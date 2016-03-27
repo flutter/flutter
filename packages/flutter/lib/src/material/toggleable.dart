@@ -148,8 +148,10 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
       _reactionController.reverse();
   }
 
+  @override
   bool hitTestSelf(Point position) => true;
 
+  @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     if (event is PointerDownEvent && isInteractive)
       _tap.addPointer(event);
@@ -163,7 +165,10 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
     }
   }
 
+  @override
   bool get hasSemantics => isInteractive;
+
+  @override
   Iterable<SemanticAnnotator> getSemanticAnnotators() sync* {
     yield (SemanticsNode semantics) {
       semantics.hasCheckedState = true;
@@ -171,11 +176,22 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
       semantics.canBeTapped = isInteractive;
     };
   }
+
+  @override
   void handleSemanticTap() => _handleTap();
 
+  @override
   void handleSemanticLongPress() { }
+
+  @override
   void handleSemanticScrollLeft() { }
+
+  @override
   void handleSemanticScrollRight() { }
+
+  @override
   void handleSemanticScrollUp() { }
+
+  @override
   void handleSemanticScrollDown() { }
 }

@@ -101,6 +101,7 @@ class HSVColor {
     );
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -113,7 +114,9 @@ class HSVColor {
         && typedOther.value == value;
   }
 
+  @override
   int get hashCode => hashValues(alpha, hue, saturation, value);
 
+  @override
   String toString() => "HSVColor($alpha, $hue, $saturation, $value)";
 }

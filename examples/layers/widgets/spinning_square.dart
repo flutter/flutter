@@ -5,12 +5,14 @@
 import 'package:flutter/widgets.dart';
 
 class SpinningSquare extends StatefulWidget {
+  @override
   _SpinningSquareState createState() => new _SpinningSquareState();
 }
 
 class _SpinningSquareState extends State<SpinningSquare> {
   AnimationController _animation;
 
+  @override
   void initState() {
     super.initState();
     // We use 3600 milliseconds instead of 1800 milliseconds because 0.0 -> 1.0
@@ -21,6 +23,7 @@ class _SpinningSquareState extends State<SpinningSquare> {
     )..repeat();
   }
 
+  @override
   Widget build(BuildContext context) {
     return new RotationTransition(
       turns: _animation,

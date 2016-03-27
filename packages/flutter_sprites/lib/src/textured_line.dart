@@ -7,6 +7,7 @@ class TexturedLine extends Node {
 
   TexturedLinePainter painter;
 
+  @override
   void paint(Canvas canvas) {
     painter.paint(canvas);
   }

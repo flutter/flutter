@@ -10,16 +10,20 @@ const double _kMinScrollbarThumbLength = 18.0;
 const double _kScrollbarThumbGirth = 6.0;
 const Duration _kScrollbarThumbFadeDuration = const Duration(milliseconds: 300);
 
+typedef Color GetThumbColor();
+
 class ScrollbarPainter extends ScrollableListPainter {
+  ScrollbarPainter({ GetThumbColor getThumbColor }) {
+    this.getThumbColor = getThumbColor ?? _defaultThumbColor;
+  }
 
+  GetThumbColor getThumbColor;
   double _opacity = 0.0;
-  int get _alpha => (_opacity * 0xFF).round();
 
-  // TODO(hansmuller): thumb color should come from ThemeData.
-  Color get thumbColor => const Color(0xFF9E9E9E);
+  Color _defaultThumbColor() => const Color(0xFF9E9E9E);
 
   void paintThumb(PaintingContext context, Rect thumbBounds) {
-    final Paint paint = new Paint()..color = thumbColor.withAlpha(_alpha);
+    final Paint paint = new Paint()..color = getThumbColor().withOpacity(_opacity);
     context.canvas.drawRect(thumbBounds, paint);
   }
 
@@ -52,14 +56,16 @@ class ScrollbarPainter extends ScrollableListPainter {
     paintThumb(context, thumbOrigin & thumbSize);
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
-    if (_alpha == 0)
+    if (_opacity == 0.0)
       return;
     paintScrollbar(context, offset);
   }
 
   AnimationController _fade;
 
+  @override
   Future<Null> scrollStarted() {
     if (_fade == null) {
       _fade = new AnimationController(duration: _kScrollbarThumbFadeDuration);
@@ -72,10 +78,12 @@ class ScrollbarPainter extends ScrollableListPainter {
     return _fade.forward();
   }
 
+  @override
   Future<Null> scrollEnded() {
     return _fade.reverse();
   }
 
+  @override
   void detach() {
     super.detach();
     _fade?.stop();

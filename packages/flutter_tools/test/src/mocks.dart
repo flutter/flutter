@@ -28,29 +28,39 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
   );
 }
 
-class MockCompiler extends Mock implements Compiler {
+class MockSnapshotCompiler extends Mock implements SnapshotCompiler {
 }
 
 class MockToolchain extends Toolchain {
-  MockToolchain() : super(compiler: new MockCompiler());
+  MockToolchain() : super(compiler: new MockSnapshotCompiler());
 }
 
 class MockAndroidDevice extends Mock implements AndroidDevice {
+  @override
   TargetPlatform get platform => TargetPlatform.android_arm;
+
+  @override
   bool isSupported() => true;
 }
 
 class MockIOSDevice extends Mock implements IOSDevice {
-  TargetPlatform get platform => TargetPlatform.ios_arm;
+  @override
+  TargetPlatform get platform => TargetPlatform.ios;
+
+  @override
   bool isSupported() => true;
 }
 
 class MockIOSSimulator extends Mock implements IOSSimulator {
-  TargetPlatform get platform => TargetPlatform.ios_x64;
+  @override
+  TargetPlatform get platform => TargetPlatform.ios;
+
+  @override
   bool isSupported() => true;
 }
 
 class MockDeviceLogReader extends DeviceLogReader {
+  @override
   String get name => 'MockLogReader';
 
   final StreamController<String> _linesStreamController =
@@ -58,6 +68,7 @@ class MockDeviceLogReader extends DeviceLogReader {
 
   final Completer<int> _finishedCompleter = new Completer<int>();
 
+  @override
   Stream<String> get lines => _linesStreamController.stream;
 
   void addLine(String line) {
@@ -66,19 +77,23 @@ class MockDeviceLogReader extends DeviceLogReader {
 
   bool _started = false;
 
+  @override
   Future<Null> start() async {
     assert(!_started);
     _started = true;
   }
 
+  @override
   bool get isReading => _started;
 
+  @override
   Future<Null> stop() {
     assert(_started);
     _started = false;
     return new Future<Null>.value();
   }
 
+  @override
   Future<int> get finished => _finishedCompleter.future;
 }
 
@@ -86,5 +101,5 @@ void applyMocksToCommand(FlutterCommand command) {
   command
     ..applicationPackages = new MockApplicationPackageStore()
     ..toolchain = new MockToolchain()
-    ..projectRootValidator = () => true;
+    ..commandValidator = () => true;
 }

@@ -9,36 +9,44 @@ part of flutter_sprites;
 ///     group.addChild(myNode);
 class PhysicsGroup extends Node {
 
+  @override
   void set scaleX(double scaleX) {
     assert(false);
   }
 
+  @override
   void set scaleY(double scaleX) {
     assert(false);
   }
 
+  @override
   void set skewX(double scaleX) {
     assert(false);
   }
 
+  @override
   void set skewY(double scaleX) {
     assert(false);
   }
 
+  @override
   void set physicsBody(PhysicsBody body) {
     assert(false);
   }
 
+  @override
   void set position(Point position) {
     super.position = position;
     _invalidatePhysicsBodies(this);
   }
 
+  @override
   void set rotation(double rotation) {
     super.rotation = rotation;
     _invalidatePhysicsBodies(this);
   }
 
+  @override
   void set scale(double scale) {
     super.scale = scale;
     _invalidatePhysicsBodies(this);
@@ -57,6 +65,7 @@ class PhysicsGroup extends Node {
     }
   }
 
+  @override
   void addChild(Node node) {
     super.addChild(node);
 
@@ -80,6 +89,7 @@ class PhysicsGroup extends Node {
     }
   }
 
+  @override
   void removeChild(Node node) {
     super.removeChild(node);
 

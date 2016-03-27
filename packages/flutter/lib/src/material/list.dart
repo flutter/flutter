@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
 import 'scrollbar_painter.dart';
+import 'theme.dart';
 
 enum MaterialListType {
   oneLine,
@@ -39,12 +40,22 @@ class MaterialList extends StatefulWidget {
   final EdgeInsets scrollablePadding;
   final Key scrollableKey;
 
+  @override
   _MaterialListState createState() => new _MaterialListState();
 }
 
 class _MaterialListState extends State<MaterialList> {
-  ScrollbarPainter _scrollbarPainter = new ScrollbarPainter();
+  ScrollbarPainter _scrollbarPainter;
 
+  @override
+  void initState() {
+    super.initState();
+    _scrollbarPainter = new ScrollbarPainter(
+      getThumbColor: () => Theme.of(context).highlightColor
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return new ScrollableList(
       key: config.scrollableKey,

@@ -13,7 +13,7 @@ enum LeaveBehindDemoAction {
   rightSwipe
 }
 
-class LeaveBehindItem {
+class LeaveBehindItem implements Comparable<LeaveBehindItem> {
   LeaveBehindItem({ this.index, this.name, this.subject, this.body });
 
   LeaveBehindItem.from(LeaveBehindItem item)
@@ -23,11 +23,15 @@ class LeaveBehindItem {
   final String name;
   final String subject;
   final String body;
+
+  @override
+  int compareTo(LeaveBehindItem other) => index.compareTo(other.index);
 }
 
 class LeaveBehindDemo extends StatefulWidget {
   LeaveBehindDemo({ Key key }) : super(key: key);
 
+  @override
   LeaveBehindDemoState createState() => new LeaveBehindDemoState();
 }
 
@@ -47,6 +51,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     });
   }
 
+  @override
   void initState() {
     super.initState();
     initListItems();
@@ -70,9 +75,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
   }
 
   void handleUndo(LeaveBehindItem item) {
-    int insertionIndex = lowerBound(leaveBehindItems, item,
-      compare: (LeaveBehindItem a, LeaveBehindItem b) => a.index.compareTo(b.index)
-    );
+    int insertionIndex = lowerBound(leaveBehindItems, item);
     setState(() {
       leaveBehindItems.insert(insertionIndex, item);
     });
@@ -122,6 +125,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     return new Scaffold(
       key: _scaffoldKey,

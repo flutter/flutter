@@ -14,18 +14,23 @@ abstract class _ListenerMixin {
 /// A mixin that helps listen to another object only when this object has registered listeners.
 abstract class AnimationLazyListenerMixin implements _ListenerMixin {
   int _listenerCounter = 0;
+
+  @override
   void didRegisterListener() {
     assert(_listenerCounter >= 0);
     if (_listenerCounter == 0)
       didStartListening();
     _listenerCounter += 1;
   }
+
+  @override
   void didUnregisterListener() {
     assert(_listenerCounter >= 1);
     _listenerCounter -= 1;
     if (_listenerCounter == 0)
       didStopListening();
   }
+
   void didStartListening();
   void didStopListening();
   bool get isListening => _listenerCounter > 0;
@@ -34,7 +39,10 @@ abstract class AnimationLazyListenerMixin implements _ListenerMixin {
 /// A mixin that replaces the didRegisterListener/didUnregisterListener contract
 /// with a dispose contract.
 abstract class AnimationEagerListenerMixin implements _ListenerMixin {
+  @override
   void didRegisterListener() { }
+
+  @override
   void didUnregisterListener() { }
 
   /// Release any resources used by this object.

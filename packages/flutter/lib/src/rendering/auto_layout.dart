@@ -114,6 +114,8 @@ class AutoLayoutParentData extends ContainerBoxParentDataMixin<RenderBox> {
 }
 
 abstract class AutoLayoutDelegate {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const AutoLayoutDelegate();
 
   List<al.Constraint> getConstraints(AutoLayoutRect parent);
@@ -179,6 +181,7 @@ class RenderAutoLayout extends RenderBox
       _explicitConstraints.clear();
   }
 
+  @override
   void adoptChild(RenderObject child) {
     // Make sure to call super first to setup the parent data
     super.adoptChild(child);
@@ -187,6 +190,7 @@ class RenderAutoLayout extends RenderBox
     assert(child.parentData == childParentData);
   }
 
+  @override
   void dropChild(RenderObject child) {
     final AutoLayoutParentData childParentData = child.parentData;
     childParentData._removeImplicitConstraints();
@@ -194,19 +198,23 @@ class RenderAutoLayout extends RenderBox
     super.dropChild(child);
   }
 
+  @override
   void setupParentData(RenderObject child) {
     if (child.parentData is! AutoLayoutParentData)
       child.parentData = new AutoLayoutParentData(child);
   }
 
+  @override
   bool get sizedByParent => true;
 
+  @override
   void performResize() {
     size = constraints.biggest;
   }
 
   Size _previousSize;
 
+  @override
   void performLayout() {
     bool needToFlushUpdates = false;
 
@@ -241,10 +249,12 @@ class RenderAutoLayout extends RenderBox
     }
   }
 
+  @override
   bool hitTestChildren(HitTestResult result, { Point position }) {
     return defaultHitTestChildren(result, position: position);
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     defaultPaint(context, offset);
   }

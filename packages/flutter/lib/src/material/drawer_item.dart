@@ -20,9 +20,14 @@ class DrawerItem extends StatelessWidget {
     this.selected: false
   }) : super(key: key);
 
+  /// The icon to display before the child widget.
   final IconData icon;
+
+  /// The widget below this widget in the tree.
   final Widget child;
+
   final VoidCallback onPressed;
+
   final bool selected;
 
   Color _getIconColor(ThemeData themeData) {
@@ -55,6 +60,7 @@ class DrawerItem extends StatelessWidget {
     return result;
   }
 
+  @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     ThemeData themeData = Theme.of(context);

@@ -13,6 +13,7 @@ class StockSymbolView extends StatelessWidget {
 
   final Stock stock;
 
+  @override
   Widget build(BuildContext context) {
     String lastSale = "\$${stock.lastSale.toStringAsFixed(2)}";
     String changeInPrice = "${stock.percentChange.toStringAsFixed(2)}%";
@@ -71,6 +72,7 @@ class StockSymbolPage extends StatelessWidget {
 
   final Stock stock;
 
+  @override
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
@@ -93,11 +95,12 @@ class StockSymbolBottomSheet extends StatelessWidget {
 
   final Stock stock;
 
+  @override
   Widget build(BuildContext context) {
     return new Container(
       padding: new EdgeInsets.all(10.0),
       decoration: new BoxDecoration(
-        border: new Border(top: new BorderSide(color: Colors.black26, width: 1.0))
+        border: new Border(top: new BorderSide(color: Colors.black26))
       ),
       child: new StockSymbolView(stock: stock)
    );

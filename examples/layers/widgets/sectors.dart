@@ -17,6 +17,7 @@ RenderBox initCircle() {
 }
 
 class SectorApp extends StatefulWidget {
+  @override
   SectorAppState createState() => new SectorAppState();
 }
 
@@ -133,7 +134,7 @@ class SectorAppState extends State<SectorApp> {
           child: new Container(
             margin: new EdgeInsets.all(8.0),
             decoration: new BoxDecoration(
-              border: new Border.all(color: new Color(0xFF000000))
+              border: new Border.all()
             ),
             padding: new EdgeInsets.all(8.0),
             child: new WidgetToRenderBoxAdapter(
@@ -147,6 +148,7 @@ class SectorAppState extends State<SectorApp> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     return new MaterialApp(
       theme: new ThemeData.light(),

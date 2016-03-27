@@ -15,6 +15,9 @@ typedef bool DragTargetWillAccept<T>(T data);
 typedef void DragTargetAccept<T>(T data);
 typedef Widget DragTargetBuilder<T>(BuildContext context, List<T> candidateData, List<dynamic> rejectedData);
 
+/// Called when a [Draggable] is dropped without being accepted by a [DragTarget].
+typedef void OnDraggableCanceled(Velocity velocity, Offset offset);
+
 /// Where the [Draggable] should be anchored during a drag.
 enum DragAnchor {
   /// Display the feedback anchored at the position of the original child. If
@@ -45,7 +48,8 @@ abstract class DraggableBase<T> extends StatefulWidget {
     this.feedback,
     this.feedbackOffset: Offset.zero,
     this.dragAnchor: DragAnchor.child,
-    this.maxSimultaneousDrags
+    this.maxSimultaneousDrags,
+    this.onDraggableCanceled
   }) : super(key: key) {
     assert(child != null);
     assert(feedback != null);
@@ -53,6 +57,8 @@ abstract class DraggableBase<T> extends StatefulWidget {
   }
 
   final T data;
+
+  /// The widget below this widget in the tree.
   final Widget child;
 
   /// The widget to show instead of [child] when a drag is under way.
@@ -78,10 +84,14 @@ abstract class DraggableBase<T> extends StatefulWidget {
   /// dragged at a time.
   final int maxSimultaneousDrags;
 
+  /// Called when the draggable is dropped without being accepted by a [DragTarget].
+  final OnDraggableCanceled onDraggableCanceled;
+
   /// Should return a new MultiDragGestureRecognizer instance
   /// constructed with the given arguments.
   MultiDragGestureRecognizer<MultiDragPointerState> createRecognizer(GestureMultiDragStartCallback onStart);
 
+  @override
   _DraggableState<T> createState() => new _DraggableState<T>();
 }
 
@@ -95,7 +105,8 @@ class Draggable<T> extends DraggableBase<T> {
     Widget feedback,
     Offset feedbackOffset: Offset.zero,
     DragAnchor dragAnchor: DragAnchor.child,
-    int maxSimultaneousDrags
+    int maxSimultaneousDrags,
+    OnDraggableCanceled onDraggableCanceled
   }) : super(
     key: key,
     data: data,
@@ -104,9 +115,11 @@ class Draggable<T> extends DraggableBase<T> {
     feedback: feedback,
     feedbackOffset: feedbackOffset,
     dragAnchor: dragAnchor,
-    maxSimultaneousDrags: maxSimultaneousDrags
+    maxSimultaneousDrags: maxSimultaneousDrags,
+    onDraggableCanceled: onDraggableCanceled
   );
 
+  @override
   ImmediateMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
     return new ImmediateMultiDragGestureRecognizer()..onStart = onStart;
   }
@@ -123,7 +136,8 @@ class HorizontalDraggable<T> extends DraggableBase<T> {
     Widget feedback,
     Offset feedbackOffset: Offset.zero,
     DragAnchor dragAnchor: DragAnchor.child,
-    int maxSimultaneousDrags
+    int maxSimultaneousDrags,
+    OnDraggableCanceled onDraggableCanceled
   }) : super(
     key: key,
     data: data,
@@ -132,9 +146,11 @@ class HorizontalDraggable<T> extends DraggableBase<T> {
     feedback: feedback,
     feedbackOffset: feedbackOffset,
     dragAnchor: dragAnchor,
-    maxSimultaneousDrags: maxSimultaneousDrags
+    maxSimultaneousDrags: maxSimultaneousDrags,
+    onDraggableCanceled: onDraggableCanceled
   );
 
+  @override
   HorizontalMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
     return new HorizontalMultiDragGestureRecognizer()..onStart = onStart;
   }
@@ -151,7 +167,8 @@ class VerticalDraggable<T> extends DraggableBase<T> {
     Widget feedback,
     Offset feedbackOffset: Offset.zero,
     DragAnchor dragAnchor: DragAnchor.child,
-    int maxSimultaneousDrags
+    int maxSimultaneousDrags,
+    OnDraggableCanceled onDraggableCanceled
   }) : super(
     key: key,
     data: data,
@@ -160,9 +177,11 @@ class VerticalDraggable<T> extends DraggableBase<T> {
     feedback: feedback,
     feedbackOffset: feedbackOffset,
     dragAnchor: dragAnchor,
-    maxSimultaneousDrags: maxSimultaneousDrags
+    maxSimultaneousDrags: maxSimultaneousDrags,
+    onDraggableCanceled: onDraggableCanceled
   );
 
+  @override
   VerticalMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
     return new VerticalMultiDragGestureRecognizer()..onStart = onStart;
   }
@@ -178,7 +197,8 @@ class LongPressDraggable<T> extends DraggableBase<T> {
     Widget feedback,
     Offset feedbackOffset: Offset.zero,
     DragAnchor dragAnchor: DragAnchor.child,
-    int maxSimultaneousDrags
+    int maxSimultaneousDrags,
+    OnDraggableCanceled onDraggableCanceled
   }) : super(
     key: key,
     data: data,
@@ -187,9 +207,11 @@ class LongPressDraggable<T> extends DraggableBase<T> {
     feedback: feedback,
     feedbackOffset: feedbackOffset,
     dragAnchor: dragAnchor,
-    maxSimultaneousDrags: maxSimultaneousDrags
+    maxSimultaneousDrags: maxSimultaneousDrags,
+    onDraggableCanceled: onDraggableCanceled
   );
 
+  @override
   DelayedMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
     return new DelayedMultiDragGestureRecognizer()
       ..onStart = (Point position) {
@@ -203,6 +225,7 @@ class LongPressDraggable<T> extends DraggableBase<T> {
 
 class _DraggableState<T> extends State<DraggableBase<T>> {
 
+  @override
   void initState() {
     super.initState();
     _recognizer = config.createRecognizer(_startDrag);
@@ -240,14 +263,17 @@ class _DraggableState<T> extends State<DraggableBase<T>> {
       dragStartPoint: dragStartPoint,
       feedback: config.feedback,
       feedbackOffset: config.feedbackOffset,
-      onDragEnd: () {
+      onDragEnd: (Velocity velocity, Offset offset, bool wasAccepted) {
         setState(() {
           _activeCount -= 1;
+          if (!wasAccepted && config.onDraggableCanceled != null)
+            config.onDraggableCanceled(velocity, offset);
         });
       }
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     assert(Overlay.of(context, debugRequiredFor: config) != null);
     final bool canDrag = config.maxSimultaneousDrags == null ||
@@ -282,6 +308,7 @@ class DragTarget<T> extends StatefulWidget {
   /// Called when an acceptable piece of data was dropped over this drag target.
   final DragTargetAccept<T> onAccept;
 
+  @override
   _DragTargetState<T> createState() => new _DragTargetState<T>();
 }
 
@@ -319,6 +346,7 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
       config.onAccept(data);
   }
 
+  @override
   Widget build(BuildContext context) {
     return new MetaData(
       metaData: this,
@@ -330,6 +358,7 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
 
 
 enum _DragEndKind { dropped, canceled }
+typedef void _OnDragEnd(Velocity velocity, Offset offset, bool wasAccepted);
 
 // The lifetime of this object is a little dubious right now. Specifically, it
 // lives as long as the pointer is down. Arguably it should self-immolate if the
@@ -359,7 +388,7 @@ class _DragAvatar<T> extends Drag {
   final Point dragStartPoint;
   final Widget feedback;
   final Offset feedbackOffset;
-  final VoidCallback onDragEnd;
+  final _OnDragEnd onDragEnd;
 
   _DragTargetState<T> _activeTarget;
   bool _activeTargetWillAcceptDrop = false;
@@ -368,13 +397,18 @@ class _DragAvatar<T> extends Drag {
   OverlayEntry _entry;
 
   // Drag API
+  @override
   void move(Offset offset) {
     _position += offset;
     update(_position);
   }
+
+  @override
   void end(Velocity velocity) {
-    finish(_DragEndKind.dropped);
+    finish(_DragEndKind.dropped, velocity);
   }
+
+  @override
   void cancel() {
     finish(_DragEndKind.canceled);
   }
@@ -406,19 +440,23 @@ class _DragAvatar<T> extends Drag {
     return null;
   }
 
-  void finish(_DragEndKind endKind) {
+  void finish(_DragEndKind endKind, [Velocity velocity]) {
+    bool wasAccepted = false;
     if (_activeTarget != null) {
-      if (endKind == _DragEndKind.dropped && _activeTargetWillAcceptDrop)
+      if (endKind == _DragEndKind.dropped && _activeTargetWillAcceptDrop) {
         _activeTarget.didDrop(data);
-      else
+        wasAccepted = true;
+      } else {
         _activeTarget.didLeave(data);
+      }
     }
     _activeTarget = null;
     _activeTargetWillAcceptDrop = false;
     _entry.remove();
     _entry = null;
+    // TODO(ianh): consider passing _entry as well so the client can perform an animation.
     if (onDragEnd != null)
-      onDragEnd();
+      onDragEnd(velocity ?? Velocity.zero, _lastOffset, wasAccepted);
   }
 
   Widget _build(BuildContext context) {

@@ -55,6 +55,7 @@ class GridDemoPhotoItem extends StatelessWidget {
     ));
   }
 
+  @override
   Widget build(BuildContext context) {
     final Widget image = new GestureDetector(
       onTap: () { showPhoto(context); },
@@ -104,9 +105,12 @@ class GridListDemoGridDelegate extends FixedColumnCountGridDelegate {
     assert(tileHeightFactor != null && tileHeightFactor > 0.0);
   }
 
+  @override
   final int columnCount;
+
   final double tileHeightFactor;
 
+  @override
   GridSpecification getGridSpecification(BoxConstraints constraints, int childCount) {
     assert(constraints.maxWidth < double.INFINITY);
     assert(constraints.maxHeight < double.INFINITY);
@@ -121,6 +125,7 @@ class GridListDemoGridDelegate extends FixedColumnCountGridDelegate {
     );
   }
 
+  @override
   bool shouldRelayout(GridListDemoGridDelegate oldDelegate) {
     return columnCount != oldDelegate.columnCount
         || tileHeightFactor != oldDelegate.tileHeightFactor
@@ -131,6 +136,7 @@ class GridListDemoGridDelegate extends FixedColumnCountGridDelegate {
 class GridListDemo extends StatefulWidget {
   GridListDemo({ Key key }) : super(key: key);
 
+  @override
   GridListDemoState createState() => new GridListDemoState();
 }
 
@@ -169,6 +175,7 @@ class GridListDemoState extends State<GridListDemo> {
   // When the ScrollableGrid first appears we want the last row to only be
   // partially visible, to help the user recognize that the grid is scrollable.
   // The GridListDemoGridDelegate's tileHeightFactor is used for this.
+  @override
   Widget build(BuildContext context) {
     final Orientation orientation = MediaQuery.of(context).orientation;
     return new Scaffold(

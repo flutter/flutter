@@ -17,6 +17,7 @@ import '../build_configuration.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
+import '../service_protocol.dart';
 import '../toolchain.dart';
 import 'adb.dart';
 import 'android.dart';
@@ -32,7 +33,10 @@ const String _deviceSnapshotPath = '/data/local/tmp/dev_snapshot.bin';
 class AndroidDevices extends PollingDeviceDiscovery {
   AndroidDevices() : super('AndroidDevices');
 
+  @override
   bool get supportsPlatform => true;
+
+  @override
   List<Device> pollingGetDevices() => getAdbDevices();
 }
 
@@ -50,6 +54,7 @@ class AndroidDevice extends Device {
 
   bool _isLocalEmulator;
 
+  @override
   bool get isLocalEmulator {
     if (_isLocalEmulator == null) {
       // http://developer.android.com/ndk/guides/abis.html (x86, armeabi-v7a, ...)
@@ -152,6 +157,7 @@ class AndroidDevice extends Device {
     return shaFile.existsSync() ? shaFile.readAsStringSync() : '';
   }
 
+  @override
   String get name => modelID;
 
   @override
@@ -180,12 +186,12 @@ class AndroidDevice extends Device {
     return true;
   }
 
-  Future<Null> _forwardObservatoryPort(int port) async {
-    bool portWasZero = port == 0;
+  Future<Null> _forwardObservatoryPort(int devicePort, int port) async {
+    bool portWasZero = (port == null) || (port == 0);
 
     try {
       // Set up port forwarding for observatory.
-      port = await portForwarder.forward(observatoryDefaultPort,
+      port = await portForwarder.forward(devicePort,
                                          hostPort: port);
       if (portWasZero)
         printStatus('Observatory listening on http://127.0.0.1:$port');
@@ -209,12 +215,17 @@ class AndroidDevice extends Device {
       return false;
     }
 
-    await _forwardObservatoryPort(debugPort);
-
     if (clearLogs)
       this.clearLogs();
 
     runCheckedSync(adbCommandForDevice(<String>['push', bundlePath, _deviceBundlePath]));
+
+    ServiceProtocolDiscovery serviceProtocolDiscovery =
+        new ServiceProtocolDiscovery(logReader);
+
+    // We take this future here but do not wait for completion until *after* we
+    // start the bundle.
+    Future<int> scrapeServicePort = serviceProtocolDiscovery.nextPort();
 
     List<String> cmd = adbCommandForDevice(<String>[
       'shell', 'am', 'start',
@@ -238,7 +249,24 @@ class AndroidDevice extends Device {
       printError(result.trim());
       return false;
     }
-    return true;
+
+    // Wait for the service protocol port here. This will complete once the
+    // device has printed "Observatory is listening on...".
+    printTrace('Waiting for observatory port to be available...');
+
+    try {
+      int devicePort = await scrapeServicePort.timeout(new Duration(seconds: 12));
+      printTrace('service protocol port = $devicePort');
+      await _forwardObservatoryPort(devicePort, debugPort);
+      return true;
+    } catch (error) {
+      if (error is TimeoutException)
+        printError('Timed out while waiting for a debug connection.');
+      else
+        printError('Error waiting for a debug connection: $error');
+
+      return false;
+    }
   }
 
   @override
@@ -279,25 +307,29 @@ class AndroidDevice extends Device {
     }
   }
 
+  @override
   Future<bool> stopApp(ApplicationPackage app) {
     List<String> command = adbCommandForDevice(<String>['shell', 'am', 'force-stop', app.id]);
     return runCommandAndStreamOutput(command).then((int exitCode) => exitCode == 0);
   }
 
-  // TODO(devoncarew): Return android_arm or android_x64 based on [isLocalEmulator].
+  // TODO(devoncarew): Use isLocalEmulator to return android_arm or android_x64.
   @override
   TargetPlatform get platform => TargetPlatform.android_arm;
 
+  @override
   void clearLogs() {
     runSync(adbCommandForDevice(<String>['logcat', '-c']));
   }
 
+  @override
   DeviceLogReader get logReader {
     if (_logReader == null)
       _logReader = new _AdbLogReader(this);
     return _logReader;
   }
 
+  @override
   DevicePortForwarder get portForwarder {
     if (_portForwarder == null)
       _portForwarder = new _AndroidDevicePortForwarder(this);
@@ -359,7 +391,7 @@ class AndroidDevice extends Device {
     if (tracePath != null) {
       String localPath = (outPath != null) ? outPath : path.basename(tracePath);
 
-      // Run cat via ADB to print the captured trace file.  (adb pull will be unable
+      // Run cat via ADB to print the captured trace file. (adb pull will be unable
       // to access the file if it does not have root permissions)
       IOSink catOutput = new File(localPath).openWrite();
       List<String> catCommand = adbCommandForDevice(
@@ -382,6 +414,7 @@ class AndroidDevice extends Device {
     return null;
   }
 
+  @override
   bool isSupported() => true;
 
   Future<bool> refreshSnapshot(AndroidApk apk, String snapshotPath) async {
@@ -402,6 +435,20 @@ class AndroidDevice extends Device {
     ]);
     runCheckedSync(cmd);
     return true;
+  }
+
+  @override
+  bool get supportsScreenshot => true;
+
+  @override
+  Future<bool> takeScreenshot(File outputFile) {
+    const String remotePath = '/data/local/tmp/flutter_screenshot.png';
+
+    runCheckedSync(adbCommandForDevice(<String>['shell', 'screencap', '-p', remotePath]));
+    runCheckedSync(adbCommandForDevice(<String>['pull', remotePath, outputFile.path]));
+    runCheckedSync(adbCommandForDevice(<String>['shell', 'rm', remotePath]));
+
+    return new Future<bool>.value(true);
   }
 }
 
@@ -488,14 +535,19 @@ class _AdbLogReader extends DeviceLogReader {
   StreamSubscription<String> _stdoutSubscription;
   StreamSubscription<String> _stderrSubscription;
 
+  @override
   Stream<String> get lines => _linesStreamController.stream;
 
+  @override
   String get name => device.name;
 
+  @override
   bool get isReading => _process != null;
 
+  @override
   Future<int> get finished => _process != null ? _process.exitCode : new Future<int>.value(0);
 
+  @override
   Future<Null> start() async {
     if (_process != null)
       throw new StateError('_AdbLogReader must be stopped before it can be started.');
@@ -505,7 +557,9 @@ class _AdbLogReader extends DeviceLogReader {
     String lastTimestamp = device.lastLogcatTimestamp;
     if (lastTimestamp != null)
       args.addAll(<String>['-T', lastTimestamp]);
-    args.addAll(<String>['-s', 'flutter:V', 'ActivityManager:W', 'System.err:W', '*:F']);
+    args.addAll(<String>[
+      '-s', 'flutter:V', 'SkyMain:V', 'AndroidRuntime:W', 'ActivityManager:W', 'System.err:W', '*:F'
+    ]);
     _process = await runCommand(device.adbCommandForDevice(args));
     _stdoutSubscription =
         _process.stdout.transform(UTF8.decoder)
@@ -516,6 +570,7 @@ class _AdbLogReader extends DeviceLogReader {
     _process.exitCode.then(_onExit);
   }
 
+  @override
   Future<Null> stop() async {
     if (_process == null)
       throw new StateError('_AdbLogReader must be started before it can be stopped.');
@@ -537,11 +592,17 @@ class _AdbLogReader extends DeviceLogReader {
   }
 
   void _onLine(String line) {
+    // Filter out some noisy ActivityManager notifications.
+    if (line.startsWith('W/ActivityManager: getRunningAppProcesses'))
+      return;
+
     _linesStreamController.add(line);
   }
 
+  @override
   int get hashCode => name.hashCode;
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -560,6 +621,7 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
     return int.parse(portString.trim(), onError: (_) => null);
   }
 
+  @override
   List<ForwardedPort> get forwardedPorts {
     final List<ForwardedPort> ports = <ForwardedPort>[];
 
@@ -591,6 +653,7 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
     return ports;
   }
 
+  @override
   Future<int> forward(int devicePort, { int hostPort }) async {
     if ((hostPort == null) || (hostPort == 0)) {
       // Auto select host port.
@@ -604,6 +667,7 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
     return hostPort;
   }
 
+  @override
   Future<Null> unforward(ForwardedPort forwardedPort) async {
     runCheckedSync(device.adbCommandForDevice(
       <String>['forward', '--remove', 'tcp:${forwardedPort.hostPort}']

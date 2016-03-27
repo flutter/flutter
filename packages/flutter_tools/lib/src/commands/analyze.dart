@@ -18,11 +18,6 @@ import '../dart/sdk.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 
-// TODO(devoncarew): Possible improvements to flutter analyze --watch:
-// - Auto-detect new issues introduced by changes and highlight then in the output.
-// - Use ANSI codes to improve the display when the terminal supports it (screen
-//   clearing, cursor position manipulation, bold and faint codes, ...)
-
 bool isDartFile(FileSystemEntity entry) => entry is File && entry.path.endsWith('.dart');
 bool isDartTestFile(FileSystemEntity entry) => entry is File && entry.path.endsWith('_test.dart');
 bool isDartBenchmarkFile(FileSystemEntity entry) => entry is File && entry.path.endsWith('_bench.dart');
@@ -118,8 +113,13 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('watch', help: 'Run analysis continuously, watching the filesystem for changes.', negatable: false);
   }
 
+  @override
   String get name => 'analyze';
+
+  @override
   String get description => 'Analyze the project\'s Dart code.';
+
+  @override
   bool get requiresProjectRoot => false;
 
   bool get isFlutterRepo {
@@ -131,6 +131,25 @@ class AnalyzeCommand extends FlutterCommand {
   @override
   Future<int> runInProject() async {
     return argResults['watch'] ? _analyzeWatch() : _analyzeOnce();
+  }
+
+  List<String> flutterRootComponents;
+  bool isFlutterLibrary(String filename) {
+    flutterRootComponents ??= path.normalize(path.absolute(ArtifactStore.flutterRoot)).split(path.separator);
+    List<String> filenameComponents = path.normalize(path.absolute(filename)).split(path.separator);
+    if (filenameComponents.length < flutterRootComponents.length + 4) // the 4: 'packages', package_name, 'lib', file_name
+      return false;
+    for (int index = 0; index < flutterRootComponents.length; index += 1) {
+      if (flutterRootComponents[index] != filenameComponents[index])
+        return false;
+    }
+    if (filenameComponents[flutterRootComponents.length] != 'packages')
+      return false;
+    if (filenameComponents[flutterRootComponents.length + 1] == 'flutter_tools')
+      return false;
+    if (filenameComponents[flutterRootComponents.length + 2] != 'lib')
+      return false;
+    return true;
   }
 
   Future<int> _analyzeOnce() async {
@@ -327,9 +346,8 @@ class AnalyzeCommand extends FlutterCommand {
       'Analyzing [${mainFile.path}]...',
       new RegExp('^\\[(hint|error)\\] Unused import \\(${mainFile.path},'),
       new RegExp(r'^\[.+\] .+ \(.+/\.pub-cache/.+'),
-      new RegExp('^\\[error\\] The argument type \'List<T>\' cannot be assigned to the parameter type \'List<.+>\''), // until we have generic methods, there's not much choice if you want to use map()
-      new RegExp(r'^\[error\] Type check failed: .*\(dynamic\) is not of type'), // allow unchecked casts from dynamic
       new RegExp('\\[warning\\] Missing concrete implementation of \'RenderObject\\.applyPaintTransform\''), // https://github.com/dart-lang/sdk/issues/25232
+      new RegExp('\\[warning\\] Missing concrete implementation of \'AbstractNode\\.attach\''), // https://github.com/dart-lang/sdk/issues/25232
       new RegExp(r'[0-9]+ (error|warning|hint|lint).+found\.'),
       new RegExp(r'^$'),
     ];
@@ -337,9 +355,9 @@ class AnalyzeCommand extends FlutterCommand {
     RegExp generalPattern = new RegExp(r'^\[(error|warning|hint|lint)\] (.+) \(([^(),]+), line ([0-9]+), col ([0-9]+)\)$');
     RegExp allowedIdentifiersPattern = new RegExp(r'_?([A-Z]|_+)\b');
     RegExp classesWithOptionalTypeArgumentsPattern = new RegExp(r'\b(GlobalKey|State|ScrollableState|Element|StatelessElement|TypeMatcher)\b');
-    RegExp constructorTearOffsPattern = new RegExp('.+#.+// analyzer doesn\'t like constructor tear-offs');
     RegExp conflictingNamesPattern = new RegExp('^The imported libraries \'([^\']+)\' and \'([^\']+)\' cannot have the same name \'([^\']+)\'\$');
     RegExp missingFilePattern = new RegExp('^Target of URI does not exist: \'([^\')]+)\'\$');
+    RegExp documentAllMembersPattern = new RegExp('^Document all public memm?bers\$');
 
     Set<String> changedFiles = new Set<String>(); // files about which we've complained that they changed
 
@@ -370,7 +388,11 @@ class AnalyzeCommand extends FlutterCommand {
             colNumber = 1;
           }
           bool shouldIgnore = false;
-          if (filename == mainFile.path) {
+          if (documentAllMembersPattern.firstMatch(errorMessage) != null) {
+            // https://github.com/dart-lang/linter/issues/207
+            // https://github.com/dart-lang/linter/issues/208
+            shouldIgnore = !isFlutterLibrary(filename);
+          } else if (filename == mainFile.path) {
             Match libs = conflictingNamesPattern.firstMatch(errorMessage);
             Match missing = missingFilePattern.firstMatch(errorMessage);
             if (libs != null) {
@@ -394,8 +416,6 @@ class AnalyzeCommand extends FlutterCommand {
             // see https://github.com/dart-lang/linter/issues/196
             if (classesWithOptionalTypeArgumentsPattern.matchAsPrefix(sourceLine, colNumber-1) != null)
               shouldIgnore = true;
-          } else if (constructorTearOffsPattern.allMatches(sourceLine).isNotEmpty) {
-            shouldIgnore = true;
           }
           if (shouldIgnore)
             continue;
@@ -422,10 +442,13 @@ class AnalyzeCommand extends FlutterCommand {
   Future<int> _analyzeWatch() async {
     List<String> directories;
 
-    if (isFlutterRepo) {
+    if (argResults['flutter-repo']) {
+      String root = path.absolute(ArtifactStore.flutterRoot);
+
       directories = <String>[];
-      directories.addAll(_gatherProjectPaths(path.absolute('examples')));
-      directories.addAll(_gatherProjectPaths(path.absolute('packages')));
+      directories.addAll(_gatherProjectPaths(path.join(root, 'examples')));
+      directories.addAll(_gatherProjectPaths(path.join(root, 'packages')));
+      directories.addAll(_gatherProjectPaths(path.join(root, 'dev')));
       printStatus('Analyzing Flutter repository (${directories.length} projects).');
       for (String projectPath in directories)
         printTrace('  ${path.relative(projectPath)}');
@@ -484,8 +507,6 @@ class AnalyzeCommand extends FlutterCommand {
       int issueDiff = issueCount - lastErrorCount;
       lastErrorCount = issueCount;
 
-      // TODO(devoncarew): If there were no issues found, and no change in the
-      // issue count, do we want to print anything?
       if (firstAnalysis)
         errorsMessage = '$issueCount ${pluralize('issue', issueCount)} found';
       else if (issueDiff > 0)
@@ -760,6 +781,7 @@ class AnalysisError implements Comparable<AnalysisError> {
   int get startColumn => json['location']['startColumn'];
   int get offset => json['location']['offset'];
 
+  @override
   int compareTo(AnalysisError other) {
     // Sort in order of file path, error location, severity, and message.
     if (file != other.file)
@@ -775,6 +797,7 @@ class AnalysisError implements Comparable<AnalysisError> {
     return message.compareTo(other.message);
   }
 
+  @override
   String toString() {
     String relativePath = path.relative(file);
     return '${severity.toLowerCase().padLeft(7)} • $message • $relativePath:$startLine:$startColumn';

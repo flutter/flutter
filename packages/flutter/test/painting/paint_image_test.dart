@@ -11,15 +11,20 @@ import 'package:test/test.dart';
 class TestImage implements ui.Image {
   TestImage({ this.width, this.height });
 
+  @override
   final int width;
+
+  @override
   final int height;
 
+  @override
   void dispose() { }
 }
 
 class TestCanvas implements Canvas {
   final List<Invocation> invocations = <Invocation>[];
 
+  @override
   void noSuchMethod(Invocation invocation) {
     invocations.add(invocation);
   }

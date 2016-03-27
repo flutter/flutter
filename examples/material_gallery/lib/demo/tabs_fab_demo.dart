@@ -26,6 +26,7 @@ const String _explanatoryText =
   "by its key.";
 
 class TabsFabDemo extends StatefulWidget {
+  @override
   _TabsFabDemoState createState() => new _TabsFabDemoState();
 }
 
@@ -33,7 +34,6 @@ class _TabsFabDemoState extends State<TabsFabDemo> {
   final GlobalKey scaffoldKey = new GlobalKey();
   final List<_Page> pages = <_Page>[
     new _Page(label: 'Blue', colors: Colors.indigo, icon: Icons.add),
-    new _Page(label: 'Too', colors: Colors.indigo, icon: Icons.add),
     new _Page(label: 'Eco', colors: Colors.green, icon: Icons.create),
     new _Page(label: 'No'),
     new _Page(label: 'Teal', colors: Colors.teal, icon: Icons.add),
@@ -41,6 +41,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> {
   ];
   _Page selectedPage;
 
+  @override
   void initState() {
     super.initState();
     selectedPage = pages[0];
@@ -77,7 +78,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> {
 
         return new Container(
           key: new ValueKey<String>(page.label),
-          padding: const EdgeInsets.TRBL(48.0, 48.0, 96.0, 48.0),
+          padding: const EdgeInsets.fromLTRB(48.0, 48.0, 48.0, 96.0),
           child: new Card(
             child: new Center(
               child: new Text(page.label, style: textStyle)
@@ -88,6 +89,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     return new TabBarSelection<_Page>(
       values: pages,

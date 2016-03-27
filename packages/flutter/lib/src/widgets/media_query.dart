@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'basic.dart';
 import 'framework.dart';
 
@@ -17,6 +19,11 @@ enum Orientation {
 /// The result of a media query.
 class MediaQueryData {
   const MediaQueryData({ this.size, this.devicePixelRatio, this.padding });
+
+  MediaQueryData.fromWindow(ui.Window window)
+    : size = window.size,
+      devicePixelRatio = window.devicePixelRatio,
+      padding = new EdgeInsets.fromWindowPadding(window.padding);
 
   /// The size of the media (e.g, the size of the screen).
   final Size size;
@@ -34,6 +41,7 @@ class MediaQueryData {
     return size.width > size.height ? Orientation.landscape : Orientation.portrait;
   }
 
+  @override
   bool operator==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
@@ -43,12 +51,14 @@ class MediaQueryData {
         && typedOther.devicePixelRatio == devicePixelRatio;
   }
 
+  @override
   int get hashCode => hashValues(
     size.hashCode,
     padding.hashCode,
     devicePixelRatio.hashCode
   );
 
+  @override
   String toString() => '$runtimeType($size, $orientation)';
 }
 
@@ -73,11 +83,13 @@ class MediaQuery extends InheritedWidget {
   /// keeping your widget up-to-date.
   static MediaQueryData of(BuildContext context) {
     MediaQuery query = context.inheritFromWidgetOfExactType(MediaQuery);
-    return query == null ? null : query.data;
+    return query?.data ?? new MediaQueryData.fromWindow(ui.window);
   }
 
+  @override
   bool updateShouldNotify(MediaQuery old) => data != old.data;
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('$data');

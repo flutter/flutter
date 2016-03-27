@@ -5,27 +5,25 @@
 import 'package:flutter/material.dart';
 
 class TwoLevelListDemo extends StatelessWidget {
+  @override
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(title: new Text('Expand/Collapse List Control')),
-      body: new Padding(
-        padding: const EdgeInsets.all(0.0),
-        child: new TwoLevelList(
-          type: MaterialListType.oneLine,
-          items: <Widget>[
-            new TwoLevelListItem(title: new Text('Top')),
-            new TwoLevelSublist(
-              title: new Text('Sublist'),
-              children: <Widget>[
-                new TwoLevelListItem(title: new Text('One')),
-                new TwoLevelListItem(title: new Text('Two')),
-                new TwoLevelListItem(title: new Text('Free')),
-                new TwoLevelListItem(title: new Text('Four'))
-              ]
-            ),
-            new TwoLevelListItem(title: new Text('Bottom'))
-          ]
-        )
+      body: new TwoLevelList(
+        type: MaterialListType.oneLine,
+        items: <Widget>[
+          new TwoLevelListItem(title: new Text('Top')),
+          new TwoLevelSublist(
+            title: new Text('Sublist'),
+            children: <Widget>[
+              new TwoLevelListItem(title: new Text('One')),
+              new TwoLevelListItem(title: new Text('Two')),
+              new TwoLevelListItem(title: new Text('Free')),
+              new TwoLevelListItem(title: new Text('Four'))
+            ]
+          ),
+          new TwoLevelListItem(title: new Text('Bottom'))
+        ]
       )
     );
   }

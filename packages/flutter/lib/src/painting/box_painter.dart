@@ -13,41 +13,107 @@ import 'edge_insets.dart';
 
 export 'edge_insets.dart' show EdgeInsets;
 
+double _getEffectiveBorderRadius(Rect rect, double borderRadius) {
+  assert(rect != null);
+  assert(borderRadius != null);
+  double shortestSide = rect.shortestSide;
+  // In principle, we should use shortestSide / 2.0, but we don't want to
+  // run into floating point rounding errors. Instead, we just use
+  // shortestSide and let Canvas do any remaining clamping.
+  // The right long-term fix is to do layout using fixed precision
+  // arithmetic. (see also "_applyFloatingPointHack")
+  return borderRadius > shortestSide ? shortestSide : borderRadius;
+}
+
+/// The style of line to draw for a [BorderSide] in a [Border].
+enum BorderStyle {
+  /// Skip the border.
+  none,
+
+  /// Draw the border as a solid line.
+  solid,
+
+  // if you add more, think about how they will lerp
+}
+
 /// A side of a border of a box.
 class BorderSide {
   const BorderSide({
     this.color: const Color(0xFF000000),
-    this.width: 1.0
+    this.width: 1.0,
+    this.style: BorderStyle.solid
   });
 
   /// The color of this side of the border.
   final Color color;
 
-  /// The width of this side of the border.
+  /// The width of this side of the border, in logical pixels. A
+  /// zero-width border is a hairline border. To omit the border
+  /// entirely, set the [style] to [BorderStyle.none].
   final double width;
 
-  /// A black border side of zero width.
-  static const BorderSide none = const BorderSide(width: 0.0);
+  /// The style of this side of the border.
+  ///
+  /// To omit a side, set [style] to [BorderStyle.none]. This skips
+  /// painting the border, but the border still has a [width].
+  final BorderStyle style;
 
+  /// A hairline black border that is not rendered.
+  static const BorderSide none = const BorderSide(width: 0.0, style: BorderStyle.none);
+
+  /// Creates a copy of this border but with the given fields replaced with the new values.
   BorderSide copyWith({
     Color color,
-    double width
+    double width,
+    BorderStyle style
   }) {
     return new BorderSide(
       color: color ?? this.color,
-      width: width ?? this.width
+      width: width ?? this.width,
+      style: style ?? this.style
     );
   }
 
+  /// Linearly interpolate between two border sides.
   static BorderSide lerp(BorderSide a, BorderSide b, double t) {
     assert(a != null);
     assert(b != null);
+    if (t == 0.0)
+      return a;
+    if (t == 1.0)
+      return b;
+    if (a.style == b.style) {
+      return new BorderSide(
+        color: Color.lerp(a.color, b.color, t),
+        width: ui.lerpDouble(a.width, b.width, t),
+        style: a.style // == b.style
+      );
+    }
+    Color colorA, colorB;
+    switch (a.style) {
+      case BorderStyle.solid:
+        colorA = a.color;
+        break;
+      case BorderStyle.none:
+        colorA = a.color.withAlpha(0x00);
+        break;
+    }
+    switch (b.style) {
+      case BorderStyle.solid:
+        colorB = b.color;
+        break;
+      case BorderStyle.none:
+        colorB = b.color.withAlpha(0x00);
+        break;
+    }
     return new BorderSide(
-      color: Color.lerp(a.color, b.color, t),
-      width: ui.lerpDouble(a.width, b.width, t)
+      color: Color.lerp(colorA, colorB, t),
+      width: ui.lerpDouble(a.width, b.width, t),
+      style: BorderStyle.solid
     );
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -55,12 +121,15 @@ class BorderSide {
       return false;
     final BorderSide typedOther = other;
     return color == typedOther.color &&
-           width == typedOther.width;
+           width == typedOther.width &&
+           style == typedOther.style;
   }
 
-  int get hashCode => hashValues(color, width);
+  @override
+  int get hashCode => hashValues(color, width, style);
 
-  String toString() => 'BorderSide($color, $width)';
+  @override
+  String toString() => 'BorderSide($color, $width, $style)';
 }
 
 /// A border of a box, comprised of four sides.
@@ -75,9 +144,10 @@ class Border {
   /// A uniform border with all sides the same color and width.
   factory Border.all({
     Color color: const Color(0xFF000000),
-    double width: 1.0
+    double width: 1.0,
+    BorderStyle style: BorderStyle.solid
   }) {
-    BorderSide side = new BorderSide(color: color, width: width);
+    final BorderSide side = new BorderSide(color: color, width: width, style: style);
     return new Border(top: side, right: side, bottom: side, left: side);
   }
 
@@ -95,9 +165,38 @@ class Border {
 
   /// The widths of the sides of this border represented as an EdgeInsets.
   EdgeInsets get dimensions {
-    return new EdgeInsets.TRBL(top.width, right.width, bottom.width, left.width);
+    return new EdgeInsets.fromLTRB(left.width, top.width, right.width, bottom.width);
   }
 
+  /// Whether all four sides of the border are identical.
+  bool get isUniform {
+    assert(top != null);
+    assert(right != null);
+    assert(bottom != null);
+    assert(left != null);
+
+    final Color topColor = top.color;
+    if (right.color != topColor ||
+        bottom.color != topColor ||
+        left.color != topColor)
+      return false;
+
+    final double topWidth = top.width;
+    if (right.width != topWidth ||
+        bottom.width != topWidth ||
+        left.width != topWidth)
+      return false;
+
+    final BorderStyle topStyle = top.style;
+    if (right.style != topStyle ||
+        bottom.style != topStyle ||
+        left.style != topStyle)
+      return false;
+
+    return true;
+  }
+
+  /// Creates a new border with the widths of this border multiplied by [t].
   Border scale(double t) {
     return new Border(
       top: top.copyWith(width: t * top.width),
@@ -107,6 +206,7 @@ class Border {
     );
   }
 
+  /// Linearly interpolate between two borders.
   static Border lerp(Border a, Border b, double t) {
     if (a == null && b == null)
       return null;
@@ -122,10 +222,140 @@ class Border {
     );
   }
 
+  void paint(Canvas canvas, Rect rect, {
+    BoxShape shape: BoxShape.rectangle,
+    double borderRadius: null
+  }) {
+    if (isUniform) {
+      if (borderRadius != null) {
+        _paintBorderWithRadius(canvas, rect, borderRadius);
+        return;
+      }
+      if (shape == BoxShape.circle) {
+        _paintBorderWithCircle(canvas, rect);
+        return;
+      }
+    }
+
+    assert(borderRadius == null); // TODO(abarth): Support non-uniform rounded borders.
+    assert(shape == BoxShape.rectangle); // TODO(ianh): Support non-uniform borders on circles.
+
+    assert(top != null);
+    assert(right != null);
+    assert(bottom != null);
+    assert(left != null);
+
+    Paint paint = new Paint()
+      ..strokeWidth = 0.0; // used for hairline borders
+    Path path;
+
+    switch (top.style) {
+      case BorderStyle.solid:
+        paint.color = top.color;
+        path = new Path();
+        path.moveTo(rect.left, rect.top);
+        path.lineTo(rect.right, rect.top);
+        if (top.width == 0.0) {
+          paint.style = PaintingStyle.stroke;
+        } else {
+          paint.style = PaintingStyle.fill;
+          path.lineTo(rect.right - right.width, rect.top + top.width);
+          path.lineTo(rect.left + left.width, rect.top + top.width);
+        }
+        canvas.drawPath(path, paint);
+        break;
+      case BorderStyle.none: ;
+    }
+
+    switch (right.style) {
+      case BorderStyle.solid:
+        paint.color = right.color;
+        path = new Path();
+        path.moveTo(rect.right, rect.top);
+        path.lineTo(rect.right, rect.bottom);
+        if (right.width == 0.0) {
+          paint.style = PaintingStyle.stroke;
+        } else {
+          paint.style = PaintingStyle.fill;
+          path.lineTo(rect.right - right.width, rect.bottom - bottom.width);
+          path.lineTo(rect.right - right.width, rect.top + top.width);
+        }
+        canvas.drawPath(path, paint);
+        break;
+      case BorderStyle.none: ;
+    }
+
+    switch (bottom.style) {
+      case BorderStyle.solid:
+        paint.color = bottom.color;
+        path = new Path();
+        path.moveTo(rect.right, rect.bottom);
+        path.lineTo(rect.left, rect.bottom);
+        if (bottom.width == 0.0) {
+          paint.style = PaintingStyle.stroke;
+        } else {
+          paint.style = PaintingStyle.fill;
+          path.lineTo(rect.left + left.width, rect.bottom - bottom.width);
+          path.lineTo(rect.right - right.width, rect.bottom - bottom.width);
+        }
+        canvas.drawPath(path, paint);
+        break;
+      case BorderStyle.none: ;
+    }
+
+    switch (left.style) {
+      case BorderStyle.solid:
+        paint.color = left.color;
+        path = new Path();
+        path.moveTo(rect.left, rect.bottom);
+        path.lineTo(rect.left, rect.top);
+        if (right.width == 0.0) {
+          paint.style = PaintingStyle.stroke;
+        } else {
+          paint.style = PaintingStyle.fill;
+          path.lineTo(rect.left + left.width, rect.top + top.width);
+          path.lineTo(rect.left + left.width, rect.bottom - bottom.width);
+        }
+        canvas.drawPath(path, paint);
+        break;
+      case BorderStyle.none: ;
+    }
+  }
+
+  void _paintBorderWithRadius(Canvas canvas, Rect rect, double borderRadius) {
+    assert(isUniform);
+    Paint paint = new Paint()
+      ..color = top.color;
+    double radius = _getEffectiveBorderRadius(rect, borderRadius);
+    RRect outer = new RRect.fromRectXY(rect, radius, radius);
+    double width = top.width;
+    if (width == 0.0) {
+      paint
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.0;
+      canvas.drawRRect(outer, paint);
+    } else {
+      RRect inner = new RRect.fromRectXY(rect.deflate(width), radius - width, radius - width);
+      canvas.drawDRRect(outer, inner, paint);
+    }
+  }
+
+  void _paintBorderWithCircle(Canvas canvas, Rect rect) {
+    assert(isUniform);
+    double width = top.width;
+    Paint paint = new Paint()
+      ..color = top.color
+      ..strokeWidth = width
+      ..style = PaintingStyle.stroke;
+    double radius = (rect.shortestSide - width) / 2.0;
+    canvas.drawCircle(rect.center, radius, paint);
+  }
+
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other is! Border)
+    if (other.runtimeType != runtimeType)
       return false;
     final Border typedOther = other;
     return top == typedOther.top &&
@@ -134,8 +364,10 @@ class Border {
            left == typedOther.left;
   }
 
+  @override
   int get hashCode => hashValues(top, right, bottom, left);
 
+  @override
   String toString() => 'Border($top, $right, $bottom, $left)';
 }
 
@@ -218,6 +450,7 @@ class BoxShadow {
     return result;
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -230,19 +463,17 @@ class BoxShadow {
            spreadRadius == typedOther.spreadRadius;
   }
 
+  @override
   int get hashCode => hashValues(color, offset, blurRadius, spreadRadius);
 
+  @override
   String toString() => 'BoxShadow($color, $offset, $blurRadius, $spreadRadius)';
-}
-
-// TODO(ianh): We should probably expose something that does this on Rect.
-// https://github.com/flutter/flutter/issues/2318
-Point _offsetToPoint(Offset offset, Rect rect) {
-  return new Point(rect.left + offset.dx * rect.width, rect.top + offset.dy * rect.height);
 }
 
 /// A 2D gradient.
 abstract class Gradient {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const Gradient();
   Shader createShader(Rect rect);
 }
@@ -250,8 +481,8 @@ abstract class Gradient {
 /// A 2D linear gradient.
 class LinearGradient extends Gradient {
   const LinearGradient({
-    this.begin: const Offset(0.0, 0.5),
-    this.end: const Offset(1.0, 0.5),
+    this.begin: const FractionalOffset(0.0, 0.5),
+    this.end: const FractionalOffset(1.0, 0.5),
     this.colors,
     this.stops,
     this.tileMode: TileMode.clamp
@@ -263,7 +494,7 @@ class LinearGradient extends Gradient {
   ///
   /// For example, a begin offset of (0.0,0.5) is half way down the
   /// left side of the box.
-  final Offset begin;
+  final FractionalOffset begin;
 
   /// The offset from coordinate (0.0,0.0) at which stop 1.0 of the
   /// gradient is placed, in a coordinate space that maps the top left
@@ -271,7 +502,7 @@ class LinearGradient extends Gradient {
   ///
   /// For example, an end offset of (1.0,0.5) is half way down the
   /// right side of the box.
-  final Offset end;
+  final FractionalOffset end;
 
   /// The colors the gradient should obtain at each of the stops.
   ///
@@ -287,13 +518,15 @@ class LinearGradient extends Gradient {
   /// How this gradient should tile the plane.
   final TileMode tileMode;
 
+  @override
   Shader createShader(Rect rect) {
     return new ui.Gradient.linear(
-      <Point>[_offsetToPoint(begin, rect), _offsetToPoint(end, rect)],
+      <Point>[begin.withinRect(rect), end.withinRect(rect)],
       colors, stops, tileMode
     );
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -325,8 +558,10 @@ class LinearGradient extends Gradient {
     return true;
   }
 
+  @override
   int get hashCode => hashValues(begin, end, tileMode, hashList(colors), hashList(stops));
 
+  @override
   String toString() {
     return 'LinearGradient($begin, $end, $colors, $stops, $tileMode)';
   }
@@ -335,7 +570,7 @@ class LinearGradient extends Gradient {
 /// A 2D radial gradient.
 class RadialGradient extends Gradient {
   const RadialGradient({
-    this.center: const Offset(0.5, 0.5),
+    this.center: const FractionalOffset(0.5, 0.5),
     this.radius: 0.5,
     this.colors,
     this.stops,
@@ -347,7 +582,7 @@ class RadialGradient extends Gradient {
   ///
   /// For example, an offset of (0.5,0.5) will place the radial
   /// gradient in the center of the box.
-  final Offset center;
+  final FractionalOffset center;
 
   /// The radius of the gradient, as a fraction of the shortest side
   /// of the paint box.
@@ -373,14 +608,16 @@ class RadialGradient extends Gradient {
   /// How this gradient should tile the plane.
   final TileMode tileMode;
 
+  @override
   Shader createShader(Rect rect) {
     return new ui.Gradient.radial(
-      _offsetToPoint(center, rect),
+      center.withinRect(rect),
       radius * rect.shortestSide,
       colors, stops, tileMode
     );
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -412,8 +649,10 @@ class RadialGradient extends Gradient {
     return true;
   }
 
+  @override
   int get hashCode => hashValues(center, radius, tileMode, hashList(colors), hashList(stops));
 
+  @override
   String toString() {
     return 'RadialGradient($center, $radius, $colors, $stops, $tileMode)';
   }
@@ -429,6 +668,14 @@ enum ImageFit {
 
   /// As small as possible while still covering the entire box.
   cover,
+
+  /// Make sure the full width of the image is shown, regardless of
+  /// whether this means the image overflows the box vertically.
+  fitWidth,
+
+  /// Make sure the full height of the image is shown, regardless of
+  /// whether this means the image overflows the box horizontally.
+  fitHeight,
 
   /// Center the image within the box and discard any portions of the image that
   /// lie outside the box.
@@ -534,6 +781,16 @@ void paintImage({
       }
       destinationSize = outputSize;
       break;
+    case ImageFit.fitWidth:
+      sourceSize = new Size(inputSize.width, inputSize.width * outputSize.height / outputSize.width);
+      sourcePosition = new Point(0.0, (inputSize.height - sourceSize.height) * (alignment?.dy ?? 0.5));
+      destinationSize = new Size(outputSize.width, sourceSize.height * outputSize.width / sourceSize.width);
+      break;
+    case ImageFit.fitHeight:
+      sourceSize = new Size(inputSize.height * outputSize.width / outputSize.height, inputSize.height);
+      sourcePosition = new Point((inputSize.width - sourceSize.width) * (alignment?.dx ?? 0.5), 0.0);
+      destinationSize = new Size(sourceSize.width * outputSize.height / sourceSize.height, outputSize.height);
+      break;
     case ImageFit.none:
       sourceSize = new Size(math.min(inputSize.width, outputSize.width),
                             math.min(inputSize.height, outputSize.height));
@@ -595,9 +852,12 @@ void paintImage({
 /// FractionalOffset(0.0, 1.0) represents the bottom left of the Size,
 class FractionalOffset {
   const FractionalOffset(this.dx, this.dy);
+
   final double dx;
   final double dy;
+
   static const FractionalOffset zero = const FractionalOffset(0.0, 0.0);
+
   FractionalOffset operator -() {
     return new FractionalOffset(-dx, -dy);
   }
@@ -625,6 +885,11 @@ class FractionalOffset {
   Offset alongSize(Size other) {
     return new Offset(dx * other.width, dy * other.height);
   }
+  Point withinRect(Rect rect) {
+    return new Point(rect.left + dx * rect.width, rect.top + dy * rect.height);
+  }
+
+  @override
   bool operator ==(dynamic other) {
     if (other is! FractionalOffset)
       return false;
@@ -632,6 +897,8 @@ class FractionalOffset {
     return dx == typedOther.dx &&
            dy == typedOther.dy;
   }
+
+  @override
   int get hashCode => hashValues(dx, dy);
   static FractionalOffset lerp(FractionalOffset a, FractionalOffset b, double t) {
     if (a == null && b == null)
@@ -642,6 +909,8 @@ class FractionalOffset {
       return new FractionalOffset(b.dx * (1.0 - t), b.dy * (1.0 - t));
     return new FractionalOffset(ui.lerpDouble(a.dx, b.dx, t), ui.lerpDouble(a.dy, b.dy, t));
   }
+
+  @override
   String toString() => '$runtimeType($dx, $dy)';
 }
 
@@ -719,6 +988,7 @@ class BackgroundImage {
       listener();
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -733,8 +1003,10 @@ class BackgroundImage {
            _imageResource == typedOther._imageResource;
   }
 
+  @override
   int get hashCode => hashValues(fit, repeat, centerSlice, colorFilter, alignment, _imageResource);
 
+  @override
   String toString() => 'BackgroundImage($fit, $repeat)';
 }
 
@@ -764,6 +1036,7 @@ class BoxDecoration extends Decoration {
     this.shape: BoxShape.rectangle
   });
 
+  @override
   bool debugAssertValid() {
     assert(shape != BoxShape.circle ||
            borderRadius == null); // Can't have a border radius if you're a circle.
@@ -797,6 +1070,7 @@ class BoxDecoration extends Decoration {
   final BoxShape shape;
 
   /// The inset space occupied by the border.
+  @override
   EdgeInsets get padding => border?.dimensions;
 
   /// Returns a new box decoration that is scaled by the given factor.
@@ -816,6 +1090,8 @@ class BoxDecoration extends Decoration {
   /// Linearly interpolate between two box decorations.
   ///
   /// Interpolates each parameter of the box decoration separately.
+  ///
+  /// See also [Decoration.lerp].
   static BoxDecoration lerp(BoxDecoration a, BoxDecoration b, double t) {
     if (a == null && b == null)
       return null;
@@ -835,18 +1111,21 @@ class BoxDecoration extends Decoration {
     );
   }
 
+  @override
   BoxDecoration lerpFrom(Decoration a, double t) {
     if (a is! BoxDecoration)
       return BoxDecoration.lerp(null, this, t);
     return BoxDecoration.lerp(a, this, t);
   }
 
+  @override
   BoxDecoration lerpTo(Decoration b, double t) {
     if (b is! BoxDecoration)
       return BoxDecoration.lerp(this, null, t);
     return BoxDecoration.lerp(this, b, t);
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -862,6 +1141,7 @@ class BoxDecoration extends Decoration {
            shape == typedOther.shape;
   }
 
+  @override
   int get hashCode {
     return hashValues(
       backgroundColor,
@@ -877,6 +1157,7 @@ class BoxDecoration extends Decoration {
   /// Stringifies the BoxDecoration. By default, the output will be on one line.
   /// If the method is passed a non-empty string argument, then the output will
   /// span multiple lines, each prefixed by that argument.
+  @override
   String toString([String prefix = '']) {
     List<String> result = <String>[];
     if (backgroundColor != null)
@@ -900,23 +1181,25 @@ class BoxDecoration extends Decoration {
     return result.join('\n');
   }
 
+  /// Whether this [Decoration] subclass needs its painters to use
+  /// [addChangeListener] to listen for updates.
+  ///
+  /// [BoxDecoration] objects only need a listener if they have a
+  /// background image.
+  @override
   bool get needsListeners => backgroundImage != null;
 
+  @override
   void addChangeListener(VoidCallback listener) {
     backgroundImage?._addChangeListener(listener);
   }
+
+  @override
   void removeChangeListener(VoidCallback listener) {
     backgroundImage?._removeChangeListener(listener);
   }
 
-  double getEffectiveBorderRadius(Rect rect) {
-    double shortestSide = rect.shortestSide;
-    // In principle, we should use shortestSide / 2.0, but we don't want to
-    // run into floating point rounding errors. Instead, we just use
-    // shortestSide and let Canvas do any remaining clamping.
-    return borderRadius > shortestSide ? shortestSide : borderRadius;
-  }
-
+  @override
   bool hitTest(Size size, Point position) {
     assert(shape != null);
     assert((Point.origin & size).contains(position));
@@ -935,6 +1218,7 @@ class BoxDecoration extends Decoration {
     }
   }
 
+  @override
   _BoxDecorationPainter createBoxPainter() => new _BoxDecorationPainter(this);
 }
 
@@ -971,25 +1255,6 @@ class _BoxDecorationPainter extends BoxPainter {
     return _cachedBackgroundPaint;
   }
 
-  bool get _hasUniformBorder {
-    Color color = _decoration.border.top.color;
-    bool hasUniformColor =
-      _decoration.border.right.color == color &&
-      _decoration.border.bottom.color == color &&
-      _decoration.border.left.color == color;
-
-    if (!hasUniformColor)
-      return false;
-
-    double width = _decoration.border.top.width;
-    bool hasUniformWidth =
-      _decoration.border.right.width == width &&
-      _decoration.border.bottom.width == width &&
-      _decoration.border.left.width == width;
-
-    return hasUniformWidth;
-  }
-
   void _paintBox(Canvas canvas, Rect rect, Paint paint) {
     switch (_decoration.shape) {
       case BoxShape.circle:
@@ -1002,7 +1267,7 @@ class _BoxDecorationPainter extends BoxPainter {
         if (_decoration.borderRadius == null) {
           canvas.drawRect(rect, paint);
         } else {
-          double radius = _decoration.getEffectiveBorderRadius(rect);
+          double radius = _getEffectiveBorderRadius(rect, _decoration.borderRadius);
           canvas.drawRRect(new RRect.fromRectXY(rect, radius, radius), paint);
         }
         break;
@@ -1044,102 +1309,17 @@ class _BoxDecorationPainter extends BoxPainter {
     );
   }
 
-  void _paintBorder(Canvas canvas, Rect rect) {
-    if (_decoration.border == null)
-      return;
-
-    if (_hasUniformBorder) {
-      if (_decoration.borderRadius != null) {
-        _paintBorderWithRadius(canvas, rect);
-        return;
-      }
-      if (_decoration.shape == BoxShape.circle) {
-        _paintBorderWithCircle(canvas, rect);
-        return;
-      }
-    }
-
-    assert(_decoration.borderRadius == null); // TODO(abarth): Support non-uniform rounded borders.
-    assert(_decoration.shape == BoxShape.rectangle); // TODO(ianh): Support non-uniform borders on circles.
-
-    assert(_decoration.border.top != null);
-    assert(_decoration.border.right != null);
-    assert(_decoration.border.bottom != null);
-    assert(_decoration.border.left != null);
-
-    Paint paint = new Paint();
-    Path path;
-
-    paint.color = _decoration.border.top.color;
-    path = new Path();
-    path.moveTo(rect.left, rect.top);
-    path.lineTo(rect.left + _decoration.border.left.width, rect.top + _decoration.border.top.width);
-    path.lineTo(rect.right - _decoration.border.right.width, rect.top + _decoration.border.top.width);
-    path.lineTo(rect.right, rect.top);
-    path.close();
-    canvas.drawPath(path, paint);
-
-    paint.color = _decoration.border.right.color;
-    path = new Path();
-    path.moveTo(rect.right, rect.top);
-    path.lineTo(rect.right - _decoration.border.right.width, rect.top + _decoration.border.top.width);
-    path.lineTo(rect.right - _decoration.border.right.width, rect.bottom - _decoration.border.bottom.width);
-    path.lineTo(rect.right, rect.bottom);
-    path.close();
-    canvas.drawPath(path, paint);
-
-    paint.color = _decoration.border.bottom.color;
-    path = new Path();
-    path.moveTo(rect.right, rect.bottom);
-    path.lineTo(rect.right - _decoration.border.right.width, rect.bottom - _decoration.border.bottom.width);
-    path.lineTo(rect.left + _decoration.border.left.width, rect.bottom - _decoration.border.bottom.width);
-    path.lineTo(rect.left, rect.bottom);
-    path.close();
-    canvas.drawPath(path, paint);
-
-    paint.color = _decoration.border.left.color;
-    path = new Path();
-    path.moveTo(rect.left, rect.bottom);
-    path.lineTo(rect.left + _decoration.border.left.width, rect.bottom - _decoration.border.bottom.width);
-    path.lineTo(rect.left + _decoration.border.left.width, rect.top + _decoration.border.top.width);
-    path.lineTo(rect.left, rect.top);
-    path.close();
-    canvas.drawPath(path, paint);
-  }
-
-  void _paintBorderWithRadius(Canvas canvas, Rect rect) {
-    assert(_hasUniformBorder);
-    assert(_decoration.shape == BoxShape.rectangle);
-    Color color = _decoration.border.top.color;
-    double width = _decoration.border.top.width;
-    double radius = _decoration.getEffectiveBorderRadius(rect);
-
-    RRect outer = new RRect.fromRectXY(rect, radius, radius);
-    RRect inner = new RRect.fromRectXY(rect.deflate(width), radius - width, radius - width);
-    canvas.drawDRRect(outer, inner, new Paint()..color = color);
-  }
-
-  void _paintBorderWithCircle(Canvas canvas, Rect rect) {
-    assert(_hasUniformBorder);
-    assert(_decoration.shape == BoxShape.circle);
-    assert(_decoration.borderRadius == null);
-    double width = _decoration.border.top.width;
-    if (width <= 0.0)
-      return;
-    Paint paint = new Paint()
-      ..color = _decoration.border.top.color
-      ..strokeWidth = width
-      ..style = PaintingStyle.stroke;
-    Point center = rect.center;
-    double radius = (rect.shortestSide - width) / 2.0;
-    canvas.drawCircle(center, radius, paint);
-  }
-
   /// Paint the box decoration into the given location on the given canvas
+  @override
   void paint(Canvas canvas, Rect rect) {
     _paintShadows(canvas, rect);
     _paintBackgroundColor(canvas, rect);
     _paintBackgroundImage(canvas, rect);
-    _paintBorder(canvas, rect);
+    _decoration.border?.paint(
+      canvas,
+      rect,
+      shape: _decoration.shape,
+      borderRadius: _decoration.borderRadius
+    );
   }
 }

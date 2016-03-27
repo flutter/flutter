@@ -10,6 +10,8 @@ import 'curves.dart';
 
 /// An object that can produce a value of type T given an [Animation] as input.
 abstract class Animatable<T> {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const Animatable();
 
   /// The current value of this object for the given animation.
@@ -31,12 +33,23 @@ abstract class Animatable<T> {
 class _AnimatedEvaluation<T> extends Animation<T> with AnimationWithParentMixin<double> {
   _AnimatedEvaluation(this.parent, this._evaluatable);
 
-  /// The animation from which this value is derived.
+  @override
   final Animation<double> parent;
 
   final Animatable<T> _evaluatable;
 
+  @override
   T get value => _evaluatable.evaluate(parent);
+
+  @override
+  String toString() {
+    return '$parent\u27A9$_evaluatable';
+  }
+
+  @override
+  String toStringDetails() {
+    return '${super.toStringDetails()} $_evaluatable';
+  }
 }
 
 class _ChainedEvaluation<T> extends Animatable<T> {
@@ -45,13 +58,29 @@ class _ChainedEvaluation<T> extends Animatable<T> {
   final Animatable<double> _parent;
   final Animatable<T> _evaluatable;
 
+  @override
   T evaluate(Animation<double> animation) {
     double value = _parent.evaluate(animation);
     return _evaluatable.evaluate(new AlwaysStoppedAnimation<double>(value));
   }
+
+  @override
+  String toString() {
+    return '$_parent\u27A9$_evaluatable';
+  }
 }
 
 /// A linear interpolation between a beginning and ending value.
+///
+/// [Tween] is useful if you want to interpolate across a range.
+///
+/// To use a [Tween] object with an animation, call the [Tween] object's `animate()` method and
+/// pass it the [Animation] object that you want to modify.
+///
+/// You can chain [Tween] objects together using the `chain()` method, so that a single
+/// [Animation] object is configured by multiple [Tween] objects called in succession. This is
+/// different than calling the `animate()` method twice, which results in two [Animation]
+/// separate objects, each configured with a single [Tween].
 class Tween<T extends dynamic> extends Animatable<T> {
   Tween({ this.begin, this.end });
 
@@ -65,6 +94,9 @@ class Tween<T extends dynamic> extends Animatable<T> {
   T lerp(double t) => begin + (end - begin) * t;
 
   /// Returns the interpolated value for the current value of the given animation.
+  ///
+  /// This method returns `begin` and `end` when the animation values are 0.0 or 1.0, respectively.
+  @override
   T evaluate(Animation<double> animation) {
     if (end == null)
       return begin;
@@ -76,6 +108,7 @@ class Tween<T extends dynamic> extends Animatable<T> {
     return lerp(t);
   }
 
+  @override
   String toString() => '$runtimeType($begin \u2192 $end)';
 }
 
@@ -86,6 +119,7 @@ class Tween<T extends dynamic> extends Animatable<T> {
 class ColorTween extends Tween<Color> {
   ColorTween({ Color begin, Color end }) : super(begin: begin, end: end);
 
+  @override
   Color lerp(double t) => Color.lerp(begin, end, t);
 }
 
@@ -96,6 +130,7 @@ class ColorTween extends Tween<Color> {
 class SizeTween extends Tween<Size> {
   SizeTween({ Size begin, Size end }) : super(begin: begin, end: end);
 
+  @override
   Size lerp(double t) => Size.lerp(begin, end, t);
 }
 
@@ -106,6 +141,7 @@ class SizeTween extends Tween<Size> {
 class RectTween extends Tween<Rect> {
   RectTween({ Rect begin, Rect end }) : super(begin: begin, end: end);
 
+  @override
   Rect lerp(double t) => Rect.lerp(begin, end, t);
 }
 
@@ -123,6 +159,7 @@ class IntTween extends Tween<int> {
 
   // The inherited lerp() function doesn't work with ints because it multiplies
   // the begin and end types by a double, and int * double returns a double.
+  @override
   int lerp(double t) => (begin + (end - begin) * t).round();
 }
 
@@ -140,6 +177,7 @@ class StepTween extends Tween<int> {
 
   // The inherited lerp() function doesn't work with ints because it multiplies
   // the begin and end types by a double, and int * double returns a double.
+  @override
   int lerp(double t) => (begin + (end - begin) * t).floor();
 }
 
@@ -154,6 +192,7 @@ class CurveTween extends Animatable<double> {
   /// The curve to use when transforming the value of the animation.
   Curve curve;
 
+  @override
   double evaluate(Animation<double> animation) {
     double t = animation.value;
     if (t == 0.0 || t == 1.0) {

@@ -25,6 +25,7 @@ class _GesturePainter extends CustomPainter {
   final bool doubleTapEnabled;
   final bool longPressEnabled;
 
+  @override
   void paint(Canvas canvas, Size size) {
     Point center = (size.center(Point.origin).toOffset() * zoom + offset).toPoint();
     double radius = size.width / 2.0 * zoom;
@@ -42,6 +43,7 @@ class _GesturePainter extends CustomPainter {
     canvas.drawCircle(center, radius, paint);
   }
 
+  @override
   bool shouldRepaint(_GesturePainter oldPainter) {
     return oldPainter.zoom != zoom
         || oldPainter.offset != offset
@@ -55,6 +57,7 @@ class _GesturePainter extends CustomPainter {
 }
 
 class GestureDemo extends StatefulWidget {
+  @override
   _GestureDemoState createState() => new _GestureDemoState();
 }
 
@@ -134,6 +137,7 @@ class _GestureDemoState extends State<GestureDemo> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     return new Stack(
       children: <Widget>[

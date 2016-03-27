@@ -46,15 +46,21 @@ class OverlayEntry {
     _key.currentState?.setState(() { /* the state that changed is in the builder */ });
   }
 
+  @override
   String toString() => '$runtimeType@$hashCode(opaque: $opaque)';
 }
 
 class _OverlayEntry extends StatefulWidget {
   _OverlayEntry(OverlayEntry entry) : entry = entry, super(key: entry._key);
+
   final OverlayEntry entry;
+
+  @override
   _OverlayEntryState createState() => new _OverlayEntryState();
 }
+
 class _OverlayEntryState extends State<_OverlayEntry> {
+  @override
   Widget build(BuildContext context) => config.entry.builder(context);
 }
 
@@ -84,7 +90,7 @@ class Overlay extends StatefulWidget {
         String additional = context.widget != debugRequiredFor
           ? '\nThe context from which that widget was searching for an overlay was:\n  $context'
           : '';
-        throw new WidgetError(
+        throw new FlutterError(
           'No Overlay widget found.\n'
           '${debugRequiredFor.runtimeType} widgets require an Overlay widget ancestor for correct operation.\n'
           'The most common way to add an Overlay to an application is to include a MaterialApp or Navigator widget in the runApp() call.\n'
@@ -98,6 +104,7 @@ class Overlay extends StatefulWidget {
     return result;
   }
 
+  @override
   OverlayState createState() => new OverlayState();
 }
 
@@ -105,6 +112,7 @@ class Overlay extends StatefulWidget {
 class OverlayState extends State<Overlay> {
   final List<OverlayEntry> _entries = new List<OverlayEntry>();
 
+  @override
   void initState() {
     super.initState();
     insertAll(config.initialEntries);
@@ -171,6 +179,7 @@ class OverlayState extends State<Overlay> {
     return result;
   }
 
+  @override
   Widget build(BuildContext context) {
     List<Widget> backwardsChildren = <Widget>[];
 
@@ -184,6 +193,7 @@ class OverlayState extends State<Overlay> {
     return new Stack(children: backwardsChildren.reversed.toList(growable: false));
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('entries: $_entries');

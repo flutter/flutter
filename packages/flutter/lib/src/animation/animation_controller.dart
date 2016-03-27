@@ -24,10 +24,17 @@ enum _AnimationDirection {
 
 /// A controller for an animation.
 ///
-/// An animation controller can drive an animation forward or backward and can
-/// set the animation to a particular value. The controller also defines the
-/// bounds of the animation and can drive an animation using a physics
-/// simulation.
+/// This class lets you perform tasks such as:
+///
+/// * Play an animation [forward] or in [reverse], or [stop] an animation.
+/// * Set the animation to a specific [value].
+/// * Define the [upperBound] and [lowerBound] values of an animation.
+/// * Create a [fling] animation effect using a physics simulation.
+///
+/// By default, an [AnimationController] linearly produces values that range from 0.0 to 1.0, during
+/// a given duration. The animation controller generates a new value whenever the device running
+/// your app is ready to display a new frame (typically, this rate is around 60 values per second).
+///
 class AnimationController extends Animation<double>
   with AnimationEagerListenerMixin, AnimationLocalListenersMixin, AnimationLocalStatusListenersMixin {
 
@@ -99,8 +106,16 @@ class AnimationController extends Animation<double>
   /// Setting this value also stops the controller if it is currently
   /// running; if this happens, it also notifies all the status
   /// listeners.
+  @override
   double get value => _value;
   double _value;
+  /// Stops the animation controller and sets the current value of the
+  /// animation.
+  ///
+  /// The new value is clamped to the range set by [lowerBound] and [upperBound].
+  ///
+  /// Value listeners are notified even if this does not change the value.
+  /// Status listeners are notified if the animation was previously playing.
   void set value(double newValue) {
     assert(newValue != null);
     stop();
@@ -109,11 +124,18 @@ class AnimationController extends Animation<double>
     _checkStatusChanged();
   }
 
+  /// The amount of time that has passed between the time the animation started and the most recent tick of the animation.
+  ///
+  /// If the controller is not animating, the last elapsed duration is null;
+  Duration get lastElapsedDuration => _lastElapsedDuration;
+  Duration _lastElapsedDuration;
+
   /// Whether this animation is currently animating in either the forward or reverse direction.
   bool get isAnimating => _ticker.isTicking;
 
   _AnimationDirection _direction;
 
+  @override
   AnimationStatus get status {
     if (!isAnimating && value == upperBound)
       return AnimationStatus.completed;
@@ -189,6 +211,7 @@ class AnimationController extends Animation<double>
     assert(simulation != null);
     assert(!isAnimating);
     _simulation = simulation;
+    _lastElapsedDuration = const Duration();
     _value = simulation.x(0.0).clamp(lowerBound, upperBound);
     Future<Null> result = _ticker.start();
     _checkStatusChanged();
@@ -198,10 +221,12 @@ class AnimationController extends Animation<double>
   /// Stops running this animation.
   void stop() {
     _simulation = null;
+    _lastElapsedDuration = null;
     _ticker.stop();
   }
 
   /// Stops running this animation.
+  @override
   void dispose() {
     stop();
   }
@@ -216,6 +241,7 @@ class AnimationController extends Animation<double>
   }
 
   void _tick(Duration elapsed) {
+    _lastElapsedDuration = elapsed;
     double elapsedInSeconds = elapsed.inMicroseconds.toDouble() / Duration.MICROSECONDS_PER_SECOND;
     _value = _simulation.x(elapsedInSeconds).clamp(lowerBound, upperBound);
     if (_simulation.isDone(elapsedInSeconds))
@@ -224,6 +250,7 @@ class AnimationController extends Animation<double>
     _checkStatusChanged();
   }
 
+  @override
   String toStringDetails() {
     String paused = isAnimating ? '' : '; paused';
     String label = debugLabel == null ? '' : '; for $debugLabel';
@@ -245,6 +272,7 @@ class _InterpolationSimulation extends Simulation {
   final double _end;
   final Curve _curve;
 
+  @override
   double x(double timeInSeconds) {
     assert(timeInSeconds >= 0.0);
     double t = (timeInSeconds / _durationInSeconds).clamp(0.0, 1.0);
@@ -256,8 +284,10 @@ class _InterpolationSimulation extends Simulation {
       return _begin + (_end - _begin) * _curve.transform(t);
   }
 
+  @override
   double dx(double timeInSeconds) => 1.0;
 
+  @override
   bool isDone(double timeInSeconds) => timeInSeconds > _durationInSeconds;
 }
 
@@ -272,13 +302,16 @@ class _RepeatingSimulation extends Simulation {
 
   final double _periodInSeconds;
 
+  @override
   double x(double timeInSeconds) {
     assert(timeInSeconds >= 0.0);
     final double t = (timeInSeconds / _periodInSeconds) % 1.0;
     return ui.lerpDouble(min, max, t);
   }
 
+  @override
   double dx(double timeInSeconds) => 1.0;
 
+  @override
   bool isDone(double timeInSeconds) => false;
 }

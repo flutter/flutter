@@ -74,6 +74,7 @@ class PianoApp extends StatelessWidget {
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     List<Widget> children = <Widget>[];
     for (PianoKey key in keys) {

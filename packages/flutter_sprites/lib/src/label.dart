@@ -33,6 +33,7 @@ class Label extends Node {
   TextPainter _painter;
   double _width;
 
+  @override
   void paint(Canvas canvas) {
     if (_painter == null) {
       _painter = new TextPainter(new TextSpan(style: _textStyle, text: _text));

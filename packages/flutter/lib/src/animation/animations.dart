@@ -11,12 +11,26 @@ import 'listener_helpers.dart';
 class _AlwaysCompleteAnimation extends Animation<double> {
   const _AlwaysCompleteAnimation();
 
+  @override
   void addListener(VoidCallback listener) { }
+
+  @override
   void removeListener(VoidCallback listener) { }
+
+  @override
   void addStatusListener(AnimationStatusListener listener) { }
+
+  @override
   void removeStatusListener(AnimationStatusListener listener) { }
+
+  @override
   AnimationStatus get status => AnimationStatus.completed;
+
+  @override
   double get value => 1.0;
+
+  @override
+  String toString() => 'kAlwaysCompleteAnimation';
 }
 
 /// An animation that is always complete.
@@ -29,12 +43,26 @@ const Animation<double> kAlwaysCompleteAnimation = const _AlwaysCompleteAnimatio
 class _AlwaysDismissedAnimation extends Animation<double> {
   const _AlwaysDismissedAnimation();
 
+  @override
   void addListener(VoidCallback listener) { }
+
+  @override
   void removeListener(VoidCallback listener) { }
+
+  @override
   void addStatusListener(AnimationStatusListener listener) { }
+
+  @override
   void removeStatusListener(AnimationStatusListener listener) { }
+
+  @override
   AnimationStatus get status => AnimationStatus.dismissed;
+
+  @override
   double get value => 0.0;
+
+  @override
+  String toString() => 'kAlwaysDismissedAnimation';
 }
 
 /// An animation that is always dismissed.
@@ -45,16 +73,40 @@ class _AlwaysDismissedAnimation extends Animation<double> {
 const Animation<double> kAlwaysDismissedAnimation = const _AlwaysDismissedAnimation();
 
 /// An animation that is always stopped at a given value.
+///
+/// The [status] is always [AnimationStatus.forward].
 class AlwaysStoppedAnimation<T> extends Animation<T> {
+  /// Creates an [AlwaysStoppedAnimation] with the given value.
+  ///
+  /// Since the [value] and [status] of an [AlwaysStoppedAnimation] can never
+  /// change, the listeners can never be invoked. It is therefore safe to reuse
+  /// an [AlwaysStoppedAnimation] instance in multiple places. If the [value] to
+  /// be used is known at compile time, the constructor should be invoked as a
+  /// `const` constructor.
   const AlwaysStoppedAnimation(this.value);
 
+  @override
   final T value;
 
+  @override
   void addListener(VoidCallback listener) { }
+
+  @override
   void removeListener(VoidCallback listener) { }
+
+  @override
   void addStatusListener(AnimationStatusListener listener) { }
+
+  @override
   void removeStatusListener(AnimationStatusListener listener) { }
+
+  @override
   AnimationStatus get status => AnimationStatus.forward;
+
+  @override
+  String toStringDetails() {
+    return '${super.toStringDetails()} $value; paused';
+  }
 }
 
 /// Implements most of the [Animation] interface, by deferring its behavior to a
@@ -64,15 +116,25 @@ abstract class AnimationWithParentMixin<T> {
   /// The animation whose value this animation will proxy.
   ///
   /// This animation must remain the same for the lifetime of this object. If
-  /// you wish to proxy a different animation at different times, conside using
+  /// you wish to proxy a different animation at different times, consider using
   /// [ProxyAnimation].
   Animation<T> get parent;
 
+  // keep these next five dartdocs in sync with the dartdocs in Animation<T>
+
+  /// Calls the listener every time the value of the animation changes.
   void addListener(VoidCallback listener) => parent.addListener(listener);
+
+  /// Stop calling the listener every time the value of the animation changes.
   void removeListener(VoidCallback listener) => parent.removeListener(listener);
+
+  /// Calls listener every time the status of the animation changes.
   void addStatusListener(AnimationStatusListener listener) => parent.addStatusListener(listener);
+
+  /// Stops calling the listener every time the status of the animation changes.
   void removeStatusListener(AnimationStatusListener listener) => parent.removeStatusListener(listener);
 
+  /// The current status of this animation.
   AnimationStatus get status => parent.status;
 }
 
@@ -123,6 +185,7 @@ class ProxyAnimation extends Animation<double>
     }
   }
 
+  @override
   void didStartListening() {
     if (_parent != null) {
       _parent.addListener(notifyListeners);
@@ -130,6 +193,7 @@ class ProxyAnimation extends Animation<double>
     }
   }
 
+  @override
   void didStopListening() {
     if (_parent != null) {
       _parent.removeListener(notifyListeners);
@@ -137,8 +201,18 @@ class ProxyAnimation extends Animation<double>
     }
   }
 
+  @override
   AnimationStatus get status => _parent != null ? _parent.status : _status;
+
+  @override
   double get value => _parent != null ? _parent.value : _value;
+
+  @override
+  String toString() {
+    if (parent == null)
+      return '$runtimeType(null; ${super.toStringDetails()} ${value.toStringAsFixed(3)})';
+    return '$parent\u27A9$runtimeType';
+  }
 }
 
 /// An animation that is the reverse of another animation.
@@ -155,19 +229,24 @@ class ReverseAnimation extends Animation<double>
   /// The animation whose value and direction this animation is reversing.
   final Animation<double> parent;
 
+  @override
   void addListener(VoidCallback listener) {
     didRegisterListener();
     parent.addListener(listener);
   }
+
+  @override
   void removeListener(VoidCallback listener) {
     parent.removeListener(listener);
     didUnregisterListener();
   }
 
+  @override
   void didStartListening() {
     parent.addStatusListener(_statusChangeHandler);
   }
 
+  @override
   void didStopListening() {
     parent.removeStatusListener(_statusChangeHandler);
   }
@@ -176,7 +255,10 @@ class ReverseAnimation extends Animation<double>
     notifyStatusListeners(_reverseStatus(status));
   }
 
+  @override
   AnimationStatus get status => _reverseStatus(parent.status);
+
+  @override
   double get value => 1.0 - parent.value;
 
   AnimationStatus _reverseStatus(AnimationStatus status) {
@@ -187,13 +269,32 @@ class ReverseAnimation extends Animation<double>
       case AnimationStatus.dismissed: return AnimationStatus.completed;
     }
   }
+
+  @override
+  String toString() {
+    return '$parent\u27AA$runtimeType';
+  }
 }
 
 /// An animation that applies a curve to another animation.
 ///
-/// [CurvedAnimation] is useful when you wish to apply a [Curve] and you already
-/// have the underlying animation object. If you don't yet have an animation and
-/// want to apply a [Curve] to a [Tween], consider using [CurveTween].
+/// [CurvedAnimation] is useful when you want to apply a non-linear [Curve] to
+/// an animation object wrapped in the [CurvedAnimation].
+///
+/// For example, the following code snippet shows how you can apply a curve to a linear animation
+/// produced by an [AnimationController]:
+///
+/// ``` dart
+///     final AnimationController controller =
+///         new AnimationController(duration: const Duration(milliseconds: 500));
+///     final CurvedAnimation animation =
+///         new CurvedAnimation(parent: controller, curve: Curves.ease);
+///```
+/// Depending on the given curve, the output of the [CurvedAnimation] could have a wider range
+/// than its input. For example, elastic curves such as [Curves.elasticIn] will significantly
+/// overshoot or undershoot the default range of 0.0 to 1.0.
+///
+/// If you want to apply a [Curve] to a [Tween], consider using [CurveTween].
 class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<double> {
   CurvedAnimation({
     this.parent,
@@ -206,6 +307,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   }
 
   /// The animation to which this animation applies a curve.
+  @override
   final Animation<double> parent;
 
   /// The curve to use in the forward direction.
@@ -238,9 +340,13 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
     }
   }
 
+  bool get _useForwardCurve {
+    return reverseCurve == null || (_curveDirection ?? parent.status) != AnimationStatus.reverse;
+  }
+
+  @override
   double get value {
-    final bool useForwardCurve = reverseCurve == null || (_curveDirection ?? parent.status) != AnimationStatus.reverse;
-    Curve activeCurve = useForwardCurve ? curve : reverseCurve;
+    Curve activeCurve = _useForwardCurve ? curve : reverseCurve;
 
     double t = parent.value;
     if (activeCurve == null)
@@ -250,6 +356,15 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
       return t;
     }
     return activeCurve.transform(t);
+  }
+
+  @override
+  String toString() {
+    if (reverseCurve == null)
+      return '$parent\u27A9$curve';
+    if (_useForwardCurve) 
+     return '$parent\u27A9$curve\u2092\u2099/$reverseCurve';
+    return '$parent\u27A9$curve/$reverseCurve\u2092\u2099';
   }
 }
 
@@ -306,6 +421,7 @@ class TrainHoppingAnimation extends Animation<double>
     assert(_lastStatus != null);
   }
 
+  @override
   AnimationStatus get status => _currentTrain.status;
 
   double _lastValue;
@@ -342,10 +458,12 @@ class TrainHoppingAnimation extends Animation<double>
       onSwitchedTrain();
   }
 
+  @override
   double get value => _currentTrain.value;
 
   /// Frees all the resources used by this performance.
   /// After this is called, this object is no longer usable.
+  @override
   void dispose() {
     assert(_currentTrain != null);
     _currentTrain.removeStatusListener(_statusChangeHandler);
@@ -355,5 +473,12 @@ class TrainHoppingAnimation extends Animation<double>
       _nextTrain.removeListener(_valueChangeHandler);
       _nextTrain = null;
     }
+  }
+
+  @override
+  String toString() {
+    if (_nextTrain != null)
+      return '$currentTrain\u27A9$runtimeType(next: $_nextTrain)';
+    return '$currentTrain\u27A9$runtimeType(no next)';
   }
 }

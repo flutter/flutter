@@ -214,6 +214,7 @@ class AdbDevice {
   /// Device product; can be null. `peregrine_retus`, `nakasi`
   String get productID => _info['product'];
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -223,8 +224,10 @@ class AdbDevice {
     return id == typedOther.id;
   }
 
+  @override
   int get hashCode => id.hashCode;
 
+  @override
   String toString() {
     if (modelID == null) {
       return '$id ($status)';

@@ -21,15 +21,13 @@ class ServiceProtocolDiscovery {
   final DeviceLogReader _logReader;
   Completer<int> _completer = new Completer<int>();
 
-  /// The [Future] returned by this function will complete when the next
-  /// service protocol port is found.
-  Future<int> nextPort() {
-    return _completer.future;
-  }
+  /// The [Future] returned by this function will complete when the next service
+  /// protocol port is found.
+  Future<int> nextPort() => _completer.future;
 
   void _onLine(String line) {
     int portNumber = 0;
-    if (line.startsWith('Observatory listening on http://')) {
+    if (line.contains('Observatory listening on http://')) {
       try {
         RegExp portExp = new RegExp(r"\d+.\d+.\d+.\d+:(\d+)");
         String port = portExp.firstMatch(line).group(1);

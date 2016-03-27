@@ -47,6 +47,7 @@ abstract class ActionInterval extends Action {
   /// The duration, in seconds, of the action.
   ///
   ///     double myTime = myAction.duration;
+  @override
   double get duration => _duration;
   double _duration;
 
@@ -58,6 +59,7 @@ abstract class ActionInterval extends Action {
   bool _firstTick = true;
   double _elapsed = 0.0;
 
+  @override
   void step(double dt) {
     if (_firstTick) {
       _firstTick = false;
@@ -96,6 +98,7 @@ class ActionRepeat extends ActionInterval {
     _duration = action.duration * numRepeats;
   }
 
+  @override
   void update(double t) {
     int currentRepeat = math.min((t * numRepeats.toDouble()).toInt(), numRepeats - 1);
     for (int i = math.max(_lastFinishedRepeat, 0); i < currentRepeat; i++) {
@@ -124,6 +127,7 @@ class ActionRepeatForever extends Action {
   ///     var myInifiniteLoop = new ActionRepeatForever(myAction);
   ActionRepeatForever(this.action);
 
+  @override
   void step(double dt) {
     _elapsedInAction += dt;
     while (_elapsedInAction > action.duration) {
@@ -176,6 +180,7 @@ class ActionSequence extends ActionInterval {
     }
   }
 
+  @override
   void update(double t) {
     if (t < _split) {
       // Play first action
@@ -225,6 +230,7 @@ class ActionSequence extends ActionInterval {
     action._finished = true;
   }
 
+  @override
   void _reset() {
     super._reset();
     _a._reset();
@@ -249,6 +255,7 @@ class ActionGroup extends ActionInterval {
     }
   }
 
+  @override
   void update(double t) {
     if (t >= 1.0) {
       // Finish all unfinished actions
@@ -289,6 +296,7 @@ class ActionGroup extends ActionInterval {
     }
   }
 
+  @override
   void _reset() {
     for (Action action in _actions) {
       action._reset();
@@ -307,9 +315,11 @@ class ActionDelay extends ActionInterval {
 /// create custom instant actions, only the [fire] method should be overriden.
 abstract class ActionInstant extends Action {
 
+  @override
   void step(double dt) {
   }
 
+  @override
   void update(double t) {
     fire();
     _finished = true;
@@ -327,6 +337,7 @@ class ActionCallFunction extends ActionInstant {
   ///     var myAction = new ActionCallFunction(() { print("Hello!";) });
   ActionCallFunction(this._function);
 
+  @override
   void fire() {
     _function();
   }
@@ -341,6 +352,7 @@ class ActionRemoveNode extends ActionInstant {
   ///     var myAction = new ActionRemoveNode(myNode);
   ActionRemoveNode(this._node);
 
+  @override
   void fire() {
     _node.removeFromParent();
   }
@@ -423,6 +435,7 @@ class ActionTween extends ActionInterval {
     }
   }
 
+  @override
   void update(double t) {
     dynamic newVal;
 

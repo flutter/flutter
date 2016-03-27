@@ -20,6 +20,9 @@ void main() {
 }
 
 class FlutterDemo extends StatefulWidget {
+  FlutterDemo({ Key key }) : super(key: key);
+
+  @override
   _FlutterDemoState createState() => new _FlutterDemoState();
 }
 
@@ -32,6 +35,7 @@ class _FlutterDemoState extends State<FlutterDemo> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(

@@ -13,6 +13,7 @@ enum ListDemoItemSize {
 class ListDemo extends StatefulWidget {
   ListDemo({ Key key }) : super(key: key);
 
+  @override
   ListDemoState createState() => new ListDemoState();
 }
 
@@ -41,7 +42,7 @@ class ListDemoState extends State<ListDemo> {
     _bottomSheet = scaffoldKey.currentState.showBottomSheet((BuildContext bottomSheetContext) {
       return new Container(
         decoration: new BoxDecoration(
-          border: new Border(top: new BorderSide(color: Colors.black26, width: 1.0))
+          border: new Border(top: new BorderSide(color: Colors.black26))
         ),
         child: new Column(
           mainAxisAlignment: MainAxisAlignment.collapse,
@@ -153,6 +154,7 @@ class ListDemoState extends State<ListDemo> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     final String layoutText = _dense ? " \u2013 Dense" : "";
     String  itemSizeText;

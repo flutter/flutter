@@ -14,11 +14,13 @@ import 'theme.dart';
 class DrawerHeader extends StatelessWidget {
   const DrawerHeader({ Key key, this.child }) : super(key: key);
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
+  @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final double statusBarHeight = (MediaQuery.of(context)?.padding ?? EdgeInsets.zero).top;
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
     return new Container(
       height: statusBarHeight + kMaterialDrawerHeight,
       decoration: new BoxDecoration(

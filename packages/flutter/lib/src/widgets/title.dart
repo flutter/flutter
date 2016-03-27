@@ -22,13 +22,16 @@ class Title extends StatelessWidget {
   /// A color that the window manager should use to identify this app.
   final Color color;
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
+  @override
   Widget build(BuildContext context) {
     updateTaskDescription(label: title, color: color);
     return child;
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     if (title != null)

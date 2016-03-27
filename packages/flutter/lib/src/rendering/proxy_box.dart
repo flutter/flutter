@@ -29,11 +29,11 @@ export 'package:flutter/gestures.dart' show
 /// for render objects that wish to mimic most, but not all, of the properties
 /// of their child.
 class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
-
   RenderProxyBox([RenderBox child = null]) {
     this.child = child;
   }
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (child != null)
@@ -41,6 +41,7 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
     return super.getMinIntrinsicWidth(constraints);
   }
 
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (child != null)
@@ -48,6 +49,7 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
     return super.getMaxIntrinsicWidth(constraints);
   }
 
+  @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (child != null)
@@ -55,6 +57,7 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
     return super.getMinIntrinsicHeight(constraints);
   }
 
+  @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (child != null)
@@ -62,12 +65,14 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
     return super.getMaxIntrinsicHeight(constraints);
   }
 
+  @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     if (child != null)
       return child.getDistanceToActualBaseline(baseline);
     return super.computeDistanceToActualBaseline(baseline);
   }
 
+  @override
   void performLayout() {
     if (child != null) {
       child.layout(constraints, parentUsesSize: true);
@@ -77,10 +82,12 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
     }
   }
 
+  @override
   bool hitTestChildren(HitTestResult result, { Point position }) {
     return child?.hitTest(result, position: position) ?? false;
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null)
       context.paintChild(child, offset);
@@ -113,6 +120,7 @@ abstract class RenderProxyBoxWithHitTestBehavior extends RenderProxyBox {
 
   HitTestBehavior behavior;
 
+  @override
   bool hitTest(HitTestResult result, { Point position }) {
     bool hitTarget = false;
     if (position.x >= 0.0 && position.x < size.width &&
@@ -124,8 +132,10 @@ abstract class RenderProxyBoxWithHitTestBehavior extends RenderProxyBox {
     return hitTarget;
   }
 
+  @override
   bool hitTestSelf(Point position) => behavior == HitTestBehavior.opaque;
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     switch (behavior) {
@@ -173,6 +183,7 @@ class RenderConstrainedBox extends RenderProxyBox {
     markNeedsLayout();
   }
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (child != null)
@@ -180,6 +191,7 @@ class RenderConstrainedBox extends RenderProxyBox {
     return _additionalConstraints.enforce(constraints).constrainWidth(0.0);
   }
 
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (child != null)
@@ -187,6 +199,7 @@ class RenderConstrainedBox extends RenderProxyBox {
     return _additionalConstraints.enforce(constraints).constrainWidth(0.0);
   }
 
+  @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (child != null)
@@ -194,6 +207,7 @@ class RenderConstrainedBox extends RenderProxyBox {
     return _additionalConstraints.enforce(constraints).constrainHeight(0.0);
   }
 
+  @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (child != null)
@@ -201,6 +215,7 @@ class RenderConstrainedBox extends RenderProxyBox {
     return _additionalConstraints.enforce(constraints).constrainHeight(0.0);
   }
 
+  @override
   void performLayout() {
     if (child != null) {
       child.layout(_additionalConstraints.enforce(constraints), parentUsesSize: true);
@@ -210,6 +225,7 @@ class RenderConstrainedBox extends RenderProxyBox {
     }
   }
 
+  @override
   void debugPaintSize(PaintingContext context, Offset offset) {
     super.debugPaintSize(context, offset);
     assert(() {
@@ -223,125 +239,10 @@ class RenderConstrainedBox extends RenderProxyBox {
     });
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('additionalConstraints: $additionalConstraints');
-  }
-}
-
-/// Sizes itself to a fraction of the total available space.
-///
-/// For both its width and width height, this render object imposes a tight
-/// constraint on its child that is a multiple (typically less than 1.0) of the
-/// maximum constraint it received from its parent on that axis. If the factor
-/// for a given axis is null, then the constraints from the parent are just
-/// passed through instead.
-///
-/// It then tries to size itself t the size of its child.
-class RenderFractionallySizedBox extends RenderProxyBox {
-  RenderFractionallySizedBox({
-    RenderBox child,
-    double widthFactor,
-    double heightFactor
-  }) : _widthFactor = widthFactor, _heightFactor = heightFactor, super(child) {
-    assert(_widthFactor == null || _widthFactor >= 0.0);
-    assert(_heightFactor == null || _heightFactor >= 0.0);
-  }
-
-  /// If non-null, the factor of the incoming width to use.
-  ///
-  /// If non-null, the child is given a tight width constraint that is the max
-  /// incoming width constraint multipled by this factor.  If null, the child is
-  /// given the incoming width constraings.
-  double get widthFactor => _widthFactor;
-  double _widthFactor;
-  void set widthFactor (double value) {
-    assert(value == null || value >= 0.0);
-    if (_widthFactor == value)
-      return;
-    _widthFactor = value;
-    markNeedsLayout();
-  }
-
-  /// If non-null, the factor of the incoming height to use.
-  ///
-  /// If non-null, the child is given a tight height constraint that is the max
-  /// incoming width constraint multipled by this factor.  If null, the child is
-  /// given the incoming width constraings.
-  double get heightFactor => _heightFactor;
-  double _heightFactor;
-  void set heightFactor (double value) {
-    assert(value == null || value >= 0.0);
-    if (_heightFactor == value)
-      return;
-    _heightFactor = value;
-    markNeedsLayout();
-  }
-
-  BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
-    double minWidth = constraints.minWidth;
-    double maxWidth = constraints.maxWidth;
-    if (_widthFactor != null) {
-      double width = maxWidth * _widthFactor;
-      minWidth = width;
-      maxWidth = width;
-    }
-    double minHeight = constraints.minHeight;
-    double maxHeight = constraints.maxHeight;
-    if (_heightFactor != null) {
-      double height = maxHeight * _heightFactor;
-      minHeight = height;
-      maxHeight = height;
-    }
-    return new BoxConstraints(
-      minWidth: minWidth,
-      maxWidth: maxWidth,
-      minHeight: minHeight,
-      maxHeight: maxHeight
-    );
-  }
-
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
-    if (child != null)
-      return child.getMinIntrinsicWidth(_getInnerConstraints(constraints));
-    return _getInnerConstraints(constraints).constrainWidth(0.0);
-  }
-
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
-    if (child != null)
-      return child.getMaxIntrinsicWidth(_getInnerConstraints(constraints));
-    return _getInnerConstraints(constraints).constrainWidth(0.0);
-  }
-
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
-    if (child != null)
-      return child.getMinIntrinsicHeight(_getInnerConstraints(constraints));
-    return _getInnerConstraints(constraints).constrainHeight(0.0);
-  }
-
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
-    if (child != null)
-      return child.getMaxIntrinsicHeight(_getInnerConstraints(constraints));
-    return _getInnerConstraints(constraints).constrainHeight(0.0);
-  }
-
-  void performLayout() {
-    if (child != null) {
-      child.layout(_getInnerConstraints(constraints), parentUsesSize: true);
-      size = child.size;
-    } else {
-      size = _getInnerConstraints(constraints).constrain(Size.zero);
-    }
-  }
-
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('widthFactor: ${_widthFactor ?? "pass-through"}');
-    description.add('heightFactor: ${_heightFactor ?? "pass-through"}');
   }
 }
 
@@ -393,18 +294,22 @@ class RenderAspectRatio extends RenderProxyBox {
     markNeedsLayout();
   }
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     return constraints.minWidth;
   }
 
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     return constraints.maxWidth;
   }
 
+  @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     return constraints.minHeight;
   }
 
+  @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     return constraints.maxHeight;
   }
@@ -413,7 +318,7 @@ class RenderAspectRatio extends RenderProxyBox {
     assert(constraints.debugAssertIsNormalized);
     assert(() {
       if (!constraints.hasBoundedWidth && !constraints.hasBoundedHeight) {
-        throw new RenderingError(
+        throw new FlutterError(
           '$runtimeType has unbounded constraints.\n'
           'This $runtimeType was given an aspect ratio of $aspectRatio but was given '
           'both unbounded width and unbounded height constraints. Because both '
@@ -468,12 +373,14 @@ class RenderAspectRatio extends RenderProxyBox {
     return constraints.constrain(new Size(width, height));
   }
 
+  @override
   void performLayout() {
     size = _applyAspectRatio(constraints);
     if (child != null)
       child.layout(new BoxConstraints.tight(size));
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('aspectRatio: $aspectRatio');
@@ -535,11 +442,13 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     return constraints.tighten(width: _applyStep(width, _stepWidth));
   }
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     return getMaxIntrinsicWidth(constraints);
   }
 
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (child == null)
@@ -548,6 +457,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     return constraints.constrainWidth(_applyStep(childResult, _stepWidth));
   }
 
+  @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (child == null)
@@ -556,6 +466,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     return constraints.constrainHeight(_applyStep(childResult, _stepHeight));
   }
 
+  @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (child == null)
@@ -564,6 +475,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     return constraints.constrainHeight(_applyStep(childResult, _stepHeight));
   }
 
+  @override
   void performLayout() {
     if (child != null) {
       BoxConstraints childConstraints = _getInnerConstraints(constraints);
@@ -576,6 +488,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     }
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('stepWidth: $stepWidth');
@@ -605,6 +518,7 @@ class RenderIntrinsicHeight extends RenderProxyBox {
     return constraints.tighten(height: height);
   }
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (child == null)
@@ -612,6 +526,7 @@ class RenderIntrinsicHeight extends RenderProxyBox {
     return child.getMinIntrinsicWidth(_getInnerConstraints(constraints));
   }
 
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (child == null)
@@ -619,11 +534,13 @@ class RenderIntrinsicHeight extends RenderProxyBox {
     return child.getMaxIntrinsicWidth(_getInnerConstraints(constraints));
   }
 
+  @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     return getMaxIntrinsicHeight(constraints);
   }
 
+  @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (child == null)
@@ -631,6 +548,7 @@ class RenderIntrinsicHeight extends RenderProxyBox {
     return child.getMaxIntrinsicHeight(constraints);
   }
 
+  @override
   void performLayout() {
     if (child != null) {
       child.layout(_getInnerConstraints(constraints), parentUsesSize: true);
@@ -649,20 +567,30 @@ int _getAlphaFromOpacity(double opacity) => (opacity * 255).round();
 /// This class paints its child into an intermediate buffer and then blends the
 /// child back into the scene partially transparent.
 ///
-/// This class is relatively expensive because it requires painting the child
-/// into an intermediate buffer.
+/// For values of opacity other than 0.0 and 1.0, this class is relatively
+/// expensive because it requires painting the child into an intermediate
+/// buffer. For the value 0.0, the child is simply not painted at all. For the
+/// value 1.0, the child is painted immediately without an intermediate buffer.
 class RenderOpacity extends RenderProxyBox {
   RenderOpacity({ RenderBox child, double opacity: 1.0 })
     : _opacity = opacity, _alpha = _getAlphaFromOpacity(opacity), super(child) {
+    assert(opacity != null);
     assert(opacity >= 0.0 && opacity <= 1.0);
   }
 
+  @override
   bool get alwaysNeedsCompositing => child != null && (_alpha != 0 && _alpha != 255);
 
   /// The fraction to scale the child's alpha value.
   ///
   /// An opacity of 1.0 is fully opaque. An opacity of 0.0 is fully transparent
   /// (i.e., invisible).
+  ///
+  /// The opacity must not be null.
+  ///
+  /// Values 1.0 and 0.0 are painted with a fast path. Other values
+  /// require painting the child into an intermediate buffer, which is
+  /// expensive.
   double get opacity => _opacity;
   double _opacity;
   void set opacity (double newOpacity) {
@@ -679,6 +607,7 @@ class RenderOpacity extends RenderProxyBox {
 
   int _alpha;
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       if (_alpha == 0)
@@ -692,11 +621,13 @@ class RenderOpacity extends RenderProxyBox {
     }
   }
 
+  @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     if (child != null && _alpha != 0)
       visitor(child);
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('opacity: ${opacity.toStringAsFixed(1)}');
@@ -729,8 +660,10 @@ class RenderShaderMask extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  @override
   bool get alwaysNeedsCompositing => child != null;
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       assert(needsCompositing);
@@ -754,7 +687,7 @@ abstract class CustomClipper<T> {
   /// same size as the RenderObject (e.g. it's a rounded rectangle
   /// with very small arcs in the corners), then this may be adequate.
   Rect getApproximateClipRect(Size size) => Point.origin & size;
-  /// Returns true if the new instance will result in a different clip
+  /// Returns `true` if the new instance will result in a different clip
   /// than the oldClipper instance.
   bool shouldRepaint(CustomClipper<T> oldClipper);
 }
@@ -788,6 +721,7 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   T get _defaultClip;
   T get _clip => _clipper?.getClip(size) ?? _defaultClip;
 
+  @override
   Rect describeApproximatePaintClip(RenderObject child) => _clipper?.getApproximateClipRect(size) ?? Point.origin & size;
 }
 
@@ -800,8 +734,10 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
     CustomClipper<Rect> clipper
   }) : super(child: child, clipper: clipper);
 
+  @override
   Rect get _defaultClip => Point.origin & size;
 
+  @override
   bool hitTest(HitTestResult result, { Point position }) {
     if (_clipper != null) {
       Rect clipRect = _clip;
@@ -811,6 +747,7 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
     return super.hitTest(result, position: position);
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null)
       context.pushClipRect(needsCompositing, offset, _clip, super.paint);
@@ -863,6 +800,7 @@ class RenderClipRRect extends RenderProxyBox {
   // TODO(ianh): either convert this to the CustomClipper world, or
   // TODO(ianh): implement describeApproximatePaintClip for this class
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       Rect rect = Point.origin & size;
@@ -893,8 +831,10 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
     return _cachedPath;
   }
 
+  @override
   Rect get _defaultClip => Point.origin & size;
 
+  @override
   bool hitTest(HitTestResult result, { Point position }) {
     Rect clipBounds = _clip;
     Point center = clipBounds.center;
@@ -907,6 +847,7 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
     return super.hitTest(result, position: position);
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       Rect clipBounds = _clip;
@@ -979,20 +920,24 @@ class RenderDecoratedBox extends RenderProxyBox {
       _decoration.removeChangeListener(markNeedsPaint);
   }
 
-  void attach() {
-    super.attach();
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
     _addListenerIfNeeded();
   }
 
+  @override
   void detach() {
     _removeListenerIfNeeded();
     super.detach();
   }
 
+  @override
   bool hitTestSelf(Point position) {
     return _decoration.hitTest(size, position);
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     assert(size.width != null);
     assert(size.height != null);
@@ -1004,6 +949,7 @@ class RenderDecoratedBox extends RenderProxyBox {
       _painter.paint(context.canvas, offset & size);
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('decoration:');
@@ -1055,8 +1001,8 @@ class RenderTransform extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  /// When set to true, hit tests are performed based on the position of the
-  /// child as it is painted. When set to false, hit tests are performed
+  /// When set to `true`, hit tests are performed based on the position of the
+  /// child as it is painted. When set to `false`, hit tests are performed
   /// ignoring the transformation.
   ///
   /// applyPaintTransform(), and therefore localToGlobal() and globalToLocal(),
@@ -1130,6 +1076,7 @@ class RenderTransform extends RenderProxyBox {
     return result;
   }
 
+  @override
   bool hitTest(HitTestResult result, { Point position }) {
     if (transformHitTests) {
       Matrix4 inverse;
@@ -1147,6 +1094,7 @@ class RenderTransform extends RenderProxyBox {
     return super.hitTest(result, position: position);
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       Matrix4 transform = _effectiveTransform;
@@ -1158,11 +1106,13 @@ class RenderTransform extends RenderProxyBox {
     }
   }
 
+  @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     transform.multiply(_effectiveTransform);
     super.applyPaintTransform(child, transform);
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('transform matrix:');
@@ -1198,14 +1148,15 @@ class RenderFractionalTranslation extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  /// When set to true, hit tests are performed based on the position of the
-  /// child as it is painted. When set to false, hit tests are performed
+  /// When set to `true`, hit tests are performed based on the position of the
+  /// child as it is painted. When set to `false`, hit tests are performed
   /// ignoring the transformation.
   ///
   /// applyPaintTransform(), and therefore localToGlobal() and globalToLocal(),
   /// always honor the transformation, regardless of the value of this property.
   bool transformHitTests;
 
+  @override
   bool hitTest(HitTestResult result, { Point position }) {
     assert(!needsLayout);
     if (transformHitTests)
@@ -1213,17 +1164,20 @@ class RenderFractionalTranslation extends RenderProxyBox {
     return super.hitTest(result, position: position);
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     assert(!needsLayout);
     if (child != null)
       super.paint(context, offset + translation.alongSize(size));
   }
 
+  @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     transform.translate(translation.dx * size.width, translation.dy * size.height);
     super.applyPaintTransform(child, transform);
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('translation: $translation');
@@ -1231,11 +1185,93 @@ class RenderFractionalTranslation extends RenderProxyBox {
   }
 }
 
+/// The interface used by [CustomPaint] (in the widgets library) and
+/// [RenderCustomPaint] (in the rendering library).
+///
+/// To implement a custom painter, subclass this interface to define your custom
+/// paint delegate. [CustomPaint] subclasses must implement the [paint] and
+/// [shouldRepaint] methods, and may optionally also implement the [hitTest]
+/// method.
+///
+/// The [paint] method is called whenever the custom object needs to be repainted.
+///
+/// The [shouldRepaint] method is called when a new instance of the class
+/// is provided, to check if the new instance actually represents different
+/// information.
+///
+/// The [hitTest] method is invoked when the user interacts with the underlying
+/// render object, to determine if the user hit the object or missed it.
 abstract class CustomPainter {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const CustomPainter();
 
+  /// Called whenever the object needs to paint. The given [Canvas] has its
+  /// coordinate space configured such that the origin is at the top left of the
+  /// box. The area of the box is the size of the [size] argument.
+  ///
+  /// Paint operations should remain inside the given area. Graphical operations
+  /// outside the bounds may be silently ignored, clipped, or not clipped.
+  ///
+  /// Implementations should be wary of correctly pairing any calls to
+  /// [Canvas.save]/[Canvas.saveLayer] and [Canvas.restore], otherwise all
+  /// subsequent painting on this canvas may be affected, with potentially
+  /// hilarious but confusing results.
+  ///
+  /// To paint text on a [Canvas], use a [TextPainter].
+  ///
+  /// To paint an image on a [Canvas]:
+  ///
+  /// 1. Obtain an [ImageResource], for example by using the [ImageCache.load]
+  ///    method on the [imageCache] singleton.
+  ///
+  /// 2. Whenever the [ImageResource]'s underlying [ImageInfo] object changes
+  ///    (see [ImageResource.addListener]), create a new instance of your custom
+  ///    paint delegate, giving it the new [ImageInfo] object.
+  ///
+  /// 3. In your delegate's [paint] method, call the [Canvas.drawImage],
+  ///    [Canvas.drawImageRect], or [Canvas.drawImageNine] methods to paint the
+  ///    [ImageInfo.image] object, applying the [ImageInfo.scale] value to
+  ///    obtain the correct rendering size.
   void paint(Canvas canvas, Size size);
+
+  /// Called whenever a new instance of the custom painter delegate class is
+  /// provided to the [RenderCustomPaint] object, or any time that a new
+  /// [CustomPaint] object is created with a new instance of the custom painter
+  /// delegate class (which amounts to the same thing, since the latter is
+  /// implemented in terms of the former).
+  ///
+  /// If the new instance represents different information than the old
+  /// instance, then the method should return `true`, otherwise it should return
+  /// `false`.
+  ///
+  /// If the method returns `false`, then the paint call might be optimized away.
+  ///
+  /// It's possible that the [paint] method will get invoked even if
+  /// [shouldRepaint] returns `false` (e.g. if an ancestor or descendant needed to
+  /// be repainted). It's also possible that the [paint] method will get invoked
+  /// without [shouldRepaint] being called at all (e.g. if the box changes
+  /// size).
+  ///
+  /// If a custom delegate has a particularly expensive paint function such that
+  /// repaints should be avoided as much as possible, a [RepaintBoundary] or
+  /// [RenderRepaintBoundary] (or other render object with [isRepaintBoundary]
+  /// set to `true`) might be helpful.
   bool shouldRepaint(CustomPainter oldDelegate);
+
+  /// Called whenever a hit test is being performed on an object that is using
+  /// this custom paint delegate.
+  ///
+  /// The given point is relative to the same coordinate space as the last
+  /// [paint] call.
+  ///
+  /// The default behavior is to consider all points to be hits for
+  /// background painters, and no points to be hits for foreground painters.
+  ///
+  /// Return `true` if the given position corresponds to a point on the drawn
+  /// image that should be considered a "hit", `false` if it corresponds to a
+  /// point that should be considered outside the painted image, and null to use
+  /// the default behavior.
   bool hitTest(Point position) => null;
 }
 
@@ -1259,8 +1295,23 @@ class RenderCustomPaint extends RenderProxyBox {
     RenderBox child
   }) : _painter = painter, _foregroundPainter = foregroundPainter, super(child);
 
+  /// The background custom paint delegate.
+  ///
+  /// This painter, if non-null, is invoked to paint behind the children.
   CustomPainter get painter => _painter;
   CustomPainter _painter;
+  /// Set a new background custom paint delegate.
+  ///
+  /// If the new delegate is the same as the previous one, this does nothing.
+  ///
+  /// If the new delegate is the same class as the previous one, then the new
+  /// delegate has its [CustomPainter.shouldRepaint] invoked; if the result is
+  /// `true`, then the delegate will be invoked.
+  ///
+  /// If the new delegate is a different class than the previous one, then the
+  /// delegate will be invoked.
+  ///
+  /// If the new value is null, then there is no background custom painter.
   void set painter (CustomPainter newPainter) {
     if (_painter == newPainter)
       return;
@@ -1269,8 +1320,23 @@ class RenderCustomPaint extends RenderProxyBox {
     _checkForRepaint(_painter, oldPainter);
   }
 
+  /// The foreground custom paint delegate.
+  ///
+  /// This painter, if non-null, is invoked to paint in front of the children.
   CustomPainter get foregroundPainter => _foregroundPainter;
   CustomPainter _foregroundPainter;
+  /// Set a new foreground custom paint delegate.
+  ///
+  /// If the new delegate is the same as the previous one, this does nothing.
+  ///
+  /// If the new delegate is the same class as the previous one, then the new
+  /// delegate has its [CustomPainter.shouldRepaint] invoked; if the result is
+  /// `true`, then the delegate will be invoked.
+  ///
+  /// If the new delegate is a different class than the previous one, then the
+  /// delegate will be invoked.
+  ///
+  /// If the new value is null, then there is no foreground custom painter.
   void set foregroundPainter (CustomPainter newPainter) {
     if (_foregroundPainter == newPainter)
       return;
@@ -1290,12 +1356,14 @@ class RenderCustomPaint extends RenderProxyBox {
     }
   }
 
+  @override
   bool hitTestChildren(HitTestResult result, { Point position }) {
     if (_foregroundPainter != null && (_foregroundPainter.hitTest(position) ?? false))
       return true;
     return super.hitTestChildren(result, position: position);
   }
 
+  @override
   bool hitTestSelf(Point position) {
     return _painter != null && (_painter.hitTest(position) ?? true);
   }
@@ -1316,7 +1384,7 @@ class RenderCustomPaint extends RenderProxyBox {
       // below that number.
       int debugNewCanvasSaveCount = canvas.getSaveCount();
       if (debugNewCanvasSaveCount > debugPreviousCanvasSaveCount) {
-        throw new RenderingError(
+        throw new FlutterError(
           'The $painter custom painter called canvas.save() or canvas.saveLayer() at least '
           '${debugNewCanvasSaveCount - debugPreviousCanvasSaveCount} more '
           'time${debugNewCanvasSaveCount - debugPreviousCanvasSaveCount == 1 ? '' : 's' } '
@@ -1326,7 +1394,7 @@ class RenderCustomPaint extends RenderProxyBox {
         );
       }
       if (debugNewCanvasSaveCount < debugPreviousCanvasSaveCount) {
-        throw new RenderingError(
+        throw new FlutterError(
           'The $painter custom painter called canvas.restore() '
           '${debugPreviousCanvasSaveCount - debugNewCanvasSaveCount} more '
           'time${debugPreviousCanvasSaveCount - debugNewCanvasSaveCount == 1 ? '' : 's' } '
@@ -1340,6 +1408,7 @@ class RenderCustomPaint extends RenderProxyBox {
     canvas.restore();
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (_painter != null)
       _paintWithPainter(context.canvas, offset, _painter);
@@ -1370,6 +1439,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   PointerUpEventListener onPointerUp;
   PointerCancelEventListener onPointerCancel;
 
+  @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     if (onPointerDown != null && event is PointerDownEvent)
       return onPointerDown(event);
@@ -1381,6 +1451,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
       return onPointerCancel(event);
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     List<String> listeners = <String>[];
@@ -1407,19 +1478,123 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
 /// previously. Similarly, when the child repaints but the surround tree does
 /// not, we can re-record its display list without re-recording the display list
 /// for the surround tree.
+///
+/// In some cases, it is necessary to place _two_ (or more) repaint boundaries
+/// to get a useful effect. Consider, for example, an e-mail application that
+/// shows an unread count and a list of e-mails. Whenever a new e-mail comes in,
+/// the list would update, but so would the unread count. If only one of these
+/// two parts of the application was behind a repaint boundary, the entire
+/// application would repaint each time. On the other hand, if both were behind
+/// a repaint boundary, a new e-mail would only change those two parts of the
+/// application and the rest of the application would not repaint.
+///
+/// To tell if a particular RenderRepaintBoundary is useful, run your
+/// application in checked mode, interacting with it in typical ways, and then
+/// call [debugDumpRenderTree]. Each RenderRepaintBoundary will include the
+/// ratio of cases where the repaint boundary was useful vs the cases where it
+/// was not. These counts can also be inspected programmatically using
+/// [debugAsymmetricPaintCount] and [debugSymmetricPaintCount] respectively.
 class RenderRepaintBoundary extends RenderProxyBox {
   RenderRepaintBoundary({ RenderBox child }) : super(child);
+
+  @override
   bool get isRepaintBoundary => true;
+
+  /// The number of times that this render object repainted at the same time as
+  /// its parent. Repaint boundaries are only useful when the parent and child
+  /// paint at different times. When both paint at the same time, the repaint
+  /// boundary is redundant, and may be actually making performance worse.
+  ///
+  /// Only valid in checked mode. In release builds, always returns zero.
+  ///
+  /// Can be reset using [debugResetMetrics]. See [debugAsymmetricPaintCount]
+  /// for the corresponding count of times where only the parent or only the
+  /// child painted.
+  int get debugSymmetricPaintCount => _debugSymmetricPaintCount;
+  int _debugSymmetricPaintCount = 0;
+
+  /// The number of times that either this render object repainted without the
+  /// parent being painted, or the parent repainted without this object being
+  /// painted. When a repaint boundary is used at a seam in the render tree
+  /// where the parent tends to repaint at entirely different times than the
+  /// child, it can improve performance by reducing the number of paint
+  /// operations that have to be recorded each frame.
+  ///
+  /// Only valid in checked mode. In release builds, always returns zero.
+  ///
+  /// Can be reset using [debugResetMetrics]. See [debugSymmetricPaintCount] for
+  /// the corresponding count of times where both the parent and the child
+  /// painted together.
+  int get debugAsymmetricPaintCount => _debugAsymmetricPaintCount;
+  int _debugAsymmetricPaintCount = 0;
+
+  /// Resets the [debugSymmetricPaintCount] and [debugAsymmetricPaintCount]
+  /// counts to zero.
+  ///
+  /// Only valid in checked mode. Does nothing in release builds.
+  void debugResetMetrics() {
+    assert(() {
+      _debugSymmetricPaintCount = 0;
+      _debugAsymmetricPaintCount = 0;
+      return true;
+    });
+  }
+
+  @override
+  void debugRegisterRepaintBoundaryPaint({ bool includedParent: true, bool includedChild: false }) {
+    assert(() {
+      if (includedParent && includedChild)
+        _debugSymmetricPaintCount += 1;
+      else
+        _debugAsymmetricPaintCount += 1;
+      return true;
+    });
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    bool inReleaseMode = true;
+    assert(() {
+      inReleaseMode = false;
+      if (debugSymmetricPaintCount + debugAsymmetricPaintCount == 0) {
+        description.add('usefulness ratio: no metrics collected yet (never painted)');
+      } else {
+        double percentage = 100.0 * debugAsymmetricPaintCount / (debugSymmetricPaintCount + debugAsymmetricPaintCount);
+        String diagnosis;
+        if (debugSymmetricPaintCount + debugAsymmetricPaintCount < 5) {
+          diagnosis = 'insufficient data to draw conclusion (less than five repaints)';
+        } else if (percentage > 90.0) {
+          diagnosis = 'this is an outstandingly useful repaint boundary and should definitely be kept';
+        } else if (percentage > 50.0) {
+          diagnosis = 'this is a useful repaint boundary and should be kept';
+        } else if (percentage > 30.0) {
+          diagnosis = 'this repaint boundary is probably useful, but maybe it would be more useful in tandem with adding more repaint boundaries elsewhere';
+        } else if (percentage > 10.0) {
+          diagnosis = 'this repaint boundary does sometimes show value, though currently not that often';
+        } else if (debugAsymmetricPaintCount == 0) {
+          diagnosis = 'this repaint boundary is astoundingly ineffectual and should be removed';
+        } else {
+          diagnosis = 'this repaint boundary is not very effective and should probably be removed';
+        }
+        description.add('metrics: ${percentage.toStringAsFixed(1)}% useful ($debugSymmetricPaintCount bad vs $debugAsymmetricPaintCount good)');
+        description.add('diagnosis: $diagnosis');
+      }
+      return true;
+    });
+    if (inReleaseMode)
+      description.add('(run in checked mode to collect repaint boundary statistics)');
+  }
 }
 
 /// Is invisible during hit testing.
 ///
-/// When [ignoring] is true, this render object (and its subtree) is invisible
+/// When [ignoring] is `true`, this render object (and its subtree) is invisible
 /// to hit testing. It still consumes space during layout and paints its child
 /// as usual. It just cannot be the target of located events because it returns
-/// false from [hitTest].
+/// `false` from [hitTest].
 ///
-/// When [ignoringSemantics] is true, the subtree will be invisible to
+/// When [ignoringSemantics] is `true`, the subtree will be invisible to
 /// the semantics layer (and thus e.g. accessibility tools). If
 /// [ignoringSemantics] is null, it uses the value of [ignoring].
 class RenderIgnorePointer extends RenderProxyBox {
@@ -1455,6 +1630,7 @@ class RenderIgnorePointer extends RenderProxyBox {
 
   bool get _effectiveIgnoringSemantics => ignoringSemantics == null ? ignoring : ignoringSemantics;
 
+  @override
   bool hitTest(HitTestResult result, { Point position }) {
     return ignoring ? false : super.hitTest(result, position: position);
   }
@@ -1462,11 +1638,13 @@ class RenderIgnorePointer extends RenderProxyBox {
   // TODO(ianh): figure out a way to still include labels and flags in
   // descendants, just make them non-interactive, even when
   // _effectiveIgnoringSemantics is true
+  @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     if (child != null && !_effectiveIgnoringSemantics)
       visitor(child);
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('ignoring: $ignoring');
@@ -1485,6 +1663,7 @@ class RenderMetaData extends RenderProxyBoxWithHitTestBehavior {
   /// Opaque meta data ignored by the render tree
   dynamic metaData;
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('metaData: $metaData');
@@ -1562,6 +1741,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
   /// leftwards drag.
   double scrollFactor;
 
+  @override
   bool get hasSemantics {
     return onTap != null
         || onLongPress != null
@@ -1569,6 +1749,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
         || onVerticalDragUpdate != null;
   }
 
+  @override
   Iterable<SemanticAnnotator> getSemanticAnnotators() sync* {
     if (hasSemantics) {
       yield (SemanticsNode semantics) {
@@ -1580,31 +1761,37 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
     }
   }
 
+  @override
   void handleSemanticTap() {
     if (onTap != null)
       onTap();
   }
 
+  @override
   void handleSemanticLongPress() {
     if (onLongPress != null)
       onLongPress();
   }
 
+  @override
   void handleSemanticScrollLeft() {
     if (onHorizontalDragUpdate != null)
       onHorizontalDragUpdate(size.width * -scrollFactor);
   }
 
+  @override
   void handleSemanticScrollRight() {
     if (onHorizontalDragUpdate != null)
       onHorizontalDragUpdate(size.width * scrollFactor);
   }
 
+  @override
   void handleSemanticScrollUp() {
     if (onVerticalDragUpdate != null)
       onVerticalDragUpdate(size.height * -scrollFactor);
   }
 
+  @override
   void handleSemanticScrollDown() {
     if (onVerticalDragUpdate != null)
       onVerticalDragUpdate(size.height * scrollFactor);
@@ -1625,11 +1812,11 @@ class RenderSemanticAnnotations extends RenderProxyBox {
     assert(container != null);
   }
 
-  /// If 'container' is true, this RenderObject will introduce a new
+  /// If 'container' is `true`, this RenderObject will introduce a new
   /// node in the semantics tree. Otherwise, the semantics will be
   /// merged with the semantics of any ancestors.
   ///
-  /// The 'container' flag is implicitly set to true on the immediate
+  /// The 'container' flag is implicitly set to `true` on the immediate
   /// semantics-providing descendants of a node where multiple
   /// children have semantics or have descendants providing semantics.
   /// In other words, the semantics of siblings are not merged. To
@@ -1645,7 +1832,7 @@ class RenderSemanticAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the "hasCheckedState" semantic to true and the
+  /// If non-null, sets the "hasCheckedState" semantic to `true` and the
   /// "isChecked" semantic to the given value.
   bool get checked => _checked;
   bool _checked;
@@ -1668,8 +1855,10 @@ class RenderSemanticAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate(onlyChanges: (value != null) == hadValue);
   }
 
+  @override
   bool get hasSemantics => container;
 
+  @override
   Iterable<SemanticAnnotator> getSemanticAnnotators() sync* {
     if (checked != null) {
       yield (SemanticsNode semantics) {
@@ -1694,6 +1883,8 @@ class RenderSemanticAnnotations extends RenderProxyBox {
 /// and the gesture detector that goes with them.
 class RenderMergeSemantics extends RenderProxyBox {
   RenderMergeSemantics({ RenderBox child }) : super(child);
+
+  @override
   Iterable<SemanticAnnotator> getSemanticAnnotators() sync* {
     yield (SemanticsNode node) { node.mergeAllDescendantsIntoThisNode = true; };
   }
@@ -1705,5 +1896,7 @@ class RenderMergeSemantics extends RenderProxyBox {
 /// to it (e.g. text included only for the visual effect).
 class RenderExcludeSemantics extends RenderProxyBox {
   RenderExcludeSemantics({ RenderBox child }) : super(child);
+
+  @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) { }
 }

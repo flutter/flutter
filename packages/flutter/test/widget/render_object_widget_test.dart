@@ -13,8 +13,32 @@ final BoxDecoration kBoxDecorationC = new BoxDecoration();
 
 class TestWidget extends StatelessWidget {
   const TestWidget({ this.child });
+
   final Widget child;
+
+  @override
   Widget build(BuildContext context) => child;
+}
+
+class TestOrientedBox extends SingleChildRenderObjectWidget {
+  TestOrientedBox({ Key key, Widget child }) : super(key: key, child: child);
+
+  Decoration _getDecoration(BuildContext context) {
+    switch (MediaQuery.of(context).orientation) {
+      case Orientation.landscape:
+        return new BoxDecoration(backgroundColor: const Color(0xFF00FF00));
+      case Orientation.portrait:
+        return new BoxDecoration(backgroundColor: const Color(0xFF0000FF));
+    }
+  }
+
+  @override
+  RenderDecoratedBox createRenderObject(BuildContext context) => new RenderDecoratedBox(decoration: _getDecoration(context));
+
+  @override
+  void updateRenderObject(BuildContext context, RenderDecoratedBox renderObject) {
+    renderObject.decoration = _getDecoration(context);
+  }
 }
 
 void main() {
@@ -166,6 +190,30 @@ void main() {
       expect(grandChild.parent, equals(child));
       expect(grandChild.decoration, equals(kBoxDecorationC));
       expect(grandChild.child, isNull);
+    });
+  });
+
+  test('Can watch inherited widgets', () {
+    testWidgets((WidgetTester tester) {
+      Key boxKey = new UniqueKey();
+      TestOrientedBox box = new TestOrientedBox(key: boxKey);
+
+      tester.pumpWidget(new MediaQuery(
+        data: new MediaQueryData(size: const Size(400.0, 300.0)),
+        child: box
+      ));
+
+      RenderDecoratedBox renderBox = tester.findElementByKey(boxKey).renderObject;
+      BoxDecoration decoration = renderBox.decoration;
+      expect(decoration.backgroundColor, equals(new Color(0xFF00FF00)));
+
+      tester.pumpWidget(new MediaQuery(
+        data: new MediaQueryData(size: const Size(300.0, 400.0)),
+        child: box
+      ));
+
+      decoration = renderBox.decoration;
+      expect(decoration.backgroundColor, equals(new Color(0xFF0000FF)));
     });
   });
 }

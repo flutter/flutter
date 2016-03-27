@@ -39,6 +39,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
 
   bool get _isVertical => quarterTurns % 2 == 1;
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (child != null)
@@ -46,6 +47,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
     return super.getMinIntrinsicWidth(constraints);
   }
 
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (child != null)
@@ -53,6 +55,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
     return super.getMaxIntrinsicWidth(constraints);
   }
 
+  @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (child != null)
@@ -60,6 +63,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
     return super.getMinIntrinsicHeight(constraints);
   }
 
+  @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (child != null)
@@ -69,6 +73,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
 
   Matrix4 _paintTransform;
 
+  @override
   void performLayout() {
     _paintTransform = null;
     if (child != null) {
@@ -83,6 +88,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
     }
   }
 
+  @override
   bool hitTestChildren(HitTestResult result, { Point position }) {
     assert(_paintTransform != null || needsLayout || child == null);
     if (child == null || _paintTransform == null)
@@ -97,11 +103,13 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
     context.paintChild(child, offset);
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null)
       context.pushTransform(needsCompositing, offset, _paintTransform, _paintChild);
   }
 
+  @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     if (_paintTransform != null)
       transform.multiply(_paintTransform);

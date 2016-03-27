@@ -9,10 +9,12 @@ import 'package:test/test.dart';
 List<String> ancestors = <String>[];
 
 class TestWidget extends StatefulWidget {
+  @override
   TestWidgetState createState() => new TestWidgetState();
 }
 
 class TestWidgetState extends State<TestWidget> {
+  @override
   void initState() {
     super.initState();
     context.visitAncestorElements((Element element) {
@@ -21,6 +23,7 @@ class TestWidgetState extends State<TestWidget> {
     });
   }
 
+  @override
   Widget build(BuildContext context) => new Container();
 }
 

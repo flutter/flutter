@@ -10,7 +10,6 @@ import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
 import 'bottom_sheet.dart';
-import 'constants.dart';
 import 'drawer.dart';
 import 'icons.dart';
 import 'icon_button.dart';
@@ -55,6 +54,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
   final EdgeInsets padding;
 
+  @override
   void performLayout(Size size) {
     BoxConstraints looseConstraints = new BoxConstraints.loose(size);
 
@@ -118,6 +118,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     }
   }
 
+  @override
   bool shouldRelayout(_ScaffoldLayout oldDelegate) {
     return padding != oldDelegate.padding;
   }
@@ -133,6 +134,7 @@ class _FloatingActionButtonTransition extends StatefulWidget {
 
   final Widget child;
 
+  @override
   _FloatingActionButtonTransitionState createState() => new _FloatingActionButtonTransitionState();
 }
 
@@ -140,6 +142,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   final AnimationController controller = new AnimationController(duration: _kFloatingActionButtonSegue);
   Widget oldChild;
 
+  @override
   void initState() {
     super.initState();
     controller.forward().then((_) {
@@ -147,11 +150,13 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     });
   }
 
+  @override
   void dispose() {
     controller.stop();
     super.dispose();
   }
 
+  @override
   void didUpdateConfig(_FloatingActionButtonTransition oldConfig) {
     if (Widget.canUpdate(oldConfig.child, config.child))
       return;
@@ -163,6 +168,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       });
   }
 
+  @override
   Widget build(BuildContext context) {
     final List<Widget> children = new List<Widget>();
     if (oldChild != null) {
@@ -204,11 +210,9 @@ class Scaffold extends StatefulWidget {
     this.floatingActionButton,
     this.drawer,
     this.scrollableKey,
-    this.appBarBehavior: AppBarBehavior.anchor,
-    this.appBarHeight
+    this.appBarBehavior: AppBarBehavior.anchor
   }) : super(key: key) {
     assert((appBarBehavior == AppBarBehavior.scroll) ? scrollableKey != null : true);
-    assert((appBarBehavior == AppBarBehavior.scroll) ? appBarHeight != null && appBarHeight > kToolBarHeight : true);
   }
 
   final AppBar appBar;
@@ -217,11 +221,11 @@ class Scaffold extends StatefulWidget {
   final Widget drawer;
   final Key scrollableKey;
   final AppBarBehavior appBarBehavior;
-  final double appBarHeight;
 
   /// The state from the closest instance of this class that encloses the given context.
   static ScaffoldState of(BuildContext context) => context.ancestorStateOfType(const TypeMatcher<ScaffoldState>());
 
+  @override
   ScaffoldState createState() => new ScaffoldState();
 }
 
@@ -233,7 +237,7 @@ class ScaffoldState extends State<Scaffold> {
 
   Animation<double> get appBarAnimation => _appBarController.view;
 
-  double get appBarHeight => config.appBarHeight;
+  double get appBarHeight => config.appBar?.expandedHeight ?? 0.0;
 
   // DRAWER API
 
@@ -363,6 +367,7 @@ class ScaffoldState extends State<Scaffold> {
 
   // INTERNALS
 
+  @override
   void initState() {
     super.initState();
     _appBarController = new AnimationController();
@@ -374,6 +379,7 @@ class ScaffoldState extends State<Scaffold> {
     }
   }
 
+  @override
   void dispose() {
     _appBarController.stop();
     _snackBarController?.stop();
@@ -391,15 +397,14 @@ class ScaffoldState extends State<Scaffold> {
 
   bool _shouldShowBackArrow;
 
-  Widget _getModifiedAppBar({ EdgeInsets padding, double foregroundOpacity: 1.0, int elevation }) {
+  Widget _getModifiedAppBar({ EdgeInsets padding, int elevation, double actualHeight}) {
     AppBar appBar = config.appBar;
     if (appBar == null)
       return null;
-    EdgeInsets appBarPadding = new EdgeInsets.only(top: padding.top);
-    Widget left = appBar.leading;
-    if (left == null) {
+    Widget leading = appBar.leading;
+    if (leading == null) {
       if (config.drawer != null) {
-        left = new IconButton(
+        leading = new IconButton(
           icon: Icons.menu,
           onPressed: openDrawer,
           tooltip: 'Open navigation menu' // TODO(ianh): Figure out how to localize this string
@@ -407,7 +412,7 @@ class ScaffoldState extends State<Scaffold> {
       } else {
         _shouldShowBackArrow ??= Navigator.canPop(context);
         if (_shouldShowBackArrow) {
-          left = new IconButton(
+          leading = new IconButton(
             icon: Icons.arrow_back,
             onPressed: () => Navigator.pop(context),
             tooltip: 'Back' // TODO(ianh): Figure out how to localize this string
@@ -417,9 +422,9 @@ class ScaffoldState extends State<Scaffold> {
     }
     return appBar.copyWith(
       elevation: elevation ?? appBar.elevation ?? 4,
-      padding: appBarPadding,
-      foregroundOpacity: foregroundOpacity,
-      left: left
+      padding: new EdgeInsets.only(top: padding.top),
+      leading: leading,
+      actualHeight: actualHeight
     );
   }
 
@@ -428,80 +433,74 @@ class ScaffoldState extends State<Scaffold> {
   double _floatingAppBarHeight = 0.0;
 
   bool _handleScrollNotification(ScrollNotification notification) {
-    final double newScrollOffset = notification.scrollable.scrollOffset;
-    if (config.scrollableKey != null && config.scrollableKey == notification.scrollable.config.key)
+    if (config.scrollableKey != null && config.scrollableKey == notification.scrollable.config.key) {
+      final double newScrollOffset = notification.scrollable.scrollOffset;
       setState(() {
         _scrollOffsetDelta = _scrollOffset - newScrollOffset;
         _scrollOffset = newScrollOffset;
       });
+    }
     return false;
   }
 
-  double _appBarOpacity(double progress) {
-    // The value of progress is 1.0 if the entire (padded) app bar is visible, 0.0
-    // if the app bar's height is zero.
-    return new Tween<double>(begin: 0.0, end: 1.0).evaluate(new CurvedAnimation(
-      parent: new AnimationController()..value = progress.clamp(0.0, 1.0),
-      curve: new Interval(0.50, 1.0)
-    ));
-  }
-
-  Widget _buildAnchoredAppBar(double toolBarHeight, EdgeInsets toolBarPadding) {
+  Widget _buildAnchoredAppBar(double expandedHeight, double height, EdgeInsets padding) {
     // Drive _appBarController to the point where the flexible space has disappeared.
-    _appBarController.value = (appBarHeight - toolBarHeight) / appBarHeight;
+    _appBarController.value = (expandedHeight - height) / expandedHeight;
     return new SizedBox(
-      height: toolBarHeight,
-      child: _getModifiedAppBar(padding: toolBarPadding)
+      height: height,
+      child: _getModifiedAppBar(padding: padding, actualHeight: height)
     );
   }
 
   Widget _buildScrollableAppBar(BuildContext context) {
-    final EdgeInsets toolBarPadding = MediaQuery.of(context)?.padding ?? EdgeInsets.zero;
-    final double toolBarHeight = kToolBarHeight + toolBarPadding.top;
+    final EdgeInsets padding = MediaQuery.of(context).padding;
+    final double expandedHeight = (config.appBar?.expandedHeight ?? 0.0) + padding.top;
+    final double collapsedHeight = (config.appBar?.collapsedHeight ?? 0.0) + padding.top;
+    final double minimumHeight = (config.appBar?.minimumHeight ?? 0.0) + padding.top;
     Widget appBar;
 
-    if (_scrollOffset <= appBarHeight && _scrollOffset >= appBarHeight - toolBarHeight) {
-      // scrolled to the top, only the toolbar is (partially) visible.
+    if (_scrollOffset <= expandedHeight && _scrollOffset >= expandedHeight - minimumHeight) {
+      // scrolled to the top, flexible space collapsed, only the toolbar and tabbar are (partially) visible.
       if (config.appBarBehavior == AppBarBehavior.under) {
-        appBar = _buildAnchoredAppBar(toolBarHeight, toolBarPadding);
+        appBar = _buildAnchoredAppBar(expandedHeight, minimumHeight, padding);
       } else {
-        final double height = math.max(_floatingAppBarHeight, appBarHeight - _scrollOffset);
-        final double opacity = _appBarOpacity(1.0 - ((toolBarHeight - height) / toolBarHeight));
-        _appBarController.value = (appBarHeight - height) / appBarHeight;
+        final double height = math.max(_floatingAppBarHeight, expandedHeight - _scrollOffset);
+        _appBarController.value = (expandedHeight - height) / expandedHeight;
         appBar = new SizedBox(
           height: height,
-          child: _getModifiedAppBar(padding: toolBarPadding, foregroundOpacity: opacity)
+          child: _getModifiedAppBar(padding: padding, actualHeight: height)
         );
       }
-    } else if (_scrollOffset > appBarHeight) {
+    } else if (_scrollOffset > expandedHeight) {
       // scrolled past the entire app bar, maybe show the "floating" toolbar.
       if (config.appBarBehavior == AppBarBehavior.under) {
-        appBar = _buildAnchoredAppBar(toolBarHeight, toolBarPadding);
+        appBar = _buildAnchoredAppBar(expandedHeight, minimumHeight, padding);
       } else {
-        _floatingAppBarHeight = (_floatingAppBarHeight + _scrollOffsetDelta).clamp(0.0, toolBarHeight);
-        final double toolBarOpacity = _appBarOpacity(_floatingAppBarHeight / toolBarHeight);
-        _appBarController.value = (appBarHeight - _floatingAppBarHeight) / appBarHeight;
+        _floatingAppBarHeight = (_floatingAppBarHeight + _scrollOffsetDelta).clamp(0.0, collapsedHeight);
+        _appBarController.value = (expandedHeight - _floatingAppBarHeight) / expandedHeight;
         appBar = new SizedBox(
           height: _floatingAppBarHeight,
-          child: _getModifiedAppBar(padding: toolBarPadding, foregroundOpacity: toolBarOpacity)
+          child: _getModifiedAppBar(padding: padding, actualHeight: _floatingAppBarHeight)
         );
       }
     } else {
-      // _scrollOffset < appBarHeight - appBarHeight, scrolled to the top, flexible space is visible
-      final double height = appBarHeight - _scrollOffset.clamp(0.0, appBarHeight);
-      _appBarController.value = (appBarHeight - height) / appBarHeight;
+      // _scrollOffset < expandedHeight - collapsedHeight, scrolled to the top, flexible space is visible]
+      final double height = expandedHeight - _scrollOffset.clamp(0.0, expandedHeight);
+      _appBarController.value = (expandedHeight - height) / expandedHeight;
       appBar = new SizedBox(
         height: height,
-        child: _getModifiedAppBar(padding: toolBarPadding, elevation: 0)
+        child: _getModifiedAppBar(padding: padding, elevation: 0, actualHeight: height)
       );
       _floatingAppBarHeight = 0.0;
+
     }
 
     return appBar;
   }
 
+  @override
   Widget build(BuildContext context) {
-    final EdgeInsets padding = MediaQuery.of(context)?.padding ?? EdgeInsets.zero;
+    final EdgeInsets padding = MediaQuery.of(context).padding;
 
     if (_snackBars.length > 0) {
       final ModalRoute<dynamic> route = ModalRoute.of(context);
@@ -517,9 +516,10 @@ class ScaffoldState extends State<Scaffold> {
     final List<LayoutId> children = new List<LayoutId>();
     _addIfNonNull(children, config.body, _ScaffoldSlot.body);
     if (config.appBarBehavior == AppBarBehavior.anchor) {
+      final double expandedHeight = (config.appBar?.expandedHeight ?? 0.0) + padding.top;
       final Widget appBar = new ConstrainedBox(
-        child: _getModifiedAppBar(padding: padding),
-        constraints: new BoxConstraints(maxHeight: config.appBarHeight ?? kExtendedAppBarHeight + padding.top)
+          child: _getModifiedAppBar(padding: padding, actualHeight: expandedHeight),
+        constraints: new BoxConstraints(maxHeight: expandedHeight)
       );
       _addIfNonNull(children, appBar, _ScaffoldSlot.appBar);
     }
@@ -618,6 +618,7 @@ class _PersistentBottomSheet extends StatefulWidget {
   final VoidCallback onDismissed;
   final WidgetBuilder builder;
 
+  @override
   _PersistentBottomSheetState createState() => new _PersistentBottomSheetState();
 }
 
@@ -626,17 +627,20 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
   // We take ownership of the animation controller given in the first configuration.
   // We also share control of that animation with out BottomSheet widget.
 
+  @override
   void initState() {
     super.initState();
     assert(config.animationController.status == AnimationStatus.forward);
     config.animationController.addStatusListener(_handleStatusChange);
   }
 
+  @override
   void didUpdateConfig(_PersistentBottomSheet oldConfig) {
     super.didUpdateConfig(oldConfig);
     assert(config.animationController == oldConfig.animationController);
   }
 
+  @override
   void dispose() {
     config.animationController.stop();
     super.dispose();
@@ -651,6 +655,7 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
       config.onDismissed();
   }
 
+  @override
   Widget build(BuildContext context) {
     return new AnimatedBuilder(
       animation: config.animationController,

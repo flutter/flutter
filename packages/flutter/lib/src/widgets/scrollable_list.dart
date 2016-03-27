@@ -41,17 +41,21 @@ class ScrollableList extends Scrollable {
   final ScrollableListPainter scrollableListPainter;
   final Iterable<Widget> children;
 
+  @override
   ScrollableState createState() => new _ScrollableListState();
 }
 
 class _ScrollableListState extends ScrollableState<ScrollableList> {
+  @override
   ScrollBehavior<double, double> createScrollBehavior() => new OverscrollWhenScrollableBehavior();
+
+  @override
   ExtentScrollBehavior get scrollBehavior => super.scrollBehavior;
 
   void _handleExtentsChanged(double contentExtent, double containerExtent) {
     config.scrollableListPainter?.contentExtent = contentExtent;
     setState(() {
-      scrollTo(scrollBehavior.updateExtents(
+      didUpdateScrollBehavior(scrollBehavior.updateExtents(
         contentExtent: config.itemsWrap ? double.INFINITY : contentExtent,
         containerExtent: containerExtent,
         scrollOffset: scrollOffset
@@ -59,21 +63,25 @@ class _ScrollableListState extends ScrollableState<ScrollableList> {
     });
   }
 
+  @override
   void dispatchOnScrollStart() {
     super.dispatchOnScrollStart();
     config.scrollableListPainter?.scrollStarted();
   }
 
+  @override
   void dispatchOnScroll() {
     super.dispatchOnScroll();
     config.scrollableListPainter?.scrollOffset = scrollOffset;
   }
 
+  @override
   void dispatchOnScrollEnd() {
     super.dispatchOnScrollEnd();
     config.scrollableListPainter?.scrollEnded();
   }
 
+  @override
   Widget buildContent(BuildContext context) {
     return new ListViewport(
       onExtentsChanged: _handleExtentsChanged,
@@ -134,36 +142,46 @@ class _VirtualListViewport extends VirtualViewport {
     }
   }
 
+  @override
   double get startOffset {
     if (padding == null)
       return scrollOffset;
     return scrollOffset - _leadingPadding;
   }
 
+  @override
   RenderList createRenderObject(BuildContext context) => new RenderList(itemExtent: itemExtent);
 
+  @override
   _VirtualListViewportElement createElement() => new _VirtualListViewportElement(this);
 }
 
 class _VirtualListViewportElement extends VirtualViewportElement {
   _VirtualListViewportElement(VirtualViewport widget) : super(widget);
 
+  @override
   _VirtualListViewport get widget => super.widget;
 
+  @override
   RenderList get renderObject => super.renderObject;
 
+  @override
   int get materializedChildBase => _materializedChildBase;
   int _materializedChildBase;
 
+  @override
   int get materializedChildCount => _materializedChildCount;
   int _materializedChildCount;
 
+  @override
   double get startOffsetBase => _startOffsetBase;
   double _startOffsetBase;
 
+  @override
   double get startOffsetLimit =>_startOffsetLimit;
   double _startOffsetLimit;
 
+  @override
   void updateRenderObject(_VirtualListViewport oldWidget) {
     renderObject
       ..mainAxis = widget.mainAxis
@@ -177,6 +195,7 @@ class _VirtualListViewportElement extends VirtualViewportElement {
   double _contentExtent;
   double _containerExtent;
 
+  @override
   void layout(BoxConstraints constraints) {
     final int length = renderObject.virtualChildCount;
     final double itemExtent = widget.itemExtent;
@@ -264,6 +283,7 @@ class ListViewport extends _VirtualListViewport with VirtualViewportFromIterable
     overlayPainter
   );
 
+  @override
   final Iterable<Widget> children;
 }
 
@@ -304,17 +324,21 @@ class ScrollableLazyList extends Scrollable {
   final EdgeInsets padding;
   final ScrollableListPainter scrollableListPainter;
 
+  @override
   ScrollableState createState() => new _ScrollableLazyListState();
 }
 
 class _ScrollableLazyListState extends ScrollableState<ScrollableLazyList> {
+  @override
   ScrollBehavior<double, double> createScrollBehavior() => new OverscrollBehavior();
+
+  @override
   ExtentScrollBehavior get scrollBehavior => super.scrollBehavior;
 
   void _handleExtentsChanged(double contentExtent, double containerExtent) {
     config.scrollableListPainter?.contentExtent = contentExtent;
     setState(() {
-      scrollTo(scrollBehavior.updateExtents(
+      didUpdateScrollBehavior(scrollBehavior.updateExtents(
         contentExtent: contentExtent,
         containerExtent: containerExtent,
         scrollOffset: scrollOffset
@@ -322,21 +346,25 @@ class _ScrollableLazyListState extends ScrollableState<ScrollableLazyList> {
     });
   }
 
+  @override
   void dispatchOnScrollStart() {
     super.dispatchOnScrollStart();
     config.scrollableListPainter?.scrollStarted();
   }
 
+  @override
   void dispatchOnScroll() {
     super.dispatchOnScroll();
     config.scrollableListPainter?.scrollOffset = scrollOffset;
   }
 
+  @override
   void dispatchOnScrollEnd() {
     super.dispatchOnScrollEnd();
     config.scrollableListPainter?.scrollEnded();
   }
 
+  @override
   Widget buildContent(BuildContext context) {
     return new LazyListViewport(
       onExtentsChanged: _handleExtentsChanged,
@@ -374,6 +402,9 @@ class LazyListViewport extends _VirtualListViewport with VirtualViewportFromBuil
     overlayPainter
   );
 
+  @override
   final int itemCount;
+
+  @override
   final ItemListBuilder itemBuilder;
 }

@@ -48,10 +48,12 @@ class ConstraintRotationToMovement extends Constraint {
 
   Point _lastPosition;
 
+  @override
   void preUpdate(Node node, double dt) {
     _lastPosition = node.position;
   }
 
+  @override
   void constrain(Node node, double dt) {
     if (_lastPosition == null) return;
     if (_lastPosition == node.position) return;
@@ -60,6 +62,29 @@ class ConstraintRotationToMovement extends Constraint {
     Offset offset = node.position - _lastPosition;
     double target = degrees(GameMath.atan2(offset.dy, offset.dx)) + baseRotation;
 
+    node.rotation = _dampenRotation(node.rotation, target, dampening);
+  }
+}
+
+/// A [Constraint] that copies a node's rotation, optionally with [dampening].
+class ConstraintRotationToNodeRotation extends Constraint {
+  /// Creates a new constraint that copies a node's rotation, optionally
+  /// with a [baseRotation] added and using [dampening].
+  ConstraintRotationToNodeRotation(this.targetNode, { this.baseRotation: 0.0, this.dampening });
+
+  /// The node to copy the rotation from
+  final Node targetNode;
+
+  /// The base rotation will be added to the rotation that copied from the targetNode
+  final double baseRotation;
+
+  /// The filter factor used when constraining the rotation of the node. Valid
+  /// values are in the range 0.0 to 1.0
+  final double dampening;
+
+  @override
+  void constrain(Node node, double dt) {
+    double target = targetNode.rotation + baseRotation;
     node.rotation = _dampenRotation(node.rotation, target, dampening);
   }
 }
@@ -83,6 +108,7 @@ class ConstraintRotationToNode extends Constraint {
   /// values are in the range 0.0 to 1.0
   final double dampening;
 
+  @override
   void constrain(Node node, double dt) {
     Offset offset;
 
@@ -117,6 +143,7 @@ class ConstraintPositionToNode extends Constraint {
   final Offset offset;
   final double dampening;
 
+  @override
   void constrain(Node node, double dt) {
     Point targetPosition;
 

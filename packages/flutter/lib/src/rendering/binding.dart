@@ -22,6 +22,7 @@ export 'package:flutter/gestures.dart' show HitTestResult;
 abstract class Renderer extends Object with Scheduler, Services
   implements HitTestable {
 
+  @override
   void initInstances() {
     super.initInstances();
     _instance = this;
@@ -47,6 +48,10 @@ abstract class Renderer extends Object with Scheduler, Services
     handleMetricsChanged(); // configures renderView's metrics
   }
 
+  /// The render tree's owner, which maintains dirty state for layout,
+  /// composite, paint, and accessibility semantics
+  final PipelineOwner pipelineOwner = new PipelineOwner();
+
   /// The render tree that's attached to the output surface.
   RenderView get renderView => _renderView;
   RenderView _renderView;
@@ -57,7 +62,7 @@ abstract class Renderer extends Object with Scheduler, Services
     if (_renderView != null)
       _renderView.detach();
     _renderView = value;
-    _renderView.attach();
+    _renderView.attach(pipelineOwner);
   }
 
   void handleMetricsChanged() {
@@ -80,16 +85,17 @@ abstract class Renderer extends Object with Scheduler, Services
   /// Pump the rendering pipeline to generate a frame.
   void beginFrame() {
     assert(renderView != null);
-    RenderObject.flushLayout();
-    RenderObject.flushCompositingBits();
-    RenderObject.flushPaint();
+    pipelineOwner.flushLayout();
+    pipelineOwner.flushCompositingBits();
+    pipelineOwner.flushPaint();
     renderView.compositeFrame(); // this sends the bits to the GPU
     if (SemanticsNode.hasListeners) {
-      RenderObject.flushSemantics();
+      pipelineOwner.flushSemantics();
       SemanticsNode.sendSemanticsTree();
     }
   }
 
+  @override
   void hitTest(HitTestResult result, Point position) {
     assert(renderView != null);
     renderView.hitTest(result, position: position);
@@ -116,6 +122,13 @@ void debugDumpSemanticsTree() {
 
 /// A concrete binding for applications that use the Rendering framework
 /// directly. This is the glue that binds the framework to the Flutter engine.
+///
+/// You would only use this binding if you are writing to the
+/// rendering layer directly. If you are writing to a higher-level
+/// library, such as the Flutter Widgets library, then you would use
+/// that layer's binding.
+///
+/// See also [BindingBase].
 class RenderingFlutterBinding extends BindingBase with Scheduler, Gesturer, Services, Renderer {
   RenderingFlutterBinding({ RenderBox root }) {
     assert(renderView != null);

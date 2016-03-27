@@ -31,6 +31,7 @@ class ButtonTheme extends InheritedWidget {
     return result?.color ?? ButtonColor.normal;
   }
 
+  @override
   bool updateShouldNotify(ButtonTheme old) => color != old.color;
 }
 
@@ -49,9 +50,13 @@ abstract class MaterialButton extends StatefulWidget {
     this.onPressed
   }) : super(key: key);
 
+  /// The widget below this widget in the tree.
   final Widget child;
+
   final ButtonColor textTheme;
+
   final Color textColor;
+
   final Color disabledTextColor;
 
   /// The callback that is invoked when the button is tapped or otherwise activated.
@@ -63,6 +68,7 @@ abstract class MaterialButton extends StatefulWidget {
   /// enable a button, set its [onPressed] property to a non-null value.
   bool get enabled => onPressed != null;
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     if (!enabled)
@@ -110,6 +116,7 @@ abstract class MaterialButtonState<T extends MaterialButton> extends State<T> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     Widget contents = new InkWell(

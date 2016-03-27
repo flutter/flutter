@@ -18,10 +18,12 @@ class _TimePickerDialog extends StatefulWidget {
 
   final TimeOfDay initialTime;
 
+  @override
   _TimePickerDialogState createState() => new _TimePickerDialogState();
 }
 
 class _TimePickerDialogState extends State<_TimePickerDialog> {
+  @override
   void initState() {
     super.initState();
     _selectedTime = config.initialTime;
@@ -43,6 +45,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
     Navigator.pop(context, _selectedTime);
   }
 
+  @override
   Widget build(BuildContext context) {
     return new Dialog(
       content: new TimePicker(

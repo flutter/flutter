@@ -14,9 +14,13 @@ const EdgeInsets _kCardMargins = const EdgeInsets.all(4.0);
 class Card extends StatelessWidget {
   const Card({ Key key, this.child, this.color }) : super(key: key);
 
+  /// The widget below this widget in the tree.
   final Widget child;
+
+  /// The color of material used for this card.
   final Color color;
 
+  @override
   Widget build(BuildContext context) {
     return new Container(
       margin: _kCardMargins,

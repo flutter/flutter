@@ -30,7 +30,11 @@ const double _kMinTabWidth = 72.0;
 const double _kMaxTabWidth = 264.0;
 const EdgeInsets _kTabLabelPadding = const EdgeInsets.symmetric(horizontal: 12.0);
 const double _kTabBarScrollDrag = 0.025;
-const Duration _kTabBarScroll = const Duration(milliseconds: 300);
+const Duration _kTabBarScroll = const Duration(milliseconds: 200);
+
+// Curves for the leading and trailing edge of the selected tab indicator.
+const Curve _kTabIndicatorLeadingCurve = Curves.easeOut;
+const Curve _kTabIndicatorTrailingCurve = Curves.easeIn;
 
 // The scrollOffset (velocity) provided to fling() is pixels/ms, and the
 // tolerance velocity is pixels/sec.
@@ -89,11 +93,13 @@ class _RenderTabBar extends RenderBox with
     }
   }
 
+  @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! _TabBarParentData)
       child.parentData = new _TabBarParentData();
   }
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     BoxConstraints widthConstraints =
         new BoxConstraints(maxWidth: constraints.maxWidth, maxHeight: constraints.maxHeight);
@@ -109,6 +115,7 @@ class _RenderTabBar extends RenderBox with
     return constraints.constrainWidth(width);
   }
 
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     BoxConstraints widthConstraints =
         new BoxConstraints(maxWidth: constraints.maxWidth, maxHeight: constraints.maxHeight);
@@ -129,8 +136,10 @@ class _RenderTabBar extends RenderBox with
 
   double _getIntrinsicHeight(BoxConstraints constraints) => constraints.constrainHeight(_tabBarHeight);
 
+  @override
   double getMinIntrinsicHeight(BoxConstraints constraints) => _getIntrinsicHeight(constraints);
 
+  @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) => _getIntrinsicHeight(constraints);
 
   void layoutFixedWidthTabs() {
@@ -194,6 +203,7 @@ class _RenderTabBar extends RenderBox with
     }
   }
 
+  @override
   void performLayout() {
     assert(constraints is BoxConstraints);
     if (childCount == 0)
@@ -211,6 +221,7 @@ class _RenderTabBar extends RenderBox with
       reportLayoutChangedIfNeeded();
   }
 
+  @override
   bool hitTestChildren(HitTestResult result, { Point position }) {
     return defaultHitTestChildren(result, position: position);
   }
@@ -233,6 +244,7 @@ class _RenderTabBar extends RenderBox with
     canvas.drawRect((point + offset) & size, new Paint()..color = indicatorColor);
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     int index = 0;
     RenderBox child = firstChild;
@@ -265,12 +277,14 @@ class _TabBarWrapper extends MultiChildRenderObjectWidget {
   final bool isScrollable;
   final TabLayoutChanged onLayoutChanged;
 
+  @override
   _RenderTabBar createRenderObject(BuildContext context) {
     _RenderTabBar result = new _RenderTabBar(onLayoutChanged);
     updateRenderObject(context, result);
     return result;
   }
 
+  @override
   void updateRenderObject(BuildContext context, _RenderTabBar renderObject) {
     renderObject
       ..selectedIndex = selectedIndex
@@ -330,6 +344,7 @@ class _Tab extends StatelessWidget {
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     Widget labelContent;
@@ -363,6 +378,7 @@ class _Tab extends StatelessWidget {
     );
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('$label');
@@ -372,8 +388,10 @@ class _Tab extends StatelessWidget {
 class _TabsScrollBehavior extends BoundedBehavior {
   _TabsScrollBehavior();
 
+  @override
   bool isScrollable = true;
 
+  @override
   Simulation createScrollSimulation(double position, double velocity) {
     if (!isScrollable)
       return null;
@@ -384,6 +402,7 @@ class _TabsScrollBehavior extends BoundedBehavior {
     );
   }
 
+  @override
   double applyCurve(double scrollOffset, double scrollDelta) {
     return (isScrollable) ? super.applyCurve(scrollOffset, scrollDelta) : 0.0;
   }
@@ -410,10 +429,15 @@ class TabBarSelection<T> extends StatefulWidget {
   }
 
   final T value;
+
   List<T> values;
+
   final ValueChanged<T> onChanged;
+
+  /// The widget below this widget in the tree.
   final Widget child;
 
+  @override
   TabBarSelectionState<T> createState() => new TabBarSelectionState<T>();
 
   static TabBarSelectionState<dynamic/*=T*/> of/*<T>*/(BuildContext context) {
@@ -436,6 +460,7 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
       _valueToIndex[value] = index++;
   }
 
+  @override
   void initState() {
     super.initState();
     _value = config.value ?? PageStorage.of(context)?.readState(context) ?? values.first;
@@ -449,6 +474,7 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
     _initValueToIndex();
   }
 
+  @override
   void didUpdateConfig(TabBarSelection<T> oldConfig) {
     super.didUpdateConfig(oldConfig);
     if (values != oldConfig.values)
@@ -532,6 +558,7 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
       ..removeListener(listener.handleProgressChange);
   }
 
+  @override
   void deactivate() {
     _controller.stop();
     for (TabBarSelectionAnimationListener listener in _animationListeners.toList()) {
@@ -542,6 +569,7 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
     _writeValue();
   }
 
+  @override
   Widget build(BuildContext context) {
     return config.child;
   }
@@ -564,13 +592,22 @@ class TabBar<T> extends Scrollable {
   final Map<T, TabLabel> labels;
   final bool isScrollable;
 
+  double get minimumHeight {
+    for (TabLabel label in labels.values) {
+      if (label.text != null && (label.icon != null || label.iconBuilder != null))
+        return _kTextAndIconTabHeight + _kTabIndicatorHeight;
+    }
+    return _kTabHeight + _kTabIndicatorHeight;
+  }
+
+  @override
   _TabBarState<T> createState() => new _TabBarState<T>();
 }
 
 class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelectionAnimationListener {
-
   TabBarSelectionState<T> _selection;
   bool _valueIsChanging = false;
+  int _lastSelectedIndex = -1;
 
   void _initSelection(TabBarSelectionState<T> selection) {
     _selection?.unregisterAnimationListener(this);
@@ -578,27 +615,32 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
     _selection?.registerAnimationListener(this);
   }
 
+  @override
   void initState() {
     super.initState();
     scrollBehavior.isScrollable = config.isScrollable;
     _initSelection(TabBarSelection.of(context));
   }
 
+  @override
   void didUpdateConfig(TabBar<T> oldConfig) {
     super.didUpdateConfig(oldConfig);
     if (!config.isScrollable)
       scrollTo(0.0);
   }
 
+  @override
   void dispose() {
     _selection?.unregisterAnimationListener(this);
     super.dispose();
   }
 
+  @override
   void handleSelectionDeactivate() {
     _selection = null;
   }
 
+  @override
   void handleStatusChange(AnimationStatus status) {
     if (config.labels.length == 0)
       return;
@@ -614,17 +656,20 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
     }
   }
 
+  @override
   void handleProgressChange() {
     if (config.labels.length == 0 || _selection == null)
       return;
 
-    if (!_valueIsChanging && _selection.valueIsChanging) {
+    if (_lastSelectedIndex != _selection.index) {
+      // Initialize our indicator animation when we change selected tabs.
       if (config.isScrollable)
         scrollTo(_centeredTabScrollOffset(_selection.index), duration: _kTabBarScroll);
       _indicatorTween
         ..begin = _indicatorRect ?? _tabIndicatorRect(_selection.previousIndex)
         ..end = _tabIndicatorRect(_selection.index);
       _valueIsChanging = true;
+      _lastSelectedIndex = _selection.index;
     }
     Rect oldRect = _indicatorRect;
     double t = _selection.animation.value;
@@ -633,13 +678,29 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
       // want to curve the animation. When _valueIsChanging is false, we're
       // animating based on a pointer event and want linear feedback. It's
       // possible we should move this curve into the selection animation.
-      t = Curves.ease.transform(t);
+      // We animate the leading and trailing edges of the rect differently.
+      // The easiest way to do this is to lerp 2 rects, and piece them together
+      // into 1.
+      Rect leftRect, rightRect;
+      if (_selection.index > _selection.previousIndex) {
+        // Moving to the right - right edge is leading.
+        rightRect = _indicatorTween.lerp(_kTabIndicatorLeadingCurve.transform(t));
+        leftRect = _indicatorTween.lerp(_kTabIndicatorTrailingCurve.transform(t));
+      } else {
+        // Moving to the left - left edge is leading.
+        leftRect = _indicatorTween.lerp(_kTabIndicatorLeadingCurve.transform(t));
+        rightRect = _indicatorTween.lerp(_kTabIndicatorTrailingCurve.transform(t));
+      }
+      _indicatorRect = new Rect.fromLTRB(
+        leftRect.left, leftRect.top, rightRect.right, rightRect.bottom
+      );
+    } else {
+      // TODO(abarth): If we've never gone through handleStatusChange before, we
+      // might not have set up our _indicatorTween yet.
+      _indicatorRect = _indicatorTween.lerp(t);
     }
-    // TODO(abarth): If we've never gone through handleStatusChange before, we
-    // might not have set up our _indicatorTween yet.
-    _indicatorRect = _indicatorTween.lerp(t);
     if (oldRect != _indicatorRect)
-      setState(() { });
+      setState(() { /* The indicator rect has changed. */ });
   }
 
   Size _viewportSize = Size.zero;
@@ -666,7 +727,10 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
     return new Rect.fromLTRB(r.left, r.bottom, r.right, r.bottom + _kTabIndicatorHeight);
   }
 
+  @override
   ScrollBehavior<double, double> createScrollBehavior() => new _TabsScrollBehavior();
+
+  @override
   _TabsScrollBehavior get scrollBehavior => super.scrollBehavior;
 
   double _centeredTabScrollOffset(int tabIndex) {
@@ -704,7 +768,7 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
   }
 
   void _updateScrollBehavior() {
-    scrollTo(scrollBehavior.updateExtents(
+    didUpdateScrollBehavior(scrollBehavior.updateExtents(
       containerExtent: config.scrollDirection == Axis.vertical ? _viewportSize.height : _viewportSize.width,
       contentExtent: _tabWidths.reduce((double sum, double width) => sum + width),
       scrollOffset: scrollOffset
@@ -731,6 +795,7 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
     return scrollOffsetToPixelDelta(scrollOffset);
   }
 
+  @override
   Widget buildContent(BuildContext context) {
     TabBarSelectionState<T> newSelection = TabBarSelection.of(context);
     if (_selection != newSelection)
@@ -753,9 +818,9 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
       indicatorColor = Colors.white;
     }
 
-    TextStyle textStyle = themeData.primaryTextTheme.body1;
+    TextStyle textStyle = themeData.primaryTextTheme.body2;
     IconThemeData iconTheme = themeData.primaryIconTheme;
-    Color textColor = themeData.primaryTextTheme.body1.color.withAlpha(0xB2); // 70% alpha
+    Color textColor = themeData.primaryTextTheme.body2.color.withAlpha(0xB2); // 70% alpha
 
     List<Widget> tabs = <Widget>[];
     bool textAndIcons = false;
@@ -808,6 +873,7 @@ class TabBarView<T> extends PageableList {
     assert(children.length > 1);
   }
 
+  @override
   _TabBarViewState<T> createState() => new _TabBarViewState<T>();
 }
 
@@ -820,6 +886,7 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
 
   BoundedBehavior _boundedBehavior;
 
+  @override
   ExtentScrollBehavior get scrollBehavior {
     _boundedBehavior ??= new BoundedBehavior();
     return _boundedBehavior;
@@ -833,22 +900,26 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
     }
   }
 
+  @override
   void initState() {
     super.initState();
     _initSelection(TabBarSelection.of(context));
   }
 
+  @override
   void didUpdateConfig(TabBarView<T> oldConfig) {
     super.didUpdateConfig(oldConfig);
     if (_selection != null && config.children != oldConfig.children)
       _updateItemsForSelectedIndex(_selection.index);
   }
 
+  @override
   void dispose() {
     _selection?.unregisterAnimationListener(this);
     super.dispose();
   }
 
+  @override
   void handleSelectionDeactivate() {
     _selection = null;
   }
@@ -872,11 +943,11 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
 
   void _updateScrollBehaviorForSelectedIndex(int selectedIndex) {
     if (selectedIndex == 0) {
-      scrollTo(scrollBehavior.updateExtents(contentExtent: 2.0, containerExtent: 1.0, scrollOffset: 0.0));
+      didUpdateScrollBehavior(scrollBehavior.updateExtents(contentExtent: 2.0, containerExtent: 1.0, scrollOffset: 0.0));
     } else if (selectedIndex == _tabCount - 1) {
-      scrollTo(scrollBehavior.updateExtents(contentExtent: 2.0, containerExtent: 1.0, scrollOffset: 1.0));
+      didUpdateScrollBehavior(scrollBehavior.updateExtents(contentExtent: 2.0, containerExtent: 1.0, scrollOffset: 1.0));
     } else {
-      scrollTo(scrollBehavior.updateExtents(contentExtent: 3.0, containerExtent: 1.0, scrollOffset: 1.0));
+      didUpdateScrollBehavior(scrollBehavior.updateExtents(contentExtent: 3.0, containerExtent: 1.0, scrollOffset: 1.0));
     }
   }
 
@@ -888,9 +959,11 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
     _updateScrollBehaviorForSelectedIndex(selectedIndex);
   }
 
+  @override
   void handleStatusChange(AnimationStatus status) {
   }
 
+  @override
   void handleProgressChange() {
     if (_selection == null || !_selection.valueIsChanging)
       return;
@@ -918,6 +991,7 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
     }
   }
 
+  @override
   void dispatchOnScroll() {
     if (_selection == null || _selection.valueIsChanging)
       return;
@@ -931,6 +1005,7 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
       controller.value = scrollOffset / 2.0;
   }
 
+  @override
   Future<Null> fling(double scrollVelocity) {
     if (_selection == null || _selection.valueIsChanging)
       return new Future<Null>.value();
@@ -955,6 +1030,7 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
     return settleScrollOffset();
   }
 
+  @override
   Widget buildContent(BuildContext context) {
     TabBarSelectionState<T> newSelection = TabBarSelection.of(context);
     if (_selection != newSelection)
@@ -997,6 +1073,7 @@ class TabPageSelector<T> extends StatelessWidget {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     final TabBarSelectionState<T> selection = TabBarSelection.of(context);
     final Color color = Theme.of(context).accentColor;

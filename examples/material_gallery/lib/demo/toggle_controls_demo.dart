@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 class ToggleControlsDemo extends StatefulWidget {
+  @override
   _ToggleControlsDemoState createState() => new _ToggleControlsDemoState();
 }
 
@@ -31,6 +32,7 @@ class _ToggleControlsDemoState extends State<ToggleControlsDemo> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(title: new Text("Selection Controls")),

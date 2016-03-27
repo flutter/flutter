@@ -30,6 +30,7 @@ class PhysicsShapeCircle extends PhysicsShape {
   final Point point;
   final double radius;
 
+  @override
   box2d.Shape _createB2Shape(PhysicsWorld node, double scale) {
     box2d.CircleShape shape = new box2d.CircleShape();
     shape.p.x = scale * point.x / node.b2WorldToNodeConversionFactor;
@@ -52,6 +53,7 @@ class PhysicsShapePolygon extends PhysicsShape {
 
   final List<Point> points;
 
+  @override
   box2d.Shape _createB2Shape(PhysicsWorld node, double scale) {
     List<Vector2> vectors = <Vector2>[];
     for (Point point in points) {
@@ -84,6 +86,7 @@ class PhysicsShapeBox extends PhysicsShape {
   final Point center;
   final double rotation;
 
+  @override
   box2d.Shape _createB2Shape(PhysicsWorld node, double scale) {
     box2d.PolygonShape shape = new box2d.PolygonShape();
     shape.setAsBox(
@@ -114,6 +117,7 @@ class PhysicsShapeChain extends PhysicsShape {
   final List<Point> points;
   final bool loop;
 
+  @override
   box2d.Shape _createB2Shape(PhysicsWorld node, double scale) {
     List<Vector2> vectors = <Vector2>[];
     for (Point point in points) {
@@ -145,6 +149,7 @@ class PhysicsShapeEdge extends PhysicsShape {
   final Point pointA;
   final Point pointB;
 
+  @override
   box2d.Shape _createB2Shape(PhysicsWorld node, double scale) {
     box2d.EdgeShape shape = new box2d.EdgeShape();
     shape.set(
@@ -172,10 +177,12 @@ class PhysicsShapeGroup extends PhysicsShape {
 
   final List<PhysicsShape> shapes;
 
+  @override
   box2d.Shape _createB2Shape(PhysicsWorld node, double scale) {
     return null;
   }
 
+  @override
   void _invalidate() {
     for (PhysicsShape shape in shapes) {
       shape._invalidate();

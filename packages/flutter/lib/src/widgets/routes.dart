@@ -21,9 +21,11 @@ abstract class OverlayRoute<T> extends Route<T> {
   List<WidgetBuilder> get builders;
 
   /// The entries this route has placed in the overlay.
+  @override
   List<OverlayEntry> get overlayEntries => _overlayEntries;
   final List<OverlayEntry> _overlayEntries = <OverlayEntry>[];
 
+  @override
   void install(OverlayEntry insertionPoint) {
     assert(_overlayEntries.isEmpty);
     for (WidgetBuilder builder in builders)
@@ -40,6 +42,7 @@ abstract class OverlayRoute<T> extends Route<T> {
   /// responsibility of the Route to later call dispose().
   ///
   /// Subclasses shouldn't call this if they want to delay the finished() call.
+  @override
   bool didPop(T result) {
     finished();
     return true;
@@ -58,6 +61,7 @@ abstract class OverlayRoute<T> extends Route<T> {
     _overlayEntries.clear();
   }
 
+  @override
   void dispose() {
     finished();
   }
@@ -145,6 +149,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   Animation<double> get forwardAnimation => _forwardAnimation;
   final ProxyAnimation _forwardAnimation = new ProxyAnimation(kAlwaysDismissedAnimation);
 
+  @override
   void install(OverlayEntry insertionPoint) {
     _controller = createAnimationController();
     assert(_controller != null);
@@ -153,12 +158,14 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     super.install(insertionPoint);
   }
 
+  @override
   void didPush() {
     _animation.addStatusListener(_handleStatusChanged);
     _controller.forward();
     super.didPush();
   }
 
+  @override
   void didReplace(Route<dynamic> oldRoute) {
     if (oldRoute is TransitionRoute<dynamic>)
       _controller.value = oldRoute._controller.value;
@@ -166,6 +173,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     super.didReplace(oldRoute);
   }
 
+  @override
   bool didPop(T result) {
     _result = result;
     _controller.reverse();
@@ -173,11 +181,13 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     return true;
   }
 
+  @override
   void didPopNext(Route<dynamic> nextRoute) {
     _updateForwardAnimation(nextRoute);
     super.didPopNext(nextRoute);
   }
 
+  @override
   void didChangeNext(Route<dynamic> nextRoute) {
     _updateForwardAnimation(nextRoute);
     super.didChangeNext(nextRoute);
@@ -224,17 +234,21 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// need to coordinate transitions with.
   bool canTransitionFrom(TransitionRoute<dynamic> nextRoute) => true;
 
+  @override
   void finished() {
     super.finished();
     _transitionCompleter?.complete(_result);
   }
 
+  @override
   void dispose() {
     _controller.stop();
     super.dispose();
   }
 
   String get debugLabel => '$runtimeType';
+
+  @override
   String toString() => '$runtimeType(animation: $_controller)';
 }
 
@@ -295,6 +309,8 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
     entry._owner = null;
     entry._notifyRemoved();
   }
+
+  @override
   bool didPop(T result) {
     if (_localHistory != null && _localHistory.length > 0) {
       LocalHistoryEntry entry = _localHistory.removeLast();
@@ -305,6 +321,8 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
     }
     return super.didPop(result);
   }
+
+  @override
   bool get willHandlePopInternally {
     return _localHistory != null && _localHistory.length > 0;
   }
@@ -325,11 +343,13 @@ class _ModalScopeStatus extends InheritedWidget {
   final bool isCurrent;
   final Route<dynamic> route;
 
+  @override
   bool updateShouldNotify(_ModalScopeStatus old) {
     return isCurrent != old.isCurrent ||
            route != old.route;
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('${isCurrent ? "active" : "inactive"}');
@@ -344,20 +364,24 @@ class _ModalScope extends StatefulWidget {
 
   final ModalRoute<dynamic> route;
 
+  @override
   _ModalScopeState createState() => new _ModalScopeState();
 }
 
 class _ModalScopeState extends State<_ModalScope> {
+  @override
   void initState() {
     super.initState();
     config.route.animation?.addStatusListener(_animationStatusChanged);
     config.route.forwardAnimation?.addStatusListener(_animationStatusChanged);
   }
 
+  @override
   void didUpdateConfig(_ModalScope oldConfig) {
     assert(config.route == oldConfig.route);
   }
 
+  @override
   void dispose() {
     config.route.animation?.removeStatusListener(_animationStatusChanged);
     config.route.forwardAnimation?.removeStatusListener(_animationStatusChanged);
@@ -370,6 +394,7 @@ class _ModalScopeState extends State<_ModalScope> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     Widget contents = new PageStorage(
       key: config.route._subtreeKey,
@@ -486,6 +511,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     return child;
   }
 
+  @override
   void didPush() {
     Focus.moveScopeTo(new GlobalObjectKey(this), context: navigator.context);
     super.didPush();
@@ -569,18 +595,24 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     );
   }
 
+  @override
   List<WidgetBuilder> get builders => <WidgetBuilder>[
     _buildModalBarrier,
     _buildModalScope
   ];
 
+  @override
   String toString() => '$runtimeType($settings, animation: $_animation)';
 }
 
 /// A modal route that overlays a widget over the current route.
 abstract class PopupRoute<T> extends ModalRoute<T> {
   PopupRoute({ Completer<T> completer }) : super(completer: completer);
+
+  @override
   bool get opaque => false;
+
+  @override
   void didChangeNext(Route<dynamic> nextRoute) {
     assert(nextRoute is! PageRoute<dynamic>);
     super.didChangeNext(nextRoute);

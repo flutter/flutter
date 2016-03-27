@@ -129,6 +129,7 @@ class Mimic extends StatelessWidget {
   /// A handle to the widget that this widget should copy.
   final MimicableHandle original;
 
+  @override
   Widget build(BuildContext context) {
     if (original != null && original._state.mounted && original._state._placeholderSize != null)
       return original._state.config.child;
@@ -143,8 +144,10 @@ class Mimic extends StatelessWidget {
 class Mimicable extends StatefulWidget {
   Mimicable({ Key key, this.child }) : super(key: key);
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
+  @override
   MimicableState createState() => new MimicableState();
 }
 
@@ -178,7 +181,7 @@ class MimicableState extends State<Mimicable> {
   MimicableHandle startMimic() {
     assert(() {
       if (_placeholderSize != null) {
-        throw new WidgetError(
+        throw new FlutterError(
           'Mimicable started while already active.\n'
           'When startMimic() or liftToOverlay() is called on a MimicableState, the mimic becomes active. '
           'While active, it cannot be reactivated until it is stopped. '
@@ -222,6 +225,7 @@ class MimicableState extends State<Mimicable> {
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     if (_placeholderSize != null) {
       return new ConstrainedBox(

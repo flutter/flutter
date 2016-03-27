@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 class TimePickerDemo extends StatefulWidget {
+  @override
   _TimePickerDemoState createState() => new _TimePickerDemoState();
 }
 
@@ -25,6 +26,7 @@ class _TimePickerDemoState extends State<TimePickerDemo> {
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(title: new Text("Time Picker")),

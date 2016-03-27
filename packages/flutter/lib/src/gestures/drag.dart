@@ -14,27 +14,32 @@ enum DragState {
   accepted
 }
 
+typedef void GestureDragDownCallback(Point globalPosition);
 typedef void GestureDragStartCallback(Point globalPosition);
 typedef void GestureDragUpdateCallback(double delta);
 typedef void GestureDragEndCallback(Velocity velocity);
+typedef void GestureDragCancelCallback();
 
+typedef void GesturePanDownCallback(Point globalPosition);
 typedef void GesturePanStartCallback(Point globalPosition);
 typedef void GesturePanUpdateCallback(Offset delta);
 typedef void GesturePanEndCallback(Velocity velocity);
+typedef void GesturePanCancelCallback();
 
 typedef void _GesturePolymorphicUpdateCallback<T>(T delta);
 
 bool _isFlingGesture(Velocity velocity) {
   assert(velocity != null);
   final double speedSquared = velocity.pixelsPerSecond.distanceSquared;
-  return speedSquared > kMinFlingVelocity * kMinFlingVelocity
-      && speedSquared < kMaxFlingVelocity * kMaxFlingVelocity;
+  return speedSquared > kMinFlingVelocity * kMinFlingVelocity;
 }
 
 abstract class _DragGestureRecognizer<T extends dynamic> extends OneSequenceGestureRecognizer {
+  GestureDragDownCallback onDown;
   GestureDragStartCallback onStart;
   _GesturePolymorphicUpdateCallback<T> onUpdate;
   GestureDragEndCallback onEnd;
+  GestureDragCancelCallback onCancel;
 
   DragState _state = DragState.ready;
   Point _initialPosition;
@@ -46,6 +51,7 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends OneSequenceGest
 
   Map<int, VelocityTracker> _velocityTrackers = new Map<int, VelocityTracker>();
 
+  @override
   void addPointer(PointerEvent event) {
     startTrackingPointer(event.pointer);
     _velocityTrackers[event.pointer] = new VelocityTracker();
@@ -53,9 +59,12 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends OneSequenceGest
       _state = DragState.possible;
       _initialPosition = event.position;
       _pendingDragDelta = _initialPendingDragDelta;
+      if (onDown != null)
+        onDown(_initialPosition);
     }
   }
 
+  @override
   void handleEvent(PointerEvent event) {
     assert(_state != DragState.ready);
     if (event is PointerMoveEvent) {
@@ -75,6 +84,7 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends OneSequenceGest
     stopTrackingIfPointerNoLongerDown(event);
   }
 
+  @override
   void acceptGesture(int pointer) {
     if (_state != DragState.accepted) {
       _state = DragState.accepted;
@@ -87,10 +97,18 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends OneSequenceGest
     }
   }
 
+  @override
+  void rejectGesture(int pointer) {
+    ensureNotTrackingPointer(pointer);
+  }
+
+  @override
   void didStopTrackingLastPointer(int pointer) {
     if (_state == DragState.possible) {
       resolve(GestureDisposition.rejected);
       _state = DragState.ready;
+      if (onCancel != null)
+        onCancel();
       return;
     }
     bool wasAccepted = (_state == DragState.accepted);
@@ -100,14 +118,19 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends OneSequenceGest
       assert(tracker != null);
 
       Velocity velocity = tracker.getVelocity();
-      if (velocity != null && _isFlingGesture(velocity))
+      if (velocity != null && _isFlingGesture(velocity)) {
+        final Offset pixelsPerSecond = velocity.pixelsPerSecond;
+        if (pixelsPerSecond.distanceSquared > kMaxFlingVelocity * kMaxFlingVelocity)
+          velocity = new Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * kMaxFlingVelocity);
         onEnd(velocity);
-      else
+      } else {
         onEnd(Velocity.zero);
+      }
     }
     _velocityTrackers.clear();
   }
 
+  @override
   void dispose() {
     _velocityTrackers.clear();
     super.dispose();
@@ -115,27 +138,45 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends OneSequenceGest
 }
 
 class VerticalDragGestureRecognizer extends _DragGestureRecognizer<double> {
+  @override
   double get _initialPendingDragDelta => 0.0;
+
+  @override
   double _getDragDelta(PointerEvent event) => event.delta.dy;
+
+  @override
   bool get _hasSufficientPendingDragDeltaToAccept => _pendingDragDelta.abs() > kTouchSlop;
 
+  @override
   String toStringShort() => 'vertical drag';
 }
 
 class HorizontalDragGestureRecognizer extends _DragGestureRecognizer<double> {
+  @override
   double get _initialPendingDragDelta => 0.0;
+
+  @override
   double _getDragDelta(PointerEvent event) => event.delta.dx;
+
+  @override
   bool get _hasSufficientPendingDragDeltaToAccept => _pendingDragDelta.abs() > kTouchSlop;
 
+  @override
   String toStringShort() => 'horizontal drag';
 }
 
 class PanGestureRecognizer extends _DragGestureRecognizer<Offset> {
+  @override
   Offset get _initialPendingDragDelta => Offset.zero;
+
+  @override
   Offset _getDragDelta(PointerEvent event) => event.delta;
+
+  @override
   bool get _hasSufficientPendingDragDeltaToAccept {
     return _pendingDragDelta.distance > kPanSlop;
   }
 
+  @override
   String toStringShort() => 'pan';
 }

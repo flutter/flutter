@@ -54,6 +54,7 @@ class ColorItem extends StatelessWidget {
 
   String colorString() => "#${color.value.toRadixString(16).padLeft(8, '0').toUpperCase()}";
 
+  @override
   Widget build(BuildContext context) {
     return new Container(
       height: kColorItemHeight,
@@ -80,6 +81,7 @@ class ColorSwatchTabView extends StatelessWidget {
   final TextStyle blackTextStyle = Typography.black.body1;
   final TextStyle whiteTextStyle = Typography.white.body1;
 
+  @override
   Widget build(BuildContext context) {
     List<Widget> colorItems =  swatch.colors.keys.map((int index) {
       return new DefaultTextStyle(
@@ -107,6 +109,7 @@ class ColorSwatchTabView extends StatelessWidget {
 }
 
 class ColorsDemo extends StatelessWidget {
+  @override
   Widget build(BuildContext context) {
     return new TabBarSelection<ColorSwatch>(
       values: colorSwatches,

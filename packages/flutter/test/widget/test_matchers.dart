@@ -20,25 +20,41 @@ bool _hasAncestorOfType(Element element, Type targetType) {
 
 class _IsOnStage extends Matcher {
   const _IsOnStage();
+
+  @override
   bool matches(Element item, Map<dynamic, dynamic> matchState) => !_hasAncestorOfType(item, OffStage);
+
+  @override
   Description describe(Description description) => description.add('onstage');
 }
 
 class _IsOffStage extends Matcher {
   const _IsOffStage();
+
+  @override
   bool matches(Element item, Map<dynamic, dynamic> matchState) => _hasAncestorOfType(item, OffStage);
+
+  @override
   Description describe(Description description) => description.add('offstage');
 }
 
 class _IsInCard extends Matcher {
   const _IsInCard();
+
+  @override
   bool matches(Element item, Map<dynamic, dynamic> matchState) => _hasAncestorOfType(item, Card);
+
+  @override
   Description describe(Description description) => description.add('in card');
 }
 
 class _IsNotInCard extends Matcher {
   const _IsNotInCard();
+
+  @override
   bool matches(Element item, Map<dynamic, dynamic> matchState) => !_hasAncestorOfType(item, Card);
+
+  @override
   Description describe(Description description) => description.add('not in card');
 }
 

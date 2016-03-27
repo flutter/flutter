@@ -183,6 +183,7 @@ class PhysicsJointRevolute extends PhysicsJoint {
     }
   }
 
+  @override
   box2d.Joint _createB2Joint(PhysicsWorld physicsNode) {
     // Create Joint Definition
     Vector2 vecAnchor = new Vector2(
@@ -288,6 +289,7 @@ class PhysicsJointPrismatic extends PhysicsJoint {
     }
   }
 
+  @override
   box2d.Joint _createB2Joint(PhysicsWorld physicsNode) {
     box2d.PrismaticJointDef b2Def = new box2d.PrismaticJointDef();
     b2Def.initialize(bodyA._body, bodyB._body, bodyA._body.position, new Vector2(axis.dx, axis.dy));
@@ -318,6 +320,7 @@ class PhysicsJointWeld extends PhysicsJoint {
   final double dampening;
   final double frequency;
 
+  @override
   box2d.Joint _createB2Joint(PhysicsWorld physicsNode) {
     box2d.WeldJointDef b2Def = new box2d.WeldJointDef();
     Vector2 middle = new Vector2(
@@ -369,6 +372,7 @@ class PhysicsJointPulley extends PhysicsJoint {
   final Point anchorB;
   final double ratio;
 
+  @override
   box2d.Joint _createB2Joint(PhysicsWorld physicsNode) {
     box2d.PulleyJointDef b2Def = new box2d.PulleyJointDef();
     b2Def.initialize(
@@ -407,6 +411,7 @@ class PhysicsJointGear extends PhysicsJoint {
   /// The ratio of the rotation for bodyA relative bodyB.
   final double ratio;
 
+  @override
   box2d.Joint _createB2Joint(PhysicsWorld physicsNode) {
     box2d.GearJointDef b2Def = new box2d.GearJointDef();
     b2Def.bodyA = bodyA._body;
@@ -452,6 +457,7 @@ class PhysicsJointDistance extends PhysicsJoint {
   /// Dampening frequency.
   final double frequency;
 
+  @override
   box2d.Joint _createB2Joint(PhysicsWorld physicsNode) {
     box2d.DistanceJointDef b2Def = new box2d.DistanceJointDef();
     b2Def.initialize(
@@ -498,6 +504,7 @@ class PhysicsJointWheel extends PhysicsJoint {
   /// Dampening frequency.
   final double frequency;
 
+  @override
   box2d.Joint _createB2Joint(PhysicsWorld physicsNode) {
     box2d.WheelJointDef b2Def = new box2d.WheelJointDef();
     b2Def.initialize(
@@ -533,6 +540,7 @@ class PhysicsJointFriction extends PhysicsJoint {
   final double maxForce;
   final double maxTorque;
 
+  @override
   box2d.Joint _createB2Joint(PhysicsWorld physicsNode) {
     box2d.FrictionJointDef b2Def = new box2d.FrictionJointDef();
     b2Def.initialize(
@@ -565,6 +573,7 @@ class PhysicsJointConstantVolume extends PhysicsJoint {
   final double dampening;
   final double frequency;
 
+  @override
   box2d.Joint _createB2Joint(PhysicsWorld physicsNode) {
     box2d.ConstantVolumeJointDef b2Def = new box2d.ConstantVolumeJointDef();
     for (PhysicsBody body in bodies) {

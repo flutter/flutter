@@ -45,6 +45,7 @@ class _ButtonDemo {
   // to recover this demo's selected tab. To enable it to compare restored
   // _ButtonDemo objects with new ones, define hashCode and operator== .
 
+  @override
   bool operator==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
@@ -52,16 +53,19 @@ class _ButtonDemo {
     return typedOther.title == title && typedOther.text == text;
   }
 
+  @override
   int get hashCode => hashValues(title.hashCode, text.hashCode);
 }
 
 class ButtonsDemo extends StatefulWidget {
+  @override
   _ButtonsDemoState createState() => new _ButtonsDemoState();
 }
 
 class _ButtonsDemoState extends State<ButtonsDemo> {
   List<_ButtonDemo> demos;
 
+  @override
   void initState() {
     super.initState();
     demos = <_ButtonDemo>[
@@ -192,6 +196,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     return new TabBarSelection<_ButtonDemo>(
       values: demos,

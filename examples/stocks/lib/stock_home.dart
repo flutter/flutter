@@ -19,6 +19,7 @@ enum _StockMenuItem { autorefresh, refresh, speedUp, speedDown }
 enum StockHomeTab { market, portfolio }
 
 class _NotImplementedDialog extends StatelessWidget {
+  @override
   Widget build(BuildContext context) {
     return new Dialog(
       title: new Text('Not Implemented'),
@@ -58,6 +59,7 @@ class StockHome extends StatefulWidget {
   final StockConfiguration configuration;
   final ValueChanged<StockConfiguration> updater;
 
+  @override
   StockHomeState createState() => new StockHomeState();
 }
 
@@ -336,6 +338,7 @@ class StockHomeState extends State<StockHome> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     return new TabBarSelection<StockHomeTab>(
       values: <StockHomeTab>[StockHomeTab.market, StockHomeTab.portfolio],
@@ -356,6 +359,7 @@ class StockHomeState extends State<StockHome> {
 }
 
 class _CreateCompanySheet extends StatefulWidget {
+  @override
   _CreateCompanySheetState createState() => new _CreateCompanySheetState();
 }
 
@@ -368,6 +372,7 @@ class _CreateCompanySheetState extends State<_CreateCompanySheet> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     // TODO(ianh): Fill this out.
     return new Column(

@@ -16,18 +16,22 @@ import '../build_configuration.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
+import '../service_protocol.dart';
 import '../toolchain.dart';
 import 'mac.dart';
 
 const String _xcrunPath = '/usr/bin/xcrun';
 
 /// Test device created by Flutter when no other device is available.
-const String _kFlutterTestDevice = 'flutter.test.device';
+const String _kFlutterTestDeviceSuffix = '(Flutter)';
 
 class IOSSimulators extends PollingDeviceDiscovery {
   IOSSimulators() : super('IOSSimulators');
 
+  @override
   bool get supportsPlatform => Platform.isMacOS;
+
+  @override
   List<Device> pollingGetDevices() => IOSSimulatorUtils.instance.getAttachedDevices();
 }
 
@@ -94,30 +98,29 @@ class SimControl {
   }
 
   SimDevice _createTestDevice() {
-    String deviceType = _findSuitableDeviceType();
-    if (deviceType == null) {
+    SimDeviceType deviceType = _findSuitableDeviceType();
+    if (deviceType == null)
       return null;
-    }
 
     String runtime = _findSuitableRuntime();
-    if (runtime == null) {
+    if (runtime == null)
       return null;
-    }
 
     // Delete any old test devices
     getDevices()
-      .where((SimDevice d) => d.name == _kFlutterTestDevice)
+      .where((SimDevice d) => d.name.endsWith(_kFlutterTestDeviceSuffix))
       .forEach(_deleteDevice);
 
     // Create new device
-    List<String> args = [_xcrunPath, 'simctl', 'create', _kFlutterTestDevice, deviceType, runtime];
+    String deviceName = '${deviceType.name} $_kFlutterTestDeviceSuffix';
+    List<String> args = [_xcrunPath, 'simctl', 'create', deviceName, deviceType.identifier, runtime];
     printTrace(args.join(' '));
     runCheckedSync(args);
 
-    return getDevices().firstWhere((SimDevice d) => d.name == _kFlutterTestDevice);
+    return getDevices().firstWhere((SimDevice d) => d.name == deviceName);
   }
 
-  String _findSuitableDeviceType() {
+  SimDeviceType _findSuitableDeviceType() {
     List<Map<String, dynamic>> allTypes = _list(SimControlListSection.devicetypes);
     List<Map<String, dynamic>> usableTypes = allTypes
       .where((Map<String, dynamic> info) => info['name'].startsWith('iPhone'))
@@ -126,14 +129,15 @@ class SimControl {
 
     if (usableTypes.isEmpty) {
       printError(
-        'No suitable device type found.'
-        '\n'
-        'You may launch an iOS Simulator manually and Flutter will attempt to '
-        'use it.'
+        'No suitable device type found.\n'
+        'You may launch an iOS Simulator manually and Flutter will attempt to use it.'
       );
     }
 
-    return usableTypes.first['identifier'];
+    return new SimDeviceType(
+      usableTypes.first['name'],
+      usableTypes.first['identifier']
+    );
   }
 
   String _findSuitableRuntime() {
@@ -145,10 +149,8 @@ class SimControl {
 
     if (usableRuntimes.isEmpty) {
       printError(
-        'No suitable iOS runtime found.'
-        '\n'
-        'You may launch an iOS Simulator manually and Flutter will attempt to '
-        'use it.'
+        'No suitable iOS runtime found.\n'
+        'You may launch an iOS Simulator manually and Flutter will attempt to use it.'
       );
     }
 
@@ -157,7 +159,7 @@ class SimControl {
 
   void _deleteDevice(SimDevice device) {
     try {
-      List<String> args = [_xcrunPath, 'simctl', 'delete', device.name];
+      List<String> args = <String>[_xcrunPath, 'simctl', 'delete', device.name];
       printTrace(args.join(' '));
       runCheckedSync(args);
     } catch(e) {
@@ -297,6 +299,30 @@ class SimControlListSection {
   static const SimControlListSection pairs = const SimControlListSection._('pairs');
 }
 
+/// A simulated device type.
+///
+/// Simulated device types can be listed using the command
+/// `xcrun simctl list devicetypes`.
+class SimDeviceType {
+  SimDeviceType(this.name, this.identifier);
+
+  /// The name of the device type.
+  ///
+  /// Examples:
+  ///
+  ///     "iPhone 6s"
+  ///     "iPhone 6 Plus"
+  final String name;
+
+  /// The identifier of the device type.
+  ///
+  /// Examples:
+  ///
+  ///     "com.apple.CoreSimulator.SimDeviceType.iPhone-6s"
+  ///     "com.apple.CoreSimulator.SimDeviceType.iPhone-6-Plus"
+  final String identifier;
+}
+
 class SimDevice {
   SimDevice(this.category, this.data);
 
@@ -314,8 +340,10 @@ class SimDevice {
 class IOSSimulator extends Device {
   IOSSimulator(String id, { this.name }) : super(id);
 
+  @override
   final String name;
 
+  @override
   bool get isLocalEmulator => true;
 
   _IOSSimulatorLogReader _logReader;
@@ -392,9 +420,8 @@ class IOSSimulator extends Device {
 
   @override
   String supportMessage() {
-    if (isSupported()) {
+    if (isSupported())
       return "Supported";
-    }
 
     return _supportMessage != null ? _supportMessage : "Unknown";
   }
@@ -429,6 +456,13 @@ class IOSSimulator extends Device {
     if (!(await _setupUpdatedApplicationBundle(app, toolchain)))
       return false;
 
+    ServiceProtocolDiscovery serviceProtocolDiscovery =
+        new ServiceProtocolDiscovery(logReader);
+
+    // We take this future here but do not wait for completion until *after* we
+    // start the application.
+    Future<int> scrapeServicePort = serviceProtocolDiscovery.nextPort();
+
     // Prepare launch arguments.
     List<String> args = <String>[
       "--flx=${path.absolute(path.join('build', 'app.flx'))}",
@@ -453,9 +487,23 @@ class IOSSimulator extends Device {
       return false;
     }
 
-    printTrace('Successfully started ${app.name} on $id.');
+    // Wait for the service protocol port here. This will complete once the
+    // device has printed "Observatory is listening on..."
+    printTrace('Waiting for observatory port to be available...');
 
-    return true;
+    try {
+      int devicePort = await scrapeServicePort.timeout(new Duration(seconds: 12));
+      printTrace('service protocol port = $devicePort');
+      printStatus('Observatory listening on http://127.0.0.1:$devicePort');
+      return true;
+    } catch (error) {
+      if (error is TimeoutException)
+        printError('Timed out while waiting for a debug connection.');
+      else
+        printError('Error waiting for a debug connection: $error');
+
+      return false;
+    }
   }
 
   bool _applicationIsInstalledAndRunning(ApplicationPackage app) {
@@ -534,8 +582,9 @@ class IOSSimulator extends Device {
   }
 
   @override
-  TargetPlatform get platform => TargetPlatform.ios_x64;
+  TargetPlatform get platform => TargetPlatform.ios;
 
+  @override
   DeviceLogReader get logReader {
     if (_logReader == null)
       _logReader = new _IOSSimulatorLogReader(this);
@@ -543,6 +592,7 @@ class IOSSimulator extends Device {
     return _logReader;
   }
 
+  @override
   DevicePortForwarder get portForwarder {
     if (_portForwarder == null)
       _portForwarder = new _IOSSimulatorDevicePortForwarder(this);
@@ -550,6 +600,7 @@ class IOSSimulator extends Device {
     return _portForwarder;
   }
 
+  @override
   void clearLogs() {
     File logFile = new File(logFilePath);
     if (logFile.existsSync()) {
@@ -563,6 +614,49 @@ class IOSSimulator extends Device {
     File logFile = new File(logFilePath);
     if (!logFile.existsSync())
       logFile.writeAsBytesSync(<int>[]);
+  }
+
+  @override
+  bool get supportsScreenshot => true;
+
+  @override
+  Future<bool> takeScreenshot(File outputFile) async {
+    String homeDirPath = Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'];
+    Directory desktopDir = new Directory(path.join(homeDirPath, 'Desktop'));
+
+    // 'Simulator Screen Shot Mar 25, 2016, 2.59.43 PM.png'
+
+    Set<File> getScreenshots() {
+      return new Set<File>.from(desktopDir.listSync().where((FileSystemEntity entity) {
+        String name = path.basename(entity.path);
+        return entity is File && name.startsWith('Simulator') && name.endsWith('.png');
+      }));
+    };
+
+    Set<File> existingScreenshots = getScreenshots();
+
+    runSync(<String>[
+      'osascript',
+      '-e',
+      'activate application "Simulator"\n'
+        'tell application "System Events" to keystroke "s" using command down'
+    ]);
+
+    // There is some latency here from the applescript call.
+    await new Future<Null>.delayed(new Duration(seconds: 1));
+
+    Set<File> shots = getScreenshots().difference(existingScreenshots);
+
+    if (shots.isEmpty) {
+      printError('Unable to locate the screenshot file.');
+      return false;
+    }
+
+    File shot = shots.first;
+    outputFile.writeAsBytesSync(shot.readAsBytesSync());
+    shot.delete();
+
+    return true;
   }
 }
 
@@ -585,16 +679,21 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   StreamSubscription<String> _systemStdoutSubscription;
   StreamSubscription<String> _systemStderrSubscription;
 
+  @override
   Stream<String> get lines => _linesStreamController.stream;
 
+  @override
   String get name => device.name;
 
+  @override
   bool get isReading => (_deviceProcess != null) && (_systemProcess != null);
 
+  @override
   Future<int> get finished {
     return (_deviceProcess != null) ? _deviceProcess.exitCode : new Future<int>.value(0);
   }
 
+  @override
   Future<Null> start() async {
     if (isReading) {
       throw new StateError(
@@ -630,6 +729,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     _systemProcess.exitCode.then(_onSystemExit);
   }
 
+  @override
   Future<Null> stop() async {
     if (!isReading) {
       throw new StateError(
@@ -727,8 +827,10 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     _linesStreamController.add(filteredLine);
   }
 
+  @override
   int get hashCode => device.logFilePath.hashCode;
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -789,10 +891,12 @@ class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {
 
   final List<ForwardedPort> _ports = <ForwardedPort>[];
 
+  @override
   List<ForwardedPort> get forwardedPorts {
     return _ports;
   }
 
+  @override
   Future<int> forward(int devicePort, {int hostPort: null}) async {
     if ((hostPort == null) || (hostPort == 0)) {
       hostPort = devicePort;
@@ -802,6 +906,7 @@ class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {
     return hostPort;
   }
 
+  @override
   Future<Null> unforward(ForwardedPort forwardedPort) async {
     _ports.remove(forwardedPort);
   }

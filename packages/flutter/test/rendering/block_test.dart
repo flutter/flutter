@@ -9,6 +9,7 @@ import 'package:test/test.dart';
 import 'rendering_tester.dart';
 
 class TestBlockPainter extends RenderObjectPainter {
+  @override
   void paint(PaintingContext context, Offset offset) { }
 }
 

@@ -13,6 +13,8 @@ class TestRenderView extends RenderView {
   TestRenderView() {
     configuration = new ViewConfiguration(size: _kTestViewSize);
   }
+
+  @override
   void scheduleInitialFrame() {
     scheduleInitialLayout();
     scheduleInitialPaint(new TransformLayer(transform: new Matrix4.identity()));
@@ -27,6 +29,7 @@ enum EnginePhase {
 }
 
 class TestRenderingFlutterBinding extends BindingBase with Scheduler, Services, Renderer, Gesturer {
+  @override
   void initRenderView() {
     if (renderView == null) {
       renderView = new TestRenderView();
@@ -36,17 +39,18 @@ class TestRenderingFlutterBinding extends BindingBase with Scheduler, Services, 
 
   EnginePhase phase = EnginePhase.composite;
 
+  @override
   void beginFrame() {
-    RenderObject.flushLayout();
+    pipelineOwner.flushLayout();
     if (phase == EnginePhase.layout)
       return;
-    RenderObject.flushCompositingBits();
+    pipelineOwner.flushCompositingBits();
     if (phase == EnginePhase.compositingBits)
       return;
-    RenderObject.flushPaint();
+    pipelineOwner.flushPaint();
     if (phase == EnginePhase.paint)
       return;
-    renderer.renderView.compositeFrame();
+    renderView.compositeFrame();
   }
 }
 
@@ -83,9 +87,11 @@ class TestCallbackPainter extends CustomPainter {
 
   final VoidCallback onPaint;
 
+  @override
   void paint(Canvas canvas, Size size) {
     onPaint();
   }
 
+  @override
   bool shouldRepaint(TestCallbackPainter oldPainter) => true;
 }

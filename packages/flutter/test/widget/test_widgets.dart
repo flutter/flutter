@@ -21,6 +21,7 @@ final BoxDecoration kBoxDecorationC = new BoxDecoration(
 class TestBuildCounter extends StatelessWidget {
   static int buildCount = 0;
 
+  @override
   Widget build(BuildContext context) {
     ++buildCount;
     return new DecoratedBox(decoration: kBoxDecorationA);
@@ -34,6 +35,7 @@ class FlipWidget extends StatefulWidget {
   final Widget left;
   final Widget right;
 
+  @override
   FlipWidgetState createState() => new FlipWidgetState();
 }
 
@@ -46,6 +48,7 @@ class FlipWidgetState extends State<FlipWidget> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     return _showLeft ? config.left : config.right;
   }

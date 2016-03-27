@@ -11,6 +11,7 @@ class _ContactCategory extends StatelessWidget {
   final IconData icon;
   final List<Widget> children;
 
+  @override
   Widget build(BuildContext context) {
     return new Container(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -41,6 +42,7 @@ class _ContactItem extends StatelessWidget {
   final IconData icon;
   final List<String> lines;
 
+  @override
   Widget build(BuildContext context) {
     List<Widget> columnChildren = lines.sublist(0, lines.length - 1).map((String line) => new Text(line)).toList();
     columnChildren.add(new Text(lines.last, style: Theme.of(context).textTheme.caption));
@@ -68,6 +70,7 @@ class _ContactItem extends StatelessWidget {
 }
 
 class FlexibleSpaceDemo extends StatefulWidget {
+  @override
   FlexibleSpaceDemoState createState() => new FlexibleSpaceDemoState();
 }
 
@@ -77,7 +80,9 @@ class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
   final Key scrollableKey = new UniqueKey();
   AppBarBehavior _appBarBehavior = AppBarBehavior.scroll;
 
+  @override
   Widget build(BuildContext context) {
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
     return new Theme(
       data: new ThemeData(
         brightness: ThemeBrightness.light,
@@ -85,10 +90,10 @@ class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
       ),
       child: new Scaffold(
         key: scaffoldKey,
-        appBarHeight: appBarHeight,
         scrollableKey: scrollableKey,
         appBarBehavior: _appBarBehavior,
         appBar: new AppBar(
+          expandedHeight: appBarHeight,
           actions: <Widget>[
             new IconButton(
               icon: Icons.create,
@@ -130,7 +135,7 @@ class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
         ),
         body: new Block(
           scrollableKey: scrollableKey,
-          padding: new EdgeInsets.only(top: appBarHeight),
+          padding: new EdgeInsets.only(top: appBarHeight + statusBarHeight),
           children: <Widget>[
             new _ContactCategory(
               icon: Icons.call,

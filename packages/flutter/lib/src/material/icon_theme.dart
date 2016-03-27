@@ -24,8 +24,10 @@ class IconTheme extends InheritedWidget {
     return result?.data;
   }
 
+  @override
   bool updateShouldNotify(IconTheme old) => data != old.data;
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('$data');

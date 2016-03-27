@@ -36,6 +36,7 @@ class _Vector {
 
   double norm() => math.sqrt(this * this);
 
+  @override
   String toString() {
     String result = "";
     for (int i = 0; i < _length; i++) {
@@ -68,6 +69,7 @@ class _Matrix {
     _columns
   );
 
+  @override
   String toString() {
     String result = "";
     for (int i = 0; i < _rows; i++) {

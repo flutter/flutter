@@ -48,6 +48,7 @@ class ZipEntry {
 class _ArchiveZipBuilder extends ZipBuilder {
   _ArchiveZipBuilder() : super._();
 
+  @override
   void createZip(File outFile, Directory zipBuildDir) {
     Archive archive = new Archive();
 
@@ -69,6 +70,7 @@ class _ArchiveZipBuilder extends ZipBuilder {
 class _ZipToolBuilder extends ZipBuilder {
   _ZipToolBuilder() : super._();
 
+  @override
   void createZip(File outFile, Directory zipBuildDir) {
     if (outFile.existsSync())
       outFile.deleteSync();

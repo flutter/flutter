@@ -10,7 +10,10 @@ import 'rendering_tester.dart';
 
 class RenderLayoutTestBox extends RenderProxyBox {
   RenderLayoutTestBox(this.onLayout);
+
   final VoidCallback onLayout;
+
+  @override
   void layout(Constraints constraints, { bool parentUsesSize: false }) {
     // Doing this in tests is ok, but if you're writing your own
     // render object, you want to override performLayout(), not
@@ -20,7 +23,11 @@ class RenderLayoutTestBox extends RenderProxyBox {
     super.layout(constraints, parentUsesSize: parentUsesSize);
     onLayout();
   }
+
+  @override
   bool get sizedByParent => true;
+
+  @override
   void performLayout() { }
 }
 

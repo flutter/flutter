@@ -11,12 +11,12 @@ import 'artifacts.dart';
 import 'base/process.dart';
 import 'build_configuration.dart';
 
-class Compiler {
-  Compiler(this._path);
+class SnapshotCompiler {
+  SnapshotCompiler(this._path);
 
-  String _path;
+  final String _path;
 
-  Future<int> compile({
+  Future<int> createSnapshot({
     String mainPath,
     String snapshotPath,
     String depfilePath,
@@ -28,17 +28,15 @@ class Compiler {
       '--package-root=${ArtifactStore.packageRoot}',
       '--snapshot=$snapshotPath'
     ];
-    if (depfilePath != null) {
+    if (depfilePath != null)
       args.add('--depfile=$depfilePath');
-    }
-    if (buildOutputPath != null) {
+    if (buildOutputPath != null)
       args.add('--build-output=$buildOutputPath');
-    }
     return runCommandAndStreamOutput(args);
   }
 }
 
-Future<String> _getCompilerPath(BuildConfiguration config) async {
+String _getCompilerPath(BuildConfiguration config) {
   if (config.type != BuildType.prebuilt) {
     String compilerPath = path.join(config.buildDir, 'clang_x64', 'sky_snapshot');
     if (FileSystemEntity.isFileSync(compilerPath))
@@ -50,19 +48,19 @@ Future<String> _getCompilerPath(BuildConfiguration config) async {
   }
   Artifact artifact = ArtifactStore.getArtifact(
     type: ArtifactType.snapshot, hostPlatform: config.hostPlatform);
-  return await ArtifactStore.getPath(artifact);
+  return ArtifactStore.getPath(artifact);
 }
 
 class Toolchain {
   Toolchain({ this.compiler });
 
-  final Compiler compiler;
+  final SnapshotCompiler compiler;
 
   static Future<Toolchain> forConfigs(List<BuildConfiguration> configs) async {
     for (BuildConfiguration config in configs) {
-      String compilerPath = await _getCompilerPath(config);
+      String compilerPath = _getCompilerPath(config);
       if (compilerPath != null)
-        return new Toolchain(compiler: new Compiler(compilerPath));
+        return new Toolchain(compiler: new SnapshotCompiler(compilerPath));
     }
     return null;
   }

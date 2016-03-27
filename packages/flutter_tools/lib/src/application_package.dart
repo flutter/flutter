@@ -31,6 +31,7 @@ abstract class ApplicationPackage {
 
   String get displayName => name;
 
+  @override
   String toString() => displayName;
 }
 
@@ -95,6 +96,7 @@ class IOSApp extends ApplicationPackage {
     return new IOSApp(iosProjectDir: projectDir, iosProjectBundleId: value);
   }
 
+  @override
   String get displayName => id;
 }
 
@@ -108,8 +110,7 @@ class ApplicationPackageStore {
     switch (platform) {
       case TargetPlatform.android_arm:
         return android;
-      case TargetPlatform.ios_arm:
-      case TargetPlatform.ios_x64:
+      case TargetPlatform.ios:
         return iOS;
       case TargetPlatform.darwin_x64:
       case TargetPlatform.linux_x64:
@@ -124,12 +125,10 @@ class ApplicationPackageStore {
     for (BuildConfiguration config in configs) {
       switch (config.targetPlatform) {
         case TargetPlatform.android_arm:
-          assert(android == null);
-          android = new AndroidApk.fromBuildConfiguration(config);
+          android ??= new AndroidApk.fromBuildConfiguration(config);
           break;
 
-        case TargetPlatform.ios_arm:
-        case TargetPlatform.ios_x64:
+        case TargetPlatform.ios:
           iOS ??= new IOSApp.fromBuildConfiguration(config);
           break;
 

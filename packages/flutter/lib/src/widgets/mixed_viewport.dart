@@ -33,10 +33,12 @@ class MixedViewport extends RenderObjectWidget {
   final ViewportDimensionsChangeCallback onPaintOffsetUpdateNeeded;
   final InvalidatorAvailableCallback onInvalidatorAvailable; // call the callback this gives to invalidate sizes
 
+  @override
   _MixedViewportElement createElement() => new _MixedViewportElement(this);
 
   // we don't pass constructor arguments to the RenderBlockViewport() because until
   // we know our children, the constructor arguments we could give have no effect
+  @override
   RenderBlockViewport createRenderObject(BuildContext context) => new RenderBlockViewport();
 
   _ChangeDescription evaluateChangesFrom(MixedViewport oldWidget) {
@@ -55,8 +57,11 @@ class MixedViewport extends RenderObjectWidget {
 class _ChildKey {
   const _ChildKey(this.type, this.key);
   factory _ChildKey.fromWidget(Widget widget) => new _ChildKey(widget.runtimeType, widget.key);
+
   final Type type;
   final Key key;
+
+  @override
   bool operator ==(dynamic other) {
     if (other is! _ChildKey)
       return false;
@@ -64,7 +69,11 @@ class _ChildKey {
     return type == typedOther.type &&
            key == typedOther.key;
   }
+
+  @override
   int get hashCode => hashValues(type, key);
+
+  @override
   String toString() => "_ChildKey(type: $type, key: $key)";
 }
 
@@ -74,6 +83,7 @@ class _MixedViewportElement extends RenderObjectElement {
       widget.onInvalidatorAvailable(invalidate);
   }
 
+  @override
   MixedViewport get widget => super.widget;
 
   /// _childExtents contains the extents of each child from the top of the list
@@ -115,6 +125,7 @@ class _MixedViewportElement extends RenderObjectElement {
   double _overrideStartOffset;
   double get startOffset => _overrideStartOffset ?? widget.startOffset;
 
+  @override
   RenderBlockViewport get renderObject => super.renderObject;
 
   /// Notify the BlockViewport that the children at indices have, or might have,
@@ -136,11 +147,13 @@ class _MixedViewportElement extends RenderObjectElement {
     _invalidIndices.clear();
   }
 
+  @override
   void visitChildren(ElementVisitor visitor) {
     for (Element child in _childrenByKey.values)
       visitor(child);
   }
 
+  @override
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
     renderObject
@@ -152,6 +165,7 @@ class _MixedViewportElement extends RenderObjectElement {
       ..minCrossAxisExtentCallback = _noIntrinsicExtent;
   }
 
+  @override
   void unmount() {
     renderObject
       ..callback = null
@@ -178,6 +192,7 @@ class _MixedViewportElement extends RenderObjectElement {
 
   static final Object _omit = new Object(); // used as a slot when it's not yet time to attach the child
 
+  @override
   void update(MixedViewport newWidget) {
     _ChangeDescription changes = newWidget.evaluateChangesFrom(widget);
     super.update(newWidget);
@@ -205,6 +220,7 @@ class _MixedViewportElement extends RenderObjectElement {
     }
   }
 
+  @override
   void performRebuild() {
     // we just need to redraw our existing widgets as-is
     if (_childrenByKey.length > 0) {
@@ -614,11 +630,13 @@ class _MixedViewportElement extends RenderObjectElement {
     _firstVisibleChildIndex = startIndex;
   }
 
+  @override
   void updateSlotForChild(Element element, dynamic newSlot) {
     assert(newSlot == null || newSlot == _omit || newSlot is Element);
     super.updateSlotForChild(element, newSlot);
   }
 
+  @override
   void insertChildRenderObject(RenderObject child, dynamic slot) {
     if (slot == _omit)
       return;
@@ -626,6 +644,7 @@ class _MixedViewportElement extends RenderObjectElement {
     renderObject.insert(child, after: slot?.renderObject);
   }
 
+  @override
   void moveChildRenderObject(RenderObject child, dynamic slot) {
     if (slot == _omit)
       return;
@@ -638,6 +657,7 @@ class _MixedViewportElement extends RenderObjectElement {
       renderObject.insert(child, after: previousSibling);
   }
 
+  @override
   void removeChildRenderObject(RenderObject child) {
     if (child.parent != renderObject)
       return; // probably had slot == _omit when inserted

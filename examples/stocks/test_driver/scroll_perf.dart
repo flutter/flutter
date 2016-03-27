@@ -3,11 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter_driver/driver_extension.dart';
-import 'package:flutter_driver/src/error.dart';
 import 'package:stocks/main.dart' as app;
 
 void main() {
-  flutterDriverLog.listen(print);
   enableFlutterDriverExtension();
   app.main();
 }

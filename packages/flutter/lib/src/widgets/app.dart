@@ -9,9 +9,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'asset_vendor.dart';
+import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
-import 'checked_mode_banner.dart';
 import 'framework.dart';
 import 'locale_query.dart';
 import 'media_query.dart';
@@ -30,21 +30,28 @@ final AssetBundle _defaultBundle = _initDefaultBundle();
 
 typedef Future<LocaleQueryData> LocaleChangedCallback(Locale locale);
 
+/// A convenience class that wraps a number of widgets that are commonly
+/// required for an application.
+///
+/// See also: [CheckedModeBanner], [DefaultTextStyle], [MediaQuery],
+/// [LocaleQuery], [AssetVendor], [Title], [Navigator], [Overlay],
+/// [SemanticsDebugger] (the widgets wrapped by this one).
+///
+/// The [onGenerateRoute] argument is required, and corresponds to
+/// [Navigator.onGenerateRoute].
 class WidgetsApp extends StatefulWidget {
   WidgetsApp({
     Key key,
     this.title,
     this.textStyle,
     this.color,
-    this.routes: const <String, WidgetBuilder>{},
     this.onGenerateRoute,
     this.onLocaleChanged,
     this.showPerformanceOverlay: false,
     this.showSemanticsDebugger: false,
     this.debugShowCheckedModeBanner: true
   }) : super(key: key) {
-    assert(routes != null);
-    assert(routes.containsKey(Navigator.defaultRouteName) || onGenerateRoute != null);
+    assert(onGenerateRoute != null);
     assert(showPerformanceOverlay != null);
     assert(showSemanticsDebugger != null);
   }
@@ -62,14 +69,8 @@ class WidgetsApp extends StatefulWidget {
   /// application switcher.
   final Color color;
 
-  /// The default table of routes for the application. When the
-  /// [Navigator] is given a named route, the name will be looked up
-  /// in this table first. If the name is not available, then
-  /// [onGenerateRoute] will be called instead.
-  final Map<String, WidgetBuilder> routes;
-
   /// The route generator callback used when the app is navigated to a
-  /// named route but the name is not in the [routes] table.
+  /// named route.
   final RouteFactory onGenerateRoute;
 
   /// Callback that is invoked when the operating system changes the
@@ -99,11 +100,8 @@ class WidgetsApp extends StatefulWidget {
   /// representative of what will happen in release mode.
   final bool debugShowCheckedModeBanner;
 
+  @override
   WidgetsAppState<WidgetsApp> createState() => new WidgetsAppState<WidgetsApp>();
-}
-
-EdgeInsets _getPadding(ui.WindowPadding padding) {
-  return new EdgeInsets.TRBL(padding.top, padding.right, padding.bottom, padding.left);
 }
 
 class WidgetsAppState<T extends WidgetsApp> extends State<T> implements BindingObserver {
@@ -112,6 +110,7 @@ class WidgetsAppState<T extends WidgetsApp> extends State<T> implements BindingO
 
   LocaleQueryData _localeData;
 
+  @override
   void initState() {
     super.initState();
     _navigator = new GlobalObjectKey(this);
@@ -119,11 +118,13 @@ class WidgetsAppState<T extends WidgetsApp> extends State<T> implements BindingO
     WidgetFlutterBinding.instance.addObserver(this);
   }
 
+  @override
   void dispose() {
     WidgetFlutterBinding.instance.removeObserver(this);
     super.dispose();
   }
 
+  @override
   bool didPopRoute() {
     assert(mounted);
     NavigatorState navigator = _navigator.currentState;
@@ -135,6 +136,7 @@ class WidgetsAppState<T extends WidgetsApp> extends State<T> implements BindingO
     return result;
   }
 
+  @override
   void didChangeMetrics() {
     setState(() {
       // The properties of ui.window have changed. We use them in our build
@@ -142,6 +144,7 @@ class WidgetsAppState<T extends WidgetsApp> extends State<T> implements BindingO
     });
   }
 
+  @override
   void didChangeLocale(Locale locale) {
     if (config.onLocaleChanged != null) {
       config.onLocaleChanged(locale).then((LocaleQueryData data) {
@@ -151,10 +154,12 @@ class WidgetsAppState<T extends WidgetsApp> extends State<T> implements BindingO
     }
   }
 
+  @override
   void didChangeAppLifecycleState(AppLifecycleState state) { }
 
   NavigatorObserver get navigatorObserver => null;
 
+  @override
   Widget build(BuildContext context) {
     if (config.onLocaleChanged != null && _localeData == null) {
       // If the app expects a locale but we don't yet know the locale, then
@@ -164,37 +169,36 @@ class WidgetsAppState<T extends WidgetsApp> extends State<T> implements BindingO
     }
 
     Widget result = new MediaQuery(
-      data: new MediaQueryData(
-        size: ui.window.size,
-        devicePixelRatio: ui.window.devicePixelRatio,
-        padding: _getPadding(ui.window.padding)
-      ),
+      data: new MediaQueryData.fromWindow(ui.window),
       child: new LocaleQuery(
         data: _localeData,
-        child: new DefaultTextStyle(
-          style: config.textStyle,
-          child: new AssetVendor(
-            bundle: _defaultBundle,
-            devicePixelRatio: ui.window.devicePixelRatio,
-            child: new Title(
-              title: config.title,
-              color: config.color,
-              child: new Navigator(
-                key: _navigator,
-                initialRoute: ui.window.defaultRouteName,
-                onGenerateRoute: config.onGenerateRoute,
-                observer: navigatorObserver
-              )
+        child: new AssetVendor(
+          bundle: _defaultBundle,
+          devicePixelRatio: ui.window.devicePixelRatio,
+          child: new Title(
+            title: config.title,
+            color: config.color,
+            child: new Navigator(
+              key: _navigator,
+              initialRoute: ui.window.defaultRouteName,
+              onGenerateRoute: config.onGenerateRoute,
+              observer: navigatorObserver
             )
           )
         )
       )
     );
+    if (config.textStyle != null) {
+      new DefaultTextStyle(
+        style: config.textStyle,
+        child: result
+      );
+    }
     if (config.showPerformanceOverlay) {
       result = new Stack(
         children: <Widget>[
           result,
-          new Positioned(bottom: 0.0, left: 0.0, right: 0.0, child: new PerformanceOverlay.allEnabled()),
+          new Positioned(top: 0.0, left: 0.0, right: 0.0, child: new PerformanceOverlay.allEnabled()),
         ]
       );
     }

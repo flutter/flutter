@@ -7,6 +7,7 @@ import 'dart:ui' as ui show Image;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import 'debug.dart';
 import 'framework.dart';
 
 export 'package:flutter/animation.dart';
@@ -68,12 +69,15 @@ class Opacity extends SingleChildRenderObjectWidget {
   /// (i.e., invisible).
   final double opacity;
 
+  @override
   RenderOpacity createRenderObject(BuildContext context) => new RenderOpacity(opacity: opacity);
 
+  @override
   void updateRenderObject(BuildContext context, RenderOpacity renderObject) {
     renderObject.opacity = opacity;
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('opacity: $opacity');
@@ -94,6 +98,7 @@ class ShaderMask extends SingleChildRenderObjectWidget {
   final ShaderCallback shaderCallback;
   final TransferMode transferMode;
 
+  @override
   RenderShaderMask createRenderObject(BuildContext context) {
     return new RenderShaderMask(
       shaderCallback: shaderCallback,
@@ -101,6 +106,7 @@ class ShaderMask extends SingleChildRenderObjectWidget {
     );
   }
 
+  @override
   void updateRenderObject(BuildContext context, RenderShaderMask renderObject) {
     renderObject
       ..shaderCallback = shaderCallback
@@ -131,8 +137,10 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
   /// Where to paint the box decoration.
   final DecorationPosition position;
 
+  @override
   RenderDecoratedBox createRenderObject(BuildContext context) => new RenderDecoratedBox(decoration: decoration, position: position);
 
+  @override
   void updateRenderObject(BuildContext context, RenderDecoratedBox renderObject) {
     renderObject
       ..decoration = decoration
@@ -140,19 +148,25 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
   }
 }
 
-/// Delegates its painting.
+/// Provides a canvas on which to draw during the paint phase.
 ///
-/// When asked to paint, custom paint first asks painter to paint with the
-/// current canvas and then paints its children. After painting its children,
-/// custom paint asks foregroundPainter to paint. The coodinate system of the
-/// canvas matches the coordinate system of the custom paint object. The
-/// painters are expected to paint within a rectangle starting at the origin
-/// and encompassing a region of the given size. If the painters paints outside
-/// those bounds, there might be insufficient memory allocated to rasterize the
-/// painting commands and the resulting behavior is undefined.
+/// When asked to paint, [CustomPaint] objects first ask their [painter] to
+/// paint on the current canvas, then they paint their children, and then, after
+/// painting their children, ask their [foregroundPainter] to paint. The
+/// coodinate system of the canvas matches the coordinate system of the
+/// [CustomPaint] object. The painters are expected to paint within a rectangle
+/// starting at the origin and encompassing a region of the given size. (If the
+/// painters paints outside those bounds, there might be insufficient memory
+/// allocated to rasterize the painting commands and the resulting behavior is
+/// undefined.)
 ///
-/// Because custom paint calls its painters during paint, you cannot dirty
-/// layout or paint information during the callback.
+/// Painters are implemented by subclassing [CustomPainter].
+///
+/// Because custom paint calls its painters during paint, you cannot mark the
+/// tree as needing a new layout during the callback (the layout for this frame
+/// has already happened).
+///
+/// See: [CustomPainter], [Canvas].
 class CustomPaint extends SingleChildRenderObjectWidget {
   CustomPaint({ Key key, this.painter, this.foregroundPainter, Widget child })
     : super(key: key, child: child);
@@ -163,17 +177,20 @@ class CustomPaint extends SingleChildRenderObjectWidget {
   /// The painter that paints after the children.
   final CustomPainter foregroundPainter;
 
+  @override
   RenderCustomPaint createRenderObject(BuildContext context) => new RenderCustomPaint(
     painter: painter,
     foregroundPainter: foregroundPainter
   );
 
+  @override
   void updateRenderObject(BuildContext context, RenderCustomPaint renderObject) {
     renderObject
       ..painter = painter
       ..foregroundPainter = foregroundPainter;
   }
 
+  @override
   void didUnmountRenderObject(RenderCustomPaint renderObject) {
     renderObject
       ..painter = null
@@ -190,12 +207,15 @@ class ClipRect extends SingleChildRenderObjectWidget {
   /// If non-null, determines which clip to use.
   final CustomClipper<Rect> clipper;
 
+  @override
   RenderClipRect createRenderObject(BuildContext context) => new RenderClipRect(clipper: clipper);
 
+  @override
   void updateRenderObject(BuildContext context, RenderClipRect renderObject) {
     renderObject.clipper = clipper;
   }
 
+  @override
   void didUnmountRenderObject(RenderClipRect renderObject) {
     renderObject.clipper = null;
   }
@@ -222,8 +242,10 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   /// object.
   final double yRadius;
 
+  @override
   RenderClipRRect createRenderObject(BuildContext context) => new RenderClipRRect(xRadius: xRadius, yRadius: yRadius);
 
+  @override
   void updateRenderObject(BuildContext context, RenderClipRRect renderObject) {
     renderObject
       ..xRadius = xRadius
@@ -241,12 +263,15 @@ class ClipOval extends SingleChildRenderObjectWidget {
   /// If non-null, determines which clip to use.
   final CustomClipper<Rect> clipper;
 
+  @override
   RenderClipOval createRenderObject(BuildContext context) => new RenderClipOval(clipper: clipper);
 
+  @override
   void updateRenderObject(BuildContext context, RenderClipOval renderObject) {
     renderObject.clipper = clipper;
   }
 
+  @override
   void didUnmountRenderObject(RenderClipOval renderObject) {
     renderObject.clipper = null;
   }
@@ -275,12 +300,13 @@ class Transform extends SingleChildRenderObjectWidget {
   /// The alignment of the origin, relative to the size of the box.
   ///
   /// This is equivalent to setting an origin based on the size of the box.
-  /// If it is specificed at the same time as an offset, both are applied.
+  /// If it is specified at the same time as an offset, both are applied.
   final FractionalOffset alignment;
 
   /// Whether to apply the translation when performing hit tests.
   final bool transformHitTests;
 
+  @override
   RenderTransform createRenderObject(BuildContext context) => new RenderTransform(
     transform: transform,
     origin: origin,
@@ -288,6 +314,7 @@ class Transform extends SingleChildRenderObjectWidget {
     transformHitTests: transformHitTests
   );
 
+  @override
   void updateRenderObject(BuildContext context, RenderTransform renderObject) {
     renderObject
       ..transform = transform
@@ -311,8 +338,10 @@ class FractionalTranslation extends SingleChildRenderObjectWidget {
   /// Whether to apply the translation when performing hit tests.
   final bool transformHitTests;
 
+  @override
   RenderFractionalTranslation createRenderObject(BuildContext context) => new RenderFractionalTranslation(translation: translation, transformHitTests: transformHitTests);
 
+  @override
   void updateRenderObject(BuildContext context, RenderFractionalTranslation renderObject) {
     renderObject
       ..translation = translation
@@ -334,8 +363,10 @@ class RotatedBox extends SingleChildRenderObjectWidget {
   /// The number of clockwise quarter turns the child should be rotated.
   final int quarterTurns;
 
+  @override
   RenderRotatedBox createRenderObject(BuildContext context) => new RenderRotatedBox(quarterTurns: quarterTurns);
 
+  @override
   void updateRenderObject(BuildContext context, RenderRotatedBox renderObject) {
     renderObject.quarterTurns = quarterTurns;
   }
@@ -356,8 +387,10 @@ class Padding extends SingleChildRenderObjectWidget {
   /// The amount to pad the child in each dimension.
   final EdgeInsets padding;
 
+  @override
   RenderPadding createRenderObject(BuildContext context) => new RenderPadding(padding: padding);
 
+  @override
   void updateRenderObject(BuildContext context, RenderPadding renderObject) {
     renderObject.padding = padding;
   }
@@ -407,13 +440,25 @@ class Align extends SingleChildRenderObjectWidget {
   /// Can be both greater and less than 1.0 but must be positive.
   final double heightFactor;
 
+  @override
   RenderPositionedBox createRenderObject(BuildContext context) => new RenderPositionedBox(alignment: alignment, widthFactor: widthFactor, heightFactor: heightFactor);
 
+  @override
   void updateRenderObject(BuildContext context, RenderPositionedBox renderObject) {
     renderObject
       ..alignment = alignment
       ..widthFactor = widthFactor
       ..heightFactor = heightFactor;
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('alignment: $alignment');
+    if (widthFactor != null)
+      description.add('widthFactor: $widthFactor');
+    if (heightFactor != null)
+      description.add('heightFactor: $heightFactor');
   }
 }
 
@@ -440,8 +485,10 @@ class CustomSingleChildLayout extends SingleChildRenderObjectWidget {
 
   final SingleChildLayoutDelegate delegate;
 
+  @override
   RenderCustomSingleChildLayoutBox createRenderObject(BuildContext context) => new RenderCustomSingleChildLayoutBox(delegate: delegate);
 
+  @override
   void updateRenderObject(BuildContext context, RenderCustomSingleChildLayoutBox renderObject) {
     renderObject.delegate = delegate;
   }
@@ -461,6 +508,7 @@ class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
   /// An object representing the identity of this child.
   final Object id;
 
+  @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is MultiChildLayoutParentData);
     final MultiChildLayoutParentData parentData = renderObject.parentData;
@@ -472,6 +520,7 @@ class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
     }
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('id: $id');
@@ -498,10 +547,12 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
   /// The delegate that controls the layout of the children.
   final MultiChildLayoutDelegate delegate;
 
+  @override
   RenderCustomMultiChildLayoutBox createRenderObject(BuildContext context) {
     return new RenderCustomMultiChildLayoutBox(delegate: delegate);
   }
 
+  @override
   void updateRenderObject(BuildContext context, RenderCustomMultiChildLayoutBox renderObject) {
     renderObject.delegate = delegate;
   }
@@ -509,8 +560,13 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 
 /// A box with a specified size.
 ///
-/// Forces its child to have a specific width and/or height and sizes itself to
-/// match the size of its child.
+/// If given a child, this widget forces its child to have a specific width
+/// and/or height (assuming values are permitted by this widget's parent). If
+/// either the width or height is null, this widget will size itself to match
+/// the child's size in that dimension.
+///
+/// If not given a child, this widget will size itself to the given width and
+/// height, treating nulls as zero.
 class SizedBox extends SingleChildRenderObjectWidget {
   SizedBox({ Key key, this.width, this.height, Widget child })
     : super(key: key, child: child);
@@ -521,6 +577,7 @@ class SizedBox extends SingleChildRenderObjectWidget {
   /// If non-null, requires the child to have exactly this height.
   final double height;
 
+  @override
   RenderConstrainedBox createRenderObject(BuildContext context) => new RenderConstrainedBox(
     additionalConstraints: _additionalConstraints
   );
@@ -529,10 +586,12 @@ class SizedBox extends SingleChildRenderObjectWidget {
     return new BoxConstraints.tightFor(width: width, height: height);
   }
 
+  @override
   void updateRenderObject(BuildContext context, RenderConstrainedBox renderObject) {
     renderObject.additionalConstraints = _additionalConstraints;
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     if (width != null)
@@ -556,12 +615,15 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
   /// The additional constraints to impose on the child.
   final BoxConstraints constraints;
 
+  @override
   RenderConstrainedBox createRenderObject(BuildContext context) => new RenderConstrainedBox(additionalConstraints: constraints);
 
+  @override
   void updateRenderObject(BuildContext context, RenderConstrainedBox renderObject) {
     renderObject.additionalConstraints = constraints;
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('$constraints');
@@ -570,10 +632,17 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 
 /// Sizes itself to a fraction of the total available space.
 ///
-/// See [RenderFractionallySizedBox] for details.
+/// See [RenderFractionallySizedOverflowBox] for details.
 class FractionallySizedBox extends SingleChildRenderObjectWidget {
-  FractionallySizedBox({ Key key, this.width, this.height, Widget child })
-    : super(key: key, child: child);
+  FractionallySizedBox({
+    Key key,
+    this.alignment: const FractionalOffset(0.5, 0.5),
+    this.width,
+    this.height,
+    Widget child
+  }) : super(key: key, child: child) {
+    assert(alignment != null && alignment.dx != null && alignment.dy != null);
+  }
 
   /// If non-null, the factor of the incoming width to use.
   ///
@@ -587,19 +656,36 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   /// incoming height constraint multipled by this factor.
   final double height;
 
-  RenderFractionallySizedBox createRenderObject(BuildContext context) => new RenderFractionallySizedBox(
+  /// How to align the child.
+  ///
+  /// The x and y values of the alignment control the horizontal and vertical
+  /// alignment, respectively.  An x value of 0.0 means that the left edge of
+  /// the child is aligned with the left edge of the parent whereas an x value
+  /// of 1.0 means that the right edge of the child is aligned with the right
+  /// edge of the parent. Other values interpolate (and extrapolate) linearly.
+  /// For example, a value of 0.5 means that the center of the child is aligned
+  /// with the center of the parent.
+  final FractionalOffset alignment;
+
+  @override
+  RenderFractionallySizedOverflowBox createRenderObject(BuildContext context) => new RenderFractionallySizedOverflowBox(
+    alignment: alignment,
     widthFactor: width,
     heightFactor: height
   );
 
-  void updateRenderObject(BuildContext context, RenderFractionallySizedBox renderObject) {
+  @override
+  void updateRenderObject(BuildContext context, RenderFractionallySizedOverflowBox renderObject) {
     renderObject
+      ..alignment = alignment
       ..widthFactor = width
       ..heightFactor = height;
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
+    description.add('alignment: $alignment');
     if (width != null)
       description.add('width: $width');
     if (height != null)
@@ -614,13 +700,24 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
 class OverflowBox extends SingleChildRenderObjectWidget {
   OverflowBox({
     Key key,
+    this.alignment: const FractionalOffset(0.5, 0.5),
     this.minWidth,
     this.maxWidth,
     this.minHeight,
     this.maxHeight,
-    this.alignment: const FractionalOffset(0.5, 0.5),
     Widget child
   }) : super(key: key, child: child);
+
+  /// How to align the child.
+  ///
+  /// The x and y values of the alignment control the horizontal and vertical
+  /// alignment, respectively.  An x value of 0.0 means that the left edge of
+  /// the child is aligned with the left edge of the parent whereas an x value
+  /// of 1.0 means that the right edge of the child is aligned with the right
+  /// edge of the parent. Other values interpolate (and extrapolate) linearly.
+  /// For example, a value of 0.5 means that the center of the child is aligned
+  /// with the center of the parent.
+  final FractionalOffset alignment;
 
   /// The minimum width constraint to give the child. Set this to null (the
   /// default) to use the constraint from the parent instead.
@@ -638,36 +735,29 @@ class OverflowBox extends SingleChildRenderObjectWidget {
   /// default) to use the constraint from the parent instead.
   final double maxHeight;
 
-  /// How to align the child.
-  ///
-  /// The x and y values of the alignment control the horizontal and vertical
-  /// alignment, respectively.  An x value of 0.0 means that the left edge of
-  /// the child is aligned with the left edge of the parent whereas an x value
-  /// of 1.0 means that the right edge of the child is aligned with the right
-  /// edge of the parent. Other values interpolate (and extrapolate) linearly.
-  /// For example, a value of 0.5 means that the center of the child is aligned
-  /// with the center of the parent.
-  final FractionalOffset alignment;
-
-  RenderOverflowBox createRenderObject(BuildContext context) => new RenderOverflowBox(
+  @override
+  RenderConstrainedOverflowBox createRenderObject(BuildContext context) => new RenderConstrainedOverflowBox(
+    alignment: alignment,
     minWidth: minWidth,
     maxWidth: maxWidth,
     minHeight: minHeight,
-    maxHeight: maxHeight,
-    alignment: alignment
+    maxHeight: maxHeight
   );
 
-  void updateRenderObject(BuildContext context, RenderOverflowBox renderObject) {
+  @override
+  void updateRenderObject(BuildContext context, RenderConstrainedOverflowBox renderObject) {
     renderObject
+      ..alignment = alignment
       ..minWidth = minWidth
       ..maxWidth = maxWidth
       ..minHeight = minHeight
-      ..maxHeight = maxHeight
-      ..alignment = alignment;
+      ..maxHeight = maxHeight;
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
+    description.add('alignment: $alignment');
     if (minWidth != null)
       description.add('minWidth: $minWidth');
     if (maxWidth != null)
@@ -680,15 +770,49 @@ class OverflowBox extends SingleChildRenderObjectWidget {
 }
 
 class SizedOverflowBox extends SingleChildRenderObjectWidget {
-  SizedOverflowBox({ Key key, this.size, Widget child })
-    : super(key: key, child: child);
+  SizedOverflowBox({
+    Key key,
+    this.alignment: const FractionalOffset(0.5, 0.5),
+    this.size,
+    Widget child
+  }) : super(key: key, child: child) {
+    assert(alignment != null && alignment.dx != null && alignment.dy != null);
+  }
+
+  /// How to align the child.
+  ///
+  /// The x and y values of the alignment control the horizontal and vertical
+  /// alignment, respectively.  An x value of 0.0 means that the left edge of
+  /// the child is aligned with the left edge of the parent whereas an x value
+  /// of 1.0 means that the right edge of the child is aligned with the right
+  /// edge of the parent. Other values interpolate (and extrapolate) linearly.
+  /// For example, a value of 0.5 means that the center of the child is aligned
+  /// with the center of the parent.
+  final FractionalOffset alignment;
 
   final Size size;
 
-  RenderSizedOverflowBox createRenderObject(BuildContext context) => new RenderSizedOverflowBox(requestedSize: size);
+  @override
+  RenderSizedOverflowBox createRenderObject(BuildContext context) {
+    return new RenderSizedOverflowBox(
+      alignment: alignment,
+      requestedSize: size
+    );
+  }
 
+  @override
   void updateRenderObject(BuildContext context, RenderSizedOverflowBox renderObject) {
-    renderObject.requestedSize = size;
+    renderObject
+      ..alignment = alignment
+      ..requestedSize = size;
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('alignment: $alignment');
+    if (size != null)
+      description.add('size: $size');
   }
 }
 
@@ -699,6 +823,7 @@ class OffStage extends SingleChildRenderObjectWidget {
   OffStage({ Key key, Widget child })
     : super(key: key, child: child);
 
+  @override
   RenderOffStage createRenderObject(BuildContext context) => new RenderOffStage();
 }
 
@@ -740,12 +865,15 @@ class AspectRatio extends SingleChildRenderObjectWidget {
   /// a 16:9 width:height aspect ratio would have a value of 16.0/9.0.
   final double aspectRatio;
 
+  @override
   RenderAspectRatio createRenderObject(BuildContext context) => new RenderAspectRatio(aspectRatio: aspectRatio);
 
+  @override
   void updateRenderObject(BuildContext context, RenderAspectRatio renderObject) {
     renderObject.aspectRatio = aspectRatio;
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('aspectRatio: $aspectRatio');
@@ -774,8 +902,10 @@ class IntrinsicWidth extends SingleChildRenderObjectWidget {
   /// If non-null, force the child's height to be a multiple of this value.
   final double stepHeight;
 
+  @override
   RenderIntrinsicWidth createRenderObject(BuildContext context) => new RenderIntrinsicWidth(stepWidth: stepWidth, stepHeight: stepHeight);
 
+  @override
   void updateRenderObject(BuildContext context, RenderIntrinsicWidth renderObject) {
     renderObject
       ..stepWidth = stepWidth
@@ -792,6 +922,8 @@ class IntrinsicWidth extends SingleChildRenderObjectWidget {
 /// This class is relatively expensive. Avoid using it where possible.
 class IntrinsicHeight extends SingleChildRenderObjectWidget {
   IntrinsicHeight({ Key key, Widget child }) : super(key: key, child: child);
+
+  @override
   RenderIntrinsicHeight createRenderObject(BuildContext context) => new RenderIntrinsicHeight();
 }
 
@@ -810,8 +942,10 @@ class Baseline extends SingleChildRenderObjectWidget {
   /// The type of baseline to use for positioning the child.
   final TextBaseline baselineType;
 
+  @override
   RenderBaseline createRenderObject(BuildContext context) => new RenderBaseline(baseline: baseline, baselineType: baselineType);
 
+  @override
   void updateRenderObject(BuildContext context, RenderBaseline renderObject) {
     renderObject
       ..baseline = baseline
@@ -863,6 +997,7 @@ class Viewport extends SingleChildRenderObjectWidget {
 
   final ViewportDimensionsChangeCallback onPaintOffsetUpdateNeeded;
 
+  @override
   RenderViewport createRenderObject(BuildContext context) {
     return new RenderViewport(
       paintOffset: paintOffset,
@@ -873,6 +1008,7 @@ class Viewport extends SingleChildRenderObjectWidget {
     );
   }
 
+  @override
   void updateRenderObject(BuildContext context, RenderViewport renderObject) {
     // Order dependency: RenderViewport validates scrollOffset based on mainAxis.
     renderObject
@@ -911,7 +1047,7 @@ class Container extends StatelessWidget {
     assert(decoration == null || decoration.debugAssertValid());
   }
 
-  /// The child to contain in the container.
+  /// The child contained by the container.
   ///
   /// If null, the container will expand to fill all available space in its parent.
   final Widget child;
@@ -943,6 +1079,7 @@ class Container extends StatelessWidget {
     return padding + decorationPadding;
   }
 
+  @override
   Widget build(BuildContext context) {
     Widget current = child;
 
@@ -976,6 +1113,7 @@ class Container extends StatelessWidget {
     return current;
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     if (constraints != null)
@@ -1014,8 +1152,10 @@ class BlockBody extends MultiChildRenderObjectWidget {
   /// The direction to use as the main axis.
   final Axis mainAxis;
 
+  @override
   RenderBlock createRenderObject(BuildContext context) => new RenderBlock(mainAxis: mainAxis);
 
+  @override
   void updateRenderObject(BuildContext context, RenderBlock renderObject) {
     renderObject.mainAxis = mainAxis;
   }
@@ -1054,8 +1194,10 @@ class Stack extends StackRenderObjectWidgetBase {
   /// How to align the non-positioned children in the stack.
   final FractionalOffset alignment;
 
+  @override
   RenderStack createRenderObject(BuildContext context) => new RenderStack(alignment: alignment);
 
+  @override
   void updateRenderObject(BuildContext context, RenderStack renderObject) {
     renderObject.alignment = alignment;
   }
@@ -1078,8 +1220,10 @@ class IndexedStack extends StackRenderObjectWidgetBase {
   /// How to align the non-positioned children in the stack.
   final FractionalOffset alignment;
 
+  @override
   RenderIndexedStack createRenderObject(BuildContext context) => new RenderIndexedStack(index: index, alignment: alignment);
 
+  @override
   void updateRenderObject(BuildContext context, RenderIndexedStack renderObject) {
     renderObject
       ..index = index
@@ -1093,6 +1237,12 @@ class IndexedStack extends StackRenderObjectWidgetBase {
 /// to its enclosing [Stack] must contain only [StatelessWidget]s or
 /// [StatefulWidget]s (not other kinds of widgets, like [RenderObjectWidget]s).
 class Positioned extends ParentDataWidget<StackRenderObjectWidgetBase> {
+  /// Creates a Positioned object with the given values.
+  ///
+  /// Only two out of the three horizontal values ([left], [right],
+  /// [width]), and only two out of the three vertical values ([top],
+  /// [bottom], [height]), can be set. In each case, at least one of
+  /// the three must be null.
   Positioned({
     Key key,
     Widget child,
@@ -1107,6 +1257,11 @@ class Positioned extends ParentDataWidget<StackRenderObjectWidgetBase> {
     assert(top == null || bottom == null || height == null);
   }
 
+  /// Creates a Positioned object with the values from the given [Rect].
+  ///
+  /// This sets the [left], [top], [width], and [height] properties
+  /// from the given [Rect]. The [right] and [bottom] properties are
+  /// set to null.
   Positioned.fromRect({
     Key key,
     Widget child,
@@ -1119,30 +1274,43 @@ class Positioned extends ParentDataWidget<StackRenderObjectWidgetBase> {
        bottom = null,
        super(key: key, child: child);
 
-  /// The offset of the child's left edge from the left of the stack.
+  /// The distance that the child's left edge is inset from the left of the stack.
+  ///
+  /// Only two out of the three horizontal values ([left], [right], [width]) can be
+  /// set. The third must be null.
   final double left;
 
-  /// The offset of the child's top edge from the top of the stack.
+  /// The distance that the child's top edge is inset from the top of the stack.
+  ///
+  /// Only two out of the three vertical values ([top], [bottom], [height]) can be
+  /// set. The third must be null.
   final double top;
 
-  /// The offset of the child's right edge from the right of the stack.
+  /// The distance that the child's right edge is inset from the right of the stack.
+  ///
+  /// Only two out of the three horizontal values ([left], [right], [width]) can be
+  /// set. The third must be null.
   final double right;
 
-  /// The offset of the child's bottom edge from the bottom of the stack.
+  /// The distance that the child's bottom edge is inset from the bottom of the stack.
+  ///
+  /// Only two out of the three vertical values ([top], [bottom], [height]) can be
+  /// set. The third must be null.
   final double bottom;
 
   /// The child's width.
   ///
-  /// Only two out of the three horizontal values (left, right, width) can be
+  /// Only two out of the three horizontal values ([left], [right], [width]) can be
   /// set. The third must be null.
   final double width;
 
   /// The child's height.
   ///
-  /// Only two out of the three vertical values (top, bottom, height) can be
+  /// Only two out of the three vertical values ([top], [bottom], [height]) can be
   /// set. The third must be null.
   final double height;
 
+  @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is StackParentData);
     final StackParentData parentData = renderObject.parentData;
@@ -1185,6 +1353,7 @@ class Positioned extends ParentDataWidget<StackRenderObjectWidgetBase> {
     }
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     if (left != null)
@@ -1215,8 +1384,10 @@ abstract class GridRenderObjectWidgetBase extends MultiChildRenderObjectWidget {
   /// The delegate that controls the layout of the children.
   GridDelegate createDelegate();
 
+  @override
   RenderGrid createRenderObject(BuildContext context) => new RenderGrid(delegate: _delegate);
 
+  @override
   void updateRenderObject(BuildContext context, RenderGrid renderObject) {
     renderObject.delegate = _delegate;
   }
@@ -1234,6 +1405,7 @@ class CustomGrid extends GridRenderObjectWidgetBase {
   /// The delegate that controls the layout of the children.
   final GridDelegate delegate;
 
+  @override
   GridDelegate createDelegate() => delegate;
 }
 
@@ -1268,6 +1440,7 @@ class FixedColumnCountGrid extends GridRenderObjectWidgetBase {
   /// The amount of padding to apply to each child.
   final EdgeInsets padding;
 
+  @override
   FixedColumnCountGridDelegate createDelegate() {
     return new FixedColumnCountGridDelegate(
       columnCount: columnCount,
@@ -1310,6 +1483,7 @@ class MaxTileWidthGrid extends GridRenderObjectWidgetBase {
   /// The amount of padding to apply to each child.
   final EdgeInsets padding;
 
+  @override
   MaxTileWidthGridDelegate createDelegate() {
     return new MaxTileWidthGridDelegate(
       maxTileWidth: maxTileWidth,
@@ -1329,6 +1503,7 @@ class GridPlacementData<DataType, WidgetType extends RenderObjectWidget> extends
   /// Opaque data passed to the getChildPlacement method of the grid's [GridDelegate].
   final DataType placementData;
 
+  @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is GridParentData);
     final GridParentData parentData = renderObject.parentData;
@@ -1340,6 +1515,7 @@ class GridPlacementData<DataType, WidgetType extends RenderObjectWidget> extends
     }
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('placementData: $placementData');
@@ -1369,8 +1545,10 @@ class Flex extends MultiChildRenderObjectWidget {
   final CrossAxisAlignment crossAxisAlignment;
   final TextBaseline textBaseline;
 
+  @override
   RenderFlex createRenderObject(BuildContext context) => new RenderFlex(direction: direction, mainAxisAlignment: mainAxisAlignment, crossAxisAlignment: crossAxisAlignment, textBaseline: textBaseline);
 
+  @override
   void updateRenderObject(BuildContext context, RenderFlex renderObject) {
     renderObject
       ..direction = direction
@@ -1440,6 +1618,7 @@ class Flexible extends ParentDataWidget<Flex> {
   /// according to the flex factors of the flexible children.
   final int flex;
 
+  @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is FlexParentData);
     final FlexParentData parentData = renderObject.parentData;
@@ -1451,6 +1630,7 @@ class Flexible extends ParentDataWidget<Flex> {
     }
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('flex: $flex');
@@ -1459,8 +1639,8 @@ class Flexible extends ParentDataWidget<Flex> {
 
 /// A paragraph of rich text.
 ///
-/// This class is rarely used directly. Instead, consider using [Text], which
-/// integrates with [DefaultTextStyle].
+/// Consider using [Text], which integrates with [DefaultTextStyle], rather than
+/// this widget, which requires explicit styling.
 class RichText extends LeafRenderObjectWidget {
   RichText({ Key key, this.text }) : super(key: key) {
     assert(text != null);
@@ -1468,8 +1648,10 @@ class RichText extends LeafRenderObjectWidget {
 
   final TextSpan text;
 
+  @override
   RenderParagraph createRenderObject(BuildContext context) => new RenderParagraph(text);
 
+  @override
   void updateRenderObject(BuildContext context, RenderParagraph renderObject) {
     renderObject.text = text;
   }
@@ -1495,8 +1677,10 @@ class DefaultTextStyle extends InheritedWidget {
     return result?.style;
   }
 
+  @override
   bool updateShouldNotify(DefaultTextStyle old) => style != old.style;
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     '$style'.split('\n').forEach(description.add);
@@ -1529,6 +1713,7 @@ class Text extends StatelessWidget {
       return style;
   }
 
+  @override
   Widget build(BuildContext context) {
     return new RichText(
       text: new TextSpan(
@@ -1538,6 +1723,7 @@ class Text extends StatelessWidget {
     );
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('"$data"');
@@ -1610,6 +1796,7 @@ class RawImage extends LeafRenderObjectWidget {
   /// the center slice will be stretched only vertically.
   final Rect centerSlice;
 
+  @override
   RenderImage createRenderObject(BuildContext context) => new RenderImage(
     image: image,
     width: width,
@@ -1622,6 +1809,7 @@ class RawImage extends LeafRenderObjectWidget {
     centerSlice: centerSlice
   );
 
+  @override
   void updateRenderObject(BuildContext context, RenderImage renderObject) {
     renderObject
       ..image = image
@@ -1635,6 +1823,7 @@ class RawImage extends LeafRenderObjectWidget {
       ..centerSlice = centerSlice;
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('image: $image');
@@ -1721,8 +1910,10 @@ class RawImageResource extends StatefulWidget {
   /// the center slice will be stretched only vertically.
   final Rect centerSlice;
 
+  @override
   _RawImageResourceState createState() => new _RawImageResourceState();
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('image: $image');
@@ -1744,6 +1935,7 @@ class RawImageResource extends StatefulWidget {
 }
 
 class _RawImageResourceState extends State<RawImageResource> {
+  @override
   void initState() {
     super.initState();
     config.image.addListener(_handleImageChanged);
@@ -1757,11 +1949,13 @@ class _RawImageResourceState extends State<RawImageResource> {
     });
   }
 
+  @override
   void dispose() {
     config.image.removeListener(_handleImageChanged);
     super.dispose();
   }
 
+  @override
   void didUpdateConfig(RawImageResource oldConfig) {
     if (config.image != oldConfig.image) {
       oldConfig.image.removeListener(_handleImageChanged);
@@ -1769,6 +1963,7 @@ class _RawImageResourceState extends State<RawImageResource> {
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     return new RawImage(
       image: _resolvedImage?.image,
@@ -1844,6 +2039,7 @@ class NetworkImage extends StatelessWidget {
   /// the center slice will be stretched only vertically.
   final Rect centerSlice;
 
+  @override
   Widget build(BuildContext context) {
     return new RawImageResource(
       image: imageCache.load(src, scale: scale),
@@ -1857,6 +2053,7 @@ class NetworkImage extends StatelessWidget {
     );
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('src: $src');
@@ -1902,6 +2099,7 @@ class DefaultAssetBundle extends InheritedWidget {
     return result?.bundle;
   }
 
+  @override
   bool updateShouldNotify(DefaultAssetBundle old) => bundle != old.bundle;
 }
 
@@ -1963,6 +2161,7 @@ class AsyncImage extends StatelessWidget {
   /// the center slice will be stretched only vertically.
   final Rect centerSlice;
 
+  @override
   Widget build(BuildContext context) {
     return new RawImageResource(
       image: imageCache.loadProvider(provider),
@@ -1976,6 +2175,7 @@ class AsyncImage extends StatelessWidget {
     );
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('provider: $provider');
@@ -2062,6 +2262,7 @@ class AssetImage extends StatelessWidget {
   /// the center slice will be stretched only vertically.
   final Rect centerSlice;
 
+  @override
   Widget build(BuildContext context) {
     return new RawImageResource(
       image: (bundle ?? DefaultAssetBundle.of(context)).loadImage(name),
@@ -2075,6 +2276,7 @@ class AssetImage extends StatelessWidget {
     );
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('name: $name');
@@ -2122,8 +2324,10 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
   /// tree will be dirty.
   final VoidCallback onBuild;
 
+  @override
   RenderBox createRenderObject(BuildContext context) => renderBox;
 
+  @override
   void updateRenderObject(BuildContext context, RenderBox renderObject) {
     if (onBuild != null)
       onBuild();
@@ -2152,6 +2356,7 @@ class Listener extends SingleChildRenderObjectWidget {
   final PointerCancelEventListener onPointerCancel;
   final HitTestBehavior behavior;
 
+  @override
   RenderPointerListener createRenderObject(BuildContext context) => new RenderPointerListener(
     onPointerDown: onPointerDown,
     onPointerMove: onPointerMove,
@@ -2160,6 +2365,7 @@ class Listener extends SingleChildRenderObjectWidget {
     behavior: behavior
   );
 
+  @override
   void updateRenderObject(BuildContext context, RenderPointerListener renderObject) {
     renderObject
       ..onPointerDown = onPointerDown
@@ -2169,6 +2375,7 @@ class Listener extends SingleChildRenderObjectWidget {
       ..behavior = behavior;
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     List<String> listeners = <String>[];
@@ -2208,6 +2415,8 @@ class Listener extends SingleChildRenderObjectWidget {
 /// for the surround tree.
 class RepaintBoundary extends SingleChildRenderObjectWidget {
   RepaintBoundary({ Key key, Widget child }) : super(key: key, child: child);
+
+  @override
   RenderRepaintBoundary createRenderObject(BuildContext context) => new RenderRepaintBoundary();
 }
 
@@ -2218,11 +2427,13 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
   final bool ignoring;
   final bool ignoringSemantics; // if null, defaults to value of ignoring
 
+  @override
   RenderIgnorePointer createRenderObject(BuildContext context) => new RenderIgnorePointer(
     ignoring: ignoring,
     ignoringSemantics: ignoringSemantics
   );
 
+  @override
   void updateRenderObject(BuildContext context, RenderIgnorePointer renderObject) {
     renderObject
       ..ignoring = ignoring
@@ -2268,12 +2479,14 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// Provides a textual description of the widget.
   final String label;
 
+  @override
   RenderSemanticAnnotations createRenderObject(BuildContext context) => new RenderSemanticAnnotations(
     container: container,
     checked: checked,
     label: label
   );
 
+  @override
   void updateRenderObject(BuildContext context, RenderSemanticAnnotations renderObject) {
     renderObject
       ..container = container
@@ -2281,6 +2494,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..label = label;
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('container: $container');
@@ -2310,6 +2524,8 @@ class Semantics extends SingleChildRenderObjectWidget {
 /// callbacks.
 class MergeSemantics extends SingleChildRenderObjectWidget {
   MergeSemantics({ Key key, Widget child }) : super(key: key, child: child);
+
+  @override
   RenderMergeSemantics createRenderObject(BuildContext context) => new RenderMergeSemantics();
 }
 
@@ -2321,6 +2537,8 @@ class MergeSemantics extends SingleChildRenderObjectWidget {
 /// redundant with the chip label.
 class ExcludeSemantics extends SingleChildRenderObjectWidget {
   ExcludeSemantics({ Key key, Widget child }) : super(key: key, child: child);
+
+  @override
   RenderExcludeSemantics createRenderObject(BuildContext context) => new RenderExcludeSemantics();
 }
 
@@ -2335,17 +2553,20 @@ class MetaData extends SingleChildRenderObjectWidget {
   final dynamic metaData;
   final HitTestBehavior behavior;
 
+  @override
   RenderMetaData createRenderObject(BuildContext context) => new RenderMetaData(
     metaData: metaData,
     behavior: behavior
   );
 
+  @override
   void updateRenderObject(BuildContext context, RenderMetaData renderObject) {
     renderObject
       ..metaData = metaData
       ..behavior = behavior;
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('behavior: $behavior');
@@ -2357,8 +2578,31 @@ class KeyedSubtree extends StatelessWidget {
   KeyedSubtree({ Key key, this.child })
     : super(key: key);
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
+  /// Wrap each item in a KeyedSubtree whose key is based on the item's existing key or
+  /// its list index + baseIndex.
+  static List<Widget> ensureUniqueKeysForList(Iterable<Widget> items, { int baseIndex: 0 }) {
+    if (items == null || items.isEmpty)
+      return items;
+
+    List<Widget> itemsWithUniqueKeys = <Widget>[];
+    int itemIndex = baseIndex;
+    for(Widget item in items) {
+      itemsWithUniqueKeys.add(new KeyedSubtree(
+        key: item.key != null ? new ValueKey<Key>(item.key) : new ValueKey<int>(itemIndex),
+        child: item
+      ));
+      itemIndex += 1;
+    }
+
+    assert(!debugItemsHaveDuplicateKeys(itemsWithUniqueKeys));
+    return itemsWithUniqueKeys;
+  }
+
+
+  @override
   Widget build(BuildContext context) => child;
 }
 
@@ -2373,15 +2617,20 @@ class Builder extends StatelessWidget {
   /// object identity.
   final WidgetBuilder builder;
 
+  @override
   Widget build(BuildContext context) => builder(context);
 }
 
 typedef Widget StatefulWidgetBuilder(BuildContext context, StateSetter setState);
 class StatefulBuilder extends StatefulWidget {
   StatefulBuilder({ Key key, this.builder }) : super(key: key);
+
   final StatefulWidgetBuilder builder;
+
+  @override
   _StatefulBuilderState createState() => new _StatefulBuilderState();
 }
 class _StatefulBuilderState extends State<StatefulBuilder> {
+  @override
   Widget build(BuildContext context) => config.builder(context, setState);
 }

@@ -11,10 +11,16 @@ class GridTile extends StatelessWidget {
     assert(child != null);
   }
 
+  /// The widget to show over the top of this grid tile.
   final Widget header;
+
+  /// The widget to show over the bottom of this grid tile.
   final Widget footer;
+
+  /// The widget that fills the tile.
   final Widget child;
 
+  @override
   Widget build(BuildContext context) {
     if (header == null && footer == null)
       return child;

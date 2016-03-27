@@ -61,6 +61,7 @@ if [ ! -f "$ENGINE_STAMP_PATH" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP_P
     Darwin)
       download_artifacts darwin-x64
       chmod a+x "$ENGINE_ARTIFACT_PATH/darwin-x64/sky_snapshot"
+      download_artifacts ios
       ;;
     Linux)
       download_artifacts linux-x64

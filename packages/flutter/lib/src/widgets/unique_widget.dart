@@ -10,6 +10,7 @@ abstract class UniqueWidget<T extends State> extends StatefulWidget {
     assert(key != null);
   }
 
+  @override
   T createState();
 
   /// The state for the unique inflated instance of this widget.

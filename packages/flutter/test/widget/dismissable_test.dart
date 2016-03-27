@@ -107,7 +107,10 @@ void dismissItem(WidgetTester tester, int item, { DismissDirection gestureDirect
 
 class Test1215DismissableWidget extends StatelessWidget {
   Test1215DismissableWidget(this.text);
+
   final String text;
+
+  @override
   Widget build(BuildContext context) {
     return new Dismissable(
       key: new ObjectKey(text),

@@ -35,8 +35,7 @@ const Curve _snackBarFadeCurve = const Interval(0.72, 1.0, curve: Curves.fastOut
 /// Snack bar actions are always enabled. If you want to disable a snack bar
 /// action, simply don't include it in the snack bar.
 ///
-/// See also:
-///  * https://www.google.com/design/spec/components/snackbars-toasts.html
+/// See also: <https://www.google.com/design/spec/components/snackbars-toasts.html>
 class SnackBarAction extends StatelessWidget {
   SnackBarAction({Key key, this.label, this.onPressed }) : super(key: key) {
     assert(label != null);
@@ -49,6 +48,7 @@ class SnackBarAction extends StatelessWidget {
   /// The callback to be invoked when the button is pressed. Must be non-null.
   final VoidCallback onPressed;
 
+  @override
   Widget build(BuildContext context) {
     return new Container(
       margin: const EdgeInsets.only(left: _kSideMargins),
@@ -67,9 +67,10 @@ class SnackBarAction extends StatelessWidget {
 /// Displayed with the Scaffold.of().showSnackBar() API.
 ///
 /// See also:
+///
 ///  * [Scaffold.of] and [ScaffoldState.showSnackBar]
 ///  * [SnackBarAction]
-///  * https://www.google.com/design/spec/components/snackbars-toasts.html
+///  * <https://www.google.com/design/spec/components/snackbars-toasts.html>
 class SnackBar extends StatelessWidget {
   SnackBar({
     Key key,
@@ -86,6 +87,7 @@ class SnackBar extends StatelessWidget {
   final Duration duration;
   final Animation<double> animation;
 
+  @override
   Widget build(BuildContext context) {
     assert(animation != null);
     List<Widget> children = <Widget>[

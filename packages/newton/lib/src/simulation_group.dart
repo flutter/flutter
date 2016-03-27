@@ -25,11 +25,13 @@ abstract class SimulationGroup extends Simulation {
   /// The result is whether the simulation was switched in this step.
   bool step(double time);
 
+  @override
   double x(double time) {
     _stepIfNecessary(time);
     return currentSimulation.x(time - currentIntervalOffset);
   }
 
+  @override
   double dx(double time) {
     _stepIfNecessary(time);
     return currentSimulation.dx(time - currentIntervalOffset);

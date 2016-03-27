@@ -12,15 +12,20 @@ import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 class RefreshCommand extends FlutterCommand {
+  @override
   final String name = 'refresh';
+
+  @override
   final String description = 'Build and deploy the Dart code in a Flutter app (Android only).';
 
   RefreshCommand() {
-    addTargetOption();
+    usesTargetOption();
   }
 
+  @override
   bool get androidOnly => true;
 
+  @override
   bool get requiresDevice => true;
 
   @override
@@ -36,7 +41,7 @@ class RefreshCommand extends FlutterCommand {
     try {
       String snapshotPath = path.join(tempDir.path, 'snapshot_blob.bin');
 
-      int result = await toolchain.compiler.compile(
+      int result = await toolchain.compiler.createSnapshot(
           mainPath: argResults['target'], snapshotPath: snapshotPath
       );
       if (result != 0) {

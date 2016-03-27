@@ -18,11 +18,7 @@ import 'run.dart';
 const String _kDefaultBundlePath = 'build/app.flx';
 
 class RunMojoCommand extends FlutterCommand {
-  final String name = 'run_mojo';
-  final String description = 'Run a Flutter app in mojo (from github.com/domokit/mojo).';
-  final bool _hideCommand;
-
-  RunMojoCommand({ bool hideCommand: false }) : _hideCommand = hideCommand {
+  RunMojoCommand({ this.hidden: false }) {
     argParser.addFlag('android', negatable: false, help: 'Run on an Android device');
     argParser.addFlag('checked', negatable: false, help: 'Run Flutter in checked mode');
     argParser.addFlag('mojo-debug', negatable: false, help: 'Use Debug build of mojo');
@@ -37,8 +33,17 @@ class RunMojoCommand extends FlutterCommand {
     argParser.addOption('devtools-path', help: 'Path to mojo devtools\' mojo_run command.');
   }
 
+  @override
+  final String name = 'run_mojo';
+
+  @override
+  final String description = 'Run a Flutter app in mojo (from github.com/domokit/mojo).';
+
+  @override
+  final bool hidden;
+
+  @override
   bool get requiresProjectRoot => false;
-  bool get hidden => _hideCommand;
 
   // TODO(abarth): Why not use path.absolute?
   String _makePathAbsolute(String relativePath) {
@@ -81,7 +86,7 @@ class RunMojoCommand extends FlutterCommand {
     return result;
   }
 
-  Future<List<String>> _getShellConfig(String bundlePath) async {
+  Future<List<String>> _getShellConfig(String targetApp) async {
     List<String> args = <String>[];
 
     final bool useDevtools = _useDevtools();
@@ -89,13 +94,12 @@ class RunMojoCommand extends FlutterCommand {
     args.add(command);
 
     BuildConfiguration config = _getCurrentHostConfig();
-    final String appPath = _makePathAbsolute(bundlePath);
 
     String flutterPath;
     if (config == null || config.type == BuildType.prebuilt) {
       TargetPlatform targetPlatform = argResults['android'] ? TargetPlatform.android_arm : TargetPlatform.linux_x64;
       Artifact artifact = ArtifactStore.getArtifact(type: ArtifactType.mojo, targetPlatform: targetPlatform);
-      flutterPath = _makePathAbsolute(await ArtifactStore.getPath(artifact));
+      flutterPath = _makePathAbsolute(ArtifactStore.getPath(artifact));
     } else {
       String localPath = path.join(config.buildDir, 'flutter.mojo');
       flutterPath = _makePathAbsolute(localPath);
@@ -103,17 +107,30 @@ class RunMojoCommand extends FlutterCommand {
 
     if (argResults['android']) {
       args.add('--android');
-      final String appName = path.basename(appPath);
-      final String appDir = path.dirname(appPath);
-      args.add('mojo:launcher http://app/$appName');
-      args.add('--map-origin=http://app/=$appDir');
+    }
 
+    final Uri appUri = Uri.parse(targetApp);
+    if (appUri.scheme.isEmpty || appUri.scheme == 'file') {
+      final String appPath = _makePathAbsolute(targetApp);
+      if (argResults['android']) {
+        final String appName = path.basename(appPath);
+        final String appDir = path.dirname(appPath);
+        args.add('mojo:launcher http://app/$appName');
+        args.add('--map-origin=http://app/=$appDir');
+      } else {
+        args.add('mojo:launcher file://$appPath');
+      }
+    } else {
+      args.add('mojo:launcher $targetApp');
+    }
+
+    // Add url-mapping for mojo:flutter.
+    if (argResults['android']) {
       final String flutterName = path.basename(flutterPath);
       final String flutterDir = path.dirname(flutterPath);
       args.add('--map-origin=http://flutter/=$flutterDir');
       args.add('--url-mappings=mojo:flutter=http://flutter/$flutterName');
     } else {
-      args.add('mojo:launcher file://$appPath');
       args.add('--url-mappings=mojo:flutter=file://$flutterPath');
     }
 
@@ -147,21 +164,21 @@ class RunMojoCommand extends FlutterCommand {
 
     await downloadToolchain();
 
-    String bundlePath = argResults['app'];
-    if (bundlePath == null) {
-      bundlePath = _kDefaultBundlePath;
+    String targetApp = argResults['app'];
+    if (targetApp == null) {
+      targetApp = _kDefaultBundlePath;
 
       String mainPath = findMainDartFile(argResults['target']);
 
       int result = await flx.build(
         toolchain,
         mainPath: mainPath,
-        outputPath: bundlePath
+        outputPath: targetApp
       );
       if (result != 0)
         return result;
     }
 
-    return await runCommandAndStreamOutput(await _getShellConfig(bundlePath));
+    return await runCommandAndStreamOutput(await _getShellConfig(targetApp));
   }
 }

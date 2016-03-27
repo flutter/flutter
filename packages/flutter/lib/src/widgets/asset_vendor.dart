@@ -33,6 +33,7 @@ class _ResolvingAssetBundle extends CachingAssetBundle {
 
   final Map<String, String> keyCache = <String, String>{};
 
+  @override
   Future<core.MojoDataPipeConsumer> load(String key) async {
     if (!keyCache.containsKey(key))
       keyCache[key] = await resolver.resolve(key);
@@ -57,10 +58,12 @@ class _ResolutionAwareAssetBundle extends _ResolvingAssetBundle {
     resolver: resolver
   );
 
+  @override
   _ResolutionAwareAssetResolver get resolver => super.resolver;
 
   final ImageDecoder _imageDecoder;
 
+  @override
   Future<ImageInfo> fetchImage(String key) async {
     core.MojoDataPipeConsumer pipe = await load(key);
     // At this point the key should be in our key cache, and the image
@@ -93,6 +96,7 @@ abstract class _VariantAssetResolver extends _AssetResolver {
     _assetManifest = JSON.decode(json);
   }
 
+  @override
   Future<String> resolve(String name) async {
     _initializer ??= _loadManifest();
     await _initializer;
@@ -146,6 +150,7 @@ class _ResolutionAwareAssetResolver extends _VariantAssetResolver {
       return candidates[lower];
   }
 
+  @override
   String chooseVariant(String main, List<String> candidates) {
     SplayTreeMap<double, String> mapping = new SplayTreeMap<double, String>();
     for (String candidate in candidates)
@@ -201,12 +206,18 @@ class AssetVendor extends StatefulWidget {
   }) : super(key: key);
 
   final AssetBundle bundle;
+
   final double devicePixelRatio;
+
+  /// The widget below this widget in the tree.
   final Widget child;
+
   final ImageDecoder imageDecoder;
 
+  @override
   _AssetVendorState createState() => new _AssetVendorState();
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('bundle: $bundle');
@@ -230,11 +241,13 @@ class _AssetVendorState extends State<AssetVendor> {
     );
   }
 
+  @override
   void initState() {
     super.initState();
     _initBundle();
   }
 
+  @override
   void didUpdateConfig(AssetVendor oldConfig) {
     if (config.bundle != oldConfig.bundle ||
         config.devicePixelRatio != oldConfig.devicePixelRatio) {
@@ -242,10 +255,12 @@ class _AssetVendorState extends State<AssetVendor> {
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     return new DefaultAssetBundle(bundle: _bundle, child: config.child);
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('bundle: $_bundle');

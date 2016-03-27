@@ -2,16 +2,16 @@ part of flutter_sprites;
 
 /// Options for setting up a [SpriteBox].
 ///
-///  * [nativePoints], use the same points as the parent [Widget].
-///  * [letterbox], use the size of the root node for the coordinate system, constrain the aspect ratio and trim off
-///  areas that end up outside the screen.
-///  * [stretch], use the size of the root node for the coordinate system, scale it to fit the size of the box.
-///  * [scaleToFit], similar to the letterbox option, but instead of trimming areas the sprite system will be scaled
-///  down to fit the box.
-///  * [fixedWidth], uses the width of the root node to set the size of the coordinate system, this option will change
-///  the height of the root node to fit the box.
-///  * [fixedHeight], uses the height of the root node to set the size of the coordinate system, this option will change
-///  the width of the root node to fit the box.
+///  * [nativePoints]: use the same points as the parent [Widget].
+///  * [letterbox]: use the size of the root node for the coordinate system, and constrain the aspect ratio and trim off
+///    areas that end up outside the screen.
+///  * [stretch]: use the size of the root node for the coordinate system, and scale it to fit the size of the box.
+///  * [scaleToFit]: similar to the letterbox option, but instead of trimming areas the sprite system will be scaled
+///    down to fit the box.
+///  * [fixedWidth]: use the width of the root node to set the size of the coordinate system, and change
+///    the height of the root node to fit the box.
+///  * [fixedHeight]: use the height of the root node to set the size of the coordinate system, and change
+///    the width of the root node to fit the box.
 enum SpriteBoxTransformMode {
   nativePoints,
   letterbox,
@@ -57,8 +57,9 @@ class SpriteBox extends RenderBox {
     }
   }
 
-  void attach() {
-    super.attach();
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
     _scheduleTick();
   }
 
@@ -138,6 +139,7 @@ class SpriteBox extends RenderBox {
   ///     var rootNode = mySpriteBox.rootNode;
   NodeWithSize get rootNode => _rootNode;
 
+  @override
   void performLayout() {
     size = constraints.biggest;
     _invalidateTransformMatrix();
@@ -189,6 +191,7 @@ class SpriteBox extends RenderBox {
     }
   }
 
+  @override
   void handleEvent(PointerEvent event, _SpriteBoxHitTestEntry entry) {
     if (!attached)
       return;
@@ -238,6 +241,7 @@ class SpriteBox extends RenderBox {
     }
   }
 
+  @override
   bool hitTest(HitTestResult result, { Point position }) {
     result.add(new _SpriteBoxHitTestEntry(this, position));
     return true;
@@ -333,6 +337,7 @@ class SpriteBox extends RenderBox {
     _rootNode._invalidateToBoxTransformMatrix();
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
     canvas.save();

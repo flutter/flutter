@@ -39,12 +39,14 @@ abstract class RenderBlockBase extends RenderBox
     addAll(children);
   }
 
+  @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! BlockParentData)
       child.parentData = new BlockParentData();
   }
 
   /// The direction to use as the main axis.
+  @override
   Axis get mainAxis => _mainAxis;
   Axis _mainAxis;
   void set mainAxis (Axis value) {
@@ -95,6 +97,7 @@ abstract class RenderBlockBase extends RenderBox
         math.max(minExtent, parentData.offset.dx + child.size.width);
   }
 
+  @override
   void performLayout() {
     BoxConstraints innerConstraints = _getInnerConstraints(constraints);
     double position = 0.0;
@@ -113,6 +116,7 @@ abstract class RenderBlockBase extends RenderBox
     assert(!size.isInfinite);
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('mainAxis: $mainAxis');
@@ -156,6 +160,7 @@ class RenderBlock extends RenderBlockBase {
     return constrainer(math.max(extent, minExtent));
   }
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (isVertical) {
@@ -168,6 +173,7 @@ class RenderBlock extends RenderBlockBase {
     return _getIntrinsicMainAxis(constraints, constraints.constrainWidth);
   }
 
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (isVertical) {
@@ -180,6 +186,7 @@ class RenderBlock extends RenderBlockBase {
     return _getIntrinsicMainAxis(constraints, constraints.constrainWidth);
   }
 
+  @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (isVertical)
@@ -191,6 +198,7 @@ class RenderBlock extends RenderBlockBase {
     );
   }
 
+  @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (isVertical)
@@ -202,10 +210,12 @@ class RenderBlock extends RenderBlockBase {
     );
   }
 
+  @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     return defaultComputeDistanceToFirstActualBaseline(baseline);
   }
 
+  @override
   void performLayout() {
     assert((isVertical ? constraints.maxHeight >= double.INFINITY : constraints.maxWidth >= double.INFINITY) &&
            'RenderBlock does not clip or resize its children, so it must be placed in a parent that does not constrain '
@@ -213,10 +223,12 @@ class RenderBlock extends RenderBlockBase {
     super.performLayout();
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     defaultPaint(context, offset);
   }
 
+  @override
   bool hitTestChildren(HitTestResult result, { Point position }) {
     return defaultHitTestChildren(result, position: position);
   }
@@ -254,6 +266,8 @@ class RenderBlockViewport extends RenderBlockBase {
        super(children: children, mainAxis: mainAxis, itemExtent: itemExtent, minExtent: minExtent);
 
   bool _inCallback = false;
+
+  @override
   bool get isRepaintBoundary => true;
 
   /// Called during [layout] to determine the block's children.
@@ -322,11 +336,13 @@ class RenderBlockViewport extends RenderBlockBase {
     markNeedsPaint();
   }
 
-  void attach() {
-    super.attach();
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
     _overlayPainter?.attach(this);
   }
 
+  @override
   void detach() {
     super.detach();
     _overlayPainter?.detach();
@@ -366,6 +382,7 @@ class RenderBlockViewport extends RenderBlockBase {
     return result;
   }
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (isVertical)
@@ -373,6 +390,7 @@ class RenderBlockViewport extends RenderBlockBase {
     return constraints.constrainWidth(minExtent);
   }
 
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (isVertical)
@@ -380,6 +398,7 @@ class RenderBlockViewport extends RenderBlockBase {
     return _getIntrinsicDimension(constraints, totalExtentCallback, new BoxConstraints(minWidth: minExtent).enforce(constraints).constrainWidth);
   }
 
+  @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (!isVertical)
@@ -387,6 +406,7 @@ class RenderBlockViewport extends RenderBlockBase {
     return constraints.constrainHeight(0.0);
   }
 
+  @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (!isVertical)
@@ -399,6 +419,7 @@ class RenderBlockViewport extends RenderBlockBase {
   // scroll the RenderBlockViewport, it would shift in its parent if
   // the parent was baseline-aligned, which makes no sense.
 
+  @override
   void performLayout() {
     if (_callback != null) {
       try {
@@ -422,10 +443,12 @@ class RenderBlockViewport extends RenderBlockBase {
     overlayPainter?.paint(context, offset);
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     context.pushClipRect(needsCompositing, offset, Point.origin & size, _paintContents);
   }
 
+  @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     if (isVertical)
       transform.translate(0.0, startOffset);
@@ -434,8 +457,10 @@ class RenderBlockViewport extends RenderBlockBase {
     super.applyPaintTransform(child, transform);
   }
 
+  @override
   Rect describeApproximatePaintClip(RenderObject child) => Point.origin & size;
 
+  @override
   bool hitTestChildren(HitTestResult result, { Point position }) {
     if (isVertical)
       return defaultHitTestChildren(result, position: position + new Offset(0.0, -startOffset));
@@ -443,6 +468,7 @@ class RenderBlockViewport extends RenderBlockBase {
       return defaultHitTestChildren(result, position: position + new Offset(-startOffset, 0.0));
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('startOffset: $startOffset');

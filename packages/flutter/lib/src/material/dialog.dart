@@ -54,6 +54,7 @@ class Dialog extends StatelessWidget {
     }
   }
 
+  @override
   Widget build(BuildContext context) {
 
     List<Widget> dialogBody = new List<Widget>();
@@ -61,7 +62,7 @@ class Dialog extends StatelessWidget {
     if (title != null) {
       EdgeInsets padding = titlePadding;
       if (padding == null)
-        padding = new EdgeInsets.TRBL(24.0, 24.0, content == null ? 20.0 : 0.0, 24.0);
+        padding = new EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0);
       dialogBody.add(new Padding(
         padding: padding,
         child: new DefaultTextStyle(
@@ -74,7 +75,7 @@ class Dialog extends StatelessWidget {
     if (content != null) {
       EdgeInsets padding = contentPadding;
       if (padding == null)
-        padding = const EdgeInsets.TRBL(20.0, 24.0, 24.0, 24.0);
+        padding = const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0);
       dialogBody.add(new Padding(
         padding: padding,
         child: new DefaultTextStyle(
@@ -123,14 +124,21 @@ class _DialogRoute<T> extends PopupRoute<T> {
 
   final Widget child;
 
+  @override
   Duration get transitionDuration => const Duration(milliseconds: 150);
+
+  @override
   bool get barrierDismissable => true;
+
+  @override
   Color get barrierColor => Colors.black54;
 
+  @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
     return child;
   }
 
+  @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation, Widget child) {
     return new FadeTransition(
       opacity: new CurvedAnimation(

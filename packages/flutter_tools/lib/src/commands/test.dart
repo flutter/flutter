@@ -23,8 +23,13 @@ class TestCommand extends FlutterCommand {
     );
   }
 
+  @override
   String get name => 'test';
+
+  @override
   String get description => 'Run Flutter unit tests for the current project (Linux only).';
+
+  @override
   bool get requiresProjectRoot => false;
 
   @override
@@ -44,7 +49,7 @@ class TestCommand extends FlutterCommand {
     if (config.type == BuildType.prebuilt) {
       Artifact artifact = ArtifactStore.getArtifact(
         type: ArtifactType.shell, targetPlatform: config.targetPlatform);
-      return await ArtifactStore.getPath(artifact);
+      return ArtifactStore.getPath(artifact);
     } else {
       switch (config.targetPlatform) {
         case TargetPlatform.linux_x64:

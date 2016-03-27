@@ -16,6 +16,8 @@ const double _kCubicErrorBound = 0.001;
 ///
 /// See [Curves] for a collection of common animation curves.
 abstract class Curve {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const Curve();
 
   /// Returns the value of the curve at point [t].
@@ -26,21 +28,36 @@ abstract class Curve {
   /// Returns a new curve that is the reversed inversion of this one.
   /// This is often useful as the reverseCurve of an [Animation].
   Curve get flipped => new FlippedCurve(this);
+
+  @override
+  String toString() {
+    return '$runtimeType';
+  }
 }
 
 /// The identity map over the unit interval.
 class Linear extends Curve {
   const Linear();
+
+  @override
   double transform(double t) => t;
 }
 
 /// A sawtooth curve that repeats a given number of times over the unit interval.
 class SawTooth extends Curve {
   const SawTooth(this.count);
+
   final int count;
+
+  @override
   double transform(double t) {
     t *= count;
     return t - t.truncateToDouble();
+  }
+
+  @override
+  String toString() {
+    return '$runtimeType($count)';
   }
 }
 
@@ -57,6 +74,7 @@ class Interval extends Curve {
   /// The curve to apply between [start] and [end].
   final Curve curve;
 
+  @override
   double transform(double t) {
     assert(start >= 0.0);
     assert(start <= 1.0);
@@ -67,6 +85,13 @@ class Interval extends Curve {
     if (t == 0.0 || t == 1.0)
       return t;
     return curve.transform(t);
+  }
+
+  @override
+  String toString() {
+    if (curve is! Linear)
+      return '$runtimeType($start\u22EF$end)\u27A9$curve';
+    return '$runtimeType($start\u22EF$end)';
   }
 }
 
@@ -79,6 +104,7 @@ class Cubic extends Curve {
   final double c;
   final double d;
 
+  @override
   double transform(double t) {
     double start = 0.0;
     double end = 1.0;
@@ -92,6 +118,11 @@ class Cubic extends Curve {
       else
         end = midpoint;
     }
+  }
+
+  @override
+  String toString() {
+    return '$runtimeType(${a.toStringAsFixed(2)}, ${b.toStringAsFixed(2)}, ${c.toStringAsFixed(2)}, ${d.toStringAsFixed(2)})';
   }
 }
 
@@ -112,13 +143,23 @@ double _bounce(double t) {
 /// A curve that is the reversed inversion of its given curve.
 class FlippedCurve extends Curve {
   FlippedCurve(this.curve);
+
   final Curve curve;
+
+  @override
   double transform(double t) => 1.0 - curve.transform(1.0 - t);
+
+  @override
+  String toString() {
+    return '$runtimeType($curve)';
+  }
 }
 
 /// An oscillating curve that grows in magnitude.
 class BounceInCurve extends Curve {
   const BounceInCurve();
+
+  @override
   double transform(double t) {
     return 1.0 - _bounce(1.0 - t);
   }
@@ -127,6 +168,8 @@ class BounceInCurve extends Curve {
 /// An oscillating curve that shrink in magnitude.
 class BounceOutCurve extends Curve {
   const BounceOutCurve();
+
+  @override
   double transform(double t) {
     return _bounce(t);
   }
@@ -135,6 +178,8 @@ class BounceOutCurve extends Curve {
 /// An oscillating curve that first grows and then shrink in magnitude.
 class BounceInOutCurve extends Curve {
   const BounceInOutCurve();
+
+  @override
   double transform(double t) {
     if (t < 0.5)
       return (1.0 - _bounce(1.0 - t)) * 0.5;
@@ -146,28 +191,47 @@ class BounceInOutCurve extends Curve {
 /// An oscillating curve that grows in magnitude while overshooting its bounds.
 class ElasticInCurve extends Curve {
   const ElasticInCurve([this.period = 0.4]);
+
   final double period;
+
+  @override
   double transform(double t) {
     double s = period / 4.0;
     t = t - 1.0;
     return -math.pow(2.0, 10.0 * t) * math.sin((t - s) * (math.PI * 2.0) / period);
+  }
+
+  @override
+  String toString() {
+    return '$runtimeType($period)';
   }
 }
 
 /// An oscillating curve that shrinks in magnitude while overshooting its bounds.
 class ElasticOutCurve extends Curve {
   const ElasticOutCurve([this.period = 0.4]);
+
   final double period;
+
+  @override
   double transform(double t) {
     double s = period / 4.0;
     return math.pow(2.0, -10 * t) * math.sin((t - s) * (math.PI * 2.0) / period) + 1.0;
+  }
+
+  @override
+  String toString() {
+    return '$runtimeType($period)';
   }
 }
 
 /// An oscillating curve that grows and then shrinks in magnitude while overshooting its bounds.
 class ElasticInOutCurve extends Curve {
   const ElasticInOutCurve([this.period = 0.4]);
+
   final double period;
+
+  @override
   double transform(double t) {
     double s = period / 4.0;
     t = 2.0 * t - 1.0;
@@ -175,6 +239,11 @@ class ElasticInOutCurve extends Curve {
       return -0.5 * math.pow(2.0, 10.0 * t) * math.sin((t - s) * (math.PI * 2.0) / period);
     else
       return math.pow(2.0, -10.0 * t) * math.sin((t - s) * (math.PI * 2.0) / period) * 0.5 + 1.0;
+  }
+
+  @override
+  String toString() {
+    return '$runtimeType($period)';
   }
 }
 

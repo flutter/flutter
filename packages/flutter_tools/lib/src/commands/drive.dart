@@ -15,7 +15,7 @@ import '../base/os.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../ios/simulators.dart' show SimControl, IOSSimulatorUtils;
-import 'apk.dart' as apk;
+import 'build_apk.dart' as build_apk;
 import 'run.dart';
 
 /// Runs integration (a.k.a. end-to-end) tests.
@@ -64,8 +64,13 @@ class DriveCommand extends RunCommandBase {
         help: 'Listen to the given port for a debug connection.');
   }
 
+  @override
   final String name = 'drive';
+
+  @override
   final String description = 'Runs Flutter Driver tests for the current project.';
+
+  @override
   final List<String> aliases = <String>['driver'];
 
   Device _device;
@@ -237,10 +242,13 @@ Future<int> startApp(DriveCommand command) async {
     return 1;
   }
 
+  // TODO(devoncarew): We should remove the need to special case here.
   if (command.device is AndroidDevice) {
     printTrace('Building an APK.');
-    int result = await apk.build(command.toolchain, command.buildConfigurations,
-      enginePath: command.runner.enginePath, target: command.target);
+    int result = await build_apk.build(
+      command.device.platform, command.toolchain, command.buildConfigurations,
+      enginePath: command.runner.enginePath, target: command.target
+    );
 
     if (result != 0)
       return result;
@@ -269,7 +277,7 @@ Future<int> startApp(DriveCommand command) async {
     }
   );
 
-  if (command.device.supportsStartPaused) {
+  if (started && command.device.supportsStartPaused) {
     await delayUntilObservatoryAvailable('localhost', command.debugPort);
   }
 

@@ -16,7 +16,7 @@ Process daemon;
 //   devices: list devices
 
 Future<Null> main() async {
-  daemon = await Process.start('flutter', ['daemon']);
+  daemon = await Process.start('dart', ['bin/flutter_tools.dart', 'daemon']);
   print('daemon process started, pid: ${daemon.pid}');
 
   daemon.stdout

@@ -6,13 +6,14 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:path/path.dart' as path;
 import 'package:stack_trace/stack_trace.dart';
 
 import 'src/base/context.dart';
 import 'src/base/logger.dart';
 import 'src/base/process.dart';
+import 'src/base/utils.dart';
 import 'src/commands/analyze.dart';
-import 'src/commands/apk.dart';
 import 'src/commands/build.dart';
 import 'src/commands/create.dart';
 import 'src/commands/daemon.dart';
@@ -25,6 +26,7 @@ import 'src/commands/logs.dart';
 import 'src/commands/refresh.dart';
 import 'src/commands/run.dart';
 import 'src/commands/run_mojo.dart';
+import 'src/commands/screenshot.dart';
 import 'src/commands/stop.dart';
 import 'src/commands/test.dart';
 import 'src/commands/trace.dart';
@@ -32,6 +34,7 @@ import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
 import 'src/device.dart';
 import 'src/doctor.dart';
+import 'src/globals.dart';
 import 'src/runner/flutter_command_runner.dart';
 
 /// Main entry point for commands.
@@ -50,10 +53,9 @@ Future<Null> main(List<String> args) async {
 
   FlutterCommandRunner runner = new FlutterCommandRunner(verboseHelp: verboseHelp)
     ..addCommand(new AnalyzeCommand())
-    ..addCommand(new ApkCommand())
     ..addCommand(new BuildCommand())
     ..addCommand(new CreateCommand())
-    ..addCommand(new DaemonCommand(hideCommand: !verboseHelp))
+    ..addCommand(new DaemonCommand(hidden: !verboseHelp))
     ..addCommand(new DevicesCommand())
     ..addCommand(new DoctorCommand())
     ..addCommand(new DriveCommand())
@@ -62,11 +64,12 @@ Future<Null> main(List<String> args) async {
     ..addCommand(new LogsCommand())
     ..addCommand(new RefreshCommand())
     ..addCommand(new RunCommand())
-    ..addCommand(new RunMojoCommand(hideCommand: !verboseHelp))
+    ..addCommand(new RunMojoCommand(hidden: !verboseHelp))
+    ..addCommand(new ScreenshotCommand())
     ..addCommand(new StopCommand())
     ..addCommand(new TestCommand())
     ..addCommand(new TraceCommand())
-    ..addCommand(new UpdatePackagesCommand(hideCommand: !verboseHelp))
+    ..addCommand(new UpdatePackagesCommand(hidden: !verboseHelp))
     ..addCommand(new UpgradeCommand());
 
   return Chain.capture(() async {
@@ -91,9 +94,53 @@ Future<Null> main(List<String> args) async {
       // We've caught an exit code.
       exit(error.exitCode);
     } else {
-      stderr.writeln(error);
-      stderr.writeln(chain.terse);
+      // We've crashed; emit a log report.
+      stderr.writeln();
+      stderr.writeln('Oops; flutter has exited unexpectedly: "$error"');
+
+      File file = _createCrashReport(args, error, chain);
+
+      stderr.writeln();
+      stderr.writeln('Crash report written to ${path.relative(file.path)}.');
+      stderr.writeln('Please let us know at https://github.com/flutter/flutter/issues!');
       exit(1);
     }
   });
+}
+
+File _createCrashReport(List<String> args, dynamic error, Chain chain) {
+  File crashFile = getUniqueFile(Directory.current, 'flutter', 'log');
+
+  StringBuffer buf = new StringBuffer();
+
+  buf.writeln('Flutter crash report; please file at https://github.com/flutter/flutter/issues.\n');
+
+  buf.writeln('## command\n');
+  buf.writeln('flutter ${args.join(' ')}\n');
+
+  buf.writeln('## exception\n');
+  buf.writeln('$error\n');
+  buf.writeln('${chain.terse}');
+
+  buf.writeln('## flutter doctor\n');
+  buf.writeln(_doctorText());
+
+  crashFile.writeAsStringSync(buf.toString());
+
+  return crashFile;
+}
+
+String _doctorText() {
+  try {
+    BufferLogger logger = new BufferLogger();
+    AppContext appContext = new AppContext();
+
+    appContext[Logger] = logger;
+
+    appContext.runInZone(() => doctor.diagnose());
+
+    return logger.statusText;
+  } catch (error) {
+    return '';
+  }
 }

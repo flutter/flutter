@@ -97,6 +97,7 @@ class RouteSettings {
   /// The initial route typically skips any entrance transition to speed startup.
   final bool isInitialRoute;
 
+  @override
   String toString() {
     String result = '"$name"';
     if (mostValuableKeys != null && mostValuableKeys.isNotEmpty) {
@@ -261,7 +262,7 @@ class Navigator extends StatefulWidget {
     NavigatorState navigator = context.ancestorStateOfType(const TypeMatcher<NavigatorState>());
     assert(() {
       if (navigator == null) {
-        throw new WidgetError(
+        throw new FlutterError(
           'openTransaction called with a context that does not include a Navigator.\n'
           'The context passed to the Navigator.openTransaction() method must be that of a widget that is a descendant of a Navigator widget.'
         );
@@ -271,6 +272,7 @@ class Navigator extends StatefulWidget {
     navigator.openTransaction(callback);
   }
 
+  @override
   NavigatorState createState() => new NavigatorState();
 }
 
@@ -279,6 +281,7 @@ class NavigatorState extends State<Navigator> {
   final GlobalKey<OverlayState> _overlayKey = new GlobalKey<OverlayState>();
   final List<Route<dynamic>> _history = new List<Route<dynamic>>();
 
+  @override
   void initState() {
     super.initState();
     assert(config.observer == null || config.observer.navigator == null);
@@ -289,6 +292,7 @@ class NavigatorState extends State<Navigator> {
     )));
   }
 
+  @override
   void didUpdateConfig(Navigator oldConfig) {
     if (oldConfig.observer != config.observer) {
       oldConfig.observer?._navigator = null;
@@ -297,6 +301,7 @@ class NavigatorState extends State<Navigator> {
     }
   }
 
+  @override
   void dispose() {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
@@ -481,6 +486,7 @@ class NavigatorState extends State<Navigator> {
     return true;
   }
 
+  @override
   Widget build(BuildContext context) {
     assert(!_debugLocked);
     assert(_history.isNotEmpty);

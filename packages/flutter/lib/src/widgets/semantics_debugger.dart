@@ -18,32 +18,40 @@ import 'gesture_detector.dart';
 class SemanticsDebugger extends StatefulWidget {
   const SemanticsDebugger({ Key key, this.child }) : super(key: key);
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
+  @override
   _SemanticsDebuggerState createState() => new _SemanticsDebuggerState();
 }
 
 class _SemanticsDebuggerState extends State<SemanticsDebugger> {
+  @override
   void initState() {
     super.initState();
     _SemanticsDebuggerListener.ensureInstantiated();
     _SemanticsDebuggerListener.instance.addListener(_update);
   }
+
+  @override
   void dispose() {
     _SemanticsDebuggerListener.instance.removeListener(_update);
     super.dispose();
   }
+
   void _update() {
     setState(() {
       // the generation of the _SemanticsDebuggerListener has changed
     });
   }
+
   Point _lastPointerDownLocation;
   void _handlePointerDown(PointerDownEvent event) {
     setState(() {
       _lastPointerDownLocation = event.position;
     });
   }
+
   void _handleTap() {
     assert(_lastPointerDownLocation != null);
     _SemanticsDebuggerListener.instance.handleTap(_lastPointerDownLocation);
@@ -65,6 +73,8 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> {
       _lastPointerDownLocation = null;
     });
   }
+
+  @override
   Widget build(BuildContext context) {
     return new CustomPaint(
       foregroundPainter: new _SemanticsDebuggerPainter(_SemanticsDebuggerListener.instance.generation, _lastPointerDownLocation),
@@ -104,6 +114,7 @@ class _SemanticsDebuggerEntry {
   Rect rect;
   List<_SemanticsDebuggerEntry> children;
 
+  @override
   String toString() {
     return '_SemanticsDebuggerEntry($id; $rect; "$label"'
            '${canBeTapped ? "; canBeTapped" : ""}'
@@ -311,6 +322,7 @@ class _SemanticsDebuggerListener implements mojom.SemanticsListener {
 
   int generation = 0;
 
+  @override
   void updateSemanticsTree(List<mojom.SemanticsNode> nodes) {
     generation += 1;
     for (mojom.SemanticsNode node in nodes)
@@ -350,8 +362,11 @@ class _SemanticsDebuggerListener implements mojom.SemanticsListener {
 
 class _SemanticsDebuggerPainter extends CustomPainter {
   const _SemanticsDebuggerPainter(this.generation, this.pointerPosition);
+
   final int generation;
   final Point pointerPosition;
+
+  @override
   void paint(Canvas canvas, Size size) {
     _SemanticsDebuggerListener.instance.nodes[0]?.paint(
       canvas,
@@ -363,6 +378,8 @@ class _SemanticsDebuggerPainter extends CustomPainter {
       canvas.drawCircle(pointerPosition, 10.0, paint);
     }
   }
+
+  @override
   bool shouldRepaint(_SemanticsDebuggerPainter oldDelegate) {
     return generation != oldDelegate.generation
         || pointerPosition != oldDelegate.pointerPosition;

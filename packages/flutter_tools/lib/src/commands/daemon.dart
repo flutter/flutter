@@ -8,6 +8,7 @@ import 'dart:io';
 
 import '../android/android_device.dart';
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/context.dart';
 import '../base/logger.dart';
 import '../device.dart';
@@ -26,16 +27,21 @@ const String protocolVersion = '0.1.0';
 /// It can be shutdown with a `daemon.shutdown` command (or by killing the
 /// process).
 class DaemonCommand extends FlutterCommand {
-  DaemonCommand({ bool hideCommand: false }) : _hideCommand = hideCommand;
+  DaemonCommand({ this.hidden: false });
 
+  @override
   final String name = 'daemon';
-  final String description = 'Run a persistent, JSON-RPC based server to communicate with devices.';
-  final bool _hideCommand;
 
+  @override
+  final String description = 'Run a persistent, JSON-RPC based server to communicate with devices.';
+
+  @override
   bool get requiresProjectRoot => false;
 
-  bool get hidden => _hideCommand;
+  @override
+  final bool hidden;
 
+  @override
   Future<int> runInProject() {
     printStatus('Starting device daemon...');
 
@@ -155,6 +161,7 @@ abstract class Domain {
 
   FlutterCommand get command => daemon.daemonCommand;
 
+  @override
   String toString() => name;
 
   void handleCommand(String command, dynamic id, dynamic args) {
@@ -220,6 +227,7 @@ class DaemonDomain extends Domain {
     return new Future<Null>.value();
   }
 
+  @override
   void dispose() {
     _subscription?.cancel();
   }
@@ -371,6 +379,7 @@ class DeviceDomain extends Domain {
     return new Future<Null>.value();
   }
 
+  @override
   void dispose() {
     for (PollingDeviceDiscovery discoverer in _discoverers) {
       discoverer.dispose();
@@ -378,23 +387,12 @@ class DeviceDomain extends Domain {
   }
 }
 
-Map<String, dynamic> _deviceToMap(Device device) {
-  return <String, dynamic>{
+Map<String, String> _deviceToMap(Device device) {
+  return <String, String>{
     'id': device.id,
     'name': device.name,
-    'platform': _enumToString(device.platform),
-    'available': true
+    'platform': getNameForTargetPlatform(device.platform)
   };
-}
-
-/// Take an enum value and get the best string representation of that.
-///
-/// toString() on enums returns 'EnumType.enumName'.
-String _enumToString(dynamic enumValue) {
-  String str = '$enumValue';
-  if (str.contains('.'))
-    return str.substring(str.indexOf('.') + 1);
-  return str;
 }
 
 dynamic _toJsonable(dynamic obj) {
@@ -410,14 +408,17 @@ class NotifyingLogger extends Logger {
 
   Stream<LogMessage> get onMessage => _messageController.stream;
 
+  @override
   void printError(String message, [StackTrace stackTrace]) {
     _messageController.add(new LogMessage('error', message, stackTrace));
   }
 
+  @override
   void printStatus(String message) {
     _messageController.add(new LogMessage('status', message));
   }
 
+  @override
   void printTrace(String message) {
     // This is a lot of traffic to send over the wire.
   }

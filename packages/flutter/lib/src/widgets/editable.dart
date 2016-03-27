@@ -63,6 +63,7 @@ class _KeyboardClientImpl implements mojom.KeyboardClient {
       ..composingExtent = inputValue.composing.end;
   }
 
+  @override
   void updateEditingState(mojom.EditingState state) {
     inputValue = new InputValue(
       text: state.text,
@@ -76,6 +77,7 @@ class _KeyboardClientImpl implements mojom.KeyboardClient {
     inputValue = inputValue.copyWith(composing: TextRange.empty);
   }
 
+  @override
   void submit(mojom.SubmitAction action) {
     clearComposing();
     onSubmitted();
@@ -101,8 +103,10 @@ class InputValue {
 
   static const InputValue empty = const InputValue();
 
+  @override
   String toString() => '$runtimeType(text: \u2524$text\u251C, selection: $selection, composing: $composing)';
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -114,6 +118,7 @@ class InputValue {
         && typedOther.composing == composing;
   }
 
+  @override
   int get hashCode => hashValues(
     text.hashCode,
     selection.hashCode,
@@ -182,6 +187,7 @@ class RawInputLine extends Scrollable {
   /// Called when the user indicates that they are done editing the text in the field.
   final ValueChanged<InputValue> onSubmitted;
 
+  @override
   RawInputLineState createState() => new RawInputLineState();
 }
 
@@ -192,9 +198,13 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
   _KeyboardClientImpl _keyboardClient;
   KeyboardHandle _keyboardHandle;
 
+  @override
   ScrollBehavior<double, double> createScrollBehavior() => new BoundedBehavior();
+
+  @override
   BoundedBehavior get scrollBehavior => super.scrollBehavior;
 
+  @override
   void initState() {
     super.initState();
     _keyboardClient = new _KeyboardClientImpl(
@@ -204,6 +214,7 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
     );
   }
 
+  @override
   void didUpdateConfig(RawInputLine oldConfig) {
     if (_keyboardClient.inputValue != config.value) {
       _keyboardClient.inputValue = config.value;
@@ -224,7 +235,7 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
     // render object via our return value.
     _containerWidth = dimensions.containerSize.width;
     _contentWidth = dimensions.contentSize.width;
-    scrollTo(scrollBehavior.updateExtents(
+    didUpdateScrollBehavior(scrollBehavior.updateExtents(
       contentExtent: _contentWidth,
       containerExtent: _containerWidth,
       // Set the scroll offset to match the content width so that the
@@ -300,6 +311,7 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
     _cursorTimer = new Timer.periodic(_kCursorBlinkHalfPeriod, _cursorTick);
   }
 
+  @override
   void dispose() {
     if (_isAttachedToKeyboard)
       _keyboardHandle.release();
@@ -314,6 +326,7 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
     _showCursor = false;
   }
 
+  @override
   Widget buildContent(BuildContext context) {
     assert(config.style != null);
     assert(config.focusKey != null);
@@ -365,6 +378,7 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
   final Offset paintOffset;
   final ViewportDimensionsChangeCallback onPaintOffsetUpdateNeeded;
 
+  @override
   RenderEditableLine createRenderObject(BuildContext context) {
     return new RenderEditableLine(
       text: _styledTextSpan,
@@ -378,6 +392,7 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
     );
   }
 
+  @override
   void updateRenderObject(BuildContext context, RenderEditableLine renderObject) {
     renderObject
       ..text = _styledTextSpan

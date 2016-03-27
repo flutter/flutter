@@ -17,6 +17,7 @@ class CardModel {
 }
 
 class CardCollection extends StatefulWidget {
+  @override
   CardCollectionState createState() => new CardCollectionState();
 }
 
@@ -72,6 +73,7 @@ class CardCollectionState extends State<CardCollection> {
       _initVariableSizedCardModels();
   }
 
+  @override
   void initState() {
     super.initState();
     _initCardModels();
@@ -395,14 +397,15 @@ class CardCollectionState extends State<CardCollection> {
 
   Shader _createShader(Rect bounds) {
     return new LinearGradient(
-        begin: const Offset(0.0, 0.0),
-        end: const Offset(0.0, 1.0),
+        begin: const FractionalOffset(0.0, 0.0),
+        end: const FractionalOffset(0.0, 1.0),
         colors: <Color>[const Color(0x00FFFFFF), const Color(0xFFFFFFFF)],
         stops: <double>[0.1, 0.35]
     )
     .createShader(bounds);
   }
 
+  @override
   Widget build(BuildContext context) {
     Widget cardCollection;
     if (_fixedSizeCards) {

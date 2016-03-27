@@ -10,6 +10,7 @@ import 'package:test/test.dart';
 class TestMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
   BoxConstraints getSizeConstraints;
 
+  @override
   Size getSize(BoxConstraints constraints) {
     if (!RenderObject.debugCheckingIntrinsics)
       getSizeConstraints = constraints;
@@ -21,6 +22,7 @@ class TestMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
   Size performLayoutSize1;
   bool performLayoutIsChild;
 
+  @override
   void performLayout(Size size) {
     assert(!RenderObject.debugCheckingIntrinsics);
     expect(() {
@@ -34,6 +36,8 @@ class TestMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
 
   bool shouldRelayoutCalled = false;
   bool shouldRelayoutValue = false;
+
+  @override
   bool shouldRelayout(_) {
     assert(!RenderObject.debugCheckingIntrinsics);
     shouldRelayoutCalled = true;
@@ -58,10 +62,13 @@ class PreferredSizeDelegate extends MultiChildLayoutDelegate {
 
   final Size preferredSize;
 
+  @override
   Size getSize(BoxConstraints constraints) => preferredSize;
 
+  @override
   void performLayout(Size size) { }
 
+  @override
   bool shouldRelayout(PreferredSizeDelegate oldDelegate) {
     return preferredSize != oldDelegate.preferredSize;
   }

@@ -35,8 +35,10 @@ abstract class AnimatedWidget extends StatefulWidget {
   Widget build(BuildContext context);
 
   /// Subclasses typically do not override this method.
+  @override
   _AnimatedState createState() => new _AnimatedState();
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('animation: $animation');
@@ -44,11 +46,13 @@ abstract class AnimatedWidget extends StatefulWidget {
 }
 
 class _AnimatedState extends State<AnimatedWidget> {
+  @override
   void initState() {
     super.initState();
     config.animation.addListener(_handleTick);
   }
 
+  @override
   void didUpdateConfig(AnimatedWidget oldConfig) {
     if (config.animation != oldConfig.animation) {
       oldConfig.animation.removeListener(_handleTick);
@@ -56,6 +60,7 @@ class _AnimatedState extends State<AnimatedWidget> {
     }
   }
 
+  @override
   void dispose() {
     config.animation.removeListener(_handleTick);
     super.dispose();
@@ -67,6 +72,7 @@ class _AnimatedState extends State<AnimatedWidget> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     return config.build(context);
   }
@@ -97,8 +103,10 @@ class SlideTransition extends AnimatedWidget {
   /// location and you want the user to benefit from "muscle memory".
   final bool transformHitTests;
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
+  @override
   Widget build(BuildContext context) {
     return new FractionalTranslation(
       translation: position.value,
@@ -130,8 +138,10 @@ class ScaleTransition extends AnimatedWidget {
   /// an alignment of (0.5, 1.0).
   final FractionalOffset alignment;
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
+  @override
   Widget build(BuildContext context) {
     double scaleValue = scale.value;
     Matrix4 transform = new Matrix4.identity()
@@ -158,8 +168,10 @@ class RotationTransition extends AnimatedWidget {
   /// rotated v * 2 * pi radians before being painted.
   final Animation<double> turns;
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
+  @override
   Widget build(BuildContext context) {
     double turnsValue = turns.value;
     Matrix4 transform = new Matrix4.rotationZ(turnsValue * math.PI * 2.0);
@@ -177,7 +189,7 @@ class SizeTransition extends AnimatedWidget {
     Key key,
     this.axis: Axis.vertical,
     Animation<double> sizeFactor,
-    this.alignment: const FractionalOffset(0.5, 0.5),
+    this.axisAlignment: 0.5,
     this.child
   }) : sizeFactor = sizeFactor, super(key: key, animation: sizeFactor) {
     assert(axis != null);
@@ -191,12 +203,19 @@ class SizeTransition extends AnimatedWidget {
   /// width or height multiplied by v.
   final Animation<double> sizeFactor;
 
-  /// How to align the child. See the [Align] widget.
-  final FractionalOffset alignment;
+  /// How to align the child along the axis that sizeFactor is modifying.
+  final double axisAlignment;
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
+  @override
   Widget build(BuildContext context) {
+    FractionalOffset alignment;
+    if (axis == Axis.vertical)
+      alignment = new FractionalOffset(0.0, axisAlignment);
+    else
+      alignment = new FractionalOffset(axisAlignment, 0.0);
     return new ClipRect(
       child: new Align(
         alignment: alignment,
@@ -224,8 +243,10 @@ class FadeTransition extends AnimatedWidget {
   /// completely transparent.
   final Animation<double> opacity;
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
+  @override
   Widget build(BuildContext context) {
     return new Opacity(opacity: opacity.value, child: child);
   }
@@ -240,6 +261,7 @@ class RelativeRectTween extends Tween<RelativeRect> {
   RelativeRectTween({ RelativeRect begin, RelativeRect end })
     : super(begin: begin, end: end);
 
+  @override
   RelativeRect lerp(double t) => RelativeRect.lerp(begin, end, t);
 }
 
@@ -260,8 +282,10 @@ class PositionedTransition extends AnimatedWidget {
   /// The animation that controls the child's size and position.
   final Animation<RelativeRect> rect;
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
+  @override
   Widget build(BuildContext context) {
     return new Positioned(
       top: rect.value.top,
@@ -318,6 +342,7 @@ class AnimatedBuilder extends AnimatedWidget {
   /// performance significantly in some cases and is therefore a good practice.
   final Widget child;
 
+  @override
   Widget build(BuildContext context) {
     return builder(context, child);
   }

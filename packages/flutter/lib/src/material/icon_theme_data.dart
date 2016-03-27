@@ -23,6 +23,7 @@ class IconThemeData {
     );
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (other is! IconThemeData)
       return false;
@@ -30,7 +31,9 @@ class IconThemeData {
     return color == typedOther.color && opacity == typedOther.opacity;
   }
 
+  @override
   int get hashCode => hashValues(color, opacity);
 
+  @override
   String toString() => '$color';
 }

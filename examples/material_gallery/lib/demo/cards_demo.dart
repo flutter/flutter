@@ -43,6 +43,7 @@ class TravelDestinationItem extends StatelessWidget {
 
   final TravelDestination destination;
 
+  @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
     TextStyle titleStyle = theme.textTheme.headline.copyWith(color: Colors.white);
@@ -115,6 +116,7 @@ class TravelDestinationItem extends StatelessWidget {
 }
 
 class CardsDemo extends StatelessWidget {
+  @override
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(

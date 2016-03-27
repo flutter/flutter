@@ -66,41 +66,50 @@ class RenderPerformanceOverlay extends RenderBox {
     markNeedsPaint();
   }
 
+  @override
   bool get sizedByParent => true;
+
+  @override
   bool get alwaysNeedsCompositing => true;
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     return constraints.constrainWidth(0.0);
   }
 
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     return constraints.constrainWidth(0.0);
   }
 
   double get intrinsicHeight {
-    const double kGraphHeight = 80.0; // must match value in performance_overlay_layer.cc
+    const double kDefaultGraphHeight = 80.0;
     double result = 0.0;
     if ((optionsMask | (1 << PerformanceOverlayOption.displayRasterizerStatistics.index) > 0) ||
         (optionsMask | (1 << PerformanceOverlayOption.visualizeRasterizerStatistics.index) > 0))
-      result += kGraphHeight;
+      result += kDefaultGraphHeight;
     if ((optionsMask | (1 << PerformanceOverlayOption.displayEngineStatistics.index) > 0) ||
         (optionsMask | (1 << PerformanceOverlayOption.visualizeEngineStatistics.index) > 0))
-      result += kGraphHeight;
+      result += kDefaultGraphHeight;
     return result;
   }
 
+  @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     return constraints.constrainHeight(intrinsicHeight);
   }
 
+  @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     return constraints.constrainHeight(intrinsicHeight);
   }
 
+  @override
   void performResize() {
     size = constraints.constrain(new Size(double.INFINITY, intrinsicHeight));
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     assert(needsCompositing);
     context.pushPerformanceOverlay(offset, optionsMask, rasterizerThreshold, size);

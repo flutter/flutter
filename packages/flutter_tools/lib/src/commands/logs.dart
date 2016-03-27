@@ -9,9 +9,6 @@ import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 class LogsCommand extends FlutterCommand {
-  final String name = 'logs';
-  final String description = 'Show log output for running Flutter apps.';
-
   LogsCommand() {
     argParser.addFlag('clear',
       negatable: false,
@@ -20,10 +17,19 @@ class LogsCommand extends FlutterCommand {
     );
   }
 
+  @override
+  final String name = 'logs';
+
+  @override
+  final String description = 'Show log output for running Flutter apps.';
+
+  @override
   bool get requiresProjectRoot => false;
 
+  @override
   bool get requiresDevice => true;
 
+  @override
   Future<int> runInProject() async {
     Device device = deviceForCommand;
 

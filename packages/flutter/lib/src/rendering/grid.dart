@@ -205,6 +205,7 @@ abstract class GridDelegateWithInOrderChildPlacement extends GridDelegate {
   // Insets for the entire grid.
   final EdgeInsets padding;
 
+  @override
   GridChildPlacement getChildPlacement(GridSpecification specification, int index, Object placementData) {
     final int columnCount = specification.columnOffsets.length - 1;
     return new GridChildPlacement(
@@ -213,6 +214,7 @@ abstract class GridDelegateWithInOrderChildPlacement extends GridDelegate {
     );
   }
 
+  @override
   bool shouldRelayout(GridDelegateWithInOrderChildPlacement oldDelegate) {
     return columnSpacing != oldDelegate.columnSpacing
         || rowSpacing != oldDelegate.rowSpacing
@@ -240,6 +242,7 @@ class FixedColumnCountGridDelegate extends GridDelegateWithInOrderChildPlacement
   /// The ratio of the width to the height of each tile in the grid.
   final double tileAspectRatio;
 
+  @override
   GridSpecification getGridSpecification(BoxConstraints constraints, int childCount) {
     assert(constraints.maxWidth < double.INFINITY);
     int rowCount = (childCount / columnCount).ceil();
@@ -256,16 +259,19 @@ class FixedColumnCountGridDelegate extends GridDelegateWithInOrderChildPlacement
     );
   }
 
+  @override
   bool shouldRelayout(FixedColumnCountGridDelegate oldDelegate) {
     return columnCount != oldDelegate.columnCount
         || tileAspectRatio != oldDelegate.tileAspectRatio
         || super.shouldRelayout(oldDelegate);
   }
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints, int childCount) {
     return constraints.constrainWidth(0.0);
   }
 
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints, int childCount) {
     return constraints.constrainWidth(0.0);
   }
@@ -297,6 +303,7 @@ class MaxTileWidthGridDelegate extends GridDelegateWithInOrderChildPlacement {
   /// The ratio of the width to the height of each tile in the grid.
   final double tileAspectRatio;
 
+  @override
   GridSpecification getGridSpecification(BoxConstraints constraints, int childCount) {
     assert(constraints.maxWidth < double.INFINITY);
     final double gridWidth = math.max(0.0, constraints.maxWidth - padding.horizontal);
@@ -315,16 +322,19 @@ class MaxTileWidthGridDelegate extends GridDelegateWithInOrderChildPlacement {
     );
   }
 
+  @override
   bool shouldRelayout(MaxTileWidthGridDelegate oldDelegate) {
     return maxTileWidth != oldDelegate.maxTileWidth
         || tileAspectRatio != oldDelegate.tileAspectRatio
         || super.shouldRelayout(oldDelegate);
   }
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints, int childCount) {
     return constraints.constrainWidth(0.0);
   }
 
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints, int childCount) {
     return constraints.constrainWidth(maxTileWidth * childCount);
   }
@@ -335,6 +345,7 @@ class GridParentData extends ContainerBoxParentDataMixin<RenderBox> {
   /// Opaque data passed to the getChildPlacement method of the grid's [GridDelegate].
   Object placementData;
 
+  @override
   String toString() => '${super.toString()}; placementData=$placementData';
 }
 
@@ -384,15 +395,17 @@ class RenderGrid extends RenderVirtualViewport<GridParentData> {
     _delegate = newDelegate;
   }
 
+  @override
   void set mainAxis(Axis value) {
     assert(() {
       if (value != Axis.vertical)
-        throw new RenderingError('RenderGrid doesn\'t yet support horizontal scrolling.');
+        throw new FlutterError('RenderGrid doesn\'t yet support horizontal scrolling.');
       return true;
     });
     super.mainAxis = value;
   }
 
+  @override
   int get virtualChildCount => super.virtualChildCount ?? childCount;
 
   /// The virtual index of the first child.
@@ -409,31 +422,37 @@ class RenderGrid extends RenderVirtualViewport<GridParentData> {
     markNeedsLayout();
   }
 
+  @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! GridParentData)
       child.parentData = new GridParentData();
   }
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     return _delegate.getMinIntrinsicWidth(constraints, virtualChildCount);
   }
 
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     return _delegate.getMaxIntrinsicWidth(constraints, virtualChildCount);
   }
 
+  @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     return _delegate.getMinIntrinsicHeight(constraints, virtualChildCount);
   }
 
+  @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     return _delegate.getMaxIntrinsicHeight(constraints, virtualChildCount);
   }
 
+  @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     return defaultComputeDistanceToHighestActualBaseline(baseline);
   }
@@ -453,6 +472,7 @@ class RenderGrid extends RenderVirtualViewport<GridParentData> {
     }
   }
 
+  @override
   void performLayout() {
     _updateGridSpecification();
     final Size gridSize = _specification.gridSize;

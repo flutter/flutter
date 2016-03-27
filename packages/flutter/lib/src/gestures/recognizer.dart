@@ -61,8 +61,13 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   final Set<int> _trackedPointers = new HashSet<int>();
 
   void handleEvent(PointerEvent event);
+
+  @override
   void acceptGesture(int pointer) { }
+
+  @override
   void rejectGesture(int pointer) { }
+
   void didStopTrackingLastPointer(int pointer);
 
   void resolve(GestureDisposition disposition) {
@@ -72,6 +77,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
       entry.resolve(disposition);
   }
 
+  @override
   void dispose() {
     resolve(GestureDisposition.rejected);
     for (int pointer in _trackedPointers)
@@ -91,6 +97,11 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
     _trackedPointers.remove(pointer);
     if (_trackedPointers.isEmpty)
       didStopTrackingLastPointer(pointer);
+  }
+
+  void ensureNotTrackingPointer(int pointer) {
+    if (_trackedPointers.contains(pointer))
+      stopTrackingPointer(pointer);
   }
 
   void stopTrackingIfPointerNoLongerDown(PointerEvent event) {
@@ -116,6 +127,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   Point initialPosition;
   Timer _timer;
 
+  @override
   void addPointer(PointerDownEvent event) {
     startTrackingPointer(event.pointer);
     if (state == GestureRecognizerState.ready) {
@@ -127,6 +139,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
     }
   }
 
+  @override
   void handleEvent(PointerEvent event) {
     assert(state != GestureRecognizerState.ready);
     if (state == GestureRecognizerState.possible && event.pointer == primaryPointer) {
@@ -151,6 +164,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
     assert(deadline == null);
   }
 
+  @override
   void rejectGesture(int pointer) {
     if (pointer == primaryPointer) {
       _stopTimer();
@@ -158,11 +172,13 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
     }
   }
 
+  @override
   void didStopTrackingLastPointer(int pointer) {
     _stopTimer();
     state = GestureRecognizerState.ready;
   }
 
+  @override
   void dispose() {
     _stopTimer();
     super.dispose();

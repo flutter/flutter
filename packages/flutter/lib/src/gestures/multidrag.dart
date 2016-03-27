@@ -125,6 +125,7 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
 
   Map<int, T> _pointers = <int, T>{};
 
+  @override
   void addPointer(PointerDownEvent event) {
     assert(_pointers != null);
     assert(event.pointer != null);
@@ -163,6 +164,7 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
     }
   }
 
+  @override
   void acceptGesture(int pointer) {
     assert(_pointers != null);
     T state = _pointers[pointer];
@@ -186,6 +188,7 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
     return drag;
   }
 
+  @override
   void rejectGesture(int pointer) {
     assert(_pointers != null);
     if (_pointers.containsKey(pointer)) {
@@ -204,6 +207,7 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
     _pointers.remove(pointer);
   }
 
+  @override
   void dispose() {
     for (int pointer in _pointers.keys)
       _removeState(pointer);
@@ -217,22 +221,26 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
 class _ImmediatePointerState extends MultiDragPointerState {
   _ImmediatePointerState(Point initialPosition) : super(initialPosition);
 
+  @override
   void checkForResolutionAfterMove() {
     assert(pendingDelta != null);
     if (pendingDelta.distance > kTouchSlop)
       resolve(GestureDisposition.accepted);
   }
 
+  @override
   void accepted(GestureMultiDragStartCallback starter) {
     starter(initialPosition);
   }
 }
 
 class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_ImmediatePointerState> {
+  @override
   _ImmediatePointerState createNewPointerState(PointerDownEvent event) {
     return new _ImmediatePointerState(event.position);
   }
 
+  @override
   String toStringShort() => 'multidrag';
 }
 
@@ -240,22 +248,26 @@ class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Im
 class _HorizontalPointerState extends MultiDragPointerState {
   _HorizontalPointerState(Point initialPosition) : super(initialPosition);
 
+  @override
   void checkForResolutionAfterMove() {
     assert(pendingDelta != null);
     if (pendingDelta.dx.abs() > kTouchSlop)
       resolve(GestureDisposition.accepted);
   }
 
+  @override
   void accepted(GestureMultiDragStartCallback starter) {
     starter(initialPosition);
   }
 }
 
 class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_HorizontalPointerState> {
+  @override
   _HorizontalPointerState createNewPointerState(PointerDownEvent event) {
     return new _HorizontalPointerState(event.position);
   }
 
+  @override
   String toStringShort() => 'horizontal multidrag';
 }
 
@@ -263,22 +275,26 @@ class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_H
 class _VerticalPointerState extends MultiDragPointerState {
   _VerticalPointerState(Point initialPosition) : super(initialPosition);
 
+  @override
   void checkForResolutionAfterMove() {
     assert(pendingDelta != null);
     if (pendingDelta.dy.abs() > kTouchSlop)
       resolve(GestureDisposition.accepted);
   }
 
+  @override
   void accepted(GestureMultiDragStartCallback starter) {
     starter(initialPosition);
   }
 }
 
 class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_VerticalPointerState> {
+  @override
   _VerticalPointerState createNewPointerState(PointerDownEvent event) {
     return new _VerticalPointerState(event.position);
   }
 
+  @override
   String toStringShort() => 'vertical multidrag';
 }
 
@@ -306,6 +322,7 @@ class _DelayedPointerState extends MultiDragPointerState {
     assert(_starter == null);
   }
 
+  @override
   void accepted(GestureMultiDragStartCallback starter) {
     assert(_starter == null);
     if (_timer == null)
@@ -314,6 +331,7 @@ class _DelayedPointerState extends MultiDragPointerState {
       _starter = starter;
   }
 
+  @override
   void checkForResolutionAfterMove() {
     assert(_timer != null);
     assert(pendingDelta != null);
@@ -321,6 +339,7 @@ class _DelayedPointerState extends MultiDragPointerState {
       resolve(GestureDisposition.rejected);
   }
 
+  @override
   void dispose() {
     _timer?.cancel();
     _timer = null;
@@ -342,9 +361,11 @@ class DelayedMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Dela
     _delay = value;
   }
 
+  @override
   _DelayedPointerState createNewPointerState(PointerDownEvent event) {
     return new _DelayedPointerState(event.position, _delay);
   }
 
+  @override
   String toStringShort() => 'long multidrag';
 }

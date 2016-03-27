@@ -56,11 +56,13 @@ class PerformanceOverlay extends LeafRenderObjectWidget {
   /// how many frame intervals).
   final int rasterizerThreshold;
 
+  @override
   RenderPerformanceOverlay createRenderObject(BuildContext context) => new RenderPerformanceOverlay(
     optionsMask: optionsMask,
     rasterizerThreshold: rasterizerThreshold
   );
 
+  @override
   void updateRenderObject(BuildContext context, RenderPerformanceOverlay renderObject) {
     renderObject
       ..optionsMask = optionsMask

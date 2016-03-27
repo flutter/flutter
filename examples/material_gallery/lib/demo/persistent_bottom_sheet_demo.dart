@@ -16,7 +16,7 @@ class PersistentBottomSheetDemo extends StatelessWidget {
     Scaffold.of(context).showBottomSheet((_) {
       return new Container(
         decoration: new BoxDecoration(
-          border: new Border(top: new BorderSide(color: Colors.black26, width: 1.0))
+          border: new Border(top: new BorderSide(color: Colors.black26))
         ),
         child: new Padding(
           padding: const EdgeInsets.all(32.0),
@@ -26,6 +26,7 @@ class PersistentBottomSheetDemo extends StatelessWidget {
     });
   }
 
+  @override
   Widget build(BuildContext notUsed) { // Can't find the Scaffold from this context.
     return new Scaffold(
       appBar: new AppBar(title: new Text("Persistent Bottom Sheet")),

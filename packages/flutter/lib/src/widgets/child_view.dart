@@ -4,8 +4,8 @@
 
 import 'package:flutter/rendering.dart';
 
-import 'media_query.dart';
 import 'framework.dart';
+import 'media_query.dart';
 
 export 'package:flutter/rendering.dart' show ChildViewConnection;
 
@@ -14,8 +14,8 @@ class ChildView extends StatelessWidget {
 
   final ChildViewConnection child;
 
+  @override
   Widget build(BuildContext context) {
-    assert(MediaQuery.of(context) != null);
     return new _ChildViewWidget(
       child: child,
       scale: MediaQuery.of(context).devicePixelRatio
@@ -32,8 +32,10 @@ class _ChildViewWidget extends LeafRenderObjectWidget {
   final ChildViewConnection child;
   final double scale;
 
+  @override
   RenderChildView createRenderObject(BuildContext context) => new RenderChildView(child: child, scale: scale);
 
+  @override
   void updateRenderObject(BuildContext context, RenderChildView renderObject) {
     renderObject
       ..child = child

@@ -11,16 +11,22 @@ import '../base/os.dart';
 import '../globals.dart';
 
 // Android SDK layout:
-//
+
 // $ANDROID_HOME/platform-tools/adb
+
 // $ANDROID_HOME/build-tools/19.1.0/aapt, dx, zipalign
 // $ANDROID_HOME/build-tools/22.0.1/aapt
 // $ANDROID_HOME/build-tools/23.0.2/aapt
+// $ANDROID_HOME/build-tools/24.0.0-preview/aapt
+
 // $ANDROID_HOME/platforms/android-22/android.jar
 // $ANDROID_HOME/platforms/android-23/android.jar
+// $ANDROID_HOME/platforms/android-N/android.jar
 
-// TODO(devoncarew): We need a way to locate the Android SDK w/o using an environment variable.
-// Perhaps something like `flutter config --android-home=foo/bar`.
+// Special case some version names in the sdk.
+const Map<String, int> _namedVersionMap = const <String, int> {
+  'android-N': 24
+};
 
 /// Locate ADB. Prefer to use one from an Android SDK, if we can locate that.
 String getAdbPath([AndroidSdk existingSdk]) {
@@ -47,8 +53,6 @@ class AndroidSdk {
   AndroidSdkVersion _latestVersion;
 
   static AndroidSdk locateAndroidSdk() {
-    // TODO: Use explicit configuration information from a metadata file?
-
     String androidHomeDir;
     if (Platform.environment.containsKey('ANDROID_HOME')) {
       androidHomeDir = Platform.environment['ANDROID_HOME'];
@@ -98,20 +102,16 @@ class AndroidSdk {
 
   String get adbPath => getPlatformToolsPath('adb');
 
-  bool validateSdkWellFormed({ bool complain: false }) {
-    if (!FileSystemEntity.isFileSync(adbPath)) {
-      if (complain)
-        printError('Android SDK file not found: $adbPath.');
-      return false;
-    }
+  /// Validate the Android SDK. This returns an empty list if there are no
+  /// issues; otherwise, it returns a list of issues found.
+  List<String> validateSdkWellFormed() {
+    if (!FileSystemEntity.isFileSync(adbPath))
+      return <String>['Android SDK file not found: $adbPath.'];
 
-    if (sdkVersions.isEmpty) {
-      if (complain)
-        printError('Android SDK does not have the proper build-tools.');
-      return false;
-    }
+    if (sdkVersions.isEmpty || latestVersion == null)
+      return <String>['Android SDK does not have the proper build-tools.'];
 
-    return latestVersion.validateSdkWellFormed(complain: complain);
+    return latestVersion.validateSdkWellFormed();
   }
 
   String getPlatformToolsPath(String binaryName) {
@@ -130,11 +130,11 @@ class AndroidSdk {
         .toList();
     }
 
-    List<Version> buildToolsVersions = <Version>[]; // 19.1.0, 22.0.1, ...
+    List<Version> buildTools = <Version>[]; // 19.1.0, 22.0.1, ...
 
     Directory buildToolsDir = new Directory(path.join(directory, 'build-tools'));
     if (buildToolsDir.existsSync()) {
-      buildToolsVersions = buildToolsDir
+      buildTools = buildToolsDir
         .listSync()
         .map((FileSystemEntity entity) {
           try {
@@ -149,25 +149,32 @@ class AndroidSdk {
 
     // Here we match up platforms with cooresponding build-tools. If we don't
     // have a match, we don't return anything for that platform version. So if
-    // the user only have 'android-22' and 'build-tools/19.0.0', we don't find
+    // the user only has 'android-22' and 'build-tools/19.0.0', we don't find
     // an Android sdk.
-    _sdkVersions = platforms.map((String platform) {
-      int sdkVersion;
+    _sdkVersions = platforms.map((String platformName) {
+      int platformVersion;
 
       try {
-        sdkVersion = int.parse(platform.substring('android-'.length));
+        if (_namedVersionMap.containsKey(platformName))
+          platformVersion = _namedVersionMap[platformName];
+        else
+          platformVersion = int.parse(platformName.substring('android-'.length));
       } catch (error) {
         return null;
       }
 
-      Version buildToolsVersion = Version.primary(buildToolsVersions.where((Version version) {
-        return version.major == sdkVersion;
+      Version buildToolsVersion = Version.primary(buildTools.where((Version version) {
+        return version.major == platformVersion;
       }).toList());
 
       if (buildToolsVersion == null)
         return null;
 
-      return new AndroidSdkVersion(this, platform, buildToolsVersion.toString());
+      return new AndroidSdkVersion(
+        this,
+        platformVersionName: platformName,
+        buildToolsVersionName: buildToolsVersion.toString()
+      );
     }).where((AndroidSdkVersion version) => version != null).toList();
 
     _sdkVersions.sort();
@@ -175,17 +182,26 @@ class AndroidSdk {
     _latestVersion = _sdkVersions.isEmpty ? null : _sdkVersions.last;
   }
 
+  @override
   String toString() => 'AndroidSdk: $directory';
 }
 
 class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
-  AndroidSdkVersion(this.sdk, this.androidVersion, this.buildToolsVersion);
+  AndroidSdkVersion(this.sdk, {
+    this.platformVersionName,
+    this.buildToolsVersionName
+  });
 
   final AndroidSdk sdk;
-  final String androidVersion;
-  final String buildToolsVersion;
+  final String platformVersionName;
+  final String buildToolsVersionName;
 
-  int get sdkLevel => int.parse(androidVersion.substring('android-'.length));
+  int get sdkLevel {
+    if (_namedVersionMap.containsKey(platformVersionName))
+      return _namedVersionMap[platformVersionName];
+    else
+      return int.parse(platformVersionName.substring('android-'.length));
+  }
 
   String get androidJarPath => getPlatformsPath('android.jar');
 
@@ -195,35 +211,39 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
 
   String get zipalignPath => getBuildToolsPath('zipalign');
 
-  bool validateSdkWellFormed({ bool complain: false }) {
-    return
-      _exists(androidJarPath, complain: complain) &&
-      _exists(aaptPath, complain: complain) &&
-      _exists(dxPath, complain: complain) &&
-      _exists(zipalignPath, complain: complain);
+  List<String> validateSdkWellFormed() {
+    if (_exists(androidJarPath) != null)
+      return <String>[_exists(androidJarPath)];
+
+    if (_exists(aaptPath) != null)
+      return <String>[_exists(aaptPath)];
+
+    if (_exists(dxPath) != null)
+      return <String>[_exists(dxPath)];
+
+    if (_exists(zipalignPath) != null)
+      return <String>[_exists(zipalignPath)];
+
+    return <String>[];
   }
 
   String getPlatformsPath(String itemName) {
-    return path.join(sdk.directory, 'platforms', androidVersion, itemName);
+    return path.join(sdk.directory, 'platforms', platformVersionName, itemName);
   }
 
   String getBuildToolsPath(String binaryName) {
-    return path.join(sdk.directory, 'build-tools', buildToolsVersion, binaryName);
+    return path.join(sdk.directory, 'build-tools', buildToolsVersionName, binaryName);
   }
 
-  int compareTo(AndroidSdkVersion other) {
-    return sdkLevel - other.sdkLevel;
-  }
+  @override
+  int compareTo(AndroidSdkVersion other) => sdkLevel - other.sdkLevel;
 
-  String toString() => '[${sdk.directory}, SDK version $sdkLevel, build-tools $buildToolsVersion]';
+  @override
+  String toString() => '[${sdk.directory}, SDK version $sdkLevel, build-tools $buildToolsVersionName]';
 
-  bool _exists(String path, { bool complain: false }) {
-    if (!FileSystemEntity.isFileSync(path)) {
-      if (complain)
-        printError('Android SDK file not found: $path.');
-      return false;
-    }
-
-    return true;
+  String _exists(String path) {
+    if (!FileSystemEntity.isFileSync(path))
+      return 'Android SDK file not found: $path.';
+    return null;
   }
 }

@@ -82,6 +82,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   _TapTracker _firstTap;
   final Map<int, _TapTracker> _trackers = new Map<int, _TapTracker>();
 
+  @override
   void addPointer(PointerEvent event) {
     // Ignore out-of-bounds second taps.
     if (_firstTap != null &&
@@ -112,8 +113,10 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
     }
   }
 
+  @override
   void acceptGesture(int pointer) { }
 
+  @override
   void rejectGesture(int pointer) {
     _TapTracker tracker = _trackers[pointer];
     // If tracker isn't in the list, check if this is the first tap tracker
@@ -138,6 +141,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
       _reset();
   }
 
+  @override
   void dispose() {
     _reset();
   }
@@ -198,6 +202,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
     }
   }
 
+  @override
   String toStringShort() => 'double tap';
 }
 
@@ -255,6 +260,7 @@ class _TapGesture extends _TapTracker {
     }
   }
 
+  @override
   void stopTrackingPointer(PointerRoute route) {
     _timer?.cancel();
     _timer = null;
@@ -305,6 +311,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
 
   final Map<int, _TapGesture> _gestureMap = new Map<int, _TapGesture>();
 
+  @override
   void addPointer(PointerEvent event) {
     assert(!_gestureMap.containsKey(event.pointer));
     _gestureMap[event.pointer] = new _TapGesture(
@@ -316,12 +323,14 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
       onTapDown(event.position, event.pointer);
   }
 
+  @override
   void acceptGesture(int pointer) {
     assert(_gestureMap.containsKey(pointer));
     _gestureMap[pointer]?.accept();
     assert(!_gestureMap.containsKey(pointer));
   }
 
+  @override
   void rejectGesture(int pointer) {
     assert(_gestureMap.containsKey(pointer));
     _gestureMap[pointer]?.reject();
@@ -347,6 +356,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
       onLongTapDown(lastPosition, pointer);
   }
 
+  @override
   void dispose() {
     List<_TapGesture> localGestures = new List<_TapGesture>.from(_gestureMap.values);
     for (_TapGesture gesture in localGestures)
@@ -355,5 +365,6 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
     assert(_gestureMap.isEmpty);
   }
 
+  @override
   String toStringShort() => 'multitap';
 }

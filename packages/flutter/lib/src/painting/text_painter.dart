@@ -25,7 +25,23 @@ bool _deepEquals(List<Object> a, List<Object> b) {
 }
 
 /// An immutable span of text.
+///
+/// A [TextSpan] object can be styled using its [style] property.
+/// The style will be applied to the [text] and the [children].
+///
+/// A [TextSpan] object can just have plain text, or it can have
+/// children [TextSpan] objects with their own styles that (possibly
+/// only partially) override the [style] of this object. If a
+/// [TextSpan] has both [text] and [children], then the [text] is
+/// treated as if it was an unstyled [TextSpan] at the start of the
+/// [children] list.
+///
+/// To paint a [TextSpan] on a [Canvas], use a [TextPainter].
 class TextSpan {
+  /// Creates a [TextSpan] with the given values.
+  ///
+  /// For the object to be useful, at least one of [text] or
+  /// [children] should be set.
   const TextSpan({
     this.style,
     this.text,
@@ -33,24 +49,42 @@ class TextSpan {
     this.recognizer
   });
 
-  /// The style to apply to the text and the children.
+  /// The style to apply to the [text] and the [children].
   final TextStyle style;
 
   /// The text contained in the span.
   ///
-  /// If both text and children are non-null, the text will preceed the
+  /// If both [text] and [children] are non-null, the text will preceed the
   /// children.
   final String text;
 
   /// Additional spans to include as children.
   ///
-  /// If both text and children are non-null, the text will preceed the
+  /// If both [text] and [children] are non-null, the text will preceed the
   /// children.
+  ///
+  /// Modifying the list after the [TextSpan] has been created is not
+  /// supported and may have unexpected results.
+  ///
+  /// The list must not contain any nulls.
   final List<TextSpan> children;
 
-  /// If non-null, will receive events that hit this text span.
+  /// A gesture recognizer that will receive events that hit this text span.
+  ///
+  /// [TextSpan] itself does not implement hit testing or event
+  /// dispatch. The owner of the [TextSpan] tree to which the object
+  /// belongs is responsible for dispatching events.
+  ///
+  /// For an example, see [RenderParagraph] in the Flutter rendering library.
   final GestureRecognizer recognizer;
 
+  /// Apply the [style], [text], and [children] of this object to the
+  /// given [ParagraphBuilder], from which a [Paragraph] can be obtained.
+  /// [Paragraph] objects can be drawn on [Canvas] objects.
+  ///
+  /// Rather than using this directly, it's simpler to use the
+  /// [TextPainter] class to paint [TextSpan] objects onto [Canvas]
+  /// objects.
   void build(ui.ParagraphBuilder builder) {
     assert(debugAssertValid());
     final bool hasStyle = style != null;
@@ -103,6 +137,9 @@ class TextSpan {
     return result;
   }
 
+  /// Flattens the [TextSpan] tree into a single string.
+  ///
+  /// Styles are not honored in this process.
   String toPlainText() {
     assert(debugAssertValid());
     StringBuffer buffer = new StringBuffer();
@@ -113,6 +150,7 @@ class TextSpan {
     return buffer.toString();
   }
 
+  @override
   String toString([String prefix = '']) {
     StringBuffer buffer = new StringBuffer();
     buffer.writeln('$prefix$runtimeType:');
@@ -135,6 +173,13 @@ class TextSpan {
     return buffer.toString();
   }
 
+  /// In checked mode, throws an exception if the object is not in a
+  /// valid configuration. Otherwise, returns true.
+  ///
+  /// This is intended to be used as follows:
+  /// ```dart
+  ///   assert(myTextSpan.debugAssertValid());
+  /// ```
   bool debugAssertValid() {
     assert(() {
       if (!visitTextSpan((TextSpan span) {
@@ -158,6 +203,7 @@ class TextSpan {
     return true;
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -169,10 +215,28 @@ class TextSpan {
         && typedOther.recognizer == recognizer
         && _deepEquals(typedOther.children, children);
   }
+
+  @override
   int get hashCode => hashValues(style, text, recognizer, hashList(children));
 }
 
-/// An object that paints a [TextSpan] into a canvas.
+/// An object that paints a [TextSpan] tree into a [Canvas].
+///
+/// To use a [TextPainter], follow these steps:
+///
+/// 1. Create a [TextSpan] tree and pass it to the [TextPainter]
+///    constructor.
+///
+/// 2. Set the [maxWidth] property of the [TextPainter] to the width
+///    of the area into which the text should be painted.
+///
+/// 3. Call [layout] to prepare the paragraph.
+///
+/// 4. Call [paint] as often as desired to paint the paragraph.
+///
+/// If the width of the area into which the text is being painted
+/// changes, return to step 2. If the text to be painted changes,
+/// return to step 1.
 class TextPainter {
   TextPainter([ TextSpan text ]) {
     this.text = text;
@@ -290,7 +354,7 @@ class TextPainter {
   /// Paints the text onto the given canvas at the given offset.
   void paint(Canvas canvas, Offset offset) {
     assert(!_needsLayout && "Please call layout() before paint() to position the text before painting it." is String);
-    _paragraph.paint(canvas, offset);
+    canvas.drawParagraph(_paragraph, offset);
   }
 
   Offset _getOffsetFromUpstream(int offset, Rect caretPrototype) {

@@ -22,59 +22,60 @@ const int kXcodeRequiredVersionMajor = 7;
 const int kXcodeRequiredVersionMinor = 0;
 
 class XCode {
+  XCode() {
+    _eulaSigned = false;
+
+    try {
+      _xcodeSelectPath = runSync(<String>['xcode-select', '--print-path']);
+      _isInstalled = true;
+
+      _xcodeVersionText = runSync(<String>['xcodebuild', '-version']).replaceAll('\n', ', ');
+
+      try {
+        printTrace('xcrun clang');
+
+        ProcessResult result = Process.runSync('/usr/bin/xcrun', <String>['clang']);
+        if (result.stdout != null && result.stdout.contains('license'))
+          _eulaSigned = false;
+        else if (result.stderr != null && result.stderr.contains('license'))
+          _eulaSigned = false;
+        else
+          _eulaSigned = true;
+      } catch (error) {
+      }
+    } catch (error) {
+      _isInstalled = false;
+    }
+  }
+
   /// Returns [XCode] active in the current app context.
   static XCode get instance => context[XCode] ?? (context[XCode] = new XCode());
 
   bool get isInstalledAndMeetsVersionCheck => isInstalled && xcodeVersionSatisfactory;
 
+  String _xcodeSelectPath;
+  String get xcodeSelectPath => _xcodeSelectPath;
+
   bool _isInstalled;
-  bool get isInstalled {
-    if (_isInstalled != null) {
-      return _isInstalled;
-    }
+  bool get isInstalled => _isInstalled;
 
-    _isInstalled = exitsHappy(<String>['xcode-select', '--print-path']);
-    return _isInstalled;
-  }
-
+  bool _eulaSigned;
   /// Has the EULA been signed?
-  bool get eulaSigned {
-    if (!isInstalled)
-      return false;
+  bool get eulaSigned => _eulaSigned;
 
-    try {
-      ProcessResult result = Process.runSync('/usr/bin/xcrun', <String>['clang']);
-      if (result.stdout != null && result.stdout.contains('license'))
-        return false;
-      if (result.stderr != null && result.stderr.contains('license'))
-        return false;
-      return true;
-    } catch (error) {
-      return false;
-    }
-  }
+  String _xcodeVersionText;
+  String get xcodeVersionText => _xcodeVersionText;
 
-  bool _xcodeVersionSatisfactory;
   bool get xcodeVersionSatisfactory {
-    if (_xcodeVersionSatisfactory != null)
-      return _xcodeVersionSatisfactory;
+    RegExp regex = new RegExp(r'Xcode ([0-9.]+)');
 
-    try {
-      String output = runSync(<String>['xcodebuild', '-version']);
-      RegExp regex = new RegExp(r'Xcode ([0-9.]+)');
+    String version = regex.firstMatch(xcodeVersionText).group(1);
+    List<String> components = version.split('.');
 
-      String version = regex.firstMatch(output).group(1);
-      List<String> components = version.split('.');
+    int major = int.parse(components[0]);
+    int minor = components.length == 1 ? 0 : int.parse(components[1]);
 
-      int major = int.parse(components[0]);
-      int minor = components.length == 1 ? 0 : int.parse(components[1]);
-
-      _xcodeVersionSatisfactory = _xcodeVersionCheckValid(major, minor);
-    } catch (error) {
-      _xcodeVersionSatisfactory = false;
-    }
-
-    return _xcodeVersionSatisfactory;
+    return _xcodeVersionCheckValid(major, minor);
   }
 }
 
@@ -88,7 +89,8 @@ bool _xcodeVersionCheckValid(int major, int minor) {
   return false;
 }
 
-Future<bool> buildIOSXcodeProject(ApplicationPackage app, { bool buildForDevice }) async {
+Future<bool> buildIOSXcodeProject(ApplicationPackage app,
+    { bool buildForDevice, Directory buildDirectory }) async {
   String flutterProjectPath = Directory.current.path;
 
   if (xcodeProjectRequiresUpdate()) {
@@ -113,8 +115,22 @@ Future<bool> buildIOSXcodeProject(ApplicationPackage app, { bool buildForDevice 
   await _addServicesToBundle(new Directory(app.localPath));
 
   List<String> commands = <String>[
-    '/usr/bin/env', 'xcrun', 'xcodebuild', '-target', 'Runner', '-configuration', 'Release'
+    '/usr/bin/env',
+    'xcrun',
+    'xcodebuild',
+    '-target', 'Runner',
+    '-configuration', 'Release',
+    'ONLY_ACTIVE_ARCH=YES',
   ];
+
+  if (buildDirectory != null) {
+    if (!buildDirectory.existsSync()) {
+      printError('The specified build directory ${buildDirectory.path} does not exist');
+      return false;
+    }
+
+    commands.add('TARGET_BUILD_DIR=${buildDirectory.absolute.path}');
+  }
 
   if (buildForDevice) {
     commands.addAll(<String>['-sdk', 'iphoneos', '-arch', 'arm64']);

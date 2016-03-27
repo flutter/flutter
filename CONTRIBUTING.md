@@ -178,7 +178,7 @@ use `--release` instead of `--debug`.
 Making a breaking change to the engine
 --------------------------------------
 
-If you make a breaking change to the engine, you'll need to land you change in a
+If you make a breaking change to the engine, you'll need to land your change in a
 few steps:
 
 1. Land your change in the engine repository.

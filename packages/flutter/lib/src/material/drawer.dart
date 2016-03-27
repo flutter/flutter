@@ -34,8 +34,11 @@ class Drawer extends StatelessWidget {
   }) : super(key: key);
 
   final int elevation;
+
+  /// The widget below this widget in the tree.
   final Widget child;
 
+  @override
   Widget build(BuildContext context) {
     return new ConstrainedBox(
       constraints: const BoxConstraints.expand(width: _kWidth),
@@ -55,10 +58,12 @@ class DrawerController extends StatefulWidget {
 
   final Widget child;
 
+  @override
   DrawerControllerState createState() => new DrawerControllerState();
 }
 
 class DrawerControllerState extends State<DrawerController> {
+  @override
   void initState() {
     super.initState();
     _controller = new AnimationController(duration: _kBaseSettleDuration)
@@ -66,6 +71,7 @@ class DrawerControllerState extends State<DrawerController> {
       ..addStatusListener(_animationStatusChanged);
   }
 
+  @override
   void dispose() {
     _controller
       ..removeListener(_animationChanged)
@@ -118,9 +124,19 @@ class DrawerControllerState extends State<DrawerController> {
 
   AnimationController _controller;
 
-  void _handleTapDown(Point position) {
+  void _handleDragDown(Point position) {
     _controller.stop();
     _ensureHistoryEntry();
+  }
+
+  void _handleDragCancel() {
+    if (_controller.isDismissed || _controller.isAnimating)
+      return;
+    if (_controller.value < 0.5) {
+      close();
+    } else {
+      open();
+    }
   }
 
   double get _width {
@@ -158,6 +174,7 @@ class DrawerControllerState extends State<DrawerController> {
   final ColorTween _color = new ColorTween(begin: Colors.transparent, end: Colors.black54);
   final GlobalKey _gestureDetectorKey = new GlobalKey();
 
+  @override
   Widget build(BuildContext context) {
     if (_controller.status == AnimationStatus.dismissed) {
       return new Align(
@@ -174,8 +191,10 @@ class DrawerControllerState extends State<DrawerController> {
     } else {
       return new GestureDetector(
         key: _gestureDetectorKey,
+        onHorizontalDragDown: _handleDragDown,
         onHorizontalDragUpdate: _move,
         onHorizontalDragEnd: _settle,
+        onHorizontalDragCancel: _handleDragCancel,
         child: new RepaintBoundary(
           child: new Stack(
             children: <Widget>[
@@ -190,16 +209,13 @@ class DrawerControllerState extends State<DrawerController> {
               ),
               new Align(
                 alignment: const FractionalOffset(0.0, 0.5),
-                child: new GestureDetector(
-                  onTapDown: _handleTapDown,
-                  child: new Align(
-                    alignment: const FractionalOffset(1.0, 0.5),
-                    widthFactor: _controller.value,
-                    child: new RepaintBoundary(
-                      child: new Focus(
-                        key: _drawerKey,
-                        child: config.child
-                      )
+                child: new Align(
+                  alignment: const FractionalOffset(1.0, 0.5),
+                  widthFactor: _controller.value,
+                  child: new RepaintBoundary(
+                    child: new Focus(
+                      key: _drawerKey,
+                      child: config.child
                     )
                   )
                 )

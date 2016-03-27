@@ -18,6 +18,7 @@ class TestFocusable extends StatelessWidget {
   final String yes;
   final bool autofocus;
 
+  @override
   Widget build(BuildContext context) {
     bool focused = Focus.at(context, autofocus: autofocus);
     return new GestureDetector(

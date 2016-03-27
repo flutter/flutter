@@ -1,14 +1,14 @@
+## Steps to Reproduce
 
-_Detailed issue description here. More information at [https://flutter.io/bug-reports/](https://flutter.io/bug-reports/)_
+Please tell us what you were doing and what went wrong.
 
-### Steps to Reproduce
-* _Add steps here. Provide verbose variants of `flutter` commands if necessary._
+## Flutter Doctor
 
-### Flutter Version
-_Add `flutter --version` here_
+Paste the output of running `flutter doctor` here.
 
-### Logs
-_Paste relevant logs here_
+## Logs and Crash Reports
 
-### Crash Reports
-_Add relevant crash reports here_
+Please attach any relevent logs or crash reports.
+
+
+> For more information about diagnosing and reporting Flutter bugs, please see [https://flutter.io/bug-reports/](https://flutter.io/bug-reports/).

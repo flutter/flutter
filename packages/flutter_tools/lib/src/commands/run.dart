@@ -15,7 +15,7 @@ import '../device.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../toolchain.dart';
-import 'apk.dart';
+import 'build_apk.dart';
 import 'install.dart';
 
 /// Given the value of the --target option, return the path of the Dart file
@@ -42,8 +42,8 @@ abstract class RunCommandBase extends FlutterCommand {
         defaultsTo: false,
         help: 'Start tracing during startup.');
     argParser.addOption('route',
-        help: 'Which route to load when starting the app.');
-    addTargetOption();
+        help: 'Which route to load when running the app.');
+    usesTargetOption();
   }
 
   bool get checked => argResults['checked'];
@@ -53,29 +53,33 @@ abstract class RunCommandBase extends FlutterCommand {
 }
 
 class RunCommand extends RunCommandBase {
+  @override
   final String name = 'run';
+
+  @override
   final String description = 'Run your Flutter app on an attached device.';
+
+  @override
   final List<String> aliases = <String>['start'];
 
   RunCommand() {
     argParser.addFlag('full-restart',
         defaultsTo: true,
-        help: 'Stop any currently running application process before starting the app.');
+        help: 'Stop any currently running application process before running the app.');
     argParser.addFlag('clear-logs',
         defaultsTo: true,
-        help: 'Clear log history before starting the app.');
+        help: 'Clear log history before running the app.');
     argParser.addFlag('start-paused',
         defaultsTo: false,
         negatable: false,
         help: 'Start in a paused mode and wait for a debugger to connect.');
-    argParser.addFlag('pub',
-        defaultsTo: true,
-        help: 'Whether to run "pub get" before running the app.');
     argParser.addOption('debug-port',
         defaultsTo: observatoryDefaultPort.toString(),
         help: 'Listen to the given port for a debug connection.');
+    usesPubOption();
   }
 
+  @override
   bool get requiresDevice => true;
 
   @override
@@ -133,8 +137,7 @@ String _getMissingPackageHintForPlatform(TargetPlatform platform) {
   switch (platform) {
     case TargetPlatform.android_arm:
       return 'Is your project missing an android/AndroidManifest.xml?';
-    case TargetPlatform.ios_arm:
-    case TargetPlatform.ios_x64:
+    case TargetPlatform.ios:
       return 'Is your project missing an ios/Info.plist?';
     default:
       return null;
@@ -179,8 +182,8 @@ Future<int> startApp(
 
   if (install) {
     printTrace('Running build command.');
-    int result = await buildAll(
-      <Device>[device], applicationPackages, toolchain, configs,
+    int result = await buildForDevice(
+      device, applicationPackages, toolchain, configs,
       enginePath: enginePath,
       target: target
     );
@@ -210,14 +213,12 @@ Future<int> startApp(
     await installApp(device, package);
   }
 
-  bool startedSomething = false;
-
   Map<String, dynamic> platformArgs = <String, dynamic>{};
 
   if (traceStartup != null)
     platformArgs['trace-startup'] = traceStartup;
 
-  printStatus('Starting ${_getDisplayPath(mainPath)} on ${device.name}...');
+  printStatus('Running ${_getDisplayPath(mainPath)} on ${device.name}...');
 
   bool result = await device.startApp(
     package,
@@ -231,19 +232,10 @@ Future<int> startApp(
     platformArgs: platformArgs
   );
 
-  if (!result) {
-    printError('Error starting application on ${device.name}.');
-  } else {
-    startedSomething = true;
+  if (!result)
+    printError('Error running application on ${device.name}.');
 
-    // If the user specified --start-paused (and the device supports it) then
-    // wait for the observatory port to become available before returning from
-    // `startApp()`.
-    if (startPaused && device.supportsStartPaused)
-      await delayUntilObservatoryAvailable('localhost', debugPort);
-  }
-
-  return startedSomething ? 0 : 2;
+  return result ? 0 : 2;
 }
 
 /// Delay until the Observatory / service protocol is available.
@@ -253,6 +245,8 @@ Future<int> startApp(
 Future<Null> delayUntilObservatoryAvailable(String host, int port, {
   Duration timeout: const Duration(seconds: 10)
 }) async {
+  printTrace('Waiting until Observatory is available (port $port).');
+
   Stopwatch stopwatch = new Stopwatch()..start();
 
   final String url = 'ws://$host:$port/ws';

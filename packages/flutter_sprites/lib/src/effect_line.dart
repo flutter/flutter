@@ -89,6 +89,7 @@ class EffectLine extends Node {
   TexturedLinePainter _painter;
   double _offset = 0.0;
 
+  @override
   void update(double dt) {
     // Update scrolling position
     if (animationMode == EffectLineAnimationMode.scroll) {
@@ -121,6 +122,7 @@ class EffectLine extends Node {
     }
   }
 
+  @override
   void paint(Canvas canvas) {
     if (points.length < 2) return;
 

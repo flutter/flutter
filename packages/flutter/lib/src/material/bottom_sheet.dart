@@ -32,6 +32,7 @@ class BottomSheet extends StatefulWidget {
   final VoidCallback onClosing;
   final WidgetBuilder builder;
 
+  @override
   _BottomSheetState createState() => new _BottomSheetState();
 
   static AnimationController createAnimationController() {
@@ -75,6 +76,7 @@ class _BottomSheetState extends State<BottomSheet> {
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     return new GestureDetector(
       onVerticalDragUpdate: _handleDragUpdate,
@@ -99,6 +101,7 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
 
   final double progress;
 
+  @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
     return new BoxConstraints(
       minWidth: constraints.maxWidth,
@@ -108,10 +111,12 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
     );
   }
 
+  @override
   Offset getPositionForChild(Size size, Size childSize) {
     return new Offset(0.0, size.height - childSize.height * progress);
   }
 
+  @override
   bool shouldRelayout(_ModalBottomSheetLayout oldDelegate) {
     return progress != oldDelegate.progress;
   }
@@ -122,10 +127,12 @@ class _ModalBottomSheet<T> extends StatefulWidget {
 
   final _ModalBottomSheetRoute<T> route;
 
+  @override
   _ModalBottomSheetState<T> createState() => new _ModalBottomSheetState<T>();
 }
 
 class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
+  @override
   Widget build(BuildContext context) {
     return new GestureDetector(
       onTap: () => Navigator.pop(context),
@@ -156,14 +163,21 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   final WidgetBuilder builder;
 
+  @override
   Duration get transitionDuration => _kBottomSheetDuration;
+
+  @override
   bool get barrierDismissable => true;
+
+  @override
   Color get barrierColor => Colors.black54;
 
+  @override
   AnimationController createAnimationController() {
     return BottomSheet.createAnimationController();
   }
 
+  @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
     return new _ModalBottomSheet<T>(route: this);
   }

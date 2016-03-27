@@ -5,6 +5,7 @@
 import 'message.dart';
 
 class Tap extends CommandWithTarget {
+  @override
   final String kind = 'tap';
 
   Tap(ObjectRef targetRef) : super(targetRef);
@@ -13,6 +14,7 @@ class Tap extends CommandWithTarget {
     return new Tap(new ObjectRef(json['targetRef']));
   }
 
+  @override
   Map<String, String> serialize() => super.serialize();
 }
 
@@ -21,12 +23,14 @@ class TapResult extends Result {
     return new TapResult();
   }
 
+  @override
   Map<String, dynamic> toJson() => {};
 }
 
 
 /// Command the driver to perform a scrolling action.
 class Scroll extends CommandWithTarget {
+  @override
   final String kind = 'scroll';
 
   Scroll(
@@ -59,6 +63,7 @@ class Scroll extends CommandWithTarget {
   /// The frequency in Hz of the generated move events.
   final int frequency;
 
+  @override
   Map<String, String> serialize() => super.serialize()..addAll({
     'dx': '$dx',
     'dy': '$dy',
@@ -72,5 +77,6 @@ class ScrollResult extends Result {
     return new ScrollResult();
   }
 
+  @override
   Map<String, dynamic> toJson() => {};
 }

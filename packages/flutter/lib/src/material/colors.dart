@@ -384,4 +384,47 @@ class Colors {
     800: const Color(0xFF37474F),
     900: const Color(0xFF263238),
   };
+
+  /// All Material design primary color swatches (except grey)
+  static const List<Map<int, Color>> primaries = const <Map<int, Color>>[
+    red,
+    pink,
+    purple,
+    deepPurple,
+    indigo,
+    blue,
+    lightBlue,
+    cyan,
+    teal,
+    green,
+    lightGreen,
+    lime,
+    yellow,
+    amber,
+    orange,
+    deepOrange,
+    brown,
+    // grey intentionally omitted
+    blueGrey,
+  ];
+
+  /// All Material design accent color swatches
+  static const List<Map<int, Color>> accents = const <Map<int, Color>>[
+    redAccent,
+    pinkAccent,
+    purpleAccent,
+    deepPurpleAccent,
+    indigoAccent,
+    blueAccent,
+    lightBlueAccent,
+    cyanAccent,
+    tealAccent,
+    greenAccent,
+    lightGreenAccent,
+    limeAccent,
+    yellowAccent,
+    amberAccent,
+    orangeAccent,
+    deepOrangeAccent,
+  ];
 }

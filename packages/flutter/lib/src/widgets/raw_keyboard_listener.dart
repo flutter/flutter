@@ -20,13 +20,18 @@ class RawKeyboardListener extends StatefulWidget {
   }
 
   final bool focused;
+
   final ValueChanged<mojom.InputEvent> onKey;
+
+  /// The widget below this widget in the tree.
   final Widget child;
 
+  @override
   _RawKeyboardListenerState createState() => new _RawKeyboardListenerState();
 }
 
 class _RawKeyboardListenerState extends State<RawKeyboardListener> implements mojom.RawKeyboardListener {
+  @override
   void initState() {
     super.initState();
     _attachOrDetachKeyboard();
@@ -34,10 +39,12 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> implements mo
 
   mojom.RawKeyboardListenerStub _stub;
 
+  @override
   void didUpdateConfig(RawKeyboardListener oldConfig) {
     _attachOrDetachKeyboard();
   }
 
+  @override
   void dispose() {
     _detachKeyboardIfAttached();
     super.dispose();
@@ -55,7 +62,7 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> implements mo
       return;
     _stub = new mojom.RawKeyboardListenerStub.unbound()..impl = this;
     mojom.RawKeyboardServiceProxy keyboard = new mojom.RawKeyboardServiceProxy.unbound();
-    shell.connectToService(null, keyboard);
+    shell.connectToViewAssociatedService(keyboard);
     keyboard.ptr.addListener(_stub);
     keyboard.close();
   }
@@ -65,11 +72,13 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> implements mo
     _stub = null;
   }
 
+  @override
   void onKey(mojom.InputEvent event) {
     if (config.onKey != null)
       config.onKey(event);
   }
 
+  @override
   Widget build(BuildContext context) {
     return config.child;
   }

@@ -68,6 +68,7 @@ class Dismissable extends StatefulWidget {
     assert(secondaryBackground != null ? background != null : true);
   }
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   /// A widget that is stacked behind the child. If secondaryBackground is also
@@ -89,10 +90,12 @@ class Dismissable extends StatefulWidget {
   /// The direction in which the widget can be dismissed.
   final DismissDirection direction;
 
+  @override
   _DismissableState createState() => new _DismissableState();
 }
 
 class _DismissableState extends State<Dismissable> {
+  @override
   void initState() {
     super.initState();
     _moveController = new AnimationController(duration: _kDismissDuration)
@@ -109,6 +112,7 @@ class _DismissableState extends State<Dismissable> {
   double _dragExtent = 0.0;
   bool _dragUnderway = false;
 
+  @override
   void dispose() {
     _moveController?.stop();
     _resizeController?.stop();
@@ -273,6 +277,7 @@ class _DismissableState extends State<Dismissable> {
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     Widget background = config.background;
     if (config.secondaryBackground != null) {
@@ -286,7 +291,7 @@ class _DismissableState extends State<Dismissable> {
       assert(() {
         if (_resizeAnimation.status != AnimationStatus.forward) {
           assert(_resizeAnimation.status == AnimationStatus.completed);
-          throw new WidgetError(
+          throw new FlutterError(
             'A dismissed Dismissable widget is still part of the tree.\n' +
             'Make sure to implement the onDismissed handler and to immediately remove the Dismissable\n' +
             'widget from the application once that handler has fired.'

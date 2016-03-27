@@ -5,7 +5,19 @@
 
 set -e
 
-export FLUTTER_ROOT=$(dirname $(dirname "${BASH_SOURCE[0]}"))
+function follow_links() {
+  file="$1"
+  while [ -h "$file" ]; do
+    # On Mac OS, readlink -f doesn't work.
+    file="$(readlink "$file")"
+  done
+  echo "$file"
+}
+
+PROG_NAME="$(follow_links "$BASH_SOURCE")"
+BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
+export FLUTTER_ROOT="$(cd "${BIN_DIR}/.." ; pwd -P)"
+
 FLUTTER_TOOLS_DIR="$FLUTTER_ROOT/packages/flutter_tools"
 SNAPSHOT_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.snapshot"
 STAMP_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.stamp"
@@ -22,7 +34,7 @@ if [ ! -f "$SNAPSHOT_PATH" ] || [ ! -f "$STAMP_PATH" ] || [ `cat "$STAMP_PATH"` 
 
   echo Building flutter tool...
   FLUTTER_DIR="$FLUTTER_ROOT/packages/flutter"
-  (cd "$FLUTTER_TOOLS_DIR"; "../../bin/cache/dart-sdk/bin/pub" get > /dev/null)
+  (cd "$FLUTTER_TOOLS_DIR"; "../../bin/cache/dart-sdk/bin/pub" get --verbosity=warning)
   "$DART" --snapshot="$SNAPSHOT_PATH" --package-root="$FLUTTER_TOOLS_DIR/packages" "$SCRIPT_PATH"
   echo $REVISION > "$STAMP_PATH"
 fi
@@ -37,7 +49,12 @@ export PATH="$DART_SDK_PATH/bin:$PATH"
 
 set +e
 
-"$DART" "$SNAPSHOT_PATH" "$@"
+if [ $FLUTTER_DEV ]; then
+  echo -e "(FLUTTER_DEV set - ignoring $SNAPSHOT_PATH)\n"
+  "$DART" --package-root="$FLUTTER_TOOLS_DIR/packages" "$SCRIPT_PATH" "$@"
+else
+  "$DART" "$SNAPSHOT_PATH" "$@"
+fi
 
 # The VM exits with code 253 if the snapshot version is out-of-date.
 # If it is, we need to snapshot it again.

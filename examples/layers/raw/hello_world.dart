@@ -22,7 +22,7 @@ void beginFrame(Duration timeStamp) {
   final ui.PictureRecorder recorder = new ui.PictureRecorder();
   final ui.Canvas canvas = new ui.Canvas(recorder, physicalBounds);
   canvas.scale(devicePixelRatio, devicePixelRatio);
-  paragraph.paint(canvas, new ui.Offset(
+  canvas.drawParagraph(paragraph, new ui.Offset(
     (logicalSize.width - paragraph.maxIntrinsicWidth) / 2.0,
     (logicalSize.height - paragraph.height) / 2.0
   ));

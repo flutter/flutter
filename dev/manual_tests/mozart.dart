@@ -46,6 +46,7 @@ class WindowDecoration extends StatelessWidget {
   final GestureTapCallback onTap;
   final GesturePanUpdateCallback onPanUpdate;
 
+  @override
   Widget build(BuildContext context) {
     double top, right, bottom, left, width, height;
 
@@ -93,6 +94,7 @@ class Window extends StatefulWidget {
   final ChildViewConnection child;
   final ValueChanged<ChildViewConnection> onClose;
 
+  @override
   _WindowState createState() => new _WindowState();
 }
 
@@ -119,6 +121,7 @@ class _WindowState extends State<Window> {
     config.onClose(config.child);
   }
 
+  @override
   Widget build(BuildContext context) {
     return new Positioned(
       left: _offset.dx,
@@ -167,6 +170,7 @@ class LauncherItem extends StatelessWidget {
   final Widget child;
   final ValueChanged<ChildViewConnection> onLaunch;
 
+  @override
   Widget build(BuildContext context) {
     return new RaisedButton(
       onPressed: () { onLaunch(new ChildViewConnection(url: url)); },
@@ -180,6 +184,7 @@ class Launcher extends StatelessWidget {
 
   final List<Widget> items;
 
+  @override
   Widget build(BuildContext context) {
     return new Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -189,6 +194,7 @@ class Launcher extends StatelessWidget {
 }
 
 class WindowManager extends StatefulWidget {
+  @override
   _WindowManagerState createState() => new _WindowManagerState();
 }
 
@@ -207,6 +213,7 @@ class _WindowManagerState extends State<WindowManager> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     return new Material(
       child: new Stack(

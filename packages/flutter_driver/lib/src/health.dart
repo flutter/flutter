@@ -7,10 +7,12 @@ import 'message.dart';
 
 /// Requests an application health check.
 class GetHealth implements Command {
+  @override
   final String kind = 'get_health';
 
   static GetHealth deserialize(Map<String, String> json) => new GetHealth();
 
+  @override
   Map<String, String> serialize() => const {};
 }
 
@@ -39,6 +41,7 @@ class Health extends Result {
   /// Health status
   final HealthStatus status;
 
+  @override
   Map<String, dynamic> toJson() => {
     'status': _healthStatusIndex.toSimpleName(status)
   };

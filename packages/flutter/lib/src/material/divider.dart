@@ -15,6 +15,7 @@ class Divider extends StatelessWidget {
   final double indent;
   final Color color;
 
+  @override
   Widget build(BuildContext context) {
     final double bottom = (height ~/ 2.0).toDouble();
     return new Container(

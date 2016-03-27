@@ -11,7 +11,10 @@ import '../runner/flutter_command.dart';
 import '../runner/version.dart';
 
 class UpgradeCommand extends FlutterCommand {
+  @override
   final String name = 'upgrade';
+
+  @override
   final String description = 'Upgrade your copy of Flutter.';
 
   @override
@@ -19,7 +22,7 @@ class UpgradeCommand extends FlutterCommand {
 
   @override
   Future<int> runInProject() async {
-    printStatus(getVersion(ArtifactStore.flutterRoot));
+    printStatus(FlutterVersion.getVersion(ArtifactStore.flutterRoot).toString());
 
     try {
       runCheckedSync(<String>[
@@ -47,7 +50,7 @@ class UpgradeCommand extends FlutterCommand {
       return code;
 
     printStatus('');
-    printStatus(getVersion(ArtifactStore.flutterRoot));
+    printStatus(FlutterVersion.getVersion(ArtifactStore.flutterRoot).toString());
 
     return 0;
   }

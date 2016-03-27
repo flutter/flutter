@@ -49,8 +49,8 @@ class FlutterCommandRunner extends CommandRunner {
         hide: !verboseHelp,
         help: 'Path to your packages directory.$packagesHelp');
     argParser.addOption('flutter-root',
-        help: 'The root directory of the Flutter repository. Uses \$$kFlutterRootEnvironmentVariableName if set,\n'
-              'otherwise defaults to a value derived from the location of this tool.', defaultsTo: _defaultFlutterRoot);
+        help: 'The root directory of the Flutter repository (uses \$$kFlutterRootEnvironmentVariableName if set).',
+              defaultsTo: _defaultFlutterRoot);
 
     if (verboseHelp)
       argParser.addSeparator('Local build selection options (not normally required):');
@@ -124,10 +124,9 @@ class FlutterCommandRunner extends CommandRunner {
         defaultsTo: 'out/ios_sim_Release/');
   }
 
+  @override
   String get usageFooter {
-    return 'Run "flutter -h -v" for verbose help output, including less commonly used options.\n'
-           '\n'
-           '${doctor.summaryText}';
+    return 'Run "flutter -h -v" for verbose help output, including less commonly used options.';
   }
 
   List<BuildConfiguration> get buildConfigurations {
@@ -165,13 +164,16 @@ class FlutterCommandRunner extends CommandRunner {
     return '.';
   }
 
+  @override
   Future<dynamic> run(Iterable<String> args) {
     return super.run(args).then((dynamic result) {
-      logger.flush();
       return result;
+    }).whenComplete(() {
+      logger.flush();
     });
   }
 
+  @override
   Future<int> runCommand(ArgResults globalResults) {
     _globalResults = globalResults;
 
@@ -197,16 +199,8 @@ class FlutterCommandRunner extends CommandRunner {
       }
     }
 
-    if (androidSdk != null) {
-      printTrace('Using Android SDK at ${androidSdk.directory}.');
-      if (androidSdk.latestVersion != null)
-        printTrace('${androidSdk.latestVersion}');
-    }
-
     if (globalResults['version']) {
-      printStatus(getVersion(ArtifactStore.flutterRoot));
-      printStatus('');
-      doctor.summary();
+      printStatus(FlutterVersion.getVersion(ArtifactStore.flutterRoot).toString());
       return new Future<int>.value(0);
     }
 
@@ -283,12 +277,7 @@ class FlutterCommandRunner extends CommandRunner {
       if (hostPlatform == HostPlatform.mac) {
         configs.add(new BuildConfiguration.prebuilt(
           hostPlatform: HostPlatform.mac,
-          targetPlatform: TargetPlatform.ios_arm
-        ));
-
-        configs.add(new BuildConfiguration.prebuilt(
-          hostPlatform: HostPlatform.mac,
-          targetPlatform: TargetPlatform.ios_x64
+          targetPlatform: TargetPlatform.ios
         ));
       }
     } else {
@@ -320,7 +309,7 @@ class FlutterCommandRunner extends CommandRunner {
           configs.add(new BuildConfiguration.local(
             type: BuildType.debug,
             hostPlatform: hostPlatform,
-            targetPlatform: TargetPlatform.ios_arm,
+            targetPlatform: TargetPlatform.ios,
             enginePath: enginePath,
             buildPath: globalResults['ios-debug-build-path']
           ));
@@ -328,7 +317,7 @@ class FlutterCommandRunner extends CommandRunner {
           configs.add(new BuildConfiguration.local(
             type: BuildType.debug,
             hostPlatform: hostPlatform,
-            targetPlatform: TargetPlatform.ios_x64,
+            targetPlatform: TargetPlatform.ios,
             enginePath: enginePath,
             buildPath: globalResults['ios-sim-debug-build-path']
           ));
@@ -357,7 +346,7 @@ class FlutterCommandRunner extends CommandRunner {
           configs.add(new BuildConfiguration.local(
             type: BuildType.release,
             hostPlatform: hostPlatform,
-            targetPlatform: TargetPlatform.ios_arm,
+            targetPlatform: TargetPlatform.ios,
             enginePath: enginePath,
             buildPath: globalResults['ios-release-build-path']
           ));
@@ -365,7 +354,7 @@ class FlutterCommandRunner extends CommandRunner {
           configs.add(new BuildConfiguration.local(
             type: BuildType.release,
             hostPlatform: hostPlatform,
-            targetPlatform: TargetPlatform.ios_x64,
+            targetPlatform: TargetPlatform.ios,
             enginePath: enginePath,
             buildPath: globalResults['ios-sim-release-build-path']
           ));

@@ -17,6 +17,7 @@ class _Estimate {
   final int degree;
   final double confidence;
 
+  @override
   String toString() {
     return 'Estimate(xCoefficients: $xCoefficients, '
                     'yCoefficients: $yCoefficients, '
@@ -73,6 +74,7 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
   _WeightChooser _chooseWeight;
   int _index;
 
+  @override
   void addMovement(Duration timeStamp, Point position) {
     _index += 1;
     if (_index == kHistorySize)
@@ -82,6 +84,7 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
     movement.position = position;
   }
 
+  @override
   _Estimate getEstimate() {
     // Iterate over movement samples in reverse time order and collect samples.
     List<double> x = new List<double>();
@@ -145,6 +148,7 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
     );
   }
 
+  @override
   void clear() {
     _index = -1;
   }
@@ -228,6 +232,7 @@ class Velocity {
         pixelsPerSecond: pixelsPerSecond + other.pixelsPerSecond);
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (other is! Velocity)
       return false;
@@ -235,8 +240,10 @@ class Velocity {
     return pixelsPerSecond == typedOther.pixelsPerSecond;
   }
 
+  @override
   int get hashCode => pixelsPerSecond.hashCode;
 
+  @override
   String toString() => 'Velocity(${pixelsPerSecond.dx.toStringAsFixed(1)}, ${pixelsPerSecond.dy.toStringAsFixed(1)})';
 }
 

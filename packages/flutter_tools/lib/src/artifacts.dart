@@ -25,10 +25,8 @@ String getNameForTargetPlatform(TargetPlatform platform) {
   switch (platform) {
     case TargetPlatform.android_arm:
       return 'android-arm';
-    case TargetPlatform.ios_arm:
-      return 'ios-arm';
-    case TargetPlatform.ios_x64:
-      return 'ios-x64';
+    case TargetPlatform.ios:
+      return 'ios';
     case TargetPlatform.darwin_x64:
       return 'darwin-x64';
     case TargetPlatform.linux_x64:
@@ -44,6 +42,7 @@ enum ArtifactType {
   androidIcuData,
   androidKeystore,
   androidLibSkyShell,
+  iosXcodeProject,
 }
 
 class Artifact {
@@ -73,12 +72,15 @@ class Artifact {
 
 class ArtifactStore {
   static const List<Artifact> knownArtifacts = const <Artifact>[
+    // tester
     const Artifact._(
       name: 'Flutter Tester',
       fileName: 'sky_shell',
       type: ArtifactType.shell,
       targetPlatform: TargetPlatform.linux_x64
     ),
+
+    // snapshotters
     const Artifact._(
       name: 'Sky Snapshot',
       fileName: 'sky_snapshot',
@@ -91,6 +93,8 @@ class ArtifactStore {
       type: ArtifactType.snapshot,
       hostPlatform: HostPlatform.mac
     ),
+
+    // mojo
     const Artifact._(
       name: 'Flutter for Mojo',
       fileName: 'flutter.mojo',
@@ -103,6 +107,8 @@ class ArtifactStore {
       type: ArtifactType.mojo,
       targetPlatform: TargetPlatform.linux_x64
     ),
+
+    // android-arm
     const Artifact._(
       name: 'Compiled Java code',
       fileName: 'classes.dex.jar',
@@ -126,6 +132,14 @@ class ArtifactStore {
       fileName: 'libsky_shell.so',
       type: ArtifactType.androidLibSkyShell,
       targetPlatform: TargetPlatform.android_arm
+    ),
+
+    // iOS
+    const Artifact._(
+      name: 'iOS Runner (Xcode Project)',
+      fileName: 'FlutterXcode.zip',
+      type: ArtifactType.iosXcodeProject,
+      targetPlatform: TargetPlatform.ios
     ),
   ];
 
@@ -197,7 +211,7 @@ class ArtifactStore {
     return cacheDir;
   }
 
-  static Future<String> getPath(Artifact artifact) async {
+  static String getPath(Artifact artifact) {
     File cachedFile = new File(path.join(
         getBaseCacheDir().path, 'engine', artifact.platform, artifact.fileName
     ));

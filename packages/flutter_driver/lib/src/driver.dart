@@ -29,6 +29,9 @@ class FlutterDriver {
   FlutterDriver.connectedTo(this._serviceClient, this._appIsolate);
 
   static const String _kFlutterExtensionMethod = 'ext.flutter_driver';
+  static const String _kStartTracingMethod = 'ext.flutter_startTracing';
+  static const String _kStopTracingMethod = 'ext.flutter_stopTracing';
+  static const String _kDownloadTraceDataMethod = 'ext.flutter_downloadTraceData';
   static const Duration _kDefaultTimeout = const Duration(seconds: 5);
   static const Duration _kDefaultPauseBetweenRetries = const Duration(milliseconds: 160);
 
@@ -205,6 +208,63 @@ class FlutterDriver {
     return result.text;
   }
 
+  /// Starts recording performance traces.
+  Future<Null> startTracing() async {
+    try {
+      await _appIsolate.invokeExtension(_kStartTracingMethod);
+      return null;
+    } catch(error, stackTrace) {
+      throw new DriverError(
+        'Failed to start tracing due to remote error',
+        error,
+        stackTrace
+      );
+    }
+  }
+
+  /// Stops recording performance traces and downloads the trace profile.
+  // TODO(yjbanov): return structured data rather than raw JSON once we have a
+  //                stable protocol to talk to.
+  Future<Map<String, dynamic>> stopTracingAndDownloadProfile() async {
+    Map<String, dynamic> stopResult =
+        await _appIsolate.invokeExtension(_kStopTracingMethod);
+    String traceFilePath = stopResult['trace_file_path'];
+
+    // Tracing data isn't available immediately as some of it is queued up in
+    // the event loop.
+    Stopwatch sw = new Stopwatch()..start();
+    while(sw.elapsed < const Duration(seconds: 30)) {
+      Map<String, dynamic> downloadResult =
+          await _appIsolate.invokeExtension(_kDownloadTraceDataMethod, <String, String>{
+            'trace_file_path': traceFilePath,
+          });
+
+      if (downloadResult['success'] == false)
+        throw new DriverError('Failed to download trace file: $traceFilePath');
+      else if (downloadResult['status'] != 'not ready')
+        return downloadResult;
+
+      // Give the event loop a chance to flush the trace log
+      await new Future<Null>.delayed(const Duration(milliseconds: 200));
+    }
+    throw new DriverError(
+      'Timed out waiting for tracing profile to become ready for download.'
+    );
+  }
+
+  /// Runs [action] and outputs a performance trace for it.
+  ///
+  /// Waits for the `Future` returned by [action] to complete prior to stopping
+  /// the trace.
+  ///
+  /// This is merely a convenience wrapper on top of [startTracing] and
+  /// [stopTracingAndDownloadProfile].
+  Future<Map<String, dynamic>> traceAction(Future<dynamic> action()) async {
+    await startTracing();
+    await action();
+    return stopTracingAndDownloadProfile();
+  }
+
   /// Calls the [evaluator] repeatedly until the result of the evaluation
   /// satisfies the [matcher].
   ///
@@ -252,7 +312,7 @@ void restoreVmServiceConnectFunction() {
 ///
 /// Times out after 30 seconds.
 Future<VMServiceClient> _waitAndConnect(String url) async {
-  Stopwatch timer = new Stopwatch();
+  Stopwatch timer = new Stopwatch()..start();
   Future<VMServiceClient> attemptConnection() {
     return VMServiceClient.connect(url)
       .catchError((dynamic e) async {

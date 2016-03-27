@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:test/test.dart';
 
 class FirstWidget extends StatelessWidget {
+  @override
   Widget build(BuildContext context) {
     return new GestureDetector(
       onTap: () {
@@ -23,10 +24,12 @@ class FirstWidget extends StatelessWidget {
 }
 
 class SecondWidget extends StatefulWidget {
+  @override
   SecondWidgetState createState() => new SecondWidgetState();
 }
 
 class SecondWidgetState extends State<SecondWidget> {
+  @override
   Widget build(BuildContext context) {
     return new GestureDetector(
       onTap: () => Navigator.pop(context),
@@ -48,6 +51,7 @@ class ThirdWidget extends StatelessWidget {
   final Key targetKey;
   final ExceptionCallback onException;
 
+  @override
   Widget build(BuildContext context) {
     return new GestureDetector(
       key: targetKey,
@@ -109,7 +113,7 @@ void main() {
       );
       tester.pumpWidget(widget);
       tester.tap(tester.findElementByKey(targetKey));
-      expect(exception, new isInstanceOf<WidgetError>());
+      expect(exception, new isInstanceOf<FlutterError>());
       expect('$exception', startsWith('openTransaction called with a context'));
     });
   });

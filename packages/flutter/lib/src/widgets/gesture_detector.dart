@@ -14,15 +14,16 @@ export 'package:flutter/gestures.dart' show
   GestureTapCallback,
   GestureTapCancelCallback,
   GestureLongPressCallback,
+  GestureDragDownCallback,
   GestureDragStartCallback,
   GestureDragUpdateCallback,
   GestureDragEndCallback,
-  GestureDragStartCallback,
-  GestureDragUpdateCallback,
-  GestureDragEndCallback,
+  GestureDragCancelCallback,
+  GesturePanDownCallback,
   GesturePanStartCallback,
   GesturePanUpdateCallback,
   GesturePanEndCallback,
+  GesturePanCancelCallback,
   GestureScaleStartCallback,
   GestureScaleUpdateCallback,
   GestureScaleEndCallback,
@@ -49,15 +50,21 @@ class GestureDetector extends StatelessWidget {
     this.onTapCancel,
     this.onDoubleTap,
     this.onLongPress,
+    this.onVerticalDragDown,
     this.onVerticalDragStart,
     this.onVerticalDragUpdate,
     this.onVerticalDragEnd,
+    this.onVerticalDragCancel,
+    this.onHorizontalDragDown,
     this.onHorizontalDragStart,
     this.onHorizontalDragUpdate,
     this.onHorizontalDragEnd,
+    this.onHorizontalDragCancel,
+    this.onPanDown,
     this.onPanStart,
     this.onPanUpdate,
     this.onPanEnd,
+    this.onPanCancel,
     this.onScaleStart,
     this.onScaleUpdate,
     this.onScaleEnd,
@@ -72,14 +79,14 @@ class GestureDetector extends StatelessWidget {
       bool haveScale = onScaleStart != null || onScaleUpdate != null || onScaleEnd != null;
       if (havePan || haveScale) {
         if (havePan && haveScale) {
-          throw new WidgetError(
+          throw new FlutterError(
             'Incorrect GestureDetector arguments.\n'
             'Having both a pan gesture recognizer and a scale gesture recognizer is redundant; scale is a superset of pan. Just use the scale gesture recognizer.'
           );
         }
         String recognizer = havePan ? 'pan' : 'scale';
         if (haveVerticalDrag && haveHorizontalDrag) {
-          throw new WidgetError(
+          throw new FlutterError(
             'Incorrect GestureDetector arguments.\n'
             'Simultaneously having a vertical drag gesture recognizer, a horizontal drag gesture recognizer, and a $recognizer gesture recognizer '
             'will result in the $recognizer gesture recognizer being ignored, since the other two will catch all drags.'
@@ -90,6 +97,7 @@ class GestureDetector extends StatelessWidget {
     });
   }
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   /// A pointer that might cause a tap has contacted the screen at a particular
@@ -116,6 +124,9 @@ class GestureDetector extends StatelessWidget {
   final GestureLongPressCallback onLongPress;
 
   /// A pointer has contacted the screen and might begin to move vertically.
+  final GestureDragDownCallback onVerticalDragDown;
+
+  /// A pointer has contacted the screen and has begun to move vertically.
   final GestureDragStartCallback onVerticalDragStart;
 
   /// A pointer that is in contact with the screen and moving vertically has
@@ -127,7 +138,14 @@ class GestureDetector extends StatelessWidget {
   /// specific velocity when it stopped contacting the screen.
   final GestureDragEndCallback onVerticalDragEnd;
 
+  /// The pointer that previously triggered the [onVerticalDragDown] did not
+  /// end up moving vertically.
+  final GestureDragCancelCallback onVerticalDragCancel;
+
   /// A pointer has contacted the screen and might begin to move horizontally.
+  final GestureDragDownCallback onHorizontalDragDown;
+
+  /// A pointer has contacted the screen and has begun to move horizontally.
   final GestureDragStartCallback onHorizontalDragStart;
 
   /// A pointer that is in contact with the screen and moving horizontally has
@@ -139,9 +157,15 @@ class GestureDetector extends StatelessWidget {
   /// specific velocity when it stopped contacting the screen.
   final GestureDragEndCallback onHorizontalDragEnd;
 
+  /// The pointer that previously triggered the [onHorizontalDragDown] did not
+  /// end up moving horizontally.
+  final GestureDragCancelCallback onHorizontalDragCancel;
+
+  final GesturePanDownCallback onPanDown;
   final GesturePanStartCallback onPanStart;
   final GesturePanUpdateCallback onPanUpdate;
   final GesturePanEndCallback onPanEnd;
+  final GesturePanCancelCallback onPanCancel;
 
   final GestureScaleStartCallback onScaleStart;
   final GestureScaleUpdateCallback onScaleUpdate;
@@ -157,6 +181,7 @@ class GestureDetector extends StatelessWidget {
   /// duplication of information.
   final bool excludeFromSemantics;
 
+  @override
   Widget build(BuildContext context) {
     Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
 
@@ -184,30 +209,48 @@ class GestureDetector extends StatelessWidget {
       };
     }
 
-    if (onVerticalDragStart != null || onVerticalDragUpdate != null || onVerticalDragEnd != null) {
+    if (onVerticalDragDown != null ||
+        onVerticalDragStart != null ||
+        onVerticalDragUpdate != null ||
+        onVerticalDragEnd != null ||
+        onVerticalDragCancel != null) {
       gestures[VerticalDragGestureRecognizer] = (VerticalDragGestureRecognizer recognizer) {
         return (recognizer ??= new VerticalDragGestureRecognizer())
+          ..onDown = onVerticalDragDown
           ..onStart = onVerticalDragStart
           ..onUpdate = onVerticalDragUpdate
-          ..onEnd = onVerticalDragEnd;
+          ..onEnd = onVerticalDragEnd
+          ..onCancel = onVerticalDragCancel;
       };
     }
 
-    if (onHorizontalDragStart != null || onHorizontalDragUpdate != null || onHorizontalDragEnd != null) {
+    if (onHorizontalDragDown != null ||
+        onHorizontalDragStart != null ||
+        onHorizontalDragUpdate != null ||
+        onHorizontalDragEnd != null ||
+        onHorizontalDragCancel != null) {
       gestures[HorizontalDragGestureRecognizer] = (HorizontalDragGestureRecognizer recognizer) {
         return (recognizer ??= new HorizontalDragGestureRecognizer())
+          ..onDown = onHorizontalDragDown
           ..onStart = onHorizontalDragStart
           ..onUpdate = onHorizontalDragUpdate
-          ..onEnd = onHorizontalDragEnd;
+          ..onEnd = onHorizontalDragEnd
+          ..onCancel = onHorizontalDragCancel;
       };
     }
 
-    if (onPanStart != null || onPanUpdate != null || onPanEnd != null) {
+    if (onPanDown != null ||
+        onPanStart != null ||
+        onPanUpdate != null ||
+        onPanEnd != null ||
+        onPanCancel != null) {
       gestures[PanGestureRecognizer] = (PanGestureRecognizer recognizer) {
         return (recognizer ??= new PanGestureRecognizer())
+          ..onDown = onPanDown
           ..onStart = onPanStart
           ..onUpdate = onPanUpdate
-          ..onEnd = onPanEnd;
+          ..onEnd = onPanEnd
+          ..onCancel = onPanCancel;
       };
     }
 
@@ -247,6 +290,7 @@ class RawGestureDetector extends StatefulWidget {
     assert(excludeFromSemantics != null);
   }
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   final Map<Type, GestureRecognizerFactory> gestures;
@@ -261,6 +305,7 @@ class RawGestureDetector extends StatefulWidget {
   /// duplication of information.
   final bool excludeFromSemantics;
 
+  @override
   RawGestureDetectorState createState() => new RawGestureDetectorState();
 }
 
@@ -268,11 +313,13 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
 
   Map<Type, GestureRecognizer> _recognizers = const <Type, GestureRecognizer>{};
 
+  @override
   void initState() {
     super.initState();
     _syncAll(config.gestures);
   }
 
+  @override
   void didUpdateConfig(RawGestureDetector oldConfig) {
     _syncAll(config.gestures);
   }
@@ -288,8 +335,12 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   /// the gesture detector should be enabled.
   void replaceGestureRecognizers(Map<Type, GestureRecognizerFactory> gestures) {
     assert(() {
-      if (!RenderObject.debugDoingLayout) {
-        throw new WidgetError(
+      // TODO kgiesing This assert will trigger if the owner of the current
+      // tree is different from the owner assigned to the renderer instance.
+      // Once elements have a notion of owners this assertion can be written
+      // more clearly.
+      if (!Renderer.instance.pipelineOwner.debugDoingLayout) {
+        throw new FlutterError(
           'Unexpected call to replaceGestureRecognizers() method of RawGestureDetectorState.\n'
           'The replaceGestureRecognizers() method can only be called during the layout phase. '
           'To set the gesture recognisers at other times, trigger a new build using setState() '
@@ -308,6 +359,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     }
   }
 
+  @override
   void dispose() {
     for (GestureRecognizer recognizer in _recognizers.values)
       recognizer.dispose();
@@ -340,6 +392,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     return config.child == null ? HitTestBehavior.translucent : HitTestBehavior.deferToChild;
   }
 
+  @override
   Widget build(BuildContext context) {
     Widget result = new Listener(
       onPointerDown: _handlePointerDown,
@@ -351,6 +404,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     return result;
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     if (_recognizers == null) {
@@ -458,12 +512,14 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
     assert(false);
   }
 
+  @override
   RenderSemanticsGestureHandler createRenderObject(BuildContext context) {
     RenderSemanticsGestureHandler result = new RenderSemanticsGestureHandler();
     updateRenderObject(context, result);
     return result;
   }
 
+  @override
   void updateRenderObject(BuildContext context, RenderSemanticsGestureHandler renderObject) {
     Map<Type, GestureRecognizer> recognizers = owner._recognizers;
     renderObject

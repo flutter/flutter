@@ -53,6 +53,7 @@ class IconButton extends StatelessWidget {
   /// used for accessibility.
   final String tooltip;
 
+  @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     Widget result = new Padding(
@@ -75,6 +76,7 @@ class IconButton extends StatelessWidget {
     );
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('$icon');

@@ -31,8 +31,7 @@ const Interval _kChildSegueInterval = const Interval(0.65, 1.0);
 /// If the [onPressed] callback is not specified or null, then the button will
 /// be disabled, will not react to touch.
 ///
-/// See also:
-///  * https://www.google.com/design/spec/components/buttons-floating-action-button.html
+/// See also: <https://www.google.com/design/spec/components/buttons-floating-action-button.html>
 class FloatingActionButton extends StatefulWidget {
   const FloatingActionButton({
     Key key,
@@ -45,18 +44,28 @@ class FloatingActionButton extends StatefulWidget {
     this.mini: false
   }) : super(key: key);
 
+  /// The widget below this widget in the tree.
   final Widget child;
+
   final String tooltip;
+
+  /// The color to use when filling the button.
+  ///
+  /// Defaults to the accent color of the current theme.
   final Color backgroundColor;
 
   /// The callback that is invoked when the button is tapped or otherwise activated.
   ///
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
+
   final int elevation;
+
   final int highlightElevation;
+
   final bool mini;
 
+  @override
   _FloatingActionButtonState createState() => new _FloatingActionButtonState();
 }
 
@@ -64,6 +73,7 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
   Animation<double> _childSegue;
   AnimationController _childSegueController;
 
+  @override
   void initState() {
     super.initState();
     _childSegueController = new AnimationController(duration: _kChildSegue)
@@ -77,6 +87,7 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
     ));
   }
 
+  @override
   void didUpdateConfig(FloatingActionButton oldConfig) {
     super.didUpdateConfig(oldConfig);
     if (Widget.canUpdate(oldConfig.child, config.child) && config.backgroundColor == oldConfig.backgroundColor)
@@ -94,6 +105,7 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     Color iconColor = Colors.white;
     Color materialColor = config.backgroundColor;

@@ -5,71 +5,6 @@
 import 'box.dart';
 import 'object.dart';
 
-export 'package:flutter/src/painting/box_painter.dart';
-
-/// A render box that's a specific size but passes its original constraints through to its child, which will probably overflow
-class RenderSizedOverflowBox extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
-  RenderSizedOverflowBox({
-    RenderBox child,
-    Size requestedSize
-  }) : _requestedSize = requestedSize {
-    assert(requestedSize != null);
-    this.child = child;
-  }
-
-  /// The size this render box should attempt to be.
-  Size get requestedSize => _requestedSize;
-  Size _requestedSize;
-  void set requestedSize (Size value) {
-    assert(value != null);
-    if (_requestedSize == value)
-      return;
-    _requestedSize = value;
-    markNeedsLayout();
-  }
-
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
-    return constraints.constrainWidth(_requestedSize.width);
-  }
-
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
-    return constraints.constrainWidth(_requestedSize.width);
-  }
-
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
-    return constraints.constrainHeight(_requestedSize.height);
-  }
-
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
-    return constraints.constrainHeight(_requestedSize.height);
-  }
-
-  double computeDistanceToActualBaseline(TextBaseline baseline) {
-    if (child != null)
-      return child.getDistanceToActualBaseline(baseline);
-    return super.computeDistanceToActualBaseline(baseline);
-  }
-
-  void performLayout() {
-    size = constraints.constrain(_requestedSize);
-    if (child != null)
-      child.layout(constraints);
-  }
-
-  bool hitTestChildren(HitTestResult result, { Point position }) {
-    return child?.hitTest(result, position: position) ?? false;
-  }
-
-  void paint(PaintingContext context, Offset offset) {
-    if (child != null)
-      context.paintChild(child, offset);
-  }
-}
-
 /// Lays the child out as if it was in the tree, but without painting anything,
 /// without making the child available for hit testing, and without taking any
 /// room in the parent.
@@ -78,23 +13,38 @@ class RenderOffStage extends RenderBox with RenderObjectWithChildMixin<RenderBox
     this.child = child;
   }
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints) => constraints.minWidth;
+
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) => constraints.minWidth;
+
+  @override
   double getMinIntrinsicHeight(BoxConstraints constraints) => constraints.minHeight;
+
+  @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) => constraints.minHeight;
 
+  @override
   bool get sizedByParent => true;
 
+  @override
   void performResize() {
     size = constraints.smallest;
   }
 
+  @override
   void performLayout() {
     if (child != null)
       child.layout(constraints);
   }
 
+  @override
   bool hitTest(HitTestResult result, { Point position }) => false;
+
+  @override
   void paint(PaintingContext context, Offset offset) { }
+
+  @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) { }
 }

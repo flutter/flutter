@@ -6,11 +6,17 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
+import 'package:path/path.dart' as path;
+
+String hex(List<int> bytes) {
+  StringBuffer result = new StringBuffer();
+  for (int part in bytes)
+    result.write('${part < 16 ? '0' : ''}${part.toRadixString(16)}');
+  return result.toString();
+}
 
 String calculateSha(File file) {
-  SHA1 sha1 = new SHA1();
-  sha1.add(file.readAsBytesSync());
-  return CryptoUtils.bytesToHex(sha1.close());
+  return hex(sha1.convert(file.readAsBytesSync()).bytes);
 }
 
 /// Convert `foo_bar` to `fooBar`.
@@ -27,6 +33,18 @@ String camelCase(String str) {
 
 /// Return the plural of the given word (`cat(s)`).
 String pluralize(String word, int count) => count == 1 ? word : word + 's';
+
+File getUniqueFile(Directory dir, String baseName, String ext) {
+  int i = 1;
+
+  while (true) {
+    String name = '${baseName}_${i.toString().padLeft(2, '0')}.$ext';
+    File file = new File(path.join(dir.path, name));
+    if (!file.existsSync())
+      return file;
+    i++;
+  }
+}
 
 /// A class to maintain a list of items, fire events when items are added or
 /// removed, and calculate a diff of changes when a new list of items is

@@ -44,6 +44,7 @@ class _FocusScope extends InheritedWidget {
     focusedScope = focusState._focusedScope == _noFocusedScope ? null : focusState._focusedScope;
   }
 
+  @override
   bool updateShouldNotify(_FocusScope oldWidget) {
     if (scopeFocused != oldWidget.scopeFocused)
       return true;
@@ -58,6 +59,7 @@ class _FocusScope extends InheritedWidget {
     return false;
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     if (scopeFocused)
@@ -99,6 +101,7 @@ class Focus extends StatefulWidget {
     assert(key != null);
   }
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   /// The key that currently has focus globally in the entire focus tree.
@@ -189,16 +192,19 @@ class Focus extends StatefulWidget {
       focusScope.focusState._setFocusedScope(key);
   }
 
+  @override
   _FocusState createState() => new _FocusState();
 }
 
 class _FocusState extends State<Focus> {
+  @override
   void initState() {
     super.initState();
     _updateWidgetRemovalListener(_focusedWidget);
     _updateScopeRemovalListener(_focusedScope);
   }
 
+  @override
   void dispose() {
     _updateWidgetRemovalListener(null);
     _updateScopeRemovalListener(null);
@@ -291,16 +297,15 @@ class _FocusState extends State<Focus> {
     Scrollable.ensureVisible(focusedContext);
   }
 
+  @override
   Widget build(BuildContext context) {
     MediaQueryData data = MediaQuery.of(context);
-    if (data != null) {
-      Size newMediaSize = data.size;
-      EdgeInsets newMediaPadding = data.padding;
-      if (newMediaSize != _mediaSize || newMediaPadding != _mediaPadding) {
-        _mediaSize = newMediaSize;
-        _mediaPadding = newMediaPadding;
-        scheduleMicrotask(_ensureVisibleIfFocused);
-      }
+    Size newMediaSize = data.size;
+    EdgeInsets newMediaPadding = data.padding;
+    if (newMediaSize != _mediaSize || newMediaPadding != _mediaPadding) {
+      _mediaSize = newMediaSize;
+      _mediaPadding = newMediaPadding;
+      scheduleMicrotask(_ensureVisibleIfFocused);
     }
     return new Semantics(
       container: true,

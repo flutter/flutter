@@ -73,6 +73,7 @@ class PageableList extends Scrollable {
   /// The list of pages themselves.
   final Iterable<Widget> children;
 
+  @override
   PageableListState<PageableList> createState() => new PageableListState<PageableList>();
 }
 
@@ -96,11 +97,13 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
     }
   }
 
+  @override
   double pixelOffsetToScrollOffset(double pixelOffset) {
     final double pixelsPerScrollUnit = _pixelsPerScrollUnit;
     return super.pixelOffsetToScrollOffset(pixelsPerScrollUnit == 0.0 ? 0.0 : pixelOffset / pixelsPerScrollUnit);
   }
 
+  @override
   double scrollOffsetToPixelOffset(double scrollOffset) {
     return super.scrollOffsetToPixelOffset(scrollOffset * _pixelsPerScrollUnit);
   }
@@ -118,11 +121,13 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
     }
   }
 
+  @override
   void initState() {
     super.initState();
     _updateScrollBehavior();
   }
 
+  @override
   void didUpdateConfig(PageableList oldConfig) {
     super.didUpdateConfig(oldConfig);
 
@@ -142,28 +147,32 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
 
   void _updateScrollBehavior() {
     config.scrollableListPainter?.contentExtent = _itemCount.toDouble();
-    scrollTo(scrollBehavior.updateExtents(
+    didUpdateScrollBehavior(scrollBehavior.updateExtents(
       contentExtent: _itemCount.toDouble(),
       containerExtent: 1.0,
       scrollOffset: scrollOffset
     ));
   }
 
+  @override
   void dispatchOnScrollStart() {
     super.dispatchOnScrollStart();
     config.scrollableListPainter?.scrollStarted();
   }
 
+  @override
   void dispatchOnScroll() {
     super.dispatchOnScroll();
     config.scrollableListPainter?.scrollOffset = scrollOffset;
   }
 
+  @override
   void dispatchOnScrollEnd() {
     super.dispatchOnScrollEnd();
     config.scrollableListPainter?.scrollEnded();
   }
 
+  @override
   Widget buildContent(BuildContext context) {
     return new PageViewport(
       itemsWrap: config.itemsWrap,
@@ -178,6 +187,7 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
   UnboundedBehavior _unboundedBehavior;
   OverscrollBehavior _overscrollBehavior;
 
+  @override
   ExtentScrollBehavior get scrollBehavior {
     if (config.itemsWrap) {
       _unboundedBehavior ??= new UnboundedBehavior();
@@ -187,10 +197,13 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
     return _overscrollBehavior;
   }
 
+  @override
   ScrollBehavior<double, double> createScrollBehavior() => scrollBehavior;
 
+  @override
   bool get shouldSnapScrollOffset => config.itemsSnapAlignment == PageableListFlingBehavior.canFlingAcrossMultiplePages;
 
+  @override
   double snapScrollOffset(double newScrollOffset) {
     final double previousItemOffset = newScrollOffset.floorToDouble();
     final double nextItemOffset = newScrollOffset.ceilToDouble();
@@ -205,6 +218,7 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
       .then(_notifyPageChanged);
   }
 
+  @override
   Future<Null> fling(double scrollVelocity) {
     switch(config.itemsSnapAlignment) {
       case PageableListFlingBehavior.canFlingAcrossMultiplePages:
@@ -214,6 +228,7 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
     }
   }
 
+  @override
   Future<Null> settleScrollOffset() {
     return scrollTo(snapScrollOffset(scrollOffset), duration: config.duration, curve: config.curve)
       .then(_notifyPageChanged);
@@ -237,43 +252,57 @@ class PageViewport extends VirtualViewportFromIterable {
     assert(mainAxis != null);
   }
 
+  @override
   final double startOffset;
+
   final Axis mainAxis;
   final ViewportAnchor anchor;
   final bool itemsWrap;
   final RenderObjectPainter overlayPainter;
+
+  @override
   final Iterable<Widget> children;
 
+  @override
   RenderList createRenderObject(BuildContext context) => new RenderList();
 
+  @override
   _PageViewportElement createElement() => new _PageViewportElement(this);
 }
 
 class _PageViewportElement extends VirtualViewportElement {
   _PageViewportElement(PageViewport widget) : super(widget);
 
+  @override
   PageViewport get widget => super.widget;
 
+  @override
   RenderList get renderObject => super.renderObject;
 
+  @override
   int get materializedChildBase => _materializedChildBase;
   int _materializedChildBase;
 
+  @override
   int get materializedChildCount => _materializedChildCount;
   int _materializedChildCount;
 
+  @override
   double get startOffsetBase => _startOffsetBase;
   double _startOffsetBase;
 
+  @override
   double get startOffsetLimit =>_startOffsetLimit;
   double _startOffsetLimit;
 
+  @override
   double scrollOffsetToPixelOffset(double scrollOffset) {
     if (_containerExtent == null)
       return 0.0;
     return super.scrollOffsetToPixelOffset(scrollOffset) * _containerExtent;
   }
 
+  @override
   void updateRenderObject(PageViewport oldWidget) {
     renderObject
       ..mainAxis = widget.mainAxis
@@ -298,6 +327,7 @@ class _PageViewportElement extends VirtualViewportElement {
     renderObject.dimensions = new ViewportDimensions(containerSize: containerSize, contentSize: materializedContentSize);
   }
 
+  @override
   void layout(BoxConstraints constraints) {
     final int length = renderObject.virtualChildCount;
 

@@ -40,12 +40,14 @@ class FrictionSimulation extends Simulation {
     return math.pow(math.E, (startVelocity - endVelocity) / (startPosition - endPosition));
   }
 
+  @override
   double x(double time) => _x + _v * math.pow(_drag, time) / _dragLog - _v / _dragLog;
 
+  @override
   double dx(double time) => _v * math.pow(_drag, time);
 
   @override
-  bool isDone(double time) => dx(time).abs() < this.tolerance.velocity;
+  bool isDone(double time) => dx(time).abs() < tolerance.velocity;
 }
 
 class BoundedFrictionSimulation extends FrictionSimulation {
@@ -60,10 +62,12 @@ class BoundedFrictionSimulation extends FrictionSimulation {
   final double _minX;
   final double _maxX;
 
+  @override
   double x(double time) {
     return super.x(time).clamp(_minX, _maxX);
   }
 
+  @override
   bool isDone(double time) {
     return super.isDone(time) ||
       (x(time) - _minX).abs() < tolerance.distance ||

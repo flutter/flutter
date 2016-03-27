@@ -35,6 +35,7 @@ class _DropDownMenuPainter extends CustomPainter {
   final double menuBottom;
   final RenderBox renderBox;
 
+  @override
   void paint(Canvas canvas, Size size) {
     final BoxPainter painter = new BoxDecoration(
       backgroundColor: color,
@@ -47,6 +48,7 @@ class _DropDownMenuPainter extends CustomPainter {
     painter.paint(canvas, new Rect.fromLTRB(0.0, top, size.width, bottom));
   }
 
+  @override
   bool shouldRepaint(_DropDownMenuPainter oldPainter) {
     return oldPainter.color != color
         || oldPainter.elevation != elevation
@@ -64,6 +66,7 @@ class _DropDownMenu<T> extends StatusTransitionWidget {
 
   final _DropDownRoute<T> route;
 
+  @override
   Widget build(BuildContext context) {
     // The menu is shown in three stages (unit timing in brackets):
     // [0s - 0.25s] - Fade in a rect-sized menu container with the selected item.
@@ -152,13 +155,18 @@ class _DropDownMenu<T> extends StatusTransitionWidget {
 // returning a real null value.
 class _DropDownRouteResult<T> {
   const _DropDownRouteResult(this.result);
+
   final T result;
+
+  @override
   bool operator ==(dynamic other) {
     if (other is! _DropDownRouteResult<T>)
       return false;
     final _DropDownRouteResult<T> typedOther = other;
     return result == typedOther.result;
   }
+
+  @override
   int get hashCode => result.hashCode;
 }
 
@@ -176,10 +184,16 @@ class _DropDownRoute<T> extends PopupRoute<_DropDownRouteResult<T>> {
   final Rect rect;
   final int elevation;
 
+  @override
   Duration get transitionDuration => _kDropDownMenuDuration;
+
+  @override
   bool get barrierDismissable => true;
+
+  @override
   Color get barrierColor => null;
 
+  @override
   ModalPosition getPosition(BuildContext context) {
     RenderBox overlayBox = Overlay.of(context).context.findRenderObject();
     assert(overlayBox != null); // can't be null; routes get inserted by Navigator which has its own Overlay
@@ -192,6 +206,7 @@ class _DropDownRoute<T> extends PopupRoute<_DropDownRouteResult<T>> {
     );
   }
 
+  @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
     return new _DropDownMenu<T>(route: this);
   }
@@ -204,9 +219,15 @@ class DropDownMenuItem<T> extends StatelessWidget {
     this.child
   }) : super(key: key);
 
+  /// The widget below this widget in the tree.
   final Widget child;
+
+  /// The value to return if the user selects this menu item.
+  ///
+  /// Eventually returned in a call to [DropDownButton.onChanged].
   final T value;
 
+  @override
   Widget build(BuildContext context) {
     return new Container(
       height: _kMenuItemHeight,
@@ -238,18 +259,21 @@ class DropDownButton<T> extends StatefulWidget {
   final ValueChanged<T> onChanged;
   final int elevation;
 
+  @override
   _DropDownButtonState<T> createState() => new _DropDownButtonState<T>();
 }
 
 class _DropDownButtonState<T> extends State<DropDownButton<T>> {
   final GlobalKey indexedStackKey = new GlobalKey(debugLabel: 'DropDownButton.IndexedStack');
 
+  @override
   void initState() {
     super.initState();
     _updateSelectedIndex();
     assert(_selectedIndex != null);
   }
 
+  @override
   void didUpdateConfig(DropDownButton<T> oldConfig) {
     if (config.items[_selectedIndex].value != config.value)
       _updateSelectedIndex();
@@ -285,6 +309,7 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     return new GestureDetector(

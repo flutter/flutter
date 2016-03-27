@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:flx/bundle.dart';
 import 'package:flx/signing.dart';
+import 'package:json_schema/json_schema.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
@@ -81,6 +82,23 @@ Map<_Asset, List<_Asset>> _parseAssets(Map<String, dynamic> manifestDescriptor, 
       }
     }
   }
+
+  // Add assets referenced in the fonts section of the manifest.
+  if (manifestDescriptor.containsKey('fonts')) {
+    for (Map<String, dynamic> family in manifestDescriptor['fonts']) {
+      List<Map<String, dynamic>> fonts = family['fonts'];
+      if (fonts == null) continue;
+
+      for (Map<String, dynamic> font in fonts) {
+        String asset = font['asset'];
+        if (asset == null) continue;
+
+        _Asset baseAsset = new _Asset(base: assetBase, key: asset);
+        result[baseAsset] = <_Asset>[];
+      }
+    }
+  }
+
   return result;
 }
 
@@ -89,6 +107,20 @@ dynamic _loadManifest(String manifestPath) {
     return null;
   String manifestDescriptor = new File(manifestPath).readAsStringSync();
   return loadYaml(manifestDescriptor);
+}
+
+Future<int> _validateManifest(Object manifest) async {
+  String schemaPath = path.join(path.absolute(ArtifactStore.flutterRoot),
+      'packages', 'flutter_tools', 'schema', 'flutter_yaml.json');
+  Schema schema = await Schema.createSchemaFromUrl('file://$schemaPath');
+
+  Validator validator = new Validator(schema);
+  if (validator.validate(manifest))
+    return 0;
+
+  printError('Error in flutter.yaml:');
+  printError(validator.errors.join('\n'));
+  return 1;
 }
 
 ZipEntry _createAssetEntry(_Asset asset) {
@@ -167,7 +199,14 @@ Future<int> build(
   String workingDirPath: defaultWorkingDirPath,
   bool precompiledSnapshot: false
 }) async {
-  Map<String, dynamic> manifestDescriptor = _loadManifest(manifestPath);
+  Object manifest = _loadManifest(manifestPath);
+  if (manifest != null) {
+    int result = await _validateManifest(manifest);
+    if (result != 0)
+      return result;
+  }
+  Map<String, dynamic> manifestDescriptor = manifest;
+
   String assetBasePath = path.dirname(path.absolute(manifestPath));
 
   File snapshotFile;
@@ -177,7 +216,11 @@ Future<int> build(
 
     // In a precompiled snapshot, the instruction buffer contains script
     // content equivalents
-    int result = await toolchain.compiler.compile(mainPath: mainPath, snapshotPath: snapshotPath, depfilePath: depfilePath, buildOutputPath: outputPath);
+    int result = await toolchain.compiler.createSnapshot(
+      mainPath: mainPath,
+      snapshotPath: snapshotPath,
+      depfilePath: depfilePath
+    );
     if (result != 0) {
       printError('Failed to run the Flutter compiler. Exit code: $result');
       return result;
