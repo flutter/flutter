@@ -28,6 +28,11 @@ abstract class Curve {
   /// Returns a new curve that is the reversed inversion of this one.
   /// This is often useful as the reverseCurve of an [Animation].
   Curve get flipped => new FlippedCurve(this);
+
+  @override
+  String toString() {
+    return '$runtimeType';
+  }
 }
 
 /// The identity map over the unit interval.
@@ -48,6 +53,11 @@ class SawTooth extends Curve {
   double transform(double t) {
     t *= count;
     return t - t.truncateToDouble();
+  }
+
+  @override
+  String toString() {
+    return '$runtimeType($count)';
   }
 }
 
@@ -76,6 +86,13 @@ class Interval extends Curve {
       return t;
     return curve.transform(t);
   }
+
+  @override
+  String toString() {
+    if (curve is! Linear)
+      return '$runtimeType($start\u22EF$end)\u27A9$curve';
+    return '$runtimeType($start\u22EF$end)';
+  }
 }
 
 /// A cubic polynomial mapping of the unit interval.
@@ -102,6 +119,11 @@ class Cubic extends Curve {
         end = midpoint;
     }
   }
+
+  @override
+  String toString() {
+    return '$runtimeType(${a.toStringAsFixed(2)}, ${b.toStringAsFixed(2)}, ${c.toStringAsFixed(2)}, ${d.toStringAsFixed(2)})';
+  }
 }
 
 double _bounce(double t) {
@@ -126,6 +148,11 @@ class FlippedCurve extends Curve {
 
   @override
   double transform(double t) => 1.0 - curve.transform(1.0 - t);
+
+  @override
+  String toString() {
+    return '$runtimeType($curve)';
+  }
 }
 
 /// An oscillating curve that grows in magnitude.
@@ -173,6 +200,11 @@ class ElasticInCurve extends Curve {
     t = t - 1.0;
     return -math.pow(2.0, 10.0 * t) * math.sin((t - s) * (math.PI * 2.0) / period);
   }
+
+  @override
+  String toString() {
+    return '$runtimeType($period)';
+  }
 }
 
 /// An oscillating curve that shrinks in magnitude while overshooting its bounds.
@@ -185,6 +217,11 @@ class ElasticOutCurve extends Curve {
   double transform(double t) {
     double s = period / 4.0;
     return math.pow(2.0, -10 * t) * math.sin((t - s) * (math.PI * 2.0) / period) + 1.0;
+  }
+
+  @override
+  String toString() {
+    return '$runtimeType($period)';
   }
 }
 
@@ -202,6 +239,11 @@ class ElasticInOutCurve extends Curve {
       return -0.5 * math.pow(2.0, 10.0 * t) * math.sin((t - s) * (math.PI * 2.0) / period);
     else
       return math.pow(2.0, -10.0 * t) * math.sin((t - s) * (math.PI * 2.0) / period) * 0.5 + 1.0;
+  }
+
+  @override
+  String toString() {
+    return '$runtimeType($period)';
   }
 }
 
