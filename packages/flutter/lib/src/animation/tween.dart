@@ -43,7 +43,7 @@ class _AnimatedEvaluation<T> extends Animation<T> with AnimationWithParentMixin<
 
   @override
   String toString() {
-    return '$parent\u27A9$_evaluatable';
+    return '$parent\u27A9$_evaluatable\u27A9$value';
   }
 
   @override
