@@ -28,6 +28,9 @@ class _AlwaysCompleteAnimation extends Animation<double> {
 
   @override
   double get value => 1.0;
+
+  @override
+  String toString() => 'kAlwaysCompleteAnimation';
 }
 
 /// An animation that is always complete.
@@ -57,6 +60,9 @@ class _AlwaysDismissedAnimation extends Animation<double> {
 
   @override
   double get value => 0.0;
+
+  @override
+  String toString() => 'kAlwaysDismissedAnimation';
 }
 
 /// An animation that is always dismissed.
@@ -96,6 +102,11 @@ class AlwaysStoppedAnimation<T> extends Animation<T> {
 
   @override
   AnimationStatus get status => AnimationStatus.forward;
+
+  @override
+  String toStringDetails() {
+    return '${super.toStringDetails()} $value; paused';
+  }
 }
 
 /// Implements most of the [Animation] interface, by deferring its behavior to a
@@ -195,6 +206,13 @@ class ProxyAnimation extends Animation<double>
 
   @override
   double get value => _parent != null ? _parent.value : _value;
+
+  @override
+  String toString() {
+    if (parent == null)
+      return '$runtimeType(null; ${super.toStringDetails()} ${value.toStringAsFixed(3)})';
+    return '$parent\u27A9$runtimeType';
+  }
 }
 
 /// An animation that is the reverse of another animation.
@@ -250,6 +268,11 @@ class ReverseAnimation extends Animation<double>
       case AnimationStatus.completed: return AnimationStatus.dismissed;
       case AnimationStatus.dismissed: return AnimationStatus.completed;
     }
+  }
+
+  @override
+  String toString() {
+    return '$parent\u27AA$runtimeType';
   }
 }
 
@@ -317,10 +340,13 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
     }
   }
 
+  bool get _useForwardCurve {
+    return reverseCurve == null || (_curveDirection ?? parent.status) != AnimationStatus.reverse;
+  }
+
   @override
   double get value {
-    final bool useForwardCurve = reverseCurve == null || (_curveDirection ?? parent.status) != AnimationStatus.reverse;
-    Curve activeCurve = useForwardCurve ? curve : reverseCurve;
+    Curve activeCurve = _useForwardCurve ? curve : reverseCurve;
 
     double t = parent.value;
     if (activeCurve == null)
@@ -330,6 +356,15 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
       return t;
     }
     return activeCurve.transform(t);
+  }
+
+  @override
+  String toString() {
+    if (reverseCurve == null)
+      return '$parent\u27A9$curve';
+    if (_useForwardCurve) 
+     return '$parent\u27A9$curve\u2092\u2099/$reverseCurve';
+    return '$parent\u27A9$curve/$reverseCurve\u2092\u2099';
   }
 }
 
@@ -438,5 +473,12 @@ class TrainHoppingAnimation extends Animation<double>
       _nextTrain.removeListener(_valueChangeHandler);
       _nextTrain = null;
     }
+  }
+
+  @override
+  String toString() {
+    if (_nextTrain != null)
+      return '$currentTrain\u27A9$runtimeType(next: $_nextTrain)';
+    return '$currentTrain\u27A9$runtimeType(no next)';
   }
 }
