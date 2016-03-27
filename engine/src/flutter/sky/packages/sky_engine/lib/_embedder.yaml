@@ -27,7 +27,7 @@ linter:
   rules:
     - avoid_empty_else
     - always_declare_return_types
-    - always_specify_types
+    # - always_specify_types # We currently whitelist some type omissions.
     - annotate_overrides
     # - avoid_as # https://github.com/dart-lang/linter/issues/195
     - avoid_init_to_null
@@ -50,7 +50,7 @@ linter:
     - sort_constructors_first
     - sort_unnamed_constructors_first
     - super_goes_last
-    - type_annotate_public_apis # subset of always_specify_types
+    # - type_annotate_public_apis # subset of always_specify_types
     - type_init_formals
     - unnecessary_brace_in_string_interp
     - unnecessary_getters_setters
