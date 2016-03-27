@@ -384,7 +384,7 @@ abstract class State<T extends StatefulWidget> {
     assert(() {
       if (_debugLifecycleState == _StateLifecycle.defunct) {
         throw new FlutterError(
-          'setState() called after dipose(): $this\n'
+          'setState() called after dispose(): $this\n'
           'This error happens if you call setState() on State object for a widget that\n'
           'no longer appears in the widget tree (e.g., whose parent widget no longer\n'
           'includes the widget in its build). This error can occur when code calls\n'
