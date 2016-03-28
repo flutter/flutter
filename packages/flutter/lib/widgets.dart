@@ -44,6 +44,7 @@ export 'src/widgets/scrollable_list.dart';
 export 'src/widgets/scrollable.dart';
 export 'src/widgets/semantics_debugger.dart';
 export 'src/widgets/status_transitions.dart';
+export 'src/widgets/table.dart';
 export 'src/widgets/title.dart';
 export 'src/widgets/transitions.dart';
 export 'src/widgets/unique_widget.dart';

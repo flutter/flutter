@@ -20,6 +20,8 @@ export 'package:flutter/services.dart' show FlutterError;
 /// original Widget's Key.
 ///
 /// Keys must be unique amongst the Elements with the same parent.
+///
+/// Subclasses of Key should either subclass [LocalKey] or [GlobalKey].
 abstract class Key {
   /// Construct a ValueKey<String> with the given String.
   /// This is the simplest way to create keys.
@@ -29,12 +31,18 @@ abstract class Key {
   const Key.constructor(); // so that subclasses can call us, since the Key() factory constructor shadows the implicit constructor
 }
 
+/// A key that is not a [GlobalKey].
+abstract class LocalKey extends Key {
+  /// Default constructor, used by subclasses.
+  const LocalKey() : super.constructor();
+}
+
 /// A kind of [Key] that uses a value of a particular type to identify itself.
 ///
 /// For example, a ValueKey<String> is equal to another ValueKey<String> if
 /// their values match.
-class ValueKey<T> extends Key {
-  const ValueKey(this.value) : super.constructor();
+class ValueKey<T> extends LocalKey {
+  const ValueKey(this.value);
 
   final T value;
 
@@ -54,8 +62,8 @@ class ValueKey<T> extends Key {
 }
 
 /// A [Key] that is only equal to itself.
-class UniqueKey extends Key {
-  const UniqueKey() : super.constructor();
+class UniqueKey extends LocalKey {
+  const UniqueKey();
 
   @override
   String toString() => '[$hashCode]';
@@ -65,8 +73,8 @@ class UniqueKey extends Key {
 ///
 /// Used to tie the identity of a Widget to the identity of an object used to
 /// generate that Widget.
-class ObjectKey extends Key {
-  const ObjectKey(this.value) : super.constructor();
+class ObjectKey extends LocalKey {
+  const ObjectKey(this.value);
 
   final Object value;
 
@@ -744,7 +752,7 @@ abstract class Element implements BuildContext {
   Element updateChild(Element child, Widget newWidget, dynamic newSlot) {
     if (newWidget == null) {
       if (child != null)
-        _deactivateChild(child);
+        deactivateChild(child);
       return null;
     }
     if (child != null) {
@@ -760,10 +768,10 @@ abstract class Element implements BuildContext {
         assert(child.widget == newWidget);
         return child;
       }
-      _deactivateChild(child);
+      deactivateChild(child);
       assert(child._parent == null);
     }
-    return _inflateWidget(newWidget, newSlot);
+    return inflateWidget(newWidget, newSlot);
   }
 
   static void finalizeTree() {
@@ -870,7 +878,7 @@ abstract class Element implements BuildContext {
     return element;
   }
 
-  Element _inflateWidget(Widget newWidget, dynamic newSlot) {
+  Element inflateWidget(Widget newWidget, dynamic newSlot) {
     Key key = newWidget.key;
     if (key is GlobalKey) {
       Element newChild = _retakeInactiveElement(key, newWidget);
@@ -901,7 +909,7 @@ abstract class Element implements BuildContext {
     });
   }
 
-  void _deactivateChild(Element child) {
+  void deactivateChild(Element child) {
     assert(child != null);
     assert(child._parent == this);
     child._parent = null;
@@ -1339,7 +1347,7 @@ abstract class ComponentElement extends BuildableElement {
   @override
   bool detachChild(Element child) {
     assert(child == _child);
-    _deactivateChild(_child);
+    deactivateChild(_child);
     _child = null;
     return true;
   }
@@ -1733,7 +1741,7 @@ abstract class RenderObjectElement extends BuildableElement {
           if (oldChild.widget.key != null)
             oldKeyedChildren[oldChild.widget.key] = oldChild;
           else
-            _deactivateChild(oldChild);
+            deactivateChild(oldChild);
         }
         oldChildrenTop += 1;
       }
@@ -1795,7 +1803,7 @@ abstract class RenderObjectElement extends BuildableElement {
     if (haveOldChildren && oldKeyedChildren.isNotEmpty) {
       for (Element oldChild in oldKeyedChildren.values) {
         if (detachedChildren == null || !detachedChildren.contains(oldChild))
-          _deactivateChild(oldChild);
+          deactivateChild(oldChild);
       }
     }
 
@@ -1897,7 +1905,7 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
   @override
   bool detachChild(Element child) {
     assert(child == _child);
-    _deactivateChild(_child);
+    deactivateChild(_child);
     _child = null;
     return true;
   }
@@ -1984,7 +1992,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   @override
   bool detachChild(Element child) {
     _detachedChildren.add(child);
-    _deactivateChild(child);
+    deactivateChild(child);
     return true;
   }
 
@@ -1994,7 +2002,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
     _children = new List<Element>(widget.children.length);
     Element previousChild;
     for (int i = 0; i < _children.length; ++i) {
-      Element newChild = _inflateWidget(widget.children[i], previousChild);
+      Element newChild = inflateWidget(widget.children[i], previousChild);
       _children[i] = newChild;
       previousChild = newChild;
     }
