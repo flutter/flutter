@@ -29,6 +29,9 @@ const String defaultWorkingDirPath = 'build/flx';
 
 const String _kSnapshotKey = 'snapshot_blob.bin';
 
+const String _kFontSetMaterial = 'material';
+const String _kFontSetRoboto = 'roboto';
+
 class _Asset {
   final String source;
   final String base;
@@ -37,25 +40,34 @@ class _Asset {
   _Asset({ this.source, this.base, this.key });
 }
 
-const String _kMaterialIconsKey = 'fonts/MaterialIcons-Regular.ttf';
+Map<String, dynamic> _readMaterialFontsManifest() {
+  String fontsPath = path.join(path.absolute(ArtifactStore.flutterRoot),
+      'packages', 'flutter_tools', 'schema', 'material_fonts.yaml');
 
-List<Map<String, dynamic>> _getMaterialFonts() {
-  return [{
-    'family': 'MaterialIcons',
-    'fonts': [{
-      'asset': _kMaterialIconsKey
-    }]
-  }];
+  return loadYaml(new File(fontsPath).readAsStringSync());
 }
 
-List<_Asset> _getMaterialAssets() {
-  return <_Asset>[
-    new _Asset(
-      base: '${ArtifactStore.flutterRoot}/bin/cache/artifacts/material_fonts',
-      source: 'MaterialIcons-Regular.ttf',
-      key: _kMaterialIconsKey
-    )
-  ];
+final Map<String, dynamic> _materialFontsManifest = _readMaterialFontsManifest();
+
+List<Map<String, dynamic>> _getMaterialFonts(String fontSet) {
+  return _materialFontsManifest[fontSet];
+}
+
+List<_Asset> _getMaterialAssets(String fontSet) {
+  List<_Asset> result = <_Asset>[];
+
+  for (Map<String, dynamic> family in _getMaterialFonts(fontSet)) {
+    for (Map<String, dynamic> font in family['fonts']) {
+      String assetKey = font['asset'];
+      result.add(new _Asset(
+        base: '${ArtifactStore.flutterRoot}/bin/cache/artifacts/material_fonts',
+        source: path.basename(assetKey),
+        key: assetKey
+      ));
+    }
+  }
+
+  return result;
 }
 
 Map<_Asset, List<_Asset>> _parseAssets(Map<String, dynamic> manifestDescriptor, String assetBase) {
@@ -144,10 +156,15 @@ ZipEntry _createAssetManifest(Map<_Asset, List<_Asset>> assets) {
   return new ZipEntry.fromString('AssetManifest.json', JSON.encode(json));
 }
 
-ZipEntry _createFontManifest(Map<String, dynamic> manifestDescriptor, List<Map<String, dynamic>> additionalFonts) {
+ZipEntry _createFontManifest(Map<String, dynamic> manifestDescriptor,
+                             bool usesMaterialDesign,
+                             bool includeRobotoFonts) {
   List<Map<String, dynamic>> fonts = <Map<String, dynamic>>[];
-  if (additionalFonts != null)
-    fonts.addAll(additionalFonts);
+  if (usesMaterialDesign) {
+    fonts.addAll(_getMaterialFonts(_kFontSetMaterial));
+    if (includeRobotoFonts)
+      fonts.addAll(_getMaterialFonts(_kFontSetRoboto));
+  }
   if (manifestDescriptor != null && manifestDescriptor.containsKey('fonts'))
     fonts.addAll(manifestDescriptor['fonts']);
   if (fonts.isEmpty)
@@ -158,7 +175,8 @@ ZipEntry _createFontManifest(Map<String, dynamic> manifestDescriptor, List<Map<S
 /// Build the flx in the build/ directory and return `localBundlePath` on success.
 Future<String> buildFlx(
   Toolchain toolchain, {
-  String mainPath: defaultMainPath
+  String mainPath: defaultMainPath,
+  bool includeRobotoFonts: true
 }) async {
   int result;
   String localBundlePath = path.join('build', 'app.flx');
@@ -167,7 +185,8 @@ Future<String> buildFlx(
     toolchain,
     snapshotPath: localSnapshotPath,
     outputPath: localBundlePath,
-    mainPath: mainPath
+    mainPath: mainPath,
+    includeRobotoFonts: includeRobotoFonts
   );
   if (result == 0)
     return localBundlePath;
@@ -197,7 +216,8 @@ Future<int> build(
   String depfilePath: defaultDepfilePath,
   String privateKeyPath: defaultPrivateKeyPath,
   String workingDirPath: defaultWorkingDirPath,
-  bool precompiledSnapshot: false
+  bool precompiledSnapshot: false,
+  bool includeRobotoFonts: true
 }) async {
   Object manifest = _loadManifest(manifestPath);
   if (manifest != null) {
@@ -235,7 +255,8 @@ Future<int> build(
       assetBasePath: assetBasePath,
       outputPath: outputPath,
       privateKeyPath: privateKeyPath,
-      workingDirPath: workingDirPath
+      workingDirPath: workingDirPath,
+      includeRobotoFonts: includeRobotoFonts
   );
 }
 
@@ -245,7 +266,8 @@ Future<int> assemble({
   String assetBasePath: defaultAssetBasePath,
   String outputPath: defaultFlxOutputPath,
   String privateKeyPath: defaultPrivateKeyPath,
-  String workingDirPath: defaultWorkingDirPath
+  String workingDirPath: defaultWorkingDirPath,
+  bool includeRobotoFonts: true
 }) async {
   printTrace('Building $outputPath');
 
@@ -272,18 +294,22 @@ Future<int> assemble({
     }
   }
 
+  List<_Asset> materialAssets = <_Asset>[];
   if (usesMaterialDesign) {
-    for (_Asset asset in _getMaterialAssets()) {
-      ZipEntry assetEntry = _createAssetEntry(asset);
-      if (assetEntry == null)
-        return 1;
-      zipBuilder.addEntry(assetEntry);
-    }
+    materialAssets.addAll(_getMaterialAssets(_kFontSetMaterial));
+    if (includeRobotoFonts)
+      materialAssets.addAll(_getMaterialAssets(_kFontSetRoboto));
+  }
+  for (_Asset asset in materialAssets) {
+    ZipEntry assetEntry = _createAssetEntry(asset);
+    if (assetEntry == null)
+      return 1;
+    zipBuilder.addEntry(assetEntry);
   }
 
   zipBuilder.addEntry(_createAssetManifest(assets));
 
-  ZipEntry fontManifest = _createFontManifest(manifestDescriptor, usesMaterialDesign ? _getMaterialFonts() : null);
+  ZipEntry fontManifest = _createFontManifest(manifestDescriptor, usesMaterialDesign, includeRobotoFonts);
   if (fontManifest != null)
     zipBuilder.addEntry(fontManifest);
 

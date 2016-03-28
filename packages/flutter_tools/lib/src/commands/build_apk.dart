@@ -435,7 +435,10 @@ Future<int> buildAndroid(
   } else {
     // Find the path to the main Dart file; build the FLX.
     String mainPath = findMainDartFile(target);
-    String localBundlePath = await flx.buildFlx(toolchain, mainPath: mainPath);
+    String localBundlePath = await flx.buildFlx(
+        toolchain,
+        mainPath: mainPath,
+        includeRobotoFonts: false);
 
     return _buildApk(platform, components, localBundlePath, keystore, outputFile);
   }

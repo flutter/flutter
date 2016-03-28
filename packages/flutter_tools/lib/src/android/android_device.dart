@@ -286,7 +286,8 @@ class AndroidDevice extends Device {
 
     String localBundlePath = await flx.buildFlx(
       toolchain,
-      mainPath: mainPath
+      mainPath: mainPath,
+      includeRobotoFonts: false
     );
 
     printTrace('Starting bundle for $this.');

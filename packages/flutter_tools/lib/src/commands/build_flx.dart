@@ -23,6 +23,7 @@ class BuildFlxCommand extends FlutterCommand {
     argParser.addOption('snapshot', defaultsTo: defaultSnapshotPath);
     argParser.addOption('depfile', defaultsTo: defaultDepfilePath);
     argParser.addOption('working-dir', defaultsTo: defaultWorkingDirPath);
+    argParser.addFlag('include-roboto-fonts', defaultsTo: true);
     usesPubOption();
   }
 
@@ -56,7 +57,8 @@ class BuildFlxCommand extends FlutterCommand {
       depfilePath: argResults['depfile'],
       privateKeyPath: argResults['private-key'],
       workingDirPath: argResults['working-dir'],
-      precompiledSnapshot: argResults['precompiled']
+      precompiledSnapshot: argResults['precompiled'],
+      includeRobotoFonts: argResults['include-roboto-fonts']
     ).then((int result) {
       if (result == 0)
         printStatus('Built $outputPath.');
