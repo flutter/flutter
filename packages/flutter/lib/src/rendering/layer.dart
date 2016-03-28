@@ -73,7 +73,7 @@ abstract class Layer {
   @override
   String toString() => '$runtimeType';
 
-  dynamic debugOwner;
+  dynamic debugCreator;
 
   String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
     String result = '$prefixLineOne$this\n';
@@ -89,8 +89,8 @@ abstract class Layer {
   }
 
   void debugFillDescription(List<String> description) {
-    if (debugOwner != null)
-      description.add('owner: $debugOwner');
+    if (debugCreator != null)
+      description.add('creator: $debugCreator');
   }
 
   String debugDescribeChildren(String prefix) => '';
