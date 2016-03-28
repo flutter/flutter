@@ -1029,7 +1029,7 @@ abstract class Element implements BuildContext {
     assert(false);
   }
 
-  String debugGetOwnershipChain(int limit) {
+  String debugGetCreatorChain(int limit) {
     List<String> chain = <String>[];
     Element node = this;
     while (chain.length < limit && node != null) {
@@ -1512,7 +1512,7 @@ class ParentDataElement<T extends RenderObjectWidget> extends _ProxyElement {
         'Incorrect use of ParentDataWidget.\n' +
         widget.debugDescribeInvalidAncestorChain(
           description: "$this",
-          ownershipChain: parent.debugGetOwnershipChain(10),
+          ownershipChain: parent.debugGetCreatorChain(10),
           foundValidAncestor: ancestor != null,
           badAncestors: badAncestors
         )
@@ -1634,7 +1634,7 @@ abstract class RenderObjectElement extends BuildableElement {
   }
 
   void debugUpdateRenderObjectOwner() {
-    _renderObject.debugOwner = debugGetOwnershipChain(10);
+    _renderObject.debugCreator = debugGetCreatorChain(10);
   }
 
   @override

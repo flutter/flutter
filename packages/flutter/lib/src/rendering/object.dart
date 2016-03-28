@@ -73,7 +73,7 @@ class PaintingContext {
     child._layer ??= new OffsetLayer();
     child._layer.removeAllChildren();
     assert(() {
-      child._layer.debugOwner = child.debugOwner ?? child.runtimeType;
+      child._layer.debugCreator = child.debugCreator ?? child.runtimeType;
       return true;
     });
     PaintingContext childContext = new PaintingContext._(child._layer, child.paintBounds);
@@ -111,7 +111,7 @@ class PaintingContext {
       });
       child._layer.detach();
       assert(() {
-        child._layer.debugOwner = child.debugOwner ?? child.runtimeType;
+        child._layer.debugCreator = child.debugCreator ?? child.runtimeType;
         return true;
       });
     }
@@ -871,7 +871,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// Override in subclasses with children and call the visitor for each child
   void visitChildren(RenderObjectVisitor visitor) { }
 
-  dynamic debugOwner;
+  dynamic debugCreator;
   static int _debugPrintedExceptionCount = 0;
   void _debugReportException(String method, dynamic exception, StackTrace stack) {
     try {
@@ -884,8 +884,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
           debugPrint('The following exception was raised during $method():');
           debugPrint('$exception');
           debugPrint('The following RenderObject was being processed when the exception was fired:\n${this}');
-          if (debugOwner != null)
-            debugPrint('This RenderObject had the following owner:\n$debugOwner');
+          if (debugCreator != null)
+            debugPrint('This RenderObject had the following creator:\n$debugCreator');
           int depth = 0;
           List<String> descendants = <String>[];
           const int maxDepth = 5;
@@ -1803,8 +1803,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// per string. Subclasses should override this to have their information
   /// included in toStringDeep().
   void debugFillDescription(List<String> description) {
-    if (debugOwner != null)
-      description.add('owner: $debugOwner');
+    if (debugCreator != null)
+      description.add('creator: $debugCreator');
     description.add('parentData: $parentData');
     description.add('constraints: $constraints');
   }

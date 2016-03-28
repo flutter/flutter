@@ -22,7 +22,7 @@ bool debugCheckHasMaterial(BuildContext context) {
         'The specific widget that could not find a Material ancestor was:\n'
         '  ${context.widget}'
         'The ownership chain for the affected widget is:\n'
-        '  ${element.debugGetOwnershipChain(10)}'
+        '  ${element.debugGetCreatorChain(10)}'
       );
     }
     return true;
@@ -41,7 +41,7 @@ bool debugCheckHasScaffold(BuildContext context) {
         'The specific widget that could not find a Scaffold ancestor was:\n'
         '  ${context.widget}'
         'The ownership chain for the affected widget is:\n'
-        '  ${element.debugGetOwnershipChain(10)}'
+        '  ${element.debugGetCreatorChain(10)}'
       );
     }
     return true;
