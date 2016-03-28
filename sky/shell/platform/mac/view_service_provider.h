@@ -6,6 +6,7 @@
 #define SKY_SHELL_PLATFORM_MAC_VIEW_SERVICE_PROVIDER_H_
 
 #include "base/bind.h"
+#include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
 #include "sky/engine/wtf/Assertions.h"
 
