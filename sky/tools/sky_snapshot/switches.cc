@@ -9,6 +9,7 @@ namespace switches {
 const char kBuildOutput[] = "build-output";
 const char kDepfile[] = "depfile";
 const char kHelp[] = "help";
+const char kPackages[] = "packages";
 const char kPackageRoot[] = "package-root";
 const char kSnapshot[] = "snapshot";
 
