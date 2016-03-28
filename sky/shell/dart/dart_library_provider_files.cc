@@ -39,16 +39,26 @@ base::FilePath SimplifyPath(const base::FilePath& path) {
 
 }  // namespace
 
-DartLibraryProviderFiles::DartLibraryProviderFiles(
-    const base::FilePath& package_root)
-    : package_root_(package_root) {
-    if (package_root_.empty())
-      package_root_ = base::FilePath(FILE_PATH_LITERAL("packages"));
-    if (!base::DirectoryExists(package_root_))
-      package_root_ = base::FilePath();
+DartLibraryProviderFiles::DartLibraryProviderFiles() {
 }
 
 DartLibraryProviderFiles::~DartLibraryProviderFiles() {
+}
+
+void DartLibraryProviderFiles::LoadPackagesMap(const base::FilePath& packages) {
+  packages_ = base::MakeAbsoluteFilePath(packages);
+  std::string packages_source;
+  if (!base::ReadFileToString(packages_, &packages_source)) {
+    LOG(ERROR) << "error: Unable to load .packages file '"
+               << packages_.AsUTF8Unsafe() << "'.";
+    exit(1);
+  }
+  std::string error;
+  if (!packages_map_.Parse(packages_source, &error)) {
+    LOG(ERROR) << "error: Unable to parse .packages file '"
+               << packages_.AsUTF8Unsafe() << "'.\n" << error;
+    exit(1);
+  }
 }
 
 void DartLibraryProviderFiles::GetLibraryAsStream(
@@ -67,9 +77,20 @@ void DartLibraryProviderFiles::GetLibraryAsStream(
 std::string DartLibraryProviderFiles::CanonicalizePackageURL(std::string url) {
   DCHECK(base::StartsWithASCII(url, "package:", true));
   base::ReplaceFirstSubstringAfterOffset(&url, 0, "package:", "");
-  CHECK(!package_root_.empty())
-      << "Cannot import packages without a valid --package-root";
-  return package_root_.Append(url).AsUTF8Unsafe();
+  size_t slash = url.find('/');
+  if (slash == std::string::npos)
+    return std::string();
+  std::string package = url.substr(0, slash);
+  std::string library_path = url.substr(slash + 1);
+  std::string package_path = packages_map_.Resolve(package);
+  if (package_path.empty())
+    return std::string();
+  if (base::StartsWithASCII(package_path, "file://", true)) {
+    base::ReplaceFirstSubstringAfterOffset(&package_path, 0, "file://", "");
+    return package_path + library_path;
+  }
+  auto path = packages_.DirName().Append(package_path).Append(library_path);
+  return SimplifyPath(path).AsUTF8Unsafe();
 }
 
 std::string DartLibraryProviderFiles::CanonicalizeFileURL(std::string url) {

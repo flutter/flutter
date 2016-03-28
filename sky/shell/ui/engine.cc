@@ -6,6 +6,7 @@
 
 #include "base/bind.h"
 #include "base/files/file_path.h"
+#include "base/files/file_util.h"
 #include "base/threading/worker_pool.h"
 #include "base/time/time.h"
 #include "base/trace_event/trace_event.h"
@@ -209,17 +210,31 @@ void Engine::RunFromPrecompiledSnapshot(const mojo::String& bundle_path) {
 }
 
 void Engine::RunFromFile(const mojo::String& main,
-                         const mojo::String& package_root,
+                         const mojo::String& packages,
                          const mojo::String& bundle) {
   TRACE_EVENT0("flutter", "Engine::RunFromFile");
+  std::string main_str(main);
   if (bundle.size() != 0) {
     // The specification of an FLX bundle is optional.
     ConfigureZipAssetBundle(bundle);
   }
-  std::string package_root_str = package_root;
-  dart_library_provider_.reset(
-      new DartLibraryProviderFiles(base::FilePath(package_root_str)));
-  RunFromLibrary(main);
+  base::FilePath packages_path = base::FilePath(std::string(packages));
+  if (packages_path.empty()) {
+    base::FilePath main_dir = base::FilePath(main_str).DirName();
+    packages_path = main_dir.Append(FILE_PATH_LITERAL(".packages"));
+    if (!base::PathExists(packages_path)) {
+      packages_path = main_dir
+          .Append(base::FilePath::kParentDirectory)
+          .Append(FILE_PATH_LITERAL(".packages"));
+      if (!base::PathExists(packages_path))
+        packages_path = base::FilePath();
+    }
+  }
+  DartLibraryProviderFiles* provider = new DartLibraryProviderFiles();
+  dart_library_provider_.reset(provider);
+  if (!packages_path.empty())
+    provider->LoadPackagesMap(packages_path);
+  RunFromLibrary(main_str);
 }
 
 void Engine::RunFromBundle(const mojo::String& script_uri,

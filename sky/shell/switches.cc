@@ -15,7 +15,7 @@ const char kFLX[] = "flx";
 const char kHelp[] = "help";
 const char kNonInteractive[] = "non-interactive";
 const char kMainDartFile[] = "dart-main";
-const char kPackageRoot[] = "package-root";
+const char kPackages[] = "packages";
 const char kStartPaused[] = "start-paused";
 const char kTraceStartup[] = "trace-startup";
 const char kDeviceObservatoryPort[] = "observatory-port";
@@ -27,7 +27,7 @@ void PrintUsage(const std::string& executable_name) {
             << " --" << kStartPaused
             << " --" << kTraceStartup
             << " --" << kFLX << "=FLX"
-            << " --" << kPackageRoot << "=PACKAGE_ROOT"
+            << " --" << kPackages << "=PACKAGES"
             << " --" << kDeviceObservatoryPort << "=8181"
             << " [ MAIN_DART ]" << std::endl;
 }

@@ -7,14 +7,17 @@
 
 #include "base/files/file_path.h"
 #include "sky/engine/tonic/dart_library_provider.h"
+#include "sky/engine/tonic/parsers/packages_map.h"
 
 namespace sky {
 namespace shell {
 
 class DartLibraryProviderFiles : public blink::DartLibraryProvider {
  public:
-  explicit DartLibraryProviderFiles(const base::FilePath& package_root);
+  DartLibraryProviderFiles();
   ~DartLibraryProviderFiles() override;
+
+  void LoadPackagesMap(const base::FilePath& packages);
 
  protected:
   // |DartLibraryProvider| implementation:
@@ -26,7 +29,8 @@ class DartLibraryProviderFiles : public blink::DartLibraryProvider {
   std::string CanonicalizePackageURL(std::string url);
   std::string CanonicalizeFileURL(std::string url);
 
-  base::FilePath package_root_;
+  base::FilePath packages_;
+  tonic::PackagesMap packages_map_;
 
   DISALLOW_COPY_AND_ASSIGN(DartLibraryProviderFiles);
 };

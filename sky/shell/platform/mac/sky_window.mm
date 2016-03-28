@@ -109,9 +109,9 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(
 
   auto args = command_line.GetArgs();
   if (args.size() > 0) {
-    auto package_root =
-        command_line.GetSwitchValueASCII(sky::shell::switches::kPackageRoot);
-    _sky_engine->RunFromFile(args[0], package_root, "");
+    auto packages =
+        command_line.GetSwitchValueASCII(sky::shell::switches::kPackages);
+    _sky_engine->RunFromFile(args[0], packages, "");
     return;
   }
 }

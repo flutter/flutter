@@ -103,9 +103,9 @@ void PlatformMacMain(int argc, const char* argv[], std::string icu_data_path) {
 }
 
 static bool FlagsValidForCommandLineLaunch(const std::string& dart_main,
-                                           const std::string& package_root,
+                                           const std::string& packages,
                                            const std::string& bundle) {
-  if (dart_main.size() == 0 || package_root.size() == 0 || bundle.size() == 0) {
+  if (dart_main.empty() || packages.empty() || bundle.empty()) {
     return false;
   }
 
@@ -119,7 +119,7 @@ static bool FlagsValidForCommandLineLaunch(const std::string& dart_main,
     return false;
   }
 
-  if (![manager fileExistsAtPath:@(package_root.c_str())]) {
+  if (![manager fileExistsAtPath:@(packages.c_str())]) {
     return false;
   }
 
@@ -157,23 +157,23 @@ bool AttemptLaunchFromCommandLineSwitches(sky::SkyEnginePtr& engine) {
   auto command_line = *base::CommandLine::ForCurrentProcess();
 
   if (command_line.HasSwitch(kMainDartFile) ||
-      command_line.HasSwitch(kPackageRoot) || command_line.HasSwitch(kFLX)) {
+      command_line.HasSwitch(kPackages) || command_line.HasSwitch(kFLX)) {
     // The main dart file, flx bundle and the package root must be specified in
     // one go. We dont want to end up in a situation where we take one value
     // from the command line and the others from user defaults. In case, any
     // new flags are specified, forget about all the old ones.
     [defaults removeObjectForKey:@(kMainDartFile)];
-    [defaults removeObjectForKey:@(kPackageRoot)];
+    [defaults removeObjectForKey:@(kPackages)];
     [defaults removeObjectForKey:@(kFLX)];
 
     [defaults synchronize];
   }
 
   std::string dart_main = ResolveCommandLineLaunchFlag(kMainDartFile);
-  std::string package_root = ResolveCommandLineLaunchFlag(kPackageRoot);
+  std::string packages = ResolveCommandLineLaunchFlag(kPackages);
   std::string bundle = ResolveCommandLineLaunchFlag(kFLX);
 
-  if (!FlagsValidForCommandLineLaunch(dart_main, package_root, bundle)) {
+  if (!FlagsValidForCommandLineLaunch(dart_main, packages, bundle)) {
     return false;
   }
 
@@ -181,13 +181,13 @@ bool AttemptLaunchFromCommandLineSwitches(sky::SkyEnginePtr& engine) {
   // defaults so that the next time the user launches the application in the
   // simulator without the tooling, the application boots up.
   [defaults setObject:@(dart_main.c_str()) forKey:@(kMainDartFile)];
-  [defaults setObject:@(package_root.c_str()) forKey:@(kPackageRoot)];
+  [defaults setObject:@(packages.c_str()) forKey:@(kPackages)];
   [defaults setObject:@(bundle.c_str()) forKey:@(kFLX)];
 
   [defaults synchronize];
 
   // Finally launch with the newly resolved arguments.
-  engine->RunFromFile(dart_main, package_root, bundle);
+  engine->RunFromFile(dart_main, packages, bundle);
   return true;
 }
 

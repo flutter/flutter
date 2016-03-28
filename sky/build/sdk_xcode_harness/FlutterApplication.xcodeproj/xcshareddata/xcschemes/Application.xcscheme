@@ -71,7 +71,7 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--package-root=$(FLUTTER_APPLICATION_PATH)/packages"
+            argument = "--packages=$(FLUTTER_APPLICATION_PATH)/.packages"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

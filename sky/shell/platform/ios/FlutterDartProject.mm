@@ -15,7 +15,7 @@
 #pragma mark - Override base class designated initializers
 
 - (instancetype)init {
-  return [self initWithFLXArchive:nil dartMain:nil packageRoot:nil];
+  return [self initWithFLXArchive:nil dartMain:nil packages:nil];
 }
 
 #pragma mark - Designated initializers
@@ -34,12 +34,12 @@
 
 - (instancetype)initWithFLXArchive:(NSURL*)archiveURL
                           dartMain:(NSURL*)dartMainURL
-                       packageRoot:(NSURL*)dartPackageURL {
+                          packages:(NSURL*)dartPackages {
   self = [super init];
 
   if (self) {
     _dartSource = [[FlutterDartSource alloc] initWithDartMain:dartMainURL
-                                                  packageRoot:dartPackageURL
+                                                     packages:dartPackages
                                                    flxArchive:archiveURL];
 
     [self checkReadiness];
@@ -160,7 +160,7 @@ static NSString* NSStringFromVMType(VMType type) {
     }
 
     engine->RunFromFile(_dartSource.dartMain.absoluteURL.path.UTF8String,
-                        _dartSource.packageRoot.absoluteURL.path.UTF8String,
+                        _dartSource.packages.absoluteURL.path.UTF8String,
                         _dartSource.flxArchive.absoluteURL.path.UTF8String);
     result(YES, @"Success");
   }];

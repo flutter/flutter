@@ -71,7 +71,7 @@ class Engine : public UIDelegate,
   void OnPointerPacket(pointer::PointerPacketPtr packet) override;
 
   void RunFromFile(const mojo::String& main,
-                   const mojo::String& package_root,
+                   const mojo::String& packages,
                    const mojo::String& bundle) override;
   void RunFromPrecompiledSnapshot(const mojo::String& bundle_path) override;
   void RunFromBundle(const mojo::String& script_uri,
