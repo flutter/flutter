@@ -11,6 +11,7 @@ import 'package:test/src/executable.dart' as executable; // ignore: implementati
 import '../artifacts.dart';
 import '../build_configuration.dart';
 import '../globals.dart';
+import '../package_map.dart';
 import '../runner/flutter_command.dart';
 import '../test/flutter_platform.dart' as loader;
 
@@ -99,8 +100,8 @@ class TestCommand extends FlutterCommand {
 
     // If we're running the flutter tests, we want to use the packages directory
     // from the flutter package in order to find the proper shell binary.
-    if (runFlutterTests && ArtifactStore.packageRoot == 'packages')
-      ArtifactStore.packageRoot = path.join(ArtifactStore.flutterRoot, 'packages', 'flutter', 'packages');
+    if (runFlutterTests)
+      PackageMap.instance = new PackageMap(path.join(ArtifactStore.flutterRoot, 'packages', 'flutter', '.packages'));
 
     Directory testDir = runFlutterTests ? _flutterUnitTestDir : _currentPackageTestDir;
 

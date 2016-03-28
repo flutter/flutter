@@ -9,6 +9,9 @@ dependencies:
   intl: '>=0.12.4+2 <0.13.0'
   vector_math: '>=1.4.5 <2.0.0'
 
+  # We need to pin crypto because archive can't handle larger numbers.
+  crypto: 0.9.2
+
   sky_engine:
     path: ../../bin/cache/pkg/sky_engine
   sky_services:

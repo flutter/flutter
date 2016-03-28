@@ -35,7 +35,7 @@ if [ ! -f "$SNAPSHOT_PATH" ] || [ ! -f "$STAMP_PATH" ] || [ `cat "$STAMP_PATH"` 
   echo Building flutter tool...
   FLUTTER_DIR="$FLUTTER_ROOT/packages/flutter"
   (cd "$FLUTTER_TOOLS_DIR"; "../../bin/cache/dart-sdk/bin/pub" get --verbosity=warning)
-  "$DART" --snapshot="$SNAPSHOT_PATH" --package-root="$FLUTTER_TOOLS_DIR/packages" "$SCRIPT_PATH"
+  "$DART" --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
   echo $REVISION > "$STAMP_PATH"
 fi
 
@@ -51,7 +51,7 @@ set +e
 
 if [ $FLUTTER_DEV ]; then
   echo -e "(FLUTTER_DEV set - ignoring $SNAPSHOT_PATH)\n"
-  "$DART" --package-root="$FLUTTER_TOOLS_DIR/packages" "$SCRIPT_PATH" "$@"
+  "$DART" --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH" "$@"
 else
   "$DART" "$SNAPSHOT_PATH" "$@"
 fi
@@ -65,5 +65,5 @@ fi
 
 set -e
 
-"$DART" --snapshot="$SNAPSHOT_PATH" --package-root="$FLUTTER_TOOLS_DIR/packages" "$SCRIPT_PATH"
+"$DART" --snapshot="$SNAPSHOT_PATH" --package="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
 "$DART" "$SNAPSHOT_PATH" "$@"

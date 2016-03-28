@@ -38,7 +38,7 @@ CD "%flutter_dir"
 REM Allows us to check if sky_engine's REVISION is correct
 CALL pub.bat get
 CD "%flutter_root%"
-CALL %dart% --snapshot="%snapshot_path%" --package-root="%flutter_tools_dir%\packages" "%script_path%"
+CALL %dart% --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"
 <nul SET /p=%revision%> "%stamp_path%"
 
 :after_snapshot
@@ -48,6 +48,6 @@ POPD
 CALL %dart% "%snapshot_path%" %*
 
 IF /I "%ERRORLEVEL%" EQU "253" (
-   CALL %dart% --snapshot="%snapshot_path%" --package-root="%flutter_tools_dir%\packages" "%script_path%"
+   CALL %dart% --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"
    CALL %dart% "%snapshot_path%" %*
 )

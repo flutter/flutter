@@ -10,6 +10,7 @@ import 'package:path/path.dart' as path;
 import 'artifacts.dart';
 import 'base/process.dart';
 import 'build_configuration.dart';
+import 'package_map.dart';
 
 class SnapshotCompiler {
   SnapshotCompiler(this._path);
@@ -25,7 +26,7 @@ class SnapshotCompiler {
     final List<String> args = [
       _path,
       mainPath,
-      '--package-root=${ArtifactStore.packageRoot}',
+      '--packages=${PackageMap.instance.packagesPath}',
       '--snapshot=$snapshotPath'
     ];
     if (depfilePath != null)

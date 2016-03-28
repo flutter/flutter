@@ -14,7 +14,7 @@ import 'package:test/src/backend/test_platform.dart'; // ignore: implementation_
 import 'package:test/src/runner/plugin/platform.dart'; // ignore: implementation_imports
 import 'package:test/src/runner/plugin/hack_register_platform.dart' as hack; // ignore: implementation_imports
 
-import '../artifacts.dart';
+import '../package_map.dart';
 
 final String _kSkyShell = Platform.environment['SKY_SHELL'];
 const String _kHost = '127.0.0.1';
@@ -44,12 +44,12 @@ Future<_ServerInfo> _startServer() async {
   return new _ServerInfo(server, 'ws://$_kHost:${server.port}$_kPath', socket.future);
 }
 
-Future<Process> _startProcess(String mainPath, { String packageRoot }) {
+Future<Process> _startProcess(String mainPath, { String packages }) {
   assert(shellPath != null || _kSkyShell != null); // Please provide the path to the shell in the SKY_SHELL environment variable.
   return Process.start(shellPath ?? _kSkyShell, [
     '--enable-checked-mode',
     '--non-interactive',
-    '--package-root=$packageRoot',
+    '--packages=$packages',
     mainPath,
   ]);
 }
@@ -90,8 +90,7 @@ void main() {
 ''');
 
     Process process = await _startProcess(
-      listenerFile.path,
-      packageRoot: path.absolute(ArtifactStore.packageRoot)
+      listenerFile.path, packages: PackageMap.instance.packagesPath
     );
 
     void finalize() {

@@ -7,12 +7,13 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 
-import '../dart/pub.dart';
 import '../application_package.dart';
 import '../build_configuration.dart';
+import '../dart/pub.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
+import '../package_map.dart';
 import '../toolchain.dart';
 import 'flutter_command_runner.dart';
 
@@ -145,6 +146,12 @@ abstract class FlutterCommand extends Command {
         printError('Target file "$targetPath" not found.');
         return false;
       }
+    }
+
+    String error = PackageMap.instance.checkValid();
+    if (error != null) {
+      printError(error);
+      return false;
     }
 
     return true;
