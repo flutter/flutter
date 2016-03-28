@@ -31,17 +31,21 @@ class XCode {
 
       _xcodeVersionText = runSync(<String>['xcodebuild', '-version']).replaceAll('\n', ', ');
 
-      try {
-        printTrace('xcrun clang');
+      if (!xcodeVersionRegex.hasMatch(_xcodeVersionText)) {
+        _isInstalled = false;
+      } else {
+        try {
+          printTrace('xcrun clang');
+          ProcessResult result = Process.runSync('/usr/bin/xcrun', <String>['clang']);
 
-        ProcessResult result = Process.runSync('/usr/bin/xcrun', <String>['clang']);
-        if (result.stdout != null && result.stdout.contains('license'))
-          _eulaSigned = false;
-        else if (result.stderr != null && result.stderr.contains('license'))
-          _eulaSigned = false;
-        else
-          _eulaSigned = true;
-      } catch (error) {
+          if (result.stdout != null && result.stdout.contains('license'))
+            _eulaSigned = false;
+          else if (result.stderr != null && result.stderr.contains('license'))
+            _eulaSigned = false;
+          else
+            _eulaSigned = true;
+        } catch (error) {
+        }
       }
     } catch (error) {
       _isInstalled = false;
@@ -66,10 +70,13 @@ class XCode {
   String _xcodeVersionText;
   String get xcodeVersionText => _xcodeVersionText;
 
-  bool get xcodeVersionSatisfactory {
-    RegExp regex = new RegExp(r'Xcode ([0-9.]+)');
+  final RegExp xcodeVersionRegex = new RegExp(r'Xcode ([0-9.]+)');
 
-    String version = regex.firstMatch(xcodeVersionText).group(1);
+  bool get xcodeVersionSatisfactory {
+    if (!xcodeVersionRegex.hasMatch(xcodeVersionText))
+      return false;
+
+    String version = xcodeVersionRegex.firstMatch(xcodeVersionText).group(1);
     List<String> components = version.split('.');
 
     int major = int.parse(components[0]);
