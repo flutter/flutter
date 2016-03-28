@@ -346,8 +346,6 @@ class AnalyzeCommand extends FlutterCommand {
       'Analyzing [${mainFile.path}]...',
       new RegExp('^\\[(hint|error)\\] Unused import \\(${mainFile.path},'),
       new RegExp(r'^\[.+\] .+ \(.+/\.pub-cache/.+'),
-      new RegExp('\\[warning\\] Missing concrete implementation of \'RenderObject\\.applyPaintTransform\''), // https://github.com/dart-lang/sdk/issues/25232
-      new RegExp('\\[warning\\] Missing concrete implementation of \'AbstractNode\\.attach\''), // https://github.com/dart-lang/sdk/issues/25232
       new RegExp(r'[0-9]+ (error|warning|hint|lint).+found\.'),
       new RegExp(r'^$'),
     ];
