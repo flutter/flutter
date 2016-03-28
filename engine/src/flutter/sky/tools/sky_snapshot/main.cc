@@ -19,10 +19,15 @@
 #include "sky/tools/sky_snapshot/vm.h"
 
 void Usage() {
-  std::cerr << "Usage: sky_snapshot"
-            << " --" << switches::kPackageRoot << " --" << switches::kSnapshot
-            << " --" << switches::kDepfile << " --" << switches::kBuildOutput
-            << " <lib/main.dart>" << std::endl;
+  std::cerr << R"USAGE(usage: sky_snapshot --packages=PACKAGES --snapshot=SNAPSHOT_BLOB <lib/main.dart>
+       [ --depfile=DEPS_FILE ] [ --build-output=BUILD_OUTPUT ] [ --help ]
+
+ * PACKAGES is the '.packages' file that defines where to find Dart packages.
+ * SNAPSHOT_BLOB is the file to write the snapshot into.
+ * DEPS_FILE is an optional '.d' file to depedendency information into.
+ * BUILD_OUTPUT optionally overrides the target name used in the DEPS_FILE.
+   (The default is SNAPSHOT_BLOB.)
+)USAGE";
 }
 
 void WriteSnapshot(base::FilePath path) {
@@ -68,6 +73,11 @@ int main(int argc, const char* argv[]) {
     return 0;
   }
 
+  if (!command_line.HasSwitch(switches::kSnapshot)) {
+    fprintf(stderr, "error: Need --snapshot.\n");
+    exit(1);
+  }
+
   InitDartVM();
   Dart_Isolate isolate = CreateDartIsolate();
   CHECK(isolate);
@@ -81,7 +91,7 @@ int main(int argc, const char* argv[]) {
 
   CHECK(!LogIfError(Dart_FinalizeLoading(true)));
 
-  CHECK(command_line.HasSwitch(switches::kSnapshot)) << "Need --snapshot";
+  CHECK(command_line.HasSwitch(switches::kSnapshot));
   WriteSnapshot(command_line.GetSwitchValuePath(switches::kSnapshot));
 
   if (command_line.HasSwitch(switches::kDepfile)) {

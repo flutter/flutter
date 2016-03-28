@@ -10,6 +10,7 @@ namespace switches {
 extern const char kBuildOutput[];
 extern const char kDepfile[];
 extern const char kHelp[];
+extern const char kPackages[];
 extern const char kPackageRoot[];
 extern const char kSnapshot[];
 
