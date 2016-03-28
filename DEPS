@@ -20,7 +20,7 @@
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
   'mojo_sdk_revision': '8d13caec84db234e320129722d2f0d5d873def11',
-  'base_revision': '6c89618151eb0e23d330778e6d6ea16fc6105010',
+  'base_revision': '672b04e54b937ec899429a6bd5409c5a6300d151',
   'skia_revision': 'ddf0713f0ba4ea75ca49a4ed6b4249eef72da1ce',
 
   # Note: When updating the Dart revision, ensure that all entries that are
