@@ -34,7 +34,7 @@ void main() {
 
   for (int i = 0; i < _kNumberOfIterations || _kRunForever; ++i) {
     appState.setState(_doNothing);
-    binding.buildDirtyElements();
+    binding.buildOwner.buildDirtyElements();
   }
 
   watch.stop();

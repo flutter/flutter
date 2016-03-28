@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:developer';
 
 import 'debug.dart';
 
@@ -613,17 +614,15 @@ class _InactiveElements {
     });
   }
 
-  void unmountAll() {
-    BuildableElement.lockState(() {
-      try {
-        _locked = true;
-        for (Element element in _elements)
-          _unmount(element);
-      } finally {
-        _elements.clear();
-        _locked = false;
-      }
-    });
+  void _unmountAll() {
+    try {
+      _locked = true;
+      for (Element element in _elements)
+        _unmount(element);
+    } finally {
+      _elements.clear();
+      _locked = false;
+    }
   }
 
   void _deactivateRecursively(Element element) {
@@ -652,8 +651,6 @@ class _InactiveElements {
   }
 }
 
-final _InactiveElements _inactiveElements = new _InactiveElements();
-
 typedef void ElementVisitor(Element element);
 
 abstract class BuildContext {
@@ -665,6 +662,120 @@ abstract class BuildContext {
   RenderObject ancestorRenderObjectOfType(TypeMatcher matcher);
   void visitAncestorElements(bool visitor(Element element));
   void visitChildElements(void visitor(Element element));
+}
+
+class BuildOwner {
+  BuildOwner({ this.onBuildScheduled });
+
+  /// Called on each build pass when the first buildable element is marked dirty
+  VoidCallback onBuildScheduled;
+
+  final _InactiveElements _inactiveElements = new _InactiveElements();
+
+  final List<BuildableElement> _dirtyElements = <BuildableElement>[];
+
+  /// Adds an element to the dirty elements list so that it will be rebuilt
+  /// when buildDirtyElements is called.
+  void scheduleBuildFor(BuildableElement element) {
+    assert(!_dirtyElements.contains(element));
+    assert(element.dirty);
+    if (_dirtyElements.isEmpty && onBuildScheduled != null)
+      onBuildScheduled();
+    _dirtyElements.add(element);
+  }
+
+  int _debugStateLockLevel = 0;
+  bool get _debugStateLocked => _debugStateLockLevel > 0;
+  bool _debugBuilding = false;
+  BuildableElement _debugCurrentBuildTarget;
+
+  /// Establishes a scope in which widget build functions can run.
+  ///
+  /// Inside a build scope, widget build functions are allowed to run, but
+  /// State.setState() is forbidden. This mechanism prevents build functions
+  /// from transitively requiring other build functions to run, potentially
+  /// causing infinite loops.
+  ///
+  /// After unwinding the last build scope on the stack, the framework verifies
+  /// that each global key is used at most once and notifies listeners about
+  /// changes to global keys.
+  void lockState(void callback(), { bool building: false }) {
+    assert(_debugStateLockLevel >= 0);
+    assert(() {
+      if (building) {
+        assert(!_debugBuilding);
+        assert(_debugCurrentBuildTarget == null);
+        _debugBuilding = true;
+      }
+      _debugStateLockLevel += 1;
+      return true;
+    });
+    try {
+      callback();
+    } finally {
+      assert(() {
+        _debugStateLockLevel -= 1;
+        if (building) {
+          assert(_debugBuilding);
+          assert(_debugCurrentBuildTarget == null);
+          _debugBuilding = false;
+        }
+        return true;
+      });
+    }
+    assert(_debugStateLockLevel >= 0);
+  }
+
+  static int _elementSort(BuildableElement a, BuildableElement b) {
+    if (a.depth < b.depth)
+      return -1;
+    if (b.depth < a.depth)
+      return 1;
+    if (b.dirty && !a.dirty)
+      return -1;
+    if (a.dirty && !b.dirty)
+      return 1;
+    return 0;
+  }
+
+  /// Builds all the elements that were marked as dirty using schedule(), in depth order.
+  /// If elements are marked as dirty while this runs, they must be deeper than the algorithm
+  /// has yet reached.
+  /// This is called by beginFrame().
+  void buildDirtyElements() {
+    if (_dirtyElements.isEmpty)
+      return;
+    Timeline.startSync('Build');
+    lockState(() {
+      _dirtyElements.sort(_elementSort);
+      int dirtyCount = _dirtyElements.length;
+      int index = 0;
+      while (index < dirtyCount) {
+        _dirtyElements[index].rebuild();
+        index += 1;
+        if (dirtyCount < _dirtyElements.length) {
+          _dirtyElements.sort(_elementSort);
+          dirtyCount = _dirtyElements.length;
+        }
+      }
+      assert(!_dirtyElements.any((BuildableElement element) => element.dirty));
+      _dirtyElements.clear();
+    }, building: true);
+    assert(_dirtyElements.isEmpty);
+    Timeline.finishSync();
+  }
+
+  /// Complete the element build pass by unmounting any elements that are no
+  /// longer active.
+  /// This is called by beginFrame().
+  void finalizeTree() {
+    lockState(() {
+      _inactiveElements._unmountAll();
+    });
+    assert(GlobalKey._debugCheckForDuplicates);
+    scheduleMicrotask(GlobalKey._notifyListeners);
+  }
+
 }
 
 /// Elements are the instantiations of Widget configurations.
@@ -696,6 +807,10 @@ abstract class Element implements BuildContext {
   Widget get widget => _widget;
   Widget _widget;
 
+  BuildOwner _owner;
+  /// The owner for this node (null if unattached).
+  BuildOwner get owner => _owner;
+
   bool _active = false;
 
   RenderObject get renderObject {
@@ -721,7 +836,7 @@ abstract class Element implements BuildContext {
   @override
   void visitChildElements(void visitor(Element element)) {
     // don't allow visitChildElements() during build, since children aren't necessarily built yet
-    assert(!BuildableElement._debugStateLocked);
+    assert(owner == null || !owner._debugStateLocked);
     visitChildren(visitor);
   }
 
@@ -774,12 +889,6 @@ abstract class Element implements BuildContext {
     return inflateWidget(newWidget, newSlot);
   }
 
-  static void finalizeTree() {
-    _inactiveElements.unmountAll();
-    assert(GlobalKey._debugCheckForDuplicates);
-    scheduleMicrotask(GlobalKey._notifyListeners);
-  }
-
   /// Called when an Element is given a new parent shortly after having been
   /// created. Use this to initialize state that depends on having a parent. For
   /// state that is independent of the position in the tree, it's better to just
@@ -796,6 +905,8 @@ abstract class Element implements BuildContext {
     _slot = newSlot;
     _depth = _parent != null ? _parent.depth + 1 : 1;
     _active = true;
+    if (parent != null) // Only assign ownership if the parent is non-null
+      _owner = parent.owner;
     if (widget.key is GlobalKey) {
       final GlobalKey key = widget.key;
       key._register(this);
@@ -874,7 +985,7 @@ abstract class Element implements BuildContext {
     if (element._parent != null && !element._parent.detachChild(element))
       return null;
     assert(element._parent == null);
-    _inactiveElements.remove(element);
+    owner._inactiveElements.remove(element);
     return element;
   }
 
@@ -914,7 +1025,7 @@ abstract class Element implements BuildContext {
     assert(child._parent == this);
     child._parent = null;
     child.detachRenderObject();
-    _inactiveElements.add(child); // this eventually calls child.deactivate()
+    owner._inactiveElements.add(child); // this eventually calls child.deactivate()
   }
 
   void _activateWithParent(Element parent, dynamic newSlot) {
@@ -1117,8 +1228,6 @@ class ErrorWidget extends LeafRenderObjectWidget {
   RenderBox createRenderObject(BuildContext context) => new RenderErrorBox(message);
 }
 
-typedef void BuildScheduler(BuildableElement element);
-
 /// Base class for instantiations of widgets that have builders and can be
 /// marked dirty.
 abstract class BuildableElement extends Element {
@@ -1139,50 +1248,6 @@ abstract class BuildableElement extends Element {
     return true;
   }
 
-  static BuildScheduler scheduleBuildFor;
-
-  static int _debugStateLockLevel = 0;
-  static bool get _debugStateLocked => _debugStateLockLevel > 0;
-  static bool _debugBuilding = false;
-  static BuildableElement _debugCurrentBuildTarget;
-
-  /// Establishes a scope in which widget build functions can run.
-  ///
-  /// Inside a build scope, widget build functions are allowed to run, but
-  /// State.setState() is forbidden. This mechanism prevents build functions
-  /// from transitively requiring other build functions to run, potentially
-  /// causing infinite loops.
-  ///
-  /// After unwinding the last build scope on the stack, the framework verifies
-  /// that each global key is used at most once and notifies listeners about
-  /// changes to global keys.
-  static void lockState(void callback(), { bool building: false }) {
-    assert(_debugStateLockLevel >= 0);
-    assert(() {
-      if (building) {
-        assert(!_debugBuilding);
-        assert(_debugCurrentBuildTarget == null);
-        _debugBuilding = true;
-      }
-      _debugStateLockLevel += 1;
-      return true;
-    });
-    try {
-      callback();
-    } finally {
-      assert(() {
-        _debugStateLockLevel -= 1;
-        if (building) {
-          assert(_debugBuilding);
-          assert(_debugCurrentBuildTarget == null);
-          _debugBuilding = false;
-        }
-        return true;
-      });
-    }
-    assert(_debugStateLockLevel >= 0);
-  }
-
   /// Marks the element as dirty and adds it to the global list of widgets to
   /// rebuild in the next frame.
   ///
@@ -1194,10 +1259,11 @@ abstract class BuildableElement extends Element {
     assert(_debugLifecycleState != _ElementLifecycle.defunct);
     if (!_active)
       return;
+    assert(owner != null);
     assert(_debugLifecycleState == _ElementLifecycle.active);
     assert(() {
-      if (_debugBuilding) {
-        if (_debugCurrentBuildTarget == null) {
+      if (owner._debugBuilding) {
+        if (owner._debugCurrentBuildTarget == null) {
           // If _debugCurrentBuildTarget is null, we're not actually building a
           // widget but instead building the root of the tree via runApp.
           // TODO(abarth): Remove these cases and ensure that we always have
@@ -1206,7 +1272,7 @@ abstract class BuildableElement extends Element {
         }
         bool foundTarget = false;
         visitAncestorElements((Element element) {
-          if (element == _debugCurrentBuildTarget) {
+          if (element == owner._debugCurrentBuildTarget) {
             foundTarget = true;
             return false;
           }
@@ -1215,7 +1281,7 @@ abstract class BuildableElement extends Element {
         if (foundTarget)
           return true;
       }
-      if (_debugStateLocked && (!_debugAllowIgnoredCallsToMarkNeedsBuild || !dirty)) {
+      if (owner._debugStateLocked && (!_debugAllowIgnoredCallsToMarkNeedsBuild || !dirty)) {
         throw new FlutterError(
           'setState() or markNeedsBuild() called during build.\n'
           'This widget cannot be marked as needing to build because the framework '
@@ -1232,8 +1298,7 @@ abstract class BuildableElement extends Element {
     if (dirty)
       return;
     _dirty = true;
-    assert(scheduleBuildFor != null);
-    scheduleBuildFor(this);
+    owner.scheduleBuildFor(this);
   }
 
   /// Called by the binding when scheduleBuild() has been called to mark this
@@ -1246,17 +1311,17 @@ abstract class BuildableElement extends Element {
       return;
     }
     assert(_debugLifecycleState == _ElementLifecycle.active);
-    assert(_debugStateLocked);
+    assert(owner._debugStateLocked);
     BuildableElement debugPreviousBuildTarget;
     assert(() {
-      debugPreviousBuildTarget = _debugCurrentBuildTarget;
-      _debugCurrentBuildTarget = this;
+      debugPreviousBuildTarget = owner._debugCurrentBuildTarget;
+      owner._debugCurrentBuildTarget = this;
      return true;
     });
     performRebuild();
     assert(() {
-      assert(_debugCurrentBuildTarget == this);
-      _debugCurrentBuildTarget = debugPreviousBuildTarget;
+      assert(owner._debugCurrentBuildTarget == this);
+      owner._debugCurrentBuildTarget = debugPreviousBuildTarget;
       return true;
     });
     assert(!_dirty);
@@ -1876,6 +1941,26 @@ abstract class RenderObjectElement extends BuildableElement {
     super.debugFillDescription(description);
     if (renderObject != null)
       description.add('renderObject: $renderObject');
+  }
+}
+
+/// Instantiation of RenderObjectWidgets at the root of the tree
+///
+/// Only root elements may have their owner set explicitly. All other
+/// elements inherit their owner from their parent.
+abstract class RootRenderObjectElement extends RenderObjectElement {
+  RootRenderObjectElement(RenderObjectWidget widget): super(widget);
+
+  void assignOwner(BuildOwner owner) {
+    _owner = owner;
+  }
+
+  @override
+  void mount(Element parent, dynamic newSlot) {
+    // Root elements should never have parents
+    assert(parent == null);
+    assert(newSlot == null);
+    super.mount(parent, newSlot);
   }
 }
 

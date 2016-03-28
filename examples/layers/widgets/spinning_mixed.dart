@@ -33,6 +33,7 @@ class Rectangle extends StatelessWidget {
 
 double value;
 RenderObjectToWidgetElement<RenderBox> element;
+BuildOwner owner;
 void attachWidgetTreeToRenderTree(RenderProxyBox container) {
   element = new RenderObjectToWidgetAdapter<RenderBox>(
     container: container,
@@ -70,7 +71,7 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
         mainAxisAlignment: MainAxisAlignment.spaceBetween
       )
     )
-  ).attachToRenderTree(element);
+  ).attachToRenderTree(owner, element);
 }
 
 Duration timeBase;

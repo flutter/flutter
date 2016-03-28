@@ -252,7 +252,7 @@ class _MixedViewportElement extends RenderObjectElement {
       _resetCache();
       _lastLayoutConstraints = constraints;
     }
-    BuildableElement.lockState(() {
+    owner.lockState(() {
       _doLayout(constraints);
     }, building: true);
   }
