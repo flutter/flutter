@@ -72,20 +72,20 @@ to the main Flutter repository for detailed instructions.
 
 Once you've got everything set up, you can run an example using your locally
 built engine by switching to that example's directory, running `pub get` to make
-sure its dependencies have been downloaded, and using `flutter start` with an
+sure its dependencies have been downloaded, and using `flutter run` with an
 explicit `--engine-src-path` pointing at the `src` directory. Make sure you have
 a device connected over USB and debugging enabled on that device:
 
  * `cd /path/to/flutter/examples/hello_world`
  * `pub get`
- * `../../bin/flutter start --engine-src-path /path/to/engine/src`
+ * `../../bin/flutter run --engine-src-path /path/to/engine/src`
 
 You can also specify a particular Dart file to run if you want to run an example
 that doesn't have a `lib/main.dart` file using the `-t` command-line option. For
 example, to run the `tabs.dart` example in the `examples/widgets` directory on a
 connected Android device, from that directory you would run:
 
- * `flutter start --engine-src-path /path/to/engine/src -t tabs.dart`
+ * `flutter run --engine-src-path /path/to/engine/src -t tabs.dart`
 
 If you're going to be debugging crashes in the engine, make sure you add
 `android:debuggable="true"` to the `<application>` element in the
