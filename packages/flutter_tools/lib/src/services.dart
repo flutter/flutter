@@ -11,6 +11,7 @@ import 'package:yaml/yaml.dart';
 
 import 'artifacts.dart';
 import 'globals.dart';
+import 'package_map.dart';
 
 const String _kFlutterManifestPath = 'flutter.yaml';
 const String _kFlutterServicesManifestPath = 'flutter_services.yaml';
@@ -28,22 +29,25 @@ dynamic _loadYamlFile(String path) {
 Future<Null> parseServiceConfigs(
   List<Map<String, String>> services, { List<File> jars }
 ) async {
-  if (!ArtifactStore.isPackageRootValid) {
-    printTrace("Artifact store invalid while parsing service configs");
+  Map<String, Uri> packageMap;
+  try {
+    packageMap = PackageMap.instance.map;
+  } on FormatException catch(e) {
+    printTrace('Invalid ".packages" file while parsing service configs:\n$e');
     return;
   }
 
   dynamic manifest = _loadYamlFile(_kFlutterManifestPath);
   if (manifest == null || manifest['services'] == null) {
-    printTrace("No services specified in the manifest");
+    printTrace('No services specified in the manifest');
     return;
   }
 
   for (String service in manifest['services']) {
-    String serviceRoot = '${ArtifactStore.packageRoot}/$service';
+    String serviceRoot = packageMap[service].path;
     dynamic serviceConfig = _loadYamlFile('$serviceRoot/$_kFlutterServicesManifestPath');
     if (serviceConfig == null) {
-      printStatus("No $_kFlutterServicesManifestPath found for service '$serviceRoot'. Skipping.");
+      printStatus('No $_kFlutterServicesManifestPath found for service "$serviceRoot". Skipping.');
       continue;
     }
 

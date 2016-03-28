@@ -467,7 +467,7 @@ class IOSSimulator extends Device {
     List<String> args = <String>[
       "--flx=${path.absolute(path.join('build', 'app.flx'))}",
       "--dart-main=${path.absolute(mainPath)}",
-      "--package-root=${path.absolute('packages')}",
+      "--packages=${path.absolute('.packages')}",
     ];
 
     if (checked)

@@ -165,27 +165,8 @@ class ArtifactStore {
     return null;
   }
 
-  // These values are initialized by FlutterCommandRunner on startup.
+  // Initialized by FlutterCommandRunner on startup.
   static String flutterRoot;
-  static String packageRoot = 'packages';
-
-  static bool get isPackageRootValid {
-    return FileSystemEntity.isDirectorySync(packageRoot);
-  }
-
-  static void ensurePackageRootIsValid() {
-    if (!isPackageRootValid) {
-      String message = '$packageRoot is not a valid directory.';
-      if (packageRoot == 'packages') {
-        if (FileSystemEntity.isFileSync('pubspec.yaml'))
-          message += '\nDid you run `pub get` in this directory?';
-        else
-          message += '\nDid you run this command from the same directory as your pubspec.yaml file?';
-      }
-      printError(message);
-      throw new ProcessExit(2);
-    }
-  }
 
   static String _engineRevision;
 

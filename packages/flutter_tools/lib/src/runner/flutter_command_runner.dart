@@ -9,13 +9,14 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
-import '../android/android_sdk.dart';
 import '../artifacts.dart';
+import '../android/android_sdk.dart';
 import '../base/context.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
 import '../globals.dart';
+import '../package_map.dart';
 import 'version.dart';
 
 const String kFlutterRootEnvironmentVariableName = 'FLUTTER_ROOT'; // should point to //flutter/ (root of flutter/flutter repo)
@@ -41,13 +42,13 @@ class FlutterCommandRunner extends CommandRunner {
         help: 'Reports the version of this tool.');
 
     String packagesHelp;
-    if (ArtifactStore.isPackageRootValid)
-      packagesHelp = '\n(defaults to "${ArtifactStore.packageRoot}")';
+    if (FileSystemEntity.isFileSync('.packages'))
+      packagesHelp = '\n(defaults to ".packages")';
     else
-      packagesHelp = '\n(required, since the current directory does not contain a "packages" subdirectory)';
-    argParser.addOption('package-root',
+      packagesHelp = '\n(required, since the current directory does not contain a ".packages" file)';
+    argParser.addOption('packages',
         hide: !verboseHelp,
-        help: 'Path to your packages directory.$packagesHelp');
+        help: 'Path to your ".packages" file.$packagesHelp');
     argParser.addOption('flutter-root',
         help: 'The root directory of the Flutter repository (uses \$$kFlutterRootEnvironmentVariableName if set).',
               defaultsTo: _defaultFlutterRoot);
@@ -184,8 +185,9 @@ class FlutterCommandRunner extends CommandRunner {
     // we must set ArtifactStore.flutterRoot early because other features use it
     // (e.g. enginePath's initialiser uses it)
     ArtifactStore.flutterRoot = path.normalize(path.absolute(globalResults['flutter-root']));
-    if (globalResults.wasParsed('package-root'))
-      ArtifactStore.packageRoot = path.normalize(path.absolute(globalResults['package-root']));
+    PackageMap.instance = new PackageMap(path.normalize(path.absolute(
+      globalResults.wasParsed('packages') ? globalResults['packages'] : '.packages'
+    )));
 
     // See if the user specified a specific device.
     deviceManager.specifiedDeviceId = globalResults['device-id'];
@@ -219,16 +221,13 @@ class FlutterCommandRunner extends CommandRunner {
     bool isRelease = globalResults['release'];
 
     if (engineSourcePath == null && (isDebug || isRelease)) {
-      if (ArtifactStore.isPackageRootValid) {
-        Directory engineDir = new Directory(path.join(ArtifactStore.packageRoot, kFlutterEnginePackageName));
-        try {
-          String realEnginePath = engineDir.resolveSymbolicLinksSync();
-          engineSourcePath = path.dirname(path.dirname(path.dirname(path.dirname(realEnginePath))));
-          bool dirExists = FileSystemEntity.isDirectorySync(path.join(engineSourcePath, 'out'));
-          if (engineSourcePath == '/' || engineSourcePath.isEmpty || !dirExists)
-            engineSourcePath = null;
-        } on FileSystemException { }
-      }
+      try {
+        Uri engineUri = PackageMap.instance.map[kFlutterEnginePackageName];
+        engineSourcePath = path.dirname(path.dirname(path.dirname(path.dirname(engineUri.path))));
+        bool dirExists = FileSystemEntity.isDirectorySync(path.join(engineSourcePath, 'out'));
+        if (engineSourcePath == '/' || engineSourcePath.isEmpty || !dirExists)
+          engineSourcePath = null;
+      } on FileSystemException { } on FormatException { }
 
       if (engineSourcePath == null)
         engineSourcePath = _tryEnginePath(path.join(ArtifactStore.flutterRoot, '../engine/src'));
