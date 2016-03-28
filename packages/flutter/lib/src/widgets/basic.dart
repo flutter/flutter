@@ -2049,8 +2049,10 @@ class NetworkImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ImageResource imageResource = imageCache.load(src, scale: scale);
     return new RawImageResource(
-      image: imageCache.load(src, scale: scale),
+      key: key == null ? new ObjectKey(imageResource) : null,
+      image: imageResource,
       width: width,
       height: height,
       color: color,
@@ -2171,8 +2173,10 @@ class AsyncImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ImageResource imageResource = imageCache.loadProvider(provider);
     return new RawImageResource(
-      image: imageCache.loadProvider(provider),
+      key: key == null ? new ObjectKey(imageResource) : null,
+      image: imageResource,
       width: width,
       height: height,
       color: color,
@@ -2272,8 +2276,10 @@ class AssetImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ImageResource imageResource = (bundle ?? DefaultAssetBundle.of(context)).loadImage(name);
     return new RawImageResource(
-      image: (bundle ?? DefaultAssetBundle.of(context)).loadImage(name),
+      key: key == null ? new ObjectKey(imageResource) : null,
+      image: imageResource,
       width: width,
       height: height,
       color: color,
