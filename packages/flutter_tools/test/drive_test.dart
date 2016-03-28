@@ -146,7 +146,7 @@ void main() {
       });
       testRunner = expectAsync((List<String> testArgs) {
         expect(testArgs, [testFile]);
-        return new Future<Null>.value();
+        return new Future<int>.value(0);
       });
       appStopper = expectAsync((_) {
         return new Future<int>.value(0);
@@ -162,6 +162,37 @@ void main() {
       ];
       return createTestCommandRunner(command).run(args).then((int code) {
         expect(code, equals(0));
+        BufferLogger buffer = logger;
+        expect(buffer.errorText, isEmpty);
+      });
+    });
+
+    testUsingContext('returns exitCode set by test runner', () async {
+      withMockDevice();
+
+      String testApp = '/some/app/test/e2e.dart';
+      String testFile = '/some/app/test_driver/e2e_test.dart';
+
+      appStarter = expectAsync((_) {
+        return new Future<int>.value(0);
+      });
+      testRunner = expectAsync((_) {
+        return new Future<int>.value(123);
+      });
+      appStopper = expectAsync((_) {
+        return new Future<int>.value(0);
+      });
+
+      MemoryFileSystem memFs = fs;
+      await memFs.file(testApp).writeAsString('main() {}');
+      await memFs.file(testFile).writeAsString('main() {}');
+
+      List<String> args = [
+        'drive',
+        '--target=$testApp',
+      ];
+      return createTestCommandRunner(command).run(args).then((int code) {
+        expect(code, equals(123));
         BufferLogger buffer = logger;
         expect(buffer.errorText, isEmpty);
       });

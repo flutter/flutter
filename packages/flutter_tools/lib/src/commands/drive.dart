@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as io;
 
 import 'package:path/path.dart' as path;
 import 'package:test/src/executable.dart' as executable; // ignore: implementation_imports
@@ -110,7 +111,6 @@ class DriveCommand extends RunCommandBase {
 
     try {
       return await testRunner([testFile])
-        .then((_) => 0)
         .catchError((dynamic error, dynamic stackTrace) {
           printError('CAUGHT EXCEPTION: $error\n$stackTrace');
           return 1;
@@ -285,15 +285,16 @@ Future<int> startApp(DriveCommand command) async {
 }
 
 /// Runs driver tests.
-typedef Future<Null> TestRunner(List<String> testArgs);
+typedef Future<int> TestRunner(List<String> testArgs);
 TestRunner testRunner = runTests;
 void restoreTestRunner() {
   testRunner = runTests;
 }
 
-Future<Null> runTests(List<String> testArgs) {
+Future<int> runTests(List<String> testArgs) async {
   printTrace('Running driver tests.');
-  return executable.main(testArgs);
+  await executable.main(testArgs);
+  return io.exitCode;
 }
 
 
