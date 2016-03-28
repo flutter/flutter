@@ -520,8 +520,36 @@ abstract class RenderBox extends RenderObject {
   bool get hasSize => _size != null;
   Size _size;
   void set size(Size value) {
-    assert((sizedByParent && debugDoingThisResize) ||
-           (!sizedByParent && debugDoingThisLayout));
+    assert(!(debugDoingThisResize && debugDoingThisLayout));
+    assert(sizedByParent || !debugDoingThisResize);
+    assert(() {
+      if ((sizedByParent && debugDoingThisResize) ||
+          (!sizedByParent && debugDoingThisLayout))
+        return true;
+      assert(!debugDoingThisResize);
+      String contract, violation, hint;
+      if (debugDoingThisLayout) {
+        assert(sizedByParent);
+        violation = 'It appears that the size setter was called from performLayout().';
+        hint = '';
+      } else {
+        violation = 'The size setter was called from outside layout (neither performResize() nor performLayout() were being run for this object).';
+        if (owner != null && owner.debugDoingLayout)
+          hint = 'Only the object itself can set its size. It is a contract violation for other objects to set it.';
+      }
+      if (sizedByParent)
+        contract = 'Because this RenderBox has sizedByParent set to true, it must set its size in performResize().';
+      else
+        contract = 'Because this RenderBox has sizedByParent set to false, it must set its size in performLayout().';
+      throw new FlutterError(
+        'RenderBox size setter called incorrectly.\n'
+        '$violation\n'
+        '$hint\n'
+        '$contract\n'
+        'The RenderBox in question is:\n'
+        '  $this'
+      );
+    });
     assert(() {
       if (value is _DebugSize) {
         if (value._owner != this) {
@@ -628,89 +656,106 @@ abstract class RenderBox extends RenderObject {
   @override
   void debugAssertDoesMeetConstraints() {
     assert(constraints != null);
-    assert(_size != null);
-    // verify that the size is not infinite
-    if (_size.isInfinite) {
-      StringBuffer information = new StringBuffer();
-      if (!constraints.hasBoundedWidth) {
-        RenderBox node = this;
-        while (!node.constraints.hasBoundedWidth && node.parent is RenderBox)
-          node = node.parent;
-        information.writeln('The nearest ancestor providing an unbounded width constraint is:');
-        information.writeln('  $node');
-        List<String> description = <String>[];
-        node.debugFillDescription(description);
-        for (String line in description)
-        information.writeln('  $line');
+    assert(() {
+      if (!hasSize) {
+        assert(!needsLayout); // this is called in the size= setter during layout, but in that case we have a size
+        String contract;
+        if (sizedByParent)
+          contract = 'Because this RenderBox has sizedByParent set to true, it must set its size in performResize().\n';
+        else
+          contract = 'Because this RenderBox has sizedByParent set to false, it must set its size in performLayout().\n';
+        throw new FlutterError(
+          'RenderBox did not set its size during layout.\n'
+          '$contract'
+          'It appears that this did not happen; layout completed, but the size property is still null.\n'
+          'The RenderBox in question is:\n'
+          '  $this'
+        );
       }
-      if (!constraints.hasBoundedHeight) {
-        RenderBox node = this;
-        while (!node.constraints.hasBoundedHeight && node.parent is RenderBox)
-          node = node.parent;
-        information.writeln('The nearest ancestor providing an unbounded height constraint is:');
-        information.writeln('  $node');
-        List<String> description = <String>[];
-        node.debugFillDescription(description);
-        for (String line in description)
-        information.writeln('  $line');
+      // verify that the size is not infinite
+      if (_size.isInfinite) {
+        StringBuffer information = new StringBuffer();
+        if (!constraints.hasBoundedWidth) {
+          RenderBox node = this;
+          while (!node.constraints.hasBoundedWidth && node.parent is RenderBox)
+            node = node.parent;
+          information.writeln('The nearest ancestor providing an unbounded width constraint is:');
+          information.writeln('  $node');
+          List<String> description = <String>[];
+          node.debugFillDescription(description);
+          for (String line in description)
+            information.writeln('  $line');
+        }
+        if (!constraints.hasBoundedHeight) {
+          RenderBox node = this;
+          while (!node.constraints.hasBoundedHeight && node.parent is RenderBox)
+            node = node.parent;
+          information.writeln('The nearest ancestor providing an unbounded height constraint is:');
+          information.writeln('  $node');
+          List<String> description = <String>[];
+          node.debugFillDescription(description);
+          for (String line in description)
+            information.writeln('  $line');
+        }
+        throw new FlutterError(
+          '$runtimeType object was given an infinite size during layout.\n'
+          'This probably means that it is a render object that tries to be '
+          'as big as possible, but it was put inside another render object '
+          'that allows its children to pick their own size.\n'
+          '$information'
+          'See https://flutter.io/layout/ for more information.'
+        );
       }
-      throw new FlutterError(
-        '$runtimeType object was given an infinite size during layout.\n'
-        'This probably means that it is a render object that tries to be\n'
-        'as big as possible, but it was put inside another render object\n'
-        'that allows its children to pick their own size.\n'
-        '$information'
-        'See https://flutter.io/layout/ for more information.'
-      );
-    }
-    // verify that the size is within the constraints
-    if (!constraints.isSatisfiedBy(_size)) {
-      throw new FlutterError(
-        '$runtimeType does not meet its constraints.\n'
-        'Constraints: $constraints\n'
-        'Size: $_size\n'
-        'If you are not writing your own RenderBox subclass, then this is not\n'
-        'your fault. Contact support: https://github.com/flutter/flutter/issues/new'
-      );
-    }
-    // verify that the intrinsics are also within the constraints
-    assert(!RenderObject.debugCheckingIntrinsics);
-    RenderObject.debugCheckingIntrinsics = true;
-    double intrinsic;
-    StringBuffer failures = new StringBuffer();
-    int failureCount = 0;
-    intrinsic = getMinIntrinsicWidth(constraints);
-    if (intrinsic != constraints.constrainWidth(intrinsic)) {
-      failures.writeln(' * getMinIntrinsicWidth() -- returned: w=$intrinsic');
-      failureCount += 1;
-    }
-    intrinsic = getMaxIntrinsicWidth(constraints);
-    if (intrinsic != constraints.constrainWidth(intrinsic)) {
-      failures.writeln(' * getMaxIntrinsicWidth() -- returned: w=$intrinsic');
-      failureCount += 1;
-    }
-    intrinsic = getMinIntrinsicHeight(constraints);
-    if (intrinsic != constraints.constrainHeight(intrinsic)) {
-      failures.writeln(' * getMinIntrinsicHeight() -- returned: h=$intrinsic');
-      failureCount += 1;
-    }
-    intrinsic = getMaxIntrinsicHeight(constraints);
-    if (intrinsic != constraints.constrainHeight(intrinsic)) {
-      failures.writeln(' * getMaxIntrinsicHeight() -- returned: h=$intrinsic');
-      failureCount += 1;
-    }
-    RenderObject.debugCheckingIntrinsics = false;
-    if (failures.isNotEmpty) {
-      assert(failureCount > 0);
-      throw new FlutterError(
-        'The intrinsic dimension methods of the $runtimeType class returned values that violate the given constraints.\n'
-        'The constraints were: $constraints\n'
-        'The following method${failureCount > 1 ? "s" : ""} returned values outside of those constraints:\n'
-        '$failures'
-        'If you are not writing your own RenderBox subclass, then this is not\n'
-        'your fault. Contact support: https://github.com/flutter/flutter/issues/new'
-      );
-    }
+      // verify that the size is within the constraints
+      if (!constraints.isSatisfiedBy(_size)) {
+        throw new FlutterError(
+          '$runtimeType does not meet its constraints.\n'
+          'Constraints: $constraints\n'
+          'Size: $_size\n'
+          'If you are not writing your own RenderBox subclass, then this is not '
+          'your fault. Contact support: https://github.com/flutter/flutter/issues/new'
+        );
+      }
+      // verify that the intrinsics are also within the constraints
+      assert(!RenderObject.debugCheckingIntrinsics);
+      RenderObject.debugCheckingIntrinsics = true;
+      double intrinsic;
+      StringBuffer failures = new StringBuffer();
+      int failureCount = 0;
+      intrinsic = getMinIntrinsicWidth(constraints);
+      if (intrinsic != constraints.constrainWidth(intrinsic)) {
+        failures.writeln(' * getMinIntrinsicWidth() -- returned: w=$intrinsic');
+        failureCount += 1;
+      }
+      intrinsic = getMaxIntrinsicWidth(constraints);
+      if (intrinsic != constraints.constrainWidth(intrinsic)) {
+        failures.writeln(' * getMaxIntrinsicWidth() -- returned: w=$intrinsic');
+        failureCount += 1;
+      }
+      intrinsic = getMinIntrinsicHeight(constraints);
+      if (intrinsic != constraints.constrainHeight(intrinsic)) {
+        failures.writeln(' * getMinIntrinsicHeight() -- returned: h=$intrinsic');
+        failureCount += 1;
+      }
+      intrinsic = getMaxIntrinsicHeight(constraints);
+      if (intrinsic != constraints.constrainHeight(intrinsic)) {
+        failures.writeln(' * getMaxIntrinsicHeight() -- returned: h=$intrinsic');
+        failureCount += 1;
+      }
+      RenderObject.debugCheckingIntrinsics = false;
+      if (failures.isNotEmpty) {
+        assert(failureCount > 0);
+        throw new FlutterError(
+          'The intrinsic dimension methods of the $runtimeType class returned values that violate the given constraints.\n'
+          'The constraints were: $constraints\n'
+          'The following method${failureCount > 1 ? "s" : ""} returned values outside of those constraints:\n'
+          '$failures'
+          'If you are not writing your own RenderBox subclass, then this is not\n'
+          'your fault. Contact support: https://github.com/flutter/flutter/issues/new'
+        );
+      }
+      return true;
+    });
   }
 
   @override
@@ -763,8 +808,30 @@ abstract class RenderBox extends RenderObject {
   /// coordinate space of the callee.  The callee is responsible for checking
   /// whether the given position is within its bounds.
   bool hitTest(HitTestResult result, { Point position }) {
-    assert(!needsLayout);
-    assert(_size != null && 'Missing size. Did you set a size during layout?' != null);
+    assert(() {
+      if (needsLayout) {
+        throw new FlutterError(
+          'Cannot hit test a dirty render box.\n'
+          'The hitTest() method was invoked on this RenderBox:\n'
+          '  $this\n'
+          'Unfortunately, since this object has been marked as needing layout, its geometry is not known at this time. '
+          'This means it cannot be accurately hit-tested. Make sure to only mark nodes as needing layout during a pipeline '
+          'flush, so that it is marked clean before any event handling occurs. If you are trying to perform a hit test '
+          'during the layout phase itself, make sure you only hit test nodes that have completed layout (e.g. the node\'s '
+          'children, after their layout() method has been called).'
+        );
+      }
+      if (!hasSize) {
+        throw new FlutterError(
+          'Cannot hit test a render box with no size.\n'
+          'The hitTest() method was invoked on this RenderBox:\n'
+          '  $this\n'
+          'Although this node is not marked as needing layout, its size is not set. A RenderBox object must have an '
+          'explicit size before it can be hit-tested. Make sure that the RenderBox in question sets its size during layout.'
+        );
+      }
+      return true;
+    });
     if (position.x >= 0.0 && position.x < _size.width &&
         position.y >= 0.0 && position.y < _size.height) {
       if (hitTestChildren(result, position: position) || hitTestSelf(position)) {

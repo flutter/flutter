@@ -353,10 +353,69 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       totalChildren++;
       int flex = _getFlex(child);
       if (flex > 0) {
-        // Flexible children can only be used when the RenderFlex box's container has a finite size.
-        // When the container is infinite, for example if you are in a scrollable viewport, then
-        // it wouldn't make any sense to have a flexible child.
-        assert(canFlex && 'See https://flutter.io/layout/#flex' is String);
+        assert(() {
+          final String identity = _direction == FlexDirection.horizontal ? 'row' : 'column';
+          final String axis = _direction == FlexDirection.horizontal ? 'horizontal' : 'vertical';
+          final String dimension = _direction == FlexDirection.horizontal ? 'width' : 'height';
+          String error, message;
+          String addendum = '';
+          if (mainAxisAlignment == MainAxisAlignment.collapse) {
+            error = 'RenderFlex children have non-zero flex but mainAxisAlignment is set to "collapse".';
+            message = 'The MainAxisAlignment.collapse value indicates that the $identity is to shrink-wrap its children '
+                      'along the $axis axis. Setting a flex on a child (e.g. using a Flexible) indicates that the '
+                      'child is to expand to fill the remaining space in the $axis direction.';
+          } else if (mainSize == double.INFINITY) {
+            error = 'RenderFlex children have non-zero flex but incoming $dimension constraints are unbounded.';
+            message = 'When a $identity is in a parent that does not provide a finite $dimension constraint, for example '
+                      'if it is in a $axis scrollable, it will try to shrink-wrap its children along the $axis '
+                      'axis. Setting a flex on a child (e.g. using a Flexible) indicates that the child is to '
+                      'expand to fill the remaining space in the $axis direction.';
+            StringBuffer information = new StringBuffer();
+            RenderBox node = this;
+            switch (_direction) {
+              case FlexDirection.horizontal:
+                while (!node.constraints.hasBoundedWidth && node.parent is RenderBox)
+                  node = node.parent;
+                if (!node.constraints.hasBoundedWidth)
+                  node = null;
+                break;
+              case FlexDirection.vertical:
+                while (!node.constraints.hasBoundedHeight && node.parent is RenderBox)
+                  node = node.parent;
+                if (!node.constraints.hasBoundedHeight)
+                  node = null;
+                break;
+            }
+            if (node != null) {
+              information.writeln('The nearest ancestor providing an unbounded width constraint is:');
+              information.writeln('  $node');
+              List<String> description = <String>[];
+              node.debugFillDescription(description);
+              for (String line in description)
+                information.writeln('  $line');
+            }
+            information.writeln('See also: https://flutter.io/layout/');
+            addendum = information.toString();
+          } else {
+            return true;
+          }
+          throw new FlutterError(
+            '$error\n'
+            '$message\n'
+            'These two directives are mutually exclusive. If a parent is to shrink-wrap its child, the child '
+            'cannot simultaneously expand to fit its parent.\n'
+            'The affected RenderFlex is:\n'
+            '  $this\n'
+            'The creator information is set to:\n'
+            '  $debugCreator\n'
+            '$addendum'
+            'If this message did not help you determine the problem, consider using debugDumpRenderTree():\n'
+            '  https://flutter.io/debugging/#rendering-layer\n'
+            '  http://docs.flutter.io/flutter/rendering/debugDumpRenderTree.html\n'
+            'If none of the above helps enough to fix this problem, please don\'t hesitate to file a bug:\n'
+            '  https://github.com/flutter/flutter/issues/new'
+          );
+        });
         totalFlex += childParentData.flex;
       } else {
         BoxConstraints innerConstraints;
