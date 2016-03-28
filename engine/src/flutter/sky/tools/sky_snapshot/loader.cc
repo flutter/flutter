@@ -69,16 +69,16 @@ void Loader::LoadPackagesMap(const base::FilePath& packages) {
   packages_ = base::MakeAbsoluteFilePath(packages);
   dependencies_.insert(packages_.AsUTF8Unsafe());
   std::string packages_source;
-  if (!base::ReadFileToString(packages, &packages_source)) {
+  if (!base::ReadFileToString(packages_, &packages_source)) {
     fprintf(stderr, "error: Unable to load .packages file '%s'.\n",
-        packages.AsUTF8Unsafe().c_str());
+        packages_.AsUTF8Unsafe().c_str());
     exit(1);
   }
   packages_map_.reset(new tonic::PackagesMap());
   std::string error;
   if (!packages_map_->Parse(packages_source, &error)) {
     fprintf(stderr, "error: Unable to parse .packages file '%s'.\n%s\n",
-        packages.AsUTF8Unsafe().c_str(), error.c_str());
+        packages_.AsUTF8Unsafe().c_str(), error.c_str());
     exit(1);
   }
 }
