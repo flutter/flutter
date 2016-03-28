@@ -43,6 +43,11 @@ class UpgradeCommand extends FlutterCommand {
     if (code != 0)
       return code;
 
+    // Causes us to update our locally cached packages.
+    code = await runCommandAndStreamOutput(<String>[
+      'bin/flutter', '--version'
+    ], workingDirectory: ArtifactStore.flutterRoot);
+
     printStatus('');
     code = await runCommandAndStreamOutput([sdkBinaryName('pub'), 'upgrade']);
 
