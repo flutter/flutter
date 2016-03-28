@@ -36,6 +36,8 @@ final mojom.ViewProxy _viewProxy = _initViewProxy();
 final mojom.View _view = _viewProxy?.ptr;
 
 mojom.ViewContainer _initViewContainer() {
+  if (_view == null)
+    return null;
   mojom.ViewContainerProxy viewContainerProxy = new mojom.ViewContainerProxy.unbound();
   _view.getContainer(viewContainerProxy);
   viewContainerProxy.ptr.setListener(new mojom.ViewContainerListenerStub.unbound()..impl = _ViewContainerListenerImpl.instance);
