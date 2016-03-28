@@ -140,7 +140,7 @@ String _doctorText() {
     appContext.runInZone(() => doctor.diagnose());
 
     return logger.statusText;
-  } catch (error) {
-    return '';
+  } catch (error, trace) {
+    return 'encountered exception: $error\n$trace';
   }
 }
