@@ -425,7 +425,10 @@ if (is_android) {
         "//sky/shell/platform/glfw/window_impl.h",
       ]
 
-      deps += [ "//third_party/glfw" ]
+      deps += [
+        "//third_party/glfw",
+        "//ui/gl",
+      ]
     } else {
       sources += [ "platform/linux/platform_view_linux.cc" ]
     }
