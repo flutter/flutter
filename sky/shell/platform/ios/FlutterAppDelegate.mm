@@ -32,7 +32,7 @@ NSURL* URLForSwitch(const char* name) {
   FlutterDartProject* project = [[FlutterDartProject alloc]
       initWithFLXArchive:URLForSwitch(sky::shell::switches::kFLX)
                 dartMain:URLForSwitch(sky::shell::switches::kMainDartFile)
-             packageRoot:URLForSwitch(sky::shell::switches::kPackageRoot)];
+                packages:URLForSwitch(sky::shell::switches::kPackages)];
 #else
   NSString* bundlePath =
       [[NSBundle mainBundle] pathForResource:@"FlutterApplication"

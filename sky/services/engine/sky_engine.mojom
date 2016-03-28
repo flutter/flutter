@@ -49,7 +49,7 @@ interface SkyEngine {
   PushRoute(string route);
   PopRoute();
 
-  RunFromFile(string main, string package_root, string bundle_path);
+  RunFromFile(string main, string packages, string bundle_path);
   RunFromPrecompiledSnapshot(string bundle_path);
   RunFromBundle(string script_uri, string bundle_path);
 

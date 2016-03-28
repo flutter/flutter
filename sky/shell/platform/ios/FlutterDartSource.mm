@@ -6,22 +6,22 @@
 
 @implementation FlutterDartSource {
   NSURL* _dartMain;
-  NSURL* _packageRoot;
+  NSURL* _packages;
   NSURL* _flxArchive;
 }
 
 - (instancetype)init {
-  return [self initWithDartMain:nil packageRoot:nil flxArchive:nil];
+  return [self initWithDartMain:nil packages:nil flxArchive:nil];
 }
 
 - (instancetype)initWithDartMain:(NSURL*)dartMain
-                     packageRoot:(NSURL*)packageRoot
+                        packages:(NSURL*)packages
                       flxArchive:(NSURL*)flxArchive {
   self = [super init];
 
   if (self) {
     _dartMain = [dartMain copy];
-    _packageRoot = [packageRoot copy];
+    _packages = [packages copy];
     _flxArchive = [flxArchive copy];
   }
 
@@ -57,14 +57,14 @@ static BOOL CheckDartProjectURL(NSMutableString* log,
 
   isValid &= CheckDartProjectURL(log, _flxArchive, @"FLX archive");
   isValid &= CheckDartProjectURL(log, _dartMain, @"Dart main");
-  isValid &= CheckDartProjectURL(log, _packageRoot, @"Dart package root");
+  isValid &= CheckDartProjectURL(log, _packages, @"Dart packages");
 
   result(isValid, log);
 }
 
 - (void)dealloc {
   [_dartMain release];
-  [_packageRoot release];
+  [_packages release];
   [_flxArchive release];
 
   [super dealloc];

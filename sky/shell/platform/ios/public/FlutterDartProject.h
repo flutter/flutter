@@ -17,7 +17,7 @@ FLUTTER_EXPORT
 
 - (instancetype)initWithFLXArchive:(NSURL*)archiveURL
                           dartMain:(NSURL*)dartMainURL
-                       packageRoot:(NSURL*)dartPackageURL
+                          packages:(NSURL*)dartPackages
     NS_DESIGNATED_INITIALIZER;
 
 @end

@@ -41,7 +41,7 @@ TestRunner& TestRunner::Shared() {
 }
 
 void TestRunner::Run(const TestDescriptor& test) {
-  sky_engine_->RunFromFile(test.path, test.package_root, "");
+  sky_engine_->RunFromFile(test.path, test.packages, "");
 }
 
 }  // namespace shell

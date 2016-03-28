@@ -24,7 +24,7 @@ class TestRunner {
 
   struct TestDescriptor {
     std::string path;
-    std::string package_root;
+    std::string packages;
   };
 
   void Run(const TestDescriptor& test);

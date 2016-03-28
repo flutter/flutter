@@ -12,11 +12,11 @@ typedef void (^ValidationResult)(BOOL result, NSString* message);
 @interface FlutterDartSource : NSObject
 
 @property(nonatomic, readonly) NSURL* dartMain;
-@property(nonatomic, readonly) NSURL* packageRoot;
+@property(nonatomic, readonly) NSURL* packages;
 @property(nonatomic, readonly) NSURL* flxArchive;
 
 - (instancetype)initWithDartMain:(NSURL*)dartMain
-                     packageRoot:(NSURL*)packageRoot
+                        packages:(NSURL*)packages
                       flxArchive:(NSURL*)flxArchive NS_DESIGNATED_INITIALIZER;
 
 - (void)validate:(ValidationResult)result;

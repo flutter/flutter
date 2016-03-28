@@ -41,8 +41,8 @@ PackageProject() {
   local dart_main=${project_path}/lib/main.dart
   AssertExists $dart_main
 
-  local package_root=${project_path}/packages
-  AssertExists $package_root
+  local packages=${project_path}/.packages
+  AssertExists $packages
 
   # Remove old build artifacts
   RunCommand rm -f ${derived_dir}/app.flx
@@ -62,7 +62,7 @@ PackageProject() {
   RunCommand ${FLUTTER_ROOT}/bin/flutter build flx                             \
       --target ${dart_main}                                                    \
       --output-file ${derived_dir}/app.flx                                     \
-      --package-root ${package_root}                                           \
+      --packages ${packages}                                                   \
       --compiler ${src_dir}/ScriptSnapshotter                                  \
       ${precompilation_flag}                                                   \
 

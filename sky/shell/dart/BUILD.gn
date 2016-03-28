@@ -15,6 +15,7 @@ source_set("dart") {
     "//mojo/data_pipe_utils",
     "//mojo/public/cpp/application",
     "//sky/engine/tonic",
+    "//sky/engine/tonic/parsers",
     "//sky/engine/wtf",
   ]
 }
