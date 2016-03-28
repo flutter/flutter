@@ -25,14 +25,12 @@ void DartInvoke(Dart_Handle closure, std::initializer_list<Dart_Handle> args) {
   Dart_Handle* argv = const_cast<Dart_Handle*>(args.begin());
   Dart_Handle handle = Dart_InvokeClosure(closure, argc, argv);
   LogIfError(handle);
-  CHECK(!Dart_IsCompilationError(handle));
 }
 
 void DartInvokeVoid(Dart_Handle closure) {
   TRACE_EVENT0("flutter", "DartInvokeVoid");
   Dart_Handle handle = Dart_InvokeClosure(closure, 0, nullptr);
   LogIfError(handle);
-  CHECK(!Dart_IsCompilationError(handle));
 }
 
 }  // namespace blink
