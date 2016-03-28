@@ -266,6 +266,10 @@ bool DartJni::InitJni() {
   return true;
 }
 
+void DartJni::OnThreadExit() {
+  base::android::DetachFromVM();
+}
+
 ScopedJavaLocalRef<jclass> DartJni::GetClass(JNIEnv* env, const char* name) {
   jobject clazz = env->CallObjectMethod(
       g_jvm_data->class_loader.obj(),

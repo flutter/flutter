@@ -28,6 +28,7 @@ class DartJni {
   static void InitForGlobal();
   static void InitForIsolate();
   static bool InitJni();
+  static void OnThreadExit();
 
   static base::android::ScopedJavaLocalRef<jclass> GetClass(
       JNIEnv* env, const char* name);
