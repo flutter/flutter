@@ -241,7 +241,7 @@ class _TimePickerHeader extends StatelessWidget {
 }
 
 List<TextPainter> _initPainters(List<String> labels) {
-  TextStyle style = Typography.black.subhead.copyWith(height: 1.0);
+  TextStyle style = Typography.black.subhead.copyWith(lineHeight: 1.0);
   List<TextPainter> painters = new List<TextPainter>(labels.length);
   for (int i = 0; i < painters.length; ++i) {
     String label = labels[i];

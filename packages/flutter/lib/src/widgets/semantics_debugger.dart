@@ -146,7 +146,7 @@ class _SemanticsDebuggerEntry {
   static const TextStyle textStyles = const TextStyle(
     color: const Color(0xFF000000),
     fontSize: 10.0,
-    height: 0.8,
+    lineHeight: 0.8,
     textAlign: TextAlign.center
   );
 

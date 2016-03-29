@@ -23,7 +23,7 @@ final List<List<String>> _kNameLines = _kDialogText
   .map((String line) => line.split(':'))
   .toList();
 
-final TextStyle _kDaveStyle = new TextStyle(color: Colors.indigo[400], height: 1.8);
+final TextStyle _kDaveStyle = new TextStyle(color: Colors.indigo[400], lineHeight: 1.8);
 final TextStyle _kHalStyle = new TextStyle(color: Colors.red[400], fontFamily: "monospace");
 final TextStyle _kBold = const TextStyle(fontWeight: FontWeight.bold);
 final TextStyle _kUnderline = const TextStyle(

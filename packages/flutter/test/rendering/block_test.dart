@@ -17,7 +17,7 @@ void main() {
   test('block intrinsics', () {
     RenderParagraph paragraph = new RenderParagraph(
       new TextSpan(
-        style: new TextStyle(height: 1.0),
+        style: new TextStyle(lineHeight: 1.0),
         text: 'Hello World'
       )
     );
