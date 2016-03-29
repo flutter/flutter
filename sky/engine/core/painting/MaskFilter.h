@@ -7,14 +7,14 @@
 
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/ThreadSafeRefCounted.h"
 
 class SkMaskFilter;
 
 namespace blink {
 class DartLibraryNatives;
 
-class MaskFilter : public RefCounted<MaskFilter>, public DartWrappable {
+class MaskFilter : public ThreadSafeRefCounted<MaskFilter>, public DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
  public:
   ~MaskFilter() override;

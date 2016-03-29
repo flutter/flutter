@@ -7,7 +7,7 @@
 
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/ThreadSafeRefCounted.h"
 #include "sky/engine/core/painting/Canvas.h"
 #include "sky/engine/core/painting/Offset.h"
 #include "sky/engine/core/rendering/RenderView.h"
@@ -16,7 +16,7 @@
 namespace blink {
 class DartLibraryNatives;
 
-class Paragraph : public RefCounted<Paragraph>, public DartWrappable {
+class Paragraph : public ThreadSafeRefCounted<Paragraph>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<Paragraph> create(PassOwnPtr<RenderView> renderView) {

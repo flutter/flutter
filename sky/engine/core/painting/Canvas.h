@@ -18,7 +18,7 @@
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/tonic/float64_list.h"
 #include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/ThreadSafeRefCounted.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
 namespace blink {
@@ -29,7 +29,7 @@ class Paragraph;
 template <>
 struct DartConverter<SkCanvas::VertexMode> : public DartConverterInteger<SkCanvas::VertexMode> {};
 
-class Canvas : public RefCounted<Canvas>, public DartWrappable {
+class Canvas : public ThreadSafeRefCounted<Canvas>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<Canvas> create(PictureRecorder* recorder, Rect& bounds);

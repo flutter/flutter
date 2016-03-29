@@ -21,11 +21,11 @@
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/tonic/float64_list.h"
 #include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/ThreadSafeRefCounted.h"
 
 namespace blink {
 
-class SceneBuilder : public RefCounted<SceneBuilder>, public DartWrappable {
+class SceneBuilder : public ThreadSafeRefCounted<SceneBuilder>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<SceneBuilder> create() {

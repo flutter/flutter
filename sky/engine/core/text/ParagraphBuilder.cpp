@@ -4,12 +4,14 @@
 
 #include "sky/engine/core/text/ParagraphBuilder.h"
 
+#include "base/location.h"
 #include "sky/engine/core/rendering/RenderInline.h"
 #include "sky/engine/core/rendering/RenderParagraph.h"
 #include "sky/engine/core/rendering/RenderText.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
 #include "sky/engine/core/script/ui_dart_state.h"
 #include "sky/engine/platform/text/LocaleToScriptMapping.h"
+#include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/tonic/dart_args.h"
 #include "sky/engine/tonic/dart_binding_macros.h"
 #include "sky/engine/tonic/dart_converter.h"
@@ -135,6 +137,8 @@ ParagraphBuilder::ParagraphBuilder()
 
 ParagraphBuilder::~ParagraphBuilder()
 {
+    base::SingleThreadTaskRunner* runner = Platform::current()->GetUITaskRunner();
+    runner->DeleteSoon(FROM_HERE, m_renderView.leakPtr());
 }
 
 void ParagraphBuilder::pushStyle(Int32List& encoded, const std::string& fontFamily, double fontSize, double letterSpacing, double wordSpacing, double lineHeight)
