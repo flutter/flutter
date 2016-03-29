@@ -391,7 +391,7 @@ class _DragAvatar<T> extends Drag {
   final _OnDragEnd onDragEnd;
 
   _DragTargetState<T> _activeTarget;
-  bool _activeTargetWillAcceptDrop = false;
+  List<_DragTargetState<T>> _lastTargets = <_DragTargetState<T>>[];
   Point _position;
   Offset _lastOffset;
   OverlayEntry _entry;
@@ -418,32 +418,58 @@ class _DragAvatar<T> extends Drag {
     _entry.markNeedsBuild();
     HitTestResult result = new HitTestResult();
     WidgetFlutterBinding.instance.hitTest(result, globalPosition + feedbackOffset);
-    _DragTargetState<T> target = _getDragTarget(result.path);
-    if (target == _activeTarget)
+
+    List<_DragTargetState<T>> targets = _getDragTargets(result.path).toList();
+
+    bool listsMatch = false;
+    if (targets.length >= _lastTargets.length && _lastTargets.isNotEmpty) {
+      listsMatch = true;
+      Iterator<_DragTargetState<T>> iterator = targets.iterator;
+      for (int i = 0; i < _lastTargets.length; i += 1) {
+        iterator.moveNext();
+        if (iterator.current != _lastTargets[i]) {
+          listsMatch = false;
+          break;
+        }
+      }
+    }
+
+    // If everything's the same, bail early.
+    if (listsMatch)
       return;
-    if (_activeTarget != null)
-      _activeTarget.didLeave(data);
-    _activeTarget = target;
-    _activeTargetWillAcceptDrop = _activeTarget != null && _activeTarget.didEnter(data);
+
+    // Leave old targets.
+    for (int i = 0; i < _lastTargets.length; i += 1)
+      _lastTargets[i].didLeave(data);
+    _lastTargets.clear();
+
+    // Enter new targets.
+    _DragTargetState<T> newTarget = targets.firstWhere((_DragTargetState<T> target) {
+        _lastTargets.add(target);
+        return target.didEnter(data);
+      },
+      orElse: () => null
+    );
+
+    _activeTarget = newTarget;
   }
 
-  _DragTargetState<T> _getDragTarget(List<HitTestEntry> path) {
-    // Look for the RenderBox that corresponds to the hit target (the hit target
-    // widget builds a RenderMetadata box for us for this purpose).
+  Iterable<_DragTargetState<T>> _getDragTargets(List<HitTestEntry> path) sync* {
+    // Look for the RenderBoxes that corresponds to the hit target (the hit target
+    // widgets build RenderMetadata boxes for us for this purpose).
     for (HitTestEntry entry in path) {
       if (entry.target is RenderMetaData) {
         RenderMetaData renderMetaData = entry.target;
         if (renderMetaData.metaData is _DragTargetState<T>)
-          return renderMetaData.metaData;
+          yield renderMetaData.metaData;
       }
     }
-    return null;
   }
 
   void finish(_DragEndKind endKind, [Velocity velocity]) {
     bool wasAccepted = false;
     if (_activeTarget != null) {
-      if (endKind == _DragEndKind.dropped && _activeTargetWillAcceptDrop) {
+      if (endKind == _DragEndKind.dropped && _activeTarget != null) {
         _activeTarget.didDrop(data);
         wasAccepted = true;
       } else {
@@ -451,7 +477,6 @@ class _DragAvatar<T> extends Drag {
       }
     }
     _activeTarget = null;
-    _activeTargetWillAcceptDrop = false;
     _entry.remove();
     _entry = null;
     // TODO(ianh): consider passing _entry as well so the client can perform an animation.

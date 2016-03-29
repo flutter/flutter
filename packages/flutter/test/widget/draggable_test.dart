@@ -753,4 +753,123 @@ void main() {
       expect(onDraggableCanceledOffset, equals(new Offset(flingStart.x, flingStart.y) + new Offset(0.0, 100.0)));
     });
   });
+
+  test('Drag and drop - allow pass thru of unaccepted data test', () {
+    testWidgets((WidgetTester tester) {
+      List<int> acceptedInts = <int>[];
+      List<double> acceptedDoubles = <double>[];
+
+      tester.pumpWidget(new MaterialApp(
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) { return new Column(
+            children: <Widget>[
+              new Draggable<int>(
+                data: 1,
+                child: new Text('IntSource'),
+                feedback: new Text('IntDragging')
+              ),
+              new Draggable<double>(
+                data: 1.0,
+                child: new Text('DoubleSource'),
+                feedback: new Text('DoubleDragging')
+              ),
+              new Stack(children:[
+                new DragTarget<int>(
+                  builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+                    return new IgnorePointer(
+                      child: new Container(
+                        height: 100.0,
+                        child: new Text('Target1')
+                      )
+                    );
+                  },
+                  onAccept: (int data) {
+                    acceptedInts.add(data);
+                  }
+                ),
+                new DragTarget<double>(
+                  builder: (BuildContext context, List<double> data, List<dynamic> rejects) {
+                    return new IgnorePointer(
+                      child: new Container(
+                        height: 100.0,
+                        child: new Text('Target2')
+                      )
+                    );
+                  },
+                  onAccept: (double data) {
+                    acceptedDoubles.add(data);
+                  }
+                ),
+              ])
+            ]);
+          },
+        }
+      ));
+
+      expect(acceptedInts, isEmpty);
+      expect(acceptedDoubles, isEmpty);
+      expect(tester.findText('IntSource'), isNotNull);
+      expect(tester.findText('IntDragging'), isNull);
+      expect(tester.findText('DoubleSource'), isNotNull);
+      expect(tester.findText('DoubleDragging'), isNull);
+      expect(tester.findText('Target1'), isNotNull);
+      expect(tester.findText('Target2'), isNotNull);
+
+      Point intLocation = tester.getCenter(tester.findText('IntSource'));
+      Point doubleLocation = tester.getCenter(tester.findText('DoubleSource'));
+      Point targetLocation = tester.getCenter(tester.findText('Target1'));
+
+      // Drag the double draggable.
+      TestGesture doubleGesture = tester.startGesture(doubleLocation, pointer: 7);
+      tester.pump();
+
+      expect(acceptedInts, isEmpty);
+      expect(acceptedDoubles, isEmpty);
+      expect(tester.findText('IntDragging'), isNull);
+      expect(tester.findText('DoubleDragging'), isNotNull);
+
+      doubleGesture.moveTo(targetLocation);
+      tester.pump();
+
+      expect(acceptedInts, isEmpty);
+      expect(acceptedDoubles, isEmpty);
+      expect(tester.findText('IntDragging'), isNull);
+      expect(tester.findText('DoubleDragging'), isNotNull);
+
+      doubleGesture.up();
+      tester.pump();
+
+      expect(acceptedInts, isEmpty);
+      expect(acceptedDoubles, equals(<double>[1.0]));
+      expect(tester.findText('IntDragging'), isNull);
+      expect(tester.findText('DoubleDragging'), isNull);
+
+      acceptedDoubles.clear();
+
+      // Drag the int draggable.
+      TestGesture intGesture = tester.startGesture(intLocation, pointer: 7);
+      tester.pump();
+
+      expect(acceptedInts, isEmpty);
+      expect(acceptedDoubles, isEmpty);
+      expect(tester.findText('IntDragging'), isNotNull);
+      expect(tester.findText('DoubleDragging'), isNull);
+
+      intGesture.moveTo(targetLocation);
+      tester.pump();
+
+      expect(acceptedInts, isEmpty);
+      expect(acceptedDoubles, isEmpty);
+      expect(tester.findText('IntDragging'), isNotNull);
+      expect(tester.findText('DoubleDragging'), isNull);
+
+      intGesture.up();
+      tester.pump();
+
+      expect(acceptedInts, equals(<int>[1]));
+      expect(acceptedDoubles, isEmpty);
+      expect(tester.findText('IntDragging'), isNull);
+      expect(tester.findText('DoubleDragging'), isNull);
+    });
+  });
 }
