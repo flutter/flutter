@@ -194,6 +194,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
     this.foregroundDecoration,
     this.margin,
     this.padding,
+    this.opacity,
     this.transform,
     this.width,
     this.height,
@@ -204,6 +205,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
     assert(foregroundDecoration == null || foregroundDecoration.debugAssertValid());
     assert(margin == null || margin.isNonNegative);
     assert(padding == null || padding.isNonNegative);
+    assert(opacity == null || (opacity >= 0.0 && opacity <= 1.0));
   }
 
   /// The widget below this widget in the tree.
@@ -223,6 +225,10 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
 
   /// Empty space to inscribe inside the decoration.
   final EdgeInsets padding;
+
+  /// The opacity to apply while painting the container. This opacity is applied
+  /// to the whole container, including the decorations, if any.
+  final double opacity;
 
   /// The transformation matrix to apply before painting the container.
   final Matrix4 transform;
@@ -249,6 +255,8 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
       description.add('margin: $margin');
     if (padding != null)
       description.add('padding: $padding');
+    if (opacity != null)
+      description.add('opacity: $opacity');
     if (transform != null)
       description.add('has transform');
     if (width != null)
@@ -264,6 +272,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
   DecorationTween _foregroundDecoration;
   EdgeInsetsTween _margin;
   EdgeInsetsTween _padding;
+  Tween<double> _opacity;
   Matrix4Tween _transform;
   Tween<double> _width;
   Tween<double> _height;
@@ -276,6 +285,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
     _foregroundDecoration = visitor(_foregroundDecoration, config.foregroundDecoration, (dynamic value) => new DecorationTween(begin: value));
     _margin = visitor(_margin, config.margin, (dynamic value) => new EdgeInsetsTween(begin: value));
     _padding = visitor(_padding, config.padding, (dynamic value) => new EdgeInsetsTween(begin: value));
+    _opacity = visitor(_opacity, config.opacity, (dynamic value) => new Tween<double>(begin: value));
     _transform = visitor(_transform, config.transform, (dynamic value) => new Matrix4Tween(begin: value));
     _width = visitor(_width, config.width, (dynamic value) => new Tween<double>(begin: value));
     _height = visitor(_height, config.height, (dynamic value) => new Tween<double>(begin: value));
@@ -290,6 +300,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
       foregroundDecoration: _foregroundDecoration?.evaluate(animation),
       margin: _margin?.evaluate(animation),
       padding: _padding?.evaluate(animation),
+      opacity: _opacity?.evaluate(animation),
       transform: _transform?.evaluate(animation),
       width: _width?.evaluate(animation),
       height: _height?.evaluate(animation)
@@ -309,6 +320,8 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
       description.add('has margin');
     if (_padding != null)
       description.add('has padding');
+    if (_opacity != null)
+      description.add('has opacity');
     if (_transform != null)
       description.add('has transform');
     if (_width != null)
