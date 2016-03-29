@@ -121,7 +121,7 @@ class ScaleTransition extends AnimatedWidget {
   ScaleTransition({
     Key key,
     Animation<double> scale,
-    this.alignment: const FractionalOffset(0.5, 0.5),
+    this.alignment: FractionalOffset.center,
     this.child
   }) : scale = scale, super(key: key, animation: scale);
 
@@ -177,7 +177,7 @@ class RotationTransition extends AnimatedWidget {
     Matrix4 transform = new Matrix4.rotationZ(turnsValue * math.PI * 2.0);
     return new Transform(
       transform: transform,
-      alignment: const FractionalOffset(0.5, 0.5),
+      alignment: FractionalOffset.center,
       child: child
     );
   }

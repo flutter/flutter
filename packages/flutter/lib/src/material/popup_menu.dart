@@ -236,7 +236,7 @@ class _PopupMenu<T> extends StatelessWidget {
             type: MaterialType.card,
             elevation: route.elevation,
             child: new Align(
-              alignment: const FractionalOffset(1.0, 0.0),
+              alignment: FractionalOffset.topRight,
               widthFactor: width.evaluate(route.animation),
               heightFactor: height.evaluate(route.animation),
               child: child

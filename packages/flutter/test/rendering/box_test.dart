@@ -14,7 +14,7 @@ void main() {
       decoration: new BoxDecoration(
         backgroundColor: const Color(0xFF00FF00),
         gradient: new RadialGradient(
-          center: FractionalOffset.zero, radius: 1.8,
+          center: FractionalOffset.topLeft, radius: 1.8,
           colors: <Color>[Colors.yellow[500], Colors.blue[500]]),
         boxShadow: elevationToShadow[3])
     );

@@ -13,7 +13,7 @@ void main() {
     // The root of our render tree is a RenderPositionedBox, which centers its
     // child both vertically and horizontally.
     root: new RenderPositionedBox(
-      alignment: const FractionalOffset(0.5, 0.5),
+      alignment: FractionalOffset.center,
       // We use a RenderParagraph to display the text 'Hello, world.' without
       // any explicit styling.
       child: new RenderParagraph(new TextSpan(text: 'Hello, world.'))

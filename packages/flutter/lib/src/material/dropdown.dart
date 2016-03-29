@@ -322,7 +322,7 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
               children: config.items,
               key: indexedStackKey,
               index: _selectedIndex,
-              alignment: const FractionalOffset(0.5, 0.0)
+              alignment: FractionalOffset.topCenter
             ),
             new Container(
               child: new Icon(icon: Icons.arrow_drop_down, size: 36.0),

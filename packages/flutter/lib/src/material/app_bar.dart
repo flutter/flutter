@@ -187,7 +187,7 @@ class AppBar extends StatelessWidget {
         padding: new EdgeInsets.only(left: combinedPadding.left, right: combinedPadding.right),
         child: new ClipRect(
           child: new OverflowBox(
-            alignment: const FractionalOffset(0.0, 1.0), // bottom justify
+            alignment: FractionalOffset.bottomLeft, // bottom justify
             minHeight: paddedCollapsedHeight,
             maxHeight: paddedCollapsedHeight,
             child: new Padding(
@@ -203,7 +203,7 @@ class AppBar extends StatelessWidget {
       appBar = new Stack(
         children: <Widget>[
           flexibleSpace(context),
-          new Align(child: appBar, alignment: const FractionalOffset(0.0, 0.0))
+          new Align(child: appBar, alignment: FractionalOffset.topLeft)
         ]
       );
     }

@@ -481,8 +481,8 @@ abstract class Gradient {
 /// A 2D linear gradient.
 class LinearGradient extends Gradient {
   const LinearGradient({
-    this.begin: const FractionalOffset(0.0, 0.5),
-    this.end: const FractionalOffset(1.0, 0.5),
+    this.begin: FractionalOffset.centerLeft,
+    this.end: FractionalOffset.centerRight,
     this.colors,
     this.stops,
     this.tileMode: TileMode.clamp
@@ -570,7 +570,7 @@ class LinearGradient extends Gradient {
 /// A 2D radial gradient.
 class RadialGradient extends Gradient {
   const RadialGradient({
-    this.center: const FractionalOffset(0.5, 0.5),
+    this.center: FractionalOffset.center,
     this.radius: 0.5,
     this.colors,
     this.stops,
@@ -856,7 +856,18 @@ class FractionalOffset {
   final double dx;
   final double dy;
 
-  static const FractionalOffset zero = const FractionalOffset(0.0, 0.0);
+  static const FractionalOffset topLeft = const FractionalOffset(0.0, 0.0);
+  static const FractionalOffset topCenter = const FractionalOffset(0.5, 0.0);
+  static const FractionalOffset topRight = const FractionalOffset(1.0, 0.0);
+
+  static const FractionalOffset bottomLeft = const FractionalOffset(0.0, 1.0);
+  static const FractionalOffset bottomCenter = const FractionalOffset(0.5, 1.0);
+  static const FractionalOffset bottomRight = const FractionalOffset(1.0, 1.0);
+
+  static const FractionalOffset centerLeft = const FractionalOffset(0.0, 0.5);
+  static const FractionalOffset centerRight = const FractionalOffset(1.0, 0.5);
+
+  static const FractionalOffset center = const FractionalOffset(0.5, 0.5);
 
   FractionalOffset operator -() {
     return new FractionalOffset(-dx, -dy);

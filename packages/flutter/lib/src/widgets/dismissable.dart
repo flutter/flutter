@@ -191,7 +191,7 @@ class _DismissableState extends State<Dismissable> {
 
   void _updateMoveAnimation() {
     _moveAnimation = new Tween<FractionalOffset>(
-      begin: FractionalOffset.zero,
+      begin: FractionalOffset.topLeft,
       end: _directionIsXAxis ?
              new FractionalOffset(_dragExtent.sign, 0.0) :
              new FractionalOffset(0.0, _dragExtent.sign)

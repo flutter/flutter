@@ -172,7 +172,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                   border: new Border(bottom: new BorderSide(color: theme.dividerColor))
                 ),
                 child: new Align(
-                  alignment: const FractionalOffset(0.0, 1.0),
+                  alignment: FractionalOffset.bottomLeft,
                   child: new Text('Event name', style: theme.textTheme.display2)
                 )
               ),
@@ -182,7 +182,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                   border: new Border(bottom: new BorderSide(color: theme.dividerColor))
                 ),
                 child: new Align(
-                  alignment: const FractionalOffset(0.0, 1.0),
+                  alignment: FractionalOffset.bottomLeft,
                   child: new Text('Location', style: theme.textTheme.title.copyWith(color: Colors.black54))
                 )
               ),
