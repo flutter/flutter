@@ -50,9 +50,10 @@ enum _ScaffoldSlot {
 }
 
 class _ScaffoldLayout extends MultiChildLayoutDelegate {
-  _ScaffoldLayout({ this.padding });
+  _ScaffoldLayout({ this.padding, this.appBarBehavior: AppBarBehavior.anchor });
 
   final EdgeInsets padding;
+  final AppBarBehavior appBarBehavior;
 
   @override
   void performLayout(Size size) {
@@ -68,7 +69,9 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     double contentBottom = size.height - padding.bottom;
 
     if (hasChild(_ScaffoldSlot.appBar)) {
-      contentTop = layoutChild(_ScaffoldSlot.appBar, fullWidthConstraints).height;
+      final double appBarHeight = layoutChild(_ScaffoldSlot.appBar, fullWidthConstraints).height;
+      if (appBarBehavior == AppBarBehavior.anchor)
+        contentTop = appBarHeight;
       positionChild(_ScaffoldSlot.appBar, Offset.zero);
     }
 
@@ -522,6 +525,8 @@ class ScaffoldState extends State<Scaffold> {
         constraints: new BoxConstraints(maxHeight: expandedHeight)
       );
       _addIfNonNull(children, appBar, _ScaffoldSlot.appBar);
+    } else {
+      children.add(new LayoutId(child: _buildScrollableAppBar(context), id: _ScaffoldSlot.appBar));
     }
     // Otherwise the AppBar will be part of a [app bar, body] Stack. See AppBarBehavior.scroll below.
 
@@ -565,21 +570,12 @@ class ScaffoldState extends State<Scaffold> {
     if (config.appBarBehavior != AppBarBehavior.anchor) {
       application = new NotificationListener<ScrollNotification>(
         onNotification: _handleScrollNotification,
-        child: new Stack(
-          children: <Widget> [
-            new CustomMultiChildLayout(
-              children: children,
-              delegate: new _ScaffoldLayout(
-                padding: EdgeInsets.zero
-              )
-            ),
-            new Positioned(
-              top: 0.0,
-              left: 0.0,
-              right: 0.0,
-              child: _buildScrollableAppBar(context)
-            )
-          ]
+        child: new CustomMultiChildLayout(
+          children: children,
+          delegate: new _ScaffoldLayout(
+            padding: EdgeInsets.zero,
+            appBarBehavior: config.appBarBehavior
+          )
         )
       );
     } else {
