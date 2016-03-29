@@ -12,7 +12,7 @@
 #include "sky/engine/core/painting/RRect.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/ThreadSafeRefCounted.h"
 #include "third_party/skia/include/core/SkPath.h"
 
 // Note: There's a very similar class in ../../platform/graphics/Path.h
@@ -22,7 +22,7 @@
 namespace blink {
 class DartLibraryNatives;
 
-class CanvasPath : public RefCounted<CanvasPath>, public DartWrappable {
+class CanvasPath : public ThreadSafeRefCounted<CanvasPath>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     ~CanvasPath() override;

@@ -8,7 +8,7 @@
 #include "sky/engine/core/painting/Rect.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/ThreadSafeRefCounted.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 
 namespace blink {
@@ -16,7 +16,7 @@ class Canvas;
 class DartLibraryNatives;
 class Picture;
 
-class PictureRecorder : public RefCounted<PictureRecorder>,
+class PictureRecorder : public ThreadSafeRefCounted<PictureRecorder>,
                         public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:

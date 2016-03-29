@@ -11,13 +11,13 @@
 #include "flow/layers/layer_tree.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/ThreadSafeRefCounted.h"
 #include "third_party/skia/include/core/SkPicture.h"
 
 namespace blink {
 class DartLibraryNatives;
 
-class Scene : public RefCounted<Scene>, public DartWrappable {
+class Scene : public ThreadSafeRefCounted<Scene>, public DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
 
  public:

@@ -7,14 +7,14 @@
 
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/ThreadSafeRefCounted.h"
 #include "third_party/skia/include/core/SkPicture.h"
 
 namespace blink {
 class Canvas;
 class DartLibraryNatives;
 
-class Picture : public RefCounted<Picture>, public DartWrappable {
+class Picture : public ThreadSafeRefCounted<Picture>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     ~Picture() override;

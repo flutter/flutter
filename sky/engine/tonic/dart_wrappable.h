@@ -14,6 +14,9 @@
 #include "sky/engine/tonic/dart_wrapper_info.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefPtr.h"
+#include "sky/engine/wtf/ThreadSafeRefCounted.h"
+
+#include <type_traits>
 
 namespace blink {
 class DartGCVisitor;
@@ -82,7 +85,9 @@ static const DartWrapperInfo kDartWrapperInfo_##LibraryName_##ClassName = {    \
   &DerefObject_##LibraryName_##ClassName,                                      \
 };                                                                             \
 const DartWrapperInfo& ClassName::dart_wrapper_info_ =                         \
-    kDartWrapperInfo_##LibraryName_##ClassName;
+    kDartWrapperInfo_##LibraryName_##ClassName;                                \
+static_assert(std::is_base_of<WTF::ThreadSafeRefCountedBase, ClassName>::value,\
+    #ClassName " must be thread-safe reference-countable.");
 
 struct DartConverterWrappable {
   static DartWrappable* FromDart(Dart_Handle handle);

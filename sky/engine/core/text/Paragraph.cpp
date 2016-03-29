@@ -4,12 +4,14 @@
 
 #include "sky/engine/core/text/ParagraphBuilder.h"
 
+#include "base/location.h"
 #include "sky/engine/core/painting/Rect.h"
 #include "sky/engine/core/rendering/PaintInfo.h"
 #include "sky/engine/core/rendering/RenderText.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
 #include "sky/engine/platform/fonts/FontCache.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/tonic/dart_args.h"
 #include "sky/engine/tonic/dart_binding_macros.h"
 #include "sky/engine/tonic/dart_converter.h"
@@ -47,6 +49,8 @@ Paragraph::Paragraph(PassOwnPtr<RenderView> renderView)
 
 Paragraph::~Paragraph()
 {
+    base::SingleThreadTaskRunner* runner = Platform::current()->GetUITaskRunner();
+    runner->DeleteSoon(FROM_HERE, m_renderView.leakPtr());
 }
 
 double Paragraph::width()

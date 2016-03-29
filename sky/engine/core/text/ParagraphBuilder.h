@@ -9,12 +9,12 @@
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/tonic/int32_list.h"
 #include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/ThreadSafeRefCounted.h"
 
 namespace blink {
 class DartLibraryNatives;
 
-class ParagraphBuilder : public RefCounted<ParagraphBuilder>, public DartWrappable {
+class ParagraphBuilder : public ThreadSafeRefCounted<ParagraphBuilder>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     static PassRefPtr<ParagraphBuilder> create() {

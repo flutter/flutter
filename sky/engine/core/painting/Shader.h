@@ -7,12 +7,12 @@
 
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RefCounted.h"
+#include "sky/engine/wtf/ThreadSafeRefCounted.h"
 #include "third_party/skia/include/core/SkShader.h"
 
 namespace blink {
 
-class Shader : public RefCounted<Shader>, public DartWrappable {
+class Shader : public ThreadSafeRefCounted<Shader>, public DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
  public:
   ~Shader() override;
