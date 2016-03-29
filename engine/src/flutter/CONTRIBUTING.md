@@ -67,7 +67,7 @@ Run the following steps, from the `src` directory created in the steps above:
 
 To run an example with your locally built binary, you'll also need to clone
 [the main Flutter repository](https://github.com/flutter/flutter). See
-[the instructions for contributing](https://github.com/flutter/engine/blob/master/CONTRIBUTING.md)
+[the instructions for contributing](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md)
 to the main Flutter repository for detailed instructions.
 
 Once you've got everything set up, you can run an example using your locally
