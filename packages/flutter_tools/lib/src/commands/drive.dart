@@ -10,7 +10,6 @@ import 'package:test/src/executable.dart' as executable; // ignore: implementati
 
 import '../android/android_device.dart' show AndroidDevice;
 import '../application_package.dart';
-import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/os.dart';
 import '../device.dart';
@@ -61,7 +60,7 @@ class DriveCommand extends RunCommandBase {
     );
 
     argParser.addOption('debug-port',
-        defaultsTo: observatoryDefaultPort.toString(),
+        defaultsTo: '8182',
         help: 'Listen to the given port for a debug connection.');
   }
 

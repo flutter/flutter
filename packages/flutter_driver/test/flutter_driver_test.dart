@@ -36,7 +36,11 @@ void main() {
       when(mockIsolate.loadRunnable()).thenReturn(mockIsolate);
       when(mockIsolate.invokeExtension(any, any))
           .thenReturn(new Future<Map<String, dynamic>>.value(<String, String>{'status': 'ok'}));
-      vmServiceConnectFunction = (String url) => new Future<VMServiceClient>.value(mockClient);
+      vmServiceConnectFunction = (String url) {
+        return new Future<VMServiceClientConnection>.value(
+          new VMServiceClientConnection(mockClient, null)
+        );
+      };
     });
 
     tearDown(() async {
@@ -90,13 +94,15 @@ void main() {
 
   group('FlutterDriver', () {
     MockVMServiceClient mockClient;
+    MockPeer mockPeer;
     MockIsolate mockIsolate;
     FlutterDriver driver;
 
     setUp(() {
       mockClient = new MockVMServiceClient();
+      mockPeer = new MockPeer();
       mockIsolate = new MockIsolate();
-      driver = new FlutterDriver.connectedTo(mockClient, mockIsolate);
+      driver = new FlutterDriver.connectedTo(mockClient, mockPeer, mockIsolate);
     });
 
     test('checks the health of the driver extension', () async {
@@ -234,6 +240,41 @@ void main() {
         expect(timedOut, isTrue);
       });
     });
+
+    group('traceAction', () {
+      test('traces action', () async {
+        bool actionCalled = false;
+        bool startTracingCalled = false;
+        bool stopTracingCalled = false;
+
+        when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals({'recordedStreams': '[all]'}))))
+          .thenAnswer((_) async {
+            startTracingCalled = true;
+            return null;
+          });
+
+        when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals({'recordedStreams': '[]'}))))
+          .thenAnswer((_) async {
+            stopTracingCalled = true;
+            return null;
+          });
+
+        when(mockPeer.sendRequest('_getVMTimeline')).thenAnswer((_) async {
+          return <String, dynamic> {
+            'test': 'profile',
+          };
+        });
+
+        Map<String, dynamic> profile = await driver.traceAction(() {
+          actionCalled = true;
+        });
+
+        expect(actionCalled, isTrue);
+        expect(startTracingCalled, isTrue);
+        expect(stopTracingCalled, isTrue);
+        expect(profile['test'], 'profile');
+      });
+    });
   });
 }
 
@@ -254,3 +295,6 @@ class MockVMPauseBreakpointEvent extends Mock implements VMPauseBreakpointEvent 
 
 @proxy
 class MockVMResumeEvent extends Mock implements VMResumeEvent { }
+
+@proxy
+class MockPeer extends Mock implements rpc.Peer { }

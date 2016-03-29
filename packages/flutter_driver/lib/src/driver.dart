@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 import 'package:vm_service_client/vm_service_client.dart';
 import 'package:matcher/matcher.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
@@ -26,12 +27,11 @@ typedef dynamic EvaluatorFunction();
 
 /// Drives a Flutter Application running in another process.
 class FlutterDriver {
-  FlutterDriver.connectedTo(this._serviceClient, this._appIsolate);
+  FlutterDriver.connectedTo(this._serviceClient, this._peer, this._appIsolate);
 
   static const String _kFlutterExtensionMethod = 'ext.flutter_driver';
-  static const String _kStartTracingMethod = 'ext.flutter_startTracing';
-  static const String _kStopTracingMethod = 'ext.flutter_stopTracing';
-  static const String _kDownloadTraceDataMethod = 'ext.flutter_downloadTraceData';
+  static const String _kSetVMTimelineFlagsMethod = '_setVMTimelineFlags';
+  static const String _kGetVMTimelineMethod = '_getVMTimeline';
   static const Duration _kDefaultTimeout = const Duration(seconds: 5);
   static const Duration _kDefaultPauseBetweenRetries = const Duration(milliseconds: 160);
 
@@ -40,11 +40,12 @@ class FlutterDriver {
   /// Resumes the application if it is currently paused (e.g. at a breakpoint).
   ///
   /// [dartVmServiceUrl] is the URL to Dart observatory (a.k.a. VM service). By
-  /// default it connects to `http://localhost:8181`.
-  static Future<FlutterDriver> connect({String dartVmServiceUrl: 'http://localhost:8181'}) async {
+  /// default it connects to `http://localhost:8182`.
+  static Future<FlutterDriver> connect({String dartVmServiceUrl: 'http://localhost:8182'}) async {
     // Connect to Dart VM servcies
     _log.info('Connecting to Flutter application at $dartVmServiceUrl');
-    VMServiceClient client = await vmServiceConnectFunction(dartVmServiceUrl);
+    VMServiceClientConnection connection = await vmServiceConnectFunction(dartVmServiceUrl);
+    VMServiceClient client = connection.client;
     VM vm = await client.getVM();
     _log.trace('Looking for the isolate');
     VMIsolate isolate = await vm.isolates.first.loadRunnable();
@@ -62,7 +63,7 @@ class FlutterDriver {
       isolate = await vm.isolates.first.loadRunnable();
     }
 
-    FlutterDriver driver = new FlutterDriver.connectedTo(client, isolate);
+    FlutterDriver driver = new FlutterDriver.connectedTo(client, connection.peer, isolate);
 
     // Attempts to resume the isolate, but does not crash if it fails because
     // the isolate is already resumed. There could be a race with other tools,
@@ -146,6 +147,8 @@ class FlutterDriver {
 
   /// Client connected to the Dart VM running the Flutter application
   final VMServiceClient _serviceClient;
+  /// JSON-RPC client useful for sending raw JSON requests.
+  final rpc.Peer _peer;
   /// The main isolate hosting the Flutter application
   final VMIsolateRef _appIsolate;
 
@@ -211,7 +214,7 @@ class FlutterDriver {
   /// Starts recording performance traces.
   Future<Null> startTracing() async {
     try {
-      await _appIsolate.invokeExtension(_kStartTracingMethod);
+      await _peer.sendRequest(_kSetVMTimelineFlagsMethod, {'recordedStreams': '[all]'});
       return null;
     } catch(error, stackTrace) {
       throw new DriverError(
@@ -226,30 +229,16 @@ class FlutterDriver {
   // TODO(yjbanov): return structured data rather than raw JSON once we have a
   //                stable protocol to talk to.
   Future<Map<String, dynamic>> stopTracingAndDownloadProfile() async {
-    Map<String, dynamic> stopResult =
-        await _appIsolate.invokeExtension(_kStopTracingMethod);
-    String traceFilePath = stopResult['trace_file_path'];
-
-    // Tracing data isn't available immediately as some of it is queued up in
-    // the event loop.
-    Stopwatch sw = new Stopwatch()..start();
-    while(sw.elapsed < const Duration(seconds: 30)) {
-      Map<String, dynamic> downloadResult =
-          await _appIsolate.invokeExtension(_kDownloadTraceDataMethod, <String, String>{
-            'trace_file_path': traceFilePath,
-          });
-
-      if (downloadResult['success'] == false)
-        throw new DriverError('Failed to download trace file: $traceFilePath');
-      else if (downloadResult['status'] != 'not ready')
-        return downloadResult;
-
-      // Give the event loop a chance to flush the trace log
-      await new Future<Null>.delayed(const Duration(milliseconds: 200));
+    try {
+      await _peer.sendRequest(_kSetVMTimelineFlagsMethod, {'recordedStreams': '[]'});
+      return _peer.sendRequest(_kGetVMTimelineMethod);
+    } catch(error, stackTrace) {
+      throw new DriverError(
+        'Failed to start tracing due to remote error',
+        error,
+        stackTrace
+      );
     }
-    throw new DriverError(
-      'Timed out waiting for tracing profile to become ready for download.'
-    );
   }
 
   /// Runs [action] and outputs a performance trace for it.
@@ -293,8 +282,22 @@ class FlutterDriver {
   });
 }
 
+/// Encapsulates connection information to an instance of a Flutter application.
+class VMServiceClientConnection {
+  /// Use this for structured access to the VM service's public APIs.
+  final VMServiceClient client;
+
+  /// Use this to make arbitrary raw JSON-RPC calls.
+  ///
+  /// This object allows reaching into private VM service APIs. Use with
+  /// caution.
+  final rpc.Peer peer;
+
+  VMServiceClientConnection(this.client, this.peer);
+}
+
 /// A function that connects to a Dart VM service given the [url].
-typedef Future<VMServiceClient> VMServiceConnectFunction(String url);
+typedef Future<VMServiceClientConnection> VMServiceConnectFunction(String url);
 
 /// The connection function used by [FlutterDriver.connect].
 ///
@@ -311,23 +314,42 @@ void restoreVmServiceConnectFunction() {
 /// the [VMServiceClient].
 ///
 /// Times out after 30 seconds.
-Future<VMServiceClient> _waitAndConnect(String url) async {
+Future<VMServiceClientConnection> _waitAndConnect(String url) async {
   Stopwatch timer = new Stopwatch()..start();
-  Future<VMServiceClient> attemptConnection() {
-    return VMServiceClient.connect(url)
-      .catchError((dynamic e) async {
-        if (timer.elapsed < const Duration(seconds: 30)) {
-          _log.info('Waiting for application to start');
-          await new Future<Null>.delayed(const Duration(seconds: 1));
-          return attemptConnection();
-        } else {
-          _log.critical(
-            'Application has not started in 30 seconds. '
-            'Giving up.'
-          );
-          throw e;
-        }
-      });
+
+  Future<VMServiceClientConnection> attemptConnection() async {
+    Uri uri = Uri.parse(url);
+    if (uri.scheme == 'http') uri = uri.replace(scheme: 'ws', path: '/ws');
+
+    WebSocket ws1;
+    WebSocket ws2;
+    try {
+      ws1 = await WebSocket.connect(uri.toString());
+      ws2 = await WebSocket.connect(uri.toString());
+      return new VMServiceClientConnection(
+        new VMServiceClient(ws1),
+        new rpc.Peer(ws2, ws2)..listen()
+      );
+    } catch(e) {
+      if (ws1 != null)
+        ws1.close();
+
+      if (ws2 != null)
+        ws2.close();
+
+      if (timer.elapsed < const Duration(seconds: 30)) {
+        _log.info('Waiting for application to start');
+        await new Future<Null>.delayed(const Duration(seconds: 1));
+        return attemptConnection();
+      } else {
+        _log.critical(
+          'Application has not started in 30 seconds. '
+          'Giving up.'
+        );
+        throw e;
+      }
+    }
   }
+
   return attemptConnection();
 }
