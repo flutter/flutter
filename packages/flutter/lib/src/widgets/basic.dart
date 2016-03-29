@@ -1033,6 +1033,7 @@ class Container extends StatelessWidget {
     this.foregroundDecoration,
     this.margin,
     this.padding,
+    this.opacity,
     this.transform,
     double width,
     double height
@@ -1045,6 +1046,7 @@ class Container extends StatelessWidget {
     assert(margin == null || margin.isNonNegative);
     assert(padding == null || padding.isNonNegative);
     assert(decoration == null || decoration.debugAssertValid());
+    assert(opacity == null || (opacity >= 0.0 && opacity <= 1.0));
   }
 
   /// The child contained by the container.
@@ -1066,6 +1068,10 @@ class Container extends StatelessWidget {
 
   /// Empty space to inscribe inside the decoration.
   final EdgeInsets padding;
+
+  /// The opacity to apply while painting the container. This opacity is applied
+  /// to the whole container, including the decorations, if any.
+  final double opacity;
 
   /// The transformation matrix to apply before painting the container.
   final Matrix4 transform;
@@ -1107,6 +1113,9 @@ class Container extends StatelessWidget {
     if (margin != null)
       current = new Padding(padding: margin, child: current);
 
+    if (opacity != null)
+      current = new Opacity(opacity: opacity, child: current);
+
     if (transform != null)
       current = new Transform(transform: transform, child: current);
 
@@ -1126,6 +1135,8 @@ class Container extends StatelessWidget {
       description.add('margin: $margin');
     if (padding != null)
       description.add('padding: $padding');
+    if (opacity != null)
+      description.add('opacity: $opacity');
     if (transform != null)
       description.add('has transform');
   }
