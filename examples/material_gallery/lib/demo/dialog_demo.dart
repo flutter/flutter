@@ -189,7 +189,7 @@ class DialogDemoState extends State<DialogDemo> {
           new RaisedButton(
             child: new Text('FULLSCREEN'),
             onPressed: () {
-              Navigator.push(context, new MaterialPageRoute<Null>(
+              Navigator.push(context, new MaterialPageRoute<DismissDialogAction>(
                 builder: (BuildContext context) => new FullScreenDialogDemo()
               ));
             }
