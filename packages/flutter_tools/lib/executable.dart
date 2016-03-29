@@ -141,6 +141,6 @@ String _doctorText() {
 
     return logger.statusText;
   } catch (error, trace) {
-    return 'encountered exception: $error\n$trace';
+    return 'encountered exception: $error\n\n```\n${trace.toString().trim()}\n```\n';
   }
 }
