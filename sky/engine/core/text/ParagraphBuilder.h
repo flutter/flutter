@@ -23,12 +23,12 @@ public:
 
     ~ParagraphBuilder() override;
 
-    void pushStyle(Int32List& encoded, const std::string& fontFamily, double fontSize, double letterSpacing, double wordSpacing, double lineHeight);
+    void pushStyle(Int32List& encoded, const std::string& fontFamily, double fontSize, double letterSpacing, double wordSpacing, double height);
     void pop();
 
     void addText(const std::string& text);
 
-    PassRefPtr<Paragraph> build(Int32List& encoded, double lineHeight);
+    PassRefPtr<Paragraph> build(Int32List& encoded, const std::string& fontFamily, double fontSize, double lineHeight);
 
     static void RegisterNatives(DartLibraryNatives* natives);
 
