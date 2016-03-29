@@ -71,4 +71,24 @@ void main() {
     table.rows = 4;
     expect(child.attached, isFalse);
   });
+
+  test('Table test: replacing cells', () {
+    RenderTable table;
+    RenderBox child1 = new RenderPositionedBox();
+    RenderBox child2 = new RenderPositionedBox();
+    RenderBox child3 = new RenderPositionedBox();
+    table = new RenderTable();
+    table.setFlatChildren(3, <RenderBox>[child1, new RenderPositionedBox(), child2,
+                                         new RenderPositionedBox(), child3, new RenderPositionedBox()]);
+    expect(table.rows, equals(2));
+    layout(table);
+    table.setFlatChildren(3, <RenderBox>[new RenderPositionedBox(), child1, new RenderPositionedBox(),
+                                         child2, new RenderPositionedBox(), child3]);
+    layout(table);
+    table.setFlatChildren(3, <RenderBox>[new RenderPositionedBox(), child1, new RenderPositionedBox(),
+                                         child2, new RenderPositionedBox(), child3]);
+    layout(table);
+    expect(table.columns, equals(3));
+    expect(table.rows, equals(2));
+  });
 }

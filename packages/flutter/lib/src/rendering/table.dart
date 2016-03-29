@@ -491,7 +491,7 @@ class RenderTable extends RenderBox {
         assert(_rows == 0);
         return;
       }
-      for (RenderBox oldChild in cells) {
+      for (RenderBox oldChild in _children) {
         if (oldChild != null)
           dropChild(oldChild);
       }
@@ -503,8 +503,8 @@ class RenderTable extends RenderBox {
     assert(cells != null);
     assert(cells.length % columns == 0);
     // remove cells that are moving away
-    for (int y = 0; y < _columns; y += 1) {
-      for (int x = 0; x < _rows; x += 1) {
+    for (int y = 0; y < _rows; y += 1) {
+      for (int x = 0; x < _columns; x += 1) {
         int xyOld = x + y * _columns;
         int xyNew = x + y * columns;
         if (_children[xyOld] != null && (x >= columns || xyNew >= cells.length || _children[xyOld] != cells[xyNew]))
@@ -567,6 +567,8 @@ class RenderTable extends RenderBox {
     assert(_children.length == rows * columns);
     final int xy = x + y * columns;
     RenderBox oldChild = _children[xy];
+    if (oldChild == value)
+      return;
     if (oldChild != null)
       dropChild(oldChild);
     _children[xy] = value;
@@ -759,6 +761,7 @@ class RenderTable extends RenderBox {
         RenderBox child = _children[xy];
         if (child != null) {
           TableCellParentData childParentData = child.parentData;
+          assert(childParentData != null);
           childParentData.x = x;
           childParentData.y = y;
           switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
