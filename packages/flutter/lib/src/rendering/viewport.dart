@@ -336,6 +336,12 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
     return null;
   }
 
+  // Workaround for https://github.com/dart-lang/sdk/issues/25232
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    super.applyPaintTransform(child, transform);
+  }
+
   @override
   bool hitTestChildren(HitTestResult result, { Point position }) {
     if (child != null) {
@@ -400,6 +406,12 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
 
   @override
   Rect describeApproximatePaintClip(RenderObject child) => Point.origin & size;
+
+  // Workaround for https://github.com/dart-lang/sdk/issues/25232
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    super.applyPaintTransform(child, transform);
+  }
 
   @override
   void debugFillDescription(List<String> description) {

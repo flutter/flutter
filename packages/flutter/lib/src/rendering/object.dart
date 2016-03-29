@@ -942,6 +942,12 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   @override
   PipelineOwner get owner => super.owner;
 
+  // Workaround for https://github.com/dart-lang/sdk/issues/25232
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+  }
+
   bool _needsLayout = true;
   /// Whether this render object's layout information is dirty.
   bool get needsLayout => _needsLayout;
