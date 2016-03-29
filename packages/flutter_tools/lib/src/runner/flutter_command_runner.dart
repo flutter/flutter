@@ -146,7 +146,7 @@ class FlutterCommandRunner extends CommandRunner {
 
   ArgResults _globalResults;
 
-  String get _defaultFlutterRoot {
+  static String get _defaultFlutterRoot {
     if (Platform.environment.containsKey(kFlutterRootEnvironmentVariableName))
       return Platform.environment[kFlutterRootEnvironmentVariableName];
     try {
@@ -157,6 +157,12 @@ class FlutterCommandRunner extends CommandRunner {
         return path.dirname(path.dirname(path.dirname(script)));
       if (path.basename(script) == kFlutterToolsScriptFileName)
         return path.dirname(path.dirname(path.dirname(path.dirname(script))));
+
+      // If run from a bare script within the repo.
+      if (script.contains('flutter/packages/'))
+        return script.substring(0, script.indexOf('flutter/packages/') + 8);
+      if (script.contains('flutter/examples/'))
+        return script.substring(0, script.indexOf('flutter/examples/') + 8);
     } catch (error) {
       // we don't have a logger at the time this is run
       // (which is why we don't use printTrace here)
@@ -362,5 +368,10 @@ class FlutterCommandRunner extends CommandRunner {
     }
 
     return configs;
+  }
+
+  static void initFlutterRoot() {
+    if (ArtifactStore.flutterRoot == null)
+      ArtifactStore.flutterRoot = _defaultFlutterRoot;
   }
 }

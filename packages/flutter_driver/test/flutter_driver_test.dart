@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'package:test/test.dart';
+
 import 'package:flutter_driver/src/driver.dart';
 import 'package:flutter_driver/src/error.dart';
 import 'package:flutter_driver/src/health.dart';
@@ -11,6 +11,7 @@ import 'package:flutter_driver/src/message.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:mockito/mockito.dart';
 import 'package:quiver/testing/async.dart';
+import 'package:test/test.dart';
 import 'package:vm_service_client/vm_service_client.dart';
 
 void main() {

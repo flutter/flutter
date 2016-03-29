@@ -20,7 +20,6 @@ Future<int> pubGet({
     directory = Directory.current.path;
 
   File pubSpecYaml = new File(path.join(directory, 'pubspec.yaml'));
-  File pubSpecLock = new File(path.join(directory, 'pubspec.lock'));
   File dotPackages = new File(path.join(directory, '.packages'));
 
   if (!pubSpecYaml.existsSync()) {
@@ -30,21 +29,20 @@ Future<int> pubGet({
     return 1;
   }
 
-  if (!checkLastModified || !pubSpecLock.existsSync() || pubSpecYaml.lastModifiedSync().isAfter(pubSpecLock.lastModifiedSync())) {
+  if (!checkLastModified || !dotPackages.existsSync() || pubSpecYaml.lastModifiedSync().isAfter(dotPackages.lastModifiedSync())) {
     String command = upgrade ? 'upgrade' : 'get';
     printStatus("Running 'pub $command' in $directory${Platform.pathSeparator}...");
     int code = await runCommandAndStreamOutput(
-      <String>[sdkBinaryName('pub'), '--verbosity=warning', command],
+      <String>[sdkBinaryName('pub'), '--verbosity=warning', command, '--no-package-symlinks'],
       workingDirectory: directory
     );
     if (code != 0)
       return code;
   }
 
-  if ((pubSpecLock.existsSync() && pubSpecLock.lastModifiedSync().isAfter(pubSpecYaml.lastModifiedSync())) &&
-      (dotPackages.existsSync() && dotPackages.lastModifiedSync().isAfter(pubSpecYaml.lastModifiedSync())))
+  if (dotPackages.existsSync() && dotPackages.lastModifiedSync().isAfter(pubSpecYaml.lastModifiedSync()))
     return 0;
 
-  printError('$directory: pubspec.yaml, pubspec.lock, and .packages are in an inconsistent state');
+  printError('$directory: pubspec.yaml and .packages are in an inconsistent state');
   return 1;
 }
