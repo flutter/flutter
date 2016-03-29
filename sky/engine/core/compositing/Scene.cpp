@@ -23,7 +23,6 @@ DART_BIND_ALL(Scene, FOR_EACH_BINDING)
 PassRefPtr<Scene> Scene::create(
     std::unique_ptr<flow::Layer> rootLayer,
     uint32_t rasterizerTracingThreshold) {
-  ASSERT(rootLayer);
   return adoptRef(new Scene(std::move(rootLayer), rasterizerTracingThreshold));
 }
 

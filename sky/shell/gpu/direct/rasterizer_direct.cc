@@ -67,7 +67,7 @@ void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
   std::unique_ptr<flow::LayerTree> layer_tree(
       reinterpret_cast<flow::LayerTree*>(layer_tree_ptr));
 
-  if (!surface_) {
+  if (!surface_ || !layer_tree->root_layer()) {
     callback.Run();
     return;
   }
