@@ -138,9 +138,9 @@ class _DatePickerHeader extends StatelessWidget {
         yearColor = mode == _DatePickerMode.year ? Colors.white : Colors.white70;
         break;
     }
-    TextStyle dayStyle = headerTheme.display3.copyWith(color: dayColor, height: 1.0, fontSize: 100.0);
-    TextStyle monthStyle = headerTheme.headline.copyWith(color: dayColor, height: 1.0);
-    TextStyle yearStyle = headerTheme.headline.copyWith(color: yearColor, height: 1.0);
+    TextStyle dayStyle = headerTheme.display3.copyWith(color: dayColor, lineHeight: 1.0, fontSize: 100.0);
+    TextStyle monthStyle = headerTheme.headline.copyWith(color: dayColor, lineHeight: 1.0);
+    TextStyle yearStyle = headerTheme.headline.copyWith(color: yearColor, lineHeight: 1.0);
 
     return new Container(
       padding: new EdgeInsets.all(10.0),
@@ -188,7 +188,7 @@ class DayPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     ThemeData themeData = Theme.of(context);
     TextStyle headerStyle = themeData.textTheme.caption.copyWith(fontWeight: FontWeight.w700);
-    TextStyle monthStyle = headerStyle.copyWith(fontSize: 14.0, height: 24.0 / 14.0);
+    TextStyle monthStyle = headerStyle.copyWith(fontSize: 14.0, lineHeight: 24.0 / 14.0);
     TextStyle dayStyle = headerStyle.copyWith(fontWeight: FontWeight.w500);
     DateFormat dateFormat = new DateFormat();
     DateSymbols symbols = dateFormat.dateSymbols;

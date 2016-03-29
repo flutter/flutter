@@ -19,7 +19,7 @@ class TextStyle {
     this.wordSpacing,
     this.textAlign,
     this.textBaseline,
-    this.height,
+    this.lineHeight,
     this.decoration,
     this.decorationColor,
     this.decorationStyle
@@ -57,7 +57,7 @@ class TextStyle {
   final TextBaseline textBaseline;
 
   /// The distance between the text baselines, as a multiple of the font size.
-  final double height;
+  final double lineHeight;
 
   /// The decorations to paint near the text (e.g., an underline).
   final TextDecoration decoration;
@@ -80,7 +80,7 @@ class TextStyle {
     double wordSpacing,
     TextAlign textAlign,
     TextBaseline textBaseline,
-    double height,
+    double lineHeight,
     TextDecoration decoration,
     Color decorationColor,
     TextDecorationStyle decorationStyle
@@ -96,7 +96,7 @@ class TextStyle {
       wordSpacing: wordSpacing != null ? wordSpacing : this.wordSpacing,
       textAlign: textAlign != null ? textAlign : this.textAlign,
       textBaseline: textBaseline != null ? textBaseline : this.textBaseline,
-      height: height != null ? height : this.height,
+      lineHeight: lineHeight != null ? lineHeight : this.lineHeight,
       decoration: decoration != null ? decoration : this.decoration,
       decorationColor: decorationColor != null ? decorationColor : this.decorationColor,
       decorationStyle: decorationStyle != null ? decorationStyle : this.decorationStyle
@@ -120,7 +120,7 @@ class TextStyle {
       wordSpacing: other.wordSpacing,
       textAlign: other.textAlign,
       textBaseline: other.textBaseline,
-      height: other.height,
+      lineHeight: other.lineHeight,
       decoration: other.decoration,
       decorationColor: other.decorationColor,
       decorationStyle: other.decorationStyle
@@ -144,7 +144,7 @@ class TextStyle {
       wordSpacing: ui.lerpDouble(begin.wordSpacing ?? end.wordSpacing, end.wordSpacing ?? begin.wordSpacing, t),
       textAlign: t < 0.5 ? begin.textAlign : end.textAlign,
       textBaseline: t < 0.5 ? begin.textBaseline : end.textBaseline,
-      height: ui.lerpDouble(begin.height ?? end.height, end.height ?? begin.height, t),
+      lineHeight: ui.lerpDouble(begin.lineHeight ?? end.lineHeight, end.lineHeight ?? begin.lineHeight, t),
       decoration: t < 0.5 ? begin.decoration : end.decoration,
       decorationColor: Color.lerp(begin.decorationColor, end.decorationColor, t),
       decorationStyle: t < 0.5 ? begin.decorationStyle : end.decorationStyle
@@ -164,7 +164,7 @@ class TextStyle {
       fontSize: fontSize,
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,
-      lineHeight: height
+      lineHeight: lineHeight
     );
   }
 
@@ -172,7 +172,7 @@ class TextStyle {
     return new ui.ParagraphStyle(
       textAlign: textAlign,
       textBaseline: textBaseline,
-      lineHeight: height
+      lineHeight: lineHeight
     );
   }
 
@@ -193,7 +193,7 @@ class TextStyle {
            wordSpacing == typedOther.wordSpacing &&
            textAlign == typedOther.textAlign &&
            textBaseline == typedOther.textBaseline &&
-           height == typedOther.height &&
+           lineHeight == typedOther.lineHeight &&
            decoration == typedOther.decoration &&
            decorationColor == typedOther.decorationColor &&
            decorationStyle == typedOther.decorationStyle;
@@ -212,7 +212,7 @@ class TextStyle {
       wordSpacing,
       textAlign,
       textBaseline,
-      height,
+      lineHeight,
       decoration,
       decorationColor,
       decorationStyle
@@ -297,8 +297,8 @@ class TextStyle {
           break;
       }
     }
-    if (height != null)
-      result.add('${prefix}height: ${height}x');
+    if (lineHeight != null)
+      result.add('${prefix}lineHeight: ${lineHeight}x');
     if (decoration != null || decorationColor != null || decorationStyle != null) {
       String decorationDescription = '${prefix}decoration: ';
       bool haveDecorationDescription = false;
