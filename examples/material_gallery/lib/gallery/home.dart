@@ -50,13 +50,15 @@ class GalleryHome extends StatefulWidget {
 }
 
 class GalleryHomeState extends State<GalleryHome> {
-  final Key _scrollableKey = new UniqueKey();
+  final Key _homeKey = new ValueKey<String>("Gallery Home");
+  final Key _listKey = new ValueKey<String>("Gallery List");
 
   @override
   Widget build(BuildContext context) {
     final double statusBarHight = (MediaQuery.of(context)?.padding ?? EdgeInsets.zero).top;
 
     return new Scaffold(
+      key: _homeKey,
       drawer: new GalleryDrawer(),
       appBar: new AppBar(
         expandedHeight: _kFlexibleSpaceMaxHeight,
@@ -65,13 +67,12 @@ class GalleryHomeState extends State<GalleryHome> {
           title: new Text("Flutter Gallery")
         )
       ),
-      scrollableKey: _scrollableKey,
+      scrollableKey: _listKey,
       appBarBehavior: AppBarBehavior.under,
       body: new TwoLevelList(
         scrollablePadding: new EdgeInsets.only(top: _kFlexibleSpaceMaxHeight + statusBarHight),
-        key: _scrollableKey,
         type: MaterialListType.oneLine,
-        scrollableKey: _scrollableKey,
+        scrollableKey: _listKey,
         items: <Widget>[
           new TwoLevelSublist(
             leading: new Icon(icon: Icons.star),
