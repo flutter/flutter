@@ -959,8 +959,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// Verify that the object's constraints are being met. Override
   /// this function in a subclass to verify that your state matches
   /// the constraints object. This function is only called in checked
-  /// mode. If the constraints are not met, it should assert or throw
-  /// an exception.
+  /// mode and only when needsLayout is false. If the constraints are
+  /// not met, it should assert or throw an exception.
   void debugAssertDoesMeetConstraints();
 
   /// When true, debugAssertDoesMeetConstraints() is currently
@@ -1111,6 +1111,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// implemented here) to return early if the child does not need to do any
   /// work to update its layout information.
   void layout(Constraints constraints, { bool parentUsesSize: false }) {
+    assert(constraints != null);
     assert(constraints.debugAssertIsNormalized);
     assert(!_debugDoingThisResize);
     assert(!_debugDoingThisLayout);
