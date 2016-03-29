@@ -1024,7 +1024,7 @@ public:
     static EUserSelect initialUserSelect() { return SELECT_TEXT; }
     static TextOverflow initialTextOverflow() { return TextOverflowClip; }
     static EWordBreak initialWordBreak() { return NormalWordBreak; }
-    static EOverflowWrap initialOverflowWrap() { return NormalOverflowWrap; }
+    static EOverflowWrap initialOverflowWrap() { return BreakOverflowWrap; }
     static LineBreak initialLineBreak() { return LineBreakAuto; }
     static const AtomicString& initialHighlight() { return nullAtom; }
     static const AtomicString& initialHyphenationString() { return nullAtom; }
