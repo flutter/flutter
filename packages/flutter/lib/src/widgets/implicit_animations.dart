@@ -382,6 +382,23 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
 
   @override
   _AnimatedPositionedState createState() => new _AnimatedPositionedState();
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (left != null)
+      description.add('left: $left');
+    if (top != null)
+      description.add('top: $top');
+    if (right != null)
+      description.add('right: $right');
+    if (bottom != null)
+      description.add('bottom: $bottom');
+    if (width != null)
+      description.add('width: $width');
+    if (height != null)
+      description.add('height: $height');
+  }
 }
 
 class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositioned> {
@@ -431,5 +448,59 @@ class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositione
       description.add('has width');
     if (_height != null)
       description.add('has height');
+  }
+}
+
+/// Animated version of [Opacity] which automatically transitions the child's
+/// opacity over a given duration whenever the given opacity changes.
+///
+/// Animating an opacity is relatively expensive.
+class AnimatedOpacity extends ImplicitlyAnimatedWidget {
+  AnimatedOpacity({
+    Key key,
+    this.child,
+    this.opacity,
+    Curve curve: Curves.linear,
+    Duration duration
+  }) : super(key: key, curve: curve, duration: duration) {
+    assert(opacity != null && opacity >= 0.0 && opacity <= 1.0);
+  }
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  /// The target opacity.
+  ///
+  /// An opacity of 1.0 is fully opaque. An opacity of 0.0 is fully transparent
+  /// (i.e., invisible).
+  ///
+  /// The opacity must not be null.
+  final double opacity;
+
+  @override
+  _AnimatedOpacityState createState() => new _AnimatedOpacityState();
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('opacity: $opacity');
+  }
+}
+
+class _AnimatedOpacityState extends AnimatedWidgetBaseState<AnimatedOpacity> {
+  Tween<double> _opacity;
+
+  @override
+  void forEachTween(TweenVisitor<dynamic> visitor) {
+    // TODO(ianh): Use constructor tear-offs when it becomes possible
+    _opacity = visitor(_opacity, config.opacity, (dynamic value) => new Tween<double>(begin: value));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Opacity(
+      opacity: _opacity.evaluate(animation),
+      child: config.child
+    );
   }
 }

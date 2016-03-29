@@ -55,18 +55,26 @@ export 'package:flutter/rendering.dart' show
 /// This class paints its child into an intermediate buffer and then blends the
 /// child back into the scene partially transparent.
 ///
-/// This class is relatively expensive because it requires painting the child
-/// into an intermediate buffer.
+/// For values of opacity other than 0.0 and 1.0, this class is relatively
+/// expensive because it requires painting the child into an intermediate
+/// buffer. For the value 0.0, the child is simply not painted at all. For the
+/// value 1.0, the child is painted immediately without an intermediate buffer.
 class Opacity extends SingleChildRenderObjectWidget {
   Opacity({ Key key, this.opacity, Widget child })
     : super(key: key, child: child) {
-    assert(opacity >= 0.0 && opacity <= 1.0);
+    assert(opacity != null && opacity >= 0.0 && opacity <= 1.0);
   }
 
   /// The fraction to scale the child's alpha value.
   ///
   /// An opacity of 1.0 is fully opaque. An opacity of 0.0 is fully transparent
   /// (i.e., invisible).
+  ///
+  /// The opacity must not be null.
+  ///
+  /// Values 1.0 and 0.0 are painted with a fast path. Other values
+  /// require painting the child into an intermediate buffer, which is
+  /// expensive.
   final double opacity;
 
   @override
