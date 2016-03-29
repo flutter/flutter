@@ -68,6 +68,9 @@ bool debugPrintMarkNeedsPaintStacks = false;
 /// Log the call stacks that mark render objects as needing layout.
 bool debugPrintMarkNeedsLayoutStacks = false;
 
+/// Check the intrinsic sizes of each [RenderBox] during layout.
+bool debugCheckIntrinsicSizes = false;
+
 List<String> debugDescribeTransform(Matrix4 transform) {
   List<String> matrix = transform.toString().split('\n').map((String s) => '  $s').toList();
   matrix.removeLast();
