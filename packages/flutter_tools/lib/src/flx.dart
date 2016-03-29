@@ -33,11 +33,11 @@ const String _kFontSetMaterial = 'material';
 const String _kFontSetRoboto = 'roboto';
 
 class _Asset {
+  _Asset({ this.source, this.base, this.key });
+
   final String source;
   final String base;
   final String key;
-
-  _Asset({ this.source, this.base, this.key });
 }
 
 Map<String, dynamic> _readMaterialFontsManifest() {
@@ -196,10 +196,10 @@ Future<String> buildFlx(
 
 /// The result from [buildInTempDir]. Note that this object should be disposed after use.
 class DirectoryResult {
+  DirectoryResult(this.directory, this.localBundlePath);
+
   final Directory directory;
   final String localBundlePath;
-
-  DirectoryResult(this.directory, this.localBundlePath);
 
   /// Call this to delete the temporary directory.
   void dispose() {

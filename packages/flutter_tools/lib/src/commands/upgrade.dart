@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import '../artifacts.dart';
 import '../base/process.dart';
+import '../dart/pub.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../runner/version.dart';
@@ -44,18 +46,21 @@ class UpgradeCommand extends FlutterCommand {
       return code;
 
     // Causes us to update our locally cached packages.
+    printStatus('');
     code = await runCommandAndStreamOutput(<String>[
       'bin/flutter', '--version'
     ], workingDirectory: ArtifactStore.flutterRoot);
 
-    printStatus('');
-    code = await runCommandAndStreamOutput([sdkBinaryName('pub'), 'upgrade']);
-
     if (code != 0)
       return code;
 
-    printStatus('');
-    printStatus(FlutterVersion.getVersion(ArtifactStore.flutterRoot).toString());
+    if (FileSystemEntity.isFileSync('pubspec.yaml')) {
+      printStatus('');
+      code = await pubGet(upgrade: true, checkLastModified: false);
+
+      if (code != 0)
+        return code;
+    }
 
     return 0;
   }
