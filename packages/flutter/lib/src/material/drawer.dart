@@ -178,7 +178,7 @@ class DrawerControllerState extends State<DrawerController> {
   Widget build(BuildContext context) {
     if (_controller.status == AnimationStatus.dismissed) {
       return new Align(
-        alignment: const FractionalOffset(0.0, 0.5),
+        alignment: FractionalOffset.centerLeft,
         child: new GestureDetector(
           key: _gestureDetectorKey,
           onHorizontalDragUpdate: _move,
@@ -208,9 +208,9 @@ class DrawerControllerState extends State<DrawerController> {
                 )
               ),
               new Align(
-                alignment: const FractionalOffset(0.0, 0.5),
+                alignment: FractionalOffset.centerLeft,
                 child: new Align(
-                  alignment: const FractionalOffset(1.0, 0.5),
+                  alignment: FractionalOffset.centerRight,
                   widthFactor: _controller.value,
                   child: new RepaintBoundary(
                     child: new Focus(

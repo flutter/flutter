@@ -81,7 +81,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
             end: new FractionalOffset(0.0, yAlignEnd)
           ).evaluate(scaleAndAlignCurve),
           child: new ScaleTransition(
-            alignment: const FractionalOffset(0.0, 1.0),
+            alignment: FractionalOffset.bottomLeft,
             scale: new Tween<double>(begin: 1.5, end: 1.0).animate(scaleAndAlignCurve),
             child: new Align(
               alignment: new FractionalOffset(0.0, 1.0),

@@ -534,7 +534,7 @@ class ScaffoldState extends State<Scaffold> {
         bottomSheets.add(_currentBottomSheet._widget);
       Widget stack = new Stack(
         children: bottomSheets,
-        alignment: const FractionalOffset(0.5, 1.0) // bottom-aligned, centered
+        alignment: FractionalOffset.bottomCenter
       );
       _addIfNonNull(children, stack, _ScaffoldSlot.bottomSheet);
     }
@@ -661,7 +661,7 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
       animation: config.animationController,
       builder: (BuildContext context, Widget child) {
         return new Align(
-          alignment: const FractionalOffset(0.0, 0.0),
+          alignment: FractionalOffset.topLeft,
           heightFactor: config.animationController.value,
           child: child
         );

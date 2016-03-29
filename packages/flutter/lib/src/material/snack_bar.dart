@@ -111,7 +111,7 @@ class SnackBar extends StatelessWidget {
         animation: heightAnimation,
         builder: (BuildContext context, Widget child) {
           return new Align(
-            alignment: const FractionalOffset(0.0, 0.0),
+            alignment: FractionalOffset.topLeft,
             heightFactor: heightAnimation.value,
             child: child
           );

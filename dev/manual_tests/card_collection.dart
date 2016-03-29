@@ -397,8 +397,8 @@ class CardCollectionState extends State<CardCollection> {
 
   Shader _createShader(Rect bounds) {
     return new LinearGradient(
-        begin: const FractionalOffset(0.0, 0.0),
-        end: const FractionalOffset(0.0, 1.0),
+        begin: FractionalOffset.topLeft,
+        end: FractionalOffset.bottomLeft,
         colors: <Color>[const Color(0x00FFFFFF), const Color(0xFFFFFFFF)],
         stops: <double>[0.1, 0.35]
     )
@@ -441,7 +441,7 @@ class CardCollectionState extends State<CardCollection> {
     if (_snapToCenter) {
       Widget indicator = new IgnorePointer(
         child: new Align(
-          alignment: const FractionalOffset(0.0, 0.5),
+          alignment: FractionalOffset.centerLeft,
           child: new Container(
             height: 1.0,
             decoration: new BoxDecoration(backgroundColor: const Color(0x80FFFFFF))

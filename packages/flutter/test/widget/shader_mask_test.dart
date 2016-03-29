@@ -10,12 +10,11 @@ import 'package:test/test.dart';
 
 Shader createShader(Rect bounds) {
   return new LinearGradient(
-      begin: const FractionalOffset(0.0, 0.0),
-      end: const FractionalOffset(0.0, 1.0),
-      colors: <Color>[const Color(0x00FFFFFF), const Color(0xFFFFFFFF)],
-      stops: <double>[0.1, 0.35]
-  )
-  .createShader(bounds);
+    begin: FractionalOffset.topLeft,
+    end: FractionalOffset.bottomLeft,
+    colors: <Color>[const Color(0x00FFFFFF), const Color(0xFFFFFFFF)],
+    stops: <double>[0.1, 0.35]
+  ).createShader(bounds);
 }
 
 
