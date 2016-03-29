@@ -55,4 +55,20 @@ void main() {
 
     expect(table.size, equals(new Size(800.0, 230.0)));
   });
+
+  test('Table test: removing cells', () {
+    RenderTable table;
+    RenderBox child;
+    table = new RenderTable(
+      columns: 5,
+      rows: 5
+    );
+    table.setChild(4, 4, child = sizedBox(10.0, 10.0));
+
+    layout(table);
+
+    expect(child.attached, isTrue);
+    table.rows = 4;
+    expect(child.attached, isFalse);
+  });
 }

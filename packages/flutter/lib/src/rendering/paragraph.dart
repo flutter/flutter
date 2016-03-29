@@ -131,7 +131,7 @@ class RenderParagraph extends RenderBox {
   @override
   String debugDescribeChildren(String prefix) {
     return '$prefix \u2558\u2550\u2566\u2550\u2550 text \u2550\u2550\u2550\n'
-           '${text.toString("$prefix   \u2551 ")}\n'
+           '${text.toString("$prefix   \u2551 ")}' // TextSpan includes a newline
            '$prefix   \u255A\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n'
            '$prefix\n';
   }
