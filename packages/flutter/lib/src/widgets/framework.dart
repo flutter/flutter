@@ -626,11 +626,11 @@ class _InactiveElements {
     });
   }
 
-  void _deactivate(Element element) {
+  void _deactivateRecursively(Element element) {
     assert(element._debugLifecycleState == _ElementLifecycle.active);
     element.deactivate();
     assert(element._debugLifecycleState == _ElementLifecycle.inactive);
-    element.visitChildren(_deactivate);
+    element.visitChildren(_deactivateRecursively);
     assert(() { element.debugDeactivated(); return true; });
   }
 
@@ -639,7 +639,7 @@ class _InactiveElements {
     assert(!_elements.contains(element));
     assert(element._parent == null);
     if (element._active)
-      _deactivate(element);
+      _deactivateRecursively(element);
     _elements.add(element);
   }
 
@@ -840,12 +840,12 @@ abstract class Element implements BuildContext {
     _slot = newSlot;
   }
 
-  void _updateDepth() {
-    int expectedDepth = _parent.depth + 1;
+  void _updateDepth(int parentDepth) {
+    int expectedDepth = parentDepth + 1;
     if (_depth < expectedDepth) {
       _depth = expectedDepth;
       visitChildren((Element child) {
-        child._updateDepth();
+        child._updateDepth(expectedDepth);
       });
     }
   }
@@ -885,7 +885,7 @@ abstract class Element implements BuildContext {
       if (newChild != null) {
         assert(newChild._parent == null);
         assert(() { _debugCheckForCycles(newChild); return true; });
-        newChild.activate(this, newSlot);
+        newChild._activateWithParent(this, newSlot);
         Element updatedChild = updateChild(newChild, newWidget, newSlot);
         assert(newChild == updatedChild);
         return updatedChild;
@@ -917,16 +917,23 @@ abstract class Element implements BuildContext {
     _inactiveElements.add(child); // this eventually calls child.deactivate()
   }
 
-  void activate(Element parent, dynamic newSlot) {
+  void _activateWithParent(Element parent, dynamic newSlot) {
     assert(_debugLifecycleState == _ElementLifecycle.inactive);
     _parent = parent;
-    _reactivate();
-    _updateDepth();
+    _updateDepth(_parent.depth);
+    _activateRecursively(this);
     attachRenderObject(newSlot);
     assert(_debugLifecycleState == _ElementLifecycle.active);
   }
 
-  void _reactivate() {
+  static void _activateRecursively(Element element) {
+    assert(element._debugLifecycleState == _ElementLifecycle.inactive);
+    element.activate();
+    assert(element._debugLifecycleState == _ElementLifecycle.active);
+    element.visitChildren(_activateRecursively);
+  }
+
+  void activate() {
     assert(_debugLifecycleState == _ElementLifecycle.inactive);
     assert(widget != null);
     assert(depth != null);
@@ -934,7 +941,6 @@ abstract class Element implements BuildContext {
     _active = true;
     _updateInheritance();
     assert(() { _debugLifecycleState = _ElementLifecycle.active; return true; });
-    visitChildren((Element child) => child._reactivate());
   }
 
   void deactivate() {
@@ -1428,6 +1434,12 @@ class StatefulElement extends ComponentElement {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
     }
     rebuild();
+  }
+
+  @override
+  void activate() {
+    super.activate();
+    markNeedsBuild();
   }
 
   @override

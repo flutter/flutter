@@ -26,6 +26,29 @@ class StateMarkerState extends State<StateMarker> {
   }
 }
 
+class DeactivateLogger extends StatefulWidget {
+  DeactivateLogger({ Key key, this.log }) : super(key: key);
+
+  final List<String> log;
+
+  @override
+  DeactivateLoggerState createState() => new DeactivateLoggerState();
+}
+
+class DeactivateLoggerState extends State<DeactivateLogger> {
+  @override
+  void deactivate() {
+    config.log.add('deactivate');
+    super.deactivate();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    config.log.add('build');
+    return new Container();
+  }
+}
+
 void main() {
   test('can reparent state', () {
     testWidgets((WidgetTester tester) {
@@ -291,6 +314,30 @@ void main() {
 
       expect(key.currentState, equals(keyState));
       expect(keyState.marker, equals("marked"));
+    });
+  });
+
+  test('Deactivate implies build', () {
+    testWidgets((WidgetTester tester) {
+      GlobalKey key = new GlobalKey();
+      List<String> log = <String>[];
+      DeactivateLogger logger = new DeactivateLogger(key: key, log: log);
+
+      tester.pumpWidget(
+        new Container(key: new UniqueKey(), child: logger)
+      );
+
+      expect(log, equals(['build']));
+
+      tester.pumpWidget(
+        new Container(key: new UniqueKey(), child: logger)
+      );
+
+      expect(log, equals(['build', 'deactivate', 'build']));
+      log.clear();
+
+      tester.pump();
+      expect(log, isEmpty);
     });
   });
 }
