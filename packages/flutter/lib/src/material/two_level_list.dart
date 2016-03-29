@@ -7,6 +7,8 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'icon.dart';
 import 'icons.dart';
+import 'icon_theme.dart';
+import 'icon_theme_data.dart';
 import 'list.dart';
 import 'list_item.dart';
 import 'theme.dart';
@@ -109,18 +111,20 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> {
       ),
       child: new Column(
         children: <Widget>[
-          new TwoLevelListItem(
-            onTap: _handleOnTap,
-            leading: config.leading,
-            title: new DefaultTextStyle(
-              style: Theme.of(context).textTheme.subhead.copyWith(color: _headerColor.evaluate(_easeInAnimation)),
-              child: config.title
-            ),
-            trailing: new RotationTransition(
-              turns: _iconTurns,
-              child: new Icon(
-                icon: Icons.expand_more,
-                color: _iconColor.evaluate(_easeInAnimation)
+          new IconTheme(
+            data: new IconThemeData(color: _iconColor.evaluate(_easeInAnimation)),
+            child: new TwoLevelListItem(
+              onTap: _handleOnTap,
+              leading: config.leading,
+              title: new DefaultTextStyle(
+                style: Theme.of(context).textTheme.subhead.copyWith(color: _headerColor.evaluate(_easeInAnimation)),
+                child: config.title
+              ),
+              trailing: new RotationTransition(
+                turns: _iconTurns,
+                child: new Icon(
+                  icon: Icons.expand_more
+                )
               )
             )
           ),
