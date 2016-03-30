@@ -38,6 +38,11 @@ class LayerTree {
 
   void set_frame_size(const SkISize& frame_size) { frame_size_ = frame_size; }
 
+  uint32_t scene_version() const { return scene_version_; }
+  void set_scene_version(uint32_t scene_version) {
+    scene_version_ = scene_version;
+  }
+
   void set_construction_time(const base::TimeDelta& delta) {
     construction_time_ = delta;
   }
@@ -59,6 +64,7 @@ class LayerTree {
 
  private:
   SkISize frame_size_;  // Physical pixels.
+  uint32_t scene_version_;
   std::unique_ptr<Layer> root_layer_;
 
   base::TimeDelta construction_time_;
