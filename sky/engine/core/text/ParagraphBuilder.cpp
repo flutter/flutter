@@ -233,7 +233,7 @@ void ParagraphBuilder::addText(const std::string& text)
 
 PassRefPtr<Paragraph> ParagraphBuilder::build(Int32List& encoded, const std::string& fontFamily, double fontSize, double lineHeight)
 {
-    DCHECK(encoded.num_elements() == 3);
+    DCHECK(encoded.num_elements() == 5);
     int32_t mask = encoded[0];
 
     if (mask) {

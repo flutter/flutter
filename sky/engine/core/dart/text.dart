@@ -368,7 +368,7 @@ Int32List _encodeParagraphStyle(TextAlign textAlign,
                                 String fontFamily,
                                 double fontSize,
                                 double lineHeight) {
-  Int32List result = new Int32List(3);
+  Int32List result = new Int32List(5);
   if (textAlign != null) {
     result[0] |= 1 << 1;
     result[1] = textAlign.index;
