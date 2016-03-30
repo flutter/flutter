@@ -9,7 +9,7 @@
 
 #include "mojo/public/c/environment/async_waiter.h"
 #include "mojo/public/c/environment/logger.h"
-#include "mojo/public/c/system/types.h"
+#include "mojo/public/c/system/handle.h"
 #include "sky/services/dynamic/dynamic_service_macros.h"
 
 FLUTTER_C_API_START
