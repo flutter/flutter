@@ -61,7 +61,7 @@ class ThemeData {
     primarySwatch ??= Colors.blue;
     primaryColor ??= isDark ? Colors.grey[900] : primarySwatch[500];
     primaryColorBrightness ??= ThemeBrightness.dark;
-    accentColor ??= primarySwatch[500];
+    accentColor ??= isDark ? Colors.tealAccent[200] : primarySwatch[500];
     accentColorBrightness ??= ThemeBrightness.dark;
     canvasColor ??= isDark ? Colors.grey[850] : Colors.grey[50];
     cardColor ??= isDark ? Colors.grey[800] : Colors.white;
