@@ -229,24 +229,26 @@ class DayPicker extends StatelessWidget {
       if (day < 1 || day > daysInMonth) {
         item = new Text("");
       } else {
-        // Put a light circle around the selected day
         BoxDecoration decoration;
-        if (selectedDate.year == year &&
-            selectedDate.month == month &&
-            selectedDate.day == day)
+        TextStyle itemStyle = dayStyle;
+
+        if (selectedDate.year == year && selectedDate.month == month && selectedDate.day == day) {
+          // The selected day gets a circle background highlight, and a contrasting text color.
+          final ThemeData theme = Theme.of(context);
+          itemStyle = itemStyle.copyWith(
+            color: (theme.brightness == ThemeBrightness.light) ? Colors.white : Colors.black87
+          );
           decoration = new BoxDecoration(
-            backgroundColor: themeData.backgroundColor,
+            backgroundColor: themeData.accentColor,
             shape: BoxShape.circle
           );
-
-        // Use a different font color for the current day
-        TextStyle itemStyle = dayStyle;
-        if (currentDate.year == year &&
-            currentDate.month == month &&
-            currentDate.day == day)
-          itemStyle = itemStyle.copyWith(color: themeData.primaryColor);
+        } else if (currentDate.year == year && currentDate.month == month && currentDate.day == day) {
+          // The current day gets a different text color.
+          itemStyle = itemStyle.copyWith(color: themeData.accentColor);
+        }
 
         item = new GestureDetector(
+          behavior: HitTestBehavior.translucent,
           onTap: () {
             DateTime result = new DateTime(year, month, day);
             onChanged(result);
@@ -285,6 +287,7 @@ class MonthPicker extends StatefulWidget {
     assert(selectedDate != null);
     assert(onChanged != null);
     assert(lastDate.isAfter(firstDate));
+    assert(selectedDate.isAfter(firstDate) || selectedDate.isAtSameMomentAs(firstDate));
   }
 
   final DateTime selectedDate;
@@ -321,6 +324,10 @@ class _MonthPickerState extends State<MonthPicker> {
     });
   }
 
+  int _monthDelta(DateTime startDate, DateTime endDate) {
+    return (endDate.year - startDate.year) * 12 + endDate.month - startDate.month;
+  }
+
   List<Widget> buildItems(BuildContext context, int start, int count) {
     List<Widget> result = new List<Widget>();
     DateTime startDate = new DateTime(config.firstDate.year + start ~/ 12, config.firstDate.month + start % 12);
@@ -344,8 +351,10 @@ class _MonthPickerState extends State<MonthPicker> {
   @override
   Widget build(BuildContext context) {
     return new ScrollableLazyList(
+      key: new ValueKey<DateTime>(config.selectedDate),
+      initialScrollOffset: config.itemExtent * _monthDelta(config.firstDate, config.selectedDate),
       itemExtent: config.itemExtent,
-      itemCount: (config.lastDate.year - config.firstDate.year) * 12 + config.lastDate.month - config.firstDate.month + 1,
+      itemCount: _monthDelta(config.firstDate, config.lastDate) + 1,
       itemBuilder: buildItems
     );
   }
