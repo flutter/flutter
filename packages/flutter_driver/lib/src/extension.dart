@@ -85,7 +85,7 @@ class FlutterDriverExtension {
 
       if (commandHandler == null || commandDeserializer == null) {
         return new ServiceExtensionResponse.error(
-          ServiceExtensionResponse.kInvalidParams,
+          ServiceExtensionResponse.invalidParams,
           'Extension $_extensionMethod does not support command $commandKind'
         );
       }
@@ -95,13 +95,13 @@ class FlutterDriverExtension {
         return new ServiceExtensionResponse.result(JSON.encode(result.toJson()));
       }, onError: (e, s) {
         _log.warning('$e:\n$s');
-        return new ServiceExtensionResponse.error(ServiceExtensionResponse.kExtensionError, '$e');
+        return new ServiceExtensionResponse.error(ServiceExtensionResponse.extensionError, '$e');
       });
     } catch(error, stackTrace) {
       String message = 'Uncaught extension error: $error\n$stackTrace';
       _log.error(message);
       return new ServiceExtensionResponse.error(
-        ServiceExtensionResponse.kExtensionError, message);
+        ServiceExtensionResponse.extensionError, message);
     }
   }
 
