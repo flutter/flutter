@@ -18,5 +18,5 @@ dependencies:
 
 dev_dependencies:
   test: '>=0.12.6 <1.0.0'
-  mockito: ^0.10.1
+  mockito: ^0.11.0
   quiver: '>=0.21.4 <0.22.0'

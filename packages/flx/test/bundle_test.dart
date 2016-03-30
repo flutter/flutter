@@ -1,9 +1,8 @@
 import 'dart:async';
-import 'dart:convert' hide BASE64;
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:crypto/crypto.dart';
 import 'package:flx/bundle.dart';
 import 'package:flx/signing.dart';
 import 'package:test/test.dart';

@@ -41,4 +41,4 @@ dependencies:
 # See also https://github.com/dart-lang/pub/issues/1356
 
 dev_dependencies:
-  mockito: ^0.10.1
+  mockito: ^0.11.0
