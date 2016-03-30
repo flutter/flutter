@@ -19,28 +19,28 @@ class TextTheme {
   const TextTheme._black()
     : display4 = const TextStyle(inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
       display3 = const TextStyle(inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
-      display2 = const TextStyle(inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, color: Colors.black54, height: 48.0 / 45.0, textBaseline: TextBaseline.alphabetic),
-      display1 = const TextStyle(inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, color: Colors.black54, height: 40.0 / 34.0, textBaseline: TextBaseline.alphabetic),
-      headline = const TextStyle(inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, color: Colors.black87, height: 32.0 / 24.0, textBaseline: TextBaseline.alphabetic),
-      title    = const TextStyle(inherit: false, fontSize:  20.0, fontWeight: FontWeight.w500, color: Colors.black87, height: 28.0 / 20.0, textBaseline: TextBaseline.alphabetic),
-      subhead  = const TextStyle(inherit: false, fontSize:  16.0, fontWeight: FontWeight.w400, color: Colors.black87, height: 24.0 / 16.0, textBaseline: TextBaseline.alphabetic),
-      body2    = const TextStyle(inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.black87, height: 24.0 / 14.0, textBaseline: TextBaseline.alphabetic),
-      body1    = const TextStyle(inherit: false, fontSize:  14.0, fontWeight: FontWeight.w400, color: Colors.black87, height: 20.0 / 14.0, textBaseline: TextBaseline.alphabetic),
+      display2 = const TextStyle(inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
+      display1 = const TextStyle(inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
+      headline = const TextStyle(inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
+      title    = const TextStyle(inherit: false, fontSize:  20.0, fontWeight: FontWeight.w500, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
+      subhead  = const TextStyle(inherit: false, fontSize:  16.0, fontWeight: FontWeight.w400, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
+      body2    = const TextStyle(inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
+      body1    = const TextStyle(inherit: false, fontSize:  14.0, fontWeight: FontWeight.w400, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
       caption  = const TextStyle(inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
       button   = const TextStyle(inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.black87, textBaseline: TextBaseline.alphabetic);
 
   const TextTheme._white()
     : display4 = const TextStyle(inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
       display3 = const TextStyle(inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
-      display2 = const TextStyle(inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, color: Colors.white70, height: 48.0 / 45.0, textBaseline: TextBaseline.alphabetic),
-      display1 = const TextStyle(inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, color: Colors.white70, height: 40.0 / 34.0, textBaseline: TextBaseline.alphabetic),
-      headline = const TextStyle(inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, color: Colors.white, height: 32.0 / 24.0, textBaseline: TextBaseline.alphabetic),
-      title    = const TextStyle(inherit: false, fontSize:  20.0, fontWeight: FontWeight.w500, color: Colors.white, height: 28.0 / 20.0, textBaseline: TextBaseline.alphabetic),
-      subhead  = const TextStyle(inherit: false, fontSize:  16.0, fontWeight: FontWeight.w400, color: Colors.white, height: 24.0 / 16.0, textBaseline: TextBaseline.alphabetic),
-      body2    = const TextStyle(inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.white, height: 24.0 / 14.0, textBaseline: TextBaseline.alphabetic),
-      body1    = const TextStyle(inherit: false, fontSize:  14.0, fontWeight: FontWeight.w400, color: Colors.white, height: 20.0 / 14.0, textBaseline: TextBaseline.alphabetic),
+      display2 = const TextStyle(inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
+      display1 = const TextStyle(inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
+      headline = const TextStyle(inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
+      title    = const TextStyle(inherit: false, fontSize:  20.0, fontWeight: FontWeight.w500, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
+      subhead  = const TextStyle(inherit: false, fontSize:  16.0, fontWeight: FontWeight.w400, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
+      body2    = const TextStyle(inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
+      body1    = const TextStyle(inherit: false, fontSize:  14.0, fontWeight: FontWeight.w400, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
       caption  = const TextStyle(inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
-      button   = const TextStyle(inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.white, textBaseline: TextBaseline.alphabetic);
+      button   = const TextStyle(inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.white,   textBaseline: TextBaseline.alphabetic);
 
   final TextStyle display4;
   final TextStyle display3;
