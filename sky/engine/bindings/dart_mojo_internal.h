@@ -6,7 +6,7 @@
 #define SKY_ENGINE_BINDINGS_DART_MOJO_INTERNAL_H_
 
 #include "base/macros.h"
-#include "mojo/public/cpp/system/core.h"
+#include "mojo/public/cpp/system/handle.h"
 
 namespace blink {
 

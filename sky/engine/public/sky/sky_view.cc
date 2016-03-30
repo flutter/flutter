@@ -28,9 +28,13 @@ SkyView::SkyView(SkyViewClient* client)
 SkyView::~SkyView() {
 }
 
-void SkyView::SetDisplayMetrics(const SkyDisplayMetrics& metrics) {
-  display_metrics_ = metrics;
-  GetWindow()->UpdateWindowMetrics(display_metrics_);
+void SkyView::SetViewportMetrics(const sky::ViewportMetricsPtr& metrics) {
+  if (metrics) {
+    viewport_metrics_ = metrics->Clone();
+    GetWindow()->UpdateWindowMetrics(viewport_metrics_);
+  } else {
+    viewport_metrics_ = nullptr;
+  }
 }
 
 void SkyView::SetLocale(const std::string& language_code,
@@ -63,7 +67,8 @@ void SkyView::CreateView(const std::string& script_uri) {
   dart_state->window()->DidCreateIsolate();
   client_->DidCreateMainIsolate(dart_state->isolate());
 
-  GetWindow()->UpdateWindowMetrics(display_metrics_);
+  if (viewport_metrics_)
+    GetWindow()->UpdateWindowMetrics(viewport_metrics_);
   GetWindow()->UpdateLocale(language_code_, country_code_);
 }
 

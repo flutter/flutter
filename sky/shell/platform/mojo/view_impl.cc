@@ -98,19 +98,18 @@ void ViewImpl::Run(base::FilePath bundle_path) {
   engine_->RunFromBundle(url_, bundle_path.value());
 }
 
-void ViewImpl::OnLayout(mojo::ui::ViewLayoutParamsPtr layout_params,
-                        mojo::Array<uint32_t> children_needing_layout,
-                        const OnLayoutCallback& callback) {
-  viewport_metrics_.device_pixel_ratio = layout_params->device_pixel_ratio;
-  viewport_metrics_.physical_width = layout_params->constraints->max_width;
-  viewport_metrics_.physical_height = layout_params->constraints->max_height;
+void ViewImpl::OnPropertiesChanged(
+    uint32_t scene_version,
+    mojo::ui::ViewPropertiesPtr properties,
+    const OnPropertiesChangedCallback& callback) {
+  auto& display_metrics = properties->display_metrics;
+  viewport_metrics_.device_pixel_ratio = display_metrics->device_pixel_ratio;
+  auto& size = properties->view_layout->size;
+  viewport_metrics_.physical_width = size->width;
+  viewport_metrics_.physical_height = size->height;
+  viewport_metrics_.scene_version = scene_version;
   engine_->OnViewportMetricsChanged(viewport_metrics_.Clone());
-
-  auto info = mojo::ui::ViewLayoutResult::New();
-  info->size = mojo::Size::New();
-  info->size->width = viewport_metrics_.physical_width;
-  info->size->height = viewport_metrics_.physical_height;
-  callback.Run(info.Pass());
+  callback.Run();
 }
 
 void ViewImpl::OnEvent(mojo::EventPtr event, const OnEventCallback& callback) {
