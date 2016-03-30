@@ -17,7 +17,7 @@ namespace blink {
 class JniClass;
 
 // Wrapper that exposes a JNI jobject to Dart
-class JniObject : public RefCounted<JniObject>, public DartWrappable {
+class JniObject : public ThreadSafeRefCounted<JniObject>, public DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
 
  public:
