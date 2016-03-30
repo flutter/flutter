@@ -82,7 +82,7 @@ class _DropDownMenu<T> extends StatusTransitionWidget {
     for (int itemIndex = 0; itemIndex < route.items.length; ++itemIndex) {
       CurvedAnimation opacity;
       if (itemIndex == route.selectedIndex) {
-        opacity = new CurvedAnimation(parent: route.animation, curve: const Interval(0.0, 0.001), reverseCurve: const Interval(0.75, 1.0));
+        opacity = new CurvedAnimation(parent: route.animation, curve: const Step(0.0), reverseCurve: const Interval(0.75, 1.0));
       } else {
         final double start = (0.5 + (itemIndex + 1) * unit).clamp(0.0, 1.0);
         final double end = (start + 1.5 * unit).clamp(0.0, 1.0);
@@ -112,7 +112,7 @@ class _DropDownMenu<T> extends StatusTransitionWidget {
     final CurvedAnimation resize = new CurvedAnimation(
       parent: route.animation,
       curve: const Interval(0.25, 0.5),
-      reverseCurve: const Interval(0.0, 0.001)
+      reverseCurve: const Step(0.0)
     );
 
     final Tween<double> menuTop = new Tween<double>(
