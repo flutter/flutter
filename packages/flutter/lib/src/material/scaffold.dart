@@ -304,6 +304,17 @@ class ScaffoldState extends State<Scaffold> {
     }
   }
 
+  void removeCurrentSnackBar() {
+    if (_snackBars.isEmpty)
+      return;
+    Completer<Null> completer = _snackBars.first._completer;
+    if (!completer.isCompleted)
+      completer.complete();
+    _snackBarTimer?.cancel();
+    _snackBarTimer = null;
+    _snackBarController.value = 0.0;
+  }
+
   void _hideSnackBar() {
     assert(_snackBarController.status == AnimationStatus.forward ||
            _snackBarController.status == AnimationStatus.completed);

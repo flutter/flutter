@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'button.dart';
 import 'flat_button.dart';
 import 'material.dart';
+import 'scaffold.dart';
 import 'theme_data.dart';
 import 'theme.dart';
 import 'typography.dart';
@@ -118,23 +119,30 @@ class SnackBar extends StatelessWidget {
         },
         child: new Semantics(
           container: true,
-          child: new Material(
-            elevation: 6,
-            color: _kSnackBackground,
-            child: new Container(
-              margin: const EdgeInsets.symmetric(horizontal: _kSideMargins),
-              child: new Theme(
-                data: new ThemeData(
-                  brightness: ThemeBrightness.dark,
-                  accentColor: theme.accentColor,
-                  accentColorBrightness: theme.accentColorBrightness,
-                  textTheme: Typography.white
-                ),
-                child: new FadeTransition(
-                  opacity: fadeAnimation,
-                  child: new Row(
-                    children: children,
-                    crossAxisAlignment: CrossAxisAlignment.center
+          child: new Dismissable(
+            key: new Key('dismissable'),
+            direction: DismissDirection.down,
+            onDismissed: (DismissDirection direction) {
+              Scaffold.of(context).removeCurrentSnackBar();
+            },
+            child: new Material(
+              elevation: 6,
+              color: _kSnackBackground,
+              child: new Container(
+                margin: const EdgeInsets.symmetric(horizontal: _kSideMargins),
+                child: new Theme(
+                  data: new ThemeData(
+                    brightness: ThemeBrightness.dark,
+                    accentColor: theme.accentColor,
+                    accentColorBrightness: theme.accentColorBrightness,
+                    textTheme: Typography.white
+                  ),
+                  child: new FadeTransition(
+                    opacity: fadeAnimation,
+                    child: new Row(
+                      children: children,
+                      crossAxisAlignment: CrossAxisAlignment.center
+                    )
                   )
                 )
               )
