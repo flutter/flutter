@@ -73,11 +73,15 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
 }
 
 const double _kThumbRadius = 6.0;
-const double _kThumbRadiusDisabled = 3.0;
+const double _kActiveThumbRadius = 9.0;
+const double _kDisabledThumbRadius = 4.0;
 const double _kReactionRadius = 16.0;
 const double _kTrackWidth = 144.0;
 final Color _kInactiveTrackColor = Colors.grey[400];
 final Color _kActiveTrackColor = Colors.grey[500];
+final Tween<double> _kReactionRadiusTween = new Tween<double>(begin: _kThumbRadius, end: _kReactionRadius);
+final Tween<double> _kThumbRadiusTween = new Tween<double>(begin: _kThumbRadius, end: _kActiveThumbRadius);
+final ColorTween _kTrackColorTween = new ColorTween(begin: _kInactiveTrackColor, end: _kActiveTrackColor);
 
 class _RenderSlider extends RenderConstrainedBox {
   _RenderSlider({
@@ -93,13 +97,10 @@ class _RenderSlider extends RenderConstrainedBox {
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd;
     _reactionController = new AnimationController(duration: kRadialReactionDuration);
-    _reaction = new Tween<double>(
-      begin: _kThumbRadius,
-      end: _kReactionRadius
-    ).animate(new CurvedAnimation(
+    _reaction = new CurvedAnimation(
       parent: _reactionController,
       curve: Curves.ease
-    ))..addListener(markNeedsPaint);
+    )..addListener(markNeedsPaint);
   }
 
   double get value => _value;
@@ -182,18 +183,23 @@ class _RenderSlider extends RenderConstrainedBox {
     double trackActive = trackLeft + trackLength * value;
 
     Paint primaryPaint = new Paint()..color = enabled ? _activeColor : _kInactiveTrackColor;
-    Paint trackPaint = new Paint()..color = _active ? _kActiveTrackColor : _kInactiveTrackColor;
+    Paint trackPaint = new Paint()..color = _kTrackColorTween.evaluate(_reaction);
 
-    double thumbRadius = enabled ? _kThumbRadius : _kThumbRadiusDisabled;
-
-    canvas.drawRect(new Rect.fromLTRB(trackLeft, trackTop, trackRight, trackBottom), trackPaint);
-    if (_value > 0.0)
-      canvas.drawRect(new Rect.fromLTRB(trackLeft, trackTop, trackActive, trackBottom), primaryPaint);
-
+    double thumbRadius = enabled ? _kThumbRadiusTween.evaluate(_reaction) : _kDisabledThumbRadius;
     Point activeLocation = new Point(trackActive, trackCenter);
+
+    if (enabled) {
+      canvas.drawRect(new Rect.fromLTRB(trackLeft, trackTop, trackRight, trackBottom), trackPaint);
+      if (_value > 0.0)
+        canvas.drawRect(new Rect.fromLTRB(trackLeft, trackTop, trackActive, trackBottom), primaryPaint);
+    } else {
+      canvas.drawRect(new Rect.fromLTRB(trackLeft, trackTop, activeLocation.x - _kDisabledThumbRadius - 2, trackBottom), trackPaint);
+      canvas.drawRect(new Rect.fromLTRB(activeLocation.x + _kDisabledThumbRadius + 2, trackTop, trackRight, trackBottom), trackPaint);
+    }
+
     if (_reaction.status != AnimationStatus.dismissed) {
       Paint reactionPaint = new Paint()..color = _activeColor.withAlpha(kRadialReactionAlpha);
-      canvas.drawCircle(activeLocation, _reaction.value, reactionPaint);
+      canvas.drawCircle(activeLocation, _kReactionRadiusTween.evaluate(_reaction), reactionPaint);
     }
     canvas.drawCircle(activeLocation, thumbRadius, primaryPaint);
   }
