@@ -653,6 +653,9 @@ abstract class RenderBox extends RenderObject {
   @override
   BoxConstraints get constraints => super.constraints;
 
+  // We check the intrinsic sizes of each render box once by default.
+  bool _debugNeedsIntrinsicSizeCheck = true;
+
   @override
   void debugAssertDoesMeetConstraints() {
     assert(constraints != null);
@@ -716,43 +719,46 @@ abstract class RenderBox extends RenderObject {
           'your fault. Contact support: https://github.com/flutter/flutter/issues/new'
         );
       }
-      // verify that the intrinsics are also within the constraints
-      assert(!RenderObject.debugCheckingIntrinsics);
-      RenderObject.debugCheckingIntrinsics = true;
-      double intrinsic;
-      StringBuffer failures = new StringBuffer();
-      int failureCount = 0;
-      intrinsic = getMinIntrinsicWidth(constraints);
-      if (intrinsic != constraints.constrainWidth(intrinsic)) {
-        failures.writeln(' * getMinIntrinsicWidth() -- returned: w=$intrinsic');
-        failureCount += 1;
-      }
-      intrinsic = getMaxIntrinsicWidth(constraints);
-      if (intrinsic != constraints.constrainWidth(intrinsic)) {
-        failures.writeln(' * getMaxIntrinsicWidth() -- returned: w=$intrinsic');
-        failureCount += 1;
-      }
-      intrinsic = getMinIntrinsicHeight(constraints);
-      if (intrinsic != constraints.constrainHeight(intrinsic)) {
-        failures.writeln(' * getMinIntrinsicHeight() -- returned: h=$intrinsic');
-        failureCount += 1;
-      }
-      intrinsic = getMaxIntrinsicHeight(constraints);
-      if (intrinsic != constraints.constrainHeight(intrinsic)) {
-        failures.writeln(' * getMaxIntrinsicHeight() -- returned: h=$intrinsic');
-        failureCount += 1;
-      }
-      RenderObject.debugCheckingIntrinsics = false;
-      if (failures.isNotEmpty) {
-        assert(failureCount > 0);
-        throw new FlutterError(
-          'The intrinsic dimension methods of the $runtimeType class returned values that violate the given constraints.\n'
-          'The constraints were: $constraints\n'
-          'The following method${failureCount > 1 ? "s" : ""} returned values outside of those constraints:\n'
-          '$failures'
-          'If you are not writing your own RenderBox subclass, then this is not\n'
-          'your fault. Contact support: https://github.com/flutter/flutter/issues/new'
-        );
+      if (_debugNeedsIntrinsicSizeCheck || debugCheckIntrinsicSizes) {
+        // verify that the intrinsics are also within the constraints
+        assert(!RenderObject.debugCheckingIntrinsics);
+        RenderObject.debugCheckingIntrinsics = true;
+        double intrinsic;
+        StringBuffer failures = new StringBuffer();
+        int failureCount = 0;
+        intrinsic = getMinIntrinsicWidth(constraints);
+        if (intrinsic != constraints.constrainWidth(intrinsic)) {
+          failures.writeln(' * getMinIntrinsicWidth() -- returned: w=$intrinsic');
+          failureCount += 1;
+        }
+        intrinsic = getMaxIntrinsicWidth(constraints);
+        if (intrinsic != constraints.constrainWidth(intrinsic)) {
+          failures.writeln(' * getMaxIntrinsicWidth() -- returned: w=$intrinsic');
+          failureCount += 1;
+        }
+        intrinsic = getMinIntrinsicHeight(constraints);
+        if (intrinsic != constraints.constrainHeight(intrinsic)) {
+          failures.writeln(' * getMinIntrinsicHeight() -- returned: h=$intrinsic');
+          failureCount += 1;
+        }
+        intrinsic = getMaxIntrinsicHeight(constraints);
+        if (intrinsic != constraints.constrainHeight(intrinsic)) {
+          failures.writeln(' * getMaxIntrinsicHeight() -- returned: h=$intrinsic');
+          failureCount += 1;
+        }
+        RenderObject.debugCheckingIntrinsics = false;
+        _debugNeedsIntrinsicSizeCheck = false;
+        if (failures.isNotEmpty) {
+          assert(failureCount > 0);
+          throw new FlutterError(
+            'The intrinsic dimension methods of the $runtimeType class returned values that violate the given constraints.\n'
+            'The constraints were: $constraints\n'
+            'The following method${failureCount > 1 ? "s" : ""} returned values outside of those constraints:\n'
+            '$failures'
+            'If you are not writing your own RenderBox subclass, then this is not\n'
+            'your fault. Contact support: https://github.com/flutter/flutter/issues/new'
+          );
+        }
       }
       return true;
     });
