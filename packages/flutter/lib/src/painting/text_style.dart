@@ -56,7 +56,11 @@ class TextStyle {
   /// The baseline to use for aligning the text.
   final TextBaseline textBaseline;
 
-  /// The distance between the text baselines, as a multiple of the font size.
+  /// The height of this text span, as a multiple of the font size.
+  ///
+  /// If applied to the root [TextSpan], this value sets the line height, which
+  /// is the minimum distance between each text baselines, as multiple of the
+  /// font size.
   final double height;
 
   /// The decorations to paint near the text (e.g., an underline).
