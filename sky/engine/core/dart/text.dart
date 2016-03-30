@@ -184,7 +184,7 @@ enum TextDecorationStyle {
 //
 //  - Element 0: A bit field where the ith bit indicates wheter the ith element
 //    has a non-null value. Bits 7 to 11 indicate whether |fontFamily|,
-//    |fontSize|, |letterSpacing|, |wordSpacing|, and |lineHeight| are non-null,
+//    |fontSize|, |letterSpacing|, |wordSpacing|, and |height| are non-null,
 //    respectively. Bit 0 is unused.
 //
 //  - Element 1: The |color| in ARGB with 8 bits per channel.
@@ -211,7 +211,7 @@ Int32List _encodeTextStyle(Color color,
                            double fontSize,
                            double letterSpacing,
                            double wordSpacing,
-                           double lineHeight) {
+                           double height) {
   Int32List result = new Int32List(7);
   if (color != null) {
     result[0] |= 1 << 1;
@@ -253,7 +253,7 @@ Int32List _encodeTextStyle(Color color,
     result[0] |= 1 << 10;
     // Passed separately to native.
   }
-  if (lineHeight != null) {
+  if (height != null) {
     result[0] |= 1 << 11;
     // Passed separately to native.
   }
@@ -274,7 +274,7 @@ class TextStyle {
   /// * [fontSize] The size of gyphs (in logical pixels) to use when painting the text.
   /// * [letterSpacing] The amount of space (in logical pixels) to add between each letter.
   /// * [wordSpacing] The amount of space (in logical pixels) to add at each sequence of white-space (i.e. between each word).
-  /// * [lineHeight] The distance between the text baselines, as a multiple of the font size.
+  /// * [height] The height of this text span, as a multiple of the font size.
   TextStyle({
     Color color,
     TextDecoration decoration,
@@ -286,7 +286,7 @@ class TextStyle {
     double fontSize,
     double letterSpacing,
     double wordSpacing,
-    double lineHeight
+    double height
   }) : _encoded = _encodeTextStyle(color,
                                    decoration,
                                    decorationColor,
@@ -297,19 +297,19 @@ class TextStyle {
                                    fontSize,
                                    letterSpacing,
                                    wordSpacing,
-                                   lineHeight),
+                                   height),
        _fontFamily = fontFamily ?? '',
        _fontSize = fontSize,
        _letterSpacing = letterSpacing,
        _wordSpacing = wordSpacing,
-       _lineHeight = lineHeight;
+       _height = height;
 
   final Int32List _encoded;
   final String _fontFamily;
   final double _fontSize;
   final double _letterSpacing;
   final double _wordSpacing;
-  final double _lineHeight;
+  final double _height;
 
   bool operator ==(dynamic other) {
     if (identical(this, other))
@@ -321,7 +321,7 @@ class TextStyle {
         _fontSize != typedOther._fontSize ||
         _letterSpacing != typedOther._letterSpacing ||
         _wordSpacing != typedOther._wordSpacing ||
-        _lineHeight != typedOther._lineHeight)
+        _height != typedOther._height)
      return false;
     for (int index = 0; index < _encoded.length; index += 1) {
       if (_encoded[index] != typedOther._encoded[index])
@@ -330,7 +330,7 @@ class TextStyle {
     return true;
   }
 
-  int get hashCode => hashValues(hashList(_encoded), _fontFamily, _fontSize, _letterSpacing, _wordSpacing, _lineHeight);
+  int get hashCode => hashValues(hashList(_encoded), _fontFamily, _fontSize, _letterSpacing, _wordSpacing, _height);
 
   String toString() {
     return 'TextStyle(${_encoded[0]}|'
@@ -344,7 +344,7 @@ class TextStyle {
              'fontSize: ${       _encoded[0] & 0x080 == 0x080 ? _fontSize                               : "unspecified"}, '
              'letterSpacing: ${  _encoded[0] & 0x100 == 0x100 ? "${_letterSpacing}x"                    : "unspecified"}, '
              'wordSpacing: ${    _encoded[0] & 0x200 == 0x200 ? "${_wordSpacing}x"                      : "unspecified"}, '
-             'lineHeight: ${     _encoded[0] & 0x400 == 0x400 ? "${_lineHeight}x"                       : "unspecified"}'
+             'height: ${         _encoded[0] & 0x400 == 0x400 ? "${_height}x"                           : "unspecified"}'
            ')';
   }
 }
@@ -363,6 +363,10 @@ class TextStyle {
 //
 Int32List _encodeParagraphStyle(TextAlign textAlign,
                                 TextBaseline textBaseline,
+                                FontWeight fontWeight,
+                                FontStyle fontStyle,
+                                String fontFamily,
+                                double fontSize,
                                 double lineHeight) {
   Int32List result = new Int32List(3);
   if (textAlign != null) {
@@ -373,8 +377,24 @@ Int32List _encodeParagraphStyle(TextAlign textAlign,
     result[0] |= 1 << 2;
     result[2] = textBaseline.index;
   }
-  if (lineHeight != null) {
+  if (fontWeight != null) {
     result[0] |= 1 << 3;
+    result[3] = fontWeight.index;
+  }
+  if (fontStyle != null) {
+    result[0] |= 1 << 4;
+    result[4] = fontStyle.index;
+  }
+  if (fontFamily != null) {
+    result[0] |= 1 << 5;
+    // Passed separately to native.
+  }
+  if (fontSize != null) {
+    result[0] |= 1 << 6;
+    // Passed separately to native.
+  }
+  if (lineHeight != null) {
+    result[0] |= 1 << 7;
     // Passed separately to native.
   }
   return result;
@@ -390,11 +410,25 @@ class ParagraphStyle {
   ParagraphStyle({
     TextAlign textAlign,
     TextBaseline textBaseline,
+    FontWeight fontWeight,
+    FontStyle fontStyle,
+    String fontFamily,
+    double fontSize,
     double lineHeight
-  }) : _encoded = _encodeParagraphStyle(textAlign, textBaseline, lineHeight),
+  }) : _encoded = _encodeParagraphStyle(textAlign,
+                                        textBaseline,
+                                        fontWeight,
+                                        fontStyle,
+                                        fontFamily,
+                                        fontSize,
+                                        lineHeight),
+       _fontFamily = fontFamily,
+       _fontSize = fontSize,
        _lineHeight = lineHeight;
 
   final Int32List _encoded;
+  final String _fontFamily;
+  final double _fontSize;
   final double _lineHeight;
 
   bool operator ==(dynamic other) {
@@ -403,7 +437,9 @@ class ParagraphStyle {
     if (other is! ParagraphStyle)
       return false;
     final ParagraphStyle typedOther = other;
-    if (_lineHeight != typedOther._lineHeight)
+    if ( _fontFamily != typedOther._fontFamily ||
+        _fontSize != typedOther._fontSize ||
+        _lineHeight != typedOther._lineHeight)
      return false;
     for (int index = 0; index < _encoded.length; index += 1) {
       if (_encoded[index] != typedOther._encoded[index])
@@ -416,9 +452,13 @@ class ParagraphStyle {
 
   String toString() {
     return 'ParagraphStyle('
-             'textAlign: ${   _encoded[0] & 0x1 == 0x1 ? TextAlign.values[_encoded[1]]    : "unspecified"}, '
-             'textBaseline: ${_encoded[0] & 0x2 == 0x2 ? TextBaseline.values[_encoded[2]] : "unspecified"}, '
-             'lineHeight: ${  _encoded[0] & 0x3 == 0x3 ? "${_lineHeight}x"                : "unspecified"}'
+             'textAlign: ${   _encoded[0] & 0x001 == 0x001 ? TextAlign.values[_encoded[1]]    : "unspecified"}, '
+             'textBaseline: ${_encoded[0] & 0x002 == 0x002 ? TextBaseline.values[_encoded[2]] : "unspecified"}, '
+             'fontWeight: ${  _encoded[0] & 0x002 == 0x002 ? FontWeight.values[_encoded[5]]   : "unspecified"}, '
+             'fontStyle: ${   _encoded[0] & 0x004 == 0x004 ? FontStyle.values[_encoded[6]]    : "unspecified"}, '
+             'fontFamily: ${  _encoded[0] & 0x008 == 0x008 ? _fontFamily                      : "unspecified"}, '
+             'fontSize: ${    _encoded[0] & 0x010 == 0x010 ? _fontSize                        : "unspecified"}, '
+             'lineHeight: ${  _encoded[0] & 0x020 == 0x020 ? "${_lineHeight}x"                : "unspecified"}'
            ')';
   }
 }
@@ -633,8 +673,8 @@ class ParagraphBuilder extends NativeFieldWrapperClass2 {
   /// Applies the given style to the added text until [pop] is called.
   ///
   /// See [pop] for details.
-  void pushStyle(TextStyle style) => _pushStyle(style._encoded, style._fontFamily, style._fontSize, style._letterSpacing, style._wordSpacing, style._lineHeight);
-  void _pushStyle(Int32List encoded, String fontFamily, double fontSize, double letterSpacing, double wordSpacing, double lineHeight) native "ParagraphBuilder_pushStyle";
+  void pushStyle(TextStyle style) => _pushStyle(style._encoded, style._fontFamily, style._fontSize, style._letterSpacing, style._wordSpacing, style._height);
+  void _pushStyle(Int32List encoded, String fontFamily, double fontSize, double letterSpacing, double wordSpacing, double height) native "ParagraphBuilder_pushStyle";
 
   /// Ends the effect of the most recent call to [pushStyle].
   ///
@@ -653,7 +693,7 @@ class ParagraphBuilder extends NativeFieldWrapperClass2 {
   ///
   /// After calling this function, the paragraph builder object is invalid and
   /// cannot be used further.
-  Paragraph build(ParagraphStyle style) => _build(style._encoded, style._lineHeight);
-  Paragraph _build(Int32List encoded, double lineHeight) native "ParagraphBuilder_build";
+  Paragraph build(ParagraphStyle style) => _build(style._encoded, style._fontFamily, style._fontSize, style._lineHeight);
+  Paragraph _build(Int32List encoded, String fontFamily, double fontSize, double lineHeight) native "ParagraphBuilder_build";
 }
 

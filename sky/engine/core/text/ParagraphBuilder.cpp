@@ -80,7 +80,7 @@ const int tsFontFamilyIndex = 7;
 const int tsFontSizeIndex = 8;
 const int tsLetterSpacingIndex = 9;
 const int tsWordSpacingIndex = 10;
-const int tsLineHeightIndex = 11;
+const int tsHeightIndex = 11;
 
 const int tsColorMask = 1 << tsColorIndex;
 const int tsTextDecorationMask = 1 << tsTextDecorationIndex;
@@ -92,16 +92,24 @@ const int tsFontFamilyMask = 1 << tsFontFamilyIndex;
 const int tsFontSizeMask = 1 << tsFontSizeIndex;
 const int tsLetterSpacingMask = 1 << tsLetterSpacingIndex;
 const int tsWordSpacingMask = 1 << tsWordSpacingIndex;
-const int tsLineHeightMask = 1 << tsLineHeightIndex;
+const int tsHeightMask = 1 << tsHeightIndex;
 
 // ParagraphStyle
 
 const int psTextAlignIndex = 1;
 const int psTextBaselineIndex = 2;
-const int psLineHeightIndex = 3;
+const int psFontWeightIndex = 3;
+const int psFontStyleIndex = 4;
+const int psFontFamilyIndex = 5;
+const int psFontSizeIndex = 6;
+const int psLineHeightIndex = 7;
 
 const int psTextAlignMask = 1 << psTextAlignIndex;
 const int psTextBaselineMask = 1 << psTextBaselineIndex;
+const int psFontWeightMask = 1 << psFontWeightIndex;
+const int psFontStyleMask = 1 << psFontStyleIndex;
+const int psFontFamilyMask = 1 << psFontFamilyIndex;
+const int psFontSizeMask = 1 << psFontSizeIndex;
 const int psLineHeightMask = 1 << psLineHeightIndex;
 
 }  // namespace
@@ -141,7 +149,7 @@ ParagraphBuilder::~ParagraphBuilder()
     runner->DeleteSoon(FROM_HERE, m_renderView.leakPtr());
 }
 
-void ParagraphBuilder::pushStyle(Int32List& encoded, const std::string& fontFamily, double fontSize, double letterSpacing, double wordSpacing, double lineHeight)
+void ParagraphBuilder::pushStyle(Int32List& encoded, const std::string& fontFamily, double fontSize, double letterSpacing, double wordSpacing, double height)
 {
     DCHECK(encoded.num_elements() == 7);
     RefPtr<RenderStyle> style = RenderStyle::create();
@@ -194,8 +202,8 @@ void ParagraphBuilder::pushStyle(Int32List& encoded, const std::string& fontFami
       style->font().update(UIDartState::Current()->font_selector());
     }
 
-    if (mask & tsLineHeightMask) {
-      style->setLineHeight(Length(lineHeight * 100.0, Percent));
+    if (mask & tsHeightMask) {
+      style->setLineHeight(Length(height * 100.0, Percent));
     }
 
     encoded.Release();
@@ -223,7 +231,7 @@ void ParagraphBuilder::addText(const std::string& text)
     m_currentRenderObject->addChild(renderText);
 }
 
-PassRefPtr<Paragraph> ParagraphBuilder::build(Int32List& encoded, double lineHeight)
+PassRefPtr<Paragraph> ParagraphBuilder::build(Int32List& encoded, const std::string& fontFamily, double fontSize, double lineHeight)
 {
     DCHECK(encoded.num_elements() == 3);
     int32_t mask = encoded[0];
@@ -237,6 +245,31 @@ PassRefPtr<Paragraph> ParagraphBuilder::build(Int32List& encoded, double lineHei
       if (mask & psTextBaselineMask) {
         // TODO(abarth): Implement TextBaseline. The CSS version of this
         // property wasn't wired up either.
+      }
+
+      if (mask & (psFontWeightMask | psFontStyleMask | psFontFamilyMask | psFontSizeMask)) {
+        FontDescription fontDescription = style->fontDescription();
+
+        if (mask & psFontWeightMask)
+          fontDescription.setWeight(static_cast<FontWeight>(encoded[psFontWeightIndex]));
+
+        if (mask & psFontStyleMask)
+          fontDescription.setStyle(static_cast<FontStyle>(encoded[psFontStyleIndex]));
+
+        if (mask & psFontFamilyMask) {
+          FontFamily family;
+          family.setFamily(String::fromUTF8(fontFamily));
+          fontDescription.setFamily(family);
+        }
+
+        if (mask & psFontSizeMask) {
+          fontDescription.setSpecifiedSize(fontSize);
+          fontDescription.setIsAbsoluteSize(true);
+          fontDescription.setComputedSize(getComputedSizeFromSpecifiedSize(fontSize));
+        }
+
+        style->setFontDescription(fontDescription);
+        style->font().update(UIDartState::Current()->font_selector());
       }
 
       if (mask & psLineHeightMask)
