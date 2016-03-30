@@ -164,7 +164,7 @@ class TextStyle {
       fontSize: fontSize,
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,
-      lineHeight: height
+      height: height
     );
   }
 
@@ -172,6 +172,10 @@ class TextStyle {
     return new ui.ParagraphStyle(
       textAlign: textAlign,
       textBaseline: textBaseline,
+      fontWeight: fontWeight,
+      fontStyle: fontStyle,
+      fontFamily: fontFamily,
+      fontSize: fontSize,
       lineHeight: height
     );
   }
