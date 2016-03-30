@@ -8,11 +8,12 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 import 'package:mojo_services/mojo/gfx/composition/scene_token.mojom.dart' as mojom;
-import 'package:mojo_services/mojo/ui/layouts.mojom.dart' as mojom;
 import 'package:mojo_services/mojo/ui/view_containers.mojom.dart' as mojom;
 import 'package:mojo_services/mojo/ui/view_provider.mojom.dart' as mojom;
+import 'package:mojo_services/mojo/ui/view_properties.mojom.dart' as mojom;
 import 'package:mojo_services/mojo/ui/view_token.mojom.dart' as mojom;
 import 'package:mojo_services/mojo/ui/views.mojom.dart' as mojom;
+import 'package:mojo_services/mojo/geometry.mojom.dart' as mojom;
 import 'package:mojo/application.dart';
 import 'package:mojo/core.dart' as core;
 import 'package:mojo/mojo/service_provider.mojom.dart' as mojom;
@@ -102,6 +103,9 @@ class ChildViewConnection {
   static int _nextViewKey = 1;
   int _viewKey;
 
+  int _sceneVersion = 1;
+  mojom.ViewProperties _currentViewProperties;
+
   VoidCallback _onViewInfoAvailable;
   mojom.ViewInfo _viewInfo;
 
@@ -138,6 +142,7 @@ class ChildViewConnection {
     _viewContainer?.removeChild(_viewKey, _viewOwner);
     _viewKey = null;
     _viewInfo = null;
+    _currentViewProperties = null;
   }
 
   // The number of render objects attached to this view. In between frames, we
@@ -166,24 +171,38 @@ class ChildViewConnection {
       _removeChildFromViewHost();
   }
 
-  void _layout({ int physicalWidth, int physicalHeight, double devicePixelRatio }) {
+  mojom.ViewProperties _createViewProperties(int physicalWidth,
+                                             int physicalHeight,
+                                             double devicePixelRatio) {
+    if (_currentViewProperties != null &&
+        _currentViewProperties.displayMetrics.devicePixelRatio == devicePixelRatio &&
+        _currentViewProperties.viewLayout.size.width == physicalWidth &&
+        _currentViewProperties.viewLayout.size.height == physicalHeight)
+      return null;
+
+    mojom.DisplayMetrics displayMetrics = new mojom.DisplayMetrics()
+      ..devicePixelRatio = devicePixelRatio;
+    mojom.Size size = new mojom.Size()
+      ..width = physicalWidth
+      ..height = physicalHeight;
+    mojom.ViewLayout viewLayout = new mojom.ViewLayout()
+      ..size = size;
+    _currentViewProperties = new mojom.ViewProperties()
+      ..displayMetrics = displayMetrics
+      ..viewLayout = viewLayout;
+    return _currentViewProperties;
+  }
+
+  void _setChildProperties(int physicalWidth, int physicalHeight, double devicePixelRatio) {
     assert(_attached);
     assert(_attachments == 1);
     assert(_viewKey != null);
     if (_view == null)
       return;
-    // TODO(abarth): Ideally we would propagate our actual constraints to be
-    // able to support rich cross-app layout. For now, we give the child tight
-    // constraints for simplicity.
-    mojom.BoxConstraints childConstraints = new mojom.BoxConstraints()
-      ..minWidth = physicalWidth
-      ..maxWidth = physicalWidth
-      ..minHeight = physicalHeight
-      ..maxHeight = physicalHeight;
-    mojom.ViewLayoutParams layoutParams = new mojom.ViewLayoutParams()
-      ..constraints = childConstraints
-      ..devicePixelRatio = devicePixelRatio;
-    _viewContainer.layoutChild(_viewKey, layoutParams);
+    mojom.ViewProperties viewProperties = _createViewProperties(physicalWidth, physicalHeight, devicePixelRatio);
+    if (viewProperties == null)
+      return;
+    _viewContainer.setChildProperties(_viewKey, _sceneVersion++, viewProperties);
   }
 }
 
@@ -257,7 +276,7 @@ class RenderChildView extends RenderBox {
     if (_child != null) {
       _physicalWidth = (size.width * scale).round();
       _physicalHeight = (size.height * scale).round();
-      _child._layout(physicalWidth: _physicalWidth, physicalHeight: _physicalHeight, devicePixelRatio: scale);
+      _child._setChildProperties(_physicalWidth, _physicalHeight, scale);
       assert(() {
         if (_view == null) {
           _debugErrorMessage ??= new TextPainter()
