@@ -34,14 +34,33 @@ const String _kFontSetMaterial = 'material';
 const String _kFontSetRoboto = 'roboto';
 
 class _Asset {
-  _Asset({ this.source, this.base, this.key });
+  _Asset({ this.base, String assetEntry, this.relativePath, this.source }) {
+    this._assetEntry = assetEntry;
+  }
+
+  String _assetEntry;
+
+  final String base;
+
+  /// The entry to list in the generated asset manifest.
+  String get assetEntry => _assetEntry ?? relativePath;
+
+  /// Where the resource is on disk realtive to [base].
+  final String relativePath;
 
   final String source;
-  final String base;
-  final String key;
+
+  /// The delta between what the assetEntry is and the relativePath (e.g.,
+  /// packages/material_gallery).
+  String get symbolicPrefix {
+    if (_assetEntry == null || _assetEntry == relativePath)
+      return null;
+    int index = _assetEntry.indexOf(relativePath);
+    return index == -1 ? null : _assetEntry.substring(0, index);
+  }
 
   @override
-  String toString() => 'base: $base, key: $key';
+  String toString() => 'asset: $assetEntry';
 }
 
 Map<String, dynamic> _readMaterialFontsManifest() {
@@ -66,7 +85,7 @@ List<_Asset> _getMaterialAssets(String fontSet) {
       result.add(new _Asset(
         base: '${ArtifactStore.flutterRoot}/bin/cache/artifacts/material_fonts',
         source: path.basename(assetKey),
-        key: assetKey
+        relativePath: assetKey
       ));
     }
   }
@@ -90,7 +109,7 @@ Map<_Asset, List<_Asset>> _parseAssets(
       result[baseAsset] = variants;
 
       // Find asset variants
-      String assetPath = path.join(baseAsset.base, baseAsset.key);
+      String assetPath = path.join(baseAsset.base, baseAsset.relativePath);
       String assetFilename = path.basename(assetPath);
       Directory assetDir = new Directory(path.dirname(assetPath));
 
@@ -101,7 +120,10 @@ Map<_Asset, List<_Asset>> _parseAssets(
             FileSystemEntity.isFileSync(entity.path) &&
             entity.path != assetPath) {
           String key = path.relative(entity.path, from: baseAsset.base);
-          variants.add(new _Asset(base: baseAsset.base, key: key));
+          String assetEntry;
+          if (baseAsset.symbolicPrefix != null)
+            assetEntry = path.join(baseAsset.symbolicPrefix, key);
+          variants.add(new _Asset(base: baseAsset.base, assetEntry: assetEntry, relativePath: key));
         }
       }
     }
@@ -117,7 +139,7 @@ Map<_Asset, List<_Asset>> _parseAssets(
         String asset = font['asset'];
         if (asset == null) continue;
 
-        _Asset baseAsset = new _Asset(base: assetBase, key: asset);
+        _Asset baseAsset = new _Asset(base: assetBase, relativePath: asset);
         result[baseAsset] = <_Asset>[];
       }
     }
@@ -141,11 +163,11 @@ _Asset _resolveAsset(PackageMap packageMap, String assetBase, String asset) {
     Uri uri = packageMap.map[packageKey];
     if (uri != null && uri.scheme == 'file') {
       File file = new File.fromUri(uri);
-      return new _Asset(base: file.path, key: relativeAsset);
+      return new _Asset(base: file.path, assetEntry: asset, relativePath: relativeAsset);
     }
   }
 
-  return new _Asset(base: assetBase, key: asset);
+  return new _Asset(base: assetBase, relativePath: asset);
 }
 
 dynamic _loadManifest(String manifestPath) {
@@ -170,13 +192,13 @@ Future<int> _validateManifest(Object manifest) async {
 }
 
 ZipEntry _createAssetEntry(_Asset asset) {
-  String source = asset.source ?? asset.key;
+  String source = asset.source ?? asset.relativePath;
   File file = new File('${asset.base}/$source');
   if (!file.existsSync()) {
     printError('Cannot find asset "$source" in directory "${path.absolute(asset.base)}".');
     return null;
   }
-  return new ZipEntry.fromFile(asset.key, file);
+  return new ZipEntry.fromFile(asset.assetEntry, file);
 }
 
 ZipEntry _createAssetManifest(Map<_Asset, List<_Asset>> assets) {
@@ -184,8 +206,8 @@ ZipEntry _createAssetManifest(Map<_Asset, List<_Asset>> assets) {
   for (_Asset main in assets.keys) {
     List<String> variants = <String>[];
     for (_Asset variant in assets[main])
-      variants.add(variant.key);
-    json[main.key] = variants;
+      variants.add(variant.relativePath);
+    json[main.relativePath] = variants;
   }
   return new ZipEntry.fromString('AssetManifest.json', JSON.encode(json));
 }
