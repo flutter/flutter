@@ -33,7 +33,6 @@ class _WeatherDemoState extends State<WeatherDemo> {
       'packages/flutter_gallery_assets/clouds-1.png',
       'packages/flutter_gallery_assets/ray.png',
       'packages/flutter_gallery_assets/sun.png',
-      'packages/flutter_gallery_assets/weathersprites.json',
       'packages/flutter_gallery_assets/weathersprites.png',
       'packages/flutter_gallery_assets/icon-sun.png',
       'packages/flutter_gallery_assets/icon-rain.png',
