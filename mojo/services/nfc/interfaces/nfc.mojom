@@ -33,7 +33,7 @@ interface Nfc {
   // MojoShell installed it will be directed to the Play Store to download
   // MojoShell.
   TransmitOnNextConnection(NfcData nfc_data, NfcTransmission&? transmission)
-    => (bool success);
+      => (bool success);
 
   // Registers an app to receive nfc messages.  Upon receiving an nfc message
   // the app will be connected to.  If the app exposes a NfcReceiver interface

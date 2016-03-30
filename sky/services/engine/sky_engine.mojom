@@ -25,6 +25,7 @@ struct ViewportMetrics {
   int32 physical_padding_right;
   int32 physical_padding_bottom;
   int32 physical_padding_left;
+  uint32 scene_version;
 };
 
 struct ServicesData {

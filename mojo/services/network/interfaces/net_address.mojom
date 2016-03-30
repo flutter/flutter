@@ -8,7 +8,7 @@ module mojo;
 enum NetAddressFamily {
   UNSPECIFIED,
   IPV4,
-  IPV6
+  IPV6,
 };
 
 struct NetAddressIPv4 {

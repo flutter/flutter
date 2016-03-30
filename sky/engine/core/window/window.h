@@ -13,7 +13,6 @@
 
 namespace blink {
 class Scene;
-struct SkyDisplayMetrics;
 class DartLibraryNatives;
 
 class WindowClient {
@@ -34,7 +33,7 @@ class Window {
   WindowClient* client() const { return client_; }
 
   void DidCreateIsolate();
-  void UpdateWindowMetrics(const SkyDisplayMetrics& metrics);
+  void UpdateWindowMetrics(const sky::ViewportMetricsPtr& metrics);
   void UpdateLocale(const std::string& language_code,
                     const std::string& country_code);
   void DispatchPointerPacket(const pointer::PointerPacketPtr& packet);

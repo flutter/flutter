@@ -30,17 +30,20 @@ interface UDPSocket {
   // returned in |bound_addr|. The caller may provide an implementation of
   // |receiver| to receive datagrams read from the socket. |receiver| is null
   // on failure.
-  Bind(NetAddress addr) => (NetworkError result, NetAddress? bound_addr,
-                            UDPSocketReceiver&? receiver);
+  Bind(NetAddress addr)
+      => (NetworkError result,
+          NetAddress? bound_addr,
+          UDPSocketReceiver&? receiver);
 
   // Connects the socket to the remote address. The socket must not be bound or
   // connected.
   // |local_addr| is non-null on success.
   // The caller may provide an implementation of |receiver| to receive datagrams
   // read from the socket. |receiver| is null on failure.
-  Connect(NetAddress remote_addr) => (NetworkError result,
-                                      NetAddress? local_addr,
-                                      UDPSocketReceiver&? receiver);
+  Connect(NetAddress remote_addr)
+      => (NetworkError result,
+          NetAddress? local_addr,
+          UDPSocketReceiver&? receiver);
 
   // Sets the OS send buffer size (in bytes) for the socket. The socket must be
   // bound or connected.

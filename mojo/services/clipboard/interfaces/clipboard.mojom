@@ -10,7 +10,7 @@ interface Clipboard {
   enum Type {
     COPY_PASTE = 0,
     SELECTION = 1,
-    DRAG = 2
+    DRAG = 2,
   };
 
   // Mime type constants

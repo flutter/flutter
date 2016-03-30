@@ -13,8 +13,8 @@
 #include "mojo/public/cpp/application/interface_factory.h"
 #include "mojo/public/cpp/application/service_provider_impl.h"
 #include "mojo/public/cpp/bindings/binding.h"
-#include "mojo/public/cpp/system/core.h"
 #include "mojo/public/cpp/system/data_pipe.h"
+#include "mojo/public/cpp/system/handle.h"
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
 #include "mojo/services/asset_bundle/interfaces/asset_bundle.mojom.h"
 #include "skia/ext/refptr.h"
@@ -117,7 +117,7 @@ class Engine : public UIDelegate,
   std::unique_ptr<blink::SkyView> sky_view_;
 
   std::string initial_route_;
-  blink::SkyDisplayMetrics display_metrics_;
+  ViewportMetricsPtr viewport_metrics_;
   std::string language_code_;
   std::string country_code_;
   mojo::Binding<SkyEngine> binding_;

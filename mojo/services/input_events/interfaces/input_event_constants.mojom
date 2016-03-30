@@ -17,6 +17,7 @@ enum EventType {
 
 // This mirrors ui::EventFlags
 // TODO(morrita): Use shift operator once it is available.
+// no-format
 enum EventFlags {
   NONE                =      0,
   CAPS_LOCK_DOWN      =      1,
@@ -45,3 +46,4 @@ enum PointerKind {
   TOUCH,
   MOUSE,
 };
+// end-no-format

@@ -1638,6 +1638,7 @@ class MojomMethod extends bindings.Struct {
   MojomStruct parameters = null;
   MojomStruct responseParams = null;
   int ordinal = 0;
+  int minVersion = 0;
 
   MojomMethod() : super(kVersions.last.size);
 
@@ -1693,6 +1694,10 @@ class MojomMethod extends bindings.Struct {
       
       result.ordinal = decoder0.decodeUint32(32);
     }
+    if (mainDataHeader.version >= 0) {
+      
+      result.minVersion = decoder0.decodeUint32(36);
+    }
     return result;
   }
 
@@ -1726,6 +1731,13 @@ class MojomMethod extends bindings.Struct {
           "ordinal of struct MojomMethod: $e";
       rethrow;
     }
+    try {
+      encoder0.encodeUint32(minVersion, 36);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "minVersion of struct MojomMethod: $e";
+      rethrow;
+    }
   }
 
   String toString() {
@@ -1733,7 +1745,8 @@ class MojomMethod extends bindings.Struct {
            "declData: $declData" ", "
            "parameters: $parameters" ", "
            "responseParams: $responseParams" ", "
-           "ordinal: $ordinal" ")";
+           "ordinal: $ordinal" ", "
+           "minVersion: $minVersion" ")";
   }
 
   Map toJson() {
@@ -1742,6 +1755,7 @@ class MojomMethod extends bindings.Struct {
     map["parameters"] = parameters;
     map["responseParams"] = responseParams;
     map["ordinal"] = ordinal;
+    map["minVersion"] = minVersion;
     return map;
   }
 }
@@ -1749,11 +1763,12 @@ class MojomMethod extends bindings.Struct {
 
 class MojomInterface extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
-    const bindings.StructDataHeader(32, 0)
+    const bindings.StructDataHeader(40, 0)
   ];
   DeclarationData declData = null;
   String serviceName_ = null;
   Map<int, MojomMethod> methods = null;
+  int currentVersion = 0;
 
   MojomInterface() : super(kVersions.last.size);
 
@@ -1827,6 +1842,10 @@ class MojomInterface extends bindings.Struct {
             keys0, values0);
       }
     }
+    if (mainDataHeader.version >= 0) {
+      
+      result.currentVersion = decoder0.decodeUint32(32);
+    }
     return result;
   }
 
@@ -1867,13 +1886,21 @@ class MojomInterface extends bindings.Struct {
           "methods of struct MojomInterface: $e";
       rethrow;
     }
+    try {
+      encoder0.encodeUint32(currentVersion, 32);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "currentVersion of struct MojomInterface: $e";
+      rethrow;
+    }
   }
 
   String toString() {
     return "MojomInterface("
            "declData: $declData" ", "
            "serviceName_: $serviceName_" ", "
-           "methods: $methods" ")";
+           "methods: $methods" ", "
+           "currentVersion: $currentVersion" ")";
   }
 
   Map toJson() {
@@ -1881,6 +1908,7 @@ class MojomInterface extends bindings.Struct {
     map["declData"] = declData;
     map["serviceName_"] = serviceName_;
     map["methods"] = methods;
+    map["currentVersion"] = currentVersion;
     return map;
   }
 }
@@ -1888,11 +1916,10 @@ class MojomInterface extends bindings.Struct {
 
 class UserValueReference extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
-    const bindings.StructDataHeader(40, 0)
+    const bindings.StructDataHeader(24, 0)
   ];
   String identifier = null;
   String valueKey = null;
-  Value resolvedConcreteValue = null;
 
   UserValueReference() : super(kVersions.last.size);
 
@@ -1937,10 +1964,6 @@ class UserValueReference extends bindings.Struct {
       
       result.valueKey = decoder0.decodeString(16, true);
     }
-    if (mainDataHeader.version >= 0) {
-      
-        result.resolvedConcreteValue = Value.decode(decoder0, 24);
-    }
     return result;
   }
 
@@ -1960,27 +1983,18 @@ class UserValueReference extends bindings.Struct {
           "valueKey of struct UserValueReference: $e";
       rethrow;
     }
-    try {
-      encoder0.encodeUnion(resolvedConcreteValue, 24, true);
-    } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "resolvedConcreteValue of struct UserValueReference: $e";
-      rethrow;
-    }
   }
 
   String toString() {
     return "UserValueReference("
            "identifier: $identifier" ", "
-           "valueKey: $valueKey" ", "
-           "resolvedConcreteValue: $resolvedConcreteValue" ")";
+           "valueKey: $valueKey" ")";
   }
 
   Map toJson() {
     Map map = new Map();
     map["identifier"] = identifier;
     map["valueKey"] = valueKey;
-    map["resolvedConcreteValue"] = resolvedConcreteValue;
     return map;
   }
 }
@@ -2187,13 +2201,12 @@ class Attribute extends bindings.Struct {
 
 class DeclarationData extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
-    const bindings.StructDataHeader(72, 0)
+    const bindings.StructDataHeader(64, 0)
   ];
   List<Attribute> attributes = null;
-  int minVersion = -1;
-  int declaredOrdinal = -1;
   String shortName = null;
   String fullIdentifier = null;
+  int declaredOrdinal = -1;
   int declarationOrder = -1;
   SourceFileInfo sourceFileInfo = null;
   ContainedDeclarations containedDeclarations = null;
@@ -2251,37 +2264,33 @@ class DeclarationData extends bindings.Struct {
     }
     if (mainDataHeader.version >= 0) {
       
-      result.minVersion = decoder0.decodeInt32(16);
+      result.shortName = decoder0.decodeString(16, true);
     }
     if (mainDataHeader.version >= 0) {
       
-      result.declaredOrdinal = decoder0.decodeInt32(20);
+      result.fullIdentifier = decoder0.decodeString(24, true);
     }
     if (mainDataHeader.version >= 0) {
       
-      result.shortName = decoder0.decodeString(24, true);
+      result.declaredOrdinal = decoder0.decodeInt32(32);
     }
     if (mainDataHeader.version >= 0) {
       
-      result.fullIdentifier = decoder0.decodeString(32, true);
+      result.declarationOrder = decoder0.decodeInt32(36);
     }
     if (mainDataHeader.version >= 0) {
       
-      result.declarationOrder = decoder0.decodeInt32(40);
-    }
-    if (mainDataHeader.version >= 0) {
-      
-      var decoder1 = decoder0.decodePointer(48, true);
+      var decoder1 = decoder0.decodePointer(40, true);
       result.sourceFileInfo = SourceFileInfo.decode(decoder1);
     }
     if (mainDataHeader.version >= 0) {
       
-      var decoder1 = decoder0.decodePointer(56, true);
+      var decoder1 = decoder0.decodePointer(48, true);
       result.containedDeclarations = ContainedDeclarations.decode(decoder1);
     }
     if (mainDataHeader.version >= 0) {
       
-      result.containerTypeKey = decoder0.decodeString(64, true);
+      result.containerTypeKey = decoder0.decodeString(56, true);
     }
     return result;
   }
@@ -2303,56 +2312,49 @@ class DeclarationData extends bindings.Struct {
       rethrow;
     }
     try {
-      encoder0.encodeInt32(minVersion, 16);
-    } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "minVersion of struct DeclarationData: $e";
-      rethrow;
-    }
-    try {
-      encoder0.encodeInt32(declaredOrdinal, 20);
-    } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "declaredOrdinal of struct DeclarationData: $e";
-      rethrow;
-    }
-    try {
-      encoder0.encodeString(shortName, 24, true);
+      encoder0.encodeString(shortName, 16, true);
     } on bindings.MojoCodecError catch(e) {
       e.message = "Error encountered while encoding field "
           "shortName of struct DeclarationData: $e";
       rethrow;
     }
     try {
-      encoder0.encodeString(fullIdentifier, 32, true);
+      encoder0.encodeString(fullIdentifier, 24, true);
     } on bindings.MojoCodecError catch(e) {
       e.message = "Error encountered while encoding field "
           "fullIdentifier of struct DeclarationData: $e";
       rethrow;
     }
     try {
-      encoder0.encodeInt32(declarationOrder, 40);
+      encoder0.encodeInt32(declaredOrdinal, 32);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "declaredOrdinal of struct DeclarationData: $e";
+      rethrow;
+    }
+    try {
+      encoder0.encodeInt32(declarationOrder, 36);
     } on bindings.MojoCodecError catch(e) {
       e.message = "Error encountered while encoding field "
           "declarationOrder of struct DeclarationData: $e";
       rethrow;
     }
     try {
-      encoder0.encodeStruct(sourceFileInfo, 48, true);
+      encoder0.encodeStruct(sourceFileInfo, 40, true);
     } on bindings.MojoCodecError catch(e) {
       e.message = "Error encountered while encoding field "
           "sourceFileInfo of struct DeclarationData: $e";
       rethrow;
     }
     try {
-      encoder0.encodeStruct(containedDeclarations, 56, true);
+      encoder0.encodeStruct(containedDeclarations, 48, true);
     } on bindings.MojoCodecError catch(e) {
       e.message = "Error encountered while encoding field "
           "containedDeclarations of struct DeclarationData: $e";
       rethrow;
     }
     try {
-      encoder0.encodeString(containerTypeKey, 64, true);
+      encoder0.encodeString(containerTypeKey, 56, true);
     } on bindings.MojoCodecError catch(e) {
       e.message = "Error encountered while encoding field "
           "containerTypeKey of struct DeclarationData: $e";
@@ -2363,10 +2365,9 @@ class DeclarationData extends bindings.Struct {
   String toString() {
     return "DeclarationData("
            "attributes: $attributes" ", "
-           "minVersion: $minVersion" ", "
-           "declaredOrdinal: $declaredOrdinal" ", "
            "shortName: $shortName" ", "
            "fullIdentifier: $fullIdentifier" ", "
+           "declaredOrdinal: $declaredOrdinal" ", "
            "declarationOrder: $declarationOrder" ", "
            "sourceFileInfo: $sourceFileInfo" ", "
            "containedDeclarations: $containedDeclarations" ", "
@@ -2376,10 +2377,9 @@ class DeclarationData extends bindings.Struct {
   Map toJson() {
     Map map = new Map();
     map["attributes"] = attributes;
-    map["minVersion"] = minVersion;
-    map["declaredOrdinal"] = declaredOrdinal;
     map["shortName"] = shortName;
     map["fullIdentifier"] = fullIdentifier;
+    map["declaredOrdinal"] = declaredOrdinal;
     map["declarationOrder"] = declarationOrder;
     map["sourceFileInfo"] = sourceFileInfo;
     map["containedDeclarations"] = containedDeclarations;

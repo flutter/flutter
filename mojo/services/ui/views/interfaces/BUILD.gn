@@ -7,10 +7,10 @@ import("$mojo_sdk_root/mojo/public/tools/bindings/mojom.gni")
 
 mojom("interfaces") {
   sources = [
-    "layouts.mojom",
     "view_associates.mojom",
     "view_containers.mojom",
     "view_manager.mojom",
+    "view_properties.mojom",
     "view_provider.mojom",
     "view_token.mojom",
     "view_tree_token.mojom",

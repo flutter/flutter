@@ -34,7 +34,7 @@ struct AudioTrackConfiguration {
   // Neither of these values may be 0.  A configuration error will occur if they
   // are.
   uint32 audio_frame_ratio = 1;
-  uint32 media_time_ratio  = 1;
+  uint32 media_time_ratio = 1;
 };
 
 interface AudioTrack {

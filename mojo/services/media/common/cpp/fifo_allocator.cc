@@ -60,7 +60,7 @@ uint64_t FifoAllocator::AllocateRegion(uint64_t size) {
   // Create a new region (allocated) of the requested size at the front of the
   // active region, and adjust the active region to reflect the deficit.
   MOJO_DCHECK(active_->size > size);
-  Region *allocated = get_free(true, size, active_->offset);
+  Region* allocated = get_free(true, size, active_->offset);
   active_->size -= size;
   active_->offset += size;
   insert_before(allocated, active_);
@@ -69,17 +69,15 @@ uint64_t FifoAllocator::AllocateRegion(uint64_t size) {
 
 void FifoAllocator::ReleaseRegion(uint64_t size, uint64_t offset) {
   // Start at active_->next. That's usually the region we're looking for.
-  bool released =
-      Release(size, offset, active_->next, nullptr) ||
-      Release(size, offset, front_, active_);
+  bool released = Release(size, offset, active_->next, nullptr) ||
+                  Release(size, offset, front_, active_);
   MOJO_DCHECK(released);
 }
 
-bool FifoAllocator::Release(
-    uint64_t size,
-    uint64_t offset,
-    Region* begin,
-    Region* end) {
+bool FifoAllocator::Release(uint64_t size,
+                            uint64_t offset,
+                            Region* begin,
+                            Region* end) {
   MOJO_DCHECK(begin != nullptr || end == nullptr);
   for (Region* region = begin; region != end; region = region->next) {
     if (region->offset == offset) {
@@ -87,7 +85,7 @@ bool FifoAllocator::Release(
       MOJO_DCHECK(region->size == size);
       region->allocated = false;
 
-      Region *prev = region->prev;
+      Region* prev = region->prev;
       if (prev != nullptr && !prev->allocated) {
         // Coalesce wtih the previous region.
         prev->size += region->size;
@@ -96,7 +94,7 @@ bool FifoAllocator::Release(
         region = prev;
       }
 
-      Region *next = region->next;
+      Region* next = region->next;
       if (next != nullptr && !next->allocated) {
         // Coalesce wtih the next region.
         next->offset = region->offset;
@@ -118,9 +116,8 @@ bool FifoAllocator::Release(
 
 bool FifoAllocator::AdvanceActive(uint64_t size) {
   MOJO_DCHECK(size != 0);
-  return
-      AdvanceActive(size, active_->next, nullptr) ||
-      AdvanceActive(size, front_, active_);
+  return AdvanceActive(size, active_->next, nullptr) ||
+         AdvanceActive(size, front_, active_);
 }
 
 bool FifoAllocator::AdvanceActive(uint64_t size, Region* begin, Region* end) {
@@ -143,10 +140,8 @@ void FifoAllocator::MakeActivePlaceholder() {
   // If the old active region was at the back of the list, we'll be inserting
   // at the front, so make the offset zero. We insert at the front, because it's
   // a bit more efficient and because we don't need to implement insert_after.
-  Region *new_active = get_free(
-      false,
-      0,
-      active_ == back_ ? 0 : active_->offset + active_->size);
+  Region* new_active = get_free(
+      false, 0, active_ == back_ ? 0 : active_->offset + active_->size);
 
   MOJO_DCHECK((active_ == back_) == (active_->next == nullptr));
   insert_before(new_active, active_ == back_ ? front_ : active_->next);
@@ -161,7 +156,7 @@ void FifoAllocator::remove(Region* region) {
     front_ = region->next;
   } else {
     MOJO_DCHECK(region->prev);
-    MOJO_DCHECK(region->prev->next ==region);
+    MOJO_DCHECK(region->prev->next == region);
     region->prev->next = region->next;
   }
 
@@ -191,12 +186,13 @@ void FifoAllocator::insert_before(Region* region, Region* before_this) {
   }
 }
 
-FifoAllocator::Region* FifoAllocator::get_free(
-    bool allocated, uint64_t size, uint64_t offset) {
+FifoAllocator::Region* FifoAllocator::get_free(bool allocated,
+                                               uint64_t size,
+                                               uint64_t offset) {
   MOJO_DCHECK(size <= size_);
   MOJO_DCHECK(offset <= size_ - size);
 
-  Region *result = free_;
+  Region* result = free_;
   if (result == nullptr) {
     result = new Region();
   } else {
@@ -212,7 +208,7 @@ FifoAllocator::Region* FifoAllocator::get_free(
 
 void FifoAllocator::DeleteFrontToBack(Region* region) {
   while (region != nullptr) {
-    Region *to_delete = region;
+    Region* to_delete = region;
     region = region->next;
     delete to_delete;
   }

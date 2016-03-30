@@ -14,7 +14,6 @@
 #include "mojo/services/network/interfaces/url_loader.mojom.h"
 #include "sky/engine/bindings/flutter_dart_state.h"
 #include "sky/engine/core/window/window.h"
-#include "sky/engine/public/platform/sky_display_metrics.h"
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebString.h"
 #include "sky/engine/wtf/OwnPtr.h"
@@ -38,8 +37,7 @@ class SkyView : public WindowClient, public IsolateClient {
   static std::unique_ptr<SkyView> Create(SkyViewClient* client);
   ~SkyView();
 
-  const SkyDisplayMetrics& display_metrics() const { return display_metrics_; }
-  void SetDisplayMetrics(const SkyDisplayMetrics& metrics);
+  void SetViewportMetrics(const sky::ViewportMetricsPtr& metrics);
   void SetLocale(const std::string& language_code,
 		 const std::string& country_code);
   void PushRoute(const std::string& route);
@@ -71,7 +69,7 @@ class SkyView : public WindowClient, public IsolateClient {
   void DidCreateSecondaryIsolate(Dart_Isolate isolate) override;
 
   SkyViewClient* client_;
-  SkyDisplayMetrics display_metrics_;
+  sky::ViewportMetricsPtr viewport_metrics_;
   std::string language_code_;
   std::string country_code_;
   std::unique_ptr<DartController> dart_controller_;

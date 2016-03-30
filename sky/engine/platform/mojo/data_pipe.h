@@ -6,7 +6,7 @@
 #define SKY_ENGINE_PLATFORM_MOJO_DATA_PIPE_H_
 
 #include "base/callback.h"
-#include "mojo/public/cpp/system/core.h"
+#include "mojo/public/cpp/system/data_pipe.h"
 #include "sky/engine/platform/SharedBuffer.h"
 
 namespace blink {

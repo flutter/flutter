@@ -24,7 +24,6 @@ enum PresentationStatus {
 // provides mechanisms for the producer and the consumer to negotiate about who
 // owns each image in the pool at a given point in time.
 interface ImagePipe {
-
   // Add an image persistently to the pipe's image pool
   // Adding an image that is already added, or using an ID that is already in
   // use are both errors and will cause the connection to close.
@@ -46,5 +45,4 @@ interface ImagePipe {
   // not being used by the consumer if the consumer is presenting this image,
   // that image may still be presented and its Present reply will reflect that.
   FlushImages();
-
 };

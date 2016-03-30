@@ -104,7 +104,9 @@ void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
 
   update->nodes.insert(kRootNodeId, root_node.Pass());
   scene_->Update(update.Pass());
-  scene_->Publish(nullptr);
+  auto metadata = mojo::gfx::composition::SceneMetadata::New();
+  metadata->version = layer_tree->scene_version();
+  scene_->Publish(metadata.Pass());
   callback.Run();
 }
 

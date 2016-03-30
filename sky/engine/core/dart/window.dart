@@ -37,12 +37,14 @@ enum AppLifecycleState {
 /// For a generic class that represents distances around a rectangle, see the
 /// [EdgeDims] class.
 class WindowPadding {
-  const WindowPadding._({ this.top, this.right, this.bottom, this.left });
+  const WindowPadding._({ this.left, this.top, this.right, this.bottom });
 
+  final double left;
   final double top;
   final double right;
   final double bottom;
-  final double left;
+
+  static const WindowPadding zero = const WindowPadding._(left: 0.0, top: 0.0, right: 0.0, bottom: 0.0);
 }
 
 /// An identifier used to select a user's language and formatting preferences,
@@ -95,12 +97,12 @@ class Window {
   /// be a power of two. Indeed, it might not even be an integer. For example,
   /// the Nexus 6 has a device pixel ratio of 3.5.
   double get devicePixelRatio => _devicePixelRatio;
-  double _devicePixelRatio;
+  double _devicePixelRatio = 1.0;
 
   /// The dimensions of the rectangle into which the application will be drawn,
   /// in logical pixels.
   Size get size => _size;
-  Size _size;
+  Size _size = Size.zero;
 
   /// The number of pixels on each side of the display rectangle into which the
   /// application can render, but over which the operating system will likely
@@ -108,7 +110,7 @@ class Window {
   /// might be rendered outside of the physical display (e.g. overscan regions
   /// on television screens).
   WindowPadding get padding => _padding;
-  WindowPadding _padding;
+  WindowPadding _padding = WindowPadding.zero;
 
   /// A callback that is invoked whenever the [devicePixelRatio], [size], or
   /// [padding] values change.

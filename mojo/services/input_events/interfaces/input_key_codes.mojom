@@ -1,6 +1,7 @@
 // Copyright 2014 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+// no-format
 
 [DartPackage="mojo_services"]
 module mojo;
@@ -185,3 +186,4 @@ enum KeyboardCode {
   // VK_OEM_AX to represent AltGr, matching the behaviour of Firefox on Linux.
   ALTGR                     = 0xE1,
 };
+// end-no-format

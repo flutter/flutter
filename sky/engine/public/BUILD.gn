@@ -54,7 +54,6 @@ source_set("platform_headers") {
     "platform/WebString.h",
     "platform/WebThread.h",
     "platform/WebVector.h",
-    "platform/sky_display_metrics.h",
     "platform/android/WebSandboxSupport.h",
     "platform/linux/WebFallbackFont.h",
     "platform/linux/WebFontInfo.h",

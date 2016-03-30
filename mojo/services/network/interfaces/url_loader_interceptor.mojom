@@ -27,8 +27,8 @@ interface URLLoaderInterceptor {
   // Intercept a request before it is sent to the network. This method can
   // transform the request by returning the new requests to consider, or
   // respond to the request itself by returning a response.
-  InterceptRequest(URLRequest request) =>
-      (URLLoaderInterceptorResponse response);
+  InterceptRequest(URLRequest request)
+      => (URLLoaderInterceptorResponse response);
 
   // Intercept |URLLoader.FollowRedirect()| calls. This method can either
   // return null to let the call through, return a request to change the
@@ -39,8 +39,8 @@ interface URLLoaderInterceptor {
   // can transform the response by returning the new response to send, ask
   // the loader to load a new request instead by returning the request to load,
   // or if the response is a redirect, follow it by returning null.
-  InterceptResponse(URLResponse response) =>
-      (URLLoaderInterceptorResponse? response);
+  InterceptResponse(URLResponse response)
+      => (URLLoaderInterceptorResponse? response);
 };
 
 // Response for the intercept methods. One and only one of the two fields

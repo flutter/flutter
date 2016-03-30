@@ -68,32 +68,12 @@ interface ViewTree {
   // See also: |mojo.gfx.composition.Compositor.CreateRenderer()|.
   SetRenderer(mojo.gfx.composition.Renderer? renderer);
 
-  // Requests that the view tree's OnLayout() method be called to compute a
-  // new layout due to a change in the view tree's layout information.
-  RequestLayout();
-
   // Gets an interface for managing the view tree's root.
   GetContainer(ViewContainer& container);
 };
 
 // An interface clients may implement to receive events from a view tree.
 interface ViewTreeListener {
-  // Called when the tree needs to update its layout.
-  //
-  // This method may be called for one or more of the following reasons:
-  //
-  //   1. The root was just set.
-  //   2. The root produced different layout information during its last
-  //      layout pass causing a recursive layout to occur.
-  //
-  // Layout requests are coalesced for efficiency.  Certain intermediate
-  // updates may be dropped if the view tree is unable to keep up with them
-  // in a timely manner.  Do nothing updates are always dropped.
-  //
-  // The implementation should invoke the callback once the event has
-  // been handled and the view tree is ready to be shown in its new aspect.
-  OnLayout() => ();
-
   // Called when the tree's renderer connection closed unexpectedly.
   //
   // The implementation should invoke the callback once the event has

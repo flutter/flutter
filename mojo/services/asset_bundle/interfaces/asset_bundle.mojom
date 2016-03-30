@@ -12,5 +12,6 @@ interface AssetBundle {
 
 [ServiceName="mojo::asset_bundle::AssetUnpacker"]
 interface AssetUnpacker {
-  UnpackZipStream(handle<data_pipe_consumer> zipped_assets, AssetBundle& asset_bundle);
+  UnpackZipStream(handle<data_pipe_consumer> zipped_assets,
+                  AssetBundle& asset_bundle);
 };

@@ -7,8 +7,8 @@ module mojo.ui;
 
 import "mojo/public/interfaces/application/service_provider.mojom";
 import "mojo/services/gfx/composition/interfaces/scenes.mojom";
-import "mojo/services/ui/views/interfaces/layouts.mojom";
 import "mojo/services/ui/views/interfaces/view_containers.mojom";
+import "mojo/services/ui/views/interfaces/view_properties.mojom";
 import "mojo/services/ui/views/interfaces/view_token.mojom";
 
 // A view is a graphical user interface component which is responsible
@@ -80,56 +80,25 @@ interface View {
   // See also: |mojo.gfx.composition.Compositor.CreateScene()|.
   CreateScene(mojo.gfx.composition.Scene& scene);
 
-  // Requests that the view's OnLayout() method be called to compute a
-  // new layout due to a change in the view's layout information.
-  RequestLayout();
-
   // Gets an interface for managing the view's children.
   GetContainer(ViewContainer& container);
 };
 
 // An interface clients may implement to receive events from a view.
 interface ViewListener {
-  // Called when the view needs to update its layout and provide its size.
+  // Called when the view receives new properties from its container.
   //
-  // This method may be called for one or more of the following reasons:
+  // Property change requests are coalesced for efficiency.  Certain
+  // intermediate updates may be dropped if the view is unable to keep up
+  // with them in a timely manner.  Do nothing updates are always dropped.
   //
-  //   1. The view called RequestLayout() to mark itself as needing layout.
-  //   2. The view's parent called LayoutChild() for the first time to
-  //      provide layout parameters to this view.
-  //   3. The view's parent called LayoutChild() and provided a
-  //      set of layout parameters which differ from its prior call to
-  //      OnLayout().
-  //   4. One or more of the view's children were just added to the view
-  //      tree using AddChild() or removed from the tree using RemoveChild().
-  //   5. One or more of the view's children produced different layout
-  //      information during their last layout pass causing a recursive
-  //      layout to occur.
-  //
-  // The |children_needing_layout| array includes the keys of all children
-  // which require a layout.  The view is responsible for calling LayoutChild()
-  // at least once for each child in the array in addition to any other
-  // children which might also need to be updated.
-  //
-  // Layout requests are coalesced for efficiency.  Certain intermediate
-  // updates may be dropped if the view is unable to keep up with them
-  // in a timely manner.  Do nothing updates are always dropped.
+  // The |scene_version| specifies the version number which the view should
+  // use when publishing scene updates which incorporate the new properties.
+  // May be |kSceneVersionNone| if the version number is not important
+  // (meaning that the container is not interested in coordinating scene
+  // updates with the child).
   //
   // The implementation should invoke the callback once the event has
   // been handled and the view is ready to be shown in its new aspect.
-  //
-  // The result of the layout may cause the parent's layout to be invalidated.
-  // When this happens, the parent's own OnLayout() method will be called
-  // and will be informed that this child needs layout.
-  //
-  // Recursive layout happens in any of the following circumstances:
-  //
-  //   1. If the resulting scene has changed since the last layout.
-  //   2. If the resulting size has changed since the last layout.
-  //
-  // It is an error to return a malformed |result| which does not satisfy
-  // the requested |layout_params|, such as by returning a size which
-  // exceeds the requested constraints; the view's connection will be closed.
-  OnLayout(mojo.ui.ViewLayoutParams layout_params,
-    array<uint32> children_needing_layout) => (mojo.ui.ViewLayoutResult result);
+  OnPropertiesChanged(uint32 scene_version, ViewProperties properties) => ();
 };

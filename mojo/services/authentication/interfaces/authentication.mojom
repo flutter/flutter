@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-[DartPackage="mojo_services", JavaPackage="org.chromium.mojo.authentication"]
+[DartPackage="mojo_services",
+ JavaPackage="org.chromium.mojo.authentication"]
 module authentication;
 
 // Interface to handle user identity and authentication tokens.
@@ -20,8 +21,8 @@ interface AuthenticationService {
   // Requests an oauth2 token for the given Google account with the given
   // scopes.  In case of error, token will be null and error will contain a
   // description of the error.
-  GetOAuth2Token(string username, array<string> scopes) =>
-      (string? token, string? error);
+  GetOAuth2Token(string username, array<string> scopes)
+      => (string? token, string? error);
 
   // Requests to clear a previously acquired token. This should be called when a
   // token is refused by a server component before requesting a new token to
@@ -35,10 +36,11 @@ interface AuthenticationService {
   // Google account credentials, invoke GetOAuth2DeviceCode() method followed by
   // AddAccount() instead of using SelectAccount(), which only works for
   // Android.
-  GetOAuth2DeviceCode(array<string> scopes) => (string? verification_url,
-                                                string? device_code,
-                                                string? user_code,
-                                                string? error);
+  GetOAuth2DeviceCode(array<string> scopes)
+      => (string? verification_url,
+          string? device_code,
+          string? user_code,
+          string? error);
 
   // Exchanges an oauth2 device code to a refresh token for the granted user,
   // and stores it locally in a secure storage location on FNL. For future

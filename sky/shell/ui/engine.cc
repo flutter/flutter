@@ -16,7 +16,6 @@
 #include "sky/engine/bindings/mojo_services.h"
 #include "sky/engine/core/script/dart_init.h"
 #include "sky/engine/core/script/ui_dart_state.h"
-#include "sky/engine/public/platform/sky_display_metrics.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
 #include "sky/engine/public/web/Sky.h"
 #include "sky/shell/dart/dart_library_provider_files.h"
@@ -75,8 +74,9 @@ std::unique_ptr<flow::LayerTree> Engine::BeginFrame(
   std::unique_ptr<flow::LayerTree> layer_tree =
       sky_view_->BeginFrame(frame_time);
   if (layer_tree) {
-    layer_tree->set_frame_size(SkISize::Make(display_metrics_.physical_width,
-                                             display_metrics_.physical_height));
+    layer_tree->set_scene_version(viewport_metrics_->scene_version);
+    layer_tree->set_frame_size(SkISize::Make(viewport_metrics_->physical_width,
+                                             viewport_metrics_->physical_height));
     layer_tree->set_construction_time(base::TimeTicks::Now() - begin_time);
   }
   return layer_tree;
@@ -132,16 +132,9 @@ void Engine::SetServices(ServicesDataPtr services) {
 }
 
 void Engine::OnViewportMetricsChanged(ViewportMetricsPtr metrics) {
-  display_metrics_.device_pixel_ratio = metrics->device_pixel_ratio;
-  display_metrics_.physical_width = metrics->physical_width;
-  display_metrics_.physical_height = metrics->physical_height;
-  display_metrics_.physical_padding_top = metrics->physical_padding_top;
-  display_metrics_.physical_padding_right = metrics->physical_padding_right;
-  display_metrics_.physical_padding_bottom = metrics->physical_padding_bottom;
-  display_metrics_.physical_padding_left = metrics->physical_padding_left;
-
+  viewport_metrics_ = metrics.Pass();
   if (sky_view_)
-    sky_view_->SetDisplayMetrics(display_metrics_);
+    sky_view_->SetViewportMetrics(viewport_metrics_);
 }
 
 void Engine::OnLocaleChanged(const mojo::String& language_code,
@@ -157,8 +150,8 @@ void Engine::OnPointerPacket(pointer::PointerPacketPtr packet) {
 
   // Convert the pointers' x and y coordinates to logical pixels.
   for (auto it = packet->pointers.begin(); it != packet->pointers.end(); ++it) {
-    (*it)->x /= display_metrics_.device_pixel_ratio;
-    (*it)->y /= display_metrics_.device_pixel_ratio;
+    (*it)->x /= viewport_metrics_->device_pixel_ratio;
+    (*it)->y /= viewport_metrics_->device_pixel_ratio;
   }
 
   if (sky_view_)
@@ -170,7 +163,7 @@ void Engine::RunFromLibrary(const std::string& name) {
   sky_view_ = blink::SkyView::Create(this);
   sky_view_->CreateView(name);
   sky_view_->RunFromLibrary(name, dart_library_provider_.get());
-  sky_view_->SetDisplayMetrics(display_metrics_);
+  sky_view_->SetViewportMetrics(viewport_metrics_);
   sky_view_->SetLocale(language_code_, country_code_);
   if (!initial_route_.empty())
     sky_view_->PushRoute(initial_route_);
@@ -183,7 +176,7 @@ void Engine::RunFromSnapshotStream(
   sky_view_ = blink::SkyView::Create(this);
   sky_view_->CreateView(script_uri);
   sky_view_->RunFromSnapshot(snapshot.Pass());
-  sky_view_->SetDisplayMetrics(display_metrics_);
+  sky_view_->SetViewportMetrics(viewport_metrics_);
   sky_view_->SetLocale(language_code_, country_code_);
   if (!initial_route_.empty())
     sky_view_->PushRoute(initial_route_);
@@ -203,7 +196,7 @@ void Engine::RunFromPrecompiledSnapshot(const mojo::String& bundle_path) {
   sky_view_ = blink::SkyView::Create(this);
   sky_view_->CreateView("http://localhost");
   sky_view_->RunFromPrecompiledSnapshot();
-  sky_view_->SetDisplayMetrics(display_metrics_);
+  sky_view_->SetViewportMetrics(viewport_metrics_);
   sky_view_->SetLocale(language_code_, country_code_);
   if (!initial_route_.empty())
     sky_view_->PushRoute(initial_route_);

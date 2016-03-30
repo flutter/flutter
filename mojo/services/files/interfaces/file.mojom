@@ -42,7 +42,8 @@ interface File {
   ReadToStream(handle<data_pipe_producer> source,
                int64 offset,
                Whence whence,
-               int64 num_bytes_to_read) => (Error error);
+               int64 num_bytes_to_read)
+      => (Error error);
   WriteFromStream(handle<data_pipe_consumer> sink, int64 offset, Whence whence)
       => (Error error);
 

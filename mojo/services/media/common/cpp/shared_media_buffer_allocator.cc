@@ -16,5 +16,5 @@ void SharedMediaBufferAllocator::OnInit() {
   fifo_allocator_.Reset(size());
 }
 
-} // namespace media
-} // namespace mojo
+}  // namespace media
+}  // namespace mojo

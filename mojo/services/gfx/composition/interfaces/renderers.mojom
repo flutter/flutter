@@ -29,8 +29,9 @@ interface Renderer {
   // It is an error to create a renderer with an invalid |scene_token|
   // or |size|; the connection will be closed.
   // TODO: make this an event instead
-  SetRootScene(SceneToken scene_token, uint32 scene_version,
-    mojo.Rect viewport);
+  SetRootScene(SceneToken scene_token,
+               uint32 scene_version,
+               mojo.Rect viewport);
 
   // Dissociates the root scene from the renderer.
   ClearRootScene();

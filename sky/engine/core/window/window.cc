@@ -6,7 +6,6 @@
 
 #include "sky/engine/core/compositing/Scene.h"
 #include "sky/engine/core/script/ui_dart_state.h"
-#include "sky/engine/public/platform/sky_display_metrics.h"
 #include "sky/engine/tonic/dart_converter.h"
 #include "sky/engine/tonic/dart_invoke.h"
 #include "sky/engine/tonic/dart_library_natives.h"
@@ -49,20 +48,20 @@ void Window::DidCreateIsolate() {
   library_.Set(DartState::Current(), Dart_LookupLibrary(ToDart("dart:ui")));
 }
 
-void Window::UpdateWindowMetrics(const SkyDisplayMetrics& metrics) {
+void Window::UpdateWindowMetrics(const sky::ViewportMetricsPtr& metrics) {
   DartState* dart_state = library_.dart_state().get();
   if (!dart_state)
     return;
   DartState::Scope scope(dart_state);
-  double device_pixel_ratio = metrics.device_pixel_ratio;
+  double device_pixel_ratio = metrics->device_pixel_ratio;
   DartInvokeField(library_.value(), "_updateWindowMetrics", {
     ToDart(device_pixel_ratio),
-    ToDart(metrics.physical_width / device_pixel_ratio),
-    ToDart(metrics.physical_height / device_pixel_ratio),
-    ToDart(metrics.physical_padding_top / device_pixel_ratio),
-    ToDart(metrics.physical_padding_right / device_pixel_ratio),
-    ToDart(metrics.physical_padding_bottom / device_pixel_ratio),
-    ToDart(metrics.physical_padding_left / device_pixel_ratio),
+    ToDart(metrics->physical_width / device_pixel_ratio),
+    ToDart(metrics->physical_height / device_pixel_ratio),
+    ToDart(metrics->physical_padding_top / device_pixel_ratio),
+    ToDart(metrics->physical_padding_right / device_pixel_ratio),
+    ToDart(metrics->physical_padding_bottom / device_pixel_ratio),
+    ToDart(metrics->physical_padding_left / device_pixel_ratio),
   });
 }
 

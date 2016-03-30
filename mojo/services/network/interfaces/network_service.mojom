@@ -40,8 +40,7 @@ interface NetworkService {
   // address and port for the OS to pick both the local address and port. In
   // all success cases, the resulting local address will be passed to the
   // callback as bound_to.
-  CreateTCPBoundSocket(NetAddress? local_address,
-                       TCPBoundSocket& bound_socket)
+  CreateTCPBoundSocket(NetAddress? local_address, TCPBoundSocket& bound_socket)
       => (NetworkError result, NetAddress? bound_to);
 
   // Creates a client socket connected to the given remote address. A local
@@ -59,8 +58,7 @@ interface NetworkService {
                            handle<data_pipe_consumer> send_stream,
                            handle<data_pipe_producer> receive_stream,
                            TCPConnectedSocket& client_socket)
-      => (NetworkError result,
-          NetAddress? local_address);
+      => (NetworkError result, NetAddress? local_address);
 
   CreateUDPSocket(UDPSocket& socket);
 
@@ -72,10 +70,8 @@ interface NetworkService {
   // address and port for the OS to pick both the local address and port. In
   // all success cases, the resulting local address will be passed to the
   // callback as bound_to.
-  CreateHttpServer(NetAddress local_address,
-                   HttpServerDelegate delegate)
-      => (NetworkError result,
-          NetAddress? bound_to);
+  CreateHttpServer(NetAddress local_address, HttpServerDelegate delegate)
+      => (NetworkError result, NetAddress? bound_to);
 
   // Register a new url loader interceptor that will be used on any new
   // URLLoader created with the current connection to the network service.

@@ -251,7 +251,7 @@ struct SceneNodeOp {
   // The version of the scene that we would like to reference.
   // Use |kSceneVersionNone| to request the most recently published
   // version of the scene if synchronization is unimportant.
-  uint32 scene_version = 0; // kSceneVersionNone
+  uint32 scene_version = 0;  // kSceneVersionNone
 };
 
 // Draws a layer.

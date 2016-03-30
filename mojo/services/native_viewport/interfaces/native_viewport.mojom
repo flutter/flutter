@@ -27,7 +27,8 @@ interface NativeViewport {
   // TODO(sky): having a create function is awkward. Should there be a factory
   // to create the NativeViewport that takes the size?
   // When the viewport is created it is initially shown.
-  Create(Size size, SurfaceConfiguration? requested_configuration) => (ViewportMetrics metrics);
+  Create(Size size, SurfaceConfiguration? requested_configuration)
+      => (ViewportMetrics metrics);
 
   Show();
   Hide();

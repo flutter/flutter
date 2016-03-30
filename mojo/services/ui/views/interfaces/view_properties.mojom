@@ -1,0 +1,37 @@
+// Copyright 2016 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[DartPackage="mojo_services"]
+module mojo.ui;
+
+import "mojo/services/geometry/interfaces/geometry.mojom";
+
+// Parameters and contextual information for a view provided by its container.
+//
+// When a container sets properties for its children, any properties which
+// are set to null are inherited from the container's own ancestors.
+struct ViewProperties {
+  DisplayMetrics? display_metrics;
+  ViewLayout? view_layout;
+};
+
+// Provides information about the physical characteristics of the display.
+struct DisplayMetrics {
+  // The ratio between the size of one display device pixel to the size
+  // of one logical pixel, assuming pixels are square.  This value changes
+  // in relation to display density and zoom level.
+  // Must be > 0.
+  float device_pixel_ratio = 1.0;
+};
+
+// Provides layout constraints for a view.
+//
+// TODO(jeffbrown): Decide how measurement should be performed.  Perhaps
+// bring back |BoxConstraints| or introduce some other protocol just for
+// measurement.
+struct ViewLayout {
+  // The size of the view in device pixels.
+  // Must be non-negative.
+  mojo.Size size;
+};

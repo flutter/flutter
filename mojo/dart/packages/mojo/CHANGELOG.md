@@ -1,3 +1,9 @@
+## 0.4.18
+
+  - 103 changes: https://github.com/domokit/mojo/compare/f59d613...31c5037
+
+  MOJO_SDK: 31c5037ab2c63649632c9f2d4227ebe6f22015a4
+
 ## 0.4.17
 
   - 48 changes: https://github.com/domokit/mojo/compare/2829804...1484e83

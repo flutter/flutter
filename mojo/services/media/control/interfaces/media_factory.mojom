@@ -23,10 +23,9 @@ interface MediaFactory {
   // one of the allowed types. If a stream cannot be converted to one of the
   // allowed types, its media type will have the scheme NONE, and the stream
   // will not be usable.
-  CreateSource(
-      string origin_url,
-      array<MediaTypeSet>? allowed_media_types,
-      MediaSource& source);
+  CreateSource(string origin_url,
+               array<MediaTypeSet>? allowed_media_types,
+               MediaSource& source);
 
   // Creates a sink. Conversions are added to the pipeline as appropriate to
   // convert the indicated media type to a type compatible with the

@@ -42,8 +42,9 @@ interface CommandBuffer {
   SetGetBuffer(int32 buffer);
   Flush(int32 put_offset);
   MakeProgress(int32 last_get_offset);
-  RegisterTransferBuffer(
-      int32 id, handle<shared_buffer> transfer_buffer, uint32 size);
+  RegisterTransferBuffer(int32 id,
+                         handle<shared_buffer> transfer_buffer,
+                         uint32 size);
   DestroyTransferBuffer(int32 id);
 
   // InsertSyncPoint returns the sync point returned via DidInsertSyncPoint.

@@ -15,7 +15,7 @@ enum DisplayType {
   DVI = 16,
   DISPLAYPORT = 32,
   NETWORK = 64,
-  LAST = NETWORK
+  LAST = NETWORK,
 };
 
 struct DisplayMode {

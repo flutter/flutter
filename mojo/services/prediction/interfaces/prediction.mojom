@@ -6,16 +6,17 @@
 module prediction;
 
 struct PrevWordInfo {
-	string word;
-	bool is_beginning_of_sentence;
+  string word;
+  bool is_beginning_of_sentence;
 };
 
 struct PredictionInfo {
-	array<PrevWordInfo> previous_words;
-	string current_word;
+  array<PrevWordInfo> previous_words;
+  string current_word;
 };
 
 [ServiceName="prediction::PredictionService"]
 interface PredictionService {
-  GetPredictionList(PredictionInfo prediction_info) => (array<string>? prediction_list);
+  GetPredictionList(PredictionInfo prediction_info)
+      => (array<string>? prediction_list);
 };
