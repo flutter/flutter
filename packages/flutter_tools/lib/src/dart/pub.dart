@@ -32,8 +32,9 @@ Future<int> pubGet({
   if (!checkLastModified || !dotPackages.existsSync() || pubSpecYaml.lastModifiedSync().isAfter(dotPackages.lastModifiedSync())) {
     String command = upgrade ? 'upgrade' : 'get';
     printStatus("Running 'pub $command' in $directory${Platform.pathSeparator}...");
+    // TODO(devoncarew): Pass in '--no-package-symlinks'.
     int code = await runCommandAndStreamOutput(
-      <String>[sdkBinaryName('pub'), '--verbosity=warning', command, '--no-package-symlinks'],
+      <String>[sdkBinaryName('pub'), '--verbosity=warning', command],
       workingDirectory: directory
     );
     if (code != 0)
