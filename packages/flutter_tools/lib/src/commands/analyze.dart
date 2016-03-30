@@ -122,12 +122,6 @@ class AnalyzeCommand extends FlutterCommand {
   @override
   bool get requiresProjectRoot => false;
 
-  bool get isFlutterRepo {
-    return FileSystemEntity.isDirectorySync('examples') &&
-      FileSystemEntity.isDirectorySync('packages') &&
-      FileSystemEntity.isFileSync('bin/flutter');
-  }
-
   @override
   Future<int> runInProject() async {
     return argResults['watch'] ? _analyzeWatch() : _analyzeOnce();
@@ -658,7 +652,7 @@ class AnalysisServer {
     List<String> args = <String>[snapshot, '--sdk', sdk];
 
     printTrace('dart ${args.join(' ')}');
-    _process = await Process.start('dart', args);
+    _process = await Process.start(path.join(dartSdkPath, 'bin', 'dart'), args);
     _process.exitCode.whenComplete(() => _process = null);
 
     Stream<String> errorStream = _process.stderr.transform(UTF8.decoder).transform(const LineSplitter());

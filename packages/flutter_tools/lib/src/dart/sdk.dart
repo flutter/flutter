@@ -2,7 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
+import 'package:path/path.dart' as path;
 
-/// Locate the Dart SDK by finding the Dart VM and going up two directories.
-String get dartSdkPath => new File(Platform.executable).parent.parent.path;
+import '../artifacts.dart';
+
+/// Locate the Dart SDK.
+String get dartSdkPath {
+  return path.join(ArtifactStore.flutterRoot, 'bin', 'cache', 'dart-sdk');
+}

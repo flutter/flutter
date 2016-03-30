@@ -15,6 +15,7 @@ import 'package:yaml/yaml.dart';
 import 'artifacts.dart';
 import 'base/file_system.dart' show ensureDirectoryExists;
 import 'globals.dart';
+import 'package_map.dart';
 import 'toolchain.dart';
 import 'zip.dart';
 
@@ -38,6 +39,9 @@ class _Asset {
   final String source;
   final String base;
   final String key;
+
+  @override
+  String toString() => 'base: $base, key: $key';
 }
 
 Map<String, dynamic> _readMaterialFontsManifest() {
@@ -70,26 +74,34 @@ List<_Asset> _getMaterialAssets(String fontSet) {
   return result;
 }
 
-Map<_Asset, List<_Asset>> _parseAssets(Map<String, dynamic> manifestDescriptor, String assetBase) {
+Map<_Asset, List<_Asset>> _parseAssets(
+  PackageMap packageMap,
+  Map<String, dynamic> manifestDescriptor,
+  String assetBase
+) {
   Map<_Asset, List<_Asset>> result = <_Asset, List<_Asset>>{};
   if (manifestDescriptor == null)
     return result;
   if (manifestDescriptor.containsKey('assets')) {
     for (String asset in manifestDescriptor['assets']) {
-      _Asset baseAsset = new _Asset(base: assetBase, key: asset);
+      _Asset baseAsset = _resolveAsset(packageMap, assetBase, asset);
+
       List<_Asset> variants = <_Asset>[];
       result[baseAsset] = variants;
+
       // Find asset variants
-      String assetPath = path.join(assetBase, asset);
+      String assetPath = path.join(baseAsset.base, baseAsset.key);
       String assetFilename = path.basename(assetPath);
       Directory assetDir = new Directory(path.dirname(assetPath));
+
       List<FileSystemEntity> files = assetDir.listSync(recursive: true);
+
       for (FileSystemEntity entity in files) {
         if (path.basename(entity.path) == assetFilename &&
             FileSystemEntity.isFileSync(entity.path) &&
             entity.path != assetPath) {
-          String key = path.relative(entity.path, from: assetBase);
-          variants.add(new _Asset(base: assetBase, key: key));
+          String key = path.relative(entity.path, from: baseAsset.base);
+          variants.add(new _Asset(base: baseAsset.base, key: key));
         }
       }
     }
@@ -112,6 +124,28 @@ Map<_Asset, List<_Asset>> _parseAssets(Map<String, dynamic> manifestDescriptor, 
   }
 
   return result;
+}
+
+_Asset _resolveAsset(PackageMap packageMap, String assetBase, String asset) {
+  if (asset.startsWith('packages/')) {
+    // Convert packages/flutter_gallery_assets/clouds-0.png to clouds-0.png.
+    String packageKey = asset.substring(9);
+    String relativeAsset = asset;
+
+    int index = packageKey.indexOf('/');
+    if (index != -1) {
+      relativeAsset = packageKey.substring(index + 1);
+      packageKey = packageKey.substring(0, index);
+    }
+
+    Uri uri = packageMap.map[packageKey];
+    if (uri != null && uri.scheme == 'file') {
+      File file = new File.fromUri(uri);
+      return new _Asset(base: file.path, key: relativeAsset);
+    }
+  }
+
+  return new _Asset(base: assetBase, key: asset);
 }
 
 dynamic _loadManifest(String manifestPath) {
@@ -271,7 +305,8 @@ Future<int> assemble({
 }) async {
   printTrace('Building $outputPath');
 
-  Map<_Asset, List<_Asset>> assets = _parseAssets(manifestDescriptor, assetBasePath);
+  PackageMap packageMap = new PackageMap(path.join(assetBasePath, '.packages'));
+  Map<_Asset, List<_Asset>> assets = _parseAssets(packageMap, manifestDescriptor, assetBasePath);
 
   final bool usesMaterialDesign = manifestDescriptor != null && manifestDescriptor['uses-material-design'] == true;
 

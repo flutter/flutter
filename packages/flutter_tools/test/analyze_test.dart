@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
+import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
@@ -19,6 +20,7 @@ void main() {
   Directory tempDir;
 
   setUp(() {
+    FlutterCommandRunner.initFlutterRoot();
     tempDir = Directory.systemTemp.createTempSync('analysis_test');
   });
 
