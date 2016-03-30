@@ -127,24 +127,6 @@ Map<_Asset, List<_Asset>> _parseAssets(
 }
 
 _Asset _resolveAsset(PackageMap packageMap, String assetBase, String asset) {
-  if (asset.startsWith('packages/')) {
-    // Convert packages/flutter_gallery_assets/clouds-0.png to clouds-0.png.
-    String packageKey = asset.substring(9);
-    String relativeAsset = asset;
-
-    int index = packageKey.indexOf('/');
-    if (index != -1) {
-      relativeAsset = packageKey.substring(index + 1);
-      packageKey = packageKey.substring(0, index);
-    }
-
-    Uri uri = packageMap.map[packageKey];
-    if (uri != null && uri.scheme == 'file') {
-      File file = new File.fromUri(uri);
-      return new _Asset(base: file.path, key: relativeAsset);
-    }
-  }
-
   return new _Asset(base: assetBase, key: asset);
 }
 
