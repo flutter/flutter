@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-[DartPackage="mojo_services", JavaPackage="org.chromium.mojo.speech_recognizer"]
+[DartPackage="mojo_services",
+ JavaPackage="org.chromium.mojo.speech_recognizer"]
 module speech_recognizer;
 
 enum Error {
@@ -14,7 +15,7 @@ enum Error {
   SPEECH_TIMEOUT = 6,
   NO_MATCH = 7,
   RECOGNIZER_BUSY = 8,
-  INSUFFICIENT_PERMISSIONS = 9
+  INSUFFICIENT_PERMISSIONS = 9,
 };
 
 struct UtteranceCandidate {

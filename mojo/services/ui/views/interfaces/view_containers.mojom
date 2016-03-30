@@ -6,7 +6,7 @@
 module mojo.ui;
 
 import "mojo/services/gfx/composition/interfaces/scene_token.mojom";
-import "mojo/services/ui/views/interfaces/layouts.mojom";
+import "mojo/services/ui/views/interfaces/view_properties.mojom";
 import "mojo/services/ui/views/interfaces/view_token.mojom";
 
 // A view container is an interface exposed by |View| and |ViewTree| to
@@ -26,12 +26,19 @@ import "mojo/services/ui/views/interfaces/view_token.mojom";
 // 2. Call |AddChild()| to add the view you would like to embed and assign
 //    it a unique key.
 //
-// 3. Call |LayoutChild()| to provide layout parameters for the new child
-//    using the key that was provided.
+// 3. Call |SetChildProperties()| to provide layout parameters and other
+//    properties for the new child using the same key that was provided
+//    to |AddChild()|.
 //
-// 4. After obtaining the layout result from the child, publish an
-//    update to your |Scene| which includes a reference to the child's own
-//    scene using the |SceneToken| included in the layout result.
+// 4. After receiving |OnChildAttached()|, publish an update to your
+//    |Scene| which includes a |SceneNodeOp| and a |SceneReference| to the
+//    child's |SceneToken| as specified in its |ViewInfo|. The |SceneNodeOp|
+//    should reference the same scene version that was provided to
+//    |SetChildProperties()|.
+//
+// 5. Whenever the container set new child properties using
+//    |SetChildProperties()|, it should provide a new scene version and
+//    update its corresponding |SceneNodeOp| to match.
 //
 // 5. Watch for the child becoming unavailable, as reported by
 //    |OnChildUnavailable()|, which indicates that the child is no longer
@@ -40,10 +47,30 @@ import "mojo/services/ui/views/interfaces/view_token.mojom";
 //    |RemoveChild()| to remove the child and discard any state that your
 //    view has associated with it.
 //
-// LAYOUT
+// VIEW PROPERTIES AND LAYOUT
 //
-// TODO(jeffbrown): Elaborate this once the layout protocol has been
-// redesigned.
+// The container controls the presentation of its children by setting
+// |ViewProperties| for each of them.  View properties include layout
+// information and other parameters the child needs to know to participate
+// in the view hierarchy.
+//
+// The container must set properties for each of its children after adding
+// them, as otherwise the children cannot be rendered (since they lack enough
+// context to know what to draw).
+//
+// SYNCHRONIZATION
+//
+// When setting properties for a child, the container must provide a
+// |child_scene_version| which will be used to mark the version of the
+// child's scene which includes these properties.  The container must then
+// update its own scene to reference the same version number in its
+// |SceneNodeOp| for the child.  This mechanism ensures synchronization
+// of child property changes with the container's own scene updates.
+//
+// See also |mojo.gfx.composition.Node| for information on how scene node
+// combinators can be combined with scene versions to provide a fallback
+// mechanism to avoid stalling the container's rendering when some of its
+// children are unresponsive.
 interface ViewContainer {
   // Sets the view container listener, or null to remove.
   SetListener(ViewContainerListener? listener);
@@ -98,20 +125,33 @@ interface ViewContainer {
   // in the container's list of children; the connection will be closed.
   RemoveChild(uint32 child_key, ViewOwner&? transferred_view_owner);
 
-  // Sets the layout parameters of the child view referenced by |child_key|
-  // and retrieves its layout information.
+  // Sets view properties for the child, such as layout constraints.
   //
-  // The returned |info| is null if this layout request was canceled either
-  // because it has been superceded by a subsequently issued layout request
-  // or because the child has become unavailable.
+  // This method must be called at least once after a child is added to
+  // set the view's properties before it can be rendered.  Rendering for
+  // children without properties is blocked until properties are set.
+  //
+  // The child will receive the new properties along with a scene version
+  // which it should apply to the first scene update which includes the
+  // effects of the property change.
+  //
+  // The |child_scene_version| specifies the version number which
+  // the child should use when publishing scene updates which incorporate
+  // the new properties.  May be |kSceneVersionNone| if the version number
+  // is not important (meaning that there is no need to coordinate the
+  // scene updates with the child).
+  //
+  // The |child_view_properties| specifies the properties for the child, or
+  // null to remove the properties from the child which will cause rendering
+  // of the child's scene to be blocked until new properties are set.
   //
   // It is an error to specify a |child_key| that does not appear in
-  // the parent's list of children; the connection will be closed.
+  // the container's list of children; the connection will be closed.
   //
-  // It is an error to specify malformed |child_layout_params| such
-  // as invalid size constraints; the connection will be closed.
-  LayoutChild(uint32 child_key, mojo.ui.ViewLayoutParams child_layout_params)
-      => (mojo.ui.ViewLayoutInfo? info);
+  // It is an error to specify malformed |child_view_properties| such
+  // as invalid layout properties; the connection will be closed.
+  SetChildProperties(uint32 child_key, uint32 child_scene_version,
+      ViewProperties? child_view_properties);
 };
 
 // An interface clients may implement to receive events from a view container.
@@ -136,6 +176,10 @@ interface ViewContainerListener {
   // The implementation should invoke the callback once the event has
   // been handled.
   OnChildUnavailable(uint32 child_key) => ();
+
+  // TODO(jeffbrown): Once we figure out measurement, add a |OnChildResized|
+  // event or similar to allow the container to get the size along with the
+  // scene version.
 };
 
 // Provides embedding information about a view for use by its container.

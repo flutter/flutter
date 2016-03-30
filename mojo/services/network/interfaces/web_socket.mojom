@@ -11,7 +11,7 @@ interface WebSocket {
   enum MessageType {
     CONTINUATION,
     TEXT,
-    BINARY
+    BINARY,
   };
   const uint16 kAbnormalCloseCode = 1006;  // stolen from websocket_bridge
 

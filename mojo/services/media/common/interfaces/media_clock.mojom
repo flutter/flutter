@@ -24,7 +24,7 @@ enum ClockDisposition {
   PREFER_MASTER,
 
   // Component must be master and cannot slave to a master clock.
-  MASTER
+  MASTER,
 };
 
 interface Clock {

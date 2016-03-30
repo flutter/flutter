@@ -30,9 +30,6 @@ struct MediaPacket {
   // according to the media timeline.
   int64 pts = kNoTimestamp;
 
-  // Duration represented by the packet.
-  uint64 duration;
-
   // Indicates whether this is the last packet in the stream.
   bool end_of_stream;
 
@@ -118,11 +115,11 @@ interface MediaConsumer {
   // the pipe using the SendPacket method.
   enum SendResult {
     CONSUMED,  // Media was completely consumed.
-    FLUSHED,   // Some or all of the media was flushed before being consumed.
+    FLUSHED,  // Some or all of the media was flushed before being consumed.
   };
 
   // Sets the shared buffer in which packet payload will be located.
-  SetBuffer(handle<shared_buffer> buffer, uint64 size) => ();
+  SetBuffer(handle<shared_buffer> buffer) => ();
 
   // Sends a packet to the consumer. The callback signals that the consumer
   // is done with the packet buffer region.

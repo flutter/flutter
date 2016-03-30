@@ -11,6 +11,10 @@ import "mojo/services/media/common/interfaces/rate_control.mojom";
 
 // Plays media.
 interface MediaPlayer {
+  // Special value for GetStatus version_last_seen parameter to get the current
+  // status immediately.
+  const uint64 kInitialStatus = 0;
+
   // Starts playback.
   Play();
 
@@ -22,10 +26,11 @@ interface MediaPlayer {
   // TODO(dalesat): Consider adding parameters regarding desired precision.
   Seek(int64 position);
 
-  // Gets the status. To get the status immediately, call GetStatus(0). To
-  // get updates thereafter, pass the version sent in the previous callback.
-  GetStatus(uint64 version_last_seen) =>
-      (uint64 version, MediaPlayerStatus status);
+  // Gets the status. To get the status immediately, call
+  // GetStatus(kInitialStatus). To get updates thereafter, pass the version
+  // sent in the previous callback.
+  GetStatus(uint64 version_last_seen)
+      => (uint64 version, MediaPlayerStatus status);
 };
 
 // MediaPlayer status information.

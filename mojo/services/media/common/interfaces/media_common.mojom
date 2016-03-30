@@ -13,6 +13,7 @@ module mojo.media;
 // see
 // https://docs.google.com/document/d/1A5QL20LzfRDOmsQKyHnA5HK1ZlmrLwAQO9y98GiDNyI/edit
 //
+// no-format
 enum MediaResult {
   OK                     = 0,   // direct map to MojoResult::OK
   UNKNOWN_ERROR          = -1,  // bucket -> UNKNOWN
@@ -34,3 +35,4 @@ enum MediaResult {
   SHUTTING_DOWN          = -15, // bucket -> FAILED_PRECON
   CONNECTION_LOST        = -16, // bucket -> INTERNAL?
 };
+// end-no-format

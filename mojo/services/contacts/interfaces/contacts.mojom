@@ -14,7 +14,6 @@ struct Contact {
 // Interface to query current user contacts.
 [ServiceName="contacts::ContactsService"]
 interface ContactsService {
-
   // Returns the number of contacts that match the given |filter|. |filter|
   // will be matched against the contact name without considering the case. A
   // contact will match as soon as a part of the name match the filter.

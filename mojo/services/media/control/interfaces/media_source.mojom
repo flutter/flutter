@@ -14,6 +14,10 @@ import "mojo/services/media/common/interfaces/media_types.mojom";
 
 // Produces media streams delivered from a specified origin.
 interface MediaSource {
+  // Special value for GetStatus version_last_seen parameter to get the current
+  // status immediately.
+  const uint64 kInitialStatus = 0;
+
   // Gets the streams produced by this source.
   GetStreams() => (array<MediaSourceStreamDescriptor> streams);
 
@@ -32,10 +36,11 @@ interface MediaSource {
   // Gets the pull mode producer for the specified stream.
   GetPullModeProducer(uint32 stream_index, MediaPullModeProducer& producer);
 
-  // Gets the status. To get the status immediately, call GetStatus(0). To
-  // get updates thereafter, pass the version sent in the previous callback.
-  GetStatus(uint64 version_last_seen) =>
-      (uint64 version, MediaSourceStatus status);
+  // Gets the status. To get the status immediately, call
+  // GetStatus(kInitialStatus). To get updates thereafter, pass the version
+  // sent in the previous callback.
+  GetStatus(uint64 version_last_seen)
+      => (uint64 version, MediaSourceStatus status);
 
   // Prepares the source.
   Prepare() => ();

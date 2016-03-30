@@ -67,6 +67,7 @@ const uint32 kIoctlTerminalGetWindowSize = 3;
 const uint32 kIoctlTerminalSetWindowSize = 4;
 
 // Constants for "termios" fields ----------------------------------------------
+// no-format
 
 // Number of base/nonoptional fields:
 const uint32 kIoctlTerminalTermiosBaseFieldCount = 6;
@@ -182,3 +183,5 @@ const uint32 kIoctlTerminalTermiosLFlagECHOK  = 0x0020;
 const uint32 kIoctlTerminalTermiosLFlagECHONL = 0x0040;
 const uint32 kIoctlTerminalTermiosLFlagNOFLSH = 0x0080;
 const uint32 kIoctlTerminalTermiosLFlagTOSTOP = 0x0100;
+
+// end-no-format

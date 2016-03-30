@@ -17,45 +17,45 @@ import "mojo/public/interfaces/network/url_response.mojom";
 //            with http servers that do not support ETags.
 [ServiceName="mojo::URLResponseDiskCache"]
 interface URLResponseDiskCache {
+  // Given an URL, returns a tuple. If the |url| is not in the cache, all the
+  // response parameters are null. Otherwise |response| is the cached response
+  // stripped of the body, |file_path| is a file containing the body of the
+  // response and  |cache_dir_path| is a directory that the applicaton can use
+  // to store content. This service guarantee that |cache_dir_path| will be
+  // emptied when |file_path| content changes. For example, a content handler
+  // that is backed by a VM that compiles files could have the VM use this
+  // directory to cache the compiled files. After |Get| has been called and a
+  // response is returned, the caller must call |Validate| or |Update| to
+  // revalidate the entry. If this is not done, a future call to |Get| may
+  // return null.
+  Get(string url)
+      => (mojo.URLResponse? response,
+          array<uint8>? file_path,
+          array<uint8>? cache_dir_path);
 
-   // Given an URL, returns a tuple. If the |url| is not in the cache, all the
-   // response parameters are null. Otherwise |response| is the cached response
-   // stripped of the body, |file_path| is a file containing the body of the
-   // response and  |cache_dir_path| is a directory that the applicaton can use
-   // to store content. This service guarantee that |cache_dir_path| will be
-   // emptied when |file_path| content changes. For example, a content handler
-   // that is backed by a VM that compiles files could have the VM use this
-   // directory to cache the compiled files. After |Get| has been called and a
-   // response is returned, the caller must call |Validate| or |Update| to
-   // revalidate the entry. If this is not done, a future call to |Get| may
-   // return null.
-   Get(string url) => (mojo.URLResponse? response,
-                       array<uint8>? file_path,
-                       array<uint8>? cache_dir_path);
+  // Validate the cache for the given |url|. This will enforce that |Get| will
+  // return an entry if it exists.
+  Validate(string url);
 
-   // Validate the cache for the given |url|. This will enforce that |Get| will
-   // return an entry if it exists.
-   Validate(string url);
+  // Update the cache with the given response.
+  Update(mojo.URLResponse response);
 
-   // Update the cache with the given response.
-   Update(mojo.URLResponse response);
+  // Given a URLResponse, updates the cache and returns a pair of paths.
+  // |file_path| is a file containing the body of the response.
+  // |cache_dir_path| is a directory that the applicaton can use to store
+  // content. This service guarantee that |cache_dir_path| will be emptied
+  // when |file_path| content changes. For example, a content handler that is
+  // backed by a VM that compiles files could have the VM use this directory
+  // to cache the compiled files.
+  UpdateAndGet(mojo.URLResponse response)
+      => (array<uint8>? file_path, array<uint8>? cache_dir_path);
 
-   // Given a URLResponse, updates the cache and returns a pair of paths.
-   // |file_path| is a file containing the body of the response.
-   // |cache_dir_path| is a directory that the applicaton can use to store
-   // content. This service guarantee that |cache_dir_path| will be emptied
-   // when |file_path| content changes. For example, a content handler that is
-   // backed by a VM that compiles files could have the VM use this directory
-   // to cache the compiled files.
-   UpdateAndGet(mojo.URLResponse response) =>
-       (array<uint8>? file_path, array<uint8>? cache_dir_path);
-
-   // Given a URLResponse that is expected to have a zipped body, updates the
-   // cache and returns a pair of paths. |extracted_dir_path| is a directory
-   // containing the unzipped body of the response. |cache_dir_path| is a
-   // directory that the applicaton can use to store content. This service
-   // guarantee that |cache_dir_path| will be emptied when |extracted_dir_path|
-   // content changes.
-   UpdateAndGetExtracted(mojo.URLResponse response) =>
-       (array<uint8>? extracted_dir_path, array<uint8>? cache_dir_path);
+  // Given a URLResponse that is expected to have a zipped body, updates the
+  // cache and returns a pair of paths. |extracted_dir_path| is a directory
+  // containing the unzipped body of the response. |cache_dir_path| is a
+  // directory that the applicaton can use to store content. This service
+  // guarantee that |cache_dir_path| will be emptied when |extracted_dir_path|
+  // content changes.
+  UpdateAndGetExtracted(mojo.URLResponse response)
+      => (array<uint8>? extracted_dir_path, array<uint8>? cache_dir_path);
 };

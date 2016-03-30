@@ -32,17 +32,18 @@ interface Process {
         mojo.files.File? stdin_file,
         mojo.files.File? stdout_file,
         mojo.files.File? stderr_file,
-        ProcessController& process_controller) => (mojo.files.Error error);
+        ProcessController& process_controller)
+      => (mojo.files.Error error);
   // Like |Spawn()|, except that the child's stdin/stdout/stderr are redirected
   // from/to |terminal_file|, which should be a |mojo.files.File| for a terminal
   // (i.e., one that behaves like one, including responding to the required
   // ioctls).
-  SpawnWithTerminal(
-      array<uint8> path,
-      array<array<uint8>>? argv,
-      array<array<uint8>>? envp,
-      mojo.files.File terminal_file,
-      ProcessController& process_controller) => (mojo.files.Error error);
+  SpawnWithTerminal(array<uint8> path,
+                    array<array<uint8>>? argv,
+                    array<array<uint8>>? envp,
+                    mojo.files.File terminal_file,
+                    ProcessController& process_controller)
+      => (mojo.files.Error error);
 };
 
 // Interface for controlling a process started by one of |Process|'s facilities

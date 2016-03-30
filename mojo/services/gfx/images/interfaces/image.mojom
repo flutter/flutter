@@ -33,10 +33,10 @@ struct ImageBuffer {
 
 // Image wraps ImageBuffer and provides image-specific metadata for the buffer
 struct Image {
-  mojo.Size size; //width and height of image in pixels
-  uint32 stride; //bytes per row
-  uint32 pitch; // pixels per row
-  ColorFormat format; //pixel format
+  mojo.Size size;  // width and height of image in pixels
+  uint32 stride;  // bytes per row
+  uint32 pitch;  // pixels per row
+  ColorFormat format;  // pixel format
   ImageBuffer buffer;
 };
 

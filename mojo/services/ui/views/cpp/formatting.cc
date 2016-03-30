@@ -23,26 +23,17 @@ std::ostream& operator<<(std::ostream& os, const mojo::ui::ViewInfo& value) {
 }
 
 std::ostream& operator<<(std::ostream& os,
-                         const mojo::ui::BoxConstraints& value) {
-  return os << "{min_width=" << value.min_width
-            << ", max_width=" << value.max_width
-            << ", min_height=" << value.min_height
-            << ", max_height=" << value.max_height << "}";
+                         const mojo::ui::ViewProperties& value) {
+  return os << "{display_metrics=" << value.display_metrics
+            << ", view_layout=" << value.view_layout << "}";
 }
 
 std::ostream& operator<<(std::ostream& os,
-                         const mojo::ui::ViewLayoutParams& value) {
-  return os << "{constraints=" << value.constraints
-            << ", device_pixel_ratio=" << value.device_pixel_ratio << "}";
+                         const mojo::ui::DisplayMetrics& value) {
+  return os << "{device_pixel_ratio=" << value.device_pixel_ratio << "}";
 }
 
-std::ostream& operator<<(std::ostream& os,
-                         const mojo::ui::ViewLayoutInfo& value) {
-  return os << "{size=" << value.size << "}";
-}
-
-std::ostream& operator<<(std::ostream& os,
-                         const mojo::ui::ViewLayoutResult& value) {
+std::ostream& operator<<(std::ostream& os, const mojo::ui::ViewLayout& value) {
   return os << "{size=" << value.size << "}";
 }
 

@@ -55,31 +55,29 @@ namespace media {
 // is very large and deallocation is frequently done out of order, the
 // sequential searches may be a performance issue.
 class FifoAllocator {
-  public:
-   // Returned by AllocatedRegion when the requested allocation cannot be
-   // performed.
-   static const uint64_t kNullOffset = std::numeric_limits<uint64_t>::max();
+ public:
+  // Returned by AllocatedRegion when the requested allocation cannot be
+  // performed.
+  static const uint64_t kNullOffset = std::numeric_limits<uint64_t>::max();
 
-   FifoAllocator(uint64_t size);
+  FifoAllocator(uint64_t size);
 
-   ~FifoAllocator();
+  ~FifoAllocator();
 
-   // Returns the size of the entire buffer as determined by the call to the
-   // constructor or the most recent call to Reset.
-   uint64_t size() const {
-     return size_;
-   }
+  // Returns the size of the entire buffer as determined by the call to the
+  // constructor or the most recent call to Reset.
+  uint64_t size() const { return size_; }
 
-   // Resets the buffer manager to its initial state (no regions allocated)
-   // with a new buffer size. Also deletes all the regions in the lookaside.
-   void Reset(uint64_t size);
+  // Resets the buffer manager to its initial state (no regions allocated)
+  // with a new buffer size. Also deletes all the regions in the lookaside.
+  void Reset(uint64_t size);
 
-   // Allocates a region and returns its offset or kNullOffset if the allocation
-   // could not be performed.
-   uint64_t AllocateRegion(uint64_t size);
+  // Allocates a region and returns its offset or kNullOffset if the allocation
+  // could not be performed.
+  uint64_t AllocateRegion(uint64_t size);
 
-   // Releases a previously-allocated region.
-   void ReleaseRegion(uint64_t size, uint64_t offset);
+  // Releases a previously-allocated region.
+  void ReleaseRegion(uint64_t size, uint64_t offset);
 
  private:
   // List element to track allocated and free regions.

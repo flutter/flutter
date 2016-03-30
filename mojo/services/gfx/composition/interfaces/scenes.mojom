@@ -209,7 +209,7 @@ struct SceneMetadata {
   //
   // Note that version numbers are unordered; there is no need to increment
   // them monotonically.  Values may also be reused at will.
-  uint32 version = 0; // kSceneVersionNone
+  uint32 version = 0;  // kSceneVersionNone
 
   // A timestamp indicating approximately when the published contents of the
   // scene are to be shown on the display output assuming everything is

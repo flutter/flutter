@@ -36,14 +36,12 @@ interface Directory {
   // Opens the file specified by |path| with the given |open_flags|. |file| is
   // optional, mainly for consistency with |OpenDirectory()| (but may be useful,
   // together with |kOpenFlagCreate|, for "touching" a file).
-  OpenFile(string path, File&? file, uint32 open_flags)
-      => (Error error);
+  OpenFile(string path, File&? file, uint32 open_flags) => (Error error);
 
   // Opens the directory specified by |path|. |directory| is optional, so that
   // this may be used as a simple "mkdir()" with |kOpenFlagCreate|.
-  OpenDirectory(string path,
-                Directory&? directory,
-                uint32 open_flags) => (Error error);
+  OpenDirectory(string path, Directory&? directory, uint32 open_flags)
+      => (Error error);
 
   // Renames/moves the file/directory given by |path| to |new_path|.
   Rename(string path, string new_path) => (Error error);

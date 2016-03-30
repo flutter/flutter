@@ -115,9 +115,7 @@ void CircularBufferMediaPipeAdapter::Init(uint64_t size) {
     return;
   }
 
-  // TODO(johngro) : We should not have to send the buffer size, it should be an
-  // intrinsic property of the buffer itself and be query-able via the handle.
-  pipe_->SetBuffer(duplicated_handle.Pass(), buffer_size_, []() {});
+  pipe_->SetBuffer(duplicated_handle.Pass(), []() {});
 }
 
 void CircularBufferMediaPipeAdapter::SetSignalCallback(SignalCbk cbk) {

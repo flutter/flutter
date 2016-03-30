@@ -74,7 +74,7 @@ enum MediaTypeScheme {
 
   // Indicates video. See VideoMediaTypeDetails and VideoMediaTypeSetDetails.
   // TODO(dalesat): One scheme for video won't be adequate.
-  VIDEO
+  VIDEO,
 };
 
 // A union of all media type details.
@@ -128,10 +128,10 @@ enum LpcmSampleFormat {
 
   // 24-bit signed samples in 32 bits, host-endian, sample size 4 bytes.
   // TODO(johngro): describe the packing for this
-  SIGNED_24_IN_32, // Host endian
+  SIGNED_24_IN_32,  // Host endian
 
   // 32-bit floating-point samples, sample size 4 bytes.
-  FLOAT
+  FLOAT,
 };
 
 // Media type details for the Multiplexed scheme.
@@ -161,7 +161,7 @@ enum AudioEncoding {
   // Placeholder indicating any audio encoding.
   ANY,
 
-  VORBIS
+  VORBIS,
 };
 
 // Media type details for the COMPRESSED_AUDIO scheme.
@@ -221,7 +221,7 @@ enum VideoEncoding {
   ANY,
 
   THEORA,
-  VP8
+  VP8,
 };
 
 // Video profiles.
@@ -239,7 +239,7 @@ enum VideoProfile {
   H264_SCALABLE_BASELINE,
   H264_SCALABLE_HIGH,
   H264_STEREO_HIGH,
-  H264_MULTIVIEW_HIGH
+  H264_MULTIVIEW_HIGH,
 };
 
 // Pixel format.
@@ -260,7 +260,7 @@ enum PixelFormat {
   RGB24,  // 24bpp BGR, 1 plane.
   RGB32,  // 32bpp BGRA, 1 plane.
   MJPEG,  // MJPEG compressed.
-  MT21
+  MT21,
 };
 
 // Pixel format.
@@ -270,5 +270,5 @@ enum ColorSpace {
   NOT_APPLICABLE,
   JPEG,
   HD_REC709,
-  SD_REC601
+  SD_REC601,
 };

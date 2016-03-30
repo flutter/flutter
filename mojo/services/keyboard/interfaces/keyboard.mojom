@@ -55,7 +55,6 @@ interface KeyboardService {
 
 [ServiceName="keyboard::KeyboardServiceFactory"]
 interface KeyboardServiceFactory {
-  CreateKeyboardService(
-      mojo.NativeViewportEventDispatcher& keyEventDispatcher,
-      KeyboardService& serviceRequest);
+  CreateKeyboardService(mojo.NativeViewportEventDispatcher& keyEventDispatcher,
+                        KeyboardService& serviceRequest);
 };

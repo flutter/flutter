@@ -31,4 +31,3 @@ interface DisplayFactory {
          ResourceReturner? returner,
          Display& display_request);
 };
-

@@ -16,7 +16,7 @@ enum Target {
   SOURCE_NODE,
 
   // In a new ViewManager node
-  NEW_NODE
+  NEW_NODE,
 };
 
 // Embedders that support navigation of implement this interface.

@@ -61,6 +61,8 @@ struct Status {
 };
 
 interface Geocoder {
-  AddressToLocation(string address, Options? options) => (string status, array<Result>? results);
-  LocationToAddress(Location location, Options? options) => (string status, array<Result>? results);
+  AddressToLocation(string address, Options? options)
+      => (string status, array<Result>? results);
+  LocationToAddress(Location location, Options? options)
+      => (string status, array<Result>? results);
 };

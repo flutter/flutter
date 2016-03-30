@@ -10,6 +10,6 @@ import "network/interfaces/net_address.mojom";
 
 interface HostResolver {
   // Get the list of IP addresses for host.
-  GetHostAddresses(string host, NetAddressFamily family) =>
-      (NetworkError result, array<NetAddress>? addresses);
+  GetHostAddresses(string host, NetAddressFamily family)
+      => (NetworkError result, array<NetAddress>? addresses);
 };

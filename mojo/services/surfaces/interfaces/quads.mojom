@@ -78,11 +78,13 @@ struct TileQuadState {
 
 struct StreamVideoQuadState {};
 
+// no-format
 enum YUVColorSpace {
   REC_601,       // SDTV standard with restricted "studio swing" color range.
   REC_709,       // HDTV standard with restricted "studio swing" color range.
   JPEG,          // Full color range [0, 255] JPEG color space.
 };
+// end-no-format
 
 struct YUVVideoQuadState {
   RectF tex_coord_rect;
@@ -144,6 +146,7 @@ struct Quad {
 };
 
 enum SkXfermode {
+  // no-format
   kClear_Mode = 0,    //!< [0, 0]
   kSrc_Mode,      //!< [Sa, Sc]
   kDst_Mode,      //!< [Da, Dc]
@@ -158,6 +161,7 @@ enum SkXfermode {
   kXor_Mode,      //!< [Sa + Da - 2 * Sa * Da, Sc * (1 - Da) + (1 - Sa) * Dc]
   kPlus_Mode,     //!< [Sa + Da, Sc + Dc]
   kModulate_Mode, // multiplies all components (= alpha and color)
+  // end-no-format
 
   // Following blend modes are defined in the CSS Compositing standard:
   // https://dvcs.w3.org/hg/FXTF/rawfile/tip/compositing/index.html#blending
@@ -180,7 +184,7 @@ enum SkXfermode {
   kSaturation_Mode,
   kColor_Mode,
   kLuminosity_Mode,
-  kLastMode = kLuminosity_Mode
+  kLastMode = kLuminosity_Mode,
 };
 
 struct SharedQuadState {

@@ -205,7 +205,6 @@ bool MessagePumpMojo::DoInternalWork(const RunState& run_state, bool block) {
     }
   } else {
     switch (result) {
-      case MOJO_RESULT_CANCELLED:
       case MOJO_RESULT_FAILED_PRECONDITION:
         RemoveInvalidHandle(*run_state_->wait_state, result,
                             wait_many_result.index);
@@ -213,6 +212,11 @@ bool MessagePumpMojo::DoInternalWork(const RunState& run_state, bool block) {
       case MOJO_RESULT_DEADLINE_EXCEEDED:
         did_work = false;
         break;
+      case MOJO_RESULT_INVALID_ARGUMENT:
+      case MOJO_RESULT_CANCELLED:
+      case MOJO_RESULT_BUSY:
+        // These results indicate a bug in "our" code (e.g., race conditions).
+        // Fall through.
       default:
         base::debug::Alias(&result);
         // Unexpected result is likely fatal, crash so we can determine cause.

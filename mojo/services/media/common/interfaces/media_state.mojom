@@ -21,5 +21,5 @@ enum MediaState {
   PLAYING,
 
   // Stopped playing because end-of-stream was encountered.
-  ENDED
+  ENDED,
 };

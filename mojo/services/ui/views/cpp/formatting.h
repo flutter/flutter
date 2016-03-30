@@ -24,13 +24,10 @@ std::ostream& operator<<(std::ostream& os,
 std::ostream& operator<<(std::ostream& os, const mojo::ui::ViewInfo& value);
 
 std::ostream& operator<<(std::ostream& os,
-                         const mojo::ui::BoxConstraints& value);
+                         const mojo::ui::ViewProperties& value);
 std::ostream& operator<<(std::ostream& os,
-                         const mojo::ui::ViewLayoutParams& value);
-std::ostream& operator<<(std::ostream& os,
-                         const mojo::ui::ViewLayoutInfo& value);
-std::ostream& operator<<(std::ostream& os,
-                         const mojo::ui::ViewLayoutResult& value);
+                         const mojo::ui::DisplayMetrics& value);
+std::ostream& operator<<(std::ostream& os, const mojo::ui::ViewLayout& value);
 
 std::ostream& operator<<(std::ostream& os,
                          const mojo::ui::ViewAssociateInfo& value);

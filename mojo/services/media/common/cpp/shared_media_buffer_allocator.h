@@ -64,4 +64,4 @@ class SharedMediaBufferAllocator : public MappedSharedBuffer {
 }  // namespace media
 }  // namespace mojo
 
-#endif // MOJO_SERVICES_MEDIA_COMMON_CPP_MAPPED_SHARED_MEDIA_BUFFER_ALLOCATOR_H_
+#endif  // MOJO_SERVICES_MEDIA_COMMON_CPP_MAPPED_SHARED_MEDIA_BUFFER_ALLOCATOR_H_

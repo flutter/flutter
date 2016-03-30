@@ -33,12 +33,14 @@ module mojo.media;
 // See also...
 // mojo/services/media/common/linear_transform.h
 //
+// no-format
 struct TimelineQuad {
   int64  reference_offset = 0;
   int64  target_offset    = 0;
   int32  reference_delta  = 0;
   uint32 target_delta     = 1;
 };
+// end-no-format
 
 // TimelineTransform
 // TODO(dalesat): Rename reference -> presentation.
@@ -50,11 +52,11 @@ struct TimelineTransform {
   // TODO: These constants should probably defined by a central time management
   // service, not here.
   const uint32 kLocalTimeID = 0xFFFFFFFF;
-  const uint32 kContextual  = 0xFFFFFFFE;
+  const uint32 kContextual = 0xFFFFFFFE;
 
   TimelineQuad quad;
   uint32 reference_timeline_id = kContextual;
-  uint32 target_timeline_id    = kLocalTimeID;
+  uint32 target_timeline_id = kLocalTimeID;
 };
 
 // RateControl

@@ -13,7 +13,9 @@ class LocalServiceProvider implements ServiceProvider {
   ServiceProviderStub _stub;
 
   LocalServiceProvider(this.connection, this._stub) {
-    assert(_stub.isOpen);
+    if (!_stub.isOpen) {
+      throw new core.MojoApiError("The service provider stub must be open");
+    }
     _stub.impl = this;
   }
 
@@ -78,18 +80,27 @@ class ApplicationConnection {
 
   FallbackServiceFactory get fallbackServiceFactory => _fallbackServiceFactory;
   set fallbackServiceFactory(FallbackServiceFactory f) {
-    assert(_localServiceProvider != null);
+    if (_localServiceProvider == null) {
+      throw new core.MojoApiError(
+          "There must be a local service provider to set a service factory");
+    }
     _fallbackServiceFactory = f;
   }
 
   bindings.ProxyBase requestService(bindings.ProxyBase proxy,
       [String serviceName]) {
-    assert(!proxy.impl.isBound &&
-        (remoteServiceProvider != null) &&
-        remoteServiceProvider.impl.isBound);
+    if (proxy.impl.isBound ||
+        (remoteServiceProvider == null) ||
+        !remoteServiceProvider.impl.isBound) {
+      throw new core.MojoApiError(
+          "The proxy is bound, or there is no remove service provider proxy");
+    }
 
     var name = serviceName ?? proxy.serviceName;
-    assert((name != null) && name.isNotEmpty);
+    if ((name == null) || name.isEmpty) {
+      throw new core.MojoApiError(
+          "If an interface has no ServiceName, then one must be provided.");
+    }
 
     var pipe = new core.MojoMessagePipe();
     proxy.impl.bind(pipe.endpoints[0]);
@@ -102,8 +113,15 @@ class ApplicationConnection {
   /// choose to expose a service description.
   void provideService(String interfaceName, ServiceFactory factory,
       {service_describer.ServiceDescription description}) {
-    assert(_localServiceProvider != null);
-    assert(interfaceName != null);
+    if (_localServiceProvider == null) {
+      throw new core.MojoApiError(
+          "There must be a local service provider to provide a service");
+    }
+    if ((interfaceName == null) || interfaceName.isEmpty) {
+      throw new core.MojoApiError(
+          "The interface name must be non-null and non-empty");
+    }
+
     _nameToServiceFactory[interfaceName] = factory;
     if (description != null) {
       _serviceDescriptions[interfaceName] = description;

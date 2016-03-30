@@ -51,6 +51,7 @@ interface NotificationService {
   // |notification_data| and with any interactions with the notification being
   // communicated to |client|.  |notification| can be used to modify or cancel
   // the notification.
-  Post(NotificationData notification_data, NotificationClient? client,
+  Post(NotificationData notification_data,
+       NotificationClient? client,
        Notification&? notification);
 };

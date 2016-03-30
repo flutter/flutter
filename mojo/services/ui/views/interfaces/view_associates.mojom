@@ -49,8 +49,9 @@ interface ViewAssociate {
   // requested service, it should close the |pipe|.
   //
   // The |view_token| is the token of the view which requested the service.
-  ConnectToViewService(ViewToken view_token, string service_name,
-      handle<message_pipe> pipe);
+  ConnectToViewService(ViewToken view_token,
+                       string service_name,
+                       handle<message_pipe> pipe);
 
   // Asks the associate to provide the view tree service identified by
   // |interface_name| through the message |pipe| endpoint supplied by
@@ -60,7 +61,8 @@ interface ViewAssociate {
   // The |view_tree_token| is the token of the view tree which requested
   // the service.
   ConnectToViewTreeService(ViewTreeToken view_tree_token,
-      string service_name, handle<message_pipe> pipe);
+                           string service_name,
+                           handle<message_pipe> pipe);
 };
 
 // Provides information about the services offered by an associate.
@@ -89,8 +91,8 @@ interface ViewInspector {
   // again to obtain a new one.  Otherwise it should assume that the view
   // tree has become unavailable (so no hit tester is available).
   GetHitTester(ViewTreeToken view_tree_token,
-      mojo.gfx.composition.HitTester& hit_tester) =>
-      (bool renderer_changed);
+               mojo.gfx.composition.HitTester& hit_tester)
+      => (bool renderer_changed);
 
   // Given an array of scene tokens, produces an array of view tokens
   // of equal size containing the view to which the scene belongs or null
@@ -99,6 +101,6 @@ interface ViewInspector {
   // It is safe to cache the results of this operation because a scene will
   // only ever be associated with at most one view although a view may
   // create several scenes during its lifetime.
-  ResolveScenes(array<mojo.gfx.composition.SceneToken> scene_tokens) =>
-      (array<ViewToken?> view_tokens);
+  ResolveScenes(array<mojo.gfx.composition.SceneToken> scene_tokens)
+      => (array<ViewToken?> view_tokens);
 };

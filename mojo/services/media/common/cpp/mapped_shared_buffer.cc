@@ -18,37 +18,38 @@ void MappedSharedBuffer::InitNew(uint64_t size) {
   buffer_.reset(new SharedBuffer(size));
   handle_.reset();
 
-  InitInternal(buffer_->handle, size);
+  InitInternal(buffer_->handle);
 }
 
-void MappedSharedBuffer::InitFromHandle(
-    ScopedSharedBufferHandle handle,
-    uint64_t size) {
+void MappedSharedBuffer::InitFromHandle(ScopedSharedBufferHandle handle) {
   MOJO_DCHECK(handle.is_valid());
-  MOJO_DCHECK(size > 0);
 
   buffer_.reset();
   handle_ = handle.Pass();
 
-  InitInternal(handle_, size);
+  InitInternal(handle_);
 }
 
-void MappedSharedBuffer::InitInternal(
-    ScopedSharedBufferHandle& handle,
-    uint64_t size) {
+void MappedSharedBuffer::InitInternal(const ScopedSharedBufferHandle& handle) {
   MOJO_DCHECK(handle.is_valid());
+
+  // Query the buffer for its size.
+  // TODO(johngro) :  It would be nice if we could do something other than
+  // DCHECK if things don't go exactly our way.
+  MojoBufferInformation info;
+  MojoResult res =
+      MojoGetBufferInformation(handle.get().value(), &info, sizeof(info));
+  uint64_t size = info.num_bytes;
+  MOJO_DCHECK(res == MOJO_RESULT_OK);
   MOJO_DCHECK(size > 0);
 
   size_ = size;
   buffer_ptr_.reset();
 
   void* ptr;
-  auto result = MapBuffer(
-      handle.get(),
-      0, // offset
-      size,
-      &ptr,
-      MOJO_MAP_BUFFER_FLAG_NONE);
+  auto result = MapBuffer(handle.get(),
+                          0,  // offset
+                          size, &ptr, MOJO_MAP_BUFFER_FLAG_NONE);
   MOJO_DCHECK(result == MOJO_RESULT_OK);
   MOJO_DCHECK(ptr);
 
@@ -88,7 +89,7 @@ void* MappedSharedBuffer::PtrFromOffset(uint64_t offset) const {
   return buffer_ptr_.get() + offset;
 }
 
-uint64_t MappedSharedBuffer::OffsetFromPtr(void *ptr) const {
+uint64_t MappedSharedBuffer::OffsetFromPtr(void* ptr) const {
   MOJO_DCHECK(buffer_ptr_);
   if (ptr == nullptr) {
     return FifoAllocator::kNullOffset;
@@ -100,5 +101,5 @@ uint64_t MappedSharedBuffer::OffsetFromPtr(void *ptr) const {
 
 void MappedSharedBuffer::OnInit() {}
 
-} // namespace media
-} // namespace mojo
+}  // namespace media
+}  // namespace mojo
