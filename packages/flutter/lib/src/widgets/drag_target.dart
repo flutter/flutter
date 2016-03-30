@@ -391,7 +391,7 @@ class _DragAvatar<T> extends Drag {
   final _OnDragEnd onDragEnd;
 
   _DragTargetState<T> _activeTarget;
-  List<_DragTargetState<T>> _lastTargets = <_DragTargetState<T>>[];
+  List<_DragTargetState<T>> _enteredTargets = <_DragTargetState<T>>[];
   Point _position;
   Offset _lastOffset;
   OverlayEntry _entry;
@@ -422,12 +422,12 @@ class _DragAvatar<T> extends Drag {
     List<_DragTargetState<T>> targets = _getDragTargets(result.path).toList();
 
     bool listsMatch = false;
-    if (targets.length >= _lastTargets.length && _lastTargets.isNotEmpty) {
+    if (targets.length >= _enteredTargets.length && _enteredTargets.isNotEmpty) {
       listsMatch = true;
       Iterator<_DragTargetState<T>> iterator = targets.iterator;
-      for (int i = 0; i < _lastTargets.length; i += 1) {
+      for (int i = 0; i < _enteredTargets.length; i += 1) {
         iterator.moveNext();
-        if (iterator.current != _lastTargets[i]) {
+        if (iterator.current != _enteredTargets[i]) {
           listsMatch = false;
           break;
         }
@@ -439,13 +439,11 @@ class _DragAvatar<T> extends Drag {
       return;
 
     // Leave old targets.
-    for (int i = 0; i < _lastTargets.length; i += 1)
-      _lastTargets[i].didLeave(data);
-    _lastTargets.clear();
+    _leaveAllEntered();
 
     // Enter new targets.
     _DragTargetState<T> newTarget = targets.firstWhere((_DragTargetState<T> target) {
-        _lastTargets.add(target);
+        _enteredTargets.add(target);
         return target.didEnter(data);
       },
       orElse: () => null
@@ -466,16 +464,20 @@ class _DragAvatar<T> extends Drag {
     }
   }
 
+  void _leaveAllEntered() {
+    for (int i = 0; i < _enteredTargets.length; i += 1)
+      _enteredTargets[i].didLeave(data);
+    _enteredTargets.clear();
+  }
+
   void finish(_DragEndKind endKind, [Velocity velocity]) {
     bool wasAccepted = false;
-    if (_activeTarget != null) {
-      if (endKind == _DragEndKind.dropped && _activeTarget != null) {
-        _activeTarget.didDrop(data);
-        wasAccepted = true;
-      } else {
-        _activeTarget.didLeave(data);
-      }
+    if (endKind == _DragEndKind.dropped && _activeTarget != null) {
+      _activeTarget.didDrop(data);
+      wasAccepted = true;
+      _enteredTargets.remove(_activeTarget);
     }
+    _leaveAllEntered();
     _activeTarget = null;
     _entry.remove();
     _entry = null;
