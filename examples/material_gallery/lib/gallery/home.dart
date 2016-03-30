@@ -16,6 +16,7 @@ import '../demo/chip_demo.dart';
 import '../demo/date_picker_demo.dart';
 import '../demo/dialog_demo.dart';
 import '../demo/drop_down_demo.dart';
+import '../demo/drawing_demo.dart';
 import '../demo/fitness_demo.dart';
 import '../demo/flexible_space_demo.dart';
 import '../demo/grid_list_demo.dart';
@@ -80,6 +81,7 @@ class GalleryHomeState extends State<GalleryHome> {
             children: <Widget>[
               new GalleryItem(title: "Weather", builder: () => new WeatherDemo()),
               new GalleryItem(title: "Fitness", builder: () => new FitnessDemo()),
+              new GalleryItem(title: "Fancy Lines", builder: () => new DrawingDemo()),
             ]
           ),
           new TwoLevelSublist(
