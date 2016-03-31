@@ -502,8 +502,7 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
   void set value(T newValue) {
     if (newValue == _value)
       return;
-    if (!_valueIsChanging)
-      _previousValue = _value;
+    _previousValue = _value;
     _value = newValue;
     _writeValue();
     _valueIsChanging = true;
@@ -779,6 +778,7 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
     setState(() {
       _tabBarSize = tabBarSize;
       _tabWidths = tabWidths;
+      _indicatorRect = _tabIndicatorRect(_selection.index);
       _updateScrollBehavior();
     });
   }
