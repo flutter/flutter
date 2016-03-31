@@ -95,6 +95,25 @@ class Interval extends Curve {
   }
 }
 
+/// A curve that is 0.0 until it hits the threshold, then it jumps to 1.0.
+class Step extends Curve {
+  const Step(this.threshold);
+
+  /// The value before which the curve is 0.0 and after which the curve is 1.0.
+  ///
+  /// At exactly step, the curve has the value 1.0.
+  final double threshold;
+
+  @override
+  double transform(double t) {
+    assert(threshold >= 0.0);
+    assert(threshold <= 1.0);
+    if (t == 0.0 || t == 1.0)
+      return t;
+    return t < threshold ? 0.0 : 1.0;
+  }
+}
+
 /// A cubic polynomial mapping of the unit interval.
 class Cubic extends Curve {
   const Cubic(this.a, this.b, this.c, this.d);
