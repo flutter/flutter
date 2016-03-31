@@ -7,4 +7,4 @@ dependencies:
     path: ../../packages/flutter
   flutter_sprites:
     path: ../../packages/flutter_sprites
-  flutter_gallery_assets: '0.0.12'
+  flutter_gallery_assets: '0.0.13'
