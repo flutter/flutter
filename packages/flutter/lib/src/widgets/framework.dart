@@ -813,9 +813,9 @@ abstract class Element implements BuildContext {
   Widget get widget => _widget;
   Widget _widget;
 
-  BuildOwner _owner;
   /// The owner for this node (null if unattached).
   BuildOwner get owner => _owner;
+  BuildOwner _owner;
 
   bool _active = false;
 
