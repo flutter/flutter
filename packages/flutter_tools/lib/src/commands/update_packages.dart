@@ -9,7 +9,6 @@ import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart' as yaml;
 
 import '../artifacts.dart';
-import '../base/utils.dart';
 import '../dart/pub.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
