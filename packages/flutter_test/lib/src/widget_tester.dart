@@ -38,9 +38,9 @@ class _SteppedWidgetFlutterBinding extends WidgetFlutterBinding {
   // Pump the rendering pipeline up to the given phase.
   @override
   void beginFrame() {
-    buildDirtyElements();
+    buildOwner.buildDirtyElements();
     _beginFrame();
-    Element.finalizeTree();
+    buildOwner.finalizeTree();
   }
 
   // Cloned from Renderer.beginFrame() but with early-exit semantics.
@@ -84,7 +84,7 @@ class WidgetTester extends Instrumentation {
   final FakeAsync async;
   final Clock clock;
 
-  /// Calls [runApp()] with the given widget, then triggers a frame sequent and
+  /// Calls [runApp()] with the given widget, then triggers a frame sequence and
   /// flushes microtasks, by calling [pump()] with the same duration (if any).
   /// The supplied EnginePhase is the final phase reached during the pump pass;
   /// if not supplied, the whole pass is executed.

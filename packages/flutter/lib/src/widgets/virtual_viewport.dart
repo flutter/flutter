@@ -157,7 +157,7 @@ abstract class VirtualViewportElement extends RenderObjectElement {
     assert(startOffsetBase != null);
     assert(startOffsetLimit != null);
     _updatePaintOffset();
-    BuildableElement.lockState(_materializeChildren, building: true);
+    owner.lockState(_materializeChildren, building: true);
   }
 
   void _materializeChildren() {

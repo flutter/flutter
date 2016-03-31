@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:developer';
 import 'dart:ui' as ui show window;
 import 'dart:ui' show AppLifecycleState, Locale;
 
@@ -26,6 +25,10 @@ class BindingObserver {
 /// This is the glue that binds the framework to the Flutter engine.
 class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, Services, Renderer {
 
+  WidgetFlutterBinding() {
+    buildOwner.onBuildScheduled = ensureVisualUpdate;
+  }
+
   /// Creates and initializes the WidgetFlutterBinding. This constructor is
   /// idempotent; calling it a second time will just return the
   /// previously-created instance.
@@ -35,11 +38,15 @@ class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, Service
     return _instance;
   }
 
+  final BuildOwner _buildOwner = new BuildOwner();
+  /// The [BuildOwner] in charge of executing the build pipeline for the
+  /// widget tree rooted at this binding.
+  BuildOwner get buildOwner => _buildOwner;
+
   @override
   void initInstances() {
     super.initInstances();
     _instance = this;
-    BuildableElement.scheduleBuildFor = scheduleBuildFor;
     ui.window.onLocaleChanged = handleLocaleChanged;
     ui.window.onPopRoute = handlePopRoute;
     ui.window.onAppLifecycleStateChanged = handleAppLifecycleStateChanged;
@@ -92,60 +99,9 @@ class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, Service
 
   @override
   void beginFrame() {
-    buildDirtyElements();
+    buildOwner.buildDirtyElements();
     super.beginFrame();
-    Element.finalizeTree();
-  }
-
-  List<BuildableElement> _dirtyElements = <BuildableElement>[];
-
-  /// Adds an element to the dirty elements list so that it will be rebuilt
-  /// when buildDirtyElements is called.
-  void scheduleBuildFor(BuildableElement element) {
-    assert(!_dirtyElements.contains(element));
-    assert(element.dirty);
-    if (_dirtyElements.isEmpty)
-      ensureVisualUpdate();
-    _dirtyElements.add(element);
-  }
-
-  static int _elementSort(BuildableElement a, BuildableElement b) {
-    if (a.depth < b.depth)
-      return -1;
-    if (b.depth < a.depth)
-      return 1;
-    if (b.dirty && !a.dirty)
-      return -1;
-    if (a.dirty && !b.dirty)
-      return 1;
-    return 0;
-  }
-
-  /// Builds all the elements that were marked as dirty using schedule(), in depth order.
-  /// If elements are marked as dirty while this runs, they must be deeper than the algorithm
-  /// has yet reached.
-  /// This is called by beginFrame().
-  void buildDirtyElements() {
-    if (_dirtyElements.isEmpty)
-      return;
-    Timeline.startSync('Build');
-    BuildableElement.lockState(() {
-      _dirtyElements.sort(_elementSort);
-      int dirtyCount = _dirtyElements.length;
-      int index = 0;
-      while (index < dirtyCount) {
-        _dirtyElements[index].rebuild();
-        index += 1;
-        if (dirtyCount < _dirtyElements.length) {
-          _dirtyElements.sort(_elementSort);
-          dirtyCount = _dirtyElements.length;
-        }
-      }
-      assert(!_dirtyElements.any((BuildableElement element) => element.dirty));
-      _dirtyElements.clear();
-    }, building: true);
-    assert(_dirtyElements.isEmpty);
-    Timeline.finishSync();
+    buildOwner.finalizeTree();
   }
 
   /// The [Element] that is at the root of the hierarchy (and which wraps the
@@ -157,7 +113,7 @@ class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, Service
       container: renderView,
       debugShortDescription: '[root]',
       child: app
-    ).attachToRenderTree(_renderViewElement);
+    ).attachToRenderTree(buildOwner, _renderViewElement);
     beginFrame();
   }
 }
@@ -205,10 +161,11 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   @override
   void updateRenderObject(BuildContext context, RenderObject renderObject) { }
 
-  RenderObjectToWidgetElement<T> attachToRenderTree([RenderObjectToWidgetElement<T> element]) {
-    BuildableElement.lockState(() {
+  RenderObjectToWidgetElement<T> attachToRenderTree(BuildOwner owner, [RenderObjectToWidgetElement<T> element]) {
+    owner.lockState(() {
       if (element == null) {
         element = createElement();
+        element.assignOwner(owner);
         element.mount(null, null);
       } else {
         element.update(this);
@@ -229,7 +186,7 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
 /// whose container is the RenderView that connects to the Flutter engine. In
 /// this usage, it is normally instantiated by the bootstrapping logic in the
 /// WidgetFlutterBinding singleton created by runApp().
-class RenderObjectToWidgetElement<T extends RenderObject> extends RenderObjectElement {
+class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObjectElement {
   RenderObjectToWidgetElement(RenderObjectToWidgetAdapter<T> widget) : super(widget);
 
   @override
