@@ -50,15 +50,19 @@ class FlutterDriver {
     _log.trace('Looking for the isolate');
     VMIsolate isolate = await vm.isolates.first.loadRunnable();
 
-    // TODO(yjbanov): for a very brief moment the isolate could report that it
-    // is resumed, right before it goes into "paused on start" state. There's no
-    // robust way to deal with it other than waiting and querying for the
-    // isolate data again. 300 millis should be sufficient as the isolate is in
-    // the runnable state (i.e. it loaded and parsed all the Dart code) and
-    // going from here to the `main()` method should be trivial.
+    // TODO(yjbanov): vm_service_client does not support "None" pause event yet.
+    // It is currently reported as `null`, but we cannot rely on it because
+    // eventually the event will be reported as a non-`null` object. For now,
+    // list all the events we know about. Later we'll check for "None" event
+    // explicitly.
     //
-    // See: https://github.com/dart-lang/sdk/issues/25902
-    if (isolate.pauseEvent is VMResumeEvent) {
+    // See: https://github.com/dart-lang/vm_service_client/issues/4
+    if (isolate.pauseEvent is! VMPauseStartEvent &&
+        isolate.pauseEvent is! VMPauseExitEvent &&
+        isolate.pauseEvent is! VMPauseBreakpointEvent &&
+        isolate.pauseEvent is! VMPauseExceptionEvent &&
+        isolate.pauseEvent is! VMPauseInterruptedEvent &&
+        isolate.pauseEvent is! VMResumeEvent) {
       await new Future<Null>.delayed(new Duration(milliseconds: 300));
       isolate = await vm.isolates.first.loadRunnable();
     }
