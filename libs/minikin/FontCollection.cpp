@@ -293,14 +293,13 @@ FontFamily* FontCollection::getFamilyForChar(uint32_t ch, uint32_t vs,
 const uint32_t NBSP = 0xa0;
 const uint32_t ZWJ = 0x200c;
 const uint32_t ZWNJ = 0x200d;
-const uint32_t KEYCAP = 0x20e3;
 const uint32_t HYPHEN = 0x2010;
 const uint32_t NB_HYPHEN = 0x2011;
 
 // Characters where we want to continue using existing font run instead of
 // recomputing the best match in the fallback list.
 static const uint32_t stickyWhitelist[] = { '!', ',', '-', '.', ':', ';', '?', NBSP, ZWJ, ZWNJ,
-        KEYCAP, HYPHEN, NB_HYPHEN };
+        HYPHEN, NB_HYPHEN };
 
 static bool isStickyWhitelisted(uint32_t c) {
     for (size_t i = 0; i < sizeof(stickyWhitelist) / sizeof(stickyWhitelist[0]); i++) {
@@ -380,12 +379,14 @@ void FontCollection::itemize(const uint16_t *string, size_t string_size, FontSty
                     langListId, variant);
             if (utf16Pos == 0 || family != lastFamily) {
                 size_t start = utf16Pos;
-                // Workaround for Emoji keycap and emoji modifier until we implement per-cluster
-                // font selection: if a keycap or an emoji modifier is found in a different font
-                // that also supports previous char, attach previous char to the new run.
-                // Bug 7557244.
+                // Workaround for combining marks and emoji modifiers until we implement
+                // per-cluster font selection: if a combining mark or an emoji modifier is found in
+                // a different font that also supports the previous character, attach previous
+                // character to the new run. U+20E3 COMBINING ENCLOSING KEYCAP, used in emoji, is
+                // handled properly by this since it's a combining mark too.
                 if (utf16Pos != 0 &&
-                        (ch == KEYCAP || (isEmojiModifier(ch) && isEmojiBase(prevCh))) &&
+                        ((U_GET_GC_MASK(ch) & U_GC_M_MASK) != 0 ||
+                         (isEmojiModifier(ch) && isEmojiBase(prevCh))) &&
                         family && family->getCoverage()->get(prevCh)) {
                     const size_t prevChLength = U16_LENGTH(prevCh);
                     run->end -= prevChLength;
