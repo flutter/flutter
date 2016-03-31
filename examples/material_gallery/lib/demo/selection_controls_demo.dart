@@ -4,12 +4,12 @@
 
 import 'package:flutter/material.dart';
 
-class ToggleControlsDemo extends StatefulWidget {
+class SelectionControlsDemo extends StatefulWidget {
   @override
-  _ToggleControlsDemoState createState() => new _ToggleControlsDemoState();
+  _SelectionControlsDemoState createState() => new _SelectionControlsDemoState();
 }
 
-class _ToggleControlsDemoState extends State<ToggleControlsDemo> {
+class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
   bool _checkboxValue = false;
   int _radioValue = 0;
   bool _switchValue = false;

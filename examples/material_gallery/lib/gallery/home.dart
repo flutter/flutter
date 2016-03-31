@@ -27,7 +27,7 @@ import '../demo/menu_demo.dart';
 import '../demo/page_selector_demo.dart';
 import '../demo/persistent_bottom_sheet_demo.dart';
 import '../demo/progress_indicator_demo.dart';
-import '../demo/toggle_controls_demo.dart';
+import '../demo/selection_controls_demo.dart';
 import '../demo/slider_demo.dart';
 import '../demo/snack_bar_demo.dart';
 import '../demo/scrollable_tabs_demo.dart';
@@ -105,7 +105,7 @@ class GalleryHomeState extends State<GalleryHome> {
               new GalleryItem(title: 'Persistent Bottom Sheet', builder: () => new PersistentBottomSheetDemo()),
               new GalleryItem(title: 'Progress Indicators', builder: () => new ProgressIndicatorDemo()),
               new GalleryItem(title: 'Scrollable Tabs', builder: () => new ScrollableTabsDemo()),
-              new GalleryItem(title: 'Selection Controls', builder: () => new ToggleControlsDemo()),
+              new GalleryItem(title: 'Selection Controls', builder: () => new SelectionControlsDemo()),
               new GalleryItem(title: 'Sliders', builder: () => new SliderDemo()),
               new GalleryItem(title: 'SnackBar', builder: () => new SnackBarDemo()),
               new GalleryItem(title: 'Tabs', builder: () => new TabsDemo()),
