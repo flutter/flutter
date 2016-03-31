@@ -35,7 +35,8 @@ class ButtonTheme extends InheritedWidget {
   bool updateShouldNotify(ButtonTheme old) => color != old.color;
 }
 
-/// Base class for buttons in the Material theme.
+/// Base class for material design buttons.
+///
 /// Rather than using this class directly, please use [FlatButton] or [RaisedButton].
 ///
 /// MaterialButtons whose [onPressed] handler is null will be disabled. To have

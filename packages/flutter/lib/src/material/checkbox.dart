@@ -15,12 +15,19 @@ import 'toggleable.dart';
 /// A material design checkbox
 ///
 /// The checkbox itself does not maintain any state. Instead, when the state of
-/// the checkbox changes, the component calls the `onChange` callback. Most
-/// components that use a checkbox will listen for the `onChange` callback and
-/// rebuild the checkbox with a new `value` to update the visual appearance of
+/// the checkbox changes, the widget calls the [onChanged] callback. Most
+/// widgets that use a checkbox will listen for the [onChanged] callback and
+/// rebuild the checkbox with a new [value] to update the visual appearance of
 /// the checkbox.
 ///
-/// <https://www.google.com/design/spec/components/lists-controls.html#lists-controls-types-of-list-controls>
+/// Requires one of its ancestors to be a [Material] widget.
+///
+/// See also:
+///  * [Radio]
+///  * [Switch]
+///  * [Slider]
+///  * <https://www.google.com/design/spec/components/selection-controls.html#selection-controls-checkbox>
+///  * <https://www.google.com/design/spec/components/lists-controls.html#lists-controls-types-of-list-controls>
 class Checkbox extends StatelessWidget {
   /// Constructs a checkbox
   ///
@@ -33,8 +40,15 @@ class Checkbox extends StatelessWidget {
     this.onChanged
   }) : super(key: key);
 
+  /// Whether this checkbox is checked or unchecked.
   final bool value;
+
+  /// The color to use when this checkbox is checked.
+  ///
+  /// Defaults to accent color of the current theme.
   final Color activeColor;
+
+  /// Called when the user checks or unchecks the checkbox.
   final ValueChanged<bool> onChanged;
 
   @override

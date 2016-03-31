@@ -67,6 +67,16 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
   }
 }
 
+/// Shows a dialog containing a material design time picker.
+///
+/// The returned Future resolves to the time selected by the user when the user
+/// closes the dialog. If the user cancels the dialog, the Future resolves to
+/// the initialTime.
+///
+/// See also:
+///  * [TimePicker]
+///  * [showDatePicker]
+///  * <https://www.google.com/design/spec/components/pickers.html#pickers-time-pickers>
 Future<TimeOfDay> showTimePicker({
   BuildContext context,
   TimeOfDay initialTime

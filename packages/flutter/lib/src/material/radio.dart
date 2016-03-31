@@ -14,6 +14,25 @@ const double _kDiameter = 16.0;
 const double _kOuterRadius = _kDiameter / 2.0;
 const double _kInnerRadius = 5.0;
 
+/// A material design radio button.
+///
+/// Used to select between a number of mutually exclusive values. When one
+/// radio button in a group is selected, the other radio buttons in the group
+/// cease to be selected.
+///
+/// The radio button itself does not maintain any state. Instead, when the state
+/// of the radio button changes, the widget calls the [onChanged] callback.
+/// Most widget that use a radio button will listen for the [onChanged]
+/// callback and rebuild the radio button with a new [groupValue] to update the
+/// visual appearance of the radio button.
+///
+/// Requires one of its ancestors to be a [Material] widget.
+///
+/// See also:
+///  * [CheckBox]
+///  * [Slider]
+///  * [Switch]
+///  * <https://www.google.com/design/spec/components/selection-controls.html#selection-controls-radio-button>
 class Radio<T> extends StatelessWidget {
   Radio({
     Key key,
@@ -23,9 +42,24 @@ class Radio<T> extends StatelessWidget {
     this.onChanged
   }) : super(key: key);
 
+  /// The value represented by this radio button.
   final T value;
+
+  /// The currently selected value for this group of radio buttons.
+  ///
+  /// This radio button is considered selected if its [value] matches the
+  /// [groupValue].
   final T groupValue;
+
+  /// The color to use when this radio button is selected.
+  ///
+  /// Defaults to accent color of the current theme.
   final Color activeColor;
+
+  /// Called when the user selects this radio button.
+  ///
+  /// For convenence, the radio button passes [value] as a parameter to this
+  /// callback.
   final ValueChanged<T> onChanged;
 
   bool get _enabled => onChanged != null;

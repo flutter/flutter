@@ -17,6 +17,16 @@ import 'typography.dart';
 
 enum _DatePickerMode { day, year }
 
+/// A material design date picker.
+///
+/// The date picker widget is rarely used directly. Instead, consider using
+/// [showDatePicker], which creates a date picker dialog.
+///
+/// Requires one of its ancestors to be a [Material] widget.
+///
+/// See also:
+///  * [showDatePicker]
+///  * <https://www.google.com/design/spec/components/pickers.html#pickers-date-pickers>
 class DatePicker extends StatefulWidget {
   DatePicker({
     this.selectedDate,
@@ -29,9 +39,18 @@ class DatePicker extends StatefulWidget {
     assert(lastDate != null);
   }
 
+  /// The currently selected date.
+  ///
+  /// This date is highlighted in the picker.
   final DateTime selectedDate;
+
+  /// Called when the user picks a date.
   final ValueChanged<DateTime> onChanged;
+
+  /// The earliest date the user is permitted to pick.
   final DateTime firstDate;
+
+  /// The latest date the user is permitted to pick.
   final DateTime lastDate;
 
   @override
@@ -165,7 +184,16 @@ class _DatePickerHeader extends StatelessWidget {
   }
 }
 
-// Fixed height component shows a single month and allows choosing a day
+/// Displays the days of a given month and allows choosing a day.
+///
+/// The days are arranged in a rectangular grid with one column for each day of
+/// the week.
+///
+/// Part of the material design [DatePicker].
+///
+/// See also:
+///  * [DatePicker].
+///  * <https://www.google.com/design/spec/components/pickers.html#pickers-date-pickers>
 class DayPicker extends StatelessWidget {
   DayPicker({
     this.selectedDate,
@@ -179,9 +207,18 @@ class DayPicker extends StatelessWidget {
     assert(displayedMonth != null);
   }
 
+  /// The currently selected date.
+  ///
+  /// This date is highlighted in the picker.
   final DateTime selectedDate;
+
+  /// The current date at the time the picker is displayed.
   final DateTime currentDate;
+
+  /// Called when the user picks a day.
   final ValueChanged<DateTime> onChanged;
+
+  /// The month whose days are displayed by this picker.
   final DateTime displayedMonth;
 
   @override
@@ -275,6 +312,16 @@ class DayPicker extends StatelessWidget {
   }
 }
 
+/// A scrollable list of months to allow picking a month.
+///
+/// Shows the days of each month in a rectangular grid with one column for each
+/// day of the week.
+///
+/// Part of the material design [DatePicker].
+///
+/// See also:
+///  * [DatePicker]
+///  * <https://www.google.com/design/spec/components/pickers.html#pickers-date-pickers>
 class MonthPicker extends StatefulWidget {
   MonthPicker({
     Key key,
@@ -290,10 +337,21 @@ class MonthPicker extends StatefulWidget {
     assert(selectedDate.isAfter(firstDate) || selectedDate.isAtSameMomentAs(firstDate));
   }
 
+  /// The currently selected date.
+  ///
+  /// This date is highlighted in the picker.
   final DateTime selectedDate;
+
+  /// Called when the user picks a month.
   final ValueChanged<DateTime> onChanged;
+
+  /// The earliest date the user is permitted to pick.
   final DateTime firstDate;
+
+  /// The latest date the user is permitted to pick.
   final DateTime lastDate;
+
+  /// The amount of vertical space to use for each month in the picker.
   final double itemExtent;
 
   @override
@@ -367,7 +425,15 @@ class _MonthPickerState extends State<MonthPicker> {
   }
 }
 
-// Scrollable list of years to allow picking a year
+/// A scrollable list of years to allow picking a year.
+///
+/// Part of the material design [DatePicker].
+///
+/// Requires one of its ancestors to be a [Material] widget.
+///
+/// See also:
+///  * [DatePicker]
+///  * <https://www.google.com/design/spec/components/pickers.html#pickers-date-pickers>
 class YearPicker extends StatefulWidget {
   YearPicker({
     Key key,
@@ -381,9 +447,18 @@ class YearPicker extends StatefulWidget {
     assert(lastDate.isAfter(firstDate));
   }
 
+  /// The currently selected date.
+  ///
+  /// This date is highlighted in the picker.
   final DateTime selectedDate;
+
+  /// Called when the user picks a year.
   final ValueChanged<DateTime> onChanged;
+
+  /// The earliest date the user is permitted to pick.
   final DateTime firstDate;
+
+  /// The latest date the user is permitted to pick.
   final DateTime lastDate;
 
   @override

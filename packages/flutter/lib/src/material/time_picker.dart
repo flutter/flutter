@@ -92,6 +92,14 @@ class TimeOfDay {
 
 enum _TimePickerMode { hour, minute }
 
+/// A material design time picker.
+///
+/// The time picker widget is rarely used directly. Instead, consider using
+/// [showTimePicker], which creates a time picker dialog.
+///
+/// See also:
+///  * [showTimePicker]
+///  * <https://www.google.com/design/spec/components/pickers.html#pickers-time-pickers>
 class TimePicker extends StatefulWidget {
   TimePicker({
     this.selectedTime,
@@ -100,7 +108,12 @@ class TimePicker extends StatefulWidget {
     assert(selectedTime != null);
   }
 
+  /// The currently selected time.
+  ///
+  /// This time is highlighted in the picker.
   final TimeOfDay selectedTime;
+
+  /// Called when the user picks a time.
   final ValueChanged<TimeOfDay> onChanged;
 
   @override

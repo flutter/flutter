@@ -243,6 +243,18 @@ class DropDownMenuItem<T> extends StatelessWidget {
   }
 }
 
+/// A material design button for selecting from a list of items.
+///
+/// A dropdown button lets the user select from a number of items. The button
+/// shows the currently selected item as well as an arrow that opens a menu for
+/// selecting another item.
+///
+/// Requires one of its ancestors to be a [Material] widget.
+///
+/// See also:
+///  * [RaisedButton]
+///  * [FlatButton]
+///  * <https://www.google.com/design/spec/components/buttons.html#buttons-dropdown-buttons>
 class DropDownButton<T> extends StatefulWidget {
   DropDownButton({
     Key key,
@@ -254,9 +266,16 @@ class DropDownButton<T> extends StatefulWidget {
     assert(items.where((DropDownMenuItem<T> item) => item.value == value).length == 1);
   }
 
+  /// The list of possible items to select among.
   final List<DropDownMenuItem<T>> items;
+
+  /// The currently selected item.
   final T value;
+
+  /// Called when the user selects an item.
   final ValueChanged<T> onChanged;
+
+  /// The height at which to place the menu when open.
   final int elevation;
 
   @override

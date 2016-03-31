@@ -26,6 +26,18 @@ const double _kEdgeDragWidth = 20.0;
 const double _kMinFlingVelocity = 365.0;
 const Duration _kBaseSettleDuration = const Duration(milliseconds: 246);
 
+/// A material design drawer.
+///
+/// Typically used in the [Scaffold.drawer] property, a drawer slides in from
+/// the side of the screen and displays a list of items that the user can
+/// interact with. The top-most item in a drawer is typically a [DrawerHeader]
+/// that displays status information about the current user.
+///
+/// See also:
+///  * [Scaffold.drawer]
+///  * [DrawerItem]
+///  * [DrawerHeader]
+///  * <https://www.google.com/design/spec/patterns/navigation-drawer.html>
 class Drawer extends StatelessWidget {
   Drawer({
     Key key,
@@ -33,6 +45,7 @@ class Drawer extends StatelessWidget {
     this.child
   }) : super(key: key);
 
+  /// The height at which to place this drawer.
   final int elevation;
 
   /// The widget below this widget in the tree.
@@ -50,6 +63,14 @@ class Drawer extends StatelessWidget {
   }
 }
 
+/// Provides interactive behavior for [Drawer] widgets.
+///
+/// Drawer controllers are typically created automatically by [Scaffold]
+/// widgets.
+///
+/// See also:
+/// * [Drawer]
+/// * [Scaffold.drawer]
 class DrawerController extends StatefulWidget {
   DrawerController({
     GlobalKey key,

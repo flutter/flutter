@@ -8,9 +8,16 @@ import 'constants.dart';
 import 'debug.dart';
 import 'theme.dart';
 
-// TODO(jackson): This class should usually render the user's
-// preferred banner image rather than a solid background
-
+/// The top-most region of a material design drawer.
+///
+/// Part of the material design [Drawer].
+///
+/// Requires one of its ancestors to be a [Material] widget.
+///
+/// See also:
+///  * [Drawer]
+///  * [DrawerItem]
+///  * <https://www.google.com/design/spec/patterns/navigation-drawer.html>
 class DrawerHeader extends StatelessWidget {
   const DrawerHeader({ Key key, this.child }) : super(key: key);
 
@@ -24,6 +31,8 @@ class DrawerHeader extends StatelessWidget {
     return new Container(
       height: statusBarHeight + kMaterialDrawerHeight,
       decoration: new BoxDecoration(
+        // TODO(jackson): This class should usually render the user's
+        // preferred banner image rather than a solid background
         backgroundColor: Theme.of(context).cardColor,
         border: const Border(
           bottom: const BorderSide(

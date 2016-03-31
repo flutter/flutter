@@ -574,13 +574,18 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
   }
 }
 
-/// Displays a horizontal row of tabs, one per label. If isScrollable is
-/// true then each tab is as wide as needed for its label and the entire
-/// [TabBar] is scrollable. Otherwise each tab gets an equal share of the
-/// available space. A [TabBarSelection] widget ancestor must have been
-/// built to enable saving and monitoring the selected tab.
+/// Displays a horizontal row of tabs, one per label.
 ///
-/// Tabs must always have an ancestor Material object.
+/// Requires one of its ancestors to be a [TabBarSelection] widget to enable
+/// saving and monitoring the selected tab.
+///
+/// Requires one of its ancestors to be a [Material] widget.
+///
+/// See also:
+///  * [TabBarSelection]
+///  * [TabBarView]
+///  * [AppBar.tabBar]
+///  * <https://www.google.com/design/spec/components/tabs.html>
 class TabBar<T> extends Scrollable {
   TabBar({
     Key key,
@@ -588,7 +593,14 @@ class TabBar<T> extends Scrollable {
     this.isScrollable: false
   }) : super(key: key, scrollDirection: Axis.horizontal);
 
+  /// The labels to display in the tabs.
   final Map<T, TabLabel> labels;
+
+  /// Whether this tab bar can be scrolled horizontally.
+  ///
+  /// If [isScrollable] is true then each tab is as wide as needed for its label
+  /// and the entire [TabBar] is scrollable. Otherwise each tab gets an equal
+  /// share of the available space.
   final bool isScrollable;
 
   double get minimumHeight {

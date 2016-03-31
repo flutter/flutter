@@ -26,8 +26,11 @@ import 'theme.dart';
 /// trying to change the button's [color] and it is not having any effect, check
 /// that you are passing a non-null [onPressed] handler.
 ///
+/// Requires one of its ancestors to be a [Material] widget.
+///
 /// See also:
-///  * [RaisedButton] class
+///  * [RaisedButton]
+///  * [DropDownButton]
 ///  * https://www.google.com/design/spec/components/buttons.html
 class FlatButton extends MaterialButton {
   FlatButton({

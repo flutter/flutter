@@ -59,6 +59,7 @@ class FloatingActionButton extends StatefulWidget {
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
 
+  /// The height at which to place this button.
   final int elevation;
 
   final int highlightElevation;

@@ -13,8 +13,10 @@ import 'theme.dart';
 /// such an image, the user's initials. A given user's initials should
 /// always be paired with the same background color, for consistency.
 ///
-/// This class is used by [Chip].
-/// See also: <https://www.google.com/design/spec/components/chips.html#chips-contact-chips>
+/// See also:
+///  * [Chip]
+///  * [ListItem]
+///  * <https://www.google.com/design/spec/components/chips.html#chips-contact-chips>
 class CircleAvatar extends StatelessWidget {
   CircleAvatar({
     Key key,

@@ -13,6 +13,22 @@ import 'shadows.dart';
 import 'theme.dart';
 import 'toggleable.dart';
 
+/// A material design switch.
+///
+/// Used to toggle the on/off state of a single setting.
+///
+/// The switch itself does not maintain any state. Instead, when the state of
+/// the switch changes, the widget calls the [onChanged] callback. Most widgets
+/// that use a switch will listen for the [onChanged] callback and rebuild the
+/// switch with a new [value] to update the visual appearance of the switch.
+///
+/// Requires one of its ancestors to be a [Material] widget.
+///
+/// See also:
+///  * [CheckBox]
+///  * [Radio]
+///  * [Slider]
+///  * <https://www.google.com/design/spec/components/selection-controls.html#selection-controls-switch>
 class Switch extends StatelessWidget {
   Switch({
     Key key,
@@ -23,10 +39,29 @@ class Switch extends StatelessWidget {
     this.onChanged
   }) : super(key: key);
 
+  /// Whether this switch is on or off.
   final bool value;
+
+  /// The color to use when this switch is on.
+  ///
+  /// Defaults to accent color of the current theme.
   final Color activeColor;
+
+  /// A decoration to use for the thumb of this switch when the switch is on.
+  ///
+  /// Defaults to a circular piece of material.
   final Decoration activeThumbDecoration;
+
+  /// A decoration to use for the thumb of this switch when the switch is off.
+  ///
+  /// Defaults to a circular piece of material.
   final Decoration inactiveThumbDecoration;
+
+  /// Called when the user toggles with switch on or off.
+  ///
+  /// The switch passes the new value to the callback but does not actually
+  /// change state until the parent widget rebuilds the switch with the new
+  /// value.
   final ValueChanged<bool> onChanged;
 
   @override
