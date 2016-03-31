@@ -72,11 +72,24 @@ static void BaseTraceEventCallback(base::TraceTicks timestamp,
     case TRACE_EVENT_PHASE_INSTANT:
       type = Dart_Timeline_Event_Instant;
       break;
+    case TRACE_EVENT_PHASE_ASYNC_BEGIN:
+      type = Dart_Timeline_Event_Async_Begin;
+      break;
+    case TRACE_EVENT_PHASE_ASYNC_END:
+      type = Dart_Timeline_Event_Async_End;
+      break;
+    case TRACE_EVENT_PHASE_COUNTER:
+      type = Dart_Timeline_Event_Counter;
+      break;
+    case TRACE_EVENT_PHASE_METADATA:
+      type = Dart_Timeline_Event_Metadata;
+      break;
     default:
       // For TRACE_EVENT_PHASE_COMPLETE events, this callback still receives
       // discrete begin-end pairs. This greatly simplifies things. We dont have
       // to track the second timestamp to pass to the Dart timeline event
       // because we never see a Dart_Timeline_Event_Duration event.
+      DCHECK(false) << "Unknown trace event phase";
       return;
   }
 
