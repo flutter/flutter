@@ -91,6 +91,7 @@ class Material extends StatefulWidget {
 
   final MaterialType type;
 
+  /// The height at which to place this material.
   final int elevation;
 
   final Color color;

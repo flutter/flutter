@@ -11,6 +11,22 @@ import 'constants.dart';
 import 'debug.dart';
 import 'theme.dart';
 
+/// A material design slider.
+///
+/// Used to select from a continuous range of values.
+///
+/// The slider itself does not maintain any state. Instead, when the state of
+/// the slider changes, the widget calls the [onChanged] callback. Most widgets
+/// that use a slider will listen for the [onChanged] callback and rebuild the
+/// slider with a new [value] to update the visual appearance of the slider.
+///
+/// Requires one of its ancestors to be a [Material] widget.
+///
+/// See also:
+///  * [CheckBox]
+///  * [Radio]
+///  * [Switch]
+///  * <https://www.google.com/design/spec/components/sliders.html>
 class Slider extends StatelessWidget {
   Slider({
     Key key,
@@ -26,10 +42,27 @@ class Slider extends StatelessWidget {
     assert(value >= min && value <= max);
   }
 
+  /// The currently selected value for this slider.
+  ///
+  /// The slider's thumb is drawn at a position that corresponds to this value.
   final double value;
+
+  /// The minium value the user can select.
+  ///
+  /// Defaults to 0.0.
   final double min;
+
+  /// The maximum value the user can select.
+  ///
+  /// Defaults to 1.0.
   final double max;
+
+  /// The color to use for the portion of the slider that has been selected.
+  ///
+  /// Defaults to accent color of the current theme.
   final Color activeColor;
+
+  /// Called when the user selects a new value for the slider.
   final ValueChanged<double> onChanged;
 
   void _handleChanged(double value) {

@@ -8,13 +8,22 @@ import 'debug.dart';
 import 'ink_well.dart';
 import 'theme.dart';
 
-/// Material List items are one to three lines of text optionally flanked by icons.
-/// Icons are defined with the [leading] and [trailing] parameters. The first line of text
-/// is not optional and is specified with [title]. The value of [subtitle] will
-/// occupy the space allocated for an aditional line of text, or two lines if
-/// isThreeLine: true is specified. If dense: true is specified then the overall
-/// height of this list item and the size of the DefaultTextStyles that wrap
+/// An item in a material design list.
+///
+/// [MaterialList] items are one to three lines of text optionally flanked by
+/// icons. Icons are defined with the [leading] and [trailing] parameters. The
+/// first line of text is not optional and is specified with [title]. The value
+/// of [subtitle] will occupy the space allocated for an aditional line of text,
+/// or two lines if [isThreeLine] is true. If [dense] is true then the overall
+/// height of this list item and the size of the [DefaultTextStyle]s that wrap
 /// the [title] and [subtitle] widget are reduced.
+///
+/// Requires one of its ancestors to be a [Material] widget.
+///
+/// See also:
+///  * [MaterialList]
+///  * [CircleAvatar]
+///  * <https://www.google.com/design/spec/components/lists.html>
 class ListItem extends StatelessWidget {
   ListItem({
     Key key,
@@ -31,14 +40,41 @@ class ListItem extends StatelessWidget {
     assert(isThreeLine ? subtitle != null : true);
   }
 
+  /// A widget to display before the title.
+  ///
+  /// Typically a [CircleAvatar] widget.
   final Widget leading;
+
+  /// The primary content of the list item.
+  ///
+  /// Typically a [Text] widget.
   final Widget title;
+
+  /// Additional content displayed below the title.
+  ///
+  /// Typically a [Text] widget.
   final Widget subtitle;
+
+  /// A widget to display after the title.
+  ///
+  /// Typically an [Icon] widget.
   final Widget trailing;
+
+  /// Whether this list item is intended to display three lines of text.
   final bool isThreeLine;
+
+  /// Whether this list item is part of a vertically dense list.
   final bool dense;
+
+  /// Whether this list item should be styled with the disabled color from the theme.
+  ///
+  /// If true, prevents the [onTap] and [onLongPress] callbacks from being operative.
   final bool enabled;
+
+  /// Called when the user taps this list item.
   final GestureTapCallback onTap;
+
+  /// Called when the user long-presses on this list item.
   final GestureLongPressCallback onLongPress;
 
   /// Add a one pixel border in between each item. If color isn't specified the

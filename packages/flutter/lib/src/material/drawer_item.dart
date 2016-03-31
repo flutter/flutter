@@ -11,6 +11,16 @@ import 'icons.dart';
 import 'ink_well.dart';
 import 'theme.dart';
 
+/// An item in a material design drawer.
+///
+/// Part of the material design [Drawer].
+///
+/// Requires one of its ancestors to be a [Material] widget.
+///
+/// See also:
+///  * [Drawer]
+///  * [DrawerHeader]
+///  * <https://www.google.com/design/spec/patterns/navigation-drawer.html>
 class DrawerItem extends StatelessWidget {
   const DrawerItem({
     Key key,
@@ -26,8 +36,13 @@ class DrawerItem extends StatelessWidget {
   /// The widget below this widget in the tree.
   final Widget child;
 
+  /// Called when the user taps this drawer item.
   final VoidCallback onPressed;
 
+  /// Whether this drawer item is currently selected.
+  ///
+  /// The currently selected item is highlighted to distinguish it from other
+  /// drawer items.
   final bool selected;
 
   Color _getIconColor(ThemeData themeData) {

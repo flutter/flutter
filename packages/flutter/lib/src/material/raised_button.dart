@@ -23,9 +23,11 @@ import 'theme.dart';
 /// not having any effect, check that you are passing a non-null [onPressed]
 /// handler.
 ///
-/// See also:
+/// Requires one of its ancestors to be a [Material] widget.
 ///
-///  * [FlatButton] class
+/// See also:
+///  * [FlatButton]
+///  * [DropDownButton]
 ///  * <https://www.google.com/design/spec/components/buttons.html>
 class RaisedButton extends MaterialButton {
   RaisedButton({
@@ -54,8 +56,13 @@ class RaisedButton extends MaterialButton {
   /// Controls the default text color if the text color isn't explicit set.
   final ThemeBrightness colorBrightness;
 
+  /// The height at which to place this button.
   final int elevation;
+
+  /// The height at which to place this button when highlighted.
   final int highlightElevation;
+
+  /// The height at which to place this button when disabled.
   final int disabledElevation;
 
   @override

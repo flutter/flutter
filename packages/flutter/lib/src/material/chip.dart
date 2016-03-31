@@ -21,6 +21,18 @@ const TextStyle _kLabelStyle = const TextStyle(
   textBaseline: TextBaseline.alphabetic
 );
 
+/// A material design chip.
+///
+/// Chips represent complex entities in small blocks, such as a contact.
+///
+/// Supplying a non-null [onDeleted] callback will cause the chip to include a
+/// button for deleting the chip.
+///
+/// Requires one of its ancestors to be a [Material] widget.
+///
+/// See also:
+///  * [CircleAvatar]
+///  * https://www.google.com/design/spec/components/chips.html
 class Chip extends StatelessWidget {
   const Chip({
     Key key,
@@ -29,8 +41,19 @@ class Chip extends StatelessWidget {
     this.onDeleted
   }) : super(key: key);
 
+  /// A widget to display prior to the chip's label.
+  ///
+  /// Typically a [CircleAvatar] widget.
   final Widget avatar;
+
+  /// The primary content of the chip.
+  ///
+  /// Typically a [Text] widget.
   final Widget label;
+
+  /// Called when the user deletes the chip, e.g., by tapping the delete button.
+  ///
+  /// The delete button is included in the ship only if this callback is non-null.
   final VoidCallback onDeleted;
 
   @override
