@@ -29,10 +29,7 @@ source_set("embedder") {
   ]
 }
 
-static_library("sdk_lib") {
-  output_name = "FlutterServices"
-  complete_static_lib = true
-
+source_set("sdk_lib") {
   sources = [
     "dynamic_service.c",
     "dynamic_service.h",
