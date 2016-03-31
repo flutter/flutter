@@ -136,4 +136,23 @@ void main() {
       expect(log, equals(['scrollstart', 'scrollend']));
     });
   });
+
+  test('fling up ends', () {
+    testWidgets((WidgetTester tester) {
+      GlobalKey<ScrollableState<Scrollable>> scrollKey = new GlobalKey<ScrollableState<Scrollable>>();
+      List<String> log = <String>[];
+      tester.pumpWidget(_buildScroller(key: scrollKey, log: log));
+
+      expect(log, equals([]));
+      tester.flingFrom(new Point(100.0, 100.0), new Offset(50.0, 50.0), 500.0);
+      tester.pump(new Duration(seconds: 1));
+      tester.pump(new Duration(seconds: 1));
+      tester.pump(new Duration(seconds: 1));
+      expect(log.first, equals('scrollstart'));
+      expect(log.last, equals('scrollend'));
+      log.removeWhere((String value) => value == 'scroll');
+      expect(log.length, equals(2));
+      expect(scrollKey.currentState.scrollOffset, equals(0.0));
+    });
+  });
 }
