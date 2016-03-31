@@ -12,6 +12,9 @@ void main() {
   runApp(
     new MaterialApp(
       title: 'Flutter Demo',
+      theme: new ThemeData(
+        primarySwatch: Colors.blue
+      ),
       routes: <String, WidgetBuilder>{
         '/': (BuildContext context) => new FlutterDemo()
       }
