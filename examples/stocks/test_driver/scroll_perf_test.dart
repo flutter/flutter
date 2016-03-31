@@ -21,7 +21,7 @@ void main() {
     });
 
     test('measure', () async {
-      Map<String, dynamic> profileJson = await driver.traceAction(() async {
+      Map<String, dynamic> timeline = await driver.traceAction(() async {
         // Find the scrollable stock list
         ObjectRef stockList = await driver.findByValueKey('stock-list');
         expect(stockList, isNotNull);
@@ -39,10 +39,10 @@ void main() {
         }
       });
 
-      // Usually the profile is saved to a file and then analyzed using
-      // chrom://tracing or a script. Both are out of scope for this little
-      // test, so all we do is check that we received something.
-      expect(profileJson, isNotNull);
+      expect(timeline, isNotNull);
+      TimelineSummary summary = summarizeTimeline(timeline);
+      summary.writeSummaryToFile('stocks_scroll_perf', pretty: true);
+      summary.writeTimelineToFile('stocks_scroll_perf', pretty: true);
     });
   });
 }

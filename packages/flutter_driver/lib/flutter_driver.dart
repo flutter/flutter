@@ -36,3 +36,8 @@ export 'src/message.dart' show
   ObjectRef,
   CommandWithTarget,
   Result;
+
+export 'src/timeline_summary.dart' show
+  summarizeTimeline,
+  EventTrace,
+  TimelineSummary;
