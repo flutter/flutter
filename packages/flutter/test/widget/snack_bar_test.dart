@@ -230,4 +230,56 @@ void main() {
       expect(tester.findText('bar2'), isNull);
     });
   });
+
+  test('SnackBar dismiss test', () {
+    testWidgets((WidgetTester tester) {
+      int snackBarCount = 0;
+      Key tapTarget = new Key('tap-target');
+      tester.pumpWidget(new MaterialApp(
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) {
+            return new Scaffold(
+              body: new Builder(
+                builder: (BuildContext context) {
+                  return new GestureDetector(
+                    onTap: () {
+                      snackBarCount += 1;
+                      Scaffold.of(context).showSnackBar(new SnackBar(
+                        content: new Text("bar$snackBarCount"),
+                        duration: new Duration(seconds: 2)
+                      ));
+                    },
+                    behavior: HitTestBehavior.opaque,
+                    child: new Container(
+                      height: 100.0,
+                      width: 100.0,
+                      key: tapTarget
+                    )
+                  );
+                }
+              )
+            );
+          }
+        }
+      ));
+      expect(tester.findText('bar1'), isNull);
+      expect(tester.findText('bar2'), isNull);
+      tester.tap(tester.findElementByKey(tapTarget)); // queue bar1
+      tester.tap(tester.findElementByKey(tapTarget)); // queue bar2
+      expect(tester.findText('bar1'), isNull);
+      expect(tester.findText('bar2'), isNull);
+      tester.pump(); // schedule animation for bar1
+      expect(tester.findText('bar1'), isNotNull);
+      expect(tester.findText('bar2'), isNull);
+      tester.pump(); // begin animation
+      expect(tester.findText('bar1'), isNotNull);
+      expect(tester.findText('bar2'), isNull);
+      tester.pump(new Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
+      tester.scroll(tester.findText('bar1'), new Offset(0.0, 50.0));
+      tester.pump(); // bar1 dismissed, bar2 begins animating
+      expect(tester.findText('bar1'), isNull);
+      expect(tester.findText('bar2'), isNotNull);
+    });
+  });
+
 }
