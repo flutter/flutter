@@ -12,7 +12,6 @@ dependencies:
   archive: ^1.0.20
   args: ^0.13.4
   crypto: 0.9.2
-  den_api: ^0.1.0
   file: ^0.1.0
   json_schema: ^1.0.3
   mustache4dart: ^1.0.0
