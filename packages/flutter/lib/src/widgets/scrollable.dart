@@ -788,7 +788,7 @@ abstract class ScrollableListPainter extends RenderObjectPainter {
 }
 
 /// A general scrollable list for a large number of children that might not all
-/// have the same height. Prefer [ScrollableWidgetList] when all the children
+/// have the same height. Prefer [ScrollableList] when all the children
 /// have the same height because it can use that property to be more efficient.
 /// Prefer [ScrollableViewport] with a single child.
 ///
