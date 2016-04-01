@@ -186,7 +186,8 @@ abstract class Device {
     bool clearLogs: false,
     bool startPaused: false,
     int debugPort: observatoryDefaultPort,
-    Map<String, dynamic> platformArgs
+    Map<String, dynamic> platformArgs,
+    String dartFlags
   });
 
   /// Stop an app package on the current device.

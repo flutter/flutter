@@ -163,8 +163,10 @@ class IOSDevice extends Device {
     bool clearLogs: false,
     bool startPaused: false,
     int debugPort: observatoryDefaultPort,
-    Map<String, dynamic> platformArgs
+    Map<String, dynamic> platformArgs,
+    String dartFlags,
   }) async {
+    // TODO(johnmccutchan): Do something with dartFlags.
     // TODO(chinmaygarde): Use checked, mainPath, route, clearLogs.
     // TODO(devoncarew): Handle startPaused, debugPort.
     printTrace('Building ${app.name} for $id');

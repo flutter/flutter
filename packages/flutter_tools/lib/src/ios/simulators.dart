@@ -446,8 +446,10 @@ class IOSSimulator extends Device {
     bool clearLogs: false,
     bool startPaused: false,
     int debugPort: observatoryDefaultPort,
-    Map<String, dynamic> platformArgs
+    Map<String, dynamic> platformArgs,
+    String dartFlags
   }) async {
+    // TODO(johnmccutchan): Do something with dartFlags.
     printTrace('Building ${app.name} for $id.');
 
     if (clearLogs)
@@ -478,6 +480,10 @@ class IOSSimulator extends Device {
 
     if (debugPort != observatoryDefaultPort)
       args.add("--observatory-port=$debugPort");
+
+    if (dartFlags != null) {
+      args.add('--dart-flags="$dartFlags"');
+    }
 
     // Launch the updated application in the simulator.
     try {
