@@ -17,7 +17,9 @@ import 'package:flutter/painting.dart';
 /// Each entry has three shadows which must be combined to obtain the defined
 /// effect for that elevation.
 ///
-/// See also: <https://www.google.com/design/spec/what-is-material/elevation-shadows.html>
+/// See also:
+///  * [Material]
+///  * <https://www.google.com/design/spec/what-is-material/elevation-shadows.html>
 const Map<int, List<BoxShadow>> elevationToShadow = _elevationToShadow; // to hide the literal from the docs
 
 const Color _kKeyUmbraOpacity = const Color(0x33000000); // alpha = 0.2

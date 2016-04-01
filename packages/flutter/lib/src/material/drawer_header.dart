@@ -15,6 +15,7 @@ import 'theme.dart';
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
+///
 ///  * [Drawer]
 ///  * [DrawerItem]
 ///  * <https://www.google.com/design/spec/patterns/navigation-drawer.html>

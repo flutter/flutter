@@ -25,6 +25,7 @@ import 'toggleable.dart';
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
+///
 ///  * [CheckBox]
 ///  * [Radio]
 ///  * [Slider]
@@ -44,7 +45,7 @@ class Switch extends StatelessWidget {
 
   /// The color to use when this switch is on.
   ///
-  /// Defaults to accent color of the current theme.
+  /// Defaults to accent color of the current [Theme].
   final Color activeColor;
 
   /// A decoration to use for the thumb of this switch when the switch is on.
@@ -62,6 +63,8 @@ class Switch extends StatelessWidget {
   /// The switch passes the new value to the callback but does not actually
   /// change state until the parent widget rebuilds the switch with the new
   /// value.
+  ///
+  /// If null, the switch will be displayed as disabled.
   final ValueChanged<bool> onChanged;
 
   @override

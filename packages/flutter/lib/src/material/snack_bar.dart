@@ -36,7 +36,10 @@ const Curve _snackBarFadeCurve = const Interval(0.72, 1.0, curve: Curves.fastOut
 /// Snack bar actions are always enabled. If you want to disable a snack bar
 /// action, simply don't include it in the snack bar.
 ///
-/// See also: <https://www.google.com/design/spec/components/snackbars-toasts.html>
+/// See also:
+///
+///  * [SnackBar]
+///  * <https://www.google.com/design/spec/components/snackbars-toasts.html>
 class SnackBarAction extends StatelessWidget {
   SnackBarAction({Key key, this.label, this.onPressed }) : super(key: key) {
     assert(label != null);

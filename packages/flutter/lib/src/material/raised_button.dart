@@ -26,8 +26,10 @@ import 'theme.dart';
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
+///
 ///  * [FlatButton]
 ///  * [DropDownButton]
+///  * [FloatingActionButton]
 ///  * <https://www.google.com/design/spec/components/buttons.html>
 class RaisedButton extends MaterialButton {
   RaisedButton({

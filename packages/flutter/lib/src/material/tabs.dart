@@ -582,6 +582,7 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
+///
 ///  * [TabBarSelection]
 ///  * [TabBarView]
 ///  * [AppBar.tabBar]

@@ -29,6 +29,7 @@ const double _kInnerRadius = 5.0;
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
+///
 ///  * [CheckBox]
 ///  * [Slider]
 ///  * [Switch]
@@ -53,13 +54,16 @@ class Radio<T> extends StatelessWidget {
 
   /// The color to use when this radio button is selected.
   ///
-  /// Defaults to accent color of the current theme.
+  /// Defaults to accent color of the current [Theme].
   final Color activeColor;
 
   /// Called when the user selects this radio button.
   ///
-  /// For convenence, the radio button passes [value] as a parameter to this
-  /// callback.
+  /// The radio button passes [value] as a parameter to this callback. The radio
+  /// button does not actually change state until the parent widget rebuilds the
+  /// radio button with the new [groupValue].
+  ///
+  /// If null, the radio button will be displayed as disabled.
   final ValueChanged<T> onChanged;
 
   bool get _enabled => onChanged != null;

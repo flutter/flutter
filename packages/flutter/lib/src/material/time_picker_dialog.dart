@@ -74,6 +74,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// the initialTime.
 ///
 /// See also:
+///
 ///  * [TimePicker]
 ///  * [showDatePicker]
 ///  * <https://www.google.com/design/spec/components/pickers.html#pickers-time-pickers>

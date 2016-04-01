@@ -30,10 +30,13 @@ const Duration _kBaseSettleDuration = const Duration(milliseconds: 246);
 ///
 /// Typically used in the [Scaffold.drawer] property, a drawer slides in from
 /// the side of the screen and displays a list of items that the user can
-/// interact with. The top-most item in a drawer is typically a [DrawerHeader]
-/// that displays status information about the current user.
+/// interact with.
+///
+/// Typically, the child of the drawer is a [Block] whose first child is a
+/// [DrawerHeader] that displays status information about the current user.
 ///
 /// See also:
+///
 ///  * [Scaffold.drawer]
 ///  * [DrawerItem]
 ///  * [DrawerHeader]
@@ -49,6 +52,8 @@ class Drawer extends StatelessWidget {
   final int elevation;
 
   /// The widget below this widget in the tree.
+  ///
+  /// Typically a [Block].
   final Widget child;
 
   @override
@@ -69,6 +74,7 @@ class Drawer extends StatelessWidget {
 /// widgets.
 ///
 /// See also:
+///
 /// * [Drawer]
 /// * [Scaffold.drawer]
 class DrawerController extends StatefulWidget {

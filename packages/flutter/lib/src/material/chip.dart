@@ -31,6 +31,7 @@ const TextStyle _kLabelStyle = const TextStyle(
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
+///
 ///  * [CircleAvatar]
 ///  * https://www.google.com/design/spec/components/chips.html
 class Chip extends StatelessWidget {
@@ -53,7 +54,7 @@ class Chip extends StatelessWidget {
 
   /// Called when the user deletes the chip, e.g., by tapping the delete button.
   ///
-  /// The delete button is included in the ship only if this callback is non-null.
+  /// The delete button is included in the chip only if this callback is non-null.
   final VoidCallback onDeleted;
 
   @override
