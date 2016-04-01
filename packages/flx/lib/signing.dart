@@ -165,8 +165,8 @@ ECSignature _asn1ParseSignature(Uint8List signature) {
 }
 
 PublicKey _publicKeyFromPrivateKey(ECPrivateKey privateKey) {
-  ECPoint Q = privateKey.parameters.G * privateKey.d;
-  return new ECPublicKey(Q, privateKey.parameters);
+  ECPoint q = privateKey.parameters.G * privateKey.d;
+  return new ECPublicKey(q, privateKey.parameters);
 }
 
 AsymmetricKeyPair<PublicKey, PrivateKey> keyPairFromPrivateKeyFileSync(String privateKeyPath) {
