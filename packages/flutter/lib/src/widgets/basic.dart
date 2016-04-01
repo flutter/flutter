@@ -1682,7 +1682,7 @@ class DefaultTextStyle extends InheritedWidget {
   /// The style from the closest instance of this class that encloses the given context.
   static TextStyle of(BuildContext context) {
     DefaultTextStyle result = context.inheritFromWidgetOfExactType(DefaultTextStyle);
-    return result?.style;
+    return result?.style ?? const TextStyle();
   }
 
   @override
@@ -1716,7 +1716,7 @@ class Text extends StatelessWidget {
 
   TextStyle _getEffectiveStyle(BuildContext context) {
     if (style == null || style.inherit)
-      return DefaultTextStyle.of(context)?.merge(style) ?? style;
+      return DefaultTextStyle.of(context).merge(style);
     else
       return style;
   }
