@@ -7,6 +7,7 @@ import("//sky/engine/bindings/bindings.gni")
 declare_args() {
   enable_gcm = false
   enable_firebase = false
+  enable_google_sign_in = false
 }
 
 group("sky") {
@@ -47,5 +48,9 @@ group("sky") {
 
   if (enable_gcm) {
     deps += [ "//third_party/gcm:gcm" ]
+  }
+
+  if (enable_google_sign_in) {
+    deps += [ "//third_party/google_sign_in" ]
   }
 }
