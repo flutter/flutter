@@ -418,7 +418,7 @@ class AndroidDevice extends Device {
   @override
   bool isSupported() => true;
 
-  Future<bool> refreshSnapshot(AndroidApk apk, String snapshotPath) async {
+  Future<bool> refreshSnapshot(String activity, String snapshotPath) async {
     if (!FileSystemEntity.isFileSync(snapshotPath)) {
       printError('Cannot find $snapshotPath');
       return false;
@@ -432,7 +432,7 @@ class AndroidDevice extends Device {
       '-d', _deviceBundlePath,
       '-f', '0x20000000',  // FLAG_ACTIVITY_SINGLE_TOP
       '--es', 'snapshot', _deviceSnapshotPath,
-      apk.launchActivity,
+      activity,
     ]);
     runCheckedSync(cmd);
     return true;

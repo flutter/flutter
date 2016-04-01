@@ -20,6 +20,10 @@ class RefreshCommand extends FlutterCommand {
 
   RefreshCommand() {
     usesTargetOption();
+
+    argParser.addOption('activity',
+      help: 'The Android activity that will be told to reload the Flutter code.'
+    );
   }
 
   @override
@@ -49,11 +53,19 @@ class RefreshCommand extends FlutterCommand {
         return result;
       }
 
+      String activity = argResults['activity'];
+      if (activity == null) {
+        if (applicationPackages.android != null) {
+          activity = applicationPackages.android.launchActivity;
+        } else {
+          printError('Unable to find the activity to be refreshed.');
+          return 1;
+        }
+      }
+
       AndroidDevice device = deviceForCommand;
 
-      bool success = await device.refreshSnapshot(
-        applicationPackages.android, snapshotPath
-      );
+      bool success = await device.refreshSnapshot(activity, snapshotPath);
       if (!success) {
         printError('Error refreshing snapshot on $device.');
         return 1;

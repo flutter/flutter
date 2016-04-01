@@ -6,6 +6,8 @@ package com.example.flutter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -74,6 +76,20 @@ public class ExampleActivity extends Activity {
     protected void onResume() {
         super.onResume();
         flutterView.onResume();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        // Reload the Flutter Dart code when the activity receives an intent
+        // from the "flutter refresh" command.
+        // This feature should only be enabled during development.  Use the
+        // debuggable flag as an indicator that we are in development mode.
+        if ((getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            if (Intent.ACTION_RUN.equals(intent.getAction())) {
+                flutterView.runFromBundle(intent.getDataString(),
+                                          intent.getStringExtra("snapshot"));
+            }
+        }
     }
 
     private void sendGetRandom() {
