@@ -18,6 +18,7 @@ export 'package:sky_services/editing/editing.mojom.dart' show KeyboardType;
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
+///
 ///  * <https://www.google.com/design/spec/components/text-fields.html>
 class Input extends StatefulWidget {
   Input({

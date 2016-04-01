@@ -23,6 +23,7 @@ import 'toggleable.dart';
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
+///
 ///  * [Radio]
 ///  * [Switch]
 ///  * [Slider]
@@ -40,15 +41,21 @@ class Checkbox extends StatelessWidget {
     this.onChanged
   }) : super(key: key);
 
-  /// Whether this checkbox is checked or unchecked.
+  /// Whether this checkbox is checked.
   final bool value;
 
   /// The color to use when this checkbox is checked.
   ///
-  /// Defaults to accent color of the current theme.
+  /// Defaults to accent color of the current [Theme].
   final Color activeColor;
 
   /// Called when the user checks or unchecks the checkbox.
+  ///
+  /// The checkbox passes the new value to the callback but does not actually
+  /// change state until the parent widget rebuilds the checkbox with the new
+  /// value.
+  ///
+  /// If null, the checkbox will be displayed as disabled.
   final ValueChanged<bool> onChanged;
 
   @override

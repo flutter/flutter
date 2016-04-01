@@ -29,6 +29,7 @@ import 'theme.dart';
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
+///
 ///  * [RaisedButton]
 ///  * [DropDownButton]
 ///  * https://www.google.com/design/spec/components/buttons.html

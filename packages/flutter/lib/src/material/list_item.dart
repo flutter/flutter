@@ -21,6 +21,7 @@ import 'theme.dart';
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
+///
 ///  * [MaterialList]
 ///  * [CircleAvatar]
 ///  * <https://www.google.com/design/spec/components/lists.html>
@@ -61,20 +62,29 @@ class ListItem extends StatelessWidget {
   final Widget trailing;
 
   /// Whether this list item is intended to display three lines of text.
+  ///
+  /// If false, the list item is treated as having one line if the subtitle is
+  /// null and treated as having two lines if the subtitle is non-null.
   final bool isThreeLine;
 
   /// Whether this list item is part of a vertically dense list.
   final bool dense;
 
-  /// Whether this list item should be styled with the disabled color from the theme.
+  /// Whether this list item is interactive.
   ///
-  /// If true, prevents the [onTap] and [onLongPress] callbacks from being operative.
+  /// If false, this list item is styled with the disabled color from the
+  /// current [Theme] and the [onTap] and [onLongPress] callbacks are
+  /// inoperative.
   final bool enabled;
 
   /// Called when the user taps this list item.
+  ///
+  /// Inoperative if [enabled] is false.
   final GestureTapCallback onTap;
 
   /// Called when the user long-presses on this list item.
+  ///
+  /// Inoperative if [enabled] is false.
   final GestureLongPressCallback onLongPress;
 
   /// Add a one pixel border in between each item. If color isn't specified the

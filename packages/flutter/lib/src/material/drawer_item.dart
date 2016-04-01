@@ -18,6 +18,7 @@ import 'theme.dart';
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
+///
 ///  * [Drawer]
 ///  * [DrawerHeader]
 ///  * <https://www.google.com/design/spec/patterns/navigation-drawer.html>
@@ -37,6 +38,8 @@ class DrawerItem extends StatelessWidget {
   final Widget child;
 
   /// Called when the user taps this drawer item.
+  ///
+  /// If null, the drawer item is displayed as disabled.
   final VoidCallback onPressed;
 
   /// Whether this drawer item is currently selected.

@@ -25,6 +25,7 @@ enum _DatePickerMode { day, year }
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
+///
 ///  * [showDatePicker]
 ///  * <https://www.google.com/design/spec/components/pickers.html#pickers-date-pickers>
 class DatePicker extends StatefulWidget {
@@ -192,6 +193,7 @@ class _DatePickerHeader extends StatelessWidget {
 /// Part of the material design [DatePicker].
 ///
 /// See also:
+///
 ///  * [DatePicker].
 ///  * <https://www.google.com/design/spec/components/pickers.html#pickers-date-pickers>
 class DayPicker extends StatelessWidget {
@@ -320,6 +322,7 @@ class DayPicker extends StatelessWidget {
 /// Part of the material design [DatePicker].
 ///
 /// See also:
+///
 ///  * [DatePicker]
 ///  * <https://www.google.com/design/spec/components/pickers.html#pickers-date-pickers>
 class MonthPicker extends StatefulWidget {
@@ -432,6 +435,7 @@ class _MonthPickerState extends State<MonthPicker> {
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
+///
 ///  * [DatePicker]
 ///  * <https://www.google.com/design/spec/components/pickers.html#pickers-date-pickers>
 class YearPicker extends StatefulWidget {

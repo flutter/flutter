@@ -14,6 +14,7 @@ import 'theme.dart';
 /// always be paired with the same background color, for consistency.
 ///
 /// See also:
+///
 ///  * [Chip]
 ///  * [ListItem]
 ///  * <https://www.google.com/design/spec/components/chips.html#chips-contact-chips>

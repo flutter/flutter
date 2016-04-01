@@ -252,6 +252,7 @@ class DropDownMenuItem<T> extends StatelessWidget {
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
+///
 ///  * [RaisedButton]
 ///  * [FlatButton]
 ///  * <https://www.google.com/design/spec/components/buttons.html#buttons-dropdown-buttons>

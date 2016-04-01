@@ -25,7 +25,11 @@ class IconData {
 ///
 /// Use with with the [Icon] class to show specific icons.
 ///
-/// See also: <https://design.google.com/icons/>
+/// See also:
+///
+///  * [Icon]
+///  * [IconButton]
+///  * <https://design.google.com/icons/>
 class Icons {
   Icons._();
 

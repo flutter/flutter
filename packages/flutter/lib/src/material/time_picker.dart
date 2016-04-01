@@ -98,6 +98,7 @@ enum _TimePickerMode { hour, minute }
 /// [showTimePicker], which creates a time picker dialog.
 ///
 /// See also:
+///
 ///  * [showTimePicker]
 ///  * <https://www.google.com/design/spec/components/pickers.html#pickers-time-pickers>
 class TimePicker extends StatefulWidget {

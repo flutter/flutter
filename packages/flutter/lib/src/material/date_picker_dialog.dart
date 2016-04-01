@@ -85,6 +85,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 /// the initialDate.
 ///
 /// See also:
+///
 ///  * [DatePicker]
 ///  * [showTimePicker]
 ///  * <https://www.google.com/design/spec/components/pickers.html#pickers-date-pickers>

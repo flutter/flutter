@@ -23,6 +23,7 @@ import 'theme.dart';
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
+///
 ///  * [CheckBox]
 ///  * [Radio]
 ///  * [Switch]
@@ -59,10 +60,16 @@ class Slider extends StatelessWidget {
 
   /// The color to use for the portion of the slider that has been selected.
   ///
-  /// Defaults to accent color of the current theme.
+  /// Defaults to accent color of the current [Theme].
   final Color activeColor;
 
   /// Called when the user selects a new value for the slider.
+  ///
+  /// The slider passes the new value to the callback but does not actually
+  /// change state until the parent widget rebuilds the slider with the new
+  /// value.
+  ///
+  /// If null, the slider will be displayed as disabled.
   final ValueChanged<double> onChanged;
 
   void _handleChanged(double value) {
