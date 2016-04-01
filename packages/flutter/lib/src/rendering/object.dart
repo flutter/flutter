@@ -777,6 +777,9 @@ class PipelineOwner {
 
 }
 
+// See _performLayout.
+void _doNothing() { }
+
 /// An object in the render tree.
 ///
 /// The [RenderObject] class hierarchy is the core of the rendering
@@ -804,6 +807,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   RenderObject() {
     _needsCompositing = isRepaintBoundary || alwaysNeedsCompositing;
+    _performLayout = performLayout;
   }
 
   // LAYOUT
@@ -1073,7 +1077,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       return true;
     });
     try {
-      performLayout();
+      _performLayout();
       markNeedsSemanticsUpdate();
     } catch (e, stack) {
       _debugReportException('performLayout', e, stack);
@@ -1168,7 +1172,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       return true;
     });
     try {
-      performLayout();
+      _performLayout();
       markNeedsSemanticsUpdate();
       assert(() { debugAssertDoesMeetConstraints(); return true; });
     } catch (e, stack) {
@@ -1234,6 +1238,11 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// child undergoes layout. Otherwise, the child can changes its layout
   /// information without informing this render object.
   void performLayout();
+
+  // We cache a closure to performLayout so that the callsite is monomorphic.
+  // Initializing this field with _buildNothing helps the compiler prove that
+  // this field always holds a closure.
+  VoidCallback _performLayout = _doNothing;
 
   /// Allows this render object to mutate its child list during layout and
   /// invokes callback.

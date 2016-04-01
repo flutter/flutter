@@ -1351,12 +1351,18 @@ abstract class BuildableElement extends Element {
 
 typedef Widget WidgetBuilder(BuildContext context);
 
+// See _builder.
+Widget _buildNothing(BuildContext context) => null;
+
 /// Base class for the instantiation of [StatelessWidget], [StatefulWidget],
 /// and [_ProxyWidget] widgets.
 abstract class ComponentElement extends BuildableElement {
   ComponentElement(Widget widget) : super(widget);
 
-  WidgetBuilder _builder;
+  // Initializing this field with _buildNothing helps the compiler prove that
+  // this field always holds a closure.
+  WidgetBuilder _builder = _buildNothing;
+
   Element _child;
 
   @override
@@ -1456,7 +1462,7 @@ class StatefulElement extends ComponentElement {
     assert(_state._debugTypesAreRight(widget));
     assert(_state._element == null);
     _state._element = this;
-    assert(_builder == null);
+    assert(_builder == _buildNothing);
     _builder = _state.build;
     assert(_state._config == null);
     _state._config = widget;
