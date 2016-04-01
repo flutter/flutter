@@ -16,7 +16,8 @@ import 'material.dart';
 
 const Duration _kDropDownMenuDuration = const Duration(milliseconds: 300);
 const double _kMenuItemHeight = 48.0;
-const EdgeInsets _kMenuHorizontalPadding = const EdgeInsets.only(left: 36.0, right: 36.0);
+const EdgeInsets _kMenuVerticalPadding = const EdgeInsets.symmetric(vertical: 8.0);
+const EdgeInsets _kMenuHorizontalPadding = const EdgeInsets.symmetric(horizontal: 36.0);
 const double _kBaselineOffsetFromBottom = 20.0;
 const Border _kDropDownUnderline = const Border(bottom: const BorderSide(color: const Color(0xFFBDBDBD), width: 2.0));
 
@@ -117,16 +118,19 @@ class _DropDownMenu<T> extends StatusTransitionWidget {
 
     final Tween<double> menuTop = new Tween<double>(
       begin: route.rect.top,
-      end: route.rect.top - route.selectedIndex * route.rect.height
+      end: route.rect.top - route.selectedIndex * route.rect.height - _kMenuVerticalPadding.top
     );
     final Tween<double> menuBottom = new Tween<double>(
       begin: route.rect.bottom,
-      end: menuTop.end + route.items.length * route.rect.height
+      end: menuTop.end + route.items.length * route.rect.height + _kMenuVerticalPadding.vertical
     );
 
     Widget child = new Material(
       type: MaterialType.transparency,
-      child: new Block(children: children)
+      child: new Block(
+        padding: _kMenuVerticalPadding,
+        children: children
+      )
     );
     return new FadeTransition(
       opacity: opacity,
@@ -200,7 +204,7 @@ class _DropDownRoute<T> extends PopupRoute<_DropDownRouteResult<T>> {
     Size overlaySize = overlayBox.size;
     RelativeRect menuRect = new RelativeRect.fromSize(rect, overlaySize);
     return new ModalPosition(
-      top: menuRect.top - selectedIndex * rect.height,
+      top: menuRect.top - selectedIndex * rect.height - _kMenuVerticalPadding.top,
       left: menuRect.left,
       right: menuRect.right
     );
