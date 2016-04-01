@@ -1,0 +1,8 @@
+name: complex_layout
+description: A new flutter project.
+dependencies:
+  flutter:
+    path: ../../../packages/flutter
+  flutter_driver:
+    path: ../../../packages/flutter_driver
+  flutter_gallery_assets: '0.0.14'
