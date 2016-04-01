@@ -7,7 +7,7 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:den_api/den_api.dart';
+import 'package:yaml/yaml.dart' as yaml;
 import 'package:path/path.dart' as path;
 
 import '../artifacts.dart';
@@ -123,9 +123,7 @@ class AnalyzeCommand extends FlutterCommand {
   bool get requiresProjectRoot => false;
 
   @override
-  Future<int> runInProject() async {
-    return argResults['watch'] ? _analyzeWatch() : _analyzeOnce();
-  }
+  Future<int> runInProject() => argResults['watch'] ? _analyzeWatch() : _analyzeOnce();
 
   List<String> flutterRootComponents;
   bool isFlutterLibrary(String filename) {
@@ -243,8 +241,8 @@ class AnalyzeCommand extends FlutterCommand {
         // we are analyzing the actual canonical source for this package;
         // make sure we remember that, in case all the packages are actually
         // pointing elsewhere somehow.
-        Pubspec pubSpecYaml = await Pubspec.load(pubSpecYamlPath);
-        String packageName = pubSpecYaml.name;
+        yaml.YamlMap pubSpecYaml = yaml.loadYaml(new File(pubSpecYamlPath).readAsStringSync());
+        String packageName = pubSpecYaml['name'];
         String packagePath = path.normalize(path.absolute(path.join(directory.path, 'lib')));
         dependencies.addCanonicalCase(packageName, packagePath, pubSpecYamlPath);
       }
