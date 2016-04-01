@@ -30,6 +30,7 @@ class CardCollectionState extends State<CardCollection> {
   static const String _sunshineURL = "http://www.walltor.com/images/wallpaper/good-morning-sunshine-58540.jpg";
 
   static const double kCardMargins = 8.0;
+  static const double kFixedCardHeight = 100.0;
 
   final TextStyle backgroundTextStyle =
     Typography.white.title.copyWith(textAlign: TextAlign.center);
@@ -59,10 +60,9 @@ class CardCollectionState extends State<CardCollection> {
 
   void _initFixedSizedCardModels() {
     const int cardCount = 27;
-    const double cardHeight = 100.0;
     _cardModels = new List<CardModel>.generate(
       cardCount,
-      (int i) => new CardModel(i, cardHeight)
+      (int i) => new CardModel(i, kFixedCardHeight)
     );
   }
 
@@ -71,6 +71,11 @@ class CardCollectionState extends State<CardCollection> {
       _initFixedSizedCardModels();
     else
       _initVariableSizedCardModels();
+  }
+
+  Iterable<int> get _cardIndices sync* {
+    for (int i = 0; i < _cardModels.length; i += 1)
+      yield i;
   }
 
   @override
@@ -99,9 +104,8 @@ class CardCollectionState extends State<CardCollection> {
   }
 
   double _fixedSizeToSnapOffset(double scrollOffset) {
-    double cardHeight = _cardModels[0].height;
-    int cardIndex = (scrollOffset.clamp(0.0, cardHeight * (_cardModels.length - 1)) / cardHeight).floor();
-    return cardIndex * cardHeight + cardHeight * 0.5;
+    int cardIndex = (scrollOffset.clamp(0.0, kFixedCardHeight * (_cardModels.length - 1)) / kFixedCardHeight).floor();
+    return cardIndex * kFixedCardHeight + kFixedCardHeight * 0.5;
   }
 
   double _toSnapOffset(double scrollOffset, Size containerSize) {
@@ -300,7 +304,7 @@ class CardCollectionState extends State<CardCollection> {
     Widget card = new Dismissable(
       key: new ObjectKey(cardModel),
       direction: _dismissDirection,
-      onResize: () { _invalidator(<int>[index]); },
+      onResize: () { if (_invalidator != null) _invalidator(<int>[index]); },
       onDismissed: (DismissDirection direction) { dismissCard(cardModel); },
       child: new Card(
         color: _primaryColor[cardModel.color],
@@ -321,7 +325,7 @@ class CardCollectionState extends State<CardCollection> {
             )
           : new DefaultTextStyle(
               style: DefaultTextStyle.of(context).merge(cardLabelStyle).merge(_textStyle).copyWith(
-                fontSize: _varyFontSizes ? _cardModels.length.toDouble() : null
+                fontSize: _varyFontSizes ? 5.0 + index : null
               ),
               child: new Column(
                 children: <Widget>[
@@ -409,10 +413,11 @@ class CardCollectionState extends State<CardCollection> {
   Widget build(BuildContext context) {
     Widget cardCollection;
     if (_fixedSizeCards) {
-      cardCollection = new ScrollableList (
+      _invalidator = null;
+      cardCollection = new ScrollableList(
         snapOffsetCallback: _snapToCenter ? _toSnapOffset : null,
-        itemExtent: _cardModels[0].height,
-        children: _cardModels.map((CardModel card) => _buildCard(context, card.value))
+        itemExtent: kFixedCardHeight,
+        children: _cardIndices.map/*<Widget>*/((int index) => _buildCard(context, index))
       );
     } else {
       cardCollection = new ScrollableMixedWidgetList(
