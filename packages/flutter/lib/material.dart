@@ -24,7 +24,7 @@ export 'src/material/drawer.dart';
 export 'src/material/drawer_header.dart';
 export 'src/material/drawer_item.dart';
 export 'src/material/divider.dart';
-export 'src/material/dropdown.dart';
+export 'src/material/drop_down.dart';
 export 'src/material/flat_button.dart';
 export 'src/material/flexible_space_bar.dart';
 export 'src/material/floating_action_button.dart';
