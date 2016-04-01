@@ -22,7 +22,6 @@ class BannerPainter extends CustomPainter {
   static const double kOffset = 40.0; // distance to bottom of banner, at a 45 degree angle inwards
   static const double kHeight = 12.0; // height of banner
   static const double kBottomOffset = kOffset + 0.707 * kHeight; // offset plus sqrt(2)/2 * banner height
-  static const Offset kTextAlign = const Offset(0.0, -3.0); // offset to move text up
   static const double kFontSize = kHeight * 0.85;
   static const double kShadowBlur = 4.0; // shadow blur sigma
   static final Rect kRect = new Rect.fromLTWH(-kOffset, kOffset - kHeight, kOffset * 2.0, kHeight);
@@ -30,7 +29,8 @@ class BannerPainter extends CustomPainter {
     color: const Color(0xFFFFFFFF),
     fontSize: kFontSize,
     fontWeight: FontWeight.w900,
-    textAlign: TextAlign.center
+    textAlign: TextAlign.center,
+    height: 1.0
   );
 
   @override
@@ -49,10 +49,9 @@ class BannerPainter extends CustomPainter {
     final TextPainter textPainter = new TextPainter()
       ..text = new TextSpan(style: kTextStyles, text: message)
       ..maxWidth = kOffset * 2.0
-      ..maxHeight = kHeight
       ..layout();
 
-    textPainter.paint(canvas, kRect.topLeft.toOffset() + kTextAlign);
+    textPainter.paint(canvas, kRect.topLeft.toOffset() + new Offset(0.0, (kRect.height - textPainter.height) / 2.0));
   }
 
   @override
