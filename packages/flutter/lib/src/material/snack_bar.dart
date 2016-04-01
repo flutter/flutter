@@ -125,6 +125,7 @@ class SnackBar extends StatelessWidget {
           child: new Dismissable(
             key: new Key('dismissable'),
             direction: DismissDirection.down,
+            resizeDuration: null,
             onDismissed: (DismissDirection direction) {
               Scaffold.of(context).removeCurrentSnackBar();
             },

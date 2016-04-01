@@ -8,7 +8,6 @@ import 'framework.dart';
 import 'gesture_detector.dart';
 
 const Duration _kDismissDuration = const Duration(milliseconds: 200);
-const Duration _kResizeDuration = const Duration(milliseconds: 300);
 const Curve _kResizeTimeCurve = const Interval(0.4, 1.0, curve: Curves.ease);
 const double _kMinFlingVelocity = 700.0;
 const double _kMinFlingVelocityDelta = 400.0;
@@ -43,17 +42,19 @@ enum DismissDirection {
 /// Can be dismissed by dragging in the indicated [direction].
 ///
 /// Dragging or flinging this widget in the [DismissDirection] causes the child
-/// to slide out of view. Following the slide animation, the Dismissable widget
-/// animates its height (or width, whichever is perpendicular to the dismiss
-/// direction) to zero.
+/// to slide out of view. Following the slide animation, if [resizeDuration] is
+/// non-null, the Dismissable widget animates its height (or width, whichever is
+/// perpendicular to the dismiss direction) to zero over the [resizeDuration].
 ///
 /// Backgrounds can be used to implement the "leave-behind" idiom. If a background
 /// is specified it is stacked behind the Dismissable's child and is exposed when
 /// the child moves.
 ///
-/// The [onDimissed] callback runs after Dismissable's size has collapsed to zero.
-/// If the Dismissable is a list item, it must have a key that distinguishes it from
-/// the other items and its onDismissed callback must remove the item from the list.
+/// The widget calls the [onDimissed] callback either after its size has
+/// collapsed to zero (if [resizeDuration] is non-null) or immediately after
+/// the slide animation (if [resizeDuration] is null). If the Dismissable is a
+/// list item, it must have a key that distinguishes it from the other items and
+/// its [onDismissed] callback must remove the item from the list.
 class Dismissable extends StatefulWidget {
   Dismissable({
     Key key,
@@ -62,7 +63,8 @@ class Dismissable extends StatefulWidget {
     this.secondaryBackground,
     this.onResize,
     this.onDismissed,
-    this.direction: DismissDirection.horizontal
+    this.direction: DismissDirection.horizontal,
+    this.resizeDuration: const Duration(milliseconds: 300)
   }) : super(key: key) {
     assert(key != null);
     assert(secondaryBackground != null ? background != null : true);
@@ -89,6 +91,12 @@ class Dismissable extends StatefulWidget {
 
   /// The direction in which the widget can be dismissed.
   final DismissDirection direction;
+
+  /// The amount of time the widget will spend contracting before [onDismissed] is called.
+  ///
+  /// If null, the widget will not contract and [onDismissed] will be called
+  /// immediately after the the widget is dismissed.
+  final Duration resizeDuration;
 
   @override
   _DismissableState createState() => new _DismissableState();
@@ -253,18 +261,23 @@ class _DismissableState extends State<Dismissable> {
     assert(_moveController != null);
     assert(_moveController.isCompleted);
     assert(_resizeController == null);
-    _resizeController = new AnimationController(duration: _kResizeDuration)
-      ..addListener(_handleResizeProgressChanged);
-    _resizeController.forward();
-    setState(() {
-      _resizeAnimation = new Tween<double>(
-        begin: 1.0,
-        end: 0.0
-      ).animate(new CurvedAnimation(
-        parent: _resizeController,
-        curve: _kResizeTimeCurve
-      ));
-    });
+    if (config.resizeDuration == null) {
+      if (config.onDismissed != null)
+        config.onDismissed(_dismissDirection);
+    } else {
+      _resizeController = new AnimationController(duration: config.resizeDuration)
+        ..addListener(_handleResizeProgressChanged);
+      _resizeController.forward();
+      setState(() {
+        _resizeAnimation = new Tween<double>(
+          begin: 1.0,
+          end: 0.0
+        ).animate(new CurvedAnimation(
+          parent: _resizeController,
+          curve: _kResizeTimeCurve
+        ));
+      });
+    }
   }
 
   void _handleResizeProgressChanged() {
