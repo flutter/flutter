@@ -173,7 +173,6 @@ class _RenderSwitch extends RenderToggleable {
          activeColor: activeColor,
          inactiveColor: inactiveColor,
          onChanged: onChanged,
-         minRadialReactionRadius: _kThumbRadius,
          size: const Size(_kSwitchWidth, _kSwitchHeight)
        ) {
     _drag = new HorizontalDragGestureRecognizer()
@@ -286,12 +285,12 @@ class _RenderSwitch extends RenderToggleable {
     RRect trackRRect = new RRect.fromRectXY(trackRect, _kTrackRadius, _kTrackRadius);
     canvas.drawRRect(trackRRect, paint);
 
-    Offset thumbOffset = new Offset(
-      offset.dx + kRadialReactionRadius + currentPosition * _trackInnerLength,
-      offset.dy + size.height / 2.0
+    Point thumbPosition = new Point(
+      kRadialReactionRadius + currentPosition * _trackInnerLength,
+      size.height / 2.0
     );
 
-    paintRadialReaction(canvas, thumbOffset);
+    paintRadialReaction(canvas, offset, thumbPosition);
 
     BoxPainter thumbPainter;
     if (_inactiveThumbDecoration == null && _activeThumbDecoration == null) {
@@ -310,10 +309,10 @@ class _RenderSwitch extends RenderToggleable {
     // The thumb contracts slightly during the animation
     double inset = 2.0 - (currentPosition - 0.5).abs() * 2.0;
     double radius = _kThumbRadius - inset;
-    Rect thumbRect = new Rect.fromLTRB(thumbOffset.dx - radius,
-                                       thumbOffset.dy - radius,
-                                       thumbOffset.dx + radius,
-                                       thumbOffset.dy + radius);
+    Rect thumbRect = new Rect.fromLTRB(thumbPosition.x + offset.dx - radius,
+                                       thumbPosition.y + offset.dy - radius,
+                                       thumbPosition.x + offset.dx + radius,
+                                       thumbPosition.y + offset.dy + radius);
     thumbPainter.paint(canvas, thumbRect);
   }
 }

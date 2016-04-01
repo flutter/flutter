@@ -133,7 +133,7 @@ class _RenderCheckbox extends RenderToggleable {
     final double offsetX = _kOffset + offset.dx;
     final double offsetY = _kOffset + offset.dy;
 
-    paintRadialReaction(canvas, offset + const Offset(kRadialReactionRadius, kRadialReactionRadius));
+    paintRadialReaction(canvas, offset, const Point(kRadialReactionRadius, kRadialReactionRadius));
 
     double t = position.value;
 

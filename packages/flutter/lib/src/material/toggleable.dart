@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'constants.dart';
 
 const Duration _kToggleDuration = const Duration(milliseconds: 200);
+final Tween<double> _kRadialReactionRadiusTween = new Tween<double>(begin: 0.0, end: kRadialReactionRadius);
 
 // RenderToggleable is a base class for material style toggleable controls with
 // toggle animations. It handles storing the current value, dispatching
@@ -20,8 +21,7 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
     Size size,
     Color activeColor,
     Color inactiveColor,
-    ValueChanged<bool> onChanged,
-    double minRadialReactionRadius: 0.0
+    ValueChanged<bool> onChanged
   }) : _value = value,
        _activeColor = activeColor,
        _inactiveColor = inactiveColor,
@@ -46,13 +46,10 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
      ..addStatusListener(_handlePositionStateChanged);
 
     _reactionController = new AnimationController(duration: kRadialReactionDuration);
-    _reaction = new Tween<double>(
-      begin: minRadialReactionRadius,
-      end: kRadialReactionRadius
-    ).animate(new CurvedAnimation(
+    _reaction = new CurvedAnimation(
       parent: _reactionController,
       curve: Curves.ease
-    ))..addListener(markNeedsPaint);
+    )..addListener(markNeedsPaint);
   }
 
   bool get value => _value;
@@ -118,6 +115,7 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
   Animation<double> _reaction;
 
   TapGestureRecognizer _tap;
+  Point _downPosition;
 
   void _handlePositionStateChanged(AnimationStatus status) {
     if (isInteractive) {
@@ -129,8 +127,10 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
   }
 
   void _handleTapDown(Point globalPosition) {
-    if (isInteractive)
+    if (isInteractive) {
+      _downPosition = globalToLocal(globalPosition);
       _reactionController.forward();
+    }
   }
 
   void _handleTap() {
@@ -139,11 +139,13 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
   }
 
   void _handleTapUp(Point globalPosition) {
+    _downPosition = null;
     if (isInteractive)
       _reactionController.reverse();
   }
 
   void _handleTapCancel() {
+    _downPosition = null;
     if (isInteractive)
       _reactionController.reverse();
   }
@@ -157,11 +159,13 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
       _tap.addPointer(event);
   }
 
-  void paintRadialReaction(Canvas canvas, Offset offset) {
+  void paintRadialReaction(Canvas canvas, Offset offset, Point origin) {
     if (!_reaction.isDismissed) {
       // TODO(abarth): We should have a different reaction color when position is zero.
       Paint reactionPaint = new Paint()..color = activeColor.withAlpha(kRadialReactionAlpha);
-      canvas.drawCircle(offset.toPoint(), _reaction.value, reactionPaint);
+      Point center = Point.lerp(_downPosition ?? origin, origin, _reaction.value);
+      double radius = _kRadialReactionRadiusTween.evaluate(_reaction);
+      canvas.drawCircle(center + offset, radius, reactionPaint);
     }
   }
 
