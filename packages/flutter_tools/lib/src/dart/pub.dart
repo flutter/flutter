@@ -32,10 +32,14 @@ Future<int> pubGet({
   if (!checkLastModified || !dotPackages.existsSync() || pubSpecYaml.lastModifiedSync().isAfter(dotPackages.lastModifiedSync())) {
     String command = upgrade ? 'upgrade' : 'get';
     printStatus("Running 'pub $command' in $directory${Platform.pathSeparator}...");
-    int code = await runCommandAndStreamOutput(
-      <String>[sdkBinaryName('pub'), '--verbosity=warning', command, '--no-package-symlinks'],
-      workingDirectory: directory
-    );
+    int code = await runCommandAndStreamOutput(<String>[
+      sdkBinaryName('pub'),
+      '--verbosity=warning',
+      command,
+      '--no-package-symlinks',
+      // '--no-precompile' // TODO(devoncarew): Available with 1.16.0-dev.3.0.
+    ], workingDirectory: directory);
+
     if (code != 0)
       return code;
   }

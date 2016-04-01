@@ -97,12 +97,18 @@ Future<Null> main(List<String> args) async {
       // We've crashed; emit a log report.
       stderr.writeln();
       stderr.writeln('Oops; flutter has exited unexpectedly: "$error"');
-
-      File file = _createCrashReport(args, error, chain);
-
       stderr.writeln();
-      stderr.writeln('Crash report written to ${path.relative(file.path)}.');
-      stderr.writeln('Please let us know at https://github.com/flutter/flutter/issues!');
+
+      if (Platform.environment.containsKey('FLUTTER_DEV')) {
+        // If we're working in the tools themselves, just print the stack trace.
+        stderr.writeln(chain.terse.toString());
+      } else {
+        File file = _createCrashReport(args, error, chain);
+
+        stderr.writeln('Crash report written to ${path.relative(file.path)}.');
+        stderr.writeln('Please let us know at https://github.com/flutter/flutter/issues!');
+      }
+
       exit(1);
     }
   });
