@@ -8,6 +8,7 @@ import 'package:flutter_driver/src/driver.dart';
 import 'package:flutter_driver/src/error.dart';
 import 'package:flutter_driver/src/health.dart';
 import 'package:flutter_driver/src/message.dart';
+import 'package:flutter_driver/src/timeline.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:mockito/mockito.dart';
 import 'package:quiver/testing/async.dart';
@@ -262,18 +263,22 @@ void main() {
 
         when(mockPeer.sendRequest('_getVMTimeline')).thenAnswer((_) async {
           return <String, dynamic> {
-            'test': 'profile',
+            'traceEvents': [
+              {
+                'name': 'test event'
+              }
+            ],
           };
         });
 
-        Map<String, dynamic> profile = await driver.traceAction(() {
+        Timeline timeline = await driver.traceAction(() {
           actionCalled = true;
         });
 
         expect(actionCalled, isTrue);
         expect(startTracingCalled, isTrue);
         expect(stopTracingCalled, isTrue);
-        expect(profile['test'], 'profile');
+        expect(timeline.events.single.name, 'test event');
       });
     });
   });

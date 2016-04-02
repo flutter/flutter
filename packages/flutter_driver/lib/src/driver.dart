@@ -15,6 +15,7 @@ import 'health.dart';
 import 'matcher_util.dart';
 import 'message.dart';
 import 'retry.dart';
+import 'timeline.dart';
 
 final Logger _log = new Logger('FlutterDriver');
 
@@ -229,16 +230,14 @@ class FlutterDriver {
     }
   }
 
-  /// Stops recording performance traces and downloads the trace profile.
-  // TODO(yjbanov): return structured data rather than raw JSON once we have a
-  //                stable protocol to talk to.
-  Future<Map<String, dynamic>> stopTracingAndDownloadProfile() async {
+  /// Stops recording performance traces and downloads the timeline.
+  Future<Timeline> stopTracingAndDownloadTimeline() async {
     try {
       await _peer.sendRequest(_kSetVMTimelineFlagsMethod, {'recordedStreams': '[]'});
-      return _peer.sendRequest(_kGetVMTimelineMethod);
+      return new Timeline.fromJson(await _peer.sendRequest(_kGetVMTimelineMethod));
     } catch(error, stackTrace) {
       throw new DriverError(
-        'Failed to start tracing due to remote error',
+        'Failed to stop tracing due to remote error',
         error,
         stackTrace
       );
@@ -251,11 +250,11 @@ class FlutterDriver {
   /// the trace.
   ///
   /// This is merely a convenience wrapper on top of [startTracing] and
-  /// [stopTracingAndDownloadProfile].
-  Future<Map<String, dynamic>> traceAction(Future<dynamic> action()) async {
+  /// [stopTracingAndDownloadTimeline].
+  Future<Timeline> traceAction(Future<dynamic> action()) async {
     await startTracing();
     await action();
-    return stopTracingAndDownloadProfile();
+    return stopTracingAndDownloadTimeline();
   }
 
   /// Calls the [evaluator] repeatedly until the result of the evaluation

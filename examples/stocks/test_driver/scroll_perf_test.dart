@@ -21,7 +21,7 @@ void main() {
     });
 
     test('measure', () async {
-      Map<String, dynamic> timeline = await driver.traceAction(() async {
+      Timeline timeline = await driver.traceAction(() async {
         // Find the scrollable stock list
         ObjectRef stockList = await driver.findByValueKey('stock-list');
         expect(stockList, isNotNull);
@@ -39,8 +39,7 @@ void main() {
         }
       });
 
-      expect(timeline, isNotNull);
-      TimelineSummary summary = summarizeTimeline(timeline);
+      TimelineSummary summary = new TimelineSummary.summarize(timeline);
       summary.writeSummaryToFile('stocks_scroll_perf', pretty: true);
       summary.writeTimelineToFile('stocks_scroll_perf', pretty: true);
     });
