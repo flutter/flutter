@@ -112,18 +112,16 @@ void main() {
           child: new AsyncImage(
             provider: imageProvider1
           )
-        )
+        ),
+        null,
+        EnginePhase.layout
       );
       RenderImage renderImage = key.currentContext.findRenderObject();
       expect(renderImage.image, isNull);
 
-      // An exception will be thrown when we try to draw the image.  Catch it.
-      RenderingExceptionHandler originalRenderingExceptionHandler = debugRenderingExceptionHandler;
-      debugRenderingExceptionHandler = (_, __, ___, ____) => null;
       imageProvider1.complete();
-      tester.pump();
-      tester.pump();
-      debugRenderingExceptionHandler = originalRenderingExceptionHandler;
+      tester.async.flushMicrotasks(); // resolve the future from the image provider
+      tester.pump(null, EnginePhase.layout);
 
       renderImage = key.currentContext.findRenderObject();
       expect(renderImage.image, isNotNull);
@@ -135,7 +133,9 @@ void main() {
           child: new AsyncImage(
             provider: imageProvider2
           )
-        )
+        ),
+        null,
+        EnginePhase.layout
       );
 
       renderImage = key.currentContext.findRenderObject();
@@ -152,18 +152,16 @@ void main() {
         new AsyncImage(
             key: key,
             provider: imageProvider1
-        )
+        ),
+        null,
+        EnginePhase.layout
       );
       RenderImage renderImage = key.currentContext.findRenderObject();
       expect(renderImage.image, isNull);
 
-      // An exception will be thrown when we try to draw the image.  Catch it.
-      RenderingExceptionHandler originalRenderingExceptionHandler = debugRenderingExceptionHandler;
-      debugRenderingExceptionHandler = (_, __, ___, ____) => null;
       imageProvider1.complete();
-      tester.pump();
-      tester.pump();
-      debugRenderingExceptionHandler = originalRenderingExceptionHandler;
+      tester.async.flushMicrotasks(); // resolve the future from the image provider
+      tester.pump(null, EnginePhase.layout);
 
       renderImage = key.currentContext.findRenderObject();
       expect(renderImage.image, isNotNull);
@@ -173,7 +171,9 @@ void main() {
         new AsyncImage(
           key: key,
           provider: imageProvider2
-        )
+        ),
+        null,
+        EnginePhase.layout
       );
 
       renderImage = key.currentContext.findRenderObject();

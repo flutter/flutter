@@ -157,7 +157,7 @@ abstract class VirtualViewportElement extends RenderObjectElement {
     assert(startOffsetBase != null);
     assert(startOffsetLimit != null);
     _updatePaintOffset();
-    owner.lockState(_materializeChildren, building: true);
+    owner.lockState(_materializeChildren, building: true, context: 'during $runtimeType layout');
   }
 
   void _materializeChildren() {

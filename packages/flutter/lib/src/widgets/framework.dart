@@ -9,6 +9,7 @@ import 'dart:developer';
 import 'debug.dart';
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 export 'dart:ui' show hashValues, hashList;
 export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugPrint;
@@ -695,17 +696,17 @@ class BuildOwner {
   bool _debugBuilding = false;
   BuildableElement _debugCurrentBuildTarget;
 
-  /// Establishes a scope in which widget build functions can run.
+  /// Establishes a scope in which calls to [State.setState] are forbidden.
   ///
-  /// Inside a build scope, widget build functions are allowed to run, but
-  /// State.setState() is forbidden. This mechanism prevents build functions
-  /// from transitively requiring other build functions to run, potentially
-  /// causing infinite loops.
+  /// This mechanism prevents build functions from transitively requiring other
+  /// build functions to run, potentially causing infinite loops.
   ///
-  /// After unwinding the last build scope on the stack, the framework verifies
-  /// that each global key is used at most once and notifies listeners about
-  /// changes to global keys.
-  void lockState(void callback(), { bool building: false }) {
+  /// If the building argument is true, then this is a build scope. Build scopes
+  /// cannot be nested.
+  ///
+  /// The context argument is used to describe the scope in case an exception is
+  /// caught while invoking the callback.
+  void lockState(void callback(), { bool building: false, String context }) {
     assert(_debugStateLockLevel >= 0);
     assert(() {
       if (building) {
@@ -718,6 +719,8 @@ class BuildOwner {
     });
     try {
       callback();
+    } catch (e, stack) {
+      _debugReportException(context, e, stack);
     } finally {
       assert(() {
         _debugStateLockLevel -= 1;
@@ -766,18 +769,25 @@ class BuildOwner {
       }
       assert(!_dirtyElements.any((BuildableElement element) => element.dirty));
       _dirtyElements.clear();
-    }, building: true);
+    }, building: true, context: 'while rebuilding dirty elements');
     assert(_dirtyElements.isEmpty);
     Timeline.finishSync();
   }
 
   /// Complete the element build pass by unmounting any elements that are no
   /// longer active.
+  ///
   /// This is called by beginFrame().
+  ///
+  /// In checked mode, this also verifies that each global key is used at most
+  /// once.
+  ///
+  /// After the current call stack unwinds, a microtask that notifies listeners
+  /// about changes to global keys will run.
   void finalizeTree() {
     lockState(() {
       _inactiveElements._unmountAll();
-    });
+    }, context: 'while finalizing the widget tree');
     assert(GlobalKey._debugCheckForDuplicates);
     scheduleMicrotask(GlobalKey._notifyListeners);
   }
@@ -2126,24 +2136,11 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   }
 }
 
-typedef void WidgetsExceptionHandler(String context, dynamic exception, StackTrace stack);
-/// This callback is invoked whenever an exception is caught by the widget
-/// system. The 'context' argument is a description of what was happening when
-/// the exception occurred, and may include additional details such as
-/// descriptions of the objects involved. The 'exception' argument contains the
-/// object that was thrown, and the 'stack' argument contains the stack trace.
-/// If no callback is set, then a default behavior consisting of dumping the
-/// context, exception, and stack trace to the console is used instead.
-WidgetsExceptionHandler debugWidgetsExceptionHandler;
 void _debugReportException(String context, dynamic exception, StackTrace stack) {
-  if (debugWidgetsExceptionHandler != null) {
-    debugWidgetsExceptionHandler(context, exception, stack);
-  } else {
-    debugPrint('-- EXCEPTION CAUGHT BY WIDGETS LIBRARY ---------------------------------');
-    debugPrint('Exception caught while $context');
-    debugPrint('$exception');
-    debugPrint('Stack trace:');
-    debugPrint('$stack');
-    debugPrint('------------------------------------------------------------------------');
-  }
+  FlutterError.reportError(new FlutterErrorDetails(
+    exception: exception,
+    stack: stack,
+    library: 'widgets library',
+    context: context
+  ));
 }

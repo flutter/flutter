@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
@@ -73,33 +72,12 @@ class BadDisposeWidgetState extends State<BadDisposeWidget> {
 
   @override
   void dispose() {
-    setState(() {});
+    setState(() { /* This is invalid behavior. */ });
     super.dispose();
   }
 }
 
 void main() {
-  dynamic cachedException;
-
-  // ** WARNING **
-  // THIS TEST OVERRIDES THE NORMAL EXCEPTION HANDLING
-  // AND DOES NOT REPORT EXCEPTIONS FROM THE FRAMEWORK
-
-  setUp(() {
-    assert(cachedException == null);
-    debugWidgetsExceptionHandler = (String context, dynamic exception, StackTrace stack) {
-      cachedException = exception;
-    };
-    debugSchedulerExceptionHandler = (dynamic exception, StackTrace stack) { throw exception; };
-  });
-
-  tearDown(() {
-    assert(cachedException == null);
-    cachedException = null;
-    debugWidgetsExceptionHandler = null;
-    debugSchedulerExceptionHandler = null;
-  });
-
   test('Legal times for setState', () {
     testWidgets((WidgetTester tester) {
       GlobalKey flipKey = new GlobalKey();
@@ -129,21 +107,18 @@ void main() {
 
   test('Setting parent state during build is forbidden', () {
     testWidgets((WidgetTester tester) {
-      expect(cachedException, isNull);
       tester.pumpWidget(new BadWidgetParent());
-      expect(cachedException, isNotNull);
-      cachedException = null;
+      expect(tester.takeException(), isNotNull);
       tester.pumpWidget(new Container());
-      expect(cachedException, isNull);
     });
   });
 
   test('Setting state during dispose is forbidden', () {
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(new BadDisposeWidget());
-      expect(() {
-        tester.pumpWidget(new Container());
-      }, throws);
+      expect(tester.takeException(), isNull);
+      tester.pumpWidget(new Container());
+      expect(tester.takeException(), isNotNull);
     });
   });
 }

@@ -254,7 +254,7 @@ class _MixedViewportElement extends RenderObjectElement {
     }
     owner.lockState(() {
       _doLayout(constraints);
-    }, building: true);
+    }, building: true, context: 'during $runtimeType layout');
   }
 
   void postLayout() {

@@ -8,8 +8,8 @@ import 'package:mojo/mojo/url_request.mojom.dart' as mojom;
 import 'package:mojo/mojo/url_response.mojom.dart' as mojom;
 import 'package:mojo_services/mojo/url_loader.mojom.dart' as mojom;
 
+import 'assertions.dart';
 import '../http/mojo_client.dart';
-import 'print.dart';
 
 export 'package:mojo/mojo/url_response.mojom.dart' show UrlResponse;
 
@@ -27,14 +27,17 @@ Future<mojom.UrlResponse> fetch(mojom.UrlRequest request, { bool require200: fal
         message.writeln('Protocol error: ${response.statusCode} ${response.statusLine ?? "<no server message>"}');
       if (response.url != request.url)
         message.writeln('Final URL after redirects was: ${response.url}');
-      throw message;
+      throw message; // this is not a FlutterError, because it's a real error, not an assertion
     }
     return response;
-  } catch (exception) {
-    debugPrint('-- EXCEPTION CAUGHT BY NETWORKING HTTP LIBRARY -------------------------');
-    debugPrint('An exception was raised while sending bytes to the Mojo network library:');
-    debugPrint('$exception');
-    debugPrint('------------------------------------------------------------------------');
+  } catch (exception, stack) {
+    FlutterError.reportError(new FlutterErrorDetails(
+      exception: exception,
+      stack: stack,
+      library: 'fetch service',
+      context: 'while sending bytes to the Mojo network library',
+      silent: true
+    ));
     return null;
   } finally {
     loader.close();

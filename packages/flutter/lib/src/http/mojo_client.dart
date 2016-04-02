@@ -149,14 +149,14 @@ class MojoClient {
       ByteData data = await mojo.DataPipeDrainer.drainHandle(response.body);
       Uint8List bodyBytes = new Uint8List.view(data.buffer);
       return new Response(bodyBytes: bodyBytes, statusCode: response.statusCode);
-    } catch (exception) {
-      assert(() {
-        debugPrint('-- EXCEPTION CAUGHT BY NETWORKING HTTP LIBRARY -------------------------');
-        debugPrint('An exception was raised while sending bytes to the Mojo network library:');
-        debugPrint('$exception');
-        debugPrint('------------------------------------------------------------------------');
-        return true;
-      });
+    } catch (exception, stack) {
+      FlutterError.reportError(new FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'networking HTTP library',
+        context: 'while sending bytes to the Mojo network library',
+        silent: true
+      ));
       return new Response(statusCode: 500);
     } finally {
       loader.close();

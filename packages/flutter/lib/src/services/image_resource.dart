@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:ui' as ui show Image;
 
-import 'print.dart';
+import 'assertions.dart';
 
 /// A [ui.Image] object with its corresponding scale.
 ///
@@ -61,7 +61,7 @@ class ImageResource {
     _futureImage.then(
       _handleImageLoaded,
       onError: (dynamic exception, dynamic stack) {
-        _handleImageError('Failed to load image:', exception, stack);
+        _handleImageError('while loading an image', exception, stack);
       }
     );
   }
@@ -86,7 +86,7 @@ class ImageResource {
       try {
         listener(_image);
       } catch (exception, stack) {
-        _handleImageError('The following exception was thrown by a synchronously-invoked image listener:', exception, stack);
+        _handleImageError('by a synchronously-invoked image listener', exception, stack);
       }
     }
   }
@@ -109,18 +109,18 @@ class ImageResource {
       try {
         listener(_image);
       } catch (exception, stack) {
-        _handleImageError('The following exception was thrown by an image listener:', exception, stack);
+        _handleImageError('by an image listener', exception, stack);
       }
     }
   }
 
-  void _handleImageError(String message, dynamic exception, dynamic stack) {
-    debugPrint('-- EXCEPTION CAUGHT BY SERVICES LIBRARY --------------------------------');
-    debugPrint(message);
-    debugPrint('$exception');
-    debugPrint('Stack trace:');
-    debugPrint('$stack');
-    debugPrint('------------------------------------------------------------------------');
+  void _handleImageError(String context, dynamic exception, dynamic stack) {
+    FlutterError.reportError(new FlutterErrorDetails(
+      exception: exception,
+      stack: stack,
+      library: 'image resource service',
+      context: context
+    ));
   }
 
   @override

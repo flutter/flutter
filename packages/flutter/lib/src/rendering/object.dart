@@ -394,16 +394,6 @@ typedef void RenderObjectVisitor(RenderObject child);
 typedef void LayoutCallback(Constraints constraints);
 typedef double ExtentCallback(Constraints constraints);
 
-typedef void RenderingExceptionHandler(RenderObject source, String method, dynamic exception, StackTrace stack);
-/// This callback is invoked whenever an exception is caught by the rendering
-/// system. The 'source' argument is the [RenderObject] object that caught the
-/// exception. The 'method' argument is the method in which the exception
-/// occurred; it will be one of 'performResize', 'performLayout, or 'paint'. The
-/// 'exception' argument contains the object that was thrown, and the 'stack'
-/// argument contains the stack trace. If no handler is registered, then the
-/// information will be printed to the console instead.
-RenderingExceptionHandler debugRenderingExceptionHandler;
-
 class _SemanticsGeometry {
   _SemanticsGeometry() : transform = new Matrix4.identity();
   _SemanticsGeometry.withClipFrom(_SemanticsGeometry other) {
@@ -889,49 +879,45 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   void visitChildren(RenderObjectVisitor visitor) { }
 
   dynamic debugCreator;
-  static int _debugPrintedExceptionCount = 0;
   void _debugReportException(String method, dynamic exception, StackTrace stack) {
-    try {
-      if (debugRenderingExceptionHandler != null) {
-        debugRenderingExceptionHandler(this, method, exception, stack);
-      } else {
-        _debugPrintedExceptionCount += 1;
-        if (_debugPrintedExceptionCount == 1) {
-          debugPrint('-- EXCEPTION CAUGHT BY RENDERING LIBRARY -------------------------------');
-          debugPrint('The following exception was raised during $method():');
-          debugPrint('$exception');
-          debugPrint('The following RenderObject was being processed when the exception was fired:\n${this}');
-          if (debugCreator != null)
-            debugPrint('This RenderObject had the following creator:\n$debugCreator');
-          int depth = 0;
-          List<String> descendants = <String>[];
-          const int maxDepth = 5;
-          void visitor(RenderObject child) {
-            depth += 1;
+    FlutterError.reportError(new FlutterErrorDetailsForRendering(
+      exception: exception,
+      stack: stack,
+      library: 'rendering library',
+      context: 'during $method()',
+      renderObject: this,
+      informationCollector: (StringBuffer information) {
+        information.writeln('The following RenderObject was being processed when the exception was fired:\n${this}');
+        if (debugCreator != null)
+          information.writeln('This RenderObject had the following creator:\n$debugCreator');
+        List<String> descendants = <String>[];
+        const int maxDepth = 5;
+        int depth = 0;
+        const int maxLines = 30;
+        int lines = 0;
+        void visitor(RenderObject child) {
+          if (lines < maxLines) {
             descendants.add('${"  " * depth}$child');
+            depth += 1;
             if (depth < maxDepth)
               child.visitChildren(visitor);
             depth -= 1;
+          } else if (lines == maxLines) {
+            descendants.add('  ...(descendants list truncated after $lines lines)');
           }
-          visitChildren(visitor);
-          if (descendants.length > 1) {
-            debugPrint('This RenderObject had the following descendants (showing up to depth $maxDepth):');
-          } else if (descendants.length == 1) {
-            debugPrint('This RenderObject had the following child:');
-          } else {
-            debugPrint('This RenderObject has no descendants.');
-          }
-          descendants.forEach(debugPrint);
-          debugPrint('Stack trace:');
-          debugPrint('$stack');
-          debugPrint('------------------------------------------------------------------------');
-        } else {
-          debugPrint('Another exception was raised: ${exception.toString().split("\n")[0]}');
+          lines += 1;
         }
+        visitChildren(visitor);
+        if (lines > 1) {
+          information.writeln('This RenderObject had the following descendants (showing up to depth $maxDepth):');
+        } else if (descendants.length == 1) {
+          information.writeln('This RenderObject had the following child:');
+        } else {
+          information.writeln('This RenderObject has no descendants.');
+        }
+        information.writeAll(descendants, '\n');
       }
-    } catch (exception) {
-      debugPrint('(exception during exception handler: $exception)');
-    }
+    ));
   }
 
   bool _debugDoingThisResize = false;
@@ -2152,4 +2138,33 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     }
     return result;
   }
+}
+
+/// Variant of [FlutterErrorDetails] with extra fields for the rendering
+/// library.
+class FlutterErrorDetailsForRendering extends FlutterErrorDetails {
+  /// Creates a [FlutterErrorDetailsForRendering] object with the given
+  /// arguments setting the object's properties.
+  ///
+  /// The rendering library calls this constructor when catching an exception
+  /// that will subsequently be reported using [FlutterError.onError].
+  const FlutterErrorDetailsForRendering({
+    dynamic exception,
+    StackTrace stack,
+    String library,
+    String context,
+    this.renderObject,
+    FlutterInformationCollector informationCollector,
+    bool silent
+  }) : super(
+    exception: exception,
+    stack: stack,
+    library: library,
+    context: context,
+    informationCollector: informationCollector,
+    silent: silent
+  );
+
+  /// The RenderObject that was being processed when the exception was caught.
+  final RenderObject renderObject;
 }

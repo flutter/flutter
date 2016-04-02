@@ -16,8 +16,6 @@ import 'events.dart';
 import 'hit_test.dart';
 import 'pointer_router.dart';
 
-typedef void GesturerExceptionHandler(PointerEvent event, HitTestTarget target, dynamic exception, StackTrace stack);
-
 /// A binding for the gesture subsystem.
 abstract class Gesturer extends BindingBase implements HitTestTarget, HitTestable {
 
@@ -82,14 +80,6 @@ abstract class Gesturer extends BindingBase implements HitTestTarget, HitTestabl
     result.add(new HitTestEntry(this));
   }
 
-  /// This callback is invoked whenever an exception is caught by the Gesturer
-  /// binding. The 'event' argument is the pointer event that was being routed.
-  /// The 'target' argument is the class whose handleEvent function threw the
-  /// exception. The 'exception' argument contains the object that was thrown,
-  /// and the 'stack' argument contains the stack trace. If no handler is
-  /// registered, then the information will be printed to the console instead.
-  GesturerExceptionHandler debugGesturerExceptionHandler;
-
   /// Dispatch the given event to the path of the given hit test result
   void dispatchEvent(PointerEvent event, HitTestResult result) {
     assert(result != null);
@@ -97,20 +87,20 @@ abstract class Gesturer extends BindingBase implements HitTestTarget, HitTestabl
       try {
         entry.target.handleEvent(event, entry);
       } catch (exception, stack) {
-        if (debugGesturerExceptionHandler != null) {
-          debugGesturerExceptionHandler(event, entry.target, exception, stack);
-        } else {
-          debugPrint('-- EXCEPTION CAUGHT BY GESTURE LIBRARY ---------------------------------');
-          debugPrint('The following exception was raised while dispatching a pointer event:');
-          debugPrint('$exception');
-          debugPrint('Event:');
-          debugPrint('$event');
-          debugPrint('Target:');
-          debugPrint('${entry.target}');
-          debugPrint('Stack trace:');
-          debugPrint('$stack');
-          debugPrint('------------------------------------------------------------------------');
-        }
+        FlutterError.reportError(new FlutterErrorDetailsForPointerEventDispatcher(
+          exception: exception,
+          stack: stack,
+          library: 'gesture library',
+          context: 'while dispatching a pointer event',
+          event: event,
+          hitTestEntry: entry,
+          informationCollector: (StringBuffer information) {
+            information.writeln('Event:');
+            information.writeln('  $event');
+            information.writeln('Target:');
+            information.write('  ${entry.target}');
+          }
+        ));
       }
     }
   }
@@ -125,3 +115,44 @@ abstract class Gesturer extends BindingBase implements HitTestTarget, HitTestabl
     }
   }
 }
+
+/// Variant of [FlutterErrorDetails] with extra fields for the gesture
+/// library's binding's pointer event dispatcher ([Gesturer.dispatchEvent]).
+///
+/// See also [FlutterErrorDetailsForPointerRouter], which is also used by the
+/// gesture library.
+class FlutterErrorDetailsForPointerEventDispatcher extends FlutterErrorDetails {
+  /// Creates a [FlutterErrorDetailsForPointerEventDispatcher] object with the given
+  /// arguments setting the object's properties.
+  ///
+  /// The gesture library calls this constructor when catching an exception
+  /// that will subsequently be reported using [FlutterError.onError].
+  const FlutterErrorDetailsForPointerEventDispatcher({
+    dynamic exception,
+    StackTrace stack,
+    String library,
+    String context,
+    this.event,
+    this.hitTestEntry,
+    FlutterInformationCollector informationCollector,
+    bool silent
+  }) : super(
+    exception: exception,
+    stack: stack,
+    library: library,
+    context: context,
+    informationCollector: informationCollector,
+    silent: silent
+  );
+
+  /// The pointer event that was being routed when the exception was raised.
+  final PointerEvent event;
+
+  /// The hit test result entry for the object whose handleEvent method threw
+  /// the exception.
+  /// 
+  /// The target object itself is given by the [HitTestEntry.target] property of
+  /// the hitTestEntry object.
+  final HitTestEntry hitTestEntry;
+}
+
