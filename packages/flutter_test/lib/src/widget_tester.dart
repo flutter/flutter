@@ -4,11 +4,12 @@
 
 import 'dart:ui' as ui show window;
 
-import 'package:quiver/testing/async.dart';
-import 'package:quiver/time.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
+import 'package:quiver/testing/async.dart';
+import 'package:quiver/time.dart';
 
 import 'instrumentation.dart';
 
@@ -89,6 +90,21 @@ class WidgetTester extends Instrumentation {
   /// The supplied EnginePhase is the final phase reached during the pump pass;
   /// if not supplied, the whole pass is executed.
   void pumpWidget(Widget widget, [ Duration duration, EnginePhase phase ]) {
+    runApp(widget);
+    pump(duration, phase);
+  }
+
+  /// Triggers a frame sequence (build/layout/paint/etc),
+  /// then flushes microtasks.
+  ///
+  /// If duration is set, then advances the clock by that much first.
+  /// Doing this flushes microtasks.
+  ///
+  /// The supplied EnginePhase is the final phase reached during the pump pass;
+  /// if not supplied, the whole pass is executed.
+  void pump([ Duration duration, EnginePhase phase ]) {
+    if (duration != null)
+      async.elapse(duration);
     if (binding is _SteppedWidgetFlutterBinding) {
       // Some tests call WidgetFlutterBinding.ensureInitialized() manually, so
       // we can't actually be sure we have a stepped binding.
@@ -98,8 +114,10 @@ class WidgetTester extends Instrumentation {
       // Can't step to a given phase in that case
       assert(phase == null);
     }
-    runApp(widget);
-    pump(duration);
+    binding.handleBeginFrame(new Duration(
+      milliseconds: clock.now().millisecondsSinceEpoch)
+    );
+    async.flushMicrotasks();
   }
 
   /// Artificially calls dispatchLocaleChanged on the Widget binding,
@@ -110,46 +128,72 @@ class WidgetTester extends Instrumentation {
     async.flushMicrotasks();
   }
 
-  /// Triggers a frame sequence (build/layout/paint/etc),
-  /// then flushes microtasks.
-  ///
-  /// If duration is set, then advances the clock by that much first.
-  /// Doing this flushes microtasks.
-  void pump([ Duration duration ]) {
-    if (duration != null)
-      async.elapse(duration);
-    binding.handleBeginFrame(new Duration(
-      milliseconds: clock.now().millisecondsSinceEpoch)
-    );
-    async.flushMicrotasks();
-  }
-
   @override
   void dispatchEvent(PointerEvent event, HitTestResult result) {
     super.dispatchEvent(event, result);
     async.flushMicrotasks();
   }
+
+  /// Returns the exception most recently caught by the Flutter framework.
+  ///
+  /// Call this if you expect an exception during a test. If an exception is
+  /// thrown and this is not called, then the exception is rethrown when
+  /// the [testWidgets] call completes.
+  ///
+  /// If two exceptions are thrown in a row without the first one being
+  /// acknowledged with a call to this method, then when the second exception is
+  /// thrown, they are both dumped to the console and then the second is
+  /// rethrown from the exception handler. This will likely result in the
+  /// framework entering a highly unstable state and everything collapsing.
+  ///
+  /// It's safe to call this when there's no pending exception; it will return
+  /// null in that case.
+  dynamic takeException() {
+    dynamic result = _pendingException;
+    _pendingException = null;
+    return result;
+  }
+  dynamic _pendingException;
 }
 
 void testWidgets(callback(WidgetTester tester)) {
   new FakeAsync().run((FakeAsync async) {
-    WidgetTester tester = new WidgetTester._(async);
-    runApp(new Container(key: new UniqueKey())); // Reset the tree to a known state.
-    callback(tester);
-    runApp(new Container(key: new UniqueKey())); // Unmount any remaining widgets.
-    async.flushMicrotasks();
-    assert(() {
-      "An animation is still running even after the widget tree was disposed.";
-      return Scheduler.instance.transientCallbackCount == 0;
-    });
-    assert(() {
-      "A Timer is still running even after the widget tree was disposed.";
-      return async.periodicTimerCount == 0;
-    });
-    assert(() {
-      "A Timer is still running even after the widget tree was disposed.";
-      return async.nonPeriodicTimerCount == 0;
-    });
-    assert(async.microtaskCount == 0); // Shouldn't be possible.
+    FlutterExceptionHandler oldHandler = FlutterError.onError;
+    try {
+      WidgetTester tester = new WidgetTester._(async);
+      FlutterError.onError = (FlutterErrorDetails details) {
+        if (tester._pendingException != null) {
+          FlutterError.dumpErrorToConsole(tester._pendingException);
+          FlutterError.dumpErrorToConsole(details.exception);
+          tester._pendingException = 'An uncaught exception was thrown.';
+          throw details.exception;
+        }
+        tester._pendingException = details;
+      };
+      runApp(new Container(key: new UniqueKey())); // Reset the tree to a known state.
+      callback(tester);
+      runApp(new Container(key: new UniqueKey())); // Unmount any remaining widgets.
+      async.flushMicrotasks();
+      assert(() {
+        "An animation is still running even after the widget tree was disposed.";
+        return Scheduler.instance.transientCallbackCount == 0;
+      });
+      assert(() {
+        "A Timer is still running even after the widget tree was disposed.";
+        return async.periodicTimerCount == 0;
+      });
+      assert(() {
+        "A Timer is still running even after the widget tree was disposed.";
+        return async.nonPeriodicTimerCount == 0;
+      });
+      assert(async.microtaskCount == 0); // Shouldn't be possible.
+      assert(() {
+        if (tester._pendingException != null)
+          FlutterError.dumpErrorToConsole(tester._pendingException);
+        return tester._pendingException == null;
+      });
+    } finally {
+      FlutterError.onError = oldHandler;
+    }
   });
 }

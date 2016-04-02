@@ -48,20 +48,6 @@ void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
 final TestParentData kNonPositioned = new TestParentData();
 
 void main() {
-  dynamic cachedException;
-
-  setUp(() {
-    assert(cachedException == null);
-    debugWidgetsExceptionHandler = (String context, dynamic exception, StackTrace stack) {
-      cachedException = exception;
-    };
-  });
-
-  tearDown(() {
-    cachedException = null;
-    debugWidgetsExceptionHandler = null;
-  });
-
   test('ParentDataWidget control test', () {
     testWidgets((WidgetTester tester) {
 
@@ -259,8 +245,6 @@ void main() {
 
   test('ParentDataWidget conflicting data', () {
     testWidgets((WidgetTester tester) {
-      expect(cachedException, isNull);
-
       tester.pumpWidget(
         new Stack(
           children: <Widget>[
@@ -276,14 +260,11 @@ void main() {
           ]
         )
       );
-
-      expect(cachedException, isNotNull);
-      cachedException = null;
+      expect(tester.takeException(), isNotNull);
 
       tester.pumpWidget(new Stack());
 
       checkTree(tester, <TestParentData>[]);
-      expect(cachedException, isNull);
 
       tester.pumpWidget(
         new Container(
@@ -298,9 +279,7 @@ void main() {
           )
         )
       );
-
-      expect(cachedException, isNotNull);
-      cachedException = null;
+      expect(tester.takeException(), isNotNull);
 
       tester.pumpWidget(
         new Stack()

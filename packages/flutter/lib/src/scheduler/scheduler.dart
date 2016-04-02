@@ -24,15 +24,7 @@ double timeDilation = 1.0;
 /// common time base.
 typedef void FrameCallback(Duration timeStamp);
 
-typedef void SchedulerExceptionHandler(dynamic exception, StackTrace stack);
-
 typedef bool SchedulingStrategy({ int priority, Scheduler scheduler });
-
-/// This callback is invoked whenever an exception is caught by the scheduler.
-/// The 'exception' argument contains the object that was thrown, and the
-/// 'stack' argument contains the stack trace. If the callback is set, it is
-/// invoked instead of printing the information to the console.
-SchedulerExceptionHandler debugSchedulerExceptionHandler;
 
 /// An entry in the scheduler's priority queue.
 ///
@@ -277,16 +269,12 @@ abstract class Scheduler extends BindingBase {
     try {
       callback(timeStamp);
     } catch (exception, stack) {
-      if (debugSchedulerExceptionHandler != null) {
-        debugSchedulerExceptionHandler(exception, stack);
-      } else {
-        debugPrint('-- EXCEPTION CAUGHT BY SCHEDULER LIBRARY -------------------------------');
-        debugPrint('An exception was raised during a scheduler callback:');
-        debugPrint('$exception');
-        debugPrint('Stack trace:');
-        debugPrint('$stack');
-        debugPrint('------------------------------------------------------------------------');
-      }
+      FlutterError.reportError(new FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'scheduler library',
+        context: 'during a scheduler callback'
+      ));
     }
   }
 

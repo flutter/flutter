@@ -795,10 +795,13 @@ abstract class RenderBox extends RenderObject {
   void performLayout() {
     assert(() {
       if (!sizedByParent) {
-        debugPrint('$runtimeType needs to either override performLayout() to\n'
-          'set size and lay out children, or, set sizedByParent to true\n'
-          'so that performResize() sizes the render object.');
-        assert(sizedByParent);
+        throw new FlutterError(
+          '$runtimeType did not implement performLayout().\n'
+          'RenderBox subclasses need to either override performLayout() to '
+          'set a size and lay out any children, or, set sizedByParent to true '
+          'so that performResize() sizes the render object.'
+        );
+        return true;
       }
       return true;
     });
