@@ -99,7 +99,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
       child: new Column(
         children: <Widget>[
           new RaisedButton(
-            child: new Text("Launch Demo"),
+            child: new Text('LAUNCH DEMO'),
             onPressed: () {
               Navigator.push(context, new MaterialPageRoute<Null>(
                 builder: (BuildContext context) => new SnackBarDemo()
@@ -107,7 +107,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             }
           ),
           new RaisedButton(
-            child: new Text("Disabled")
+            child: new Text('DISABLED')
           )
         ]
         .map((Widget child) {
@@ -129,7 +129,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
         child: new Column(
           children: <Widget>[
             new FlatButton(
-              child: new Text("Launch Demo"),
+              child: new Text('LAUNCH DEMO'),
               onPressed: () {
                 Navigator.push(context, new MaterialPageRoute<Null>(
                   builder: (_) => new DialogDemo()
@@ -137,7 +137,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
               }
             ),
             new FlatButton(
-              child: new Text("Disabled")
+              child: new Text('DISABLED')
             )
           ]
           .map((Widget child) {
@@ -182,12 +182,11 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
     return new Builder(
       builder: (BuildContext context) {
         final TextStyle textStyle = Theme.of(context).textTheme.caption.copyWith(fontSize: 16.0);
-        return new Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        return new Block(
           children: <Widget>[
             demo.builder(context),
             new Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+              padding: const EdgeInsets.fromLTRB(32.0, 0.0, 32.0, 24.0),
               child: new Text(demo.text, style: textStyle)
             )
           ]
