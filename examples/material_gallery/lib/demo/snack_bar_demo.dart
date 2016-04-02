@@ -23,7 +23,7 @@ class SnackBarDemo extends StatelessWidget {
   Widget buildBody(BuildContext context) {
     return new Padding(
       padding: const EdgeInsets.all(24.0),
-      child: new Column(
+      child: new Block(
         children: <Widget>[
           new Text(_text1),
           new Text(_text2),
