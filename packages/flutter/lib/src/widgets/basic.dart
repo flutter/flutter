@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Image;
+import 'dart:ui' as ui show Image, ImageFilter;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -119,6 +119,28 @@ class ShaderMask extends SingleChildRenderObjectWidget {
     renderObject
       ..shaderCallback = shaderCallback
       ..transferMode = transferMode;
+  }
+}
+
+class BackdropFilter extends SingleChildRenderObjectWidget {
+  BackdropFilter({
+    Key key,
+    this.filter,
+    Widget child
+  }) : super(key: key, child: child) {
+    assert(filter != null);
+  }
+
+  final ui.ImageFilter filter;
+
+  @override
+  RenderBackdropFilter createRenderObject(BuildContext context) {
+    return new RenderBackdropFilter(filter: filter);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderBackdropFilter renderObject) {
+    renderObject.filter = filter;
   }
 }
 

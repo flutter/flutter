@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:developer';
-import 'dart:ui' as ui show PictureRecorder;
+import 'dart:ui' as ui show ImageFilter, PictureRecorder;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
@@ -330,6 +330,19 @@ class PaintingContext {
     );
     _appendLayer(shaderLayer);
     PaintingContext childContext = new PaintingContext._(shaderLayer, _paintBounds);
+    painter(childContext, offset);
+    childContext._stopRecordingIfNeeded();
+  }
+
+  /// Push a backdrop filter.
+  ///
+  /// This function applies a filter to the existing painted content and then
+  /// synchronously calls the painter to paint on top of the filtered backdrop.
+  void pushBackdropFilter(Offset offset, ui.ImageFilter filter, PaintingContextCallback painter) {
+    _stopRecordingIfNeeded();
+    BackdropFilterLayer backdropFilterLayer = new BackdropFilterLayer(filter: filter);
+    _appendLayer(backdropFilterLayer);
+    PaintingContext childContext = new PaintingContext._(backdropFilterLayer, _paintBounds);
     painter(childContext, offset);
     childContext._stopRecordingIfNeeded();
   }

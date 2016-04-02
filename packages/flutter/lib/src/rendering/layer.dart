@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Picture, SceneBuilder;
+import 'dart:ui' as ui show ImageFilter, Picture, SceneBuilder;
 import 'dart:ui' show Offset;
 
 import 'package:flutter/painting.dart';
@@ -446,5 +446,20 @@ class ShaderMaskLayer extends ContainerLayer {
     description.add('shader: $shader');
     description.add('maskRect: $maskRect');
     description.add('transferMode: $transferMode');
+  }
+}
+
+/// A composited layer that applies a filter to the existing contents of the scene.
+class BackdropFilterLayer extends ContainerLayer {
+  BackdropFilterLayer({ this.filter });
+
+  /// The filter to apply to the existing contents of the scene.
+  ui.ImageFilter filter;
+
+  @override
+  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+    builder.pushBackdropFilter(filter);
+    addChildrenToScene(builder, layerOffset);
+    builder.pop();
   }
 }

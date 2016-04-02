@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui show ImageFilter;
+
 import 'package:flutter/gestures.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -669,6 +671,34 @@ class RenderShaderMask extends RenderProxyBox {
       assert(needsCompositing);
       Rect rect = Point.origin & size;
       context.pushShaderMask(offset, _shaderCallback(rect), rect, _transferMode, super.paint);
+    }
+  }
+}
+
+class RenderBackdropFilter extends RenderProxyBox {
+  RenderBackdropFilter({ RenderBox child, ui.ImageFilter filter })
+    : _filter = filter, super(child) {
+    assert(filter != null);
+  }
+
+  ui.ImageFilter get filter => _filter;
+  ui.ImageFilter _filter;
+  void set filter (ui.ImageFilter newFilter) {
+    assert(newFilter != null);
+    if (_filter == newFilter)
+      return;
+    _filter = newFilter;
+    markNeedsPaint();
+  }
+
+  @override
+  bool get alwaysNeedsCompositing => child != null;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null) {
+      assert(needsCompositing);
+      context.pushBackdropFilter(offset, _filter, super.paint);
     }
   }
 }
