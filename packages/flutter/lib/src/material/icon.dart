@@ -22,6 +22,11 @@ import 'theme.dart';
 /// in your project's `flutter.yaml` file. This ensures that the
 /// MaterialIcons font is included in your application. This font is
 /// used to display the icons.
+///
+/// See also:
+///
+///  * [IconButton], for interactive icons
+///  * [Icons], for the list of available icons for use with this class
 class Icon extends StatelessWidget {
   Icon({
     Key key,
@@ -41,6 +46,12 @@ class Icon extends StatelessWidget {
   final IconData icon;
 
   /// The color to use when drawing the icon.
+  ///
+  /// Defaults to the current [IconTheme] color, if any. If there is
+  /// no [IconTheme], then it defaults to white if the theme is dark
+  /// and black if the theme is light. See [Theme] to set the current
+  /// theme and [ThemeData.brightness] for setting the current theme's
+  /// brightness.
   final Color color;
 
   Color _getDefaultColorForThemeBrightness(ThemeBrightness brightness) {

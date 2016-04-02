@@ -20,12 +20,18 @@ import 'tooltip.dart';
 ///
 /// If the [onPressed] callback is not specified or null, then the button will
 /// be disabled, will not react to touch.
+///
+/// See also:
+///
+///  * [Icons]
+///  * [AppBar]
 class IconButton extends StatelessWidget {
   const IconButton({
     Key key,
     this.size: 24.0,
     this.icon,
     this.color,
+    this.disabledColor,
     this.onPressed,
     this.tooltip
   }) : super(key: key);
@@ -39,8 +45,21 @@ class IconButton extends StatelessWidget {
   /// The icon to display inside the button.
   final IconData icon;
 
-  /// The color to use for the icon inside the button.
+  /// The color to use for the icon inside the button, if the icon is enabled.
+  /// Defaults to the current color, as defined by [Icon.color].
+  ///
+  /// The icon is enabled if [onPressed] is not null.
+  ///
+  /// See also [disabledColor].
   final Color color;
+
+  /// The color to use for the icon inside the button, if the icon is disabled.
+  /// Defaults to the [ThemeData.disabledColor] of the current [Theme].
+  ///
+  /// The icon is disabled if [onPressed] is null.
+  ///
+  /// See also [color].
+  final Color disabledColor;
 
   /// The callback that is invoked when the button is tapped or otherwise activated.
   ///
@@ -56,12 +75,17 @@ class IconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
+    Color currentColor;
+    if (onPressed != null)
+      currentColor = color;
+    else
+      currentColor = disabledColor ?? Theme.of(context).disabledColor;
     Widget result = new Padding(
       padding: const EdgeInsets.all(8.0),
       child: new Icon(
         size: size,
         icon: icon,
-        color: onPressed != null ? color : Theme.of(context).disabledColor
+        color: currentColor
       )
     );
     if (tooltip != null) {
