@@ -12,6 +12,7 @@
 #include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/compositing/Scene.h"
 #include "sky/engine/core/painting/CanvasPath.h"
+#include "sky/engine/core/painting/ImageFilter.h"
 #include "sky/engine/core/painting/Offset.h"
 #include "sky/engine/core/painting/Paint.h"
 #include "sky/engine/core/painting/Picture.h"
@@ -40,6 +41,7 @@ public:
     void pushClipPath(const CanvasPath* path);
     void pushOpacity(int alpha);
     void pushColorFilter(CanvasColor color, TransferMode transferMode);
+    void pushBackdropFilter(ImageFilter* filter);
     void pushShaderMask(Shader* shader, const Rect& maskRect, TransferMode transferMode);
     void pop();
 

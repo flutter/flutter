@@ -8,7 +8,7 @@
 
 namespace blink {
 
-FloatRect mapImageFilterRect(ImageFilter* filter, const FloatRect& rect)
+FloatRect mapImageFilterRect(SkImageFilter* filter, const FloatRect& rect)
 {
     return filter->computeFastBounds(rect);
 }

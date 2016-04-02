@@ -214,6 +214,34 @@ class ColorFilter extends NativeFieldWrapperClass2 {
   void _constructor(Color color, TransferMode transferMode) native "ColorFilter_constructor";
 }
 
+/// A filter operation to apply to a raster image.
+///
+/// See [SceneBuilder.pushBackdropFilter].
+class ImageFilter extends NativeFieldWrapperClass2 {
+  void _constructor() native "ImageFilter_constructor";
+
+  /// A source filter containing an image.
+  // ImageFilter.image({ Image image }) {
+  //   _constructor();
+  //   _initImage(image);
+  // }
+  // void _initImage(Image image) native "ImageFilter_initImage";
+
+  /// A source filter containing a picture.
+  // ImageFilter.picture({ Picture picture }) {
+  //   _constructor();
+  //   _initPicture(picture);
+  // }
+  // void _initPicture(Picture picture) native "ImageFilter_initPicture";
+
+  /// Applies a Gaussian blur.
+  ImageFilter.blur({ double sigmaX: 0.0, double sigmaY: 0.0 }) {
+    _constructor();
+    _initBlur(sigmaX, sigmaY);
+  }
+  void _initBlur(double sigmaX, double sigmaY) native "ImageFilter_initBlur";
+}
+
 /// Base class for objects such as [Gradient] and [ImageShader] which
 /// correspond to shaders.
 abstract class Shader extends NativeFieldWrapperClass2 { }

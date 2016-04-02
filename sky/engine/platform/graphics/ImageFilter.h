@@ -11,9 +11,7 @@ class SkImageFilter;
 
 namespace blink {
 
-typedef SkImageFilter ImageFilter;
-
-PLATFORM_EXPORT FloatRect mapImageFilterRect(ImageFilter*, const FloatRect&);
+PLATFORM_EXPORT FloatRect mapImageFilterRect(SkImageFilter*, const FloatRect&);
 
 } // namespace blink
 

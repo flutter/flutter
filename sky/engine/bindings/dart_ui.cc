@@ -13,6 +13,7 @@
 #include "sky/engine/core/painting/CanvasImage.h"
 #include "sky/engine/core/painting/CanvasPath.h"
 #include "sky/engine/core/painting/ColorFilter.h"
+#include "sky/engine/core/painting/ImageFilter.h"
 #include "sky/engine/core/painting/ImageShader.h"
 #include "sky/engine/core/painting/MaskFilter.h"
 #include "sky/engine/core/painting/painting.h"
@@ -50,6 +51,7 @@ void DartUI::InitForGlobal() {
     CanvasPath::RegisterNatives(g_natives);
     ColorFilter::RegisterNatives(g_natives);
     DartRuntimeHooks::RegisterNatives(g_natives);
+    ImageFilter::RegisterNatives(g_natives);
     ImageShader::RegisterNatives(g_natives);
     MaskFilter::RegisterNatives(g_natives);
     MojoServices::RegisterNatives(g_natives);

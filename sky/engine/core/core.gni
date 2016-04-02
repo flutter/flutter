@@ -29,6 +29,8 @@ sky_core_files = [
   "painting/ColorFilter.cpp",
   "painting/ColorFilter.h",
   "painting/FilterQuality.h",
+  "painting/ImageFilter.cpp",
+  "painting/ImageFilter.h",
   "painting/ImageShader.cpp",
   "painting/ImageShader.h",
   "painting/MaskFilter.cpp",

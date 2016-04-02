@@ -4,6 +4,7 @@
 
 #include "sky/engine/core/compositing/SceneBuilder.h"
 
+#include "flow/layers/backdrop_filter_layer.h"
 #include "flow/layers/child_scene_layer.h"
 #include "flow/layers/clip_path_layer.h"
 #include "flow/layers/clip_rect_layer.h"
@@ -48,6 +49,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, SceneBuilder);
   V(SceneBuilder, pushClipPath) \
   V(SceneBuilder, pushOpacity) \
   V(SceneBuilder, pushColorFilter) \
+  V(SceneBuilder, pushBackdropFilter) \
   V(SceneBuilder, pushShaderMask) \
   V(SceneBuilder, pop) \
   V(SceneBuilder, addPicture) \
@@ -119,6 +121,13 @@ void SceneBuilder::pushColorFilter(CanvasColor color, TransferMode transferMode)
     std::unique_ptr<flow::ColorFilterLayer> layer(new flow::ColorFilterLayer());
     layer->set_color(color);
     layer->set_transfer_mode(transferMode);
+    addLayer(std::move(layer));
+}
+
+void SceneBuilder::pushBackdropFilter(ImageFilter* filter)
+{
+    std::unique_ptr<flow::BackdropFilterLayer> layer(new flow::BackdropFilterLayer());
+    layer->set_filter(filter->toSkia());
     addLayer(std::move(layer));
 }
 

@@ -316,7 +316,7 @@ GraphicsContext* FilterEffectRendererHelper::beginFilterEffect(GraphicsContext* 
 {
     ASSERT(m_filter);
     SkiaImageFilterBuilder builder(context);
-    RefPtr<ImageFilter> imageFilter = builder.build(m_filter->lastEffect().get(), ColorSpaceDeviceRGB);
+    RefPtr<SkImageFilter> imageFilter = builder.build(m_filter->lastEffect().get(), ColorSpaceDeviceRGB);
     if (!imageFilter) {
         m_haveFilterEffect = false;
         return context;

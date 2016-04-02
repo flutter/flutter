@@ -81,6 +81,14 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// See [pop] for details about the operation stack.
   void pushColorFilter(Color color, TransferMode transferMode) native "SceneBuilder_pushColorFilter";
 
+  /// Pushes a backdrop filter operation onto the operation stack.
+  ///
+  /// The given filter is applied to the current contents of the scene prior to
+  /// rasterizing the given objects.
+  ///
+  /// See [pop] for details about the operation stack.
+  void pushBackdropFilter(ImageFilter filter) native "SceneBuilder_pushBackdropFilter";
+
   /// Pushes a shader mask operation onto the operation stack.
   ///
   /// The given shader is applied to the object's rasterization in the given

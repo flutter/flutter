@@ -8,6 +8,8 @@ source_set("flow") {
     "checkerboard.h",
     "instrumentation.cc",
     "instrumentation.h",
+    "layers/backdrop_filter_layer.cc",
+    "layers/backdrop_filter_layer.h",
     "layers/child_scene_layer.cc",
     "layers/child_scene_layer.h",
     "layers/clip_path_layer.cc",
