@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -10,10 +12,18 @@ import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'theme.dart';
+import 'typography.dart';
 
 /// A material design slider.
 ///
-/// Used to select from a continuous range of values.
+/// Used to select from a range of values.
+///
+/// A slider can be used to select from either a continuous or a discrete set of
+/// values. The default is use a continuous range of values from [min] to [max].
+/// To use discrete values, use a non-null value for [divisions], which
+/// indicates the number of discrete intervals. For example, if [min] is 0.0 and
+/// [max] is 50.0 and [divisions] is 5, then the slider can take on the values
+/// discrete values 0.0, 10.0, 20.0, 30.0, 40.0, and 50.0.
 ///
 /// The slider itself does not maintain any state. Instead, when the state of
 /// the slider changes, the widget calls the [onChanged] callback. Most widgets
@@ -34,6 +44,8 @@ class Slider extends StatelessWidget {
     this.value,
     this.min: 0.0,
     this.max: 1.0,
+    this.divisions,
+    this.label,
     this.activeColor,
     this.onChanged
   }) : super(key: key) {
@@ -41,6 +53,7 @@ class Slider extends StatelessWidget {
     assert(min != null);
     assert(max != null);
     assert(value >= min && value <= max);
+    assert(divisions == null || divisions > 0);
   }
 
   /// The currently selected value for this slider.
@@ -57,6 +70,18 @@ class Slider extends StatelessWidget {
   ///
   /// Defaults to 1.0.
   final double max;
+
+  /// The number of discrete divisions.
+  ///
+  /// Typically used with [label] to show the current discrete value.
+  ///
+  /// If null, the slider is continuous.
+  final int divisions;
+
+  /// A label to show above the slider when the slider is active.
+  ///
+  /// Typically used to display the value of a discrete slider.
+  final String label;
 
   /// The color to use for the portion of the slider that has been selected.
   ///
@@ -82,6 +107,8 @@ class Slider extends StatelessWidget {
     assert(debugCheckHasMaterial(context));
     return new _SliderRenderObjectWidget(
       value: (value - min) / (max - min),
+      divisions: divisions,
+      label: label,
       activeColor: activeColor ?? Theme.of(context).accentColor,
       onChanged: onChanged != null ? _handleChanged : null
     );
@@ -89,16 +116,26 @@ class Slider extends StatelessWidget {
 }
 
 class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
-  _SliderRenderObjectWidget({ Key key, this.value, this.activeColor, this.onChanged })
-      : super(key: key);
+  _SliderRenderObjectWidget({
+    Key key,
+    this.value,
+    this.divisions,
+    this.label,
+    this.activeColor,
+    this.onChanged
+  }) : super(key: key);
 
   final double value;
+  final int divisions;
+  final String label;
   final Color activeColor;
   final ValueChanged<double> onChanged;
 
   @override
   _RenderSlider createRenderObject(BuildContext context) => new _RenderSlider(
     value: value,
+    divisions: divisions,
+    label: label,
     activeColor: activeColor,
     onChanged: onChanged
   );
@@ -107,6 +144,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderSlider renderObject) {
     renderObject
       ..value = value
+      ..divisions = divisions
+      ..label = label
       ..activeColor = activeColor
       ..onChanged = onChanged;
   }
@@ -122,16 +161,39 @@ final Color _kActiveTrackColor = Colors.grey[500];
 final Tween<double> _kReactionRadiusTween = new Tween<double>(begin: _kThumbRadius, end: _kReactionRadius);
 final Tween<double> _kThumbRadiusTween = new Tween<double>(begin: _kThumbRadius, end: _kActiveThumbRadius);
 final ColorTween _kTrackColorTween = new ColorTween(begin: _kInactiveTrackColor, end: _kActiveTrackColor);
+final ColorTween _kTickColorTween = new ColorTween(begin: _kInactiveTrackColor, end: Colors.black54);
+final Duration _kDiscreteTransitionDuration = const Duration(milliseconds: 500);
+
+const double _kLabelBalloonRadius = 14.0;
+final Tween<double> _kLabelBalloonCenterTween = new Tween<double>(begin: 0.0, end: -_kLabelBalloonRadius * 2.0);
+final Tween<double> _kLabelBalloonRadiusTween = new Tween<double>(begin: _kThumbRadius, end: _kLabelBalloonRadius);
+final Tween<double> _kLabelBalloonTipTween = new Tween<double>(begin: 0.0, end: -8.0);
+final double _kLabelBalloonTipAttachmentRatio = math.sin(math.PI / 4.0);
+
+double _getAdditionalHeightForLabel(String label) {
+  return label == null ? 0.0 : _kLabelBalloonRadius * 2.0;
+}
+
+BoxConstraints _getAdditionalConstraints(String label) {
+  return new BoxConstraints.tightFor(
+    width: _kTrackWidth + 2 * _kReactionRadius,
+    height: 2 * _kReactionRadius + _getAdditionalHeightForLabel(label)
+  );
+}
 
 class _RenderSlider extends RenderConstrainedBox {
   _RenderSlider({
     double value,
+    int divisions,
+    String label,
     Color activeColor,
     this.onChanged
   }) : _value = value,
+       _divisions = divisions,
        _activeColor = activeColor,
-        super(additionalConstraints: const BoxConstraints.tightFor(width: _kTrackWidth + 2 * _kReactionRadius, height: 2 * _kReactionRadius)) {
+        super(additionalConstraints: _getAdditionalConstraints(label)) {
     assert(value != null && value >= 0.0 && value <= 1.0);
+    this.label = label;
     _drag = new HorizontalDragGestureRecognizer()
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
@@ -140,6 +202,10 @@ class _RenderSlider extends RenderConstrainedBox {
     _reaction = new CurvedAnimation(
       parent: _reactionController,
       curve: Curves.ease
+    )..addListener(markNeedsPaint);
+    _position = new AnimationController(
+      value: value,
+      duration: _kDiscreteTransitionDuration
     )..addListener(markNeedsPaint);
   }
 
@@ -150,6 +216,38 @@ class _RenderSlider extends RenderConstrainedBox {
     if (newValue == _value)
       return;
     _value = newValue;
+    if (divisions != null)
+      _position.animateTo(newValue, curve: Curves.ease);
+    else
+      _position.value = newValue;
+  }
+
+  int get divisions => _divisions;
+  int _divisions;
+  void set divisions(int newDivisions) {
+    if (newDivisions == _divisions)
+      return;
+    _divisions = newDivisions;
+    markNeedsPaint();
+  }
+
+  String get label => _label;
+  String _label;
+  void set label(String newLabel) {
+    if (newLabel == _label)
+      return;
+    _label = newLabel;
+    additionalConstraints = _getAdditionalConstraints(_label);
+    if (newLabel != null) {
+      _labelPainter
+        ..text = new TextSpan(
+          style: Typography.white.body1.copyWith(fontSize: 10.0),
+          text: newLabel
+        )
+        ..layoutToMaxIntrinsicWidth();
+    } else {
+      _labelPainter.text = null;
+    }
     markNeedsPaint();
   }
 
@@ -169,15 +267,25 @@ class _RenderSlider extends RenderConstrainedBox {
   Animation<double> _reaction;
   AnimationController _reactionController;
 
+  AnimationController _position;
+  final TextPainter _labelPainter = new TextPainter();
+
   HorizontalDragGestureRecognizer _drag;
   bool _active = false;
   double _currentDragValue = 0.0;
+
+  double get _discretizedCurrentDragValue {
+    double dragValue = _currentDragValue.clamp(0.0, 1.0);
+    if (divisions != null)
+      dragValue = (dragValue * divisions).round() / divisions;
+    return dragValue;
+  }
 
   void _handleDragStart(Point globalPosition) {
     if (onChanged != null) {
       _active = true;
       _currentDragValue = (globalToLocal(globalPosition).x - _kReactionRadius) / _trackLength;
-      onChanged(_currentDragValue.clamp(0.0, 1.0));
+      onChanged(_discretizedCurrentDragValue);
       _reactionController.forward();
       markNeedsPaint();
     }
@@ -186,7 +294,7 @@ class _RenderSlider extends RenderConstrainedBox {
   void _handleDragUpdate(double delta) {
     if (onChanged != null) {
       _currentDragValue += delta / _trackLength;
-      onChanged(_currentDragValue.clamp(0.0, 1.0));
+      onChanged(_discretizedCurrentDragValue);
     }
   }
 
@@ -214,33 +322,74 @@ class _RenderSlider extends RenderConstrainedBox {
 
     final double trackLength = _trackLength;
     final bool enabled = onChanged != null;
+    final double value = _position.value;
 
-    double trackCenter = offset.dy + size.height / 2.0;
-    double trackLeft = offset.dx + _kReactionRadius;
-    double trackTop = trackCenter - 1.0;
-    double trackBottom = trackCenter + 1.0;
-    double trackRight = trackLeft + trackLength;
-    double trackActive = trackLeft + trackLength * value;
+    final double additionalHeightForLabel = _getAdditionalHeightForLabel(label);
+    final double trackCenter = offset.dy + (size.height - additionalHeightForLabel) / 2.0 + additionalHeightForLabel;
+    final double trackLeft = offset.dx + _kReactionRadius;
+    final double trackTop = trackCenter - 1.0;
+    final double trackBottom = trackCenter + 1.0;
+    final double trackRight = trackLeft + trackLength;
+    final double trackActive = trackLeft + trackLength * value;
 
-    Paint primaryPaint = new Paint()..color = enabled ? _activeColor : _kInactiveTrackColor;
-    Paint trackPaint = new Paint()..color = _kTrackColorTween.evaluate(_reaction);
+    final Paint primaryPaint = new Paint()..color = enabled ? _activeColor : _kInactiveTrackColor;
+    final Paint trackPaint = new Paint()..color = _kTrackColorTween.evaluate(_reaction);
 
-    double thumbRadius = enabled ? _kThumbRadiusTween.evaluate(_reaction) : _kDisabledThumbRadius;
-    Point activeLocation = new Point(trackActive, trackCenter);
+    final Point thumbCenter = new Point(trackActive, trackCenter);
+    final double thumbRadius = enabled ? _kThumbRadiusTween.evaluate(_reaction) : _kDisabledThumbRadius;
 
     if (enabled) {
-      canvas.drawRect(new Rect.fromLTRB(trackLeft, trackTop, trackRight, trackBottom), trackPaint);
-      if (_value > 0.0)
+      if (value > 0.0)
         canvas.drawRect(new Rect.fromLTRB(trackLeft, trackTop, trackActive, trackBottom), primaryPaint);
+      if (value < 1.0)
+        canvas.drawRect(new Rect.fromLTRB(trackActive, trackTop, trackRight, trackBottom), trackPaint);
     } else {
-      canvas.drawRect(new Rect.fromLTRB(trackLeft, trackTop, activeLocation.x - _kDisabledThumbRadius - 2, trackBottom), trackPaint);
-      canvas.drawRect(new Rect.fromLTRB(activeLocation.x + _kDisabledThumbRadius + 2, trackTop, trackRight, trackBottom), trackPaint);
+      if (value > 0.0)
+        canvas.drawRect(new Rect.fromLTRB(trackLeft, trackTop, trackActive - _kDisabledThumbRadius - 2, trackBottom), trackPaint);
+      if (value < 1.0)
+        canvas.drawRect(new Rect.fromLTRB(trackActive + _kDisabledThumbRadius + 2, trackTop, trackRight, trackBottom), trackPaint);
     }
 
     if (_reaction.status != AnimationStatus.dismissed) {
-      Paint reactionPaint = new Paint()..color = _activeColor.withAlpha(kRadialReactionAlpha);
-      canvas.drawCircle(activeLocation, _kReactionRadiusTween.evaluate(_reaction), reactionPaint);
+      final int divisions = this.divisions;
+      if (divisions != null) {
+        const double tickWidth = 2.0;
+        final double dx = (trackLength - tickWidth) / divisions;
+        // If the ticks would be too dense, don't bother painting them.
+        if (dx >= 3 * tickWidth) {
+          final Paint tickPaint = new Paint()..color = _kTickColorTween.evaluate(_reaction);
+          for (int i = 0; i <= divisions; i += 1) {
+            double left = trackLeft + i * dx;
+            canvas.drawRect(new Rect.fromLTRB(left, trackTop, left + tickWidth, trackBottom), tickPaint);
+          }
+        }
+      }
+
+      if (label != null) {
+        final Point center = new Point(trackActive, _kLabelBalloonCenterTween.evaluate(_reaction) + trackCenter);
+        final double radius = _kLabelBalloonRadiusTween.evaluate(_reaction);
+        final Point tip = new Point(trackActive, _kLabelBalloonTipTween.evaluate(_reaction) + trackCenter);
+        final double tipAttachment = _kLabelBalloonTipAttachmentRatio * radius;
+
+        canvas.drawCircle(center, radius, primaryPaint);
+        Path path = new Path()
+          ..moveTo(tip.x, tip.y)
+          ..lineTo(center.x - tipAttachment, center.y + tipAttachment)
+          ..lineTo(center.x + tipAttachment, center.y + tipAttachment)
+          ..close();
+        canvas.drawPath(path, primaryPaint);
+        _labelPainter.layout();
+        Offset labelOffset = new Offset(
+          center.x - _labelPainter.width / 2.0,
+          center.y - _labelPainter.height / 2.0
+        );
+        _labelPainter.paint(canvas, labelOffset);
+        return;
+      } else {
+        Paint reactionPaint = new Paint()..color = _activeColor.withAlpha(kRadialReactionAlpha);
+        canvas.drawCircle(thumbCenter, _kReactionRadiusTween.evaluate(_reaction), reactionPaint);
+      }
     }
-    canvas.drawCircle(activeLocation, thumbRadius, primaryPaint);
+    canvas.drawCircle(thumbCenter, thumbRadius, primaryPaint);
   }
 }
