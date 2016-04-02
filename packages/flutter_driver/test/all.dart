@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'flutter_driver_test.dart' as flutter_driver_test;
-import 'retry_test.dart' as retry_test;
+import 'src/retry_test.dart' as retry_test;
 
 void main() {
   flutter_driver_test.main();
