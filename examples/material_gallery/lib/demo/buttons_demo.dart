@@ -63,12 +63,12 @@ class ButtonsDemo extends StatefulWidget {
 }
 
 class _ButtonsDemoState extends State<ButtonsDemo> {
-  List<_ButtonDemo> demos;
+  List<_ButtonDemo> _demos;
 
   @override
   void initState() {
     super.initState();
-    demos = <_ButtonDemo>[
+    _demos = <_ButtonDemo>[
       new _ButtonDemo(title: 'FLOATING', text: _floatingText, builder: buildFloatingButton),
       new _ButtonDemo(title: 'RAISED', text: _raisedText, builder: buildRaisedButton),
       new _ButtonDemo(title: 'FLAT', text: _flatText, builder: buildFlatButton),
@@ -198,17 +198,17 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
   @override
   Widget build(BuildContext context) {
     return new TabBarSelection<_ButtonDemo>(
-      values: demos,
+      values: _demos,
       child: new Scaffold(
         appBar: new AppBar(
           title: new Text("Buttons"),
           tabBar: new TabBar<_ButtonDemo>(
             isScrollable: true,
-            labels: new Map<_ButtonDemo, TabLabel>.fromIterable(demos, value: (_ButtonDemo demo) => demo.tabLabel)
+            labels: new Map<_ButtonDemo, TabLabel>.fromIterable(_demos, value: (_ButtonDemo demo) => demo.tabLabel)
           )
         ),
         body: new TabBarView<_ButtonDemo>(
-          children: demos.map(buildTabView).toList()
+          children: _demos.map(buildTabView).toList()
         )
       )
     );

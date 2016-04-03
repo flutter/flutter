@@ -99,13 +99,13 @@ class FullScreenDialogDemo extends StatefulWidget {
 }
 
 class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
-  DateTime fromDateTime = new DateTime.now();
-  DateTime toDateTime = new DateTime.now();
-  bool allDayValue = false;
-  bool saveNeeded = false;
+  DateTime _fromDateTime = new DateTime.now();
+  DateTime _toDateTime = new DateTime.now();
+  bool _allDayValue = false;
+  bool _saveNeeded = false;
 
   void handleDismissButton(BuildContext context) {
-    if (!saveNeeded) {
+    if (!_saveNeeded) {
       Navigator.pop(context, null);
       return;
     }
@@ -192,11 +192,11 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                 children: <Widget>[
                   new Text('From', style: theme.textTheme.caption),
                   new DateTimeItem(
-                    dateTime: fromDateTime,
+                    dateTime: _fromDateTime,
                     onChanged: (DateTime value) {
                       setState(() {
-                        fromDateTime = value;
-                        saveNeeded = true;
+                        _fromDateTime = value;
+                        _saveNeeded = true;
                       });
                     }
                   )
@@ -208,11 +208,11 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                 children: <Widget>[
                   new Text('To', style: theme.textTheme.caption),
                   new DateTimeItem(
-                    dateTime: toDateTime,
+                    dateTime: _toDateTime,
                     onChanged: (DateTime value) {
                       setState(() {
-                        toDateTime = value;
-                        saveNeeded = true;
+                        _toDateTime = value;
+                        _saveNeeded = true;
                       });
                     }
                   )
@@ -225,11 +225,11 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                 child: new Row(
                   children: <Widget> [
                     new Checkbox(
-                      value: allDayValue,
+                      value: _allDayValue,
                       onChanged: (bool value) {
                         setState(() {
-                          allDayValue = value;
-                          saveNeeded = true;
+                          _allDayValue = value;
+                          _saveNeeded = true;
                         });
                       }
                     ),

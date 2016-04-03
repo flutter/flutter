@@ -60,7 +60,7 @@ class DialogDemo extends StatefulWidget {
 }
 
 class DialogDemoState extends State<DialogDemo> {
-  final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   void showDemoDialog/*<T>*/({ BuildContext context, Dialog dialog }) {
     showDialog/*<T>*/(
@@ -69,7 +69,7 @@ class DialogDemoState extends State<DialogDemo> {
     )
     .then((dynamic/*=T*/ value) { // The value passed to Navigator.pop() or null.
       if (value != null) {
-        scaffoldKey.currentState.showSnackBar(new SnackBar(
+        _scaffoldKey.currentState.showSnackBar(new SnackBar(
           content: new Text('You selected: $value')
         ));
       }
@@ -82,7 +82,7 @@ class DialogDemoState extends State<DialogDemo> {
     final TextStyle dialogTextStyle = theme.textTheme.subhead.copyWith(color: theme.textTheme.caption.color);
 
     return new Scaffold(
-      key: scaffoldKey,
+      key: _scaffoldKey,
       appBar: new AppBar(
         title: new Text('Dialogs')
       ),
@@ -179,7 +179,7 @@ class DialogDemoState extends State<DialogDemo> {
               )
               .then((TimeOfDay value) { // The value passed to Navigator.pop() or null.
                 if (value != null) {
-                  scaffoldKey.currentState.showSnackBar(new SnackBar(
+                  _scaffoldKey.currentState.showSnackBar(new SnackBar(
                     content: new Text('You selected: $value')
                   ));
                 }

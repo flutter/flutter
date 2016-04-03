@@ -10,7 +10,7 @@ class DropDownDemo extends StatefulWidget {
 }
 
 class _DropDownDemoState extends State<DropDownDemo> {
-  String value = "Free";
+  String _value = "Free";
 
   List<DropDownMenuItem<String>> buildItems() {
     return <String>["One", "Two", "Free", "Four"].map((String value) {
@@ -26,11 +26,11 @@ class _DropDownDemoState extends State<DropDownDemo> {
       body: new Center(
         child: new DropDownButton<String>(
           items: buildItems(),
-          value: value,
+          value: _value,
           onChanged: (String newValue) {
             setState(() {
               if (newValue != null)
-                value = newValue;
+                _value = newValue;
             });
           }
         )

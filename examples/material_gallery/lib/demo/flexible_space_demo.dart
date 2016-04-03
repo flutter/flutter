@@ -75,9 +75,9 @@ class FlexibleSpaceDemo extends StatefulWidget {
 }
 
 class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
-  final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
-  final double appBarHeight = 256.0;
-  final Key scrollableKey = new UniqueKey();
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final double _appBarHeight = 256.0;
+  final Key _scrollableKey = new UniqueKey();
   AppBarBehavior _appBarBehavior = AppBarBehavior.scroll;
 
   @override
@@ -89,17 +89,17 @@ class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
         primarySwatch: Colors.indigo
       ),
       child: new Scaffold(
-        key: scaffoldKey,
-        scrollableKey: scrollableKey,
+        key: _scaffoldKey,
+        scrollableKey: _scrollableKey,
         appBarBehavior: _appBarBehavior,
         appBar: new AppBar(
-          expandedHeight: appBarHeight,
+          expandedHeight: _appBarHeight,
           actions: <Widget>[
             new IconButton(
               icon: Icons.create,
               tooltip: 'Search',
               onPressed: () {
-                scaffoldKey.currentState.showSnackBar(new SnackBar(
+                _scaffoldKey.currentState.showSnackBar(new SnackBar(
                   content: new Text('Not supported.')
                 ));
               }
@@ -128,14 +128,14 @@ class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
               image: new AssetImage(
                 name: 'packages/flutter_gallery_assets/ali_connors.png',
                 fit: ImageFit.cover,
-                height: appBarHeight
+                height: _appBarHeight
               )
             );
           }
         ),
         body: new Block(
-          scrollableKey: scrollableKey,
-          padding: new EdgeInsets.only(top: appBarHeight + statusBarHeight),
+          scrollableKey: _scrollableKey,
+          padding: new EdgeInsets.only(top: _appBarHeight + statusBarHeight),
           children: <Widget>[
             new _ContactCategory(
               icon: Icons.call,

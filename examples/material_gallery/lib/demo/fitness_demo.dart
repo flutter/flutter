@@ -53,16 +53,16 @@ class _FitnessDemoContentsState extends State<_FitnessDemoContents> {
     AssetBundle bundle = DefaultAssetBundle.of(context);
     _loadAssets(bundle).then((_) {
       setState(() {
-        assetsLoaded = true;
+        _assetsLoaded = true;
         workoutAnimation = new _WorkoutAnimationNode(
           onPerformedJumpingJack: () {
             setState(() {
-              count += 1;
+              _count += 1;
             });
           },
           onSecondPassed: (int seconds) {
             setState(() {
-              time = seconds;
+              _time = seconds;
             });
           }
         );
@@ -70,16 +70,16 @@ class _FitnessDemoContentsState extends State<_FitnessDemoContents> {
     });
   }
 
-  bool assetsLoaded = false;
-  int count = 0;
-  int time = 0;
-  int get kcal => (count * 0.2).toInt();
+  bool _assetsLoaded = false;
+  int _count = 0;
+  int _time = 0;
+  int get kcal => (_count * 0.2).toInt();
 
   _WorkoutAnimationNode workoutAnimation;
 
   @override
   Widget build(BuildContext context) {
-    if (!assetsLoaded)
+    if (!_assetsLoaded)
       return new Container();
 
     Color buttonColor;
@@ -115,8 +115,8 @@ class _FitnessDemoContentsState extends State<_FitnessDemoContents> {
             child: new Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                _createInfoPanelCell(Icons.accessibility, '$count', 'COUNT'),
-                _createInfoPanelCell(Icons.timer, _formatSeconds(time), 'TIME'),
+                _createInfoPanelCell(Icons.accessibility, '$_count', 'COUNT'),
+                _createInfoPanelCell(Icons.timer, _formatSeconds(_time), 'TIME'),
                 _createInfoPanelCell(Icons.flash_on, '$kcal', 'KCAL')
               ]
             )
@@ -170,8 +170,8 @@ class _FitnessDemoContentsState extends State<_FitnessDemoContents> {
 
   void startWorkout() {
     setState(() {
-      count = 0;
-      time = 0;
+      _count = 0;
+      _time = 0;
       workoutAnimation.start();
     });
   }
@@ -180,14 +180,14 @@ class _FitnessDemoContentsState extends State<_FitnessDemoContents> {
     setState(() {
       workoutAnimation.stop();
 
-      if (count >= 3) {
+      if (_count >= 3) {
         showDialog(
           context: context,
           child: new Stack(children: <Widget>[
             new _Fireworks(),
             new Dialog(
               title: new Text("Awesome workout"),
-              content: new Text("You have completed $count jumping jacks. Good going!"),
+              content: new Text("You have completed $_count jumping jacks. Good going!"),
               actions: <Widget>[
                 new FlatButton(
                   child: new Text("SWEET"),
