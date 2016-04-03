@@ -124,6 +124,8 @@ class FlutterError extends AssertionError {
 
   static int _errorCount = 0;
 
+  static const int _kWrapWidth = 120;
+
   /// Prints the given exception details to the console.
   ///
   /// The first time this is called, it dumps a very verbose message to the
@@ -135,7 +137,7 @@ class FlutterError extends AssertionError {
   static void dumpErrorToConsole(FlutterErrorDetails details) {
     assert(details != null);
     assert(details.exception != null);
-    bool reportError = !details.silent;
+    bool reportError = details.silent != true; // could be null
     assert(() {
       // In checked mode, we ignore the "silent" flag.
       reportError = true;
@@ -144,19 +146,26 @@ class FlutterError extends AssertionError {
     if (!reportError)
       return;
     if (_errorCount == 0) {
-      final String header = '-- EXCEPTION CAUGHT BY ${details.library} '.toUpperCase();
-      const String footer = '------------------------------------------------------------------------';
-      debugPrint('$header${"-" * (footer.length - header.length)}');
-      debugPrint('The following exception was raised${ details.context != null ? " ${details.context}" : ""}:');
-      debugPrint('${details.exception}');
+      final String header = '\u2550\u2550\u2561 EXCEPTION CAUGHT BY ${details.library} \u255E'.toUpperCase();
+      final String footer = '\u2501' * _kWrapWidth;
+      debugPrint('$header${"\u2550" * (footer.length - header.length)}');
+      debugPrint('The following exception was raised${ details.context != null ? " ${details.context}" : ""}:', wrapWidth: _kWrapWidth);
+      debugPrint('${details.exception}', wrapWidth: _kWrapWidth);
+      if ((details.exception is AssertionError) && (details.exception is! FlutterError)) {
+        debugPrint('Either the assertion indicates an error in the framework itself, or we should '
+                   'provide substantially more information in this error message to help you determine '
+                   'and fix the underlying cause.', wrapWidth: _kWrapWidth);
+        debugPrint('In either case, please report this assertion by filing a bug on GitHub:', wrapWidth: _kWrapWidth);
+        debugPrint('  https://github.com/flutter/flutter/issues/new');
+      }
       if (details.informationCollector != null) {
         StringBuffer information = new StringBuffer();
         details.informationCollector(information);
-        debugPrint(information.toString());
+        debugPrint(information.toString(), wrapWidth: _kWrapWidth);
       }
       if (details.stack != null) {
-        debugPrint('Stack trace:');
-        debugPrint('${details.stack}$footer');
+        debugPrint('Stack trace:', wrapWidth: _kWrapWidth);
+        debugPrint('${details.stack}$footer'); // StackTrace objects include a trailing newline
       } else {
         debugPrint(footer);
       }

@@ -889,7 +889,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       informationCollector: (StringBuffer information) {
         information.writeln('The following RenderObject was being processed when the exception was fired:\n${this}');
         if (debugCreator != null)
-          information.writeln('This RenderObject had the following creator:\n$debugCreator');
+          information.writeln('This RenderObject had the following creator:\n  $debugCreator');
         List<String> descendants = <String>[];
         const int maxDepth = 5;
         int depth = 0;
@@ -897,8 +897,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
         int lines = 0;
         void visitor(RenderObject child) {
           if (lines < maxLines) {
-            descendants.add('${"  " * depth}$child');
             depth += 1;
+            descendants.add('${"  " * depth}$child');
             if (depth < maxDepth)
               child.visitChildren(visitor);
             depth -= 1;
@@ -2155,7 +2155,7 @@ class FlutterErrorDetailsForRendering extends FlutterErrorDetails {
     String context,
     this.renderObject,
     FlutterInformationCollector informationCollector,
-    bool silent
+    bool silent: false
   }) : super(
     exception: exception,
     stack: stack,
