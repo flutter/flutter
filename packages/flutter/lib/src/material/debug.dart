@@ -20,7 +20,7 @@ bool debugCheckHasMaterial(BuildContext context) {
         'To introduce a Material widget, you can either directly include one, or use a widget that contains Material itself, '
         'such as a Card, Dialog, Drawer, or Scaffold.\n'
         'The specific widget that could not find a Material ancestor was:\n'
-        '  ${context.widget}'
+        '  ${context.widget}\n'
         'The ownership chain for the affected widget is:\n'
         '  ${element.debugGetCreatorChain(10)}'
       );
@@ -39,7 +39,7 @@ bool debugCheckHasScaffold(BuildContext context) {
         'No Scaffold widget found.\n'
         '${context.widget.runtimeType} widgets require a Scaffold widget ancestor.\n'
         'The specific widget that could not find a Scaffold ancestor was:\n'
-        '  ${context.widget}'
+        '  ${context.widget}\n'
         'The ownership chain for the affected widget is:\n'
         '  ${element.debugGetCreatorChain(10)}'
       );

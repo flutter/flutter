@@ -46,7 +46,7 @@ abstract class MultiChildLayoutDelegate {
     assert(() {
       if (child == null) {
         throw new FlutterError(
-          'The $this custom multichild layout delegate tried to lay out a non-existent child:\n'
+          'The $this custom multichild layout delegate tried to lay out a non-existent child.\n'
           'There is no child with the id "$childId".'
         );
       }
@@ -60,7 +60,7 @@ abstract class MultiChildLayoutDelegate {
         assert(constraints.debugAssertIsNormalized);
       } on AssertionError catch (exception) {
         throw new FlutterError(
-          'The $this custom multichild layout delegate provided invalid box constraints for the child with id "$childId":\n'
+          'The $this custom multichild layout delegate provided invalid box constraints for the child with id "$childId".\n'
           '$exception\n'
           'The minimum width and height must be greater than or equal to zero.\n'
           'The maximum width must be greater than or equal to the minimum width.\n'
