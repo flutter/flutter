@@ -32,9 +32,6 @@ class ListenCommand extends RunCommandBase {
 
   @override
   Future<int> runInProject() async {
-    await downloadApplicationPackages();
-    await downloadToolchain();
-
     Iterable<String> directories = () sync* {
       yield* argResults.rest;
       yield '.';

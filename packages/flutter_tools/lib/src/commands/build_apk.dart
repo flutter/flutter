@@ -185,8 +185,6 @@ class BuildApkCommand extends FlutterCommand {
       return 1;
     }
 
-    await downloadToolchain();
-
     // TODO(devoncarew): This command should take an arg for the output type (arm / x64).
 
     return await buildAndroid(

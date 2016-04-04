@@ -21,8 +21,6 @@ class InstallCommand extends FlutterCommand {
 
   @override
   Future<int> runInProject() async {
-    await downloadApplicationPackages();
-
     Device device = deviceForCommand;
     ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
 

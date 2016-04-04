@@ -94,13 +94,6 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<int> runInProject() async {
-    printTrace('Downloading toolchain.');
-
-    await Future.wait([
-      downloadToolchain(),
-      downloadApplicationPackages(),
-    ], eagerError: true);
-
     bool clearLogs = argResults['clear-logs'];
 
     int debugPort;

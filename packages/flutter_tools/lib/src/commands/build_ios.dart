@@ -31,13 +31,6 @@ class BuildIOSCommand extends FlutterCommand {
       return 1;
     }
 
-    printTrace('Ensuring toolchains are up to date.');
-
-    await Future.wait([
-      downloadToolchain(),
-      downloadApplicationPackages(),
-    ], eagerError: true);
-
     IOSApp app = applicationPackages.iOS;
 
     if (app == null) {
