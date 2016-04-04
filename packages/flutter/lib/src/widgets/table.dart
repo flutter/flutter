@@ -21,8 +21,9 @@ export 'package:flutter/rendering.dart' show
     TableColumnWidth;
 
 class TableRow {
-  const TableRow({ this.key, this.children });
+  const TableRow({ this.key, this.decoration, this.children });
   final LocalKey key;
+  final Decoration decoration;
   final List<Widget> children;
 }
 
@@ -39,13 +40,15 @@ class _TableElementRow {
 class Table extends RenderObjectWidget {
   Table({
     Key key,
-    this.children: const <TableRow>[],
+    List<TableRow> children: const <TableRow>[],
     this.columnWidths,
     this.defaultColumnWidth: const FlexColumnWidth(1.0),
     this.border,
     this.defaultVerticalAlignment: TableCellVerticalAlignment.top,
     this.textBaseline
-  }) : super(key: key) {
+  }) : children = children,
+       _rowDecorations = children.map/*<Decoration>*/((TableRow row) => row.decoration).toList(),
+       super(key: key) {
     assert(children != null);
     assert(defaultColumnWidth != null);
     assert(defaultVerticalAlignment != null);
@@ -63,6 +66,8 @@ class Table extends RenderObjectWidget {
   final TableCellVerticalAlignment defaultVerticalAlignment;
   final TextBaseline textBaseline;
 
+  final List<Decoration> _rowDecorations;
+
   @override
   _TableElement createElement() => new _TableElement(this);
 
@@ -74,6 +79,7 @@ class Table extends RenderObjectWidget {
       columnWidths: columnWidths,
       defaultColumnWidth: defaultColumnWidth,
       border: border,
+      rowDecorations: _rowDecorations,
       defaultVerticalAlignment: defaultVerticalAlignment,
       textBaseline: textBaseline
     );
@@ -87,6 +93,7 @@ class Table extends RenderObjectWidget {
       ..columnWidths = columnWidths
       ..defaultColumnWidth = defaultColumnWidth
       ..border = border
+      ..rowDecorations = _rowDecorations
       ..defaultVerticalAlignment = defaultVerticalAlignment
       ..textBaseline = textBaseline;
   }

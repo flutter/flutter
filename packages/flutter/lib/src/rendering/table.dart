@@ -345,6 +345,8 @@ class RenderTable extends RenderBox {
     Map<int, TableColumnWidth> columnWidths,
     TableColumnWidth defaultColumnWidth: const FlexColumnWidth(1.0),
     TableBorder border,
+    List<Decoration> rowDecorations,
+    Decoration defaultRowDecoration,
     TableCellVerticalAlignment defaultVerticalAlignment: TableCellVerticalAlignment.top,
     TextBaseline textBaseline,
     List<List<RenderBox>> children
@@ -359,6 +361,7 @@ class RenderTable extends RenderBox {
     _columnWidths = columnWidths ?? new HashMap<int, TableColumnWidth>();
     _defaultColumnWidth = defaultColumnWidth;
     _border = border;
+    this.rowDecorations = rowDecorations; // must use setter to initialize box painters
     _defaultVerticalAlignment = defaultVerticalAlignment;
     _textBaseline = textBaseline;
     if (children != null) {
@@ -366,8 +369,6 @@ class RenderTable extends RenderBox {
         addRow(row);
     }
   }
-
-  // TODO(ianh): Add a 'decoration' field to the children's parent data, to paint on each cell.
 
   // Children are stored in row-major order.
   // _children.length must be rows * columns
@@ -419,8 +420,8 @@ class RenderTable extends RenderBox {
     markNeedsLayout();
   }
 
-  Map<int, TableColumnWidth> _columnWidths;
   Map<int, TableColumnWidth> get columnWidths => new Map<int, TableColumnWidth>.unmodifiable(_columnWidths);
+  Map<int, TableColumnWidth> _columnWidths;
   void set columnWidths(Map<int, TableColumnWidth> value) {
     value ??= new HashMap<int, TableColumnWidth>();
     if (_columnWidths == value)
@@ -453,6 +454,38 @@ class RenderTable extends RenderBox {
       return;
     _border = value;
     markNeedsPaint();
+  }
+ 
+  List<Decoration> get rowDecorations => new List<Decoration>.unmodifiable(_rowDecorations ?? const <Decoration>[]);
+  List<Decoration> _rowDecorations;
+  List<BoxPainter> _rowDecorationPainters;
+  void set rowDecorations(List<Decoration> value) {
+    if (_rowDecorations == value)
+      return;
+    _removeListenersIfNeeded();
+    _rowDecorations = value;
+    _rowDecorationPainters = _rowDecorations != null ? new List<BoxPainter>(_rowDecorations.length) : null;
+    _addListenersIfNeeded();
+  }
+
+  void _removeListenersIfNeeded() {
+    Set<Decoration> visitedDecorations = new Set<Decoration>();
+    if (_rowDecorations != null && attached) {
+      for (Decoration decoration in _rowDecorations) {
+        if (decoration != null && decoration.needsListeners && visitedDecorations.add(decoration))
+          decoration.removeChangeListener(markNeedsPaint);
+      }
+    }
+  }
+
+  void _addListenersIfNeeded() {
+    Set<Decoration> visitedDecorations = new Set<Decoration>();
+    if (_rowDecorations != null && attached) {
+      for (Decoration decoration in _rowDecorations) {
+        if (decoration != null && decoration.needsListeners && visitedDecorations.add(decoration))
+          decoration.addChangeListener(markNeedsPaint);
+      }
+    }
   }
 
   TableCellVerticalAlignment get defaultVerticalAlignment => _defaultVerticalAlignment;
@@ -581,13 +614,15 @@ class RenderTable extends RenderBox {
     super.attach(owner);
     for (RenderBox child in _children)
       child?.attach(owner);
+    _addListenersIfNeeded();
   }
 
   @override
   void detach() {
-    super.detach();
+    _removeListenersIfNeeded();
     for (RenderBox child in _children)
       child?.detach();
+    super.detach();
   }
 
   @override
@@ -823,8 +858,9 @@ class RenderTable extends RenderBox {
       }
       rowTop += rowHeight;
     }
+    _rowTops.add(rowTop);
     size = constraints.constrain(new Size(positions.last + widths.last, rowTop));
-    assert(_rowTops.length == rows);
+    assert(_rowTops.length == rows + 1);
   }
 
   @override
@@ -845,10 +881,25 @@ class RenderTable extends RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    Canvas canvas;
     assert(_children.length == rows * columns);
     if (rows * columns == 0)
       return;
-    assert(_rowTops.length == rows);
+    assert(_rowTops.length == rows + 1);
+    canvas = context.canvas;
+    if (_rowDecorations != null) {
+      for (int y = 0; y < rows; y += 1) {
+        if (_rowDecorations.length <= y)
+          break;
+        _rowDecorationPainters[y] ??= _rowDecorations[y].createBoxPainter();
+        _rowDecorationPainters[y].paint(canvas, new Rect.fromLTRB(
+          offset.dx,
+          offset.dy + _rowTops[y],
+          offset.dx + size.width,
+          offset.dy + _rowTops[y+1]
+        ));
+      }
+    }
     for (int index = 0; index < _children.length; index += 1) {
       RenderBox child = _children[index];
       if (child != null) {
@@ -856,9 +907,8 @@ class RenderTable extends RenderBox {
         context.paintChild(child, childParentData.offset + offset);
       }
     }
+    canvas = context.canvas;
     Rect bounds = offset & size;
-    Canvas canvas = context.canvas;
-    canvas.saveLayer(bounds, new Paint());
     if (border != null) {
       switch (border.verticalInside.style) {
         case BorderStyle.solid:
@@ -892,7 +942,6 @@ class RenderTable extends RenderBox {
       }
       border.paint(canvas, bounds);
     }
-    canvas.restore();
   }
 
   @override
