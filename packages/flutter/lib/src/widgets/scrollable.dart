@@ -659,7 +659,7 @@ class ScrollableViewport extends Scrollable {
 
 class _ScrollableViewportState extends ScrollableState<ScrollableViewport> {
   @override
-  ScrollBehavior<double, double> createScrollBehavior() => new OverscrollWhenScrollableBehavior();
+  OverscrollWhenScrollableBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior();
 
   @override
   OverscrollWhenScrollableBehavior get scrollBehavior => super.scrollBehavior;
@@ -830,7 +830,7 @@ class ScrollableMixedWidgetListState extends ScrollableState<ScrollableMixedWidg
   }
 
   @override
-  ScrollBehavior<double, double> createScrollBehavior() => new OverscrollBehavior();
+  OverscrollBehavior createScrollBehavior() => new OverscrollBehavior();
 
   @override
   OverscrollBehavior get scrollBehavior => super.scrollBehavior;

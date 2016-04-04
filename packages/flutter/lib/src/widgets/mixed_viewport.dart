@@ -9,7 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'framework.dart';
 import 'basic.dart';
 
-typedef Widget IndexedBuilder(BuildContext context, int index); // return null if index is greater than index of last entry
 typedef void InvalidatorCallback(Iterable<int> indices);
 typedef void InvalidatorAvailableCallback(InvalidatorCallback invalidator);
 

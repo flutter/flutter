@@ -198,7 +198,7 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
   }
 
   @override
-  ScrollBehavior<double, double> createScrollBehavior() => scrollBehavior;
+  ExtentScrollBehavior createScrollBehavior() => scrollBehavior;
 
   @override
   bool get shouldSnapScrollOffset => config.itemsSnapAlignment == PageableListFlingBehavior.canFlingAcrossMultiplePages;

@@ -170,8 +170,7 @@ abstract class VirtualViewportElement extends RenderObjectElement {
     for (int i = 0; i < count; ++i) {
       int childIndex = base + i;
       Widget child = _widgetProvider.getChild(childIndex);
-      Key key = child.key != null ? new ValueKey<Key>(child.key) : new ValueKey<int>(childIndex);
-      newWidgets[i] = new RepaintBoundary(key: key, child: child);
+      newWidgets[i] = new RepaintBoundary.wrap(child, childIndex);
     }
 
     assert(!debugChildrenHaveDuplicateKeys(widget, newWidgets));

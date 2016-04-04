@@ -2452,6 +2452,11 @@ class Listener extends SingleChildRenderObjectWidget {
 class RepaintBoundary extends SingleChildRenderObjectWidget {
   RepaintBoundary({ Key key, Widget child }) : super(key: key, child: child);
 
+  factory RepaintBoundary.wrap(Widget child, int childIndex) {
+    Key key = child.key != null ? new ValueKey<Key>(child.key) : new ValueKey<int>(childIndex);
+    return new RepaintBoundary(key: key, child: child);
+  }
+
   @override
   RenderRepaintBoundary createRenderObject(BuildContext context) => new RenderRepaintBoundary();
 }
