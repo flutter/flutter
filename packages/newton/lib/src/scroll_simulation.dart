@@ -7,10 +7,25 @@ import 'simulation_group.dart';
 import 'simulation.dart';
 import 'spring_simulation.dart';
 
+/// Composite simulation for scrollable interfaces.
+///
 /// Simulates kinetic scrolling behavior between a leading and trailing
-/// boundary. Friction is applied within the extends and a spring action applied
-/// at the boundaries. This simulation can only step forward.
+/// boundary. Friction is applied within the extents and a spring action is
+/// applied at the boundaries. This simulation can only step forward.
 class ScrollSimulation extends SimulationGroup {
+  /// Creates a [ScrollSimulation] with the given parameters.
+  ///
+  /// The position and velocity arguments must use the same units as will be
+  /// expected from the [x] and [dx] methods respectively.
+  ///
+  /// The leading and trailing extents must use the unit of length, the same
+  /// unit as used for the position argument and as expected from the [x]
+  /// method.
+  ///
+  /// The units used with the provided [SpringDescription] must similarly be
+  /// consistent with the other arguments.
+  ///
+  /// The final argument is the coefficient of friction, which is unitless.
   ScrollSimulation(
     double position,
     double velocity,
