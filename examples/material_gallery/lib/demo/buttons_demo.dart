@@ -3,59 +3,116 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
-import 'tabs_fab_demo.dart';
-import 'dialog_demo.dart';
-import 'snack_bar_demo.dart';
-
-const String _floatingText =
-  "A floating action button is a circular material button that lifts "
-  "and displays an ink reaction on press. It turns and fades in when "
-  "it changes.";
+import '../gallery/demo.dart';
 
 const String _raisedText =
-  "A raised button is typically a rectangular material button that lifts "
-  "and displays ink reactions on press. Raised buttons add dimension to "
-  "mostly flat layouts. They emphasize functions on busy or wide spaces.";
+  "# Raised buttons\n"
+  "Raised buttons add dimension to mostly flat layouts. They emphasize"
+  "functions on busy or wide spaces.";
+
+const String _raisedCode =
+"""// Create a flat button
+new RaisedButton(
+  child: new Text('BUTTON TITLE'),
+  onPressed: () {
+    // Perform some action
+  }
+);
+
+// Create a disabled button
+// The button is disabled because there is no
+// onPressed method specified
+new RaisedButton(
+  child: new Text('BUTTON TITLE')
+);""";
 
 const String _flatText =
+  "# Flat buttons\n"
   "A flat button is made of ink that displays ink reactions on press "
   "but does not lift. Use flat buttons on toolbars, in dialogs and "
   "inline with padding";
 
+const String _flatCode =
+"""// Create a flat button
+new FlatButton(
+  child: new Text('BUTTON TITLE'),
+  onPressed: () {
+    // Perform some action
+  }
+);
+
+// Create a disabled button
+// The button is disabled because there is no
+// onPressed method specified
+new FlatButton(
+  child: new Text('BUTTON TITLE')
+);""";
+
 const String _dropdownText =
-  "A dropdown button selects between multiple selections. The button "
-  "displays the current state and a down arrow.";
+  "# Dropdown buttons\n"
+  "A dropdown button displays a menu that's used to select a value from a "
+  "small set of values. The button displays the current value and a down "
+  "arrow.";
 
-class _ButtonDemo {
-  _ButtonDemo({ this.title, this.text, this.builder }) {
-    assert(title != null);
-    assert(text != null);
-    assert(builder != null);
-  }
+const String _dropdownCode =
+"""// Member variable holding value
+String dropdownValue
 
-  final String title;
-  final String text;
-  final WidgetBuilder builder;
+// Drop down button with string values
+new DropDownButton<String>(
+  value: dropdownValue,
+  onChanged: (String newValue) {
+    // null indicates the user didn't select a
+    // new value
+    setState(() {
+      if (newValue != null)
+        dropdownValue = newValue;
+    });
+  },
+  items: <String>['One', 'Two', 'Free', 'Four']
+    .map((String value) {
+      return new DropDownMenuItem<String>(
+        value: value,
+        child: new Text(value));
+    })
+    .toList()
+)""";
 
-  TabLabel get tabLabel => new TabLabel(text: title.toUpperCase());
+const String _iconText =
+  "IconButtons are appropriate for toggle buttons that allow a single choice to be "
+  "selected or deselected, such as adding or removing an item's star.";
 
-  // The TabBarSelection created below saves and restores _ButtonDemo objects
-  // to recover this demo's selected tab. To enable it to compare restored
-  // _ButtonDemo objects with new ones, define hashCode and operator== .
+const String _iconCode =
+"""// Member variable holding toggle value
+bool iconButtonToggle;
 
-  @override
-  bool operator==(Object other) {
-    if (other.runtimeType != runtimeType)
-      return false;
-    _ButtonDemo typedOther = other;
-    return typedOther.title == title && typedOther.text == text;
-  }
+// Toggable icon button
+new IconButton(
+  icon: Icons.thumb_up,
+  onPressed: () {
+    setState(() => iconButtonToggle = !iconButtonToggle);
+  },
+  color: iconButtonToggle ? Theme.of(context).primaryColor : null
+)""";
 
-  @override
-  int get hashCode => hashValues(title.hashCode, text.hashCode);
-}
+const String _actionText =
+  "# Floating action buttons\n"
+  "Floating action buttons are used for a promoted action. They are "
+  "distinguished by a circled icon floating above the UI and have motion "
+  "behaviors that include morphing, launching, and a transferring anchor "
+  "point.";
+
+const String _actionCode =
+"""// Floating action button in Scaffold
+new Scaffold(
+  appBar: new AppBar(
+    title: new Text('Demo')
+  ),
+  floatingActionButton: new FloatingActionButton(
+    child: new Icon(icon: Icons.add)
+  )
+);""";
 
 class ButtonsDemo extends StatefulWidget {
   @override
@@ -63,153 +120,143 @@ class ButtonsDemo extends StatefulWidget {
 }
 
 class _ButtonsDemoState extends State<ButtonsDemo> {
-  List<_ButtonDemo> _demos;
-
   @override
-  void initState() {
-    super.initState();
-    _demos = <_ButtonDemo>[
-      new _ButtonDemo(title: 'FLOATING', text: _floatingText, builder: buildFloatingButton),
-      new _ButtonDemo(title: 'RAISED', text: _raisedText, builder: buildRaisedButton),
-      new _ButtonDemo(title: 'FLAT', text: _flatText, builder: buildFlatButton),
-      new _ButtonDemo(title: 'DROPDOWN', text: _dropdownText, builder: buildDropdownButton)
+  Widget build(BuildContext context) {
+    List<ComponentDemoTabData> demos = <ComponentDemoTabData>[
+      new ComponentDemoTabData(
+        tabName: 'RAISED',
+        description: _raisedText,
+        widget: buildRaisedButton(),
+        exampleCode: _raisedCode
+      ),
+      new ComponentDemoTabData(
+        tabName: 'FLAT',
+        description: _flatText,
+        widget: buildFlatButton(),
+        exampleCode: _flatCode
+      ),
+      new ComponentDemoTabData(
+        tabName: 'DROPDOWN',
+        description: _dropdownText,
+        widget: buildDropdownButton(),
+        exampleCode:
+        _dropdownCode
+      ),
+      new ComponentDemoTabData(
+        tabName: 'ICON',
+        description: _iconText,
+        widget: buildIconButton(),
+        exampleCode: _iconCode
+      ),
+      new ComponentDemoTabData(
+        tabName: 'ACTION',
+        description: _actionText,
+        widget: buildActionButton(),
+        exampleCode: _actionCode
+      ),
     ];
-  }
 
-  Widget buildFloatingButton(BuildContext context) {
-    return new SizedBox(
-      height: 128.0,
-      child: new Center(
-        child: new FloatingActionButton(
-          tooltip: 'Open FAB demos',
-          child: new Icon(icon: Icons.add),
-          onPressed: () {
-            Navigator.push(context, new MaterialPageRoute<Null>(
-              builder: (BuildContext context) => new TabsFabDemo()
-            ));
-          }
-        )
-      )
+    return new TabbedComponentDemoScaffold(
+      title: 'Buttons',
+      demos: demos
     );
   }
 
-  Widget buildRaisedButton(BuildContext context) {
-    return new Container(
-      margin: const EdgeInsets.symmetric(vertical: 16.0),
-      child: new Column(
+  Widget buildRaisedButton() {
+    return new Align(
+      alignment: new FractionalOffset(0.5, 0.4),
+      child: new Row(
+        mainAxisAlignment: MainAxisAlignment.collapse,
         children: <Widget>[
           new RaisedButton(
-            child: new Text('LAUNCH DEMO'),
+            child: new Text('RAISED BUTTON'),
             onPressed: () {
-              Navigator.push(context, new MaterialPageRoute<Null>(
-                builder: (BuildContext context) => new SnackBarDemo()
-              ));
+              // Perform some action
             }
           ),
           new RaisedButton(
             child: new Text('DISABLED')
           )
         ]
-        .map((Widget child) {
-          return new Container(
-            margin: const EdgeInsets.symmetric(vertical: 8.0),
-            child: child
-          );
-        })
-        .toList()
       )
     );
   }
 
-  Widget buildFlatButton(BuildContext context) {
-    return new Container(
-      margin: const EdgeInsets.symmetric(vertical: 16.0),
-      child: new ButtonTheme(
-        color: ButtonColor.accent,
-        child: new Column(
-          children: <Widget>[
-            new FlatButton(
-              child: new Text('LAUNCH DEMO'),
-              onPressed: () {
-                Navigator.push(context, new MaterialPageRoute<Null>(
-                  builder: (_) => new DialogDemo()
-                ));
-              }
-            ),
-            new FlatButton(
-              child: new Text('DISABLED')
-            )
-          ]
-          .map((Widget child) {
-            return new Container(
-              margin: const EdgeInsets.symmetric(vertical: 8.0),
-              child: child
-            );
+  Widget buildFlatButton() {
+    return new Align(
+      alignment: new FractionalOffset(0.5, 0.4),
+      child: new Row(
+        mainAxisAlignment: MainAxisAlignment.collapse,
+        children: <Widget>[
+          new FlatButton(
+            child: new Text('FLAT BUTTON'),
+            onPressed: () {
+              // Perform some action
+            }
+          ),
+          new FlatButton(
+            child: new Text('DISABLED')
+          )
+        ]
+      )
+    );
+  }
+
+  String dropdownValue = 'Free';
+
+  Widget buildDropdownButton() {
+    return new Align(
+      alignment: new FractionalOffset(0.5, 0.4),
+      child: new DropDownButton<String>(
+        value: dropdownValue,
+        onChanged: (String newValue) {
+          setState(() {
+            if (newValue != null)
+              dropdownValue = newValue;
+          });
+        },
+        items: <String>['One', 'Two', 'Free', 'Four']
+          .map((String value) {
+            return new DropDownMenuItem<String>(
+              value: value,
+              child: new Text(value));
           })
           .toList()
-        )
       )
     );
   }
 
-  String dropdownValue = "Free";
+  bool iconButtonToggle = false;
 
-  Widget buildDropdownButton(BuildContext context) {
-    return new SizedBox(
-      height: 256.0,
-      child: new Center(
-        child: new DropDownButton<String>(
-          value: dropdownValue,
-          onChanged: (String newValue) {
-            setState(() {
-              if (newValue != null)
-                dropdownValue = newValue;
-            });
-          },
-          items: <String>["One", "Two", "Free", "Four"]
-            .map((String value) {
-              return new DropDownMenuItem<String>(
-                value: value,
-                child: new Text(value));
-            })
-            .toList()
-        )
-      )
-    );
-  }
-
-  Widget buildTabView(_ButtonDemo demo) {
-    return new Builder(
-      builder: (BuildContext context) {
-        final TextStyle textStyle = Theme.of(context).textTheme.caption.copyWith(fontSize: 16.0);
-        return new Block(
-          children: <Widget>[
-            demo.builder(context),
-            new Padding(
-              padding: const EdgeInsets.fromLTRB(32.0, 0.0, 32.0, 24.0),
-              child: new Text(demo.text, style: textStyle)
-            )
-          ]
-        );
-      }
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return new TabBarSelection<_ButtonDemo>(
-      values: _demos,
-      child: new Scaffold(
-        appBar: new AppBar(
-          title: new Text('Buttons'),
-          tabBar: new TabBar<_ButtonDemo>(
-            isScrollable: true,
-            labels: new Map<_ButtonDemo, TabLabel>.fromIterable(_demos, value: (_ButtonDemo demo) => demo.tabLabel)
+  Widget buildIconButton() {
+    return new Align(
+      alignment: new FractionalOffset(0.5, 0.4),
+      child: new Row(
+        mainAxisAlignment: MainAxisAlignment.collapse,
+        children: <Widget>[
+          new IconButton(
+            icon: Icons.thumb_up,
+            onPressed: () {
+              setState(() => iconButtonToggle = !iconButtonToggle);
+            },
+            color: iconButtonToggle ? Theme.of(context).primaryColor : null
+          ),
+          new IconButton(
+            icon: Icons.thumb_up
           )
-        ),
-        body: new TabBarView<_ButtonDemo>(
-          children: _demos.map(buildTabView).toList()
-        )
+        ]
+      )
+    );
+  }
+
+  Widget buildActionButton() {
+    return new Align(
+      alignment: new FractionalOffset(0.5, 0.4),
+      child: new FloatingActionButton(
+        child: new Icon(icon: Icons.add),
+        onPressed: () {
+          // Perform some action
+        }
       )
     );
   }
