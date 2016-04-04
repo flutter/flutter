@@ -99,7 +99,7 @@ void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
   root_node->op->get_image()->content_rect->height = size.height;
   root_node->op->get_image()->image_resource_id = kContentImageResourceId;
   root_node->hit_test_behavior = mojo::gfx::composition::HitTestBehavior::New();
-  root_node->combinator = mojo::gfx::composition::Node::Combinator::PRUNE;
+  root_node->combinator = mojo::gfx::composition::Node::Combinator::MERGE;
   layer_tree->UpdateScene(update.get(), root_node.get());
 
   update->nodes.insert(kRootNodeId, root_node.Pass());
