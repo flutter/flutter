@@ -288,7 +288,7 @@ class AnalyzeCommand extends FlutterCommand {
     // save the Dart file and the .packages file to disk
     Directory host = Directory.systemTemp.createTempSync('flutter-analyze-');
     File mainFile = new File(path.join(host.path, 'main.dart'))..writeAsStringSync(mainBody.toString());
-    File optionsFile = new File(path.join(ArtifactStore.flutterRoot, 'packages', 'flutter_tools', '.analysis_options'));
+    File optionsFile = new File(path.join(ArtifactStore.flutterRoot, 'packages', 'flutter_tools', 'flutter_analysis_options'));
     File packagesFile = new File(path.join(host.path, '.packages'))..writeAsStringSync(packagesBody.toString());
 
     List<String> cmd = <String>[
