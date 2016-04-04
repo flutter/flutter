@@ -456,6 +456,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     if (child == null)
       return constraints.constrainWidth(0.0);
     double childResult = child.getMaxIntrinsicWidth(constraints);
+    assert(!childResult.isInfinite);
     return constraints.constrainWidth(_applyStep(childResult, _stepWidth));
   }
 
@@ -465,6 +466,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     if (child == null)
       return constraints.constrainHeight(0.0);
     double childResult = child.getMinIntrinsicHeight(_getInnerConstraints(constraints));
+    assert(!childResult.isInfinite);
     return constraints.constrainHeight(_applyStep(childResult, _stepHeight));
   }
 
@@ -474,6 +476,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     if (child == null)
       return constraints.constrainHeight(0.0);
     double childResult = child.getMaxIntrinsicHeight(_getInnerConstraints(constraints));
+    assert(!childResult.isInfinite);
     return constraints.constrainHeight(_applyStep(childResult, _stepHeight));
   }
 

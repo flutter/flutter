@@ -12,6 +12,7 @@ class Colors {
   /// Completely invisible.
   static const Color transparent = const Color(0x00000000);
 
+
   /// Completely opaque black.
   static const Color black   = const Color(0xFF000000);
 
@@ -21,6 +22,11 @@ class Colors {
   /// Black with 54% opacity.
   static const Color black54 = const Color(0x8A000000);
 
+  /// Black with 38% opacity.
+  ///
+  /// Used for the placeholder text in data tables in light themes.
+  static const Color black38 = const Color(0x61000000);
+
   /// Black with 45% opacity.
   ///
   /// Used for modal barriers.
@@ -28,13 +34,14 @@ class Colors {
 
   /// Black with 26% opacity.
   ///
-  /// Used for disabled radio buttons and text of disabled flat buttons in the light theme.
+  /// Used for disabled radio buttons and the text of disabled flat buttons in light themes.
   static const Color black26 = const Color(0x42000000);
 
   /// Black with 12% opacity.
   ///
-  /// Used for the background of disabled raised buttons in the light theme.
+  /// Used for the background of disabled raised buttons in light themes.
   static const Color black12 = const Color(0x1F000000);
+
 
   /// Completely opaque white.
   static const Color white   = const Color(0xFFFFFFFF);
@@ -44,16 +51,17 @@ class Colors {
 
   /// White with 32% opacity.
   ///
-  /// Used for disabled radio buttons and text of disabled flat buttons in the dark theme.
+  /// Used for disabled radio buttons and the text of disabled flat buttons in dark themes.
   static const Color white30 = const Color(0x4DFFFFFF);
 
   /// White with 12% opacity.
   ///
-  /// Used for the background of disabled raised buttons in the dark theme.
+  /// Used for the background of disabled raised buttons in dark themes.
   static const Color white12 = const Color(0x1FFFFFFF);
 
   /// White with 10% opacity.
   static const Color white10 = const Color(0x1AFFFFFF);
+
 
   /// The red primary swatch.
   static const Map<int, Color> red = const <int, Color>{

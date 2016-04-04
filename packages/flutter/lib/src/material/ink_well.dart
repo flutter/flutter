@@ -64,6 +64,31 @@ class InkResponse extends StatefulWidget {
   /// The shape (e.g., circle, rectangle) to use for the highlight drawn around this part of the material.
   final BoxShape highlightShape;
 
+  /// The rectangle to use for the highlight effect and for clipping
+  /// the splash effects if [containedInkWell] is true.
+  ///
+  /// This method is intended to be overridden by descendants that
+  /// specialize [InkResponse] for unusual cases. For example,
+  /// [RowInkWell] implements this method to return the rectangle
+  /// corresponding to the row that the widget is in.
+  ///
+  /// The default behavior returns null, which is equivalent to
+  /// returning the referenceBox argument's bounding box (though
+  /// slightly more efficient).
+  RectCallback getRectCallback(RenderBox referenceBox) => null;
+
+  /// Asserts that the given context satisfies the prerequisites for
+  /// this class.
+  ///
+  /// This method is intended to be overridden by descendants that
+  /// specialize [InkResponse] for unusual cases. For example,
+  /// [RowInkWell] implements this method to verify that the widget is
+  /// in a table.
+  bool debugCheckContext(BuildContext context) {
+    assert(debugCheckHasMaterial(context));
+    return true;
+  }
+
   @override
   _InkResponseState<InkResponse> createState() => new _InkResponseState<InkResponse>();
 }
@@ -85,6 +110,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
           referenceBox: referenceBox,
           color: Theme.of(context).highlightColor,
           shape: config.highlightShape,
+          rectCallback: config.getRectCallback(referenceBox),
           onRemoved: () {
             assert(_lastHighlight != null);
             _lastHighlight = null;
@@ -105,11 +131,13 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
     RenderBox referenceBox = context.findRenderObject();
     assert(Material.of(context) != null);
     InkSplash splash;
+    RectCallback rectCallback = config.getRectCallback(referenceBox);
     splash = Material.of(context).splashAt(
       referenceBox: referenceBox,
       position: referenceBox.globalToLocal(position),
       color: Theme.of(context).splashColor,
-      containedInWell: config.containedInkWell,
+      containedInkWell: config.containedInkWell,
+      rectCallback: config.containedInkWell ? rectCallback : null,
       onRemoved: () {
         if (_splashes != null) {
           assert(_splashes.contains(splash));
@@ -176,7 +204,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
 
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasMaterial(context));
+    assert(config.debugCheckContext(context));
     final bool enabled = config.onTap != null || config.onDoubleTap != null || config.onLongPress != null;
     return new GestureDetector(
       onTapDown: enabled ? _handleTapDown : null,

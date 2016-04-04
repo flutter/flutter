@@ -19,17 +19,47 @@ class TableCellParentData extends BoxParentData {
   int y;
 
   @override
-  String toString() => '${super.toString()}; $verticalAlignment';
+  String toString() => '${super.toString()}; ${verticalAlignment == null ? "default vertical alignment" : "$verticalAlignment"}';
 }
 
 /// Base class to describe how wide a column in a [RenderTable] should be.
 abstract class TableColumnWidth {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const TableColumnWidth();
 
+  /// The smallest width that the column can have.
+  ///
+  /// The `cells` argument is an iterable that provides all the cells
+  /// in the table for this column. Walking the cells is by definition
+  /// O(N), so algorithms that do that should be considered expensive.
+  ///
+  /// The `containerWidth` argument is the `maxWidth` of the incoming
+  /// constraints for the table, and might be infinite.
   double minIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth);
 
+  /// The ideal width that the column should have. This must be equal
+  /// to or greater than the [minIntrinsicWidth]. The column might be
+  /// bigger than this width, e.g. if the column is flexible or if the
+  /// table's width ends up being forced to be bigger than the sum of
+  /// all the maxIntrinsicWidth values.
+  ///
+  /// The `cells` argument is an iterable that provides all the cells
+  /// in the table for this column. Walking the cells is by definition
+  /// O(N), so algorithms that do that should be considered expensive.
+  ///
+  /// The `containerWidth` argument is the `maxWidth` of the incoming
+  /// constraints for the table, and might be infinite.
   double maxIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth);
 
+  /// The flex factor to apply to the cell if there is any room left
+  /// over when laying out the table. The remaining space is
+  /// distributed to any columns with flex in proportion to their flex
+  /// value (higher values get more space).
+  ///
+  /// The `cells` argument is an iterable that provides all the cells
+  /// in the table for this column. Walking the cells is by definition
+  /// O(N), so algorithms that do that should be considered expensive.
   double flex(Iterable<RenderBox> cells) => null;
 
   @override
@@ -40,8 +70,12 @@ abstract class TableColumnWidth {
 /// cells in that column.
 ///
 /// This is a very expensive way to size a column.
+///
+/// A flex value can be provided. If specified (and non-null), the
+/// column will participate in the distribution of remaining space
+/// once all the non-flexible columns have been sized.
 class IntrinsicColumnWidth extends TableColumnWidth { 
-  const IntrinsicColumnWidth();
+  const IntrinsicColumnWidth({ double flex }) : _flex = flex;
 
   @override
   double minIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) {
@@ -58,6 +92,11 @@ class IntrinsicColumnWidth extends TableColumnWidth {
       result = math.max(result, cell.getMaxIntrinsicWidth(const BoxConstraints()));
     return result;
   }
+
+  final double _flex;
+
+  @override
+  double flex(Iterable<RenderBox> cells) => _flex;
 }
 
 /// Sizes the column to a specific number of pixels.
@@ -169,10 +208,13 @@ class MaxColumnWidth extends TableColumnWidth {
 
   @override
   double flex(Iterable<RenderBox> cells) {
-    double aFlex = a.flex(cells);
+    final double aFlex = a.flex(cells);
     if (aFlex == null)
       return b.flex(cells);
-    return math.max(aFlex, b.flex(cells));
+    final double bFlex = b.flex(cells);
+    if (bFlex == null)
+      return null;
+    return math.max(aFlex, bFlex);
   }
 
   @override
@@ -215,7 +257,10 @@ class MinColumnWidth extends TableColumnWidth {
     double aFlex = a.flex(cells);
     if (aFlex == null)
       return b.flex(cells);
-    return math.min(aFlex, b.flex(cells));
+    double bFlex = b.flex(cells);
+    if (bFlex == null)
+      return null;
+    return math.min(aFlex, bFlex);
   }
 
   @override
@@ -535,26 +580,34 @@ class RenderTable extends RenderBox {
     }
     assert(cells != null);
     assert(cells.length % columns == 0);
-    // remove cells that are moving away
+    // fill a set with the cells that are moving (it's important not
+    // to dropChild a child that's remaining with us, because that
+    // would clear their parentData field)
+    final Set<RenderBox> lostChildren = new HashSet<RenderBox>();
     for (int y = 0; y < _rows; y += 1) {
       for (int x = 0; x < _columns; x += 1) {
         int xyOld = x + y * _columns;
         int xyNew = x + y * columns;
         if (_children[xyOld] != null && (x >= columns || xyNew >= cells.length || _children[xyOld] != cells[xyNew]))
-          dropChild(_children[xyOld]);
+          lostChildren.add(_children[xyOld]);
       }
     }
-    // adopt cells that are arriving
+    // adopt cells that are arriving, and cross cells that are just moving off our list of lostChildren
     int y = 0;
     while (y * columns < cells.length) {
       for (int x = 0; x < columns; x += 1) {
         int xyNew = x + y * columns;
         int xyOld = x + y * _columns;
-        if (cells[xyNew] != null && (x >= _columns || y >= _rows || _children[xyOld] != cells[xyNew]))
-          adoptChild(cells[xyNew]);
+        if (cells[xyNew] != null && (x >= _columns || y >= _rows || _children[xyOld] != cells[xyNew])) {
+          if (!lostChildren.remove(cells[xyNew]))
+            adoptChild(cells[xyNew]);
+        }
       }
       y += 1;
     }
+    // drop all the lost children
+    for (RenderBox oldChild in lostChildren)
+      dropChild(oldChild);
     // update our internal values
     _columns = columns;
     _rows = cells.length ~/ columns;
@@ -666,7 +719,7 @@ class RenderTable extends RenderBox {
     // honorable mention, most likely to improve if taught about memoization award
     assert(constraints.debugAssertIsValid());
     assert(_children.length == rows * columns);
-    final List<double> widths = computeColumnWidths(constraints);
+    final List<double> widths = _computeColumnWidths(constraints);
     double rowTop = 0.0;
     for (int y = 0; y < rows; y += 1) {
       double rowHeight = 0.0;
@@ -694,6 +747,10 @@ class RenderTable extends RenderBox {
     return _baselineDistance;
   }
 
+  /// Returns the list of [RenderBox] objects that are in the given
+  /// column, in row order, starting from the first row.
+  ///
+  /// This is a lazily-evaluated iterable.
   Iterable<RenderBox> column(int x) sync* {
     for (int y = 0; y < rows; y += 1) {
       final int xy = x + y * columns;
@@ -703,6 +760,10 @@ class RenderTable extends RenderBox {
     }
   }
 
+  /// Returns the list of [RenderBox] objects that are on the given
+  /// row, in column order, starting with the first column.
+  ///
+  /// This is a lazily-evaluated iterable.
   Iterable<RenderBox> row(int y) sync* {
     final int start = y * columns;
     final int end = (y + 1) * columns;
@@ -713,48 +774,166 @@ class RenderTable extends RenderBox {
     }
   }
 
-  List<double> computeColumnWidths(BoxConstraints constraints) {
+  List<double> _computeColumnWidths(BoxConstraints constraints) {
     assert(_children.length == rows * columns);
+    // We apply the constraints to the column widths in the order of
+    // least important to most important:
+    // 1. apply the ideal widths (maxIntrinsicWidth)
+    // 2. grow the flex columns so that the table has the maxWidth (if
+    //    finite) or the minWidth (if not)
+    // 3. if there were no flex columns, then grow the table to the
+    //    minWidth.
+    // 4. apply the maximum width of the table, shrinking columns as
+    //    necessary, applying minimum column widths as we go
+
+    // 1. apply ideal widths, and collect information we'll need later
     final List<double> widths = new List<double>(columns);
+    final List<double> minWidths = new List<double>(columns);
     final List<double> flexes = new List<double>(columns);
-    double totalMinWidth = 0.0;
-    double totalMaxWidth = constraints.maxWidth.isFinite ? constraints.maxWidth : 0.0;
+    double tableWidth = 0.0; // running tally of the sum of widths[x] for all x
+    double unflexedTableWidth = 0.0; // sum of the maxIntrinsicWidths of any column that has null flex
     double totalFlex = 0.0;
     for (int x = 0; x < columns; x += 1) {
       TableColumnWidth columnWidth = _columnWidths[x] ?? defaultColumnWidth;
       Iterable<RenderBox> columnCells = column(x);
-      double minIntrinsicWidth = columnWidth.minIntrinsicWidth(columnCells, constraints.maxWidth);
-      widths[x] = minIntrinsicWidth;
-      totalMinWidth += minIntrinsicWidth;
-      if (!constraints.maxWidth.isFinite) {
-        double maxIntrinsicWidth = columnWidth.maxIntrinsicWidth(columnCells, constraints.maxWidth);
-        assert(minIntrinsicWidth <= maxIntrinsicWidth);
-        totalMaxWidth += maxIntrinsicWidth;
-      }
+      // apply ideal width (maxIntrinsicWidth)
+      final double maxIntrinsicWidth = columnWidth.maxIntrinsicWidth(columnCells, constraints.maxWidth);
+      assert(maxIntrinsicWidth.isFinite);
+      assert(maxIntrinsicWidth >= 0.0);
+      widths[x] = maxIntrinsicWidth;
+      tableWidth += maxIntrinsicWidth;
+      // collect min width information while we're at it
+      final double minIntrinsicWidth = columnWidth.minIntrinsicWidth(columnCells, constraints.maxWidth);
+      assert(minIntrinsicWidth.isFinite);
+      assert(minIntrinsicWidth >= 0.0);
+      minWidths[x] = minIntrinsicWidth;
+      assert(maxIntrinsicWidth >= minIntrinsicWidth);
+      // collect flex information while we're at it
       double flex = columnWidth.flex(columnCells);
       if (flex != null) {
-        assert(flex != 0.0);
+        assert(flex.isFinite);
+        assert(flex > 0.0);
         flexes[x] = flex;
         totalFlex += flex;
+      } else {
+        unflexedTableWidth += maxIntrinsicWidth;
       }
     }
     assert(!widths.any((double value) => value == null));
-    // table is going to be the biggest of:
-    //  - the incoming minimum width
-    //  - the sum of the cells' minimum widths
-    //  - the incoming maximum width if it is finite, or else the table's ideal shrink-wrap width
-    double tableWidth = math.max(constraints.minWidth, math.max(totalMinWidth, totalMaxWidth));
-    double remainingWidth = tableWidth - totalMinWidth;
-    if (remainingWidth > 0.0) {
-      if (totalFlex > 0.0) {
+    final double maxWidthConstraint = constraints.maxWidth;
+    final double minWidthConstraint = constraints.minWidth;
+
+    // 2. grow the flex columns so that the table has the maxWidth (if
+    //    finite) or the minWidth (if not)
+    if (totalFlex > 0.0) {
+      // this can only grow the table, but it _will_ grow the table at
+      // least as big as the target width.
+      double targetWidth;
+      if (maxWidthConstraint.isFinite) {
+        targetWidth = maxWidthConstraint; 
+      } else {
+        targetWidth = minWidthConstraint;
+      }
+      if (tableWidth < targetWidth) {
+        final double remainingWidth = targetWidth - unflexedTableWidth;
+        assert(remainingWidth.isFinite);
+        assert(remainingWidth >= 0.0);
         for (int x = 0; x < columns; x += 1) {
           if (flexes[x] != null) {
-            widths[x] += math.max((flexes[x] / totalFlex) * remainingWidth - widths[x], 0.0);
+            final double flexedWidth = remainingWidth * flexes[x] / totalFlex;
+            assert(flexedWidth.isFinite);
+            assert(flexedWidth >= 0.0);
+            if (widths[x] < flexedWidth) {
+              final double delta = flexedWidth - widths[x];
+              tableWidth += delta;
+              widths[x] = flexedWidth;
+            }
           }
         }
-      } else {
-        for (int x = 0; x < columns; x += 1)
-          widths[x] += remainingWidth / columns;
+        assert(tableWidth >= targetWidth);
+      }
+    } else // step 2 and 3 are mutually exclusive
+
+    // 3. if there were no flex columns, then grow the table to the
+    //    minWidth.
+    if (tableWidth < minWidthConstraint) {
+      final double delta = (minWidthConstraint - tableWidth) / columns;
+      for (int x = 0; x < columns; x += 1)
+        widths[x] += delta;
+      tableWidth = minWidthConstraint;
+    }
+
+    // beyond this point, unflexedTableWidth is no longer valid
+    assert(() { unflexedTableWidth = null; return true; });
+
+    // 4. apply the maximum width of the table, shrinking columns as
+    //    necessary, applying minimum column widths as we go
+    if (tableWidth > maxWidthConstraint) {
+      double deficit = tableWidth - maxWidthConstraint;
+      // Some columns may have low flex but have all the free space.
+      // (Consider a case with a 1px wide column of flex 1000.0 and
+      // a 1000px wide column of flex 1.0; the sizes coming from the
+      // maxIntrinsicWidths. If the maximum table width is 2px, then
+      // just applying the flexes to the deficit would result in a
+      // table with one column at -998px and one column at 990px,
+      // which is wildly unhelpful.)
+      // Similarly, some columns may be flexible, but not actually
+      // be shrinkable due to a large minimum width. (Consider a
+      // case with two columns, one is flex and one isn't, both have
+      // 1000px maxIntrinsicWidths, but the flex one has 1000px
+      // minIntrinsicWidth also. The whole deficit will have to come
+      // from the non-flex column.)
+      // So what we do is we repeatedly iterate through the flexible
+      // columns shrinking them proportionally until we have no
+      // available columns, then do the same to the non-flexible ones.
+      int availableColumns = columns;
+      while (deficit > 0.0 && totalFlex > 0.0) {
+        double newTotalFlex = 0.0;
+        for (int x = 0; x < columns; x += 1) {
+          if (flexes[x] != null) {
+            final double newWidth = widths[x] - deficit * flexes[x] / totalFlex;
+            assert(newWidth.isFinite);
+            assert(newWidth >= 0.0);
+            if (newWidth <= minWidths[x]) {
+              // shrank to minimum
+              deficit -= widths[x] - minWidths[x];
+              widths[x] = minWidths[x];
+              flexes[x] = null;
+              availableColumns -= 1;
+            } else {
+              deficit -= widths[x] - newWidth;
+              widths[x] = newWidth;
+              newTotalFlex += flexes[x];
+            }
+          }
+        }
+        totalFlex = newTotalFlex;
+      }
+      if (deficit > 0.0) {
+        // Now we have to take out the remaining space from the
+        // columns that aren't minimum sized.
+        // To make this fair, we repeatedly remove equal amounts from
+        // each column, clamped to the minimum width, until we run out
+        // of columns that aren't at their minWidth.
+        do {
+          final double delta = deficit / availableColumns;
+          int newAvailableColumns = 0;
+          for (int x = 0; x < columns; x += 1) {
+            double availableDelta = widths[x] - minWidths[x];
+            if (availableDelta > 0.0) {
+              if (availableDelta <= delta) {
+                // shrank to minimum
+                deficit -= widths[x] - minWidths[x];
+                widths[x] = minWidths[x];
+              } else {
+                deficit -= availableDelta;
+                widths[x] -= availableDelta;
+                newAvailableColumns += 1;
+              }
+            }
+          }
+          availableColumns = newAvailableColumns;
+        } while (deficit > 0.0 && availableColumns > 0);
       }
     }
     return widths;
@@ -764,16 +943,30 @@ class RenderTable extends RenderBox {
   List<double> _rowTops = <double>[];
   List<double> _columnLefts;
 
+  /// Returns the position and dimensions of the box that the given
+  /// row covers, in this render object's coordinate space (so the
+  /// left coordinate is always 0.0).
+  ///
+  /// The row being queried must exist.
+  ///
+  /// This is only valid after layout.
+  Rect getRowBox(int row) {
+    assert(row >= 0);
+    assert(row < rows);
+    assert(!needsLayout);
+    return new Rect.fromLTRB(0.0, _rowTops[row], size.width, _rowTops[row + 1]);
+  }
+
   @override
   void performLayout() {
     assert(_children.length == rows * columns);
     if (rows * columns == 0) {
       // TODO(ianh): if columns is zero, this should be zero width
       // TODO(ianh): if columns is not zero, this should be based on the column width specifications
-      size = constraints.constrain(const Size(double.INFINITY, 0.0));
+      size = constraints.constrain(const Size(0.0, 0.0));
       return;
     }
-    final List<double> widths = computeColumnWidths(constraints);
+    final List<double> widths = _computeColumnWidths(constraints);
     final List<double> positions = new List<double>(columns);
     _rowTops.clear();
     positions[0] = 0.0;

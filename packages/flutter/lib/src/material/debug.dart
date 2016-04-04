@@ -7,9 +7,19 @@ import 'package:flutter/widgets.dart';
 import 'material.dart';
 import 'scaffold.dart';
 
-/// Throws an exception of the given build context is not contained in a [Material] widget.
+/// Asserts that the given context has a [Material] ancestor.
 ///
-/// Does nothing if asserts are disabled.
+/// Used by many material design widgets to make sure that they are
+/// only used in contexts where they can print ink onto some material.
+///
+/// To invoke this function, use the following pattern, typically in the
+/// relevant Widget's [build] method:
+///
+/// ```dart
+/// assert(debugCheckHasMaterial(context));
+/// ```
+///
+/// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasMaterial(BuildContext context) {
   assert(() {
     if (context.widget is! Material && context.ancestorWidgetOfExactType(Material) == null) {
@@ -33,9 +43,22 @@ bool debugCheckHasMaterial(BuildContext context) {
   return true;
 }
 
-/// Throws an exception of the given build context is not contained in a [Scaffold] widget.
+/// Asserts that the given context has a [Scaffold] ancestor.
 ///
-/// Does nothing if asserts are disabled.
+/// Used by some material design widgets to make sure that they are
+/// only used in contexts where they can communicate with a Scaffold.
+///
+/// For example, the [AppBar] in some situations requires a Scaffold
+/// to do the right thing with scrolling.
+///
+/// To invoke this function, use the following pattern, typically in the
+/// relevant Widget's [build] method:
+///
+/// ```dart
+/// assert(debugCheckHasScaffold(context));
+/// ```
+///
+/// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasScaffold(BuildContext context) {
   assert(() {
     if (Scaffold.of(context) == null) {

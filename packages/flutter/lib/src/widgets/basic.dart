@@ -957,9 +957,17 @@ class IntrinsicHeight extends SingleChildRenderObjectWidget {
   RenderIntrinsicHeight createRenderObject(BuildContext context) => new RenderIntrinsicHeight();
 }
 
-/// Positions its child vertically according to the child's baseline.
+/// Shifts the child down such that the child's baseline (or the
+/// bottom of the child, if the child has no baseline) is [baseline]
+/// logical pixels below the top of this box, then sizes this box to
+/// contain the child. If [baseline] is less than the distance from
+/// the top of the child to the baseline of the child, then the child
+/// is top-aligned instead.
 class Baseline extends SingleChildRenderObjectWidget {
-  Baseline({ Key key, this.baseline, this.baselineType: TextBaseline.alphabetic, Widget child })
+  /// Creates a [Baseline] object.
+  ///
+  /// The [baseline] and [baselineType] arguments are required.
+  Baseline({ Key key, this.baseline, this.baselineType, Widget child })
     : super(key: key, child: child) {
     assert(baseline != null);
     assert(baselineType != null);

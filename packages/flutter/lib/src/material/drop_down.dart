@@ -15,11 +15,13 @@ import 'theme.dart';
 import 'material.dart';
 
 const Duration _kDropDownMenuDuration = const Duration(milliseconds: 300);
+const double _kTopMargin = 6.0;
 const double _kMenuItemHeight = 48.0;
 const EdgeInsets _kMenuVerticalPadding = const EdgeInsets.symmetric(vertical: 8.0);
 const EdgeInsets _kMenuHorizontalPadding = const EdgeInsets.symmetric(horizontal: 36.0);
 const double _kBaselineOffsetFromBottom = 20.0;
-const Border _kDropDownUnderline = const Border(bottom: const BorderSide(color: const Color(0xFFBDBDBD), width: 2.0));
+const double _kBottomBorderHeight = 2.0;
+const Border _kDropDownUnderline = const Border(bottom: const BorderSide(color: const Color(0xFFBDBDBD), width: _kBottomBorderHeight));
 
 class _DropDownMenuPainter extends CustomPainter {
   const _DropDownMenuPainter({
@@ -235,7 +237,7 @@ class DropDownMenuItem<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Container(
       height: _kMenuItemHeight,
-      padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 6.0),
+      padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: _kTopMargin),
       child: new DefaultTextStyle(
         style: Theme.of(context).textTheme.subhead,
         child: new Baseline(
@@ -245,6 +247,32 @@ class DropDownMenuItem<T> extends StatelessWidget {
       )
     );
   }
+}
+
+/// An inherited widget that causes any descendant [DropDownButton]
+/// widgets to not include their regular underline.
+///
+/// This is used by [DataTable] to remove the underline from any
+/// [DropDownButton] widgets placed within material data tables, as
+/// required by the material design specification.
+class DropDownButtonHideUnderline extends InheritedWidget {
+  /// Creates a [DropDownButtonHideUnderline]. A non-null [child] must
+  /// be given.
+  DropDownButtonHideUnderline({
+    Key key,
+    Widget child
+  }) : super(key: key, child: child) {
+    assert(child != null);
+  }
+
+  /// Returns whether the underline of [DropDownButton] widgets should
+  /// be hidden.
+  static bool at(BuildContext context) {
+    return context.inheritFromWidgetOfExactType(DropDownButtonHideUnderline) != null;
+  }
+
+  @override
+  bool updateShouldNotify(DropDownButtonHideUnderline old) => false;
 }
 
 /// A material design button for selecting from a list of items.
@@ -336,26 +364,35 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
+    Widget result = new Row(
+      children: <Widget>[
+        new IndexedStack(
+          children: config.items,
+          key: indexedStackKey,
+          index: _selectedIndex,
+          alignment: FractionalOffset.topCenter
+        ),
+        new Container(
+          child: new Icon(icon: Icons.arrow_drop_down, size: 36.0),
+          padding: const EdgeInsets.only(top: _kTopMargin)
+        )
+      ],
+      mainAxisAlignment: MainAxisAlignment.collapse
+    );
+    if (DropDownButtonHideUnderline.at(context)) {
+      result = new Padding(
+        padding: const EdgeInsets.only(bottom: _kBottomBorderHeight),
+        child: result
+      );
+    } else {
+      result = new Container(
+        decoration: const BoxDecoration(border: _kDropDownUnderline),
+        child: result
+      );
+    }
     return new GestureDetector(
       onTap: _handleTap,
-      child: new Container(
-        decoration: new BoxDecoration(border: _kDropDownUnderline),
-        child: new Row(
-          children: <Widget>[
-            new IndexedStack(
-              children: config.items,
-              key: indexedStackKey,
-              index: _selectedIndex,
-              alignment: FractionalOffset.topCenter
-            ),
-            new Container(
-              child: new Icon(icon: Icons.arrow_drop_down, size: 36.0),
-              padding: const EdgeInsets.only(top: 6.0)
-            )
-          ],
-          mainAxisAlignment: MainAxisAlignment.collapse
-        )
-      )
+      child: result
     );
   }
 }

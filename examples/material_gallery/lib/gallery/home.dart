@@ -13,6 +13,7 @@ import '../demo/buttons_demo.dart';
 import '../demo/cards_demo.dart';
 import '../demo/colors_demo.dart';
 import '../demo/chip_demo.dart';
+import '../demo/data_table_demo.dart';
 import '../demo/date_picker_demo.dart';
 import '../demo/dialog_demo.dart';
 import '../demo/drop_down_demo.dart';
@@ -122,6 +123,7 @@ class GalleryHomeState extends State<GalleryHome> {
               new GalleryItem(title: 'Cards', builder: () => new CardsDemo()),
               new GalleryItem(title: 'Chips', builder: () => new ChipDemo()),
               new GalleryItem(title: 'Date picker', builder: () => new DatePickerDemo()),
+              new GalleryItem(title: 'Data tables', builder: () => new DataTableDemo()),
               new GalleryItem(title: 'Dialog', builder: () => new DialogDemo()),
               new GalleryItem(title: 'Drop-down button', builder: () => new DropDownDemo()),
               new GalleryItem(title: 'Expand/collapse list control', builder: () => new TwoLevelListDemo()),
