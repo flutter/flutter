@@ -4,6 +4,11 @@
 # to opt-in to all desired lints (https://github.com/dart-lang/sdk/issues/25843).
 # For a list of lints, see: http://dart-lang.github.io/linter/lints/
 
+# This file is the .analyzis_options file used by "flutter analyze".
+# It isn't named that because otherwise editors like Atom would try
+# to use it, and that wouldn't work because it enables things that
+# need to be silenced, in particular, public_member_api_docs.
+
 analyzer:
   language:
     enableSuperMixins: true
@@ -39,7 +44,7 @@ linter:
     - package_names
     - package_prefixed_library_names
     - prefer_is_not_empty
-    # - public_member_api_docs # still a lot of work to do before enabling this one
+    - public_member_api_docs
     - slash_for_doc_comments
     - sort_constructors_first
     - sort_unnamed_constructors_first

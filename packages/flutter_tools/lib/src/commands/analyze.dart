@@ -108,6 +108,7 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('flutter-repo', help: 'Include all the examples and tests from the Flutter repository.', defaultsTo: false);
     argParser.addFlag('current-directory', help: 'Include all the Dart files in the current directory, if any.', defaultsTo: true);
     argParser.addFlag('current-package', help: 'Include the lib/main.dart file from the current directory, if any.', defaultsTo: true);
+    argParser.addFlag('dartdocs', help: 'List every public member that is lacking documentation. (Only examines files in the Flutter repository.)', defaultsTo: false);
     argParser.addFlag('preamble', help: 'Display the number of files that will be analyzed.', defaultsTo: true);
     argParser.addFlag('congratulate', help: 'Show output even when there are no errors, warnings, hints, or lints.', defaultsTo: true);
     argParser.addFlag('watch', help: 'Run analysis continuously, watching the filesystem for changes.', negatable: false);
@@ -287,7 +288,7 @@ class AnalyzeCommand extends FlutterCommand {
     // save the Dart file and the .packages file to disk
     Directory host = Directory.systemTemp.createTempSync('flutter-analyze-');
     File mainFile = new File(path.join(host.path, 'main.dart'))..writeAsStringSync(mainBody.toString());
-    File optionsFile = new File(path.join(ArtifactStore.flutterRoot, 'packages', 'flutter_tools', '.analysis_options'));
+    File optionsFile = new File(path.join(ArtifactStore.flutterRoot, 'packages', 'flutter_tools', 'flutter_analysis_options'));
     File packagesFile = new File(path.join(host.path, '.packages'))..writeAsStringSync(packagesBody.toString());
 
     List<String> cmd = <String>[
@@ -351,6 +352,7 @@ class AnalyzeCommand extends FlutterCommand {
 
     Set<String> changedFiles = new Set<String>(); // files about which we've complained that they changed
 
+    int membersMissingDocumentation = 0;
     List<String> errorLines = output.toString().split('\n');
     for (String errorLine in errorLines) {
       if (patternsToSkip.every((Pattern pattern) => pattern.allMatches(errorLine).isEmpty)) {
@@ -381,7 +383,14 @@ class AnalyzeCommand extends FlutterCommand {
           if (documentAllMembersPattern.firstMatch(errorMessage) != null) {
             // https://github.com/dart-lang/linter/issues/207
             // https://github.com/dart-lang/linter/issues/208
-            shouldIgnore = !isFlutterLibrary(filename);
+            if (isFlutterLibrary(filename)) {
+              if (!argResults['dartdocs']) {
+                membersMissingDocumentation += 1;
+                shouldIgnore = true;
+              }
+            } else {
+              shouldIgnore = true;
+            }
           } else if (filename == mainFile.path) {
             Match libs = conflictingNamesPattern.firstMatch(errorMessage);
             Match missing = missingFilePattern.firstMatch(errorMessage);
@@ -422,10 +431,18 @@ class AnalyzeCommand extends FlutterCommand {
     if (exitCode < 0 || exitCode > 3) // analyzer exit codes: 0 = nothing, 1 = hints, 2 = warnings, 3 = errors
       return exitCode;
 
-    if (errorCount > 0)
+    if (errorCount > 0) {
+      if (membersMissingDocumentation > 0 && argResults['flutter-repo'])
+        printError('[lint] $membersMissingDocumentation public ${ membersMissingDocumentation == 1 ? "member lacks" : "members lack" } documentation');
       return 1; // we consider any level of error to be an error exit (we don't report different levels)
-    if (argResults['congratulate'])
-      printStatus('No analyzer warnings! (ran in ${elapsed}s)');
+    }
+    if (argResults['congratulate']) {
+      if (membersMissingDocumentation > 0 && argResults['flutter-repo']) {
+        printStatus('No analyzer warnings! (ran in ${elapsed}s; $membersMissingDocumentation public ${ membersMissingDocumentation == 1 ? "member lacks" : "members lack" } documentation)');
+      } else {
+        printStatus('No analyzer warnings! (ran in ${elapsed}s)');
+      }
+    }
     return 0;
   }
 
