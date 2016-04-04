@@ -259,16 +259,9 @@ List<TextPainter> _initPainters(List<String> labels) {
   List<TextPainter> painters = new List<TextPainter>(labels.length);
   for (int i = 0; i < painters.length; ++i) {
     String label = labels[i];
-    TextPainter painter = new TextPainter(
+    painters[i] = new TextPainter(
       new TextSpan(style: style, text: label)
-    );
-    painter
-      ..maxWidth = double.INFINITY
-      ..maxHeight = double.INFINITY
-      ..layout()
-      ..maxWidth = painter.maxIntrinsicWidth
-      ..layout();
-    painters[i] = painter;
+    )..layoutToMaxIntrinsicWidth();
   }
   return painters;
 }

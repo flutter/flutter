@@ -243,7 +243,7 @@ class TextPainter {
   }
 
   ui.Paragraph _paragraph;
-  bool _needsLayout = true;
+  bool _needsLayout = false;
 
   TextSpan _text;
   /// The (potentially styled) text to paint.
@@ -253,10 +253,15 @@ class TextPainter {
     if (_text == value)
       return;
     _text = value;
-    ui.ParagraphBuilder builder = new ui.ParagraphBuilder();
-    _text.build(builder);
-    _paragraph = builder.build(_text.style?.paragraphStyle ?? new ui.ParagraphStyle());
-    _needsLayout = true;
+    if (_text != null) {
+      ui.ParagraphBuilder builder = new ui.ParagraphBuilder();
+      _text.build(builder);
+      _paragraph = builder.build(_text.style?.paragraphStyle ?? new ui.ParagraphStyle());
+      _needsLayout = true;
+    } else {
+      _paragraph = null;
+      _needsLayout = false;
+    }
   }
 
   /// The minimum width at which to layout the text.
@@ -343,12 +348,33 @@ class TextPainter {
     }
   }
 
+  bool _lastLayoutWasToMaxIntrinsicWidth = false;
+
   /// Computes the visual position of the glyphs for painting the text.
   void layout() {
     if (!_needsLayout)
       return;
     _paragraph.layout();
     _needsLayout = false;
+    _lastLayoutWasToMaxIntrinsicWidth = false;
+  }
+
+  /// Computes the visual position of the glyphs using the unconstrainted max intrinsic width.
+  void layoutToMaxIntrinsicWidth() {
+    if (!_needsLayout && _lastLayoutWasToMaxIntrinsicWidth && width == maxIntrinsicWidth)
+      return;
+    _needsLayout = false;
+    _lastLayoutWasToMaxIntrinsicWidth = true;
+    _paragraph
+      ..minWidth = 0.0
+      ..maxWidth = double.INFINITY
+      ..layout();
+    final double newMaxIntrinsicWidth = maxIntrinsicWidth;
+    _paragraph
+      ..minWidth = newMaxIntrinsicWidth
+      ..maxWidth = newMaxIntrinsicWidth
+      ..layout();
+    assert(width == maxIntrinsicWidth);
   }
 
   /// Paints the text onto the given canvas at the given offset.
