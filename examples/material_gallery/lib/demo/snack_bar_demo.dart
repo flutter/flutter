@@ -17,8 +17,15 @@ const String _text2 =
 const String _text3 =
   "By default snackbars automatically disappear after a few seconds ";
 
-class SnackBarDemo extends StatelessWidget {
+class SnackBarDemo extends StatefulWidget {
   SnackBarDemo({ Key key }) : super(key: key);
+
+  @override
+  _SnackBarDemoState createState() => new _SnackBarDemoState();
+}
+
+class _SnackBarDemoState extends State<SnackBarDemo> {
+  int _snackBarIndex = 1;
 
   Widget buildBody(BuildContext context) {
     return new Padding(
@@ -27,21 +34,24 @@ class SnackBarDemo extends StatelessWidget {
         children: <Widget>[
           new Text(_text1),
           new Text(_text2),
-          new RaisedButton(
-            child: new Text('Show a SnackBar'),
-            onPressed: () {
-              Scaffold.of(context).showSnackBar(new SnackBar(
-                content: new Text('This is a SnackBar'),
-                action: new SnackBarAction(
-                  label: 'ACTION',
-                  onPressed: () {
-                    Scaffold.of(context).showSnackBar(new SnackBar(
-                      content: new Text("You pressed the SnackBar's Action")
-                    ));
-                  }
-                )
-              ));
-            }
+          new Center(
+            child: new RaisedButton(
+              child: new Text('SHOW A SNACKBAR'),
+              onPressed: () {
+                final int thisSnackBarIndex = _snackBarIndex++;
+                Scaffold.of(context).showSnackBar(new SnackBar(
+                  content: new Text('This is SnackBar #$thisSnackBarIndex'),
+                  action: new SnackBarAction(
+                    label: 'ACTION',
+                    onPressed: () {
+                      Scaffold.of(context).showSnackBar(new SnackBar(
+                        content: new Text("You pressed SnackBar $thisSnackBarIndex's Action")
+                      ));
+                    }
+                  )
+                ));
+              }
+            )
           ),
           new Text(_text3),
         ]

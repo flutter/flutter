@@ -4,7 +4,13 @@
 
 import 'package:flutter/material.dart';
 
-class PersistentBottomSheetDemo extends StatelessWidget {
+class PersistentBottomSheetDemo extends StatefulWidget {
+  @override
+  _PersistentBottomSheetDemoState createState() => new _PersistentBottomSheetDemoState();
+}
+
+class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   final TextStyle textStyle = new TextStyle(
     color: Colors.indigo[400],
@@ -12,8 +18,20 @@ class PersistentBottomSheetDemo extends StatelessWidget {
     textAlign: TextAlign.center
   );
 
-  void showBottomSheet(BuildContext context) {
-    Scaffold.of(context).showBottomSheet((_) {
+  VoidCallback _showBottomSheetCallback;
+
+  @override
+  void initState() {
+    super.initState();
+    _showBottomSheetCallback = showBottomSheet;
+  }
+
+
+  void showBottomSheet() {
+    setState(() { // disable the button
+      _showBottomSheetCallback = null;
+    });
+    _scaffoldKey.currentState.showBottomSheet/*<Null>*/((BuildContext context) {
       return new Container(
         decoration: new BoxDecoration(
           border: new Border(top: new BorderSide(color: Colors.black26))
@@ -23,30 +41,28 @@ class PersistentBottomSheetDemo extends StatelessWidget {
           child: new Text("This is a Material persistent bottom sheet. Drag downwards to dismiss it.", style: textStyle)
         )
       );
+    })
+    .closed.then((_) {
+      setState(() { // re-enable the button
+        _showBottomSheetCallback = showBottomSheet;
+      });
     });
   }
 
   @override
-  Widget build(BuildContext notUsed) { // Can't find the Scaffold from this context.
+  Widget build(BuildContext context) {
     return new Scaffold(
+      key: _scaffoldKey,
       appBar: new AppBar(title: new Text("Persistent Bottom Sheet")),
       floatingActionButton: new FloatingActionButton(
         child: new Icon(icon: Icons.add),
         backgroundColor: Colors.redAccent[200]
       ),
-      body: new Builder(
-        builder: (BuildContext context) {
-          return new Center(
-            child: new Container(
-              width: 200.0,
-              height: 200.0,
-              child: new RaisedButton(
-                onPressed: () { showBottomSheet(context); },
-                child: new Text('Show the persistent bottom sheet', style: textStyle)
-              )
-            )
-          );
-        }
+      body: new Center(
+        child: new RaisedButton(
+          onPressed: _showBottomSheetCallback,
+          child: new Text('SHOW BOTTOM SHEET')
+        )
       )
     );
   }
