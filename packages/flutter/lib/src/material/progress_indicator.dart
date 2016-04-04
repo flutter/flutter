@@ -14,13 +14,34 @@ const double _kCircularProgressIndicatorStrokeWidth = 4.0;
 
 // TODO(hansmuller): implement the support for buffer indicator
 
+/// A base class for material design progress indicators
+///
+/// This widget cannot be instantiated directly. For a linear progress
+/// indicator, see [LinearProgressIndicator]. For a circular progress indicator,
+/// see [CircularProgressIndicator].
+///
+/// See also:
+///
+///  * <https://www.google.com/design/spec/components/progress-activity.html>
 abstract class ProgressIndicator extends StatefulWidget {
+  /// Creates a progress indicator.
+  ///
+  /// The [value] argument can be either null (corresponding to an indeterminate
+  /// progress indcator) or non-null (corresponding to a determinate progress
+  /// indicator). See [value] for details.
   ProgressIndicator({
     Key key,
     this.value
   }) : super(key: key);
 
-  final double value; // Null for non-determinate progress indicator.
+  /// If non-null, the value of this progress indicator with 0.0 corresponding
+  /// to no progress having been made and 1.0 corresponding to all the progress
+  /// having been made.
+  ///
+  /// If null, this progress indicator is indeterminate, which means the
+  /// indicator displays a predetermined animation that does not indicator how
+  /// much actual progress is being made.
+  final double value;
 
   Color _getBackgroundColor(BuildContext context) => Theme.of(context).backgroundColor;
   Color _getValueColor(BuildContext context) => Theme.of(context).primaryColor;
@@ -74,7 +95,30 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
   }
 }
 
+/// A material design linear progress indicator.
+///
+/// A widget that shows progress along a line. There are two kinds of linear
+/// progress indicators:
+///
+///  * _Determinate_. Determinate progress indicators have a specific value at
+///    each point in time, and the value should increase monotonically from 0.0
+///    to 1.0, at which time the indicator is complete. To create a determinate
+///    progress indicator, use a non-null [value] between 0.0 and 1.0.
+///  * _Indeterminate_. Indeterminate progress indicators do not have a specific
+///    value at each point in time and instead indicate that progress is being
+///    made without indicating how much progress remains. To create an
+///    indeterminate progress indicator, use a null [value].
+///
+/// See also:
+///
+///  * [CircularProgressIndicator]
+///  * <https://www.google.com/design/spec/components/progress-activity.html#progress-activity-types-of-indicators>
 class LinearProgressIndicator extends ProgressIndicator {
+  /// Creates a linear progress indicator.
+  ///
+  /// The [value] argument can be either null (corresponding to an indeterminate
+  /// progress indcator) or non-null (corresponding to a determinate progress
+  /// indicator). See [value] for details.
   LinearProgressIndicator({
     Key key,
     double value
@@ -172,7 +216,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
       canvas.drawPath(path, paint);
 
     } else {
-      // Non-determinate
+      // Indeterminate
       paint.strokeCap = StrokeCap.square;
 
       double arcSweep = math.max(headValue * 3 / 2 * math.PI - tailValue * 3 / 2 * math.PI, _kEpsilon);
@@ -196,7 +240,30 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
   }
 }
 
+/// A material design circular progress indicator.
+///
+/// A widget that shows progress along a circle. There are two kinds of circular
+/// progress indicators:
+///
+///  * _Determinate_. Determinate progress indicators have a specific value at
+///    each point in time, and the value should increase monotonically from 0.0
+///    to 1.0, at which time the indicator is complete. To create a determinate
+///    progress indicator, use a non-null [value] between 0.0 and 1.0.
+///  * _Indeterminate_. Indeterminate progress indicators do not have a specific
+///    value at each point in time and instead indicate that progress is being
+///    made without indicating how much progress remains. To create an
+///    indeterminate progress indicator, use a null [value].
+///
+/// See also:
+///
+///  * [LinearProgressIndicator]
+///  * <https://www.google.com/design/spec/components/progress-activity.html#progress-activity-types-of-indicators>
 class CircularProgressIndicator extends ProgressIndicator {
+  /// Creates a circular progress indicator.
+  ///
+  /// The [value] argument can be either null (corresponding to an indeterminate
+  /// progress indcator) or non-null (corresponding to a determinate progress
+  /// indicator). See [value] for details.
   CircularProgressIndicator({
     Key key,
     double value
