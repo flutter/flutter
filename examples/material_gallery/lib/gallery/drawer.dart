@@ -3,23 +3,24 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart' show timeDilation;
-import 'package:flutter/widgets.dart';
-
-import 'app.dart';
 
 class GalleryDrawer extends StatelessWidget {
-  GalleryDrawer({ Key key }) : super(key: key);
-
-  void _changeTheme(BuildContext context, bool value) {
-    GalleryApp.of(context).lightTheme = value;
+  GalleryDrawer({
+    Key key,
+    this.theme,
+    this.onThemeChanged,
+    this.timeDilation,
+    this.onTimeDilationChanged
+  }) : super(key: key) {
+    assert(onThemeChanged != null);
+    assert(onTimeDilationChanged != null);
   }
 
-  void _toggleAnimationSpeed(BuildContext context) {
-    GalleryApp.of(context).setState(() {
-      timeDilation = (timeDilation != 1.0) ? 1.0 : 5.0;
-    });
-  }
+  final bool theme;
+  final ValueChanged<bool> onThemeChanged;
+
+  final double timeDilation;
+  final ValueChanged<double> onTimeDilationChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -29,30 +30,30 @@ class GalleryDrawer extends StatelessWidget {
           new DrawerHeader(child: new Text('Flutter Gallery')),
           new DrawerItem(
             icon: Icons.brightness_5,
-            onPressed: () { _changeTheme(context, true); },
-            selected: GalleryApp.of(context).lightTheme,
+            onPressed: () { onThemeChanged(true); },
+            selected: theme,
             child: new Row(
               children: <Widget>[
                 new Flexible(child: new Text('Light')),
                 new Radio<bool>(
                   value: true,
-                  groupValue: GalleryApp.of(context).lightTheme,
-                  onChanged: (bool value) { _changeTheme(context, value); }
+                  groupValue: theme,
+                  onChanged: onThemeChanged
                 )
               ]
             )
           ),
           new DrawerItem(
             icon: Icons.brightness_7,
-            onPressed: () { _changeTheme(context, false); },
-            selected: !GalleryApp.of(context).lightTheme,
+            onPressed: () { onThemeChanged(false); },
+            selected: theme,
             child: new Row(
               children: <Widget>[
                 new Flexible(child: new Text('Dark')),
                 new Radio<bool>(
                   value: false,
-                  groupValue: GalleryApp.of(context).lightTheme,
-                  onChanged: (bool value) { _changeTheme(context, value); }
+                  groupValue: theme,
+                  onChanged: onThemeChanged
                 )
               ]
             )
@@ -61,13 +62,13 @@ class GalleryDrawer extends StatelessWidget {
           new DrawerItem(
             icon: Icons.hourglass_empty,
             selected: timeDilation != 1.0,
-            onPressed: () { _toggleAnimationSpeed(context); },
+            onPressed: () { onTimeDilationChanged(timeDilation != 1.0 ? 1.0 : 20.0); },
             child: new Row(
               children: <Widget>[
                 new Flexible(child: new Text('Animate Slowly')),
                 new Checkbox(
                   value: timeDilation != 1.0,
-                  onChanged: (bool value) { _toggleAnimationSpeed(context); }
+                  onChanged: (bool value) { onTimeDilationChanged(value ? 20.0 : 1.0); }
                 )
               ]
             )

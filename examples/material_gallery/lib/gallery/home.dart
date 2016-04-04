@@ -44,7 +44,22 @@ import '../demo/weather_demo.dart';
 const double _kFlexibleSpaceMaxHeight = 256.0;
 
 class GalleryHome extends StatefulWidget {
-  GalleryHome({ Key key }) : super(key: key);
+  GalleryHome({
+    Key key,
+    this.theme,
+    this.onThemeChanged,
+    this.timeDilation,
+    this.onTimeDilationChanged
+  }) : super(key: key) {
+    assert(onThemeChanged != null);
+    assert(onTimeDilationChanged != null);
+  }
+
+  final bool theme;
+  final ValueChanged<bool> onThemeChanged;
+
+  final double timeDilation;
+  final ValueChanged<double> onTimeDilationChanged;
 
   @override
   GalleryHomeState createState() => new GalleryHomeState();
@@ -60,7 +75,12 @@ class GalleryHomeState extends State<GalleryHome> {
 
     return new Scaffold(
       key: _homeKey,
-      drawer: new GalleryDrawer(),
+      drawer: new GalleryDrawer(
+        theme: config.theme,
+        onThemeChanged: config.onThemeChanged,
+        timeDilation: config.timeDilation,
+        onTimeDilationChanged: config.onTimeDilationChanged
+      ),
       appBar: new AppBar(
         expandedHeight: _kFlexibleSpaceMaxHeight,
         flexibleSpace: (BuildContext context) =>  new FlexibleSpaceBar(
