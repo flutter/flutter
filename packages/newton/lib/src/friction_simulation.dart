@@ -7,21 +7,43 @@ import 'dart:math' as math;
 import 'simulation.dart';
 import 'tolerance.dart';
 
+/// A simulation that applies a drag to slow a particle down.
+///
+/// Models a particle affected by fluid drag, e.g. air resistance.
+///
+/// The simulation ends when the velocity of the particle drops to zero (within
+/// the current velocity [tolerance]).
 class FrictionSimulation extends Simulation {
+  /// Creates a [FrictionSimulation] with the given arguments, namely: the fluid
+  /// drag coefficient, a unitless value; the initial position, in the same
+  /// length units as used for [x]; and the initial velocity, in the same
+  /// velocity units as used for [dx].
   FrictionSimulation(double drag, double position, double velocity)
     : _drag = drag,
       _dragLog = math.log(drag),
       _x = position,
       _v = velocity;
 
-  // A friction simulation that starts and ends at the specified positions
-  // and velocities.
+  /// Creates a new friction simulation with its fluid drag coefficient set so
+  /// as to ensure that the simulation starts and ends at the specified
+  /// positions and velocities.
+  ///
+  /// The positions must use the same units as expected from [x], and the
+  /// velocities must use the same units as expected from [dx].
+  ///
+  /// The sign of the start and end velocities must be the same, the magnitude
+  /// of the start velocity must be greater than the magnitude of the end
+  /// velocity, and the velocities must be in the direction appropriate for the
+  /// particle to start from the start position and reach the end position.
   factory FrictionSimulation.through(double startPosition, double endPosition, double startVelocity, double endVelocity) {
+    assert(startVelocity.sign == endVelocity.sign);
+    assert(startVelocity.abs() >= endVelocity.abs());
+    assert((endPosition - startPosition).sign == startVelocity.sign);
     return new FrictionSimulation(
       _dragFor(startPosition, endPosition, startVelocity, endVelocity),
       startPosition,
-      startVelocity)
-      .. tolerance = new Tolerance(velocity: endVelocity.abs());
+      startVelocity
+    )..tolerance = new Tolerance(velocity: endVelocity.abs());
   }
 
   final double _drag;
@@ -50,14 +72,25 @@ class FrictionSimulation extends Simulation {
   bool isDone(double time) => dx(time).abs() < tolerance.velocity;
 }
 
+/// A [FrictionSimulation] that clamps the modelled particle to a specific range
+/// of values.
 class BoundedFrictionSimulation extends FrictionSimulation {
+  /// Creates a [BoundedFrictionSimulation] with the given arguments, namely:
+  /// the fluid drag coefficient, a unitless value; the initial position, in the
+  /// same length units as used for [x]; the initial velocity, in the same
+  /// velocity units as used for [dx], the minimum value for the position, and
+  /// the maximum value for the position. The minimum and maximum values must be
+  /// in the same units as the initial position, and the initial position must
+  /// be within the given range.
   BoundedFrictionSimulation(
     double drag,
     double position,
     double velocity,
     this._minX,
     this._maxX
-  ) : super(drag, position, velocity);
+  ) : super(drag, position, velocity) {
+    assert(position.clamp(_minX, _maxX) == position);
+  }
 
   final double _minX;
   final double _maxX;

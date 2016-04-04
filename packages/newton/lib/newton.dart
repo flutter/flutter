@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Simple Physics Simulations for Dart. Springs, friction, gravity, etc.
+/// Simple one-dimensional physics simulations, such as springs, friction, and
+/// gravity, for use in user interface animations.
 library newton;
 
 export 'src/clamped_simulation.dart';

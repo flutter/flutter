@@ -20,8 +20,9 @@ import 'scroll_behavior.dart';
 
 /// The accuracy to which scrolling is computed.
 final Tolerance kPixelScrollTolerance = new Tolerance(
-  velocity: 1.0 / (0.050 * ui.window.devicePixelRatio),  // logical pixels per second
-  distance: 1.0 / ui.window.devicePixelRatio  // logical pixels
+  // TODO(ianh): Handle the case of the device pixel ratio changing.
+  velocity: 1.0 / (0.050 * ui.window.devicePixelRatio), // logical pixels per second
+  distance: 1.0 / ui.window.devicePixelRatio // logical pixels
 );
 
 typedef void ScrollListener(double scrollOffset);

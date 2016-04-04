@@ -2,17 +2,45 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// Structure that specifies maximum allowable magnitudes for distances,
+/// durations, and velocity differences to be considered equal.
 class Tolerance {
+  /// Creates a [Tolerance] object. By default, the distance, time, and velocity
+  /// tolerances are all ±0.001; the constructor arguments override this.
+  ///
+  /// The arguments should all be positive values.
+  const Tolerance({
+    this.distance: _kEpsilonDefault,
+    this.time: _kEpsilonDefault,
+    this.velocity: _kEpsilonDefault
+  });
+
+  static const double _kEpsilonDefault = 1e-3;
+
+  /// A default tolerance of 0.001 for all three values.
+  static const Tolerance defaultTolerance = const Tolerance();
+
+  /// The magnitude of the maximum distance between two points for them to be
+  /// considered within tolerance.
+  ///
+  /// The units for the distance tolerance must be the same as the units used
+  /// for the distances that are to be compared to this tolerance.
   final double distance;
+
+  /// The magnitude of the maximum duration between two times for them to be
+  /// considered within tolerance.
+  ///
+  /// The units for the time tolerance must be the same as the units used
+  /// for the times that are to be compared to this tolerance.
   final double time;
+
+  /// The magnitude of the maximum difference between two velocities for them to
+  /// be considered within tolerance.
+  ///
+  /// The units for the velocity tolerance must be the same as the units used
+  /// for the velocities that are to be compared to this tolerance.
   final double velocity;
 
-  const Tolerance({this.distance: epsilonDefault, this.time: epsilonDefault,
-      this.velocity: epsilonDefault});
-
   @override
-  String toString() => 'Tolerance(distance: $distance, time=$time, velocity: $velocity)';
+  String toString() => 'Tolerance(distance: ±$distance, time: ±$time, velocity: ±$velocity)';
 }
-
-const double epsilonDefault = 1e-3;
-const Tolerance toleranceDefault = const Tolerance();

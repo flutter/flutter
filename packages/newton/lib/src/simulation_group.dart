@@ -6,24 +6,49 @@ import 'simulation.dart';
 import 'tolerance.dart';
 import 'utils.dart';
 
-/// The abstract base class for all composite simulations. Concrete subclasses
-/// must implement the appropriate methods to select the appropriate simulation
-/// at a given time interval. The simulation group takes care to call the `step`
-/// method at appropriate intervals. If more fine grained control over the the
-/// step is necessary, subclasses may override the [x], [dx], and [isDone]
-/// methods.
+/// Base class for composite simulations.
+///
+/// Concrete subclasses must implement the [currentSimulation] getter, the
+/// [currentIntervalOffset] getter, and the [step] function to select the
+/// appropriate simulation at a given time interval. This class implements the
+/// [x], [dx], and [isDone] functions by calling the [step] method if necessary
+/// and then deferring to the [currentSimulation]'s methods with a time offset
+/// by [currentIntervalOffset].
+///
+/// The tolerance of this simulation is pushed to the simulations that are used
+/// by this group as they become active. This mean simulations should not be
+/// shared among different groups that are active at the same time.
 abstract class SimulationGroup extends Simulation {
 
-  /// The currently active simulation
+  /// The currently active simulation.
+  ///
+  /// This getter should return the same value until [step] is called and
+  /// returns true.
   Simulation get currentSimulation;
 
-  /// The time offset applied to the currently active simulation;
+  /// The time offset applied to the currently active simulation when deferring
+  /// [x], [dx], and [isDone] to it.
   double get currentIntervalOffset;
 
   /// Called when a significant change in the interval is detected. Subclasses
-  /// must decide if the the current simulation must be switched (or updated).
-  /// The result is whether the simulation was switched in this step.
+  /// must decide if the current simulation must be switched (or updated).
+  ///
+  /// Must return true if the simulation was switched in this step, otherwise
+  /// false.
+  ///
+  /// If this function returns true, then [currentSimulation] must start
+  /// returning a new value.
   bool step(double time);
+
+  double _lastStep = -1.0;
+  void _stepIfNecessary(double time) {
+    if (nearEqual(_lastStep, time, Tolerance.defaultTolerance.time))
+      return;
+
+    _lastStep = time;
+    if (step(time))
+      currentSimulation.tolerance = tolerance;
+  }
 
   @override
   double x(double time) {
@@ -38,26 +63,14 @@ abstract class SimulationGroup extends Simulation {
   }
 
   @override
-  void set tolerance(Tolerance t) {
-    this.currentSimulation.tolerance = t;
-    super.tolerance = t;
-  }
-
-  @override
   bool isDone(double time) {
     _stepIfNecessary(time);
     return currentSimulation.isDone(time - currentIntervalOffset);
   }
 
-  double _lastStep = -1.0;
-  void _stepIfNecessary(double time) {
-    if (nearEqual(_lastStep, time, toleranceDefault.time)) {
-      return;
-    }
-
-    _lastStep = time;
-    if (step(time)) {
-      this.currentSimulation.tolerance = this.tolerance;
-    }
+  @override
+  void set tolerance(Tolerance t) {
+    currentSimulation.tolerance = t;
+    super.tolerance = t;
   }
 }
