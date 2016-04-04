@@ -34,13 +34,6 @@ class RefreshCommand extends FlutterCommand {
 
   @override
   Future<int> runInProject() async {
-    printTrace('Downloading toolchain.');
-
-    await Future.wait([
-      downloadToolchain(),
-      downloadApplicationPackages(),
-    ], eagerError: true);
-
     Directory tempDir = await Directory.systemTemp.createTemp('flutter_tools');
     try {
       String snapshotPath = path.join(tempDir.path, 'snapshot_blob.bin');

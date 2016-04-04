@@ -38,8 +38,6 @@ class TraceCommand extends FlutterCommand {
 
   @override
   Future<int> runInProject() async {
-    await downloadApplicationPackages();
-
     ApplicationPackage androidApp = applicationPackages.android;
     AndroidDevice device = deviceForCommand;
 

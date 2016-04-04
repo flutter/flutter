@@ -40,10 +40,7 @@ class BuildFlxCommand extends FlutterCommand {
   @override
   Future<int> runInProject() async {
     String compilerPath = argResults['compiler'];
-
-    if (compilerPath == null)
-      await downloadToolchain();
-    else
+    if (compilerPath != null)
       toolchain = new Toolchain(compiler: new SnapshotCompiler(compilerPath));
 
     String outputPath = argResults['output-file'];

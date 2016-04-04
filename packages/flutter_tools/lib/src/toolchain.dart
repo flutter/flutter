@@ -57,7 +57,7 @@ class Toolchain {
 
   final SnapshotCompiler compiler;
 
-  static Future<Toolchain> forConfigs(List<BuildConfiguration> configs) async {
+  static Toolchain forConfigs(List<BuildConfiguration> configs) {
     for (BuildConfiguration config in configs) {
       String compilerPath = _getCompilerPath(config);
       if (compilerPath != null)

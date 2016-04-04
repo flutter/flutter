@@ -162,8 +162,6 @@ class RunMojoCommand extends FlutterCommand {
       return 1;
     }
 
-    await downloadToolchain();
-
     String targetApp = argResults['app'];
     if (targetApp == null) {
       targetApp = _kDefaultBundlePath;

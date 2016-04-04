@@ -35,7 +35,6 @@ void main() {
       command = new DriveCommand();
       applyMocksToCommand(command);
       useInMemoryFileSystem(cwd: '/some/app');
-      toolchainDownloader = (_) async { };
       targetDeviceFinder = () {
         throw 'Unexpected call to targetDeviceFinder';
       };

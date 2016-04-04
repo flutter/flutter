@@ -262,11 +262,6 @@ class AppDomain extends Domain {
     Directory.current = new Directory(projectDirectory);
 
     try {
-      await Future.wait([
-        command.downloadToolchain(),
-        command.downloadApplicationPackages(),
-      ], eagerError: true);
-
       int result = await startApp(
         device,
         command.applicationPackages,
@@ -304,11 +299,6 @@ class AppDomain extends Domain {
     Directory.current = new Directory(projectDirectory);
 
     try {
-      await Future.wait([
-        command.downloadToolchain(),
-        command.downloadApplicationPackages(),
-      ], eagerError: true);
-
       ApplicationPackage app = command.applicationPackages.getPackageForPlatform(device.platform);
       return device.stopApp(app);
     } finally {

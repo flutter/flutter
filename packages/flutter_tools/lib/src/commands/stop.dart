@@ -21,7 +21,6 @@ class StopCommand extends FlutterCommand {
 
   @override
   Future<int> runInProject() async {
-    await downloadApplicationPackages();
     Device device = deviceForCommand;
     ApplicationPackage app = applicationPackages.getPackageForPlatform(device.platform);
     printStatus('Stopping apps on ${device.name}.');

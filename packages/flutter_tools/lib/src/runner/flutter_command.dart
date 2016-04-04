@@ -58,12 +58,12 @@ abstract class FlutterCommand extends Command {
     _usesPubOption = true;
   }
 
-  Future<Null> downloadToolchain() async {
-    toolchain ??= await Toolchain.forConfigs(buildConfigurations);
+  void _setupToolchain() {
+    toolchain ??= Toolchain.forConfigs(buildConfigurations);
   }
 
-  Future<Null> downloadApplicationPackages() async {
-    applicationPackages ??= await ApplicationPackageStore.forConfigs(buildConfigurations);
+  void _setupApplicationPackages() {
+    applicationPackages ??= ApplicationPackageStore.forConfigs(buildConfigurations);
   }
 
   @override
@@ -125,6 +125,9 @@ abstract class FlutterCommand extends Command {
       if (exitCode != 0)
         return exitCode;
     }
+
+    _setupToolchain();
+    _setupApplicationPackages();
 
     return await runInProject();
   }

@@ -80,8 +80,6 @@ class DriveCommand extends RunCommandBase {
 
   @override
   Future<int> runInProject() async {
-    await toolchainDownloader(this);
-
     String testFile = _getTestFile();
     if (testFile == null) {
       return 1;
@@ -310,19 +308,4 @@ Future<int> stopApp(DriveCommand command) async {
       .getPackageForPlatform(command.device.platform);
   bool stopped = await command.device.stopApp(package);
   return stopped ? 0 : 1;
-}
-
-/// Downloads Flutter toolchain.
-typedef Future<Null> ToolchainDownloader(DriveCommand command);
-ToolchainDownloader toolchainDownloader = downloadToolchain;
-void restoreToolchainDownloader() {
-  toolchainDownloader = downloadToolchain;
-}
-
-Future<Null> downloadToolchain(DriveCommand command) async {
-  printTrace('Downloading toolchain.');
-  await Future.wait([
-    command.downloadToolchain(),
-    command.downloadApplicationPackages(),
-  ], eagerError: true);
 }
