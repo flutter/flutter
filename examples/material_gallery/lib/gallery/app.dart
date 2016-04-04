@@ -3,34 +3,32 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart' show timeDilation;
 
 import 'home.dart';
 
 class GalleryApp extends StatefulWidget {
   GalleryApp({ Key key }) : super(key: key);
 
-  static GalleryAppState of(BuildContext context) => context.ancestorStateOfType(const TypeMatcher<GalleryAppState>());
-
   @override
   GalleryAppState createState() => new GalleryAppState();
 }
 
 class GalleryAppState extends State<GalleryApp> {
-  bool _lightTheme = true;
-  bool get lightTheme => _lightTheme;
-  void set lightTheme(bool value) {
-    setState(() {
-      _lightTheme = value;
-    });
-  }
+  bool _useLightTheme = true;
 
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
       title: 'Flutter Material Gallery',
-      theme: lightTheme ? _kGalleryLightTheme : _kGalleryDarkTheme,
+      theme: _useLightTheme ? _kGalleryLightTheme : _kGalleryDarkTheme,
       routes: {
-        '/': (BuildContext context) => new GalleryHome()
+        '/': (BuildContext context) => new GalleryHome(
+          theme: _useLightTheme,
+          onThemeChanged: (bool value) { setState(() { _useLightTheme = value; }); },
+          timeDilation: timeDilation,
+          onTimeDilationChanged: (double value) { setState(() { timeDilation = value; }); }
+        )
       }
     );
   }
