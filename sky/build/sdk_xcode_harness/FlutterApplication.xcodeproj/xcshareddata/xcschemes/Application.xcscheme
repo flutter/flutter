@@ -74,6 +74,10 @@
             argument = "--packages=$(FLUTTER_APPLICATION_PATH)/.packages"
             isEnabled = "YES">
          </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--observatory-port=8181"
+            isEnabled = "YES">
+         </CommandLineArgument>
       </CommandLineArguments>
       <AdditionalOptions>
       </AdditionalOptions>
