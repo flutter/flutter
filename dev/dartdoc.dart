@@ -8,6 +8,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+/// This script expects to run with the cwd as the root of the flutter repo. It
+/// will generate documentation for the packages in `packages/`, and leave the
+/// documentation in `doc/doc/api`.
 main(List<String> args) async {
   // Create the pubspec.yaml file.
   StringBuffer buf = new StringBuffer('''
@@ -50,7 +53,7 @@ dependencies:
   for (String libraryRef in _libraryRefs()) {
     String name = _entityName(libraryRef);
 
-    args.add('--include');
+    args.add('--include-external');
     args.add(name.substring(0, name.length - 5));
   }
 
