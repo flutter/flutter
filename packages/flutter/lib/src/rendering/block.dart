@@ -80,11 +80,12 @@ abstract class RenderBlockBase extends RenderBox
   bool get isVertical => _mainAxis == Axis.vertical;
 
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
-    if (isVertical)
-      return new BoxConstraints.tightFor(width: constraints.constrainWidth(constraints.maxWidth),
-                                         height: itemExtent);
-    return new BoxConstraints.tightFor(height: constraints.constrainHeight(constraints.maxHeight),
-                                       width: itemExtent);
+    switch (_mainAxis) {
+      case Axis.horizontal:
+        return new BoxConstraints.tightFor(height: constraints.maxHeight, width: itemExtent);
+      case Axis.vertical:
+        return new BoxConstraints.tightFor(width: constraints.maxWidth, height: itemExtent);
+    }
   }
 
   double get _mainAxisExtent {

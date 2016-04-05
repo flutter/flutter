@@ -47,7 +47,7 @@ class ScrollableList extends Scrollable {
 
 class _ScrollableListState extends ScrollableState<ScrollableList> {
   @override
-  ScrollBehavior<double, double> createScrollBehavior() => new OverscrollWhenScrollableBehavior();
+  ExtentScrollBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior();
 
   @override
   ExtentScrollBehavior get scrollBehavior => super.scrollBehavior;
@@ -330,7 +330,7 @@ class ScrollableLazyList extends Scrollable {
 
 class _ScrollableLazyListState extends ScrollableState<ScrollableLazyList> {
   @override
-  ScrollBehavior<double, double> createScrollBehavior() => new OverscrollBehavior();
+  ExtentScrollBehavior createScrollBehavior() => new OverscrollBehavior();
 
   @override
   ExtentScrollBehavior get scrollBehavior => super.scrollBehavior;

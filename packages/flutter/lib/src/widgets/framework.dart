@@ -701,17 +701,17 @@ class BuildOwner {
   /// This mechanism prevents build functions from transitively requiring other
   /// build functions to run, potentially causing infinite loops.
   ///
-  /// If the building argument is true, then this is a build scope. Build scopes
-  /// cannot be nested.
+  /// If the building argument is true, then this function enables additional
+  /// asserts that check invariants that should apply during building.
   ///
   /// The context argument is used to describe the scope in case an exception is
   /// caught while invoking the callback.
   void lockState(void callback(), { bool building: false, String context }) {
+    bool debugPreviouslyBuilding;
     assert(_debugStateLockLevel >= 0);
     assert(() {
       if (building) {
-        assert(!_debugBuilding);
-        assert(_debugCurrentBuildTarget == null);
+        debugPreviouslyBuilding = _debugBuilding;
         _debugBuilding = true;
       }
       _debugStateLockLevel += 1;
@@ -726,8 +726,7 @@ class BuildOwner {
         _debugStateLockLevel -= 1;
         if (building) {
           assert(_debugBuilding);
-          assert(_debugCurrentBuildTarget == null);
-          _debugBuilding = false;
+          _debugBuilding = debugPreviouslyBuilding;
         }
         return true;
       });
@@ -1360,6 +1359,7 @@ abstract class BuildableElement extends Element {
 }
 
 typedef Widget WidgetBuilder(BuildContext context);
+typedef Widget IndexedBuilder(BuildContext context, int index);
 
 // See _builder.
 Widget _buildNothing(BuildContext context) => null;
@@ -2088,6 +2088,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   @override
   void moveChildRenderObject(RenderObject child, dynamic slot) {
     final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject = this.renderObject;
+    assert(child.parent == renderObject);
     renderObject.move(child, after: slot?.renderObject);
     assert(renderObject == this.renderObject);
   }

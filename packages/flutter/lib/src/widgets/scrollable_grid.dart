@@ -43,7 +43,7 @@ class ScrollableGrid extends Scrollable {
 
 class _ScrollableGridState extends ScrollableState<ScrollableGrid> {
   @override
-  ScrollBehavior<double, double> createScrollBehavior() => new OverscrollBehavior();
+  ExtentScrollBehavior createScrollBehavior() => new OverscrollBehavior();
 
   @override
   ExtentScrollBehavior get scrollBehavior => super.scrollBehavior;
