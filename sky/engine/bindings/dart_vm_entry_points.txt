@@ -15,6 +15,7 @@ dart:ui,::,_setupHooks
 dart:ui,::,_updateLocale
 dart:ui,::,_updateWindowMetrics
 dart:ui,Canvas,Canvas.
+dart:ui,Color,Color.
 dart:ui,Image,Image.
 dart:ui,ImageShader,ImageShader.
 dart:ui,Paragraph,Paragraph.
