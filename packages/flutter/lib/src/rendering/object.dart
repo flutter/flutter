@@ -65,7 +65,7 @@ class PaintingContext {
   /// the subtree that don't need to be repainted.
   static void repaintCompositedChild(RenderObject child, { bool debugAlsoPaintedParent: false }) {
     assert(child.isRepaintBoundary);
-    assert(child.needsPaint);
+    assert(child._needsPaint);
     assert(() {
       child.debugRegisterRepaintBoundaryPaint(includedParent: debugAlsoPaintedParent, includedChild: true);
       return true;
@@ -101,7 +101,7 @@ class PaintingContext {
     assert(_canvas == null || _canvas.getSaveCount() == 1);
 
     // Create a layer for our child, and paint the child into it.
-    if (child.needsPaint) {
+    if (child._needsPaint) {
       repaintCompositedChild(child, debugAlsoPaintedParent: true);
     } else {
       assert(child._layer != null);
@@ -1383,8 +1383,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   }
 
   bool _needsPaint = true;
-  /// The visual appearance of this render object has changed since it last painted.
-  bool get needsPaint => _needsPaint;
 
   /// Mark this render object as having changed its visual appearance.
   ///
