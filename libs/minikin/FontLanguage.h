@@ -24,6 +24,11 @@
 
 namespace android {
 
+// Due to the limits in font fallback score calculation, we can't use anything more than 17
+// languages.
+const size_t FONT_LANGUAGES_LIMIT = 17;
+class FontLanguages;
+
 // FontLanguage is a compact representation of a BCP 47 language tag. It
 // does not capture all possible information, only what directly affects
 // font rendering.
@@ -54,12 +59,16 @@ public:
 
     std::string getString() const;
 
+    // Calculates a matching score. This score represents how well the input languages cover this
+    // language. The maximum score in the language list is returned.
     // 0 = no match, 1 = script match, 2 = script and primary language match.
-    int getScoreFor(const FontLanguage other) const;
+    int calcScoreFor(const FontLanguages& supported) const;
 
     uint64_t getIdentifier() const { return (uint64_t)mScript << 32 | (uint64_t)mLanguage; }
 
 private:
+    friend class FontLanguages;  // for FontLanguages constructor
+
     // ISO 15924 compliant script code. The 4 chars script code are packed into a 32 bit integer.
     uint32_t mScript;
 
@@ -80,12 +89,37 @@ private:
     uint8_t mSubScriptBits;
 
     static uint8_t scriptToSubScriptBits(uint32_t script);
-    bool supportsScript(uint8_t requestedBits) const;
+
+    // Returns true if the provide subscript bits has the requested subscript bits.
+    // Note that this function returns false if the requested subscript bits are empty.
+    static bool supportsScript(uint8_t providedBits, uint8_t requestedBits);
 };
 
-// Due to the limit of font fallback cost calculation, we can't use anything more than 17 languages.
-const size_t FONT_LANGUAGES_LIMIT = 17;
-typedef std::vector<FontLanguage> FontLanguages;
+// An immutable list of languages.
+class FontLanguages {
+public:
+    FontLanguages(std::vector<FontLanguage>&& languages);
+    FontLanguages() : mUnionOfSubScriptBits(0), mIsAllTheSameLanguage(false) {}
+    FontLanguages(FontLanguages&&) = default;
+
+    size_t size() const { return mLanguages.size(); }
+    bool empty() const { return mLanguages.empty(); }
+    const FontLanguage& operator[] (size_t n) const { return mLanguages[n]; }
+
+private:
+    friend struct FontLanguage;  // for calcScoreFor
+
+    std::vector<FontLanguage> mLanguages;
+    uint8_t mUnionOfSubScriptBits;
+    bool mIsAllTheSameLanguage;
+
+    uint8_t getUnionOfSubScriptBits() const { return mUnionOfSubScriptBits; }
+    bool isAllTheSameLanguage() const { return mIsAllTheSameLanguage; }
+
+    // Do not copy and assign.
+    FontLanguages(const FontLanguages&) = delete;
+    void operator=(const FontLanguages&) = delete;
+};
 
 }  // namespace android
 
