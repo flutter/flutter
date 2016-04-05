@@ -147,7 +147,7 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> {
       ..begin = theme.textTheme.subhead.color
       ..end = theme.accentColor;
     _iconColor
-      ..begin = theme.unselectedColor
+      ..begin = theme.unselectedWidgetColor
       ..end = theme.accentColor;
 
     return new AnimatedBuilder(

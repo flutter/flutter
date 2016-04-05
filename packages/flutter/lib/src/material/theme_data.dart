@@ -8,7 +8,23 @@ import 'colors.dart';
 import 'icon_theme_data.dart';
 import 'typography.dart';
 
-enum ThemeBrightness { dark, light }
+/// The contrast needs of a color.
+///
+/// This is used to describe the contrast needs of a theme as a whole
+/// ([ThemeData.brightness]), its primary color
+/// ([ThemeData.primaryColorBrightness]), and its accent color
+/// ([ThemeData.accentColorBrightness]).
+enum ThemeBrightness {
+  /// The color is dark, and will require a light text color to achieve readable contrast.
+  ///
+  /// For example, the color might be dark grey, requiring white text.
+  dark,
+
+  /// The color is right, and will require a dark text color to achieve readable contrast.
+  ///
+  /// For example, the color might be bright white, requiring black text.
+  light,
+}
 
 // Deriving these values is black magic. The spec claims that pressed buttons
 // have a highlight of 0x66999999, but that's clearly wrong. The videos in the
@@ -31,6 +47,26 @@ const Color _kDarkThemeSplashColor = const Color(0x40CCCCCC);
 ///
 /// Use this class to configure a [Theme] widget.
 class ThemeData {
+  /// Create a ThemeData given a set of preferred values.
+  ///
+  /// Default values will be derived for arguments that are omitted.
+  ///
+  /// The most useful values to give are, in order of importance:
+  ///
+  ///  * The desired theme [brightness].
+  ///
+  ///  * The primary color palette (the [primarySwatch]), chosen from
+  ///    one of the swatches defined by the material design spec. This
+  ///    should be one of the maps from the [Colors] class that do not
+  ///    have "accent" in their name.
+  ///
+  ///  * The [accentColor], sometimes called the secondary color, and,
+  ///    if the accent color is specified, its brightness
+  ///    ([accentColorBrightness]), so that the right contrasting text
+  ///    color will be used over the accent color.
+  ///
+  /// See <https://www.google.com/design/spec/style/color.html> for
+  /// more discussion on how to pick the right colors.
   factory ThemeData({
     ThemeBrightness brightness,
     Map<int, Color> primarySwatch,
@@ -43,14 +79,14 @@ class ThemeData {
     Color dividerColor,
     Color highlightColor,
     Color splashColor,
-    Color unselectedColor,
+    Color selectedRowColor,
+    Color unselectedWidgetColor,
     Color disabledColor,
     Color buttonColor,
-    Color selectionColor,
+    Color textSelectionColor,
     Color backgroundColor,
     Color indicatorColor,
     Color hintColor,
-    double hintOpacity,
     Color errorColor,
     TextTheme textTheme,
     TextTheme primaryTextTheme,
@@ -68,14 +104,14 @@ class ThemeData {
     dividerColor ??= isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000);
     highlightColor ??= isDark ? _kDarkThemeHighlightColor : _kLightThemeHighlightColor;
     splashColor ??= isDark ? _kDarkThemeSplashColor : _kLightThemeSplashColor;
-    unselectedColor ??= isDark ? Colors.white70 : Colors.black54;
+    selectedRowColor ??= Colors.grey[100];
+    unselectedWidgetColor ??= isDark ? Colors.white70 : Colors.black54;
     disabledColor ??= isDark ? Colors.white30 : Colors.black26;
     buttonColor ??= isDark ? primarySwatch[600] : Colors.grey[300];
-    selectionColor ??= isDark ? accentColor : primarySwatch[200];
+    textSelectionColor ??= isDark ? accentColor : primarySwatch[200];
     backgroundColor ??= isDark ? Colors.grey[700] : primarySwatch[200];
     indicatorColor ??= accentColor == primaryColor ? Colors.white : accentColor;
     hintColor ??= isDark ? const Color(0x42FFFFFF) : const Color(0x4C000000);
-    hintOpacity ??= hintColor != null ? hintColor.alpha / 0xFF : isDark ? 0.26 : 0.30;
     errorColor ??= Colors.red[700];
     textTheme ??= isDark ? Typography.white : Typography.black;
     primaryTextTheme ??= primaryColorBrightness == ThemeBrightness.dark ? Typography.white : Typography.black;
@@ -91,14 +127,14 @@ class ThemeData {
       dividerColor: dividerColor,
       highlightColor: highlightColor,
       splashColor: splashColor,
-      unselectedColor: unselectedColor,
+      selectedRowColor: selectedRowColor,
+      unselectedWidgetColor: unselectedWidgetColor,
       disabledColor: disabledColor,
       buttonColor: buttonColor,
-      selectionColor: selectionColor,
+      textSelectionColor: textSelectionColor,
       backgroundColor: backgroundColor,
       indicatorColor: indicatorColor,
       hintColor: hintColor,
-      hintOpacity: hintOpacity,
       errorColor: errorColor,
       textTheme: textTheme,
       primaryTextTheme: primaryTextTheme,
@@ -106,6 +142,12 @@ class ThemeData {
     );
   }
 
+  /// Create a ThemeData given a set of exact values. All the values
+  /// must be specified.
+  ///
+  /// This will rarely be used directly. It is used by [lerp] to
+  /// create intermediate themes based on two themes created with the
+  /// [new ThemeData] constructor.
   ThemeData.raw({
     this.brightness,
     this.primaryColor,
@@ -117,14 +159,14 @@ class ThemeData {
     this.dividerColor,
     this.highlightColor,
     this.splashColor,
-    this.unselectedColor,
+    this.selectedRowColor,
+    this.unselectedWidgetColor,
     this.disabledColor,
     this.buttonColor,
-    this.selectionColor,
+    this.textSelectionColor,
     this.backgroundColor,
     this.indicatorColor,
     this.hintColor,
-    this.hintOpacity,
     this.errorColor,
     this.textTheme,
     this.primaryTextTheme,
@@ -140,22 +182,29 @@ class ThemeData {
     assert(dividerColor != null);
     assert(highlightColor != null);
     assert(splashColor != null);
-    assert(unselectedColor != null);
+    assert(selectedRowColor != null);
+    assert(unselectedWidgetColor != null);
     assert(disabledColor != null);
     assert(buttonColor != null);
-    assert(selectionColor != null);
+    assert(textSelectionColor != null);
     assert(disabledColor != null);
     assert(indicatorColor != null);
     assert(hintColor != null);
-    assert(hintOpacity != null);
     assert(errorColor != null);
     assert(textTheme != null);
     assert(primaryTextTheme != null);
     assert(primaryIconTheme != null);
   }
 
+  /// A default light blue theme.
   factory ThemeData.light() => new ThemeData(brightness: ThemeBrightness.light);
+
+  /// A default dark theme with a teal accent color.
   factory ThemeData.dark() => new ThemeData(brightness: ThemeBrightness.dark);
+
+  /// The default theme. Same as [new ThemeData.light].
+  ///
+  /// This is used by [Theme.of] when no theme has been specified.
   factory ThemeData.fallback() => new ThemeData.light();
 
   /// The brightness of the overall theme of the application. Used by widgets
@@ -170,40 +219,70 @@ class ThemeData {
   /// dark, use Colors.white or the accentColor for a contrasting color.
   final ThemeBrightness brightness;
 
-  /// The background colour for major parts of the app (toolbars, tab bars, etc)
+  /// The background color for major parts of the app (toolbars, tab bars, etc)
   final Color primaryColor;
 
-  /// The brightness of the primaryColor. Used to determine the colour of text and
+  /// The brightness of the primaryColor. Used to determine the color of text and
   /// icons placed on top of the primary color (e.g. toolbar text).
   final ThemeBrightness primaryColorBrightness;
 
   /// The foreground color for widgets (knobs, text, etc)
   final Color accentColor;
 
-  /// The brightness of the accentColor. Used to determine the colour of text
+  /// The brightness of the accentColor. Used to determine the color of text
   /// and icons placed on top of the accent color (e.g. the icons on a floating
   /// action button).
   final ThemeBrightness accentColorBrightness;
 
+  /// The color of [Material] when it is of infinite extent, e.g. the
+  /// body of a [Scaffold].
   final Color canvasColor;
+
+  /// The color of [Material] when it is used as a [Card].
   final Color cardColor;
+
+  /// The color of [Divider]s and [PopupMenuDivider]s, also used
+  /// between [ListItem]s, between rows in [DataTable]s, and so forth.
   final Color dividerColor;
+
+  /// The highlight color used during ink splash animations or to
+  /// indicate an item in a menu is selected.
   final Color highlightColor;
+
+  /// The color of ink splashes. See [InkWell].
   final Color splashColor;
-  final Color unselectedColor;
+
+  /// The color used to highlight selected rows.
+  final Color selectedRowColor;
+
+  /// The color used for widgets in their inactive (but enabled)
+  /// state. For example, an unchecked checkbox. Usually contrasted
+  /// with the [accentColor]. See also [disabledColor].
+  final Color unselectedWidgetColor;
+
+  /// The color used for widgets that are inoperative, regardless of
+  /// their state. For example, a disabled checkbox (which may be
+  /// checked or unchecked).
   final Color disabledColor;
+
+  /// The default color of the [Material] used in [RaisedButton]s.
   final Color buttonColor;
-  final Color selectionColor;
+
+  /// The color of text selections in text fields, such as [Input].
+  final Color textSelectionColor;
+
+  /// A color that contrasts with the [primaryColor], e.g. used as the
+  /// remaining part of a progress bar.
   final Color backgroundColor;
 
   /// The color of the selected tab indicator in a tab strip.
   final Color indicatorColor;
 
-  // Some users want the pre-multiplied color, others just want the opacity.
+  /// The color to use for hint text or placeholder text, e.g. in
+  /// [Input] fields.
   final Color hintColor;
-  final double hintOpacity;
 
-  /// The color to use for input validation errors.
+  /// The color to use for input validation errors, e.g. in [Input] fields.
   final Color errorColor;
 
   /// Text with a color that contrasts with the card and canvas colors.
@@ -214,6 +293,7 @@ class ThemeData {
 
   final IconThemeData primaryIconTheme;
 
+  /// Linearly interpolate between two themes.
   static ThemeData lerp(ThemeData begin, ThemeData end, double t) {
     return new ThemeData.raw(
       brightness: t < 0.5 ? begin.brightness : end.brightness,
@@ -224,16 +304,16 @@ class ThemeData {
       dividerColor: Color.lerp(begin.dividerColor, end.dividerColor, t),
       highlightColor: Color.lerp(begin.highlightColor, end.highlightColor, t),
       splashColor: Color.lerp(begin.splashColor, end.splashColor, t),
-      unselectedColor: Color.lerp(begin.unselectedColor, end.unselectedColor, t),
+      selectedRowColor: Color.lerp(begin.selectedRowColor, end.selectedRowColor, t),
+      unselectedWidgetColor: Color.lerp(begin.unselectedWidgetColor, end.unselectedWidgetColor, t),
       disabledColor: Color.lerp(begin.disabledColor, end.disabledColor, t),
       buttonColor: Color.lerp(begin.buttonColor, end.buttonColor, t),
-      selectionColor: Color.lerp(begin.selectionColor, end.selectionColor, t),
+      textSelectionColor: Color.lerp(begin.textSelectionColor, end.textSelectionColor, t),
       backgroundColor: Color.lerp(begin.backgroundColor, end.backgroundColor, t),
       accentColor: Color.lerp(begin.accentColor, end.accentColor, t),
       accentColorBrightness: t < 0.5 ? begin.accentColorBrightness : end.accentColorBrightness,
       indicatorColor: Color.lerp(begin.indicatorColor, end.indicatorColor, t),
       hintColor: Color.lerp(begin.hintColor, end.hintColor, t),
-      hintOpacity: lerpDouble(begin.hintOpacity, end.hintOpacity, t),
       errorColor: Color.lerp(begin.errorColor, end.errorColor, t),
       textTheme: TextTheme.lerp(begin.textTheme, end.textTheme, t),
       primaryTextTheme: TextTheme.lerp(begin.primaryTextTheme, end.primaryTextTheme, t),
@@ -254,16 +334,16 @@ class ThemeData {
            (otherData.dividerColor == dividerColor) &&
            (otherData.highlightColor == highlightColor) &&
            (otherData.splashColor == splashColor) &&
-           (otherData.unselectedColor == unselectedColor) &&
+           (otherData.selectedRowColor == selectedRowColor) &&
+           (otherData.unselectedWidgetColor == unselectedWidgetColor) &&
            (otherData.disabledColor == disabledColor) &&
            (otherData.buttonColor == buttonColor) &&
-           (otherData.selectionColor == selectionColor) &&
+           (otherData.textSelectionColor == textSelectionColor) &&
            (otherData.backgroundColor == backgroundColor) &&
            (otherData.accentColor == accentColor) &&
            (otherData.accentColorBrightness == accentColorBrightness) &&
            (otherData.indicatorColor == indicatorColor) &&
            (otherData.hintColor == hintColor) &&
-           (otherData.hintOpacity == hintOpacity) &&
            (otherData.errorColor == errorColor) &&
            (otherData.textTheme == textTheme) &&
            (otherData.primaryTextTheme == primaryTextTheme) &&
@@ -281,17 +361,17 @@ class ThemeData {
       dividerColor,
       highlightColor,
       splashColor,
-      unselectedColor,
+      selectedRowColor,
+      unselectedWidgetColor,
       disabledColor,
       buttonColor,
-      selectionColor,
+      textSelectionColor,
       backgroundColor,
       accentColor,
       accentColorBrightness,
       hashValues( // Too many values.
         indicatorColor,
         hintColor,
-        hintOpacity,
         errorColor,
         textTheme,
         primaryTextTheme,

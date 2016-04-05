@@ -189,8 +189,8 @@ class _InputState extends State<Input> {
         focusKey: focusKey,
         style: textStyle,
         hideText: config.hideText,
-        cursorColor: themeData.selectionColor,
-        selectionColor: themeData.selectionColor,
+        cursorColor: themeData.textSelectionColor,
+        selectionColor: themeData.textSelectionColor,
         keyboardType: config.keyboardType,
         onChanged: onChanged,
         onSubmitted: onSubmitted

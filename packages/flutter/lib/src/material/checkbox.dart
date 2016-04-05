@@ -65,7 +65,7 @@ class Checkbox extends StatelessWidget {
     return new _CheckboxRenderObjectWidget(
       value: value,
       activeColor: activeColor ?? themeData.accentColor,
-      inactiveColor: onChanged != null ? themeData.unselectedColor : themeData.disabledColor,
+      inactiveColor: onChanged != null ? themeData.unselectedWidgetColor : themeData.disabledColor,
       onChanged: onChanged
     );
   }
