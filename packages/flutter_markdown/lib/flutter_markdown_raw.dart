@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library flutter_markdown;
+library flutter_markdown_raw;
 
 export 'src/markdown_raw.dart';
 export 'src/markdown_style_raw.dart';

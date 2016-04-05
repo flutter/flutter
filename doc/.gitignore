@@ -1,0 +1,8 @@
+.pub/
+packages
+.packages
+pubspec.lock
+
+pubspec.yaml
+api/
+lib/
