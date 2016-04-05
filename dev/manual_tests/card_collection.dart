@@ -44,7 +44,6 @@ class CardCollectionState extends State<CardCollection> {
   bool _fixedSizeCards = false;
   bool _sunshine = false;
   bool _varyFontSizes = false;
-  InvalidatorCallback _invalidator;
 
   void _initVariableSizedCardModels() {
     List<double> cardHeights = <double>[
@@ -304,7 +303,6 @@ class CardCollectionState extends State<CardCollection> {
     Widget card = new Dismissable(
       key: new ObjectKey(cardModel),
       direction: _dismissDirection,
-      onResize: () { if (_invalidator != null) _invalidator(<int>[index]); },
       onDismissed: (DismissDirection direction) { dismissCard(cardModel); },
       child: new Card(
         color: _primaryColor[cardModel.color],
@@ -413,18 +411,15 @@ class CardCollectionState extends State<CardCollection> {
   Widget build(BuildContext context) {
     Widget cardCollection;
     if (_fixedSizeCards) {
-      _invalidator = null;
       cardCollection = new ScrollableList(
         snapOffsetCallback: _snapToCenter ? _toSnapOffset : null,
         itemExtent: kFixedCardHeight,
         children: _cardIndices.map/*<Widget>*/((int index) => _buildCard(context, index))
       );
     } else {
-      cardCollection = new ScrollableMixedWidgetList(
-        builder: _buildCard,
-        token: _cardModels.length,
-        snapOffsetCallback: _snapToCenter ? _toSnapOffset : null,
-        onInvalidatorAvailable: (InvalidatorCallback callback) { _invalidator = callback; }
+      cardCollection = new LazyBlock(
+        delegate: new LazyBlockBuilder(_buildCard),
+        snapOffsetCallback: _snapToCenter ? _toSnapOffset : null
       );
     }
 
