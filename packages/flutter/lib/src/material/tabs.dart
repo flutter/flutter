@@ -632,6 +632,7 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
     super.initState();
     scrollBehavior.isScrollable = config.isScrollable;
     _initSelection(TabBarSelection.of(context));
+    _lastSelectedIndex = _selection.index;
   }
 
   @override
@@ -652,6 +653,30 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
     _selection = null;
   }
 
+  // Initialize _indicatorTween for interactive dragging between the tab on the left
+  // and the tab on the right. In this case _selection.animation.value is 0.5 when
+  // the indicator is below the selected tab, 0.0 when it's under the left tab, and 1.0
+  // when it's under the tab on the right.
+  void _initIndicatorTweenForDrag() {
+    assert(!_valueIsChanging);
+    _indicatorTween = new RectTween(
+      begin: _tabIndicatorRect(math.max(0, _selection.index - 1)),
+      end: _tabIndicatorRect(math.min(config.labels.length - 1, _selection.index + 1))
+    );
+  }
+
+  // Initialize _indicatorTween for animating the selected tab indicator from the
+  // previously selected tab to the newly selected one. In this case
+  // _selection.animation.value is 0.0 when the indicator is below the previously
+  // selected tab, and 1.0 when it's under the newly selected one.
+  void _initIndicatorTweenForAnimation() {
+    assert(_valueIsChanging);
+    _indicatorTween = new RectTween(
+      begin: _indicatorRect ?? _tabIndicatorRect(_selection.previousIndex),
+      end: _tabIndicatorRect(_selection.index)
+    );
+  }
+
   @override
   void handleStatusChange(AnimationStatus status) {
     if (config.labels.length == 0)
@@ -659,10 +684,8 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
 
     if (_valueIsChanging && status == AnimationStatus.completed) {
       _valueIsChanging = false;
-      _indicatorTween
-        ..begin = _tabIndicatorRect(math.max(0, _selection.index - 1))
-        ..end = _tabIndicatorRect(math.min(config.labels.length - 1, _selection.index + 1));
       setState(() {
+        _initIndicatorTweenForDrag();
         _indicatorRect = _tabIndicatorRect(_selection.index);
       });
     }
@@ -674,25 +697,26 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
       return;
 
     if (_lastSelectedIndex != _selection.index) {
-      // Initialize our indicator animation when we change selected tabs.
+      _valueIsChanging = true;
       if (config.isScrollable)
         scrollTo(_centeredTabScrollOffset(_selection.index), duration: _kTabBarScroll);
-      _indicatorTween
-        ..begin = _indicatorRect ?? _tabIndicatorRect(_selection.previousIndex)
-        ..end = _tabIndicatorRect(_selection.index);
-      _valueIsChanging = true;
+      _initIndicatorTweenForAnimation();
       _lastSelectedIndex = _selection.index;
+    } else if (_indicatorTween == null) {
+      _initIndicatorTweenForDrag();
     }
+
     Rect oldRect = _indicatorRect;
     double t = _selection.animation.value;
-    if (_valueIsChanging) {
-      // When _valueIsChanging is true, we're animating based on a ticker and
-      // want to curve the animation. When _valueIsChanging is false, we're
-      // animating based on a pointer event and want linear feedback. It's
-      // possible we should move this curve into the selection animation.
-      // We animate the leading and trailing edges of the rect differently.
-      // The easiest way to do this is to lerp 2 rects, and piece them together
-      // into 1.
+
+    // When _valueIsChanging is false, we're animating based on drag gesture and
+    // want linear selected tab indicator motion. When _valueIsChanging is true,
+    // a ticker is driving the selection change and we want to curve the animation.
+    // In this case the leading and trailing edges of the move at different rates.
+    // The easiest way to do this is to lerp 2 rects, and piece them together into 1.
+    if (!_valueIsChanging) {
+      _indicatorRect = _indicatorTween.lerp(t);
+    } else {
       Rect leftRect, rightRect;
       if (_selection.index > _selection.previousIndex) {
         // Moving to the right - right edge is leading.
@@ -706,10 +730,6 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
       _indicatorRect = new Rect.fromLTRB(
         leftRect.left, leftRect.top, rightRect.right, rightRect.bottom
       );
-    } else {
-      // TODO(abarth): If we've never gone through handleStatusChange before, we
-      // might not have set up our _indicatorTween yet.
-      _indicatorRect = _indicatorTween.lerp(t);
     }
     if (oldRect != _indicatorRect)
       setState(() { /* The indicator rect has changed. */ });
@@ -719,7 +739,7 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
   Size _tabBarSize;
   List<double> _tabWidths;
   Rect _indicatorRect;
-  RectTween _indicatorTween = new RectTween();
+  RectTween _indicatorTween;
 
   Rect _tabRect(int tabIndex) {
     assert(_tabBarSize != null);
