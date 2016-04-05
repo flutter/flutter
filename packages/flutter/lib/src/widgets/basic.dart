@@ -1447,8 +1447,8 @@ class FixedColumnCountGrid extends GridRenderObjectWidgetBase {
     Key key,
     List<Widget> children: _emptyWidgetList,
     this.columnCount,
-    this.columnSpacing,
-    this.rowSpacing,
+    this.columnSpacing: 0.0,
+    this.rowSpacing: 0.0,
     this.tileAspectRatio: 1.0,
     this.padding: EdgeInsets.zero
   }) : super(key: key, children: children) {
@@ -1490,8 +1490,8 @@ class MaxTileWidthGrid extends GridRenderObjectWidgetBase {
     Key key,
     List<Widget> children: _emptyWidgetList,
     this.maxTileWidth,
-    this.columnSpacing,
-    this.rowSpacing,
+    this.columnSpacing: 0.0,
+    this.rowSpacing: 0.0,
     this.tileAspectRatio: 1.0,
     this.padding: EdgeInsets.zero
   }) : super(key: key, children: children) {
