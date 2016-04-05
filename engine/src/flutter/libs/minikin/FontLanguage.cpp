@@ -126,24 +126,59 @@ bool FontLanguage::isEqualScript(const FontLanguage& other) const {
     return other.mScript == mScript;
 }
 
-bool FontLanguage::supportsScript(uint8_t requestedBits) const {
-    return requestedBits != 0 && (mSubScriptBits & requestedBits) == requestedBits;
+// static
+bool FontLanguage::supportsScript(uint8_t providedBits, uint8_t requestedBits) {
+    return requestedBits != 0 && (providedBits & requestedBits) == requestedBits;
 }
 
 bool FontLanguage::supportsHbScript(hb_script_t script) const {
     static_assert(SCRIPT_TAG('J', 'p', 'a', 'n') == HB_TAG('J', 'p', 'a', 'n'),
                   "The Minikin script and HarfBuzz hb_script_t have different encodings.");
     if (script == mScript) return true;
-    return supportsScript(scriptToSubScriptBits(script));
+    return supportsScript(mSubScriptBits, scriptToSubScriptBits(script));
 }
 
-int FontLanguage::getScoreFor(const FontLanguage other) const {
-    if (isUnsupported() || other.isUnsupported()) {
-        return 0;
-    } else if (isEqualScript(other) || supportsScript(other.mSubScriptBits)) {
-        return mLanguage == other.mLanguage ? 2 : 1;
-    } else {
-        return 0;
+int FontLanguage::calcScoreFor(const FontLanguages& supported) const {
+    int score = 0;
+    for (size_t i = 0; i < supported.size(); ++i) {
+        if (isEqualScript(supported[i]) ||
+                supportsScript(supported[i].mSubScriptBits, mSubScriptBits)) {
+            if (mLanguage == supported[i].mLanguage) {
+                return 2;
+            } else {
+                score = 1;
+            }
+        }
+    }
+
+    if (score == 1) {
+        return score;
+    }
+
+    if (supportsScript(supported.getUnionOfSubScriptBits(), mSubScriptBits)) {
+        // Gives score of 2 only if the language matches all of the font languages except for the
+        // exact match case handled above.
+        return (mLanguage == supported[0].mLanguage && supported.isAllTheSameLanguage()) ? 2 : 1;
+    }
+
+    return 0;
+}
+
+FontLanguages::FontLanguages(std::vector<FontLanguage>&& languages)
+    : mLanguages(std::move(languages)) {
+    if (mLanguages.empty()) {
+        return;
+    }
+
+    const FontLanguage& lang = mLanguages[0];
+
+    mIsAllTheSameLanguage = true;
+    mUnionOfSubScriptBits = lang.mSubScriptBits;
+    for (size_t i = 1; i < mLanguages.size(); ++i) {
+        mUnionOfSubScriptBits |= mLanguages[i].mSubScriptBits;
+        if (mIsAllTheSameLanguage && lang.mLanguage != mLanguages[i].mLanguage) {
+            mIsAllTheSameLanguage = false;
+        }
     }
 }
 
