@@ -41,3 +41,7 @@ dependencies:
 
 dev_dependencies:
   mockito: ^0.11.0
+
+# Exclude this package from the hosted API docs.
+dartdoc:
+  nodoc: true
