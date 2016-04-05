@@ -12,7 +12,7 @@ class LauncherData {
   final String title;
 }
 
-const List<LauncherData> _kLauncherData = const <LauncherData>[
+final List<LauncherData> _kLauncherData = <LauncherData>[
   const LauncherData(
     url: 'mojo:noodles_view',
     title: 'Noodles'
@@ -20,6 +20,10 @@ const List<LauncherData> _kLauncherData = const <LauncherData>[
   const LauncherData(
     url: 'mojo:shapes_view',
     title: 'Shapes'
+  ),
+  new LauncherData(
+    url: Uri.base.resolve('../../../examples/stocks/build/app.flx').toString(),
+    title: 'Stocks'
   ),
 ];
 
