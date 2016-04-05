@@ -891,13 +891,15 @@ class RenderTable extends RenderBox {
       for (int y = 0; y < rows; y += 1) {
         if (_rowDecorations.length <= y)
           break;
-        _rowDecorationPainters[y] ??= _rowDecorations[y].createBoxPainter();
-        _rowDecorationPainters[y].paint(canvas, new Rect.fromLTRB(
-          offset.dx,
-          offset.dy + _rowTops[y],
-          offset.dx + size.width,
-          offset.dy + _rowTops[y+1]
-        ));
+        if (_rowDecorations[y] != null) {
+          _rowDecorationPainters[y] ??= _rowDecorations[y].createBoxPainter();
+          _rowDecorationPainters[y].paint(canvas, new Rect.fromLTRB(
+            offset.dx,
+            offset.dy + _rowTops[y],
+            offset.dx + size.width,
+            offset.dy + _rowTops[y+1]
+          ));
+        }
       }
     }
     for (int index = 0; index < _children.length; index += 1) {

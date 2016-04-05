@@ -47,7 +47,9 @@ class Table extends RenderObjectWidget {
     this.defaultVerticalAlignment: TableCellVerticalAlignment.top,
     this.textBaseline
   }) : children = children,
-       _rowDecorations = children.map/*<Decoration>*/((TableRow row) => row.decoration).toList(),
+       _rowDecorations = children.any((TableRow row) => row.decoration != null)
+                         ? children.map/*<Decoration>*/((TableRow row) => row.decoration).toList()
+                         : null,
        super(key: key) {
     assert(children != null);
     assert(defaultColumnWidth != null);
