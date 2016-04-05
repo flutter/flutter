@@ -12,7 +12,6 @@ main(List<String> args) async {
   // Create the pubspec.yaml file.
   StringBuffer buf = new StringBuffer('''
 name: Flutter
-description: Flutter is a new way to build high-performance, cross-platform mobile apps.
 dependencies:
 ''');
   for (String package in _findPackageNames()) {
