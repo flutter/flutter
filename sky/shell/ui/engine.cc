@@ -74,9 +74,14 @@ std::unique_ptr<flow::LayerTree> Engine::BeginFrame(
   std::unique_ptr<flow::LayerTree> layer_tree =
       sky_view_->BeginFrame(frame_time);
   if (layer_tree) {
-    layer_tree->set_scene_version(viewport_metrics_->scene_version);
-    layer_tree->set_frame_size(SkISize::Make(viewport_metrics_->physical_width,
-                                             viewport_metrics_->physical_height));
+    if (viewport_metrics_) {
+      layer_tree->set_scene_version(viewport_metrics_->scene_version);
+      layer_tree->set_frame_size(SkISize::Make(viewport_metrics_->physical_width,
+                                               viewport_metrics_->physical_height));
+    } else {
+      layer_tree->set_scene_version(0);
+      layer_tree->set_frame_size(SkISize::Make(0, 0));
+    }
     layer_tree->set_construction_time(base::TimeTicks::Now() - begin_time);
   }
   return layer_tree;
