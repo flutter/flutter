@@ -26,8 +26,9 @@ class DartLibraryProviderFiles : public blink::DartLibraryProvider {
   Dart_Handle CanonicalizeURL(Dart_Handle library, Dart_Handle url) override;
 
  private:
-  std::string CanonicalizePackageURL(std::string url);
-  std::string CanonicalizeFileURL(std::string url);
+  std::string GetFilePathForURL(std::string url);
+  std::string GetFilePathForPackageURL(std::string url);
+  std::string GetFilePathForFileURL(std::string url);
 
   base::FilePath packages_;
   tonic::PackagesMap packages_map_;
