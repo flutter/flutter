@@ -69,7 +69,7 @@ class Radio<T> extends StatelessWidget {
   bool get _enabled => onChanged != null;
 
   Color _getInactiveColor(ThemeData themeData) {
-    return _enabled ? themeData.unselectedColor : themeData.disabledColor;
+    return _enabled ? themeData.unselectedWidgetColor : themeData.disabledColor;
   }
 
   void _handleChanged(bool selected) {
