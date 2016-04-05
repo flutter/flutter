@@ -250,10 +250,10 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_TooltipPositionDelegate oldDelegate) {
-    return target != target
-        || verticalOffset != verticalOffset
-        || screenEdgeMargin != screenEdgeMargin
-        || preferBelow != preferBelow;
+    return target != oldDelegate.target
+        || verticalOffset != oldDelegate.verticalOffset
+        || screenEdgeMargin != oldDelegate.screenEdgeMargin
+        || preferBelow != oldDelegate.preferBelow;
   }
 }
 
