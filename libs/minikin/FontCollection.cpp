@@ -177,9 +177,15 @@ uint32_t FontCollection::calcCoverageScore(uint32_t ch, uint32_t vs, FontFamily*
     }
 
     if (vs == 0xFE0F || vs == 0xFE0E) {
-        // TODO use all language in the list.
-        const FontLanguage lang = FontLanguageListCache::getById(fontFamily->langId())[0];
-        const bool hasEmojiFlag = lang.hasEmojiFlag();
+        const FontLanguages& langs = FontLanguageListCache::getById(fontFamily->langId());
+        bool hasEmojiFlag = false;
+        for (size_t i = 0; i < langs.size(); ++i) {
+            if (langs[i].hasEmojiFlag()) {
+                hasEmojiFlag = true;
+                break;
+            }
+        }
+
         if (vs == 0xFE0F) {
             return hasEmojiFlag ? 2 : 1;
         } else {  // vs == 0xFE0E
@@ -208,13 +214,12 @@ uint32_t FontCollection::calcCoverageScore(uint32_t ch, uint32_t vs, FontFamily*
 uint32_t FontCollection::calcLanguageMatchingScore(
         uint32_t userLangListId, const FontFamily& fontFamily) {
     const FontLanguages& langList = FontLanguageListCache::getById(userLangListId);
-    // TODO use all language in the list.
-    FontLanguage fontLanguage = FontLanguageListCache::getById(fontFamily.langId())[0];
+    const FontLanguages& fontLanguages = FontLanguageListCache::getById(fontFamily.langId());
 
     const size_t maxCompareNum = std::min(langList.size(), FONT_LANGUAGES_LIMIT);
-    uint32_t score = fontLanguage.getScoreFor(langList[0]);  // maxCompareNum can't be zero.
-    for (size_t i = 1; i < maxCompareNum; ++i) {
-        score = score * 3u + fontLanguage.getScoreFor(langList[i]);
+    uint32_t score = 0;
+    for (size_t i = 0; i < maxCompareNum; ++i) {
+        score = score * 3u + langList[i].calcScoreFor(fontLanguages);
     }
     return score;
 }
