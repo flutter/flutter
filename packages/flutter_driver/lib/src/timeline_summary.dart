@@ -9,6 +9,7 @@ import 'package:file/file.dart';
 import 'package:path/path.dart' as path;
 
 import 'common.dart';
+import 'timeline.dart';
 
 const String _kDefaultDirectory = 'build';
 final JsonEncoder _prettyEncoder = new JsonEncoder.withIndent('  ');
@@ -18,14 +19,10 @@ final JsonEncoder _prettyEncoder = new JsonEncoder.withIndent('  ');
 const Duration kBuildBudget = const Duration(milliseconds: 8);
 
 /// Extracts statistics from the event loop timeline.
-TimelineSummary summarizeTimeline(Map<String, dynamic> timeline) {
-  return new TimelineSummary(timeline);
-}
-
 class TimelineSummary {
-  TimelineSummary(this._timeline);
+  TimelineSummary.summarize(this._timeline);
 
-  final Map<String, dynamic> _timeline;
+  final Timeline _timeline;
 
   /// Average amount of time spent per frame in the framework building widgets,
   /// updating layout, painting and compositing.
@@ -68,7 +65,7 @@ class TimelineSummary {
       {String destinationDirectory: _kDefaultDirectory, bool pretty: false}) async {
     await fs.directory(destinationDirectory).create(recursive: true);
     File file = fs.file(path.join(destinationDirectory, '$traceName.timeline.json'));
-    await file.writeAsString(_encodeJson(_timeline, pretty));
+    await file.writeAsString(_encodeJson(_timeline.json, pretty));
   }
 
   /// Writes [summaryJson] to a file.
@@ -79,17 +76,15 @@ class TimelineSummary {
     await file.writeAsString(_encodeJson(summaryJson, pretty));
   }
 
-  String _encodeJson(dynamic json, bool pretty) {
+  String _encodeJson(Map<String, dynamic> json, bool pretty) {
     return pretty
       ? _prettyEncoder.convert(json)
       : JSON.encode(json);
   }
 
-  List<Map<String, dynamic>> get _traceEvents => _timeline['traceEvents'];
-
-  List<Map<String, dynamic>> _extractNamedEvents(String name) {
-    return _traceEvents
-      .where((Map<String, dynamic> event) => event['name'] == name)
+  List<TimelineEvent> _extractNamedEvents(String name) {
+    return _timeline.events
+      .where((TimelineEvent event) => event.name == name)
       .toList();
   }
 
@@ -98,13 +93,16 @@ class TimelineSummary {
     List<TimedEvent> result = <TimedEvent>[];
 
     // Timeline does not guarantee that the first event is the "begin" event.
-    Iterator<Map<String, dynamic>> events = _extractNamedEvents(name)
-        .skipWhile((Map<String, dynamic> evt) => evt['ph'] != 'B').iterator;
+    Iterator<TimelineEvent> events = _extractNamedEvents(name)
+        .skipWhile((TimelineEvent evt) => evt.phase != 'B').iterator;
     while(events.moveNext()) {
-      Map<String, dynamic> beginEvent = events.current;
+      TimelineEvent beginEvent = events.current;
       if (events.moveNext()) {
-        Map<String, dynamic> endEvent = events.current;
-        result.add(new TimedEvent(beginEvent['ts'], endEvent['ts']));
+        TimelineEvent endEvent = events.current;
+        result.add(new TimedEvent(
+          beginEvent.timestampMicros,
+          endEvent.timestampMicros
+        ));
       }
     }
 

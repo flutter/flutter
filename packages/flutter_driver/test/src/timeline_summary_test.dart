@@ -6,15 +6,15 @@ import 'dart:convert' show JSON;
 
 import 'package:test/test.dart';
 import 'package:flutter_driver/src/common.dart';
-import 'package:flutter_driver/src/timeline_summary.dart';
+import 'package:flutter_driver/flutter_driver.dart';
 
 void main() {
   group('TimelineSummary', () {
 
     TimelineSummary summarize(List<Map<String, dynamic>> testEvents) {
-      return summarizeTimeline(<String, dynamic>{
+      return new TimelineSummary.summarize(new Timeline.fromJson(<String, dynamic>{
         'traceEvents': testEvents,
-      });
+      }));
     }
 
     Map<String, dynamic> begin(int timeStamp) => <String, dynamic>{

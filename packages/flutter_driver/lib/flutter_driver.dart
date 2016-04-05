@@ -41,3 +41,7 @@ export 'src/timeline_summary.dart' show
   summarizeTimeline,
   EventTrace,
   TimelineSummary;
+
+export 'src/timeline.dart' show
+  Timeline,
+  TimelineEvent;

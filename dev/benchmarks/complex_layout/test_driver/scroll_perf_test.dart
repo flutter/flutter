@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart';
 
@@ -22,7 +20,7 @@ void main() {
     });
 
     test('measure', () async {
-      Map<String, dynamic> profileJson = await driver.traceAction(() async {
+      Timeline timeline = await driver.traceAction(() async {
         // Find the scrollable stock list
         ObjectRef stockList = await driver.findByValueKey('main-scroll');
         expect(stockList, isNotNull);
@@ -40,8 +38,9 @@ void main() {
         }
       });
 
-      expect(profileJson, isNotNull);
-      await new File("build/profile.json").writeAsString(JSON.encode(profileJson));
+      TimelineSummary summary = new TimelineSummary.summarize(timeline);
+      summary.writeSummaryToFile('complex_layout_scroll_perf', pretty: true);
+      summary.writeTimelineToFile('complex_layout_scroll_perf', pretty: true);
     });
   });
 }
