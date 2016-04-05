@@ -10,7 +10,7 @@ import 'dart:io';
 
 /// This script expects to run with the cwd as the root of the flutter repo. It
 /// will generate documentation for the packages in `packages/`, and leave the
-/// documentation in `doc/doc/api`.
+/// documentation in `dev/docs/doc/api/`.
 main(List<String> args) async {
   // Create the pubspec.yaml file.
   StringBuffer buf = new StringBuffer('''
@@ -19,35 +19,34 @@ dependencies:
 ''');
   for (String package in _findPackageNames()) {
     buf.writeln('  $package:');
-    buf.writeln('    path: ../packages/$package');
+    buf.writeln('    path: ../../packages/$package');
   }
-  new File('doc/pubspec.yaml').writeAsStringSync(buf.toString());
+  new File('dev/docs/pubspec.yaml').writeAsStringSync(buf.toString());
 
   // Create the library file.
-  Directory libDir = new Directory('doc/lib');
+  Directory libDir = new Directory('dev/docs/lib');
   libDir.createSync();
 
   StringBuffer contents = new StringBuffer('library temp_doc;\n\n');
   for (String libraryRef in _libraryRefs()) {
     contents.writeln('import \'package:$libraryRef\';');
   }
-  new File('doc/lib/temp_doc.dart').writeAsStringSync(contents.toString());
+  new File('dev/docs/lib/temp_doc.dart').writeAsStringSync(contents.toString());
 
   // Run pub.
-  Process process = await Process.start('pub', <String>['get'], workingDirectory: 'doc');
+  Process process = await Process.start('pub', <String>['get'], workingDirectory: 'dev/docs');
   _print(process.stdout);
   _print(process.stderr);
   int code = await process.exitCode;
   if (code != 0)
     exit(code);
 
-  // Generate the documentation; we require dartdoc >= 0.9.3.
+  // Generate the documentation; we require dartdoc >= 0.9.3+1.
   List<String> args = <String>[
     'global', 'run', 'dartdoc',
-    // TODO(devoncarew): Move this file into doc/.
-    '--header', '../packages/flutter/doc/styles.html',
-    '--header', '_analytics.html',
-    '--dart-sdk', '../bin/cache/dart-sdk',
+    '--header', 'styles.html',
+    '--header', 'analytics.html',
+    '--dart-sdk', '../../bin/cache/dart-sdk',
     '--exclude', 'temp_doc'
   ];
   for (String libraryRef in _libraryRefs()) {
@@ -57,7 +56,7 @@ dependencies:
     args.add(name.substring(0, name.length - 5));
   }
 
-  process = await Process.start('pub', args, workingDirectory: 'doc');
+  process = await Process.start('pub', args, workingDirectory: 'dev/docs');
   _print(process.stdout);
   _print(process.stderr);
   exit(await process.exitCode);
