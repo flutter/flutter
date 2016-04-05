@@ -30,7 +30,7 @@ namespace android {
 typedef ICUTestBase FontLanguagesTest;
 typedef ICUTestBase FontLanguageTest;
 
-static FontLanguages createFontLanguages(const std::string& input) {
+static const FontLanguages& createFontLanguages(const std::string& input) {
     AutoMutex _l(gMinikinLock);
     uint32_t langId = FontLanguageListCache::getId(input);
     return FontLanguageListCache::getById(langId);
@@ -217,35 +217,30 @@ TEST_F(FontLanguagesTest, basicTests) {
     EXPECT_EQ(0u, emptyLangs.size());
 
     FontLanguage english = createFontLanguage("en");
-    FontLanguages singletonLangs = createFontLanguages("en");
+    const FontLanguages& singletonLangs = createFontLanguages("en");
     EXPECT_EQ(1u, singletonLangs.size());
     EXPECT_EQ(english, singletonLangs[0]);
 
     FontLanguage french = createFontLanguage("fr");
-    FontLanguages twoLangs = createFontLanguages("en,fr");
+    const FontLanguages& twoLangs = createFontLanguages("en,fr");
     EXPECT_EQ(2u, twoLangs.size());
     EXPECT_EQ(english, twoLangs[0]);
     EXPECT_EQ(french, twoLangs[1]);
 }
 
 TEST_F(FontLanguagesTest, unsupportedLanguageTests) {
-    FontLanguage unsupportedLang = createFontLanguage("abcd");
-    ASSERT_TRUE(unsupportedLang.isUnsupported());
+    const FontLanguages& oneUnsupported = createFontLanguages("abcd-example");
+    EXPECT_TRUE(oneUnsupported.empty());
 
-    FontLanguages oneUnsupported = createFontLanguages("abcd-example");
-    EXPECT_EQ(1u, oneUnsupported.size());
-    EXPECT_TRUE(oneUnsupported[0].isUnsupported());
-
-    FontLanguages twoUnsupporteds = createFontLanguages("abcd-example,abcd-example");
-    EXPECT_EQ(1u, twoUnsupporteds.size());
-    EXPECT_TRUE(twoUnsupporteds[0].isUnsupported());
+    const FontLanguages& twoUnsupporteds = createFontLanguages("abcd-example,abcd-example");
+    EXPECT_TRUE(twoUnsupporteds.empty());
 
     FontLanguage english = createFontLanguage("en");
-    FontLanguages firstUnsupported = createFontLanguages("abcd-example,en");
+    const FontLanguages& firstUnsupported = createFontLanguages("abcd-example,en");
     EXPECT_EQ(1u, firstUnsupported.size());
     EXPECT_EQ(english, firstUnsupported[0]);
 
-    FontLanguages lastUnsupported = createFontLanguages("en,abcd-example");
+    const FontLanguages& lastUnsupported = createFontLanguages("en,abcd-example");
     EXPECT_EQ(1u, lastUnsupported.size());
     EXPECT_EQ(english, lastUnsupported[0]);
 }
@@ -256,20 +251,20 @@ TEST_F(FontLanguagesTest, repeatedLanguageTests) {
     FontLanguage englishInLatn = createFontLanguage("en-Latn");
     ASSERT_TRUE(english == englishInLatn);
 
-    FontLanguages langs = createFontLanguages("en,en-Latn");
+    const FontLanguages& langs = createFontLanguages("en,en-Latn");
     EXPECT_EQ(1u, langs.size());
     EXPECT_EQ(english, langs[0]);
 
     // Country codes are ignored.
-    FontLanguages fr = createFontLanguages("fr,fr-CA,fr-FR");
+    const FontLanguages& fr = createFontLanguages("fr,fr-CA,fr-FR");
     EXPECT_EQ(1u, fr.size());
     EXPECT_EQ(french, fr[0]);
 
     // The order should be kept.
-    langs = createFontLanguages("en,fr,en-Latn");
-    EXPECT_EQ(2u, langs.size());
-    EXPECT_EQ(english, langs[0]);
-    EXPECT_EQ(french, langs[1]);
+    const FontLanguages& langs2 = createFontLanguages("en,fr,en-Latn");
+    EXPECT_EQ(2u, langs2.size());
+    EXPECT_EQ(english, langs2[0]);
+    EXPECT_EQ(french, langs2[1]);
 }
 
 TEST_F(FontLanguagesTest, undEmojiTests) {

@@ -76,8 +76,8 @@ static size_t toLanguageTag(char* output, size_t outSize, const std::string& loc
     return outLength;
 }
 
-static FontLanguages constructFontLanguages(const std::string& input) {
-    FontLanguages result;
+static std::vector<FontLanguage> parseLanguageList(const std::string& input) {
+    std::vector<FontLanguage> result;
     size_t currentIdx = 0;
     size_t commaLoc = 0;
     char langTag[ULOC_FULLNAME_CAPACITY];
@@ -121,11 +121,11 @@ uint32_t FontLanguageListCache::getId(const std::string& languages) {
 
     // Given language list is not in cache. Insert it and return newly assigned ID.
     const uint32_t nextId = inst->mLanguageLists.size();
-    FontLanguages fontLanguages = constructFontLanguages(languages);
+    FontLanguages fontLanguages(parseLanguageList(languages));
     if (fontLanguages.empty()) {
         return kEmptyListId;
     }
-    inst->mLanguageLists.push_back(fontLanguages);
+    inst->mLanguageLists.push_back(std::move(fontLanguages));
     inst->mLanguageListLookupTable.insert(std::make_pair(languages, nextId));
     return nextId;
 }
@@ -146,7 +146,7 @@ FontLanguageListCache* FontLanguageListCache::getInstance() {
 
         // Insert an empty language list for mapping default language list to kEmptyListId.
         // The default language list has only one FontLanguage and it is the unsupported language.
-        instance->mLanguageLists.push_back(FontLanguages({FontLanguage()}));
+        instance->mLanguageLists.push_back(FontLanguages());
         instance->mLanguageListLookupTable.insert(std::make_pair("", kEmptyListId));
     }
     return instance;
