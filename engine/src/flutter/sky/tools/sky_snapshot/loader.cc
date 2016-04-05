@@ -161,7 +161,7 @@ std::string Loader::GetFilePathForFileURL(std::string url) {
 }
 
 std::string Loader::Fetch(const std::string& url) {
-  base::FilePath path(url);
+  base::FilePath path(GetFilePathForURL(url));
   std::string source;
   if (!base::ReadFileToString(path, &source)) {
     fprintf(stderr, "error: Unable to find Dart library '%s'.\n", url.c_str());
