@@ -14,7 +14,6 @@ import 'globals.dart';
 import 'ios/ios_workflow.dart';
 import 'runner/version.dart';
 
-
 const Map<String, String> _osNames = const <String, String>{
   'macos': 'Mac OS',
   'linux': 'Linux',
@@ -196,8 +195,19 @@ class _FlutterValidator extends DoctorValidator {
       'engine revision ${version.engineRevisionShort}'
     ));
 
+    String dartVersion = _getDartVersion();
+    if (dartVersion != null)
+      messages.add(new ValidationMessage(dartVersion));
+    else
+      messages.add(new ValidationMessage.error('Unable to find the Dart executable on the path.'));
+
     return new ValidationResult(ValidationType.installed, messages,
       statusInfo: 'on ${osName()}, channel ${version.channel}');
+  }
+
+  String _getDartVersion() {
+    ProcessResult result = Process.runSync('dart', <String>['--version']);
+    return result.exitCode != 0 ? null : result.stderr.trim();
   }
 }
 
