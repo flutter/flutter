@@ -546,7 +546,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
       config.onScrollEnd(_scrollOffset);
   }
 
-  final GlobalKey _gestureDetectorKey = new GlobalKey();
+  final GlobalKey<RawGestureDetectorState> _gestureDetectorKey = new GlobalKey<RawGestureDetectorState>();
 
   @override
   Widget build(BuildContext context) {

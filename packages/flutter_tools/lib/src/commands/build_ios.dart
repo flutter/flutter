@@ -3,15 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import '../application_package.dart';
 import '../build_configuration.dart';
 import '../globals.dart';
 import '../ios/mac.dart';
 import '../runner/flutter_command.dart';
-
-import 'package:path/path.dart' as path;
 
 class BuildIOSCommand extends FlutterCommand {
   BuildIOSCommand() {

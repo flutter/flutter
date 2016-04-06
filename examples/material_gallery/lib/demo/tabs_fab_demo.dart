@@ -31,7 +31,7 @@ class TabsFabDemo extends StatefulWidget {
 }
 
 class _TabsFabDemoState extends State<TabsFabDemo> {
-  final GlobalKey scaffoldKey = new GlobalKey();
+  final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
   final List<_Page> pages = <_Page>[
     new _Page(label: 'Blue', colors: Colors.indigo, icon: Icons.add),
     new _Page(label: 'Eco', colors: Colors.green, icon: Icons.create),
