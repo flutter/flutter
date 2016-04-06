@@ -186,7 +186,7 @@ class AndroidDevice extends Device {
     return true;
   }
 
-  Future<Null> _forwardObservatoryPort(int devicePort, int port) async {
+  Future<Null> _forwardPort(String service, int devicePort, int port) async {
     bool portWasZero = (port == null) || (port == 0);
 
     try {
@@ -194,9 +194,9 @@ class AndroidDevice extends Device {
       port = await portForwarder.forward(devicePort,
                                          hostPort: port);
       if (portWasZero)
-        printStatus('Observatory listening on http://127.0.0.1:$port');
+        printStatus('$service listening on http://127.0.0.1:$port');
     } catch (e) {
-      printError('Unable to forward Observatory port $port: $e');
+      printError('Unable to forward port $port: $e');
     }
   }
 
@@ -206,7 +206,8 @@ class AndroidDevice extends Device {
     String route,
     bool clearLogs: false,
     bool startPaused: false,
-    int debugPort: observatoryDefaultPort
+    int observatoryPort: observatoryDefaultPort,
+    int diagnosticPort: diagnosticDefaultPort
   }) async {
     printTrace('$this startBundle');
 
@@ -220,12 +221,15 @@ class AndroidDevice extends Device {
 
     runCheckedSync(adbCommandForDevice(<String>['push', bundlePath, _deviceBundlePath]));
 
-    ServiceProtocolDiscovery serviceProtocolDiscovery =
-        new ServiceProtocolDiscovery(logReader);
+    ServiceProtocolDiscovery observatoryDiscovery =
+        new ServiceProtocolDiscovery(logReader, ServiceProtocolDiscovery.kObservatoryService);
+    ServiceProtocolDiscovery diagnosticDiscovery =
+        new ServiceProtocolDiscovery(logReader, ServiceProtocolDiscovery.kDiagnosticService);
 
     // We take this future here but do not wait for completion until *after* we
     // start the bundle.
-    Future<int> scrapeServicePort = serviceProtocolDiscovery.nextPort();
+    Future<List<int>> scrapeServicePorts = Future.wait(
+        <Future<int>>[observatoryDiscovery.nextPort(), diagnosticDiscovery.nextPort()]);
 
     List<String> cmd = adbCommandForDevice(<String>[
       'shell', 'am', 'start',
@@ -255,9 +259,14 @@ class AndroidDevice extends Device {
     printTrace('Waiting for observatory port to be available...');
 
     try {
-      int devicePort = await scrapeServicePort.timeout(new Duration(seconds: 12));
-      printTrace('service protocol port = $devicePort');
-      await _forwardObservatoryPort(devicePort, debugPort);
+      List<int> devicePorts = await scrapeServicePorts.timeout(new Duration(seconds: 12));
+      int observatoryDevicePort = devicePorts[0];
+      int diagnosticDevicePort = devicePorts[1];
+      printTrace('observatory port = $observatoryDevicePort');
+      await _forwardPort(ServiceProtocolDiscovery.kObservatoryService,
+          observatoryDevicePort, observatoryPort);
+      await _forwardPort(ServiceProtocolDiscovery.kDiagnosticService,
+          diagnosticDevicePort, diagnosticPort);
       return true;
     } catch (error) {
       if (error is TimeoutException)
@@ -278,7 +287,8 @@ class AndroidDevice extends Device {
     bool checked: true,
     bool clearLogs: false,
     bool startPaused: false,
-    int debugPort: observatoryDefaultPort,
+    int observatoryPort: observatoryDefaultPort,
+    int diagnosticPort: diagnosticDefaultPort,
     Map<String, dynamic> platformArgs
   }) async {
     if (!_checkForSupportedAdbVersion() || !_checkForSupportedAndroidVersion())
@@ -300,7 +310,8 @@ class AndroidDevice extends Device {
       route: route,
       clearLogs: clearLogs,
       startPaused: startPaused,
-      debugPort: debugPort
+      observatoryPort: observatoryPort,
+      diagnosticPort: diagnosticPort
     )) {
       return true;
     } else {

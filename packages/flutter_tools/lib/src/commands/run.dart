@@ -221,7 +221,7 @@ Future<int> startApp(
     checked: checked,
     clearLogs: clearLogs,
     startPaused: startPaused,
-    debugPort: debugPort,
+    observatoryPort: debugPort,
     platformArgs: platformArgs
   );
 

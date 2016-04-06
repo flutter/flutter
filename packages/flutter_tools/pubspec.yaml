@@ -13,6 +13,7 @@ dependencies:
   args: ^0.13.4
   crypto: 0.9.2
   file: ^0.1.0
+  http: ^0.11.3
   json_schema: ^1.0.3
   mustache4dart: ^1.0.0
   package_config: ^0.1.3

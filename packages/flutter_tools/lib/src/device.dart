@@ -185,7 +185,8 @@ abstract class Device {
     bool checked: true,
     bool clearLogs: false,
     bool startPaused: false,
-    int debugPort: observatoryDefaultPort,
+    int observatoryPort: observatoryDefaultPort,
+    int diagnosticPort: diagnosticDefaultPort,
     Map<String, dynamic> platformArgs
   });
 

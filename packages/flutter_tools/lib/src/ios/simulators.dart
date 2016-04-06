@@ -445,7 +445,8 @@ class IOSSimulator extends Device {
     bool checked: true,
     bool clearLogs: false,
     bool startPaused: false,
-    int debugPort: observatoryDefaultPort,
+    int observatoryPort: observatoryDefaultPort,
+    int diagnosticPort: diagnosticDefaultPort,
     Map<String, dynamic> platformArgs
   }) async {
     printTrace('Building ${app.name} for $id.');
@@ -457,7 +458,7 @@ class IOSSimulator extends Device {
       return false;
 
     ServiceProtocolDiscovery serviceProtocolDiscovery =
-        new ServiceProtocolDiscovery(logReader);
+        new ServiceProtocolDiscovery(logReader, ServiceProtocolDiscovery.kObservatoryService);
 
     // We take this future here but do not wait for completion until *after* we
     // start the application.
@@ -476,8 +477,8 @@ class IOSSimulator extends Device {
     if (startPaused)
       args.add("--start-paused");
 
-    if (debugPort != observatoryDefaultPort)
-      args.add("--observatory-port=$debugPort");
+    if (observatoryPort != observatoryDefaultPort)
+      args.add("--observatory-port=$observatoryPort");
 
     // Launch the updated application in the simulator.
     try {

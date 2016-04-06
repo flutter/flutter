@@ -3,3 +3,4 @@
 // found in the LICENSE file.
 
 const int observatoryDefaultPort = 8181;
+const int diagnosticDefaultPort = 8182;
