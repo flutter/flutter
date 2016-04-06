@@ -10,6 +10,21 @@ import 'package:test/test.dart';
 
 import 'test_semantics.dart';
 
+// This file uses "as dynamic" in a few places to defeat the static
+// analysis. In general you want to avoid using this style in your
+// code, as it will cause the analyzer to be unable to help you catch
+// errors.
+//
+// In this case, we do it because we are trying to call internal
+// methods of the tooltip code in order to test it. Normally, the
+// state of a tooltip is a private class, but by using a GlobalKey we
+// can get a handle to that object and by using "as dynamic" we can
+// bypass the analyzer's type checks and call methods that we aren't
+// supposed to be able to know about.
+//
+// It's ok to do this in tests, but you really don't want to do it in
+// production code.
+
 void main() {
   test('Does tooltip end up in the right place - top left', () {
     testWidgets((WidgetTester tester) {
@@ -47,7 +62,7 @@ void main() {
           ]
         )
       );
-      key.currentState.showTooltip();
+      (key.currentState as dynamic).showTooltip(); // before using "as dynamic" in your code, see note top of file
       tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
       /********************* 800x600 screen
@@ -101,7 +116,7 @@ void main() {
           ]
         )
       );
-      key.currentState.showTooltip();
+      (key.currentState as dynamic).showTooltip(); // before using "as dynamic" in your code, see note top of file
       tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
       /********************* 800x600 screen
@@ -157,7 +172,7 @@ void main() {
           ]
         )
       );
-      key.currentState.showTooltip();
+      (key.currentState as dynamic).showTooltip(); // before using "as dynamic" in your code, see note top of file
       tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
       // we try to put it here but it doesn't fit:
@@ -224,7 +239,7 @@ void main() {
           ]
         )
       );
-      key.currentState.showTooltip();
+      (key.currentState as dynamic).showTooltip(); // before using "as dynamic" in your code, see note top of file
       tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
       /********************* 800x600 screen
@@ -279,7 +294,7 @@ void main() {
           ]
         )
       );
-      key.currentState.showTooltip();
+      (key.currentState as dynamic).showTooltip(); // before using "as dynamic" in your code, see note top of file
       tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
       /********************* 800x600 screen
@@ -336,7 +351,7 @@ void main() {
           ]
         )
       );
-      key.currentState.showTooltip();
+      (key.currentState as dynamic).showTooltip(); // before using "as dynamic" in your code, see note top of file
       tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
       /********************* 800x600 screen
@@ -404,7 +419,8 @@ void main() {
       expect(client.updates[1], isNull);
       client.updates.clear();
 
-      key.currentState.showTooltip(); // this triggers a rebuild of the semantics because the tree changes
+      // before using "as dynamic" in your code, see note top of file
+      (key.currentState as dynamic).showTooltip(); // this triggers a rebuild of the semantics because the tree changes
 
       tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
       expect(client.updates.length, equals(2));
