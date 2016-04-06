@@ -172,7 +172,7 @@ class ListDemoState extends State<ListDemo> {
     return new Scaffold(
       key: scaffoldKey,
       appBar: new AppBar(
-        title: new Text('Scrolling list\n$itemSizeText$layoutText'),
+        title: new Text('Scrolling list\n$itemTypeText$layoutText'),
         actions: <Widget>[
           new IconButton(
             icon: Icons.sort_by_alpha,
