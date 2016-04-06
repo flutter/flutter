@@ -134,7 +134,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
         actions: <Widget>[
           new PopupMenuButton<LeaveBehindDemoAction>(
             onSelected: handleDemoAction,
-            items: <PopupMenuEntry<LeaveBehindDemoAction>>[
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<LeaveBehindDemoAction>>[
               new PopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.reset,
                 child: new Text('Reset the list')
