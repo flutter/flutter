@@ -97,7 +97,7 @@ bool _xcodeVersionCheckValid(int major, int minor) {
 }
 
 Future<bool> buildIOSXcodeProject(ApplicationPackage app,
-    { bool buildForDevice, Directory buildDirectory, bool codesign: true }) async {
+    { bool buildForDevice, bool codesign: true }) async {
   String flutterProjectPath = Directory.current.path;
 
   if (xcodeProjectRequiresUpdate()) {
@@ -131,15 +131,6 @@ Future<bool> buildIOSXcodeProject(ApplicationPackage app,
     '-configuration', 'Release',
     'ONLY_ACTIVE_ARCH=YES',
   ];
-
-  if (buildDirectory != null) {
-    if (!buildDirectory.existsSync()) {
-      printError('The specified build directory ${buildDirectory.path} does not exist');
-      return false;
-    }
-
-    commands.add('TARGET_BUILD_DIR=${buildDirectory.absolute.path}');
-  }
 
   if (buildForDevice) {
     commands.addAll(<String>['-sdk', 'iphoneos', '-arch', 'arm64']);
