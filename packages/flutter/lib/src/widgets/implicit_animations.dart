@@ -162,7 +162,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
   }
 
   /// Subclasses must implement this function by running through the following
-  /// steps for for each animatable facet in the class:
+  /// steps for each animatable facet in the class:
   ///
   /// 1. Call the visitor callback with three arguments, the first argument
   /// being the current value of the Tween<T> object that represents the

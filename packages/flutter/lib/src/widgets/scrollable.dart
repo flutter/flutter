@@ -379,9 +379,16 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     return _controller.animateTo(newScrollOffset, duration: duration, curve: curve).then(_endScroll);
   }
 
+  /// Update any in-progress scrolling physics to account for new scroll behavior.
+  ///
+  /// The scrolling physics depends on the scroll behavior. When changing the
+  /// scrolling behavior, call this function to update any in-progress scrolling
+  /// physics to account for the new scroll behavior. This function preserves
+  /// the current velocity when updating the physics.
+  ///
+  /// If there are no in-progress scrolling physics, this function scrolls to
+  /// the given offset instead.
   void didUpdateScrollBehavior(double newScrollOffset) {
-    if (newScrollOffset == _scrollOffset)
-      return;
     if (_numberOfInProgressScrolls > 0) {
       if (_simulation != null) {
         double dx = _simulation.dx(_controller.lastElapsedDuration.inMicroseconds / Duration.MICROSECONDS_PER_SECOND);

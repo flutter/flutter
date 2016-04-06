@@ -9,7 +9,10 @@ import 'framework.dart';
 import 'scrollable.dart';
 import 'scroll_behavior.dart';
 
-/// Provides children for [LazyBlock] and [LazyBlockViewport]
+/// Provides children for [LazyBlock] or [LazyBlockViewport].
+///
+/// See also [LazyBlockBuilder] for an implementation of LazyBlockDelegate based
+/// on an [IndexedBuilder] closure.
 abstract class LazyBlockDelegate {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -17,25 +20,54 @@ abstract class LazyBlockDelegate {
 
   /// Returns a widget representing the item with the given index.
   ///
+  /// This function might be called with index parameters in any order. This
+  /// function should return null for indices that exceed the number of children
+  /// provided by this delegate. If this function must not return a null value
+  /// for an index if it previously returned a non-null value for that index or
+  /// a larger index.
+  ///
+  /// This function might be called during the build or layout phases of the
+  /// pipeline.
+  ///
   /// The returned widget might or might not be cached by [LazyBlock]. See
   /// [shouldRebuild] for details about how to evict the cache.
   Widget buildItem(BuildContext context, int index);
 
   /// Whether [LazyBlock] should evict its cache of widgets returned by [buildItem].
   ///
-  /// When a [LazyBlock] receives a new configuration, it evicts its cache of
-  /// widgets if (1) the new configuration has a delegate with a different
-  /// runtimeType thant he old delegate, or (2) the [shouldRebuild] method of
-  /// the new delegate returns true when passed the old delgate.
+  /// When a [LazyBlock] receives a new configuration with a new delegate, it
+  /// evicts its cache of widgets if (1) the new configuration has a delegate
+  /// with a different runtimeType than the old delegate, or (2) the
+  /// [shouldRebuild] method of the new delegate returns true when passed the
+  /// old delgate.
   ///
   /// When calling this function, [LazyBlock] will always pass an argument that
   /// matches the runtimeType of the receiver.
   bool shouldRebuild(LazyBlockDelegate oldDelegate);
 }
 
+/// Uses an [IndexedBuilder] to provide children for [LazyBlock].
+///
+/// A LazyBlockBuilder rebuilds the children whenever the [LazyBlock] is
+/// rebuilt, similar to the behavior of [Builder].
+///
+/// See also [LazyBlockViewport].
 class LazyBlockBuilder extends LazyBlockDelegate {
-  LazyBlockBuilder(this.builder);
+  /// Creates a LazyBlockBuilder based on the given builder.
+  LazyBlockBuilder({ this.builder }) {
+    assert(builder != null);
+  }
 
+  /// Returns a widget representing the item with the given index.
+  ///
+  /// This function might be called with index parameters in any order. This
+  /// function should return null for indices that exceed the number of children
+  /// provided by this delegate. If this function must not return a null value
+  /// for an index if it previously returned a non-null value for that index or
+  /// a larger index.
+  ///
+  /// This function might be called during the build or layout phases of the
+  /// pipeline.
   final IndexedBuilder builder;
 
   @override
@@ -45,20 +77,46 @@ class LazyBlockBuilder extends LazyBlockDelegate {
   bool shouldRebuild(LazyBlockDelegate oldDelegate) => true;
 }
 
+/// An infinite scrolling list of variable height children.
+///
+/// [LazyBlock] is a general-purpose scrollable list for a large (or infinite)
+/// number of children that might not all have the same height. Rather than
+/// materializing all of its children, [LazyBlock] asks its [delegate] to build
+/// child widgets lazily to fill its viewport. [LazyBlock] caches the widgets
+/// it obtains from the delegate as long as they're visible. (See
+/// [LazyBlockDelegate.shouldRebuild] for details about how to evict the cache.)
+///
+/// [LazyBlock] works by dead reckoning changes to its [scrollOffset] from the
+/// top of the first child that is visible in its viewport. If the children
+/// above the first visible child change size, the [scrollOffset] might not
+/// return to zero when the [LazyBlock] is scrolled all the way back to the
+/// start because the height of each child will be subtracted incrementally from
+/// the current scroll position. For this reason, making large changes to the
+/// [scrollOffset] is expensive because [LazyBlock] computes the size of every
+/// child between the old scroll offset and the new scroll offset.
+///
+/// Prefer [ScrollableList] when all the children have the same height because
+/// it can use that property to be more efficient. Prefer [ScrollableViewport]
+/// when there is only one child.
 class LazyBlock extends Scrollable {
   LazyBlock({
     Key key,
     double initialScrollOffset,
+    Axis scrollDirection: Axis.vertical,
     ScrollListener onScroll,
     SnapOffsetCallback snapOffsetCallback,
     this.delegate
   }) : super(
     key: key,
     initialScrollOffset: initialScrollOffset,
+    scrollDirection: scrollDirection,
     onScroll: onScroll,
     snapOffsetCallback: snapOffsetCallback
   );
 
+  /// Provides children for this widget.
+  ///
+  /// See [LazyBlockDelegate] for details.
   final LazyBlockDelegate delegate;
 
   @override
@@ -87,27 +145,70 @@ class _LazyBlockState extends ScrollableState<LazyBlock> {
   Widget buildContent(BuildContext context) {
     return new LazyBlockViewport(
       startOffset: scrollOffset,
-      direction: config.scrollDirection,
+      mainAxis: config.scrollDirection,
       onExtentsChanged: _handleExtentsChanged,
       delegate: config.delegate
     );
   }
 }
 
+/// Signature used by [LazyBlockViewport] to report its interior and exterior dimensions.
 typedef void LazyBlockExtentsChangedCallback(double contentExtent, double containerExtent, double minScrollOffset);
 
+/// A viewport on an infinite list of variable height children.
+///
+/// [LazyBlockViewport] is a a general-purpose viewport for a large (or
+/// infinite) number of children that might not all have the same height. Rather
+/// than materializing all of its children, [LazyBlockViewport] asks its
+/// [delegate] to build child widgets lazily to fill itself. [LazyBlockViewport]
+/// caches the widgets it obtains from the delegate as long as they're visible.
+/// (See [LazyBlockDelegate.shouldRebuild] for details about how to evict the
+/// cache.)
+///
+/// [LazyBlockViewport] works by dead reckoning changes to its [startOffset]
+/// from the top of the first child that is visible in itself. For this reason,
+/// making large changes to the [startOffset] is expensive because
+/// [LazyBlockViewport] computes the size of every child between the old offset
+/// and the new offset.
+///
+/// Prefer [ListViewport] when all the children have the same height because
+/// it can use that property to be more efficient. Prefer [Viewport] when there
+/// is only one child.
+///
+/// For a scrollable version of this widget, see [LazyBlock].
 class LazyBlockViewport extends RenderObjectWidget {
   LazyBlockViewport({
     Key key,
-    this.startOffset,
-    this.direction,
+    this.startOffset: 0.0,
+    this.mainAxis: Axis.vertical,
     this.onExtentsChanged,
     this.delegate
-  }) : super(key: key);
+  }) : super(key: key) {
+    assert(delegate != null);
+  }
 
+  /// The offset of the start of the viewport.
+  ///
+  /// As the start offset increases, children with larger indices are visible
+  /// in the viewport.
+  ///
+  /// For vertical viewports, the offset is from the top of the viewport. For
+  /// horizontal viewports, the offset is from the left of the viewport.
   final double startOffset;
-  final Axis direction;
+
+  /// The direction in which the children are permitted to be larger than the viewport
+  ///
+  /// The children are given layout constraints that are fully unconstrainted
+  /// along the main axis (e.g., children can be as tall as it wants if the main
+  /// axis is vertical).
+  final Axis mainAxis;
+
+  /// Called when the interior or exterior dimensions of the viewport change.
   final LazyBlockExtentsChangedCallback onExtentsChanged;
+
+  /// Provides children for this widget.
+  ///
+  /// See [LazyBlockDelegate] for details.
   final LazyBlockDelegate delegate;
 
   @override
@@ -264,7 +365,7 @@ class _LazyBlockElement extends RenderObjectElement {
     super.mount(parent, newSlot);
     renderObject
       ..callback = _layout
-      ..mainAxis = widget.direction;
+      ..mainAxis = widget.mainAxis;
     // Children will get built during layout.
     // Paint offset will get updated during layout.
   }
@@ -273,7 +374,7 @@ class _LazyBlockElement extends RenderObjectElement {
   void update(LazyBlockViewport newWidget) {
     LazyBlockViewport oldWidget = widget;
     super.update(newWidget);
-    renderObject.mainAxis = widget.direction;
+    renderObject.mainAxis = widget.mainAxis;
     LazyBlockDelegate newDelegate = newWidget.delegate;
     LazyBlockDelegate oldDelegate = oldWidget.delegate;
     if (newDelegate != oldDelegate && (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRebuild(oldDelegate))) {
@@ -391,9 +492,9 @@ class _LazyBlockElement extends RenderObjectElement {
         _minScrollOffset = currentLogicalOffset;
         _startOffsetLowerLimit = double.NEGATIVE_INFINITY;
       } else {
-        // The first element is not visible. Ensure that we have enough headroom
-        // so we don't hit the min scroll offset prematurely.
-        _minScrollOffset = currentLogicalOffset - blockExtent * 2.0;
+        // The first element is not visible. Ensure that we have one blockExtent
+        // of headroom so we don't hit the min scroll offset prematurely.
+        _minScrollOffset = currentLogicalOffset - blockExtent;
         _startOffsetLowerLimit = currentLogicalOffset;
       }
 
@@ -430,12 +531,12 @@ class _LazyBlockElement extends RenderObjectElement {
       if (currentLogicalOffset < endLogicalOffset) {
         // The last element is visible. We need to update our reckoning of where
         // the max scroll offset is.
-        _maxScrollOffset = currentLogicalOffset;
+        _maxScrollOffset = currentLogicalOffset - blockExtent;
         _startOffsetUpperLimit = double.INFINITY;
       } else {
-        // The last element is not visible. Ensure that we have enough headroom
-        // so we don't hit the max scroll offset prematurely.
-        _maxScrollOffset = currentLogicalOffset + blockExtent * 2.0;
+        // The last element is not visible. Ensure that we have one blockExtent
+        // of headroom so we don't hit the max scroll offset prematurely.
+        _maxScrollOffset = currentLogicalOffset;
         _startOffsetUpperLimit = currentLogicalOffset - blockExtent;
       }
 
@@ -469,7 +570,7 @@ class _LazyBlockElement extends RenderObjectElement {
 
     LazyBlockExtentsChangedCallback onExtentsChanged = widget.onExtentsChanged;
     if (onExtentsChanged != null) {
-      double contentExtent = _maxScrollOffset - _minScrollOffset;
+      double contentExtent = _maxScrollOffset - _minScrollOffset + blockExtent;
       if (_lastReportedContentExtent != contentExtent ||
           _lastReportedContainerExtent != blockExtent ||
           _lastReportedMinScrollOffset != _minScrollOffset) {
@@ -482,7 +583,7 @@ class _LazyBlockElement extends RenderObjectElement {
   }
 
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
-    switch (widget.direction) {
+    switch (widget.mainAxis) {
       case Axis.horizontal:
         return new BoxConstraints.tightFor(height: constraints.maxHeight);
       case Axis.vertical:
@@ -491,7 +592,7 @@ class _LazyBlockElement extends RenderObjectElement {
   }
 
   double _getMainAxisExtent(Size size) {
-    switch (widget.direction) {
+    switch (widget.mainAxis) {
       case Axis.horizontal:
         return size.width;
       case Axis.vertical:
@@ -500,7 +601,7 @@ class _LazyBlockElement extends RenderObjectElement {
   }
 
   Offset _getMainAxisOffsetForSize(Size size) {
-    switch (widget.direction) {
+    switch (widget.mainAxis) {
       case Axis.horizontal:
         return new Offset(size.width, 0.0);
       case Axis.vertical:
@@ -517,7 +618,7 @@ class _LazyBlockElement extends RenderObjectElement {
 
   void _updatePaintOffset() {
     double physicalStartOffset = widget.startOffset - _firstChildLogicalOffset;
-    switch (widget.direction) {
+    switch (widget.mainAxis) {
       case Axis.horizontal:
         renderObject.paintOffset = new Offset(-physicalStartOffset, 0.0);
         break;

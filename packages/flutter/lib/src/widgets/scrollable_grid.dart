@@ -126,8 +126,8 @@ class _GridViewportElement extends VirtualViewportElement {
     super.updateRenderObject(oldWidget);
   }
 
-  double _contentExtent;
-  double _containerExtent;
+  double _lastReportedContentExtent;
+  double _lastReportedContainerExtent;
   GridSpecification _specification;
 
   @override
@@ -146,10 +146,10 @@ class _GridViewportElement extends VirtualViewportElement {
 
     super.layout(constraints);
 
-    if (contentExtent != _contentExtent || containerExtent != _containerExtent) {
-      _contentExtent = contentExtent;
-      _containerExtent = containerExtent;
-      widget.onExtentsChanged(_contentExtent, _containerExtent);
+    if (contentExtent != _lastReportedContentExtent || containerExtent != _lastReportedContainerExtent) {
+      _lastReportedContentExtent = contentExtent;
+      _lastReportedContainerExtent = containerExtent;
+      widget.onExtentsChanged(_lastReportedContentExtent, _lastReportedContainerExtent);
     }
   }
 }

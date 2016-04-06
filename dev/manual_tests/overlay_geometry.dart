@@ -130,7 +130,7 @@ class CardBuilder extends LazyBlockDelegate {
 class OverlayGeometryAppState extends State<OverlayGeometryApp> {
   List<CardModel> cardModels;
   Map<MarkerType, Point> markers = new Map<MarkerType, Point>();
-  double markersScrollOffset;
+  double markersScrollOffset = 0.0;
   ScrollListener scrollListener;
 
   @override

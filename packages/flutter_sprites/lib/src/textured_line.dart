@@ -100,7 +100,7 @@ class TexturedLinePainter {
     List<Vector2> miters = _computeMiterList(vectors, false);
 
     List<Point> vertices = <Point>[];
-    List<int> indicies = <int>[];
+    List<int> indices = <int>[];
     List<Color> verticeColors = <Color>[];
     List<Point> textureCoordinates;
     double textureTop;
@@ -151,8 +151,8 @@ class TexturedLinePainter {
       int lastIndex1 = (i - 1) * 2 + 1;
       int currentIndex0 = i * 2;
       int currentIndex1 = i * 2 + 1;
-      indicies.addAll(<int>[lastIndex0, lastIndex1, currentIndex0]);
-      indicies.addAll(<int>[lastIndex1, currentIndex1, currentIndex0]);
+      indices.addAll(<int>[lastIndex0, lastIndex1, currentIndex0]);
+      indices.addAll(<int>[lastIndex1, currentIndex1, currentIndex0]);
 
       // Add colors
       verticeColors.add(colors[i]);
@@ -170,7 +170,7 @@ class TexturedLinePainter {
       lastMiter = currentMiter;
     }
 
-    canvas.drawVertices(VertexMode.triangles, vertices, textureCoordinates, verticeColors, TransferMode.modulate, indicies, _cachedPaint);
+    canvas.drawVertices(VertexMode.triangles, vertices, textureCoordinates, verticeColors, TransferMode.modulate, indices, _cachedPaint);
   }
 
   double _xPosForStop(double stop) {

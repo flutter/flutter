@@ -418,7 +418,7 @@ class CardCollectionState extends State<CardCollection> {
       );
     } else {
       cardCollection = new LazyBlock(
-        delegate: new LazyBlockBuilder(_buildCard),
+        delegate: new LazyBlockBuilder(builder: _buildCard),
         snapOffsetCallback: _snapToCenter ? _toSnapOffset : null
       );
     }
