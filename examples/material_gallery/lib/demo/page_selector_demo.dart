@@ -24,7 +24,7 @@ class PageSelectorDemo extends StatelessWidget {
     ];
 
     return new Scaffold(
-      appBar: new AppBar(title: new Text('Page Selector')),
+      appBar: new AppBar(title: new Text('Page selector')),
       body: new TabBarSelection<IconData>(
         values: icons,
         child: new Builder(

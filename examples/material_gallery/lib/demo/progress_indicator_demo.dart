@@ -73,7 +73,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> {
           height: 30.0,
           child: new CircularProgressIndicator(value: animation.value)
         ),
-        new Text("${(animation.value * 100.0).toStringAsFixed(1)}%" + (controller.isAnimating ? '' : ' (paused)'))
+        new Text('${(animation.value * 100.0).toStringAsFixed(1)}%${ controller.isAnimating ? "" : " (paused)" }')
     ];
     return new Column(
       children: indicators
@@ -86,7 +86,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(title: new Text('Progress Indicators')),
+      appBar: new AppBar(title: new Text('Progress indicators')),
       body: new DefaultTextStyle(
         style: Theme.of(context).textTheme.title,
         child: new GestureDetector(

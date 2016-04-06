@@ -116,7 +116,7 @@ class ScrollingTechniquesDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(title: new Text('Scrolling Techniques')),
+      appBar: new AppBar(title: new Text('Scrolling techniques')),
       body: new Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: new Block(

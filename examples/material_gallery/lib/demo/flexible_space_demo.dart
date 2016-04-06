@@ -113,11 +113,11 @@ class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
               itemBuilder: (BuildContext context) => <PopupMenuItem<AppBarBehavior>>[
                 new PopupMenuItem<AppBarBehavior>(
                   value: AppBarBehavior.scroll,
-                  child: new Text('AppBar scrolls away')
+                  child: new Text('Toolbar scrolls away')
                 ),
                 new PopupMenuItem<AppBarBehavior>(
                   value: AppBarBehavior.under,
-                  child: new Text('AppBar stays put')
+                  child: new Text('Toolbar stays put')
                 )
               ]
             )

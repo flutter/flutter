@@ -66,12 +66,12 @@ class MenuDemoState extends State<MenuDemo> {
             onSelected: showMenuSelection,
             itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
               new PopupMenuItem<String>(
-                value: 'AppBar Menu',
-                child: new Text('AppBar Menu')
+                value: 'Toolbar menu',
+                child: new Text('Toolbar menu')
               ),
               new PopupMenuItem<String>(
-                value: 'Right Here',
-                child: new Text('Right Here')
+                value: 'Right here',
+                child: new Text('Right here')
               ),
               new PopupMenuItem<String>(
                 value: 'Hooray!',
@@ -133,7 +133,7 @@ class MenuDemoState extends State<MenuDemo> {
                   value: 'Get Link',
                   child: new ListItem(
                     leading: new Icon(icon: Icons.link),
-                    title: new Text('Get Link')
+                    title: new Text('Get link')
                   )
                 ),
                 new PopupMenuDivider(),

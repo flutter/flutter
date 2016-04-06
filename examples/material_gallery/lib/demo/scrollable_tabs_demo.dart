@@ -49,22 +49,22 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> {
       values: icons,
       child: new Scaffold(
         appBar: new AppBar(
-          title: new Text('Scrollable Tabs'),
+          title: new Text('Scrollable tabs'),
           actions: <Widget>[
             new PopupMenuButton<TabsDemoStyle>(
               onSelected: changeDemoStyle,
               itemBuilder: (BuildContext context) => <PopupMenuItem<TabsDemoStyle>>[
                 new PopupMenuItem<TabsDemoStyle>(
                   value: TabsDemoStyle.iconsAndText,
-                  child: new Text('Icons and Text')
+                  child: new Text('Icons and text')
                 ),
                 new PopupMenuItem<TabsDemoStyle>(
                   value: TabsDemoStyle.iconsOnly,
-                  child: new Text('Icons Only')
+                  child: new Text('Icons only')
                 ),
                 new PopupMenuItem<TabsDemoStyle>(
                   value: TabsDemoStyle.textOnly,
-                  child: new Text('Text Only')
+                  child: new Text('Text only')
                 ),
               ]
             )

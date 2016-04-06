@@ -48,7 +48,7 @@ class _DrawingDemoState extends State<DrawingDemo> {
 
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text("Fancy Lines")
+        title: new Text('Fancy lines')
       ),
       body: body
     );

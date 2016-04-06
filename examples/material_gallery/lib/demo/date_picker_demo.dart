@@ -33,7 +33,7 @@ class _DatePickerDemoState extends State<DatePickerDemo> {
   Widget build(BuildContext context) {
     return
       new Scaffold(
-      appBar: new AppBar(title: new Text("Date Picker")),
+      appBar: new AppBar(title: new Text('Date picker')),
       body: new Column(
         children: <Widget>[
           new Text(new DateFormat.yMMMd().format(_selectedDate)),

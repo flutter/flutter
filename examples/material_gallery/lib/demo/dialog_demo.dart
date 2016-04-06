@@ -119,7 +119,7 @@ class DialogDemoState extends State<DialogDemo> {
               showDemoDialog/*<DialogDemoAction>*/(
                 context: context,
                 dialog: new Dialog(
-                  title: new Text("Use Google's location service?"),
+                  title: new Text('Use Google\'s location service?'),
                   content: new Text(
                     _alertWithTitleText,
                     style: dialogTextStyle
