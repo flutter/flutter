@@ -101,7 +101,7 @@ class TopBarMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return new PopupMenuButton<String>(
       onSelected: (String value) { print("Selected: $value"); },
-      items: <PopupMenuItem<String>>[
+      itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
         new PopupMenuItem<String>(
           value: "Friends",
           child: new MenuItemWithIcon(Icons.people, "Friends", "5 new")

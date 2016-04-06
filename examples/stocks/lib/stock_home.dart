@@ -220,7 +220,7 @@ class StockHomeState extends State<StockHome> {
         ),
         new PopupMenuButton<_StockMenuItem>(
           onSelected: (_StockMenuItem value) { _handleStockMenu(context, value); },
-          items: <PopupMenuItem<_StockMenuItem>>[
+          itemBuilder: (BuildContext context) => <PopupMenuItem<_StockMenuItem>>[
             new CheckedPopupMenuItem<_StockMenuItem>(
               value: _StockMenuItem.autorefresh,
               checked: _autorefresh,

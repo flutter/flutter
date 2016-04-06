@@ -53,7 +53,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> {
           actions: <Widget>[
             new PopupMenuButton<TabsDemoStyle>(
               onSelected: changeDemoStyle,
-              items: <PopupMenuItem<TabsDemoStyle>>[
+              itemBuilder: (BuildContext context) => <PopupMenuItem<TabsDemoStyle>>[
                 new PopupMenuItem<TabsDemoStyle>(
                   value: TabsDemoStyle.iconsAndText,
                   child: new Text('Icons and Text')

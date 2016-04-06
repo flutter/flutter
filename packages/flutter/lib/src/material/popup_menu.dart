@@ -380,6 +380,9 @@ Future<dynamic/*=T*/> showMenu/*<T>*/({
 /// its menu to be dismissed.
 typedef void PopupMenuItemSelected<T>(T value);
 
+/// Signature used by [PopupMenuButton] to lazily construct the items shown when the button is pressed.
+typedef List<PopupMenuEntry<T>> PopupMenuItemBuilder<T>(BuildContext context);
+
 /// Displays a menu when pressed and calls [onSelected] when the menu is dismissed
 /// because an item was selected. The value passed to [onSelected] is the value of
 /// the selected menu item. If child is null then a standard 'navigation/more_vert'
@@ -387,15 +390,18 @@ typedef void PopupMenuItemSelected<T>(T value);
 class PopupMenuButton<T> extends StatefulWidget {
   PopupMenuButton({
     Key key,
-    this.items,
+    this.itemBuilder,
     this.initialValue,
     this.onSelected,
     this.tooltip: 'Show menu',
     this.elevation: 8,
     this.child
-  }) : super(key: key);
+  }) : super(key: key) {
+    assert(itemBuilder != null);
+  }
 
-  final List<PopupMenuEntry<T>> items;
+  /// Called when the button is pressed to create the items to show in the menu.
+  final PopupMenuItemBuilder<T> itemBuilder;
 
   final T initialValue;
 
@@ -420,7 +426,7 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     showMenu/*<T>*/(
       context: context,
       elevation: config.elevation,
-      items: config.items,
+      items: config.itemBuilder(context),
       initialValue: config.initialValue,
       position: new ModalPosition(
         left: topLeft.x,
