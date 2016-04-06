@@ -155,13 +155,13 @@ class ListDemoState extends State<ListDemo> {
     switch(_itemType) {
       case MaterialListType.oneLine:
       case MaterialListType.oneLineWithAvatar:
-        itemTypeText = 'Single-Line';
+        itemTypeText = 'Single-line';
         break;
       case MaterialListType.twoLine:
-        itemTypeText = 'Two-Line';
+        itemTypeText = 'Two-line';
         break;
       case MaterialListType.threeLine:
-        itemTypeText = 'Three-Line';
+        itemTypeText = 'Three-line';
         break;
     }
 
