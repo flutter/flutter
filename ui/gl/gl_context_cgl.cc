@@ -278,10 +278,10 @@ bool GLContextCGL::GetTotalGpuMemory(size_t* bytes) {
     GLint video_memory = 0;
     if (CGLDescribeRenderer(renderer_info,
                             renderer_index,
-                            kCGLRPVideoMemory,
+                            kCGLRPVideoMemoryMegabytes,
                             &video_memory) != kCGLNoError)
         continue;
-    *bytes = video_memory;
+    *bytes = (video_memory * 1000000);
     return true;
   }
 
