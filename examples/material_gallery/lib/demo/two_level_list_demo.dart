@@ -8,7 +8,7 @@ class TwoLevelListDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(title: new Text('Expand/Collapse List Control')),
+      appBar: new AppBar(title: new Text('Expand/collapse list control')),
       body: new TwoLevelList(
         type: MaterialListType.oneLine,
         items: <Widget>[

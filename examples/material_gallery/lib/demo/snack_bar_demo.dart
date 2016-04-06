@@ -40,12 +40,12 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
               onPressed: () {
                 final int thisSnackBarIndex = _snackBarIndex++;
                 Scaffold.of(context).showSnackBar(new SnackBar(
-                  content: new Text('This is SnackBar #$thisSnackBarIndex'),
+                  content: new Text('This is snackbar #$thisSnackBarIndex.'),
                   action: new SnackBarAction(
                     label: 'ACTION',
                     onPressed: () {
                       Scaffold.of(context).showSnackBar(new SnackBar(
-                        content: new Text("You pressed SnackBar $thisSnackBarIndex's Action")
+                        content: new Text('You pressed snackbar $thisSnackBarIndex\'s action.')
                       ));
                     }
                   )
@@ -70,7 +70,7 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('SnackBar')
+        title: new Text('Snackbar')
       ),
       body: new Builder(
         // Create an inner BuildContext so that the snackBar onPressed methods

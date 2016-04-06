@@ -20,7 +20,7 @@ class FitnessDemo extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text("Fitness")
+        title: new Text('Fitness')
       ),
       body: new _FitnessDemoContents()
     );
@@ -108,7 +108,7 @@ class _FitnessDemoContentsState extends State<_FitnessDemoContents> {
           ),
           new Padding(
             padding: new EdgeInsets.only(top: 20.0),
-            child: new Text("JUMPING JACKS", style: Theme.of(context).textTheme.title)
+            child: new Text('JUMPING JACKS', style: Theme.of(context).textTheme.title)
           ),
           new Padding(
             padding: new EdgeInsets.only(top: 20.0, bottom: 20.0),
@@ -186,11 +186,11 @@ class _FitnessDemoContentsState extends State<_FitnessDemoContents> {
           child: new Stack(children: <Widget>[
             new _Fireworks(),
             new Dialog(
-              title: new Text("Awesome workout"),
-              content: new Text("You have completed $_count jumping jacks. Good going!"),
+              title: new Text('Awesome workout'),
+              content: new Text('You have completed $_count jumping jacks. Good going!'),
               actions: <Widget>[
                 new FlatButton(
-                  child: new Text("SWEET"),
+                  child: new Text('SWEET'),
                   onPressed: () { Navigator.pop(context); }
                 )
               ]

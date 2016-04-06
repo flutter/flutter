@@ -38,7 +38,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
         ),
         child: new Padding(
           padding: const EdgeInsets.all(32.0),
-          child: new Text("This is a Material persistent bottom sheet. Drag downwards to dismiss it.", style: textStyle)
+          child: new Text('This is a Material persistent bottom sheet. Drag downwards to dismiss it.', style: textStyle)
         )
       );
     })
@@ -53,7 +53,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
   Widget build(BuildContext context) {
     return new Scaffold(
       key: _scaffoldKey,
-      appBar: new AppBar(title: new Text("Persistent Bottom Sheet")),
+      appBar: new AppBar(title: new Text('Persistent bottom sheet')),
       floatingActionButton: new FloatingActionButton(
         child: new Icon(icon: Icons.add),
         backgroundColor: Colors.redAccent[200]

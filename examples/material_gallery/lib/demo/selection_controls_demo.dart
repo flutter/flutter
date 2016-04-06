@@ -35,7 +35,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(title: new Text("Selection Controls")),
+      appBar: new AppBar(title: new Text('Selection controls')),
       body: new Column(
         children: <Widget>[
           new Row(

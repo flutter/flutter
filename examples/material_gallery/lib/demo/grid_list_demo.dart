@@ -180,7 +180,7 @@ class GridListDemoState extends State<GridListDemo> {
     final Orientation orientation = MediaQuery.of(context).orientation;
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Grid List'),
+        title: new Text('Grid list'),
         actions: <Widget>[
           new IconButton(
             icon: Icons.more_vert,

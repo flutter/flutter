@@ -149,7 +149,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
           icon: Icons.clear,
           onPressed: () { handleDismissButton(context); }
         ),
-        title: new Text('New Event'),
+        title: new Text('New event'),
         actions: <Widget> [
           new FlatButton(
             child: new Text('SAVE', style: theme.textTheme.body1.copyWith(color: Colors.white)),

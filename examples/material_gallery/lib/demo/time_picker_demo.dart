@@ -29,7 +29,7 @@ class _TimePickerDemoState extends State<TimePickerDemo> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(title: new Text("Time Picker")),
+      appBar: new AppBar(title: new Text('Time picker')),
       body: new Column(
         children: <Widget>[
           new Text('$_selectedTime'),

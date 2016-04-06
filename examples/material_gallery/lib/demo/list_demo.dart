@@ -77,7 +77,7 @@ class ListDemoState extends State<ListDemo> {
             ),
             new ListItem(
               dense: true,
-              title: new Text('Show Avatar'),
+              title: new Text('Show avatar'),
               trailing: new Checkbox(
                 value: _showAvatars,
                 onChanged: (bool value) {
@@ -90,7 +90,7 @@ class ListDemoState extends State<ListDemo> {
             ),
             new ListItem(
               dense: true,
-              title: new Text('Show Icon'),
+              title: new Text('Show icon'),
               trailing: new Checkbox(
                 value: _showIcons,
                 onChanged: (bool value) {
@@ -103,7 +103,7 @@ class ListDemoState extends State<ListDemo> {
             ),
             new ListItem(
               dense: true,
-              title: new Text('Show Dividers'),
+              title: new Text('Show dividers'),
               trailing: new Checkbox(
                 value: _showDividers,
                 onChanged: (bool value) {
@@ -116,7 +116,7 @@ class ListDemoState extends State<ListDemo> {
             ),
             new ListItem(
               dense: true,
-              title: new Text('Dense Layout'),
+              title: new Text('Dense layout'),
               trailing: new Checkbox(
                 value: _dense,
                 onChanged: (bool value) {
@@ -148,7 +148,7 @@ class ListDemoState extends State<ListDemo> {
       isThreeLine: _itemSize == ListDemoItemSize.threeLine,
       dense: _dense,
       leading: _showAvatars ? new CircleAvatar(child: new Text(item)) : null,
-      title: new Text('This item represents $item'),
+      title: new Text('This item represents $item.'),
       subtitle: secondary,
       trailing: _showIcons ? new Icon(icon: Icons.info, color: Theme.of(context).disabledColor) : null
     );
@@ -177,7 +177,7 @@ class ListDemoState extends State<ListDemo> {
     return new Scaffold(
       key: scaffoldKey,
       appBar: new AppBar(
-        title: new Text('Scrolling List\n$itemSizeText$layoutText'),
+        title: new Text('Scrolling list\n$itemSizeText$layoutText'),
         actions: <Widget>[
           new IconButton(
             icon: Icons.sort_by_alpha,

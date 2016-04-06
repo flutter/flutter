@@ -97,7 +97,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> {
       child: new Scaffold(
         key: scaffoldKey,
         appBar: new AppBar(
-          title: new Text("FAB per Tab"),
+          title: new Text('FAB per tab'),
           tabBar: new TabBar<_Page>(
             labels: new Map<_Page, TabLabel>.fromIterable(pages, value: (_Page page) => page.tabLabel)
           )

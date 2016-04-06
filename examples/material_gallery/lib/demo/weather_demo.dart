@@ -65,7 +65,7 @@ class _WeatherDemoState extends State<WeatherDemo> {
     if (!assetsLoaded) {
       return new Scaffold(
         appBar: new AppBar(
-          title: new Text("Weather")
+          title: new Text('Weather')
         ),
         body: new Container(
           decoration: new BoxDecoration(
@@ -77,7 +77,7 @@ class _WeatherDemoState extends State<WeatherDemo> {
 
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text("Weather")
+        title: new Text('Weather')
       ),
       body: new Material(
         child: new Stack(

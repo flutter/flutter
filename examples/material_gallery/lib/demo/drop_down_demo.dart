@@ -22,7 +22,7 @@ class _DropDownDemoState extends State<DropDownDemo> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(title: new Text("Dropdown Button")),
+      appBar: new AppBar(title: new Text('Drop-down button')),
       body: new Center(
         child: new DropDownButton<String>(
           items: buildItems(),

@@ -61,7 +61,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
     return new Scaffold(
       key: _scaffoldKey,
       appBar: new AppBar(
-        title: new Text('Text Fields')
+        title: new Text('Text fields')
       ),
       body: new Form(
         onSubmitted: _handleSubmitted,

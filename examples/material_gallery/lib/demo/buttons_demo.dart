@@ -201,7 +201,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
       values: _demos,
       child: new Scaffold(
         appBar: new AppBar(
-          title: new Text("Buttons"),
+          title: new Text('Buttons'),
           tabBar: new TabBar<_ButtonDemo>(
             isScrollable: true,
             labels: new Map<_ButtonDemo, TabLabel>.fromIterable(_demos, value: (_ButtonDemo demo) => demo.tabLabel)

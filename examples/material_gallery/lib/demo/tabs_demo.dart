@@ -48,7 +48,7 @@ class TabsDemoState extends State<TabsDemo> {
         scrollableKey: _selectedPage.key,
         appBarBehavior: AppBarBehavior.under,
         appBar: new AppBar(
-          title: new Text('Tabs and Scrolling'),
+          title: new Text('Tabs and scrolling'),
           tabBar: new TabBar<_Page>(
             labels: new Map<_Page, TabLabel>.fromIterable(_pages, value: (_Page page) {
               return new TabLabel(text: page.label);
