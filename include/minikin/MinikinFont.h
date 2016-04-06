@@ -94,6 +94,9 @@ struct MinikinRect {
 
 class MinikinFontFreeType;
 
+// Callback for freeing data
+typedef void (*MinikinDestroyFunc) (void* data);
+
 class MinikinFont : public MinikinRefCounted {
 public:
     virtual ~MinikinFont();
@@ -104,8 +107,23 @@ public:
     virtual void GetBounds(MinikinRect* bounds, uint32_t glyph_id,
         const MinikinPaint &paint) const = 0;
 
-    // If buf is NULL, just update size
-    virtual bool GetTable(uint32_t tag, uint8_t *buf, size_t *size) = 0;
+    virtual const void* GetTable(uint32_t tag, size_t* size, MinikinDestroyFunc* destroy) = 0;
+
+    // Override if font can provide access to raw data
+    virtual const void* GetFontData() const {
+        return nullptr;
+    }
+
+    // Override if font can provide access to raw data
+    virtual size_t GetFontSize() const {
+        return 0;
+    }
+
+    // Override if font can provide access to raw data.
+    // Returns index within OpenType collection
+    virtual int GetFontIndex() const {
+        return 0;
+    }
 
     virtual int32_t GetUniqueId() const = 0;
 

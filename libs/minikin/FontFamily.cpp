@@ -77,15 +77,11 @@ FontFamily::~FontFamily() {
 bool FontFamily::addFont(MinikinFont* typeface) {
     AutoMutex _l(gMinikinLock);
     const uint32_t os2Tag = MinikinFont::MakeTag('O', 'S', '/', '2');
-    size_t os2Size = 0;
-    bool ok = typeface->GetTable(os2Tag, NULL, &os2Size);
-    if (!ok) return false;
-    UniquePtr<uint8_t[]> os2Data(new uint8_t[os2Size]);
-    ok = typeface->GetTable(os2Tag, os2Data.get(), &os2Size);
-    if (!ok) return false;
+    HbBlob os2Table(getFontTable(typeface, os2Tag));
+    if (os2Table.get() == nullptr) return false;
     int weight;
     bool italic;
-    if (analyzeStyle(os2Data.get(), os2Size, &weight, &italic)) {
+    if (analyzeStyle(os2Table.get(), os2Table.size(), &weight, &italic)) {
         //ALOGD("analyzed weight = %d, italic = %s", weight, italic ? "true" : "false");
         FontStyle style(weight, italic);
         addFontLocked(typeface, style);
@@ -165,20 +161,15 @@ const SparseBitSet* FontFamily::getCoverage() {
         const FontStyle defaultStyle;
         MinikinFont* typeface = getClosestMatch(defaultStyle).font;
         const uint32_t cmapTag = MinikinFont::MakeTag('c', 'm', 'a', 'p');
-        size_t cmapSize = 0;
-        if (!typeface->GetTable(cmapTag, NULL, &cmapSize)) {
+        HbBlob cmapTable(getFontTable(typeface, cmapTag));
+        if (cmapTable.get() == nullptr) {
             ALOGE("Could not get cmap table size!\n");
             // Note: This means we will retry on the next call to getCoverage, as we can't store
             //       the failure. This is fine, as we assume this doesn't really happen in practice.
             return nullptr;
         }
-        UniquePtr<uint8_t[]> cmapData(new uint8_t[cmapSize]);
-        if (!typeface->GetTable(cmapTag, cmapData.get(), &cmapSize)) {
-            ALOGE("Unexpected failure to read cmap table!\n");
-            return nullptr;
-        }
         // TODO: Error check?
-        CmapCoverage::getCoverage(mCoverage, cmapData.get(), cmapSize, &mHasVSTable);
+        CmapCoverage::getCoverage(mCoverage, cmapTable.get(), cmapTable.size(), &mHasVSTable);
 #ifdef VERBOSE_DEBUG
         ALOGD("font coverage length=%d, first ch=%x\n", mCoverage.length(),
                 mCoverage.nextSetBit(0));
@@ -198,7 +189,9 @@ bool FontFamily::hasVariationSelector(uint32_t codepoint, uint32_t variationSele
     MinikinFont* minikinFont = getClosestMatch(defaultStyle).font;
     hb_font_t* font = getHbFontLocked(minikinFont);
     uint32_t unusedGlyph;
-    return hb_font_get_glyph(font, codepoint, variationSelector, &unusedGlyph);
+    bool result = hb_font_get_glyph(font, codepoint, variationSelector, &unusedGlyph);
+    hb_font_destroy(font);
+    return result;
 }
 
 bool FontFamily::hasVSTable() const {

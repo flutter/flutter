@@ -99,6 +99,7 @@ struct LayoutContext {
     void clearHbFonts() {
         for (size_t i = 0; i < hbFonts.size(); i++) {
             hb_font_set_funcs(hbFonts[i], nullptr, nullptr, nullptr);
+            hb_font_destroy(hbFonts[i]);
         }
         hbFonts.clear();
     }
