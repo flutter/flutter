@@ -25,7 +25,9 @@ enum EnginePhase {
   layout,
   compositingBits,
   paint,
-  composite
+  composite,
+  flushSemantics,
+  sendSemanticsTree
 }
 
 class TestRenderingFlutterBinding extends BindingBase with Scheduler, Services, Renderer, Gesturer {
@@ -51,6 +53,14 @@ class TestRenderingFlutterBinding extends BindingBase with Scheduler, Services, 
     if (phase == EnginePhase.paint)
       return;
     renderView.compositeFrame();
+    if (phase == EnginePhase.composite)
+      return;
+    if (SemanticsNode.hasListeners) {
+      pipelineOwner.flushSemantics();
+      if (phase == EnginePhase.flushSemantics)
+        return;
+      SemanticsNode.sendSemanticsTree();
+    }
   }
 }
 

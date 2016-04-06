@@ -107,10 +107,6 @@ class PaintingContext {
       assert(child._layer != null);
       assert(() {
         child.debugRegisterRepaintBoundaryPaint(includedParent: true, includedChild: false);
-        return true;
-      });
-      child._layer.detach();
-      assert(() {
         child._layer.debugCreator = child.debugCreator ?? child.runtimeType;
         return true;
       });
@@ -121,6 +117,7 @@ class PaintingContext {
 
   void _appendLayer(Layer layer) {
     assert(!_isRecording);
+    layer.detach();
     _containerLayer.append(layer);
   }
 
@@ -949,6 +946,30 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
+    // If the node was dirtied in some way while unattached, make sure to add
+    // it to the appropriate dirty list now that an owner is available
+    if (_needsLayout && _relayoutSubtreeRoot != null) {
+      // Don't enter this block if we've never laid out at all;
+      // scheduleInitialLayout() will handle it
+      _needsLayout = false;
+      markNeedsLayout();
+    }
+    if (_needsCompositingBitsUpdate) {
+      _needsCompositingBitsUpdate = false;
+      markNeedsCompositingBitsUpdate();
+    }
+    if (_needsPaint && _layer != null) {
+      // Don't enter this block if we've never painted at all;
+      // scheduleInitialPaint() will handle it
+      _needsPaint = false;
+      markNeedsPaint();
+    }
+    if (_needsSemanticsUpdate && hasSemantics) {
+      // Don't enter this block if we've never updated semantics at all;
+      // scheduleInitialSemantics() will handle it
+      _needsSemanticsUpdate = false;
+      markNeedsSemanticsUpdate();
+    }
   }
 
   bool _needsLayout = true;
@@ -1396,8 +1417,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// writes are coalesced, removing redundant computation.
   void markNeedsPaint() {
     assert(owner == null || !owner.debugDoingPaint);
-    if (!attached)
-      return; // Don't try painting things that aren't in the hierarchy
     if (_needsPaint)
       return;
     _needsPaint = true;
@@ -1592,7 +1611,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// tree will be out of date.
   void markNeedsSemanticsUpdate({ bool onlyChanges: false, bool noGeometry: false }) {
     assert(!attached || !owner._debugDoingSemantics);
-    if (!attached || !owner._semanticsEnabled || (_needsSemanticsUpdate && onlyChanges && (_needsSemanticsGeometryUpdate || noGeometry)))
+    if ((attached && !owner._semanticsEnabled) || (_needsSemanticsUpdate && onlyChanges && (_needsSemanticsGeometryUpdate || noGeometry)))
       return;
     if (!noGeometry && (_semantics == null || (_semantics.hasChildren && _semantics.wasAffectedByClip))) {
       // Since the geometry might have changed, we need to make sure to reapply any clips.
@@ -1612,7 +1631,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       }
       if (!node._needsSemanticsUpdate) {
         node._needsSemanticsUpdate = true;
-        owner._nodesNeedingSemantics.add(node);
+        if (owner != null)
+          owner._nodesNeedingSemantics.add(node);
       }
     } else {
       // The shape of the semantics tree around us may have changed.
@@ -1631,7 +1651,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       node._semantics?.reset();
       if (!node._needsSemanticsUpdate) {
         node._needsSemanticsUpdate = true;
-        owner._nodesNeedingSemantics.add(node);
+        if (owner != null)
+          owner._nodesNeedingSemantics.add(node);
       }
     }
   }
