@@ -4,12 +4,6 @@
 
 import 'package:flutter/material.dart';
 
-enum ListDemoItemSize {
-  oneLine,
-  twoLine,
-  threeLine
-}
-
 class ListDemo extends StatefulWidget {
   ListDemo({ Key key }) : super(key: key);
 
@@ -21,7 +15,7 @@ class ListDemoState extends State<ListDemo> {
   final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
 
   PersistentBottomSheetController<Null> _bottomSheet;
-  ListDemoItemSize _itemSize = ListDemoItemSize.threeLine;
+  MaterialListType _itemType = MaterialListType.threeLine;
   bool _dense = false;
   bool _showAvatars = true;
   bool _showIcons = false;
@@ -31,9 +25,9 @@ class ListDemoState extends State<ListDemo> {
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'
   ];
 
-  void changeItemSize(ListDemoItemSize size) {
+  void changeItemType(MaterialListType type) {
     setState(() {
-      _itemSize = size;
+      _itemType = type;
     });
     _bottomSheet?.setState(() { });
   }
@@ -51,28 +45,28 @@ class ListDemoState extends State<ListDemo> {
             new ListItem(
               dense: true,
               title: new Text('One-line'),
-              trailing: new Radio<ListDemoItemSize>(
-                value: ListDemoItemSize.oneLine,
-                groupValue: _itemSize,
-                onChanged: changeItemSize
+              trailing: new Radio<MaterialListType>(
+                value: _showAvatars ? MaterialListType.oneLineWithAvatar : MaterialListType.oneLine,
+                groupValue: _itemType,
+                onChanged: changeItemType
               )
             ),
             new ListItem(
               dense: true,
               title: new Text('Two-line'),
-              trailing: new Radio<ListDemoItemSize>(
-                value: ListDemoItemSize.twoLine,
-                groupValue: _itemSize,
-                onChanged: changeItemSize
+              trailing: new Radio<MaterialListType>(
+                value: MaterialListType.twoLine,
+                groupValue: _itemType,
+                onChanged: changeItemType
               )
             ),
             new ListItem(
               dense: true,
               title: new Text('Three-line'),
-              trailing: new Radio<ListDemoItemSize>(
-                value: ListDemoItemSize.threeLine,
-                groupValue: _itemSize,
-                onChanged: changeItemSize
+              trailing: new Radio<MaterialListType>(
+                value: MaterialListType.threeLine,
+                groupValue: _itemType,
+                onChanged: changeItemType
               )
             ),
             new ListItem(
@@ -135,17 +129,17 @@ class ListDemoState extends State<ListDemo> {
 
   Widget buildListItem(BuildContext context, String item) {
     Widget secondary;
-    if (_itemSize == ListDemoItemSize.twoLine) {
+    if (_itemType == MaterialListType.twoLine) {
       secondary = new Text(
         "Additional item information."
       );
-    } else if (_itemSize == ListDemoItemSize.threeLine) {
+    } else if (_itemType == MaterialListType.threeLine) {
       secondary = new Text(
         "Even more additional list item information appears on line three."
       );
     }
     return new ListItem(
-      isThreeLine: _itemSize == ListDemoItemSize.threeLine,
+      isThreeLine: _itemType == MaterialListType.threeLine,
       dense: _dense,
       leading: _showAvatars ? new CircleAvatar(child: new Text(item)) : null,
       title: new Text('This item represents $item.'),
@@ -157,16 +151,17 @@ class ListDemoState extends State<ListDemo> {
   @override
   Widget build(BuildContext context) {
     final String layoutText = _dense ? " \u2013 Dense" : "";
-    String  itemSizeText;
-    switch(_itemSize) {
-      case ListDemoItemSize.oneLine:
-        itemSizeText = 'Single-Line';
+    String  itemTypeText;
+    switch(_itemType) {
+      case MaterialListType.oneLine:
+      case MaterialListType.oneLineWithAvatar:
+        itemTypeText = 'Single-line';
         break;
-      case ListDemoItemSize.twoLine:
-        itemSizeText = 'Two-Line';
+      case MaterialListType.twoLine:
+        itemTypeText = 'Two-line';
         break;
-      case ListDemoItemSize.threeLine:
-        itemSizeText = 'Three-Line';
+      case MaterialListType.threeLine:
+        itemTypeText = 'Three-line';
         break;
     }
 
@@ -177,7 +172,7 @@ class ListDemoState extends State<ListDemo> {
     return new Scaffold(
       key: scaffoldKey,
       appBar: new AppBar(
-        title: new Text('Scrolling list\n$itemSizeText$layoutText'),
+        title: new Text('Scrolling list\n$itemTypeText$layoutText'),
         actions: <Widget>[
           new IconButton(
             icon: Icons.sort_by_alpha,
@@ -196,9 +191,11 @@ class ListDemoState extends State<ListDemo> {
           )
         ]
       ),
-      body: new Block(
-        padding: new EdgeInsets.all(_dense ? 4.0 : 8.0),
-        children: listItems.toList()
+      body: new MaterialList(
+        type: _itemType,
+        scrollablePadding: new EdgeInsets.all(_dense ? 4.0 : 8.0),
+        clampOverscrolls: true,
+        children: listItems
       )
     );
   }

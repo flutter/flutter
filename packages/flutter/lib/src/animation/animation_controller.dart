@@ -166,6 +166,7 @@ class AnimationController extends Animation<double>
   Future<Null> animateTo(double target, { Duration duration, Curve curve: Curves.linear }) {
     Duration simulationDuration = duration;
     if (simulationDuration == null) {
+      assert(this.duration != null);
       double range = upperBound - lowerBound;
       double remainingFraction = range.isFinite ? (target - _value).abs() / range : 1.0;
       simulationDuration = this.duration * remainingFraction;

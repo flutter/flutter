@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/widgets.dart';
 
 const double _kMinScrollbarThumbLength = 18.0;
@@ -66,7 +64,7 @@ class ScrollbarPainter extends ScrollableListPainter {
   AnimationController _fade;
 
   @override
-  Future<Null> scrollStarted() {
+  void scrollStarted() {
     if (_fade == null) {
       _fade = new AnimationController(duration: _kScrollbarThumbFadeDuration);
       CurvedAnimation curve = new CurvedAnimation(parent: _fade, curve: Curves.ease);
@@ -75,12 +73,12 @@ class ScrollbarPainter extends ScrollableListPainter {
         renderObject?.markNeedsPaint();
       });
     }
-    return _fade.forward();
+   _fade.forward();
   }
 
   @override
-  Future<Null> scrollEnded() {
-    return _fade.reverse();
+  void scrollEnded() {
+    _fade.reverse();
   }
 
   @override
