@@ -9,8 +9,8 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
-import '../artifacts.dart';
 import '../android/android_sdk.dart';
+import '../artifacts.dart';
 import '../base/context.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
@@ -173,6 +173,10 @@ class FlutterCommandRunner extends CommandRunner {
 
   @override
   Future<dynamic> run(Iterable<String> args) {
+    // Have an invocation of 'build' print out it's sub-commands.
+    if (args.length == 1 && args.first == 'build')
+      args = <String>['build', '-h'];
+
     return super.run(args).then((dynamic result) {
       return result;
     }).whenComplete(() {
