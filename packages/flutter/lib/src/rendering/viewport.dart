@@ -125,9 +125,9 @@ class RenderViewportBase extends RenderBox implements HasMainAxis {
 
   /// The direction in which the child is permitted to be larger than the viewport
   ///
-  /// If the viewport is scrollable in a particular direction (e.g., vertically),
-  /// the child is given layout constraints that are fully unconstrainted in
-  /// that direction (e.g., the child can be as tall as it wants).
+  /// The child is given layout constraints that are fully unconstrainted along
+  /// the main axis (e.g., the child can be as tall as it wants if the main axis
+  /// is vertical).
   @override
   Axis get mainAxis => _mainAxis;
   Axis _mainAxis;

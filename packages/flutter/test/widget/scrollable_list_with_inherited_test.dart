@@ -23,7 +23,7 @@ Widget buildCard(BuildContext context, int index) {
 
 Widget buildFrame() {
   return new LazyBlock(
-    delegate: new LazyBlockBuilder(buildCard)
+    delegate: new LazyBlockBuilder(builder: buildCard)
   );
 }
 
