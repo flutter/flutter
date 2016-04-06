@@ -15,7 +15,9 @@ import 'package:path/path.dart' as path;
 
 class BuildIOSCommand extends FlutterCommand {
   BuildIOSCommand() {
-    argParser.addFlag('simulator', help: 'Build for the iOS simulator instead of the device');
+    argParser.addFlag('simulator', help: 'Build for the iOS simulator instead of the device.');
+    argParser.addFlag('codesign', negatable: true, defaultsTo: true,
+        help: 'Codesign the application bundle (only available on device builds).');
   }
 
   @override
@@ -39,6 +41,12 @@ class BuildIOSCommand extends FlutterCommand {
     }
 
     bool forSimulator = argResults['simulator'];
+    bool shouldCodesign = argResults['codesign'];
+
+    if (!forSimulator && !shouldCodesign) {
+      printStatus('Warning: Building for device with codesigning disabled.');
+      printStatus('You will have to manually codesign before deploying to device.');
+    }
 
     String logTarget = forSimulator ? "simulator" : "device";
 
@@ -50,7 +58,7 @@ class BuildIOSCommand extends FlutterCommand {
       await buildDir.create();
 
     bool result = await buildIOSXcodeProject(app,
-        buildForDevice: !forSimulator, buildDirectory: buildDir);
+        buildForDevice: !forSimulator, buildDirectory: buildDir, codesign: shouldCodesign);
 
     if (!result) {
       printError('Encountered error while building for $logTarget.');

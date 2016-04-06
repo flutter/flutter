@@ -97,7 +97,7 @@ bool _xcodeVersionCheckValid(int major, int minor) {
 }
 
 Future<bool> buildIOSXcodeProject(ApplicationPackage app,
-    { bool buildForDevice, Directory buildDirectory }) async {
+    { bool buildForDevice, Directory buildDirectory, bool codesign: true }) async {
   String flutterProjectPath = Directory.current.path;
 
   if (xcodeProjectRequiresUpdate()) {
@@ -125,6 +125,8 @@ Future<bool> buildIOSXcodeProject(ApplicationPackage app,
     '/usr/bin/env',
     'xcrun',
     'xcodebuild',
+    'clean',
+    'build',
     '-target', 'Runner',
     '-configuration', 'Release',
     'ONLY_ACTIVE_ARCH=YES',
@@ -141,6 +143,15 @@ Future<bool> buildIOSXcodeProject(ApplicationPackage app,
 
   if (buildForDevice) {
     commands.addAll(<String>['-sdk', 'iphoneos', '-arch', 'arm64']);
+    if (!codesign) {
+      commands.addAll(
+        <String>[
+          'CODE_SIGNING_ALLOWED=NO',
+          'CODE_SIGNING_REQUIRED=NO',
+          'CODE_SIGNING_IDENTITY=""'
+        ]
+      );
+    }
   } else {
     commands.addAll(<String>['-sdk', 'iphonesimulator', '-arch', 'x86_64']);
   }
