@@ -7,6 +7,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
+class StateMarker extends StatefulWidget {
+  StateMarker({ Key key, this.child }) : super(key: key);
+
+  final Widget child;
+
+  @override
+  StateMarkerState createState() => new StateMarkerState();
+}
+
+class StateMarkerState extends State<StateMarker> {
+  String marker;
+
+  @override
+  Widget build(BuildContext context) {
+    if (config.child != null)
+      return config.child;
+    return new Container();
+  }
+}
+
 Widget buildFrame({ List<String> tabs, String value, bool isScrollable: false, Key tabBarKey }) {
   return new Material(
     child: new TabBarSelection<String>(
@@ -141,6 +161,92 @@ void main() {
 
       // Scrolling the TabBar doesn't change the selection
       expect(selection.value, equals('AAAAAA'));
+    });
+  });
+
+  test('TabView maintains state', () {
+    testWidgets((WidgetTester tester) {
+      List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE'];
+      String value = tabs[0];
+
+      void onTabSelectionChanged(String newValue) {
+        value = newValue;
+      }
+
+      Widget builder() {
+        return new Material(
+          child: new TabBarSelection<String>(
+            value: value,
+            values: tabs,
+            onChanged: onTabSelectionChanged,
+            child: new TabBarView<String>(
+              children: tabs.map((String name) {
+                return new StateMarker(
+                  child: new Text(name)
+                );
+              }).toList()
+            )
+          )
+        );
+      }
+
+      StateMarkerState findStateMarkerState(String name) {
+        Element secondLabel = tester.findText(name);
+        expect(secondLabel, isNotNull);
+        StatefulElement secondMarker;
+        secondLabel.visitAncestorElements((Element element) {
+          if (element.widget is StateMarker) {
+            secondMarker = element;
+            return false;
+          }
+          return true;
+        });
+        expect(secondMarker, isNotNull);
+        return secondMarker.state;
+      }
+
+      tester.pumpWidget(builder());
+      TestGesture gesture = tester.startGesture(tester.getCenter(tester.findText(tabs[0])));
+      gesture.moveBy(new Offset(-600.0, 0.0));
+      tester.pump();
+      expect(value, equals(tabs[0]));
+      findStateMarkerState(tabs[1]).marker = 'marked';
+      gesture.up();
+      tester.pump();
+      tester.pump(const Duration(seconds: 1));
+      expect(value, equals(tabs[1]));
+      tester.pumpWidget(builder());
+      expect(findStateMarkerState(tabs[1]).marker, equals('marked'));
+
+      // Move to the third tab.
+
+      gesture = tester.startGesture(tester.getCenter(tester.findText(tabs[1])));
+      gesture.moveBy(new Offset(-600.0, 0.0));
+      gesture.up();
+      tester.pump();
+      expect(findStateMarkerState(tabs[1]).marker, equals('marked'));
+      tester.pump(const Duration(seconds: 1));
+      expect(value, equals(tabs[2]));
+      tester.pumpWidget(builder());
+
+      // The state is now gone.
+
+      expect(tester.findText(tabs[1]), isNull);
+
+      // Move back to the second tab.
+
+      gesture = tester.startGesture(tester.getCenter(tester.findText(tabs[2])));
+      gesture.moveBy(new Offset(600.0, 0.0));
+      tester.pump();
+      StateMarkerState markerState = findStateMarkerState(tabs[1]);
+      expect(markerState.marker, isNull);
+      markerState.marker = 'marked';
+      gesture.up();
+      tester.pump();
+      tester.pump(const Duration(seconds: 1));
+      expect(value, equals(tabs[1]));
+      tester.pumpWidget(builder());
+      expect(findStateMarkerState(tabs[1]).marker, equals('marked'));
     });
   });
 }

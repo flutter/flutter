@@ -959,9 +959,12 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
 
   void _updateItemsFromChildren(int first, int second, [int third]) {
     List<Widget> widgets = config.children;
-    _items = <Widget>[widgets[first], widgets[second]];
+    _items = <Widget>[
+      new KeyedSubtree.wrap(widgets[first], first),
+      new KeyedSubtree.wrap(widgets[second], second),
+    ];
     if (third != null)
-      _items.add(widgets[third]);
+      _items.add(new KeyedSubtree.wrap(widgets[third], third));
   }
 
   void _updateItemsForSelectedIndex(int selectedIndex) {
