@@ -19,7 +19,11 @@
 #ifndef MINIKIN_INTERNAL_H
 #define MINIKIN_INTERNAL_H
 
+#include <hb.h>
+
 #include <utils/Mutex.h>
+
+#include <minikin/MinikinFont.h>
 
 namespace android {
 
@@ -37,6 +41,35 @@ bool isEmojiBase(uint32_t c);
 
 // Returns true if c is emoji modifier.
 bool isEmojiModifier(uint32_t c);
+
+hb_blob_t* getFontTable(MinikinFont* minikinFont, uint32_t tag);
+
+// An RAII wrapper for hb_blob_t
+class HbBlob {
+public:
+    // Takes ownership of hb_blob_t object, caller is no longer
+    // responsible for calling hb_blob_destroy().
+    HbBlob(hb_blob_t* blob) : mBlob(blob) {
+    }
+
+    ~HbBlob() {
+        hb_blob_destroy(mBlob);
+    }
+
+    const uint8_t* get() const {
+        const char* data = hb_blob_get_data(mBlob, nullptr);
+        return reinterpret_cast<const uint8_t*>(data);
+    }
+
+    size_t size() const {
+        unsigned int length = 0;
+        hb_blob_get_data(mBlob, &length);
+        return (size_t)length;
+    }
+
+private:
+    hb_blob_t* mBlob;
+};
 
 }
 

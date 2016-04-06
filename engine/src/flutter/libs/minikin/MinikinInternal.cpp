@@ -17,6 +17,7 @@
 // Definitions internal to Minikin
 
 #include "MinikinInternal.h"
+#include "HbFontCache.h"
 
 #include <cutils/log.h>
 
@@ -70,6 +71,15 @@ bool isEmojiBase(uint32_t c) {
     } else {
         return false;
     }
+}
+
+hb_blob_t* getFontTable(MinikinFont* minikinFont, uint32_t tag) {
+    assertMinikinLocked();
+    hb_font_t* font = getHbFontLocked(minikinFont);
+    hb_face_t* face = hb_font_get_face(font);
+    hb_blob_t* blob = hb_face_reference_table(face, tag);
+    hb_font_destroy(font);
+    return blob;
 }
 
 }
