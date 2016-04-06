@@ -98,9 +98,7 @@ class Tween<T extends dynamic> extends Animatable<T> {
   /// This method returns `begin` and `end` when the animation values are 0.0 or 1.0, respectively.
   @override
   T evaluate(Animation<double> animation) {
-    if (end == null)
-      return begin;
-    double t = animation.value;
+    final double t = animation.value;
     if (t == 0.0)
       return begin;
     if (t == 1.0)
