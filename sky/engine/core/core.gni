@@ -205,6 +205,8 @@ sky_core_files = [
   "script/dart_init.h",
   "script/dart_service_isolate.cc",
   "script/dart_service_isolate.h",
+  "script/embedder_resources.cc",
+  "script/embedder_resources.h",
   "script/monitor.h",
   "script/ui_dart_state.cc",
   "script/ui_dart_state.h",

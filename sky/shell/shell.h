@@ -7,12 +7,15 @@
 
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
+#include "base/memory/weak_ptr.h"
 #include "base/message_loop/message_loop.h"
 #include "base/threading/thread.h"
 #include "sky/shell/tracing_controller.h"
 
 namespace sky {
 namespace shell {
+
+class Rasterizer;
 
 class Shell {
  public:
@@ -40,11 +43,16 @@ class Shell {
 
   TracingController& tracing_controller();
 
+  // Maintain a list of rasterizers.
+  // These APIs must only be accessed on the GPU thread.
+  void AddRasterizer(const base::WeakPtr<Rasterizer>& rasterizer);
+  void PurgeRasterizers();
+  void GetRasterizers(std::vector<base::WeakPtr<Rasterizer>>* rasterizer);
+
  private:
   Shell();
 
-  void InitGPU(const base::Thread::Options& options);
-  void InitUI(const base::Thread::Options& options);
+  void InitGpuThread();
 
   std::unique_ptr<base::Thread> gpu_thread_;
   std::unique_ptr<base::Thread> ui_thread_;
@@ -54,7 +62,11 @@ class Shell {
   scoped_refptr<base::SingleThreadTaskRunner> ui_task_runner_;
   scoped_refptr<base::SingleThreadTaskRunner> io_task_runner_;
 
+  std::unique_ptr<base::ThreadChecker> gpu_thread_checker_;
+
   TracingController tracing_controller_;
+
+  std::vector<base::WeakPtr<Rasterizer>> rasterizers_;
 
   DISALLOW_COPY_AND_ASSIGN(Shell);
 };

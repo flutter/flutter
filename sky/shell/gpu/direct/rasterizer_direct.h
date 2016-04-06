@@ -38,6 +38,8 @@ class RasterizerDirect : public Rasterizer {
   void OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget);
   void OnOutputSurfaceDestroyed();
 
+  flow::LayerTree* GetLastLayerTree() override;
+
  private:
   void Draw(uint64_t layer_tree_ptr, const DrawCallback& callback) override;
 
@@ -53,6 +55,8 @@ class RasterizerDirect : public Rasterizer {
   flow::PaintContext paint_context_;
 
   mojo::Binding<rasterizer::Rasterizer> binding_;
+
+  std::unique_ptr<flow::LayerTree> last_layer_tree_;
 
   base::WeakPtrFactory<RasterizerDirect> weak_factory_;
 

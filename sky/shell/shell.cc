@@ -18,7 +18,9 @@
 #include "base/single_thread_task_runner.h"
 #include "base/trace_event/trace_event.h"
 #include "mojo/message_pump/message_pump_mojo.h"
+#include "sky/engine/core/script/dart_init.h"
 #include "sky/engine/public/platform/sky_settings.h"
+#include "sky/shell/diagnostic/diagnostic_server.h"
 #include "sky/shell/switches.h"
 #include "sky/shell/ui/engine.h"
 
@@ -30,6 +32,10 @@ static Shell* g_shell = nullptr;
 
 scoped_ptr<base::MessagePump> CreateMessagePumpMojo() {
   return make_scoped_ptr(new mojo::common::MessagePumpMojo);
+}
+
+bool IsInvalid(const base::WeakPtr<Rasterizer>& rasterizer) {
+  return !rasterizer;
 }
 
 class NonDiscardableMemory : public base::DiscardableMemory {
@@ -53,6 +59,14 @@ class NonDiscardableMemoryAllocator : public base::DiscardableMemoryAllocator {
 
 base::LazyInstance<NonDiscardableMemoryAllocator> g_discardable;
 
+void ServiceIsolateHook(bool running_precompiled) {
+  if (!running_precompiled) {
+    const blink::SkySettings& settings = blink::SkySettings::Get();
+    if (settings.enable_observatory)
+      DiagnosticServer::Start();
+  }
+}
+
 }  // namespace
 
 Shell::Shell() {
@@ -64,6 +78,8 @@ Shell::Shell() {
   gpu_thread_.reset(new base::Thread("gpu_thread"));
   gpu_thread_->StartWithOptions(options);
   gpu_task_runner_ = gpu_thread_->message_loop()->task_runner();
+  gpu_task_runner_->PostTask(FROM_HERE,
+      base::Bind(&Shell::InitGpuThread, base::Unretained(this)));
 
   ui_thread_.reset(new base::Thread("ui_thread"));
   ui_thread_->StartWithOptions(options);
@@ -72,6 +88,8 @@ Shell::Shell() {
   io_thread_.reset(new base::Thread("io_thread"));
   io_thread_->StartWithOptions(options);
   io_task_runner_ = io_thread_->message_loop()->task_runner();
+
+  blink::SetServiceIsolateHook(ServiceIsolateHook);
 }
 
 Shell::~Shell() {}
@@ -139,6 +157,27 @@ Shell& Shell::Shared() {
 
 TracingController& Shell::tracing_controller() {
   return tracing_controller_;
+}
+
+void Shell::InitGpuThread() {
+  gpu_thread_checker_.reset(new base::ThreadChecker());
+}
+
+void Shell::AddRasterizer(const base::WeakPtr<Rasterizer>& rasterizer) {
+  DCHECK(gpu_thread_checker_ && gpu_thread_checker_->CalledOnValidThread());
+  rasterizers_.push_back(rasterizer);
+}
+
+void Shell::PurgeRasterizers() {
+  DCHECK(gpu_thread_checker_ && gpu_thread_checker_->CalledOnValidThread());
+  rasterizers_.erase(
+      std::remove_if(rasterizers_.begin(), rasterizers_.end(), IsInvalid),
+      rasterizers_.end());
+}
+
+void Shell::GetRasterizers(std::vector<base::WeakPtr<Rasterizer>>* rasterizers) {
+  DCHECK(gpu_thread_checker_ && gpu_thread_checker_->CalledOnValidThread());
+  *rasterizers = rasterizers_;
 }
 
 }  // namespace shell

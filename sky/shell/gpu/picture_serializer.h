@@ -7,8 +7,15 @@
 
 #include "base/files/file_path.h"
 #include "third_party/skia/include/core/SkPicture.h"
+#include "third_party/skia/include/core/SkPixelSerializer.h"
 
 namespace sky {
+
+class PngPixelSerializer : public SkPixelSerializer {
+ public:
+  bool onUseEncodedData(const void*, size_t) override;
+  SkData* onEncode(const SkPixmap& pixmap) override;
+};
 
 void SerializePicture(const base::FilePath& file_name, SkPicture*);
 

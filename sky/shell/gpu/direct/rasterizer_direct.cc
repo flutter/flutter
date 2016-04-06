@@ -33,6 +33,8 @@ RasterizerDirect::RasterizerDirect()
 }
 
 RasterizerDirect::~RasterizerDirect() {
+  weak_factory_.InvalidateWeakPtrs();
+  Shell::Shared().PurgeRasterizers();
 }
 
 base::WeakPtr<RasterizerDirect> RasterizerDirect::GetWeakPtr() {
@@ -46,6 +48,8 @@ base::WeakPtr<Rasterizer> RasterizerDirect::GetWeakRasterizerPtr() {
 void RasterizerDirect::ConnectToRasterizer(
     mojo::InterfaceRequest<rasterizer::Rasterizer> request) {
   binding_.Bind(request.Pass());
+
+  Shell::Shared().AddRasterizer(GetWeakRasterizerPtr());
 }
 
 void RasterizerDirect::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) {
@@ -126,6 +130,8 @@ void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
   }
 
   callback.Run();
+
+  last_layer_tree_ = std::move(layer_tree);
 }
 
 void RasterizerDirect::OnOutputSurfaceDestroyed() {
@@ -149,6 +155,10 @@ void RasterizerDirect::EnsureGLContext() {
   CHECK(context_->MakeCurrent(surface_.get()));
   gr_gl_interface_ = skia::AdoptRef(gfx::CreateInProcessSkiaGLBinding());
   ganesh_canvas_.SetGrGLInterface(gr_gl_interface_.get());
+}
+
+flow::LayerTree* RasterizerDirect::GetLastLayerTree() {
+  return last_layer_tree_.get();
 }
 
 }  // namespace shell

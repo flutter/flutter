@@ -9,25 +9,25 @@
 
 #define DART_NATIVE_CALLBACK(CLASS, METHOD) \
   static void CLASS##_##METHOD(Dart_NativeArguments args) { \
-    DartCall(&CLASS::METHOD, args); \
+    blink::DartCall(&CLASS::METHOD, args);                  \
   }
 
 #define DART_NATIVE_CALLBACK_STATIC(CLASS, METHOD) \
   static void CLASS##_##METHOD(Dart_NativeArguments args) { \
-    DartCallStatic(&CLASS::METHOD, args); \
+    blink::DartCallStatic(&CLASS::METHOD, args);            \
   }
 
 #define DART_REGISTER_NATIVE(CLASS, METHOD) \
   { #CLASS "_" #METHOD, CLASS##_##METHOD, \
-    IndicesForSignature<decltype(&CLASS::METHOD)>::count + 1, true },
+    blink::IndicesForSignature<decltype(&CLASS::METHOD)>::count + 1, true },
 
 #define DART_REGISTER_NATIVE_STATIC(CLASS, METHOD) \
   { #CLASS "_" #METHOD, CLASS##_##METHOD, \
-    IndicesForSignature<decltype(&CLASS::METHOD)>::count, true },
+    blink::IndicesForSignature<decltype(&CLASS::METHOD)>::count, true },
 
 #define DART_BIND_ALL(CLASS, FOR_EACH) \
 FOR_EACH(DART_NATIVE_CALLBACK) \
-void CLASS::RegisterNatives(DartLibraryNatives* natives) { \
+void CLASS::RegisterNatives(blink::DartLibraryNatives* natives) {      \
   natives->Register({ \
     FOR_EACH(DART_REGISTER_NATIVE) \
   }); \

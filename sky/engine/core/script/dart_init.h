@@ -43,6 +43,8 @@ bool IsRunningPrecompiledCode();
 
 using EmbedderTracingCallback = base::Callback<void(void)>;
 
+typedef void (*ServiceIsolateHook)(bool);
+
 struct EmbedderTracingCallbacks {
   EmbedderTracingCallback start_tracing_callback;
   EmbedderTracingCallback stop_tracing_callback;
@@ -55,6 +57,10 @@ void InitDartVM();
 
 void SetEmbedderTracingCallbacks(
     std::unique_ptr<EmbedderTracingCallbacks> callbacks);
+
+// Provide a function that will be called during initialization of the
+// service isolate.
+void SetServiceIsolateHook(ServiceIsolateHook hook);
 
 Dart_Handle DartLibraryTagHandler(Dart_LibraryTag tag,
                                   Dart_Handle library,

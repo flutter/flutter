@@ -106,6 +106,9 @@ const char kFileUriPrefix[] = "file://";
 
 const char kDartFlags[] = "dart-flags";
 
+bool g_service_isolate_initialized = false;
+ServiceIsolateHook g_service_isolate_hook = nullptr;
+
 void IsolateShutdownCallback(void* callback_data) {
   DartState* dart_state = static_cast<DartState*>(callback_data);
   delete dart_state;
@@ -122,9 +125,6 @@ bool IsServiceIsolateURL(const char* url_name) {
          String(url_name) == DART_VM_SERVICE_ISOLATE_NAME;
 }
 
-// TODO(rafaelw): Right now this only supports the creation of the handle
-// watcher isolate and the service isolate. Presumably, we'll want application
-// isolates to spawn their own isolates.
 Dart_Isolate IsolateCreateCallback(const char* script_uri,
                                    const char* main,
                                    const char* package_root,
@@ -157,8 +157,12 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
             ip, port, DartLibraryTagHandler, IsRunningPrecompiledCode(), error);
         CHECK(service_isolate_booted) << error;
       }
+
+      if (g_service_isolate_hook)
+        g_service_isolate_hook(IsRunningPrecompiledCode());
     }
     Dart_ExitIsolate();
+    g_service_isolate_initialized = true;
     return isolate;
   }
 
@@ -349,6 +353,11 @@ static void EmbedderTimelineStopRecording() {
     return;
   }
   callbacks->stop_tracing_callback.Run();
+}
+
+void SetServiceIsolateHook(ServiceIsolateHook hook) {
+  CHECK(!g_service_isolate_initialized);
+  g_service_isolate_hook = hook;
 }
 
 void InitDartVM() {

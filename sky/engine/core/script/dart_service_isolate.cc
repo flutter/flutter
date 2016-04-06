@@ -6,6 +6,7 @@
 
 #include "base/logging.h"
 #include "dart/runtime/include/dart_api.h"
+#include "sky/engine/core/script/embedder_resources.h"
 #include "sky/engine/tonic/dart_error.h"
 #include "sky/engine/tonic/dart_library_natives.h"
 
@@ -25,12 +26,6 @@
 #define kLibrarySourceNamePrefix "/vmservice"
 static const char* kServiceIsolateScript = "vmservice_io.dart";
 
-struct ResourcesEntry {
-  const char* path_;
-  const char* resource_;
-  int length_;
-};
-
 namespace mojo {
   namespace dart {
     extern ResourcesEntry __sky_embedder_service_isolate_resources_[];
@@ -42,6 +37,7 @@ namespace {
 
 static Dart_LibraryTagHandler g_embedder_tag_handler;
 static DartLibraryNatives* g_natives;
+static EmbedderResources* g_resources;
 
 Dart_NativeFunction GetNativeFunction(Dart_Handle name,
                                       int argument_count,
@@ -56,48 +52,6 @@ const uint8_t* GetSymbol(Dart_NativeFunction native_function) {
 }
 
 }  // namespace
-
-class Resources {
- public:
-  static const int kNoSuchInstance = -1;
-  static int ResourceLookup(const char* path, const char** resource) {
-    ResourcesEntry* table = ResourcesTable();
-    for (int i = 0; table[i].path_ != NULL; i++) {
-      const ResourcesEntry& entry = table[i];
-      if (strcmp(path, entry.path_) == 0) {
-        *resource = entry.resource_;
-        DCHECK(entry.length_ > 0);
-        return entry.length_;
-      }
-    }
-    return kNoSuchInstance;
-  }
-
-  static const char* Path(int idx) {
-    DCHECK(idx >= 0);
-    ResourcesEntry* entry = At(idx);
-    if (entry == NULL) {
-      return NULL;
-    }
-    DCHECK(entry->path_ != NULL);
-    return entry->path_;
-  }
-
- private:
-  static ResourcesEntry* At(int idx) {
-    DCHECK(idx >= 0);
-    ResourcesEntry* table = ResourcesTable();
-    for (int i = 0; table[i].path_ != NULL; i++) {
-      if (idx == i) {
-        return &table[i];
-      }
-    }
-    return NULL;
-  }
-  static ResourcesEntry* ResourcesTable() {
-    return &mojo::dart::__sky_embedder_service_isolate_resources_[0];
-  }
-};
 
 void DartServiceIsolate::TriggerResourceLoad(Dart_NativeArguments args) {
   Dart_Handle library = Dart_RootLibrary();
@@ -133,6 +87,11 @@ bool DartServiceIsolate::Startup(std::string server_ip,
       {"VMServiceIO_NotifyServerState", NotifyServerState, 2, true },
       {"VMServiceIO_Shutdown", Shutdown, 0, true },
     });
+  }
+
+  if (!g_resources) {
+    g_resources = new EmbedderResources(
+        &mojo::dart::__sky_embedder_service_isolate_resources_[0]);
   }
 
   Dart_Handle result;
@@ -206,8 +165,8 @@ Dart_Handle DartServiceIsolate::GetSource(const char* name) {
   char buffer[kBufferSize];
   snprintf(&buffer[0], kBufferSize-1, "%s/%s", kLibrarySourceNamePrefix, name);
   const char* vmservice_source = NULL;
-  int r = Resources::ResourceLookup(buffer, &vmservice_source);
-  DCHECK(r != Resources::kNoSuchInstance);
+  int r = g_resources->ResourceLookup(buffer, &vmservice_source);
+  DCHECK(r != EmbedderResources::kNoSuchInstance);
   return Dart_NewStringFromCString(vmservice_source);
 }
 
@@ -229,9 +188,9 @@ Dart_Handle DartServiceIsolate::LoadResource(Dart_Handle library,
   Dart_Handle name = Dart_NewStringFromCString(resource_name);
   RETURN_ERROR_HANDLE(name);
   const char* data_buffer = NULL;
-  int data_buffer_length = Resources::ResourceLookup(resource_name,
-                                                     &data_buffer);
-  DCHECK(data_buffer_length != Resources::kNoSuchInstance);
+  int data_buffer_length = g_resources->ResourceLookup(resource_name,
+                                                       &data_buffer);
+  DCHECK(data_buffer_length != EmbedderResources::kNoSuchInstance);
   Dart_Handle data_list = Dart_NewTypedData(Dart_TypedData_kUint8,
                                             data_buffer_length);
   RETURN_ERROR_HANDLE(data_list);
@@ -260,8 +219,8 @@ Dart_Handle DartServiceIsolate::LoadResource(Dart_Handle library,
 Dart_Handle DartServiceIsolate::LoadResources(Dart_Handle library) {
   Dart_Handle result = Dart_Null();
   intptr_t prefixLen = strlen(kLibrarySourceNamePrefix);
-  for (intptr_t i = 0; Resources::Path(i) != NULL; i++) {
-    const char* path = Resources::Path(i);
+  for (intptr_t i = 0; g_resources->Path(i) != NULL; i++) {
+    const char* path = g_resources->Path(i);
     // If it doesn't begin with kLibrarySourceNamePrefix it is a frontend
     // resource.
     if (strncmp(path, kLibrarySourceNamePrefix, prefixLen) != 0) {

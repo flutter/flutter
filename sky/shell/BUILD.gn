@@ -3,9 +3,21 @@
 # found in the LICENSE file.
 
 import("//build/config/ui.gni")
+import("//mojo/dart/embedder/embedder.gni")
+
+dart_embedder_resources("generate_sky_embedder_diagnostic_server_resources_cc") {
+  inputs = [
+    "//sky/shell/diagnostic/diagnostic_server.dart"
+  ]
+  root_prefix = "//sky/shell/diagnostic/"
+  output = "$target_gen_dir/sky_embedder_diagnostic_server_resources.cc"
+  table_name = "sky_embedder_diagnostic_server"
+}
 
 source_set("common") {
   sources = [
+    "diagnostic/diagnostic_server.cc",
+    "diagnostic/diagnostic_server.h",
     "gpu/picture_serializer.cc",
     "gpu/picture_serializer.h",
     "platform_view.cc",
@@ -30,6 +42,7 @@ source_set("common") {
     "ui/platform_impl.h",
     "ui_delegate.cc",
     "ui_delegate.h",
+    "$target_gen_dir/sky_embedder_diagnostic_server_resources.cc",
   ]
 
   if (is_ios && !use_ios_simulator) {
@@ -39,6 +52,7 @@ source_set("common") {
   }
 
   public_deps = dart_deps + [
+    ":generate_sky_embedder_diagnostic_server_resources_cc",
     "//base",
     "//base:i18n",
     "//build/config/sanitizers:deps",

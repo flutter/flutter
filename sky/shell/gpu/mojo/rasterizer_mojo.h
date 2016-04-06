@@ -32,6 +32,8 @@ class RasterizerMojo : public Rasterizer {
   void Init(mojo::ApplicationConnectorPtr connector,
             mojo::gfx::composition::ScenePtr scene);
 
+  flow::LayerTree* GetLastLayerTree() override;
+
  private:
   void Draw(uint64_t layer_tree_ptr, const DrawCallback& callback) override;
 
@@ -48,6 +50,7 @@ class RasterizerMojo : public Rasterizer {
   mojo::gfx::composition::ScenePtr scene_;
   std::unique_ptr<GLState> gl_state_;
   flow::PaintContext paint_context_;
+  std::unique_ptr<flow::LayerTree> last_layer_tree_;
 
   base::WeakPtrFactory<RasterizerMojo> weak_factory_;
 

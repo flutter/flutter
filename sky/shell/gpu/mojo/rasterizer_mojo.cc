@@ -7,6 +7,7 @@
 #include "base/trace_event/trace_event.h"
 #include "mojo/gpu/gl_texture.h"
 #include "mojo/skia/ganesh_texture_surface.h"
+#include "sky/shell/shell.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
 namespace sky {
@@ -23,6 +24,8 @@ RasterizerMojo::RasterizerMojo() : binding_(this), weak_factory_(this) {
 }
 
 RasterizerMojo::~RasterizerMojo() {
+  weak_factory_.InvalidateWeakPtrs();
+  Shell::Shared().PurgeRasterizers();
 }
 
 base::WeakPtr<RasterizerMojo> RasterizerMojo::GetWeakPtr() {
@@ -36,6 +39,8 @@ base::WeakPtr<Rasterizer> RasterizerMojo::GetWeakRasterizerPtr() {
 void RasterizerMojo::ConnectToRasterizer (
     mojo::InterfaceRequest<rasterizer::Rasterizer> request ) {
   binding_.Bind(request.Pass());
+
+  Shell::Shared().AddRasterizer(GetWeakRasterizerPtr());
 }
 
 void RasterizerMojo::Init(mojo::ApplicationConnectorPtr connector,
@@ -108,6 +113,12 @@ void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
   metadata->version = layer_tree->scene_version();
   scene_->Publish(metadata.Pass());
   callback.Run();
+
+  last_layer_tree_ = std::move(layer_tree);
+}
+
+flow::LayerTree* RasterizerMojo::GetLastLayerTree() {
+  return last_layer_tree_.get();
 }
 
 RasterizerMojo::GLState::GLState(mojo::ApplicationConnector* connector)

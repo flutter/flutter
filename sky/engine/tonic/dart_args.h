@@ -101,6 +101,22 @@ class DartDispatcher {
 };
 
 template <size_t... indices,
+          typename... ArgTypes>
+struct DartDispatcher<IndicesHolder<indices...>, void (*)(ArgTypes...)>
+    : public DartArgHolder<indices, ArgTypes>... {
+  using FunctionPtr = void (*)(ArgTypes...);
+
+  DartArgIterator* it_;
+
+  explicit DartDispatcher(DartArgIterator* it)
+      : DartArgHolder<indices, ArgTypes>(it)..., it_(it) { }
+
+  void Dispatch(FunctionPtr func) {
+    (*func)(DartArgHolder<indices, ArgTypes>::value...);
+  }
+};
+
+template <size_t... indices,
           typename ResultType,
           typename... ArgTypes>
 struct DartDispatcher<IndicesHolder<indices...>, ResultType (*)(ArgTypes...)>
@@ -112,7 +128,12 @@ struct DartDispatcher<IndicesHolder<indices...>, ResultType (*)(ArgTypes...)>
   explicit DartDispatcher(DartArgIterator* it)
       : DartArgHolder<indices, ArgTypes>(it)..., it_(it) { }
 
-  ResultType Dispatch(FunctionPtr func) {
+  void Dispatch(FunctionPtr func) {
+    DartReturn((*func)(DartArgHolder<indices, ArgTypes>::value...),
+               it_->args());
+  }
+
+  ResultType DispatchCtor(FunctionPtr func) {
     return (*func)(DartArgHolder<indices, ArgTypes>::value...);
   }
 };
@@ -172,7 +193,7 @@ void DartCallStatic(Sig func, Dart_NativeArguments args) {
   DartDispatcher<Indices, Sig> decoder(&it);
   if (it.had_exception())
     return;
-  DartReturn(decoder.Dispatch(func), args);
+  decoder.Dispatch(func);
 }
 
 template<typename Sig>
@@ -182,7 +203,7 @@ void DartCallConstructor(Sig func, Dart_NativeArguments args) {
   DartDispatcher<Indices, Sig> decoder(&it);
   if (it.had_exception())
     return;
-  decoder.Dispatch(func)->AssociateWithDartWrapper(args);
+  decoder.DispatchCtor(func)->AssociateWithDartWrapper(args);
 }
 
 }  // namespace blink

@@ -23,6 +23,8 @@ class Rasterizer : public rasterizer::Rasterizer {
       mojo::InterfaceRequest<rasterizer::Rasterizer> request) = 0;
   virtual base::WeakPtr<::sky::shell::Rasterizer> GetWeakRasterizerPtr() = 0;
 
+  virtual flow::LayerTree* GetLastLayerTree() = 0;
+
   // Implemented by each GPU backend.
   static std::unique_ptr<Rasterizer> Create();
 };
