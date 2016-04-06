@@ -27,7 +27,6 @@ export 'src/widgets/lazy_block.dart';
 export 'src/widgets/locale_query.dart';
 export 'src/widgets/media_query.dart';
 export 'src/widgets/mimic.dart';
-export 'src/widgets/mixed_viewport.dart';
 export 'src/widgets/modal_barrier.dart';
 export 'src/widgets/navigator.dart';
 export 'src/widgets/notification_listener.dart';
