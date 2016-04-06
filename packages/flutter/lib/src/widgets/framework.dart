@@ -1241,6 +1241,11 @@ class ErrorWidget extends LeafRenderObjectWidget {
 
   @override
   RenderBox createRenderObject(BuildContext context) => new RenderErrorBox(message);
+
+  @override
+  void debugFillDescription(List<String> description) {
+    description.add('message: ' + _stringify(message));
+  }
 }
 
 /// Base class for instantiations of widgets that have builders and can be

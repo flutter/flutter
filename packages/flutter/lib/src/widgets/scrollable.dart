@@ -13,7 +13,6 @@ import 'package:flutter/rendering.dart' show HasMainAxis;
 import 'basic.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
-import 'mixed_viewport.dart';
 import 'notification_listener.dart';
 import 'page_storage.dart';
 import 'scroll_behavior.dart';
@@ -612,11 +611,10 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   /// The widgets used by this method should be widgets that provide a
   /// layout-time callback that reports the sizes that are relevant to
   /// the scroll offset (typically the size of the scrollable
-  /// container and the scrolled contents). [Viewport] and
-  /// [MixedViewport] provide an [onPaintOffsetUpdateNeeded] callback
-  /// for this purpose; [GridViewport], [ListViewport], and
-  /// [LazyListViewport] provide an [onExtentsChanged] callback for
-  /// this purpose.
+  /// container and the scrolled contents). [Viewport] provides an
+  /// [onPaintOffsetUpdateNeeded] callback for this purpose; [GridViewport],
+  /// [ListViewport], [LazyListViewport], and [LazyBlockViewport] provide an
+  /// [onExtentsChanged] callback for this purpose.
   ///
   /// This callback should be used to update the scroll behavior, if
   /// necessary, and then to call [updateGestureDetector] to update
@@ -705,6 +703,10 @@ class _ScrollableViewportState extends ScrollableState<ScrollableViewport> {
 /// A mashup of [ScrollableViewport] and [BlockBody]. Useful when you have a small,
 /// fixed number of children that you wish to arrange in a block layout and that
 /// might exceed the height of its container (and therefore need to scroll).
+///
+/// If you have a large number of children, consider using [LazyBlock] (if the
+/// children have variable height) or [ScrollableList] (if the children all have
+/// the same fixed height).
 class Block extends StatelessWidget {
   Block({
     Key key,
@@ -793,77 +795,4 @@ abstract class ScrollableListPainter extends RenderObjectPainter {
   /// "ended" means that the scroll animation either stopped of its own accord
   /// or was canceled  by the user.
   Future<Null> scrollEnded() => new Future<Null>.value();
-}
-
-/// A general scrollable list for a large number of children that might not all
-/// have the same height. Prefer [ScrollableList] when all the children
-/// have the same height because it can use that property to be more efficient.
-/// Prefer [ScrollableViewport] with a single child.
-///
-/// ScrollableMixedWidgetList only supports vertical scrolling.
-class ScrollableMixedWidgetList extends Scrollable {
-  ScrollableMixedWidgetList({
-    Key key,
-    double initialScrollOffset,
-    ScrollListener onScroll,
-    SnapOffsetCallback snapOffsetCallback,
-    this.builder,
-    this.token,
-    this.onInvalidatorAvailable
-  }) : super(
-    key: key,
-    initialScrollOffset: initialScrollOffset,
-    onScroll: onScroll,
-    snapOffsetCallback: snapOffsetCallback
-  );
-
-  // TODO(ianh): Support horizontal scrolling.
-
-  final IndexedBuilder builder;
-  final Object token;
-  final InvalidatorAvailableCallback onInvalidatorAvailable;
-
-  @override
-  ScrollableMixedWidgetListState createState() => new ScrollableMixedWidgetListState();
-}
-
-class ScrollableMixedWidgetListState extends ScrollableState<ScrollableMixedWidgetList> {
-  @override
-  void initState() {
-    super.initState();
-    scrollBehavior.updateExtents(
-      contentExtent: double.INFINITY
-    );
-  }
-
-  @override
-  OverscrollBehavior createScrollBehavior() => new OverscrollBehavior();
-
-  @override
-  OverscrollBehavior get scrollBehavior => super.scrollBehavior;
-
-  Offset _handlePaintOffsetUpdateNeeded(ViewportDimensions dimensions) {
-    // We make various state changes here but don't have to do so in a
-    // setState() callback because we are called during layout and all
-    // we're updating is the new offset, which we are providing to the
-    // render object via our return value.
-    didUpdateScrollBehavior(scrollBehavior.updateExtents(
-      contentExtent: dimensions.contentSize.height,
-      containerExtent: dimensions.containerSize.height,
-      scrollOffset: scrollOffset
-    ));
-    updateGestureDetector();
-    return scrollOffsetToPixelDelta(scrollOffset);
-  }
-
-  @override
-  Widget buildContent(BuildContext context) {
-    return new MixedViewport(
-      startOffset: scrollOffset,
-      builder: config.builder,
-      token: config.token,
-      onInvalidatorAvailable: config.onInvalidatorAvailable,
-      onPaintOffsetUpdateNeeded: _handlePaintOffsetUpdateNeeded
-    );
-  }
 }

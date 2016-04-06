@@ -28,7 +28,7 @@ Widget buildFrame() {
 }
 
 void main() {
-  test('MixedViewport is a build function (smoketest)', () {
+  test('LazyBlock is a build function (smoketest)', () {
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(buildFrame());
       expect(tester.findText('0'), isNotNull);

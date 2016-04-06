@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 import 'test_widgets.dart';
 
 void main() {
-  test('MixedViewport mount/dismount smoke test', () {
+  test('LazyBlockViewport mount/dismount smoke test', () {
     testWidgets((WidgetTester tester) {
       List<int> callbackTracker = <int>[];
 
@@ -18,15 +18,15 @@ void main() {
 
       Widget builder() {
         return new FlipWidget(
-          left: new MixedViewport(
-            builder: (BuildContext context, int i) {
+          left: new LazyBlockViewport(
+            delegate: new LazyBlockBuilder(builder: (BuildContext context, int i) {
               callbackTracker.add(i);
               return new Container(
                 key: new ValueKey<int>(i),
                 height: 100.0,
                 child: new Text("$i")
               );
-            },
+            }),
             startOffset: 0.0
           ),
           right: new Text('Not Today')
@@ -54,7 +54,7 @@ void main() {
     });
   });
 
-  test('MixedViewport vertical', () {
+  test('LazyBlockViewport vertical', () {
     testWidgets((WidgetTester tester) {
       List<int> callbackTracker = <int>[];
 
@@ -76,8 +76,8 @@ void main() {
 
       Widget builder() {
         return new FlipWidget(
-          left: new MixedViewport(
-            builder: itemBuilder,
+          left: new LazyBlockViewport(
+            delegate: new LazyBlockBuilder(builder: itemBuilder),
             startOffset: offset
           ),
           right: new Text('Not Today')
@@ -86,23 +86,27 @@ void main() {
 
       tester.pumpWidget(builder());
 
-      // 0 is built to find its width
+      // 0 is built to find its height
       expect(callbackTracker, equals([0, 1, 2, 3, 4]));
-
       callbackTracker.clear();
 
       offset = 400.0; // now only 3 should fit, numbered 2-4.
 
       tester.pumpWidget(builder());
 
-      // 0 and 1 aren't built, we know their size and nothing else changed
-      expect(callbackTracker, equals([2, 3, 4]));
+      // We build all the children to find their new size.
+      expect(callbackTracker, equals([0, 1, 2, 3, 4]));
+      callbackTracker.clear();
 
+      tester.pumpWidget(builder());
+
+      // 0 isn't built because they're not visible.
+      expect(callbackTracker, equals([1, 2, 3, 4]));
       callbackTracker.clear();
     });
   });
 
-  test('MixedViewport horizontal', () {
+  test('LazyBlockViewport horizontal', () {
     testWidgets((WidgetTester tester) {
       List<int> callbackTracker = <int>[];
 
@@ -124,10 +128,10 @@ void main() {
 
       Widget builder() {
         return new FlipWidget(
-          left: new MixedViewport(
-            builder: itemBuilder,
+          left: new LazyBlockViewport(
+            delegate: new LazyBlockBuilder(builder: itemBuilder),
             startOffset: offset,
-            direction: Axis.horizontal
+            mainAxis: Axis.horizontal
           ),
           right: new Text('Not Today')
         );
@@ -144,14 +148,19 @@ void main() {
 
       tester.pumpWidget(builder());
 
-      // 0 and 1 aren't built, we know their size and nothing else changed
-      expect(callbackTracker, equals([2, 3, 4, 5]));
+      // We build all the children to find their new size.
+      expect(callbackTracker, equals([0, 1, 2, 3, 4, 5]));
+      callbackTracker.clear();
 
+      tester.pumpWidget(builder());
+
+      // 0 isn't built because they're not visible.
+      expect(callbackTracker, equals([1, 2, 3, 4, 5]));
       callbackTracker.clear();
     });
   });
 
-  test('MixedViewport reinvoke builders', () {
+  test('LazyBlockViewport reinvoke builders', () {
     testWidgets((WidgetTester tester) {
       List<int> callbackTracker = <int>[];
       List<String> text = <String>[];
@@ -173,8 +182,8 @@ void main() {
       };
 
       Widget builder() {
-        return new MixedViewport(
-          builder: itemBuilder,
+        return new LazyBlockViewport(
+          delegate: new LazyBlockBuilder(builder: itemBuilder),
           startOffset: 0.0
         );
       }
@@ -197,7 +206,7 @@ void main() {
     });
   });
 
-  test('MixedViewport reinvoke builders', () {
+  test('LazyBlockViewport reinvoke builders', () {
     testWidgets((WidgetTester tester) {
       StateSetter setState;
       ThemeData themeData = new ThemeData.light();
@@ -214,7 +223,9 @@ void main() {
         );
       };
 
-      Widget viewport = new MixedViewport(builder: itemBuilder);
+      Widget viewport = new LazyBlockViewport(
+        delegate: new LazyBlockBuilder(builder: itemBuilder)
+      );
 
       tester.pumpWidget(
         new StatefulBuilder(

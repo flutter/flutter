@@ -377,18 +377,8 @@ class _LazyBlockElement extends RenderObjectElement {
     renderObject.mainAxis = widget.mainAxis;
     LazyBlockDelegate newDelegate = newWidget.delegate;
     LazyBlockDelegate oldDelegate = oldWidget.delegate;
-    if (newDelegate != oldDelegate && (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRebuild(oldDelegate))) {
-      IndexedBuilder builder = newDelegate.buildItem;
-      List<Widget> widgets = <Widget>[];
-      for (int i = 0; i < widgets.length; ++i) {
-        int logicalIndex = _firstChildLogicalIndex + i;
-        Widget childWidget = builder(this, logicalIndex);
-        if (childWidget == null)
-          break;
-        widgets[i] = new RepaintBoundary.wrap(childWidget, logicalIndex);
-      }
-      _children = new List<Element>.from(updateChildren(_children, widgets));
-    }
+    if (newDelegate != oldDelegate && (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRebuild(oldDelegate)))
+      performRebuild();
     // If the new start offset can be displayed properly with the items
     // currently represented in _children, we just need to update the paint
     // offset. Otherwise, we need to trigger a layout in order to change the
@@ -403,6 +393,21 @@ class _LazyBlockElement extends RenderObjectElement {
   void unmount() {
     renderObject.callback = null;
     super.unmount();
+  }
+
+  @override
+  void performRebuild() {
+    IndexedBuilder builder = widget.delegate.buildItem;
+    List<Widget> widgets = <Widget>[];
+    for (int i = 0; i < _children.length; ++i) {
+      int logicalIndex = _firstChildLogicalIndex + i;
+      Widget childWidget = builder(this, logicalIndex);
+      if (childWidget == null)
+        break;
+      widgets.add(new RepaintBoundary.wrap(childWidget, logicalIndex));
+    }
+    _children = new List<Element>.from(updateChildren(_children, widgets));
+    super.performRebuild();
   }
 
   void _layout(BoxConstraints constraints) {
