@@ -96,9 +96,10 @@ Future<Null> main(List<String> args) async {
     } else {
       // We've crashed; emit a log report.
       stderr.writeln();
-      stderr.writeln('Oops; flutter has exited unexpectedly: "$error"');
-
-      stderr.writeln();
+      if (error is String)
+        stderr.writeln('Oops; flutter has exited unexpectedly: "$error".');
+      else
+        stderr.writeln('Oops; flutter has exited unexpectedly.');
 
       if (Platform.environment.containsKey('FLUTTER_DEV')) {
         // If we're working in the tools themselves, just print the stack trace.
@@ -106,8 +107,9 @@ Future<Null> main(List<String> args) async {
       } else {
         File file = _createCrashReport(args, error, chain);
 
-        stderr.writeln('Crash report written to ${path.relative(file.path)}.');
-        stderr.writeln('Please let us know at https://github.com/flutter/flutter/issues!');
+        stderr.writeln(
+          'Crash report written to ${path.relative(file.path)}; '
+          'please let us know at https://github.com/flutter/flutter/issues.');
       }
 
       exit(1);
@@ -127,10 +129,10 @@ File _createCrashReport(List<String> args, dynamic error, Chain chain) {
 
   buf.writeln('## exception\n');
   buf.writeln('$error\n');
-  buf.writeln('${chain.terse}');
+  buf.writeln('```\n${chain.terse}```\n');
 
   buf.writeln('## flutter doctor\n');
-  buf.writeln(_doctorText());
+  buf.writeln('```\n${_doctorText()}```');
 
   crashFile.writeAsStringSync(buf.toString());
 
@@ -148,6 +150,6 @@ String _doctorText() {
 
     return logger.statusText;
   } catch (error, trace) {
-    return 'encountered exception: $error\n\n```\n${trace.toString().trim()}\n```\n';
+    return 'encountered exception: $error\n\n${trace.toString().trim()}\n';
   }
 }

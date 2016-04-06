@@ -14,7 +14,6 @@ import 'globals.dart';
 import 'ios/ios_workflow.dart';
 import 'runner/version.dart';
 
-
 const Map<String, String> _osNames = const <String, String>{
   'macos': 'Mac OS',
   'linux': 'Linux',
