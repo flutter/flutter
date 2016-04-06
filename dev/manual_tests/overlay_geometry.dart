@@ -90,11 +90,44 @@ class OverlayGeometryApp extends StatefulWidget {
   OverlayGeometryAppState createState() => new OverlayGeometryAppState();
 }
 
-class OverlayGeometryAppState extends State<OverlayGeometryApp> {
+typedef void CardTapCallback(Key targetKey, Point globalPosition);
+
+class CardBuilder extends LazyBlockDelegate {
+  CardBuilder({ this.cardModels, this.onTapUp });
+
+  final List<CardModel> cardModels;
+  final CardTapCallback onTapUp;
 
   static const TextStyle cardLabelStyle =
     const TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
 
+  @override
+  Widget buildItem(BuildContext context, int index) {
+    if (index >= cardModels.length)
+      return null;
+    CardModel cardModel = cardModels[index];
+    return new GestureDetector(
+      key: cardModel.key,
+      onTapUp: (Point globalPosition) { onTapUp(cardModel.targetKey, globalPosition); },
+      child: new Card(
+        key: cardModel.targetKey,
+        color: cardModel.color,
+        child: new Container(
+          height: cardModel.height,
+          padding: const EdgeInsets.all(8.0),
+          child: new Center(child: new Text(cardModel.label, style: cardLabelStyle))
+        )
+      )
+    );
+  }
+
+  @override
+  bool shouldRebuild(CardBuilder oldDelegate) {
+    return oldDelegate.cardModels != cardModels;
+  }
+}
+
+class OverlayGeometryAppState extends State<OverlayGeometryApp> {
   List<CardModel> cardModels;
   Map<MarkerType, Point> markers = new Map<MarkerType, Point>();
   double markersScrollOffset;
@@ -125,9 +158,9 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
     });
   }
 
-  void handlePointerDown(GlobalKey target, PointerDownEvent event) {
+  void handleTapUp(GlobalKey target, Point globalPosition) {
     setState(() {
-      markers[MarkerType.touch] = event.position;
+      markers[MarkerType.touch] = globalPosition;
       final RenderBox box = target.currentContext.findRenderObject();
       markers[MarkerType.topLeft] = box.localToGlobal(new Point(0.0, 0.0));
       final Size size = box.size;
@@ -137,25 +170,6 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
     });
   }
 
-  Widget builder(BuildContext context, int index) {
-    if (index >= cardModels.length)
-      return null;
-    CardModel cardModel = cardModels[index];
-    return new Listener(
-      key: cardModel.key,
-      onPointerDown: (PointerDownEvent event) { return handlePointerDown(cardModel.targetKey, event); },
-      child: new Card(
-        key: cardModel.targetKey,
-        color: cardModel.color,
-        child: new Container(
-          height: cardModel.height,
-          padding: const EdgeInsets.all(8.0),
-          child: new Center(child: new Text(cardModel.label, style: cardLabelStyle))
-        )
-      )
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     List<Widget> layers = <Widget>[
@@ -163,10 +177,12 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
         appBar: new AppBar(title: new Text('Tap a Card')),
         body: new Container(
           padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-          child: new ScrollableMixedWidgetList(
-            builder: builder,
-            token: cardModels.length,
-            onScroll: handleScroll
+          child: new LazyBlock(
+            onScroll: handleScroll,
+            delegate: new CardBuilder(
+              cardModels: cardModels,
+              onTapUp: handleTapUp
+            )
           )
         )
       )

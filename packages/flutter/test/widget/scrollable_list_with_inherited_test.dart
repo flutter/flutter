@@ -21,13 +21,9 @@ Widget buildCard(BuildContext context, int index) {
   );
 }
 
-InvalidatorCallback invalidator;
-
 Widget buildFrame() {
-  return new ScrollableMixedWidgetList(
-    builder: buildCard,
-    token: items.length,
-    onInvalidatorAvailable: (InvalidatorCallback callback) { invalidator = callback; }
+  return new LazyBlock(
+    delegate: new LazyBlockBuilder(buildCard)
   );
 }
 

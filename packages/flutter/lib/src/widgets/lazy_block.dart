@@ -33,6 +33,18 @@ abstract class LazyBlockDelegate {
   bool shouldRebuild(LazyBlockDelegate oldDelegate);
 }
 
+class LazyBlockBuilder extends LazyBlockDelegate {
+  LazyBlockBuilder(this.builder);
+
+  final IndexedBuilder builder;
+
+  @override
+  Widget buildItem(BuildContext context, int index) => builder(context, index);
+
+  @override
+  bool shouldRebuild(LazyBlockDelegate oldDelegate) => true;
+}
+
 class LazyBlock extends Scrollable {
   LazyBlock({
     Key key,
@@ -124,18 +136,19 @@ class _RenderLazyBlock extends RenderVirtualViewport<_LazyBlockParentData> {
       child.parentData = new _LazyBlockParentData();
   }
 
-  double _noIntrinsicExtent() {
+  bool _debugThrowIfNotCheckingIntrinsics() {
     assert(() {
       if (!RenderObject.debugCheckingIntrinsics) {
-        throw new UnsupportedError(
-          'MixedViewport does not support returning intrinsic dimensions.\n'
-          'Calculating the intrinsic dimensions would require walking the entire child list,\n'
-          'which defeats the entire point of having a lazily-built list of children.'
+        throw new FlutterError(
+          'LazyBlockViewport does not support returning intrinsic dimensions.\n'
+          'Calculating the intrinsic dimensions would require walking the entire '
+          'child list, which defeats the entire point of having a lazily-built '
+          'list of children.'
         );
       }
       return true;
     });
-    return null;
+    return true;
   }
 
   double getIntrinsicWidth(BoxConstraints constraints) {
@@ -143,7 +156,8 @@ class _RenderLazyBlock extends RenderVirtualViewport<_LazyBlockParentData> {
       case Axis.horizontal:
         return constraints.constrainWidth(0.0);
       case Axis.vertical:
-        return _noIntrinsicExtent();
+        assert(_debugThrowIfNotCheckingIntrinsics());
+        return constraints.constrainWidth(0.0);
     }
   }
 
@@ -162,9 +176,10 @@ class _RenderLazyBlock extends RenderVirtualViewport<_LazyBlockParentData> {
   double getIntrinsicHeight(BoxConstraints constraints) {
     switch (mainAxis) {
       case Axis.horizontal:
-        return constraints.constrainWidth(0.0);
+        return constraints.constrainHeight(0.0);
       case Axis.vertical:
-        return _noIntrinsicExtent();
+        assert(_debugThrowIfNotCheckingIntrinsics());
+        return constraints.constrainHeight(0.0);
     }
   }
 
@@ -259,13 +274,19 @@ class _LazyBlockElement extends RenderObjectElement {
     LazyBlockViewport oldWidget = widget;
     super.update(newWidget);
     renderObject.mainAxis = widget.direction;
-    if (newWidget.delegate.runtimeType != oldWidget.delegate.runtimeType ||
-        newWidget.delegate.shouldRebuild(oldWidget.delegate)) {
-      IndexedBuilder builder = widget.delegate.buildItem;
-      List<Widget> widgets = new List<Widget>(_children.length);
-      for (int i = 0; i < widgets.length; ++i)
-        widgets[i] = builder(this, _firstChildLogicalIndex + i);
-      _children = updateChildren(_children, widgets);
+    LazyBlockDelegate newDelegate = newWidget.delegate;
+    LazyBlockDelegate oldDelegate = oldWidget.delegate;
+    if (newDelegate != oldDelegate && (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRebuild(oldDelegate))) {
+      IndexedBuilder builder = newDelegate.buildItem;
+      List<Widget> widgets = <Widget>[];
+      for (int i = 0; i < widgets.length; ++i) {
+        int logicalIndex = _firstChildLogicalIndex + i;
+        Widget childWidget = builder(this, logicalIndex);
+        if (childWidget == null)
+          break;
+        widgets[i] = new RepaintBoundary.wrap(childWidget, logicalIndex);
+      }
+      _children = new List<Element>.from(updateChildren(_children, widgets));
     }
     // If the new start offset can be displayed properly with the items
     // currently represented in _children, we just need to update the paint
@@ -316,8 +337,9 @@ class _LazyBlockElement extends RenderObjectElement {
 
         while (currentLogicalIndex > 0 && currentLogicalOffset > startLogicalOffset) {
           currentLogicalIndex -= 1;
-          Widget newWidget = new RepaintBoundary.wrap(builder(this, currentLogicalIndex), currentLogicalIndex);
+          Widget newWidget = builder(this, currentLogicalIndex);
           assert(newWidget != null);
+          newWidget = new RepaintBoundary.wrap(newWidget, currentLogicalIndex);
           newChildren.add(inflateWidget(newWidget, null));
           RenderBox child = block.firstChild;
           assert(child == newChildren.last.renderObject);
@@ -383,9 +405,10 @@ class _LazyBlockElement extends RenderObjectElement {
         int physicalIndex = currentLogicalIndex - _firstChildLogicalIndex;
         if (physicalIndex >= _children.length) {
           assert(physicalIndex == _children.length);
-          Widget newWidget = new RepaintBoundary.wrap(builder(this, currentLogicalIndex), currentLogicalIndex);
+          Widget newWidget = builder(this, currentLogicalIndex);
           if (newWidget == null)
             break;
+          newWidget = new RepaintBoundary.wrap(newWidget, currentLogicalIndex);
           Element previousChild = _children.isEmpty ? null : _children.last;
           _children.add(inflateWidget(newWidget, previousChild));
         }
