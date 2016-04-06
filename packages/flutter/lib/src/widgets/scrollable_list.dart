@@ -21,6 +21,7 @@ class ScrollableList extends Scrollable {
     SnapOffsetCallback snapOffsetCallback,
     this.itemExtent,
     this.itemsWrap: false,
+    this.clampOverscrolls: false,
     this.padding,
     this.scrollableListPainter,
     this.children
@@ -37,6 +38,7 @@ class ScrollableList extends Scrollable {
 
   final double itemExtent;
   final bool itemsWrap;
+  final bool clampOverscrolls;
   final EdgeInsets padding;
   final ScrollableListPainter scrollableListPainter;
   final Iterable<Widget> children;
@@ -76,16 +78,13 @@ class _ScrollableListState extends ScrollableState<ScrollableList> {
   }
 
   @override
-  void dispatchOnScrollEnd() {
-    super.dispatchOnScrollEnd();
-    config.scrollableListPainter?.scrollEnded();
-  }
-
-  @override
   Widget buildContent(BuildContext context) {
+    final double listScrollOffset = config.clampOverscrolls
+      ? scrollOffset.clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset)
+      : scrollOffset;
     return new ListViewport(
       onExtentsChanged: _handleExtentsChanged,
-      scrollOffset: scrollOffset,
+      scrollOffset: listScrollOffset,
       mainAxis: config.scrollDirection,
       anchor: config.scrollAnchor,
       itemExtent: config.itemExtent,
