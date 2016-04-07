@@ -332,7 +332,6 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
       _scrollOffset = newScrollOffset;
     });
     PageStorage.of(context)?.writeState(context, _scrollOffset);
-    new ScrollNotification(this, _scrollOffset).dispatch(context);
     _startScroll();
     dispatchOnScroll();
     _endScroll();
@@ -494,6 +493,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     assert(_numberOfInProgressScrolls > 0);
     if (config.onScroll != null)
       config.onScroll(_scrollOffset);
+    new ScrollNotification(this, ScrollNotificationKind.updated).dispatch(context);
   }
 
   void _handleDragDown(_) {
@@ -518,6 +518,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     assert(_numberOfInProgressScrolls == 1);
     if (config.onScrollStart != null)
       config.onScrollStart(_scrollOffset);
+    new ScrollNotification(this, ScrollNotificationKind.started).dispatch(context);
   }
 
   void _handleDragUpdate(double delta) {
@@ -543,6 +544,8 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     assert(_numberOfInProgressScrolls == 0);
     if (config.onScrollEnd != null)
       config.onScrollEnd(_scrollOffset);
+    if (mounted)
+      new ScrollNotification(this, ScrollNotificationKind.ended).dispatch(context);
   }
 
   final GlobalKey<RawGestureDetectorState> _gestureDetectorKey = new GlobalKey<RawGestureDetectorState>();
@@ -622,15 +625,31 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   Widget buildContent(BuildContext context);
 }
 
+/// Indicates if a [ScrollNotification] indicates the start, end or the
+/// middle of a scroll.
+enum ScrollNotificationKind {
+  /// The [ScrollNotification] indicates that the scrollOffset has been changed
+  /// and no existing scroll is underway.
+  started,
+
+  /// The [ScrollNotification] indicates that the scrollOffset has been changed.
+  updated,
+
+  /// The [ScrollNotification] indicates that the scrollOffset has stopped changing.
+  /// This may be because the fling animation that follows a drag gesture has
+  /// completed or simply because the scrollOffset was reset.
+  ended
+}
+
 /// Indicates that a descendant scrollable has scrolled.
 class ScrollNotification extends Notification {
-  ScrollNotification(this.scrollable, this.scrollOffset);
+  ScrollNotification(this.scrollable, this.kind);
+
+  // Indicates if we're at the start, end or the middle of a scroll.
+  final ScrollNotificationKind kind;
 
   /// The scrollable that scrolled.
   final ScrollableState scrollable;
-
-  /// The new scroll offset that the scrollable obtained.
-  final double scrollOffset;
 }
 
 /// A simple scrollable widget that has a single child. Use this widget if
