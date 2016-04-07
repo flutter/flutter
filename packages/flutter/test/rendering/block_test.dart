@@ -2,16 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:test/test.dart';
-
-import 'rendering_tester.dart';
-
-class TestBlockPainter extends RenderObjectPainter {
-  @override
-  void paint(PaintingContext context, Offset offset) { }
-}
 
 void main() {
   test('block intrinsics', () {
@@ -57,31 +49,5 @@ void main() {
     expect(testBlock.getMaxIntrinsicWidth(empty), equals(0.0));
     expect(testBlock.getMinIntrinsicHeight(empty), equals(0.0));
     expect(testBlock.getMaxIntrinsicHeight(empty), equals(0.0));
-  });
-
-
-  test('overlay painters can attach and detach', () {
-    TestBlockPainter first = new TestBlockPainter();
-    TestBlockPainter second = new TestBlockPainter();
-    RenderBlockViewport block = new RenderBlockViewport(overlayPainter: first);
-
-    // The first painter isn't attached because we haven't attached block.
-    expect(first.renderObject, isNull);
-    expect(second.renderObject, isNull);
-
-    block.overlayPainter = second;
-
-    expect(first.renderObject, isNull);
-    expect(second.renderObject, isNull);
-
-    layout(block);
-
-    expect(first.renderObject, isNull);
-    expect(second.renderObject, equals(block));
-
-    block.overlayPainter = first;
-
-    expect(first.renderObject, equals(block));
-    expect(second.renderObject, isNull);
   });
 }
