@@ -186,7 +186,7 @@ class FlutterEngine {
       Directory dir = new Directory(path.join(pkgDir.path, pkgName));
       if (!dir.existsSync() || allDirty) {
         await _downloadItem('Downloading engine package $pkgName...',
-          url + pkgName + '.zip', dir);
+          url + pkgName + '.zip', pkgDir);
       }
     }
 
@@ -205,9 +205,11 @@ class FlutterEngine {
 
   void _makeFilesExecutable(Directory dir) {
     for (FileSystemEntity entity in dir.listSync()) {
-      // chmod a+x "$ENGINE_ARTIFACT_PATH/darwin-x64/sky_snapshot" and sky_shell
-      if (entity is File && path.basename(entity.path).startsWith('sky_'))
-        os.makeExecutable(entity);
+      if (entity is File) {
+        String name = path.basename(entity.path);
+        if (name == 'sky_snapshot' || name == 'sky_shell')
+          os.makeExecutable(entity);
+      }
     }
   }
 
