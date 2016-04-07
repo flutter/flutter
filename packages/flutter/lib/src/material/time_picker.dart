@@ -10,7 +10,6 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'theme.dart';
 import 'typography.dart';
-import 'constants.dart';
 
 const Duration _kDialAnimateDuration = const Duration(milliseconds: 200);
 const double _kTwoPi = 2 * math.PI;
@@ -18,8 +17,12 @@ const int _kHoursPerDay = 24;
 const int _kHoursPerPeriod = 12;
 const int _kMinutesPerHour = 60;
 
+/// Whether the [TimeOfDay] is before or after noon.
 enum DayPeriod {
+  /// Ante meridiem (before noon).
   am,
+
+  /// Post meridiem (after noon).
   pm,
 }
 
@@ -217,7 +220,7 @@ class _TimePickerHeader extends StatelessWidget {
     );
 
     return new Container(
-      padding: kDialogHeadingPadding,
+      padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 20.0),
       decoration: new BoxDecoration(backgroundColor: theme.primaryColor),
       child: new Row(
         children: <Widget>[

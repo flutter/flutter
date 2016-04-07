@@ -4,7 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'constants.dart';
 import 'overscroll_painter.dart';
 import 'theme.dart';
 
@@ -16,10 +15,10 @@ enum MaterialListType {
 }
 
 Map<MaterialListType, double> kListItemExtent = const <MaterialListType, double>{
-  MaterialListType.oneLine: kOneLineListItemHeight,
-  MaterialListType.oneLineWithAvatar: kOneLineListItemWithAvatarHeight,
-  MaterialListType.twoLine: kTwoLineListItemHeight,
-  MaterialListType.threeLine: kThreeLineListItemHeight,
+  MaterialListType.oneLine: 48.0,
+  MaterialListType.oneLineWithAvatar: 56.0,
+  MaterialListType.twoLine: 72.0,
+  MaterialListType.threeLine: 88.0,
 };
 
 class MaterialList extends StatefulWidget {

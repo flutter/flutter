@@ -2,39 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
-
-// TODO(eseidel) Toolbar needs to change size based on orientation:
-// http://www.google.com/design/spec/layout/structure.html#structure-app-bar
-// Mobile Landscape: 48dp
-// Mobile Portrait: 56dp
-// Tablet/Desktop: 64dp
+/// The height of the tool bar component of the [AppBar].
 const double kToolBarHeight = 56.0;
-const double kExtendedAppBarHeight = 128.0;
 
+/// The height of a tab bar containing text.
 const double kTextTabBarHeight = 48.0;
-const double kIconTabBarHeight = 26.0;
-const double kTextAndIconTabBarHeight = 74.0;
 
-// https://www.google.com/design/spec/layout/metrics-keylines.html#metrics-keylines-keylines-spacing
-const double kListTitleHeight = 72.0;
-const double kListSubtitleHeight = 48.0;
-
-const double kOneLineListItemHeight = 48.0;
-const double kOneLineListItemWithAvatarHeight = 56.0;
-const double kTwoLineListItemHeight = 72.0;
-const double kThreeLineListItemHeight = 88.0;
-
-const double kMaterialDrawerHeight = 140.0;
-const double kScrollbarSize = 10.0;
-const Duration kScrollbarFadeDuration = const Duration(milliseconds: 250);
-const Duration kScrollbarFadeDelay = const Duration(milliseconds: 300);
-const double kFadingEdgeLength = 12.0;
-const double kPressedStateDuration = 64.0; // units?
+/// The amount of time theme change animations should last.
 const Duration kThemeChangeDuration = const Duration(milliseconds: 200);
 
-const EdgeInsets kDialogHeadingPadding = const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 20.0);
+/// The radius of a circular material ink response in logical pixels.
+const double kRadialReactionRadius = 24.0;
 
-const double kRadialReactionRadius = 24.0; // Pixels
+/// The amount of time a circular material ink response should take to expand to its full size.
 const Duration kRadialReactionDuration = const Duration(milliseconds: 200);
+
+/// The value of the alpha channel to use when drawing a circular material ink response.
 const int kRadialReactionAlpha = 0x33;
