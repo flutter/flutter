@@ -544,7 +544,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     assert(_numberOfInProgressScrolls == 0);
     if (config.onScrollEnd != null)
       config.onScrollEnd(_scrollOffset);
-    if (context != null)
+    if (mounted)
       new ScrollNotification(this, ScrollNotificationKind.ended).dispatch(context);
   }
 
