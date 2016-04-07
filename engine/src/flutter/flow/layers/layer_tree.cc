@@ -9,7 +9,7 @@
 
 namespace flow {
 
-LayerTree::LayerTree() : scene_version_(0), rasterizer_tracing_threashold_(0) {
+LayerTree::LayerTree() : scene_version_(0), rasterizer_tracing_threshold_(0) {
 }
 
 LayerTree::~LayerTree() {

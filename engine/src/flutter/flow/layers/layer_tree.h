@@ -55,11 +55,11 @@ class LayerTree {
   // trace the rasterized picture to a trace file. Specify 0 to disable all
   // tracing
   void set_rasterizer_tracing_threshold(uint32_t interval) {
-    rasterizer_tracing_threashold_ = interval;
+    rasterizer_tracing_threshold_ = interval;
   }
 
   uint32_t rasterizer_tracing_threshold() const {
-    return rasterizer_tracing_threashold_;
+    return rasterizer_tracing_threshold_;
   }
 
  private:
@@ -68,7 +68,7 @@ class LayerTree {
   std::unique_ptr<Layer> root_layer_;
 
   base::TimeDelta construction_time_;
-  uint32_t rasterizer_tracing_threashold_;
+  uint32_t rasterizer_tracing_threshold_;
 
   DISALLOW_COPY_AND_ASSIGN(LayerTree);
 };
