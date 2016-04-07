@@ -35,8 +35,8 @@ class RaisedButton extends MaterialButton {
   RaisedButton({
     Key key,
     Widget child,
+    ThemeBrightness colorBrightness,
     this.color,
-    this.colorBrightness,
     this.disabledColor,
     this.elevation: 2,
     this.highlightElevation: 8,
@@ -44,6 +44,7 @@ class RaisedButton extends MaterialButton {
     VoidCallback onPressed
   }) : super(key: key,
              child: child,
+             colorBrightness: colorBrightness,
              onPressed: onPressed);
 
   /// The color of the button, as printed on the [Material]. Defaults to null,
@@ -55,16 +56,13 @@ class RaisedButton extends MaterialButton {
   /// value.
   final Color disabledColor;
 
-  /// Controls the default text color if the text color isn't explicit set.
-  final ThemeBrightness colorBrightness;
-
-  /// The height at which to place this button.
+  /// The z-coordinate at which to place this button.
   final int elevation;
 
-  /// The height at which to place this button when highlighted.
+  /// The z-coordinate at which to place this button when highlighted.
   final int highlightElevation;
 
-  /// The height at which to place this button when disabled.
+  /// The z-coordinate at which to place this button when disabled.
   final int disabledElevation;
 
   @override
@@ -97,10 +95,5 @@ class _RaisedButtonState extends MaterialButtonState<RaisedButton> {
           return Colors.white12;
       }
     }
-  }
-
-  @override
-  ThemeBrightness getColorBrightness(BuildContext context) {
-    return config.colorBrightness ?? Theme.of(context).brightness;
   }
 }

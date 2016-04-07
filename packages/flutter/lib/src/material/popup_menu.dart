@@ -409,7 +409,7 @@ class PopupMenuButton<T> extends StatefulWidget {
 
   final String tooltip;
 
-  /// The height at which to place the menu when open.
+  /// The z-coordinate at which to place the menu when open.
   final int elevation;
 
   /// The widget below this widget in the tree.

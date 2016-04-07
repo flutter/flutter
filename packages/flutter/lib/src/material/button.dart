@@ -10,8 +10,28 @@ import 'ink_well.dart';
 import 'material.dart';
 import 'theme.dart';
 
-enum ButtonColor { normal, accent }
+/// Whether a button should use the accent color for its text.
+///
+/// See also:
+///
+///  * [ButtonTheme]
+///  * [RaisedButton]
+///  * [FlatButton]
+enum ButtonColor {
+  /// The button should use the normal color (e.g., black or white depending on the [ThemeData.brightness]) for its text.
+  normal,
 
+  /// The button should use the accent color (e.g., [ThemeData.accentColor]) for its text.
+  accent,
+}
+
+/// Defines the button color used by a widget subtree.
+///
+/// See also:
+///
+///  * [ButtonColor]
+///  * [RaisedButton]
+///  * [FlatButton]
 class ButtonTheme extends InheritedWidget {
   ButtonTheme({
     Key key,
@@ -21,6 +41,7 @@ class ButtonTheme extends InheritedWidget {
     assert(child != null);
   }
 
+  /// The button color that this subtree should use.
   final ButtonColor color;
 
   /// The color from the closest instance of this class that encloses the given context.
@@ -45,6 +66,7 @@ abstract class MaterialButton extends StatefulWidget {
   MaterialButton({
     Key key,
     this.child,
+    this.colorBrightness,
     this.textTheme,
     this.textColor,
     this.disabledTextColor,
@@ -54,10 +76,24 @@ abstract class MaterialButton extends StatefulWidget {
   /// The widget below this widget in the tree.
   final Widget child;
 
+  /// The theme brightness to use for this button.
+  ///
+  /// Defaults to the brightness from [ThemeData.brightness].
+  final ThemeBrightness colorBrightness;
+
+  /// The color scheme to use for this button's text.
+  ///
+  /// Defaults to the button color from [ButtonTheme].
   final ButtonColor textTheme;
 
+  /// The color to use for this button's text.
+  ///
+  /// Defaults to the color determined by the [textTheme].
   final Color textColor;
 
+  /// The color to use for this button's text when the button cannot be pressed.
+  ///
+  /// Defaults to a color derived from the [Theme].
   final Color disabledTextColor;
 
   /// The callback that is invoked when the button is tapped or otherwise activated.
@@ -77,14 +113,25 @@ abstract class MaterialButton extends StatefulWidget {
   }
 }
 
+/// A state object for [MaterialButton].
+///
+/// Subclasses of [MaterialButton] should use a subclass of
+/// [MaterialButtonState] for their state objects.
 abstract class MaterialButtonState<T extends MaterialButton> extends State<T> {
+  /// Whether this button is in the process of potentially being pressed.
   bool highlight = false;
 
+  /// The z-coordinate at which to place this button.
   int get elevation;
-  Color getColor(BuildContext context);
-  ThemeBrightness getColorBrightness(BuildContext context);
 
-  Color getTextColor(BuildContext context) {
+  /// The color to use for the button's material.
+  Color getColor(BuildContext context);
+
+  ThemeBrightness _getColorBrightness(BuildContext context) {
+    return config.colorBrightness ?? Theme.of(context).brightness;
+  }
+
+  Color _getTextColor(BuildContext context) {
     if (config.enabled) {
       if (config.textColor != null)
         return config.textColor;
@@ -92,7 +139,7 @@ abstract class MaterialButtonState<T extends MaterialButton> extends State<T> {
         case ButtonColor.accent:
           return Theme.of(context).accentColor;
         case ButtonColor.normal:
-          switch (getColorBrightness(context)) {
+          switch (_getColorBrightness(context)) {
             case ThemeBrightness.light:
               return Colors.black87;
             case ThemeBrightness.dark:
@@ -102,7 +149,7 @@ abstract class MaterialButtonState<T extends MaterialButton> extends State<T> {
     }
     if (config.disabledTextColor != null)
       return config.disabledTextColor;
-    switch (getColorBrightness(context)) {
+    switch (_getColorBrightness(context)) {
       case ThemeBrightness.light:
         return Colors.black26;
       case ThemeBrightness.dark:
@@ -131,7 +178,7 @@ abstract class MaterialButtonState<T extends MaterialButton> extends State<T> {
         )
       )
     );
-    TextStyle style = Theme.of(context).textTheme.button.copyWith(color: getTextColor(context));
+    TextStyle style = Theme.of(context).textTheme.button.copyWith(color: _getTextColor(context));
     int elevation = this.elevation;
     Color color = getColor(context);
     if (elevation > 0 || color != null) {

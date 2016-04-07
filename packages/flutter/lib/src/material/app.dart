@@ -22,7 +22,19 @@ const TextStyle _errorTextStyle = const TextStyle(
   decorationStyle: TextDecorationStyle.double
 );
 
-
+/// An application that uses material design.
+///
+/// A convenience widget that wraps a number of widgets that are commonly
+/// required for material design applications. It builds upon
+/// [WidgetsApp] by adding material-design specific functionality, such as
+/// [AnimatedTheme] and [GridPaper]. This widget also configures the top-level
+/// [Navigator] to perform [Hero] animations.
+///
+/// See also:
+///
+///  * [WidgetsApp]
+///  * [Scaffold]
+///  * [MaterialPageRoute]
 class MaterialApp extends WidgetsApp {
   MaterialApp({
     Key key,
@@ -65,6 +77,12 @@ class MaterialApp extends WidgetsApp {
   /// The colors to use for the application's widgets.
   final ThemeData theme;
 
+  /// The application's top-level routing table.
+  ///
+  /// When a named route is pushed with [Navigator.pushNamed], the route name is
+  /// looked up in this map. If the name is present, the associated
+  /// [WidgetBuilder] is used to construct a [MaterialPageRoute] that performs
+  /// an appropriate transition, including [Hero] animations, to the new route.
   final Map<String, WidgetBuilder> routes;
 
   /// Turns on a [GridPaper] overlay that paints a baseline grid

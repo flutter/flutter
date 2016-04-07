@@ -48,7 +48,7 @@ class Drawer extends StatelessWidget {
     this.child
   }) : super(key: key);
 
-  /// The height at which to place this drawer.
+  /// The z-coordinate at which to place this drawer.
   final int elevation;
 
   /// The widget below this widget in the tree.

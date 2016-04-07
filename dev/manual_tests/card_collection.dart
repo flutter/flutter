@@ -282,16 +282,14 @@ class CardCollectionState extends State<CardCollection> {
       actions: <Widget>[
         new Text(_dismissDirectionText(_dismissDirection))
       ],
-      flexibleSpace: (_) {
-        return new Container(
-          padding: const EdgeInsets.only(left: 72.0),
-          height: 128.0,
-          child: new Align(
-            alignment: const FractionalOffset(0.0, 0.75),
-            child: new Text('Swipe Away: ${_cardModels.length}', style: Theme.of(context).primaryTextTheme.title)
-          )
-        );
-      }
+      flexibleSpace: new Container(
+        padding: const EdgeInsets.only(left: 72.0),
+        height: 128.0,
+        child: new Align(
+          alignment: const FractionalOffset(0.0, 0.75),
+          child: new Text('Swipe Away: ${_cardModels.length}', style: Theme.of(context).primaryTextTheme.title)
+        )
+      )
     );
   }
 

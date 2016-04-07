@@ -238,16 +238,27 @@ class ScaffoldState extends State<Scaffold> {
 
   AnimationController _appBarController;
 
+  /// The animation controlling the size of the app bar.
+  ///
+  /// Useful for linking animation effects to the expansion and collapse of the
+  /// app bar.
   Animation<double> get appBarAnimation => _appBarController.view;
 
+  /// The height of the app bar when fully expanded.
+  ///
+  /// See [AppBar.expandedHeight].
   double get appBarHeight => config.appBar?.expandedHeight ?? 0.0;
 
   // DRAWER API
 
   final GlobalKey<DrawerControllerState> _drawerKey = new GlobalKey<DrawerControllerState>();
 
+  /// Opens the [Drawer] (if any).
+  ///
+  /// If the scaffold has a non-null [Scaffold.drawer], this function will cause
+  /// the drawer to begin its entrance animation.
   void openDrawer() {
-    _drawerKey.currentState.open();
+    _drawerKey.currentState?.open();
   }
 
   // SNACKBAR API
@@ -256,6 +267,12 @@ class ScaffoldState extends State<Scaffold> {
   AnimationController _snackBarController;
   Timer _snackBarTimer;
 
+  /// Shows a [SnackBar] at the bottom fo the scaffold.
+  ///
+  /// A scaffold can show at most one snack bar at a time. If this function is
+  /// called while another snack bar is already visible, the given snack bar
+  /// will be added to a queue and displayed after the earlier snack bars have
+  /// closed.
   ScaffoldFeatureController<SnackBar, Null> showSnackBar(SnackBar snackbar) {
     _snackBarController ??= SnackBar.createAnimationController()
       ..addStatusListener(_handleSnackBarStatusChange);
@@ -304,6 +321,10 @@ class ScaffoldState extends State<Scaffold> {
     }
   }
 
+  /// Removes the current [SnackBar] (if any) immediately.
+  ///
+  /// The removed snack bar does not run its normal exit animation. If there are
+  /// any queued snack bars, they begin their entrance animation immediately.
   void removeCurrentSnackBar() {
     if (_snackBars.isEmpty)
       return;
@@ -330,6 +351,25 @@ class ScaffoldState extends State<Scaffold> {
   List<Widget> _dismissedBottomSheets;
   PersistentBottomSheetController<dynamic> _currentBottomSheet;
 
+  /// Shows a persistent material design bottom sheet.
+  ///
+  /// A persistent bottom sheet shows information that supplements the primary
+  /// content of the app. A persistent bottom sheet remains visible even when
+  /// the user interacts with other parts of the app.
+  ///
+  /// A closely related widget is  a modal bottom sheet, which is an alternative
+  /// to a menu or a dialog and prevents the user from interacting with the rest
+  /// of the app. Modal bottom sheets can be created and displayed with the
+  /// [showModalBottomSheet] function.
+  ///
+  /// Returns a contoller that can be used to close and otherwise manipulate the
+  /// button sheet.
+  ///
+  /// See also:
+  ///
+  ///  * [BottomSheet]
+  ///  * [showModalBottomSheet]
+  ///  * <https://www.google.com/design/spec/components/bottom-sheets.html#bottom-sheets-persistent-bottom-sheets>
   PersistentBottomSheetController<dynamic/*=T*/> showBottomSheet/*<T>*/(WidgetBuilder builder) {
     if (_currentBottomSheet != null) {
       _currentBottomSheet.close();
