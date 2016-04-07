@@ -7,12 +7,12 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
-import 'package:mojo_services/mojo/network_service.mojom.dart' as mojo;
-import 'package:mojo_services/mojo/url_loader.mojom.dart' as mojo;
+import 'package:mojo_services/mojo/network_service.mojom.dart' as mojom;
+import 'package:mojo_services/mojo/url_loader.mojom.dart' as mojom;
 import 'package:mojo/core.dart' as mojo;
-import 'package:mojo/mojo/url_request.mojom.dart' as mojo;
-import 'package:mojo/mojo/url_response.mojom.dart' as mojo;
-import 'package:mojo/mojo/http_header.mojom.dart' as mojo;
+import 'package:mojo/mojo/url_request.mojom.dart' as mojom;
+import 'package:mojo/mojo/url_response.mojom.dart' as mojom;
+import 'package:mojo/mojo/http_header.mojom.dart' as mojom;
 
 import 'response.dart';
 
@@ -124,15 +124,15 @@ class MojoClient {
   }
 
   Future<Response> _send(String method, dynamic url, Map<String, String> headers, [dynamic body, Encoding encoding = UTF8]) async {
-    mojo.UrlLoaderProxy loader = new mojo.UrlLoaderProxy.unbound();
-    List<mojo.HttpHeader> mojoHeaders = <mojo.HttpHeader>[];
+    mojom.UrlLoaderProxy loader = new mojom.UrlLoaderProxy.unbound();
+    List<mojom.HttpHeader> mojoHeaders = <mojom.HttpHeader>[];
     headers?.forEach((String name, String value) {
-      mojo.HttpHeader header = new mojo.HttpHeader()
+      mojom.HttpHeader header = new mojom.HttpHeader()
         ..name = name
         ..value = value;
       mojoHeaders.add(header);
     });
-    mojo.UrlRequest request = new mojo.UrlRequest()
+    mojom.UrlRequest request = new mojom.UrlRequest()
       ..url = url.toString()
       ..headers = mojoHeaders
       ..method = method;
@@ -145,10 +145,16 @@ class MojoClient {
     }
     try {
       networkService.ptr.createUrlLoader(loader);
-      mojo.UrlResponse response = (await loader.ptr.start(request)).response;
+      mojom.UrlResponse response = (await loader.ptr.start(request)).response;
       ByteData data = await mojo.DataPipeDrainer.drainHandle(response.body);
       Uint8List bodyBytes = new Uint8List.view(data.buffer);
-      return new Response(bodyBytes: bodyBytes, statusCode: response.statusCode);
+      Map<String, String> headers = <String, String>{};
+      for (mojom.HttpHeader header in response.headers) {
+        String headerName = header.name.toLowerCase();
+        String existingValue = headers[headerName];
+        headers[headerName] = existingValue != null ? '$existingValue, ${header.value}' : header.value;
+      }
+      return new Response.bytes(bodyBytes, response.statusCode, headers: headers);
     } catch (exception, stack) {
       FlutterError.reportError(new FlutterErrorDetails(
         exception: exception,
@@ -157,7 +163,7 @@ class MojoClient {
         context: 'while sending bytes to the Mojo network library',
         silent: true
       ));
-      return new Response(statusCode: 500);
+      return new Response.bytes(null, 500);
     } finally {
       loader.close();
     }
@@ -169,12 +175,12 @@ class MojoClient {
     throw new Exception("Request to $url failed with status ${response.statusCode}.");
   }
 
-  static mojo.NetworkServiceProxy _initNetworkService() {
-    mojo.NetworkServiceProxy proxy = new mojo.NetworkServiceProxy.unbound();
+  static mojom.NetworkServiceProxy _initNetworkService() {
+    mojom.NetworkServiceProxy proxy = new mojom.NetworkServiceProxy.unbound();
     shell.connectToService("mojo:authenticated_network_service", proxy);
     return proxy;
   }
 
   /// A handle to the [NetworkService] object used by [MojoClient].
-  static final mojo.NetworkServiceProxy networkService = _initNetworkService();
+  static final mojom.NetworkServiceProxy networkService = _initNetworkService();
 }
