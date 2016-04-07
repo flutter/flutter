@@ -14,7 +14,7 @@ void main() {
     test('Discovery Heartbeat', () async {
       MockDeviceLogReader logReader = new MockDeviceLogReader();
       ServiceProtocolDiscovery discoverer =
-          new ServiceProtocolDiscovery(logReader);
+          new ServiceProtocolDiscovery(logReader, ServiceProtocolDiscovery.kObservatoryService);
       // Get next port future.
       Future<int> nextPort = discoverer.nextPort();
       expect(nextPort, isNotNull);

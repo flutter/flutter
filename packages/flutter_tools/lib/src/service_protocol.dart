@@ -8,9 +8,13 @@ import 'device.dart';
 
 /// Discover service protocol ports on devices.
 class ServiceProtocolDiscovery {
-  /// [logReader] A [DeviceLogReader] to look for Observatory messages in.
-  ServiceProtocolDiscovery(DeviceLogReader logReader)
-      : _logReader = logReader {
+  static const String kObservatoryService = 'Observatory';
+  static const String kDiagnosticService = 'Diagnostic server';
+
+  /// [logReader] A [DeviceLogReader] to look for service messages in.
+  ServiceProtocolDiscovery(DeviceLogReader logReader, String serviceName)
+      : _logReader = logReader,
+        _serviceName = serviceName {
     assert(_logReader != null);
     if (!_logReader.isReading)
       _logReader.start();
@@ -19,6 +23,7 @@ class ServiceProtocolDiscovery {
   }
 
   final DeviceLogReader _logReader;
+  final String _serviceName;
   Completer<int> _completer = new Completer<int>();
 
   /// The [Future] returned by this function will complete when the next service
@@ -27,7 +32,7 @@ class ServiceProtocolDiscovery {
 
   void _onLine(String line) {
     int portNumber = 0;
-    if (line.contains('Observatory listening on http://')) {
+    if (line.contains('$_serviceName listening on http://')) {
       try {
         RegExp portExp = new RegExp(r"\d+.\d+.\d+.\d+:(\d+)");
         String port = portExp.firstMatch(line).group(1);

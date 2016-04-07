@@ -268,7 +268,7 @@ Future<int> startApp(DriveCommand command) async {
     checked: command.checked,
     clearLogs: true,
     startPaused: true,
-    debugPort: command.debugPort,
+    observatoryPort: command.debugPort,
     platformArgs: <String, dynamic>{
       'trace-startup': command.traceStartup,
     }
