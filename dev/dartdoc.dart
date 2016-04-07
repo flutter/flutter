@@ -56,26 +56,32 @@ dependencies:
     args.add(name.substring(0, name.length - 5));
   }
 
-  [
-    'activity',
-    'editing',
-    'firebase',
-    'flutter',
-    'gcm',
-    'media',
-    'pointer',
-    'raw_keyboard',
-    'semantics',
-    'sky'
-  ].forEach((libName) {
+  _findSkyServicesLibraryNames().forEach((String libName) {
     args.add('--include-external');
-    args.add('${libName}_mojom');
+    args.add('${libName}');
   });
 
   process = await Process.start('pub', args, workingDirectory: 'dev/docs');
   _print(process.stdout);
   _print(process.stderr);
   exit(await process.exitCode);
+}
+
+List<String> _findSkyServicesLibraryNames() {
+  Directory skyServicesLocation = new Directory('bin/cache/pkg/sky_services/lib');
+  if (!skyServicesLocation.existsSync()) {
+    throw 'Did not find sky_services package location in '
+          '${skyServicesLocation.path}, skipping those libraries.';
+    return <String>[];
+  }
+  return skyServicesLocation.listSync(followLinks: false, recursive: true)
+      .where((FileSystemEntity entity) {
+    return entity is File && entity.path.endsWith('.mojom.dart');
+  }).map((FileSystemEntity entity) {
+    String basename = _entityName(entity.path);
+    basename = basename.substring(0, basename.length-('.dart'.length));
+    return basename.replaceAll('.', '_');
+  });
 }
 
 List<String> _findPackageNames() {
@@ -92,7 +98,6 @@ List<Directory> _findPackages() {
       return !nodoc;
     })
     .toList();
-
 }
 
 List<String> _libraryRefs() sync* {
