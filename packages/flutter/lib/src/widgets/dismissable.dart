@@ -76,7 +76,7 @@ class Dismissable extends StatefulWidget {
   /// A widget that is stacked behind the child. If secondaryBackground is also
   /// specified then this widget only appears when the child has been dragged
   /// down or to the right.
-  final  Widget background;
+  final Widget background;
 
   /// A widget that is stacked behind the child and is exposed when the child
   /// has been dragged up or to the left. It may only be specified when background
@@ -119,6 +119,7 @@ class _DismissableState extends State<Dismissable> {
 
   double _dragExtent = 0.0;
   bool _dragUnderway = false;
+  Size _sizePriorToCollapse;
 
   @override
   void dispose() {
@@ -261,6 +262,7 @@ class _DismissableState extends State<Dismissable> {
     assert(_moveController != null);
     assert(_moveController.isCompleted);
     assert(_resizeController == null);
+    assert(_sizePriorToCollapse == null);
     if (config.resizeDuration == null) {
       if (config.onDismissed != null)
         config.onDismissed(_dismissDirection);
@@ -269,6 +271,8 @@ class _DismissableState extends State<Dismissable> {
         ..addListener(_handleResizeProgressChanged);
       _resizeController.forward();
       setState(() {
+        RenderBox box = context.findRenderObject();
+        _sizePriorToCollapse = box.size;
         _resizeAnimation = new Tween<double>(
           begin: 1.0,
           end: 0.0
@@ -315,8 +319,12 @@ class _DismissableState extends State<Dismissable> {
 
       return new SizeTransition(
         sizeFactor: _resizeAnimation,
-        axis: _directionIsXAxis ? Axis.horizontal : Axis.vertical,
-        child: background
+        axis: _directionIsXAxis ? Axis.vertical : Axis.horizontal,
+        child: new SizedBox(
+          width: _sizePriorToCollapse.width,
+          height: _sizePriorToCollapse.height,
+          child: background
+        )
       );
     }
 
