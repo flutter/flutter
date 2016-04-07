@@ -33,7 +33,7 @@ void dispatchRequest(HttpRequest request) {
   try {
     if (request.uri.path == '/skp') {
       ReceivePort port = new ReceivePort();
-      port.first.then((Object data) => onReceiveSkiaPicture(response, data));
+      port.first.then((Uint8List data) => onReceiveSkiaPicture(response, data));
       handleSkiaPictureRequest(port.sendPort);
       return;
     }
@@ -46,10 +46,11 @@ void dispatchRequest(HttpRequest request) {
   response.close();
 }
 
-void onReceiveSkiaPicture(HttpResponse response, Object data) {
+void onReceiveSkiaPicture(HttpResponse response, Uint8List data) {
   if (data != null) {
     response.statusCode = HttpStatus.OK;
     response.headers.contentType = ContentType.BINARY;
+    response.headers.contentLength = data.length;
     response.add(data);
   } else {
     sendError(response, 'Unable to capture Skia picture');
