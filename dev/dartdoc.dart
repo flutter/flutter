@@ -56,6 +56,22 @@ dependencies:
     args.add(name.substring(0, name.length - 5));
   }
 
+  [
+    'activity',
+    'editing',
+    'firebase',
+    'flutter',
+    'gcm',
+    'media',
+    'pointer',
+    'raw_keyboard',
+    'semantics',
+    'sky'
+  ].forEach((libName) {
+    args.add('--include-external');
+    args.add('${libName}_mojom');
+  });
+
   process = await Process.start('pub', args, workingDirectory: 'dev/docs');
   _print(process.stdout);
   _print(process.stderr);
