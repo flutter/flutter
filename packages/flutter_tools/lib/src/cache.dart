@@ -21,7 +21,7 @@ class Cache {
   /// Return the top-level directory in the cache; this is `bin/cache`.
   Directory getRoot() => new Directory(path.join(ArtifactStore.flutterRoot, 'bin', 'cache'));
 
-  /// Return the top-level muteable directory in the cache; this is `bin/cache/artifacts`.
+  /// Return the top-level mutable directory in the cache; this is `bin/cache/artifacts`.
   Directory getCacheArtifacts() {
     Directory artifacts = new Directory(path.join(getRoot().path, 'artifacts'));
     if (!artifacts.existsSync())
