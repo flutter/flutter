@@ -14,6 +14,7 @@
 #include "base/logging.h"
 #include "base/mac/scoped_nsautorelease_pool.h"
 #include "base/message_loop/message_loop.h"
+#include "base/trace_event/trace_event.h"
 #include "mojo/edk/embedder/embedder.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
 #include "sky/engine/wtf/MakeUnique.h"
@@ -22,7 +23,6 @@
 #include "sky/shell/tracing_controller.h"
 #include "sky/shell/ui_delegate.h"
 #include "ui/gl/gl_surface.h"
-#include "base/trace_event/trace_event.h"
 
 namespace sky {
 namespace shell {
@@ -49,6 +49,9 @@ static void RedirectIOConnectionsToSyslog() {
 class EmbedderState {
  public:
   EmbedderState(int argc, const char* argv[], std::string icu_data_path) {
+    CHECK([NSThread isMainThread])
+        << "Embedder initialization must occur on the main platform thread";
+
     RedirectIOConnectionsToSyslog();
 
     base::CommandLine::Init(argc, argv);
@@ -70,10 +73,12 @@ class EmbedderState {
     // marker that can be used as a reference for startup.
     TRACE_EVENT_INSTANT0("flutter", "main", TRACE_EVENT_SCOPE_PROCESS);
 
+    embedder_message_loop_ = WTF::MakeUnique<base::MessageLoopForUI>();
+
 #if TARGET_OS_IPHONE
     // One cannot start the message loop on the platform main thread. Instead,
     // we attach to the CFRunLoop
-    embedder_message_loop_.Attach();
+    embedder_message_loop_->Attach();
 #endif
 
     mojo::embedder::Init(mojo::embedder::CreateSimplePlatformSupport());
@@ -83,17 +88,23 @@ class EmbedderState {
     sky::shell::Shell::InitStandalone(icu_data_path);
   }
 
+  ~EmbedderState() {
+    CHECK([NSThread isMainThread])
+        << "Embedder destruction must occur on the main platform thread";
+#if !TARGET_OS_IPHONE
+    embedder_message_loop_->QuitNow();
+    embedder_message_loop_.release();
+#endif
+  }
+
  private:
   base::AtExitManager exit_manager_;
-  base::MessageLoopForUI embedder_message_loop_;
+  std::unique_ptr<base::MessageLoopForUI> embedder_message_loop_;
 
   DISALLOW_COPY_AND_ASSIGN(EmbedderState);
 };
 
 void PlatformMacMain(int argc, const char* argv[], std::string icu_data_path) {
-  CHECK([NSThread isMainThread])
-      << "Embedder initialization must occur on the main platform thread";
-
   static std::unique_ptr<EmbedderState> g_embedder;
   static std::once_flag once_main;
 
