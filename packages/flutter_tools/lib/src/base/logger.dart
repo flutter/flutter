@@ -207,7 +207,7 @@ class _AnsiStatus extends Status {
   _AnsiStatus(this.message) {
     stopwatch = new Stopwatch()..start();
 
-    stdout.write('${message.padRight(40)}     ');
+    stdout.write('${message.padRight(44)}     ');
     stdout.write('${_progress[0]}');
 
     timer = new Timer.periodic(new Duration(milliseconds: 100), _callback);

@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
+import '../base/logger.dart';
 import '../base/process.dart';
 import '../globals.dart';
 
@@ -31,11 +32,12 @@ Future<int> pubGet({
 
   if (!checkLastModified || !dotPackages.existsSync() || pubSpecYaml.lastModifiedSync().isAfter(dotPackages.lastModifiedSync())) {
     String command = upgrade ? 'upgrade' : 'get';
-    printStatus("Running 'pub $command' in $directory${Platform.pathSeparator}...");
+    Status status = logger.startProgress("Running 'pub $command' in ${path.basename(directory)}...");
     int code = await runCommandAndStreamOutput(
-      <String>[sdkBinaryName('pub'), '--verbosity=warning', command, '--no-package-symlinks'],
+      <String>[sdkBinaryName('pub'), '--verbosity=warning', command, '--no-package-symlinks', '--no-precompile'],
       workingDirectory: directory
     );
+    status.stop(showElapsedTime: true);
     if (code != 0)
       return code;
   }
