@@ -75,6 +75,10 @@ public:
         mCache.clear();
     }
 
+    void remove(int32_t fontId) {
+        mCache.remove(fontId);
+    }
+
 private:
     static const size_t kMaxEntries = 100;
 
@@ -93,6 +97,12 @@ HbFontCache* getFontCacheLocked() {
 void purgeHbFontCacheLocked() {
     assertMinikinLocked();
     getFontCacheLocked()->clear();
+}
+
+void purgeHbFont(const MinikinFont* minikinFont) {
+    AutoMutex _l(gMinikinLock);
+    const int32_t fontId = minikinFont->GetUniqueId();
+    getFontCacheLocked()->remove(fontId);
 }
 
 hb_font_t* getHbFontLocked(MinikinFont* minikinFont) {
