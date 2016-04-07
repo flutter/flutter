@@ -71,7 +71,7 @@ List<String> _findSkyServicesLibraryNames() {
   Directory skyServicesLocation = new Directory('bin/cache/pkg/sky_services/lib');
   if (!skyServicesLocation.existsSync()) {
     throw 'Did not find sky_services package location in '
-          '${skyServicesLocation.path}, skipping those libraries.';
+          '${skyServicesLocation.path}.';
     return <String>[];
   }
   return skyServicesLocation.listSync(followLinks: false, recursive: true)
