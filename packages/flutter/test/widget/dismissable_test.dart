@@ -12,6 +12,7 @@ Axis scrollDirection = Axis.vertical;
 DismissDirection dismissDirection = DismissDirection.horizontal;
 DismissDirection reportedDismissDirection;
 List<int> dismissedItems = <int>[];
+Widget background;
 
 void handleOnResize(int item) {
   expect(dismissedItems.contains(item), isFalse);
@@ -29,6 +30,7 @@ Widget buildDismissableItem(int item) {
     direction: dismissDirection,
     onDismissed: (DismissDirection direction) { handleOnDismissed(direction, item); },
     onResize: () { handleOnResize(item); },
+    background: background,
     child: new Container(
       width: itemExtent,
       height: itemExtent,
@@ -123,11 +125,15 @@ class Test1215DismissableWidget extends StatelessWidget {
 }
 
 void main() {
+  setUp(() {
+    dismissedItems = <int>[];
+    background = null;
+  });
+
   test('Horizontal drag triggers dismiss scrollDirection=vertical', () {
     testWidgets((WidgetTester tester) {
       scrollDirection = Axis.vertical;
       dismissDirection = DismissDirection.horizontal;
-      dismissedItems = <int>[];
 
       tester.pumpWidget(widgetBuilder());
       expect(dismissedItems, isEmpty);
@@ -148,7 +154,6 @@ void main() {
     testWidgets((WidgetTester tester) {
       scrollDirection = Axis.horizontal;
       dismissDirection = DismissDirection.vertical;
-      dismissedItems = <int>[];
 
       tester.pumpWidget(widgetBuilder());
       expect(dismissedItems, isEmpty);
@@ -169,7 +174,6 @@ void main() {
     testWidgets((WidgetTester tester) {
       scrollDirection = Axis.vertical;
       dismissDirection = DismissDirection.endToStart;
-      dismissedItems = <int>[];
 
       tester.pumpWidget(widgetBuilder());
       expect(dismissedItems, isEmpty);
@@ -190,7 +194,6 @@ void main() {
     testWidgets((WidgetTester tester) {
       scrollDirection = Axis.vertical;
       dismissDirection = DismissDirection.startToEnd;
-      dismissedItems = <int>[];
 
       tester.pumpWidget(widgetBuilder());
       expect(dismissedItems, isEmpty);
@@ -209,7 +212,6 @@ void main() {
     testWidgets((WidgetTester tester) {
       scrollDirection = Axis.horizontal;
       dismissDirection = DismissDirection.up;
-      dismissedItems = <int>[];
 
       tester.pumpWidget(widgetBuilder());
       expect(dismissedItems, isEmpty);
@@ -228,7 +230,6 @@ void main() {
     testWidgets((WidgetTester tester) {
       scrollDirection = Axis.horizontal;
       dismissDirection = DismissDirection.down;
-      dismissedItems = <int>[];
 
       tester.pumpWidget(widgetBuilder());
       expect(dismissedItems, isEmpty);
@@ -253,7 +254,6 @@ void main() {
     testWidgets((WidgetTester tester) {
       scrollDirection = Axis.horizontal;
       dismissDirection = DismissDirection.down;
-      dismissedItems = <int>[];
 
       tester.pumpWidget(widgetBuilder());
       Element itemElement = tester.findText('0');
@@ -305,6 +305,26 @@ void main() {
       tester.pump(new Duration(seconds: 1)); // finish the slide away (at which point the child is no longer included in the tree)
       expect(tester.findText('1'), isNull);
       expect(tester.findText('2'), isNull);
+    });
+  });
+
+  test('Dismissable starts from the full size when collapsing', () {
+    testWidgets((WidgetTester tester) {
+      scrollDirection = Axis.vertical;
+      dismissDirection = DismissDirection.horizontal;
+      background = new Text('background');
+
+      tester.pumpWidget(widgetBuilder());
+      expect(dismissedItems, isEmpty);
+
+      Element itemElement = tester.findText(0.toString());
+      expect(itemElement, isNotNull);
+      dismissElement(tester, itemElement, gestureDirection: DismissDirection.startToEnd);
+      tester.pump();
+
+      Element backgroundElement = tester.findText('background');
+      RenderBox backgroundBox = backgroundElement.findRenderObject();
+      expect(backgroundBox.size.height, equals(100.0));
     });
   });
 }
