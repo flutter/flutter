@@ -88,7 +88,7 @@ class Scrollbar extends StatefulWidget {
 }
 
 class _ScrollbarState extends State<Scrollbar> {
-  AnimationController _fade = new AnimationController(duration: _kScrollbarThumbFadeDuration);
+  final AnimationController _fade = new AnimationController(duration: _kScrollbarThumbFadeDuration);
   CurvedAnimation _opacity;
   double _scrollOffset;
   Axis _scrollDirection;
@@ -101,7 +101,7 @@ class _ScrollbarState extends State<Scrollbar> {
     _opacity = new CurvedAnimation(parent: _fade, curve: Curves.ease);
   }
 
-  void updateState(ScrollableState scrollable) {
+  void _updateState(ScrollableState scrollable) {
     final ExtentScrollBehavior scrollBehavior = scrollable.scrollBehavior;
     _scrollOffset = scrollable.scrollOffset;
     _scrollDirection = scrollable.config.scrollDirection;
@@ -109,34 +109,34 @@ class _ScrollbarState extends State<Scrollbar> {
     _containerExtent = scrollBehavior.containerExtent;
   }
 
-  void onScrollStarted(ScrollableState scrollable) {
-    updateState(scrollable);
+  void _onScrollStarted(ScrollableState scrollable) {
+    _updateState(scrollable);
    _fade.forward();
   }
 
-  void onScrollUpdated(ScrollableState scrollable) {
+  void _onScrollUpdated(ScrollableState scrollable) {
     setState(() {
-      updateState(scrollable);
+      _updateState(scrollable);
     });
   }
 
-  void onScrollEnded(ScrollableState scrollable) {
-    updateState(scrollable);
+  void _onScrollEnded(ScrollableState scrollable) {
+    _updateState(scrollable);
     _fade.reverse();
   }
 
-  bool handleScrollNotification(ScrollNotification notification) {
+  bool _handleScrollNotification(ScrollNotification notification) {
     if (config.scrollableKey == null || config.scrollableKey == notification.scrollable.config.key) {
       final ScrollableState scrollable = notification.scrollable;
       switch(notification.kind) {
         case ScrollNotificationKind.started:
-          onScrollStarted(scrollable);
+          _onScrollStarted(scrollable);
           break;
         case ScrollNotificationKind.updated:
-          onScrollUpdated(scrollable);
+          _onScrollUpdated(scrollable);
           break;
         case ScrollNotificationKind.ended:
-          onScrollEnded(scrollable);
+          _onScrollEnded(scrollable);
           break;
       }
     }
@@ -146,7 +146,7 @@ class _ScrollbarState extends State<Scrollbar> {
   @override
   Widget build(BuildContext context) {
     return new NotificationListener<ScrollNotification>(
-      onNotification: handleScrollNotification,
+      onNotification: _handleScrollNotification,
       child: new AnimatedBuilder(
         animation: _opacity,
         builder: (BuildContext context, Widget child) {

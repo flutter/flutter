@@ -332,7 +332,6 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
       _scrollOffset = newScrollOffset;
     });
     PageStorage.of(context)?.writeState(context, _scrollOffset);
-    new ScrollNotification(this, ScrollNotificationKind.updated).dispatch(context);
     _startScroll();
     dispatchOnScroll();
     _endScroll();
@@ -494,6 +493,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     assert(_numberOfInProgressScrolls > 0);
     if (config.onScroll != null)
       config.onScroll(_scrollOffset);
+    new ScrollNotification(this, ScrollNotificationKind.updated).dispatch(context);
   }
 
   void _handleDragDown(_) {
@@ -544,7 +544,8 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     assert(_numberOfInProgressScrolls == 0);
     if (config.onScrollEnd != null)
       config.onScrollEnd(_scrollOffset);
-    new ScrollNotification(this, ScrollNotificationKind.ended).dispatch(context);
+    if (context != null)
+      new ScrollNotification(this, ScrollNotificationKind.ended).dispatch(context);
   }
 
   final GlobalKey<RawGestureDetectorState> _gestureDetectorKey = new GlobalKey<RawGestureDetectorState>();
