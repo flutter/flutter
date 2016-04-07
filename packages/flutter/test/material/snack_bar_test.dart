@@ -282,4 +282,48 @@ void main() {
     });
   });
 
+  test('SnackBar cannot be tapped twice', () {
+    testWidgets((WidgetTester tester) {
+      int tapCount = 0;
+      tester.pumpWidget(new MaterialApp(
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) {
+            return new Scaffold(
+              body: new Builder(
+                builder: (BuildContext context) {
+                  return new GestureDetector(
+                    onTap: () {
+                      Scaffold.of(context).showSnackBar(new SnackBar(
+                        content: new Text('I am a snack bar.'),
+                        duration: new Duration(seconds: 2),
+                        action: new SnackBarAction(
+                          label: 'ACTION',
+                          onPressed: () {
+                            ++tapCount;
+                          }
+                        )
+                      ));
+                    },
+                    child: new Text('X')
+                  );
+                }
+              )
+            );
+          }
+        }
+      ));
+      tester.tap(tester.findText('X'));
+      tester.pump(); // start animation
+      tester.pump(const Duration(milliseconds: 750));
+
+      expect(tapCount, equals(0));
+      tester.tap(tester.findText('ACTION'));
+      expect(tapCount, equals(1));
+      tester.tap(tester.findText('ACTION'));
+      expect(tapCount, equals(1));
+      tester.pump();
+      tester.tap(tester.findText('ACTION'));
+      expect(tapCount, equals(1));
+    });
+  });
 }

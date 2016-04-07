@@ -36,11 +36,13 @@ const Curve _snackBarFadeCurve = const Interval(0.72, 1.0, curve: Curves.fastOut
 /// Snack bar actions are always enabled. If you want to disable a snack bar
 /// action, simply don't include it in the snack bar.
 ///
+/// Snack bar actions can only be pressed once. Subsequent presses are ignored.
+///
 /// See also:
 ///
 ///  * [SnackBar]
 ///  * <https://www.google.com/design/spec/components/snackbars-toasts.html>
-class SnackBarAction extends StatelessWidget {
+class SnackBarAction extends StatefulWidget {
   SnackBarAction({Key key, this.label, this.onPressed }) : super(key: key) {
     assert(label != null);
     assert(onPressed != null);
@@ -50,16 +52,35 @@ class SnackBarAction extends StatelessWidget {
   final String label;
 
   /// The callback to be invoked when the button is pressed. Must be non-null.
+  ///
+  /// This callback will be invoked at most once each time this action is
+  /// displayed in a [SnackBar].
   final VoidCallback onPressed;
+
+  @override
+  _SnackBarActionState createState() => new _SnackBarActionState();
+}
+
+class _SnackBarActionState extends State<SnackBarAction> {
+  bool _haveTriggeredAction = false;
+
+  void _handlePressed() {
+    if (_haveTriggeredAction)
+      return;
+    setState(() {
+      _haveTriggeredAction = true;
+    });
+    config.onPressed();
+  }
 
   @override
   Widget build(BuildContext context) {
     return new Container(
       margin: const EdgeInsets.only(left: _kSideMargins),
       child: new FlatButton(
-        onPressed: onPressed,
+        onPressed: _haveTriggeredAction ? null : _handlePressed,
         textTheme: ButtonColor.accent,
-        child: new Text(label)
+        child: new Text(config.label)
       )
     );
   }
