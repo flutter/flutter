@@ -6,7 +6,6 @@ import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
 import 'overscroll_painter.dart';
-import 'scrollbar_painter.dart';
 import 'theme.dart';
 
 enum MaterialListType {
