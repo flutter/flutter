@@ -58,7 +58,7 @@ dependencies:
 
   _findSkyServicesLibraryNames().forEach((String libName) {
     args.add('--include-external');
-    args.add('${libName}');
+    args.add(libName);
   });
 
   process = await Process.start('pub', args, workingDirectory: 'dev/docs');
@@ -72,7 +72,6 @@ List<String> _findSkyServicesLibraryNames() {
   if (!skyServicesLocation.existsSync()) {
     throw 'Did not find sky_services package location in '
           '${skyServicesLocation.path}.';
-    return <String>[];
   }
   return skyServicesLocation.listSync(followLinks: false, recursive: true)
       .where((FileSystemEntity entity) {
