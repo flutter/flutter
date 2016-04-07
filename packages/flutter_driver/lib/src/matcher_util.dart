@@ -6,11 +6,12 @@ import 'package:matcher/matcher.dart';
 
 /// Matches [value] against the [matcher].
 MatchResult match(dynamic value, Matcher matcher) {
-  if (matcher.matches(value, {})) {
+  Map<dynamic, dynamic> matchState = {};
+  if (matcher.matches(value, matchState)) {
     return new MatchResult._matched();
   } else {
     Description description =
-        matcher.describeMismatch(value, new _TextDescription(), {}, false);
+        matcher.describeMismatch(value, new _TextDescription(), matchState, false);
     return new MatchResult._mismatched(description.toString());
   }
 }
