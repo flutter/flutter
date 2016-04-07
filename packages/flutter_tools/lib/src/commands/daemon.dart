@@ -412,6 +412,12 @@ class NotifyingLogger extends Logger {
   void printTrace(String message) {
     // This is a lot of traffic to send over the wire.
   }
+
+  @override
+  Status startProgress(String message) {
+    printStatus(message);
+    return new Status();
+  }
 }
 
 class LogMessage {

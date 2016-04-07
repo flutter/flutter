@@ -5,6 +5,7 @@
 import 'android/android_sdk.dart';
 import 'base/context.dart';
 import 'base/logger.dart';
+import 'cache.dart';
 import 'device.dart';
 import 'doctor.dart';
 
@@ -12,6 +13,7 @@ DeviceManager get deviceManager => context[DeviceManager];
 Logger get logger => context[Logger];
 AndroidSdk get androidSdk => context[AndroidSdk];
 Doctor get doctor => context[Doctor];
+Cache get cache => Cache.instance;
 
 /// Display an error level message to the user. Commands should use this if they
 /// fail in some way.

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:io';
 
 final _AnsiTerminal _terminal = new _AnsiTerminal();
@@ -21,26 +22,58 @@ abstract class Logger {
   /// to help diagnose issues with the toolchain or with their setup.
   void printTrace(String message);
 
+  /// Start an indeterminate progress display.
+  Status startProgress(String message);
+
   /// Flush any buffered output.
   void flush() { }
 }
 
+class Status {
+  void stop({ bool showElapsedTime: false }) { }
+  void cancel() { }
+}
+
 class StdoutLogger implements Logger {
+  Status _status;
+
   @override
   bool get isVerbose => false;
 
   @override
   void printError(String message, [StackTrace stackTrace]) {
+    _status?.cancel();
+    _status = null;
+
     stderr.writeln(message);
     if (stackTrace != null)
       stderr.writeln(stackTrace);
   }
 
   @override
-  void printStatus(String message) => print(message);
+  void printStatus(String message) {
+    _status?.cancel();
+    _status = null;
+
+    print(message);
+  }
 
   @override
   void printTrace(String message) { }
+
+  @override
+  Status startProgress(String message) {
+    _status?.cancel();
+    _status = null;
+
+    if (_terminal.supportsColor) {
+      _status = new _AnsiStatus(message);
+      return _status;
+    } else {
+      printStatus(message);
+      return new Status();
+    }
+  }
 
   @override
   void flush() { }
@@ -68,6 +101,12 @@ class BufferLogger implements Logger {
   void printTrace(String message) => _trace.writeln(message);
 
   @override
+  Status startProgress(String message) {
+    printStatus(message);
+    return new Status();
+  }
+
+  @override
   void flush() { }
 }
 
@@ -93,6 +132,12 @@ class VerboseLogger implements Logger {
   void printTrace(String message) {
     _emit();
     lastMessage = new _LogMessage(_LogType.trace, message);
+  }
+
+  @override
+  Status startProgress(String message) {
+    printStatus(message);
+    return new Status();
   }
 
   @override
@@ -156,4 +201,54 @@ class _AnsiTerminal {
   bool get supportsColor => _supportsColor;
 
   String writeBold(String str) => supportsColor ? '$_bold$str$_reset' : str;
+}
+
+class _AnsiStatus extends Status {
+  _AnsiStatus(this.message) {
+    stopwatch = new Stopwatch()..start();
+
+    stdout.write('${message.padRight(40)}     ');
+    stdout.write('${_progress[0]}');
+
+    timer = new Timer.periodic(new Duration(milliseconds: 100), _callback);
+  }
+
+  static final List<String> _progress = <String>['-', r'\', '|', r'/', '-', r'\', '|', '/'];
+
+  final String message;
+  Stopwatch stopwatch;
+  Timer timer;
+  int index = 1;
+  bool live = true;
+
+  void _callback(Timer timer) {
+    stdout.write('\b${_progress[index]}');
+    index = ++index % _progress.length;
+  }
+
+  @override
+  void stop({ bool showElapsedTime: false }) {
+    if (!live)
+      return;
+    live = false;
+
+    if (showElapsedTime) {
+      double seconds = stopwatch.elapsedMilliseconds / 1000.0;
+      print('\b\b\b\b${seconds.toStringAsFixed(1)}s');
+    } else {
+      print('\b');
+    }
+
+    timer.cancel();
+  }
+
+  @override
+  void cancel() {
+    if (!live)
+      return;
+    live = false;
+
+    print('\b');
+    timer.cancel();
+  }
 }
