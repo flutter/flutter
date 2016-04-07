@@ -125,6 +125,7 @@ class InputValue {
     composing.hashCode
   );
 
+  /// Creates a copy of this input value but with the given fields replaced with the new values.
   InputValue copyWith({
     String text,
     TextSelection selection,

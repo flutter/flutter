@@ -91,7 +91,7 @@ class BoxConstraints extends Constraints {
       minHeight = height != null ? height : double.INFINITY,
       maxHeight = height != null ? height : double.INFINITY;
 
-  /// Returns new box constraints that remove the minimum width and height requirements.
+  /// Creates a copy of this box constraints but with the given fields replaced with the new values.
   BoxConstraints copyWith({
     double minWidth,
     double maxWidth,

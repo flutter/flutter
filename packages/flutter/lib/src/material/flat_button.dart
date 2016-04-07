@@ -32,20 +32,21 @@ import 'theme.dart';
 ///
 ///  * [RaisedButton]
 ///  * [DropDownButton]
-///  * https://www.google.com/design/spec/components/buttons.html
+///  * <https://www.google.com/design/spec/components/buttons.html>
 class FlatButton extends MaterialButton {
   FlatButton({
     Key key,
     Widget child,
+    ThemeBrightness colorBrightness,
     ButtonColor textTheme,
     Color textColor,
     Color disabledTextColor,
     this.color,
-    this.colorBrightness,
     this.disabledColor,
     VoidCallback onPressed
   }) : super(key: key,
              child: child,
+             colorBrightness: colorBrightness,
              textTheme: textTheme,
              textColor: textColor,
              disabledTextColor: disabledTextColor,
@@ -60,9 +61,6 @@ class FlatButton extends MaterialButton {
   /// value.
   final Color disabledColor;
 
-  /// Controls the default text color if the text color isn't explicit set.
-  final ThemeBrightness colorBrightness;
-
   @override
   _FlatButtonState createState() => new _FlatButtonState();
 }
@@ -76,10 +74,5 @@ class _FlatButtonState extends MaterialButtonState<FlatButton> {
     if (!config.enabled)
       return config.disabledColor;
     return config.color;
-  }
-
-  @override
-  ThemeBrightness getColorBrightness(BuildContext context) {
-    return config.colorBrightness ?? Theme.of(context).brightness;
   }
 }

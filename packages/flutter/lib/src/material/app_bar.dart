@@ -12,6 +12,24 @@ import 'tabs.dart';
 import 'theme.dart';
 import 'typography.dart';
 
+/// A material design app bar.
+///
+/// An app bar consists of a tool bar and potentially other widgets, such as a
+/// [TabBar] and a [FlexibleSpaceBar]. App bars typically expose one or more
+/// common actions with [IconButtons]s which are optionally followed by a
+/// [PopupMenuButton] for less common operations.
+///
+/// App bars are most commonly used in a [Scaffold], which places the app bar at
+/// the top of the app.
+///
+/// See also:
+///
+///  * [Scaffold]
+///  * [TabBar]
+///  * [IconButton]
+///  * [PopupMenuButton]
+///  * [FlexibleSpaceBar]
+///  * <https://www.google.com/design/spec/layout/structure.html#structure-toolbars>
 class AppBar extends StatelessWidget {
   AppBar({
     Key key,
@@ -19,7 +37,6 @@ class AppBar extends StatelessWidget {
     this.title,
     this.actions,
     this.flexibleSpace,
-    this.foregroundOpacity: 1.0,
     this.tabBar,
     this.elevation: 4,
     this.backgroundColor,
@@ -38,28 +55,65 @@ class AppBar extends StatelessWidget {
     assert((tabBar != null) ? flexibleSpace == null : true);
   }
 
+  /// A widget to display before the [title].
+  ///
+  /// If this field is null and this app bar is used in a [Scaffold], the
+  /// [Scaffold] will fill this field with an appropriate widget. For example,
+  /// if the [Scaffold] also has a [Drawer], the [Scaffold] will fill this
+  /// widget with an [IconButton] that opens the drawer. If there's no [Drawer]
+  /// and the parent [Navigator] can go back, the [Scaffold] will fill this
+  /// field with an [IconButton] that calls [Navigator.pop].
   final Widget leading;
+
+  /// The primary widget displayed in the app bar.
+  ///
+  /// Typically a [Text] widget containing a description of the current contents
+  /// of the app.
   final Widget title;
+
+  /// Widgets to display after the title.
+  ///
+  /// Typically these widgets are [IconButton]s representing common operations.
+  /// For less common operations, consider using a [PopupMenuButton] as the
+  /// last action.
   final List<Widget> actions;
-  final WidgetBuilder flexibleSpace;
-  final double foregroundOpacity;
+
+  /// A widget to aid in building scroll-based collapsing app bar effects.
+  ///
+  /// Typically a [FlexibleSpaceBar]. See [FlexibleSpaceBar] for details.
+  final Widget flexibleSpace;
+
+  /// A horizontal strip of tabs to display at the bottom of the app bar.
   final TabBar<dynamic> tabBar;
+
+  /// The z-coordinate at which to place this app bar.
   final int elevation;
+
+  /// The color to use for the the app bar's material.
+  ///
+  /// Defaults to [ThemeData.primaryColor].
   final Color backgroundColor;
+
+  /// The typographic style to use for text in the app bar.
+  ///
+  /// Defaults to [ThemeData.primaryTextTheme].
   final TextTheme textTheme;
+
+  /// The amount of space to inset the contents of the app bar.
   final EdgeInsets padding;
+
   final double _expandedHeight;
   final double _collapsedHeight;
   final double _minimumHeight;
   final double _actualHeight;
 
+  /// Creates a copy of this app bar but with the given fields replaced with the new values.
   AppBar copyWith({
     Key key,
     Widget leading,
     Widget title,
     List<Widget> actions,
-    WidgetBuilder flexibleSpace,
-    double foregroundOpacity,
+    Widget flexibleSpace,
     int elevation,
     Color backgroundColor,
     TextTheme textTheme,
@@ -74,7 +128,6 @@ class AppBar extends StatelessWidget {
       title: title ?? this.title,
       actions: actions ?? this.actions,
       flexibleSpace: flexibleSpace ?? this.flexibleSpace,
-      foregroundOpacity: foregroundOpacity ?? this.foregroundOpacity,
       tabBar: tabBar ?? this.tabBar,
       elevation: elevation ?? this.elevation,
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -90,8 +143,10 @@ class AppBar extends StatelessWidget {
 
   double get _toolBarHeight => kToolBarHeight;
 
+  /// The height of this app bar when fully expanded.
   double get expandedHeight => _expandedHeight ?? (_toolBarHeight + (_tabBarHeight ?? 0.0));
 
+  /// The height of this app bar when fully collapsed.
   double get collapsedHeight => _collapsedHeight ?? (_toolBarHeight + (_tabBarHeight ?? 0.0));
 
   double get minimumHeight => _minimumHeight ?? _tabBarHeight ?? _toolBarHeight;
@@ -202,7 +257,7 @@ class AppBar extends StatelessWidget {
     if (flexibleSpace != null) {
       appBar = new Stack(
         children: <Widget>[
-          flexibleSpace(context),
+          flexibleSpace,
           new Align(child: appBar, alignment: FractionalOffset.topLeft)
         ]
       );

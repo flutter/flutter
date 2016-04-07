@@ -280,7 +280,7 @@ class DropDownButton<T> extends StatefulWidget {
   /// Called when the user selects an item.
   final ValueChanged<T> onChanged;
 
-  /// The height at which to place the menu when open.
+  /// The z-coordinate at which to place the menu when open.
   final int elevation;
 
   @override

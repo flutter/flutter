@@ -83,7 +83,7 @@ class GalleryHomeState extends State<GalleryHome> {
       ),
       appBar: new AppBar(
         expandedHeight: _kFlexibleSpaceMaxHeight,
-        flexibleSpace: (BuildContext context) =>  new FlexibleSpaceBar(
+        flexibleSpace: new FlexibleSpaceBar(
           image: new GalleryHeader(),
           title: new Text("Flutter gallery")
         )

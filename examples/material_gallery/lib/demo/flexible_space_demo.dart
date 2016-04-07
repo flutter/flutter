@@ -122,16 +122,14 @@ class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
               ]
             )
           ],
-          flexibleSpace: (BuildContext context) {
-            return new FlexibleSpaceBar(
-              title : new Text('Ali Connors'),
-              image: new AssetImage(
-                name: 'packages/flutter_gallery_assets/ali_connors.png',
-                fit: ImageFit.cover,
-                height: _appBarHeight
-              )
-            );
-          }
+          flexibleSpace: new FlexibleSpaceBar(
+            title : new Text('Ali Connors'),
+            image: new AssetImage(
+              name: 'packages/flutter_gallery_assets/ali_connors.png',
+              fit: ImageFit.cover,
+              height: _appBarHeight
+            )
+          )
         ),
         body: new Block(
           scrollableKey: _scrollableKey,

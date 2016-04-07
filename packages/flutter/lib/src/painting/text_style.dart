@@ -72,8 +72,7 @@ class TextStyle {
   /// The style in which to paint the text decorations (e.g., dashed).
   final TextDecorationStyle decorationStyle;
 
-  /// Returns a new text style that matches this text style but with the given
-  /// values replaced.
+  /// Creates a copy of this text style but with the given fields replaced with the new values.
   TextStyle copyWith({
     Color color,
     String fontFamily,
