@@ -6,6 +6,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:path/path.dart' as path;
+
+import '../dart/sdk.dart';
 import '../globals.dart';
 
 typedef String StringConverter(String string);
@@ -91,7 +94,7 @@ String runSync(List<String> cmd, { String workingDirectory }) {
 /// Return the platform specific name for the given Dart SDK binary. So, `pub`
 /// ==> `pub.bat`.
 String sdkBinaryName(String name) {
-  return Platform.isWindows ? '$name.bat' : name;
+  return path.absolute(path.join(dartSdkPath, 'bin', Platform.isWindows ? '$name.bat' : name));
 }
 
 bool exitsHappy(List<String> cli) {
