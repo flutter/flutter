@@ -32,6 +32,7 @@ minikin_src_files := \
     Measurement.cpp \
     MinikinInternal.cpp \
     MinikinRefCounted.cpp \
+    MinikinFont.cpp \
     MinikinFontFreeType.cpp \
     SparseBitSet.cpp \
     WordBreaker.cpp
