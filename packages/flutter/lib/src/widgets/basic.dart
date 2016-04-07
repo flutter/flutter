@@ -2616,12 +2616,22 @@ class MetaData extends SingleChildRenderObjectWidget {
   }
 }
 
+/// Always builds the given child.
+///
+/// Useful for attaching a key to an existing widget.
 class KeyedSubtree extends StatelessWidget {
+  /// Creates a widget that always builds the given child.
   KeyedSubtree({ Key key, this.child })
     : super(key: key);
 
   /// The widget below this widget in the tree.
   final Widget child;
+
+  /// Creates a KeyedSubtree for child with a key that's based on the child's existing key or childIndex.
+  factory KeyedSubtree.wrap(Widget child, int childIndex) {
+    Key key = child.key != null ? new ValueKey<Key>(child.key) : new ValueKey<int>(childIndex);
+    return new KeyedSubtree(key: key, child: child);
+  }
 
   /// Wrap each item in a KeyedSubtree whose key is based on the item's existing key or
   /// its list index + baseIndex.
@@ -2631,18 +2641,14 @@ class KeyedSubtree extends StatelessWidget {
 
     List<Widget> itemsWithUniqueKeys = <Widget>[];
     int itemIndex = baseIndex;
-    for(Widget item in items) {
-      itemsWithUniqueKeys.add(new KeyedSubtree(
-        key: item.key != null ? new ValueKey<Key>(item.key) : new ValueKey<int>(itemIndex),
-        child: item
-      ));
+    for (Widget item in items) {
+      itemsWithUniqueKeys.add(new KeyedSubtree.wrap(item, itemIndex));
       itemIndex += 1;
     }
 
     assert(!debugItemsHaveDuplicateKeys(itemsWithUniqueKeys));
     return itemsWithUniqueKeys;
   }
-
 
   @override
   Widget build(BuildContext context) => child;

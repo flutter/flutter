@@ -1158,6 +1158,9 @@ abstract class Element implements BuildContext {
     return renderObjectAncestor?.renderObject;
   }
 
+  /// Calls visitor for each ancestor element.
+  ///
+  /// Continues until visitor reaches the root or until visitor returns false.
   @override
   void visitAncestorElements(bool visitor(Element element)) {
     Element ancestor = _parent;
