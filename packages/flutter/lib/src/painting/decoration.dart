@@ -51,9 +51,9 @@ abstract class Decoration {
   /// otherwise it uses [begin]'s [lerpFrom] function.
   static Decoration lerp(Decoration begin, Decoration end, double t) {
     if (end != null)
-      return end.lerpTo(begin, t);
+      return end.lerpFrom(begin, t);
     if (begin != null)
-      return begin.lerpFrom(end, t);
+      return begin.lerpTo(end, t);
     return null;
   }
 
