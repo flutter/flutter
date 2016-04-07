@@ -10,10 +10,9 @@ import 'package:path/path.dart' as path;
 import 'artifacts.dart';
 import 'base/context.dart';
 import 'base/logger.dart';
+import 'base/os.dart';
 import 'base/process.dart';
 import 'globals.dart';
-
-// update_material_fonts
 
 class Cache {
   static Cache get instance => context[Cache] ?? (context[Cache] = new Cache());
@@ -21,13 +20,16 @@ class Cache {
   /// Return the top-level directory in the cache; this is `bin/cache`.
   Directory getRoot() => new Directory(path.join(ArtifactStore.flutterRoot, 'bin', 'cache'));
 
-  /// Return the top-level mutable directory in the cache; this is `bin/cache/artifacts`.
-  Directory getCacheArtifacts() {
-    Directory artifacts = new Directory(path.join(getRoot().path, 'artifacts'));
-    if (!artifacts.existsSync())
-      artifacts.createSync();
-    return artifacts;
+  /// Return a directory in the cache dir. For `pkg`, this will return `bin/cache/pkg`.
+  Directory getCacheDir(String name) {
+    Directory dir = new Directory(path.join(getRoot().path, name));
+    if (!dir.existsSync())
+      dir.createSync();
+    return dir;
   }
+
+  /// Return the top-level mutable directory in the cache; this is `bin/cache/artifacts`.
+  Directory getCacheArtifacts() => getCacheDir('artifacts');
 
   /// Get a named directory from with the cache's artifact directory; for example,
   /// `material_fonts` would return `bin/cache/artifacts/material_fonts`.
@@ -48,6 +50,16 @@ class Cache {
   void setStampFor(String kArtifactName, String version) {
     File stampFile = new File(path.join(getRoot().path, '$kArtifactName.stamp'));
     stampFile.writeAsStringSync(version);
+  }
+
+  Future<Null> updateAll() async {
+    MaterialFonts materialFonts = new MaterialFonts(cache);
+    if (!materialFonts.isUpToDate())
+      await materialFonts.download();
+
+    FlutterEngine engine = new FlutterEngine(cache);
+    if (!engine.isUpToDate())
+      await engine.download();
   }
 
   /// Download a file from the given URL and return the bytes.
@@ -114,6 +126,96 @@ class MaterialFonts {
       true
     ).then((_) {
       cache.setStampFor(kName, cache.getVersionFor(kName));
+      status.stop(showElapsedTime: true);
+    }).whenComplete(() {
+      status.cancel();
+    });
+  }
+}
+
+// TODO(devoncarew): Move the services download to here.
+// gs://flutter_infra/flutter/ed3014b3d337d025393bd894ffa2897e05d43e91/firebase/
+// gs://flutter_infra/flutter/ed3014b3d337d025393bd894ffa2897e05d43e91/gcm/
+
+class FlutterEngine {
+  FlutterEngine(this.cache);
+
+  static const String kName = 'engine';
+
+  final Cache cache;
+
+  List<String> _getEngineDirs() {
+    List<String> dirs = <String>['android-arm', 'android-x64'];
+
+    if (Platform.isMacOS)
+      dirs.addAll(<String>['ios', 'darwin-x64']);
+    else if (Platform.isLinux)
+      dirs.add('linux-x64');
+
+    return dirs;
+  }
+
+  List<String> _getPackageDirs() => <String>['sky_engine', 'sky_services'];
+
+  bool isUpToDate() {
+    Directory pkgDir = cache.getCacheDir('pkg');
+    for (String pkgName in _getPackageDirs()) {
+      Directory dir = new Directory(path.join(pkgDir.path, pkgName));
+      if (!dir.existsSync())
+        return false;
+    }
+
+    Directory engineDir = cache.getArtifactDirectory(kName);
+    for (String dirName in _getEngineDirs()) {
+      Directory dir = new Directory(path.join(engineDir.path, dirName));
+      if (!dir.existsSync())
+        return false;
+    }
+
+    return cache.getVersionFor(kName) == cache.getStampFor(kName);
+  }
+
+  Future<Null> download() async {
+    String engineVersion = cache.getVersionFor(kName);
+    String url = 'https://storage.googleapis.com/flutter_infra/flutter/$engineVersion/';
+
+    bool allDirty = engineVersion != cache.getStampFor(kName);
+
+    Directory pkgDir = cache.getCacheDir('pkg');
+    for (String pkgName in _getPackageDirs()) {
+      Directory dir = new Directory(path.join(pkgDir.path, pkgName));
+      if (!dir.existsSync() || allDirty) {
+        await _downloadItem('Downloading engine package $pkgName...',
+          url + pkgName + '.zip', pkgDir);
+      }
+    }
+
+    Directory engineDir = cache.getArtifactDirectory(kName);
+    for (String dirName in _getEngineDirs()) {
+      Directory dir = new Directory(path.join(engineDir.path, dirName));
+      if (!dir.existsSync() || allDirty) {
+        await _downloadItem('Downloading engine artifacts $dirName...',
+          url + dirName + '/artifacts.zip', dir);
+        _makeFilesExecutable(dir);
+      }
+    }
+
+    cache.setStampFor(kName, cache.getVersionFor(kName));
+  }
+
+  void _makeFilesExecutable(Directory dir) {
+    for (FileSystemEntity entity in dir.listSync()) {
+      if (entity is File) {
+        String name = path.basename(entity.path);
+        if (name == 'sky_snapshot' || name == 'sky_shell')
+          os.makeExecutable(entity);
+      }
+    }
+  }
+
+  Future<Null> _downloadItem(String message, String url, Directory dest) {
+    Status status = logger.startProgress(message);
+    return Cache._downloadFileToCache(Uri.parse(url), dest, true).then((_) {
       status.stop(showElapsedTime: true);
     }).whenComplete(() {
       status.cancel();

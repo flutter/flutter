@@ -40,7 +40,7 @@ class _PosixUtils extends OperatingSystemUtils {
 
   @override
   ProcessResult makeExecutable(File file) {
-    return Process.runSync('chmod', ['u+x', file.path]);
+    return Process.runSync('chmod', ['a+x', file.path]);
   }
 
   /// Return the path (with symlinks resolved) to the given executable, or `null`

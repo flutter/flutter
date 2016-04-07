@@ -54,6 +54,9 @@ class UpgradeCommand extends FlutterCommand {
     if (code != 0)
       return code;
 
+    // Check for and download any engine updates.
+    await cache.updateAll();
+
     if (FileSystemEntity.isFileSync('pubspec.yaml')) {
       printStatus('');
       code = await pubGet(upgrade: true, checkLastModified: false);
