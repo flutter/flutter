@@ -89,7 +89,8 @@ int main(int argc, const char* argv[]) {
   CHECK(args.size() == 1);
   LoadScript(args[0]);
 
-  CHECK(!LogIfError(Dart_FinalizeLoading(true)));
+  if (LogIfError(Dart_FinalizeLoading(true)))
+    return 1;
 
   CHECK(command_line.HasSwitch(switches::kSnapshot));
   WriteSnapshot(command_line.GetSwitchValuePath(switches::kSnapshot));
