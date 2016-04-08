@@ -86,6 +86,10 @@ class _Painter extends CustomPainter {
   }
 }
 
+/// When the child's Scrollable descendant overscrolls, displays a
+/// a translucent arc over the affected edge of the child.
+/// If the OverscrollIndicator's child has more than one Scrollable descendant
+/// the scrollableKey parameter can be used to identify the one to track.
 class OverscrollIndicator extends StatefulWidget {
   OverscrollIndicator({ Key key, this.scrollableKey, this.child }) : super(key: key) {
     assert(child != null);
@@ -99,7 +103,7 @@ class OverscrollIndicator extends StatefulWidget {
 }
 
 class _OverscrollIndicatorState extends State<OverscrollIndicator> {
-  final _extentAnimation = new AnimationController(
+  final AnimationController _extentAnimation = new AnimationController(
     lowerBound: _kMinIndicatorExtent,
     upperBound: _kMaxIndicatorExtent,
     duration: _kIndicatorHideDuration
