@@ -30,26 +30,18 @@ namespace android {
 
 static hb_blob_t* referenceTable(hb_face_t* /* face */, hb_tag_t tag, void* userData) {
     MinikinFont* font = reinterpret_cast<MinikinFont*>(userData);
-    size_t length = 0;
-    bool ok = font->GetTable(tag, NULL, &length);
-    if (!ok) {
-        return 0;
+    MinikinDestroyFunc destroy = 0;
+    size_t size = 0;
+    const void* buffer = font->GetTable(tag, &size, &destroy);
+    if (buffer == nullptr) {
+        return nullptr;
     }
-    char* buffer = reinterpret_cast<char*>(malloc(length));
-    if (!buffer) {
-        return 0;
-    }
-    ok = font->GetTable(tag, reinterpret_cast<uint8_t*>(buffer), &length);
 #ifdef VERBOSE_DEBUG
-    ALOGD("referenceTable %c%c%c%c length=%zd %d",
-        (tag >>24)&0xff, (tag>>16)&0xff, (tag>>8)&0xff, tag&0xff, length, ok);
+    ALOGD("referenceTable %c%c%c%c length=%zd",
+        (tag >>24)&0xff, (tag>>16)&0xff, (tag>>8)&0xff, tag&0xff, size);
 #endif
-    if (!ok) {
-        free(buffer);
-        return 0;
-    }
-    return hb_blob_create(const_cast<char*>(buffer), length,
-            HB_MEMORY_MODE_WRITABLE, buffer, free);
+    return hb_blob_create(reinterpret_cast<const char*>(buffer), size,
+            HB_MEMORY_MODE_READONLY, const_cast<void*>(buffer), destroy);
 }
 
 class HbFontCache : private OnEntryRemoved<int32_t, hb_font_t*> {
@@ -105,24 +97,37 @@ void purgeHbFont(const MinikinFont* minikinFont) {
     getFontCacheLocked()->remove(fontId);
 }
 
+// Returns a new reference to a hb_font_t object, caller is
+// responsible for calling hb_font_destroy() on it.
 hb_font_t* getHbFontLocked(MinikinFont* minikinFont) {
     assertMinikinLocked();
+    // TODO: get rid of nullFaceFont
     static hb_font_t* nullFaceFont = nullptr;
     if (minikinFont == nullptr) {
         if (nullFaceFont == nullptr) {
             nullFaceFont = hb_font_create(nullptr);
         }
-        return nullFaceFont;
+        return hb_font_reference(nullFaceFont);
     }
 
     HbFontCache* fontCache = getFontCacheLocked();
     const int32_t fontId = minikinFont->GetUniqueId();
     hb_font_t* font = fontCache->get(fontId);
     if (font != nullptr) {
-        return font;
+        return hb_font_reference(font);
     }
 
-    hb_face_t* face = hb_face_create_for_tables(referenceTable, minikinFont, nullptr);
+    hb_face_t* face;
+    const void* buf = minikinFont->GetFontData();
+    if (buf == nullptr) {
+        face = hb_face_create_for_tables(referenceTable, minikinFont, nullptr);
+    } else {
+        size_t size = minikinFont->GetFontSize();
+        hb_blob_t* blob = hb_blob_create(reinterpret_cast<const char*>(buf), size,
+            HB_MEMORY_MODE_READONLY, nullptr, nullptr);
+        face = hb_face_create(blob, minikinFont->GetFontIndex());
+        hb_blob_destroy(blob);
+    }
     hb_font_t* parent_font = hb_font_create(face);
     hb_ot_font_set_funcs(parent_font);
 
@@ -133,7 +138,7 @@ hb_font_t* getHbFontLocked(MinikinFont* minikinFont) {
     hb_font_destroy(parent_font);
     hb_face_destroy(face);
     fontCache->put(fontId, font);
-    return font;
+    return hb_font_reference(font);
 }
 
 }  // namespace android
