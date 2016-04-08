@@ -14,6 +14,7 @@ import 'base/os.dart';
 import 'base/process.dart';
 import 'globals.dart';
 
+/// A warpper around the `bin/cache/` directory.
 class Cache {
   static Cache get instance => context[Cache] ?? (context[Cache] = new Cache());
 
@@ -50,6 +51,29 @@ class Cache {
   void setStampFor(String kArtifactName, String version) {
     File stampFile = new File(path.join(getRoot().path, '$kArtifactName.stamp'));
     stampFile.writeAsStringSync(version);
+  }
+
+  Future<String> getThirdPartyFile(String urlStr, String serviceName, {
+    bool unzip: false
+  }) async {
+    Uri url = Uri.parse(urlStr);
+    Directory thirdPartyDir = getArtifactDirectory('third_party');
+
+    Directory serviceDir = new Directory(path.join(thirdPartyDir.path, serviceName));
+    if (!serviceDir.existsSync())
+      serviceDir.createSync(recursive: true);
+
+    File cachedFile = new File(path.join(serviceDir.path, url.pathSegments.last));
+    if (!cachedFile.existsSync()) {
+      try {
+        await _downloadFileToCache(url, cachedFile, unzip);
+      } catch (e) {
+        printError('Failed to fetch third-party artifact $url: $e');
+        throw e;
+      }
+    }
+
+    return cachedFile.path;
   }
 
   Future<Null> updateAll() async {
@@ -132,10 +156,6 @@ class MaterialFonts {
     });
   }
 }
-
-// TODO(devoncarew): Move the services download to here.
-// gs://flutter_infra/flutter/ed3014b3d337d025393bd894ffa2897e05d43e91/firebase/
-// gs://flutter_infra/flutter/ed3014b3d337d025393bd894ffa2897e05d43e91/gcm/
 
 class FlutterEngine {
   FlutterEngine(this.cache);
