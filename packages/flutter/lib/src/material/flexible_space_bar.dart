@@ -22,12 +22,27 @@ class FlexibleSpaceBar extends StatefulWidget {
 }
 
 class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
+  Animation<double> _scaffoldAnimation;
+
+  void _handleTick() {
+    setState(() {
+      // The animation's state is our build state, and it changed already.
+    });
+  }
+
+  @override
+  void deactivate() {
+    _scaffoldAnimation?.removeListener(_handleTick);
+    _scaffoldAnimation = null;
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasScaffold(context));
     final double statusBarHeight = MediaQuery.of(context).padding.top;
-    final Animation<double> animation = Scaffold.of(context).appBarAnimation;
-    final double appBarHeight = Scaffold.of(context).appBarHeight + statusBarHeight;
+    final ScaffoldState scaffold = Scaffold.of(context);
+    _scaffoldAnimation ??= scaffold.appBarAnimation..addListener(_handleTick);
+    final double appBarHeight = scaffold.appBarHeight + statusBarHeight;
     final double toolBarHeight = kToolBarHeight + statusBarHeight;
     final List<Widget> children = <Widget>[];
 
@@ -36,10 +51,10 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
       final double fadeStart = (appBarHeight - toolBarHeight * 2.0) / appBarHeight;
       final double fadeEnd = (appBarHeight - toolBarHeight) / appBarHeight;
       final CurvedAnimation opacityCurve = new CurvedAnimation(
-        parent: animation,
+        parent: _scaffoldAnimation,
         curve: new Interval(math.max(0.0, fadeStart), math.min(fadeEnd, 1.0))
       );
-      final double parallax = new Tween<double>(begin: 0.0, end: appBarHeight / 4.0).evaluate(animation);
+      final double parallax = new Tween<double>(begin: 0.0, end: appBarHeight / 4.0).evaluate(_scaffoldAnimation);
       children.add(new Positioned(
         top: -parallax,
         left: 0.0,
@@ -59,7 +74,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
       final double fadeStart = (appBarHeight - toolBarHeight) / appBarHeight;
       final double fadeEnd = (appBarHeight - toolBarHeight / 2.0) / appBarHeight;
       final CurvedAnimation opacityCurve = new CurvedAnimation(
-        parent: animation,
+        parent: _scaffoldAnimation,
         curve: new Interval(fadeStart, fadeEnd)
       );
       TextStyle titleStyle = Theme.of(context).primaryTextTheme.title;
@@ -70,7 +85,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
       final double yAlignEnd = (statusBarHeight + kToolBarHeight / 2.0) / toolBarHeight;
       final double scaleAndAlignEnd = (appBarHeight - toolBarHeight) / appBarHeight;
       final CurvedAnimation scaleAndAlignCurve = new CurvedAnimation(
-        parent: animation,
+        parent: _scaffoldAnimation,
         curve: new Interval(0.0, scaleAndAlignEnd)
       );
       children.add(new Padding(
