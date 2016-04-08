@@ -18,7 +18,7 @@ bool _shouldRunPubGet({ File pubSpecYaml, File dotPackages }) {
   DateTime dotPackagesLastModified = dotPackages.lastModifiedSync();
   if (pubSpecYaml.lastModifiedSync().isAfter(dotPackagesLastModified))
     return true;
-  File flutterToolsStamp = new File(path.join(Cache.instance.getRoot().path, 'flutter_tools.stamp'));
+  File flutterToolsStamp = Cache.instance.getStampFileFor('flutter_tools');
   if (flutterToolsStamp.lastModifiedSync().isAfter(dotPackagesLastModified))
     return true;
   return false;

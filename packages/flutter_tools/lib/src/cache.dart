@@ -38,19 +38,29 @@ class Cache {
     return new Directory(path.join(getCacheArtifacts().path, name));
   }
 
-  String getVersionFor(String kArtifactName) {
-    File versionFile = new File(path.join(getRoot().path, '$kArtifactName.version'));
+  String getVersionFor(String artifactName) {
+    File versionFile = new File(path.join(getRoot().path, '$artifactName.version'));
     return versionFile.existsSync() ? versionFile.readAsStringSync().trim() : null;
   }
 
-  String getStampFor(String kArtifactName) {
-    File stampFile = new File(path.join(getRoot().path, '$kArtifactName.stamp'));
+  String getStampFor(String artifactName) {
+    File stampFile = getStampFileFor(artifactName);
     return stampFile.existsSync() ? stampFile.readAsStringSync().trim() : null;
   }
 
-  void setStampFor(String kArtifactName, String version) {
-    File stampFile = new File(path.join(getRoot().path, '$kArtifactName.stamp'));
-    stampFile.writeAsStringSync(version);
+  void setStampFor(String artifactName, String version) {
+    getStampFileFor(artifactName).writeAsStringSync(version);
+  }
+
+  File getStampFileFor(String artifactName) {
+    return new File(path.join(getRoot().path, '$artifactName.stamp'));
+  }
+
+  bool isUpToDate() {
+    MaterialFonts materialFonts = new MaterialFonts(cache);
+    FlutterEngine engine = new FlutterEngine(cache);
+
+    return materialFonts.isUpToDate() && engine.isUpToDate();
   }
 
   Future<String> getThirdPartyFile(String urlStr, String serviceName, {
