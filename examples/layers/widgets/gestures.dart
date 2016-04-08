@@ -56,12 +56,7 @@ class _GesturePainter extends CustomPainter {
   }
 }
 
-class GestureDemo extends StatefulWidget {
-  @override
-  _GestureDemoState createState() => new _GestureDemoState();
-}
-
-class _GestureDemoState extends State<GestureDemo> {
+class _GestureDemoState extends State<StatefulWidget> {
 
   Point _startingFocalPoint;
 
@@ -223,7 +218,7 @@ void main() {
         return new Scaffold(
           appBar: new AppBar(
               title: new Text('Gestures Demo')),
-          body: new GestureDemo()
+          body: new SimpleStatefulWidget(() => new _GestureDemoState())
         );
       }
     }

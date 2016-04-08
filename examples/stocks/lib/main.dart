@@ -23,12 +23,7 @@ import 'stock_strings.dart';
 import 'stock_symbol_viewer.dart';
 import 'stock_types.dart';
 
-class StocksApp extends StatefulWidget {
-  @override
-  StocksAppState createState() => new StocksAppState();
-}
-
-class StocksAppState extends State<StocksApp> {
+class StocksAppState extends State<StatefulWidget> {
 
   final Map<String, Stock> _stocks = <String, Stock>{};
   final List<String> _symbols = <String>[];
@@ -128,5 +123,5 @@ class StocksAppState extends State<StocksApp> {
 }
 
 void main() {
-  runApp(new StocksApp());
+  runApp(new SimpleStatefulWidget(() => new StocksAppState()));
 }

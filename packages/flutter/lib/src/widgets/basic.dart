@@ -2670,3 +2670,29 @@ class _StatefulBuilderState extends State<StatefulBuilder> {
   @override
   Widget build(BuildContext context) => config.builder(context, setState);
 }
+
+/// A callback capable of creating a custom [State] subclass.
+///
+/// See [SimpleStatefulWidget] for more information.
+typedef State StateCreator();
+
+/// A widget allowing easy creation of state that requires no configuration.
+///
+/// The most flexible way to add statefulness to a widget hierarchy is to
+/// use a custom subclass of [StatefulWidget], in order to create a custom
+/// subclass of [State]. If the [State] subclass doesn't require any additional
+/// configuration, then the [StatefulWidget] subclass becomes simple boilerplate
+/// around [StatefulWidget.createState]. In such cases, this class can be used
+/// instead of the boilerplate, simplifying the client code.
+///
+/// For example:
+/// ```dart
+///     void build(BuildContext context) =>
+///       new SimpleStatefulWidget(() => new MyState());
+/// ```
+class SimpleStatefulWidget extends StatefulWidget {
+  SimpleStatefulWidget(this.creator);
+  final StateCreator creator;
+  @override
+  State<StatefulWidget> createState() => creator();
+}
