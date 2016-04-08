@@ -8,7 +8,6 @@ import 'dart:ui' as ui show window;
 
 import 'package:newton/newton.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart' show HasMainAxis;
 
 import 'basic.dart';
 import 'framework.dart';
