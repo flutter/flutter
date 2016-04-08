@@ -30,7 +30,7 @@ public:
     float GetHorizontalAdvance(uint32_t glyph_id, const android::MinikinPaint &paint) const;
     void GetBounds(android::MinikinRect* bounds, uint32_t glyph_id,
             const android::MinikinPaint& paint) const;
-    bool GetTable(uint32_t tag, uint8_t *buf, size_t *size);
+    const void* GetTable(uint32_t tag, size_t* size, android::MinikinDestroyFunc* destroy);
     int32_t GetUniqueId() const;
 
     const std::string& fontPath() const { return mFontPath; }
