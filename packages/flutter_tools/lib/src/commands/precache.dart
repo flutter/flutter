@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 
-import '../cache.dart';
 import '../globals.dart';
 
 class PrecacheCommand extends Command {
@@ -18,10 +17,10 @@ class PrecacheCommand extends Command {
 
   @override
   Future<int> run() async {
-    if (Cache.instance.isUpToDate())
+    if (cache.isUpToDate())
       printStatus('All up-to-date.');
     else
-      await Cache.instance.updateAll();
+      await cache.updateAll();
 
     return 0;
   }
