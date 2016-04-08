@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
-import 'package:archive/archive.dart';
 import 'package:path/path.dart' as path;
 
 import 'base/process.dart';
@@ -179,85 +177,20 @@ class ArtifactStore {
     return _engineRevision;
   }
 
-  static Directory getBaseCacheDir() {
-    if (flutterRoot == null) {
-      printError('FLUTTER_ROOT not specified. Cannot find artifact cache.');
-      throw new ProcessExit(2);
-    }
-    Directory cacheDir = new Directory(path.join(flutterRoot, 'bin', 'cache', 'artifacts'));
-    if (!cacheDir.existsSync()) {
-      printError('${cacheDir.path} does not exist. Cannot find artifact cache.');
-      throw new ProcessExit(2);
-    }
-    return cacheDir;
+  static Directory _getBaseCacheDir() {
+    return new Directory(path.join(flutterRoot, 'bin', 'cache', 'artifacts'));
   }
 
+  // TODO(devoncarew): There are 5 call-sites of this (run_mojo, build_apk, the
+  // test command, toolchain, setup_xcodeproj); move them over to using
+  // something from `cache.dart`.
   static String getPath(Artifact artifact) {
-    File cachedFile = new File(path.join(
-        getBaseCacheDir().path, 'engine', artifact.platform, artifact.fileName
-    ));
+    File cachedFile = new File(
+      path.join(_getBaseCacheDir().path, 'engine', artifact.platform, artifact.fileName)
+    );
     if (!cachedFile.existsSync()) {
       printError('File not found in the platform artifacts: ${cachedFile.path}');
       throw new ProcessExit(2);
-    }
-    return cachedFile.path;
-  }
-
-  /// Download a file from the given URL and return the bytes.
-  static Future<List<int>> _downloadFile(Uri url) async {
-    printStatus('Downloading $url.');
-
-    HttpClient httpClient = new HttpClient();
-    HttpClientRequest request = await httpClient.getUrl(url);
-    HttpClientResponse response = await request.close();
-    printTrace('Received response statusCode=${response.statusCode}');
-    if (response.statusCode != 200)
-      throw new Exception(response.reasonPhrase);
-
-    BytesBuilder responseBody = new BytesBuilder(copy: false);
-    await for (List<int> chunk in response)
-      responseBody.add(chunk);
-
-    return responseBody.takeBytes();
-  }
-
-  /// Download a file from the given url and write it to the cache.
-  /// If [unzip] is true, treat the url as a zip file, and unzip it to the
-  /// directory given.
-  static Future<Null> _downloadFileToCache(Uri url, FileSystemEntity cachedFile, bool unzip) async {
-    if (!cachedFile.parent.existsSync())
-      cachedFile.parent.createSync(recursive: true);
-
-    List<int> fileBytes = await _downloadFile(url);
-    if (unzip) {
-      if (cachedFile is Directory && !cachedFile.existsSync())
-        cachedFile.createSync(recursive: true);
-
-      Archive archive = new ZipDecoder().decodeBytes(fileBytes);
-      for (ArchiveFile archiveFile in archive) {
-        File subFile = new File(path.join(cachedFile.path, archiveFile.name));
-        subFile.writeAsBytesSync(archiveFile.content, flush: true);
-      }
-    } else {
-      File asFile = new File(cachedFile.path);
-      asFile.writeAsBytesSync(fileBytes, flush: true);
-    }
-  }
-
-  static Future<String> getThirdPartyFile(String urlStr, String cacheSubdir, bool unzip) async {
-    Uri url = Uri.parse(urlStr);
-    Directory baseDir = getBaseCacheDir();
-    Directory cacheDir = new Directory(path.join(
-        baseDir.path, 'third_party', cacheSubdir));
-    File cachedFile = new File(
-        path.join(cacheDir.path, url.pathSegments[url.pathSegments.length-1]));
-    if (!cachedFile.existsSync()) {
-      try {
-        await _downloadFileToCache(url, cachedFile, unzip);
-      } catch (e) {
-        printError('Failed to fetch third-party artifact: $url: $e');
-        throw new ProcessExit(2);
-      }
     }
     return cachedFile.path;
   }

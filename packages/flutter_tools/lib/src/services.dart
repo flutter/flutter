@@ -9,7 +9,6 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
-import 'artifacts.dart';
 import 'globals.dart';
 import 'package_map.dart';
 
@@ -75,7 +74,7 @@ Future<String> getServiceFromUrl(
     return url.replaceAll('android-sdk:', '${androidSdk.directory}/');
   } else if (url.startsWith("http")) {
     // It's a regular file to download.
-    return await ArtifactStore.getThirdPartyFile(url, serviceName, unzip);
+    return await cache.getThirdPartyFile(url, serviceName, unzip: unzip);
   } else {
     // Assume url is a path relative to the service's root dir.
     return path.join(rootDir, url);
