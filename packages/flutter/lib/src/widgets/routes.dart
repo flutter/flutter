@@ -285,7 +285,7 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
 
   /// Adds a local history entry to this route.
   ///
-  /// When asked to pop, if this route has any local history entires, this route
+  /// When asked to pop, if this route has any local history entries, this route
   /// will handle the pop internally by removing the most recently added local
   /// history entry.
   ///
