@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 import 'rendering_tester.dart';
 
 void main() {
-  test('Should be able to hit with negative scroll offset', () {
+  test('Should be able to hit with positive paint offset', () {
     RenderBox green = new RenderDecoratedBox(
       decoration: new BoxDecoration(
         backgroundColor: const Color(0xFF00FF00)
