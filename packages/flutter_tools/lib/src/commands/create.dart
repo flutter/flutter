@@ -11,6 +11,7 @@ import 'package:path/path.dart' as path;
 import '../android/android.dart' as android;
 import '../artifacts.dart';
 import '../base/utils.dart';
+import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart';
 import '../template.dart';
@@ -65,6 +66,8 @@ class CreateCommand extends Command {
       printError('variable was specified. Unable to find package:flutter.');
       return 2;
     }
+
+    await Cache.instance.updateAll();
 
     String flutterRoot = path.absolute(ArtifactStore.flutterRoot);
 
