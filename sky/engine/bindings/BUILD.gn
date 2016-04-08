@@ -109,7 +109,7 @@ action("generate_snapshot_bin") {
   dart_jni_path = rebase_path("//sky/engine/bindings/jni/jni.dart")
 
   gen_snapshot_dir =
-      get_label_info("//dart/runtime/bin:gen_snapshot($host_toolchain)",
+      get_label_info("//dart/runtime/bin:gen_snapshot($dart_host_toolchain)",
                      "root_out_dir")
   script = "//dart/runtime/tools/create_snapshot_bin.py"
 
