@@ -570,7 +570,7 @@ class _AdbLogReader extends DeviceLogReader {
     if (lastTimestamp != null)
       args.addAll(<String>['-T', lastTimestamp]);
     args.addAll(<String>[
-      '-s', 'flutter:V', 'SkyMain:V', 'AndroidRuntime:W', 'ActivityManager:W', 'System.err:W', '*:F'
+      '-s', 'flutter:V', 'FlutterMain:V', 'FlutterView:V', 'AndroidRuntime:W', 'ActivityManager:W', 'System.err:W', '*:F'
     ]);
     _process = await runCommand(device.adbCommandForDevice(args));
     _stdoutSubscription =
