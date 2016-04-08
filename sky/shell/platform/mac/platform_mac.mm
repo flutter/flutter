@@ -89,10 +89,7 @@ class EmbedderState {
   }
 
   ~EmbedderState() {
-    CHECK([NSThread isMainThread])
-        << "Embedder destruction must occur on the main platform thread";
 #if !TARGET_OS_IPHONE
-    embedder_message_loop_->QuitNow();
     embedder_message_loop_.release();
 #endif
   }
