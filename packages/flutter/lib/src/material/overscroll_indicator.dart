@@ -122,9 +122,9 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
   }
 
   void _updateState(ScrollableState scrollable) {
-    final ExtentScrollBehavior scrollBehavior = scrollable.scrollBehavior;
-    if (scrollBehavior is! ExtentScrollBehavior)
+    if (scrollable.scrollBehavior is! ExtentScrollBehavior)
       return;
+    final ExtentScrollBehavior scrollBehavior = scrollable.scrollBehavior;
     _scrollDirection = scrollable.config.scrollDirection;
     _scrollOffset = scrollable.scrollOffset;
     _minScrollOffset = scrollBehavior.minScrollOffset;
