@@ -218,7 +218,7 @@ final Set<String> _packageDependencies = new Set<String>.from(<String>[
 String _validateProjectName(String projectName) {
   if (_packageDependencies.contains(projectName)) {
     return "Invalid project name: '$projectName' - this will conflict with Flutter "
-    "package dependencies.";
+      "package dependencies.";
   }
   return null;
 }
@@ -233,7 +233,7 @@ String _validateProjectDir(String projectName) {
         // Do not re-use directory if it is not empty.
         if (new Directory(projectName).listSync(followLinks: false).isNotEmpty) {
           return "Invalid project name: '$projectName' - refers to a directory "
-          "that is not empty.";
+            "that is not empty.";
         };
         break;
       case FileSystemEntityType.FILE:
