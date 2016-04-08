@@ -9,6 +9,7 @@
     line-height: 1.5;
     color: #111;
     background-color: #fdfdfd;
+    font-weight: 300;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -18,11 +19,25 @@
   h1 {
     font-size: 42px !important;
     letter-spacing: -1px;
-    line-height: 1.1;
+  }
+
+  header h1 {
+    font-weight: 300;
   }
 
   h2 {
+    color: #111;
+    font-size: 26px;
+  }
+
+  .markdown h2 {
+    font-size: 24px;
+  }
+
+  section.summary h2 {
     font-size: 32px;
+    color: inherit;
+    border-bottom: none;
   }
 
   .sidebar ol,
@@ -30,8 +45,59 @@
     font-size: inherit;
   }
 
+  .sidebar-offcanvas-left ol {
+    padding: 0 16px 16px 0;
+  }
+
+  .sidebar h5 {
+    padding-top: 0 !important;
+    text-transform: uppercase;
+  }
+
+  .sidebar-offcanvas-left {
+    background-color: inherit;
+  }
+
+  .sidebar-offcanvas-left h5 {
+    border-bottom: none;
+    padding: 0 0 16px 0;
+  }
+
+  .sidebar-offcanvas-left h5:last-of-type {
+    padding: 0 0 16px 0;
+  }
+
+  pre,
+  pre.prettyprint,
   pre > code {
-    font-size: 14px;
+    font-size: 15px;
+  }
+
+  pre,
+  pre.prettyprint {
+    background: inherit;
+    border: none;
+    margin: 0 0 15px 0;
+    padding: 8px 12px;
+  }
+
+  code {
+    background-color: inherit;
+  }
+
+  dl.dl-horizontal dt {
+    color: inherit;
+  }
+
+  footer {
+    border-top: 1px solid #e8e8e8;
+    height: inherit;
+    padding-bottom: 15px;
+    text-transform: lowercase;
+  }
+
+  footer p {
+    color: #828282;
   }
 </style>
 

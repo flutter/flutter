@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'icon.dart';
+import 'icon_button.dart';
+
 class IconData {
   const IconData(this.codePoint);
   final int codePoint;
@@ -29,7 +32,7 @@ class IconData {
 ///
 ///  * [Icon]
 ///  * [IconButton]
-///  * <https://design.google.com/icons/>
+///  * [design.google.com/icons](https://design.google.com/icons/)
 class Icons {
   Icons._();
 

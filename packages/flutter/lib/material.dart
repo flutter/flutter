@@ -4,7 +4,9 @@
 
 /// Flutter widgets implementing Material Design.
 ///
-/// See https://www.google.com/design/spec/material-design/introduction.html
+/// See
+/// [www.google.com/design/spec/material-design](https://www.google.com/design/spec/material-design/introduction.html)
+/// for an introduction to Material Design.
 library material;
 
 export 'src/material/app.dart';
