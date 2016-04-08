@@ -6,24 +6,24 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
-const double _kMinScrollbarThumbLength = 18.0;
+const double _kMinScrollbarThumbExtent = 18.0;
 const double _kScrollbarThumbGirth = 6.0;
 const Duration _kScrollbarThumbFadeDuration = const Duration(milliseconds: 300);
 
-class _ScrollbarPainter extends CustomPainter {
-  _ScrollbarPainter({
+class _Painter extends CustomPainter {
+  _Painter({
     this.scrollOffset,
     this.scrollDirection,
     this.contentExtent,
     this.containerExtent,
-    this.thumbColor
+    this.color
   });
 
   final double scrollOffset;
   final Axis scrollDirection;
   final double contentExtent;
   final double containerExtent;
-  final Color thumbColor;
+  final Color color;
 
   void paintScrollbar(Canvas canvas, Size size) {
     Point thumbOrigin;
@@ -32,7 +32,7 @@ class _ScrollbarPainter extends CustomPainter {
     switch (scrollDirection) {
       case Axis.vertical:
         double thumbHeight = size.height * containerExtent / contentExtent;
-        thumbHeight = thumbHeight.clamp(_kMinScrollbarThumbLength, size.height);
+        thumbHeight = thumbHeight.clamp(_kMinScrollbarThumbExtent, size.height);
         final double maxThumbTop = size.height - thumbHeight;
         double thumbTop = (scrollOffset / (contentExtent - containerExtent)) * maxThumbTop;
         thumbTop = thumbTop.clamp(0.0, maxThumbTop);
@@ -41,7 +41,7 @@ class _ScrollbarPainter extends CustomPainter {
         break;
       case Axis.horizontal:
         double thumbWidth = size.width * containerExtent / contentExtent;
-        thumbWidth = thumbWidth.clamp(_kMinScrollbarThumbLength, size.width);
+        thumbWidth = thumbWidth.clamp(_kMinScrollbarThumbExtent, size.width);
         final double maxThumbLeft = size.width - thumbWidth;
         double thumbLeft = (scrollOffset / (contentExtent - containerExtent)) * maxThumbLeft;
         thumbLeft = thumbLeft.clamp(0.0, maxThumbLeft);
@@ -50,24 +50,24 @@ class _ScrollbarPainter extends CustomPainter {
         break;
     }
 
-    final Paint paint = new Paint()..color = thumbColor;
+    final Paint paint = new Paint()..color = color;
     canvas.drawRect(thumbOrigin & thumbSize, paint);
   }
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (scrollOffset == null || thumbColor.alpha == 0)
+    if (scrollOffset == null || color.alpha == 0)
       return;
     paintScrollbar(canvas, size);
   }
 
   @override
-  bool shouldRepaint(_ScrollbarPainter oldPainter) {
+  bool shouldRepaint(_Painter oldPainter) {
     return oldPainter.scrollOffset != scrollOffset
       || oldPainter.scrollDirection != scrollDirection
       || oldPainter.contentExtent != contentExtent
       || oldPainter.containerExtent != containerExtent
-      || oldPainter.thumbColor != thumbColor;
+      || oldPainter.color != color;
   }
 }
 
@@ -102,6 +102,8 @@ class _ScrollbarState extends State<Scrollbar> {
   }
 
   void _updateState(ScrollableState scrollable) {
+    if (scrollable.scrollBehavior is! ExtentScrollBehavior)
+      return;
     final ExtentScrollBehavior scrollBehavior = scrollable.scrollBehavior;
     _scrollOffset = scrollable.scrollOffset;
     _scrollDirection = scrollable.config.scrollDirection;
@@ -151,12 +153,12 @@ class _ScrollbarState extends State<Scrollbar> {
         animation: _opacity,
         builder: (BuildContext context, Widget child) {
           return new CustomPaint(
-            foregroundPainter: new _ScrollbarPainter(
+            foregroundPainter: new _Painter(
               scrollOffset: _scrollOffset,
               scrollDirection: _scrollDirection,
               containerExtent: _containerExtent,
               contentExtent: _contentExtent,
-              thumbColor: Theme.of(context).highlightColor.withOpacity(_opacity.value)
+              color: Theme.of(context).highlightColor.withOpacity(_opacity.value)
             ),
             child: child
           );
