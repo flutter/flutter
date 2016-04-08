@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'box.dart';
 import 'object.dart';
-import 'viewport.dart';
 
 /// Parent data for use with [RenderBlockBase].
 class BlockParentData extends ContainerBoxParentDataMixin<RenderBox> { }
@@ -25,8 +24,7 @@ typedef double _Constrainer(double value);
 /// viewport with a scrolling direction that matches the block's main axis.
 class RenderBlock extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, BlockParentData>,
-         RenderBoxContainerDefaultsMixin<RenderBox, BlockParentData>
-    implements HasMainAxis {
+         RenderBoxContainerDefaultsMixin<RenderBox, BlockParentData> {
 
   RenderBlock({
     List<RenderBox> children,
@@ -42,7 +40,6 @@ class RenderBlock extends RenderBox
   }
 
   /// The direction to use as the main axis.
-  @override
   Axis get mainAxis => _mainAxis;
   Axis _mainAxis;
   void set mainAxis (Axis value) {
