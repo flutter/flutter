@@ -5,14 +5,51 @@
 import 'basic.dart';
 import 'framework.dart';
 
-/// A place in the overlay that can contain a widget.
+/// A place in an [Overlay] that can contain a widget.
+///
+/// Overlay entries are inserted into an [Overlay] using the
+/// [OverlayState.insert] or [OverlayState.insertAll] functions. To find the
+/// closest enclosing overlay for a given [BuildContext], use the [Overlay.of]
+/// function.
+///
+/// An overlay entry can be in at most one overlay at a time. To remove an entry
+/// from its overlay, call the [remove] function on the overlay entry.
+///
+/// Because an [Overlay] uses a [Stack] layout, overlay entries can use
+/// [Positioned] and [AnimatedPositioned] to position themselves within the
+/// overlay.
+///
+/// For example, [Draggable] uses an [OverlayEntry] to show the drag avatar that
+/// follows the user's finger across the screen after the drag begins. Using the
+/// overlay to display the drag avatar lets the avatar float over the other
+/// widgets in the app. As the user's finger moves, draggable calls
+/// [markNeedsBuild] on the overlay entry to cause it to rebuild. It its build,
+/// the entry includes a [Positioned] with its top and left property set to
+/// position the drag avatar near the user's finger. When the drag is over,
+/// [Draggable] removes the entry from the overlay to remove the drag avatar
+/// from view.
+///
+/// See also:
+///
+///  * [Overlay]
+///  * [OverlayState]
+///  * [WidgetsApp]
+///  * [MaterialApp]
 class OverlayEntry {
+  /// Creates an overlay entry.
+  ///
+  /// To insert the entry into an [Overlay], first find the overlay using
+  /// [Overlay.of] and then call [OverlayState.insert]. To remove the entry,
+  /// call [remove] on the overlay entry itself.
   OverlayEntry({
     this.builder,
     bool opaque: false
   }) : _opaque = opaque;
 
   /// This entry will include the widget built by this builder in the overlay at the entry's position.
+  ///
+  /// To cause this builder to be invoked again, call [markNeedsBuild] on this
+  /// overlay entry.
   final WidgetBuilder builder;
 
   /// Whether this entry occludes the entire overlay.
@@ -65,7 +102,31 @@ class _OverlayEntryState extends State<_OverlayEntry> {
 }
 
 /// A [Stack] of entries that can be managed independently.
+///
+/// Overlays let independent child widgets "float" visual elements on top of
+/// other widgets by inserting them into the overlay's [Stack]. The overlay lets
+/// each of these widgets manage their participation in the overlay using
+/// [OverlayEntry] objects.
+///
+/// Although you can create an [Overlay] directly, it's most common to use the
+/// overlay created by the [Navigator] in a [WidgetsApp] or a [MaterialApp]. The
+/// navigator uses its overlay to manage the visual appearance of its routes.
+///
+/// See also:
+///
+///  * [OverlayEntry]
+///  * [OverlayState]
+///  * [WidgetsApp]
+///  * [MaterialApp]
 class Overlay extends StatefulWidget {
+  /// Creates an overlay.
+  ///
+  /// The initial entries will be inserted into the overlay when its associated
+  /// [OverlayState] is initialized.
+  ///
+  /// Rather than creating an overlay, consider using the overlay that has
+  /// already been created by the [WidgetsApp] or the [MaterialApp] for this
+  /// application.
   Overlay({
     Key key,
     this.initialEntries: const <OverlayEntry>[]
@@ -109,6 +170,9 @@ class Overlay extends StatefulWidget {
 }
 
 /// The current state of an [Overlay].
+///
+/// Used to insert [OverlayEntry]s into the overlay using the [insert] and
+/// [insertAll] functions.
 class OverlayState extends State<Overlay> {
   final List<OverlayEntry> _entries = new List<OverlayEntry>();
 
