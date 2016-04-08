@@ -65,8 +65,9 @@ static void vprintf_stderr_common(const char* format, va_list args)
 {
 #if OS(ANDROID)
     __android_log_vprint(ANDROID_LOG_WARN, "flutter", format, args);
-#endif
+#else
     vfprintf(stderr, format, args);
+#endif
 }
 
 #if COMPILER(CLANG) || COMPILER(GCC)
