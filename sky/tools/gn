@@ -27,6 +27,9 @@ def get_out_dir(args):
     else:
         target_dir += 'Release'
 
+    if args.ios_force_armv7:
+        target_dir += '_armv7'
+
     return os.path.join('out', target_dir)
 
 def to_command_line(gn_args):
