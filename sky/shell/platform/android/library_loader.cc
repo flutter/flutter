@@ -13,7 +13,7 @@
 #include "mojo/android/system/core_impl.h"
 #include "sky/engine/bindings/jni/dart_jni.h"
 #include "sky/shell/platform/android/platform_view_android.h"
-#include "sky/shell/platform/android/sky_main.h"
+#include "sky/shell/platform/android/flutter_main.h"
 #include "sky/shell/platform/android/tracing_controller.h"
 
 namespace {
@@ -21,8 +21,8 @@ namespace {
 base::android::RegistrationMethod kSkyRegisteredMethods[] = {
     {"CoreImpl", mojo::android::RegisterCoreImpl},
     {"BaseRunLoop", mojo::android::RegisterBaseRunLoop},
-    {"PlatformViewAndroid", sky::shell::PlatformViewAndroid::Register},
-    {"SkyMain", sky::shell::RegisterSkyMain},
+    {"FlutterView", sky::shell::PlatformViewAndroid::Register},
+    {"FlutterMain", sky::shell::RegisterFlutterMain},
     {"TracingController", sky::shell::RegisterTracingController},
 };
 

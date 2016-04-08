@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_SHELL_SKY_MAIN_H_
-#define SKY_SHELL_SKY_MAIN_H_
+#ifndef SKY_SHELL_PLATFORM_ANDROID_FLUTTER_MAIN_H_
+#define SKY_SHELL_PLATFORM_ANDROID_FLUTTER_MAIN_H_
 
 #include <jni.h>
 
 namespace sky {
 namespace shell {
 
-bool RegisterSkyMain(JNIEnv* env);
+bool RegisterFlutterMain(JNIEnv* env);
 
 }  // namespace shell
 }  // namespace sky
 
-#endif  // SKY_SHELL_SKY_MAIN_H_
+#endif  // SKY_SHELL_PLATFORM_ANDROID_FLUTTER_MAIN_H_

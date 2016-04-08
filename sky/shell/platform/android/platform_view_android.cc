@@ -10,7 +10,7 @@
 #include "base/android/jni_android.h"
 #include "base/bind.h"
 #include "base/location.h"
-#include "jni/PlatformViewAndroid_jni.h"
+#include "jni/FlutterView_jni.h"
 #include "sky/shell/gpu/direct/surface_notifications_direct.h"
 #include "sky/shell/shell.h"
 #include "sky/shell/shell_view.h"

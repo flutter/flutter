@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package org.domokit.sky.shell;
+package io.flutter.view;
 
 import android.graphics.Rect;
 import android.opengl.Matrix;
@@ -24,16 +24,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityNodeProvider
-                                                          implements SemanticsListener {
+class AccessibilityBridge extends AccessibilityNodeProvider implements SemanticsListener {
     private Map<Integer, PersistentAccessibilityNode> mTreeNodes;
-    private PlatformViewAndroid mOwner;
+    private FlutterView mOwner;
     private SemanticsServer.Proxy mSemanticsServer;
     private boolean mAccessilibilyEnabled = true;
     private PersistentAccessibilityNode mFocusedNode;
     private PersistentAccessibilityNode mHoveredNode;
 
-    FlutterSemanticsToAndroidAccessibilityBridge(PlatformViewAndroid owner, SemanticsServer.Proxy semanticsServer) {
+    AccessibilityBridge(FlutterView owner, SemanticsServer.Proxy semanticsServer) {
         assert owner != null;
         assert semanticsServer != null;
         mOwner = owner;
@@ -42,7 +41,7 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
         mSemanticsServer.addSemanticsListener(this);
     }
 
-    public void setAccessibilityEnabled(boolean accessibilityEnabled) {
+    void setAccessibilityEnabled(boolean accessibilityEnabled) {
         mAccessilibilyEnabled = accessibilityEnabled;
     }
 
@@ -189,14 +188,14 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
     // TODO(ianh): implement findAccessibilityNodeInfosByText()
     // TODO(ianh): implement findFocus()
 
-    public void handleTouchExplorationExit() {
+    void handleTouchExplorationExit() {
         if (mHoveredNode != null) {
             sendAccessibilityEvent(mHoveredNode.id, AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
             mHoveredNode = null;
         }
     }
 
-    public void handleTouchExploration(float x, float y) {
+    void handleTouchExploration(float x, float y) {
         if (mTreeNodes.isEmpty())
             return;
         assert mTreeNodes.containsKey(0);
@@ -247,7 +246,7 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
         return persistentNode;
     }
 
-    public void removePersistentNode(PersistentAccessibilityNode node) {
+    void removePersistentNode(PersistentAccessibilityNode node) {
         assert mTreeNodes.containsKey(node.id);
         assert mTreeNodes.get(node.id).parent == null;
         mTreeNodes.remove(node.id);
@@ -263,7 +262,7 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
         }
     }
 
-    public void reset(SemanticsServer.Proxy newSemanticsServer) {
+    void reset(SemanticsServer.Proxy newSemanticsServer) {
         mTreeNodes.clear();
         sendAccessibilityEvent(mFocusedNode.id, AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
         mFocusedNode = null;
@@ -315,7 +314,7 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
                     }
                 }
                 for (SemanticsNode childNode : node.children) {
-                    PersistentAccessibilityNode child = FlutterSemanticsToAndroidAccessibilityBridge.this.updateSemanticsNode(childNode);
+                    PersistentAccessibilityNode child = AccessibilityBridge.this.updateSemanticsNode(childNode);
                     assert child != null;
                     child.parent = this;
                     children.add(child);
@@ -323,7 +322,7 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
                 if (oldChildren != null) {
                     for (PersistentAccessibilityNode child : oldChildren) {
                         if (child.parent == null) {
-                            FlutterSemanticsToAndroidAccessibilityBridge.this.removePersistentNode(child);
+                            AccessibilityBridge.this.removePersistentNode(child);
                         }
                     }
                 }
@@ -336,16 +335,16 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
         }
 
         // fields that we pass straight to the Android accessibility API
-        public int id = -1;
-        public PersistentAccessibilityNode parent;
-        public boolean canBeTapped;
-        public boolean canBeLongPressed;
-        public boolean canBeScrolledHorizontally;
-        public boolean canBeScrolledVertically;
-        public boolean hasCheckedState;
-        public boolean isChecked;
-        public String label;
-        public List<PersistentAccessibilityNode> children;
+        int id = -1;
+        PersistentAccessibilityNode parent;
+        boolean canBeTapped;
+        boolean canBeLongPressed;
+        boolean canBeScrolledHorizontally;
+        boolean canBeScrolledVertically;
+        boolean hasCheckedState;
+        boolean isChecked;
+        String label;
+        List<PersistentAccessibilityNode> children;
 
         // geometry, which we have to convert to global coordinates to send to Android
         private float[] transform; // can be null, meaning identity transform
@@ -360,7 +359,7 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
                 return;
             }
             geometryDirty = true;
-            // TODO(ianh): if we are the FlutterSemanticsToAndroidAccessibilityBridge.this.mFocusedNode
+            // TODO(ianh): if we are the AccessibilityBridge.this.mFocusedNode
             // then we may have to unfocus and refocus ourselves to get Android to update the focus rect
             for (PersistentAccessibilityNode child : children) {
                 child.invalidateGlobalGeometry();
@@ -407,7 +406,7 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
             return Math.max(a, Math.max(b, Math.max(c, d)));
         }
 
-        public Rect getGlobalRect() {
+        Rect getGlobalRect() {
             if (geometryDirty) {
                 float[] transform = getGlobalTransform();
                 float[] point1 = transformPoint(transform, new float[]{left,         top,          0, 1});
@@ -426,7 +425,7 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
             return globalRect;
         }
 
-        public PersistentAccessibilityNode hitTest(int x, int y) {
+        PersistentAccessibilityNode hitTest(int x, int y) {
             Rect rect = getGlobalRect();
             if (!rect.contains(x, y))
                 return null;

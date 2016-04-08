@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package org.domokit.sky.shell;
+package io.flutter.view;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -18,18 +18,18 @@ import org.domokit.common.ResourcePaths;
 /**
  * A class to clean up orphaned resource directories after unclean shutdowns.
  **/
-public class ResourceCleaner {
+class ResourceCleaner {
     private static final String TAG = "ResourceCleaner";
     private static final long DELAY_MS = 5000;
 
     private class CleanTask extends AsyncTask<Void, Void, Void> {
         private final File[] mFilesToDelete;
 
-        public CleanTask(File[] filesToDelete) {
+        CleanTask(File[] filesToDelete) {
             mFilesToDelete = filesToDelete;
         }
 
-        public boolean hasFilesToDelete() {
+        boolean hasFilesToDelete() {
             return mFilesToDelete.length > 0;
         }
 
@@ -56,11 +56,11 @@ public class ResourceCleaner {
 
     private final Context mContext;
 
-    public ResourceCleaner(Context context) {
+    ResourceCleaner(Context context) {
         mContext = context;
     }
 
-    public void start() {
+    void start() {
         File cacheDir = mContext.getCacheDir();
         if (cacheDir == null) {
             return;

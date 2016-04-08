@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package org.domokit.sky.shell;
+package io.flutter.view;
 
 import android.util.Log;
 
@@ -12,11 +12,11 @@ import java.util.TreeMap;
 /**
  * An registry for services.
  **/
-public class ServiceRegistry {
+class ServiceRegistry {
     private static final String TAG = "ServiceRegistry";
     private Map<String, ServiceFactory> mRegistrations;
 
-    public static final ServiceRegistry SHARED = new ServiceRegistry();
+    static final ServiceRegistry SHARED = new ServiceRegistry();
 
     // In addition to the shared registry, there is a per-view registry
     // maintained by the PlatformServiceProvider.
@@ -24,13 +24,13 @@ public class ServiceRegistry {
         mRegistrations = new TreeMap<String, ServiceFactory>();
     }
 
-    public void register(String interfaceName, ServiceFactory connector) {
+    void register(String interfaceName, ServiceFactory connector) {
         assert !mRegistrations.containsKey(interfaceName);
         assert connector != null;
         mRegistrations.put(interfaceName, connector);
     }
 
-    public ServiceFactory get(String interfaceName) {
+    ServiceFactory get(String interfaceName) {
         if (!mRegistrations.containsKey(interfaceName)) {
             Log.e(TAG, "Unknown service " + interfaceName);
         }

@@ -13,6 +13,9 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import io.flutter.view.FlutterMain;
+import io.flutter.view.FlutterView;
+
 import org.chromium.base.PathUtils;
 import org.chromium.base.TraceEvent;
 import org.chromium.mojom.sky.EventType;
@@ -29,7 +32,7 @@ import java.util.ArrayList;
  */
 public class SkyActivity extends Activity {
     private TracingController mTracingController;
-    private PlatformViewAndroid mView;
+    private FlutterView mView;
 
     private String[] getArgsFromIntent(Intent intent) {
         // Before adding more entries to this list, consider that arbitrary
@@ -69,8 +72,8 @@ public class SkyActivity extends Activity {
         }
 
         String[] args = getArgsFromIntent(getIntent());
-        SkyMain.ensureInitialized(getApplicationContext(), args);
-        mView = new PlatformViewAndroid(this);
+        FlutterMain.ensureInitializationComplete(getApplicationContext(), args);
+        mView = new FlutterView(this);
         ActivityImpl.setCurrentActivity(this);
         setContentView(mView);
         mTracingController = new TracingController(this);
@@ -132,7 +135,7 @@ public class SkyActivity extends Activity {
             return;
         }
         File dataDir = new File(PathUtils.getDataDirectory(this));
-        File appBundle = new File(dataDir, SkyMain.APP_BUNDLE);
+        File appBundle = new File(dataDir, FlutterMain.APP_BUNDLE);
         if (appBundle.exists()) {
             mView.runFromBundle(appBundle.getPath(), null);
             return;

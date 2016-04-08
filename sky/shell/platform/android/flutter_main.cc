@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/platform/android/sky_main.h"
+#include "sky/shell/platform/android/flutter_main.h"
 
 #include "base/android/jni_android.h"
 #include "base/android/jni_array.h"
@@ -18,7 +18,7 @@
 #include "base/path_service.h"
 #include "base/run_loop.h"
 #include "base/threading/simple_thread.h"
-#include "jni/SkyMain_jni.h"
+#include "jni/FlutterMain_jni.h"
 #include "mojo/edk/embedder/embedder.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
 #include "sky/shell/shell.h"
@@ -84,7 +84,7 @@ static void Init(JNIEnv* env,
   InitializeTracing();
 }
 
-bool RegisterSkyMain(JNIEnv* env) {
+bool RegisterFlutterMain(JNIEnv* env) {
   return RegisterNativesImpl(env);
 }
 

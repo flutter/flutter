@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package org.domokit.sky.shell;
+package io.flutter.view;
 
 import android.content.Context;
 
@@ -15,12 +15,12 @@ import org.chromium.mojom.mojo.ServiceProvider;
 /**
  * A collection of services.
  **/
-public class ServiceProviderImpl implements ServiceProvider {
+class ServiceProviderImpl implements ServiceProvider {
     private Core mCore;
     private Context mContext;
     private ServiceRegistry mRegistry;
 
-    public ServiceProviderImpl(Core core, Context context, ServiceRegistry registry) {
+    ServiceProviderImpl(Core core, Context context, ServiceRegistry registry) {
         assert core != null;
         assert context != null;
         mCore = core;

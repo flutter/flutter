@@ -31,7 +31,7 @@ class TracingController {
     private final TracingBroadcastReceiver mBroadcastReceiver;
     private final TracingIntentFilter mIntentFilter;
 
-    public TracingController(Context context) {
+    TracingController(Context context) {
         mContext = context;
         mBroadcastReceiver = new TracingBroadcastReceiver();
         mIntentFilter = new TracingIntentFilter(context);
@@ -39,7 +39,7 @@ class TracingController {
         mContext.registerReceiver(mBroadcastReceiver, mIntentFilter);
     }
 
-    public void stop() {
+    void stop() {
         mContext.unregisterReceiver(mBroadcastReceiver);
     }
 

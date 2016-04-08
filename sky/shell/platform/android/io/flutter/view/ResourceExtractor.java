@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package org.domokit.sky.shell;
+package io.flutter.view;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -26,14 +26,14 @@ import java.util.concurrent.ExecutionException;
 /**
  * A class to intialize the native code.
  **/
-public class ResourceExtractor {
+class ResourceExtractor {
     private static final String TAG = "ResourceExtractor";
     private static final String TIMESTAMP_PREFIX = "res_timestamp-";
 
     private class ExtractTask extends AsyncTask<Void, Void, Void> {
         private static final int BUFFER_SIZE = 16 * 1024;
 
-        public ExtractTask() { }
+        ExtractTask() { }
 
         private void extractResources() {
             final File dataDir = new File(PathUtils.getDataDirectory(mContext));
@@ -131,24 +131,24 @@ public class ResourceExtractor {
     private final HashSet<String> mResources;
     private ExtractTask mExtractTask;
 
-    public ResourceExtractor(Context context) {
+    ResourceExtractor(Context context) {
         mContext = context;
         mResources = new HashSet<String>();
     }
 
-    public void addResources(String[] resources) {
+    void addResources(String[] resources) {
         for (String resource : resources) {
             mResources.add(resource);
         }
     }
 
-    public void start() {
+    void start() {
         assert mExtractTask == null;
         mExtractTask = new ExtractTask();
         mExtractTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    public void waitForCompletion() {
+    void waitForCompletion() {
         assert mExtractTask != null;
 
         try {

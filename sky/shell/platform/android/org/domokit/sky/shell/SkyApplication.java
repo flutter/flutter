@@ -6,6 +6,8 @@ package org.domokit.sky.shell;
 
 import android.app.Application;
 
+import io.flutter.view.FlutterMain;
+
 /**
  * Sky implementation of {@link android.app.Application}, managing application-level global
  * initializations.
@@ -14,6 +16,6 @@ public class SkyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        SkyMain.startInit(this);
+        FlutterMain.startInitialization(this);
     }
 }

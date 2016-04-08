@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_SHELL_PLATFORM_VIEW_ANDROID_H_
-#define SKY_SHELL_PLATFORM_VIEW_ANDROID_H_
+#ifndef SKY_SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_H_
+#define SKY_SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_H_
 
 #include "sky/shell/platform_view.h"
 
@@ -43,4 +43,4 @@ class PlatformViewAndroid : public PlatformView {
 }  // namespace shell
 }  // namespace sky
 
-#endif  // SKY_SHELL_PLATFORM_VIEW_ANDROID_H_
+#endif  // SKY_SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_H_

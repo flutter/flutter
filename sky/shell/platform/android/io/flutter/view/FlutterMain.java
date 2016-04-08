@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package org.domokit.sky.shell;
+package io.flutter.view;
 
 import android.content.Context;
 import android.util.Log;
@@ -44,32 +44,25 @@ import org.domokit.platform.SystemChromeImpl;
 import org.domokit.platform.SystemSoundImpl;
 import org.domokit.vsync.VSyncProviderImpl;
 
-
 /**
- * A class to intialize the native code.
+ * A class to intialize the Flutter engine.
  **/
 @JNINamespace("sky::shell")
-public class SkyMain {
-    private static final String TAG = "SkyMain";
-
+public class FlutterMain {
     public static final String APP_BUNDLE = "app.flx";
+
+    private static final String TAG = "FlutterMain";
     private static final String MANIFEST = "flutter.yaml";
     private static final String SERVICES = "services.json";
-
     private static final String PRIVATE_DATA_DIRECTORY_SUFFIX = "sky_shell";
     private static final String[] SKY_RESOURCES = {"icudtl.dat", APP_BUNDLE, MANIFEST};
-
-    /**
-     * A guard flag for calling nativeInit() only once.
-     **/
     private static boolean sInitialized = false;
-
     private static ResourceExtractor sResourceExtractor;
 
     /**
      * Starts initialization of the native system.
      **/
-    public static void startInit(Context applicationContext) {
+    public static void startInitialization(Context applicationContext) {
         initJavaUtils(applicationContext);
         initResources(applicationContext);
         initNative(applicationContext);
@@ -79,7 +72,7 @@ public class SkyMain {
     /**
      * Blocks until initialization of the native system has completed.
      **/
-    public static void ensureInitialized(Context applicationContext, String[] args) {
+    public static void ensureInitializationComplete(Context applicationContext, String[] args) {
         if (sInitialized) {
             return;
         }
@@ -90,7 +83,7 @@ public class SkyMain {
             CoreImpl.getInstance().createDefaultRunLoop();
             sInitialized = true;
         } catch (Exception e) {
-            Log.e(TAG, "SkyMain initialization failed.", e);
+            Log.e(TAG, "Flutter initialization failed.", e);
             throw new RuntimeException(e);
         }
     }

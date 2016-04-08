@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package org.domokit.sky.shell;
+package io.flutter.view;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -56,16 +56,14 @@ import org.domokit.editing.KeyboardViewState;
 import org.domokit.raw_keyboard.RawKeyboardServiceImpl;
 import org.domokit.raw_keyboard.RawKeyboardServiceState;
 
-import org.domokit.sky.shell.FlutterSemanticsToAndroidAccessibilityBridge;
-
 /**
- * A view containing Sky
+ * An Android view containing a Flutter app.
  */
 @JNINamespace("sky::shell")
-public class PlatformViewAndroid extends SurfaceView
+public class FlutterView extends SurfaceView
   implements AccessibilityManager.AccessibilityStateChangeListener,
              AccessibilityManager.TouchExplorationStateChangeListener {
-    private static final String TAG = "PlatformViewAndroid";
+    private static final String TAG = "FlutterView";
 
     private long mNativePlatformView;
     private SkyEngine.Proxy mSkyEngine;
@@ -81,11 +79,11 @@ public class PlatformViewAndroid extends SurfaceView
     private final RawKeyboardServiceState mRawKeyboardState;
     private final AccessibilityManager mAccessibilityManager;
 
-    public PlatformViewAndroid(Context context) {
+    public FlutterView(Context context) {
         this(context, null);
     }
 
-    public PlatformViewAndroid(Context context, AttributeSet attrs) {
+    public FlutterView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         mMetrics = new ViewportMetrics();
@@ -471,11 +469,11 @@ public class PlatformViewAndroid extends SurfaceView
         return mAccessibilityNodeProvider;
     }
 
-    private FlutterSemanticsToAndroidAccessibilityBridge mAccessibilityNodeProvider;
+    private AccessibilityBridge mAccessibilityNodeProvider;
 
     void ensureAccessibilityEnabled() {
         if (mAccessibilityNodeProvider == null) {
-            mAccessibilityNodeProvider = new FlutterSemanticsToAndroidAccessibilityBridge(this, createSemanticsServer());
+            mAccessibilityNodeProvider = new AccessibilityBridge(this, createSemanticsServer());
         }
     }
 

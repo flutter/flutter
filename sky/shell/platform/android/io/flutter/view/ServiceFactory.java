@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package org.domokit.sky.shell;
+package io.flutter.view;
 
 import android.content.Context;
 
@@ -14,6 +14,6 @@ import org.chromium.mojo.system.MessagePipeHandle;
  * registered with ServiceRegistry and thereby made available to non-Java
  * clients.
  **/
-public interface ServiceFactory {
-    public void connectToService(Context context, Core core, MessagePipeHandle pipe);
+interface ServiceFactory {
+    void connectToService(Context context, Core core, MessagePipeHandle pipe);
 }

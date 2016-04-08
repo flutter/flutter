@@ -139,8 +139,8 @@ if (is_android) {
 
   generate_jni("jni_headers") {
     sources = [
-      "platform/android/org/domokit/sky/shell/PlatformViewAndroid.java",
-      "platform/android/org/domokit/sky/shell/SkyMain.java",
+      "platform/android/io/flutter/view/FlutterView.java",
+      "platform/android/io/flutter/view/FlutterMain.java",
       "platform/android/org/domokit/sky/shell/TracingController.java",
     ]
     jni_package = "sky/shell"
@@ -148,11 +148,11 @@ if (is_android) {
 
   shared_library("sky_shell") {
     sources = [
+      "platform/android/flutter_main.cc",
+      "platform/android/flutter_main.h",
       "platform/android/library_loader.cc",
       "platform/android/platform_view_android.cc",
       "platform/android/platform_view_android.h",
-      "platform/android/sky_main.cc",
-      "platform/android/sky_main.h",
       "platform/android/tracing_controller.cc",
       "platform/android/tracing_controller.h",
     ]
@@ -175,16 +175,16 @@ if (is_android) {
 
   android_library("java") {
     java_files = [
-      "platform/android/org/domokit/sky/shell/FlutterSemanticsToAndroidAccessibilityBridge.java",
-      "platform/android/org/domokit/sky/shell/PlatformViewAndroid.java",
-      "platform/android/org/domokit/sky/shell/ResourceCleaner.java",
-      "platform/android/org/domokit/sky/shell/ResourceExtractor.java",
-      "platform/android/org/domokit/sky/shell/ServiceFactory.java",
-      "platform/android/org/domokit/sky/shell/ServiceProviderImpl.java",
-      "platform/android/org/domokit/sky/shell/ServiceRegistry.java",
+      "platform/android/io/flutter/view/AccessibilityBridge.java",
+      "platform/android/io/flutter/view/FlutterMain.java",
+      "platform/android/io/flutter/view/FlutterView.java",
+      "platform/android/io/flutter/view/ResourceCleaner.java",
+      "platform/android/io/flutter/view/ResourceExtractor.java",
+      "platform/android/io/flutter/view/ServiceFactory.java",
+      "platform/android/io/flutter/view/ServiceProviderImpl.java",
+      "platform/android/io/flutter/view/ServiceRegistry.java",
       "platform/android/org/domokit/sky/shell/SkyActivity.java",
       "platform/android/org/domokit/sky/shell/SkyApplication.java",
-      "platform/android/org/domokit/sky/shell/SkyMain.java",
       "platform/android/org/domokit/sky/shell/TracingController.java",
     ]
 
