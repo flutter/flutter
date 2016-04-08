@@ -42,7 +42,7 @@ void enableFlutterDriverExtension() {
 }
 
 /// Handles a command and returns a result.
-typedef Future<R> CommandHandlerCallback<R extends Result>(Command c);
+typedef Future<Result> CommandHandlerCallback(Command c);
 
 /// Deserializes JSON map to a command object.
 typedef Command CommandDeserializerCallback(Map<String, String> params);
@@ -93,7 +93,7 @@ class FlutterDriverExtension {
       Command command = commandDeserializer(params);
       return commandHandler(command).then((Result result) {
         return new ServiceExtensionResponse.result(JSON.encode(result.toJson()));
-      }, onError: (e, s) {
+      }, onError: (Object e, Object s) {
         _log.warning('$e:\n$s');
         return new ServiceExtensionResponse.error(ServiceExtensionResponse.extensionError, '$e');
       });
@@ -122,9 +122,9 @@ class FlutterDriverExtension {
   /// [descriptionGetter] describes the object to be waited for. It is used in
   /// the warning printed should timeout happen.
   Future<ObjectRef> _waitForObject(String descriptionGetter(), Object locator()) async {
-    Object object = await retry(locator, _kDefaultTimeout, _kDefaultPauseBetweenRetries, predicate: (object) {
+    Object object = await retry(locator, _kDefaultTimeout, _kDefaultPauseBetweenRetries, predicate: (Object object) {
       return object != null;
-    }).catchError((dynamic error, stackTrace) {
+    }).catchError((Object error, Object stackTrace) {
       _log.warning('Timed out waiting for ${descriptionGetter()}');
       return null;
     });
@@ -132,7 +132,7 @@ class FlutterDriverExtension {
     ObjectRef elemRef = object != null
       ? new ObjectRef(_registerObject(object))
       : new ObjectRef.notFound();
-    return new Future.value(elemRef);
+    return new Future<ObjectRef>.value(elemRef);
   }
 
   Future<ObjectRef> findByValueKey(ByValueKey byKey) async {
@@ -220,8 +220,8 @@ class FlutterDriverExtension {
     Element object = _dereference(reference);
 
     if (object == null)
-      return new Future.error('Object reference not found ($reference).');
+      return new Future<String>.error('Object reference not found ($reference).');
 
-    return new Future.value(object);
+    return new Future<Element>.value(object);
   }
 }
