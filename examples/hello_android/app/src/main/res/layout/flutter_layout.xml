@@ -30,7 +30,7 @@
           />
   </LinearLayout>
 
-  <org.domokit.sky.shell.PlatformViewAndroid
+  <io.flutter.view.FlutterView
       android:id="@+id/flutter_view"
       android:layout_width="fill_parent"
       android:layout_height="fill_parent"
