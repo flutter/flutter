@@ -189,12 +189,14 @@ class ListDemoState extends State<ListDemo> {
           )
         ]
       ),
-      body: new Scrollbar(
-        child: new MaterialList(
-          type: _itemType,
-          scrollablePadding: new EdgeInsets.all(_dense ? 4.0 : 8.0),
-          clampOverscrolls: true,
-          children: listItems
+      body: new OverscrollIndicator(
+        child: new Scrollbar(
+          child: new MaterialList(
+            type: _itemType,
+            scrollablePadding: new EdgeInsets.all(_dense ? 4.0 : 8.0),
+            clampOverscrolls: true,
+            children: listItems
+          )
         )
       )
     );

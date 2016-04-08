@@ -4,9 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'overscroll_painter.dart';
-import 'theme.dart';
-
 enum MaterialListType {
   oneLine,
   oneLineWithAvatar,
@@ -46,16 +43,6 @@ class MaterialList extends StatefulWidget {
 }
 
 class _MaterialListState extends State<MaterialList> {
-  ScrollableListPainter _overscrollPainter;
-
-  Color _getOverscrollIndicatorColor() => Theme.of(context).accentColor.withOpacity(0.35);
-
-  @override
-  void initState() {
-    super.initState();
-    _overscrollPainter = new OverscrollPainter(getIndicatorColor: _getOverscrollIndicatorColor);
-  }
-
   @override
   Widget build(BuildContext context) {
     return new ScrollableList(
@@ -66,7 +53,6 @@ class _MaterialListState extends State<MaterialList> {
       onScroll: config.onScroll,
       itemExtent: kListItemExtent[config.type],
       padding: const EdgeInsets.symmetric(vertical: 8.0) + config.scrollablePadding,
-      scrollableListPainter: config.clampOverscrolls ? _overscrollPainter : null,
       children: config.children
     );
   }
