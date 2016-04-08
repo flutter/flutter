@@ -35,7 +35,6 @@ class PageableList extends Scrollable {
     this.itemsWrap: false,
     this.itemsSnapAlignment: PageableListFlingBehavior.stopAtNextPage,
     this.onPageChanged,
-    this.scrollableListPainter,
     this.duration: const Duration(milliseconds: 200),
     this.curve: Curves.ease,
     this.children
@@ -60,9 +59,6 @@ class PageableList extends Scrollable {
 
   /// Called when the currently visible page changes.
   final ValueChanged<int> onPageChanged;
-
-  /// Used to paint the scrollbar for this list.
-  final ScrollableListPainter scrollableListPainter;
 
   /// The duration used when animating to a given page.
   final Duration duration;
@@ -146,30 +142,11 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
   }
 
   void _updateScrollBehavior() {
-    config.scrollableListPainter?.contentExtent = _itemCount.toDouble();
     didUpdateScrollBehavior(scrollBehavior.updateExtents(
       contentExtent: _itemCount.toDouble(),
       containerExtent: 1.0,
       scrollOffset: scrollOffset
     ));
-  }
-
-  @override
-  void dispatchOnScrollStart() {
-    super.dispatchOnScrollStart();
-    config.scrollableListPainter?.scrollStarted();
-  }
-
-  @override
-  void dispatchOnScroll() {
-    super.dispatchOnScroll();
-    config.scrollableListPainter?.scrollOffset = scrollOffset;
-  }
-
-  @override
-  void dispatchOnScrollEnd() {
-    super.dispatchOnScrollEnd();
-    config.scrollableListPainter?.scrollEnded();
   }
 
   @override
@@ -179,7 +156,6 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
       mainAxis: config.scrollDirection,
       anchor: config.scrollAnchor,
       startOffset: scrollOffset,
-      overlayPainter: config.scrollableListPainter,
       children: config.children
     );
   }
