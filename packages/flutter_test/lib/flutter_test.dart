@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Testing library for flutter, built on top of package:test.
+/// Testing library for flutter, built on top of `package:test`.
 library flutter_test;
 
 export 'src/instrumentation.dart';
