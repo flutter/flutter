@@ -23,6 +23,8 @@ String getNameForTargetPlatform(TargetPlatform platform) {
   switch (platform) {
     case TargetPlatform.android_arm:
       return 'android-arm';
+    case TargetPlatform.android_x64:
+      return 'android-x64';
     case TargetPlatform.ios:
       return 'ios';
     case TargetPlatform.darwin_x64:
@@ -130,6 +132,32 @@ class ArtifactStore {
       fileName: 'libsky_shell.so',
       type: ArtifactType.androidLibSkyShell,
       targetPlatform: TargetPlatform.android_arm
+    ),
+
+    // android-x86
+    const Artifact._(
+      name: 'Compiled Java code',
+      fileName: 'classes.dex.jar',
+      type: ArtifactType.androidClassesJar,
+      targetPlatform: TargetPlatform.android_x64
+    ),
+    const Artifact._(
+      name: 'ICU data table',
+      fileName: 'icudtl.dat',
+      type: ArtifactType.androidIcuData,
+      targetPlatform: TargetPlatform.android_x64
+    ),
+    const Artifact._(
+      name: 'Key Store',
+      fileName: 'chromium-debug.keystore',
+      type: ArtifactType.androidKeystore,
+      targetPlatform: TargetPlatform.android_x64
+    ),
+    const Artifact._(
+      name: 'Compiled C++ code',
+      fileName: 'libsky_shell.so',
+      type: ArtifactType.androidLibSkyShell,
+      targetPlatform: TargetPlatform.android_x64
     ),
 
     // iOS

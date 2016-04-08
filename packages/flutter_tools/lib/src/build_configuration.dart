@@ -21,6 +21,7 @@ enum HostPlatform {
 
 enum TargetPlatform {
   android_arm,
+  android_x64,
   ios,
   darwin_x64,
   linux_x64
