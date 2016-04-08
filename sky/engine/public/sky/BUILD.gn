@@ -24,8 +24,6 @@ source_set("sky") {
   ]
 
   sources = [
-    "sky_headless.cc",
-    "sky_headless.h",
     "sky_view.cc",
     "sky_view.h",
     "sky_view_client.cc",
