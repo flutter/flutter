@@ -12,8 +12,7 @@ public:
     void GetBounds(MinikinRect* bounds, uint32_t glyph_id,
         const MinikinPaint& paint) const;
 
-    // If buf is NULL, just update size
-    bool GetTable(uint32_t tag, uint8_t *buf, size_t *size);
+    const void* GetTable(uint32_t tag, size_t* size, MinikinDestroyFunc* destroy);
 
     int32_t GetUniqueId() const;
 
