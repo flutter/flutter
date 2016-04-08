@@ -102,6 +102,8 @@ class GalleryHomeState extends State<GalleryHome> {
               new GalleryItem(title: "Weather", builder: () => new WeatherDemo()),
               new GalleryItem(title: "Fitness", builder: () => new FitnessDemo()),
               new GalleryItem(title: "Fancy lines", builder: () => new DrawingDemo()),
+              new GalleryItem(title: 'Flexible space toolbar', builder: () => new FlexibleSpaceDemo()),
+              new GalleryItem(title: 'Floating action button', builder: () => new TabsFabDemo()),
             ]
           ),
           new TwoLevelSublist(
@@ -109,7 +111,6 @@ class GalleryHomeState extends State<GalleryHome> {
             title: new Text("Components"),
             children: <Widget>[
               new GalleryItem(title: 'Buttons', builder: () => new ButtonsDemo()),
-              new GalleryItem(title: 'Buttons: floating action button', builder: () => new TabsFabDemo()),
               new GalleryItem(title: 'Cards', builder: () => new CardsDemo()),
               new GalleryItem(title: 'Chips', builder: () => new ChipDemo()),
               new GalleryItem(title: 'Date picker', builder: () => new DatePickerDemo()),
@@ -132,7 +133,6 @@ class GalleryHomeState extends State<GalleryHome> {
               new GalleryItem(title: 'Tabs', builder: () => new TabsDemo()),
               new GalleryItem(title: 'Text fields', builder: () => new TextFieldDemo()),
               new GalleryItem(title: 'Time picker', builder: () => new TimePickerDemo()),
-              new GalleryItem(title: 'Toolbar', builder: () => new FlexibleSpaceDemo()),
               new GalleryItem(title: 'Tooltips', builder: () => new TooltipDemo()),
             ]
           ),
