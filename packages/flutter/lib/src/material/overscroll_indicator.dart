@@ -172,9 +172,9 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
 
   @override
   void dispose() {
-    super.dispose();
     _hideTimer?.cancel();
     _hideTimer = null;
+    super.dispose();
   }
 
   Color get _indicatorColor {
