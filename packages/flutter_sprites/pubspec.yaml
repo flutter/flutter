@@ -10,6 +10,5 @@ dependencies:
     path: ../flutter
 
 dev_dependencies:
-  flutter_tools:
-    path: ../flutter_tools
-  test: any # constrained by the dependency in flutter_tools
+  flutter_test:
+    path: ../flutter_test
