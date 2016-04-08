@@ -7,6 +7,9 @@ import 'package:flutter/widgets.dart';
 import 'material.dart';
 import 'scaffold.dart';
 
+/// Throws an exception of the given build context is not contained in a [Material] widget.
+///
+/// Does nothing if asserts are disabled.
 bool debugCheckHasMaterial(BuildContext context) {
   assert(() {
     if (context.widget is! Material && context.ancestorWidgetOfExactType(Material) == null) {
@@ -30,7 +33,9 @@ bool debugCheckHasMaterial(BuildContext context) {
   return true;
 }
 
-
+/// Throws an exception of the given build context is not contained in a [Scaffold] widget.
+///
+/// Does nothing if asserts are disabled.
 bool debugCheckHasScaffold(BuildContext context) {
   assert(() {
     if (Scaffold.of(context) == null) {

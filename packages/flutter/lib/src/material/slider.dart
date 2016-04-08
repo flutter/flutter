@@ -39,6 +39,15 @@ import 'typography.dart';
 ///  * [Switch]
 ///  * <https://www.google.com/design/spec/components/sliders.html>
 class Slider extends StatelessWidget {
+  /// Creates a material design slider.
+  ///
+  /// The slider itself does not maintain any state. Instead, when the state of
+  /// the slider changes, the widget calls the [onChanged] callback. Most widgets
+  /// that use a slider will listen for the [onChanged] callback and rebuild the
+  /// slider with a new [value] to update the visual appearance of the slider.
+  ///
+  /// * [value] determines currently selected value for this slider.
+  /// * [onChanged] is called when the user selects a new value for the slider.
   Slider({
     Key key,
     this.value,
