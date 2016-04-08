@@ -275,6 +275,11 @@ class FlutterCommandRunner extends CommandRunner {
         targetPlatform: TargetPlatform.android_arm
       ));
 
+      configs.add(new BuildConfiguration.prebuilt(
+        hostPlatform: hostPlatform,
+        targetPlatform: TargetPlatform.android_x64
+      ));
+
       if (hostPlatform == HostPlatform.linux) {
         configs.add(new BuildConfiguration.prebuilt(
           hostPlatform: HostPlatform.linux,

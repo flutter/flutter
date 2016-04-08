@@ -325,9 +325,8 @@ class AndroidDevice extends Device {
     return runCommandAndStreamOutput(command).then((int exitCode) => exitCode == 0);
   }
 
-  // TODO(devoncarew): Use isLocalEmulator to return android_arm or android_x64.
   @override
-  TargetPlatform get platform => TargetPlatform.android_arm;
+  TargetPlatform get platform => isLocalEmulator ? TargetPlatform.android_x64 : TargetPlatform.android_arm;
 
   @override
   void clearLogs() {
