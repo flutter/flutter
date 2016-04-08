@@ -209,15 +209,19 @@ class BuildApkCommand extends FlutterCommand {
 }
 
 Future<_ApkComponents> _findApkComponents(
-  BuildConfiguration config, String enginePath, String manifest, String resources
+  TargetPlatform platform,
+  BuildConfiguration config,
+  String enginePath,
+  String manifest,
+  String resources
 ) async {
   List<String> artifactPaths;
   if (enginePath != null) {
-    // TODO(devoncarew): Support x64.
+    String abiDir = platform == TargetPlatform.android_arm ? 'armeabi-v7a' : 'x86_64';
     artifactPaths = [
       '$enginePath/third_party/icu/android/icudtl.dat',
       '${config.buildDir}/gen/sky/shell/shell/classes.dex.jar',
-      '${config.buildDir}/gen/sky/shell/shell/shell/libs/armeabi-v7a/libsky_shell.so',
+      '${config.buildDir}/gen/sky/shell/shell/shell/libs/$abiDir/libsky_shell.so',
       '$enginePath/build/android/ant/chromium-debug.keystore',
     ];
   } else {
@@ -283,8 +287,7 @@ int _buildApk(
 
     _AssetBuilder artifactBuilder = new _AssetBuilder(tempDir, 'artifacts');
     artifactBuilder.add(classesDex, 'classes.dex');
-    // x86? x86_64?
-    String abiDir = platform == TargetPlatform.android_arm ? 'armeabi-v7a' : 'x86';
+    String abiDir = platform == TargetPlatform.android_arm ? 'armeabi-v7a' : 'x86_64';
     artifactBuilder.add(components.libSkyShell, 'lib/$abiDir/libsky_shell.so');
 
     File unalignedApk = new File('${tempDir.path}/app.apk.unaligned');
@@ -413,7 +416,7 @@ Future<int> buildAndroid(
   }
 
   BuildConfiguration config = configs.firstWhere((BuildConfiguration bc) => bc.targetPlatform == platform);
-  _ApkComponents components = await _findApkComponents(config, enginePath, manifest, resources);
+  _ApkComponents components = await _findApkComponents(platform, config, enginePath, manifest, resources);
 
   if (components == null) {
     printError('Failure building APK. Unable to find components.');
