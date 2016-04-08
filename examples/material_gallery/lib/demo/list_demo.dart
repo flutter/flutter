@@ -38,9 +38,7 @@ class ListDemoState extends State<ListDemo> {
         decoration: new BoxDecoration(
           border: new Border(top: new BorderSide(color: Colors.black26))
         ),
-        child: new Column(
-          mainAxisAlignment: MainAxisAlignment.collapse,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: new Block(
           children: <Widget>[
             new ListItem(
               dense: true,
