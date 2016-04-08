@@ -115,11 +115,6 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
   double _minScrollOffset;
   double _maxScrollOffset;
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
   void _hide() {
     _hideTimer?.cancel();
     _hideTimer = null;
