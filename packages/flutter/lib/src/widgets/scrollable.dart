@@ -8,7 +8,6 @@ import 'dart:ui' as ui show window;
 
 import 'package:newton/newton.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart' show HasMainAxis;
 
 import 'basic.dart';
 import 'framework.dart';
@@ -762,102 +761,5 @@ class Block extends StatelessWidget {
       onScroll: onScroll,
       child: contents
     );
-  }
-}
-
-abstract class ScrollableListPainter extends RenderObjectPainter {
-  @override
-  void attach(RenderObject renderObject) {
-    assert(renderObject is RenderBox);
-    assert(renderObject is HasMainAxis);
-    super.attach(renderObject);
-  }
-
-  @override
-  RenderBox get renderObject => super.renderObject;
-
-  Axis get scrollDirection {
-    HasMainAxis scrollable = renderObject as dynamic;
-    return scrollable?.mainAxis;
-  }
-
-  Size get viewportSize => renderObject.size;
-
-  double get contentExtent => _contentExtent;
-  double _contentExtent = 0.0;
-  void set contentExtent (double value) {
-    assert(value != null);
-    assert(value >= 0.0);
-    if (_contentExtent == value)
-      return;
-    _contentExtent = value;
-    renderObject?.markNeedsPaint();
-  }
-
-  double get scrollOffset => _scrollOffset;
-  double _scrollOffset = 0.0;
-  void set scrollOffset (double value) {
-    assert(value != null);
-    if (_scrollOffset == value)
-      return;
-    _scrollOffset = value;
-    renderObject?.markNeedsPaint();
-  }
-
-  /// Called when a scroll starts. Subclasses may override this method to
-  /// initialize some state or to play an animation.
-  void scrollStarted() { }
-
-  /// Similar to scrollStarted(). Called when a scroll ends. For fling scrolls
-  /// "ended" means that the scroll animation either stopped of its own accord
-  /// or was canceled  by the user.
-  void scrollEnded() { }
-}
-
-class CompoundScrollableListPainter extends ScrollableListPainter {
-  CompoundScrollableListPainter(this.painters);
-
-  final List<ScrollableListPainter> painters;
-
-  @override
-  void attach(RenderObject renderObject) {
-    for(ScrollableListPainter painter in painters)
-      painter.attach(renderObject);
-  }
-
-  @override
-  void detach() {
-    for(ScrollableListPainter painter in painters)
-      painter.detach();
-  }
-
-  @override
-  void set contentExtent (double value) {
-    for(ScrollableListPainter painter in painters)
-      painter.contentExtent = value;
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    for(ScrollableListPainter painter in painters)
-      painter.paint(context, offset);
-  }
-
-  @override
-  void set scrollOffset (double value) {
-    for(ScrollableListPainter painter in painters)
-      painter.scrollOffset = value;
-  }
-
-  @override
-  void scrollStarted() {
-    for(ScrollableListPainter painter in painters)
-      painter.scrollStarted();
-  }
-
-  @override
-  void scrollEnded() {
-    for(ScrollableListPainter painter in painters)
-      painter.scrollEnded();
   }
 }

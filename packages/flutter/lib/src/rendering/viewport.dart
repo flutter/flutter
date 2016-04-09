@@ -73,18 +73,12 @@ class ViewportDimensions {
   String toString() => 'ViewportDimensions(container: $containerSize, content: $contentSize)';
 }
 
-/// An interface that indicates that an object has a scroll direction.
-abstract class HasMainAxis {
-  /// Whether this object scrolls horizontally or vertically.
-  Axis get mainAxis;
-}
-
 /// A base class for render objects that are bigger on the inside.
 ///
 /// This class holds the common fields for viewport render objects but does not
 /// have a child model. See [RenderViewport] for a viewport with a single child
 /// and [RenderVirtualViewport] for a viewport with multiple children.
-class RenderViewportBase extends RenderBox implements HasMainAxis {
+class RenderViewportBase extends RenderBox {
   RenderViewportBase(
     Offset paintOffset,
     Axis mainAxis,
@@ -128,7 +122,6 @@ class RenderViewportBase extends RenderBox implements HasMainAxis {
   /// The child is given layout constraints that are fully unconstrainted along
   /// the main axis (e.g., the child can be as tall as it wants if the main axis
   /// is vertical).
-  @override
   Axis get mainAxis => _mainAxis;
   Axis _mainAxis;
   void set mainAxis(Axis value) {

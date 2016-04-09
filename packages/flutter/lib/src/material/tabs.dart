@@ -1075,7 +1075,6 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
       itemsWrap: config.itemsWrap,
       mainAxis: config.scrollDirection,
       startOffset: scrollOffset,
-      overlayPainter: config.scrollableListPainter,
       children: _items
     );
   }
