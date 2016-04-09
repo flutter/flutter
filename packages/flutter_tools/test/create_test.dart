@@ -48,5 +48,31 @@ void main() {
     },
     // This test can take a while due to network requests.
     timeout: new Timeout(new Duration(minutes: 2)));
+
+    // Verify that we fail with an error code when the file exists.
+    testUsingContext('fails when file exists', () async {
+      ArtifactStore.flutterRoot = '../..';
+      CreateCommand command = new CreateCommand();
+      CommandRunner runner = new CommandRunner('test_flutter', '')
+        ..addCommand(command);
+      File existingFile = new File("${temp.path.toString()}/bad");
+      if (!existingFile.existsSync()) existingFile.createSync();
+      await runner.run(['create', existingFile.path])
+          .then((int code) => expect(code, equals(1)));
+    });
+
+    // Verify that we fail with an error code when the file exists.
+    testUsingContext('fails with non-empty directory', () async {
+      ArtifactStore.flutterRoot = '../..';
+      CreateCommand command = new CreateCommand();
+      CommandRunner runner = new CommandRunner('test_flutter', '')
+        ..addCommand(command);
+      File existingFile = new File("${temp.path.toString()}/bad");
+      if (!existingFile.existsSync()) existingFile.createSync();
+      RandomAccessFile raf = existingFile.openSync();
+      raf.close();
+      await runner.run(['create', temp.path])
+          .then((int code) => expect(code, equals(1)));
+    });
   });
 }
