@@ -473,27 +473,23 @@ List<AndroidDevice> getAdbDevices() {
   List<String> output = runSync(<String>[adbPath, 'devices', '-l']).trim().split('\n');
 
   // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper
-  RegExp deviceRegex1 = new RegExp(
+  RegExp deviceRegExLong = new RegExp(
       r'^(\S+)\s+device\s+.*product:(\S+)\s+model:(\S+)\s+device:(\S+)$');
 
   // 0149947A0D01500C       device usb:340787200X
-  RegExp deviceRegex2 = new RegExp(r'^(\S+)\s+device\s+\S+$');
-  RegExp unauthorizedRegex = new RegExp(r'^(\S+)\s+unauthorized\s+\S+$');
-  RegExp offlineRegex = new RegExp(r'^(\S+)\s+offline\s+\S+$');
+  // emulator-5612          host features:shell_2
+  RegExp deviceRegExShort = new RegExp(r'^(\S+)\s+(\S+)\s+\S+$');
 
-  // Skip the first line, which is always 'List of devices attached'.
-  for (String line in output.skip(1)) {
-    // Skip lines like:
-    // * daemon not running. starting it now on port 5037 *
-    // * daemon started successfully *
+  for (String line in output) {
+    // Skip lines like: * daemon started successfully *
     if (line.startsWith('* daemon '))
       continue;
 
     if (line.startsWith('List of devices'))
       continue;
 
-    if (deviceRegex1.hasMatch(line)) {
-      Match match = deviceRegex1.firstMatch(line);
+    if (deviceRegExLong.hasMatch(line)) {
+      Match match = deviceRegExLong.firstMatch(line);
       String deviceID = match[1];
       String productID = match[2];
       String modelID = match[3];
@@ -508,21 +504,21 @@ List<AndroidDevice> getAdbDevices() {
         modelID: modelID,
         deviceCodeName: deviceCodeName
       ));
-    } else if (deviceRegex2.hasMatch(line)) {
-      Match match = deviceRegex2.firstMatch(line);
+    } else if (deviceRegExShort.hasMatch(line)) {
+      Match match = deviceRegExShort.firstMatch(line);
       String deviceID = match[1];
-      devices.add(new AndroidDevice(deviceID));
-    } else if (unauthorizedRegex.hasMatch(line)) {
-      Match match = unauthorizedRegex.firstMatch(line);
-      String deviceID = match[1];
-      printError(
-        'Device $deviceID is not authorized.\n'
-        'You might need to check your device for an authorization dialog.'
-      );
-    } else if (offlineRegex.hasMatch(line)) {
-      Match match = offlineRegex.firstMatch(line);
-      String deviceID = match[1];
-      printError('Device $deviceID is offline.');
+      String deviceState = match[2];
+
+      if (deviceState == 'unauthorized') {
+        printError(
+          'Device $deviceID is not authorized.\n'
+          'You might need to check your device for an authorization dialog.'
+        );
+      } else if (deviceState == 'offline') {
+        printError('Device $deviceID is offline.');
+      } else {
+        devices.add(new AndroidDevice(deviceID));
+      }
     } else {
       printError(
         'Unexpected failure parsing device information from adb output:\n'
@@ -530,6 +526,7 @@ List<AndroidDevice> getAdbDevices() {
         'Please report a bug at https://github.com/flutter/flutter/issues/new');
     }
   }
+
   return devices;
 }
 

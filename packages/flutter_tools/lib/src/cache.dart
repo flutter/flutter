@@ -11,7 +11,6 @@ import 'artifacts.dart';
 import 'base/context.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
-import 'base/process.dart';
 import 'globals.dart';
 
 /// A warpper around the `bin/cache/` directory.
@@ -129,8 +128,7 @@ class Cache {
 
       File tempFile = new File(path.join(Directory.systemTemp.path, '${url.toString().hashCode}.zip'));
       tempFile.writeAsBytesSync(fileBytes, flush: true);
-      // unzip -o -q zipfile -d dest
-      runSync(<String>['unzip', '-o', '-q', tempFile.path, '-d', location.path]);
+      os.unzip(tempFile, location);
       tempFile.deleteSync();
     } else {
       (location as File).writeAsBytesSync(fileBytes, flush: true);

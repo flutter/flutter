@@ -527,7 +527,7 @@ class AnalyzeCommand extends FlutterCommand {
 
       String files = '${analyzedPaths.length} ${pluralize('file', analyzedPaths.length)}';
       String seconds = (analysisTimer.elapsedMilliseconds / 1000.0).toStringAsFixed(2);
-      printStatus('$errorsMessage • analyzed $files, $seconds seconds');
+      printStatus('$errorsMessage ${logger.separator} analyzed $files, $seconds seconds');
 
       firstAnalysis = false;
     }
@@ -807,6 +807,7 @@ class AnalysisError implements Comparable<AnalysisError> {
   @override
   String toString() {
     String relativePath = path.relative(file);
-    return '${severity.toLowerCase().padLeft(7)} • $message • $relativePath:$startLine:$startColumn';
+    String sep = logger.separator;
+    return '${severity.toLowerCase().padLeft(7)} $sep $message $sep $relativePath:$startLine:$startColumn';
   }
 }
