@@ -24,6 +24,7 @@ class SkTypeface;
 class MinikinFontForTest : public android::MinikinFont {
 public:
     explicit MinikinFontForTest(const std::string& font_path);
+    MinikinFontForTest(const std::string& font_path, SkTypeface* typeface);
     ~MinikinFontForTest();
 
     // MinikinFont overrides.
@@ -31,7 +32,6 @@ public:
     void GetBounds(android::MinikinRect* bounds, uint32_t glyph_id,
             const android::MinikinPaint& paint) const;
     const void* GetTable(uint32_t tag, size_t* size, android::MinikinDestroyFunc* destroy);
-    int32_t GetUniqueId() const;
 
     const std::string& fontPath() const { return mFontPath; }
 private:

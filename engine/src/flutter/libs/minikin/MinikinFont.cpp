@@ -20,7 +20,7 @@
 namespace android {
 
 MinikinFont::~MinikinFont() {
-    purgeHbFont(this);
+    purgeHbFontLocked(this);
 }
 
 }  // namespace android

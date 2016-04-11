@@ -99,6 +99,8 @@ typedef void (*MinikinDestroyFunc) (void* data);
 
 class MinikinFont : public MinikinRefCounted {
 public:
+    MinikinFont(int32_t uniqueId) : mUniqueId(uniqueId) {}
+
     virtual ~MinikinFont();
 
     virtual float GetHorizontalAdvance(uint32_t glyph_id,
@@ -125,12 +127,14 @@ public:
         return 0;
     }
 
-    virtual int32_t GetUniqueId() const = 0;
-
     static uint32_t MakeTag(char c1, char c2, char c3, char c4) {
         return ((uint32_t)c1 << 24) | ((uint32_t)c2 << 16) |
             ((uint32_t)c3 << 8) | (uint32_t)c4;
     }
+
+    int32_t GetUniqueId() const { return mUniqueId; }
+private:
+    const int32_t mUniqueId;
 };
 
 }  // namespace android
