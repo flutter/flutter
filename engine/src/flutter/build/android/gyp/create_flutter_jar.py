@@ -29,7 +29,7 @@ def main(args):
 
   input_deps = []
 
-  with zipfile.ZipFile(options.output, 'w') as out_zip:
+  with zipfile.ZipFile(options.output, 'w', zipfile.ZIP_DEFLATED) as out_zip:
     input_deps.append(options.dist_jar)
     with zipfile.ZipFile(options.dist_jar, 'r') as dist_zip:
       for dist_file in dist_zip.infolist():
