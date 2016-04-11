@@ -109,11 +109,13 @@ class Doctor {
       else
         printStatus('${result.leadingBox} ${validator.title}');
 
+      final String separator = Platform.isWindows ? ' ' : logger.separator;
+
       for (ValidationMessage message in result.messages) {
         if (message.isError) {
           printStatus('    x ${message.message.replaceAll('\n', '\n      ')}');
         } else {
-          printStatus('    • ${message.message.replaceAll('\n', '\n      ')}');
+          printStatus('    $separator ${message.message.replaceAll('\n', '\n      ')}');
         }
       }
     }
@@ -160,9 +162,9 @@ class ValidationResult {
 
   String get leadingBox {
     if (type == ValidationType.missing)
-      return '[ ]';
+      return '[x]';
     else if (type == ValidationType.installed)
-      return '[✓]';
+      return Platform.isWindows ? '[+]' : '[✓]';
     else
       return '[-]';
   }
@@ -185,6 +187,7 @@ class _FlutterValidator extends DoctorValidator {
   @override
   ValidationResult validate() {
     List<ValidationMessage> messages = <ValidationMessage>[];
+    ValidationType valid = ValidationType.installed;
 
     FlutterVersion version = FlutterVersion.getVersion();
 
@@ -195,7 +198,16 @@ class _FlutterValidator extends DoctorValidator {
       'engine revision ${version.engineRevisionShort}'
     ));
 
-    return new ValidationResult(ValidationType.installed, messages,
+    if (Platform.isWindows) {
+      valid = ValidationType.missing;
+
+      messages.add(new ValidationMessage.error(
+        'Flutter tools are not (yet) supported on Windows: '
+        'https://github.com/flutter/flutter/issues/138.'
+      ));
+    }
+
+    return new ValidationResult(valid, messages,
       statusInfo: 'on ${osName()}, channel ${version.channel}');
   }
 }
@@ -247,7 +259,9 @@ class _AtomValidator extends DoctorValidator {
     }
 
     return new ValidationResult(
-      installCount == 2 ? ValidationType.installed : installCount == 1 ? ValidationType.partial : ValidationType.missing,
+      installCount == 2
+        ? ValidationType.installed
+        : installCount == 1 ? ValidationType.partial : ValidationType.missing,
       messages
     );
   }

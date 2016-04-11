@@ -216,10 +216,12 @@ class ArtifactStore {
     File cachedFile = new File(
       path.join(_getBaseCacheDir().path, 'engine', artifact.platform, artifact.fileName)
     );
+
     if (!cachedFile.existsSync()) {
       printError('File not found in the platform artifacts: ${cachedFile.path}');
-      throw new ProcessExit(2);
+      return null;
+    } else {
+      return cachedFile.path;
     }
-    return cachedFile.path;
   }
 }
