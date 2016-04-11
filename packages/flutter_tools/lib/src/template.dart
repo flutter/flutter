@@ -4,8 +4,8 @@
 
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
 import 'package:mustache4dart/mustache4dart.dart' as mustache;
+import 'package:path/path.dart' as path;
 
 import 'artifacts.dart';
 import 'globals.dart';
