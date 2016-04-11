@@ -220,7 +220,7 @@ class BuildApkCommand extends FlutterCommand {
         keyAlias: argResults['keystore-key-alias'],
         keyPassword: argResults['keystore-key-password']
       ),
-      buildForDeploy: variant
+      buildVariant: variant
     );
   }
 }
@@ -231,9 +231,9 @@ Future<_ApkComponents> _findApkComponents(
   String enginePath,
   String manifest,
   String resources,
-  BuildVariant buildForDeploy
+  BuildVariant buildVariant
 ) async {
-  // TODO(devoncarew): Get the right artifacts for [buildForDeploy].
+  // TODO(devoncarew): Get the right artifacts for [buildVariant].
 
   List<String> artifactPaths;
   if (enginePath != null) {
@@ -287,11 +287,11 @@ int _buildApk(
   String flxPath,
   ApkKeystoreInfo keystore,
   String outputFile,
-  BuildVariant buildForDeploy
+  BuildVariant buildVariant
 ) {
   Directory tempDir = Directory.systemTemp.createTempSync('flutter_tools');
 
-  printTrace('Building APK; buildForDeploy: ${getVariantName(buildForDeploy)}.');
+  printTrace('Building APK; buildVariant: ${getVariantName(buildVariant)}.');
 
   try {
     _ApkBuilder builder = new _ApkBuilder(androidSdk.latestVersion);
@@ -408,7 +408,7 @@ Future<int> buildAndroid(
   String target,
   String flxPath,
   ApkKeystoreInfo keystore,
-  BuildVariant buildForDeploy: BuildVariant.develop
+  BuildVariant buildVariant: BuildVariant.develop
 }) async {
   // Validate that we can find an android sdk.
   if (androidSdk == null) {
@@ -440,7 +440,7 @@ Future<int> buildAndroid(
 
   BuildConfiguration config = configs.firstWhere((BuildConfiguration bc) => bc.targetPlatform == platform);
   _ApkComponents components = await _findApkComponents(
-    platform, config, enginePath, manifest, resources, buildForDeploy
+    platform, config, enginePath, manifest, resources, buildVariant
   );
 
   if (components == null) {
@@ -448,7 +448,7 @@ Future<int> buildAndroid(
     return 1;
   }
 
-  printStatus('Building APK in ${getVariantName(buildForDeploy)} mode...');
+  printStatus('Building APK in ${getVariantName(buildVariant)} mode...');
 
   if (flxPath != null && flxPath.isNotEmpty) {
     if (!FileSystemEntity.isFileSync(flxPath)) {
@@ -457,7 +457,7 @@ Future<int> buildAndroid(
       return 1;
     }
 
-    return _buildApk(platform, components, flxPath, keystore, outputFile, buildForDeploy);
+    return _buildApk(platform, components, flxPath, keystore, outputFile, buildVariant);
   } else {
     // Find the path to the main Dart file; build the FLX.
     String mainPath = findMainDartFile(target);
@@ -466,7 +466,7 @@ Future<int> buildAndroid(
         mainPath: mainPath,
         includeRobotoFonts: false);
 
-    return _buildApk(platform, components, localBundlePath, keystore, outputFile, buildForDeploy);
+    return _buildApk(platform, components, localBundlePath, keystore, outputFile, buildVariant);
   }
 }
 
@@ -476,7 +476,7 @@ Future<int> buildApk(
   List<BuildConfiguration> configs, {
   String enginePath,
   String target,
-  BuildVariant buildForDeploy: BuildVariant.develop
+  BuildVariant buildVariant: BuildVariant.develop
 }) async {
   if (!FileSystemEntity.isFileSync(_kDefaultAndroidManifestPath)) {
     printError('Cannot build APK. Missing $_kDefaultAndroidManifestPath.');
@@ -490,7 +490,7 @@ Future<int> buildApk(
     enginePath: enginePath,
     force: false,
     target: target,
-    buildForDeploy: buildForDeploy
+    buildVariant: buildVariant
   );
 
   return result;

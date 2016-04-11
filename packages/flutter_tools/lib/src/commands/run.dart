@@ -170,7 +170,7 @@ Future<int> startApp(
       device.platform, toolchain, configs,
       enginePath: enginePath,
       target: target,
-      buildForDeploy: BuildVariant.develop
+      buildVariant: BuildVariant.develop
     );
 
     if (result != 0)
