@@ -22,8 +22,14 @@
 
 #include <cutils/log.h>
 
-MinikinFontForTest::MinikinFontForTest(const std::string& font_path) : mFontPath(font_path) {
-    mTypeface = SkTypeface::CreateFromFile(font_path.c_str());
+MinikinFontForTest::MinikinFontForTest(const std::string& font_path) :
+    MinikinFontForTest(font_path, SkTypeface::CreateFromFile(font_path.c_str())) {
+}
+
+MinikinFontForTest::MinikinFontForTest(const std::string& font_path, SkTypeface* typeface) :
+    MinikinFont(typeface->uniqueID()),
+    mTypeface(typeface),
+    mFontPath(font_path) {
 }
 
 MinikinFontForTest::~MinikinFontForTest() {
@@ -54,8 +60,4 @@ const void* MinikinFontForTest::GetTable(uint32_t tag, size_t* size,
     mTypeface->getTableData(tag, 0, tableSize, buf);
     *destroy = free;
     return buf;
-}
-
-int32_t MinikinFontForTest::GetUniqueId() const {
-    return mTypeface->uniqueID();
 }

@@ -37,6 +37,23 @@ private:
     int mRefcount_;
 };
 
+// An RAII container for reference counted objects.
+// Note: this is only suitable for clients which are _not_ holding the global lock.
+template <typename T>
+class MinikinAutoUnref {
+public:
+    MinikinAutoUnref(T* obj) : mObj(obj) {
+    }
+    ~MinikinAutoUnref() {
+        mObj->Unref();
+    }
+    T& operator*() const { return *mObj; }
+    T* operator->() const { return mObj; }
+    T* get() const { return mObj; }
+private:
+    T* mObj;
+};
+
 }
 
 #endif   // MINIKIN_REF_COUNTED_H
