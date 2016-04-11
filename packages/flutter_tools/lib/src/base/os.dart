@@ -63,6 +63,7 @@ class _PosixUtils extends OperatingSystemUtils {
   }
 
   // unzip -o -q zipfile -d dest
+  @override
   void unzip(File file, Directory targetDirectory) {
     runSync(<String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path]);
   }
@@ -85,6 +86,7 @@ class _WindowsUtils extends OperatingSystemUtils {
     return new File(result.stdout.trim().split('\n').first.trim());
   }
 
+  @override
   void unzip(File file, Directory targetDirectory) {
     Archive archive = new ZipDecoder().decodeBytes(file.readAsBytesSync());
 
