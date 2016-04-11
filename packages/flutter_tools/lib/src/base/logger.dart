@@ -199,19 +199,13 @@ class _AnsiTerminal {
   _AnsiTerminal() {
     // TODO(devoncarew): This detection does not work for Windows.
     String term = Platform.environment['TERM'];
-    _supportsColor = term != null && term != 'dumb';
+    supportsColor = term != null && term != 'dumb';
   }
 
   static const String _bold = '\u001B[1m';
   static const String _reset = '\u001B[0m';
 
-  bool _supportsColor;
-
-  bool get supportsColor => _supportsColor;
-
-  set supportsColor(bool value) {
-    _supportsColor = value;
-  }
+  bool supportsColor;
 
   String writeBold(String str) => supportsColor ? '$_bold$str$_reset' : str;
 }
