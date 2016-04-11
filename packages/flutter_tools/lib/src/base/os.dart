@@ -5,10 +5,16 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:archive/archive.dart';
+import 'package:path/path.dart' as path;
+
 import 'context.dart';
+import 'process.dart';
 
 /// Returns [OperatingSystemUtils] active in the current app context (i.e. zone).
-OperatingSystemUtils get os => context[OperatingSystemUtils] ?? (context[OperatingSystemUtils] = new OperatingSystemUtils._());
+OperatingSystemUtils get os {
+  return context[OperatingSystemUtils] ?? (context[OperatingSystemUtils] = new OperatingSystemUtils._());
+}
 
 abstract class OperatingSystemUtils {
   factory OperatingSystemUtils._() {
@@ -33,6 +39,8 @@ abstract class OperatingSystemUtils {
   /// Return the path (with symlinks resolved) to the given executable, or `null`
   /// if `which` was not able to locate the binary.
   File which(String execName);
+
+  void unzip(File file, Directory targetDirectory);
 }
 
 class _PosixUtils extends OperatingSystemUtils {
@@ -53,6 +61,12 @@ class _PosixUtils extends OperatingSystemUtils {
     String path = result.stdout.trim().split('\n').first.trim();
     return new File(new File(path).resolveSymbolicLinksSync());
   }
+
+  // unzip -o -q zipfile -d dest
+  @override
+  void unzip(File file, Directory targetDirectory) {
+    runSync(<String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path]);
+  }
 }
 
 class _WindowsUtils extends OperatingSystemUtils {
@@ -66,7 +80,26 @@ class _WindowsUtils extends OperatingSystemUtils {
 
   @override
   File which(String execName) {
-    throw new UnimplementedError('_WindowsUtils.which');
+    ProcessResult result = Process.runSync('where', <String>[execName]);
+    if (result.exitCode != 0)
+      return null;
+    return new File(result.stdout.trim().split('\n').first.trim());
+  }
+
+  @override
+  void unzip(File file, Directory targetDirectory) {
+    Archive archive = new ZipDecoder().decodeBytes(file.readAsBytesSync());
+
+    for (ArchiveFile archiveFile in archive.files) {
+      // The archive package doesn't correctly set isFile.
+      if (!archiveFile.isFile || archiveFile.name.endsWith('/'))
+        continue;
+
+      File destFile = new File(path.join(targetDirectory.path, archiveFile.name));
+      if (!destFile.parent.existsSync())
+        destFile.parent.createSync(recursive: true);
+      destFile.writeAsBytesSync(archiveFile.content);
+    }
   }
 }
 
