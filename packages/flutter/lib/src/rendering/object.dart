@@ -382,9 +382,25 @@ abstract class Constraints {
   /// Whether the constraint is expressed in a consistent manner.
   bool get isNormalized;
 
-  /// Same as [isNormalized] but, in checked mode, throws an exception
-  /// if isNormalized is false.
-  bool get debugAssertIsNormalized;
+  /// Asserts that the constraints are valid.
+  ///
+  /// This might involve checks more detailed than [isNormalized].
+  ///
+  /// For example, the [BoxConstraints] subclass verifies that the
+  /// constraints are not [NaN].
+  ///
+  /// If the [isAppliedConstraint] argument is true, then even
+  /// stricter rules are enforced. This argument is set to true when
+  /// checking constraints that are about to be applied to a
+  /// [RenderObject] during layout, as opposed to constraints that may
+  /// be further affected by other constraints. For example, the
+  /// asserts for verifying the validity of
+  /// [RenderConstrainedBox.additionalConstraints] do not set this
+  /// argument, but the asserts for verifying the argument passed to
+  /// the [layout] method do.
+  ///
+  /// Returns the same as [isNormalized] if asserts are disabled.
+  bool debugAssertIsValid({ bool isAppliedConstraint: false });
 }
 
 typedef void RenderObjectVisitor(RenderObject child);
@@ -1136,7 +1152,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// work to update its layout information.
   void layout(Constraints constraints, { bool parentUsesSize: false }) {
     assert(constraints != null);
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid(isAppliedConstraint: true));
     assert(!_debugDoingThisResize);
     assert(!_debugDoingThisLayout);
     final RenderObject parent = this.parent;

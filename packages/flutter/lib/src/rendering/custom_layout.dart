@@ -57,7 +57,7 @@ abstract class MultiChildLayoutDelegate {
         );
       }
       try {
-        assert(constraints.debugAssertIsNormalized);
+        assert(constraints.debugAssertIsValid(isAppliedConstraint: true));
       } on AssertionError catch (exception) {
         throw new FlutterError(
           'The $this custom multichild layout delegate provided invalid box constraints for the child with id "$childId".\n'
@@ -232,7 +232,7 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   }
 
   Size _getSize(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     return constraints.constrain(_delegate.getSize(constraints));
   }
 

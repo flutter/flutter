@@ -225,7 +225,7 @@ abstract class RenderStackBase extends RenderBox
 
   @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     double width = constraints.minWidth;
     RenderBox child = firstChild;
     while (child != null) {
@@ -241,7 +241,7 @@ abstract class RenderStackBase extends RenderBox
 
   @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     bool hasNonPositionedChildren = false;
     double width = constraints.minWidth;
     RenderBox child = firstChild;
@@ -262,7 +262,7 @@ abstract class RenderStackBase extends RenderBox
 
   @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     double height = constraints.minHeight;
     RenderBox child = firstChild;
     while (child != null) {
@@ -278,7 +278,7 @@ abstract class RenderStackBase extends RenderBox
 
   @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     bool hasNonPositionedChildren = false;
     double height = constraints.minHeight;
     RenderBox child = firstChild;

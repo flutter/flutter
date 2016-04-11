@@ -171,7 +171,7 @@ class RenderBlock extends RenderBox
 
   @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     switch (mainAxis) {
       case Axis.horizontal:
         return _getIntrinsicMainAxis(constraints, constraints.constrainWidth);
@@ -186,7 +186,7 @@ class RenderBlock extends RenderBox
 
   @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     switch (mainAxis) {
       case Axis.horizontal:
         return _getIntrinsicMainAxis(constraints, constraints.constrainWidth);
@@ -201,7 +201,7 @@ class RenderBlock extends RenderBox
 
   @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     switch (mainAxis) {
       case Axis.horizontal:
         return _getIntrinsicCrossAxis(
@@ -216,7 +216,7 @@ class RenderBlock extends RenderBox
 
   @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     switch (mainAxis) {
       case Axis.horizontal:
         return _getIntrinsicCrossAxis(
