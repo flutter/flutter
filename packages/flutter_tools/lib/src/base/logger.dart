@@ -13,6 +13,10 @@ abstract class Logger {
 
   String get separator => _sep;
 
+  set supportsColor(bool value) {
+    _terminal.supportsColor = value;
+  }
+
   /// Display an error level message to the user. Commands should use this if they
   /// fail in some way.
   void printError(String message, [StackTrace stackTrace]);
@@ -202,7 +206,12 @@ class _AnsiTerminal {
   static const String _reset = '\u001B[0m';
 
   bool _supportsColor;
+
   bool get supportsColor => _supportsColor;
+
+  set supportsColor(bool value) {
+    _supportsColor = value;
+  }
 
   String writeBold(String str) => supportsColor ? '$_bold$str$_reset' : str;
 }

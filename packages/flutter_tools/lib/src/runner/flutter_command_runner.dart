@@ -196,9 +196,8 @@ class FlutterCommandRunner extends CommandRunner {
     if (globalResults['verbose'])
       context[Logger] = new VerboseLogger();
 
-    // TODO:
-    // if (!globalResults['color'])
-    //   logger.supportsColor = false;
+    if (!globalResults['color'])
+      logger.supportsColor = false;
 
     // we must set ArtifactStore.flutterRoot early because other features use it
     // (e.g. enginePath's initialiser uses it)

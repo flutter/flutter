@@ -46,6 +46,7 @@ class UpgradeCommand extends FlutterCommand {
 
     // Check for and download any engine and pkg/ updates.
     printStatus('');
+    printStatus('Upgrading engine...');
     code = await runCommandAndStreamOutput(<String>[
       'bin/flutter', '--no-color', 'precache'
     ], workingDirectory: ArtifactStore.flutterRoot);
