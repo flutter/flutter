@@ -8,8 +8,8 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../artifacts.dart';
-import '../build_configuration.dart';
 import '../base/process.dart';
+import '../build_configuration.dart';
 import '../globals.dart';
 import '../runner/flutter_command_runner.dart';
 
