@@ -41,7 +41,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
 
   @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     if (child != null)
       return _isVertical ? child.getMinIntrinsicHeight(constraints.flipped) : child.getMinIntrinsicWidth(constraints);
     return super.getMinIntrinsicWidth(constraints);
@@ -49,7 +49,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
 
   @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     if (child != null)
       return _isVertical ? child.getMaxIntrinsicHeight(constraints.flipped) : child.getMaxIntrinsicWidth(constraints);
     return super.getMaxIntrinsicWidth(constraints);
@@ -57,7 +57,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
 
   @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     if (child != null)
       return _isVertical ? child.getMinIntrinsicWidth(constraints.flipped) : child.getMinIntrinsicHeight(constraints);
     return super.getMinIntrinsicHeight(constraints);
@@ -65,7 +65,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
 
   @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     if (child != null)
       return _isVertical ? child.getMaxIntrinsicWidth(constraints.flipped) : child.getMaxIntrinsicHeight(constraints);
     return super.getMaxIntrinsicHeight(constraints);

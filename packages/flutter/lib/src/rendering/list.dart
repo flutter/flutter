@@ -82,7 +82,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
   }
 
   double _getIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     switch (mainAxis) {
       case Axis.vertical:
         return constraints.constrainWidth(0.0);
@@ -102,7 +102,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
   }
 
   double _getIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     switch (mainAxis) {
       case Axis.vertical:
         return constraints.constrainHeight(_preferredExtent);

@@ -246,7 +246,7 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
 
   @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     if (child != null)
       return constraints.constrainWidth(child.getMinIntrinsicWidth(_getInnerConstraints(constraints)));
     return super.getMinIntrinsicWidth(constraints);
@@ -254,7 +254,7 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
 
   @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     if (child != null)
       return constraints.constrainWidth(child.getMaxIntrinsicWidth(_getInnerConstraints(constraints)));
     return super.getMaxIntrinsicWidth(constraints);
@@ -262,7 +262,7 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
 
   @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     if (child != null)
       return constraints.constrainHeight(child.getMinIntrinsicHeight(_getInnerConstraints(constraints)));
     return super.getMinIntrinsicHeight(constraints);
@@ -270,7 +270,7 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
 
   @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     if (child != null)
       return constraints.constrainHeight(child.getMaxIntrinsicHeight(_getInnerConstraints(constraints)));
     return super.getMaxIntrinsicHeight(constraints);
