@@ -177,9 +177,9 @@ class BuildApkCommand extends FlutterCommand {
 
   @override
   final String description = 'Build an Android APK file from your app.\n\n'
-    'This command can build develop and deploy versions of your application. \'develop\' builds support\n'
-    'debugging and a quick development cycle. \'deploy\' builds don\'t support debugging and are suitable\n'
-    'for deploying to app stores.';
+    'This command can build development and deployable versions of your application. \'develop\' builds\n'
+    'support debugging and a quick development cycle. \'deploy\' builds don\'t support debugging and are\n'
+    'suitable for deploying to app stores.';
 
   @override
   Future<int> runInProject() async {
