@@ -118,7 +118,7 @@ class FlutterDriver {
       if (signal == 'timeout') {
         throw new DriverError(
           'Timed out waiting for Flutter Driver extension to become available. '
-          'Ensure your application (lib/main.dart) imports '
+          'Ensure your test app (often: lib/main.dart) imports '
           '"package:flutter_driver/driver_extension.dart" and '
           'calls enableFlutterDriverExtension() as the first call in main().'
         );
