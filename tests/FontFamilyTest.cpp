@@ -350,9 +350,9 @@ void expectVSGlyphs(FontFamily* family, uint32_t codepoint, const std::set<uint3
 }
 
 TEST_F(FontFamilyTest, hasVariationSelectorTest) {
-    MinikinFontForTest minikinFont(kVsTestFont);
-    FontFamily family;
-    family.addFont(&minikinFont);
+    MinikinAutoUnref<MinikinFontForTest> minikinFont(new MinikinFontForTest(kVsTestFont));
+    MinikinAutoUnref<FontFamily> family(new FontFamily);
+    family->addFont(minikinFont.get());
 
     AutoMutex _l(gMinikinLock);
 
@@ -365,24 +365,24 @@ TEST_F(FontFamilyTest, hasVariationSelectorTest) {
     const uint32_t kVS20 = 0xE0103;
 
     const uint32_t kSupportedChar1 = 0x82A6;
-    EXPECT_TRUE(family.getCoverage()->get(kSupportedChar1));
-    expectVSGlyphs(&family, kSupportedChar1, std::set<uint32_t>({kVS1, kVS17, kVS18, kVS19}));
+    EXPECT_TRUE(family->getCoverage()->get(kSupportedChar1));
+    expectVSGlyphs(family.get(), kSupportedChar1, std::set<uint32_t>({kVS1, kVS17, kVS18, kVS19}));
 
     const uint32_t kSupportedChar2 = 0x845B;
-    EXPECT_TRUE(family.getCoverage()->get(kSupportedChar2));
-    expectVSGlyphs(&family, kSupportedChar2, std::set<uint32_t>({kVS2, kVS18, kVS19, kVS20}));
+    EXPECT_TRUE(family->getCoverage()->get(kSupportedChar2));
+    expectVSGlyphs(family.get(), kSupportedChar2, std::set<uint32_t>({kVS2, kVS18, kVS19, kVS20}));
 
     const uint32_t kNoVsSupportedChar = 0x537F;
-    EXPECT_TRUE(family.getCoverage()->get(kNoVsSupportedChar));
-    expectVSGlyphs(&family, kNoVsSupportedChar, std::set<uint32_t>());
+    EXPECT_TRUE(family->getCoverage()->get(kNoVsSupportedChar));
+    expectVSGlyphs(family.get(), kNoVsSupportedChar, std::set<uint32_t>());
 
     const uint32_t kVsOnlySupportedChar = 0x717D;
-    EXPECT_FALSE(family.getCoverage()->get(kVsOnlySupportedChar));
-    expectVSGlyphs(&family, kVsOnlySupportedChar, std::set<uint32_t>({kVS3, kVS19, kVS20}));
+    EXPECT_FALSE(family->getCoverage()->get(kVsOnlySupportedChar));
+    expectVSGlyphs(family.get(), kVsOnlySupportedChar, std::set<uint32_t>({kVS3, kVS19, kVS20}));
 
     const uint32_t kNotSupportedChar = 0x845C;
-    EXPECT_FALSE(family.getCoverage()->get(kNotSupportedChar));
-    expectVSGlyphs(&family, kNotSupportedChar, std::set<uint32_t>());
+    EXPECT_FALSE(family->getCoverage()->get(kNotSupportedChar));
+    expectVSGlyphs(family.get(), kNotSupportedChar, std::set<uint32_t>());
 }
 
 TEST_F(FontFamilyTest, hasVSTableTest) {
@@ -403,12 +403,13 @@ TEST_F(FontFamilyTest, hasVSTableTest) {
                 "Font " + testCase.fontPath + " should have a variation sequence table." :
                 "Font " + testCase.fontPath + " shouldn't have a variation sequence table.");
 
-        MinikinFontForTest minikinFont(testCase.fontPath);
-        FontFamily family;
-        family.addFont(&minikinFont);
-        family.getCoverage();
+        MinikinAutoUnref<MinikinFontForTest> minikinFont(new MinikinFontForTest(testCase.fontPath));
+        MinikinAutoUnref<FontFamily> family(new FontFamily);
+        family->addFont(minikinFont.get());
+        AutoMutex _l(gMinikinLock);
+        family->getCoverage();
 
-        EXPECT_EQ(testCase.hasVSTable, family.hasVSTable());
+        EXPECT_EQ(testCase.hasVSTable, family->hasVSTable());
     }
 }
 

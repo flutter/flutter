@@ -52,8 +52,6 @@ public:
 
     // TODO: provide access to raw data, as an optimization.
 
-    int32_t GetUniqueId() const;
-
     // Not a virtual method, as the protocol to access rendered
     // glyph bitmaps is probably different depending on the
     // backend.
@@ -64,7 +62,6 @@ public:
 
 private:
     FT_Face mTypeface;
-    int32_t mUniqueId;
     static int32_t sIdCounter;
 };
 
