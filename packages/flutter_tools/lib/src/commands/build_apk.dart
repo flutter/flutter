@@ -196,7 +196,10 @@ class BuildApkCommand extends FlutterCommand {
       return 1;
     }
 
-    bool buildForDeploy = argResults['deploy'];
+    BuildVariant variant = BuildVariant.develop;
+
+    if (argResults['deploy'])
+      variant = BuildVariant.deploy;
 
     // TODO(devoncarew): This command should take an arg for the output type (arm / x64).
 
@@ -217,7 +220,7 @@ class BuildApkCommand extends FlutterCommand {
         keyAlias: argResults['keystore-key-alias'],
         keyPassword: argResults['keystore-key-password']
       ),
-      buildForDeploy: buildForDeploy
+      buildForDeploy: variant
     );
   }
 }
@@ -228,7 +231,7 @@ Future<_ApkComponents> _findApkComponents(
   String enginePath,
   String manifest,
   String resources,
-  bool buildForDeploy
+  BuildVariant buildForDeploy
 ) async {
   // TODO(devoncarew): Get the right artifacts for [buildForDeploy].
 
@@ -284,12 +287,11 @@ int _buildApk(
   String flxPath,
   ApkKeystoreInfo keystore,
   String outputFile,
-  bool buildForDeploy
+  BuildVariant buildForDeploy
 ) {
   Directory tempDir = Directory.systemTemp.createTempSync('flutter_tools');
 
-  // TODO(devoncarew): Use the [buildForDeploy] param.
-  printTrace('Building APK; buildForDeploy: $buildForDeploy.');
+  printTrace('Building APK; buildForDeploy: ${getVariantName(buildForDeploy)}.');
 
   try {
     _ApkBuilder builder = new _ApkBuilder(androidSdk.latestVersion);
@@ -406,7 +408,7 @@ Future<int> buildAndroid(
   String target,
   String flxPath,
   ApkKeystoreInfo keystore,
-  bool buildForDeploy: false
+  BuildVariant buildForDeploy: BuildVariant.develop
 }) async {
   // Validate that we can find an android sdk.
   if (androidSdk == null) {
@@ -446,7 +448,7 @@ Future<int> buildAndroid(
     return 1;
   }
 
-  printStatus('Building APK in ${buildForDeploy ? 'deploy' : 'develop'} mode...');
+  printStatus('Building APK in ${getVariantName(buildForDeploy)} mode...');
 
   if (flxPath != null && flxPath.isNotEmpty) {
     if (!FileSystemEntity.isFileSync(flxPath)) {
@@ -474,7 +476,7 @@ Future<int> buildApk(
   List<BuildConfiguration> configs, {
   String enginePath,
   String target,
-  bool buildForDeploy: false
+  BuildVariant buildForDeploy: BuildVariant.develop
 }) async {
   if (!FileSystemEntity.isFileSync(_kDefaultAndroidManifestPath)) {
     printError('Cannot build APK. Missing $_kDefaultAndroidManifestPath.');

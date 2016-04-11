@@ -14,6 +14,19 @@ enum BuildType {
   debug,
 }
 
+/// The type of build - `develop`, `profile`, or `deploy`.
+enum BuildVariant {
+  develop,
+  profile,
+  deploy
+}
+
+String getVariantName(BuildVariant variant) {
+  String name = '$variant';
+  int index = name.indexOf('.');
+  return index == -1 ? name : name.substring(index + 1);
+}
+
 enum HostPlatform {
   mac,
   linux,
