@@ -5,7 +5,7 @@
 /// Provides API to test Flutter applications that run on real
 /// devices and emulators.
 ///
-/// The application run in a separate process from the test itself.
+/// The application runs in a separate process from the test itself.
 ///
 /// This is Flutter's version of Selenium WebDriver (generic web),
 /// Protractor (Angular), Espresso (Android) or Earl Gray (iOS).
