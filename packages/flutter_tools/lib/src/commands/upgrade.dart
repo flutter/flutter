@@ -20,42 +20,39 @@ class UpgradeCommand extends FlutterCommand {
   final String description = 'Upgrade your copy of Flutter.';
 
   @override
-  Validator projectRootValidator = () => true;
+  bool get requiresProjectRoot => false;
 
   @override
   Future<int> runInProject() async {
-    printStatus(FlutterVersion.getVersion(ArtifactStore.flutterRoot).toString());
-
     try {
       runCheckedSync(<String>[
         'git', 'rev-parse', '@{u}'
       ], workingDirectory: ArtifactStore.flutterRoot);
     } catch (e) {
-      printError('Unable to upgrade Flutter. No upstream repository configured for Flutter.');
+      printError('Unable to upgrade Flutter: no upstream repository configured.');
       return 1;
     }
 
-    printStatus('');
     printStatus('Upgrading Flutter...');
 
-    int code = await runCommandAndStreamOutput(<String>[
-      'git', 'pull', '--ff-only'
-    ], workingDirectory: ArtifactStore.flutterRoot);
+    int code = await runCommandAndStreamOutput(
+      <String>['git', 'pull', '--ff-only'],
+      workingDirectory: ArtifactStore.flutterRoot,
+      mapFunction: (String line) => matchesGitLine(line) ? null : line
+    );
 
     if (code != 0)
       return code;
 
-    // Causes us to update our locally cached packages.
+    // Check for and download any engine and pkg/ updates.
     printStatus('');
+    printStatus('Upgrading engine...');
     code = await runCommandAndStreamOutput(<String>[
-      'bin/flutter', '--version'
+      'bin/flutter', '--no-color', 'precache'
     ], workingDirectory: ArtifactStore.flutterRoot);
 
-    if (code != 0)
-      return code;
-
-    // Check for and download any engine updates.
-    await cache.updateAll();
+    printStatus('');
+    printStatus(FlutterVersion.getVersion(ArtifactStore.flutterRoot).toString());
 
     if (FileSystemEntity.isFileSync('pubspec.yaml')) {
       printStatus('');
@@ -66,5 +63,20 @@ class UpgradeCommand extends FlutterCommand {
     }
 
     return 0;
+  }
+
+  //  dev/benchmarks/complex_layout/lib/main.dart        |  24 +-
+  static final RegExp _gitDiffRegex = new RegExp(r' (\S+)\s+\|\s+\d+ [+-]+');
+
+  //  rename {packages/flutter/doc => dev/docs}/styles.html (92%)
+  //  delete mode 100644 doc/index.html
+  //  create mode 100644 examples/material_gallery/lib/gallery/demo.dart
+  static final RegExp _gitChangedRegex = new RegExp(r' (rename|delete mode|create mode) .+');
+
+  // Public for testing.
+  static bool matchesGitLine(String line) {
+    return _gitDiffRegex.hasMatch(line)
+      || _gitChangedRegex.hasMatch(line)
+      || line == 'Fast-forward';
   }
 }

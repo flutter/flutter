@@ -15,7 +15,7 @@ typedef String StringConverter(String string);
 
 /// This runs the command in the background from the specified working
 /// directory. Completes when the process has been started.
-Future<Process> runCommand(List<String> cmd, {String workingDirectory}) async {
+Future<Process> runCommand(List<String> cmd, { String workingDirectory }) async {
   printTrace(cmd.join(' '));
   String executable = cmd[0];
   List<String> arguments = cmd.length > 1 ? cmd.sublist(1) : [];

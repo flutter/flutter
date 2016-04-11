@@ -56,7 +56,7 @@ class SimControl {
   /// Returns [SimControl] active in the current app context (i.e. zone).
   static SimControl get instance => context[SimControl] ?? (context[SimControl] = new SimControl());
 
-  Future<bool> boot({String deviceName}) async {
+  Future<bool> boot({ String deviceName }) async {
     if (_isAnyConnected())
       return true;
 
