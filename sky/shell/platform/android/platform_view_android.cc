@@ -47,7 +47,6 @@ PlatformViewAndroid::~PlatformViewAndroid() {
 }
 
 void PlatformViewAndroid::Detach(JNIEnv* env, jobject obj) {
-  DCHECK(!window_);
   shell_view_.reset();
   // Note: |this| has been destroyed at this point.
 }
