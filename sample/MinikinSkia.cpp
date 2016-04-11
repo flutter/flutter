@@ -7,6 +7,7 @@
 namespace android {
 
 MinikinFontSkia::MinikinFontSkia(SkTypeface *typeface) :
+    MinikinFont(typeface->uniqueID()),
     mTypeface(typeface) {
 }
 
@@ -65,10 +66,6 @@ const void* MinikinFontSkia::GetTable(uint32_t tag, size_t* size, MinikinDestroy
 
 SkTypeface *MinikinFontSkia::GetSkTypeface() {
     return mTypeface;
-}
-
-int32_t MinikinFontSkia::GetUniqueId() const {
-    return mTypeface->uniqueID();
 }
 
 }
