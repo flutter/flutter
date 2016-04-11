@@ -10,4 +10,4 @@ dependencies:
     path: ../../packages/flutter_sprites
   flutter_markdown:
     path: ../../packages/flutter_markdown
-  flutter_gallery_assets: '0.0.13'
+  flutter_gallery_assets: '0.0.15'
