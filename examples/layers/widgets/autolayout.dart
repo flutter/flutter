@@ -47,12 +47,7 @@ class _MyAutoLayoutDelegate extends AutoLayoutDelegate {
   bool shouldUpdateConstraints(_MyAutoLayoutDelegate oldDelegate) => true;
 }
 
-class ColoredBoxes extends StatefulWidget {
-  @override
-  _ColoredBoxesState createState() => new _ColoredBoxesState();
-}
-
-class _ColoredBoxesState extends State<ColoredBoxes> {
+class _ColoredBoxesState extends State<StatefulWidget> {
   final _MyAutoLayoutDelegate delegate = new _MyAutoLayoutDelegate();
 
   @override
@@ -90,5 +85,5 @@ class _ColoredBoxesState extends State<ColoredBoxes> {
 }
 
 void main() {
-  runApp(new ColoredBoxes());
+  runApp(new SimpleStatefulWidget(() => new _ColoredBoxesState()));
 }
