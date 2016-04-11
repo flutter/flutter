@@ -14,8 +14,6 @@ public:
 
     const void* GetTable(uint32_t tag, size_t* size, MinikinDestroyFunc* destroy);
 
-    int32_t GetUniqueId() const;
-
     SkTypeface *GetSkTypeface();
 
 private:

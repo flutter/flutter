@@ -91,8 +91,8 @@ void purgeHbFontCacheLocked() {
     getFontCacheLocked()->clear();
 }
 
-void purgeHbFont(const MinikinFont* minikinFont) {
-    AutoMutex _l(gMinikinLock);
+void purgeHbFontLocked(const MinikinFont* minikinFont) {
+    assertMinikinLocked();
     const int32_t fontId = minikinFont->GetUniqueId();
     getFontCacheLocked()->remove(fontId);
 }

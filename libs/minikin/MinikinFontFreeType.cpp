@@ -30,8 +30,8 @@ namespace android {
 int32_t MinikinFontFreeType::sIdCounter = 0;
 
 MinikinFontFreeType::MinikinFontFreeType(FT_Face typeface) : 
+    MinikinFont(sIdCounter++),
     mTypeface(typeface) {
-    mUniqueId = sIdCounter++;
 }
 
 MinikinFontFreeType::~MinikinFontFreeType() {
@@ -70,10 +70,6 @@ const void* MinikinFontFreeType::GetTable(uint32_t tag, size_t* size, MinikinDes
     *destroy = free;
     *size = ftsize;
     return buf;
-}
-
-int32_t MinikinFontFreeType::GetUniqueId() const {
-    return mUniqueId;
 }
 
 bool MinikinFontFreeType::Render(uint32_t glyph_id, const MinikinPaint& /* paint */,
