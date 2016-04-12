@@ -11,11 +11,36 @@ import 'constants.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
+/// The part of a material design [AppBar] that expands and collapses.
+///
+/// Most commonly used in in the [AppBar.flexibleSpace] field, a flexible space
+/// bar expands and contracts as the app scrolls so that the [AppBar] reaches
+/// from the top of the app to the top of the scrolling contents of the app.
+///
+/// Requires one of its ancestors to be a [Scaffold] widget because the
+/// [Scaffold] coordinates the scrolling effect between the flexible space and
+/// its body.
+///
+/// See also:
+///  * [AppBar]
+///  * [Scaffold]
+///  * <https://www.google.com/design/spec/patterns/scrolling-techniques.html>
 class FlexibleSpaceBar extends StatefulWidget {
-  FlexibleSpaceBar({ Key key, this.title, this.image }) : super(key: key);
+  /// Creates a flexible space bar.
+  ///
+  /// Most commonly used in the [AppBar.flexibleSpace] field. Requires one of
+  /// its ancestors to be a [Scaffold] widget.
+  FlexibleSpaceBar({ Key key, this.title, this.background }) : super(key: key);
 
+  /// The primary contents of the flexible space bar when expanded.
+  ///
+  /// Typically a [Text] widget.
   final Widget title;
-  final Widget image;
+
+  /// Shown behind the [title] when expanded.
+  ///
+  /// Typically an [AssetImage] widget with [AssetImage.fit] set to [ImageFit.cover].
+  final Widget background;
 
   @override
   _FlexibleSpaceBarState createState() => new _FlexibleSpaceBarState();
@@ -47,7 +72,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
     final List<Widget> children = <Widget>[];
 
     // background image
-    if (config.image != null) {
+    if (config.background != null) {
       final double fadeStart = (appBarHeight - toolBarHeight * 2.0) / appBarHeight;
       final double fadeEnd = (appBarHeight - toolBarHeight) / appBarHeight;
       final CurvedAnimation opacityCurve = new CurvedAnimation(
@@ -63,7 +88,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
           opacity: new Tween<double>(begin: 1.0, end: 0.0).evaluate(opacityCurve),
           child: new SizedBox(
             height: appBarHeight + statusBarHeight,
-            child: config.image
+            child: config.background
           )
         )
        ));

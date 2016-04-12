@@ -2,8 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// A description of a material design icon.
+///
+/// See [Icons] for a number of predefined icons.
 class IconData {
+  /// Creates icon data.
+  ///
+  /// Rarely used directly. Instead, consider using one of the predefined icons
+  /// from the [Icons] collection.
   const IconData(this.codePoint);
+
+  /// The unicode code point at which this icon is stored in the icon font.
   final int codePoint;
 
   @override

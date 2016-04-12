@@ -28,6 +28,9 @@ import 'theme.dart';
 ///  * [IconButton], for interactive icons
 ///  * [Icons], for the list of available icons for use with this class
 class Icon extends StatelessWidget {
+  /// Creates an icon.
+  ///
+  /// The size argument is required to be non-null.
   Icon({
     Key key,
     this.icon,
