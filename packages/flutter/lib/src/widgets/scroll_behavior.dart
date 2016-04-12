@@ -90,7 +90,7 @@ abstract class ExtentScrollBehavior extends ScrollBehavior<double, double> {
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('content: ${contentExtent.toStringAsFixed(1)}');
-    description.add('container: ${contentExtent.toStringAsFixed(1)}');
+    description.add('container: ${containerExtent.toStringAsFixed(1)}');
     description.add('range: ${minScrollOffset?.toStringAsFixed(1)} .. ${maxScrollOffset?.toStringAsFixed(1)}');
   }
 }
