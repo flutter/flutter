@@ -108,7 +108,7 @@ class AppBar extends StatelessWidget {
   /// Defaults to [ThemeData.primaryTextTheme].
   final TextTheme textTheme;
 
-  /// The amount of space to inset the contents of the app bar.
+  /// The amount of space by which to inset the contents of the app bar.
   final EdgeInsets padding;
 
   final double _expandedHeight;

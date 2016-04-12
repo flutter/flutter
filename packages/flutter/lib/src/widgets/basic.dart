@@ -414,7 +414,7 @@ class Padding extends SingleChildRenderObjectWidget {
     assert(padding != null);
   }
 
-  /// The amount to pad the child in each dimension.
+  /// The amount of space by which to inset the child.
   final EdgeInsets padding;
 
   @override
