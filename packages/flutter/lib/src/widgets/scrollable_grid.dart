@@ -19,7 +19,9 @@ class ScrollableGrid extends Scrollable {
   ScrollableGrid({
     Key key,
     double initialScrollOffset,
+    ScrollListener onScrollStart,
     ScrollListener onScroll,
+    ScrollListener onScrollEnd,
     SnapOffsetCallback snapOffsetCallback,
     this.delegate,
     this.children
@@ -30,7 +32,9 @@ class ScrollableGrid extends Scrollable {
     // grids. For horizontally scrolling grids, we'll probably need to use a
     // delegate that places children in column-major order.
     scrollDirection: Axis.vertical,
+    onScrollStart: onScrollStart,
     onScroll: onScroll,
+    onScrollEnd: onScrollEnd,
     snapOffsetCallback: snapOffsetCallback
   );
 

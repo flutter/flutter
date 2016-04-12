@@ -733,7 +733,9 @@ class Block extends StatelessWidget {
     this.initialScrollOffset,
     this.scrollDirection: Axis.vertical,
     this.scrollAnchor: ViewportAnchor.start,
+    this.onScrollStart,
     this.onScroll,
+    this.onScrollEnd,
     this.scrollableKey
   }) : super(key: key) {
     assert(children != null);
@@ -745,10 +747,22 @@ class Block extends StatelessWidget {
   /// The amount of space by which to inset the children inside the viewport.
   final EdgeInsets padding;
 
+  /// The scroll offset this widget should use when first created.
   final double initialScrollOffset;
+
   final Axis scrollDirection;
   final ViewportAnchor scrollAnchor;
+
+  /// Called whenever this widget starts to scroll.
+  final ScrollListener onScrollStart;
+
+  /// Called whenever this widget's scroll offset changes.
   final ScrollListener onScroll;
+
+  /// Called whenever this widget stops scrolling.
+  final ScrollListener onScrollEnd;
+
+  /// The key to use for the underlying scrollable widget.
   final Key scrollableKey;
 
   @override
@@ -761,7 +775,9 @@ class Block extends StatelessWidget {
       initialScrollOffset: initialScrollOffset,
       scrollDirection: scrollDirection,
       scrollAnchor: scrollAnchor,
+      onScrollStart: onScrollStart,
       onScroll: onScroll,
+      onScrollEnd: onScrollEnd,
       child: contents
     );
   }

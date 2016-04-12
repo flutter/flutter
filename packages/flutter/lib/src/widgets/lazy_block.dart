@@ -135,7 +135,9 @@ class LazyBlock extends Scrollable {
     Key key,
     double initialScrollOffset,
     Axis scrollDirection: Axis.vertical,
+    ScrollListener onScrollStart,
     ScrollListener onScroll,
+    ScrollListener onScrollEnd,
     SnapOffsetCallback snapOffsetCallback,
     this.delegate,
     this.padding
@@ -143,7 +145,9 @@ class LazyBlock extends Scrollable {
     key: key,
     initialScrollOffset: initialScrollOffset,
     scrollDirection: scrollDirection,
+    onScrollStart: onScrollStart,
     onScroll: onScroll,
+    onScrollEnd: onScrollEnd,
     snapOffsetCallback: snapOffsetCallback
   );
 

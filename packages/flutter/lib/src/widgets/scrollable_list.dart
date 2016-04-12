@@ -51,7 +51,9 @@ class ScrollableList extends Scrollable {
     double initialScrollOffset,
     Axis scrollDirection: Axis.vertical,
     ViewportAnchor scrollAnchor: ViewportAnchor.start,
+    ScrollListener onScrollStart,
     ScrollListener onScroll,
+    ScrollListener onScrollEnd,
     SnapOffsetCallback snapOffsetCallback,
     this.itemExtent,
     this.itemsWrap: false,
@@ -62,7 +64,9 @@ class ScrollableList extends Scrollable {
     initialScrollOffset: initialScrollOffset,
     scrollDirection: scrollDirection,
     scrollAnchor: scrollAnchor,
+    onScrollStart: onScrollStart,
     onScroll: onScroll,
+    onScrollEnd: onScrollEnd,
     snapOffsetCallback: snapOffsetCallback
   ) {
     assert(itemExtent != null);
