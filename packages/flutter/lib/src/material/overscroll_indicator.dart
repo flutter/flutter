@@ -202,7 +202,10 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
             child: child
           );
         },
-        child: config.child
+        child: new ClampOverscrolls(
+          child: config.child,
+          value: true
+        )
       )
     );
   }

@@ -11,6 +11,40 @@ import 'virtual_viewport.dart';
 
 import 'package:flutter/rendering.dart';
 
+/// If true, the ClampOverscroll's [Scrollable] descendant will clamp its
+/// viewport's scrollOffsets to the [ScrollBehavior]'s min and max values.
+/// In this case the Scrollable's scrollOffset will still over and undershoot
+/// the ScrollBehavior's limits, but the viewport itself will not.
+class ClampOverscrolls extends InheritedWidget {
+  ClampOverscrolls({
+    Key key,
+    this.value,
+    Widget child
+  }) : super(key: key, child: child) {
+    assert(value != null);
+    assert(child != null);
+  }
+
+  /// True if the [Scrollable] descendant should clamp its viewport's scrollOffset
+  /// values when they are less than the [ScrollBehavior]'s minimum or greater than
+  /// its maximum.
+  final bool value;
+
+  static bool of(BuildContext context) {
+    final ClampOverscrolls result = context.inheritFromWidgetOfExactType(ClampOverscrolls);
+    return result?.value ?? false;
+  }
+
+  @override
+  bool updateShouldNotify(ClampOverscrolls old) => value != old.value;
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('value: $value');
+  }
+}
+
 class ScrollableList extends Scrollable {
   ScrollableList({
     Key key,
@@ -21,7 +55,6 @@ class ScrollableList extends Scrollable {
     SnapOffsetCallback snapOffsetCallback,
     this.itemExtent,
     this.itemsWrap: false,
-    this.clampOverscrolls: false,
     this.padding,
     this.children
   }) : super(
@@ -37,7 +70,6 @@ class ScrollableList extends Scrollable {
 
   final double itemExtent;
   final bool itemsWrap;
-  final bool clampOverscrolls;
   final EdgeInsets padding;
   final Iterable<Widget> children;
 
@@ -64,10 +96,11 @@ class _ScrollableListState extends ScrollableState<ScrollableList> {
 
   @override
   Widget buildContent(BuildContext context) {
-    final double listScrollOffset = config.clampOverscrolls
+    final bool clampOverscrolls = ClampOverscrolls.of(context);
+    final double listScrollOffset = clampOverscrolls
       ? scrollOffset.clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset)
       : scrollOffset;
-    return new ListViewport(
+    Widget viewport = new ListViewport(
       onExtentsChanged: _handleExtentsChanged,
       scrollOffset: listScrollOffset,
       mainAxis: config.scrollDirection,
@@ -77,6 +110,9 @@ class _ScrollableListState extends ScrollableState<ScrollableList> {
       padding: config.padding,
       children: config.children
     );
+    if (clampOverscrolls)
+      viewport = new ClampOverscrolls(value: false, child: viewport);
+    return viewport;
   }
 }
 

@@ -24,7 +24,6 @@ class MaterialList extends StatefulWidget {
     this.initialScrollOffset,
     this.onScroll,
     this.type: MaterialListType.twoLine,
-    this.clampOverscrolls: false,
     this.children,
     this.scrollablePadding: EdgeInsets.zero,
     this.scrollableKey
@@ -33,7 +32,6 @@ class MaterialList extends StatefulWidget {
   final double initialScrollOffset;
   final ScrollListener onScroll;
   final MaterialListType type;
-  final bool clampOverscrolls;
   final Iterable<Widget> children;
   final EdgeInsets scrollablePadding;
   final Key scrollableKey;
@@ -49,7 +47,6 @@ class _MaterialListState extends State<MaterialList> {
       key: config.scrollableKey,
       initialScrollOffset: config.initialScrollOffset,
       scrollDirection: Axis.vertical,
-      clampOverscrolls: config.clampOverscrolls,
       onScroll: config.onScroll,
       itemExtent: kListItemExtent[config.type],
       padding: const EdgeInsets.symmetric(vertical: 8.0) + config.scrollablePadding,
