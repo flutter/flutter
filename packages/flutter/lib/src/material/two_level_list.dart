@@ -161,21 +161,30 @@ class TwoLevelList extends StatelessWidget {
   TwoLevelList({
     Key key,
     this.scrollableKey,
-    this.items,
+    this.children,
     this.type: MaterialListType.twoLine,
-    this.scrollablePadding
+    this.padding
   }) : super(key: key);
 
-  final List<Widget> items;
+  /// The widgets to display in this list.
+  ///
+  /// Typically [TwoLevelListItem] or [TwoLevelSublist] widgets.
+  final List<Widget> children;
+
+  /// The kind of [ListItem] contained in this list.
   final MaterialListType type;
+
+  /// The key to use for the underlying scrollable widget.
   final Key scrollableKey;
-  final EdgeInsets scrollablePadding;
+
+  /// The amount of space by which to inset the children inside the viewport.
+  final EdgeInsets padding;
 
   @override
   Widget build(BuildContext context) {
     return new Block(
-      padding: scrollablePadding,
-      children: KeyedSubtree.ensureUniqueKeysForList(items),
+      padding: padding,
+      children: KeyedSubtree.ensureUniqueKeysForList(children),
       scrollableKey: scrollableKey
     );
   }

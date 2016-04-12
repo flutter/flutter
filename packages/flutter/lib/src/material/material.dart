@@ -12,6 +12,11 @@ import 'constants.dart';
 import 'shadows.dart';
 import 'theme.dart';
 
+/// The various kinds of material in material design.
+///
+/// See also:
+///  * [Material]
+///  * [kMaterialEdges]
 enum MaterialType {
   /// Infinite extent using default theme canvas color.
   canvas,
@@ -29,6 +34,12 @@ enum MaterialType {
   transparency
 }
 
+/// The border radii used by the various kinds of material in material design.
+///
+/// See also:
+///
+///  * [MaterialType]
+///  * [Material]
 const Map<MaterialType, double> kMaterialEdges = const <MaterialType, double>{
   MaterialType.canvas: null,
   MaterialType.card: 2.0,
@@ -37,23 +48,50 @@ const Map<MaterialType, double> kMaterialEdges = const <MaterialType, double>{
   MaterialType.transparency: null,
 };
 
+/// A visual reaction on a piece of [Material] to user input.
+///
+/// Typically created by [MaterialInkController.splashAt].
 abstract class InkSplash {
+  /// The user input is confirmed.
+  ///
+  /// Causes the reaction to propagate faster across the material.
   void confirm();
+
+  /// The user input was cancelled.
+  ///
+  /// Causes the reaction to gradually disappear.
   void cancel();
+
+  /// Free up the resources associated with this reaction.
   void dispose();
 }
 
+/// A visual emphasis on a part of a [Material] receiving user interaction.
+///
+/// Typically created by [MaterialInkController.highlightAt].
 abstract class InkHighlight {
+  /// Start visually emphasizing this part of the material.
   void activate();
+
+  /// Stop visually emphasizing this part of the material.
   void deactivate();
+
+  /// Free up the resources associated with this highlight.
   void dispose();
+
+  /// Whether this part of the material is being visually emphasized.
   bool get active;
+
+  /// The color use to visually represent the emphasis.
   Color get color;
   void set color(Color value);
 }
 
+/// An interface for creating [InkSplash]s and [InkHighlight]s on a material.
+///
+/// Typically obtained via [Material.of].
 abstract class MaterialInkController {
-  /// The color of the material
+  /// The color of the material.
   Color get color;
 
   /// Begin a splash, centered at position relative to referenceBox.
@@ -69,11 +107,31 @@ abstract class MaterialInkController {
   void addInkFeature(InkFeature feature);
 }
 
-/// Describes a sheet of Material. If the layout changes (e.g. because there's a
-/// list on the paper, and it's been scrolled), a LayoutChangedNotification must
-/// be dispatched at the relevant subtree. (This in particular means that
-/// Transitions should not be placed inside Material.)
+/// A piece of material.
+///
+/// Material is the central metaphor in material design. Each piece of material
+/// exists at a given elevation, which influences how that piece of material
+/// visually relates to other pieces of material and how that material casts
+/// shadows on other pieces of material.
+///
+/// Most user interface elements are either conceptually printed on a piece of
+/// material or themselves made of material. Material reacts to user input using
+/// [InkSplash] and [InkHighlight] effects. To trigger a reaction on the
+/// material, use a [MaterialInkController] obtained via [Material.of].
+///
+/// If the layout changes (e.g. because there's a list on the paper, and it's
+/// been scrolled), a LayoutChangedNotification must be dispatched at the
+/// relevant subtree. (This in particular means that Transitions should not be
+/// placed inside Material.) Otherwise, in-progress ink features (e.g., ink
+/// splashes and ink highlights) won't move to account for the new layout.
+///
+/// See also:
+///
+/// * <https://www.google.com/design/spec/material-design/introduction.html>
 class Material extends StatefulWidget {
+  /// Creates a piece of material.
+  ///
+  /// Both the type and the elevation arguments are required.
   Material({
     Key key,
     this.child,
@@ -89,18 +147,24 @@ class Material extends StatefulWidget {
   /// The widget below this widget in the tree.
   final Widget child;
 
+  /// The kind of material (e.g., card or canvas).
   final MaterialType type;
 
   /// The z-coordinate at which to place this material.
   final int elevation;
 
+  /// The color of the material.
+  ///
+  /// Must be opaque. To create a transparent piece of material, use
+  /// [MaterialType.transparency].
   final Color color;
 
+  /// The typographical style to use for text within this material.
   final TextStyle textStyle;
 
   /// The ink controller from the closest instance of this class that encloses the given context.
   static MaterialInkController of(BuildContext context) {
-    final RenderInkFeatures result = context.ancestorRenderObjectOfType(const TypeMatcher<RenderInkFeatures>());
+    final _RenderInkFeatures result = context.ancestorRenderObjectOfType(const TypeMatcher<_RenderInkFeatures>());
     return result;
   }
 
@@ -147,7 +211,7 @@ class _MaterialState extends State<Material> {
       onNotification: (LayoutChangedNotification notification) {
         _inkFeatureRenderer.currentContext.findRenderObject().markNeedsPaint();
       },
-      child: new InkFeatures(
+      child: new _InkFeatures(
         key: _inkFeatureRenderer,
         color: backgroundColor,
         child: contents
@@ -192,8 +256,8 @@ const double _kDefaultSplashRadius = 35.0; // logical pixels
 const double _kSplashConfirmedVelocity = 1.0; // logical pixels per millisecond
 const double _kSplashInitialSize = 0.0; // logical pixels
 
-class RenderInkFeatures extends RenderProxyBox implements MaterialInkController {
-  RenderInkFeatures({ RenderBox child, this.color }) : super(child);
+class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController {
+  _RenderInkFeatures({ RenderBox child, this.color }) : super(child);
 
   // This is here to satisfy the MaterialInkController contract.
   // The actual painting of this color is done by a Container in the
@@ -289,33 +353,44 @@ class RenderInkFeatures extends RenderProxyBox implements MaterialInkController 
   }
 }
 
-class InkFeatures extends SingleChildRenderObjectWidget {
-  InkFeatures({ Key key, this.color, Widget child }) : super(key: key, child: child);
+class _InkFeatures extends SingleChildRenderObjectWidget {
+  _InkFeatures({ Key key, this.color, Widget child }) : super(key: key, child: child);
 
   final Color color;
 
   @override
-  RenderInkFeatures createRenderObject(BuildContext context) => new RenderInkFeatures(color: color);
+  _RenderInkFeatures createRenderObject(BuildContext context) => new _RenderInkFeatures(color: color);
 
   @override
-  void updateRenderObject(BuildContext context, RenderInkFeatures renderObject) {
+  void updateRenderObject(BuildContext context, _RenderInkFeatures renderObject) {
     renderObject.color = color;
   }
 }
 
+/// A visual reaction on a piece of [Material].
+///
+/// Typically used with [MaterialInkController].
 abstract class InkFeature {
+  /// To add an ink feature to a piece of Material, obtain the
+  /// [MaterialInkController] via [Material.of] and call
+  /// [MaterialInkController.addInkFeature].
   InkFeature({
     this.renderer,
     this.referenceBox,
     this.onRemoved
   });
 
-  final RenderInkFeatures renderer;
+  final _RenderInkFeatures renderer;
+
+  /// The render box whose visual position defines the frame of reference for this ink feature.
   final RenderBox referenceBox;
+
+  /// Called when the ink feature is no longer visible on the material.
   final VoidCallback onRemoved;
 
   bool _debugDisposed = false;
 
+  /// Free up the resources associated with this ink feature.
   void dispose() {
     assert(!_debugDisposed);
     assert(() { _debugDisposed = true; return true; });
@@ -343,6 +418,10 @@ abstract class InkFeature {
     paintFeature(canvas, transform);
   }
 
+  /// Override this method to paint the ink feature.
+  ///
+  /// The transform argument gives the coordinate conversion from the coordinate
+  /// system of the canvas to the coodinate system of the [referenceBox].
   void paintFeature(Canvas canvas, Matrix4 transform);
 
   @override
@@ -351,7 +430,7 @@ abstract class InkFeature {
 
 class _InkSplash extends InkFeature implements InkSplash {
   _InkSplash({
-    RenderInkFeatures renderer,
+    _RenderInkFeatures renderer,
     RenderBox referenceBox,
     this.position,
     this.color,
@@ -445,7 +524,7 @@ class _InkSplash extends InkFeature implements InkSplash {
 
 class _InkHighlight extends InkFeature implements InkHighlight {
   _InkHighlight({
-    RenderInkFeatures renderer,
+    _RenderInkFeatures renderer,
     RenderBox referenceBox,
     Color color,
     this.shape,

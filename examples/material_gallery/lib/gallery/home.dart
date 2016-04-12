@@ -91,10 +91,10 @@ class GalleryHomeState extends State<GalleryHome> {
       scrollableKey: _listKey,
       appBarBehavior: AppBarBehavior.under,
       body: new TwoLevelList(
-        scrollablePadding: new EdgeInsets.only(top: _kFlexibleSpaceMaxHeight + statusBarHight),
+        padding: new EdgeInsets.only(top: _kFlexibleSpaceMaxHeight + statusBarHight),
         type: MaterialListType.oneLine,
         scrollableKey: _listKey,
-        items: <Widget>[
+        children: <Widget>[
           new TwoLevelSublist(
             leading: new Icon(icon: Icons.star),
             title: new Text("Demos"),

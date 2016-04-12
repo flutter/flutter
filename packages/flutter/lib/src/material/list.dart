@@ -4,13 +4,36 @@
 
 import 'package:flutter/widgets.dart';
 
+/// The kind of list items contained in a material design list.
+///
+/// See also:
+///
+///  * [MaterialList]
+///  * [ListItem]
+///  * [kListItemExtent]
+///  * <https://www.google.com/design/spec/components/lists.html#lists-specs>
 enum MaterialListType {
+  /// A list item that contains a single line of text.
   oneLine,
+
+  /// A list item that contains a [CircleAvatar] followed by a single line of text.
   oneLineWithAvatar,
+
+  /// A list item that contains two lines of text.
   twoLine,
+
+  /// A list item that contains three lines of text.
   threeLine
 }
 
+/// The vertical extent of the different types of material list items.
+///
+/// See also:
+///
+///  * [MaterialListType]
+///  * [ListItem]
+///  * [kListItemExtent]
+///  * <https://www.google.com/design/spec/components/lists.html#lists-specs>
 Map<MaterialListType, double> kListItemExtent = const <MaterialListType, double>{
   MaterialListType.oneLine: 48.0,
   MaterialListType.oneLineWithAvatar: 56.0,
@@ -18,39 +41,70 @@ Map<MaterialListType, double> kListItemExtent = const <MaterialListType, double>
   MaterialListType.threeLine: 88.0,
 };
 
-class MaterialList extends StatefulWidget {
+/// A scrollable list containing material list items.
+///
+/// Material list configures a [ScrollableList] with a number of default values
+/// to match material design.
+///
+/// See also:
+///
+///  * [ListItem]
+///  * [ScrollableList]
+///  * [TwoLevelList]
+///  * [ScrollableGrid]
+///  * <https://www.google.com/design/spec/components/lists.html>
+class MaterialList extends StatelessWidget {
+  /// Creates a material list.
+  ///
+  /// By default, has a type of [MaterialListType.twoLine].
   MaterialList({
     Key key,
     this.initialScrollOffset,
+    this.onScrollStart,
     this.onScroll,
+    this.onScrollEnd,
     this.type: MaterialListType.twoLine,
     this.children,
-    this.scrollablePadding: EdgeInsets.zero,
+    this.padding: EdgeInsets.zero,
     this.scrollableKey
   }) : super(key: key);
 
+  /// The scroll offset this widget should use when first created.
   final double initialScrollOffset;
+
+  /// Called whenever this widget starts to scroll.
+  final ScrollListener onScrollStart;
+
+  /// Called whenever this widget's scroll offset changes.
   final ScrollListener onScroll;
+
+  /// Called whenever this widget stops scrolling.
+  final ScrollListener onScrollEnd;
+
+  /// The kind of [ListItem] contained in this list.
   final MaterialListType type;
+
+  /// The widgets to display in this list.
   final Iterable<Widget> children;
-  final EdgeInsets scrollablePadding;
+
+  /// The amount of space by which to inset the children inside the viewport.
+  final EdgeInsets padding;
+
+  /// The key to use for the underlying scrollable widget.
   final Key scrollableKey;
 
   @override
-  _MaterialListState createState() => new _MaterialListState();
-}
-
-class _MaterialListState extends State<MaterialList> {
-  @override
   Widget build(BuildContext context) {
     return new ScrollableList(
-      key: config.scrollableKey,
-      initialScrollOffset: config.initialScrollOffset,
+      key: scrollableKey,
+      initialScrollOffset: initialScrollOffset,
       scrollDirection: Axis.vertical,
-      onScroll: config.onScroll,
-      itemExtent: kListItemExtent[config.type],
-      padding: const EdgeInsets.symmetric(vertical: 8.0) + config.scrollablePadding,
-      children: config.children
+      onScrollStart: onScrollStart,
+      onScroll: onScroll,
+      onScrollEnd: onScrollEnd,
+      itemExtent: kListItemExtent[type],
+      padding: const EdgeInsets.symmetric(vertical: 8.0) + padding,
+      children: children
     );
   }
 }

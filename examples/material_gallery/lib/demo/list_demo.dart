@@ -193,7 +193,7 @@ class ListDemoState extends State<ListDemo> {
         child: new Scrollbar(
           child: new MaterialList(
             type: _itemType,
-            scrollablePadding: new EdgeInsets.all(_dense ? 4.0 : 8.0),
+            padding: new EdgeInsets.all(_dense ? 4.0 : 8.0),
             children: listItems
           )
         )

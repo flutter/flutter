@@ -18,7 +18,7 @@ void main() {
         return new Material(
           child: new Viewport(
             child: new TwoLevelList(
-              items: <Widget>[
+              children: <Widget>[
                 new TwoLevelListItem(title: new Text('Top'), key: topKey),
                 new TwoLevelSublist(
                   key: sublistKey,

@@ -11,7 +11,7 @@ class TwoLevelListDemo extends StatelessWidget {
       appBar: new AppBar(title: new Text('Expand/collapse list control')),
       body: new TwoLevelList(
         type: MaterialListType.oneLine,
-        items: <Widget>[
+        children: <Widget>[
           new TwoLevelListItem(title: new Text('Top')),
           new TwoLevelSublist(
             title: new Text('Sublist'),

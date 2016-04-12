@@ -118,7 +118,7 @@ class ListItem extends StatelessWidget {
       yield item;
   }
 
-  TextStyle primaryTextStyle(BuildContext context) {
+  TextStyle _primaryTextStyle(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TextStyle style = theme.textTheme.subhead;
     if (!enabled) {
@@ -128,7 +128,7 @@ class ListItem extends StatelessWidget {
     return dense ? style.copyWith(fontSize: 13.0) : style;
   }
 
-  TextStyle secondaryTextStyle(BuildContext context) {
+  TextStyle _secondaryTextStyle(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final Color color = theme.textTheme.caption.color;
     final TextStyle style = theme.textTheme.body1;
@@ -167,7 +167,7 @@ class ListItem extends StatelessWidget {
     }
 
     final Widget primaryLine = new DefaultTextStyle(
-      style: primaryTextStyle(context),
+      style: _primaryTextStyle(context),
       child: title ?? new Container()
     );
     Widget center = primaryLine;
@@ -178,7 +178,7 @@ class ListItem extends StatelessWidget {
         children: <Widget>[
           primaryLine,
           new DefaultTextStyle(
-            style: secondaryTextStyle(context),
+            style: _secondaryTextStyle(context),
             child: subtitle
           )
         ]
