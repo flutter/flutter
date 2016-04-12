@@ -63,6 +63,9 @@ class Tooltip extends StatefulWidget {
 
   final double height;
 
+  /// The amount of space by which to inset the child.
+  ///
+  /// Defaults to 16.0 logical pixels in each direction.
   final EdgeInsets padding;
 
   final double verticalOffset;

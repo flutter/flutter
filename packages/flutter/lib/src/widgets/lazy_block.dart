@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
 import 'scrollable.dart';
+import 'scrollable_list.dart';
 import 'scroll_behavior.dart';
 
 /// Provides children for [LazyBlock] or [LazyBlockViewport].
@@ -77,6 +80,35 @@ class LazyBlockBuilder extends LazyBlockDelegate {
   bool shouldRebuild(LazyBlockDelegate oldDelegate) => true;
 }
 
+/// Uses a [List<Widget>] to provide children for [LazyBlock].
+///
+/// See also [LazyBlockViewport].
+class LazyBlockChildren extends LazyBlockDelegate {
+  /// Creates a LazyBlockChildren that displays the given children.
+  ///
+  /// The list of children must not be modified after being passed to this
+  /// constructor.
+  LazyBlockChildren({ this.children }) {
+    assert(children != null);
+  }
+
+  /// The widgets to display.
+  ///
+  /// This list must not be modified after being stored in this field.
+  final List<Widget> children;
+
+  @override
+  Widget buildItem(BuildContext context, int index) {
+    assert(index >= 0);
+    return index < children.length ? children[index] : null;
+  }
+
+  @override
+  bool shouldRebuild(LazyBlockChildren oldDelegate) {
+    return children != oldDelegate.children;
+  }
+}
+
 /// An infinite scrolling list of variable height children.
 ///
 /// [LazyBlock] is a general-purpose scrollable list for a large (or infinite)
@@ -105,7 +137,8 @@ class LazyBlock extends Scrollable {
     Axis scrollDirection: Axis.vertical,
     ScrollListener onScroll,
     SnapOffsetCallback snapOffsetCallback,
-    this.delegate
+    this.delegate,
+    this.padding
   }) : super(
     key: key,
     initialScrollOffset: initialScrollOffset,
@@ -118,6 +151,9 @@ class LazyBlock extends Scrollable {
   ///
   /// See [LazyBlockDelegate] for details.
   final LazyBlockDelegate delegate;
+
+  /// The amount of space by which to inset the children inside the viewport.
+  final EdgeInsets padding;
 
   @override
   ScrollableState<LazyBlock> createState() => new _LazyBlockState();
@@ -143,12 +179,20 @@ class _LazyBlockState extends ScrollableState<LazyBlock> {
 
   @override
   Widget buildContent(BuildContext context) {
-    return new LazyBlockViewport(
-      startOffset: scrollOffset,
+    final bool clampOverscrolls = ClampOverscrolls.of(context);
+    final double startOffset = clampOverscrolls
+      ? scrollOffset.clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset)
+      : scrollOffset;
+    Widget viewport = new LazyBlockViewport(
+      startOffset: startOffset,
       mainAxis: config.scrollDirection,
+      padding: config.padding,
       onExtentsChanged: _handleExtentsChanged,
       delegate: config.delegate
     );
+    if (clampOverscrolls)
+      viewport = new ClampOverscrolls(value: false, child: viewport);
+    return viewport;
   }
 }
 
@@ -181,6 +225,7 @@ class LazyBlockViewport extends RenderObjectWidget {
     Key key,
     this.startOffset: 0.0,
     this.mainAxis: Axis.vertical,
+    this.padding,
     this.onExtentsChanged,
     this.delegate
   }) : super(key: key) {
@@ -203,6 +248,9 @@ class LazyBlockViewport extends RenderObjectWidget {
   /// axis is vertical).
   final Axis mainAxis;
 
+  /// The amount of space by which to inset the children inside the viewport.
+  final EdgeInsets padding;
+
   /// Called when the interior or exterior dimensions of the viewport change.
   final LazyBlockExtentsChangedCallback onExtentsChanged;
 
@@ -210,6 +258,17 @@ class LazyBlockViewport extends RenderObjectWidget {
   ///
   /// See [LazyBlockDelegate] for details.
   final LazyBlockDelegate delegate;
+
+  double get _mainAxisPadding {
+    if (padding == null)
+      return 0.0;
+    switch (mainAxis) {
+      case Axis.horizontal:
+        return padding.horizontal;
+      case Axis.vertical:
+        return padding.vertical;
+    }
+  }
 
   @override
   _LazyBlockElement createElement() => new _LazyBlockElement(this);
@@ -383,10 +442,14 @@ class _LazyBlockElement extends RenderObjectElement {
     // currently represented in _children, we just need to update the paint
     // offset. Otherwise, we need to trigger a layout in order to change the
     // set of explicitly represented children.
-    if (widget.startOffset >= _startOffsetLowerLimit && widget.startOffset < _startOffsetUpperLimit)
+    double startOffset = widget.startOffset;
+    if (startOffset >= _startOffsetLowerLimit &&
+        startOffset < _startOffsetUpperLimit &&
+        newWidget.padding == oldWidget.padding) {
       _updatePaintOffset();
-    else
+    } else {
       renderObject.markNeedsLayout();
+    }
   }
 
   @override
@@ -536,7 +599,7 @@ class _LazyBlockElement extends RenderObjectElement {
       if (currentLogicalOffset < endLogicalOffset) {
         // The last element is visible. We need to update our reckoning of where
         // the max scroll offset is.
-        _maxScrollOffset = currentLogicalOffset - blockExtent;
+        _maxScrollOffset = currentLogicalOffset + widget._mainAxisPadding - blockExtent;
         _startOffsetUpperLimit = double.INFINITY;
       } else {
         // The last element is not visible. Ensure that we have one blockExtent
@@ -561,7 +624,7 @@ class _LazyBlockElement extends RenderObjectElement {
       // position the first physical child at Offset.zero and use the paintOffset
       // on the render object to adjust the final paint location of the children.
 
-      Offset currentChildOffset = Offset.zero;
+      Offset currentChildOffset = _initialChildOffset;
       child = block.firstChild;
       while (child != null) {
         final _LazyBlockParentData childParentData = child.parentData;
@@ -590,10 +653,20 @@ class _LazyBlockElement extends RenderObjectElement {
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
     switch (widget.mainAxis) {
       case Axis.horizontal:
-        return new BoxConstraints.tightFor(height: constraints.maxHeight);
+        double padding = widget.padding?.vertical ?? 0.0;
+        double height = math.max(0.0, constraints.maxHeight - padding);
+        return new BoxConstraints.tightFor(height: height);
       case Axis.vertical:
-        return new BoxConstraints.tightFor(width: constraints.maxWidth);
+        double padding = widget.padding?.horizontal ?? 0.0;
+        double width = math.max(0.0, constraints.maxWidth - padding);
+        return new BoxConstraints.tightFor(width: width);
     }
+  }
+
+  Offset get _initialChildOffset {
+    if (widget.padding == null)
+      return Offset.zero;
+    return new Offset(widget.padding.left, widget.padding.top);
   }
 
   double _getMainAxisExtent(Size size) {

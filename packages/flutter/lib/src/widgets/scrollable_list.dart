@@ -70,7 +70,10 @@ class ScrollableList extends Scrollable {
 
   final double itemExtent;
   final bool itemsWrap;
+
+  /// The amount of space by which to inset the children inside the viewport.
   final EdgeInsets padding;
+
   final Iterable<Widget> children;
 
   @override
@@ -339,6 +342,8 @@ class ScrollableLazyList extends Scrollable {
   final double itemExtent;
   final int itemCount;
   final ItemListBuilder itemBuilder;
+
+  /// The amount of space by which to inset the children inside the viewport.
   final EdgeInsets padding;
 
   @override

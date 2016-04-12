@@ -4,6 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:test/test.dart';
 
 import 'test_widgets.dart';
@@ -251,4 +252,33 @@ void main() {
       expect(decoraton.backgroundColor, equals(Colors.green[500]));
     });
   });
+
+  test('LazyBlockViewport padding', () {
+    testWidgets((WidgetTester tester) {
+      IndexedBuilder itemBuilder = (BuildContext context, int i) {
+        return new Container(
+          key: new ValueKey<int>(i),
+          width: 500.0, // this should be ignored
+          height: 220.0,
+          decoration: new BoxDecoration(
+            backgroundColor: Colors.green[500]
+          ),
+          child: new Text("$i")
+        );
+      };
+
+      tester.pumpWidget(
+        new LazyBlockViewport(
+          padding: new EdgeInsets.fromLTRB(7.0, 3.0, 5.0, 11.0),
+          delegate: new LazyBlockBuilder(builder: itemBuilder)
+        )
+      );
+
+      RenderBox firstBox = tester.findText('0').findRenderObject();
+      Point upperLeft = firstBox.localToGlobal(Point.origin);
+      expect(upperLeft, equals(new Point(7.0, 3.0)));
+      expect(firstBox.size.width, equals(800.0 - 12.0));
+    });
+  });
+
 }

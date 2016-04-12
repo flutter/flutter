@@ -741,7 +741,10 @@ class Block extends StatelessWidget {
   }
 
   final List<Widget> children;
+
+  /// The amount of space by which to inset the children inside the viewport.
   final EdgeInsets padding;
+
   final double initialScrollOffset;
   final Axis scrollDirection;
   final ViewportAnchor scrollAnchor;
