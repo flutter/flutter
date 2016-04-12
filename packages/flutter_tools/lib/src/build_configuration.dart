@@ -14,6 +14,20 @@ enum BuildType {
   debug,
 }
 
+/// The type of build - `develop` or `deploy`.
+///
+/// TODO(devoncarew): Add a `profile` variant.
+enum BuildVariant {
+  develop,
+  deploy
+}
+
+String getVariantName(BuildVariant variant) {
+  String name = '$variant';
+  int index = name.indexOf('.');
+  return index == -1 ? name : name.substring(index + 1);
+}
+
 enum HostPlatform {
   mac,
   linux,
