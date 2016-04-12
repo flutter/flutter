@@ -7,11 +7,9 @@ import 'print.dart';
 /// Signature for [FlutterError.onException] handler.
 typedef void FlutterExceptionHandler(FlutterErrorDetails details);
 
-/// Signature for [FlutterErrorDetails.informationCollector] callback.
-///
-/// The text written to the information argument may contain newlines but should
-/// not end with a newline.
-typedef void FlutterInformationCollector(StringBuffer information);
+/// Signature for [FlutterErrorDetails.informationCollector] callback
+/// and other callbacks that collect information into a string buffer.
+typedef void InformationCollector(StringBuffer information);
 
 /// Class for information provided to [FlutterExceptionHandler] callbacks.
 ///
@@ -56,7 +54,10 @@ class FlutterErrorDetails {
   ///
   /// Information collector callbacks can be expensive, so the generated information
   /// should be cached, rather than the callback being invoked multiple times.
-  final FlutterInformationCollector informationCollector;
+  ///
+  /// The text written to the information argument may contain newlines but should
+  /// not end with a newline.
+  final InformationCollector informationCollector;
 
   /// Whether this error should be ignored by the default error reporting
   /// behavior in release mode.
@@ -124,7 +125,7 @@ class FlutterError extends AssertionError {
 
   static int _errorCount = 0;
 
-  static const int _kWrapWidth = 120;
+  static const int _kWrapWidth = 100;
 
   /// Prints the given exception details to the console.
   ///

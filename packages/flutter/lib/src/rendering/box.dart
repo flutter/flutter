@@ -303,8 +303,17 @@ class BoxConstraints extends Constraints {
   }
 
   @override
-  bool debugAssertIsValid({ bool isAppliedConstraint: false }) {
+  bool debugAssertIsValid({
+    bool isAppliedConstraint: false,
+    InformationCollector informationCollector
+  }) {
     assert(() {
+      void throwError(String message) {
+        StringBuffer information = new StringBuffer();
+        if (informationCollector != null)
+          informationCollector(information);
+        throw new FlutterError('$message\n${information}The offending constraints were:\n  $this');
+      }
       if (minWidth.isNaN || maxWidth.isNaN || minHeight.isNaN || maxHeight.isNaN) {
         List<String> affectedFieldsList = <String>[];
         if (minWidth.isNaN)
@@ -326,27 +335,27 @@ class BoxConstraints extends Constraints {
         } else {
           whichFields = affectedFieldsList.single;
         }
-        throw new FlutterError('BoxConstraints has ${affectedFieldsList.length == 1 ? 'a NaN value' : 'NaN values' } in $whichFields.\n$this');
+        throwError('BoxConstraints has ${affectedFieldsList.length == 1 ? 'a NaN value' : 'NaN values' } in $whichFields.');
       }
       if (minWidth < 0.0 && minHeight < 0.0)
-        throw new FlutterError('BoxConstraints has both a negative minimum width and a negative minimum height.\n$this');
+        throwError('BoxConstraints has both a negative minimum width and a negative minimum height.');
       if (minWidth < 0.0)
-        throw new FlutterError('BoxConstraints has a negative minimum width.\n$this');
+        throwError('BoxConstraints has a negative minimum width.');
       if (minHeight < 0.0)
-        throw new FlutterError('BoxConstraints has a negative minimum height.\n$this');
+        throwError('BoxConstraints has a negative minimum height.');
       if (maxWidth < minWidth && maxHeight < minHeight)
-        throw new FlutterError('BoxConstraints has both width and height constraints non-normalized.\n$this');
+        throwError('BoxConstraints has both width and height constraints non-normalized.');
       if (maxWidth < minWidth)
-        throw new FlutterError('BoxConstraints has non-normalized width constraints.\n$this');
+        throwError('BoxConstraints has non-normalized width constraints.');
       if (maxHeight < minHeight)
-        throw new FlutterError('BoxConstraints has non-normalized height constraints.\n$this');
+        throwError('BoxConstraints has non-normalized height constraints.');
       if (isAppliedConstraint) {
         if (minWidth.isInfinite && minHeight.isInfinite)
-          throw new FlutterError('BoxConstraints requires infinite width and infinite height.\n$this');
+          throwError('BoxConstraints forces an infinite width and infinite height.');
         if (minWidth.isInfinite)
-          throw new FlutterError('BoxConstraints requires infinite width.\n$this');
+          throwError('BoxConstraints forces an infinite width.');
         if (minHeight.isInfinite)
-          throw new FlutterError('BoxConstraints requires infinite height.\n$this');
+          throwError('BoxConstraints forces an infinite height.');
       }
       assert(isNormalized);
       return true;

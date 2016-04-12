@@ -89,7 +89,7 @@ class FlutterErrorDetailsForPointerRouter extends FlutterErrorDetails {
     this.router,
     this.route,
     this.event,
-    FlutterInformationCollector informationCollector,
+    InformationCollector informationCollector,
     bool silent: false
   }) : super(
     exception: exception,

@@ -43,7 +43,10 @@ class SectorConstraints extends Constraints {
   bool get isNormalized => minDeltaRadius <= maxDeltaRadius && minDeltaTheta <= maxDeltaTheta;
 
   @override
-  bool debugAssertIsValid({ bool isAppliedConstraint: false }) {
+  bool debugAssertIsValid({
+    bool isAppliedConstraint: false,
+    InformationCollector informationCollector
+  }) {
     assert(isNormalized);
     return isNormalized;
   }
