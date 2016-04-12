@@ -46,20 +46,26 @@ const double _kFlexibleSpaceMaxHeight = 256.0;
 class GalleryHome extends StatefulWidget {
   GalleryHome({
     Key key,
-    this.theme,
+    this.useLightTheme,
     this.onThemeChanged,
     this.timeDilation,
-    this.onTimeDilationChanged
+    this.onTimeDilationChanged,
+    this.showPerformanceOverlay,
+    this.onShowPerformanceOverlayChanged
   }) : super(key: key) {
     assert(onThemeChanged != null);
     assert(onTimeDilationChanged != null);
+    assert(onShowPerformanceOverlayChanged != null);
   }
 
-  final bool theme;
+  final bool useLightTheme;
   final ValueChanged<bool> onThemeChanged;
 
   final double timeDilation;
   final ValueChanged<double> onTimeDilationChanged;
+
+  final bool showPerformanceOverlay;
+  final ValueChanged<bool> onShowPerformanceOverlayChanged;
 
   @override
   GalleryHomeState createState() => new GalleryHomeState();
@@ -76,10 +82,12 @@ class GalleryHomeState extends State<GalleryHome> {
     return new Scaffold(
       key: _homeKey,
       drawer: new GalleryDrawer(
-        theme: config.theme,
+        useLightTheme: config.useLightTheme,
         onThemeChanged: config.onThemeChanged,
         timeDilation: config.timeDilation,
-        onTimeDilationChanged: config.onTimeDilationChanged
+        onTimeDilationChanged: config.onTimeDilationChanged,
+        showPerformanceOverlay: config.showPerformanceOverlay,
+        onShowPerformanceOverlayChanged: config.onShowPerformanceOverlayChanged
       ),
       appBar: new AppBar(
         expandedHeight: _kFlexibleSpaceMaxHeight,

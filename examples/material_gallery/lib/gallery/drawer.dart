@@ -7,20 +7,25 @@ import 'package:flutter/material.dart';
 class GalleryDrawer extends StatelessWidget {
   GalleryDrawer({
     Key key,
-    this.theme,
+    this.useLightTheme,
     this.onThemeChanged,
     this.timeDilation,
-    this.onTimeDilationChanged
+    this.onTimeDilationChanged,
+    this.showPerformanceOverlay,
+    this.onShowPerformanceOverlayChanged
   }) : super(key: key) {
     assert(onThemeChanged != null);
     assert(onTimeDilationChanged != null);
   }
 
-  final bool theme;
+  final bool useLightTheme;
   final ValueChanged<bool> onThemeChanged;
 
   final double timeDilation;
   final ValueChanged<double> onTimeDilationChanged;
+
+  final bool showPerformanceOverlay;
+  final ValueChanged<bool> onShowPerformanceOverlayChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -31,13 +36,13 @@ class GalleryDrawer extends StatelessWidget {
           new DrawerItem(
             icon: Icons.brightness_5,
             onPressed: () { onThemeChanged(true); },
-            selected: theme,
+            selected: useLightTheme,
             child: new Row(
               children: <Widget>[
                 new Flexible(child: new Text('Light')),
                 new Radio<bool>(
                   value: true,
-                  groupValue: theme,
+                  groupValue: useLightTheme,
                   onChanged: onThemeChanged
                 )
               ]
@@ -46,13 +51,13 @@ class GalleryDrawer extends StatelessWidget {
           new DrawerItem(
             icon: Icons.brightness_7,
             onPressed: () { onThemeChanged(false); },
-            selected: theme,
+            selected: useLightTheme,
             child: new Row(
               children: <Widget>[
                 new Flexible(child: new Text('Dark')),
                 new Radio<bool>(
                   value: false,
-                  groupValue: theme,
+                  groupValue: useLightTheme,
                   onChanged: onThemeChanged
                 )
               ]
@@ -72,7 +77,21 @@ class GalleryDrawer extends StatelessWidget {
                 )
               ]
             )
-          )
+          ),
+          new DrawerItem(
+            icon: Icons.assessment,
+            onPressed: () { onShowPerformanceOverlayChanged(!showPerformanceOverlay); },
+            selected: showPerformanceOverlay,
+            child: new Row(
+              children: <Widget>[
+                new Flexible(child: new Text('Performance Overlay')),
+                new Checkbox(
+                  value: showPerformanceOverlay,
+                  onChanged: (bool value) { onShowPerformanceOverlayChanged(!showPerformanceOverlay); }
+                )
+              ]
+            )
+          ),
         ]
       )
     );
