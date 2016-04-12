@@ -194,7 +194,6 @@ class ListDemoState extends State<ListDemo> {
           child: new MaterialList(
             type: _itemType,
             scrollablePadding: new EdgeInsets.all(_dense ? 4.0 : 8.0),
-            clampOverscrolls: true,
             children: listItems
           )
         )
