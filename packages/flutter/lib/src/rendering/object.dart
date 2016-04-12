@@ -20,7 +20,7 @@ import 'binding.dart';
 
 export 'package:flutter/gestures.dart' show HitTestEntry, HitTestResult;
 export 'package:flutter/painting.dart';
-export 'package:flutter/services.dart' show FlutterError;
+export 'package:flutter/services.dart' show FlutterError, InformationCollector;
 
 /// Base class for data associated with a [RenderObject] by its parent.
 ///
@@ -389,7 +389,7 @@ abstract class Constraints {
   /// For example, the [BoxConstraints] subclass verifies that the
   /// constraints are not [NaN].
   ///
-  /// If the [isAppliedConstraint] argument is true, then even
+  /// If the `isAppliedConstraint` argument is true, then even
   /// stricter rules are enforced. This argument is set to true when
   /// checking constraints that are about to be applied to a
   /// [RenderObject] during layout, as opposed to constraints that may
@@ -399,8 +399,16 @@ abstract class Constraints {
   /// argument, but the asserts for verifying the argument passed to
   /// the [layout] method do.
   ///
+  /// The `informationCollector` argument takes an optional callback
+  /// which is called when an exception is to be thrown. The collected
+  /// information is then included in the message after the error
+  /// line.
+  ///
   /// Returns the same as [isNormalized] if asserts are disabled.
-  bool debugAssertIsValid({ bool isAppliedConstraint: false });
+  bool debugAssertIsValid({
+    bool isAppliedConstraint: false,
+    InformationCollector informationCollector
+  });
 }
 
 typedef void RenderObjectVisitor(RenderObject child);
@@ -900,13 +908,13 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       context: 'during $method()',
       renderObject: this,
       informationCollector: (StringBuffer information) {
-        information.writeln('The following RenderObject was being processed when the exception was fired:\n${this}');
+        information.writeln('The following RenderObject was being processed when the exception was fired:\n  $this');
         if (debugCreator != null)
-          information.writeln('This RenderObject had the following creator:\n  $debugCreator');
+          information.writeln('This RenderObject had the following creator information:\n  $debugCreator');
         List<String> descendants = <String>[];
         const int maxDepth = 5;
         int depth = 0;
-        const int maxLines = 30;
+        const int maxLines = 25;
         int lines = 0;
         void visitor(RenderObject child) {
           if (lines < maxLines) {
@@ -1147,12 +1155,39 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// override performResize and/or performLayout.
   ///
   /// The parent's performLayout method should call the layout of all its
-  /// children unconditionally. It is the layout functions's responsibility (as
+  /// children unconditionally. It is the layout function's responsibility (as
   /// implemented here) to return early if the child does not need to do any
   /// work to update its layout information.
   void layout(Constraints constraints, { bool parentUsesSize: false }) {
     assert(constraints != null);
-    assert(constraints.debugAssertIsValid(isAppliedConstraint: true));
+    assert(constraints.debugAssertIsValid(
+      isAppliedConstraint: true,
+      informationCollector: (StringBuffer information) {
+        List<String> stack = StackTrace.current.toString().split('\n');
+        int targetFrame;
+        Pattern layoutFramePattern = new RegExp(r'^#[0-9]+ +RenderObject.layout \(');
+        for (int i = 0; i < stack.length; i += 1) {
+          if (layoutFramePattern.matchAsPrefix(stack[i]) != null) {
+            targetFrame = i + 1;
+            break;
+          }
+        }
+        if (targetFrame != null && targetFrame < stack.length) {
+          information.writeln(
+            'These invalid constraints were provided to $runtimeType\'s method() ' 
+            'function by the following function, which probably computed the '
+            'invalid constraints in question:'
+          );
+          Pattern targetFramePattern = new RegExp(r'^#[0-9]+ +(.+)$');
+          Match targetFrameMatch = targetFramePattern.matchAsPrefix(stack[targetFrame]);
+          if (targetFrameMatch != null && targetFrameMatch.groupCount > 0) {
+            information.writeln('  ${targetFrameMatch.group(1)}');
+          } else {
+            information.writeln(stack[targetFrame]);
+          }
+        }
+      }
+    ));
     assert(!_debugDoingThisResize);
     assert(!_debugDoingThisLayout);
     final RenderObject parent = this.parent;
@@ -2189,7 +2224,7 @@ class FlutterErrorDetailsForRendering extends FlutterErrorDetails {
     String library,
     String context,
     this.renderObject,
-    FlutterInformationCollector informationCollector,
+    InformationCollector informationCollector,
     bool silent: false
   }) : super(
     exception: exception,

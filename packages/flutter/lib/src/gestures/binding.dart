@@ -134,7 +134,7 @@ class FlutterErrorDetailsForPointerEventDispatcher extends FlutterErrorDetails {
     String context,
     this.event,
     this.hitTestEntry,
-    FlutterInformationCollector informationCollector,
+    InformationCollector informationCollector,
     bool silent: false
   }) : super(
     exception: exception,

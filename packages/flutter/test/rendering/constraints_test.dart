@@ -43,7 +43,8 @@ void main() {
     }
     expect(result, equals(
       'BoxConstraints has NaN values in minWidth, maxWidth, and maxHeight.\n'
-      'BoxConstraints(NaN<=w<=NaN, 2.0<=h<=NaN; NOT NORMALIZED)'
+      'The offending constraints were:\n'
+      '  BoxConstraints(NaN<=w<=NaN, 2.0<=h<=NaN; NOT NORMALIZED)'
     ));
 
     result = 'no exception';
@@ -55,7 +56,8 @@ void main() {
     }
     expect(result, equals(
       'BoxConstraints has a NaN value in minHeight.\n'
-      'BoxConstraints(0.0<=w<=Infinity, NaN<=h<=Infinity; NOT NORMALIZED)'
+      'The offending constraints were:\n'
+      '  BoxConstraints(0.0<=w<=Infinity, NaN<=h<=Infinity; NOT NORMALIZED)'
     ));
 
     result = 'no exception';
@@ -67,7 +69,8 @@ void main() {
     }
     expect(result, equals(
       'BoxConstraints has NaN values in maxWidth and minHeight.\n'
-      'BoxConstraints(0.0<=w<=NaN, NaN<=h<=Infinity; NOT NORMALIZED)'
+      'The offending constraints were:\n'
+      '  BoxConstraints(0.0<=w<=NaN, NaN<=h<=Infinity; NOT NORMALIZED)'
     ));
   });
 }
