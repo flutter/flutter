@@ -4,9 +4,21 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Creates a [Stack] with the header anchored across the top or a footer across the
-/// bottom. The [GridTileBar] class can be used to create grid tile headers and footers.
+/// A tile in a material design grid list.
+///
+/// A grid list is a [ScrollableGrid] of tiles in a vertical and horizontal
+/// array. Each tile typically contains some visually rich content (e.g., an
+/// image) together with a [GridTileBar] in either a [header] or a [footer].
+///
+/// See also:
+///
+///  * [ScrollableGrid]
+///  * [GridTileBar]
+///  * <https://www.google.com/design/spec/components/grid-lists.html>
 class GridTile extends StatelessWidget {
+  /// Creates a grid tile.
+  ///
+  /// Must have a child. Does not typically have both a header and a footer.
   GridTile({ Key key, this.header, this.footer, this.child }) : super(key: key) {
     assert(child != null);
   }

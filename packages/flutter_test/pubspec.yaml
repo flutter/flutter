@@ -1,9 +1,15 @@
 name: flutter_test
 dependencies:
-  test: 0.12.13
   quiver: ^0.21.4
 
-  # Not needed directly but transitively included due to package:test.
+  # The flutter tools depend on very specific internal implementation
+  # details of the 'test' package, which change between versions, so
+  # here we pin it precisely to avoid version skew across our packages.
+  test: 0.12.13
+
+  # We don't actually depend on 'analyzer', but 'test' does. We pin the
+  # version of analyzer we depend on to avoid version skew across our
+  # packages.
   analyzer: 0.27.2
 
   flutter:

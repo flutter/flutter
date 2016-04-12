@@ -6,7 +6,11 @@ import 'package:flutter/widgets.dart';
 
 import 'icon_theme_data.dart';
 
+/// Controls the color and opacity of icons in a widget subtree.
 class IconTheme extends InheritedWidget {
+  /// Creates an icon theme that controls the color and opacity of descendant widgets.
+  ///
+  /// Both data and child arguments are required to be non-null.
   IconTheme({
     Key key,
     this.data,
@@ -16,6 +20,7 @@ class IconTheme extends InheritedWidget {
     assert(child != null);
   }
 
+  /// The color and opacity to use for icons in this subtree.
   final IconThemeData data;
 
   /// The data from the closest instance of this class that encloses the given context.

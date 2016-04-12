@@ -25,21 +25,15 @@ dependencies:
   flx:
     path: ../flx
 
-  test: 0.12.13 # see note below
-  analyzer: '0.27.2' # see note below
+  # We depend on very specific internal implementation details of the
+  # 'test' package, which change between versions, so here we pin it
+  # precisely.
+  test: 0.12.13
 
-# A note about 'test':
-# We depend on very specific internal implementation details of the
-# 'test' package, which change between versions, so here we pin it
-# precisely.
-
-# A note about 'analyzer':
-# We don't actually depend on 'analyzer', but 'test' does. We aren't
-# compatible with some older versions of 'analyzer'. We lie here,
-# saying we do depend on it, so that we constrain the version that
-# 'test' will get to a version that we'll probably be ok with. (This
-# is why there's no upper bound on our dependency.)
-# See also https://github.com/dart-lang/pub/issues/1356
+  # We don't actually depend on 'analyzer', but 'test' does. We pin the
+  # version of analyzer we depend on to avoid version skew across our
+  # packages.
+  analyzer: 0.27.2
 
 dev_dependencies:
   mockito: ^0.11.0

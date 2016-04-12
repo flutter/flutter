@@ -11,21 +11,30 @@ import 'ink_well.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 
-/// A material design "icon button".
+/// A material design icon button.
 ///
 /// An icon button is a picture printed on a [Material] widget that reacts to
 /// touches by filling with color.
 ///
-/// Use icon buttons on toolbars.
+/// Icon buttons are commonly used in the [AppBar.actions] field, but they can
+/// be used in many other places as well.
 ///
 /// If the [onPressed] callback is not specified or null, then the button will
 /// be disabled, will not react to touch.
+///
+/// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
 ///
 ///  * [Icons]
 ///  * [AppBar]
 class IconButton extends StatelessWidget {
+  /// Creates an icon button.
+  ///
+  /// Icon buttons are commonly used in the [AppBar.actions] field, but they can
+  /// be used in many other places as well.
+  ///
+  /// Requires one of its ancestors to be a [Material] widget.
   const IconButton({
     Key key,
     this.size: 24.0,

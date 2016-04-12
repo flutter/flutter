@@ -26,6 +26,11 @@ import 'theme.dart';
 ///  * [CircleAvatar]
 ///  * <https://www.google.com/design/spec/components/lists.html>
 class ListItem extends StatelessWidget {
+  /// Creates a list item.
+  ///
+  /// If [isThreeLine] is true, then [subtitle] must not be null.
+  ///
+  /// Requires one of its ancestors to be a [Material] widget.
   ListItem({
     Key key,
     this.leading,

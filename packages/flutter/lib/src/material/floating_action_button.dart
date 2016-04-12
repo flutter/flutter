@@ -19,24 +19,29 @@ const double _kSizeMini = 40.0;
 const Duration _kChildSegue = const Duration(milliseconds: 400);
 const Interval _kChildSegueInterval = const Interval(0.65, 1.0);
 
-/// A material design "floating action button".
+/// A material design floating action button.
 ///
 /// A floating action button is a circular icon button that hovers over content
-/// to promote a primary action in the application.
+/// to promote a primary action in the application. Floating action buttons are
+/// most commonly used in the [Scaffold.floatingActionButton] field.
 ///
 /// Use at most a single floating action button per screen. Floating action
 /// buttons should be used for positive actions such as "create", "share", or
 /// "navigate".
 ///
 /// If the [onPressed] callback is not specified or null, then the button will
-/// be disabled, will not react to touch.
+/// be disabled and will not react to touch.
 ///
 /// See also:
 ///
+///  * [Scaffold]
 ///  * [RaisedButton]
 ///  * [FlatButton]
 ///  * <https://www.google.com/design/spec/components/buttons-floating-action-button.html>
 class FloatingActionButton extends StatefulWidget {
+  /// Creates a floating action button.
+  ///
+  /// Most commonly used in the [Scaffold.floatingActionButton] field.
   const FloatingActionButton({
     Key key,
     this.child,
@@ -51,6 +56,10 @@ class FloatingActionButton extends StatefulWidget {
   /// The widget below this widget in the tree.
   final Widget child;
 
+  /// Text that describes the action that will occur when the button is pressed.
+  ///
+  /// This text is displayed when the user long-presses on the button and is
+  /// used for accessibility.
   final String tooltip;
 
   /// The color to use when filling the button.
@@ -66,8 +75,14 @@ class FloatingActionButton extends StatefulWidget {
   /// The z-coordinate at which to place this button.
   final int elevation;
 
+  /// The z-coordinate at which to place this button when the user is touching the button.
   final int highlightElevation;
 
+  /// Controls the size of this button.
+  ///
+  /// By default, floating action buttons are non-mini and have a height and
+  /// width of 56.0 logical pixels. Mini floating action buttons have a height
+  /// and width of 40.0 logical pixels.
   final bool mini;
 
   @override

@@ -407,6 +407,10 @@ class PopupMenuButton<T> extends StatefulWidget {
 
   final PopupMenuItemSelected<T> onSelected;
 
+  /// Text that describes the action that will occur when the button is pressed.
+  ///
+  /// This text is displayed when the user long-presses on the button and is
+  /// used for accessibility.
   final String tooltip;
 
   /// The z-coordinate at which to place the menu when open.
