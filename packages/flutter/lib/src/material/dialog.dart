@@ -11,12 +11,18 @@ import 'colors.dart';
 import 'material.dart';
 import 'theme.dart';
 
-typedef Widget DialogBuilder(NavigatorState navigator);
-
 /// A material design dialog
 ///
-/// <https://www.google.com/design/spec/components/dialogs.html>
+/// Typically passed as the child widget to [showDialog], which displays the
+/// dialog.
+///
+/// See also:
+///  * [showDialog]
+///  * <https://www.google.com/design/spec/components/dialogs.html>
 class Dialog extends StatelessWidget {
+  /// Creates a dialog.
+  ///
+  /// Typically used in conjunction with [showDialog].
   Dialog({
     Key key,
     this.title,
@@ -56,7 +62,6 @@ class Dialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     List<Widget> dialogBody = new List<Widget>();
 
     if (title != null) {
@@ -150,6 +155,17 @@ class _DialogRoute<T> extends PopupRoute<T> {
   }
 }
 
+/// Displays a dialog above the current contents of the app.
+///
+/// This function typically receives a [Dialog] widget as its child argument.
+/// Content below the dialog is dimmed with a [ModalBarrier].
+///
+/// Returns a `Future` that resolves to the value (if any) that was passed to
+/// [Navigator.pop] when the dialog was closed.
+///
+/// See also:
+///  * [Dialog]
+///  * <https://www.google.com/design/spec/components/dialogs.html>
 Future<dynamic/*=T*/> showDialog/*<T>*/({ BuildContext context, Widget child }) {
   Completer<dynamic/*=T*/> completer = new Completer<dynamic/*=T*/>();
   Navigator.push(context, new _DialogRoute<dynamic/*=T*/>(completer: completer, child: child));

@@ -8,7 +8,6 @@ import 'dart:ui' as ui show window;
 
 import 'package:newton/newton.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart' show HasMainAxis;
 
 import 'basic.dart';
 import 'framework.dart';
@@ -332,7 +331,6 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
       _scrollOffset = newScrollOffset;
     });
     PageStorage.of(context)?.writeState(context, _scrollOffset);
-    new ScrollNotification(this, _scrollOffset).dispatch(context);
     _startScroll();
     dispatchOnScroll();
     _endScroll();
@@ -494,6 +492,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     assert(_numberOfInProgressScrolls > 0);
     if (config.onScroll != null)
       config.onScroll(_scrollOffset);
+    new ScrollNotification(this, ScrollNotificationKind.updated).dispatch(context);
   }
 
   void _handleDragDown(_) {
@@ -518,6 +517,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     assert(_numberOfInProgressScrolls == 1);
     if (config.onScrollStart != null)
       config.onScrollStart(_scrollOffset);
+    new ScrollNotification(this, ScrollNotificationKind.started).dispatch(context);
   }
 
   void _handleDragUpdate(double delta) {
@@ -543,6 +543,8 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     assert(_numberOfInProgressScrolls == 0);
     if (config.onScrollEnd != null)
       config.onScrollEnd(_scrollOffset);
+    if (mounted)
+      new ScrollNotification(this, ScrollNotificationKind.ended).dispatch(context);
   }
 
   final GlobalKey<RawGestureDetectorState> _gestureDetectorKey = new GlobalKey<RawGestureDetectorState>();
@@ -622,15 +624,31 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   Widget buildContent(BuildContext context);
 }
 
+/// Indicates if a [ScrollNotification] indicates the start, end or the
+/// middle of a scroll.
+enum ScrollNotificationKind {
+  /// The [ScrollNotification] indicates that the scrollOffset has been changed
+  /// and no existing scroll is underway.
+  started,
+
+  /// The [ScrollNotification] indicates that the scrollOffset has been changed.
+  updated,
+
+  /// The [ScrollNotification] indicates that the scrollOffset has stopped changing.
+  /// This may be because the fling animation that follows a drag gesture has
+  /// completed or simply because the scrollOffset was reset.
+  ended
+}
+
 /// Indicates that a descendant scrollable has scrolled.
 class ScrollNotification extends Notification {
-  ScrollNotification(this.scrollable, this.scrollOffset);
+  ScrollNotification(this.scrollable, this.kind);
+
+  // Indicates if we're at the start, end or the middle of a scroll.
+  final ScrollNotificationKind kind;
 
   /// The scrollable that scrolled.
   final ScrollableState scrollable;
-
-  /// The new scroll offset that the scrollable obtained.
-  final double scrollOffset;
 }
 
 /// A simple scrollable widget that has a single child. Use this widget if
@@ -743,102 +761,5 @@ class Block extends StatelessWidget {
       onScroll: onScroll,
       child: contents
     );
-  }
-}
-
-abstract class ScrollableListPainter extends RenderObjectPainter {
-  @override
-  void attach(RenderObject renderObject) {
-    assert(renderObject is RenderBox);
-    assert(renderObject is HasMainAxis);
-    super.attach(renderObject);
-  }
-
-  @override
-  RenderBox get renderObject => super.renderObject;
-
-  Axis get scrollDirection {
-    HasMainAxis scrollable = renderObject as dynamic;
-    return scrollable?.mainAxis;
-  }
-
-  Size get viewportSize => renderObject.size;
-
-  double get contentExtent => _contentExtent;
-  double _contentExtent = 0.0;
-  void set contentExtent (double value) {
-    assert(value != null);
-    assert(value >= 0.0);
-    if (_contentExtent == value)
-      return;
-    _contentExtent = value;
-    renderObject?.markNeedsPaint();
-  }
-
-  double get scrollOffset => _scrollOffset;
-  double _scrollOffset = 0.0;
-  void set scrollOffset (double value) {
-    assert(value != null);
-    if (_scrollOffset == value)
-      return;
-    _scrollOffset = value;
-    renderObject?.markNeedsPaint();
-  }
-
-  /// Called when a scroll starts. Subclasses may override this method to
-  /// initialize some state or to play an animation.
-  void scrollStarted() { }
-
-  /// Similar to scrollStarted(). Called when a scroll ends. For fling scrolls
-  /// "ended" means that the scroll animation either stopped of its own accord
-  /// or was canceled  by the user.
-  void scrollEnded() { }
-}
-
-class CompoundScrollableListPainter extends ScrollableListPainter {
-  CompoundScrollableListPainter(this.painters);
-
-  final List<ScrollableListPainter> painters;
-
-  @override
-  void attach(RenderObject renderObject) {
-    for(ScrollableListPainter painter in painters)
-      painter.attach(renderObject);
-  }
-
-  @override
-  void detach() {
-    for(ScrollableListPainter painter in painters)
-      painter.detach();
-  }
-
-  @override
-  void set contentExtent (double value) {
-    for(ScrollableListPainter painter in painters)
-      painter.contentExtent = value;
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    for(ScrollableListPainter painter in painters)
-      painter.paint(context, offset);
-  }
-
-  @override
-  void set scrollOffset (double value) {
-    for(ScrollableListPainter painter in painters)
-      painter.scrollOffset = value;
-  }
-
-  @override
-  void scrollStarted() {
-    for(ScrollableListPainter painter in painters)
-      painter.scrollStarted();
-  }
-
-  @override
-  void scrollEnded() {
-    for(ScrollableListPainter painter in painters)
-      painter.scrollEnded();
   }
 }

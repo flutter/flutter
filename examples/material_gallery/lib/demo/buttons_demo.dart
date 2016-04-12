@@ -8,11 +8,11 @@ import '../gallery/demo.dart';
 
 const String _raisedText =
   "# Raised buttons\n"
-  "Raised buttons add dimension to mostly flat layouts. They emphasize"
+  "Raised buttons add dimension to mostly flat layouts. They emphasize "
   "functions on busy or wide spaces.";
 
 const String _raisedCode =
-"""// Create a flat button
+"""// Create a raised button.
 new RaisedButton(
   child: new Text('BUTTON TITLE'),
   onPressed: () {
@@ -20,21 +20,21 @@ new RaisedButton(
   }
 );
 
-// Create a disabled button
-// The button is disabled because there is no
-// onPressed method specified
+// Create a disabled button.
+// Buttons are disabled when onPressed isn't
+// specified or is null.
 new RaisedButton(
   child: new Text('BUTTON TITLE')
 );""";
 
 const String _flatText =
   "# Flat buttons\n"
-  "A flat button is made of ink that displays ink reactions on press "
+  "A flat button displays an ink splash on press "
   "but does not lift. Use flat buttons on toolbars, in dialogs and "
   "inline with padding";
 
 const String _flatCode =
-"""// Create a flat button
+"""// Create a flat button.
 new FlatButton(
   child: new Text('BUTTON TITLE'),
   onPressed: () {
@@ -42,9 +42,9 @@ new FlatButton(
   }
 );
 
-// Create a disabled button
-// The button is disabled because there is no
-// onPressed method specified
+// Create a disabled button.
+// Buttons are disabled when onPressed isn't
+// specified or is null.
 new FlatButton(
   child: new Text('BUTTON TITLE')
 );""";
@@ -56,15 +56,15 @@ const String _dropdownText =
   "arrow.";
 
 const String _dropdownCode =
-"""// Member variable holding value
+"""// Member variable holding value.
 String dropdownValue
 
-// Drop down button with string values
+// Drop down button with string values.
 new DropDownButton<String>(
   value: dropdownValue,
   onChanged: (String newValue) {
     // null indicates the user didn't select a
-    // new value
+    // new value.
     setState(() {
       if (newValue != null)
         dropdownValue = newValue;
@@ -84,27 +84,27 @@ const String _iconText =
   "selected or deselected, such as adding or removing an item's star.";
 
 const String _iconCode =
-"""// Member variable holding toggle value
-bool iconButtonToggle;
+"""// Member variable holding toggle value.
+bool value;
 
-// Toggable icon button
+// Toggleable icon button.
 new IconButton(
   icon: Icons.thumb_up,
   onPressed: () {
-    setState(() => iconButtonToggle = !iconButtonToggle);
+    setState(() => value = !value);
   },
-  color: iconButtonToggle ? Theme.of(context).primaryColor : null
+  color: value ? Theme.of(context).primaryColor : null
 )""";
 
 const String _actionText =
   "# Floating action buttons\n"
   "Floating action buttons are used for a promoted action. They are "
-  "distinguished by a circled icon floating above the UI and have motion "
+  "distinguished by a circled icon floating above the UI and can have motion "
   "behaviors that include morphing, launching, and a transferring anchor "
   "point.";
 
 const String _actionCode =
-"""// Floating action button in Scaffold
+"""// Floating action button in Scaffold.
 new Scaffold(
   appBar: new AppBar(
     title: new Text('Demo')

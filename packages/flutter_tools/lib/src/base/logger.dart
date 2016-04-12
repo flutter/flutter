@@ -6,9 +6,16 @@ import 'dart:async';
 import 'dart:io';
 
 final _AnsiTerminal _terminal = new _AnsiTerminal();
+final String _sep = Platform.isWindows ? '-' : '•';
 
 abstract class Logger {
   bool get isVerbose => false;
+
+  String get separator => _sep;
+
+  set supportsColor(bool value) {
+    _terminal.supportsColor = value;
+  }
 
   /// Display an error level message to the user. Commands should use this if they
   /// fail in some way.
@@ -34,7 +41,7 @@ class Status {
   void cancel() { }
 }
 
-class StdoutLogger implements Logger {
+class StdoutLogger extends Logger {
   Status _status;
 
   @override
@@ -79,7 +86,7 @@ class StdoutLogger implements Logger {
   void flush() { }
 }
 
-class BufferLogger implements Logger {
+class BufferLogger extends Logger {
   @override
   bool get isVerbose => false;
 
@@ -110,7 +117,7 @@ class BufferLogger implements Logger {
   void flush() { }
 }
 
-class VerboseLogger implements Logger {
+class VerboseLogger extends Logger {
   _LogMessage lastMessage;
 
   @override
@@ -170,10 +177,10 @@ class _LogMessage {
     stopwatch.stop();
 
     int millis = stopwatch.elapsedMilliseconds;
-    String prefix = '${millis.toString().padLeft(4)} ms • ';
+    String prefix = '${millis.toString().padLeft(4)} ms $_sep ';
     String indent = ''.padLeft(prefix.length);
     if (millis >= 100)
-      prefix = _terminal.writeBold(prefix.substring(0, prefix.length - 3)) + ' • ';
+      prefix = _terminal.writeBold(prefix.substring(0, prefix.length - 3)) + ' $_sep ';
     String indentMessage = message.replaceAll('\n', '\n$indent');
 
     if (type == _LogType.error) {
@@ -190,15 +197,15 @@ class _LogMessage {
 
 class _AnsiTerminal {
   _AnsiTerminal() {
+    // TODO(devoncarew): This detection does not work for Windows.
     String term = Platform.environment['TERM'];
-    _supportsColor = term != null && term != 'dumb';
+    supportsColor = term != null && term != 'dumb';
   }
 
   static const String _bold = '\u001B[1m';
   static const String _reset = '\u001B[0m';
 
-  bool _supportsColor;
-  bool get supportsColor => _supportsColor;
+  bool supportsColor;
 
   String writeBold(String str) => supportsColor ? '$_bold$str$_reset' : str;
 }
@@ -236,7 +243,7 @@ class _AnsiStatus extends Status {
       double seconds = stopwatch.elapsedMilliseconds / 1000.0;
       print('\b\b\b\b${seconds.toStringAsFixed(1)}s');
     } else {
-      print('\b');
+      print('\b ');
     }
 
     timer.cancel();
@@ -248,7 +255,7 @@ class _AnsiStatus extends Status {
       return;
     live = false;
 
-    print('\b');
+    print('\b ');
     timer.cancel();
   }
 }

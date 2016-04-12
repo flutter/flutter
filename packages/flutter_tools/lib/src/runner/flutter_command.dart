@@ -154,10 +154,13 @@ abstract class FlutterCommand extends Command {
       }
     }
 
-    String error = PackageMap.instance.checkValid();
-    if (error != null) {
-      printError(error);
-      return false;
+    // Validate the current package map only if we will not be running "pub get" later.
+    if (!(_usesPubOption && argResults['pub'])) {
+      String error = PackageMap.instance.checkValid();
+      if (error != null) {
+        printError(error);
+        return false;
+      }
     }
 
     return true;

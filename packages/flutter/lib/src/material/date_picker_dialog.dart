@@ -80,9 +80,9 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 
 /// Shows a dialog containing a material design date picker.
 ///
-/// The returned Future resolves to the date selected by the user when the user
-/// closes the dialog. If the user cancels the dialog, the Future resolves to
-/// the initialDate.
+/// The returned [Future] resolves to the date selected by the user when the
+/// user closes the dialog. If the user cancels the dialog, the [Future]
+/// resolves to the initialDate.
 ///
 /// See also:
 ///

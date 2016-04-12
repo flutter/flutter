@@ -11,6 +11,7 @@ typedef bool NotificationListenerCallback<T extends Notification>(T notification
 abstract class Notification {
   /// Start bubbling this notification at the given build context.
   void dispatch(BuildContext target) {
+    assert(target != null); // Only call dispatch if the widget's State is still mounted.
     target.visitAncestorElements((Element element) {
       if (element is StatelessElement &&
           element.widget is NotificationListener<Notification>) {

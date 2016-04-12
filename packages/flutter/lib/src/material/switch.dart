@@ -31,6 +31,15 @@ import 'toggleable.dart';
 ///  * [Slider]
 ///  * <https://www.google.com/design/spec/components/selection-controls.html#selection-controls-switch>
 class Switch extends StatelessWidget {
+  /// Creates a material design switch.
+  ///
+  /// The switch itself does not maintain any state. Instead, when the state of
+  /// the switch changes, the widget calls the [onChanged] callback. Most widgets
+  /// that use a switch will listen for the [onChanged] callback and rebuild the
+  /// switch with a new [value] to update the visual appearance of the switch.
+  ///
+  /// * [value] determines this switch is on or off.
+  /// * [onChanged] is called when the user toggles with switch on or off.
   Switch({
     Key key,
     this.value,

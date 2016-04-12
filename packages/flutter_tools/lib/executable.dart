@@ -23,6 +23,7 @@ import 'src/commands/drive.dart';
 import 'src/commands/install.dart';
 import 'src/commands/listen.dart';
 import 'src/commands/logs.dart';
+import 'src/commands/precache.dart';
 import 'src/commands/refresh.dart';
 import 'src/commands/run.dart';
 import 'src/commands/run_mojo.dart';
@@ -63,6 +64,7 @@ Future<Null> main(List<String> args) async {
     ..addCommand(new InstallCommand())
     ..addCommand(new ListenCommand())
     ..addCommand(new LogsCommand())
+    ..addCommand(new PrecacheCommand())
     ..addCommand(new RefreshCommand())
     ..addCommand(new RunCommand())
     ..addCommand(new RunMojoCommand(hidden: !verboseHelp))
@@ -98,15 +100,17 @@ Future<Null> main(List<String> args) async {
     } else {
       // We've crashed; emit a log report.
       stderr.writeln();
-      if (error is String)
-        stderr.writeln('Oops; flutter has exited unexpectedly: "$error".');
-      else
-        stderr.writeln('Oops; flutter has exited unexpectedly.');
 
       if (Platform.environment.containsKey('FLUTTER_DEV')) {
-        // If we're working in the tools themselves, just print the stack trace.
+        // If we're working on the tools themselves, just print the stack trace.
+        stderr.writeln('$error');
         stderr.writeln(chain.terse.toString());
       } else {
+        if (error is String)
+          stderr.writeln('Oops; flutter has exited unexpectedly: "$error".');
+        else
+          stderr.writeln('Oops; flutter has exited unexpectedly.');
+
         File file = _createCrashReport(args, error, chain);
 
         stderr.writeln(

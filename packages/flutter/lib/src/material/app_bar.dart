@@ -12,6 +12,12 @@ import 'tabs.dart';
 import 'theme.dart';
 import 'typography.dart';
 
+// TODO(eseidel) Toolbar needs to change size based on orientation:
+// http://www.google.com/design/spec/layout/structure.html#structure-app-bar
+// Mobile Landscape: 48dp
+// Mobile Portrait: 56dp
+// Tablet/Desktop: 64dp
+
 /// A material design app bar.
 ///
 /// An app bar consists of a tool bar and potentially other widgets, such as a
@@ -19,8 +25,8 @@ import 'typography.dart';
 /// common actions with [IconButtons]s which are optionally followed by a
 /// [PopupMenuButton] for less common operations.
 ///
-/// App bars are most commonly used in a [Scaffold], which places the app bar at
-/// the top of the app.
+/// App bars are most commonly used in the [Scaffold.appBar] property, which
+/// places the app bar at the top of the app.
 ///
 /// See also:
 ///
@@ -31,6 +37,9 @@ import 'typography.dart';
 ///  * [FlexibleSpaceBar]
 ///  * <https://www.google.com/design/spec/layout/structure.html#structure-toolbars>
 class AppBar extends StatelessWidget {
+  /// Creates a material design app bar.
+  ///
+  /// Typically used in the [Scaffold.appBar] property.
   AppBar({
     Key key,
     this.leading,

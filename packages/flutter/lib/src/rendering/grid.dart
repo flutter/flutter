@@ -430,25 +430,25 @@ class RenderGrid extends RenderVirtualViewport<GridParentData> {
 
   @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     return _delegate.getMinIntrinsicWidth(constraints, virtualChildCount);
   }
 
   @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     return _delegate.getMaxIntrinsicWidth(constraints, virtualChildCount);
   }
 
   @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     return _delegate.getMinIntrinsicHeight(constraints, virtualChildCount);
   }
 
   @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     return _delegate.getMaxIntrinsicHeight(constraints, virtualChildCount);
   }
 

@@ -61,14 +61,14 @@ abstract class Gesturer extends BindingBase implements HitTestTarget, HitTestabl
       HitTestResult result = new HitTestResult();
       hitTest(result, event.position);
       _hitTests[event.pointer] = result;
-    } else if (event is! PointerUpEvent) {
+    } else if (event is! PointerUpEvent && event is! PointerCancelEvent) {
       assert(event.down == _hitTests.containsKey(event.pointer));
       if (!event.down)
         return; // we currently ignore add, remove, and hover move events
     }
     assert(_hitTests[event.pointer] != null);
     dispatchEvent(event, _hitTests[event.pointer]);
-    if (event is PointerUpEvent) {
+    if (event is PointerUpEvent || event is PointerCancelEvent) {
       assert(_hitTests.containsKey(event.pointer));
       _hitTests.remove(event.pointer);
     }

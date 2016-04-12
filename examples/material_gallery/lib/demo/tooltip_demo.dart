@@ -19,8 +19,7 @@ class TooltipDemo extends StatelessWidget {
       ),
       body: new Builder(
         builder: (BuildContext context) {
-          return new Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          return new Block(
             children: <Widget>[
               new Text(_introText, style: theme.textTheme.subhead),
               new Row(

@@ -11,6 +11,7 @@ import 'package:path/path.dart' as path;
 import '../android/android.dart' as android;
 import '../artifacts.dart';
 import '../base/utils.dart';
+import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart';
 import '../template.dart';
@@ -66,6 +67,8 @@ class CreateCommand extends Command {
       return 2;
     }
 
+    await Cache.instance.updateAll();
+
     String flutterRoot = path.absolute(ArtifactStore.flutterRoot);
 
     String flutterPackagesDirectory = path.join(flutterRoot, 'packages');
@@ -85,6 +88,10 @@ class CreateCommand extends Command {
     String dirPath = path.normalize(projectDir.absolute.path);
     String projectName = _normalizeProjectName(path.basename(dirPath));
 
+    if (_validateProjectDir(dirPath) != null) {
+      printError(_validateProjectDir(dirPath));
+      return 1;
+    }
     if (_validateProjectName(projectName) != null) {
       printError(_validateProjectName(projectName));
       return 1;
@@ -214,9 +221,32 @@ final Set<String> _packageDependencies = new Set<String>.from(<String>[
 String _validateProjectName(String projectName) {
   if (_packageDependencies.contains(projectName)) {
     return "Invalid project name: '$projectName' - this will conflict with Flutter "
-    "package dependencies.";
+      "package dependencies.";
   }
+  return null;
+}
 
+/// Return `null` if the project directory is legal. Return a validation message
+/// if we should disallow the directory name.
+String _validateProjectDir(String projectName) {
+  FileSystemEntityType type = FileSystemEntity.typeSync(projectName);
+  if (type != FileSystemEntityType.NOT_FOUND) {
+    switch(type) {
+      case FileSystemEntityType.DIRECTORY:
+        // Do not re-use directory if it is not empty.
+        if (new Directory(projectName).listSync(followLinks: false).isNotEmpty) {
+          return "Invalid project name: '$projectName' - refers to a directory "
+            "that is not empty.";
+        };
+        break;
+      case FileSystemEntityType.FILE:
+        // Do not overwrite files.
+        return "Invalid project name: '$projectName' - file exists.";
+      case FileSystemEntityType.LINK:
+        // Do not overwrite links.
+        return "Invalid project name: '$projectName' - refers to a link.";
+    }
+  }
   return null;
 }
 

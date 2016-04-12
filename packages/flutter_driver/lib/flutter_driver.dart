@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// This library provides API to test Flutter applications that run on real
+/// Provides API to test Flutter applications that run on real
 /// devices and emulators.
 ///
-/// The application run in a separate process from the test itself. If you are
-/// familiar with Selenium (web), Espresso (Android) or UI Automation (iOS),
-/// this is Flutter's version of that.
+/// The application runs in a separate process from the test itself.
 ///
 /// This is Flutter's version of Selenium WebDriver (generic web),
 /// Protractor (Angular), Espresso (Android) or Earl Gray (iOS).

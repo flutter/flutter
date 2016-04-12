@@ -19,6 +19,7 @@ import 'theme.dart';
 ///  * [ListItem]
 ///  * <https://www.google.com/design/spec/components/chips.html#chips-contact-chips>
 class CircleAvatar extends StatelessWidget {
+  /// Creates a circle that represents a user.
   CircleAvatar({
     Key key,
     this.child,

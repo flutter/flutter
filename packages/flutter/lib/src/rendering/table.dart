@@ -636,7 +636,7 @@ class RenderTable extends RenderBox {
 
   @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     assert(_children.length == rows * columns);
     double totalMinWidth = 0.0;
     for (int x = 0; x < columns; x += 1) {
@@ -649,7 +649,7 @@ class RenderTable extends RenderBox {
 
   @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     assert(_children.length == rows * columns);
     double totalMaxWidth = 0.0;
     for (int x = 0; x < columns; x += 1) {
@@ -664,7 +664,7 @@ class RenderTable extends RenderBox {
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     // winner of the 2016 world's most expensive intrinsic dimension function award
     // honorable mention, most likely to improve if taught about memoization award
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     assert(_children.length == rows * columns);
     final List<double> widths = computeColumnWidths(constraints);
     double rowTop = 0.0;

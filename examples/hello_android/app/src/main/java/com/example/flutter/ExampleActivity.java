@@ -18,8 +18,8 @@ import android.widget.TextView;
 
 import org.chromium.base.PathUtils;
 import org.domokit.activity.ActivityImpl;
-import org.domokit.sky.shell.SkyMain;
-import org.domokit.sky.shell.PlatformViewAndroid;
+import io.flutter.view.FlutterMain;
+import io.flutter.view.FlutterView;
 
 import java.io.File;
 import org.json.JSONException;
@@ -28,21 +28,21 @@ import org.json.JSONObject;
 public class ExampleActivity extends Activity {
     private static final String TAG = "ExampleActivity";
 
-    private PlatformViewAndroid flutterView;
+    private FlutterView flutterView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        SkyMain.ensureInitialized(getApplicationContext(), null);
+        FlutterMain.ensureInitializationComplete(getApplicationContext(), null);
         setContentView(R.layout.flutter_layout);
 
-        flutterView = (PlatformViewAndroid) findViewById(R.id.flutter_view);
-        File appBundle = new File(PathUtils.getDataDirectory(this), SkyMain.APP_BUNDLE);
+        flutterView = (FlutterView) findViewById(R.id.flutter_view);
+        File appBundle = new File(PathUtils.getDataDirectory(this), FlutterMain.APP_BUNDLE);
         flutterView.runFromBundle(appBundle.getPath(), null);
 
         flutterView.addOnMessageListener("getLocation",
-            new PlatformViewAndroid.OnMessageListener() {
+            new FlutterView.OnMessageListener() {
                 @Override
                 public String onMessage(String message) {
                     return onGetLocation(message);
@@ -103,7 +103,7 @@ public class ExampleActivity extends Activity {
         }
 
         flutterView.sendToFlutter("getRandom", message.toString(),
-            new PlatformViewAndroid.MessageReplyCallback() {
+            new FlutterView.MessageReplyCallback() {
                 @Override
                 public void onReply(String json) {
                     onRandomReply(json);

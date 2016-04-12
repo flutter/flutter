@@ -26,6 +26,7 @@ import 'run_test.dart' as run_test;
 import 'service_protocol_test.dart' as service_protocol_test;
 import 'stop_test.dart' as stop_test;
 import 'trace_test.dart' as trace_test;
+import 'upgrade_test.dart' as upgrade_test;
 
 void main() {
   adb_test.main();
@@ -47,4 +48,5 @@ void main() {
   service_protocol_test.main();
   stop_test.main();
   trace_test.main();
+  upgrade_test.main();
 }

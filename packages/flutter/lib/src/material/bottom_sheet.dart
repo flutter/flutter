@@ -236,8 +236,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// can be created and displayed with the [Scaffold.showBottomSheet] function.
 ///
 /// Returns a `Future` that resolves to the value (if any) that was passed to
-/// [Navigator.pop] when the modal bottom sheet is removed from the navigation
-/// history.
+/// [Navigator.pop] when the modal bottom sheet was closed.
 ///
 /// See also:
 ///

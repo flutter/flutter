@@ -34,7 +34,7 @@ GOTO :after_snapshot
 CD "%flutter_tools_dir%"
 ECHO Updating flutter tool...
 CALL pub.bat get
-CD "%flutter_dir"
+CD "%flutter_dir%"
 REM Allows us to check if sky_engine's REVISION is correct
 CALL pub.bat get
 CD "%flutter_root%"

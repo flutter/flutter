@@ -40,6 +40,10 @@ class FlutterCommandRunner extends CommandRunner {
     argParser.addFlag('version',
         negatable: false,
         help: 'Reports the version of this tool.');
+    argParser.addFlag('color',
+        negatable: true,
+        hide: !verboseHelp,
+        help: 'Whether to use terminal colors.');
 
     String packagesHelp;
     if (FileSystemEntity.isFileSync('.packages'))
@@ -192,6 +196,9 @@ class FlutterCommandRunner extends CommandRunner {
     if (globalResults['verbose'])
       context[Logger] = new VerboseLogger();
 
+    if (globalResults.wasParsed('color'))
+      logger.supportsColor = globalResults['color'];
+
     // we must set ArtifactStore.flutterRoot early because other features use it
     // (e.g. enginePath's initialiser uses it)
     ArtifactStore.flutterRoot = path.normalize(path.absolute(globalResults['flutter-root']));
@@ -273,6 +280,11 @@ class FlutterCommandRunner extends CommandRunner {
       configs.add(new BuildConfiguration.prebuilt(
         hostPlatform: hostPlatform,
         targetPlatform: TargetPlatform.android_arm
+      ));
+
+      configs.add(new BuildConfiguration.prebuilt(
+        hostPlatform: hostPlatform,
+        targetPlatform: TargetPlatform.android_x64
       ));
 
       if (hostPlatform == HostPlatform.linux) {

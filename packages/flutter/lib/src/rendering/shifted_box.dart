@@ -17,7 +17,7 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
 
   @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     if (child != null)
       return child.getMinIntrinsicWidth(constraints);
     return super.getMinIntrinsicWidth(constraints);
@@ -25,7 +25,7 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
 
   @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     if (child != null)
       return child.getMaxIntrinsicWidth(constraints);
     return super.getMaxIntrinsicWidth(constraints);
@@ -33,7 +33,7 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
 
   @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     if (child != null)
       return child.getMinIntrinsicHeight(constraints);
     return super.getMinIntrinsicHeight(constraints);
@@ -41,7 +41,7 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
 
   @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     if (child != null)
       return child.getMaxIntrinsicHeight(constraints);
     return super.getMaxIntrinsicHeight(constraints);
@@ -112,7 +112,7 @@ class RenderPadding extends RenderShiftedBox {
 
   @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     double totalPadding = padding.left + padding.right;
     if (child != null)
       return constraints.constrainWidth(child.getMinIntrinsicWidth(constraints.deflate(padding)) + totalPadding);
@@ -121,7 +121,7 @@ class RenderPadding extends RenderShiftedBox {
 
   @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     double totalPadding = padding.left + padding.right;
     if (child != null)
       return constraints.constrainWidth(child.getMaxIntrinsicWidth(constraints.deflate(padding)) + totalPadding);
@@ -130,7 +130,7 @@ class RenderPadding extends RenderShiftedBox {
 
   @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     double totalPadding = padding.top + padding.bottom;
     if (child != null)
       return constraints.constrainHeight(child.getMinIntrinsicHeight(constraints.deflate(padding)) + totalPadding);
@@ -139,7 +139,7 @@ class RenderPadding extends RenderShiftedBox {
 
   @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     double totalPadding = padding.top + padding.bottom;
     if (child != null)
       return constraints.constrainHeight(child.getMaxIntrinsicHeight(constraints.deflate(padding)) + totalPadding);
@@ -494,25 +494,25 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
 
   @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     return constraints.minWidth;
   }
 
   @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     return constraints.minWidth;
   }
 
   @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     return constraints.minHeight;
   }
 
   @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     return constraints.minHeight;
   }
 
@@ -567,25 +567,25 @@ class RenderSizedOverflowBox extends RenderAligningShiftedBox {
 
   @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     return constraints.constrainWidth(_requestedSize.width);
   }
 
   @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     return constraints.constrainWidth(_requestedSize.width);
   }
 
   @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     return constraints.constrainHeight(_requestedSize.height);
   }
 
   @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     return constraints.constrainHeight(_requestedSize.height);
   }
 
@@ -683,7 +683,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
 
   @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     if (child != null)
       return constraints.constrainWidth(child.getMinIntrinsicWidth(_getInnerConstraints(constraints)));
     return constraints.constrainWidth(_getInnerConstraints(constraints).constrainWidth(0.0));
@@ -691,7 +691,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
 
   @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     if (child != null)
       return constraints.constrainWidth(child.getMaxIntrinsicWidth(_getInnerConstraints(constraints)));
     return constraints.constrainWidth(_getInnerConstraints(constraints).constrainWidth(0.0));
@@ -699,7 +699,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
 
   @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     if (child != null)
       return constraints.constrainHeight(child.getMinIntrinsicHeight(_getInnerConstraints(constraints)));
     return constraints.constrainHeight(_getInnerConstraints(constraints).constrainHeight(0.0));
@@ -707,7 +707,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
 
   @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     if (child != null)
       return constraints.constrainHeight(child.getMaxIntrinsicHeight(_getInnerConstraints(constraints)));
     return constraints.constrainHeight(_getInnerConstraints(constraints).constrainHeight(0.0));
@@ -779,25 +779,25 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
 
   @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     return _getSize(constraints).width;
   }
 
   @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     return _getSize(constraints).width;
   }
 
   @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     return _getSize(constraints).height;
   }
 
   @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     return _getSize(constraints).height;
   }
 
@@ -813,7 +813,7 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
   void performLayout() {
     if (child != null) {
       BoxConstraints childConstraints = delegate.getConstraintsForChild(constraints);
-      assert(childConstraints.debugAssertIsNormalized);
+      assert(childConstraints.debugAssertIsValid(isAppliedConstraint: true));
       child.layout(childConstraints, parentUsesSize: !childConstraints.isTight);
       final BoxParentData childParentData = child.parentData;
       childParentData.offset = delegate.getPositionForChild(size, childConstraints.isTight ? childConstraints.smallest : child.size);

@@ -487,7 +487,7 @@ class ScaffoldState extends State<Scaffold> {
   double _floatingAppBarHeight = 0.0;
 
   bool _handleScrollNotification(ScrollNotification notification) {
-    if (config.scrollableKey != null && config.scrollableKey == notification.scrollable.config.key) {
+    if (config.scrollableKey == null || config.scrollableKey == notification.scrollable.config.key) {
       final double newScrollOffset = notification.scrollable.scrollOffset;
       setState(() {
         _scrollOffsetDelta = _scrollOffset - newScrollOffset;

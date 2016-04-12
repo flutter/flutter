@@ -10,7 +10,6 @@ import 'package:path/path.dart' as path;
 import '../application_package.dart';
 import '../base/common.dart';
 import '../build_configuration.dart';
-import '../dart/pub.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
@@ -81,16 +80,6 @@ class RunCommand extends RunCommandBase {
 
   @override
   bool get requiresDevice => true;
-
-  @override
-  Future<int> run() async {
-    if (argResults['pub']) {
-      int exitCode = await pubGet();
-      if (exitCode != 0)
-        return exitCode;
-    }
-    return await super.run();
-  }
 
   @override
   Future<int> runInProject() async {
@@ -173,13 +162,17 @@ Future<int> startApp(
     return 1;
   }
 
-  if (install) {
+  // TODO(devoncarew): We shouldn't have to do type checks here.
+  if (install && device is AndroidDevice) {
     printTrace('Running build command.');
-    int result = await buildForDevice(
-      device, applicationPackages, toolchain, configs,
+
+    int result = await buildApk(
+      device.platform, toolchain, configs,
       enginePath: enginePath,
-      target: target
+      target: target,
+      buildVariant: BuildVariant.develop
     );
+
     if (result != 0)
       return result;
   }

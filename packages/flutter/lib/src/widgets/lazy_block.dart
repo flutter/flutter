@@ -264,13 +264,13 @@ class _RenderLazyBlock extends RenderVirtualViewport<_LazyBlockParentData> {
 
   @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     return getIntrinsicWidth(constraints);
   }
 
   @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     return getIntrinsicWidth(constraints);
   }
 
@@ -286,13 +286,13 @@ class _RenderLazyBlock extends RenderVirtualViewport<_LazyBlockParentData> {
 
   @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     return getIntrinsicHeight(constraints);
   }
 
   @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
+    assert(constraints.debugAssertIsValid());
     return getIntrinsicHeight(constraints);
   }
 

@@ -9,21 +9,53 @@ import 'dart:ui' show Color;
 class Colors {
   Colors._();
 
+  /// Completely invisible.
   static const Color transparent = const Color(0x00000000);
 
+  /// Completely opaque black.
   static const Color black   = const Color(0xFF000000);
-  static const Color black87 = const Color(0xDD000000);
-  static const Color black54 = const Color(0x8A000000);
-  static const Color black45 = const Color(0x73000000); // mask color
-  static const Color black26 = const Color(0x42000000); // disabled radio buttons and text of disabled flat buttons in light theme
-  static const Color black12 = const Color(0x1F000000); // background of disabled raised buttons in light theme
 
+  /// Black with 87% opacity.
+  static const Color black87 = const Color(0xDD000000);
+
+  /// Black with 54% opacity.
+  static const Color black54 = const Color(0x8A000000);
+
+  /// Black with 45% opacity.
+  ///
+  /// Used for modal barriers.
+  static const Color black45 = const Color(0x73000000);
+
+  /// Black with 26% opacity.
+  ///
+  /// Used for disabled radio buttons and text of disabled flat buttons in the light theme.
+  static const Color black26 = const Color(0x42000000);
+
+  /// Black with 12% opacity.
+  ///
+  /// Used for the background of disabled raised buttons in the light theme.
+  static const Color black12 = const Color(0x1F000000);
+
+  /// Completely opaque white.
   static const Color white   = const Color(0xFFFFFFFF);
+
+  /// White with 70% opacity.
   static const Color white70 = const Color(0xB3FFFFFF);
-  static const Color white30 = const Color(0x4DFFFFFF); // disabled radio buttons and text of disabled flat buttons in dark theme
-  static const Color white12 = const Color(0x1FFFFFFF); // background of disabled raised buttons in dark theme
+
+  /// White with 32% opacity.
+  ///
+  /// Used for disabled radio buttons and text of disabled flat buttons in the dark theme.
+  static const Color white30 = const Color(0x4DFFFFFF);
+
+  /// White with 12% opacity.
+  ///
+  /// Used for the background of disabled raised buttons in the dark theme.
+  static const Color white12 = const Color(0x1FFFFFFF);
+
+  /// White with 10% opacity.
   static const Color white10 = const Color(0x1AFFFFFF);
 
+  /// The red primary swatch.
   static const Map<int, Color> red = const <int, Color>{
      50: const Color(0xFFFFEBEE),
     100: const Color(0xFFFFCDD2),
@@ -37,6 +69,7 @@ class Colors {
     900: const Color(0xFFB71C1C),
   };
 
+  /// The red accent swatch.
   static const Map<int, Color> redAccent = const <int, Color>{
     100: const Color(0xFFFF8A80),
     200: const Color(0xFFFF5252),
@@ -44,6 +77,7 @@ class Colors {
     700: const Color(0xFFD50000),
   };
 
+  /// The pink primary swatch.
   static const Map<int, Color> pink = const <int, Color>{
      50: const Color(0xFFFCE4EC),
     100: const Color(0xFFF8BBD0),
@@ -57,6 +91,7 @@ class Colors {
     900: const Color(0xFF880E4F),
   };
 
+  /// The pink accent swatch.
   static const Map<int, Color> pinkAccent = const <int, Color>{
     100: const Color(0xFFFF80AB),
     200: const Color(0xFFFF4081),
@@ -64,6 +99,7 @@ class Colors {
     700: const Color(0xFFC51162),
   };
 
+  /// The purple primary swatch.
   static const Map<int, Color> purple = const <int, Color>{
      50: const Color(0xFFF3E5F5),
     100: const Color(0xFFE1BEE7),
@@ -77,6 +113,7 @@ class Colors {
     900: const Color(0xFF4A148C),
   };
 
+  /// The purple accent swatch.
   static const Map<int, Color> purpleAccent = const <int, Color>{
     100: const Color(0xFFEA80FC),
     200: const Color(0xFFE040FB),
@@ -84,6 +121,7 @@ class Colors {
     700: const Color(0xFFAA00FF),
   };
 
+  /// The deep purple primary swatch.
   static const Map<int, Color> deepPurple = const <int, Color>{
      50: const Color(0xFFEDE7F6),
     100: const Color(0xFFD1C4E9),
@@ -97,6 +135,7 @@ class Colors {
     900: const Color(0xFF311B92),
   };
 
+  /// The deep purple accent swatch.
   static const Map<int, Color> deepPurpleAccent = const <int, Color>{
     100: const Color(0xFFB388FF),
     200: const Color(0xFF7C4DFF),
@@ -104,6 +143,7 @@ class Colors {
     700: const Color(0xFF6200EA),
   };
 
+  /// The indigo primary swatch.
   static const Map<int, Color> indigo = const <int, Color>{
      50: const Color(0xFFE8EAF6),
     100: const Color(0xFFC5CAE9),
@@ -117,6 +157,7 @@ class Colors {
     900: const Color(0xFF1A237E),
   };
 
+  /// The indigo accent swatch.
   static const Map<int, Color> indigoAccent = const <int, Color>{
     100: const Color(0xFF8C9EFF),
     200: const Color(0xFF536DFE),
@@ -124,6 +165,7 @@ class Colors {
     700: const Color(0xFF304FFE),
   };
 
+  /// The blue primary swatch.
   static const Map<int, Color> blue = const <int, Color>{
      50: const Color(0xFFE3F2FD),
     100: const Color(0xFFBBDEFB),
@@ -137,6 +179,7 @@ class Colors {
     900: const Color(0xFF0D47A1),
   };
 
+  /// The blue accent swatch.
   static const Map<int, Color> blueAccent = const <int, Color>{
     100: const Color(0xFF82B1FF),
     200: const Color(0xFF448AFF),
@@ -144,6 +187,7 @@ class Colors {
     700: const Color(0xFF2962FF),
   };
 
+  /// The light blue primary swatch.
   static const Map<int, Color> lightBlue = const <int, Color>{
      50: const Color(0xFFE1F5FE),
     100: const Color(0xFFB3E5FC),
@@ -157,6 +201,7 @@ class Colors {
     900: const Color(0xFF01579B),
   };
 
+  /// The light blue accent swatch.
   static const Map<int, Color> lightBlueAccent = const <int, Color>{
     100: const Color(0xFF80D8FF),
     200: const Color(0xFF40C4FF),
@@ -164,6 +209,7 @@ class Colors {
     700: const Color(0xFF0091EA),
   };
 
+  /// The cyan primary swatch.
   static const Map<int, Color> cyan = const <int, Color>{
      50: const Color(0xFFE0F7FA),
     100: const Color(0xFFB2EBF2),
@@ -177,6 +223,7 @@ class Colors {
     900: const Color(0xFF006064),
   };
 
+  /// The cyan accent swatch.
   static const Map<int, Color> cyanAccent = const <int, Color>{
     100: const Color(0xFF84FFFF),
     200: const Color(0xFF18FFFF),
@@ -184,6 +231,7 @@ class Colors {
     700: const Color(0xFF00B8D4),
   };
 
+  /// The teal primary swatch.
   static const Map<int, Color> teal = const <int, Color>{
      50: const Color(0xFFE0F2F1),
     100: const Color(0xFFB2DFDB),
@@ -197,6 +245,7 @@ class Colors {
     900: const Color(0xFF004D40),
   };
 
+  /// The teal accent swatch.
   static const Map<int, Color> tealAccent = const <int, Color>{
     100: const Color(0xFFA7FFEB),
     200: const Color(0xFF64FFDA),
@@ -204,6 +253,7 @@ class Colors {
     700: const Color(0xFF00BFA5),
   };
 
+  /// The green primary swatch.
   static const Map<int, Color> green = const <int, Color>{
      50: const Color(0xFFE8F5E9),
     100: const Color(0xFFC8E6C9),
@@ -217,6 +267,7 @@ class Colors {
     900: const Color(0xFF1B5E20),
   };
 
+  /// The green accent swatch.
   static const Map<int, Color> greenAccent = const <int, Color>{
     100: const Color(0xFFB9F6CA),
     200: const Color(0xFF69F0AE),
@@ -224,6 +275,7 @@ class Colors {
     700: const Color(0xFF00C853),
   };
 
+  /// The light green primary swatch.
   static const Map<int, Color> lightGreen = const <int, Color>{
      50: const Color(0xFFF1F8E9),
     100: const Color(0xFFDCEDC8),
@@ -237,6 +289,7 @@ class Colors {
     900: const Color(0xFF33691E),
   };
 
+  /// The light green accent swatch.
   static const Map<int, Color> lightGreenAccent = const <int, Color>{
     100: const Color(0xFFCCFF90),
     200: const Color(0xFFB2FF59),
@@ -244,6 +297,7 @@ class Colors {
     700: const Color(0xFF64DD17),
   };
 
+  /// The lime primary swatch.
   static const Map<int, Color> lime = const <int, Color>{
      50: const Color(0xFFF9FBE7),
     100: const Color(0xFFF0F4C3),
@@ -257,6 +311,7 @@ class Colors {
     900: const Color(0xFF827717),
   };
 
+  /// The lime accent primary swatch.
   static const Map<int, Color> limeAccent = const <int, Color>{
     100: const Color(0xFFF4FF81),
     200: const Color(0xFFEEFF41),
@@ -264,6 +319,7 @@ class Colors {
     700: const Color(0xFFAEEA00),
   };
 
+  /// The yellow primary swatch.
   static const Map<int, Color> yellow = const <int, Color>{
      50: const Color(0xFFFFFDE7),
     100: const Color(0xFFFFF9C4),
@@ -277,6 +333,7 @@ class Colors {
     900: const Color(0xFFF57F17),
   };
 
+  /// The yellow accent swatch.
   static const Map<int, Color> yellowAccent = const <int, Color>{
     100: const Color(0xFFFFFF8D),
     200: const Color(0xFFFFFF00),
@@ -284,6 +341,7 @@ class Colors {
     700: const Color(0xFFFFD600),
   };
 
+  /// The amber primary swatch.
   static const Map<int, Color> amber = const <int, Color>{
      50: const Color(0xFFFFF8E1),
     100: const Color(0xFFFFECB3),
@@ -297,6 +355,7 @@ class Colors {
     900: const Color(0xFFFF6F00),
   };
 
+  /// The amber accent swatch.
   static const Map<int, Color> amberAccent = const <int, Color>{
     100: const Color(0xFFFFE57F),
     200: const Color(0xFFFFD740),
@@ -304,6 +363,7 @@ class Colors {
     700: const Color(0xFFFFAB00),
   };
 
+  /// The orange primary swatch.
   static const Map<int, Color> orange = const <int, Color>{
      50: const Color(0xFFFFF3E0),
     100: const Color(0xFFFFE0B2),
@@ -317,6 +377,7 @@ class Colors {
     900: const Color(0xFFE65100),
   };
 
+  /// The orange accent swatch.
   static const Map<int, Color> orangeAccent = const <int, Color>{
     100: const Color(0xFFFFD180),
     200: const Color(0xFFFFAB40),
@@ -324,6 +385,7 @@ class Colors {
     700: const Color(0xFFFF6D00),
   };
 
+  /// The deep orange primary swatch.
   static const Map<int, Color> deepOrange = const <int, Color>{
      50: const Color(0xFFFBE9E7),
     100: const Color(0xFFFFCCBC),
@@ -337,6 +399,7 @@ class Colors {
     900: const Color(0xFFBF360C),
   };
 
+  /// The deep orange accent swatch.
   static const Map<int, Color> deepOrangeAccent = const <int, Color>{
     100: const Color(0xFFFF9E80),
     200: const Color(0xFFFF6E40),
@@ -344,6 +407,7 @@ class Colors {
     700: const Color(0xFFDD2C00),
   };
 
+  /// The brown primary swatch.
   static const Map<int, Color> brown = const <int, Color>{
      50: const Color(0xFFEFEBE9),
     100: const Color(0xFFD7CCC8),
@@ -357,6 +421,7 @@ class Colors {
     900: const Color(0xFF3E2723),
   };
 
+  /// The grey primary swatch.
   static const Map<int, Color> grey = const <int, Color>{
      50: const Color(0xFFFAFAFA),
     100: const Color(0xFFF5F5F5),
@@ -372,6 +437,7 @@ class Colors {
     900: const Color(0xFF212121),
   };
 
+  /// The blue-grey primary swatch.
   static const Map<int, Color> blueGrey = const <int, Color>{
      50: const Color(0xFFECEFF1),
     100: const Color(0xFFCFD8DC),
@@ -385,7 +451,7 @@ class Colors {
     900: const Color(0xFF263238),
   };
 
-  /// All Material design primary color swatches (except grey)
+  /// The material design primary color swatches (except grey).
   static const List<Map<int, Color>> primaries = const <Map<int, Color>>[
     red,
     pink,
@@ -408,7 +474,7 @@ class Colors {
     blueGrey,
   ];
 
-  /// All Material design accent color swatches
+  /// The material design accent color swatches.
   static const List<Map<int, Color>> accents = const <Map<int, Color>>[
     redAccent,
     pinkAccent,

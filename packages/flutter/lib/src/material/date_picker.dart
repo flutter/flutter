@@ -29,6 +29,10 @@ enum _DatePickerMode { day, year }
 ///  * [showDatePicker]
 ///  * <https://www.google.com/design/spec/components/pickers.html#pickers-date-pickers>
 class DatePicker extends StatefulWidget {
+  /// Creates a date picker.
+  ///
+  /// Rather than creating a date picker directly, consider using
+  /// [showDatePicker] to show a date picker in a dialog.
   DatePicker({
     this.selectedDate,
     this.onChanged,
@@ -197,6 +201,9 @@ class _DatePickerHeader extends StatelessWidget {
 ///  * [DatePicker].
 ///  * <https://www.google.com/design/spec/components/pickers.html#pickers-date-pickers>
 class DayPicker extends StatelessWidget {
+  /// Creates a day picker.
+  ///
+  /// Rarely used directly. Instead, typically used as part of a [DatePicker].
   DayPicker({
     this.selectedDate,
     this.currentDate,
@@ -326,6 +333,9 @@ class DayPicker extends StatelessWidget {
 ///  * [DatePicker]
 ///  * <https://www.google.com/design/spec/components/pickers.html#pickers-date-pickers>
 class MonthPicker extends StatefulWidget {
+  /// Creates a month picker.
+  ///
+  /// Rarely used directly. Instead, typically used as part of a [DatePicker].
   MonthPicker({
     Key key,
     this.selectedDate,

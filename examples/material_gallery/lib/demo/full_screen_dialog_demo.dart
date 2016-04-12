@@ -159,95 +159,87 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
           )
         ]
       ),
-      body: new Padding(
+      body: new Block(
         padding: const EdgeInsets.all(16.0),
-        child: new ScrollableViewport(
-          child: new Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisAlignment: MainAxisAlignment.collapse,
+        children: <Widget>[
+          new Container(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            decoration: new BoxDecoration(
+              border: new Border(bottom: new BorderSide(color: theme.dividerColor))
+            ),
+            child: new Align(
+              alignment: FractionalOffset.bottomLeft,
+              child: new Text('Event name', style: theme.textTheme.display2)
+            )
+          ),
+          new Container(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            decoration: new BoxDecoration(
+              border: new Border(bottom: new BorderSide(color: theme.dividerColor))
+            ),
+            child: new Align(
+              alignment: FractionalOffset.bottomLeft,
+              child: new Text('Location', style: theme.textTheme.title.copyWith(color: Colors.black54))
+            )
+          ),
+          new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              new Container(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                decoration: new BoxDecoration(
-                  border: new Border(bottom: new BorderSide(color: theme.dividerColor))
-                ),
-                child: new Align(
-                  alignment: FractionalOffset.bottomLeft,
-                  child: new Text('Event name', style: theme.textTheme.display2)
-                )
-              ),
-              new Container(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                decoration: new BoxDecoration(
-                  border: new Border(bottom: new BorderSide(color: theme.dividerColor))
-                ),
-                child: new Align(
-                  alignment: FractionalOffset.bottomLeft,
-                  child: new Text('Location', style: theme.textTheme.title.copyWith(color: Colors.black54))
-                )
-              ),
-              new Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  new Text('From', style: theme.textTheme.caption),
-                  new DateTimeItem(
-                    dateTime: _fromDateTime,
-                    onChanged: (DateTime value) {
-                      setState(() {
-                        _fromDateTime = value;
-                        _saveNeeded = true;
-                      });
-                    }
-                  )
-                ]
-              ),
-              new Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  new Text('To', style: theme.textTheme.caption),
-                  new DateTimeItem(
-                    dateTime: _toDateTime,
-                    onChanged: (DateTime value) {
-                      setState(() {
-                        _toDateTime = value;
-                        _saveNeeded = true;
-                      });
-                    }
-                  )
-                ]
-              ),
-              new Container(
-                decoration: new BoxDecoration(
-                  border: new Border(bottom: new BorderSide(color: theme.dividerColor))
-                ),
-                child: new Row(
-                  children: <Widget> [
-                    new Checkbox(
-                      value: _allDayValue,
-                      onChanged: (bool value) {
-                        setState(() {
-                          _allDayValue = value;
-                          _saveNeeded = true;
-                        });
-                      }
-                    ),
-                    new Text('All-day')
-                  ]
-                )
+              new Text('From', style: theme.textTheme.caption),
+              new DateTimeItem(
+                dateTime: _fromDateTime,
+                onChanged: (DateTime value) {
+                  setState(() {
+                    _fromDateTime = value;
+                    _saveNeeded = true;
+                  });
+                }
               )
             ]
-            .map((Widget child) {
-              return new Container(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                height: 96.0,
-                child: child
-              );
-            })
-            .toList()
+          ),
+          new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              new Text('To', style: theme.textTheme.caption),
+              new DateTimeItem(
+                dateTime: _toDateTime,
+                onChanged: (DateTime value) {
+                  setState(() {
+                    _toDateTime = value;
+                    _saveNeeded = true;
+                  });
+                }
+              )
+            ]
+          ),
+          new Container(
+            decoration: new BoxDecoration(
+              border: new Border(bottom: new BorderSide(color: theme.dividerColor))
+            ),
+            child: new Row(
+              children: <Widget> [
+                new Checkbox(
+                  value: _allDayValue,
+                  onChanged: (bool value) {
+                    setState(() {
+                      _allDayValue = value;
+                      _saveNeeded = true;
+                    });
+                  }
+                ),
+                new Text('All-day')
+              ]
+            )
           )
-        )
+        ]
+        .map((Widget child) {
+          return new Container(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            height: 96.0,
+            child: child
+          );
+        })
+        .toList()
       )
     );
   }

@@ -11,9 +11,9 @@ import 'artifacts.dart';
 import 'base/context.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
-import 'base/process.dart';
 import 'globals.dart';
 
+/// A warpper around the `bin/cache/` directory.
 class Cache {
   static Cache get instance => context[Cache] ?? (context[Cache] = new Cache());
 
@@ -37,19 +37,52 @@ class Cache {
     return new Directory(path.join(getCacheArtifacts().path, name));
   }
 
-  String getVersionFor(String kArtifactName) {
-    File versionFile = new File(path.join(getRoot().path, '$kArtifactName.version'));
+  String getVersionFor(String artifactName) {
+    File versionFile = new File(path.join(getRoot().path, '$artifactName.version'));
     return versionFile.existsSync() ? versionFile.readAsStringSync().trim() : null;
   }
 
-  String getStampFor(String kArtifactName) {
-    File stampFile = new File(path.join(getRoot().path, '$kArtifactName.stamp'));
+  String getStampFor(String artifactName) {
+    File stampFile = getStampFileFor(artifactName);
     return stampFile.existsSync() ? stampFile.readAsStringSync().trim() : null;
   }
 
-  void setStampFor(String kArtifactName, String version) {
-    File stampFile = new File(path.join(getRoot().path, '$kArtifactName.stamp'));
-    stampFile.writeAsStringSync(version);
+  void setStampFor(String artifactName, String version) {
+    getStampFileFor(artifactName).writeAsStringSync(version);
+  }
+
+  File getStampFileFor(String artifactName) {
+    return new File(path.join(getRoot().path, '$artifactName.stamp'));
+  }
+
+  bool isUpToDate() {
+    MaterialFonts materialFonts = new MaterialFonts(cache);
+    FlutterEngine engine = new FlutterEngine(cache);
+
+    return materialFonts.isUpToDate() && engine.isUpToDate();
+  }
+
+  Future<String> getThirdPartyFile(String urlStr, String serviceName, {
+    bool unzip: false
+  }) async {
+    Uri url = Uri.parse(urlStr);
+    Directory thirdPartyDir = getArtifactDirectory('third_party');
+
+    Directory serviceDir = new Directory(path.join(thirdPartyDir.path, serviceName));
+    if (!serviceDir.existsSync())
+      serviceDir.createSync(recursive: true);
+
+    File cachedFile = new File(path.join(serviceDir.path, url.pathSegments.last));
+    if (!cachedFile.existsSync()) {
+      try {
+        await _downloadFileToCache(url, cachedFile, unzip);
+      } catch (e) {
+        printError('Failed to fetch third-party artifact $url: $e');
+        throw e;
+      }
+    }
+
+    return cachedFile.path;
   }
 
   Future<Null> updateAll() async {
@@ -95,8 +128,7 @@ class Cache {
 
       File tempFile = new File(path.join(Directory.systemTemp.path, '${url.toString().hashCode}.zip'));
       tempFile.writeAsBytesSync(fileBytes, flush: true);
-      // unzip -o -q zipfile -d dest
-      runSync(<String>['unzip', '-o', '-q', tempFile.path, '-d', location.path]);
+      os.unzip(tempFile, location);
       tempFile.deleteSync();
     } else {
       (location as File).writeAsBytesSync(fileBytes, flush: true);
@@ -132,10 +164,6 @@ class MaterialFonts {
     });
   }
 }
-
-// TODO(devoncarew): Move the services download to here.
-// gs://flutter_infra/flutter/ed3014b3d337d025393bd894ffa2897e05d43e91/firebase/
-// gs://flutter_infra/flutter/ed3014b3d337d025393bd894ffa2897e05d43e91/gcm/
 
 class FlutterEngine {
   FlutterEngine(this.cache);
