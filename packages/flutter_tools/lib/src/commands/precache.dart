@@ -18,7 +18,7 @@ class PrecacheCommand extends Command {
   @override
   Future<int> run() async {
     if (cache.isUpToDate())
-      printStatus('All up-to-date.');
+      printStatus('Already up-to-date.');
     else
       await cache.updateAll();
 

@@ -243,7 +243,7 @@ class _AnsiStatus extends Status {
       double seconds = stopwatch.elapsedMilliseconds / 1000.0;
       print('\b\b\b\b${seconds.toStringAsFixed(1)}s');
     } else {
-      print('\b');
+      print('\b ');
     }
 
     timer.cancel();
@@ -255,7 +255,7 @@ class _AnsiStatus extends Status {
       return;
     live = false;
 
-    print('\b');
+    print('\b ');
     timer.cancel();
   }
 }
