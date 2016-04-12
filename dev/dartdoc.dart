@@ -41,13 +41,15 @@ dependencies:
   if (code != 0)
     exit(code);
 
-  // Generate the documentation; we require dartdoc >= 0.9.3+1.
+  // Generate the documentation; we require dartdoc >= 0.9.4.
   List<String> args = <String>[
     'global', 'run', 'dartdoc',
     '--header', 'styles.html',
     '--header', 'analytics.html',
     '--dart-sdk', '../../bin/cache/dart-sdk',
-    '--exclude', 'temp_doc'
+    '--exclude', 'temp_doc',
+    '--favicon=favicon.ico',
+    '--use-categories'
   ];
   for (String libraryRef in _libraryRefs()) {
     String name = _entityName(libraryRef);
