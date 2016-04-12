@@ -5,6 +5,7 @@
 package org.domokit.sky.gradle
 
 import com.android.builder.model.AndroidProject
+import com.google.common.base.Joiner
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Project
@@ -25,15 +26,6 @@ class FlutterPlugin implements Plugin<Project> {
         Properties properties = new Properties()
         properties.load(project.rootProject.file("local.properties").newDataInputStream())
 
-        String enginePath = properties.getProperty("flutter.jar")
-        if (enginePath == null) {
-            throw new GradleException("flutter.jar must be defined in local.properties")
-        }
-        FileCollection flutterEngine = project.files(enginePath)
-        if (!flutterEngine.singleFile.isFile()) {
-            throw new GradleException("flutter.jar must point to a Flutter engine JAR")
-        }
-
         String sdkPath = properties.getProperty("flutter.sdk")
         if (sdkPath == null) {
             throw new GradleException("flutter.sdk must be defined in local.properties")
@@ -41,6 +33,27 @@ class FlutterPlugin implements Plugin<Project> {
         sdkDir = project.file(sdkPath)
         if (!sdkDir.isDirectory()) {
             throw new GradleException("flutter.sdk must point to the Flutter SDK directory")
+        }
+
+        File flutterJar
+        String flutterJarPath = properties.getProperty("flutter.jar")
+        if (flutterJarPath != null) {
+            flutterJar = project.file(flutterJarPath)
+            if (!flutterJar.isFile()) {
+                throw new GradleException("flutter.jar must point to a Flutter engine JAR")
+            }
+        } else {
+            flutterJar = new File(sdkDir, Joiner.on(File.separatorChar).join(
+                "bin", "cache", "artifacts", "engine", "android-arm", "flutter.jar"))
+            if (!flutterJar.isFile()) {
+                project.exec {
+                    executable "${sdkDir}/bin/flutter"
+                    args "precache"
+                }
+                if (!flutterJar.isFile()) {
+                    throw new GradleException("Unable to find flutter.jar in SDK: ${flutterJar}")
+                }
+            }
         }
 
         String engineSrcPath = properties.getProperty("flutter.engineSrcPath")
@@ -52,7 +65,7 @@ class FlutterPlugin implements Plugin<Project> {
         }
 
         project.extensions.create("flutter", FlutterExtension)
-        project.dependencies.add("compile", flutterEngine)
+        project.dependencies.add("compile", project.files(flutterJar))
         project.afterEvaluate this.&addFlutterTask
     }
 
