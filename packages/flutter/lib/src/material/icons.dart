@@ -38,7 +38,7 @@ class IconData {
 ///
 ///  * [Icon]
 ///  * [IconButton]
-///  * <https://design.google.com/icons/>
+///  * [design.google.com/icons](https://design.google.com/icons/)
 class Icons {
   Icons._();
 

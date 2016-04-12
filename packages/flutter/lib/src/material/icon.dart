@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'icons.dart';
+import 'icon_button.dart';
 import 'icon_theme.dart';
 import 'theme.dart';
 

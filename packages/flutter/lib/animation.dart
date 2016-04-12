@@ -4,7 +4,7 @@
 
 /// The Flutter animation system.
 ///
-/// See <https://flutter.io/animations/> for an overview.
+/// See [flutter.io/animations](https://flutter.io/animations/) for an overview.
 ///
 /// This library depends only on core Dart libraries and the `newton` package.
 library animation;
