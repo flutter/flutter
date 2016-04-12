@@ -205,6 +205,7 @@ class BuildApkCommand extends FlutterCommand {
 
     return await buildAndroid(
       TargetPlatform.android_arm,
+      variant,
       toolchain: toolchain,
       configs: buildConfigurations,
       enginePath: runner.enginePath,
@@ -219,8 +220,7 @@ class BuildApkCommand extends FlutterCommand {
         password: argResults['keystore-password'],
         keyAlias: argResults['keystore-key-alias'],
         keyPassword: argResults['keystore-key-password']
-      ),
-      buildVariant: variant
+      )
     );
   }
 }
@@ -283,12 +283,15 @@ Future<_ApkComponents> _findApkComponents(
 
 int _buildApk(
   TargetPlatform platform,
+  BuildVariant buildVariant,
   _ApkComponents components,
   String flxPath,
   ApkKeystoreInfo keystore,
-  String outputFile,
-  BuildVariant buildVariant
+  String outputFile
 ) {
+  assert(platform != null);
+  assert(buildVariant != null);
+
   Directory tempDir = Directory.systemTemp.createTempSync('flutter_tools');
 
   printTrace('Building APK; buildVariant: ${getVariantName(buildVariant)}.');
@@ -397,7 +400,8 @@ bool _needsRebuild(String apkPath, String manifest) {
 }
 
 Future<int> buildAndroid(
-  TargetPlatform platform, {
+  TargetPlatform platform,
+  BuildVariant buildVariant, {
   Toolchain toolchain,
   List<BuildConfiguration> configs,
   String enginePath,
@@ -407,8 +411,7 @@ Future<int> buildAndroid(
   String outputFile: _kDefaultOutputPath,
   String target,
   String flxPath,
-  ApkKeystoreInfo keystore,
-  BuildVariant buildVariant: BuildVariant.develop
+  ApkKeystoreInfo keystore
 }) async {
   // Validate that we can find an android sdk.
   if (androidSdk == null) {
@@ -457,7 +460,7 @@ Future<int> buildAndroid(
       return 1;
     }
 
-    return _buildApk(platform, components, flxPath, keystore, outputFile, buildVariant);
+    return _buildApk(platform, buildVariant, components, flxPath, keystore, outputFile);
   } else {
     // Find the path to the main Dart file; build the FLX.
     String mainPath = findMainDartFile(target);
@@ -466,7 +469,7 @@ Future<int> buildAndroid(
         mainPath: mainPath,
         includeRobotoFonts: false);
 
-    return _buildApk(platform, components, localBundlePath, keystore, outputFile, buildVariant);
+    return _buildApk(platform, buildVariant, components, localBundlePath, keystore, outputFile);
   }
 }
 
@@ -485,12 +488,12 @@ Future<int> buildApk(
 
   int result = await buildAndroid(
     platform,
+    buildVariant,
     toolchain: toolchain,
     configs: configs,
     enginePath: enginePath,
     force: false,
-    target: target,
-    buildVariant: buildVariant
+    target: target
   );
 
   return result;

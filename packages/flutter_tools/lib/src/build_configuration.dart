@@ -14,10 +14,11 @@ enum BuildType {
   debug,
 }
 
-/// The type of build - `develop`, `profile`, or `deploy`.
+/// The type of build - `develop` or `deploy`.
+///
+/// TODO(devoncarew): Add a `profile` variant.
 enum BuildVariant {
   develop,
-  profile,
   deploy
 }
 
