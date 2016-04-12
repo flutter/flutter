@@ -8,7 +8,6 @@ To build this project:
 * Create a `local.properties` file with these entries:
   * `sdk.dir=[path to the Android SDK]`
   * `flutter.sdk=[path to the Flutter SDK]`
-  * `flutter.jar=[path to the flutter.jar file in your build of the Flutter engine]`
 
 Then run:
 
