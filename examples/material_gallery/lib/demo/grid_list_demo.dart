@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -14,19 +15,80 @@ enum GridDemoTileStyle {
 }
 
 class Photo {
-  const Photo({ this.assetName });
+  const Photo({ this.assetName, this.title, this.caption });
 
   final String assetName;
 
-  String get title => 'Safari';
-  String get caption => 'March 2015';
+  final String title;
+  final String caption;
 
   bool get isValid => assetName != null;
 }
 
-final List<Photo> photos = new List<Photo>.generate(16, (int index) {
-  return const Photo(assetName: 'packages/flutter_gallery_assets/kangaroo_valley_safari.png');
-});
+final List<Photo> photos = <Photo>[
+  const Photo(
+    assetName: 'packages/flutter_gallery_assets/landscape_0.jpg',
+    title: 'Philippines',
+    caption: 'Batad rice terraces'
+  ),
+  const Photo(
+    assetName: 'packages/flutter_gallery_assets/landscape_1.jpg',
+    title: 'Italy',
+    caption: 'Ceresole Reale'
+  ),
+  const Photo(
+    assetName: 'packages/flutter_gallery_assets/landscape_2.jpg',
+    title: 'Somewhere',
+    caption: 'Beautiful mountains'
+  ),
+  const Photo(
+    assetName: 'packages/flutter_gallery_assets/landscape_3.jpg',
+    title: 'A place',
+    caption: 'Beautiful hills'
+  ),
+  const Photo(
+    assetName: 'packages/flutter_gallery_assets/landscape_4.jpg',
+    title: 'New Zealand',
+    caption: 'View from the van'
+  ),
+  const Photo(
+    assetName: 'packages/flutter_gallery_assets/landscape_5.jpg',
+    title: 'Autumn',
+    caption: 'The golden season'
+  ),
+  const Photo(
+    assetName: 'packages/flutter_gallery_assets/landscape_6.jpg',
+    title: 'Germany',
+    caption: 'Englischer Garten'
+  ),
+  const Photo(assetName:
+    'packages/flutter_gallery_assets/landscape_7.jpg',
+    title: 'A country',
+    caption: 'Grass fields'
+  ),
+  const Photo(
+    assetName: 'packages/flutter_gallery_assets/landscape_8.jpg',
+    title: 'Mountain country',
+    caption: 'River forest'
+  ),
+  const Photo(
+    assetName: 'packages/flutter_gallery_assets/landscape_9.jpg',
+    title: 'Alpine place',
+    caption: 'Green hills'
+  ),
+  const Photo(
+    assetName: 'packages/flutter_gallery_assets/landscape_10.jpg',
+    title: 'Desert land',
+    caption: 'Blue skies'
+  ),
+  const Photo(
+    assetName: 'packages/flutter_gallery_assets/landscape_11.jpg',
+    title: 'Narnia',
+    caption: 'Rocks and rivers'
+  ),
+];
+
+const String photoHeroTag = 'Photo';
 
 class GridDemoPhotoItem extends StatelessWidget {
   GridDemoPhotoItem({ Key key, this.photo, this.tileStyle }) : super(key: key) {
@@ -38,16 +100,26 @@ class GridDemoPhotoItem extends StatelessWidget {
   final GridDemoTileStyle tileStyle;
 
   void showPhoto(BuildContext context) {
+    Key photoKey = new Key(photo.assetName);
+    Set<Key> mostValuableKeys = new HashSet<Key>();
+    mostValuableKeys.add(photoKey);
+
     Navigator.push(context, new MaterialPageRoute<Null>(
+      settings: new RouteSettings(
+        mostValuableKeys: mostValuableKeys
+      ),
       builder: (BuildContext context) {
         return new Scaffold(
           appBar: new AppBar(
             title: new Text(photo.title)
           ),
           body: new Material(
-            child: new AssetImage(
-              name: photo.assetName,
-              fit: ImageFit.cover
+            child: new Hero(
+              tag: photoHeroTag,
+              child: new AssetImage(
+                name: photo.assetName,
+                fit: ImageFit.cover
+              )
             )
           )
         );
@@ -59,9 +131,13 @@ class GridDemoPhotoItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final Widget image = new GestureDetector(
       onTap: () { showPhoto(context); },
-      child: new AssetImage(
-        name: photo.assetName,
-        fit: ImageFit.cover
+      child: new Hero(
+        key: new Key(photo.assetName),
+        tag: photoHeroTag,
+        child: new AssetImage(
+          name: photo.assetName,
+          fit: ImageFit.cover
+        )
       )
     );
 
