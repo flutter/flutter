@@ -52,8 +52,8 @@ Widget widgetBuilder() {
   );
 }
 
-void dismissElement(WidgetTester tester, Element itemElement, { DismissDirection gestureDirection }) {
-  assert(itemElement != null);
+void dismissElement(WidgetTester tester, Finder finder, { DismissDirection gestureDirection }) {
+  assert(tester.exists(finder));
   assert(gestureDirection != DismissDirection.horizontal);
   assert(gestureDirection != DismissDirection.vertical);
 
@@ -63,24 +63,24 @@ void dismissElement(WidgetTester tester, Element itemElement, { DismissDirection
     case DismissDirection.endToStart:
       // getTopRight() returns a point that's just beyond itemWidget's right
       // edge and outside the Dismissable event listener's bounds.
-      downLocation = tester.getTopRight(itemElement) + const Offset(-0.1, 0.0);
-      upLocation = tester.getTopLeft(itemElement);
+      downLocation = tester.getTopRight(finder) + const Offset(-0.1, 0.0);
+      upLocation = tester.getTopLeft(finder);
       break;
     case DismissDirection.startToEnd:
       // we do the same thing here to keep the test symmetric
-      downLocation = tester.getTopLeft(itemElement) + const Offset(0.1, 0.0);
-      upLocation = tester.getTopRight(itemElement);
+      downLocation = tester.getTopLeft(finder) + const Offset(0.1, 0.0);
+      upLocation = tester.getTopRight(finder);
       break;
     case DismissDirection.up:
       // getBottomLeft() returns a point that's just below itemWidget's bottom
       // edge and outside the Dismissable event listener's bounds.
-      downLocation = tester.getBottomLeft(itemElement) + const Offset(0.0, -0.1);
-      upLocation = tester.getTopLeft(itemElement);
+      downLocation = tester.getBottomLeft(finder) + const Offset(0.0, -0.1);
+      upLocation = tester.getTopLeft(finder);
       break;
     case DismissDirection.down:
       // again with doing the same here for symmetry
-      downLocation = tester.getTopLeft(itemElement) + const Offset(0.1, 0.0);
-      upLocation = tester.getBottomLeft(itemElement);
+      downLocation = tester.getTopLeft(finder) + const Offset(0.1, 0.0);
+      upLocation = tester.getBottomLeft(finder);
       break;
     default:
       fail("unsupported gestureDirection");
@@ -95,10 +95,10 @@ void dismissItem(WidgetTester tester, int item, { DismissDirection gestureDirect
   assert(gestureDirection != DismissDirection.horizontal);
   assert(gestureDirection != DismissDirection.vertical);
 
-  Element itemElement = tester.findText(item.toString());
-  expect(itemElement, isNotNull);
+  Finder itemFinder = find.text(item.toString());
+  expect(tester, hasWidget(itemFinder));
 
-  dismissElement(tester, itemElement, gestureDirection: gestureDirection);
+  dismissElement(tester, itemFinder, gestureDirection: gestureDirection);
 
   tester.pumpWidget(widgetBuilder()); // start the slide
   tester.pumpWidget(widgetBuilder(), const Duration(seconds: 1)); // finish the slide and start shrinking...
@@ -139,12 +139,12 @@ void main() {
       expect(dismissedItems, isEmpty);
 
       dismissItem(tester, 0, gestureDirection: DismissDirection.startToEnd);
-      expect(tester.findText('0'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('0')));
       expect(dismissedItems, equals([0]));
       expect(reportedDismissDirection, DismissDirection.startToEnd);
 
       dismissItem(tester, 1, gestureDirection: DismissDirection.endToStart);
-      expect(tester.findText('1'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('1')));
       expect(dismissedItems, equals([0, 1]));
       expect(reportedDismissDirection, DismissDirection.endToStart);
     });
@@ -159,12 +159,12 @@ void main() {
       expect(dismissedItems, isEmpty);
 
       dismissItem(tester, 0, gestureDirection: DismissDirection.up);
-      expect(tester.findText('0'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('0')));
       expect(dismissedItems, equals([0]));
       expect(reportedDismissDirection, DismissDirection.up);
 
       dismissItem(tester, 1, gestureDirection: DismissDirection.down);
-      expect(tester.findText('1'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('1')));
       expect(dismissedItems, equals([0, 1]));
       expect(reportedDismissDirection, DismissDirection.down);
     });
@@ -179,12 +179,12 @@ void main() {
       expect(dismissedItems, isEmpty);
 
       dismissItem(tester, 0, gestureDirection: DismissDirection.startToEnd);
-      expect(tester.findText('0'), isNotNull);
+      expect(tester, hasWidget(find.text('0')));
       expect(dismissedItems, isEmpty);
       dismissItem(tester, 1, gestureDirection: DismissDirection.startToEnd);
 
       dismissItem(tester, 0, gestureDirection: DismissDirection.endToStart);
-      expect(tester.findText('0'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('0')));
       expect(dismissedItems, equals([0]));
       dismissItem(tester, 1, gestureDirection: DismissDirection.endToStart);
     });
@@ -199,11 +199,11 @@ void main() {
       expect(dismissedItems, isEmpty);
 
       dismissItem(tester, 0, gestureDirection: DismissDirection.endToStart);
-      expect(tester.findText('0'), isNotNull);
+      expect(tester, hasWidget(find.text('0')));
       expect(dismissedItems, isEmpty);
 
       dismissItem(tester, 0, gestureDirection: DismissDirection.startToEnd);
-      expect(tester.findText('0'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('0')));
       expect(dismissedItems, equals([0]));
     });
   });
@@ -217,11 +217,11 @@ void main() {
       expect(dismissedItems, isEmpty);
 
       dismissItem(tester, 0, gestureDirection: DismissDirection.down);
-      expect(tester.findText('0'), isNotNull);
+      expect(tester, hasWidget(find.text('0')));
       expect(dismissedItems, isEmpty);
 
       dismissItem(tester, 0, gestureDirection: DismissDirection.up);
-      expect(tester.findText('0'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('0')));
       expect(dismissedItems, equals([0]));
     });
   });
@@ -235,11 +235,11 @@ void main() {
       expect(dismissedItems, isEmpty);
 
       dismissItem(tester, 0, gestureDirection: DismissDirection.up);
-      expect(tester.findText('0'), isNotNull);
+      expect(tester, hasWidget(find.text('0')));
       expect(dismissedItems, isEmpty);
 
       dismissItem(tester, 0, gestureDirection: DismissDirection.down);
-      expect(tester.findText('0'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('0')));
       expect(dismissedItems, equals([0]));
     });
   });
@@ -256,9 +256,7 @@ void main() {
       dismissDirection = DismissDirection.down;
 
       tester.pumpWidget(widgetBuilder());
-      Element itemElement = tester.findText('0');
-
-      Point location = tester.getTopLeft(itemElement);
+      Point location = tester.getTopLeft(find.text('0'));
       Offset offset = new Offset(0.0, 5.0);
       TestGesture gesture = tester.startGesture(location, pointer: 5);
       gesture.moveBy(offset);
@@ -293,18 +291,18 @@ void main() {
           )
         )
       ));
-      expect(tester.findText('1'), isNotNull);
-      expect(tester.findText('2'), isNotNull);
-      dismissElement(tester, tester.findText('2'), gestureDirection: DismissDirection.startToEnd);
+      expect(tester, hasWidget(find.text('1')));
+      expect(tester, hasWidget(find.text('2')));
+      dismissElement(tester, find.text('2'), gestureDirection: DismissDirection.startToEnd);
       tester.pump(); // start the slide away
       tester.pump(new Duration(seconds: 1)); // finish the slide away
-      expect(tester.findText('1'), isNotNull);
-      expect(tester.findText('2'), isNull);
-      dismissElement(tester, tester.findText('1'), gestureDirection: DismissDirection.startToEnd);
+      expect(tester, hasWidget(find.text('1')));
+      expect(tester, doesNotHaveWidget(find.text('2')));
+      dismissElement(tester, find.text('1'), gestureDirection: DismissDirection.startToEnd);
       tester.pump(); // start the slide away
       tester.pump(new Duration(seconds: 1)); // finish the slide away (at which point the child is no longer included in the tree)
-      expect(tester.findText('1'), isNull);
-      expect(tester.findText('2'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('1')));
+      expect(tester, doesNotHaveWidget(find.text('2')));
     });
   });
 
@@ -317,13 +315,12 @@ void main() {
       tester.pumpWidget(widgetBuilder());
       expect(dismissedItems, isEmpty);
 
-      Element itemElement = tester.findText(0.toString());
-      expect(itemElement, isNotNull);
-      dismissElement(tester, itemElement, gestureDirection: DismissDirection.startToEnd);
+      Finder itemFinder = find.text('0');
+      expect(tester, hasWidget(itemFinder));
+      dismissElement(tester, itemFinder, gestureDirection: DismissDirection.startToEnd);
       tester.pump();
 
-      Element backgroundElement = tester.findText('background');
-      RenderBox backgroundBox = backgroundElement.findRenderObject();
+      RenderBox backgroundBox = tester.renderObjectOf(find.text('background'));
       expect(backgroundBox.size.height, equals(100.0));
     });
   });

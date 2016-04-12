@@ -51,101 +51,101 @@ void main() {
 
       // the initial setup.
 
-      expect(tester.findElementByKey(firstKey), isOnStage);
-      expect(tester.findElementByKey(firstKey), isInCard);
-      expect(tester.findElementByKey(secondKey), isNull);
+      expect(find.byKey(firstKey), isOnStage(tester));
+      expect(find.byKey(firstKey), isInCard(tester));
+      expect(tester, doesNotHaveWidget(find.byKey(secondKey)));
 
-      tester.tap(tester.findText('two'));
+      tester.tap(find.text('two'));
       tester.pump(); // begin navigation
 
       // at this stage, the second route is off-stage, so that we can form the
       // hero party.
 
-      expect(tester.findElementByKey(firstKey), isOnStage);
-      expect(tester.findElementByKey(firstKey), isInCard);
-      expect(tester.findElementByKey(secondKey), isOffStage);
-      expect(tester.findElementByKey(secondKey), isInCard);
+      expect(find.byKey(firstKey), isOnStage(tester));
+      expect(find.byKey(firstKey), isInCard(tester));
+      expect(find.byKey(secondKey), isOffStage(tester));
+      expect(find.byKey(secondKey), isInCard(tester));
 
       tester.pump();
 
       // at this stage, the heroes have just gone on their journey, we are
       // seeing them at t=16ms. The original page no longer contains the hero.
 
-      expect(tester.findElementByKey(firstKey), isNull);
-      expect(tester.findElementByKey(secondKey), isOnStage);
-      expect(tester.findElementByKey(secondKey), isNotInCard);
+      expect(tester, doesNotHaveWidget(find.byKey(firstKey)));
+      expect(find.byKey(secondKey), isOnStage(tester));
+      expect(find.byKey(secondKey), isNotInCard(tester));
 
       tester.pump();
 
       // t=32ms for the journey. Surely they are still at it.
 
-      expect(tester.findElementByKey(firstKey), isNull);
-      expect(tester.findElementByKey(secondKey), isOnStage);
-      expect(tester.findElementByKey(secondKey), isNotInCard);
+      expect(tester, doesNotHaveWidget(find.byKey(firstKey)));
+      expect(find.byKey(secondKey), isOnStage(tester));
+      expect(find.byKey(secondKey), isNotInCard(tester));
 
       tester.pump(new Duration(seconds: 1));
 
       // t=1.032s for the journey. The journey has ended (it ends this frame, in
       // fact). The hero should now be in the new page, on-stage.
 
-      expect(tester.findElementByKey(firstKey), isNull);
-      expect(tester.findElementByKey(secondKey), isOnStage);
-      expect(tester.findElementByKey(secondKey), isInCard);
+      expect(tester, doesNotHaveWidget(find.byKey(firstKey)));
+      expect(find.byKey(secondKey), isOnStage(tester));
+      expect(find.byKey(secondKey), isInCard(tester));
 
       tester.pump();
 
       // Should not change anything.
 
-      expect(tester.findElementByKey(firstKey), isNull);
-      expect(tester.findElementByKey(secondKey), isOnStage);
-      expect(tester.findElementByKey(secondKey), isInCard);
+      expect(tester, doesNotHaveWidget(find.byKey(firstKey)));
+      expect(find.byKey(secondKey), isOnStage(tester));
+      expect(find.byKey(secondKey), isInCard(tester));
 
       // Now move on to view 3
 
-      tester.tap(tester.findText('three'));
+      tester.tap(find.text('three'));
       tester.pump(); // begin navigation
 
       // at this stage, the second route is off-stage, so that we can form the
       // hero party.
 
-      expect(tester.findElementByKey(secondKey), isOnStage);
-      expect(tester.findElementByKey(secondKey), isInCard);
-      expect(tester.findElementByKey(thirdKey), isOffStage);
-      expect(tester.findElementByKey(thirdKey), isInCard);
+      expect(find.byKey(secondKey), isOnStage(tester));
+      expect(find.byKey(secondKey), isInCard(tester));
+      expect(find.byKey(thirdKey), isOffStage(tester));
+      expect(find.byKey(thirdKey), isInCard(tester));
 
       tester.pump();
 
       // at this stage, the heroes have just gone on their journey, we are
       // seeing them at t=16ms. The original page no longer contains the hero.
 
-      expect(tester.findElementByKey(secondKey), isNull);
-      expect(tester.findElementByKey(thirdKey), isOnStage);
-      expect(tester.findElementByKey(thirdKey), isNotInCard);
+      expect(tester, doesNotHaveWidget(find.byKey(secondKey)));
+      expect(find.byKey(thirdKey), isOnStage(tester));
+      expect(find.byKey(thirdKey), isNotInCard(tester));
 
       tester.pump();
 
       // t=32ms for the journey. Surely they are still at it.
 
-      expect(tester.findElementByKey(secondKey), isNull);
-      expect(tester.findElementByKey(thirdKey), isOnStage);
-      expect(tester.findElementByKey(thirdKey), isNotInCard);
+      expect(tester, doesNotHaveWidget(find.byKey(secondKey)));
+      expect(find.byKey(thirdKey), isOnStage(tester));
+      expect(find.byKey(thirdKey), isNotInCard(tester));
 
       tester.pump(new Duration(seconds: 1));
 
       // t=1.032s for the journey. The journey has ended (it ends this frame, in
       // fact). The hero should now be in the new page, on-stage.
 
-      expect(tester.findElementByKey(secondKey), isNull);
-      expect(tester.findElementByKey(thirdKey), isOnStage);
-      expect(tester.findElementByKey(thirdKey), isInCard);
+      expect(tester, doesNotHaveWidget(find.byKey(secondKey)));
+      expect(find.byKey(thirdKey), isOnStage(tester));
+      expect(find.byKey(thirdKey), isInCard(tester));
 
       tester.pump();
 
       // Should not change anything.
 
-      expect(tester.findElementByKey(secondKey), isNull);
-      expect(tester.findElementByKey(thirdKey), isOnStage);
-      expect(tester.findElementByKey(thirdKey), isInCard);
+      expect(tester, doesNotHaveWidget(find.byKey(secondKey)));
+      expect(find.byKey(thirdKey), isOnStage(tester));
+      expect(find.byKey(thirdKey), isInCard(tester));
     });
   });
 }

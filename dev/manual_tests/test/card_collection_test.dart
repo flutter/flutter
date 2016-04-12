@@ -15,27 +15,27 @@ void main() {
       tester.pump(); // see https://github.com/flutter/flutter/issues/1865
       tester.pump(); // triggers a frame
 
-      Element navigationMenu = tester.findElement((Element element) {
+      Finder navigationMenu = find.byElement((Element element) {
         Widget widget = element.widget;
         if (widget is Tooltip)
           return widget.message == 'Open navigation menu';
         return false;
       });
 
-      expect(navigationMenu, isNotNull);
+      expect(tester, hasWidget(navigationMenu));
 
       tester.tap(navigationMenu);
       tester.pump(); // start opening menu
       tester.pump(const Duration(seconds: 1)); // wait til it's really opened
 
       // smoke test for various checkboxes
-      tester.tap(tester.findText('Make card labels editable'));
+      tester.tap(find.text('Make card labels editable'));
       tester.pump();
-      tester.tap(tester.findText('Let the sun shine'));
+      tester.tap(find.text('Let the sun shine'));
       tester.pump();
-      tester.tap(tester.findText('Make card labels editable'));
+      tester.tap(find.text('Make card labels editable'));
       tester.pump();
-      tester.tap(tester.findText('Vary font sizes'));
+      tester.tap(find.text('Vary font sizes'));
       tester.pump();
     });
   });

@@ -23,7 +23,7 @@ void main() {
       ));
 
       tester.pump();
-      expect(tester.findText('BottomSheet'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('BottomSheet')));
 
       showModalBottomSheet/*<Null>*/(
         context: context,
@@ -35,28 +35,28 @@ void main() {
 
       tester.pump(); // bottom sheet show animation starts
       tester.pump(new Duration(seconds: 1)); // animation done
-      expect(tester.findText('BottomSheet'), isNotNull);
+      expect(tester, hasWidget(find.text('BottomSheet')));
       expect(showBottomSheetThenCalled, isFalse);
 
       // Tap on the the bottom sheet itself to dismiss it
-      tester.tap(tester.findText('BottomSheet'));
+      tester.tap(find.text('BottomSheet'));
       tester.pump(); // bottom sheet dismiss animation starts
       expect(showBottomSheetThenCalled, isTrue);
       tester.pump(new Duration(seconds: 1)); // last frame of animation (sheet is entirely off-screen, but still present)
       tester.pump(new Duration(seconds: 1)); // frame after the animation (sheet has been removed)
-      expect(tester.findText('BottomSheet'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('BottomSheet')));
 
       showModalBottomSheet/*<Null>*/(context: context, builder: (BuildContext context) => new Text('BottomSheet'));
       tester.pump(); // bottom sheet show animation starts
       tester.pump(new Duration(seconds: 1)); // animation done
-      expect(tester.findText('BottomSheet'), isNotNull);
+      expect(tester, hasWidget(find.text('BottomSheet')));
 
       // Tap above the the bottom sheet to dismiss it
       tester.tapAt(new Point(20.0, 20.0));
       tester.pump(); // bottom sheet dismiss animation starts
       tester.pump(new Duration(seconds: 1)); // animation done
       tester.pump(new Duration(seconds: 1)); // rebuild frame
-      expect(tester.findText('BottomSheet'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('BottomSheet')));
     });
   });
 
@@ -77,7 +77,7 @@ void main() {
       ));
 
       expect(showBottomSheetThenCalled, isFalse);
-      expect(tester.findText('BottomSheet'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('BottomSheet')));
 
       scaffoldKey.currentState.showBottomSheet((BuildContext context) {
         return new Container(
@@ -89,33 +89,33 @@ void main() {
       });
 
       expect(showBottomSheetThenCalled, isFalse);
-      expect(tester.findText('BottomSheet'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('BottomSheet')));
 
       tester.pump(); // bottom sheet show animation starts
 
       expect(showBottomSheetThenCalled, isFalse);
-      expect(tester.findText('BottomSheet'), isNotNull);
+      expect(tester, hasWidget(find.text('BottomSheet')));
 
       tester.pump(new Duration(seconds: 1)); // animation done
 
       expect(showBottomSheetThenCalled, isFalse);
-      expect(tester.findText('BottomSheet'), isNotNull);
+      expect(tester, hasWidget(find.text('BottomSheet')));
 
-      tester.fling(tester.findText('BottomSheet'), const Offset(0.0, 20.0), 1000.0);
+      tester.fling(find.text('BottomSheet'), const Offset(0.0, 20.0), 1000.0);
       tester.pump(); // drain the microtask queue (Future completion callback)
 
       expect(showBottomSheetThenCalled, isTrue);
-      expect(tester.findText('BottomSheet'), isNotNull);
+      expect(tester, hasWidget(find.text('BottomSheet')));
 
       tester.pump(); // bottom sheet dismiss animation starts
 
       expect(showBottomSheetThenCalled, isTrue);
-      expect(tester.findText('BottomSheet'), isNotNull);
+      expect(tester, hasWidget(find.text('BottomSheet')));
 
       tester.pump(new Duration(seconds: 1)); // animation done
 
       expect(showBottomSheetThenCalled, isTrue);
-      expect(tester.findText('BottomSheet'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('BottomSheet')));
     });
   });
 

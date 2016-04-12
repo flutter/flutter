@@ -26,9 +26,9 @@ void main() {
 
       tester.pumpWidget(new MaterialApp(routes: routes));
 
-      expect(tester.findText('Home'), isOnStage);
-      expect(tester.findText('Settings'), isNull);
-      expect(tester.findText('Overlay'), isNull);
+      expect(find.text('Home'), isOnStage(tester));
+      expect(tester, doesNotHaveWidget(find.text('Settings')));
+      expect(tester, doesNotHaveWidget(find.text('Overlay')));
 
       expect(Navigator.canPop(containerKey1.currentContext), isFalse);
       Navigator.pushNamed(containerKey1.currentContext, '/settings');
@@ -36,63 +36,63 @@ void main() {
 
       tester.pump();
 
-      expect(tester.findText('Home'), isOnStage);
-      expect(tester.findText('Settings'), isOffStage);
-      expect(tester.findText('Overlay'), isNull);
+      expect(find.text('Home'), isOnStage(tester));
+      expect(find.text('Settings'), isOffStage(tester));
+      expect(tester, doesNotHaveWidget(find.text('Overlay')));
 
       tester.pump(const Duration(milliseconds: 16));
 
-      expect(tester.findText('Home'), isOnStage);
-      expect(tester.findText('Settings'), isOnStage);
-      expect(tester.findText('Overlay'), isNull);
+      expect(find.text('Home'), isOnStage(tester));
+      expect(find.text('Settings'), isOnStage(tester));
+      expect(tester, doesNotHaveWidget(find.text('Overlay')));
 
       tester.pump(const Duration(seconds: 1));
 
-      expect(tester.findText('Home'), isNull);
-      expect(tester.findText('Settings'), isOnStage);
-      expect(tester.findText('Overlay'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('Home')));
+      expect(find.text('Settings'), isOnStage(tester));
+      expect(tester, doesNotHaveWidget(find.text('Overlay')));
 
       Navigator.push(containerKey2.currentContext, new TestOverlayRoute());
 
       tester.pump();
 
-      expect(tester.findText('Home'), isNull);
-      expect(tester.findText('Settings'), isOnStage);
-      expect(tester.findText('Overlay'), isOnStage);
+      expect(tester, doesNotHaveWidget(find.text('Home')));
+      expect(find.text('Settings'), isOnStage(tester));
+      expect(find.text('Overlay'), isOnStage(tester));
 
       tester.pump(const Duration(seconds: 1));
 
-      expect(tester.findText('Home'), isNull);
-      expect(tester.findText('Settings'), isOnStage);
-      expect(tester.findText('Overlay'), isOnStage);
+      expect(tester, doesNotHaveWidget(find.text('Home')));
+      expect(find.text('Settings'), isOnStage(tester));
+      expect(find.text('Overlay'), isOnStage(tester));
 
       expect(Navigator.canPop(containerKey2.currentContext), isTrue);
       Navigator.pop(containerKey2.currentContext);
       tester.pump();
 
-      expect(tester.findText('Home'), isNull);
-      expect(tester.findText('Settings'), isOnStage);
-      expect(tester.findText('Overlay'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('Home')));
+      expect(find.text('Settings'), isOnStage(tester));
+      expect(tester, doesNotHaveWidget(find.text('Overlay')));
 
       tester.pump(const Duration(seconds: 1));
 
-      expect(tester.findText('Home'), isNull);
-      expect(tester.findText('Settings'), isOnStage);
-      expect(tester.findText('Overlay'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('Home')));
+      expect(find.text('Settings'), isOnStage(tester));
+      expect(tester, doesNotHaveWidget(find.text('Overlay')));
 
       expect(Navigator.canPop(containerKey2.currentContext), isTrue);
       Navigator.pop(containerKey2.currentContext);
       tester.pump();
 
-      expect(tester.findText('Home'), isOnStage);
-      expect(tester.findText('Settings'), isOnStage);
-      expect(tester.findText('Overlay'), isNull);
+      expect(find.text('Home'), isOnStage(tester));
+      expect(find.text('Settings'), isOnStage(tester));
+      expect(tester, doesNotHaveWidget(find.text('Overlay')));
 
       tester.pump(const Duration(seconds: 1));
 
-      expect(tester.findText('Home'), isOnStage);
-      expect(tester.findText('Settings'), isNull);
-      expect(tester.findText('Overlay'), isNull);
+      expect(find.text('Home'), isOnStage(tester));
+      expect(tester, doesNotHaveWidget(find.text('Settings')));
+      expect(tester, doesNotHaveWidget(find.text('Overlay')));
 
       expect(Navigator.canPop(containerKey1.currentContext), isFalse);
 

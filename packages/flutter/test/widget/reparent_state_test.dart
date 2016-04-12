@@ -77,7 +77,7 @@ void main() {
       StateMarkerState rightState = right.currentState;
       rightState.marker = "right";
 
-      StateMarkerState grandchildState = tester.findStateByConfig(grandchild);
+      StateMarkerState grandchildState = tester.stateOf(find.byConfig(grandchild));
       expect(grandchildState, isNotNull);
       grandchildState.marker = "grandchild";
 
@@ -103,7 +103,7 @@ void main() {
       expect(right.currentState, equals(rightState));
       expect(rightState.marker, equals("right"));
 
-      StateMarkerState newGrandchildState = tester.findStateByConfig(newGrandchild);
+      StateMarkerState newGrandchildState = tester.stateOf(find.byConfig(newGrandchild));
       expect(newGrandchildState, isNotNull);
       expect(newGrandchildState, equals(grandchildState));
       expect(newGrandchildState.marker, equals("grandchild"));
@@ -148,7 +148,7 @@ void main() {
       StateMarkerState rightState = right.currentState;
       rightState.marker = "right";
 
-      StateMarkerState grandchildState = tester.findStateByConfig(grandchild);
+      StateMarkerState grandchildState = tester.stateOf(find.byConfig(grandchild));
       expect(grandchildState, isNotNull);
       grandchildState.marker = "grandchild";
 
@@ -170,7 +170,7 @@ void main() {
       expect(right.currentState, equals(rightState));
       expect(rightState.marker, equals("right"));
 
-      StateMarkerState newGrandchildState = tester.findStateByConfig(newGrandchild);
+      StateMarkerState newGrandchildState = tester.stateOf(find.byConfig(newGrandchild));
       expect(newGrandchildState, isNotNull);
       expect(newGrandchildState, equals(grandchildState));
       expect(newGrandchildState.marker, equals("grandchild"));

@@ -102,7 +102,7 @@ void main() {
   });
 
   test('Animation rerun', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       tester.pumpWidget(
         new Center(
           child: new AnimatedContainer(

@@ -33,7 +33,7 @@ void main() {
         )
       );
 
-      tester.tap(tester.findText('X'));
+      tester.tap(find.text('X'));
 
       expect(log, equals([
         'bottom',

@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 
 void main() {
   test('Comparing coordinates', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       Key keyA = new GlobalKey();
       Key keyB = new GlobalKey();
 

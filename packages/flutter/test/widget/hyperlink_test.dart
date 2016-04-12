@@ -45,8 +45,7 @@ void main() {
         )
       );
 
-      Element element = tester.findElementByKey(textKey);
-      RenderBox box = element.renderObject;
+      RenderBox box = tester.renderObjectOf(find.byKey(textKey));
 
       expect(didTapLeft, isFalse);
       expect(didTapRight, isFalse);

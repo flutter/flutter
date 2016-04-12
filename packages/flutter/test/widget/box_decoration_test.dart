@@ -38,7 +38,7 @@ void main() {
           )
         )
       );
-      expect(tester.getSize(tester.findElementByKey(key)), equals(const Size(45.0, 45.0)));
+      expect(tester.getSize(find.byKey(key)), equals(const Size(45.0, 45.0)));
     });
   });
 }

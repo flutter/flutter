@@ -47,21 +47,21 @@ void main() {
       List<String> tabs = <String>['A', 'B', 'C'];
 
       tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: false));
-      TabBarSelectionState<String> selection = TabBarSelection.of(tester.findText('A'));
+      TabBarSelectionState<String> selection = TabBarSelection.of(tester.elementTreeTester.findText('A'));
       expect(selection, isNotNull);
       expect(selection.indexOf('A'), equals(0));
       expect(selection.indexOf('B'), equals(1));
       expect(selection.indexOf('C'), equals(2));
-      expect(tester.findText('A'), isNotNull);
-      expect(tester.findText('B'), isNotNull);
-      expect(tester.findText('C'), isNotNull);
+      expect(tester, hasWidget(find.text('A')));
+      expect(tester, hasWidget(find.text('B')));
+      expect(tester, hasWidget(find.text('C')));
       expect(selection.index, equals(2));
       expect(selection.previousIndex, equals(2));
       expect(selection.value, equals('C'));
       expect(selection.previousValue, equals('C'));
 
       tester.pumpWidget(buildFrame(tabs: tabs, value: 'C' ,isScrollable: false));
-      tester.tap(tester.findText('B'));
+      tester.tap(find.text('B'));
       tester.pump();
       expect(selection.valueIsChanging, true);
       tester.pump(const Duration(seconds: 1)); // finish the animation
@@ -72,7 +72,7 @@ void main() {
       expect(selection.previousIndex, equals(2));
 
       tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: false));
-      tester.tap(tester.findText('C'));
+      tester.tap(find.text('C'));
       tester.pump();
       tester.pump(const Duration(seconds: 1));
       expect(selection.value, equals('C'));
@@ -81,7 +81,7 @@ void main() {
       expect(selection.previousIndex, equals(1));
 
       tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: false));
-      tester.tap(tester.findText('A'));
+      tester.tap(find.text('A'));
       tester.pump();
       tester.pump(const Duration(seconds: 1));
       expect(selection.value, equals('A'));
@@ -96,25 +96,25 @@ void main() {
       List<String> tabs = <String>['A', 'B', 'C'];
 
       tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: true));
-      TabBarSelectionState<String> selection = TabBarSelection.of(tester.findText('A'));
+      TabBarSelectionState<String> selection = TabBarSelection.of(tester.elementTreeTester.findText('A'));
       expect(selection, isNotNull);
-      expect(tester.findText('A'), isNotNull);
-      expect(tester.findText('B'), isNotNull);
-      expect(tester.findText('C'), isNotNull);
+      expect(tester, hasWidget(find.text('A')));
+      expect(tester, hasWidget(find.text('B')));
+      expect(tester, hasWidget(find.text('C')));
       expect(selection.value, equals('C'));
 
       tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: true));
-      tester.tap(tester.findText('B'));
+      tester.tap(find.text('B'));
       tester.pump();
       expect(selection.value, equals('B'));
 
       tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: true));
-      tester.tap(tester.findText('C'));
+      tester.tap(find.text('C'));
       tester.pump();
       expect(selection.value, equals('C'));
 
       tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: true));
-      tester.tap(tester.findText('A'));
+      tester.tap(find.text('A'));
       tester.pump();
       expect(selection.value, equals('A'));
     });
@@ -125,20 +125,20 @@ void main() {
       List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE', 'FFFFFF', 'GGGGGG', 'HHHHHH', 'IIIIII', 'JJJJJJ', 'KKKKKK', 'LLLLLL'];
       Key tabBarKey = new Key('TabBar');
       tester.pumpWidget(buildFrame(tabs: tabs, value: 'AAAAAA', isScrollable: true, tabBarKey: tabBarKey));
-      TabBarSelectionState<String> selection = TabBarSelection.of(tester.findText('AAAAAA'));
+      TabBarSelectionState<String> selection = TabBarSelection.of(tester.elementTreeTester.findText('AAAAAA'));
       expect(selection, isNotNull);
       expect(selection.value, equals('AAAAAA'));
 
-      expect(tester.getSize(tester.findElementByKey(tabBarKey)).width, equals(800.0));
+      expect(tester.getSize(find.byKey(tabBarKey)).width, equals(800.0));
       // The center of the FFFFFF item is to the right of the TabBar's center
-      expect(tester.getCenter(tester.findText('FFFFFF')).x, greaterThan(401.0));
+      expect(tester.getCenter(find.text('FFFFFF')).x, greaterThan(401.0));
 
-      tester.tap(tester.findText('FFFFFF'));
+      tester.tap(find.text('FFFFFF'));
       tester.pump();
       tester.pump(const Duration(seconds: 1)); // finish the scroll animation
       expect(selection.value, equals('FFFFFF'));
       // The center of the FFFFFF item is now at the TabBar's center
-      expect(tester.getCenter(tester.findText('FFFFFF')).x, closeTo(400.0, 1.0));
+      expect(tester.getCenter(find.text('FFFFFF')).x, closeTo(400.0, 1.0));
     });
   });
 
@@ -148,16 +148,16 @@ void main() {
       List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE', 'FFFFFF', 'GGGGGG', 'HHHHHH', 'IIIIII', 'JJJJJJ', 'KKKKKK', 'LLLLLL'];
       Key tabBarKey = new Key('TabBar');
       tester.pumpWidget(buildFrame(tabs: tabs, value: 'AAAAAA', isScrollable: true, tabBarKey: tabBarKey));
-      TabBarSelectionState<String> selection = TabBarSelection.of(tester.findText('AAAAAA'));
+      TabBarSelectionState<String> selection = TabBarSelection.of(tester.elementTreeTester.findText('AAAAAA'));
       expect(selection, isNotNull);
       expect(selection.value, equals('AAAAAA'));
 
       // Fling-scroll the TabBar to the left
-      expect(tester.getCenter(tester.findText('HHHHHH')).x, lessThan(700.0));
-      tester.fling(tester.findElementByKey(tabBarKey), const Offset(-20.0, 0.0), 1000.0);
+      expect(tester.getCenter(find.text('HHHHHH')).x, lessThan(700.0));
+      tester.fling(find.byKey(tabBarKey), const Offset(-20.0, 0.0), 1000.0);
       tester.pump();
       tester.pump(const Duration(seconds: 1)); // finish the scroll animation
-      expect(tester.getCenter(tester.findText('HHHHHH')).x, lessThan(500.0));
+      expect(tester.getCenter(find.text('HHHHHH')).x, lessThan(500.0));
 
       // Scrolling the TabBar doesn't change the selection
       expect(selection.value, equals('AAAAAA'));
@@ -191,22 +191,11 @@ void main() {
       }
 
       StateMarkerState findStateMarkerState(String name) {
-        Element secondLabel = tester.findText(name);
-        expect(secondLabel, isNotNull);
-        StatefulElement secondMarker;
-        secondLabel.visitAncestorElements((Element element) {
-          if (element.widget is StateMarker) {
-            secondMarker = element;
-            return false;
-          }
-          return true;
-        });
-        expect(secondMarker, isNotNull);
-        return secondMarker.state;
+        return tester.stateOf(find.widgetWithText(StateMarker, name));
       }
 
       tester.pumpWidget(builder());
-      TestGesture gesture = tester.startGesture(tester.getCenter(tester.findText(tabs[0])));
+      TestGesture gesture = tester.startGesture(tester.getCenter(find.text(tabs[0])));
       gesture.moveBy(new Offset(-600.0, 0.0));
       tester.pump();
       expect(value, equals(tabs[0]));
@@ -220,7 +209,7 @@ void main() {
 
       // Move to the third tab.
 
-      gesture = tester.startGesture(tester.getCenter(tester.findText(tabs[1])));
+      gesture = tester.startGesture(tester.getCenter(find.text(tabs[1])));
       gesture.moveBy(new Offset(-600.0, 0.0));
       gesture.up();
       tester.pump();
@@ -231,11 +220,11 @@ void main() {
 
       // The state is now gone.
 
-      expect(tester.findText(tabs[1]), isNull);
+      expect(tester, doesNotHaveWidget(find.text(tabs[1])));
 
       // Move back to the second tab.
 
-      gesture = tester.startGesture(tester.getCenter(tester.findText(tabs[2])));
+      gesture = tester.startGesture(tester.getCenter(find.text(tabs[2])));
       gesture.moveBy(new Offset(600.0, 0.0));
       tester.pump();
       StateMarkerState markerState = findStateMarkerState(tabs[1]);

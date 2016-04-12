@@ -77,27 +77,27 @@ void main() {
 
       tester.pumpWidget(new MaterialApp(routes: routes));
 
-      expect(tester.findText('X'), isNotNull);
-      expect(tester.findText('Y'), isNull);
+      expect(tester, hasWidget(find.text('X')));
+      expect(tester, doesNotHaveWidget(find.text('Y')));
 
-      tester.tap(tester.findText('X'));
+      tester.tap(find.text('X'));
       tester.pump(const Duration(milliseconds: 10));
 
-      expect(tester.findText('X'), isNotNull);
-      expect(tester.findText('Y'), isNotNull);
+      expect(tester, hasWidget(find.text('X')));
+      expect(tester, hasWidget(find.text('Y')));
 
       tester.pump(const Duration(milliseconds: 10));
       tester.pump(const Duration(milliseconds: 10));
       tester.pump(const Duration(seconds: 1));
 
-      tester.tap(tester.findText('Y'));
+      tester.tap(find.text('Y'));
       tester.pump(const Duration(milliseconds: 10));
       tester.pump(const Duration(milliseconds: 10));
       tester.pump(const Duration(milliseconds: 10));
       tester.pump(const Duration(seconds: 1));
 
-      expect(tester.findText('X'), isNotNull);
-      expect(tester.findText('Y'), isNull);
+      expect(tester, hasWidget(find.text('X')));
+      expect(tester, doesNotHaveWidget(find.text('Y')));
     });
   });
 
@@ -112,7 +112,7 @@ void main() {
         }
       );
       tester.pumpWidget(widget);
-      tester.tap(tester.findElementByKey(targetKey));
+      tester.tap(find.byKey(targetKey));
       expect(exception, new isInstanceOf<FlutterError>());
       expect('$exception', startsWith('openTransaction called with a context'));
     });

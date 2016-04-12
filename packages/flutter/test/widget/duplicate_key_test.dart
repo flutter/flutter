@@ -58,7 +58,7 @@ void main() {
   test('duplicate key smoke test', () {
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(builder());
-      StatefulLeafState leaf = tester.findStateOfType(StatefulLeafState);
+      StatefulLeafState leaf = tester.stateOf(find.byType(StatefulLeaf));
       leaf.test();
       tester.pump();
       Item lastItem = items[1];

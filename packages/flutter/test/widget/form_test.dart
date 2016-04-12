@@ -101,8 +101,7 @@ void main() {
         tester.pumpWidget(builder());
 
         // Check for a new Text widget with our error text.
-        Element errorElement = tester.findText(errorText(testValue));
-        expect(errorElement, isNotNull);
+        expect(tester, hasWidget(find.text(errorText(testValue))));
       }
 
       checkErrorText('Test');
@@ -157,8 +156,7 @@ void main() {
         expect(fieldValue, equals(testValue));
 
         // Check for a new Text widget with our error text.
-        Element errorElement = tester.findText(errorText(testValue));
-        expect(errorElement, isNotNull);
+        expect(tester, hasWidget(find.text(errorText(testValue))));
       }
 
       checkErrorText('Test');

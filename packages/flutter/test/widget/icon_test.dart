@@ -18,7 +18,7 @@ void main() {
           child: new Icon(icon: Icons.add)
         )
       );
-      Text text = tester.findWidgetOfType(Text);
+      Text text = tester.widget(find.byType(Text));
       expect(text.style.color, equals(Colors.green[500].withOpacity(0.5)));
     });
   });

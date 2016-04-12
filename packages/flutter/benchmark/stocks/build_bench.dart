@@ -24,7 +24,7 @@ void main() {
     tester.tapAt(new Point(20.0, 20.0)); // Open drawer
     tester.pump(); // Start drawer animation
     tester.pump(const Duration(seconds: 1)); // Complete drawer animation
-    appState = tester.findStateOfType(stocks.StocksAppState);
+    appState = tester.stateOf(find.byType(stocks.StocksApp));
   });
 
   WidgetFlutterBinding binding = WidgetFlutterBinding.instance;

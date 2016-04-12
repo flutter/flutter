@@ -46,7 +46,7 @@ class OuterContainerState extends State<OuterContainer> {
 
 void main() {
   test('resync stateful widget', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       Key innerKey = new Key('inner');
       Key outerKey = new Key('outer');
 

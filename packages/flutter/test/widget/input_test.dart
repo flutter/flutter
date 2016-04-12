@@ -51,8 +51,9 @@ void main() {
 
       tester.pumpWidget(builder());
 
-      Element input = tester.findElementByKey(inputKey);
-      RenderBox inputBox = input.renderObject;
+      RenderBox findInputBox() => tester.renderObjectOf(find.byKey(inputKey));
+
+      RenderBox inputBox = findInputBox();
       Size emptyInputSize = inputBox.size;
 
       void enterText(String testValue) {
@@ -70,11 +71,11 @@ void main() {
       }
 
       enterText(' ');
-      expect(input.renderObject, equals(inputBox));
+      expect(findInputBox(), equals(inputBox));
       expect(inputBox.size, equals(emptyInputSize));
 
       enterText('Test');
-      expect(input.renderObject, equals(inputBox));
+      expect(findInputBox(), equals(inputBox));
       expect(inputBox.size, equals(emptyInputSize));
     });
   });
@@ -96,7 +97,7 @@ void main() {
 
       tester.pumpWidget(builder());
 
-      RawInputLineState editableText = tester.findStateOfType(RawInputLineState);
+      RawInputLineState editableText = tester.stateOf(find.byType(RawInputLine));
 
       // Check that the cursor visibility toggles after each blink interval.
       void checkCursorToggle() {

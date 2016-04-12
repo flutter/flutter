@@ -56,19 +56,19 @@ void main() {
 
       String state() {
         String result = '';
-        if (tester.findText('A') != null)
+        if (tester.exists(find.text('A')))
           result += 'A';
-        if (tester.findText('B') != null)
+        if (tester.exists(find.text('B')))
           result += 'B';
-        if (tester.findText('C') != null)
+        if (tester.exists(find.text('C')))
           result += 'C';
-        if (tester.findText('D') != null)
+        if (tester.exists(find.text('D')))
           result += 'D';
-        if (tester.findText('E') != null)
+        if (tester.exists(find.text('E')))
           result += 'E';
-        if (tester.findText('F') != null)
+        if (tester.exists(find.text('F')))
           result += 'F';
-        if (tester.findText('G') != null)
+        if (tester.exists(find.text('G')))
           result += 'G';
         return result;
       }

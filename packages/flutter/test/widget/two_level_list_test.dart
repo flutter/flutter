@@ -39,12 +39,12 @@ void main() {
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(new MaterialApp(routes: routes));
 
-      expect(tester.findText('Top'), isNotNull);
-      expect(tester.findText('Sublist'), isNotNull);
-      expect(tester.findText('Bottom'), isNotNull);
+      expect(tester, hasWidget(find.text('Top')));
+      expect(tester, hasWidget(find.text('Sublist')));
+      expect(tester, hasWidget(find.text('Bottom')));
 
-      double getY(Key key) => tester.getTopLeft(tester.findElementByKey(key)).y;
-      double getHeight(Key key) => tester.getSize(tester.findElementByKey(key)).height;
+      double getY(Key key) => tester.getTopLeft(find.byKey(key)).y;
+      double getHeight(Key key) => tester.getSize(find.byKey(key)).height;
 
       expect(getY(topKey), lessThan(getY(sublistKey)));
       expect(getY(sublistKey), lessThan(getY(bottomKey)));
@@ -53,15 +53,15 @@ void main() {
       expect(getHeight(topKey), equals(getHeight(sublistKey) - 2.0));
       expect(getHeight(bottomKey), equals(getHeight(sublistKey) - 2.0));
 
-      tester.tap(tester.findText('Sublist'));
+      tester.tap(find.text('Sublist'));
       tester.pump(const Duration(seconds: 1));
       tester.pump(const Duration(seconds: 1));
 
-      expect(tester.findText('Top'), isNotNull);
-      expect(tester.findText('Sublist'), isNotNull);
-      expect(tester.findText('0'), isNotNull);
-      expect(tester.findText('1'), isNotNull);
-      expect(tester.findText('Bottom'), isNotNull);
+      expect(tester, hasWidget(find.text('Top')));
+      expect(tester, hasWidget(find.text('Sublist')));
+      expect(tester, hasWidget(find.text('0')));
+      expect(tester, hasWidget(find.text('1')));
+      expect(tester, hasWidget(find.text('Bottom')));
 
       expect(getY(topKey), lessThan(getY(sublistKey)));
       expect(getY(sublistKey), lessThan(getY(bottomKey)));

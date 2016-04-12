@@ -46,7 +46,7 @@ void main() {
         )
       );
 
-      tester.tap(tester.findText('X'));
+      tester.tap(find.text('X'));
       expect(didReceiveTap, isTrue);
     });
   });
@@ -65,7 +65,7 @@ void main() {
           key: flexKey
         )
       ));
-      RenderBox renderBox = tester.findElementByKey(flexKey).renderObject;
+      RenderBox renderBox = tester.renderObjectOf(find.byKey(flexKey));
       expect(renderBox.size.width, equals(800.0));
       expect(renderBox.size.height, equals(100.0));
 
@@ -80,7 +80,7 @@ void main() {
           mainAxisAlignment: MainAxisAlignment.collapse
         )
       ));
-      renderBox = tester.findElementByKey(flexKey).renderObject;
+      renderBox = tester.renderObjectOf(find.byKey(flexKey));
       expect(renderBox.size.width, equals(40.0));
       expect(renderBox.size.height, equals(100.0));
     });
@@ -96,7 +96,7 @@ void main() {
           key: flexKey
         )
       ));
-      RenderBox renderBox = tester.findElementByKey(flexKey).renderObject;
+      RenderBox renderBox = tester.renderObjectOf(find.byKey(flexKey));
       expect(renderBox.size.width, equals(100.0));
       expect(renderBox.size.height, equals(600.0));
 
@@ -111,7 +111,7 @@ void main() {
           mainAxisAlignment: MainAxisAlignment.collapse
         )
       ));
-      renderBox = tester.findElementByKey(flexKey).renderObject;
+      renderBox = tester.renderObjectOf(find.byKey(flexKey));
       expect(renderBox.size.width, equals(100.0));
       expect(renderBox.size.height, equals(250.0));
     });
@@ -138,7 +138,7 @@ void main() {
         )
       ));
 
-      RenderBox renderBox = tester.findElementByKey(childKey).renderObject;
+      RenderBox renderBox = tester.renderObjectOf(find.byKey(childKey));
       expect(renderBox.size.width, equals(0.0));
       expect(renderBox.size.height, equals(100.0));
 
@@ -159,7 +159,7 @@ void main() {
         )
       ));
 
-      renderBox = tester.findElementByKey(childKey).renderObject;
+      renderBox = tester.renderObjectOf(find.byKey(childKey));
       expect(renderBox.size.width, equals(100.0));
       expect(renderBox.size.height, equals(0.0));
     });

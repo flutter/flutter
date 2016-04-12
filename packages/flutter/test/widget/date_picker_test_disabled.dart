@@ -29,12 +29,12 @@ void main() {
       tester.pumpWidget(widget);
 
       expect(currentValue, isNull);
-      tester.tap(tester.findText('2015'));
+      tester.tap(find.text('2015'));
       tester.pumpWidget(widget);
-      tester.tap(tester.findText('2014'));
+      tester.tap(find.text('2014'));
       tester.pumpWidget(widget);
       expect(currentValue, equals(new DateTime(2014, 6, 9)));
-      tester.tap(tester.findText('30'));
+      tester.tap(find.text('30'));
       expect(currentValue, equals(new DateTime(2013, 1, 30)));
     });
   });
