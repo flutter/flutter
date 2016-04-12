@@ -12,7 +12,7 @@ import 'debug.dart';
 import 'material.dart';
 import 'theme.dart';
 
-/// An area of a Material that responds to touch. Has a configurable shape and
+/// An area of a [Material] that responds to touch. Has a configurable shape and
 /// can be configured to clip splashes that extend outside its bounds or not.
 ///
 /// For a variant of this widget that is specialised for rectangular areas that
@@ -25,6 +25,9 @@ import 'theme.dart';
 ///
 ///     assert(debugCheckHasMaterial(context));
 class InkResponse extends StatefulWidget {
+  /// Creates an area of a [Material] that responds to touch.
+  ///
+  /// Must have an ancestor [Material] widget in which to cause ink reactions.
   InkResponse({
     Key key,
     this.child,
@@ -32,23 +35,33 @@ class InkResponse extends StatefulWidget {
     this.onDoubleTap,
     this.onLongPress,
     this.onHighlightChanged,
-    this.containedInWell: false,
+    this.containedInkWell: false,
     this.highlightShape: BoxShape.circle
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
   final Widget child;
 
+  /// Called when the user taps this part of the material
   final GestureTapCallback onTap;
 
+  /// Called when the user double taps this part of the material.
   final GestureTapCallback onDoubleTap;
 
+  /// Called when the user long-presses on this part of the material.
   final GestureLongPressCallback onLongPress;
 
+  /// Called when this part of the material either becomes highlighted or stops behing highlighted.
+  ///
+  /// The value passed to the callback is true if this part of the material has
+  /// become highlighted and false if this part of the material has stopped
+  /// being highlighted.
   final ValueChanged<bool> onHighlightChanged;
 
-  final bool containedInWell;
+  /// Whether this ink response should be clipped its bounds.
+  final bool containedInkWell;
 
+  /// The shape (e.g., circle, rectangle) to use for the highlight drawn around this part of the material.
   final BoxShape highlightShape;
 
   @override
@@ -88,7 +101,6 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
       config.onHighlightChanged(value);
   }
 
-
   void _handleTapDown(Point position) {
     RenderBox referenceBox = context.findRenderObject();
     assert(Material.of(context) != null);
@@ -97,7 +109,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
       referenceBox: referenceBox,
       position: referenceBox.globalToLocal(position),
       color: Theme.of(context).splashColor,
-      containedInWell: config.containedInWell,
+      containedInWell: config.containedInkWell,
       onRemoved: () {
         if (_splashes != null) {
           assert(_splashes.contains(splash));
@@ -188,6 +200,9 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
 ///
 ///     assert(debugCheckHasMaterial(context));
 class InkWell extends InkResponse {
+  /// Creates an ink well.
+  ///
+  /// Must have an ancestor [Material] widget in which to cause ink reactions.
   InkWell({
     Key key,
     Widget child,
@@ -202,7 +217,7 @@ class InkWell extends InkResponse {
     onDoubleTap: onDoubleTap,
     onLongPress: onLongPress,
     onHighlightChanged: onHighlightChanged,
-    containedInWell: true,
+    containedInkWell: true,
     highlightShape: BoxShape.rectangle
   );
 }

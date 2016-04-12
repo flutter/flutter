@@ -9,13 +9,21 @@ import 'icon_theme.dart';
 import 'icon_theme_data.dart';
 import 'typography.dart';
 
-
-/// Typically used to stack a one or two line header or footer on a Grid tile.
-/// The layout is based on the "Grid Lists" section of the Material Design spec:
-/// https://www.google.com/design/spec/components/grid-lists.html#grid-lists-specs
-/// For a one-line header specify [title] and to add a second line specify [subtitle].
-/// Use [leading] or [trailing] to add an icon.
+/// A header used in a material design [GridTile].
+///
+/// Typically used to add a one or two line header or footer on a [GridTile].
+///
+/// For a one-line header, include a [title] widget. To add a second line, also
+/// include a [subtitle] wiget. Use [leading] or [trailing] to add an icon.
+///
+/// See also:
+///
+///  * [GridTile]
+///  * <https://www.google.com/design/spec/components/grid-lists.html#grid-lists-specs>
 class GridTileBar extends StatelessWidget {
+  /// Creates a grid tile bar.
+  ///
+  /// Typically used to with [GridTile].
   GridTileBar({
     Key key,
     this.backgroundColor,
@@ -25,10 +33,29 @@ class GridTileBar extends StatelessWidget {
     this.trailing
   }) : super(key: key);
 
+  /// The color to paint behind the child widgets.
+  ///
+  /// Defaults to transparent.
   final Color backgroundColor;
+
+  /// A widget to display before the title.
+  ///
+  /// Typically an [Icon] or an [IconButton] widget.
   final Widget leading;
+
+  /// The primary content of the list item.
+  ///
+  /// Typically a [Text] widget.
   final Widget title;
+
+  /// Additional content displayed below the title.
+  ///
+  /// Typically a [Text] widget.
   final Widget subtitle;
+
+  /// A widget to display after the title.
+  ///
+  /// Typically an [Icon] or an [IconButton] widget.
   final Widget trailing;
 
   @override
