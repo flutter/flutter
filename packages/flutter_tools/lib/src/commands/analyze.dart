@@ -122,6 +122,19 @@ class AnalyzeCommand extends FlutterCommand {
   String get description => 'Analyze the project\'s Dart code.';
 
   @override
+  bool get shouldRunPub {
+    // If they're not analyzing the current project.
+    if (!argResults['current-package'])
+      return false;
+
+    // Or we're not in a project directory.
+    if (!new File('pubspec.yaml').existsSync())
+      return false;
+
+    return super.shouldRunPub;
+  }
+
+  @override
   bool get requiresProjectRoot => false;
 
   @override
