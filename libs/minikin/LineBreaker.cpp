@@ -419,6 +419,7 @@ size_t LineBreaker::computeBreaks() {
 void LineBreaker::finish() {
     mWordBreaker.finish();
     mWidth = 0;
+    mLineWidths.clear();
     mCandidates.clear();
     mBreaks.clear();
     mWidths.clear();

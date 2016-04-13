@@ -69,6 +69,9 @@ class LineWidths {
             }
             return width;
         }
+        void clear() {
+            mIndents.clear();
+        }
     private:
         float mFirstWidth;
         int mFirstWidthLineCount;
