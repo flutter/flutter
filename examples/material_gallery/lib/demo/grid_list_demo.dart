@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:collection';
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -37,7 +36,7 @@ new ScrollableGrid(
         fit: ImageFit.cover
       )
     );
-  }).toList()
+  })
 );""";
 
 enum GridDemoTileStyle {
@@ -50,7 +49,6 @@ class Photo {
   Photo({ this.assetName, this.title, this.caption, this.isFavorite: false });
 
   final String assetName;
-
   final String title;
   final String caption;
 
@@ -159,49 +157,6 @@ class GridDemoPhotoItem extends StatelessWidget {
   }
 }
 
-class GridListDemoGridDelegate extends FixedColumnCountGridDelegate {
-  GridListDemoGridDelegate({
-    this.columnCount,
-    double columnSpacing: 0.0,
-    double rowSpacing: 0.0,
-    EdgeInsets padding: EdgeInsets.zero,
-    this.tileHeightFactor: 1.0
-  }) : super(columnSpacing: columnSpacing, rowSpacing: rowSpacing, padding: padding) {
-    assert(columnCount != null && columnCount >= 0);
-    assert(tileHeightFactor != null && tileHeightFactor > 0.0);
-  }
-
-  @override
-  final int columnCount;
-
-  final double tileHeightFactor;
-
-  @override
-  GridSpecification getGridSpecification(BoxConstraints constraints, int childCount) {
-    assert(constraints.maxWidth < double.INFINITY);
-
-    double tileWidth = math.max(0.0, constraints.maxWidth - padding.horizontal + columnSpacing) / columnCount;
-    double tileHeight = tileWidth * tileHeightFactor;
-
-    return new GridSpecification.fromRegularTiles(
-      tileWidth: tileWidth,
-      tileHeight: tileHeight,
-      columnCount: columnCount,
-      rowCount: (childCount / columnCount).ceil(),
-      columnSpacing: columnSpacing,
-      rowSpacing: rowSpacing,
-      padding: padding
-    );
-  }
-
-  @override
-  bool shouldRelayout(GridListDemoGridDelegate oldDelegate) {
-    return columnCount != oldDelegate.columnCount
-        || tileHeightFactor != oldDelegate.tileHeightFactor
-        || super.shouldRelayout(oldDelegate);
-  }
-}
-
 class GridListDemo extends StatefulWidget {
   GridListDemo({ Key key }) : super(key: key);
 
@@ -248,8 +203,8 @@ class GridListDemoState extends State<GridListDemo> {
       title: 'Germany',
       caption: 'Englischer Garten'
     ),
-    new Photo(assetName:
-      'packages/flutter_gallery_assets/landscape_7.jpg',
+    new Photo(
+      assetName: 'packages/flutter_gallery_assets/landscape_7.jpg',
       title: 'A country',
       caption: 'Grass fields'
     ),
@@ -325,12 +280,12 @@ class GridListDemoState extends State<GridListDemo> {
         children: <Widget>[
           new Flexible(
             child: new ScrollableGrid(
-              delegate: new GridListDemoGridDelegate(
+              delegate: new FixedColumnCountGridDelegate(
                 columnCount: (orientation == Orientation.portrait) ? 2 : 3,
                 rowSpacing: 4.0,
                 columnSpacing: 4.0,
                 padding: const EdgeInsets.all(4.0),
-                tileHeightFactor: (orientation == Orientation.portrait) ? 1.0 : 0.75
+                tileAspectRatio: (orientation == Orientation.portrait) ? 1.0 : 1.3
               ),
               children: photos.map((Photo photo) {
                 return new GridDemoPhotoItem(
@@ -343,7 +298,6 @@ class GridListDemoState extends State<GridListDemo> {
                   }
                 );
               })
-              .toList()
             )
           ),
           new DemoBottomBar(
