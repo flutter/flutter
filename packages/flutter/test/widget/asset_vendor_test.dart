@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui show Image, hashValues;
+import 'dart:ui' as ui show Image;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
