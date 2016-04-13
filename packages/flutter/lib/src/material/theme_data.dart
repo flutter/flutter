@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Color, hashValues, hashList, lerpDouble;
+import 'dart:ui' show Color, hashValues;
 
 import 'colors.dart';
 import 'icon_theme_data.dart';
