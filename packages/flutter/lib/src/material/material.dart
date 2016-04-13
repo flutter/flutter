@@ -202,8 +202,9 @@ class _MaterialState extends State<Material> {
     Color backgroundColor = _getBackgroundColor(context);
     Widget contents = config.child;
     if (contents != null) {
-      contents = new DefaultTextStyle(
+      contents = new AnimatedDefaultTextStyle(
         style: config.textStyle ?? Theme.of(context).textTheme.body1,
+        duration: kThemeChangeDuration,
         child: contents
       );
     }

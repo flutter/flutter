@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
+import 'constants.dart';
 import 'divider.dart';
 import 'icon.dart';
 import 'icons.dart';
@@ -90,8 +91,9 @@ class _PopupMenuItemState<T extends PopupMenuItem<dynamic>> extends State<T> {
     if (!config.enabled)
       style = style.copyWith(color: theme.disabledColor);
 
-    Widget item = new DefaultTextStyle(
+    Widget item = new AnimatedDefaultTextStyle(
       style: style,
+      duration: kThemeChangeDuration,
       child: new Baseline(
         baseline: config.height - _kBaselineOffsetFromBottom,
         child: buildChild()

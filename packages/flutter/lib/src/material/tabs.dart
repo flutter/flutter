@@ -851,9 +851,9 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
       indicatorColor = Colors.white;
     }
 
-    TextStyle textStyle = themeData.primaryTextTheme.body2;
-    IconThemeData iconTheme = themeData.primaryIconTheme;
-    Color textColor = themeData.primaryTextTheme.body2.color.withAlpha(0xB2); // 70% alpha
+    final TextStyle textStyle = themeData.primaryTextTheme.body2;
+    final IconThemeData iconTheme = themeData.primaryIconTheme;
+    final Color textColor = themeData.primaryTextTheme.body2.color.withAlpha(0xB2); // 70% alpha
 
     List<Widget> tabs = <Widget>[];
     bool textAndIcons = false;
