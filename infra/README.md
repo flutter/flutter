@@ -51,7 +51,7 @@ by the [luci/recipes-py github project](https://github.com/luci/recipes-py).
 
 The typical cycle for editing a recipe is:
 
-1. Make your edits.
+1. Make your edits (probably to files in `//chrome_infra/build/scripts/slave/recipes/flutter`).
 2. Run `build/scripts/slave/recipes.py simulation_test train flutter` to update expected files  (remove the flutter if you need to do a global update).
 3. Run `build/scripts/tools/run_recipe.py flutter/flutter` (or flutter/engine) if something was strange during training and you need to run it locally.
 4. Upload the patch (`git commit`, `git cl upload`) and send it to someone in the `recipes/flutter/OWNERS` file for review.
