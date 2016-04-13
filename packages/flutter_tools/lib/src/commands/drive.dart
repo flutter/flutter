@@ -60,7 +60,7 @@ class DriveCommand extends RunCommandBase {
     );
 
     argParser.addOption('debug-port',
-        defaultsTo: '8182',
+        defaultsTo: '8183',
         help: 'Listen to the given port for a debug connection.');
   }
 
