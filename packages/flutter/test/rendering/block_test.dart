@@ -30,11 +30,15 @@ void main() {
     expect(paragraph.getMaxIntrinsicHeight(unconstrained), equals(oneLineTextHeight));
     expect(paragraph.getMaxIntrinsicHeight(constrained), equals(twoLinesTextHeight));
 
-    RenderBox testBlock = new RenderBlock(
+    // test setup
+    RenderBlock testBlock = new RenderBlock(
       children: <RenderBox>[
         paragraph,
       ]
     );
+    final BoxConstraints empty = new BoxConstraints.tight(Size.zero);
+
+    // vertical block
     expect(testBlock.getMinIntrinsicWidth(unconstrained), equals(wrappedTextWidth));
     expect(testBlock.getMinIntrinsicWidth(constrained), equals(wrappedTextWidth));
     expect(testBlock.getMaxIntrinsicWidth(unconstrained), equals(textWidth));
@@ -43,8 +47,21 @@ void main() {
     expect(testBlock.getMinIntrinsicHeight(constrained), equals(twoLinesTextHeight));
     expect(testBlock.getMaxIntrinsicHeight(unconstrained), equals(oneLineTextHeight));
     expect(testBlock.getMaxIntrinsicHeight(constrained), equals(twoLinesTextHeight));
+    expect(testBlock.getMinIntrinsicWidth(empty), equals(0.0));
+    expect(testBlock.getMaxIntrinsicWidth(empty), equals(0.0));
+    expect(testBlock.getMinIntrinsicHeight(empty), equals(0.0));
+    expect(testBlock.getMaxIntrinsicHeight(empty), equals(0.0));
 
-    final BoxConstraints empty = new BoxConstraints.tight(Size.zero);
+    // horizontal block
+    testBlock.mainAxis = Axis.horizontal;
+    expect(testBlock.getMinIntrinsicWidth(unconstrained), equals(textWidth));
+    expect(testBlock.getMinIntrinsicWidth(constrained), equals(constrained.maxWidth));
+    expect(testBlock.getMaxIntrinsicWidth(unconstrained), equals(textWidth));
+    expect(testBlock.getMaxIntrinsicWidth(constrained), equals(constrained.maxWidth));
+    expect(testBlock.getMinIntrinsicHeight(unconstrained), equals(oneLineTextHeight));
+    expect(testBlock.getMinIntrinsicHeight(constrained), equals(oneLineTextHeight));
+    expect(testBlock.getMaxIntrinsicHeight(unconstrained), equals(oneLineTextHeight));
+    expect(testBlock.getMaxIntrinsicHeight(constrained), equals(oneLineTextHeight));
     expect(testBlock.getMinIntrinsicWidth(empty), equals(0.0));
     expect(testBlock.getMaxIntrinsicWidth(empty), equals(0.0));
     expect(testBlock.getMinIntrinsicHeight(empty), equals(0.0));

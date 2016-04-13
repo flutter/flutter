@@ -157,7 +157,7 @@ class RenderBlock extends RenderBox
     while (child != null) {
       switch (mainAxis) {
         case Axis.horizontal:
-          extent += child.getMinIntrinsicWidth(innerConstraints);
+          extent += child.getMaxIntrinsicWidth(innerConstraints);
           break;
         case Axis.vertical:
           extent += child.getMinIntrinsicHeight(innerConstraints);
@@ -206,7 +206,7 @@ class RenderBlock extends RenderBox
       case Axis.horizontal:
         return _getIntrinsicCrossAxis(
           constraints,
-          (RenderBox child, BoxConstraints innerConstraints) => child.getMinIntrinsicWidth(innerConstraints),
+          (RenderBox child, BoxConstraints innerConstraints) => child.getMinIntrinsicHeight(innerConstraints),
           constraints.constrainHeight
         );
       case Axis.vertical:
@@ -221,7 +221,7 @@ class RenderBlock extends RenderBox
       case Axis.horizontal:
         return _getIntrinsicCrossAxis(
           constraints,
-          (RenderBox child, BoxConstraints innerConstraints) => child.getMaxIntrinsicWidth(innerConstraints),
+          (RenderBox child, BoxConstraints innerConstraints) => child.getMaxIntrinsicHeight(innerConstraints),
           constraints.constrainHeight
         );
       case Axis.vertical:
