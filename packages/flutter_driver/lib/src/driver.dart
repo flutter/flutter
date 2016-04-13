@@ -41,8 +41,8 @@ class FlutterDriver {
   /// Resumes the application if it is currently paused (e.g. at a breakpoint).
   ///
   /// [dartVmServiceUrl] is the URL to Dart observatory (a.k.a. VM service). By
-  /// default it connects to `http://localhost:8182`.
-  static Future<FlutterDriver> connect({String dartVmServiceUrl: 'http://localhost:8182'}) async {
+  /// default it connects to `http://localhost:8183`.
+  static Future<FlutterDriver> connect({String dartVmServiceUrl: 'http://localhost:8183'}) async {
     // Connect to Dart VM servcies
     _log.info('Connecting to Flutter application at $dartVmServiceUrl');
     VMServiceClientConnection connection = await vmServiceConnectFunction(dartVmServiceUrl);
