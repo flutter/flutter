@@ -69,12 +69,12 @@ class Ticker {
 
     // The onTick callback may have scheduled another tick already.
     if (isTicking && _animationId == null)
-      _scheduleTick();
+      _scheduleTick(rescheduling: true);
   }
 
-  void _scheduleTick() {
+  void _scheduleTick({ bool rescheduling: false }) {
     assert(isTicking);
     assert(_animationId == null);
-    _animationId = Scheduler.instance.scheduleFrameCallback(_tick);
+    _animationId = Scheduler.instance.scheduleFrameCallback(_tick, rescheduling: rescheduling);
   }
 }

@@ -117,6 +117,38 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
   TapGestureRecognizer _tap;
   Point _downPosition;
 
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    if (_positionController != null) {
+      if (value)
+        _positionController.forward();
+      else
+        _positionController.reverse();
+    }
+    if (_reactionController != null && isInteractive) {
+      switch (_reactionController.status) {
+        case AnimationStatus.forward:
+          _reactionController.forward();
+          break;
+        case AnimationStatus.reverse:
+          _reactionController.reverse();
+          break;
+        case AnimationStatus.dismissed:
+        case AnimationStatus.completed:
+          // nothing to do
+          break;
+      }
+    }
+  }
+
+  @override
+  void detach() {
+    _positionController?.stop();
+    _reactionController?.stop();
+    super.detach();
+  }
+
   void _handlePositionStateChanged(AnimationStatus status) {
     if (isInteractive) {
       if (status == AnimationStatus.completed && !_value)

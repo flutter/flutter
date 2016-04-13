@@ -5,6 +5,9 @@
 import 'dart:async';
 import 'dart:collection';
 
+/// Signature for [debugPrint] implementations.
+typedef void DebugPrintCallback(String message, { int wrapWidth });
+
 /// Prints a message to the console, which you can access using the "flutter"
 /// tool's "logs" command ("flutter logs").
 ///
@@ -16,9 +19,15 @@ import 'dart:collection';
 /// to this function (directly or indirectly via [debugDumpRenderTree] or
 /// [debugDumpApp]) and to the Dart [print] method can result in out-of-order
 /// messages in the logs.
-void debugPrint(String message, { int wrapWidth }) {
+///
+/// The implementation of this function can be replaced by setting the
+/// variable to a new implementation that matches the
+/// [DebugPrintCallback] signature. For example, flutter_test does this.
+DebugPrintCallback debugPrint = _defaultDebugPrint;
+
+void _defaultDebugPrint(String message, { int wrapWidth }) {
   if (wrapWidth != null) {
-    _debugPrintBuffer.addAll(message.split('\n').expand((String line) => _wordWrap(line, wrapWidth)));
+    _debugPrintBuffer.addAll(message.split('\n').expand((String line) => debugWordWrap(line, wrapWidth)));
   } else {
     _debugPrintBuffer.addAll(message.split('\n'));
   }
@@ -26,7 +35,7 @@ void debugPrint(String message, { int wrapWidth }) {
     _debugPrintTask();
 }
 int _debugPrintedCharacters = 0;
-int _kDebugPrintCapacity = 16 * 1024;
+const int _kDebugPrintCapacity = 16 * 1024;
 Duration _kDebugPrintPauseTime = const Duration(seconds: 1);
 Queue<String> _debugPrintBuffer = new Queue<String>();
 Stopwatch _debugPrintStopwatch = new Stopwatch();
@@ -51,10 +60,24 @@ void _debugPrintTask() {
     _debugPrintStopwatch.start();
   }
 }
+
 final RegExp _indentPattern = new RegExp('^ *(?:[-+*] |[0-9]+[.):] )?');
 enum _WordWrapParseMode { inSpace, inWord, atBreak }
-Iterable<String> _wordWrap(String message, int width) sync* {
-  if (message.length < width) {
+/// Wraps the given string at the given width.
+///
+/// Wrapping occurs at space characters (U+0020). Lines that start
+/// with an octothorpe ("#", U+0023) are not wrapped (so for example,
+/// Dart stack traces won't be wrapped).
+///
+/// This is not suitable for use with arbitrary Unicode text. For
+/// example, it doesn't implement UAX #14, can't handle ideographic
+/// text, doesn't hyphenate, and so forth. It is only intended for
+/// formatting error messages.
+///
+/// The default [debugPrint] implementation uses this for its line
+/// wrapping.
+Iterable<String> debugWordWrap(String message, int width) sync* {
+  if (message.length < width || message[0] == '#') {
     yield message;
     return;
   }
