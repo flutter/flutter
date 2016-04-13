@@ -30,10 +30,26 @@ typedef bool SchedulingStrategy({ int priority, Scheduler scheduler });
 ///
 /// Combines the task and its priority.
 class _TaskEntry {
+  const _TaskEntry(this.task, this.priority);
   final VoidCallback task;
   final int priority;
+}
 
-  const _TaskEntry(this.task, this.priority);
+class _FrameCallbackEntry {
+  _FrameCallbackEntry(this.callback, { bool rescheduling: false }) {
+    assert(() {
+      if (rescheduling) {
+        assert(currentCallbackStack != null);
+        stack = currentCallbackStack;
+      } else {
+        stack = StackTrace.current;
+      }
+      return true;
+    });
+  }
+  static StackTrace currentCallbackStack;
+  final FrameCallback callback;
+  StackTrace stack;
 }
 
 class Priority {
@@ -141,7 +157,7 @@ abstract class Scheduler extends BindingBase {
   }
 
   int _nextFrameCallbackId = 0; // positive
-  Map<int, FrameCallback> _transientCallbacks = <int, FrameCallback>{};
+  Map<int, _FrameCallbackEntry> _transientCallbacks = <int, _FrameCallbackEntry>{};
   final Set<int> _removedIds = new HashSet<int>();
 
   int get transientCallbackCount => _transientCallbacks.length;
@@ -150,9 +166,14 @@ abstract class Scheduler extends BindingBase {
   ///
   /// Adds the given callback to the list of frame-callbacks and ensures that a
   /// frame is scheduled.
-  int scheduleFrameCallback(FrameCallback callback) {
+  ///
+  /// If `rescheduling` is true, the call must be in the context of a
+  /// frame callback, and for debugging purposes the stack trace
+  /// stored for this callback will be the same stack trace as for the
+  /// current callback.
+  int scheduleFrameCallback(FrameCallback callback, { bool rescheduling: false }) {
     _ensureBeginFrameCallback();
-    return addFrameCallback(callback);
+    return addFrameCallback(callback, rescheduling: rescheduling);
   }
 
   /// Adds a frame callback.
@@ -162,9 +183,18 @@ abstract class Scheduler extends BindingBase {
   ///
   /// The registered callbacks are executed in the order in which they have been
   /// registered.
-  int addFrameCallback(FrameCallback callback) {
+  ///
+  /// Callbacks registered with this method will not be invoked until
+  /// a frame is requested. To register a callback and ensure that a
+  /// frame is immediately scheduled, use [scheduleFrameCallback].
+  ///
+  /// If `rescheduling` is true, the call must be in the context of a
+  /// frame callback, and for debugging purposes the stack trace
+  /// stored for this callback will be the same stack trace as for the
+  /// current callback.
+  int addFrameCallback(FrameCallback callback, { bool rescheduling: false }) {
     _nextFrameCallbackId += 1;
-    _transientCallbacks[_nextFrameCallbackId] = callback;
+    _transientCallbacks[_nextFrameCallbackId] = new _FrameCallbackEntry(callback, rescheduling: rescheduling);
     return _nextFrameCallbackId;
   }
 
@@ -217,11 +247,11 @@ abstract class Scheduler extends BindingBase {
   void _invokeTransientFrameCallbacks(Duration timeStamp) {
     Timeline.startSync('Animate');
     assert(_debugInFrame);
-    Map<int, FrameCallback> callbacks = _transientCallbacks;
-    _transientCallbacks = new Map<int, FrameCallback>();
-    callbacks.forEach((int id, FrameCallback callback) {
+    Map<int, _FrameCallbackEntry> callbacks = _transientCallbacks;
+    _transientCallbacks = new Map<int, _FrameCallbackEntry>();
+    callbacks.forEach((int id, _FrameCallbackEntry callbackEntry) {
       if (!_removedIds.contains(id))
-        invokeFrameCallback(callback, timeStamp);
+        invokeFrameCallback(callbackEntry.callback, timeStamp, callbackEntry.stack);
     });
     _removedIds.clear();
     Timeline.finishSync();
@@ -264,8 +294,12 @@ abstract class Scheduler extends BindingBase {
   /// Wraps the callback in a try/catch and forwards any error to
   /// [debugSchedulerExceptionHandler], if set. If not set, then simply prints
   /// the error.
-  void invokeFrameCallback(FrameCallback callback, Duration timeStamp) {
+  ///
+  /// Must not be called reentrantly from within a frame callback.
+  void invokeFrameCallback(FrameCallback callback, Duration timeStamp, [ StackTrace stack ]) {
     assert(callback != null);
+    assert(_FrameCallbackEntry.currentCallbackStack == null);
+    assert(() { _FrameCallbackEntry.currentCallbackStack = stack; return true; });
     try {
       callback(timeStamp);
     } catch (exception, stack) {
@@ -273,9 +307,55 @@ abstract class Scheduler extends BindingBase {
         exception: exception,
         stack: stack,
         library: 'scheduler library',
-        context: 'during a scheduler callback'
+        context: 'during a scheduler callback',
+        informationCollector: (stack == null) ? null : (StringBuffer information) {
+          information.writeln('When this callback was registered, this was the stack:\n$stack');
+        }
       ));
     }
+    assert(() { _FrameCallbackEntry.currentCallbackStack = null; return true; });
+  }
+
+  /// Asserts that there are no registered transient callbacks; if
+  /// there are, prints their locations and throws an exception.
+  ///
+  /// This is expected to be called at the end of tests (the
+  /// flutter_test framework does it automatically in normal cases).
+  ///
+  /// To invoke this method, call it, when you expect there to be no
+  /// transient callbacks registered, in an assert statement with a
+  /// message that you want printed when a transient callback is
+  /// registered, as follows:
+  ///
+  /// ```dart
+  /// assert(Scheduler.instance.debugAssertNoTransientCallbacks(
+  ///   'A leak of transient callbacks was detected while doing foo.'
+  /// ));
+  /// ```
+  ///
+  /// Does nothing if asserts are disabled. Always returns true.
+  bool debugAssertNoTransientCallbacks(String reason) {
+    assert(() {
+      if (transientCallbackCount > 0) {
+        FlutterError.reportError(new FlutterErrorDetails(
+          exception: reason,
+          library: 'scheduler library',
+          informationCollector: (StringBuffer information) {
+            information.writeln(
+              'There ${ transientCallbackCount == 1 ? "was one transient callback" : "were $transientCallbackCount transient callbacks" } '
+              'left. The stack traces for when they were registered are as follows:'
+            );
+            for (int id in _transientCallbacks.keys) {
+              _FrameCallbackEntry entry = _transientCallbacks[id];
+              information.writeln('-- callback $id --');
+              information.writeln(entry.stack);
+            }
+          }
+        ));
+      }
+      return true;
+    });
+    return true;
   }
 
   /// Ensures that the scheduler is woken by the event loop.

@@ -80,7 +80,17 @@ class WidgetTester extends Instrumentation {
       super(binding: _SteppedWidgetFlutterBinding.ensureInitialized()) {
     timeDilation = 1.0;
     ui.window.onBeginFrame = null;
+    debugPrint = _synchronousDebugPrint;
   }
+
+  void _synchronousDebugPrint(String message, { int wrapWidth }) {
+    if (wrapWidth != null) {
+      print(message.split('\n').expand((String line) => debugWordWrap(line, wrapWidth)).join('\n'));
+    } else {
+      print(message);
+    }
+  }
+
 
   final FakeAsync async;
   final Clock clock;
@@ -174,24 +184,22 @@ void testWidgets(callback(WidgetTester tester)) {
       callback(tester);
       runApp(new Container(key: new UniqueKey())); // Unmount any remaining widgets.
       async.flushMicrotasks();
+      assert(Scheduler.instance.debugAssertNoTransientCallbacks(
+        'An animation is still running even after the widget tree was disposed.'
+      ));
       assert(() {
-        "An animation is still running even after the widget tree was disposed.";
-        return Scheduler.instance.transientCallbackCount == 0;
-      });
-      assert(() {
-        "A Timer is still running even after the widget tree was disposed.";
+        'A Timer is still running even after the widget tree was disposed.';
         return async.periodicTimerCount == 0;
       });
       assert(() {
-        "A Timer is still running even after the widget tree was disposed.";
+        'A Timer is still running even after the widget tree was disposed.';
         return async.nonPeriodicTimerCount == 0;
       });
       assert(async.microtaskCount == 0); // Shouldn't be possible.
-      assert(() {
-        if (tester._pendingException != null)
-          FlutterError.dumpErrorToConsole(tester._pendingException);
-        return tester._pendingException == null;
-      });
+      if (tester._pendingException != null) {
+        FlutterError.dumpErrorToConsole(tester._pendingException);
+        throw 'An exception (shown above) was thrown during the test.';
+      }
     } finally {
       FlutterError.onError = oldHandler;
     }
