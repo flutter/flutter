@@ -29,6 +29,8 @@ void main() {
         await driver.tap(await driver.findByText('Components'));
         await driver.tap(await driver.findByText('Style'));
 
+        // TODO(eseidel): These are very artifical scrolls, we should use better
+        // https://github.com/flutter/flutter/issues/3316
         // Scroll down
         for (int i = 0; i < 5; i++) {
           await driver.scroll(stockList, 0.0, -300.0, new Duration(milliseconds: 300));
@@ -42,9 +44,9 @@ void main() {
         }
       });
 
-      TimelineSummary summary = new TimelineSummary.summarize(timeline);
-      summary.writeSummaryToFile('home_scroll_perf', pretty: true);
-      summary.writeTimelineToFile('home_scroll_perf', pretty: true);
+      new TimelineSummary.summarize(timeline)
+        ..writeSummaryToFile('home_scroll_perf', pretty: true)
+        ..writeTimelineToFile('home_scroll_perf', pretty: true);
     });
   });
 }
