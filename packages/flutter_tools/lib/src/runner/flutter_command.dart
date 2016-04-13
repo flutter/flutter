@@ -121,9 +121,13 @@ abstract class FlutterCommand extends Command {
     }
 
     if (_usesPubOption && argResults['pub']) {
-      int exitCode = await pubGet();
-      if (exitCode != 0)
-        return exitCode;
+      // Flutter analyze and flutter test can work both on a project and on the flutter repo.
+      bool flutterRepo = argResults.options.contains('flutter-repo') && argResults['flutter-repo'];
+      if (!flutterRepo) {
+        int exitCode = await pubGet();
+        if (exitCode != 0)
+          return exitCode;
+      }
     }
 
     // Populate the cache.
