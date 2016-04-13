@@ -112,6 +112,7 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('preamble', help: 'Display the number of files that will be analyzed.', defaultsTo: true);
     argParser.addFlag('congratulate', help: 'Show output even when there are no errors, warnings, hints, or lints.', defaultsTo: true);
     argParser.addFlag('watch', help: 'Run analysis continuously, watching the filesystem for changes.', negatable: false);
+    usesPubOption();
   }
 
   @override
