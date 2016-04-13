@@ -31,7 +31,7 @@ void main() {
     expect(paragraph.getMaxIntrinsicHeight(constrained), equals(twoLinesTextHeight));
 
     // test setup
-    RenderBox testBlock = new RenderBlock(
+    RenderBlock testBlock = new RenderBlock(
       children: <RenderBox>[
         paragraph,
       ]
