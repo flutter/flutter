@@ -32,7 +32,7 @@ class TestCommand extends FlutterCommand {
   String get description => 'Run Flutter unit tests for the current project (Linux only).';
 
   @override
-  bool get shouldRunPub => argResults['flutter-repo'] ? false : super.shouldRunPub;
+  bool get shouldRunPub => !argResults['flutter-repo'] && super.shouldRunPub;
 
   @override
   bool get requiresProjectRoot => false;
