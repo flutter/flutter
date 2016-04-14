@@ -22,6 +22,7 @@ class TestCommand extends FlutterCommand {
       help: 'Run tests from the \'flutter\' package in the Flutter repository instead of the current directory.',
       defaultsTo: false
     );
+    usesPubOption();
   }
 
   @override
@@ -29,6 +30,9 @@ class TestCommand extends FlutterCommand {
 
   @override
   String get description => 'Run Flutter unit tests for the current project (Linux only).';
+
+  @override
+  bool get shouldRunPub => !argResults['flutter-repo'] && super.shouldRunPub;
 
   @override
   bool get requiresProjectRoot => false;

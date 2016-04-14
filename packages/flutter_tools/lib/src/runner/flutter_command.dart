@@ -41,6 +41,8 @@ abstract class FlutterCommand extends Command {
 
   bool _usesPubOption = false;
 
+  bool get shouldRunPub => _usesPubOption && argResults['pub'];
+
   List<BuildConfiguration> get buildConfigurations => runner.buildConfigurations;
 
   void usesTargetOption() {
@@ -120,7 +122,7 @@ abstract class FlutterCommand extends Command {
       }
     }
 
-    if (_usesPubOption && argResults['pub']) {
+    if (shouldRunPub) {
       int exitCode = await pubGet();
       if (exitCode != 0)
         return exitCode;
