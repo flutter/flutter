@@ -12,7 +12,7 @@ dependencies:
   json_rpc_2: any
   matcher: '>=0.12.0 <1.0.0'
   path: ^1.3.0
-  vm_service_client: '>=0.1.2 <1.0.0'
+  vm_service_client: '>=0.1.2 <0.2.0'
   flutter:
     path: '../flutter'
   flutter_test:
