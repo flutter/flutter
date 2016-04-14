@@ -124,8 +124,8 @@ class ChildViewConnection {
     assert(_attached);
     assert(_viewOwner != null);
     assert(_viewKey == null);
+    assert(_viewInfo == null);
     _viewKey = _nextViewKey++;
-    _viewInfo = null;
     _viewContainer?.addChild(_viewKey, _viewOwner.impl);
     _viewOwner = null;
     assert(!_ViewContainerListenerImpl.instance._connections.containsKey(_viewKey));
@@ -253,12 +253,20 @@ class RenderChildView extends RenderBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    _child?._attach();
+    if (_child != null) {
+      _child._attach();
+      assert(_child._onViewInfoAvailable == null);
+      _child._onViewInfoAvailable = markNeedsPaint;
+    }
   }
 
   @override
   void detach() {
-    _child?._detach();
+    if (_child != null) {
+      _child._detach();
+      assert(_child._onViewInfoAvailable != null);
+      _child._onViewInfoAvailable = null;
+    }
     super.detach();
   }
 
