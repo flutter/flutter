@@ -8,6 +8,7 @@ import 'dart:ui' as ui show window;
 
 import 'package:newton/newton.dart';
 import 'package:flutter/gestures.dart';
+import 'package:meta/meta.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -217,6 +218,7 @@ abstract class Scrollable extends StatefulWidget {
 /// along the [config.scrollDirection] axis and are implemented in
 /// terms of the [pixelOffsetToScrollOffset] and
 /// [scrollOffsetToPixelOffset] methods.
+@optionalTypeArgs
 abstract class ScrollableState<T extends Scrollable> extends State<T> {
   @override
   void initState() {
