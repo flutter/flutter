@@ -10,6 +10,7 @@ import 'debug.dart';
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 
 export 'dart:ui' show hashValues, hashList;
 export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugPrint;
@@ -112,6 +113,7 @@ typedef void GlobalKeyRemoveListener(GlobalKey key);
 /// GlobalKeys are relatively expensive. If you don't need any of the features
 /// listed above, consider using a [Key], [ValueKey], [ObjectKey], or
 /// [UniqueKey] instead.
+@optionalTypeArgs
 abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   /// Constructs a LabeledGlobalKey, which is a GlobalKey with a label used for debugging.
   /// The label is not used for comparing the identity of the key.
@@ -253,6 +255,7 @@ class GlobalObjectKey extends GlobalKey {
 }
 
 /// This class is a work-around for the "is" operator not accepting a variable value as its right operand
+@optionalTypeArgs
 class TypeMatcher<T> {
   const TypeMatcher();
   bool check(dynamic object) => object is T;
@@ -346,6 +349,7 @@ enum _StateLifecycle {
 typedef void StateSetter(VoidCallback fn);
 
 /// The logic and internal state for a [StatefulWidget].
+@optionalTypeArgs
 abstract class State<T extends StatefulWidget> {
   /// The current configuration (an instance of the corresponding
   /// [StatefulWidget] class).
