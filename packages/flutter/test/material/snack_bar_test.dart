@@ -37,24 +37,24 @@ void main() {
           }
         }
       ));
-      expect(tester.findText(helloSnackBar), isNull);
-      tester.tap(tester.findElementByKey(tapTarget));
-      expect(tester.findText(helloSnackBar), isNull);
+      expect(tester, doesNotHaveWidget(find.text(helloSnackBar)));
+      tester.tap(find.byKey(tapTarget));
+      expect(tester, doesNotHaveWidget(find.text(helloSnackBar)));
       tester.pump(); // schedule animation
-      expect(tester.findText(helloSnackBar), isNotNull);
+      expect(tester, hasWidget(find.text(helloSnackBar)));
       tester.pump(); // begin animation
-      expect(tester.findText(helloSnackBar), isNotNull);
+      expect(tester, hasWidget(find.text(helloSnackBar)));
       tester.pump(new Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
-      expect(tester.findText(helloSnackBar), isNotNull);
+      expect(tester, hasWidget(find.text(helloSnackBar)));
       tester.pump(new Duration(milliseconds: 750)); // 1.50s
-      expect(tester.findText(helloSnackBar), isNotNull);
+      expect(tester, hasWidget(find.text(helloSnackBar)));
       tester.pump(new Duration(milliseconds: 750)); // 2.25s
-      expect(tester.findText(helloSnackBar), isNotNull);
+      expect(tester, hasWidget(find.text(helloSnackBar)));
       tester.pump(new Duration(milliseconds: 750)); // 3.00s // timer triggers to dismiss snackbar, reverse animation is scheduled
       tester.pump(); // begin animation
-      expect(tester.findText(helloSnackBar), isNotNull); // frame 0 of dismiss animation
+      expect(tester, hasWidget(find.text(helloSnackBar))); // frame 0 of dismiss animation
       tester.pump(new Duration(milliseconds: 750)); // 3.75s // last frame of animation, snackbar removed from build
-      expect(tester.findText(helloSnackBar), isNull);
+      expect(tester, doesNotHaveWidget(find.text(helloSnackBar)));
     });
   });
 
@@ -89,53 +89,53 @@ void main() {
           }
         }
       ));
-      expect(tester.findText('bar1'), isNull);
-      expect(tester.findText('bar2'), isNull);
-      tester.tap(tester.findElementByKey(tapTarget)); // queue bar1
-      tester.tap(tester.findElementByKey(tapTarget)); // queue bar2
-      expect(tester.findText('bar1'), isNull);
-      expect(tester.findText('bar2'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('bar1')));
+      expect(tester, doesNotHaveWidget(find.text('bar2')));
+      tester.tap(find.byKey(tapTarget)); // queue bar1
+      tester.tap(find.byKey(tapTarget)); // queue bar2
+      expect(tester, doesNotHaveWidget(find.text('bar1')));
+      expect(tester, doesNotHaveWidget(find.text('bar2')));
       tester.pump(); // schedule animation for bar1
-      expect(tester.findText('bar1'), isNotNull);
-      expect(tester.findText('bar2'), isNull);
+      expect(tester, hasWidget(find.text('bar1')));
+      expect(tester, doesNotHaveWidget(find.text('bar2')));
       tester.pump(); // begin animation
-      expect(tester.findText('bar1'), isNotNull);
-      expect(tester.findText('bar2'), isNull);
+      expect(tester, hasWidget(find.text('bar1')));
+      expect(tester, doesNotHaveWidget(find.text('bar2')));
       tester.pump(new Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
-      expect(tester.findText('bar1'), isNotNull);
-      expect(tester.findText('bar2'), isNull);
+      expect(tester, hasWidget(find.text('bar1')));
+      expect(tester, doesNotHaveWidget(find.text('bar2')));
       tester.pump(new Duration(milliseconds: 750)); // 1.50s
-      expect(tester.findText('bar1'), isNotNull);
-      expect(tester.findText('bar2'), isNull);
+      expect(tester, hasWidget(find.text('bar1')));
+      expect(tester, doesNotHaveWidget(find.text('bar2')));
       tester.pump(new Duration(milliseconds: 750)); // 2.25s
-      expect(tester.findText('bar1'), isNotNull);
-      expect(tester.findText('bar2'), isNull);
+      expect(tester, hasWidget(find.text('bar1')));
+      expect(tester, doesNotHaveWidget(find.text('bar2')));
       tester.pump(new Duration(milliseconds: 750)); // 3.00s // timer triggers to dismiss snackbar, reverse animation is scheduled
       tester.pump(); // begin animation
-      expect(tester.findText('bar1'), isNotNull);
-      expect(tester.findText('bar2'), isNull);
+      expect(tester, hasWidget(find.text('bar1')));
+      expect(tester, doesNotHaveWidget(find.text('bar2')));
       tester.pump(new Duration(milliseconds: 750)); // 3.75s // last frame of animation, snackbar removed from build, new snack bar put in its place
-      expect(tester.findText('bar1'), isNull);
-      expect(tester.findText('bar2'), isNotNull);
+      expect(tester, doesNotHaveWidget(find.text('bar1')));
+      expect(tester, hasWidget(find.text('bar2')));
       tester.pump(); // begin animation
-      expect(tester.findText('bar1'), isNull);
-      expect(tester.findText('bar2'), isNotNull);
+      expect(tester, doesNotHaveWidget(find.text('bar1')));
+      expect(tester, hasWidget(find.text('bar2')));
       tester.pump(new Duration(milliseconds: 750)); // 4.50s // animation last frame; two second timer starts here
-      expect(tester.findText('bar1'), isNull);
-      expect(tester.findText('bar2'), isNotNull);
+      expect(tester, doesNotHaveWidget(find.text('bar1')));
+      expect(tester, hasWidget(find.text('bar2')));
       tester.pump(new Duration(milliseconds: 750)); // 5.25s
-      expect(tester.findText('bar1'), isNull);
-      expect(tester.findText('bar2'), isNotNull);
+      expect(tester, doesNotHaveWidget(find.text('bar1')));
+      expect(tester, hasWidget(find.text('bar2')));
       tester.pump(new Duration(milliseconds: 750)); // 6.00s
-      expect(tester.findText('bar1'), isNull);
-      expect(tester.findText('bar2'), isNotNull);
+      expect(tester, doesNotHaveWidget(find.text('bar1')));
+      expect(tester, hasWidget(find.text('bar2')));
       tester.pump(new Duration(milliseconds: 750)); // 6.75s // timer triggers to dismiss snackbar, reverse animation is scheduled
       tester.pump(); // begin animation
-      expect(tester.findText('bar1'), isNull);
-      expect(tester.findText('bar2'), isNotNull);
+      expect(tester, doesNotHaveWidget(find.text('bar1')));
+      expect(tester, hasWidget(find.text('bar2')));
       tester.pump(new Duration(milliseconds: 750)); // 7.50s // last frame of animation, snackbar removed from build, new snack bar put in its place
-      expect(tester.findText('bar1'), isNull);
-      expect(tester.findText('bar2'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('bar1')));
+      expect(tester, doesNotHaveWidget(find.text('bar2')));
     });
   });
 
@@ -172,62 +172,62 @@ void main() {
           }
         }
       ));
-      expect(tester.findText('bar1'), isNull);
-      expect(tester.findText('bar2'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('bar1')));
+      expect(tester, doesNotHaveWidget(find.text('bar2')));
       time = 1000;
-      tester.tap(tester.findElementByKey(tapTarget)); // queue bar1
+      tester.tap(find.byKey(tapTarget)); // queue bar1
       ScaffoldFeatureController<SnackBar, Null> firstController = lastController;
       time = 2;
-      tester.tap(tester.findElementByKey(tapTarget)); // queue bar2
-      expect(tester.findText('bar1'), isNull);
-      expect(tester.findText('bar2'), isNull);
+      tester.tap(find.byKey(tapTarget)); // queue bar2
+      expect(tester, doesNotHaveWidget(find.text('bar1')));
+      expect(tester, doesNotHaveWidget(find.text('bar2')));
       tester.pump(); // schedule animation for bar1
-      expect(tester.findText('bar1'), isNotNull);
-      expect(tester.findText('bar2'), isNull);
+      expect(tester, hasWidget(find.text('bar1')));
+      expect(tester, doesNotHaveWidget(find.text('bar2')));
       tester.pump(); // begin animation
-      expect(tester.findText('bar1'), isNotNull);
-      expect(tester.findText('bar2'), isNull);
+      expect(tester, hasWidget(find.text('bar1')));
+      expect(tester, doesNotHaveWidget(find.text('bar2')));
       tester.pump(new Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
-      expect(tester.findText('bar1'), isNotNull);
-      expect(tester.findText('bar2'), isNull);
+      expect(tester, hasWidget(find.text('bar1')));
+      expect(tester, doesNotHaveWidget(find.text('bar2')));
       tester.pump(new Duration(milliseconds: 750)); // 1.50s
-      expect(tester.findText('bar1'), isNotNull);
-      expect(tester.findText('bar2'), isNull);
+      expect(tester, hasWidget(find.text('bar1')));
+      expect(tester, doesNotHaveWidget(find.text('bar2')));
       tester.pump(new Duration(milliseconds: 750)); // 2.25s
-      expect(tester.findText('bar1'), isNotNull);
-      expect(tester.findText('bar2'), isNull);
+      expect(tester, hasWidget(find.text('bar1')));
+      expect(tester, doesNotHaveWidget(find.text('bar2')));
       tester.pump(new Duration(milliseconds: 10000)); // 12.25s
-      expect(tester.findText('bar1'), isNotNull);
-      expect(tester.findText('bar2'), isNull);
+      expect(tester, hasWidget(find.text('bar1')));
+      expect(tester, doesNotHaveWidget(find.text('bar2')));
 
       firstController.close(); // snackbar is manually dismissed
 
       tester.pump(new Duration(milliseconds: 750)); // 13.00s // reverse animation is scheduled
       tester.pump(); // begin animation
-      expect(tester.findText('bar1'), isNotNull);
-      expect(tester.findText('bar2'), isNull);
+      expect(tester, hasWidget(find.text('bar1')));
+      expect(tester, doesNotHaveWidget(find.text('bar2')));
       tester.pump(new Duration(milliseconds: 750)); // 13.75s // last frame of animation, snackbar removed from build, new snack bar put in its place
-      expect(tester.findText('bar1'), isNull);
-      expect(tester.findText('bar2'), isNotNull);
+      expect(tester, doesNotHaveWidget(find.text('bar1')));
+      expect(tester, hasWidget(find.text('bar2')));
       tester.pump(); // begin animation
-      expect(tester.findText('bar1'), isNull);
-      expect(tester.findText('bar2'), isNotNull);
+      expect(tester, doesNotHaveWidget(find.text('bar1')));
+      expect(tester, hasWidget(find.text('bar2')));
       tester.pump(new Duration(milliseconds: 750)); // 14.50s // animation last frame; two second timer starts here
-      expect(tester.findText('bar1'), isNull);
-      expect(tester.findText('bar2'), isNotNull);
+      expect(tester, doesNotHaveWidget(find.text('bar1')));
+      expect(tester, hasWidget(find.text('bar2')));
       tester.pump(new Duration(milliseconds: 750)); // 15.25s
-      expect(tester.findText('bar1'), isNull);
-      expect(tester.findText('bar2'), isNotNull);
+      expect(tester, doesNotHaveWidget(find.text('bar1')));
+      expect(tester, hasWidget(find.text('bar2')));
       tester.pump(new Duration(milliseconds: 750)); // 16.00s
-      expect(tester.findText('bar1'), isNull);
-      expect(tester.findText('bar2'), isNotNull);
+      expect(tester, doesNotHaveWidget(find.text('bar1')));
+      expect(tester, hasWidget(find.text('bar2')));
       tester.pump(new Duration(milliseconds: 750)); // 16.75s // timer triggers to dismiss snackbar, reverse animation is scheduled
       tester.pump(); // begin animation
-      expect(tester.findText('bar1'), isNull);
-      expect(tester.findText('bar2'), isNotNull);
+      expect(tester, doesNotHaveWidget(find.text('bar1')));
+      expect(tester, hasWidget(find.text('bar2')));
       tester.pump(new Duration(milliseconds: 750)); // 17.50s // last frame of animation, snackbar removed from build, new snack bar put in its place
-      expect(tester.findText('bar1'), isNull);
-      expect(tester.findText('bar2'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('bar1')));
+      expect(tester, doesNotHaveWidget(find.text('bar2')));
     });
   });
 
@@ -262,23 +262,23 @@ void main() {
           }
         }
       ));
-      expect(tester.findText('bar1'), isNull);
-      expect(tester.findText('bar2'), isNull);
-      tester.tap(tester.findElementByKey(tapTarget)); // queue bar1
-      tester.tap(tester.findElementByKey(tapTarget)); // queue bar2
-      expect(tester.findText('bar1'), isNull);
-      expect(tester.findText('bar2'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('bar1')));
+      expect(tester, doesNotHaveWidget(find.text('bar2')));
+      tester.tap(find.byKey(tapTarget)); // queue bar1
+      tester.tap(find.byKey(tapTarget)); // queue bar2
+      expect(tester, doesNotHaveWidget(find.text('bar1')));
+      expect(tester, doesNotHaveWidget(find.text('bar2')));
       tester.pump(); // schedule animation for bar1
-      expect(tester.findText('bar1'), isNotNull);
-      expect(tester.findText('bar2'), isNull);
+      expect(tester, hasWidget(find.text('bar1')));
+      expect(tester, doesNotHaveWidget(find.text('bar2')));
       tester.pump(); // begin animation
-      expect(tester.findText('bar1'), isNotNull);
-      expect(tester.findText('bar2'), isNull);
+      expect(tester, hasWidget(find.text('bar1')));
+      expect(tester, doesNotHaveWidget(find.text('bar2')));
       tester.pump(new Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
-      tester.scroll(tester.findText('bar1'), new Offset(0.0, 50.0));
+      tester.scroll(find.text('bar1'), new Offset(0.0, 50.0));
       tester.pump(); // bar1 dismissed, bar2 begins animating
-      expect(tester.findText('bar1'), isNull);
-      expect(tester.findText('bar2'), isNotNull);
+      expect(tester, doesNotHaveWidget(find.text('bar1')));
+      expect(tester, hasWidget(find.text('bar2')));
     });
   });
 
@@ -312,17 +312,17 @@ void main() {
           }
         }
       ));
-      tester.tap(tester.findText('X'));
+      tester.tap(find.text('X'));
       tester.pump(); // start animation
       tester.pump(const Duration(milliseconds: 750));
 
       expect(tapCount, equals(0));
-      tester.tap(tester.findText('ACTION'));
+      tester.tap(find.text('ACTION'));
       expect(tapCount, equals(1));
-      tester.tap(tester.findText('ACTION'));
+      tester.tap(find.text('ACTION'));
       expect(tapCount, equals(1));
       tester.pump();
-      tester.tap(tester.findText('ACTION'));
+      tester.tap(find.text('ACTION'));
       expect(tapCount, equals(1));
     });
   });

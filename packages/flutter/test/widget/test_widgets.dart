@@ -4,7 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 final BoxDecoration kBoxDecorationA = new BoxDecoration(
   backgroundColor: const Color(0xFFFF0000)
@@ -55,10 +54,6 @@ class FlipWidgetState extends State<FlipWidget> {
 }
 
 void flipStatefulWidget(WidgetTester tester) {
-  StatefulElement stateElement =
-      tester.findElement((Element element) => element is StatefulElement);
-  expect(stateElement, isNotNull);
-  expect(stateElement.state is FlipWidgetState, isTrue);
-  FlipWidgetState state = stateElement.state;
+  FlipWidgetState state = tester.stateOf(find.byType(FlipWidget));
   state.flip();
 }

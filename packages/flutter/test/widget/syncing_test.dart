@@ -56,7 +56,7 @@ void main() {
         )
       );
 
-      TestWidgetState state = tester.findStateOfType(TestWidgetState);
+      TestWidgetState state = tester.stateOf(find.byType(TestWidget));
 
       expect(state.persistentState, equals(1));
       expect(state.updates, equals(0));
@@ -92,7 +92,7 @@ void main() {
         )
       );
 
-      TestWidgetState state = tester.findStateOfType(TestWidgetState);
+      TestWidgetState state = tester.stateOf(find.byType(TestWidget));
 
       expect(state.persistentState, equals(10));
       expect(state.updates, equals(0));
@@ -106,7 +106,7 @@ void main() {
         )
       );
 
-      state = tester.findStateOfType(TestWidgetState);
+      state = tester.stateOf(find.byType(TestWidget));
 
       expect(state.persistentState, equals(11));
       expect(state.updates, equals(0));
@@ -116,7 +116,7 @@ void main() {
   });
 
   test('swap instances around', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       Widget a = new TestWidget(persistentState: 0x61, syncedState: 0x41, child: new Text('apple'));
       Widget b = new TestWidget(persistentState: 0x62, syncedState: 0x42, child: new Text('banana'));
       tester.pumpWidget(new Column());

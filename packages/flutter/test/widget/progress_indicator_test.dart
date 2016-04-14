@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 
 void main() {
   test('LinearProgressIndicator changes when its value changes', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       tester.pumpWidget(new Block(children: <Widget>[new LinearProgressIndicator(value: 0.0)]));
 
       List<Layer> layers1 = tester.layers;

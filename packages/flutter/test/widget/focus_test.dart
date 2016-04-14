@@ -53,34 +53,34 @@ void main() {
           )
         )
       );
-      expect(tester.findText('a'),         isNull);
-      expect(tester.findText('A FOCUSED'), isNotNull);
-      expect(tester.findText('b'),         isNotNull);
-      expect(tester.findText('B FOCUSED'), isNull);
-      tester.tap(tester.findText('A FOCUSED'));
+      expect(tester, doesNotHaveWidget(find.text('a')));
+      expect(tester, hasWidget(find.text('A FOCUSED')));
+      expect(tester, hasWidget(find.text('b')));
+      expect(tester, doesNotHaveWidget(find.text('B FOCUSED')));
+      tester.tap(find.text('A FOCUSED'));
       tester.pump();
-      expect(tester.findText('a'),         isNull);
-      expect(tester.findText('A FOCUSED'), isNotNull);
-      expect(tester.findText('b'),         isNotNull);
-      expect(tester.findText('B FOCUSED'), isNull);
-      tester.tap(tester.findText('A FOCUSED'));
+      expect(tester, doesNotHaveWidget(find.text('a')));
+      expect(tester, hasWidget(find.text('A FOCUSED')));
+      expect(tester, hasWidget(find.text('b')));
+      expect(tester, doesNotHaveWidget(find.text('B FOCUSED')));
+      tester.tap(find.text('A FOCUSED'));
       tester.pump();
-      expect(tester.findText('a'),         isNull);
-      expect(tester.findText('A FOCUSED'), isNotNull);
-      expect(tester.findText('b'),         isNotNull);
-      expect(tester.findText('B FOCUSED'), isNull);
-      tester.tap(tester.findText('b'));
+      expect(tester, doesNotHaveWidget(find.text('a')));
+      expect(tester, hasWidget(find.text('A FOCUSED')));
+      expect(tester, hasWidget(find.text('b')));
+      expect(tester, doesNotHaveWidget(find.text('B FOCUSED')));
+      tester.tap(find.text('b'));
       tester.pump();
-      expect(tester.findText('a'),         isNotNull);
-      expect(tester.findText('A FOCUSED'), isNull);
-      expect(tester.findText('b'),         isNull);
-      expect(tester.findText('B FOCUSED'), isNotNull);
-      tester.tap(tester.findText('a'));
+      expect(tester, hasWidget(find.text('a')));
+      expect(tester, doesNotHaveWidget(find.text('A FOCUSED')));
+      expect(tester, doesNotHaveWidget(find.text('b')));
+      expect(tester, hasWidget(find.text('B FOCUSED')));
+      tester.tap(find.text('a'));
       tester.pump();
-      expect(tester.findText('a'),         isNull);
-      expect(tester.findText('A FOCUSED'), isNotNull);
-      expect(tester.findText('b'),         isNotNull);
-      expect(tester.findText('B FOCUSED'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('a')));
+      expect(tester, hasWidget(find.text('A FOCUSED')));
+      expect(tester, hasWidget(find.text('b')));
+      expect(tester, doesNotHaveWidget(find.text('B FOCUSED')));
     });
   });
 
@@ -100,20 +100,20 @@ void main() {
         )
       );
 
-      expect(tester.findText('a'),         isNotNull);
-      expect(tester.findText('A FOCUSED'), isNull);
+      expect(tester, hasWidget(find.text('a')));
+      expect(tester, doesNotHaveWidget(find.text('A FOCUSED')));
 
       Focus.moveTo(keyA);
       tester.pump();
 
-      expect(tester.findText('a'),         isNull);
-      expect(tester.findText('A FOCUSED'), isNotNull);
+      expect(tester, doesNotHaveWidget(find.text('a')));
+      expect(tester, hasWidget(find.text('A FOCUSED')));
 
       Focus.clear(keyA.currentContext);
       tester.pump();
 
-      expect(tester.findText('a'),         isNotNull);
-      expect(tester.findText('A FOCUSED'), isNull);
+      expect(tester, hasWidget(find.text('a')));
+      expect(tester, doesNotHaveWidget(find.text('A FOCUSED')));
     });
   });
 
@@ -138,14 +138,14 @@ void main() {
         )
       );
 
-      expect(tester.findText('a'),         isNotNull);
-      expect(tester.findText('A FOCUSED'), isNull);
+      expect(tester, hasWidget(find.text('a')));
+      expect(tester, doesNotHaveWidget(find.text('A FOCUSED')));
 
       Focus.moveTo(keyA);
       tester.pump();
 
-      expect(tester.findText('a'),         isNull);
-      expect(tester.findText('A FOCUSED'), isNotNull);
+      expect(tester, doesNotHaveWidget(find.text('a')));
+      expect(tester, hasWidget(find.text('A FOCUSED')));
 
       Focus.moveScopeTo(keyChildFocus, context: keyA.currentContext);
 
@@ -172,8 +172,8 @@ void main() {
         )
       );
 
-      expect(tester.findText('a'),         isNotNull);
-      expect(tester.findText('A FOCUSED'), isNull);
+      expect(tester, hasWidget(find.text('a')));
+      expect(tester, doesNotHaveWidget(find.text('A FOCUSED')));
 
       tester.pumpWidget(
         new Focus(
@@ -192,13 +192,13 @@ void main() {
       );
 
       // Focus has received the removal notification but we haven't rebuilt yet.
-      expect(tester.findText('a'),         isNotNull);
-      expect(tester.findText('A FOCUSED'), isNull);
+      expect(tester, hasWidget(find.text('a')));
+      expect(tester, doesNotHaveWidget(find.text('A FOCUSED')));
 
       tester.pump();
 
-      expect(tester.findText('a'),         isNull);
-      expect(tester.findText('A FOCUSED'), isNotNull);
+      expect(tester, doesNotHaveWidget(find.text('a')));
+      expect(tester, hasWidget(find.text('A FOCUSED')));
     });
   });
 }

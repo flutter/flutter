@@ -42,7 +42,7 @@ void main() {
         )
       );
 
-      RenderBox box = tester.findElementByKey(rotatedBoxKey).renderObject;
+      RenderBox box = tester.elementTreeTester.findElementByKey(rotatedBoxKey).renderObject;
       expect(box.size.width, equals(65.0));
       expect(box.size.height, equals(175.0));
 

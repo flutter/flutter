@@ -35,7 +35,7 @@ void main() {
       );
 
       tester.pumpWidget(subject);
-      tester.tap(tester.findText('target'));
+      tester.tap(find.text('target'));
       tester.pumpWidget(subject);
       expect(tapped, isFalse,
         reason: 'because the tap is prevented by ModalBarrier');
@@ -52,7 +52,7 @@ void main() {
       );
 
       tester.pumpWidget(subject);
-      tester.tap(tester.findText('target'));
+      tester.tap(find.text('target'));
       tester.pumpWidget(subject);
       expect(tapped, isTrue,
         reason: 'because the tap is not prevented by ModalBarrier');
@@ -69,19 +69,19 @@ void main() {
       tester.pumpWidget(new MaterialApp(routes: routes));
 
       // Initially the barrier is not visible
-      expect(tester.findElementByKey(const ValueKey<String>('barrier')), isNull);
+      expect(tester, doesNotHaveWidget(find.byKey(const ValueKey<String>('barrier'))));
 
       // Tapping on X routes to the barrier
-      tester.tap(tester.findText('X'));
+      tester.tap(find.text('X'));
       tester.pump();  // begin transition
       tester.pump(const Duration(seconds: 1));  // end transition
 
       // Tap on the barrier to dismiss it
-      tester.tap(tester.findElementByKey(const ValueKey<String>('barrier')));
+      tester.tap(find.byKey(const ValueKey<String>('barrier')));
       tester.pump();  // begin transition
       tester.pump(const Duration(seconds: 1));  // end transition
 
-      expect(tester.findElementByKey(const ValueKey<String>('barrier')), isNull,
+      expect(tester, doesNotHaveWidget(find.byKey(const ValueKey<String>('barrier'))),
         reason: 'because the barrier was dismissed');
     });
   });

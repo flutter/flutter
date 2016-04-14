@@ -36,8 +36,7 @@ void main() {
 
       tester.pumpWidget(builder());
 
-      StatefulElement element = tester.findElement((Element element) => element.widget is FlipWidget);
-      FlipWidgetState testWidget = element.state;
+      FlipWidgetState testWidget = tester.stateOf(find.byType(FlipWidget));
 
       expect(callbackTracker, equals([0, 1, 2, 3, 4, 5]));
 
@@ -176,8 +175,7 @@ void main() {
         );
       };
 
-      ElementVisitor collectText = (Element element) {
-        final Widget widget = element.widget;
+      void collectText(Widget widget) {
         if (widget is Text)
           text.add(widget.data);
       };
@@ -193,7 +191,7 @@ void main() {
 
       expect(callbackTracker, equals([0, 1, 2]));
       callbackTracker.clear();
-      tester.walkElements(collectText);
+      tester.widgets.forEach(collectText);
       expect(text, equals(['0', '1', '2']));
       text.clear();
 
@@ -201,7 +199,7 @@ void main() {
 
       expect(callbackTracker, equals([0, 1, 2]));
       callbackTracker.clear();
-      tester.walkElements(collectText);
+      tester.widgets.forEach(collectText);
       expect(text, equals(['0', '1', '2']));
       text.clear();
     });
@@ -237,7 +235,7 @@ void main() {
         )
       );
 
-      DecoratedBox widget = tester.findWidgetOfType(DecoratedBox);
+      DecoratedBox widget = tester.widget(find.byType(DecoratedBox));
       BoxDecoration decoraton = widget.decoration;
       expect(decoraton.backgroundColor, equals(Colors.blue[500]));
 
@@ -247,7 +245,7 @@ void main() {
 
       tester.pump();
 
-      widget = tester.findWidgetOfType(DecoratedBox);
+      widget = tester.widget(find.byType(DecoratedBox));
       decoraton = widget.decoration;
       expect(decoraton.backgroundColor, equals(Colors.green[500]));
     });
@@ -274,7 +272,7 @@ void main() {
         )
       );
 
-      RenderBox firstBox = tester.findText('0').findRenderObject();
+      RenderBox firstBox = tester.renderObjectOf(find.text('0'));
       Point upperLeft = firstBox.localToGlobal(Point.origin);
       expect(upperLeft, equals(new Point(7.0, 3.0)));
       expect(firstBox.size.width, equals(800.0 - 12.0));

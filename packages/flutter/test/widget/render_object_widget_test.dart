@@ -43,7 +43,7 @@ class TestOrientedBox extends SingleChildRenderObjectWidget {
 
 void main() {
   test('RenderObjectWidget smoke test', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       tester.pumpWidget(new DecoratedBox(decoration: kBoxDecorationA));
       SingleChildRenderObjectElement element =
           tester.findElement((Element element) => element is SingleChildRenderObjectElement);
@@ -64,7 +64,7 @@ void main() {
   });
 
   test('RenderObjectWidget can add and remove children', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
 
       void checkFullTree() {
         SingleChildRenderObjectElement element =
@@ -150,7 +150,7 @@ void main() {
   });
 
   test('Detached render tree is intact', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
 
       tester.pumpWidget(new DecoratedBox(
         decoration: kBoxDecorationA,
@@ -194,7 +194,7 @@ void main() {
   });
 
   test('Can watch inherited widgets', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       Key boxKey = new UniqueKey();
       TestOrientedBox box = new TestOrientedBox(key: boxKey);
 

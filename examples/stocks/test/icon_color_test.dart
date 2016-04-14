@@ -38,7 +38,7 @@ Element findElementOfExactWidgetTypeGoingUp(Element node, Type targetType) {
 
 final RegExp materialIconAssetNameColorExtractor = new RegExp(r'[^/]+/ic_.+_(white|black)_[0-9]+dp\.png');
 
-void checkIconColor(WidgetTester tester, String label, Color color) {
+void checkIconColor(ElementTreeTester tester, String label, Color color) {
   // The icon is going to be in the same merged semantics box as the text
   // regardless of how the menu item is represented, so this is a good
   // way to find the menu item. I hope.
@@ -59,11 +59,11 @@ void main() {
       tester.pump(); // triggers a frame
 
       // sanity check
-      expect(tester.findText('MARKET'), isNotNull);
-      expect(tester.findText('Help & Feedback'), isNull);
+      expect(tester, hasWidget(find.text('MARKET')));
+      expect(tester, doesNotHaveWidget(find.text('Help & Feedback')));
       tester.pump(new Duration(seconds: 2));
-      expect(tester.findText('MARKET'), isNotNull);
-      expect(tester.findText('Help & Feedback'), isNull);
+      expect(tester, hasWidget(find.text('MARKET')));
+      expect(tester, doesNotHaveWidget(find.text('Help & Feedback')));
 
       // drag the drawer out
       Point left = new Point(0.0, ui.window.size.height / 2.0);
@@ -74,24 +74,24 @@ void main() {
       tester.pump();
       gesture.up();
       tester.pump();
-      expect(tester.findText('MARKET'), isNotNull);
-      expect(tester.findText('Help & Feedback'), isNotNull);
+      expect(tester, hasWidget(find.text('MARKET')));
+      expect(tester, hasWidget(find.text('Help & Feedback')));
 
       // check the colour of the icon - light mode
-      checkIconColor(tester, 'Stock List', Colors.purple[500]); // theme primary color
-      checkIconColor(tester, 'Account Balance', Colors.black45); // enabled
-      checkIconColor(tester, 'Help & Feedback', Colors.black26); // disabled
+      checkIconColor(tester.elementTreeTester, 'Stock List', Colors.purple[500]); // theme primary color
+      checkIconColor(tester.elementTreeTester, 'Account Balance', Colors.black45); // enabled
+      checkIconColor(tester.elementTreeTester, 'Help & Feedback', Colors.black26); // disabled
 
       // switch to dark mode
-      tester.tap(tester.findText('Pessimistic'));
+      tester.tap(find.text('Pessimistic'));
       tester.pump(); // get the tap and send the notification that the theme has changed
       tester.pump(); // start the theme transition
       tester.pump(const Duration(seconds: 5)); // end the transition
 
       // check the colour of the icon - dark mode
-      checkIconColor(tester, 'Stock List', Colors.redAccent[200]); // theme accent color
-      checkIconColor(tester, 'Account Balance', Colors.white); // enabled
-      checkIconColor(tester, 'Help & Feedback', Colors.white30); // disabled
+      checkIconColor(tester.elementTreeTester, 'Stock List', Colors.redAccent[200]); // theme accent color
+      checkIconColor(tester.elementTreeTester, 'Account Balance', Colors.white); // enabled
+      checkIconColor(tester.elementTreeTester, 'Help & Feedback', Colors.white30); // disabled
 
     });
   });

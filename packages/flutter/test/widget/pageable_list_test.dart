@@ -44,7 +44,7 @@ Widget buildFrame({
 
 void page(WidgetTester tester, Offset offset) {
   String itemText = currentPage != null ? currentPage.toString() : '0';
-  tester.scroll(tester.findText(itemText), offset);
+  tester.scroll(find.text(itemText), offset);
   // One frame to start the animation, a second to complete it.
   tester.pump();
   tester.pump(const Duration(seconds: 1));
@@ -67,22 +67,22 @@ void main() {
       pageLeft(tester);
       expect(currentPage, equals(1));
 
-      expect(tester.findText('0'), isNull);
-      expect(tester.findText('1'), isNotNull);
-      expect(tester.findText('2'), isNull);
-      expect(tester.findText('3'), isNull);
-      expect(tester.findText('4'), isNull);
-      expect(tester.findText('5'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('0')));
+      expect(tester, hasWidget(find.text('1')));
+      expect(tester, doesNotHaveWidget(find.text('2')));
+      expect(tester, doesNotHaveWidget(find.text('3')));
+      expect(tester, doesNotHaveWidget(find.text('4')));
+      expect(tester, doesNotHaveWidget(find.text('5')));
 
       pageRight(tester);
       expect(currentPage, equals(0));
 
-      expect(tester.findText('0'), isNotNull);
-      expect(tester.findText('1'), isNull);
-      expect(tester.findText('2'), isNull);
-      expect(tester.findText('3'), isNull);
-      expect(tester.findText('4'), isNull);
-      expect(tester.findText('5'), isNull);
+      expect(tester, hasWidget(find.text('0')));
+      expect(tester, doesNotHaveWidget(find.text('1')));
+      expect(tester, doesNotHaveWidget(find.text('2')));
+      expect(tester, doesNotHaveWidget(find.text('3')));
+      expect(tester, doesNotHaveWidget(find.text('4')));
+      expect(tester, doesNotHaveWidget(find.text('5')));
 
       pageRight(tester);
       expect(currentPage, equals(0));
@@ -96,32 +96,32 @@ void main() {
       pageRight(tester);
       expect(currentPage, equals(4));
 
-      expect(tester.findText('0'), isNull);
-      expect(tester.findText('1'), isNull);
-      expect(tester.findText('2'), isNull);
-      expect(tester.findText('3'), isNull);
-      expect(tester.findText('4'), isNotNull);
-      expect(tester.findText('5'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('0')));
+      expect(tester, doesNotHaveWidget(find.text('1')));
+      expect(tester, doesNotHaveWidget(find.text('2')));
+      expect(tester, doesNotHaveWidget(find.text('3')));
+      expect(tester, hasWidget(find.text('4')));
+      expect(tester, doesNotHaveWidget(find.text('5')));
 
       pageLeft(tester);
       expect(currentPage, equals(5));
 
-      expect(tester.findText('0'), isNull);
-      expect(tester.findText('1'), isNull);
-      expect(tester.findText('2'), isNull);
-      expect(tester.findText('3'), isNull);
-      expect(tester.findText('4'), isNull);
-      expect(tester.findText('5'), isNotNull);
+      expect(tester, doesNotHaveWidget(find.text('0')));
+      expect(tester, doesNotHaveWidget(find.text('1')));
+      expect(tester, doesNotHaveWidget(find.text('2')));
+      expect(tester, doesNotHaveWidget(find.text('3')));
+      expect(tester, doesNotHaveWidget(find.text('4')));
+      expect(tester, hasWidget(find.text('5')));
 
       pageLeft(tester);
       expect(currentPage, equals(5));
 
-      expect(tester.findText('0'), isNull);
-      expect(tester.findText('1'), isNull);
-      expect(tester.findText('2'), isNull);
-      expect(tester.findText('3'), isNull);
-      expect(tester.findText('4'), isNull);
-      expect(tester.findText('5'), isNotNull);
+      expect(tester, doesNotHaveWidget(find.text('0')));
+      expect(tester, doesNotHaveWidget(find.text('1')));
+      expect(tester, doesNotHaveWidget(find.text('2')));
+      expect(tester, doesNotHaveWidget(find.text('3')));
+      expect(tester, doesNotHaveWidget(find.text('4')));
+      expect(tester, hasWidget(find.text('5')));
     });
   });
 
@@ -146,42 +146,42 @@ void main() {
       pageRight(tester);
       expect(currentPage, equals(4));
 
-      expect(tester.findText('0'), isNull);
-      expect(tester.findText('1'), isNull);
-      expect(tester.findText('2'), isNull);
-      expect(tester.findText('3'), isNull);
-      expect(tester.findText('4'), isNotNull);
-      expect(tester.findText('5'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('0')));
+      expect(tester, doesNotHaveWidget(find.text('1')));
+      expect(tester, doesNotHaveWidget(find.text('2')));
+      expect(tester, doesNotHaveWidget(find.text('3')));
+      expect(tester, hasWidget(find.text('4')));
+      expect(tester, doesNotHaveWidget(find.text('5')));
 
       pageLeft(tester);
       expect(currentPage, equals(5));
 
-      expect(tester.findText('0'), isNull);
-      expect(tester.findText('1'), isNull);
-      expect(tester.findText('2'), isNull);
-      expect(tester.findText('3'), isNull);
-      expect(tester.findText('4'), isNull);
-      expect(tester.findText('5'), isNotNull);
+      expect(tester, doesNotHaveWidget(find.text('0')));
+      expect(tester, doesNotHaveWidget(find.text('1')));
+      expect(tester, doesNotHaveWidget(find.text('2')));
+      expect(tester, doesNotHaveWidget(find.text('3')));
+      expect(tester, doesNotHaveWidget(find.text('4')));
+      expect(tester, hasWidget(find.text('5')));
 
       pageLeft(tester);
       expect(currentPage, equals(0));
 
-      expect(tester.findText('0'), isNotNull);
-      expect(tester.findText('1'), isNull);
-      expect(tester.findText('2'), isNull);
-      expect(tester.findText('3'), isNull);
-      expect(tester.findText('4'), isNull);
-      expect(tester.findText('5'), isNull);
+      expect(tester, hasWidget(find.text('0')));
+      expect(tester, doesNotHaveWidget(find.text('1')));
+      expect(tester, doesNotHaveWidget(find.text('2')));
+      expect(tester, doesNotHaveWidget(find.text('3')));
+      expect(tester, doesNotHaveWidget(find.text('4')));
+      expect(tester, doesNotHaveWidget(find.text('5')));
 
       pageLeft(tester);
       expect(currentPage, equals(1));
 
-      expect(tester.findText('0'), isNull);
-      expect(tester.findText('1'), isNotNull);
-      expect(tester.findText('2'), isNull);
-      expect(tester.findText('3'), isNull);
-      expect(tester.findText('4'), isNull);
-      expect(tester.findText('5'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('0')));
+      expect(tester, hasWidget(find.text('1')));
+      expect(tester, doesNotHaveWidget(find.text('2')));
+      expect(tester, doesNotHaveWidget(find.text('3')));
+      expect(tester, doesNotHaveWidget(find.text('4')));
+      expect(tester, doesNotHaveWidget(find.text('5')));
     });
   });
 
@@ -238,12 +238,12 @@ void main() {
       pageSize = new Size(pageSize.height, pageSize.width);
       tester.pumpWidget(buildFrame(itemsWrap: true));
 
-      expect(tester.findText('0'), isNull);
-      expect(tester.findText('1'), isNull);
-      expect(tester.findText('2'), isNull);
-      expect(tester.findText('3'), isNull);
-      expect(tester.findText('4'), isNull);
-      expect(tester.findText('5'), isNotNull);
+      expect(tester, doesNotHaveWidget(find.text('0')));
+      expect(tester, doesNotHaveWidget(find.text('1')));
+      expect(tester, doesNotHaveWidget(find.text('2')));
+      expect(tester, doesNotHaveWidget(find.text('3')));
+      expect(tester, doesNotHaveWidget(find.text('4')));
+      expect(tester, hasWidget(find.text('5')));
 
       box = globalKeys[5].currentContext.findRenderObject();
       expect(box.size.width, equals(pageSize.width));

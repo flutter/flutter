@@ -10,9 +10,9 @@ void main() {
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(new MarkdownBody(data: "Hello"));
 
-      List<Element> elements = _listElements(tester);
-      _expectWidgetTypes(elements, <Type>[MarkdownBody, Column, Container, Padding, RichText]);
-      _expectTextStrings(elements, <String>["Hello"]);
+      Iterable<Widget> widgets = tester.widgets;
+      _expectWidgetTypes(widgets, <Type>[MarkdownBody, Column, Container, Padding, RichText]);
+      _expectTextStrings(widgets, <String>["Hello"]);
     });
   });
 
@@ -20,9 +20,9 @@ void main() {
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(new MarkdownBody(data: "# Header"));
 
-      List<Element> elements = _listElements(tester);
-      _expectWidgetTypes(elements, <Type>[MarkdownBody, Column, Container, Padding, RichText]);
-      _expectTextStrings(elements, <String>["Header"]);
+      Iterable<Widget> widgets = tester.widgets;
+      _expectWidgetTypes(widgets, <Type>[MarkdownBody, Column, Container, Padding, RichText]);
+      _expectTextStrings(widgets, <String>["Header"]);
     });
   });
 
@@ -30,8 +30,8 @@ void main() {
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(new MarkdownBody(data: ""));
 
-      List<Element> elements = _listElements(tester);
-      _expectWidgetTypes(elements, <Type>[MarkdownBody, Column]);
+      Iterable<Widget> widgets = tester.widgets;
+      _expectWidgetTypes(widgets, <Type>[MarkdownBody, Column]);
     });
   });
 
@@ -39,8 +39,8 @@ void main() {
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(new MarkdownBody(data: "1. Item 1\n1. Item 2\n2. Item 3"));
 
-      List<Element> elements = _listElements(tester);
-      _expectTextStrings(elements, <String>[
+      Iterable<Widget> widgets = tester.widgets;
+      _expectTextStrings(widgets, <String>[
         "1.",
         "Item 1",
         "2.",
@@ -55,8 +55,8 @@ void main() {
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(new MarkdownBody(data: "- Item 1\n- Item 2\n- Item 3"));
 
-      List<Element> elements = _listElements(tester);
-      _expectTextStrings(elements, <String>[
+      Iterable<Widget> widgets = tester.widgets;
+      _expectTextStrings(widgets, <String>[
         "•",
         "Item 1",
         "•",
@@ -71,11 +71,12 @@ void main() {
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(new Markdown(data: ""));
 
-      List<Element> elements = _listElements(tester);
-      _expectWidgetTypes(elements, <Type>[
+      List<Widget> widgets = tester.widgets.toList();
+      _expectWidgetTypes(widgets.take(2), <Type>[
         Markdown,
         ScrollableViewport,
-        null, null, null, null, null, // ScrollableViewport internals
+      ]);
+      _expectWidgetTypes(widgets.reversed.take(3).toList().reversed, <Type>[
         Padding,
         MarkdownBody,
         Column
@@ -87,8 +88,7 @@ void main() {
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(new Markdown(data: "[Link Text](href)"));
 
-      Element textElement = tester.findElement((Element element) => element.widget is RichText);
-      RichText textWidget = textElement.widget;
+      RichText textWidget = tester.widgets.firstWhere((Widget widget) => widget is RichText);
       TextSpan span = textWidget.text;
 
       expect(span.children[0].recognizer.runtimeType, equals(TapGestureRecognizer));
@@ -98,7 +98,7 @@ void main() {
   test("Changing config - data", () {
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(new Markdown(data: "Data1"));
-      _expectTextStrings(_listElements(tester), <String>["Data1"]);
+      _expectTextStrings(tester.widgets, <String>["Data1"]);
 
       String stateBefore = WidgetFlutterBinding.instance.renderViewElement.toStringDeep();
       tester.pumpWidget(new Markdown(data: "Data1"));
@@ -106,7 +106,7 @@ void main() {
       expect(stateBefore, equals(stateAfter));
 
       tester.pumpWidget(new Markdown(data: "Data2"));
-      _expectTextStrings(_listElements(tester), <String>["Data2"]);
+      _expectTextStrings(tester.widgets, <String>["Data2"]);
     });
   });
 
@@ -127,28 +127,14 @@ void main() {
   });
 }
 
-List<Element> _listElements(WidgetTester tester) {
-  List<Element> elements = <Element>[];
-  tester.walkElements((Element element) {
-    elements.add(element);
-  });
-  return elements;
+void _expectWidgetTypes(Iterable<Widget> widgets, List<Type> expected) {
+  List<Type> actual = widgets.map((Widget w) => w.runtimeType).toList();
+  expect(actual, expected);
 }
 
-void _expectWidgetTypes(List<Element> elements, List<Type> types) {
-  expect(elements.length, equals(types.length));
-  for (int i = 0; i < elements.length; i += 1) {
-    Element element = elements[i];
-    Type type = types[i];
-    if (type == null) continue;
-    expect(element.widget.runtimeType, equals(type));
-  }
-}
-
-void _expectTextStrings(List<Element> elements, List<String> strings) {
+void _expectTextStrings(Iterable<Widget> widgets, List<String> strings) {
   int currentString = 0;
-  for (Element element in elements) {
-    Widget widget = element.widget;
+  for (Widget widget in widgets) {
     if (widget is RichText) {
       TextSpan span = widget.text;
       String text = _extractTextFromTextSpan(span);

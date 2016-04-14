@@ -38,36 +38,34 @@ void main() {
 
       // we're 600 pixels high, each item is 100 pixels high, scroll position is
       // zero, so we should have exactly 6 items, 0..5.
-      expect(tester.findText('0'), isNotNull);
-      expect(tester.findText('1'), isNotNull);
-      expect(tester.findText('2'), isNotNull);
-      expect(tester.findText('3'), isNotNull);
-      expect(tester.findText('4'), isNotNull);
-      expect(tester.findText('5'), isNotNull);
-      expect(tester.findText('6'), isNull);
-      expect(tester.findText('10'), isNull);
-      expect(tester.findText('100'), isNull);
+      expect(tester, hasWidget(find.text('0')));
+      expect(tester, hasWidget(find.text('1')));
+      expect(tester, hasWidget(find.text('2')));
+      expect(tester, hasWidget(find.text('3')));
+      expect(tester, hasWidget(find.text('4')));
+      expect(tester, hasWidget(find.text('5')));
+      expect(tester, doesNotHaveWidget(find.text('6')));
+      expect(tester, doesNotHaveWidget(find.text('10')));
+      expect(tester, doesNotHaveWidget(find.text('100')));
 
-      StatefulElement target =
-        tester.findElement((Element element) => element.widget is ScrollableLazyList);
-      ScrollableState targetState = target.state;
+      ScrollableState targetState = tester.stateOf(find.byType(ScrollableLazyList));
       targetState.scrollTo(1000.0);
       tester.pump(new Duration(seconds: 1));
 
       // we're 600 pixels high, each item is 100 pixels high, scroll position is
       // 1000, so we should have exactly 6 items, 10..15.
 
-      expect(tester.findText('0'), isNull);
-      expect(tester.findText('8'), isNull);
-      expect(tester.findText('9'), isNull);
-      expect(tester.findText('10'), isNotNull);
-      expect(tester.findText('11'), isNotNull);
-      expect(tester.findText('12'), isNotNull);
-      expect(tester.findText('13'), isNotNull);
-      expect(tester.findText('14'), isNotNull);
-      expect(tester.findText('15'), isNotNull);
-      expect(tester.findText('16'), isNull);
-      expect(tester.findText('100'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('0')));
+      expect(tester, doesNotHaveWidget(find.text('8')));
+      expect(tester, doesNotHaveWidget(find.text('9')));
+      expect(tester, hasWidget(find.text('10')));
+      expect(tester, hasWidget(find.text('11')));
+      expect(tester, hasWidget(find.text('12')));
+      expect(tester, hasWidget(find.text('13')));
+      expect(tester, hasWidget(find.text('14')));
+      expect(tester, hasWidget(find.text('15')));
+      expect(tester, doesNotHaveWidget(find.text('16')));
+      expect(tester, doesNotHaveWidget(find.text('100')));
 
       navigatorKey.currentState.openTransaction(
         (NavigatorTransaction transaction) => transaction.pushNamed('/second')
@@ -76,15 +74,15 @@ void main() {
       tester.pump(new Duration(seconds: 1));
 
       // same as the first list again
-      expect(tester.findText('0'), isNotNull);
-      expect(tester.findText('1'), isNotNull);
-      expect(tester.findText('2'), isNotNull);
-      expect(tester.findText('3'), isNotNull);
-      expect(tester.findText('4'), isNotNull);
-      expect(tester.findText('5'), isNotNull);
-      expect(tester.findText('6'), isNull);
-      expect(tester.findText('10'), isNull);
-      expect(tester.findText('100'), isNull);
+      expect(tester, hasWidget(find.text('0')));
+      expect(tester, hasWidget(find.text('1')));
+      expect(tester, hasWidget(find.text('2')));
+      expect(tester, hasWidget(find.text('3')));
+      expect(tester, hasWidget(find.text('4')));
+      expect(tester, hasWidget(find.text('5')));
+      expect(tester, doesNotHaveWidget(find.text('6')));
+      expect(tester, doesNotHaveWidget(find.text('10')));
+      expect(tester, doesNotHaveWidget(find.text('100')));
 
       navigatorKey.currentState.openTransaction(
         (NavigatorTransaction transaction) => transaction.pop()
@@ -95,17 +93,17 @@ void main() {
       // we're 600 pixels high, each item is 100 pixels high, scroll position is
       // 1000, so we should have exactly 6 items, 10..15.
 
-      expect(tester.findText('0'), isNull);
-      expect(tester.findText('8'), isNull);
-      expect(tester.findText('9'), isNull);
-      expect(tester.findText('10'), isNotNull);
-      expect(tester.findText('11'), isNotNull);
-      expect(tester.findText('12'), isNotNull);
-      expect(tester.findText('13'), isNotNull);
-      expect(tester.findText('14'), isNotNull);
-      expect(tester.findText('15'), isNotNull);
-      expect(tester.findText('16'), isNull);
-      expect(tester.findText('100'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('0')));
+      expect(tester, doesNotHaveWidget(find.text('8')));
+      expect(tester, doesNotHaveWidget(find.text('9')));
+      expect(tester, hasWidget(find.text('10')));
+      expect(tester, hasWidget(find.text('11')));
+      expect(tester, hasWidget(find.text('12')));
+      expect(tester, hasWidget(find.text('13')));
+      expect(tester, hasWidget(find.text('14')));
+      expect(tester, hasWidget(find.text('15')));
+      expect(tester, doesNotHaveWidget(find.text('16')));
+      expect(tester, doesNotHaveWidget(find.text('100')));
 
     });
   });

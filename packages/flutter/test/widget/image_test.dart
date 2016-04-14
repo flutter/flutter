@@ -24,7 +24,7 @@ void main() {
       );
 
       ImageResource imageResource = imageCache.load(testUrl, scale: 1.0);
-      expect(tester.findElementByKey(new ObjectKey(imageResource)), isNotNull);
+      expect(tester, hasWidget(find.byKey(new ObjectKey(imageResource))));
     });
   });
 
@@ -40,7 +40,7 @@ void main() {
       );
 
       ImageResource imageResource = imageCache.load(testUrl, scale: 1.0);
-      expect(tester.findElementByKey(new ObjectKey(imageResource)), isNull);
+      expect(tester, doesNotHaveWidget(find.byKey(new ObjectKey(imageResource))));
     });
   });
 
@@ -50,7 +50,7 @@ void main() {
       tester.pumpWidget(new AsyncImage(provider: imageProvider));
 
       ImageResource imageResource = imageCache.loadProvider(imageProvider);
-      expect(tester.findElementByKey(new ObjectKey(imageResource)), isNotNull);
+      expect(tester, hasWidget(find.byKey(new ObjectKey(imageResource))));
     });
   });
 
@@ -65,7 +65,7 @@ void main() {
       );
 
       ImageResource imageResource = imageCache.loadProvider(imageProvider);
-      expect(tester.findElementByKey(new ObjectKey(imageResource)), isNull);
+      expect(tester, doesNotHaveWidget(find.byKey(new ObjectKey(imageResource))));
     });
   });
 
@@ -81,7 +81,7 @@ void main() {
       );
 
       ImageResource imageResource = assetBundle.loadImage(name);
-      expect(tester.findElementByKey(new ObjectKey(imageResource)), isNotNull);
+      expect(tester, hasWidget(find.byKey(new ObjectKey(imageResource))));
     });
   });
 
@@ -98,7 +98,7 @@ void main() {
       );
 
       ImageResource imageResource = assetBundle.loadImage(name);
-      expect(tester.findElementByKey(new ObjectKey(imageResource)), isNull);
+      expect(tester, doesNotHaveWidget(find.byKey(new ObjectKey(imageResource))));
     });
   });
 
@@ -120,7 +120,7 @@ void main() {
       expect(renderImage.image, isNull);
 
       imageProvider1.complete();
-      tester.async.flushMicrotasks(); // resolve the future from the image provider
+      tester.flushMicrotasks(); // resolve the future from the image provider
       tester.pump(null, EnginePhase.layout);
 
       renderImage = key.currentContext.findRenderObject();
@@ -160,7 +160,7 @@ void main() {
       expect(renderImage.image, isNull);
 
       imageProvider1.complete();
-      tester.async.flushMicrotasks(); // resolve the future from the image provider
+      tester.flushMicrotasks(); // resolve the future from the image provider
       tester.pump(null, EnginePhase.layout);
 
       renderImage = key.currentContext.findRenderObject();

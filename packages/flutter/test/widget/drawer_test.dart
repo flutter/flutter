@@ -28,17 +28,17 @@ void main() {
         )
       );
       tester.pump(); // no effect
-      expect(tester.findText('drawer'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('drawer')));
       scaffoldKey.currentState.openDrawer();
       tester.pump(); // drawer should be starting to animate in
-      expect(tester.findText('drawer'), isNotNull);
+      expect(tester, hasWidget(find.text('drawer')));
       tester.pump(new Duration(seconds: 1)); // animation done
-      expect(tester.findText('drawer'), isNotNull);
+      expect(tester, hasWidget(find.text('drawer')));
       Navigator.pop(context);
       tester.pump(); // drawer should be starting to animate away
-      expect(tester.findText('drawer'), isNotNull);
+      expect(tester, hasWidget(find.text('drawer')));
       tester.pump(new Duration(seconds: 1)); // animation done
-      expect(tester.findText('drawer'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('drawer')));
     });
   });
 
@@ -59,24 +59,24 @@ void main() {
         )
       );
       tester.pump(); // no effect
-      expect(tester.findText('drawer'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('drawer')));
       scaffoldKey.currentState.openDrawer();
       tester.pump(); // drawer should be starting to animate in
-      expect(tester.findText('drawer'), isNotNull);
+      expect(tester, hasWidget(find.text('drawer')));
       tester.pump(new Duration(seconds: 1)); // animation done
-      expect(tester.findText('drawer'), isNotNull);
-      tester.tap(tester.findText('drawer'));
+      expect(tester, hasWidget(find.text('drawer')));
+      tester.tap(find.text('drawer'));
       tester.pump(); // nothing should have happened
-      expect(tester.findText('drawer'), isNotNull);
+      expect(tester, hasWidget(find.text('drawer')));
       tester.pump(new Duration(seconds: 1)); // ditto
-      expect(tester.findText('drawer'), isNotNull);
+      expect(tester, hasWidget(find.text('drawer')));
       tester.tapAt(const Point(750.0, 100.0)); // on the mask
       tester.pump();
       tester.pump(new Duration(milliseconds: 10));
       // drawer should be starting to animate away
-      expect(tester.findText('drawer'), isNotNull);
+      expect(tester, hasWidget(find.text('drawer')));
       tester.pump(new Duration(seconds: 1)); // animation done
-      expect(tester.findText('drawer'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('drawer')));
     });
   });
 
@@ -108,18 +108,18 @@ void main() {
           }
         )
       );
-      expect(tester.findText('drawer'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('drawer')));
       scaffoldKey.currentState.openDrawer();
       tester.pump(); // drawer should be starting to animate in
-      expect(tester.findText('drawer'), isNotNull);
+      expect(tester, hasWidget(find.text('drawer')));
       tester.pump(new Duration(seconds: 1)); // animation done
-      expect(tester.findText('drawer'), isNotNull);
+      expect(tester, hasWidget(find.text('drawer')));
 
       tester.tapAt(const Point(750.0, 100.0)); // on the mask
       tester.pump();
       tester.pump(new Duration(milliseconds: 10));
       // drawer should be starting to animate away
-      RenderBox textBox = tester.findText('drawer').renderObject;
+      RenderBox textBox = tester.renderObjectOf(find.text('drawer'));
       double textLeft = textBox.localToGlobal(Point.origin).x;
       expect(textLeft, lessThan(0.0));
 

@@ -31,21 +31,21 @@ void main() {
           )
         )
       ));
-      tester.scroll(tester.findText('2'), const Offset(-280.0, 0.0));
+      tester.scroll(find.text('2'), const Offset(-280.0, 0.0));
       tester.pump(const Duration(seconds: 1));
       // screen is 800px wide, and has the following items:
       //  -280..10  = 0
       //    10..300 = 1
       //   300..590 = 2
       //   590..880 = 3
-      expect(tester.findText('0'), isNotNull);
-      expect(tester.findText('1'), isNotNull);
-      expect(tester.findText('2'), isNotNull);
-      expect(tester.findText('3'), isNotNull);
-      expect(tester.findText('4'), isNull);
-      expect(tester.findText('5'), isNull);
+      expect(tester, hasWidget(find.text('0')));
+      expect(tester, hasWidget(find.text('1')));
+      expect(tester, hasWidget(find.text('2')));
+      expect(tester, hasWidget(find.text('3')));
+      expect(tester, doesNotHaveWidget(find.text('4')));
+      expect(tester, doesNotHaveWidget(find.text('5')));
       expect(tapped, equals([]));
-      tester.tap(tester.findText('2'));
+      tester.tap(find.text('2'));
       expect(tapped, equals([2]));
     });
   });
@@ -71,23 +71,23 @@ void main() {
           )
         )
       ));
-      tester.scroll(tester.findText('1'), const Offset(0.0, -280.0));
+      tester.scroll(find.text('1'), const Offset(0.0, -280.0));
       tester.pump(const Duration(seconds: 1));
       // screen is 600px tall, and has the following items:
       //  -280..10  = 0
       //    10..300 = 1
       //   300..590 = 2
       //   590..880 = 3
-      expect(tester.findText('0'), isNotNull);
-      expect(tester.findText('1'), isNotNull);
-      expect(tester.findText('2'), isNotNull);
-      expect(tester.findText('3'), isNotNull);
-      expect(tester.findText('4'), isNull);
-      expect(tester.findText('5'), isNull);
+      expect(tester, hasWidget(find.text('0')));
+      expect(tester, hasWidget(find.text('1')));
+      expect(tester, hasWidget(find.text('2')));
+      expect(tester, hasWidget(find.text('3')));
+      expect(tester, doesNotHaveWidget(find.text('4')));
+      expect(tester, doesNotHaveWidget(find.text('5')));
       expect(tapped, equals([]));
-      tester.tap(tester.findText('1'));
+      tester.tap(find.text('1'));
       expect(tapped, equals([1]));
-      tester.tap(tester.findText('3'));
+      tester.tap(find.text('3'));
       expect(tapped, equals([1])); // the center of the third item is off-screen so it shouldn't get hit
     });
   });

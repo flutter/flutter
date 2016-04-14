@@ -34,7 +34,7 @@ void main() {
       );
 
       expect(value, equals(0.0));
-      tester.tap(tester.findElementByKey(sliderKey));
+      tester.tap(find.byKey(sliderKey));
       expect(value, equals(0.5));
       tester.pump(); // No animation should start.
       expect(Scheduler.instance.transientCallbackCount, equals(0));
@@ -70,11 +70,11 @@ void main() {
       );
 
       expect(value, equals(0.0));
-      tester.tap(tester.findElementByKey(sliderKey));
+      tester.tap(find.byKey(sliderKey));
       expect(value, equals(50.0));
-      tester.scroll(tester.findElementByKey(sliderKey), const Offset(5.0, 0.0));
+      tester.scroll(find.byKey(sliderKey), const Offset(5.0, 0.0));
       expect(value, equals(50.0));
-      tester.scroll(tester.findElementByKey(sliderKey), const Offset(40.0, 0.0));
+      tester.scroll(find.byKey(sliderKey), const Offset(40.0, 0.0));
       expect(value, equals(80.0));
 
       tester.pump(); // Starts animation.

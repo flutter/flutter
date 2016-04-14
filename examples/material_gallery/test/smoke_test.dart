@@ -16,45 +16,45 @@ void main() {
       tester.pump(); // triggers a frame
 
       // Try loading Weather demo
-      tester.tap(tester.findText('Demos'));
+      tester.tap(find.text('Demos'));
       tester.pump();
       tester.pump(const Duration(seconds: 1)); // wait til it's really opened
 
-      tester.tap(tester.findText('Weather'));
+      tester.tap(find.text('Weather'));
       tester.pump();
       tester.pump(const Duration(seconds: 1)); // wait til it's really opened
 
       // Go back
-      Element backButton = tester.findElement((Element element) {
+      Finder backButton = find.byElement((Element element) {
         Widget widget = element.widget;
         if (widget is Tooltip)
           return widget.message == 'Back';
         return false;
       });
-      expect(backButton, isNotNull);
+      expect(tester, hasWidget(backButton));
       tester.tap(backButton);
       tester.pump(); // start going back
       tester.pump(const Duration(seconds: 1)); // wait til it's finished
 
       // Open menu
-      Element navigationMenu = tester.findElement((Element element) {
+      Finder navigationMenu = find.byElement((Element element) {
         Widget widget = element.widget;
         if (widget is Tooltip)
           return widget.message == 'Open navigation menu';
         return false;
       });
-      expect(navigationMenu, isNotNull);
+      expect(tester, hasWidget(navigationMenu));
       tester.tap(navigationMenu);
       tester.pump(); // start opening menu
       tester.pump(const Duration(seconds: 1)); // wait til it's really opened
 
       // switch theme
-      tester.tap(tester.findText('Dark'));
+      tester.tap(find.text('Dark'));
       tester.pump();
       tester.pump(const Duration(seconds: 1)); // wait til it's changed
 
       // switch theme
-      tester.tap(tester.findText('Light'));
+      tester.tap(find.text('Light'));
       tester.pump();
       tester.pump(const Duration(seconds: 1)); // wait til it's changed
     });

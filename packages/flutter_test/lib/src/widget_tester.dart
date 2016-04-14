@@ -2,206 +2,463 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show window;
-
-import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:quiver/testing/async.dart';
-import 'package:quiver/time.dart';
+import 'package:test/test.dart';
 
+import 'element_tree_tester.dart';
 import 'instrumentation.dart';
 
-/// Enumeration of possible phases to reach in pumpWidget.
-enum EnginePhase {
-  layout,
-  compositingBits,
-  paint,
-  composite,
-  flushSemantics,
-  sendSemanticsTree
-}
-
-class _SteppedWidgetFlutterBinding extends WidgetFlutterBinding {
-
-  /// Creates and initializes the binding. This constructor is
-  /// idempotent; calling it a second time will just return the
-  /// previously-created instance.
-  static WidgetFlutterBinding ensureInitialized() {
-    if (WidgetFlutterBinding.instance == null)
-      new _SteppedWidgetFlutterBinding();
-    return WidgetFlutterBinding.instance;
-  }
-
-  EnginePhase phase = EnginePhase.sendSemanticsTree;
-
-  // Pump the rendering pipeline up to the given phase.
-  @override
-  void beginFrame() {
-    buildOwner.buildDirtyElements();
-    _beginFrame();
-    buildOwner.finalizeTree();
-  }
-
-  // Cloned from Renderer.beginFrame() but with early-exit semantics.
-  void _beginFrame() {
-    assert(renderView != null);
-    pipelineOwner.flushLayout();
-    if (phase == EnginePhase.layout)
-      return;
-    pipelineOwner.flushCompositingBits();
-    if (phase == EnginePhase.compositingBits)
-      return;
-    pipelineOwner.flushPaint();
-    if (phase == EnginePhase.paint)
-      return;
-    renderView.compositeFrame(); // this sends the bits to the GPU
-    if (phase == EnginePhase.composite)
-      return;
-    if (SemanticsNode.hasListeners) {
-      pipelineOwner.flushSemantics();
-      if (phase == EnginePhase.flushSemantics)
-        return;
-      SemanticsNode.sendSemanticsTree();
-    }
-  }
-}
-
-/// Helper class for flutter tests providing fake async.
+/// Runs the [callback] inside the Flutter test environment.
 ///
-/// This class extends Instrumentation to also abstract away the beginFrame
-/// and async/clock access to allow writing tests which depend on the passage
-/// of time without actually moving the clock forward.
-class WidgetTester extends Instrumentation {
-  WidgetTester._(FakeAsync async)
-    : async = async,
-      clock = async.getClock(new DateTime.utc(2015, 1, 1)),
-      super(binding: _SteppedWidgetFlutterBinding.ensureInitialized()) {
-    timeDilation = 1.0;
-    ui.window.onBeginFrame = null;
-    debugPrint = _synchronousDebugPrint;
-  }
+/// Use this function for testing custom [StatelessWidget]s and
+/// [StatefulWidget]s.
+///
+/// Example:
+///
+///     test('MyWidget', () {
+///        testWidgets((WidgetTester tester) {
+///          tester.pumpWidget(new MyWidget());
+///          tester.tap(find.byText('Save'));
+///          expect(tester, hasWidget(find.byText('Success')));
+///        });
+///     });
+void testWidgets(void callback(WidgetTester widgetTester)) {
+  testElementTree((ElementTreeTester elementTreeTester) {
+    callback(new WidgetTester._(elementTreeTester));
+  });
+}
 
-  void _synchronousDebugPrint(String message, { int wrapWidth }) {
-    if (wrapWidth != null) {
-      print(message.split('\n').expand((String line) => debugWordWrap(line, wrapWidth)).join('\n'));
-    } else {
-      print(message);
-    }
-  }
+/// A convenient accessor to frequently used finders.
+///
+/// Examples:
+///
+///     tester.tap(find.byText('Save'));
+///     tester.widget(find.byType(MyWidget));
+///     tester.stateOf(find.byConfig(config));
+///     tester.getSize(find.byKey(new ValueKey('save-button')));
+const CommonFinders find = const CommonFinders();
 
+/// Asserts that [finder] locates a widget in the test element tree.
+///
+/// Example:
+///
+///     expect(tester, hasWidget(find.byText('Save')));
+Matcher hasWidget(Finder finder) => new _HasWidgetMatcher(finder);
 
-  final FakeAsync async;
-  final Clock clock;
+/// Opposite of [hasWidget].
+Matcher doesNotHaveWidget(Finder finder) => new _DoesNotHaveWidgetMatcher(finder);
 
-  /// Calls [runApp()] with the given widget, then triggers a frame sequence and
-  /// flushes microtasks, by calling [pump()] with the same duration (if any).
-  /// The supplied EnginePhase is the final phase reached during the pump pass;
-  /// if not supplied, the whole pass is executed.
+/// Class that programmatically interacts with widgets and the test environment.
+class WidgetTester {
+  WidgetTester._(this.elementTreeTester);
+
+  /// Exposes the [Element] tree created from widgets.
+  final ElementTreeTester elementTreeTester;
+
+  WidgetFlutterBinding get binding => elementTreeTester.binding;
+
+  /// Renders the UI from the given [widget].
+  ///
+  /// See [ElementTreeTester.pumpWidget] for details.
   void pumpWidget(Widget widget, [ Duration duration, EnginePhase phase ]) {
-    runApp(widget);
-    pump(duration, phase);
+    elementTreeTester.pumpWidget(widget, duration, phase);
   }
 
-  /// Triggers a frame sequence (build/layout/paint/etc),
-  /// then flushes microtasks.
+  /// Triggers a sequence of frames for [duration] amount of time.
   ///
-  /// If duration is set, then advances the clock by that much first.
-  /// Doing this flushes microtasks.
-  ///
-  /// The supplied EnginePhase is the final phase reached during the pump pass;
-  /// if not supplied, the whole pass is executed.
+  /// See [ElementTreeTester.pump] for details.
   void pump([ Duration duration, EnginePhase phase ]) {
-    if (duration != null)
-      async.elapse(duration);
-    if (binding is _SteppedWidgetFlutterBinding) {
-      // Some tests call WidgetFlutterBinding.ensureInitialized() manually, so
-      // we can't actually be sure we have a stepped binding.
-      _SteppedWidgetFlutterBinding steppedBinding = binding;
-      steppedBinding.phase = phase ?? EnginePhase.sendSemanticsTree;
-    } else {
-      // Can't step to a given phase in that case
-      assert(phase == null);
-    }
-    binding.handleBeginFrame(new Duration(
-      milliseconds: clock.now().millisecondsSinceEpoch)
-    );
-    async.flushMicrotasks();
+    elementTreeTester.pump(duration, phase);
   }
 
-  /// Artificially calls dispatchLocaleChanged on the Widget binding,
-  /// then flushes microtasks.
+  /// Changes the current locale.
+  ///
+  /// See [ElementTreeTester.setLocale] for details.
   void setLocale(String languageCode, String countryCode) {
-    Locale locale = new Locale(languageCode, countryCode);
-    binding.dispatchLocaleChanged(locale);
-    async.flushMicrotasks();
+    elementTreeTester.setLocale(languageCode, countryCode);
   }
 
-  @override
+  /// Sends an [event] at [result] location.
+  ///
+  /// See [ElementTreeTester.dispatchEvent] for details.
   void dispatchEvent(PointerEvent event, HitTestResult result) {
-    super.dispatchEvent(event, result);
-    async.flushMicrotasks();
+    elementTreeTester.dispatchEvent(event, result);
   }
 
   /// Returns the exception most recently caught by the Flutter framework.
   ///
-  /// Call this if you expect an exception during a test. If an exception is
-  /// thrown and this is not called, then the exception is rethrown when
-  /// the [testWidgets] call completes.
-  ///
-  /// If two exceptions are thrown in a row without the first one being
-  /// acknowledged with a call to this method, then when the second exception is
-  /// thrown, they are both dumped to the console and then the second is
-  /// rethrown from the exception handler. This will likely result in the
-  /// framework entering a highly unstable state and everything collapsing.
-  ///
-  /// It's safe to call this when there's no pending exception; it will return
-  /// null in that case.
+  /// See [ElementTreeTester.takeException] for details.
   dynamic takeException() {
-    dynamic result = _pendingException;
-    _pendingException = null;
-    return result;
+    return elementTreeTester.takeException();
   }
-  dynamic _pendingException;
+
+  /// Returns the fake implmentation of the event loop used by the test
+  /// environment.
+  ///
+  /// Use it to travel into the future without actually waiting, control the
+  /// flushing of microtasks and timers.
+  FakeAsync get async => elementTreeTester.async;
+
+  /// Runs all remaining microtasks, including those scheduled as a result of
+  /// running them, until there are no more microtasks scheduled.
+  ///
+  /// Does not run timers. May result in an infinite loop or run out of memory
+  /// if microtasks continue to recursively schedule new microtasks.
+  void flushMicrotasks() {
+    elementTreeTester.async.flushMicrotasks();
+  }
+
+  /// Checks if the element identified by [finder] exists in the tree.
+  bool exists(Finder finder) => finder.find(this).isNotEmpty;
+
+  /// All widgets currently live on the UI returned in a depth-first traversal
+  /// order.
+  Iterable<Widget> get widgets {
+    return this.elementTreeTester.allElements
+      .map((Element element) => element.widget);
+  }
+
+  /// Finds the first widget, searching in the depth-first traversal order.
+  Widget widget(Finder finder) {
+    return finder.findFirst(this).widget;
+  }
+
+  /// Finds the first state object, searching in the depth-first traversal order.
+  State stateOf(Finder finder) {
+    Element element = finder.findFirst(this);
+    Widget widget = element.widget;
+
+    if (widget is StatefulWidget)
+      return (element as StatefulElement).state;
+
+    throw new ElementNotFoundError(
+      'Widget of type ${widget.runtimeType} found by ${finder.description} does not correspond to a StatefulWidget'
+    );
+  }
+
+  /// Finds the [Element] corresponding to the first widget found by [finder],
+  /// searching in the depth-first traversal order.
+  Element elementOf(Finder finder) => finder.findFirst(this);
+
+  /// Finds the [RenderObject] corresponding to the first widget found by
+  /// [finder], searching in the depth-first traversal order.
+  RenderObject renderObjectOf(Finder finder) => finder.findFirst(this).findRenderObject();
+
+  /// Emulates a tapping action at the center of the widget found by [finder].
+  void tap(Finder finder, { int pointer: 1 }) {
+    tapAt(getCenter(finder), pointer: pointer);
+  }
+
+  /// Emulates a tapping action at the given [location].
+  ///
+  /// See [ElementTreeTester.tapAt] for details.
+  void tapAt(Point location, { int pointer: 1 }) {
+    elementTreeTester.tapAt(location, pointer: pointer);
+  }
+
+  /// Scrolls by dragging the center of a widget found by [finder] by [offset].
+  void scroll(Finder finder, Offset offset, { int pointer: 1 }) {
+    scrollAt(getCenter(finder), offset, pointer: pointer);
+  }
+
+  /// Scrolls by dragging the screen at [startLocation] by [offset].
+  ///
+  /// See [ElementTreeTester.scrollAt] for details.
+  void scrollAt(Point startLocation, Offset offset, { int pointer: 1 }) {
+    elementTreeTester.scrollAt(startLocation, offset, pointer: pointer);
+  }
+
+  /// Attempts a fling gesture starting at the center of a widget found by
+  /// [finder].
+  ///
+  /// See also [flingFrom].
+  void fling(Finder finder, Offset offset, double velocity, { int pointer: 1 }) {
+    flingFrom(getCenter(finder), offset, velocity, pointer: pointer);
+  }
+
+  /// Attempts a fling gesture starting at [startLocation], moving by [offset]
+  /// with the given [velocity].
+  ///
+  /// See [ElementTreeTester.flingFrom] for details.
+  void flingFrom(Point startLocation, Offset offset, double velocity, { int pointer: 1 }) {
+    elementTreeTester.flingFrom(startLocation, offset, velocity, pointer: pointer);
+  }
+
+  /// Begins a gesture at a particular point, and returns the
+  /// [TestGesture] object which you can use to continue the gesture.
+  TestGesture startGesture(Point downLocation, { int pointer: 1 }) {
+    return elementTreeTester.startGesture(downLocation, pointer: pointer);
+  }
+
+  /// Returns the size of the element corresponding to the widget located by
+  /// [finder].
+  ///
+  /// This is only valid once the element's render object has been laid out at
+  /// least once.
+  Size getSize(Finder finder) {
+    assert(finder != null);
+    Element element = finder.findFirst(this);
+    return elementTreeTester.getSize(element);
+  }
+
+  /// Returns the point at the center of the widget found by [finder].
+  Point getCenter(Finder finder) {
+    Element element = finder.findFirst(this);
+    return elementTreeTester.getCenter(element);
+  }
+
+  /// Returns the point at the top left of the given element.
+  Point getTopLeft(Finder finder) {
+    Element element = finder.findFirst(this);
+    return elementTreeTester.getTopLeft(element);
+  }
+
+  /// Returns the point at the top right of the given element. This
+  /// point is not inside the object's hit test area.
+  Point getTopRight(Finder finder) {
+    Element element = finder.findFirst(this);
+    return elementTreeTester.getTopRight(element);
+  }
+
+  /// Returns the point at the bottom left of the given element. This
+  /// point is not inside the object's hit test area.
+  Point getBottomLeft(Finder finder) {
+    Element element = finder.findFirst(this);
+    return elementTreeTester.getBottomLeft(element);
+  }
+
+  /// Returns the point at the bottom right of the given element. This
+  /// point is not inside the object's hit test area.
+  Point getBottomRight(Finder finder) {
+    Element element = finder.findFirst(this);
+    return elementTreeTester.getBottomRight(element);
+  }
 }
 
-void testWidgets(callback(WidgetTester tester)) {
-  new FakeAsync().run((FakeAsync async) {
-    FlutterExceptionHandler oldHandler = FlutterError.onError;
-    try {
-      WidgetTester tester = new WidgetTester._(async);
-      FlutterError.onError = (FlutterErrorDetails details) {
-        if (tester._pendingException != null) {
-          FlutterError.dumpErrorToConsole(tester._pendingException);
-          FlutterError.dumpErrorToConsole(details.exception);
-          tester._pendingException = 'An uncaught exception was thrown.';
-          throw details.exception;
+/// Provides lightweight syntax for getting frequently used widget [Finder]s.
+class CommonFinders {
+  const CommonFinders();
+
+  /// Finds [Text] widgets containing string equal to [text].
+  Finder text(String text) => new _TextFinder(text);
+
+  /// Looks for widgets that contain [Text] with [text] in it.
+  ///
+  /// Example:
+  ///
+  ///     // Suppose you have a button with text 'Update' in it:
+  ///     new Button(
+  ///       child: new Text('Update')
+  ///     )
+  ///
+  ///     // You can find and tap on it like this:
+  ///     tester.tap(find.widgetWithText(Button, 'Update'));
+  Finder widgetWithText(Type widgetType, String text) => new _WidgetWithTextFinder(widgetType, text);
+
+  /// Finds widgets by [key].
+  Finder byKey(Key key) => new _KeyFinder(key);
+
+  /// Finds widgets by [type].
+  Finder byType(Type type) => new _TypeFinder(type);
+
+  /// Finds widgets equal to [config].
+  Finder byConfig(Widget config) => new _ConfigFinder(config);
+
+  /// Finds widgets using an element [predicate].
+  Finder byElement(ElementPredicate predicate) => new _ElementFinder(predicate);
+}
+
+/// Finds [Element]s inside the element tree.
+abstract class Finder {
+  Iterable<Element> find(WidgetTester tester);
+
+  /// Describes what the finder is looking for. The description should be such
+  /// that [toString] reads as a descriptive English sentence.
+  String get description;
+
+  Element findFirst(WidgetTester tester) {
+    Iterable<Element> results = find(tester);
+    return results.isNotEmpty
+      ? results.first
+      : throw new ElementNotFoundError.fromFinder(this);
+  }
+
+  @override
+  String toString() => 'widget with $description';
+}
+
+/// Indicates that an attempt to find a widget within the current element tree
+/// failed.
+class ElementNotFoundError extends Error {
+  ElementNotFoundError(this.message);
+
+  ElementNotFoundError.fromFinder(Finder finder)
+      : message = 'Element not found by ${finder.description}';
+
+  final String message;
+
+  @override
+  String toString() => 'ElementNotFoundError: $message';
+}
+
+class _TextFinder extends Finder {
+  _TextFinder(this.text);
+
+  final String text;
+
+  @override
+  String get description => 'text "$text"';
+
+  @override
+  Iterable<Element> find(WidgetTester tester) {
+    return tester.elementTreeTester.findElements((Element element) {
+      if (element.widget is! Text)
+        return false;
+      Text textWidget = element.widget;
+      return textWidget.data == text;
+    });
+  }
+}
+
+class _WidgetWithTextFinder extends Finder {
+  _WidgetWithTextFinder(this.widgetType, this.text);
+
+  final Type widgetType;
+  final String text;
+
+  @override
+  String get description => 'type $widgetType with text "$text"';
+
+  @override
+  Iterable<Element> find(WidgetTester tester) {
+    return tester.elementTreeTester.allElements
+      .map((Element textElement) {
+        if (textElement.widget is! Text)
+          return null;
+
+        Text textWidget = textElement.widget;
+        if (textWidget.data == text) {
+          Element parent;
+          textElement.visitAncestorElements((Element element) {
+            if (element.widget.runtimeType == widgetType) {
+              parent = element;
+              return false;
+            }
+            return true;
+          });
+          return parent;
         }
-        tester._pendingException = details;
-      };
-      runApp(new Container(key: new UniqueKey())); // Reset the tree to a known state.
-      callback(tester);
-      runApp(new Container(key: new UniqueKey())); // Unmount any remaining widgets.
-      async.flushMicrotasks();
-      assert(Scheduler.instance.debugAssertNoTransientCallbacks(
-        'An animation is still running even after the widget tree was disposed.'
-      ));
-      assert(() {
-        'A Timer is still running even after the widget tree was disposed.';
-        return async.periodicTimerCount == 0;
-      });
-      assert(() {
-        'A Timer is still running even after the widget tree was disposed.';
-        return async.nonPeriodicTimerCount == 0;
-      });
-      assert(async.microtaskCount == 0); // Shouldn't be possible.
-      if (tester._pendingException != null) {
-        FlutterError.dumpErrorToConsole(tester._pendingException);
-        throw 'An exception (shown above) was thrown during the test.';
-      }
-    } finally {
-      FlutterError.onError = oldHandler;
-    }
-  });
+
+        return null;
+      })
+      .where((Element element) => element != null);
+  }
+}
+
+class _KeyFinder extends Finder {
+  _KeyFinder(this.key);
+
+  final Key key;
+
+  @override
+  String get description => 'key $key';
+
+  @override
+  Iterable<Element> find(WidgetTester tester) {
+    return tester.elementTreeTester.findElements((Element element) => element.widget.key == key);
+  }
+}
+
+class _TypeFinder extends Finder {
+  _TypeFinder(this.widgetType);
+
+  final Type widgetType;
+
+  @override
+  String get description => 'type "$widgetType"';
+
+  @override
+  Iterable<Element> find(WidgetTester tester) {
+    return tester.elementTreeTester.allElements.where((Element element) {
+      return element.widget.runtimeType == widgetType;
+    });
+  }
+}
+
+class _ConfigFinder extends Finder {
+  _ConfigFinder(this.config);
+
+  final Widget config;
+
+  @override
+  String get description => 'the given configuration ($config)';
+
+  @override
+  Iterable<Element> find(WidgetTester tester) {
+    return tester.elementTreeTester.allElements.where((Element element) {
+      return element.widget == config;
+    });
+  }
+}
+
+typedef bool ElementPredicate(Element element);
+
+class _ElementFinder extends Finder {
+  _ElementFinder(this.predicate);
+
+  final ElementPredicate predicate;
+
+  @override
+  String get description => 'element satisfying given predicate ($predicate)';
+
+  @override
+  Iterable<Element> find(WidgetTester tester) {
+    return tester.elementTreeTester.allElements.where(predicate);
+  }
+}
+
+class _HasWidgetMatcher extends Matcher {
+  const _HasWidgetMatcher(this.finder);
+
+  final Finder finder;
+
+  @override
+  bool matches(WidgetTester tester, Map<dynamic, dynamic> matchState) {
+    return tester.exists(finder);
+  }
+
+  @override
+  Description describe(Description description) {
+    return description.add('$finder exists in the element tree');
+  }
+
+  @override
+  Description describeMismatch(
+      dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
+    return mismatchDescription.add('Does not contain $finder');
+  }
+}
+
+class _DoesNotHaveWidgetMatcher extends Matcher {
+  const _DoesNotHaveWidgetMatcher(this.finder);
+
+  final Finder finder;
+
+  @override
+  bool matches(WidgetTester tester, Map<dynamic, dynamic> matchState) {
+    return !tester.exists(finder);
+  }
+
+  @override
+  Description describe(Description description) {
+    return description.add('$finder does not exist in the element tree');
+  }
+
+  @override
+  Description describeMismatch(
+      dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
+    return mismatchDescription.add('Contains $finder');
+  }
 }

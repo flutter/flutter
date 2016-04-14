@@ -146,7 +146,7 @@ void main() {
   });
 
   test('Loose constraints', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       Key key = new UniqueKey();
       tester.pumpWidget(new Center(
         child: new CustomMultiChildLayout(

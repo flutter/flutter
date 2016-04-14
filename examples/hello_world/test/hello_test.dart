@@ -13,7 +13,7 @@ void main() {
       hello_world.main(); // builds the app and schedules a frame but doesn't trigger one
       tester.pump(); // triggers a frame
 
-      expect(tester.findText('Hello, world!'), isNotNull);
+      expect(tester, hasWidget(find.text('Hello, world!')));
     });
   });
 }

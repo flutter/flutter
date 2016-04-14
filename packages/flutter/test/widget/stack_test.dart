@@ -23,7 +23,7 @@ void main() {
   });
 
   test('Can change position data', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       Key key = new Key('container');
 
       tester.pumpWidget(
@@ -80,7 +80,7 @@ void main() {
   });
 
   test('Can remove parent data', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       Key key = new Key('container');
       Container container = new Container(key: key, width: 10.0, height: 10.0);
 
@@ -110,7 +110,7 @@ void main() {
   });
 
   test('Can align non-positioned children', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       Key child0Key = new Key('child0');
       Key child1Key = new Key('child1');
 
@@ -167,9 +167,9 @@ void main() {
       }
 
       tester.pumpWidget(buildFrame(0));
-      expect(tester.findText('0'), isNotNull);
-      expect(tester.findText('1'), isNotNull);
-      expect(tester.findText('2'), isNotNull);
+      expect(tester, hasWidget(find.text('0')));
+      expect(tester, hasWidget(find.text('1')));
+      expect(tester, hasWidget(find.text('2')));
       expect(itemsPainted, equals([0]));
 
       tester.pumpWidget(buildFrame(1));
@@ -196,18 +196,18 @@ void main() {
 
       tester.pumpWidget(buildFrame(0));
       expect(itemsTapped, isEmpty);
-      tester.tap(tester.findElementByKey(key));
+      tester.tap(find.byKey(key));
       expect(itemsTapped, [0]);
 
       tester.pumpWidget(buildFrame(2));
       expect(itemsTapped, isEmpty);
-      tester.tap(tester.findElementByKey(key));
+      tester.tap(find.byKey(key));
       expect(itemsTapped, [2]);
     });
   });
 
   test('Can set width and height', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       Key key = new Key('container');
 
       BoxDecoration kBoxDecoration = new BoxDecoration(

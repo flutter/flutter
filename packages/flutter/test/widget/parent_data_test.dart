@@ -20,7 +20,7 @@ class TestParentData {
 
 void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
   MultiChildRenderObjectElement element =
-      tester.findElement((Element element) => element is MultiChildRenderObjectElement);
+      tester.elementOf(find.byElement((Element element) => element is MultiChildRenderObjectElement));
   expect(element, isNotNull);
   expect(element.renderObject is RenderStack, isTrue);
   RenderStack renderObject = element.renderObject;

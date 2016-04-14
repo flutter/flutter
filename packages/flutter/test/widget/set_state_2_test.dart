@@ -41,7 +41,7 @@ void main() {
         }
       ));
       log.add('---');
-      tester.tap(tester.findText('inner'));;
+      tester.tap(find.text('inner'));;
       tester.pump();
       log.add('---');
       expect(log, equals(<String>[

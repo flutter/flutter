@@ -3,12 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:test/test.dart';
 
-bool _hasAncestorOfType(Element element, Type targetType) {
-  expect(element, isNotNull);
+bool _hasAncestorOfType(WidgetTester tester, Finder finder, Type targetType) {
+  expect(tester, hasWidget(finder));
   bool result = false;
-  element.visitAncestorElements((Element ancestor) {
+  finder.findFirst(tester).visitAncestorElements((Element ancestor) {
     if (ancestor.widget.runtimeType == targetType) {
       result = true;
       return false;
@@ -19,46 +20,54 @@ bool _hasAncestorOfType(Element element, Type targetType) {
 }
 
 class _IsOnStage extends Matcher {
-  const _IsOnStage();
+  const _IsOnStage(this.tester);
+
+  final WidgetTester tester;
 
   @override
-  bool matches(Element item, Map<dynamic, dynamic> matchState) => !_hasAncestorOfType(item, OffStage);
+  bool matches(Finder finder, Map<dynamic, dynamic> matchState) => !_hasAncestorOfType(tester, finder, OffStage);
 
   @override
   Description describe(Description description) => description.add('onstage');
 }
 
 class _IsOffStage extends Matcher {
-  const _IsOffStage();
+  const _IsOffStage(this.tester);
+
+  final WidgetTester tester;
 
   @override
-  bool matches(Element item, Map<dynamic, dynamic> matchState) => _hasAncestorOfType(item, OffStage);
+  bool matches(Finder finder, Map<dynamic, dynamic> matchState) => _hasAncestorOfType(tester, finder, OffStage);
 
   @override
   Description describe(Description description) => description.add('offstage');
 }
 
 class _IsInCard extends Matcher {
-  const _IsInCard();
+  const _IsInCard(this.tester);
+
+  final WidgetTester tester;
 
   @override
-  bool matches(Element item, Map<dynamic, dynamic> matchState) => _hasAncestorOfType(item, Card);
+  bool matches(Finder finder, Map<dynamic, dynamic> matchState) => _hasAncestorOfType(tester, finder, Card);
 
   @override
   Description describe(Description description) => description.add('in card');
 }
 
 class _IsNotInCard extends Matcher {
-  const _IsNotInCard();
+  const _IsNotInCard(this.tester);
+
+  final WidgetTester tester;
 
   @override
-  bool matches(Element item, Map<dynamic, dynamic> matchState) => !_hasAncestorOfType(item, Card);
+  bool matches(Finder finder, Map<dynamic, dynamic> matchState) => !_hasAncestorOfType(tester, finder, Card);
 
   @override
   Description describe(Description description) => description.add('not in card');
 }
 
-const Matcher isOnStage = const _IsOnStage();
-const Matcher isOffStage = const _IsOffStage();
-const Matcher isInCard = const _IsInCard();
-const Matcher isNotInCard = const _IsNotInCard();
+Matcher isOnStage(WidgetTester tester) => new _IsOnStage(tester);
+Matcher isOffStage(WidgetTester tester) => new _IsOffStage(tester);
+Matcher isInCard(WidgetTester tester) => new _IsInCard(tester);
+Matcher isNotInCard(WidgetTester tester) => new _IsNotInCard(tester);

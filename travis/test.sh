@@ -14,6 +14,7 @@ flutter analyze --flutter-repo --no-current-directory --no-current-package --con
 (cd packages/flutter; flutter test)
 (cd packages/flutter_driver; dart -c test/all.dart)
 (cd packages/flutter_sprites; flutter test)
+(cd packages/flutter_test; flutter test)
 (cd packages/flutter_tools; dart -c test/all.dart)
 (cd packages/flx; dart -c test/all.dart)
 (cd packages/newton; dart -c test/all.dart)

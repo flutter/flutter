@@ -120,15 +120,15 @@ Widget buildImageAtRatio(String image, Key key, double ratio, bool inferSize) {
   );
 }
 
-RenderImage getRenderImage(WidgetTester tester, Key key) {
+RenderImage getRenderImage(ElementTreeTester tester, Key key) {
   return tester.findElementByKey(key).renderObject;
 }
 
-TestImage getTestImage(WidgetTester tester, Key key) {
+TestImage getTestImage(ElementTreeTester tester, Key key) {
   return getRenderImage(tester, key).image;
 }
 
-void pumpTreeToLayout(WidgetTester tester, Widget widget) {
+void pumpTreeToLayout(ElementTreeTester tester, Widget widget) {
   Duration pumpDuration = const Duration(milliseconds: 0);
   EnginePhase pumpPhase = EnginePhase.layout;
   tester.pumpWidget(widget, pumpDuration, pumpPhase);
@@ -139,7 +139,7 @@ void main() {
 
   test('Image for device pixel ratio 1.0', () {
     const double ratio = 1.0;
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       Key key = new GlobalKey();
       pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false));
       expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));
@@ -153,7 +153,7 @@ void main() {
 
   test('Image for device pixel ratio 0.5', () {
     const double ratio = 0.5;
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       Key key = new GlobalKey();
       pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false));
       expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));
@@ -167,7 +167,7 @@ void main() {
 
   test('Image for device pixel ratio 1.5', () {
     const double ratio = 1.5;
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       Key key = new GlobalKey();
       pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false));
       expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));
@@ -181,7 +181,7 @@ void main() {
 
   test('Image for device pixel ratio 1.75', () {
     const double ratio = 1.75;
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       Key key = new GlobalKey();
       pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false));
       expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));
@@ -195,7 +195,7 @@ void main() {
 
   test('Image for device pixel ratio 2.3', () {
     const double ratio = 2.3;
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       Key key = new GlobalKey();
       pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false));
       expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));
@@ -209,7 +209,7 @@ void main() {
 
   test('Image for device pixel ratio 3.7', () {
     const double ratio = 3.7;
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       Key key = new GlobalKey();
       pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false));
       expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));
@@ -223,7 +223,7 @@ void main() {
 
   test('Image for device pixel ratio 5.1', () {
     const double ratio = 5.1;
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       Key key = new GlobalKey();
       pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false));
       expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));

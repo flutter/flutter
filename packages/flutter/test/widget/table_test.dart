@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 
 void main() {
   test('Table widget - control test', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       tester.pumpWidget(
         new Table(
           children: <TableRow>[
@@ -41,7 +41,7 @@ void main() {
     });
   });
   test('Table widget - changing table dimensions', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       tester.pumpWidget(
         new Table(
           children: <TableRow>[
@@ -92,7 +92,7 @@ void main() {
     });
   });
   test('Table widget - repump test', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       tester.pumpWidget(
         new Table(
           children: <TableRow>[
@@ -145,7 +145,7 @@ void main() {
     });
   });
   test('Table widget - intrinsic sizing test', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       tester.pumpWidget(
         new Table(
           defaultColumnWidth: const IntrinsicColumnWidth(),
@@ -179,7 +179,7 @@ void main() {
     });
   });
   test('Table widget - intrinsic sizing test, resizing', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       tester.pumpWidget(
         new Table(
           defaultColumnWidth: const IntrinsicColumnWidth(),
@@ -235,7 +235,7 @@ void main() {
     });
   });
   test('Table widget - intrinsic sizing test, changing column widths', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       tester.pumpWidget(
         new Table(
           children: <TableRow>[
@@ -290,7 +290,7 @@ void main() {
     });
   });
   test('Table widget - moving test', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       List<BuildContext> contexts = <BuildContext>[];
       tester.pumpWidget(
         new Table(

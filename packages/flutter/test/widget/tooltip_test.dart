@@ -27,7 +27,7 @@ import 'test_semantics.dart';
 
 void main() {
   test('Does tooltip end up in the right place - top left', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       GlobalKey key = new GlobalKey();
       tester.pumpWidget(
         new Overlay(
@@ -81,7 +81,7 @@ void main() {
   });
 
   test('Does tooltip end up in the right place - center prefer above fits', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       GlobalKey key = new GlobalKey();
       tester.pumpWidget(
         new Overlay(
@@ -137,7 +137,7 @@ void main() {
   });
 
   test('Does tooltip end up in the right place - center prefer above does not fit', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       GlobalKey key = new GlobalKey();
       tester.pumpWidget(
         new Overlay(
@@ -204,7 +204,7 @@ void main() {
   });
 
   test('Does tooltip end up in the right place - center prefer below fits', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       GlobalKey key = new GlobalKey();
       tester.pumpWidget(
         new Overlay(
@@ -259,7 +259,7 @@ void main() {
   });
 
   test('Does tooltip end up in the right place - way off to the right', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       GlobalKey key = new GlobalKey();
       tester.pumpWidget(
         new Overlay(
@@ -316,7 +316,7 @@ void main() {
   });
 
   test('Does tooltip end up in the right place - near the edge', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       GlobalKey key = new GlobalKey();
       tester.pumpWidget(
         new Overlay(
@@ -373,7 +373,7 @@ void main() {
   });
 
   test('Does tooltip contribute semantics', () {
-    testWidgets((WidgetTester tester) {
+    testElementTree((ElementTreeTester tester) {
       TestSemanticsListener client = new TestSemanticsListener();
       GlobalKey key = new GlobalKey();
       tester.pumpWidget(

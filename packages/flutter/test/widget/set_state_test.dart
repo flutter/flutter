@@ -64,7 +64,7 @@ void main() {
   test('setState() smoke test', () {
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(new Outside());
-      Point location = tester.getCenter(tester.findText('INSIDE'));
+      Point location = tester.getCenter(find.text('INSIDE'));
       TestGesture gesture = tester.startGesture(location);
       tester.pump();
       gesture.up();

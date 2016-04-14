@@ -29,35 +29,35 @@ void main() {
       }));
 
       expect(accepted, isEmpty);
-      expect(tester.findText('Source'), isNotNull);
-      expect(tester.findText('Dragging'), isNull);
-      expect(tester.findText('Target'), isNotNull);
+      expect(tester, hasWidget(find.text('Source')));
+      expect(tester, doesNotHaveWidget(find.text('Dragging')));
+      expect(tester, hasWidget(find.text('Target')));
 
-      Point firstLocation = tester.getCenter(tester.findText('Source'));
+      Point firstLocation = tester.getCenter(find.text('Source'));
       TestGesture gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
 
       expect(accepted, isEmpty);
-      expect(tester.findText('Source'), isNotNull);
-      expect(tester.findText('Dragging'), isNotNull);
-      expect(tester.findText('Target'), isNotNull);
+      expect(tester, hasWidget(find.text('Source')));
+      expect(tester, hasWidget(find.text('Dragging')));
+      expect(tester, hasWidget(find.text('Target')));
 
-      Point secondLocation = tester.getCenter(tester.findText('Target'));
+      Point secondLocation = tester.getCenter(find.text('Target'));
       gesture.moveTo(secondLocation);
       tester.pump();
 
       expect(accepted, isEmpty);
-      expect(tester.findText('Source'), isNotNull);
-      expect(tester.findText('Dragging'), isNotNull);
-      expect(tester.findText('Target'), isNotNull);
+      expect(tester, hasWidget(find.text('Source')));
+      expect(tester, hasWidget(find.text('Dragging')));
+      expect(tester, hasWidget(find.text('Target')));
 
       gesture.up();
       tester.pump();
 
       expect(accepted, equals(<int>[1]));
-      expect(tester.findText('Source'), isNotNull);
-      expect(tester.findText('Dragging'), isNull);
-      expect(tester.findText('Target'), isNotNull);
+      expect(tester, hasWidget(find.text('Source')));
+      expect(tester, doesNotHaveWidget(find.text('Dragging')));
+      expect(tester, hasWidget(find.text('Target')));
     });
   });
 
@@ -93,30 +93,30 @@ void main() {
       }));
 
       expect(events, isEmpty);
-      expect(tester.findText('Source'), isNotNull);
-      expect(tester.findText('Dragging'), isNull);
-      expect(tester.findText('Target'), isNotNull);
-      expect(tester.findText('Button'), isNotNull);
+      expect(tester, hasWidget(find.text('Source')));
+      expect(tester, doesNotHaveWidget(find.text('Dragging')));
+      expect(tester, hasWidget(find.text('Target')));
+      expect(tester, hasWidget(find.text('Button')));
 
       // taps (we check both to make sure the test is consistent)
 
       expect(events, isEmpty);
-      tester.tap(tester.findText('Button'));
+      tester.tap(find.text('Button'));
       expect(events, equals(<String>['tap']));
       events.clear();
 
       expect(events, isEmpty);
-      tester.tap(tester.findText('Target'));
+      tester.tap(find.text('Target'));
       expect(events, equals(<String>['tap']));
       events.clear();
 
       // drag and drop
 
-      firstLocation = tester.getCenter(tester.findText('Source'));
+      firstLocation = tester.getCenter(find.text('Source'));
       TestGesture gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
 
-      secondLocation = tester.getCenter(tester.findText('Target'));
+      secondLocation = tester.getCenter(find.text('Target'));
       gesture.moveTo(secondLocation);
       tester.pump();
 
@@ -128,17 +128,17 @@ void main() {
 
       // drag and tap and drop
 
-      firstLocation = tester.getCenter(tester.findText('Source'));
+      firstLocation = tester.getCenter(find.text('Source'));
       gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
 
-      secondLocation = tester.getCenter(tester.findText('Target'));
+      secondLocation = tester.getCenter(find.text('Target'));
       gesture.moveTo(secondLocation);
       tester.pump();
 
       expect(events, isEmpty);
-      tester.tap(tester.findText('Button'));
-      tester.tap(tester.findText('Target'));
+      tester.tap(find.text('Button'));
+      tester.tap(find.text('Target'));
       gesture.up();
       tester.pump();
       expect(events, equals(<String>['tap', 'tap', 'drop']));
@@ -174,19 +174,19 @@ void main() {
       }));
 
       expect(events, isEmpty);
-      expect(tester.findText('Button'), isNotNull);
-      expect(tester.findText('Target'), isNotNull);
+      expect(tester, hasWidget(find.text('Button')));
+      expect(tester, hasWidget(find.text('Target')));
 
       expect(events, isEmpty);
-      tester.tap(tester.findText('Button'));
+      tester.tap(find.text('Button'));
       expect(events, equals(<String>['tap']));
       events.clear();
 
-      firstLocation = tester.getCenter(tester.findText('Button'));
+      firstLocation = tester.getCenter(find.text('Button'));
       TestGesture gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
 
-      secondLocation = tester.getCenter(tester.findText('Target'));
+      secondLocation = tester.getCenter(find.text('Target'));
       gesture.moveTo(secondLocation);
       tester.pump();
 
@@ -221,18 +221,18 @@ void main() {
       }));
 
       expect(events, isEmpty);
-      expect(tester.findText('Source'), isNotNull);
-      expect(tester.findText('Target'), isNotNull);
+      expect(tester, hasWidget(find.text('Source')));
+      expect(tester, hasWidget(find.text('Target')));
 
       expect(events, isEmpty);
-      tester.tap(tester.findText('Source'));
+      tester.tap(find.text('Source'));
       expect(events, isEmpty);
 
-      firstLocation = tester.getCenter(tester.findText('Source'));
+      firstLocation = tester.getCenter(find.text('Source'));
       TestGesture gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
 
-      secondLocation = tester.getCenter(tester.findText('Target'));
+      secondLocation = tester.getCenter(find.text('Target'));
       gesture.moveTo(secondLocation);
       tester.pump();
 
@@ -266,20 +266,20 @@ void main() {
       }));
 
       expect(events, isEmpty);
-      expect(tester.findText('Source'), isNotNull);
-      expect(tester.findText('Target'), isNotNull);
+      expect(tester, hasWidget(find.text('Source')));
+      expect(tester, hasWidget(find.text('Target')));
 
       expect(events, isEmpty);
-      tester.tap(tester.findText('Source'));
+      tester.tap(find.text('Source'));
       expect(events, isEmpty);
 
-      firstLocation = tester.getCenter(tester.findText('Source'));
+      firstLocation = tester.getCenter(find.text('Source'));
       TestGesture gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
 
       tester.pump(const Duration(seconds: 20));
 
-      secondLocation = tester.getCenter(tester.findText('Target'));
+      secondLocation = tester.getCenter(find.text('Target'));
       gesture.moveTo(secondLocation);
       tester.pump();
 
@@ -319,14 +319,14 @@ void main() {
       }));
 
       expect(events, isEmpty);
-      expect(tester.findText('Target'), isNotNull);
-      expect(tester.findText('H'), isNotNull);
-      expect(tester.findText('V'), isNotNull);
+      expect(tester, hasWidget(find.text('Target')));
+      expect(tester, hasWidget(find.text('H')));
+      expect(tester, hasWidget(find.text('V')));
 
       // vertical draggable drags vertically
       expect(events, isEmpty);
-      firstLocation = tester.getCenter(tester.findText('V'));
-      secondLocation = tester.getCenter(tester.findText('Target'));
+      firstLocation = tester.getCenter(find.text('V'));
+      secondLocation = tester.getCenter(find.text('Target'));
       TestGesture gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
       gesture.moveTo(secondLocation);
@@ -334,14 +334,14 @@ void main() {
       gesture.up();
       tester.pump();
       expect(events, equals(<String>['drop 2']));
-      expect(tester.getCenter(tester.findText('Target')).y, greaterThan(0.0));
+      expect(tester.getCenter(find.text('Target')).y, greaterThan(0.0));
       events.clear();
 
       // horizontal draggable drags horizontally
       expect(events, isEmpty);
-      firstLocation = tester.getTopLeft(tester.findText('H'));
-      secondLocation = tester.getTopRight(tester.findText('H'));
-      thirdLocation = tester.getCenter(tester.findText('Target'));
+      firstLocation = tester.getTopLeft(find.text('H'));
+      secondLocation = tester.getTopRight(find.text('H'));
+      thirdLocation = tester.getCenter(find.text('Target'));
       gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
       gesture.moveTo(secondLocation);
@@ -351,15 +351,15 @@ void main() {
       gesture.up();
       tester.pump();
       expect(events, equals(<String>['drop 1']));
-      expect(tester.getCenter(tester.findText('Target')).y, greaterThan(0.0));
+      expect(tester.getCenter(find.text('Target')).y, greaterThan(0.0));
       events.clear();
 
       // vertical draggable drags horizontally when there's no competition
       // from other gesture detectors
       expect(events, isEmpty);
-      firstLocation = tester.getTopLeft(tester.findText('V'));
-      secondLocation = tester.getTopRight(tester.findText('V'));
-      thirdLocation = tester.getCenter(tester.findText('Target'));
+      firstLocation = tester.getTopLeft(find.text('V'));
+      secondLocation = tester.getTopRight(find.text('V'));
+      thirdLocation = tester.getCenter(find.text('Target'));
       gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
       gesture.moveTo(secondLocation);
@@ -369,14 +369,14 @@ void main() {
       gesture.up();
       tester.pump();
       expect(events, equals(<String>['drop 2']));
-      expect(tester.getCenter(tester.findText('Target')).y, greaterThan(0.0));
+      expect(tester.getCenter(find.text('Target')).y, greaterThan(0.0));
       events.clear();
 
       // horizontal draggable doesn't drag vertically when there is competition
       // for vertical gestures
       expect(events, isEmpty);
-      firstLocation = tester.getCenter(tester.findText('H'));
-      secondLocation = tester.getCenter(tester.findText('Target'));
+      firstLocation = tester.getCenter(find.text('H'));
+      secondLocation = tester.getCenter(find.text('Target'));
       gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
       gesture.moveTo(secondLocation);
@@ -384,7 +384,7 @@ void main() {
       gesture.up();
       tester.pump();
       expect(events, equals(<String>[]));
-      expect(tester.getCenter(tester.findText('Target')).y, lessThan(0.0));
+      expect(tester.getCenter(find.text('Target')).y, lessThan(0.0));
       events.clear();
     });
   });
@@ -418,14 +418,14 @@ void main() {
       }));
 
       expect(events, isEmpty);
-      expect(tester.findText('Target'), isNotNull);
-      expect(tester.findText('H'), isNotNull);
-      expect(tester.findText('V'), isNotNull);
+      expect(tester, hasWidget(find.text('Target')));
+      expect(tester, hasWidget(find.text('H')));
+      expect(tester, hasWidget(find.text('V')));
 
       // horizontal draggable drags horizontally
       expect(events, isEmpty);
-      firstLocation = tester.getCenter(tester.findText('H'));
-      secondLocation = tester.getCenter(tester.findText('Target'));
+      firstLocation = tester.getCenter(find.text('H'));
+      secondLocation = tester.getCenter(find.text('Target'));
       TestGesture gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
       gesture.moveTo(secondLocation);
@@ -433,14 +433,14 @@ void main() {
       gesture.up();
       tester.pump();
       expect(events, equals(<String>['drop 1']));
-      expect(tester.getCenter(tester.findText('Target')).x, greaterThan(0.0));
+      expect(tester.getCenter(find.text('Target')).x, greaterThan(0.0));
       events.clear();
 
       // vertical draggable drags vertically
       expect(events, isEmpty);
-      firstLocation = tester.getTopLeft(tester.findText('V'));
-      secondLocation = tester.getBottomLeft(tester.findText('V'));
-      thirdLocation = tester.getCenter(tester.findText('Target'));
+      firstLocation = tester.getTopLeft(find.text('V'));
+      secondLocation = tester.getBottomLeft(find.text('V'));
+      thirdLocation = tester.getCenter(find.text('Target'));
       gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
       gesture.moveTo(secondLocation);
@@ -450,15 +450,15 @@ void main() {
       gesture.up();
       tester.pump();
       expect(events, equals(<String>['drop 2']));
-      expect(tester.getCenter(tester.findText('Target')).x, greaterThan(0.0));
+      expect(tester.getCenter(find.text('Target')).x, greaterThan(0.0));
       events.clear();
 
       // horizontal draggable drags vertically when there's no competition
       // from other gesture detectors
       expect(events, isEmpty);
-      firstLocation = tester.getTopLeft(tester.findText('H'));
-      secondLocation = tester.getBottomLeft(tester.findText('H'));
-      thirdLocation = tester.getCenter(tester.findText('Target'));
+      firstLocation = tester.getTopLeft(find.text('H'));
+      secondLocation = tester.getBottomLeft(find.text('H'));
+      thirdLocation = tester.getCenter(find.text('Target'));
       gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
       gesture.moveTo(secondLocation);
@@ -468,14 +468,14 @@ void main() {
       gesture.up();
       tester.pump();
       expect(events, equals(<String>['drop 1']));
-      expect(tester.getCenter(tester.findText('Target')).x, greaterThan(0.0));
+      expect(tester.getCenter(find.text('Target')).x, greaterThan(0.0));
       events.clear();
 
       // vertical draggable doesn't drag horizontally when there is competition
       // for horizontal gestures
       expect(events, isEmpty);
-      firstLocation = tester.getCenter(tester.findText('V'));
-      secondLocation = tester.getCenter(tester.findText('Target'));
+      firstLocation = tester.getCenter(find.text('V'));
+      secondLocation = tester.getCenter(find.text('Target'));
       gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
       gesture.moveTo(secondLocation);
@@ -483,7 +483,7 @@ void main() {
       gesture.up();
       tester.pump();
       expect(events, equals(<String>[]));
-      expect(tester.getCenter(tester.findText('Target')).x, lessThan(0.0));
+      expect(tester.getCenter(find.text('Target')).x, lessThan(0.0));
       events.clear();
     });
   });
@@ -516,38 +516,38 @@ void main() {
       }));
 
       expect(accepted, isEmpty);
-      expect(tester.findText('Source'), isNotNull);
-      expect(tester.findText('Dragging'), isNull);
-      expect(tester.findText('Target'), isNotNull);
+      expect(tester, hasWidget(find.text('Source')));
+      expect(tester, doesNotHaveWidget(find.text('Dragging')));
+      expect(tester, hasWidget(find.text('Target')));
       expect(onDraggableCanceledCalled, isFalse);
 
-      Point firstLocation = tester.getCenter(tester.findText('Source'));
+      Point firstLocation = tester.getCenter(find.text('Source'));
       TestGesture gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
 
       expect(accepted, isEmpty);
-      expect(tester.findText('Source'), isNotNull);
-      expect(tester.findText('Dragging'), isNotNull);
-      expect(tester.findText('Target'), isNotNull);
+      expect(tester, hasWidget(find.text('Source')));
+      expect(tester, hasWidget(find.text('Dragging')));
+      expect(tester, hasWidget(find.text('Target')));
       expect(onDraggableCanceledCalled, isFalse);
 
-      Point secondLocation = tester.getCenter(tester.findText('Target'));
+      Point secondLocation = tester.getCenter(find.text('Target'));
       gesture.moveTo(secondLocation);
       tester.pump();
 
       expect(accepted, isEmpty);
-      expect(tester.findText('Source'), isNotNull);
-      expect(tester.findText('Dragging'), isNotNull);
-      expect(tester.findText('Target'), isNotNull);
+      expect(tester, hasWidget(find.text('Source')));
+      expect(tester, hasWidget(find.text('Dragging')));
+      expect(tester, hasWidget(find.text('Target')));
       expect(onDraggableCanceledCalled, isFalse);
 
       gesture.up();
       tester.pump();
 
       expect(accepted, equals(<int>[1]));
-      expect(tester.findText('Source'), isNotNull);
-      expect(tester.findText('Dragging'), isNull);
-      expect(tester.findText('Target'), isNotNull);
+      expect(tester, hasWidget(find.text('Source')));
+      expect(tester, doesNotHaveWidget(find.text('Dragging')));
+      expect(tester, hasWidget(find.text('Target')));
       expect(onDraggableCanceledCalled, isFalse);
     });
   });
@@ -585,38 +585,38 @@ void main() {
       }));
 
       expect(accepted, isEmpty);
-      expect(tester.findText('Source'), isNotNull);
-      expect(tester.findText('Dragging'), isNull);
-      expect(tester.findText('Target'), isNotNull);
+      expect(tester, hasWidget(find.text('Source')));
+      expect(tester, doesNotHaveWidget(find.text('Dragging')));
+      expect(tester, hasWidget(find.text('Target')));
       expect(onDraggableCanceledCalled, isFalse);
 
-      Point firstLocation = tester.getTopLeft(tester.findText('Source'));
+      Point firstLocation = tester.getTopLeft(find.text('Source'));
       TestGesture gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
 
       expect(accepted, isEmpty);
-      expect(tester.findText('Source'), isNotNull);
-      expect(tester.findText('Dragging'), isNotNull);
-      expect(tester.findText('Target'), isNotNull);
+      expect(tester, hasWidget(find.text('Source')));
+      expect(tester, hasWidget(find.text('Dragging')));
+      expect(tester, hasWidget(find.text('Target')));
       expect(onDraggableCanceledCalled, isFalse);
 
-      Point secondLocation = tester.getCenter(tester.findText('Target'));
+      Point secondLocation = tester.getCenter(find.text('Target'));
       gesture.moveTo(secondLocation);
       tester.pump();
 
       expect(accepted, isEmpty);
-      expect(tester.findText('Source'), isNotNull);
-      expect(tester.findText('Dragging'), isNotNull);
-      expect(tester.findText('Target'), isNotNull);
+      expect(tester, hasWidget(find.text('Source')));
+      expect(tester, hasWidget(find.text('Dragging')));
+      expect(tester, hasWidget(find.text('Target')));
       expect(onDraggableCanceledCalled, isFalse);
 
       gesture.up();
       tester.pump();
 
       expect(accepted, isEmpty);
-      expect(tester.findText('Source'), isNotNull);
-      expect(tester.findText('Dragging'), isNull);
-      expect(tester.findText('Target'), isNotNull);
+      expect(tester, hasWidget(find.text('Source')));
+      expect(tester, doesNotHaveWidget(find.text('Dragging')));
+      expect(tester, hasWidget(find.text('Target')));
       expect(onDraggableCanceledCalled, isTrue);
       expect(onDraggableCanceledVelocity, equals(Velocity.zero));
       expect(onDraggableCanceledOffset,
@@ -657,19 +657,19 @@ void main() {
       }));
 
       expect(accepted, isEmpty);
-      expect(tester.findText('Source'), isNotNull);
-      expect(tester.findText('Dragging'), isNull);
-      expect(tester.findText('Target'), isNotNull);
+      expect(tester, hasWidget(find.text('Source')));
+      expect(tester, doesNotHaveWidget(find.text('Dragging')));
+      expect(tester, hasWidget(find.text('Target')));
       expect(onDraggableCanceledCalled, isFalse);
 
-      Point flingStart = tester.getTopLeft(tester.findText('Source'));
+      Point flingStart = tester.getTopLeft(find.text('Source'));
       tester.flingFrom(flingStart, new Offset(0.0, 100.0), 1000.0);
       tester.pump();
 
       expect(accepted, isEmpty);
-      expect(tester.findText('Source'), isNotNull);
-      expect(tester.findText('Dragging'), isNull);
-      expect(tester.findText('Target'), isNotNull);
+      expect(tester, hasWidget(find.text('Source')));
+      expect(tester, doesNotHaveWidget(find.text('Dragging')));
+      expect(tester, hasWidget(find.text('Target')));
       expect(onDraggableCanceledCalled, isTrue);
       expect(onDraggableCanceledVelocity.pixelsPerSecond.dx.abs(),
           lessThan(0.0000001));
@@ -720,16 +720,16 @@ void main() {
 
       expect(acceptedInts, isEmpty);
       expect(acceptedDoubles, isEmpty);
-      expect(tester.findText('IntSource'), isNotNull);
-      expect(tester.findText('IntDragging'), isNull);
-      expect(tester.findText('DoubleSource'), isNotNull);
-      expect(tester.findText('DoubleDragging'), isNull);
-      expect(tester.findText('Target1'), isNotNull);
-      expect(tester.findText('Target2'), isNotNull);
+      expect(tester, hasWidget(find.text('IntSource')));
+      expect(tester, doesNotHaveWidget(find.text('IntDragging')));
+      expect(tester, hasWidget(find.text('DoubleSource')));
+      expect(tester, doesNotHaveWidget(find.text('DoubleDragging')));
+      expect(tester, hasWidget(find.text('Target1')));
+      expect(tester, hasWidget(find.text('Target2')));
 
-      Point intLocation = tester.getCenter(tester.findText('IntSource'));
-      Point doubleLocation = tester.getCenter(tester.findText('DoubleSource'));
-      Point targetLocation = tester.getCenter(tester.findText('Target1'));
+      Point intLocation = tester.getCenter(find.text('IntSource'));
+      Point doubleLocation = tester.getCenter(find.text('DoubleSource'));
+      Point targetLocation = tester.getCenter(find.text('Target1'));
 
       // Drag the double draggable.
       TestGesture doubleGesture =
@@ -738,24 +738,24 @@ void main() {
 
       expect(acceptedInts, isEmpty);
       expect(acceptedDoubles, isEmpty);
-      expect(tester.findText('IntDragging'), isNull);
-      expect(tester.findText('DoubleDragging'), isNotNull);
+      expect(tester, doesNotHaveWidget(find.text('IntDragging')));
+      expect(tester, hasWidget(find.text('DoubleDragging')));
 
       doubleGesture.moveTo(targetLocation);
       tester.pump();
 
       expect(acceptedInts, isEmpty);
       expect(acceptedDoubles, isEmpty);
-      expect(tester.findText('IntDragging'), isNull);
-      expect(tester.findText('DoubleDragging'), isNotNull);
+      expect(tester, doesNotHaveWidget(find.text('IntDragging')));
+      expect(tester, hasWidget(find.text('DoubleDragging')));
 
       doubleGesture.up();
       tester.pump();
 
       expect(acceptedInts, isEmpty);
       expect(acceptedDoubles, equals(<double>[1.0]));
-      expect(tester.findText('IntDragging'), isNull);
-      expect(tester.findText('DoubleDragging'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('IntDragging')));
+      expect(tester, doesNotHaveWidget(find.text('DoubleDragging')));
 
       acceptedDoubles.clear();
 
@@ -765,24 +765,24 @@ void main() {
 
       expect(acceptedInts, isEmpty);
       expect(acceptedDoubles, isEmpty);
-      expect(tester.findText('IntDragging'), isNotNull);
-      expect(tester.findText('DoubleDragging'), isNull);
+      expect(tester, hasWidget(find.text('IntDragging')));
+      expect(tester, doesNotHaveWidget(find.text('DoubleDragging')));
 
       intGesture.moveTo(targetLocation);
       tester.pump();
 
       expect(acceptedInts, isEmpty);
       expect(acceptedDoubles, isEmpty);
-      expect(tester.findText('IntDragging'), isNotNull);
-      expect(tester.findText('DoubleDragging'), isNull);
+      expect(tester, hasWidget(find.text('IntDragging')));
+      expect(tester, doesNotHaveWidget(find.text('DoubleDragging')));
 
       intGesture.up();
       tester.pump();
 
       expect(acceptedInts, equals(<int>[1]));
       expect(acceptedDoubles, isEmpty);
-      expect(tester.findText('IntDragging'), isNull);
-      expect(tester.findText('DoubleDragging'), isNull);
+      expect(tester, doesNotHaveWidget(find.text('IntDragging')));
+      expect(tester, doesNotHaveWidget(find.text('DoubleDragging')));
     });
   });
 
@@ -818,8 +818,8 @@ void main() {
         },
       }));
 
-      Point dragTargetLocation = tester.getCenter(tester.findText('Source'));
-      Point targetLocation = tester.getCenter(tester.findText('Target1'));
+      Point dragTargetLocation = tester.getCenter(find.text('Source'));
+      Point targetLocation = tester.getCenter(find.text('Target1'));
 
       for (int i = 0; i < 2; i += 1) {
         TestGesture gesture = tester.startGesture(dragTargetLocation);
