@@ -98,6 +98,7 @@ void main() {
             'average_frame_build_time_millis': 7.0,
             'missed_frame_build_budget_count': 2,
             'frame_count': 3,
+            'frame_build_times': <int>[9000, 1000, 11000],
           }
         );
       });
@@ -132,6 +133,7 @@ void main() {
           'average_frame_build_time_millis': 7.0,
           'missed_frame_build_budget_count': 2,
           'frame_count': 3,
+          'frame_build_times': <int>[9000, 1000, 11000],
         });
       });
     });
