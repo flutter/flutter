@@ -57,6 +57,9 @@ class TimelineSummary {
       'average_frame_build_time_millis': computeAverageFrameBuildTimeMillis(),
       'missed_frame_build_budget_count': computeMissedFrameBuildBudgetCount(),
       'frame_count': countFrames(),
+      'frame_build_times': _extractBeginFrameEvents()
+        .map((TimedEvent event) => event.duration.inMicroseconds)
+        .toList()
     };
   }
 
