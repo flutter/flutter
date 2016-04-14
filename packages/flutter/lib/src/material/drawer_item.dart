@@ -5,6 +5,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'constants.dart';
 import 'debug.dart';
 import 'icon.dart';
 import 'icons.dart';
@@ -102,8 +103,9 @@ class DrawerItem extends StatelessWidget {
       new Flexible(
         child: new Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: new DefaultTextStyle(
+          child: new AnimatedDefaultTextStyle(
             style: _getTextStyle(themeData),
+            duration: kThemeChangeDuration,
             child: child
           )
         )

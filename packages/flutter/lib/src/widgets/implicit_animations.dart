@@ -48,6 +48,16 @@ class Matrix4Tween extends Tween<Matrix4> {
   }
 }
 
+/// An interpolation between two [TextStyle]s.
+///
+/// This will not work well if the styles don't set the same fields.
+class TextStyleTween extends Tween<TextStyle> {
+  TextStyleTween({ TextStyle begin, TextStyle end }) : super(begin: begin, end: end);
+
+  @override
+  TextStyle lerp(double t) => TextStyle.lerp(begin, end, t);
+}
+
 /// An abstract widget for building widgets that gradually change their
 /// values over a period of time.
 abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
@@ -500,6 +510,58 @@ class _AnimatedOpacityState extends AnimatedWidgetBaseState<AnimatedOpacity> {
   Widget build(BuildContext context) {
     return new Opacity(
       opacity: _opacity.evaluate(animation),
+      child: config.child
+    );
+  }
+}
+
+/// Animated version of [DefaultTextStyle] which automatically
+/// transitions the default text style (the text style to apply to
+/// descendant [Text] widgets without explicit style) over a given
+/// duration whenever the given style changes.
+class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
+  AnimatedDefaultTextStyle({
+    Key key,
+    this.child,
+    this.style,
+    Curve curve: Curves.linear,
+    Duration duration
+  }) : super(key: key, curve: curve, duration: duration) {
+    assert(style != null);
+    assert(child != null);
+  }
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  /// The target text style.
+  ///
+  /// The text style must not be null.
+  final TextStyle style;
+
+  @override
+  _AnimatedDefaultTextStyleState createState() => new _AnimatedDefaultTextStyleState();
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    '$style'.split('\n').forEach(description.add);
+  }
+}
+
+class _AnimatedDefaultTextStyleState extends AnimatedWidgetBaseState<AnimatedDefaultTextStyle> {
+  TextStyleTween _style;
+
+  @override
+  void forEachTween(TweenVisitor<dynamic> visitor) {
+    // TODO(ianh): Use constructor tear-offs when it becomes possible
+    _style = visitor(_style, config.style, (dynamic value) => new TextStyleTween(begin: value));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new DefaultTextStyle(
+      style: _style.evaluate(animation),
       child: config.child
     );
   }

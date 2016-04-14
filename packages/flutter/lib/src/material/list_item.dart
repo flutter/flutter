@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'constants.dart';
 import 'debug.dart';
 import 'ink_well.dart';
 import 'theme.dart';
@@ -166,8 +167,9 @@ class ListItem extends StatelessWidget {
       ));
     }
 
-    final Widget primaryLine = new DefaultTextStyle(
+    final Widget primaryLine = new AnimatedDefaultTextStyle(
       style: _primaryTextStyle(context),
+      duration: kThemeChangeDuration,
       child: title ?? new Container()
     );
     Widget center = primaryLine;
@@ -177,8 +179,9 @@ class ListItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           primaryLine,
-          new DefaultTextStyle(
+          new AnimatedDefaultTextStyle(
             style: _secondaryTextStyle(context),
+            duration: kThemeChangeDuration,
             child: subtitle
           )
         ]

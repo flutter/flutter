@@ -5,6 +5,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'constants.dart';
 import 'debug.dart';
 import 'ink_well.dart';
 import 'material.dart';
@@ -190,8 +191,9 @@ abstract class MaterialButtonState<T extends MaterialButton> extends State<T> {
         child: contents
       );
     } else {
-      contents = new DefaultTextStyle(
+      contents = new AnimatedDefaultTextStyle(
         style: style,
+        duration: kThemeChangeDuration,
         child: contents
       );
     }
