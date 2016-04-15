@@ -55,6 +55,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       count += await _runPub(new Directory("${ArtifactStore.flutterRoot}/packages"), upgrade: upgrade);
       count += await _runPub(new Directory("${ArtifactStore.flutterRoot}/examples"), upgrade: upgrade);
       count += await _runPub(new Directory("${ArtifactStore.flutterRoot}/dev"), upgrade: upgrade);
+      count += await _runPub(new Directory("${ArtifactStore.flutterRoot}/dev/benchmarks"), upgrade: upgrade);
 
       double seconds = timer.elapsedMilliseconds / 1000.0;
       printStatus('\nRan \'pub\' $count time${count == 1 ? "" : "s"} in ${seconds.toStringAsFixed(1)}s.');
