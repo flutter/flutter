@@ -5,6 +5,7 @@
 import 'dart:collection';
 
 import 'framework.dart';
+import 'table.dart';
 
 Key _firstNonUniqueKey(Iterable<Widget> widgets) {
   Set<Key> keySet = new HashSet<Key>();
@@ -18,6 +19,20 @@ Key _firstNonUniqueKey(Iterable<Widget> widgets) {
   return null;
 }
 
+/// Asserts if the given child list contains any duplicate non-null keys.
+///
+/// To invoke this function, use the following pattern, typically in the
+/// relevant Widget's constructor:
+///
+/// ```dart
+/// assert(!debugChildrenHaveDuplicateKeys(this, children));
+/// ```
+///
+/// For a version of this function that can be used in contexts where
+/// the list of items does not have a particular parent, see
+/// [debugItemsHaveDuplicateKeys].
+///
+/// Does nothing if asserts are disabled. Always returns true.
 bool debugChildrenHaveDuplicateKeys(Widget parent, Iterable<Widget> children) {
   assert(() {
     final Key nonUniqueKey = _firstNonUniqueKey(children);
@@ -33,12 +48,54 @@ bool debugChildrenHaveDuplicateKeys(Widget parent, Iterable<Widget> children) {
   return false;
 }
 
+/// Asserts if the given list of items contains any duplicate non-null keys.
+///
+/// To invoke this function, use the following pattern:
+///
+/// ```dart
+/// assert(!debugItemsHaveDuplicateKeys(items));
+/// ```
+///
+/// For a version of this function specifically intended for parents
+/// checking their children lists, see [debugChildrenHaveDuplicateKeys].
+///
+/// Does nothing if asserts are disabled. Always returns true.
 bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
   assert(() {
     final Key nonUniqueKey = _firstNonUniqueKey(items);
     if (nonUniqueKey != null)
-      throw new FlutterError('Duplicate key found: $nonUniqueKey.\n');
+      throw new FlutterError('Duplicate key found: $nonUniqueKey.');
     return true;
   });
   return false;
+}
+
+/// Asserts that the given context has a [Table] ancestor.
+///
+/// Used by [RowInkWell] to make sure that it is only used in an appropriate context.
+///
+/// To invoke this function, use the following pattern, typically in the
+/// relevant Widget's [build] method:
+///
+/// ```dart
+/// assert(debugCheckHasTable(context));
+/// ```
+///
+/// Does nothing if asserts are disabled. Always returns true.
+bool debugCheckHasTable(BuildContext context) {
+  assert(() {
+    if (context.widget is! Table && context.ancestorWidgetOfExactType(Table) == null) {
+      Element element = context;
+      throw new FlutterError(
+        'No Table widget found.\n'
+        '${context.widget.runtimeType} widgets require a Table widget ancestor.\n'
+        'The specific widget that could not find a Table ancestor was:\n'
+        '  ${context.widget}\n'
+        'The ownership chain for the affected widget is:\n'
+        '  ${element.debugGetCreatorChain(10)}'
+      );
+    }
+    return true;
+  });
+  return true;
 }

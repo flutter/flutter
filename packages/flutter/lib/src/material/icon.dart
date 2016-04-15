@@ -46,7 +46,7 @@ class Icon extends StatelessWidget {
   /// Icons occupy a square with width and height equal to size.
   final double size;
 
-  /// The icon to display.
+  /// The icon to display. The available icons are described in [Icons].
   final IconData icon;
 
   /// The color to use when drawing the icon.

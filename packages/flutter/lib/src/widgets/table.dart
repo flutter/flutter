@@ -25,6 +25,25 @@ class TableRow {
   final LocalKey key;
   final Decoration decoration;
   final List<Widget> children;
+
+  @override
+  String toString() {
+    StringBuffer result = new StringBuffer();
+    result.write('TableRow(');
+    if (key != null)
+      result.write('$key, ');
+    if (decoration != null)
+      result.write('$decoration, ');
+    if (children != null) {
+      result.write('child list is null');
+    } else if (children.length == 0) {
+      result.write('no children');
+    } else {
+      result.write('$children');
+    }
+    result.write(')');
+    return result.toString();
+  }
 }
 
 class _TableElementRow {
@@ -54,6 +73,7 @@ class Table extends RenderObjectWidget {
     assert(children != null);
     assert(defaultColumnWidth != null);
     assert(defaultVerticalAlignment != null);
+    assert(!children.any((TableRow row) => row.children.any((Widget cell) => cell == null)));
     assert(() {
       List<Widget> flatChildren = children.expand((TableRow row) => row.children).toList(growable: false);
       return !debugChildrenHaveDuplicateKeys(this, flatChildren);
@@ -125,7 +145,10 @@ class _TableElement extends RenderObjectElement {
     _children = widget.children.map((TableRow row) {
       return new _TableElementRow(
         key: row.key,
-        children: row.children.map((Widget child) => inflateWidget(child, null)).toList(growable: false)
+        children: row.children.map/*<Element>*/((Widget child) {
+          assert(child != null);
+          return inflateWidget(child, null);
+        }).toList(growable: false)
       );
     }).toList(growable: false);
     assert(() { _debugWillReattachChildren = false; return true; });

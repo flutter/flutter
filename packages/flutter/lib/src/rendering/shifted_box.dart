@@ -821,9 +821,16 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
   }
 }
 
-/// Positions its child vertically according to the child's baseline.
+/// Shifts the child down such that the child's baseline (or the
+/// bottom of the child, if the child has no baseline) is [baseline]
+/// logical pixels below the top of this box, then sizes this box to
+/// contain the child. If [baseline] is less than the distance from
+/// the top of the child to the baseline of the child, then the child
+/// is top-aligned instead.
 class RenderBaseline extends RenderShiftedBox {
-
+  /// Creates a [RenderBaseline] object.
+  ///
+  /// The [baseline] and [baselineType] arguments are required.
   RenderBaseline({
     RenderBox child,
     double baseline,
@@ -862,10 +869,13 @@ class RenderBaseline extends RenderShiftedBox {
   void performLayout() {
     if (child != null) {
       child.layout(constraints.loosen(), parentUsesSize: true);
-      size = constraints.constrain(child.size);
-      double delta = baseline - child.getDistanceToBaseline(baselineType);
+      final double childBaseline = child.getDistanceToBaseline(baselineType);
+      final double actualBaseline = math.max(baseline, childBaseline);
+      final double top = actualBaseline - childBaseline;
       final BoxParentData childParentData = child.parentData;
-      childParentData.offset = new Offset(0.0, delta);
+      childParentData.offset = new Offset(0.0, top);
+      final Size childSize = child.size;
+      size = constraints.constrain(new Size(childSize.width, top + childSize.height));
     } else {
       performResize();
     }

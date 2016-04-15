@@ -12,10 +12,15 @@ import 'constants.dart';
 import 'shadows.dart';
 import 'theme.dart';
 
-/// The various kinds of material in material design.
+/// Signature for callback used by ink effects to obtain the rectangle for the effect.
+typedef Rect RectCallback();
+
+/// The various kinds of material in material design. Used to
+/// configure the default behavior of [Material] widgets.
 ///
 /// See also:
-///  * [Material]
+///
+///  * [Material], in particular [Material.type]
 ///  * [kMaterialEdges]
 enum MaterialType {
   /// Infinite extent using default theme canvas color.
@@ -27,7 +32,7 @@ enum MaterialType {
   /// A circle, no color by default (used for floating action buttons).
   circle,
 
-  /// Rounded edges, no color by default (used for MaterialButton buttons).
+  /// Rounded edges, no color by default (used for [MaterialButton] buttons).
   button,
 
   /// A transparent piece of material that draws ink splashes and highlights.
@@ -95,13 +100,36 @@ abstract class MaterialInkController {
   Color get color;
 
   /// Begin a splash, centered at position relative to referenceBox.
-  /// If containedInWell is true, then the splash will be sized to fit
-  /// the referenceBox, then clipped to it when drawn.
+  ///
+  /// If containedInkWell is true, then the splash will be sized to fit
+  /// the well rectangle, then clipped to it when drawn. The well
+  /// rectangle is the box returned by rectCallback, if provided, or
+  /// otherwise is the bounds of the referenceBox.
+  ///
+  /// If containedInkWell is false, then rectCallback should be null.
+  /// The ink splash is clipped only to the edges of the [Material].
+  /// This is the default.
+  ///
   /// When the splash is removed, onRemoved will be invoked.
-  InkSplash splashAt({ RenderBox referenceBox, Point position, Color color, bool containedInWell, VoidCallback onRemoved });
+  InkSplash splashAt({
+    RenderBox referenceBox,
+    Point position,
+    Color color,
+    bool containedInkWell: false,
+    RectCallback rectCallback,
+    VoidCallback onRemoved
+  });
 
-  /// Begin a highlight, coincident with the referenceBox.
-  InkHighlight highlightAt({ RenderBox referenceBox, Color color, BoxShape shape: BoxShape.rectangle, VoidCallback onRemoved });
+  /// Begin a highlight animation. If a rectCallback is given, then it
+  /// provides the highlight rectangle, otherwise, the highlight
+  /// rectangle is coincident with the referenceBox.
+  InkHighlight highlightAt({
+    RenderBox referenceBox,
+    Color color,
+    BoxShape shape: BoxShape.rectangle,
+    RectCallback rectCallback,
+    VoidCallback onRemoved
+  });
 
   /// Add an arbitrary InkFeature to this InkController.
   void addInkFeature(InkFeature feature);
@@ -147,22 +175,27 @@ class Material extends StatefulWidget {
   /// The widget below this widget in the tree.
   final Widget child;
 
-  /// The kind of material (e.g., card or canvas).
+  /// The kind of material to show (e.g., card or canvas). This
+  /// affects the shape of the widget, the roundness of its corners if
+  /// the shape is rectangular, and the default color.
   final MaterialType type;
 
   /// The z-coordinate at which to place this material.
   final int elevation;
 
-  /// The color of the material.
+  /// The color to paint the material.
   ///
   /// Must be opaque. To create a transparent piece of material, use
   /// [MaterialType.transparency].
+  ///
+  /// By default, the color is derived from the [type] of material.
   final Color color;
 
   /// The typographical style to use for text within this material.
   final TextStyle textStyle;
 
-  /// The ink controller from the closest instance of this class that encloses the given context.
+  /// The ink controller from the closest instance of this class that
+  /// encloses the given context.
   static MaterialInkController of(BuildContext context) {
     final _RenderInkFeatures result = context.ancestorRenderObjectOfType(const TypeMatcher<_RenderInkFeatures>());
     return result;
@@ -273,13 +306,24 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
     RenderBox referenceBox,
     Point position,
     Color color,
-    bool containedInWell,
+    bool containedInkWell: false,
+    RectCallback rectCallback,
     VoidCallback onRemoved
   }) {
     double radius;
-    if (containedInWell) {
-      radius = _getSplashTargetSize(referenceBox.size, position);
+    RectCallback clipCallback;
+    if (containedInkWell) {
+      Size size;
+      if (rectCallback != null) {
+        size = rectCallback().size;
+        clipCallback = rectCallback;
+      } else {
+        size = referenceBox.size;
+        clipCallback = () => Point.origin & size;
+      }
+      radius = _getSplashTargetSize(size, position);
     } else {
+      assert(rectCallback == null);
       radius = _kDefaultSplashRadius;
     }
     _InkSplash splash = new _InkSplash(
@@ -288,8 +332,8 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
       position: position,
       color: color,
       targetRadius: radius,
-      clipToReferenceBox: containedInWell,
-      repositionToReferenceBox: !containedInWell,
+      clipCallback: clipCallback,
+      repositionToReferenceBox: !containedInkWell,
       onRemoved: onRemoved
     );
     addInkFeature(splash);
@@ -309,6 +353,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
     RenderBox referenceBox,
     Color color,
     BoxShape shape: BoxShape.rectangle,
+    RectCallback rectCallback,
     VoidCallback onRemoved
   }) {
     _InkHighlight highlight = new _InkHighlight(
@@ -316,6 +361,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
       referenceBox: referenceBox,
       color: color,
       shape: shape,
+      rectCallback: rectCallback,
       onRemoved: onRemoved
     );
     addInkFeature(highlight);
@@ -436,7 +482,7 @@ class _InkSplash extends InkFeature implements InkSplash {
     this.position,
     this.color,
     this.targetRadius,
-    this.clipToReferenceBox,
+    this.clipCallback,
     this.repositionToReferenceBox,
     VoidCallback onRemoved
   }) : super(renderer: renderer, referenceBox: referenceBox, onRemoved: onRemoved) {
@@ -460,7 +506,7 @@ class _InkSplash extends InkFeature implements InkSplash {
   final Point position;
   final Color color;
   final double targetRadius;
-  final bool clipToReferenceBox;
+  final RectCallback clipCallback;
   final bool repositionToReferenceBox;
 
   Animation<double> _radius;
@@ -499,25 +545,23 @@ class _InkSplash extends InkFeature implements InkSplash {
   void paintFeature(Canvas canvas, Matrix4 transform) {
     Paint paint = new Paint()..color = color.withAlpha(_alpha.value);
     Point center = position;
+    if (repositionToReferenceBox)
+      center = Point.lerp(center, referenceBox.size.center(Point.origin), _radiusController.value);
     Offset originOffset = MatrixUtils.getAsTranslation(transform);
     if (originOffset == null) {
       canvas.save();
       canvas.transform(transform.storage);
-      if (clipToReferenceBox)
-        canvas.clipRect(Point.origin & referenceBox.size);
-      if (repositionToReferenceBox)
-        center = Point.lerp(center, Point.origin, _radiusController.value);
+      if (clipCallback != null)
+        canvas.clipRect(clipCallback());
       canvas.drawCircle(center, _radius.value, paint);
       canvas.restore();
     } else {
-      if (clipToReferenceBox) {
+      if (clipCallback != null) {
         canvas.save();
-        canvas.clipRect(originOffset.toPoint() & referenceBox.size);
+        canvas.clipRect(clipCallback().shift(originOffset));
       }
-      if (repositionToReferenceBox)
-        center = Point.lerp(center, referenceBox.size.center(Point.origin), _radiusController.value);
       canvas.drawCircle(center + originOffset, _radius.value, paint);
-      if (clipToReferenceBox)
+      if (clipCallback != null)
         canvas.restore();
     }
   }
@@ -527,6 +571,7 @@ class _InkHighlight extends InkFeature implements InkHighlight {
   _InkHighlight({
     _RenderInkFeatures renderer,
     RenderBox referenceBox,
+    this.rectCallback,
     Color color,
     this.shape,
     VoidCallback onRemoved
@@ -541,6 +586,8 @@ class _InkHighlight extends InkFeature implements InkHighlight {
       end: color.alpha
     ).animate(_alphaController);
   }
+
+  final RectCallback rectCallback;
 
   @override
   Color get color => _color;
@@ -597,13 +644,14 @@ class _InkHighlight extends InkFeature implements InkHighlight {
   void paintFeature(Canvas canvas, Matrix4 transform) {
     Paint paint = new Paint()..color = color.withAlpha(_alpha.value);
     Offset originOffset = MatrixUtils.getAsTranslation(transform);
+    final Rect rect = (rectCallback != null ? rectCallback() : Point.origin & referenceBox.size);
     if (originOffset == null) {
       canvas.save();
       canvas.transform(transform.storage);
-      _paintHighlight(canvas, Point.origin & referenceBox.size, paint);
+      _paintHighlight(canvas, rect, paint);
       canvas.restore();
     } else {
-      _paintHighlight(canvas, originOffset.toPoint() & referenceBox.size, paint);
+      _paintHighlight(canvas, rect.shift(originOffset), paint);
     }
   }
 

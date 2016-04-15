@@ -609,12 +609,12 @@ abstract class RenderBox extends RenderObject {
   /// baseline, regardless of padding, font size differences, etc. If there is
   /// no baseline, this function returns the distance from the y-coordinate of
   /// the position of the box to the y-coordinate of the bottom of the box
-  /// (i.e., the height of the box) unless the the caller passes true
+  /// (i.e., the height of the box) unless the caller passes true
   /// for `onlyReal`, in which case the function returns null.
   ///
-  /// Only call this function calling [layout] on this box. You are only
-  /// allowed to call this from the parent of this box during that parent's
-  /// [performLayout] or [paint] functions.
+  /// Only call this function after calling [layout] on this box. You
+  /// are only allowed to call this from the parent of this box during
+  /// that parent's [performLayout] or [paint] functions.
   double getDistanceToBaseline(TextBaseline baseline, { bool onlyReal: false }) {
     assert(!needsLayout);
     assert(!_debugDoingBaseline);
@@ -724,6 +724,10 @@ abstract class RenderBox extends RenderObject {
           'as big as possible, but it was put inside another render object '
           'that allows its children to pick their own size.\n'
           '$information'
+          'The constraints that applied to the $runtimeType were:\n'
+          '  $constraints\n'
+          'The exact size it was given was:\n'
+          '  $_size\n'
           'See https://flutter.io/layout/ for more information.'
         );
       }
@@ -788,7 +792,7 @@ abstract class RenderBox extends RenderObject {
       // if we have cached data, then someone must have used our data
       assert(_ancestorUsesBaseline);
       final RenderObject parent = this.parent;
-      parent.markNeedsLayout();
+      parent?.markNeedsLayout();
       assert(parent == this.parent);
       // Now that they're dirty, we can forget that they used the
       // baseline. If they use it again, then we'll set the bit

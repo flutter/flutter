@@ -1009,6 +1009,7 @@ abstract class Element implements BuildContext {
   }
 
   Element inflateWidget(Widget newWidget, dynamic newSlot) {
+    assert(newWidget != null);
     Key key = newWidget.key;
     if (key is GlobalKey) {
       Element newChild = _retakeInactiveElement(key, newWidget);

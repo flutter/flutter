@@ -64,6 +64,9 @@ class Checkbox extends StatelessWidget {
   /// If null, the checkbox will be displayed as disabled.
   final ValueChanged<bool> onChanged;
 
+  /// The width of a checkbox widget.
+  static const double width = 18.0;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -114,10 +117,9 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
 }
 
 const double _kMidpoint = 0.5;
-const double _kEdgeSize = 18.0;
+const double _kEdgeSize = Checkbox.width;
 const double _kEdgeRadius = 1.0;
 const double _kStrokeWidth = 2.0;
-const double _kOffset = kRadialReactionRadius - _kEdgeSize / 2.0;
 
 class _RenderCheckbox extends RenderToggleable {
   _RenderCheckbox({
@@ -135,11 +137,13 @@ class _RenderCheckbox extends RenderToggleable {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final Canvas canvas = context.canvas;
-    final double offsetX = _kOffset + offset.dx;
-    final double offsetY = _kOffset + offset.dy;
 
-    paintRadialReaction(canvas, offset, const Point(kRadialReactionRadius, kRadialReactionRadius));
+    final Canvas canvas = context.canvas;
+
+    final double offsetX = offset.dx + (size.width - _kEdgeSize) / 2.0;
+    final double offsetY = offset.dy + (size.height - _kEdgeSize) / 2.0;
+
+    paintRadialReaction(canvas, offset, size.center(Point.origin));
 
     double t = position.value;
 

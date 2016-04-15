@@ -93,6 +93,32 @@ class RenderBlock extends RenderBox
       );
       return false;
     });
+    assert(() {
+      switch (mainAxis) {
+        case Axis.horizontal:
+          if (!constraints.maxHeight.isInfinite)
+            return true;
+          break;
+        case Axis.vertical:
+          if (!constraints.maxWidth.isInfinite)
+            return true;
+          break;
+      }
+      // TODO(ianh): Detect if we're actually nested blocks and say something
+      // more specific to the exact situation in that case, and don't mention
+      // nesting blocks in the negative case.
+      throw new FlutterError(
+        'RenderBlock must have a bounded constraint for its cross axis.\n'
+        'RenderBlock forces its children to expand to fit the block\'s container, '
+        'so it must be placed in a parent that does constrain the block\'s cross '
+        'axis to a finite dimension. If you are attempting to nest a block with '
+        'one direction inside a block of another direction, you will want to '
+        'wrap the inner one inside a box that fixes the dimension in that direction, '
+        'for example, a RenderIntrinsicWidth or RenderIntrinsicHeight object. '
+        'This is relatively expensive, however.' // (that's why we don't do it automatically)
+      );
+      return false;
+    });
     BoxConstraints innerConstraints = _getInnerConstraints(constraints);
     double position = 0.0;
     RenderBox child = firstChild;
