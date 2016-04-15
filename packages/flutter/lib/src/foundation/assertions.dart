@@ -20,6 +20,10 @@ class FlutterErrorDetails {
   ///
   /// The framework calls this constructor when catching an exception that will
   /// subsequently be reported using [FlutterError.onError].
+  ///
+  /// The [exception] must not be null; other arguments can be left to
+  /// their default values. (`throw null` results in a
+  /// [NullThrownError] exception.)
   const FlutterErrorDetails({
     this.exception,
     this.stack,
@@ -150,8 +154,25 @@ class FlutterError extends AssertionError {
       final String header = '\u2550\u2550\u2561 EXCEPTION CAUGHT BY ${details.library} \u255E'.toUpperCase();
       final String footer = '\u2501' * _kWrapWidth;
       debugPrint('$header${"\u2550" * (footer.length - header.length)}');
-      debugPrint('The following exception was raised${ details.context != null ? " ${details.context}" : ""}:', wrapWidth: _kWrapWidth);
-      debugPrint('${details.exception}', wrapWidth: _kWrapWidth);
+      final String verb = 'thrown${ details.context != null ? " ${details.context}" : ""}';
+      if (details.exception is NullThrownError) {
+        debugPrint('The null value was $verb.', wrapWidth: _kWrapWidth);
+      } else if (details.exception is num) {
+        debugPrint('The number ${details.exception} was $verb.', wrapWidth: _kWrapWidth);
+      } else {
+        String errorName;
+        if (details.exception is AssertionError) {
+          errorName = 'assertion';
+        } else if (details.exception is String) {
+          errorName = 'message';
+        } else if (details.exception is Error || details.exception is Exception) {
+          errorName = '${details.exception.runtimeType}';
+        } else {
+          errorName = '${details.exception.runtimeType} object';
+        }
+        debugPrint('The following $errorName was $verb:', wrapWidth: _kWrapWidth);
+        debugPrint('${details.exception}', wrapWidth: _kWrapWidth);
+      }
       if ((details.exception is AssertionError) && (details.exception is! FlutterError)) {
         debugPrint('Either the assertion indicates an error in the framework itself, or we should '
                    'provide substantially more information in this error message to help you determine '
@@ -171,7 +192,7 @@ class FlutterError extends AssertionError {
         debugPrint(footer);
       }
     } else {
-      debugPrint('Another exception was raised: ${details.exception.toString().split("\n")[0]}');
+      debugPrint('Another exception was thrown: ${details.exception.toString().split("\n")[0]}');
     }
     _errorCount += 1;
   }
