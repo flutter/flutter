@@ -24,8 +24,7 @@
 #include "FontLanguage.h"
 #include "MinikinFontForTest.h"
 
-std::unique_ptr<android::FontCollection> getFontCollection(
-         const char* fontDir, const char* fontXml) {
+android::FontCollection* getFontCollection(const char* fontDir, const char* fontXml) {
     xmlDoc* doc = xmlReadFile(fontXml, NULL, 0);
     xmlNode* familySet = xmlDocGetRootElement(doc);
 
@@ -73,9 +72,10 @@ std::unique_ptr<android::FontCollection> getFontCollection(
     }
     xmlFreeDoc(doc);
 
-    std::unique_ptr<android::FontCollection> r(new android::FontCollection(families));
+    android::FontCollection* collection = new android::FontCollection(families);
+    collection->Ref();
     for (size_t i = 0; i < families.size(); ++i) {
         families[i]->Unref();
     }
-    return r;
+    return collection;
 }
