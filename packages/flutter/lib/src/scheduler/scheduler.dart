@@ -9,7 +9,7 @@ import 'dart:ui' as ui show window;
 import 'dart:ui' show VoidCallback;
 
 import 'package:collection/collection.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 
 export 'dart:ui' show VoidCallback;
 

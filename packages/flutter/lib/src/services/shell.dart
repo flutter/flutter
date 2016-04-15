@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Manages connections with embedder-provided services.
-library shell;
-
 import 'dart:ui' as ui;
 
 import 'package:mojo/application.dart';

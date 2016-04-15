@@ -5,10 +5,10 @@
 import 'dart:developer';
 import 'dart:ui' as ui show ImageFilter, PictureRecorder;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 import 'package:mojo_services/mojo/gfx/composition/scene_token.mojom.dart' as mojom;
 import 'package:vector_math/vector_math_64.dart';
 
@@ -20,7 +20,7 @@ import 'binding.dart';
 
 export 'package:flutter/gestures.dart' show HitTestEntry, HitTestResult;
 export 'package:flutter/painting.dart';
-export 'package:flutter/services.dart' show FlutterError, InformationCollector;
+export 'package:flutter/foundation.dart' show FlutterError, InformationCollector;
 
 /// Base class for data associated with a [RenderObject] by its parent.
 ///

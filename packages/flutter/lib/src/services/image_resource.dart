@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:ui' as ui show Image;
 
-import 'assertions.dart';
+import 'package:flutter/foundation.dart';
 
 /// A [ui.Image] object with its corresponding scale.
 ///
