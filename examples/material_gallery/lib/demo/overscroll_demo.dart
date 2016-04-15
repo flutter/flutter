@@ -14,7 +14,9 @@ class OverscrollDemo extends StatefulWidget {
 }
 
 class OverscrollDemoState extends State<OverscrollDemo> {
-  static final _items = <String>['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'];
+  static final List<String> _items = <String>[
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'
+  ];
 
   IndicatorType _type = IndicatorType.refresh;
 
