@@ -183,7 +183,7 @@ class RotationTransition extends AnimatedWidget {
   }
 }
 
-/// Animates a widget's width or height.
+/// Animates its own size and clips and aligns the child.
 class SizeTransition extends AnimatedWidget {
   SizeTransition({
     Key key,
