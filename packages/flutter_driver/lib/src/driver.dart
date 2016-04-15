@@ -20,6 +20,14 @@ import 'timeline.dart';
 
 final Logger _log = new Logger('FlutterDriver');
 
+/// A convenient accessor to frequently used finders.
+///
+/// Examples:
+///
+///     driver.tap(find.byText('Save'));
+///     driver.scroll(find.byValueKey(42));
+const CommonFinders find = const CommonFinders._();
+
 /// Computes a value.
 ///
 /// If computation is asynchronous, the function may return a [Future].
@@ -162,14 +170,15 @@ class FlutterDriver {
   Future<Map<String, dynamic>> _sendCommand(Command command) async {
     Map<String, String> parameters = <String, String>{'command': command.kind}
       ..addAll(command.serialize());
-    return _appIsolate.invokeExtension(_kFlutterExtensionMethod, parameters)
-      .then((Map<String, dynamic> result) => result, onError: (dynamic error, dynamic stackTrace) {
-        throw new DriverError(
-          'Failed to fulfill ${command.runtimeType} due to remote error',
-          error,
-          stackTrace
-        );
-      });
+    try {
+      return await _appIsolate.invokeExtension(_kFlutterExtensionMethod, parameters);
+    } catch (error, stackTrace) {
+      throw new DriverError(
+        'Failed to fulfill ${command.runtimeType} due to remote error',
+        error,
+        stackTrace
+      );
+    }
   }
 
   /// Checks the status of the Flutter Driver extension.
@@ -177,23 +186,14 @@ class FlutterDriver {
     return Health.fromJson(await _sendCommand(new GetHealth()));
   }
 
-  /// Finds the UI element with the given [key].
-  Future<ObjectRef> findByValueKey(dynamic key) async {
-    return ObjectRef.fromJson(await _sendCommand(new Find(new ByValueKey(key))));
+  /// Taps at the center of the widget located by [finder].
+  Future<Null> tap(SerializableFinder finder) async {
+    return await _sendCommand(new Tap(finder)).then((Map<String, dynamic> _) => null);
   }
 
-  /// Finds the UI element for the tooltip with the given [message].
-  Future<ObjectRef> findByTooltipMessage(String message) async {
-    return ObjectRef.fromJson(await _sendCommand(new Find(new ByTooltipMessage(message))));
-  }
-
-  /// Finds the text element with the given [text].
-  Future<ObjectRef> findByText(String text) async {
-    return ObjectRef.fromJson(await _sendCommand(new Find(new ByText(text))));
-  }
-
-  Future<Null> tap(ObjectRef ref) async {
-    return await _sendCommand(new Tap(ref)).then((Map<String, dynamic> _) => null);
+  /// Whether at least one widget identified by [finder] exists on the UI.
+  Future<bool> exists(SerializableFinder finder) async {
+    return await _sendCommand(new Exists(finder)).then((Map<String, dynamic> _) => null);
   }
 
   /// Tell the driver to perform a scrolling action.
@@ -209,13 +209,13 @@ class FlutterDriver {
   ///
   /// The move events are generated at a given [frequency] in Hz (or events per
   /// second). It defaults to 60Hz.
-  Future<Null> scroll(ObjectRef ref, double dx, double dy, Duration duration, {int frequency: 60}) async {
-    return await _sendCommand(new Scroll(ref, dx, dy, duration, frequency)).then((Map<String, dynamic> _) => null);
+  Future<Null> scroll(SerializableFinder finder, double dx, double dy, Duration duration, {int frequency: 60}) async {
+    return await _sendCommand(new Scroll(finder, dx, dy, duration, frequency)).then((Map<String, dynamic> _) => null);
   }
 
-  Future<String> getText(ObjectRef ref) async {
-    GetTextResult result = GetTextResult.fromJson(await _sendCommand(new GetText(ref)));
-    return result.text;
+  /// Returns the text in the `Text` widget located by [finder].
+  Future<String> getText(SerializableFinder finder) async {
+    return GetTextResult.fromJson(await _sendCommand(new GetText(finder))).text;
   }
 
   /// Starts recording performance traces.
@@ -357,4 +357,18 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
   }
 
   return attemptConnection();
+}
+
+/// Provides convenient accessors to frequently used finders.
+class CommonFinders {
+  const CommonFinders._();
+
+  /// Finds [Text] widgets containing string equal to [text].
+  SerializableFinder text(String text) => new ByText(text);
+
+  /// Finds widgets by [key].
+  SerializableFinder byValueKey(dynamic key) => new ByValueKey(key);
+
+  /// Finds widgets with a tooltip with the given [message].
+  SerializableFinder byTooltip(String message) => new ByTooltipMessage(message);
 }

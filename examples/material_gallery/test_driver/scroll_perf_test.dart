@@ -22,12 +22,12 @@ void main() {
     test('measure', () async {
       Timeline timeline = await driver.traceAction(() async {
         // Find the scrollable stock list
-        ObjectRef stockList = await driver.findByValueKey('Gallery List');
+        SerializableFinder stockList = find.byValueKey('Gallery List');
         expect(stockList, isNotNull);
 
-        await driver.tap(await driver.findByText('Demos'));
-        await driver.tap(await driver.findByText('Components'));
-        await driver.tap(await driver.findByText('Style'));
+        await driver.tap(find.text('Demos'));
+        await driver.tap(find.text('Components'));
+        await driver.tap(find.text('Style'));
 
         // TODO(eseidel): These are very artifical scrolls, we should use better
         // https://github.com/flutter/flutter/issues/3316

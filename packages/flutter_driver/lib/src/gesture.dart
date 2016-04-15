@@ -3,15 +3,16 @@
 // found in the LICENSE file.
 
 import 'message.dart';
+import 'find.dart';
 
 class Tap extends CommandWithTarget {
   @override
   final String kind = 'tap';
 
-  Tap(ObjectRef targetRef) : super(targetRef);
+  Tap(SerializableFinder finder) : super(finder);
 
   static Tap deserialize(Map<String, String> json) {
-    return new Tap(new ObjectRef(json['targetRef']));
+    return new Tap(SerializableFinder.deserialize(json));
   }
 
   @override
@@ -34,16 +35,16 @@ class Scroll extends CommandWithTarget {
   final String kind = 'scroll';
 
   Scroll(
-    ObjectRef targetRef,
+    SerializableFinder finder,
     this.dx,
     this.dy,
     this.duration,
     this.frequency
-  ) : super(targetRef);
+  ) : super(finder);
 
   static Scroll deserialize(Map<String, dynamic> json) {
     return new Scroll(
-      new ObjectRef(json['targetRef']),
+      SerializableFinder.deserialize(json),
       double.parse(json['dx']),
       double.parse(json['dy']),
       new Duration(microseconds: int.parse(json['duration'])),

@@ -22,7 +22,7 @@ void main() {
     test('measure', () async {
       Timeline timeline = await driver.traceAction(() async {
         // Find the scrollable stock list
-        ObjectRef stockList = await driver.findByValueKey('main-scroll');
+        SerializableFinder stockList = find.byValueKey('main-scroll');
         expect(stockList, isNotNull);
 
         // Scroll down
