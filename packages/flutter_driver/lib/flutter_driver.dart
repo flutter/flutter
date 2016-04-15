@@ -12,6 +12,9 @@
 library flutter_driver;
 
 export 'src/driver.dart' show
+  find,
+  CommonFinders,
+  EvaluatorFunction,
   FlutterDriver;
 
 export 'src/error.dart' show
@@ -21,7 +24,7 @@ export 'src/error.dart' show
   flutterDriverLog;
 
 export 'src/find.dart' show
-  ObjectRef,
+  SerializableFinder,
   GetTextResult;
 
 export 'src/health.dart' show
@@ -31,7 +34,6 @@ export 'src/health.dart' show
 export 'src/message.dart' show
   Message,
   Command,
-  ObjectRef,
   CommandWithTarget,
   Result;
 

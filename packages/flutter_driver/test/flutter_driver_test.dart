@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:flutter_driver/src/driver.dart';
 import 'package:flutter_driver/src/error.dart';
 import 'package:flutter_driver/src/health.dart';
-import 'package:flutter_driver/src/message.dart';
 import 'package:flutter_driver/src/timeline.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:mockito/mockito.dart';
@@ -120,27 +119,23 @@ void main() {
       await driver.close();
     });
 
-    group('findByValueKey', () {
+    group('ByValueKey', () {
       test('restricts value types', () async {
-        expect(driver.findByValueKey(null),
+        expect(() => find.byValueKey(null),
             throwsA(new isInstanceOf<DriverError>()));
       });
 
       test('finds by ValueKey', () async {
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           expect(i.positionalArguments[1], {
-            'command': 'find',
-            'searchSpecType': 'ByValueKey',
+            'command': 'tap',
+            'finderType': 'ByValueKey',
             'keyValueString': 'foo',
             'keyValueType': 'String'
           });
-          return new Future<Map<String, dynamic>>.value(<String, dynamic>{
-            'objectReferenceKey': '123',
-          });
+          return new Future<Null>.value();
         });
-        ObjectRef result = await driver.findByValueKey('foo');
-        expect(result, isNotNull);
-        expect(result.objectReferenceKey, '123');
+        await driver.tap(find.byValueKey('foo'));
       });
     });
 
@@ -149,20 +144,16 @@ void main() {
         expect(driver.tap(null), throwsA(new isInstanceOf<DriverError>()));
       });
 
-      test('requires a valid target reference', () async {
-        expect(driver.tap(new ObjectRef.notFound()),
-          throwsA(new isInstanceOf<DriverError>()));
-      });
-
       test('sends the tap command', () async {
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           expect(i.positionalArguments[1], <String, dynamic>{
             'command': 'tap',
-            'targetRef': '123'
+            'finderType': 'ByText',
+            'text': 'foo',
           });
           return new Future<Map<String, dynamic>>.value();
         });
-        await driver.tap(new ObjectRef('123'));
+        await driver.tap(find.text('foo'));
       });
     });
 
@@ -171,22 +162,19 @@ void main() {
         expect(driver.getText(null), throwsA(new isInstanceOf<DriverError>()));
       });
 
-      test('requires a valid target reference', () async {
-        expect(driver.getText(new ObjectRef.notFound()),
-          throwsA(new isInstanceOf<DriverError>()));
-      });
-
       test('sends the getText command', () async {
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           expect(i.positionalArguments[1], <String, dynamic>{
             'command': 'get_text',
-            'targetRef': '123'
+            'finderType': 'ByValueKey',
+            'keyValueString': '123',
+            'keyValueType': 'int'
           });
           return new Future<Map<String, dynamic>>.value({
             'text': 'hello'
           });
         });
-        String result = await driver.getText(new ObjectRef('123'));
+        String result = await driver.getText(find.byValueKey(123));
         expect(result, 'hello');
       });
     });

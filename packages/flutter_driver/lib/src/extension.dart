@@ -47,34 +47,39 @@ typedef Future<Result> CommandHandlerCallback(Command c);
 /// Deserializes JSON map to a command object.
 typedef Command CommandDeserializerCallback(Map<String, String> params);
 
+/// Runs the finder and returns the [Element] found, or `null`.
+typedef Future<Element> FinderCallback(SerializableFinder finder);
+
 class FlutterDriverExtension {
   static final Logger _log = new Logger('FlutterDriverExtension');
 
   FlutterDriverExtension() {
-    _commandHandlers = {
+    _commandHandlers = <String, CommandHandlerCallback>{
       'get_health': getHealth,
-      'find': find,
       'tap': tap,
       'get_text': getText,
       'scroll': scroll,
     };
 
-    _commandDeserializers = {
+    _commandDeserializers = <String, CommandDeserializerCallback>{
       'get_health': GetHealth.deserialize,
-      'find': Find.deserialize,
       'tap': Tap.deserialize,
       'get_text': GetText.deserialize,
       'scroll': Scroll.deserialize,
+    };
+
+    _finders = <String, FinderCallback>{
+      'ByValueKey': _findByValueKey,
+      'ByTooltipMessage': _findByTooltipMessage,
+      'ByText': _findByText,
     };
   }
 
   final Instrumentation prober = new Instrumentation();
 
-  Map<String, CommandHandlerCallback> _commandHandlers =
-      <String, CommandHandlerCallback>{};
-
-  Map<String, CommandDeserializerCallback> _commandDeserializers =
-      <String, CommandDeserializerCallback>{};
+  Map<String, CommandHandlerCallback> _commandHandlers;
+  Map<String, CommandDeserializerCallback> _commandDeserializers;
+  Map<String, FinderCallback> _finders;
 
   Future<ServiceExtensionResponse> call(Map<String, String> params) async {
     try {
@@ -107,36 +112,18 @@ class FlutterDriverExtension {
 
   Future<Health> getHealth(GetHealth command) async => new Health(HealthStatus.ok);
 
-  Future<ObjectRef> find(Find command) async {
-    SearchSpecification searchSpec = command.searchSpec;
-    switch(searchSpec.runtimeType) {
-      case ByValueKey: return findByValueKey(searchSpec);
-      case ByTooltipMessage: return findByTooltipMessage(searchSpec);
-      case ByText: return findByText(searchSpec);
-    }
-    throw new DriverError('Unsupported search specification type ${searchSpec.runtimeType}');
-  }
-
-  /// Runs object [locator] repeatedly until it returns a non-`null` value.
-  ///
-  /// [descriptionGetter] describes the object to be waited for. It is used in
-  /// the warning printed should timeout happen.
-  Future<ObjectRef> _waitForObject(String descriptionGetter(), Object locator()) async {
-    Object object = await retry(locator, _kDefaultTimeout, _kDefaultPauseBetweenRetries, predicate: (Object object) {
+  /// Runs object [finder] repeatedly until it finds an [Element].
+  Future<Element> _waitForElement(String descriptionGetter(), Element locator()) {
+    return retry(locator, _kDefaultTimeout, _kDefaultPauseBetweenRetries, predicate: (dynamic object) {
       return object != null;
     }).catchError((Object error, Object stackTrace) {
       _log.warning('Timed out waiting for ${descriptionGetter()}');
       return null;
     });
-
-    ObjectRef elemRef = object != null
-      ? new ObjectRef(_registerObject(object))
-      : new ObjectRef.notFound();
-    return new Future<ObjectRef>.value(elemRef);
   }
 
-  Future<ObjectRef> findByValueKey(ByValueKey byKey) async {
-    return _waitForObject(
+  Future<Element> _findByValueKey(ByValueKey byKey) async {
+    return _waitForElement(
       () => 'element with key "${byKey.keyValue}" of type ${byKey.keyValueType}',
       () {
         return prober.findElementByKey(new ValueKey<dynamic>(byKey.keyValue));
@@ -144,8 +131,8 @@ class FlutterDriverExtension {
     );
   }
 
-  Future<ObjectRef> findByTooltipMessage(ByTooltipMessage byTooltipMessage) async {
-    return _waitForObject(
+  Future<Element> _findByTooltipMessage(ByTooltipMessage byTooltipMessage) async {
+    return _waitForElement(
       () => 'tooltip with message "${byTooltipMessage.text}" on it',
       () {
         return prober.findElement((Element element) {
@@ -160,22 +147,31 @@ class FlutterDriverExtension {
     );
   }
 
-  Future<ObjectRef> findByText(ByText byText) async {
-    return await _waitForObject(
+  Future<Element> _findByText(ByText byText) async {
+    return await _waitForElement(
       () => 'text "${byText.text}"',
       () {
         return prober.findText(byText.text);
       });
   }
 
+  Future<Element> _runFinder(SerializableFinder finder) {
+    FinderCallback cb = _finders[finder.finderType];
+
+    if (cb == null)
+      throw 'Unsupported finder type: ${finder.finderType}';
+
+    return cb(finder);
+  }
+
   Future<TapResult> tap(Tap command) async {
-    Element target = await _dereferenceOrDie(command.targetRef);
+    Element target = await _runFinder(command.finder);
     prober.tap(target);
     return new TapResult();
   }
 
   Future<ScrollResult> scroll(Scroll command) async {
-    Element target = await _dereferenceOrDie(command.targetRef);
+    Element target = await _runFinder(command.finder);
     final int totalMoves = command.duration.inMicroseconds * command.frequency ~/ Duration.MICROSECONDS_PER_SECOND;
     Offset delta = new Offset(command.dx, command.dy) / totalMoves.toDouble();
     Duration pause = command.duration ~/ totalMoves;
@@ -198,30 +194,9 @@ class FlutterDriverExtension {
   }
 
   Future<GetTextResult> getText(GetText command) async {
-    Element target = await _dereferenceOrDie(command.targetRef);
+    Element target = await _runFinder(command.finder);
     // TODO(yjbanov): support more ways to read text
     Text text = target.widget;
     return new GetTextResult(text.data);
-  }
-
-  int _refCounter = 1;
-  final Map<String, Object> _objectRefs = <String, Object>{};
-  String _registerObject(Object obj) {
-    if (obj == null)
-      throw new ArgumentError('Cannot register null object');
-    String refKey = '${_refCounter++}';
-    _objectRefs[refKey] = obj;
-    return refKey;
-  }
-
-  dynamic _dereference(String reference) => _objectRefs[reference];
-
-  Future<dynamic> _dereferenceOrDie(String reference) {
-    Element object = _dereference(reference);
-
-    if (object == null)
-      return new Future<String>.error('Object reference not found ($reference).');
-
-    return new Future<Element>.value(object);
   }
 }

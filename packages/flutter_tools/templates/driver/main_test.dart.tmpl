@@ -23,14 +23,14 @@ void main() {
 
     test('tap on the floating action button; verify counter', () async {
       // Find floating action button (fab) to tap on
-      ObjectRef fab = await driver.findByTooltipMessage('Increment');
-      expect(fab, isNotNull);
+      SerializableFinder fab = find.byTooltip('Increment');
+      expect(await driver.exists(fab), isTrue);
 
       // Tap on the fab
       await driver.tap(fab);
 
       // Wait for text to change to the desired value
-      expect(await driver.findByText('Button tapped 1 time.'), isNotNull);
+      expect(await driver.exists(find.text('Button tapped 1 time.')), isTrue);
     });
   });
 }
