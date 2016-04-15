@@ -65,6 +65,9 @@ uint32_t FontStyle::pack(int variant, int weight, bool italic) {
     return (weight & kWeightMask) | (italic ? kItalicMask : 0) | (variant << kVariantShift);
 }
 
+FontFamily::FontFamily() : FontFamily(0 /* variant */) {
+}
+
 FontFamily::FontFamily(int variant) : FontFamily(FontLanguageListCache::kEmptyListId, variant) {
 }
 
@@ -156,6 +159,16 @@ FontStyle FontFamily::getStyle(size_t index) const {
     return mFonts[index].style;
 }
 
+bool FontFamily::isColorEmojiFamily() const {
+    const FontLanguages& languageList = FontLanguageListCache::getById(mLangId);
+    for (size_t i = 0; i < languageList.size(); ++i) {
+        if (languageList[i].hasEmojiFlag()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 const SparseBitSet* FontFamily::getCoverage() {
     if (!mCoverageValid) {
         const FontStyle defaultStyle;
@@ -179,9 +192,11 @@ const SparseBitSet* FontFamily::getCoverage() {
     return &mCoverage;
 }
 
-bool FontFamily::hasVariationSelector(uint32_t codepoint, uint32_t variationSelector) {
+bool FontFamily::hasGlyph(uint32_t codepoint, uint32_t variationSelector) {
     assertMinikinLocked();
-    if (!mHasVSTable) {
+    if (variationSelector != 0 && !mHasVSTable) {
+        // Early exit if the variation selector is specified but the font doesn't have a cmap format
+        // 14 subtable.
         return false;
     }
 
