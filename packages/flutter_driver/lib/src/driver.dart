@@ -4,9 +4,10 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'package:vm_service_client/vm_service_client.dart';
-import 'package:matcher/matcher.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
+import 'package:matcher/matcher.dart';
+import 'package:vm_service_client/vm_service_client.dart';
+import 'package:web_socket_channel/io.dart';
 
 import 'error.dart';
 import 'find.dart';
@@ -331,8 +332,8 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
       ws1 = await WebSocket.connect(uri.toString());
       ws2 = await WebSocket.connect(uri.toString());
       return new VMServiceClientConnection(
-        new VMServiceClient(ws1),
-        new rpc.Peer(ws2, ws2)..listen()
+        new VMServiceClient(new IOWebSocketChannel(ws1)),
+        new rpc.Peer(new IOWebSocketChannel(ws2))..listen()
       );
     } catch(e) {
       if (ws1 != null)
