@@ -169,8 +169,8 @@ class ElementTreeTester extends Instrumentation {
 void testElementTree(callback(ElementTreeTester tester)) {
   new FakeAsync().run((FakeAsync async) {
     FlutterExceptionHandler oldHandler = FlutterError.onError;
+    ElementTreeTester tester = new ElementTreeTester._(async);
     try {
-      ElementTreeTester tester = new ElementTreeTester._(async);
       FlutterError.onError = (FlutterErrorDetails details) {
         if (tester._pendingException != null) {
           FlutterError.dumpErrorToConsole(tester._pendingException);
@@ -196,12 +196,14 @@ void testElementTree(callback(ElementTreeTester tester)) {
         return async.nonPeriodicTimerCount == 0;
       });
       assert(async.microtaskCount == 0); // Shouldn't be possible.
-      if (tester._pendingException != null) {
-        FlutterError.dumpErrorToConsole(tester._pendingException);
+      if (tester._pendingException != null)
         throw 'An exception (shown above) was thrown during the test.';
-      }
     } finally {
       FlutterError.onError = oldHandler;
+      if (tester._pendingException != null) {
+        FlutterError.dumpErrorToConsole(tester._pendingException);
+        tester._pendingException = null;
+      }
     }
   });
 }
