@@ -10,43 +10,48 @@ class ProgressIndicatorDemo extends StatefulWidget {
 }
 
 class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> {
+  AnimationController _controller;
+  Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
-    controller = new AnimationController(
+    _controller = new AnimationController(
       duration: const Duration(milliseconds: 1500)
     )..forward();
 
-    animation = new CurvedAnimation(
-      parent: controller,
+    _animation = new CurvedAnimation(
+      parent: _controller,
       curve: new Interval(0.0, 0.9, curve: Curves.ease),
       reverseCurve: Curves.ease
     )..addStatusListener((AnimationStatus status) {
       if (status == AnimationStatus.dismissed)
-        controller.forward();
+        _controller.forward();
       else if (status == AnimationStatus.completed)
-        controller.reverse();
+        _controller.reverse();
     });
   }
 
-  Animation<double> animation;
-  AnimationController controller;
+  @override
+  void dispose() {
+    _controller.stop();
+    super.dispose();
+  }
 
   void _handleTap() {
     setState(() {
       // valueAnimation.isAnimating is part of our build state
-      if (controller.isAnimating) {
-        controller.stop();
+      if (_controller.isAnimating) {
+        _controller.stop();
       } else {
-        switch (controller.status) {
+        switch (_controller.status) {
           case AnimationStatus.dismissed:
           case AnimationStatus.forward:
-            controller.forward();
+            _controller.forward();
             break;
           case AnimationStatus.reverse:
           case AnimationStatus.completed:
-            controller.reverse();
+            _controller.reverse();
             break;
         }
       }
@@ -61,19 +66,19 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> {
         ),
         new LinearProgressIndicator(),
         new LinearProgressIndicator(),
-        new LinearProgressIndicator(value: animation.value),
+        new LinearProgressIndicator(value: _animation.value),
         new CircularProgressIndicator(),
         new SizedBox(
             width: 20.0,
             height: 20.0,
-            child: new CircularProgressIndicator(value: animation.value)
+            child: new CircularProgressIndicator(value: _animation.value)
         ),
         new SizedBox(
           width: 50.0,
           height: 30.0,
-          child: new CircularProgressIndicator(value: animation.value)
+          child: new CircularProgressIndicator(value: _animation.value)
         ),
-        new Text('${(animation.value * 100.0).toStringAsFixed(1)}%${ controller.isAnimating ? "" : " (paused)" }')
+        new Text('${(_animation.value * 100.0).toStringAsFixed(1)}%${ _controller.isAnimating ? "" : " (paused)" }')
     ];
     return new Column(
       children: indicators
@@ -95,7 +100,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> {
           child: new Container(
             padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
             child: new AnimatedBuilder(
-              animation: animation,
+              animation: _animation,
               builder: _buildIndicators
             )
           )
