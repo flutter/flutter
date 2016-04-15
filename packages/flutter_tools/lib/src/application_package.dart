@@ -47,7 +47,7 @@ class AndroidApk extends ApplicationPackage {
   }
 
   /// Creates a new AndroidApk based on the information in the Android manifest.
-  factory AndroidApk.fromBuildConfiguration(BuildConfiguration config) {
+  factory AndroidApk.fromCurrentDirectory() {
     String manifestPath = path.join('android', 'AndroidManifest.xml');
     if (!FileSystemEntity.isFileSync(manifestPath))
       return null;
@@ -82,8 +82,8 @@ class IOSApp extends ApplicationPackage {
     String iosProjectBundleId
   }) : super(localPath: iosProjectDir, id: iosProjectBundleId);
 
-  factory IOSApp.fromBuildConfiguration(BuildConfiguration config) {
-    if (getCurrentHostPlatform() != HostPlatform.mac)
+  factory IOSApp.fromCurrentDirectory() {
+    if (getCurrentHostPlatform() != HostPlatform.darwin_x64)
       return null;
 
     String plistPath = path.join('ios', 'Info.plist');
@@ -99,9 +99,22 @@ class IOSApp extends ApplicationPackage {
   String get displayName => id;
 }
 
+ApplicationPackage getApplicationPackageForPlatform(TargetPlatform platform) {
+  switch (platform) {
+    case TargetPlatform.android_arm:
+    case TargetPlatform.android_x64:
+      return new AndroidApk.fromCurrentDirectory();
+    case TargetPlatform.ios:
+      return new IOSApp.fromCurrentDirectory();
+    case TargetPlatform.darwin_x64:
+    case TargetPlatform.linux_x64:
+      return null;
+  }
+}
+
 class ApplicationPackageStore {
-  final AndroidApk android;
-  final IOSApp iOS;
+  AndroidApk android;
+  IOSApp iOS;
 
   ApplicationPackageStore({ this.android, this.iOS });
 
@@ -109,36 +122,14 @@ class ApplicationPackageStore {
     switch (platform) {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_x64:
+        android ??= new AndroidApk.fromCurrentDirectory();
         return android;
       case TargetPlatform.ios:
+        iOS ??= new IOSApp.fromCurrentDirectory();
         return iOS;
       case TargetPlatform.darwin_x64:
       case TargetPlatform.linux_x64:
         return null;
     }
-  }
-
-  static ApplicationPackageStore forConfigs(List<BuildConfiguration> configs) {
-    AndroidApk android;
-    IOSApp iOS;
-
-    for (BuildConfiguration config in configs) {
-      switch (config.targetPlatform) {
-        case TargetPlatform.android_arm:
-        case TargetPlatform.android_x64:
-          android ??= new AndroidApk.fromBuildConfiguration(config);
-          break;
-
-        case TargetPlatform.ios:
-          iOS ??= new IOSApp.fromBuildConfiguration(config);
-          break;
-
-        case TargetPlatform.darwin_x64:
-        case TargetPlatform.linux_x64:
-          break;
-      }
-    }
-
-    return new ApplicationPackageStore(android: android, iOS: iOS);
   }
 }

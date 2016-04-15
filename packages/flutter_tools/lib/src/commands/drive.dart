@@ -304,8 +304,7 @@ void restoreAppStopper() {
 
 Future<int> stopApp(DriveCommand command) async {
   printTrace('Stopping application.');
-  ApplicationPackage package = command.applicationPackages
-      .getPackageForPlatform(command.device.platform);
+  ApplicationPackage package = command.applicationPackages.getPackageForPlatform(command.device.platform);
   bool stopped = await command.device.stopApp(package);
   return stopped ? 0 : 1;
 }

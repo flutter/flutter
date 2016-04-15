@@ -17,6 +17,7 @@ import '../base/process.dart';
 import '../build_configuration.dart';
 import '../globals.dart';
 import '../package_map.dart';
+import '../toolchain.dart';
 import 'version.dart';
 
 const String kFlutterRootEnvironmentVariableName = 'FLUTTER_ROOT'; // should point to //flutter/ (root of flutter/flutter repo)
@@ -79,6 +80,7 @@ class FlutterCommandRunner extends CommandRunner {
             'Defaults to \$$kFlutterEngineEnvironmentVariableName if set, otherwise defaults to the path given in your pubspec.yaml\n'
             'dependency_overrides for $kFlutterEnginePackageName, if any, or, failing that, tries to guess at the location\n'
             'based on the value of the --flutter-root option.');
+
     argParser.addOption('host-debug-build-path',
         hide: !verboseHelp,
         help:
@@ -91,6 +93,7 @@ class FlutterCommandRunner extends CommandRunner {
             'Path to your host Release out directory (i.e. the one that runs on your workstation, not a device), if you are building Flutter locally.\n'
             'This path is relative to --engine-src-path. Not normally required.',
         defaultsTo: 'out/Release/');
+
     argParser.addOption('android-debug-build-path',
         hide: !verboseHelp,
         help:
@@ -209,6 +212,16 @@ class FlutterCommandRunner extends CommandRunner {
     // See if the user specified a specific device.
     deviceManager.specifiedDeviceId = globalResults['device-id'];
 
+    // Set up the tooling configuration.
+    if (enginePath != null) {
+      ToolConfiguration.instance.engineSrcPath = enginePath;
+
+      if (globalResults.wasParsed('release'))
+        ToolConfiguration.instance.release = globalResults['release'];
+      if (globalResults.wasParsed('debug'))
+        ToolConfiguration.instance.release = !globalResults['debug'];
+    }
+
     // The Android SDK could already have been set by tests.
     if (!context.isSet(AndroidSdk)) {
       if (enginePath != null) {
@@ -287,17 +300,17 @@ class FlutterCommandRunner extends CommandRunner {
         targetPlatform: TargetPlatform.android_x64
       ));
 
-      if (hostPlatform == HostPlatform.linux) {
+      if (hostPlatform == HostPlatform.linux_x64) {
         configs.add(new BuildConfiguration.prebuilt(
-          hostPlatform: HostPlatform.linux,
+          hostPlatform: HostPlatform.linux_x64,
           targetPlatform: TargetPlatform.linux_x64,
           testable: true
         ));
       }
 
-      if (hostPlatform == HostPlatform.mac) {
+      if (hostPlatform == HostPlatform.darwin_x64) {
         configs.add(new BuildConfiguration.prebuilt(
-          hostPlatform: HostPlatform.mac,
+          hostPlatform: HostPlatform.darwin_x64,
           targetPlatform: TargetPlatform.ios
         ));
       }

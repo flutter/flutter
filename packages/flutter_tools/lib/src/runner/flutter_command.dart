@@ -65,7 +65,7 @@ abstract class FlutterCommand extends Command {
   }
 
   void _setupApplicationPackages() {
-    applicationPackages ??= ApplicationPackageStore.forConfigs(buildConfigurations);
+    applicationPackages ??= new ApplicationPackageStore();
   }
 
   @override

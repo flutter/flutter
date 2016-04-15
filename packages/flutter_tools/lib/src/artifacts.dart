@@ -9,30 +9,6 @@ import 'package:path/path.dart' as path;
 import 'build_configuration.dart';
 import 'globals.dart';
 
-String _getNameForHostPlatform(HostPlatform platform) {
-  switch (platform) {
-    case HostPlatform.linux:
-      return 'linux-x64';
-    case HostPlatform.mac:
-      return 'darwin-x64';
-  }
-}
-
-String getNameForTargetPlatform(TargetPlatform platform) {
-  switch (platform) {
-    case TargetPlatform.android_arm:
-      return 'android-arm';
-    case TargetPlatform.android_x64:
-      return 'android-x64';
-    case TargetPlatform.ios:
-      return 'ios';
-    case TargetPlatform.darwin_x64:
-      return 'darwin-x64';
-    case TargetPlatform.linux_x64:
-      return 'linux-x64';
-  }
-}
-
 enum ArtifactType {
   snapshot,
   shell,
@@ -41,7 +17,6 @@ enum ArtifactType {
   androidIcuData,
   androidKeystore,
   androidLibSkyShell,
-  iosXcodeProject,
 }
 
 class Artifact {
@@ -63,7 +38,7 @@ class Artifact {
     if (targetPlatform != null)
       return getNameForTargetPlatform(targetPlatform);
     if (hostPlatform != null)
-      return _getNameForHostPlatform(hostPlatform);
+      return getNameForHostPlatform(hostPlatform);
     assert(false);
     return null;
   }
@@ -84,13 +59,13 @@ class ArtifactStore {
       name: 'Sky Snapshot',
       fileName: 'sky_snapshot',
       type: ArtifactType.snapshot,
-      hostPlatform: HostPlatform.linux
+      hostPlatform: HostPlatform.linux_x64
     ),
     const Artifact._(
       name: 'Sky Snapshot',
       fileName: 'sky_snapshot',
       type: ArtifactType.snapshot,
-      hostPlatform: HostPlatform.mac
+      hostPlatform: HostPlatform.darwin_x64
     ),
 
     // mojo
@@ -157,14 +132,6 @@ class ArtifactStore {
       fileName: 'libsky_shell.so',
       type: ArtifactType.androidLibSkyShell,
       targetPlatform: TargetPlatform.android_x64
-    ),
-
-    // iOS
-    const Artifact._(
-      name: 'iOS Runner (Xcode Project)',
-      fileName: 'FlutterXcode.zip',
-      type: ArtifactType.iosXcodeProject,
-      targetPlatform: TargetPlatform.ios
     ),
   ];
 

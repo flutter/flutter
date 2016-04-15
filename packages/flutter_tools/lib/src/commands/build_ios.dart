@@ -25,7 +25,7 @@ class BuildIOSCommand extends FlutterCommand {
 
   @override
   Future<int> runInProject() async {
-    if (getCurrentHostPlatform() != HostPlatform.mac) {
+    if (getCurrentHostPlatform() != HostPlatform.darwin_x64) {
       printError('Building for iOS is only supported on the Mac.');
       return 1;
     }
