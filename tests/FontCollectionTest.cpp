@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 
 #include <minikin/FontCollection.h>
+#include "FontTestUtils.h"
 #include "MinikinFontForTest.h"
 #include "MinikinInternal.h"
 
@@ -73,6 +74,37 @@ TEST(FontCollectionTest, hasVariationSelectorTest) {
 
   EXPECT_FALSE(fc.hasVariationSelector(0x717D, 0));
   expectVSGlyphs(fc, 0x717D, std::set<uint32_t>({0xFE02, 0xE0102, 0xE0103}));
+}
+
+const char kEmojiXmlFile[] = kTestFontDir "emoji.xml";
+
+TEST(FontCollectionTest, hasVariationSelectorTest_emoji) {
+    MinikinAutoUnref<FontCollection> collection(getFontCollection(kTestFontDir, kEmojiXmlFile));
+
+    // Both text/color font have cmap format 14 subtable entry for VS15/VS16 respectively.
+    EXPECT_TRUE(collection->hasVariationSelector(0x2623, 0xFE0E));
+    EXPECT_TRUE(collection->hasVariationSelector(0x2623, 0xFE0F));
+
+    // The text font has cmap format 14 subtable entry for VS15 but the color font doesn't have for
+    // VS16
+    EXPECT_TRUE(collection->hasVariationSelector(0x2626, 0xFE0E));
+    EXPECT_FALSE(collection->hasVariationSelector(0x2626, 0xFE0F));
+
+    // The color font has cmap format 14 subtable entry for VS16 but the text font doesn't have for
+    // VS15.
+    EXPECT_TRUE(collection->hasVariationSelector(0x262A, 0xFE0E));
+    EXPECT_TRUE(collection->hasVariationSelector(0x262A, 0xFE0F));
+
+    // Neither text/color font have cmap format 14 subtable entry for VS15/VS16.
+    EXPECT_TRUE(collection->hasVariationSelector(0x262E, 0xFE0E));
+    EXPECT_FALSE(collection->hasVariationSelector(0x262E, 0xFE0F));
+
+    // Text font doesn't have U+262F U+FE0E or even its base code point U+262F.
+    EXPECT_FALSE(collection->hasVariationSelector(0x262F, 0xFE0E));
+
+    // VS15/VS16 is only for emoji, should return false for not an emoji code point.
+    EXPECT_FALSE(collection->hasVariationSelector(0x2229, 0xFE0E));
+    EXPECT_FALSE(collection->hasVariationSelector(0x2229, 0xFE0F));
 }
 
 }  // namespace android
