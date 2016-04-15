@@ -742,7 +742,7 @@ class PipelineOwner {
     Timeline.startSync('Compositing Bits');
     _nodesNeedingCompositingBitsUpdate.sort((RenderObject a, RenderObject b) => a.depth - b.depth);
     for (RenderObject node in _nodesNeedingCompositingBitsUpdate) {
-      if (node.owner == this)
+      if (node._needsCompositingBitsUpdate && node.owner == this)
         node._updateCompositingBits();
     }
     _nodesNeedingCompositingBitsUpdate.clear();
@@ -767,8 +767,7 @@ class PipelineOwner {
       _nodesNeedingPaint = <RenderObject>[];
       // Sort the dirty nodes in reverse order (deepest first).
       for (RenderObject node in dirtyNodes..sort((RenderObject a, RenderObject b) => b.depth - a.depth)) {
-        assert(node._needsPaint);
-        if (node.owner == this)
+        if (node._needsPaint && node.owner == this)
           PaintingContext.repaintCompositedChild(node);
       };
       assert(_nodesNeedingPaint.length == 0);
