@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../android/android_device.dart';
 import '../application_package.dart';
+import '../base/common.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 
@@ -16,6 +17,9 @@ class TraceCommand extends FlutterCommand {
     argParser.addOption('out', help: 'Specify the path of the saved trace file.');
     argParser.addOption('duration',
         defaultsTo: '10', abbr: 'd', help: 'Duration in seconds to trace.');
+    argParser.addOption('debug-port',
+        defaultsTo: observatoryDefaultPort.toString(),
+        help: 'Local port where the observatory is listening.');
   }
 
   @override
@@ -40,26 +44,27 @@ class TraceCommand extends FlutterCommand {
   Future<int> runInProject() async {
     ApplicationPackage androidApp = applicationPackages.android;
     AndroidDevice device = deviceForCommand;
+    int observatoryPort = int.parse(argResults['debug-port']);
 
     if ((!argResults['start'] && !argResults['stop']) ||
         (argResults['start'] && argResults['stop'])) {
       // Setting neither flags or both flags means do both commands and wait
       // duration seconds in between.
-      device.startTracing(androidApp);
+      await device.startTracing(androidApp, observatoryPort);
       await new Future<Null>.delayed(
         new Duration(seconds: int.parse(argResults['duration'])),
-        () => _stopTracing(device, androidApp)
+        () => _stopTracing(device, androidApp, observatoryPort)
       );
     } else if (argResults['stop']) {
-      await _stopTracing(device, androidApp);
+      await _stopTracing(device, androidApp, observatoryPort);
     } else {
-      device.startTracing(androidApp);
+      await device.startTracing(androidApp, observatoryPort);
     }
     return 0;
   }
 
-  Future<Null> _stopTracing(AndroidDevice android, AndroidApk androidApp) async {
-    String tracePath = await android.stopTracing(androidApp, outPath: argResults['out']);
+  Future<Null> _stopTracing(AndroidDevice android, AndroidApk androidApp, int observatoryPort) async {
+    String tracePath = await android.stopTracing(androidApp, observatoryPort, argResults['out']);
     if (tracePath == null) {
       printError('No trace file saved.');
     } else {

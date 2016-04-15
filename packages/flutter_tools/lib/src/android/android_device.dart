@@ -6,13 +6,16 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:path/path.dart' as path;
+import 'package:web_socket_channel/io.dart';
 
 import '../android/android_sdk.dart';
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/os.dart';
 import '../base/process.dart';
+import '../base/utils.dart';
 import '../build_configuration.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
@@ -348,16 +351,6 @@ class AndroidDevice extends Device {
     return _portForwarder;
   }
 
-  void startTracing(AndroidApk apk) {
-    runCheckedSync(adbCommandForDevice(<String>[
-      'shell',
-      'am',
-      'broadcast',
-      '-a',
-      '${apk.id}.TRACING_START'
-    ]));
-  }
-
   /// Return the most recent timestamp in the Android log or `null` if there is
   /// no available timestamp. The format can be passed to logcat's -T option.
   String get lastLogcatTimestamp {
@@ -370,59 +363,57 @@ class AndroidDevice extends Device {
     return timeMatch?.group(0);
   }
 
-  Future<String> stopTracing(AndroidApk apk, { String outPath }) async {
-    // Workaround for logcat -c not always working:
-    // http://stackoverflow.com/questions/25645012/logcat-on-android-l-not-clearing-after-unplugging-and-reconnecting
-    String beforeStop = lastLogcatTimestamp;
-    runCheckedSync(adbCommandForDevice(<String>[
-      'shell',
-      'am',
-      'broadcast',
-      '-a',
-      '${apk.id}.TRACING_STOP'
-    ]));
+  Future<rpc.Client> _connectToObservatory(int observatoryPort) async {
+    Uri uri = new Uri(scheme: 'ws', host: '127.0.0.1', port: observatoryPort, path: 'ws');
+    WebSocket ws = await WebSocket.connect(uri.toString());
+    rpc.Client client = new rpc.Client(new IOWebSocketChannel(ws));
+    client.listen();
+    return client;
+  }
 
-    RegExp traceRegExp = new RegExp(r'Saving trace to (\S+)', multiLine: true);
-    RegExp completeRegExp = new RegExp(r'Trace complete', multiLine: true);
-
-    String tracePath;
-    bool isComplete = false;
-    while (!isComplete) {
-      List<String> args = <String>['logcat', '-d'];
-      if (beforeStop != null)
-        args.addAll(<String>['-T', beforeStop]);
-      String logs = runCheckedSync(adbCommandForDevice(args));
-      Match fileMatch = traceRegExp.firstMatch(logs);
-      if (fileMatch != null && fileMatch[1] != null) {
-        tracePath = fileMatch[1];
-      }
-      isComplete = completeRegExp.hasMatch(logs);
+  Future<Null> startTracing(AndroidApk apk, int observatoryPort) async {
+    rpc.Client client;
+    try {
+      client = await _connectToObservatory(observatoryPort);
+    } catch (e) {
+      printError('Error connecting to observatory: $e');
+      return;
     }
 
-    if (tracePath != null) {
-      String localPath = (outPath != null) ? outPath : path.basename(tracePath);
+    await client.sendRequest('_setVMTimelineFlags',
+        {'recordedStreams': ['Compiler', 'Dart', 'Embedder', 'GC']}
+    );
+    await client.sendRequest('_clearVMTimeline');
+  }
 
-      // Run cat via ADB to print the captured trace file. (adb pull will be unable
-      // to access the file if it does not have root permissions)
-      IOSink catOutput = new File(localPath).openWrite();
-      List<String> catCommand = adbCommandForDevice(
-          <String>['shell', 'run-as', apk.id, 'cat', tracePath]
-      );
-      Process catProcess = await Process.start(catCommand[0],
-          catCommand.getRange(1, catCommand.length).toList());
-      catProcess.stdout.pipe(catOutput);
-      int exitCode = await catProcess.exitCode;
-      if (exitCode != 0)
-        throw 'Error code $exitCode returned when running ${catCommand.join(" ")}';
-
-      runSync(adbCommandForDevice(
-          <String>['shell', 'run-as', apk.id, 'rm', tracePath]
-      ));
-      return localPath;
+  Future<String> stopTracing(AndroidApk apk, int observatoryPort, String outPath) async {
+    rpc.Client client;
+    try {
+      client = await _connectToObservatory(observatoryPort);
+    } catch (e) {
+      printError('Error connecting to observatory: $e');
+      return null;
     }
-    printError('No trace file detected. '
-        'Did you remember to start the trace before stopping it?');
-    return null;
+
+    await client.sendRequest('_setVMTimelineFlags', {'recordedStreams': '[]'});
+
+    File localFile;
+    if (outPath != null) {
+      localFile = new File(outPath);
+    } else {
+      localFile = getUniqueFile(Directory.current, 'trace', 'json');
+    }
+
+    Map<String, dynamic> response = await client.sendRequest('_getVMTimeline');
+    List<dynamic> traceEvents = response['traceEvents'];
+
+    IOSink sink = localFile.openWrite();
+    Stream<Object> streamIn = new Stream<Object>.fromIterable(<Object>[traceEvents]);
+    Stream<List<int>> streamOut = new JsonUtf8Encoder().bind(streamIn);
+    await sink.addStream(streamOut);
+    await sink.close();
+
+    return path.basename(localFile.path);
   }
 
   @override
