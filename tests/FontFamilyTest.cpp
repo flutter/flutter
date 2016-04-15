@@ -339,10 +339,10 @@ void expectVSGlyphs(FontFamily* family, uint32_t codepoint, const std::set<uint3
             i = 0xE0100;
         }
         if (vs.find(i) == vs.end()) {
-            EXPECT_FALSE(family->hasVariationSelector(codepoint, i))
+            EXPECT_FALSE(family->hasGlyph(codepoint, i))
                     << "Glyph for U+" << std::hex << codepoint << " U+" << i;
         } else {
-            EXPECT_TRUE(family->hasVariationSelector(codepoint, i))
+            EXPECT_TRUE(family->hasGlyph(codepoint, i))
                     << "Glyph for U+" << std::hex << codepoint << " U+" << i;
         }
 
