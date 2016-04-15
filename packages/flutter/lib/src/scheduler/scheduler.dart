@@ -296,20 +296,20 @@ abstract class Scheduler extends BindingBase {
   /// the error.
   ///
   /// Must not be called reentrantly from within a frame callback.
-  void invokeFrameCallback(FrameCallback callback, Duration timeStamp, [ StackTrace stack ]) {
+  void invokeFrameCallback(FrameCallback callback, Duration timeStamp, [ StackTrace callbackStack ]) {
     assert(callback != null);
     assert(_FrameCallbackEntry.currentCallbackStack == null);
-    assert(() { _FrameCallbackEntry.currentCallbackStack = stack; return true; });
+    assert(() { _FrameCallbackEntry.currentCallbackStack = callbackStack; return true; });
     try {
       callback(timeStamp);
-    } catch (exception, stack) {
+    } catch (exception, exceptionStack) {
       FlutterError.reportError(new FlutterErrorDetails(
         exception: exception,
-        stack: stack,
+        stack: exceptionStack,
         library: 'scheduler library',
         context: 'during a scheduler callback',
-        informationCollector: (stack == null) ? null : (StringBuffer information) {
-          information.writeln('When this callback was registered, this was the stack:\n$stack');
+        informationCollector: (callbackStack == null) ? null : (StringBuffer information) {
+          information.writeln('When this callback was registered, this was the stack:\n$callbackStack');
         }
       ));
     }
