@@ -37,6 +37,19 @@ typedef Future<Null> RefreshCallback();
 /// start of the scrollable, bottom for over-scrolls at the end.
 enum RefreshIndicatorLocation { top, bottom }
 
+/// A widget that supports the Material "swipe to refresh" idiom.
+///
+/// When the child's vertical Scrollable descendant overscrolls, an
+/// animated circular progress indicator is faded into view. When the scroll
+/// ends, if the indicator has been dragged far enough for it to become
+/// completely opaque, the refresh callback is called. The callback is
+/// expected to udpate the scrollback and then complete the Future it
+/// returns. The refresh indicator disappears after the callback's
+/// Future has completed.
+///
+/// See also:
+///
+///  * <https://www.google.com/design/spec/patterns/swipe-to-refresh.html>
 class RefreshIndicator extends StatefulWidget {
   RefreshIndicator({
     Key key,
@@ -166,6 +179,8 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
   bool _handleScrollNotification(ScrollNotification notification) {
     if (config.scrollableKey == null || config.scrollableKey == notification.scrollable.config.key) {
       final ScrollableState scrollable = notification.scrollable;
+      if (scrollable.config.scrollDirection != Axis.vertical)
+        return false;
       switch(notification.kind) {
         case ScrollNotificationKind.started:
           _onScrollStarted(scrollable);
