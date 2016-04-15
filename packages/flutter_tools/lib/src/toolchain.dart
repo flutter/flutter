@@ -40,6 +40,8 @@ class SnapshotCompiler {
   }
 }
 
+// TODO(devoncarew): This should instead take a host platform and target platform.
+
 String _getCompilerPath(BuildConfiguration config) {
   if (config.type != BuildType.prebuilt) {
     String compilerPath = path.join(config.buildDir, 'clang_x64', 'sky_snapshot');
