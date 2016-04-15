@@ -8,13 +8,15 @@ import 'theme.dart';
 
 /// A material design divider.
 ///
-/// A one logical pixel thick horizontal line.
+/// A one logical pixel thick horizontal line, with padding on either
+/// side. The box's total height is controlled by [height].
 ///
 /// Dividers can be used in lists and [Drawer]s to separate content vertically.
 /// To create a one-pixel divider between items in a list, consider using
 /// [ListItem.divideItems], which is optimized for this case.
 ///
 /// See also:
+///
 ///  * [ListItem.divideItems]
 ///  * <https://www.google.com/design/spec/components/dividers.html>
 class Divider extends StatelessWidget {
@@ -41,7 +43,8 @@ class Divider extends StatelessWidget {
 
   /// The color to use when painting the line.
   ///
-  /// Defaults to [ThemeData.dividerColor].
+  /// Defaults to the current theme's divider color, given by
+  /// [ThemeData.dividerColor].
   final Color color;
 
   @override
