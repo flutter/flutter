@@ -199,8 +199,6 @@ sky_core_files = [
   "rendering/style/StyleVisualData.h",
   "script/dart_controller.cc",
   "script/dart_controller.h",
-  "script/dart_debugger.cc",
-  "script/dart_debugger.h",
   "script/dart_init.cc",
   "script/dart_init.h",
   "script/dart_service_isolate.cc",
@@ -219,6 +217,13 @@ sky_core_files = [
   "window/window.cc",
   "window/window.h",
 ]
+
+if (flutter_develop_mode) {
+  sky_core_files += [
+    "script/dart_debugger.cc",
+    "script/dart_debugger.h",
+  ]
+}
 
 core_dart_files = get_path_info([
                                   "dart/compositing.dart",

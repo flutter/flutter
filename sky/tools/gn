@@ -27,6 +27,10 @@ def get_out_dir(args):
     else:
         target_dir += 'Release'
 
+    # Currently --develop does not change the out-dir.
+    if not args.develop:
+        target_dir += '_Deploy'
+
     if args.ios_force_armv7:
         target_dir += '_armv7'
 
@@ -44,6 +48,7 @@ def to_gn_args(args):
 
     gn_args['is_debug'] = args.debug
     gn_args['is_clang'] = args.clang and args.target_os not in ['android', 'fnl']
+    gn_args['flutter_develop_mode'] = args.develop
 
     ios_target_cpu = 'arm64'
     if args.ios_force_armv7:
@@ -102,6 +107,7 @@ def to_gn_args(args):
     gn_args['enable_gcm'] = args.enable_gcm
     gn_args['enable_google_sign_in'] = args.enable_google_sign_in
     gn_args['use_glfw'] = args.use_glfw
+    gn_args['dart_product'] = not args.develop
 
     return gn_args
 
@@ -111,6 +117,11 @@ def parse_args(args):
 
   parser.add_argument('--debug', default=True, action='store_true')
   parser.add_argument('--release', default=False, dest='debug', action='store_false')
+
+  # Deploy is a placeholder for https://github.com/flutter/flutter/issues/3263
+  # Adding it now unblocks bot/tool work.
+  parser.add_argument('--develop', default=True, action='store_true')
+  parser.add_argument('--deploy', default=False, dest='develop', action='store_false')
 
   parser.add_argument('--target-os', type=str, choices=['android', 'ios'])
   parser.add_argument('--android', dest='target_os', action='store_const', const='android')

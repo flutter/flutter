@@ -325,6 +325,14 @@ bool IsRunningPrecompiledCode() {
 
 #endif  // DART_ALLOW_DYNAMIC_RESOLUTION
 
+bool IsDevelopMode() {
+#ifdef FLUTTER_DEVELOP_MODE
+  return true;
+#else
+  return false;
+#endif
+}
+
 static base::LazyInstance<std::unique_ptr<EmbedderTracingCallbacks>>::Leaky
     g_tracing_callbacks = LAZY_INSTANCE_INITIALIZER;
 
@@ -376,7 +384,7 @@ void InitDartVM() {
   enable_checked_mode = true;
 #endif
 
-  if (IsRunningPrecompiledCode()) {
+  if (IsRunningPrecompiledCode() || !IsDevelopMode()) {
     enable_checked_mode = false;
   }
 
@@ -387,9 +395,11 @@ void InitDartVM() {
     // The version of the VM setup to run precompiled code does not recognize
     // the mirrors or the background compilation flags. They are never enabled.
     // Make sure we dont pass in unrecognized flags.
-    args.append(kDartMirrorsArgs, arraysize(kDartMirrorsArgs));
-    args.append(kDartBackgroundCompilationArgs,
-                arraysize(kDartBackgroundCompilationArgs));
+    if (IsDevelopMode()) {
+      args.append(kDartMirrorsArgs, arraysize(kDartMirrorsArgs));
+      args.append(kDartBackgroundCompilationArgs,
+                  arraysize(kDartBackgroundCompilationArgs));
+    }
   } else {
     args.append(kDartPrecompilationArgs, arraysize(kDartPrecompilationArgs));
   }
@@ -420,11 +430,13 @@ void InitDartVM() {
   }
   CHECK(Dart_SetVMFlags(args.size(), args.data()));
 
+#ifdef FLUTTER_DEVELOP_MODE
   {
     TRACE_EVENT0("flutter", "DartDebugger::InitDebugger");
     // This should be called before calling Dart_Initialize.
     DartDebugger::InitDebugger();
   }
+#endif
 
   DartUI::InitForGlobal();
 #ifdef OS_ANDROID

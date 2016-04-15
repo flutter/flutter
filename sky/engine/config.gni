@@ -28,6 +28,8 @@ declare_args() {
   } else {
     sky_dart_strict_mode = false
   }
+
+  flutter_develop_mode = false
 }
 
 # feature_defines_list ---------------------------------------------------------
@@ -55,4 +57,8 @@ if (sky_dart_strict_mode) {
 
 if (sky_use_dart) {
   feature_defines_list += [ "WTF_USE_DART=1" ]
+}
+
+if (flutter_develop_mode) {
+  feature_defines_list += [ "FLUTTER_DEVELOP_MODE=1" ]
 }
