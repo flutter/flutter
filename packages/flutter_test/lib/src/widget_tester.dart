@@ -38,7 +38,7 @@ void testWidgets(void callback(WidgetTester widgetTester)) {
 ///     tester.widget(find.byType(MyWidget));
 ///     tester.stateOf(find.byConfig(config));
 ///     tester.getSize(find.byKey(new ValueKey('save-button')));
-const CommonFinders find = const CommonFinders();
+const CommonFinders find = const CommonFinders._();
 
 /// Asserts that [finder] locates a widget in the test element tree.
 ///
@@ -239,7 +239,7 @@ class WidgetTester {
 
 /// Provides lightweight syntax for getting frequently used widget [Finder]s.
 class CommonFinders {
-  const CommonFinders();
+  const CommonFinders._();
 
   /// Finds [Text] widgets containing string equal to [text].
   Finder text(String text) => new _TextFinder(text);
