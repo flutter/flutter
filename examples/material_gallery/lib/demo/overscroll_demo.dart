@@ -32,7 +32,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
 
     Widget body = new MaterialList(
       type: MaterialListType.threeLine,
-      scrollablePadding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8.0),
       children: _items.map((String item) {
         return new ListItem(
           isThreeLine: true,
