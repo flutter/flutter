@@ -16,16 +16,20 @@ class GalleryApp extends StatefulWidget {
 
 class GalleryAppState extends State<GalleryApp> {
   bool _useLightTheme = true;
+  bool _showPerformanceOverlay = false;
 
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
       title: 'Flutter Material Gallery',
       theme: _useLightTheme ? _kGalleryLightTheme : _kGalleryDarkTheme,
+      showPerformanceOverlay: _showPerformanceOverlay,
       routes: {
         '/': (BuildContext context) => new GalleryHome(
-          theme: _useLightTheme,
+          useLightTheme: _useLightTheme,
           onThemeChanged: (bool value) { setState(() { _useLightTheme = value; }); },
+          showPerformanceOverlay: _showPerformanceOverlay,
+          onShowPerformanceOverlayChanged: (bool value) { setState(() { _showPerformanceOverlay = value; }); },
           timeDilation: timeDilation,
           onTimeDilationChanged: (double value) { setState(() { timeDilation = value; }); }
         )
