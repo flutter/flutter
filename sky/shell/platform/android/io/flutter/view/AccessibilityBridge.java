@@ -28,7 +28,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
     private Map<Integer, PersistentAccessibilityNode> mTreeNodes;
     private FlutterView mOwner;
     private SemanticsServer.Proxy mSemanticsServer;
-    private boolean mAccessilibilyEnabled = true;
+    private boolean mAccessibilityEnabled = false;
     private PersistentAccessibilityNode mFocusedNode;
     private PersistentAccessibilityNode mHoveredNode;
 
@@ -42,7 +42,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
     }
 
     void setAccessibilityEnabled(boolean accessibilityEnabled) {
-        mAccessilibilyEnabled = accessibilityEnabled;
+        mAccessibilityEnabled = accessibilityEnabled;
     }
 
     @Override
@@ -121,8 +121,10 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
             result.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_ACCESSIBILITY_FOCUS);
         }
 
-        for (PersistentAccessibilityNode child : node.children) {
-            result.addChild(mOwner, child.id);
+        if (node.children != null) {
+            for (PersistentAccessibilityNode child : node.children) {
+                result.addChild(mOwner, child.id);
+            }
         }
 
         return result;
@@ -221,7 +223,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
     }
 
     private void sendAccessibilityEvent(int virtualViewId, int eventType) {
-        if (!mAccessilibilyEnabled) {
+        if (!mAccessibilityEnabled) {
             return;
         }
         if (virtualViewId == 0) {
@@ -257,8 +259,10 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
         if (mHoveredNode == node) {
             mHoveredNode = null;
         }
-        for (PersistentAccessibilityNode child : node.children) {
-            removePersistentNode(child);
+        if (node.children != null) {
+            for (PersistentAccessibilityNode child : node.children) {
+                removePersistentNode(child);
+            }
         }
     }
 
@@ -306,18 +310,22 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
             }
             if (node.children != null) {
                 List<PersistentAccessibilityNode> oldChildren = children;
-                children = new ArrayList<PersistentAccessibilityNode>(node.children.length);
                 if (oldChildren != null) {
                     for (PersistentAccessibilityNode child : oldChildren) {
                         assert child.parent != null;
                         child.parent = null;
                     }
                 }
-                for (SemanticsNode childNode : node.children) {
-                    PersistentAccessibilityNode child = AccessibilityBridge.this.updateSemanticsNode(childNode);
-                    assert child != null;
-                    child.parent = this;
-                    children.add(child);
+                if (node.children.length > 0) {
+                    children = new ArrayList<PersistentAccessibilityNode>(node.children.length);
+                    for (SemanticsNode childNode : node.children) {
+                        PersistentAccessibilityNode child = AccessibilityBridge.this.updateSemanticsNode(childNode);
+                        assert child != null;
+                        child.parent = this;
+                        children.add(child);
+                    }
+                } else {
+                    children = null;
                 }
                 if (oldChildren != null) {
                     for (PersistentAccessibilityNode child : oldChildren) {
@@ -361,8 +369,10 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
             geometryDirty = true;
             // TODO(ianh): if we are the AccessibilityBridge.this.mFocusedNode
             // then we may have to unfocus and refocus ourselves to get Android to update the focus rect
-            for (PersistentAccessibilityNode child : children) {
-                child.invalidateGlobalGeometry();
+            if (children != null) {
+                for (PersistentAccessibilityNode child : children) {
+                    child.invalidateGlobalGeometry();
+                }
             }
         }
 
@@ -429,11 +439,13 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
             Rect rect = getGlobalRect();
             if (!rect.contains(x, y))
                 return null;
-            for (int index = children.size()-1; index >= 0; index -= 1) {
-                PersistentAccessibilityNode child = children.get(index);
-                PersistentAccessibilityNode result = child.hitTest(x, y);
-                if (result != null) {
-                    return result;
+            if (children != null) {
+                for (int index = children.size()-1; index >= 0; index -= 1) {
+                    PersistentAccessibilityNode child = children.get(index);
+                    PersistentAccessibilityNode result = child.hitTest(x, y);
+                    if (result != null) {
+                        return result;
+                    }
                 }
             }
             return this;
