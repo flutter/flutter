@@ -34,4 +34,8 @@ executable("sky_snapshot") {
       "-lgcc_s",
     ]
   }
+
+  if (flutter_develop_mode) {
+    defines = [ "FLUTTER_DEVELOP_MODE=1" ]
+  }
 }
