@@ -7,13 +7,13 @@
 /// For example, this library includes [fetch], which fetches data from the
 /// network.
 ///
-/// This library depends only on core Dart libraries as well as the `mojo`,
-/// `mojo_services`, and `sky_services` and packages.
+/// This library depends only on core Dart libraries, the `mojo`,
+/// `mojo_services`, and `sky_services` packages, and the `foundation`
+/// Flutter library.
 library services;
 
 export 'src/services/activity.dart';
 export 'src/services/app_messages.dart';
-export 'src/services/assertions.dart';
 export 'src/services/asset_bundle.dart';
 export 'src/services/binding.dart';
 export 'src/services/fetch.dart';
@@ -21,4 +21,4 @@ export 'src/services/image_cache.dart';
 export 'src/services/image_decoder.dart';
 export 'src/services/image_resource.dart';
 export 'src/services/keyboard.dart';
-export 'src/services/print.dart';
+export 'src/services/shell.dart';

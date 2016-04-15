@@ -5,7 +5,7 @@
 import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphStyle, TextBox;
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
 import 'text_editing.dart';

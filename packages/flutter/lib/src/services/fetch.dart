@@ -4,12 +4,12 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:mojo/mojo/url_request.mojom.dart' as mojom;
 import 'package:mojo/mojo/url_response.mojom.dart' as mojom;
 import 'package:mojo_services/mojo/url_loader.mojom.dart' as mojom;
 
-import 'assertions.dart';
-import '../http/mojo_client.dart';
+import '../http/mojo_client.dart'; // TODO(ianh): clean this up, see https://github.com/flutter/flutter/issues/2889
 
 export 'package:mojo/mojo/url_response.mojom.dart' show UrlResponse;
 

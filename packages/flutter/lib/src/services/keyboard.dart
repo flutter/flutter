@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:sky_services/editing/editing.mojom.dart' as mojom;
 
-import 'binding.dart';
+import 'shell.dart';
 
 export 'package:sky_services/editing/editing.mojom.dart' show KeyboardType;
 

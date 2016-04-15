@@ -50,4 +50,5 @@ export 'src/widgets/transitions.dart';
 export 'src/widgets/unique_widget.dart';
 export 'src/widgets/virtual_viewport.dart';
 
+export 'package:flutter/foundation.dart';
 export 'package:vector_math/vector_math_64.dart' show Matrix4;

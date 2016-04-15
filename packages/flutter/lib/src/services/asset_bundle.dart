@@ -7,7 +7,6 @@ import 'dart:ui' as ui;
 import 'dart:typed_data';
 
 import 'package:flutter/http.dart' as http;
-
 import 'package:mojo/core.dart' as core;
 import 'package:mojo_services/mojo/asset_bundle/asset_bundle.mojom.dart';
 
@@ -15,7 +14,7 @@ import 'fetch.dart';
 import 'image_cache.dart';
 import 'image_decoder.dart';
 import 'image_resource.dart';
-import 'binding.dart';
+import 'shell.dart';
 
 abstract class AssetBundle {
   ImageResource loadImage(String key);

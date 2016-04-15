@@ -4,9 +4,10 @@
 
 import 'dart:async';
 
-import 'package:flutter/shell.dart';
 import 'package:mojo/core.dart' as core;
 import 'package:sky_services/flutter/platform/app_messages.mojom.dart';
+
+import 'shell.dart';
 
 // APIs for exchanging messages with the host application.
 
