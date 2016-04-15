@@ -13,13 +13,13 @@ import 'package:flutter/widgets.dart';
 final Random random = new Random();
 
 Future<String> handleGetRandom(String json) async {
-  Map message = JSON.decode(json);
+  Map<String, dynamic> message = JSON.decode(json);
   double min = message['min'].toDouble();
   double max = message['max'].toDouble();
 
   double value = (random.nextDouble() * (max - min)) + min;
 
-  Map reply = {'value': value};
+  Map<String, double> reply = <String, double>{'value': value};
   return JSON.encode(reply);
 }
 
@@ -51,13 +51,13 @@ class _HelloAndroidState extends State<HelloAndroid> {
   }
 
   void _getLocation() {
-    Map message = {'provider': 'network'};
+    Map<String, String> message = <String, String>{'provider': 'network'};
     HostMessages.sendToHost('getLocation', JSON.encode(message))
         .then(_onReceivedLocation);
   }
 
   void _onReceivedLocation(String json) {
-    Map reply = JSON.decode(json);
+    Map<String, double> reply = JSON.decode(json);
     setState(() {
       _latitude = reply['latitude'];
       _longitude = reply['longitude'];

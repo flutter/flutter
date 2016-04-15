@@ -1,4 +1,9 @@
 name: gradle
+
 dependencies:
   flutter:
     path: ../../../../../packages/flutter
+
+dev_dependencies:
+  flutter_test:
+    path: ../../../../../packages/flutter_test

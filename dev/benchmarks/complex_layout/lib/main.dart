@@ -457,7 +457,7 @@ class ItemGalleryBox extends StatelessWidget {
         child: new Column(
           children: <Widget>[
             new Flexible(
-              child: new TabBarView(
+              child: new TabBarView<String>(
                 children: tabNames.map((String tabName) {
                   return new Container(
                     key: new Key("Tab $index - $tabName"),
