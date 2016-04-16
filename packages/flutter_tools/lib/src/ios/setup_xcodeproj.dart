@@ -99,13 +99,9 @@ Future<int> setupXcodeProjectHarness(String flutterProjectPath) async {
   String iosFilesPath = path.join(flutterProjectPath, 'ios');
   String xcodeprojPath = path.join(iosFilesPath, '.generated');
 
-  Artifact xcodeProject = ArtifactStore.getArtifact(
-    type: ArtifactType.iosXcodeProject,
-    targetPlatform: TargetPlatform.ios
-  );
-
-  String xcodeProjectPath = ArtifactStore.getPath(xcodeProject);
-  List<int> archiveBytes = new File(xcodeProjectPath).readAsBytesSync();
+  Directory toolDir = tools.getEngineArtifactsDirectory(TargetPlatform.ios, BuildVariant.develop);
+  File archiveFile = new File(path.join(toolDir.path, 'FlutterXcode.zip'));
+  List<int> archiveBytes = archiveFile.readAsBytesSync();
 
   if (archiveBytes.isEmpty) {
     printError('Error: No archive bytes received.');

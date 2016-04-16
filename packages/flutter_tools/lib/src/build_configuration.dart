@@ -6,6 +6,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
+import 'base/utils.dart';
 import 'globals.dart';
 
 enum BuildType {
@@ -22,15 +23,15 @@ enum BuildVariant {
   deploy
 }
 
-String getVariantName(BuildVariant variant) {
-  String name = '$variant';
-  int index = name.indexOf('.');
-  return index == -1 ? name : name.substring(index + 1);
-}
+String getVariantName(BuildVariant variant) => getEnumName(variant);
 
 enum HostPlatform {
-  mac,
-  linux,
+  darwin_x64,
+  linux_x64,
+}
+
+String getNameForHostPlatform(HostPlatform platform) {
+  return getEnumName(platform).replaceAll('_', '-');
 }
 
 enum TargetPlatform {
@@ -41,13 +42,19 @@ enum TargetPlatform {
   linux_x64
 }
 
+String getNameForTargetPlatform(TargetPlatform platform) {
+  return getEnumName(platform).replaceAll('_', '-');
+}
+
 HostPlatform getCurrentHostPlatform() {
   if (Platform.isMacOS)
-    return HostPlatform.mac;
+    return HostPlatform.darwin_x64;
   if (Platform.isLinux)
-    return HostPlatform.linux;
+    return HostPlatform.linux_x64;
+
   printError('Unsupported host platform, defaulting to Linux');
-  return HostPlatform.linux;
+
+  return HostPlatform.linux_x64;
 }
 
 TargetPlatform getCurrentHostPlatformAsTarget() {

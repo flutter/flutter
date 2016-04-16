@@ -34,6 +34,13 @@ String camelCase(String str) {
 /// Return the plural of the given word (`cat(s)`).
 String pluralize(String word, int count) => count == 1 ? word : word + 's';
 
+/// Return the name of an enum item.
+String getEnumName(dynamic enumItem) {
+  String name = '$enumItem';
+  int index = name.indexOf('.');
+  return index == -1 ? name : name.substring(index + 1);
+}
+
 File getUniqueFile(Directory dir, String baseName, String ext) {
   int i = 1;
 

@@ -96,7 +96,6 @@ class RunCommand extends RunCommandBase {
 
     int result = await startApp(
       deviceForCommand,
-      applicationPackages,
       toolchain,
       buildConfigurations,
       target: target,
@@ -128,7 +127,6 @@ String _getMissingPackageHintForPlatform(TargetPlatform platform) {
 
 Future<int> startApp(
   Device device,
-  ApplicationPackageStore applicationPackages,
   Toolchain toolchain,
   List<BuildConfiguration> configs, {
   String target,
@@ -151,7 +149,7 @@ Future<int> startApp(
     return 1;
   }
 
-  ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
+  ApplicationPackage package = getApplicationPackageForPlatform(device.platform);
 
   if (package == null) {
     String message = 'No application found for ${device.platform}.';

@@ -15,16 +15,28 @@ import 'globals.dart';
 
 /// A warpper around the `bin/cache/` directory.
 class Cache {
+  /// [rootOverride] is configurable for testing.
+  Cache({ Directory rootOverride }) {
+    this._rootOverride = rootOverride;
+  }
+
+  Directory _rootOverride;
+
   static Cache get instance => context[Cache] ?? (context[Cache] = new Cache());
 
   /// Return the top-level directory in the cache; this is `bin/cache`.
-  Directory getRoot() => new Directory(path.join(ArtifactStore.flutterRoot, 'bin', 'cache'));
+  Directory getRoot() {
+    if (_rootOverride != null)
+      return new Directory(path.join(_rootOverride.path, 'bin', 'cache'));
+    else
+      return new Directory(path.join(ArtifactStore.flutterRoot, 'bin', 'cache'));
+  }
 
   /// Return a directory in the cache dir. For `pkg`, this will return `bin/cache/pkg`.
   Directory getCacheDir(String name) {
     Directory dir = new Directory(path.join(getRoot().path, name));
     if (!dir.existsSync())
-      dir.createSync();
+      dir.createSync(recursive: true);
     return dir;
   }
 

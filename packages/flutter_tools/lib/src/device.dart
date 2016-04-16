@@ -8,7 +8,6 @@ import 'dart:math' as math;
 
 import 'android/android_device.dart';
 import 'application_package.dart';
-import 'artifacts.dart';
 import 'base/common.dart';
 import 'base/utils.dart';
 import 'build_configuration.dart';
