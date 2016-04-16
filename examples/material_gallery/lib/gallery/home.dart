@@ -26,6 +26,7 @@ import '../demo/leave_behind_demo.dart';
 import '../demo/list_demo.dart';
 import '../demo/modal_bottom_sheet_demo.dart';
 import '../demo/menu_demo.dart';
+import '../demo/overscroll_demo.dart';
 import '../demo/page_selector_demo.dart';
 import '../demo/persistent_bottom_sheet_demo.dart';
 import '../demo/progress_indicator_demo.dart';
@@ -133,6 +134,7 @@ class GalleryHomeState extends State<GalleryHome> {
               new GalleryItem(title: 'List', builder: () => new ListDemo()),
               new GalleryItem(title: 'Menus', builder: () => new MenuDemo()),
               new GalleryItem(title: 'Modal bottom sheet', builder: () => new ModalBottomSheetDemo()),
+              new GalleryItem(title: 'Over-scroll', builder: () => new OverscrollDemo()),
               new GalleryItem(title: 'Page selector', builder: () => new PageSelectorDemo()),
               new GalleryItem(title: 'Persistent bottom sheet', builder: () => new PersistentBottomSheetDemo()),
               new GalleryItem(title: 'Progress indicators', builder: () => new ProgressIndicatorDemo()),

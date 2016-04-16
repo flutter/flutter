@@ -1242,7 +1242,7 @@ class Stack extends StackRenderObjectWidgetBase {
   }
 }
 
-/// A [Stack] that shows a single child at once.
+/// A [Stack] that shows a single child from a list of children.
 class IndexedStack extends StackRenderObjectWidgetBase {
   IndexedStack({
     Key key,

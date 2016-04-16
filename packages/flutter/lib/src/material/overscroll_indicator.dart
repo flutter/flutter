@@ -174,6 +174,7 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
   void dispose() {
     _hideTimer?.cancel();
     _hideTimer = null;
+    _extentAnimation.dispose();
     super.dispose();
   }
 
