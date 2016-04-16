@@ -59,6 +59,7 @@ class FlutterDriverExtension {
       'tap': tap,
       'get_text': getText,
       'scroll': scroll,
+      'waitFor': waitFor,
     };
 
     _commandDeserializers = <String, CommandDeserializerCallback>{
@@ -66,6 +67,7 @@ class FlutterDriverExtension {
       'tap': Tap.deserialize,
       'get_text': GetText.deserialize,
       'scroll': Scroll.deserialize,
+      'waitFor': WaitFor.deserialize,
     };
 
     _finders = <String, FinderCallback>{
@@ -168,6 +170,13 @@ class FlutterDriverExtension {
     Element target = await _runFinder(command.finder);
     prober.tap(target);
     return new TapResult();
+  }
+
+  Future<WaitForResult> waitFor(WaitFor command) async {
+    if (await _runFinder(command.finder) != null)
+      return new WaitForResult();
+    else
+      return null;
   }
 
   Future<ScrollResult> scroll(Scroll command) async {

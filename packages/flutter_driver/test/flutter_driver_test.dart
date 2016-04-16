@@ -10,7 +10,6 @@ import 'package:flutter_driver/src/health.dart';
 import 'package:flutter_driver/src/timeline.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:mockito/mockito.dart';
-import 'package:quiver/testing/async.dart';
 import 'package:test/test.dart';
 import 'package:vm_service_client/vm_service_client.dart';
 
@@ -180,54 +179,21 @@ void main() {
     });
 
     group('waitFor', () {
-      test('waits for a condition', () {
-        expect(
-          driver.waitFor(() {
-            return new Future<int>.delayed(
-              new Duration(milliseconds: 50),
-              () => 123
-            );
-          }, equals(123)),
-          completion(123)
-        );
+      test('requires a target reference', () async {
+        expect(driver.waitFor(null), throwsA(new isInstanceOf<DriverError>()));
       });
 
-      test('retries a correct number of times', () {
-        new FakeAsync().run((FakeAsync fakeAsync) {
-          int retryCount = 0;
-
-          expect(
-            driver.waitFor(
-              () {
-                retryCount++;
-                return retryCount;
-              },
-              equals(2),
-              timeout: new Duration(milliseconds: 30),
-              pauseBetweenRetries: new Duration(milliseconds: 10)
-            ),
-            completion(2)
-          );
-
-          fakeAsync.elapse(new Duration(milliseconds: 50));
-
-          // Check that we didn't retry more times than necessary
-          expect(retryCount, 2);
+      test('sends the waitFor command', () async {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          expect(i.positionalArguments[1], <String, dynamic>{
+            'command': 'waitFor',
+            'finderType': 'ByTooltipMessage',
+            'text': 'foo',
+            'timeout': '1000',
+          });
+          return new Future<Map<String, dynamic>>.value({});
         });
-      });
-
-      test('times out', () async {
-        bool timedOut = false;
-        await driver.waitFor(
-          () => 1,
-          equals(2),
-          timeout: new Duration(milliseconds: 10),
-          pauseBetweenRetries: new Duration(milliseconds: 2)
-        ).catchError((dynamic err, dynamic stack) {
-          timedOut = true;
-        });
-
-        expect(timedOut, isTrue);
+        await driver.waitFor(find.byTooltip('foo'), timeout: new Duration(seconds: 1));
       });
     });
 
