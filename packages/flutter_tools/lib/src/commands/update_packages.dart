@@ -5,24 +5,9 @@
 import 'dart:async';
 import 'dart:io';
 
-import '../artifacts.dart';
 import '../dart/pub.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
-
-/// Return the total number of projects run; throws the exit code on error.
-Future<int> _runPub(Directory directory, { bool upgrade: false }) async {
-  int updateCount = 0;
-  for (FileSystemEntity dir in directory.listSync()) {
-    if (dir is Directory && FileSystemEntity.isFileSync(dir.path + Platform.pathSeparator + 'pubspec.yaml')) {
-      updateCount++;
-      int code = await pubGet(directory: dir.path, upgrade: upgrade, checkLastModified: false);
-      if (code != 0)
-        throw code;
-    }
-  }
-  return updateCount;
-}
 
 class UpdatePackagesCommand extends FlutterCommand {
   UpdatePackagesCommand({ this.hidden: false }) {
@@ -52,10 +37,12 @@ class UpdatePackagesCommand extends FlutterCommand {
       int count = 0;
       bool upgrade = argResults['upgrade'];
 
-      count += await _runPub(new Directory("${ArtifactStore.flutterRoot}/packages"), upgrade: upgrade);
-      count += await _runPub(new Directory("${ArtifactStore.flutterRoot}/examples"), upgrade: upgrade);
-      count += await _runPub(new Directory("${ArtifactStore.flutterRoot}/dev"), upgrade: upgrade);
-      count += await _runPub(new Directory("${ArtifactStore.flutterRoot}/dev/benchmarks"), upgrade: upgrade);
+      for (Directory dir in runner.getRepoPackages()) {
+        int code = await pubGet(directory: dir.path, upgrade: upgrade, checkLastModified: false);
+        if (code != 0)
+          throw code;
+        count++;
+      }
 
       double seconds = timer.elapsedMilliseconds / 1000.0;
       printStatus('\nRan \'pub\' $count time${count == 1 ? "" : "s"} in ${seconds.toStringAsFixed(1)}s.');

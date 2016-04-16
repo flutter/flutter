@@ -390,4 +390,25 @@ class FlutterCommandRunner extends CommandRunner {
     if (ArtifactStore.flutterRoot == null)
       ArtifactStore.flutterRoot = _defaultFlutterRoot;
   }
+
+  /// Get all pub packages in the Flutter repo.
+  List<Directory> getRepoPackages() {
+    return _gatherProjectPaths(path.absolute(ArtifactStore.flutterRoot))
+      .map((String dir) => new Directory(dir))
+      .toList();
+  }
+
+  static List<String> _gatherProjectPaths(String rootPath) {
+    if (FileSystemEntity.isFileSync(path.join(rootPath, '.dartignore')))
+      return <String>[];
+
+    if (FileSystemEntity.isFileSync(path.join(rootPath, 'pubspec.yaml')))
+      return <String>[rootPath];
+
+    return new Directory(rootPath)
+      .listSync(followLinks: false)
+      .expand((FileSystemEntity entity) {
+        return entity is Directory ? _gatherProjectPaths(entity.path) : <String>[];
+      });
+  }
 }

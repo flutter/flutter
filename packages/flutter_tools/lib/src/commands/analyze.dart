@@ -89,18 +89,6 @@ void _addPackage(String directoryPath, List<String> dartFiles, Set<String> pubSp
     pubSpecDirectories.add(directoryPath);
 }
 
-/// Adds all packages in [subPath], assuming a flat directory structure, i.e.
-/// each direct child of [subPath] is a plain Dart package.
-void _addFlatPackageList(String subPath, List<String> dartFiles, Set<String> pubSpecDirectories) {
-  Directory subdirectory = new Directory(path.join(ArtifactStore.flutterRoot, subPath));
-  if (subdirectory.existsSync()) {
-    for (FileSystemEntity entry in subdirectory.listSync()) {
-      if (entry is Directory)
-        _addPackage(entry.path, dartFiles, pubSpecDirectories);
-    }
-  }
-}
-
 class FileChanged { }
 
 class AnalyzeCommand extends FlutterCommand {
@@ -199,8 +187,8 @@ class AnalyzeCommand extends FlutterCommand {
       //dev/manual_tests/*/ as package
       //dev/manual_tests/*/ as files
 
-      _addFlatPackageList('packages', dartFiles, pubSpecDirectories);
-      _addFlatPackageList('examples', dartFiles, pubSpecDirectories);
+      for (Directory dir in runner.getRepoPackages())
+        _addPackage(dir.path, dartFiles, pubSpecDirectories);
 
       Directory subdirectory;
 
@@ -235,7 +223,6 @@ class AnalyzeCommand extends FlutterCommand {
         if (foundOne)
           pubSpecDirectories.add(subdirectory.path);
       }
-
     }
 
     dartFiles = dartFiles.map((String directory) => path.normalize(path.absolute(directory))).toSet().toList();
@@ -453,12 +440,7 @@ class AnalyzeCommand extends FlutterCommand {
     List<String> directories;
 
     if (argResults['flutter-repo']) {
-      String root = path.absolute(ArtifactStore.flutterRoot);
-
-      directories = <String>[];
-      directories.addAll(_gatherProjectPaths(path.join(root, 'examples')));
-      directories.addAll(_gatherProjectPaths(path.join(root, 'packages')));
-      directories.addAll(_gatherProjectPaths(path.join(root, 'dev')));
+      directories = runner.getRepoPackages().map((Directory dir) => dir.path).toList();
       printStatus('Analyzing Flutter repository (${directories.length} projects).');
       for (String projectPath in directories)
         printTrace('  ${path.relative(projectPath)}');
@@ -550,17 +532,6 @@ class AnalyzeCommand extends FlutterCommand {
       return true;
 
     return false;
-  }
-
-  List<String> _gatherProjectPaths(String rootPath) {
-    if (FileSystemEntity.isFileSync(path.join(rootPath, 'pubspec.yaml')))
-      return <String>[rootPath];
-
-    return new Directory(rootPath)
-      .listSync(followLinks: false)
-      .expand((FileSystemEntity entity) {
-        return entity is Directory ? _gatherProjectPaths(entity.path) : <String>[];
-      });
   }
 }
 
