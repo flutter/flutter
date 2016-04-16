@@ -98,6 +98,8 @@ class ToolConfiguration {
   /// Used to override the directory calculated from engineSrcPath (--engine-out-dir).
   String engineOutDir;
 
+  String get _modeStr => release ? 'Release' : 'Debug';
+
   /// The directory that contains development tools for the given platform. This
   /// includes things like `sky_shell` and `sky_snapshot`.
   ///
@@ -113,8 +115,7 @@ class ToolConfiguration {
     platform ??= getCurrentHostPlatform();
 
     if (engineSrcPath != null) {
-      String toolsDir = release ? 'out/Release' : 'out/Debug';
-      return new Directory(path.join(engineSrcPath, toolsDir));
+      return new Directory(path.join(engineSrcPath, 'out/$_modeStr'));
     } else {
       Directory engineDir = _cache.getArtifactDirectory('engine');
       return new Directory(path.join(engineDir.path, getNameForHostPlatform(platform)));
@@ -134,7 +135,6 @@ class ToolConfiguration {
     if (engineOutDir != null) {
       return new Directory(engineOutDir);
     } else if (engineSrcPath != null) {
-      String mode = release ? 'Release' : 'Debug';
       String type;
 
       switch (platform) {
@@ -157,7 +157,7 @@ class ToolConfiguration {
       }
 
       // Return something like 'out/android_Release'.
-      return new Directory(path.join(engineSrcPath, 'out/${type}_$mode'));
+      return new Directory(path.join(engineSrcPath, 'out/${type}_$_modeStr'));
     } else {
       // TODO(devoncarew): We'll want to suffix the directory name with the variant.
 
