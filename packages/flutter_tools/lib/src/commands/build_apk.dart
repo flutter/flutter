@@ -323,7 +323,7 @@ int _buildApk(
     apkShaFile.writeAsStringSync(calculateSha(finalApk));
 
     double size = finalApk.lengthSync() / (1024 * 1024);
-    printStatus('Built ${finalApk.path} (${size.toStringAsFixed(2)}MB).');
+    printStatus('Built ${finalApk.path} (${size.toStringAsFixed(1)}MB).');
 
     return 0;
   } finally {

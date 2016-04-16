@@ -47,7 +47,7 @@ class BuildIOSCommand extends FlutterCommand {
 
     String logTarget = forSimulator ? "simulator" : "device";
 
-    printStatus('Building ${app} for $logTarget...');
+    printStatus('Building $app for $logTarget...');
 
     bool result = await buildIOSXcodeProject(app,
         buildForDevice: !forSimulator, codesign: shouldCodesign);
