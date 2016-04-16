@@ -28,9 +28,10 @@ const Duration _kIndicatorSnapDuration = const Duration(milliseconds: 150);
 // has completed.
 const Duration _kIndicatorScaleDuration = const Duration(milliseconds: 200);
 
-/// A function that's called when the user has dragged the refresh indicator
-/// far enough to demonstrate that they want the app to refresh. The returned
-/// Future must complete when the refresh operation is finished.
+/// The signature for a function that's called when the user has dragged the
+/// refresh indicator far enough to demonstrate that they want the app to
+/// refresh. The returned Future must complete when the refresh operation
+/// is finished.
 typedef Future<Null> RefreshCallback();
 
 /// Where the refresh indicator appears: top for over-scrolls at the
@@ -59,6 +60,7 @@ class RefreshIndicator extends StatefulWidget {
     this.refresh
   }) : super(key: key) {
     assert(child != null);
+    assert(refresh != null);
   }
 
   /// Identifies the [Scrollable] descendant of child that will cause the
@@ -117,6 +119,13 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
     ));
   }
 
+  @override
+  void dispose() {
+    _sizeController.dispose();
+    _scaleController.dispose();
+    super.dispose();
+  }
+
   void _updateState(ScrollableState scrollable) {
     final Axis axis = scrollable.config.scrollDirection;
     if (axis != Axis.vertical || scrollable.scrollBehavior is! ExtentScrollBehavior)
@@ -158,16 +167,10 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
     _updateState(scrollable);
   }
 
-  Future<Null> _defaultRefresh() {
-    Completer<Null> completer = new Completer<Null>();
-    new Timer(new Duration(seconds: 3), () { completer.complete(null); });
-    return completer.future;
-  }
-
   Future<Null> _doOnScrollEnded(ScrollableState scrollable) async {
     if (_valueColor.value.alpha == 0xFF) {
       await _sizeController.animateTo(1.0 / _kDragSizeFactorLimit, duration: _kIndicatorSnapDuration);
-      await (config.refresh ?? _defaultRefresh)();
+      await config.refresh();
     }
     return _scaleController.animateTo(1.0, duration: _kIndicatorScaleDuration);
   }

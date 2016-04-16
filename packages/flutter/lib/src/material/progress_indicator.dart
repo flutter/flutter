@@ -50,8 +50,8 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// the current theme's backgroundColor.
   final Color backgroundColor;
 
-  /// The indicator's color is the animation's value.To specify a constant
-  /// color use: `new ColorTween(end: color).animate(kAlwaysCompleteAnimation)`.
+  /// The indicator's color is the animation's value. To specify a constant
+  /// color use: `new AlwaysStoppedAnimation<Color>(color)`.
   ///
   /// If null, the progress indicator is rendered with the current theme's primaryColor.
   final Animation<Color> valueColor;
@@ -156,7 +156,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> {
 
   @override
   void dispose() {
-    _controller.stop();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -200,21 +200,23 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 
   _CircularProgressIndicatorPainter({
     this.valueColor,
-    this.value,
-    this.headValue,
-    this.tailValue,
-    this.stepValue,
-    this.rotationValue,
+    double value,
+    double headValue,
+    double tailValue,
+    int stepValue,
+    double rotationValue,
     this.strokeWidth
-  }) {
-    if (value != null) { // Determinate progress indicator.
-      arcStart = _kStartAngle;
-      arcSweep = value.clamp(0.0, 1.0) * _kSweep;
-    } else {
-      arcStart = _kStartAngle + tailValue * 3 / 2 * math.PI + rotationValue * math.PI * 1.7 - stepValue * 0.8 * math.PI;
-      arcSweep = math.max(headValue * 3 / 2 * math.PI - tailValue * 3 / 2 * math.PI, _kEpsilon);
-    }
-  }
+  }) : this.value = value,
+       this.headValue = headValue,
+       this.tailValue = tailValue,
+       this.stepValue = stepValue,
+       this.rotationValue = rotationValue,
+       arcStart = value != null
+         ? _kStartAngle
+         : _kStartAngle + tailValue * 3 / 2 * math.PI + rotationValue * math.PI * 1.7 - stepValue * 0.8 * math.PI,
+       arcSweep = value != null
+         ? value.clamp(0.0, 1.0) * _kSweep
+         : math.max(headValue * 3 / 2 * math.PI - tailValue * 3 / 2 * math.PI, _kEpsilon);
 
   final Color valueColor;
   final double value;
@@ -223,8 +225,8 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
   final int stepValue;
   final double rotationValue;
   final double strokeWidth;
-  double arcStart;
-  double arcSweep;
+  final double arcStart;
+  final double arcSweep;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -318,7 +320,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> {
 
   @override
   void dispose() {
-    _controller.stop();
+    _controller.dispose();
     super.dispose();
   }
 

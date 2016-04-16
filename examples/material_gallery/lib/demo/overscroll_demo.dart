@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 enum IndicatorType { overscroll, refresh }
@@ -19,6 +21,13 @@ class OverscrollDemoState extends State<OverscrollDemo> {
   ];
 
   IndicatorType _type = IndicatorType.refresh;
+
+  Future<Null> refresh() {
+    Completer<Null> completer = new Completer<Null>();
+    new Timer(new Duration(seconds: 3), () { completer.complete(null); });
+    return completer.future;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +58,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
         body = new OverscrollIndicator(child: body);
         break;
       case IndicatorType.refresh:
-        body = new RefreshIndicator(child: body);
+        body = new RefreshIndicator(child: body, refresh: refresh);
         break;
     }
 

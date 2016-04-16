@@ -20,8 +20,8 @@ import 'instrumentation.dart';
 ///     test('MyWidget', () {
 ///        testWidgets((WidgetTester tester) {
 ///          tester.pumpWidget(new MyWidget());
-///          tester.tap(find.byText('Save'));
-///          expect(tester, hasWidget(find.byText('Success')));
+///          tester.tap(find.text('Save'));
+///          expect(tester, hasWidget(find.text('Success')));
 ///        });
 ///     });
 void testWidgets(void callback(WidgetTester widgetTester)) {
@@ -34,7 +34,7 @@ void testWidgets(void callback(WidgetTester widgetTester)) {
 ///
 /// Examples:
 ///
-///     tester.tap(find.byText('Save'));
+///     tester.tap(find.text('Save'));
 ///     tester.widget(find.byType(MyWidget));
 ///     tester.stateOf(find.byConfig(config));
 ///     tester.getSize(find.byKey(new ValueKey('save-button')));
@@ -44,7 +44,7 @@ const CommonFinders find = const CommonFinders._();
 ///
 /// Example:
 ///
-///     expect(tester, hasWidget(find.byText('Save')));
+///     expect(tester, hasWidget(find.text('Save')));
 Matcher hasWidget(Finder finder) => new _HasWidgetMatcher(finder);
 
 /// Opposite of [hasWidget].
