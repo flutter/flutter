@@ -98,6 +98,8 @@ class ToolConfiguration {
   /// Used to override the directory calculated from engineSrcPath (--engine-out-dir).
   String engineOutDir;
 
+  bool get isLocalEngine => engineSrcPath != null || engineOutDir != null;
+
   String get _modeStr => release ? 'Release' : 'Debug';
 
   /// The directory that contains development tools for the given platform. This
@@ -159,9 +161,11 @@ class ToolConfiguration {
       // Return something like 'out/android_Release'.
       return new Directory(path.join(engineSrcPath, 'out/${type}_$_modeStr'));
     } else {
-      // TODO(devoncarew): We'll want to suffix the directory name with the variant.
+      // For now, only suffix for deploy variants.
+      String suffix = variant == BuildVariant.deploy ? '-${getVariantName(variant)}' : '';
 
-      String dirName = getNameForTargetPlatform(platform);
+      // Create something like `android-arm` or `android-arm-deploy`.
+      String dirName = getNameForTargetPlatform(platform) + suffix;
       Directory engineDir = _cache.getArtifactDirectory('engine');
       return new Directory(path.join(engineDir.path, dirName));
     }

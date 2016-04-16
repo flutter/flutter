@@ -38,7 +38,7 @@ void main() {
       );
       expect(
         toolConfig.getEngineArtifactsDirectory(TargetPlatform.android_arm, BuildVariant.deploy).path,
-        endsWith('cache/artifacts/engine/android-arm')
+        endsWith('cache/artifacts/engine/android-arm-deploy')
       );
     });
 
