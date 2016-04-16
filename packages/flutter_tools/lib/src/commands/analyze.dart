@@ -187,9 +187,8 @@ class AnalyzeCommand extends FlutterCommand {
       //dev/manual_tests/*/ as package
       //dev/manual_tests/*/ as files
 
-      for (Directory dir in runner.getRepoPackages()) {
+      for (Directory dir in runner.getRepoPackages())
         _addPackage(dir.path, dartFiles, pubSpecDirectories);
-      }
 
       Directory subdirectory;
 
