@@ -22,6 +22,23 @@ bool isDartFile(FileSystemEntity entry) => entry is File && entry.path.endsWith(
 bool isDartTestFile(FileSystemEntity entry) => entry is File && entry.path.endsWith('_test.dart');
 bool isDartBenchmarkFile(FileSystemEntity entry) => entry is File && entry.path.endsWith('_bench.dart');
 
+RegExp _testFileParser = new RegExp(r'^(.+)_test(\.dart)$');
+
+void _addDriverTest(FileSystemEntity entry, List<String> dartFiles) {
+  if (isDartTestFile(entry)) {
+    final String testFileName = entry.path;
+    dartFiles.add(testFileName);
+    Match groups = _testFileParser.firstMatch(testFileName);
+    assert(groups.groupCount == 2);
+    final String hostFileName = '${groups[1]}${groups[2]}';
+    File hostFile = new File(hostFileName);
+    if (hostFile.existsSync()) {
+      assert(isDartFile(hostFile));
+      dartFiles.add(hostFileName);
+    }
+  }
+}
+
 void _addPackage(String directoryPath, List<String> dartFiles, Set<String> pubSpecDirectories) {
   final int originalDartFilesCount = dartFiles.length;
 
@@ -61,12 +78,10 @@ void _addPackage(String directoryPath, List<String> dartFiles, Set<String> pubSp
   if (testDriverDirectory.existsSync()) {
     for (FileSystemEntity entry in testDriverDirectory.listSync()) {
       if (entry is Directory) {
-        for (FileSystemEntity subentry in entry.listSync()) {
-          if (isDartTestFile(subentry))
-            dartFiles.add(subentry.path);
-        }
+        for (FileSystemEntity subentry in entry.listSync())
+          _addDriverTest(subentry, dartFiles);
       } else if (isDartTestFile(entry)) {
-        dartFiles.add(entry.path);
+        _addDriverTest(entry, dartFiles);
       }
     }
   }
