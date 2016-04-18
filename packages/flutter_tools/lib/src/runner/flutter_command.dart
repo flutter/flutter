@@ -70,6 +70,9 @@ abstract class FlutterCommand extends Command {
   }
 
   BuildMode getBuildMode() {
+    if (argResults['debug'] && argResults['deploy'])
+      throw new UsageException('Only one of --debug or --deploy should be specified.', null);
+
     BuildMode mode = BuildMode.debug;
     if (argResults['deploy'])
       mode = BuildMode.deploy;
