@@ -243,8 +243,9 @@ Future<int> startApp(DriveCommand command) async {
   if (command.device is AndroidDevice) {
     printTrace('Building an APK.');
     int result = await build_apk.buildApk(
-      command.device.platform, command.toolchain, command.buildConfigurations,
-      enginePath: command.runner.enginePath, target: command.target
+      command.device.platform,
+      command.toolchain,
+      target: command.target
     );
 
     if (result != 0)

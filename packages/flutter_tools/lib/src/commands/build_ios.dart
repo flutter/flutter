@@ -30,7 +30,7 @@ class BuildIOSCommand extends FlutterCommand {
       return 1;
     }
 
-    IOSApp app = applicationPackages.iOS;
+    IOSApp app = applicationPackages.getPackageForPlatform(TargetPlatform.ios);
 
     if (app == null) {
       printError('Application not configured for iOS');
@@ -47,7 +47,7 @@ class BuildIOSCommand extends FlutterCommand {
 
     String logTarget = forSimulator ? "simulator" : "device";
 
-    printStatus('Building the application for $logTarget.');
+    printStatus('Building $app for $logTarget...');
 
     bool result = await buildIOSXcodeProject(app,
         buildForDevice: !forSimulator, codesign: shouldCodesign);

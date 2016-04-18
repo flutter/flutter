@@ -184,18 +184,31 @@ class FlutterEngine {
 
   final Cache cache;
 
+  List<String> _getPackageDirs() => <String>['sky_engine', 'sky_services'];
+
   List<String> _getEngineDirs() {
-    List<String> dirs = <String>['android-arm', 'android-x64'];
+    List<String> dirs = <String>[
+      'android-arm',
+      'android-arm-deploy',
+      'android-x64'
+    ];
 
     if (Platform.isMacOS)
-      dirs.addAll(<String>['ios', 'darwin-x64']);
+      dirs.add('ios');
     else if (Platform.isLinux)
       dirs.add('linux-x64');
 
     return dirs;
   }
 
-  List<String> _getPackageDirs() => <String>['sky_engine', 'sky_services'];
+  List<String> _getToolsDirs() {
+    if (Platform.isMacOS)
+      return <String>['darwin-x64'];
+    else if (Platform.isLinux)
+      return <String>['linux-x64'];
+    else
+      return <String>[];
+  }
 
   bool isUpToDate() {
     Directory pkgDir = cache.getCacheDir('pkg');
@@ -207,6 +220,12 @@ class FlutterEngine {
 
     Directory engineDir = cache.getArtifactDirectory(kName);
     for (String dirName in _getEngineDirs()) {
+      Directory dir = new Directory(path.join(engineDir.path, dirName));
+      if (!dir.existsSync())
+        return false;
+    }
+
+    for (String dirName in _getToolsDirs()) {
       Directory dir = new Directory(path.join(engineDir.path, dirName));
       if (!dir.existsSync())
         return false;
@@ -235,6 +254,14 @@ class FlutterEngine {
       Directory dir = new Directory(path.join(engineDir.path, dirName));
       if (!dir.existsSync() || allDirty) {
         await _downloadItem('Downloading engine artifacts $dirName...',
+          url + dirName + '/artifacts.zip', dir);
+      }
+    }
+
+    for (String dirName in _getToolsDirs()) {
+      Directory dir = new Directory(path.join(engineDir.path, dirName));
+      if (!dir.existsSync() || allDirty) {
+        await _downloadItem('Downloading engine tools $dirName...',
           url + dirName + '/artifacts.zip', dir);
         _makeFilesExecutable(dir);
       }

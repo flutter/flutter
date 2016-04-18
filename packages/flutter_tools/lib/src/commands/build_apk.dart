@@ -8,7 +8,6 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../android/android_sdk.dart';
-import '../artifacts.dart';
 import '../base/file_system.dart' show ensureDirectoryExists;
 import '../base/os.dart';
 import '../base/process.dart';
@@ -207,8 +206,6 @@ class BuildApkCommand extends FlutterCommand {
       TargetPlatform.android_arm,
       variant,
       toolchain: toolchain,
-      configs: buildConfigurations,
-      enginePath: runner.enginePath,
       force: true,
       manifest: argResults['manifest'],
       resources: argResults['resources'],
@@ -227,51 +224,43 @@ class BuildApkCommand extends FlutterCommand {
 
 Future<_ApkComponents> _findApkComponents(
   TargetPlatform platform,
-  BuildConfiguration config,
-  String enginePath,
+  BuildVariant buildVariant,
   String manifest,
-  String resources,
-  BuildVariant buildVariant
+  String resources
 ) async {
-  // TODO(devoncarew): Get the right artifacts for [buildVariant].
-
-  List<String> artifactPaths;
-  if (enginePath != null) {
-    String abiDir = platform == TargetPlatform.android_arm ? 'armeabi-v7a' : 'x86_64';
-    artifactPaths = [
-      '$enginePath/third_party/icu/android/icudtl.dat',
-      '${config.buildDir}/gen/sky/shell/shell/classes.dex.jar',
-      '${config.buildDir}/gen/sky/shell/shell/shell/libs/$abiDir/libsky_shell.so',
-      '$enginePath/build/android/ant/chromium-debug.keystore',
-    ];
-  } else {
-    List<ArtifactType> artifactTypes = <ArtifactType>[
-      ArtifactType.androidIcuData,
-      ArtifactType.androidClassesJar,
-      ArtifactType.androidLibSkyShell,
-      ArtifactType.androidKeystore,
-    ];
-    artifactPaths = artifactTypes.map((ArtifactType type) {
-      return ArtifactStore.getPath(ArtifactStore.getArtifact(
-        type: type,
-        targetPlatform: config.targetPlatform
-      ));
-    }).toList();
-  }
-
   _ApkComponents components = new _ApkComponents();
   components.manifest = new File(manifest);
-  components.icuData = new File(artifactPaths[0]);
-  components.jars = [new File(artifactPaths[1])];
-  components.libSkyShell = new File(artifactPaths[2]);
-  components.debugKeystore = new File(artifactPaths[3]);
   components.resources = resources == null ? null : new Directory(resources);
+
+  if (tools.isLocalEngine) {
+    String abiDir = platform == TargetPlatform.android_arm ? 'armeabi-v7a' : 'x86_64';
+    String enginePath = tools.engineSrcPath;
+    String buildDir = tools.getEngineArtifactsDirectory(platform, buildVariant).path;
+
+    components.icuData = new File('$enginePath/third_party/icu/android/icudtl.dat');
+    components.jars = <File>[
+      new File('$buildDir/gen/sky/shell/shell/classes.dex.jar')
+    ];
+    components.libSkyShell = new File('$buildDir/gen/sky/shell/shell/shell/libs/$abiDir/libsky_shell.so');
+    components.debugKeystore = new File('$enginePath/build/android/ant/chromium-debug.keystore');
+  } else {
+    Directory artifacts = tools.getEngineArtifactsDirectory(platform, buildVariant);
+
+    components.icuData = new File(path.join(artifacts.path, 'icudtl.dat'));
+    components.jars = <File>[
+      new File(path.join(artifacts.path, 'classes.dex.jar'))
+    ];
+    components.libSkyShell = new File(path.join(artifacts.path, 'libsky_shell.so'));
+    components.debugKeystore = new File(path.join(artifacts.path, 'chromium-debug.keystore'));
+  }
 
   await parseServiceConfigs(components.services, jars: components.jars);
 
-  for (File file in <File>[
+  List<File> allFiles = <File>[
     components.manifest, components.icuData, components.libSkyShell, components.debugKeystore
-  ]..addAll(components.jars)) {
+  ]..addAll(components.jars);
+
+  for (File file in allFiles) {
     if (!file.existsSync()) {
       printError('Cannot locate file: ${file.path}');
       return null;
@@ -333,7 +322,8 @@ int _buildApk(
     File apkShaFile = new File('$outputFile.sha1');
     apkShaFile.writeAsStringSync(calculateSha(finalApk));
 
-    printStatus('Generated APK to ${finalApk.path}.');
+    double size = finalApk.lengthSync() / (1024 * 1024);
+    printStatus('Built ${finalApk.path} (${size.toStringAsFixed(1)}MB).');
 
     return 0;
   } finally {
@@ -403,8 +393,6 @@ Future<int> buildAndroid(
   TargetPlatform platform,
   BuildVariant buildVariant, {
   Toolchain toolchain,
-  List<BuildConfiguration> configs,
-  String enginePath,
   bool force: false,
   String manifest: _kDefaultAndroidManifestPath,
   String resources,
@@ -441,17 +429,17 @@ Future<int> buildAndroid(
       resources = _kDefaultResourcesPath;
   }
 
-  BuildConfiguration config = configs.firstWhere((BuildConfiguration bc) => bc.targetPlatform == platform);
   _ApkComponents components = await _findApkComponents(
-    platform, config, enginePath, manifest, resources, buildVariant
+    platform, buildVariant, manifest, resources
   );
 
   if (components == null) {
-    printError('Failure building APK. Unable to find components.');
+    printError('Failure building APK: unable to find components.');
     return 1;
   }
 
-  printStatus('Building APK in ${getVariantName(buildVariant)} mode...');
+  String typeName = path.basename(tools.getEngineArtifactsDirectory(platform, buildVariant).path);
+  printStatus('Building APK in ${getVariantName(buildVariant)} mode ($typeName)...');
 
   if (flxPath != null && flxPath.isNotEmpty) {
     if (!FileSystemEntity.isFileSync(flxPath)) {
@@ -475,14 +463,12 @@ Future<int> buildAndroid(
 
 Future<int> buildApk(
   TargetPlatform platform,
-  Toolchain toolchain,
-  List<BuildConfiguration> configs, {
-  String enginePath,
+  Toolchain toolchain, {
   String target,
   BuildVariant buildVariant: BuildVariant.develop
 }) async {
   if (!FileSystemEntity.isFileSync(_kDefaultAndroidManifestPath)) {
-    printError('Cannot build APK. Missing $_kDefaultAndroidManifestPath.');
+    printError('Cannot build APK: missing $_kDefaultAndroidManifestPath.');
     return 1;
   }
 
@@ -490,8 +476,6 @@ Future<int> buildApk(
     platform,
     buildVariant,
     toolchain: toolchain,
-    configs: configs,
-    enginePath: enginePath,
     force: false,
     target: target
   );

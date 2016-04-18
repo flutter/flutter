@@ -97,7 +97,6 @@ class RunCommand extends RunCommandBase {
     int result = await startApp(
       deviceForCommand,
       toolchain,
-      buildConfigurations,
       target: target,
       enginePath: runner.enginePath,
       install: true,
@@ -127,8 +126,7 @@ String _getMissingPackageHintForPlatform(TargetPlatform platform) {
 
 Future<int> startApp(
   Device device,
-  Toolchain toolchain,
-  List<BuildConfiguration> configs, {
+  Toolchain toolchain, {
   String target,
   String enginePath,
   bool stop: true,
@@ -165,8 +163,8 @@ Future<int> startApp(
     printTrace('Running build command.');
 
     int result = await buildApk(
-      device.platform, toolchain, configs,
-      enginePath: enginePath,
+      device.platform,
+      toolchain,
       target: target,
       buildVariant: BuildVariant.develop
     );

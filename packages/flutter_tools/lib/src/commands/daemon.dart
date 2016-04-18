@@ -265,7 +265,6 @@ class AppDomain extends Domain {
       int result = await startApp(
         device,
         command.toolchain,
-        command.buildConfigurations,
         stop: true,
         target: args['target'],
         route: args['route'],
