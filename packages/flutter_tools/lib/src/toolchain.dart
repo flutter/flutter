@@ -93,14 +93,14 @@ class ToolConfiguration {
   String engineSrcPath;
 
   /// The engine mode to use (only relevent when [engineSrcPath] is set).
-  bool release;
+  bool engineRelease;
 
   /// Used to override the directory calculated from engineSrcPath (--engine-out-dir).
   String engineOutDir;
 
   bool get isLocalEngine => engineSrcPath != null || engineOutDir != null;
 
-  String get _modeStr => release ? 'Release' : 'Debug';
+  String get _modeStr => engineRelease ? 'Release' : 'Debug';
 
   /// The directory that contains development tools for the given platform. This
   /// includes things like `sky_shell` and `sky_snapshot`.

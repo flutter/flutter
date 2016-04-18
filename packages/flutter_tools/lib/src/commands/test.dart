@@ -138,7 +138,7 @@ class TestCommand extends FlutterCommand {
         return exitCode;
     }
     if (!foundOne) {
-      printError('At least one of --debug or --release must be set, to specify the local build products to test.');
+      printError('At least one of --engine-debug or --engine-release must be set, to specify the local build products to test.');
       return 1;
     }
 

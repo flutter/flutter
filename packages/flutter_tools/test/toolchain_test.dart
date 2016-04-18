@@ -45,7 +45,7 @@ void main() {
     testUsingContext('using enginePath', () {
       ToolConfiguration toolConfig = new ToolConfiguration();
       toolConfig.engineSrcPath = 'engine';
-      toolConfig.release = true;
+      toolConfig.engineRelease = true;
 
       expect(
         toolConfig.getToolsDirectory(platform: HostPlatform.linux_x64).path,
@@ -56,7 +56,7 @@ void main() {
         'engine/out/android_Release'
       );
 
-      toolConfig.release = false;
+      toolConfig.engineRelease = false;
       expect(
         toolConfig.getToolsDirectory(platform: HostPlatform.linux_x64).path,
         'engine/out/Debug'

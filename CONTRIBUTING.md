@@ -86,7 +86,7 @@ Flutter tests use [package:flutter_test](https://github.com/flutter/flutter/tree
 `flutter test --flutter-repo` is a shortcut for those working on the flutter repository itself which runs all tests inside the `flutter` package regardless of the current working directory.
 To run all the tests for the entire Flutter repository, the same way that Travis runs them, run `travis/test.sh`.
 
-If you've built [your own flutter engine](#working-on-the-engine-and-the-framework-at-the-same-time), you can pass `--debug` or `--release` to change what flutter shell `flutter test` uses.
+If you've built [your own flutter engine](#working-on-the-engine-and-the-framework-at-the-same-time), you can pass `--engine-debug` or `--engine-release` to change what flutter shell `flutter test` uses.
 To do this with the `travis/test.sh` script, you can use the `FLUTTER_ENGINE` environment variable.
 
 Note: Flutter tests are headless, you won't see any UI. You can use
@@ -166,14 +166,14 @@ the following steps.
    configurations (e.g., `out/android_Debug`).
 
 You should now be able to run the tests against your locally built
-engine using the `flutter test --debug` command. To run one of the
+engine using the `flutter test --engine-debug` command. To run one of the
 examples on your device using your locally built engine, use the
-`--debug` option to the `flutter` tool:
+`--engine-debug` option to the `flutter` tool:
 
- * `flutter run --debug`
+ * `flutter run --engine-debug`
 
 If you want to test the release version instead of the debug version,
-use `--release` instead of `--debug`.
+use `--engine-release` instead of `--engine-debug`.
 
 Making a breaking change to the engine
 --------------------------------------
