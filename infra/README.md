@@ -43,7 +43,10 @@ search for files named `api.py` or `example.py` under `infra/build`.
 Flutter has one recipe per repository. Currently
 [flutter/flutter](https://chromium.googlesource.com/chromium/tools/build.git/+/master/scripts/slave/recipes/flutter/flutter.py)
 and
-[flutter/engine](https://chromium.googlesource.com/chromium/tools/build.git/+/master/scripts/slave/recipes/flutter/engine.py).
+[flutter/engine](https://chromium.googlesource.com/chromium/tools/build.git/+/master/scripts/slave/recipes/flutter/engine.py):
+
+- build/scripts/slave/recipes/flutter/flutter.py
+- build/scripts/slave/recipes/flutter/engine.py
 
 Recipes are just Python.  They are
 [documented](https://github.com/luci/recipes-py/blob/master/doc/user_guide.md)
