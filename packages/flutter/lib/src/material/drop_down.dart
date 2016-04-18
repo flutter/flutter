@@ -241,6 +241,7 @@ class DropDownMenuItem<T> extends StatelessWidget {
       child: new DefaultTextStyle(
         style: Theme.of(context).textTheme.subhead,
         child: new Baseline(
+          baselineType: TextBaseline.alphabetic,
           baseline: _kMenuItemHeight - _kBaselineOffsetFromBottom,
           child: child
         )

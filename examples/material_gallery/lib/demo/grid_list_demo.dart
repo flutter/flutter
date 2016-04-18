@@ -9,35 +9,7 @@ import 'package:flutter/widgets.dart';
 
 import '../gallery/demo.dart';
 
-const String _kExampleCode =
-"""// Creates a scrollable grid list with images
-// loaded from the web.
-new ScrollableGrid(
-  delegate: new FixedColumnCountGridDelegate(
-    columnCount: 3,
-    tileAspectRatio: 1.0,
-    padding: const EdgeInsets.all(4.0),
-    columnSpacing: 4.0,
-    rowSpacing: 4.0
-  ),
-  children: <String>[
-    'https://example.com/image-0.jpg',
-    'https://example.com/image-1.jpg',
-    'https://example.com/image-2.jpg',
-    ...
-    'https://example.com/image-n.jpg'
-  ].map((String url) {
-    return new GridTile(
-      footer: new GridTileBar(
-        title: new Text(url)
-      ),
-      child: new NetworkImage(
-        src: url,
-        fit: ImageFit.cover
-      )
-    );
-  })
-);""";
+const String _kExampleCode = 'gridlists';
 
 enum GridDemoTileStyle {
   imageOnly,
@@ -301,7 +273,7 @@ class GridListDemoState extends State<GridListDemo> {
             )
           ),
           new DemoBottomBar(
-            exampleCode: _kExampleCode
+            exampleCodeTag: _kExampleCode
           )
         ]
       )

@@ -1,0 +1,51 @@
+// Copyright 2016 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:async';
+import 'package:flutter/material.dart';
+
+const String _kStartTag = '// START ';
+const String _kEndTag = '// END';
+
+Map<String, String> _exampleCode;
+
+Future<String> getExampleCode(String tag, BuildContext context) async {
+  if (_exampleCode == null)
+    await _parseExampleCode(context);
+
+  return _exampleCode[tag];
+}
+
+Future<Null> _parseExampleCode(BuildContext context) async {
+  String code = await DefaultAssetBundle.of(context).loadString('lib/gallery/example_code.dart');
+  _exampleCode = <String, String>{};
+
+  List<String> lines = code.split('\n');
+  List<String> codeBlock;
+  String codeTag;
+
+  for (String line in lines) {
+    if (codeBlock == null) {
+      // Outside a block.
+      if (line.startsWith(_kStartTag)) {
+        // Starting a new code block.
+        codeBlock = <String>[];
+        codeTag = line.substring(_kStartTag.length);
+      } else {
+        // Just skipping the line.
+      }
+    } else {
+      // Inside a block.
+      if (line.startsWith(_kEndTag)) {
+        // Add the block.
+        _exampleCode[codeTag] = codeBlock.join('\n');
+        codeBlock = null;
+        codeTag = null;
+      } else {
+        // Add to the current block
+        codeBlock.add(line);
+      }
+    }
+  }
+}
