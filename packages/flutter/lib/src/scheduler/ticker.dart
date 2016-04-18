@@ -4,14 +4,22 @@
 
 import 'dart:async';
 
-import 'scheduler.dart';
+import 'binding.dart';
 
 /// Signature for the [onTick] constructor argument of the [Ticker] class.
+///
+/// The argument is the time that the object had spent enabled so far
+/// at the time of the callback being invoked.
 typedef void TickerCallback(Duration elapsed);
 
 /// Calls its callback once per animation frame.
+///
+/// When created, a ticker is initially disabled. Call [start] to
+/// enable the ticker.
+///
+/// See also [Scheduler.scheduleFrameCallback].
 class Ticker {
-  /// Constructs a ticker that will call [onTick] once per frame while running.
+  /// Creates a ticker that will call [onTick] once per frame while running.
   Ticker(TickerCallback onTick) : _onTick = onTick;
 
   final TickerCallback _onTick;
@@ -20,7 +28,11 @@ class Ticker {
   int _animationId;
   Duration _startTime;
 
-  /// Starts calling onTick once per animation frame.
+  /// Whether this ticker has scheduled a call to invoke its callback
+  /// on the next frame.
+  bool get isTicking => _completer != null;
+
+  /// Starts calling the ticker's callback once per animation frame.
   ///
   /// The returned future resolves once the ticker stops ticking.
   Future<Null> start() {
@@ -31,7 +43,7 @@ class Ticker {
     return _completer.future;
   }
 
-  /// Stops calling onTick.
+  /// Stops calling the ticker's callback.
   ///
   /// Causes the future returned by [start] to resolve.
   void stop() {
@@ -53,9 +65,6 @@ class Ticker {
     assert(!isTicking);
     localCompleter.complete();
   }
-
-  /// Whether this ticker has scheduled a call to onTick
-  bool get isTicking => _completer != null;
 
   void _tick(Duration timeStamp) {
     assert(isTicking);
