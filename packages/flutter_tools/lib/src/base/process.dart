@@ -92,9 +92,10 @@ String runSync(List<String> cmd, { String workingDirectory }) {
 }
 
 /// Return the platform specific name for the given Dart SDK binary. So, `pub`
-/// ==> `pub.bat`.
-String sdkBinaryName(String name) {
-  return path.absolute(path.join(dartSdkPath, 'bin', Platform.isWindows ? '$name.bat' : name));
+/// ==> `pub.bat`.  The default SDK location can be overridden with a specified
+/// [sdkLocation].
+String sdkBinaryName(String name, { String sdkLocation }) {
+  return path.absolute(path.join(sdkLocation ?? dartSdkPath, 'bin', Platform.isWindows ? '$name.bat' : name));
 }
 
 bool exitsHappy(List<String> cli) {

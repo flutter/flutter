@@ -100,6 +100,8 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('preamble', help: 'Display the number of files that will be analyzed.', defaultsTo: true);
     argParser.addFlag('congratulate', help: 'Show output even when there are no errors, warnings, hints, or lints.', defaultsTo: true);
     argParser.addFlag('watch', help: 'Run analysis continuously, watching the filesystem for changes.', negatable: false);
+    argParser.addOption('dart-sdk', help: 'The path to the Dart SDK.', hide: true);
+
     usesPubOption();
   }
 
@@ -293,7 +295,7 @@ class AnalyzeCommand extends FlutterCommand {
     File packagesFile = new File(path.join(host.path, '.packages'))..writeAsStringSync(packagesBody.toString());
 
     List<String> cmd = <String>[
-      sdkBinaryName('dartanalyzer'),
+      sdkBinaryName('dartanalyzer', sdkLocation: argResults['dart-sdk']),
       // do not set '--warnings', since that will include the entire Dart SDK
       '--ignore-unrecognized-flags',
       '--enable_type_checks',
