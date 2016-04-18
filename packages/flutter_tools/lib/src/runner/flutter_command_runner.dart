@@ -61,18 +61,18 @@ class FlutterCommandRunner extends CommandRunner {
     if (verboseHelp)
       argParser.addSeparator('Local build selection options (not normally required):');
 
-    argParser.addFlag('debug',
+    argParser.addFlag('engine-debug',
         negatable: false,
         hide: !verboseHelp,
         help:
             'Set this if you are building Flutter locally and want to use the debug build products.\n'
-            'Defaults to true if --engine-src-path is specified and --release is not, otherwise false.');
-    argParser.addFlag('release',
+            'Defaults to true if --engine-src-path is specified and --engine-release is not, otherwise false.');
+    argParser.addFlag('engine-release',
         negatable: false,
         hide: !verboseHelp,
         help:
             'Set this if you are building Flutter locally and want to use the release build products.\n'
-            'The --release option is not compatible with the listen command on iOS devices and simulators.');
+            'The --engine-release option is not compatible with the listen command on iOS devices and simulators.');
     argParser.addOption('engine-src-path',
         hide: !verboseHelp,
         help:
@@ -216,10 +216,10 @@ class FlutterCommandRunner extends CommandRunner {
     if (enginePath != null) {
       ToolConfiguration.instance.engineSrcPath = enginePath;
 
-      if (globalResults.wasParsed('release'))
-        ToolConfiguration.instance.release = globalResults['release'];
-      if (globalResults.wasParsed('debug'))
-        ToolConfiguration.instance.release = !globalResults['debug'];
+      if (globalResults.wasParsed('engine-release'))
+        ToolConfiguration.instance.engineRelease = globalResults['engine-release'];
+      if (globalResults.wasParsed('engine-debug'))
+        ToolConfiguration.instance.engineRelease = !globalResults['engine-debug'];
     }
 
     // The Android SDK could already have been set by tests.
@@ -247,8 +247,8 @@ class FlutterCommandRunner extends CommandRunner {
 
   String _findEnginePath(ArgResults globalResults) {
     String engineSourcePath = globalResults['engine-src-path'] ?? Platform.environment[kFlutterEngineEnvironmentVariableName];
-    bool isDebug = globalResults['debug'];
-    bool isRelease = globalResults['release'];
+    bool isDebug = globalResults['engine-debug'];
+    bool isRelease = globalResults['engine-release'];
 
     if (engineSourcePath == null && (isDebug || isRelease)) {
       try {
@@ -282,8 +282,8 @@ class FlutterCommandRunner extends CommandRunner {
   }
 
   List<BuildConfiguration> _createBuildConfigurations(ArgResults globalResults) {
-    bool isDebug = globalResults['debug'];
-    bool isRelease = globalResults['release'];
+    bool isDebug = globalResults['engine-debug'];
+    bool isRelease = globalResults['engine-release'];
     HostPlatform hostPlatform = getCurrentHostPlatform();
     TargetPlatform hostPlatformAsTarget = getCurrentHostPlatformAsTarget();
 
