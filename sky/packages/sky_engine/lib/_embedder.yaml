@@ -15,19 +15,22 @@ embedded_libs:
 
 analyzer:
   language:
+    enableStrictCallChecks: true
     enableSuperMixins: true
+  strong-mode: true
   errors:
     # We allow overriding fields (if they use super, ideally...).
     strong_mode_invalid_field_override: ignore
     # We allow type narrowing.
     strong_mode_invalid_method_override: ignore
+    strong_mode_static_type_error: ignore
+    strong_mode_down_cast_composite: ignore
     todo: ignore
-
 linter:
   rules:
     - avoid_empty_else
     - always_declare_return_types
-    # - always_specify_types # We currently whitelist some type omissions.
+    - always_specify_types
     - annotate_overrides
     # - avoid_as # https://github.com/dart-lang/linter/issues/195
     - avoid_init_to_null
@@ -50,7 +53,7 @@ linter:
     - sort_constructors_first
     - sort_unnamed_constructors_first
     - super_goes_last
-    # - type_annotate_public_apis # subset of always_specify_types
+    - type_annotate_public_apis # subset of always_specify_types
     - type_init_formals
     - unnecessary_brace_in_string_interp
     - unnecessary_getters_setters
