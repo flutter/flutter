@@ -3,12 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
-import 'dart:developer';
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter_test/src/instrumentation.dart';
 import 'package:flutter_test/src/test_pointer.dart';
 
@@ -18,10 +17,21 @@ import 'gesture.dart';
 import 'health.dart';
 import 'message.dart';
 
-const String _extensionMethod = 'ext.flutter_driver';
+const String _extensionMethodName = 'driver';
+const String _extensionMethod = 'ext.flutter.$_extensionMethodName';
 const Duration _kDefaultTimeout = const Duration(seconds: 5);
 
-bool _flutterDriverExtensionEnabled = false;
+class _DriverBinding extends WidgetFlutterBinding {
+  @override
+  void initServiceExtensions() {
+    super.initServiceExtensions();
+    FlutterDriverExtension extension = new FlutterDriverExtension();
+    registerServiceExtension(
+      name: _extensionMethodName,
+      callback: extension.call
+    );
+  }
+}
 
 /// Enables Flutter Driver VM service extension.
 ///
@@ -31,13 +41,9 @@ bool _flutterDriverExtensionEnabled = false;
 /// Call this function prior to running your application, e.g. before you call
 /// `runApp`.
 void enableFlutterDriverExtension() {
-  if (_flutterDriverExtensionEnabled)
-    return;
-  FlutterDriverExtension extension = new FlutterDriverExtension();
-  registerExtension(_extensionMethod, (String methodName, Map<String, String> params) {
-    return extension.call(params);
-  });
-  _flutterDriverExtensionEnabled = true;
+  assert(WidgetFlutterBinding.instance == null);
+  new _DriverBinding();
+  assert(WidgetFlutterBinding.instance is _DriverBinding);
 }
 
 /// Handles a command and returns a result.
@@ -81,32 +87,19 @@ class FlutterDriverExtension {
   final Map<String, CommandDeserializerCallback> _commandDeserializers = <String, CommandDeserializerCallback>{};
   final Map<String, FinderCallback> _finders = <String, FinderCallback>{};
 
-  Future<ServiceExtensionResponse> call(Map<String, String> params) async {
+  Future<Map<String, dynamic>> call(Map<String, String> params) async {
     try {
       String commandKind = params['command'];
       CommandHandlerCallback commandHandler = _commandHandlers[commandKind];
       CommandDeserializerCallback commandDeserializer =
           _commandDeserializers[commandKind];
-
-      if (commandHandler == null || commandDeserializer == null) {
-        return new ServiceExtensionResponse.error(
-          ServiceExtensionResponse.invalidParams,
-          'Extension $_extensionMethod does not support command $commandKind'
-        );
-      }
-
+      if (commandHandler == null || commandDeserializer == null)
+        throw 'Extension $_extensionMethod does not support command $commandKind';
       Command command = commandDeserializer(params);
-      return commandHandler(command).then((Result result) {
-        return new ServiceExtensionResponse.result(JSON.encode(result.toJson()));
-      }, onError: (Object e, Object s) {
-        _log.warning('$e:\n$s');
-        return new ServiceExtensionResponse.error(ServiceExtensionResponse.extensionError, '$e');
-      });
-    } catch(error, stackTrace) {
-      String message = 'Uncaught extension error: $error\n$stackTrace';
-      _log.error(message);
-      return new ServiceExtensionResponse.error(
-        ServiceExtensionResponse.extensionError, message);
+      return (await commandHandler(command)).toJson();
+    } catch (error, stackTrace) {
+      _log.error('Uncaught extension error: $error\n$stackTrace');
+      rethrow;
     }
   }
 

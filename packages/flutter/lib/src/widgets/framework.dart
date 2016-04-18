@@ -794,7 +794,19 @@ class BuildOwner {
     assert(GlobalKey._debugCheckForDuplicates);
     scheduleMicrotask(GlobalKey._notifyListeners);
   }
-
+ 
+  /// Cause the entire subtree rooted at the given [Element] to
+  /// be entirely rebuilt. This is used by development tools when
+  /// the application code has changed, to cause the widget tree to
+  /// pick up any changed implementations.
+  ///
+  /// This is expensive and should not be called except during
+  /// development.
+  void reassemble(Element root) {
+    assert(root._parent == null);
+    assert(root.owner == this);
+    root._reassemble();
+  }
 }
 
 /// Elements are the instantiations of Widget configurations.
@@ -831,6 +843,13 @@ abstract class Element implements BuildContext {
   BuildOwner _owner;
 
   bool _active = false;
+
+  void _reassemble() {
+    assert(_active);
+    visitChildren((Element child) {
+      child._reassemble();
+    });
+  }
 
   RenderObject get renderObject {
     RenderObject result;
@@ -1364,6 +1383,12 @@ abstract class BuildableElement extends Element {
   }
 
   @override
+  void _reassemble() {
+    markNeedsBuild();
+    super._reassemble();
+  }
+
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     if (dirty)
@@ -1374,7 +1399,7 @@ abstract class BuildableElement extends Element {
 typedef Widget WidgetBuilder(BuildContext context);
 typedef Widget IndexedBuilder(BuildContext context, int index);
 
-// See _builder.
+// See ComponentElement._builder.
 Widget _buildNothing(BuildContext context) => null;
 
 /// Base class for the instantiation of [StatelessWidget], [StatefulWidget],
@@ -1476,6 +1501,12 @@ class StatelessElement extends ComponentElement {
     _dirty = true;
     rebuild();
   }
+
+  @override
+  void _reassemble() {
+    _builder = widget.build;
+    super._reassemble();
+  }
 }
 
 /// Instantiation of [StatefulWidget]s.
@@ -1494,6 +1525,12 @@ class StatefulElement extends ComponentElement {
 
   State<StatefulWidget> get state => _state;
   State<StatefulWidget> _state;
+
+  @override
+  void _reassemble() {
+    _builder = state.build;
+    super._reassemble();
+  }
 
   @override
   void _firstBuild() {
@@ -1591,6 +1628,12 @@ abstract class _ProxyElement extends ComponentElement {
   Widget _build(BuildContext context) => widget.child;
 
   @override
+  void _reassemble() {
+    _builder = _build;
+    super._reassemble();
+  }
+
+  @override
   void update(_ProxyWidget newWidget) {
     _ProxyWidget oldWidget = widget;
     assert(widget != null);
@@ -1654,7 +1697,6 @@ class ParentDataElement<T extends RenderObjectWidget> extends _ProxyElement {
     visitChildren(notifyChildren);
   }
 }
-
 
 
 class InheritedElement extends _ProxyElement {

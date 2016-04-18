@@ -60,8 +60,8 @@ class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, Service
   /// bindings from other frameworks based on the Flutter "rendering" library),
   /// then WidgetFlutterBinding.instance will not be valid (and will throw in
   /// checked mode).
-  static WidgetFlutterBinding _instance;
   static WidgetFlutterBinding get instance => _instance;
+  static WidgetFlutterBinding _instance;
 
   final List<BindingObserver> _observers = new List<BindingObserver>();
 
@@ -115,6 +115,12 @@ class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, Service
       child: app
     ).attachToRenderTree(buildOwner, _renderViewElement);
     beginFrame();
+  }
+
+  @override
+  void reassembleApplication() {
+    buildOwner.reassemble(_renderViewElement);
+    super.reassembleApplication();
   }
 }
 

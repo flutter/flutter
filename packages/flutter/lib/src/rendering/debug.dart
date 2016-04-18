@@ -2,13 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:convert' show JSON;
-import 'dart:developer' as developer;
-
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 
 export 'package:flutter/services.dart' show debugPrint;
 
@@ -75,58 +70,4 @@ List<String> debugDescribeTransform(Matrix4 transform) {
   List<String> matrix = transform.toString().split('\n').map((String s) => '  $s').toList();
   matrix.removeLast();
   return matrix;
-}
-
-bool _extensionsInitialized = false;
-
-void initServiceExtensions() {
-  if (_extensionsInitialized)
-    return;
-
-  _extensionsInitialized = true;
-
-  assert(() {
-    developer.registerExtension('ext.flutter.debugPaint', _debugPaint);
-    developer.registerExtension('ext.flutter.timeDilation', _timeDilation);
-
-    return true;
-  });
-}
-
-/// Toggle the [debugPaintSizeEnabled] setting.
-Future<developer.ServiceExtensionResponse> _debugPaint(String method, Map<String, String> parameters) {
-  if (parameters.containsKey('enabled')) {
-    debugPaintSizeEnabled = parameters['enabled'] == 'true';
-
-    // Redraw everything - mark the world as dirty.
-    RenderObjectVisitor visitor;
-    visitor = (RenderObject child) {
-      child.markNeedsPaint();
-      child.visitChildren(visitor);
-    };
-    Renderer.instance?.renderView?.visitChildren(visitor);
-  }
-
-  return new Future<developer.ServiceExtensionResponse>.value(
-    new developer.ServiceExtensionResponse.result(JSON.encode({
-      'type': '_extensionType',
-      'method': method,
-      'enabled': debugPaintSizeEnabled
-    }))
-  );
-}
-
-/// Manipulate the scheduler's [timeDilation] field.
-Future<developer.ServiceExtensionResponse> _timeDilation(String method, Map<String, String> parameters) {
-  if (parameters.containsKey('timeDilation')) {
-    timeDilation = double.parse(parameters['timeDilation']);
-  }
-
-  return new Future<developer.ServiceExtensionResponse>.value(
-    new developer.ServiceExtensionResponse.result(JSON.encode({
-      'type': '_extensionType',
-      'method': method,
-      'timeDilation': '$timeDilation'
-    }))
-  );
 }

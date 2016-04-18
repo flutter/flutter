@@ -31,15 +31,37 @@ abstract class Renderer extends Object with Scheduler, Services
     initRenderView();
     initSemantics();
     assert(renderView != null);
-    assert(() {
-      initServiceExtensions();
-      return true;
-    });
     addPersistentFrameCallback(_handlePersistentFrameCallback);
   }
 
-  static Renderer _instance;
+  /// The current [Renderer], if one has been created.
   static Renderer get instance => _instance;
+  static Renderer _instance;
+
+  @override
+  void initServiceExtensions() {
+    super.initServiceExtensions();
+    assert(() {
+      // this service extension only works in checked mode
+      registerBoolServiceExtension(
+        name: 'debugPaint', 
+        getter: () => debugPaintSizeEnabled,
+        setter: (bool value) {
+          if (debugPaintSizeEnabled == value)
+            return;
+          debugPaintSizeEnabled = value;
+          RenderObjectVisitor visitor;
+          visitor = (RenderObject child) {
+            child.markNeedsPaint();
+            child.visitChildren(visitor);
+          };
+          instance?.renderView?.visitChildren(visitor);
+        }
+      );
+      return true;
+    });
+  }
+
 
   void initRenderView() {
     if (renderView == null) {
@@ -94,6 +116,12 @@ abstract class Renderer extends Object with Scheduler, Services
       pipelineOwner.flushSemantics();
       SemanticsNode.sendSemanticsTree();
     }
+  }
+
+  @override
+  void reassembleApplication() {
+    super.reassembleApplication();
+    pipelineOwner.reassemble(renderView);
   }
 
   @override

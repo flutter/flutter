@@ -10,5 +10,6 @@
 library foundation;
 
 export 'src/foundation/assertions.dart';
+export 'src/foundation/basic_types.dart';
 export 'src/foundation/binding.dart';
 export 'src/foundation/print.dart';
