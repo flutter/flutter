@@ -52,9 +52,9 @@ class TravelDestinationItem extends StatelessWidget {
     TextStyle descriptionStyle = theme.textTheme.subhead;
     TextStyle buttonStyle = theme.textTheme.button.copyWith(color: theme.primaryColor);
 
-    return new Card(
-      child: new SizedBox(
-        height: height,
+    return new SizedBox(
+      height: height,
+      child: new Card(
         child: new Column(
           children: <Widget>[
             // photo and title
