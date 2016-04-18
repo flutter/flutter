@@ -69,8 +69,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
         tabName: 'DROPDOWN',
         description: _dropdownText,
         widget: buildDropdownButton(),
-        exampleCodeTag:
-        _dropdownCode
+        exampleCodeTag: _dropdownCode
       ),
       new ComponentDemoTabData(
         tabName: 'ICON',

@@ -7,11 +7,11 @@
 
 import 'package:flutter/material.dart';
 
-class ButtonsDemo{
-  void setState(VoidCallback callback) {}
+class ButtonsDemo {
+  void setState(VoidCallback callback) { }
   BuildContext context;
 
-  void buttons(){
+  void buttons() {
 
 // START buttons_raised
 // Create a raised button.
@@ -106,7 +106,7 @@ new Scaffold(
 
 
 class SelectionControls {
-  void setState(VoidCallback callback) {}
+  void setState(VoidCallback callback) { }
 
   void selectionControls() {
 

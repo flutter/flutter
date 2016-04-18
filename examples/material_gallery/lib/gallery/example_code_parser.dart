@@ -3,25 +3,26 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 const String _kStartTag = '// START ';
 const String _kEndTag = '// END';
 
 Map<String, String> _exampleCode;
 
-Future<String> getExampleCode(String tag, BuildContext context) async {
+Future<String> getExampleCode(String tag, AssetBundle bundle) async {
   if (_exampleCode == null)
-    await _parseExampleCode(context);
+    await _parseExampleCode(bundle);
 
   return _exampleCode[tag];
 }
 
-Future<Null> _parseExampleCode(BuildContext context) async {
-  String code = await DefaultAssetBundle.of(context).loadString('lib/gallery/example_code.dart');
+Future<Null> _parseExampleCode(AssetBundle bundle) async {
+  final String code = await bundle.loadString('lib/gallery/example_code.dart');
   _exampleCode = <String, String>{};
 
-  List<String> lines = code.split('\n');
+  final List<String> lines = code.split('\n');
+
   List<String> codeBlock;
   String codeTag;
 
