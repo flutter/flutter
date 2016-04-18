@@ -137,14 +137,8 @@ class ApkKeystoreInfo {
 
 class BuildApkCommand extends FlutterCommand {
   BuildApkCommand() {
-    argParser.addFlag('develop',
-      negatable: false,
-      help: 'Build a development version of your app (the default).');
-    argParser.addFlag('deploy',
-      negatable: false,
-      help: 'Build a deployable version of your app.');
-
     usesTargetOption();
+    addBuildModeFlags();
     usesPubOption();
 
     argParser.addOption('manifest',
@@ -176,7 +170,7 @@ class BuildApkCommand extends FlutterCommand {
 
   @override
   final String description = 'Build an Android APK file from your app.\n\n'
-    'This command can build development and deployable versions of your application. \'develop\' builds\n'
+    'This command can build development and deployable versions of your application. \'debug\' builds\n'
     'support debugging and a quick development cycle. \'deploy\' builds don\'t support debugging and are\n'
     'suitable for deploying to app stores.';
 
@@ -195,16 +189,13 @@ class BuildApkCommand extends FlutterCommand {
       return 1;
     }
 
-    BuildVariant variant = BuildVariant.develop;
-
-    if (argResults['deploy'])
-      variant = BuildVariant.deploy;
+    BuildMode mode = getBuildMode();
 
     // TODO(devoncarew): This command should take an arg for the output type (arm / x64).
 
     return await buildAndroid(
       TargetPlatform.android_arm,
-      variant,
+      mode,
       toolchain: toolchain,
       force: true,
       manifest: argResults['manifest'],
@@ -224,7 +215,7 @@ class BuildApkCommand extends FlutterCommand {
 
 Future<_ApkComponents> _findApkComponents(
   TargetPlatform platform,
-  BuildVariant buildVariant,
+  BuildMode buildMode,
   String manifest,
   String resources
 ) async {
@@ -235,7 +226,7 @@ Future<_ApkComponents> _findApkComponents(
   if (tools.isLocalEngine) {
     String abiDir = platform == TargetPlatform.android_arm ? 'armeabi-v7a' : 'x86_64';
     String enginePath = tools.engineSrcPath;
-    String buildDir = tools.getEngineArtifactsDirectory(platform, buildVariant).path;
+    String buildDir = tools.getEngineArtifactsDirectory(platform, buildMode).path;
 
     components.icuData = new File('$enginePath/third_party/icu/android/icudtl.dat');
     components.jars = <File>[
@@ -244,7 +235,7 @@ Future<_ApkComponents> _findApkComponents(
     components.libSkyShell = new File('$buildDir/gen/sky/shell/shell/shell/libs/$abiDir/libsky_shell.so');
     components.debugKeystore = new File('$enginePath/build/android/ant/chromium-debug.keystore');
   } else {
-    Directory artifacts = tools.getEngineArtifactsDirectory(platform, buildVariant);
+    Directory artifacts = tools.getEngineArtifactsDirectory(platform, buildMode);
 
     components.icuData = new File(path.join(artifacts.path, 'icudtl.dat'));
     components.jars = <File>[
@@ -272,18 +263,18 @@ Future<_ApkComponents> _findApkComponents(
 
 int _buildApk(
   TargetPlatform platform,
-  BuildVariant buildVariant,
+  BuildMode buildMode,
   _ApkComponents components,
   String flxPath,
   ApkKeystoreInfo keystore,
   String outputFile
 ) {
   assert(platform != null);
-  assert(buildVariant != null);
+  assert(buildMode != null);
 
   Directory tempDir = Directory.systemTemp.createTempSync('flutter_tools');
 
-  printTrace('Building APK; buildVariant: ${getVariantName(buildVariant)}.');
+  printTrace('Building APK; buildMode: ${getModeName(buildMode)}.');
 
   try {
     _ApkBuilder builder = new _ApkBuilder(androidSdk.latestVersion);
@@ -391,7 +382,7 @@ bool _needsRebuild(String apkPath, String manifest) {
 
 Future<int> buildAndroid(
   TargetPlatform platform,
-  BuildVariant buildVariant, {
+  BuildMode buildMode, {
   Toolchain toolchain,
   bool force: false,
   String manifest: _kDefaultAndroidManifestPath,
@@ -429,17 +420,15 @@ Future<int> buildAndroid(
       resources = _kDefaultResourcesPath;
   }
 
-  _ApkComponents components = await _findApkComponents(
-    platform, buildVariant, manifest, resources
-  );
+  _ApkComponents components = await _findApkComponents(platform, buildMode, manifest, resources);
 
   if (components == null) {
     printError('Failure building APK: unable to find components.');
     return 1;
   }
 
-  String typeName = path.basename(tools.getEngineArtifactsDirectory(platform, buildVariant).path);
-  printStatus('Building APK in ${getVariantName(buildVariant)} mode ($typeName)...');
+  String typeName = path.basename(tools.getEngineArtifactsDirectory(platform, buildMode).path);
+  printStatus('Building APK in ${getModeName(buildMode)} mode ($typeName)...');
 
   if (flxPath != null && flxPath.isNotEmpty) {
     if (!FileSystemEntity.isFileSync(flxPath)) {
@@ -448,16 +437,16 @@ Future<int> buildAndroid(
       return 1;
     }
 
-    return _buildApk(platform, buildVariant, components, flxPath, keystore, outputFile);
+    return _buildApk(platform, buildMode, components, flxPath, keystore, outputFile);
   } else {
     // Find the path to the main Dart file; build the FLX.
     String mainPath = findMainDartFile(target);
     String localBundlePath = await flx.buildFlx(
-        toolchain,
-        mainPath: mainPath,
-        includeRobotoFonts: false);
+      toolchain,
+      mainPath: mainPath,
+      includeRobotoFonts: false);
 
-    return _buildApk(platform, buildVariant, components, localBundlePath, keystore, outputFile);
+    return _buildApk(platform, buildMode, components, localBundlePath, keystore, outputFile);
   }
 }
 
@@ -465,7 +454,7 @@ Future<int> buildApk(
   TargetPlatform platform,
   Toolchain toolchain, {
   String target,
-  BuildVariant buildVariant: BuildVariant.develop
+  BuildMode buildMode: BuildMode.debug
 }) async {
   if (!FileSystemEntity.isFileSync(_kDefaultAndroidManifestPath)) {
     printError('Cannot build APK: missing $_kDefaultAndroidManifestPath.');
@@ -474,7 +463,7 @@ Future<int> buildApk(
 
   int result = await buildAndroid(
     platform,
-    buildVariant,
+    buildMode,
     toolchain: toolchain,
     force: false,
     target: target

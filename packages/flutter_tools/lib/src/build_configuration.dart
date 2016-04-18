@@ -15,15 +15,15 @@ enum BuildType {
   debug,
 }
 
-/// The type of build - `develop` or `deploy`.
+/// The type of build - `debug` or `deploy`.
 ///
-/// TODO(devoncarew): Add a `profile` variant.
-enum BuildVariant {
-  develop,
+/// TODO(devoncarew): Add a `profile` mode.
+enum BuildMode {
+  debug,
   deploy
 }
 
-String getVariantName(BuildVariant variant) => getEnumName(variant);
+String getModeName(BuildMode mode) => getEnumName(mode);
 
 enum HostPlatform {
   darwin_x64,

@@ -62,6 +62,7 @@ class RunCommand extends RunCommandBase {
   final List<String> aliases = <String>['start'];
 
   RunCommand() {
+    addBuildModeFlags();
     argParser.addFlag('full-restart',
         defaultsTo: true,
         help: 'Stop any currently running application process before running the app.');
@@ -106,7 +107,8 @@ class RunCommand extends RunCommandBase {
       route: route,
       clearLogs: clearLogs,
       startPaused: argResults['start-paused'],
-      debugPort: debugPort
+      debugPort: debugPort,
+      buildMode: getBuildMode()
     );
 
     return result;
@@ -136,7 +138,8 @@ Future<int> startApp(
   String route,
   bool clearLogs: false,
   bool startPaused: false,
-  int debugPort: observatoryDefaultPort
+  int debugPort: observatoryDefaultPort,
+  BuildMode buildMode: BuildMode.debug
 }) async {
   String mainPath = findMainDartFile(target);
   if (!FileSystemEntity.isFileSync(mainPath)) {
@@ -166,7 +169,7 @@ Future<int> startApp(
       device.platform,
       toolchain,
       target: target,
-      buildVariant: BuildVariant.develop
+      buildMode: buildMode
     );
 
     if (result != 0)

@@ -99,7 +99,7 @@ Future<int> setupXcodeProjectHarness(String flutterProjectPath) async {
   String iosFilesPath = path.join(flutterProjectPath, 'ios');
   String xcodeprojPath = path.join(iosFilesPath, '.generated');
 
-  Directory toolDir = tools.getEngineArtifactsDirectory(TargetPlatform.ios, BuildVariant.develop);
+  Directory toolDir = tools.getEngineArtifactsDirectory(TargetPlatform.ios, BuildMode.debug);
   File archiveFile = new File(path.join(toolDir.path, 'FlutterXcode.zip'));
   List<int> archiveBytes = archiveFile.readAsBytesSync();
 

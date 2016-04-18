@@ -126,14 +126,14 @@ class ToolConfiguration {
 
   /// Return the directory that contains engine artifacts for the given targets.
   /// This directory might contain artifacts like `libsky_shell.so`.
-  Directory getEngineArtifactsDirectory(TargetPlatform platform, BuildVariant variant) {
-    Directory dir = _getEngineArtifactsDirectory(platform, variant);
+  Directory getEngineArtifactsDirectory(TargetPlatform platform, BuildMode mode) {
+    Directory dir = _getEngineArtifactsDirectory(platform, mode);
     if (dir != null)
       printTrace('Using engine artifacts dir: ${dir.path}');
     return dir;
   }
 
-  Directory _getEngineArtifactsDirectory(TargetPlatform platform, BuildVariant variant) {
+  Directory _getEngineArtifactsDirectory(TargetPlatform platform, BuildMode mode) {
     if (engineOutDir != null) {
       return new Directory(engineOutDir);
     } else if (engineSrcPath != null) {
@@ -162,7 +162,7 @@ class ToolConfiguration {
       return new Directory(path.join(engineSrcPath, 'out/${type}_$_modeStr'));
     } else {
       // For now, only suffix for deploy variants.
-      String suffix = variant == BuildVariant.deploy ? '-${getVariantName(variant)}' : '';
+      String suffix = mode == BuildMode.deploy ? '-${getModeName(mode)}' : '';
 
       // Create something like `android-arm` or `android-arm-deploy`.
       String dirName = getNameForTargetPlatform(platform) + suffix;
