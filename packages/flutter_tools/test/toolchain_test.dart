@@ -33,11 +33,11 @@ void main() {
         endsWith('cache/artifacts/engine/linux-x64')
       );
       expect(
-        toolConfig.getEngineArtifactsDirectory(TargetPlatform.android_arm, BuildVariant.develop).path,
+        toolConfig.getEngineArtifactsDirectory(TargetPlatform.android_arm, BuildMode.debug).path,
         endsWith('cache/artifacts/engine/android-arm')
       );
       expect(
-        toolConfig.getEngineArtifactsDirectory(TargetPlatform.android_arm, BuildVariant.deploy).path,
+        toolConfig.getEngineArtifactsDirectory(TargetPlatform.android_arm, BuildMode.deploy).path,
         endsWith('cache/artifacts/engine/android-arm-deploy')
       );
     });
@@ -52,7 +52,7 @@ void main() {
         'engine/out/Release'
       );
       expect(
-        toolConfig.getEngineArtifactsDirectory(TargetPlatform.android_arm, BuildVariant.develop).path,
+        toolConfig.getEngineArtifactsDirectory(TargetPlatform.android_arm, BuildMode.debug).path,
         'engine/out/android_Release'
       );
 

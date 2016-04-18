@@ -60,6 +60,25 @@ abstract class FlutterCommand extends Command {
     _usesPubOption = true;
   }
 
+  void addBuildModeFlags() {
+    argParser.addFlag('debug',
+      negatable: false,
+      help: 'Build a debug version of your app (the default).');
+    argParser.addFlag('deploy',
+      negatable: false,
+      help: 'Build a deployable version of your app.');
+  }
+
+  BuildMode getBuildMode() {
+    if (argResults['debug'] && argResults['deploy'])
+      throw new UsageException('Only one of --debug or --deploy should be specified.', null);
+
+    BuildMode mode = BuildMode.debug;
+    if (argResults['deploy'])
+      mode = BuildMode.deploy;
+    return mode;
+  }
+
   void _setupToolchain() {
     toolchain ??= Toolchain.forConfigs(buildConfigurations);
   }
