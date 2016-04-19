@@ -38,6 +38,8 @@ class IconButton extends StatelessWidget {
   const IconButton({
     Key key,
     this.size: 24.0,
+    this.padding: const EdgeInsets.all(8.0),
+    this.alignment: FractionalOffset.centerLeft,
     this.icon,
     this.color,
     this.disabledColor,
@@ -46,10 +48,14 @@ class IconButton extends StatelessWidget {
   }) : super(key: key);
 
   /// The size of the icon inside the button.
-  ///
-  /// The button itself will be larger than the icon by 8.0 logical pixels in
-  /// each direction.
   final double size;
+
+  /// The padding around the button's icon. The entire padded icon will react
+  /// to input gestures.
+  final EdgeInsets padding;
+
+  /// Defines how the icon is positioned within the IconButton.
+  final FractionalOffset alignment;
 
   /// The icon to display inside the button.
   final IconData icon;
@@ -90,11 +96,18 @@ class IconButton extends StatelessWidget {
     else
       currentColor = disabledColor ?? Theme.of(context).disabledColor;
     Widget result = new Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: new Icon(
-        size: size,
-        icon: icon,
-        color: currentColor
+      padding: padding,
+      child: new LimitedBox(
+        maxWidth: size,
+        maxHeight: size,
+        child: new Align(
+          alignment: alignment,
+          child: new Icon(
+            size: size,
+            icon: icon,
+            color: currentColor
+          )
+        )
       )
     );
     if (tooltip != null) {

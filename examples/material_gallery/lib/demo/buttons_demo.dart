@@ -174,6 +174,8 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             icon: Icons.thumb_up
           )
         ]
+        .map((Widget button) => new SizedBox(width: 64.0, height: 64.0, child: button))
+        .toList()
       )
     );
   }
