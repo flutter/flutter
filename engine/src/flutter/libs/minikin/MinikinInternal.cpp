@@ -18,6 +18,7 @@
 
 #include "MinikinInternal.h"
 #include "HbFontCache.h"
+#include "generated/UnicodeData.h"
 
 #include <cutils/log.h>
 
@@ -29,6 +30,11 @@ void assertMinikinLocked() {
 #ifdef ENABLE_RACE_DETECTION
     LOG_ALWAYS_FATAL_IF(gMinikinLock.tryLock() == 0);
 #endif
+}
+
+bool isEmoji(uint32_t c) {
+    const size_t length = sizeof(generated::EMOJI_LIST) / sizeof(generated::EMOJI_LIST[0]);
+    return std::binary_search(generated::EMOJI_LIST, generated::EMOJI_LIST + length, c);
 }
 
 // Based on Modifiers from http://www.unicode.org/L2/L2016/16011-data-file.txt
