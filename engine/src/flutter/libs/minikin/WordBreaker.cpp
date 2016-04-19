@@ -90,18 +90,9 @@ static bool isBreakValid(const uint16_t* buf, size_t bufEnd, size_t i) {
         }
     }
 
-    // Known emoji ZWJ sequences
-    if (codePoint == CHAR_ZWJ) {
-        // Possible emoji ZWJ sequence
-        if (next_codepoint == 0x2764 ||       // HEAVY BLACK HEART
-                next_codepoint == 0x1F466 ||  // BOY
-                next_codepoint == 0x1F467 ||  // GIRL
-                next_codepoint == 0x1F468 ||  // MAN
-                next_codepoint == 0x1F469 ||  // WOMAN
-                next_codepoint == 0x1F48B ||  // KISS MARK
-                next_codepoint == 0x1F5E8) {  // LEFT SPEECH BUBBLE
-            return false;
-        }
+    // Emoji ZWJ sequences.
+    if (codePoint == CHAR_ZWJ && isEmoji(next_codepoint)) {
+        return false;
     }
 
     // Proposed Rule LB30b from http://www.unicode.org/L2/L2016/16011r3-break-prop-emoji.pdf

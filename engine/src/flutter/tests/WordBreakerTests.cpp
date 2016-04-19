@@ -93,6 +93,8 @@ TEST_F(WordBreakerTest, zwjEmojiSequences) {
         UTF16(0x1F469), 0x200D, 0x2764, 0x200D, UTF16(0x1F48B), 0x200D, UTF16(0x1F469),
         // eye + zwj + left speech bubble
         UTF16(0x1F441), 0x200D, UTF16(0x1F5E8),
+        // CAT FACE + zwj + BUST IN SILHOUETTE
+        UTF16(0x1F431), 0x200D, UTF16(0x1F464),
     };
     WordBreaker breaker;
     breaker.setLocale(icu::Locale::getEnglish());
@@ -104,9 +106,12 @@ TEST_F(WordBreakerTest, zwjEmojiSequences) {
     EXPECT_EQ(17, breaker.next());  // after woman + zwj + heart + zwj + woman
     EXPECT_EQ(7, breaker.wordStart());
     EXPECT_EQ(17, breaker.wordEnd());
-    EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
+    EXPECT_EQ(22, breaker.next());  // after eye + zwj + left speech bubble
     EXPECT_EQ(17, breaker.wordStart());
     EXPECT_EQ(22, breaker.wordEnd());
+    EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
+    EXPECT_EQ(22, breaker.wordStart());
+    EXPECT_EQ(27, breaker.wordEnd());
 }
 
 TEST_F(WordBreakerTest, emojiWithModifier) {
