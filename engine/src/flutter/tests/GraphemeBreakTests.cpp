@@ -148,6 +148,10 @@ TEST(GraphemeBreak, tailoring) {
     EXPECT_FALSE(IsBreak("U+1F469 U+200D U+1F469 U+200D U+1F467 U+200D | U+1F466"));
     EXPECT_FALSE(IsBreak("U+1F441 U+200D | U+1F5E8"));
 
+    // Do not break before and after zwj with all kind of emoji characters.
+    EXPECT_FALSE(IsBreak("U+1F431 | U+200D U+1F464"));
+    EXPECT_FALSE(IsBreak("U+1F431 U+200D | U+1F464"));
+
     // ARABIC LETTER BEH + ZWJ + heart, not a zwj emoji sequence, so we preserve the break
     EXPECT_TRUE(IsBreak("U+0628 U+200D | U+2764"));
 }
