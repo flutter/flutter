@@ -24,3 +24,6 @@ flutter analyze --flutter-repo --no-current-directory --no-current-package --con
 (cd examples/layers; flutter test)
 (cd examples/material_gallery; flutter test)
 (cd examples/stocks; flutter test)
+
+CREATE_TEST_DIR=`mktemp -d`
+(cd $CREATE_TEST_DIR && flutter create --with-driver-test create_test && cd create_test && flutter analyze)
