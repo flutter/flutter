@@ -41,7 +41,9 @@ class TravelDestinationItem extends StatelessWidget {
     assert(destination != null && destination.isValid);
   }
 
+  static final double height = 328.0;
   final TravelDestination destination;
+
 
   @override
   Widget build(BuildContext context) {
@@ -50,9 +52,9 @@ class TravelDestinationItem extends StatelessWidget {
     TextStyle descriptionStyle = theme.textTheme.subhead;
     TextStyle buttonStyle = theme.textTheme.button.copyWith(color: theme.primaryColor);
 
-    return new Card(
-      child: new SizedBox(
-        height: 328.0,
+    return new SizedBox(
+      height: height,
+      child: new Card(
         child: new Column(
           children: <Widget>[
             // photo and title
@@ -122,7 +124,8 @@ class CardsDemo extends StatelessWidget {
       appBar: new AppBar(
         title: new Text('Travel stream')
       ),
-      body: new Block(
+      body: new ScrollableList(
+        itemExtent: TravelDestinationItem.height,
         padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
         children: destinations.map((TravelDestination destination) {
           return new Container(
