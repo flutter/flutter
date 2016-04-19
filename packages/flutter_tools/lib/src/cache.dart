@@ -189,7 +189,7 @@ class FlutterEngine {
   List<String> _getEngineDirs() {
     List<String> dirs = <String>[
       'android-arm',
-      'android-arm-deploy',
+      'android-arm-release',
       'android-x64'
     ];
 

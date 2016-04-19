@@ -37,8 +37,8 @@ void main() {
         endsWith('cache/artifacts/engine/android-arm')
       );
       expect(
-        toolConfig.getEngineArtifactsDirectory(TargetPlatform.android_arm, BuildMode.deploy).path,
-        endsWith('cache/artifacts/engine/android-arm-deploy')
+        toolConfig.getEngineArtifactsDirectory(TargetPlatform.android_arm, BuildMode.release).path,
+        endsWith('cache/artifacts/engine/android-arm-release')
       );
     });
 

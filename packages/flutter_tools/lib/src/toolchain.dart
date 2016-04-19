@@ -162,9 +162,9 @@ class ToolConfiguration {
       return new Directory(path.join(engineSrcPath, 'out/${type}_$_modeStr'));
     } else {
       // For now, only suffix for deploy variants.
-      String suffix = mode == BuildMode.deploy ? '-${getModeName(mode)}' : '';
+      String suffix = mode == BuildMode.release ? '-${getModeName(mode)}' : '';
 
-      // Create something like `android-arm` or `android-arm-deploy`.
+      // Create something like `android-arm` or `android-arm-release`.
       String dirName = getNameForTargetPlatform(platform) + suffix;
       Directory engineDir = _cache.getArtifactDirectory('engine');
       return new Directory(path.join(engineDir.path, dirName));

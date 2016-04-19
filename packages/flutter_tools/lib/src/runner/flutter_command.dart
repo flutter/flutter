@@ -64,18 +64,18 @@ abstract class FlutterCommand extends Command {
     argParser.addFlag('debug',
       negatable: false,
       help: 'Build a debug version of your app (the default).');
-    argParser.addFlag('deploy',
+    argParser.addFlag('release',
       negatable: false,
-      help: 'Build a deployable version of your app.');
+      help: 'Build a release version of your app.');
   }
 
   BuildMode getBuildMode() {
-    if (argResults['debug'] && argResults['deploy'])
-      throw new UsageException('Only one of --debug or --deploy should be specified.', null);
+    if (argResults['debug'] && argResults['release'])
+      throw new UsageException('Only one of --debug or --release should be specified.', null);
 
     BuildMode mode = BuildMode.debug;
-    if (argResults['deploy'])
-      mode = BuildMode.deploy;
+    if (argResults['release'])
+      mode = BuildMode.release;
     return mode;
   }
 
