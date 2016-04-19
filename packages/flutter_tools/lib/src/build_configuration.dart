@@ -15,12 +15,12 @@ enum BuildType {
   debug,
 }
 
-/// The type of build - `debug` or `deploy`.
+/// The type of build - `debug` or `release`.
 ///
 /// TODO(devoncarew): Add a `profile` mode.
 enum BuildMode {
   debug,
-  deploy
+  release
 }
 
 String getModeName(BuildMode mode) => getEnumName(mode);
