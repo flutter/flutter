@@ -77,7 +77,6 @@ class FlexibleSpaceDemo extends StatefulWidget {
 class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   final double _appBarHeight = 256.0;
-  final Key _scrollableKey = new UniqueKey();
   AppBarBehavior _appBarBehavior = AppBarBehavior.scroll;
 
   @override
@@ -90,7 +89,6 @@ class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
       ),
       child: new Scaffold(
         key: _scaffoldKey,
-        scrollableKey: _scrollableKey,
         appBarBehavior: _appBarBehavior,
         appBar: new AppBar(
           expandedHeight: _appBarHeight,
@@ -132,7 +130,6 @@ class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
           )
         ),
         body: new Block(
-          scrollableKey: _scrollableKey,
           padding: new EdgeInsets.only(top: _appBarHeight + statusBarHeight),
           children: <Widget>[
             new _ContactCategory(
