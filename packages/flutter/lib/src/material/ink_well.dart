@@ -69,7 +69,7 @@ class InkResponse extends StatefulWidget {
   ///
   /// This method is intended to be overridden by descendants that
   /// specialize [InkResponse] for unusual cases. For example,
-  /// [RowInkWell] implements this method to return the rectangle
+  /// [TableRowInkWell] implements this method to return the rectangle
   /// corresponding to the row that the widget is in.
   ///
   /// The default behavior returns null, which is equivalent to
@@ -82,7 +82,7 @@ class InkResponse extends StatefulWidget {
   ///
   /// This method is intended to be overridden by descendants that
   /// specialize [InkResponse] for unusual cases. For example,
-  /// [RowInkWell] implements this method to verify that the widget is
+  /// [TableRowInkWell] implements this method to verify that the widget is
   /// in a table.
   bool debugCheckContext(BuildContext context) {
     assert(debugCheckHasMaterial(context));
