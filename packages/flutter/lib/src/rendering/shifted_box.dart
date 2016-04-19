@@ -617,7 +617,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   ///
   /// If non-null, the child is given a tight width constraint that is the max
   /// incoming width constraint multipled by this factor.  If null, the child is
-  /// given the incoming width constraings.
+  /// given the incoming width constraints.
   double get widthFactor => _widthFactor;
   double _widthFactor;
   set widthFactor (double value) {
@@ -632,7 +632,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   ///
   /// If non-null, the child is given a tight height constraint that is the max
   /// incoming width constraint multipled by this factor.  If null, the child is
-  /// given the incoming width constraings.
+  /// given the incoming width constraints.
   double get heightFactor => _heightFactor;
   double _heightFactor;
   set heightFactor (double value) {

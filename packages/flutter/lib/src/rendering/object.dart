@@ -1353,7 +1353,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
         }
         if (targetFrame != null && targetFrame < stack.length) {
           information.writeln(
-            'These invalid constraints were provided to $runtimeType\'s method() '
+            'These invalid constraints were provided to $runtimeType\'s layout() '
             'function by the following function, which probably computed the '
             'invalid constraints in question:'
           );
