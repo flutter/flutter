@@ -36,7 +36,7 @@ typedef dynamic EvaluatorFunction();
 class FlutterDriver {
   FlutterDriver.connectedTo(this._serviceClient, this._peer, this._appIsolate);
 
-  static const String _kFlutterExtensionMethod = 'ext.flutter_driver';
+  static const String _kFlutterExtensionMethod = 'ext.flutter.driver';
   static const String _kSetVMTimelineFlagsMethod = '_setVMTimelineFlags';
   static const String _kGetVMTimelineMethod = '_getVMTimeline';
   static const Duration _kDefaultTimeout = const Duration(seconds: 5);

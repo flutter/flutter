@@ -5,11 +5,11 @@
 import 'dart:math' as math;
 import 'dart:ui' show Rect;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:sky_services/semantics/semantics.mojom.dart' as mojom;
 import 'package:vector_math/vector_math_64.dart';
 
-import 'basic_types.dart';
 import 'node.dart';
 
 /// The type of function returned by [RenderObject.getSemanticAnnotators()].

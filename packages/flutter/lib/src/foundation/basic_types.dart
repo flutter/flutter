@@ -2,7 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+export 'dart:ui' show VoidCallback;
+
+/// Signature for callbacks that report that an underlying value has changed.
+///
+/// See also [ValueSetter].
 typedef void ValueChanged<T>(T value);
+
+/// Signature for callbacks that report that a value has been set.
+///
+/// This is the same signature as [ValueChanged], but is used when the
+/// callback is invoked even if the underlying value has not changed.
+/// For example, service extensions use this callback because they
+/// invoke the callback whenever the extension is invoked with a
+/// value, regardless of whether the given value is new or not.
+typedef void ValueSetter<T>(T value);
+
+/// Signature for callbacks that are to report a value on demand.
+///
+/// See also [ValueSetter].
+typedef T ValueGetter<T>();
 
 /// A BitField over an enum (or other class whose values implement "index").
 /// Only the first 63 values of the enum can be used as indices.

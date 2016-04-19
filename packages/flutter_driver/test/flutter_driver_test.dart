@@ -51,7 +51,7 @@ void main() {
     test('connects to isolate paused at start', () async {
       when(mockIsolate.pauseEvent).thenReturn(new MockVMPauseStartEvent());
       when(mockIsolate.resume()).thenReturn(new Future<Null>.value());
-      when(mockIsolate.onExtensionAdded).thenReturn(new Stream<String>.fromIterable(<String>['ext.flutter_driver']));
+      when(mockIsolate.onExtensionAdded).thenReturn(new Stream<String>.fromIterable(<String>['ext.flutter.driver']));
 
       FlutterDriver driver = await FlutterDriver.connect();
       expect(driver, isNotNull);

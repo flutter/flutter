@@ -82,6 +82,18 @@ abstract class Scheduler extends BindingBase {
   static Scheduler get instance => _instance;
   static Scheduler _instance;
 
+  @override
+  void initServiceExtensions() {
+    super.initServiceExtensions();
+    registerNumericServiceExtension(
+      name: 'timeDilation', 
+      getter: () => timeDilation,
+      setter: (double value) {
+        timeDilation = value;
+      }
+    );
+  }
+
 
   /// The strategy to use when deciding whether to run a task or not.
   /// 

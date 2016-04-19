@@ -797,7 +797,19 @@ class PipelineOwner {
       Timeline.finishSync();
     }
   }
-
+ 
+  /// Cause the entire subtree rooted at the given [RenderObject] to
+  /// be entirely reprocessed. This is used by development tools when
+  /// the application code has changed, to cause the rendering tree to
+  /// pick up any changed implementations.
+  ///
+  /// This is expensive and should not be called except during
+  /// development.
+  void reassemble(RenderObject root) {
+    assert(root.parent is! RenderObject);
+    assert(root.owner == this);
+    root._reassemble();
+  }
 }
 
 // See _performLayout.
@@ -831,6 +843,17 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   RenderObject() {
     _needsCompositing = isRepaintBoundary || alwaysNeedsCompositing;
     _performLayout = performLayout;
+  }
+
+  void _reassemble() {
+    _performLayout = performLayout;
+    markNeedsLayout();
+    markNeedsCompositingBitsUpdate();
+    markNeedsPaint();
+    markNeedsSemanticsUpdate();
+    visitChildren((RenderObject child) {
+      child._reassemble();
+    });
   }
 
   // LAYOUT
