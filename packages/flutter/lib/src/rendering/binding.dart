@@ -41,10 +41,11 @@ abstract class Renderer extends Object with Scheduler, Services
   @override
   void initServiceExtensions() {
     super.initServiceExtensions();
+
     assert(() {
       // this service extension only works in checked mode
       registerBoolServiceExtension(
-        name: 'debugPaint', 
+        name: 'debugPaint',
         getter: () => debugPaintSizeEnabled,
         setter: (bool value) {
           if (debugPaintSizeEnabled == value)
@@ -60,8 +61,19 @@ abstract class Renderer extends Object with Scheduler, Services
       );
       return true;
     });
-  }
 
+    assert(() {
+      // this service extension only works in checked mode
+      registerBoolServiceExtension(
+        name: 'repaintRainbow',
+        getter: () => debugRepaintRainbowEnabled,
+        setter: (bool value) {
+          debugRepaintRainbowEnabled = value;
+        }
+      );
+      return true;
+    });
+  }
 
   void initRenderView() {
     if (renderView == null) {
