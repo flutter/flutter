@@ -106,7 +106,7 @@ class MojoAssetBundle extends CachingAssetBundle {
 AssetBundle _initRootBundle() {
   int h = ui.MojoServices.takeRootBundle();
   if (h == core.MojoHandle.INVALID)
-    return null;
+    return new NetworkAssetBundle(Uri.base);
   core.MojoHandle handle = new core.MojoHandle(h);
   return new MojoAssetBundle(new AssetBundleProxy.fromHandle(handle));
 }

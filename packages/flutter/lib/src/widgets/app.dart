@@ -20,14 +20,6 @@ import 'performance_overlay.dart';
 import 'semantics_debugger.dart';
 import 'title.dart';
 
-AssetBundle _initDefaultBundle() {
-  if (rootBundle != null)
-    return rootBundle;
-  return new NetworkAssetBundle(Uri.base);
-}
-
-final AssetBundle _defaultBundle = _initDefaultBundle();
-
 typedef Future<LocaleQueryData> LocaleChangedCallback(Locale locale);
 
 /// A convenience class that wraps a number of widgets that are commonly
@@ -173,7 +165,7 @@ class WidgetsAppState<T extends WidgetsApp> extends State<T> implements BindingO
       child: new LocaleQuery(
         data: _localeData,
         child: new AssetVendor(
-          bundle: _defaultBundle,
+          bundle: rootBundle,
           devicePixelRatio: ui.window.devicePixelRatio,
           child: new Title(
             title: config.title,
