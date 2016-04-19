@@ -75,7 +75,6 @@ class GalleryHome extends StatefulWidget {
 
 class GalleryHomeState extends State<GalleryHome> {
   final Key _homeKey = new ValueKey<String>("Gallery Home");
-  final Key _listKey = new ValueKey<String>("Gallery List");
 
   @override
   Widget build(BuildContext context) {
@@ -98,12 +97,10 @@ class GalleryHomeState extends State<GalleryHome> {
           background: new GalleryHeader()
         )
       ),
-      scrollableKey: _listKey,
       appBarBehavior: AppBarBehavior.under,
       body: new TwoLevelList(
         padding: new EdgeInsets.only(top: _kFlexibleSpaceMaxHeight + statusBarHight),
         type: MaterialListType.oneLine,
-        scrollableKey: _listKey,
         children: <Widget>[
           new TwoLevelSublist(
             leading: new Icon(icon: Icons.star),

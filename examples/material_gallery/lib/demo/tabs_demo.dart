@@ -45,7 +45,6 @@ class TabsDemoState extends State<TabsDemo> {
         });
       },
       child: new Scaffold(
-        scrollableKey: _selectedPage.key,
         appBarBehavior: AppBarBehavior.under,
         appBar: new AppBar(
           title: new Text('Tabs and scrolling'),
