@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
-import 'package:matcher/matcher.dart';
 import 'package:vm_service_client/vm_service_client.dart';
 import 'package:web_socket_channel/io.dart';
 
@@ -13,9 +12,7 @@ import 'error.dart';
 import 'find.dart';
 import 'gesture.dart';
 import 'health.dart';
-import 'matcher_util.dart';
 import 'message.dart';
-import 'retry.dart';
 import 'timeline.dart';
 
 final Logger _log = new Logger('FlutterDriver');
@@ -43,7 +40,6 @@ class FlutterDriver {
   static const String _kSetVMTimelineFlagsMethod = '_setVMTimelineFlags';
   static const String _kGetVMTimelineMethod = '_getVMTimeline';
   static const Duration _kDefaultTimeout = const Duration(seconds: 5);
-  static const Duration _kDefaultPauseBetweenRetries = const Duration(milliseconds: 160);
 
   /// Connects to a Flutter application.
   ///
@@ -188,12 +184,14 @@ class FlutterDriver {
 
   /// Taps at the center of the widget located by [finder].
   Future<Null> tap(SerializableFinder finder) async {
-    return await _sendCommand(new Tap(finder)).then((Map<String, dynamic> _) => null);
+    await _sendCommand(new Tap(finder));
+    return null;
   }
 
-  /// Whether at least one widget identified by [finder] exists on the UI.
-  Future<bool> exists(SerializableFinder finder) async {
-    return await _sendCommand(new Exists(finder)).then((Map<String, dynamic> _) => null);
+  /// Waits until [finder] locates the target.
+  Future<Null> waitFor(SerializableFinder finder, {Duration timeout: _kDefaultTimeout}) async {
+    await _sendCommand(new WaitFor(finder, timeout: timeout));
+    return null;
   }
 
   /// Tell the driver to perform a scrolling action.
@@ -257,24 +255,6 @@ class FlutterDriver {
     await startTracing();
     await action();
     return stopTracingAndDownloadTimeline();
-  }
-
-  /// Calls the [evaluator] repeatedly until the result of the evaluation
-  /// satisfies the [matcher].
-  ///
-  /// Returns the result of the evaluation.
-  Future<String> waitFor(EvaluatorFunction evaluator, Matcher matcher, {
-    Duration timeout: _kDefaultTimeout,
-    Duration pauseBetweenRetries: _kDefaultPauseBetweenRetries
-  }) async {
-    return retry(() async {
-      dynamic value = await evaluator();
-      MatchResult matchResult = match(value, matcher);
-      if (!matchResult.hasMatched) {
-        return new Future<Null>.error(matchResult.mismatchDescription);
-      }
-      return value;
-    }, timeout, pauseBetweenRetries);
   }
 
   /// Closes the underlying connection to the VM service.

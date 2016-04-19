@@ -37,35 +37,44 @@ abstract class CommandWithTarget extends Command {
   Map<String, String> serialize() => finder.serialize();
 }
 
-/// Checks if the widget identified by the given finder exists.
-class Exists extends CommandWithTarget {
+/// Waits until [finder] can locate the target.
+class WaitFor extends CommandWithTarget {
   @override
-  final String kind = 'exists';
+  final String kind = 'waitFor';
 
-  Exists(SerializableFinder finder) : super(finder);
+  WaitFor(SerializableFinder finder, {this.timeout})
+      : super(finder);
 
-  static Exists deserialize(Map<String, String> json) {
-    return new Exists(SerializableFinder.deserialize(json));
+  final Duration timeout;
+
+  static WaitFor deserialize(Map<String, String> json) {
+    Duration timeout = json['timeout'] != null
+      ? new Duration(milliseconds: int.parse(json['timeout']))
+      : null;
+    return new WaitFor(SerializableFinder.deserialize(json), timeout: timeout);
   }
 
   @override
-  Map<String, String> serialize() => super.serialize();
+  Map<String, String> serialize() {
+    Map<String, String> json = super.serialize();
+
+    if (timeout != null) {
+      json['timeout'] = '${timeout.inMilliseconds}';
+    }
+
+    return json;
+  }
 }
 
-class ExistsResult extends Result {
-  ExistsResult(this.exists);
+class WaitForResult extends Result {
+  WaitForResult();
 
-  static ExistsResult fromJson(Map<String, dynamic> json) {
-    return new ExistsResult(json['exists']);
+  static WaitForResult fromJson(Map<String, dynamic> json) {
+    return new WaitForResult();
   }
 
-  /// Whether the widget was found on the UI or not.
-  final bool exists;
-
   @override
-  Map<String, dynamic> toJson() => {
-    'exists': exists,
-  };
+  Map<String, dynamic> toJson() => <String, dynamic>{};
 }
 
 /// Describes how to the driver should search for elements.

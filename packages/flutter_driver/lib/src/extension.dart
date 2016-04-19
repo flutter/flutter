@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/src/instrumentation.dart';
@@ -16,11 +17,9 @@ import 'find.dart';
 import 'gesture.dart';
 import 'health.dart';
 import 'message.dart';
-import 'retry.dart';
 
 const String _extensionMethod = 'ext.flutter_driver';
 const Duration _kDefaultTimeout = const Duration(seconds: 5);
-const Duration _kDefaultPauseBetweenRetries = const Duration(milliseconds: 160);
 
 bool _flutterDriverExtensionEnabled = false;
 
@@ -54,32 +53,33 @@ class FlutterDriverExtension {
   static final Logger _log = new Logger('FlutterDriverExtension');
 
   FlutterDriverExtension() {
-    _commandHandlers = <String, CommandHandlerCallback>{
+    _commandHandlers.addAll(<String, CommandHandlerCallback>{
       'get_health': getHealth,
       'tap': tap,
       'get_text': getText,
       'scroll': scroll,
-    };
+      'waitFor': waitFor,
+    });
 
-    _commandDeserializers = <String, CommandDeserializerCallback>{
+    _commandDeserializers.addAll(<String, CommandDeserializerCallback>{
       'get_health': GetHealth.deserialize,
       'tap': Tap.deserialize,
       'get_text': GetText.deserialize,
       'scroll': Scroll.deserialize,
-    };
+      'waitFor': WaitFor.deserialize,
+    });
 
-    _finders = <String, FinderCallback>{
+    _finders.addAll(<String, FinderCallback>{
       'ByValueKey': _findByValueKey,
       'ByTooltipMessage': _findByTooltipMessage,
       'ByText': _findByText,
-    };
+    });
   }
 
   final Instrumentation prober = new Instrumentation();
-
-  Map<String, CommandHandlerCallback> _commandHandlers;
-  Map<String, CommandDeserializerCallback> _commandDeserializers;
-  Map<String, FinderCallback> _finders;
+  final Map<String, CommandHandlerCallback> _commandHandlers = <String, CommandHandlerCallback>{};
+  final Map<String, CommandDeserializerCallback> _commandDeserializers = <String, CommandDeserializerCallback>{};
+  final Map<String, FinderCallback> _finders = <String, FinderCallback>{};
 
   Future<ServiceExtensionResponse> call(Map<String, String> params) async {
     try {
@@ -110,16 +110,42 @@ class FlutterDriverExtension {
     }
   }
 
+  Stream<Duration> _onFrameReadyStream;
+  Stream<Duration> get _onFrameReady {
+    if (_onFrameReadyStream == null) {
+      // Lazy-initialize the frame callback because the renderer is not yet
+      // available at the time the extension is registered.
+      StreamController<Duration> frameReadyController = new StreamController<Duration>.broadcast(sync: true);
+      Scheduler.instance.addPersistentFrameCallback((Duration timestamp) {
+        frameReadyController.add(timestamp);
+      });
+      _onFrameReadyStream = frameReadyController.stream;
+    }
+    return _onFrameReadyStream;
+  }
+
   Future<Health> getHealth(GetHealth command) async => new Health(HealthStatus.ok);
 
-  /// Runs object [finder] repeatedly until it finds an [Element].
+  /// Runs [locator] repeatedly until it finds an [Element] or times out.
   Future<Element> _waitForElement(String descriptionGetter(), Element locator()) {
-    return retry(locator, _kDefaultTimeout, _kDefaultPauseBetweenRetries, predicate: (dynamic object) {
-      return object != null;
-    }).catchError((Object error, Object stackTrace) {
-      _log.warning('Timed out waiting for ${descriptionGetter()}');
-      return null;
+    Completer<Element> completer = new Completer<Element>();
+    StreamSubscription<Duration> subscription;
+
+    Timer timeout = new Timer(_kDefaultTimeout, () {
+      subscription.cancel();
+      completer.completeError('Timed out waiting for ${descriptionGetter()}');
     });
+
+    subscription = _onFrameReady.listen((Duration duration) {
+      Element element = locator();
+      if (element != null) {
+        subscription.cancel();
+        timeout.cancel();
+        completer.complete(element);
+      }
+    });
+
+    return completer.future;
   }
 
   Future<Element> _findByValueKey(ByValueKey byKey) async {
@@ -168,6 +194,13 @@ class FlutterDriverExtension {
     Element target = await _runFinder(command.finder);
     prober.tap(target);
     return new TapResult();
+  }
+
+  Future<WaitForResult> waitFor(WaitFor command) async {
+    if (await _runFinder(command.finder) != null)
+      return new WaitForResult();
+    else
+      return null;
   }
 
   Future<ScrollResult> scroll(Scroll command) async {
