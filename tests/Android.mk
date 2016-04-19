@@ -77,6 +77,7 @@ LOCAL_SRC_FILES += \
     FontTestUtils.cpp \
     HbFontCacheTest.cpp \
     MinikinFontForTest.cpp \
+    MinikinInternalTest.cpp \
     GraphemeBreakTests.cpp \
     LayoutUtilsTest.cpp \
     UnicodeUtils.cpp \
