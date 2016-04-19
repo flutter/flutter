@@ -490,7 +490,7 @@ class ScaffoldState extends State<Scaffold> {
     final ScrollableState scrollable = notification.scrollable;
     if ((scrollable.config.scrollDirection == Axis.vertical) &&
         (config.scrollableKey == null || config.scrollableKey == scrollable.config.key)) {
-      final double newScrollOffset = notification.scrollable.scrollOffset;
+      final double newScrollOffset = scrollable.scrollOffset;
       setState(() {
         _scrollOffsetDelta = _scrollOffset - newScrollOffset;
         _scrollOffset = newScrollOffset;
