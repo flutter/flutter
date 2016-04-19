@@ -102,6 +102,10 @@ static const char* kDartStartPausedArgs[]{
     "--pause_isolates_on_start",
 };
 
+static const char* kDartTraceStartupArgs[]{
+    "--timeline_streams=Compiler,Dart,Embedder,GC",
+};
+
 const char kFileUriPrefix[] = "file://";
 
 const char kDartFlags[] = "dart-flags";
@@ -409,6 +413,9 @@ void InitDartVM() {
 
   if (SkySettings::Get().start_paused)
     args.append(kDartStartPausedArgs, arraysize(kDartStartPausedArgs));
+
+  if (SkySettings::Get().trace_startup)
+    args.append(kDartTraceStartupArgs, arraysize(kDartTraceStartupArgs));
 
   Vector<std::string> dart_flags;
   if (base::CommandLine::ForCurrentProcess()->HasSwitch(kDartFlags)) {

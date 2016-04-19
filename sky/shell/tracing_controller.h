@@ -49,9 +49,6 @@ class TracingController {
 
   void StopBaseTracing();
 
-  void StartDartTracing();
-  void StopDartTracing();
-
   base::FilePath TracePathWithExtension(base::FilePath dir,
                                         std::string extension) const;
 

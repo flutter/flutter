@@ -135,12 +135,10 @@ void Shell::InitStandalone(std::string icu_data_path) {
   settings.start_paused = command_line.HasSwitch(switches::kStartPaused);
   settings.enable_dart_checked_mode =
       command_line.HasSwitch(switches::kEnableCheckedMode);
+  settings.trace_startup = command_line.HasSwitch(switches::kTraceStartup);
   blink::SkySettings::Set(settings);
 
   Init();
-
-  if (command_line.HasSwitch(switches::kTraceStartup))
-    Shared().tracing_controller().StartTracing();
 }
 
 void Shell::Init() {

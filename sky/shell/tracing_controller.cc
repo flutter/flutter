@@ -171,14 +171,9 @@ void TracingController::StartTracing() {
 
   tracing_active_ = true;
 
-  StartDartTracing();
   StartBaseTracing();
 
   AddTraceMetadata();
-}
-
-void TracingController::StartDartTracing() {
-  Dart_GlobalTimelineSetRecordedStreams(DART_TIMELINE_STREAM_ALL);
 }
 
 void TracingController::StartBaseTracing() {
@@ -199,7 +194,6 @@ void TracingController::StopTracing() {
   tracing_active_ = false;
 
   StopBaseTracing();
-  StopDartTracing();
 }
 
 void TracingController::StopBaseTracing() {
@@ -207,10 +201,6 @@ void TracingController::StopBaseTracing() {
 
   log->SetDisabled();
   log->SetEventCallbackDisabled();
-}
-
-void TracingController::StopDartTracing() {
-  Dart_GlobalTimelineSetRecordedStreams(DART_TIMELINE_STREAM_DISABLE);
 }
 
 base::FilePath TracingController::TracePathWithExtension(
