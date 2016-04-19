@@ -39,7 +39,7 @@ class IconButton extends StatelessWidget {
     Key key,
     this.size: 24.0,
     this.padding: const EdgeInsets.all(8.0),
-    this.alignment: FractionalOffset.centerLeft,
+    this.alignment: FractionalOffset.center,
     this.icon,
     this.color,
     this.disabledColor,

@@ -327,24 +327,10 @@ class RenderLimitedBox extends RenderProxyBox {
   void performLayout() {
     if (child != null) {
       child.layout(_limitConstraints(constraints), parentUsesSize: true);
-      size = child.size;
+      size = constraints.constrain(child.size);
     } else {
       size = _limitConstraints(constraints).constrain(Size.zero);
     }
-  }
-
-  @override
-  void debugPaintSize(PaintingContext context, Offset offset) {
-    super.debugPaintSize(context, offset);
-    assert(() {
-      Paint paint;
-      if (child == null || child.size.isEmpty) {
-        paint = new Paint()
-          ..color = debugPaintSpacingColor;
-        context.canvas.drawRect(offset & size, paint);
-      }
-      return true;
-    });
   }
 
   @override
