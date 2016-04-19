@@ -6,6 +6,7 @@ import 'dart:ui' as ui show Image, ImageFilter;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 
 import 'debug.dart';
 import 'framework.dart';
@@ -2134,10 +2135,19 @@ class DefaultAssetBundle extends InheritedWidget {
   /// The bundle to use as a default.
   final AssetBundle bundle;
 
-  /// The bundle from the closest instance of this class that encloses the given context.
+  /// The bundle from the closest instance of this class that encloses
+  /// the given context.
+  ///
+  /// If there is no [DefaultAssetBundle] ancestor widget in the tree
+  /// at the given context, then this will return the [rootBundle].
+  /// The [rootBundle] does not automatically select images based on
+  /// the current device pixel ratio. To get an asset bundle that
+  /// automatically performs pixel-density-aware asset resolution, use
+  /// a [MaterialApp], [WidgetsApp], or [AssetVendor] widget, which
+  /// introduce a suitably-configured [DefaultAssetBundle] widget.
   static AssetBundle of(BuildContext context) {
     DefaultAssetBundle result = context.inheritFromWidgetOfExactType(DefaultAssetBundle);
-    return result?.bundle;
+    return result?.bundle ?? rootBundle;
   }
 
   @override
@@ -2243,12 +2253,20 @@ class AsyncImage extends StatelessWidget {
 ///
 /// By default, asset image will load the image from the closest enclosing
 /// [DefaultAssetBundle].
+///
+/// To get an asset bundle that automatically performs
+/// pixel-density-aware asset resolution, use a [MaterialApp],
+/// [WidgetsApp], or [AssetVendor] widget, which introduce a
+/// suitably-configured [DefaultAssetBundle] widget.
 class AssetImage extends StatelessWidget {
+  /// Creates an [AssetImage].
+  ///
+  /// The `name` argument must not be null.
   // Don't add asserts here unless absolutely necessary, since it will
   // require removing the const constructor, which is an API change.
   const AssetImage({
     Key key,
-    this.name,
+    @required this.name,
     this.bundle,
     this.width,
     this.height,
