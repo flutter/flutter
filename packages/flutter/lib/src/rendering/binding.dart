@@ -68,8 +68,6 @@ abstract class Renderer extends Object with Scheduler, Services
         name: 'repaintRainbow',
         getter: () => debugRepaintRainbowEnabled,
         setter: (bool value) {
-          if (debugRepaintRainbowEnabled == value)
-            return;
           debugRepaintRainbowEnabled = value;
         }
       );
