@@ -223,17 +223,17 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   @override
   void initState() {
     super.initState();
-    _controller = new AnimationController.unbounded()..addListener(_handleAnimationChanged);
+    _controller = new AnimationController.unbounded()
+      ..addListener(_handleAnimationChanged);
     _scrollOffset = PageStorage.of(context)?.readState(context) ?? config.initialScrollOffset ?? 0.0;
   }
 
-  Simulation _simulation;
+  Simulation _simulation; // if we're flinging, then this is the animation with which we're doing it
   AnimationController _controller;
 
   @override
   void dispose() {
-    _simulation = null;
-    _controller.stop();
+    _stop();
     super.dispose();
   }
 
@@ -360,8 +360,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
       return new Future<Null>.value();
 
     if (duration == null) {
-      _simulation = null;
-      _controller.stop();
+      _stop();
       _setScrollOffset(newScrollOffset);
       return new Future<Null>.value();
     }
@@ -371,8 +370,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   }
 
   Future<Null> _animateTo(double newScrollOffset, Duration duration, Curve curve) {
-    _simulation = null;
-    _controller.stop();
+    _stop();
     _controller.value = scrollOffset;
     _startScroll();
     return _controller.animateTo(newScrollOffset, duration: duration, curve: curve).then(_endScroll);
@@ -388,6 +386,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   /// If there are no in-progress scrolling physics, this function scrolls to
   /// the given offset instead.
   void didUpdateScrollBehavior(double newScrollOffset) {
+    assert(_controller.isAnimating || _simulation == null);
     if (_numberOfInProgressScrolls > 0) {
       if (_simulation != null) {
         double dx = _simulation.dx(_controller.lastElapsedDuration.inMicroseconds / Duration.MICROSECONDS_PER_SECOND);
@@ -420,8 +419,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   }
 
   Future<Null> _startToEndAnimation(double scrollVelocity) {
-    _simulation = null;
-    _controller.stop();
+    _stop();
     _simulation = _createSnapSimulation(scrollVelocity) ?? _createFlingSimulation(scrollVelocity);
     if (_simulation == null)
       return new Future<Null>.value();
@@ -498,8 +496,13 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   }
 
   void _handleDragDown(_) {
-    _simulation = null;
+    _stop();
+  }
+
+  void _stop() {
+    assert(_controller.isAnimating || _simulation == null);
     _controller.stop();
+    _simulation = null;
   }
 
   void _handleDragStart(_) {
@@ -533,8 +536,10 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
 
   Null _endScroll([Null _]) {
     _numberOfInProgressScrolls -= 1;
-    if (_numberOfInProgressScrolls == 0)
+    if (_numberOfInProgressScrolls == 0) {
+      _simulation = null;
       dispatchOnScrollEnd();
+    }
     return null;
   }
 
