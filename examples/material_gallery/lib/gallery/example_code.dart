@@ -228,8 +228,3 @@ new ScrollableGrid(
 // END
   }
 }
-
-// START test
-// test line 1
-// test line 2
-// END
