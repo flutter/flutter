@@ -51,12 +51,7 @@ abstract class Renderer extends Object with Scheduler, Services
           if (debugPaintSizeEnabled == value)
             return;
           debugPaintSizeEnabled = value;
-          RenderObjectVisitor visitor;
-          visitor = (RenderObject child) {
-            child.markNeedsPaint();
-            child.visitChildren(visitor);
-          };
-          instance?.renderView?.visitChildren(visitor);
+          _forceRepaint();
         }
       );
       return true;
@@ -68,7 +63,10 @@ abstract class Renderer extends Object with Scheduler, Services
         name: 'repaintRainbow',
         getter: () => debugRepaintRainbowEnabled,
         setter: (bool value) {
+          bool repaint = debugRepaintRainbowEnabled && !value;
           debugRepaintRainbowEnabled = value;
+          if (repaint)
+            _forceRepaint();
         }
       );
       return true;
@@ -141,6 +139,15 @@ abstract class Renderer extends Object with Scheduler, Services
     assert(renderView != null);
     renderView.hitTest(result, position: position);
     super.hitTest(result, position);
+  }
+
+  void _forceRepaint() {
+    RenderObjectVisitor visitor;
+    visitor = (RenderObject child) {
+      child.markNeedsPaint();
+      child.visitChildren(visitor);
+    };
+    instance?.renderView?.visitChildren(visitor);
   }
 }
 
