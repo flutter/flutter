@@ -156,8 +156,10 @@ class Window {
   void scheduleFrame() native "Window_scheduleFrame";
 
   /// Updates the application's rendering on the GPU with the newly provided
-  /// [Scene]. For optimal performance, this should only be called in response
-  /// to the [onBeginFrame] callback being invoked.
+  /// [Scene]. This function must be called within the scope of the
+  /// [onBeginFrame] callback being invoked. If this function is called multiple
+  /// times during a single [onBeginFrame] callback or called outside the scope
+  /// of an [onBeginFrame], the call will be ignored.
   ///
   /// To record graphical operations, first create a
   /// [PictureRecorder], then construct a [Canvas], passing that

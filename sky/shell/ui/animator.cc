@@ -23,6 +23,7 @@ Animator::Animator(const Engine::Config& config,
       did_defer_frame_request_(false),
       engine_requested_frame_(false),
       paused_(false),
+      is_ready_to_draw_(false),
       weak_factory_(this) {
 }
 
@@ -84,15 +85,28 @@ void Animator::BeginFrame(int64_t time_stamp) {
     return;
   }
 
+  begin_time_ = base::TimeTicks::Now();
   base::TimeTicks frame_time = time_stamp ?
-      base::TimeTicks::FromInternalValue(time_stamp) : base::TimeTicks::Now();
+      base::TimeTicks::FromInternalValue(time_stamp) : begin_time_;
 
-  std::unique_ptr<flow::LayerTree> layer_tree = engine_->BeginFrame(frame_time);
+  is_ready_to_draw_ = true;
+  engine_->BeginFrame(frame_time);
+  bool was_ready_to_draw = is_ready_to_draw_;
+  is_ready_to_draw_ = false;
 
-  if (!layer_tree) {
+  // If we were still ready to draw when done with the frame, that means we
+  // didn't draw anything this frame and we should acknowledge the frame
+  // ourselves instead of waiting for the rasterizer to acknowledge it.
+  if (was_ready_to_draw)
     OnFrameComplete();
-    return;
-  }
+}
+
+void Animator::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
+  if (!is_ready_to_draw_)
+    return; // Only draw once per frame.
+  is_ready_to_draw_ = false;
+
+  layer_tree->set_construction_time(base::TimeTicks::Now() - begin_time_);
 
   // TODO(abarth): Doesn't this leak if OnFrameComplete never runs?
   rasterizer_->Draw(reinterpret_cast<uint64_t>(layer_tree.release()),

@@ -6,6 +6,7 @@
 #define SKY_SHELL_UI_ANIMATOR_H_
 
 #include "base/memory/weak_ptr.h"
+#include "base/time/time.h"
 #include "mojo/services/gfx/composition/interfaces/scheduling.mojom.h"
 #include "mojo/services/vsync/interfaces/vsync.mojom.h"
 #include "sky/shell/ui/engine.h"
@@ -21,6 +22,8 @@ class Animator {
 
   void RequestFrame();
   void FlushRealTimeEvents();
+
+  void Render(std::unique_ptr<flow::LayerTree> layer_tree);
 
   void Start();
   void Stop();
@@ -49,6 +52,8 @@ class Animator {
   bool did_defer_frame_request_;
   bool engine_requested_frame_;
   bool paused_;
+  bool is_ready_to_draw_;
+  base::TimeTicks begin_time_;
 
   base::WeakPtrFactory<Animator> weak_factory_;
 

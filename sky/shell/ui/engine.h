@@ -55,7 +55,7 @@ class Engine : public UIDelegate,
 
   static void Init();
 
-  std::unique_ptr<flow::LayerTree> BeginFrame(base::TimeTicks frame_time);
+  void BeginFrame(base::TimeTicks frame_time);
 
  private:
   // UIDelegate implementation:

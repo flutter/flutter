@@ -85,10 +85,8 @@ void SkyView::RunFromSnapshot(mojo::ScopedDataPipeConsumerHandle snapshot) {
   dart_controller_->RunFromSnapshot(snapshot.Pass());
 }
 
-std::unique_ptr<flow::LayerTree> SkyView::BeginFrame(
-    base::TimeTicks frame_time) {
+void SkyView::BeginFrame(base::TimeTicks frame_time) {
   GetWindow()->BeginFrame(frame_time);
-  return std::move(layer_tree_);
 }
 
 void SkyView::HandlePointerPacket(const pointer::PointerPacketPtr& packet) {
@@ -109,7 +107,7 @@ void SkyView::FlushRealTimeEvents() {
 }
 
 void SkyView::Render(Scene* scene) {
-  layer_tree_ = scene->takeLayerTree();
+  client_->Render(scene->takeLayerTree());
 }
 
 void SkyView::DidCreateSecondaryIsolate(Dart_Isolate isolate) {

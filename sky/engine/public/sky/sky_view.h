@@ -43,8 +43,7 @@ class SkyView : public WindowClient, public IsolateClient {
   void PushRoute(const std::string& route);
   void PopRoute();
 
-  std::unique_ptr<flow::LayerTree> BeginFrame(
-      base::TimeTicks frame_time);
+  void BeginFrame(base::TimeTicks frame_time);
 
   void CreateView(const std::string& script_uri);
 
@@ -73,7 +72,6 @@ class SkyView : public WindowClient, public IsolateClient {
   std::string language_code_;
   std::string country_code_;
   std::unique_ptr<DartController> dart_controller_;
-  std::unique_ptr<flow::LayerTree> layer_tree_;
 
   base::WeakPtrFactory<SkyView> weak_factory_;
 

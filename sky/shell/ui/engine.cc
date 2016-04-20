@@ -63,28 +63,10 @@ void Engine::Init() {
   blink::initialize(g_platform_impl);
 }
 
-std::unique_ptr<flow::LayerTree> Engine::BeginFrame(
-    base::TimeTicks frame_time) {
+void Engine::BeginFrame(base::TimeTicks frame_time) {
   TRACE_EVENT0("flutter", "Engine::BeginFrame");
-
-  if (!sky_view_)
-    return nullptr;
-
-  auto begin_time = base::TimeTicks::Now();
-  std::unique_ptr<flow::LayerTree> layer_tree =
-      sky_view_->BeginFrame(frame_time);
-  if (layer_tree) {
-    if (viewport_metrics_) {
-      layer_tree->set_scene_version(viewport_metrics_->scene_version);
-      layer_tree->set_frame_size(SkISize::Make(viewport_metrics_->physical_width,
-                                               viewport_metrics_->physical_height));
-    } else {
-      layer_tree->set_scene_version(0);
-      layer_tree->set_frame_size(SkISize::Make(0, 0));
-    }
-    layer_tree->set_construction_time(base::TimeTicks::Now() - begin_time);
-  }
-  return layer_tree;
+  if (sky_view_)
+    sky_view_->BeginFrame(frame_time);
 }
 
 void Engine::ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request) {
@@ -343,7 +325,19 @@ void Engine::FlushRealTimeEvents() {
   animator_->FlushRealTimeEvents();
 }
 
-void Engine::Render(std::unique_ptr<flow::LayerTree> layer_tree) {}
+void Engine::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
+  if (!layer_tree)
+    return;
+  if (viewport_metrics_) {
+    layer_tree->set_scene_version(viewport_metrics_->scene_version);
+    layer_tree->set_frame_size(SkISize::Make(viewport_metrics_->physical_width,
+                                             viewport_metrics_->physical_height));
+  } else {
+    layer_tree->set_scene_version(0);
+    layer_tree->set_frame_size(SkISize::Make(0, 0));
+  }
+  animator_->Render(std::move(layer_tree));
+}
 
 }  // namespace shell
 }  // namespace sky
