@@ -215,9 +215,9 @@ class OverlayState extends State<Overlay> {
   }
 
   void _remove(OverlayEntry entry) {
-    setState(() {
-      _entries.remove(entry);
-    });
+    _entries.remove(entry);
+    if (mounted)
+      setState(() { /* entry was removed */ });
   }
 
   /// (DEBUG ONLY) Check whether a given entry is visible (i.e., not behind an opaque entry).
