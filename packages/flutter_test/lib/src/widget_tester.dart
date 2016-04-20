@@ -126,7 +126,7 @@ class WidgetTester {
   }
 
   /// Finds the first state object, searching in the depth-first traversal order.
-  State stateOf(Finder finder) {
+  State/*=T*/ stateOf/*<T extends State>*/(Finder finder) {
     Element element = finder.findFirst(this);
     Widget widget = element.widget;
 

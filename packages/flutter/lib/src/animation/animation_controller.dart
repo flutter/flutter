@@ -126,7 +126,7 @@ class AnimationController extends Animation<double>
 
   /// The amount of time that has passed between the time the animation started and the most recent tick of the animation.
   ///
-  /// If the controller is not animating, the last elapsed duration is null;
+  /// If the controller is not animating, the last elapsed duration is null.
   Duration get lastElapsedDuration => _lastElapsedDuration;
   Duration _lastElapsedDuration;
 
@@ -212,7 +212,7 @@ class AnimationController extends Animation<double>
     assert(simulation != null);
     assert(!isAnimating);
     _simulation = simulation;
-    _lastElapsedDuration = const Duration();
+    _lastElapsedDuration = Duration.ZERO;
     _value = simulation.x(0.0).clamp(lowerBound, upperBound);
     Future<Null> result = _ticker.start();
     _checkStatusChanged();
