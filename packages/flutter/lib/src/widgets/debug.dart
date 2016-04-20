@@ -72,7 +72,7 @@ bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
 
 /// Asserts that the given context has a [Table] ancestor.
 ///
-/// Used by [RowInkWell] to make sure that it is only used in an appropriate context.
+/// Used by [TableRowInkWell] to make sure that it is only used in an appropriate context.
 ///
 /// To invoke this function, use the following pattern, typically in the
 /// relevant Widget's [build] method:

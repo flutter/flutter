@@ -337,7 +337,7 @@ class DataTable extends StatelessWidget {
       )
     );
     if (onRowTap != null) {
-      contents = new RowInkWell(
+      contents = new TableRowInkWell(
         onTap: onRowTap,
         child: contents
       );
@@ -443,7 +443,7 @@ class DataTable extends StatelessWidget {
         child: label
       );
     } else if (onSelectChanged != null) {
-      label = new RowInkWell(
+      label = new TableRowInkWell(
         onTap: onSelectChanged,
         child: label
       );
@@ -555,15 +555,15 @@ class DataTable extends StatelessWidget {
 /// Must have an ancestor [Material] widget in which to cause ink
 /// reactions and an ancestor [Table] widget to establish a row.
 ///
-/// The RowInkWell must be in the same coordinate space (modulo
+/// The TableRowInkWell must be in the same coordinate space (modulo
 /// translations) as the [Table]. If it's rotated or scaled or
 /// otherwise transformed, it will not be able to describe the
 /// rectangle of the row in its own coordinate system as a [Rect], and
 /// thus the splash will not occur. (In general, this is easy to
-/// achieve: just put the RowInkWell as the direct child of the
+/// achieve: just put the TableRowInkWell as the direct child of the
 /// [Table], and put the other contents of the cell inside it.)
-class RowInkWell extends InkResponse {
-  RowInkWell({
+class TableRowInkWell extends InkResponse {
+  TableRowInkWell({
     Key key,
     Widget child,
     GestureTapCallback onTap,
@@ -599,7 +599,7 @@ class RowInkWell extends InkResponse {
         assert(cellParentData.y != null);
         Rect rect = table.getRowBox(cellParentData.y);
         // The rect is in the table's coordinate space. We need to change it to the
-        // RowInkWell's coordinate space.
+        // TableRowInkWell's coordinate space.
         table.applyPaintTransform(cell, transform);
         Offset offset = MatrixUtils.getAsTranslation(transform);
         if (offset != null)
