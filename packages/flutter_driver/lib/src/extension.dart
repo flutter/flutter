@@ -120,7 +120,14 @@ class FlutterDriverExtension {
   Future<Health> getHealth(GetHealth command) async => new Health(HealthStatus.ok);
 
   /// Runs [locator] repeatedly until it finds an [Element] or times out.
-  Future<Element> _waitForElement(String descriptionGetter(), Element locator()) {
+  Future<Element> _waitForElement(String descriptionGetter(), Element locator()) async {
+    // Short-circuit if the element is already on the UI
+    Element element = locator();
+    if (element != null) {
+      return element;
+    }
+
+    // No element yet, so we retry on frames rendered in the future.
     Completer<Element> completer = new Completer<Element>();
     StreamSubscription<Duration> subscription;
 
