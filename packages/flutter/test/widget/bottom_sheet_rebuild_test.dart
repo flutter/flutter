@@ -14,19 +14,15 @@ void main() {
       int buildCount = 0;
 
       tester.pumpWidget(new MaterialApp(
-        routes: <String, WidgetBuilder>{
-          '/': (BuildContext context) {
-            return new Scaffold(
-              key: scaffoldKey,
-              body: new Center(child: new Text('body'))
-            );
-          }
-        }
+        home: new Scaffold(
+          key: scaffoldKey,
+          body: new Center(child: new Text('body'))
+        )
       ));
 
       bottomSheet = scaffoldKey.currentState.showBottomSheet/*<Null>*/((_) {
         return new Builder(
-          builder: (_) {
+          builder: (BuildContext context) {
             buildCount += 1;
             return new Container(height: 200.0);
           }

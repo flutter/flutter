@@ -301,11 +301,5 @@ class IsolateExampleState extends State<StatefulWidget> {
 }
 
 void main() {
-  runApp(
-    new MaterialApp(
-      routes: <String, WidgetBuilder>{
-        '/': (BuildContext context) => new IsolateExampleWidget()
-      }
-    )
-  );
+  runApp(new MaterialApp(home: new IsolateExampleWidget()));
 }

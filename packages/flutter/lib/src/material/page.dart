@@ -66,9 +66,12 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
     Widget result = builder(context);
     assert(() {
-      if (result == null)
-        debugPrint('The builder for route \'${settings.name}\' returned null. Route builders must never return null.');
-      assert(result != null && 'A route builder returned null. See the previous log message for details.' is String);
+      if (result == null) {
+        throw new FlutterError(
+          'The builder for route "${settings.name}" returned null.\n'
+          'Route builders must never return null.'
+        );
+      }
       return true;
     });
     return result;

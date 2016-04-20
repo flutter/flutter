@@ -36,10 +36,18 @@ const TextStyle _errorTextStyle = const TextStyle(
 ///  * [Scaffold]
 ///  * [MaterialPageRoute]
 class MaterialApp extends WidgetsApp {
+  /// Creates a MaterialApp.
+  ///
+  /// At least one of [home], [routes], or [onGenerateRoute] must be
+  /// given. If only [routes] is given, it must include an entry for
+  /// the [Navigator.defaultRouteName] (`'/'`).
+  ///
+  /// See also the [new WidgetsApp] constructor (which this extends).
   MaterialApp({
     Key key,
     String title,
     ThemeData theme,
+    Widget home,
     Map<String, WidgetBuilder> routes: const <String, WidgetBuilder>{},
     RouteFactory onGenerateRoute,
     LocaleChangedCallback onLocaleChanged,
@@ -48,6 +56,7 @@ class MaterialApp extends WidgetsApp {
     bool showSemanticsDebugger: false,
     bool debugShowCheckedModeBanner: true
   }) : theme = theme,
+       home = home,
        routes = routes,
        super(
     key: key,
@@ -56,6 +65,8 @@ class MaterialApp extends WidgetsApp {
     color: theme?.primaryColor ?? Colors.blue[500], // blue[500] is the primary color of the default theme
     onGenerateRoute: (RouteSettings settings) {
       WidgetBuilder builder = routes[settings.name];
+      if (builder == null && home != null && settings.name == Navigator.defaultRouteName)
+        builder = (BuildContext context) => home;
       if (builder != null) {
         return new MaterialPageRoute<Null>(
           builder: builder,
@@ -72,10 +83,29 @@ class MaterialApp extends WidgetsApp {
     debugShowCheckedModeBanner: debugShowCheckedModeBanner
   ) {
     assert(debugShowMaterialGrid != null);
+    assert(routes != null);
+    assert(!routes.containsKey(Navigator.defaultRouteName) || (home == null));
+    assert(routes.containsKey(Navigator.defaultRouteName) || (home != null) || (onGenerateRoute != null));
   }
 
   /// The colors to use for the application's widgets.
   final ThemeData theme;
+
+  /// The widget for the default route of the app
+  /// ([Navigator.defaultRouteName], which is `'/'`).
+  ///
+  /// This is the page that is displayed first when the application is
+  /// started normally.
+  ///
+  /// To be able to directly call [Theme.of], [MediaQuery.of],
+  /// [LocaleQuery.of], etc, in the code sets the [home] argument in
+  /// the constructor, you can use a [Builder] widget to get a
+  /// [BuildContext].
+  ///
+  /// If this is not specified, then either the route with name `'/'`
+  /// must be given in [routes], or the [onGenerateRoute] callback
+  /// must be able to build a widget for that route.
+  final Widget home;
 
   /// The application's top-level routing table.
   ///
@@ -83,6 +113,15 @@ class MaterialApp extends WidgetsApp {
   /// looked up in this map. If the name is present, the associated
   /// [WidgetBuilder] is used to construct a [MaterialPageRoute] that performs
   /// an appropriate transition, including [Hero] animations, to the new route.
+  ///
+  /// If the app only has one page, then you can specify it using [home] instead.
+  ///
+  /// If [home] is specified, then it is an error to provide a route
+  /// in this map for the [Navigator.defaultRouteName] route (`'/'`).
+  ///
+  /// If a route is requested that is not specified in this table (or
+  /// by [home]), then the [onGenerateRoute] callback is invoked to
+  /// build the page instead.
   final Map<String, WidgetBuilder> routes;
 
   /// Turns on a [GridPaper] overlay that paints a baseline grid

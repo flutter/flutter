@@ -24,16 +24,14 @@ class GalleryAppState extends State<GalleryApp> {
       title: 'Flutter Material Gallery',
       theme: _useLightTheme ? _kGalleryLightTheme : _kGalleryDarkTheme,
       showPerformanceOverlay: _showPerformanceOverlay,
-      routes: {
-        '/': (BuildContext context) => new GalleryHome(
-          useLightTheme: _useLightTheme,
-          onThemeChanged: (bool value) { setState(() { _useLightTheme = value; }); },
-          showPerformanceOverlay: _showPerformanceOverlay,
-          onShowPerformanceOverlayChanged: (bool value) { setState(() { _showPerformanceOverlay = value; }); },
-          timeDilation: timeDilation,
-          onTimeDilationChanged: (double value) { setState(() { timeDilation = value; }); }
-        )
-      }
+      home: new GalleryHome(
+        useLightTheme: _useLightTheme,
+        onThemeChanged: (bool value) { setState(() { _useLightTheme = value; }); },
+        showPerformanceOverlay: _showPerformanceOverlay,
+        onShowPerformanceOverlayChanged: (bool value) { setState(() { _showPerformanceOverlay = value; }); },
+        timeDilation: timeDilation,
+        onTimeDilationChanged: (double value) { setState(() { timeDilation = value; }); }
+      )
     );
   }
 }

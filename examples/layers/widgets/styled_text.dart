@@ -122,17 +122,14 @@ class _StyledTextDemoState extends State<StyledTextDemo> {
 void main() {
   runApp(new MaterialApp(
     theme: new ThemeData.light(),
-    routes: <String, WidgetBuilder>{
-      '/': (BuildContext context) {
-        return new Scaffold(
-          appBar: new AppBar(
-            title: new Text('Hal and Dave')),
-          body: new Material(
-            color: Colors.grey[50],
-            child: new StyledTextDemo()
-          )
-        );
-      }
-    }
+    home: new Scaffold(
+      appBar: new AppBar(
+        title: new Text('Hal and Dave')
+      ),
+      body: new Material(
+        color: Colors.grey[50],
+        child: new StyledTextDemo()
+      )
+    )
   ));
 }

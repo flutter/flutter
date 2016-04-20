@@ -10,23 +10,23 @@ import 'package:test/test.dart';
 void main() {
   test('Verify that a tap dismisses a modal BottomSheet', () {
     testWidgets((WidgetTester tester) {
-      BuildContext context;
+      BuildContext savedContext;
       bool showBottomSheetThenCalled = false;
 
       tester.pumpWidget(new MaterialApp(
-          routes: <String, WidgetBuilder>{
-            '/': (BuildContext ctx) {
-              context = ctx;
-              return new Container();
-            }
+        home: new Builder(
+          builder: (BuildContext context) {
+            savedContext = context;
+            return new Container();
           }
+        )
       ));
 
       tester.pump();
       expect(tester, doesNotHaveWidget(find.text('BottomSheet')));
 
       showModalBottomSheet/*<Null>*/(
-        context: context,
+        context: savedContext,
         builder: (BuildContext context) => new Text('BottomSheet')
       ).then((Null result) {
         expect(result, isNull);
@@ -46,7 +46,7 @@ void main() {
       tester.pump(new Duration(seconds: 1)); // frame after the animation (sheet has been removed)
       expect(tester, doesNotHaveWidget(find.text('BottomSheet')));
 
-      showModalBottomSheet/*<Null>*/(context: context, builder: (BuildContext context) => new Text('BottomSheet'));
+      showModalBottomSheet/*<Null>*/(context: savedContext, builder: (BuildContext context) => new Text('BottomSheet'));
       tester.pump(); // bottom sheet show animation starts
       tester.pump(new Duration(seconds: 1)); // animation done
       expect(tester, hasWidget(find.text('BottomSheet')));
@@ -66,14 +66,10 @@ void main() {
       bool showBottomSheetThenCalled = false;
 
       tester.pumpWidget(new MaterialApp(
-        routes: <String, WidgetBuilder>{
-          '/': (BuildContext context) {
-            return new Scaffold(
-              key: scaffoldKey,
-              body: new Center(child: new Text('body'))
-            );
-          }
-        }
+        home: new Scaffold(
+          key: scaffoldKey,
+          body: new Center(child: new Text('body'))
+        )
       ));
 
       expect(showBottomSheetThenCalled, isFalse);

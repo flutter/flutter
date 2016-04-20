@@ -218,14 +218,9 @@ class _GestureDemoState extends State<GestureDemo> {
 void main() {
   runApp(new MaterialApp(
     theme: new ThemeData.dark(),
-    routes: <String, WidgetBuilder>{
-      '/': (BuildContext context) {
-        return new Scaffold(
-          appBar: new AppBar(
-              title: new Text('Gestures Demo')),
-          body: new GestureDemo()
-        );
-      }
-    }
+    home: new Scaffold(
+      appBar: new AppBar(title: new Text('Gestures Demo')),
+      body: new GestureDemo()
+    )
   ));
 }

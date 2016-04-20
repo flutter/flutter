@@ -12,30 +12,26 @@ void main() {
       String helloSnackBar = 'Hello SnackBar';
       Key tapTarget = new Key('tap-target');
       tester.pumpWidget(new MaterialApp(
-        routes: <String, WidgetBuilder>{
-          '/': (BuildContext context) {
-            return new Scaffold(
-              body: new Builder(
-                builder: (BuildContext context) {
-                  return new GestureDetector(
-                    onTap: () {
-                      Scaffold.of(context).showSnackBar(new SnackBar(
-                        content: new Text(helloSnackBar),
-                        duration: new Duration(seconds: 2)
-                      ));
-                    },
-                    behavior: HitTestBehavior.opaque,
-                    child: new Container(
-                      height: 100.0,
-                      width: 100.0,
-                      key: tapTarget
-                    )
-                  );
-                }
-              )
-            );
-          }
-        }
+        home: new Scaffold(
+          body: new Builder(
+            builder: (BuildContext context) {
+              return new GestureDetector(
+                onTap: () {
+                  Scaffold.of(context).showSnackBar(new SnackBar(
+                    content: new Text(helloSnackBar),
+                    duration: new Duration(seconds: 2)
+                  ));
+                },
+                behavior: HitTestBehavior.opaque,
+                child: new Container(
+                  height: 100.0,
+                  width: 100.0,
+                  key: tapTarget
+                )
+              );
+            }
+          )
+        )
       ));
       expect(tester, doesNotHaveWidget(find.text(helloSnackBar)));
       tester.tap(find.byKey(tapTarget));
@@ -63,31 +59,27 @@ void main() {
       int snackBarCount = 0;
       Key tapTarget = new Key('tap-target');
       tester.pumpWidget(new MaterialApp(
-        routes: <String, WidgetBuilder>{
-          '/': (BuildContext context) {
-            return new Scaffold(
-              body: new Builder(
-                builder: (BuildContext context) {
-                  return new GestureDetector(
-                    onTap: () {
-                      snackBarCount += 1;
-                      Scaffold.of(context).showSnackBar(new SnackBar(
-                        content: new Text("bar$snackBarCount"),
-                        duration: new Duration(seconds: 2)
-                      ));
-                    },
-                    behavior: HitTestBehavior.opaque,
-                    child: new Container(
-                      height: 100.0,
-                      width: 100.0,
-                      key: tapTarget
-                    )
-                  );
-                }
-              )
-            );
-          }
-        }
+        home: new Scaffold(
+          body: new Builder(
+            builder: (BuildContext context) {
+              return new GestureDetector(
+                onTap: () {
+                  snackBarCount += 1;
+                  Scaffold.of(context).showSnackBar(new SnackBar(
+                    content: new Text("bar$snackBarCount"),
+                    duration: new Duration(seconds: 2)
+                  ));
+                },
+                behavior: HitTestBehavior.opaque,
+                child: new Container(
+                  height: 100.0,
+                  width: 100.0,
+                  key: tapTarget
+                )
+              );
+            }
+          )
+        )
       ));
       expect(tester, doesNotHaveWidget(find.text('bar1')));
       expect(tester, doesNotHaveWidget(find.text('bar2')));
@@ -146,31 +138,27 @@ void main() {
       int time;
       ScaffoldFeatureController<SnackBar, Null> lastController;
       tester.pumpWidget(new MaterialApp(
-        routes: <String, WidgetBuilder>{
-          '/': (BuildContext context) {
-            return new Scaffold(
-              body: new Builder(
-                builder: (BuildContext context) {
-                  return new GestureDetector(
-                    onTap: () {
-                      snackBarCount += 1;
-                      lastController = Scaffold.of(context).showSnackBar(new SnackBar(
-                        content: new Text("bar$snackBarCount"),
-                        duration: new Duration(seconds: time)
-                      ));
-                    },
-                    behavior: HitTestBehavior.opaque,
-                    child: new Container(
-                      height: 100.0,
-                      width: 100.0,
-                      key: tapTarget
-                    )
-                  );
-                }
-              )
-            );
-          }
-        }
+        home: new Scaffold(
+          body: new Builder(
+            builder: (BuildContext context) {
+              return new GestureDetector(
+                onTap: () {
+                  snackBarCount += 1;
+                  lastController = Scaffold.of(context).showSnackBar(new SnackBar(
+                    content: new Text("bar$snackBarCount"),
+                    duration: new Duration(seconds: time)
+                  ));
+                },
+                behavior: HitTestBehavior.opaque,
+                child: new Container(
+                  height: 100.0,
+                  width: 100.0,
+                  key: tapTarget
+                )
+              );
+            }
+          )
+        )
       ));
       expect(tester, doesNotHaveWidget(find.text('bar1')));
       expect(tester, doesNotHaveWidget(find.text('bar2')));
@@ -236,31 +224,27 @@ void main() {
       int snackBarCount = 0;
       Key tapTarget = new Key('tap-target');
       tester.pumpWidget(new MaterialApp(
-        routes: <String, WidgetBuilder>{
-          '/': (BuildContext context) {
-            return new Scaffold(
-              body: new Builder(
-                builder: (BuildContext context) {
-                  return new GestureDetector(
-                    onTap: () {
-                      snackBarCount += 1;
-                      Scaffold.of(context).showSnackBar(new SnackBar(
-                        content: new Text("bar$snackBarCount"),
-                        duration: new Duration(seconds: 2)
-                      ));
-                    },
-                    behavior: HitTestBehavior.opaque,
-                    child: new Container(
-                      height: 100.0,
-                      width: 100.0,
-                      key: tapTarget
-                    )
-                  );
-                }
-              )
-            );
-          }
-        }
+        home: new Scaffold(
+          body: new Builder(
+            builder: (BuildContext context) {
+              return new GestureDetector(
+                onTap: () {
+                  snackBarCount += 1;
+                  Scaffold.of(context).showSnackBar(new SnackBar(
+                    content: new Text("bar$snackBarCount"),
+                    duration: new Duration(seconds: 2)
+                  ));
+                },
+                behavior: HitTestBehavior.opaque,
+                child: new Container(
+                  height: 100.0,
+                  width: 100.0,
+                  key: tapTarget
+                )
+              );
+            }
+          )
+        )
       ));
       expect(tester, doesNotHaveWidget(find.text('bar1')));
       expect(tester, doesNotHaveWidget(find.text('bar2')));
@@ -286,31 +270,27 @@ void main() {
     testWidgets((WidgetTester tester) {
       int tapCount = 0;
       tester.pumpWidget(new MaterialApp(
-        routes: <String, WidgetBuilder>{
-          '/': (BuildContext context) {
-            return new Scaffold(
-              body: new Builder(
-                builder: (BuildContext context) {
-                  return new GestureDetector(
-                    onTap: () {
-                      Scaffold.of(context).showSnackBar(new SnackBar(
-                        content: new Text('I am a snack bar.'),
-                        duration: new Duration(seconds: 2),
-                        action: new SnackBarAction(
-                          label: 'ACTION',
-                          onPressed: () {
-                            ++tapCount;
-                          }
-                        )
-                      ));
-                    },
-                    child: new Text('X')
-                  );
-                }
-              )
-            );
-          }
-        }
+        home: new Scaffold(
+          body: new Builder(
+            builder: (BuildContext context) {
+              return new GestureDetector(
+                onTap: () {
+                  Scaffold.of(context).showSnackBar(new SnackBar(
+                    content: new Text('I am a snack bar.'),
+                    duration: new Duration(seconds: 2),
+                    action: new SnackBarAction(
+                      label: 'ACTION',
+                      onPressed: () {
+                        ++tapCount;
+                      }
+                    )
+                  ));
+                },
+                child: new Text('X')
+              );
+            }
+          )
+        )
       ));
       tester.tap(find.text('X'));
       tester.pump(); // start animation
