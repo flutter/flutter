@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -171,7 +170,6 @@ class DrawerControllerState extends State<DrawerController> {
   }
 
   double get _width {
-    assert(!Scheduler.debugInFrame); // we should never try to read the tree state while building or laying out
     RenderBox drawerBox = _drawerKey.currentContext?.findRenderObject();
     if (drawerBox != null)
       return drawerBox.size.width;
