@@ -440,6 +440,7 @@ if (is_android) {
       ]
 
       deps += [
+        "//sky/services/raw_keyboard:interfaces",
         "//third_party/glfw",
         "//ui/gl",
       ]

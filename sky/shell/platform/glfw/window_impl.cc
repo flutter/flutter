@@ -29,12 +29,43 @@ void OnCursorPosChanged(GLFWwindow* window, double x, double y) {
   ToImpl(window)->DispatchMouseMoveEvent(x, y);
 }
 
+void OnKeyEvent(GLFWwindow* window, int key, int scancode, int action,
+                int mods) {
+  sky::InputEventPtr result = sky::InputEvent::New();
+  result->time_stamp = base::TimeTicks::Now().ToInternalValue();
+  switch (action) {
+    case GLFW_PRESS:
+    case GLFW_REPEAT:
+      result->type = sky::EventType::KEY_PRESSED;
+      break;
+    case GLFW_RELEASE:
+      result->type = sky::EventType::KEY_RELEASED;
+      break;
+    default:
+      LOG(WARNING) << "Unknown key action: " << action;
+      return;
+  }
+  result->key_data = sky::KeyData::New();
+  result->key_data->key_code = key;
+  result->key_data->scan_code = scancode;
+
+  if (mods & GLFW_MOD_SHIFT)
+    result->key_data->meta_state |= 0x00000001;
+  if (mods & GLFW_MOD_CONTROL)
+    result->key_data->meta_state |= 0x00001000;
+  if (mods & GLFW_MOD_ALT)
+    result->key_data->meta_state |= 0x00000002;
+
+  ToImpl(window)->DispatchKeyEvent(result.Pass());
+}
+
 }  // namespace
 
 WindowImpl::WindowImpl(GLFWwindow* window)
     : window_(window),
       shell_view_(new ShellView(Shell::Shared())),
-      buttons_(0) {
+      buttons_(0),
+      view_services_binding_(this) {
   glfwSetWindowUserPointer(window_, this);
   auto platform_view =
       static_cast<sky::shell::PlatformViewGLFW*>(shell_view_->view());
@@ -48,6 +79,7 @@ WindowImpl::WindowImpl(GLFWwindow* window)
 
   glfwSetWindowSizeCallback(window_, OnWindowSizeChanged);
   glfwSetMouseButtonCallback(window_, OnMouseButtonChanged);
+  glfwSetKeyCallback(window_, OnKeyEvent);
 }
 
 WindowImpl::~WindowImpl() {
@@ -58,6 +90,12 @@ WindowImpl::~WindowImpl() {
 
 void WindowImpl::RunFromBundle(const std::string& script_uri,
                                const std::string& bundle_path) {
+  mojo::ServiceProviderPtr view_services;
+  view_services_binding_.Bind(mojo::GetProxy(&view_services));
+
+  ServicesDataPtr services = ServicesData::New();
+  services->view_services = view_services.Pass();
+  engine_->SetServices(services.Pass());
   engine_->RunFromBundle(script_uri, bundle_path);
 }
 
@@ -133,6 +171,27 @@ void WindowImpl::DispatchMouseMoveEvent(double x, double y) {
   auto pointer_packet = pointer::PointerPacket::New();
   pointer_packet->pointers.push_back(pointer_data.Pass());
   engine_->OnPointerPacket(pointer_packet.Pass());
+}
+
+void WindowImpl::DispatchKeyEvent(sky::InputEventPtr sky_event) {
+  for (auto& listener : raw_keyboard_listeners_) {
+    listener->OnKey(sky_event.Clone());
+  }
+}
+
+void WindowImpl::ConnectToService(const mojo::String& service_name,
+                                  mojo::ScopedMessagePipeHandle handle) {
+  if (service_name == raw_keyboard::RawKeyboardService::Name_) {
+    raw_keyboard_bindings_.AddBinding(
+        this,
+        mojo::MakeRequest<raw_keyboard::RawKeyboardService>(handle.Pass()));
+  }
+}
+
+void WindowImpl::AddListener(
+    mojo::InterfaceHandle<raw_keyboard::RawKeyboardListener> listener) {
+  raw_keyboard_listeners_.push_back(
+      raw_keyboard::RawKeyboardListenerPtr::Create(listener.Pass()));
 }
 
 }  // namespace shell

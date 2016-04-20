@@ -8,17 +8,20 @@
 #include <memory>
 #include <string>
 
+#include "mojo/common/binding_set.h"
 #include "sky/services/engine/sky_engine.mojom.h"
+#include "sky/services/raw_keyboard/raw_keyboard.mojom.h"
 #include "sky/shell/platform_view.h"
 #include "sky/shell/shell_view.h"
 
 namespace sky {
 namespace shell {
 
-class WindowImpl {
+class WindowImpl : public mojo::ServiceProvider,
+                   public raw_keyboard::RawKeyboardService {
  public:
   explicit WindowImpl(GLFWwindow* window);
-  ~WindowImpl();
+  ~WindowImpl() override;
 
   void RunFromBundle(const std::string& script_uri,
                      const std::string& bundle_path);
@@ -26,12 +29,26 @@ class WindowImpl {
   void UpdateViewportMetrics(int width, int height);
   void DispatchMouseButtonEvent(int button, int action, int mods);
   void DispatchMouseMoveEvent(double x, double y);
+  void DispatchKeyEvent(sky::InputEventPtr event);
+
+  // mojo::ServiceProvider
+  void ConnectToService(const mojo::String& service_name,
+      mojo::ScopedMessagePipeHandle client_handle) override;
+
+  // raw_keyboard::RawKeyboardService
+  void AddListener(
+      mojo::InterfaceHandle<raw_keyboard::RawKeyboardListener> listener)
+      override;
 
  private:
   GLFWwindow* window_;
   std::unique_ptr<ShellView> shell_view_;
   sky::SkyEnginePtr engine_;
   int buttons_;
+
+  mojo::Binding<mojo::ServiceProvider> view_services_binding_;
+  mojo::BindingSet<raw_keyboard::RawKeyboardService> raw_keyboard_bindings_;
+  std::vector<raw_keyboard::RawKeyboardListenerPtr> raw_keyboard_listeners_;
 
   DISALLOW_COPY_AND_ASSIGN(WindowImpl);
 };
