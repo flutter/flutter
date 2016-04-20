@@ -10,24 +10,7 @@ const String _checkboxText =
   "# Checkboxes\n"
   "Checkboxes allow the user to select multiple options from a set.";
 
-const String _checkboxCode =
-"""// Member variable holding the checkbox's value.
-bool checkboxValue = false;
-
-// Create a checkbox.
-new Checkbox(
-  value: checkboxValue,
-  onChanged: (bool value) {
-    setState(() {
-      checkboxValue = value;
-    }
-  );
-})
-
-// Create a disabled checkbox.
-// Checkboxes are disabled when onChanged isn't
-// specified or null.
-new Checkbox(value: false)""";
+const String _checkboxCode = 'selectioncontrols_checkbox';
 
 const String _radioText =
   "# Radio buttons\n"
@@ -35,43 +18,7 @@ const String _radioText =
   "buttons for exclusive selection if you think that the user needs to see "
   "all available options side-by-side.";
 
-const String _radioCode =
-"""// Member variable holding value.
-int radioValue = 0;
-
-// Method setting value.
-void handleRadioValueChanged(int value) {
-  setState(() {
-    radioValue = value;
-  });
-}
-
-// Creates a set of radio buttons.
-new Row(
-  children: <Widget>[
-    new Radio<int>(
-      value: 0,
-      groupValue: radioValue,
-      onChanged: handleRadioValueChanged
-    ),
-    new Radio<int>(
-      value: 1,
-      groupValue: radioValue,
-      onChanged: handleRadioValueChanged
-    ),
-    new Radio<int>(
-      value: 2,
-      groupValue: radioValue,
-      onChanged: handleRadioValueChanged
-    )
-  ]
-);
-
-// Creates a disabled radio button.
-new Radio<int>(
-  value: 0,
-  groupValue: 0
-);""";
+const String _radioCode = 'selectioncontrols_radio';
 
 const String _switchText =
   "# Switches\n"
@@ -79,24 +26,7 @@ const String _switchText =
   "that the switch controls, as well as the state it’s in, should be made "
   "clear from the corresponding inline label.";
 
-const String _switchCode =
-"""// Member variable holding value.
-bool switchValue = false;
-
-// Create a switch.
-new Switch(
-  value: switchValue,
-  onChanged: (bool value) {
-    setState(() {
-      switchValue = value;
-    }
-  );
-})
-
-// Create a disabled switch.
-// Switches are disabled when onChanged isn't
-// specified or null.
-new Switch(value: false)""";
+const String _switchCode = 'selectioncontrols_switch';
 
 class SelectionControlsDemo extends StatefulWidget {
   @override
@@ -111,19 +41,19 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
         tabName: "CHECKBOX",
         description: _checkboxText,
         widget: buildCheckbox(),
-        exampleCode: _checkboxCode
+        exampleCodeTag: _checkboxCode
       ),
       new ComponentDemoTabData(
         tabName: "RADIO",
         description: _radioText,
         widget: buildRadio(),
-        exampleCode: _radioCode
+        exampleCodeTag: _radioCode
       ),
       new ComponentDemoTabData(
         tabName: "SWITCH",
         description: _switchText,
         widget: buildSwitch(),
-        exampleCode: _switchCode
+        exampleCodeTag: _switchCode
       )
     ];
 

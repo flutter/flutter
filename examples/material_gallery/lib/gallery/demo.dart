@@ -5,18 +5,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
-import '../gallery/syntax_highlighter.dart';
+import 'syntax_highlighter.dart';
+import 'example_code_parser.dart';
 
 class SingleComponentDemoData {
   SingleComponentDemoData({
     this.widget,
-    this.exampleCode,
+    this.exampleCodeTag,
     this.description,
     this.onPressedDemo
   });
 
   final Widget widget;
-  final String exampleCode;
+  final String exampleCodeTag;
   final String description;
   final VoidCallback onPressedDemo;
 }
@@ -24,13 +25,13 @@ class SingleComponentDemoData {
 class ComponentDemoTabData extends SingleComponentDemoData {
   ComponentDemoTabData({
     Widget widget,
-    String exampleCode,
+    String exampleCodeTag,
     String description,
     VoidCallback onPressedDemo,
     this.tabName
   }) : super(
     widget: widget,
-    exampleCode: exampleCode,
+    exampleCodeTag: exampleCodeTag,
     description: description,
     onPressedDemo: onPressedDemo
   );
@@ -117,7 +118,7 @@ class SingleComponentDemo extends StatelessWidget {
           child: demo.widget
         ),
         new DemoBottomBar(
-          exampleCode: demo.exampleCode,
+          exampleCodeTag: demo.exampleCodeTag,
           onPressedDemo: demo.onPressedDemo
         )
       ]
@@ -126,18 +127,18 @@ class SingleComponentDemo extends StatelessWidget {
 }
 
 class DemoBottomBar extends StatelessWidget {
-  DemoBottomBar({ this.exampleCode, this.onPressedDemo });
+  DemoBottomBar({ this.exampleCodeTag, this.onPressedDemo });
 
-  final String exampleCode;
+  final String exampleCodeTag;
   final VoidCallback onPressedDemo;
 
   @override
   Widget build(BuildContext context) {
     VoidCallback onPressedCode;
-    if (exampleCode != null) {
+    if (exampleCodeTag != null) {
       onPressedCode = () {
         Navigator.push(context, new MaterialPageRoute<FullScreenCodeDialog>(
-          builder: (BuildContext context) => new FullScreenCodeDialog(code: exampleCode)
+          builder: (BuildContext context) => new FullScreenCodeDialog(exampleCodeTag: exampleCodeTag)
         ));
       };
     }
@@ -185,9 +186,9 @@ class DemoBottomBar extends StatelessWidget {
 }
 
 class FormattedCode extends StatefulWidget {
-  FormattedCode(this.code);
+  FormattedCode(this.exampleCode);
 
-  final String code;
+  final String exampleCode;
 
   @override
   _FormattedCodeState createState() => new _FormattedCodeState();
@@ -211,25 +212,58 @@ class _FormattedCodeState extends State<FormattedCode> {
   void didUpdateConfig(FormattedCode oldConfig) {
     super.didUpdateConfig(oldConfig);
 
-    if (oldConfig.code != config.code)
+    if (oldConfig.exampleCode != config.exampleCode)
       _formatText();
   }
 
   void _formatText() {
     _formattedText = new TextSpan(
       style: new TextStyle(fontFamily: 'monospace', fontSize: 10.0),
-      children: <TextSpan>[new DartSyntaxHighlighter().format(config.code)]
+      children: <TextSpan>[new DartSyntaxHighlighter().format(config.exampleCode)]
     );
   }
 }
 
-class FullScreenCodeDialog extends StatelessWidget {
-  FullScreenCodeDialog({ this.code });
+class FullScreenCodeDialog extends StatefulWidget {
+  FullScreenCodeDialog({ this.exampleCodeTag });
 
-  final String code;
+  final String exampleCodeTag;
+
+  @override
+  FullScreenCodeDialogState createState() => new FullScreenCodeDialogState();
+}
+
+class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
+
+  String _exampleCode;
+
+  @override
+  void initState() {
+    super.initState();
+
+    getExampleCode(config.exampleCodeTag, DefaultAssetBundle.of(context)).then((String code) {
+      setState(() {
+        _exampleCode = code;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    Widget body;
+    if (_exampleCode == null) {
+      body = new Center(
+        child: new CircularProgressIndicator()
+      );
+    } else {
+      body = new ScrollableViewport(
+        child: new Padding(
+          padding: new EdgeInsets.all(16.0),
+          child: new FormattedCode(_exampleCode)
+        )
+      );
+    }
+
     return new Scaffold(
       appBar: new AppBar(
         leading: new IconButton(
@@ -238,12 +272,7 @@ class FullScreenCodeDialog extends StatelessWidget {
         ),
         title: new Text('Example Code')
       ),
-      body: new ScrollableViewport(
-        child: new Padding(
-          padding: new EdgeInsets.all(16.0),
-          child: new FormattedCode(code)
-        )
-      )
+      body: body
     );
   }
 }

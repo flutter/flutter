@@ -11,21 +11,7 @@ const String _raisedText =
   "Raised buttons add dimension to mostly flat layouts. They emphasize "
   "functions on busy or wide spaces.";
 
-const String _raisedCode =
-"""// Create a raised button.
-new RaisedButton(
-  child: new Text('BUTTON TITLE'),
-  onPressed: () {
-    // Perform some action
-  }
-);
-
-// Create a disabled button.
-// Buttons are disabled when onPressed isn't
-// specified or is null.
-new RaisedButton(
-  child: new Text('BUTTON TITLE')
-);""";
+const String _raisedCode = 'buttons_raised';
 
 const String _flatText =
   "# Flat buttons\n"
@@ -33,21 +19,7 @@ const String _flatText =
   "but does not lift. Use flat buttons on toolbars, in dialogs and "
   "inline with padding";
 
-const String _flatCode =
-"""// Create a flat button.
-new FlatButton(
-  child: new Text('BUTTON TITLE'),
-  onPressed: () {
-    // Perform some action
-  }
-);
-
-// Create a disabled button.
-// Buttons are disabled when onPressed isn't
-// specified or is null.
-new FlatButton(
-  child: new Text('BUTTON TITLE')
-);""";
+const String _flatCode = 'buttons_flat';
 
 const String _dropdownText =
   "# Dropdown buttons\n"
@@ -55,46 +27,13 @@ const String _dropdownText =
   "small set of values. The button displays the current value and a down "
   "arrow.";
 
-const String _dropdownCode =
-"""// Member variable holding value.
-String dropdownValue
-
-// Drop down button with string values.
-new DropDownButton<String>(
-  value: dropdownValue,
-  onChanged: (String newValue) {
-    // null indicates the user didn't select a
-    // new value.
-    setState(() {
-      if (newValue != null)
-        dropdownValue = newValue;
-    });
-  },
-  items: <String>['One', 'Two', 'Free', 'Four']
-    .map((String value) {
-      return new DropDownMenuItem<String>(
-        value: value,
-        child: new Text(value));
-    })
-    .toList()
-)""";
+const String _dropdownCode = 'buttons_dropdown';
 
 const String _iconText =
   "IconButtons are appropriate for toggle buttons that allow a single choice to be "
   "selected or deselected, such as adding or removing an item's star.";
 
-const String _iconCode =
-"""// Member variable holding toggle value.
-bool value;
-
-// Toggleable icon button.
-new IconButton(
-  icon: Icons.thumb_up,
-  onPressed: () {
-    setState(() => value = !value);
-  },
-  color: value ? Theme.of(context).primaryColor : null
-)""";
+const String _iconCode = 'buttons_icon';
 
 const String _actionText =
   "# Floating action buttons\n"
@@ -103,16 +42,7 @@ const String _actionText =
   "behaviors that include morphing, launching, and a transferring anchor "
   "point.";
 
-const String _actionCode =
-"""// Floating action button in Scaffold.
-new Scaffold(
-  appBar: new AppBar(
-    title: new Text('Demo')
-  ),
-  floatingActionButton: new FloatingActionButton(
-    child: new Icon(icon: Icons.add)
-  )
-);""";
+const String _actionCode = 'buttons_action';
 
 class ButtonsDemo extends StatefulWidget {
   @override
@@ -127,32 +57,31 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
         tabName: 'RAISED',
         description: _raisedText,
         widget: buildRaisedButton(),
-        exampleCode: _raisedCode
+        exampleCodeTag: _raisedCode
       ),
       new ComponentDemoTabData(
         tabName: 'FLAT',
         description: _flatText,
         widget: buildFlatButton(),
-        exampleCode: _flatCode
+        exampleCodeTag: _flatCode
       ),
       new ComponentDemoTabData(
         tabName: 'DROPDOWN',
         description: _dropdownText,
         widget: buildDropdownButton(),
-        exampleCode:
-        _dropdownCode
+        exampleCodeTag: _dropdownCode
       ),
       new ComponentDemoTabData(
         tabName: 'ICON',
         description: _iconText,
         widget: buildIconButton(),
-        exampleCode: _iconCode
+        exampleCodeTag: _iconCode
       ),
       new ComponentDemoTabData(
         tabName: 'ACTION',
         description: _actionText,
         widget: buildActionButton(),
-        exampleCode: _actionCode
+        exampleCodeTag: _actionCode
       ),
     ];
 
