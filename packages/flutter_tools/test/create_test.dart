@@ -41,10 +41,11 @@ void main() {
       CommandRunner runner = new CommandRunner('test_flutter', '')
         ..addCommand(command);
 
-      await runner.run(<String>['create', '--no-pub', temp.path])
-        .then((int code) => expect(code, equals(0)));
-      await runner.run(<String>['create', '--no-pub', temp.path])
-        .then((int code) => expect(code, equals(0)));
+      int code = await runner.run(<String>['create', '--no-pub', temp.path]);
+      expect(code, equals(0));
+
+      code = await runner.run(<String>['create', '--no-pub', temp.path]);
+      expect(code, equals(0));
     });
 
     // Verify that we fail with an error code when the file exists.
@@ -55,8 +56,8 @@ void main() {
         ..addCommand(command);
       File existingFile = new File("${temp.path.toString()}/bad");
       if (!existingFile.existsSync()) existingFile.createSync();
-      await runner.run(<String>['create', existingFile.path])
-        .then((int code) => expect(code, equals(1)));
+      int code = await runner.run(<String>['create', existingFile.path]);
+      expect(code, equals(1));
     });
   });
 }
@@ -69,7 +70,8 @@ Future<Null> _createAndAnalyzeProject(Directory dir, List<String> createArgs) as
   List<String> args = <String>['create'];
   args.addAll(createArgs);
   args.add(dir.path);
-  await runner.run(args).then((int code) => expect(code, equals(0)));
+  int code = await runner.run(args);
+  expect(code, equals(0));
 
   String mainPath = path.join(dir.path, 'lib', 'main.dart');
   expect(new File(mainPath).existsSync(), true);
