@@ -4,20 +4,19 @@ Flutter Examples
 This directory contains several examples of using Flutter. Each of these is an
 individual Dart application package.
 
-To run a sample with the `flutter` tool, run `pub get` inside its directory,
-then run `flutter run`. (See the
+To run an example, use `flutter run` inside that example's directory.  See the
 [getting started guide](https://flutter.io/getting-started/) to install
-the `flutter` tool.)
+the `flutter` tool.
 
 Available examples include:
 
 - **Hello, world** The [hello world app](hello_world) is a basic app that shows
-   the text "hello, world."
+  the text "hello, world."
 
-- **Stocks** The [stocks app](stocks) is an example of a typical mobile app
-   built using Flutter. The app shows a list of all the stocks in the NASDAQ.
+- **Material Gallery** The [material gallery app](material_gallery) showcases
+  Flutter's implementation of [material design](https://www.google.com/design/spec/material-design/introduction.html).
 
-- **Widgets** The [widget apps](widgets) demonstrate a number of Flutter widgets
-   so you can experiment with them in a simple container. There is no main.dart
-   in this directory because each file is a standalone sample. To run a
-   particular file, use `flutter run -t filename.dart`.
+- **Layers** The [layers vignettes](layers) show how to use the various layers
+  in the Flutter framework. There is no main.dart in this directory because each
+  file is a standalone example. To run a particular file, use
+  `flutter run -t filename.dart`.
