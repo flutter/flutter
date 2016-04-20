@@ -11,13 +11,6 @@ import 'basic_types.dart';
 /// Typically used for an offset from each of the four sides of a box. For
 /// example, the padding inside a box can be represented using this class.
 class EdgeInsets {
-  /// Constructs insets from offsets from the top, right, bottom and left.
-  ///
-  /// We'll be removing this function sometime soon. Please use
-  /// [EdgeInsets.fromLTRB] instead.
-  @Deprecated('soon. Use fromLTRB instead.')
-  const EdgeInsets.TRBL(this.top, this.right, this.bottom, this.left);
-
   /// Constructs insets from offsets from the left, top, right, and bottom.
   const EdgeInsets.fromLTRB(this.left, this.top, this.right, this.bottom);
 
