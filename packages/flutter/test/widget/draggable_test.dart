@@ -11,22 +11,25 @@ void main() {
     testWidgets((WidgetTester tester) {
       List<int> accepted = <int>[];
 
-      tester.pumpWidget(new MaterialApp(routes: <String, WidgetBuilder>{
-        '/': (BuildContext context) {
-          return new Column(children: <Widget>[
+      tester.pumpWidget(new MaterialApp(
+        home: new Column(
+          children: <Widget>[
             new Draggable<int>(
-                data: 1,
-                child: new Text('Source'),
-                feedback: new Text('Dragging')),
-            new DragTarget<int>(builder:
-                (BuildContext context, List<int> data, List<dynamic> rejects) {
-              return new Container(height: 100.0, child: new Text('Target'));
-            }, onAccept: (int data) {
-              accepted.add(data);
-            }),
-          ]);
-        },
-      }));
+              data: 1,
+              child: new Text('Source'),
+              feedback: new Text('Dragging')
+            ),
+            new DragTarget<int>(
+              builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+                return new Container(height: 100.0, child: new Text('Target'));
+              },
+              onAccept: (int data) {
+                accepted.add(data);
+              }
+            ),
+          ]
+        )
+      ));
 
       expect(accepted, isEmpty);
       expect(tester, hasWidget(find.text('Source')));
@@ -66,31 +69,38 @@ void main() {
       List<String> events = <String>[];
       Point firstLocation, secondLocation;
 
-      tester.pumpWidget(new MaterialApp(routes: <String, WidgetBuilder>{
-        '/': (BuildContext context) {
-          return new Column(children: <Widget>[
+      tester.pumpWidget(new MaterialApp(
+        home: new Column(
+          children: <Widget>[
             new Draggable<int>(
-                data: 1,
-                child: new Text('Source'),
-                feedback: new Text('Dragging')),
-            new Stack(children: <Widget>[
-              new GestureDetector(
+              data: 1,
+              child: new Text('Source'),
+              feedback: new Text('Dragging')
+            ),
+            new Stack(
+              children: <Widget>[
+                new GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTap: () {
                     events.add('tap');
                   },
-                  child: new Container(child: new Text('Button'))),
-              new DragTarget<int>(builder: (BuildContext context,
-                  List<int> data, List<dynamic> rejects) {
-                return new IgnorePointer(
-                    child: new Container(child: new Text('Target')));
-              }, onAccept: (int data) {
-                events.add('drop');
-              }),
-            ]),
-          ]);
-        },
-      }));
+                  child: new Container(child: new Text('Button')
+                )
+              ),
+              new DragTarget<int>(
+                builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+                  return new IgnorePointer(
+                    child: new Container(child: new Text('Target'))
+                  );
+                },
+                onAccept: (int data) {
+                  events.add('drop');
+                }),
+              ]
+            ),
+          ]
+        )
+      ));
 
       expect(events, isEmpty);
       expect(tester, hasWidget(find.text('Source')));
@@ -151,27 +161,31 @@ void main() {
       List<String> events = <String>[];
       Point firstLocation, secondLocation;
 
-      tester.pumpWidget(new MaterialApp(routes: <String, WidgetBuilder>{
-        '/': (BuildContext context) {
-          return new Column(children: <Widget>[
+      tester.pumpWidget(new MaterialApp(
+        home: new Column(
+          children: <Widget>[
             new Draggable<int>(
-                data: 1,
-                child: new GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () {
-                      events.add('tap');
-                    },
-                    child: new Container(child: new Text('Button'))),
-                feedback: new Text('Dragging')),
-            new DragTarget<int>(builder:
-                (BuildContext context, List<int> data, List<dynamic> rejects) {
-              return new Text('Target');
-            }, onAccept: (int data) {
-              events.add('drop');
-            }),
-          ]);
-        },
-      }));
+              data: 1,
+              child: new GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  events.add('tap');
+                },
+                child: new Container(child: new Text('Button'))
+              ),
+              feedback: new Text('Dragging')
+            ),
+            new DragTarget<int>(
+              builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+                return new Text('Target');
+              },
+              onAccept: (int data) {
+                events.add('drop');
+              }
+            ),
+          ]
+        )
+      ));
 
       expect(events, isEmpty);
       expect(tester, hasWidget(find.text('Button')));
@@ -203,22 +217,25 @@ void main() {
       List<String> events = <String>[];
       Point firstLocation, secondLocation;
 
-      tester.pumpWidget(new MaterialApp(routes: <String, WidgetBuilder>{
-        '/': (BuildContext context) {
-          return new Column(children: <Widget>[
+      tester.pumpWidget(new MaterialApp(
+        home: new Column(
+          children: <Widget>[
             new LongPressDraggable<int>(
-                data: 1,
-                child: new Text('Source'),
-                feedback: new Text('Dragging')),
-            new DragTarget<int>(builder:
-                (BuildContext context, List<int> data, List<dynamic> rejects) {
-              return new Text('Target');
-            }, onAccept: (int data) {
-              events.add('drop');
-            }),
-          ]);
-        },
-      }));
+              data: 1,
+              child: new Text('Source'),
+              feedback: new Text('Dragging')
+            ),
+            new DragTarget<int>(
+              builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+                return new Text('Target');
+              },
+              onAccept: (int data) {
+                events.add('drop');
+              }
+            ),
+          ]
+        )
+      ));
 
       expect(events, isEmpty);
       expect(tester, hasWidget(find.text('Source')));
@@ -248,22 +265,25 @@ void main() {
       List<String> events = <String>[];
       Point firstLocation, secondLocation;
 
-      tester.pumpWidget(new MaterialApp(routes: <String, WidgetBuilder>{
-        '/': (BuildContext context) {
-          return new Column(children: <Widget>[
+      tester.pumpWidget(new MaterialApp(
+        home: new Column(
+          children: <Widget>[
             new Draggable<int>(
-                data: 1,
-                child: new Text('Source'),
-                feedback: new Text('Dragging')),
-            new DragTarget<int>(builder:
-                (BuildContext context, List<int> data, List<dynamic> rejects) {
-              return new Text('Target');
-            }, onAccept: (int data) {
-              events.add('drop');
-            }),
-          ]);
-        },
-      }));
+              data: 1,
+              child: new Text('Source'),
+              feedback: new Text('Dragging')
+            ),
+            new DragTarget<int>(
+              builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+                return new Text('Target');
+              },
+              onAccept: (int data) {
+                events.add('drop');
+              }
+            ),
+          ]
+        )
+      ));
 
       expect(events, isEmpty);
       expect(tester, hasWidget(find.text('Source')));
@@ -296,27 +316,35 @@ void main() {
       List<String> events = <String>[];
       Point firstLocation, secondLocation, thirdLocation;
 
-      tester.pumpWidget(new MaterialApp(routes: <String, WidgetBuilder>{
-        '/': (BuildContext context) {
-          return new Block(children: <Widget>[
-            new DragTarget<int>(builder:
-                (BuildContext context, List<int> data, List<dynamic> rejects) {
-              return new Text('Target');
-            }, onAccept: (int data) {
-              events.add('drop $data');
-            }),
+      tester.pumpWidget(new MaterialApp(
+        home: new Block(
+          children: <Widget>[
+            new DragTarget<int>(
+              builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+                return new Text('Target');
+              },
+              onAccept: (int data) {
+                events.add('drop $data');
+              }
+            ),
             new Container(height: 400.0),
             new HorizontalDraggable<int>(
-                data: 1, child: new Text('H'), feedback: new Text('Dragging')),
+              data: 1,
+              child: new Text('H'),
+              feedback: new Text('Dragging')
+            ),
             new VerticalDraggable<int>(
-                data: 2, child: new Text('V'), feedback: new Text('Dragging')),
+              data: 2,
+              child: new Text('V'),
+              feedback: new Text('Dragging')
+            ),
             new Container(height: 500.0),
             new Container(height: 500.0),
             new Container(height: 500.0),
             new Container(height: 500.0),
-          ]);
-        },
-      }));
+          ]
+        )
+      ));
 
       expect(events, isEmpty);
       expect(tester, hasWidget(find.text('Target')));
@@ -395,27 +423,36 @@ void main() {
       List<String> events = <String>[];
       Point firstLocation, secondLocation, thirdLocation;
 
-      tester.pumpWidget(new MaterialApp(routes: <String, WidgetBuilder>{
-        '/': (BuildContext context) {
-          return new Block(scrollDirection: Axis.horizontal, children: <Widget>[
-            new DragTarget<int>(builder:
-                (BuildContext context, List<int> data, List<dynamic> rejects) {
-              return new Text('Target');
-            }, onAccept: (int data) {
-              events.add('drop $data');
-            }),
+      tester.pumpWidget(new MaterialApp(
+        home: new Block(
+          scrollDirection: Axis.horizontal,
+          children: <Widget>[
+            new DragTarget<int>(
+              builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+                return new Text('Target');
+              },
+              onAccept: (int data) {
+                events.add('drop $data');
+              }
+            ),
             new Container(width: 400.0),
             new HorizontalDraggable<int>(
-                data: 1, child: new Text('H'), feedback: new Text('Dragging')),
+              data: 1,
+              child: new Text('H'),
+              feedback: new Text('Dragging')
+            ),
             new VerticalDraggable<int>(
-                data: 2, child: new Text('V'), feedback: new Text('Dragging')),
+              data: 2,
+              child: new Text('V'),
+              feedback: new Text('Dragging')
+            ),
             new Container(width: 500.0),
             new Container(width: 500.0),
             new Container(width: 500.0),
             new Container(width: 500.0),
-          ]);
-        },
-      }));
+          ]
+        )
+      ));
 
       expect(events, isEmpty);
       expect(tester, hasWidget(find.text('Target')));
@@ -495,25 +532,28 @@ void main() {
       List<int> accepted = <int>[];
       bool onDraggableCanceledCalled = false;
 
-      tester.pumpWidget(new MaterialApp(routes: <String, WidgetBuilder>{
-        '/': (BuildContext context) {
-          return new Column(children: <Widget>[
+      tester.pumpWidget(new MaterialApp(
+        home: new Column(
+          children: <Widget>[
             new Draggable<int>(
-                data: 1,
-                child: new Text('Source'),
-                feedback: new Text('Dragging'),
-                onDraggableCanceled: (Velocity velocity, Offset offset) {
-                  onDraggableCanceledCalled = true;
-                }),
-            new DragTarget<int>(builder:
-                (BuildContext context, List<int> data, List<dynamic> rejects) {
-              return new Container(height: 100.0, child: new Text('Target'));
-            }, onAccept: (int data) {
-              accepted.add(data);
-            }),
-          ]);
-        },
-      }));
+              data: 1,
+              child: new Text('Source'),
+              feedback: new Text('Dragging'),
+              onDraggableCanceled: (Velocity velocity, Offset offset) {
+                onDraggableCanceledCalled = true;
+              }
+            ),
+            new DragTarget<int>(
+              builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+                return new Container(height: 100.0, child: new Text('Target'));
+              },
+              onAccept: (int data) {
+                accepted.add(data);
+              }
+            ),
+          ]
+        )
+      ));
 
       expect(accepted, isEmpty);
       expect(tester, hasWidget(find.text('Source')));
@@ -561,28 +601,31 @@ void main() {
       Velocity onDraggableCanceledVelocity;
       Offset onDraggableCanceledOffset;
 
-      tester.pumpWidget(new MaterialApp(routes: <String, WidgetBuilder>{
-        '/': (BuildContext context) {
-          return new Column(children: <Widget>[
+      tester.pumpWidget(new MaterialApp(
+        home: new Column(
+          children: <Widget>[
             new Draggable<int>(
-                data: 1,
-                child: new Text('Source'),
-                feedback: new Text('Dragging'),
-                onDraggableCanceled: (Velocity velocity, Offset offset) {
-                  onDraggableCanceledCalled = true;
-                  onDraggableCanceledVelocity = velocity;
-                  onDraggableCanceledOffset = offset;
-                }),
+              data: 1,
+              child: new Text('Source'),
+              feedback: new Text('Dragging'),
+              onDraggableCanceled: (Velocity velocity, Offset offset) {
+                onDraggableCanceledCalled = true;
+                onDraggableCanceledVelocity = velocity;
+                onDraggableCanceledOffset = offset;
+              }
+            ),
             new DragTarget<int>(
-                builder: (BuildContext context, List<int> data,
-                    List<dynamic> rejects) {
-                  return new Container(
-                      height: 100.0, child: new Text('Target'));
-                },
-                onWillAccept: (int data) => false),
-          ]);
-        },
-      }));
+              builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+                return new Container(
+                  height: 100.0,
+                  child: new Text('Target')
+                );
+              },
+              onWillAccept: (int data) => false
+            ),
+          ]
+        )
+      ));
 
       expect(accepted, isEmpty);
       expect(tester, hasWidget(find.text('Source')));
@@ -633,28 +676,29 @@ void main() {
       Velocity onDraggableCanceledVelocity;
       Offset onDraggableCanceledOffset;
 
-      tester.pumpWidget(new MaterialApp(routes: <String, WidgetBuilder>{
-        '/': (BuildContext context) {
-          return new Column(children: <Widget>[
-            new Draggable<int>(
-                data: 1,
-                child: new Text('Source'),
-                feedback: new Text('Source'),
-                onDraggableCanceled: (Velocity velocity, Offset offset) {
-                  onDraggableCanceledCalled = true;
-                  onDraggableCanceledVelocity = velocity;
-                  onDraggableCanceledOffset = offset;
-                }),
-            new DragTarget<int>(
-                builder: (BuildContext context, List<int> data,
-                    List<dynamic> rejects) {
-                  return new Container(
-                      height: 100.0, child: new Text('Target'));
-                },
-                onWillAccept: (int data) => false),
-          ]);
-        },
-      }));
+      tester.pumpWidget(new MaterialApp(
+        home: new Column(children: <Widget>[
+          new Draggable<int>(
+            data: 1,
+            child: new Text('Source'),
+            feedback: new Text('Source'),
+            onDraggableCanceled: (Velocity velocity, Offset offset) {
+              onDraggableCanceledCalled = true;
+              onDraggableCanceledVelocity = velocity;
+              onDraggableCanceledOffset = offset;
+            }
+          ),
+          new DragTarget<int>(
+            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+              return new Container(
+                height: 100.0,
+                child: new Text('Target')
+              );
+            },
+            onWillAccept: (int data) => false),
+          ]
+        )
+      ));
 
       expect(accepted, isEmpty);
       expect(tester, hasWidget(find.text('Source')));
@@ -683,40 +727,56 @@ void main() {
   });
 
   test('Drag and drop - allow pass thru of unaccepted data test', () {
-    testWidgets((WidgetTester tester) {
+      testWidgets((WidgetTester tester) {
       List<int> acceptedInts = <int>[];
       List<double> acceptedDoubles = <double>[];
 
-      tester.pumpWidget(new MaterialApp(routes: <String, WidgetBuilder>{
-        '/': (BuildContext context) {
-          return new Column(children: <Widget>[
+      tester.pumpWidget(new MaterialApp(
+        home: new Column(
+          children: <Widget>[
             new Draggable<int>(
-                data: 1,
-                child: new Text('IntSource'),
-                feedback: new Text('IntDragging')),
+              data: 1,
+              child: new Text('IntSource'),
+              feedback: new Text('IntDragging')
+            ),
             new Draggable<double>(
-                data: 1.0,
-                child: new Text('DoubleSource'),
-                feedback: new Text('DoubleDragging')),
-            new Stack(children: [
-              new DragTarget<int>(builder: (BuildContext context,
-                  List<int> data, List<dynamic> rejects) {
-                return new IgnorePointer(child: new Container(
-                    height: 100.0, child: new Text('Target1')));
-              }, onAccept: (int data) {
-                acceptedInts.add(data);
-              }),
-              new DragTarget<double>(builder: (BuildContext context,
-                  List<double> data, List<dynamic> rejects) {
-                return new IgnorePointer(child: new Container(
-                    height: 100.0, child: new Text('Target2')));
-              }, onAccept: (double data) {
-                acceptedDoubles.add(data);
-              }),
-            ])
-          ]);
-        },
-      }));
+              data: 1.0,
+              child: new Text('DoubleSource'),
+              feedback: new Text('DoubleDragging')
+            ),
+            new Stack(
+              children: <Widget>[
+                new DragTarget<int>(
+                  builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+                    return new IgnorePointer(
+                      child: new Container(
+                        height: 100.0,
+                        child: new Text('Target1')
+                      )
+                    );
+                  },
+                  onAccept: (int data) {
+                    acceptedInts.add(data);
+                  }
+                ),
+                new DragTarget<double>(
+                  builder: (BuildContext context, List<double> data, List<dynamic> rejects) {
+                    return new IgnorePointer(
+                      child: new Container(
+                        height: 100.0,
+                        child: new Text('Target2')
+                      )
+                    );
+                  },
+                  onAccept: (double data) {
+                    acceptedDoubles.add(data);
+                  }
+                ),
+              ]
+            )
+          ]
+        )
+      ));
 
       expect(acceptedInts, isEmpty);
       expect(acceptedDoubles, isEmpty);
@@ -791,32 +851,46 @@ void main() {
       List<DragTargetData> acceptedDragTargetDatas = <DragTargetData>[];
       List<ExtendedDragTargetData> acceptedExtendedDragTargetDatas = <ExtendedDragTargetData>[];
       DragTargetData dragTargetData = new DragTargetData();
-      tester.pumpWidget(new MaterialApp(routes: <String, WidgetBuilder>{
-        '/': (BuildContext context) {
-          return new Column(children: <Widget>[
+      tester.pumpWidget(new MaterialApp(
+        home: new Column(
+          children: <Widget>[
             new Draggable<DragTargetData>(
-                data: dragTargetData,
-                child: new Text('Source'),
-                feedback: new Text('Dragging')),
-            new Stack(children: [
-              new DragTarget<DragTargetData>(builder: (BuildContext context,
-                  List<DragTargetData> data, List<dynamic> rejects) {
-                return new IgnorePointer(child: new Container(
-                    height: 100.0, child: new Text('Target1')));
-              }, onAccept: (DragTargetData data) {
-                acceptedDragTargetDatas.add(data);
-              }),
-              new DragTarget<ExtendedDragTargetData>(builder: (BuildContext context,
-                  List<ExtendedDragTargetData> data, List<ExtendedDragTargetData> rejects) {
-                return new IgnorePointer(child: new Container(
-                    height: 100.0, child: new Text('Target2')));
-              }, onAccept: (ExtendedDragTargetData data) {
-                acceptedExtendedDragTargetDatas.add(data);
-              }),
-            ])
-          ]);
-        },
-      }));
+              data: dragTargetData,
+              child: new Text('Source'),
+              feedback: new Text('Dragging')
+            ),
+            new Stack(
+              children: <Widget>[
+                new DragTarget<DragTargetData>(
+                  builder: (BuildContext context, List<DragTargetData> data, List<dynamic> rejects) {
+                    return new IgnorePointer(
+                      child: new Container(
+                        height: 100.0,
+                        child: new Text('Target1')
+                      )
+                    );
+                  }, onAccept: (DragTargetData data) {
+                    acceptedDragTargetDatas.add(data);
+                  }
+                ),
+                new DragTarget<ExtendedDragTargetData>(
+                  builder: (BuildContext context, List<ExtendedDragTargetData> data, List<ExtendedDragTargetData> rejects) {
+                    return new IgnorePointer(
+                      child: new Container(
+                        height: 100.0,
+                        child: new Text('Target2')
+                      )
+                    );
+                  },
+                  onAccept: (ExtendedDragTargetData data) {
+                    acceptedExtendedDragTargetDatas.add(data);
+                  }
+                ),
+              ]
+            )
+          ]
+        )
+      ));
 
       Point dragTargetLocation = tester.getCenter(find.text('Source'));
       Point targetLocation = tester.getCenter(find.text('Target1'));

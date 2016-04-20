@@ -9,25 +9,19 @@ import 'package:sky_services/sky/input_event.mojom.dart' as mojom;
 GlobalKey _key = new GlobalKey();
 
 void main() {
-  runApp(
-    new MaterialApp(
-      title: "Hardware Key Demo",
-      routes: <String, WidgetBuilder>{
-        '/': (BuildContext context) {
-          return new Scaffold(
-            appBar: new AppBar(
-              title: new Text("Hardware Key Demo")
-            ),
-            body: new Material(
-              child: new RawKeyboardDemo(
-                key: _key
-              )
-            )
-          );
-        }
-      }
+  runApp(new MaterialApp(
+    title: "Hardware Key Demo",
+    home: new Scaffold(
+      appBar: new AppBar(
+        title: new Text("Hardware Key Demo")
+      ),
+      body: new Material(
+        child: new RawKeyboardDemo(
+          key: _key
+        )
+      )
     )
-  );
+  ));
 }
 
 class RawKeyboardDemo extends StatefulWidget {

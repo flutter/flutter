@@ -21,7 +21,7 @@ You can use [hyperlinks](hyperlink) in markdown
 ## Code blocks
 Formatted Dart code looks really pretty too. This is an example of how to create your own Markdown widget:
 
-    new Markdown(data: "Hello _world_!");
+    new Markdown(data: 'Hello _world_!');
 
 Enjoy!
 """;
@@ -29,11 +29,9 @@ Enjoy!
 void main() {
   runApp(new MaterialApp(
     title: "Markdown Demo",
-    routes: <String, WidgetBuilder>{
-      '/': (BuildContext context) => new Scaffold(
-        appBar: new AppBar(title: new Text("Markdown Demo")),
-        body: new Markdown(data: _kMarkdownData)
-      )
-    }
+    home: new Scaffold(
+      appBar: new AppBar(title: new Text('Markdown Demo')),
+      body: new Markdown(data: _kMarkdownData)
+    )
   ));
 }

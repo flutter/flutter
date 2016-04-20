@@ -12,19 +12,19 @@ void main() {
   test('Drawer control test', () {
     testWidgets((WidgetTester tester) {
       GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
-      BuildContext context;
+      BuildContext savedContext;
       tester.pumpWidget(
         new MaterialApp(
-          routes: <String, WidgetBuilder>{
-            '/': (BuildContext ctx) {
-              context = ctx;
+          home: new Builder(
+            builder: (BuildContext context) {
+              savedContext = context;
               return new Scaffold(
                 key: scaffoldKey,
                 drawer: new Text('drawer'),
                 body: new Container()
               );
             }
-          }
+          )
         )
       );
       tester.pump(); // no effect
@@ -34,7 +34,7 @@ void main() {
       expect(tester, hasWidget(find.text('drawer')));
       tester.pump(new Duration(seconds: 1)); // animation done
       expect(tester, hasWidget(find.text('drawer')));
-      Navigator.pop(context);
+      Navigator.pop(savedContext);
       tester.pump(); // drawer should be starting to animate away
       expect(tester, hasWidget(find.text('drawer')));
       tester.pump(new Duration(seconds: 1)); // animation done
@@ -47,15 +47,11 @@ void main() {
       GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
       tester.pumpWidget(
         new MaterialApp(
-          routes: <String, WidgetBuilder>{
-            '/': (BuildContext context) {
-              return new Scaffold(
-                key: scaffoldKey,
-                drawer: new Text('drawer'),
-                body: new Container()
-              );
-            }
-          }
+          home: new Scaffold(
+            key: scaffoldKey,
+            drawer: new Text('drawer'),
+            body: new Container()
+          )
         )
       );
       tester.pump(); // no effect
@@ -85,27 +81,23 @@ void main() {
       GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
       tester.pumpWidget(
         new MaterialApp(
-          routes: <String, WidgetBuilder>{
-            '/': (BuildContext context) {
-              return new Scaffold(
-                key: scaffoldKey,
-                drawer: new Drawer(
-                  child: new Block(
-                    children: <Widget>[
-                      new Text('drawer'),
-                      new Container(
-                        height: 1000.0,
-                        decoration: new BoxDecoration(
-                          backgroundColor: Colors.blue[500]
-                        )
-                      ),
-                    ]
-                  )
-                ),
-                body: new Container()
-              );
-            }
-          }
+          home: new Scaffold(
+            key: scaffoldKey,
+            drawer: new Drawer(
+              child: new Block(
+                children: <Widget>[
+                  new Text('drawer'),
+                  new Container(
+                    height: 1000.0,
+                    decoration: new BoxDecoration(
+                      backgroundColor: Colors.blue[500]
+                    )
+                  ),
+                ]
+              )
+            ),
+            body: new Container()
+          )
         )
       );
       expect(tester, doesNotHaveWidget(find.text('drawer')));

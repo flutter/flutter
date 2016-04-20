@@ -24,9 +24,7 @@ class ComplexLayoutAppState extends State<ComplexLayoutApp> {
     return new MaterialApp(
       theme: lightTheme ? new ThemeData.light() : new ThemeData.dark(),
       title: 'Advanced Layout',
-      routes: <String, WidgetBuilder>{
-        '/': (BuildContext context) => new ComplexLayout(),
-      }
+      home: new ComplexLayout()
     );
   }
 
