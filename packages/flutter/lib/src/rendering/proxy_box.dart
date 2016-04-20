@@ -248,6 +248,101 @@ class RenderConstrainedBox extends RenderProxyBox {
   }
 }
 
+/// Constrains the child's maxWidth and maxHeight if they're otherwise
+/// unconstrained.
+class RenderLimitedBox extends RenderProxyBox {
+  RenderLimitedBox({
+    RenderBox child,
+    double maxWidth: double.INFINITY,
+    double maxHeight: double.INFINITY
+  }) : _maxWidth = maxWidth, _maxHeight = maxHeight, super(child) {
+    assert(maxWidth != null && maxWidth >= 0.0);
+    assert(maxHeight != null && maxHeight >= 0.0);
+  }
+
+  /// The value to use for maxWidth if the incoming maxWidth constraint is infinite.
+  double get maxWidth => _maxWidth;
+  double _maxWidth;
+  void set maxWidth (double value) {
+    assert(value != null && value >= 0.0);
+    if (_maxWidth == value)
+      return;
+    _maxWidth = value;
+    markNeedsLayout();
+  }
+
+  /// The value to use for maxHeight if the incoming maxHeight constraint is infinite.
+  double get maxHeight => _maxHeight;
+  double _maxHeight;
+  void set maxHeight (double value) {
+    assert(value != null && value >= 0.0);
+    if (_maxHeight == value)
+      return;
+    _maxHeight = value;
+    markNeedsLayout();
+  }
+
+  BoxConstraints _limitConstraints(BoxConstraints constraints) {
+    return new BoxConstraints(
+      minWidth: constraints.minWidth,
+      maxWidth: constraints.hasBoundedWidth ? constraints.maxWidth : constraints.constrainWidth(maxWidth),
+      minHeight: constraints.minHeight,
+      maxHeight: constraints.hasBoundedHeight ? constraints.maxHeight : constraints.constrainHeight(maxHeight)
+    );
+  }
+
+  @override
+  double getMinIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.debugAssertIsValid());
+    if (child != null)
+      return child.getMinIntrinsicWidth(_limitConstraints(constraints));
+    return _limitConstraints(constraints).constrainWidth(0.0);
+  }
+
+  @override
+  double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.debugAssertIsValid());
+    if (child != null)
+      return child.getMaxIntrinsicWidth(_limitConstraints(constraints));
+    return _limitConstraints(constraints).constrainWidth(0.0);
+  }
+
+  @override
+  double getMinIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.debugAssertIsValid());
+    if (child != null)
+      return child.getMinIntrinsicHeight(_limitConstraints(constraints));
+    return _limitConstraints(constraints).constrainHeight(0.0);
+  }
+
+  @override
+  double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.debugAssertIsValid());
+    if (child != null)
+      return child.getMaxIntrinsicHeight(_limitConstraints(constraints));
+    return _limitConstraints(constraints).constrainHeight(0.0);
+  }
+
+  @override
+  void performLayout() {
+    if (child != null) {
+      child.layout(_limitConstraints(constraints), parentUsesSize: true);
+      size = constraints.constrain(child.size);
+    } else {
+      size = _limitConstraints(constraints).constrain(Size.zero);
+    }
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (maxWidth != double.INFINITY)
+      description.add('maxWidth: $maxWidth');
+    if (maxHeight != double.INFINITY)
+      description.add('maxHeight: $maxHeight');
+  }
+}
+
 /// Attempts to size the child to a specific aspect ratio.
 ///
 /// The render object first tries the largest width permited by the layout

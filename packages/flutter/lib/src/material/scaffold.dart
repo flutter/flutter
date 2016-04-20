@@ -460,6 +460,7 @@ class ScaffoldState extends State<Scaffold> {
       if (config.drawer != null) {
         leading = new IconButton(
           icon: Icons.menu,
+          alignment: FractionalOffset.centerLeft,
           onPressed: openDrawer,
           tooltip: 'Open navigation menu' // TODO(ianh): Figure out how to localize this string
         );
@@ -468,6 +469,7 @@ class ScaffoldState extends State<Scaffold> {
         if (_shouldShowBackArrow) {
           leading = new IconButton(
             icon: Icons.arrow_back,
+            alignment: FractionalOffset.centerLeft,
             onPressed: () => Navigator.pop(context),
             tooltip: 'Back' // TODO(ianh): Figure out how to localize this string
           );

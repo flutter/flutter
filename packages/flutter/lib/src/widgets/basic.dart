@@ -724,6 +724,47 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   }
 }
 
+/// A box that limits its size only when it's unconstrained.
+///
+/// If this widget's maximum width is unconstrained then its child's width is
+/// limited to maxWidth. Similarly, if this widget's maximum height is unconstrained
+/// then its child's height is limited to to maxHeight.
+class LimitedBox extends SingleChildRenderObjectWidget {
+  LimitedBox({ Key key, this.maxWidth: double.INFINITY, this.maxHeight: double.INFINITY, Widget child })
+    : super(key: key, child: child) {
+    assert(maxWidth != null && maxWidth >= 0.0);
+    assert(maxHeight != null && maxHeight >= 0.0);
+  }
+
+  /// The maximum width limit to apply in the absence of a maxWidth constraint.
+  final double maxWidth;
+
+  /// The maximum height limit to apply in the absence of a maxHeight constraint.
+  final double maxHeight;
+
+  @override
+  RenderLimitedBox createRenderObject(BuildContext context) => new RenderLimitedBox(
+    maxWidth: maxWidth,
+    maxHeight: maxHeight
+  );
+
+  @override
+  void updateRenderObject(BuildContext context, RenderLimitedBox renderObject) {
+    renderObject
+      ..maxWidth = maxWidth
+      ..maxHeight = maxHeight;
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (maxWidth != double.INFINITY)
+      description.add('maxWidth: $maxWidth');
+    if (maxHeight != double.INFINITY)
+      description.add('maxHeight: $maxHeight');
+  }
+}
+
 /// A render object that imposes different constraints on its child than it gets
 /// from its parent, possibly allowing the child to overflow the parent.
 ///
