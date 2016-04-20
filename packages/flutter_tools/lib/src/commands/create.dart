@@ -21,7 +21,8 @@ class CreateCommand extends Command {
   final String name = 'create';
 
   @override
-  final String description = 'Create a new Flutter project.\nIf run on a project that already exists, this will repair the project, recreating any files that are missing.';
+  final String description = 'Create a new Flutter project.\n\n'
+    'If run on a project that already exists, this will repair the project, recreating any files that are missing.';
 
   @override
   final List<String> aliases = <String>['init'];
@@ -57,13 +58,12 @@ class CreateCommand extends Command {
 
     if (argResults.rest.length > 1) {
       printStatus('Multiple output directories specified.');
-      printStatus('To create (or repair) a flutter application directory, run "flutter create dirname" where "dirname" is the application directory.');
       return 2;
     }
 
     if (ArtifactStore.flutterRoot == null) {
-      printError('Neither the --flutter-root command line flag nor the FLUTTER_ROOT environment');
-      printError('variable was specified. Unable to find package:flutter.');
+      printError('Neither the --flutter-root command line flag nor the FLUTTER_ROOT environment\n'
+        'variable was specified. Unable to find package:flutter.');
       return 2;
     }
 
@@ -230,15 +230,9 @@ String _validateProjectName(String projectName) {
 /// if we should disallow the directory name.
 String _validateProjectDir(String projectName) {
   FileSystemEntityType type = FileSystemEntity.typeSync(projectName);
+
   if (type != FileSystemEntityType.NOT_FOUND) {
     switch(type) {
-      case FileSystemEntityType.DIRECTORY:
-        // Do not re-use directory if it is not empty.
-        if (new Directory(projectName).listSync(followLinks: false).isNotEmpty) {
-          return "Invalid project name: '$projectName' - refers to a directory "
-            "that is not empty.";
-        };
-        break;
       case FileSystemEntityType.FILE:
         // Do not overwrite files.
         return "Invalid project name: '$projectName' - file exists.";
@@ -247,6 +241,7 @@ String _validateProjectDir(String projectName) {
         return "Invalid project name: '$projectName' - refers to a link.";
     }
   }
+
   return null;
 }
 
