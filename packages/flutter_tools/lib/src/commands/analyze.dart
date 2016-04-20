@@ -367,6 +367,8 @@ class AnalyzeCommand extends FlutterCommand {
 
     Set<String> changedFiles = new Set<String>(); // files about which we've complained that they changed
 
+    _SourceCache cache = new _SourceCache(10);
+
     int membersMissingDocumentation = 0;
     List<String> errorLines = output.toString().split('\n');
     for (String errorLine in errorLines) {
@@ -380,7 +382,7 @@ class AnalyzeCommand extends FlutterCommand {
           int colNumber = int.parse(groups[5]);
           try {
             File source = new File(filename);
-            List<String> sourceLines = source.readAsLinesSync();
+            List<String> sourceLines = cache.getSourceFor(source);
             if (lineNumber > sourceLines.length)
               throw new FileChanged();
             String sourceLine = sourceLines[lineNumber-1];
@@ -799,5 +801,22 @@ class AnalysisError implements Comparable<AnalysisError> {
     String relativePath = path.relative(file);
     String sep = logger.separator;
     return '${severity.toLowerCase().padLeft(7)} $sep $message $sep $relativePath:$startLine:$startColumn';
+  }
+}
+
+class _SourceCache {
+  _SourceCache(this.cacheSize);
+
+  final int cacheSize;
+  final Map<String, List<String>> _lines = new LinkedHashMap<String, List<String>>();
+
+  List<String> getSourceFor(File file) {
+    if (!_lines.containsKey(file.path)) {
+      if (_lines.length >= cacheSize)
+        _lines.remove(_lines.keys.first);
+      _lines[file.path] = file.readAsLinesSync();
+    }
+
+    return _lines[file.path];
   }
 }
