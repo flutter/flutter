@@ -40,8 +40,9 @@ class TestAssetBundle extends AssetBundle {
   ImageResource loadImage(String key) => null;
 
   @override
-  Future<String> loadString(String key) {if (key == 'lib/gallery/example_code.dart')
-      return (new Completer<String>()..complete(testCodeFile)).future;
+  Future<String> loadString(String key) {
+    if (key == 'lib/gallery/example_code.dart')
+      return new Future<String>.value(testCodeFile);
     return null;
   }
 
