@@ -19,6 +19,7 @@ import '../package_map.dart';
 final String _kSkyShell = Platform.environment['SKY_SHELL'];
 const String _kHost = '127.0.0.1';
 const String _kPath = '/runner';
+const Duration _kPlatformTimeout = const Duration(seconds: 3);
 
 String shellPath;
 
@@ -105,6 +106,25 @@ void main() {
         dirToDelete.deleteSync(recursive: true);
       }
     }
+    Timer timeout = new Timer(_kPlatformTimeout, () {
+      process.stderr
+        .transform(UTF8.decoder)
+        .transform(const LineSplitter())
+        .listen((String line) {
+          if (line != null)
+            print(line);
+        });
+      finalize();
+      throw new TimeoutException("Test took too long", _kPlatformTimeout);
+    });
+    void cancelTimerAndFinalize() {
+      finalize();
+      if (timeout != null) {
+        Timer timerToCancel = timeout;
+        timeout = null;
+        timerToCancel.cancel();
+      }
+    }
 
     try {
       WebSocket socket = await info.socket;
@@ -112,7 +132,7 @@ void main() {
       return channel.transformStream(
         new StreamTransformer<String, String>.fromHandlers(
           handleDone: (EventSink<String> sink) {
-            finalize();
+            cancelTimerAndFinalize();
             sink.close();
           }
         )
@@ -121,12 +141,12 @@ void main() {
           sink.add(JSON.encode(data));
         },
         handleDone: (EventSink<String> sink) {
-          finalize();
+          cancelTimerAndFinalize();
           sink.close();
         }
       ));
     } catch(e) {
-      finalize();
+      cancelTimerAndFinalize();
       rethrow;
     }
   }
