@@ -4,46 +4,22 @@
 
 import 'dart:async';
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 import 'package:mojo/core.dart' as core;
-
 import 'package:test/test.dart';
 
 import '../lib/gallery/example_code_parser.dart';
 
 void main() {
-  test('Material Gallery example code parser test', () {
-    testWidgets((WidgetTester tester) {
-      TestParsingWidget testWidget = new TestParsingWidget();
-      tester.pumpWidget(testWidget);
-    });
+  test('Material Gallery example code parser test', () async {
+    TestAssetBundle bundle = new TestAssetBundle();
+
+    String codeSnippet0 = await getExampleCode('test_0', bundle);
+    expect(codeSnippet0, 'test 0 0\ntest 0 1');
+
+    String codeSnippet1 = await getExampleCode('test_1', bundle);
+    expect(codeSnippet1, 'test 1 0\ntest 1 1');
   });
-}
-
-class TestParsingWidget extends StatefulWidget {
-  @override
-  TestParsingWidgetState createState() => new TestParsingWidgetState();
-}
-
-class TestParsingWidgetState extends State<TestParsingWidget> {
-  @override
-  void initState() {
-    super.initState();
-    getExampleCode('test_0', new TestAssetBundle()).then((String codeSnippet) {
-      expect(codeSnippet, 'test 0 0\ntest 0 1');
-    });
-    getExampleCode('test_1', new TestAssetBundle()).then((String codeSnippet) {
-      expect(codeSnippet, 'test 1 0\ntest 1 1');
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return new Container();
-  }
 }
 
 const String testCodeFile = """// A fake test file
