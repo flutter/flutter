@@ -8,6 +8,7 @@ import 'package:test/test.dart';
 
 import '../lib/main.dart' as material_gallery;
 
+// Warning: the following strings must be kept in sync with GalleryHome.
 const List<String> demoCategories = const <String>['Demos', 'Components', 'Style'];
 const List<String> demoNames = const <String>[
   'Weather',
@@ -86,7 +87,7 @@ void main() {
       tester.pump(); // triggers a frame
 
       // Expand the demo category submenus.
-      for(String category in demoCategories.reversed) {
+      for (String category in demoCategories.reversed) {
         tester.tap(find.text(category));
         tester.pump();
         tester.pump(const Duration(seconds: 1)); // Wait until the menu has expanded.
@@ -94,14 +95,14 @@ void main() {
 
       final List<double> scrollDeltas = new List<double>();
       double previousY = tester.getTopRight(find.text(demoCategories[0])).y;
-      for(String name in demoNames) {
+      for (String name in demoNames) {
         final double y = tester.getTopRight(find.text(name)).y;
         scrollDeltas.add(previousY - y);
         previousY = y;
       }
 
       // Launch each demo and then scroll that item out of the way.
-      for(int i = 0; i < demoNames.length; i++) {
+      for (int i = 0; i < demoNames.length; i += 1) {
         final String name = demoNames[i];
         print("$name");
         smokeDemo(tester, name);
