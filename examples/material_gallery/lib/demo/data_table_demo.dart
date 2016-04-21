@@ -20,6 +20,8 @@ class Desert {
 }
 
 class DataTableDemo extends StatefulWidget {
+  static const String routeName = '/data-table';
+
   @override
   _DataTableDemoState createState() => new _DataTableDemoState();
 }

@@ -39,6 +39,8 @@ class TextStyleItem extends StatelessWidget {
 }
 
 class TypographyDemo extends StatelessWidget {
+  static const String routeName = '/typography';
+
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;

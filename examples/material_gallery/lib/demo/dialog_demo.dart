@@ -55,6 +55,8 @@ class DialogDemoItem extends StatelessWidget {
 }
 
 class DialogDemo extends StatefulWidget {
+  static const String routeName = '/dialog';
+
   @override
   DialogDemoState createState() => new DialogDemoState();
 }

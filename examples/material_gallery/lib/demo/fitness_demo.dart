@@ -16,6 +16,8 @@ SpriteSheet _sprites;
 class FitnessDemo extends StatelessWidget {
   FitnessDemo({ Key key }) : super(key: key);
 
+  static const String routeName = '/fitness';
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(

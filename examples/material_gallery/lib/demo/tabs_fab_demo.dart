@@ -26,6 +26,8 @@ const String _explanatoryText =
   "by its key.";
 
 class TabsFabDemo extends StatefulWidget {
+  static const String routeName = '/tabs-fab';
+
   @override
   _TabsFabDemoState createState() => new _TabsFabDemoState();
 }

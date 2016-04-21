@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 
 class PageSelectorDemo extends StatelessWidget {
 
+  static const String routeName = '/page-selector';
+
   void _handleArrowButtonPress(BuildContext context, int delta) {
     final TabBarSelectionState<IconData> selection = TabBarSelection.of/*<IconData>*/(context);
     if (!selection.valueIsChanging)

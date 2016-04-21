@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 class TimePickerDemo extends StatefulWidget {
+  static const String routeName = '/time-picker';
+
   @override
   _TimePickerDemoState createState() => new _TimePickerDemoState();
 }
