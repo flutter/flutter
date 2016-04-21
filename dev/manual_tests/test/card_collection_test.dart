@@ -15,8 +15,7 @@ void main() {
       tester.pump(); // see https://github.com/flutter/flutter/issues/1865
       tester.pump(); // triggers a frame
 
-      Finder navigationMenu = find.byElement((Element element) {
-        Widget widget = element.widget;
+      Finder navigationMenu = find.byWidgetPredicate((Widget widget) {
         if (widget is Tooltip)
           return widget.message == 'Open navigation menu';
         return false;

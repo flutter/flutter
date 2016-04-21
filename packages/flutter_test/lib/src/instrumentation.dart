@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -61,20 +59,6 @@ class Instrumentation {
       return e;
     }
     return null;
-  }
-
-  /// Returns all elements ordered in a depth-first traversal fashion.
-  ///
-  /// The returned iterable is lazy. It does not walk the entire element tree
-  /// immediately, but rather a chunk at a time as the iteration progresses
-  /// using [Iterator.moveNext].
-  Iterable<Element> get allElements {
-    return new _DepthFirstChildIterable(binding.renderViewElement);
-  }
-
-  /// Returns all elements that satisfy [predicate].
-  Iterable<Element> findElements(bool predicate(Element element)) {
-    return allElements.where(predicate);
   }
 
   /// Returns the first element that corresponds to a widget with the
@@ -246,44 +230,5 @@ class Instrumentation {
     HitTestResult result = new HitTestResult();
     binding.hitTest(result, location);
     return result;
-  }
-}
-
-class _DepthFirstChildIterable extends IterableBase<Element> {
-  _DepthFirstChildIterable(this.rootElement);
-
-  Element rootElement;
-
-  @override
-  Iterator<Element> get iterator => new _DepthFirstChildIterator(rootElement);
-}
-
-class _DepthFirstChildIterator implements Iterator<Element> {
-  _DepthFirstChildIterator(Element rootElement)
-      : _stack = _reverseChildrenOf(rootElement).toList();
-
-  Element _current;
-
-  final List<Element> _stack;
-
-  @override
-  Element get current => _current;
-
-  @override
-  bool moveNext() {
-    if (_stack.isEmpty)
-      return false;
-
-    _current = _stack.removeLast();
-    // Stack children in reverse order to traverse first branch first
-    _stack.addAll(_reverseChildrenOf(_current));
-
-    return true;
-  }
-
-  static Iterable<Element> _reverseChildrenOf(Element element) {
-    List<Element> children = <Element>[];
-    element.visitChildren(children.add);
-    return children.reversed;
   }
 }
