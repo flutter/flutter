@@ -16,7 +16,7 @@ class NineSliceSprite extends NodeWithSize with SpritePaint {
     this.insets = insets;
   }
 
-  /// Creates a new NineSliceSprite from the privided [image], [size], and
+  /// Creates a new NineSliceSprite from the provided [image], [size], and
   /// texture [insets].
   NineSliceSprite.fromImage(ui.Image image, Size size, EdgeInsets insets)
     : this(new Texture(image), size, insets);
