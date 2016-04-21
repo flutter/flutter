@@ -13,6 +13,8 @@ import 'theme.dart';
 
 export 'package:sky_services/editing/editing.mojom.dart' show KeyboardType;
 
+const double _kTextSelectionHandleSize = 20.0; // pixels
+
 /// A material design text input field.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
@@ -191,6 +193,7 @@ class _InputState extends State<Input> {
         hideText: config.hideText,
         cursorColor: themeData.textSelectionColor,
         selectionColor: themeData.textSelectionColor,
+        selectionHandleBuilder: _textSelectionHandleBuilder,
         keyboardType: config.keyboardType,
         onChanged: onChanged,
         onSubmitted: onSubmitted
@@ -237,6 +240,32 @@ class _InputState extends State<Input> {
       )
     );
   }
+
+  Widget _textSelectionHandleBuilder(
+      BuildContext context, TextSelectionHandleType type) {
+    Widget handle = new SizedBox(
+      width: _kTextSelectionHandleSize,
+      height: _kTextSelectionHandleSize,
+      child: new CustomPaint(
+        painter: new _TextSelectionHandlePainter(
+          type: type,
+          color: Theme.of(context).textSelectionHandleColor
+        )
+      )
+    );
+
+    switch (type) {
+      case TextSelectionHandleType.left:
+        // Shift the child left by 100% of its width, so its top-right corner
+        // touches the selection endpoint.
+        return new FractionalTranslation(
+          translation: const FractionalOffset(-1.0, 0.0),
+          child: handle
+        );
+      case TextSelectionHandleType.right:
+        return handle;
+    }
+  }
 }
 
 class _FormFieldData {
@@ -269,5 +298,42 @@ class _FormFieldData {
     assert(scope != null);
     scope.form.onSubmitted();
     scope.onFieldChanged();
+  }
+}
+
+/// Draws a single text selection handle. The [type] determines where the handle
+/// points (e.g. the [left] handle points up and to the right).
+class _TextSelectionHandlePainter extends CustomPainter {
+  _TextSelectionHandlePainter({this.type, this.color});
+
+  final TextSelectionHandleType type;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint paint = new Paint()..color = color;
+
+    // Each handle is a circle, with a rectangle in the top quadrant of that
+    // circle in the direction it's pointing. [rect] here is the size of the
+    // corner rect, e.g. half the diameter of the circle.
+    double radius = size.width/2.0;
+    canvas.drawCircle(new Point(radius, radius), radius, paint);
+
+    Rect rect;
+    switch (type) {
+      case TextSelectionHandleType.left:
+        rect = new Rect.fromLTWH(radius, 0.0, radius, radius);
+        break;
+      case TextSelectionHandleType.right:
+        rect = new Rect.fromLTWH(0.0, 0.0, radius, radius);
+        break;
+    }
+    canvas.drawRect(rect, paint);
+  }
+
+  @override
+  bool shouldRepaint(_TextSelectionHandlePainter oldPainter) {
+    return type != oldPainter.type ||
+           color != oldPainter.color;
   }
 }

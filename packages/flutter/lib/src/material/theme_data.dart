@@ -84,6 +84,7 @@ class ThemeData {
     Color disabledColor,
     Color buttonColor,
     Color textSelectionColor,
+    Color textSelectionHandleColor,
     Color backgroundColor,
     Color indicatorColor,
     Color hintColor,
@@ -109,6 +110,7 @@ class ThemeData {
     disabledColor ??= isDark ? Colors.white30 : Colors.black26;
     buttonColor ??= isDark ? primarySwatch[600] : Colors.grey[300];
     textSelectionColor ??= isDark ? accentColor : primarySwatch[200];
+    textSelectionHandleColor ??= isDark ? Colors.tealAccent[400] : primarySwatch[300];
     backgroundColor ??= isDark ? Colors.grey[700] : primarySwatch[200];
     indicatorColor ??= accentColor == primaryColor ? Colors.white : accentColor;
     hintColor ??= isDark ? const Color(0x42FFFFFF) : const Color(0x4C000000);
@@ -132,6 +134,7 @@ class ThemeData {
       disabledColor: disabledColor,
       buttonColor: buttonColor,
       textSelectionColor: textSelectionColor,
+      textSelectionHandleColor: textSelectionHandleColor,
       backgroundColor: backgroundColor,
       indicatorColor: indicatorColor,
       hintColor: hintColor,
@@ -164,6 +167,7 @@ class ThemeData {
     this.disabledColor,
     this.buttonColor,
     this.textSelectionColor,
+    this.textSelectionHandleColor,
     this.backgroundColor,
     this.indicatorColor,
     this.hintColor,
@@ -187,6 +191,7 @@ class ThemeData {
     assert(disabledColor != null);
     assert(buttonColor != null);
     assert(textSelectionColor != null);
+    assert(textSelectionHandleColor != null);
     assert(disabledColor != null);
     assert(indicatorColor != null);
     assert(hintColor != null);
@@ -271,6 +276,8 @@ class ThemeData {
   /// The color of text selections in text fields, such as [Input].
   final Color textSelectionColor;
 
+  final Color textSelectionHandleColor;
+
   /// A color that contrasts with the [primaryColor], e.g. used as the
   /// remaining part of a progress bar.
   final Color backgroundColor;
@@ -309,6 +316,7 @@ class ThemeData {
       disabledColor: Color.lerp(begin.disabledColor, end.disabledColor, t),
       buttonColor: Color.lerp(begin.buttonColor, end.buttonColor, t),
       textSelectionColor: Color.lerp(begin.textSelectionColor, end.textSelectionColor, t),
+      textSelectionHandleColor: Color.lerp(begin.textSelectionHandleColor, end.textSelectionHandleColor, t),
       backgroundColor: Color.lerp(begin.backgroundColor, end.backgroundColor, t),
       accentColor: Color.lerp(begin.accentColor, end.accentColor, t),
       accentColorBrightness: t < 0.5 ? begin.accentColorBrightness : end.accentColorBrightness,
@@ -339,6 +347,7 @@ class ThemeData {
            (otherData.disabledColor == disabledColor) &&
            (otherData.buttonColor == buttonColor) &&
            (otherData.textSelectionColor == textSelectionColor) &&
+           (otherData.textSelectionHandleColor == textSelectionHandleColor) &&
            (otherData.backgroundColor == backgroundColor) &&
            (otherData.accentColor == accentColor) &&
            (otherData.accentColorBrightness == accentColorBrightness) &&
@@ -366,10 +375,11 @@ class ThemeData {
       disabledColor,
       buttonColor,
       textSelectionColor,
+      textSelectionHandleColor,
       backgroundColor,
       accentColor,
-      accentColorBrightness,
       hashValues( // Too many values.
+        accentColorBrightness,
         indicatorColor,
         hintColor,
         errorColor,

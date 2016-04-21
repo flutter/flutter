@@ -4,7 +4,6 @@
 
 import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphStyle, TextBox;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
 import 'box.dart';
@@ -16,6 +15,21 @@ const double _kCaretHeightOffset = 2.0; // pixels
 const double _kCaretWidth = 1.0; // pixels
 
 final String _kZeroWidthSpace = new String.fromCharCode(0x200B);
+
+/// Called when the user changes the selection (including cursor location).
+typedef void SelectionChangedHandler(TextSelection selection, RenderEditableLine renderObject);
+
+/// Represents a global screen coordinate of the point in a selection, and the
+/// text direction at that point.
+class TextSelectionPoint {
+  TextSelectionPoint(this.point, this.direction);
+
+  /// Screen coordinates of the lower left or lower right corner of the selection.
+  final Point point;
+
+  /// Direction of the text at this edge of the selection.
+  final TextDirection direction;
+}
 
 /// A single line of editable text.
 class RenderEditableLine extends RenderBox {
@@ -44,9 +58,11 @@ class RenderEditableLine extends RenderBox {
       ..onTapDown = _handleTapDown
       ..onTap = _handleTap
       ..onTapCancel = _handleTapCancel;
+    _longPress = new LongPressGestureRecognizer()
+      ..onLongPress = _handleLongPress;
   }
 
-  ValueChanged<TextSelection> onSelectionChanged;
+  SelectionChangedHandler onSelectionChanged;
   ViewportDimensionsChangeCallback onPaintOffsetUpdateNeeded;
 
   /// The text to display
@@ -111,6 +127,32 @@ class RenderEditableLine extends RenderBox {
     markNeedsPaint();
   }
 
+  List<TextSelectionPoint> getEndpointsForSelection(TextSelection selection) {
+    _textPainter.layout(); // TODO(mpcomplete): is this hacky?
+
+    Offset offset = _paintOffset + new Offset(0.0, -_kCaretHeightOffset);
+
+    if (selection.isCollapsed) {
+      // TODO(mpcomplete): This doesn't work well at an RTL/LTR boundary.
+      Offset caretOffset = _textPainter.getOffsetForCaret(selection.extent, _caretPrototype);
+      Point start = new Point(caretOffset.dx, _contentSize.height) + offset;
+      return [new TextSelectionPoint(localToGlobal(start), null)];
+    } else {
+      List<ui.TextBox> boxes = _textPainter.getBoxesForSelection(selection);
+      Point start = new Point(boxes.first.start, boxes.first.bottom) + offset;
+      Point end = new Point(boxes.last.end, boxes.last.bottom) + offset;
+      return [
+        new TextSelectionPoint(localToGlobal(start), boxes.first.direction),
+        new TextSelectionPoint(localToGlobal(end), boxes.last.direction),
+      ];
+    }
+  }
+
+  TextPosition getPositionForPoint(Point global) {
+    global += -paintOffset;
+    return _textPainter.getPositionForOffset(globalToLocal(global).toOffset());
+  }
+
   Size _contentSize;
 
   ui.Paragraph _layoutTemplate;
@@ -159,16 +201,20 @@ class RenderEditableLine extends RenderBox {
   bool hitTestSelf(Point position) => true;
 
   TapGestureRecognizer _tap;
+  LongPressGestureRecognizer _longPress;
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
-    if (event is PointerDownEvent && onSelectionChanged != null)
+    if (event is PointerDownEvent && onSelectionChanged != null) {
       _tap.addPointer(event);
+      _longPress.addPointer(event);
+    }
   }
 
   Point _lastTapDownPosition;
+  Point _longPressPosition;
   void _handleTapDown(Point globalPosition) {
-    _lastTapDownPosition = globalPosition;
+    _lastTapDownPosition = globalPosition + -paintOffset;
   }
 
   void _handleTap() {
@@ -177,12 +223,39 @@ class RenderEditableLine extends RenderBox {
     _lastTapDownPosition = null;
     if (onSelectionChanged != null) {
       TextPosition position = _textPainter.getPositionForOffset(globalToLocal(global).toOffset());
-      onSelectionChanged(new TextSelection.fromPosition(position));
+      onSelectionChanged(new TextSelection.fromPosition(position), this);
     }
   }
 
   void _handleTapCancel() {
+    // longPress arrives after tapCancel, so remember the tap position.
+    _longPressPosition = _lastTapDownPosition;
     _lastTapDownPosition = null;
+  }
+
+  void _handleLongPress() {
+    final Point global = _longPressPosition;
+    _longPressPosition = null;
+    if (onSelectionChanged != null) {
+      TextPosition position = _textPainter.getPositionForOffset(globalToLocal(global).toOffset());
+      onSelectionChanged(_selectWordAtOffset(position), this);
+    }
+  }
+
+  TextSelection _selectWordAtOffset(TextPosition position) {
+    // TODO(mpcomplete): Placeholder. Need to ask the engine for this info to do
+    // it correctly.
+    String str = text.toPlainText();
+    int start = position.offset - 1;
+    while (start >= 0 && str[start] != ' ')
+      --start;
+    ++start;
+
+    int end = position.offset;
+    while (end < str.length && str[end] != ' ')
+      ++end;
+
+    return new TextSelection(baseOffset: start, extentOffset: end);
   }
 
   BoxConstraints _constraintsForCurrentLayout; // when null, we don't have a current layout

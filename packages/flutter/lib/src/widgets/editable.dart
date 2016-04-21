@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:flutter/rendering.dart' show RenderEditableLine;
+import 'package:flutter/rendering.dart' show RenderEditableLine, SelectionChangedHandler;
 import 'package:sky_services/editing/editing.mojom.dart' as mojom;
 import 'package:flutter/services.dart';
 
@@ -13,6 +13,7 @@ import 'framework.dart';
 import 'focus.dart';
 import 'scrollable.dart';
 import 'scroll_behavior.dart';
+import 'text_selection.dart';
 
 export 'package:flutter/painting.dart' show TextSelection;
 export 'package:sky_services/editing/editing.mojom.dart' show KeyboardType;
@@ -152,6 +153,7 @@ class RawInputLine extends Scrollable {
     this.style,
     this.cursorColor,
     this.selectionColor,
+    this.selectionHandleBuilder,
     this.keyboardType,
     this.onChanged,
     this.onSubmitted
@@ -179,6 +181,8 @@ class RawInputLine extends Scrollable {
   /// The color to use when painting the selection.
   final Color selectionColor;
 
+  final TextSelectionHandleBuilder selectionHandleBuilder;
+
   /// The type of keyboard to use for editing the text.
   final KeyboardType keyboardType;
 
@@ -198,6 +202,7 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
 
   _KeyboardClientImpl _keyboardClient;
   KeyboardHandle _keyboardHandle;
+  TextSelectionHandles _selectionHandles;
 
   @override
   ScrollBehavior<double, double> createScrollBehavior() => new BoundedBehavior();
@@ -222,6 +227,12 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
       if (_isAttachedToKeyboard)
         _keyboardHandle.setEditingState(_keyboardClient.editingState);
     }
+  }
+
+  @override
+  void dispatchOnScroll() {
+    super.dispatchOnScroll();
+    _selectionHandles?.update(_keyboardClient.inputValue.selection);
   }
 
   bool get _isAttachedToKeyboard => _keyboardHandle != null && _keyboardHandle.attached;
@@ -275,6 +286,14 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
   void _handleTextUpdated() {
     if (config.onChanged != null)
       config.onChanged(_keyboardClient.inputValue);
+    if (_keyboardClient.inputValue.text != config.value.text) {
+      _selectionHandles?.hide();
+      _selectionHandles = null;
+    } else {
+      // If the text is unchanged, this was probably called for a selection
+      // change.
+      _selectionHandles?.update(_keyboardClient.inputValue.selection);
+    }
   }
 
   void _handleTextSubmitted() {
@@ -283,11 +302,28 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
       config.onSubmitted(_keyboardClient.inputValue);
   }
 
-  void _handleSelectionChanged(TextSelection selection) {
+  void _handleSelectionChanged(TextSelection selection, RenderEditableLine renderObject) {
     // Note that this will show the keyboard for all selection changes on the
     // EditableLineWidget, not just changes triggered by user gestures.
     requestKeyboard();
 
+    if (config.onChanged != null)
+      config.onChanged(_keyboardClient.inputValue.copyWith(selection: selection));
+
+    if (_selectionHandles == null &&
+        _keyboardClient.inputValue.text.isNotEmpty &&
+        config.selectionHandleBuilder != null) {
+      _selectionHandles = new TextSelectionHandles(
+        selection: selection,
+        renderObject: renderObject,
+        onSelectionHandleChanged: _handleSelectionHandleChanged,
+        builder: config.selectionHandleBuilder
+      );
+      _selectionHandles.show(context, debugRequiredFor: config);
+    }
+  }
+
+  void _handleSelectionHandleChanged(TextSelection selection) {
     if (config.onChanged != null)
       config.onChanged(_keyboardClient.inputValue.copyWith(selection: selection));
   }
@@ -318,6 +354,9 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
       _keyboardHandle.release();
     if (_cursorTimer != null)
       _stopCursorTimer();
+    scheduleMicrotask(() { // can't hide while disposing, since it triggers a rebuild
+      _selectionHandles?.hide();
+    });
     super.dispose();
   }
 
@@ -340,6 +379,13 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
       _startCursorTimer();
     else if (_cursorTimer != null && (!focused || !config.value.selection.isCollapsed))
       _stopCursorTimer();
+
+    if (_selectionHandles != null && !focused) {
+      scheduleMicrotask(() { // can't hide while disposing, since it triggers a rebuild
+        _selectionHandles.hide();
+        _selectionHandles = null;
+      });
+    }
 
     return new _EditableLineWidget(
       value: config.value,
@@ -375,7 +421,7 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
   final bool showCursor;
   final Color selectionColor;
   final bool hideText;
-  final ValueChanged<TextSelection> onSelectionChanged;
+  final SelectionChangedHandler onSelectionChanged;
   final Offset paintOffset;
   final ViewportDimensionsChangeCallback onPaintOffsetUpdateNeeded;
 
