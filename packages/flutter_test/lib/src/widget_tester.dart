@@ -291,7 +291,7 @@ abstract class Finder {
   }
 
   @override
-  String toString() => 'Finder for a widget with $description';
+  String toString() => '[Finder for $description]';
 }
 
 /// Indicates that an attempt to find a widget within the current element tree
