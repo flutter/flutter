@@ -80,7 +80,11 @@ abstract class Gesturer extends BindingBase implements HitTestable, HitTestDispa
     result.add(new HitTestEntry(this));
   }
 
-  /// Dispatch the given event to the path of the given hit test result.
+  /// Dispatch an event to a hit test result's path.
+  ///
+  /// This sends the given event to every [HitTestTarget] in the entries
+  /// of the given [HitTestResult], and catches exceptions that any of
+  /// the handlers might throw. The `result` argument must not be null.
   @override // from HitTestDispatcher
   void dispatchEvent(PointerEvent event, HitTestResult result) {
     assert(result != null);
