@@ -109,6 +109,8 @@ class ColorSwatchTabView extends StatelessWidget {
 }
 
 class ColorsDemo extends StatelessWidget {
+  static const String routeName = '/colors';
+
   @override
   Widget build(BuildContext context) {
     return new TabBarSelection<ColorSwatch>(

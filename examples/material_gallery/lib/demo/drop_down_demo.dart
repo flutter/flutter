@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 
 class DropDownDemo extends StatefulWidget {
+  static const String routeName = '/dropdown';
+
   @override
   _DropDownDemoState createState() => new _DropDownDemoState();
 }

@@ -10,6 +10,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_sprites/flutter_sprites.dart';
 
 class DrawingDemo extends StatefulWidget {
+  static const String routeName = '/drawing';
+
   @override
   _DrawingDemoState createState() => new _DrawingDemoState();
 }

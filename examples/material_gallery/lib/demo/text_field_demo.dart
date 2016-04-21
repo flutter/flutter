@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 class TextFieldDemo extends StatefulWidget {
   TextFieldDemo({ Key key }) : super(key: key);
 
+  static const String routeName = '/text-field';
+
   @override
   TextFieldDemoState createState() => new TextFieldDemoState();
 }

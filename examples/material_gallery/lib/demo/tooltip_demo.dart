@@ -10,6 +10,9 @@ const String _introText =
   "apps accessible, like screen readers.";
 
 class TooltipDemo extends StatelessWidget {
+
+  static const String routeName = '/tooltip';
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);

@@ -20,6 +20,8 @@ enum WeatherType {
 class WeatherDemo extends StatefulWidget {
   WeatherDemo({ Key key }) : super(key: key);
 
+  static const String routeName = '/weather';
+
   @override
   _WeatherDemoState createState() => new _WeatherDemoState();
 }

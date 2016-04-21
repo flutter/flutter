@@ -70,6 +70,8 @@ class _ContactItem extends StatelessWidget {
 }
 
 class FlexibleSpaceDemo extends StatefulWidget {
+  static const String routeName = '/flexible-space';
+
   @override
   FlexibleSpaceDemoState createState() => new FlexibleSpaceDemoState();
 }

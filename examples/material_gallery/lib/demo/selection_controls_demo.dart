@@ -29,6 +29,8 @@ const String _switchText =
 const String _switchCode = 'selectioncontrols_switch';
 
 class SelectionControlsDemo extends StatefulWidget {
+  static const String routeName = '/selection-controls';
+
   @override
   _SelectionControlsDemoState createState() => new _SelectionControlsDemoState();
 }

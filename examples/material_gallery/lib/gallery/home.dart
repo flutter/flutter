@@ -5,43 +5,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
+import '../demos.dart';
 import 'drawer.dart';
 import 'header.dart';
 import 'item.dart';
-
-import '../demo/buttons_demo.dart';
-import '../demo/cards_demo.dart';
-import '../demo/colors_demo.dart';
-import '../demo/chip_demo.dart';
-import '../demo/data_table_demo.dart';
-import '../demo/date_picker_demo.dart';
-import '../demo/dialog_demo.dart';
-import '../demo/drop_down_demo.dart';
-import '../demo/drawing_demo.dart';
-import '../demo/fitness_demo.dart';
-import '../demo/flexible_space_demo.dart';
-import '../demo/grid_list_demo.dart';
-import '../demo/icons_demo.dart';
-import '../demo/leave_behind_demo.dart';
-import '../demo/list_demo.dart';
-import '../demo/modal_bottom_sheet_demo.dart';
-import '../demo/menu_demo.dart';
-import '../demo/overscroll_demo.dart';
-import '../demo/page_selector_demo.dart';
-import '../demo/persistent_bottom_sheet_demo.dart';
-import '../demo/progress_indicator_demo.dart';
-import '../demo/selection_controls_demo.dart';
-import '../demo/slider_demo.dart';
-import '../demo/snack_bar_demo.dart';
-import '../demo/scrollable_tabs_demo.dart';
-import '../demo/tabs_demo.dart';
-import '../demo/tabs_fab_demo.dart';
-import '../demo/text_field_demo.dart';
-import '../demo/time_picker_demo.dart';
-import '../demo/tooltip_demo.dart';
-import '../demo/two_level_list_demo.dart';
-import '../demo/typography_demo.dart';
-import '../demo/weather_demo.dart';
 
 const double _kFlexibleSpaceMaxHeight = 256.0;
 
@@ -106,51 +73,51 @@ class GalleryHomeState extends State<GalleryHome> {
             leading: new Icon(icon: Icons.star),
             title: new Text('Demos'),
             children: <Widget>[
-              new GalleryItem(title: 'Weather', builder: () => new WeatherDemo()),
-              new GalleryItem(title: 'Fitness', builder: () => new FitnessDemo()),
-              new GalleryItem(title: 'Fancy lines', builder: () => new DrawingDemo()),
-              new GalleryItem(title: 'Flexible space toolbar', builder: () => new FlexibleSpaceDemo()),
-              new GalleryItem(title: 'Floating action button', builder: () => new TabsFabDemo()),
+              new GalleryItem(title: 'Weather', routeName: WeatherDemo.routeName),
+              new GalleryItem(title: 'Fitness', routeName: FitnessDemo.routeName),
+              new GalleryItem(title: 'Fancy lines', routeName: DrawingDemo.routeName),
+              new GalleryItem(title: 'Flexible space toolbar', routeName: FlexibleSpaceDemo.routeName),
+              new GalleryItem(title: 'Floating action button', routeName: TabsFabDemo.routeName),
             ]
           ),
           new TwoLevelSublist(
             leading: new Icon(icon: Icons.extension),
             title: new Text('Components'),
             children: <Widget>[
-              new GalleryItem(title: 'Buttons', builder: () => new ButtonsDemo()),
-              new GalleryItem(title: 'Cards', builder: () => new CardsDemo()),
-              new GalleryItem(title: 'Chips', builder: () => new ChipDemo()),
-              new GalleryItem(title: 'Date picker', builder: () => new DatePickerDemo()),
-              new GalleryItem(title: 'Data tables', builder: () => new DataTableDemo()),
-              new GalleryItem(title: 'Dialog', builder: () => new DialogDemo()),
-              new GalleryItem(title: 'Drop-down button', builder: () => new DropDownDemo()),
-              new GalleryItem(title: 'Expand/collapse list control', builder: () => new TwoLevelListDemo()),
-              new GalleryItem(title: 'Grid', builder: () => new GridListDemo()),
-              new GalleryItem(title: 'Icons', builder: () => new IconsDemo()),
-              new GalleryItem(title: 'Leave-behind list items', builder: () => new LeaveBehindDemo()),
-              new GalleryItem(title: 'List', builder: () => new ListDemo()),
-              new GalleryItem(title: 'Menus', builder: () => new MenuDemo()),
-              new GalleryItem(title: 'Modal bottom sheet', builder: () => new ModalBottomSheetDemo()),
-              new GalleryItem(title: 'Over-scroll', builder: () => new OverscrollDemo()),
-              new GalleryItem(title: 'Page selector', builder: () => new PageSelectorDemo()),
-              new GalleryItem(title: 'Persistent bottom sheet', builder: () => new PersistentBottomSheetDemo()),
-              new GalleryItem(title: 'Progress indicators', builder: () => new ProgressIndicatorDemo()),
-              new GalleryItem(title: 'Scrollable tabs', builder: () => new ScrollableTabsDemo()),
-              new GalleryItem(title: 'Selection controls', builder: () => new SelectionControlsDemo()),
-              new GalleryItem(title: 'Sliders', builder: () => new SliderDemo()),
-              new GalleryItem(title: 'Snackbar', builder: () => new SnackBarDemo()),
-              new GalleryItem(title: 'Tabs', builder: () => new TabsDemo()),
-              new GalleryItem(title: 'Text fields', builder: () => new TextFieldDemo()),
-              new GalleryItem(title: 'Time picker', builder: () => new TimePickerDemo()),
-              new GalleryItem(title: 'Tooltips', builder: () => new TooltipDemo()),
+              new GalleryItem(title: 'Buttons', routeName: ButtonsDemo.routeName),
+              new GalleryItem(title: 'Cards', routeName: CardsDemo.routeName),
+              new GalleryItem(title: 'Chips', routeName: ChipDemo.routeName),
+              new GalleryItem(title: 'Date picker', routeName: DatePickerDemo.routeName),
+              new GalleryItem(title: 'Data tables', routeName: DataTableDemo.routeName),
+              new GalleryItem(title: 'Dialog', routeName: DialogDemo.routeName),
+              new GalleryItem(title: 'Drop-down button', routeName: DropDownDemo.routeName),
+              new GalleryItem(title: 'Expand/collapse list control', routeName: TwoLevelListDemo.routeName),
+              new GalleryItem(title: 'Grid', routeName: GridListDemo.routeName),
+              new GalleryItem(title: 'Icons', routeName: IconsDemo.routeName),
+              new GalleryItem(title: 'Leave-behind list items', routeName: LeaveBehindDemo.routeName),
+              new GalleryItem(title: 'List', routeName: ListDemo.routeName),
+              new GalleryItem(title: 'Menus', routeName: MenuDemo.routeName),
+              new GalleryItem(title: 'Modal bottom sheet', routeName: ModalBottomSheetDemo.routeName),
+              new GalleryItem(title: 'Over-scroll', routeName: OverscrollDemo.routeName),
+              new GalleryItem(title: 'Page selector', routeName: PageSelectorDemo.routeName),
+              new GalleryItem(title: 'Persistent bottom sheet', routeName: PersistentBottomSheetDemo.routeName),
+              new GalleryItem(title: 'Progress indicators', routeName: ProgressIndicatorDemo.routeName),
+              new GalleryItem(title: 'Scrollable tabs', routeName: ScrollableTabsDemo.routeName),
+              new GalleryItem(title: 'Selection controls', routeName: SelectionControlsDemo.routeName),
+              new GalleryItem(title: 'Sliders', routeName: SliderDemo.routeName),
+              new GalleryItem(title: 'Snackbar', routeName: SnackBarDemo.routeName),
+              new GalleryItem(title: 'Tabs', routeName: TabsDemo.routeName),
+              new GalleryItem(title: 'Text fields', routeName: TextFieldDemo.routeName),
+              new GalleryItem(title: 'Time picker', routeName: TimePickerDemo.routeName),
+              new GalleryItem(title: 'Tooltips', routeName: TooltipDemo.routeName),
             ]
           ),
           new TwoLevelSublist(
             leading: new Icon(icon: Icons.color_lens),
             title: new Text('Style'),
             children: <Widget>[
-              new GalleryItem(title: 'Colors', builder: () => new ColorsDemo()),
-              new GalleryItem(title: 'Typography', builder: () => new TypographyDemo()),
+              new GalleryItem(title: 'Colors', routeName: ColorsDemo.routeName),
+              new GalleryItem(title: 'Typography', routeName: TypographyDemo.routeName),
             ]
           )
         ]

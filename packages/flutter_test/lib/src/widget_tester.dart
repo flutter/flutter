@@ -266,6 +266,11 @@ class CommonFinders {
   /// Finds widgets equal to [config].
   Finder byConfig(Widget config) => new _ConfigFinder(config);
 
+  /// Finds widgets using a [predicate].
+  Finder byPredicate(WidgetPredicate predicate) {
+    return new _ElementFinder((Element element) => predicate(element.widget));
+  }
+
   /// Finds widgets using an element [predicate].
   Finder byElement(ElementPredicate predicate) => new _ElementFinder(predicate);
 }
@@ -403,6 +408,7 @@ class _ConfigFinder extends Finder {
   }
 }
 
+typedef bool WidgetPredicate(Widget element);
 typedef bool ElementPredicate(Element element);
 
 class _ElementFinder extends Finder {

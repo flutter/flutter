@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 
 class ModalBottomSheetDemo extends StatelessWidget {
+  static const String routeName = '/modal-bottom-sheet';
+
   final TextStyle textStyle = new TextStyle(
     color: Colors.indigo[400],
     fontSize: 24.0,

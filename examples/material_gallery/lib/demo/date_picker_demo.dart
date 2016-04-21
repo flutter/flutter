@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class DatePickerDemo extends StatefulWidget {
+  static const String routeName = '/date-picker';
+
   @override
   _DatePickerDemoState createState() => new _DatePickerDemoState();
 }

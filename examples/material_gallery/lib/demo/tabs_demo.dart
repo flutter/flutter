@@ -19,6 +19,8 @@ final List<_Page> _pages = <_Page>[
 ];
 
 class TabsDemo extends StatefulWidget {
+  static const String routeName = '/tabs';
+
   @override
   TabsDemoState createState() => new TabsDemoState();
 }

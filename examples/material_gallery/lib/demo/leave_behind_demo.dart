@@ -31,6 +31,8 @@ class LeaveBehindItem implements Comparable<LeaveBehindItem> {
 class LeaveBehindDemo extends StatefulWidget {
   LeaveBehindDemo({ Key key }) : super(key: key);
 
+  static const String routeName = '/leave-behind';
+
   @override
   LeaveBehindDemoState createState() => new LeaveBehindDemoState();
 }

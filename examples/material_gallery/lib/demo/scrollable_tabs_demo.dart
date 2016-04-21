@@ -11,6 +11,8 @@ enum TabsDemoStyle {
 }
 
 class ScrollableTabsDemo extends StatefulWidget {
+  static const String routeName = '/scrollable-tabs';
+
   @override
   ScrollableTabsDemoState createState() => new ScrollableTabsDemoState();
 }
