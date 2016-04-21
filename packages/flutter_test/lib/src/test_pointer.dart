@@ -125,13 +125,13 @@ class TestGesture {
   }) {
     // hit test
     final HitTestResult result = new HitTestResult();
-    target ??= Gesturer.instance;
+    target ??= GestureBinding.instance;
     assert(target != null);
     target.hitTest(result, downLocation);
 
     // dispatch down event
     final TestPointer testPointer = new TestPointer(pointer);
-    dispatcher ??= Gesturer.instance;
+    dispatcher ??= GestureBinding.instance;
     assert(dispatcher != null);
     dispatcher.dispatchEvent(testPointer.down(downLocation), result);
 

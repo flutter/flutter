@@ -18,7 +18,7 @@ typedef bool OverrideConnectToService(String url, Object proxy);
 /// Manages connections with embedder-provided services.
 class MojoShell {
   /// Creates the MojoShell singleton. This constructor can only be called once.
-  /// If your application uses bindings, it is called by the [Services] binding.
+  /// If your application uses bindings, it is called by the [ServicesBinding] binding.
   /// (See [BindingBase] for more details on bindings. Any application using
   /// the Flutter 'rendering' or 'widgets' libraries uses a binding.)
   MojoShell() {

@@ -19,7 +19,7 @@ const PointerUpEvent up = const PointerUpEvent(
 );
 
 void main() {
-  setUp(ensureGesturer);
+  setUp(ensureGestureBinding);
 
   test('Should recognize long press', () {
     LongPressGestureRecognizer longPress = new LongPressGestureRecognizer();
@@ -31,9 +31,9 @@ void main() {
 
     new FakeAsync().run((FakeAsync async) {
       longPress.addPointer(down);
-      Gesturer.instance.gestureArena.close(5);
+      GestureBinding.instance.gestureArena.close(5);
       expect(longPressRecognized, isFalse);
-      Gesturer.instance.pointerRouter.route(down);
+      GestureBinding.instance.pointerRouter.route(down);
       expect(longPressRecognized, isFalse);
       async.elapse(const Duration(milliseconds: 300));
       expect(longPressRecognized, isFalse);
@@ -54,13 +54,13 @@ void main() {
 
     new FakeAsync().run((FakeAsync async) {
       longPress.addPointer(down);
-      Gesturer.instance.gestureArena.close(5);
+      GestureBinding.instance.gestureArena.close(5);
       expect(longPressRecognized, isFalse);
-      Gesturer.instance.pointerRouter.route(down);
+      GestureBinding.instance.pointerRouter.route(down);
       expect(longPressRecognized, isFalse);
       async.elapse(const Duration(milliseconds: 300));
       expect(longPressRecognized, isFalse);
-      Gesturer.instance.pointerRouter.route(up);
+      GestureBinding.instance.pointerRouter.route(up);
       expect(longPressRecognized, isFalse);
       async.elapse(const Duration(seconds: 1));
       expect(longPressRecognized, isFalse);
@@ -86,10 +86,10 @@ void main() {
     new FakeAsync().run((FakeAsync async) {
       tap.addPointer(down);
       longPress.addPointer(down);
-      Gesturer.instance.gestureArena.close(5);
+      GestureBinding.instance.gestureArena.close(5);
       expect(tapDownRecognized, isFalse);
       expect(longPressRecognized, isFalse);
-      Gesturer.instance.pointerRouter.route(down);
+      GestureBinding.instance.pointerRouter.route(down);
       expect(tapDownRecognized, isFalse);
       expect(longPressRecognized, isFalse);
       async.elapse(const Duration(milliseconds: 300));

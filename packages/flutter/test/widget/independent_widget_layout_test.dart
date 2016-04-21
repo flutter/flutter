@@ -18,7 +18,7 @@ class OffscreenRenderView extends RenderView {
   void scheduleInitialFrame() {
     scheduleInitialLayout();
     scheduleInitialPaint(new TransformLayer(transform: new Matrix4.identity()));
-    // Don't call Scheduler.instance.ensureVisualUpdate()
+    // Don't call SchedulerBinding.instance.ensureVisualUpdate()
   }
 
   @override

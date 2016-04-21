@@ -17,7 +17,7 @@ typedef void TickerCallback(Duration elapsed);
 /// When created, a ticker is initially disabled. Call [start] to
 /// enable the ticker.
 ///
-/// See also [Scheduler.scheduleFrameCallback].
+/// See also [SchedulerBinding.scheduleFrameCallback].
 class Ticker {
   /// Creates a ticker that will call [onTick] once per frame while running.
   Ticker(TickerCallback onTick) : _onTick = onTick;
@@ -53,7 +53,7 @@ class Ticker {
     _startTime = null;
 
     if (_animationId != null) {
-      Scheduler.instance.cancelFrameCallbackWithId(_animationId);
+      SchedulerBinding.instance.cancelFrameCallbackWithId(_animationId);
       _animationId = null;
     }
 
@@ -84,6 +84,6 @@ class Ticker {
   void _scheduleTick({ bool rescheduling: false }) {
     assert(isTicking);
     assert(_animationId == null);
-    _animationId = Scheduler.instance.scheduleFrameCallback(_tick, rescheduling: rescheduling);
+    _animationId = SchedulerBinding.instance.scheduleFrameCallback(_tick, rescheduling: rescheduling);
   }
 }

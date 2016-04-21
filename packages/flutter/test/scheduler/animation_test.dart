@@ -6,10 +6,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:test/test.dart';
 
-class TestSchedulerBinding extends BindingBase with Scheduler { }
+class TestSchedulerBinding extends BindingBase with SchedulerBinding { }
 
 void main() {
-  Scheduler scheduler = new TestSchedulerBinding();
+  SchedulerBinding scheduler = new TestSchedulerBinding();
 
   test("Check for a time dilation being in effect", () {
     expect(timeDilation, equals(1.0));

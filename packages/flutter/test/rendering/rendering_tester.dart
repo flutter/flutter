@@ -30,7 +30,7 @@ enum EnginePhase {
   sendSemanticsTree
 }
 
-class TestRenderingFlutterBinding extends BindingBase with Scheduler, Services, Renderer, Gesturer {
+class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, ServicesBinding, RendererBinding, GestureBinding {
   @override
   void initRenderView() {
     if (renderView == null) {

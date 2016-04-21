@@ -30,14 +30,20 @@ typedef Future<Map<String, dynamic>> ServiceExtensionCallback(Map<String, String
 ///
 /// The top-most layer used to write the application will have a
 /// concrete class that inherits from BindingBase and uses all the
-/// various BindingBase mixins (such as [Services]). For example, the
+/// various BindingBase mixins (such as [ServicesBinding]). For example, the
 /// Widgets library in flutter introduces a binding called
-/// [WidgetFlutterBinding]. The relevant library defines how to create
+/// [WidgetsFlutterBinding]. The relevant library defines how to create
 /// the binding. It could be implied (for example,
-/// [WidgetFlutterBinding] is automatically started from [runApp]), or
+/// [WidgetsFlutterBinding] is automatically started from [runApp]), or
 /// the application might be required to explicitly call the
 /// constructor.
 abstract class BindingBase {
+  /// Default abstract constructor for bindings.
+  ///
+  /// First calls [initInstances] to have bindings initialize their
+  /// instance pointers and other state, then calls
+  /// [initServiceExtensions] to have bindings initialize their
+  /// observatory service extensions, if any.
   BindingBase() {
     assert(!_debugInitialized);
     initInstances();

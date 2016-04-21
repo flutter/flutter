@@ -14,6 +14,7 @@ import 'package:quiver/time.dart';
 import 'instrumentation.dart';
 
 /// Enumeration of possible phases to reach in pumpWidget.
+// TODO(ianh): Merge with identical code in the rendering test code.
 enum EnginePhase {
   layout,
   compositingBits,
@@ -23,7 +24,7 @@ enum EnginePhase {
   sendSemanticsTree
 }
 
-class _SteppedWidgetFlutterBinding extends WidgetFlutterBinding { // TODO(ianh): refactor so we're not extending a concrete binding
+class _SteppedWidgetFlutterBinding extends WidgetsFlutterBinding { // TODO(ianh): refactor so we're not extending a concrete binding
   _SteppedWidgetFlutterBinding(this.async);
 
   final FakeAsync async;
@@ -31,10 +32,10 @@ class _SteppedWidgetFlutterBinding extends WidgetFlutterBinding { // TODO(ianh):
   /// Creates and initializes the binding. This constructor is
   /// idempotent; calling it a second time will just return the
   /// previously-created instance.
-  static Widgeteer ensureInitialized(FakeAsync async) {
-    if (Widgeteer.instance == null)
+  static WidgetsBinding ensureInitialized(FakeAsync async) {
+    if (WidgetsBinding.instance == null)
       new _SteppedWidgetFlutterBinding(async);
-    return Widgeteer.instance;
+    return WidgetsBinding.instance;
   }
 
   EnginePhase phase = EnginePhase.sendSemanticsTree;
@@ -47,7 +48,7 @@ class _SteppedWidgetFlutterBinding extends WidgetFlutterBinding { // TODO(ianh):
     buildOwner.finalizeTree();
   }
 
-  // Cloned from Renderer.beginFrame() but with early-exit semantics.
+  // Cloned from RendererBinding.beginFrame() but with early-exit semantics.
   void _beginFrame() {
     assert(renderView != null);
     pipelineOwner.flushLayout();
@@ -125,7 +126,7 @@ class ElementTreeTester extends Instrumentation {
     if (duration != null)
       async.elapse(duration);
     if (binding is _SteppedWidgetFlutterBinding) {
-      // Some tests call WidgetFlutterBinding.ensureInitialized() manually, so
+      // Some tests call WidgetsFlutterBinding.ensureInitialized() manually, so
       // we can't actually be sure we have a stepped binding.
       _SteppedWidgetFlutterBinding steppedBinding = binding;
       steppedBinding.phase = phase ?? EnginePhase.sendSemanticsTree;
@@ -187,7 +188,7 @@ void testElementTree(callback(ElementTreeTester tester)) {
       callback(tester);
       runApp(new Container(key: new UniqueKey())); // Unmount any remaining widgets.
       async.flushMicrotasks();
-      assert(Scheduler.instance.debugAssertNoTransientCallbacks(
+      assert(SchedulerBinding.instance.debugAssertNoTransientCallbacks(
         'An animation is still running even after the widget tree was disposed.'
       ));
       assert(() {

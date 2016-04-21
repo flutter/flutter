@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// A task priority, as passed to [Scheduler.scheduleTask].
+/// A task priority, as passed to [SchedulerBinding.scheduleTask].
 class Priority {
   const Priority._(this._value);
 

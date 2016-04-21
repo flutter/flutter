@@ -4,9 +4,8 @@
 
 import 'dart:collection';
 
-import 'package:flutter/scheduler.dart';
-
 import 'basic.dart';
+import 'binding.dart';
 import 'framework.dart';
 import 'navigator.dart';
 import 'overlay.dart';
@@ -444,7 +443,7 @@ class HeroController extends NavigatorObserver {
   void _checkForHeroQuest() {
     if (_from != null && _to != null && _from != _to) {
       _to.offstage = _to.animation.status != AnimationStatus.completed;
-      Scheduler.instance.addPostFrameCallback(_updateQuest);
+      WidgetsBinding.instance.addPostFrameCallback(_updateQuest);
     }
   }
 

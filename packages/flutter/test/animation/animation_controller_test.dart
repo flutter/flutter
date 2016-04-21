@@ -3,13 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/animation.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 void main() {
   test("Can set value during status callback", () {
-    WidgetFlutterBinding.ensureInitialized();
+    WidgetsFlutterBinding.ensureInitialized();
     AnimationController controller = new AnimationController(
       duration: const Duration(milliseconds: 100)
     );
@@ -30,10 +29,10 @@ void main() {
     controller.forward();
     expect(didComplete, isFalse);
     expect(didDismiss, isFalse);
-    Scheduler.instance.handleBeginFrame(const Duration(seconds: 1));
+    WidgetsBinding.instance.handleBeginFrame(const Duration(seconds: 1));
     expect(didComplete, isFalse);
     expect(didDismiss, isFalse);
-    Scheduler.instance.handleBeginFrame(const Duration(seconds: 2));
+    WidgetsBinding.instance.handleBeginFrame(const Duration(seconds: 2));
     expect(didComplete, isTrue);
     expect(didDismiss, isTrue);
 
@@ -41,7 +40,7 @@ void main() {
   });
 
   test("Receives status callbacks for forward and reverse", () {
-    WidgetFlutterBinding.ensureInitialized();
+    WidgetsFlutterBinding.ensureInitialized();
     AnimationController controller = new AnimationController(
       duration: const Duration(milliseconds: 100)
     );
@@ -87,16 +86,16 @@ void main() {
     controller.reverse();
     log.clear();
 
-    Scheduler.instance.handleBeginFrame(const Duration(seconds: 10));
+    WidgetsBinding.instance.handleBeginFrame(const Duration(seconds: 10));
     expect(log, equals([]));
     expect(valueLog, equals([]));
-    Scheduler.instance.handleBeginFrame(const Duration(seconds: 20));
+    WidgetsBinding.instance.handleBeginFrame(const Duration(seconds: 20));
     expect(log, equals([]));
     expect(valueLog, equals([]));
-    Scheduler.instance.handleBeginFrame(const Duration(seconds: 30));
+    WidgetsBinding.instance.handleBeginFrame(const Duration(seconds: 30));
     expect(log, equals([]));
     expect(valueLog, equals([]));
-    Scheduler.instance.handleBeginFrame(const Duration(seconds: 40));
+    WidgetsBinding.instance.handleBeginFrame(const Duration(seconds: 40));
     expect(log, equals([]));
     expect(valueLog, equals([]));
 
@@ -104,7 +103,7 @@ void main() {
   });
 
   test("Forward and reverse from values", () {
-    WidgetFlutterBinding.ensureInitialized();
+    WidgetsFlutterBinding.ensureInitialized();
     AnimationController controller = new AnimationController(
       duration: const Duration(milliseconds: 100)
     );

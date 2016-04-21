@@ -5,13 +5,13 @@
 import 'dart:developer';
 import 'dart:ui' as ui show Scene, SceneBuilder, window;
 
-import 'package:flutter/scheduler.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
 import 'debug.dart';
 import 'layer.dart';
 import 'object.dart';
+import 'binding.dart';
 
 /// The layout constraints for the root render object.
 class ViewConfiguration {
@@ -73,7 +73,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   void scheduleInitialFrame() {
     scheduleInitialLayout();
     scheduleInitialPaint(new TransformLayer(transform: _logicalToDeviceTransform));
-    Scheduler.instance.ensureVisualUpdate();
+    RendererBinding.instance.ensureVisualUpdate();
   }
 
   // We never call layout() on this class, so this should never get

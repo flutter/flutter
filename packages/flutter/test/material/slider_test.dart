@@ -37,7 +37,7 @@ void main() {
       tester.tap(find.byKey(sliderKey));
       expect(value, equals(0.5));
       tester.pump(); // No animation should start.
-      expect(Scheduler.instance.transientCallbackCount, equals(0));
+      expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
     });
   });
 
@@ -78,13 +78,13 @@ void main() {
       expect(value, equals(80.0));
 
       tester.pump(); // Starts animation.
-      expect(Scheduler.instance.transientCallbackCount, greaterThan(0));
+      expect(SchedulerBinding.instance.transientCallbackCount, greaterThan(0));
       tester.pump(const Duration(milliseconds: 200));
       tester.pump(const Duration(milliseconds: 200));
       tester.pump(const Duration(milliseconds: 200));
       tester.pump(const Duration(milliseconds: 200));
       // Animation complete.
-      expect(Scheduler.instance.transientCallbackCount, equals(0));
+      expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
     });
   });
 }

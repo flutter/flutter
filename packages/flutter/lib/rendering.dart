@@ -14,9 +14,10 @@
 /// top of the rendering library, then you will want to have a binding
 /// (see [BindingBase]). You can use [RenderingFlutterBinding], or you
 /// can create your own binding. If you create your own binding, it
-/// needs to import at least [Scheduler], [Gesturer], [Services], and
-/// [Renderer]. The rendering library does not automatically create a
-/// binding, but relies on one being initialized with those features.
+/// needs to import at least [SchedulerBinding], [GestureBinding],
+/// [ServicesBinding], and [RendererBinding]. The rendering library
+/// does not automatically create a binding, but relies on one being
+/// initialized with those features.
 library rendering;
 
 export 'src/rendering/auto_layout.dart';

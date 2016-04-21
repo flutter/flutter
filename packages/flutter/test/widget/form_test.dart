@@ -26,7 +26,7 @@ class MockKeyboard implements mojom.Keyboard {
 }
 
 void main() {
-  WidgetFlutterBinding.ensureInitialized(); // for serviceMocker
+  WidgetsFlutterBinding.ensureInitialized(); // for serviceMocker
   MockKeyboard mockKeyboard = new MockKeyboard();
   serviceMocker.registerMockService(mojom.Keyboard.serviceName, mockKeyboard);
 

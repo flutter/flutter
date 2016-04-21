@@ -26,7 +26,7 @@ double timeDilation = 1.0;
 /// common time base.
 typedef void FrameCallback(Duration timeStamp);
 
-/// Signature for the [Scheduler.schedulingStrategy] callback. Invoked
+/// Signature for the [SchedulerBinding.schedulingStrategy] callback. Invoked
 /// whenever the system needs to decide whether a task at a given
 /// priority needs to be run.
 ///
@@ -34,7 +34,7 @@ typedef void FrameCallback(Duration timeStamp);
 /// at this time, false otherwise.
 ///
 /// See also [defaultSchedulingStrategy].
-typedef bool SchedulingStrategy({ int priority, Scheduler scheduler });
+typedef bool SchedulingStrategy({ int priority, SchedulerBinding scheduler });
 
 class _TaskEntry {
   const _TaskEntry(this.task, this.priority);
@@ -69,7 +69,7 @@ class _FrameCallbackEntry {
 /// * Non-rendering tasks, to be run between frames. These are given a
 ///   priority and are executed in priority order according to a
 ///   [schedulingStrategy].
-abstract class Scheduler extends BindingBase {
+abstract class SchedulerBinding extends BindingBase {
 
   @override
   void initInstances() {
@@ -78,9 +78,9 @@ abstract class Scheduler extends BindingBase {
     ui.window.onBeginFrame = handleBeginFrame;
   }
 
-  /// The current [Scheduler], if one has been created.
-  static Scheduler get instance => _instance;
-  static Scheduler _instance;
+  /// The current [SchedulerBinding], if one has been created.
+  static SchedulerBinding get instance => _instance;
+  static SchedulerBinding _instance;
 
   @override
   void initServiceExtensions() {
@@ -237,7 +237,7 @@ abstract class Scheduler extends BindingBase {
   /// you want printed when a transient callback is registered:
   ///
   /// ```dart
-  /// assert(Scheduler.instance.debugAssertNoTransientCallbacks(
+  /// assert(SchedulerBinding.instance.debugAssertNoTransientCallbacks(
   ///   'A leak of transient callbacks was detected while doing foo.'
   /// ));
   /// ```
@@ -398,12 +398,12 @@ abstract class Scheduler extends BindingBase {
   }
 }
 
-/// The default [SchedulingStrategy] for [Scheduler.schedulingStrategy].
+/// The default [SchedulingStrategy] for [SchedulerBinding.schedulingStrategy].
 ///
 /// If there are any frame callbacks registered, only runs tasks with
 /// a [Priority] of [Priority.animation] or higher. Otherwise, runs
 /// all tasks.
-bool defaultSchedulingStrategy({ int priority, Scheduler scheduler }) {
+bool defaultSchedulingStrategy({ int priority, SchedulerBinding scheduler }) {
   if (scheduler.transientCallbackCount > 0)
     return priority >= Priority.animation.value;
   return true;

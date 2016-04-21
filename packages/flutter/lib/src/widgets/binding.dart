@@ -17,7 +17,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 
 /// Interface for classes that register with the Widgets layer binding.
 ///
-/// See [Widgeteer.addObserver] and [Widgeteer.removeObserver].
+/// See [WidgetsBinding.addObserver] and [WidgetsBinding.removeObserver].
 abstract class WidgetsBindingObserver {
   /// Called when the system tells the app to pop the current route.
   /// For example, on Android, this is called when the user presses
@@ -48,7 +48,7 @@ abstract class WidgetsBindingObserver {
 }
 
 /// The glue between the widgets layer and the Flutter engine.
-abstract class Widgeteer implements Gesturer, Renderer {
+abstract class WidgetsBinding extends BindingBase implements GestureBinding, RendererBinding {
   @override
   void initInstances() {
     super.initInstances();
@@ -59,13 +59,13 @@ abstract class Widgeteer implements Gesturer, Renderer {
     ui.window.onAppLifecycleStateChanged = handleAppLifecycleStateChanged;
   }
 
-  /// The current [Widgeteer], if one has been created.
+  /// The current [WidgetsBinding], if one has been created.
   ///
   /// If you need the binding to be constructed before calling [runApp],
   /// you can ensure a Widget binding has been constructed by calling the
-  /// `WidgetFlutterBinding.ensureInitialized()` function.
-  static Widgeteer get instance => _instance;
-  static Widgeteer _instance;
+  /// `WidgetsFlutterBinding.ensureInitialized()` function.
+  static WidgetsBinding get instance => _instance;
+  static WidgetsBinding _instance;
 
   @override
   void initServiceExtensions() {
@@ -202,19 +202,19 @@ abstract class Widgeteer implements Gesturer, Renderer {
 
 /// Inflate the given widget and attach it to the screen.
 ///
-/// Initializes the binding using [WidgetFlutterBinding] if necessary.
+/// Initializes the binding using [WidgetsFlutterBinding] if necessary.
 void runApp(Widget app) {
-  WidgetFlutterBinding.ensureInitialized()._runApp(app);
+  WidgetsFlutterBinding.ensureInitialized()._runApp(app);
 }
 
 /// Print a string representation of the currently running app.
 void debugDumpApp() {
-  assert(Widgeteer.instance != null);
-  assert(Widgeteer.instance.renderViewElement != null);
+  assert(WidgetsBinding.instance != null);
+  assert(WidgetsBinding.instance.renderViewElement != null);
   String mode = 'RELEASE MODE';
   assert(() { mode = 'CHECKED MODE'; return true; });
-  debugPrint('${Widgeteer.instance.runtimeType} - $mode');
-  debugPrint(Widgeteer.instance.renderViewElement.toStringDeep());
+  debugPrint('${WidgetsBinding.instance.runtimeType} - $mode');
+  debugPrint(WidgetsBinding.instance.renderViewElement.toStringDeep());
 }
 
 /// This class provides a bridge from a RenderObject to an Element tree. The
@@ -269,7 +269,7 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
 /// In typical usage, it will be instantiated for a RenderObjectToWidgetAdapter
 /// whose container is the RenderView that connects to the Flutter engine. In
 /// this usage, it is normally instantiated by the bootstrapping logic in the
-/// WidgetFlutterBinding singleton created by runApp().
+/// WidgetsFlutterBinding singleton created by runApp().
 class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObjectElement {
   RenderObjectToWidgetElement(RenderObjectToWidgetAdapter<T> widget) : super(widget);
 
@@ -323,16 +323,16 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
 
 /// A concrete binding for applications based on the Widgets framework.
 /// This is the glue that binds the framework to the Flutter engine.
-class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, Services, Renderer, Widgeteer {
-  /// Creates and initializes the WidgetFlutterBinding. This function
+class WidgetsFlutterBinding extends BindingBase with SchedulerBinding, GestureBinding, ServicesBinding, RendererBinding, WidgetsBinding {
+  /// Creates and initializes the WidgetsFlutterBinding. This function
   /// is idempotent; calling it a second time will just return the
   /// previously-created instance.
   ///
   /// You only need to call this method if you need the binding to be
   /// initialized before calling [runApp].
-  static WidgetFlutterBinding ensureInitialized() {
-    if (Widgeteer.instance == null)
-      new WidgetFlutterBinding();
-    return Widgeteer.instance;
+  static WidgetsFlutterBinding ensureInitialized() {
+    if (WidgetsBinding.instance == null)
+      new WidgetsFlutterBinding();
+    return WidgetsBinding.instance;
   }
 }

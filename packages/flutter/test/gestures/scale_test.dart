@@ -9,11 +9,11 @@ import 'package:test/test.dart';
 import 'gesture_tester.dart';
 
 void main() {
-  setUp(ensureGesturer);
+  setUp(ensureGestureBinding);
 
   test('Should recognize scale gestures', () {
-    GestureArenaManager gestureArena = Gesturer.instance.gestureArena;
-    PointerRouter pointerRouter = Gesturer.instance.pointerRouter;
+    GestureArenaManager gestureArena = GestureBinding.instance.gestureArena;
+    PointerRouter pointerRouter = GestureBinding.instance.pointerRouter;
     ScaleGestureRecognizer scale = new ScaleGestureRecognizer();
     TapGestureRecognizer tap = new TapGestureRecognizer();
 

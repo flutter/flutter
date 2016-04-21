@@ -339,7 +339,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       // tree is different from the owner assigned to the renderer instance.
       // Once elements have a notion of owners this assertion can be written
       // more clearly.
-      if (!Renderer.instance.pipelineOwner.debugDoingLayout) {
+      if (!RendererBinding.instance.pipelineOwner.debugDoingLayout) {
         throw new FlutterError(
           'Unexpected call to replaceGestureRecognizers() method of RawGestureDetectorState.\n'
           'The replaceGestureRecognizers() method can only be called during the layout phase. '

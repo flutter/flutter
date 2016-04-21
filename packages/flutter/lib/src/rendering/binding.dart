@@ -20,7 +20,7 @@ import 'semantics.dart';
 export 'package:flutter/gestures.dart' show HitTestResult;
 
 /// The glue between the render tree and the Flutter engine.
-abstract class Renderer implements Scheduler, Services, HitTestable {
+abstract class RendererBinding extends BindingBase implements SchedulerBinding, ServicesBinding, HitTestable {
   @override
   void initInstances() {
     super.initInstances();
@@ -32,9 +32,9 @@ abstract class Renderer implements Scheduler, Services, HitTestable {
     addPersistentFrameCallback(_handlePersistentFrameCallback);
   }
 
-  /// The current [Renderer], if one has been created.
-  static Renderer get instance => _instance;
-  static Renderer _instance;
+  /// The current [RendererBinding], if one has been created.
+  static RendererBinding get instance => _instance;
+  static RendererBinding _instance;
 
   @override
   void initServiceExtensions() {
@@ -167,19 +167,19 @@ abstract class Renderer implements Scheduler, Services, HitTestable {
 
 /// Prints a textual representation of the entire render tree.
 void debugDumpRenderTree() {
-  debugPrint(Renderer.instance?.renderView?.toStringDeep());
+  debugPrint(RendererBinding.instance?.renderView?.toStringDeep());
 }
 
 /// Prints a textual representation of the entire layer tree.
 void debugDumpLayerTree() {
-  debugPrint(Renderer.instance?.renderView?.layer?.toStringDeep());
+  debugPrint(RendererBinding.instance?.renderView?.layer?.toStringDeep());
 }
 
 /// Prints a textual representation of the entire semantics tree.
 /// This will only work if there is a semantics client attached.
 /// Otherwise, the tree is empty and this will print "null".
 void debugDumpSemanticsTree() {
-  debugPrint(Renderer.instance?.renderView?.debugSemantics?.toStringDeep() ?? 'Semantics not collected.');
+  debugPrint(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep() ?? 'Semantics not collected.');
 }
 
 /// A concrete binding for applications that use the Rendering framework
@@ -191,7 +191,7 @@ void debugDumpSemanticsTree() {
 /// that layer's binding.
 ///
 /// See also [BindingBase].
-class RenderingFlutterBinding extends BindingBase with Scheduler, Gesturer, Services, Renderer {
+class RenderingFlutterBinding extends BindingBase with SchedulerBinding, GestureBinding, ServicesBinding, RendererBinding {
   RenderingFlutterBinding({ RenderBox root }) {
     assert(renderView != null);
     renderView.child = root;

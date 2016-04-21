@@ -89,7 +89,7 @@ void rotate(Duration timeStamp) {
 }
 
 void main() {
-  Widgeteer binding = WidgetFlutterBinding.ensureInitialized();
+  WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
   RenderProxyBox proxy = new RenderProxyBox();
   attachWidgetTreeToRenderTree(proxy);
 

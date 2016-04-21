@@ -17,7 +17,7 @@ class TestGestureArenaMember extends GestureArenaMember {
 }
 
 void main() {
-  setUp(ensureGesturer);
+  setUp(ensureGestureBinding);
 
   // Down/up pair 1: normal tap sequence
   const PointerDownEvent down1 = const PointerDownEvent(
@@ -66,14 +66,14 @@ void main() {
     };
 
     tap.addPointer(down1);
-    Gesturer.instance.gestureArena.close(1);
+    GestureBinding.instance.gestureArena.close(1);
     expect(tapRecognized, isFalse);
-    Gesturer.instance.pointerRouter.route(down1);
+    GestureBinding.instance.pointerRouter.route(down1);
     expect(tapRecognized, isFalse);
 
-    Gesturer.instance.pointerRouter.route(up1);
+    GestureBinding.instance.pointerRouter.route(up1);
     expect(tapRecognized, isTrue);
-    Gesturer.instance.gestureArena.sweep(1);
+    GestureBinding.instance.gestureArena.sweep(1);
     expect(tapRecognized, isTrue);
 
     tap.dispose();
@@ -88,25 +88,25 @@ void main() {
     };
 
     tap.addPointer(down1);
-    Gesturer.instance.gestureArena.close(1);
+    GestureBinding.instance.gestureArena.close(1);
     expect(tapsRecognized, 0);
-    Gesturer.instance.pointerRouter.route(down1);
+    GestureBinding.instance.pointerRouter.route(down1);
     expect(tapsRecognized, 0);
 
-    Gesturer.instance.pointerRouter.route(up1);
+    GestureBinding.instance.pointerRouter.route(up1);
     expect(tapsRecognized, 1);
-    Gesturer.instance.gestureArena.sweep(1);
+    GestureBinding.instance.gestureArena.sweep(1);
     expect(tapsRecognized, 1);
 
     tap.addPointer(down1);
-    Gesturer.instance.gestureArena.close(1);
+    GestureBinding.instance.gestureArena.close(1);
     expect(tapsRecognized, 1);
-    Gesturer.instance.pointerRouter.route(down1);
+    GestureBinding.instance.pointerRouter.route(down1);
     expect(tapsRecognized, 1);
 
-    Gesturer.instance.pointerRouter.route(up1);
+    GestureBinding.instance.pointerRouter.route(up1);
     expect(tapsRecognized, 2);
-    Gesturer.instance.gestureArena.sweep(1);
+    GestureBinding.instance.gestureArena.sweep(1);
     expect(tapsRecognized, 2);
 
     tap.dispose();
@@ -121,26 +121,26 @@ void main() {
     };
 
     tap.addPointer(down1);
-    Gesturer.instance.gestureArena.close(1);
+    GestureBinding.instance.gestureArena.close(1);
     expect(tapsRecognized, 0);
-    Gesturer.instance.pointerRouter.route(down1);
+    GestureBinding.instance.pointerRouter.route(down1);
     expect(tapsRecognized, 0);
 
     tap.addPointer(down2);
-    Gesturer.instance.gestureArena.close(2);
+    GestureBinding.instance.gestureArena.close(2);
     expect(tapsRecognized, 0);
-    Gesturer.instance.pointerRouter.route(down1);
+    GestureBinding.instance.pointerRouter.route(down1);
     expect(tapsRecognized, 0);
 
 
-    Gesturer.instance.pointerRouter.route(up1);
+    GestureBinding.instance.pointerRouter.route(up1);
     expect(tapsRecognized, 1);
-    Gesturer.instance.gestureArena.sweep(1);
+    GestureBinding.instance.gestureArena.sweep(1);
     expect(tapsRecognized, 1);
 
-    Gesturer.instance.pointerRouter.route(up2);
+    GestureBinding.instance.pointerRouter.route(up2);
     expect(tapsRecognized, 1);
-    Gesturer.instance.gestureArena.sweep(2);
+    GestureBinding.instance.gestureArena.sweep(2);
     expect(tapsRecognized, 1);
 
     tap.dispose();
@@ -159,20 +159,20 @@ void main() {
     };
 
     tap.addPointer(down3);
-    Gesturer.instance.gestureArena.close(3);
+    GestureBinding.instance.gestureArena.close(3);
     expect(tapRecognized, isFalse);
     expect(tapCanceled, isFalse);
-    Gesturer.instance.pointerRouter.route(down3);
+    GestureBinding.instance.pointerRouter.route(down3);
     expect(tapRecognized, isFalse);
     expect(tapCanceled, isFalse);
 
-    Gesturer.instance.pointerRouter.route(move3);
+    GestureBinding.instance.pointerRouter.route(move3);
     expect(tapRecognized, isFalse);
     expect(tapCanceled, isTrue);
-    Gesturer.instance.pointerRouter.route(up3);
+    GestureBinding.instance.pointerRouter.route(up3);
     expect(tapRecognized, isFalse);
     expect(tapCanceled, isTrue);
-    Gesturer.instance.gestureArena.sweep(3);
+    GestureBinding.instance.gestureArena.sweep(3);
     expect(tapRecognized, isFalse);
     expect(tapCanceled, isTrue);
 
@@ -189,16 +189,16 @@ void main() {
 
     new FakeAsync().run((FakeAsync async) {
       tap.addPointer(down1);
-      Gesturer.instance.gestureArena.close(1);
+      GestureBinding.instance.gestureArena.close(1);
       expect(tapRecognized, isFalse);
-      Gesturer.instance.pointerRouter.route(down1);
+      GestureBinding.instance.pointerRouter.route(down1);
       expect(tapRecognized, isFalse);
 
       async.elapse(new Duration(milliseconds: 500));
       expect(tapRecognized, isFalse);
-      Gesturer.instance.pointerRouter.route(up1);
+      GestureBinding.instance.pointerRouter.route(up1);
       expect(tapRecognized, isTrue);
-      Gesturer.instance.gestureArena.sweep(1);
+      GestureBinding.instance.gestureArena.sweep(1);
       expect(tapRecognized, isTrue);
     });
 
@@ -215,16 +215,16 @@ void main() {
 
     tap.addPointer(down1);
     TestGestureArenaMember member = new TestGestureArenaMember();
-    GestureArenaEntry entry = Gesturer.instance.gestureArena.add(1, member);
-    Gesturer.instance.gestureArena.hold(1);
-    Gesturer.instance.gestureArena.close(1);
+    GestureArenaEntry entry = GestureBinding.instance.gestureArena.add(1, member);
+    GestureBinding.instance.gestureArena.hold(1);
+    GestureBinding.instance.gestureArena.close(1);
     expect(tapRecognized, isFalse);
-    Gesturer.instance.pointerRouter.route(down1);
+    GestureBinding.instance.pointerRouter.route(down1);
     expect(tapRecognized, isFalse);
 
-    Gesturer.instance.pointerRouter.route(up1);
+    GestureBinding.instance.pointerRouter.route(up1);
     expect(tapRecognized, isFalse);
-    Gesturer.instance.gestureArena.sweep(1);
+    GestureBinding.instance.gestureArena.sweep(1);
     expect(tapRecognized, isFalse);
 
     entry.resolve(GestureDisposition.accepted);
@@ -243,16 +243,16 @@ void main() {
 
     tap.addPointer(down1);
     TestGestureArenaMember member = new TestGestureArenaMember();
-    GestureArenaEntry entry = Gesturer.instance.gestureArena.add(1, member);
-    Gesturer.instance.gestureArena.hold(1);
-    Gesturer.instance.gestureArena.close(1);
+    GestureArenaEntry entry = GestureBinding.instance.gestureArena.add(1, member);
+    GestureBinding.instance.gestureArena.hold(1);
+    GestureBinding.instance.gestureArena.close(1);
     expect(tapRecognized, isFalse);
-    Gesturer.instance.pointerRouter.route(down1);
+    GestureBinding.instance.pointerRouter.route(down1);
     expect(tapRecognized, isFalse);
 
-    Gesturer.instance.pointerRouter.route(up1);
+    GestureBinding.instance.pointerRouter.route(up1);
     expect(tapRecognized, isFalse);
-    Gesturer.instance.gestureArena.sweep(1);
+    GestureBinding.instance.gestureArena.sweep(1);
     expect(tapRecognized, isFalse);
 
     entry.resolve(GestureDisposition.rejected);
