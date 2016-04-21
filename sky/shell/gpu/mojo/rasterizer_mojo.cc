@@ -132,6 +132,7 @@ void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
   DrawCallback* context = new DrawCallback();
   *context = callback;
   TRACE_EVENT_ASYNC_BEGIN0("flutter", "MGLEcho", context);
+  mojo::GLContext::Scope scope(gl_state_->gl_context);
   MGLEcho(DidEcho, context);
 }
 
