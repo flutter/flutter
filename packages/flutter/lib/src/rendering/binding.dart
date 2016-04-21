@@ -20,9 +20,7 @@ import 'semantics.dart';
 export 'package:flutter/gestures.dart' show HitTestResult;
 
 /// The glue between the render tree and the Flutter engine.
-abstract class Renderer extends Object with Scheduler, Services
-  implements HitTestable {
-
+abstract class Renderer implements Scheduler, Services, HitTestable {
   @override
   void initInstances() {
     super.initInstances();
@@ -73,6 +71,12 @@ abstract class Renderer extends Object with Scheduler, Services
     });
   }
 
+  /// Creates a [RenderView] object to be the root of the
+  /// [RenderObject] rendering tree, and initializes it so that it
+  /// will be rendered when the engine is next ready to display a
+  /// frame.
+  ///
+  /// Called automatically when the binding is created.
   void initRenderView() {
     if (renderView == null) {
       renderView = new RenderView();
@@ -88,6 +92,8 @@ abstract class Renderer extends Object with Scheduler, Services
   /// The render tree that's attached to the output surface.
   RenderView get renderView => _renderView;
   RenderView _renderView;
+  /// Sets the given [RenderView] object (which must not be null), and its tree, to
+  /// be the new render tree to display. The previous tree, if any, is detached.
   void set renderView(RenderView value) {
     assert(value != null);
     if (_renderView == value)
@@ -98,11 +104,17 @@ abstract class Renderer extends Object with Scheduler, Services
     _renderView.attach(pipelineOwner);
   }
 
+  /// Invoked when the system metrics change.
+  ///
+  /// See [ui.window.onMetricsChanged].
   void handleMetricsChanged() {
     assert(renderView != null);
     renderView.configuration = new ViewConfiguration(size: ui.window.size);
   }
 
+  /// Prepares the rendering library to handle semantics requests from the engine.
+  ///
+  /// Called automatically when the binding is created.
   void initSemantics() {
     SemanticsNode.onSemanticsEnabled = renderView.scheduleInitialSemantics;
     shell.provideService(mojom.SemanticsServer.serviceName, (core.MojoMessagePipeEndpoint endpoint) {
@@ -116,6 +128,8 @@ abstract class Renderer extends Object with Scheduler, Services
   }
 
   /// Pump the rendering pipeline to generate a frame.
+  ///
+  /// Called automatically by the engine when it is time to lay out and paint a frame.
   void beginFrame() {
     assert(renderView != null);
     pipelineOwner.flushLayout();

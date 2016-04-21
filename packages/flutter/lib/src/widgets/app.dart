@@ -98,7 +98,7 @@ class WidgetsApp extends StatefulWidget {
   WidgetsAppState<WidgetsApp> createState() => new WidgetsAppState<WidgetsApp>();
 }
 
-class WidgetsAppState<T extends WidgetsApp> extends State<T> implements BindingObserver {
+class WidgetsAppState<T extends WidgetsApp> extends State<T> implements WidgetsBindingObserver {
 
   GlobalObjectKey _navigator;
 
@@ -109,12 +109,12 @@ class WidgetsAppState<T extends WidgetsApp> extends State<T> implements BindingO
     super.initState();
     _navigator = new GlobalObjectKey(this);
     didChangeLocale(ui.window.locale);
-    WidgetFlutterBinding.instance.addObserver(this);
+    Widgeteer.instance.addObserver(this);
   }
 
   @override
   void dispose() {
-    WidgetFlutterBinding.instance.removeObserver(this);
+    Widgeteer.instance.removeObserver(this);
     super.dispose();
   }
 

@@ -417,7 +417,7 @@ class _DragAvatar<T> extends Drag {
     _lastOffset = globalPosition - dragStartPoint;
     _entry.markNeedsBuild();
     HitTestResult result = new HitTestResult();
-    WidgetFlutterBinding.instance.hitTest(result, globalPosition + feedbackOffset);
+    Widgeteer.instance.hitTest(result, globalPosition + feedbackOffset);
 
     List<_DragTargetState<T>> targets = _getDragTargets(result.path).toList();
 

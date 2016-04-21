@@ -23,18 +23,18 @@ enum EnginePhase {
   sendSemanticsTree
 }
 
-class _SteppedWidgetFlutterBinding extends WidgetFlutterBinding {
-  _SteppedWidgetFlutterBinding._(this.async);
+class _SteppedWidgetFlutterBinding extends WidgetFlutterBinding { // TODO(ianh): refactor so we're not extending a concrete binding
+  _SteppedWidgetFlutterBinding(this.async);
 
   final FakeAsync async;
 
   /// Creates and initializes the binding. This constructor is
   /// idempotent; calling it a second time will just return the
   /// previously-created instance.
-  static WidgetFlutterBinding ensureInitialized(FakeAsync async) {
-    if (WidgetFlutterBinding.instance == null)
-      new _SteppedWidgetFlutterBinding._(async);
-    return WidgetFlutterBinding.instance;
+  static Widgeteer ensureInitialized(FakeAsync async) {
+    if (Widgeteer.instance == null)
+      new _SteppedWidgetFlutterBinding(async);
+    return Widgeteer.instance;
   }
 
   EnginePhase phase = EnginePhase.sendSemanticsTree;

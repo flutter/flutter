@@ -27,14 +27,14 @@ void main() {
     appState = tester.stateOf(find.byType(stocks.StocksApp));
   });
 
-  WidgetFlutterBinding binding = WidgetFlutterBinding.instance;
+  BuildOwner buildOwner = Widgeteer.instance.buildOwner;
 
   Stopwatch watch = new Stopwatch()
     ..start();
 
   for (int i = 0; i < _kNumberOfIterations || _kRunForever; ++i) {
     appState.setState(_doNothing);
-    binding.buildOwner.buildDirtyElements();
+    buildOwner.buildDirtyElements();
   }
 
   watch.stop();

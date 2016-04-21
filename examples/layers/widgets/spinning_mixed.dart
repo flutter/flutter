@@ -89,7 +89,7 @@ void rotate(Duration timeStamp) {
 }
 
 void main() {
-  WidgetFlutterBinding.ensureInitialized();
+  Widgeteer binding = WidgetFlutterBinding.ensureInitialized();
   RenderProxyBox proxy = new RenderProxyBox();
   attachWidgetTreeToRenderTree(proxy);
 
@@ -101,6 +101,6 @@ void main() {
   transformBox = new RenderTransform(child: flexRoot, transform: new Matrix4.identity());
   RenderPadding root = new RenderPadding(padding: new EdgeInsets.all(80.0), child: transformBox);
 
-  WidgetFlutterBinding.instance.renderView.child = root;
-  WidgetFlutterBinding.instance.addPersistentFrameCallback(rotate);
+  binding.renderView.child = root;
+  binding.addPersistentFrameCallback(rotate);
 }

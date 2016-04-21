@@ -17,10 +17,10 @@ typedef Point SizeToPointFunction(Size size);
 /// This class provides hooks for accessing the rendering tree and dispatching
 /// fake tap/drag/etc. events.
 class Instrumentation {
-  Instrumentation({ WidgetFlutterBinding binding })
+  Instrumentation({ Widgeteer binding })
     : this.binding = binding ?? WidgetFlutterBinding.ensureInitialized();
 
-  final WidgetFlutterBinding binding;
+  final Widgeteer binding;
 
   /// Returns a list of all the [Layer] objects in the rendering.
   List<Layer> get layers => _layers(binding.renderView.layer);

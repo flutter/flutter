@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:quiver/testing/async.dart';
 import 'package:test/test.dart';
 
-import 'element_tree_tester.dart';
+import 'binding.dart';
 import 'test_pointer.dart';
 
 /// Runs the [callback] inside the Flutter test environment.
@@ -57,7 +57,7 @@ class WidgetTester {
   /// Exposes the [Element] tree created from widgets.
   final ElementTreeTester elementTreeTester;
 
-  WidgetFlutterBinding get binding => elementTreeTester.binding;
+  Widgeteer get binding => elementTreeTester.binding;
 
   /// Renders the UI from the given [widget].
   ///
