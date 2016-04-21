@@ -45,8 +45,7 @@ class OuterContainerState extends State<OuterContainer> {
 }
 
 void main() {
-  test('resync stateful widget', () {
-    testElementTree((ElementTreeTester tester) {
+  testWidgets('resync stateful widget', (WidgetTester tester) {
       Key innerKey = new Key('inner');
       Key outerKey = new Key('outer');
 
@@ -57,7 +56,7 @@ void main() {
 
       tester.pumpWidget(outer1);
 
-      StatefulElement innerElement = tester.findElementByKey(innerKey);
+      StatefulElement innerElement = tester.element(find.byKey(innerKey));
       InnerWidgetState innerElementState = innerElement.state;
       expect(innerElementState.config, equals(inner1));
       expect(innerElementState._didInitState, isTrue);
@@ -68,22 +67,21 @@ void main() {
 
       tester.pumpWidget(outer2);
 
-      expect(tester.findElementByKey(innerKey), equals(innerElement));
+      expect(tester.element(find.byKey(innerKey)), equals(innerElement));
       expect(innerElement.state, equals(innerElementState));
 
       expect(innerElementState.config, equals(inner2));
       expect(innerElementState._didInitState, isTrue);
       expect(innerElement.renderObject.attached, isTrue);
 
-      StatefulElement outerElement = tester.findElementByKey(outerKey);
+      StatefulElement outerElement = tester.element(find.byKey(outerKey));
       expect(outerElement.state.config, equals(outer2));
       outerElement.state.setState(() {});
       tester.pump();
 
-      expect(tester.findElementByKey(innerKey), equals(innerElement));
+      expect(tester.element(find.byKey(innerKey)), equals(innerElement));
       expect(innerElement.state, equals(innerElementState));
       expect(innerElementState.config, equals(inner2));
       expect(innerElement.renderObject.attached, isTrue);
-    });
   });
 }

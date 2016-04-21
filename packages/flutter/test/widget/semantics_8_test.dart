@@ -10,8 +10,7 @@ import 'package:test/test.dart';
 import 'test_semantics.dart';
 
 void main() {
-  test('Semantics 8 - Merging with reset', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Semantics 8 - Merging with reset', (WidgetTester tester) {
       TestSemanticsListener client = new TestSemanticsListener();
 
       tester.pumpWidget(
@@ -91,6 +90,5 @@ void main() {
       expect(client.updates[1], isNull);
       client.updates.clear();
 
-    });
   });
 }

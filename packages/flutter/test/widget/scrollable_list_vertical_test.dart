@@ -21,8 +21,7 @@ Widget buildFrame() {
 }
 
 void main() {
-  test('Drag vertically', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Drag vertically', (WidgetTester tester) {
       tester.pumpWidget(buildFrame());
 
       tester.pump();
@@ -32,12 +31,12 @@ void main() {
       //   -10..280 = 1
       //   280..570 = 2
       //   570..860 = 3
-      expect(tester, doesNotHaveWidget(find.text('0')));
-      expect(tester, hasWidget(find.text('1')));
-      expect(tester, hasWidget(find.text('2')));
-      expect(tester, hasWidget(find.text('3')));
-      expect(tester, doesNotHaveWidget(find.text('4')));
-      expect(tester, doesNotHaveWidget(find.text('5')));
+      expect(find.text('0'), findsNothing);
+      expect(find.text('1'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
+      expect(find.text('4'), findsNothing);
+      expect(find.text('5'), findsNothing);
 
       tester.pump();
       tester.scroll(find.text('2'), const Offset(0.0, -290.0));
@@ -46,28 +45,26 @@ void main() {
       //   -10..280 = 2
       //   280..570 = 3
       //   570..860 = 4
-      expect(tester, doesNotHaveWidget(find.text('0')));
-      expect(tester, doesNotHaveWidget(find.text('1')));
-      expect(tester, hasWidget(find.text('2')));
-      expect(tester, hasWidget(find.text('3')));
-      expect(tester, hasWidget(find.text('4')));
-      expect(tester, doesNotHaveWidget(find.text('5')));
+      expect(find.text('0'), findsNothing);
+      expect(find.text('1'), findsNothing);
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
+      expect(find.text('4'), findsOneWidget);
+      expect(find.text('5'), findsNothing);
 
       tester.pump();
       tester.scroll(find.text('3'), const Offset(-300.0, 0.0));
       tester.pump();
       // nothing should have changed
-      expect(tester, doesNotHaveWidget(find.text('0')));
-      expect(tester, doesNotHaveWidget(find.text('1')));
-      expect(tester, hasWidget(find.text('2')));
-      expect(tester, hasWidget(find.text('3')));
-      expect(tester, hasWidget(find.text('4')));
-      expect(tester, doesNotHaveWidget(find.text('5')));
-    });
+      expect(find.text('0'), findsNothing);
+      expect(find.text('1'), findsNothing);
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
+      expect(find.text('4'), findsOneWidget);
+      expect(find.text('5'), findsNothing);
   });
 
-  test('Drag vertically', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Drag vertically', (WidgetTester tester) {
       tester.pumpWidget(
         new ScrollableList(
           itemExtent: 290.0,
@@ -85,12 +82,12 @@ void main() {
       // screen is 600px high, and has the following items:
       //   250..540 = 0
       //   540..830 = 1
-      expect(tester, hasWidget(find.text('0')));
-      expect(tester, hasWidget(find.text('1')));
-      expect(tester, doesNotHaveWidget(find.text('2')));
-      expect(tester, doesNotHaveWidget(find.text('3')));
-      expect(tester, doesNotHaveWidget(find.text('4')));
-      expect(tester, doesNotHaveWidget(find.text('5')));
+      expect(find.text('0'), findsOneWidget);
+      expect(find.text('1'), findsOneWidget);
+      expect(find.text('2'), findsNothing);
+      expect(find.text('3'), findsNothing);
+      expect(find.text('4'), findsNothing);
+      expect(find.text('5'), findsNothing);
 
       tester.scroll(find.text('0'), const Offset(0.0, -300.0));
       tester.pump();
@@ -98,12 +95,11 @@ void main() {
       //   -50..240 = 0
       //   240..530 = 1
       //   530..820 = 2
-      expect(tester, hasWidget(find.text('0')));
-      expect(tester, hasWidget(find.text('1')));
-      expect(tester, hasWidget(find.text('2')));
-      expect(tester, doesNotHaveWidget(find.text('3')));
-      expect(tester, doesNotHaveWidget(find.text('4')));
-      expect(tester, doesNotHaveWidget(find.text('5')));
-    });
+      expect(find.text('0'), findsOneWidget);
+      expect(find.text('1'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('3'), findsNothing);
+      expect(find.text('4'), findsNothing);
+      expect(find.text('5'), findsNothing);
   });
 }

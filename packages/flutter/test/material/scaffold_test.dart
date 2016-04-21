@@ -8,15 +8,14 @@ import 'package:flutter/rendering.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Scaffold control test', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Scaffold control test', (WidgetTester tester) {
       Key bodyKey = new UniqueKey();
       tester.pumpWidget(new Scaffold(
         appBar: new AppBar(title: new Text('Title')),
         body: new Container(key: bodyKey)
       ));
 
-      RenderBox bodyBox = tester.renderObjectOf(find.byKey(bodyKey));
+      RenderBox bodyBox = tester.renderObject(find.byKey(bodyKey));
       expect(bodyBox.size, equals(new Size(800.0, 544.0)));
 
       tester.pumpWidget(new MediaQuery(
@@ -27,7 +26,7 @@ void main() {
         )
       ));
 
-      bodyBox = tester.renderObjectOf(find.byKey(bodyKey));
+      bodyBox = tester.renderObject(find.byKey(bodyKey));
       expect(bodyBox.size, equals(new Size(800.0, 444.0)));
 
       tester.pumpWidget(new MediaQuery(
@@ -39,8 +38,7 @@ void main() {
         )
       ));
 
-      bodyBox = tester.renderObjectOf(find.byKey(bodyKey));
+      bodyBox = tester.renderObject(find.byKey(bodyKey));
       expect(bodyBox.size, equals(new Size(800.0, 544.0)));
-    });
   });
 }

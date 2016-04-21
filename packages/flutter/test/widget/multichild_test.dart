@@ -10,7 +10,7 @@ import 'package:test/test.dart';
 import 'test_widgets.dart';
 
 void checkTree(WidgetTester tester, List<BoxDecoration> expectedDecorations) {
-  MultiChildRenderObjectElement element = tester.elementOf(find.byElementPredicate(
+  MultiChildRenderObjectElement element = tester.element(find.byElementPredicate(
     (Element element) => element is MultiChildRenderObjectElement
   ));
   expect(element, isNotNull);
@@ -33,8 +33,7 @@ void checkTree(WidgetTester tester, List<BoxDecoration> expectedDecorations) {
 }
 
 void main() {
-  test('MultiChildRenderObjectElement control test', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('MultiChildRenderObjectElement control test', (WidgetTester tester) {
 
       tester.pumpWidget(
         new Stack(
@@ -111,11 +110,9 @@ void main() {
 
       checkTree(tester, <BoxDecoration>[]);
 
-    });
   });
 
-  test('MultiChildRenderObjectElement with stateless widgets', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('MultiChildRenderObjectElement with stateless widgets', (WidgetTester tester) {
 
       tester.pumpWidget(
         new Stack(
@@ -232,11 +229,9 @@ void main() {
       );
 
       checkTree(tester, <BoxDecoration>[]);
-    });
   });
 
-  test('MultiChildRenderObjectElement with stateful widgets', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('MultiChildRenderObjectElement with stateful widgets', (WidgetTester tester) {
       tester.pumpWidget(
         new Stack(
           children: <Widget>[
@@ -331,6 +326,5 @@ void main() {
       );
 
       checkTree(tester, <BoxDecoration>[kBoxDecorationB, kBoxDecorationC]);
-    });
   });
 }

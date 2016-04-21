@@ -10,7 +10,6 @@ const int _kNumberOfIterations = 50000;
 const bool _kRunForever = false;
 
 void main() {
-  assert(false); // Don't run in checked mode
   stock_data.StockDataFetcher.actuallyFetchData = false;
 
   const Duration _kAnimationDuration = const Duration(milliseconds: 200);
@@ -21,7 +20,7 @@ void main() {
   Stopwatch watch = new Stopwatch()
     ..start();
 
-  testWidgets((WidgetTester tester) {
+  benchmarkWidgets((WidgetTester tester) {
     stocks.main();
     tester.pump(); // Start startup animation
     tester.pump(const Duration(seconds: 1)); // Complete startup animation

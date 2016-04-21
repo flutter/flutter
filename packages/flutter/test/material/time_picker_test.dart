@@ -7,8 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('tap-select an hour', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('tap-select an hour', (WidgetTester tester) {
       Key _timePickerKey = new UniqueKey();
       TimeOfDay _selectedTime = const TimeOfDay(hour: 7, minute: 0);
 
@@ -56,11 +55,9 @@ void main() {
 
       tester.pump(const Duration(seconds: 1)); // Finish gesture animation.
       tester.pump(const Duration(seconds: 1)); // Finish settling animation.
-    });
   });
 
-  test('drag-select an hour', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('drag-select an hour', (WidgetTester tester) {
       Key _timePickerKey = new UniqueKey();
       TimeOfDay _selectedTime = const TimeOfDay(hour: 7, minute: 0);
 
@@ -121,6 +118,5 @@ void main() {
       expect(_selectedTime.hour, equals(9));
       tester.pump(const Duration(seconds: 1));
       tester.pump(const Duration(seconds: 1));
-    });
   });
 }

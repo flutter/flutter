@@ -9,8 +9,7 @@ import 'package:test/test.dart';
 
 void main() {
 
-  test('Can animate position data', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Can animate position data', (WidgetTester tester) {
 
       final RelativeRectTween rect = new RelativeRectTween(
         begin: new RelativeRect.fromRect(
@@ -71,7 +70,6 @@ void main() {
       expect(positions, equals([const Offset(10.0, 10.0), const Offset(10.0, 10.0), const Offset(17.0, 17.0), const Offset(24.0, 24.0), const Offset(45.0, 45.0), const Offset(80.0, 80.0)]));
 
       controller.stop();
-    });
   });
 
 }

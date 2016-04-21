@@ -7,16 +7,15 @@ import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Scroll flings twice in a row does not crash', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Scroll flings twice in a row does not crash', (WidgetTester tester) {
       tester.pumpWidget(new Block(
         children: <Widget>[
-          new Container(height: 100000.0)          
+          new Container(height: 100000.0)
         ]
       ));
 
       ScrollableState<ScrollableViewport> scrollable =
-          tester.stateOf/*<ScrollableState<ScrollableViewport>>*/(find.byType(ScrollableViewport));
+          tester.state/*<ScrollableState<ScrollableViewport>>*/(find.byType(ScrollableViewport));
 
       expect(scrollable.scrollOffset, equals(0.0));
 
@@ -33,7 +32,5 @@ void main() {
       tester.pump(const Duration(seconds: 5));
 
       expect(scrollable.scrollOffset, greaterThan(oldOffset));
-      
-    });
   });
 }

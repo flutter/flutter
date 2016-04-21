@@ -4,11 +4,9 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:test/test.dart';
 
 void main() {
-  test('Block inside LazyBlock', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Block inside LazyBlock', (WidgetTester tester) {
       tester.pumpWidget(new LazyBlock(
         delegate: new LazyBlockChildren(
           children: <Widget>[
@@ -29,6 +27,5 @@ void main() {
           ]
         )
       ));
-    });
   });
 }

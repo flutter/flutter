@@ -12,8 +12,7 @@ void main() {
   // The "can be constructed" tests that follow are primarily to ensure that any
   // animations started by the progress indicators are stopped at dispose() time.
 
-  test('LinearProgressIndicator(value: 0.0) can be constructed', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('LinearProgressIndicator(value: 0.0) can be constructed', (WidgetTester tester) {
       tester.pumpWidget(
         new Center(
           child: new SizedBox(
@@ -22,11 +21,9 @@ void main() {
           )
         )
       );
-    });
   });
 
-  test('LinearProgressIndicator(value: null) can be constructed', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('LinearProgressIndicator(value: null) can be constructed', (WidgetTester tester) {
       tester.pumpWidget(
         new Center(
           child: new SizedBox(
@@ -35,36 +32,29 @@ void main() {
           )
         )
       );
-    });
   });
 
-  test('CircularProgressIndicator(value: 0.0) can be constructed', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('CircularProgressIndicator(value: 0.0) can be constructed', (WidgetTester tester) {
       tester.pumpWidget(
         new Center(
           child: new CircularProgressIndicator(value: 0.0)
         )
       );
-    });
   });
 
-  test('CircularProgressIndicator(value: null) can be constructed', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('CircularProgressIndicator(value: null) can be constructed', (WidgetTester tester) {
       tester.pumpWidget(
         new Center(
           child: new CircularProgressIndicator(value: null)
         )
       );
-    });
   });
 
-  test('LinearProgressIndicator changes when its value changes', () {
-    testElementTree((ElementTreeTester tester) {
-      tester.pumpWidget(new Block(children: <Widget>[new LinearProgressIndicator(value: 0.0)]));
-      List<Layer> layers1 = tester.layers;
-      tester.pumpWidget(new Block(children: <Widget>[new LinearProgressIndicator(value: 0.5)]));
-      List<Layer> layers2 = tester.layers;
-      expect(layers1, isNot(equals(layers2)));
-    });
+  testWidgets('LinearProgressIndicator causes a repaint when it changes', (WidgetTester tester) {
+    tester.pumpWidget(new Block(children: <Widget>[new LinearProgressIndicator(value: 0.0)]));
+    List<Layer> layers1 = tester.layers;
+    tester.pumpWidget(new Block(children: <Widget>[new LinearProgressIndicator(value: 0.5)]));
+    List<Layer> layers2 = tester.layers;
+    expect(layers1, isNot(equals(layers2)));
   });
 }

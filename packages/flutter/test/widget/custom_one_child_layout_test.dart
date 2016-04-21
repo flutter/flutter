@@ -56,8 +56,7 @@ Widget buildFrame(SingleChildLayoutDelegate delegate) {
 }
 
 void main() {
-  test('Control test for CustomSingleChildLayout', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Control test for CustomSingleChildLayout', (WidgetTester tester) {
       TestSingleChildLayoutDelegate delegate = new TestSingleChildLayoutDelegate();
       tester.pumpWidget(buildFrame(delegate));
 
@@ -76,11 +75,9 @@ void main() {
 
       expect(delegate.childSizeFromGetPositionForChild.width, 150.0);
       expect(delegate.childSizeFromGetPositionForChild.height, 400.0);
-    });
   });
 
-  test('Test SingleChildDelegate shouldRelayout method', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Test SingleChildDelegate shouldRelayout method', (WidgetTester tester) {
       TestSingleChildLayoutDelegate delegate = new TestSingleChildLayoutDelegate();
       tester.pumpWidget(buildFrame(delegate));
 
@@ -101,7 +98,6 @@ void main() {
       tester.pumpWidget(buildFrame(delegate));
       expect(delegate.shouldRelayoutCalled, isTrue);
       expect(delegate.constraintsFromGetConstraintsForChild, isNotNull);
-    });
   });
 
 }

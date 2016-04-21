@@ -43,8 +43,7 @@ class TestWidgetState extends State<TestWidget> {
 
 void main() {
 
-  test('no change', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('no change', (WidgetTester tester) {
       tester.pumpWidget(
         new Container(
           child: new Container(
@@ -56,7 +55,7 @@ void main() {
         )
       );
 
-      TestWidgetState state = tester.stateOf(find.byType(TestWidget));
+      TestWidgetState state = tester.state(find.byType(TestWidget));
 
       expect(state.persistentState, equals(1));
       expect(state.updates, equals(0));
@@ -76,11 +75,9 @@ void main() {
       expect(state.updates, equals(1));
 
       tester.pumpWidget(new Container());
-    });
   });
 
-  test('remove one', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('remove one', (WidgetTester tester) {
       tester.pumpWidget(
         new Container(
           child: new Container(
@@ -92,7 +89,7 @@ void main() {
         )
       );
 
-      TestWidgetState state = tester.stateOf(find.byType(TestWidget));
+      TestWidgetState state = tester.state(find.byType(TestWidget));
 
       expect(state.persistentState, equals(10));
       expect(state.updates, equals(0));
@@ -106,17 +103,15 @@ void main() {
         )
       );
 
-      state = tester.stateOf(find.byType(TestWidget));
+      state = tester.state(find.byType(TestWidget));
 
       expect(state.persistentState, equals(11));
       expect(state.updates, equals(0));
 
       tester.pumpWidget(new Container());
-    });
   });
 
-  test('swap instances around', () {
-    testElementTree((ElementTreeTester tester) {
+  testWidgets('swap instances around', (WidgetTester tester) {
       Widget a = new TestWidget(persistentState: 0x61, syncedState: 0x41, child: new Text('apple'));
       Widget b = new TestWidget(persistentState: 0x62, syncedState: 0x42, child: new Text('banana'));
       tester.pumpWidget(new Column());
@@ -141,8 +136,8 @@ void main() {
 
       TestWidgetState first, second;
 
-      first = tester.findStateByConfig(a);
-      second = tester.findStateByConfig(b);
+      first = tester.state(find.byConfig(a));
+      second = tester.state(find.byConfig(b));
 
       expect(first.config, equals(a));
       expect(first.persistentState, equals(0x61));
@@ -166,8 +161,8 @@ void main() {
         )
       );
 
-      first = tester.findStateByConfig(a);
-      second = tester.findStateByConfig(b);
+      first = tester.state(find.byConfig(a));
+      second = tester.state(find.byConfig(b));
 
       // same as before
       expect(first.config, equals(a));
@@ -195,8 +190,8 @@ void main() {
         )
       );
 
-      first = tester.findStateByConfig(b);
-      second = tester.findStateByConfig(a);
+      first = tester.state(find.byConfig(b));
+      second = tester.state(find.byConfig(a));
 
       expect(first.config, equals(b));
       expect(first.persistentState, equals(0x61));
@@ -204,6 +199,5 @@ void main() {
       expect(second.config, equals(a));
       expect(second.persistentState, equals(0x62));
       expect(second.syncedState, equals(0x41));
-    });
   });
 }

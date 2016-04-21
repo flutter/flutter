@@ -8,8 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('AnimatedContainer control test', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('AnimatedContainer control test', (WidgetTester tester) {
       GlobalKey key = new GlobalKey();
 
       BoxDecoration decorationA = new BoxDecoration(
@@ -51,11 +50,9 @@ void main() {
       actualDecoration = box.decoration;
       expect(actualDecoration.backgroundColor, equals(decorationB.backgroundColor));
 
-    });
   });
 
-  test('AnimatedContainer overanimate test', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('AnimatedContainer overanimate test', (WidgetTester tester) {
       tester.pumpWidget(
         new AnimatedContainer(
           duration: const Duration(milliseconds: 200),
@@ -98,11 +95,9 @@ void main() {
         )
       );
       expect(tester.binding.transientCallbackCount, 0);
-    });
   });
 
-  test('Animation rerun', () {
-    testElementTree((ElementTreeTester tester) {
+  testWidgets('Animation rerun', (WidgetTester tester) {
       tester.pumpWidget(
         new Center(
           child: new AnimatedContainer(
@@ -117,7 +112,7 @@ void main() {
       tester.pump();
       tester.pump(new Duration(milliseconds: 100));
 
-      RenderBox text = tester.findText('X').renderObject;
+      RenderBox text = tester.renderObject(find.text('X'));
       expect(text.size.width, equals(100.0));
       expect(text.size.height, equals(100.0));
 
@@ -136,7 +131,7 @@ void main() {
       tester.pump();
       tester.pump(new Duration(milliseconds: 100));
 
-      text = tester.findText('X').renderObject;
+      text = tester.renderObject(find.text('X'));
       expect(text.size.width, greaterThan(110.0));
       expect(text.size.width, lessThan(190.0));
       expect(text.size.height, greaterThan(110.0));
@@ -168,6 +163,5 @@ void main() {
 
       expect(text.size.width, equals(200.0));
       expect(text.size.height, equals(100.0));
-    });
   });
 }

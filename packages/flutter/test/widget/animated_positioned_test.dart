@@ -8,8 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('AnimatedPositioned - basics', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('AnimatedPositioned - basics', (WidgetTester tester) {
       GlobalKey key = new GlobalKey();
 
       RenderBox box;
@@ -66,11 +65,9 @@ void main() {
       box = key.currentContext.findRenderObject();
       expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(37.0 + 59.0 / 2.0, 31.0 + 71.0 / 2.0)));
 
-    });
   });
 
-  test('AnimatedPositioned - interrupted animation', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('AnimatedPositioned - interrupted animation', (WidgetTester tester) {
       GlobalKey key = new GlobalKey();
 
       RenderBox box;
@@ -149,11 +146,9 @@ void main() {
       box = key.currentContext.findRenderObject();
       expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(200.0, 200.0)));
 
-    });
   });
 
-  test('AnimatedPositioned - switching variables', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('AnimatedPositioned - switching variables', (WidgetTester tester) {
       GlobalKey key = new GlobalKey();
 
       RenderBox box;
@@ -209,7 +204,6 @@ void main() {
       box = key.currentContext.findRenderObject();
       expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(350.0, 150.0)));
 
-    });
   });
 
 }

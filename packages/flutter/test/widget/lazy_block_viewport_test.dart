@@ -10,8 +10,7 @@ import 'package:test/test.dart';
 import 'test_widgets.dart';
 
 void main() {
-  test('LazyBlockViewport mount/dismount smoke test', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('LazyBlockViewport mount/dismount smoke test', (WidgetTester tester) {
       List<int> callbackTracker = <int>[];
 
       // the root view is 800x600 in the test environment
@@ -36,7 +35,7 @@ void main() {
 
       tester.pumpWidget(builder());
 
-      FlipWidgetState testWidget = tester.stateOf(find.byType(FlipWidget));
+      FlipWidgetState testWidget = tester.state(find.byType(FlipWidget));
 
       expect(callbackTracker, equals([0, 1, 2, 3, 4, 5]));
 
@@ -51,11 +50,9 @@ void main() {
       tester.pump();
 
       expect(callbackTracker, equals([0, 1, 2, 3, 4, 5]));
-    });
   });
 
-  test('LazyBlockViewport vertical', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('LazyBlockViewport vertical', (WidgetTester tester) {
       List<int> callbackTracker = <int>[];
 
       // the root view is 800x600 in the test environment
@@ -103,11 +100,9 @@ void main() {
       // 0 isn't built because they're not visible.
       expect(callbackTracker, equals([1, 2, 3, 4]));
       callbackTracker.clear();
-    });
   });
 
-  test('LazyBlockViewport horizontal', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('LazyBlockViewport horizontal', (WidgetTester tester) {
       List<int> callbackTracker = <int>[];
 
       // the root view is 800x600 in the test environment
@@ -157,11 +152,9 @@ void main() {
       // 0 isn't built because they're not visible.
       expect(callbackTracker, equals([1, 2, 3, 4, 5]));
       callbackTracker.clear();
-    });
   });
 
-  test('LazyBlockViewport reinvoke builders', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('LazyBlockViewport reinvoke builders', (WidgetTester tester) {
       List<int> callbackTracker = <int>[];
       List<String> text = <String>[];
 
@@ -191,7 +184,7 @@ void main() {
 
       expect(callbackTracker, equals([0, 1, 2]));
       callbackTracker.clear();
-      tester.widgets.forEach(collectText);
+      tester.allWidgets.forEach(collectText);
       expect(text, equals(['0', '1', '2']));
       text.clear();
 
@@ -199,14 +192,12 @@ void main() {
 
       expect(callbackTracker, equals([0, 1, 2]));
       callbackTracker.clear();
-      tester.widgets.forEach(collectText);
+      tester.allWidgets.forEach(collectText);
       expect(text, equals(['0', '1', '2']));
       text.clear();
-    });
   });
 
-  test('LazyBlockViewport reinvoke builders', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('LazyBlockViewport reinvoke builders', (WidgetTester tester) {
       StateSetter setState;
       ThemeData themeData = new ThemeData.light();
 
@@ -235,7 +226,7 @@ void main() {
         )
       );
 
-      DecoratedBox widget = tester.widget(find.byType(DecoratedBox));
+      DecoratedBox widget = tester.firstWidget(find.byType(DecoratedBox));
       BoxDecoration decoraton = widget.decoration;
       expect(decoraton.backgroundColor, equals(Colors.blue[500]));
 
@@ -245,14 +236,12 @@ void main() {
 
       tester.pump();
 
-      widget = tester.widget(find.byType(DecoratedBox));
+      widget = tester.firstWidget(find.byType(DecoratedBox));
       decoraton = widget.decoration;
       expect(decoraton.backgroundColor, equals(Colors.green[500]));
-    });
   });
 
-  test('LazyBlockViewport padding', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('LazyBlockViewport padding', (WidgetTester tester) {
       IndexedBuilder itemBuilder = (BuildContext context, int i) {
         return new Container(
           key: new ValueKey<int>(i),
@@ -272,15 +261,13 @@ void main() {
         )
       );
 
-      RenderBox firstBox = tester.renderObjectOf(find.text('0'));
+      RenderBox firstBox = tester.renderObject(find.text('0'));
       Point upperLeft = firstBox.localToGlobal(Point.origin);
       expect(upperLeft, equals(new Point(7.0, 3.0)));
       expect(firstBox.size.width, equals(800.0 - 12.0));
-    });
   });
 
-  test('Underflow extents', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Underflow extents', (WidgetTester tester) {
       double lastContentExtent;
       double lastContainerExtent;
       double lastMinScrollOffset;
@@ -304,6 +291,5 @@ void main() {
       expect(lastContentExtent, equals(300.0));
       expect(lastContainerExtent, equals(600.0));
       expect(lastMinScrollOffset, equals(0.0));
-    });
   });
 }

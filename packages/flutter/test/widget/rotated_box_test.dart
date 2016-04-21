@@ -7,8 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Rotated box control test', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Rotated box control test', (WidgetTester tester) {
       List<String> log = <String>[];
       Key rotatedBoxKey = new UniqueKey();
 
@@ -42,7 +41,7 @@ void main() {
         )
       );
 
-      RenderBox box = tester.elementTreeTester.findElementByKey(rotatedBoxKey).renderObject;
+      RenderBox box = tester.renderObject(find.byKey(rotatedBoxKey));
       expect(box.size.width, equals(65.0));
       expect(box.size.height, equals(175.0));
 
@@ -53,6 +52,5 @@ void main() {
       tester.tapAt(new Point(380.0, 320.0));
       expect(log, equals(['right']));
       log.clear();
-    });
   });
 }

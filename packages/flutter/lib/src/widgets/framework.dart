@@ -662,6 +662,12 @@ class _InactiveElements {
   }
 }
 
+/// Signature for the callback to [BuildContext.visitChildElements].
+///
+/// The argument is the child being visited.
+///
+/// It is safe to call `element.visitChildElements` reentrantly within
+/// this callback.
 typedef void ElementVisitor(Element element);
 
 abstract class BuildContext {
@@ -672,7 +678,7 @@ abstract class BuildContext {
   State ancestorStateOfType(TypeMatcher matcher);
   RenderObject ancestorRenderObjectOfType(TypeMatcher matcher);
   void visitAncestorElements(bool visitor(Element element));
-  void visitChildElements(void visitor(Element element));
+  void visitChildElements(ElementVisitor visitor);
 }
 
 class BuildOwner {

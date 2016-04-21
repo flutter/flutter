@@ -26,8 +26,7 @@ import '../widget/test_semantics.dart';
 // production code.
 
 void main() {
-  test('Does tooltip end up in the right place - center', () {
-    testElementTree((ElementTreeTester tester) {
+  testWidgets('Does tooltip end up in the right place - center', (WidgetTester tester) {
       GlobalKey key = new GlobalKey();
       tester.pumpWidget(
         new Overlay(
@@ -74,13 +73,11 @@ void main() {
        *                   *
        *********************/
 
-      RenderBox tip = tester.findText('TIP').renderObject.parent.parent.parent.parent.parent;
+      RenderBox tip = tester.renderObject(find.text('TIP')).parent.parent.parent.parent.parent;
       expect(tip.localToGlobal(tip.size.topLeft(Point.origin)), equals(const Point(284.0, 20.0)));
-    });
   });
 
-  test('Does tooltip end up in the right place - top left', () {
-    testElementTree((ElementTreeTester tester) {
+  testWidgets('Does tooltip end up in the right place - top left', (WidgetTester tester) {
       GlobalKey key = new GlobalKey();
       tester.pumpWidget(
         new Overlay(
@@ -127,14 +124,12 @@ void main() {
        *                   *
        *********************/
 
-      RenderBox tip = tester.findText('TIP').renderObject.parent.parent.parent.parent.parent;
+      RenderBox tip = tester.renderObject(find.text('TIP')).parent.parent.parent.parent.parent;
       expect(tip.size.height, equals(20.0)); // 10.0 height + 5.0 padding * 2 (top, bottom)
       expect(tip.localToGlobal(tip.size.topLeft(Point.origin)), equals(const Point(10.0, 20.0)));
-    });
   });
 
-  test('Does tooltip end up in the right place - center prefer above fits', () {
-    testElementTree((ElementTreeTester tester) {
+  testWidgets('Does tooltip end up in the right place - center prefer above fits', (WidgetTester tester) {
       GlobalKey key = new GlobalKey();
       tester.pumpWidget(
         new Overlay(
@@ -182,15 +177,13 @@ void main() {
        *                   *
        *********************/
 
-      RenderBox tip = tester.findText('TIP').renderObject.parent;
+      RenderBox tip = tester.renderObject(find.text('TIP')).parent;
       expect(tip.size.height, equals(100.0));
       expect(tip.localToGlobal(tip.size.topLeft(Point.origin)).y, equals(100.0));
       expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).y, equals(200.0));
-    });
   });
 
-  test('Does tooltip end up in the right place - center prefer above does not fit', () {
-    testElementTree((ElementTreeTester tester) {
+  testWidgets('Does tooltip end up in the right place - center prefer above does not fit', (WidgetTester tester) {
       GlobalKey key = new GlobalKey();
       tester.pumpWidget(
         new Overlay(
@@ -249,15 +242,13 @@ void main() {
        *                   * }-100.0 margin
        *********************/
 
-      RenderBox tip = tester.findText('TIP').renderObject.parent;
+      RenderBox tip = tester.renderObject(find.text('TIP')).parent;
       expect(tip.size.height, equals(100.0));
       expect(tip.localToGlobal(tip.size.topLeft(Point.origin)).y, equals(399.0));
       expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).y, equals(499.0));
-    });
   });
 
-  test('Does tooltip end up in the right place - center prefer below fits', () {
-    testElementTree((ElementTreeTester tester) {
+  testWidgets('Does tooltip end up in the right place - center prefer below fits', (WidgetTester tester) {
       GlobalKey key = new GlobalKey();
       tester.pumpWidget(
         new Overlay(
@@ -304,15 +295,13 @@ void main() {
        *                   * }-100.0 margin
        *********************/
 
-      RenderBox tip = tester.findText('TIP').renderObject.parent;
+      RenderBox tip = tester.renderObject(find.text('TIP')).parent;
       expect(tip.size.height, equals(100.0));
       expect(tip.localToGlobal(tip.size.topLeft(Point.origin)).y, equals(400.0));
       expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).y, equals(500.0));
-    });
   });
 
-  test('Does tooltip end up in the right place - way off to the right', () {
-    testElementTree((ElementTreeTester tester) {
+  testWidgets('Does tooltip end up in the right place - way off to the right', (WidgetTester tester) {
       GlobalKey key = new GlobalKey();
       tester.pumpWidget(
         new Overlay(
@@ -360,16 +349,14 @@ void main() {
        *                   * }-10.0 margin
        *********************/
 
-      RenderBox tip = tester.findText('TIP').renderObject.parent;
+      RenderBox tip = tester.renderObject(find.text('TIP')).parent;
       expect(tip.size.height, equals(10.0));
       expect(tip.localToGlobal(tip.size.topLeft(Point.origin)).y, equals(310.0));
       expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).x, equals(790.0));
       expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).y, equals(320.0));
-    });
   });
 
-  test('Does tooltip end up in the right place - near the edge', () {
-    testElementTree((ElementTreeTester tester) {
+  testWidgets('Does tooltip end up in the right place - near the edge', (WidgetTester tester) {
       GlobalKey key = new GlobalKey();
       tester.pumpWidget(
         new Overlay(
@@ -417,16 +404,14 @@ void main() {
        *                   * }-10.0 margin
        *********************/
 
-      RenderBox tip = tester.findText('TIP').renderObject.parent;
+      RenderBox tip = tester.renderObject(find.text('TIP')).parent;
       expect(tip.size.height, equals(10.0));
       expect(tip.localToGlobal(tip.size.topLeft(Point.origin)).y, equals(310.0));
       expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).x, equals(790.0));
       expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).y, equals(320.0));
-    });
   });
 
-  test('Does tooltip contribute semantics', () {
-    testElementTree((ElementTreeTester tester) {
+  testWidgets('Does tooltip contribute semantics', (WidgetTester tester) {
       TestSemanticsListener client = new TestSemanticsListener();
       GlobalKey key = new GlobalKey();
       tester.pumpWidget(
@@ -493,6 +478,5 @@ void main() {
       expect(client.updates[0].children.length, equals(0));
       expect(client.updates[1], isNull);
       client.updates.clear();
-    });
   });
 }

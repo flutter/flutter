@@ -7,8 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('setState() overbuild test', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('setState() overbuild test', (WidgetTester tester) {
       List<String> log = <String>[];
       Builder inner = new Builder(
         builder: (BuildContext context) {
@@ -54,6 +53,5 @@ void main() {
         'middle 1',
         '---',
       ]));
-    });
   });
 }

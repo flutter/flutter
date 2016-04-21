@@ -5,8 +5,11 @@
 /// Testing library for flutter, built on top of `package:test`.
 library flutter_test;
 
+export 'src/all_elements.dart';
 export 'src/binding.dart';
-export 'src/instrumentation.dart';
+export 'src/controller.dart';
+export 'src/finders.dart';
+export 'src/matchers.dart';
 export 'src/service_mocker.dart';
 export 'src/test_pointer.dart';
 export 'src/widget_tester.dart';

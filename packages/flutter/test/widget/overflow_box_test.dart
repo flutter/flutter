@@ -8,8 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('OverflowBox control test', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('OverflowBox control test', (WidgetTester tester) {
       GlobalKey inner = new GlobalKey();
       tester.pumpWidget(new Align(
         alignment: const FractionalOffset(1.0, 1.0),
@@ -30,10 +29,9 @@ void main() {
       RenderBox box = inner.currentContext.findRenderObject();
       expect(box.localToGlobal(Point.origin), equals(const Point(745.0, 565.0)));
       expect(box.size, equals(const Size(100.0, 50.0)));
-    });
   });
 
-  test('OverflowBox implements debugFillDescription', () {
+  testWidgets('OverflowBox implements debugFillDescription', (WidgetTester tester) {
     List<String> description = <String>[];
     new OverflowBox(
       minWidth: 1.0,

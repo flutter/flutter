@@ -19,7 +19,7 @@ class TestParentData {
 }
 
 void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
-  MultiChildRenderObjectElement element = tester.elementOf(
+  MultiChildRenderObjectElement element = tester.element(
     find.byElementPredicate((Element element) => element is MultiChildRenderObjectElement)
   );
   expect(element, isNotNull);
@@ -49,8 +49,7 @@ void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
 final TestParentData kNonPositioned = new TestParentData();
 
 void main() {
-  test('ParentDataWidget control test', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('ParentDataWidget control test', (WidgetTester tester) {
 
       tester.pumpWidget(
         new Stack(
@@ -241,11 +240,9 @@ void main() {
       );
 
       checkTree(tester, <TestParentData>[]);
-    });
   });
 
-  test('ParentDataWidget conflicting data', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('ParentDataWidget conflicting data', (WidgetTester tester) {
       tester.pumpWidget(
         new Stack(
           children: <Widget>[
@@ -287,11 +284,9 @@ void main() {
       );
 
       checkTree(tester, <TestParentData>[]);
-    });
   });
 
-  test('ParentDataWidget interacts with global keys', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('ParentDataWidget interacts with global keys', (WidgetTester tester) {
       GlobalKey key = new GlobalKey();
 
       tester.pumpWidget(
@@ -344,6 +339,5 @@ void main() {
       checkTree(tester, <TestParentData>[
         new TestParentData(top: 10.0, left: 10.0),
       ]);
-    });
   });
 }

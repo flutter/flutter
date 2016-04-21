@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
-Size _getSize(ElementTreeTester tester, BoxConstraints constraints, double aspectRatio) {
+Size _getSize(WidgetTester tester, BoxConstraints constraints, double aspectRatio) {
   Key childKey = new UniqueKey();
   tester.pumpWidget(
     new Center(
@@ -22,36 +22,32 @@ Size _getSize(ElementTreeTester tester, BoxConstraints constraints, double aspec
       )
     )
   );
-  RenderBox box = tester.findElementByKey(childKey).renderObject;
+  RenderBox box = tester.renderObject(find.byKey(childKey));
   return box.size;
 }
 
 void main() {
-  test('Aspect ratio control test', () {
-    testElementTree((ElementTreeTester tester) {
-      expect(_getSize(tester, new BoxConstraints.loose(new Size(500.0, 500.0)), 2.0), equals(new Size(500.0, 250.0)));
-      expect(_getSize(tester, new BoxConstraints.loose(new Size(500.0, 500.0)), 0.5), equals(new Size(250.0, 500.0)));
-    });
+  testWidgets('Aspect ratio control test', (WidgetTester tester) {
+    expect(_getSize(tester, new BoxConstraints.loose(new Size(500.0, 500.0)), 2.0), equals(new Size(500.0, 250.0)));
+    expect(_getSize(tester, new BoxConstraints.loose(new Size(500.0, 500.0)), 0.5), equals(new Size(250.0, 500.0)));
   });
 
-  test('Aspect ratio infinite width', () {
-    testElementTree((ElementTreeTester tester) {
-      Key childKey = new UniqueKey();
-      tester.pumpWidget(
-        new Center(
-          child: new Viewport(
-            mainAxis: Axis.horizontal,
-            child: new AspectRatio(
-              aspectRatio: 2.0,
-              child: new Container(
-                key: childKey
-              )
+  testWidgets('Aspect ratio infinite width', (WidgetTester tester) {
+    Key childKey = new UniqueKey();
+    tester.pumpWidget(
+      new Center(
+        child: new Viewport(
+          mainAxis: Axis.horizontal,
+          child: new AspectRatio(
+            aspectRatio: 2.0,
+            child: new Container(
+              key: childKey
             )
           )
         )
-      );
-      RenderBox box = tester.findElementByKey(childKey).renderObject;
-      expect(box.size, equals(new Size(1200.0, 600.0)));
-    });
+      )
+    );
+    RenderBox box = tester.renderObject(find.byKey(childKey));
+    expect(box.size, equals(new Size(1200.0, 600.0)));
   });
 }

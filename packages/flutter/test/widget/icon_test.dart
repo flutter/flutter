@@ -7,8 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Can set opacity for an Icon', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Can set opacity for an Icon', (WidgetTester tester) {
       tester.pumpWidget(
         new IconTheme(
           data: new IconThemeData(
@@ -20,6 +19,5 @@ void main() {
       );
       Text text = tester.widget(find.byType(Text));
       expect(text.style.color, equals(Colors.green[500].withOpacity(0.5)));
-    });
   });
 }

@@ -8,8 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Slider can move when tapped', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Slider can move when tapped', (WidgetTester tester) {
       Key sliderKey = new UniqueKey();
       double value = 0.0;
 
@@ -38,11 +37,9 @@ void main() {
       expect(value, equals(0.5));
       tester.pump(); // No animation should start.
       expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
-    });
   });
 
-  test('Slider take on discrete values', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Slider take on discrete values', (WidgetTester tester) {
       Key sliderKey = new UniqueKey();
       double value = 0.0;
 
@@ -85,6 +82,5 @@ void main() {
       tester.pump(const Duration(milliseconds: 200));
       // Animation complete.
       expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
-    });
   });
 }

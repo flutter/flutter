@@ -8,8 +8,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_test/src/instrumentation.dart';
-import 'package:flutter_test/src/test_pointer.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'error.dart';
 import 'find.dart';
@@ -53,7 +52,7 @@ typedef Future<Result> CommandHandlerCallback(Command c);
 typedef Command CommandDeserializerCallback(Map<String, String> params);
 
 /// Runs the finder and returns the [Element] found, or `null`.
-typedef Future<Element> FinderCallback(SerializableFinder finder);
+typedef Finder FinderConstructor(SerializableFinder finder);
 
 class FlutterDriverExtension {
   static final Logger _log = new Logger('FlutterDriverExtension');
@@ -75,17 +74,17 @@ class FlutterDriverExtension {
       'waitFor': WaitFor.deserialize,
     });
 
-    _finders.addAll(<String, FinderCallback>{
-      'ByValueKey': _findByValueKey,
-      'ByTooltipMessage': _findByTooltipMessage,
-      'ByText': _findByText,
+    _finders.addAll(<String, FinderConstructor>{
+      'ByText': _createByTextFinder,
+      'ByTooltipMessage': _createByTooltipMessageFinder,
+      'ByValueKey': _createByValueKeyFinder,
     });
   }
 
-  final Instrumentation prober = new Instrumentation();
+  final WidgetController prober = new WidgetController(WidgetsBinding.instance);
   final Map<String, CommandHandlerCallback> _commandHandlers = <String, CommandHandlerCallback>{};
   final Map<String, CommandDeserializerCallback> _commandDeserializers = <String, CommandDeserializerCallback>{};
-  final Map<String, FinderCallback> _finders = <String, FinderCallback>{};
+  final Map<String, FinderConstructor> _finders = <String, FinderConstructor>{};
 
   Future<Map<String, dynamic>> call(Map<String, String> params) async {
     try {
@@ -120,91 +119,71 @@ class FlutterDriverExtension {
   Future<Health> getHealth(GetHealth command) async => new Health(HealthStatus.ok);
 
   /// Runs [locator] repeatedly until it finds an [Element] or times out.
-  Future<Element> _waitForElement(String descriptionGetter(), Element locator()) async {
+  Future<Finder> _waitForElement(Finder finder) {
     // Short-circuit if the element is already on the UI
-    Element element = locator();
-    if (element != null) {
-      return element;
-    }
+    if (finder.precache())
+      return new Future<Finder>.value(finder);
 
     // No element yet, so we retry on frames rendered in the future.
-    Completer<Element> completer = new Completer<Element>();
+    Completer<Finder> completer = new Completer<Finder>();
     StreamSubscription<Duration> subscription;
 
     Timer timeout = new Timer(_kDefaultTimeout, () {
       subscription.cancel();
-      completer.completeError('Timed out waiting for ${descriptionGetter()}');
+      completer.completeError('Timed out waiting for ${finder.description}');
     });
 
     subscription = _onFrameReady.listen((Duration duration) {
-      Element element = locator();
-      if (element != null) {
+      if (finder.precache()) {
         subscription.cancel();
         timeout.cancel();
-        completer.complete(element);
+        completer.complete(finder);
       }
     });
 
     return completer.future;
   }
 
-  Future<Element> _findByValueKey(ByValueKey byKey) async {
-    return _waitForElement(
-      () => 'element with key "${byKey.keyValue}" of type ${byKey.keyValueType}',
-      () {
-        return prober.findElementByKey(new ValueKey<dynamic>(byKey.keyValue));
-      }
-    );
+  Finder _createByTextFinder(ByText arguments) {
+    return find.text(arguments.text);
   }
 
-  Future<Element> _findByTooltipMessage(ByTooltipMessage byTooltipMessage) async {
-    return _waitForElement(
-      () => 'tooltip with message "${byTooltipMessage.text}" on it',
-      () {
-        return prober.findElement((Element element) {
-          Widget widget = element.widget;
-
-          if (widget is Tooltip)
-            return widget.message == byTooltipMessage.text;
-
-          return false;
-        });
-      }
-    );
+  Finder _createByTooltipMessageFinder(ByTooltipMessage arguments) {
+    return find.byElementPredicate((Element element) {
+      Widget widget = element.widget;
+      if (widget is Tooltip)
+        return widget.message == arguments.text;
+      return false;
+    });
   }
 
-  Future<Element> _findByText(ByText byText) async {
-    return await _waitForElement(
-      () => 'text "${byText.text}"',
-      () {
-        return prober.findText(byText.text);
-      });
+  Finder _createByValueKeyFinder(ByValueKey arguments) {
+    return find.byKey(new ValueKey<dynamic>(arguments.keyValue));
   }
 
-  Future<Element> _runFinder(SerializableFinder finder) {
-    FinderCallback cb = _finders[finder.finderType];
+  Finder _createFinder(SerializableFinder finder) {
+    FinderConstructor constructor = _finders[finder.finderType];
 
-    if (cb == null)
+    if (constructor == null)
       throw 'Unsupported finder type: ${finder.finderType}';
 
-    return cb(finder);
+    return constructor(finder);
   }
 
   Future<TapResult> tap(Tap command) async {
-    Element target = await _runFinder(command.finder);
-    prober.tap(target);
+    prober.tap(await _waitForElement(_createFinder(command.finder)));
     return new TapResult();
   }
 
   Future<WaitForResult> waitFor(WaitFor command) async {
-    if (await _runFinder(command.finder) != null)
+    if ((await _waitForElement(_createFinder(command.finder))).evaluate().isNotEmpty)
       return new WaitForResult();
     else
       return null;
   }
 
   Future<ScrollResult> scroll(Scroll command) async {
-    Element target = await _runFinder(command.finder);
+    Finder target = await _waitForElement(_createFinder(command.finder));
     final int totalMoves = command.duration.inMicroseconds * command.frequency ~/ Duration.MICROSECONDS_PER_SECOND;
     Offset delta = new Offset(command.dx, command.dy) / totalMoves.toDouble();
     Duration pause = command.duration ~/ totalMoves;
@@ -227,9 +206,9 @@ class FlutterDriverExtension {
   }
 
   Future<GetTextResult> getText(GetText command) async {
-    Element target = await _runFinder(command.finder);
+    Finder target = await _waitForElement(_createFinder(command.finder));
     // TODO(yjbanov): support more ways to read text
-    Text text = target.widget;
+    Text text = target.evaluate().single.widget;
     return new GetTextResult(text.data);
   }
 }

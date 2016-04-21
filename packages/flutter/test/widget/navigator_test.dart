@@ -68,8 +68,7 @@ class ThirdWidget extends StatelessWidget {
 }
 
 void main() {
-  test('Can navigator navigate to and from a stateful widget', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Can navigator navigate to and from a stateful widget', (WidgetTester tester) {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => new FirstWidget(),
         '/second': (BuildContext context) => new SecondWidget(),
@@ -77,14 +76,14 @@ void main() {
 
       tester.pumpWidget(new MaterialApp(routes: routes));
 
-      expect(tester, hasWidget(find.text('X')));
-      expect(tester, doesNotHaveWidget(find.text('Y')));
+      expect(find.text('X'), findsOneWidget);
+      expect(find.text('Y'), findsNothing);
 
       tester.tap(find.text('X'));
       tester.pump(const Duration(milliseconds: 10));
 
-      expect(tester, hasWidget(find.text('X')));
-      expect(tester, hasWidget(find.text('Y')));
+      expect(find.text('X'), findsOneWidget);
+      expect(find.text('Y'), findsOneWidget);
 
       tester.pump(const Duration(milliseconds: 10));
       tester.pump(const Duration(milliseconds: 10));
@@ -96,13 +95,11 @@ void main() {
       tester.pump(const Duration(milliseconds: 10));
       tester.pump(const Duration(seconds: 1));
 
-      expect(tester, hasWidget(find.text('X')));
-      expect(tester, doesNotHaveWidget(find.text('Y')));
-    });
+      expect(find.text('X'), findsOneWidget);
+      expect(find.text('Y'), findsNothing);
   });
 
-  test('Navigator.openTransaction fails gracefully when not found in context', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Navigator.openTransaction fails gracefully when not found in context', (WidgetTester tester) {
       Key targetKey = new Key('foo');
       dynamic exception;
       Widget widget = new ThirdWidget(
@@ -115,6 +112,5 @@ void main() {
       tester.tap(find.byKey(targetKey));
       expect(exception, new isInstanceOf<FlutterError>());
       expect('$exception', startsWith('openTransaction called with a context'));
-    });
   });
 }

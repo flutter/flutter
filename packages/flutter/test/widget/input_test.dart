@@ -27,7 +27,6 @@ class MockKeyboard implements mojom.Keyboard {
 }
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized(); // for serviceMocker
   MockKeyboard mockKeyboard = new MockKeyboard();
   serviceMocker.registerMockService(mojom.Keyboard.serviceName, mockKeyboard);
 
@@ -40,8 +39,7 @@ void main() {
       ..composingExtent = testValue.length);
   }
 
-  test('Editable text has consistent size', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Editable text has consistent size', (WidgetTester tester) {
       GlobalKey inputKey = new GlobalKey();
       InputValue inputValue = InputValue.empty;
 
@@ -60,7 +58,7 @@ void main() {
 
       tester.pumpWidget(builder());
 
-      RenderBox findInputBox() => tester.renderObjectOf(find.byKey(inputKey));
+      RenderBox findInputBox() => tester.renderObject(find.byKey(inputKey));
 
       RenderBox inputBox = findInputBox();
       Size emptyInputSize = inputBox.size;
@@ -81,11 +79,9 @@ void main() {
       checkText('Test');
       expect(findInputBox(), equals(inputBox));
       expect(inputBox.size, equals(emptyInputSize));
-    });
   });
 
-  test('Cursor blinks', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Cursor blinks', (WidgetTester tester) {
       GlobalKey inputKey = new GlobalKey();
 
       Widget builder() {
@@ -101,20 +97,20 @@ void main() {
 
       tester.pumpWidget(builder());
 
-      RawInputLineState editableText = tester.stateOf(find.byType(RawInputLine));
+      RawInputLineState editableText = tester.state(find.byType(RawInputLine));
 
       // Check that the cursor visibility toggles after each blink interval.
       void checkCursorToggle() {
         bool initialShowCursor = editableText.cursorCurrentlyVisible;
-        tester.async.elapse(editableText.cursorBlinkInterval);
+        tester.pump(editableText.cursorBlinkInterval);
         expect(editableText.cursorCurrentlyVisible, equals(!initialShowCursor));
-        tester.async.elapse(editableText.cursorBlinkInterval);
+        tester.pump(editableText.cursorBlinkInterval);
         expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
-        tester.async.elapse(editableText.cursorBlinkInterval ~/ 10);
+        tester.pump(editableText.cursorBlinkInterval ~/ 10);
         expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
-        tester.async.elapse(editableText.cursorBlinkInterval);
+        tester.pump(editableText.cursorBlinkInterval);
         expect(editableText.cursorCurrentlyVisible, equals(!initialShowCursor));
-        tester.async.elapse(editableText.cursorBlinkInterval);
+        tester.pump(editableText.cursorBlinkInterval);
         expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
       }
 
@@ -126,11 +122,9 @@ void main() {
         ..selectionBase = 1
         ..selectionExtent = 1);
       checkCursorToggle();
-    });
   });
 
-  test('hideText control test', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('hideText control test', (WidgetTester tester) {
       GlobalKey inputKey = new GlobalKey();
 
       Widget builder() {
@@ -154,12 +148,11 @@ void main() {
         ..selectionExtent = testValue.length);
 
       tester.pump();
-    });
   });
 
   // Returns the first RenderEditableLine.
   RenderEditableLine findRenderEditableLine(WidgetTester tester) {
-    RenderObject root = tester.renderObjectOf(find.byType(RawInputLine));
+    RenderObject root = tester.renderObject(find.byType(RawInputLine));
     expect(root, isNotNull);
 
     RenderEditableLine renderLine;
@@ -183,8 +176,7 @@ void main() {
     return endpoints[0].point;
   }
 
-  test('Can long press to select', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Can long press to select', (WidgetTester tester) {
       GlobalKey inputKey = new GlobalKey();
       InputValue inputValue = InputValue.empty;
 
@@ -228,11 +220,9 @@ void main() {
       // 'def' is selected.
       expect(inputValue.selection.baseOffset, testValue.indexOf('d'));
       expect(inputValue.selection.extentOffset, testValue.indexOf('f')+1);
-    });
   });
 
-  test('Can drag handles to change selection', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Can drag handles to change selection', (WidgetTester tester) {
       GlobalKey inputKey = new GlobalKey();
       InputValue inputValue = InputValue.empty;
 
@@ -304,7 +294,6 @@ void main() {
 
       expect(inputValue.selection.baseOffset, selection.baseOffset-2);
       expect(inputValue.selection.extentOffset, selection.extentOffset+2);
-    });
   });
 
 }

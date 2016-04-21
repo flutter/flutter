@@ -8,8 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Can hit test flex children of stacks', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Can hit test flex children of stacks', (WidgetTester tester) {
       bool didReceiveTap = false;
       tester.pumpWidget(
         new Container(
@@ -48,14 +47,12 @@ void main() {
 
       tester.tap(find.text('X'));
       expect(didReceiveTap, isTrue);
-    });
   });
 
-  test('Row, Column and FlexJustifyContent.collapse', () {
-    final Key flexKey = new Key('flexKey');
+  testWidgets('Row and FlexJustifyContent.collapse', (WidgetTester tester) {
+      final Key flexKey = new Key('flexKey');
 
-    // Row without mainAxisAlignment: FlexJustifyContent.collapse
-    testWidgets((WidgetTester tester) {
+      // Row without mainAxisAlignment: FlexJustifyContent.collapse
       tester.pumpWidget(new Center(
         child: new Row(
           children: <Widget>[
@@ -65,7 +62,7 @@ void main() {
           key: flexKey
         )
       ));
-      RenderBox renderBox = tester.renderObjectOf(find.byKey(flexKey));
+      RenderBox renderBox = tester.renderObject(find.byKey(flexKey));
       expect(renderBox.size.width, equals(800.0));
       expect(renderBox.size.height, equals(100.0));
 
@@ -80,13 +77,15 @@ void main() {
           mainAxisAlignment: MainAxisAlignment.collapse
         )
       ));
-      renderBox = tester.renderObjectOf(find.byKey(flexKey));
+      renderBox = tester.renderObject(find.byKey(flexKey));
       expect(renderBox.size.width, equals(40.0));
       expect(renderBox.size.height, equals(100.0));
-    });
+  });
 
-    // Column without mainAxisAlignment: FlexJustifyContent.collapse
-    testWidgets((WidgetTester tester) {
+  testWidgets('Column and FlexJustifyContent.collapse', (WidgetTester tester) {
+      final Key flexKey = new Key('flexKey');
+
+      // Column without mainAxisAlignment: FlexJustifyContent.collapse
       tester.pumpWidget(new Center(
         child: new Column(
           children: <Widget>[
@@ -96,7 +95,7 @@ void main() {
           key: flexKey
         )
       ));
-      RenderBox renderBox = tester.renderObjectOf(find.byKey(flexKey));
+      RenderBox renderBox = tester.renderObject(find.byKey(flexKey));
       expect(renderBox.size.width, equals(100.0));
       expect(renderBox.size.height, equals(600.0));
 
@@ -111,16 +110,14 @@ void main() {
           mainAxisAlignment: MainAxisAlignment.collapse
         )
       ));
-      renderBox = tester.renderObjectOf(find.byKey(flexKey));
+      renderBox = tester.renderObject(find.byKey(flexKey));
       expect(renderBox.size.width, equals(100.0));
       expect(renderBox.size.height, equals(250.0));
-    });
   });
 
-  test('Can layout at zero size', () {
-    final Key childKey = new Key('childKey');
+  testWidgets('Can layout at zero size', (WidgetTester tester) {
+      final Key childKey = new Key('childKey');
 
-    testWidgets((WidgetTester tester) {
       tester.pumpWidget(new Center(
         child: new Container(
           width: 0.0,
@@ -138,7 +135,7 @@ void main() {
         )
       ));
 
-      RenderBox renderBox = tester.renderObjectOf(find.byKey(childKey));
+      RenderBox renderBox = tester.renderObject(find.byKey(childKey));
       expect(renderBox.size.width, equals(0.0));
       expect(renderBox.size.height, equals(100.0));
 
@@ -159,9 +156,8 @@ void main() {
         )
       ));
 
-      renderBox = tester.renderObjectOf(find.byKey(childKey));
+      renderBox = tester.renderObject(find.byKey(childKey));
       expect(renderBox.size.width, equals(100.0));
       expect(renderBox.size.height, equals(0.0));
-    });
   });
 }

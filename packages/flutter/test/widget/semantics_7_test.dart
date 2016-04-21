@@ -11,8 +11,7 @@ import 'test_semantics.dart';
 import 'package:sky_services/semantics/semantics.mojom.dart' as mojom;
 
 void main() {
-  test('Semantics 7 - Merging', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Semantics 7 - Merging', (WidgetTester tester) {
       TestSemanticsListener client = new TestSemanticsListener();
 
       String label;
@@ -168,6 +167,5 @@ void main() {
 
       client.updates.clear();
 
-    });
   });
 }

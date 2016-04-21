@@ -10,8 +10,7 @@ import 'package:test/test.dart';
 import 'test_semantics.dart';
 
 void main() {
-  test('Semantics 3', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Semantics 3', (WidgetTester tester) {
       TestSemanticsListener client = new TestSemanticsListener();
 
       // implicit annotators
@@ -147,6 +146,5 @@ void main() {
       );
       expect(client.updates.length, equals(0));
 
-    });
   });
 }

@@ -10,20 +10,15 @@ import 'package:test/test.dart';
 import '../rendering/rendering_tester.dart';
 
 void main() {
-  test('Can construct an empty Stack', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Can construct an empty Stack', (WidgetTester tester) {
       tester.pumpWidget(new Stack());
-    });
   });
 
-  test('Can construct an empty Centered Stack', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Can construct an empty Centered Stack', (WidgetTester tester) {
       tester.pumpWidget(new Center(child: new Stack()));
-    });
   });
 
-  test('Can change position data', () {
-    testElementTree((ElementTreeTester tester) {
+  testWidgets('Can change position data', (WidgetTester tester) {
       Key key = new Key('container');
 
       tester.pumpWidget(
@@ -44,7 +39,7 @@ void main() {
       Element container;
       StackParentData parentData;
 
-      container = tester.findElementByKey(key);
+      container = tester.element(find.byKey(key));
       parentData = container.renderObject.parentData;
       expect(parentData.top, isNull);
       expect(parentData.right, isNull);
@@ -68,7 +63,7 @@ void main() {
         )
       );
 
-      container = tester.findElementByKey(key);
+      container = tester.element(find.byKey(key));
       parentData = container.renderObject.parentData;
       expect(parentData.top, isNull);
       expect(parentData.right, equals(10.0));
@@ -76,16 +71,14 @@ void main() {
       expect(parentData.left, isNull);
       expect(parentData.width, isNull);
       expect(parentData.height, isNull);
-    });
   });
 
-  test('Can remove parent data', () {
-    testElementTree((ElementTreeTester tester) {
+  testWidgets('Can remove parent data', (WidgetTester tester) {
       Key key = new Key('container');
       Container container = new Container(key: key, width: 10.0, height: 10.0);
 
       tester.pumpWidget(new Stack(children: <Widget>[ new Positioned(left: 10.0, child: container) ]));
-      Element containerElement = tester.findElementByKey(key);
+      Element containerElement = tester.element(find.byKey(key));
 
       StackParentData parentData;
       parentData = containerElement.renderObject.parentData;
@@ -97,7 +90,7 @@ void main() {
       expect(parentData.height, isNull);
 
       tester.pumpWidget(new Stack(children: <Widget>[ container ]));
-      containerElement = tester.findElementByKey(key);
+      containerElement = tester.element(find.byKey(key));
 
       parentData = containerElement.renderObject.parentData;
       expect(parentData.top, isNull);
@@ -106,11 +99,9 @@ void main() {
       expect(parentData.left, isNull);
       expect(parentData.width, isNull);
       expect(parentData.height, isNull);
-    });
   });
 
-  test('Can align non-positioned children', () {
-    testElementTree((ElementTreeTester tester) {
+  testWidgets('Can align non-positioned children', (WidgetTester tester) {
       Key child0Key = new Key('child0');
       Key child1Key = new Key('child1');
 
@@ -126,30 +117,24 @@ void main() {
         )
       );
 
-      Element child0 = tester.findElementByKey(child0Key);
+      Element child0 = tester.element(find.byKey(child0Key));
       final StackParentData child0RenderObjectParentData = child0.renderObject.parentData;
       expect(child0RenderObjectParentData.offset, equals(const Offset(0.0, 0.0)));
 
-      Element child1 = tester.findElementByKey(child1Key);
+      Element child1 = tester.element(find.byKey(child1Key));
       final StackParentData child1RenderObjectParentData = child1.renderObject.parentData;
       expect(child1RenderObjectParentData.offset, equals(const Offset(5.0, 5.0)));
-    });
   });
 
-  test('Can construct an empty IndexedStack', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Can construct an empty IndexedStack', (WidgetTester tester) {
       tester.pumpWidget(new IndexedStack());
-    });
   });
 
-  test('Can construct an empty Centered IndexedStack', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Can construct an empty Centered IndexedStack', (WidgetTester tester) {
       tester.pumpWidget(new Center(child: new IndexedStack()));
-    });
   });
 
-  test('Can construct an IndexedStack', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Can construct an IndexedStack', (WidgetTester tester) {
       int itemCount = 3;
       List<int> itemsPainted;
 
@@ -167,9 +152,9 @@ void main() {
       }
 
       tester.pumpWidget(buildFrame(0));
-      expect(tester, hasWidget(find.text('0')));
-      expect(tester, hasWidget(find.text('1')));
-      expect(tester, hasWidget(find.text('2')));
+      expect(find.text('0'), findsOneWidget);
+      expect(find.text('1'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
       expect(itemsPainted, equals([0]));
 
       tester.pumpWidget(buildFrame(1));
@@ -177,11 +162,9 @@ void main() {
 
       tester.pumpWidget(buildFrame(2));
       expect(itemsPainted, equals([2]));
-    });
   });
 
-  test('Can hit test an IndexedStack', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Can hit test an IndexedStack', (WidgetTester tester) {
       Key key = new Key('indexedStack');
       int itemCount = 3;
       List<int> itemsTapped;
@@ -203,11 +186,9 @@ void main() {
       expect(itemsTapped, isEmpty);
       tester.tap(find.byKey(key));
       expect(itemsTapped, [2]);
-    });
   });
 
-  test('Can set width and height', () {
-    testElementTree((ElementTreeTester tester) {
+  testWidgets('Can set width and height', (WidgetTester tester) {
       Key key = new Key('container');
 
       BoxDecoration kBoxDecoration = new BoxDecoration(
@@ -231,7 +212,7 @@ void main() {
       RenderBox renderBox;
       StackParentData parentData;
 
-      box = tester.findElementByKey(key);
+      box = tester.element(find.byKey(key));
       renderBox = box.renderObject;
       parentData = renderBox.parentData;
       expect(parentData.top, isNull);
@@ -258,7 +239,7 @@ void main() {
         )
       );
 
-      box = tester.findElementByKey(key);
+      box = tester.element(find.byKey(key));
       renderBox = box.renderObject;
       parentData = renderBox.parentData;
       expect(parentData.top, isNull);
@@ -271,7 +252,6 @@ void main() {
       expect(parentData.offset.dy, equals(0.0));
       expect(renderBox.size.width, equals(11.0));
       expect(renderBox.size.height, equals(12.0));
-    });
   });
 
 }

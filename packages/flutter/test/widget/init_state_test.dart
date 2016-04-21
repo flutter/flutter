@@ -28,10 +28,8 @@ class TestWidgetState extends State<TestWidget> {
 }
 
 void main() {
-  test('initState() is called when we are in the tree', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('initState() is called when we are in the tree', (WidgetTester tester) {
       tester.pumpWidget(new Container(child: new TestWidget()));
       expect(ancestors, equals(<String>['Container', 'RenderObjectToWidgetAdapter<RenderBox>']));
-    });
   });
 }

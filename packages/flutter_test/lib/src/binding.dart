@@ -2,18 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show window;
+import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:quiver/testing/async.dart';
 import 'package:quiver/time.dart';
 
-import 'instrumentation.dart';
-
-/// Enumeration of possible phases to reach in pumpWidget.
+/// Enumeration of possible phases to reach in
+/// [WidgetTester.pumpWidget] and [TestWidgetsFlutterBinding.pump].
 // TODO(ianh): Merge with identical code in the rendering test code.
 enum EnginePhase {
   layout,
@@ -24,25 +25,44 @@ enum EnginePhase {
   sendSemanticsTree
 }
 
-class _SteppedWidgetFlutterBinding extends WidgetsFlutterBinding { // TODO(ianh): refactor so we're not extending a concrete binding
-  _SteppedWidgetFlutterBinding(this.async);
-
-  final FakeAsync async;
-
+class TestWidgetsFlutterBinding extends BindingBase with SchedulerBinding, GestureBinding, ServicesBinding, RendererBinding, WidgetsBinding {
   /// Creates and initializes the binding. This constructor is
   /// idempotent; calling it a second time will just return the
   /// previously-created instance.
-  static WidgetsBinding ensureInitialized(FakeAsync async) {
+  static WidgetsBinding ensureInitialized() {
     if (WidgetsBinding.instance == null)
-      new _SteppedWidgetFlutterBinding(async);
+      new TestWidgetsFlutterBinding();
+    assert(WidgetsBinding.instance is TestWidgetsFlutterBinding);
     return WidgetsBinding.instance;
   }
+
+  @override
+  void initInstances() {
+    timeDilation = 1.0; // just in case the developer has artificially changed it for development
+    debugPrint = _synchronousDebugPrint; // TODO(ianh): don't do this when running as 'flutter run'
+    super.initInstances();
+  }
+
+  void _synchronousDebugPrint(String message, { int wrapWidth }) {
+    if (wrapWidth != null) {
+      print(message.split('\n').expand((String line) => debugWordWrap(line, wrapWidth)).join('\n'));
+    } else {
+      print(message);
+    }
+  }
+
+  FakeAsync get fakeAsync => _fakeAsync;
+  bool get inTest => fakeAsync != null;
+
+  FakeAsync _fakeAsync;
+  Clock _clock;
 
   EnginePhase phase = EnginePhase.sendSemanticsTree;
 
   // Pump the rendering pipeline up to the given phase.
   @override
   void beginFrame() {
+    assert(inTest);
     buildOwner.buildDirtyElements();
     _beginFrame();
     buildOwner.finalizeTree();
@@ -50,6 +70,7 @@ class _SteppedWidgetFlutterBinding extends WidgetsFlutterBinding { // TODO(ianh)
 
   // Cloned from RendererBinding.beginFrame() but with early-exit semantics.
   void _beginFrame() {
+    assert(inTest);
     assert(renderView != null);
     pipelineOwner.flushLayout();
     if (phase == EnginePhase.layout)
@@ -73,45 +94,9 @@ class _SteppedWidgetFlutterBinding extends WidgetsFlutterBinding { // TODO(ianh)
 
   @override
   void dispatchEvent(PointerEvent event, HitTestResult result) {
+    assert(inTest);
     super.dispatchEvent(event, result);
-    async.flushMicrotasks();
-  }
-}
-
-/// Helper class for flutter tests providing fake async.
-///
-/// This class extends Instrumentation to also abstract away the beginFrame
-/// and async/clock access to allow writing tests which depend on the passage
-/// of time without actually moving the clock forward.
-class ElementTreeTester extends Instrumentation {
-  ElementTreeTester._(FakeAsync async)
-    : async = async,
-      clock = async.getClock(new DateTime.utc(2015, 1, 1)),
-      super(binding: _SteppedWidgetFlutterBinding.ensureInitialized(async)) {
-    timeDilation = 1.0;
-    ui.window.onBeginFrame = null;
-    debugPrint = _synchronousDebugPrint;
-  }
-
-  void _synchronousDebugPrint(String message, { int wrapWidth }) {
-    if (wrapWidth != null) {
-      print(message.split('\n').expand((String line) => debugWordWrap(line, wrapWidth)).join('\n'));
-    } else {
-      print(message);
-    }
-  }
-
-
-  final FakeAsync async;
-  final Clock clock;
-
-  /// Calls [runApp] with the given widget, then triggers a frame sequence and
-  /// flushes microtasks, by calling [pump] with the same duration (if any).
-  /// The supplied [EnginePhase] is the final phase reached during the pump pass;
-  /// if not supplied, the whole pass is executed.
-  void pumpWidget(Widget widget, [ Duration duration, EnginePhase phase ]) {
-    runApp(widget);
-    pump(duration, phase);
+    fakeAsync.flushMicrotasks();
   }
 
   /// Triggers a frame sequence (build/layout/paint/etc),
@@ -122,30 +107,25 @@ class ElementTreeTester extends Instrumentation {
   ///
   /// The supplied EnginePhase is the final phase reached during the pump pass;
   /// if not supplied, the whole pass is executed.
-  void pump([ Duration duration, EnginePhase phase ]) {
+  void pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsTree ]) {
+    assert(inTest);
+    assert(_clock != null);
     if (duration != null)
-      async.elapse(duration);
-    if (binding is _SteppedWidgetFlutterBinding) {
-      // Some tests call WidgetsFlutterBinding.ensureInitialized() manually, so
-      // we can't actually be sure we have a stepped binding.
-      _SteppedWidgetFlutterBinding steppedBinding = binding;
-      steppedBinding.phase = phase ?? EnginePhase.sendSemanticsTree;
-    } else {
-      // Can't step to a given phase in that case
-      assert(phase == null);
-    }
-    binding.handleBeginFrame(new Duration(
-      milliseconds: clock.now().millisecondsSinceEpoch)
-    );
-    async.flushMicrotasks();
+      fakeAsync.elapse(duration);
+    phase = newPhase;
+    handleBeginFrame(new Duration(
+      milliseconds: _clock.now().millisecondsSinceEpoch
+    ));
+    fakeAsync.flushMicrotasks();
   }
 
   /// Artificially calls dispatchLocaleChanged on the Widget binding,
   /// then flushes microtasks.
   void setLocale(String languageCode, String countryCode) {
+    assert(inTest);
     Locale locale = new Locale(languageCode, countryCode);
-    binding.dispatchLocaleChanged(locale);
-    async.flushMicrotasks();
+    dispatchLocaleChanged(locale);
+    fakeAsync.flushMicrotasks();
   }
 
   /// Returns the exception most recently caught by the Flutter framework.
@@ -163,51 +143,100 @@ class ElementTreeTester extends Instrumentation {
   /// It's safe to call this when there's no pending exception; it will return
   /// null in that case.
   dynamic takeException() {
+    assert(inTest);
     dynamic result = _pendingException;
     _pendingException = null;
     return result;
   }
   dynamic _pendingException;
-}
 
-void testElementTree(callback(ElementTreeTester tester)) {
-  new FakeAsync().run((FakeAsync async) {
+  /// Called by the [testWidgets] function before a test is executed.
+  void preTest() {
+    assert(fakeAsync == null);
+    assert(_clock == null);
+    _fakeAsync = new FakeAsync();
+    _clock = fakeAsync.getClock(new DateTime.utc(2015, 1, 1));
+  }
+
+  /// Invoke the callback inside a [FakeAsync] scope on which [pump] can
+  /// advance time.
+  ///
+  /// Returns a future which completes when the test has run.
+  ///
+  /// Called by the [testWidgets] and [benchmarkWidgets] functions to
+  /// run a test.
+  Future<Null> runTest(Future<Null> callback()) {
+    assert(inTest);
+    Future<Null> callbackResult;
+    fakeAsync.run((FakeAsync fakeAsync) {
+      assert(fakeAsync == this.fakeAsync);
+      callbackResult = _runTest(callback);
+      fakeAsync.flushMicrotasks();
+      assert(inTest);
+    });
+    // callbackResult is a Future that was created in the Zone of the fakeAsync.
+    // This means that if we call .then() on it (as the test framework is about to),
+    // it will register a microtask to handle the future _in the fake async zone_.
+    // To avoid this, we wrap it in a Future that we've created _outside_ the fake
+    // async zone.
+    return new Future<Null>.value(callbackResult);
+  }
+
+  Future<Null> _runTest(Future<Null> callback()) async {
+    assert(inTest);
     FlutterExceptionHandler oldHandler = FlutterError.onError;
-    ElementTreeTester tester = new ElementTreeTester._(async);
     try {
       FlutterError.onError = (FlutterErrorDetails details) {
-        if (tester._pendingException != null) {
-          FlutterError.dumpErrorToConsole(tester._pendingException);
+        if (_pendingException != null) {
+          FlutterError.dumpErrorToConsole(_pendingException);
           FlutterError.dumpErrorToConsole(details.exception);
-          tester._pendingException = 'An uncaught exception was thrown.';
+          _pendingException = 'An uncaught exception was thrown.';
           throw details.exception;
         }
-        tester._pendingException = details;
+        _pendingException = details;
       };
+
+      // run the test
       runApp(new Container(key: new UniqueKey())); // Reset the tree to a known state.
-      callback(tester);
+      await callback();
+      fakeAsync.flushMicrotasks();
       runApp(new Container(key: new UniqueKey())); // Unmount any remaining widgets.
-      async.flushMicrotasks();
-      assert(SchedulerBinding.instance.debugAssertNoTransientCallbacks(
+      fakeAsync.flushMicrotasks();
+
+      // verify invariants
+      assert(debugAssertNoTransientCallbacks(
         'An animation is still running even after the widget tree was disposed.'
       ));
       assert(() {
         'A Timer is still running even after the widget tree was disposed.';
-        return async.periodicTimerCount == 0;
+        return fakeAsync.periodicTimerCount == 0;
       });
       assert(() {
         'A Timer is still running even after the widget tree was disposed.';
-        return async.nonPeriodicTimerCount == 0;
+        return fakeAsync.nonPeriodicTimerCount == 0;
       });
-      assert(async.microtaskCount == 0); // Shouldn't be possible.
-      if (tester._pendingException != null)
+      assert(fakeAsync.microtaskCount == 0); // Shouldn't be possible.
+
+      // check for unexpected exceptions
+      if (_pendingException != null)
         throw 'An exception (shown above) was thrown during the test.';
     } finally {
       FlutterError.onError = oldHandler;
-      if (tester._pendingException != null) {
-        FlutterError.dumpErrorToConsole(tester._pendingException);
-        tester._pendingException = null;
+      if (_pendingException != null) {
+        FlutterError.dumpErrorToConsole(_pendingException);
+        _pendingException = null;
       }
+      assert(inTest);
     }
-  });
+    return null;
+  }
+
+  /// Called by the [testWidgets] function after a test is executed.
+  void postTest() {
+    assert(_fakeAsync != null);
+    assert(_clock != null);
+    _clock = null;
+    _fakeAsync = null;
+  }
+
 }

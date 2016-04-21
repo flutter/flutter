@@ -7,8 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Drag and drop - control test', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Drag and drop - control test', (WidgetTester tester) {
       List<int> accepted = <int>[];
 
       tester.pumpWidget(new MaterialApp(
@@ -32,40 +31,38 @@ void main() {
       ));
 
       expect(accepted, isEmpty);
-      expect(tester, hasWidget(find.text('Source')));
-      expect(tester, doesNotHaveWidget(find.text('Dragging')));
-      expect(tester, hasWidget(find.text('Target')));
+      expect(find.text('Source'), findsOneWidget);
+      expect(find.text('Dragging'), findsNothing);
+      expect(find.text('Target'), findsOneWidget);
 
       Point firstLocation = tester.getCenter(find.text('Source'));
       TestGesture gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
 
       expect(accepted, isEmpty);
-      expect(tester, hasWidget(find.text('Source')));
-      expect(tester, hasWidget(find.text('Dragging')));
-      expect(tester, hasWidget(find.text('Target')));
+      expect(find.text('Source'), findsOneWidget);
+      expect(find.text('Dragging'), findsOneWidget);
+      expect(find.text('Target'), findsOneWidget);
 
       Point secondLocation = tester.getCenter(find.text('Target'));
       gesture.moveTo(secondLocation);
       tester.pump();
 
       expect(accepted, isEmpty);
-      expect(tester, hasWidget(find.text('Source')));
-      expect(tester, hasWidget(find.text('Dragging')));
-      expect(tester, hasWidget(find.text('Target')));
+      expect(find.text('Source'), findsOneWidget);
+      expect(find.text('Dragging'), findsOneWidget);
+      expect(find.text('Target'), findsOneWidget);
 
       gesture.up();
       tester.pump();
 
       expect(accepted, equals(<int>[1]));
-      expect(tester, hasWidget(find.text('Source')));
-      expect(tester, doesNotHaveWidget(find.text('Dragging')));
-      expect(tester, hasWidget(find.text('Target')));
-    });
+      expect(find.text('Source'), findsOneWidget);
+      expect(find.text('Dragging'), findsNothing);
+      expect(find.text('Target'), findsOneWidget);
   });
 
-  test('Drag and drop - dragging over button', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Drag and drop - dragging over button', (WidgetTester tester) {
       List<String> events = <String>[];
       Point firstLocation, secondLocation;
 
@@ -103,10 +100,10 @@ void main() {
       ));
 
       expect(events, isEmpty);
-      expect(tester, hasWidget(find.text('Source')));
-      expect(tester, doesNotHaveWidget(find.text('Dragging')));
-      expect(tester, hasWidget(find.text('Target')));
-      expect(tester, hasWidget(find.text('Button')));
+      expect(find.text('Source'), findsOneWidget);
+      expect(find.text('Dragging'), findsNothing);
+      expect(find.text('Target'), findsOneWidget);
+      expect(find.text('Button'), findsOneWidget);
 
       // taps (we check both to make sure the test is consistent)
 
@@ -153,11 +150,9 @@ void main() {
       tester.pump();
       expect(events, equals(<String>['tap', 'tap', 'drop']));
       events.clear();
-    });
   });
 
-  test('Drag and drop - tapping button', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Drag and drop - tapping button', (WidgetTester tester) {
       List<String> events = <String>[];
       Point firstLocation, secondLocation;
 
@@ -188,8 +183,8 @@ void main() {
       ));
 
       expect(events, isEmpty);
-      expect(tester, hasWidget(find.text('Button')));
-      expect(tester, hasWidget(find.text('Target')));
+      expect(find.text('Button'), findsOneWidget);
+      expect(find.text('Target'), findsOneWidget);
 
       expect(events, isEmpty);
       tester.tap(find.text('Button'));
@@ -209,11 +204,9 @@ void main() {
       tester.pump();
       expect(events, equals(<String>['drop']));
       events.clear();
-    });
   });
 
-  test('Drag and drop - long press draggable, short press', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Drag and drop - long press draggable, short press', (WidgetTester tester) {
       List<String> events = <String>[];
       Point firstLocation, secondLocation;
 
@@ -238,8 +231,8 @@ void main() {
       ));
 
       expect(events, isEmpty);
-      expect(tester, hasWidget(find.text('Source')));
-      expect(tester, hasWidget(find.text('Target')));
+      expect(find.text('Source'), findsOneWidget);
+      expect(find.text('Target'), findsOneWidget);
 
       expect(events, isEmpty);
       tester.tap(find.text('Source'));
@@ -257,11 +250,9 @@ void main() {
       gesture.up();
       tester.pump();
       expect(events, isEmpty);
-    });
   });
 
-  test('Drag and drop - long press draggable, long press', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Drag and drop - long press draggable, long press', (WidgetTester tester) {
       List<String> events = <String>[];
       Point firstLocation, secondLocation;
 
@@ -286,8 +277,8 @@ void main() {
       ));
 
       expect(events, isEmpty);
-      expect(tester, hasWidget(find.text('Source')));
-      expect(tester, hasWidget(find.text('Target')));
+      expect(find.text('Source'), findsOneWidget);
+      expect(find.text('Target'), findsOneWidget);
 
       expect(events, isEmpty);
       tester.tap(find.text('Source'));
@@ -307,12 +298,9 @@ void main() {
       gesture.up();
       tester.pump();
       expect(events, equals(<String>['drop']));
-    });
   });
 
-  test('Drag and drop - horizontal and vertical draggables in vertical block',
-      () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Drag and drop - horizontal and vertical draggables in vertical block', (WidgetTester tester) {
       List<String> events = <String>[];
       Point firstLocation, secondLocation, thirdLocation;
 
@@ -347,9 +335,9 @@ void main() {
       ));
 
       expect(events, isEmpty);
-      expect(tester, hasWidget(find.text('Target')));
-      expect(tester, hasWidget(find.text('H')));
-      expect(tester, hasWidget(find.text('V')));
+      expect(find.text('Target'), findsOneWidget);
+      expect(find.text('H'), findsOneWidget);
+      expect(find.text('V'), findsOneWidget);
 
       // vertical draggable drags vertically
       expect(events, isEmpty);
@@ -414,12 +402,9 @@ void main() {
       expect(events, equals(<String>[]));
       expect(tester.getCenter(find.text('Target')).y, lessThan(0.0));
       events.clear();
-    });
   });
 
-  test('Drag and drop - horizontal and vertical draggables in horizontal block',
-      () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Drag and drop - horizontal and vertical draggables in horizontal block', (WidgetTester tester) {
       List<String> events = <String>[];
       Point firstLocation, secondLocation, thirdLocation;
 
@@ -455,9 +440,9 @@ void main() {
       ));
 
       expect(events, isEmpty);
-      expect(tester, hasWidget(find.text('Target')));
-      expect(tester, hasWidget(find.text('H')));
-      expect(tester, hasWidget(find.text('V')));
+      expect(find.text('Target'), findsOneWidget);
+      expect(find.text('H'), findsOneWidget);
+      expect(find.text('V'), findsOneWidget);
 
       // horizontal draggable drags horizontally
       expect(events, isEmpty);
@@ -522,13 +507,9 @@ void main() {
       expect(events, equals(<String>[]));
       expect(tester.getCenter(find.text('Target')).x, lessThan(0.0));
       events.clear();
-    });
   });
 
-  test(
-      'Drag and drop - onDraggableDropped not called if dropped on accepting target',
-      () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Drag and drop - onDraggableDropped not called if dropped on accepting target', (WidgetTester tester) {
       List<int> accepted = <int>[];
       bool onDraggableCanceledCalled = false;
 
@@ -556,9 +537,9 @@ void main() {
       ));
 
       expect(accepted, isEmpty);
-      expect(tester, hasWidget(find.text('Source')));
-      expect(tester, doesNotHaveWidget(find.text('Dragging')));
-      expect(tester, hasWidget(find.text('Target')));
+      expect(find.text('Source'), findsOneWidget);
+      expect(find.text('Dragging'), findsNothing);
+      expect(find.text('Target'), findsOneWidget);
       expect(onDraggableCanceledCalled, isFalse);
 
       Point firstLocation = tester.getCenter(find.text('Source'));
@@ -566,9 +547,9 @@ void main() {
       tester.pump();
 
       expect(accepted, isEmpty);
-      expect(tester, hasWidget(find.text('Source')));
-      expect(tester, hasWidget(find.text('Dragging')));
-      expect(tester, hasWidget(find.text('Target')));
+      expect(find.text('Source'), findsOneWidget);
+      expect(find.text('Dragging'), findsOneWidget);
+      expect(find.text('Target'), findsOneWidget);
       expect(onDraggableCanceledCalled, isFalse);
 
       Point secondLocation = tester.getCenter(find.text('Target'));
@@ -576,26 +557,22 @@ void main() {
       tester.pump();
 
       expect(accepted, isEmpty);
-      expect(tester, hasWidget(find.text('Source')));
-      expect(tester, hasWidget(find.text('Dragging')));
-      expect(tester, hasWidget(find.text('Target')));
+      expect(find.text('Source'), findsOneWidget);
+      expect(find.text('Dragging'), findsOneWidget);
+      expect(find.text('Target'), findsOneWidget);
       expect(onDraggableCanceledCalled, isFalse);
 
       gesture.up();
       tester.pump();
 
       expect(accepted, equals(<int>[1]));
-      expect(tester, hasWidget(find.text('Source')));
-      expect(tester, doesNotHaveWidget(find.text('Dragging')));
-      expect(tester, hasWidget(find.text('Target')));
+      expect(find.text('Source'), findsOneWidget);
+      expect(find.text('Dragging'), findsNothing);
+      expect(find.text('Target'), findsOneWidget);
       expect(onDraggableCanceledCalled, isFalse);
-    });
   });
 
-  test(
-      'Drag and drop - onDraggableDropped called if dropped on non-accepting target',
-      () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Drag and drop - onDraggableDropped called if dropped on non-accepting target', (WidgetTester tester) {
       List<int> accepted = <int>[];
       bool onDraggableCanceledCalled = false;
       Velocity onDraggableCanceledVelocity;
@@ -628,9 +605,9 @@ void main() {
       ));
 
       expect(accepted, isEmpty);
-      expect(tester, hasWidget(find.text('Source')));
-      expect(tester, doesNotHaveWidget(find.text('Dragging')));
-      expect(tester, hasWidget(find.text('Target')));
+      expect(find.text('Source'), findsOneWidget);
+      expect(find.text('Dragging'), findsNothing);
+      expect(find.text('Target'), findsOneWidget);
       expect(onDraggableCanceledCalled, isFalse);
 
       Point firstLocation = tester.getTopLeft(find.text('Source'));
@@ -638,9 +615,9 @@ void main() {
       tester.pump();
 
       expect(accepted, isEmpty);
-      expect(tester, hasWidget(find.text('Source')));
-      expect(tester, hasWidget(find.text('Dragging')));
-      expect(tester, hasWidget(find.text('Target')));
+      expect(find.text('Source'), findsOneWidget);
+      expect(find.text('Dragging'), findsOneWidget);
+      expect(find.text('Target'), findsOneWidget);
       expect(onDraggableCanceledCalled, isFalse);
 
       Point secondLocation = tester.getCenter(find.text('Target'));
@@ -648,29 +625,24 @@ void main() {
       tester.pump();
 
       expect(accepted, isEmpty);
-      expect(tester, hasWidget(find.text('Source')));
-      expect(tester, hasWidget(find.text('Dragging')));
-      expect(tester, hasWidget(find.text('Target')));
+      expect(find.text('Source'), findsOneWidget);
+      expect(find.text('Dragging'), findsOneWidget);
+      expect(find.text('Target'), findsOneWidget);
       expect(onDraggableCanceledCalled, isFalse);
 
       gesture.up();
       tester.pump();
 
       expect(accepted, isEmpty);
-      expect(tester, hasWidget(find.text('Source')));
-      expect(tester, doesNotHaveWidget(find.text('Dragging')));
-      expect(tester, hasWidget(find.text('Target')));
+      expect(find.text('Source'), findsOneWidget);
+      expect(find.text('Dragging'), findsNothing);
+      expect(find.text('Target'), findsOneWidget);
       expect(onDraggableCanceledCalled, isTrue);
       expect(onDraggableCanceledVelocity, equals(Velocity.zero));
-      expect(onDraggableCanceledOffset,
-          equals(new Offset(secondLocation.x, secondLocation.y)));
-    });
+      expect(onDraggableCanceledOffset, equals(new Offset(secondLocation.x, secondLocation.y)));
   });
 
-  test(
-      'Drag and drop - onDraggableDropped called if dropped on non-accepting target with correct velocity',
-      () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Drag and drop - onDraggableDropped called if dropped on non-accepting target with correct velocity', (WidgetTester tester) {
       List<int> accepted = <int>[];
       bool onDraggableCanceledCalled = false;
       Velocity onDraggableCanceledVelocity;
@@ -701,9 +673,9 @@ void main() {
       ));
 
       expect(accepted, isEmpty);
-      expect(tester, hasWidget(find.text('Source')));
-      expect(tester, doesNotHaveWidget(find.text('Dragging')));
-      expect(tester, hasWidget(find.text('Target')));
+      expect(find.text('Source'), findsOneWidget);
+      expect(find.text('Dragging'), findsNothing);
+      expect(find.text('Target'), findsOneWidget);
       expect(onDraggableCanceledCalled, isFalse);
 
       Point flingStart = tester.getTopLeft(find.text('Source'));
@@ -711,23 +683,16 @@ void main() {
       tester.pump();
 
       expect(accepted, isEmpty);
-      expect(tester, hasWidget(find.text('Source')));
-      expect(tester, doesNotHaveWidget(find.text('Dragging')));
-      expect(tester, hasWidget(find.text('Target')));
+      expect(find.text('Source'), findsOneWidget);
+      expect(find.text('Dragging'), findsNothing);
+      expect(find.text('Target'), findsOneWidget);
       expect(onDraggableCanceledCalled, isTrue);
-      expect(onDraggableCanceledVelocity.pixelsPerSecond.dx.abs(),
-          lessThan(0.0000001));
-      expect((onDraggableCanceledVelocity.pixelsPerSecond.dy - 1000.0).abs(),
-          lessThan(0.0000001));
-      expect(
-          onDraggableCanceledOffset,
-          equals(
-              new Offset(flingStart.x, flingStart.y) + new Offset(0.0, 100.0)));
-    });
+      expect(onDraggableCanceledVelocity.pixelsPerSecond.dx.abs(), lessThan(0.0000001));
+      expect((onDraggableCanceledVelocity.pixelsPerSecond.dy - 1000.0).abs(), lessThan(0.0000001));
+      expect(onDraggableCanceledOffset, equals(new Offset(flingStart.x, flingStart.y) + new Offset(0.0, 100.0)));
   });
 
-  test('Drag and drop - allow pass thru of unaccepted data test', () {
-      testWidgets((WidgetTester tester) {
+  testWidgets('Drag and drop - allow pass thru of unaccepted data test', (WidgetTester tester) {
       List<int> acceptedInts = <int>[];
       List<double> acceptedDoubles = <double>[];
 
@@ -780,12 +745,12 @@ void main() {
 
       expect(acceptedInts, isEmpty);
       expect(acceptedDoubles, isEmpty);
-      expect(tester, hasWidget(find.text('IntSource')));
-      expect(tester, doesNotHaveWidget(find.text('IntDragging')));
-      expect(tester, hasWidget(find.text('DoubleSource')));
-      expect(tester, doesNotHaveWidget(find.text('DoubleDragging')));
-      expect(tester, hasWidget(find.text('Target1')));
-      expect(tester, hasWidget(find.text('Target2')));
+      expect(find.text('IntSource'), findsOneWidget);
+      expect(find.text('IntDragging'), findsNothing);
+      expect(find.text('DoubleSource'), findsOneWidget);
+      expect(find.text('DoubleDragging'), findsNothing);
+      expect(find.text('Target1'), findsOneWidget);
+      expect(find.text('Target2'), findsOneWidget);
 
       Point intLocation = tester.getCenter(find.text('IntSource'));
       Point doubleLocation = tester.getCenter(find.text('DoubleSource'));
@@ -798,24 +763,24 @@ void main() {
 
       expect(acceptedInts, isEmpty);
       expect(acceptedDoubles, isEmpty);
-      expect(tester, doesNotHaveWidget(find.text('IntDragging')));
-      expect(tester, hasWidget(find.text('DoubleDragging')));
+      expect(find.text('IntDragging'), findsNothing);
+      expect(find.text('DoubleDragging'), findsOneWidget);
 
       doubleGesture.moveTo(targetLocation);
       tester.pump();
 
       expect(acceptedInts, isEmpty);
       expect(acceptedDoubles, isEmpty);
-      expect(tester, doesNotHaveWidget(find.text('IntDragging')));
-      expect(tester, hasWidget(find.text('DoubleDragging')));
+      expect(find.text('IntDragging'), findsNothing);
+      expect(find.text('DoubleDragging'), findsOneWidget);
 
       doubleGesture.up();
       tester.pump();
 
       expect(acceptedInts, isEmpty);
       expect(acceptedDoubles, equals(<double>[1.0]));
-      expect(tester, doesNotHaveWidget(find.text('IntDragging')));
-      expect(tester, doesNotHaveWidget(find.text('DoubleDragging')));
+      expect(find.text('IntDragging'), findsNothing);
+      expect(find.text('DoubleDragging'), findsNothing);
 
       acceptedDoubles.clear();
 
@@ -825,29 +790,27 @@ void main() {
 
       expect(acceptedInts, isEmpty);
       expect(acceptedDoubles, isEmpty);
-      expect(tester, hasWidget(find.text('IntDragging')));
-      expect(tester, doesNotHaveWidget(find.text('DoubleDragging')));
+      expect(find.text('IntDragging'), findsOneWidget);
+      expect(find.text('DoubleDragging'), findsNothing);
 
       intGesture.moveTo(targetLocation);
       tester.pump();
 
       expect(acceptedInts, isEmpty);
       expect(acceptedDoubles, isEmpty);
-      expect(tester, hasWidget(find.text('IntDragging')));
-      expect(tester, doesNotHaveWidget(find.text('DoubleDragging')));
+      expect(find.text('IntDragging'), findsOneWidget);
+      expect(find.text('DoubleDragging'), findsNothing);
 
       intGesture.up();
       tester.pump();
 
       expect(acceptedInts, equals(<int>[1]));
       expect(acceptedDoubles, isEmpty);
-      expect(tester, doesNotHaveWidget(find.text('IntDragging')));
-      expect(tester, doesNotHaveWidget(find.text('DoubleDragging')));
-    });
+      expect(find.text('IntDragging'), findsNothing);
+      expect(find.text('DoubleDragging'), findsNothing);
   });
 
-  test('Drag and drop - allow pass thru of unaccepted data twice test', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Drag and drop - allow pass thru of unaccepted data twice test', (WidgetTester tester) {
       List<DragTargetData> acceptedDragTargetDatas = <DragTargetData>[];
       List<ExtendedDragTargetData> acceptedExtendedDragTargetDatas = <ExtendedDragTargetData>[];
       DragTargetData dragTargetData = new DragTargetData();
@@ -909,12 +872,9 @@ void main() {
         acceptedDragTargetDatas.clear();
         tester.pump();
       }
-    });
   });
 }
 
-class DragTargetData {
-}
+class DragTargetData { }
 
-class ExtendedDragTargetData extends DragTargetData {
-}
+class ExtendedDragTargetData extends DragTargetData { }

@@ -52,8 +52,7 @@ Future<Null> fling(double velocity) {
 }
 
 void main() {
-  test('ScrollableList snap scrolling, fling(0.8)', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('ScrollableList snap scrolling, fling(0.8)', (WidgetTester tester) {
       tester.pumpWidget(buildFrame());
 
       scrollOffset = 0.0;
@@ -106,6 +105,5 @@ void main() {
       tester.pump();
       tester.pump(dt);
       expect(completed, true);
-    });
   });
 }

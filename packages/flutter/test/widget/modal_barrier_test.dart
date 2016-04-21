@@ -25,8 +25,7 @@ void main() {
     );
   });
 
-  test('ModalBarrier prevents interactions with widgets behind it', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('ModalBarrier prevents interactions with widgets behind it', (WidgetTester tester) {
       Widget subject = new Stack(
         children: <Widget>[
           tapTarget,
@@ -39,11 +38,9 @@ void main() {
       tester.pumpWidget(subject);
       expect(tapped, isFalse,
         reason: 'because the tap is prevented by ModalBarrier');
-    });
   });
 
-  test('ModalBarrier does not prevent interactions with widgets in front of it', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('ModalBarrier does not prevent interactions with widgets in front of it', (WidgetTester tester) {
       Widget subject = new Stack(
         children: <Widget>[
           new ModalBarrier(dismissable: false),
@@ -56,11 +53,9 @@ void main() {
       tester.pumpWidget(subject);
       expect(tapped, isTrue,
         reason: 'because the tap is not prevented by ModalBarrier');
-    });
   });
 
-  test('ModalBarrier pops the Navigator when dismissed', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('ModalBarrier pops the Navigator when dismissed', (WidgetTester tester) {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => new FirstWidget(),
         '/modal': (BuildContext context) => new SecondWidget(),
@@ -69,7 +64,7 @@ void main() {
       tester.pumpWidget(new MaterialApp(routes: routes));
 
       // Initially the barrier is not visible
-      expect(tester, doesNotHaveWidget(find.byKey(const ValueKey<String>('barrier'))));
+      expect(find.byKey(const ValueKey<String>('barrier')), findsNothing);
 
       // Tapping on X routes to the barrier
       tester.tap(find.text('X'));
@@ -81,9 +76,8 @@ void main() {
       tester.pump();  // begin transition
       tester.pump(const Duration(seconds: 1));  // end transition
 
-      expect(tester, doesNotHaveWidget(find.byKey(const ValueKey<String>('barrier'))),
+      expect(find.byKey(const ValueKey<String>('barrier')), findsNothing,
         reason: 'because the barrier was dismissed');
-    });
   });
 }
 

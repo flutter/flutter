@@ -9,8 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('MediaQuery has a default', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('MediaQuery has a default', (WidgetTester tester) {
       Size size;
 
       tester.pumpWidget(
@@ -23,6 +22,5 @@ void main() {
       );
 
       expect(size, equals(ui.window.size));
-    });
   });
 }

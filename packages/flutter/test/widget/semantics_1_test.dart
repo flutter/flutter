@@ -11,8 +11,7 @@ import 'package:test/test.dart';
 import 'test_semantics.dart';
 
 void main() {
-  test('Semantics 1', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Semantics 1', (WidgetTester tester) {
       TestSemanticsListener client = new TestSemanticsListener();
 
       // smoketest
@@ -245,6 +244,5 @@ void main() {
       expect(client.updates[0].children[1].children.length, equals(0));
       expect(client.updates[1], isNull);
       client.updates.clear();
-    });
   });
 }

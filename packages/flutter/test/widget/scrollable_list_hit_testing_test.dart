@@ -10,8 +10,7 @@ import 'package:test/test.dart';
 const List<int> items = const <int>[0, 1, 2, 3, 4, 5];
 
 void main() {
-  test('Tap item after scroll - horizontal', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Tap item after scroll - horizontal', (WidgetTester tester) {
       List<int> tapped = <int>[];
       tester.pumpWidget(new Center(
         child: new Container(
@@ -38,20 +37,18 @@ void main() {
       //    10..300 = 1
       //   300..590 = 2
       //   590..880 = 3
-      expect(tester, hasWidget(find.text('0')));
-      expect(tester, hasWidget(find.text('1')));
-      expect(tester, hasWidget(find.text('2')));
-      expect(tester, hasWidget(find.text('3')));
-      expect(tester, doesNotHaveWidget(find.text('4')));
-      expect(tester, doesNotHaveWidget(find.text('5')));
+      expect(find.text('0'), findsOneWidget);
+      expect(find.text('1'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
+      expect(find.text('4'), findsNothing);
+      expect(find.text('5'), findsNothing);
       expect(tapped, equals([]));
       tester.tap(find.text('2'));
       expect(tapped, equals([2]));
-    });
   });
 
-  test('Tap item after scroll - vertical', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Tap item after scroll - vertical', (WidgetTester tester) {
       List<int> tapped = <int>[];
       tester.pumpWidget(new Center(
         child: new Container(
@@ -78,22 +75,20 @@ void main() {
       //    10..300 = 1
       //   300..590 = 2
       //   590..880 = 3
-      expect(tester, hasWidget(find.text('0')));
-      expect(tester, hasWidget(find.text('1')));
-      expect(tester, hasWidget(find.text('2')));
-      expect(tester, hasWidget(find.text('3')));
-      expect(tester, doesNotHaveWidget(find.text('4')));
-      expect(tester, doesNotHaveWidget(find.text('5')));
+      expect(find.text('0'), findsOneWidget);
+      expect(find.text('1'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
+      expect(find.text('4'), findsNothing);
+      expect(find.text('5'), findsNothing);
       expect(tapped, equals([]));
       tester.tap(find.text('1'));
       expect(tapped, equals([1]));
       tester.tap(find.text('3'));
       expect(tapped, equals([1])); // the center of the third item is off-screen so it shouldn't get hit
-    });
   });
 
-  test('Padding scroll anchor start', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Padding scroll anchor start', (WidgetTester tester) {
       List<int> tapped = <int>[];
 
       tester.pumpWidget(
@@ -123,11 +118,9 @@ void main() {
       expect(tapped, equals([0, 1]));
       tester.tapAt(new Point(800.0 - 16.0, 400.0));
       expect(tapped, equals([0, 1, 1]));
-    });
   });
 
-  test('Padding scroll anchor end', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Padding scroll anchor end', (WidgetTester tester) {
       List<int> tapped = <int>[];
 
       tester.pumpWidget(
@@ -158,6 +151,5 @@ void main() {
       expect(tapped, equals([5, 4]));
       tester.tapAt(new Point(800.0 - 16.0, 200.0));
       expect(tapped, equals([5, 4, 4]));
-    });
   });
 }

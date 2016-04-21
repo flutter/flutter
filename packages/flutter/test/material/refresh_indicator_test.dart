@@ -17,8 +17,7 @@ void main() {
     return new Future<Null>.value();
   }
 
-  test('RefreshIndicator', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('RefreshIndicator', (WidgetTester tester) {
       tester.pumpWidget(
         new RefreshIndicator(
           refresh: refresh,
@@ -39,6 +38,5 @@ void main() {
       tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
       tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
       expect(refreshCalled, true);
-    });
   });
 }

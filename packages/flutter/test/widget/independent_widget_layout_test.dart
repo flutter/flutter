@@ -109,8 +109,7 @@ class TriggerableState extends State<TriggerableWidget> {
 }
 
 void main() {
-  test('no crosstalk between widget build owners', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('no crosstalk between widget build owners', (WidgetTester tester) {
       Trigger trigger1 = new Trigger();
       Counter counter1 = new Counter();
       Trigger trigger2 = new Trigger();
@@ -158,6 +157,5 @@ void main() {
       // Now both widgets should have rebuilt
       expect(counter1.count, equals(3));
       expect(counter2.count, equals(3));
-    });
   });
 }

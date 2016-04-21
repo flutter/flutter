@@ -10,8 +10,7 @@ import 'package:test/test.dart';
 import 'test_semantics.dart';
 
 void main() {
-  test('Does FlatButton contribute semantics', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Does FlatButton contribute semantics', (WidgetTester tester) {
       TestSemanticsListener client = new TestSemanticsListener();
       tester.pumpWidget(
         new Material(
@@ -49,6 +48,5 @@ void main() {
       expect(client.updates[0].children[0].children.length, equals(0));
       expect(client.updates[1], isNull);
       client.updates.clear();
-    });
   });
 }

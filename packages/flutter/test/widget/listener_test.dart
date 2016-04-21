@@ -7,8 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Events bubble up the tree', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Events bubble up the tree', (WidgetTester tester) {
       List<String> log = new List<String>();
 
       tester.pumpWidget(
@@ -40,6 +39,5 @@ void main() {
         'middle',
         'top',
       ]));
-    });
   });
 }

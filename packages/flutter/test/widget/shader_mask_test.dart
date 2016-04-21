@@ -6,7 +6,6 @@ import 'dart:ui' show Shader;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 Shader createShader(Rect bounds) {
   return new LinearGradient(
@@ -19,10 +18,8 @@ Shader createShader(Rect bounds) {
 
 
 void main() {
-  test('Can be constructed', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Can be constructed', (WidgetTester tester) {
       Widget child = new Container(width: 100.0, height: 100.0);
       tester.pumpWidget(new ShaderMask(child: child, shaderCallback: createShader));
-    });
   });
 }

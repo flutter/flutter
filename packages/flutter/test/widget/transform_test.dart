@@ -7,8 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Transform origin', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Transform origin', (WidgetTester tester) {
       bool didReceiveTap = false;
       tester.pumpWidget(
         new Stack(
@@ -55,11 +54,9 @@ void main() {
       expect(didReceiveTap, isFalse);
       tester.tapAt(new Point(190.0, 150.0));
       expect(didReceiveTap, isTrue);
-    });
   });
 
-  test('Transform alignment', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Transform alignment', (WidgetTester tester) {
       bool didReceiveTap = false;
       tester.pumpWidget(
         new Stack(
@@ -106,11 +103,9 @@ void main() {
       expect(didReceiveTap, isFalse);
       tester.tapAt(new Point(190.0, 150.0));
       expect(didReceiveTap, isTrue);
-    });
   });
 
-  test('Transform offset + alignment', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Transform offset + alignment', (WidgetTester tester) {
       bool didReceiveTap = false;
       tester.pumpWidget(
         new Stack(
@@ -158,6 +153,5 @@ void main() {
       expect(didReceiveTap, isFalse);
       tester.tapAt(new Point(190.0, 150.0));
       expect(didReceiveTap, isTrue);
-    });
   });
 }

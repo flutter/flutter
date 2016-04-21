@@ -49,26 +49,25 @@ void main() {
   final Duration kTwoTenthsOfTheTransitionDuration = kMaterialPageRouteTransitionDuration * 0.2;
   final Duration kFourTenthsOfTheTransitionDuration = kMaterialPageRouteTransitionDuration * 0.4;
 
-  test('Check onstage/offstage handling around transitions', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Check onstage/offstage handling around transitions', (WidgetTester tester) {
 
       GlobalKey insideKey = new GlobalKey();
 
       String state() {
         String result = '';
-        if (tester.exists(find.text('A')))
+        if (tester.any(find.text('A')))
           result += 'A';
-        if (tester.exists(find.text('B')))
+        if (tester.any(find.text('B')))
           result += 'B';
-        if (tester.exists(find.text('C')))
+        if (tester.any(find.text('C')))
           result += 'C';
-        if (tester.exists(find.text('D')))
+        if (tester.any(find.text('D')))
           result += 'D';
-        if (tester.exists(find.text('E')))
+        if (tester.any(find.text('E')))
           result += 'E';
-        if (tester.exists(find.text('F')))
+        if (tester.any(find.text('F')))
           result += 'F';
-        if (tester.exists(find.text('G')))
+        if (tester.any(find.text('G')))
           result += 'G';
         return result;
       }
@@ -172,6 +171,5 @@ void main() {
       tester.pump(kFourTenthsOfTheTransitionDuration);
       expect(state(), equals('G')); // transition 1->4 is done
 
-    });
   });
 }

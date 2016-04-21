@@ -22,8 +22,7 @@ class TestCustomPainter extends CustomPainter {
 }
 
 void main() {
-  test('Control test for custom painting', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Control test for custom painting', (WidgetTester tester) {
       List<String> log = <String>[];
       tester.pumpWidget(new CustomPaint(
         painter: new TestCustomPainter(
@@ -43,6 +42,5 @@ void main() {
       ));
 
       expect(log, equals(['background', 'child', 'foreground']));
-    });
   });
 }

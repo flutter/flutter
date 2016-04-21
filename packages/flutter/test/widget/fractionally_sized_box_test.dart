@@ -8,8 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('FractionallySizedBox', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('FractionallySizedBox', (WidgetTester tester) {
       GlobalKey inner = new GlobalKey();
       tester.pumpWidget(new OverflowBox(
         minWidth: 0.0,
@@ -30,6 +29,5 @@ void main() {
       RenderBox box = inner.currentContext.findRenderObject();
       expect(box.size, equals(const Size(50.0, 25.0)));
       expect(box.localToGlobal(Point.origin), equals(const Point(25.0, 37.5)));
-    });
   });
 }

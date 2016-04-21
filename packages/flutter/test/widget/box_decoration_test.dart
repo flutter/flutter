@@ -8,8 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Circles can have uniform borders', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Circles can have uniform borders', (WidgetTester tester) {
       tester.pumpWidget(
         new Container(
           padding: new EdgeInsets.all(50.0),
@@ -20,11 +19,9 @@ void main() {
           )
         )
       );
-    });
   });
 
-  test('Bordered Container insets its child', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Bordered Container insets its child', (WidgetTester tester) {
       Key key = new Key('outerContainer');
       tester.pumpWidget(
         new Center(
@@ -39,6 +36,5 @@ void main() {
         )
       );
       expect(tester.getSize(find.byKey(key)), equals(const Size(45.0, 45.0)));
-    });
   });
 }

@@ -8,8 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Semantics 6 - SemanticsDebugger smoke test', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Semantics 6 - SemanticsDebugger smoke test', (WidgetTester tester) {
 
       // This is a smoketest to verify that adding a debugger doesn't crash.
 
@@ -45,6 +44,5 @@ void main() {
 
       expect(true, isTrue); // expect that we reach here without crashing
 
-    });
   });
 }

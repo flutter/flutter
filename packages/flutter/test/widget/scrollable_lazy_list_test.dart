@@ -9,8 +9,7 @@ import 'package:test/test.dart';
 import 'test_widgets.dart';
 
 void main() {
-  test('HomogeneousViewport mount/dismount smoke test', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('HomogeneousViewport mount/dismount smoke test', (WidgetTester tester) {
       List<int> callbackTracker = <int>[];
 
       // the root view is 800x600 in the test environment
@@ -39,7 +38,7 @@ void main() {
 
       tester.pumpWidget(builder());
 
-      FlipWidgetState testWidget = tester.stateOf(find.byType(FlipWidget));
+      FlipWidgetState testWidget = tester.state(find.byType(FlipWidget));
 
       expect(callbackTracker, equals([0, 1, 2, 3, 4, 5]));
 
@@ -54,11 +53,9 @@ void main() {
       tester.pump();
 
       expect(callbackTracker, equals([0, 1, 2, 3, 4, 5]));
-    });
   });
 
-  test('HomogeneousViewport vertical', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('HomogeneousViewport vertical', (WidgetTester tester) {
       List<int> callbackTracker = <int>[];
 
       // the root view is 800x600 in the test environment
@@ -104,11 +101,9 @@ void main() {
       expect(callbackTracker, equals([2, 3, 4]));
 
       callbackTracker.clear();
-    });
   });
 
-  test('HomogeneousViewport horizontal', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('HomogeneousViewport horizontal', (WidgetTester tester) {
       List<int> callbackTracker = <int>[];
 
       // the root view is 800x600 in the test environment
@@ -155,11 +150,9 @@ void main() {
       expect(callbackTracker, equals([2, 3, 4, 5]));
 
       callbackTracker.clear();
-    });
   });
 
-  test('ScrollableLazyList 10 items, 2-3 items visible', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('ScrollableLazyList 10 items, 2-3 items visible', (WidgetTester tester) {
       List<int> callbackTracker = <int>[];
 
       // The root view is 800x600 in the test environment and our list
@@ -201,7 +194,6 @@ void main() {
       tester.pumpWidget(testWidget);
       expect(callbackTracker, equals([2, 3, 4]));
       callbackTracker.clear();
-    });
   });
 
 }

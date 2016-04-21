@@ -361,13 +361,19 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
 /// A concrete binding for applications based on the Widgets framework.
 /// This is the glue that binds the framework to the Flutter engine.
 class WidgetsFlutterBinding extends BindingBase with SchedulerBinding, GestureBinding, ServicesBinding, RendererBinding, WidgetsBinding {
-  /// Creates and initializes the WidgetsFlutterBinding. This function
-  /// is idempotent; calling it a second time will just return the
-  /// previously-created instance.
+
+  /// Returns an instance of the [WidgetsBinding], creating and
+  /// initializing it if necessary. If one is created, it will be a
+  /// [WidgetsFlutterBinding]. If one was previously initialized, then
+  /// it will at least implement [WidgetsBinding].
   ///
   /// You only need to call this method if you need the binding to be
   /// initialized before calling [runApp].
-  static WidgetsFlutterBinding ensureInitialized() {
+  ///
+  /// In the `flutter_test` framework, [testWidgets] initializes the
+  /// binding instance to a [TestWidgetsFlutterBinding], not a
+  /// [WidgetsFlutterBinding].
+  static WidgetsBinding ensureInitialized() {
     if (WidgetsBinding.instance == null)
       new WidgetsFlutterBinding();
     return WidgetsBinding.instance;

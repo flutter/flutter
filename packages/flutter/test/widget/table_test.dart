@@ -8,8 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Table widget - control test', () {
-    testElementTree((ElementTreeTester tester) {
+  testWidgets('Table widget - control test', (WidgetTester tester) {
       tester.pumpWidget(
         new Table(
           children: <TableRow>[
@@ -31,17 +30,16 @@ void main() {
           ]
         )
       );
-      RenderBox boxA = tester.findText('AAAAAA').findRenderObject();
-      RenderBox boxD = tester.findText('D').findRenderObject();
-      RenderBox boxG = tester.findText('G').findRenderObject();
-      RenderBox boxB = tester.findText('B').findRenderObject();
+      RenderBox boxA = tester.renderObject(find.text('AAAAAA'));
+      RenderBox boxD = tester.renderObject(find.text('D'));
+      RenderBox boxG = tester.renderObject(find.text('G'));
+      RenderBox boxB = tester.renderObject(find.text('B'));
       expect(boxA.size, equals(boxD.size));
       expect(boxA.size, equals(boxG.size));
       expect(boxA.size, equals(boxB.size));
-    });
   });
-  test('Table widget - changing table dimensions', () {
-    testElementTree((ElementTreeTester tester) {
+
+  testWidgets('Table widget - changing table dimensions', (WidgetTester tester) {
       tester.pumpWidget(
         new Table(
           children: <TableRow>[
@@ -63,8 +61,8 @@ void main() {
           ]
         )
       );
-      RenderBox boxA1 = tester.findText('A').findRenderObject();
-      RenderBox boxG1 = tester.findText('G').findRenderObject();
+      RenderBox boxA1 = tester.renderObject(find.text('A'));
+      RenderBox boxG1 = tester.renderObject(find.text('G'));
       expect(boxA1, isNotNull);
       expect(boxG1, isNotNull);
       tester.pumpWidget(
@@ -83,16 +81,15 @@ void main() {
           ]
         )
       );
-      RenderBox boxA2 = tester.findText('a').findRenderObject();
-      RenderBox boxG2 = tester.findText('g').findRenderObject();
+      RenderBox boxA2 = tester.renderObject(find.text('a'));
+      RenderBox boxG2 = tester.renderObject(find.text('g'));
       expect(boxA2, isNotNull);
       expect(boxG2, isNotNull);
       expect(boxA1, equals(boxA2));
       expect(boxG1, isNot(equals(boxG2)));
-    });
   });
-  test('Table widget - repump test', () {
-    testElementTree((ElementTreeTester tester) {
+
+  testWidgets('Table widget - repump test', (WidgetTester tester) {
       tester.pumpWidget(
         new Table(
           children: <TableRow>[
@@ -135,17 +132,16 @@ void main() {
           ]
         )
       );
-      RenderBox boxA = tester.findText('AAA').findRenderObject();
-      RenderBox boxD = tester.findText('D').findRenderObject();
-      RenderBox boxG = tester.findText('G').findRenderObject();
-      RenderBox boxB = tester.findText('B').findRenderObject();
+      RenderBox boxA = tester.renderObject(find.text('AAA'));
+      RenderBox boxD = tester.renderObject(find.text('D'));
+      RenderBox boxG = tester.renderObject(find.text('G'));
+      RenderBox boxB = tester.renderObject(find.text('B'));
       expect(boxA.size, equals(boxD.size));
       expect(boxA.size, equals(boxG.size));
       expect(boxA.size, equals(boxB.size));
-    });
   });
-  test('Table widget - intrinsic sizing test', () {
-    testElementTree((ElementTreeTester tester) {
+
+  testWidgets('Table widget - intrinsic sizing test', (WidgetTester tester) {
       tester.pumpWidget(
         new Table(
           defaultColumnWidth: const IntrinsicColumnWidth(),
@@ -168,18 +164,17 @@ void main() {
           ]
         )
       );
-      RenderBox boxA = tester.findText('AAA').findRenderObject();
-      RenderBox boxD = tester.findText('D').findRenderObject();
-      RenderBox boxG = tester.findText('G').findRenderObject();
-      RenderBox boxB = tester.findText('B').findRenderObject();
+      RenderBox boxA = tester.renderObject(find.text('AAA'));
+      RenderBox boxD = tester.renderObject(find.text('D'));
+      RenderBox boxG = tester.renderObject(find.text('G'));
+      RenderBox boxB = tester.renderObject(find.text('B'));
       expect(boxA.size, equals(boxD.size));
       expect(boxA.size, equals(boxG.size));
       expect(boxA.size.width, greaterThan(boxB.size.width));
       expect(boxA.size.height, equals(boxB.size.height));
-    });
   });
-  test('Table widget - intrinsic sizing test, resizing', () {
-    testElementTree((ElementTreeTester tester) {
+
+  testWidgets('Table widget - intrinsic sizing test, resizing', (WidgetTester tester) {
       tester.pumpWidget(
         new Table(
           defaultColumnWidth: const IntrinsicColumnWidth(),
@@ -224,18 +219,17 @@ void main() {
           ]
         )
       );
-      RenderBox boxA = tester.findText('A').findRenderObject();
-      RenderBox boxD = tester.findText('D').findRenderObject();
-      RenderBox boxG = tester.findText('G').findRenderObject();
-      RenderBox boxB = tester.findText('B').findRenderObject();
+      RenderBox boxA = tester.renderObject(find.text('A'));
+      RenderBox boxD = tester.renderObject(find.text('D'));
+      RenderBox boxG = tester.renderObject(find.text('G'));
+      RenderBox boxB = tester.renderObject(find.text('B'));
       expect(boxA.size, equals(boxD.size));
       expect(boxA.size, equals(boxG.size));
       expect(boxA.size.width, lessThan(boxB.size.width));
       expect(boxA.size.height, equals(boxB.size.height));
-    });
   });
-  test('Table widget - intrinsic sizing test, changing column widths', () {
-    testElementTree((ElementTreeTester tester) {
+
+  testWidgets('Table widget - intrinsic sizing test, changing column widths', (WidgetTester tester) {
       tester.pumpWidget(
         new Table(
           children: <TableRow>[
@@ -279,18 +273,17 @@ void main() {
           ]
         )
       );
-      RenderBox boxA = tester.findText('AAA').findRenderObject();
-      RenderBox boxD = tester.findText('D').findRenderObject();
-      RenderBox boxG = tester.findText('G').findRenderObject();
-      RenderBox boxB = tester.findText('B').findRenderObject();
+      RenderBox boxA = tester.renderObject(find.text('AAA'));
+      RenderBox boxD = tester.renderObject(find.text('D'));
+      RenderBox boxG = tester.renderObject(find.text('G'));
+      RenderBox boxB = tester.renderObject(find.text('B'));
       expect(boxA.size, equals(boxD.size));
       expect(boxA.size, equals(boxG.size));
       expect(boxA.size.width, greaterThan(boxB.size.width));
       expect(boxA.size.height, equals(boxB.size.height));
-    });
   });
-  test('Table widget - moving test', () {
-    testElementTree((ElementTreeTester tester) {
+
+  testWidgets('Table widget - moving test', (WidgetTester tester) {
       List<BuildContext> contexts = <BuildContext>[];
       tester.pumpWidget(
         new Table(
@@ -338,7 +331,6 @@ void main() {
       );
       expect(contexts.length, equals(2));
       expect(contexts[0], equals(contexts[1]));
-    });
   });
   // TODO(ianh): Test handling of TableCell object
 }

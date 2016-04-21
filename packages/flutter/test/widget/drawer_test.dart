@@ -9,8 +9,7 @@ import 'package:test/test.dart';
 
 void main() {
 
-  test('Drawer control test', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Drawer control test', (WidgetTester tester) {
       GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
       BuildContext savedContext;
       tester.pumpWidget(
@@ -28,22 +27,20 @@ void main() {
         )
       );
       tester.pump(); // no effect
-      expect(tester, doesNotHaveWidget(find.text('drawer')));
+      expect(find.text('drawer'), findsNothing);
       scaffoldKey.currentState.openDrawer();
       tester.pump(); // drawer should be starting to animate in
-      expect(tester, hasWidget(find.text('drawer')));
+      expect(find.text('drawer'), findsOneWidget);
       tester.pump(new Duration(seconds: 1)); // animation done
-      expect(tester, hasWidget(find.text('drawer')));
+      expect(find.text('drawer'), findsOneWidget);
       Navigator.pop(savedContext);
       tester.pump(); // drawer should be starting to animate away
-      expect(tester, hasWidget(find.text('drawer')));
+      expect(find.text('drawer'), findsOneWidget);
       tester.pump(new Duration(seconds: 1)); // animation done
-      expect(tester, doesNotHaveWidget(find.text('drawer')));
-    });
+      expect(find.text('drawer'), findsNothing);
   });
 
-  test('Drawer tap test', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Drawer tap test', (WidgetTester tester) {
       GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
       tester.pumpWidget(
         new MaterialApp(
@@ -55,29 +52,27 @@ void main() {
         )
       );
       tester.pump(); // no effect
-      expect(tester, doesNotHaveWidget(find.text('drawer')));
+      expect(find.text('drawer'), findsNothing);
       scaffoldKey.currentState.openDrawer();
       tester.pump(); // drawer should be starting to animate in
-      expect(tester, hasWidget(find.text('drawer')));
+      expect(find.text('drawer'), findsOneWidget);
       tester.pump(new Duration(seconds: 1)); // animation done
-      expect(tester, hasWidget(find.text('drawer')));
+      expect(find.text('drawer'), findsOneWidget);
       tester.tap(find.text('drawer'));
       tester.pump(); // nothing should have happened
-      expect(tester, hasWidget(find.text('drawer')));
+      expect(find.text('drawer'), findsOneWidget);
       tester.pump(new Duration(seconds: 1)); // ditto
-      expect(tester, hasWidget(find.text('drawer')));
+      expect(find.text('drawer'), findsOneWidget);
       tester.tapAt(const Point(750.0, 100.0)); // on the mask
       tester.pump();
       tester.pump(new Duration(milliseconds: 10));
       // drawer should be starting to animate away
-      expect(tester, hasWidget(find.text('drawer')));
+      expect(find.text('drawer'), findsOneWidget);
       tester.pump(new Duration(seconds: 1)); // animation done
-      expect(tester, doesNotHaveWidget(find.text('drawer')));
-    });
+      expect(find.text('drawer'), findsNothing);
   });
 
-  test('Drawer drag cancel resume', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Drawer drag cancel resume', (WidgetTester tester) {
       GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
       tester.pumpWidget(
         new MaterialApp(
@@ -100,18 +95,18 @@ void main() {
           )
         )
       );
-      expect(tester, doesNotHaveWidget(find.text('drawer')));
+      expect(find.text('drawer'), findsNothing);
       scaffoldKey.currentState.openDrawer();
       tester.pump(); // drawer should be starting to animate in
-      expect(tester, hasWidget(find.text('drawer')));
+      expect(find.text('drawer'), findsOneWidget);
       tester.pump(new Duration(seconds: 1)); // animation done
-      expect(tester, hasWidget(find.text('drawer')));
+      expect(find.text('drawer'), findsOneWidget);
 
       tester.tapAt(const Point(750.0, 100.0)); // on the mask
       tester.pump();
       tester.pump(new Duration(milliseconds: 10));
       // drawer should be starting to animate away
-      RenderBox textBox = tester.renderObjectOf(find.text('drawer'));
+      RenderBox textBox = tester.renderObject(find.text('drawer'));
       double textLeft = textBox.localToGlobal(Point.origin).x;
       expect(textLeft, lessThan(0.0));
 
@@ -128,7 +123,6 @@ void main() {
       expect(textBox.localToGlobal(Point.origin).x, equals(0.0));
 
       gesture.up();
-    });
   });
 
 }

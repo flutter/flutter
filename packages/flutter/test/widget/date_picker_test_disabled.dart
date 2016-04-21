@@ -7,8 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Can select a day', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Can select a day', (WidgetTester tester) {
       DateTime currentValue;
 
       Widget widget = new Material(
@@ -36,6 +35,5 @@ void main() {
       expect(currentValue, equals(new DateTime(2014, 6, 9)));
       tester.tap(find.text('30'));
       expect(currentValue, equals(new DateTime(2013, 1, 30)));
-    });
   });
 }

@@ -10,11 +10,10 @@ import 'package:test/test.dart';
 import 'test_widgets.dart';
 
 void main() {
-  test('Stateful widget smoke test', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Stateful widget smoke test', (WidgetTester tester) {
 
       void checkTree(BoxDecoration expectedDecoration) {
-        SingleChildRenderObjectElement element = tester.elementOf(
+        SingleChildRenderObjectElement element = tester.element(
           find.byElementPredicate((Element element) => element is SingleChildRenderObjectElement)
         );
         expect(element, isNotNull);
@@ -55,11 +54,9 @@ void main() {
       );
 
       checkTree(kBoxDecorationB);
-    });
   });
 
-  test('Don\'t rebuild subwidgets', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Don\'t rebuild subwidgets', (WidgetTester tester) {
       tester.pumpWidget(
         new FlipWidget(
           key: new Key('rebuild test'),
@@ -75,6 +72,5 @@ void main() {
       tester.pump();
 
       expect(TestBuildCounter.buildCount, equals(1));
-    });
   });
 }

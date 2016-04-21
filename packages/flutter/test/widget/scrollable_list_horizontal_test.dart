@@ -28,8 +28,7 @@ Widget buildFrame(ViewportAnchor scrollAnchor) {
 }
 
 void main() {
-  test('Drag horizontally with scroll anchor at top', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Drag horizontally with scroll anchor at top', (WidgetTester tester) {
       tester.pumpWidget(buildFrame(ViewportAnchor.start));
 
       tester.pump(const Duration(seconds: 1));
@@ -39,12 +38,12 @@ void main() {
       //   -10..280 = 1
       //   280..570 = 2
       //   570..860 = 3
-      expect(tester, doesNotHaveWidget(find.text('0')));
-      expect(tester, hasWidget(find.text('1')));
-      expect(tester, hasWidget(find.text('2')));
-      expect(tester, hasWidget(find.text('3')));
-      expect(tester, doesNotHaveWidget(find.text('4')));
-      expect(tester, doesNotHaveWidget(find.text('5')));
+      expect(find.text('0'), findsNothing);
+      expect(find.text('1'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
+      expect(find.text('4'), findsNothing);
+      expect(find.text('5'), findsNothing);
 
       // the center of item 3 is visible, so this works;
       // if item 3 was a bit wider, such that its center was past the 800px mark, this would fail,
@@ -56,23 +55,23 @@ void main() {
       //   -10..280 = 2
       //   280..570 = 3
       //   570..860 = 4
-      expect(tester, doesNotHaveWidget(find.text('0')));
-      expect(tester, doesNotHaveWidget(find.text('1')));
-      expect(tester, hasWidget(find.text('2')));
-      expect(tester, hasWidget(find.text('3')));
-      expect(tester, hasWidget(find.text('4')));
-      expect(tester, doesNotHaveWidget(find.text('5')));
+      expect(find.text('0'), findsNothing);
+      expect(find.text('1'), findsNothing);
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
+      expect(find.text('4'), findsOneWidget);
+      expect(find.text('5'), findsNothing);
 
       tester.pump(const Duration(seconds: 1));
       tester.scroll(find.text('3'), const Offset(0.0, -290.0));
       tester.pump(const Duration(seconds: 1));
       // unchanged
-      expect(tester, doesNotHaveWidget(find.text('0')));
-      expect(tester, doesNotHaveWidget(find.text('1')));
-      expect(tester, hasWidget(find.text('2')));
-      expect(tester, hasWidget(find.text('3')));
-      expect(tester, hasWidget(find.text('4')));
-      expect(tester, doesNotHaveWidget(find.text('5')));
+      expect(find.text('0'), findsNothing);
+      expect(find.text('1'), findsNothing);
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
+      expect(find.text('4'), findsOneWidget);
+      expect(find.text('5'), findsNothing);
 
       tester.pump(const Duration(seconds: 1));
       tester.scroll(find.text('3'), const Offset(-290.0, 0.0));
@@ -81,12 +80,12 @@ void main() {
       //   -10..280 = 3
       //   280..570 = 4
       //   570..860 = 5
-      expect(tester, doesNotHaveWidget(find.text('0')));
-      expect(tester, doesNotHaveWidget(find.text('1')));
-      expect(tester, doesNotHaveWidget(find.text('2')));
-      expect(tester, hasWidget(find.text('3')));
-      expect(tester, hasWidget(find.text('4')));
-      expect(tester, hasWidget(find.text('5')));
+      expect(find.text('0'), findsNothing);
+      expect(find.text('1'), findsNothing);
+      expect(find.text('2'), findsNothing);
+      expect(find.text('3'), findsOneWidget);
+      expect(find.text('4'), findsOneWidget);
+      expect(find.text('5'), findsOneWidget);
 
       tester.pump(const Duration(seconds: 1));
       // at this point we can drag 60 pixels further before we hit the friction zone
@@ -99,23 +98,23 @@ void main() {
       // screen is 800px wide, and has the following items:
       //   -11..279 = 4
       //   279..569 = 5
-      expect(tester, doesNotHaveWidget(find.text('0')));
-      expect(tester, doesNotHaveWidget(find.text('1')));
-      expect(tester, doesNotHaveWidget(find.text('2')));
-      expect(tester, doesNotHaveWidget(find.text('3')));
-      expect(tester, hasWidget(find.text('4')));
-      expect(tester, hasWidget(find.text('5')));
+      expect(find.text('0'), findsNothing);
+      expect(find.text('1'), findsNothing);
+      expect(find.text('2'), findsNothing);
+      expect(find.text('3'), findsNothing);
+      expect(find.text('4'), findsOneWidget);
+      expect(find.text('5'), findsOneWidget);
       tester.pump(const Duration(seconds: 1)); // a second after release
       // screen is 800px wide, and has the following items:
       //   -70..220 = 3
       //   220..510 = 4
       //   510..800 = 5
-      expect(tester, doesNotHaveWidget(find.text('0')));
-      expect(tester, doesNotHaveWidget(find.text('1')));
-      expect(tester, doesNotHaveWidget(find.text('2')));
-      expect(tester, hasWidget(find.text('3')));
-      expect(tester, hasWidget(find.text('4')));
-      expect(tester, hasWidget(find.text('5')));
+      expect(find.text('0'), findsNothing);
+      expect(find.text('1'), findsNothing);
+      expect(find.text('2'), findsNothing);
+      expect(find.text('3'), findsOneWidget);
+      expect(find.text('4'), findsOneWidget);
+      expect(find.text('5'), findsOneWidget);
 
       tester.pumpWidget(new Container());
       tester.pumpWidget(buildFrame(ViewportAnchor.start), const Duration(seconds: 1));
@@ -126,12 +125,12 @@ void main() {
       //    10..300 = 1
       //   300..590 = 2
       //   590..880 = 3
-      expect(tester, hasWidget(find.text('0')));
-      expect(tester, hasWidget(find.text('1')));
-      expect(tester, hasWidget(find.text('2')));
-      expect(tester, hasWidget(find.text('3')));
-      expect(tester, doesNotHaveWidget(find.text('4')));
-      expect(tester, doesNotHaveWidget(find.text('5')));
+      expect(find.text('0'), findsOneWidget);
+      expect(find.text('1'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
+      expect(find.text('4'), findsNothing);
+      expect(find.text('5'), findsNothing);
       tester.pump(const Duration(seconds: 1));
       tester.scroll(find.text('2'), const Offset(-290.0, 0.0));
       tester.pump(const Duration(seconds: 1));
@@ -140,17 +139,15 @@ void main() {
       //    10..300 = 2
       //   300..590 = 3
       //   590..880 = 4
-      expect(tester, doesNotHaveWidget(find.text('0')));
-      expect(tester, hasWidget(find.text('1')));
-      expect(tester, hasWidget(find.text('2')));
-      expect(tester, hasWidget(find.text('3')));
-      expect(tester, hasWidget(find.text('4')));
-      expect(tester, doesNotHaveWidget(find.text('5')));
-    });
+      expect(find.text('0'), findsNothing);
+      expect(find.text('1'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
+      expect(find.text('4'), findsOneWidget);
+      expect(find.text('5'), findsNothing);
   });
 
-  test('Drag horizontally with scroll anchor at end', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Drag horizontally with scroll anchor at end', (WidgetTester tester) {
       tester.pumpWidget(buildFrame(ViewportAnchor.end));
 
       tester.pump(const Duration(seconds: 1));
@@ -158,12 +155,12 @@ void main() {
       //   -70..220 = 3
       //   220..510 = 4
       //   510..800 = 5
-      expect(tester, doesNotHaveWidget(find.text('0')));
-      expect(tester, doesNotHaveWidget(find.text('1')));
-      expect(tester, doesNotHaveWidget(find.text('2')));
-      expect(tester, hasWidget(find.text('3')));
-      expect(tester, hasWidget(find.text('4')));
-      expect(tester, hasWidget(find.text('5')));
+      expect(find.text('0'), findsNothing);
+      expect(find.text('1'), findsNothing);
+      expect(find.text('2'), findsNothing);
+      expect(find.text('3'), findsOneWidget);
+      expect(find.text('4'), findsOneWidget);
+      expect(find.text('5'), findsOneWidget);
 
       tester.scroll(find.text('5'), const Offset(300.0, 0.0));
       tester.pump(const Duration(seconds: 1));
@@ -171,12 +168,12 @@ void main() {
       //   -80..210 = 2
       //   230..520 = 3
       //   520..810 = 4
-      expect(tester, doesNotHaveWidget(find.text('0')));
-      expect(tester, doesNotHaveWidget(find.text('1')));
-      expect(tester, hasWidget(find.text('2')));
-      expect(tester, hasWidget(find.text('3')));
-      expect(tester, hasWidget(find.text('4')));
-      expect(tester, doesNotHaveWidget(find.text('5')));
+      expect(find.text('0'), findsNothing);
+      expect(find.text('1'), findsNothing);
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
+      expect(find.text('4'), findsOneWidget);
+      expect(find.text('5'), findsNothing);
 
       // the center of item 3 is visible, so this works;
       // if item 3 was a bit wider, such that its center was past the 800px mark, this would fail,
@@ -188,23 +185,23 @@ void main() {
       //   -10..280 = 1
       //   280..570 = 2
       //   570..860 = 3
-      expect(tester, doesNotHaveWidget(find.text('0')));
-      expect(tester, hasWidget(find.text('1')));
-      expect(tester, hasWidget(find.text('2')));
-      expect(tester, hasWidget(find.text('3')));
-      expect(tester, doesNotHaveWidget(find.text('4')));
-      expect(tester, doesNotHaveWidget(find.text('5')));
+      expect(find.text('0'), findsNothing);
+      expect(find.text('1'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
+      expect(find.text('4'), findsNothing);
+      expect(find.text('5'), findsNothing);
 
       tester.pump(const Duration(seconds: 1));
       tester.scroll(find.text('3'), const Offset(0.0, 290.0));
       tester.pump(const Duration(seconds: 1));
       // unchanged
-      expect(tester, doesNotHaveWidget(find.text('0')));
-      expect(tester, hasWidget(find.text('1')));
-      expect(tester, hasWidget(find.text('2')));
-      expect(tester, hasWidget(find.text('3')));
-      expect(tester, doesNotHaveWidget(find.text('4')));
-      expect(tester, doesNotHaveWidget(find.text('5')));
+      expect(find.text('0'), findsNothing);
+      expect(find.text('1'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
+      expect(find.text('4'), findsNothing);
+      expect(find.text('5'), findsNothing);
 
       tester.pump(const Duration(seconds: 1));
       tester.scroll(find.text('2'), const Offset(290.0, 0.0));
@@ -213,12 +210,12 @@ void main() {
       //   -10..280 = 0
       //   280..570 = 1
       //   570..860 = 2
-      expect(tester, hasWidget(find.text('0')));
-      expect(tester, hasWidget(find.text('1')));
-      expect(tester, hasWidget(find.text('2')));
-      expect(tester, doesNotHaveWidget(find.text('3')));
-      expect(tester, doesNotHaveWidget(find.text('4')));
-      expect(tester, doesNotHaveWidget(find.text('5')));
+      expect(find.text('0'), findsOneWidget);
+      expect(find.text('1'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('3'), findsNothing);
+      expect(find.text('4'), findsNothing);
+      expect(find.text('5'), findsNothing);
 
       tester.pump(const Duration(seconds: 1));
       // at this point we can drag 60 pixels further before we hit the friction zone
@@ -231,23 +228,22 @@ void main() {
       // screen is 800px wide, and has the following items:
       //   280..570 = 0
       //   570..860 = 1
-      expect(tester, hasWidget(find.text('0')));
-      expect(tester, hasWidget(find.text('1')));
-      expect(tester, doesNotHaveWidget(find.text('2')));
-      expect(tester, doesNotHaveWidget(find.text('3')));
-      expect(tester, doesNotHaveWidget(find.text('4')));
-      expect(tester, doesNotHaveWidget(find.text('5')));
+      expect(find.text('0'), findsOneWidget);
+      expect(find.text('1'), findsOneWidget);
+      expect(find.text('2'), findsNothing);
+      expect(find.text('3'), findsNothing);
+      expect(find.text('4'), findsNothing);
+      expect(find.text('5'), findsNothing);
       tester.pump(const Duration(seconds: 1)); // a second after release
       // screen is 800px wide, and has the following items:
       //     0..290 = 0
       //   290..580 = 1
       //   580..870 = 2
-      expect(tester, hasWidget(find.text('0')));
-      expect(tester, hasWidget(find.text('1')));
-      expect(tester, hasWidget(find.text('2')));
-      expect(tester, doesNotHaveWidget(find.text('3')));
-      expect(tester, doesNotHaveWidget(find.text('4')));
-      expect(tester, doesNotHaveWidget(find.text('5')));
-    });
+      expect(find.text('0'), findsOneWidget);
+      expect(find.text('1'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('3'), findsNothing);
+      expect(find.text('4'), findsNothing);
+      expect(find.text('5'), findsNothing);
   });
 }

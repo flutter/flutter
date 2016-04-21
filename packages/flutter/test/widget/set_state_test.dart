@@ -4,7 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 class Inside extends StatefulWidget {
   @override
@@ -61,14 +60,12 @@ class OutsideState extends State<Outside> {
 }
 
 void main() {
-  test('setState() smoke test', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('setState() smoke test', (WidgetTester tester) {
       tester.pumpWidget(new Outside());
       Point location = tester.getCenter(find.text('INSIDE'));
       TestGesture gesture = tester.startGesture(location);
       tester.pump();
       gesture.up();
       tester.pump();
-    });
   });
 }

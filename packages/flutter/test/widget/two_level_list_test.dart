@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('TwoLeveList basics', () {
+  testWidgets('TwoLeveList basics', (WidgetTester tester) {
     final Key topKey = new UniqueKey();
     final Key sublistKey = new UniqueKey();
     final Key bottomKey = new UniqueKey();
@@ -36,37 +36,35 @@ void main() {
       }
     };
 
-    testWidgets((WidgetTester tester) {
-      tester.pumpWidget(new MaterialApp(routes: routes));
+    tester.pumpWidget(new MaterialApp(routes: routes));
 
-      expect(tester, hasWidget(find.text('Top')));
-      expect(tester, hasWidget(find.text('Sublist')));
-      expect(tester, hasWidget(find.text('Bottom')));
+    expect(find.text('Top'), findsOneWidget);
+    expect(find.text('Sublist'), findsOneWidget);
+    expect(find.text('Bottom'), findsOneWidget);
 
-      double getY(Key key) => tester.getTopLeft(find.byKey(key)).y;
-      double getHeight(Key key) => tester.getSize(find.byKey(key)).height;
+    double getY(Key key) => tester.getTopLeft(find.byKey(key)).y;
+    double getHeight(Key key) => tester.getSize(find.byKey(key)).height;
 
-      expect(getY(topKey), lessThan(getY(sublistKey)));
-      expect(getY(sublistKey), lessThan(getY(bottomKey)));
+    expect(getY(topKey), lessThan(getY(sublistKey)));
+    expect(getY(sublistKey), lessThan(getY(bottomKey)));
 
-      // The sublist has a one pixel border above and below.
-      expect(getHeight(topKey), equals(getHeight(sublistKey) - 2.0));
-      expect(getHeight(bottomKey), equals(getHeight(sublistKey) - 2.0));
+    // The sublist has a one pixel border above and below.
+    expect(getHeight(topKey), equals(getHeight(sublistKey) - 2.0));
+    expect(getHeight(bottomKey), equals(getHeight(sublistKey) - 2.0));
 
-      tester.tap(find.text('Sublist'));
-      tester.pump(const Duration(seconds: 1));
-      tester.pump(const Duration(seconds: 1));
+    tester.tap(find.text('Sublist'));
+    tester.pump(const Duration(seconds: 1));
+    tester.pump(const Duration(seconds: 1));
 
-      expect(tester, hasWidget(find.text('Top')));
-      expect(tester, hasWidget(find.text('Sublist')));
-      expect(tester, hasWidget(find.text('0')));
-      expect(tester, hasWidget(find.text('1')));
-      expect(tester, hasWidget(find.text('Bottom')));
+    expect(find.text('Top'), findsOneWidget);
+    expect(find.text('Sublist'), findsOneWidget);
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('Bottom'), findsOneWidget);
 
-      expect(getY(topKey), lessThan(getY(sublistKey)));
-      expect(getY(sublistKey), lessThan(getY(bottomKey)));
-      expect(getY(bottomKey) - getY(sublistKey), greaterThan(getHeight(topKey)));
-      expect(getY(bottomKey) - getY(sublistKey), greaterThan(getHeight(bottomKey)));
-    });
+    expect(getY(topKey), lessThan(getY(sublistKey)));
+    expect(getY(sublistKey), lessThan(getY(bottomKey)));
+    expect(getY(bottomKey) - getY(sublistKey), greaterThan(getHeight(topKey)));
+    expect(getY(bottomKey) - getY(sublistKey), greaterThan(getHeight(bottomKey)));
   });
 }

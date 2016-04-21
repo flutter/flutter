@@ -50,8 +50,7 @@ class DeactivateLoggerState extends State<DeactivateLogger> {
 }
 
 void main() {
-  test('can reparent state', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('can reparent state', (WidgetTester tester) {
       GlobalKey left = new GlobalKey();
       GlobalKey right = new GlobalKey();
 
@@ -77,7 +76,7 @@ void main() {
       StateMarkerState rightState = right.currentState;
       rightState.marker = "right";
 
-      StateMarkerState grandchildState = tester.stateOf(find.byConfig(grandchild));
+      StateMarkerState grandchildState = tester.state(find.byConfig(grandchild));
       expect(grandchildState, isNotNull);
       grandchildState.marker = "grandchild";
 
@@ -103,7 +102,7 @@ void main() {
       expect(right.currentState, equals(rightState));
       expect(rightState.marker, equals("right"));
 
-      StateMarkerState newGrandchildState = tester.stateOf(find.byConfig(newGrandchild));
+      StateMarkerState newGrandchildState = tester.state(find.byConfig(newGrandchild));
       expect(newGrandchildState, isNotNull);
       expect(newGrandchildState, equals(grandchildState));
       expect(newGrandchildState.marker, equals("grandchild"));
@@ -122,11 +121,9 @@ void main() {
       expect(left.currentState, equals(leftState));
       expect(leftState.marker, equals("left"));
       expect(right.currentState, isNull);
-    });
   });
 
-  test('can reparent state with multichild widgets', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('can reparent state with multichild widgets', (WidgetTester tester) {
       GlobalKey left = new GlobalKey();
       GlobalKey right = new GlobalKey();
 
@@ -148,7 +145,7 @@ void main() {
       StateMarkerState rightState = right.currentState;
       rightState.marker = "right";
 
-      StateMarkerState grandchildState = tester.stateOf(find.byConfig(grandchild));
+      StateMarkerState grandchildState = tester.state(find.byConfig(grandchild));
       expect(grandchildState, isNotNull);
       grandchildState.marker = "grandchild";
 
@@ -170,7 +167,7 @@ void main() {
       expect(right.currentState, equals(rightState));
       expect(rightState.marker, equals("right"));
 
-      StateMarkerState newGrandchildState = tester.stateOf(find.byConfig(newGrandchild));
+      StateMarkerState newGrandchildState = tester.state(find.byConfig(newGrandchild));
       expect(newGrandchildState, isNotNull);
       expect(newGrandchildState, equals(grandchildState));
       expect(newGrandchildState.marker, equals("grandchild"));
@@ -189,11 +186,9 @@ void main() {
       expect(left.currentState, equals(leftState));
       expect(leftState.marker, equals("left"));
       expect(right.currentState, isNull);
-    });
   });
 
-  test('can with scrollable list', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('can with scrollable list', (WidgetTester tester) {
       GlobalKey key = new GlobalKey();
 
       tester.pumpWidget(new StateMarker(key: key));
@@ -219,11 +214,9 @@ void main() {
 
       expect(key.currentState, equals(keyState));
       expect(keyState.marker, equals("marked"));
-    });
   });
 
-  test('Reparent during update children', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Reparent during update children', (WidgetTester tester) {
       GlobalKey key = new GlobalKey();
 
       tester.pumpWidget(new Stack(
@@ -255,11 +248,9 @@ void main() {
 
       expect(key.currentState, equals(keyState));
       expect(keyState.marker, equals("marked"));
-    });
   });
 
-  test('Reparent to child during update children', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Reparent to child during update children', (WidgetTester tester) {
       GlobalKey key = new GlobalKey();
 
       tester.pumpWidget(new Stack(
@@ -314,11 +305,9 @@ void main() {
 
       expect(key.currentState, equals(keyState));
       expect(keyState.marker, equals("marked"));
-    });
   });
 
-  test('Deactivate implies build', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Deactivate implies build', (WidgetTester tester) {
       GlobalKey key = new GlobalKey();
       List<String> log = <String>[];
       DeactivateLogger logger = new DeactivateLogger(key: key, log: log);
@@ -338,6 +327,5 @@ void main() {
 
       tester.pump();
       expect(log, isEmpty);
-    });
   });
 }

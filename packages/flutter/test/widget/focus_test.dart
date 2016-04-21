@@ -29,8 +29,7 @@ class TestFocusable extends StatelessWidget {
 }
 
 void main() {
-  test('Can have multiple focused children and they update accordingly', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Can have multiple focused children and they update accordingly', (WidgetTester tester) {
       GlobalKey keyFocus = new GlobalKey();
       GlobalKey keyA = new GlobalKey();
       GlobalKey keyB = new GlobalKey();
@@ -53,39 +52,37 @@ void main() {
           )
         )
       );
-      expect(tester, doesNotHaveWidget(find.text('a')));
-      expect(tester, hasWidget(find.text('A FOCUSED')));
-      expect(tester, hasWidget(find.text('b')));
-      expect(tester, doesNotHaveWidget(find.text('B FOCUSED')));
+      expect(find.text('a'), findsNothing);
+      expect(find.text('A FOCUSED'), findsOneWidget);
+      expect(find.text('b'), findsOneWidget);
+      expect(find.text('B FOCUSED'), findsNothing);
       tester.tap(find.text('A FOCUSED'));
       tester.pump();
-      expect(tester, doesNotHaveWidget(find.text('a')));
-      expect(tester, hasWidget(find.text('A FOCUSED')));
-      expect(tester, hasWidget(find.text('b')));
-      expect(tester, doesNotHaveWidget(find.text('B FOCUSED')));
+      expect(find.text('a'), findsNothing);
+      expect(find.text('A FOCUSED'), findsOneWidget);
+      expect(find.text('b'), findsOneWidget);
+      expect(find.text('B FOCUSED'), findsNothing);
       tester.tap(find.text('A FOCUSED'));
       tester.pump();
-      expect(tester, doesNotHaveWidget(find.text('a')));
-      expect(tester, hasWidget(find.text('A FOCUSED')));
-      expect(tester, hasWidget(find.text('b')));
-      expect(tester, doesNotHaveWidget(find.text('B FOCUSED')));
+      expect(find.text('a'), findsNothing);
+      expect(find.text('A FOCUSED'), findsOneWidget);
+      expect(find.text('b'), findsOneWidget);
+      expect(find.text('B FOCUSED'), findsNothing);
       tester.tap(find.text('b'));
       tester.pump();
-      expect(tester, hasWidget(find.text('a')));
-      expect(tester, doesNotHaveWidget(find.text('A FOCUSED')));
-      expect(tester, doesNotHaveWidget(find.text('b')));
-      expect(tester, hasWidget(find.text('B FOCUSED')));
+      expect(find.text('a'), findsOneWidget);
+      expect(find.text('A FOCUSED'), findsNothing);
+      expect(find.text('b'), findsNothing);
+      expect(find.text('B FOCUSED'), findsOneWidget);
       tester.tap(find.text('a'));
       tester.pump();
-      expect(tester, doesNotHaveWidget(find.text('a')));
-      expect(tester, hasWidget(find.text('A FOCUSED')));
-      expect(tester, hasWidget(find.text('b')));
-      expect(tester, doesNotHaveWidget(find.text('B FOCUSED')));
-    });
+      expect(find.text('a'), findsNothing);
+      expect(find.text('A FOCUSED'), findsOneWidget);
+      expect(find.text('b'), findsOneWidget);
+      expect(find.text('B FOCUSED'), findsNothing);
   });
 
-  test('Can blur', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Can blur', (WidgetTester tester) {
       GlobalKey keyFocus = new GlobalKey();
       GlobalKey keyA = new GlobalKey();
       tester.pumpWidget(
@@ -100,25 +97,23 @@ void main() {
         )
       );
 
-      expect(tester, hasWidget(find.text('a')));
-      expect(tester, doesNotHaveWidget(find.text('A FOCUSED')));
+      expect(find.text('a'), findsOneWidget);
+      expect(find.text('A FOCUSED'), findsNothing);
 
       Focus.moveTo(keyA);
       tester.pump();
 
-      expect(tester, doesNotHaveWidget(find.text('a')));
-      expect(tester, hasWidget(find.text('A FOCUSED')));
+      expect(find.text('a'), findsNothing);
+      expect(find.text('A FOCUSED'), findsOneWidget);
 
       Focus.clear(keyA.currentContext);
       tester.pump();
 
-      expect(tester, hasWidget(find.text('a')));
-      expect(tester, doesNotHaveWidget(find.text('A FOCUSED')));
-    });
+      expect(find.text('a'), findsOneWidget);
+      expect(find.text('A FOCUSED'), findsNothing);
   });
 
-  test('Can move focus to scope', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Can move focus to scope', (WidgetTester tester) {
       GlobalKey keyParentFocus = new GlobalKey();
       GlobalKey keyChildFocus = new GlobalKey();
       GlobalKey keyA = new GlobalKey();
@@ -138,14 +133,14 @@ void main() {
         )
       );
 
-      expect(tester, hasWidget(find.text('a')));
-      expect(tester, doesNotHaveWidget(find.text('A FOCUSED')));
+      expect(find.text('a'), findsOneWidget);
+      expect(find.text('A FOCUSED'), findsNothing);
 
       Focus.moveTo(keyA);
       tester.pump();
 
-      expect(tester, doesNotHaveWidget(find.text('a')));
-      expect(tester, hasWidget(find.text('A FOCUSED')));
+      expect(find.text('a'), findsNothing);
+      expect(find.text('A FOCUSED'), findsOneWidget);
 
       Focus.moveScopeTo(keyChildFocus, context: keyA.currentContext);
 
@@ -172,8 +167,8 @@ void main() {
         )
       );
 
-      expect(tester, hasWidget(find.text('a')));
-      expect(tester, doesNotHaveWidget(find.text('A FOCUSED')));
+      expect(find.text('a'), findsOneWidget);
+      expect(find.text('A FOCUSED'), findsNothing);
 
       tester.pumpWidget(
         new Focus(
@@ -192,13 +187,12 @@ void main() {
       );
 
       // Focus has received the removal notification but we haven't rebuilt yet.
-      expect(tester, hasWidget(find.text('a')));
-      expect(tester, doesNotHaveWidget(find.text('A FOCUSED')));
+      expect(find.text('a'), findsOneWidget);
+      expect(find.text('A FOCUSED'), findsNothing);
 
       tester.pump();
 
-      expect(tester, doesNotHaveWidget(find.text('a')));
-      expect(tester, hasWidget(find.text('A FOCUSED')));
-    });
+      expect(find.text('a'), findsNothing);
+      expect(find.text('A FOCUSED'), findsOneWidget);
   });
 }

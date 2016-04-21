@@ -75,8 +75,7 @@ class PreferredSizeDelegate extends MultiChildLayoutDelegate {
 }
 
 void main() {
-  test('Control test for CustomMultiChildLayout', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Control test for CustomMultiChildLayout', (WidgetTester tester) {
       TestMultiChildLayoutDelegate delegate = new TestMultiChildLayoutDelegate();
       tester.pumpWidget(buildFrame(delegate));
 
@@ -92,11 +91,9 @@ void main() {
       expect(delegate.performLayoutSize1.width, 100.0);
       expect(delegate.performLayoutSize1.height, 200.0);
       expect(delegate.performLayoutIsChild, false);
-    });
   });
 
-  test('Test MultiChildDelegate shouldRelayout method', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Test MultiChildDelegate shouldRelayout method', (WidgetTester tester) {
       TestMultiChildLayoutDelegate delegate = new TestMultiChildLayoutDelegate();
       tester.pumpWidget(buildFrame(delegate));
 
@@ -117,11 +114,9 @@ void main() {
       tester.pumpWidget(buildFrame(delegate));
       expect(delegate.shouldRelayoutCalled, isTrue);
       expect(delegate.performLayoutSize, isNotNull);
-    });
   });
 
-  test('Nested CustomMultiChildLayouts', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Nested CustomMultiChildLayouts', (WidgetTester tester) {
       TestMultiChildLayoutDelegate delegate = new TestMultiChildLayoutDelegate();
       tester.pumpWidget(new Center(
         child: new CustomMultiChildLayout(
@@ -142,11 +137,9 @@ void main() {
         )
       ));
 
-    });
   });
 
-  test('Loose constraints', () {
-    testElementTree((ElementTreeTester tester) {
+  testWidgets('Loose constraints', (WidgetTester tester) {
       Key key = new UniqueKey();
       tester.pumpWidget(new Center(
         child: new CustomMultiChildLayout(
@@ -155,7 +148,7 @@ void main() {
         )
       ));
 
-      RenderBox box = tester.findElementByKey(key).renderObject;
+      RenderBox box = tester.renderObject(find.byKey(key));
       expect(box.size.width, equals(300.0));
       expect(box.size.height, equals(200.0));
 
@@ -168,6 +161,5 @@ void main() {
 
       expect(box.size.width, equals(350.0));
       expect(box.size.height, equals(250.0));
-    });
   });
 }

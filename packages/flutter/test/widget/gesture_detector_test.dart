@@ -7,8 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Uncontested scrolls start immediately', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Uncontested scrolls start immediately', (WidgetTester tester) {
       bool didStartDrag = false;
       double updatedDragDelta;
       bool didEndDrag = false;
@@ -56,11 +55,9 @@ void main() {
       didEndDrag = false;
 
       tester.pumpWidget(new Container());
-    });
   });
 
-  test('Match two scroll gestures in succession', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Match two scroll gestures in succession', (WidgetTester tester) {
       int gestureCount = 0;
       double dragDistance = 0.0;
 
@@ -92,11 +89,9 @@ void main() {
       expect(dragDistance, 20.0);
 
       tester.pumpWidget(new Container());
-    });
   });
 
-  test('Pan doesn\'t crash', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Pan doesn\'t crash', (WidgetTester tester) {
       bool didStartPan = false;
       Offset panDelta;
       bool didEndPan = false;
@@ -130,11 +125,9 @@ void main() {
       expect(panDelta.dx, 20.0);
       expect(panDelta.dy, 30.0);
       expect(didEndPan, isTrue);
-    });
   });
 
-  test('Translucent', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Translucent', (WidgetTester tester) {
       bool didReceivePointerDown;
       bool didTap;
 
@@ -197,6 +190,5 @@ void main() {
       expect(didReceivePointerDown, isTrue);
       expect(didTap, isTrue);
 
-    });
   });
 }

@@ -10,16 +10,13 @@ import 'package:test/test.dart';
 void main() {
   stock_data.StockDataFetcher.actuallyFetchData = false;
 
-  test("Test changing locale", () {
-    testWidgets((WidgetTester tester) {
-      stocks.main();
-      tester.flushMicrotasks(); // see https://github.com/flutter/flutter/issues/1865
-      tester.pump();
-
-      expect(tester, hasWidget(find.text('MARKET')));
-      tester.setLocale("es", "US");
-      tester.pump();
-      expect(tester, hasWidget(find.text('MERCADO')));
-    });
+  testWidgets("Test changing locale", (WidgetTester tester) {
+    stocks.main();
+    tester.flushMicrotasks(); // see https://github.com/flutter/flutter/issues/1865
+    tester.pump();
+    expect(find.text('MARKET'), findsOneWidget);
+    tester.binding.setLocale("es", "US");
+    tester.pump();
+    expect(find.text('MERCADO'), findsOneWidget);
   });
 }

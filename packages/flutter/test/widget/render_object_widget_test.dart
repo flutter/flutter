@@ -42,11 +42,10 @@ class TestOrientedBox extends SingleChildRenderObjectWidget {
 }
 
 void main() {
-  test('RenderObjectWidget smoke test', () {
-    testElementTree((ElementTreeTester tester) {
+  testWidgets('RenderObjectWidget smoke test', (WidgetTester tester) {
       tester.pumpWidget(new DecoratedBox(decoration: kBoxDecorationA));
       SingleChildRenderObjectElement element =
-          tester.findElement((Element element) => element is SingleChildRenderObjectElement);
+          tester.element(find.byElementType(SingleChildRenderObjectElement));
       expect(element, isNotNull);
       expect(element.renderObject is RenderDecoratedBox, isTrue);
       RenderDecoratedBox renderObject = element.renderObject;
@@ -54,21 +53,19 @@ void main() {
       expect(renderObject.position, equals(DecorationPosition.background));
 
       tester.pumpWidget(new DecoratedBox(decoration: kBoxDecorationB));
-      element = tester.findElement((Element element) => element is SingleChildRenderObjectElement);
+      element = tester.element(find.byElementType(SingleChildRenderObjectElement));
       expect(element, isNotNull);
       expect(element.renderObject is RenderDecoratedBox, isTrue);
       renderObject = element.renderObject;
       expect(renderObject.decoration, equals(kBoxDecorationB));
       expect(renderObject.position, equals(DecorationPosition.background));
-    });
   });
 
-  test('RenderObjectWidget can add and remove children', () {
-    testElementTree((ElementTreeTester tester) {
+  testWidgets('RenderObjectWidget can add and remove children', (WidgetTester tester) {
 
       void checkFullTree() {
         SingleChildRenderObjectElement element =
-            tester.findElement((Element element) => element is SingleChildRenderObjectElement);
+            tester.firstElement(find.byElementType(SingleChildRenderObjectElement));
         expect(element, isNotNull);
         expect(element.renderObject is RenderDecoratedBox, isTrue);
         RenderDecoratedBox renderObject = element.renderObject;
@@ -84,7 +81,7 @@ void main() {
 
       void childBareTree() {
         SingleChildRenderObjectElement element =
-            tester.findElement((Element element) => element is SingleChildRenderObjectElement);
+            tester.element(find.byElementType(SingleChildRenderObjectElement));
         expect(element, isNotNull);
         expect(element.renderObject is RenderDecoratedBox, isTrue);
         RenderDecoratedBox renderObject = element.renderObject;
@@ -146,11 +143,9 @@ void main() {
       ));
 
       childBareTree();
-    });
   });
 
-  test('Detached render tree is intact', () {
-    testElementTree((ElementTreeTester tester) {
+  testWidgets('Detached render tree is intact', (WidgetTester tester) {
 
       tester.pumpWidget(new DecoratedBox(
         decoration: kBoxDecorationA,
@@ -163,7 +158,7 @@ void main() {
       ));
 
       SingleChildRenderObjectElement element =
-          tester.findElement((Element element) => element is SingleChildRenderObjectElement);
+          tester.firstElement(find.byElementType(SingleChildRenderObjectElement));
       expect(element.renderObject is RenderDecoratedBox, isTrue);
       RenderDecoratedBox parent = element.renderObject;
       expect(parent.child is RenderDecoratedBox, isTrue);
@@ -179,7 +174,7 @@ void main() {
       ));
 
       element =
-          tester.findElement((Element element) => element is SingleChildRenderObjectElement);
+          tester.element(find.byElementType(SingleChildRenderObjectElement));
       expect(element.renderObject is RenderDecoratedBox, isTrue);
       expect(element.renderObject, equals(parent));
       expect(parent.child, isNull);
@@ -190,11 +185,9 @@ void main() {
       expect(grandChild.parent, equals(child));
       expect(grandChild.decoration, equals(kBoxDecorationC));
       expect(grandChild.child, isNull);
-    });
   });
 
-  test('Can watch inherited widgets', () {
-    testElementTree((ElementTreeTester tester) {
+  testWidgets('Can watch inherited widgets', (WidgetTester tester) {
       Key boxKey = new UniqueKey();
       TestOrientedBox box = new TestOrientedBox(key: boxKey);
 
@@ -203,7 +196,7 @@ void main() {
         child: box
       ));
 
-      RenderDecoratedBox renderBox = tester.findElementByKey(boxKey).renderObject;
+      RenderDecoratedBox renderBox = tester.renderObject(find.byKey(boxKey));
       BoxDecoration decoration = renderBox.decoration;
       expect(decoration.backgroundColor, equals(new Color(0xFF00FF00)));
 
@@ -214,6 +207,5 @@ void main() {
 
       decoration = renderBox.decoration;
       expect(decoration.backgroundColor, equals(new Color(0xFF0000FF)));
-    });
   });
 }

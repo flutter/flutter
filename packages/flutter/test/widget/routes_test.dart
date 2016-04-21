@@ -90,8 +90,7 @@ void runNavigatorTest(
 }
 
 void main() {
-  test('Route management - push, replace, pop', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Route management - push, replace, pop', (WidgetTester tester) {
       GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
       tester.pumpWidget(new Navigator(
         key: navigatorKey,
@@ -178,11 +177,9 @@ void main() {
       expect(results, equals(['initial: dispose']));
       expect(routes.isEmpty, isTrue);
       results.clear();
-    });
   });
 
-  test('Route management - push, remove, pop', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Route management - push, remove, pop', (WidgetTester tester) {
       GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
       tester.pumpWidget(new Navigator(
         key: navigatorKey,
@@ -303,11 +300,9 @@ void main() {
       expect(results, equals(['second: dispose']));
       expect(routes.isEmpty, isTrue);
       results.clear();
-    });
   });
 
-  test('Route management - push, replace, popUntil', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Route management - push, replace, popUntil', (WidgetTester tester) {
       GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
       tester.pumpWidget(new Navigator(
         key: navigatorKey,
@@ -383,6 +378,5 @@ void main() {
       expect(results, equals(['A: dispose', 'b: dispose']));
       expect(routes.isEmpty, isTrue);
       results.clear();
-    });
   });
 }

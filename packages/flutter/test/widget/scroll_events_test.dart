@@ -23,8 +23,7 @@ Widget _buildScroller({Key key, List<String> log}) {
 }
 
 void main() {
-  test('Scroll event drag', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Scroll event drag', (WidgetTester tester) {
       List<String> log = <String>[];
       tester.pumpWidget(_buildScroller(log: log));
 
@@ -41,11 +40,9 @@ void main() {
       expect(log, equals(['scrollstart', 'scroll']));
       tester.pump(const Duration(seconds: 1));
       expect(log, equals(['scrollstart', 'scroll', 'scrollend']));
-    });
   });
 
-  test('Scroll scrollTo animation', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Scroll scrollTo animation', (WidgetTester tester) {
       GlobalKey<ScrollableState<Scrollable>> scrollKey = new GlobalKey<ScrollableState<Scrollable>>();
       List<String> log = <String>[];
       tester.pumpWidget(_buildScroller(key: scrollKey, log: log));
@@ -59,11 +56,9 @@ void main() {
       expect(log, equals(['scrollstart', 'scroll']));
       tester.pump(const Duration(milliseconds: 1500));
       expect(log, equals(['scrollstart', 'scroll', 'scroll', 'scrollend']));
-    });
   });
 
-  test('Scroll scrollTo no animation', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Scroll scrollTo no animation', (WidgetTester tester) {
       GlobalKey<ScrollableState<Scrollable>> scrollKey = new GlobalKey<ScrollableState<Scrollable>>();
       List<String> log = <String>[];
       tester.pumpWidget(_buildScroller(key: scrollKey, log: log));
@@ -71,11 +66,9 @@ void main() {
       expect(log, equals([]));
       scrollKey.currentState.scrollTo(100.0);
       expect(log, equals(['scrollstart', 'scroll', 'scrollend']));
-    });
   });
 
-  test('Scroll during animation', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Scroll during animation', (WidgetTester tester) {
       GlobalKey<ScrollableState<Scrollable>> scrollKey = new GlobalKey<ScrollableState<Scrollable>>();
       List<String> log = <String>[];
       tester.pumpWidget(_buildScroller(key: scrollKey, log: log));
@@ -93,11 +86,9 @@ void main() {
       expect(log, equals(['scrollstart', 'scroll', 'scroll', 'scrollend']));
       tester.pump(const Duration(milliseconds: 1500));
       expect(log, equals(['scrollstart', 'scroll', 'scroll', 'scrollend']));
-    });
   });
 
-  test('Scroll during animation', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Scroll during animation', (WidgetTester tester) {
       GlobalKey<ScrollableState<Scrollable>> scrollKey = new GlobalKey<ScrollableState<Scrollable>>();
       List<String> log = <String>[];
       tester.pumpWidget(_buildScroller(key: scrollKey, log: log));
@@ -115,11 +106,9 @@ void main() {
       expect(log, equals(['scrollstart', 'scroll']));
       tester.pump(const Duration(milliseconds: 1500));
       expect(log, equals(['scrollstart', 'scroll', 'scroll', 'scrollend']));
-    });
   });
 
-  test('fling, fling generates one start/end pair', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('fling, fling generates two start/end pairs', (WidgetTester tester) {
       GlobalKey<ScrollableState<Scrollable>> scrollKey = new GlobalKey<ScrollableState<Scrollable>>();
       List<String> log = <String>[];
       tester.pumpWidget(_buildScroller(key: scrollKey, log: log));
@@ -130,15 +119,15 @@ void main() {
       log.removeWhere((String value) => value == 'scroll');
       expect(log, equals(['scrollstart']));
       tester.flingFrom(new Point(100.0, 100.0), new Offset(-50.0, -50.0), 500.0);
+      log.removeWhere((String value) => value == 'scroll');
+      expect(log, equals(['scrollstart', 'scrollend', 'scrollstart']));
       tester.pump(new Duration(seconds: 1));
       tester.pump(new Duration(seconds: 1));
       log.removeWhere((String value) => value == 'scroll');
-      expect(log, equals(['scrollstart', 'scrollend']));
-    });
+      expect(log, equals(['scrollstart', 'scrollend', 'scrollstart', 'scrollend']));
   });
 
-  test('fling up ends', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('fling up ends', (WidgetTester tester) {
       GlobalKey<ScrollableState<Scrollable>> scrollKey = new GlobalKey<ScrollableState<Scrollable>>();
       List<String> log = <String>[];
       tester.pumpWidget(_buildScroller(key: scrollKey, log: log));
@@ -153,6 +142,5 @@ void main() {
       log.removeWhere((String value) => value == 'scroll');
       expect(log.length, equals(2));
       expect(scrollKey.currentState.scrollOffset, equals(0.0));
-    });
   });
 }

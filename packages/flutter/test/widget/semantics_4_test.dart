@@ -10,8 +10,7 @@ import 'package:test/test.dart';
 import 'test_semantics.dart';
 
 void main() {
-  test('Semantics 4', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Semantics 4', (WidgetTester tester) {
       TestSemanticsListener client = new TestSemanticsListener();
 
       //    O
@@ -115,6 +114,5 @@ void main() {
       expect(client.updates[1], isNull);
       client.updates.clear();
 
-    });
   });
 }

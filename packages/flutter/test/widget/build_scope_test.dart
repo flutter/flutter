@@ -78,8 +78,7 @@ class BadDisposeWidgetState extends State<BadDisposeWidget> {
 }
 
 void main() {
-  test('Legal times for setState', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Legal times for setState', (WidgetTester tester) {
       GlobalKey flipKey = new GlobalKey();
       expect(ProbeWidgetState.buildCount, equals(0));
       tester.pumpWidget(new ProbeWidget());
@@ -102,23 +101,18 @@ void main() {
       expect(ProbeWidgetState.buildCount, equals(3));
       tester.pumpWidget(new Container());
       expect(ProbeWidgetState.buildCount, equals(3));
-    });
   });
 
-  test('Setting parent state during build is forbidden', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Setting parent state during build is forbidden', (WidgetTester tester) {
       tester.pumpWidget(new BadWidgetParent());
       expect(tester.takeException(), isNotNull);
       tester.pumpWidget(new Container());
-    });
   });
 
-  test('Setting state during dispose is forbidden', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Setting state during dispose is forbidden', (WidgetTester tester) {
       tester.pumpWidget(new BadDisposeWidget());
       expect(tester.takeException(), isNull);
       tester.pumpWidget(new Container());
       expect(tester.takeException(), isNotNull);
-    });
   });
 }

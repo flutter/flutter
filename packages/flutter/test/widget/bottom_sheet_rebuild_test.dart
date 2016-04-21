@@ -7,8 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Verify that a BottomSheet can be rebuilt with ScaffoldFeatureController.setState()', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Verify that a BottomSheet can be rebuilt with ScaffoldFeatureController.setState()', (WidgetTester tester) {
       final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
       PersistentBottomSheetController<Null> bottomSheet;
       int buildCount = 0;
@@ -35,7 +34,6 @@ void main() {
       bottomSheet.setState((){ });
       tester.pump();
       expect(buildCount, equals(2));
-    });
   });
 
 }

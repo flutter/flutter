@@ -9,8 +9,7 @@ import 'package:test/test.dart';
 final Key blockKey = new Key('test');
 
 void main() {
-  test('Cannot scroll a non-overflowing block', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Cannot scroll a non-overflowing block', (WidgetTester tester) {
       tester.pumpWidget(
         new Block(
           key: blockKey,
@@ -33,11 +32,9 @@ void main() {
       expect(tester.getCenter(find.text('Hello')) == middleOfContainer, isTrue);
 
       gesture.up();
-    });
   });
 
-  test('Can scroll an overflowing block', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Can scroll an overflowing block', (WidgetTester tester) {
       tester.pumpWidget(
         new Block(
           key: blockKey,
@@ -63,11 +60,9 @@ void main() {
       expect(tester.getCenter(find.text('Hello')), isNot(equals(middleOfContainer)));
 
       gesture.up();
-    });
   });
 
-  test('Scroll anchor', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Scroll anchor', (WidgetTester tester) {
       int first = 0;
       int second = 0;
 
@@ -110,6 +105,5 @@ void main() {
       tester.tapAt(target);
       expect(first, equals(1));
       expect(second, equals(1));
-    });
   });
 }

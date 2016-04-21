@@ -19,8 +19,7 @@ class TestInherited extends InheritedWidget {
 }
 
 void main() {
-  test('Inherited notifies dependents', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Inherited notifies dependents', (WidgetTester tester) {
       List<TestInherited> log = <TestInherited>[];
 
       Builder builder = new Builder(
@@ -44,11 +43,9 @@ void main() {
       tester.pumpWidget(third);
 
       expect(log, equals([first, third]));
-    });
   });
 
-  test('Update inherited when reparenting state', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Update inherited when reparenting state', (WidgetTester tester) {
       GlobalKey globalKey = new GlobalKey();
       List<TestInherited> log = <TestInherited>[];
 
@@ -76,6 +73,5 @@ void main() {
       tester.pumpWidget(second);
 
       expect(log, equals([first, second]));
-    });
   });
 }

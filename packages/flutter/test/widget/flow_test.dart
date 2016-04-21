@@ -32,8 +32,7 @@ class TestFlowDelegate extends FlowDelegate {
 }
 
 void main() {
-  test('Flow control test', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Flow control test', (WidgetTester tester) {
       AnimationController startOffset = new AnimationController.unbounded();
       List<int> log = <int>[];
 
@@ -85,6 +84,5 @@ void main() {
       log.clear();
       tester.tapAt(new Point(20.0, 90.0));
       expect(log, equals([0]));
-    });
   });
 }

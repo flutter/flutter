@@ -8,8 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Verify that a tap dismisses a modal BottomSheet', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Verify that a tap dismisses a modal BottomSheet', (WidgetTester tester) {
       BuildContext savedContext;
       bool showBottomSheetThenCalled = false;
 
@@ -23,7 +22,7 @@ void main() {
       ));
 
       tester.pump();
-      expect(tester, doesNotHaveWidget(find.text('BottomSheet')));
+      expect(find.text('BottomSheet'), findsNothing);
 
       showModalBottomSheet/*<Null>*/(
         context: savedContext,
@@ -35,7 +34,7 @@ void main() {
 
       tester.pump(); // bottom sheet show animation starts
       tester.pump(new Duration(seconds: 1)); // animation done
-      expect(tester, hasWidget(find.text('BottomSheet')));
+      expect(find.text('BottomSheet'), findsOneWidget);
       expect(showBottomSheetThenCalled, isFalse);
 
       // Tap on the the bottom sheet itself to dismiss it
@@ -44,24 +43,22 @@ void main() {
       expect(showBottomSheetThenCalled, isTrue);
       tester.pump(new Duration(seconds: 1)); // last frame of animation (sheet is entirely off-screen, but still present)
       tester.pump(new Duration(seconds: 1)); // frame after the animation (sheet has been removed)
-      expect(tester, doesNotHaveWidget(find.text('BottomSheet')));
+      expect(find.text('BottomSheet'), findsNothing);
 
       showModalBottomSheet/*<Null>*/(context: savedContext, builder: (BuildContext context) => new Text('BottomSheet'));
       tester.pump(); // bottom sheet show animation starts
       tester.pump(new Duration(seconds: 1)); // animation done
-      expect(tester, hasWidget(find.text('BottomSheet')));
+      expect(find.text('BottomSheet'), findsOneWidget);
 
       // Tap above the the bottom sheet to dismiss it
       tester.tapAt(new Point(20.0, 20.0));
       tester.pump(); // bottom sheet dismiss animation starts
       tester.pump(new Duration(seconds: 1)); // animation done
       tester.pump(new Duration(seconds: 1)); // rebuild frame
-      expect(tester, doesNotHaveWidget(find.text('BottomSheet')));
-    });
+      expect(find.text('BottomSheet'), findsNothing);
   });
 
-  test('Verify that a downwards fling dismisses a persistent BottomSheet', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Verify that a downwards fling dismisses a persistent BottomSheet', (WidgetTester tester) {
       GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
       bool showBottomSheetThenCalled = false;
 
@@ -73,7 +70,7 @@ void main() {
       ));
 
       expect(showBottomSheetThenCalled, isFalse);
-      expect(tester, doesNotHaveWidget(find.text('BottomSheet')));
+      expect(find.text('BottomSheet'), findsNothing);
 
       scaffoldKey.currentState.showBottomSheet((BuildContext context) {
         return new Container(
@@ -85,34 +82,33 @@ void main() {
       });
 
       expect(showBottomSheetThenCalled, isFalse);
-      expect(tester, doesNotHaveWidget(find.text('BottomSheet')));
+      expect(find.text('BottomSheet'), findsNothing);
 
       tester.pump(); // bottom sheet show animation starts
 
       expect(showBottomSheetThenCalled, isFalse);
-      expect(tester, hasWidget(find.text('BottomSheet')));
+      expect(find.text('BottomSheet'), findsOneWidget);
 
       tester.pump(new Duration(seconds: 1)); // animation done
 
       expect(showBottomSheetThenCalled, isFalse);
-      expect(tester, hasWidget(find.text('BottomSheet')));
+      expect(find.text('BottomSheet'), findsOneWidget);
 
       tester.fling(find.text('BottomSheet'), const Offset(0.0, 20.0), 1000.0);
       tester.pump(); // drain the microtask queue (Future completion callback)
 
       expect(showBottomSheetThenCalled, isTrue);
-      expect(tester, hasWidget(find.text('BottomSheet')));
+      expect(find.text('BottomSheet'), findsOneWidget);
 
       tester.pump(); // bottom sheet dismiss animation starts
 
       expect(showBottomSheetThenCalled, isTrue);
-      expect(tester, hasWidget(find.text('BottomSheet')));
+      expect(find.text('BottomSheet'), findsOneWidget);
 
       tester.pump(new Duration(seconds: 1)); // animation done
 
       expect(showBottomSheetThenCalled, isTrue);
-      expect(tester, doesNotHaveWidget(find.text('BottomSheet')));
-    });
+      expect(find.text('BottomSheet'), findsNothing);
   });
 
 }
