@@ -11,11 +11,8 @@ const String _kEndTag = '// END';
 Map<String, String> _exampleCode;
 
 Future<String> getExampleCode(String tag, AssetBundle bundle) async {
-  print('getExampleCode tag: $tag bundle: $bundle');
-
   if (_exampleCode == null)
     await _parseExampleCode(bundle);
-
   return _exampleCode[tag];
 }
 
