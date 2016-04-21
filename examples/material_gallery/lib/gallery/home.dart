@@ -93,7 +93,7 @@ class GalleryHomeState extends State<GalleryHome> {
       appBar: new AppBar(
         expandedHeight: _kFlexibleSpaceMaxHeight,
         flexibleSpace: new FlexibleSpaceBar(
-          title: new Text("Flutter gallery"),
+          title: new Text('Flutter gallery'),
           background: new GalleryHeader()
         )
       ),
@@ -104,18 +104,18 @@ class GalleryHomeState extends State<GalleryHome> {
         children: <Widget>[
           new TwoLevelSublist(
             leading: new Icon(icon: Icons.star),
-            title: new Text("Demos"),
+            title: new Text('Demos'),
             children: <Widget>[
-              new GalleryItem(title: "Weather", builder: () => new WeatherDemo()),
-              new GalleryItem(title: "Fitness", builder: () => new FitnessDemo()),
-              new GalleryItem(title: "Fancy lines", builder: () => new DrawingDemo()),
+              new GalleryItem(title: 'Weather', builder: () => new WeatherDemo()),
+              new GalleryItem(title: 'Fitness', builder: () => new FitnessDemo()),
+              new GalleryItem(title: 'Fancy lines', builder: () => new DrawingDemo()),
               new GalleryItem(title: 'Flexible space toolbar', builder: () => new FlexibleSpaceDemo()),
               new GalleryItem(title: 'Floating action button', builder: () => new TabsFabDemo()),
             ]
           ),
           new TwoLevelSublist(
             leading: new Icon(icon: Icons.extension),
-            title: new Text("Components"),
+            title: new Text('Components'),
             children: <Widget>[
               new GalleryItem(title: 'Buttons', builder: () => new ButtonsDemo()),
               new GalleryItem(title: 'Cards', builder: () => new CardsDemo()),
@@ -147,7 +147,7 @@ class GalleryHomeState extends State<GalleryHome> {
           ),
           new TwoLevelSublist(
             leading: new Icon(icon: Icons.color_lens),
-            title: new Text("Style"),
+            title: new Text('Style'),
             children: <Widget>[
               new GalleryItem(title: 'Colors', builder: () => new ColorsDemo()),
               new GalleryItem(title: 'Typography', builder: () => new TypographyDemo()),
