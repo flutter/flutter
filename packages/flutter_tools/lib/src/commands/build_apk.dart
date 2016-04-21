@@ -122,6 +122,7 @@ class _ApkComponents {
   File libSkyShell;
   File debugKeystore;
   Directory resources;
+  Map<String, File> extraFiles;
 }
 
 class ApkKeystoreInfo {
@@ -155,6 +156,9 @@ class BuildApkCommand extends FlutterCommand {
     argParser.addOption('flx',
       abbr: 'f',
       help: 'Path to the FLX file. If this is not provided, an FLX will be built.');
+    argParser.addOption('add-file',
+      help: 'Add a file to the APK (must have the format <path/in/APK>=<local/file/path>).',
+      allowMultiple: true);
     argParser.addOption('keystore',
       help: 'Path to the keystore used to sign the app.');
     argParser.addOption('keystore-password',
@@ -191,6 +195,16 @@ class BuildApkCommand extends FlutterCommand {
 
     BuildMode mode = getBuildMode();
 
+    Map<String, File> extraFiles = <String, File>{};
+    for (String addFile in argResults['add-file']) {
+      List<String> keyValue = addFile.split('=');
+      if (keyValue.length != 2) {
+        printError('add-file option must have the format <path/in/APK>=<local/file/path>');
+        return 1;
+      }
+      extraFiles[keyValue.first] = new File(keyValue.last);
+    }
+
     // TODO(devoncarew): This command should take an arg for the output type (arm / x64).
 
     return await buildAndroid(
@@ -203,6 +217,7 @@ class BuildApkCommand extends FlutterCommand {
       outputFile: argResults['output-file'],
       target: argResults['target'],
       flxPath: argResults['flx'],
+      extraFiles: extraFiles,
       keystore: (argResults['keystore'] ?? '').isEmpty ? null : new ApkKeystoreInfo(
         keystore: argResults['keystore'],
         password: argResults['keystore-password'],
@@ -217,11 +232,13 @@ Future<_ApkComponents> _findApkComponents(
   TargetPlatform platform,
   BuildMode buildMode,
   String manifest,
-  String resources
+  String resources,
+  Map<String, File> extraFiles
 ) async {
   _ApkComponents components = new _ApkComponents();
   components.manifest = new File(manifest);
   components.resources = resources == null ? null : new Directory(resources);
+  components.extraFiles = extraFiles != null ? extraFiles : <String, File>{};
 
   if (tools.isLocalEngine) {
     String abiDir = platform == TargetPlatform.android_arm ? 'armeabi-v7a' : 'x86_64';
@@ -249,7 +266,8 @@ Future<_ApkComponents> _findApkComponents(
 
   List<File> allFiles = <File>[
     components.manifest, components.icuData, components.libSkyShell, components.debugKeystore
-  ]..addAll(components.jars);
+  ]..addAll(components.jars)
+   ..addAll(components.extraFiles.values);
 
   for (File file in allFiles) {
     if (!file.existsSync()) {
@@ -294,6 +312,9 @@ int _buildApk(
     artifactBuilder.add(classesDex, 'classes.dex');
     String abiDir = platform == TargetPlatform.android_arm ? 'armeabi-v7a' : 'x86_64';
     artifactBuilder.add(components.libSkyShell, 'lib/$abiDir/libsky_shell.so');
+
+    for (String relativePath in components.extraFiles.keys)
+      artifactBuilder.add(components.extraFiles[relativePath], relativePath);
 
     File unalignedApk = new File('${tempDir.path}/app.apk.unaligned');
     builder.package(
@@ -390,6 +411,7 @@ Future<int> buildAndroid(
   String outputFile: _kDefaultOutputPath,
   String target,
   String flxPath,
+  Map<String, File> extraFiles,
   ApkKeystoreInfo keystore
 }) async {
   // Validate that we can find an android sdk.
@@ -420,7 +442,7 @@ Future<int> buildAndroid(
       resources = _kDefaultResourcesPath;
   }
 
-  _ApkComponents components = await _findApkComponents(platform, buildMode, manifest, resources);
+  _ApkComponents components = await _findApkComponents(platform, buildMode, manifest, resources, extraFiles);
 
   if (components == null) {
     printError('Failure building APK: unable to find components.');
