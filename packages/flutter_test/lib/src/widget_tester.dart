@@ -8,7 +8,7 @@ import 'package:quiver/testing/async.dart';
 import 'package:test/test.dart';
 
 import 'element_tree_tester.dart';
-import 'instrumentation.dart';
+import 'test_pointer.dart';
 
 /// Runs the [callback] inside the Flutter test environment.
 ///
@@ -81,10 +81,8 @@ class WidgetTester {
   }
 
   /// Sends an [event] at [result] location.
-  ///
-  /// See [ElementTreeTester.dispatchEvent] for details.
   void dispatchEvent(PointerEvent event, HitTestResult result) {
-    elementTreeTester.dispatchEvent(event, result);
+    binding.dispatchEvent(event, result);
   }
 
   /// Returns the exception most recently caught by the Flutter framework.
