@@ -191,7 +191,7 @@ class AppBar extends StatelessWidget {
 
       if (iconTheme != null) {
         iconTheme = new IconThemeData(
-          opacity: opacity * iconTheme.clampedOpacity,
+          opacity: opacity * iconTheme.opacity,
           color: iconTheme.color
         );
       }
