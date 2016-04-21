@@ -15,43 +15,57 @@ import 'framework.dart';
 
 export 'dart:ui' show AppLifecycleState, Locale;
 
-class BindingObserver {
+/// Interface for classes that register with the Widgets layer binding.
+///
+/// See [Widgeteer.addObserver] and [Widgeteer.removeObserver].
+abstract class WidgetsBindingObserver {
+  /// Called when the system tells the app to pop the current route.
+  /// For example, on Android, this is called when the user presses
+  /// the back button.
+  ///
+  /// Observers are notified in registration order until one returns
+  /// true. If none return true, the application quits.
+  ///
+  /// Observers are expected to return true if they were able to
+  /// handle the notification, for example by closing an active dialog
+  /// box, and false otherwise. The [WidgetsApp] widget uses this
+  /// mechanism to notify the [Navigator] widget that it should pop
+  /// its current route if possible.
   bool didPopRoute() => false;
+
+  /// Called when the application's dimensions change. For example,
+  /// when a phone is rotated.
   void didChangeMetrics() { }
+
+  /// Called when the system tells the app that the user's locale has
+  /// changed. For example, if the user changes the system language
+  /// settings.
   void didChangeLocale(Locale locale) { }
+
+  /// Called when the system puts the app in the background or returns
+  /// the app to the foreground.
   void didChangeAppLifecycleState(AppLifecycleState state) { }
 }
 
-/// A concrete binding for applications based on the Widgets framework.
-/// This is the glue that binds the framework to the Flutter engine.
-class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, Services, Renderer {
-
-  WidgetFlutterBinding() {
-    buildOwner.onBuildScheduled = ensureVisualUpdate;
-  }
-
-  /// Creates and initializes the WidgetFlutterBinding. This constructor is
-  /// idempotent; calling it a second time will just return the
-  /// previously-created instance.
-  static WidgetFlutterBinding ensureInitialized() {
-    if (_instance == null)
-      new WidgetFlutterBinding();
-    return _instance;
-  }
-
-  final BuildOwner _buildOwner = new BuildOwner();
-  /// The [BuildOwner] in charge of executing the build pipeline for the
-  /// widget tree rooted at this binding.
-  BuildOwner get buildOwner => _buildOwner;
-
+/// The glue between the widgets layer and the Flutter engine.
+abstract class Widgeteer implements Gesturer, Renderer {
   @override
   void initInstances() {
     super.initInstances();
     _instance = this;
+    buildOwner.onBuildScheduled = ensureVisualUpdate;
     ui.window.onLocaleChanged = handleLocaleChanged;
     ui.window.onPopRoute = handlePopRoute;
     ui.window.onAppLifecycleStateChanged = handleAppLifecycleStateChanged;
   }
+
+  /// The current [Widgeteer], if one has been created.
+  ///
+  /// If you need the binding to be constructed before calling [runApp],
+  /// you can ensure a Widget binding has been constructed by calling the
+  /// `WidgetFlutterBinding.ensureInitialized()` function.
+  static Widgeteer get instance => _instance;
+  static Widgeteer _instance;
 
   @override
   void initServiceExtensions() {
@@ -69,48 +83,91 @@ class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, Service
     );
   }
 
-  /// The one static instance of this class.
+  /// The [BuildOwner] in charge of executing the build pipeline for the
+  /// widget tree rooted at this binding.
+  BuildOwner get buildOwner => _buildOwner;
+  final BuildOwner _buildOwner = new BuildOwner();
+
+  final List<WidgetsBindingObserver> _observers = <WidgetsBindingObserver>[];
+
+  /// Registers the given object as a binding observer. Binding
+  /// observers are notified when various application events occur,
+  /// for example when the system locale changes. Generally, one
+  /// widget in the widget tree registers itself as a binding
+  /// observer, and converts the system state into inherited widgets.
   ///
-  /// Only valid after the WidgetFlutterBinding constructor) has been called.
-  /// Only one binding class can be instantiated per process. If another
-  /// BindingBase implementation has been instantiated before this one (e.g.
-  /// bindings from other frameworks based on the Flutter "rendering" library),
-  /// then WidgetFlutterBinding.instance will not be valid (and will throw in
-  /// checked mode).
-  static WidgetFlutterBinding get instance => _instance;
-  static WidgetFlutterBinding _instance;
+  /// For example, the [WidgetsApp] widget registers as a binding
+  /// observer and passes the screen size to a [MediaQuery] widget
+  /// each time it is built, which enables other widgets to use the
+  /// [MediaQuery.of] static method and (implicitly) the
+  /// [InheritedWidget] mechanism to be notified whenever the screen
+  /// size changes (e.g. whenever the screen rotates).
+  void addObserver(WidgetsBindingObserver observer) => _observers.add(observer);
 
-  final List<BindingObserver> _observers = new List<BindingObserver>();
+  /// Unregisters the given observer. This should be used sparingly as
+  /// it is relatively expensive (O(N) in the number of registered
+  /// observers).
+  bool removeObserver(WidgetsBindingObserver observer) => _observers.remove(observer);
 
-  void addObserver(BindingObserver observer) => _observers.add(observer);
-  bool removeObserver(BindingObserver observer) => _observers.remove(observer);
-
+  /// Invoked when the system metrics change.
+  ///
+  /// Notifies all the observers using
+  /// [WidgetsBindingObserver.didChangeMetrics].
+  ///
+  /// See [ui.window.onMetricsChanged].
   @override
   void handleMetricsChanged() {
     super.handleMetricsChanged();
-    for (BindingObserver observer in _observers)
+    for (WidgetsBindingObserver observer in _observers)
       observer.didChangeMetrics();
   }
 
+  /// Invoked when the system locale changes.
+  ///
+  /// Calls [dispatchLocaleChanged] to notify the binding observers.
+  ///
+  /// See [ui.window.onLocaleChanged].
   void handleLocaleChanged() {
     dispatchLocaleChanged(ui.window.locale);
   }
 
+  /// Notify all the observers that the locale has changed (using
+  /// [WidgetsBindingObserver.didChangeLocale]), giving them the
+  /// `locale` argument.
   void dispatchLocaleChanged(Locale locale) {
-    for (BindingObserver observer in _observers)
+    for (WidgetsBindingObserver observer in _observers)
       observer.didChangeLocale(locale);
   }
 
+  /// Invoked when the system pops the current route.
+  ///
+  /// This first notifies the binding observers (using
+  /// [WidgetsBindingObserver.didPopRoute]), in registration order,
+  /// until one returns true, meaning that it was able to handle the
+  /// request (e.g. by closing a dialog box). If none return true,
+  /// then the application is shut down.
+  ///
+  /// [WidgetsApp] uses this in conjunction with a [Navigator] to
+  /// cause the back button to close dialog boxes, return from modal
+  /// pages, and so forth.
+  ///
+  /// See [ui.window.onPopRoute].
   void handlePopRoute() {
-    for (BindingObserver observer in _observers) {
+    for (WidgetsBindingObserver observer in _observers) {
       if (observer.didPopRoute())
         return;
     }
     activity.finishCurrentActivity();
   }
 
+  /// Invoked when the application lifecycle state changes.
+  ///
+  /// Notifies all the observers using
+  /// [WidgetsBindingObserver.didChangeAppLifecycleState].
+  ///
+  /// See [ui.window.onAppLifecycleStateChanged].
   void handleAppLifecycleStateChanged(AppLifecycleState state) {
-    for (BindingObserver observer in _observers)
+    for (WidgetsBindingObserver observer in _observers)
       observer.didChangeAppLifecycleState(state);
   }
 
@@ -123,6 +180,8 @@ class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, Service
 
   /// The [Element] that is at the root of the hierarchy (and which wraps the
   /// [RenderView] object at the root of the rendering hierarchy).
+  ///
+  /// This is initialized the first time [runApp] is called.
   Element get renderViewElement => _renderViewElement;
   Element _renderViewElement;
   void _runApp(Widget app) {
@@ -142,18 +201,20 @@ class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, Service
 }
 
 /// Inflate the given widget and attach it to the screen.
+///
+/// Initializes the binding using [WidgetFlutterBinding] if necessary.
 void runApp(Widget app) {
   WidgetFlutterBinding.ensureInitialized()._runApp(app);
 }
 
 /// Print a string representation of the currently running app.
 void debugDumpApp() {
-  assert(WidgetFlutterBinding.instance != null);
-  assert(WidgetFlutterBinding.instance.renderViewElement != null);
+  assert(Widgeteer.instance != null);
+  assert(Widgeteer.instance.renderViewElement != null);
   String mode = 'RELEASE MODE';
   assert(() { mode = 'CHECKED MODE'; return true; });
-  debugPrint('${WidgetFlutterBinding.instance.runtimeType} - $mode');
-  debugPrint(WidgetFlutterBinding.instance.renderViewElement.toStringDeep());
+  debugPrint('${Widgeteer.instance.runtimeType} - $mode');
+  debugPrint(Widgeteer.instance.renderViewElement.toStringDeep());
 }
 
 /// This class provides a bridge from a RenderObject to an Element tree. The
@@ -257,5 +318,21 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   void removeChildRenderObject(RenderObject child) {
     assert(renderObject.child == child);
     renderObject.child = null;
+  }
+}
+
+/// A concrete binding for applications based on the Widgets framework.
+/// This is the glue that binds the framework to the Flutter engine.
+class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, Services, Renderer, Widgeteer {
+  /// Creates and initializes the WidgetFlutterBinding. This function
+  /// is idempotent; calling it a second time will just return the
+  /// previously-created instance.
+  ///
+  /// You only need to call this method if you need the binding to be
+  /// initialized before calling [runApp].
+  static WidgetFlutterBinding ensureInitialized() {
+    if (Widgeteer.instance == null)
+      new WidgetFlutterBinding();
+    return Widgeteer.instance;
   }
 }

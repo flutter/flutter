@@ -21,7 +21,7 @@ const String _extensionMethodName = 'driver';
 const String _extensionMethod = 'ext.flutter.$_extensionMethodName';
 const Duration _kDefaultTimeout = const Duration(seconds: 5);
 
-class _DriverBinding extends WidgetFlutterBinding {
+class _DriverBinding extends WidgetFlutterBinding { // TODO(ianh): refactor so we're not extending a concrete binding
   @override
   void initServiceExtensions() {
     super.initServiceExtensions();
@@ -41,9 +41,9 @@ class _DriverBinding extends WidgetFlutterBinding {
 /// Call this function prior to running your application, e.g. before you call
 /// `runApp`.
 void enableFlutterDriverExtension() {
-  assert(WidgetFlutterBinding.instance == null);
+  assert(Widgeteer.instance == null);
   new _DriverBinding();
-  assert(WidgetFlutterBinding.instance is _DriverBinding);
+  assert(Widgeteer.instance is _DriverBinding);
 }
 
 /// Handles a command and returns a result.

@@ -100,9 +100,9 @@ void main() {
       tester.pumpWidget(new Markdown(data: "Data1"));
       _expectTextStrings(tester.widgets, <String>["Data1"]);
 
-      String stateBefore = WidgetFlutterBinding.instance.renderViewElement.toStringDeep();
+      String stateBefore = Widgeteer.instance.renderViewElement.toStringDeep();
       tester.pumpWidget(new Markdown(data: "Data1"));
-      String stateAfter = WidgetFlutterBinding.instance.renderViewElement.toStringDeep();
+      String stateAfter = Widgeteer.instance.renderViewElement.toStringDeep();
       expect(stateBefore, equals(stateAfter));
 
       tester.pumpWidget(new Markdown(data: "Data2"));
@@ -119,9 +119,9 @@ void main() {
 
       tester.pumpWidget(new Markdown(data: "Test", markdownStyle: style1));
 
-      String stateBefore = WidgetFlutterBinding.instance.renderViewElement.toStringDeep();
+      String stateBefore = Widgeteer.instance.renderViewElement.toStringDeep();
       tester.pumpWidget(new Markdown(data: "Test", markdownStyle: style2));
-      String stateAfter = WidgetFlutterBinding.instance.renderViewElement.toStringDeep();
+      String stateAfter = Widgeteer.instance.renderViewElement.toStringDeep();
       expect(stateBefore, isNot(stateAfter));
     });
   });
