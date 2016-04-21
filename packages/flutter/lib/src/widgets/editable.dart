@@ -289,10 +289,6 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
     if (_keyboardClient.inputValue.text != config.value.text) {
       _selectionHandles?.hide();
       _selectionHandles = null;
-    } else {
-      // If the text is unchanged, this was probably called for a selection
-      // change.
-      _selectionHandles?.update(_keyboardClient.inputValue.selection);
     }
   }
 
@@ -309,6 +305,11 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
 
     if (config.onChanged != null)
       config.onChanged(_keyboardClient.inputValue.copyWith(selection: selection));
+
+    if (_selectionHandles != null) {
+      _selectionHandles.hide();
+      _selectionHandles = null;
+    }
 
     if (_selectionHandles == null &&
         _keyboardClient.inputValue.text.isNotEmpty &&

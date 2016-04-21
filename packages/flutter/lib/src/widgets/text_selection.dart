@@ -19,7 +19,7 @@ import 'overlay.dart';
 /// mixed text: '<the nwor<b quick fox'
 ///   Here 'the b' is selected, but 'brown' is RTL. Both are drawn with the
 ///   [left] type.
-enum TextSelectionHandleType { left, right }
+enum TextSelectionHandleType { left, right, collapsed }
 
 /// Builds a handle of the given type.
 typedef Widget TextSelectionHandleBuilder(BuildContext context, TextSelectionHandleType type);
@@ -190,8 +190,10 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
     TextSelectionHandleType ltrType,
     TextSelectionHandleType rtlType
   ) {
-    // [direction] is null when it doesn't matter.
-    switch (endpoint.direction ?? TextDirection.ltr) {
+    if (config.selection.isCollapsed)
+      return TextSelectionHandleType.collapsed;
+
+    switch (endpoint.direction) {
       case TextDirection.ltr:
         return ltrType;
       case TextDirection.rtl:

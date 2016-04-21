@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -248,22 +250,27 @@ class _InputState extends State<Input> {
       height: _kTextSelectionHandleSize,
       child: new CustomPaint(
         painter: new _TextSelectionHandlePainter(
-          type: type,
           color: Theme.of(context).textSelectionHandleColor
         )
       )
     );
 
+    // [handle] is a circle, with a rectangle in the top left quadrant of that
+    // circle (an onion pointing to 10:30). We rotate [handle] to point
+    // straight up or up-right depending on the handle type.
     switch (type) {
-      case TextSelectionHandleType.left:
-        // Shift the child left by 100% of its width, so its top-right corner
-        // touches the selection endpoint.
-        return new FractionalTranslation(
-          translation: const FractionalOffset(-1.0, 0.0),
+      case TextSelectionHandleType.left:  // points up-right
+        return new Transform(
+          transform: new Matrix4.identity().rotateZ(math.PI / 2.0),
           child: handle
         );
-      case TextSelectionHandleType.right:
+      case TextSelectionHandleType.right:  // points up-left
         return handle;
+      case TextSelectionHandleType.collapsed:  // points up
+        return new Transform(
+          transform: new Matrix4.identity().rotateZ(math.PI / 4.0),
+          child: handle
+        );
     }
   }
 }
@@ -304,36 +311,20 @@ class _FormFieldData {
 /// Draws a single text selection handle. The [type] determines where the handle
 /// points (e.g. the [left] handle points up and to the right).
 class _TextSelectionHandlePainter extends CustomPainter {
-  _TextSelectionHandlePainter({this.type, this.color});
+  _TextSelectionHandlePainter({ this.color });
 
-  final TextSelectionHandleType type;
   final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
     Paint paint = new Paint()..color = color;
-
-    // Each handle is a circle, with a rectangle in the top quadrant of that
-    // circle in the direction it's pointing. [rect] here is the size of the
-    // corner rect, e.g. half the diameter of the circle.
     double radius = size.width/2.0;
     canvas.drawCircle(new Point(radius, radius), radius, paint);
-
-    Rect rect;
-    switch (type) {
-      case TextSelectionHandleType.left:
-        rect = new Rect.fromLTWH(radius, 0.0, radius, radius);
-        break;
-      case TextSelectionHandleType.right:
-        rect = new Rect.fromLTWH(0.0, 0.0, radius, radius);
-        break;
-    }
-    canvas.drawRect(rect, paint);
+    canvas.drawRect(new Rect.fromLTWH(0.0, 0.0, radius, radius), paint);
   }
 
   @override
   bool shouldRepaint(_TextSelectionHandlePainter oldPainter) {
-    return type != oldPainter.type ||
-           color != oldPainter.color;
+    return color != oldPainter.color;
   }
 }
