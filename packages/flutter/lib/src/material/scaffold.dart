@@ -214,9 +214,7 @@ class Scaffold extends StatefulWidget {
     this.drawer,
     this.scrollableKey,
     this.appBarBehavior: AppBarBehavior.anchor
-  }) : super(key: key) {
-    assert((appBarBehavior == AppBarBehavior.scroll) ? scrollableKey != null : true);
-  }
+  }) : super(key: key);
 
   final AppBar appBar;
   final Widget body;

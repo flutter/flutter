@@ -40,14 +40,14 @@ class PageSelectorDemo extends StatelessWidget {
                         icon: Icons.arrow_back,
                         color: color,
                         onPressed: () { _handleArrowButtonPress(context, -1); },
-                        tooltip: 'Back'
+                        tooltip: 'Page Back'
                       ),
                       new TabPageSelector<IconData>(),
                       new IconButton(
                         icon: Icons.arrow_forward,
                         color: color,
                         onPressed: () { _handleArrowButtonPress(context, 1); },
-                        tooltip: 'Forward'
+                        tooltip: 'Page Forward'
                       )
                     ],
                     mainAxisAlignment: MainAxisAlignment.spaceBetween
