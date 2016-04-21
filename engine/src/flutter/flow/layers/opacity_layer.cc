@@ -19,8 +19,7 @@ void OpacityLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 
 void OpacityLayer::Paint(PaintContext::ScopedFrame& frame) {
   SkPaint paint;
-  paint.setColor(SkColorSetARGB(alpha_, 0, 0, 0));
-  paint.setXfermodeMode(SkXfermode::kSrcOver_Mode);
+  paint.setAlpha(alpha_);
 
   SkCanvas& canvas = frame.canvas();
   SkAutoCanvasRestore save(&canvas, false);
