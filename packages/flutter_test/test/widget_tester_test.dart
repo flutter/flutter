@@ -26,9 +26,9 @@ void main() {
 
         expect(failure, isNotNull);
         String message = failure.message;
-        expect(message, contains('Expected: widget with text "foo" exists in the element tree'));
+        expect(message, contains('Expected: [Finder for text "foo"] exists in the element tree'));
         expect(message, contains("Actual: <Instance of 'WidgetTester'>"));
-        expect(message, contains('Which: Does not contain widget with text "foo"'));
+        expect(message, contains('Which: Does not contain [Finder for text "foo"]'));
       });
     });
   });
@@ -53,9 +53,9 @@ void main() {
 
         expect(failure, isNotNull);
         String message = failure.message;
-        expect(message, contains('Expected: widget with text "foo" does not exist in the element tree'));
+        expect(message, contains('Expected: [Finder for text "foo"] does not exist in the element tree'));
         expect(message, contains("Actual: <Instance of 'WidgetTester'>"));
-        expect(message, contains('Which: Contains widget with text "foo"'));
+        expect(message, contains('Which: Contains [Finder for text "foo"]'));
       });
     });
   });
