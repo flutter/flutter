@@ -92,6 +92,8 @@ class WidgetsApp extends StatefulWidget {
   /// representative of what will happen in release mode.
   final bool debugShowCheckedModeBanner;
 
+  static bool showPerformanceOverlayOverride = false;
+
   @override
   WidgetsAppState<WidgetsApp> createState() => new WidgetsAppState<WidgetsApp>();
 }
@@ -186,7 +188,7 @@ class WidgetsAppState<T extends WidgetsApp> extends State<T> implements BindingO
         child: result
       );
     }
-    if (config.showPerformanceOverlay) {
+    if (config.showPerformanceOverlay || WidgetsApp.showPerformanceOverlayOverride) {
       result = new Stack(
         children: <Widget>[
           result,

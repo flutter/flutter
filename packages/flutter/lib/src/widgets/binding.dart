@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import 'app.dart';
 import 'framework.dart';
 
 export 'dart:ui' show AppLifecycleState, Locale;
@@ -50,6 +51,22 @@ class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, Service
     ui.window.onLocaleChanged = handleLocaleChanged;
     ui.window.onPopRoute = handlePopRoute;
     ui.window.onAppLifecycleStateChanged = handleAppLifecycleStateChanged;
+  }
+
+  @override
+  void initServiceExtensions() {
+    super.initServiceExtensions();
+
+    registerBoolServiceExtension(
+      name: 'showPerformanceOverlay',
+      getter: () => WidgetsApp.showPerformanceOverlayOverride,
+      setter: (bool value) {
+        if (WidgetsApp.showPerformanceOverlayOverride == value)
+          return;
+        WidgetsApp.showPerformanceOverlayOverride = value;
+        buildOwner.reassemble(renderViewElement);
+      }
+    );
   }
 
   /// The one static instance of this class.
@@ -113,13 +130,13 @@ class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, Service
       container: renderView,
       debugShortDescription: '[root]',
       child: app
-    ).attachToRenderTree(buildOwner, _renderViewElement);
+    ).attachToRenderTree(buildOwner, renderViewElement);
     beginFrame();
   }
 
   @override
   void reassembleApplication() {
-    buildOwner.reassemble(_renderViewElement);
+    buildOwner.reassemble(renderViewElement);
     super.reassembleApplication();
   }
 }
