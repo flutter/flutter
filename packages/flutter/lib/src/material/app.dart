@@ -47,7 +47,7 @@ class MaterialApp extends StatefulWidget {
   MaterialApp({
     Key key,
     this.title,
-    ThemeData theme,
+    this.theme,
     this.home,
     this.routes: const <String, WidgetBuilder>{},
     this.onGenerateRoute,
@@ -56,10 +56,7 @@ class MaterialApp extends StatefulWidget {
     this.showPerformanceOverlay: false,
     this.showSemanticsDebugger: false,
     this.debugShowCheckedModeBanner: true
-  }) : theme = theme,
-       textStyle = _errorTextStyle,
-       color = theme?.primaryColor ?? Colors.blue[500], // blue[500] is the primary color of the default theme
-       super(key: key) {
+  }) : super(key: key) {
     assert(debugShowMaterialGrid != null);
     assert(routes != null);
     assert(!routes.containsKey(Navigator.defaultRouteName) || (home == null));
@@ -70,16 +67,6 @@ class MaterialApp extends StatefulWidget {
 
   /// The colors to use for the application's widgets.
   final ThemeData theme;
-
-  /// The default text style for [Text] in the application.
-  final TextStyle textStyle;
-
-  /// The primary color to use for the application in the operating system
-  /// interface.
-  ///
-  /// For example, on Android this is the color used for the application in the
-  /// application switcher.
-  final Color color;
 
   /// The widget for the default route of the app
   /// ([Navigator.defaultRouteName], which is `'/'`).
@@ -130,7 +117,7 @@ class MaterialApp extends StatefulWidget {
   /// reported by the framework.
   final bool showSemanticsDebugger;
 
-  /// Turns on a "SLOW MODE" little banner in checked mode to indicate
+  /// Turns on a little "SLOW MODE" banner in checked mode to indicate
   /// that the app is in checked mode. This is on by default (in
   /// checked mode), to turn it off, set the constructor argument to
   /// false. In release mode this has no effect.
@@ -138,7 +125,7 @@ class MaterialApp extends StatefulWidget {
   /// To get this banner in your application if you're not using
   /// WidgetsApp, include a [CheckedModeBanner] widget in your app.
   ///
-  /// This banner is intended to avoid people complaining that your
+  /// This banner is intended to deter people from complaining that your
   /// app is slow when it's in checked mode. In checked mode, Flutter
   /// enables a large number of expensive diagnostics to aid in
   /// development, and so performance in checked mode is not
@@ -181,8 +168,8 @@ class _MaterialAppState extends State<MaterialApp> {
       duration: kThemeAnimationDuration,
       child: new WidgetsApp(
         title: config.title,
-        textStyle: config.textStyle,
-        color: config.color,
+        textStyle: _errorTextStyle,
+        color: theme?.primaryColor ?? Colors.blue[500], // blue[500] is the primary color of the default theme
         navigatorObserver: _heroController,
         onGenerateRoute: _onGenerateRoute,
         onLocaleChanged: config.onLocaleChanged,
