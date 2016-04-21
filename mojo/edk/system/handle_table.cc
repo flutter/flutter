@@ -19,47 +19,46 @@ namespace system {
 HandleTable::Entry::Entry() : busy(false) {
 }
 
-HandleTable::Entry::Entry(RefPtr<Dispatcher>&& dispatcher)
-    : dispatcher(std::move(dispatcher)), busy(false) {}
+HandleTable::Entry::Entry(Handle&& handle)
+    : handle(std::move(handle)), busy(false) {}
 
 HandleTable::Entry::~Entry() {
   DCHECK(!busy);
 }
 
-HandleTable::HandleTable() : next_handle_(MOJO_HANDLE_INVALID + 1) {
-}
+HandleTable::HandleTable() : next_handle_value_(MOJO_HANDLE_INVALID + 1) {}
 
 HandleTable::~HandleTable() {
   // This should usually not be reached (the only instance should be owned by
   // the singleton |Core|, which lives forever), except in tests.
 }
 
-MojoResult HandleTable::GetDispatcher(MojoHandle handle,
+MojoResult HandleTable::GetDispatcher(MojoHandle handle_value,
                                       RefPtr<Dispatcher>* dispatcher) {
-  DCHECK_NE(handle, MOJO_HANDLE_INVALID);
+  DCHECK_NE(handle_value, MOJO_HANDLE_INVALID);
   DCHECK(dispatcher);
 
-  HandleToEntryMap::iterator it = handle_to_entry_map_.find(handle);
+  HandleToEntryMap::iterator it = handle_to_entry_map_.find(handle_value);
   if (it == handle_to_entry_map_.end())
     return MOJO_RESULT_INVALID_ARGUMENT;
   if (it->second.busy)
     return MOJO_RESULT_BUSY;
-  *dispatcher = it->second.dispatcher;
+  *dispatcher = it->second.handle.dispatcher;
 
   return MOJO_RESULT_OK;
 }
 
-MojoResult HandleTable::GetAndRemoveDispatcher(MojoHandle handle,
+MojoResult HandleTable::GetAndRemoveDispatcher(MojoHandle handle_value,
                                                RefPtr<Dispatcher>* dispatcher) {
-  DCHECK_NE(handle, MOJO_HANDLE_INVALID);
+  DCHECK_NE(handle_value, MOJO_HANDLE_INVALID);
   DCHECK(dispatcher);
 
-  HandleToEntryMap::iterator it = handle_to_entry_map_.find(handle);
+  HandleToEntryMap::iterator it = handle_to_entry_map_.find(handle_value);
   if (it == handle_to_entry_map_.end())
     return MOJO_RESULT_INVALID_ARGUMENT;
   if (it->second.busy)
     return MOJO_RESULT_BUSY;
-  *dispatcher = std::move(it->second.dispatcher);
+  *dispatcher = std::move(it->second.handle.dispatcher);
   handle_to_entry_map_.erase(it);
 
   return MOJO_RESULT_OK;
@@ -68,7 +67,8 @@ MojoResult HandleTable::GetAndRemoveDispatcher(MojoHandle handle,
 MojoHandle HandleTable::AddDispatcher(Dispatcher* dispatcher) {
   if (handle_to_entry_map_.size() >= GetConfiguration().max_handle_table_size)
     return MOJO_HANDLE_INVALID;
-  return AddDispatcherNoSizeCheck(RefPtr<Dispatcher>(dispatcher));
+  return AddHandleNoSizeCheck(
+      Handle(RefPtr<Dispatcher>(dispatcher), MOJO_HANDLE_RIGHT_TRANSFER));
 }
 
 std::pair<MojoHandle, MojoHandle> HandleTable::AddDispatcherPair(
@@ -78,8 +78,10 @@ std::pair<MojoHandle, MojoHandle> HandleTable::AddDispatcherPair(
       GetConfiguration().max_handle_table_size)
     return std::make_pair(MOJO_HANDLE_INVALID, MOJO_HANDLE_INVALID);
   return std::make_pair(
-      AddDispatcherNoSizeCheck(RefPtr<Dispatcher>(dispatcher0)),
-      AddDispatcherNoSizeCheck(RefPtr<Dispatcher>(dispatcher1)));
+      AddHandleNoSizeCheck(
+          Handle(RefPtr<Dispatcher>(dispatcher0), MOJO_HANDLE_RIGHT_TRANSFER)),
+      AddHandleNoSizeCheck(
+          Handle(RefPtr<Dispatcher>(dispatcher1), MOJO_HANDLE_RIGHT_TRANSFER)));
 }
 
 bool HandleTable::AddDispatcherVector(const DispatcherVector& dispatchers,
@@ -99,7 +101,8 @@ bool HandleTable::AddDispatcherVector(const DispatcherVector& dispatchers,
 
   for (size_t i = 0; i < dispatchers.size(); i++) {
     if (dispatchers[i]) {
-      handles[i] = AddDispatcherNoSizeCheck(dispatchers[i].Clone());
+      handles[i] = AddHandleNoSizeCheck(
+          Handle(dispatchers[i].Clone(), MOJO_HANDLE_RIGHT_TRANSFER));
     } else {
       LOG(WARNING) << "Invalid dispatcher at index " << i;
       handles[i] = MOJO_HANDLE_INVALID;
@@ -110,29 +113,29 @@ bool HandleTable::AddDispatcherVector(const DispatcherVector& dispatchers,
 
 MojoResult HandleTable::MarkBusyAndStartTransport(
     MojoHandle disallowed_handle,
-    const MojoHandle* handles,
+    const MojoHandle* handle_values,
     uint32_t num_handles,
     std::vector<DispatcherTransport>* transports) {
   DCHECK_NE(disallowed_handle, MOJO_HANDLE_INVALID);
-  DCHECK(handles);
+  DCHECK(handle_values);
   DCHECK_LE(num_handles, GetConfiguration().max_message_num_handles);
   DCHECK(transports);
   DCHECK_EQ(transports->size(), num_handles);
 
   std::vector<Entry*> entries(num_handles);
 
-  // First verify all the handles and get their dispatchers.
+  // First verify all the handle values and get their dispatchers.
   uint32_t i;
   MojoResult error_result = MOJO_RESULT_INTERNAL;
   for (i = 0; i < num_handles; i++) {
     // Sending your own handle is not allowed (and, for consistency, returns
     // "busy").
-    if (handles[i] == disallowed_handle) {
+    if (handle_values[i] == disallowed_handle) {
       error_result = MOJO_RESULT_BUSY;
       break;
     }
 
-    HandleToEntryMap::iterator it = handle_to_entry_map_.find(handles[i]);
+    HandleToEntryMap::iterator it = handle_to_entry_map_.find(handle_values[i]);
     if (it == handle_to_entry_map_.end()) {
       error_result = MOJO_RESULT_INVALID_ARGUMENT;
       break;
@@ -150,12 +153,13 @@ MojoResult HandleTable::MarkBusyAndStartTransport(
     // Try to start the transport.
     DispatcherTransport transport =
         Dispatcher::HandleTableAccess::TryStartTransport(
-            entries[i]->dispatcher.get());
+            entries[i]->handle.dispatcher.get());
     if (!transport.is_valid()) {
       // Only log for Debug builds, since this is not a problem with the system
       // code, but with user code.
       DLOG(WARNING) << "Likely race condition in user code detected: attempt "
-                       "to transfer handle " << handles[i]
+                       "to transfer handle "
+                    << handle_values[i]
                     << " while it is in use on a different thread";
 
       // Unset the busy flag (since it won't be unset below).
@@ -193,39 +197,38 @@ MojoResult HandleTable::MarkBusyAndStartTransport(
   return MOJO_RESULT_OK;
 }
 
-MojoHandle HandleTable::AddDispatcherNoSizeCheck(
-    RefPtr<Dispatcher>&& dispatcher) {
-  DCHECK(dispatcher);
+MojoHandle HandleTable::AddHandleNoSizeCheck(Handle&& handle) {
+  DCHECK(handle);
   DCHECK_LT(handle_to_entry_map_.size(),
             GetConfiguration().max_handle_table_size);
-  DCHECK_NE(next_handle_, MOJO_HANDLE_INVALID);
+  DCHECK_NE(next_handle_value_, MOJO_HANDLE_INVALID);
 
   // TODO(vtl): Maybe we want to do something different/smarter. (Or maybe try
   // assigning randomly?)
-  while (handle_to_entry_map_.find(next_handle_) !=
+  while (handle_to_entry_map_.find(next_handle_value_) !=
          handle_to_entry_map_.end()) {
-    next_handle_++;
-    if (next_handle_ == MOJO_HANDLE_INVALID)
-      next_handle_++;
+    next_handle_value_++;
+    if (next_handle_value_ == MOJO_HANDLE_INVALID)
+      next_handle_value_++;
   }
 
-  MojoHandle new_handle = next_handle_;
-  handle_to_entry_map_[new_handle] = Entry(std::move(dispatcher));
+  MojoHandle new_handle_value = next_handle_value_;
+  handle_to_entry_map_[new_handle_value] = Entry(std::move(handle));
 
-  next_handle_++;
-  if (next_handle_ == MOJO_HANDLE_INVALID)
-    next_handle_++;
+  next_handle_value_++;
+  if (next_handle_value_ == MOJO_HANDLE_INVALID)
+    next_handle_value_++;
 
-  return new_handle;
+  return new_handle_value;
 }
 
-void HandleTable::RemoveBusyHandles(const MojoHandle* handles,
+void HandleTable::RemoveBusyHandles(const MojoHandle* handle_values,
                                     uint32_t num_handles) {
-  DCHECK(handles);
+  DCHECK(handle_values);
   DCHECK_LE(num_handles, GetConfiguration().max_message_num_handles);
 
   for (uint32_t i = 0; i < num_handles; i++) {
-    HandleToEntryMap::iterator it = handle_to_entry_map_.find(handles[i]);
+    HandleToEntryMap::iterator it = handle_to_entry_map_.find(handle_values[i]);
     DCHECK(it != handle_to_entry_map_.end());
     DCHECK(it->second.busy);
     it->second.busy = false;  // For the sake of a |DCHECK()|.
@@ -233,13 +236,13 @@ void HandleTable::RemoveBusyHandles(const MojoHandle* handles,
   }
 }
 
-void HandleTable::RestoreBusyHandles(const MojoHandle* handles,
+void HandleTable::RestoreBusyHandles(const MojoHandle* handle_values,
                                      uint32_t num_handles) {
-  DCHECK(handles);
+  DCHECK(handle_values);
   DCHECK_LE(num_handles, GetConfiguration().max_message_num_handles);
 
   for (uint32_t i = 0; i < num_handles; i++) {
-    HandleToEntryMap::iterator it = handle_to_entry_map_.find(handles[i]);
+    HandleToEntryMap::iterator it = handle_to_entry_map_.find(handle_values[i]);
     DCHECK(it != handle_to_entry_map_.end());
     DCHECK(it->second.busy);
     it->second.busy = false;

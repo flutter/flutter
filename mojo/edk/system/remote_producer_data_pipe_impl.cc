@@ -281,16 +281,27 @@ MojoResult RemoteProducerDataPipeImpl::ConsumerEndReadData(
 HandleSignalsState RemoteProducerDataPipeImpl::ConsumerGetHandleSignalsState()
     const {
   HandleSignalsState rv;
-  if (current_num_bytes_ > 0) {
+  // |consumer_read_threshold_num_bytes()| is always at least 1.
+  if (current_num_bytes_ >= consumer_read_threshold_num_bytes()) {
+    if (!consumer_in_two_phase_read()) {
+      rv.satisfied_signals |=
+          MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_READ_THRESHOLD;
+    }
+    rv.satisfiable_signals |=
+        MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_READ_THRESHOLD;
+  } else if (current_num_bytes_ > 0u) {
     if (!consumer_in_two_phase_read())
       rv.satisfied_signals |= MOJO_HANDLE_SIGNAL_READABLE;
     rv.satisfiable_signals |= MOJO_HANDLE_SIGNAL_READABLE;
-  } else if (producer_open()) {
-    rv.satisfiable_signals |= MOJO_HANDLE_SIGNAL_READABLE;
   }
-  if (!producer_open())
+  if (producer_open()) {
+    rv.satisfiable_signals |= MOJO_HANDLE_SIGNAL_READABLE |
+                              MOJO_HANDLE_SIGNAL_PEER_CLOSED |
+                              MOJO_HANDLE_SIGNAL_READ_THRESHOLD;
+  } else {
     rv.satisfied_signals |= MOJO_HANDLE_SIGNAL_PEER_CLOSED;
-  rv.satisfiable_signals |= MOJO_HANDLE_SIGNAL_PEER_CLOSED;
+    rv.satisfiable_signals |= MOJO_HANDLE_SIGNAL_PEER_CLOSED;
+  }
   return rv;
 }
 

@@ -36,10 +36,6 @@ namespace mojo {
 namespace system {
 namespace {
 
-const MojoHandleSignals kAllSignals = MOJO_HANDLE_SIGNAL_READABLE |
-                                      MOJO_HANDLE_SIGNAL_WRITABLE |
-                                      MOJO_HANDLE_SIGNAL_PEER_CLOSED;
-
 class RemoteDataPipeImplTest : public testing::Test {
  public:
   RemoteDataPipeImplTest()
@@ -155,7 +151,9 @@ TEST_F(RemoteDataPipeImplTest, Sanity) {
   message_pipe(1)->RemoveAwakable(0, &waiter, &hss);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE,
             hss.satisfied_signals);
-  EXPECT_EQ(kAllSignals, hss.satisfiable_signals);
+  EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE |
+                MOJO_HANDLE_SIGNAL_PEER_CLOSED,
+            hss.satisfiable_signals);
   EXPECT_EQ(MOJO_RESULT_OK, message_pipe(1)->ReadMessage(
                                 0, UserPointer<void>(read_buffer),
                                 MakeUserPointer(&read_buffer_size), nullptr,
@@ -217,7 +215,9 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerWithClosedProducer) {
   message_pipe(1)->RemoveAwakable(0, &waiter, &hss);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE,
             hss.satisfied_signals);
-  EXPECT_EQ(kAllSignals, hss.satisfiable_signals);
+  EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE |
+                MOJO_HANDLE_SIGNAL_PEER_CLOSED,
+            hss.satisfiable_signals);
   EXPECT_EQ(MOJO_RESULT_OK,
             message_pipe(1)->ReadMessage(
                 0, UserPointer<void>(read_buffer),
@@ -249,7 +249,9 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerWithClosedProducer) {
   }
   // We don't know if the fact that the producer has been closed is known yet.
   EXPECT_TRUE((hss.satisfied_signals & MOJO_HANDLE_SIGNAL_READABLE));
+  EXPECT_TRUE((hss.satisfied_signals & MOJO_HANDLE_SIGNAL_READ_THRESHOLD));
   EXPECT_TRUE((hss.satisfiable_signals & MOJO_HANDLE_SIGNAL_READABLE));
+  EXPECT_TRUE((hss.satisfiable_signals & MOJO_HANDLE_SIGNAL_READ_THRESHOLD));
 
   // Read one element.
   elements[0] = -1;
@@ -332,7 +334,9 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringTwoPhaseWrite) {
   message_pipe(1)->RemoveAwakable(0, &waiter, &hss);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE,
             hss.satisfied_signals);
-  EXPECT_EQ(kAllSignals, hss.satisfiable_signals);
+  EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE |
+                MOJO_HANDLE_SIGNAL_PEER_CLOSED,
+            hss.satisfiable_signals);
   EXPECT_EQ(MOJO_RESULT_OK,
             message_pipe(1)->ReadMessage(
                 0, UserPointer<void>(read_buffer),
@@ -372,7 +376,9 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringTwoPhaseWrite) {
   }
   // We don't know if the fact that the producer has been closed is known yet.
   EXPECT_TRUE((hss.satisfied_signals & MOJO_HANDLE_SIGNAL_READABLE));
+  EXPECT_TRUE((hss.satisfied_signals & MOJO_HANDLE_SIGNAL_READ_THRESHOLD));
   EXPECT_TRUE((hss.satisfiable_signals & MOJO_HANDLE_SIGNAL_READABLE));
+  EXPECT_TRUE((hss.satisfiable_signals & MOJO_HANDLE_SIGNAL_READ_THRESHOLD));
 
   // Read one element.
   int32_t elements[10] = {-1, -1};
@@ -451,7 +457,9 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringSecondTwoPhaseWrite) {
   message_pipe(1)->RemoveAwakable(0, &waiter, &hss);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE,
             hss.satisfied_signals);
-  EXPECT_EQ(kAllSignals, hss.satisfiable_signals);
+  EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE |
+                MOJO_HANDLE_SIGNAL_PEER_CLOSED,
+            hss.satisfiable_signals);
   EXPECT_EQ(MOJO_RESULT_OK,
             message_pipe(1)->ReadMessage(
                 0, UserPointer<void>(read_buffer),
@@ -489,9 +497,11 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringSecondTwoPhaseWrite) {
   } else {
     ASSERT_EQ(MOJO_RESULT_ALREADY_EXISTS, result);
   }
-  EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_PEER_CLOSED,
+  EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_PEER_CLOSED |
+                MOJO_HANDLE_SIGNAL_READ_THRESHOLD,
             hss.satisfied_signals);
-  EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_PEER_CLOSED,
+  EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_PEER_CLOSED |
+                MOJO_HANDLE_SIGNAL_READ_THRESHOLD,
             hss.satisfiable_signals);
 
   // Read some elements.

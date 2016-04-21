@@ -33,8 +33,8 @@ GaneshFramebufferSurface::GaneshFramebufferSurface(
   desc.fStencilBits = stencil_bits;
   desc.fRenderTargetHandle = framebuffer_binding;
 
-  surface_ = ::skia::AdoptRef(
-      SkSurface::NewFromBackendRenderTarget(scope.gr_context(), desc, nullptr));
+  surface_ = ::skia::AdoptRef(SkSurface::NewFromBackendRenderTarget(
+      scope.gr_context().get(), desc, nullptr));
   DCHECK(surface_);
 }
 

@@ -5,22 +5,26 @@
 #ifndef MOJO_GPU_GL_TEXTURE_H_
 #define MOJO_GPU_GL_TEXTURE_H_
 
-#include "base/basictypes.h"
 #include "mojo/gpu/gl_context.h"
 #include "mojo/services/geometry/interfaces/geometry.mojom.h"
 
 namespace mojo {
 
+// Manages a GL texture.
+//
+// Instances of this object are not thread-safe and must be used on the same
+// thread as the GL context was created on.
 class GLTexture {
  public:
-  GLTexture(base::WeakPtr<GLContext> context, mojo::Size size);
+  GLTexture(const GLContext::Scope& gl_scope, const mojo::Size& size);
   ~GLTexture();
 
+  const scoped_refptr<GLContext>& gl_context() const { return gl_context_; }
   const mojo::Size& size() const { return size_; }
   uint32_t texture_id() const { return texture_id_; }
 
  private:
-  base::WeakPtr<GLContext> context_;
+  scoped_refptr<GLContext> gl_context_;
   mojo::Size size_;
   uint32_t texture_id_;
 

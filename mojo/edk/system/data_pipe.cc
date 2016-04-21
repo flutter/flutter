@@ -281,6 +281,29 @@ void DataPipe::ProducerClose() {
   ProducerCloseNoLock();
 }
 
+MojoResult DataPipe::ProducerSetOptions(uint32_t write_threshold_num_bytes) {
+  MutexLocker locker(&mutex_);
+  DCHECK(has_local_producer_no_lock());
+
+  if (write_threshold_num_bytes % element_num_bytes() != 0)
+    return MOJO_RESULT_INVALID_ARGUMENT;
+
+  HandleSignalsState old_producer_state =
+      impl_->ProducerGetHandleSignalsState();
+  producer_write_threshold_num_bytes_ = write_threshold_num_bytes;
+  HandleSignalsState new_producer_state =
+      impl_->ProducerGetHandleSignalsState();
+  if (!new_producer_state.equals(old_producer_state))
+    AwakeProducerAwakablesForStateChangeNoLock(new_producer_state);
+  return MOJO_RESULT_OK;
+}
+
+void DataPipe::ProducerGetOptions(uint32_t* write_threshold_num_bytes) {
+  MutexLocker locker(&mutex_);
+  DCHECK(has_local_producer_no_lock());
+  *write_threshold_num_bytes = producer_write_threshold_num_bytes_;
+}
+
 MojoResult DataPipe::ProducerWriteData(UserPointer<const void> elements,
                                        UserPointer<uint32_t> num_bytes,
                                        bool all_or_none) {
@@ -456,6 +479,29 @@ void DataPipe::ConsumerCancelAllAwakables() {
 void DataPipe::ConsumerClose() {
   MutexLocker locker(&mutex_);
   ConsumerCloseNoLock();
+}
+
+MojoResult DataPipe::ConsumerSetOptions(uint32_t read_threshold_num_bytes) {
+  MutexLocker locker(&mutex_);
+  DCHECK(has_local_consumer_no_lock());
+
+  if (read_threshold_num_bytes % element_num_bytes() != 0)
+    return MOJO_RESULT_INVALID_ARGUMENT;
+
+  HandleSignalsState old_consumer_state =
+      impl_->ConsumerGetHandleSignalsState();
+  consumer_read_threshold_num_bytes_ = read_threshold_num_bytes;
+  HandleSignalsState new_consumer_state =
+      impl_->ConsumerGetHandleSignalsState();
+  if (!new_consumer_state.equals(old_consumer_state))
+    AwakeConsumerAwakablesForStateChangeNoLock(new_consumer_state);
+  return MOJO_RESULT_OK;
+}
+
+void DataPipe::ConsumerGetOptions(uint32_t* read_threshold_num_bytes) {
+  MutexLocker locker(&mutex_);
+  DCHECK(has_local_consumer_no_lock());
+  *read_threshold_num_bytes = consumer_read_threshold_num_bytes_;
 }
 
 MojoResult DataPipe::ConsumerReadData(UserPointer<void> elements,
@@ -663,6 +709,8 @@ DataPipe::DataPipe(bool has_local_producer,
       capacity_num_bytes_(validated_options.capacity_num_bytes),
       producer_open_(true),
       consumer_open_(true),
+      producer_write_threshold_num_bytes_(0),
+      consumer_read_threshold_num_bytes_(0),
       producer_awakable_list_(has_local_producer ? new AwakableList()
                                                  : nullptr),
       consumer_awakable_list_(has_local_consumer ? new AwakableList()

@@ -8,8 +8,6 @@ source_set("gpu") {
   sources = [
     "gl_context.cc",
     "gl_context.h",
-    "gl_context_owner.cc",
-    "gl_context_owner.h",
     "gl_texture.cc",
     "gl_texture.h",
   ]

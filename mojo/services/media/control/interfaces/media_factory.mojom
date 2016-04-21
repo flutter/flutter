@@ -9,21 +9,23 @@ import "mojo/services/media/common/interfaces/media_types.mojom";
 import "mojo/services/media/control/interfaces/media_player.mojom";
 import "mojo/services/media/control/interfaces/media_sink.mojom";
 import "mojo/services/media/control/interfaces/media_source.mojom";
+import "mojo/services/media/core/interfaces/media_demux.mojom";
 import "mojo/services/media/core/interfaces/media_type_converter.mojom";
+import "mojo/services/media/core/interfaces/seeking_reader.mojom";
 
 // Exposed by the factory service to create media-related agents.
 [ServiceName="mojo::media::MediaFactory"]
 interface MediaFactory {
   // Creates a player.
   // TODO(dalesat): Add means of specifying destinations.
-  CreatePlayer(string origin_url, MediaPlayer& player);
+  CreatePlayer(SeekingReader reader, MediaPlayer& player);
 
   // Creates a source. If allowed_media_types is supplied, conversions will be
   // added to each stream as needed to make the media type of the stream match
   // one of the allowed types. If a stream cannot be converted to one of the
   // allowed types, its media type will have the scheme NONE, and the stream
   // will not be usable.
-  CreateSource(string origin_url,
+  CreateSource(SeekingReader reader,
                array<MediaTypeSet>? allowed_media_types,
                MediaSource& source);
 
@@ -32,6 +34,12 @@ interface MediaFactory {
   // destination.
   CreateSink(string destination_url, MediaType media_type, MediaSink& sink);
 
+  // Creates a demux.
+  CreateDemux(SeekingReader reader, MediaDemux& demux);
+
   // Creates a decoder.
   CreateDecoder(MediaType input_media_type, MediaTypeConverter& decoder);
+
+  // Creates a network reader.
+  CreateNetworkReader(string url, SeekingReader& reader);
 };

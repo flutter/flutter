@@ -9,6 +9,7 @@
 #include "base/logging.h"
 #include "mojo/edk/system/data_pipe.h"
 #include "mojo/edk/system/memory.h"
+#include "mojo/edk/system/options_validation.h"
 
 using mojo::platform::ScopedPlatformHandle;
 using mojo::util::MutexLocker;
@@ -72,6 +73,51 @@ DataPipeProducerDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock() {
   auto dispatcher = DataPipeProducerDispatcher::Create();
   dispatcher->Init(std::move(data_pipe_));
   return dispatcher;
+}
+
+MojoResult DataPipeProducerDispatcher::SetDataPipeProducerOptionsImplNoLock(
+    UserPointer<const MojoDataPipeProducerOptions> options) {
+  mutex().AssertHeld();
+
+  // The default of 0 means 1 element (however big that is).
+  uint32_t write_threshold_num_bytes = 0;
+  if (!options.IsNull()) {
+    UserOptionsReader<MojoDataPipeProducerOptions> reader(options);
+    if (!reader.is_valid())
+      return MOJO_RESULT_INVALID_ARGUMENT;
+
+    if (!OPTIONS_STRUCT_HAS_MEMBER(MojoDataPipeProducerOptions,
+                                   write_threshold_num_bytes, reader))
+      return MOJO_RESULT_OK;
+
+    write_threshold_num_bytes = reader.options().write_threshold_num_bytes;
+  }
+
+  return data_pipe_->ProducerSetOptions(write_threshold_num_bytes);
+}
+
+MojoResult DataPipeProducerDispatcher::GetDataPipeProducerOptionsImplNoLock(
+    UserPointer<MojoDataPipeProducerOptions> options,
+    uint32_t options_num_bytes) {
+  mutex().AssertHeld();
+
+  // Note: If/when |MojoDataPipeProducerOptions| is extended beyond its initial
+  // definition, more work will be necessary. (See the definition of
+  // |MojoGetDataPipeProducerOptions()| in mojo/public/c/system/data_pipe.h.)
+  static_assert(sizeof(MojoDataPipeProducerOptions) == 8u,
+                "MojoDataPipeProducerOptions has been extended!");
+
+  if (options_num_bytes < sizeof(MojoDataPipeProducerOptions))
+    return MOJO_RESULT_INVALID_ARGUMENT;
+
+  uint32_t write_threshold_num_bytes = 0;
+  data_pipe_->ProducerGetOptions(&write_threshold_num_bytes);
+  MojoDataPipeProducerOptions model_options = {
+      sizeof(MojoDataPipeProducerOptions),  // |struct_size|.
+      write_threshold_num_bytes,            // |write_threshold_num_bytes|.
+  };
+  options.Put(model_options);
+  return MOJO_RESULT_OK;
 }
 
 MojoResult DataPipeProducerDispatcher::WriteDataImplNoLock(

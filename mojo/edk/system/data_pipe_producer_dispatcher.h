@@ -47,6 +47,11 @@ class DataPipeProducerDispatcher final : public Dispatcher {
   void CloseImplNoLock() override;
   util::RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock()
       override;
+  MojoResult SetDataPipeProducerOptionsImplNoLock(
+      UserPointer<const MojoDataPipeProducerOptions> options) override;
+  MojoResult GetDataPipeProducerOptionsImplNoLock(
+      UserPointer<MojoDataPipeProducerOptions> options,
+      uint32_t options_num_bytes) override;
   MojoResult WriteDataImplNoLock(UserPointer<const void> elements,
                                  UserPointer<uint32_t> num_bytes,
                                  MojoWriteDataFlags flags) override;

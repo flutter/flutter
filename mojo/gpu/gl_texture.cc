@@ -8,10 +8,8 @@
 
 namespace mojo {
 
-GLTexture::GLTexture(base::WeakPtr<GLContext> context, mojo::Size size)
-    : context_(context), size_(size), texture_id_(0u) {
-  DCHECK(context_);
-  context_->MakeCurrent();
+GLTexture::GLTexture(const GLContext::Scope& gl_scope, const mojo::Size& size)
+    : gl_context_(gl_scope.gl_context()), size_(size), texture_id_(0u) {
   glGenTextures(1, &texture_id_);
   glBindTexture(GL_TEXTURE_2D, texture_id_);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size_.width, size_.height, 0, GL_RGBA,
@@ -21,10 +19,11 @@ GLTexture::GLTexture(base::WeakPtr<GLContext> context, mojo::Size size)
 }
 
 GLTexture::~GLTexture() {
-  if (context_) {
-    context_->MakeCurrent();
-    glDeleteTextures(1, &texture_id_);
-  }
+  if (gl_context_->is_lost())
+    return;
+
+  GLContext::Scope gl_scope(gl_context_);
+  glDeleteTextures(1, &texture_id_);
 }
 
 }  // namespace mojo

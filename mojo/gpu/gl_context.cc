@@ -10,22 +10,22 @@
 
 namespace mojo {
 
-GLContext::Observer::~Observer() {}
-
 GLContext::GLContext(InterfaceHandle<CommandBuffer> command_buffer)
-    : weak_factory_(this) {
-  context_ = MGLCreateContext(MGL_API_VERSION_GLES2,
-                              command_buffer.PassHandle().release().value(),
-                              MGL_NO_CONTEXT, &ContextLostThunk, this,
-                              Environment::GetDefaultAsyncWaiter());
-  DCHECK(context_ != MGL_NO_CONTEXT);
+    : mgl_context_(
+          MGLCreateContext(MGL_API_VERSION_GLES2,
+                           command_buffer.PassHandle().release().value(),
+                           MGL_NO_CONTEXT,
+                           &ContextLostThunk,
+                           this,
+                           Environment::GetDefaultAsyncWaiter())) {
+  DCHECK(mgl_context_ != MGL_NO_CONTEXT);
 }
 
 GLContext::~GLContext() {
-  MGLDestroyContext(context_);
+  MGLDestroyContext(mgl_context_);
 }
 
-base::WeakPtr<GLContext> GLContext::CreateOffscreen(
+scoped_refptr<GLContext> GLContext::CreateOffscreen(
     ApplicationConnector* connector) {
   ServiceProviderPtr native_viewport;
   connector->ConnectToApplication("mojo:native_viewport_service",
@@ -34,31 +34,25 @@ base::WeakPtr<GLContext> GLContext::CreateOffscreen(
   ConnectToService(native_viewport.get(), &gpu_service);
   InterfaceHandle<CommandBuffer> command_buffer;
   gpu_service->CreateOffscreenGLES2Context(GetProxy(&command_buffer));
-  return CreateFromCommandBuffer(command_buffer.Pass());
+  return new GLContext(command_buffer.Pass());
 }
 
-base::WeakPtr<GLContext> GLContext::CreateFromCommandBuffer(
+scoped_refptr<GLContext> GLContext::CreateFromCommandBuffer(
     InterfaceHandle<CommandBuffer> command_buffer) {
-  return (new GLContext(command_buffer.Pass()))->weak_factory_.GetWeakPtr();
+  return new GLContext(command_buffer.Pass());
 }
 
-void GLContext::MakeCurrent() {
-  MGLMakeCurrent(context_);
-}
-
-bool GLContext::IsCurrent() {
-  return context_ == MGLGetCurrentContext();
-}
-
-void GLContext::Destroy() {
-  delete this;
+bool GLContext::IsCurrent() const {
+  return mgl_context_ == MGLGetCurrentContext();
 }
 
 void GLContext::AddObserver(Observer* observer) {
+  DCHECK(observer);
   observers_.AddObserver(observer);
 }
 
 void GLContext::RemoveObserver(Observer* observer) {
+  DCHECK(observer);
   observers_.RemoveObserver(observer);
 }
 
@@ -67,7 +61,26 @@ void GLContext::ContextLostThunk(void* self) {
 }
 
 void GLContext::OnContextLost() {
+  DCHECK(!lost_);
+
+  lost_ = true;
   FOR_EACH_OBSERVER(Observer, observers_, OnContextLost());
 }
+
+GLContext::Scope::Scope(const scoped_refptr<GLContext>& gl_context)
+    : gl_context_(gl_context), prior_mgl_context_(MGLGetCurrentContext()) {
+  DCHECK(gl_context_);
+  CHECK(!gl_context_->is_lost());  // common bug, check it in release builds
+
+  MGLMakeCurrent(gl_context_->mgl_context_);
+}
+
+GLContext::Scope::~Scope() {
+  DCHECK(gl_context_->IsCurrent());
+
+  MGLMakeCurrent(prior_mgl_context_);
+}
+
+GLContext::Observer::~Observer() {}
 
 }  // namespace mojo

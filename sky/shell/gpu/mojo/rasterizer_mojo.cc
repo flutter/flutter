@@ -56,7 +56,7 @@ void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
   std::unique_ptr<flow::LayerTree> layer_tree(
       reinterpret_cast<flow::LayerTree*>(layer_tree_ptr));
 
-  if (!scene_ || !gl_state_ || !gl_state_->gl_context_owner.context()) {
+  if (!scene_ || !gl_state_ || gl_state_->gl_context->is_lost()) {
     callback.Run();
     return;
   }
@@ -75,12 +75,12 @@ void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
   DCHECK(texture);
 
   {
-    mojo::skia::GaneshContext::Scope scope(&gl_state_->ganesh_context);
+    mojo::skia::GaneshContext::Scope scope(gl_state_->ganesh_context);
     mojo::skia::GaneshTextureSurface texture_surface(scope, std::move(texture));
 
     SkCanvas* canvas = texture_surface.canvas();
     flow::PaintContext::ScopedFrame frame =
-        paint_context_.AcquireFrame(scope.gr_context(), *canvas);
+        paint_context_.AcquireFrame(scope.gr_context().get(), *canvas);
     canvas->clear(SK_ColorBLACK);
     layer_tree->Raster(frame);
 
@@ -122,9 +122,9 @@ flow::LayerTree* RasterizerMojo::GetLastLayerTree() {
 }
 
 RasterizerMojo::GLState::GLState(mojo::ApplicationConnector* connector)
-  : gl_context_owner(connector),
-    gl_texture_recycler(gl_context_owner.context()),
-    ganesh_context(gl_context_owner.context()) {
+  : gl_context(mojo::GLContext::CreateOffscreen(connector)),
+    gl_texture_recycler(gl_context),
+    ganesh_context(new mojo::skia::GaneshContext(gl_context)) {
 }
 
 RasterizerMojo::GLState::~GLState() {

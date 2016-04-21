@@ -5,118 +5,80 @@
 [DartPackage="mojo_services"]
 module mojo.media;
 
-// Specifies the type of media.
+// Describes the type of media.
 struct MediaType {
-  // Broadly identifies the media type and indicates how the details field is
-  // to be interpreted.
-  MediaTypeScheme scheme;
+  const string kAudioEncodingLpcm = "lpcm";
+  const string kAudioEncodingVorbis = "vorbis";
+  const string kVideoEncodingUncompressed = "uncompressed_video";
+  const string kVideoEncodingTheora = "theora";
 
-  // Scheme-dependent details.
-  MediaTypeDetails? details;
+  // Identifies the type’s medium.
+  MediaTypeMedium medium;
+
+  // Medium-dependent details.
+  MediaTypeDetails details;
+
+  // Encoding.
+  string encoding;
+
+  // Encoding-specific parameters.
+  array<uint8>? encoding_parameters;
 };
 
-// Specifies a set of types of media.
-// TODO(dalesat): Consider eliminating type sets.
+// Describes a set of types of media.
 struct MediaTypeSet {
-  // Broadly identifies the media types and indicates how the details field is
-  // to be interpreted.
-  MediaTypeScheme scheme;
+  // Identifies the types’ medium.
+  MediaTypeMedium medium;
 
-  // Scheme-dependent details.
-  MediaTypeSetDetails? details;
+  // Medium-dependent details.
+  MediaTypeSetDetails details;
+
+  // Included encodings.
+  array<string> encodings;
 };
 
-// Media type schemes. A media type scheme broadly identifies a media type and
-// indicates what structure, if any, is used to specify the details of the type.
-// If a scheme XYZ has details, then there should be structure definitions for
-// XyzMediaTypeDetails and XyzMediaTypeSetDetails, and fields of those types
-// should appear in MediaTypeDetails and MediaTypeSetDetails respectively.
-// TODO(dalesat): Placeholder schemes could go away as part of eliminating
-// or simplifying type sets.
-enum MediaTypeScheme {
-  // Placeholder indicating type is unknown.
-  UNKNOWN,
-
-  // Placeholder indicating no type.
-  NONE,
-
-  // Placeholder indicating any elementary type.
-  ANY_ELEMENTARY,
-
-  // Placeholder indicating any audio type.
-  ANY_AUDIO,
-
-  // Placeholder indicating any video type.
-  ANY_VIDEO,
-
-  // Placeholder indicating any subpicture type.
-  ANY_SUBPICTURE,
-
-  // Placeholder indicating any text type.
-  ANY_TEXT,
-
-  // Placeholder indicating any multiplexed type.
-  ANY_MULTIPLEXED,
-
-  // Placeholder indicating any type.
-  ANY,
-
-  // Indicates a multiplexed type. See MultiplexedMediaTypeDetails and
-  // MultiplexedMediaTypeSetDetails.
-  MULTIPLEXED,
-
-  // Indicates LPCM audio. See LpcmMediaTypeDetails and LpcmMediaTypeSetDetails.
-  LPCM,
-
-  // Indicates compressed audio. See CompressedAudioMediaTypeDetails and
-  // CompressedAudioMediaTypeSetDetails.
-  COMPRESSED_AUDIO,
-
-  // Indicates video. See VideoMediaTypeDetails and VideoMediaTypeSetDetails.
-  // TODO(dalesat): One scheme for video won't be adequate.
+// Medium values for MediaType
+enum MediaTypeMedium {
+  AUDIO,
   VIDEO,
+  TEXT,
+  SUBPICTURE
 };
 
 // A union of all media type details.
 union MediaTypeDetails {
-  // Each field name should correspond to a value in MediaTypeScheme.
-  MultiplexedMediaTypeDetails multiplexed;
-  LpcmMediaTypeDetails lpcm;
-  CompressedAudioMediaTypeDetails compressed_audio;
+  AudioMediaTypeDetails audio;
   VideoMediaTypeDetails video;
+  TextMediaTypeDetails text;
+  SubpictureMediaTypeDetails subpicture;
 };
 
 // A union of all media type set details.
 union MediaTypeSetDetails {
-  // Each field name should correspond to a value in MediaTypeScheme.
-  MultiplexedMediaTypeSetDetails multiplexed;
-  LpcmMediaTypeSetDetails lpcm;
-  CompressedAudioMediaTypeSetDetails compressed_audio;
+  AudioMediaTypeSetDetails audio;
   VideoMediaTypeSetDetails video;
+  TextMediaTypeSetDetails text;
+  SubpictureMediaTypeSetDetails subpicture;
 };
 
-// MediaType details for the LPCM scheme.
-struct LpcmMediaTypeDetails {
-  LpcmSampleFormat sample_format;
+// Media type details for the AUDIO medium.
+struct AudioMediaTypeDetails {
+  AudioSampleFormat sample_format;
   uint32 channels;
   uint32 frames_per_second;
   // TODO(dalesat): Channel designations.
 };
 
-// MediaTypeSet details for the LPCM scheme.
-struct LpcmMediaTypeSetDetails {
-  LpcmSampleFormat sample_format;
+// Media type set details for the AUDIO medium.
+struct AudioMediaTypeSetDetails {
+  AudioSampleFormat sample_format;
   uint32 min_channels;
   uint32 max_channels;
   uint32 min_frames_per_second;
   uint32 max_frames_per_second;
 };
 
-// Sample formats for LPCM media types.
-enum LpcmSampleFormat {
-  // Placeholder indicating sample format is unknown.
-  UNKNOWN,
-
+enum AudioSampleFormat {
   // Placeholder indicating any sample format.
   ANY,
 
@@ -128,67 +90,15 @@ enum LpcmSampleFormat {
 
   // 24-bit signed samples in 32 bits, host-endian, sample size 4 bytes.
   // TODO(johngro): describe the packing for this
-  SIGNED_24_IN_32,  // Host endian
+  SIGNED_24_IN_32,
 
   // 32-bit floating-point samples, sample size 4 bytes.
   FLOAT,
 };
 
-// Media type details for the Multiplexed scheme.
-struct MultiplexedMediaTypeDetails {
-  // Describes how the streams are multiplexed.
-  MediaType multiplex_type;
-
-  // Media type for each substream.
-  array<MediaType> substream_types;
-};
-
-// Media type set details for the Multiplexed scheme.
-struct MultiplexedMediaTypeSetDetails {
-  // Describes how the streams can be multiplexed.
-  MediaTypeSet multiplex_type_set;
-
-  // Possible substream types.
-  array<MediaTypeSet> substream_type_sets;
-};
-
-// Audio encodings.
-// TODO(dalesat): Add more audio encodings.
-enum AudioEncoding {
-  // Placeholder indicating audio encoding is unknown.
-  UNKNOWN,
-
-  // Placeholder indicating any audio encoding.
-  ANY,
-
-  VORBIS,
-};
-
-// Media type details for the COMPRESSED_AUDIO scheme.
-struct CompressedAudioMediaTypeDetails {
-  AudioEncoding encoding;
-  LpcmSampleFormat sample_format;
-  uint32 channels;
-  uint32 frames_per_second;
-
-  // Encoding-specific parameter provided by demuxes and used by decoders.
-  string extra_data_base64;
-};
-
-// Media type set details for the COMPRESSED_AUDIO scheme.
-struct CompressedAudioMediaTypeSetDetails {
-  AudioEncoding encoding;
-  LpcmSampleFormat sample_format;
-  uint32 min_channels;
-  uint32 max_channels;
-  uint32 min_frames_per_second;
-  uint32 max_frames_per_second;
-};
-
-// Media type details for the VIDEO scheme.
-// TODO(dalesat): Expand and document.
+// Media type details for the VIDEO medium.
+// TODO(dalesat): Refine and document.
 struct VideoMediaTypeDetails {
-  VideoEncoding encoding;
   VideoProfile profile;
   PixelFormat pixel_format;
   ColorSpace color_space;
@@ -196,32 +106,15 @@ struct VideoMediaTypeDetails {
   uint32 height;
   uint32 coded_width;
   uint32 coded_height;
-
-  // Encoding-specific parameter provided by demuxes and used by decoders.
-  string extra_data_base64;
 };
 
-// Media type set details for the VIDEO scheme.
+// Media type set details for the VIDEO medium.
 // TODO(dalesat): Expand and document.
 struct VideoMediaTypeSetDetails {
-  VideoEncoding encoding;
   uint32 min_width;
   uint32 max_width;
   uint32 min_height;
   uint32 max_height;
-};
-
-// Video encodings.
-// TODO(dalesat): Add more video encodings.
-enum VideoEncoding {
-  // Placeholder indicating video encoding is unknown.
-  UNKNOWN,
-
-  // Placeholder indicating any video encoding.
-  ANY,
-
-  THEORA,
-  VP8,
 };
 
 // Video profiles.
@@ -271,4 +164,24 @@ enum ColorSpace {
   JPEG,
   HD_REC709,
   SD_REC601,
+};
+
+// Media type details for the TEXT medium.
+// TODO(dalesat): Define.
+struct TextMediaTypeDetails {
+};
+
+// Media type set details for the TEXT medium.
+// TODO(dalesat): Define.
+struct TextMediaTypeSetDetails {
+};
+
+// Media type details for the SUBPICTURE medium.
+// TODO(dalesat): Define.
+struct SubpictureMediaTypeDetails {
+};
+
+// Media type set details for the SUBPICTURE medium.
+// TODO(dalesat): Define.
+struct SubpictureMediaTypeSetDetails {
 };

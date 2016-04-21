@@ -16,7 +16,7 @@
 namespace sky {
 namespace shell {
 
-GLTextureRecycler::GLTextureRecycler(base::WeakPtr<mojo::GLContext> gl_context,
+GLTextureRecycler::GLTextureRecycler(scoped_refptr<mojo::GLContext> gl_context,
                                      uint32_t max_recycled_textures)
     : gl_context_(gl_context),
       max_recycled_textures_(max_recycled_textures),
@@ -26,32 +26,33 @@ GLTextureRecycler::~GLTextureRecycler() {}
 
 std::unique_ptr<mojo::GLTexture> GLTextureRecycler::GetTexture(
     const mojo::Size& requested_size) {
-  if (!gl_context_) {
+  if (gl_context_->is_lost()) {
     recycled_textures_.clear();
     return nullptr;
   }
+
+  mojo::GLContext::Scope scope(gl_context_);
 
   while (!recycled_textures_.empty()) {
     GLRecycledTextureInfo texture_info(std::move(recycled_textures_.front()));
     recycled_textures_.pop_front();
     if (texture_info.first->size().Equals(requested_size)) {
-      gl_context_->MakeCurrent();
       glWaitSyncPointCHROMIUM(texture_info.second);
       return std::move(texture_info.first);
     }
   }
 
   return std::unique_ptr<mojo::GLTexture>(
-      new mojo::GLTexture(gl_context_, requested_size));
+      new mojo::GLTexture(scope, requested_size));
 }
 
 mojo::gfx::composition::ResourcePtr GLTextureRecycler::BindTextureResource(
     std::unique_ptr<mojo::GLTexture> texture) {
-  if (!gl_context_)
+  if (gl_context_->is_lost())
     return nullptr;
 
   // Produce the texture.
-  gl_context_->MakeCurrent();
+  mojo::GLContext::Scope scope(gl_context_);
   glBindTexture(GL_TEXTURE_2D, texture->texture_id());
   GLbyte mailbox[GL_MAILBOX_SIZE_CHROMIUM];
   glGenMailboxCHROMIUM(mailbox);

@@ -144,6 +144,14 @@ class DataPipeImpl {
   bool consumer_open() const MOJO_NO_THREAD_SAFETY_ANALYSIS {
     return owner_->consumer_open_no_lock();
   }
+  size_t producer_write_threshold_num_bytes() const
+      MOJO_NO_THREAD_SAFETY_ANALYSIS {
+    return owner_->producer_write_threshold_num_bytes_no_lock();
+  }
+  size_t consumer_read_threshold_num_bytes() const
+      MOJO_NO_THREAD_SAFETY_ANALYSIS {
+    return owner_->consumer_read_threshold_num_bytes_no_lock();
+  }
   uint32_t producer_two_phase_max_num_bytes_written() const
       MOJO_NO_THREAD_SAFETY_ANALYSIS {
     return owner_->producer_two_phase_max_num_bytes_written_no_lock();

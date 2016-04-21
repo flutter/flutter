@@ -12,9 +12,9 @@
 #include <memory>
 #include <vector>
 
-#include "base/logging.h"
 #include "mojo/edk/platform/test_stopwatch.h"
 #include "mojo/edk/platform/thread_utils.h"
+#include "mojo/edk/system/mock_simple_dispatcher.h"
 #include "mojo/edk/system/test/timeouts.h"
 #include "mojo/edk/system/waiter.h"
 #include "mojo/edk/system/waiter_test_utils.h"
@@ -28,78 +28,16 @@ using mojo::platform::test::Stopwatch;
 using mojo::platform::ThreadSleep;
 using mojo::util::MakeRefCounted;
 using mojo::util::MakeUnique;
-using mojo::util::MutexLocker;
 using mojo::util::RefPtr;
 
 namespace mojo {
 namespace system {
 namespace {
 
-class MockSimpleDispatcher final : public SimpleDispatcher {
- public:
-  // Note: Use |MakeRefCounted<MockSimpleDispatcher>()|.
-
-  void SetSatisfiedSignals(MojoHandleSignals new_satisfied_signals) {
-    MutexLocker locker(&mutex());
-
-    // Any new signals that are set should be satisfiable.
-    CHECK_EQ(new_satisfied_signals & ~state_.satisfied_signals,
-             new_satisfied_signals & ~state_.satisfied_signals &
-                 state_.satisfiable_signals);
-
-    if (new_satisfied_signals == state_.satisfied_signals)
-      return;
-
-    state_.satisfied_signals = new_satisfied_signals;
-    HandleSignalsStateChangedNoLock();
-  }
-
-  void SetSatisfiableSignals(MojoHandleSignals new_satisfiable_signals) {
-    MutexLocker locker(&mutex());
-
-    // Satisfied implies satisfiable.
-    CHECK_EQ(new_satisfiable_signals & state_.satisfied_signals,
-             state_.satisfied_signals);
-
-    if (new_satisfiable_signals == state_.satisfiable_signals)
-      return;
-
-    state_.satisfiable_signals = new_satisfiable_signals;
-    HandleSignalsStateChangedNoLock();
-  }
-
-  Type GetType() const override { return Type::UNKNOWN; }
-
- private:
-  FRIEND_MAKE_REF_COUNTED(MockSimpleDispatcher);
-
-  MockSimpleDispatcher()
-      : state_(MOJO_HANDLE_SIGNAL_NONE,
-               MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE) {}
-  explicit MockSimpleDispatcher(const HandleSignalsState& state)
-      : state_(state) {}
-  ~MockSimpleDispatcher() override {}
-
-  RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock() override
-      MOJO_NO_THREAD_SAFETY_ANALYSIS {
-    return MakeRefCounted<MockSimpleDispatcher>(state_);
-  }
-
-  // |Dispatcher| override:
-  HandleSignalsState GetHandleSignalsStateImplNoLock() const override {
-    mutex().AssertHeld();
-    return state_;
-  }
-
-  HandleSignalsState state_ MOJO_GUARDED_BY(mutex());
-
-  MOJO_DISALLOW_COPY_AND_ASSIGN(MockSimpleDispatcher);
-};
-
 TEST(SimpleDispatcherTest, Basic) {
   Stopwatch stopwatch;
 
-  auto d = MakeRefCounted<MockSimpleDispatcher>();
+  auto d = MakeRefCounted<test::MockSimpleDispatcher>();
   Waiter w;
   uint32_t context = 0;
   HandleSignalsState hss;
@@ -201,7 +139,7 @@ TEST(SimpleDispatcherTest, Basic) {
 TEST(SimpleDispatcherTest, BasicUnsatisfiable) {
   Stopwatch stopwatch;
 
-  auto d = MakeRefCounted<MockSimpleDispatcher>();
+  auto d = MakeRefCounted<test::MockSimpleDispatcher>();
   Waiter w;
   uint32_t context = 0;
   HandleSignalsState hss;
@@ -274,13 +212,13 @@ TEST(SimpleDispatcherTest, BasicUnsatisfiable) {
 TEST(SimpleDispatcherTest, BasicClosed) {
   Stopwatch stopwatch;
 
-  RefPtr<MockSimpleDispatcher> d;
+  RefPtr<test::MockSimpleDispatcher> d;
   Waiter w;
   uint32_t context = 0;
   HandleSignalsState hss;
 
   // Try adding a writable waiter when the dispatcher has been closed.
-  d = MakeRefCounted<MockSimpleDispatcher>();
+  d = MakeRefCounted<test::MockSimpleDispatcher>();
   w.Init();
   EXPECT_EQ(MOJO_RESULT_OK, d->Close());
   hss = HandleSignalsState();
@@ -291,7 +229,7 @@ TEST(SimpleDispatcherTest, BasicClosed) {
   // Shouldn't need to remove the waiter (it was not added).
 
   // Wait (forever) for writable and then the dispatcher is closed.
-  d = MakeRefCounted<MockSimpleDispatcher>();
+  d = MakeRefCounted<test::MockSimpleDispatcher>();
   w.Init();
   ASSERT_EQ(MOJO_RESULT_OK,
             d->AddAwakable(&w, MOJO_HANDLE_SIGNAL_WRITABLE, 2, nullptr));
@@ -303,7 +241,7 @@ TEST(SimpleDispatcherTest, BasicClosed) {
   // Don't need to remove waiters from closed dispatchers.
 
   // Wait for zero time for writable and then the dispatcher is closed.
-  d = MakeRefCounted<MockSimpleDispatcher>();
+  d = MakeRefCounted<test::MockSimpleDispatcher>();
   w.Init();
   ASSERT_EQ(MOJO_RESULT_OK,
             d->AddAwakable(&w, MOJO_HANDLE_SIGNAL_WRITABLE, 3, nullptr));
@@ -316,7 +254,7 @@ TEST(SimpleDispatcherTest, BasicClosed) {
 
   // Wait for non-zero, finite time for writable and then the dispatcher is
   // closed.
-  d = MakeRefCounted<MockSimpleDispatcher>();
+  d = MakeRefCounted<test::MockSimpleDispatcher>();
   w.Init();
   ASSERT_EQ(MOJO_RESULT_OK,
             d->AddAwakable(&w, MOJO_HANDLE_SIGNAL_WRITABLE, 4, nullptr));
@@ -338,7 +276,7 @@ TEST(SimpleDispatcherTest, BasicThreaded) {
 
   // Wait for readable (already readable).
   {
-    auto d = MakeRefCounted<MockSimpleDispatcher>();
+    auto d = MakeRefCounted<test::MockSimpleDispatcher>();
     {
       d->SetSatisfiedSignals(MOJO_HANDLE_SIGNAL_READABLE);
       test::WaiterThread thread(d, MOJO_HANDLE_SIGNAL_READABLE,
@@ -359,7 +297,7 @@ TEST(SimpleDispatcherTest, BasicThreaded) {
 
   // Wait for readable and becomes readable after some time.
   {
-    auto d = MakeRefCounted<MockSimpleDispatcher>();
+    auto d = MakeRefCounted<test::MockSimpleDispatcher>();
     {
       test::WaiterThread thread(d, MOJO_HANDLE_SIGNAL_READABLE,
                                 MOJO_DEADLINE_INDEFINITE, 2, &did_wait, &result,
@@ -383,7 +321,7 @@ TEST(SimpleDispatcherTest, BasicThreaded) {
 
   // Wait for readable and becomes never-readable after some time.
   {
-    auto d = MakeRefCounted<MockSimpleDispatcher>();
+    auto d = MakeRefCounted<test::MockSimpleDispatcher>();
     {
       test::WaiterThread thread(d, MOJO_HANDLE_SIGNAL_READABLE,
                                 MOJO_DEADLINE_INDEFINITE, 3, &did_wait, &result,
@@ -406,7 +344,7 @@ TEST(SimpleDispatcherTest, BasicThreaded) {
 
   // Wait for readable and dispatcher gets closed.
   {
-    auto d = MakeRefCounted<MockSimpleDispatcher>();
+    auto d = MakeRefCounted<test::MockSimpleDispatcher>();
     test::WaiterThread thread(d, MOJO_HANDLE_SIGNAL_READABLE,
                               MOJO_DEADLINE_INDEFINITE, 4, &did_wait, &result,
                               &context, &hss);
@@ -426,7 +364,7 @@ TEST(SimpleDispatcherTest, BasicThreaded) {
 
   // Wait for readable and times out.
   {
-    auto d = MakeRefCounted<MockSimpleDispatcher>();
+    auto d = MakeRefCounted<test::MockSimpleDispatcher>();
     {
       test::WaiterThread thread(d, MOJO_HANDLE_SIGNAL_READABLE,
                                 2 * test::EpsilonTimeout(), 5, &did_wait,
@@ -460,7 +398,7 @@ TEST(SimpleDispatcherTest, MultipleWaiters) {
 
   // All wait for readable and becomes readable after some time.
   {
-    auto d = MakeRefCounted<MockSimpleDispatcher>();
+    auto d = MakeRefCounted<test::MockSimpleDispatcher>();
     std::vector<std::unique_ptr<test::WaiterThread>> threads;
     for (uint32_t i = 0; i < kNumWaiters; i++) {
       threads.push_back(MakeUnique<test::WaiterThread>(
@@ -483,7 +421,7 @@ TEST(SimpleDispatcherTest, MultipleWaiters) {
   // Some wait for readable, some for writable, and becomes readable after some
   // time.
   {
-    auto d = MakeRefCounted<MockSimpleDispatcher>();
+    auto d = MakeRefCounted<test::MockSimpleDispatcher>();
     std::vector<std::unique_ptr<test::WaiterThread>> threads;
     for (uint32_t i = 0; i < kNumWaiters / 2; i++) {
       threads.push_back(MakeUnique<test::WaiterThread>(
@@ -520,7 +458,7 @@ TEST(SimpleDispatcherTest, MultipleWaiters) {
   // Some wait for readable, some for writable, and becomes readable and
   // never-writable after some time.
   {
-    auto d = MakeRefCounted<MockSimpleDispatcher>();
+    auto d = MakeRefCounted<test::MockSimpleDispatcher>();
     std::vector<std::unique_ptr<test::WaiterThread>> threads;
     for (uint32_t i = 0; i < kNumWaiters / 2; i++) {
       threads.push_back(MakeUnique<test::WaiterThread>(
@@ -558,7 +496,7 @@ TEST(SimpleDispatcherTest, MultipleWaiters) {
   // Some wait for readable, some for writable, and becomes readable after some
   // time.
   {
-    auto d = MakeRefCounted<MockSimpleDispatcher>();
+    auto d = MakeRefCounted<test::MockSimpleDispatcher>();
     std::vector<std::unique_ptr<test::WaiterThread>> threads;
     for (uint32_t i = 0; i < kNumWaiters / 2; i++) {
       threads.push_back(MakeUnique<test::WaiterThread>(

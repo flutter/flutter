@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file contains the definitions of the system functions, which are
+// declared in various header files in mojo/public/c/system.
+
 #include "mojo/edk/embedder/embedder_internal.h"
 #include "mojo/edk/system/core.h"
 #include "mojo/public/c/system/buffer.h"
@@ -14,7 +17,6 @@
 using mojo::embedder::internal::g_core;
 using mojo::system::MakeUserPointer;
 
-// Definitions of the system functions.
 extern "C" {
 
 MojoTimeTicks MojoGetTimeTicksNow() {
@@ -82,6 +84,21 @@ MojoResult MojoCreateDataPipe(const MojoCreateDataPipeOptions* options,
                                 MakeUserPointer(data_pipe_consumer_handle));
 }
 
+MojoResult MojoSetDataPipeProducerOptions(
+    MojoHandle data_pipe_producer_handle,
+    const struct MojoDataPipeProducerOptions* options) {
+  return g_core->SetDataPipeProducerOptions(data_pipe_producer_handle,
+                                            MakeUserPointer(options));
+}
+
+MojoResult MojoGetDataPipeProducerOptions(
+    MojoHandle data_pipe_producer_handle,
+    struct MojoDataPipeProducerOptions* options,
+    uint32_t options_num_bytes) {
+  return g_core->GetDataPipeProducerOptions(
+      data_pipe_producer_handle, MakeUserPointer(options), options_num_bytes);
+}
+
 MojoResult MojoWriteData(MojoHandle data_pipe_producer_handle,
                          const void* elements,
                          uint32_t* num_elements,
@@ -102,6 +119,21 @@ MojoResult MojoBeginWriteData(MojoHandle data_pipe_producer_handle,
 MojoResult MojoEndWriteData(MojoHandle data_pipe_producer_handle,
                             uint32_t num_elements_written) {
   return g_core->EndWriteData(data_pipe_producer_handle, num_elements_written);
+}
+
+MojoResult MojoSetDataPipeConsumerOptions(
+    MojoHandle data_pipe_consumer_handle,
+    const struct MojoDataPipeConsumerOptions* options) {
+  return g_core->SetDataPipeConsumerOptions(data_pipe_consumer_handle,
+                                            MakeUserPointer(options));
+}
+
+MojoResult MojoGetDataPipeConsumerOptions(
+    MojoHandle data_pipe_consumer_handle,
+    struct MojoDataPipeConsumerOptions* options,
+    uint32_t options_num_bytes) {
+  return g_core->GetDataPipeConsumerOptions(
+      data_pipe_consumer_handle, MakeUserPointer(options), options_num_bytes);
 }
 
 MojoResult MojoReadData(MojoHandle data_pipe_consumer_handle,

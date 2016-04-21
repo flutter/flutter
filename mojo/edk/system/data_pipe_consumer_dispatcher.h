@@ -47,6 +47,11 @@ class DataPipeConsumerDispatcher final : public Dispatcher {
   void CloseImplNoLock() override;
   util::RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock()
       override;
+  MojoResult SetDataPipeConsumerOptionsImplNoLock(
+      UserPointer<const MojoDataPipeConsumerOptions> options) override;
+  MojoResult GetDataPipeConsumerOptionsImplNoLock(
+      UserPointer<MojoDataPipeConsumerOptions> options,
+      uint32_t options_num_bytes) override;
   MojoResult ReadDataImplNoLock(UserPointer<void> elements,
                                 UserPointer<uint32_t> num_bytes,
                                 MojoReadDataFlags flags) override;

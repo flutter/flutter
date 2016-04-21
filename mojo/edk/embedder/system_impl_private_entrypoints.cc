@@ -162,6 +162,27 @@ MojoResult MojoSystemImplCreateDataPipe(
                               MakeUserPointer(data_pipe_consumer_handle));
 }
 
+MojoResult MojoSystemImplSetDataPipeProducerOptions(
+    MojoSystemImpl system,
+    MojoHandle data_pipe_producer_handle,
+    const struct MojoDataPipeProducerOptions* options) {
+  mojo::system::Core* core = static_cast<mojo::system::Core*>(system);
+  DCHECK(core);
+  return core->SetDataPipeProducerOptions(data_pipe_producer_handle,
+                                          MakeUserPointer(options));
+}
+
+MojoResult MojoSystemImplGetDataPipeProducerOptions(
+    MojoSystemImpl system,
+    MojoHandle data_pipe_producer_handle,
+    struct MojoDataPipeProducerOptions* options,
+    uint32_t options_num_bytes) {
+  mojo::system::Core* core = static_cast<mojo::system::Core*>(system);
+  DCHECK(core);
+  return core->GetDataPipeProducerOptions(
+      data_pipe_producer_handle, MakeUserPointer(options), options_num_bytes);
+}
+
 MojoResult MojoSystemImplWriteData(MojoSystemImpl system,
                                    MojoHandle data_pipe_producer_handle,
                                    const void* elements,
@@ -191,6 +212,27 @@ MojoResult MojoSystemImplEndWriteData(MojoSystemImpl system,
   mojo::system::Core* core = static_cast<mojo::system::Core*>(system);
   DCHECK(core);
   return core->EndWriteData(data_pipe_producer_handle, num_elements_written);
+}
+
+MojoResult MojoSystemImplSetDataPipeConsumerOptions(
+    MojoSystemImpl system,
+    MojoHandle data_pipe_consumer_handle,
+    const struct MojoDataPipeConsumerOptions* options) {
+  mojo::system::Core* core = static_cast<mojo::system::Core*>(system);
+  DCHECK(core);
+  return core->SetDataPipeConsumerOptions(data_pipe_consumer_handle,
+                                          MakeUserPointer(options));
+}
+
+MojoResult MojoSystemImplGetDataPipeConsumerOptions(
+    MojoSystemImpl system,
+    MojoHandle data_pipe_consumer_handle,
+    struct MojoDataPipeConsumerOptions* options,
+    uint32_t options_num_bytes) {
+  mojo::system::Core* core = static_cast<mojo::system::Core*>(system);
+  DCHECK(core);
+  return core->GetDataPipeConsumerOptions(
+      data_pipe_consumer_handle, MakeUserPointer(options), options_num_bytes);
 }
 
 MojoResult MojoSystemImplReadData(MojoSystemImpl system,

@@ -29,7 +29,7 @@ class Delimiter {
 
 std::ostream& operator<<(std::ostream& os,
                          const mojo::gfx::composition::SceneToken& value) {
-  return os << "{value=" << value.value << "}";
+  return os << "<S" << value.value << ">";
 }
 
 std::ostream& operator<<(std::ostream& os,

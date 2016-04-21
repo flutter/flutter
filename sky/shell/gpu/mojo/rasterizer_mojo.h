@@ -7,7 +7,7 @@
 
 #include "base/memory/weak_ptr.h"
 #include "flow/paint_context.h"
-#include "mojo/gpu/gl_context_owner.h"
+#include "mojo/gpu/gl_context.h"
 #include "mojo/public/interfaces/application/application_connector.mojom.h"
 #include "mojo/services/gfx/composition/interfaces/scenes.mojom.h"
 #include "mojo/skia/ganesh_context.h"
@@ -41,9 +41,9 @@ class RasterizerMojo : public Rasterizer {
     explicit GLState(mojo::ApplicationConnector* connector);
     ~GLState();
 
-    mojo::GLContextOwner gl_context_owner;
+    scoped_refptr<mojo::GLContext> gl_context;
     GLTextureRecycler gl_texture_recycler;
-    mojo::skia::GaneshContext ganesh_context;
+    scoped_refptr<mojo::skia::GaneshContext> ganesh_context;
   };
 
   mojo::Binding<rasterizer::Rasterizer> binding_;

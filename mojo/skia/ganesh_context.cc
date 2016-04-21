@@ -19,76 +19,86 @@ constexpr int kMaxGaneshResourceCacheCount = 2048;
 // GPU cache.
 constexpr size_t kMaxGaneshResourceCacheBytes = 96 * 1024 * 1024;
 
-GaneshContext::GaneshContext(base::WeakPtr<GLContext> gl_context)
+GaneshContext::GaneshContext(const scoped_refptr<GLContext>& gl_context)
     : gl_context_(gl_context) {
   DCHECK(gl_context_);
+  if (is_lost())
+    return;
+
   gl_context_->AddObserver(this);
 
-  Scope scope(this);
-
+  GLContext::Scope gl_scope(gl_context_);
   ::skia::RefPtr<GrGLInterface> interface =
       ::skia::AdoptRef(CreateMojoSkiaGLBinding());
   DCHECK(interface);
-
   gr_context_ = ::skia::AdoptRef(GrContext::Create(
       kOpenGL_GrBackend, reinterpret_cast<GrBackendContext>(interface.get())));
   DCHECK(gr_context_);
-
   gr_context_->setResourceCacheLimits(kMaxGaneshResourceCacheCount,
                                       kMaxGaneshResourceCacheBytes);
 }
 
 GaneshContext::~GaneshContext() {
-  if (gl_context_)
-    gl_context_->RemoveObserver(this);
+  DCHECK(!scope_entered_);
+  if (!gr_context_)
+    return;
 
-  ReleaseContext();
+  gl_context_->RemoveObserver(this);
+  if (is_lost()) {
+    gr_context_->abandonContext();
+  } else {
+    // TODO(jeffbrown): Current versions of Skia offer a function to release
+    // and abandon the context.  Enable this after rolling Skia.
+    // GLContext::Scope gl_scope(gl_context_);
+    // gr_context_->releaseResourcesAndAbandonContext();
+    gr_context_->abandonContext();
+  }
 }
 
 void GaneshContext::OnContextLost() {
-  context_lost_ = true;
-  if (!scope_entered_)
-    ReleaseContext();
-}
+  DCHECK(gr_context_);
+  DCHECK(is_lost());
 
-void GaneshContext::ReleaseContext() {
-  Scope(this);
-  gr_context_->abandonContext();
-  gr_context_.clear();
-  gl_context_.reset();
-}
-
-void GaneshContext::EnterScope() {
-  CHECK(!scope_entered_);
-  scope_entered_ = true;
-
-  if (gl_context_) {
-    previous_mgl_context_ = MGLGetCurrentContext();
-    gl_context_->MakeCurrent();
-
-    // Reset the Ganesh context when entering its scope in case the caller
-    // performed low-level GL operations which might interfere with Ganesh's
-    // state expectations.
-    if (gr_context_)
-      gr_context_->resetContext();
+  gl_context_->RemoveObserver(this);
+  if (!scope_entered_) {
+    gr_context_->abandonContext();
+    gr_context_.clear();
   }
 }
 
-void GaneshContext::ExitScope() {
-  CHECK(scope_entered_);
-  scope_entered_ = false;
+GaneshContext::Scope::Scope(const scoped_refptr<GaneshContext>& ganesh_context)
+    : ganesh_context_(ganesh_context), gl_scope_(ganesh_context->gl_context_) {
+  DCHECK(!ganesh_context_->scope_entered_);
+  DCHECK(ganesh_context_->gr_context_);
+  DCHECK(!ganesh_context_->is_lost());
 
-  if (gl_context_) {
-    // Flush the Ganesh context when exiting its scope.
-    if (gr_context_)
-      gr_context_->flush();
+  // Do this first to avoid potential reentrance if the context is lost.
+  ganesh_context_->scope_entered_ = true;
 
-    MGLMakeCurrent(previous_mgl_context_);
-    previous_mgl_context_ = MGL_NO_CONTEXT;
+  // Reset the Ganesh context when entering its scope in case the caller
+  // performed GL operations which might interfere with Ganesh's cached state.
+  ganesh_context_->gr_context_->resetContext();
+}
 
-    if (context_lost_)
-      ReleaseContext();
+GaneshContext::Scope::~Scope() {
+  DCHECK(ganesh_context_->scope_entered_);
+  DCHECK(ganesh_context_->gr_context_);
+
+  // Flush the Ganesh context when exiting its scope to ensure all pending
+  // operations have been applied to the GL context.
+  if (!ganesh_context_->is_lost()) {
+    ganesh_context_->gr_context_->flush();
   }
+
+  // Abandon the Ganesh context if lost while inside the scope or while
+  // flushing it above.
+  if (ganesh_context_->is_lost()) {
+    ganesh_context_->gr_context_->abandonContext();
+    ganesh_context_->gr_context_.clear();
+  }
+
+  // Do this last to avoid potential reentrance if the context is lost.
+  ganesh_context_->scope_entered_ = false;
 }
 
 }  // namespace skia

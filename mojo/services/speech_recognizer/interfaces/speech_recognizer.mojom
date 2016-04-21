@@ -26,9 +26,17 @@ struct UtteranceCandidate {
   float confidence_score;
 };
 
-union ResultOrError {
-  Error error_code;
-  array<UtteranceCandidate> results;
+// Receives events from the |SpeechRecognizerService|.
+interface SpeechRecognizerListener {
+  // Called when an error occurs.
+  OnRecognizerError(Error error_code);
+
+  // Called when the recognizer receives results.  |complete| will be true if
+  // the recognizer has stopped listening with these results.
+  OnResults(array<UtteranceCandidate> results, bool complete);
+
+  // Called when sound level changes.
+  OnSoundLevelChanged(float rmsDb);
 };
 
 // |SpeechRecognizerService| provides access to a speech recognition service.
@@ -39,7 +47,7 @@ interface SpeechRecognizerService {
   // Starts listening to the user. When listening has finished or an error
   // occurs, returns |result_or_error|. Any call to Listen() made while another
   // is in progress will immediately return an error.
-  Listen() => (ResultOrError result_or_error);
+  Listen(SpeechRecognizerListener listener);
 
   // Stops the SpeechRecognizer from listening and finishes any previous call
   // to Listen() causing it to return.

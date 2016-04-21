@@ -9,6 +9,7 @@
 #include "base/logging.h"
 #include "mojo/edk/system/data_pipe.h"
 #include "mojo/edk/system/memory.h"
+#include "mojo/edk/system/options_validation.h"
 
 using mojo::platform::ScopedPlatformHandle;
 using mojo::util::MutexLocker;
@@ -72,6 +73,51 @@ DataPipeConsumerDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock() {
   auto dispatcher = DataPipeConsumerDispatcher::Create();
   dispatcher->Init(std::move(data_pipe_));
   return dispatcher;
+}
+
+MojoResult DataPipeConsumerDispatcher::SetDataPipeConsumerOptionsImplNoLock(
+    UserPointer<const MojoDataPipeConsumerOptions> options) {
+  mutex().AssertHeld();
+
+  // The default of 0 means 1 element (however big that is).
+  uint32_t read_threshold_num_bytes = 0;
+  if (!options.IsNull()) {
+    UserOptionsReader<MojoDataPipeConsumerOptions> reader(options);
+    if (!reader.is_valid())
+      return MOJO_RESULT_INVALID_ARGUMENT;
+
+    if (!OPTIONS_STRUCT_HAS_MEMBER(MojoDataPipeConsumerOptions,
+                                   read_threshold_num_bytes, reader))
+      return MOJO_RESULT_OK;
+
+    read_threshold_num_bytes = reader.options().read_threshold_num_bytes;
+  }
+
+  return data_pipe_->ConsumerSetOptions(read_threshold_num_bytes);
+}
+
+MojoResult DataPipeConsumerDispatcher::GetDataPipeConsumerOptionsImplNoLock(
+    UserPointer<MojoDataPipeConsumerOptions> options,
+    uint32_t options_num_bytes) {
+  mutex().AssertHeld();
+
+  // Note: If/when |MojoDataPipeConsumerOptions| is extended beyond its initial
+  // definition, more work will be necessary. (See the definition of
+  // |MojoGetDataPipeConsumerOptions()| in mojo/public/c/system/data_pipe.h.)
+  static_assert(sizeof(MojoDataPipeConsumerOptions) == 8u,
+                "MojoDataPipeConsumerOptions has been extended!");
+
+  if (options_num_bytes < sizeof(MojoDataPipeConsumerOptions))
+    return MOJO_RESULT_INVALID_ARGUMENT;
+
+  uint32_t read_threshold_num_bytes = 0;
+  data_pipe_->ConsumerGetOptions(&read_threshold_num_bytes);
+  MojoDataPipeConsumerOptions model_options = {
+      sizeof(MojoDataPipeConsumerOptions),  // |struct_size|.
+      read_threshold_num_bytes,             // |read_threshold_num_bytes|.
+  };
+  options.Put(model_options);
+  return MOJO_RESULT_OK;
 }
 
 MojoResult DataPipeConsumerDispatcher::ReadDataImplNoLock(

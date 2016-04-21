@@ -8,6 +8,7 @@
 
 #include "base/logging.h"
 #include "mojo/gpu/gl_texture.h"
+#include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/gpu/gl/GrGLTypes.h"
 
 namespace mojo {
@@ -33,14 +34,15 @@ GaneshTextureSurface::GaneshTextureSurface(const GaneshContext::Scope& scope,
   desc.fSampleCnt = 0;
   desc.fTextureHandle = reinterpret_cast<GrBackendObject>(&info);
 
-  surface_ = ::skia::AdoptRef(
-      SkSurface::NewFromBackendTexture(scope.gr_context(), desc, nullptr));
+  surface_ = ::skia::AdoptRef(SkSurface::NewFromBackendTexture(
+      scope.gr_context().get(), desc, nullptr));
   DCHECK(surface_);
 }
 
 GaneshTextureSurface::~GaneshTextureSurface() {}
 
 std::unique_ptr<GLTexture> GaneshTextureSurface::TakeTexture() {
+  surface_->getCanvas()->flush();
   surface_.clear();
   return std::move(texture_);
 }

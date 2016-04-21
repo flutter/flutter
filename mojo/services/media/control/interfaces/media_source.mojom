@@ -5,7 +5,6 @@
 [DartPackage="mojo_services"]
 module mojo.media;
 
-import "mojo/services/media/common/interfaces/media_clock.mojom";
 import "mojo/services/media/common/interfaces/media_common.mojom";
 import "mojo/services/media/common/interfaces/media_metadata.mojom";
 import "mojo/services/media/common/interfaces/media_state.mojom";
@@ -20,15 +19,6 @@ interface MediaSource {
 
   // Gets the streams produced by this source.
   GetStreams() => (array<MediaSourceStreamDescriptor> streams);
-
-  // Gets the clock disposition from the source.
-  GetClockDisposition() => (ClockDisposition clock_disposition);
-
-  // Gets a master clock if the source can be master, null otherwise.
-  GetMasterClock(Clock& master_clock);
-
-  // Sets a master clock.
-  SetMasterClock(Clock? master_clock);
 
   // Gets the producer for the specified stream.
   GetProducer(uint32 stream_index, MediaProducer& producer);

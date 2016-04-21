@@ -11,8 +11,8 @@
 #include "base/logging.h"
 #include "mojo/edk/platform/platform_shared_buffer.h"
 #include "mojo/edk/system/memory.h"
+#include "mojo/edk/system/mock_simple_dispatcher.h"
 #include "mojo/edk/system/waiter.h"
-#include "mojo/edk/util/make_unique.h"
 #include "mojo/edk/util/ref_ptr.h"
 #include "mojo/edk/util/waitable_event.h"
 #include "mojo/public/cpp/system/macros.h"
@@ -20,7 +20,6 @@
 
 using mojo::platform::PlatformSharedBufferMapping;
 using mojo::util::MakeRefCounted;
-using mojo::util::MakeUnique;
 using mojo::util::ManualResetWaitableEvent;
 using mojo::util::RefPtr;
 
@@ -28,29 +27,9 @@ namespace mojo {
 namespace system {
 namespace {
 
-// Trivial subclass that makes the constructor public.
-class TrivialDispatcher final : public Dispatcher {
- public:
-  // Note: Use |MakeRefCounted<TrivialDispatcher>()|.
-
-  Type GetType() const override { return Type::UNKNOWN; }
-
- private:
-  FRIEND_MAKE_REF_COUNTED(TrivialDispatcher);
-
-  TrivialDispatcher() {}
-  ~TrivialDispatcher() override {}
-
-  RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock() override {
-    mutex().AssertHeld();
-    return AdoptRef(new TrivialDispatcher());
-  }
-
-  MOJO_DISALLOW_COPY_AND_ASSIGN(TrivialDispatcher);
-};
-
 TEST(DispatcherTest, Basic) {
-  auto d = MakeRefCounted<TrivialDispatcher>();
+  auto d = MakeRefCounted<test::MockSimpleDispatcher>(MOJO_HANDLE_SIGNAL_NONE,
+                                                      MOJO_HANDLE_SIGNAL_NONE);
 
   EXPECT_EQ(Dispatcher::Type::UNKNOWN, d->GetType());
 
@@ -61,12 +40,20 @@ TEST(DispatcherTest, Basic) {
             d->ReadMessage(NullUserPointer(), NullUserPointer(), nullptr,
                            nullptr, MOJO_WRITE_MESSAGE_FLAG_NONE));
   EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+            d->SetDataPipeProducerOptions(NullUserPointer()));
+  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+            d->GetDataPipeProducerOptions(NullUserPointer(), 0));
+  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
             d->WriteData(NullUserPointer(), NullUserPointer(),
                          MOJO_WRITE_DATA_FLAG_NONE));
   EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
             d->BeginWriteData(NullUserPointer(), NullUserPointer(),
                               MOJO_WRITE_DATA_FLAG_NONE));
   EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT, d->EndWriteData(0));
+  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+            d->SetDataPipeConsumerOptions(NullUserPointer()));
+  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+            d->GetDataPipeConsumerOptions(NullUserPointer(), 0));
   EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
             d->ReadData(NullUserPointer(), NullUserPointer(),
                         MOJO_READ_DATA_FLAG_NONE));
@@ -110,12 +97,20 @@ TEST(DispatcherTest, Basic) {
             d->ReadMessage(NullUserPointer(), NullUserPointer(), nullptr,
                            nullptr, MOJO_WRITE_MESSAGE_FLAG_NONE));
   EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+            d->SetDataPipeProducerOptions(NullUserPointer()));
+  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+            d->GetDataPipeProducerOptions(NullUserPointer(), 0));
+  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
             d->WriteData(NullUserPointer(), NullUserPointer(),
                          MOJO_WRITE_DATA_FLAG_NONE));
   EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
             d->BeginWriteData(NullUserPointer(), NullUserPointer(),
                               MOJO_WRITE_DATA_FLAG_NONE));
   EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT, d->EndWriteData(0));
+  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+            d->SetDataPipeConsumerOptions(NullUserPointer()));
+  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+            d->GetDataPipeConsumerOptions(NullUserPointer(), 0));
   EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
             d->ReadData(NullUserPointer(), NullUserPointer(),
                         MOJO_READ_DATA_FLAG_NONE));
@@ -148,9 +143,13 @@ enum class DispatcherOp {
   CLOSE = 0,
   WRITE_MESSAGE,
   READ_MESSAGE,
+  SET_DATA_PIPE_PRODUCER_OPTIONS,
+  GET_DATA_PIPE_PRODUCER_OPTIONS,
   WRITE_DATA,
   BEGIN_WRITE_DATA,
   END_WRITE_DATA,
+  SET_DATA_PIPE_CONSUMER_OPTIONS,
+  GET_DATA_PIPE_CONSUMER_OPTIONS,
   READ_DATA,
   BEGIN_READ_DATA,
   END_READ_DATA,
@@ -190,6 +189,14 @@ void ThreadSafetyStressHelper(ManualResetWaitableEvent* event,
           dispatcher->ReadMessage(NullUserPointer(), NullUserPointer(), nullptr,
                                   nullptr, MOJO_WRITE_MESSAGE_FLAG_NONE));
       break;
+    case DispatcherOp::SET_DATA_PIPE_PRODUCER_OPTIONS:
+      EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+                dispatcher->SetDataPipeProducerOptions(NullUserPointer()));
+      break;
+    case DispatcherOp::GET_DATA_PIPE_PRODUCER_OPTIONS:
+      EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+                dispatcher->GetDataPipeProducerOptions(NullUserPointer(), 0));
+      break;
     case DispatcherOp::WRITE_DATA:
       EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
                 dispatcher->WriteData(NullUserPointer(), NullUserPointer(),
@@ -202,6 +209,14 @@ void ThreadSafetyStressHelper(ManualResetWaitableEvent* event,
       break;
     case DispatcherOp::END_WRITE_DATA:
       EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT, dispatcher->EndWriteData(0));
+      break;
+    case DispatcherOp::SET_DATA_PIPE_CONSUMER_OPTIONS:
+      EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+                dispatcher->SetDataPipeConsumerOptions(NullUserPointer()));
+      break;
+    case DispatcherOp::GET_DATA_PIPE_CONSUMER_OPTIONS:
+      EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+                dispatcher->GetDataPipeConsumerOptions(NullUserPointer(), 0));
       break;
     case DispatcherOp::READ_DATA:
       EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
@@ -272,7 +287,8 @@ TEST(DispatcherTest, ThreadSafetyStress) {
   for (size_t i = 0; i < kRepeatCount; i++) {
     // Manual reset, not initially signaled.
     ManualResetWaitableEvent event;
-    auto d = MakeRefCounted<TrivialDispatcher>();
+    auto d = MakeRefCounted<test::MockSimpleDispatcher>(
+        MOJO_HANDLE_SIGNAL_NONE, MOJO_HANDLE_SIGNAL_NONE);
 
     std::vector<std::thread> threads;
     for (size_t j = 0; j < kNumThreads; j++) {
@@ -302,7 +318,8 @@ TEST(DispatcherTest, ThreadSafetyStressNoClose) {
   for (size_t i = 0; i < kRepeatCount; i++) {
     // Manual reset, not initially signaled.
     ManualResetWaitableEvent event;
-    auto d = MakeRefCounted<TrivialDispatcher>();
+    auto d = MakeRefCounted<test::MockSimpleDispatcher>(
+        MOJO_HANDLE_SIGNAL_NONE, MOJO_HANDLE_SIGNAL_NONE);
 
     std::vector<std::thread> threads;
     for (size_t j = 0; j < kNumThreads; j++) {

@@ -48,7 +48,7 @@ void ReleaseThunk(void* data) {
   desc.fOrigin = origin;
   desc.fTextureHandle = reinterpret_cast<GrBackendObject>(&info);
   return ::skia::AdoptRef(SkImage::NewFromTexture(
-      scope.gr_context(), desc, kPremul_SkAlphaType, &ReleaseThunk,
+      scope.gr_context().get(), desc, kPremul_SkAlphaType, &ReleaseThunk,
       new base::Closure(release_callback)));
 }
 

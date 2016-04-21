@@ -257,10 +257,18 @@ HandleSignalsState RemoteConsumerDataPipeImpl::ProducerGetHandleSignalsState()
     const {
   HandleSignalsState rv;
   if (consumer_open()) {
-    if (consumer_num_bytes_ < capacity_num_bytes() &&
-        !producer_in_two_phase_write())
-      rv.satisfied_signals |= MOJO_HANDLE_SIGNAL_WRITABLE;
-    rv.satisfiable_signals |= MOJO_HANDLE_SIGNAL_WRITABLE;
+    if (!producer_in_two_phase_write()) {
+      // |producer_write_threshold_num_bytes()| is always at least 1.
+      if (capacity_num_bytes() - consumer_num_bytes_ >=
+          producer_write_threshold_num_bytes()) {
+        rv.satisfied_signals |=
+            MOJO_HANDLE_SIGNAL_WRITABLE | MOJO_HANDLE_SIGNAL_WRITE_THRESHOLD;
+      } else if (consumer_num_bytes_ < capacity_num_bytes()) {
+        rv.satisfied_signals |= MOJO_HANDLE_SIGNAL_WRITABLE;
+      }
+    }
+    rv.satisfiable_signals |=
+        MOJO_HANDLE_SIGNAL_WRITABLE | MOJO_HANDLE_SIGNAL_WRITE_THRESHOLD;
   } else {
     rv.satisfied_signals |= MOJO_HANDLE_SIGNAL_PEER_CLOSED;
   }

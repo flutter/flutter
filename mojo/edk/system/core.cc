@@ -405,6 +405,29 @@ MojoResult Core::CreateDataPipe(
   return MOJO_RESULT_OK;
 }
 
+MojoResult Core::SetDataPipeProducerOptions(
+    MojoHandle data_pipe_producer_handle,
+    UserPointer<const MojoDataPipeProducerOptions> options) {
+  RefPtr<Dispatcher> dispatcher;
+  MojoResult result = GetDispatcher(data_pipe_producer_handle, &dispatcher);
+  if (result != MOJO_RESULT_OK)
+    return result;
+
+  return dispatcher->SetDataPipeProducerOptions(options);
+}
+
+MojoResult Core::GetDataPipeProducerOptions(
+    MojoHandle data_pipe_producer_handle,
+    UserPointer<MojoDataPipeProducerOptions> options,
+    uint32_t options_num_bytes) {
+  RefPtr<Dispatcher> dispatcher;
+  MojoResult result = GetDispatcher(data_pipe_producer_handle, &dispatcher);
+  if (result != MOJO_RESULT_OK)
+    return result;
+
+  return dispatcher->GetDataPipeProducerOptions(options, options_num_bytes);
+}
+
 MojoResult Core::WriteData(MojoHandle data_pipe_producer_handle,
                            UserPointer<const void> elements,
                            UserPointer<uint32_t> num_bytes,
@@ -437,6 +460,29 @@ MojoResult Core::EndWriteData(MojoHandle data_pipe_producer_handle,
     return result;
 
   return dispatcher->EndWriteData(num_bytes_written);
+}
+
+MojoResult Core::SetDataPipeConsumerOptions(
+    MojoHandle data_pipe_consumer_handle,
+    UserPointer<const MojoDataPipeConsumerOptions> options) {
+  RefPtr<Dispatcher> dispatcher;
+  MojoResult result = GetDispatcher(data_pipe_consumer_handle, &dispatcher);
+  if (result != MOJO_RESULT_OK)
+    return result;
+
+  return dispatcher->SetDataPipeConsumerOptions(options);
+}
+
+MojoResult Core::GetDataPipeConsumerOptions(
+    MojoHandle data_pipe_consumer_handle,
+    UserPointer<MojoDataPipeConsumerOptions> options,
+    uint32_t options_num_bytes) {
+  RefPtr<Dispatcher> dispatcher;
+  MojoResult result = GetDispatcher(data_pipe_consumer_handle, &dispatcher);
+  if (result != MOJO_RESULT_OK)
+    return result;
+
+  return dispatcher->GetDataPipeConsumerOptions(options, options_num_bytes);
 }
 
 MojoResult Core::ReadData(MojoHandle data_pipe_consumer_handle,

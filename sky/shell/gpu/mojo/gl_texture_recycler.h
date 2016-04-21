@@ -28,7 +28,7 @@ namespace shell {
 // TODO(abarth): Move to //mojo/gpu and reconcile with mojo::ui::GLRenderer.
 class GLTextureRecycler {
  public:
-  GLTextureRecycler(base::WeakPtr<mojo::GLContext> gl_context,
+  GLTextureRecycler(scoped_refptr<mojo::GLContext> gl_context,
              uint32_t max_recycled_textures = 3u);
   ~GLTextureRecycler();
 
@@ -69,7 +69,7 @@ class GLTextureRecycler {
 
   void ReleaseTexture(GLRecycledTextureInfo texture_info, bool recyclable);
 
-  const base::WeakPtr<mojo::GLContext> gl_context_;
+  scoped_refptr<mojo::GLContext> gl_context_;
   const uint32_t max_recycled_textures_;
 
   std::deque<GLRecycledTextureInfo> recycled_textures_;

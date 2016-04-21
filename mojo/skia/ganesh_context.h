@@ -5,9 +5,8 @@
 #ifndef MOJO_SKIA_GANESH_CONTEXT_H_
 #define MOJO_SKIA_GANESH_CONTEXT_H_
 
-#include "base/basictypes.h"
-#include "base/logging.h"
-#include "base/memory/weak_ptr.h"
+#include "base/macros.h"
+#include "base/memory/ref_counted.h"
 #include "mojo/gpu/gl_context.h"
 #include "skia/ext/refptr.h"
 #include "third_party/skia/include/gpu/GrContext.h"
@@ -17,8 +16,10 @@ namespace skia {
 
 // Binds a Ganesh rendering context to a GL context.
 //
-// This object is not thread-safe.
-class GaneshContext : public GLContext::Observer {
+// Instances of this object is not thread-safe and must be used on the
+// same thread as the GL context was created on.
+class GaneshContext : public base::RefCounted<GaneshContext>,
+                      private GLContext::Observer {
  public:
   // RAII style helper for executing code within a Ganesh environment.
   //
@@ -33,54 +34,58 @@ class GaneshContext : public GLContext::Observer {
    public:
     // Upon entry to the scope, makes the GL context active and resets
     // the Ganesh context state.
-    explicit Scope(GaneshContext* context) : context_(context) {
-      DCHECK(context_);
-      context_->EnterScope();
-    }
+    //
+    // This operation is not allowed if |GaneshContext::is_lost()| is true.
+    explicit Scope(const scoped_refptr<GaneshContext>& ganesh_context);
 
     // Upon exit from the scope, flushes the Ganesh context state and
-    // restores the prior GL context.
-    ~Scope() { context_->ExitScope(); }
+    // reactivates the prior GL context.
+    ~Scope();
 
-    // Gets the underlying GL context, may be null if the context was lost.
+    // Gets the underlying Ganesh context, never null.
+    const scoped_refptr<GaneshContext>& ganesh_context() const {
+      return ganesh_context_;
+    }
+
+    // Gets the underlying Ganesh rendering context, never null.
+    const ::skia::RefPtr<GrContext>& gr_context() const {
+      return ganesh_context_->gr_context_;
+    }
+
+    // Gets the underlying GL context scope.
     //
     // Be careful when manipulating the GL context from within a Ganesh
     // scope since the Ganesh renderer caches GL state.  Queries are safe
     // but operations which modify the state of the GL context, such as binding
     // textures, should be followed by a call to |GrContext::resetContext|
     // before performing other Ganesh related actions within the scope.
-    const base::WeakPtr<GLContext>& gl_context() const {
-      return context_->gl_context_;
-    }
-
-    // Gets the Ganesh rendering context, may be null if the context was lost.
-    GrContext* gr_context() const { return context_->gr_context_.get(); }
+    const GLContext::Scope& gl_scope() const { return gl_scope_; }
 
    private:
-    GaneshContext* context_;
+    scoped_refptr<GaneshContext> ganesh_context_;
+    GLContext::Scope gl_scope_;
 
     DISALLOW_COPY_AND_ASSIGN(Scope);
   };
 
-  explicit GaneshContext(base::WeakPtr<GLContext> gl_context);
-  ~GaneshContext() override;
+  // Creates a Ganesh context bound to the specified GL context.
+  explicit GaneshContext(const scoped_refptr<GLContext>& gl_context);
 
-  // Gets the underlying GL context.
-  const base::WeakPtr<GLContext>& gl_context() const { return gl_context_; }
+  // Gets the underlying GL context, never null.
+  const scoped_refptr<GLContext>& gl_context() const { return gl_context_; }
+
+  // Returns true if the GL context was lost.
+  bool is_lost() const { return gl_context_->is_lost(); }
 
  private:
+  friend class base::RefCounted<GaneshContext>;
+
+  ~GaneshContext() override;
   void OnContextLost() override;
-  void ReleaseContext();
 
-  void EnterScope();
-  void ExitScope();
-
-  base::WeakPtr<GLContext> gl_context_;
+  const scoped_refptr<GLContext> gl_context_;
   ::skia::RefPtr<GrContext> gr_context_;
-
   bool scope_entered_ = false;
-  bool context_lost_ = false;
-  MGLContext previous_mgl_context_ = MGL_NO_CONTEXT;
 
   DISALLOW_COPY_AND_ASSIGN(GaneshContext);
 };

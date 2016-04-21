@@ -9,6 +9,7 @@
 #include <utility>
 #include <vector>
 
+#include "mojo/edk/system/handle.h"
 #include "mojo/edk/util/ref_ptr.h"
 #include "mojo/public/c/system/handle.h"
 #include "mojo/public/c/system/result.h"
@@ -30,69 +31,74 @@ bool ShutdownCheckNoLeaks(Core*);
 }
 
 // This class provides the (global) handle table (owned by |Core|), which maps
-// (valid) |MojoHandle|s to |Dispatcher|s. This is abstracted so that, e.g.,
-// caching may be added.
+// (valid) |MojoHandle|s to |Handle|s (basically, |Dispatcher|s plus rights).
+// This is abstracted so that, e.g., caching may be added.
 //
 // This class is NOT thread-safe; locking is left to |Core| (since it may need
 // to make several changes -- "atomically" or in rapid successsion, in which
 // case the extra locking/unlocking would be unnecessary overhead).
-
 class HandleTable {
  public:
   HandleTable();
   ~HandleTable();
 
-  // On success, gets the dispatcher for a given handle (which should not be
-  // |MOJO_HANDLE_INVALID|). On failure, returns an appropriate result (and
+  // TODO(vtl): Replace the dispatcher-only methods with ones that either take a
+  // handle, or ones that deal in dispatchers *and* rights. (E.g., it might be
+  // convenient for there to be a "GetDispatcher()" that automatically does
+  // rights-checking.)
+
+  // On success, gets the dispatcher for a given handle value (which should not
+  // be |MOJO_HANDLE_INVALID|). On failure, returns an appropriate result (and
   // leaves |dispatcher| alone), namely |MOJO_RESULT_INVALID_ARGUMENT| if
-  // there's no dispatcher for the given handle or |MOJO_RESULT_BUSY| if the
-  // handle is marked as busy.
-  MojoResult GetDispatcher(MojoHandle handle,
+  // there's no dispatcher for the given handle value or |MOJO_RESULT_BUSY| if
+  // the handle value is marked as busy.
+  MojoResult GetDispatcher(MojoHandle handle_value,
                            util::RefPtr<Dispatcher>* dispatcher);
 
-  // Like |GetDispatcher()|, but on success also removes the handle from the
-  // handle table.
-  MojoResult GetAndRemoveDispatcher(MojoHandle handle,
+  // Like |GetDispatcher()|, but on success also removes the handle value from
+  // the handle table.
+  MojoResult GetAndRemoveDispatcher(MojoHandle handle_value,
                                     util::RefPtr<Dispatcher>* dispatcher);
 
-  // Adds a dispatcher (which must be valid), returning the handle for it.
+  // Adds a dispatcher (which must be valid), returning the handle value for it.
   // Returns |MOJO_HANDLE_INVALID| on failure (if the handle table is full).
   MojoHandle AddDispatcher(Dispatcher* dispatcher);
 
-  // Adds a pair of dispatchers (which must be valid), return a pair of handles
-  // for them. On failure (if the handle table is full), the first (and second)
-  // handles will be |MOJO_HANDLE_INVALID|, and neither dispatcher will be
-  // added.
+  // Adds a pair of dispatchers (which must be valid), return a pair of handle
+  // values for them. On failure (if the handle table is full), the (first and
+  // second) handle values will be |MOJO_HANDLE_INVALID|, and neither dispatcher
+  // will be added.
   std::pair<MojoHandle, MojoHandle> AddDispatcherPair(Dispatcher* dispatcher0,
                                                       Dispatcher* dispatcher1);
 
   // Adds the given vector of dispatchers (of size at most
-  // |kMaxMessageNumHandles|). |handles| must point to an array of size at least
-  // |dispatchers.size()|. Unlike the other |AddDispatcher...()| functions, some
-  // of the dispatchers may be invalid (null). Returns true on success and false
-  // on failure (if the handle table is full), in which case it leaves
-  // |handles[...]| untouched (and all dispatchers unadded).
+  // |kMaxMessageNumHandles|). |handle_values| must point to an array of size at
+  // least |dispatchers.size()|. Unlike the other |AddDispatcher...()|
+  // functions, some of the dispatchers may be invalid (null). Returns true on
+  // success and false on failure (if the handle table is full), in which case
+  // it leaves |handle_values[...]| untouched (and all dispatchers unadded).
   bool AddDispatcherVector(const DispatcherVector& dispatchers,
-                           MojoHandle* handles);
+                           MojoHandle* handle_values);
 
-  // Tries to mark the given handles as busy and start transport on them (i.e.,
-  // take their dispatcher locks); |transports| must be sized to contain
+  // Tries to mark the given handle values as busy and start transport on them
+  // (i.e., take their dispatcher locks); |transports| must be sized to contain
   // |num_handles| elements. On failure, returns them to their original
   // (non-busy, unlocked state).
   MojoResult MarkBusyAndStartTransport(
       MojoHandle disallowed_handle,
-      const MojoHandle* handles,
+      const MojoHandle* handle_values,
       uint32_t num_handles,
       std::vector<DispatcherTransport>* transports);
 
-  // Remove the given handles, which must all be present and which should have
-  // previously been marked busy by |MarkBusyAndStartTransport()|.
-  void RemoveBusyHandles(const MojoHandle* handles, uint32_t num_handles);
+  // Remove the given handle values, which must all be present and which should
+  // have previously been marked busy by |MarkBusyAndStartTransport()|.
+  void RemoveBusyHandles(const MojoHandle* handle_values, uint32_t num_handles);
 
-  // Restores the given handles, which must all be present and which should have
-  // previously been marked busy by |MarkBusyAndStartTransport()|, to a non-busy
-  // state.
-  void RestoreBusyHandles(const MojoHandle* handles, uint32_t num_handles);
+  // Restores the given handle values, which must all be present and which
+  // should have previously been marked busy by |MarkBusyAndStartTransport()|,
+  // to a non-busy state.
+  void RestoreBusyHandles(const MojoHandle* handle_values,
+                          uint32_t num_handles);
 
  private:
   friend bool internal::ShutdownCheckNoLeaks(Core*);
@@ -116,19 +122,20 @@ class HandleTable {
   // closed (or learning about this too late).
   struct Entry {
     Entry();
-    explicit Entry(util::RefPtr<Dispatcher>&& dispatcher);
+    explicit Entry(Handle&& handle);
     ~Entry();
 
+    Handle handle;
     util::RefPtr<Dispatcher> dispatcher;
     bool busy;
   };
   using HandleToEntryMap = std::unordered_map<MojoHandle, Entry>;
 
-  // Adds the given dispatcher to the handle table, not doing any size checks.
-  MojoHandle AddDispatcherNoSizeCheck(util::RefPtr<Dispatcher>&& dispatcher);
+  // Adds the given handle to the handle table, not doing any size checks.
+  MojoHandle AddHandleNoSizeCheck(Handle&& handle);
 
   HandleToEntryMap handle_to_entry_map_;
-  MojoHandle next_handle_;  // Invariant: never |MOJO_HANDLE_INVALID|.
+  MojoHandle next_handle_value_;  // Invariant: never |MOJO_HANDLE_INVALID|.
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(HandleTable);
 };

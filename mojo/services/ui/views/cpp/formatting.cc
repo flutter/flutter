@@ -10,12 +10,12 @@ namespace mojo {
 namespace ui {
 
 std::ostream& operator<<(std::ostream& os, const mojo::ui::ViewToken& value) {
-  return os << "{value=" << value.value << "}";
+  return os << "<V" << value.value << ">";
 }
 
 std::ostream& operator<<(std::ostream& os,
                          const mojo::ui::ViewTreeToken& value) {
-  return os << "{value=" << value.value << "}";
+  return os << "<T" << value.value << ">";
 }
 
 std::ostream& operator<<(std::ostream& os, const mojo::ui::ViewInfo& value) {
