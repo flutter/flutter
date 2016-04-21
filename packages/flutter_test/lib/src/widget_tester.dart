@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:quiver/testing/async.dart';
@@ -9,6 +12,12 @@ import 'package:test/test.dart';
 
 import 'binding.dart';
 import 'test_pointer.dart';
+
+/// Signature for [CommonFinders.byPredicate].
+typedef bool WidgetPredicate(Widget widget);
+
+/// Signature for [CommonFinders.byElement].
+typedef bool ElementPredicate(Element element);
 
 /// Runs the [callback] inside the Flutter test environment.
 ///
@@ -30,26 +39,6 @@ void testWidgets(void callback(WidgetTester widgetTester)) {
   });
 }
 
-/// A convenient accessor to frequently used finders.
-///
-/// Examples:
-///
-///     tester.tap(find.text('Save'));
-///     tester.widget(find.byType(MyWidget));
-///     tester.stateOf(find.byConfig(config));
-///     tester.getSize(find.byKey(new ValueKey('save-button')));
-const CommonFinders find = const CommonFinders._();
-
-/// Asserts that [finder] locates a widget in the test element tree.
-///
-/// Example:
-///
-///     expect(tester, hasWidget(find.text('Save')));
-Matcher hasWidget(Finder finder) => new _HasWidgetMatcher(finder);
-
-/// Opposite of [hasWidget].
-Matcher doesNotHaveWidget(Finder finder) => new _DoesNotHaveWidgetMatcher(finder);
-
 /// Class that programmatically interacts with widgets and the test environment.
 class WidgetTester {
   WidgetTester._(this.elementTreeTester);
@@ -57,6 +46,8 @@ class WidgetTester {
   /// Exposes the [Element] tree created from widgets.
   final ElementTreeTester elementTreeTester;
 
+  /// The binding instance that the widget tester is using when it
+  /// needs a binding (e.g. for event dispatch).
   Widgeteer get binding => elementTreeTester.binding;
 
   /// Renders the UI from the given [widget].
@@ -114,8 +105,7 @@ class WidgetTester {
   /// All widgets currently live on the UI returned in a depth-first traversal
   /// order.
   Iterable<Widget> get widgets {
-    return this.elementTreeTester.allElements
-      .map((Element element) => element.widget);
+    return this.allElements.map((Element element) => element.widget);
   }
 
   /// Finds the first widget, searching in the depth-first traversal order.
@@ -233,16 +223,82 @@ class WidgetTester {
     Element element = finder.findFirst(this);
     return elementTreeTester.getBottomRight(element);
   }
+
+  /// Returns all elements ordered in a depth-first traversal fashion.
+  ///
+  /// The returned iterable is lazy. It does not walk the entire element tree
+  /// immediately, but rather a chunk at a time as the iteration progresses
+  /// using [Iterator.moveNext].
+  Iterable<Element> get allElements {
+    return new _DepthFirstChildIterable(binding.renderViewElement);
+  }
 }
 
+class _DepthFirstChildIterable extends IterableBase<Element> {
+  _DepthFirstChildIterable(this.rootElement);
+
+  Element rootElement;
+
+  @override
+  Iterator<Element> get iterator => new _DepthFirstChildIterator(rootElement);
+}
+
+class _DepthFirstChildIterator implements Iterator<Element> {
+  _DepthFirstChildIterator(Element rootElement)
+      : _stack = _reverseChildrenOf(rootElement).toList();
+
+  Element _current;
+
+  final List<Element> _stack;
+
+  @override
+  Element get current => _current;
+
+  @override
+  bool moveNext() {
+    if (_stack.isEmpty)
+      return false;
+
+    _current = _stack.removeLast();
+    // Stack children in reverse order to traverse first branch first
+    _stack.addAll(_reverseChildrenOf(_current));
+
+    return true;
+  }
+
+  static Iterable<Element> _reverseChildrenOf(Element element) {
+    final List<Element> children = <Element>[];
+    element.visitChildren(children.add);
+    return children.reversed;
+  }
+}
+
+/// A convenient accessor to frequently used finders.
+///
+/// Examples:
+///
+///     tester.tap(find.text('Save'));
+///     tester.widget(find.byType(MyWidget));
+///     tester.stateOf(find.byConfig(config));
+///     tester.getSize(find.byKey(new ValueKey('save-button')));
+const CommonFinders find = const CommonFinders._();
+
 /// Provides lightweight syntax for getting frequently used widget [Finder]s.
+///
+/// This class is instantiated once, as [find].
 class CommonFinders {
   const CommonFinders._();
 
-  /// Finds [Text] widgets containing string equal to [text].
+  /// Finds [Text] widgets containing string equal to the `text`
+  /// argument.
+  ///
+  /// Example:
+  ///
+  ///     expect(tester, hasWidget(find.text('Back')));
   Finder text(String text) => new _TextFinder(text);
 
-  /// Looks for widgets that contain [Text] with [text] in it.
+  /// Looks for widgets that contain a [Text] descendant with `text`
+  /// in it.
   ///
   /// Example:
   ///
@@ -255,32 +311,67 @@ class CommonFinders {
   ///     tester.tap(find.widgetWithText(Button, 'Update'));
   Finder widgetWithText(Type widgetType, String text) => new _WidgetWithTextFinder(widgetType, text);
 
-  /// Finds widgets by [key].
+  /// Finds widgets by searching for one with a particular [Key].
+  ///
+  /// Example:
+  ///
+  ///     expect(tester, hasWidget(find.byKey(backKey)));
   Finder byKey(Key key) => new _KeyFinder(key);
 
-  /// Finds widgets by [type].
+  /// Finds widgets by searching for widgehts with a particular type.
+  ///
+  /// The `type` argument must be a subclass of [Widget].
+  ///
+  /// Example:
+  ///
+  ///     expect(tester, hasWidget(find.byType(IconButton)));
   Finder byType(Type type) => new _TypeFinder(type);
 
-  /// Finds widgets equal to [config].
+  /// Finds widgets whose current widget is the instance given by the
+  /// argument.
+  ///
+  /// Example:
+  ///
+  ///     // Suppose you have a button created like this:
+  ///     Widget myButton = new Button(
+  ///       child: new Text('Update')
+  ///     );
+  ///
+  ///     // You can find and tap on it like this:
+  ///     tester.tap(find.byConfig(myButton));
   Finder byConfig(Widget config) => new _ConfigFinder(config);
 
-  /// Finds widgets using a [predicate].
-  Finder byPredicate(WidgetPredicate predicate) {
-    return new _ElementFinder((Element element) => predicate(element.widget));
-  }
+  /// Finds widgets using a widget predicate.
+  ///
+  /// Example:
+  ///
+  ///     expect(tester, hasWidget(find.byWidgetPredicate(
+  ///       (Widget widget) => widget is Tooltip && widget.message == 'Back'
+  ///     )));
+  Finder byWidgetPredicate(WidgetPredicate predicate) => new _WidgetPredicateFinder(predicate);
 
-  /// Finds widgets using an element [predicate].
-  Finder byElement(ElementPredicate predicate) => new _ElementFinder(predicate);
+  /// Finds widgets using an element predicate.
+  ///
+  /// Example:
+  ///
+  ///     expect(tester, hasWidget(find.byWidgetPredicate(
+  ///       (Element element) => element is SingleChildRenderObjectElement
+  ///     )));
+  Finder byElementPredicate(ElementPredicate predicate) => new _ElementPredicateFinder(predicate);
 }
 
 /// Finds [Element]s inside the element tree.
 abstract class Finder {
+  /// Returns all the elements that match this finder's pattern,
+  /// using the given tester to determine which element tree to look at.
   Iterable<Element> find(WidgetTester tester);
 
-  /// Describes what the finder is looking for. The description should be such
-  /// that [toString] reads as a descriptive English sentence.
+  /// Describes what the finder is looking for. The description should be
+  /// a brief English noun phrase describing the finder's pattern.
   String get description;
 
+  /// Returns the first value returned from [find], unless no value is found,
+  /// in which case it throws an [ElementNotFoundError].
   Element findFirst(WidgetTester tester) {
     Iterable<Element> results = find(tester);
     return results.isNotEmpty
@@ -316,7 +407,7 @@ class _TextFinder extends Finder {
 
   @override
   Iterable<Element> find(WidgetTester tester) {
-    return tester.elementTreeTester.findElements((Element element) {
+    return tester.allElements.where((Element element) {
       if (element.widget is! Text)
         return false;
       Text textWidget = element.widget;
@@ -336,7 +427,7 @@ class _WidgetWithTextFinder extends Finder {
 
   @override
   Iterable<Element> find(WidgetTester tester) {
-    return tester.elementTreeTester.allElements
+    return tester.allElements
       .map((Element textElement) {
         if (textElement.widget is! Text)
           return null;
@@ -370,7 +461,9 @@ class _KeyFinder extends Finder {
 
   @override
   Iterable<Element> find(WidgetTester tester) {
-    return tester.elementTreeTester.findElements((Element element) => element.widget.key == key);
+    return tester.allElements.where((Element element) {
+      return element.widget.key == key;
+    });
   }
 }
 
@@ -384,7 +477,7 @@ class _TypeFinder extends Finder {
 
   @override
   Iterable<Element> find(WidgetTester tester) {
-    return tester.elementTreeTester.allElements.where((Element element) {
+    return tester.allElements.where((Element element) {
       return element.widget.runtimeType == widgetType;
     });
   }
@@ -400,28 +493,48 @@ class _ConfigFinder extends Finder {
 
   @override
   Iterable<Element> find(WidgetTester tester) {
-    return tester.elementTreeTester.allElements.where((Element element) {
+    return tester.allElements.where((Element element) {
       return element.widget == config;
     });
   }
 }
 
-typedef bool WidgetPredicate(Widget element);
-typedef bool ElementPredicate(Element element);
+class _WidgetPredicateFinder extends Finder {
+  _WidgetPredicateFinder(this.predicate);
 
-class _ElementFinder extends Finder {
-  _ElementFinder(this.predicate);
+  final WidgetPredicate predicate;
+
+  @override
+  String get description => 'widget predicate ($predicate)';
+
+  @override
+  Iterable<Element> find(WidgetTester tester) {
+    return tester.allElements.where((Element element) {
+      return predicate(element.widget);
+    });
+  }
+}
+
+class _ElementPredicateFinder extends Finder {
+  _ElementPredicateFinder(this.predicate);
 
   final ElementPredicate predicate;
 
   @override
-  String get description => 'element satisfying given predicate ($predicate)';
+  String get description => 'element predicate ($predicate)';
 
   @override
   Iterable<Element> find(WidgetTester tester) {
-    return tester.elementTreeTester.allElements.where(predicate);
+    return tester.allElements.where(predicate);
   }
 }
+
+/// Asserts that [finder] locates a widget in the test element tree.
+///
+/// Example:
+///
+///     expect(tester, hasWidget(find.text('Save')));
+Matcher hasWidget(Finder finder) => new _HasWidgetMatcher(finder);
 
 class _HasWidgetMatcher extends Matcher {
   const _HasWidgetMatcher(this.finder);
@@ -444,6 +557,14 @@ class _HasWidgetMatcher extends Matcher {
     return mismatchDescription.add('Does not contain $finder');
   }
 }
+
+/// Asserts that [finder] does not locate a widget in the test element tree.
+/// Opposite of [hasWidget].
+///
+/// Example:
+///
+///     expect(tester, doesNotHaveWidget(find.text('Save')));
+Matcher doesNotHaveWidget(Finder finder) => new _DoesNotHaveWidgetMatcher(finder);
 
 class _DoesNotHaveWidgetMatcher extends Matcher {
   const _DoesNotHaveWidgetMatcher(this.finder);

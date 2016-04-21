@@ -14,14 +14,14 @@ import '../lib/gallery/item.dart' as material_gallery;
 const List<String> demoCategories = const <String>['Demos', 'Components', 'Style'];
 
 Finder findGalleryItemByRouteName(WidgetTester tester, String routeName) {
-  return find.byPredicate((Widget widget) {
+  return find.byWidgetPredicate((Widget widget) {
     return widget is material_gallery.GalleryItem
         && widget.routeName == routeName;
   });
 }
 
 Finder byTooltip(WidgetTester tester, String message) {
-  return find.byPredicate((Widget widget) {
+  return find.byWidgetPredicate((Widget widget) {
     return widget is Tooltip && widget.message == message;
   });
 }
