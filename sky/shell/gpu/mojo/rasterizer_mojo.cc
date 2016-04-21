@@ -4,6 +4,8 @@
 
 #include "sky/shell/gpu/mojo/rasterizer_mojo.h"
 
+#include <MGL/mgl_echo.h>
+
 #include "base/trace_event/trace_event.h"
 #include "mojo/gpu/gl_texture.h"
 #include "mojo/skia/ganesh_texture_surface.h"
@@ -12,6 +14,16 @@
 
 namespace sky {
 namespace shell {
+namespace {
+
+void DidEcho(void* context) {
+  TRACE_EVENT_ASYNC_END0("flutter", "DidEcho", context);
+  Rasterizer::DrawCallback* callback = static_cast<Rasterizer::DrawCallback*>(context);
+  callback->Run();
+  delete callback;
+}
+
+}  // namespace
 
 const uint32_t kContentImageResourceId = 1;
 const uint32_t kRootNodeId = mojo::gfx::composition::kSceneRootNodeId;
@@ -112,9 +124,15 @@ void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
   auto metadata = mojo::gfx::composition::SceneMetadata::New();
   metadata->version = layer_tree->scene_version();
   scene_->Publish(metadata.Pass());
-  callback.Run();
 
   last_layer_tree_ = std::move(layer_tree);
+
+  // Ask MGL to ack these commands so that we know we're not getting too far
+  // ahead. Ideally Mozart would help us coordinate with the other views.
+  DrawCallback* context = new DrawCallback();
+  *context = callback;
+  TRACE_EVENT_ASYNC_BEGIN0("flutter", "MGLEcho", context);
+  MGLEcho(DidEcho, context);
 }
 
 flow::LayerTree* RasterizerMojo::GetLastLayerTree() {
