@@ -24,13 +24,16 @@ enum EnginePhase {
 }
 
 class _SteppedWidgetFlutterBinding extends WidgetFlutterBinding {
+  _SteppedWidgetFlutterBinding._(this.async);
+
+  final FakeAsync async;
 
   /// Creates and initializes the binding. This constructor is
   /// idempotent; calling it a second time will just return the
   /// previously-created instance.
-  static WidgetFlutterBinding ensureInitialized() {
+  static WidgetFlutterBinding ensureInitialized(FakeAsync async) {
     if (WidgetFlutterBinding.instance == null)
-      new _SteppedWidgetFlutterBinding();
+      new _SteppedWidgetFlutterBinding._(async);
     return WidgetFlutterBinding.instance;
   }
 
@@ -66,6 +69,12 @@ class _SteppedWidgetFlutterBinding extends WidgetFlutterBinding {
       SemanticsNode.sendSemanticsTree();
     }
   }
+
+  @override
+  void dispatchEvent(PointerEvent event, HitTestResult result) {
+    super.dispatchEvent(event, result);
+    async.flushMicrotasks();
+  }
 }
 
 /// Helper class for flutter tests providing fake async.
@@ -77,7 +86,7 @@ class ElementTreeTester extends Instrumentation {
   ElementTreeTester._(FakeAsync async)
     : async = async,
       clock = async.getClock(new DateTime.utc(2015, 1, 1)),
-      super(binding: _SteppedWidgetFlutterBinding.ensureInitialized()) {
+      super(binding: _SteppedWidgetFlutterBinding.ensureInitialized(async)) {
     timeDilation = 1.0;
     ui.window.onBeginFrame = null;
     debugPrint = _synchronousDebugPrint;
@@ -135,12 +144,6 @@ class ElementTreeTester extends Instrumentation {
   void setLocale(String languageCode, String countryCode) {
     Locale locale = new Locale(languageCode, countryCode);
     binding.dispatchLocaleChanged(locale);
-    async.flushMicrotasks();
-  }
-
-  @override
-  void dispatchEvent(PointerEvent event, HitTestResult result) {
-    super.dispatchEvent(event, result);
     async.flushMicrotasks();
   }
 

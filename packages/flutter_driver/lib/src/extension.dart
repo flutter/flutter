@@ -214,14 +214,14 @@ class FlutterDriverExtension {
     HitTestResult hitTest = new HitTestResult();
 
     prober.binding.hitTest(hitTest, startLocation);
-    prober.dispatchEvent(pointer.down(startLocation), hitTest);
+    prober.binding.dispatchEvent(pointer.down(startLocation), hitTest);
     await new Future<Null>.value();  // so that down and move don't happen in the same microtask
     for (int moves = 0; moves < totalMoves; moves++) {
       currentLocation = currentLocation + delta;
-      prober.dispatchEvent(pointer.move(currentLocation), hitTest);
+      prober.binding.dispatchEvent(pointer.move(currentLocation), hitTest);
       await new Future<Null>.delayed(pause);
     }
-    prober.dispatchEvent(pointer.up(), hitTest);
+    prober.binding.dispatchEvent(pointer.up(), hitTest);
 
     return new ScrollResult();
   }

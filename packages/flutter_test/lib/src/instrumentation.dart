@@ -182,8 +182,8 @@ class Instrumentation {
   void tapAt(Point location, { int pointer: 1 }) {
     HitTestResult result = _hitTest(location);
     TestPointer p = new TestPointer(pointer);
-    dispatchEvent(p.down(location), result);
-    dispatchEvent(p.up(), result);
+    binding.dispatchEvent(p.down(location), result);
+    binding.dispatchEvent(p.up(), result);
   }
 
   /// Attempts a fling gesture starting from the center of the given
@@ -205,13 +205,13 @@ class Instrumentation {
     const int kMoveCount = 50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
     final double timeStampDelta = 1000.0 * offset.distance / (kMoveCount * velocity);
     double timeStamp = 0.0;
-    dispatchEvent(p.down(startLocation, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
+    binding.dispatchEvent(p.down(startLocation, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
     for(int i = 0; i <= kMoveCount; i++) {
       final Point location = startLocation + Offset.lerp(Offset.zero, offset, i / kMoveCount);
-      dispatchEvent(p.move(location, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
+      binding.dispatchEvent(p.move(location, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
       timeStamp += timeStampDelta;
     }
-    dispatchEvent(p.up(timeStamp: new Duration(milliseconds: timeStamp.round())), result);
+    binding.dispatchEvent(p.up(timeStamp: new Duration(milliseconds: timeStamp.round())), result);
   }
 
   /// Attempts to drag the given element by the given offset, by
@@ -231,73 +231,21 @@ class Instrumentation {
     // Events for the entire press-drag-release gesture are dispatched
     // to the widgets "hit" by the pointer down event.
     HitTestResult result = _hitTest(startLocation);
-    dispatchEvent(p.down(startLocation), result);
-    dispatchEvent(p.move(endLocation), result);
-    dispatchEvent(p.up(), result);
+    binding.dispatchEvent(p.down(startLocation), result);
+    binding.dispatchEvent(p.move(endLocation), result);
+    binding.dispatchEvent(p.up(), result);
   }
 
   /// Begins a gesture at a particular point, and returns the
   /// [TestGesture] object which you can use to continue the gesture.
   TestGesture startGesture(Point downLocation, { int pointer: 1 }) {
-    TestPointer p = new TestPointer(pointer);
-    HitTestResult result = _hitTest(downLocation);
-    dispatchEvent(p.down(downLocation), result);
-    return new TestGesture._(this, result, p);
+    return new TestGesture(downLocation, pointer: pointer);
   }
 
   HitTestResult _hitTest(Point location) {
     HitTestResult result = new HitTestResult();
     binding.hitTest(result, location);
     return result;
-  }
-
-  /// Sends a [PointerEvent] at a particular [HitTestResult].
-  ///
-  /// Generally speaking, it is preferred to use one of the more
-  /// semantically meaningful ways to dispatch events in tests, in
-  /// particular: [tap], [tapAt], [fling], [flingFrom], [scroll],
-  /// [scrollAt], or [startGesture].
-  void dispatchEvent(PointerEvent event, HitTestResult result) {
-    binding.dispatchEvent(event, result);
-  }
-}
-
-/// A class for performing gestures in tests. To create a
-/// [TestGesture], call [WidgetTester.startGesture].
-class TestGesture {
-  TestGesture._(this._target, this._result, this.pointer);
-
-  final Instrumentation _target;
-  final HitTestResult _result;
-  final TestPointer pointer;
-  bool _isDown = true;
-
-  /// Send a move event moving the pointer to the given location.
-  void moveTo(Point location) {
-    assert(_isDown);
-    _target.dispatchEvent(pointer.move(location), _result);
-  }
-
-  /// Send a move event moving the pointer by the given offset.
-  void moveBy(Offset offset) {
-    assert(_isDown);
-    moveTo(pointer.location + offset);
-  }
-
-  /// End the gesture by releasing the pointer.
-  void up() {
-    assert(_isDown);
-    _isDown = false;
-    _target.dispatchEvent(pointer.up(), _result);
-  }
-
-  /// End the gesture by canceling the pointer (as would happen if the
-  /// system showed a modal dialog on top of the Flutter application,
-  /// for instance).
-  void cancel() {
-    assert(_isDown);
-    _isDown = false;
-    _target.dispatchEvent(pointer.cancel(), _result);
   }
 }
 
