@@ -9,6 +9,12 @@ abstract class HitTestable { // ignore: one_member_abstracts
   void hitTest(HitTestResult result, Point position);
 }
 
+/// An object that can dispatch events.
+abstract class HitTestDispatcher { // ignore: one_member_abstracts
+  /// Override this function to dispatch events.
+  void dispatchEvent(PointerEvent event, HitTestResult result);
+}
+
 /// An object that can handle events.
 abstract class HitTestTarget { // ignore: one_member_abstracts
   /// Override this function to receive events.

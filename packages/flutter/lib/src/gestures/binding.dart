@@ -17,7 +17,7 @@ import 'hit_test.dart';
 import 'pointer_router.dart';
 
 /// A binding for the gesture subsystem.
-abstract class Gesturer extends BindingBase implements HitTestTarget, HitTestable {
+abstract class Gesturer extends BindingBase implements HitTestable, HitTestDispatcher, HitTestTarget {
 
   @override
   void initInstances() {
@@ -75,12 +75,13 @@ abstract class Gesturer extends BindingBase implements HitTestTarget, HitTestabl
   }
 
   /// Determine which [HitTestTarget] objects are located at a given position.
-  @override
+  @override // from HitTestable
   void hitTest(HitTestResult result, Point position) {
     result.add(new HitTestEntry(this));
   }
 
-  /// Dispatch the given event to the path of the given hit test result
+  /// Dispatch the given event to the path of the given hit test result.
+  @override // from HitTestDispatcher
   void dispatchEvent(PointerEvent event, HitTestResult result) {
     assert(result != null);
     for (HitTestEntry entry in result.path) {
@@ -105,7 +106,7 @@ abstract class Gesturer extends BindingBase implements HitTestTarget, HitTestabl
     }
   }
 
-  @override
+  @override // from HitTestTarget
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     pointerRouter.route(event);
     if (event is PointerDownEvent) {
