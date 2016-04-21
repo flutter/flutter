@@ -37,4 +37,5 @@ assets:
   - packages/flutter_gallery_assets/landscape_9.jpg
   - packages/flutter_gallery_assets/landscape_10.jpg
   - packages/flutter_gallery_assets/landscape_11.jpg
+  - packages/flutter_gallery_assets/shadow.png
   - lib/gallery/example_code.dart

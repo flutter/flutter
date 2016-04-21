@@ -30,6 +30,7 @@ part 'src/effect_line.dart';
 part 'src/image_map.dart';
 part 'src/label.dart';
 part 'src/layer.dart';
+part 'src/nine_slice_sprite.dart';
 part 'src/node.dart';
 part 'src/node3d.dart';
 part 'src/node_with_size.dart';

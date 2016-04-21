@@ -10,7 +10,7 @@ dependencies:
     path: ../../packages/flutter_sprites
   flutter_markdown:
     path: ../../packages/flutter_markdown
-  flutter_gallery_assets: '0.0.15'
+  flutter_gallery_assets: '0.0.16'
 
 dev_dependencies:
   test: any # flutter_test provides the version constraints
