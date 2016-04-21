@@ -31,6 +31,15 @@ void main() {
   MockKeyboard mockKeyboard = new MockKeyboard();
   serviceMocker.registerMockService(mojom.Keyboard.serviceName, mockKeyboard);
 
+  void enterText(String testValue) {
+    // Simulate entry of text through the keyboard.
+    expect(mockKeyboard.client, isNotNull);
+    mockKeyboard.client.updateEditingState(new mojom.EditingState()
+      ..text = testValue
+      ..composingBase = 0
+      ..composingExtent = testValue.length);
+  }
+
   test('Editable text has consistent size', () {
     testWidgets((WidgetTester tester) {
       GlobalKey inputKey = new GlobalKey();
@@ -56,13 +65,8 @@ void main() {
       RenderBox inputBox = findInputBox();
       Size emptyInputSize = inputBox.size;
 
-      void enterText(String testValue) {
-        // Simulate entry of text through the keyboard.
-        expect(mockKeyboard.client, isNotNull);
-        mockKeyboard.client.updateEditingState(new mojom.EditingState()
-          ..text = testValue
-          ..composingBase = 0
-          ..composingExtent = testValue.length);
+      void checkText(String testValue) {
+        enterText(testValue);
 
         // Check that the onChanged event handler fired.
         expect(inputValue.text, equals(testValue));
@@ -70,11 +74,11 @@ void main() {
         tester.pumpWidget(builder());
       }
 
-      enterText(' ');
+      checkText(' ');
       expect(findInputBox(), equals(inputBox));
       expect(inputBox.size, equals(emptyInputSize));
 
-      enterText('Test');
+      checkText('Test');
       expect(findInputBox(), equals(inputBox));
       expect(inputBox.size, equals(emptyInputSize));
     });
@@ -152,4 +156,155 @@ void main() {
       tester.pump();
     });
   });
+
+  // Returns the first RenderEditableLine.
+  RenderEditableLine findRenderEditableLine(WidgetTester tester) {
+    RenderObject root = tester.renderObjectOf(find.byType(RawInputLine));
+    expect(root, isNotNull);
+
+    RenderEditableLine renderLine;
+    void recursiveFinder(RenderObject child) {
+      if (child is RenderEditableLine) {
+        renderLine = child;
+        return;
+      }
+      child.visitChildren(recursiveFinder);
+    }
+    root.visitChildren(recursiveFinder);
+    expect(renderLine, isNotNull);
+    return renderLine;
+  }
+
+  Point textOffsetToPosition(WidgetTester tester, int offset) {
+    RenderEditableLine renderLine = findRenderEditableLine(tester);
+    List<TextSelectionPoint> endpoints = renderLine.getEndpointsForSelection(
+        new TextSelection.collapsed(offset: offset));
+    expect(endpoints.length, 1);
+    return endpoints[0].point;
+  }
+
+  test('Can long press to select', () {
+    testWidgets((WidgetTester tester) {
+      GlobalKey inputKey = new GlobalKey();
+      InputValue inputValue = InputValue.empty;
+
+      Widget builder() {
+        return new Overlay(
+          initialEntries: <OverlayEntry>[
+            new OverlayEntry(
+              builder: (BuildContext context) {
+                return new Center(
+                  child: new Material(
+                    child: new Input(
+                      value: inputValue,
+                      key: inputKey,
+                      onChanged: (InputValue value) { inputValue = value; }
+                    )
+                  )
+                );
+              }
+            )
+          ]
+        );
+      }
+
+      tester.pumpWidget(builder());
+
+      String testValue = 'abc def ghi';
+      enterText(testValue);
+      expect(inputValue.text, testValue);
+
+      tester.pumpWidget(builder());
+
+      expect(inputValue.selection.isCollapsed, true);
+
+      // Long press the 'e' to select 'def'.
+      Point ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
+      TestGesture gesture = tester.startGesture(ePos, pointer: 7);
+      tester.pump(const Duration(seconds: 2));
+      gesture.up();
+      tester.pump();
+
+      // 'def' is selected.
+      expect(inputValue.selection.baseOffset, testValue.indexOf('d'));
+      expect(inputValue.selection.extentOffset, testValue.indexOf('f')+1);
+    });
+  });
+
+  test('Can drag handles to change selection', () {
+    testWidgets((WidgetTester tester) {
+      GlobalKey inputKey = new GlobalKey();
+      InputValue inputValue = InputValue.empty;
+
+      Widget builder() {
+        return new Overlay(
+          initialEntries: <OverlayEntry>[
+            new OverlayEntry(
+              builder: (BuildContext context) {
+                return new Center(
+                  child: new Material(
+                    child: new Input(
+                      value: inputValue,
+                      key: inputKey,
+                      onChanged: (InputValue value) { inputValue = value; }
+                    )
+                  )
+                );
+              }
+            )
+          ]
+        );
+      }
+
+      tester.pumpWidget(builder());
+
+      String testValue = 'abc def ghi';
+      enterText(testValue);
+
+      tester.pumpWidget(builder());
+
+      // Long press the 'e' to select 'def'.
+      Point ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
+      TestGesture gesture = tester.startGesture(ePos, pointer: 7);
+      tester.pump(const Duration(seconds: 2));
+      gesture.up();
+      tester.pump();
+
+      TextSelection selection = inputValue.selection;
+
+      RenderEditableLine renderLine = findRenderEditableLine(tester);
+      List<TextSelectionPoint> endpoints = renderLine.getEndpointsForSelection(
+          selection);
+      expect(endpoints.length, 2);
+
+      // Drag the right handle 2 letters to the right.
+      // Note: use a small offset because the endpoint is on the very corner
+      // of the handle.
+      Point handlePos = endpoints[1].point + new Offset(1.0, 1.0);
+      Point newHandlePos = textOffsetToPosition(tester, selection.extentOffset+2);
+      gesture = tester.startGesture(handlePos, pointer: 7);
+      tester.pump();
+      gesture.moveTo(newHandlePos);
+      tester.pump();
+      gesture.up();
+      tester.pump();
+
+      expect(inputValue.selection.baseOffset, selection.baseOffset);
+      expect(inputValue.selection.extentOffset, selection.extentOffset+2);
+
+      // Drag the left handle 2 letters to the left.
+      handlePos = endpoints[0].point + new Offset(-1.0, 1.0);
+      newHandlePos = textOffsetToPosition(tester, selection.baseOffset-2);
+      gesture = tester.startGesture(handlePos, pointer: 7);
+      tester.pump();
+      gesture.moveTo(newHandlePos);
+      tester.pump();
+      gesture.up();
+      tester.pumpWidget(builder());
+
+      expect(inputValue.selection.baseOffset, selection.baseOffset-2);
+      expect(inputValue.selection.extentOffset, selection.extentOffset+2);
+    });
+  });
+
 }
