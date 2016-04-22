@@ -190,7 +190,6 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
       debugShortDescription: '[root]',
       child: app
     ).attachToRenderTree(buildOwner, renderViewElement);
-    beginFrame();
   }
 
   @override
