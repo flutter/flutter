@@ -96,6 +96,7 @@ class _PopupMenuItemState<T extends PopupMenuItem<dynamic>> extends State<T> {
       duration: kThemeChangeDuration,
       child: new Baseline(
         baseline: config.height - _kBaselineOffsetFromBottom,
+        baselineType: TextBaseline.alphabetic,
         child: buildChild()
       )
     );
