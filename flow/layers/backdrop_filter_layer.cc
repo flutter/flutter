@@ -4,6 +4,8 @@
 
 #include "flow/layers/backdrop_filter_layer.h"
 
+#include "third_party/skia/include/core/SkImageFilter.h"
+
 namespace flow {
 
 BackdropFilterLayer::BackdropFilterLayer() {
@@ -12,12 +14,11 @@ BackdropFilterLayer::BackdropFilterLayer() {
 BackdropFilterLayer::~BackdropFilterLayer() {
 }
 
-void BackdropFilterLayer::Paint(PaintContext::ScopedFrame& frame) {
-  SkCanvas& canvas = frame.canvas();
-  SkAutoCanvasRestore save(&canvas, false);
-  canvas.saveLayer(SkCanvas::SaveLayerRec{
+void BackdropFilterLayer::Paint(PaintContext& context) {
+  SkAutoCanvasRestore save(&context.canvas, false);
+  context.canvas.saveLayer(SkCanvas::SaveLayerRec{
       &paint_bounds(), nullptr, filter_.get(), 0});
-  PaintChildren(frame);
+  PaintChildren(context);
 }
 
 }  // namespace flow

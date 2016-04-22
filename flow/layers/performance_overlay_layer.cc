@@ -64,7 +64,7 @@ PerformanceOverlayLayer::PerformanceOverlayLayer(uint64_t options)
 }
 
 
-void PerformanceOverlayLayer::Paint(PaintContext::ScopedFrame& frame) {
+void PerformanceOverlayLayer::Paint(PaintContext& context) {
   if (!options_)
     return;
 
@@ -72,15 +72,15 @@ void PerformanceOverlayLayer::Paint(PaintContext::ScopedFrame& frame) {
   SkScalar y = paint_bounds().y();
   SkScalar width = paint_bounds().width();
   SkScalar height = paint_bounds().height() / 2;
-  SkAutoCanvasRestore save(&frame.canvas(), true);
+  SkAutoCanvasRestore save(&context.canvas, true);
 
-  VisualizeStopWatch(frame.canvas(), frame.context().frame_time(),
+  VisualizeStopWatch(context.canvas, context.frame_time,
                      x, y, width, height,
                      options_ & kVisualizeRasterizerStatistics,
                      options_ & kDisplayRasterizerStatistics,
                      "Rasterizer");
 
-  VisualizeStopWatch(frame.canvas(), frame.context().engine_time(),
+  VisualizeStopWatch(context.canvas, context.engine_time,
                      x, y + height, width, height,
                      options_ & kVisualizeEngineStatistics,
                      options_ & kDisplayEngineStatistics,

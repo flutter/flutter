@@ -18,7 +18,7 @@ class ClipRRectLayer : public ContainerLayer {
 
  protected:
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
-  void Paint(PaintContext::ScopedFrame& frame) override;
+  void Paint(PaintContext& context) override;
 
  private:
   SkRRect clip_rrect_;

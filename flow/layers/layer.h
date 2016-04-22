@@ -10,7 +10,8 @@
 
 #include "base/logging.h"
 #include "base/macros.h"
-#include "flow/paint_context.h"
+#include "flow/instrumentation.h"
+#include "flow/raster_cache.h"
 #include "skia/ext/refptr.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColor.h"
@@ -46,7 +47,14 @@ class Layer {
   };
 
   virtual void Preroll(PrerollContext* context, const SkMatrix& matrix);
-  virtual void Paint(PaintContext::ScopedFrame& frame) = 0;
+
+  struct PaintContext {
+    SkCanvas& canvas;
+    const Stopwatch& frame_time;
+    const Stopwatch& engine_time;
+  };
+
+  virtual void Paint(PaintContext& context) = 0;
   virtual void UpdateScene(mojo::gfx::composition::SceneUpdate* update,
                            mojo::gfx::composition::Node* container);
 

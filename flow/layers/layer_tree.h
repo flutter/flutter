@@ -10,6 +10,7 @@
 
 #include "base/macros.h"
 #include "base/time/time.h"
+#include "flow/compositor_context.h"
 #include "flow/layers/layer.h"
 #include "third_party/skia/include/core/SkSize.h"
 
@@ -20,7 +21,7 @@ class LayerTree {
   LayerTree();
   ~LayerTree();
 
-  void Raster(PaintContext::ScopedFrame& frame);
+  void Raster(CompositorContext::ScopedFrame& frame);
 
   // TODO(abarth): Integrate scene updates with the rasterization pass so that
   // we can draw on top of child scenes (and so that we can apply clips and

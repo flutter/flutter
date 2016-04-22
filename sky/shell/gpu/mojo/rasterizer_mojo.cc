@@ -82,7 +82,7 @@ void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
     return;
   }
 
-  paint_context_.engine_time().SetLapTime(layer_tree->construction_time());
+  compositor_context_.engine_time().SetLapTime(layer_tree->construction_time());
 
   std::unique_ptr<mojo::GLTexture> texture =
       gl_state_->gl_texture_recycler.GetTexture(size);
@@ -93,8 +93,8 @@ void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
     mojo::skia::GaneshTextureSurface texture_surface(scope, std::move(texture));
 
     SkCanvas* canvas = texture_surface.canvas();
-    flow::PaintContext::ScopedFrame frame =
-        paint_context_.AcquireFrame(scope.gr_context().get(), *canvas);
+    flow::CompositorContext::ScopedFrame frame =
+        compositor_context_.AcquireFrame(scope.gr_context().get(), *canvas);
     canvas->clear(SK_ColorBLACK);
     layer_tree->Raster(frame);
 

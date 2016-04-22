@@ -12,16 +12,15 @@ ColorFilterLayer::ColorFilterLayer() {
 ColorFilterLayer::~ColorFilterLayer() {
 }
 
-void ColorFilterLayer::Paint(PaintContext::ScopedFrame& frame) {
+void ColorFilterLayer::Paint(PaintContext& context) {
   skia::RefPtr<SkColorFilter> color_filter =
       skia::AdoptRef(SkColorFilter::CreateModeFilter(color_, transfer_mode_));
   SkPaint paint;
   paint.setColorFilter(color_filter.get());
 
-  SkCanvas& canvas = frame.canvas();
-  SkAutoCanvasRestore save(&canvas, false);
-  canvas.saveLayer(&paint_bounds(), &paint);
-  PaintChildren(frame);
+  SkAutoCanvasRestore save(&context.canvas, false);
+  context.canvas.saveLayer(&paint_bounds(), &paint);
+  PaintChildren(context);
 }
 
 }  // namespace flow

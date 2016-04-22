@@ -6,7 +6,7 @@
 #define SKY_SHELL_GPU_MOJO_RASTERIZER_MOJO_H_
 
 #include "base/memory/weak_ptr.h"
-#include "flow/paint_context.h"
+#include "flow/compositor_context.h"
 #include "mojo/gpu/gl_context.h"
 #include "mojo/public/interfaces/application/application_connector.mojom.h"
 #include "mojo/services/gfx/composition/interfaces/scenes.mojom.h"
@@ -49,7 +49,7 @@ class RasterizerMojo : public Rasterizer {
   mojo::Binding<rasterizer::Rasterizer> binding_;
   mojo::gfx::composition::ScenePtr scene_;
   std::unique_ptr<GLState> gl_state_;
-  flow::PaintContext paint_context_;
+  flow::CompositorContext compositor_context_;
   std::unique_ptr<flow::LayerTree> last_layer_tree_;
 
   base::WeakPtrFactory<RasterizerMojo> weak_factory_;

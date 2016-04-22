@@ -19,11 +19,10 @@ void TransformLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   transform_.mapRect(&context->child_paint_bounds);
 }
 
-void TransformLayer::Paint(PaintContext::ScopedFrame& frame) {
-  SkCanvas& canvas = frame.canvas();
-  SkAutoCanvasRestore save(&canvas, true);
-  canvas.concat(transform_);
-  PaintChildren(frame);
+void TransformLayer::Paint(PaintContext& context) {
+  SkAutoCanvasRestore save(&context.canvas, true);
+  context.canvas.concat(transform_);
+  PaintChildren(context);
 }
 
 }  // namespace flow

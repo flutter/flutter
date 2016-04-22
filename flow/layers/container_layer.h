@@ -20,7 +20,7 @@ class ContainerLayer : public Layer {
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
   void PrerollChildren(PrerollContext* context, const SkMatrix& matrix);
 
-  void PaintChildren(PaintContext::ScopedFrame& frame) const;
+  void PaintChildren(PaintContext& context) const;
 
   void UpdateScene(mojo::gfx::composition::SceneUpdate* update,
                    mojo::gfx::composition::Node* container) override;

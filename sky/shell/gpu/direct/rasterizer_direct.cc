@@ -85,15 +85,15 @@ void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
   // There is no way for the compositor to know how long the layer tree
   // construction took. Fortunately, the layer tree does. Grab that time
   // for instrumentation.
-  paint_context_.engine_time().SetLapTime(layer_tree->construction_time());
+  compositor_context_.engine_time().SetLapTime(layer_tree->construction_time());
 
   {
     EnsureGLContext();
     CHECK(context_->MakeCurrent(surface_.get()));
     SkCanvas* canvas = ganesh_canvas_.GetCanvas(
       surface_->GetBackingFrameBufferObject(), layer_tree->frame_size());
-    flow::PaintContext::ScopedFrame frame =
-        paint_context_.AcquireFrame(ganesh_canvas_.gr_context(), *canvas);
+    flow::CompositorContext::ScopedFrame frame =
+        compositor_context_.AcquireFrame(ganesh_canvas_.gr_context(), *canvas);
     canvas->clear(SK_ColorBLACK);
     layer_tree->Raster(frame);
     canvas->flush();
@@ -104,7 +104,7 @@ void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
   bool frameExceededThreshold = false;
   uint32_t thresholdInterval = layer_tree->rasterizer_tracing_threshold();
   if (thresholdInterval != 0 &&
-      paint_context_.frame_time().LastLap().InMillisecondsF() >
+      compositor_context_.frame_time().LastLap().InMillisecondsF() >
           thresholdInterval * kOneFrameDuration) {
     // While rendering the last frame, if we exceeded the tracing threshold
     // specified in the layer tree, we force a trace to disk.
@@ -120,7 +120,7 @@ void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
     recoder.beginRecording(SkRect::MakeWH(size.width(), size.height()));
 
     {
-      auto frame = paint_context_.AcquireFrame(
+      auto frame = compositor_context_.AcquireFrame(
           nullptr, *recoder.getRecordingCanvas(), false);
       layer_tree->Raster(frame);
     }
@@ -137,7 +137,7 @@ void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
 void RasterizerDirect::OnOutputSurfaceDestroyed() {
   if (context_) {
     CHECK(context_->MakeCurrent(surface_.get()));
-    paint_context_.OnGrContextDestroyed();
+    compositor_context_.OnGrContextDestroyed();
     ganesh_canvas_.SetGrGLInterface(nullptr);
     context_ = nullptr;
   }

@@ -9,7 +9,7 @@
 #include "base/logging.h"
 #include "dart/runtime/include/dart_api.h"
 #include "dart/runtime/include/dart_native_api.h"
-#include "flow/paint_context.h"
+#include "flow/compositor_context.h"
 #include "sky/engine/core/script/embedder_resources.h"
 #include "sky/engine/tonic/dart_binding_macros.h"
 #include "sky/engine/tonic/dart_invoke.h"
@@ -128,8 +128,8 @@ void DiagnosticServer::SkiaPictureTask(Dart_Port port_id) {
   recorder.beginRecording(SkRect::MakeWH(layer_tree->frame_size().width(),
                                          layer_tree->frame_size().height()));
 
-  flow::PaintContext paint_context;
-  flow::PaintContext::ScopedFrame frame = paint_context.AcquireFrame(
+  flow::CompositorContext compositor_context;
+  flow::CompositorContext::ScopedFrame frame = compositor_context.AcquireFrame(
       nullptr, *recorder.getRecordingCanvas(), false);
   layer_tree->Raster(frame);
 

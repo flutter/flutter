@@ -6,7 +6,7 @@
 #define SKY_SHELL_GPU_DIRECT_RASTERIZER_H_
 
 #include "base/memory/weak_ptr.h"
-#include "flow/paint_context.h"
+#include "flow/compositor_context.h"
 #include "skia/ext/refptr.h"
 #include "sky/shell/gpu/direct/ganesh_canvas.h"
 #include "sky/shell/rasterizer.h"
@@ -52,7 +52,7 @@ class RasterizerDirect : public Rasterizer {
   skia::RefPtr<const GrGLInterface> gr_gl_interface_;
   GaneshCanvas ganesh_canvas_;
 
-  flow::PaintContext paint_context_;
+  flow::CompositorContext compositor_context_;
 
   mojo::Binding<rasterizer::Rasterizer> binding_;
 

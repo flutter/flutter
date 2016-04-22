@@ -12,17 +12,17 @@ ShaderMaskLayer::ShaderMaskLayer() {
 ShaderMaskLayer::~ShaderMaskLayer() {
 }
 
-void ShaderMaskLayer::Paint(PaintContext::ScopedFrame& frame) {
-  SkCanvas& canvas = frame.canvas();
-  SkAutoCanvasRestore save(&canvas, false);
-  canvas.saveLayer(&paint_bounds(), nullptr);
-  PaintChildren(frame);
+void ShaderMaskLayer::Paint(PaintContext& context) {
+  SkAutoCanvasRestore save(&context.canvas, false);
+  context.canvas.saveLayer(&paint_bounds(), nullptr);
+  PaintChildren(context);
 
   SkPaint paint;
   paint.setXfermodeMode(transfer_mode_);
   paint.setShader(shader_);
-  canvas.translate(mask_rect_.left(), mask_rect_.top());
-  canvas.drawRect(SkRect::MakeWH(mask_rect_.width(), mask_rect_.height()), paint);
+  context.canvas.translate(mask_rect_.left(), mask_rect_.top());
+  context.canvas.drawRect(
+      SkRect::MakeWH(mask_rect_.width(), mask_rect_.height()), paint);
 }
 
 }  // namespace flow

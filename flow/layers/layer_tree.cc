@@ -15,7 +15,7 @@ LayerTree::LayerTree() : scene_version_(0), rasterizer_tracing_threshold_(0) {
 LayerTree::~LayerTree() {
 }
 
-void LayerTree::Raster(PaintContext::ScopedFrame& frame) {
+void LayerTree::Raster(CompositorContext::ScopedFrame& frame) {
   {
     TRACE_EVENT0("flutter", "LayerTree::Preroll");
     Layer::PrerollContext context = {
@@ -27,8 +27,13 @@ void LayerTree::Raster(PaintContext::ScopedFrame& frame) {
   }
 
   {
+    Layer::PaintContext context = {
+      frame.canvas(),
+      frame.context().frame_time(),
+      frame.context().engine_time(),
+    };
     TRACE_EVENT0("flutter", "LayerTree::Paint");
-    root_layer_->Paint(frame);
+    root_layer_->Paint(context);
   }
 }
 

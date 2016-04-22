@@ -6,6 +6,8 @@ source_set("flow") {
   sources = [
     "checkerboard.cc",
     "checkerboard.h",
+    "compositor_context.cc",
+    "compositor_context.h",
     "instrumentation.cc",
     "instrumentation.h",
     "layers/backdrop_filter_layer.cc",
@@ -36,8 +38,6 @@ source_set("flow") {
     "layers/shader_mask_layer.h",
     "layers/transform_layer.cc",
     "layers/transform_layer.h",
-    "paint_context.cc",
-    "paint_context.h",
     "raster_cache.cc",
     "raster_cache.h",
   ]
