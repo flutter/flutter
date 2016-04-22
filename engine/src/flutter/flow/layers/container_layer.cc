@@ -33,9 +33,9 @@ void ContainerLayer::PrerollChildren(PrerollContext* context,
   context->child_paint_bounds = child_paint_bounds;
 }
 
-void ContainerLayer::PaintChildren(PaintContext::ScopedFrame& frame) const {
+void ContainerLayer::PaintChildren(PaintContext& context) const {
   for (auto& layer : layers_)
-    layer->Paint(frame);
+    layer->Paint(context);
 }
 
 void ContainerLayer::UpdateScene(mojo::gfx::composition::SceneUpdate* update,

@@ -19,11 +19,10 @@ void ClipRectLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   set_paint_bounds(context->child_paint_bounds);
 }
 
-void ClipRectLayer::Paint(PaintContext::ScopedFrame& frame) {
-  SkCanvas& canvas = frame.canvas();
-  SkAutoCanvasRestore save(&canvas, true);
-  canvas.clipRect(paint_bounds());
-  PaintChildren(frame);
+void ClipRectLayer::Paint(PaintContext& context) {
+  SkAutoCanvasRestore save(&context.canvas, true);
+  context.canvas.clipRect(paint_bounds());
+  PaintChildren(context);
 }
 
 }  // namespace flow

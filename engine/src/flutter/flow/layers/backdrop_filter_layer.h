@@ -17,7 +17,7 @@ class BackdropFilterLayer : public ContainerLayer {
   void set_filter(SkImageFilter* filter) { filter_ = skia::SharePtr(filter); }
 
  protected:
-  void Paint(PaintContext::ScopedFrame& frame) override;
+  void Paint(PaintContext& context) override;
 
  private:
   skia::RefPtr<SkImageFilter> filter_;

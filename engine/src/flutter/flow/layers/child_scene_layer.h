@@ -30,7 +30,7 @@ class ChildSceneLayer : public Layer {
   }
 
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
-  void Paint(PaintContext::ScopedFrame& frame) override;
+  void Paint(PaintContext& context) override;
   void UpdateScene(mojo::gfx::composition::SceneUpdate* update,
                    mojo::gfx::composition::Node* container) override;
 

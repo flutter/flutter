@@ -27,7 +27,7 @@ class ShaderMaskLayer : public ContainerLayer {
   }
 
  protected:
-  void Paint(PaintContext::ScopedFrame& frame) override;
+  void Paint(PaintContext& context) override;
 
  private:
   sk_sp<SkShader> shader_;

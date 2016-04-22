@@ -6,9 +6,9 @@
 
 #include "base/logging.h"
 #include "base/trace_event/trace_event.h"
-#include "flow/paint_context.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkImage.h"
+#include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
 #define ENABLE_RASTER_CACHE 1

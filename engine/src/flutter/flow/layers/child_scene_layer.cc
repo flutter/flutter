@@ -24,7 +24,7 @@ void ChildSceneLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   transform_.preScale(inverse_device_pixel_ratio, inverse_device_pixel_ratio);
 }
 
-void ChildSceneLayer::Paint(PaintContext::ScopedFrame& frame) {
+void ChildSceneLayer::Paint(PaintContext& context) {
 }
 
 void ChildSceneLayer::UpdateScene(mojo::gfx::composition::SceneUpdate* update,

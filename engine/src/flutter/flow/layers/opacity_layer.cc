@@ -12,14 +12,13 @@ OpacityLayer::OpacityLayer() {
 OpacityLayer::~OpacityLayer() {
 }
 
-void OpacityLayer::Paint(PaintContext::ScopedFrame& frame) {
+void OpacityLayer::Paint(PaintContext& context) {
   SkPaint paint;
   paint.setAlpha(alpha_);
 
-  SkCanvas& canvas = frame.canvas();
-  SkAutoCanvasRestore save(&canvas, false);
-  canvas.saveLayer(&paint_bounds(), &paint);
-  PaintChildren(frame);
+  SkAutoCanvasRestore save(&context.canvas, false);
+  context.canvas.saveLayer(&paint_bounds(), &paint);
+  PaintChildren(context);
 }
 
 }  // namespace flow

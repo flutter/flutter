@@ -21,7 +21,7 @@ class ColorFilterLayer : public ContainerLayer {
   }
 
  protected:
-  void Paint(PaintContext::ScopedFrame& frame) override;
+  void Paint(PaintContext& context) override;
 
  private:
   SkColor color_;

@@ -19,7 +19,7 @@ class PerformanceOverlayLayer : public Layer {
  public:
   explicit PerformanceOverlayLayer(uint64_t options);
 
-  void Paint(PaintContext::ScopedFrame& frame) override;
+  void Paint(PaintContext& context) override;
 
  private:
   int options_;
