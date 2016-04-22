@@ -14,10 +14,8 @@ extern void* kDartIsolateSnapshotBuffer;
 }
 
 static const char* kDartArgs[] = {
-#ifdef FLUTTER_DEVELOP_MODE
     "--enable_mirrors=false",
     "--load_deferred_eagerly=true",
-#endif
     "--conditional_directives",
 };
 
