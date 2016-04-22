@@ -86,7 +86,7 @@ abstract class SchedulerBinding extends BindingBase {
   void initServiceExtensions() {
     super.initServiceExtensions();
     registerNumericServiceExtension(
-      name: 'timeDilation',
+      name: 'timeDilation', 
       getter: () => timeDilation,
       setter: (double value) {
         timeDilation = value;
@@ -94,8 +94,9 @@ abstract class SchedulerBinding extends BindingBase {
     );
   }
 
+
   /// The strategy to use when deciding whether to run a task or not.
-  ///
+  /// 
   /// Defaults to [defaultSchedulingStrategy].
   SchedulingStrategy schedulingStrategy = defaultSchedulingStrategy;
 
@@ -117,6 +118,7 @@ abstract class SchedulerBinding extends BindingBase {
     if (isFirstTask)
       _ensureEventLoopCallback();
   }
+
 
   // Whether this scheduler already requested to be called from the event loop.
   bool _hasRequestedAnEventLoopCallback = false;
@@ -153,9 +155,10 @@ abstract class SchedulerBinding extends BindingBase {
     } else {
       // TODO(floitsch): we shouldn't need to request a frame. Just schedule
       // an event-loop callback.
-      _scheduleFrame();
+      ensureVisualUpdate();
     }
   }
+
 
   int _nextFrameCallbackId = 0; // positive
   Map<int, _FrameCallbackEntry> _transientCallbacks = <int, _FrameCallbackEntry>{};
@@ -184,7 +187,7 @@ abstract class SchedulerBinding extends BindingBase {
   /// Callbacks registered with this method can be canceled using
   /// [cancelFrameCallbackWithId].
   int scheduleFrameCallback(FrameCallback callback, { bool rescheduling: false }) {
-    _scheduleFrame();
+    ensureVisualUpdate();
     return addFrameCallback(callback, rescheduling: rescheduling);
   }
 
@@ -267,6 +270,7 @@ abstract class SchedulerBinding extends BindingBase {
     return true;
   }
 
+
   final List<FrameCallback> _persistentCallbacks = new List<FrameCallback>();
 
   /// Adds a persistent frame callback.
@@ -281,6 +285,7 @@ abstract class SchedulerBinding extends BindingBase {
   void addPersistentFrameCallback(FrameCallback callback) {
     _persistentCallbacks.add(callback);
   }
+
 
   final List<FrameCallback> _postFrameCallbacks = new List<FrameCallback>();
 
@@ -301,11 +306,10 @@ abstract class SchedulerBinding extends BindingBase {
     _postFrameCallbacks.add(callback);
   }
 
-  // Whether this scheduler as requested that handleBeginFrame be called soon.
-  bool _hasScheduledFrame = false;
 
-  // Whether this scheduler is currently producing a frame in handleBeginFrame.
-  bool _isProducingFrame = false;
+  // Whether this scheduler already requested to be called at the beginning of
+  // the next frame.
+  bool _hasRequestedABeginFrameCallback = false;
 
   /// If necessary, schedules a new frame by calling
   /// [ui.window.scheduleFrame].
@@ -315,17 +319,19 @@ abstract class SchedulerBinding extends BindingBase {
   /// device's screen is turned off it will typically be delayed until
   /// the screen is on and the application is visible.)
   void ensureVisualUpdate() {
-    if (_hasScheduledFrame || _isProducingFrame)
-      return;
-    _scheduleFrame();
-  }
-
-  void _scheduleFrame() {
-    if (_hasScheduledFrame)
+    if (_hasRequestedABeginFrameCallback)
       return;
     ui.window.scheduleFrame();
-    _hasScheduledFrame = true;
+    _hasRequestedABeginFrameCallback = true;
   }
+
+  /// Whether the scheduler is currently handling a "begin frame"
+  /// callback.
+  ///
+  /// True while [handleBeginFrame] is running in checked mode. False
+  /// otherwise.
+  static bool get debugInFrame => _debugInFrame;
+  static bool _debugInFrame = false;
 
   /// Called by the engine to produce a new frame.
   ///
@@ -336,11 +342,11 @@ abstract class SchedulerBinding extends BindingBase {
   /// callbacks registered by [addPostFrameCallback].
   void handleBeginFrame(Duration rawTimeStamp) {
     Timeline.startSync('Begin frame');
-    assert(!_isProducingFrame);
-    _isProducingFrame = true;
-    _hasScheduledFrame = false;
+    assert(!_debugInFrame);
+    assert(() { _debugInFrame = true; return true; });
     Duration timeStamp = new Duration(
         microseconds: (rawTimeStamp.inMicroseconds / timeDilation).round());
+    _hasRequestedABeginFrameCallback = false;
     _invokeTransientFrameCallbacks(timeStamp);
 
     for (FrameCallback callback in _persistentCallbacks)
@@ -352,7 +358,7 @@ abstract class SchedulerBinding extends BindingBase {
     for (FrameCallback callback in localPostFrameCallbacks)
       _invokeFrameCallback(callback, timeStamp);
 
-    _isProducingFrame = false;
+    assert(() { _debugInFrame = false; return true; });
     Timeline.finishSync();
 
     // All frame-related callbacks have been executed. Run lower-priority tasks.
@@ -361,7 +367,7 @@ abstract class SchedulerBinding extends BindingBase {
 
   void _invokeTransientFrameCallbacks(Duration timeStamp) {
     Timeline.startSync('Animate');
-    assert(_isProducingFrame);
+    assert(_debugInFrame);
     Map<int, _FrameCallbackEntry> callbacks = _transientCallbacks;
     _transientCallbacks = new Map<int, _FrameCallbackEntry>();
     callbacks.forEach((int id, _FrameCallbackEntry callbackEntry) {
