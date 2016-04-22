@@ -181,6 +181,8 @@ class Material extends StatefulWidget {
   final MaterialType type;
 
   /// The z-coordinate at which to place this material.
+  ///
+  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
   final int elevation;
 
   /// The color to paint the material.
@@ -266,7 +268,7 @@ class _MaterialState extends State<Material> {
         duration: kThemeChangeDuration,
         decoration: new BoxDecoration(
           borderRadius: kMaterialEdges[config.type],
-          boxShadow: config.elevation == 0 ? null : elevationToShadow[config.elevation],
+          boxShadow: config.elevation == 0 ? null : kElevationToShadow[config.elevation],
           shape: config.type == MaterialType.circle ? BoxShape.circle : BoxShape.rectangle
         ),
         child: new Container(

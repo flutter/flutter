@@ -268,7 +268,7 @@ class _RenderSwitch extends RenderToggleable {
     return new BoxDecoration(
       backgroundColor: color,
       shape: BoxShape.circle,
-      boxShadow: elevationToShadow[1]
+      boxShadow: kElevationToShadow[1]
     );
   }
 

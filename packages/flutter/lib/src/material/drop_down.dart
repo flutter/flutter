@@ -43,7 +43,7 @@ class _DropDownMenuPainter extends CustomPainter {
     final BoxPainter painter = new BoxDecoration(
       backgroundColor: color,
       borderRadius: 2.0,
-      boxShadow: elevationToShadow[elevation]
+      boxShadow: kElevationToShadow[elevation]
     ).createBoxPainter();
 
     double top = renderBox.globalToLocal(new Point(0.0, menuTop)).y;
@@ -310,6 +310,8 @@ class DropDownButton<T> extends StatefulWidget {
   final ValueChanged<T> onChanged;
 
   /// The z-coordinate at which to place the menu when open.
+  ///
+  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
   final int elevation;
 
   @override

@@ -51,6 +51,8 @@ class Drawer extends StatelessWidget {
   }) : super(key: key);
 
   /// The z-coordinate at which to place this drawer.
+  ///
+  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
   final int elevation;
 
   /// The widget below this widget in the tree.
