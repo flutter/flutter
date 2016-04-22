@@ -22,6 +22,7 @@ class _GalleryHeaderState extends State<GalleryHeader> {
     _images = new ImageMap(bundle);
     await _images.load(<String>[
       'packages/flutter_gallery_assets/grain.png',
+      'packages/flutter_gallery_assets/shadow.png',
     ]);
   }
 
@@ -52,6 +53,7 @@ class _FlutterHeaderNode extends NodeWithSize {
 
     clippingLayer.addChild(new _BackgroundBox());
 
+    paperAnimation = new _PaperAnimation(_images);
     paperAnimation.position = _kCenterPoint;
     clippingLayer.addChild(paperAnimation);
 
@@ -64,7 +66,7 @@ class _FlutterHeaderNode extends NodeWithSize {
 
   final ImageMap _images;
   final Layer clippingLayer = new Layer();
-  final _PaperAnimation paperAnimation = new _PaperAnimation();
+  _PaperAnimation paperAnimation;
 
   @override
   void spriteBoxPerformedLayout() {
@@ -108,11 +110,11 @@ final List<_PaperConfig> _kPaperConfigs = <_PaperConfig>[
 ];
 
 class _PaperAnimation extends Node {
-  _PaperAnimation() {
+  _PaperAnimation(ImageMap images) {
     for (_PaperConfig config in _kPaperConfigs) {
 
       final _PaperSheet sheet = new _PaperSheet(config);
-      final _PaperSheetShadow shadow = new _PaperSheetShadow(config);
+      final _PaperSheetShadow shadow = new _PaperSheetShadow(config, images);
 
       addChild(shadow);
       addChild(sheet);
@@ -120,7 +122,7 @@ class _PaperAnimation extends Node {
 
       shadow.constraints = <Constraint>[
         new ConstraintRotationToNodeRotation(sheet),
-        new ConstraintPositionToNode(sheet, offset: const Offset(0.0, 10.0))
+        new ConstraintPositionToNode(sheet, offset: const Offset(0.0, 8.0))
       ];
     }
   }
@@ -169,18 +171,21 @@ class _PaperSheet extends Node {
 }
 
 class _PaperSheetShadow extends Node {
-  _PaperSheetShadow(this._config) {
-    _paperPaint.color = Colors.black45;
-    _paperPaint.maskFilter = new MaskFilter.blur(BlurStyle.normal, 10.0);
+  _PaperSheetShadow(this._config, ImageMap images) {
+    NineSliceSprite shadow = new NineSliceSprite.fromImage(
+      images['packages/flutter_gallery_assets/shadow.png'],
+      new Size(
+        _config.rect.size.width + 32.0,
+        _config.rect.size.height + 32.0
+      ),
+      const EdgeInsets.all(0.375)
+    );
+    shadow.drawCenterPart = false;
+    shadow.opacity = 0.5;
+    addChild(shadow);
   }
 
   final _PaperConfig _config;
-  final Paint _paperPaint = new Paint();
-
-  @override
-  void paint(Canvas canvas) {
-    canvas.drawRect(_config.rect, _paperPaint);
-  }
 }
 
 class _BackgroundBox extends Node {
