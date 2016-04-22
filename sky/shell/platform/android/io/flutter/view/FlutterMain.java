@@ -7,6 +7,7 @@ package io.flutter.view;
 import android.content.Context;
 import android.util.Log;
 import android.content.res.AssetManager;
+import android.os.SystemClock;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
@@ -63,9 +64,19 @@ public class FlutterMain {
      * Starts initialization of the native system.
      **/
     public static void startInitialization(Context applicationContext) {
+        long initStartTimestampMillis = SystemClock.uptimeMillis();
         initJavaUtils(applicationContext);
         initResources(applicationContext);
         initNative(applicationContext);
+
+        // We record the initialization time using SystemClock because at the start of the
+        // initialization we have not yet loaded the native library to call into dart_tools_api.h.
+        // To get Timeline timestamp of the start of initialization we simply subtract the delta
+        // from the Timeline timestamp at the current moment (the assumption is that the overhead
+        // of the JNI call is negligible).
+        long initTimeMillis = SystemClock.uptimeMillis() - initStartTimestampMillis;
+        nativeRecordStartTimestamp(initTimeMillis);
+
         onServiceRegistryAvailable(applicationContext, ServiceRegistry.SHARED);
     }
 
@@ -89,6 +100,7 @@ public class FlutterMain {
     }
 
     private static native void nativeInit(Context context, String[] args);
+    private static native void nativeRecordStartTimestamp(long initTimeMillis);
 
     private static void onServiceRegistryAvailable(final Context applicationContext, ServiceRegistry registry) {
         parseServicesConfig(applicationContext, registry);

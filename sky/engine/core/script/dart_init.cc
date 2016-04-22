@@ -36,6 +36,7 @@
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/tonic/uint8_list.h"
 #include "sky/engine/wtf/MakeUnique.h"
+#include "sky/engine/core/start_up.h"
 
 #ifdef OS_ANDROID
 #include "sky/engine/bindings/jni/dart_jni.h"
@@ -104,6 +105,7 @@ static const char* kDartStartPausedArgs[]{
 
 static const char* kDartTraceStartupArgs[]{
     "--timeline_streams=Compiler,Dart,Embedder,GC",
+    "--timeline_recorder=endless",
 };
 
 const char kFileUriPrefix[] = "file://";
@@ -460,6 +462,20 @@ void InitDartVM() {
                           nullptr,
                           // VM service assets archive
                           GetVMServiceAssetsArchiveCallback) == nullptr);
+
+    // Send the earliest available timestamp in the application lifecycle to
+    // timeline. The difference between this timestamp and the time we render the
+    // very first frame gives us a good idea about Flutter's startup time.
+    if (blink::engine_main_enter_ts != 0) {
+      Dart_TimelineEvent("FlutterEngineMainEnter",    // label
+                         blink::engine_main_enter_ts, // timestamp0
+                         0,                           // timestamp1_or_async_id
+                         Dart_Timeline_Event_Instant, // event type
+                         0,                           // argument_count
+                         nullptr,                     // argument_names
+                         nullptr                      // argument_values
+                         );
+    }
   }
 
   // Allow streaming of stdout and stderr by the Dart vm.

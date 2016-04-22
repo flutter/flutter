@@ -22,7 +22,9 @@
 #include "mojo/edk/embedder/embedder.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
 #include "sky/shell/shell.h"
+#include "sky/engine/core/start_up.h"
 #include "ui/gl/gl_surface.h"
+#include "dart/runtime/include/dart_tools_api.h"
 
 using base::LazyInstance;
 
@@ -82,6 +84,12 @@ static void Init(JNIEnv* env,
   Shell::InitStandalone();
 
   InitializeTracing();
+}
+
+static void RecordStartTimestamp(JNIEnv* env, jclass jcaller,
+    jlong initTimeMillis) {
+  int64_t initTimeMicros = static_cast<int64_t>(initTimeMillis) * static_cast<int64_t>(1000);
+  blink::engine_main_enter_ts = Dart_TimelineGetMicros() - initTimeMicros;
 }
 
 bool RegisterFlutterMain(JNIEnv* env) {

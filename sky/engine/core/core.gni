@@ -7,6 +7,8 @@ sky_core_output_dir = "$root_gen_dir/sky/core"
 sky_core_files = [
   "Init.cpp",
   "Init.h",
+  "start_up.h",
+  "start_up.cc",
   "compositing/Scene.cpp",
   "compositing/Scene.h",
   "compositing/SceneBuilder.cpp",
