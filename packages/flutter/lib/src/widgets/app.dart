@@ -37,6 +37,7 @@ class WidgetsApp extends StatefulWidget {
     this.title,
     this.textStyle,
     this.color,
+    this.navigatorObserver,
     this.onGenerateRoute,
     this.onLocaleChanged,
     this.showPerformanceOverlay: false,
@@ -91,6 +92,9 @@ class WidgetsApp extends StatefulWidget {
   /// development, and so performance in checked mode is not
   /// representative of what will happen in release mode.
   final bool debugShowCheckedModeBanner;
+
+  /// The observer for the Navigator created for this app.
+  final NavigatorObserver navigatorObserver;
 
   static bool showPerformanceOverlayOverride = false;
 
@@ -151,8 +155,6 @@ class WidgetsAppState<T extends WidgetsApp> extends State<T> implements WidgetsB
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) { }
 
-  NavigatorObserver get navigatorObserver => null;
-
   @override
   Widget build(BuildContext context) {
     if (config.onLocaleChanged != null && _localeData == null) {
@@ -176,7 +178,7 @@ class WidgetsAppState<T extends WidgetsApp> extends State<T> implements WidgetsB
               key: _navigator,
               initialRoute: ui.window.defaultRouteName,
               onGenerateRoute: config.onGenerateRoute,
-              observer: navigatorObserver
+              observer: config.navigatorObserver
             )
           )
         )
