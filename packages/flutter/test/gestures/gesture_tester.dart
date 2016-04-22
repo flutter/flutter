@@ -5,10 +5,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
-class TestGestureFlutterBinding extends BindingBase with Gesturer { }
+class TestGestureFlutterBinding extends BindingBase with GestureBinding { }
 
-void ensureGesturer() {
-  if (Gesturer.instance == null)
+void ensureGestureBinding() {
+  if (GestureBinding.instance == null)
     new TestGestureFlutterBinding();
-  assert(Gesturer.instance != null);
+  assert(GestureBinding.instance != null);
 }

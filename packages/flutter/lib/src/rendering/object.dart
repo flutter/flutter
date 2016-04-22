@@ -1096,7 +1096,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       });
       if (owner != null)
         owner._nodesNeedingLayout.add(this);
-      Scheduler.instance.ensureVisualUpdate();
+      RendererBinding.instance.ensureVisualUpdate();
     }
   }
 
@@ -1504,7 +1504,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       assert(_layer != null);
       if (owner != null)
         owner._nodesNeedingPaint.add(this);
-      Scheduler.instance.ensureVisualUpdate();
+      RendererBinding.instance.ensureVisualUpdate();
     } else if (parent is RenderObject) {
       // We don't have our own layer; one of our ancestors will take
       // care of updating the layer we're in and when they do that
@@ -1518,7 +1518,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       // then we have to paint ourselves, since nobody else can paint
       // us. We don't add ourselves to _nodesNeedingPaint in this
       // case, because the root is always told to paint regardless.
-      Scheduler.instance.ensureVisualUpdate();
+      RendererBinding.instance.ensureVisualUpdate();
     }
   }
 
@@ -1626,7 +1626,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// Requires that this render object is attached, and is the root of
   /// the render tree.
   ///
-  /// See [Renderer] for an example of how this function is used.
+  /// See [RendererBinding] for an example of how this function is used.
   void scheduleInitialSemantics() {
     assert(attached);
     assert(parent is! RenderObject);
@@ -1636,7 +1636,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(owner._semanticsEnabled == false);
     owner._semanticsEnabled = true;
     owner._nodesNeedingSemantics.add(this);
-    Scheduler.instance.ensureVisualUpdate();
+    RendererBinding.instance.ensureVisualUpdate();
   }
 
   /// Whether this RenderObject introduces a new box for accessibility purposes.

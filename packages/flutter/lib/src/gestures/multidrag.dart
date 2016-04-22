@@ -133,8 +133,8 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
     assert(!_pointers.containsKey(event.pointer));
     T state = createNewPointerState(event);
     _pointers[event.pointer] = state;
-    Gesturer.instance.pointerRouter.addRoute(event.pointer, handleEvent);
-    state._setArenaEntry(Gesturer.instance.gestureArena.add(event.pointer, this));
+    GestureBinding.instance.pointerRouter.addRoute(event.pointer, handleEvent);
+    state._setArenaEntry(GestureBinding.instance.gestureArena.add(event.pointer, this));
   }
 
   T createNewPointerState(PointerDownEvent event);
@@ -202,7 +202,7 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
   void _removeState(int pointer) {
     assert(_pointers != null);
     assert(_pointers.containsKey(pointer));
-    Gesturer.instance.pointerRouter.removeRoute(pointer, handleEvent);
+    GestureBinding.instance.pointerRouter.removeRoute(pointer, handleEvent);
     _pointers[pointer].dispose();
     _pointers.remove(pointer);
   }

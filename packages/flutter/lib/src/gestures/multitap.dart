@@ -36,14 +36,14 @@ class _TapTracker {
   void startTrackingPointer(PointerRoute route) {
     if (!_isTrackingPointer) {
       _isTrackingPointer = true;
-      Gesturer.instance.pointerRouter.addRoute(pointer, route);
+      GestureBinding.instance.pointerRouter.addRoute(pointer, route);
     }
   }
 
   void stopTrackingPointer(PointerRoute route) {
     if (_isTrackingPointer) {
       _isTrackingPointer = false;
-      Gesturer.instance.pointerRouter.removeRoute(pointer, route);
+      GestureBinding.instance.pointerRouter.removeRoute(pointer, route);
     }
   }
 
@@ -91,7 +91,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
     _stopDoubleTapTimer();
     _TapTracker tracker = new _TapTracker(
       event: event,
-      entry: Gesturer.instance.gestureArena.add(event.pointer, this)
+      entry: GestureBinding.instance.gestureArena.add(event.pointer, this)
     );
     _trackers[event.pointer] = tracker;
     tracker.startTrackingPointer(handleEvent);
@@ -154,14 +154,14 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
       _TapTracker tracker = _firstTap;
       _firstTap = null;
       _reject(tracker);
-      Gesturer.instance.gestureArena.release(tracker.pointer);
+      GestureBinding.instance.gestureArena.release(tracker.pointer);
     }
     _clearTrackers();
   }
 
   void _registerFirstTap(_TapTracker tracker) {
     _startDoubleTapTimer();
-    Gesturer.instance.gestureArena.hold(tracker.pointer);
+    GestureBinding.instance.gestureArena.hold(tracker.pointer);
     // Note, order is important below in order for the clear -> reject logic to
     // work properly.
     _freezeTracker(tracker);
@@ -225,7 +225,7 @@ class _TapGesture extends _TapTracker {
        _lastPosition = event.position,
        super(
     event: event,
-    entry: Gesturer.instance.gestureArena.add(event.pointer, gestureRecognizer)
+    entry: GestureBinding.instance.gestureArena.add(event.pointer, gestureRecognizer)
   ) {
     startTrackingPointer(handleEvent);
     if (longTapDelay > Duration.ZERO) {

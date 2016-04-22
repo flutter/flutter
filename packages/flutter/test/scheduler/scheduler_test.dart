@@ -6,19 +6,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:test/test.dart';
 
-class TestSchedulerBinding extends BindingBase with Scheduler { }
+class TestSchedulerBinding extends BindingBase with SchedulerBinding { }
 
 class TestStrategy {
   int allowedPriority = 10000;
 
-  bool shouldRunTaskWithPriority({ int priority, Scheduler scheduler }) {
+  bool shouldRunTaskWithPriority({ int priority, SchedulerBinding scheduler }) {
     return priority >= allowedPriority;
   }
 }
 
 void main() {
   test("Tasks are executed in the right order", () {
-    Scheduler scheduler = new TestSchedulerBinding();
+    SchedulerBinding scheduler = new TestSchedulerBinding();
     TestStrategy strategy = new TestStrategy();
     scheduler.schedulingStrategy = strategy.shouldRunTaskWithPriority;
     List<int> input = <int>[2, 23, 23, 11, 0, 80, 3];

@@ -27,7 +27,7 @@ void main() {
     appState = tester.stateOf(find.byType(stocks.StocksApp));
   });
 
-  BuildOwner buildOwner = Widgeteer.instance.buildOwner;
+  BuildOwner buildOwner = WidgetsBinding.instance.buildOwner;
 
   Stopwatch watch = new Stopwatch()
     ..start();

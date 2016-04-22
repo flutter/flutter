@@ -81,19 +81,19 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   void dispose() {
     resolve(GestureDisposition.rejected);
     for (int pointer in _trackedPointers)
-      Gesturer.instance.pointerRouter.removeRoute(pointer, handleEvent);
+      GestureBinding.instance.pointerRouter.removeRoute(pointer, handleEvent);
     _trackedPointers.clear();
     assert(_entries.isEmpty);
   }
 
   void startTrackingPointer(int pointer) {
-    Gesturer.instance.pointerRouter.addRoute(pointer, handleEvent);
+    GestureBinding.instance.pointerRouter.addRoute(pointer, handleEvent);
     _trackedPointers.add(pointer);
-    _entries.add(Gesturer.instance.gestureArena.add(pointer, this));
+    _entries.add(GestureBinding.instance.gestureArena.add(pointer, this));
   }
 
   void stopTrackingPointer(int pointer) {
-    Gesturer.instance.pointerRouter.removeRoute(pointer, handleEvent);
+    GestureBinding.instance.pointerRouter.removeRoute(pointer, handleEvent);
     _trackedPointers.remove(pointer);
     if (_trackedPointers.isEmpty)
       didStopTrackingLastPointer(pointer);

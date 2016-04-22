@@ -24,14 +24,14 @@ void main() {
 
   ViewConfiguration big = const ViewConfiguration(size: const Size(360.0, 640.0));
   ViewConfiguration small = const ViewConfiguration(size: const Size(355.0, 635.0));
-  RenderView renderView = Widgeteer.instance.renderView;
+  RenderView renderView = WidgetsBinding.instance.renderView;
 
   Stopwatch watch = new Stopwatch()
     ..start();
 
   for (int i = 0; i < _kNumberOfIterations || _kRunForever; ++i) {
     renderView.configuration = (i % 2 == 0) ? big : small;
-    Renderer.instance.pipelineOwner.flushLayout();
+    RendererBinding.instance.pipelineOwner.flushLayout();
   }
 
   watch.stop();

@@ -113,12 +113,12 @@ class WidgetsAppState<T extends WidgetsApp> extends State<T> implements WidgetsB
     super.initState();
     _navigator = new GlobalObjectKey(this);
     didChangeLocale(ui.window.locale);
-    Widgeteer.instance.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
-    Widgeteer.instance.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 

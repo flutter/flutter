@@ -29,7 +29,7 @@ class ServiceMocker {
 
   // Provide a mock implementation for a Mojo interface.
   // Make sure you initialise the binding before calling this.
-  // For example, by calling `WidgetFlutterBinding.ensureInitialized();`
+  // For example, by calling `WidgetsFlutterBinding.ensureInitialized();`
   void registerMockService(String interfaceName, Object mock) {
     _interfaceMocks[interfaceName] = mock;
   }

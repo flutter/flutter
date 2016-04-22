@@ -48,7 +48,7 @@ class WidgetTester {
 
   /// The binding instance that the widget tester is using when it
   /// needs a binding (e.g. for event dispatch).
-  Widgeteer get binding => elementTreeTester.binding;
+  WidgetsBinding get binding => elementTreeTester.binding;
 
   /// Renders the UI from the given [widget].
   ///

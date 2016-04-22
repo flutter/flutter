@@ -21,7 +21,7 @@ const String _extensionMethodName = 'driver';
 const String _extensionMethod = 'ext.flutter.$_extensionMethodName';
 const Duration _kDefaultTimeout = const Duration(seconds: 5);
 
-class _DriverBinding extends WidgetFlutterBinding { // TODO(ianh): refactor so we're not extending a concrete binding
+class _DriverBinding extends WidgetsFlutterBinding { // TODO(ianh): refactor so we're not extending a concrete binding
   @override
   void initServiceExtensions() {
     super.initServiceExtensions();
@@ -41,9 +41,9 @@ class _DriverBinding extends WidgetFlutterBinding { // TODO(ianh): refactor so w
 /// Call this function prior to running your application, e.g. before you call
 /// `runApp`.
 void enableFlutterDriverExtension() {
-  assert(Widgeteer.instance == null);
+  assert(WidgetsBinding.instance == null);
   new _DriverBinding();
-  assert(Widgeteer.instance is _DriverBinding);
+  assert(WidgetsBinding.instance is _DriverBinding);
 }
 
 /// Handles a command and returns a result.
@@ -109,7 +109,7 @@ class FlutterDriverExtension {
       // Lazy-initialize the frame callback because the renderer is not yet
       // available at the time the extension is registered.
       StreamController<Duration> frameReadyController = new StreamController<Duration>.broadcast(sync: true);
-      Scheduler.instance.addPersistentFrameCallback((Duration timestamp) {
+      SchedulerBinding.instance.addPersistentFrameCallback((Duration timestamp) {
         frameReadyController.add(timestamp);
       });
       _onFrameReadyStream = frameReadyController.stream;

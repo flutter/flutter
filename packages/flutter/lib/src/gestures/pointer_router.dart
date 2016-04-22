@@ -101,9 +101,9 @@ class FlutterErrorDetailsForPointerRouter extends FlutterErrorDetails {
   );
 
   /// The pointer router that caught the exception.
-  /// 
-  /// In a typical application, this is the value of [Gesturer.pointerRouter] on
-  /// the binding ([Gesturer.instance]).
+  ///
+  /// In a typical application, this is the value of [GestureBinding.pointerRouter] on
+  /// the binding ([GestureBinding.instance]).
   final PointerRouter router;
 
   /// The callback that threw the exception.

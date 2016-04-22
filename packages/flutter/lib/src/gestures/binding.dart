@@ -17,7 +17,7 @@ import 'hit_test.dart';
 import 'pointer_router.dart';
 
 /// A binding for the gesture subsystem.
-abstract class Gesturer extends BindingBase implements HitTestable, HitTestDispatcher, HitTestTarget {
+abstract class GestureBinding extends BindingBase implements HitTestable, HitTestDispatcher, HitTestTarget {
 
   @override
   void initInstances() {
@@ -27,8 +27,8 @@ abstract class Gesturer extends BindingBase implements HitTestable, HitTestDispa
   }
 
   /// The singleton instance of this object.
-  static Gesturer get instance => _instance;
-  static Gesturer _instance;
+  static GestureBinding get instance => _instance;
+  static GestureBinding _instance;
 
   void _handlePointerPacket(ByteData serializedPacket) {
     final mojo_bindings.Message message = new mojo_bindings.Message(
@@ -122,7 +122,7 @@ abstract class Gesturer extends BindingBase implements HitTestable, HitTestDispa
 }
 
 /// Variant of [FlutterErrorDetails] with extra fields for the gesture
-/// library's binding's pointer event dispatcher ([Gesturer.dispatchEvent]).
+/// library's binding's pointer event dispatcher ([GestureBinding.dispatchEvent]).
 ///
 /// See also [FlutterErrorDetailsForPointerRouter], which is also used by the
 /// gesture library.
@@ -155,7 +155,7 @@ class FlutterErrorDetailsForPointerEventDispatcher extends FlutterErrorDetails {
 
   /// The hit test result entry for the object whose handleEvent method threw
   /// the exception.
-  /// 
+  ///
   /// The target object itself is given by the [HitTestEntry.target] property of
   /// the hitTestEntry object.
   final HitTestEntry hitTestEntry;

@@ -12,7 +12,7 @@ import 'package:test/test.dart';
 
 typedef void HandleEventCallback(PointerEvent event);
 
-class TestGestureFlutterBinding extends BindingBase with Gesturer {
+class TestGestureFlutterBinding extends BindingBase with GestureBinding {
   HandleEventCallback callback;
 
   @override
@@ -20,19 +20,19 @@ class TestGestureFlutterBinding extends BindingBase with Gesturer {
     if (callback != null)
       callback(event);
     super.handleEvent(event, entry);
-  }  
+  }
 }
 
 TestGestureFlutterBinding _binding = new TestGestureFlutterBinding();
 
-void ensureTestGesturer() {
+void ensureTestGestureBinding() {
   if (_binding == null)
     _binding = new TestGestureFlutterBinding();
-  assert(Gesturer.instance != null);
+  assert(GestureBinding.instance != null);
 }
 
 void main() {
-  setUp(ensureTestGesturer);
+  setUp(ensureTestGestureBinding);
 
   test('Pointer tap events', () {
     mojo_bindings.Encoder encoder = new mojo_bindings.Encoder();
