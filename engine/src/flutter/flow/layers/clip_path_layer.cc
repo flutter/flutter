@@ -12,10 +12,17 @@ ClipPathLayer::ClipPathLayer() {
 ClipPathLayer::~ClipPathLayer() {
 }
 
+void ClipPathLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
+  PrerollChildren(context, matrix);
+  if (!context->child_paint_bounds.intersect(clip_path_.getBounds()))
+    context->child_paint_bounds.setEmpty();
+  set_paint_bounds(context->child_paint_bounds);
+}
+
 void ClipPathLayer::Paint(PaintContext::ScopedFrame& frame) {
   SkCanvas& canvas = frame.canvas();
   SkAutoCanvasRestore save(&canvas, false);
-  canvas.saveLayer(&clip_path_.getBounds(), nullptr);
+  canvas.saveLayer(&paint_bounds(), nullptr);
   canvas.clipPath(clip_path_);
   PaintChildren(frame);
 }

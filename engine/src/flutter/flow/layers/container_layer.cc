@@ -19,6 +19,7 @@ void ContainerLayer::Add(std::unique_ptr<Layer> layer) {
 
 void ContainerLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   PrerollChildren(context, matrix);
+  set_paint_bounds(context->child_paint_bounds);
 }
 
 void ContainerLayer::PrerollChildren(PrerollContext* context,

@@ -21,7 +21,6 @@ class ColorFilterLayer : public ContainerLayer {
   }
 
  protected:
-  void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
   void Paint(PaintContext::ScopedFrame& frame) override;
 
  private:
