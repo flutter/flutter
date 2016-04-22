@@ -23,7 +23,7 @@ void DrawStatisticsText(SkCanvas& canvas,
 }
 
 void VisualizeStopWatch(SkCanvas& canvas,
-                        const instrumentation::Stopwatch& stopwatch,
+                        const Stopwatch& stopwatch,
                         SkScalar x,
                         SkScalar y,
                         SkScalar width,
@@ -31,36 +31,36 @@ void VisualizeStopWatch(SkCanvas& canvas,
                         bool show_graph,
                         bool show_labels,
                         const std::string& label_prefix) {
-  const int labelX = 8; // distance from x
-  const int labelY = -10; // distance from y+height
+  const int label_x = 8; // distance from x
+  const int label_y = -10; // distance from y+height
 
   if (show_graph) {
-    SkRect visualizationRect = SkRect::MakeXYWH(x, y, width, height);
-    stopwatch.visualize(canvas, visualizationRect);
+    SkRect visualization_rect = SkRect::MakeXYWH(x, y, width, height);
+    stopwatch.Visualize(canvas, visualization_rect);
   }
 
   if (show_labels) {
-    double msPerFrame = stopwatch.maxDelta().InMillisecondsF();
+    double ms_per_frame = stopwatch.MaxDelta().InMillisecondsF();
     double fps;
-    if (msPerFrame < instrumentation::kOneFrameMS) {
-      fps = 1e3 / instrumentation::kOneFrameMS; 
+    if (ms_per_frame < kOneFrameMS) {
+      fps = 1e3 / kOneFrameMS; 
     } else {
-      fps = 1e3 / msPerFrame;
+      fps = 1e3 / ms_per_frame;
     }
 
     std::stringstream stream;
     stream.setf(std::ios::fixed | std::ios::showpoint);
     stream << std::setprecision(1);
-    stream << label_prefix << "  " << fps        << " fps  "
-                                   << msPerFrame << "ms/frame";
-    DrawStatisticsText(canvas, stream.str(), x + labelX, y + height + labelY);
+    stream << label_prefix << "  " << fps          << " fps  "
+                                   << ms_per_frame << "ms/frame";
+    DrawStatisticsText(canvas, stream.str(), x + label_x, y + height + label_y);
   }
 }
 
 }  // namespace
 
-PerformanceOverlayLayer::PerformanceOverlayLayer(uint64_t enabledOptions)
-    : options_(enabledOptions) {
+PerformanceOverlayLayer::PerformanceOverlayLayer(uint64_t options)
+    : options_(options) {
 }
 
 

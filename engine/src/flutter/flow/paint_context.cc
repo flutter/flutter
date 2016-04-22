@@ -12,17 +12,17 @@ namespace flow {
 PaintContext::PaintContext() {
 }
 
-void PaintContext::beginFrame(ScopedFrame& frame, bool enableInstrumentation) {
+void PaintContext::BeginFrame(ScopedFrame& frame, bool enableInstrumentation) {
   if (enableInstrumentation) {
-    frame_count_.increment();
-    frame_time_.start();
+    frame_count_.Increment();
+    frame_time_.Start();
   }
 }
 
-void PaintContext::endFrame(ScopedFrame& frame, bool enableInstrumentation) {
+void PaintContext::EndFrame(ScopedFrame& frame, bool enableInstrumentation) {
   raster_cache_.SweepAfterFrame();
   if (enableInstrumentation) {
-    frame_time_.stop();
+    frame_time_.Stop();
   }
 }
 
@@ -37,13 +37,13 @@ PaintContext::ScopedFrame::ScopedFrame(PaintContext& context,
                                        bool instrumentation_enabled)
     : context_(context), gr_context_(gr_context), canvas_(&canvas),
       instrumentation_enabled_(instrumentation_enabled) {
-  context_.beginFrame(*this, instrumentation_enabled_);
+  context_.BeginFrame(*this, instrumentation_enabled_);
 }
 
 PaintContext::ScopedFrame::ScopedFrame(ScopedFrame&& frame) = default;
 
 PaintContext::ScopedFrame::~ScopedFrame() {
-  context_.endFrame(*this, instrumentation_enabled_);
+  context_.EndFrame(*this, instrumentation_enabled_);
 }
 
 PaintContext::~PaintContext() {

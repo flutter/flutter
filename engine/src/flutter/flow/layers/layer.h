@@ -11,7 +11,6 @@
 #include "base/logging.h"
 #include "base/macros.h"
 #include "flow/paint_context.h"
-#include "mojo/services/gfx/composition/interfaces/scenes.mojom.h"
 #include "skia/ext/refptr.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColor.h"
@@ -23,6 +22,15 @@
 #include "third_party/skia/include/core/SkRRect.h"
 #include "third_party/skia/include/core/SkXfermode.h"
 
+namespace mojo {
+namespace gfx {
+namespace composition {
+class SceneUpdate;
+class Node;
+}  // composition
+}  // namespace gfx
+}  // namespace mojo
+
 namespace flow {
 
 class ContainerLayer;
@@ -32,13 +40,13 @@ class Layer {
   virtual ~Layer();
 
   struct PrerollContext {
-    PaintContext::ScopedFrame& frame;
+    RasterCache& raster_cache;
+    GrContext* gr_context;
     SkRect child_paint_bounds;
   };
 
   virtual void Preroll(PrerollContext* context, const SkMatrix& matrix);
   virtual void Paint(PaintContext::ScopedFrame& frame) = 0;
-
   virtual void UpdateScene(mojo::gfx::composition::SceneUpdate* update,
                            mojo::gfx::composition::Node* container);
 

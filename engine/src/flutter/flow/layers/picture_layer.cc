@@ -21,8 +21,8 @@ PictureLayer::~PictureLayer() {
 
 void PictureLayer::Preroll(PrerollContext* context,
                            const SkMatrix& matrix) {
-  image_ = context->frame.context().raster_cache().GetPrerolledImage(
-      context->frame.gr_context(), picture_.get(), matrix);
+  image_ = context->raster_cache.GetPrerolledImage(
+      context->gr_context, picture_.get(), matrix);
   context->child_paint_bounds = picture_->cullRect().makeOffset(offset_.x(), offset_.y());
 }
 

@@ -17,7 +17,7 @@ const int kVisualizeEngineStatistics = 0x08;
 
 class PerformanceOverlayLayer : public Layer {
  public:
-  explicit PerformanceOverlayLayer(uint64_t enabledOptions);
+  explicit PerformanceOverlayLayer(uint64_t options);
 
   void Paint(PaintContext::ScopedFrame& frame) override;
 

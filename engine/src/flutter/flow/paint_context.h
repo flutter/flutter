@@ -54,19 +54,19 @@ class PaintContext {
   void OnGrContextDestroyed();
 
   RasterCache& raster_cache() { return raster_cache_; }
-  const instrumentation::Counter& frame_count() const { return frame_count_; }
-  const instrumentation::Stopwatch& frame_time() const { return frame_time_; }
-  instrumentation::Stopwatch& engine_time() { return engine_time_; };
+  const Counter& frame_count() const { return frame_count_; }
+  const Stopwatch& frame_time() const { return frame_time_; }
+  Stopwatch& engine_time() { return engine_time_; };
 
  private:
   RasterCache raster_cache_;
 
-  instrumentation::Counter frame_count_;
-  instrumentation::Stopwatch frame_time_;
-  instrumentation::Stopwatch engine_time_;
+  Counter frame_count_;
+  Stopwatch frame_time_;
+  Stopwatch engine_time_;
 
-  void beginFrame(ScopedFrame& frame, bool enableInstrumentation);
-  void endFrame(ScopedFrame& frame, bool enableInstrumentation);
+  void BeginFrame(ScopedFrame& frame, bool enableInstrumentation);
+  void EndFrame(ScopedFrame& frame, bool enableInstrumentation);
 
   DISALLOW_COPY_AND_ASSIGN(PaintContext);
 };
