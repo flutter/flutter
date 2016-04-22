@@ -73,6 +73,8 @@ class FloatingActionButton extends StatefulWidget {
   final VoidCallback onPressed;
 
   /// The z-coordinate at which to place this button.
+  ///
+  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
   final int elevation;
 
   /// The z-coordinate at which to place this button when the user is touching the button.

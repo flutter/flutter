@@ -96,6 +96,8 @@ class AppBar extends StatelessWidget {
   final TabBar<dynamic> tabBar;
 
   /// The z-coordinate at which to place this app bar.
+  ///
+  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
   final int elevation;
 
   /// The color to use for the the app bar's material.

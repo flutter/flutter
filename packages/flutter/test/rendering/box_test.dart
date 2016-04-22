@@ -16,7 +16,7 @@ void main() {
         gradient: new RadialGradient(
           center: FractionalOffset.topLeft, radius: 1.8,
           colors: <Color>[Colors.yellow[500], Colors.blue[500]]),
-        boxShadow: elevationToShadow[3])
+        boxShadow: kElevationToShadow[3])
     );
     layout(root);
     expect(root.size.width, equals(800.0));
