@@ -28,7 +28,7 @@ const TextStyle _errorTextStyle = const TextStyle(
 /// required for material design applications. It builds upon a
 /// [WidgetsApp] by adding material-design specific functionality, such as
 /// [AnimatedTheme] and [GridPaper]. This widget also configures the top-level
-/// [Navigator] to perform [Hero] animations.
+/// [Navigator]'s observer to perform [Hero] animations.
 ///
 /// See also:
 ///
