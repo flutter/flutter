@@ -8,6 +8,7 @@ import 'basic_types.dart';
 
 /// An immutable style in which paint text.
 class TextStyle {
+  /// Creates a text style.
   const TextStyle({
     this.inherit: true,
     this.color,
@@ -25,7 +26,7 @@ class TextStyle {
     this.decorationStyle
   });
 
-  /// Whether null values are replaced with their value in an ancestor text style.
+  /// Whether null values are replaced with their value in an ancestor text style (e.g., in a [TextSpan] tree).
   final bool inherit;
 
   /// The color to use when painting the text.
@@ -154,7 +155,7 @@ class TextStyle {
     );
   }
 
-
+  /// The style information for text runs, encoded for use by `dart:ui`.
   ui.TextStyle get textStyle {
     return new ui.TextStyle(
       color: color,
@@ -171,6 +172,7 @@ class TextStyle {
     );
   }
 
+  /// The style information for paragraphs, encoded for use by `dart:ui`.
   ui.ParagraphStyle get paragraphStyle {
     return new ui.ParagraphStyle(
       textAlign: textAlign,
