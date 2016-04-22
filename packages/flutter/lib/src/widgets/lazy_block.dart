@@ -201,6 +201,20 @@ class _LazyBlockState extends ScrollableState<LazyBlock> {
 }
 
 /// Signature used by [LazyBlockViewport] to report its interior and exterior dimensions.
+///
+///  * The [contentExtent] is the interior dimension of the viewport (i.e., the
+///    size of the thing that's being viewed through the viewport).
+///  * The [containerExtent] is the exterior dimension of the viewport (i.e.,
+///    the amount of the thing inside the viewport that is visible from outside
+///    the viewport).
+///  * The [minScrollOffset] is the offset at which the starting edge of the
+///    first item in the viewport is aligned with the starting edge of the
+///    viewport. (As the scroll offset increases, items with larger indices are
+///    revealed in the viewport.) Typically the min scroll offset is 0.0, but
+///    because [LazyBlockViewport] uses dead reckoning, the min scroll offset
+///    might not always be 0.0. For example, if an item that's offscreen changes
+///    size, the visible items will retain their current scroll offsets even if
+///    the distance to the starting edge of the first item changes.
 typedef void LazyBlockExtentsChangedCallback(double contentExtent, double containerExtent, double minScrollOffset);
 
 /// A viewport on an infinite list of variable height children.

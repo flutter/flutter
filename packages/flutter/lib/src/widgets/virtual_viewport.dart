@@ -10,6 +10,13 @@ import 'framework.dart';
 
 import 'package:flutter/rendering.dart';
 
+/// Signature for reporting the interior and exterior dimensions of a viewport.
+///
+///  * The [contentExtent] is the interior dimension of the viewport (i.e., the
+///    size of the thing that's being viewed through the viewport).
+///  * The [containerExtent] is the exterior dimension of the viewport (i.e.,
+///    the amount of the thing inside the viewport that is visible from outside
+///    the viewport).
 typedef void ExtentsChangedCallback(double contentExtent, double containerExtent);
 
 /// An abstract widget whose children are not all materialized.

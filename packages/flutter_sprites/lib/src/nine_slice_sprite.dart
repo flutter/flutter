@@ -81,7 +81,7 @@ class NineSliceSprite extends NodeWithSize with SpritePaint {
   List<Point> _vertices;
   List<Point> _textureCoordinates;
   List<Color> _colors;
-  List<int> _indicies;
+  List<int> _indices;
 
   @override
   void paint(Canvas canvas) {
@@ -157,7 +157,7 @@ class NineSliceSprite extends NodeWithSize with SpritePaint {
       }
 
       // Build indices.
-      _indicies = <int>[];
+      _indices = <int>[];
       for (int y = 0; y < 3; y += 1) {
         for (int x = 0; x < 3; x += 1) {
           // Check if we should skip the middle rectangle.
@@ -167,13 +167,13 @@ class NineSliceSprite extends NodeWithSize with SpritePaint {
           // Add a rectangle (two triangles).
           int index = y * 4 + x;
 
-          _indicies.add(index);
-          _indicies.add(index + 1);
-          _indicies.add(index + 4);
+          _indices.add(index);
+          _indices.add(index + 1);
+          _indices.add(index + 4);
 
-          _indicies.add(index + 1);
-          _indicies.add(index + 5);
-          _indicies.add(index + 4);
+          _indices.add(index + 1);
+          _indices.add(index + 5);
+          _indices.add(index + 4);
         }
       }
     }
@@ -184,7 +184,7 @@ class NineSliceSprite extends NodeWithSize with SpritePaint {
       _textureCoordinates,
       _colors,
       TransferMode.modulate,
-      _indicies,
+      _indices,
       _cachedPaint
     );
   }
