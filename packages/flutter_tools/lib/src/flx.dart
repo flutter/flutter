@@ -245,6 +245,7 @@ ZipEntry _createFontManifest(Map<String, dynamic> manifestDescriptor,
 Future<String> buildFlx(
   Toolchain toolchain, {
   String mainPath: defaultMainPath,
+  bool precompiledSnapshot: false,
   bool includeRobotoFonts: true
 }) async {
   int result;
@@ -255,6 +256,7 @@ Future<String> buildFlx(
     snapshotPath: localSnapshotPath,
     outputPath: localBundlePath,
     mainPath: mainPath,
+    precompiledSnapshot: precompiledSnapshot,
     includeRobotoFonts: includeRobotoFonts
   );
   if (result == 0)
