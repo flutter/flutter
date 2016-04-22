@@ -48,7 +48,13 @@ def to_gn_args(args):
 
     gn_args['is_debug'] = args.debug
     gn_args['is_clang'] = args.clang and args.target_os not in ['android', 'fnl']
-    gn_args['flutter_develop_mode'] = args.develop
+
+    if args.develop:
+        gn_args['dart_runtime_mode'] = 'develop'
+    elif args.debug:
+        gn_args['dart_runtime_mode'] = 'profile'
+    else:
+        gn_args['dart_runtime_mode'] = 'release'
 
     ios_target_cpu = 'arm64'
     if args.ios_force_armv7:
@@ -107,7 +113,6 @@ def to_gn_args(args):
     gn_args['enable_gcm'] = args.enable_gcm
     gn_args['enable_google_sign_in'] = args.enable_google_sign_in
     gn_args['use_glfw'] = args.use_glfw
-    gn_args['dart_product'] = not args.develop
 
     return gn_args
 
