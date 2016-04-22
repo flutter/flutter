@@ -17,6 +17,7 @@ class ClipPathLayer : public ContainerLayer {
   void set_clip_path(const SkPath& clip_path) { clip_path_ = clip_path; }
 
  protected:
+  void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
   void Paint(PaintContext::ScopedFrame& frame) override;
 
  private:

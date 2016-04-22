@@ -12,11 +12,6 @@ OpacityLayer::OpacityLayer() {
 OpacityLayer::~OpacityLayer() {
 }
 
-void OpacityLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
-  ContainerLayer::Preroll(context, matrix);
-  set_paint_bounds(context->child_paint_bounds);
-}
-
 void OpacityLayer::Paint(PaintContext::ScopedFrame& frame) {
   SkPaint paint;
   paint.setAlpha(alpha_);

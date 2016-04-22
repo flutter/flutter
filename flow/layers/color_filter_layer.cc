@@ -12,11 +12,6 @@ ColorFilterLayer::ColorFilterLayer() {
 ColorFilterLayer::~ColorFilterLayer() {
 }
 
-void ColorFilterLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
-  ContainerLayer::Preroll(context, matrix);
-  set_paint_bounds(context->child_paint_bounds);
-}
-
 void ColorFilterLayer::Paint(PaintContext::ScopedFrame& frame) {
   skia::RefPtr<SkColorFilter> color_filter =
       skia::AdoptRef(SkColorFilter::CreateModeFilter(color_, transfer_mode_));

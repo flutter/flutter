@@ -12,11 +12,6 @@ BackdropFilterLayer::BackdropFilterLayer() {
 BackdropFilterLayer::~BackdropFilterLayer() {
 }
 
-void BackdropFilterLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
-  ContainerLayer::Preroll(context, matrix);
-  set_paint_bounds(context->child_paint_bounds);
-}
-
 void BackdropFilterLayer::Paint(PaintContext::ScopedFrame& frame) {
   SkCanvas& canvas = frame.canvas();
   SkAutoCanvasRestore save(&canvas, false);

@@ -17,7 +17,6 @@ class OpacityLayer : public ContainerLayer {
   void set_alpha(int alpha) { alpha_ = alpha; }
 
  protected:
-  void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
   void Paint(PaintContext::ScopedFrame& frame) override;
 
  private:

@@ -9,15 +9,12 @@
 #include "flow/layers/performance_overlay_layer.h"
 
 namespace flow {
+namespace {
 
-PerformanceOverlayLayer::PerformanceOverlayLayer(uint64_t enabledOptions)
-    : options_(enabledOptions) {
-}
-
-static void DrawStatisticsText(SkCanvas& canvas,
-                               const std::string& string,
-                               int x,
-                               int y) {
+void DrawStatisticsText(SkCanvas& canvas,
+                        const std::string& string,
+                        int x,
+                        int y) {
   SkPaint paint;
   paint.setTextSize(14);
   paint.setLinearText(false);
@@ -25,15 +22,15 @@ static void DrawStatisticsText(SkCanvas& canvas,
   canvas.drawText(string.c_str(), string.size(), x, y, paint);
 }
 
-static void VisualizeStopWatch(SkCanvas& canvas,
-                               const instrumentation::Stopwatch& stopwatch,
-                               SkScalar x,
-                               SkScalar y,
-                               SkScalar width,
-                               SkScalar height,
-                               bool show_graph,
-                               bool show_labels,
-                               std::string label_prefix) {
+void VisualizeStopWatch(SkCanvas& canvas,
+                        const instrumentation::Stopwatch& stopwatch,
+                        SkScalar x,
+                        SkScalar y,
+                        SkScalar width,
+                        SkScalar height,
+                        bool show_graph,
+                        bool show_labels,
+                        const std::string& label_prefix) {
   const int labelX = 8; // distance from x
   const int labelY = -10; // distance from y+height
 
@@ -60,10 +57,16 @@ static void VisualizeStopWatch(SkCanvas& canvas,
   }
 }
 
+}  // namespace
+
+PerformanceOverlayLayer::PerformanceOverlayLayer(uint64_t enabledOptions)
+    : options_(enabledOptions) {
+}
+
+
 void PerformanceOverlayLayer::Paint(PaintContext::ScopedFrame& frame) {
-  if (!options_) {
+  if (!options_)
     return;
-  }
 
   SkScalar x = paint_bounds().x();
   SkScalar y = paint_bounds().y();

@@ -12,10 +12,17 @@ ClipRectLayer::ClipRectLayer() {
 ClipRectLayer::~ClipRectLayer() {
 }
 
+void ClipRectLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
+  PrerollChildren(context, matrix);
+  if (!context->child_paint_bounds.intersect(clip_rect_))
+    context->child_paint_bounds.setEmpty();
+  set_paint_bounds(context->child_paint_bounds);
+}
+
 void ClipRectLayer::Paint(PaintContext::ScopedFrame& frame) {
   SkCanvas& canvas = frame.canvas();
   SkAutoCanvasRestore save(&canvas, true);
-  canvas.clipRect(clip_rect_);
+  canvas.clipRect(paint_bounds());
   PaintChildren(frame);
 }
 
