@@ -17,7 +17,7 @@ namespace shell {
 namespace {
 
 void DidEcho(void* context) {
-  TRACE_EVENT_ASYNC_END0("flutter", "DidEcho", context);
+  TRACE_EVENT_ASYNC_END0("flutter", "MGLEcho", context);
   Rasterizer::DrawCallback* callback = static_cast<Rasterizer::DrawCallback*>(context);
   callback->Run();
   delete callback;
@@ -69,6 +69,7 @@ void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
       reinterpret_cast<flow::LayerTree*>(layer_tree_ptr));
 
   if (!scene_ || !gl_state_ || gl_state_->gl_context->is_lost()) {
+    TRACE_EVENT_INSTANT0("flutter", "RasterizerMojo::Draw error one", TRACE_EVENT_SCOPE_THREAD);
     callback.Run();
     return;
   }
@@ -78,6 +79,7 @@ void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
   size.height = layer_tree->frame_size().height();
 
   if (size.width <= 0 || size.height <= 0.0) {
+    TRACE_EVENT_INSTANT0("flutter", "RasterizerMojo::Draw empty frame size", TRACE_EVENT_SCOPE_THREAD);
     callback.Run();
     return;
   }

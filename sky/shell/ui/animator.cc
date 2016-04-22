@@ -38,7 +38,9 @@ void Animator::RequestFrame() {
 
   DCHECK(!did_defer_frame_request_);
   outstanding_requests_++;
+  TRACE_COUNTER1("flutter", "outstanding_requests_", outstanding_requests_);
   if (outstanding_requests_ >= kPipelineDepth) {
+    TRACE_EVENT_INSTANT1("flutter", "Frame request deferred", TRACE_EVENT_SCOPE_THREAD, "outstanding_requests_", outstanding_requests_);
     did_defer_frame_request_ = true;
     return;
   }
@@ -116,6 +118,7 @@ void Animator::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
 void Animator::OnFrameComplete() {
   DCHECK(outstanding_requests_ > 0);
   --outstanding_requests_;
+  TRACE_COUNTER1("flutter", "outstanding_requests_", outstanding_requests_);
   if (paused_)
     return;
 
@@ -144,6 +147,7 @@ void Animator::Reset() {
   weak_factory_.InvalidateWeakPtrs();
 
   outstanding_requests_ = 0;
+  TRACE_COUNTER1("flutter", "outstanding_requests_", outstanding_requests_);
   did_defer_frame_request_ = false;
   engine_requested_frame_ = false;
   paused_ = false;
