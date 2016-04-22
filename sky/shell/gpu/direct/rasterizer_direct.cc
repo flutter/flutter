@@ -85,7 +85,7 @@ void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
   // There is no way for the compositor to know how long the layer tree
   // construction took. Fortunately, the layer tree does. Grab that time
   // for instrumentation.
-  paint_context_.engine_time().setLapTime(layer_tree->construction_time());
+  paint_context_.engine_time().SetLapTime(layer_tree->construction_time());
 
   {
     EnsureGLContext();
@@ -104,7 +104,7 @@ void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
   bool frameExceededThreshold = false;
   uint32_t thresholdInterval = layer_tree->rasterizer_tracing_threshold();
   if (thresholdInterval != 0 &&
-      paint_context_.frame_time().lastLap().InMillisecondsF() >
+      paint_context_.frame_time().LastLap().InMillisecondsF() >
           thresholdInterval * kOneFrameDuration) {
     // While rendering the last frame, if we exceeded the tracing threshold
     // specified in the layer tree, we force a trace to disk.

@@ -18,7 +18,11 @@ LayerTree::~LayerTree() {
 void LayerTree::Raster(PaintContext::ScopedFrame& frame) {
   {
     TRACE_EVENT0("flutter", "LayerTree::Preroll");
-    Layer::PrerollContext context = { frame, SkRect::MakeEmpty() };
+    Layer::PrerollContext context = {
+      frame.context().raster_cache(),
+      frame.gr_context(),
+      SkRect::MakeEmpty(),
+    };
     root_layer_->Preroll(&context, SkMatrix());
   }
 

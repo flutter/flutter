@@ -11,7 +11,6 @@
 #include "third_party/skia/include/core/SkCanvas.h"
 
 namespace flow {
-namespace instrumentation {
 
 static const double kOneFrameMS = 1e3 / 60.0;
 
@@ -19,14 +18,14 @@ class Stopwatch {
  public:
   class ScopedLap {
    public:
-    explicit ScopedLap(Stopwatch& stopwatch) : _stopwatch(stopwatch) {
-      _stopwatch.start();
+    explicit ScopedLap(Stopwatch& stopwatch) : stopwatch_(stopwatch) {
+      stopwatch_.Start();
     }
 
-    ~ScopedLap() { _stopwatch.stop(); }
+    ~ScopedLap() { stopwatch_.Stop(); }
 
    private:
-    Stopwatch& _stopwatch;
+    Stopwatch& stopwatch_;
 
     DISALLOW_COPY_AND_ASSIGN(ScopedLap);
   };
@@ -34,45 +33,36 @@ class Stopwatch {
   explicit Stopwatch();
   ~Stopwatch();
 
-  const base::TimeDelta& lastLap() const;
-
-  base::TimeDelta currentLap() const { return base::TimeTicks::Now() - _start; }
-
-  base::TimeDelta maxDelta() const;
-
-  void visualize(SkCanvas& canvas, const SkRect& rect) const;
-
-  void start();
-
-  void stop();
-
-  void setLapTime(const base::TimeDelta& delta);
+  const base::TimeDelta& LastLap() const;
+  base::TimeDelta CurrentLap() const { return base::TimeTicks::Now() - start_; }
+  base::TimeDelta MaxDelta() const;
+  void Visualize(SkCanvas& canvas, const SkRect& rect) const;
+  void Start();
+  void Stop();
+  void SetLapTime(const base::TimeDelta& delta);
 
  private:
-  base::TimeTicks _start;
-  std::vector<base::TimeDelta> _laps;
-  size_t _current_sample;
+  base::TimeTicks start_;
+  std::vector<base::TimeDelta> laps_;
+  size_t current_sample_;
 
   DISALLOW_COPY_AND_ASSIGN(Stopwatch);
 };
 
 class Counter {
  public:
-  explicit Counter() : _count(0) {}
+  explicit Counter() : count_(0) {}
 
-  size_t count() const { return _count; }
-
-  void reset(size_t count = 0) { _count = count; }
-
-  void increment(size_t count = 1) { _count += count; }
+  size_t count() const { return count_; }
+  void Reset(size_t count = 0) { count_ = count; }
+  void Increment(size_t count = 1) { count_ += count; }
 
  private:
-  size_t _count;
+  size_t count_;
 
   DISALLOW_COPY_AND_ASSIGN(Counter);
 };
 
-}  // namespace instrumentation
 }  // namespace flow
 
 #endif  // FLOW_INSTRUMENTATION_H_

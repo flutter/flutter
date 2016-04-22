@@ -82,6 +82,8 @@ void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
     return;
   }
 
+  paint_context_.engine_time().SetLapTime(layer_tree->construction_time());
+
   std::unique_ptr<mojo::GLTexture> texture =
       gl_state_->gl_texture_recycler.GetTexture(size);
   DCHECK(texture);
