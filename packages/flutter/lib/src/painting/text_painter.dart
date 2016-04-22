@@ -36,7 +36,15 @@ bool _deepEquals(List<Object> a, List<Object> b) {
 /// treated as if it was an unstyled [TextSpan] at the start of the
 /// [children] list.
 ///
-/// To paint a [TextSpan] on a [Canvas], use a [TextPainter].
+/// To paint a [TextSpan] on a [Canvas], use a [TextPainter]. To display a text
+/// span in a widget, use a [RichText]. For text with a single style, consider
+/// using the [Text] widget.
+///
+/// See also:
+///
+///  * [Text]
+///  * [RichText]
+///  * [TextPainter]
 class TextSpan {
   /// Creates a [TextSpan] with the given values.
   ///
@@ -102,6 +110,7 @@ class TextSpan {
       builder.pop();
   }
 
+  /// Walks this text span and its decendants in pre-order and calls [visitor] for each span that has text.
   bool visitTextSpan(bool visitor(TextSpan span)) {
     if (text != null) {
       if (!visitor(this))
@@ -116,6 +125,7 @@ class TextSpan {
     return true;
   }
 
+  /// Returns the text span that contains the given position in the text.
   TextSpan getSpanForPosition(TextPosition position) {
     assert(debugAssertValid());
     TextAffinity affinity = position.affinity;
@@ -238,6 +248,10 @@ class TextSpan {
 /// changes, return to step 2. If the text to be painted changes,
 /// return to step 1.
 class TextPainter {
+  /// Creates a text painter that paints the given text.
+  ///
+  /// The text argument is optional but [text] must be non-null before calling
+  /// [layout] or [layoutToMaxIntrinsicWidth].
   TextPainter([ TextSpan text ]) {
     this.text = text;
   }
@@ -245,9 +259,9 @@ class TextPainter {
   ui.Paragraph _paragraph;
   bool _needsLayout = false;
 
-  TextSpan _text;
   /// The (potentially styled) text to paint.
   TextSpan get text => _text;
+  TextSpan _text;
   void set text(TextSpan value) {
     assert(value == null || value.debugAssertValid());
     if (_text == value)
@@ -265,6 +279,8 @@ class TextPainter {
   }
 
   /// The minimum width at which to layout the text.
+  ///
+  /// Requires [layout] to be called again before painting.
   double get minWidth => _paragraph.minWidth;
   void set minWidth(double value) {
     if (_paragraph.minWidth == value)
@@ -274,6 +290,8 @@ class TextPainter {
   }
 
   /// The maximum width at which to layout the text.
+  ///
+  /// Requires [layout] to be called again before painting.
   double get maxWidth => _paragraph.maxWidth;
   void set maxWidth(double value) {
     if (_paragraph.maxWidth == value)
@@ -283,6 +301,8 @@ class TextPainter {
   }
 
   /// The minimum height at which to layout the text.
+  ///
+  /// Requires [layout] or [layoutToMaxIntrinsicWidth] to be called again before painting.
   double get minHeight => _paragraph.minHeight;
   void set minHeight(double value) {
     if (_paragraph.minHeight == value)
@@ -292,6 +312,8 @@ class TextPainter {
   }
 
   /// The maximum height at which to layout the text.
+  ///
+  /// Requires [layout] or [layoutToMaxIntrinsicWidth] to be called again before painting.
   double get maxHeight => _paragraph.maxHeight;
   void set maxHeight(double value) {
     if (_paragraph.maxHeight == value)
@@ -311,33 +333,48 @@ class TextPainter {
   }
 
   /// The width at which decreasing the width of the text would prevent it from painting itself completely within its bounds.
+  ///
+  /// Valid only after [layout] or [layoutToMaxIntrinsicWidth] has been called.
   double get minIntrinsicWidth {
     assert(!_needsLayout);
     return _applyFloatingPointHack(_paragraph.minIntrinsicWidth);
   }
 
   /// The width at which increasing the width of the text no longer decreases the height.
+  ///
+  /// Valid only after [layout] or [layoutToMaxIntrinsicWidth] has been called.
   double get maxIntrinsicWidth {
     assert(!_needsLayout);
     return _applyFloatingPointHack(_paragraph.maxIntrinsicWidth);
   }
 
+  /// The horizontal space required to paint this text.
+  ///
+  /// Valid only after [layout] or [layoutToMaxIntrinsicWidth] has been called.
   double get width {
     assert(!_needsLayout);
     return _applyFloatingPointHack(_paragraph.width);
   }
 
+  /// The vertical space required to paint this text.
+  ///
+  /// Valid only after [layout] or [layoutToMaxIntrinsicWidth] has been called.
   double get height {
     assert(!_needsLayout);
     return _applyFloatingPointHack(_paragraph.height);
   }
 
+  /// The amount of space required to paint this text.
+  ///
+  /// Valid only after [layout] or [layoutToMaxIntrinsicWidth] has been called.
   Size get size {
     assert(!_needsLayout);
     return new Size(width, height);
   }
 
   /// Returns the distance from the top of the text to the first baseline of the given type.
+  ///
+  /// Valid only after [layout] or [layoutToMaxIntrinsicWidth] has been called.
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(!_needsLayout);
     switch (baseline) {
@@ -360,6 +397,8 @@ class TextPainter {
   }
 
   /// Computes the visual position of the glyphs using the unconstrainted max intrinsic width.
+  ///
+  /// Overwrites the previously configured [minWidth] and [maxWidth] values.
   void layoutToMaxIntrinsicWidth() {
     if (!_needsLayout && _lastLayoutWasToMaxIntrinsicWidth && width == maxIntrinsicWidth)
       return;
@@ -378,8 +417,18 @@ class TextPainter {
   }
 
   /// Paints the text onto the given canvas at the given offset.
+  ///
+  /// Valid only after [layout] or [layoutToMaxIntrinsicWidth] has been called.
   void paint(Canvas canvas, Offset offset) {
-    assert(!_needsLayout && "Please call layout() before paint() to position the text before painting it." is String);
+    assert(() {
+      if (_needsLayout) {
+        throw new FlutterError(
+          'TextPainter.paint called when text geometry was not yet calculated.\n'
+          'Please call layout() before paint() to position the text before painting it.'
+        );
+      }
+      return true;
+    });
     canvas.drawParagraph(_paragraph, offset);
   }
 
@@ -404,6 +453,8 @@ class TextPainter {
   }
 
   /// Returns the offset at which to paint the caret.
+  ///
+  /// Valid only after [layout] or [layoutToMaxIntrinsicWidth] has been called.
   Offset getOffsetForCaret(TextPosition position, Rect caretPrototype) {
     assert(!_needsLayout);
     int offset = position.offset;
@@ -431,6 +482,7 @@ class TextPainter {
     return _paragraph.getBoxesForRange(selection.start, selection.end);
   }
 
+  /// Returns the position within the text for the given pixel offset.
   TextPosition getPositionForOffset(Offset offset) {
     assert(!_needsLayout);
     return _paragraph.getPositionForOffset(offset);
