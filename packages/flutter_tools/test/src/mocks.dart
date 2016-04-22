@@ -63,38 +63,12 @@ class MockDeviceLogReader extends DeviceLogReader {
   @override
   String get name => 'MockLogReader';
 
-  final StreamController<String> _linesStreamController =
-      new StreamController<String>.broadcast();
-
-  final Completer<int> _finishedCompleter = new Completer<int>();
+  final StreamController<String> _linesController = new StreamController<String>.broadcast();
 
   @override
-  Stream<String> get lines => _linesStreamController.stream;
+  Stream<String> get logLines => _linesController.stream;
 
-  void addLine(String line) {
-    _linesStreamController.add(line);
-  }
-
-  bool _started = false;
-
-  @override
-  Future<Null> start() async {
-    assert(!_started);
-    _started = true;
-  }
-
-  @override
-  bool get isReading => _started;
-
-  @override
-  Future<Null> stop() {
-    assert(_started);
-    _started = false;
-    return new Future<Null>.value();
-  }
-
-  @override
-  Future<int> get finished => _finishedCompleter.future;
+  void addLine(String line) => _linesController.add(line);
 }
 
 void applyMocksToCommand(FlutterCommand command) {

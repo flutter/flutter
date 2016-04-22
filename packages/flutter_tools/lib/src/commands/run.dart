@@ -17,19 +17,6 @@ import '../toolchain.dart';
 import 'build_apk.dart';
 import 'install.dart';
 
-/// Given the value of the --target option, return the path of the Dart file
-/// where the app's main function should be.
-String findMainDartFile([String target]) {
-  if (target == null)
-    target = '';
-  String targetPath = path.absolute(target);
-  if (FileSystemEntity.isDirectorySync(targetPath)) {
-    return path.join(targetPath, 'lib', 'main.dart');
-  } else {
-    return targetPath;
-  }
-}
-
 abstract class RunCommandBase extends FlutterCommand {
   RunCommandBase() {
     argParser.addFlag('checked',
@@ -66,17 +53,21 @@ class RunCommand extends RunCommandBase {
     argParser.addFlag('full-restart',
         defaultsTo: true,
         help: 'Stop any currently running application process before running the app.');
-    argParser.addFlag('clear-logs',
-        defaultsTo: true,
-        help: 'Clear log history before running the app.');
     argParser.addFlag('start-paused',
         defaultsTo: false,
         negatable: false,
         help: 'Start in a paused mode and wait for a debugger to connect.');
     argParser.addOption('debug-port',
-        defaultsTo: observatoryDefaultPort.toString(),
-        help: 'Listen to the given port for a debug connection.');
+        help: 'Listen to the given port for a debug connection (defaults to $defaultObservatoryPort).');
     usesPubOption();
+
+    // A temporary, hidden flag to experiment with a different run style.
+    // TODO(devoncarew): Remove this.
+    argParser.addFlag('tsr',
+        defaultsTo: false,
+        negatable: false,
+        hide: true,
+        help: 'Stay resident after running the app.');
   }
 
   @override
@@ -84,8 +75,6 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<int> runInProject() async {
-    bool clearLogs = argResults['clear-logs'];
-
     int debugPort;
 
     try {
@@ -95,34 +84,44 @@ class RunCommand extends RunCommandBase {
       return 1;
     }
 
-    int result = await startApp(
-      deviceForCommand,
-      toolchain,
-      target: target,
-      enginePath: runner.enginePath,
-      install: true,
-      stop: argResults['full-restart'],
-      checked: checked,
-      traceStartup: traceStartup,
-      route: route,
-      clearLogs: clearLogs,
-      startPaused: argResults['start-paused'],
-      debugPort: debugPort,
-      buildMode: getBuildMode()
-    );
+    int result;
+
+    DebuggingOptions options;
+
+    if (getBuildMode() != BuildMode.debug) {
+      options = new DebuggingOptions.disabled();
+    } else {
+      options = new DebuggingOptions.enabled(
+        checked: checked,
+        startPaused: argResults['start-paused'],
+        observatoryPort: debugPort
+      );
+    }
+
+    if (argResults['tsr']) {
+      result = await startAppStayResident(
+        deviceForCommand,
+        toolchain,
+        target: target,
+        debuggingOptions: options,
+        traceStartup: traceStartup,
+        buildMode: getBuildMode()
+      );
+    } else {
+      result = await startApp(
+        deviceForCommand,
+        toolchain,
+        target: target,
+        stop: argResults['full-restart'],
+        install: true,
+        debuggingOptions: options,
+        traceStartup: traceStartup,
+        route: route,
+        buildMode: getBuildMode()
+      );
+    }
 
     return result;
-  }
-}
-
-String _getMissingPackageHintForPlatform(TargetPlatform platform) {
-  switch (platform) {
-    case TargetPlatform.android_arm:
-      return 'Is your project missing an android/AndroidManifest.xml?';
-    case TargetPlatform.ios:
-      return 'Is your project missing an ios/Info.plist?';
-    default:
-      return null;
   }
 }
 
@@ -130,15 +129,11 @@ Future<int> startApp(
   Device device,
   Toolchain toolchain, {
   String target,
-  String enginePath,
   bool stop: true,
   bool install: true,
-  bool checked: true,
+  DebuggingOptions debuggingOptions,
   bool traceStartup: false,
   String route,
-  bool clearLogs: false,
-  bool startPaused: false,
-  int debugPort: observatoryDefaultPort,
   BuildMode buildMode: BuildMode.debug
 }) async {
   String mainPath = findMainDartFile(target);
@@ -205,22 +200,123 @@ Future<int> startApp(
 
   printStatus('Running ${_getDisplayPath(mainPath)} on ${device.name}...');
 
-  bool result = await device.startApp(
+  LaunchResult result = await device.startApp(
     package,
     toolchain,
     mainPath: mainPath,
     route: route,
-    checked: checked,
-    clearLogs: clearLogs,
-    startPaused: startPaused,
-    observatoryPort: debugPort,
+    debuggingOptions: debuggingOptions,
     platformArgs: platformArgs
   );
 
-  if (!result)
+  if (!result.started)
     printError('Error running application on ${device.name}.');
 
-  return result ? 0 : 2;
+  return result.started ? 0 : 2;
+}
+
+// start logging
+// start the app
+// scrape obs. port
+// connect via obs.
+// stay alive as long as obs. is alive
+// intercept SIG_QUIT; kill the launched app
+
+Future<int> startAppStayResident(
+  Device device,
+  Toolchain toolchain, {
+  String target,
+  DebuggingOptions debuggingOptions,
+  bool traceStartup: false,
+  BuildMode buildMode: BuildMode.debug
+}) async {
+  String mainPath = findMainDartFile(target);
+  if (!FileSystemEntity.isFileSync(mainPath)) {
+    String message = 'Tried to run $mainPath, but that file does not exist.';
+    if (target == null)
+      message += '\nConsider using the -t option to specify the Dart file to start.';
+    printError(message);
+    return 1;
+  }
+
+  ApplicationPackage package = getApplicationPackageForPlatform(device.platform);
+
+  if (package == null) {
+    String message = 'No application found for ${device.platform}.';
+    String hint = _getMissingPackageHintForPlatform(device.platform);
+    if (hint != null)
+      message += '\n$hint';
+    printError(message);
+    return 1;
+  }
+
+  // TODO(devoncarew): We shouldn't have to do type checks here.
+  if (device is AndroidDevice) {
+    printTrace('Running build command.');
+
+    int result = await buildApk(
+      device.platform,
+      toolchain,
+      target: target,
+      buildMode: buildMode
+    );
+
+    if (result != 0)
+      return result;
+  }
+
+  // TODO(devoncarew): Move this into the device.startApp() impls.
+  if (package != null) {
+    printTrace("Stopping app '${package.name}' on ${device.name}.");
+    // We don't wait for the stop command to complete.
+    device.stopApp(package);
+  }
+
+  // Allow any stop commands from above to start work.
+  await new Future<Duration>.delayed(Duration.ZERO);
+
+  printTrace('Running install command.');
+
+  // TODO(devoncarew): This fails for ios devices - we haven't built yet.
+  await installApp(device, package);
+
+  Map<String, dynamic> platformArgs;
+  if (traceStartup != null)
+    platformArgs = <String, dynamic>{ 'trace-startup': traceStartup };
+
+  printStatus('Running ${_getDisplayPath(mainPath)} on ${device.name}...');
+
+  StreamSubscription<String> sub = device.logReader.logLines.listen((String line) {
+    // if (!line.startsWith('Observatory listening on'))
+      printStatus(line);
+  });
+
+  LaunchResult result = await device.startApp(
+    package,
+    toolchain,
+    mainPath: mainPath,
+    debuggingOptions: debuggingOptions,
+    platformArgs: platformArgs
+  );
+
+  await sub.cancel();
+
+  if (!result.started)
+    printError('Error running application on ${device.name}.');
+
+  return result.started ? 0 : 2;
+}
+
+/// Given the value of the --target option, return the path of the Dart file
+/// where the app's main function should be.
+String findMainDartFile([String target]) {
+  if (target == null)
+    target = '';
+  String targetPath = path.absolute(target);
+  if (FileSystemEntity.isDirectorySync(targetPath))
+    return path.join(targetPath, 'lib', 'main.dart');
+  else
+    return targetPath;
 }
 
 /// Delay until the Observatory / service protocol is available.
@@ -232,10 +328,9 @@ Future<Null> delayUntilObservatoryAvailable(String host, int port, {
 }) async {
   printTrace('Waiting until Observatory is available (port $port).');
 
-  Stopwatch stopwatch = new Stopwatch()..start();
-
   final String url = 'ws://$host:$port/ws';
   printTrace('Looking for the observatory at $url.');
+  Stopwatch stopwatch = new Stopwatch()..start();
 
   while (stopwatch.elapsed <= timeout) {
     try {
@@ -251,11 +346,21 @@ Future<Null> delayUntilObservatoryAvailable(String host, int port, {
   printTrace('Unable to connect to the observatory.');
 }
 
+String _getMissingPackageHintForPlatform(TargetPlatform platform) {
+  switch (platform) {
+    case TargetPlatform.android_arm:
+    case TargetPlatform.android_x64:
+      return 'Is your project missing an android/AndroidManifest.xml?';
+    case TargetPlatform.ios:
+      return 'Is your project missing an ios/Info.plist?';
+    default:
+      return null;
+  }
+}
+
 /// Return a relative path if [fullPath] is contained by the cwd, else return an
 /// absolute path.
 String _getDisplayPath(String fullPath) {
   String cwd = Directory.current.path + Platform.pathSeparator;
-  if (fullPath.startsWith(cwd))
-    return fullPath.substring(cwd.length);
-  return fullPath;
+  return fullPath.startsWith(cwd) ?  fullPath.substring(cwd.length) : fullPath;
 }

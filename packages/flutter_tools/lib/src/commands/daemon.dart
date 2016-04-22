@@ -262,13 +262,13 @@ class AppDomain extends Domain {
     Directory.current = new Directory(projectDirectory);
 
     try {
+      // TODO: Return the observatory port.
       int result = await startApp(
         device,
         command.toolchain,
         stop: true,
         target: args['target'],
-        route: args['route'],
-        checked: args['checked'] ?? true
+        route: args['route']
       );
 
       if (result != 0)

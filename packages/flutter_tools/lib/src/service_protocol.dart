@@ -8,27 +8,29 @@ import 'device.dart';
 
 /// Discover service protocol ports on devices.
 class ServiceProtocolDiscovery {
+  /// [logReader] - a [DeviceLogReader] to look for service messages in.
+  ServiceProtocolDiscovery(DeviceLogReader logReader, String serviceName)
+      : _logReader = logReader, _serviceName = serviceName {
+    assert(_logReader != null);
+    _subscription = _logReader.logLines.listen(_onLine);
+  }
+
   static const String kObservatoryService = 'Observatory';
   static const String kDiagnosticService = 'Diagnostic server';
 
-  /// [logReader] A [DeviceLogReader] to look for service messages in.
-  ServiceProtocolDiscovery(DeviceLogReader logReader, String serviceName)
-      : _logReader = logReader,
-        _serviceName = serviceName {
-    assert(_logReader != null);
-    if (!_logReader.isReading)
-      _logReader.start();
-
-    _logReader.lines.listen(_onLine);
-  }
-
   final DeviceLogReader _logReader;
   final String _serviceName;
+
   Completer<int> _completer = new Completer<int>();
+  StreamSubscription<String> _subscription;
 
   /// The [Future] returned by this function will complete when the next service
   /// protocol port is found.
   Future<int> nextPort() => _completer.future;
+
+  void cancel() {
+    _subscription.cancel();
+  }
 
   void _onLine(String line) {
     int portNumber = 0;
@@ -48,6 +50,7 @@ class ServiceProtocolDiscovery {
   void _located(int port) {
     assert(_completer != null);
     assert(!_completer.isCompleted);
+
     _completer.complete(port);
     _completer = new Completer<int>();
   }

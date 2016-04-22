@@ -109,3 +109,32 @@ Future<int> findAvailablePort() async {
   await socket.close();
   return port;
 }
+
+const int _kMaxSearchIterations = 5;
+
+// TODO: time how long this takes
+
+/// This method will attempt to return a port close to or the same as
+/// [defaultPort]. Failing that, it will return any available port.
+Future<int> findPreferredPort(int defaultPort, { int searchStep: 2 }) async {
+  int iterationCount = 0;
+
+  while (iterationCount < _kMaxSearchIterations) {
+    int port = defaultPort + iterationCount * searchStep;
+    if (await _isPortAvailable(port))
+      return port;
+    iterationCount++;
+  }
+
+  return findAvailablePort();
+}
+
+Future<bool> _isPortAvailable(int port) async {
+  try {
+    ServerSocket socket = await ServerSocket.bind(InternetAddress.LOOPBACK_IP_V4, port);
+    await socket.close();
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
