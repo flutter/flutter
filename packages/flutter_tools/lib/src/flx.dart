@@ -115,7 +115,13 @@ Map<_Asset, List<_Asset>> _parseAssets(
 
       List<FileSystemEntity> files = assetDir.listSync(recursive: true);
 
+      final String buildDirPath = path.absolute(path.join(assetBase, 'build'));
+
       for (FileSystemEntity entity in files) {
+        // Exclude files from the `build/` directory.
+        if (entity.path.startsWith(buildDirPath))
+          continue;
+
         if (path.basename(entity.path) == assetFilename &&
             FileSystemEntity.isFileSync(entity.path) &&
             entity.path != assetPath) {
