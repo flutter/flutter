@@ -125,7 +125,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// Actually causes the output of the rendering pipeline to appear on screen.
   void compositeFrame() {
-    Timeline.startSync('Composite');
+    Timeline.startSync('Compositing');
     try {
       final TransformLayer transformLayer = layer;
       transformLayer.transform = _logicalToDeviceTransform;

@@ -739,7 +739,7 @@ class PipelineOwner {
   /// Called as part of the rendering pipeline after [flushLayout] and before
   /// [flushPaint].
   void flushCompositingBits() {
-    Timeline.startSync('Compositing Bits');
+    Timeline.startSync('Compositing bits');
     _nodesNeedingCompositingBitsUpdate.sort((RenderObject a, RenderObject b) => a.depth - b.depth);
     for (RenderObject node in _nodesNeedingCompositingBitsUpdate) {
       if (node._needsCompositingBitsUpdate && node.owner == this)
@@ -797,7 +797,7 @@ class PipelineOwner {
       Timeline.finishSync();
     }
   }
- 
+
   /// Cause the entire subtree rooted at the given [RenderObject] to
   /// be entirely reprocessed. This is used by development tools when
   /// the application code has changed, to cause the rendering tree to
@@ -1196,7 +1196,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
         }
         if (targetFrame != null && targetFrame < stack.length) {
           information.writeln(
-            'These invalid constraints were provided to $runtimeType\'s method() ' 
+            'These invalid constraints were provided to $runtimeType\'s method() '
             'function by the following function, which probably computed the '
             'invalid constraints in question:'
           );

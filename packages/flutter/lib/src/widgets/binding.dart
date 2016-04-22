@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:developer' as developer;
 import 'dart:ui' as ui show window;
 import 'dart:ui' show AppLifecycleState, Locale;
 
@@ -171,11 +172,27 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
       observer.didChangeAppLifecycleState(state);
   }
 
+  bool _didFirstFrame = false;
+  bool _reportFirstFrame = true;
+
+  /// Tell the framework that the first useful frame has been completed.
+  ///
+  /// This is used by [WidgetsApp] to report the first frame.
+  // remove this once we've fixed https://github.com/flutter/flutter/issues/1865
+  void didFirstFrame() {
+    _didFirstFrame = true;
+  }
+
   @override
   void beginFrame() {
     buildOwner.buildDirtyElements();
     super.beginFrame();
     buildOwner.finalizeTree();
+    // TODO(ianh): Following code should not be included in release mode, only profile and debug mode
+    if (_reportFirstFrame && _didFirstFrame) {
+      developer.Timeline.instantSync('Widgets completed first useful frame');
+      _reportFirstFrame = false;
+    }
   }
 
   /// The [Element] that is at the root of the hierarchy (and which wraps the
