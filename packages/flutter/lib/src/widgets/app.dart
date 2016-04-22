@@ -164,6 +164,9 @@ class WidgetsAppState<T extends WidgetsApp> extends State<T> implements WidgetsB
       return new Container();
     }
 
+    // TODO(ianh): The following line should not be included in release mode, only in profile and debug modes.
+    WidgetsBinding.instance.didFirstFrame();
+
     Widget result = new MediaQuery(
       data: new MediaQueryData.fromWindow(ui.window),
       child: new LocaleQuery(

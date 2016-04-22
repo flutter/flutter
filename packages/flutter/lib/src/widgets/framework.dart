@@ -788,13 +788,15 @@ class BuildOwner {
   /// After the current call stack unwinds, a microtask that notifies listeners
   /// about changes to global keys will run.
   void finalizeTree() {
+    Timeline.startSync('Finalize tree');
     lockState(() {
       _inactiveElements._unmountAll();
     }, context: 'while finalizing the widget tree');
     assert(GlobalKey._debugCheckForDuplicates);
     scheduleMicrotask(GlobalKey._notifyListeners);
+    Timeline.finishSync();
   }
- 
+
   /// Cause the entire subtree rooted at the given [Element] to
   /// be entirely rebuilt. This is used by development tools when
   /// the application code has changed, to cause the widget tree to

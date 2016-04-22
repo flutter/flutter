@@ -45,6 +45,8 @@ abstract class BindingBase {
   /// [initServiceExtensions] to have bindings initialize their
   /// observatory service extensions, if any.
   BindingBase() {
+    developer.Timeline.startSync('Framework initialization');
+
     assert(!_debugInitialized);
     initInstances();
     assert(_debugInitialized);
@@ -52,6 +54,8 @@ abstract class BindingBase {
     assert(!_debugServiceExtensionsRegistered);
     initServiceExtensions();
     assert(_debugServiceExtensionsRegistered);
+
+    developer.Timeline.finishSync();
   }
 
   static bool _debugInitialized = false;
@@ -116,7 +120,7 @@ abstract class BindingBase {
   ///
   /// Invokes the `callback` callback when the service extension is
   /// invoked.
-  void registerSignalServiceExtension({ 
+  void registerSignalServiceExtension({
     @required String name,
     @required VoidCallback callback
   }) {
@@ -143,7 +147,7 @@ abstract class BindingBase {
   ///
   /// Invokes the `setter` callback with the new value when the
   /// service extension method is invoked with a new value.
-  void registerBoolServiceExtension({ 
+  void registerBoolServiceExtension({
     String name,
     @required ValueGetter<bool> getter,
     @required ValueSetter<bool> setter
@@ -152,7 +156,7 @@ abstract class BindingBase {
     assert(getter != null);
     assert(setter != null);
     registerServiceExtension(
-      name: name, 
+      name: name,
       callback: (Map<String, String> parameters) async {
         if (parameters.containsKey('enabled'))
           setter(parameters['enabled'] == 'true');
@@ -172,7 +176,7 @@ abstract class BindingBase {
   ///
   /// Invokes the `setter` callback with the new value when the
   /// service extension method is invoked with a new value.
-  void registerNumericServiceExtension({ 
+  void registerNumericServiceExtension({
     @required String name,
     @required ValueGetter<double> getter,
     @required ValueSetter<double> setter
@@ -200,7 +204,7 @@ abstract class BindingBase {
   /// logs.
   ///
   /// The returned map will be mutated.
-  void registerServiceExtension({ 
+  void registerServiceExtension({
     @required String name,
     @required ServiceExtensionCallback callback
   }) {

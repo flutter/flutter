@@ -341,7 +341,7 @@ abstract class SchedulerBinding extends BindingBase {
   /// typically drive the rendering pipeline, and finally calls the
   /// callbacks registered by [addPostFrameCallback].
   void handleBeginFrame(Duration rawTimeStamp) {
-    Timeline.startSync('Begin frame');
+    Timeline.startSync('Frame');
     assert(!_debugInFrame);
     assert(() { _debugInFrame = true; return true; });
     Duration timeStamp = new Duration(
