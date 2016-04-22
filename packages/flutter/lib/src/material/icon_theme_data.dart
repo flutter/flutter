@@ -12,8 +12,9 @@ import 'dart:ui' show Color, hashValues;
 class IconThemeData {
   /// Creates an icon theme data.
   ///
-  /// The given opacity applies to both explicit and default icon colors.
-  const IconThemeData({ this.color, double opacity }) : _opacity = opacity;
+  /// The opacity applies to both explicit and default icon colors. The value
+  /// is clamped between 0.0 and 1.0.
+  const IconThemeData({ this.color, double opacity: 1.0 }) : _opacity = opacity;
 
   /// The default color for icons.
   final Color color;
