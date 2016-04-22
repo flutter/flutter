@@ -49,12 +49,6 @@ def to_gn_args(args):
     gn_args['is_debug'] = args.debug
     gn_args['is_clang'] = args.clang and args.target_os not in ['android', 'fnl']
 
-    if args.develop:
-        gn_args['dart_runtime_mode'] = 'develop'
-    elif args.debug:
-        gn_args['dart_runtime_mode'] = 'profile'
-    else:
-        gn_args['dart_runtime_mode'] = 'release'
 
     ios_target_cpu = 'arm64'
     if args.ios_force_armv7:
@@ -63,22 +57,27 @@ def to_gn_args(args):
 
     if args.target_os == 'android':
         gn_args['target_os'] = 'android'
+        aot = not args.develop
     elif args.target_os == 'ios':
         gn_args['target_os'] = 'ios'
         gn_args['ios_deployment_target'] = '7.0'
         gn_args['use_ios_simulator'] = args.simulator
         if args.simulator:
-            gn_args['use_libjpeg_turbo'] = False
+          gn_args['use_libjpeg_turbo'] = False
+          aot = False
         else:
           # The iOS simulator snapshot is host targetted
           gn_args['dart_target_arch'] = ios_target_cpu
+          aot = True
     elif args.target_os == 'fnl':
       gn_args['target_os'] = 'fnl'
       gn_args['use_aura'] = False
       gn_args['use_ozone'] = True
+      aot = False
     else:
-        gn_args['use_aura'] = False
-        gn_args['use_system_harfbuzz'] = False
+      gn_args['use_aura'] = False
+      gn_args['use_system_harfbuzz'] = False
+      aot = False
 
     if args.target_os in ['android', 'ios'] and not args.simulator:
       if args.target_os == 'ios':
@@ -90,6 +89,14 @@ def to_gn_args(args):
         gn_args['target_cpu'] = 'arm'
     else:
         gn_args['target_cpu'] = 'x64'
+
+    if aot:
+        if args.debug:
+            gn_args['dart_runtime_mode'] = 'profile'
+        else:
+            gn_args['dart_runtime_mode'] = 'release'
+    else:
+        gn_args['dart_runtime_mode'] = 'develop'
 
     if args.target_sysroot:
       gn_args['target_sysroot'] = args.target_sysroot
