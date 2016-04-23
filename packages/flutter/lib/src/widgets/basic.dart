@@ -1720,13 +1720,34 @@ class Flexible extends ParentDataWidget<Flex> {
 
 /// A paragraph of rich text.
 ///
-/// Consider using [Text], which integrates with [DefaultTextStyle], rather than
-/// this widget, which requires explicit styling.
+/// The [RichText] widget displays text that uses multiple different styles. The
+/// text to display is described using a tree of [TextSpan] objects, each of
+/// which has an associated style that is used for that subtree. The text might
+/// break across multiple lines or might all be displayed on the same line
+/// depending on the layout constraints.
+///
+/// Text displayed in a [RichText] widget must be explicitly styled. When
+/// picking which style to use, consider using [DefaultTextStyle.of] the current
+/// [BuildContext] to provide defaults.
+///
+/// When all the text uses the same style, consider using the [Text] widget,
+/// which is less verbose and integrates with [DefaultTextStyle] for default
+/// styling.
+///
+/// See also:
+///
+///  * [Text]
+///  * [TextSpan]
+///  * [DefaultTextStyle]
 class RichText extends LeafRenderObjectWidget {
+  /// Creates a paragraph of rich text.
+  ///
+  /// The [text] argument is required to be non-null.
   RichText({ Key key, this.text }) : super(key: key) {
     assert(text != null);
   }
 
+  /// The text to display in this widget.
   final TextSpan text;
 
   @override
@@ -1768,11 +1789,31 @@ class DefaultTextStyle extends InheritedWidget {
   }
 }
 
-/// A run of text.
+/// A run of text with a single style.
 ///
-/// By default, the text will be styled using the closest enclosing
-/// [DefaultTextStyle].
+/// The [Text] widget displays a string of text with single style. The string
+/// might break across multiple lines or might all be displayed on the same line
+/// depending on the layout constraints.
+///
+/// The [style] argument is optional. When omitted, the text will use the style
+/// from the closest enclosing [DefaultTextStyle]. If the given style's
+/// [TextStyle.inherit] property is true, the given style will be merged with
+/// the closest enclosing [DefaultTextStyle]. This merging behavior is useful,
+/// for example, to make the text bold while using the default font family and
+/// size.
+///
+/// To display text that uses multiple styles (e.g., a paragraph with some bold
+/// words), use [RichText].
+///
+/// See also:
+///
+///  * [RichText]
+///  * [DefaultTextStyle]
 class Text extends StatelessWidget {
+  /// Creates a text widget.
+  ///
+  /// If the [style] argument is null, the text will use the style from the
+  /// closest enclosing [DefaultTextStyle].
   Text(this.data, { Key key, this.style }) : super(key: key) {
     assert(data != null);
   }
@@ -1818,6 +1859,11 @@ class Text extends StatelessWidget {
 /// This widget is rarely used directly. Instead, consider using [AssetImage] or
 /// [NetworkImage], depending on whather you wish to display an image from the
 /// assert bundle or from the network.
+///
+/// See also:
+///
+///  * [AssetImage]
+///  * [NetworkImage]
 class RawImage extends LeafRenderObjectWidget {
   RawImage({
     Key key,

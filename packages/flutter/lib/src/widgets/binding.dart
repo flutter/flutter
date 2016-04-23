@@ -54,7 +54,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   void initInstances() {
     super.initInstances();
     _instance = this;
-    buildOwner.onBuildScheduled = ensureVisualUpdate;
+    buildOwner.onBuildScheduled = _handleBuildScheduled;
     ui.window.onLocaleChanged = handleLocaleChanged;
     ui.window.onPopRoute = handlePopRoute;
     ui.window.onAppLifecycleStateChanged = handleAppLifecycleStateChanged;
@@ -183,9 +183,23 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
     _didFirstFrame = true;
   }
 
+  void _handleBuildScheduled() {
+    // If we're in the process of building dirty elements, we're know that any
+    // builds that are scheduled will be run this frame, which means we don't
+    // need to schedule another frame.
+    if (_buildingDirtyElements)
+      return;
+    scheduleFrame();
+  }
+
+  bool _buildingDirtyElements = false;
+
   @override
   void beginFrame() {
+    assert(!_buildingDirtyElements);
+    _buildingDirtyElements = true;
     buildOwner.buildDirtyElements();
+    _buildingDirtyElements = false;
     super.beginFrame();
     buildOwner.finalizeTree();
     // TODO(ianh): Following code should not be included in release mode, only profile and debug mode
