@@ -221,7 +221,7 @@ class RenderPadding extends RenderShiftedBox {
 abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   RenderAligningShiftedBox({
     RenderBox child,
-    FractionalOffset alignment: const FractionalOffset(0.5, 0.5)
+    FractionalOffset alignment: FractionalOffset.center
   }) : _alignment = alignment,
        super(child) {
     assert(alignment != null && alignment.dx != null && alignment.dy != null);
@@ -277,7 +277,7 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
 ///
 /// For example, to align a box at the bottom right, you would pass this box a
 /// tight constraint that is bigger than the child's natural size,
-/// with an alignment of [const FractionalOffset(1.0, 1.0)].
+/// with an alignment of [FractionalOffset.bottomRight].
 ///
 /// By default, sizes to be as big as possible in both axes. If either axis is
 /// unconstrained, then in that direction it will be sized to fit the child's
@@ -288,7 +288,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
     RenderBox child,
     double widthFactor,
     double heightFactor,
-    FractionalOffset alignment: const FractionalOffset(0.5, 0.5)
+    FractionalOffset alignment: FractionalOffset.center
   }) : _widthFactor = widthFactor,
        _heightFactor = heightFactor,
        super(child: child, alignment: alignment) {
@@ -432,7 +432,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
     double maxWidth,
     double minHeight,
     double maxHeight,
-    FractionalOffset alignment: const FractionalOffset(0.5, 0.5)
+    FractionalOffset alignment: FractionalOffset.center
   }) : _minWidth = minWidth,
        _maxWidth = maxWidth,
        _minHeight = minHeight,
@@ -548,7 +548,7 @@ class RenderSizedOverflowBox extends RenderAligningShiftedBox {
   RenderSizedOverflowBox({
     RenderBox child,
     Size requestedSize,
-    FractionalOffset alignment: const FractionalOffset(0.5, 0.5)
+    FractionalOffset alignment: FractionalOffset.center
   }) : _requestedSize = requestedSize,
        super(child: child, alignment: alignment) {
     assert(requestedSize != null);
@@ -620,7 +620,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
     RenderBox child,
     double widthFactor,
     double heightFactor,
-    FractionalOffset alignment: const FractionalOffset(0.5, 0.5)
+    FractionalOffset alignment: FractionalOffset.center
   }) : _widthFactor = widthFactor,
        _heightFactor = heightFactor,
        super(child: child, alignment: alignment) {

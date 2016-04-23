@@ -21,6 +21,8 @@ export 'package:flutter/rendering.dart' show
     CustomPainter,
     FixedColumnCountGridDelegate,
     FlexDirection,
+    FlowDelegate,
+    FlowPaintingContext,
     FractionalOffsetTween,
     GridDelegate,
     GridDelegateWithInOrderChildPlacement,
@@ -165,7 +167,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
   /// Commonly a [BoxDecoration].
   final Decoration decoration;
 
-  /// Where to paint the box decoration.
+  /// Whether to paint the box decoration behind or in front of the child.
   final DecorationPosition position;
 
   @override
@@ -431,16 +433,25 @@ class Padding extends SingleChildRenderObjectWidget {
 ///
 /// For example, to align a box at the bottom right, you would pass this box a
 /// tight constraint that is bigger than the child's natural size,
-/// with an alignment of [const FractionalOffset(1.0, 1.0)].
+/// with an alignment of [FractionalOffset.bottomRight].
 ///
 /// By default, sizes to be as big as possible in both axes. If either axis is
 /// unconstrained, then in that direction it will be sized to fit the child's
 /// dimensions. Using widthFactor and heightFactor you can force this latter
 /// behavior in all cases.
+///
+/// See also:
+///
+///  * [CustomSingleChildLayout]
+///  * [Center] (which is the same as [Align] but with the [alignment] always
+///    set to [FractionalOffset.center])
 class Align extends SingleChildRenderObjectWidget {
+  /// Creates an alignment widget.
+  ///
+  /// The alignment defaults to [FractionalOffset.center].
   Align({
     Key key,
-    this.alignment: const FractionalOffset(0.5, 0.5),
+    this.alignment: FractionalOffset.center,
     this.widthFactor,
     this.heightFactor,
     Widget child
@@ -494,6 +505,10 @@ class Align extends SingleChildRenderObjectWidget {
 }
 
 /// Centers its child within itself.
+///
+/// See also:
+///
+///  * [Align]
 class Center extends Align {
   Center({ Key key, double widthFactor, double heightFactor, Widget child })
     : super(key: key, widthFactor: widthFactor, heightFactor: heightFactor, child: child);
@@ -505,7 +520,17 @@ class Center extends Align {
 /// decide where to position the child. The delegate can also determine the size
 /// of the parent, but the size of the parent cannot depend on the size of the
 /// child.
+///
+/// See also:
+///
+///  * [SingleChildLayoutDelegate]
+///  * [Align] (which positions a single child according to a [FractionalOffset])
+///  * [CustomMultiChildLayout] (which uses a delegate to position multiple
+///    children)
 class CustomSingleChildLayout extends SingleChildRenderObjectWidget {
+  /// Creates a custom single child layout.
+  ///
+  /// The delegate argument must not be null.
   CustomSingleChildLayout({
     Key key,
     this.delegate,
@@ -514,6 +539,7 @@ class CustomSingleChildLayout extends SingleChildRenderObjectWidget {
     assert(delegate != null);
   }
 
+  /// The delegate that controls the layout of the child.
   final SingleChildLayoutDelegate delegate;
 
   @override
@@ -527,6 +553,9 @@ class CustomSingleChildLayout extends SingleChildRenderObjectWidget {
 
 /// Metadata for identifying children in a [CustomMultiChildLayout].
 class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
+  /// Marks a child with a layout identifier.
+  ///
+  /// Both the child and the id arguments must not be null.
   LayoutId({
     Key key,
     Widget child,
@@ -566,7 +595,17 @@ const List<Widget> _emptyWidgetList = const <Widget>[];
 /// decide where to position each child. The delegate can also determine the
 /// size of the parent, but the size of the parent cannot depend on the sizes of
 /// the children.
+///
+/// See also:
+///
+/// * [MultiChildLayoutDelegate]
+/// * [CustomSingleChildLayout]
+/// * [Stack]
+/// * [Flow]
 class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
+  /// Creates a custom multi-child layout.
+  ///
+  /// The delegate argument must not be null.
   CustomMultiChildLayout({
     Key key,
     List<Widget> children: _emptyWidgetList,
@@ -667,7 +706,7 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 class FractionallySizedBox extends SingleChildRenderObjectWidget {
   FractionallySizedBox({
     Key key,
-    this.alignment: const FractionalOffset(0.5, 0.5),
+    this.alignment: FractionalOffset.center,
     this.width,
     this.height,
     Widget child
@@ -772,7 +811,7 @@ class LimitedBox extends SingleChildRenderObjectWidget {
 class OverflowBox extends SingleChildRenderObjectWidget {
   OverflowBox({
     Key key,
-    this.alignment: const FractionalOffset(0.5, 0.5),
+    this.alignment: FractionalOffset.center,
     this.minWidth,
     this.maxWidth,
     this.minHeight,
@@ -844,7 +883,7 @@ class OverflowBox extends SingleChildRenderObjectWidget {
 class SizedOverflowBox extends SingleChildRenderObjectWidget {
   SizedOverflowBox({
     Key key,
-    this.alignment: const FractionalOffset(0.5, 0.5),
+    this.alignment: FractionalOffset.center,
     this.size,
     Widget child
   }) : super(key: key, child: child) {
@@ -1265,11 +1304,18 @@ abstract class StackRenderObjectWidgetBase extends MultiChildRenderObjectWidget 
 /// For more details about the stack layout algorithm, see
 /// [RenderStack]. To control the position of child widgets, see the
 /// [Positioned] widget.
+///
+/// See also:
+///
+///  * [Flow]
+///  * [Align] (which positions a single child according to a [FractionalOffset])
+///  * [CustomSingleChildLayout]
+///  * [CustomMultiChildLayout]
 class Stack extends StackRenderObjectWidgetBase {
   Stack({
     Key key,
     List<Widget> children: _emptyWidgetList,
-    this.alignment: const FractionalOffset(0.0, 0.0)
+    this.alignment: FractionalOffset.topLeft
   }) : super(key: key, children: children);
 
   /// How to align the non-positioned children in the stack.
@@ -1289,7 +1335,7 @@ class IndexedStack extends StackRenderObjectWidgetBase {
   IndexedStack({
     Key key,
     List<Widget> children: _emptyWidgetList,
-    this.alignment: const FractionalOffset(0.0, 0.0),
+    this.alignment: FractionalOffset.topLeft,
     this.index: 0
   }) : super(key: key, children: children) {
     assert(index != null);
@@ -1715,6 +1761,71 @@ class Flexible extends ParentDataWidget<Flex> {
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('flex: $flex');
+  }
+}
+
+/// Implements the flow layout algorithm.
+///
+/// Flow layouts are optimized for repositioning children using transformation
+/// matrices.
+///
+/// The flow container is sized independently from the children by the
+/// [FlowDelegate.getSize] function of the delegate. The children are then sized
+/// independently given the constraints from the
+/// [FlowDelegate.getConstraintsForChild] function.
+///
+/// Rather than positioning the children during layout, the children are
+/// positioned using transformation matrices during the paint phase using the
+/// matrices from the [FlowDelegate.paintChildren] function. The children can be
+/// repositioned efficiently by simply repainting the flow.
+///
+/// The most efficient way to trigger a repaint of the flow is to supply a
+/// repaint argument to the constructor of the [FlowDelegate]. The flow will
+/// listen to this animation and repaint whenever the animation ticks, avoiding
+/// both the build and layout phases of the pipeline.
+///
+/// See also:
+///
+///  * [FlowDelegate]
+///  * [Stack]
+///  * [CustomSingleChildLayout]
+///  * [CustomMultiChildLayout]
+class Flow extends MultiChildRenderObjectWidget {
+  /// Creates a flow layout.
+  ///
+  /// Wraps each of the given children in a [RepaintBoundary] to avoid
+  /// repainting the children when the flow repaints.
+  Flow({
+    Key key,
+    List<Widget> children: _emptyWidgetList,
+    this.delegate
+  }) : super(key: key, children: RepaintBoundary.wrapAll(children)) {
+    assert(delegate != null);
+  }
+
+  /// Creates a flow layout.
+  ///
+  /// Does not wrap the given children in repaint boundaries, unlike the default
+  /// constructor. Useful when the child is trivial to paint or already contains
+  /// a repaint boundary.
+  Flow.unwrapped({
+    Key key,
+    List<Widget> children: _emptyWidgetList,
+    this.delegate
+  }) : super(key: key, children: children) {
+    assert(delegate != null);
+  }
+
+  /// The delegate that controls the transformation matrices of the children.
+  final FlowDelegate delegate;
+
+  @override
+  RenderFlow createRenderObject(BuildContext context) => new RenderFlow(delegate: delegate);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderFlow renderObject) {
+    renderObject
+      ..delegate = delegate;
   }
 }
 
