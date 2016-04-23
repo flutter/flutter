@@ -2570,6 +2570,13 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
     return new RepaintBoundary(key: key, child: child);
   }
 
+  static List<RepaintBoundary> wrapAll(List<Widget> widgets) {
+    List<RepaintBoundary> result = new List<RepaintBoundary>(widgets.length);
+    for (int i = 0; i < result.length; ++i)
+      result[i] = new RepaintBoundary.wrap(widgets[i], i);
+    return result;
+  }
+
   @override
   RenderRepaintBoundary createRenderObject(BuildContext context) => new RenderRepaintBoundary();
 }

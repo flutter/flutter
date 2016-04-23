@@ -1118,7 +1118,7 @@ class RenderTransform extends RenderProxyBox {
   /// The alignment of the origin, relative to the size of the box.
   ///
   /// This is equivalent to setting an origin based on the size of the box.
-  /// If it is specificed at the same time as an offset, both are applied.
+  /// If it is specified at the same time as an offset, both are applied.
   FractionalOffset get alignment => _alignment;
   FractionalOffset _alignment;
   void set alignment (FractionalOffset newAlignment) {

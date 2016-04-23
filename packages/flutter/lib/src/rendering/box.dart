@@ -1049,7 +1049,7 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
   /// appear in the child list.
   double defaultComputeDistanceToFirstActualBaseline(TextBaseline baseline) {
     assert(!needsLayout);
-    RenderBox child = firstChild;
+    ChildType child = firstChild;
     while (child != null) {
       final ParentDataType childParentData = child.parentData;
       double result = child.getDistanceToActualBaseline(baseline);
@@ -1067,7 +1067,7 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
   double defaultComputeDistanceToHighestActualBaseline(TextBaseline baseline) {
     assert(!needsLayout);
     double result;
-    RenderBox child = firstChild;
+    ChildType child = firstChild;
     while (child != null) {
       final ParentDataType childParentData = child.parentData;
       double candidate = child.getDistanceToActualBaseline(baseline);
@@ -1103,12 +1103,23 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
 
   /// Paints each child by walking the child list forwards.
   void defaultPaint(PaintingContext context, Offset offset) {
-    RenderBox child = firstChild;
+    ChildType child = firstChild;
     while (child != null) {
       final ParentDataType childParentData = child.parentData;
       context.paintChild(child, childParentData.offset + offset);
       child = childParentData.nextSibling;
     }
+  }
+
+  List<ChildType> getChildrenAsList() {
+    List<ChildType> result = <ChildType>[];
+    RenderBox child = firstChild;
+    while (child != null) {
+      final ParentDataType childParentData = child.parentData;
+      result.add(child);
+      child = childParentData.nextSibling;
+    }
+    return result;
   }
 }
 
