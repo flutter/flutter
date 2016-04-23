@@ -109,7 +109,7 @@ class Doctor {
       else
         printStatus('${result.leadingBox} ${validator.title}');
 
-      final String separator = Platform.isWindows ? ' ' : logger.separator;
+      final String separator = Platform.isWindows ? ' ' : '•';
 
       for (ValidationMessage message in result.messages) {
         if (message.isError) {
