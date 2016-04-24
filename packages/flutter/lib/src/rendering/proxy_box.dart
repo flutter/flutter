@@ -806,6 +806,7 @@ abstract class CustomClipper<T> {
   /// Returns a description of the clip given that the render object being
   /// clipped is of the given size.
   T getClip(Size size);
+
   /// Returns an approximation of the clip returned by [getClip], as
   /// an axis-aligned Rect. This is used by the semantics layer to
   /// determine whether widgets should be excluded.
@@ -815,6 +816,7 @@ abstract class CustomClipper<T> {
   /// same size as the RenderObject (e.g. it's a rounded rectangle
   /// with very small arcs in the corners), then this may be adequate.
   Rect getApproximateClipRect(Size size) => Point.origin & size;
+
   /// Returns `true` if the new instance will result in a different clip
   /// than the oldClipper instance.
   bool shouldRepaint(CustomClipper<T> oldClipper);
@@ -995,7 +997,10 @@ enum DecorationPosition {
 
 /// Paints a [Decoration] either before or after its child paints.
 class RenderDecoratedBox extends RenderProxyBox {
-
+  /// Creates a decorated box.
+  ///
+  /// Both the [decoration] and the [position] arguments are required. By
+  /// default the decoration paints behind the child.
   RenderDecoratedBox({
     Decoration decoration,
     DecorationPosition position: DecorationPosition.background,
@@ -1010,6 +1015,8 @@ class RenderDecoratedBox extends RenderProxyBox {
   BoxPainter _painter;
 
   /// What decoration to paint.
+  ///
+  /// Commonly a [BoxDecoration].
   Decoration get decoration => _decoration;
   Decoration _decoration;
   void set decoration (Decoration newDecoration) {
@@ -1023,7 +1030,7 @@ class RenderDecoratedBox extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  /// Where to paint the box decoration.
+  /// Whether to paint the box decoration behind or in front of the child.
   DecorationPosition get position => _position;
   DecorationPosition _position;
   void set position (DecorationPosition newPosition) {
@@ -1118,7 +1125,7 @@ class RenderTransform extends RenderProxyBox {
   /// The alignment of the origin, relative to the size of the box.
   ///
   /// This is equivalent to setting an origin based on the size of the box.
-  /// If it is specificed at the same time as an offset, both are applied.
+  /// If it is specified at the same time as an offset, both are applied.
   FractionalOffset get alignment => _alignment;
   FractionalOffset _alignment;
   void set alignment (FractionalOffset newAlignment) {

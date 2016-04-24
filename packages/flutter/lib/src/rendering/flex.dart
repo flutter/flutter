@@ -7,7 +7,7 @@ import 'dart:math' as math;
 import 'box.dart';
 import 'object.dart';
 
-/// Parent data for use with [RenderFlex]
+/// Parent data for use with [RenderFlex].
 class FlexParentData extends ContainerBoxParentDataMixin<RenderBox> {
   /// The flex factor to use for this child
   ///
