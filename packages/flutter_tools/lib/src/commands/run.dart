@@ -77,15 +77,16 @@ class RunCommand extends RunCommandBase {
   Future<int> runInProject() async {
     int debugPort;
 
-    try {
-      debugPort = int.parse(argResults['debug-port']);
-    } catch (error) {
-      printError('Invalid port for `--debug-port`: $error');
-      return 1;
+    if (argResults['debug-port'] != null) {
+      try {
+        debugPort = int.parse(argResults['debug-port']);
+      } catch (error) {
+        printError('Invalid port for `--debug-port`: $error');
+        return 1;
+      }
     }
 
     int result;
-
     DebuggingOptions options;
 
     if (getBuildMode() != BuildMode.debug) {
@@ -303,6 +304,14 @@ Future<int> startAppStayResident(
 
   if (!result.started)
     printError('Error running application on ${device.name}.');
+
+  // TODO: connect w/ observatory
+
+  // TODO: stay logging
+
+  // TODO: listen for obs. quit or ctrl-c
+
+  // TODO: cleanup (adb, log listeners); exit
 
   return result.started ? 0 : 2;
 }
