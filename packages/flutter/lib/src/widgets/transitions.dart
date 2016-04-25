@@ -20,6 +20,7 @@ export 'package:flutter/rendering.dart' show RelativeRect;
 /// For more complex case involving additional state, consider using
 /// [AnimatedBuilder].
 abstract class AnimatedWidget extends StatefulWidget {
+  /// The [animation] argument is required.
   AnimatedWidget({
     Key key,
     this.animation
@@ -80,14 +81,15 @@ class _AnimatedState extends State<AnimatedWidget> {
 
 /// Animates the position of a widget relative to its normal position.
 class SlideTransition extends AnimatedWidget {
+  /// Creates a fractional translation transition.
+  ///
+  /// The [position] argument is required.
   SlideTransition({
     Key key,
     Animation<FractionalOffset> position,
     this.transformHitTests: true,
     this.child
-  }) : position = position, super(key: key, animation: position) {
-    assert(position != null);
-  }
+  }) : position = position, super(key: key, animation: position);
 
   /// The animation that controls the position of the child.
   ///
@@ -118,12 +120,18 @@ class SlideTransition extends AnimatedWidget {
 
 /// Animates the scale of transformed widget.
 class ScaleTransition extends AnimatedWidget {
+  /// Creates a scale transition.
+  ///
+  /// The [scale] argument is required. The [alignment] argument defaults to
+  /// [FractionalOffset.center].
   ScaleTransition({
     Key key,
     Animation<double> scale,
     this.alignment: FractionalOffset.center,
     this.child
-  }) : scale = scale, super(key: key, animation: scale);
+  }) : scale = scale, super(key: key, animation: scale) {
+    assert(scale != null);
+  }
 
   /// The animation that controls the scale of the child.
   ///
@@ -143,9 +151,9 @@ class ScaleTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    double scaleValue = scale.value;
+    final double scaleValue = scale.value;
     Matrix4 transform = new Matrix4.identity()
-      ..scale(scaleValue, scaleValue);
+      ..scale(scaleValue, scaleValue, 1.0);
     return new Transform(
       transform: transform,
       alignment: alignment,
@@ -156,6 +164,9 @@ class ScaleTransition extends AnimatedWidget {
 
 /// Animates the rotation of a widget.
 class RotationTransition extends AnimatedWidget {
+  /// Creates a rotation transition.
+  ///
+  /// The [turns] argument is required.
   RotationTransition({
     Key key,
     Animation<double> turns,
@@ -185,6 +196,11 @@ class RotationTransition extends AnimatedWidget {
 
 /// Animates its own size and clips and aligns the child.
 class SizeTransition extends AnimatedWidget {
+  /// Creates a size transition.
+  ///
+  /// The [sizeFactor] argument is required. The [axis] argument defaults to
+  /// [Axis.vertical]. The [axisAlignment] defaults to 0.5, which centers the
+  /// child along the main axis during the transition.
   SizeTransition({
     Key key,
     this.axis: Axis.vertical,
@@ -229,6 +245,9 @@ class SizeTransition extends AnimatedWidget {
 
 /// Animates the opacity of a widget.
 class FadeTransition extends AnimatedWidget {
+  /// Creates an opacity transition.
+  ///
+  /// The [opacity] argument is required.
   FadeTransition({
     Key key,
     Animation<double> opacity,
@@ -271,6 +290,9 @@ class RelativeRectTween extends Tween<RelativeRect> {
 ///
 /// Only works if it's the child of a [Stack].
 class PositionedTransition extends AnimatedWidget {
+  /// Creates a transition for [Positioned].
+  ///
+  /// The [rect] argument is required.
   PositionedTransition({
     Key key,
     Animation<RelativeRect> rect,
@@ -320,6 +342,9 @@ typedef Widget TransitionBuilder(BuildContext context, Widget child);
 /// For simple cases without additional state, consider using
 /// [AnimatedWidget].
 class AnimatedBuilder extends AnimatedWidget {
+  /// Creates an animated builder.
+  ///
+  /// The [animation] argument is required.
   AnimatedBuilder({
     Key key,
     Animation<Object> animation,
