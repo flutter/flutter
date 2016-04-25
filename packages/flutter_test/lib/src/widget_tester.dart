@@ -318,7 +318,7 @@ class CommonFinders {
   ///     expect(tester, hasWidget(find.byKey(backKey)));
   Finder byKey(Key key) => new _KeyFinder(key);
 
-  /// Finds widgets by searching for widgehts with a particular type.
+  /// Finds widgets by searching for widgets with a particular type.
   ///
   /// The `type` argument must be a subclass of [Widget].
   ///
