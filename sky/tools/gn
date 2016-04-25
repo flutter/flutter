@@ -89,6 +89,7 @@ def to_gn_args(args):
     else:
         gn_args['target_cpu'] = 'x64'
 
+    gn_args['flutter_aot'] = aot
     if aot:
         gn_args['flutter_aot'] = True
         gn_args['dart_target_arch'] = gn_args['target_cpu']
