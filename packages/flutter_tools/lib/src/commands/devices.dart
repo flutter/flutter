@@ -34,7 +34,7 @@ class DevicesCommand extends FlutterCommand {
 
     if (devices.isEmpty) {
       printStatus(
-        'No connected devices detected.\n\n'
+        'No devices detected.\n\n'
         'If you expected your device to be detected, please run "flutter doctor" to diagnose\n'
         'potential issues, or visit https://flutter.io/setup/ for troubleshooting tips.');
     } else {
