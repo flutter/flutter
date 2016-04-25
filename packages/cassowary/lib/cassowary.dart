@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 /// An implementation of the Cassowary constraint solving algorithm in Dart.
+/// 
+/// To use, import `package:cassowary/cassowary.dart`.
 ///
 /// This is used by the [RenderAutoLayout] render object in the rendering
 /// library and by the [AutoLayout] widget in the widget library.
