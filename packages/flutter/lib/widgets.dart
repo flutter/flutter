@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 /// The Flutter widget framework.
+/// 
+/// To use, import `package:flutter/widgets.dart`.
 library widgets;
 
 export 'src/widgets/app.dart';

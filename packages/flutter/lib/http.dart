@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 /// A [Future]-based library for making HTTP requests.
+/// 
+/// To use, import `package:flutter/http.dart`.
 ///
 /// This library is based on Dart's `http` package, but differs in that it is a
 /// `mojo`-based HTTP client and does not have a dependency on mirrors.

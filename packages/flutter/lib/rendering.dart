@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 /// The Flutter rendering tree.
+/// 
+/// To use, import `package:flutter/rendering.dart`.
 ///
 /// The [RenderObject] hierarchy is used by the Flutter Widgets
 /// library to implement its layout and painting back-end. Generally,

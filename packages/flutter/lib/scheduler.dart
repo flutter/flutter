@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 /// The Flutter Scheduler library.
+/// 
+/// To use, import `package:flutter/schedule.dart`.
 ///
 /// This library is responsible for scheduler frame callbacks, and tasks at
 /// given priorities.
