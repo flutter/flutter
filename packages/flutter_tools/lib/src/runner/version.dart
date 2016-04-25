@@ -54,4 +54,17 @@ class FlutterVersion {
   static FlutterVersion getVersion([String flutterRoot]) {
     return new FlutterVersion(flutterRoot != null ? flutterRoot : ArtifactStore.flutterRoot);
   }
+
+  static String getVersionString() {
+    final String cwd = ArtifactStore.flutterRoot;
+
+    String commit = runSync(<String>['git', 'rev-parse', 'HEAD'], workingDirectory: cwd);
+    if (commit.length > 8)
+      commit = commit.substring(0, 8);
+
+    String branch = runSync(<String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+      workingDirectory: cwd);
+
+    return '$commit/$branch';
+  }
 }

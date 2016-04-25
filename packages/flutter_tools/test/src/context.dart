@@ -12,7 +12,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
-
+import 'package:flutter_tools/src/usage.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
@@ -44,6 +44,9 @@ void testUsingContext(String description, dynamic testMethod(), {
 
     if (!overrides.containsKey(SimControl))
       testContext[SimControl] = new MockSimControl();
+
+    if (!overrides.containsKey(Usage))
+      testContext[Usage] = new MockUsage();
 
     if (!overrides.containsKey(OperatingSystemUtils)) {
       MockOperatingSystemUtils os = new MockOperatingSystemUtils();
@@ -112,3 +115,33 @@ class MockSimControl extends Mock implements SimControl {
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
 
 class MockIOSSimulatorUtils extends Mock implements IOSSimulatorUtils {}
+
+class MockUsage implements Usage {
+  @override
+  bool get isFirstRun => false;
+
+  @override
+  set enable(bool value) { }
+
+  @override
+  void sendCommand(String command) { }
+
+  @override
+  UsageTimer startTimer(String event) => new _MockUsageTimer(event);
+
+  @override
+  void sendException(dynamic exception, StackTrace trace) { }
+
+  @override
+  Future<Null> waitForLastPing() => new Future<Null>.value();
+}
+
+class _MockUsageTimer implements UsageTimer {
+  _MockUsageTimer(this.event);
+
+  @override
+  final String event;
+
+  @override
+  void finish() { }
+}

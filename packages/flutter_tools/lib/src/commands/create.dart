@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
 import '../android/android.dart' as android;
@@ -14,9 +13,10 @@ import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart';
+import '../runner/flutter_command.dart';
 import '../template.dart';
 
-class CreateCommand extends Command {
+class CreateCommand extends FlutterCommand {
   @override
   final String name = 'create';
 
@@ -26,6 +26,9 @@ class CreateCommand extends Command {
 
   @override
   final List<String> aliases = <String>['init'];
+
+  @override
+  bool get requiresProjectRoot => false;
 
   CreateCommand() {
     argParser.addFlag('pub',
@@ -49,7 +52,7 @@ class CreateCommand extends Command {
   String get invocation => "${runner.executableName} $name <output directory>";
 
   @override
-  Future<int> run() async {
+  Future<int> runInProject() async {
     if (argResults.rest.isEmpty) {
       printStatus('No option specified for the output directory.');
       printStatus(usage);

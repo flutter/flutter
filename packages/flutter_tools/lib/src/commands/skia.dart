@@ -12,12 +12,6 @@ import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 class SkiaCommand extends FlutterCommand {
-  @override
-  final String name = 'skia';
-
-  @override
-  final String description = 'Retrieve the last frame rendered by a Flutter app as a Skia picture.';
-
   SkiaCommand() {
     argParser.addOption('output-file', help: 'Write the Skia picture file to this path.');
     argParser.addOption('skiaserve', help: 'Post the picture to a skiaserve debugger at this URL.');
@@ -25,6 +19,12 @@ class SkiaCommand extends FlutterCommand {
         defaultsTo: diagnosticDefaultPort.toString(),
         help: 'Local port where the diagnostic server is listening.');
   }
+
+  @override
+  final String name = 'skia';
+
+  @override
+  final String description = 'Retrieve the last frame rendered by a Flutter app as a Skia picture.';
 
   @override
   Future<int> runInProject() async {

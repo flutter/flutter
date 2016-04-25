@@ -15,6 +15,7 @@ import '../flx.dart' as flx;
 import '../globals.dart';
 import '../package_map.dart';
 import '../toolchain.dart';
+import '../usage.dart';
 import 'flutter_command_runner.dart';
 
 typedef bool Validator();
@@ -89,11 +90,15 @@ abstract class FlutterCommand extends Command {
 
   @override
   Future<int> run() {
+    flutterUsage.sendCommand(name);
+
     Stopwatch stopwatch = new Stopwatch()..start();
+    UsageTimer analyticsTimer = flutterUsage.startTimer(name);
 
     return _run().then((int exitCode) {
       int ms = stopwatch.elapsedMilliseconds;
       printTrace("'flutter $name' took ${ms}ms; exiting with code $exitCode.");
+      analyticsTimer.finish();
       return exitCode;
     });
   }

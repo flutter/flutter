@@ -84,13 +84,15 @@ class FlutterCommandRunner extends CommandRunner {
     argParser.addOption('host-debug-build-path',
         hide: !verboseHelp,
         help:
-            'Path to your host Debug out directory (i.e. the one that runs on your workstation, not a device), if you are building Flutter locally.\n'
+            'Path to your host Debug out directory (i.e. the one that runs on your workstation, not a device),\n'
+            'if you are building Flutter locally.\n'
             'This path is relative to --engine-src-path. Not normally required.',
         defaultsTo: 'out/Debug/');
     argParser.addOption('host-release-build-path',
         hide: !verboseHelp,
         help:
-            'Path to your host Release out directory (i.e. the one that runs on your workstation, not a device), if you are building Flutter locally.\n'
+            'Path to your host Release out directory (i.e. the one that runs on your workstation, not a device),\n'
+            'if you are building Flutter locally.\n'
             'This path is relative to --engine-src-path. Not normally required.',
         defaultsTo: 'out/Release/');
 
@@ -232,6 +234,7 @@ class FlutterCommandRunner extends CommandRunner {
     }
 
     if (globalResults['version']) {
+      flutterUsage.sendCommand('version');
       printStatus(FlutterVersion.getVersion(ArtifactStore.flutterRoot).toString());
       return new Future<int>.value(0);
     }
