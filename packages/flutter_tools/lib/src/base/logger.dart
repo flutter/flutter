@@ -6,12 +6,9 @@ import 'dart:async';
 import 'dart:io';
 
 final _AnsiTerminal _terminal = new _AnsiTerminal();
-final String _sep = Platform.isWindows ? '-' : '•';
 
 abstract class Logger {
   bool get isVerbose => false;
-
-  String get separator => _sep;
 
   set supportsColor(bool value) {
     _terminal.supportsColor = value;
@@ -177,10 +174,10 @@ class _LogMessage {
     stopwatch.stop();
 
     int millis = stopwatch.elapsedMilliseconds;
-    String prefix = '${millis.toString().padLeft(4)} ms $_sep ';
+    String prefix = '${millis.toString().padLeft(4)} ms • ';
     String indent = ''.padLeft(prefix.length);
     if (millis >= 100)
-      prefix = _terminal.writeBold(prefix.substring(0, prefix.length - 3)) + ' $_sep ';
+      prefix = _terminal.writeBold(prefix.substring(0, prefix.length - 3)) + ' • ';
     String indentMessage = message.replaceAll('\n', '\n$indent');
 
     if (type == _LogType.error) {

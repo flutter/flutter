@@ -183,7 +183,6 @@ class AndroidDevice extends Device {
     if (!_checkForSupportedAdbVersion() || !_checkForSupportedAndroidVersion())
       return false;
 
-    printStatus('Installing ${app.name} on device.');
     runCheckedSync(adbCommandForDevice(<String>['install', '-r', app.localPath]));
     runCheckedSync(adbCommandForDevice(<String>['shell', 'echo', '-n', _getSourceSha1(app), '>', _getDeviceSha1Path(app)]));
     return true;
