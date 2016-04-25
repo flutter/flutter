@@ -101,6 +101,11 @@ class Window {
 
   /// The dimensions of the rectangle into which the application will be drawn,
   /// in logical pixels.
+  ///
+  /// Logical pixels are roughly the same visual size across devices. Physical
+  /// pixels are the size of the actual hardware pixels on the device. The
+  /// number of physical pixels per logical pixel is described by the
+  /// [devicePixelRatio].
   Size get size => _size;
   Size _size = Size.zero;
 
