@@ -88,9 +88,11 @@ abstract class FlutterCommand extends Command {
     applicationPackages ??= new ApplicationPackageStore();
   }
 
+  String get usagePath => name;
+
   @override
   Future<int> run() {
-    flutterUsage.sendCommand(name);
+    flutterUsage.sendCommand(usagePath);
 
     Stopwatch stopwatch = new Stopwatch()..start();
     UsageTimer analyticsTimer = flutterUsage.startTimer(name);
