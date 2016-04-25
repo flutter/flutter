@@ -110,7 +110,7 @@ if (is_android) {
 group("dist") {
   deps = []
 
-  if (!is_ios && !is_mac) {
+  if (!flutter_aot) {
     deps += [ ":sky_shell" ]
   }
 
