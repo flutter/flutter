@@ -17,12 +17,7 @@ import 'runner/version.dart';
 
 const String _kFlutterUA = 'UA-67589403-5';
 
-const Duration _kMaxExitDelayDuration = const Duration(milliseconds: 250);
-
 class Usage {
-  /// Returns [Usage] active in the current app context.
-  static Usage get instance => context[Usage] ?? (context[Usage] = new Usage());
-
   Usage() {
     _ga = new AnalyticsIO(_kFlutterUA, 'flutter', FlutterVersion.getVersionString());
 
@@ -33,6 +28,9 @@ class Usage {
       _ga.optIn = true;
     }
   }
+
+  /// Returns [Usage] active in the current app context.
+  static Usage get instance => context[Usage] ?? (context[Usage] = new Usage());
 
   bool _isFirstRun = false;
 
@@ -65,11 +63,13 @@ class Usage {
     _ga.sendException(message);
   }
 
-  Future<Null> waitForLastPing() {
+  /// Returns when the last analytics event has been sent, or after a fixed
+  /// (short) delay, whichever is less.
+  Future<Null> ensureAnalyticsSent() {
     // TODO(devoncarew): This may delay tool exit and could cause some analytics
     // events to not be reported. Perhaps we could send the analytics pings
     // out-of-process from flutter_tools?
-    return _ga.waitForLastPing(timeout: _kMaxExitDelayDuration);
+    return _ga.waitForLastPing(timeout: new Duration(milliseconds: 250));
   }
 }
 

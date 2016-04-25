@@ -136,7 +136,7 @@ class MockUsage implements Usage {
   void sendException(dynamic exception, StackTrace trace) { }
 
   @override
-  Future<Null> waitForLastPing() => new Future<Null>.value();
+  Future<Null> ensureAnalyticsSent() => new Future<Null>.value();
 }
 
 class _MockUsageTimer implements UsageTimer {

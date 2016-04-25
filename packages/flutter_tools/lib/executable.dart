@@ -86,9 +86,9 @@ Future<Null> main(List<String> args) async {
 
     if (flutterUsage.isFirstRun) {
       printStatus(
-        'The Flutter tool anonymously reports feature usage statistics and basic crash reports to improve\n'
-        'the tool over time; use "flutter config" to control this behavior. See our privacy policy:\n'
-        'https://www.google.com/intl/en/policies/privacy/.\n'
+        'The Flutter tool anonymously reports feature usage statistics and basic crash reports to Google to\n'
+        'help Google contribute improvements to Flutter over time. Use "flutter config" to control this\n'
+        'behavior. See Google\'s privacy policy: https://www.google.com/intl/en/policies/privacy/.\n'
       );
     }
 
@@ -174,7 +174,7 @@ String _doctorText() {
 
 Future<Null> _exit(int code) async {
   Stopwatch stopwatch = new Stopwatch()..start();
-  await flutterUsage.waitForLastPing();
+  await flutterUsage.ensureAnalyticsSent();
   printTrace('usage: ${stopwatch.elapsedMilliseconds}ms waitForLastPing');
   logger.flush();
   await Timer.run(() {

@@ -13,7 +13,7 @@ class ConfigCommand extends FlutterCommand {
       negatable: true,
       help:
         'Enable or disable reporting anonymously tool usage statistics and basic crash reports\n'
-        'to Google Analytics. See our privacy policy: www.google.com/intl/en/policies/privacy.');
+        'to Google Analytics. See Google\'s privacy policy: www.google.com/intl/en/policies/privacy.');
   }
 
   @override
@@ -27,6 +27,10 @@ class ConfigCommand extends FlutterCommand {
 
   @override
   bool get requiresProjectRoot => false;
+
+  /// Return `null` to disable tracking of the `config` command.
+  @override
+  String get usagePath => null;
 
   @override
   Future<int> runInProject() async {

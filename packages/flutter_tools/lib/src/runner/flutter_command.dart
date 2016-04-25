@@ -88,17 +88,19 @@ abstract class FlutterCommand extends Command {
     applicationPackages ??= new ApplicationPackageStore();
   }
 
+  /// The path to send to Google Analytics. Return `null` here to disable
+  /// tracking of the command.
   String get usagePath => name;
 
   @override
   Future<int> run() {
     Stopwatch stopwatch = new Stopwatch()..start();
-    UsageTimer analyticsTimer = flutterUsage.startTimer(name);
+    UsageTimer analyticsTimer = usagePath == null ? null : flutterUsage.startTimer(name);
 
     return _run().then((int exitCode) {
       int ms = stopwatch.elapsedMilliseconds;
       printTrace("'flutter $name' took ${ms}ms; exiting with code $exitCode.");
-      analyticsTimer.finish();
+      analyticsTimer?.finish();
       return exitCode;
     });
   }
@@ -158,7 +160,9 @@ abstract class FlutterCommand extends Command {
     _setupToolchain();
     _setupApplicationPackages();
 
-    flutterUsage.sendCommand(usagePath);
+    String commandPath = usagePath;
+    if (commandPath != null)
+      flutterUsage.sendCommand(usagePath);
 
     return await runInProject();
   }

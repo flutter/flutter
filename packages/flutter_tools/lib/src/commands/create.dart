@@ -17,19 +17,6 @@ import '../runner/flutter_command.dart';
 import '../template.dart';
 
 class CreateCommand extends FlutterCommand {
-  @override
-  final String name = 'create';
-
-  @override
-  final String description = 'Create a new Flutter project.\n\n'
-    'If run on a project that already exists, this will repair the project, recreating any files that are missing.';
-
-  @override
-  final List<String> aliases = <String>['init'];
-
-  @override
-  bool get requiresProjectRoot => false;
-
   CreateCommand() {
     argParser.addFlag('pub',
       defaultsTo: true,
@@ -47,6 +34,19 @@ class CreateCommand extends FlutterCommand {
       help: 'The description to use for your new flutter project. This string ends up in the pubspec.yaml file.'
     );
   }
+
+  @override
+  final String name = 'create';
+
+  @override
+  final String description = 'Create a new Flutter project.\n\n'
+    'If run on a project that already exists, this will repair the project, recreating any files that are missing.';
+
+  @override
+  final List<String> aliases = <String>['init'];
+
+  @override
+  bool get requiresProjectRoot => false;
 
   @override
   String get invocation => "${runner.executableName} $name <output directory>";
