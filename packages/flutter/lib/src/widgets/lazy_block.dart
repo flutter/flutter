@@ -494,165 +494,184 @@ class _LazyBlockElement extends RenderObjectElement {
   void _layout(BoxConstraints constraints) {
     final double blockExtent = _getMainAxisExtent(renderObject.size);
 
-    owner.lockState(() {
-      final IndexedBuilder builder = widget.delegate.buildItem;
-      final double startLogicalOffset = widget.startOffset;
-      final double endLogicalOffset = startLogicalOffset + blockExtent;
-      final _RenderLazyBlock block = renderObject;
-      final BoxConstraints innerConstraints = _getInnerConstraints(constraints);
+    final IndexedBuilder builder = widget.delegate.buildItem;
+    final double startLogicalOffset = widget.startOffset;
+    final double endLogicalOffset = startLogicalOffset + blockExtent;
+    final _RenderLazyBlock block = renderObject;
+    final BoxConstraints innerConstraints = _getInnerConstraints(constraints);
 
-      // A high watermark for which children have been through layout this pass.
-      int firstLogicalIndexNeedingLayout = _firstChildLogicalIndex;
+    // A high watermark for which children have been through layout this pass.
+    int firstLogicalIndexNeedingLayout = _firstChildLogicalIndex;
 
-      // The index of the current child we're examining. The index is the same one
-      // used for the builder (as opposed to the physical index in the _children
-      // list).
-      int currentLogicalIndex = _firstChildLogicalIndex;
+    // The index of the current child we're examining. The index is the same one
+    // used for the builder (as opposed to the physical index in the _children
+    // list).
+    int currentLogicalIndex = _firstChildLogicalIndex;
 
-      // The offset of the current child we're examining from the start of the
-      // entire block (in the direction of the main axis). As we compute layout
-      // information, we use dead reckoning to keep track of where all the
-      // children are based on this quantity.
-      double currentLogicalOffset = _firstChildLogicalOffset;
+    // The offset of the current child we're examining from the start of the
+    // entire block (in the direction of the main axis). As we compute layout
+    // information, we use dead reckoning to keep track of where all the
+    // children are based on this quantity.
+    double currentLogicalOffset = _firstChildLogicalOffset;
 
-      // First, we check if we need to inflate any children before the start of
-      // the viewport. Because we're dead reckoning from the current viewport, we
-      // inflate the children in reverse tree order.
+    // First, we check if we need to inflate any children before the start of
+    // the viewport. Because we're dead reckoning from the current viewport, we
+    // inflate the children in reverse tree order.
 
-      if (currentLogicalIndex > 0 && currentLogicalOffset > startLogicalOffset) {
-        final List<Element> newChildren = <Element>[];
+    if (currentLogicalIndex > 0 && currentLogicalOffset > startLogicalOffset) {
+      final List<Element> newChildren = <Element>[];
 
-        while (currentLogicalIndex > 0 && currentLogicalOffset > startLogicalOffset) {
-          currentLogicalIndex -= 1;
+      while (currentLogicalIndex > 0 && currentLogicalOffset > startLogicalOffset) {
+        currentLogicalIndex -= 1;
+        Element newElement;
+        owner.lockState(() {
+          // TODO(abarth): Handle exceptions from builder gracefully.
           Widget newWidget = builder(this, currentLogicalIndex);
-          assert(newWidget != null);
+          if (newWidget == null) {
+            throw new FlutterError(
+              'buildItem must not return null after returning non-null.\n'
+              'If buildItem for a LazyBlockDelegate returns a non-null widget for a given '
+              'index, it must return non-null widgets for every smaller index as well. The '
+              'buildItem function for ${widget.delegate.runtimeType} returned null for '
+              'index $currentLogicalIndex after having returned a non-null value for index '
+              '${currentLogicalIndex - 1}.'
+            );
+          }
           newWidget = new RepaintBoundary.wrap(newWidget, currentLogicalIndex);
-          newChildren.add(inflateWidget(newWidget, null));
-          RenderBox child = block.firstChild;
-          assert(child == newChildren.last.renderObject);
-          child.layout(innerConstraints, parentUsesSize: true);
-          currentLogicalOffset -= _getMainAxisExtent(child.size);
-        }
-
-        final int numberOfNewChildren = newChildren.length;
-        _children.insertAll(0, newChildren.reversed);
-        _firstChildLogicalIndex = currentLogicalIndex;
-        _firstChildLogicalOffset = currentLogicalOffset;
-        firstLogicalIndexNeedingLayout = currentLogicalIndex + numberOfNewChildren;
-      } else if (currentLogicalOffset < startLogicalOffset) {
-        // If we didn't need to inflate more children before the viewport, we
-        // might need to deactivate children that have left the viewport from the
-        // top. We repeatedly check whether the first child overlaps the viewport
-        // and deactivate it if it's outside the viewport.
-        int currentPhysicalIndex = 0;
-        while (block.firstChild != null) {
-          RenderBox child = block.firstChild;
-          child.layout(innerConstraints, parentUsesSize: true);
-          firstLogicalIndexNeedingLayout += 1;
-          double childExtent = _getMainAxisExtent(child.size);
-          if (currentLogicalOffset + childExtent >= startLogicalOffset)
-            break;
-          deactivateChild(_children[currentPhysicalIndex]);
-          _children[currentPhysicalIndex] = null;
-          currentPhysicalIndex += 1;
-          currentLogicalIndex += 1;
-          currentLogicalOffset += childExtent;
-        }
-
-        if (currentPhysicalIndex > 0) {
-          _children.removeRange(0, currentPhysicalIndex);
-          _firstChildLogicalIndex = currentLogicalIndex;
-          _firstChildLogicalOffset = currentLogicalOffset;
-        }
+          newElement = inflateWidget(newWidget, null);
+        }, building: true);
+        newChildren.add(newElement);
+        RenderBox child = block.firstChild;
+        assert(child == newChildren.last.renderObject);
+        child.layout(innerConstraints, parentUsesSize: true);
+        currentLogicalOffset -= _getMainAxisExtent(child.size);
       }
 
-      // We've now established the invariant that the first physical child in the
-      // block is the first child that ought to be visible in the viewport. Now we
-      // need to walk forward until we've filled up the viewport. We might have
-      // already called layout for some of the children we encounter in this phase
-      // of the algorithm, we we'll need to be careful not to call layout on them again.
-
-      if (currentLogicalOffset >= startLogicalOffset) {
-        // The first element is visible. We need to update our reckoning of where
-        // the min scroll offset is.
-        _minScrollOffset = currentLogicalOffset;
-        _startOffsetLowerLimit = double.NEGATIVE_INFINITY;
-      } else {
-        // The first element is not visible. Ensure that we have one blockExtent
-        // of headroom so we don't hit the min scroll offset prematurely.
-        _minScrollOffset = currentLogicalOffset - blockExtent;
-        _startOffsetLowerLimit = currentLogicalOffset;
-      }
-
-      // Materialize new children until we fill the viewport (or run out of
-      // children to materialize).
-
-      RenderBox child;
-      while (currentLogicalOffset < endLogicalOffset) {
-        int physicalIndex = currentLogicalIndex - _firstChildLogicalIndex;
-        if (physicalIndex >= _children.length) {
-          assert(physicalIndex == _children.length);
-          Widget newWidget = builder(this, currentLogicalIndex);
-          if (newWidget == null)
-            break;
-          newWidget = new RepaintBoundary.wrap(newWidget, currentLogicalIndex);
-          Element previousChild = _children.isEmpty ? null : _children.last;
-          _children.add(inflateWidget(newWidget, previousChild));
-        }
-        child = _getNextWithin(block, child);
-        assert(child != null);
-        if (currentLogicalIndex >= firstLogicalIndexNeedingLayout) {
-          assert(currentLogicalIndex == firstLogicalIndexNeedingLayout);
-          child.layout(innerConstraints, parentUsesSize: true);
-          firstLogicalIndexNeedingLayout += 1;
-        }
-        currentLogicalOffset += _getMainAxisExtent(child.size);
-        currentLogicalIndex += 1;
-      }
-
-      // We now have all the physical children we ought to have to fill the
-      // viewport. The currentLogicalIndex is the index of the first child that
-      // we don't need.
-
-      if (currentLogicalOffset < endLogicalOffset) {
-        // The last element is visible. We need to update our reckoning of where
-        // the max scroll offset is.
-        _maxScrollOffset = currentLogicalOffset + widget._mainAxisPadding - blockExtent;
-        _startOffsetUpperLimit = double.INFINITY;
-      } else {
-        // The last element is not visible. Ensure that we have one blockExtent
-        // of headroom so we don't hit the max scroll offset prematurely.
-        _maxScrollOffset = currentLogicalOffset;
-        _startOffsetUpperLimit = currentLogicalOffset - blockExtent;
-      }
-
-      // Remove any unneeded children.
-
-      int currentPhysicalIndex = currentLogicalIndex - _firstChildLogicalIndex;
-      final int numberOfRequiredPhysicalChildren = currentPhysicalIndex;
-      while (currentPhysicalIndex < _children.length) {
+      final int numberOfNewChildren = newChildren.length;
+      _children.insertAll(0, newChildren.reversed);
+      _firstChildLogicalIndex = currentLogicalIndex;
+      _firstChildLogicalOffset = currentLogicalOffset;
+      firstLogicalIndexNeedingLayout = currentLogicalIndex + numberOfNewChildren;
+    } else if (currentLogicalOffset < startLogicalOffset) {
+      // If we didn't need to inflate more children before the viewport, we
+      // might need to deactivate children that have left the viewport from the
+      // top. We repeatedly check whether the first child overlaps the viewport
+      // and deactivate it if it's outside the viewport.
+      int currentPhysicalIndex = 0;
+      while (block.firstChild != null) {
+        RenderBox child = block.firstChild;
+        child.layout(innerConstraints, parentUsesSize: true);
+        firstLogicalIndexNeedingLayout += 1;
+        double childExtent = _getMainAxisExtent(child.size);
+        if (currentLogicalOffset + childExtent >= startLogicalOffset)
+          break;
         deactivateChild(_children[currentPhysicalIndex]);
         _children[currentPhysicalIndex] = null;
         currentPhysicalIndex += 1;
-      }
-      _children.length = numberOfRequiredPhysicalChildren;
-
-      // We now have the correct physical children, each of which has gone through
-      // layout exactly once. We still need to position them correctly. We
-      // position the first physical child at Offset.zero and use the paintOffset
-      // on the render object to adjust the final paint location of the children.
-
-      Offset currentChildOffset = _initialChildOffset;
-      child = block.firstChild;
-      while (child != null) {
-        final _LazyBlockParentData childParentData = child.parentData;
-        childParentData.offset = currentChildOffset;
-        currentChildOffset += _getMainAxisOffsetForSize(child.size);
-        child = childParentData.nextSibling;
+        currentLogicalIndex += 1;
+        currentLogicalOffset += childExtent;
       }
 
-      _updatePaintOffset();
-    }, building: true, context: 'during $runtimeType layout');
+      if (currentPhysicalIndex > 0) {
+        _children.removeRange(0, currentPhysicalIndex);
+        _firstChildLogicalIndex = currentLogicalIndex;
+        _firstChildLogicalOffset = currentLogicalOffset;
+      }
+    }
+
+    // We've now established the invariant that the first physical child in the
+    // block is the first child that ought to be visible in the viewport. Now we
+    // need to walk forward until we've filled up the viewport. We might have
+    // already called layout for some of the children we encounter in this phase
+    // of the algorithm, we we'll need to be careful not to call layout on them again.
+
+    if (currentLogicalOffset >= startLogicalOffset) {
+      // The first element is visible. We need to update our reckoning of where
+      // the min scroll offset is.
+      _minScrollOffset = currentLogicalOffset;
+      _startOffsetLowerLimit = double.NEGATIVE_INFINITY;
+    } else {
+      // The first element is not visible. Ensure that we have one blockExtent
+      // of headroom so we don't hit the min scroll offset prematurely.
+      _minScrollOffset = currentLogicalOffset - blockExtent;
+      _startOffsetLowerLimit = currentLogicalOffset;
+    }
+
+    // Materialize new children until we fill the viewport (or run out of
+    // children to materialize).
+
+    RenderBox child;
+    while (currentLogicalOffset < endLogicalOffset) {
+      int physicalIndex = currentLogicalIndex - _firstChildLogicalIndex;
+      if (physicalIndex >= _children.length) {
+        assert(physicalIndex == _children.length);
+        Element newElement;
+        owner.lockState(() {
+          // TODO(abarth): Handle exceptions from builder gracefully.
+          Widget newWidget = builder(this, currentLogicalIndex);
+          if (newWidget == null)
+            return;
+          newWidget = new RepaintBoundary.wrap(newWidget, currentLogicalIndex);
+          Element previousChild = _children.isEmpty ? null : _children.last;
+          newElement = inflateWidget(newWidget, previousChild);
+        }, building: true);
+        if (newElement == null)
+          return;
+        _children.add(newElement);
+      }
+      child = _getNextWithin(block, child);
+      assert(child != null);
+      if (currentLogicalIndex >= firstLogicalIndexNeedingLayout) {
+        assert(currentLogicalIndex == firstLogicalIndexNeedingLayout);
+        child.layout(innerConstraints, parentUsesSize: true);
+        firstLogicalIndexNeedingLayout += 1;
+      }
+      currentLogicalOffset += _getMainAxisExtent(child.size);
+      currentLogicalIndex += 1;
+    }
+
+    // We now have all the physical children we ought to have to fill the
+    // viewport. The currentLogicalIndex is the index of the first child that
+    // we don't need.
+
+    if (currentLogicalOffset < endLogicalOffset) {
+      // The last element is visible. We need to update our reckoning of where
+      // the max scroll offset is.
+      _maxScrollOffset = currentLogicalOffset + widget._mainAxisPadding - blockExtent;
+      _startOffsetUpperLimit = double.INFINITY;
+    } else {
+      // The last element is not visible. Ensure that we have one blockExtent
+      // of headroom so we don't hit the max scroll offset prematurely.
+      _maxScrollOffset = currentLogicalOffset;
+      _startOffsetUpperLimit = currentLogicalOffset - blockExtent;
+    }
+
+    // Remove any unneeded children.
+
+    int currentPhysicalIndex = currentLogicalIndex - _firstChildLogicalIndex;
+    final int numberOfRequiredPhysicalChildren = currentPhysicalIndex;
+    while (currentPhysicalIndex < _children.length) {
+      deactivateChild(_children[currentPhysicalIndex]);
+      _children[currentPhysicalIndex] = null;
+      currentPhysicalIndex += 1;
+    }
+    _children.length = numberOfRequiredPhysicalChildren;
+
+    // We now have the correct physical children, each of which has gone through
+    // layout exactly once. We still need to position them correctly. We
+    // position the first physical child at Offset.zero and use the paintOffset
+    // on the render object to adjust the final paint location of the children.
+
+    Offset currentChildOffset = _initialChildOffset;
+    child = block.firstChild;
+    while (child != null) {
+      final _LazyBlockParentData childParentData = child.parentData;
+      childParentData.offset = currentChildOffset;
+      currentChildOffset += _getMainAxisOffsetForSize(child.size);
+      child = childParentData.nextSibling;
+    }
+
+    _updatePaintOffset();
 
     LazyBlockExtentsChangedCallback onExtentsChanged = widget.onExtentsChanged;
     if (onExtentsChanged != null) {
