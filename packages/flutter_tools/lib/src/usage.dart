@@ -15,8 +15,7 @@ import 'runner/version.dart';
 
 // TODO(devoncarew): We'll want to find a way to send (sanitized) command parameters.
 
-// TODO: replace with the real UA
-const String _kFlutterUA = 'UA-00000000-0';
+const String _kFlutterUA = 'UA-67589403-5';
 
 const Duration _kMaxExitDelayDuration = const Duration(milliseconds: 250);
 

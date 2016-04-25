@@ -92,8 +92,6 @@ abstract class FlutterCommand extends Command {
 
   @override
   Future<int> run() {
-    flutterUsage.sendCommand(usagePath);
-
     Stopwatch stopwatch = new Stopwatch()..start();
     UsageTimer analyticsTimer = flutterUsage.startTimer(name);
 
@@ -159,6 +157,8 @@ abstract class FlutterCommand extends Command {
 
     _setupToolchain();
     _setupApplicationPackages();
+
+    flutterUsage.sendCommand(usagePath);
 
     return await runInProject();
   }
