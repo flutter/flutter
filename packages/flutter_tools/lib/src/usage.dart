@@ -4,7 +4,8 @@
 
 import 'dart:async';
 
-import 'package:usage/usage_io.dart';
+import 'package:usage/usage.dart';
+import 'package:usage/src/usage_impl_io.dart';
 
 import 'base/context.dart';
 import 'globals.dart';

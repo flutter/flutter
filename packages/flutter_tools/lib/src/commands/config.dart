@@ -11,16 +11,17 @@ class ConfigCommand extends FlutterCommand {
   ConfigCommand() {
     argParser.addFlag('analytics',
       negatable: true,
-      help:
-        'Enable or disable reporting anonymously tool usage statistics and basic crash reports\n'
-        'to Google Analytics. See Google\'s privacy policy: www.google.com/intl/en/policies/privacy.');
+      help: 'Enable or disable reporting anonymously tool usage statistics and crash reports.');
   }
 
   @override
   final String name = 'config';
 
   @override
-  final String description = 'Configure Flutter settings.';
+  final String description =
+    'Configure Flutter settings.\n\n'
+    'The Flutter tool anonymously reports feature usage statistics and basic crash reports to help improve\n'
+    'Flutter tools over time. See Google\'s privacy policy: www.google.com/intl/en/policies/privacy.';
 
   @override
   final List<String> aliases = <String>['configure'];

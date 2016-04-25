@@ -20,7 +20,7 @@ dependencies:
   path: ^1.3.0
   pub_semver: ^1.0.0
   stack_trace: ^1.4.0
-  usage: ^1.2.0
+  usage: ^2.0.0
   web_socket_channel: ^1.0.0
   xml: ^2.4.1
   yaml: ^2.1.3
