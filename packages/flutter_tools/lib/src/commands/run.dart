@@ -84,6 +84,9 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<int> runInProject() async {
+
+    flutterUsage.sendEvent('runTarget', getNameForTargetPlatform(deviceForCommand.platform));
+
     bool clearLogs = argResults['clear-logs'];
 
     int debugPort;

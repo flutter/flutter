@@ -51,7 +51,14 @@ class Usage {
     _ga.sendScreenView(command);
   }
 
-  UsageTimer startTimer(String event) => new UsageTimer._(event, _ga.startTimer(event));
+  void sendEvent(String category, String parameter) {
+    printTrace('usage: $category:$parameter');
+    _ga.sendEvent(category, parameter);
+  }
+
+  UsageTimer startTimer(String event) {
+    return new UsageTimer._(event, _ga.startTimer(event));
+  }
 
   void sendException(dynamic exception, StackTrace trace) {
     String message = '${exception.runtimeType}; ${sanitizeStacktrace(trace)}';
