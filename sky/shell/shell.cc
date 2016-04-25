@@ -136,6 +136,8 @@ void Shell::InitStandalone(std::string icu_data_path) {
   settings.enable_dart_checked_mode =
       command_line.HasSwitch(switches::kEnableCheckedMode);
   settings.trace_startup = command_line.HasSwitch(switches::kTraceStartup);
+  settings.aot_snapshot_path = command_line.GetSwitchValueASCII(
+      switches::kAotSnapshotPath);
   blink::SkySettings::Set(settings);
 
   Init();

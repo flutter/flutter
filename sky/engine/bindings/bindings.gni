@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("//mojo/dart/packages/mojo/sdk_ext_sources.gni")
+import("//sky/engine/config.gni")
 
 bindings_output_dir = "$root_gen_dir/sky/bindings"
 
@@ -17,6 +18,11 @@ if (target_os == "ios" && !use_ios_simulator) {
     dart_host_toolchain = "//build/toolchain/mac:clang_x64"
   } else {
     assert(false, "Unknown active architecture on iOS")
+  }
+}
+if (target_os == "android" && flutter_aot) {
+  if (host_os == "linux" && target_cpu == "arm") {
+    dart_host_toolchain = "//build/toolchain/linux:clang_x86"
   }
 }
 

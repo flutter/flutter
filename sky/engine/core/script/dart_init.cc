@@ -261,11 +261,32 @@ static void ServiceStreamCancelCallback(const char* stream_id) {
 
 const char* kDartVmIsolateSnapshotBufferName = "kDartVmIsolateSnapshotBuffer";
 const char* kDartIsolateSnapshotBufferName = "kDartIsolateSnapshotBuffer";
+
+#if OS(IOS)
+
 const char* kInstructionsSnapshotName = "kInstructionsSnapshot";
 const char* kDataSnapshotName = "kDataSnapshot";
 
-const char* kDartApplicationLibraryPath =
-    "FlutterApplication.framework/FlutterApplication";
+const char* GetDartApplicationLibraryPath() {
+  return "FlutterApplication.framework/FlutterApplication";
+}
+
+#elif OS(ANDROID)
+
+const char* kInstructionsSnapshotName = "_kInstructionsSnapshot";
+const char* kDataSnapshotName = "_kDataSnapshot";
+
+const char* GetDartApplicationLibraryPath() {
+  const std::string& aot_snapshot_path = SkySettings::Get().aot_snapshot_path;
+  CHECK(!aot_snapshot_path.empty());
+  return aot_snapshot_path.c_str();
+}
+
+#else
+
+#error "AOT mode is not supported on this platform"
+
+#endif
 
 static void* DartLookupSymbolInLibrary(const char* symbol_name,
                                        const char* library) {
@@ -293,7 +314,7 @@ void* _DartSymbolLookup(const char* symbol_name) {
   // symbols resolved. Once the application library is loaded, there is
   // currently no provision to unload the same.
   void* symbol =
-      DartLookupSymbolInLibrary(symbol_name, kDartApplicationLibraryPath);
+      DartLookupSymbolInLibrary(symbol_name, GetDartApplicationLibraryPath());
   if (symbol != nullptr) {
     return symbol;
   }
@@ -429,11 +450,13 @@ void InitDartVM() {
   }
   CHECK(Dart_SetVMFlags(args.size(), args.data()));
 
+#ifndef FLUTTER_PRODUCT_MODE
   {
     TRACE_EVENT0("flutter", "DartDebugger::InitDebugger");
     // This should be called before calling Dart_Initialize.
     DartDebugger::InitDebugger();
   }
+#endif
 
   DartUI::InitForGlobal();
 #ifdef OS_ANDROID

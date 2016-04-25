@@ -67,7 +67,6 @@ def to_gn_args(args):
           aot = False
         else:
           # The iOS simulator snapshot is host targetted
-          gn_args['dart_target_arch'] = ios_target_cpu
           aot = True
     elif args.target_os == 'fnl':
       gn_args['target_os'] = 'fnl'
@@ -91,12 +90,16 @@ def to_gn_args(args):
         gn_args['target_cpu'] = 'x64'
 
     if aot:
+        gn_args['flutter_aot'] = True
+        gn_args['dart_target_arch'] = gn_args['target_cpu']
         if args.debug:
             gn_args['dart_runtime_mode'] = 'profile'
         else:
             gn_args['dart_runtime_mode'] = 'release'
     else:
         gn_args['dart_runtime_mode'] = 'develop'
+
+    gn_args['flutter_product_mode'] = (gn_args['dart_runtime_mode'] == 'release')
 
     if args.target_sysroot:
       gn_args['target_sysroot'] = args.target_sysroot

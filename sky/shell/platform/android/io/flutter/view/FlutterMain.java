@@ -9,9 +9,11 @@ import android.util.Log;
 import android.content.res.AssetManager;
 import android.os.SystemClock;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.util.Arrays;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -59,6 +61,7 @@ public class FlutterMain {
     private static final String[] SKY_RESOURCES = {"icudtl.dat", APP_BUNDLE, MANIFEST};
     private static boolean sInitialized = false;
     private static ResourceExtractor sResourceExtractor;
+    private static String sAotSnapshotPath;
 
     /**
      * Starts initialization of the native system.
@@ -68,6 +71,7 @@ public class FlutterMain {
         initJavaUtils(applicationContext);
         initResources(applicationContext);
         initNative(applicationContext);
+        initAot(applicationContext);
 
         // We record the initialization time using SystemClock because at the start of the
         // initialization we have not yet loaded the native library to call into dart_tools_api.h.
@@ -89,7 +93,17 @@ public class FlutterMain {
         }
         try {
             sResourceExtractor.waitForCompletion();
-            nativeInit(applicationContext, args);
+
+            String[] shellArgs;
+            if (sAotSnapshotPath != null) {
+                shellArgs = (args != null) ? Arrays.copyOf(args, args.length + 1) : new String[1];
+                shellArgs[shellArgs.length - 1] = "--aot-snapshot-path=" + sAotSnapshotPath;
+            } else {
+                shellArgs = args;
+            }
+
+            nativeInit(applicationContext, shellArgs);
+
             // Create the mojo run loop.
             CoreImpl.getInstance().createDefaultRunLoop();
             sInitialized = true;
@@ -245,5 +259,17 @@ public class FlutterMain {
             Log.e(TAG, "Unable to load Sky Engine binary.", e);
             throw new RuntimeException(e);
         }
+    }
+
+    private static void initAot(Context applicationContext) {
+        File aotSnapshot = new File(applicationContext.getApplicationInfo().nativeLibraryDir,
+                                    System.mapLibraryName("snapshot_aot"));
+        if (aotSnapshot.exists()) {
+            sAotSnapshotPath = aotSnapshot.getPath();
+        }
+    }
+
+    public static boolean isRunningPrecompiledCode() {
+        return sAotSnapshotPath != null;
     }
 }

@@ -385,11 +385,15 @@ public class FlutterView extends SurfaceView
 
         resetAccessibilityTree();
 
-        String scriptUri = "file://" + bundlePath;
-        if (snapshotPath != null) {
-            mSkyEngine.runFromBundleAndSnapshot(scriptUri, bundlePath, snapshotPath);
+        if (FlutterMain.isRunningPrecompiledCode()) {
+            mSkyEngine.runFromPrecompiledSnapshot(bundlePath);
         } else {
-            mSkyEngine.runFromBundle(scriptUri, bundlePath);
+            String scriptUri = "file://" + bundlePath;
+            if (snapshotPath != null) {
+                mSkyEngine.runFromBundleAndSnapshot(scriptUri, bundlePath, snapshotPath);
+            } else {
+                mSkyEngine.runFromBundle(scriptUri, bundlePath);
+            }
         }
 
         // Connect to the ApplicationMessages service exported by the Flutter framework

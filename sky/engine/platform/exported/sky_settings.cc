@@ -4,20 +4,24 @@
 
 #include "sky/engine/public/platform/sky_settings.h"
 
+#include <memory>
+
+#include "base/lazy_instance.h"
 #include "base/logging.h"
 
 namespace blink {
 
-static SkySettings s_settings;
+static base::LazyInstance<SkySettings> s_settings = LAZY_INSTANCE_INITIALIZER;
+
 static bool s_have_settings = false;
 
 const SkySettings& SkySettings::Get() {
-  return s_settings;
+  return s_settings.Get();
 }
 
 void SkySettings::Set(const SkySettings& settings) {
   CHECK(!s_have_settings);
-  s_settings = settings;
+  s_settings.Get() = settings;
   s_have_settings = true;
 }
 

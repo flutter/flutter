@@ -13,13 +13,11 @@
 
 namespace blink {
 
-#define DART_ALLOW_DYNAMIC_RESOLUTION OS(IOS)
+#define DART_ALLOW_DYNAMIC_RESOLUTION (OS(IOS) || FLUTTER_AOT)
 
 #if DART_ALLOW_DYNAMIC_RESOLUTION
 
-extern const char* kDartVmIsolateSnapshotBufferName;
 extern const char* kDartIsolateSnapshotBufferName;
-extern const char* kInstructionsSnapshotName;
 
 void* _DartSymbolLookup(const char* symbol_name);
 

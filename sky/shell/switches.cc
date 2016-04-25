@@ -19,6 +19,7 @@ const char kPackages[] = "packages";
 const char kStartPaused[] = "start-paused";
 const char kTraceStartup[] = "trace-startup";
 const char kDeviceObservatoryPort[] = "observatory-port";
+const char kAotSnapshotPath[] = "aot-snapshot-path";
 
 void PrintUsage(const std::string& executable_name) {
   std::cerr << "Usage: " << executable_name
