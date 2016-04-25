@@ -15,7 +15,7 @@ class Response {
   /// The result of decoding [bodyBytes] using ISO-8859-1.
   ///
   /// If [bodyBytes] is null, this will also be null.
-  String get body => _encodingForHeaders(headers).decode(bodyBytes);
+  String get body => bodyBytes == null ? null : _encodingForHeaders(headers).decode(bodyBytes);
 
   /// The raw byte stream.
   final Uint8List bodyBytes;
@@ -80,6 +80,8 @@ String _getCharset(String contentType) {
 }
 
 Encoding _encodingForHeaders(Map<String, String> headers) {
+  if (headers == null)
+    return LATIN1;
   String contentType = headers['content-type'];
   if (contentType == null)
     return LATIN1;
