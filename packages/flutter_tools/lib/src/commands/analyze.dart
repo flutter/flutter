@@ -353,7 +353,7 @@ class AnalyzeCommand extends FlutterCommand {
     });
 
     int exitCode = await process.exitCode;
-    status.stop(showElapsedTime: true);
+    status?.stop(showElapsedTime: true);
 
     List<Pattern> patternsToSkip = <Pattern>[
       'Analyzing [${mainFile.path}]...',
