@@ -63,7 +63,7 @@ class RunCommand extends RunCommandBase {
 
     // A temporary, hidden flag to experiment with a different run style.
     // TODO(devoncarew): Remove this.
-    argParser.addFlag('tsr',
+    argParser.addFlag('resident',
         defaultsTo: false,
         negatable: false,
         hide: true,
@@ -99,7 +99,7 @@ class RunCommand extends RunCommandBase {
       );
     }
 
-    if (argResults['tsr']) {
+    if (argResults['resident']) {
       result = await startAppStayResident(
         deviceForCommand,
         toolchain,
@@ -287,8 +287,8 @@ Future<int> startAppStayResident(
 
   printStatus('Running ${_getDisplayPath(mainPath)} on ${device.name}...');
 
-  StreamSubscription<String> sub = device.logReader.logLines.listen((String line) {
-    // if (!line.startsWith('Observatory listening on'))
+  StreamSubscription<String> loggingSubscription = device.logReader.logLines.listen((String line) {
+    if (!line.contains('Observatory listening on http') && !line.contains('Diagnostic server listening on http'))
       printStatus(line);
   });
 
@@ -300,20 +300,53 @@ Future<int> startAppStayResident(
     platformArgs: platformArgs
   );
 
-  await sub.cancel();
-
-  if (!result.started)
+  if (!result.started) {
     printError('Error running application on ${device.name}.');
+    await loggingSubscription.cancel();
+    return 2;
+  }
 
-  // TODO: connect w/ observatory
+  Completer<int> exitCompleter = new Completer<int>();
 
-  // TODO: stay logging
+  void complete(int exitCode) {
+    if (!exitCompleter.isCompleted)
+      exitCompleter.complete(0);
+  };
 
-  // TODO: listen for obs. quit or ctrl-c
+  // Connect to observatory.
+  WebSocket observatoryConnection;
 
-  // TODO: cleanup (adb, log listeners); exit
+  if (debuggingOptions.debuggingEnabled) {
+    final String localhost = InternetAddress.LOOPBACK_IP_V4.address;
+    final String url = 'ws://$localhost:${result.observatoryPort}/ws';
 
-  return result.started ? 0 : 2;
+    observatoryConnection = await WebSocket.connect(url);
+    printTrace('Connected to observatory port: ${result.observatoryPort}.');
+
+    // Listen for observatory connection close.
+    observatoryConnection.listen((dynamic data) {
+      // Ignore observatory messages.
+    }, onDone: () {
+      loggingSubscription.cancel();
+      printStatus('Application finished.');
+      complete(0);
+    });
+  }
+
+  printStatus('Application running.');
+
+  // When terminating, close down the log reader.
+  ProcessSignal.SIGINT.watch().listen((ProcessSignal signal) {
+    loggingSubscription.cancel();
+    printStatus('');
+    complete(0);
+  });
+  ProcessSignal.SIGTERM.watch().listen((ProcessSignal signal) {
+    loggingSubscription.cancel();
+    complete(0);
+  });
+
+  return exitCompleter.future;
 }
 
 /// Given the value of the --target option, return the path of the Dart file

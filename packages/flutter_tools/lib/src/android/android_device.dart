@@ -189,13 +189,10 @@ class AndroidDevice extends Device {
   }
 
   Future<Null> _forwardPort(String service, int devicePort, int port) async {
-    // bool portWasZero = (port == null) || (port == 0);
-
     try {
       // Set up port forwarding for observatory.
       port = await portForwarder.forward(devicePort, hostPort: port);
-      // if (portWasZero)
-        printStatus('$service listening on http://127.0.0.1:$port');
+      printStatus('$service listening on http://127.0.0.1:$port');
     } catch (e) {
       printError('Unable to forward port $port: $e');
     }
@@ -264,15 +261,19 @@ class AndroidDevice extends Device {
         List<int> devicePorts = await scrapeServicePorts.timeout(new Duration(seconds: 20));
         int observatoryDevicePort = devicePorts[0];
         printTrace('observatory port = $observatoryDevicePort');
+        int observatoryLocalPort = await options.findBestObservatoryPort();
+        // TODO: Remember the forwarding information (so we can later remove the
+        // port forwarding).
         await _forwardPort(ServiceProtocolDiscovery.kObservatoryService,
-            observatoryDevicePort, await options.findBestObservatoryPort());
+            observatoryDevicePort, observatoryLocalPort);
         int diagnosticDevicePort = devicePorts[1];
         printTrace('diagnostic port = $diagnosticDevicePort');
+        int diagnosticLocalPort = await options.findBestDiagnosticPort();
         await _forwardPort(ServiceProtocolDiscovery.kDiagnosticService,
-            diagnosticDevicePort, await options.findBestDiagnosticPort());
+            diagnosticDevicePort, diagnosticLocalPort);
         return new LaunchResult.succeeded(
-          observatoryPort: options.observatoryPort,
-          diagnosticPort: options.diagnosticPort
+          observatoryPort: observatoryLocalPort,
+          diagnosticPort: diagnosticLocalPort
         );
       } catch (error) {
         if (error is TimeoutException)
@@ -565,6 +566,8 @@ class _AdbLogReader extends DeviceLogReader {
   }
 
   void _stop() {
+    // TODO(devoncarew): We should remove adb port forwarding here.
+
     _process?.kill();
   }
 }

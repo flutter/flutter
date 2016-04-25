@@ -43,8 +43,6 @@ class LogsCommand extends FlutterCommand {
 
     Completer<int> exitCompleter = new Completer<int>();
 
-    // TODO: less at start
-
     // Start reading.
     StreamSubscription<String> subscription = logReader.logLines.listen(
       printStatus,
