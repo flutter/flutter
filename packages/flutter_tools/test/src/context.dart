@@ -121,7 +121,10 @@ class MockUsage implements Usage {
   bool get isFirstRun => false;
 
   @override
-  set enable(bool value) { }
+  bool get enabled => true;
+
+  @override
+  set enabled(bool value) { }
 
   @override
   void sendCommand(String command) { }
@@ -134,6 +137,9 @@ class MockUsage implements Usage {
 
   @override
   void sendException(dynamic exception, StackTrace trace) { }
+
+  @override
+  Stream<Map<String, dynamic>> get onSend => null;
 
   @override
   Future<Null> ensureAnalyticsSent() => new Future<Null>.value();

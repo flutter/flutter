@@ -8,6 +8,7 @@
 // fix lands.
 
 import 'adb_test.dart' as adb_test;
+import 'analytics_test.dart' as analytics_test;
 import 'analyze_duplicate_names_test.dart' as analyze_duplicate_names_test;
 import 'analyze_test.dart' as analyze_test;
 import 'android_device_test.dart' as android_device_test;
@@ -31,6 +32,7 @@ import 'upgrade_test.dart' as upgrade_test;
 
 void main() {
   adb_test.main();
+  analytics_test.main();
   analyze_duplicate_names_test.main();
   analyze_test.main();
   android_device_test.main();

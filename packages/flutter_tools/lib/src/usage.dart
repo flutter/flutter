@@ -4,11 +4,10 @@
 
 import 'dart:async';
 
-import 'package:usage/usage.dart';
 import 'package:usage/src/usage_impl_io.dart';
+import 'package:usage/usage.dart';
 
 import 'base/context.dart';
-import 'globals.dart';
 import 'runner/version.dart';
 
 // TODO(devoncarew): We'll need to do some work on the user agent in order to
@@ -20,49 +19,48 @@ const String _kFlutterUA = 'UA-67589403-5';
 
 class Usage {
   Usage() {
-    _ga = new AnalyticsIO(_kFlutterUA, 'flutter', FlutterVersion.getVersionString());
-
-    // Check if this is the first run. If so, enable analytics. We show opt-out
-    // methods (flutter config) the first time the tool is run.
-    if (!_ga.hasSetOptIn) {
-      _isFirstRun = true;
-      _ga.optIn = true;
-    }
+    _analytics = new AnalyticsIO(_kFlutterUA, 'flutter', FlutterVersion.getVersionString());
+    _analytics.analyticsOpt = AnalyticsOpt.optOut;
   }
 
   /// Returns [Usage] active in the current app context.
   static Usage get instance => context[Usage] ?? (context[Usage] = new Usage());
 
-  bool _isFirstRun = false;
+  Analytics _analytics;
 
-  bool get isFirstRun => _isFirstRun;
+  bool get isFirstRun => _analytics.firstRun;
 
-  Analytics _ga;
+  bool get enabled => _analytics.enabled;
 
   /// Enable or disable reporting analytics.
-  set enable(bool value) {
-    _ga.optIn = value;
+  set enabled(bool value) {
+    _analytics.enabled = value;
   }
 
   void sendCommand(String command) {
-    printTrace('usage: $command');
-    _ga.sendScreenView(command);
+    if (!isFirstRun)
+      _analytics.sendScreenView(command);
   }
 
   void sendEvent(String category, String parameter) {
-    printTrace('usage: $category:$parameter');
-    _ga.sendEvent(category, parameter);
+    if (!isFirstRun)
+      _analytics.sendEvent(category, parameter);
   }
 
   UsageTimer startTimer(String event) {
-    return new UsageTimer._(event, _ga.startTimer(event));
+    if (isFirstRun)
+      return new _MockUsageTimer();
+    else
+      return new UsageTimer._(event, _analytics.startTimer(event));
   }
 
   void sendException(dynamic exception, StackTrace trace) {
-    String message = '${exception.runtimeType}; ${sanitizeStacktrace(trace)}';
-    printTrace('usage: $message');
-    _ga.sendException(message);
+    if (!isFirstRun)
+      _analytics.sendException('${exception.runtimeType}; ${sanitizeStacktrace(trace)}');
   }
+
+  /// Fires whenever analytics data is sent over the network; public for testing.
+  Stream<Map<String, dynamic>> get onSend => _analytics.onSend;
 
   /// Returns when the last analytics event has been sent, or after a fixed
   /// (short) delay, whichever is less.
@@ -70,7 +68,7 @@ class Usage {
     // TODO(devoncarew): This may delay tool exit and could cause some analytics
     // events to not be reported. Perhaps we could send the analytics pings
     // out-of-process from flutter_tools?
-    return _ga.waitForLastPing(timeout: new Duration(milliseconds: 250));
+    return _analytics.waitForLastPing(timeout: new Duration(milliseconds: 250));
   }
 }
 
@@ -82,6 +80,15 @@ class UsageTimer {
 
   void finish() {
     _timer.finish();
-    printTrace('usage: ${_timer.currentElapsedMillis}ms for event \'$event\'');
   }
+}
+
+class _MockUsageTimer implements UsageTimer {
+  @override
+  String event;
+  @override
+  AnalyticsTimer _timer;
+
+  @override
+  void finish() { }
 }

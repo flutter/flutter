@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import '../artifacts.dart';
 import '../base/process.dart';
 
@@ -58,13 +60,17 @@ class FlutterVersion {
   static String getVersionString() {
     final String cwd = ArtifactStore.flutterRoot;
 
-    String commit = runSync(<String>['git', 'rev-parse', 'HEAD'], workingDirectory: cwd);
+    String commit = _runSync('git', <String>['rev-parse', 'HEAD'], cwd);
     if (commit.length > 8)
       commit = commit.substring(0, 8);
 
-    String branch = runSync(<String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
-      workingDirectory: cwd);
+    String branch = _runSync('git', <String>['rev-parse', '--abbrev-ref', 'HEAD'], cwd);
 
     return '$commit/$branch';
   }
+}
+
+String _runSync(String executable, List<String> arguments, String cwd) {
+  ProcessResult results = Process.runSync(executable, arguments, workingDirectory: cwd);
+  return results.exitCode == 0 ? results.stdout.trim() : '';
 }

@@ -9,9 +9,11 @@ import '../runner/flutter_command.dart';
 
 class ConfigCommand extends FlutterCommand {
   ConfigCommand() {
+    String usageStatus = flutterUsage.enabled ? 'enabled' : 'disabled';
+
     argParser.addFlag('analytics',
       negatable: true,
-      help: 'Enable or disable reporting anonymously tool usage statistics and crash reports.');
+      help: 'Enable or disable reporting anonymously tool usage statistics and crash reports ($usageStatus).');
   }
 
   @override
@@ -37,7 +39,7 @@ class ConfigCommand extends FlutterCommand {
   Future<int> runInProject() async {
     if (argResults.wasParsed('analytics')) {
       bool value = argResults['analytics'];
-      flutterUsage.enable = value;
+      flutterUsage.enabled = value;
       printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
     } else {
       printStatus(usage);

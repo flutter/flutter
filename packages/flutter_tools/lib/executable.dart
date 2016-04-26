@@ -173,10 +173,14 @@ String _doctorText() {
 }
 
 Future<Null> _exit(int code) async {
-  Stopwatch stopwatch = new Stopwatch()..start();
-  await flutterUsage.ensureAnalyticsSent();
-  printTrace('usage: ${stopwatch.elapsedMilliseconds}ms waitForLastPing');
+  if (flutterUsage.enabled) {
+    Stopwatch stopwatch = new Stopwatch()..start();
+    await flutterUsage.ensureAnalyticsSent();
+    printTrace('ensureAnalyticsSent: ${stopwatch.elapsedMilliseconds}ms');
+  }
+
   logger.flush();
+
   await Timer.run(() {
     exit(code);
   });

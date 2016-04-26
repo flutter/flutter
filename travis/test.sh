@@ -1,7 +1,7 @@
 #!/bin/bash
 set -ex
 
-export PATH="$PWD/bin:$PATH"
+export PATH="$PWD/bin:$PWD/bin/cache/dart-sdk/bin:$PATH"
 
 # analyze all the Dart code in the repo
 flutter analyze --flutter-repo
