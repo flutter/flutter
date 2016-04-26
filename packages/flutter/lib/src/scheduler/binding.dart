@@ -250,10 +250,17 @@ abstract class SchedulerBinding extends BindingBase {
           exception: reason,
           library: 'scheduler library',
           informationCollector: (StringBuffer information) {
-            information.writeln(
-              'There ${ transientCallbackCount == 1 ? "was one transient callback" : "were $transientCallbackCount transient callbacks" } '
-              'left. The stack traces for when they were registered are as follows:'
-            );
+            if (transientCallbackCount == 1) {
+              information.writeln(
+                'There was one transient callback left. '
+                'The stack traces for when it was registered is as follows:'
+              );
+            } else {
+              information.writeln(
+                'There were $transientCallbackCount transient callbacks left. '
+                'The stack traces for when they were registered are as follows:'
+              );
+            }
             for (int id in _transientCallbacks.keys) {
               _FrameCallbackEntry entry = _transientCallbacks[id];
               information.writeln('-- callback $id --');
