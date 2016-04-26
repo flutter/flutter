@@ -246,7 +246,7 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
     } else if (normalizedTargetX > size.width - screenEdgeMargin.right - childSize.width / 2.0) {
       x = size.width - screenEdgeMargin.right - childSize.width;
     } else {
-      x = normalizedTargetX + childSize.width / 2.0;
+      x = normalizedTargetX - childSize.width / 2.0;
     }
     return new Offset(x, y);
   }
