@@ -91,7 +91,6 @@ def to_gn_args(args):
 
     gn_args['flutter_aot'] = aot
     if aot:
-        gn_args['flutter_aot'] = True
         gn_args['dart_target_arch'] = gn_args['target_cpu']
         if args.debug:
             gn_args['dart_runtime_mode'] = 'profile'
