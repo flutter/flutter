@@ -32,7 +32,7 @@ void main() {
       temp.deleteSync(recursive: true);
     });
 
-    // Ensure we con't send anything when analytics is disabled.
+    // Ensure we don't send anything when analytics is disabled.
     testUsingContext('doesn\'t send when disabled', () async {
       int count = 0;
       flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);

@@ -88,7 +88,7 @@ Future<Null> main(List<String> args) async {
       printStatus(
         'The Flutter tool anonymously reports feature usage statistics and basic crash reports to Google to\n'
         'help Google contribute improvements to Flutter over time. Use "flutter config" to control this\n'
-        'behavior. See Google\'s privacy policy: https://www.google.com/intl/en/policies/privacy/.\n'
+        'behavior. See Google\'s privacy policy: https://www.google.com/intl/en/policies/privacy/\n'
       );
     }
 
@@ -173,14 +173,18 @@ String _doctorText() {
 }
 
 Future<Null> _exit(int code) async {
+  // Send any last analytics calls that are in progress without overly delaying
+  // the tool's exit (we wait a maximum of 250ms).
   if (flutterUsage.enabled) {
     Stopwatch stopwatch = new Stopwatch()..start();
     await flutterUsage.ensureAnalyticsSent();
     printTrace('ensureAnalyticsSent: ${stopwatch.elapsedMilliseconds}ms');
   }
 
+  // Write any buffered output.
   logger.flush();
 
+  // Give the task / timer queue one cycle through before we hard exit.
   await Timer.run(() {
     exit(code);
   });
