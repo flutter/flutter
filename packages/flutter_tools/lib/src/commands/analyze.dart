@@ -118,6 +118,18 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('watch', help: 'Run analysis continuously, watching the filesystem for changes.', negatable: false);
     argParser.addOption('dart-sdk', help: 'The path to the Dart SDK.', hide: true);
 
+    // These options enable a benchmarking mode where the total time is written at the
+    // end of the run to a json file.
+    argParser.addOption('benchmark-out',
+      defaultsTo: 'analysis.json',
+      hide: true,
+      help: 'Where to write benchmarking output.'
+    );
+    argParser.addOption('benchmark-expected',
+      hide: true,
+      help: 'The time (in seconds) that the benchmark is expected to run.'
+    );
+
     usesPubOption();
   }
 
@@ -163,6 +175,10 @@ class AnalyzeCommand extends FlutterCommand {
     if (filenameComponents[flutterRootComponents.length + 2] != 'lib')
       return false;
     return true;
+  }
+
+  bool get _isBenchmarking {
+    return argResults.wasParsed('benchmark-out') || argResults.wasParsed('benchmark-expected');
   }
 
   Future<int> _analyzeOnce() async {
@@ -442,6 +458,9 @@ class AnalyzeCommand extends FlutterCommand {
     if (exitCode < 0 || exitCode > 3) // analyzer exit codes: 0 = nothing, 1 = hints, 2 = warnings, 3 = errors
       return exitCode;
 
+    if (_isBenchmarking)
+      _writeBenchmark(stopwatch, errorCount);
+
     if (errorCount > 0) {
       if (membersMissingDocumentation > 0 && argResults['flutter-repo'])
         printError('[lint] $membersMissingDocumentation public ${ membersMissingDocumentation == 1 ? "member lacks" : "members lack" } documentation');
@@ -535,6 +554,11 @@ class AnalyzeCommand extends FlutterCommand {
       String seconds = (analysisTimer.elapsedMilliseconds / 1000.0).toStringAsFixed(2);
       printStatus('$errorsMessage • analyzed $files, $seconds seconds');
 
+      if (firstAnalysis && _isBenchmarking) {
+        _writeBenchmark(analysisTimer, issueCount);
+        exit(0);
+      }
+
       firstAnalysis = false;
     }
   }
@@ -553,6 +577,24 @@ class AnalyzeCommand extends FlutterCommand {
       return true;
 
     return false;
+  }
+
+  void _writeBenchmark(Stopwatch stopwatch, int errorCount) {
+    String benchmarkOut = argResults['benchmark-out'];
+    String expectedTime = argResults['benchmark-expected'];
+
+    Map<String, dynamic> data = <String, dynamic>{
+      'time': (stopwatch.elapsedMilliseconds / 1000.0).toStringAsFixed(3),
+      'issues': errorCount
+    };
+
+    if (expectedTime != null)
+      data['expected'] = expectedTime;
+
+    JsonEncoder encoder = new JsonEncoder.withIndent('  ');
+    new File(benchmarkOut).writeAsStringSync(encoder.convert(data) + '\n');
+
+    printStatus('Analysis benchmark written to $benchmarkOut.');
   }
 }
 
