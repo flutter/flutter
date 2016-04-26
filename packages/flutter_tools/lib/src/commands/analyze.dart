@@ -120,7 +120,7 @@ class AnalyzeCommand extends FlutterCommand {
 
     // These options enable a benchmarking mode where the total time is written at the
     // end of the run to a json file.
-    argParser.addOption('benchmark-output',
+    argParser.addOption('benchmark-out',
       defaultsTo: 'analysis.json',
       hide: true,
       help: 'Where to write benchmarking output.'
@@ -178,7 +178,7 @@ class AnalyzeCommand extends FlutterCommand {
   }
 
   bool get _isBenchmarking {
-    return argResults.wasParsed('benchmark-output') || argResults.wasParsed('benchmark-expected');
+    return argResults.wasParsed('benchmark-out') || argResults.wasParsed('benchmark-expected');
   }
 
   Future<int> _analyzeOnce() async {
@@ -580,21 +580,21 @@ class AnalyzeCommand extends FlutterCommand {
   }
 
   void _writeBenchmark(Stopwatch stopwatch, int errorCount) {
-    String benchmarkOutput = argResults['benchmark-output'];
-    String expected = argResults['benchmark-expected'];
+    String benchmarkOut = argResults['benchmark-out'];
+    String expectedTime = argResults['benchmark-expected'];
 
     Map<String, dynamic> data = <String, dynamic>{
       'time': (stopwatch.elapsedMilliseconds / 1000.0).toStringAsFixed(3),
       'issues': errorCount
     };
 
-    if (expected != null)
-      data['expected'] = expected;
+    if (expectedTime != null)
+      data['expected'] = expectedTime;
 
     JsonEncoder encoder = new JsonEncoder.withIndent('  ');
-    new File(benchmarkOutput).writeAsStringSync(encoder.convert(data) + '\n');
+    new File(benchmarkOut).writeAsStringSync(encoder.convert(data) + '\n');
 
-    printStatus('Analysis benchmark written to $benchmarkOutput.');
+    printStatus('Analysis benchmark written to $benchmarkOut.');
   }
 }
 
