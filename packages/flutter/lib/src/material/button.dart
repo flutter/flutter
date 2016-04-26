@@ -7,6 +7,8 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
+import 'icon_theme_data.dart';
+import 'icon_theme.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'theme.dart';
@@ -168,24 +170,30 @@ abstract class MaterialButtonState<T extends MaterialButton> extends State<T> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    Widget contents = new InkWell(
-      onTap: config.onPressed,
-      onHighlightChanged: _handleHighlightChanged,
-      child: new Container(
-        padding: new EdgeInsets.symmetric(horizontal: 8.0),
-        child: new Center(
-          widthFactor: 1.0,
-          child: config.child
+    final Color textColor = _getTextColor(context);
+    Widget contents = new IconTheme(
+      data: new IconThemeData(
+        color: textColor
+      ),
+      child: new InkWell(
+        onTap: config.onPressed,
+        onHighlightChanged: _handleHighlightChanged,
+        child: new Container(
+          padding: new EdgeInsets.symmetric(horizontal: 8.0),
+          child: new Center(
+            widthFactor: 1.0,
+            child: config.child
+          )
         )
       )
     );
-    TextStyle style = Theme.of(context).textTheme.button.copyWith(color: _getTextColor(context));
-    int elevation = this.elevation;
-    Color color = getColor(context);
+    final TextStyle style = Theme.of(context).textTheme.button.copyWith(color: textColor);
+    final int elevation = this.elevation;
+    final Color color = getColor(context);
     if (elevation > 0 || color != null) {
       contents = new Material(
         type: MaterialType.button,
-        color: getColor(context),
+        color: color,
         elevation: elevation,
         textStyle: style,
         child: contents
