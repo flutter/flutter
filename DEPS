@@ -25,7 +25,8 @@ vars = {
 
   # Note: When updating the Dart revision, ensure that all entries that are
   # dependencies of dart are also updated
-  'dart_revision': '36e2c86d14aed0ba08a41dabbaa89b88add1a423',
+  'dart_revision': '14ec00f86bbc893f1c731ea36afb1b98d8cd77cc',
+  'dart_boringssl_revision': 'daeafc22c66ad48f6b32fc8d3362eb9ba31b774e',
   'dart_observatory_packages_revision': 'cf90eb9077177d3d6b3fd5e8289477c2385c026a',
   'dart_root_certificates_revision': 'aed07942ce98507d2be28cbd29e879525410c7fc',
 
@@ -57,6 +58,9 @@ deps = {
 
   'src/dart':
     Var('chromium_git') + '/external/github.com/dart-lang/sdk.git' + '@' + Var('dart_revision'),
+
+  'src/dart/third_party/boringssl/src':
+   'https://boringssl.googlesource.com/boringssl.git@' + Var('dart_boringssl_revision'),
 
   'src/dart/third_party/observatory_pub_packages':
    Var('chromium_git') +
