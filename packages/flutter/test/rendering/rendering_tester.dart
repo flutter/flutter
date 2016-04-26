@@ -105,3 +105,15 @@ class TestCallbackPainter extends CustomPainter {
   @override
   bool shouldRepaint(TestCallbackPainter oldPainter) => true;
 }
+
+
+class RenderSizedBox extends RenderBox {
+  RenderSizedBox(this._size);
+
+  final Size _size;
+
+  @override
+  void performLayout() {
+    size = constraints.constrain(_size);
+  }
+}
