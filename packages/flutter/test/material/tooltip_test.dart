@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:test/test.dart';
 
-import 'test_semantics.dart';
+import '../widget/test_semantics.dart';
 
 // This file uses "as dynamic" in a few places to defeat the static
 // analysis. In general you want to avoid using this style in your
@@ -26,6 +26,59 @@ import 'test_semantics.dart';
 // production code.
 
 void main() {
+  test('Does tooltip end up in the right place - center', () {
+    testElementTree((ElementTreeTester tester) {
+      GlobalKey key = new GlobalKey();
+      tester.pumpWidget(
+        new Overlay(
+          initialEntries: <OverlayEntry>[
+            new OverlayEntry(
+              builder: (BuildContext context) {
+                return new Stack(
+                  children: <Widget>[
+                    new Positioned(
+                      left: 300.0,
+                      top: 0.0,
+                      child: new Tooltip(
+                        key: key,
+                        message: 'TIP',
+                        height: 20.0,
+                        padding: const EdgeInsets.all(5.0),
+                        verticalOffset: 20.0,
+                        screenEdgeMargin: const EdgeInsets.all(10.0),
+                        preferBelow: false,
+                        fadeDuration: const Duration(seconds: 1),
+                        showDuration: const Duration(seconds: 2),
+                        child: new Container(
+                          width: 0.0,
+                          height: 0.0
+                        )
+                      )
+                    ),
+                  ]
+                );
+              }
+            ),
+          ]
+        )
+      );
+      (key.currentState as dynamic).showTooltip(); // before using "as dynamic" in your code, see note top of file
+      tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+      /********************* 800x600 screen
+       *      o            * y=0
+       *      |            * }- 20.0 vertical offset, of which 10.0 is in the screen edge margin
+       *   +----+          * \- (5.0 padding in height)
+       *   |    |          * |- 20 height
+       *   +----+          * /- (5.0 padding in height)
+       *                   *
+       *********************/
+
+      RenderBox tip = tester.findText('TIP').renderObject.parent.parent.parent.parent.parent;
+      expect(tip.localToGlobal(tip.size.topLeft(Point.origin)), equals(const Point(284.0, 20.0)));
+    });
+  });
+
   test('Does tooltip end up in the right place - top left', () {
     testElementTree((ElementTreeTester tester) {
       GlobalKey key = new GlobalKey();
