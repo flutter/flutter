@@ -9,13 +9,15 @@ import 'cache.dart';
 import 'device.dart';
 import 'doctor.dart';
 import 'toolchain.dart';
+import 'usage.dart';
 
 DeviceManager get deviceManager => context[DeviceManager];
 Logger get logger => context[Logger];
 AndroidSdk get androidSdk => context[AndroidSdk];
-Doctor get doctor => context[Doctor];
 Cache get cache => Cache.instance;
+Doctor get doctor => context[Doctor];
 ToolConfiguration get tools => ToolConfiguration.instance;
+Usage get flutterUsage => Usage.instance;
 
 /// Display an error level message to the user. Commands should use this if they
 /// fail in some way.

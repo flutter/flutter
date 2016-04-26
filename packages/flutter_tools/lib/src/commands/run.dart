@@ -83,6 +83,17 @@ class RunCommand extends RunCommandBase {
   bool get requiresDevice => true;
 
   @override
+  String get usagePath {
+    Device device = deviceForCommand;
+
+    if (device == null)
+      return name;
+
+    // Return 'run/ios'.
+    return '$name/${getNameForTargetPlatform(device.platform)}';
+  }
+
+  @override
   Future<int> runInProject() async {
     bool clearLogs = argResults['clear-logs'];
 

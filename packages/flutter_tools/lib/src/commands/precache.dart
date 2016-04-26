@@ -4,11 +4,10 @@
 
 import 'dart:async';
 
-import 'package:args/command_runner.dart';
-
 import '../globals.dart';
+import '../runner/flutter_command.dart';
 
-class PrecacheCommand extends Command {
+class PrecacheCommand extends FlutterCommand {
   @override
   final String name = 'precache';
 
@@ -16,7 +15,10 @@ class PrecacheCommand extends Command {
   final String description = 'Populates the Flutter tool\'s cache of binary artifacts.';
 
   @override
-  Future<int> run() async {
+  bool get requiresProjectRoot => false;
+
+  @override
+  Future<int> runInProject() async {
     if (cache.isUpToDate())
       printStatus('Already up-to-date.');
     else

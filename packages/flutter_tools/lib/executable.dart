@@ -15,6 +15,7 @@ import 'src/base/process.dart';
 import 'src/base/utils.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/build.dart';
+import 'src/commands/config.dart';
 import 'src/commands/create.dart';
 import 'src/commands/daemon.dart';
 import 'src/commands/devices.dart';
@@ -56,6 +57,7 @@ Future<Null> main(List<String> args) async {
   FlutterCommandRunner runner = new FlutterCommandRunner(verboseHelp: verboseHelp)
     ..addCommand(new AnalyzeCommand())
     ..addCommand(new BuildCommand())
+    ..addCommand(new ConfigCommand())
     ..addCommand(new CreateCommand())
     ..addCommand(new DaemonCommand(hidden: !verboseHelp))
     ..addCommand(new DevicesCommand())
@@ -82,10 +84,18 @@ Future<Null> main(List<String> args) async {
     context[DeviceManager] = new DeviceManager();
     Doctor.initGlobal();
 
+    if (flutterUsage.isFirstRun) {
+      printStatus(
+        'The Flutter tool anonymously reports feature usage statistics and basic crash reports to Google to\n'
+        'help Google contribute improvements to Flutter over time. Use "flutter config" to control this\n'
+        'behavior. See Google\'s privacy policy: https://www.google.com/intl/en/policies/privacy/\n'
+      );
+    }
+
     dynamic result = await runner.run(args);
 
     if (result is int)
-      exit(result);
+      _exit(result);
   }, onError: (dynamic error, Chain chain) {
     if (error is UsageException) {
       stderr.writeln(error.message);
@@ -93,13 +103,15 @@ Future<Null> main(List<String> args) async {
       stderr.writeln("Run 'flutter -h' (or 'flutter <command> -h') for available "
         "flutter commands and options.");
       // Argument error exit code.
-      exit(64);
+      _exit(64);
     } else if (error is ProcessExit) {
       // We've caught an exit code.
-      exit(error.exitCode);
+      _exit(error.exitCode);
     } else {
       // We've crashed; emit a log report.
       stderr.writeln();
+
+      flutterUsage.sendException(error, chain);
 
       if (Platform.environment.containsKey('FLUTTER_DEV')) {
         // If we're working on the tools themselves, just print the stack trace.
@@ -118,7 +130,7 @@ Future<Null> main(List<String> args) async {
           'please let us know at https://github.com/flutter/flutter/issues.');
       }
 
-      exit(1);
+      _exit(1);
     }
   });
 }
@@ -158,4 +170,22 @@ String _doctorText() {
   } catch (error, trace) {
     return 'encountered exception: $error\n\n${trace.toString().trim()}\n';
   }
+}
+
+Future<Null> _exit(int code) async {
+  // Send any last analytics calls that are in progress without overly delaying
+  // the tool's exit (we wait a maximum of 250ms).
+  if (flutterUsage.enabled) {
+    Stopwatch stopwatch = new Stopwatch()..start();
+    await flutterUsage.ensureAnalyticsSent();
+    printTrace('ensureAnalyticsSent: ${stopwatch.elapsedMilliseconds}ms');
+  }
+
+  // Write any buffered output.
+  logger.flush();
+
+  // Give the task / timer queue one cycle through before we hard exit.
+  await Timer.run(() {
+    exit(code);
+  });
 }

@@ -15,6 +15,7 @@ import '../flx.dart' as flx;
 import '../globals.dart';
 import '../package_map.dart';
 import '../toolchain.dart';
+import '../usage.dart';
 import 'flutter_command_runner.dart';
 
 typedef bool Validator();
@@ -94,13 +95,19 @@ abstract class FlutterCommand extends Command {
     applicationPackages ??= new ApplicationPackageStore();
   }
 
+  /// The path to send to Google Analytics. Return `null` here to disable
+  /// tracking of the command.
+  String get usagePath => name;
+
   @override
   Future<int> run() {
     Stopwatch stopwatch = new Stopwatch()..start();
+    UsageTimer analyticsTimer = usagePath == null ? null : flutterUsage.startTimer(name);
 
     return _run().then((int exitCode) {
       int ms = stopwatch.elapsedMilliseconds;
       printTrace("'flutter $name' took ${ms}ms; exiting with code $exitCode.");
+      analyticsTimer?.finish();
       return exitCode;
     });
   }
@@ -159,6 +166,10 @@ abstract class FlutterCommand extends Command {
 
     _setupToolchain();
     _setupApplicationPackages();
+
+    String commandPath = usagePath;
+    if (commandPath != null)
+      flutterUsage.sendCommand(usagePath);
 
     return await runInProject();
   }
