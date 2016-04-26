@@ -131,6 +131,52 @@ bool IsServiceIsolateURL(const char* url_name) {
          String(url_name) == DART_VM_SERVICE_ISOLATE_NAME;
 }
 
+#ifdef FLUTTER_PRODUCT_MODE
+
+Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
+                                          char** error) {
+  return nullptr;
+}
+
+#else  // FLUTTER_PRODUCT_MODE
+
+Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
+                                          char** error) {
+  DartState* dart_state = new DartState();
+  Dart_Isolate isolate = Dart_CreateIsolate(
+      script_uri, "main", reinterpret_cast<const uint8_t*>(
+                              DART_SYMBOL(kDartIsolateSnapshotBuffer)),
+      nullptr, dart_state, error);
+  CHECK(isolate) << error;
+  dart_state->SetIsolate(isolate);
+  CHECK(Dart_IsServiceIsolate(isolate));
+  CHECK(!LogIfError(Dart_SetLibraryTagHandler(DartLibraryTagHandler)));
+  {
+    DartApiScope dart_api_scope;
+    DartIO::InitForIsolate();
+    DartUI::InitForIsolate();
+    DartMojoInternal::InitForIsolate();
+    DartRuntimeHooks::Install(DartRuntimeHooks::SecondaryIsolate, "");
+    const SkySettings& settings = SkySettings::Get();
+    if (settings.enable_observatory) {
+      std::string ip = "127.0.0.1";
+      const intptr_t port = settings.observatory_port;
+      const bool service_isolate_booted = DartServiceIsolate::Startup(
+          ip, port, DartLibraryTagHandler, IsRunningPrecompiledCode(), error);
+      CHECK(service_isolate_booted) << error;
+    }
+
+    if (g_service_isolate_hook)
+      g_service_isolate_hook(IsRunningPrecompiledCode());
+  }
+  Dart_ExitIsolate();
+
+  g_service_isolate_initialized = true;
+  return isolate;
+}
+
+#endif  // FLUTTER_PRODUCT_MODE
+
 Dart_Isolate IsolateCreateCallback(const char* script_uri,
                                    const char* main,
                                    const char* package_root,
@@ -139,37 +185,9 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
                                    void* callback_data,
                                    char** error) {
   TRACE_EVENT0("flutter", __func__);
-  if (IsServiceIsolateURL(script_uri)) {
-    DartState* dart_state = new DartState();
-    Dart_Isolate isolate = Dart_CreateIsolate(
-        script_uri, "main", reinterpret_cast<const uint8_t*>(
-                                DART_SYMBOL(kDartIsolateSnapshotBuffer)),
-        nullptr, dart_state, error);
-    CHECK(isolate) << error;
-    dart_state->SetIsolate(isolate);
-    CHECK(Dart_IsServiceIsolate(isolate));
-    CHECK(!LogIfError(Dart_SetLibraryTagHandler(DartLibraryTagHandler)));
-    {
-      DartApiScope dart_api_scope;
-      DartIO::InitForIsolate();
-      DartUI::InitForIsolate();
-      DartMojoInternal::InitForIsolate();
-      DartRuntimeHooks::Install(DartRuntimeHooks::SecondaryIsolate, "");
-      const SkySettings& settings = SkySettings::Get();
-      if (settings.enable_observatory) {
-        std::string ip = "127.0.0.1";
-        const intptr_t port = settings.observatory_port;
-        const bool service_isolate_booted = DartServiceIsolate::Startup(
-            ip, port, DartLibraryTagHandler, IsRunningPrecompiledCode(), error);
-        CHECK(service_isolate_booted) << error;
-      }
 
-      if (g_service_isolate_hook)
-        g_service_isolate_hook(IsRunningPrecompiledCode());
-    }
-    Dart_ExitIsolate();
-    g_service_isolate_initialized = true;
-    return isolate;
+  if (IsServiceIsolateURL(script_uri)) {
+    return ServiceIsolateCreateCallback(script_uri, error);
   }
 
   std::vector<uint8_t> snapshot_data;
