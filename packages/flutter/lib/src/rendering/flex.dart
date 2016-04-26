@@ -29,33 +29,45 @@ enum FlexDirection {
   vertical
 }
 
-/// How the children should be placed along the main axis in a flex layout
+/// How the children should be placed along the main axis in a flex layout.
 enum MainAxisAlignment {
-  /// Place the children as close to the start of the main axis as possible
+  /// Place the children as close to the start of the main axis as possible.
   start,
-  /// Place the children as close to the end of the main axis as possible
+
+  /// Place the children as close to the end of the main axis as possible.
   end,
-  /// Place the children as close to the middle of the main axis as possible
+
+  /// Place the children as close to the middle of the main axis as possible.
   center,
-  /// Place the free space evenly between the children
+
+  /// Place the free space evenly between the children.
   spaceBetween,
-  /// Place the free space evenly between the children as well as before and after the first and last child
+
+  /// Place the free space evenly between the children as well as half of that space before and after the first and last child.
   spaceAround,
+
+  /// Place the free space evenly between the children as well as before and after the first and last child.
+  spaceEvenly,
+
   /// Do not expand to fill the free space. None of the children may specify a flex factor.
   collapse,
 }
 
-/// How the children should be placed along the cross axis in a flex layout
+/// How the children should be placed along the cross axis in a flex layout.
 enum CrossAxisAlignment {
-  /// Place the children as close to the start of the cross axis as possible
+  /// Place the children as close to the start of the cross axis as possible.
   start,
-  /// Place the children as close to the end of the cross axis as possible
+
+  /// Place the children as close to the end of the cross axis as possible.
   end,
-  /// Place the children as close to the middle of the cross axis as possible
+
+  /// Place the children as close to the middle of the cross axis as possible.
   center,
-  /// Require the children to fill the cross axis
+
+  /// Require the children to fill the cross axis.
   stretch,
-  /// Place the children along the cross axis such that their baselines match
+
+  /// Place the children along the cross axis such that their baselines match.
   baseline,
 }
 
@@ -561,6 +573,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       case MainAxisAlignment.spaceAround:
         betweenSpace = totalChildren > 0 ? remainingSpace / totalChildren : 0.0;
         leadingSpace = betweenSpace / 2.0;
+        break;
+      case MainAxisAlignment.spaceEvenly:
+        betweenSpace = totalChildren > 0 ? remainingSpace / (totalChildren + 1) : 0.0;
+        leadingSpace = betweenSpace;
         break;
     }
 
