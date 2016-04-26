@@ -226,12 +226,6 @@ abstract class Device {
   }
 }
 
-// TODO: default to a std port
-// TODO: validate that the given port is free
-// TODO: print what we bound to
-
-// TODO: find good values for defaultObservatoryPort, defaultDiagnosticPort
-
 class DebuggingOptions {
   DebuggingOptions.enabled({
     this.checked: true,
