@@ -253,6 +253,8 @@ if (is_android) {
     source_set(target_name) {
 
       sources = [
+        "platform/ios/accessibility_bridge.h",
+        "platform/ios/accessibility_bridge.mm",
         "platform/ios/FlutterAppDelegate.h",
         "platform/ios/FlutterAppDelegate.mm",
         "platform/ios/FlutterDartProject.mm",
@@ -289,11 +291,13 @@ if (is_android) {
       deps = [
         "//mojo/edk/base_edk",
         "//mojo/edk/system",
+        "//skia",
         "//sky/services/activity",
         "//sky/services/dynamic:embedder",
         "//sky/services/editing",
         "//sky/services/media",
         "//sky/services/ns_net",
+        "//sky/services/semantics",
         "//sky/services/vsync",
         "//ui/gl",
         ":common",

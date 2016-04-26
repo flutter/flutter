@@ -3,13 +3,14 @@
 // found in the LICENSE file.
 
 #import "sky/shell/platform/ios/public/FlutterViewController.h"
-#import "sky/shell/platform/ios/public/FlutterViewController.h"
 
 #include "base/mac/scoped_nsautorelease_pool.h"
 #include "base/trace_event/trace_event.h"
+#include "mojo/public/interfaces/application/service_provider.mojom.h"
 #include "sky/engine/wtf/MakeUnique.h"
 #include "sky/services/engine/sky_engine.mojom.h"
 #include "sky/services/platform/ios/system_chrome_impl.h"
+#include "sky/services/semantics/semantics.mojom.h"
 #include "sky/shell/platform/ios/flutter_touch_mapper.h"
 #include "sky/shell/platform/ios/FlutterDartProject_Internal.h"
 #include "sky/shell/platform/ios/FlutterDynamicServiceLoader.h"
@@ -30,6 +31,7 @@
   sky::shell::TouchMapper _touchMapper;
   std::unique_ptr<sky::shell::ShellView> _shellView;
   sky::SkyEnginePtr _engine;
+  mojo::ServiceProviderPtr _dartServices;
   BOOL _initialized;
 }
 
@@ -173,6 +175,8 @@ static void DynamicServiceResolve(void* baton,
   mojo::ServiceProviderPtr serviceProvider;
 
   auto serviceProviderProxy = mojo::GetProxy(&serviceProvider);
+  // TODO(eseidel): this unretained reference might not be safe since
+  // the engine could outlive this controller
   auto serviceResolutionCallback = base::Bind(
       &DynamicServiceResolve,
       base::Unretained(reinterpret_cast<void*>(_dynamicServiceLoader)));
@@ -183,8 +187,10 @@ static void DynamicServiceResolve(void* baton,
   mojo::ServiceProviderPtr viewServiceProvider;
   new sky::shell::ViewServiceProvider(mojo::GetProxy(&viewServiceProvider));
 
+  DCHECK(!_dartServices.is_bound());
   sky::ServicesDataPtr services = sky::ServicesData::New();
   services->incoming_services = serviceProvider.Pass();
+  services->outgoing_services = mojo::GetProxy(&_dartServices);
   services->view_services = viewServiceProvider.Pass();
   _engine->SetServices(services.Pass());
 }
@@ -193,6 +199,7 @@ static void DynamicServiceResolve(void* baton,
 
 - (void)loadView {
   FlutterView* surface = [[FlutterView alloc] init];
+  [surface withAccessibility:_dartServices.get()];
 
   self.view = surface;
   self.view.multipleTouchEnabled = YES;

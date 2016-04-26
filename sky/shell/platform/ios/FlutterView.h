@@ -5,9 +5,13 @@
 #ifndef FLUTTER_FLUTTERVIEW_H_
 #define FLUTTER_FLUTTERVIEW_H_
 
+#include "mojo/public/interfaces/application/service_provider.mojom.h"
+
 #include <UIKit/UIKit.h>
 
 @interface FlutterView : UIView
+
+- (void)withAccessibility:(mojo::ServiceProvider*)serviceProvider;
 
 @end
 
