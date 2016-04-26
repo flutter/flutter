@@ -143,7 +143,8 @@ class WidgetTester {
   ///
   /// See [ElementTreeTester.tapAt] for details.
   void tapAt(Point location, { int pointer: 1 }) {
-    elementTreeTester.tapAt(location, pointer: pointer);
+    startGesture(location, pointer: pointer)
+      ..up();
   }
 
   /// Scrolls by dragging the center of a widget found by [finder] by [offset].
@@ -155,7 +156,9 @@ class WidgetTester {
   ///
   /// See [ElementTreeTester.scrollAt] for details.
   void scrollAt(Point startLocation, Offset offset, { int pointer: 1 }) {
-    elementTreeTester.scrollAt(startLocation, offset, pointer: pointer);
+    startGesture(startLocation, pointer: pointer)
+      ..moveBy(offset)
+      ..up();
   }
 
   /// Attempts a fling gesture starting at the center of a widget found by
@@ -172,12 +175,15 @@ class WidgetTester {
   /// See [ElementTreeTester.flingFrom] for details.
   void flingFrom(Point startLocation, Offset offset, double velocity, { int pointer: 1 }) {
     elementTreeTester.flingFrom(startLocation, offset, velocity, pointer: pointer);
+    flushMicrotasks();
   }
 
   /// Begins a gesture at a particular point, and returns the
   /// [TestGesture] object which you can use to continue the gesture.
   TestGesture startGesture(Point downLocation, { int pointer: 1 }) {
-    return elementTreeTester.startGesture(downLocation, pointer: pointer);
+    TestGesture gesture = elementTreeTester.startGesture(downLocation, pointer: pointer)..async = async;
+    flushMicrotasks();
+    return gesture;
   }
 
   /// Returns the size of the element corresponding to the widget located by

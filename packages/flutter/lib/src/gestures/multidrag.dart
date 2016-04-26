@@ -168,7 +168,8 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
   void acceptGesture(int pointer) {
     assert(_pointers != null);
     T state = _pointers[pointer];
-    assert(state != null);
+    if (state == null)
+      return; // We might already have canceled this drag if the up comes before the accept.
     state.accepted((Point initialPosition) => _startDrag(initialPosition, pointer));
   }
 

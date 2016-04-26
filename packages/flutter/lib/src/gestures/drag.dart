@@ -8,10 +8,10 @@ import 'constants.dart';
 import 'events.dart';
 import 'velocity_tracker.dart';
 
-enum DragState {
+enum _DragState {
   ready,
   possible,
-  accepted
+  accepted,
 }
 
 typedef void GestureDragDownCallback(Point globalPosition);
@@ -41,7 +41,7 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends OneSequenceGest
   GestureDragEndCallback onEnd;
   GestureDragCancelCallback onCancel;
 
-  DragState _state = DragState.ready;
+  _DragState _state = _DragState.ready;
   Point _initialPosition;
   T _pendingDragDelta;
 
@@ -55,8 +55,8 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends OneSequenceGest
   void addPointer(PointerEvent event) {
     startTrackingPointer(event.pointer);
     _velocityTrackers[event.pointer] = new VelocityTracker();
-    if (_state == DragState.ready) {
-      _state = DragState.possible;
+    if (_state == _DragState.ready) {
+      _state = _DragState.possible;
       _initialPosition = event.position;
       _pendingDragDelta = _initialPendingDragDelta;
       if (onDown != null)
@@ -66,13 +66,13 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends OneSequenceGest
 
   @override
   void handleEvent(PointerEvent event) {
-    assert(_state != DragState.ready);
+    assert(_state != _DragState.ready);
     if (event is PointerMoveEvent) {
       VelocityTracker tracker = _velocityTrackers[event.pointer];
       assert(tracker != null);
       tracker.addPosition(event.timeStamp, event.position);
       T delta = _getDragDelta(event);
-      if (_state == DragState.accepted) {
+      if (_state == _DragState.accepted) {
         if (onUpdate != null)
           onUpdate(delta);
       } else {
@@ -86,8 +86,8 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends OneSequenceGest
 
   @override
   void acceptGesture(int pointer) {
-    if (_state != DragState.accepted) {
-      _state = DragState.accepted;
+    if (_state != _DragState.accepted) {
+      _state = _DragState.accepted;
       T delta = _pendingDragDelta;
       _pendingDragDelta = _initialPendingDragDelta;
       if (onStart != null)
@@ -104,15 +104,15 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends OneSequenceGest
 
   @override
   void didStopTrackingLastPointer(int pointer) {
-    if (_state == DragState.possible) {
+    if (_state == _DragState.possible) {
       resolve(GestureDisposition.rejected);
-      _state = DragState.ready;
+      _state = _DragState.ready;
       if (onCancel != null)
         onCancel();
       return;
     }
-    bool wasAccepted = (_state == DragState.accepted);
-    _state = DragState.ready;
+    bool wasAccepted = (_state == _DragState.accepted);
+    _state = _DragState.ready;
     if (wasAccepted && onEnd != null) {
       VelocityTracker tracker = _velocityTrackers[pointer];
       assert(tracker != null);

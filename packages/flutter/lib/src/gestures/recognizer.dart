@@ -57,7 +57,7 @@ abstract class GestureRecognizer extends GestureArenaMember {
 /// which manages each pointer independently and can consider multiple
 /// simultaneous touches to each result in a separate tap.
 abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
-  final List<GestureArenaEntry> _entries = <GestureArenaEntry>[];
+  final Map<int, GestureArenaEntry> _entries = <int, GestureArenaEntry>{};
   final Set<int> _trackedPointers = new HashSet<int>();
 
   void handleEvent(PointerEvent event);
@@ -71,7 +71,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   void didStopTrackingLastPointer(int pointer);
 
   void resolve(GestureDisposition disposition) {
-    List<GestureArenaEntry> localEntries = new List<GestureArenaEntry>.from(_entries);
+    List<GestureArenaEntry> localEntries = new List<GestureArenaEntry>.from(_entries.values);
     _entries.clear();
     for (GestureArenaEntry entry in localEntries)
       entry.resolve(disposition);
@@ -89,7 +89,8 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   void startTrackingPointer(int pointer) {
     GestureBinding.instance.pointerRouter.addRoute(pointer, handleEvent);
     _trackedPointers.add(pointer);
-    _entries.add(GestureBinding.instance.gestureArena.add(pointer, this));
+    assert(!_entries.containsValue(pointer));
+    _entries[pointer] = GestureBinding.instance.gestureArena.add(pointer, this);
   }
 
   void stopTrackingPointer(int pointer) {

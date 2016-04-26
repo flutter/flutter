@@ -164,10 +164,8 @@ class Instrumentation {
   /// Dispatch a pointer down / pointer up sequence at the given
   /// location.
   void tapAt(Point location, { int pointer: 1 }) {
-    HitTestResult result = _hitTest(location);
-    TestPointer p = new TestPointer(pointer);
-    binding.dispatchEvent(p.down(location), result);
-    binding.dispatchEvent(p.up(), result);
+    startGesture(location, pointer: pointer)
+      ..up();
   }
 
   /// Attempts a fling gesture starting from the center of the given
@@ -210,14 +208,9 @@ class Instrumentation {
   /// Attempts a drag gesture consisting of a pointer down, a move by
   /// the given offset, and a pointer up.
   void scrollAt(Point startLocation, Offset offset, { int pointer: 1 }) {
-    Point endLocation = startLocation + offset;
-    TestPointer p = new TestPointer(pointer);
-    // Events for the entire press-drag-release gesture are dispatched
-    // to the widgets "hit" by the pointer down event.
-    HitTestResult result = _hitTest(startLocation);
-    binding.dispatchEvent(p.down(startLocation), result);
-    binding.dispatchEvent(p.move(endLocation), result);
-    binding.dispatchEvent(p.up(), result);
+    startGesture(startLocation, pointer: pointer)
+      ..moveBy(offset)
+      ..up();
   }
 
   /// Begins a gesture at a particular point, and returns the
