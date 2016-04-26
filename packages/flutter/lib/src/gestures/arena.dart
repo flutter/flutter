@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 /// Whether the gesture was accepted or rejected.
 enum GestureDisposition {
   /// This gesture was accepted as the interpretation of the user's input.
@@ -130,12 +132,22 @@ class GestureArenaManager {
       sweep(pointer);
   }
 
+  void _resolveByDefault(int pointer, _GestureArena state) {
+    if (!_arenas.containsKey(pointer))
+      return;  // Already resolved earlier.
+    assert(_arenas[pointer] == state);
+    assert(!state.isOpen);
+    final List<GestureArenaMember> members = state.members;
+    assert(members.length == 1);
+    _arenas.remove(pointer);
+    state.members.first.acceptGesture(pointer);
+  }
+
   void _tryToResolveArena(int pointer, _GestureArena state) {
     assert(_arenas[pointer] == state);
     assert(!state.isOpen);
     if (state.members.length == 1) {
-      _arenas.remove(pointer);
-      state.members.first.acceptGesture(pointer);
+      scheduleMicrotask(() => _resolveByDefault(pointer, state));
     } else if (state.members.isEmpty) {
       _arenas.remove(pointer);
     } else if (state.eagerWinner != null) {

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:quiver/testing/async.dart';
 import 'package:test/test.dart';
 
 import 'gesture_tester.dart';
@@ -57,7 +56,7 @@ void main() {
     position: const Point(25.0, 25.0)
   );
 
-  test('Should recognize tap', () {
+  testGesture('Should recognize tap', (GestureTester tester) {
     TapGestureRecognizer tap = new TapGestureRecognizer();
 
     bool tapRecognized = false;
@@ -66,12 +65,12 @@ void main() {
     };
 
     tap.addPointer(down1);
-    GestureBinding.instance.gestureArena.close(1);
+    tester.closeArena(1);
     expect(tapRecognized, isFalse);
-    GestureBinding.instance.pointerRouter.route(down1);
+    tester.route(down1);
     expect(tapRecognized, isFalse);
 
-    GestureBinding.instance.pointerRouter.route(up1);
+    tester.route(up1);
     expect(tapRecognized, isTrue);
     GestureBinding.instance.gestureArena.sweep(1);
     expect(tapRecognized, isTrue);
@@ -79,7 +78,7 @@ void main() {
     tap.dispose();
   });
 
-  test('No duplicate tap events', () {
+  testGesture('No duplicate tap events', (GestureTester tester) {
     TapGestureRecognizer tap = new TapGestureRecognizer();
 
     int tapsRecognized = 0;
@@ -88,23 +87,23 @@ void main() {
     };
 
     tap.addPointer(down1);
-    GestureBinding.instance.gestureArena.close(1);
+    tester.closeArena(1);
     expect(tapsRecognized, 0);
-    GestureBinding.instance.pointerRouter.route(down1);
+    tester.route(down1);
     expect(tapsRecognized, 0);
 
-    GestureBinding.instance.pointerRouter.route(up1);
+    tester.route(up1);
     expect(tapsRecognized, 1);
     GestureBinding.instance.gestureArena.sweep(1);
     expect(tapsRecognized, 1);
 
     tap.addPointer(down1);
-    GestureBinding.instance.gestureArena.close(1);
+    tester.closeArena(1);
     expect(tapsRecognized, 1);
-    GestureBinding.instance.pointerRouter.route(down1);
+    tester.route(down1);
     expect(tapsRecognized, 1);
 
-    GestureBinding.instance.pointerRouter.route(up1);
+    tester.route(up1);
     expect(tapsRecognized, 2);
     GestureBinding.instance.gestureArena.sweep(1);
     expect(tapsRecognized, 2);
@@ -112,7 +111,7 @@ void main() {
     tap.dispose();
   });
 
-  test('Should not recognize two overlapping taps', () {
+  testGesture('Should not recognize two overlapping taps', (GestureTester tester) {
     TapGestureRecognizer tap = new TapGestureRecognizer();
 
     int tapsRecognized = 0;
@@ -121,24 +120,24 @@ void main() {
     };
 
     tap.addPointer(down1);
-    GestureBinding.instance.gestureArena.close(1);
+    tester.closeArena(1);
     expect(tapsRecognized, 0);
-    GestureBinding.instance.pointerRouter.route(down1);
+    tester.route(down1);
     expect(tapsRecognized, 0);
 
     tap.addPointer(down2);
-    GestureBinding.instance.gestureArena.close(2);
+    tester.closeArena(2);
     expect(tapsRecognized, 0);
-    GestureBinding.instance.pointerRouter.route(down1);
+    tester.route(down1);
     expect(tapsRecognized, 0);
 
 
-    GestureBinding.instance.pointerRouter.route(up1);
+    tester.route(up1);
     expect(tapsRecognized, 1);
     GestureBinding.instance.gestureArena.sweep(1);
     expect(tapsRecognized, 1);
 
-    GestureBinding.instance.pointerRouter.route(up2);
+    tester.route(up2);
     expect(tapsRecognized, 1);
     GestureBinding.instance.gestureArena.sweep(2);
     expect(tapsRecognized, 1);
@@ -146,7 +145,7 @@ void main() {
     tap.dispose();
   });
 
-  test('Distance cancels tap', () {
+  testGesture('Distance cancels tap', (GestureTester tester) {
     TapGestureRecognizer tap = new TapGestureRecognizer();
 
     bool tapRecognized = false;
@@ -159,17 +158,17 @@ void main() {
     };
 
     tap.addPointer(down3);
-    GestureBinding.instance.gestureArena.close(3);
+    tester.closeArena(3);
     expect(tapRecognized, isFalse);
     expect(tapCanceled, isFalse);
-    GestureBinding.instance.pointerRouter.route(down3);
+    tester.route(down3);
     expect(tapRecognized, isFalse);
     expect(tapCanceled, isFalse);
 
-    GestureBinding.instance.pointerRouter.route(move3);
+    tester.route(move3);
     expect(tapRecognized, isFalse);
     expect(tapCanceled, isTrue);
-    GestureBinding.instance.pointerRouter.route(up3);
+    tester.route(up3);
     expect(tapRecognized, isFalse);
     expect(tapCanceled, isTrue);
     GestureBinding.instance.gestureArena.sweep(3);
@@ -179,7 +178,7 @@ void main() {
     tap.dispose();
   });
 
-  test('Timeout does not cancel tap', () {
+  testGesture('Timeout does not cancel tap', (GestureTester tester) {
     TapGestureRecognizer tap = new TapGestureRecognizer();
 
     bool tapRecognized = false;
@@ -187,25 +186,23 @@ void main() {
       tapRecognized = true;
     };
 
-    new FakeAsync().run((FakeAsync async) {
-      tap.addPointer(down1);
-      GestureBinding.instance.gestureArena.close(1);
-      expect(tapRecognized, isFalse);
-      GestureBinding.instance.pointerRouter.route(down1);
-      expect(tapRecognized, isFalse);
+    tap.addPointer(down1);
+    tester.closeArena(1);
+    expect(tapRecognized, isFalse);
+    tester.route(down1);
+    expect(tapRecognized, isFalse);
 
-      async.elapse(new Duration(milliseconds: 500));
-      expect(tapRecognized, isFalse);
-      GestureBinding.instance.pointerRouter.route(up1);
-      expect(tapRecognized, isTrue);
-      GestureBinding.instance.gestureArena.sweep(1);
-      expect(tapRecognized, isTrue);
-    });
+    tester.async.elapse(new Duration(milliseconds: 500));
+    expect(tapRecognized, isFalse);
+    tester.route(up1);
+    expect(tapRecognized, isTrue);
+    GestureBinding.instance.gestureArena.sweep(1);
+    expect(tapRecognized, isTrue);
 
     tap.dispose();
   });
 
-  test('Should yield to other arena members', () {
+  testGesture('Should yield to other arena members', (GestureTester tester) {
     TapGestureRecognizer tap = new TapGestureRecognizer();
 
     bool tapRecognized = false;
@@ -217,12 +214,12 @@ void main() {
     TestGestureArenaMember member = new TestGestureArenaMember();
     GestureArenaEntry entry = GestureBinding.instance.gestureArena.add(1, member);
     GestureBinding.instance.gestureArena.hold(1);
-    GestureBinding.instance.gestureArena.close(1);
+    tester.closeArena(1);
     expect(tapRecognized, isFalse);
-    GestureBinding.instance.pointerRouter.route(down1);
+    tester.route(down1);
     expect(tapRecognized, isFalse);
 
-    GestureBinding.instance.pointerRouter.route(up1);
+    tester.route(up1);
     expect(tapRecognized, isFalse);
     GestureBinding.instance.gestureArena.sweep(1);
     expect(tapRecognized, isFalse);
@@ -233,7 +230,7 @@ void main() {
     tap.dispose();
   });
 
-  test('Should trigger on release of held arena', () {
+  testGesture('Should trigger on release of held arena', (GestureTester tester) {
     TapGestureRecognizer tap = new TapGestureRecognizer();
 
     bool tapRecognized = false;
@@ -245,17 +242,18 @@ void main() {
     TestGestureArenaMember member = new TestGestureArenaMember();
     GestureArenaEntry entry = GestureBinding.instance.gestureArena.add(1, member);
     GestureBinding.instance.gestureArena.hold(1);
-    GestureBinding.instance.gestureArena.close(1);
+    tester.closeArena(1);
     expect(tapRecognized, isFalse);
-    GestureBinding.instance.pointerRouter.route(down1);
+    tester.route(down1);
     expect(tapRecognized, isFalse);
 
-    GestureBinding.instance.pointerRouter.route(up1);
+    tester.route(up1);
     expect(tapRecognized, isFalse);
     GestureBinding.instance.gestureArena.sweep(1);
     expect(tapRecognized, isFalse);
 
     entry.resolve(GestureDisposition.rejected);
+    tester.async.flushMicrotasks();
     expect(tapRecognized, isTrue);
 
     tap.dispose();
