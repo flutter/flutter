@@ -133,7 +133,7 @@ class RelativeRect {
   String toString() => "RelativeRect.fromLTRB(${left?.toStringAsFixed(1)}, ${top?.toStringAsFixed(1)}, ${right?.toStringAsFixed(1)}, ${bottom?.toStringAsFixed(1)})";
 }
 
-/// Parent data for use with [RenderStack]
+/// Parent data for use with [RenderStack].
 class StackParentData extends ContainerBoxParentDataMixin<RenderBox> {
   /// The distance by which the child's top edge is inset from the top of the stack.
   double top;
@@ -437,6 +437,10 @@ abstract class RenderStackBase extends RenderBox
 /// edge of the stack. If the child extends beyond the bounds of the
 /// stack, the stack will clip the child's painting to the bounds of
 /// the stack.
+///
+/// See also:
+///
+///  * [RenderFlow]
 class RenderStack extends RenderStackBase {
   RenderStack({
     List<RenderBox> children,

@@ -15,11 +15,10 @@ enum BuildType {
   debug,
 }
 
-/// The type of build - `debug` or `release`.
-///
-/// TODO(devoncarew): Add a `profile` mode.
+/// The type of build - `debug`, `profile`, or `release`.
 enum BuildMode {
   debug,
+  profile,
   release
 }
 

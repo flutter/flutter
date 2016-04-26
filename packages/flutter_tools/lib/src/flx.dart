@@ -93,14 +93,22 @@ List<_Asset> _getMaterialAssets(String fontSet) {
   return result;
 }
 
+/// Given an assetBase location and a flutter.yaml manifest, return a map of
+/// assets to asset variants.
 Map<_Asset, List<_Asset>> _parseAssets(
   PackageMap packageMap,
   Map<String, dynamic> manifestDescriptor,
-  String assetBase
-) {
+  String assetBase, {
+  List<String> excludeDirs: const <String>[]
+}) {
   Map<_Asset, List<_Asset>> result = <_Asset, List<_Asset>>{};
+
   if (manifestDescriptor == null)
     return result;
+
+  excludeDirs = excludeDirs.map(
+    (String exclude) => path.absolute(exclude) + Platform.pathSeparator).toList();
+
   if (manifestDescriptor.containsKey('assets')) {
     for (String asset in manifestDescriptor['assets']) {
       _Asset baseAsset = _resolveAsset(packageMap, assetBase, asset);
@@ -116,9 +124,14 @@ Map<_Asset, List<_Asset>> _parseAssets(
       List<FileSystemEntity> files = assetDir.listSync(recursive: true);
 
       for (FileSystemEntity entity in files) {
-        if (path.basename(entity.path) == assetFilename &&
-            FileSystemEntity.isFileSync(entity.path) &&
-            entity.path != assetPath) {
+        if (!FileSystemEntity.isFileSync(entity.path))
+          continue;
+
+        // Exclude any files in the given directories.
+        if (excludeDirs.any((String exclude) => entity.path.startsWith(exclude)))
+          continue;
+
+        if (path.basename(entity.path) == assetFilename && entity.path != assetPath) {
           String key = path.relative(entity.path, from: baseAsset.base);
           String assetEntry;
           if (baseAsset.symbolicPrefix != null)
@@ -201,11 +214,11 @@ ZipEntry _createAssetEntry(_Asset asset) {
   return new ZipEntry.fromFile(asset.assetEntry, file);
 }
 
-ZipEntry _createAssetManifest(Map<_Asset, List<_Asset>> assets) {
+ZipEntry _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
   Map<String, List<String>> json = <String, List<String>>{};
-  for (_Asset main in assets.keys) {
+  for (_Asset main in assetVariants.keys) {
     List<String> variants = <String>[];
-    for (_Asset variant in assets[main])
+    for (_Asset variant in assetVariants[main])
       variants.add(variant.relativePath);
     json[main.relativePath] = variants;
   }
@@ -327,23 +340,28 @@ Future<int> assemble({
 }) async {
   printTrace('Building $outputPath');
 
-  PackageMap packageMap = new PackageMap(path.join(assetBasePath, '.packages'));
-  Map<_Asset, List<_Asset>> assets = _parseAssets(packageMap, manifestDescriptor, assetBasePath);
+  Map<_Asset, List<_Asset>> assetVariants = _parseAssets(
+    new PackageMap(path.join(assetBasePath, '.packages')),
+    manifestDescriptor,
+    assetBasePath,
+    excludeDirs: <String>[workingDirPath, path.join(assetBasePath, 'build')]
+  );
 
-  final bool usesMaterialDesign = manifestDescriptor != null && manifestDescriptor['uses-material-design'] == true;
+  final bool usesMaterialDesign = manifestDescriptor != null &&
+    manifestDescriptor['uses-material-design'] == true;
 
   ZipBuilder zipBuilder = new ZipBuilder();
 
   if (snapshotFile != null)
     zipBuilder.addEntry(new ZipEntry.fromFile(_kSnapshotKey, snapshotFile));
 
-  for (_Asset asset in assets.keys) {
+  for (_Asset asset in assetVariants.keys) {
     ZipEntry assetEntry = _createAssetEntry(asset);
     if (assetEntry == null)
       return 1;
     zipBuilder.addEntry(assetEntry);
 
-    for (_Asset variant in assets[asset]) {
+    for (_Asset variant in assetVariants[asset]) {
       ZipEntry variantEntry = _createAssetEntry(variant);
       if (variantEntry == null)
         return 1;
@@ -364,7 +382,7 @@ Future<int> assemble({
     zipBuilder.addEntry(assetEntry);
   }
 
-  zipBuilder.addEntry(_createAssetManifest(assets));
+  zipBuilder.addEntry(_createAssetManifest(assetVariants));
 
   ZipEntry fontManifest = _createFontManifest(manifestDescriptor, usesMaterialDesign, includeRobotoFonts);
   if (fontManifest != null)

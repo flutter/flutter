@@ -710,7 +710,7 @@ class BuildOwner {
   ///
   /// The context argument is used to describe the scope in case an exception is
   /// caught while invoking the callback.
-  void lockState(void callback(), { bool building: false, String context }) {
+  void lockState(void callback(), { bool building: false }) {
     bool debugPreviouslyBuilding;
     assert(_debugStateLockLevel >= 0);
     assert(() {
@@ -723,8 +723,6 @@ class BuildOwner {
     });
     try {
       callback();
-    } catch (e, stack) {
-      _debugReportException(context, e, stack);
     } finally {
       assert(() {
         _debugStateLockLevel -= 1;
@@ -758,23 +756,25 @@ class BuildOwner {
     if (_dirtyElements.isEmpty)
       return;
     Timeline.startSync('Build');
-    lockState(() {
-      _dirtyElements.sort(_elementSort);
-      int dirtyCount = _dirtyElements.length;
-      int index = 0;
-      while (index < dirtyCount) {
-        _dirtyElements[index].rebuild();
-        index += 1;
-        if (dirtyCount < _dirtyElements.length) {
-          _dirtyElements.sort(_elementSort);
-          dirtyCount = _dirtyElements.length;
+    try {
+      lockState(() {
+        _dirtyElements.sort(_elementSort);
+        int dirtyCount = _dirtyElements.length;
+        int index = 0;
+        while (index < dirtyCount) {
+          _dirtyElements[index].rebuild();
+          index += 1;
+          if (dirtyCount < _dirtyElements.length) {
+            _dirtyElements.sort(_elementSort);
+            dirtyCount = _dirtyElements.length;
+          }
         }
-      }
-      assert(!_dirtyElements.any((BuildableElement element) => element.dirty));
+        assert(!_dirtyElements.any((BuildableElement element) => element.dirty));
+      }, building: true);
+    } finally {
       _dirtyElements.clear();
-    }, building: true, context: 'while rebuilding dirty elements');
-    assert(_dirtyElements.isEmpty);
-    Timeline.finishSync();
+      Timeline.finishSync();
+    }
   }
 
   /// Complete the element build pass by unmounting any elements that are no
@@ -789,12 +789,17 @@ class BuildOwner {
   /// about changes to global keys will run.
   void finalizeTree() {
     Timeline.startSync('Finalize tree');
-    lockState(() {
-      _inactiveElements._unmountAll();
-    }, context: 'while finalizing the widget tree');
-    assert(GlobalKey._debugCheckForDuplicates);
-    scheduleMicrotask(GlobalKey._notifyListeners);
-    Timeline.finishSync();
+    try {
+      lockState(() {
+        _inactiveElements._unmountAll();
+      });
+      assert(GlobalKey._debugCheckForDuplicates);
+      scheduleMicrotask(GlobalKey._notifyListeners);
+    } catch (e, stack) {
+      _debugReportException('while finalizing the widget tree', e, stack);
+    } finally {
+      Timeline.finishSync();
+    }
   }
 
   /// Cause the entire subtree rooted at the given [Element] to

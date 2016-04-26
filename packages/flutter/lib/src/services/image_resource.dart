@@ -14,7 +14,7 @@ import 'package:flutter/foundation.dart';
 class ImageInfo {
   /// Creates an [ImageInfo] object for the given image and scale.
   ///
-  /// Both the image and the scale must be non-null.
+  /// Both the image and the scale must not be null.
   ImageInfo({ this.image, this.scale: 1.0 }) {
     assert(image != null);
     assert(scale != null);

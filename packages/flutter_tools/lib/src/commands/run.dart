@@ -188,7 +188,7 @@ Future<int> startApp(
   await new Future<Duration>.delayed(Duration.ZERO);
 
   if (install) {
-    printTrace('Running install command.');
+    printStatus('Installing $package to $device...');
 
     // TODO(devoncarew): This fails for ios devices - we haven't built yet.
     await installApp(device, package);

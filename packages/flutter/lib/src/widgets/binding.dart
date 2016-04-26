@@ -285,7 +285,7 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
       } else {
         element.update(this);
       }
-    }, building: true, context: 'while attaching root widget to rendering tree');
+    }, building: true);
     return element;
   }
 

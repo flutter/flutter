@@ -18,14 +18,24 @@ enum Orientation {
 
 /// The result of a media query.
 class MediaQueryData {
+  /// Creates data for a media query with explicit values.
+  ///
+  /// Consider using [MediaQueryData.fromWindow] to create data based on a
+  /// [ui.Window].
   const MediaQueryData({ this.size, this.devicePixelRatio, this.padding });
 
+  /// Creates data for a media query based on the given window.
   MediaQueryData.fromWindow(ui.Window window)
     : size = window.size,
       devicePixelRatio = window.devicePixelRatio,
       padding = new EdgeInsets.fromWindowPadding(window.padding);
 
-  /// The size of the media (e.g, the size of the screen).
+  /// The size of the media in logical pixel (e.g, the size of the screen).
+  ///
+  /// Logical pixels are roughly the same visual size across devices. Physical
+  /// pixels are the size of the actual hardware pixels on the device. The
+  /// number of physical pixels per logical pixel is described by the
+  /// [devicePixelRatio].
   final Size size;
 
   /// The number of device pixels for each logical pixel. This number might not

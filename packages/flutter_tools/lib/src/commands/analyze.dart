@@ -7,10 +7,11 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:yaml/yaml.dart' as yaml;
 import 'package:path/path.dart' as path;
+import 'package:yaml/yaml.dart' as yaml;
 
 import '../artifacts.dart';
+import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_configuration.dart';
@@ -111,7 +112,7 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('flutter-repo', help: 'Include all the examples and tests from the Flutter repository.', defaultsTo: false);
     argParser.addFlag('current-directory', help: 'Include all the Dart files in the current directory, if any.', defaultsTo: true);
     argParser.addFlag('current-package', help: 'Include the lib/main.dart file from the current directory, if any.', defaultsTo: true);
-    argParser.addFlag('dartdocs', help: 'List every public member that is lacking documentation. (Only examines files in the Flutter repository.)', defaultsTo: false);
+    argParser.addFlag('dartdocs', help: 'List every public member that is lacking documentation (only examines files in the Flutter repository).', defaultsTo: false);
     argParser.addFlag('preamble', help: 'Display the number of files that will be analyzed.', defaultsTo: true);
     argParser.addFlag('congratulate', help: 'Show output even when there are no errors, warnings, hints, or lints.', defaultsTo: true);
     argParser.addFlag('watch', help: 'Run analysis continuously, watching the filesystem for changes.', negatable: false);
@@ -323,11 +324,12 @@ class AnalyzeCommand extends FlutterCommand {
       mainFile.path
     ];
 
+    Status status;
     if (argResults['preamble']) {
       if (dartFiles.length == 1) {
-        printStatus('Analyzing ${dartFiles.first}...');
+        status = logger.startProgress('Analyzing ${path.relative(dartFiles.first)}...');
       } else {
-        printStatus('Analyzing ${dartFiles.length} entry points...');
+        status = logger.startProgress('Analyzing ${dartFiles.length} entry points...');
       }
       for (String file in dartFiles)
         printTrace(file);
@@ -351,6 +353,7 @@ class AnalyzeCommand extends FlutterCommand {
     });
 
     int exitCode = await process.exitCode;
+    status?.stop(showElapsedTime: true);
 
     List<Pattern> patternsToSkip = <Pattern>[
       'Analyzing [${mainFile.path}]...',
@@ -530,7 +533,7 @@ class AnalyzeCommand extends FlutterCommand {
 
       String files = '${analyzedPaths.length} ${pluralize('file', analyzedPaths.length)}';
       String seconds = (analysisTimer.elapsedMilliseconds / 1000.0).toStringAsFixed(2);
-      printStatus('$errorsMessage ${logger.separator} analyzed $files, $seconds seconds');
+      printStatus('$errorsMessage • analyzed $files, $seconds seconds');
 
       firstAnalysis = false;
     }
@@ -799,8 +802,7 @@ class AnalysisError implements Comparable<AnalysisError> {
   @override
   String toString() {
     String relativePath = path.relative(file);
-    String sep = logger.separator;
-    return '${severity.toLowerCase().padLeft(7)} $sep $message $sep $relativePath:$startLine:$startColumn';
+    return '${severity.toLowerCase().padLeft(7)} • $message • $relativePath:$startLine:$startColumn';
   }
 }
 

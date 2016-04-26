@@ -219,8 +219,8 @@ abstract class Device {
 
     for (Device device in devices) {
       String supportIndicator = device.isSupported() ? '' : ' (unsupported)';
-      printStatus('${device.name.padRight(nameWidth)} ${logger.separator} '
-        '${device.id.padRight(idWidth)} ${logger.separator} '
+      printStatus('${device.name.padRight(nameWidth)} • '
+        '${device.id.padRight(idWidth)} • '
         '${getNameForTargetPlatform(device.platform)}$supportIndicator');
     }
   }

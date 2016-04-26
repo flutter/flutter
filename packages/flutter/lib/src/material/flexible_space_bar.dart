@@ -80,18 +80,21 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
         curve: new Interval(math.max(0.0, fadeStart), math.min(fadeEnd, 1.0))
       );
       final double parallax = new Tween<double>(begin: 0.0, end: appBarHeight / 4.0).evaluate(_scaffoldAnimation);
-      children.add(new Positioned(
-        top: -parallax,
-        left: 0.0,
-        right: 0.0,
-        child: new Opacity(
-          opacity: new Tween<double>(begin: 1.0, end: 0.0).evaluate(opacityCurve),
-          child: new SizedBox(
-            height: appBarHeight + statusBarHeight,
-            child: config.background
+      final double opacity = new Tween<double>(begin: 1.0, end: 0.0).evaluate(opacityCurve);
+      if (opacity > 0.0) {
+        children.add(new Positioned(
+          top: -parallax,
+          left: 0.0,
+          right: 0.0,
+          child: new Opacity(
+            opacity: opacity,
+            child: new SizedBox(
+              height: appBarHeight + statusBarHeight,
+              child: config.background
+            )
           )
-        )
-       ));
+        ));
+      }
     }
 
     // title
@@ -102,34 +105,37 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
         parent: _scaffoldAnimation,
         curve: new Interval(fadeStart, fadeEnd)
       );
-      TextStyle titleStyle = Theme.of(context).primaryTextTheme.title;
-      titleStyle = titleStyle.copyWith(
-        color: titleStyle.color.withAlpha(new Tween<double>(begin: 255.0, end: 0.0).evaluate(opacityCurve).toInt())
-      );
-      final double yAlignStart = 1.0;
-      final double yAlignEnd = (statusBarHeight + kToolBarHeight / 2.0) / toolBarHeight;
-      final double scaleAndAlignEnd = (appBarHeight - toolBarHeight) / appBarHeight;
-      final CurvedAnimation scaleAndAlignCurve = new CurvedAnimation(
-        parent: _scaffoldAnimation,
-        curve: new Interval(0.0, scaleAndAlignEnd)
-      );
-      children.add(new Padding(
-        padding: const EdgeInsets.only(left: 72.0, bottom: 14.0),
-        child: new Align(
-          alignment: new Tween<FractionalOffset>(
-            begin: new FractionalOffset(0.0, yAlignStart),
-            end: new FractionalOffset(0.0, yAlignEnd)
-          ).evaluate(scaleAndAlignCurve),
-          child: new ScaleTransition(
-            alignment: FractionalOffset.bottomLeft,
-            scale: new Tween<double>(begin: 1.5, end: 1.0).animate(scaleAndAlignCurve),
-            child: new Align(
-              alignment: new FractionalOffset(0.0, 1.0),
-              child: new DefaultTextStyle(style: titleStyle, child: config.title)
+      final int alpha = new Tween<double>(begin: 255.0, end: 0.0).evaluate(opacityCurve).toInt();
+      if (alpha > 0) {
+        TextStyle titleStyle = Theme.of(context).primaryTextTheme.title;
+        titleStyle = titleStyle.copyWith(
+          color: titleStyle.color.withAlpha(alpha)
+        );
+        final double yAlignStart = 1.0;
+        final double yAlignEnd = (statusBarHeight + kToolBarHeight / 2.0) / toolBarHeight;
+        final double scaleAndAlignEnd = (appBarHeight - toolBarHeight) / appBarHeight;
+        final CurvedAnimation scaleAndAlignCurve = new CurvedAnimation(
+          parent: _scaffoldAnimation,
+          curve: new Interval(0.0, scaleAndAlignEnd)
+        );
+        children.add(new Padding(
+          padding: const EdgeInsets.only(left: 72.0, bottom: 14.0),
+          child: new Align(
+            alignment: new Tween<FractionalOffset>(
+              begin: new FractionalOffset(0.0, yAlignStart),
+              end: new FractionalOffset(0.0, yAlignEnd)
+            ).evaluate(scaleAndAlignCurve),
+            child: new ScaleTransition(
+              alignment: FractionalOffset.bottomLeft,
+              scale: new Tween<double>(begin: 1.5, end: 1.0).animate(scaleAndAlignCurve),
+              child: new Align(
+                alignment: new FractionalOffset(0.0, 1.0),
+                child: new DefaultTextStyle(style: titleStyle, child: config.title)
+              )
             )
           )
-        )
-      ));
+        ));
+      }
     }
 
     return new ClipRect(child: new Stack(children: children));

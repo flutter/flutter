@@ -162,7 +162,11 @@ class ToolConfiguration {
       }
 
       // Return something like 'out/android_Release'.
-      return new Directory(path.join(engineSrcPath, 'out/${type}_$_modeStr'));
+      String buildOutputPath = 'out/${type}_$_modeStr';
+      if (mode == BuildMode.profile)
+        buildOutputPath += '_Deploy';
+
+      return new Directory(path.join(engineSrcPath, buildOutputPath));
     } else {
       // For now, only suffix for deploy variants.
       String suffix = mode == BuildMode.release ? '-${getModeName(mode)}' : '';
