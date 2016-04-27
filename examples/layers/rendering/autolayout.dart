@@ -5,7 +5,7 @@
 // This example shows how to use the Cassowary autolayout system directly in the
 // underlying render tree.
 
-import 'package:cassowary/cassowary.dart' as al;
+import 'package:flutter/cassowary.dart' as al;
 import 'package:flutter/rendering.dart';
 
 class _MyAutoLayoutDelegate extends AutoLayoutDelegate {

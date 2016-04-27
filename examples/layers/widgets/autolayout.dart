@@ -4,7 +4,7 @@
 
 // This example shows how to use the Cassowary autolayout system with widgets.
 
-import 'package:cassowary/cassowary.dart' as al;
+import 'package:flutter/cassowary.dart' as al;
 import 'package:flutter/widgets.dart';
 
 class _MyAutoLayoutDelegate extends AutoLayoutDelegate {
