@@ -5,7 +5,8 @@
 /// Simple one-dimensional physics simulations, such as springs, friction, and
 /// gravity, for use in user interface animations.
 /// 
-/// To use, import `package:newton/newton.dart`.
+/// This library is not meant to be imported by developers.
+/// It will soon be integrated into another Flutter library.
 library newton;
 
 export 'src/clamped_simulation.dart';
