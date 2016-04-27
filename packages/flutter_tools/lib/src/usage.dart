@@ -19,7 +19,8 @@ const String _kFlutterUA = 'UA-67589403-5';
 
 class Usage {
   Usage() {
-    _analytics = new AnalyticsIO(_kFlutterUA, 'flutter', FlutterVersion.getVersionString());
+    String version = FlutterVersion.getVersionString(whitelistBranchName: true);
+    _analytics = new AnalyticsIO(_kFlutterUA, 'flutter', version);
     _analytics.analyticsOpt = AnalyticsOpt.optOut;
   }
 
@@ -51,7 +52,7 @@ class Usage {
     if (isFirstRun)
       return new _MockUsageTimer();
     else
-      return new UsageTimer._(event, _analytics.startTimer(event));
+      return new UsageTimer._(event, _analytics.startTimer(event, category: 'flutter'));
   }
 
   void sendException(dynamic exception, StackTrace trace) {
