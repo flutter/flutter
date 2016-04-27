@@ -26,6 +26,9 @@ class SnapshotCompiler {
     String depfilePath,
     String buildOutputPath
   }) {
+    assert(mainPath != null);
+    assert(snapshotPath != null);
+
     final List<String> args = [
       _path,
       mainPath,

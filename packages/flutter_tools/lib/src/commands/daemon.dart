@@ -267,8 +267,7 @@ class AppDomain extends Domain {
         command.toolchain,
         stop: true,
         target: args['target'],
-        route: args['route'],
-        checked: args['checked'] ?? true
+        route: args['route']
       );
 
       if (result != 0)

@@ -16,7 +16,7 @@ class SkiaCommand extends FlutterCommand {
     argParser.addOption('output-file', help: 'Write the Skia picture file to this path.');
     argParser.addOption('skiaserve', help: 'Post the picture to a skiaserve debugger at this URL.');
     argParser.addOption('diagnostic-port',
-        defaultsTo: diagnosticDefaultPort.toString(),
+        defaultsTo: defaultDiagnosticPort.toString(),
         help: 'Local port where the diagnostic server is listening.');
   }
 

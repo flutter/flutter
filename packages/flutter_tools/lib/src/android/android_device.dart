@@ -12,7 +12,6 @@ import 'package:web_socket_channel/io.dart';
 
 import '../android/android_sdk.dart';
 import '../application_package.dart';
-import '../base/common.dart';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
@@ -189,49 +188,38 @@ class AndroidDevice extends Device {
   }
 
   Future<Null> _forwardPort(String service, int devicePort, int port) async {
-    bool portWasZero = (port == null) || (port == 0);
-
     try {
       // Set up port forwarding for observatory.
-      port = await portForwarder.forward(devicePort,
-                                         hostPort: port);
-      if (portWasZero)
-        printStatus('$service listening on http://127.0.0.1:$port');
+      port = await portForwarder.forward(devicePort, hostPort: port);
+      printStatus('$service listening on http://127.0.0.1:$port');
     } catch (e) {
       printError('Unable to forward port $port: $e');
     }
   }
 
-  Future<bool> startBundle(AndroidApk apk, String bundlePath, {
-    bool checked: true,
+  Future<LaunchResult> startBundle(AndroidApk apk, String bundlePath, {
     bool traceStartup: false,
     String route,
-    bool clearLogs: false,
-    bool startPaused: false,
-    int observatoryPort: observatoryDefaultPort,
-    int diagnosticPort: diagnosticDefaultPort
+    DebuggingOptions options
   }) async {
     printTrace('$this startBundle');
 
     if (!FileSystemEntity.isFileSync(bundlePath)) {
       printError('Cannot find $bundlePath');
-      return false;
+      return new LaunchResult.failed();
     }
-
-    if (clearLogs)
-      this.clearLogs();
 
     runCheckedSync(adbCommandForDevice(<String>['push', bundlePath, _deviceBundlePath]));
 
-    ServiceProtocolDiscovery observatoryDiscovery =
-        new ServiceProtocolDiscovery(logReader, ServiceProtocolDiscovery.kObservatoryService);
-    ServiceProtocolDiscovery diagnosticDiscovery =
-        new ServiceProtocolDiscovery(logReader, ServiceProtocolDiscovery.kDiagnosticService);
+    ServiceProtocolDiscovery observatoryDiscovery;
+    ServiceProtocolDiscovery diagnosticDiscovery;
 
-    // We take this future here but do not wait for completion until *after* we
-    // start the bundle.
-    Future<List<int>> scrapeServicePorts = Future.wait(
-        <Future<int>>[observatoryDiscovery.nextPort(), diagnosticDiscovery.nextPort()]);
+    if (options.debuggingEnabled) {
+      observatoryDiscovery = new ServiceProtocolDiscovery(
+        logReader, ServiceProtocolDiscovery.kObservatoryService);
+      diagnosticDiscovery = new ServiceProtocolDiscovery(
+        logReader, ServiceProtocolDiscovery.kDiagnosticService);
+    }
 
     List<String> cmd = adbCommandForDevice(<String>[
       'shell', 'am', 'start',
@@ -240,61 +228,76 @@ class AndroidDevice extends Device {
       '-f', '0x20000000',  // FLAG_ACTIVITY_SINGLE_TOP
       '--ez', 'enable-background-compilation', 'true',
     ]);
-    if (checked)
-      cmd.addAll(<String>['--ez', 'enable-checked-mode', 'true']);
     if (traceStartup)
       cmd.addAll(<String>['--ez', 'trace-startup', 'true']);
-    if (startPaused)
-      cmd.addAll(<String>['--ez', 'start-paused', 'true']);
     if (route != null)
       cmd.addAll(<String>['--es', 'route', route]);
+    if (options.debuggingEnabled) {
+      if (options.checked)
+        cmd.addAll(<String>['--ez', 'enable-checked-mode', 'true']);
+      if (options.startPaused)
+        cmd.addAll(<String>['--ez', 'start-paused', 'true']);
+    }
     cmd.add(apk.launchActivity);
     String result = runCheckedSync(cmd);
     // This invocation returns 0 even when it fails.
     if (result.contains('Error: ')) {
       printError(result.trim());
-      return false;
+      return new LaunchResult.failed();
     }
 
-    // Wait for the service protocol port here. This will complete once the
-    // device has printed "Observatory is listening on...".
-    printTrace('Waiting for observatory port to be available...');
+    if (!options.debuggingEnabled) {
+      return new LaunchResult.succeeded();
+    } else {
+      // Wait for the service protocol port here. This will complete once the
+      // device has printed "Observatory is listening on...".
+      printTrace('Waiting for observatory port to be available...');
 
-    try {
-      List<int> devicePorts = await scrapeServicePorts.timeout(new Duration(seconds: 12));
-      int observatoryDevicePort = devicePorts[0];
-      int diagnosticDevicePort = devicePorts[1];
-      printTrace('observatory port = $observatoryDevicePort');
-      await _forwardPort(ServiceProtocolDiscovery.kObservatoryService,
-          observatoryDevicePort, observatoryPort);
-      await _forwardPort(ServiceProtocolDiscovery.kDiagnosticService,
-          diagnosticDevicePort, diagnosticPort);
-      return true;
-    } catch (error) {
-      if (error is TimeoutException)
-        printError('Timed out while waiting for a debug connection.');
-      else
-        printError('Error waiting for a debug connection: $error');
-
-      return false;
+      try {
+        Future<List<int>> scrapeServicePorts = Future.wait(
+          <Future<int>>[observatoryDiscovery.nextPort(), diagnosticDiscovery.nextPort()]
+        );
+        List<int> devicePorts = await scrapeServicePorts.timeout(new Duration(seconds: 20));
+        int observatoryDevicePort = devicePorts[0];
+        printTrace('observatory port = $observatoryDevicePort');
+        int observatoryLocalPort = await options.findBestObservatoryPort();
+        // TODO(devoncarew): Remember the forwarding information (so we can later remove the
+        // port forwarding).
+        await _forwardPort(ServiceProtocolDiscovery.kObservatoryService,
+            observatoryDevicePort, observatoryLocalPort);
+        int diagnosticDevicePort = devicePorts[1];
+        printTrace('diagnostic port = $diagnosticDevicePort');
+        int diagnosticLocalPort = await options.findBestDiagnosticPort();
+        await _forwardPort(ServiceProtocolDiscovery.kDiagnosticService,
+            diagnosticDevicePort, diagnosticLocalPort);
+        return new LaunchResult.succeeded(
+          observatoryPort: observatoryLocalPort,
+          diagnosticPort: diagnosticLocalPort
+        );
+      } catch (error) {
+        if (error is TimeoutException)
+          printError('Timed out while waiting for a debug connection.');
+        else
+          printError('Error waiting for a debug connection: $error');
+        return new LaunchResult.failed();
+      } finally {
+        observatoryDiscovery.cancel();
+        diagnosticDiscovery.cancel();
+      }
     }
   }
 
   @override
-  Future<bool> startApp(
+  Future<LaunchResult> startApp(
     ApplicationPackage package,
     Toolchain toolchain, {
     String mainPath,
     String route,
-    bool checked: true,
-    bool clearLogs: false,
-    bool startPaused: false,
-    int observatoryPort: observatoryDefaultPort,
-    int diagnosticPort: diagnosticDefaultPort,
+    DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs
   }) async {
     if (!_checkForSupportedAdbVersion() || !_checkForSupportedAndroidVersion())
-      return false;
+      return new LaunchResult.failed();
 
     String localBundlePath = await flx.buildFlx(
       toolchain,
@@ -304,21 +307,13 @@ class AndroidDevice extends Device {
 
     printTrace('Starting bundle for $this.');
 
-    if (await startBundle(
+    return startBundle(
       package,
       localBundlePath,
-      checked: checked,
       traceStartup: platformArgs['trace-startup'],
       route: route,
-      clearLogs: clearLogs,
-      startPaused: startPaused,
-      observatoryPort: observatoryPort,
-      diagnosticPort: diagnosticPort
-    )) {
-      return true;
-    } else {
-      return false;
-    }
+      options: debuggingOptions
+    );
   }
 
   @override
@@ -468,7 +463,8 @@ List<AndroidDevice> getAdbDevices() {
 
   // 0149947A0D01500C       device usb:340787200X
   // emulator-5612          host features:shell_2
-  RegExp deviceRegExShort = new RegExp(r'^(\S+)\s+(\S+)\s+\S+$');
+  // emulator-5554          offline
+  RegExp deviceRegExShort = new RegExp(r'^(\S+)\s+(\S+)(\s+\S+)?$');
 
   for (String line in output) {
     // Skip lines like: * daemon started successfully *
@@ -522,34 +518,25 @@ List<AndroidDevice> getAdbDevices() {
 
 /// A log reader that logs from `adb logcat`.
 class _AdbLogReader extends DeviceLogReader {
-  _AdbLogReader(this.device);
+  _AdbLogReader(this.device) {
+    _linesController = new StreamController<String>.broadcast(
+      onListen: _start,
+      onCancel: _stop
+    );
+  }
 
   final AndroidDevice device;
 
-  final StreamController<String> _linesStreamController =
-      new StreamController<String>.broadcast();
-
+  StreamController<String> _linesController;
   Process _process;
-  StreamSubscription<String> _stdoutSubscription;
-  StreamSubscription<String> _stderrSubscription;
 
   @override
-  Stream<String> get lines => _linesStreamController.stream;
+  Stream<String> get logLines => _linesController.stream;
 
   @override
   String get name => device.name;
 
-  @override
-  bool get isReading => _process != null;
-
-  @override
-  Future<int> get finished => _process != null ? _process.exitCode : new Future<int>.value(0);
-
-  @override
-  Future<Null> start() async {
-    if (_process != null)
-      throw new StateError('_AdbLogReader must be stopped before it can be started.');
-
+  void _start() {
     // Start the adb logcat process.
     List<String> args = <String>['logcat', '-v', 'tag'];
     String lastTimestamp = device.lastLogcatTimestamp;
@@ -558,55 +545,29 @@ class _AdbLogReader extends DeviceLogReader {
     args.addAll(<String>[
       '-s', 'flutter:V', 'FlutterMain:V', 'FlutterView:V', 'AndroidRuntime:W', 'ActivityManager:W', 'System.err:W', '*:F'
     ]);
-    _process = await runCommand(device.adbCommandForDevice(args));
-    _stdoutSubscription =
-        _process.stdout.transform(UTF8.decoder)
-                       .transform(const LineSplitter()).listen(_onLine);
-    _stderrSubscription =
-        _process.stderr.transform(UTF8.decoder)
-                       .transform(const LineSplitter()).listen(_onLine);
-    _process.exitCode.then(_onExit);
-  }
+    runCommand(device.adbCommandForDevice(args)).then((Process process) {
+      _process = process;
+      _process.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);
+      _process.stderr.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);
 
-  @override
-  Future<Null> stop() async {
-    if (_process == null)
-      throw new StateError('_AdbLogReader must be started before it can be stopped.');
-
-    _stdoutSubscription?.cancel();
-    _stdoutSubscription = null;
-    _stderrSubscription?.cancel();
-    _stderrSubscription = null;
-    await _process.kill();
-    _process = null;
-  }
-
-  void _onExit(int exitCode) {
-    _stdoutSubscription?.cancel();
-    _stdoutSubscription = null;
-    _stderrSubscription?.cancel();
-    _stderrSubscription = null;
-    _process = null;
+      _process.exitCode.then((int code) {
+        if (_linesController.hasListener)
+          _linesController.close();
+      });
+    });
   }
 
   void _onLine(String line) {
     // Filter out some noisy ActivityManager notifications.
     if (line.startsWith('W/ActivityManager: getRunningAppProcesses'))
       return;
-
-    _linesStreamController.add(line);
+    _linesController.add(line);
   }
 
-  @override
-  int get hashCode => name.hashCode;
+  void _stop() {
+    // TODO(devoncarew): We should remove adb port forwarding here.
 
-  @override
-  bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
-    if (other is! _AdbLogReader)
-      return false;
-    return other.device.id == device.id;
+    _process?.kill();
   }
 }
 

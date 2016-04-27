@@ -11,6 +11,7 @@ import 'package:test/src/executable.dart' as executable; // ignore: implementati
 import '../android/android_device.dart' show AndroidDevice;
 import '../application_package.dart';
 import '../base/file_system.dart';
+import '../base/common.dart';
 import '../base/os.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -60,8 +61,9 @@ class DriveCommand extends RunCommandBase {
     );
 
     argParser.addOption('debug-port',
-        defaultsTo: '8183',
-        help: 'Listen to the given port for a debug connection.');
+      defaultsTo: defaultDrivePort.toString(),
+      help: 'Listen to the given port for a debug connection.'
+    );
   }
 
   @override
@@ -261,25 +263,22 @@ Future<int> startApp(DriveCommand command) async {
   await command.device.installApp(package);
 
   printTrace('Starting application.');
-  bool started = await command.device.startApp(
+  LaunchResult result = await command.device.startApp(
     package,
     command.toolchain,
     mainPath: mainPath,
     route: command.route,
-    checked: command.checked,
-    clearLogs: true,
-    startPaused: true,
-    observatoryPort: command.debugPort,
+    debuggingOptions: new DebuggingOptions.enabled(
+      checked: command.checked,
+      startPaused: true,
+      observatoryPort: command.debugPort
+    ),
     platformArgs: <String, dynamic>{
       'trace-startup': command.traceStartup,
     }
   );
 
-  if (started && command.device.supportsStartPaused) {
-    await delayUntilObservatoryAvailable('localhost', command.debugPort);
-  }
-
-  return started ? 0 : 2;
+  return result.started ? 0 : 2;
 }
 
 /// Runs driver tests.

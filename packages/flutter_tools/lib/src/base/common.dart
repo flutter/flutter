@@ -2,5 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-const int observatoryDefaultPort = 8181;
-const int diagnosticDefaultPort = 8182;
+const int defaultObservatoryPort = 8100;
+const int defaultDiagnosticPort  = 8101;
+const int defaultDrivePort       = 8183;

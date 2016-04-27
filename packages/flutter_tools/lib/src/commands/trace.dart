@@ -18,7 +18,7 @@ class TraceCommand extends FlutterCommand {
     argParser.addOption('duration',
         defaultsTo: '10', abbr: 'd', help: 'Duration in seconds to trace.');
     argParser.addOption('debug-port',
-        defaultsTo: observatoryDefaultPort.toString(),
+        defaultsTo: defaultObservatoryPort.toString(),
         help: 'Local port where the observatory is listening.');
   }
 

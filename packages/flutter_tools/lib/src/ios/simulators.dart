@@ -9,7 +9,6 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
-import '../base/common.dart';
 import '../base/context.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
@@ -437,32 +436,25 @@ class IOSSimulator extends Device {
   }
 
   @override
-  Future<bool> startApp(
+  Future<LaunchResult> startApp(
     ApplicationPackage app,
     Toolchain toolchain, {
     String mainPath,
     String route,
-    bool checked: true,
-    bool clearLogs: false,
-    bool startPaused: false,
-    int observatoryPort: observatoryDefaultPort,
-    int diagnosticPort: diagnosticDefaultPort,
+    DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs
   }) async {
     printTrace('Building ${app.name} for $id.');
 
-    if (clearLogs)
-      this.clearLogs();
-
     if (!(await _setupUpdatedApplicationBundle(app, toolchain)))
-      return false;
+      return new LaunchResult.failed();
 
-    ServiceProtocolDiscovery serviceProtocolDiscovery =
-        new ServiceProtocolDiscovery(logReader, ServiceProtocolDiscovery.kObservatoryService);
+    ServiceProtocolDiscovery observatoryDiscovery;
 
-    // We take this future here but do not wait for completion until *after* we
-    // start the application.
-    Future<int> scrapeServicePort = serviceProtocolDiscovery.nextPort();
+    if (debuggingOptions.debuggingEnabled) {
+      observatoryDiscovery = new ServiceProtocolDiscovery(
+        logReader, ServiceProtocolDiscovery.kObservatoryService);
+    }
 
     // Prepare launch arguments.
     List<String> args = <String>[
@@ -471,39 +463,47 @@ class IOSSimulator extends Device {
       "--packages=${path.absolute('.packages')}",
     ];
 
-    if (checked)
-      args.add("--enable-checked-mode");
+    if (debuggingOptions.debuggingEnabled) {
+      if (debuggingOptions.checked)
+        args.add("--enable-checked-mode");
+      if (debuggingOptions.startPaused)
+        args.add("--start-paused");
 
-    if (startPaused)
-      args.add("--start-paused");
-
-    if (observatoryPort != observatoryDefaultPort)
+      int observatoryPort = await debuggingOptions.findBestObservatoryPort();
       args.add("--observatory-port=$observatoryPort");
+    }
 
     // Launch the updated application in the simulator.
     try {
       SimControl.instance.launch(id, app.id, args);
     } catch (error) {
       printError('$error');
-      return false;
+      return new LaunchResult.failed();
     }
 
-    // Wait for the service protocol port here. This will complete once the
-    // device has printed "Observatory is listening on..."
-    printTrace('Waiting for observatory port to be available...');
+    if (!debuggingOptions.debuggingEnabled) {
+      return new LaunchResult.succeeded();
+    } else {
+      // Wait for the service protocol port here. This will complete once the
+      // device has printed "Observatory is listening on..."
+      printTrace('Waiting for observatory port to be available...');
 
-    try {
-      int devicePort = await scrapeServicePort.timeout(new Duration(seconds: 12));
-      printTrace('service protocol port = $devicePort');
-      printStatus('Observatory listening on http://127.0.0.1:$devicePort');
-      return true;
-    } catch (error) {
-      if (error is TimeoutException)
-        printError('Timed out while waiting for a debug connection.');
-      else
-        printError('Error waiting for a debug connection: $error');
-
-      return false;
+      try {
+        int devicePort = await observatoryDiscovery
+          .nextPort()
+          .timeout(new Duration(seconds: 20));
+        printTrace('service protocol port = $devicePort');
+        printStatus('Observatory listening on http://127.0.0.1:$devicePort');
+        return new LaunchResult.succeeded(observatoryPort: devicePort);
+      } catch (error) {
+        if (error is TimeoutException)
+          printError('Timed out while waiting for a debug connection.');
+        else
+          printError('Error waiting for a debug connection: $error');
+        return new LaunchResult.failed();
+      } finally {
+        observatoryDiscovery.cancel();
+      }
     }
   }
 
@@ -662,118 +662,57 @@ class IOSSimulator extends Device {
 }
 
 class _IOSSimulatorLogReader extends DeviceLogReader {
-  _IOSSimulatorLogReader(this.device);
+  _IOSSimulatorLogReader(this.device) {
+    _linesController = new StreamController<String>.broadcast(
+      onListen: () {
+        _start();
+      },
+      onCancel: _stop
+    );
+  }
 
   final IOSSimulator device;
 
-  final StreamController<String> _linesStreamController =
-      new StreamController<String>.broadcast();
-
+  StreamController<String> _linesController;
   bool _lastWasFiltered = false;
 
-  // We log from two logs: the device and the system log.
+  // We log from two files: the device and the system log.
   Process _deviceProcess;
-  StreamSubscription<String> _deviceStdoutSubscription;
-  StreamSubscription<String> _deviceStderrSubscription;
-
   Process _systemProcess;
-  StreamSubscription<String> _systemStdoutSubscription;
-  StreamSubscription<String> _systemStderrSubscription;
 
   @override
-  Stream<String> get lines => _linesStreamController.stream;
+  Stream<String> get logLines => _linesController.stream;
 
   @override
   String get name => device.name;
 
-  @override
-  bool get isReading => (_deviceProcess != null) && (_systemProcess != null);
-
-  @override
-  Future<int> get finished {
-    return (_deviceProcess != null) ? _deviceProcess.exitCode : new Future<int>.value(0);
-  }
-
-  @override
-  Future<Null> start() async {
-    if (isReading) {
-      throw new StateError(
-        '_IOSSimulatorLogReader must be stopped before it can be started.'
-      );
-    }
-
-    // TODO(johnmccutchan): Add a ProcessSet abstraction that handles running
-    // N processes and merging their output.
-
+  Future<Null> _start() async {
     // Device log.
     device.ensureLogsExists();
-    _deviceProcess = await runCommand(
-        <String>['tail', '-n', '+0', '-F', device.logFilePath]);
-    _deviceStdoutSubscription =
-        _deviceProcess.stdout.transform(UTF8.decoder)
-                             .transform(const LineSplitter()).listen(_onDeviceLine);
-    _deviceStderrSubscription =
-        _deviceProcess.stderr.transform(UTF8.decoder)
-                             .transform(const LineSplitter()).listen(_onDeviceLine);
-    _deviceProcess.exitCode.then(_onDeviceExit);
+    _deviceProcess = await runCommand(<String>['tail', '-n', '0', '-F', device.logFilePath]);
+    _deviceProcess.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onDeviceLine);
+    _deviceProcess.stderr.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onDeviceLine);
 
     // Track system.log crashes.
     // ReportCrash[37965]: Saved crash report for FlutterRunner[37941]...
-    _systemProcess = await runCommand(
-        <String>['tail', '-F', '/private/var/log/system.log']);
-    _systemStdoutSubscription =
-        _systemProcess.stdout.transform(UTF8.decoder)
-                             .transform(const LineSplitter()).listen(_onSystemLine);
-    _systemStderrSubscription =
-        _systemProcess.stderr.transform(UTF8.decoder)
-                             .transform(const LineSplitter()).listen(_onSystemLine);
-    _systemProcess.exitCode.then(_onSystemExit);
-  }
+    _systemProcess = await runCommand(<String>['tail', '-n', '0', '-F', '/private/var/log/system.log']);
+    _systemProcess.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onSystemLine);
+    _systemProcess.stderr.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onSystemLine);
 
-  @override
-  Future<Null> stop() async {
-    if (!isReading) {
-      throw new StateError(
-        '_IOSSimulatorLogReader must be started before it can be stopped.'
-      );
-    }
-    if (_deviceProcess != null) {
-      await _deviceProcess.kill();
-      _deviceProcess = null;
-    }
-    _onDeviceExit(0);
-    if (_systemProcess != null) {
-      await _systemProcess.kill();
-      _systemProcess = null;
-    }
-    _onSystemExit(0);
-  }
-
-  void _onDeviceExit(int exitCode) {
-    _deviceStdoutSubscription?.cancel();
-    _deviceStdoutSubscription = null;
-    _deviceStderrSubscription?.cancel();
-    _deviceStderrSubscription = null;
-    _deviceProcess = null;
-  }
-
-  void _onSystemExit(int exitCode) {
-    _systemStdoutSubscription?.cancel();
-    _systemStdoutSubscription = null;
-    _systemStderrSubscription?.cancel();
-    _systemStderrSubscription = null;
-    _systemProcess = null;
+    _deviceProcess.exitCode.then((int code) {
+      if (_linesController.hasListener)
+        _linesController.close();
+    });
   }
 
   // Match the log prefix (in order to shorten it):
   //   'Jan 29 01:31:44 devoncarew-macbookpro3 SpringBoard[96648]: ...'
-  final RegExp _mapRegex =
-      new RegExp(r'\S+ +\S+ +\S+ \S+ (.+)\[\d+\]\)?: (.*)$');
+  static final RegExp _mapRegex = new RegExp(r'\S+ +\S+ +\S+ \S+ (.+)\[\d+\]\)?: (.*)$');
 
   // Jan 31 19:23:28 --- last message repeated 1 time ---
-  final RegExp _lastMessageRegex = new RegExp(r'\S+ +\S+ +\S+ --- (.*) ---$');
+  static final RegExp _lastMessageRegex = new RegExp(r'\S+ +\S+ +\S+ --- (.*) ---$');
 
-  final RegExp _flutterRunnerRegex = new RegExp(r' FlutterRunner\[\d+\] ');
+  static final RegExp _flutterRunnerRegex = new RegExp(r' FlutterRunner\[\d+\] ');
 
   String _filterDeviceLine(String string) {
     Match match = _mapRegex.matchAsPrefix(string);
@@ -808,8 +747,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     String filteredLine = _filterDeviceLine(line);
     if (filteredLine == null)
       return;
-
-    _linesStreamController.add(filteredLine);
+    _linesController.add(filteredLine);
   }
 
   String _filterSystemLog(String string) {
@@ -825,19 +763,12 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     if (filteredLine == null)
       return;
 
-    _linesStreamController.add(filteredLine);
+    _linesController.add(filteredLine);
   }
 
-  @override
-  int get hashCode => device.logFilePath.hashCode;
-
-  @override
-  bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
-    if (other is! _IOSSimulatorLogReader)
-      return false;
-    return other.device.logFilePath == device.logFilePath;
+  void _stop() {
+    _deviceProcess?.kill();
+    _systemProcess?.kill();
   }
 }
 

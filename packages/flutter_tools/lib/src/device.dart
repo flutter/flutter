@@ -10,6 +10,7 @@ import 'android/android_device.dart';
 import 'application_package.dart';
 import 'base/common.dart';
 import 'base/utils.dart';
+import 'base/os.dart';
 import 'build_configuration.dart';
 import 'globals.dart';
 import 'ios/devices.dart';
@@ -176,16 +177,12 @@ abstract class Device {
   ///
   /// [platformArgs] allows callers to pass platform-specific arguments to the
   /// start call.
-  Future<bool> startApp(
+  Future<LaunchResult> startApp(
     ApplicationPackage package,
     Toolchain toolchain, {
     String mainPath,
     String route,
-    bool checked: true,
-    bool clearLogs: false,
-    bool startPaused: false,
-    int observatoryPort: observatoryDefaultPort,
-    int diagnosticPort: diagnosticDefaultPort,
+    DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs
   });
 
@@ -229,6 +226,68 @@ abstract class Device {
   }
 }
 
+class DebuggingOptions {
+  DebuggingOptions.enabled({
+    this.checked: true,
+    this.startPaused: false,
+    this.observatoryPort,
+    this.diagnosticPort
+   }) : debuggingEnabled = true;
+
+  DebuggingOptions.disabled() :
+    debuggingEnabled = false,
+    checked = false,
+    startPaused = false,
+    observatoryPort = null,
+    diagnosticPort = null;
+
+  final bool debuggingEnabled;
+
+  final bool checked;
+  final bool startPaused;
+  final int observatoryPort;
+  final int diagnosticPort;
+
+  bool get hasObservatoryPort => observatoryPort != null;
+
+  /// Return the user specified observatory port. If that isn't available,
+  /// return [defaultObservatoryPort], or a port close to that one.
+  Future<int> findBestObservatoryPort() {
+    if (hasObservatoryPort)
+      return new Future<int>.value(observatoryPort);
+    return findPreferredPort(observatoryPort ?? defaultObservatoryPort);
+  }
+
+  bool get hasDiagnosticPort => diagnosticPort != null;
+
+  /// Return the user specified diagnostic port. If that isn't available,
+  /// return [defaultObservatoryPort], or a port close to that one.
+  Future<int> findBestDiagnosticPort() {
+    return findPreferredPort(diagnosticPort ?? defaultDiagnosticPort);
+  }
+}
+
+class LaunchResult {
+  LaunchResult.succeeded({ this.observatoryPort, this.diagnosticPort }) : started = true;
+  LaunchResult.failed() : started = false, observatoryPort = null, diagnosticPort = null;
+
+  bool get hasObservatory => observatoryPort != null;
+
+  final bool started;
+  final int observatoryPort;
+  final int diagnosticPort;
+
+  @override
+  String toString() {
+    StringBuffer buf = new StringBuffer('started=$started');
+    if (observatoryPort != null)
+      buf.write(', observatory=$observatoryPort');
+    if (diagnosticPort != null)
+      buf.write(', diagnostic=$diagnosticPort');
+    return buf.toString();
+  }
+}
+
 class ForwardedPort {
   ForwardedPort(this.hostPort, this.devicePort);
 
@@ -248,40 +307,18 @@ abstract class DevicePortForwarder {
   /// Forward [hostPort] on the host to [devicePort] on the device.
   /// If [hostPort] is null, will auto select a host port.
   /// Returns a Future that completes with the host port.
-  Future<int> forward(int devicePort, {int hostPort: null});
+  Future<int> forward(int devicePort, { int hostPort: null });
 
   /// Stops forwarding [forwardedPort].
   Future<Null> unforward(ForwardedPort forwardedPort);
 }
 
-/// Read the log for a particular device. Subclasses must implement `hashCode`
-/// and `operator ==` so that log readers that read from the same location can be
-/// de-duped. For example, two Android devices will both try and log using
-/// `adb logcat`; we don't want to display two identical log streams.
+/// Read the log for a particular device.
 abstract class DeviceLogReader {
   String get name;
 
-  /// A broadcast stream where each element in the string is a line of log
-  /// output.
-  Stream<String> get lines;
-
-  /// Start reading logs from the device.
-  Future<Null> start();
-
-  /// Actively reading lines from the log?
-  bool get isReading;
-
-  /// Actively stop reading logs from the device.
-  Future<Null> stop();
-
-  /// Completes when the log is finished.
-  Future<int> get finished;
-
-  @override
-  int get hashCode;
-
-  @override
-  bool operator ==(dynamic other);
+  /// A broadcast stream where each element in the string is a line of log output.
+  Stream<String> get logLines;
 
   @override
   String toString() => name;

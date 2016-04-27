@@ -9,7 +9,6 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
-import '../base/common.dart';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
@@ -154,19 +153,15 @@ class IOSDevice extends Device {
   }
 
   @override
-  Future<bool> startApp(
+  Future<LaunchResult> startApp(
     ApplicationPackage app,
     Toolchain toolchain, {
     String mainPath,
     String route,
-    bool checked: true,
-    bool clearLogs: false,
-    bool startPaused: false,
-    int observatoryPort: observatoryDefaultPort,
-    int diagnosticPort: diagnosticDefaultPort,
+    DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs
   }) async {
-    // TODO(chinmaygarde): Use checked, mainPath, route, clearLogs.
+    // TODO(chinmaygarde): Use checked, mainPath, route.
     // TODO(devoncarew): Handle startPaused, debugPort.
     printTrace('Building ${app.name} for $id');
 
@@ -174,7 +169,7 @@ class IOSDevice extends Device {
     bool buildResult = await buildIOSXcodeProject(app, buildForDevice: true);
     if (!buildResult) {
       printError('Could not build the precompiled application for the device.');
-      return false;
+      return new LaunchResult.failed();
     }
 
     // Step 2: Check that the application exists at the specified path.
@@ -182,7 +177,7 @@ class IOSDevice extends Device {
     bool bundleExists = bundle.existsSync();
     if (!bundleExists) {
       printError('Could not find the built application bundle at ${bundle.path}.');
-      return false;
+      return new LaunchResult.failed();
     }
 
     // Step 3: Attempt to install the application on the device.
@@ -197,10 +192,10 @@ class IOSDevice extends Device {
 
     if (installationResult != 0) {
       printError('Could not install ${bundle.path} on $id.');
-      return false;
+      return new LaunchResult.failed();
     }
 
-    return true;
+    return new LaunchResult.succeeded();
   }
 
   @override
@@ -266,90 +261,46 @@ class IOSDevice extends Device {
 }
 
 class _IOSDeviceLogReader extends DeviceLogReader {
-  _IOSDeviceLogReader(this.device);
+  _IOSDeviceLogReader(this.device) {
+    _linesController = new StreamController<String>.broadcast(
+     onListen: _start,
+     onCancel: _stop
+   );
+  }
 
   final IOSDevice device;
 
-  final StreamController<String> _linesStreamController =
-      new StreamController<String>.broadcast();
-
+  StreamController<String> _linesController;
   Process _process;
-  StreamSubscription<String> _stdoutSubscription;
-  StreamSubscription<String> _stderrSubscription;
 
   @override
-  Stream<String> get lines => _linesStreamController.stream;
+  Stream<String> get logLines => _linesController.stream;
 
   @override
   String get name => device.name;
 
-  @override
-  bool get isReading => _process != null;
+  void _start() {
+    runCommand(<String>[device.loggerPath]).then((Process process) {
+      _process = process;
+      _process.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);
+      _process.stderr.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);
 
-  @override
-  Future<int> get finished {
-    return _process != null ? _process.exitCode : new Future<int>.value(0);
+      _process.exitCode.then((int code) {
+        if (_linesController.hasListener)
+          _linesController.close();
+      });
+    });
   }
 
-  @override
-  Future<Null> start() async {
-    if (_process != null) {
-      throw new StateError(
-        '_IOSDeviceLogReader must be stopped before it can be started.'
-      );
-    }
-    _process = await runCommand(<String>[device.loggerPath]);
-    _stdoutSubscription =
-        _process.stdout.transform(UTF8.decoder)
-                       .transform(const LineSplitter()).listen(_onLine);
-    _stderrSubscription =
-        _process.stderr.transform(UTF8.decoder)
-                       .transform(const LineSplitter()).listen(_onLine);
-    _process.exitCode.then(_onExit);
-  }
-
-  @override
-  Future<Null> stop() async {
-    if (_process == null) {
-      throw new StateError(
-        '_IOSDeviceLogReader must be started before it can be stopped.'
-      );
-    }
-    _stdoutSubscription?.cancel();
-    _stdoutSubscription = null;
-    _stderrSubscription?.cancel();
-    _stderrSubscription = null;
-    await _process.kill();
-    _process = null;
-  }
-
-  void _onExit(int exitCode) {
-    _stdoutSubscription?.cancel();
-    _stdoutSubscription = null;
-    _stderrSubscription?.cancel();
-    _stderrSubscription = null;
-    _process = null;
-  }
-
-  RegExp _runnerRegex = new RegExp(r'Runner');
+  static final RegExp _runnerRegex = new RegExp(r'FlutterRunner');
 
   void _onLine(String line) {
-    if (!_runnerRegex.hasMatch(line))
-      return;
-
-    _linesStreamController.add(line);
+    if (_runnerRegex.hasMatch(line))
+      _linesController.add(line);
   }
 
-  @override
-  int get hashCode => name.hashCode;
-
-  @override
-  bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
-    if (other is! _IOSDeviceLogReader)
-      return false;
-    return other.name == name;
+  void _stop() {
+    _process?.kill();
   }
 }
 

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import '../device.dart';
 import '../globals.dart';
@@ -40,17 +41,33 @@ class LogsCommand extends FlutterCommand {
 
     printStatus('Showing $logReader logs:');
 
-    // Start reading.
-    if (!logReader.isReading)
-      await logReader.start();
+    Completer<int> exitCompleter = new Completer<int>();
 
-    StreamSubscription<String> subscription = logReader.lines.listen(printStatus);
+    // Start reading.
+    StreamSubscription<String> subscription = logReader.logLines.listen(
+      printStatus,
+      onDone: () {
+        exitCompleter.complete(0);
+      },
+      onError: (dynamic error) {
+        exitCompleter.complete(error is int ? error : 1);
+      }
+    );
+
+    // When terminating, close down the log reader.
+    ProcessSignal.SIGINT.watch().listen((ProcessSignal signal) {
+      subscription.cancel();
+      printStatus('');
+      exitCompleter.complete(0);
+    });
+    ProcessSignal.SIGTERM.watch().listen((ProcessSignal signal) {
+      subscription.cancel();
+      exitCompleter.complete(0);
+    });
 
     // Wait for the log reader to be finished.
-    int result = await logReader.finished;
-
+    int result = await exitCompleter.future;
     subscription.cancel();
-
     if (result != 0)
       printError('Error listening to $logReader logs.');
     return result;
