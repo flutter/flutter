@@ -10,7 +10,6 @@ import 'package:flutter/http.dart' as http;
 import 'package:mojo/core.dart' as core;
 import 'package:mojo_services/mojo/asset_bundle/asset_bundle.mojom.dart';
 
-import 'fetch.dart';
 import 'image_cache.dart';
 import 'image_decoder.dart';
 import 'image_resource.dart';
@@ -34,7 +33,7 @@ class NetworkAssetBundle extends AssetBundle {
 
   @override
   Future<core.MojoDataPipeConsumer> load(String key) async {
-    return (await fetchUrl(_urlFromKey(key))).body;
+    return await http.readDataPipe(_urlFromKey(key));
   }
 
   @override
@@ -88,7 +87,7 @@ class MojoAssetBundle extends CachingAssetBundle {
   }
 
   static Future<Null> _fetchAndUnpackBundle(String relativeUrl, AssetBundleProxy bundle) async {
-    core.MojoDataPipeConsumer bundleData = (await fetchUrl(relativeUrl)).body;
+    core.MojoDataPipeConsumer bundleData = await http.readDataPipe(Uri.base.resolve(relativeUrl));
     AssetUnpackerProxy unpacker = new AssetUnpackerProxy.unbound();
     shell.connectToService("mojo:asset_bundle", unpacker);
     unpacker.ptr.unpackZipStream(bundleData, bundle);
