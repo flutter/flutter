@@ -202,10 +202,27 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 
 /// Implements the basic material design visual layout structure.
 ///
-/// This class provides APIs for showing drawers, snackbars, and bottom sheets.
+/// This class provides APIs for showing drawers, snack bars, and bottom sheets.
 ///
-/// See: <https://www.google.com/design/spec/layout/structure.html>
+/// To display a snackbar or a persistent bottom sheet, obtain the
+/// [ScaffoldState] for the current [BuildContext] via [Scaffold.of] and use the
+/// [ScaffoldState.showSnackBar] and [ScaffoldState.showBottomSheet] functions.
+///
+/// See also:
+///
+///  * [AppBar]
+///  * [FloatingActionButton]
+///  * [Drawer]
+///  * [SnackBar]
+///  * [BottomSheet]
+///  * [ScaffoldState]
+///  * <https://www.google.com/design/spec/layout/structure.html>
 class Scaffold extends StatefulWidget {
+  /// Creates a visual scaffold for material design widgets.
+  ///
+  /// By default, the [appBarBehavior] causes the [appBar] not to respond to
+  /// scrolling and the [body] is resized to avoid the window padding (e.g., to
+  /// to avoid being obscured by an onscreen keyboard).
   Scaffold({
     Key key,
     this.appBar,
@@ -213,17 +230,51 @@ class Scaffold extends StatefulWidget {
     this.floatingActionButton,
     this.drawer,
     this.scrollableKey,
-    this.appBarBehavior: AppBarBehavior.anchor
+    this.appBarBehavior: AppBarBehavior.anchor,
+    this.resizeToAvoidWindowPadding: true
   }) : super(key: key) {
     assert(scrollableKey != null ? (appBarBehavior != AppBarBehavior.anchor) : true);
   }
 
+  /// An app bar to display at the top of the scaffold.
   final AppBar appBar;
+
+  /// The primary content of the scaffold.
+  ///
+  /// Displayed below the app bar and behind the [floatingActionButton] and
+  /// [drawer]. To avoid the body being resized to avoid the window padding
+  /// (e.g., from the onscreen keyboard), see [resizeToAvoidWindowPadding].
   final Widget body;
+
+  /// A button displayed on top of the body.
+  ///
+  /// Typically a [FloatingActionButton].
   final Widget floatingActionButton;
+
+  /// A panel displayed to the side of the body, often hidden on mobile devices.
+  ///
+  /// Typically a [Drawer].
   final Widget drawer;
+
+  /// The key of the primary [Scrollable] widget in the [body].
+  ///
+  /// Used to control scroll-linked effects, such as the collapse of the
+  /// [appBar].
   final Key scrollableKey;
+
+  /// How the [appBar] should respond to scrolling.
+  ///
+  /// By default, the [appBar] does not respond to scrolling.
   final AppBarBehavior appBarBehavior;
+
+  /// Whether the [body] (and other floating widgets) should size themselves to avoid the window's padding.
+  ///
+  /// For example, if there is an onscreen keyboard displayed above the
+  /// scaffold, the body can be resized to avoid overlapping the keyboard, which
+  /// prevents widgets inside the body from being obscured by the keyboard.
+  ///
+  /// Defaults to true.
+  final bool resizeToAvoidWindowPadding;
 
   /// The state from the closest instance of this class that encloses the given context.
   static ScaffoldState of(BuildContext context) => context.ancestorStateOfType(const TypeMatcher<ScaffoldState>());
@@ -232,6 +283,10 @@ class Scaffold extends StatefulWidget {
   ScaffoldState createState() => new ScaffoldState();
 }
 
+/// State for a [Scaffold].
+///
+/// Can display [SnackBar]s and [BottomSheet]s. Retrieve a [ScaffoldState] from
+/// the current [BuildContext] using [Scaffold.of].
 class ScaffoldState extends State<Scaffold> {
 
   // APPBAR API
@@ -510,8 +565,7 @@ class ScaffoldState extends State<Scaffold> {
     );
   }
 
-  Widget _buildScrollableAppBar(BuildContext context) {
-    final EdgeInsets padding = MediaQuery.of(context).padding;
+  Widget _buildScrollableAppBar(BuildContext context, EdgeInsets padding) {
     final double expandedHeight = (config.appBar?.expandedHeight ?? 0.0) + padding.top;
     final double collapsedHeight = (config.appBar?.collapsedHeight ?? 0.0) + padding.top;
     final double minimumHeight = (config.appBar?.minimumHeight ?? 0.0) + padding.top;
@@ -558,7 +612,9 @@ class ScaffoldState extends State<Scaffold> {
 
   @override
   Widget build(BuildContext context) {
-    final EdgeInsets padding = MediaQuery.of(context).padding;
+    EdgeInsets padding = MediaQuery.of(context).padding;
+    if (!config.resizeToAvoidWindowPadding)
+      padding = new EdgeInsets.only(top: padding.top);
 
     if (_snackBars.length > 0) {
       final ModalRoute<dynamic> route = ModalRoute.of(context);
@@ -581,7 +637,7 @@ class ScaffoldState extends State<Scaffold> {
       );
       _addIfNonNull(children, appBar, _ScaffoldSlot.appBar);
     } else {
-      children.add(new LayoutId(child: _buildScrollableAppBar(context), id: _ScaffoldSlot.appBar));
+      children.add(new LayoutId(child: _buildScrollableAppBar(context, padding), id: _ScaffoldSlot.appBar));
     }
     // Otherwise the AppBar will be part of a [app bar, body] Stack. See AppBarBehavior.scroll below.
 
