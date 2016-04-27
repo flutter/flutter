@@ -110,6 +110,12 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
   }
 
   @override
+  void dispose() {
+    _childSegueController.dispose();
+    super.dispose();
+  }
+
+  @override
   void didUpdateConfig(FloatingActionButton oldConfig) {
     super.didUpdateConfig(oldConfig);
     if (Widget.canUpdate(oldConfig.child, config.child) && config.backgroundColor == oldConfig.backgroundColor)
