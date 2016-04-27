@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 /// Invoke Java Native Interface APIs from Dart.
+///
+/// To use, import `dart:jni`.
 library dart_jni;
 
 import 'dart:collection';
