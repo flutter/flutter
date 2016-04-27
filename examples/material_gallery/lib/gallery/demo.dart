@@ -5,8 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
-import 'syntax_highlighter.dart';
 import 'example_code_parser.dart';
+import 'syntax_highlighter.dart';
 
 class SingleComponentDemoData {
   SingleComponentDemoData({

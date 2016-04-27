@@ -5,10 +5,9 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'package:material_gallery/gallery/example_code_parser.dart';
 import 'package:mojo/core.dart' as core;
 import 'package:test/test.dart';
-
-import '../lib/gallery/example_code_parser.dart';
 
 void main() {
   test('Material Gallery example code parser test', () async {

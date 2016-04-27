@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+
 import 'package:flutter/services.dart';
 
 const String _kStartTag = '// START ';
