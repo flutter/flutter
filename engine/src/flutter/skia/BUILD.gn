@@ -355,7 +355,7 @@ component("skia") {
       ]
     } else if (use_glfw) {
       sources += [
-        "//skia/ext/GrGLCreateNativeInterface_glfw.cpp"
+        "//third_party/skia/src/gpu/gl/glfw/GrGLCreateNativeInterface_glfw.cpp"
       ]
     }
 
