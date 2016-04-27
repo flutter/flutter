@@ -398,6 +398,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.onSelected,
     this.tooltip: 'Show menu',
     this.elevation: 8,
+    this.padding: const EdgeInsets.all(8.0),
     this.child
   }) : super(key: key) {
     assert(itemBuilder != null);
@@ -420,6 +421,11 @@ class PopupMenuButton<T> extends StatefulWidget {
   ///
   /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
   final int elevation;
+
+  /// Matches IconButton's 8 dps padding by default. In some cases, notably where
+  /// this button appears as the trailing element of a list item, it's useful to be able
+  /// to set the padding to zero.
+  final EdgeInsets padding;
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -453,6 +459,7 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     if (config.child == null) {
       return new IconButton(
         icon: Icons.more_vert,
+        padding: config.padding,
         tooltip: config.tooltip,
         onPressed: () { showButtonMenu(context); }
       );
