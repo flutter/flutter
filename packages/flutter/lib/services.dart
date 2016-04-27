@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 /// System services exposed to Flutter apps.
+/// 
+/// To use, import `package:flutter/services.dart`.
 ///
 /// For example, this library includes [fetch], which fetches data from the
 /// network.

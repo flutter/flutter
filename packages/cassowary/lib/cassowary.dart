@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 /// An implementation of the Cassowary constraint solving algorithm in Dart.
+/// 
+/// This library is not meant to be imported by developers.
+/// It will soon be integrated into another Flutter library.
 ///
 /// This is used by the [RenderAutoLayout] render object in the rendering
 /// library and by the [AutoLayout] widget in the widget library.

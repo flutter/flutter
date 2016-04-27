@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 /// Flutter widgets implementing Material Design.
+/// 
+/// To use, import `package:flutter/material.dart`.
 ///
 /// See
 /// [www.google.com/design/spec/material-design](https://www.google.com/design/spec/material-design/introduction.html)

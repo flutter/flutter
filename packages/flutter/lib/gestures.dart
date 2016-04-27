@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 /// The Flutter gesture recognizers.
+/// 
+/// To use, import `package:flutter/gestures.dart`.
 library gestures;
 
 export 'src/gestures/arena.dart';

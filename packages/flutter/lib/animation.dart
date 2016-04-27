@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 /// The Flutter animation system.
+/// 
+/// To use, import `package:flutter/animation.dart`.
 ///
 /// See [flutter.io/animations](https://flutter.io/animations/) for an overview.
 ///

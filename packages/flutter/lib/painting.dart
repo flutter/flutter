@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 /// The Flutter painting library.
+/// 
+/// To use, import `package:flutter/painting.dart`.
 ///
 /// This library includes a variety of classes that wrap the Flutter
 /// engine's painting API for more specialised purposes, such as painting scaled
