@@ -4,7 +4,7 @@
 
 import 'package:test/test.dart';
 
-import 'package:newton/newton.dart';
+import 'package:flutter/physics.dart';
 
 void main() {
   test('test_friction', () {

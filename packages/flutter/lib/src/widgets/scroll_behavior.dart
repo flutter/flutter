@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'package:newton/newton.dart';
+import 'package:flutter/physics.dart';
 
 const double _kSecondsPerMillisecond = 1000.0;
 const double _kScrollDrag = 0.025;

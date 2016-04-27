@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/scheduler.dart';
-import 'package:newton/newton.dart';
+import 'package:flutter/physics.dart';
 
 import 'animation.dart';
 import 'curves.dart';
