@@ -1738,6 +1738,16 @@ class InheritedElement extends _ProxyElement {
   void notifyDescendants(InheritedWidget oldWidget) {
     if (!widget.updateShouldNotify(oldWidget))
       return;
+    dispatchDependenciesChanged();
+  }
+
+  /// Notifies all dependent elements that this inherited widget has changed.
+  ///
+  /// [InheritedElement] calls this function if [InheritedWidget.updateShouldNotify]
+  /// returns true. Subclasses of [InheritedElement] might wish to call this
+  /// function at other times if their inherited information changes outside of
+  /// the build phase.
+  void dispatchDependenciesChanged() {
     final Type ourRuntimeType = widget.runtimeType;
     for (Element dependant in _dependents) {
       dependant.dependenciesChanged(ourRuntimeType);
