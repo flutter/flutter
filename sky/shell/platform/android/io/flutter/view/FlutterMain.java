@@ -13,7 +13,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -52,16 +56,32 @@ import org.domokit.vsync.VSyncProviderImpl;
  **/
 @JNINamespace("sky::shell")
 public class FlutterMain {
+    private static final String TAG = "FlutterMain";
+
     public static final String APP_BUNDLE = "app.flx";
 
-    private static final String TAG = "FlutterMain";
+    // Resource names used for components of the precompiled snapshot.
+    private static final String AOT_INSTR = "snapshot_aot_instr";
+    private static final String AOT_ISOLATE = "snapshot_aot_isolate";
+    private static final String AOT_RODATA = "snapshot_aot_rodata";
+    private static final String AOT_VM_ISOLATE = "snapshot_aot_vmisolate";
+    private static final String[] AOT_RESOURCES = {
+        AOT_INSTR, AOT_ISOLATE, AOT_RODATA, AOT_VM_ISOLATE
+    };
+
     private static final String MANIFEST = "flutter.yaml";
     private static final String SERVICES = "services.json";
     private static final String PRIVATE_DATA_DIRECTORY_SUFFIX = "sky_shell";
-    private static final String[] SKY_RESOURCES = {"icudtl.dat", APP_BUNDLE, MANIFEST};
+
+    private static final List<String> SKY_RESOURCES = new ArrayList<String>();
+    static {
+        Collections.addAll(SKY_RESOURCES, "icudtl.dat", APP_BUNDLE, MANIFEST);
+        Collections.addAll(SKY_RESOURCES, AOT_RESOURCES);
+    }
+
     private static boolean sInitialized = false;
     private static ResourceExtractor sResourceExtractor;
-    private static String sAotSnapshotPath;
+    private static boolean sIsPrecompiled;
 
     /**
      * Starts initialization of the native system.
@@ -95,9 +115,10 @@ public class FlutterMain {
             sResourceExtractor.waitForCompletion();
 
             String[] shellArgs;
-            if (sAotSnapshotPath != null) {
+            if (sIsPrecompiled) {
                 shellArgs = (args != null) ? Arrays.copyOf(args, args.length + 1) : new String[1];
-                shellArgs[shellArgs.length - 1] = "--aot-snapshot-path=" + sAotSnapshotPath;
+                shellArgs[shellArgs.length - 1] =
+                    "--aot-snapshot-path=" + PathUtils.getDataDirectory(applicationContext);
             } else {
                 shellArgs = args;
             }
@@ -262,14 +283,18 @@ public class FlutterMain {
     }
 
     private static void initAot(Context applicationContext) {
-        File aotSnapshot = new File(applicationContext.getApplicationInfo().nativeLibraryDir,
-                                    System.mapLibraryName("snapshot_aot"));
-        if (aotSnapshot.exists()) {
-            sAotSnapshotPath = aotSnapshot.getPath();
+        AssetManager manager = applicationContext.getResources().getAssets();
+        try {
+            HashSet<String> assets = new HashSet<String>();
+            Collections.addAll(assets, manager.list(""));
+            sIsPrecompiled = assets.containsAll(Arrays.asList(AOT_RESOURCES));
+        } catch (IOException e) {
+            Log.e(TAG, "Unable to access Flutter resources", e);
+            throw new RuntimeException(e);
         }
     }
 
     public static boolean isRunningPrecompiledCode() {
-        return sAotSnapshotPath != null;
+        return sIsPrecompiled;
     }
 }

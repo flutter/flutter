@@ -5,9 +5,15 @@
 #include "sky/engine/core/script/dart_init.h"
 
 #include <dlfcn.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
 
 #include "base/bind.h"
 #include "base/command_line.h"
+#include "base/files/file_path.h"
+#include "base/files/file_util.h"
 #include "base/lazy_instance.h"
 #include "base/logging.h"
 #include "base/single_thread_task_runner.h"
@@ -279,32 +285,13 @@ static void ServiceStreamCancelCallback(const char* stream_id) {
 
 const char* kDartVmIsolateSnapshotBufferName = "kDartVmIsolateSnapshotBuffer";
 const char* kDartIsolateSnapshotBufferName = "kDartIsolateSnapshotBuffer";
-
-#if OS(IOS)
-
 const char* kInstructionsSnapshotName = "kInstructionsSnapshot";
 const char* kDataSnapshotName = "kDataSnapshot";
 
-const char* GetDartApplicationLibraryPath() {
-  return "FlutterApplication.framework/FlutterApplication";
-}
+#if OS(IOS)
 
-#elif OS(ANDROID)
-
-const char* kInstructionsSnapshotName = "_kInstructionsSnapshot";
-const char* kDataSnapshotName = "_kDataSnapshot";
-
-const char* GetDartApplicationLibraryPath() {
-  const std::string& aot_snapshot_path = SkySettings::Get().aot_snapshot_path;
-  CHECK(!aot_snapshot_path.empty());
-  return aot_snapshot_path.c_str();
-}
-
-#else
-
-#error "AOT mode is not supported on this platform"
-
-#endif
+const char* kDartApplicationLibraryPath =
+    "FlutterApplication.framework/FlutterApplication";
 
 static void* DartLookupSymbolInLibrary(const char* symbol_name,
                                        const char* library) {
@@ -332,7 +319,7 @@ void* _DartSymbolLookup(const char* symbol_name) {
   // symbols resolved. Once the application library is loaded, there is
   // currently no provision to unload the same.
   void* symbol =
-      DartLookupSymbolInLibrary(symbol_name, GetDartApplicationLibraryPath());
+      DartLookupSymbolInLibrary(symbol_name, kDartApplicationLibraryPath);
   if (symbol != nullptr) {
     return symbol;
   }
@@ -340,6 +327,71 @@ void* _DartSymbolLookup(const char* symbol_name) {
   // Check inside the default library
   return DartLookupSymbolInLibrary(symbol_name, nullptr);
 }
+
+#elif OS(ANDROID)
+
+// Describes an asset file that holds a part of the precompiled snapshot.
+struct SymbolAsset {
+  const char* symbol_name;
+  const char* file_name;
+  bool is_executable;
+  void* mapping;
+};
+
+static SymbolAsset g_symbol_assets[] = {
+  {kDartVmIsolateSnapshotBufferName, "snapshot_aot_vmisolate", false},
+  {kDartIsolateSnapshotBufferName, "snapshot_aot_isolate", false},
+  {kInstructionsSnapshotName, "snapshot_aot_instr", true},
+  {kDataSnapshotName, "snapshot_aot_rodata", false},
+};
+
+// Resolve a precompiled snapshot symbol by mapping the corresponding asset
+// file into memory.
+void* _DartSymbolLookup(const char* symbol_name) {
+  for (SymbolAsset& symbol_asset : g_symbol_assets) {
+    if (strcmp(symbol_name, symbol_asset.symbol_name))
+      continue;
+
+    if (symbol_asset.mapping) {
+      return symbol_asset.mapping;
+    }
+
+    const std::string& aot_snapshot_path = SkySettings::Get().aot_snapshot_path;
+    CHECK(!aot_snapshot_path.empty());
+
+    base::FilePath asset_path =
+        base::FilePath(aot_snapshot_path).Append(symbol_asset.file_name);
+    int64 asset_size;
+    if (!base::GetFileSize(asset_path, &asset_size))
+      return nullptr;
+
+    int fd = HANDLE_EINTR(::open(asset_path.value().c_str(), O_RDONLY));
+    if (fd == -1) {
+      return nullptr;
+    }
+
+    int mmap_flags = PROT_READ;
+    if (symbol_asset.is_executable)
+      mmap_flags |= PROT_EXEC;
+
+    void* symbol = ::mmap(NULL, asset_size, mmap_flags, MAP_PRIVATE, fd, 0);
+    if (symbol == MAP_FAILED) {
+      HANDLE_EINTR(::close(fd));
+      return nullptr;
+    }
+
+    symbol_asset.mapping = symbol;
+    return symbol;
+  }
+
+  return nullptr;
+}
+
+#else
+
+#error "AOT mode is not supported on this platform"
+
+#endif
 
 static const uint8_t* PrecompiledInstructionsSymbolIfPresent() {
   return reinterpret_cast<uint8_t*>(DART_SYMBOL(kInstructionsSnapshot));

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
@@ -136,10 +137,8 @@ class ResourceExtractor {
         mResources = new HashSet<String>();
     }
 
-    void addResources(String[] resources) {
-        for (String resource : resources) {
-            mResources.add(resource);
-        }
+    void addResources(List<String> resources) {
+        mResources.addAll(resources);
     }
 
     void start() {
