@@ -7,6 +7,13 @@ import 'dart:io';
 import '../artifacts.dart';
 import '../base/process.dart';
 
+final Set<String> kKnownBranchNames = new Set<String>.from(<String>[
+  'master',
+  'alpha',
+  'hackathon',
+  'beta'
+]);
+
 class FlutterVersion {
   FlutterVersion(this.flutterRoot) {
     _channel = _runGit('git rev-parse --abbrev-ref --symbolic @{u}');
@@ -35,13 +42,13 @@ class FlutterVersion {
 
   String _frameworkRevision;
   String get frameworkRevision => _frameworkRevision;
-  String get frameworkRevisionShort => _runGit('git rev-parse --short $frameworkRevision');
+  String get frameworkRevisionShort => _shortGitRevision(frameworkRevision);
 
   String _frameworkAge;
   String get frameworkAge => _frameworkAge;
 
   String get engineRevision => ArtifactStore.engineRevision;
-  String get engineRevisionShort => _runGit('git rev-parse --short $engineRevision');
+  String get engineRevisionShort => _shortGitRevision(engineRevision);
 
   String _runGit(String command) => runSync(command.split(' '), workingDirectory: flutterRoot);
 
@@ -57,14 +64,21 @@ class FlutterVersion {
     return new FlutterVersion(flutterRoot != null ? flutterRoot : ArtifactStore.flutterRoot);
   }
 
-  static String getVersionString() {
+  /// Return a short string for the version (`a76bc8e22b/alpha`).
+  static String getVersionString({ bool whitelistBranchName: false }) {
     final String cwd = ArtifactStore.flutterRoot;
 
-    String commit = _runSync('git', <String>['rev-parse', 'HEAD'], cwd);
-    if (commit.length > 8)
-      commit = commit.substring(0, 8);
+    String commit = _shortGitRevision(_runSync('git', <String>['rev-parse', 'HEAD'], cwd));
+    commit = commit.isEmpty ? 'unknown' : commit;
 
     String branch = _runSync('git', <String>['rev-parse', '--abbrev-ref', 'HEAD'], cwd);
+    branch = branch == 'HEAD' ? 'master' : branch;
+
+    if (whitelistBranchName || branch.isEmpty) {
+      // Only return the branch names we know about; arbitrary branch names might contain PII.
+      if (!kKnownBranchNames.contains(branch))
+        branch = 'dev';
+    }
 
     return '$commit/$branch';
   }
@@ -73,4 +87,8 @@ class FlutterVersion {
 String _runSync(String executable, List<String> arguments, String cwd) {
   ProcessResult results = Process.runSync(executable, arguments, workingDirectory: cwd);
   return results.exitCode == 0 ? results.stdout.trim() : '';
+}
+
+String _shortGitRevision(String revision) {
+  return revision.length > 10 ? revision.substring(0, 10) : revision;
 }

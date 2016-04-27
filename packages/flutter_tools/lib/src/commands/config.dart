@@ -23,7 +23,7 @@ class ConfigCommand extends FlutterCommand {
   final String description =
     'Configure Flutter settings.\n\n'
     'The Flutter tool anonymously reports feature usage statistics and basic crash reports to help improve\n'
-    'Flutter tools over time. See Google\'s privacy policy: www.google.com/intl/en/policies/privacy';
+    'Flutter tools over time. See Google\'s privacy policy: https://www.google.com/intl/en/policies/privacy/';
 
   @override
   final List<String> aliases = <String>['configure'];
