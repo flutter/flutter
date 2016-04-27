@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 
-import '../demos.dart';
+import '../demo/all.dart';
 import 'home.dart';
 
 final Map<String, WidgetBuilder> kRoutes = <String, WidgetBuilder>{

@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import '../demos.dart';
+import '../demo/all.dart';
 import 'drawer.dart';
 import 'header.dart';
 import 'item.dart';

@@ -4,18 +4,17 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_gallery/gallery/app.dart' as material_gallery_app;
+import 'package:material_gallery/gallery/item.dart' as material_gallery_item;
+import 'package:material_gallery/main.dart' as material_gallery_main;
 import 'package:test/test.dart';
-
-import '../lib/main.dart' as material_gallery;
-import '../lib/gallery/app.dart' as material_gallery;
-import '../lib/gallery/item.dart' as material_gallery;
 
 // Warning: the following strings must be kept in sync with GalleryHome.
 const List<String> demoCategories = const <String>['Demos', 'Components', 'Style'];
 
 Finder findGalleryItemByRouteName(WidgetTester tester, String routeName) {
   return find.byWidgetPredicate((Widget widget) {
-    return widget is material_gallery.GalleryItem
+    return widget is material_gallery_item.GalleryItem
         && widget.routeName == routeName;
   });
 }
@@ -53,7 +52,7 @@ void smokeDemo(WidgetTester tester, String routeName) {
 void main() {
   test('Material Gallery app smoke test', () {
     testWidgets((WidgetTester tester) {
-      material_gallery.main(); // builds the app and schedules a frame but doesn't trigger one
+      material_gallery_main.main(); // builds the app and schedules a frame but doesn't trigger one
       tester.pump(); // see https://github.com/flutter/flutter/issues/1865
       tester.pump(); // triggers a frame
 
@@ -66,7 +65,7 @@ void main() {
 
       final List<double> scrollDeltas = new List<double>();
       double previousY = tester.getTopRight(find.text(demoCategories[0])).y;
-      final List<String> routeNames = material_gallery.kRoutes.keys.toList();
+      final List<String> routeNames = material_gallery_app.kRoutes.keys.toList();
       for (String routeName in routeNames) {
         final double y = tester.getTopRight(findGalleryItemByRouteName(tester, routeName)).y;
         scrollDeltas.add(previousY - y);
