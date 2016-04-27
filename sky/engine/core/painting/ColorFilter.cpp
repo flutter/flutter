@@ -25,11 +25,10 @@ void ColorFilter::RegisterNatives(DartLibraryNatives* natives) {
 
 PassRefPtr<ColorFilter> ColorFilter::create(CanvasColor color,
                                             TransferMode transfer_mode) {
-  return adoptRef(new ColorFilter(
-      adoptRef(SkColorFilter::CreateModeFilter(color, transfer_mode))));
+  return adoptRef(new ColorFilter(SkColorFilter::MakeModeFilter(color, transfer_mode)));
 }
 
-ColorFilter::ColorFilter(PassRefPtr<SkColorFilter> filter)
+ColorFilter::ColorFilter(sk_sp<SkColorFilter> filter)
     : filter_(filter) {
 }
 

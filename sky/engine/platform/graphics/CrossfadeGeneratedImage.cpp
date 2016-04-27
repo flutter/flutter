@@ -27,7 +27,6 @@
 
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/platform/graphics/GraphicsContextStateSaver.h"
-#include "sky/engine/platform/graphics/ImageBuffer.h"
 
 namespace blink {
 
@@ -96,16 +95,6 @@ void CrossfadeGeneratedImage::draw(GraphicsContext* context, const FloatRect& ds
 
 void CrossfadeGeneratedImage::drawPattern(GraphicsContext* context, const FloatRect& srcRect, const FloatSize& scale, const FloatPoint& phase, CompositeOperator compositeOp, const FloatRect& dstRect, WebBlendMode blendMode, const IntSize& repeatSpacing)
 {
-    OwnPtr<ImageBuffer> imageBuffer = context->createRasterBuffer(m_size);
-    if (!imageBuffer)
-        return;
-
-    // Fill with the cross-faded image.
-    GraphicsContext* graphicsContext = imageBuffer->context();
-    drawCrossfade(graphicsContext);
-
-    // Tile the image buffer into the context.
-    imageBuffer->drawPattern(context, srcRect, scale, phase, compositeOp, dstRect, blendMode, repeatSpacing);
 }
 
 } // namespace blink

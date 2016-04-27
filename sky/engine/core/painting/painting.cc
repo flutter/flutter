@@ -50,9 +50,8 @@ void DecodeImage(scoped_ptr<DartPersistentValue> callback,
   }
 
   RefPtr<CanvasImage> resultImage = CanvasImage::create();
-  RefPtr<SkImage> skImage = adoptRef(
-      SkImage::NewFromBitmap(imageFrame->getSkBitmap()));
-  resultImage->setImage(skImage.release());
+  sk_sp<SkImage> skImage = SkImage::MakeFromBitmap(imageFrame->getSkBitmap());
+  resultImage->setImage(std::move(skImage));
 
   DartInvoke(callback->value(), {ToDart(resultImage)});
 }

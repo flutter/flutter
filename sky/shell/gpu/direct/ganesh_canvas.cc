@@ -28,7 +28,7 @@ GaneshCanvas::~GaneshCanvas() {
 }
 
 void GaneshCanvas::SetGrGLInterface(const GrGLInterface* interface) {
-  sk_surface_.clear();
+  sk_surface_ = nullptr;
   if (interface) {
     gr_context_ = skia::AdoptRef(GrContext::Create(kOpenGL_GrBackend,
         reinterpret_cast<GrBackendContext>(interface)));
@@ -59,7 +59,7 @@ SkCanvas* GaneshCanvas::GetCanvas(int32_t fbo, const SkISize& size) {
   skia::RefPtr<GrRenderTarget> target = skia::AdoptRef(
     gr_context_->textureProvider()->wrapBackendRenderTarget(desc));
   DCHECK(target);
-  sk_surface_ = skia::AdoptRef(SkSurface::NewRenderTargetDirect(target.get()));
+  sk_surface_ = SkSurface::MakeRenderTargetDirect(target.get());
   DCHECK(sk_surface_);
   return sk_surface_->getCanvas();
 }

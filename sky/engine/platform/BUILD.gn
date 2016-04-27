@@ -178,8 +178,6 @@ source_set("platform") {
     "graphics/DecodingImageGenerator.h",
     "graphics/DeferredImageDecoder.cpp",
     "graphics/DeferredImageDecoder.h",
-    "graphics/DisplayList.cpp",
-    "graphics/DisplayList.h",
     "graphics/DrawLooperBuilder.cpp",
     "graphics/DrawLooperBuilder.h",
     "graphics/FrameData.cpp",
@@ -199,11 +197,6 @@ source_set("platform") {
     "graphics/GraphicsTypes.h",
     "graphics/Image.cpp",
     "graphics/Image.h",
-    "graphics/ImageBuffer.cpp",
-    "graphics/ImageBuffer.h",
-    "graphics/ImageBufferClient.h",
-    "graphics/ImageBufferSurface.cpp",
-    "graphics/ImageBufferSurface.h",
     "graphics/ImageDecodingStore.cpp",
     "graphics/ImageDecodingStore.h",
     "graphics/ImageFilter.cpp",
@@ -228,62 +221,6 @@ source_set("platform") {
     "graphics/StrokeData.h",
     "graphics/ThreadSafeDataTransport.cpp",
     "graphics/ThreadSafeDataTransport.h",
-    "graphics/UnacceleratedImageBufferSurface.cpp",
-    "graphics/UnacceleratedImageBufferSurface.h",
-    "graphics/filters/DistantLightSource.cpp",
-    "graphics/filters/DistantLightSource.h",
-    "graphics/filters/FEBlend.cpp",
-    "graphics/filters/FEBlend.h",
-    "graphics/filters/FEColorMatrix.cpp",
-    "graphics/filters/FEColorMatrix.h",
-    "graphics/filters/FEComponentTransfer.cpp",
-    "graphics/filters/FEComponentTransfer.h",
-    "graphics/filters/FEComposite.cpp",
-    "graphics/filters/FEComposite.h",
-    "graphics/filters/FEConvolveMatrix.cpp",
-    "graphics/filters/FEConvolveMatrix.h",
-    "graphics/filters/FEDiffuseLighting.cpp",
-    "graphics/filters/FEDiffuseLighting.h",
-    "graphics/filters/FEDisplacementMap.cpp",
-    "graphics/filters/FEDisplacementMap.h",
-    "graphics/filters/FEDropShadow.cpp",
-    "graphics/filters/FEDropShadow.h",
-    "graphics/filters/FEFlood.cpp",
-    "graphics/filters/FEFlood.h",
-    "graphics/filters/FEGaussianBlur.cpp",
-    "graphics/filters/FEGaussianBlur.h",
-    "graphics/filters/FELighting.cpp",
-    "graphics/filters/FELighting.h",
-    "graphics/filters/FEMerge.cpp",
-    "graphics/filters/FEMerge.h",
-    "graphics/filters/FEMorphology.cpp",
-    "graphics/filters/FEMorphology.h",
-    "graphics/filters/FEOffset.cpp",
-    "graphics/filters/FEOffset.h",
-    "graphics/filters/FESpecularLighting.cpp",
-    "graphics/filters/FESpecularLighting.h",
-    "graphics/filters/FETile.cpp",
-    "graphics/filters/FETile.h",
-    "graphics/filters/Filter.h",
-    "graphics/filters/FilterEffect.cpp",
-    "graphics/filters/FilterEffect.h",
-    "graphics/filters/FilterOperation.cpp",
-    "graphics/filters/FilterOperation.h",
-    "graphics/filters/FilterOperations.cpp",
-    "graphics/filters/FilterOperations.h",
-    "graphics/filters/LightSource.cpp",
-    "graphics/filters/LightSource.h",
-    "graphics/filters/ParallelJobs.h",
-    "graphics/filters/PointLightSource.cpp",
-    "graphics/filters/PointLightSource.h",
-    "graphics/filters/SkiaImageFilterBuilder.cpp",
-    "graphics/filters/SkiaImageFilterBuilder.h",
-    "graphics/filters/SourceAlpha.cpp",
-    "graphics/filters/SourceAlpha.h",
-    "graphics/filters/SourceGraphic.cpp",
-    "graphics/filters/SourceGraphic.h",
-    "graphics/filters/SpotLightSource.cpp",
-    "graphics/filters/SpotLightSource.h",
     "graphics/skia/NativeImageSkia.cpp",
     "graphics/skia/NativeImageSkia.h",
     "graphics/skia/SkSizeHash.h",
@@ -448,10 +385,6 @@ source_set("platform") {
   if (is_linux) {
     direct_dependent_configs = [ "//build/config/linux:fontconfig" ]
   }
-
-  if (target_cpu == "arm") {
-    deps += [ ":sky_arm_neon" ]
-  }
 }
 
 test("platform_unittests") {
@@ -476,7 +409,6 @@ test("platform_unittests") {
     "geometry/FloatRoundedRectTest.cpp",
     "geometry/RegionTest.cpp",
     "geometry/RoundedRectTest.cpp",
-    "graphics/GraphicsContextTest.cpp",
     "graphics/ThreadSafeDataTransportTest.cpp",
     "image-decoders/ImageDecoderTest.cpp",
     "testing/RunAllTests.cpp",
@@ -510,26 +442,4 @@ test("platform_unittests") {
   defines = [ "INSIDE_BLINK" ]
 
   include_dirs = [ "$root_build_dir" ]
-}
-
-if (target_cpu == "arm") {
-  source_set("sky_arm_neon") {
-    sources = [
-      "graphics/cpu/arm/WebGLImageConversionNEON.h",
-      "graphics/cpu/arm/filters/FEBlendNEON.h",
-      "graphics/cpu/arm/filters/FECompositeArithmeticNEON.h",
-      "graphics/cpu/arm/filters/FEGaussianBlurNEON.h",
-      "graphics/cpu/arm/filters/NEONHelpers.h",
-    ]
-    # The *NEON.cpp files fail to compile when -mthumb is passed. Force
-    # them to build in ARM mode.
-    # See https://bugs.webkit.org/show_bug.cgi?id=62916.
-    # TODO(GYP)
-    #'cflags': ['-marm'],
-    #    'conditions': [
-    #      ['OS=="android"', {
-    #        'cflags!': ['-mthumb'],
-    #      }],
-    #    ],
-  }
 }

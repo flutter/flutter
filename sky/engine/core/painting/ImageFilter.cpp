@@ -45,15 +45,15 @@ ImageFilter::~ImageFilter() {
 }
 
 void ImageFilter::initImage(CanvasImage* image) {
-  filter_ = adoptRef(SkImageSource::Create(image->image()));
+  filter_ = SkImageSource::Make(image->image());
 }
 
 void ImageFilter::initPicture(Picture* picture) {
-  filter_ = adoptRef(SkPictureImageFilter::Create(picture->toSkia()));
+  filter_ = SkPictureImageFilter::Make(picture->toSkia());
 }
 
 void ImageFilter::initBlur(double sigmaX, double sigmaY) {
-  filter_ = adoptRef(SkBlurImageFilter::Create(sigmaX, sigmaY));
+  filter_ = SkBlurImageFilter::Make(sigmaX, sigmaY, nullptr);
 }
 
 } // namespace blink

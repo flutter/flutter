@@ -32,7 +32,6 @@
 #include "sky/engine/platform/graphics/skia/SkiaUtils.h"
 
 #include "sky/engine/platform/graphics/GraphicsContext.h"
-#include "sky/engine/platform/graphics/ImageBuffer.h"
 #include "third_party/skia/include/core/SkColorPriv.h"
 #include "third_party/skia/include/core/SkRegion.h"
 

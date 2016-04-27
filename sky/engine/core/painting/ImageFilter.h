@@ -24,14 +24,14 @@ class ImageFilter : public ThreadSafeRefCounted<ImageFilter>, public DartWrappab
   void initPicture(Picture*);
   void initBlur(double sigmaX, double sigmaY);
 
-  SkImageFilter* toSkia() { return filter_.get(); }
+  sk_sp<SkImageFilter> toSkia() { return filter_; }
 
   static void RegisterNatives(DartLibraryNatives* natives);
 
  private:
   ImageFilter();
 
-  RefPtr<SkImageFilter> filter_;
+  sk_sp<SkImageFilter> filter_;
 };
 
 } // namespace blink

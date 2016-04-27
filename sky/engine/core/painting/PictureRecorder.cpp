@@ -55,7 +55,7 @@ PassRefPtr<Picture> PictureRecorder::endRecording()
     if (!isRecording())
         return nullptr;
     RefPtr<Picture> picture = Picture::create(
-        adoptRef(m_pictureRecorder.endRecording()));
+        m_pictureRecorder.finishRecordingAsPicture());
     m_canvas->clearSkCanvas();
     m_canvas->ClearDartWrapper();
     m_canvas = nullptr;

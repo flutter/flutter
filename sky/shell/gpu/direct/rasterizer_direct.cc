@@ -125,7 +125,7 @@ void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
       layer_tree->Raster(frame);
     }
 
-    RefPtr<SkPicture> picture = adoptRef(recoder.endRecordingAsPicture());
+    sk_sp<SkPicture> picture = recoder.finishRecordingAsPicture();
     SerializePicture(path, picture.get());
   }
 

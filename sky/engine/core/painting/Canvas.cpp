@@ -277,7 +277,7 @@ void Canvas::drawPicture(Picture* picture)
     if (!m_canvas)
         return;
     ASSERT(picture);
-    m_canvas->drawPicture(picture->toSkia());
+    m_canvas->drawPicture(picture->toSkia().get());
 }
 
 void Canvas::drawParagraph(Paragraph* paragraph, const Offset& offset) {
@@ -318,7 +318,7 @@ void Canvas::drawVertices(SkCanvas::VertexMode vertexMode,
   for (uint16_t i : indices)
     skIndices.push_back(i);
 
-  RefPtr<SkXfermode> transferModePtr = adoptRef(SkXfermode::Create(transferMode));
+  sk_sp<SkXfermode> transferModePtr = SkXfermode::Make(transferMode);
 
   m_canvas->drawVertices(
     vertexMode,
@@ -341,7 +341,7 @@ void Canvas::drawAtlas(CanvasImage* atlas,
   if (!m_canvas)
     return;
 
-  RefPtr<SkImage> skImage = atlas->image();
+  sk_sp<SkImage> skImage = atlas->image();
 
   std::vector<SkRSXform> skXForms;
   skXForms.reserve(transforms.size());

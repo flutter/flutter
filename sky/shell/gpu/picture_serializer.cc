@@ -5,6 +5,7 @@
 #include "sky/shell/gpu/picture_serializer.h"
 
 #include <vector>
+#include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkPixelSerializer.h"
 #include "third_party/skia/include/core/SkStream.h"

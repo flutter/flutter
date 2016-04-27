@@ -115,7 +115,7 @@ void GraphicsContextState::setStrokePattern(const PassRefPtr<Pattern> pattern)
     m_strokeData.clearGradient();
     m_strokeData.setPattern(pattern);
     m_strokePaint.setColor(applyAlpha(SK_ColorBLACK));
-    m_strokePaint.setShader(m_strokeData.pattern()->shader());
+    m_strokePaint.setShader(sk_ref_sp(m_strokeData.pattern()->shader()));
 }
 
 void GraphicsContextState::clearStrokePattern()
@@ -174,7 +174,7 @@ void GraphicsContextState::setFillPattern(const PassRefPtr<Pattern> pattern)
     m_fillGradient.clear();
     m_fillPattern = pattern;
     m_fillPaint.setColor(applyAlpha(SK_ColorBLACK));
-    m_fillPaint.setShader(m_fillPattern->shader());
+    m_fillPaint.setShader(sk_ref_sp(m_fillPattern->shader()));
 }
 
 void GraphicsContextState::clearFillPattern()
@@ -220,8 +220,8 @@ void GraphicsContextState::setLineDash(const DashArray& dashes, float dashOffset
 void GraphicsContextState::setColorFilter(PassRefPtr<SkColorFilter> colorFilter)
 {
     m_colorFilter = colorFilter;
-    m_strokePaint.setColorFilter(m_colorFilter.get());
-    m_fillPaint.setColorFilter(m_colorFilter.get());
+    m_strokePaint.setColorFilter(toSkSp(m_colorFilter));
+    m_fillPaint.setColorFilter(toSkSp(m_colorFilter));
 }
 
 void GraphicsContextState::setCompositeOperation(CompositeOperator compositeOperation, WebBlendMode blendMode)

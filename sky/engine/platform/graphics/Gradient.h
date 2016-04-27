@@ -110,7 +110,7 @@ public:
 
     float aspectRatio() const { return m_aspectRatio; }
 
-    SkShader* shader();
+    sk_sp<SkShader> shader();
 
     void setDrawsInPMColorSpace(bool drawInPMColorSpace);
 
@@ -139,7 +139,7 @@ private:
     GradientSpreadMethod m_spreadMethod;
     AffineTransform m_gradientSpaceTransformation;
 
-    RefPtr<SkShader> m_gradient;
+    sk_sp<SkShader> m_gradient;
 };
 
 } // namespace blink

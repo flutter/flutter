@@ -24,15 +24,15 @@ class CanvasImage final : public ThreadSafeRefCounted<CanvasImage>,
   int height();
   void dispose();
 
-  SkImage* image() const { return image_.get(); }
-  void setImage(PassRefPtr<SkImage> image) { image_ = image; }
+  sk_sp<SkImage> image() const { return image_; }
+  void setImage(sk_sp<SkImage> image) { image_ = image; }
 
   static void RegisterNatives(DartLibraryNatives* natives);
 
  private:
   CanvasImage();
 
-  RefPtr<SkImage> image_;
+  sk_sp<SkImage> image_;
 };
 
 }  // namespace blink

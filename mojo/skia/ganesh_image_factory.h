@@ -22,7 +22,7 @@ namespace skia {
 // Creates an SkImage from a GL texture.
 // The underlying texture must be kept alive for as long as the SkImage exists.
 // Invokes |release_callback| when the SkImage is deleted.
-::skia::RefPtr<SkImage> CreateImageFromTexture(
+sk_sp<SkImage> CreateImageFromTexture(
     const GaneshContext::Scope& scope,
     uint32_t texture_id,
     uint32_t width,

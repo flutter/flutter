@@ -534,7 +534,7 @@ public:
     bool shouldUseTransformFromContainer(const RenderObject* container) const;
     void getTransformFromContainer(const RenderObject* container, const LayoutSize& offsetInContainer, TransformationMatrix&) const;
 
-    bool createsGroup() const { return isTransparent() || style()->hasFilter(); }
+    bool createsGroup() const { return isTransparent(); }
 
     virtual void addFocusRingRects(Vector<IntRect>&, const LayoutPoint& /* additionalOffset */, const RenderBox* /* paintContainer */ = 0) const { };
 

@@ -30,7 +30,7 @@ class GaneshCanvas {
 
  private:
   skia::RefPtr<GrContext> gr_context_;
-  skia::RefPtr<SkSurface> sk_surface_;
+  sk_sp<SkSurface> sk_surface_;
 
   DISALLOW_COPY_AND_ASSIGN(GaneshCanvas);
 };

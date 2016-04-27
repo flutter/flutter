@@ -27,7 +27,7 @@ class GaneshFramebufferSurface {
   SkCanvas* canvas() const { return surface_->getCanvas(); }
 
  private:
-  ::skia::RefPtr<SkSurface> surface_;
+  sk_sp<SkSurface> surface_;
 
   DISALLOW_COPY_AND_ASSIGN(GaneshFramebufferSurface);
 };

@@ -289,8 +289,7 @@ bool RenderStyle::diffNeedsFullLayout(const RenderStyle& other) const
             || rareNonInheritedData->m_alignContent != other.rareNonInheritedData->m_alignContent
             || rareNonInheritedData->m_alignItems != other.rareNonInheritedData->m_alignItems
             || rareNonInheritedData->m_alignSelf != other.rareNonInheritedData->m_alignSelf
-            || rareNonInheritedData->m_justifyContent != other.rareNonInheritedData->m_justifyContent
-            || rareNonInheritedData->hasFilters() != other.rareNonInheritedData->hasFilters())
+            || rareNonInheritedData->m_justifyContent != other.rareNonInheritedData->m_justifyContent)
             return true;
 
         if (rareNonInheritedData->m_flexibleBox.get() != other.rareNonInheritedData->m_flexibleBox.get()

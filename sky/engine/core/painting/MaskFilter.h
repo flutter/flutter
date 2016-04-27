@@ -8,6 +8,7 @@
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/ThreadSafeRefCounted.h"
+#include "third_party/skia/include/core/SkMaskFilter.h"
 
 class SkMaskFilter;
 
@@ -21,14 +22,14 @@ class MaskFilter : public ThreadSafeRefCounted<MaskFilter>, public DartWrappable
   static PassRefPtr<MaskFilter> create(
       unsigned style, double sigma, unsigned flags);
 
-  SkMaskFilter* filter() { return filter_.get(); }
+  sk_sp<SkMaskFilter> filter() { return filter_; }
 
   static void RegisterNatives(DartLibraryNatives* natives);
 
  private:
-  MaskFilter(PassRefPtr<SkMaskFilter> filter);
+  MaskFilter(sk_sp<SkMaskFilter> filter);
 
-  RefPtr<SkMaskFilter> filter_;
+  sk_sp<SkMaskFilter> filter_;
 };
 
 } // namespace blink

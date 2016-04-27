@@ -28,7 +28,6 @@
 #define SKY_ENGINE_PLATFORM_ANIMATION_ANIMATIONVALUE_H_
 
 #include "sky/engine/platform/animation/TimingFunction.h"
-#include "sky/engine/platform/graphics/filters/FilterOperations.h"
 #include "sky/engine/platform/transforms/TransformOperations.h"
 
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -90,23 +89,6 @@ public:
 
 private:
     TransformOperations m_value;
-};
-
-// Used to store one filter value in a keyframe list.
-class FilterAnimationValue final : public AnimationValue {
-public:
-    explicit FilterAnimationValue(double keyTime, const FilterOperations* value = 0, PassRefPtr<TimingFunction> timingFunction = nullptr)
-        : AnimationValue(keyTime, timingFunction)
-    {
-        if (value)
-            m_value = *value;
-    }
-    virtual PassOwnPtr<AnimationValue> clone() const override { return adoptPtr(new FilterAnimationValue(*this)); }
-
-    const FilterOperations* value() const { return &m_value; }
-
-private:
-    FilterOperations m_value;
 };
 
 } // namespace blink

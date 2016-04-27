@@ -79,8 +79,6 @@ namespace blink {
 
 using std::max;
 
-class FilterOperations;
-
 class AppliedTextDecoration;
 class BorderData;
 class Font;
@@ -289,8 +287,6 @@ public:
             return true;
         return hasBackgroundImage();
     }
-
-    FilterOutsets filterOutsets() const { return hasFilter() ? filter().outsets() : FilterOutsets(); }
 
     Order rtlOrdering() const { return static_cast<Order>(inherited_flags.m_rtlOrdering); }
     void setRTLOrdering(Order o) { inherited_flags.m_rtlOrdering = o; }
@@ -644,10 +640,6 @@ public:
 
     EImageRendering imageRendering() const { return static_cast<EImageRendering>(rareInheritedData->m_imageRendering); }
 
-    FilterOperations& mutableFilter() { return rareNonInheritedData.access()->m_filter.access()->m_operations; }
-    const FilterOperations& filter() const { return rareNonInheritedData->m_filter->m_operations; }
-    bool hasFilter() const { return !rareNonInheritedData->m_filter->m_operations.operations().isEmpty(); }
-
     TouchAction touchAction() const { return static_cast<TouchAction>(rareNonInheritedData->m_touchAction); }
     TouchActionDelay touchActionDelay() const { return static_cast<TouchActionDelay>(rareInheritedData->m_touchActionDelay); }
 
@@ -881,8 +873,6 @@ public:
     void setObjectFit(ObjectFit f) { SET_VAR(rareNonInheritedData, m_objectFit, f); }
     void setObjectPosition(LengthPoint position) { SET_VAR(rareNonInheritedData, m_objectPosition, position); }
 
-    void setFilter(const FilterOperations& ops) { SET_VAR(rareNonInheritedData.access()->m_filter, m_operations, ops); }
-
     void setTabSize(unsigned size) { SET_VAR(rareInheritedData, m_tabSize, size); }
 
     // End CSS3 Setters
@@ -949,7 +939,7 @@ public:
     void setHasCurrentColor() { noninherited_flags.currentColor = true; }
     bool hasCurrentColor() const { return noninherited_flags.currentColor; }
 
-    bool hasBoxDecorations() const { return hasBorder() || hasBorderRadius() || hasOutline() || boxShadow() || hasFilter(); }
+    bool hasBoxDecorations() const { return hasBorder() || hasBorderRadius() || hasOutline() || boxShadow(); }
 
     // Initial values for all the properties
     static EBorderStyle initialBorderStyle() { return BNONE; }
@@ -1069,7 +1059,6 @@ public:
     // Keep these at the end.
     // FIXME: Why? Seems these should all be one big sorted list.
     static Color initialTapHighlightColor();
-    static const FilterOperations& initialFilter() { DEFINE_STATIC_LOCAL(FilterOperations, ops, ()); return ops; }
 
     Color resolveColor(StyleColor unresolvedColor) const {
       return unresolvedColor.resolve(color());

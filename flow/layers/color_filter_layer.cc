@@ -13,10 +13,10 @@ ColorFilterLayer::~ColorFilterLayer() {
 }
 
 void ColorFilterLayer::Paint(PaintContext& context) {
-  skia::RefPtr<SkColorFilter> color_filter =
-      skia::AdoptRef(SkColorFilter::CreateModeFilter(color_, transfer_mode_));
+  sk_sp<SkColorFilter> color_filter =
+      SkColorFilter::MakeModeFilter(color_, transfer_mode_);
   SkPaint paint;
-  paint.setColorFilter(color_filter.get());
+  paint.setColorFilter(std::move(color_filter));
 
   SkAutoCanvasRestore save(&context.canvas, false);
   context.canvas.saveLayer(&paint_bounds(), &paint);

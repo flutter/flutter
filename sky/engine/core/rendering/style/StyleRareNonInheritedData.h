@@ -59,7 +59,6 @@ public:
 
     bool counterDataEquivalent(const StyleRareNonInheritedData&) const;
     bool shadowDataEquivalent(const StyleRareNonInheritedData&) const;
-    bool hasFilters() const;
     bool hasOpacity() const { return opacity < 1; }
 
     float opacity; // Whether or not we're transparent.

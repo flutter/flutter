@@ -26,7 +26,6 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_STYLE_STYLEFILTERDATA_H_
 #define SKY_ENGINE_CORE_RENDERING_STYLE_STYLEFILTERDATA_H_
 
-#include "sky/engine/platform/graphics/filters/FilterOperations.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
 
@@ -42,8 +41,6 @@ public:
     {
         return !(*this == o);
     }
-
-    FilterOperations m_operations;
 
 private:
     StyleFilterData();

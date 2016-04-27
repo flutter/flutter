@@ -69,8 +69,6 @@ sky_core_files = [
   "rendering/ClipRect.h",
   "rendering/ClipRects.h",
   "rendering/ClipRectsCache.h",
-  "rendering/FilterEffectRenderer.cpp",
-  "rendering/FilterEffectRenderer.h",
   "rendering/GapRects.h",
   "rendering/HitTestLocation.cpp",
   "rendering/HitTestLocation.h",

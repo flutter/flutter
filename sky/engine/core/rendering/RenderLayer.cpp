@@ -57,7 +57,6 @@
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/platform/geometry/TransformState.h"
 #include "sky/engine/platform/graphics/GraphicsContextStateSaver.h"
-#include "sky/engine/platform/graphics/filters/SourceGraphic.h"
 #include "sky/engine/platform/transforms/ScaleTransformOperation.h"
 #include "sky/engine/platform/transforms/TransformationMatrix.h"
 #include "sky/engine/platform/transforms/TranslateTransformOperation.h"
@@ -492,11 +491,6 @@ LayoutRect RenderLayer::boundingBoxForCompositing(const RenderLayer* ancestorLay
     const_cast<RenderLayer*>(this)->stackingNode()->updateLayerListsIfNeeded();
 
     expandRectForReflectionAndStackingChildren(this, result);
-
-    // FIXME: We can optimize the size of the composited layers, by not enlarging
-    // filtered areas with the outsets if we know that the filter is going to render in hardware.
-    // https://bugs.webkit.org/show_bug.cgi?id=81239
-    m_renderer->style()->filterOutsets().expandRect(result);
 
     if (renderer()->transform())
         result = renderer()->transform()->mapRect(result);

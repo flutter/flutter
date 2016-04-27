@@ -289,7 +289,7 @@ void NativeImageSkia::drawPattern(
     SkPaint paint;
     paint.setShader(shader);
     paint.setXfermodeMode(WebCoreCompositeToSkiaComposite(compositeOp, blendMode));
-    paint.setColorFilter(context->colorFilter());
+    paint.setColorFilter(sk_ref_sp(context->colorFilter()));
     paint.setFilterQuality(filterLevel);
     context->drawRect(destRect, paint);
 }

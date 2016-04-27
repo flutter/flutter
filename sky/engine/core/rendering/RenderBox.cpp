@@ -201,22 +201,6 @@ void RenderBox::updateFromStyle()
     }
 
     setHasTransform(styleToUse->hasTransformRelatedProperty());
-    updateFilters();
-}
-
-void RenderBox::updateFilters()
-{
-    if (!style()->hasFilter()) {
-        m_filterRenderer = nullptr;
-        return;
-    }
-
-    m_filterRenderer = FilterEffectRenderer::create();
-
-    // If the filter fails to build, remove it from the layer. It will still attempt to
-    // go through regular processing (e.g. compositing), but never apply anything.
-    if (!m_filterRenderer->build(this, style()->filter()))
-        m_filterRenderer = nullptr;
 }
 
 void RenderBox::layout()
@@ -801,14 +785,12 @@ static LayoutRect transparencyClipBox(const RenderLayer* layer, const RenderLaye
         // paints unfragmented.y
         LayoutRect clipRect = layer->physicalBoundingBox(layer);
         expandClipRectForDescendantsAndReflection(clipRect, layer, layer, subPixelAccumulation);
-        layer->renderer()->style()->filterOutsets().expandRect(clipRect);
         LayoutRect result = transform.mapRect(clipRect);
         return result;
     }
 
     LayoutRect clipRect = layer->physicalBoundingBox(rootLayer);
     expandClipRectForDescendantsAndReflection(clipRect, layer, rootLayer, subPixelAccumulation);
-    layer->renderer()->style()->filterOutsets().expandRect(clipRect);
     clipRect.move(subPixelAccumulation);
     return clipRect;
 }
@@ -833,7 +815,6 @@ void RenderBox::paintLayerContents(GraphicsContext* context, const LayerPainting
         return;
 
     LayoutRect rootRelativeBounds;
-    bool rootRelativeBoundsComputed = false;
 
     // Apply clip-path to context.
     GraphicsContextStateSaver clipStateSaver(*context, false);
@@ -858,16 +839,6 @@ void RenderBox::paintLayerContents(GraphicsContext* context, const LayerPainting
 
     layer()->clipToRect(localPaintingInfo, context, contentRect);
 
-    FilterEffectRendererHelper filterPainter(m_filterRenderer && style()->hasFilter());
-
-    if (filterPainter.haveFilterEffect()) {
-        if (!rootRelativeBoundsComputed)
-            rootRelativeBounds = layer()->physicalBoundingBoxIncludingReflectionAndStackingChildren(paintingInfo.rootLayer, offsetFromRoot);
-
-        if (filterPainter.prepareFilterEffect(m_filterRenderer.get(), rootRelativeBounds, paintingInfo.paintDirtyRect))
-            context = filterPainter.beginFilterEffect(context);
-    }
-
     LayoutPoint layerLocation = toPoint(layerBounds.location() - location() + localPaintingInfo.subPixelAccumulation);
 
     Vector<RenderBox*> layers;
@@ -878,9 +849,6 @@ void RenderBox::paintLayerContents(GraphicsContext* context, const LayerPainting
     for (auto& box : layers) {
         box->paintLayer(context, paintingInfo);
     }
-
-    if (filterPainter.hasStartedFilterEffect())
-        context = filterPainter.applyFilterEffect();
 
     layer()->restoreClip(context, localPaintingInfo.paintDirtyRect, contentRect);
 

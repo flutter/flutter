@@ -30,7 +30,6 @@
 #include "sky/engine/platform/graphics/GeneratedImage.h"
 #include "sky/engine/platform/graphics/Gradient.h"
 #include "sky/engine/platform/graphics/Image.h"
-#include "sky/engine/platform/graphics/ImageBuffer.h"
 #include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {

@@ -18,18 +18,18 @@ class Picture : public ThreadSafeRefCounted<Picture>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     ~Picture() override;
-    static PassRefPtr<Picture> create(PassRefPtr<SkPicture> skPicture);
+    static PassRefPtr<Picture> create(sk_sp<SkPicture> skPicture);
 
-    SkPicture* toSkia() const { return m_picture.get(); }
+    sk_sp<SkPicture> toSkia() const { return m_picture; }
 
     void dispose();
 
     static void RegisterNatives(DartLibraryNatives* natives);
 
 private:
-    explicit Picture(PassRefPtr<SkPicture> skPicture);
+    explicit Picture(sk_sp<SkPicture> skPicture);
 
-    RefPtr<SkPicture> m_picture;
+    sk_sp<SkPicture> m_picture;
 };
 
 } // namespace blink

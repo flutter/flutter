@@ -30,9 +30,7 @@
 #include "sky/engine/platform/geometry/IntRect.h"
 #include "sky/engine/platform/geometry/RoundedRect.h"
 #include "sky/engine/platform/graphics/BitmapImage.h"
-#include "sky/engine/platform/graphics/DisplayList.h"
 #include "sky/engine/platform/graphics/Gradient.h"
-#include "sky/engine/platform/graphics/ImageBuffer.h"
 #include "sky/engine/platform/graphics/skia/SkiaUtils.h"
 #include "sky/engine/platform/text/BidiResolver.h"
 #include "sky/engine/platform/text/TextRunIterator.h"
@@ -55,28 +53,6 @@
 #include "third_party/skia/include/gpu/GrTexture.h"
 
 namespace blink {
-
-namespace {
-
-class CompatibleImageBufferSurface : public ImageBufferSurface {
-    WTF_MAKE_NONCOPYABLE(CompatibleImageBufferSurface); WTF_MAKE_FAST_ALLOCATED;
-public:
-    CompatibleImageBufferSurface(PassRefPtr<SkSurface> surface, const IntSize& size, OpacityMode opacityMode)
-        : ImageBufferSurface(size, opacityMode)
-        , m_surface(surface)
-    {
-    }
-    virtual ~CompatibleImageBufferSurface() { }
-
-    virtual SkCanvas* canvas() const override { return m_surface ? m_surface->getCanvas() : 0; }
-    virtual bool isValid() const override { return m_surface; }
-    virtual bool isAccelerated() const override { return isValid() && m_surface->getCanvas()->getTopDevice()->accessRenderTarget(); }
-
-private:
-    RefPtr<SkSurface> m_surface;
-};
-
-} // unnamed namespace
 
 struct GraphicsContext::CanvasSaveState {
     CanvasSaveState(bool pendingSave, int count)
@@ -334,12 +310,6 @@ SkColorFilter* GraphicsContext::colorFilter() const
 
 void GraphicsContext::setColorFilter(ColorFilterObsolete colorFilter)
 {
-    GraphicsContextState* stateToSet = mutableState();
-
-    // We only support one active color filter at the moment. If (when) this becomes a problem,
-    // we should switch to using color filter chains (Skia work in progress).
-    ASSERT(!stateToSet->colorFilter());
-    stateToSet->setColorFilter(WebCoreColorFilterToSkiaColorFilter(colorFilter));
 }
 
 bool GraphicsContext::readPixels(const SkImageInfo& info, void* pixels, size_t rowBytes, int x, int y)
@@ -386,7 +356,6 @@ void GraphicsContext::beginLayer(float opacity, CompositeOperator op, const Floa
     SkPaint layerPaint;
     layerPaint.setAlpha(static_cast<unsigned char>(opacity * 255));
     layerPaint.setXfermodeMode(WebCoreCompositeToSkiaComposite(op, m_paintState->blendMode()));
-    layerPaint.setColorFilter(WebCoreColorFilterToSkiaColorFilter(colorFilter).get());
     layerPaint.setImageFilter(imageFilter);
 
     if (bounds) {
@@ -412,24 +381,6 @@ void GraphicsContext::endLayer()
 #if ENABLE(ASSERT)
     --m_layerCount;
 #endif
-}
-
-void GraphicsContext::drawDisplayList(DisplayList* displayList, const FloatPoint& point)
-{
-    ASSERT(displayList);
-
-    if (contextDisabled())
-        return;
-
-    realizeCanvasSave();
-
-    if (point.x() || point.y()) {
-        SkMatrix m;
-        m.setTranslate(point.x(), point.y());
-        m_canvas->drawPicture(displayList->picture(), &m, 0);
-    } else {
-        m_canvas->drawPicture(displayList->picture());
-    }
 }
 
 void GraphicsContext::drawConvexPolygon(size_t numPoints, const FloatPoint* points, bool shouldAntialias)
@@ -841,41 +792,6 @@ void GraphicsContext::drawTiledImage(Image* image, const IntRect& dest, const In
     }
 
     image->drawTiled(this, dest, srcRect, tileScaleFactor, hRule, vRule, op);
-}
-
-void GraphicsContext::drawImageBuffer(ImageBuffer* image, const FloatRect& dest,
-    const FloatRect* src, CompositeOperator op, WebBlendMode blendMode)
-{
-    if (contextDisabled() || !image)
-        return;
-
-    image->draw(this, dest, src, op, blendMode);
-}
-
-void GraphicsContext::drawPicture(PassRefPtr<SkPicture> picture, const FloatRect& dest, const FloatRect& src, CompositeOperator op, WebBlendMode blendMode)
-{
-    if (contextDisabled() || !picture)
-        return;
-
-    SkMatrix ctm = m_canvas->getTotalMatrix();
-    SkRect deviceDest;
-    ctm.mapRect(&deviceDest, dest);
-    SkRect sourceBounds = WebCoreFloatRectToSKRect(src);
-
-    RefPtr<SkImageFilter> pictureFilter = adoptRef(SkPictureImageFilter::Create(picture.get(), sourceBounds));
-    SkMatrix layerScale;
-    layerScale.setScale(deviceDest.width() / src.width(), deviceDest.height() / src.height());
-    RefPtr<SkImageFilter> matrixFilter = adoptRef(SkImageFilter::CreateMatrixFilter(layerScale, kLow_SkFilterQuality, pictureFilter.get()));
-    SkPaint picturePaint;
-    picturePaint.setXfermodeMode(WebCoreCompositeToSkiaComposite(op, blendMode));
-    picturePaint.setImageFilter(matrixFilter.get());
-    SkRect layerBounds = SkRect::MakeWH(std::max(deviceDest.width(), sourceBounds.width()), std::max(deviceDest.height(), sourceBounds.height()));
-    m_canvas->save();
-    m_canvas->resetMatrix();
-    m_canvas->translate(deviceDest.x(), deviceDest.y());
-    m_canvas->saveLayer(&layerBounds, &picturePaint);
-    m_canvas->restore();
-    m_canvas->restore();
 }
 
 void GraphicsContext::writePixels(const SkImageInfo& info, const void* pixels, size_t rowBytes, int x, int y)
@@ -1465,30 +1381,6 @@ void GraphicsContext::adjustLineToPixelBoundaries(FloatPoint& p1, FloatPoint& p2
     }
 }
 
-PassOwnPtr<ImageBuffer> GraphicsContext::createRasterBuffer(const IntSize& size, OpacityMode opacityMode) const
-{
-    // Make the buffer larger if the context's transform is scaling it so we need a higher
-    // resolution than one pixel per unit. Also set up a corresponding scale factor on the
-    // graphics context.
-
-    AffineTransform transform = getCTM();
-    IntSize scaledSize(static_cast<int>(ceil(size.width() * transform.xScale())), static_cast<int>(ceil(size.height() * transform.yScale())));
-
-    SkAlphaType alphaType = (opacityMode == Opaque) ? kOpaque_SkAlphaType : kPremul_SkAlphaType;
-    SkImageInfo info = SkImageInfo::MakeN32(size.width(), size.height(), alphaType);
-    RefPtr<SkSurface> skSurface = adoptRef(SkSurface::NewRaster(info));
-    if (!skSurface)
-        return nullptr;
-    OwnPtr<ImageBufferSurface> surface = adoptPtr(new CompatibleImageBufferSurface(skSurface.release(), scaledSize, opacityMode));
-    ASSERT(surface->isValid());
-    OwnPtr<ImageBuffer> buffer = adoptPtr(new ImageBuffer(surface.release()));
-
-    buffer->context()->scale(static_cast<float>(scaledSize.width()) / size.width(),
-        static_cast<float>(scaledSize.height()) / size.height());
-
-    return buffer.release();
-}
-
 void GraphicsContext::setPathFromConvexPoints(SkPath* path, size_t numPoints, const FloatPoint* points)
 {
     path->incReserve(numPoints);
@@ -1521,12 +1413,6 @@ void GraphicsContext::setRadii(SkVector* radii, IntSize topLeft, IntSize topRigh
         SkIntToScalar(bottomRight.height()));
     radii[SkRRect::kLowerLeft_Corner].set(SkIntToScalar(bottomLeft.width()),
         SkIntToScalar(bottomLeft.height()));
-}
-
-PassRefPtr<SkColorFilter> GraphicsContext::WebCoreColorFilterToSkiaColorFilter(ColorFilterObsolete colorFilter)
-{
-    // FIXME(sky): Remove
-    return nullptr;
 }
 
 void GraphicsContext::draw2xMarker(SkBitmap* bitmap, int index)
@@ -1637,7 +1523,7 @@ void GraphicsContext::preparePaintForDrawRectToRect(
     bool isDataComplete) const
 {
     paint->setXfermodeMode(WebCoreCompositeToSkiaComposite(compositeOp, blendMode));
-    paint->setColorFilter(this->colorFilter());
+    paint->setColorFilter(sk_ref_sp(this->colorFilter()));
     paint->setAlpha(this->getNormalizedAlpha());
     paint->setLooper(toSkSp(this->drawLooper()));
     paint->setAntiAlias(shouldDrawAntiAliased(this, destRect));

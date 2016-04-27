@@ -26,11 +26,11 @@ void MaskFilter::RegisterNatives(DartLibraryNatives* natives) {
 
 PassRefPtr<MaskFilter> MaskFilter::create(
       unsigned style, double sigma, unsigned flags) {
-  return adoptRef(new MaskFilter(adoptRef(SkBlurMaskFilter::Create(
-      static_cast<SkBlurStyle>(style), sigma, flags))));
+  return adoptRef(new MaskFilter(SkBlurMaskFilter::Make(
+      static_cast<SkBlurStyle>(style), sigma, flags)));
 }
 
-MaskFilter::MaskFilter(PassRefPtr<SkMaskFilter> filter)
+MaskFilter::MaskFilter(sk_sp<SkMaskFilter> filter)
     : filter_(filter) {
 }
 

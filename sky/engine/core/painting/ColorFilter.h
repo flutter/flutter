@@ -22,14 +22,14 @@ class ColorFilter : public ThreadSafeRefCounted<ColorFilter>, public DartWrappab
   static PassRefPtr<ColorFilter> create(CanvasColor color,
                                         TransferMode transfer_mode);
 
-  SkColorFilter* filter() { return filter_.get(); }
+  sk_sp<SkColorFilter> filter() { return filter_; }
 
   static void RegisterNatives(DartLibraryNatives* natives);
 
  private:
-  ColorFilter(PassRefPtr<SkColorFilter> filter);
+  ColorFilter(sk_sp<SkColorFilter> filter);
 
-  RefPtr<SkColorFilter> filter_;
+  sk_sp<SkColorFilter> filter_;
 };
 
 } // namespace blink

@@ -28,19 +28,16 @@
 namespace blink {
 
 StyleFilterData::StyleFilterData()
-    : m_operations()
 {
 }
 
 StyleFilterData::StyleFilterData(const StyleFilterData& o)
-    : RefCounted<StyleFilterData>()
-    , m_operations(o.m_operations)
 {
 }
 
 bool StyleFilterData::operator==(const StyleFilterData& o) const
 {
-    return m_operations == o.m_operations;
+    return true;
 }
 
 } // namespace blink

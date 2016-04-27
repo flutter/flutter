@@ -105,12 +105,10 @@ void DrawLooperBuilder::addShadow(const FloatSize& offset, float blur, const Col
         uint32_t mfFlags = SkBlurMaskFilter::kHighQuality_BlurFlag;
         if (shadowTransformMode == ShadowIgnoresTransforms)
             mfFlags |= SkBlurMaskFilter::kIgnoreTransform_BlurFlag;
-        RefPtr<SkMaskFilter> mf = adoptRef(SkBlurMaskFilter::Create(kNormal_SkBlurStyle, sigma, mfFlags));
-        paint->setMaskFilter(mf.get());
+        paint->setMaskFilter(SkBlurMaskFilter::Make(kNormal_SkBlurStyle, sigma, mfFlags));
     }
 
-    RefPtr<SkColorFilter> cf = adoptRef(SkColorFilter::CreateModeFilter(skColor, SkXfermode::kSrcIn_Mode));
-    paint->setColorFilter(cf.get());
+    paint->setColorFilter(SkColorFilter::MakeModeFilter(skColor, SkXfermode::kSrcIn_Mode));
 }
 
 } // namespace blink

@@ -34,7 +34,6 @@
 #include "sky/engine/platform/graphics/DashArray.h"
 #include "sky/engine/platform/graphics/DrawLooperBuilder.h"
 #include "sky/engine/platform/graphics/GraphicsContextState.h"
-#include "sky/engine/platform/graphics/ImageBufferSurface.h"
 #include "sky/engine/platform/graphics/ImageFilter.h"
 #include "sky/engine/platform/graphics/ImageOrientation.h"
 #include "sky/engine/platform/graphics/RegionTracker.h"
@@ -53,8 +52,6 @@ struct SkRect;
 
 namespace blink {
 
-class DisplayList;
-class ImageBuffer;
 class KURL;
 
 class PLATFORM_EXPORT GraphicsContext {
@@ -258,8 +255,6 @@ public:
         const IntRect&, const IntSize& innerTopLeft, const IntSize& innerTopRight, const IntSize& innerBottomLeft, const IntSize& innerBottomRight, const Color&);
     void fillBetweenRoundedRects(const RoundedRect&, const RoundedRect&, const Color&);
 
-    void drawDisplayList(DisplayList*, const FloatPoint&);
-
     void drawImage(Image*, const IntPoint&, CompositeOperator = CompositeSourceOver, RespectImageOrientationEnum = DoNotRespectImageOrientation);
     void drawImage(Image*, const IntRect&, CompositeOperator = CompositeSourceOver, RespectImageOrientationEnum = DoNotRespectImageOrientation);
     void drawImage(Image*, const FloatRect& destRect);
@@ -271,10 +266,6 @@ public:
     void drawTiledImage(Image*, const IntRect& destRect, const IntRect& srcRect,
         const FloatSize& tileScaleFactor, Image::TileRule hRule = Image::StretchTile, Image::TileRule vRule = Image::StretchTile,
         CompositeOperator = CompositeSourceOver);
-
-    void drawImageBuffer(ImageBuffer*, const FloatRect& destRect, const FloatRect* srcRect = 0, CompositeOperator = CompositeSourceOver, WebBlendMode = WebBlendModeNormal);
-
-    void drawPicture(PassRefPtr<SkPicture>, const FloatRect& dest, const FloatRect& src, CompositeOperator, WebBlendMode);
 
     // These methods write to the canvas and modify the opaque region, if tracked.
     // Also drawLine(const IntPoint& point1, const IntPoint& point2) and fillRoundedRect
@@ -369,10 +360,6 @@ public:
     void setURLFragmentForRect(const String& name, const IntRect&);
     void addURLTargetAtPoint(const String& name, const IntPoint&);
 
-    // Create an image buffer compatible with this context, with suitable resolution
-    // for drawing into the buffer and then into this context.
-    PassOwnPtr<ImageBuffer> createRasterBuffer(const IntSize&, OpacityMode = NonOpaque) const;
-
     static void adjustLineToPixelBoundaries(FloatPoint& p1, FloatPoint& p2, float strokeWidth, StrokeStyle);
 
     void preparePaintForDrawRectToRect(
@@ -400,8 +387,6 @@ private:
 
     static void setPathFromConvexPoints(SkPath*, size_t, const FloatPoint*);
     static void setRadii(SkVector*, IntSize, IntSize, IntSize, IntSize);
-
-    static PassRefPtr<SkColorFilter> WebCoreColorFilterToSkiaColorFilter(ColorFilterObsolete);
 
     static inline int focusRingOutset(int offset) { return 0; }
     static inline int focusRingWidth(int width) { return 1; }

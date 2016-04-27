@@ -19,13 +19,13 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Picture);
 
 DART_BIND_ALL(Picture, FOR_EACH_BINDING)
 
-PassRefPtr<Picture> Picture::create(PassRefPtr<SkPicture> skPicture)
+PassRefPtr<Picture> Picture::create(sk_sp<SkPicture> skPicture)
 {
     ASSERT(skPicture);
     return adoptRef(new Picture(skPicture));
 }
 
-Picture::Picture(PassRefPtr<SkPicture> skPicture)
+Picture::Picture(sk_sp<SkPicture> skPicture)
     : m_picture(skPicture)
 {
 }

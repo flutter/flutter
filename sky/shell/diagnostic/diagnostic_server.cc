@@ -133,7 +133,7 @@ void DiagnosticServer::SkiaPictureTask(Dart_Port port_id) {
       nullptr, *recorder.getRecordingCanvas(), false);
   layer_tree->Raster(frame);
 
-  RefPtr<SkPicture> picture = adoptRef(recorder.endRecordingAsPicture());
+  sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();
 
   SkDynamicMemoryWStream stream;
   sky::PngPixelSerializer serializer;
