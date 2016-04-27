@@ -40,7 +40,7 @@ RasterCache::Entry::Entry() {
 RasterCache::Entry::~Entry() {
 }
 
-skia::RefPtr<SkImage> RasterCache::GetPrerolledImage(GrContext* context,
+sk_sp<SkImage> RasterCache::GetPrerolledImage(GrContext* context,
                                                      SkPicture* picture,
                                                      const SkMatrix& ctm) {
 #if ENABLE_RASTER_CACHE
@@ -79,15 +79,15 @@ skia::RefPtr<SkImage> RasterCache::GetPrerolledImage(GrContext* context,
                    "width", physical_size.width(),
                    "height", physical_size.height());
       SkImageInfo info = SkImageInfo::MakeN32Premul(physical_size);
-      skia::RefPtr<SkSurface> surface = skia::AdoptRef(
-          SkSurface::NewRenderTarget(context, SkBudgeted::kYes, info));
+      sk_sp<SkSurface> surface =
+          SkSurface::MakeRenderTarget(context, SkBudgeted::kYes, info);
       if (surface) {
         SkCanvas* canvas = surface->getCanvas();
         canvas->clear(SK_ColorTRANSPARENT);
         canvas->scale(scaleX, scaleY);
         canvas->translate(-rect.left(), -rect.top());
         canvas->drawPicture(picture);
-        entry.image = skia::AdoptRef(surface->newImageSnapshot());
+        entry.image = surface->makeImageSnapshot();
       }
     }
   }

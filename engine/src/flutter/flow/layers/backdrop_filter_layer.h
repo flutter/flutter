@@ -14,13 +14,13 @@ class BackdropFilterLayer : public ContainerLayer {
   BackdropFilterLayer();
   ~BackdropFilterLayer() override;
 
-  void set_filter(SkImageFilter* filter) { filter_ = skia::SharePtr(filter); }
+  void set_filter(sk_sp<SkImageFilter> filter) { filter_ = std::move(filter); }
 
  protected:
   void Paint(PaintContext& context) override;
 
  private:
-  skia::RefPtr<SkImageFilter> filter_;
+  sk_sp<SkImageFilter> filter_;
 
   DISALLOW_COPY_AND_ASSIGN(BackdropFilterLayer);
 };

@@ -21,7 +21,7 @@ class RasterCache {
   RasterCache();
   ~RasterCache();
 
-  skia::RefPtr<SkImage> GetPrerolledImage(
+  sk_sp<SkImage> GetPrerolledImage(
       GrContext* context, SkPicture* picture, const SkMatrix& ctm);
   void SweepAfterFrame();
 
@@ -35,7 +35,7 @@ class RasterCache {
     bool used_this_frame = false;
     int access_count = 0;
     SkISize physical_size;
-    skia::RefPtr<SkImage> image;
+    sk_sp<SkImage> image;
   };
 
   using Cache = std::unordered_map<uint32_t, Entry>;

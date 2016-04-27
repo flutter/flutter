@@ -273,8 +273,6 @@ component("skia") {
     "ext/image_operations.h",
     "ext/opacity_draw_filter.cc",
     "ext/opacity_draw_filter.h",
-    "ext/pixel_ref_utils.cc",
-    "ext/pixel_ref_utils.h",
     "ext/platform_canvas.cc",
     "ext/platform_canvas.h",
     "ext/platform_device.cc",
@@ -326,8 +324,6 @@ component("skia") {
     "//third_party/skia/src/utils/SkFrontBufferedStream.cpp",
     "//third_party/skia/src/utils/SkInterpolator.cpp",
     "//third_party/skia/src/utils/SkLayer.cpp",
-    "//third_party/skia/src/utils/SkMD5.cpp",
-    "//third_party/skia/src/utils/SkMD5.h",
     "//third_party/skia/src/utils/SkMeshUtils.cpp",
     "//third_party/skia/src/utils/SkNinePatch.cpp",
     "//third_party/skia/src/utils/SkOSFile.cpp",
@@ -414,7 +410,6 @@ component("skia") {
     sources -= [
       "//third_party/skia/src/ports/SkOSFile_posix.cpp",
       "//third_party/skia/src/ports/SkTLS_pthread.cpp",
-      "//third_party/skia/src/ports/SkTime_Unix.cpp",
     ]
   } else {
     sources -= [
@@ -614,7 +609,6 @@ test("skia_unittests") {
     "ext/bitmap_platform_device_mac_unittest.cc",
     "ext/convolver_unittest.cc",
     "ext/image_operations_unittest.cc",
-    "ext/pixel_ref_utils_unittest.cc",
     "ext/platform_canvas_unittest.cc",
     "ext/recursive_gaussian_convolution_unittest.cc",
     "ext/refptr_unittest.cc",
