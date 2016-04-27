@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -317,6 +318,9 @@ Future<int> startAppStayResident(
     return 2;
   }
 
+  if (traceStartup)
+    await _downloadStartupTrace(debuggingOptions.observatoryPort, device);
+
   Completer<int> exitCompleter = new Completer<int>();
 
   void complete(int exitCode) {
@@ -370,6 +374,59 @@ String findMainDartFile([String target]) {
     return path.join(targetPath, 'lib', 'main.dart');
   else
     return targetPath;
+}
+
+Future<Null> _downloadStartupTrace(int observatoryPort, Device device) async {
+  Map<String, dynamic> timeline = await device.stopTracingAndDownloadTimeline(
+    observatoryPort,
+    waitForFirstFrame: true
+  );
+
+  int extractInstantEventTimestamp(String eventName) {
+    List<Map<String, dynamic>> events = timeline['traceEvents'];
+    Map<String, dynamic> event = events
+        .firstWhere((Map<String, dynamic> event) => event['name'] == eventName, orElse: () => null);
+    if (event == null)
+      return null;
+    return event['ts'];
+  }
+
+  int engineEnterTimestampMicros = extractInstantEventTimestamp(flutterEngineMainEnterEventName);
+  int frameworkInitTimestampMicros = extractInstantEventTimestamp(frameworkInitEventName);
+  int firstFrameTimestampMicros = extractInstantEventTimestamp(firstUsefulFrameEventName);
+
+  if (engineEnterTimestampMicros == null) {
+    printError('Engine start event is missing in the timeline. Cannot compute startup time.');
+    return null;
+  }
+
+  if (firstFrameTimestampMicros == null) {
+    printError('First frame event is missing in the timeline. Cannot compute startup time.');
+    return null;
+  }
+
+  File traceInfoFile = new File('build/start_up_info.json');
+  int timeToFirstFrameMicros = firstFrameTimestampMicros - engineEnterTimestampMicros;
+  Map<String, dynamic> traceInfo = <String, dynamic>{
+    'engineEnterTimestampMicros': engineEnterTimestampMicros,
+    'timeToFirstFrameMicros': timeToFirstFrameMicros,
+  };
+
+  if (frameworkInitTimestampMicros != null) {
+    traceInfo['timeToFrameworkInitMicros'] = frameworkInitTimestampMicros - engineEnterTimestampMicros;
+  }
+
+  await traceInfoFile.writeAsString(JSON.encode(traceInfo));
+
+  String timeToFirstFrameMessage;
+  if (timeToFirstFrameMicros > 1000000) {
+    timeToFirstFrameMessage = '${(timeToFirstFrameMicros / 1000000).toStringAsFixed(2)} seconds';
+  } else {
+    timeToFirstFrameMessage = '${timeToFirstFrameMicros ~/ 1000} milliseconds';
+  }
+
+  printStatus('Time to first frame $timeToFirstFrameMessage');
+  printStatus('Saved startup trace info in ${traceInfoFile.path}');
 }
 
 /// Delay until the Observatory / service protocol is available.

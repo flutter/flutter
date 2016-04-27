@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
+import 'dart:convert';
 
-import '../android/android_device.dart';
-import '../application_package.dart';
 import '../base/common.dart';
+import '../base/utils.dart';
+import '../device.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 
@@ -35,40 +37,42 @@ class TraceCommand extends FlutterCommand {
     'with --start and later with --stop.';
 
   @override
-  bool get androidOnly => true;
-
-  @override
   bool get requiresDevice => true;
 
   @override
   Future<int> runInProject() async {
-    ApplicationPackage androidApp = applicationPackages.android;
-    AndroidDevice device = deviceForCommand;
+    Device device = deviceForCommand;
     int observatoryPort = int.parse(argResults['debug-port']);
 
     if ((!argResults['start'] && !argResults['stop']) ||
         (argResults['start'] && argResults['stop'])) {
       // Setting neither flags or both flags means do both commands and wait
       // duration seconds in between.
-      await device.startTracing(androidApp, observatoryPort);
+      await device.startTracing(observatoryPort);
       await new Future<Null>.delayed(
         new Duration(seconds: int.parse(argResults['duration'])),
-        () => _stopTracing(device, androidApp, observatoryPort)
+        () => _stopTracing(device, observatoryPort)
       );
     } else if (argResults['stop']) {
-      await _stopTracing(device, androidApp, observatoryPort);
+      await _stopTracing(device, observatoryPort);
     } else {
-      await device.startTracing(androidApp, observatoryPort);
+      await device.startTracing(observatoryPort);
     }
     return 0;
   }
 
-  Future<Null> _stopTracing(AndroidDevice android, AndroidApk androidApp, int observatoryPort) async {
-    String tracePath = await android.stopTracing(androidApp, observatoryPort, argResults['out']);
-    if (tracePath == null) {
-      printError('No trace file saved.');
+  Future<Null> _stopTracing(Device device, int observatoryPort) async {
+    Map<String, dynamic> timeline = await device.stopTracingAndDownloadTimeline(observatoryPort);
+
+    String outPath = argResults['out'];
+    File localFile;
+    if (outPath != null) {
+      localFile = new File(outPath);
     } else {
-      printStatus('Trace file saved to $tracePath');
+      localFile = getUniqueFile(Directory.current, 'trace', 'json');
     }
+
+    await localFile.writeAsString(JSON.encode(timeline));
+    printStatus('Trace file saved to ${localFile.path}');
   }
 }

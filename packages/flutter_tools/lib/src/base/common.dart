@@ -5,3 +5,8 @@
 const int defaultObservatoryPort = 8100;
 const int defaultDiagnosticPort  = 8101;
 const int defaultDrivePort       = 8183;
+
+// Names of some of the Timeline events we care about
+const String flutterEngineMainEnterEventName = 'FlutterEngineMainEnter';
+const String frameworkInitEventName = 'Framework initialization';
+const String firstUsefulFrameEventName = 'Widgets completed first useful frame';
