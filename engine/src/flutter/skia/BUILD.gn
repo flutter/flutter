@@ -533,16 +533,18 @@ source_set("skia_opts") {
   defines = []
 
   if (current_cpu == "x86" || current_cpu == "x64") {
-    sources = gypi_skia_opts.sse2_sources + gypi_skia_opts.ssse3_sources +
-              gypi_skia_opts.sse41_sources + gypi_skia_opts.avx_sources +
-              [
-                # Chrome-specific.
-                "ext/convolver_SSE2.cc",
-                "ext/convolver_SSE2.h",
-              ]
+    if (!is_ios) {
+      sources = gypi_skia_opts.sse2_sources + gypi_skia_opts.ssse3_sources +
+                gypi_skia_opts.sse41_sources + gypi_skia_opts.avx_sources +
+                [
+                  # Chrome-specific.
+                  "ext/convolver_SSE2.cc",
+                  "ext/convolver_SSE2.h",
+                ]
 
-    if (is_linux || is_mac || is_ios) {
       cflags += [ "-msse4.1" ]
+    } else {
+      sources = gypi_skia_opts.none_sources
     }
   } else if (current_cpu == "arm") {
     # The assembly uses the frame pointer register (r7 in Thumb/r11 in
