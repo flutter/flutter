@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui show window;
 
-import 'package:newton/newton.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/gestures.dart';
 import 'package:meta/meta.dart';
 

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:newton/newton.dart';
+import 'package:flutter/physics.dart';
 
-export 'package:newton/newton.dart' show SpringDescription;
+export 'package:flutter/physics.dart' show SpringDescription;
 
 /// A factory for simulations.
 abstract class Force {

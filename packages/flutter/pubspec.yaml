@@ -21,8 +21,6 @@ dependencies:
 
   cassowary:
     path: ../cassowary
-  newton:
-    path: ../newton
 
 dev_dependencies:
   flutter_test:
