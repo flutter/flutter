@@ -106,9 +106,10 @@ enum _TimePickerMode { hour, minute }
 ///  * <https://www.google.com/design/spec/components/pickers.html#pickers-time-pickers>
 class TimePicker extends StatefulWidget {
   TimePicker({
+    Key key,
     this.selectedTime,
     this.onChanged
-  }) {
+  }) : super(key: key) {
     assert(selectedTime != null);
   }
 
@@ -417,10 +418,11 @@ class _DialState extends State<_Dial> {
 
   void _updateThetaForPan() {
     setState(() {
-      Offset offset = _position - _center;
+      final Offset offset = _position - _center;
+      final double angle = (math.atan2(offset.dx, offset.dy) - math.PI / 2.0) % _kTwoPi;
       _thetaTween
-        ..begin = (math.atan2(offset.dx, offset.dy) - math.PI / 2.0) % _kTwoPi
-        ..end = null;
+        ..begin = angle
+        ..end = angle; // The controller doesn't animate during the pan gesture.
     });
   }
 
