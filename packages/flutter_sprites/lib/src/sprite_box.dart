@@ -63,6 +63,12 @@ class SpriteBox extends RenderBox {
     _scheduleTick();
   }
 
+  @override
+  void detach() {
+    super.detach();
+    _unscheduleTick();
+  }
+
   // Member variables
 
   // Root node for drawing
@@ -366,8 +372,14 @@ class SpriteBox extends RenderBox {
 
   // Updates
 
+  int _frameCallbackId;
+
   void _scheduleTick() {
-    SchedulerBinding.instance.scheduleFrameCallback(_tick);
+    _frameCallbackId = SchedulerBinding.instance.scheduleFrameCallback(_tick);
+  }
+
+  void _unscheduleTick() {
+    SchedulerBinding.instance.cancelFrameCallbackWithId(_frameCallbackId);
   }
 
   void _tick(Duration timeStamp) {
