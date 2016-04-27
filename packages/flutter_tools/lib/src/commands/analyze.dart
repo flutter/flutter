@@ -552,9 +552,7 @@ class AnalyzeCommand extends FlutterCommand {
 
       if (firstAnalysis && _isBenchmarking) {
         _writeBenchmark(analysisTimer, issueCount);
-        server.dispose().then((dynamic result) {
-          exit(0);
-        });
+        server.dispose().then((_) => exit(0));
       }
 
       firstAnalysis = false;
