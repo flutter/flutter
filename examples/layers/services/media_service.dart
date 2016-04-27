@@ -4,11 +4,11 @@
 
 import 'dart:async';
 
-import 'package:mojo/mojo/url_response.mojom.dart';
 import 'package:sky_services/media/media.mojom.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/http.dart' as http;
 
 // All of these sounds are marked as public domain at soundbible.
 const String chimes = "http://soundbible.com/grab.php?id=2030&type=wav";
@@ -42,8 +42,7 @@ class PianoKey {
   Future<Null> load(MediaServiceProxy mediaService) async {
     try {
       mediaService.ptr.createPlayer(player);
-      UrlResponse response = await fetchUrl(soundUrl);
-      await player.ptr.prepare(response.body);
+      await player.ptr.prepare(await http.readDataPipe(soundUrl));
     } catch (e) {
       print("Error: failed to load sound file $soundUrl");
       player.close();

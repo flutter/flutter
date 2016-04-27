@@ -124,8 +124,31 @@ class MojoClient {
     });
   }
 
-  Future<Response> _send(String method, dynamic url, Map<String, String> headers, [dynamic body, Encoding encoding = UTF8]) async {
+  Future<mojo.MojoDataPipeConsumer> readDataPipe(dynamic url, { Map<String, String> headers }) async {
     mojom.UrlLoaderProxy loader = new mojom.UrlLoaderProxy.unbound();
+    mojom.UrlRequest request = _prepareRequest('get', url, headers);
+    mojom.UrlResponse response;
+    try {
+      networkService.ptr.createUrlLoader(loader);
+      response = (await loader.ptr.start(request)).response;
+    } catch (exception, stack) {
+      FlutterError.reportError(new FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'networking HTTP library',
+        context: 'while sending bytes to the Mojo network library',
+        silent: true
+      ));
+      return null;
+    } finally {
+      loader.close();
+    }
+    if (response.statusCode < 400)
+      return response.body;
+    throw new Exception("Request to $url failed with status ${response.statusCode}.");
+  }
+
+  mojom.UrlRequest _prepareRequest(String method, dynamic url, Map<String, String> headers, [dynamic body, Encoding encoding = UTF8]) {
     List<mojom.HttpHeader> mojoHeaders = <mojom.HttpHeader>[];
     headers?.forEach((String name, String value) {
       mojom.HttpHeader header = new mojom.HttpHeader()
@@ -144,6 +167,12 @@ class MojoClient {
       ByteData data = new ByteData.view(encodedBody.buffer);
       mojo.DataPipeFiller.fillHandle(pipe.producer, data);
     }
+    return request;
+  }
+
+  Future<Response> _send(String method, dynamic url, Map<String, String> headers, [dynamic body, Encoding encoding = UTF8]) async {
+    mojom.UrlLoaderProxy loader = new mojom.UrlLoaderProxy.unbound();
+    mojom.UrlRequest request = _prepareRequest(method, url, headers, body, encoding);
     try {
       networkService.ptr.createUrlLoader(loader);
       mojom.UrlResponse response = (await loader.ptr.start(request)).response;

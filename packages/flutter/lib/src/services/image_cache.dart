@@ -6,9 +6,9 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:ui' show hashValues;
 
-import 'package:mojo/mojo/url_response.mojom.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/http.dart' as http;
 
-import 'fetch.dart';
 import 'image_decoder.dart';
 import 'image_resource.dart';
 
@@ -52,14 +52,21 @@ class _UrlFetcher implements ImageProvider {
 
   @override
   Future<ImageInfo> loadImage() async {
-    UrlResponse response = await fetchUrl(_url, require200: true);
-    if (response != null) {
+    try {
       return new ImageInfo(
-        image: await decodeImageFromDataPipe(response.body),
+        image: await decodeImageFromDataPipe(await http.readDataPipe(Uri.base.resolve(_url))),
         scale: _scale
       );
+    } catch (exception, stack) {
+      FlutterError.reportError(new FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'services library',
+        context: 'while fetching an image for the image cache',
+        silent: true
+      ));
+      return null;
     }
-    return null;
   }
 
   @override

@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:mojo/core.dart' as mojo;
+
 import 'mojo_client.dart';
 import 'response.dart';
 
@@ -143,6 +145,20 @@ Future<String> read(dynamic url, { Map<String, String> headers }) {
 /// the same server, you should use a single [MojoClient] for all of those requests.
 Future<Uint8List> readBytes(dynamic url, { Map<String, String> headers }) {
   return _withClient/*<Uint8List>*/((MojoClient client) => client.readBytes(url, headers: headers));
+}
+
+/// Sends an HTTP GET request with the given headers to the given URL, which can
+/// be a [Uri] or a [String], and returns a Future that completes to a data pipe
+/// containing the response bytes.
+///
+/// The Future will emit a [ClientException] if the response doesn't have a
+/// success status code.
+///
+/// This automatically initializes a new [MojoClient] and closes that client once
+/// the request is complete. If you're planning on making multiple requests to
+/// the same server, you should use a single [MojoClient] for all of those requests.
+Future<mojo.MojoDataPipeConsumer> readDataPipe(dynamic url, { Map<String, String> headers }) {
+  return _withClient/*<mojo.MojoDataPipeConsumer>*/((MojoClient client) => client.readDataPipe(url, headers: headers));
 }
 
 Future<dynamic/*=T*/> _withClient/*<T>*/(Future<dynamic/*=T*/> fn(MojoClient client)) {
