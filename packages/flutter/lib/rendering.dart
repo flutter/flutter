@@ -22,6 +22,14 @@
 /// initialized with those features.
 library rendering;
 
+// these imports are just for the dartdocs above
+import 'gestures.dart';
+import 'scheduler.dart';
+import 'services.dart';
+import 'src/rendering/binding.dart';
+import 'src/rendering/box.dart';
+import 'src/rendering/object.dart';
+
 export 'src/rendering/auto_layout.dart';
 export 'src/rendering/binding.dart';
 export 'src/rendering/block.dart';
