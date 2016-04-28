@@ -1,15 +1,4 @@
-# Specify analysis options.
-#
-# Note that until there is a default "all-in" lint rule-set we need
-# to opt-in to all desired lints (https://github.com/dart-lang/sdk/issues/25843).
-# For a list of lints, see: http://dart-lang.github.io/linter/lints/
-
-# This file is the .analysis_options file used by "flutter analyze".
-# It isn't named that because otherwise editors like Atom would try
-# to use it, and that wouldn't work because it enables things that
-# need to be silenced, in particular, public_member_api_docs.
-
-# Please keep synchronized with //packages/flutter/.analysis_options
+# Please keep synchronized with //packages/flutter_tools/flutter_analysis_options
 
 analyzer:
   language:
@@ -47,7 +36,7 @@ linter:
     - package_names
     - package_prefixed_library_names
     - prefer_is_not_empty
-    - public_member_api_docs
+    # - public_member_api_docs
     - slash_for_doc_comments
     - sort_constructors_first
     - sort_unnamed_constructors_first

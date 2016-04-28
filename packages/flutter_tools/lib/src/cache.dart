@@ -143,7 +143,8 @@ class Cache {
       os.unzip(tempFile, location);
       tempFile.deleteSync();
     } else {
-      (location as File).writeAsBytesSync(fileBytes, flush: true);
+      File file = location;
+      file.writeAsBytesSync(fileBytes, flush: true);
     }
   }
 }
