@@ -115,10 +115,9 @@ class TextTheme {
 /// The two material design text themes.
 ///
 /// [Typography.black] and [Typography.white] define the two text themes used in
-/// material design. The black text theme, which uses darkly colored glyphs, is
-/// used on lightly colored backgrounds in light themes. The white text theme,
-/// which uses lightly colored glyphs, is used on darkly colored backgrounds in
-/// in light themes and in dark themes.
+/// material design. The black text theme, which uses dark glyphs, is used on
+/// light backgrounds in light themes. The white text theme, which uses light
+/// glyphs, is used in dark themes and on dark backgrounds in in light themes.
 ///
 /// To obtain the current text theme, call [Theme.of] with the current
 /// [BuildContext] and read the [ThemeData.textTheme] property.
@@ -131,9 +130,9 @@ class TextTheme {
 class Typography {
   Typography._();
 
-  /// A material design text theme with darkly colored glyphs.
+  /// A material design text theme with dark glyphs.
   static const TextTheme black = const TextTheme._black();
 
-  /// A material design text theme with lightly colored glyphs.
+  /// A material design text theme with light glyphs.
   static const TextTheme white = const TextTheme._white();
 }
