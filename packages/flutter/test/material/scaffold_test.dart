@@ -35,7 +35,7 @@ void main() {
         child: new Scaffold(
           appBar: new AppBar(title: new Text('Title')),
           body: new Container(key: bodyKey),
-          resizeToAvoidWindowPadding: false
+          resizeToAvoidBottomPadding: false
         )
       ));
 

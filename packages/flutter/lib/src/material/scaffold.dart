@@ -231,7 +231,7 @@ class Scaffold extends StatefulWidget {
     this.drawer,
     this.scrollableKey,
     this.appBarBehavior: AppBarBehavior.anchor,
-    this.resizeToAvoidWindowPadding: true
+    this.resizeToAvoidBottomPadding: true
   }) : super(key: key) {
     assert(scrollableKey != null ? (appBarBehavior != AppBarBehavior.anchor) : true);
   }
@@ -243,7 +243,7 @@ class Scaffold extends StatefulWidget {
   ///
   /// Displayed below the app bar and behind the [floatingActionButton] and
   /// [drawer]. To avoid the body being resized to avoid the window padding
-  /// (e.g., from the onscreen keyboard), see [resizeToAvoidWindowPadding].
+  /// (e.g., from the onscreen keyboard), see [resizeToAvoidBottomPadding].
   final Widget body;
 
   /// A button displayed on top of the body.
@@ -267,14 +267,15 @@ class Scaffold extends StatefulWidget {
   /// By default, the [appBar] does not respond to scrolling.
   final AppBarBehavior appBarBehavior;
 
-  /// Whether the [body] (and other floating widgets) should size themselves to avoid the window's padding.
+  /// Whether the [body] (and other floating widgets) should size themselves to
+  /// avoid the window's bottom padding.
   ///
   /// For example, if there is an onscreen keyboard displayed above the
   /// scaffold, the body can be resized to avoid overlapping the keyboard, which
   /// prevents widgets inside the body from being obscured by the keyboard.
   ///
   /// Defaults to true.
-  final bool resizeToAvoidWindowPadding;
+  final bool resizeToAvoidBottomPadding;
 
   /// The state from the closest instance of this class that encloses the given context.
   static ScaffoldState of(BuildContext context) => context.ancestorStateOfType(const TypeMatcher<ScaffoldState>());
@@ -613,8 +614,8 @@ class ScaffoldState extends State<Scaffold> {
   @override
   Widget build(BuildContext context) {
     EdgeInsets padding = MediaQuery.of(context).padding;
-    if (!config.resizeToAvoidWindowPadding)
-      padding = new EdgeInsets.only(top: padding.top);
+    if (!config.resizeToAvoidBottomPadding)
+      padding = new EdgeInsets.fromLTRB(padding.left, padding.top, padding.right, 0.0);
 
     if (_snackBars.length > 0) {
       final ModalRoute<dynamic> route = ModalRoute.of(context);

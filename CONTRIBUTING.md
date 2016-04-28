@@ -78,10 +78,10 @@ Individual tests can also be run directly, e.g. `flutter test lib/my_app_test.da
 
 Flutter tests use [package:flutter_test](https://github.com/flutter/flutter/tree/master/packages/flutter_test) which provides flutter-specific extensions on top of [package:test](https://pub.dartlang.org/packages/test).
 
-`flutter test` runs tests inside the flutter shell.  Some packages inside the flutter repository can be run inside the dart command line VM as well as the flutter shell, `packages/flutter_tools` is one such examples:
+`flutter test` runs tests inside the flutter shell.  Some packages inside the flutter repository can be run inside the dart command line VM as well as the flutter shell, `packages/flutter_tools` is one such example:
 
  * `cd packages/flutter_tools`
- * `pub run test`
+ * `dart test/all.dart`
 
 `flutter test --flutter-repo` is a shortcut for those working on the flutter repository itself which runs all tests inside the `flutter` package regardless of the current working directory.
 To run all the tests for the entire Flutter repository, the same way that Travis runs them, run `travis/test.sh`.
