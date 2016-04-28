@@ -84,7 +84,7 @@ class MenuDemoState extends State<MenuDemo> {
         ]
       ),
       body: new Block(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
         children: <Widget>[
           // Pressing the PopupMenuButton on the right of this item shows
           // a simple menu with one disabled item. Typically the contents
@@ -92,6 +92,7 @@ class MenuDemoState extends State<MenuDemo> {
           new ListItem(
             title: new Text('An item with a context menu button'),
             trailing: new PopupMenuButton<String>(
+              padding: EdgeInsets.zero,
               onSelected: showMenuSelection,
               itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
                 new PopupMenuItem<String>(
@@ -115,6 +116,7 @@ class MenuDemoState extends State<MenuDemo> {
           new ListItem(
             title: new Text('An item with a sectioned menu'),
             trailing: new PopupMenuButton<String>(
+              padding: EdgeInsets.zero,
               onSelected: showMenuSelection,
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                 new PopupMenuItem<String>(
@@ -153,6 +155,7 @@ class MenuDemoState extends State<MenuDemo> {
           // a menu whose current value is highlighted and aligned over the
           // list item's center line.
           new PopupMenuButton<String>(
+            padding: EdgeInsets.zero,
             initialValue: _simpleValue,
             onSelected: showMenuSelection,
             child: new ListItem(
@@ -179,6 +182,7 @@ class MenuDemoState extends State<MenuDemo> {
           new ListItem(
             title: new Text('An item with a checklist menu'),
             trailing: new PopupMenuButton<String>(
+              padding: EdgeInsets.zero,
               onSelected: showCheckedMenuSelections,
               itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
                 new CheckedPopupMenuItem<String>(
