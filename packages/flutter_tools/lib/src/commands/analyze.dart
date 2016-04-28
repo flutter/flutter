@@ -118,12 +118,10 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('watch', help: 'Run analysis continuously, watching the filesystem for changes.', negatable: false);
     argParser.addOption('dart-sdk', help: 'The path to the Dart SDK.', hide: true);
 
-    // These options enable a benchmarking mode where the total time is written at the
-    // end of the run to a json file.
-    argParser.addOption('benchmark-out',
-      defaultsTo: 'analysis.json',
-      hide: true,
-      help: 'Where to write benchmarking output.'
+    // Options to enable a benchmarking mode.
+    argParser.addFlag('benchmark',
+      negatable: false,
+      hide: true
     );
     argParser.addOption('benchmark-expected',
       hide: true,
@@ -177,9 +175,7 @@ class AnalyzeCommand extends FlutterCommand {
     return true;
   }
 
-  bool get _isBenchmarking {
-    return argResults.wasParsed('benchmark-out') || argResults.wasParsed('benchmark-expected');
-  }
+  bool get _isBenchmarking => argResults['benchmark'];
 
   Future<int> _analyzeOnce() async {
     Stopwatch stopwatch = new Stopwatch()..start();
@@ -490,7 +486,7 @@ class AnalyzeCommand extends FlutterCommand {
     }
 
     AnalysisServer server = new AnalysisServer(dartSdkPath, directories);
-    server.onAnalyzing.listen(_handleAnalysisStatus);
+    server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);
 
     await server.start();
@@ -506,7 +502,7 @@ class AnalyzeCommand extends FlutterCommand {
   Stopwatch analysisTimer;
   int lastErrorCount = 0;
 
-  void _handleAnalysisStatus(bool isAnalyzing) {
+  void _handleAnalysisStatus(AnalysisServer server, bool isAnalyzing) {
     if (isAnalyzing) {
       if (firstAnalysis) {
         printStatus('Analyzing ${path.basename(Directory.current.path)}...');
@@ -556,7 +552,7 @@ class AnalyzeCommand extends FlutterCommand {
 
       if (firstAnalysis && _isBenchmarking) {
         _writeBenchmark(analysisTimer, issueCount);
-        exit(0);
+        server.dispose().then((_) => exit(0));
       }
 
       firstAnalysis = false;
@@ -580,7 +576,7 @@ class AnalyzeCommand extends FlutterCommand {
   }
 
   void _writeBenchmark(Stopwatch stopwatch, int errorCount) {
-    String benchmarkOut = argResults['benchmark-out'];
+    final String benchmarkOut = 'analysis_benchmark.json';
     String expectedTime = argResults['benchmark-expected'];
 
     Map<String, dynamic> data = <String, dynamic>{
