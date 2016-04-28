@@ -118,8 +118,10 @@ class WidgetTester {
     Element element = finder.findFirst(this);
     Widget widget = element.widget;
 
-    if (widget is StatefulWidget)
-      return (element as StatefulElement).state;
+    if (widget is StatefulWidget) {
+      StatefulElement statefulElement = element;
+      return statefulElement.state;
+    }
 
     throw new ElementNotFoundError(
       'Widget of type ${widget.runtimeType} found by ${finder.description} does not correspond to a StatefulWidget'
