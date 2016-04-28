@@ -29,7 +29,7 @@ linter:
     - always_declare_return_types
     - always_specify_types
     - annotate_overrides
-    # - avoid_as # https://github.com/dart-lang/linter/issues/195
+    - avoid_as
     - avoid_init_to_null
     # - avoid_return_types_on_setters # https://github.com/dart-lang/linter/issues/202
     - camel_case_types
