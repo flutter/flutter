@@ -136,13 +136,12 @@ SnapshotProject() {
   RunCommand ${FLUTTER_ARCH_TOOLS_PATH}/Snapshotter                            \
       --vm_isolate_snapshot=${derived_dir}/kDartVmIsolateSnapshotBuffer        \
       --isolate_snapshot=${derived_dir}/kDartIsolateSnapshotBuffer             \
-      --instructions_snapshot=${derived_dir}/InstructionsSnapshot.S            \
+      --assembly=${derived_dir}/InstructionsSnapshot.S            \
       --embedder_entry_points_manifest=${src_dir}/EmbedderEntryPoints          \
       --package_root=${packages}                                               \
       --url_mapping=dart:mojo.internal,${mojo_internal_path}                   \
       --url_mapping=dart:ui,${ui_path}                                         \
       --url_mapping=dart:vmservice_sky,$vm_service_path                        \
-      --no-checked                                                             \
       --conditional_directives                                                 \
       $main_path
 
