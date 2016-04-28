@@ -172,15 +172,17 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
       observer.didChangeAppLifecycleState(state);
   }
 
-  bool _didFirstFrame = false;
-  bool _reportFirstFrame = true;
+  bool _needToReportFirstFrame = true;
+  bool _thisFrameWasUseful = true;
 
-  /// Tell the framework that the first useful frame has been completed.
+  /// Tell the framework that the frame we are currently building
+  /// should not be considered to be a useful first frame.
   ///
   /// This is used by [WidgetsApp] to report the first frame.
-  // remove this once we've fixed https://github.com/flutter/flutter/issues/1865
-  void didFirstFrame() {
-    _didFirstFrame = true;
+  //
+  // TODO(ianh): This method should only be available in debug and profile modes.
+  void preventThisFrameFromBeingReportedAsFirstFrame() {
+    _thisFrameWasUseful = false;
   }
 
   void _handleBuildScheduled() {
@@ -202,10 +204,14 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
     _buildingDirtyElements = false;
     super.beginFrame();
     buildOwner.finalizeTree();
-    // TODO(ianh): Following code should not be included in release mode, only profile and debug mode
-    if (_reportFirstFrame && _didFirstFrame) {
-      developer.Timeline.instantSync('Widgets completed first useful frame');
-      _reportFirstFrame = false;
+    // TODO(ianh): Following code should not be included in release mode, only profile and debug modes.
+    if (_needToReportFirstFrame) {
+      if (_thisFrameWasUseful) {
+        _thisFrameWasUseful = true;
+      } else {
+        developer.Timeline.instantSync('Widgets completed first useful frame');
+        _needToReportFirstFrame = false;
+      }
     }
   }
 

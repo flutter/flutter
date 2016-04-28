@@ -161,11 +161,10 @@ class WidgetsAppState<T extends WidgetsApp> extends State<T> implements WidgetsB
       // If the app expects a locale but we don't yet know the locale, then
       // don't build the widgets now.
       // TODO(ianh): Make this unnecessary. See https://github.com/flutter/flutter/issues/1865
+      // TODO(ianh): The following line should not be included in release mode, only in profile and debug modes.
+      WidgetsBinding.instance.preventThisFrameFromBeingReportedAsFirstFrame();
       return new Container();
     }
-
-    // TODO(ianh): The following line should not be included in release mode, only in profile and debug modes.
-    WidgetsBinding.instance.didFirstFrame();
 
     Widget result = new MediaQuery(
       data: new MediaQueryData.fromWindow(ui.window),
