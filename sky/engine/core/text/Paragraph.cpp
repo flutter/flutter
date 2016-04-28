@@ -87,7 +87,7 @@ void Paragraph::layout(double width)
 {
     FontCachePurgePreventer fontCachePurgePreventer;
 
-    int maxWidth = width;
+    int maxWidth = LayoutUnit(width); // Handles infinity properly.
     int maxHeight = intMaxForLayoutUnit;
     if (m_legacyWidthUsed) {
       maxWidth = std::max(m_minWidth, m_maxWidth);
