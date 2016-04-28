@@ -224,6 +224,8 @@ Future<int> startApp(
 
   if (!result.started)
     printError('Error running application on ${device.name}.');
+  else if (traceStartup)
+    await _downloadStartupTrace(result.observatoryPort, device);
 
   return result.started ? 0 : 2;
 }
@@ -317,9 +319,6 @@ Future<int> startAppStayResident(
     await loggingSubscription.cancel();
     return 2;
   }
-
-  if (traceStartup)
-    await _downloadStartupTrace(debuggingOptions.observatoryPort, device);
 
   Completer<int> exitCompleter = new Completer<int>();
 
