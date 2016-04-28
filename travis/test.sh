@@ -10,7 +10,6 @@ flutter analyze --flutter-repo
 # //chrome_infra/build/scripts/slave/recipes/flutter/flutter.py
 # see https://github.com/flutter/flutter/blob/master/infra/README.md
 
-(cd packages/cassowary; dart -c test/all.dart)
 (cd packages/flutter; flutter test)
 (cd packages/flutter_driver; dart -c test/all.dart)
 (cd packages/flutter_sprites; flutter test)

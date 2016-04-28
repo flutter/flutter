@@ -19,9 +19,6 @@ dependencies:
   sky_services:
     path: ../../bin/cache/pkg/sky_services
 
-  cassowary:
-    path: ../cassowary
-
 dev_dependencies:
   flutter_test:
     path: ../flutter_test
