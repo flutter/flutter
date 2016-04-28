@@ -34,20 +34,6 @@ template("sky_precompilation_sdk") {
     deps = [  snapshotter_target  ]
   }
 
-  script_snapshotter_copy_gen_target_name =
-      target_name + "_copy_script_snapshotter"
-  copy(script_snapshotter_copy_gen_target_name) {
-    script_snapshotter_target = "//sky/tools/sky_snapshot($dart_host_toolchain)"
-    script_snapshotter_directory =
-        get_label_info(script_snapshotter_target, "root_out_dir")
-    script_snapshotter_name = get_label_info(script_snapshotter_target, "name")
-
-    sources = [  "$script_snapshotter_directory/$script_snapshotter_name"  ]
-    outputs = [  "$sdk_dir/$tools_dir/ScriptSnapshotter"  ]
-
-    deps = [  script_snapshotter_target  ]
-  }
-
   copy("embedder_entry_points") {
     sources = [ "//sky/engine/bindings/dart_vm_entry_points.txt" ]
     outputs = [  "$sdk_dir/$tools_dir/EmbedderEntryPoints"  ]
@@ -114,7 +100,6 @@ template("sky_precompilation_sdk") {
   group(target_name) {
     deps = [
       ":$snapshotter_copy_gen_target_name",
-      ":$script_snapshotter_copy_gen_target_name",
       ":embedder_entry_points",
       ":$copy_runner_gen_target_name",
       ":$copy_data_gen_target_name",

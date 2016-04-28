@@ -63,7 +63,6 @@ PackageProject() {
       --target ${dart_main}                                                    \
       --output-file ${derived_dir}/app.flx                                     \
       --packages ${packages}                                                   \
-      --compiler ${src_dir}/ScriptSnapshotter                                  \
       ${precompilation_flag}                                                   \
 
   if [[ $? -ne 0 ]]; then

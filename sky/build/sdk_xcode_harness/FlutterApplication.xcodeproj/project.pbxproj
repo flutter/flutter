@@ -60,7 +60,6 @@
 		9E40464B1C1B64B500A4B87C /* Flutter.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Flutter.xcconfig; sourceTree = "<group>"; };
 		9E4046501C1B6A3600A4B87C /* EmbedderEntryPoints */ = {isa = PBXFileReference; lastKnownFileType = text; path = EmbedderEntryPoints; sourceTree = "<group>"; };
 		9E4046511C1B6A3600A4B87C /* PackagerInvoke */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = PackagerInvoke; sourceTree = "<group>"; };
-		9E4046521C1B6A3600A4B87C /* ScriptSnapshotter */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = ScriptSnapshotter; sourceTree = "<group>"; };
 		9E4046531C1B6A3600A4B87C /* SnapshotterInvoke */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = SnapshotterInvoke; sourceTree = "<group>"; };
 		9E4046541C1B6A3600A4B87C /* icudtl.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = icudtl.dat; sourceTree = "<group>"; };
 		9E4046561C1B6A3600A4B87C /* FlutterRunner */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = FlutterRunner; sourceTree = "<group>"; };
@@ -160,7 +159,6 @@
 			children = (
 				9E4046501C1B6A3600A4B87C /* EmbedderEntryPoints */,
 				9E4046511C1B6A3600A4B87C /* PackagerInvoke */,
-				9E4046521C1B6A3600A4B87C /* ScriptSnapshotter */,
 				9E4046531C1B6A3600A4B87C /* SnapshotterInvoke */,
 				9E4046541C1B6A3600A4B87C /* icudtl.dat */,
 			);
