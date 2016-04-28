@@ -36,17 +36,8 @@ class Label extends Node {
   @override
   void paint(Canvas canvas) {
     if (_painter == null) {
-      _painter = new TextPainter(new TextSpan(style: _textStyle, text: _text));
-
-      _painter.maxWidth = double.INFINITY;
-      _painter.minWidth = 0.0;
-      _painter.layout();
-
-      _width = _painter.maxIntrinsicWidth.ceil().toDouble();
-
-      _painter.maxWidth = _width;
-      _painter.minWidth = _width;
-      _painter.layout();
+      _painter = new TextPainter(new TextSpan(style: _textStyle, text: _text))
+        ..layout();
     }
 
     Offset offset = Offset.zero;

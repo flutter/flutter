@@ -183,10 +183,9 @@ class _SemanticsDebuggerEntry {
     message = message.trim();
     if (message != '') {
       textPainter ??= new TextPainter();
-      textPainter.text = new TextSpan(style: textStyles, text: message);
-      textPainter.maxWidth = rect.width;
-      textPainter.maxHeight = rect.height;
-      textPainter.layout();
+      textPainter
+        ..text = new TextSpan(style: textStyles, text: message)
+        ..layout(maxWidth: rect.width);
     } else {
       textPainter = null;
     }

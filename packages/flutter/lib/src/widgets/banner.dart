@@ -48,8 +48,7 @@ class BannerPainter extends CustomPainter {
 
     final TextPainter textPainter = new TextPainter()
       ..text = new TextSpan(style: kTextStyles, text: message)
-      ..maxWidth = kOffset * 2.0
-      ..layout();
+      ..layout(maxWidth: kOffset * 2.0);
 
     textPainter.paint(canvas, kRect.topLeft.toOffset() + new Offset(0.0, (kRect.height - textPainter.height) / 2.0));
   }

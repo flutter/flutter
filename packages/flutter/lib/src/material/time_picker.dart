@@ -265,7 +265,7 @@ List<TextPainter> _initPainters(List<String> labels) {
     String label = labels[i];
     painters[i] = new TextPainter(
       new TextSpan(style: style, text: label)
-    )..layoutToMaxIntrinsicWidth();
+    )..layout();
   }
   return painters;
 }

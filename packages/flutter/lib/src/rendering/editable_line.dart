@@ -48,12 +48,6 @@ class RenderEditableLine extends RenderBox {
        _selection = selection,
        _paintOffset = paintOffset {
     assert(!showCursor || cursorColor != null);
-    // TODO(abarth): These min/max values should be the default for TextPainter.
-    _textPainter
-      ..minWidth = 0.0
-      ..maxWidth = double.INFINITY
-      ..minHeight = 0.0
-      ..maxHeight = double.INFINITY;
     _tap = new TapGestureRecognizer()
       ..onTapDown = _handleTapDown
       ..onTap = _handleTap
@@ -75,7 +69,6 @@ class RenderEditableLine extends RenderBox {
     if (oldStyledText.style != value.style)
       _layoutTemplate = null;
     _textPainter.text = value;
-    _constraintsForCurrentLayout = null;
     markNeedsLayout();
   }
 
@@ -258,27 +251,6 @@ class RenderEditableLine extends RenderBox {
     return new TextSelection(baseOffset: start, extentOffset: end);
   }
 
-  BoxConstraints _constraintsForCurrentLayout; // when null, we don't have a current layout
-
-  // TODO(abarth): This logic should live in TextPainter and be shared with RenderParagraph.
-  void _layoutText(BoxConstraints constraints) {
-    assert(constraints != null);
-    assert(constraints.debugAssertIsValid());
-    if (_constraintsForCurrentLayout == constraints)
-      return; // already cached this layout
-    _textPainter.maxWidth = constraints.maxWidth;
-    _textPainter.minWidth = constraints.minWidth;
-    _textPainter.minHeight = constraints.minHeight;
-    _textPainter.maxHeight = constraints.maxHeight;
-    _textPainter.layout();
-    // By default, we shrinkwrap to the intrinsic width.
-    double width = constraints.constrainWidth(_textPainter.maxIntrinsicWidth);
-    _textPainter.minWidth = width;
-    _textPainter.maxWidth = width;
-    _textPainter.layout();
-    _constraintsForCurrentLayout = constraints;
-  }
-
   Rect _caretPrototype;
 
   @override
@@ -287,7 +259,7 @@ class RenderEditableLine extends RenderBox {
     size = new Size(constraints.maxWidth, constraints.constrainHeight(_preferredHeight));
     _caretPrototype = new Rect.fromLTWH(0.0, _kCaretHeightOffset, _kCaretWidth, size.height - 2.0 * _kCaretHeightOffset);
     _selectionRects = null;
-    _layoutText(new BoxConstraints(minHeight: constraints.minHeight, maxHeight: constraints.maxHeight));
+    _textPainter.layout();
     Size contentSize = new Size(_textPainter.width + _kCaretGap + _kCaretWidth, _textPainter.height);
     if (onPaintOffsetUpdateNeeded != null && (size != oldSize || contentSize != _contentSize))
       onPaintOffsetUpdateNeeded(new ViewportDimensions(containerSize: size, contentSize: contentSize));
