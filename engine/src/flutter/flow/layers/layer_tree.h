@@ -21,8 +21,6 @@ class LayerTree {
   LayerTree();
   ~LayerTree();
 
-  void Raster(CompositorContext::ScopedFrame& frame);
-
   // TODO(abarth): Integrate scene updates with the rasterization pass so that
   // we can draw on top of child scenes (and so that we can apply clips and
   // blending operations to child scene).
@@ -35,6 +33,7 @@ class LayerTree {
     root_layer_ = std::move(root_layer);
   }
 
+  SkRect GetBounds() const;
   const SkISize& frame_size() const { return frame_size_; }
 
   void set_frame_size(const SkISize& frame_size) { frame_size_ = frame_size; }
