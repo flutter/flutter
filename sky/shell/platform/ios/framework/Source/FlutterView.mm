@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "sky/shell/platform/ios/framework/Source/FlutterView.h"
+
 #include "base/memory/weak_ptr.h"
-#include "sky/shell/platform/ios/accessibility_bridge.h"
-#include "sky/shell/platform/ios/FlutterView.h"
+#include "sky/shell/platform/ios/framework/Source/accessibility_bridge.h"
 
 @interface FlutterView ()<UIInputViewAudioFeedback>
 

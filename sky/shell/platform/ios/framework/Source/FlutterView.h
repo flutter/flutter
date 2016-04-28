@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_FLUTTERVIEW_H_
-#define FLUTTER_FLUTTERVIEW_H_
+#ifndef SKY_SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTER_VIEW_H_
+#define SKY_SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTER_VIEW_H_
 
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
 
@@ -15,4 +15,4 @@
 
 @end
 
-#endif  // FLUTTER_FLUTTERVIEW_H_
+#endif  // SKY_SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTER_VIEW_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_SHELL_PLATFORM_IOS_ACCESSIBILITY_BRIDGE_H_
-#define SKY_SHELL_PLATFORM_IOS_ACCESSIBILITY_BRIDGE_H_
+#ifndef SKY_SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_ACCESSIBILITY_BRIDGE_H_
+#define SKY_SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_ACCESSIBILITY_BRIDGE_H_
 
 #include <map>
 #include <memory>
@@ -18,7 +18,7 @@
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/services/semantics/semantics.mojom.h"
-#include "sky/shell/platform/ios/FlutterView.h"
+#include "sky/shell/platform/ios/framework/Source/FlutterView.h"
 #include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/utils/SkMatrix44.h"
 
@@ -64,4 +64,4 @@ class AccessibilityBridge final : public semantics::SemanticsListener {
 }  // namespace shell
 }  // namespace sky
 
-#endif  // SKY_SHELL_PLATFORM_IOS_ACCESSIBILITY_BRIDGE_H_
+#endif  // SKY_SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_ACCESSIBILITY_BRIDGE_H_

@@ -5,7 +5,7 @@
 #include "base/command_line.h"
 #include "base/trace_event/trace_event.h"
 #include "sky/shell/platform/ios/FlutterAppDelegate.h"
-#include "sky/shell/platform/ios/public/FlutterViewController.h"
+#include "sky/shell/platform/ios/framework/Headers/FlutterViewController.h"
 #include "sky/shell/switches.h"
 
 NSURL* URLForSwitch(const char* name) {

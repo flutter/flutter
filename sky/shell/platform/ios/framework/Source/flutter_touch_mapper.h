@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_SHELL_PLATFORM_IOS_TOUCH_MAPPER_H_
-#define SKY_SHELL_PLATFORM_IOS_TOUCH_MAPPER_H_
+#ifndef SKY_SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_TOUCH_MAPPER_H_
+#define SKY_SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_TOUCH_MAPPER_H_
 
 #include <UIKit/UIKit.h>
 
@@ -39,4 +39,4 @@ class TouchMapper {
 }  // namespace shell
 }  // namespace sky
 
-#endif  // SKY_SHELL_PLATFORM_IOS_TOUCH_MAPPER_H_
+#endif  // SKY_SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_TOUCH_MAPPER_H_

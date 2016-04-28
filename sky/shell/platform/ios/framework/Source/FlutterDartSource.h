@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_SHELL_PLATFORM_IOS_FLUTTERDARTSOURCE_H_
-#define SKY_SHELL_PLATFORM_IOS_FLUTTERDARTSOURCE_H_
+#ifndef SKY_SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERDARTSOURCE_H_
+#define SKY_SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERDARTSOURCE_H_
 
 #import <Foundation/Foundation.h>
 
@@ -23,4 +23,4 @@ typedef void (^ValidationResult)(BOOL result, NSString* message);
 
 @end
 
-#endif  // SKY_SHELL_PLATFORM_IOS_FLUTTERDARTSOURCE_H_
+#endif  // SKY_SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERDARTSOURCE_H_

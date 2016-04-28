@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/platform/ios/public/FlutterDartProject.h"
+#ifndef SKY_SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERDARTPROJECT_INTERNAL_H_
+#define SKY_SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERDARTPROJECT_INTERNAL_H_
+
+#include "sky/shell/platform/ios/framework/Headers/FlutterDartProject.h"
 
 #include "sky/services/engine/sky_engine.mojom.h"
 
@@ -24,3 +27,5 @@ typedef void (^LaunchResult)(BOOL success, NSString* message);
                 result:(LaunchResult)result;
 
 @end
+
+#endif  // SKY_SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERDARTPROJECT_INTERNAL_H_

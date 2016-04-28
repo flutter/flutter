@@ -253,26 +253,26 @@ if (is_android) {
     source_set(target_name) {
 
       sources = [
-        "platform/ios/accessibility_bridge.h",
-        "platform/ios/accessibility_bridge.mm",
         "platform/ios/FlutterAppDelegate.h",
         "platform/ios/FlutterAppDelegate.mm",
-        "platform/ios/FlutterDartProject.mm",
-        "platform/ios/FlutterDartProject_Internal.h",
-        "platform/ios/FlutterDartSource.h",
-        "platform/ios/FlutterDartSource.mm",
-        "platform/ios/FlutterDynamicServiceLoader.h",
-        "platform/ios/FlutterDynamicServiceLoader.mm",
-        "platform/ios/FlutterView.h",
-        "platform/ios/FlutterView.mm",
-        "platform/ios/FlutterViewController.mm",
-        "platform/ios/flutter_touch_mapper.h",
-        "platform/ios/flutter_touch_mapper.mm",
+        "platform/ios/framework/Headers/Flutter.h",
+        "platform/ios/framework/Headers/FlutterDartProject.h",
+        "platform/ios/framework/Headers/FlutterMacros.h",
+        "platform/ios/framework/Headers/FlutterViewController.h",
+        "platform/ios/framework/Source/accessibility_bridge.h",
+        "platform/ios/framework/Source/accessibility_bridge.mm",
+        "platform/ios/framework/Source/FlutterDartProject.mm",
+        "platform/ios/framework/Source/FlutterDartProject_Internal.h",
+        "platform/ios/framework/Source/FlutterDartSource.h",
+        "platform/ios/framework/Source/FlutterDartSource.mm",
+        "platform/ios/framework/Source/FlutterDynamicServiceLoader.h",
+        "platform/ios/framework/Source/FlutterDynamicServiceLoader.mm",
+        "platform/ios/framework/Source/FlutterView.h",
+        "platform/ios/framework/Source/FlutterView.mm",
+        "platform/ios/framework/Source/FlutterViewController.mm",
+        "platform/ios/framework/Source/flutter_touch_mapper.h",
+        "platform/ios/framework/Source/flutter_touch_mapper.mm",
         "platform/ios/main_ios.mm",
-        "platform/ios/public/Flutter.h",
-        "platform/ios/public/FlutterDartProject.h",
-        "platform/ios/public/FlutterMacros.h",
-        "platform/ios/public/FlutterViewController.h",
       ]
 
       set_sources_assignment_filter([])
@@ -381,9 +381,10 @@ if (is_android) {
 
     copy("framework_headers") {
       sources = [
-        "platform/ios/public/Flutter.h",
-        "platform/ios/public/FlutterMacros.h",
-        "platform/ios/public/FlutterViewController.h",
+        "platform/ios/framework/Headers/Flutter.h",
+        "platform/ios/framework/Headers/FlutterDartProject.h",
+        "platform/ios/framework/Headers/FlutterMacros.h",
+        "platform/ios/framework/Headers/FlutterViewController.h",
       ]
       outputs = [ "$framework_dir/Headers/{{source_file_part}}" ]
     }

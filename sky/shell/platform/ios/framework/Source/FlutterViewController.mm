@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import "sky/shell/platform/ios/public/FlutterViewController.h"
+#import "sky/shell/platform/ios/framework/Headers/FlutterViewController.h"
 
 #include "base/mac/scoped_nsautorelease_pool.h"
 #include "base/trace_event/trace_event.h"
@@ -11,10 +11,10 @@
 #include "sky/services/engine/sky_engine.mojom.h"
 #include "sky/services/platform/ios/system_chrome_impl.h"
 #include "sky/services/semantics/semantics.mojom.h"
-#include "sky/shell/platform/ios/flutter_touch_mapper.h"
-#include "sky/shell/platform/ios/FlutterDartProject_Internal.h"
-#include "sky/shell/platform/ios/FlutterDynamicServiceLoader.h"
-#include "sky/shell/platform/ios/FlutterView.h"
+#include "sky/shell/platform/ios/framework/Source/flutter_touch_mapper.h"
+#include "sky/shell/platform/ios/framework/Source/FlutterDartProject_Internal.h"
+#include "sky/shell/platform/ios/framework/Source/FlutterDynamicServiceLoader.h"
+#include "sky/shell/platform/ios/framework/Source/FlutterView.h"
 #include "sky/shell/platform/mac/platform_mac.h"
 #include "sky/shell/platform/mac/platform_view_mac.h"
 #include "sky/shell/platform/mac/platform_service_provider.h"
