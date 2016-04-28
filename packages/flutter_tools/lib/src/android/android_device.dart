@@ -6,15 +6,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
-import 'package:path/path.dart' as path;
-import 'package:web_socket_channel/io.dart';
-
 import '../android/android_sdk.dart';
 import '../application_package.dart';
 import '../base/os.dart';
 import '../base/process.dart';
-import '../base/utils.dart';
 import '../build_configuration.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
@@ -355,59 +350,6 @@ class AndroidDevice extends Device {
     RegExp timeRegExp = new RegExp(r'^\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}', multiLine: true);
     Match timeMatch = timeRegExp.firstMatch(output);
     return timeMatch?.group(0);
-  }
-
-  Future<rpc.Client> _connectToObservatory(int observatoryPort) async {
-    Uri uri = new Uri(scheme: 'ws', host: '127.0.0.1', port: observatoryPort, path: 'ws');
-    WebSocket ws = await WebSocket.connect(uri.toString());
-    rpc.Client client = new rpc.Client(new IOWebSocketChannel(ws));
-    client.listen();
-    return client;
-  }
-
-  Future<Null> startTracing(AndroidApk apk, int observatoryPort) async {
-    rpc.Client client;
-    try {
-      client = await _connectToObservatory(observatoryPort);
-    } catch (e) {
-      printError('Error connecting to observatory: $e');
-      return;
-    }
-
-    await client.sendRequest('_setVMTimelineFlags',
-        {'recordedStreams': ['Compiler', 'Dart', 'Embedder', 'GC']}
-    );
-    await client.sendRequest('_clearVMTimeline');
-  }
-
-  Future<String> stopTracing(AndroidApk apk, int observatoryPort, String outPath) async {
-    rpc.Client client;
-    try {
-      client = await _connectToObservatory(observatoryPort);
-    } catch (e) {
-      printError('Error connecting to observatory: $e');
-      return null;
-    }
-
-    await client.sendRequest('_setVMTimelineFlags', {'recordedStreams': '[]'});
-
-    File localFile;
-    if (outPath != null) {
-      localFile = new File(outPath);
-    } else {
-      localFile = getUniqueFile(Directory.current, 'trace', 'json');
-    }
-
-    Map<String, dynamic> response = await client.sendRequest('_getVMTimeline');
-    List<dynamic> traceEvents = response['traceEvents'];
-
-    IOSink sink = localFile.openWrite();
-    Stream<Object> streamIn = new Stream<Object>.fromIterable(<Object>[traceEvents]);
-    Stream<List<int>> streamOut = new JsonUtf8Encoder().bind(streamIn);
-    await sink.addStream(streamOut);
-    await sink.close();
-
-    return path.basename(localFile.path);
   }
 
   @override
