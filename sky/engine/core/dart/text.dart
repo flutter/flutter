@@ -583,6 +583,38 @@ class TextPosition {
   }
 }
 
+/// Layout constraints for [Paragraph] objects.
+///
+/// Instances of this class are typically used with [Paragraph.layout].
+class ParagraphConstraints {
+  /// Creates constraints for laying out a pargraph.
+  ///
+  /// The [width] argument must not be null.
+  ParagraphConstraints({ this.width }) {
+    assert(width != null);
+  }
+
+  /// The width the paragraph should use whey computing the positions of glyphs.
+  ///
+  /// If possible, the paragraph will select a soft line break prior to reaching
+  /// this width. If no soft line break is available, the paragraph will select
+  /// a hard line break prior to reaching this width.
+  ///
+  /// This width will also be used for positioning glyphs with [TextAlign].
+  final double width;
+
+  bool operator ==(dynamic other) {
+    if (other is! ParagraphConstraints)
+      return false;
+    final ParagraphConstraints typedOther = other;
+    return typedOther.width == width;
+  }
+
+  int get hashCode => width.hashCode;
+
+  String toString() => 'ParagraphConstraints(width: $width)';
+}
+
 /// A paragraph of text.
 ///
 /// A paragraph retains the size and position of each glyph in the text and can
@@ -650,7 +682,8 @@ abstract class Paragraph extends NativeFieldWrapperClass2 {
   /// Setting the [minWidth], [maxWidth], [minHeight], or [maxHeight]
   /// invalidates the layout of this paragraph, requiring a call to this
   /// function before painting or reading geometry from this paragraph.
-  void layout() native "Paragraph_layout";
+  void layout([ParagraphConstraints constraints]) => _layout(constraints?.width);
+  void _layout(double width) native "Paragraph_layout";
 
   /// Returns a list of text boxes that enclose the given text range.
   List<TextBox> getBoxesForRange(int start, int end) native "Paragraph_getRectsForRange";

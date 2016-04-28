@@ -43,7 +43,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Paragraph);
 DART_BIND_ALL(Paragraph, FOR_EACH_BINDING)
 
 Paragraph::Paragraph(PassOwnPtr<RenderView> renderView)
-    : m_renderView(renderView)
+    : m_legacyWidthUsed(false), m_renderView(renderView)
 {
 }
 
@@ -83,12 +83,16 @@ double Paragraph::ideographicBaseline()
     return firstChildBox()->firstLineBoxBaseline(FontBaselineOrAuto(IdeographicBaseline));
 }
 
-void Paragraph::layout()
+void Paragraph::layout(double width)
 {
     FontCachePurgePreventer fontCachePurgePreventer;
 
-    LayoutUnit maxWidth = std::max(m_minWidth, m_maxWidth);
-    LayoutUnit maxHeight = std::max(m_minHeight, m_maxHeight);
+    int maxWidth = width;
+    int maxHeight = intMaxForLayoutUnit;
+    if (m_legacyWidthUsed) {
+      maxWidth = std::max(m_minWidth, m_maxWidth);
+      maxHeight = std::max(m_minHeight, m_maxHeight);
+    }
     m_renderView->setFrameViewSize(IntSize(maxWidth, maxHeight));
     m_renderView->layout();
 }

@@ -26,10 +26,10 @@ public:
     ~Paragraph() override;
 
     double minWidth() { return m_minWidth; }
-    void setMinWidth(double width) { m_minWidth = width; }
+    void setMinWidth(double width) { m_minWidth = width; m_legacyWidthUsed = true; }
 
     double maxWidth() { return m_maxWidth; }
-    void setMaxWidth(double width) { m_maxWidth = width; }
+    void setMaxWidth(double width) { m_maxWidth = width; m_legacyWidthUsed = true; }
 
     double minHeight() { return m_minHeight; }
     void setMinHeight(double height) { m_minHeight = height; }
@@ -44,7 +44,7 @@ public:
     double alphabeticBaseline();
     double ideographicBaseline();
 
-    void layout();
+    void layout(double width);
     void paint(Canvas* canvas, const Offset& offset);
 
     std::vector<TextBox> getRectsForRange(unsigned start, unsigned end);
@@ -59,6 +59,7 @@ private:
 
     int absoluteOffsetForPosition(const PositionWithAffinity& position);
 
+    bool m_legacyWidthUsed;
     LayoutUnit m_minWidth;
     LayoutUnit m_maxWidth;
     LayoutUnit m_minHeight;
