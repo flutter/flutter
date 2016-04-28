@@ -279,4 +279,31 @@ void main() {
     });
   });
 
+  test('Underflow extents', () {
+    testWidgets((WidgetTester tester) {
+      double lastContentExtent;
+      double lastContainerExtent;
+      double lastMinScrollOffset;
+      void handleExtendsChanged(double contentExtent, double containerExtent, double minScrollOffset) {
+        lastContentExtent = contentExtent;
+        lastContainerExtent = containerExtent;
+        lastMinScrollOffset = minScrollOffset;
+      }
+
+      tester.pumpWidget(new LazyBlockViewport(
+        onExtentsChanged: handleExtendsChanged,
+        delegate: new LazyBlockChildren(
+          children: <Widget>[
+            new Container(height: 100.0),
+            new Container(height: 100.0),
+            new Container(height: 100.0),
+          ]
+        )
+      ));
+
+      expect(lastContentExtent, equals(300.0));
+      expect(lastContainerExtent, equals(600.0));
+      expect(lastMinScrollOffset, equals(0.0));
+    });
+  });
 }

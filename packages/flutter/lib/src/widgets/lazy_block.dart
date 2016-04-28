@@ -616,7 +616,7 @@ class _LazyBlockElement extends RenderObjectElement {
           newElement = inflateWidget(newWidget, previousChild);
         }, building: true);
         if (newElement == null)
-          return;
+          break;
         _children.add(newElement);
       }
       child = _getNextWithin(block, child);
