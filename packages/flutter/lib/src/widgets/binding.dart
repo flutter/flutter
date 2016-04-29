@@ -206,11 +206,11 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
     buildOwner.finalizeTree();
     // TODO(ianh): Following code should not be included in release mode, only profile and debug modes.
     if (_needToReportFirstFrame) {
-      if (!_thisFrameWasUseful) {
-        _thisFrameWasUseful = true;
-      } else {
+      if (_thisFrameWasUseful) {
         developer.Timeline.instantSync('Widgets completed first useful frame');
         _needToReportFirstFrame = false;
+      } else {
+        _thisFrameWasUseful = true;
       }
     }
   }
