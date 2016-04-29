@@ -79,7 +79,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
       margin: const EdgeInsets.only(left: _kSideMargins),
       child: new FlatButton(
         onPressed: _haveTriggeredAction ? null : _handlePressed,
-        textTheme: ButtonColor.accent,
+        textTheme: ButtonTextTheme.accent,
         child: new Text(config.label)
       )
     );

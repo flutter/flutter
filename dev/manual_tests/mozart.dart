@@ -190,8 +190,8 @@ class Launcher extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return new ButtonBar(
+      alignment: MainAxisAlignment.center,
       children: items
     );
   }

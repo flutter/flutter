@@ -104,7 +104,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     addAll(children);
   }
 
-  /// The direction to use as the main axis
+  /// The direction to use as the main axis.
   FlexDirection get direction => _direction;
   FlexDirection _direction;
   void set direction (FlexDirection value) {
@@ -114,7 +114,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
   }
 
-  /// How the children should be placed along the main axis
+  /// How the children should be placed along the main axis.
   MainAxisAlignment get mainAxisAlignment => _mainAxisAlignment;
   MainAxisAlignment _mainAxisAlignment;
   void set mainAxisAlignment (MainAxisAlignment value) {
@@ -124,7 +124,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
   }
 
-  /// How the children should be placed along the cross axis
+  /// How the children should be placed along the cross axis.
   CrossAxisAlignment get crossAxisAlignment => _crossAxisAlignment;
   CrossAxisAlignment _crossAxisAlignment;
   void set crossAxisAlignment (CrossAxisAlignment value) {
@@ -134,7 +134,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
   }
 
-  /// If using aligning items according to their baseline, which baseline to use
+  /// If aligning items according to their baseline, which baseline to use.
   TextBaseline get textBaseline => _textBaseline;
   TextBaseline _textBaseline;
   void set textBaseline (TextBaseline value) {
@@ -144,7 +144,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
   }
 
-  /// Set during layout if overflow occurred on the main axis
+  /// Set during layout if overflow occurred on the main axis.
   double _overflow;
 
   @override

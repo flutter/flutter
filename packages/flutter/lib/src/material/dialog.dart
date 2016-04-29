@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
+import 'button_bar.dart';
 import 'colors.dart';
 import 'material.dart';
 import 'theme.dart';
@@ -91,13 +92,10 @@ class Dialog extends StatelessWidget {
     }
 
     if (actions != null) {
-      dialogBody.add(new ButtonTheme(
-        color: ButtonColor.accent,
-        child: new Container(
-          child: new Row(
-            children: actions,
-            mainAxisAlignment: MainAxisAlignment.end
-          )
+      dialogBody.add(new ButtonTheme.footer(
+        child: new ButtonBar(
+          alignment: MainAxisAlignment.end,
+          children: actions
         )
       ));
     }
