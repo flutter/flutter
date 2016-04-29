@@ -1752,12 +1752,26 @@ class Flexible extends ParentDataWidget<Flex> {
   /// according to the flex factors of the flexible children.
   final int flex;
 
+  /// Whether to apply tight or loose constraints to this child if this child has a non-null [flex].
+  ///
+  /// Ignored if [flex] is null. If this property is null, the child will be
+  /// given tight constraints.
+  FlexConstraintType constraintType;
+
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is FlexParentData);
     final FlexParentData parentData = renderObject.parentData;
+    bool needsLayout = false;
     if (parentData.flex != flex) {
       parentData.flex = flex;
+      needsLayout = true;
+    }
+    if (parentData.constraintType != constraintType) {
+      parentData.constraintType = constraintType;
+      needsLayout = true;
+    }
+    if (needsLayout) {
       AbstractNode targetParent = renderObject.parent;
       if (targetParent is RenderObject)
         targetParent.markNeedsLayout();

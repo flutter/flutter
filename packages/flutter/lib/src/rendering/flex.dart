@@ -7,6 +7,15 @@ import 'dart:math' as math;
 import 'box.dart';
 import 'object.dart';
 
+/// Whether to apply tight or loose constraints to flexible children.
+enum FlexConstraintType {
+  /// Require the child to fill the flexible space.
+  tight,
+
+  /// Permit the child to use less than all the flexible space.
+  loose,
+}
+
 /// Parent data for use with [RenderFlex].
 class FlexParentData extends ContainerBoxParentDataMixin<RenderBox> {
   /// The flex factor to use for this child
@@ -16,6 +25,12 @@ class FlexParentData extends ContainerBoxParentDataMixin<RenderBox> {
   /// dividing the free space (after placing the inflexible children)
   /// according to the flex factors of the flexible children.
   int flex;
+
+  /// Whether to apply tight or loose constraints to this child if this child has a non-null [flex].
+  ///
+  /// Ignored if [flex] is null. If this property is null, the child will be
+  /// given tight constraints.
+  FlexConstraintType constraintType;
 
   @override
   String toString() => '${super.toString()}; flex=$flex';
@@ -336,7 +351,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
   int _getFlex(RenderBox child) {
     final FlexParentData childParentData = child.parentData;
-    return childParentData.flex != null ? childParentData.flex : 0;
+    return childParentData.flex ?? 0;
   }
 
   double _getCrossSize(RenderBox child) {
@@ -466,17 +481,19 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     double maxBaselineDistance = 0.0;
     double usedSpace = 0.0;
     if (totalFlex > 0 || crossAxisAlignment == CrossAxisAlignment.baseline) {
-      double spacePerFlex = totalFlex > 0 ? (freeSpace / totalFlex) : 0.0;
+      final double spacePerFlex = totalFlex > 0 ? (freeSpace / totalFlex) : 0.0;
       child = firstChild;
       while (child != null) {
-        int flex = _getFlex(child);
+        final FlexParentData childParentData = child.parentData;
+        final int flex = _getFlex(child);
+        final bool isTight = (childParentData.constraintType ?? FlexConstraintType.tight) == FlexConstraintType.tight;
         if (flex > 0) {
-          double spaceForChild = spacePerFlex * flex;
+          final double spaceForChild = spacePerFlex * flex;
           BoxConstraints innerConstraints;
           if (crossAxisAlignment == CrossAxisAlignment.stretch) {
             switch (_direction) {
               case FlexDirection.horizontal:
-                innerConstraints = new BoxConstraints(minWidth: spaceForChild,
+                innerConstraints = new BoxConstraints(minWidth: isTight ? spaceForChild : 0.0,
                                                       maxWidth: spaceForChild,
                                                       minHeight: constraints.maxHeight,
                                                       maxHeight: constraints.maxHeight);
@@ -484,20 +501,20 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
               case FlexDirection.vertical:
                 innerConstraints = new BoxConstraints(minWidth: constraints.maxWidth,
                                                       maxWidth: constraints.maxWidth,
-                                                      minHeight: spaceForChild,
+                                                      minHeight: isTight ? spaceForChild : 0.0,
                                                       maxHeight: spaceForChild);
                 break;
             }
           } else {
             switch (_direction) {
               case FlexDirection.horizontal:
-                innerConstraints = new BoxConstraints(minWidth: spaceForChild,
+                innerConstraints = new BoxConstraints(minWidth: isTight ? spaceForChild : 0.0,
                                                       maxWidth: spaceForChild,
                                                       maxHeight: constraints.maxHeight);
                 break;
               case FlexDirection.vertical:
                 innerConstraints = new BoxConstraints(maxWidth: constraints.maxWidth,
-                                                      minHeight: spaceForChild,
+                                                      minHeight: isTight ? spaceForChild : 0.0,
                                                       maxHeight: spaceForChild);
                 break;
             }
@@ -508,11 +525,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         }
         if (crossAxisAlignment == CrossAxisAlignment.baseline) {
           assert(textBaseline != null && 'To use FlexAlignItems.baseline, you must also specify which baseline to use using the "baseline" argument.' is String);
-          double distance = child.getDistanceToBaseline(textBaseline, onlyReal: true);
+          final double distance = child.getDistanceToBaseline(textBaseline, onlyReal: true);
           if (distance != null)
             maxBaselineDistance = math.max(maxBaselineDistance, distance);
         }
-        final FlexParentData childParentData = child.parentData;
         child = childParentData.nextSibling;
       }
     }
