@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert' show JSON;
 import 'dart:developer' as developer;
+import 'dart:io' show exit;
 
 import 'package:meta/meta.dart';
 
@@ -99,6 +100,10 @@ abstract class BindingBase {
     registerSignalServiceExtension(
       name: 'reassemble',
       callback: reassembleApplication
+    );
+    registerSignalServiceExtension(
+      name: 'exit',
+      callback: _exitApplication
     );
     assert(() { _debugServiceExtensionsRegistered = true; return true; });
   }
@@ -246,4 +251,9 @@ abstract class BindingBase {
 
   @override
   String toString() => '<$runtimeType>';
+}
+
+/// Terminate the Flutter application.
+void _exitApplication() {
+  exit(0);
 }
