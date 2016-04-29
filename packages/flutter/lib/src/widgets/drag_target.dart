@@ -217,7 +217,7 @@ class LongPressDraggable<T> extends DraggableBase<T> {
       ..onStart = (Point position) {
         Drag result = onStart(position);
         if (result != null)
-          userFeedback.performHapticFeedback(HapticFeedbackType.virtualKey);
+          HapticFeedback.vibrate();
         return result;
       };
   }
