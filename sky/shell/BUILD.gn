@@ -410,7 +410,7 @@ if (is_android) {
   sky_precompilation_sdk("shell") {
     sdk_name = "Flutter"
   }
-} else if (is_linux && !is_fnl) {
+} else if (is_linux) {
   executable("shell") {
     output_name = "sky_shell"
 
@@ -500,8 +500,6 @@ if (is_android) {
       ":sky_resources",
     ]
   }
-} else if (is_fnl) {
-  # Nothing fnl specific.
 } else {
   assert(false, "Unsupported platform")
 }

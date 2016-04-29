@@ -16,8 +16,6 @@ def get_out_dir(args):
         target_dir += 'android_'
     elif args.target_os == 'ios':
         target_dir += 'ios_'
-    elif args.target_os == 'fnl':
-        target_dir += 'fnl_'
 
     if args.simulator:
         target_dir += 'sim_'
@@ -47,7 +45,7 @@ def to_gn_args(args):
     gn_args = {}
 
     gn_args['is_debug'] = args.debug
-    gn_args['is_clang'] = args.clang and args.target_os not in ['android', 'fnl']
+    gn_args['is_clang'] = args.clang and args.target_os not in ['android']
 
 
     ios_target_cpu = 'arm64'
@@ -68,11 +66,6 @@ def to_gn_args(args):
         else:
           # The iOS simulator snapshot is host targetted
           aot = True
-    elif args.target_os == 'fnl':
-      gn_args['target_os'] = 'fnl'
-      gn_args['use_aura'] = False
-      gn_args['use_ozone'] = True
-      aot = False
     else:
       gn_args['use_aura'] = False
       gn_args['use_system_harfbuzz'] = False
@@ -140,7 +133,6 @@ def parse_args(args):
 
   parser.add_argument('--target-os', type=str, choices=['android', 'ios'])
   parser.add_argument('--android', dest='target_os', action='store_const', const='android')
-  parser.add_argument('--fnl', dest='target_os', action='store_const', const='fnl')
   parser.add_argument('--ios', dest='target_os', action='store_const', const='ios')
   parser.add_argument('--ios-force-armv7', dest='ios_force_armv7', action='store_true', default=False)
   parser.add_argument('--simulator', action='store_true', default=False)
