@@ -79,8 +79,20 @@ public class InputConnectionAdaptor extends BaseInputConnection {
     @Override
     public boolean sendKeyEvent(KeyEvent event) {
         boolean result = super.sendKeyEvent(event);
-        if (event.getAction() == KeyEvent.ACTION_UP)
-            commitText(String.valueOf(event.getNumber()), 1);
+        if (event.getAction() == KeyEvent.ACTION_UP) {
+            // Weird special case. This method is (sometimes) called for the backspace key in 2
+            // situations:
+            // 1. There is no selection. In that case, we want to delete the previous character.
+            // 2. There is a selection. In that case, we want to delete the selection.
+            //    event.getNumber() is 0, and commitText("", 1) will do what we want.
+            if (event.getKeyCode() == KeyEvent.KEYCODE_DEL &&
+                mOutgoingState.selectionBase == mOutgoingState.selectionExtent) {
+              deleteSurroundingText(1, 0);
+            } else {
+              String text = event.getNumber() == 0 ? "" : String.valueOf(event.getNumber());
+              commitText(text, 1);
+            }
+        }
         return result;
     }
 
