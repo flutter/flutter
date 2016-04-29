@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphStyle, TextStyle;
+import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, TextStyle;
 
 import 'box.dart';
 import 'object.dart';
@@ -103,16 +103,17 @@ class RenderErrorBox extends RenderBox {
   void paint(PaintingContext context, Offset offset) {
     try {
       context.canvas.drawRect(offset & size, new Paint() .. color = backgroundColor);
+      double width;
       if (_paragraph != null) {
         // See the comment in the RenderErrorBox constructor. This is not the
         // code you want to be copying and pasting. :-)
         if (parent is RenderBox) {
           RenderBox parentBox = parent;
-          _paragraph.maxWidth = parentBox.size.width;
+          width = parentBox.size.width;
         } else {
-          _paragraph.maxWidth = size.width;
+          width = size.width;
         }
-        _paragraph.layout();
+        _paragraph.layout(new ui.ParagraphConstraints(width: width));
         context.canvas.drawParagraph(_paragraph, offset);
       }
     } catch (e) { }
