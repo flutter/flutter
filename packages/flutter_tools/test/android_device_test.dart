@@ -15,4 +15,28 @@ void main() {
       expect(device.id, equals(deviceId));
     });
   });
+
+  group('getAdbDevices', () {
+    testUsingContext('physical devices', () {
+      List<AndroidDevice> devices = getAdbDevices(mockAdbOutput: '''
+List of devices attached
+05a02bac               device usb:336592896X product:razor model:Nexus_7 device:flo
+
+''');
+      expect(devices, hasLength(1));
+      expect(devices.first.name, 'Nexus 7');
+    });
+
+    testUsingContext('emulators and short listings', () {
+      List<AndroidDevice> devices = getAdbDevices(mockAdbOutput: '''
+List of devices attached
+localhost:36790        device
+0149947A0D01500C       device usb:340787200X
+emulator-5612          host features:shell_2
+
+''');
+      expect(devices, hasLength(3));
+      expect(devices.first.name, 'localhost:36790');
+    });
+  });
 }

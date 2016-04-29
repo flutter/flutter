@@ -55,8 +55,12 @@ class AndroidDevice extends Device {
   bool get isLocalEmulator {
     if (_isLocalEmulator == null) {
       // http://developer.android.com/ndk/guides/abis.html (x86, armeabi-v7a, ...)
-      String value = runCheckedSync(adbCommandForDevice(['shell', 'getprop', 'ro.product.cpu.abi']));
-      _isLocalEmulator = value.startsWith('x86');
+      try {
+        String value = runCheckedSync(adbCommandForDevice(['shell', 'getprop', 'ro.product.cpu.abi']));
+        _isLocalEmulator = value.startsWith('x86');
+      } catch (error) {
+        _isLocalEmulator = false;
+      }
     }
 
     return _isLocalEmulator;
@@ -390,14 +394,21 @@ class AndroidDevice extends Device {
   }
 }
 
-List<AndroidDevice> getAdbDevices() {
-  String adbPath = getAdbPath(androidSdk);
-  if (adbPath == null)
-    return <AndroidDevice>[];
-
+/// Return the list of connected ADB devices.
+///
+/// [mockAdbOutput] is public for testing.
+List<AndroidDevice> getAdbDevices({ String mockAdbOutput }) {
   List<AndroidDevice> devices = [];
+  List<String> output;
 
-  List<String> output = runSync(<String>[adbPath, 'devices', '-l']).trim().split('\n');
+  if (mockAdbOutput == null) {
+    String adbPath = getAdbPath(androidSdk);
+    if (adbPath == null)
+      return <AndroidDevice>[];
+    output = runSync(<String>[adbPath, 'devices', '-l']).trim().split('\n');
+  } else {
+    output = mockAdbOutput.trim().split('\n');
+  }
 
   // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper
   RegExp deviceRegExLong = new RegExp(
@@ -445,7 +456,7 @@ List<AndroidDevice> getAdbDevices() {
       } else if (deviceState == 'offline') {
         printError('Device $deviceID is offline.');
       } else {
-        devices.add(new AndroidDevice(deviceID));
+        devices.add(new AndroidDevice(deviceID, modelID: deviceID));
       }
     } else {
       printError(
