@@ -22,7 +22,7 @@ class TestBuildCounter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ++buildCount;
+    buildCount += 1;
     return new DecoratedBox(decoration: kBoxDecorationA);
   }
 }
@@ -54,6 +54,6 @@ class FlipWidgetState extends State<FlipWidget> {
 }
 
 void flipStatefulWidget(WidgetTester tester) {
-  FlipWidgetState state = tester.stateOf(find.byType(FlipWidget));
+  FlipWidgetState state = tester.state(find.byType(FlipWidget));
   state.flip();
 }

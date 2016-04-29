@@ -25,88 +25,82 @@ void main() {
     );
   });
 
-  test('ModalBarrier prevents interactions with widgets behind it', () {
-    testWidgets((WidgetTester tester) {
-      Widget subject = new Stack(
-        children: <Widget>[
-          tapTarget,
-          new ModalBarrier(dismissable: false),
-        ]
-      );
+  testWidgets('ModalBarrier prevents interactions with widgets behind it', (WidgetTester tester) {
+    Widget subject = new Stack(
+      children: <Widget>[
+        tapTarget,
+        new ModalBarrier(dismissable: false),
+      ]
+    );
 
-      tester.pumpWidget(subject);
-      tester.tap(find.text('target'));
-      tester.pumpWidget(subject);
-      expect(tapped, isFalse,
-        reason: 'because the tap is prevented by ModalBarrier');
-    });
+    tester.pumpWidget(subject);
+    tester.tap(find.text('target'));
+    tester.pumpWidget(subject);
+    expect(tapped, isFalse,
+      reason: 'because the tap is prevented by ModalBarrier');
   });
 
-  test('ModalBarrier does not prevent interactions with widgets in front of it', () {
-    testWidgets((WidgetTester tester) {
-      Widget subject = new Stack(
-        children: <Widget>[
-          new ModalBarrier(dismissable: false),
-          tapTarget,
-        ]
-      );
+  testWidgets('ModalBarrier does not prevent interactions with widgets in front of it', (WidgetTester tester) {
+    Widget subject = new Stack(
+      children: <Widget>[
+        new ModalBarrier(dismissable: false),
+        tapTarget,
+      ]
+    );
 
-      tester.pumpWidget(subject);
-      tester.tap(find.text('target'));
-      tester.pumpWidget(subject);
-      expect(tapped, isTrue,
-        reason: 'because the tap is not prevented by ModalBarrier');
-    });
+    tester.pumpWidget(subject);
+    tester.tap(find.text('target'));
+    tester.pumpWidget(subject);
+    expect(tapped, isTrue,
+      reason: 'because the tap is not prevented by ModalBarrier');
   });
 
-  test('ModalBarrier pops the Navigator when dismissed', () {
-    testWidgets((WidgetTester tester) {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/': (BuildContext context) => new FirstWidget(),
-        '/modal': (BuildContext context) => new SecondWidget(),
-      };
+  testWidgets('ModalBarrier pops the Navigator when dismissed', (WidgetTester tester) {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => new FirstWidget(),
+      '/modal': (BuildContext context) => new SecondWidget(),
+    };
 
-      tester.pumpWidget(new MaterialApp(routes: routes));
+    tester.pumpWidget(new MaterialApp(routes: routes));
 
-      // Initially the barrier is not visible
-      expect(tester, doesNotHaveWidget(find.byKey(const ValueKey<String>('barrier'))));
+    // Initially the barrier is not visible
+    expect(find.byKey(const ValueKey<String>('barrier')), findsNothing);
 
-      // Tapping on X routes to the barrier
-      tester.tap(find.text('X'));
-      tester.pump();  // begin transition
-      tester.pump(const Duration(seconds: 1));  // end transition
+    // Tapping on X routes to the barrier
+    tester.tap(find.text('X'));
+    tester.pump();  // begin transition
+    tester.pump(const Duration(seconds: 1));  // end transition
 
-      // Tap on the barrier to dismiss it
-      tester.tap(find.byKey(const ValueKey<String>('barrier')));
-      tester.pump();  // begin transition
-      tester.pump(const Duration(seconds: 1));  // end transition
+    // Tap on the barrier to dismiss it
+    tester.tap(find.byKey(const ValueKey<String>('barrier')));
+    tester.pump();  // begin transition
+    tester.pump(const Duration(seconds: 1));  // end transition
 
-      expect(tester, doesNotHaveWidget(find.byKey(const ValueKey<String>('barrier'))),
-        reason: 'because the barrier was dismissed');
-    });
+    expect(find.byKey(const ValueKey<String>('barrier')), findsNothing,
+      reason: 'because the barrier was dismissed');
   });
 }
 
 class FirstWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new GestureDetector(
-      onTap: () {
-        Navigator.pushNamed(context, '/modal');
-      },
-      child: new Container(
-        child: new Text('X')
-      )
-    );
+  return new GestureDetector(
+    onTap: () {
+      Navigator.pushNamed(context, '/modal');
+    },
+    child: new Container(
+      child: new Text('X')
+    )
+  );
   }
 }
 
 class SecondWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new ModalBarrier(
-      key: const ValueKey<String>('barrier'),
-      dismissable: true
-    );
+  return new ModalBarrier(
+    key: const ValueKey<String>('barrier'),
+    dismissable: true
+  );
   }
 }

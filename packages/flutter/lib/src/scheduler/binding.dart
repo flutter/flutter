@@ -398,7 +398,8 @@ abstract class SchedulerBinding extends BindingBase {
         library: 'scheduler library',
         context: 'during a scheduler callback',
         informationCollector: (callbackStack == null) ? null : (StringBuffer information) {
-          information.writeln('When this callback was registered, this was the stack:\n$callbackStack');
+          // callbackStack ends with a newline, so don't introduce one artificially here
+          information.write('When this callback was registered, this was the stack:\n$callbackStack');
         }
       ));
     }

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:quiver/testing/async.dart';
 
 export 'dart:ui' show Point;
 
@@ -140,12 +139,11 @@ class TestGesture {
     return new TestGesture._(dispatcher, result, testPointer);
   }
 
-  TestGesture._(this._dispatcher, this._result, this._pointer);
+  const TestGesture._(this._dispatcher, this._result, this._pointer);
 
   final HitTestDispatcher _dispatcher;
   final HitTestResult _result;
   final TestPointer _pointer;
-  FakeAsync async;
 
   /// Send a move event moving the pointer by the given offset.
   void moveBy(Offset offset) {
@@ -157,7 +155,6 @@ class TestGesture {
   void moveTo(Point location) {
     assert(_pointer._isDown);
     _dispatcher.dispatchEvent(_pointer.move(location), _result);
-    async?.flushMicrotasks();
   }
 
   /// End the gesture by releasing the pointer.
@@ -167,7 +164,6 @@ class TestGesture {
     assert(_pointer._isDown);
     _dispatcher.dispatchEvent(_pointer.up(), _result);
     assert(!_pointer._isDown);
-    async?.flushMicrotasks();
   }
 
   /// End the gesture by canceling the pointer (as would happen if the
@@ -179,6 +175,5 @@ class TestGesture {
     assert(_pointer._isDown);
     _dispatcher.dispatchEvent(_pointer.cancel(), _result);
     assert(!_pointer._isDown);
-    async?.flushMicrotasks();
   }
 }

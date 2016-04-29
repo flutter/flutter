@@ -8,39 +8,37 @@ import 'package:flutter/rendering.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Scaffold control test', () {
-    testWidgets((WidgetTester tester) {
-      Key bodyKey = new UniqueKey();
-      tester.pumpWidget(new Scaffold(
+  testWidgets('Scaffold control test', (WidgetTester tester) {
+    Key bodyKey = new UniqueKey();
+    tester.pumpWidget(new Scaffold(
+      appBar: new AppBar(title: new Text('Title')),
+      body: new Container(key: bodyKey)
+    ));
+
+    RenderBox bodyBox = tester.renderObject(find.byKey(bodyKey));
+    expect(bodyBox.size, equals(new Size(800.0, 544.0)));
+
+    tester.pumpWidget(new MediaQuery(
+      data: new MediaQueryData(padding: new EdgeInsets.only(bottom: 100.0)),
+      child: new Scaffold(
         appBar: new AppBar(title: new Text('Title')),
         body: new Container(key: bodyKey)
-      ));
+      )
+    ));
 
-      RenderBox bodyBox = tester.renderObjectOf(find.byKey(bodyKey));
-      expect(bodyBox.size, equals(new Size(800.0, 544.0)));
+    bodyBox = tester.renderObject(find.byKey(bodyKey));
+    expect(bodyBox.size, equals(new Size(800.0, 444.0)));
 
-      tester.pumpWidget(new MediaQuery(
-        data: new MediaQueryData(padding: new EdgeInsets.only(bottom: 100.0)),
-        child: new Scaffold(
-          appBar: new AppBar(title: new Text('Title')),
-          body: new Container(key: bodyKey)
-        )
-      ));
+    tester.pumpWidget(new MediaQuery(
+      data: new MediaQueryData(padding: new EdgeInsets.only(bottom: 100.0)),
+      child: new Scaffold(
+        appBar: new AppBar(title: new Text('Title')),
+        body: new Container(key: bodyKey),
+        resizeToAvoidBottomPadding: false
+      )
+    ));
 
-      bodyBox = tester.renderObjectOf(find.byKey(bodyKey));
-      expect(bodyBox.size, equals(new Size(800.0, 444.0)));
-
-      tester.pumpWidget(new MediaQuery(
-        data: new MediaQueryData(padding: new EdgeInsets.only(bottom: 100.0)),
-        child: new Scaffold(
-          appBar: new AppBar(title: new Text('Title')),
-          body: new Container(key: bodyKey),
-          resizeToAvoidBottomPadding: false
-        )
-      ));
-
-      bodyBox = tester.renderObjectOf(find.byKey(bodyKey));
-      expect(bodyBox.size, equals(new Size(800.0, 544.0)));
-    });
+    bodyBox = tester.renderObject(find.byKey(bodyKey));
+    expect(bodyBox.size, equals(new Size(800.0, 544.0)));
   });
 }

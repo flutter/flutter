@@ -10,71 +10,67 @@ import 'package:test/test.dart';
 import 'test_widgets.dart';
 
 void main() {
-  test('Stateful widget smoke test', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Stateful widget smoke test', (WidgetTester tester) {
 
-      void checkTree(BoxDecoration expectedDecoration) {
-        SingleChildRenderObjectElement element = tester.elementOf(
-          find.byElementPredicate((Element element) => element is SingleChildRenderObjectElement)
-        );
-        expect(element, isNotNull);
-        expect(element.renderObject is RenderDecoratedBox, isTrue);
-        RenderDecoratedBox renderObject = element.renderObject;
-        expect(renderObject.decoration, equals(expectedDecoration));
-      }
-
-      tester.pumpWidget(
-        new FlipWidget(
-          left: new DecoratedBox(decoration: kBoxDecorationA),
-          right: new DecoratedBox(decoration: kBoxDecorationB)
-        )
+    void checkTree(BoxDecoration expectedDecoration) {
+      SingleChildRenderObjectElement element = tester.element(
+        find.byElementPredicate((Element element) => element is SingleChildRenderObjectElement)
       );
+      expect(element, isNotNull);
+      expect(element.renderObject is RenderDecoratedBox, isTrue);
+      RenderDecoratedBox renderObject = element.renderObject;
+      expect(renderObject.decoration, equals(expectedDecoration));
+    }
 
-      checkTree(kBoxDecorationA);
+    tester.pumpWidget(
+      new FlipWidget(
+        left: new DecoratedBox(decoration: kBoxDecorationA),
+        right: new DecoratedBox(decoration: kBoxDecorationB)
+      )
+    );
 
-      tester.pumpWidget(
-        new FlipWidget(
-          left: new DecoratedBox(decoration: kBoxDecorationB),
-          right: new DecoratedBox(decoration: kBoxDecorationA)
-        )
-      );
+    checkTree(kBoxDecorationA);
 
-      checkTree(kBoxDecorationB);
+    tester.pumpWidget(
+      new FlipWidget(
+        left: new DecoratedBox(decoration: kBoxDecorationB),
+        right: new DecoratedBox(decoration: kBoxDecorationA)
+      )
+    );
 
-      flipStatefulWidget(tester);
+    checkTree(kBoxDecorationB);
 
-      tester.pump();
+    flipStatefulWidget(tester);
 
-      checkTree(kBoxDecorationA);
+    tester.pump();
 
-      tester.pumpWidget(
-        new FlipWidget(
-          left: new DecoratedBox(decoration: kBoxDecorationA),
-          right: new DecoratedBox(decoration: kBoxDecorationB)
-        )
-      );
+    checkTree(kBoxDecorationA);
 
-      checkTree(kBoxDecorationB);
-    });
+    tester.pumpWidget(
+      new FlipWidget(
+        left: new DecoratedBox(decoration: kBoxDecorationA),
+        right: new DecoratedBox(decoration: kBoxDecorationB)
+      )
+    );
+
+    checkTree(kBoxDecorationB);
   });
 
-  test('Don\'t rebuild subwidgets', () {
-    testWidgets((WidgetTester tester) {
-      tester.pumpWidget(
-        new FlipWidget(
-          key: new Key('rebuild test'),
-          left: new TestBuildCounter(),
-          right: new DecoratedBox(decoration: kBoxDecorationB)
-        )
-      );
+  testWidgets('Don\'t rebuild subwidgets', (WidgetTester tester) {
+    tester.pumpWidget(
+      new FlipWidget(
+        key: new Key('rebuild test'),
+        left: new TestBuildCounter(),
+        right: new DecoratedBox(decoration: kBoxDecorationB)
+      )
+    );
 
-      expect(TestBuildCounter.buildCount, equals(1));
+    expect(TestBuildCounter.buildCount, equals(1));
 
-      flipStatefulWidget(tester);
+    flipStatefulWidget(tester);
 
-      tester.pump();
+    tester.pump();
 
-      expect(TestBuildCounter.buildCount, equals(1));
-    });
+    expect(TestBuildCounter.buildCount, equals(1));
   });
 }

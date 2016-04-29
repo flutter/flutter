@@ -4,7 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 class Item {
   GlobalKey key1 = new GlobalKey();
@@ -55,16 +54,14 @@ Widget builder() {
 }
 
 void main() {
-  test('duplicate key smoke test', () {
-    testWidgets((WidgetTester tester) {
-      tester.pumpWidget(builder());
-      StatefulLeafState leaf = tester.stateOf(find.byType(StatefulLeaf));
-      leaf.test();
-      tester.pump();
-      Item lastItem = items[1];
-      items.remove(lastItem);
-      items.insert(0, lastItem);
-      tester.pumpWidget(builder()); // this marks the app dirty and rebuilds it
-    });
+  testWidgets('duplicate key smoke test', (WidgetTester tester) {
+    tester.pumpWidget(builder());
+    StatefulLeafState leaf = tester.firstState(find.byType(StatefulLeaf));
+    leaf.test();
+    tester.pump();
+    Item lastItem = items[1];
+    items.remove(lastItem);
+    items.insert(0, lastItem);
+    tester.pumpWidget(builder()); // this marks the app dirty and rebuilds it
   });
 }

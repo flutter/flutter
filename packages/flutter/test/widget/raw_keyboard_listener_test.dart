@@ -4,13 +4,10 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 void main() {
-  test('Can dispose without keyboard', () {
-    testWidgets((WidgetTester tester) {
-      tester.pumpWidget(new RawKeyboardListener(child: new Container()));
-      tester.pumpWidget(new Container());
-    });
+  testWidgets('Can dispose without keyboard', (WidgetTester tester) {
+    tester.pumpWidget(new RawKeyboardListener(child: new Container()));
+    tester.pumpWidget(new Container());
   });
 }

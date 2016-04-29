@@ -7,11 +7,11 @@ import 'package:test/test.dart';
 
 void main() {
   test('BoundedBehavior min scroll offset', () {
-    BoundedBehavior behavior = new BoundedBehavior(
-      contentExtent: 150.0,
-      containerExtent: 75.0,
-      minScrollOffset: -100.0
-    );
+  BoundedBehavior behavior = new BoundedBehavior(
+    contentExtent: 150.0,
+    containerExtent: 75.0,
+    minScrollOffset: -100.0
+  );
     expect(behavior.minScrollOffset, equals(-100.0));
     expect(behavior.maxScrollOffset, equals(-25.0));
 

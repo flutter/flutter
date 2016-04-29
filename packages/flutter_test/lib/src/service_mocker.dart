@@ -5,10 +5,13 @@
 import 'package:flutter/services.dart';
 import 'package:mojo/bindings.dart' as bindings;
 
-// Tests can use ServiceMocker to register replacement implementations
-// of Mojo services.
+import 'binding.dart';
+
+/// Tests can use [ServiceMocker] to register replacement implementations
+/// of Mojo services.
 class ServiceMocker {
   ServiceMocker._() {
+    TestWidgetsFlutterBinding.ensureInitialized();
     shell.overrideConnectToService = _connectToService;
   }
 
@@ -27,12 +30,14 @@ class ServiceMocker {
     }
   }
 
-  // Provide a mock implementation for a Mojo interface.
-  // Make sure you initialise the binding before calling this.
-  // For example, by calling `WidgetsFlutterBinding.ensureInitialized();`
+  /// Provide a mock implementation for a Mojo interface.
   void registerMockService(String interfaceName, Object mock) {
     _interfaceMocks[interfaceName] = mock;
   }
 }
 
+/// Instance of the utility class for providing mocks for tests.
+///
+/// The first time this variable is accessed, it will initialize the
+/// [TestWidgetsFlutterBinding] if necessary.
 final ServiceMocker serviceMocker = new ServiceMocker._();

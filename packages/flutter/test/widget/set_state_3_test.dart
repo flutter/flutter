@@ -4,7 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 ChangerState changer;
 
@@ -52,12 +51,10 @@ class LeafState extends State<Leaf> {
 }
 
 void main() {
-  test('three-way setState() smoke test', () {
-    testWidgets((WidgetTester tester) {
-      tester.pumpWidget(new Changer(new Wrapper(new Leaf())));
-      tester.pumpWidget(new Changer(new Wrapper(new Leaf())));
-      changer.test();
-      tester.pump();
-    });
+  testWidgets('three-way setState() smoke test', (WidgetTester tester) {
+    tester.pumpWidget(new Changer(new Wrapper(new Leaf())));
+    tester.pumpWidget(new Changer(new Wrapper(new Leaf())));
+    changer.test();
+    tester.pump();
   });
 }

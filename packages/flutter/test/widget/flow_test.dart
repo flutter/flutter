@@ -32,59 +32,57 @@ class TestFlowDelegate extends FlowDelegate {
 }
 
 void main() {
-  test('Flow control test', () {
-    testWidgets((WidgetTester tester) {
-      AnimationController startOffset = new AnimationController.unbounded();
-      List<int> log = <int>[];
+  testWidgets('Flow control test', (WidgetTester tester) {
+    AnimationController startOffset = new AnimationController.unbounded();
+    List<int> log = <int>[];
 
-      Widget buildBox(int i) {
-        return new GestureDetector(
-          onTap: () {
-            log.add(i);
-          },
-          child: new Container(
-            width: 100.0,
-            height: 100.0,
-            decoration: const BoxDecoration(
-              backgroundColor: const Color(0xFF0000FF)
-            ),
-            child: new Text('$i')
-          )
-        );
-      }
-
-      tester.pumpWidget(
-        new Flow(
-          delegate: new TestFlowDelegate(startOffset: startOffset),
-          children: <Widget>[
-            buildBox(0),
-            buildBox(1),
-            buildBox(2),
-            buildBox(3),
-            buildBox(4),
-            buildBox(5),
-            buildBox(6),
-          ]
+    Widget buildBox(int i) {
+      return new GestureDetector(
+        onTap: () {
+          log.add(i);
+        },
+        child: new Container(
+          width: 100.0,
+          height: 100.0,
+          decoration: const BoxDecoration(
+            backgroundColor: const Color(0xFF0000FF)
+          ),
+          child: new Text('$i')
         )
       );
+    }
 
-      tester.tap(find.text('0'));
-      expect(log, equals([0]));
-      tester.tap(find.text('1'));
-      expect(log, equals([0, 1]));
-      tester.tap(find.text('2'));
-      expect(log, equals([0, 1, 2]));
+    tester.pumpWidget(
+      new Flow(
+        delegate: new TestFlowDelegate(startOffset: startOffset),
+        children: <Widget>[
+          buildBox(0),
+          buildBox(1),
+          buildBox(2),
+          buildBox(3),
+          buildBox(4),
+          buildBox(5),
+          buildBox(6),
+        ]
+      )
+    );
 
-      log.clear();
-      tester.tapAt(new Point(20.0, 90.0));
-      expect(log, equals([1]));
+    tester.tap(find.text('0'));
+    expect(log, equals([0]));
+    tester.tap(find.text('1'));
+    expect(log, equals([0, 1]));
+    tester.tap(find.text('2'));
+    expect(log, equals([0, 1, 2]));
 
-      startOffset.value = 50.0;
-      tester.pump();
+    log.clear();
+    tester.tapAt(new Point(20.0, 90.0));
+    expect(log, equals([1]));
 
-      log.clear();
-      tester.tapAt(new Point(20.0, 90.0));
-      expect(log, equals([0]));
-    });
+    startOffset.value = 50.0;
+    tester.pump();
+
+    log.clear();
+    tester.tapAt(new Point(20.0, 90.0));
+    expect(log, equals([0]));
   });
 }

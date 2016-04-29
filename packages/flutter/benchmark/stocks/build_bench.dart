@@ -12,19 +12,18 @@ const bool _kRunForever = false;
 void _doNothing() { }
 
 void main() {
-  assert(false); // Don't run in checked mode
   stock_data.StockDataFetcher.actuallyFetchData = false;
 
   stocks.StocksAppState appState;
 
-  testWidgets((WidgetTester tester) {
+  benchmarkWidgets((WidgetTester tester) {
     stocks.main();
     tester.pump(); // Start startup animation
     tester.pump(const Duration(seconds: 1)); // Complete startup animation
     tester.tapAt(new Point(20.0, 20.0)); // Open drawer
     tester.pump(); // Start drawer animation
     tester.pump(const Duration(seconds: 1)); // Complete drawer animation
-    appState = tester.stateOf(find.byType(stocks.StocksApp));
+    appState = tester.state(find.byType(stocks.StocksApp));
   });
 
   BuildOwner buildOwner = WidgetsBinding.instance.buildOwner;

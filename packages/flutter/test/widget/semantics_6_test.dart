@@ -8,13 +8,27 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Semantics 6 - SemanticsDebugger smoke test', () {
-    testWidgets((WidgetTester tester) {
+  testWidgets('Semantics 6 - SemanticsDebugger smoke test', (WidgetTester tester) {
 
-      // This is a smoketest to verify that adding a debugger doesn't crash.
+    // This is a smoketest to verify that adding a debugger doesn't crash.
 
-      tester.pumpWidget(
-        new Stack(
+    tester.pumpWidget(
+      new Stack(
+        children: <Widget>[
+          new Semantics(),
+          new Semantics(
+            container: true
+          ),
+          new Semantics(
+            label: 'label'
+          ),
+        ]
+      )
+    );
+
+    tester.pumpWidget(
+      new SemanticsDebugger(
+        child: new Stack(
           children: <Widget>[
             new Semantics(),
             new Semantics(
@@ -25,26 +39,10 @@ void main() {
             ),
           ]
         )
-      );
+      )
+    );
 
-      tester.pumpWidget(
-        new SemanticsDebugger(
-          child: new Stack(
-            children: <Widget>[
-              new Semantics(),
-              new Semantics(
-                container: true
-              ),
-              new Semantics(
-                label: 'label'
-              ),
-            ]
-          )
-        )
-      );
+    expect(true, isTrue); // expect that we reach here without crashing
 
-      expect(true, isTrue); // expect that we reach here without crashing
-
-    });
   });
 }

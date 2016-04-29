@@ -10,40 +10,38 @@ import 'package:test/test.dart';
 import 'test_semantics.dart';
 
 void main() {
-  test('Semantics 5', () {
-    testWidgets((WidgetTester tester) {
-      TestSemanticsListener client = new TestSemanticsListener();
+  testWidgets('Semantics 5', (WidgetTester tester) {
+    TestSemanticsListener client = new TestSemanticsListener();
 
-      tester.pumpWidget(
-        new Stack(
-          children: <Widget>[
-            new Semantics(
-              // this tests that empty nodes disappear
-            ),
-            new Semantics(
-              // this tests whether you can have a container with no other semantics
-              container: true
-            ),
-            new Semantics(
-              label: 'label' // (force a fork)
-            ),
-          ]
-        )
-      );
-      expect(client.updates.length, equals(2));
-      expect(client.updates[0].id, equals(0));
-      expect(client.updates[0].flags.hasCheckedState, isFalse);
-      expect(client.updates[0].strings.label, equals(''));
-      expect(client.updates[0].children.length, equals(2));
-      expect(client.updates[0].children[0].id, equals(1));
-      expect(client.updates[0].children[0].flags.hasCheckedState, isFalse);
-      expect(client.updates[0].children[0].strings.label, equals(''));
-      expect(client.updates[0].children[1].id, equals(2));
-      expect(client.updates[0].children[1].flags.hasCheckedState, isFalse);
-      expect(client.updates[0].children[1].strings.label, equals('label'));
-      expect(client.updates[1], isNull);
-      client.updates.clear();
+    tester.pumpWidget(
+      new Stack(
+        children: <Widget>[
+          new Semantics(
+            // this tests that empty nodes disappear
+          ),
+          new Semantics(
+            // this tests whether you can have a container with no other semantics
+            container: true
+          ),
+          new Semantics(
+            label: 'label' // (force a fork)
+          ),
+        ]
+      )
+    );
+    expect(client.updates.length, equals(2));
+    expect(client.updates[0].id, equals(0));
+    expect(client.updates[0].flags.hasCheckedState, isFalse);
+    expect(client.updates[0].strings.label, equals(''));
+    expect(client.updates[0].children.length, equals(2));
+    expect(client.updates[0].children[0].id, equals(1));
+    expect(client.updates[0].children[0].flags.hasCheckedState, isFalse);
+    expect(client.updates[0].children[0].strings.label, equals(''));
+    expect(client.updates[0].children[1].id, equals(2));
+    expect(client.updates[0].children[1].flags.hasCheckedState, isFalse);
+    expect(client.updates[0].children[1].strings.label, equals('label'));
+    expect(client.updates[1], isNull);
+    client.updates.clear();
 
-    });
   });
 }

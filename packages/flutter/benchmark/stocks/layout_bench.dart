@@ -10,10 +10,9 @@ const int _kNumberOfIterations = 100000;
 const bool _kRunForever = false;
 
 void main() {
-  assert(false); // Don't run in checked mode
   stock_data.StockDataFetcher.actuallyFetchData = false;
 
-  testWidgets((WidgetTester tester) {
+  benchmarkWidgets((WidgetTester tester) {
     stocks.main();
     tester.pump(); // Start startup animation
     tester.pump(const Duration(seconds: 1)); // Complete startup animation

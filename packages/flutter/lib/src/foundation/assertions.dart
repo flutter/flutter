@@ -136,10 +136,11 @@ class FlutterError extends AssertionError {
   /// The first time this is called, it dumps a very verbose message to the
   /// console using [debugPrint].
   ///
-  /// Subsequent calls only dump the first line of the exception.
+  /// Subsequent calls only dump the first line of the exception, unless
+  /// `forceReport` is set to true (in which case it dumps the verbose message).
   ///
-  /// This is the default behavior for the [onError] handler.
-  static void dumpErrorToConsole(FlutterErrorDetails details) {
+  /// The default behavior for the [onError] handler is to call this function.
+  static void dumpErrorToConsole(FlutterErrorDetails details, { bool forceReport: false }) {
     assert(details != null);
     assert(details.exception != null);
     bool reportError = details.silent != true; // could be null
@@ -148,9 +149,9 @@ class FlutterError extends AssertionError {
       reportError = true;
       return true;
     });
-    if (!reportError)
+    if (!reportError && !forceReport)
       return;
-    if (_errorCount == 0) {
+    if (_errorCount == 0 || forceReport) {
       final String header = '\u2550\u2550\u2561 EXCEPTION CAUGHT BY ${details.library} \u255E'.toUpperCase();
       final String footer = '\u2501' * _kWrapWidth;
       debugPrint('$header${"\u2550" * (footer.length - header.length)}');
@@ -186,7 +187,7 @@ class FlutterError extends AssertionError {
         debugPrint(information.toString(), wrapWidth: _kWrapWidth);
       }
       if (details.stack != null) {
-        debugPrint('Stack trace:', wrapWidth: _kWrapWidth);
+        debugPrint('When the exception was thrown, this was the stack:', wrapWidth: _kWrapWidth);
         debugPrint('${details.stack}$footer'); // StackTrace objects include a trailing newline
       } else {
         debugPrint(footer);

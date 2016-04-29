@@ -35,7 +35,7 @@ Finder findBackButton(WidgetTester tester) => byTooltip(tester, 'Back');
 void smokeDemo(WidgetTester tester, String routeName) {
   // Ensure that we're (likely to be) on the home page
   final Finder menuItem = findGalleryItemByRouteName(tester, routeName);
-  expect(tester, hasWidget(menuItem));
+  expect(menuItem, findsOneWidget);
 
   tester.tap(menuItem);
   tester.pump(); // Launch the demo.
@@ -43,58 +43,56 @@ void smokeDemo(WidgetTester tester, String routeName) {
 
   // Go back
   Finder backButton = findBackButton(tester);
-  expect(tester, hasWidget(backButton));
+  expect(backButton, findsOneWidget);
   tester.tap(backButton);
   tester.pump(); // Start the navigator pop "back" operation.
   tester.pump(const Duration(seconds: 1)); // Wait until it has finished.
 }
 
 void main() {
-  test('Material Gallery app smoke test', () {
-    testWidgets((WidgetTester tester) {
-      material_gallery_main.main(); // builds the app and schedules a frame but doesn't trigger one
-      tester.pump(); // see https://github.com/flutter/flutter/issues/1865
-      tester.pump(); // triggers a frame
+  testWidgets('Material Gallery app smoke test', (WidgetTester tester) {
+    material_gallery_main.main(); // builds the app and schedules a frame but doesn't trigger one
+    tester.pump(); // see https://github.com/flutter/flutter/issues/1865
+    tester.pump(); // triggers a frame
 
-      // Expand the demo category submenus.
-      for (String category in demoCategories.reversed) {
-        tester.tap(find.text(category));
-        tester.pump();
-        tester.pump(const Duration(seconds: 1)); // Wait until the menu has expanded.
-      }
-
-      final List<double> scrollDeltas = new List<double>();
-      double previousY = tester.getTopRight(find.text(demoCategories[0])).y;
-      final List<String> routeNames = material_gallery_app.kRoutes.keys.toList();
-      for (String routeName in routeNames) {
-        final double y = tester.getTopRight(findGalleryItemByRouteName(tester, routeName)).y;
-        scrollDeltas.add(previousY - y);
-        previousY = y;
-      }
-
-      // Launch each demo and then scroll that item out of the way.
-      for (int i = 0; i < routeNames.length; i += 1) {
-        final String routeName = routeNames[i];
-        smokeDemo(tester, routeName);
-        tester.scroll(findGalleryItemByRouteName(tester, routeName), new Offset(0.0, scrollDeltas[i]));
-        tester.pump();
-      }
-
-      Finder navigationMenuButton = findNavigationMenuButton(tester);
-      expect(tester, hasWidget(navigationMenuButton));
-      tester.tap(navigationMenuButton);
-      tester.pump(); // Start opening drawer.
-      tester.pump(const Duration(seconds: 1)); // Wait until it's really opened.
-
-      // switch theme
-      tester.tap(find.text('Dark'));
+    // Expand the demo category submenus.
+    for (String category in demoCategories.reversed) {
+      tester.tap(find.text(category));
       tester.pump();
-      tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
+      tester.pump(const Duration(seconds: 1)); // Wait until the menu has expanded.
+    }
 
-      // switch theme
-      tester.tap(find.text('Light'));
+    final List<double> scrollDeltas = new List<double>();
+    double previousY = tester.getTopRight(find.text(demoCategories[0])).y;
+    final List<String> routeNames = material_gallery_app.kRoutes.keys.toList();
+    for (String routeName in routeNames) {
+      final double y = tester.getTopRight(findGalleryItemByRouteName(tester, routeName)).y;
+      scrollDeltas.add(previousY - y);
+      previousY = y;
+    }
+
+    // Launch each demo and then scroll that item out of the way.
+    for (int i = 0; i < routeNames.length; i += 1) {
+      final String routeName = routeNames[i];
+      smokeDemo(tester, routeName);
+      tester.scroll(findGalleryItemByRouteName(tester, routeName), new Offset(0.0, scrollDeltas[i]));
       tester.pump();
-      tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
-    });
+    }
+
+    Finder navigationMenuButton = findNavigationMenuButton(tester);
+    expect(navigationMenuButton, findsOneWidget);
+    tester.tap(navigationMenuButton);
+    tester.pump(); // Start opening drawer.
+    tester.pump(const Duration(seconds: 1)); // Wait until it's really opened.
+
+    // switch theme
+    tester.tap(find.text('Dark'));
+    tester.pump();
+    tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
+
+    // switch theme
+    tester.tap(find.text('Light'));
+    tester.pump();
+    tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
   });
 }
