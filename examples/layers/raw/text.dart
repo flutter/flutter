@@ -21,7 +21,7 @@ ui.Picture paint(ui.Rect paintBounds) {
 
   // The paint method of Pargraph draws the contents of the paragraph unto the
   // given canvas.
-  canvas.drawParagraph(paragraph, new ui.Offset(paragraph.maxWidth / -2.0, (paragraph.maxWidth / 2.0) - 125));
+  canvas.drawParagraph(paragraph, new ui.Offset(paragraph.width / -2.0, (paragraph.width / 2.0) - 125));
 
   return recorder.endRecording();
 }
@@ -72,11 +72,10 @@ void main() {
   // left, right, or center alignment. Once built, the contents of the paragraph
   // cannot be altered, but sizing and positioning information can be updated.
   paragraph = builder.build(new ui.ParagraphStyle())
-    // Next, we supply a maximum width that the text is permitted to occupy.
-    ..maxWidth = 180.0
-    // ... and we ask the paragraph to the visual position of each its glyphs as
-    // well as its overall size, subject to its sizing constraints.
-    ..layout();
+    // Next, we supply a width that the text is permitted to occupy and we ask
+    // the paragraph to the visual position of each its glyphs as well as its
+    // overall size, subject to its sizing constraints.
+    ..layout(new ui.ParagraphConstraints(width: 180.0));
 
   // Finally, we register our beginFrame callback and kick off the first frame.
   ui.window.onBeginFrame = beginFrame;

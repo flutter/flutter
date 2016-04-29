@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphStyle, TextBox;
+import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, TextBox;
 
 import 'package:flutter/gestures.dart';
 
@@ -157,11 +157,7 @@ class RenderEditableLine extends RenderBox {
       // TODO(abarth): ParagraphBuilder#build's argument should be optional.
       // TODO(abarth): These min/max values should be the default for ui.Paragraph.
       _layoutTemplate = builder.build(new ui.ParagraphStyle())
-        ..minWidth = 0.0
-        ..maxWidth = double.INFINITY
-        ..minHeight = 0.0
-        ..maxHeight = double.INFINITY
-        ..layout();
+        ..layout(new ui.ParagraphConstraints(width: double.INFINITY));
     }
     return _layoutTemplate.height;
   }

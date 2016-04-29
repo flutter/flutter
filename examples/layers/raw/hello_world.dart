@@ -15,8 +15,7 @@ void beginFrame(Duration timeStamp) {
   final ui.ParagraphBuilder paragraphBuilder = new ui.ParagraphBuilder()
     ..addText('Hello, world.');
   final ui.Paragraph paragraph = paragraphBuilder.build(new ui.ParagraphStyle())
-    ..maxWidth = logicalSize.width
-    ..layout();
+    ..layout(new ui.ParagraphConstraints(width: logicalSize.width));
 
   final ui.Rect physicalBounds = ui.Point.origin & (logicalSize * devicePixelRatio);
   final ui.PictureRecorder recorder = new ui.PictureRecorder();
