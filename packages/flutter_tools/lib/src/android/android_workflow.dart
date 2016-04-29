@@ -66,8 +66,6 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
         }
 
         if (javaVersion != null) {
-          type = ValidationType.installed;
-
           messages.add(new ValidationMessage(javaVersion));
 
           if (os.which('jarsigner') == null) {
@@ -75,6 +73,8 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
               'The jarsigner utility was not found; this is used to build Android APKs. You may need to install\n'
               'or re-install the Java JDK: $_kJdkDownload.'
             ));
+          } else {
+            type = ValidationType.installed;
           }
         } else {
           messages.add(new ValidationMessage.error(
