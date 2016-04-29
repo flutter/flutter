@@ -282,7 +282,7 @@ class ThemeData {
   /// remaining part of a progress bar.
   final Color backgroundColor;
 
-  /// The color of the selected tab indicator in a tab strip.
+  /// The color of the selected tab indicator in a tab bar.
   final Color indicatorColor;
 
   /// The color to use for hint text or placeholder text, e.g. in

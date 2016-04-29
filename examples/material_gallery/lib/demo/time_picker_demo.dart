@@ -33,14 +33,15 @@ class _TimePickerDemoState extends State<TimePickerDemo> {
     return new Scaffold(
       appBar: new AppBar(title: new Text('Time picker')),
       body: new Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           new Text('$_selectedTime'),
+          new SizedBox(height: 20.0),
           new RaisedButton(
             onPressed: _handleSelectTime,
             child: new Text('SELECT TIME')
           ),
-        ],
-        mainAxisAlignment: MainAxisAlignment.center
+        ]
       )
     );
   }

@@ -1667,9 +1667,16 @@ class Flex extends MultiChildRenderObjectWidget {
     assert(crossAxisAlignment != null);
   }
 
+  /// The direction to use as the main axis.
   final FlexDirection direction;
+
+  /// How the children should be placed along the main axis.
   final MainAxisAlignment mainAxisAlignment;
+
+  /// How the children should be placed along the cross axis.
   final CrossAxisAlignment crossAxisAlignment;
+
+  /// If aligning items according to their baseline, which baseline to use.
   final TextBaseline textBaseline;
 
   @override

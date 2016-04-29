@@ -39,6 +39,7 @@ class _DatePickerDemoState extends State<DatePickerDemo> {
       body: new Column(
         children: <Widget>[
           new Text(new DateFormat.yMMMd().format(_selectedDate)),
+          new SizedBox(height: 20.0),
           new RaisedButton(
             onPressed: _handleSelectDate,
             child: new Text('SELECT DATE')

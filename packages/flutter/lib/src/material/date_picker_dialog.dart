@@ -9,8 +9,6 @@ import 'package:flutter/widgets.dart';
 import 'dialog.dart';
 import 'date_picker.dart';
 import 'flat_button.dart';
-import 'theme.dart';
-import 'theme_data.dart';
 
 class _DatePickerDialog extends StatefulWidget {
   _DatePickerDialog({
@@ -53,7 +51,6 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
     return new Dialog(
       content: new DatePicker(
         selectedDate: _selectedDate,
@@ -64,12 +61,10 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
       contentPadding: EdgeInsets.zero,
       actions: <Widget>[
         new FlatButton(
-          textColor: theme.accentColor,
           child: new Text('CANCEL'),
           onPressed: _handleCancel
         ),
         new FlatButton(
-          textColor: theme.accentColor,
           child: new Text('OK'),
           onPressed: _handleOk
         ),

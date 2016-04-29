@@ -31,21 +31,23 @@ import 'theme.dart';
 ///  * [DropDownButton]
 ///  * [FloatingActionButton]
 ///  * <https://www.google.com/design/spec/components/buttons.html>
-class RaisedButton extends MaterialButton {
+class RaisedButton extends StatelessWidget {
   RaisedButton({
     Key key,
-    Widget child,
-    ThemeBrightness colorBrightness,
+    this.onPressed,
     this.color,
     this.disabledColor,
     this.elevation: 2,
     this.highlightElevation: 8,
     this.disabledElevation: 0,
-    VoidCallback onPressed
-  }) : super(key: key,
-             child: child,
-             colorBrightness: colorBrightness,
-             onPressed: onPressed);
+    this.colorBrightness,
+    this.child
+  }) : super(key: key);
+
+  /// The callback that is invoked when the button is tapped or otherwise activated.
+  ///
+  /// If this is set to null, the button will be disabled.
+  final VoidCallback onPressed;
 
   /// The color of the button, as printed on the [Material]. Defaults to null,
   /// meaning that the color is automatically derived from the [Theme].
@@ -62,34 +64,33 @@ class RaisedButton extends MaterialButton {
   final int elevation;
 
   /// The z-coordinate at which to place this button when highlighted.
+  ///
+  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
   final int highlightElevation;
 
   /// The z-coordinate at which to place this button when disabled.
+  ///
+  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
   final int disabledElevation;
 
-  @override
-  _RaisedButtonState createState() => new _RaisedButtonState();
-}
+  /// The theme brightness to use for this button.
+  ///
+  /// Defaults to the brightness from [ThemeData.brightness].
+  final ThemeBrightness colorBrightness;
 
-class _RaisedButtonState extends MaterialButtonState<RaisedButton> {
-  @override
-  int get elevation {
-    if (config.enabled) {
-      if (highlight)
-        return config.highlightElevation;
-      return config.elevation;
-    } else {
-      return config.disabledElevation;
-    }
-  }
+  /// The widget below this widget in the tree.
+  final Widget child;
 
-  @override
-  Color getColor(BuildContext context) {
-    if (config.enabled) {
-      return config.color ?? Theme.of(context).buttonColor;
+  /// Whether the button is enabled or disabled. Buttons are disabled by default. To
+  /// enable a button, set its [onPressed] property to a non-null value.
+  bool get enabled => onPressed != null;
+
+  Color _getColor(BuildContext context) {
+    if (enabled) {
+      return color ?? Theme.of(context).buttonColor;
     } else {
-      if (config.disabledColor != null)
-        return config.disabledColor;
+      if (disabledColor != null)
+        return disabledColor;
       switch (Theme.of(context).brightness) {
         case ThemeBrightness.light:
           return Colors.black12;
@@ -97,5 +98,17 @@ class _RaisedButtonState extends MaterialButtonState<RaisedButton> {
           return Colors.white12;
       }
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new MaterialButton(
+      onPressed: onPressed,
+      color: _getColor(context),
+      elevation: enabled ? elevation : disabledElevation,
+      highlightElevation: enabled ? highlightElevation : disabledElevation,
+      colorBrightness: colorBrightness,
+      child: child
+    );
   }
 }

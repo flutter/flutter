@@ -92,7 +92,7 @@ class AppBar extends StatelessWidget {
   /// Typically a [FlexibleSpaceBar]. See [FlexibleSpaceBar] for details.
   final Widget flexibleSpace;
 
-  /// A horizontal strip of tabs to display at the bottom of the app bar.
+  /// A horizontal bar of tabs to display at the bottom of the app bar.
   final TabBar<dynamic> tabBar;
 
   /// The z-coordinate at which to place this app bar.

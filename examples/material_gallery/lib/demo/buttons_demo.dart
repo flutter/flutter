@@ -96,8 +96,8 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
   Widget buildRaisedButton() {
     return new Align(
       alignment: new FractionalOffset(0.5, 0.4),
-      child: new Row(
-        mainAxisAlignment: MainAxisAlignment.collapse,
+      child: new ButtonBar(
+        alignment: MainAxisAlignment.collapse,
         children: <Widget>[
           new RaisedButton(
             child: new Text('RAISED BUTTON'),
@@ -116,8 +116,8 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
   Widget buildFlatButton() {
     return new Align(
       alignment: new FractionalOffset(0.5, 0.4),
-      child: new Row(
-        mainAxisAlignment: MainAxisAlignment.collapse,
+      child: new ButtonBar(
+        alignment: MainAxisAlignment.collapse,
         children: <Widget>[
           new FlatButton(
             child: new Text('FLAT BUTTON'),

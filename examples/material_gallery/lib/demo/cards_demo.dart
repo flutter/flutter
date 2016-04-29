@@ -44,18 +44,17 @@ class TravelDestinationItem extends StatelessWidget {
   static final double height = 328.0;
   final TravelDestination destination;
 
-
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
     TextStyle titleStyle = theme.textTheme.headline.copyWith(color: Colors.white);
     TextStyle descriptionStyle = theme.textTheme.subhead;
-    TextStyle buttonStyle = theme.textTheme.button.copyWith(color: theme.primaryColor);
 
     return new SizedBox(
       height: height,
       child: new Card(
         child: new Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             // photo and title
             new SizedBox(
@@ -83,33 +82,35 @@ class TravelDestinationItem extends StatelessWidget {
             // description and share/expore buttons
             new Flexible(
               child: new Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
                 child: new Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     // three line description
                     new Text(destination.description[0], style: descriptionStyle),
                     new Text(destination.description[1], style: descriptionStyle),
                     new Text(destination.description[2], style: descriptionStyle),
-                    // share, explore buttons
-                    new Flexible(
-                      child: new Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: <Widget>[
-                          new Padding(
-                            padding: const EdgeInsets.only(right: 16.0),
-                            child: new Text('SHARE', style: buttonStyle)
-                          ),
-                          new Text('EXPLORE', style: buttonStyle)
-                        ]
-                      )
-                    )
                   ]
                 )
               )
-            )
+            ),
+            // share, explore buttons
+            // TODO(abarth): The theme and the bar should be part of card.
+            new ButtonTheme.footer(
+              child: new ButtonBar(
+                alignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  new FlatButton(
+                    child: new Text('SHARE'),
+                    onPressed: () { /* do nothing */ }
+                  ),
+                  new FlatButton(
+                    child: new Text('EXPLORE'),
+                    onPressed: () { /* do nothing */ }
+                  ),
+                ]
+              )
+            ),
           ]
         )
       )

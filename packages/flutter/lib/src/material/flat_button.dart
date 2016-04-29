@@ -33,27 +33,36 @@ import 'theme.dart';
 ///  * [RaisedButton]
 ///  * [DropDownButton]
 ///  * <https://www.google.com/design/spec/components/buttons.html>
-class FlatButton extends MaterialButton {
+class FlatButton extends StatelessWidget {
   FlatButton({
     Key key,
-    Widget child,
-    ThemeBrightness colorBrightness,
-    ButtonColor textTheme,
-    Color textColor,
-    Color disabledTextColor,
+    this.onPressed,
+    this.textColor,
+    this.disabledTextColor,
     this.color,
     this.disabledColor,
-    VoidCallback onPressed
-  }) : super(key: key,
-             child: child,
-             colorBrightness: colorBrightness,
-             textTheme: textTheme,
-             textColor: textColor,
-             disabledTextColor: disabledTextColor,
-             onPressed: onPressed);
+    this.textTheme,
+    this.colorBrightness,
+    this.child
+  }) : super(key: key);
+
+  /// The callback that is invoked when the button is tapped or otherwise activated.
+  ///
+  /// If this is set to null, the button will be disabled.
+  final VoidCallback onPressed;
+
+  /// The color to use for this button's text.
+  ///
+  /// Defaults to the color determined by the [textTheme].
+  final Color textColor;
+
+  /// The color to use for this button's text when the button cannot be pressed.
+  ///
+  /// Defaults to a color derived from the [Theme].
+  final Color disabledTextColor;
 
   /// The color of the button, as printed on the [Material]. Defaults to null,
-  /// meaning transparent.
+  /// meaning that the color is automatically derived from the [Theme].
   final Color color;
 
   /// The color of the button when the button is disabled. Buttons are disabled
@@ -61,18 +70,32 @@ class FlatButton extends MaterialButton {
   /// value.
   final Color disabledColor;
 
-  @override
-  _FlatButtonState createState() => new _FlatButtonState();
-}
+  /// The color scheme to use for this button's text.
+  ///
+  /// Defaults to the button color from [ButtonTheme].
+  final ButtonTextTheme textTheme;
 
-class _FlatButtonState extends MaterialButtonState<FlatButton> {
-  @override
-  int get elevation => 0;
+  /// The theme brightness to use for this button.
+  ///
+  /// Defaults to the brightness from [ThemeData.brightness].
+  final ThemeBrightness colorBrightness;
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  /// Whether the button is enabled or disabled. Buttons are disabled by default. To
+  /// enable a button, set its [onPressed] property to a non-null value.
+  bool get enabled => onPressed != null;
 
   @override
-  Color getColor(BuildContext context) {
-    if (!config.enabled)
-      return config.disabledColor;
-    return config.color;
+  Widget build(BuildContext context) {
+    return new MaterialButton(
+      onPressed: onPressed,
+      textColor: enabled ? textColor : disabledTextColor,
+      color: enabled ? color : disabledColor,
+      textTheme: textTheme,
+      colorBrightness: colorBrightness,
+      child: child
+    );
   }
 }
