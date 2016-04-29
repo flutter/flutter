@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert' show JSON, JsonEncoder;
+import 'dart:math' as math;
 
 import 'package:file/file.dart';
 import 'package:path/path.dart' as path;
@@ -26,6 +27,8 @@ class TimelineSummary {
 
   /// Average amount of time spent per frame in the framework building widgets,
   /// updating layout, painting and compositing.
+  ///
+  /// Returns null if no frames were recorded.
   double computeAverageFrameBuildTimeMillis() {
     int totalBuildTimeMicros = 0;
     int frameCount = 0;
@@ -37,6 +40,24 @@ class TimelineSummary {
 
     return frameCount > 0
       ? (totalBuildTimeMicros / frameCount) / 1000
+      : null;
+  }
+
+  /// Find amount of time spent in the framework building widgets,
+  /// updating layout, painting and compositing on worst frame.
+  ///
+  /// Returns null if no frames were recorded.
+  double computeWorstFrameBuildTimeMillis() {
+    int maxBuildTimeMicros = 0;
+    int frameCount = 0;
+
+    for (TimedEvent event in _extractBeginFrameEvents()) {
+      frameCount++;
+      maxBuildTimeMicros = math.max(maxBuildTimeMicros, event.duration.inMicroseconds);
+    }
+
+    return frameCount > 0
+      ? maxBuildTimeMicros / 1000
       : null;
   }
 
@@ -55,6 +76,7 @@ class TimelineSummary {
   Map<String, dynamic> get summaryJson {
     return <String, dynamic> {
       'average_frame_build_time_millis': computeAverageFrameBuildTimeMillis(),
+      'worst_frame_build_time_millis': computeWorstFrameBuildTimeMillis(),
       'missed_frame_build_budget_count': computeMissedFrameBuildBudgetCount(),
       'frame_count': countFrames(),
       'frame_build_times': _extractBeginFrameEvents()
