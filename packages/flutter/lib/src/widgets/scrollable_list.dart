@@ -317,7 +317,7 @@ class ListViewport extends _VirtualListViewport with VirtualViewportFromIterable
 /// the same size (extent) in the scrollDirection. For example for
 /// ScrollDirection.vertical itemExtent is the height of each item. Use this
 /// widget when you have a large number of children or when you are concerned
-// about offscreen widgets consuming resources.
+/// about offscreen widgets consuming resources.
 class ScrollableLazyList extends Scrollable {
   ScrollableLazyList({
     Key key,
