@@ -25,18 +25,6 @@ public:
 
     ~Paragraph() override;
 
-    double minWidth() { return m_minWidth; }
-    void setMinWidth(double width) { m_minWidth = width; m_legacyWidthUsed = true; }
-
-    double maxWidth() { return m_maxWidth; }
-    void setMaxWidth(double width) { m_maxWidth = width; m_legacyWidthUsed = true; }
-
-    double minHeight() { return m_minHeight; }
-    void setMinHeight(double height) { m_minHeight = height; }
-
-    double maxHeight() { return m_maxHeight; }
-    void setMaxHeight(double height) { m_maxHeight = height; }
-
     double width();
     double height();
     double minIntrinsicWidth();
@@ -58,12 +46,6 @@ private:
     RenderBox* firstChildBox() const { return m_renderView->firstChildBox(); }
 
     int absoluteOffsetForPosition(const PositionWithAffinity& position);
-
-    bool m_legacyWidthUsed;
-    LayoutUnit m_minWidth;
-    LayoutUnit m_maxWidth;
-    LayoutUnit m_minHeight;
-    LayoutUnit m_maxHeight;
 
     explicit Paragraph(PassOwnPtr<RenderView> renderView);
 

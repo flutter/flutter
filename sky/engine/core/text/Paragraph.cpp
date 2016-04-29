@@ -22,14 +22,6 @@ namespace blink {
 IMPLEMENT_WRAPPERTYPEINFO(ui, Paragraph);
 
 #define FOR_EACH_BINDING(V) \
-  V(Paragraph, minWidth) \
-  V(Paragraph, setMinWidth) \
-  V(Paragraph, maxWidth) \
-  V(Paragraph, setMaxWidth) \
-  V(Paragraph, minHeight) \
-  V(Paragraph, setMinHeight) \
-  V(Paragraph, maxHeight) \
-  V(Paragraph, setMaxHeight) \
   V(Paragraph, width) \
   V(Paragraph, height) \
   V(Paragraph, minIntrinsicWidth) \
@@ -43,7 +35,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Paragraph);
 DART_BIND_ALL(Paragraph, FOR_EACH_BINDING)
 
 Paragraph::Paragraph(PassOwnPtr<RenderView> renderView)
-    : m_legacyWidthUsed(false), m_renderView(renderView)
+    : m_renderView(renderView)
 {
 }
 
@@ -88,12 +80,7 @@ void Paragraph::layout(double width)
     FontCachePurgePreventer fontCachePurgePreventer;
 
     int maxWidth = LayoutUnit(width); // Handles infinity properly.
-    int maxHeight = intMaxForLayoutUnit;
-    if (m_legacyWidthUsed) {
-      maxWidth = std::max(m_minWidth, m_maxWidth);
-      maxHeight = std::max(m_minHeight, m_maxHeight);
-    }
-    m_renderView->setFrameViewSize(IntSize(maxWidth, maxHeight));
+    m_renderView->setFrameViewSize(IntSize(maxWidth, intMaxForLayoutUnit));
     m_renderView->layout();
 }
 

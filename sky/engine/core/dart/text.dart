@@ -631,22 +631,6 @@ abstract class Paragraph extends NativeFieldWrapperClass2 {
   /// object. To create a Paragraph object, use a [ParagraphBuilder].
   Paragraph(); // (this constructor is here just so we can document it)
 
-  /// The minimum amount of horizontal space this paragraph of text is permitted to occupy.
-  double get minWidth native "Paragraph_minWidth";
-  void set minWidth(double value) native "Paragraph_setMinWidth";
-
-  /// The maximum amount of horizontal space this paragraph of text is permitted to occupy.
-  double get maxWidth native "Paragraph_maxWidth";
-  void set maxWidth(double value) native "Paragraph_setMaxWidth";
-
-  /// The minimum amount of vertical space this paragraph of text is permitted to occupy.
-  double get minHeight native "Paragraph_minHeight";
-  void set minHeight(double value) native "Paragraph_setMinHeight";
-
-  /// The maximum amount of vertical space this paragraph of text is permitted to occupy.
-  double get maxHeight native "Paragraph_maxHeight";
-  void set maxHeight(double value) native "Paragraph_setMaxHeight";
-
   /// The amount of horizontal space this paragraph occupies.
   ///
   /// Valid only after [layout] has been called.
@@ -678,11 +662,7 @@ abstract class Paragraph extends NativeFieldWrapperClass2 {
   double get ideographicBaseline native "Paragraph_ideographicBaseline";
 
   /// Computes the size and position of each glyph in the paragraph.
-  ///
-  /// Setting the [minWidth], [maxWidth], [minHeight], or [maxHeight]
-  /// invalidates the layout of this paragraph, requiring a call to this
-  /// function before painting or reading geometry from this paragraph.
-  void layout([ParagraphConstraints constraints]) => _layout(constraints?.width);
+  void layout(ParagraphConstraints constraints) => _layout(constraints.width);
   void _layout(double width) native "Paragraph_layout";
 
   /// Returns a list of text boxes that enclose the given text range.
