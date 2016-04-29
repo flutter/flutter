@@ -69,13 +69,11 @@ void main() {
     expect(child1.spriteBox, isNull);
   });
 
-  test("Node - transformations", () {
+  testWidgets("Node - transformations", (WidgetTester tester) {
     const double epsilon = 0.01;
 
     NodeWithSize rootNode = new NodeWithSize(const Size(1024.0, 1024.0));
-    testWidgets((WidgetTester tester) {
-      tester.pumpWidget(new SpriteWidget(rootNode));
-    });
+    tester.pumpWidget(new SpriteWidget(rootNode));
 
     // Translations and transformations adding up correctly.
     Node child0 = new Node();
