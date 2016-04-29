@@ -24,14 +24,6 @@ copy("sky_shell") {
     deps = [
       "//sky/shell:shell_struct",
     ]
-  } else if (is_fnl) {
-    sources = [
-      "$root_build_dir/flutter.mojo",
-    ]
-
-    deps = [
-      "//sky/shell/platform/mojo",
-    ]
   } else if (!is_ios) {
     sources = [
       "$root_build_dir/flutter.mojo",

@@ -24,10 +24,6 @@ group("sky") {
     deps += [ "//sky/tools/sky_snapshot($dart_host_toolchain)" ]
   }
 
-  if (is_fnl) {
-    deps -= [ "//sky/shell" ]
-  }
-
   if (is_linux || is_android) {
     deps += [ "//sky/shell/platform/mojo" ]
   }
