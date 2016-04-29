@@ -303,16 +303,16 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
     // EditableLineWidget, not just changes triggered by user gestures.
     requestKeyboard();
 
+    InputValue newInput = new InputValue(text: _keyboardClient.inputValue.text, selection: selection);
     if (config.onChanged != null)
-      config.onChanged(_keyboardClient.inputValue.copyWith(selection: selection));
+      config.onChanged(newInput);
 
     if (_selectionHandles != null) {
       _selectionHandles.hide();
       _selectionHandles = null;
     }
 
-    if (_selectionHandles == null &&
-        _keyboardClient.inputValue.text.isNotEmpty &&
+    if (_keyboardClient.inputValue.text.isNotEmpty &&
         config.selectionHandleBuilder != null) {
       _selectionHandles = new TextSelectionHandles(
         selection: selection,
@@ -325,8 +325,9 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
   }
 
   void _handleSelectionHandleChanged(TextSelection selection) {
+    InputValue newInput = new InputValue(text: _keyboardClient.inputValue.text, selection: selection);
     if (config.onChanged != null)
-      config.onChanged(_keyboardClient.inputValue.copyWith(selection: selection));
+      config.onChanged(newInput);
   }
 
   /// Whether the blinking cursor is actually visible at this precise moment
@@ -381,10 +382,14 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
     else if (_cursorTimer != null && (!focused || !config.value.selection.isCollapsed))
       _stopCursorTimer();
 
-    if (_selectionHandles != null && !focused) {
-      scheduleMicrotask(() { // can't hide while disposing, since it triggers a rebuild
-        _selectionHandles.hide();
-        _selectionHandles = null;
+    if (_selectionHandles != null) {
+      scheduleMicrotask(() { // can't update while disposing, since it triggers a rebuild
+        if (focused) {
+          _selectionHandles.update(config.value.selection);
+        } else {
+          _selectionHandles.hide();
+          _selectionHandles = null;
+        }
       });
     }
 
