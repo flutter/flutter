@@ -9,7 +9,8 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
 
-const int kTargetLineCount = 100 * 1024;
+/// If no `copies` param is passed in, we scale the generated app up to 60k lines.
+const int kTargetLineCount = 60 * 1024;
 
 void main(List<String> args) {
   // If we're run from the `tools` dir, set the cwd to the repo root.
@@ -52,7 +53,12 @@ void main(List<String> args) {
     copies = int.parse(results['copies']);
   }
 
-  print('Making $copies copies of material_gallery to ${out.path}/');
+  print('Stats:');
+  print('  packages/flutter           : ${getStatsFor(new Directory("packages/flutter"))}');
+  print('  examples/material_gallery  : ${getStatsFor(new Directory("examples/material_gallery"))}');
+  print('');
+
+  print('Making $copies copies of material_gallery:');
 
   Directory lib = _dir(out, 'lib');
   if (lib.existsSync())
@@ -76,8 +82,7 @@ void main(List<String> args) {
   _file(out, '.dartignore').writeAsStringSync('');
 
   // Count source lines and number of files; tell how to run it.
-  SourceStats stats = getStatsFor(out);
-  print('material_gallery copied $copies times ($stats).');
+  print('  ${path.relative(results["out"])}: ${getStatsFor(out)}');
 }
 
 // TODO(devoncarew): Create an entry-point that builds a UI with all `n` copies.
