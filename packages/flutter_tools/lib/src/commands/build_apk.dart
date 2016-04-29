@@ -18,6 +18,7 @@ import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../services.dart';
 import '../toolchain.dart';
+import 'build_aot.dart';
 import 'run.dart';
 
 export '../android/android_device.dart' show AndroidDevice;
@@ -156,6 +157,9 @@ class BuildApkCommand extends FlutterCommand {
     argParser.addOption('flx',
       abbr: 'f',
       help: 'Path to the FLX file. If this is not provided, an FLX will be built.');
+    argParser.addOption('aot-path',
+      help: 'Path to the ahead-of-time compiled snapshot directory.\n'
+            'If this is not provided, an AOT snapshot will be built.');
     argParser.addOption('add-file',
       help: 'Add a file to the APK (must have the format <path/in/APK>=<local/file/path>).',
       allowMultiple: true);
@@ -217,6 +221,7 @@ class BuildApkCommand extends FlutterCommand {
       outputFile: argResults['output-file'],
       target: argResults['target'],
       flxPath: argResults['flx'],
+      aotPath: argResults['aot-path'],
       extraFiles: extraFiles,
       keystore: (argResults['keystore'] ?? '').isEmpty ? null : new ApkKeystoreInfo(
         keystore: argResults['keystore'],
@@ -401,6 +406,9 @@ bool _needsRebuild(String apkPath, String manifest) {
   return false;
 }
 
+// Returns true if the selected build mode uses ahead-of-time compilation.
+bool _isAotBuildMode(BuildMode mode) => mode == BuildMode.profile;
+
 Future<int> buildAndroid(
   TargetPlatform platform,
   BuildMode buildMode, {
@@ -411,6 +419,7 @@ Future<int> buildAndroid(
   String outputFile: _kDefaultOutputPath,
   String target,
   String flxPath,
+  String aotPath,
   Map<String, File> extraFiles,
   ApkKeystoreInfo keystore
 }) async {
@@ -458,18 +467,44 @@ Future<int> buildAndroid(
       printError('(Omit the --flx option to build the FLX automatically)');
       return 1;
     }
-
-    return _buildApk(platform, buildMode, components, flxPath, keystore, outputFile);
   } else {
-    // Find the path to the main Dart file; build the FLX.
-    String mainPath = findMainDartFile(target);
-    String localBundlePath = await flx.buildFlx(
+    // Build the FLX.
+    flxPath = await flx.buildFlx(
       toolchain,
-      mainPath: mainPath,
+      mainPath: findMainDartFile(target),
+      precompiledSnapshot: _isAotBuildMode(buildMode),
       includeRobotoFonts: false);
-
-    return _buildApk(platform, buildMode, components, localBundlePath, keystore, outputFile);
   }
+
+  // Build an AOT snapshot if needed.
+  if (_isAotBuildMode(buildMode) && aotPath == null) {
+    aotPath = buildAotSnapshot(findMainDartFile(target));
+    if (aotPath == null) {
+      printError('Failed to build AOT snapshot');
+      return 1;
+    }
+  }
+
+  if (aotPath != null) {
+    if (!_isAotBuildMode(buildMode)) {
+      printError('AOT snapshot can not be used in build mode $buildMode');
+      return 1;
+    }
+    if (!FileSystemEntity.isDirectorySync(aotPath)) {
+      printError('AOT snapshot does not exist: $aotPath');
+      return 1;
+    }
+    for (String aotFilename in kAotSnapshotFiles) {
+      String aotFilePath = path.join(aotPath, aotFilename);
+      if (!FileSystemEntity.isFileSync(aotFilePath)) {
+        printError('Missing AOT snapshot file: $aotFilePath');
+        return 1;
+      }
+      components.extraFiles['assets/$aotFilename'] = new File(aotFilePath);
+    }
+  }
+
+  return _buildApk(platform, buildMode, components, flxPath, keystore, outputFile);
 }
 
 Future<int> buildApk(

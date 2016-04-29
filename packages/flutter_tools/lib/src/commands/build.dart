@@ -8,12 +8,14 @@ import 'dart:io';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import 'build_apk.dart';
+import 'build_aot.dart';
 import 'build_flx.dart';
 import 'build_ios.dart';
 
 class BuildCommand extends FlutterCommand {
   BuildCommand() {
     addSubcommand(new BuildApkCommand());
+    addSubcommand(new BuildAotCommand());
     addSubcommand(new BuildCleanCommand());
     addSubcommand(new BuildIOSCommand());
     addSubcommand(new BuildFlxCommand());
