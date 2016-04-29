@@ -21,7 +21,7 @@ final Logger _log = new Logger('FlutterDriver');
 ///
 /// Examples:
 ///
-///     driver.tap(find.byText('Save'));
+///     driver.tap(find.text('Save'));
 ///     driver.scroll(find.byValueKey(42));
 const CommonFinders find = const CommonFinders._();
 
@@ -209,6 +209,12 @@ class FlutterDriver {
   /// second). It defaults to 60Hz.
   Future<Null> scroll(SerializableFinder finder, double dx, double dy, Duration duration, {int frequency: 60}) async {
     return await _sendCommand(new Scroll(finder, dx, dy, duration, frequency)).then((Map<String, dynamic> _) => null);
+  }
+
+  /// Tell the driver to ensure that the widget located by [finder] has been
+  /// scrolled completely into view. See [Scrollable.ensureVisible].
+  Future<Null> scrollToVisible(SerializableFinder finder) async {
+    return await _sendCommand(new ScrollToVisible(finder)).then((Map<String, dynamic> _) => null);
   }
 
   /// Returns the text in the `Text` widget located by [finder].

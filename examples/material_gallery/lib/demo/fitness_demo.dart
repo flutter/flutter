@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sprites/flutter_sprites.dart';
@@ -288,7 +287,7 @@ class _ProgressCircle extends NodeWithSize {
     Paint circlePaint = new Paint()
       ..color = Colors.white30
       ..strokeWidth = 24.0
-      ..style = ui.PaintingStyle.stroke;
+      ..style = PaintingStyle.stroke;
 
     canvas.drawCircle(
       new Point(size.width / 2.0, size.height / 2.0),
@@ -299,7 +298,7 @@ class _ProgressCircle extends NodeWithSize {
     Paint pathPaint = new Paint()
       ..color = Colors.purple[500]
       ..strokeWidth = 25.0
-      ..style = ui.PaintingStyle.stroke;
+      ..style = PaintingStyle.stroke;
 
     double angle = value.clamp(0.0, 1.0) * _kSweep;
     Path path = new Path()
