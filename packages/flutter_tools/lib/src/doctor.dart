@@ -113,7 +113,7 @@ class Doctor {
 
       for (ValidationMessage message in result.messages) {
         if (message.isError) {
-          printStatus('    x ${message.message.replaceAll('\n', '\n      ')}');
+          printStatus('    x ${message.message.replaceAll('\n', '\n      ')}', emphasis: true);
         } else {
           printStatus('    $separator ${message.message.replaceAll('\n', '\n      ')}');
         }
@@ -159,6 +159,8 @@ class ValidationResult {
   // A short message about the status.
   final String statusInfo;
   final List<ValidationMessage> messages;
+
+  bool get isInstalled => type == ValidationType.installed;
 
   String get leadingBox {
     if (type == ValidationType.missing)

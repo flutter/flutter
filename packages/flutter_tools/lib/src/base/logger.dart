@@ -20,7 +20,7 @@ abstract class Logger {
 
   /// Display normal output of the command. This should be used for things like
   /// progress messages, success messages, or just normal command output.
-  void printStatus(String message);
+  void printStatus(String message, { bool emphasis: false });
 
   /// Use this for verbose tracing output. Users can turn this output on in order
   /// to help diagnose issues with the toolchain or with their setup.
@@ -55,11 +55,11 @@ class StdoutLogger extends Logger {
   }
 
   @override
-  void printStatus(String message) {
+  void printStatus(String message, { bool emphasis: false }) {
     _status?.cancel();
     _status = null;
 
-    print(message);
+    print(emphasis ? _terminal.writeBold(message) : message);
   }
 
   @override
@@ -99,7 +99,7 @@ class BufferLogger extends Logger {
   void printError(String message, [StackTrace stackTrace]) => _error.writeln(message);
 
   @override
-  void printStatus(String message) => _status.writeln(message);
+  void printStatus(String message, { bool emphasis: false }) => _status.writeln(message);
 
   @override
   void printTrace(String message) => _trace.writeln(message);
@@ -127,7 +127,7 @@ class VerboseLogger extends Logger {
   }
 
   @override
-  void printStatus(String message) {
+  void printStatus(String message, { bool emphasis: false }) {
     _emit();
     lastMessage = new _LogMessage(_LogType.status, message);
   }

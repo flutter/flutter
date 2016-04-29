@@ -401,7 +401,7 @@ class NotifyingLogger extends Logger {
   }
 
   @override
-  void printStatus(String message) {
+  void printStatus(String message, { bool emphasis: false }) {
     _messageController.add(new LogMessage('status', message));
   }
 
