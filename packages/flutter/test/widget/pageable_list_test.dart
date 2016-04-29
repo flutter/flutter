@@ -60,178 +60,178 @@ void pageRight(WidgetTester tester) {
 
 void main() {
   testWidgets('PageableList with itemsWrap: false', (WidgetTester tester) {
-      currentPage = null;
-      tester.pumpWidget(buildFrame());
-      expect(currentPage, isNull);
-      pageLeft(tester);
-      expect(currentPage, equals(1));
+    currentPage = null;
+    tester.pumpWidget(buildFrame());
+    expect(currentPage, isNull);
+    pageLeft(tester);
+    expect(currentPage, equals(1));
 
-      expect(find.text('0'), findsNothing);
-      expect(find.text('1'), findsOneWidget);
-      expect(find.text('2'), findsNothing);
-      expect(find.text('3'), findsNothing);
-      expect(find.text('4'), findsNothing);
-      expect(find.text('5'), findsNothing);
+    expect(find.text('0'), findsNothing);
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('2'), findsNothing);
+    expect(find.text('3'), findsNothing);
+    expect(find.text('4'), findsNothing);
+    expect(find.text('5'), findsNothing);
 
-      pageRight(tester);
-      expect(currentPage, equals(0));
+    pageRight(tester);
+    expect(currentPage, equals(0));
 
-      expect(find.text('0'), findsOneWidget);
-      expect(find.text('1'), findsNothing);
-      expect(find.text('2'), findsNothing);
-      expect(find.text('3'), findsNothing);
-      expect(find.text('4'), findsNothing);
-      expect(find.text('5'), findsNothing);
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('1'), findsNothing);
+    expect(find.text('2'), findsNothing);
+    expect(find.text('3'), findsNothing);
+    expect(find.text('4'), findsNothing);
+    expect(find.text('5'), findsNothing);
 
-      pageRight(tester);
-      expect(currentPage, equals(0));
+    pageRight(tester);
+    expect(currentPage, equals(0));
   });
 
   testWidgets('PageableList with end scroll anchor', (WidgetTester tester) {
-      currentPage = 5;
-      tester.pumpWidget(buildFrame(scrollAnchor: ViewportAnchor.end));
-      pageRight(tester);
-      expect(currentPage, equals(4));
+    currentPage = 5;
+    tester.pumpWidget(buildFrame(scrollAnchor: ViewportAnchor.end));
+    pageRight(tester);
+    expect(currentPage, equals(4));
 
-      expect(find.text('0'), findsNothing);
-      expect(find.text('1'), findsNothing);
-      expect(find.text('2'), findsNothing);
-      expect(find.text('3'), findsNothing);
-      expect(find.text('4'), findsOneWidget);
-      expect(find.text('5'), findsNothing);
+    expect(find.text('0'), findsNothing);
+    expect(find.text('1'), findsNothing);
+    expect(find.text('2'), findsNothing);
+    expect(find.text('3'), findsNothing);
+    expect(find.text('4'), findsOneWidget);
+    expect(find.text('5'), findsNothing);
 
-      pageLeft(tester);
-      expect(currentPage, equals(5));
+    pageLeft(tester);
+    expect(currentPage, equals(5));
 
-      expect(find.text('0'), findsNothing);
-      expect(find.text('1'), findsNothing);
-      expect(find.text('2'), findsNothing);
-      expect(find.text('3'), findsNothing);
-      expect(find.text('4'), findsNothing);
-      expect(find.text('5'), findsOneWidget);
+    expect(find.text('0'), findsNothing);
+    expect(find.text('1'), findsNothing);
+    expect(find.text('2'), findsNothing);
+    expect(find.text('3'), findsNothing);
+    expect(find.text('4'), findsNothing);
+    expect(find.text('5'), findsOneWidget);
 
-      pageLeft(tester);
-      expect(currentPage, equals(5));
+    pageLeft(tester);
+    expect(currentPage, equals(5));
 
-      expect(find.text('0'), findsNothing);
-      expect(find.text('1'), findsNothing);
-      expect(find.text('2'), findsNothing);
-      expect(find.text('3'), findsNothing);
-      expect(find.text('4'), findsNothing);
-      expect(find.text('5'), findsOneWidget);
+    expect(find.text('0'), findsNothing);
+    expect(find.text('1'), findsNothing);
+    expect(find.text('2'), findsNothing);
+    expect(find.text('3'), findsNothing);
+    expect(find.text('4'), findsNothing);
+    expect(find.text('5'), findsOneWidget);
   });
 
   testWidgets('PageableList with itemsWrap: true', (WidgetTester tester) {
-      currentPage = null;
-      tester.pumpWidget(buildFrame(itemsWrap: true));
-      expect(currentPage, isNull);
-      pageLeft(tester);
-      expect(currentPage, equals(1));
-      pageRight(tester);
-      expect(currentPage, equals(0));
-      pageRight(tester);
-      expect(currentPage, equals(5));
+    currentPage = null;
+    tester.pumpWidget(buildFrame(itemsWrap: true));
+    expect(currentPage, isNull);
+    pageLeft(tester);
+    expect(currentPage, equals(1));
+    pageRight(tester);
+    expect(currentPage, equals(0));
+    pageRight(tester);
+    expect(currentPage, equals(5));
   });
 
   testWidgets('PageableList with end and itemsWrap: true', (WidgetTester tester) {
-      currentPage = 5;
-      tester.pumpWidget(buildFrame(itemsWrap: true, scrollAnchor: ViewportAnchor.end));
-      pageRight(tester);
-      expect(currentPage, equals(4));
+    currentPage = 5;
+    tester.pumpWidget(buildFrame(itemsWrap: true, scrollAnchor: ViewportAnchor.end));
+    pageRight(tester);
+    expect(currentPage, equals(4));
 
-      expect(find.text('0'), findsNothing);
-      expect(find.text('1'), findsNothing);
-      expect(find.text('2'), findsNothing);
-      expect(find.text('3'), findsNothing);
-      expect(find.text('4'), findsOneWidget);
-      expect(find.text('5'), findsNothing);
+    expect(find.text('0'), findsNothing);
+    expect(find.text('1'), findsNothing);
+    expect(find.text('2'), findsNothing);
+    expect(find.text('3'), findsNothing);
+    expect(find.text('4'), findsOneWidget);
+    expect(find.text('5'), findsNothing);
 
-      pageLeft(tester);
-      expect(currentPage, equals(5));
+    pageLeft(tester);
+    expect(currentPage, equals(5));
 
-      expect(find.text('0'), findsNothing);
-      expect(find.text('1'), findsNothing);
-      expect(find.text('2'), findsNothing);
-      expect(find.text('3'), findsNothing);
-      expect(find.text('4'), findsNothing);
-      expect(find.text('5'), findsOneWidget);
+    expect(find.text('0'), findsNothing);
+    expect(find.text('1'), findsNothing);
+    expect(find.text('2'), findsNothing);
+    expect(find.text('3'), findsNothing);
+    expect(find.text('4'), findsNothing);
+    expect(find.text('5'), findsOneWidget);
 
-      pageLeft(tester);
-      expect(currentPage, equals(0));
+    pageLeft(tester);
+    expect(currentPage, equals(0));
 
-      expect(find.text('0'), findsOneWidget);
-      expect(find.text('1'), findsNothing);
-      expect(find.text('2'), findsNothing);
-      expect(find.text('3'), findsNothing);
-      expect(find.text('4'), findsNothing);
-      expect(find.text('5'), findsNothing);
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('1'), findsNothing);
+    expect(find.text('2'), findsNothing);
+    expect(find.text('3'), findsNothing);
+    expect(find.text('4'), findsNothing);
+    expect(find.text('5'), findsNothing);
 
-      pageLeft(tester);
-      expect(currentPage, equals(1));
+    pageLeft(tester);
+    expect(currentPage, equals(1));
 
-      expect(find.text('0'), findsNothing);
-      expect(find.text('1'), findsOneWidget);
-      expect(find.text('2'), findsNothing);
-      expect(find.text('3'), findsNothing);
-      expect(find.text('4'), findsNothing);
-      expect(find.text('5'), findsNothing);
+    expect(find.text('0'), findsNothing);
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('2'), findsNothing);
+    expect(find.text('3'), findsNothing);
+    expect(find.text('4'), findsNothing);
+    expect(find.text('5'), findsNothing);
   });
 
   testWidgets('PageableList with two items', (WidgetTester tester) {
-      currentPage = null;
-      tester.pumpWidget(buildFrame(itemsWrap: true, pages: <int>[0, 1]));
-      expect(currentPage, isNull);
-      pageLeft(tester);
-      expect(currentPage, equals(1));
-      pageRight(tester);
-      expect(currentPage, equals(0));
-      pageRight(tester);
-      expect(currentPage, equals(1));
+    currentPage = null;
+    tester.pumpWidget(buildFrame(itemsWrap: true, pages: <int>[0, 1]));
+    expect(currentPage, isNull);
+    pageLeft(tester);
+    expect(currentPage, equals(1));
+    pageRight(tester);
+    expect(currentPage, equals(0));
+    pageRight(tester);
+    expect(currentPage, equals(1));
   });
 
   testWidgets('PageableList with one item', (WidgetTester tester) {
-      currentPage = null;
-      tester.pumpWidget(buildFrame(itemsWrap: true, pages: <int>[0]));
-      expect(currentPage, isNull);
-      pageLeft(tester);
-      expect(currentPage, equals(0));
-      pageRight(tester);
-      expect(currentPage, equals(0));
-      pageRight(tester);
-      expect(currentPage, equals(0));
+    currentPage = null;
+    tester.pumpWidget(buildFrame(itemsWrap: true, pages: <int>[0]));
+    expect(currentPage, isNull);
+    pageLeft(tester);
+    expect(currentPage, equals(0));
+    pageRight(tester);
+    expect(currentPage, equals(0));
+    pageRight(tester);
+    expect(currentPage, equals(0));
   });
 
   testWidgets('PageableList with no items', (WidgetTester tester) {
-      currentPage = null;
-      tester.pumpWidget(buildFrame(itemsWrap: true, pages: <int>[]));
-      expect(currentPage, isNull);
+    currentPage = null;
+    tester.pumpWidget(buildFrame(itemsWrap: true, pages: <int>[]));
+    expect(currentPage, isNull);
   });
 
   testWidgets('PageableList resize parent', (WidgetTester tester) {
-      tester.pumpWidget(new Container());
-      currentPage = null;
+    tester.pumpWidget(new Container());
+    currentPage = null;
 
-      tester.pumpWidget(buildFrame(itemsWrap: true));
-      expect(currentPage, isNull);
-      pageRight(tester);
-      expect(currentPage, equals(5));
+    tester.pumpWidget(buildFrame(itemsWrap: true));
+    expect(currentPage, isNull);
+    pageRight(tester);
+    expect(currentPage, equals(5));
 
-      RenderBox box = globalKeys[5].currentContext.findRenderObject();
-      expect(box.size.width, equals(pageSize.width));
-      expect(box.size.height, equals(pageSize.height));
+    RenderBox box = globalKeys[5].currentContext.findRenderObject();
+    expect(box.size.width, equals(pageSize.width));
+    expect(box.size.height, equals(pageSize.height));
 
-      pageSize = new Size(pageSize.height, pageSize.width);
-      tester.pumpWidget(buildFrame(itemsWrap: true));
+    pageSize = new Size(pageSize.height, pageSize.width);
+    tester.pumpWidget(buildFrame(itemsWrap: true));
 
-      expect(find.text('0'), findsNothing);
-      expect(find.text('1'), findsNothing);
-      expect(find.text('2'), findsNothing);
-      expect(find.text('3'), findsNothing);
-      expect(find.text('4'), findsNothing);
-      expect(find.text('5'), findsOneWidget);
+    expect(find.text('0'), findsNothing);
+    expect(find.text('1'), findsNothing);
+    expect(find.text('2'), findsNothing);
+    expect(find.text('3'), findsNothing);
+    expect(find.text('4'), findsNothing);
+    expect(find.text('5'), findsOneWidget);
 
-      box = globalKeys[5].currentContext.findRenderObject();
-      expect(box.size.width, equals(pageSize.width));
-      expect(box.size.height, equals(pageSize.height));
+    box = globalKeys[5].currentContext.findRenderObject();
+    expect(box.size.width, equals(pageSize.width));
+    expect(box.size.height, equals(pageSize.height));
   });
 }

@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('Can dispose without keyboard', (WidgetTester tester) {
-      tester.pumpWidget(new RawKeyboardListener(child: new Container()));
-      tester.pumpWidget(new Container());
+    tester.pumpWidget(new RawKeyboardListener(child: new Container()));
+    tester.pumpWidget(new Container());
   });
 }

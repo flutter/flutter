@@ -29,16 +29,16 @@ Widget buildFrame() {
 
 void main() {
   testWidgets('LazyBlock is a build function (smoketest)', (WidgetTester tester) {
-      tester.pumpWidget(buildFrame());
-      expect(find.text('0'), findsOneWidget);
-      expect(find.text('1'), findsOneWidget);
-      expect(find.text('2'), findsOneWidget);
-      expect(find.text('3'), findsOneWidget);
-      items.removeAt(2);
-      tester.pumpWidget(buildFrame());
-      expect(find.text('0'), findsOneWidget);
-      expect(find.text('1'), findsOneWidget);
-      expect(find.text('2'), findsNothing);
-      expect(find.text('3'), findsOneWidget);
+    tester.pumpWidget(buildFrame());
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('2'), findsOneWidget);
+    expect(find.text('3'), findsOneWidget);
+    items.removeAt(2);
+    tester.pumpWidget(buildFrame());
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('2'), findsNothing);
+    expect(find.text('3'), findsOneWidget);
   });
 }

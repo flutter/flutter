@@ -10,190 +10,190 @@ import 'test_widgets.dart';
 
 void main() {
   testWidgets('HomogeneousViewport mount/dismount smoke test', (WidgetTester tester) {
-      List<int> callbackTracker = <int>[];
+    List<int> callbackTracker = <int>[];
 
-      // the root view is 800x600 in the test environment
-      // so if our widget is 100 pixels tall, it should fit exactly 6 times.
+    // the root view is 800x600 in the test environment
+    // so if our widget is 100 pixels tall, it should fit exactly 6 times.
 
-      Widget builder() {
-        return new FlipWidget(
-          left: new ScrollableLazyList(
-            itemBuilder: (BuildContext context, int start, int count) {
-              List<Widget> result = <Widget>[];
-              for (int index = start; index < start + count; index += 1) {
-                callbackTracker.add(index);
-                result.add(new Container(
-                  key: new ValueKey<int>(index),
-                  height: 100.0,
-                  child: new Text("$index")
-                ));
-              }
-              return result;
-            },
-            itemExtent: 100.0
-          ),
-          right: new Text('Not Today')
-        );
-      }
+    Widget builder() {
+      return new FlipWidget(
+        left: new ScrollableLazyList(
+          itemBuilder: (BuildContext context, int start, int count) {
+            List<Widget> result = <Widget>[];
+            for (int index = start; index < start + count; index += 1) {
+              callbackTracker.add(index);
+              result.add(new Container(
+                key: new ValueKey<int>(index),
+                height: 100.0,
+                child: new Text("$index")
+              ));
+            }
+            return result;
+          },
+          itemExtent: 100.0
+        ),
+        right: new Text('Not Today')
+      );
+    }
 
-      tester.pumpWidget(builder());
+    tester.pumpWidget(builder());
 
-      FlipWidgetState testWidget = tester.state(find.byType(FlipWidget));
+    FlipWidgetState testWidget = tester.state(find.byType(FlipWidget));
 
-      expect(callbackTracker, equals([0, 1, 2, 3, 4, 5]));
+    expect(callbackTracker, equals([0, 1, 2, 3, 4, 5]));
 
-      callbackTracker.clear();
-      testWidget.flip();
-      tester.pump();
+    callbackTracker.clear();
+    testWidget.flip();
+    tester.pump();
 
-      expect(callbackTracker, equals([]));
+    expect(callbackTracker, equals([]));
 
-      callbackTracker.clear();
-      testWidget.flip();
-      tester.pump();
+    callbackTracker.clear();
+    testWidget.flip();
+    tester.pump();
 
-      expect(callbackTracker, equals([0, 1, 2, 3, 4, 5]));
+    expect(callbackTracker, equals([0, 1, 2, 3, 4, 5]));
   });
 
   testWidgets('HomogeneousViewport vertical', (WidgetTester tester) {
-      List<int> callbackTracker = <int>[];
+    List<int> callbackTracker = <int>[];
 
-      // the root view is 800x600 in the test environment
-      // so if our widget is 200 pixels tall, it should fit exactly 3 times.
-      // but if we are offset by 300 pixels, there will be 4, numbered 1-4.
+    // the root view is 800x600 in the test environment
+    // so if our widget is 200 pixels tall, it should fit exactly 3 times.
+    // but if we are offset by 300 pixels, there will be 4, numbered 1-4.
 
-      ItemListBuilder itemBuilder = (BuildContext context, int start, int count) {
-        List<Widget> result = <Widget>[];
-        for (int index = start; index < start + count; index += 1) {
-          callbackTracker.add(index);
-          result.add(new Container(
-            key: new ValueKey<int>(index),
-            width: 500.0, // this should be ignored
-            height: 400.0, // should be overridden by itemExtent
-            child: new Text("$index")
-          ));
-        }
-        return result;
-      };
+    ItemListBuilder itemBuilder = (BuildContext context, int start, int count) {
+      List<Widget> result = <Widget>[];
+      for (int index = start; index < start + count; index += 1) {
+        callbackTracker.add(index);
+        result.add(new Container(
+          key: new ValueKey<int>(index),
+          width: 500.0, // this should be ignored
+          height: 400.0, // should be overridden by itemExtent
+          child: new Text("$index")
+        ));
+      }
+      return result;
+    };
 
-      GlobalKey<ScrollableState<ScrollableLazyList>> scrollableKey = new GlobalKey<ScrollableState<ScrollableLazyList>>();
-      FlipWidget testWidget = new FlipWidget(
-        left: new ScrollableLazyList(
-          key: scrollableKey,
-          itemBuilder: itemBuilder,
-          itemExtent: 200.0,
-          initialScrollOffset: 300.0
-        ),
-        right: new Text('Not Today')
-      );
+    GlobalKey<ScrollableState<ScrollableLazyList>> scrollableKey = new GlobalKey<ScrollableState<ScrollableLazyList>>();
+    FlipWidget testWidget = new FlipWidget(
+      left: new ScrollableLazyList(
+        key: scrollableKey,
+        itemBuilder: itemBuilder,
+        itemExtent: 200.0,
+        initialScrollOffset: 300.0
+      ),
+      right: new Text('Not Today')
+    );
 
-      tester.pumpWidget(testWidget);
+    tester.pumpWidget(testWidget);
 
-      expect(callbackTracker, equals([1, 2, 3, 4]));
+    expect(callbackTracker, equals([1, 2, 3, 4]));
 
-      callbackTracker.clear();
+    callbackTracker.clear();
 
-      scrollableKey.currentState.scrollTo(400.0);
-      // now only 3 should fit, numbered 2-4.
+    scrollableKey.currentState.scrollTo(400.0);
+    // now only 3 should fit, numbered 2-4.
 
-      tester.pumpWidget(testWidget);
+    tester.pumpWidget(testWidget);
 
-      expect(callbackTracker, equals([2, 3, 4]));
+    expect(callbackTracker, equals([2, 3, 4]));
 
-      callbackTracker.clear();
+    callbackTracker.clear();
   });
 
   testWidgets('HomogeneousViewport horizontal', (WidgetTester tester) {
-      List<int> callbackTracker = <int>[];
+    List<int> callbackTracker = <int>[];
 
-      // the root view is 800x600 in the test environment
-      // so if our widget is 200 pixels wide, it should fit exactly 4 times.
-      // but if we are offset by 300 pixels, there will be 5, numbered 1-5.
+    // the root view is 800x600 in the test environment
+    // so if our widget is 200 pixels wide, it should fit exactly 4 times.
+    // but if we are offset by 300 pixels, there will be 5, numbered 1-5.
 
-      ItemListBuilder itemBuilder = (BuildContext context, int start, int count) {
-        List<Widget> result = <Widget>[];
-        for (int index = start; index < start + count; index += 1) {
-          callbackTracker.add(index);
-          result.add(new Container(
-            key: new ValueKey<int>(index),
-            width: 400.0, // this should be overridden by itemExtent
-            height: 500.0, // this should be ignored
-            child: new Text("$index")
-          ));
-        }
-        return result;
-      };
+    ItemListBuilder itemBuilder = (BuildContext context, int start, int count) {
+      List<Widget> result = <Widget>[];
+      for (int index = start; index < start + count; index += 1) {
+        callbackTracker.add(index);
+        result.add(new Container(
+          key: new ValueKey<int>(index),
+          width: 400.0, // this should be overridden by itemExtent
+          height: 500.0, // this should be ignored
+          child: new Text("$index")
+        ));
+      }
+      return result;
+    };
 
-      GlobalKey<ScrollableState<ScrollableLazyList>> scrollableKey = new GlobalKey<ScrollableState<ScrollableLazyList>>();
-      FlipWidget testWidget = new FlipWidget(
-        left: new ScrollableLazyList(
-          key: scrollableKey,
-          itemBuilder: itemBuilder,
-          itemExtent: 200.0,
-          initialScrollOffset: 300.0,
-          scrollDirection: Axis.horizontal
-        ),
-        right: new Text('Not Today')
-      );
+    GlobalKey<ScrollableState<ScrollableLazyList>> scrollableKey = new GlobalKey<ScrollableState<ScrollableLazyList>>();
+    FlipWidget testWidget = new FlipWidget(
+      left: new ScrollableLazyList(
+        key: scrollableKey,
+        itemBuilder: itemBuilder,
+        itemExtent: 200.0,
+        initialScrollOffset: 300.0,
+        scrollDirection: Axis.horizontal
+      ),
+      right: new Text('Not Today')
+    );
 
-      tester.pumpWidget(testWidget);
+    tester.pumpWidget(testWidget);
 
-      expect(callbackTracker, equals([1, 2, 3, 4, 5]));
+    expect(callbackTracker, equals([1, 2, 3, 4, 5]));
 
-      callbackTracker.clear();
+    callbackTracker.clear();
 
-      scrollableKey.currentState.scrollTo(400.0);
-      // now only 4 should fit, numbered 2-5.
+    scrollableKey.currentState.scrollTo(400.0);
+    // now only 4 should fit, numbered 2-5.
 
-      tester.pumpWidget(testWidget);
+    tester.pumpWidget(testWidget);
 
-      expect(callbackTracker, equals([2, 3, 4, 5]));
+    expect(callbackTracker, equals([2, 3, 4, 5]));
 
-      callbackTracker.clear();
+    callbackTracker.clear();
   });
 
   testWidgets('ScrollableLazyList 10 items, 2-3 items visible', (WidgetTester tester) {
-      List<int> callbackTracker = <int>[];
+    List<int> callbackTracker = <int>[];
 
-      // The root view is 800x600 in the test environment and our list
-      // items are 300 tall. Scrolling should cause two or three items
-      // to be built.
+    // The root view is 800x600 in the test environment and our list
+    // items are 300 tall. Scrolling should cause two or three items
+    // to be built.
 
-      ItemListBuilder itemBuilder = (BuildContext context, int start, int count) {
-        List<Widget> result = <Widget>[];
-        for (int index = start; index < start + count; index += 1) {
-          callbackTracker.add(index);
-          result.add(new Text('$index', key: new ValueKey<int>(index)));
-        }
-        return result;
-      };
+    ItemListBuilder itemBuilder = (BuildContext context, int start, int count) {
+      List<Widget> result = <Widget>[];
+      for (int index = start; index < start + count; index += 1) {
+        callbackTracker.add(index);
+        result.add(new Text('$index', key: new ValueKey<int>(index)));
+      }
+      return result;
+    };
 
-      GlobalKey<ScrollableState<ScrollableLazyList>> scrollableKey = new GlobalKey<ScrollableState<ScrollableLazyList>>();
-      Widget testWidget = new ScrollableLazyList(
-        key: scrollableKey,
-        itemBuilder: itemBuilder,
-        itemExtent: 300.0,
-        itemCount: 10
-      );
+    GlobalKey<ScrollableState<ScrollableLazyList>> scrollableKey = new GlobalKey<ScrollableState<ScrollableLazyList>>();
+    Widget testWidget = new ScrollableLazyList(
+      key: scrollableKey,
+      itemBuilder: itemBuilder,
+      itemExtent: 300.0,
+      itemCount: 10
+    );
 
-      tester.pumpWidget(testWidget);
-      expect(callbackTracker, equals([0, 1]));
-      callbackTracker.clear();
+    tester.pumpWidget(testWidget);
+    expect(callbackTracker, equals([0, 1]));
+    callbackTracker.clear();
 
-      scrollableKey.currentState.scrollTo(150.0);
-      tester.pumpWidget(testWidget);
-      expect(callbackTracker, equals([0, 1, 2]));
-      callbackTracker.clear();
+    scrollableKey.currentState.scrollTo(150.0);
+    tester.pumpWidget(testWidget);
+    expect(callbackTracker, equals([0, 1, 2]));
+    callbackTracker.clear();
 
-      scrollableKey.currentState.scrollTo(600.0);
-      tester.pumpWidget(testWidget);
-      expect(callbackTracker, equals([2, 3]));
-      callbackTracker.clear();
+    scrollableKey.currentState.scrollTo(600.0);
+    tester.pumpWidget(testWidget);
+    expect(callbackTracker, equals([2, 3]));
+    callbackTracker.clear();
 
-      scrollableKey.currentState.scrollTo(750.0);
-      tester.pumpWidget(testWidget);
-      expect(callbackTracker, equals([2, 3, 4]));
-      callbackTracker.clear();
+    scrollableKey.currentState.scrollTo(750.0);
+    tester.pumpWidget(testWidget);
+    expect(callbackTracker, equals([2, 3, 4]));
+    callbackTracker.clear();
   });
 
 }

@@ -13,41 +13,41 @@ void main() {
   // animations started by the progress indicators are stopped at dispose() time.
 
   testWidgets('LinearProgressIndicator(value: 0.0) can be constructed', (WidgetTester tester) {
-      tester.pumpWidget(
-        new Center(
-          child: new SizedBox(
-            width: 200.0,
-            child: new LinearProgressIndicator(value: 0.0)
-          )
+    tester.pumpWidget(
+      new Center(
+        child: new SizedBox(
+          width: 200.0,
+          child: new LinearProgressIndicator(value: 0.0)
         )
-      );
+      )
+    );
   });
 
   testWidgets('LinearProgressIndicator(value: null) can be constructed', (WidgetTester tester) {
-      tester.pumpWidget(
-        new Center(
-          child: new SizedBox(
-            width: 200.0,
-            child: new LinearProgressIndicator(value: null)
-          )
+    tester.pumpWidget(
+      new Center(
+        child: new SizedBox(
+          width: 200.0,
+          child: new LinearProgressIndicator(value: null)
         )
-      );
+      )
+    );
   });
 
   testWidgets('CircularProgressIndicator(value: 0.0) can be constructed', (WidgetTester tester) {
-      tester.pumpWidget(
-        new Center(
-          child: new CircularProgressIndicator(value: 0.0)
-        )
-      );
+    tester.pumpWidget(
+      new Center(
+        child: new CircularProgressIndicator(value: 0.0)
+      )
+    );
   });
 
   testWidgets('CircularProgressIndicator(value: null) can be constructed', (WidgetTester tester) {
-      tester.pumpWidget(
-        new Center(
-          child: new CircularProgressIndicator(value: null)
-        )
-      );
+    tester.pumpWidget(
+      new Center(
+        child: new CircularProgressIndicator(value: null)
+      )
+    );
   });
 
   testWidgets('LinearProgressIndicator causes a repaint when it changes', (WidgetTester tester) {

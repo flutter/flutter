@@ -79,40 +79,40 @@ class BadDisposeWidgetState extends State<BadDisposeWidget> {
 
 void main() {
   testWidgets('Legal times for setState', (WidgetTester tester) {
-      GlobalKey flipKey = new GlobalKey();
-      expect(ProbeWidgetState.buildCount, equals(0));
-      tester.pumpWidget(new ProbeWidget());
-      expect(ProbeWidgetState.buildCount, equals(1));
-      tester.pumpWidget(new ProbeWidget());
-      expect(ProbeWidgetState.buildCount, equals(2));
-      tester.pumpWidget(new FlipWidget(
-        key: flipKey,
-        left: new Container(),
-        right: new ProbeWidget()
-      ));
-      expect(ProbeWidgetState.buildCount, equals(2));
-      FlipWidgetState flipState1 = flipKey.currentState;
-      flipState1.flip();
-      tester.pump();
-      expect(ProbeWidgetState.buildCount, equals(3));
-      FlipWidgetState flipState2 = flipKey.currentState;
-      flipState2.flip();
-      tester.pump();
-      expect(ProbeWidgetState.buildCount, equals(3));
-      tester.pumpWidget(new Container());
-      expect(ProbeWidgetState.buildCount, equals(3));
+    GlobalKey flipKey = new GlobalKey();
+    expect(ProbeWidgetState.buildCount, equals(0));
+    tester.pumpWidget(new ProbeWidget());
+    expect(ProbeWidgetState.buildCount, equals(1));
+    tester.pumpWidget(new ProbeWidget());
+    expect(ProbeWidgetState.buildCount, equals(2));
+    tester.pumpWidget(new FlipWidget(
+      key: flipKey,
+      left: new Container(),
+      right: new ProbeWidget()
+    ));
+    expect(ProbeWidgetState.buildCount, equals(2));
+    FlipWidgetState flipState1 = flipKey.currentState;
+    flipState1.flip();
+    tester.pump();
+    expect(ProbeWidgetState.buildCount, equals(3));
+    FlipWidgetState flipState2 = flipKey.currentState;
+    flipState2.flip();
+    tester.pump();
+    expect(ProbeWidgetState.buildCount, equals(3));
+    tester.pumpWidget(new Container());
+    expect(ProbeWidgetState.buildCount, equals(3));
   });
 
   testWidgets('Setting parent state during build is forbidden', (WidgetTester tester) {
-      tester.pumpWidget(new BadWidgetParent());
-      expect(tester.takeException(), isNotNull);
-      tester.pumpWidget(new Container());
+    tester.pumpWidget(new BadWidgetParent());
+    expect(tester.takeException(), isNotNull);
+    tester.pumpWidget(new Container());
   });
 
   testWidgets('Setting state during dispose is forbidden', (WidgetTester tester) {
-      tester.pumpWidget(new BadDisposeWidget());
-      expect(tester.takeException(), isNull);
-      tester.pumpWidget(new Container());
-      expect(tester.takeException(), isNotNull);
+    tester.pumpWidget(new BadDisposeWidget());
+    expect(tester.takeException(), isNull);
+    tester.pumpWidget(new Container());
+    expect(tester.takeException(), isNotNull);
   });
 }

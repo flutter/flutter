@@ -131,105 +131,105 @@ void main() {
   });
 
   testWidgets('Horizontal drag triggers dismiss scrollDirection=vertical', (WidgetTester tester) {
-      scrollDirection = Axis.vertical;
-      dismissDirection = DismissDirection.horizontal;
+    scrollDirection = Axis.vertical;
+    dismissDirection = DismissDirection.horizontal;
 
-      tester.pumpWidget(widgetBuilder());
-      expect(dismissedItems, isEmpty);
+    tester.pumpWidget(widgetBuilder());
+    expect(dismissedItems, isEmpty);
 
-      dismissItem(tester, 0, gestureDirection: DismissDirection.startToEnd);
-      expect(find.text('0'), findsNothing);
-      expect(dismissedItems, equals([0]));
-      expect(reportedDismissDirection, DismissDirection.startToEnd);
+    dismissItem(tester, 0, gestureDirection: DismissDirection.startToEnd);
+    expect(find.text('0'), findsNothing);
+    expect(dismissedItems, equals([0]));
+    expect(reportedDismissDirection, DismissDirection.startToEnd);
 
-      dismissItem(tester, 1, gestureDirection: DismissDirection.endToStart);
-      expect(find.text('1'), findsNothing);
-      expect(dismissedItems, equals([0, 1]));
-      expect(reportedDismissDirection, DismissDirection.endToStart);
+    dismissItem(tester, 1, gestureDirection: DismissDirection.endToStart);
+    expect(find.text('1'), findsNothing);
+    expect(dismissedItems, equals([0, 1]));
+    expect(reportedDismissDirection, DismissDirection.endToStart);
   });
 
   testWidgets('Vertical drag triggers dismiss scrollDirection=horizontal', (WidgetTester tester) {
-      scrollDirection = Axis.horizontal;
-      dismissDirection = DismissDirection.vertical;
+    scrollDirection = Axis.horizontal;
+    dismissDirection = DismissDirection.vertical;
 
-      tester.pumpWidget(widgetBuilder());
-      expect(dismissedItems, isEmpty);
+    tester.pumpWidget(widgetBuilder());
+    expect(dismissedItems, isEmpty);
 
-      dismissItem(tester, 0, gestureDirection: DismissDirection.up);
-      expect(find.text('0'), findsNothing);
-      expect(dismissedItems, equals([0]));
-      expect(reportedDismissDirection, DismissDirection.up);
+    dismissItem(tester, 0, gestureDirection: DismissDirection.up);
+    expect(find.text('0'), findsNothing);
+    expect(dismissedItems, equals([0]));
+    expect(reportedDismissDirection, DismissDirection.up);
 
-      dismissItem(tester, 1, gestureDirection: DismissDirection.down);
-      expect(find.text('1'), findsNothing);
-      expect(dismissedItems, equals([0, 1]));
-      expect(reportedDismissDirection, DismissDirection.down);
+    dismissItem(tester, 1, gestureDirection: DismissDirection.down);
+    expect(find.text('1'), findsNothing);
+    expect(dismissedItems, equals([0, 1]));
+    expect(reportedDismissDirection, DismissDirection.down);
   });
 
   testWidgets('drag-left with DismissDirection.left triggers dismiss', (WidgetTester tester) {
-      scrollDirection = Axis.vertical;
-      dismissDirection = DismissDirection.endToStart;
+    scrollDirection = Axis.vertical;
+    dismissDirection = DismissDirection.endToStart;
 
-      tester.pumpWidget(widgetBuilder());
-      expect(dismissedItems, isEmpty);
+    tester.pumpWidget(widgetBuilder());
+    expect(dismissedItems, isEmpty);
 
-      dismissItem(tester, 0, gestureDirection: DismissDirection.startToEnd);
-      expect(find.text('0'), findsOneWidget);
-      expect(dismissedItems, isEmpty);
-      dismissItem(tester, 1, gestureDirection: DismissDirection.startToEnd);
+    dismissItem(tester, 0, gestureDirection: DismissDirection.startToEnd);
+    expect(find.text('0'), findsOneWidget);
+    expect(dismissedItems, isEmpty);
+    dismissItem(tester, 1, gestureDirection: DismissDirection.startToEnd);
 
-      dismissItem(tester, 0, gestureDirection: DismissDirection.endToStart);
-      expect(find.text('0'), findsNothing);
-      expect(dismissedItems, equals([0]));
-      dismissItem(tester, 1, gestureDirection: DismissDirection.endToStart);
+    dismissItem(tester, 0, gestureDirection: DismissDirection.endToStart);
+    expect(find.text('0'), findsNothing);
+    expect(dismissedItems, equals([0]));
+    dismissItem(tester, 1, gestureDirection: DismissDirection.endToStart);
   });
 
   testWidgets('drag-right with DismissDirection.right triggers dismiss', (WidgetTester tester) {
-      scrollDirection = Axis.vertical;
-      dismissDirection = DismissDirection.startToEnd;
+    scrollDirection = Axis.vertical;
+    dismissDirection = DismissDirection.startToEnd;
 
-      tester.pumpWidget(widgetBuilder());
-      expect(dismissedItems, isEmpty);
+    tester.pumpWidget(widgetBuilder());
+    expect(dismissedItems, isEmpty);
 
-      dismissItem(tester, 0, gestureDirection: DismissDirection.endToStart);
-      expect(find.text('0'), findsOneWidget);
-      expect(dismissedItems, isEmpty);
+    dismissItem(tester, 0, gestureDirection: DismissDirection.endToStart);
+    expect(find.text('0'), findsOneWidget);
+    expect(dismissedItems, isEmpty);
 
-      dismissItem(tester, 0, gestureDirection: DismissDirection.startToEnd);
-      expect(find.text('0'), findsNothing);
-      expect(dismissedItems, equals([0]));
+    dismissItem(tester, 0, gestureDirection: DismissDirection.startToEnd);
+    expect(find.text('0'), findsNothing);
+    expect(dismissedItems, equals([0]));
   });
 
   testWidgets('drag-up with DismissDirection.up triggers dismiss', (WidgetTester tester) {
-      scrollDirection = Axis.horizontal;
-      dismissDirection = DismissDirection.up;
+    scrollDirection = Axis.horizontal;
+    dismissDirection = DismissDirection.up;
 
-      tester.pumpWidget(widgetBuilder());
-      expect(dismissedItems, isEmpty);
+    tester.pumpWidget(widgetBuilder());
+    expect(dismissedItems, isEmpty);
 
-      dismissItem(tester, 0, gestureDirection: DismissDirection.down);
-      expect(find.text('0'), findsOneWidget);
-      expect(dismissedItems, isEmpty);
+    dismissItem(tester, 0, gestureDirection: DismissDirection.down);
+    expect(find.text('0'), findsOneWidget);
+    expect(dismissedItems, isEmpty);
 
-      dismissItem(tester, 0, gestureDirection: DismissDirection.up);
-      expect(find.text('0'), findsNothing);
-      expect(dismissedItems, equals([0]));
+    dismissItem(tester, 0, gestureDirection: DismissDirection.up);
+    expect(find.text('0'), findsNothing);
+    expect(dismissedItems, equals([0]));
   });
 
   testWidgets('drag-down with DismissDirection.down triggers dismiss', (WidgetTester tester) {
-      scrollDirection = Axis.horizontal;
-      dismissDirection = DismissDirection.down;
+    scrollDirection = Axis.horizontal;
+    dismissDirection = DismissDirection.down;
 
-      tester.pumpWidget(widgetBuilder());
-      expect(dismissedItems, isEmpty);
+    tester.pumpWidget(widgetBuilder());
+    expect(dismissedItems, isEmpty);
 
-      dismissItem(tester, 0, gestureDirection: DismissDirection.up);
-      expect(find.text('0'), findsOneWidget);
-      expect(dismissedItems, isEmpty);
+    dismissItem(tester, 0, gestureDirection: DismissDirection.up);
+    expect(find.text('0'), findsOneWidget);
+    expect(dismissedItems, isEmpty);
 
-      dismissItem(tester, 0, gestureDirection: DismissDirection.down);
-      expect(find.text('0'), findsNothing);
-      expect(dismissedItems, equals([0]));
+    dismissItem(tester, 0, gestureDirection: DismissDirection.down);
+    expect(find.text('0'), findsNothing);
+    expect(dismissedItems, equals([0]));
   });
 
   // This is a regression test for an fn2 bug where dragging a card caused an
@@ -239,22 +239,22 @@ void main() {
   // https://github.com/flutter/engine/pull/1134 at the time, and later made
   // irrelevant by fn3, but just in case...
   testWidgets('Verify that drag-move events do not assert', (WidgetTester tester) {
-      scrollDirection = Axis.horizontal;
-      dismissDirection = DismissDirection.down;
+    scrollDirection = Axis.horizontal;
+    dismissDirection = DismissDirection.down;
 
-      tester.pumpWidget(widgetBuilder());
-      Point location = tester.getTopLeft(find.text('0'));
-      Offset offset = new Offset(0.0, 5.0);
-      TestGesture gesture = tester.startGesture(location, pointer: 5);
-      gesture.moveBy(offset);
-      tester.pumpWidget(widgetBuilder());
-      gesture.moveBy(offset);
-      tester.pumpWidget(widgetBuilder());
-      gesture.moveBy(offset);
-      tester.pumpWidget(widgetBuilder());
-      gesture.moveBy(offset);
-      tester.pumpWidget(widgetBuilder());
-      gesture.up();
+    tester.pumpWidget(widgetBuilder());
+    Point location = tester.getTopLeft(find.text('0'));
+    Offset offset = new Offset(0.0, 5.0);
+    TestGesture gesture = tester.startGesture(location, pointer: 5);
+    gesture.moveBy(offset);
+    tester.pumpWidget(widgetBuilder());
+    gesture.moveBy(offset);
+    tester.pumpWidget(widgetBuilder());
+    gesture.moveBy(offset);
+    tester.pumpWidget(widgetBuilder());
+    gesture.moveBy(offset);
+    tester.pumpWidget(widgetBuilder());
+    gesture.up();
   });
 
   // This one is for a case where dssmissing a widget above a previously
@@ -264,47 +264,47 @@ void main() {
   // actually remove the dismissed widget, which is a violation of the
   // Dismissable contract. This is not an example of good practice.
   testWidgets('dismissing bottom then top (smoketest)', (WidgetTester tester) {
-      tester.pumpWidget(new Center(
-        child: new Container(
-          width: 100.0,
-          height: 1000.0,
-          child: new Column(
-            children: <Widget>[
-              new Test1215DismissableWidget('1'),
-              new Test1215DismissableWidget('2')
-            ]
-          )
+    tester.pumpWidget(new Center(
+      child: new Container(
+        width: 100.0,
+        height: 1000.0,
+        child: new Column(
+          children: <Widget>[
+            new Test1215DismissableWidget('1'),
+            new Test1215DismissableWidget('2')
+          ]
         )
-      ));
-      expect(find.text('1'), findsOneWidget);
-      expect(find.text('2'), findsOneWidget);
-      dismissElement(tester, find.text('2'), gestureDirection: DismissDirection.startToEnd);
-      tester.pump(); // start the slide away
-      tester.pump(new Duration(seconds: 1)); // finish the slide away
-      expect(find.text('1'), findsOneWidget);
-      expect(find.text('2'), findsNothing);
-      dismissElement(tester, find.text('1'), gestureDirection: DismissDirection.startToEnd);
-      tester.pump(); // start the slide away
-      tester.pump(new Duration(seconds: 1)); // finish the slide away (at which point the child is no longer included in the tree)
-      expect(find.text('1'), findsNothing);
-      expect(find.text('2'), findsNothing);
+      )
+    ));
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('2'), findsOneWidget);
+    dismissElement(tester, find.text('2'), gestureDirection: DismissDirection.startToEnd);
+    tester.pump(); // start the slide away
+    tester.pump(new Duration(seconds: 1)); // finish the slide away
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('2'), findsNothing);
+    dismissElement(tester, find.text('1'), gestureDirection: DismissDirection.startToEnd);
+    tester.pump(); // start the slide away
+    tester.pump(new Duration(seconds: 1)); // finish the slide away (at which point the child is no longer included in the tree)
+    expect(find.text('1'), findsNothing);
+    expect(find.text('2'), findsNothing);
   });
 
   testWidgets('Dismissable starts from the full size when collapsing', (WidgetTester tester) {
-      scrollDirection = Axis.vertical;
-      dismissDirection = DismissDirection.horizontal;
-      background = new Text('background');
+    scrollDirection = Axis.vertical;
+    dismissDirection = DismissDirection.horizontal;
+    background = new Text('background');
 
-      tester.pumpWidget(widgetBuilder());
-      expect(dismissedItems, isEmpty);
+    tester.pumpWidget(widgetBuilder());
+    expect(dismissedItems, isEmpty);
 
-      Finder itemFinder = find.text('0');
-      expect(itemFinder, findsOneWidget);
-      dismissElement(tester, itemFinder, gestureDirection: DismissDirection.startToEnd);
-      tester.pump();
+    Finder itemFinder = find.text('0');
+    expect(itemFinder, findsOneWidget);
+    dismissElement(tester, itemFinder, gestureDirection: DismissDirection.startToEnd);
+    tester.pump();
 
-      expect(find.text('background'), findsNWidgets(5));
-      RenderBox backgroundBox = tester.firstRenderObject(find.text('background'));
-      expect(backgroundBox.size.height, equals(100.0));
+    expect(find.text('background'), findsNWidgets(5));
+    RenderBox backgroundBox = tester.firstRenderObject(find.text('background'));
+    expect(backgroundBox.size.height, equals(100.0));
   });
 }

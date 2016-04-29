@@ -20,58 +20,58 @@ class TestInherited extends InheritedWidget {
 
 void main() {
   testWidgets('Inherited notifies dependents', (WidgetTester tester) {
-      List<TestInherited> log = <TestInherited>[];
+    List<TestInherited> log = <TestInherited>[];
 
-      Builder builder = new Builder(
-        builder: (BuildContext context) {
-          log.add(context.inheritFromWidgetOfExactType(TestInherited));
-          return new Container();
-        }
-      );
+    Builder builder = new Builder(
+      builder: (BuildContext context) {
+        log.add(context.inheritFromWidgetOfExactType(TestInherited));
+        return new Container();
+      }
+    );
 
-      TestInherited first = new TestInherited(child: builder);
-      tester.pumpWidget(first);
+    TestInherited first = new TestInherited(child: builder);
+    tester.pumpWidget(first);
 
-      expect(log, equals([first]));
+    expect(log, equals([first]));
 
-      TestInherited second = new TestInherited(child: builder, shouldNotify: false);
-      tester.pumpWidget(second);
+    TestInherited second = new TestInherited(child: builder, shouldNotify: false);
+    tester.pumpWidget(second);
 
-      expect(log, equals([first]));
+    expect(log, equals([first]));
 
-      TestInherited third = new TestInherited(child: builder, shouldNotify: true);
-      tester.pumpWidget(third);
+    TestInherited third = new TestInherited(child: builder, shouldNotify: true);
+    tester.pumpWidget(third);
 
-      expect(log, equals([first, third]));
+    expect(log, equals([first, third]));
   });
 
   testWidgets('Update inherited when reparenting state', (WidgetTester tester) {
-      GlobalKey globalKey = new GlobalKey();
-      List<TestInherited> log = <TestInherited>[];
+    GlobalKey globalKey = new GlobalKey();
+    List<TestInherited> log = <TestInherited>[];
 
-      TestInherited build() {
-        return new TestInherited(
-          key: new UniqueKey(),
-          child: new Container(
-            key: globalKey,
-            child: new Builder(
-              builder: (BuildContext context) {
-                log.add(context.inheritFromWidgetOfExactType(TestInherited));
-                return new Container();
-              }
-            )
+    TestInherited build() {
+      return new TestInherited(
+        key: new UniqueKey(),
+        child: new Container(
+          key: globalKey,
+          child: new Builder(
+            builder: (BuildContext context) {
+              log.add(context.inheritFromWidgetOfExactType(TestInherited));
+              return new Container();
+            }
           )
-        );
-      }
+        )
+      );
+    }
 
-      TestInherited first = build();
-      tester.pumpWidget(first);
+    TestInherited first = build();
+    tester.pumpWidget(first);
 
-      expect(log, equals([first]));
+    expect(log, equals([first]));
 
-      TestInherited second = build();
-      tester.pumpWidget(second);
+    TestInherited second = build();
+    tester.pumpWidget(second);
 
-      expect(log, equals([first, second]));
+    expect(log, equals([first, second]));
   });
 }

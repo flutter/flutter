@@ -18,25 +18,25 @@ void main() {
   }
 
   testWidgets('RefreshIndicator', (WidgetTester tester) {
-      tester.pumpWidget(
-        new RefreshIndicator(
-          refresh: refresh,
-          child: new Block(
-            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map((String item) {
-              return new SizedBox(
-                height: 200.0,
-                child: new Text(item)
-              );
-            }).toList()
-          )
+    tester.pumpWidget(
+      new RefreshIndicator(
+        refresh: refresh,
+        child: new Block(
+          children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map((String item) {
+            return new SizedBox(
+              height: 200.0,
+              child: new Text(item)
+            );
+          }).toList()
         )
-      );
+      )
+    );
 
-      tester.fling(find.text('A'), const Offset(0.0, 200.0), -1000.0);
-      tester.pump();
-      tester.pump(const Duration(seconds: 1)); // finish the scroll animation
-      tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
-      tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
-      expect(refreshCalled, true);
+    tester.fling(find.text('A'), const Offset(0.0, 200.0), -1000.0);
+    tester.pump();
+    tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
+    tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
+    expect(refreshCalled, true);
   });
 }

@@ -52,9 +52,9 @@ class LeafState extends State<Leaf> {
 
 void main() {
   testWidgets('three-way setState() smoke test', (WidgetTester tester) {
-      tester.pumpWidget(new Changer(new Wrapper(new Leaf())));
-      tester.pumpWidget(new Changer(new Wrapper(new Leaf())));
-      changer.test();
-      tester.pump();
+    tester.pumpWidget(new Changer(new Wrapper(new Leaf())));
+    tester.pumpWidget(new Changer(new Wrapper(new Leaf())));
+    changer.test();
+    tester.pump();
   });
 }

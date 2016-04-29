@@ -43,7 +43,43 @@ class TestOrientedBox extends SingleChildRenderObjectWidget {
 
 void main() {
   testWidgets('RenderObjectWidget smoke test', (WidgetTester tester) {
-      tester.pumpWidget(new DecoratedBox(decoration: kBoxDecorationA));
+    tester.pumpWidget(new DecoratedBox(decoration: kBoxDecorationA));
+    SingleChildRenderObjectElement element =
+        tester.element(find.byElementType(SingleChildRenderObjectElement));
+    expect(element, isNotNull);
+    expect(element.renderObject is RenderDecoratedBox, isTrue);
+    RenderDecoratedBox renderObject = element.renderObject;
+    expect(renderObject.decoration, equals(kBoxDecorationA));
+    expect(renderObject.position, equals(DecorationPosition.background));
+
+    tester.pumpWidget(new DecoratedBox(decoration: kBoxDecorationB));
+    element = tester.element(find.byElementType(SingleChildRenderObjectElement));
+    expect(element, isNotNull);
+    expect(element.renderObject is RenderDecoratedBox, isTrue);
+    renderObject = element.renderObject;
+    expect(renderObject.decoration, equals(kBoxDecorationB));
+    expect(renderObject.position, equals(DecorationPosition.background));
+  });
+
+  testWidgets('RenderObjectWidget can add and remove children', (WidgetTester tester) {
+
+    void checkFullTree() {
+      SingleChildRenderObjectElement element =
+          tester.firstElement(find.byElementType(SingleChildRenderObjectElement));
+      expect(element, isNotNull);
+      expect(element.renderObject is RenderDecoratedBox, isTrue);
+      RenderDecoratedBox renderObject = element.renderObject;
+      expect(renderObject.decoration, equals(kBoxDecorationA));
+      expect(renderObject.position, equals(DecorationPosition.background));
+      expect(renderObject.child, isNotNull);
+      expect(renderObject.child is RenderDecoratedBox, isTrue);
+      RenderDecoratedBox child = renderObject.child;
+      expect(child.decoration, equals(kBoxDecorationB));
+      expect(child.position, equals(DecorationPosition.background));
+      expect(child.child, isNull);
+    }
+
+    void childBareTree() {
       SingleChildRenderObjectElement element =
           tester.element(find.byElementType(SingleChildRenderObjectElement));
       expect(element, isNotNull);
@@ -51,161 +87,125 @@ void main() {
       RenderDecoratedBox renderObject = element.renderObject;
       expect(renderObject.decoration, equals(kBoxDecorationA));
       expect(renderObject.position, equals(DecorationPosition.background));
+      expect(renderObject.child, isNull);
+    }
 
-      tester.pumpWidget(new DecoratedBox(decoration: kBoxDecorationB));
-      element = tester.element(find.byElementType(SingleChildRenderObjectElement));
-      expect(element, isNotNull);
-      expect(element.renderObject is RenderDecoratedBox, isTrue);
-      renderObject = element.renderObject;
-      expect(renderObject.decoration, equals(kBoxDecorationB));
-      expect(renderObject.position, equals(DecorationPosition.background));
-  });
+    tester.pumpWidget(new DecoratedBox(
+      decoration: kBoxDecorationA,
+      child: new DecoratedBox(
+        decoration: kBoxDecorationB
+      )
+    ));
 
-  testWidgets('RenderObjectWidget can add and remove children', (WidgetTester tester) {
+    checkFullTree();
 
-      void checkFullTree() {
-        SingleChildRenderObjectElement element =
-            tester.firstElement(find.byElementType(SingleChildRenderObjectElement));
-        expect(element, isNotNull);
-        expect(element.renderObject is RenderDecoratedBox, isTrue);
-        RenderDecoratedBox renderObject = element.renderObject;
-        expect(renderObject.decoration, equals(kBoxDecorationA));
-        expect(renderObject.position, equals(DecorationPosition.background));
-        expect(renderObject.child, isNotNull);
-        expect(renderObject.child is RenderDecoratedBox, isTrue);
-        RenderDecoratedBox child = renderObject.child;
-        expect(child.decoration, equals(kBoxDecorationB));
-        expect(child.position, equals(DecorationPosition.background));
-        expect(child.child, isNull);
-      }
-
-      void childBareTree() {
-        SingleChildRenderObjectElement element =
-            tester.element(find.byElementType(SingleChildRenderObjectElement));
-        expect(element, isNotNull);
-        expect(element.renderObject is RenderDecoratedBox, isTrue);
-        RenderDecoratedBox renderObject = element.renderObject;
-        expect(renderObject.decoration, equals(kBoxDecorationA));
-        expect(renderObject.position, equals(DecorationPosition.background));
-        expect(renderObject.child, isNull);
-      }
-
-      tester.pumpWidget(new DecoratedBox(
-        decoration: kBoxDecorationA,
+    tester.pumpWidget(new DecoratedBox(
+      decoration: kBoxDecorationA,
+      child: new TestWidget(
         child: new DecoratedBox(
           decoration: kBoxDecorationB
         )
-      ));
+      )
+    ));
 
-      checkFullTree();
+    checkFullTree();
 
-      tester.pumpWidget(new DecoratedBox(
-        decoration: kBoxDecorationA,
+    tester.pumpWidget(new DecoratedBox(
+      decoration: kBoxDecorationA,
+      child: new DecoratedBox(
+        decoration: kBoxDecorationB
+      )
+    ));
+
+    checkFullTree();
+
+    tester.pumpWidget(new DecoratedBox(
+      decoration: kBoxDecorationA
+    ));
+
+    childBareTree();
+
+    tester.pumpWidget(new DecoratedBox(
+      decoration: kBoxDecorationA,
+      child: new TestWidget(
         child: new TestWidget(
           child: new DecoratedBox(
             decoration: kBoxDecorationB
           )
         )
-      ));
+      )
+    ));
 
-      checkFullTree();
+    checkFullTree();
 
-      tester.pumpWidget(new DecoratedBox(
-        decoration: kBoxDecorationA,
-        child: new DecoratedBox(
-          decoration: kBoxDecorationB
-        )
-      ));
+    tester.pumpWidget(new DecoratedBox(
+      decoration: kBoxDecorationA
+    ));
 
-      checkFullTree();
-
-      tester.pumpWidget(new DecoratedBox(
-        decoration: kBoxDecorationA
-      ));
-
-      childBareTree();
-
-      tester.pumpWidget(new DecoratedBox(
-        decoration: kBoxDecorationA,
-        child: new TestWidget(
-          child: new TestWidget(
-            child: new DecoratedBox(
-              decoration: kBoxDecorationB
-            )
-          )
-        )
-      ));
-
-      checkFullTree();
-
-      tester.pumpWidget(new DecoratedBox(
-        decoration: kBoxDecorationA
-      ));
-
-      childBareTree();
+    childBareTree();
   });
 
   testWidgets('Detached render tree is intact', (WidgetTester tester) {
 
-      tester.pumpWidget(new DecoratedBox(
-        decoration: kBoxDecorationA,
+    tester.pumpWidget(new DecoratedBox(
+      decoration: kBoxDecorationA,
+      child: new DecoratedBox(
+        decoration: kBoxDecorationB,
         child: new DecoratedBox(
-          decoration: kBoxDecorationB,
-          child: new DecoratedBox(
-            decoration: kBoxDecorationC
-          )
+          decoration: kBoxDecorationC
         )
-      ));
+      )
+    ));
 
-      SingleChildRenderObjectElement element =
-          tester.firstElement(find.byElementType(SingleChildRenderObjectElement));
-      expect(element.renderObject is RenderDecoratedBox, isTrue);
-      RenderDecoratedBox parent = element.renderObject;
-      expect(parent.child is RenderDecoratedBox, isTrue);
-      RenderDecoratedBox child = parent.child;
-      expect(child.decoration, equals(kBoxDecorationB));
-      expect(child.child is RenderDecoratedBox, isTrue);
-      RenderDecoratedBox grandChild = child.child;
-      expect(grandChild.decoration, equals(kBoxDecorationC));
-      expect(grandChild.child, isNull);
+    SingleChildRenderObjectElement element =
+        tester.firstElement(find.byElementType(SingleChildRenderObjectElement));
+    expect(element.renderObject is RenderDecoratedBox, isTrue);
+    RenderDecoratedBox parent = element.renderObject;
+    expect(parent.child is RenderDecoratedBox, isTrue);
+    RenderDecoratedBox child = parent.child;
+    expect(child.decoration, equals(kBoxDecorationB));
+    expect(child.child is RenderDecoratedBox, isTrue);
+    RenderDecoratedBox grandChild = child.child;
+    expect(grandChild.decoration, equals(kBoxDecorationC));
+    expect(grandChild.child, isNull);
 
-      tester.pumpWidget(new DecoratedBox(
-        decoration: kBoxDecorationA
-      ));
+    tester.pumpWidget(new DecoratedBox(
+      decoration: kBoxDecorationA
+    ));
 
-      element =
-          tester.element(find.byElementType(SingleChildRenderObjectElement));
-      expect(element.renderObject is RenderDecoratedBox, isTrue);
-      expect(element.renderObject, equals(parent));
-      expect(parent.child, isNull);
+    element =
+        tester.element(find.byElementType(SingleChildRenderObjectElement));
+    expect(element.renderObject is RenderDecoratedBox, isTrue);
+    expect(element.renderObject, equals(parent));
+    expect(parent.child, isNull);
 
-      expect(child.parent, isNull);
-      expect(child.decoration, equals(kBoxDecorationB));
-      expect(child.child, equals(grandChild));
-      expect(grandChild.parent, equals(child));
-      expect(grandChild.decoration, equals(kBoxDecorationC));
-      expect(grandChild.child, isNull);
+    expect(child.parent, isNull);
+    expect(child.decoration, equals(kBoxDecorationB));
+    expect(child.child, equals(grandChild));
+    expect(grandChild.parent, equals(child));
+    expect(grandChild.decoration, equals(kBoxDecorationC));
+    expect(grandChild.child, isNull);
   });
 
   testWidgets('Can watch inherited widgets', (WidgetTester tester) {
-      Key boxKey = new UniqueKey();
-      TestOrientedBox box = new TestOrientedBox(key: boxKey);
+    Key boxKey = new UniqueKey();
+    TestOrientedBox box = new TestOrientedBox(key: boxKey);
 
-      tester.pumpWidget(new MediaQuery(
-        data: new MediaQueryData(size: const Size(400.0, 300.0)),
-        child: box
-      ));
+    tester.pumpWidget(new MediaQuery(
+      data: new MediaQueryData(size: const Size(400.0, 300.0)),
+      child: box
+    ));
 
-      RenderDecoratedBox renderBox = tester.renderObject(find.byKey(boxKey));
-      BoxDecoration decoration = renderBox.decoration;
-      expect(decoration.backgroundColor, equals(new Color(0xFF00FF00)));
+    RenderDecoratedBox renderBox = tester.renderObject(find.byKey(boxKey));
+    BoxDecoration decoration = renderBox.decoration;
+    expect(decoration.backgroundColor, equals(new Color(0xFF00FF00)));
 
-      tester.pumpWidget(new MediaQuery(
-        data: new MediaQueryData(size: const Size(300.0, 400.0)),
-        child: box
-      ));
+    tester.pumpWidget(new MediaQuery(
+      data: new MediaQueryData(size: const Size(300.0, 400.0)),
+      child: box
+    ));
 
-      decoration = renderBox.decoration;
-      expect(decoration.backgroundColor, equals(new Color(0xFF0000FF)));
+    decoration = renderBox.decoration;
+    expect(decoration.backgroundColor, equals(new Color(0xFF0000FF)));
   });
 }

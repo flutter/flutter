@@ -110,52 +110,52 @@ class TriggerableState extends State<TriggerableWidget> {
 
 void main() {
   testWidgets('no crosstalk between widget build owners', (WidgetTester tester) {
-      Trigger trigger1 = new Trigger();
-      Counter counter1 = new Counter();
-      Trigger trigger2 = new Trigger();
-      Counter counter2 = new Counter();
-      OffscreenWidgetTree tree = new OffscreenWidgetTree();
-      // Both counts should start at zero
-      expect(counter1.count, equals(0));
-      expect(counter2.count, equals(0));
-      // Lay out the "onscreen" in the default test binding
-      tester.pumpWidget(new TriggerableWidget(trigger: trigger1, counter: counter1));
-      // Only the "onscreen" widget should have built
-      expect(counter1.count, equals(1));
-      expect(counter2.count, equals(0));
-      // Lay out the "offscreen" in a separate tree
-      tree.pumpWidget(new TriggerableWidget(trigger: trigger2, counter: counter2));
-      // Now both widgets should have built
-      expect(counter1.count, equals(1));
-      expect(counter2.count, equals(1));
-      // Mark both as needing layout
-      trigger1.fire();
-      trigger2.fire();
-      // Marking as needing layout shouldn't immediately build anything
-      expect(counter1.count, equals(1));
-      expect(counter2.count, equals(1));
-      // Pump the "onscreen" layout
-      tester.pump();
-      // Only the "onscreen" widget should have rebuilt
-      expect(counter1.count, equals(2));
-      expect(counter2.count, equals(1));
-      // Pump the "offscreen" layout
-      tree.pumpFrame();
-      // Now both widgets should have rebuilt
-      expect(counter1.count, equals(2));
-      expect(counter2.count, equals(2));
-      // Mark both as needing layout, again
-      trigger1.fire();
-      trigger2.fire();
-      // Now pump the "offscreen" layout first
-      tree.pumpFrame();
-      // Only the "offscreen" widget should have rebuilt
-      expect(counter1.count, equals(2));
-      expect(counter2.count, equals(3));
-      // Pump the "onscreen" layout
-      tester.pump();
-      // Now both widgets should have rebuilt
-      expect(counter1.count, equals(3));
-      expect(counter2.count, equals(3));
+    Trigger trigger1 = new Trigger();
+    Counter counter1 = new Counter();
+    Trigger trigger2 = new Trigger();
+    Counter counter2 = new Counter();
+    OffscreenWidgetTree tree = new OffscreenWidgetTree();
+    // Both counts should start at zero
+    expect(counter1.count, equals(0));
+    expect(counter2.count, equals(0));
+    // Lay out the "onscreen" in the default test binding
+    tester.pumpWidget(new TriggerableWidget(trigger: trigger1, counter: counter1));
+    // Only the "onscreen" widget should have built
+    expect(counter1.count, equals(1));
+    expect(counter2.count, equals(0));
+    // Lay out the "offscreen" in a separate tree
+    tree.pumpWidget(new TriggerableWidget(trigger: trigger2, counter: counter2));
+    // Now both widgets should have built
+    expect(counter1.count, equals(1));
+    expect(counter2.count, equals(1));
+    // Mark both as needing layout
+    trigger1.fire();
+    trigger2.fire();
+    // Marking as needing layout shouldn't immediately build anything
+    expect(counter1.count, equals(1));
+    expect(counter2.count, equals(1));
+    // Pump the "onscreen" layout
+    tester.pump();
+    // Only the "onscreen" widget should have rebuilt
+    expect(counter1.count, equals(2));
+    expect(counter2.count, equals(1));
+    // Pump the "offscreen" layout
+    tree.pumpFrame();
+    // Now both widgets should have rebuilt
+    expect(counter1.count, equals(2));
+    expect(counter2.count, equals(2));
+    // Mark both as needing layout, again
+    trigger1.fire();
+    trigger2.fire();
+    // Now pump the "offscreen" layout first
+    tree.pumpFrame();
+    // Only the "offscreen" widget should have rebuilt
+    expect(counter1.count, equals(2));
+    expect(counter2.count, equals(3));
+    // Pump the "onscreen" layout
+    tester.pump();
+    // Now both widgets should have rebuilt
+    expect(counter1.count, equals(3));
+    expect(counter2.count, equals(3));
   });
 }

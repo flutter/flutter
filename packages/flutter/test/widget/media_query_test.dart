@@ -10,17 +10,17 @@ import 'package:test/test.dart';
 
 void main() {
   testWidgets('MediaQuery has a default', (WidgetTester tester) {
-      Size size;
+    Size size;
 
-      tester.pumpWidget(
-        new Builder(
-          builder: (BuildContext context) {
-            size = MediaQuery.of(context).size;
-            return new Container();
-          }
-        )
-      );
+    tester.pumpWidget(
+      new Builder(
+        builder: (BuildContext context) {
+          size = MediaQuery.of(context).size;
+          return new Container();
+        }
+      )
+    );
 
-      expect(size, equals(ui.window.size));
+    expect(size, equals(ui.window.size));
   });
 }

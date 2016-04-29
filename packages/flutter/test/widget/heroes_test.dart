@@ -44,104 +44,104 @@ class ThreeRoute extends MaterialPageRoute<Null> {
 void main() {
   testWidgets('Heroes animate', (WidgetTester tester) {
 
-      tester.pumpWidget(new MaterialApp(routes: routes));
+    tester.pumpWidget(new MaterialApp(routes: routes));
 
-      // the initial setup.
+    // the initial setup.
 
-      expect(find.byKey(firstKey), isOnStage);
-      expect(find.byKey(firstKey), isInCard);
-      expect(find.byKey(secondKey), findsNothing);
+    expect(find.byKey(firstKey), isOnStage);
+    expect(find.byKey(firstKey), isInCard);
+    expect(find.byKey(secondKey), findsNothing);
 
-      tester.tap(find.text('two'));
-      tester.pump(); // begin navigation
+    tester.tap(find.text('two'));
+    tester.pump(); // begin navigation
 
-      // at this stage, the second route is off-stage, so that we can form the
-      // hero party.
+    // at this stage, the second route is off-stage, so that we can form the
+    // hero party.
 
-      expect(find.byKey(firstKey), isOnStage);
-      expect(find.byKey(firstKey), isInCard);
-      expect(find.byKey(secondKey), isOffStage);
-      expect(find.byKey(secondKey), isInCard);
+    expect(find.byKey(firstKey), isOnStage);
+    expect(find.byKey(firstKey), isInCard);
+    expect(find.byKey(secondKey), isOffStage);
+    expect(find.byKey(secondKey), isInCard);
 
-      tester.pump();
+    tester.pump();
 
-      // at this stage, the heroes have just gone on their journey, we are
-      // seeing them at t=16ms. The original page no longer contains the hero.
+    // at this stage, the heroes have just gone on their journey, we are
+    // seeing them at t=16ms. The original page no longer contains the hero.
 
-      expect(find.byKey(firstKey), findsNothing);
-      expect(find.byKey(secondKey), isOnStage);
-      expect(find.byKey(secondKey), isNotInCard);
+    expect(find.byKey(firstKey), findsNothing);
+    expect(find.byKey(secondKey), isOnStage);
+    expect(find.byKey(secondKey), isNotInCard);
 
-      tester.pump();
+    tester.pump();
 
-      // t=32ms for the journey. Surely they are still at it.
+    // t=32ms for the journey. Surely they are still at it.
 
-      expect(find.byKey(firstKey), findsNothing);
-      expect(find.byKey(secondKey), isOnStage);
-      expect(find.byKey(secondKey), isNotInCard);
+    expect(find.byKey(firstKey), findsNothing);
+    expect(find.byKey(secondKey), isOnStage);
+    expect(find.byKey(secondKey), isNotInCard);
 
-      tester.pump(new Duration(seconds: 1));
+    tester.pump(new Duration(seconds: 1));
 
-      // t=1.032s for the journey. The journey has ended (it ends this frame, in
-      // fact). The hero should now be in the new page, on-stage.
+    // t=1.032s for the journey. The journey has ended (it ends this frame, in
+    // fact). The hero should now be in the new page, on-stage.
 
-      expect(find.byKey(firstKey), findsNothing);
-      expect(find.byKey(secondKey), isOnStage);
-      expect(find.byKey(secondKey), isInCard);
+    expect(find.byKey(firstKey), findsNothing);
+    expect(find.byKey(secondKey), isOnStage);
+    expect(find.byKey(secondKey), isInCard);
 
-      tester.pump();
+    tester.pump();
 
-      // Should not change anything.
+    // Should not change anything.
 
-      expect(find.byKey(firstKey), findsNothing);
-      expect(find.byKey(secondKey), isOnStage);
-      expect(find.byKey(secondKey), isInCard);
+    expect(find.byKey(firstKey), findsNothing);
+    expect(find.byKey(secondKey), isOnStage);
+    expect(find.byKey(secondKey), isInCard);
 
-      // Now move on to view 3
+    // Now move on to view 3
 
-      tester.tap(find.text('three'));
-      tester.pump(); // begin navigation
+    tester.tap(find.text('three'));
+    tester.pump(); // begin navigation
 
-      // at this stage, the second route is off-stage, so that we can form the
-      // hero party.
+    // at this stage, the second route is off-stage, so that we can form the
+    // hero party.
 
-      expect(find.byKey(secondKey), isOnStage);
-      expect(find.byKey(secondKey), isInCard);
-      expect(find.byKey(thirdKey), isOffStage);
-      expect(find.byKey(thirdKey), isInCard);
+    expect(find.byKey(secondKey), isOnStage);
+    expect(find.byKey(secondKey), isInCard);
+    expect(find.byKey(thirdKey), isOffStage);
+    expect(find.byKey(thirdKey), isInCard);
 
-      tester.pump();
+    tester.pump();
 
-      // at this stage, the heroes have just gone on their journey, we are
-      // seeing them at t=16ms. The original page no longer contains the hero.
+    // at this stage, the heroes have just gone on their journey, we are
+    // seeing them at t=16ms. The original page no longer contains the hero.
 
-      expect(find.byKey(secondKey), findsNothing);
-      expect(find.byKey(thirdKey), isOnStage);
-      expect(find.byKey(thirdKey), isNotInCard);
+    expect(find.byKey(secondKey), findsNothing);
+    expect(find.byKey(thirdKey), isOnStage);
+    expect(find.byKey(thirdKey), isNotInCard);
 
-      tester.pump();
+    tester.pump();
 
-      // t=32ms for the journey. Surely they are still at it.
+    // t=32ms for the journey. Surely they are still at it.
 
-      expect(find.byKey(secondKey), findsNothing);
-      expect(find.byKey(thirdKey), isOnStage);
-      expect(find.byKey(thirdKey), isNotInCard);
+    expect(find.byKey(secondKey), findsNothing);
+    expect(find.byKey(thirdKey), isOnStage);
+    expect(find.byKey(thirdKey), isNotInCard);
 
-      tester.pump(new Duration(seconds: 1));
+    tester.pump(new Duration(seconds: 1));
 
-      // t=1.032s for the journey. The journey has ended (it ends this frame, in
-      // fact). The hero should now be in the new page, on-stage.
+    // t=1.032s for the journey. The journey has ended (it ends this frame, in
+    // fact). The hero should now be in the new page, on-stage.
 
-      expect(find.byKey(secondKey), findsNothing);
-      expect(find.byKey(thirdKey), isOnStage);
-      expect(find.byKey(thirdKey), isInCard);
+    expect(find.byKey(secondKey), findsNothing);
+    expect(find.byKey(thirdKey), isOnStage);
+    expect(find.byKey(thirdKey), isInCard);
 
-      tester.pump();
+    tester.pump();
 
-      // Should not change anything.
+    // Should not change anything.
 
-      expect(find.byKey(secondKey), findsNothing);
-      expect(find.byKey(thirdKey), isOnStage);
-      expect(find.byKey(thirdKey), isInCard);
+    expect(find.byKey(secondKey), findsNothing);
+    expect(find.byKey(thirdKey), isOnStage);
+    expect(find.byKey(thirdKey), isInCard);
   });
 }

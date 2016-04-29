@@ -22,7 +22,7 @@ class TestBuildCounter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ++buildCount;
+    buildCount += 1;
     return new DecoratedBox(decoration: kBoxDecorationA);
   }
 }

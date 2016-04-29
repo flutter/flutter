@@ -76,90 +76,90 @@ class PreferredSizeDelegate extends MultiChildLayoutDelegate {
 
 void main() {
   testWidgets('Control test for CustomMultiChildLayout', (WidgetTester tester) {
-      TestMultiChildLayoutDelegate delegate = new TestMultiChildLayoutDelegate();
-      tester.pumpWidget(buildFrame(delegate));
+    TestMultiChildLayoutDelegate delegate = new TestMultiChildLayoutDelegate();
+    tester.pumpWidget(buildFrame(delegate));
 
-      expect(delegate.getSizeConstraints.minWidth, 0.0);
-      expect(delegate.getSizeConstraints.maxWidth, 800.0);
-      expect(delegate.getSizeConstraints.minHeight, 0.0);
-      expect(delegate.getSizeConstraints.maxHeight, 600.0);
+    expect(delegate.getSizeConstraints.minWidth, 0.0);
+    expect(delegate.getSizeConstraints.maxWidth, 800.0);
+    expect(delegate.getSizeConstraints.minHeight, 0.0);
+    expect(delegate.getSizeConstraints.maxHeight, 600.0);
 
-      expect(delegate.performLayoutSize.width, 200.0);
-      expect(delegate.performLayoutSize.height, 300.0);
-      expect(delegate.performLayoutSize0.width, 150.0);
-      expect(delegate.performLayoutSize0.height, 100.0);
-      expect(delegate.performLayoutSize1.width, 100.0);
-      expect(delegate.performLayoutSize1.height, 200.0);
-      expect(delegate.performLayoutIsChild, false);
+    expect(delegate.performLayoutSize.width, 200.0);
+    expect(delegate.performLayoutSize.height, 300.0);
+    expect(delegate.performLayoutSize0.width, 150.0);
+    expect(delegate.performLayoutSize0.height, 100.0);
+    expect(delegate.performLayoutSize1.width, 100.0);
+    expect(delegate.performLayoutSize1.height, 200.0);
+    expect(delegate.performLayoutIsChild, false);
   });
 
   testWidgets('Test MultiChildDelegate shouldRelayout method', (WidgetTester tester) {
-      TestMultiChildLayoutDelegate delegate = new TestMultiChildLayoutDelegate();
-      tester.pumpWidget(buildFrame(delegate));
+    TestMultiChildLayoutDelegate delegate = new TestMultiChildLayoutDelegate();
+    tester.pumpWidget(buildFrame(delegate));
 
-      // Layout happened because the delegate was set.
-      expect(delegate.performLayoutSize, isNotNull); // i.e. layout happened
-      expect(delegate.shouldRelayoutCalled, isFalse);
+    // Layout happened because the delegate was set.
+    expect(delegate.performLayoutSize, isNotNull); // i.e. layout happened
+    expect(delegate.shouldRelayoutCalled, isFalse);
 
-      // Layout did not happen because shouldRelayout() returned false.
-      delegate = new TestMultiChildLayoutDelegate();
-      delegate.shouldRelayoutValue = false;
-      tester.pumpWidget(buildFrame(delegate));
-      expect(delegate.shouldRelayoutCalled, isTrue);
-      expect(delegate.performLayoutSize, isNull);
+    // Layout did not happen because shouldRelayout() returned false.
+    delegate = new TestMultiChildLayoutDelegate();
+    delegate.shouldRelayoutValue = false;
+    tester.pumpWidget(buildFrame(delegate));
+    expect(delegate.shouldRelayoutCalled, isTrue);
+    expect(delegate.performLayoutSize, isNull);
 
-      // Layout happened because shouldRelayout() returned true.
-      delegate = new TestMultiChildLayoutDelegate();
-      delegate.shouldRelayoutValue = true;
-      tester.pumpWidget(buildFrame(delegate));
-      expect(delegate.shouldRelayoutCalled, isTrue);
-      expect(delegate.performLayoutSize, isNotNull);
+    // Layout happened because shouldRelayout() returned true.
+    delegate = new TestMultiChildLayoutDelegate();
+    delegate.shouldRelayoutValue = true;
+    tester.pumpWidget(buildFrame(delegate));
+    expect(delegate.shouldRelayoutCalled, isTrue);
+    expect(delegate.performLayoutSize, isNotNull);
   });
 
   testWidgets('Nested CustomMultiChildLayouts', (WidgetTester tester) {
-      TestMultiChildLayoutDelegate delegate = new TestMultiChildLayoutDelegate();
-      tester.pumpWidget(new Center(
-        child: new CustomMultiChildLayout(
-          children: <Widget>[
-            new LayoutId(
-              id: 0,
-              child: new CustomMultiChildLayout(
-                children: <Widget>[
-                  new LayoutId(id: 0, child: new Container(width: 150.0, height: 100.0)),
-                  new LayoutId(id: 1, child: new Container(width: 100.0, height: 200.0)),
-                ],
-                delegate: delegate
-              )
-            ),
-            new LayoutId(id: 1, child: new Container(width: 100.0, height: 200.0)),
-          ],
-          delegate: delegate
-        )
-      ));
+    TestMultiChildLayoutDelegate delegate = new TestMultiChildLayoutDelegate();
+    tester.pumpWidget(new Center(
+      child: new CustomMultiChildLayout(
+        children: <Widget>[
+          new LayoutId(
+            id: 0,
+            child: new CustomMultiChildLayout(
+              children: <Widget>[
+                new LayoutId(id: 0, child: new Container(width: 150.0, height: 100.0)),
+                new LayoutId(id: 1, child: new Container(width: 100.0, height: 200.0)),
+              ],
+              delegate: delegate
+            )
+          ),
+          new LayoutId(id: 1, child: new Container(width: 100.0, height: 200.0)),
+        ],
+        delegate: delegate
+      )
+    ));
 
   });
 
   testWidgets('Loose constraints', (WidgetTester tester) {
-      Key key = new UniqueKey();
-      tester.pumpWidget(new Center(
-        child: new CustomMultiChildLayout(
-          key: key,
-          delegate: new PreferredSizeDelegate(preferredSize: new Size(300.0, 200.0))
-        )
-      ));
+    Key key = new UniqueKey();
+    tester.pumpWidget(new Center(
+      child: new CustomMultiChildLayout(
+        key: key,
+        delegate: new PreferredSizeDelegate(preferredSize: new Size(300.0, 200.0))
+      )
+    ));
 
-      RenderBox box = tester.renderObject(find.byKey(key));
-      expect(box.size.width, equals(300.0));
-      expect(box.size.height, equals(200.0));
+    RenderBox box = tester.renderObject(find.byKey(key));
+    expect(box.size.width, equals(300.0));
+    expect(box.size.height, equals(200.0));
 
-      tester.pumpWidget(new Center(
-        child: new CustomMultiChildLayout(
-          key: key,
-          delegate: new PreferredSizeDelegate(preferredSize: new Size(350.0, 250.0))
-        )
-      ));
+    tester.pumpWidget(new Center(
+      child: new CustomMultiChildLayout(
+        key: key,
+        delegate: new PreferredSizeDelegate(preferredSize: new Size(350.0, 250.0))
+      )
+    ));
 
-      expect(box.size.width, equals(350.0));
-      expect(box.size.height, equals(250.0));
+    expect(box.size.width, equals(350.0));
+    expect(box.size.height, equals(250.0));
   });
 }

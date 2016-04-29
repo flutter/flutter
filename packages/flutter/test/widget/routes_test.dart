@@ -91,292 +91,292 @@ void runNavigatorTest(
 
 void main() {
   testWidgets('Route management - push, replace, pop', (WidgetTester tester) {
-      GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
-      tester.pumpWidget(new Navigator(
-        key: navigatorKey,
-        onGenerateRoute: (_) => new TestRoute('initial')
-      ));
-      NavigatorState host = navigatorKey.currentState;
-      runNavigatorTest(
-        tester,
-        host,
-        (NavigatorTransaction transaction) {
-        },
-        [
-          'initial: install',
-          'initial: didPush',
-          'initial: didChangeNext null',
-        ]
-      );
-      TestRoute second;
-      runNavigatorTest(
-        tester,
-        host,
-        (NavigatorTransaction transaction) {
-          transaction.push(second = new TestRoute('second'));
-        },
-        [
-          'second: install',
-          'second: didPush',
-          'second: didChangeNext null',
-          'initial: didChangeNext second',
-        ]
-      );
-      runNavigatorTest(
-        tester,
-        host,
-        (NavigatorTransaction transaction) {
-          transaction.push(new TestRoute('third'));
-        },
-        [
-          'third: install',
-          'third: didPush',
-          'third: didChangeNext null',
-          'second: didChangeNext third',
-        ]
-      );
-      runNavigatorTest(
-        tester,
-        host,
-        (NavigatorTransaction transaction) {
-          transaction.replace(oldRoute: second, newRoute: new TestRoute('two'));
-        },
-        [
-          'two: install',
-          'two: didReplace second',
-          'two: didChangeNext third',
-          'initial: didChangeNext two',
-          'second: dispose',
-        ]
-      );
-      runNavigatorTest(
-        tester,
-        host,
-        (NavigatorTransaction transaction) {
-          transaction.pop('hello');
-        },
-        [
-          'third: didPop hello',
-          'third: dispose',
-          'two: didPopNext third',
-        ]
-      );
-      runNavigatorTest(
-        tester,
-        host,
-        (NavigatorTransaction transaction) {
-          transaction.pop('good bye');
-        },
-        [
-          'two: didPop good bye',
-          'two: dispose',
-          'initial: didPopNext two',
-        ]
-      );
-      tester.pumpWidget(new Container());
-      expect(results, equals(['initial: dispose']));
-      expect(routes.isEmpty, isTrue);
-      results.clear();
+    GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
+    tester.pumpWidget(new Navigator(
+      key: navigatorKey,
+      onGenerateRoute: (_) => new TestRoute('initial')
+    ));
+    NavigatorState host = navigatorKey.currentState;
+    runNavigatorTest(
+      tester,
+      host,
+      (NavigatorTransaction transaction) {
+      },
+      [
+        'initial: install',
+        'initial: didPush',
+        'initial: didChangeNext null',
+      ]
+    );
+    TestRoute second;
+    runNavigatorTest(
+      tester,
+      host,
+      (NavigatorTransaction transaction) {
+        transaction.push(second = new TestRoute('second'));
+      },
+      [
+        'second: install',
+        'second: didPush',
+        'second: didChangeNext null',
+        'initial: didChangeNext second',
+      ]
+    );
+    runNavigatorTest(
+      tester,
+      host,
+      (NavigatorTransaction transaction) {
+        transaction.push(new TestRoute('third'));
+      },
+      [
+        'third: install',
+        'third: didPush',
+        'third: didChangeNext null',
+        'second: didChangeNext third',
+      ]
+    );
+    runNavigatorTest(
+      tester,
+      host,
+      (NavigatorTransaction transaction) {
+        transaction.replace(oldRoute: second, newRoute: new TestRoute('two'));
+      },
+      [
+        'two: install',
+        'two: didReplace second',
+        'two: didChangeNext third',
+        'initial: didChangeNext two',
+        'second: dispose',
+      ]
+    );
+    runNavigatorTest(
+      tester,
+      host,
+      (NavigatorTransaction transaction) {
+        transaction.pop('hello');
+      },
+      [
+        'third: didPop hello',
+        'third: dispose',
+        'two: didPopNext third',
+      ]
+    );
+    runNavigatorTest(
+      tester,
+      host,
+      (NavigatorTransaction transaction) {
+        transaction.pop('good bye');
+      },
+      [
+        'two: didPop good bye',
+        'two: dispose',
+        'initial: didPopNext two',
+      ]
+    );
+    tester.pumpWidget(new Container());
+    expect(results, equals(['initial: dispose']));
+    expect(routes.isEmpty, isTrue);
+    results.clear();
   });
 
   testWidgets('Route management - push, remove, pop', (WidgetTester tester) {
-      GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
-      tester.pumpWidget(new Navigator(
-        key: navigatorKey,
-        onGenerateRoute: (_) => new TestRoute('first')
-      ));
-      NavigatorState host = navigatorKey.currentState;
-      runNavigatorTest(
-        tester,
-        host,
-        (NavigatorTransaction transaction) {
-        },
-        [
-          'first: install',
-          'first: didPush',
-          'first: didChangeNext null',
-        ]
-      );
-      TestRoute second;
-      runNavigatorTest(
-        tester,
-        host,
-        (NavigatorTransaction transaction) {
-          transaction.push(second = new TestRoute('second'));
-        },
-        [
-          'second: install',
-          'second: didPush',
-          'second: didChangeNext null',
-          'first: didChangeNext second',
-        ]
-      );
-      runNavigatorTest(
-        tester,
-        host,
-        (NavigatorTransaction transaction) {
-          transaction.push(new TestRoute('third'));
-        },
-        [
-          'third: install',
-          'third: didPush',
-          'third: didChangeNext null',
-          'second: didChangeNext third',
-        ]
-      );
-      runNavigatorTest(
-        tester,
-        host,
-        (NavigatorTransaction transaction) {
-          transaction.removeRouteBefore(second);
-        },
-        [
-          'first: dispose',
-        ]
-      );
-      runNavigatorTest(
-        tester,
-        host,
-        (NavigatorTransaction transaction) {
-          transaction.pop('good bye');
-        },
-        [
-          'third: didPop good bye',
-          'third: dispose',
-          'second: didPopNext third',
-        ]
-      );
-      runNavigatorTest(
-        tester,
-        host,
-        (NavigatorTransaction transaction) {
-          transaction.push(new TestRoute('three'));
-        },
-        [
-          'three: install',
-          'three: didPush',
-          'three: didChangeNext null',
-          'second: didChangeNext three',
-        ]
-      );
-      TestRoute four;
-      runNavigatorTest(
-        tester,
-        host,
-        (NavigatorTransaction transaction) {
-          transaction.push(four = new TestRoute('four'));
-        },
-        [
-          'four: install',
-          'four: didPush',
-          'four: didChangeNext null',
-          'three: didChangeNext four',
-        ]
-      );
-      runNavigatorTest(
-        tester,
-        host,
-        (NavigatorTransaction transaction) {
-          transaction.removeRouteBefore(four);
-        },
-        [
-          'second: didChangeNext four',
-          'three: dispose',
-        ]
-      );
-      runNavigatorTest(
-        tester,
-        host,
-        (NavigatorTransaction transaction) {
-          transaction.pop('the end');
-        },
-        [
-          'four: didPop the end',
-          'four: dispose',
-          'second: didPopNext four',
-        ]
-      );
-      tester.pumpWidget(new Container());
-      expect(results, equals(['second: dispose']));
-      expect(routes.isEmpty, isTrue);
-      results.clear();
+    GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
+    tester.pumpWidget(new Navigator(
+      key: navigatorKey,
+      onGenerateRoute: (_) => new TestRoute('first')
+    ));
+    NavigatorState host = navigatorKey.currentState;
+    runNavigatorTest(
+      tester,
+      host,
+      (NavigatorTransaction transaction) {
+      },
+      [
+        'first: install',
+        'first: didPush',
+        'first: didChangeNext null',
+      ]
+    );
+    TestRoute second;
+    runNavigatorTest(
+      tester,
+      host,
+      (NavigatorTransaction transaction) {
+        transaction.push(second = new TestRoute('second'));
+      },
+      [
+        'second: install',
+        'second: didPush',
+        'second: didChangeNext null',
+        'first: didChangeNext second',
+      ]
+    );
+    runNavigatorTest(
+      tester,
+      host,
+      (NavigatorTransaction transaction) {
+        transaction.push(new TestRoute('third'));
+      },
+      [
+        'third: install',
+        'third: didPush',
+        'third: didChangeNext null',
+        'second: didChangeNext third',
+      ]
+    );
+    runNavigatorTest(
+      tester,
+      host,
+      (NavigatorTransaction transaction) {
+        transaction.removeRouteBefore(second);
+      },
+      [
+        'first: dispose',
+      ]
+    );
+    runNavigatorTest(
+      tester,
+      host,
+      (NavigatorTransaction transaction) {
+        transaction.pop('good bye');
+      },
+      [
+        'third: didPop good bye',
+        'third: dispose',
+        'second: didPopNext third',
+      ]
+    );
+    runNavigatorTest(
+      tester,
+      host,
+      (NavigatorTransaction transaction) {
+        transaction.push(new TestRoute('three'));
+      },
+      [
+        'three: install',
+        'three: didPush',
+        'three: didChangeNext null',
+        'second: didChangeNext three',
+      ]
+    );
+    TestRoute four;
+    runNavigatorTest(
+      tester,
+      host,
+      (NavigatorTransaction transaction) {
+        transaction.push(four = new TestRoute('four'));
+      },
+      [
+        'four: install',
+        'four: didPush',
+        'four: didChangeNext null',
+        'three: didChangeNext four',
+      ]
+    );
+    runNavigatorTest(
+      tester,
+      host,
+      (NavigatorTransaction transaction) {
+        transaction.removeRouteBefore(four);
+      },
+      [
+        'second: didChangeNext four',
+        'three: dispose',
+      ]
+    );
+    runNavigatorTest(
+      tester,
+      host,
+      (NavigatorTransaction transaction) {
+        transaction.pop('the end');
+      },
+      [
+        'four: didPop the end',
+        'four: dispose',
+        'second: didPopNext four',
+      ]
+    );
+    tester.pumpWidget(new Container());
+    expect(results, equals(['second: dispose']));
+    expect(routes.isEmpty, isTrue);
+    results.clear();
   });
 
   testWidgets('Route management - push, replace, popUntil', (WidgetTester tester) {
-      GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
-      tester.pumpWidget(new Navigator(
-        key: navigatorKey,
-        onGenerateRoute: (_) => new TestRoute('A')
-      ));
-      NavigatorState host = navigatorKey.currentState;
-      runNavigatorTest(
-        tester,
-        host,
-        (NavigatorTransaction transaction) {
-        },
-        [
-          'A: install',
-          'A: didPush',
-          'A: didChangeNext null',
-        ]
-      );
-      runNavigatorTest(
-        tester,
-        host,
-        (NavigatorTransaction transaction) {
-          transaction.push(new TestRoute('B'));
-        },
-        [
-          'B: install',
-          'B: didPush',
-          'B: didChangeNext null',
-          'A: didChangeNext B',
-        ]
-      );
-      TestRoute routeC;
-      runNavigatorTest(
-        tester,
-        host,
-        (NavigatorTransaction transaction) {
-          transaction.push(routeC = new TestRoute('C'));
-        },
-        [
-          'C: install',
-          'C: didPush',
-          'C: didChangeNext null',
-          'B: didChangeNext C',
-        ]
-      );
-      TestRoute routeB;
-      runNavigatorTest(
-        tester,
-        host,
-        (NavigatorTransaction transaction) {
-          transaction.replaceRouteBefore(anchorRoute: routeC, newRoute: routeB = new TestRoute('b'));
-        },
-        [
-          'b: install',
-          'b: didReplace B',
-          'b: didChangeNext C',
-          'A: didChangeNext b',
-          'B: dispose',
-        ]
-      );
-      runNavigatorTest(
-        tester,
-        host,
-        (NavigatorTransaction transaction) {
-          transaction.popUntil(routeB);
-        },
-        [
-          'C: didPop null',
-          'C: dispose',
-          'b: didPopNext C',
-        ]
-      );
-      tester.pumpWidget(new Container());
-      expect(results, equals(['A: dispose', 'b: dispose']));
-      expect(routes.isEmpty, isTrue);
-      results.clear();
+    GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
+    tester.pumpWidget(new Navigator(
+      key: navigatorKey,
+      onGenerateRoute: (_) => new TestRoute('A')
+    ));
+    NavigatorState host = navigatorKey.currentState;
+    runNavigatorTest(
+      tester,
+      host,
+      (NavigatorTransaction transaction) {
+      },
+      [
+        'A: install',
+        'A: didPush',
+        'A: didChangeNext null',
+      ]
+    );
+    runNavigatorTest(
+      tester,
+      host,
+      (NavigatorTransaction transaction) {
+        transaction.push(new TestRoute('B'));
+      },
+      [
+        'B: install',
+        'B: didPush',
+        'B: didChangeNext null',
+        'A: didChangeNext B',
+      ]
+    );
+    TestRoute routeC;
+    runNavigatorTest(
+      tester,
+      host,
+      (NavigatorTransaction transaction) {
+        transaction.push(routeC = new TestRoute('C'));
+      },
+      [
+        'C: install',
+        'C: didPush',
+        'C: didChangeNext null',
+        'B: didChangeNext C',
+      ]
+    );
+    TestRoute routeB;
+    runNavigatorTest(
+      tester,
+      host,
+      (NavigatorTransaction transaction) {
+        transaction.replaceRouteBefore(anchorRoute: routeC, newRoute: routeB = new TestRoute('b'));
+      },
+      [
+        'b: install',
+        'b: didReplace B',
+        'b: didChangeNext C',
+        'A: didChangeNext b',
+        'B: dispose',
+      ]
+    );
+    runNavigatorTest(
+      tester,
+      host,
+      (NavigatorTransaction transaction) {
+        transaction.popUntil(routeB);
+      },
+      [
+        'C: didPop null',
+        'C: dispose',
+        'b: didPopNext C',
+      ]
+    );
+    tester.pumpWidget(new Container());
+    expect(results, equals(['A: dispose', 'b: dispose']));
+    expect(routes.isEmpty, isTrue);
+    results.clear();
   });
 }

@@ -61,11 +61,11 @@ class OutsideState extends State<Outside> {
 
 void main() {
   testWidgets('setState() smoke test', (WidgetTester tester) {
-      tester.pumpWidget(new Outside());
-      Point location = tester.getCenter(find.text('INSIDE'));
-      TestGesture gesture = tester.startGesture(location);
-      tester.pump();
-      gesture.up();
-      tester.pump();
+    tester.pumpWidget(new Outside());
+    Point location = tester.getCenter(find.text('INSIDE'));
+    TestGesture gesture = tester.startGesture(location);
+    tester.pump();
+    gesture.up();
+    tester.pump();
   });
 }

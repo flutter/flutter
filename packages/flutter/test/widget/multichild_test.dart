@@ -35,296 +35,296 @@ void checkTree(WidgetTester tester, List<BoxDecoration> expectedDecorations) {
 void main() {
   testWidgets('MultiChildRenderObjectElement control test', (WidgetTester tester) {
 
-      tester.pumpWidget(
-        new Stack(
-          children: <Widget>[
-            new DecoratedBox(decoration: kBoxDecorationA),
-            new DecoratedBox(decoration: kBoxDecorationB),
-            new DecoratedBox(decoration: kBoxDecorationC),
-          ]
-        )
-      );
+    tester.pumpWidget(
+      new Stack(
+        children: <Widget>[
+          new DecoratedBox(decoration: kBoxDecorationA),
+          new DecoratedBox(decoration: kBoxDecorationB),
+          new DecoratedBox(decoration: kBoxDecorationC),
+        ]
+      )
+    );
 
-      checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB, kBoxDecorationC]);
+    checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB, kBoxDecorationC]);
 
-      tester.pumpWidget(
-        new Stack(
-          children: <Widget>[
-            new DecoratedBox(decoration: kBoxDecorationA),
-            new DecoratedBox(decoration: kBoxDecorationC),
-          ]
-        )
-      );
+    tester.pumpWidget(
+      new Stack(
+        children: <Widget>[
+          new DecoratedBox(decoration: kBoxDecorationA),
+          new DecoratedBox(decoration: kBoxDecorationC),
+        ]
+      )
+    );
 
-      checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationC]);
+    checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationC]);
 
-      tester.pumpWidget(
-        new Stack(
-          children: <Widget>[
-            new DecoratedBox(decoration: kBoxDecorationA),
-            new DecoratedBox(key: new Key('b'), decoration: kBoxDecorationB),
-            new DecoratedBox(decoration: kBoxDecorationC),
-          ]
-        )
-      );
+    tester.pumpWidget(
+      new Stack(
+        children: <Widget>[
+          new DecoratedBox(decoration: kBoxDecorationA),
+          new DecoratedBox(key: new Key('b'), decoration: kBoxDecorationB),
+          new DecoratedBox(decoration: kBoxDecorationC),
+        ]
+      )
+    );
 
-      checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB, kBoxDecorationC]);
+    checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB, kBoxDecorationC]);
 
-      tester.pumpWidget(
-        new Stack(
-          children: <Widget>[
-            new DecoratedBox(key: new Key('b'), decoration: kBoxDecorationB),
-            new DecoratedBox(decoration: kBoxDecorationC),
-            new DecoratedBox(key: new Key('a'), decoration: kBoxDecorationA),
-          ]
-        )
-      );
+    tester.pumpWidget(
+      new Stack(
+        children: <Widget>[
+          new DecoratedBox(key: new Key('b'), decoration: kBoxDecorationB),
+          new DecoratedBox(decoration: kBoxDecorationC),
+          new DecoratedBox(key: new Key('a'), decoration: kBoxDecorationA),
+        ]
+      )
+    );
 
-      checkTree(tester, <BoxDecoration>[kBoxDecorationB, kBoxDecorationC, kBoxDecorationA]);
+    checkTree(tester, <BoxDecoration>[kBoxDecorationB, kBoxDecorationC, kBoxDecorationA]);
 
-      tester.pumpWidget(
-        new Stack(
-          children: <Widget>[
-            new DecoratedBox(key: new Key('a'), decoration: kBoxDecorationA),
-            new DecoratedBox(decoration: kBoxDecorationC),
-            new DecoratedBox(key: new Key('b'), decoration: kBoxDecorationB),
-          ]
-        )
-      );
+    tester.pumpWidget(
+      new Stack(
+        children: <Widget>[
+          new DecoratedBox(key: new Key('a'), decoration: kBoxDecorationA),
+          new DecoratedBox(decoration: kBoxDecorationC),
+          new DecoratedBox(key: new Key('b'), decoration: kBoxDecorationB),
+        ]
+      )
+    );
 
-      checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationC, kBoxDecorationB]);
+    checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationC, kBoxDecorationB]);
 
-      tester.pumpWidget(
-        new Stack(
-          children: <Widget>[
-            new DecoratedBox(decoration: kBoxDecorationC),
-          ]
-        )
-      );
+    tester.pumpWidget(
+      new Stack(
+        children: <Widget>[
+          new DecoratedBox(decoration: kBoxDecorationC),
+        ]
+      )
+    );
 
-      checkTree(tester, <BoxDecoration>[kBoxDecorationC]);
+    checkTree(tester, <BoxDecoration>[kBoxDecorationC]);
 
-      tester.pumpWidget(
-        new Stack()
-      );
+    tester.pumpWidget(
+      new Stack()
+    );
 
-      checkTree(tester, <BoxDecoration>[]);
+    checkTree(tester, <BoxDecoration>[]);
 
   });
 
   testWidgets('MultiChildRenderObjectElement with stateless widgets', (WidgetTester tester) {
 
-      tester.pumpWidget(
-        new Stack(
-          children: <Widget>[
-            new DecoratedBox(decoration: kBoxDecorationA),
-            new DecoratedBox(decoration: kBoxDecorationB),
-            new DecoratedBox(decoration: kBoxDecorationC),
-          ]
-        )
-      );
+    tester.pumpWidget(
+      new Stack(
+        children: <Widget>[
+          new DecoratedBox(decoration: kBoxDecorationA),
+          new DecoratedBox(decoration: kBoxDecorationB),
+          new DecoratedBox(decoration: kBoxDecorationC),
+        ]
+      )
+    );
 
-      checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB, kBoxDecorationC]);
+    checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB, kBoxDecorationC]);
 
-      tester.pumpWidget(
-        new Stack(
-          children: <Widget>[
-            new DecoratedBox(decoration: kBoxDecorationA),
-            new Container(
+    tester.pumpWidget(
+      new Stack(
+        children: <Widget>[
+          new DecoratedBox(decoration: kBoxDecorationA),
+          new Container(
+            child: new DecoratedBox(decoration: kBoxDecorationB)
+          ),
+          new DecoratedBox(decoration: kBoxDecorationC),
+        ]
+      )
+    );
+
+    checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB, kBoxDecorationC]);
+
+    tester.pumpWidget(
+      new Stack(
+        children: <Widget>[
+          new DecoratedBox(decoration: kBoxDecorationA),
+          new Container(
+            child: new Container(
               child: new DecoratedBox(decoration: kBoxDecorationB)
-            ),
-            new DecoratedBox(decoration: kBoxDecorationC),
-          ]
-        )
-      );
+            )
+          ),
+          new DecoratedBox(decoration: kBoxDecorationC),
+        ]
+      )
+    );
 
-      checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB, kBoxDecorationC]);
+    checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB, kBoxDecorationC]);
 
-      tester.pumpWidget(
-        new Stack(
-          children: <Widget>[
-            new DecoratedBox(decoration: kBoxDecorationA),
-            new Container(
-              child: new Container(
-                child: new DecoratedBox(decoration: kBoxDecorationB)
-              )
-            ),
-            new DecoratedBox(decoration: kBoxDecorationC),
-          ]
-        )
-      );
-
-      checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB, kBoxDecorationC]);
-
-      tester.pumpWidget(
-        new Stack(
-          children: <Widget>[
-            new Container(
-              child: new Container(
-                child: new DecoratedBox(decoration: kBoxDecorationB)
-              )
-            ),
-            new Container(
-              child: new DecoratedBox(decoration: kBoxDecorationA)
-            ),
-            new DecoratedBox(decoration: kBoxDecorationC),
-          ]
-        )
-      );
-
-      checkTree(tester, <BoxDecoration>[kBoxDecorationB, kBoxDecorationA, kBoxDecorationC]);
-
-      tester.pumpWidget(
-        new Stack(
-          children: <Widget>[
-            new Container(
+    tester.pumpWidget(
+      new Stack(
+        children: <Widget>[
+          new Container(
+            child: new Container(
               child: new DecoratedBox(decoration: kBoxDecorationB)
-            ),
-            new Container(
-              child: new DecoratedBox(decoration: kBoxDecorationA)
-            ),
-            new DecoratedBox(decoration: kBoxDecorationC),
-          ]
-        )
-      );
+            )
+          ),
+          new Container(
+            child: new DecoratedBox(decoration: kBoxDecorationA)
+          ),
+          new DecoratedBox(decoration: kBoxDecorationC),
+        ]
+      )
+    );
 
-      checkTree(tester, <BoxDecoration>[kBoxDecorationB, kBoxDecorationA, kBoxDecorationC]);
+    checkTree(tester, <BoxDecoration>[kBoxDecorationB, kBoxDecorationA, kBoxDecorationC]);
 
-      tester.pumpWidget(
-        new Stack(
-          children: <Widget>[
-            new Container(
-              key: new Key('b'),
-              child: new DecoratedBox(decoration: kBoxDecorationB)
-            ),
-            new Container(
-              key: new Key('a'),
-              child: new DecoratedBox(decoration: kBoxDecorationA)
-            ),
-          ]
-        )
-      );
+    tester.pumpWidget(
+      new Stack(
+        children: <Widget>[
+          new Container(
+            child: new DecoratedBox(decoration: kBoxDecorationB)
+          ),
+          new Container(
+            child: new DecoratedBox(decoration: kBoxDecorationA)
+          ),
+          new DecoratedBox(decoration: kBoxDecorationC),
+        ]
+      )
+    );
 
-      checkTree(tester, <BoxDecoration>[kBoxDecorationB, kBoxDecorationA]);
+    checkTree(tester, <BoxDecoration>[kBoxDecorationB, kBoxDecorationA, kBoxDecorationC]);
 
-      tester.pumpWidget(
-        new Stack(
-          children: <Widget>[
-            new Container(
-              key: new Key('a'),
-              child: new DecoratedBox(decoration: kBoxDecorationA)
-            ),
-            new Container(
-              key: new Key('b'),
-              child: new DecoratedBox(decoration: kBoxDecorationB)
-            ),
-          ]
-        )
-      );
+    tester.pumpWidget(
+      new Stack(
+        children: <Widget>[
+          new Container(
+            key: new Key('b'),
+            child: new DecoratedBox(decoration: kBoxDecorationB)
+          ),
+          new Container(
+            key: new Key('a'),
+            child: new DecoratedBox(decoration: kBoxDecorationA)
+          ),
+        ]
+      )
+    );
 
-      checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB]);
+    checkTree(tester, <BoxDecoration>[kBoxDecorationB, kBoxDecorationA]);
 
-      tester.pumpWidget(
-        new Stack()
-      );
+    tester.pumpWidget(
+      new Stack(
+        children: <Widget>[
+          new Container(
+            key: new Key('a'),
+            child: new DecoratedBox(decoration: kBoxDecorationA)
+          ),
+          new Container(
+            key: new Key('b'),
+            child: new DecoratedBox(decoration: kBoxDecorationB)
+          ),
+        ]
+      )
+    );
 
-      checkTree(tester, <BoxDecoration>[]);
+    checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB]);
+
+    tester.pumpWidget(
+      new Stack()
+    );
+
+    checkTree(tester, <BoxDecoration>[]);
   });
 
   testWidgets('MultiChildRenderObjectElement with stateful widgets', (WidgetTester tester) {
-      tester.pumpWidget(
-        new Stack(
-          children: <Widget>[
-            new DecoratedBox(decoration: kBoxDecorationA),
-            new DecoratedBox(decoration: kBoxDecorationB),
-          ]
-        )
-      );
+    tester.pumpWidget(
+      new Stack(
+        children: <Widget>[
+          new DecoratedBox(decoration: kBoxDecorationA),
+          new DecoratedBox(decoration: kBoxDecorationB),
+        ]
+      )
+    );
 
-      checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB]);
+    checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB]);
 
-      tester.pumpWidget(
-        new Stack(
-          children: <Widget>[
-            new FlipWidget(
-              left: new DecoratedBox(decoration: kBoxDecorationA),
-              right: new DecoratedBox(decoration: kBoxDecorationB)
-            ),
-            new DecoratedBox(decoration: kBoxDecorationC),
-          ]
-        )
-      );
+    tester.pumpWidget(
+      new Stack(
+        children: <Widget>[
+          new FlipWidget(
+            left: new DecoratedBox(decoration: kBoxDecorationA),
+            right: new DecoratedBox(decoration: kBoxDecorationB)
+          ),
+          new DecoratedBox(decoration: kBoxDecorationC),
+        ]
+      )
+    );
 
-      checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationC]);
+    checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationC]);
 
-      flipStatefulWidget(tester);
-      tester.pump();
+    flipStatefulWidget(tester);
+    tester.pump();
 
-      checkTree(tester, <BoxDecoration>[kBoxDecorationB, kBoxDecorationC]);
+    checkTree(tester, <BoxDecoration>[kBoxDecorationB, kBoxDecorationC]);
 
-      tester.pumpWidget(
-        new Stack(
-          children: <Widget>[
-            new FlipWidget(
-              left: new DecoratedBox(decoration: kBoxDecorationA),
-              right: new DecoratedBox(decoration: kBoxDecorationB)
-            ),
-          ]
-        )
-      );
+    tester.pumpWidget(
+      new Stack(
+        children: <Widget>[
+          new FlipWidget(
+            left: new DecoratedBox(decoration: kBoxDecorationA),
+            right: new DecoratedBox(decoration: kBoxDecorationB)
+          ),
+        ]
+      )
+    );
 
-      checkTree(tester, <BoxDecoration>[kBoxDecorationB]);
+    checkTree(tester, <BoxDecoration>[kBoxDecorationB]);
 
-      flipStatefulWidget(tester);
-      tester.pump();
+    flipStatefulWidget(tester);
+    tester.pump();
 
-      checkTree(tester, <BoxDecoration>[kBoxDecorationA]);
+    checkTree(tester, <BoxDecoration>[kBoxDecorationA]);
 
-      tester.pumpWidget(
-        new Stack(
-          children: <Widget>[
-            new FlipWidget(
-              key: new Key('flip'),
-              left: new DecoratedBox(decoration: kBoxDecorationA),
-              right: new DecoratedBox(decoration: kBoxDecorationB)
-            ),
-          ]
-        )
-      );
+    tester.pumpWidget(
+      new Stack(
+        children: <Widget>[
+          new FlipWidget(
+            key: new Key('flip'),
+            left: new DecoratedBox(decoration: kBoxDecorationA),
+            right: new DecoratedBox(decoration: kBoxDecorationB)
+          ),
+        ]
+      )
+    );
 
-      tester.pumpWidget(
-        new Stack(
-          children: <Widget>[
-            new DecoratedBox(key: new Key('c'), decoration: kBoxDecorationC),
-            new FlipWidget(
-              key: new Key('flip'),
-              left: new DecoratedBox(decoration: kBoxDecorationA),
-              right: new DecoratedBox(decoration: kBoxDecorationB)
-            ),
-          ]
-        )
-      );
+    tester.pumpWidget(
+      new Stack(
+        children: <Widget>[
+          new DecoratedBox(key: new Key('c'), decoration: kBoxDecorationC),
+          new FlipWidget(
+            key: new Key('flip'),
+            left: new DecoratedBox(decoration: kBoxDecorationA),
+            right: new DecoratedBox(decoration: kBoxDecorationB)
+          ),
+        ]
+      )
+    );
 
-      checkTree(tester, <BoxDecoration>[kBoxDecorationC, kBoxDecorationA]);
+    checkTree(tester, <BoxDecoration>[kBoxDecorationC, kBoxDecorationA]);
 
-      flipStatefulWidget(tester);
-      tester.pump();
+    flipStatefulWidget(tester);
+    tester.pump();
 
-      checkTree(tester, <BoxDecoration>[kBoxDecorationC, kBoxDecorationB]);
+    checkTree(tester, <BoxDecoration>[kBoxDecorationC, kBoxDecorationB]);
 
-      tester.pumpWidget(
-        new Stack(
-          children: <Widget>[
-            new FlipWidget(
-              key: new Key('flip'),
-              left: new DecoratedBox(decoration: kBoxDecorationA),
-              right: new DecoratedBox(decoration: kBoxDecorationB)
-            ),
-            new DecoratedBox(key: new Key('c'), decoration: kBoxDecorationC),
-          ]
-        )
-      );
+    tester.pumpWidget(
+      new Stack(
+        children: <Widget>[
+          new FlipWidget(
+            key: new Key('flip'),
+            left: new DecoratedBox(decoration: kBoxDecorationA),
+            right: new DecoratedBox(decoration: kBoxDecorationB)
+          ),
+          new DecoratedBox(key: new Key('c'), decoration: kBoxDecorationC),
+        ]
+      )
+    );
 
-      checkTree(tester, <BoxDecoration>[kBoxDecorationB, kBoxDecorationC]);
+    checkTree(tester, <BoxDecoration>[kBoxDecorationB, kBoxDecorationC]);
   });
 }
