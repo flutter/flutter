@@ -428,9 +428,6 @@ bool _needsRebuild(String apkPath, String manifest) {
   return false;
 }
 
-// Returns true if the selected build mode uses ahead-of-time compilation.
-bool _isAotBuildMode(BuildMode mode) => mode == BuildMode.profile;
-
 Future<int> buildAndroid(
   TargetPlatform platform,
   BuildMode buildMode, {
@@ -494,13 +491,13 @@ Future<int> buildAndroid(
     flxPath = await flx.buildFlx(
       toolchain,
       mainPath: findMainDartFile(target),
-      precompiledSnapshot: _isAotBuildMode(buildMode),
+      precompiledSnapshot: isAotBuildMode(buildMode),
       includeRobotoFonts: false);
   }
 
   // Build an AOT snapshot if needed.
-  if (_isAotBuildMode(buildMode) && aotPath == null) {
-    aotPath = buildAotSnapshot(findMainDartFile(target));
+  if (isAotBuildMode(buildMode) && aotPath == null) {
+    aotPath = buildAotSnapshot(findMainDartFile(target), buildMode);
     if (aotPath == null) {
       printError('Failed to build AOT snapshot');
       return 1;
@@ -508,7 +505,7 @@ Future<int> buildAndroid(
   }
 
   if (aotPath != null) {
-    if (!_isAotBuildMode(buildMode)) {
+    if (!isAotBuildMode(buildMode)) {
       printError('AOT snapshot can not be used in build mode $buildMode');
       return 1;
     }

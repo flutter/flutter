@@ -32,13 +32,13 @@ class BuildAotCommand extends FlutterCommand {
   final String name = 'aot';
 
   @override
-  final String description = "Build an ahead-of-time compiled snapshot of your app's Dart code. "
-                             "(local engine builds only)";
+  final String description = "Build an ahead-of-time compiled snapshot of your app's Dart code.";
 
   @override
   Future<int> runInProject() async {
     String outputPath = buildAotSnapshot(
       findMainDartFile(argResults['target']),
+      getBuildMode(),
       outputPath: argResults['output-dir']
     );
     if (outputPath == null)
@@ -55,18 +55,30 @@ String _getSdkExtensionPath(String packagesPath, String package) {
 }
 
 String buildAotSnapshot(
-  String mainPath, {
+  String mainPath,
+  BuildMode buildMode, {
   String outputPath: _kDefaultAotOutputDir
 }) {
-  String engineSrc = tools.engineSrcPath;
-  if (engineSrc == null) {
-    printError('AOT compilation requires --engine-src-path');
+  if (!isAotBuildMode(buildMode)) {
+    printError('${getModeName(buildMode)} mode does not support AOT compilation.');
     return null;
   }
 
-  String engineOut = tools.getEngineArtifactsDirectory(
-      TargetPlatform.android_arm, BuildMode.profile).path;
-  String genSnapshot = path.join(engineOut, 'clang_x86', 'gen_snapshot');
+  String entryPointsDir, genSnapshot;
+
+  String engineSrc = tools.engineSrcPath;
+  if (engineSrc != null) {
+    entryPointsDir  = path.join(engineSrc, 'sky', 'engine', 'bindings');
+    String engineOut = tools.getEngineArtifactsDirectory(
+        TargetPlatform.android_arm, buildMode).path;
+    genSnapshot = path.join(engineOut, 'clang_x86', 'gen_snapshot');
+  } else {
+    String artifactsDir = tools.getEngineArtifactsDirectory(
+        TargetPlatform.android_arm, buildMode).path;
+    entryPointsDir = artifactsDir;
+    String hostToolsDir = path.join(artifactsDir, getNameForHostPlatform(getCurrentHostPlatform()));
+    genSnapshot = path.join(hostToolsDir, 'gen_snapshot');
+  }
 
   Directory outputDir = new Directory(outputPath);
   outputDir.createSync(recursive: true);
@@ -75,9 +87,8 @@ String buildAotSnapshot(
   String instructionsBlob = path.join(outputDir.path, 'snapshot_aot_instr');
   String rodataBlob = path.join(outputDir.path, 'snapshot_aot_rodata');
 
-  String bindingsSrc = path.join(engineSrc, 'sky', 'engine', 'bindings');
-  String vmEntryPoints = path.join(bindingsSrc, 'dart_vm_entry_points.txt');
-  String vmEntryPointsAndroid = path.join(bindingsSrc, 'dart_vm_entry_points_android.txt');
+  String vmEntryPoints = path.join(entryPointsDir, 'dart_vm_entry_points.txt');
+  String vmEntryPointsAndroid = path.join(entryPointsDir, 'dart_vm_entry_points_android.txt');
 
   String packagesPath = path.absolute(Directory.current.path, 'packages');
   if (!FileSystemEntity.isDirectorySync(packagesPath)) {
@@ -119,7 +130,7 @@ String buildAotSnapshot(
     '--no-sim-use-hardfp',
   ];
 
-  if (!tools.engineRelease) {
+  if (!(tools.engineRelease || buildMode == BuildMode.release)) {
     genSnapshotCmd.addAll([
       '--no-checked',
       '--conditional_directives',

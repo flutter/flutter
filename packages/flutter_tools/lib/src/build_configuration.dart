@@ -24,6 +24,11 @@ enum BuildMode {
 
 String getModeName(BuildMode mode) => getEnumName(mode);
 
+// Returns true if the selected build mode uses ahead-of-time compilation.
+bool isAotBuildMode(BuildMode mode) {
+  return mode == BuildMode.profile || mode == BuildMode.release;
+}
+
 enum HostPlatform {
   darwin_x64,
   linux_x64,
