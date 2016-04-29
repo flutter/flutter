@@ -11,8 +11,6 @@ import 'package:path/path.dart' as path;
 
 const int kTargetLineCount = 100 * 1024;
 
-// TODO: Copy this into the ../benchmarks directory?
-
 void main(List<String> args) {
   // If we're run from the `tools` dir, set the cwd to the repo root.
   if (path.basename(Directory.current.path) == 'tools')
@@ -20,7 +18,7 @@ void main(List<String> args) {
 
   ArgParser argParser = new ArgParser();
   // ../mega_gallery? dev/benchmarks/mega_gallery?
-  argParser.addOption('out', defaultsTo: path.normalize(path.absolute('dev/benchmarks/mega_gallery')));
+  argParser.addOption('out', defaultsTo: _normalize('dev/benchmarks/mega_gallery'));
   argParser.addOption('copies');
   argParser.addFlag('delete', negatable: false);
   argParser.addFlag('help', abbr: 'h', negatable: false);
@@ -34,10 +32,8 @@ void main(List<String> args) {
     exit(0);
   }
 
-  Directory source = new Directory(path.normalize(path.absolute('examples/material_gallery')));
-  int copies;
-
-  Directory out = new Directory(path.normalize(path.absolute(results['out'])));
+  Directory source = new Directory(_normalize('examples/material_gallery'));
+  Directory out = new Directory(_normalize(results['out']));
 
   if (results['delete']) {
     if (out.existsSync()) {
@@ -48,6 +44,7 @@ void main(List<String> args) {
     exit(0);
   }
 
+  int copies;
   if (!results.wasParsed('copies')) {
     SourceStats stats = getStatsFor(_dir(source, 'lib'));
     copies = (kTargetLineCount / stats.lines).round();
@@ -69,16 +66,42 @@ void main(List<String> args) {
     _copyGallery(out, i);
 
   // Create a new entry-point.
-  // TODO:
+  _createEntry(_file(out, 'lib/main.dart'), copies);
 
   // Update the pubspec.
   String pubspec = _file(out, 'pubspec.yaml').readAsStringSync();
   pubspec = pubspec.replaceAll('../../packages/flutter', '../../../packages/flutter');
   _file(out, 'pubspec.yaml').writeAsStringSync(pubspec);
 
+  _file(out, '.dartignore').writeAsStringSync('');
+
   // Count source lines and number of files; tell how to run it.
   SourceStats stats = getStatsFor(out);
   print('material_gallery copied $copies times ($stats).');
+}
+
+// TODO(devoncarew): Create an entry-point that builds a UI with all `n` copies.
+void _createEntry(File mainFile, int copies) {
+  StringBuffer imports = new StringBuffer();
+  for (int i = 1; i < copies; i++)
+    imports.writeln("import 'gallery_$i/main.dart' as main_$i;");
+
+  String contents = '''
+// Copyright 2016 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter/widgets.dart';
+
+import 'gallery/app.dart';
+${imports.toString().trim()}
+
+void main() {
+  runApp(new GalleryApp());
+}
+''';
+
+  mainFile.writeAsStringSync(contents);
 }
 
 void _copyGallery(Directory galleryDir, int index) {
@@ -114,6 +137,7 @@ void _copy(Directory source, Directory target) {
 
 Directory _dir(Directory parent, String name) => new Directory(path.join(parent.path, name));
 File _file(Directory parent, String name) => new File(path.join(parent.path, name));
+String _normalize(String filePath) => path.normalize(path.absolute(filePath));
 
 class SourceStats {
   int files = 0;
@@ -122,13 +146,16 @@ class SourceStats {
   String toString() => '${_comma(files)} files, ${_comma(lines)} lines';
 }
 
-SourceStats getStatsFor(Directory dir) {
-  SourceStats stats = new SourceStats();
+SourceStats getStatsFor(Directory dir, [SourceStats stats]) {
+  stats ??= new SourceStats();
 
-  for (FileSystemEntity entity in dir.listSync(recursive: true, followLinks: false)) {
-    if (entity is File && path.basename(entity.path).endsWith('.dart')) {
+  for (FileSystemEntity entity in dir.listSync(recursive: false, followLinks: false)) {
+    String name = path.basename(entity.path);
+    if (entity is File && name.endsWith('.dart')) {
       stats.files += 1;
       stats.lines += _lineCount(entity);
+    } else if (entity is Directory && !name.startsWith('.')) {
+      getStatsFor(entity, stats);
     }
   }
 
