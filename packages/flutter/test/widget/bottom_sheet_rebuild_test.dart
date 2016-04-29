@@ -4,15 +4,14 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:test/test.dart';
 
 void main() {
-  testWidgets('Verify that a BottomSheet can be rebuilt with ScaffoldFeatureController.setState()', (WidgetTester tester) {
+  testWidgets('Verify that a BottomSheet can be rebuilt with ScaffoldFeatureController.setState()', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
     PersistentBottomSheetController<Null> bottomSheet;
     int buildCount = 0;
 
-    tester.pumpWidget(new MaterialApp(
+    await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         key: scaffoldKey,
         body: new Center(child: new Text('body'))
@@ -28,11 +27,11 @@ void main() {
       );
     });
 
-    tester.pump();
+    await tester.pump();
     expect(buildCount, equals(1));
 
     bottomSheet.setState((){ });
-    tester.pump();
+    await tester.pump();
     expect(buildCount, equals(2));
   });
 

@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:test/test.dart';
 
 void main() {
 
@@ -17,8 +16,8 @@ void main() {
     return new Future<Null>.value();
   }
 
-  testWidgets('RefreshIndicator', (WidgetTester tester) {
-    tester.pumpWidget(
+  testWidgets('RefreshIndicator', (WidgetTester tester) async {
+    await tester.pumpWidget(
       new RefreshIndicator(
         refresh: refresh,
         child: new Block(
@@ -32,11 +31,11 @@ void main() {
       )
     );
 
-    tester.fling(find.text('A'), const Offset(0.0, 200.0), -1000.0);
-    tester.pump();
-    tester.pump(const Duration(seconds: 1)); // finish the scroll animation
-    tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
-    tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
+    await tester.fling(find.text('A'), const Offset(0.0, 200.0), -1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
     expect(refreshCalled, true);
   });
 }

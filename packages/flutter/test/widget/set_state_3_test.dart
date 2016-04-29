@@ -51,10 +51,10 @@ class LeafState extends State<Leaf> {
 }
 
 void main() {
-  testWidgets('three-way setState() smoke test', (WidgetTester tester) {
-    tester.pumpWidget(new Changer(new Wrapper(new Leaf())));
-    tester.pumpWidget(new Changer(new Wrapper(new Leaf())));
+  testWidgets('three-way setState() smoke test', (WidgetTester tester) async {
+    await tester.pumpWidget(new Changer(new Wrapper(new Leaf())));
+    await tester.pumpWidget(new Changer(new Wrapper(new Leaf())));
     changer.test();
-    tester.pump();
+    await tester.pump();
   });
 }

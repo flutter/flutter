@@ -5,19 +5,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:test/test.dart';
 
 import 'test_semantics.dart';
 import 'package:sky_services/semantics/semantics.mojom.dart' as mojom;
 
 void main() {
-  testWidgets('Semantics 7 - Merging', (WidgetTester tester) {
+  testWidgets('Semantics 7 - Merging', (WidgetTester tester) async {
     TestSemanticsListener client = new TestSemanticsListener();
 
     String label;
 
     label = '1';
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new MergeSemantics(
@@ -94,7 +93,7 @@ void main() {
     client.updates.clear();
 
     label = '2';
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new MergeSemantics(

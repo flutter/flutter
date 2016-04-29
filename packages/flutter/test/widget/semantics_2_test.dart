@@ -6,12 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:test/test.dart';
 
 import 'test_semantics.dart';
 
 void main() {
-  testWidgets('Semantics 2', (WidgetTester tester) {
+  testWidgets('Semantics 2', (WidgetTester tester) async {
     TestSemanticsListener client = new TestSemanticsListener();
 
     // this test is the same as the test in Semantics 1, but
@@ -19,7 +18,7 @@ void main() {
     // switching to not ignoring it.
 
     // forking semantics
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Column(
         children: <Widget>[
           new Container(
@@ -84,7 +83,7 @@ void main() {
     client.updates.clear();
 
     // toggle a branch off
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Column(
         children: <Widget>[
           new Container(
@@ -121,7 +120,7 @@ void main() {
     client.updates.clear();
 
     // toggle a branch back on
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Column(
         children: <Widget>[
           new Container(

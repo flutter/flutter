@@ -497,6 +497,13 @@ class TabBarSelection<T> extends StatefulWidget {
   static TabBarSelectionState<dynamic/*=T*/> of/*<T>*/(BuildContext context) {
     return context.ancestorStateOfType(new TypeMatcher<TabBarSelectionState<dynamic/*=T*/>>());
   }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('current tab: $value');
+    description.add('available tabs: $values');
+  }
 }
 
 class TabBarSelectionState<T> extends State<TabBarSelection<T>> {

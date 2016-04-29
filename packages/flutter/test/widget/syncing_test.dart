@@ -4,7 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 class TestWidget extends StatefulWidget {
   TestWidget({ this.child, this.persistentState, this.syncedState });
@@ -43,8 +42,8 @@ class TestWidgetState extends State<TestWidget> {
 
 void main() {
 
-  testWidgets('no change', (WidgetTester tester) {
-    tester.pumpWidget(
+  testWidgets('no change', (WidgetTester tester) async {
+    await tester.pumpWidget(
       new Container(
         child: new Container(
           child: new TestWidget(
@@ -60,7 +59,7 @@ void main() {
     expect(state.persistentState, equals(1));
     expect(state.updates, equals(0));
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Container(
         child: new Container(
           child: new TestWidget(
@@ -74,11 +73,11 @@ void main() {
     expect(state.persistentState, equals(1));
     expect(state.updates, equals(1));
 
-    tester.pumpWidget(new Container());
+    await tester.pumpWidget(new Container());
   });
 
-  testWidgets('remove one', (WidgetTester tester) {
-    tester.pumpWidget(
+  testWidgets('remove one', (WidgetTester tester) async {
+    await tester.pumpWidget(
       new Container(
         child: new Container(
           child: new TestWidget(
@@ -94,7 +93,7 @@ void main() {
     expect(state.persistentState, equals(10));
     expect(state.updates, equals(0));
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Container(
         child: new TestWidget(
           persistentState: 11,
@@ -108,18 +107,18 @@ void main() {
     expect(state.persistentState, equals(11));
     expect(state.updates, equals(0));
 
-    tester.pumpWidget(new Container());
+    await tester.pumpWidget(new Container());
   });
 
-  testWidgets('swap instances around', (WidgetTester tester) {
+  testWidgets('swap instances around', (WidgetTester tester) async {
     Widget a = new TestWidget(persistentState: 0x61, syncedState: 0x41, child: new Text('apple'));
     Widget b = new TestWidget(persistentState: 0x62, syncedState: 0x42, child: new Text('banana'));
-    tester.pumpWidget(new Column());
+    await tester.pumpWidget(new Column());
 
     GlobalKey keyA = new GlobalKey();
     GlobalKey keyB = new GlobalKey();
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Column(
         children: <Widget>[
           new Container(
@@ -146,7 +145,7 @@ void main() {
     expect(second.persistentState, equals(0x62));
     expect(second.syncedState, equals(0x42));
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Column(
         children: <Widget>[
           new Container(
@@ -175,7 +174,7 @@ void main() {
     // now we swap the nodes over
     // since they are both "old" nodes, they shouldn't sync with each other even though they look alike
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Column(
         children: <Widget>[
           new Container(

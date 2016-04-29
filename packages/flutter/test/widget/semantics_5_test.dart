@@ -5,15 +5,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:test/test.dart';
 
 import 'test_semantics.dart';
 
 void main() {
-  testWidgets('Semantics 5', (WidgetTester tester) {
+  testWidgets('Semantics 5', (WidgetTester tester) async {
     TestSemanticsListener client = new TestSemanticsListener();
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new Semantics(

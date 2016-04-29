@@ -5,7 +5,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 import 'test_widgets.dart';
 
@@ -49,9 +48,9 @@ void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
 final TestParentData kNonPositioned = new TestParentData();
 
 void main() {
-  testWidgets('ParentDataWidget control test', (WidgetTester tester) {
+  testWidgets('ParentDataWidget control test', (WidgetTester tester) async {
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new DecoratedBox(decoration: kBoxDecorationA),
@@ -71,7 +70,7 @@ void main() {
       kNonPositioned,
     ]);
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new Positioned(
@@ -99,7 +98,7 @@ void main() {
     DecoratedBox kDecoratedBoxB = new DecoratedBox(decoration: kBoxDecorationB);
     DecoratedBox kDecoratedBoxC = new DecoratedBox(decoration: kBoxDecorationC);
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new Positioned(
@@ -123,7 +122,7 @@ void main() {
       kNonPositioned,
     ]);
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new Positioned(
@@ -147,7 +146,7 @@ void main() {
       kNonPositioned,
     ]);
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           kDecoratedBoxA,
@@ -167,7 +166,7 @@ void main() {
       kNonPositioned,
     ]);
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           kDecoratedBoxA,
@@ -191,7 +190,7 @@ void main() {
       new TestParentData(top: 8.0),
     ]);
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new Positioned(
@@ -207,13 +206,13 @@ void main() {
     ]);
 
     flipStatefulWidget(tester);
-    tester.pump();
+    await tester.pump();
 
     checkTree(tester, <TestParentData>[
       new TestParentData(right: 10.0),
     ]);
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new Positioned(
@@ -229,21 +228,21 @@ void main() {
     ]);
 
     flipStatefulWidget(tester);
-    tester.pump();
+    await tester.pump();
 
     checkTree(tester, <TestParentData>[
       new TestParentData(top: 7.0),
     ]);
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack()
     );
 
     checkTree(tester, <TestParentData>[]);
   });
 
-  testWidgets('ParentDataWidget conflicting data', (WidgetTester tester) {
-    tester.pumpWidget(
+  testWidgets('ParentDataWidget conflicting data', (WidgetTester tester) async {
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new Positioned(
@@ -260,11 +259,11 @@ void main() {
     );
     expect(tester.takeException(), isNotNull);
 
-    tester.pumpWidget(new Stack());
+    await tester.pumpWidget(new Stack());
 
     checkTree(tester, <TestParentData>[]);
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Container(
         child: new Flex(
           children: <Widget>[
@@ -279,17 +278,17 @@ void main() {
     );
     expect(tester.takeException(), isNotNull);
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack()
     );
 
     checkTree(tester, <TestParentData>[]);
   });
 
-  testWidgets('ParentDataWidget interacts with global keys', (WidgetTester tester) {
+  testWidgets('ParentDataWidget interacts with global keys', (WidgetTester tester) async {
     GlobalKey key = new GlobalKey();
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new Positioned(
@@ -305,7 +304,7 @@ void main() {
       new TestParentData(top: 10.0, left: 10.0),
     ]);
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new Positioned(
@@ -324,7 +323,7 @@ void main() {
       new TestParentData(top: 10.0, left: 10.0),
     ]);
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new Positioned(

@@ -6,16 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:test/test.dart';
 
 import 'test_semantics.dart';
 
 void main() {
-  testWidgets('Semantics 1', (WidgetTester tester) {
+  testWidgets('Semantics 1', (WidgetTester tester) async {
     TestSemanticsListener client = new TestSemanticsListener();
 
     // smoketest
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Container(
         child: new Semantics(
           label: 'test1',
@@ -42,7 +41,7 @@ void main() {
     client.updates.clear();
 
     // control for forking
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Column(
         children: <Widget>[
           new Container(
@@ -79,7 +78,7 @@ void main() {
     client.updates.clear();
 
     // forking semantics
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Column(
         children: <Widget>[
           new Container(
@@ -144,7 +143,7 @@ void main() {
     client.updates.clear();
 
     // toggle a branch off
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Column(
         children: <Widget>[
           new Container(
@@ -181,7 +180,7 @@ void main() {
     client.updates.clear();
 
     // toggle a branch back on
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Column(
         children: <Widget>[
           new Container(

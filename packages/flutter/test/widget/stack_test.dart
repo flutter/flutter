@@ -5,23 +5,22 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 import '../rendering/rendering_tester.dart';
 
 void main() {
-  testWidgets('Can construct an empty Stack', (WidgetTester tester) {
-    tester.pumpWidget(new Stack());
+  testWidgets('Can construct an empty Stack', (WidgetTester tester) async {
+    await tester.pumpWidget(new Stack());
   });
 
-  testWidgets('Can construct an empty Centered Stack', (WidgetTester tester) {
-    tester.pumpWidget(new Center(child: new Stack()));
+  testWidgets('Can construct an empty Centered Stack', (WidgetTester tester) async {
+    await tester.pumpWidget(new Center(child: new Stack()));
   });
 
-  testWidgets('Can change position data', (WidgetTester tester) {
+  testWidgets('Can change position data', (WidgetTester tester) async {
     Key key = new Key('container');
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new Positioned(
@@ -48,7 +47,7 @@ void main() {
     expect(parentData.width, isNull);
     expect(parentData.height, isNull);
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new Positioned(
@@ -73,11 +72,11 @@ void main() {
     expect(parentData.height, isNull);
   });
 
-  testWidgets('Can remove parent data', (WidgetTester tester) {
+  testWidgets('Can remove parent data', (WidgetTester tester) async {
     Key key = new Key('container');
     Container container = new Container(key: key, width: 10.0, height: 10.0);
 
-    tester.pumpWidget(new Stack(children: <Widget>[ new Positioned(left: 10.0, child: container) ]));
+    await tester.pumpWidget(new Stack(children: <Widget>[ new Positioned(left: 10.0, child: container) ]));
     Element containerElement = tester.element(find.byKey(key));
 
     StackParentData parentData;
@@ -89,7 +88,7 @@ void main() {
     expect(parentData.width, isNull);
     expect(parentData.height, isNull);
 
-    tester.pumpWidget(new Stack(children: <Widget>[ container ]));
+    await tester.pumpWidget(new Stack(children: <Widget>[ container ]));
     containerElement = tester.element(find.byKey(key));
 
     parentData = containerElement.renderObject.parentData;
@@ -101,11 +100,11 @@ void main() {
     expect(parentData.height, isNull);
   });
 
-  testWidgets('Can align non-positioned children', (WidgetTester tester) {
+  testWidgets('Can align non-positioned children', (WidgetTester tester) async {
     Key child0Key = new Key('child0');
     Key child1Key = new Key('child1');
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Center(
         child: new Stack(
           children: <Widget>[
@@ -126,15 +125,15 @@ void main() {
     expect(child1RenderObjectParentData.offset, equals(const Offset(5.0, 5.0)));
   });
 
-  testWidgets('Can construct an empty IndexedStack', (WidgetTester tester) {
-    tester.pumpWidget(new IndexedStack());
+  testWidgets('Can construct an empty IndexedStack', (WidgetTester tester) async {
+    await tester.pumpWidget(new IndexedStack());
   });
 
-  testWidgets('Can construct an empty Centered IndexedStack', (WidgetTester tester) {
-    tester.pumpWidget(new Center(child: new IndexedStack()));
+  testWidgets('Can construct an empty Centered IndexedStack', (WidgetTester tester) async {
+    await tester.pumpWidget(new Center(child: new IndexedStack()));
   });
 
-  testWidgets('Can construct an IndexedStack', (WidgetTester tester) {
+  testWidgets('Can construct an IndexedStack', (WidgetTester tester) async {
     int itemCount = 3;
     List<int> itemsPainted;
 
@@ -151,20 +150,20 @@ void main() {
       return new Center(child: new IndexedStack(children: items, index: index));
     }
 
-    tester.pumpWidget(buildFrame(0));
+    await tester.pumpWidget(buildFrame(0));
     expect(find.text('0'), findsOneWidget);
     expect(find.text('1'), findsOneWidget);
     expect(find.text('2'), findsOneWidget);
     expect(itemsPainted, equals(<int>[0]));
 
-    tester.pumpWidget(buildFrame(1));
+    await tester.pumpWidget(buildFrame(1));
     expect(itemsPainted, equals(<int>[1]));
 
-    tester.pumpWidget(buildFrame(2));
+    await tester.pumpWidget(buildFrame(2));
     expect(itemsPainted, equals(<int>[2]));
   });
 
-  testWidgets('Can hit test an IndexedStack', (WidgetTester tester) {
+  testWidgets('Can hit test an IndexedStack', (WidgetTester tester) async {
     Key key = new Key('indexedStack');
     int itemCount = 3;
     List<int> itemsTapped;
@@ -177,25 +176,25 @@ void main() {
       return new Center(child: new IndexedStack(children: items, key: key, index: index));
     }
 
-    tester.pumpWidget(buildFrame(0));
+    await tester.pumpWidget(buildFrame(0));
     expect(itemsTapped, isEmpty);
-    tester.tap(find.byKey(key));
+    await tester.tap(find.byKey(key));
     expect(itemsTapped, <int>[0]);
 
-    tester.pumpWidget(buildFrame(2));
+    await tester.pumpWidget(buildFrame(2));
     expect(itemsTapped, isEmpty);
-    tester.tap(find.byKey(key));
+    await tester.tap(find.byKey(key));
     expect(itemsTapped, <int>[2]);
   });
 
-  testWidgets('Can set width and height', (WidgetTester tester) {
+  testWidgets('Can set width and height', (WidgetTester tester) async {
     Key key = new Key('container');
 
     BoxDecoration kBoxDecoration = new BoxDecoration(
       backgroundColor: new Color(0xFF00FF00)
     );
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new Positioned(
@@ -226,7 +225,7 @@ void main() {
     expect(renderBox.size.width, equals(11.0));
     expect(renderBox.size.height, equals(12.0));
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new Positioned(

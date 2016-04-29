@@ -10,12 +10,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 void main() {
-  testWidgets('Verify NetworkImage sets an ObjectKey on its ImageResource if it doesn\'t have a key', (WidgetTester tester) {
+  testWidgets('Verify NetworkImage sets an ObjectKey on its ImageResource if it doesn\'t have a key', (WidgetTester tester) async {
     final String testUrl = 'https://foo.bar/baz1.png';
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new NetworkImage(
         scale: 1.0,
         src: testUrl
@@ -26,9 +25,9 @@ void main() {
     expect(find.byKey(new ObjectKey(imageResource)), findsOneWidget);
   });
 
-  testWidgets('Verify NetworkImage doesn\'t set an ObjectKey on its ImageResource if it has a key', (WidgetTester tester) {
+  testWidgets('Verify NetworkImage doesn\'t set an ObjectKey on its ImageResource if it has a key', (WidgetTester tester) async {
     final String testUrl = 'https://foo.bar/baz2.png';
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new NetworkImage(
         key: new GlobalKey(),
         scale: 1.0,
@@ -40,17 +39,17 @@ void main() {
     expect(find.byKey(new ObjectKey(imageResource)), findsNothing);
   });
 
-  testWidgets('Verify AsyncImage sets an ObjectKey on its ImageResource if it doesn\'t have a key', (WidgetTester tester) {
+  testWidgets('Verify AsyncImage sets an ObjectKey on its ImageResource if it doesn\'t have a key', (WidgetTester tester) async {
     ImageProvider imageProvider = new TestImageProvider();
-    tester.pumpWidget(new AsyncImage(provider: imageProvider));
+    await tester.pumpWidget(new AsyncImage(provider: imageProvider));
 
     ImageResource imageResource = imageCache.loadProvider(imageProvider);
     expect(find.byKey(new ObjectKey(imageResource)), findsOneWidget);
   });
 
-  testWidgets('Verify AsyncImage doesn\'t set an ObjectKey on its ImageResource if it has a key', (WidgetTester tester) {
+  testWidgets('Verify AsyncImage doesn\'t set an ObjectKey on its ImageResource if it has a key', (WidgetTester tester) async {
     ImageProvider imageProvider = new TestImageProvider();
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new AsyncImage(
         key: new GlobalKey(),
         provider: imageProvider
@@ -61,10 +60,10 @@ void main() {
     expect(find.byKey(new ObjectKey(imageResource)), findsNothing);
   });
 
-  testWidgets('Verify AssetImage sets an ObjectKey on its ImageResource if it doesn\'t have a key', (WidgetTester tester) {
+  testWidgets('Verify AssetImage sets an ObjectKey on its ImageResource if it doesn\'t have a key', (WidgetTester tester) async {
     final String name = 'foo';
     final AssetBundle assetBundle = new TestAssetBundle();
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new AssetImage(
         name: name,
         bundle: assetBundle
@@ -75,10 +74,10 @@ void main() {
     expect(find.byKey(new ObjectKey(imageResource)), findsOneWidget);
   });
 
-  testWidgets('Verify AssetImage doesn\'t set an ObjectKey on its ImageResource if it has a key', (WidgetTester tester) {
+  testWidgets('Verify AssetImage doesn\'t set an ObjectKey on its ImageResource if it has a key', (WidgetTester tester) async {
     final String name = 'foo';
     final AssetBundle assetBundle = new TestAssetBundle();
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new AssetImage(
         key: new GlobalKey(),
         name: name,
@@ -90,10 +89,10 @@ void main() {
     expect(find.byKey(new ObjectKey(imageResource)), findsNothing);
   });
 
-  testWidgets('Verify AsyncImage resets its RenderImage when changing providers if it doesn\'t have a key', (WidgetTester tester) {
+  testWidgets('Verify AsyncImage resets its RenderImage when changing providers if it doesn\'t have a key', (WidgetTester tester) async {
     final GlobalKey key = new GlobalKey();
     TestImageProvider imageProvider1 = new TestImageProvider();
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Container(
         key: key,
         child: new AsyncImage(
@@ -107,14 +106,14 @@ void main() {
     expect(renderImage.image, isNull);
 
     imageProvider1.complete();
-    tester.flushMicrotasks(); // resolve the future from the image provider
-    tester.pump(null, EnginePhase.layout);
+    await tester.idle(); // resolve the future from the image provider
+    await tester.pump(null, EnginePhase.layout);
 
     renderImage = key.currentContext.findRenderObject();
     expect(renderImage.image, isNotNull);
 
     TestImageProvider imageProvider2 = new TestImageProvider();
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Container(
         key: key,
         child: new AsyncImage(
@@ -130,10 +129,10 @@ void main() {
 
   });
 
-  testWidgets('Verify AsyncImage doesn\'t reset its RenderImage when changing providers if it has a key', (WidgetTester tester) {
+  testWidgets('Verify AsyncImage doesn\'t reset its RenderImage when changing providers if it has a key', (WidgetTester tester) async {
     final GlobalKey key = new GlobalKey();
     TestImageProvider imageProvider1 = new TestImageProvider();
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new AsyncImage(
           key: key,
           provider: imageProvider1
@@ -145,14 +144,14 @@ void main() {
     expect(renderImage.image, isNull);
 
     imageProvider1.complete();
-    tester.flushMicrotasks(); // resolve the future from the image provider
-    tester.pump(null, EnginePhase.layout);
+    await tester.idle(); // resolve the future from the image provider
+    await tester.pump(null, EnginePhase.layout);
 
     renderImage = key.currentContext.findRenderObject();
     expect(renderImage.image, isNotNull);
 
     TestImageProvider imageProvider2 = new TestImageProvider();
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new AsyncImage(
         key: key,
         provider: imageProvider2

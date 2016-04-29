@@ -4,11 +4,10 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:test/test.dart';
 
 void main() {
-  testWidgets('Can set opacity for an Icon', (WidgetTester tester) {
-    tester.pumpWidget(
+  testWidgets('Can set opacity for an Icon', (WidgetTester tester) async {
+    await tester.pumpWidget(
       new IconTheme(
         data: new IconThemeData(
           color: Colors.green[500],

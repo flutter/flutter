@@ -51,7 +51,7 @@ Future<Process> _startProcess(String mainPath, { String packages }) {
     '--non-interactive',
     '--packages=$packages',
     mainPath,
-  ]);
+  ], environment: <String, String>{ 'FLUTTER_TEST': 'true' });
 }
 
 class FlutterPlatform extends PlatformPlugin {

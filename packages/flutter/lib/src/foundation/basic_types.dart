@@ -25,6 +25,9 @@ typedef void ValueSetter<T>(T value);
 /// See also [ValueSetter].
 typedef T ValueGetter<T>();
 
+/// Signature for callbacks that filter an iterable.
+typedef Iterable<T> IterableFilter<T>(Iterable<T> input);
+
 /// A BitField over an enum (or other class whose values implement "index").
 /// Only the first 63 values of the enum can be used as indices.
 class BitField<T extends dynamic> {

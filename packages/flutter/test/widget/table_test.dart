@@ -5,11 +5,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 void main() {
-  testWidgets('Table widget - control test', (WidgetTester tester) {
-    tester.pumpWidget(
+  testWidgets('Table widget - control test', (WidgetTester tester) async {
+    await tester.pumpWidget(
       new Table(
         children: <TableRow>[
           new TableRow(
@@ -39,8 +38,8 @@ void main() {
     expect(boxA.size, equals(boxB.size));
   });
 
-  testWidgets('Table widget - changing table dimensions', (WidgetTester tester) {
-    tester.pumpWidget(
+  testWidgets('Table widget - changing table dimensions', (WidgetTester tester) async {
+    await tester.pumpWidget(
       new Table(
         children: <TableRow>[
           new TableRow(
@@ -65,7 +64,7 @@ void main() {
     RenderBox boxG1 = tester.renderObject(find.text('G'));
     expect(boxA1, isNotNull);
     expect(boxG1, isNotNull);
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Table(
         children: <TableRow>[
           new TableRow(
@@ -89,8 +88,8 @@ void main() {
     expect(boxG1, isNot(equals(boxG2)));
   });
 
-  testWidgets('Table widget - repump test', (WidgetTester tester) {
-    tester.pumpWidget(
+  testWidgets('Table widget - repump test', (WidgetTester tester) async {
+    await tester.pumpWidget(
       new Table(
         children: <TableRow>[
           new TableRow(
@@ -111,7 +110,7 @@ void main() {
         ]
       )
     );
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Table(
         children: <TableRow>[
           new TableRow(
@@ -141,8 +140,8 @@ void main() {
     expect(boxA.size, equals(boxB.size));
   });
 
-  testWidgets('Table widget - intrinsic sizing test', (WidgetTester tester) {
-    tester.pumpWidget(
+  testWidgets('Table widget - intrinsic sizing test', (WidgetTester tester) async {
+    await tester.pumpWidget(
       new Table(
         defaultColumnWidth: const IntrinsicColumnWidth(),
         children: <TableRow>[
@@ -174,8 +173,8 @@ void main() {
     expect(boxA.size.height, equals(boxB.size.height));
   });
 
-  testWidgets('Table widget - intrinsic sizing test, resizing', (WidgetTester tester) {
-    tester.pumpWidget(
+  testWidgets('Table widget - intrinsic sizing test, resizing', (WidgetTester tester) async {
+    await tester.pumpWidget(
       new Table(
         defaultColumnWidth: const IntrinsicColumnWidth(),
         children: <TableRow>[
@@ -197,7 +196,7 @@ void main() {
         ]
       )
     );
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Table(
         defaultColumnWidth: const IntrinsicColumnWidth(),
         children: <TableRow>[
@@ -229,8 +228,8 @@ void main() {
     expect(boxA.size.height, equals(boxB.size.height));
   });
 
-  testWidgets('Table widget - intrinsic sizing test, changing column widths', (WidgetTester tester) {
-    tester.pumpWidget(
+  testWidgets('Table widget - intrinsic sizing test, changing column widths', (WidgetTester tester) async {
+    await tester.pumpWidget(
       new Table(
         children: <TableRow>[
           new TableRow(
@@ -251,7 +250,7 @@ void main() {
         ]
       )
     );
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Table(
         defaultColumnWidth: const IntrinsicColumnWidth(),
         children: <TableRow>[
@@ -283,9 +282,9 @@ void main() {
     expect(boxA.size.height, equals(boxB.size.height));
   });
 
-  testWidgets('Table widget - moving test', (WidgetTester tester) {
+  testWidgets('Table widget - moving test', (WidgetTester tester) async {
     List<BuildContext> contexts = <BuildContext>[];
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Table(
         children: <TableRow>[
           new TableRow(
@@ -307,7 +306,7 @@ void main() {
         ]
       )
     );
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Table(
         children: <TableRow>[
           new TableRow(

@@ -20,7 +20,7 @@ void main() {
     yieldCount = 0;
   });
 
-  test("The Caching Iterable: length caches", () {
+  test('The Caching Iterable: length caches', () {
     Iterable<int> i = new CachingIterable<int>(range(1, 5).iterator);
     expect(yieldCount, equals(0));
     expect(i.length, equals(5));
@@ -36,7 +36,7 @@ void main() {
     expect(yieldCount, equals(5));
   });
 
-  test("The Caching Iterable: laziness", () {
+  test('The Caching Iterable: laziness', () {
     Iterable<int> i = new CachingIterable<int>(range(1, 5).iterator);
     expect(yieldCount, equals(0));
 
@@ -50,7 +50,7 @@ void main() {
     expect(yieldCount, equals(5));
   });
 
-  test("The Caching Iterable: where and map", () {
+  test('The Caching Iterable: where and map', () {
     Iterable<int> integers = new CachingIterable<int>(range(1, 5).iterator);
     expect(yieldCount, equals(0));
 

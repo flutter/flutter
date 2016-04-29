@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart' hide TypeMatcher;
 import 'package:flutter/material.dart';
-import 'package:test/test.dart' hide TypeMatcher;
 
 class TestTransition extends AnimatedWidget {
   TestTransition({
@@ -47,7 +46,7 @@ void main() {
   final Duration kTwoTenthsOfTheTransitionDuration = const Duration(milliseconds: 30);
   final Duration kFourTenthsOfTheTransitionDuration = const Duration(milliseconds: 60);
 
-  testWidgets('Check onstage/offstage handling around transitions', (WidgetTester tester) {
+  testWidgets('Check onstage/offstage handling around transitions', (WidgetTester tester) async {
 
     GlobalKey insideKey = new GlobalKey();
 
@@ -70,7 +69,7 @@ void main() {
       return result;
     }
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new MaterialApp(
         onGenerateRoute: (RouteSettings settings) {
           switch (settings.name) {
@@ -112,61 +111,61 @@ void main() {
 
     navigator.openTransaction((NavigatorTransaction transaction) => transaction.pushNamed('/2'));
     expect(state(), equals('BC')); // transition 1->2 is not yet built
-    tester.pump();
+    await tester.pump();
     expect(state(), equals('BCE')); // transition 1->2 is at 0.0
 
-    tester.pump(kFourTenthsOfTheTransitionDuration);
+    await tester.pump(kFourTenthsOfTheTransitionDuration);
     expect(state(), equals('BCE')); // transition 1->2 is at 0.4
 
-    tester.pump(kFourTenthsOfTheTransitionDuration);
+    await tester.pump(kFourTenthsOfTheTransitionDuration);
     expect(state(), equals('BDE')); // transition 1->2 is at 0.8
 
-    tester.pump(kFourTenthsOfTheTransitionDuration);
+    await tester.pump(kFourTenthsOfTheTransitionDuration);
     expect(state(), equals('E')); // transition 1->2 is at 1.0
 
 
     navigator.openTransaction((NavigatorTransaction transaction) => transaction.pop());
     expect(state(), equals('E')); // transition 1<-2 is at 1.0, just reversed
-    tester.pump();
+    await tester.pump();
     expect(state(), equals('BDE')); // transition 1<-2 is at 1.0
 
-    tester.pump(kFourTenthsOfTheTransitionDuration);
+    await tester.pump(kFourTenthsOfTheTransitionDuration);
     expect(state(), equals('BDE')); // transition 1<-2 is at 0.6
 
     navigator.openTransaction((NavigatorTransaction transaction) => transaction.pushNamed('/3'));
     expect(state(), equals('BDE')); // transition 1<-2 is at 0.6
-    tester.pump();
+    await tester.pump();
     expect(state(), equals('BDEF')); // transition 1<-2 is at 0.6, 1->3 is at 0.0
 
-    tester.pump(kFourTenthsOfTheTransitionDuration);
+    await tester.pump(kFourTenthsOfTheTransitionDuration);
     expect(state(), equals('BCEF')); // transition 1<-2 is at 0.2, 1->3 is at 0.4
 
-    tester.pump(kFourTenthsOfTheTransitionDuration);
+    await tester.pump(kFourTenthsOfTheTransitionDuration);
     expect(state(), equals('BDF')); // transition 1<-2 is done, 1->3 is at 0.8
 
     navigator.openTransaction((NavigatorTransaction transaction) => transaction.pop());
     expect(state(), equals('BDF')); // transition 1<-3 is at 0.8, just reversed
-    tester.pump();
+    await tester.pump();
     expect(state(), equals('BDF')); // transition 1<-3 is at 0.8
 
-    tester.pump(kTwoTenthsOfTheTransitionDuration); // notice that dT=0.2 here, not 0.4
+    await tester.pump(kTwoTenthsOfTheTransitionDuration); // notice that dT=0.2 here, not 0.4
     expect(state(), equals('BDF')); // transition 1<-3 is at 0.6
 
-    tester.pump(kFourTenthsOfTheTransitionDuration);
+    await tester.pump(kFourTenthsOfTheTransitionDuration);
     expect(state(), equals('BCF')); // transition 1<-3 is at 0.2
 
     navigator.openTransaction((NavigatorTransaction transaction) => transaction.pushNamed('/4'));
     expect(state(), equals('BCF')); // transition 1<-3 is at 0.2, 1->4 is not yet built
-    tester.pump();
+    await tester.pump();
     expect(state(), equals('BCFG')); // transition 1<-3 is at 0.2, 1->4 is at 0.0
 
-    tester.pump(kFourTenthsOfTheTransitionDuration);
+    await tester.pump(kFourTenthsOfTheTransitionDuration);
     expect(state(), equals('BCG')); // transition 1<-3 is done, 1->4 is at 0.4
 
-    tester.pump(kFourTenthsOfTheTransitionDuration);
+    await tester.pump(kFourTenthsOfTheTransitionDuration);
     expect(state(), equals('BDG')); // transition 1->4 is at 0.8
 
-    tester.pump(kFourTenthsOfTheTransitionDuration);
+    await tester.pump(kFourTenthsOfTheTransitionDuration);
     expect(state(), equals('G')); // transition 1->4 is done
 
   });

@@ -164,7 +164,7 @@ class RenderImage extends RenderBox {
   ///  - The RenderImage's dimension are maximal subject to being smaller than
   ///    the intrinsic size of the image.
   Size _sizeForConstraints(BoxConstraints constraints) {
-    // Folds the given |width| and |height| into |cosntraints| so they can all
+    // Folds the given |width| and |height| into |constraints| so they can all
     // be treated uniformly.
     constraints = new BoxConstraints.tightFor(
       width: _width,

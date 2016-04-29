@@ -5,7 +5,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 class StateMarker extends StatefulWidget {
   StateMarker({ Key key, this.child }) : super(key: key);
@@ -42,10 +41,10 @@ Widget buildFrame({ List<String> tabs, String value, bool isScrollable: false, K
 }
 
 void main() {
-  testWidgets('TabBar tap selects tab', (WidgetTester tester) {
+  testWidgets('TabBar tap selects tab', (WidgetTester tester) async {
     List<String> tabs = <String>['A', 'B', 'C'];
 
-    tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: false));
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: false));
     TabBarSelectionState<String> selection = TabBarSelection.of(tester.element(find.text('A')));
     expect(selection, isNotNull);
     expect(selection.indexOf('A'), equals(0));
@@ -59,40 +58,40 @@ void main() {
     expect(selection.value, equals('C'));
     expect(selection.previousValue, equals('C'));
 
-    tester.pumpWidget(buildFrame(tabs: tabs, value: 'C' ,isScrollable: false));
-    tester.tap(find.text('B'));
-    tester.pump();
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'C' ,isScrollable: false));
+    await tester.tap(find.text('B'));
+    await tester.pump();
     expect(selection.valueIsChanging, true);
-    tester.pump(const Duration(seconds: 1)); // finish the animation
+    await tester.pump(const Duration(seconds: 1)); // finish the animation
     expect(selection.valueIsChanging, false);
     expect(selection.value, equals('B'));
     expect(selection.previousValue, equals('C'));
     expect(selection.index, equals(1));
     expect(selection.previousIndex, equals(2));
 
-    tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: false));
-    tester.tap(find.text('C'));
-    tester.pump();
-    tester.pump(const Duration(seconds: 1));
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: false));
+    await tester.tap(find.text('C'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
     expect(selection.value, equals('C'));
     expect(selection.previousValue, equals('B'));
     expect(selection.index, equals(2));
     expect(selection.previousIndex, equals(1));
 
-    tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: false));
-    tester.tap(find.text('A'));
-    tester.pump();
-    tester.pump(const Duration(seconds: 1));
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: false));
+    await tester.tap(find.text('A'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
     expect(selection.value, equals('A'));
     expect(selection.previousValue, equals('C'));
     expect(selection.index, equals(0));
     expect(selection.previousIndex, equals(2));
   });
 
-  testWidgets('Scrollable TabBar tap selects tab', (WidgetTester tester) {
+  testWidgets('Scrollable TabBar tap selects tab', (WidgetTester tester) async {
     List<String> tabs = <String>['A', 'B', 'C'];
 
-    tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: true));
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: true));
     TabBarSelectionState<String> selection = TabBarSelection.of(tester.element(find.text('A')));
     expect(selection, isNotNull);
     expect(find.text('A'), findsOneWidget);
@@ -100,26 +99,26 @@ void main() {
     expect(find.text('C'), findsOneWidget);
     expect(selection.value, equals('C'));
 
-    tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: true));
-    tester.tap(find.text('B'));
-    tester.pump();
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: true));
+    await tester.tap(find.text('B'));
+    await tester.pump();
     expect(selection.value, equals('B'));
 
-    tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: true));
-    tester.tap(find.text('C'));
-    tester.pump();
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: true));
+    await tester.tap(find.text('C'));
+    await tester.pump();
     expect(selection.value, equals('C'));
 
-    tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: true));
-    tester.tap(find.text('A'));
-    tester.pump();
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: true));
+    await tester.tap(find.text('A'));
+    await tester.pump();
     expect(selection.value, equals('A'));
   });
 
-  testWidgets('Scrollable TabBar tap centers selected tab', (WidgetTester tester) {
+  testWidgets('Scrollable TabBar tap centers selected tab', (WidgetTester tester) async {
     List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE', 'FFFFFF', 'GGGGGG', 'HHHHHH', 'IIIIII', 'JJJJJJ', 'KKKKKK', 'LLLLLL'];
     Key tabBarKey = new Key('TabBar');
-    tester.pumpWidget(buildFrame(tabs: tabs, value: 'AAAAAA', isScrollable: true, tabBarKey: tabBarKey));
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'AAAAAA', isScrollable: true, tabBarKey: tabBarKey));
     TabBarSelectionState<String> selection = TabBarSelection.of(tester.element(find.text('AAAAAA')));
     expect(selection, isNotNull);
     expect(selection.value, equals('AAAAAA'));
@@ -128,35 +127,35 @@ void main() {
     // The center of the FFFFFF item is to the right of the TabBar's center
     expect(tester.getCenter(find.text('FFFFFF')).x, greaterThan(401.0));
 
-    tester.tap(find.text('FFFFFF'));
-    tester.pump();
-    tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.tap(find.text('FFFFFF'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     expect(selection.value, equals('FFFFFF'));
     // The center of the FFFFFF item is now at the TabBar's center
     expect(tester.getCenter(find.text('FFFFFF')).x, closeTo(400.0, 1.0));
   });
 
 
-  testWidgets('TabBar can be scrolled independent of the selection', (WidgetTester tester) {
+  testWidgets('TabBar can be scrolled independent of the selection', (WidgetTester tester) async {
     List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE', 'FFFFFF', 'GGGGGG', 'HHHHHH', 'IIIIII', 'JJJJJJ', 'KKKKKK', 'LLLLLL'];
     Key tabBarKey = new Key('TabBar');
-    tester.pumpWidget(buildFrame(tabs: tabs, value: 'AAAAAA', isScrollable: true, tabBarKey: tabBarKey));
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'AAAAAA', isScrollable: true, tabBarKey: tabBarKey));
     TabBarSelectionState<String> selection = TabBarSelection.of(tester.element(find.text('AAAAAA')));
     expect(selection, isNotNull);
     expect(selection.value, equals('AAAAAA'));
 
     // Fling-scroll the TabBar to the left
     expect(tester.getCenter(find.text('HHHHHH')).x, lessThan(700.0));
-    tester.fling(find.byKey(tabBarKey), const Offset(-20.0, 0.0), 1000.0);
-    tester.pump();
-    tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.fling(find.byKey(tabBarKey), const Offset(-20.0, 0.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     expect(tester.getCenter(find.text('HHHHHH')).x, lessThan(500.0));
 
     // Scrolling the TabBar doesn't change the selection
     expect(selection.value, equals('AAAAAA'));
   });
 
-  testWidgets('TabView maintains state', (WidgetTester tester) {
+  testWidgets('TabView maintains state', (WidgetTester tester) async {
     List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE'];
     String value = tabs[0];
 
@@ -185,29 +184,29 @@ void main() {
       return tester.state(find.widgetWithText(StateMarker, name));
     }
 
-    tester.pumpWidget(builder());
-    TestGesture gesture = tester.startGesture(tester.getCenter(find.text(tabs[0])));
-    gesture.moveBy(new Offset(-600.0, 0.0));
-    tester.pump();
+    await tester.pumpWidget(builder());
+    TestGesture gesture = await tester.startGesture(tester.getCenter(find.text(tabs[0])));
+    await gesture.moveBy(new Offset(-600.0, 0.0));
+    await tester.pump();
     expect(value, equals(tabs[0]));
     findStateMarkerState(tabs[1]).marker = 'marked';
-    gesture.up();
-    tester.pump();
-    tester.pump(const Duration(seconds: 1));
+    await gesture.up();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
     expect(value, equals(tabs[1]));
-    tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
     expect(findStateMarkerState(tabs[1]).marker, equals('marked'));
 
     // Move to the third tab.
 
-    gesture = tester.startGesture(tester.getCenter(find.text(tabs[1])));
-    gesture.moveBy(new Offset(-600.0, 0.0));
-    gesture.up();
-    tester.pump();
+    gesture = await tester.startGesture(tester.getCenter(find.text(tabs[1])));
+    await gesture.moveBy(new Offset(-600.0, 0.0));
+    await gesture.up();
+    await tester.pump();
     expect(findStateMarkerState(tabs[1]).marker, equals('marked'));
-    tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
     expect(value, equals(tabs[2]));
-    tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
 
     // The state is now gone.
 
@@ -215,17 +214,17 @@ void main() {
 
     // Move back to the second tab.
 
-    gesture = tester.startGesture(tester.getCenter(find.text(tabs[2])));
-    gesture.moveBy(new Offset(600.0, 0.0));
-    tester.pump();
+    gesture = await tester.startGesture(tester.getCenter(find.text(tabs[2])));
+    await gesture.moveBy(new Offset(600.0, 0.0));
+    await tester.pump();
     StateMarkerState markerState = findStateMarkerState(tabs[1]);
     expect(markerState.marker, isNull);
     markerState.marker = 'marked';
-    gesture.up();
-    tester.pump();
-    tester.pump(const Duration(seconds: 1));
+    await gesture.up();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
     expect(value, equals(tabs[1]));
-    tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
     expect(findStateMarkerState(tabs[1]).marker, equals('marked'));
   });
 }

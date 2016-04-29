@@ -4,12 +4,11 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 import 'test_widgets.dart';
 
 void main() {
-  testWidgets('HomogeneousViewport mount/dismount smoke test', (WidgetTester tester) {
+  testWidgets('HomogeneousViewport mount/dismount smoke test', (WidgetTester tester) async {
     List<int> callbackTracker = <int>[];
 
     // the root view is 800x600 in the test environment
@@ -36,7 +35,7 @@ void main() {
       );
     }
 
-    tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
 
     FlipWidgetState testWidget = tester.state(find.byType(FlipWidget));
 
@@ -44,18 +43,18 @@ void main() {
 
     callbackTracker.clear();
     testWidget.flip();
-    tester.pump();
+    await tester.pump();
 
     expect(callbackTracker, equals(<int>[]));
 
     callbackTracker.clear();
     testWidget.flip();
-    tester.pump();
+    await tester.pump();
 
     expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4, 5]));
   });
 
-  testWidgets('HomogeneousViewport vertical', (WidgetTester tester) {
+  testWidgets('HomogeneousViewport vertical', (WidgetTester tester) async {
     List<int> callbackTracker = <int>[];
 
     // the root view is 800x600 in the test environment
@@ -87,7 +86,7 @@ void main() {
       right: new Text('Not Today')
     );
 
-    tester.pumpWidget(testWidget);
+    await tester.pumpWidget(testWidget);
 
     expect(callbackTracker, equals(<int>[1, 2, 3, 4]));
 
@@ -96,14 +95,14 @@ void main() {
     scrollableKey.currentState.scrollTo(400.0);
     // now only 3 should fit, numbered 2-4.
 
-    tester.pumpWidget(testWidget);
+    await tester.pumpWidget(testWidget);
 
     expect(callbackTracker, equals(<int>[2, 3, 4]));
 
     callbackTracker.clear();
   });
 
-  testWidgets('HomogeneousViewport horizontal', (WidgetTester tester) {
+  testWidgets('HomogeneousViewport horizontal', (WidgetTester tester) async {
     List<int> callbackTracker = <int>[];
 
     // the root view is 800x600 in the test environment
@@ -136,7 +135,7 @@ void main() {
       right: new Text('Not Today')
     );
 
-    tester.pumpWidget(testWidget);
+    await tester.pumpWidget(testWidget);
 
     expect(callbackTracker, equals(<int>[1, 2, 3, 4, 5]));
 
@@ -145,14 +144,14 @@ void main() {
     scrollableKey.currentState.scrollTo(400.0);
     // now only 4 should fit, numbered 2-5.
 
-    tester.pumpWidget(testWidget);
+    await tester.pumpWidget(testWidget);
 
     expect(callbackTracker, equals(<int>[2, 3, 4, 5]));
 
     callbackTracker.clear();
   });
 
-  testWidgets('ScrollableLazyList 10 items, 2-3 items visible', (WidgetTester tester) {
+  testWidgets('ScrollableLazyList 10 items, 2-3 items visible', (WidgetTester tester) async {
     List<int> callbackTracker = <int>[];
 
     // The root view is 800x600 in the test environment and our list
@@ -176,22 +175,22 @@ void main() {
       itemCount: 10
     );
 
-    tester.pumpWidget(testWidget);
+    await tester.pumpWidget(testWidget);
     expect(callbackTracker, equals(<int>[0, 1]));
     callbackTracker.clear();
 
     scrollableKey.currentState.scrollTo(150.0);
-    tester.pumpWidget(testWidget);
+    await tester.pumpWidget(testWidget);
     expect(callbackTracker, equals(<int>[0, 1, 2]));
     callbackTracker.clear();
 
     scrollableKey.currentState.scrollTo(600.0);
-    tester.pumpWidget(testWidget);
+    await tester.pumpWidget(testWidget);
     expect(callbackTracker, equals(<int>[2, 3]));
     callbackTracker.clear();
 
     scrollableKey.currentState.scrollTo(750.0);
-    tester.pumpWidget(testWidget);
+    await tester.pumpWidget(testWidget);
     expect(callbackTracker, equals(<int>[2, 3, 4]));
     callbackTracker.clear();
   });

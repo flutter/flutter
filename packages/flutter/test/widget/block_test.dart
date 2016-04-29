@@ -4,13 +4,12 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 final Key blockKey = new Key('test');
 
 void main() {
-  testWidgets('Cannot scroll a non-overflowing block', (WidgetTester tester) {
-    tester.pumpWidget(
+  testWidgets('Cannot scroll a non-overflowing block', (WidgetTester tester) async {
+    await tester.pumpWidget(
       new Block(
         key: blockKey,
         children: <Widget>[
@@ -24,18 +23,18 @@ void main() {
 
     Point middleOfContainer = tester.getCenter(find.text('Hello'));
     Point target = tester.getCenter(find.byKey(blockKey));
-    TestGesture gesture = tester.startGesture(target);
-    gesture.moveBy(const Offset(0.0, -10.0));
+    TestGesture gesture = await tester.startGesture(target);
+    await gesture.moveBy(const Offset(0.0, -10.0));
 
-    tester.pump(const Duration(milliseconds: 1));
+    await tester.pump(const Duration(milliseconds: 1));
 
     expect(tester.getCenter(find.text('Hello')) == middleOfContainer, isTrue);
 
-    gesture.up();
+    await gesture.up();
   });
 
-  testWidgets('Can scroll an overflowing block', (WidgetTester tester) {
-    tester.pumpWidget(
+  testWidgets('Can scroll an overflowing block', (WidgetTester tester) async {
+    await tester.pumpWidget(
       new Block(
         key: blockKey,
         children: <Widget>[
@@ -52,17 +51,17 @@ void main() {
     expect(middleOfContainer.y, equals(1000.0));
 
     Point target = tester.getCenter(find.byKey(blockKey));
-    TestGesture gesture = tester.startGesture(target);
-    gesture.moveBy(const Offset(0.0, -10.0));
+    TestGesture gesture = await tester.startGesture(target);
+    await gesture.moveBy(const Offset(0.0, -10.0));
 
-    tester.pump(); // redo layout
+    await tester.pump(); // redo layout
 
     expect(tester.getCenter(find.text('Hello')), isNot(equals(middleOfContainer)));
 
-    gesture.up();
+    await gesture.up();
   });
 
-  testWidgets('Scroll anchor', (WidgetTester tester) {
+  testWidgets('Scroll anchor', (WidgetTester tester) async {
     int first = 0;
     int second = 0;
 
@@ -93,16 +92,16 @@ void main() {
       );
     }
 
-    tester.pumpWidget(buildBlock(ViewportAnchor.end));
+    await tester.pumpWidget(buildBlock(ViewportAnchor.end));
 
     Point target = const Point(200.0, 200.0);
-    tester.tapAt(target);
+    await tester.tapAt(target);
     expect(first, equals(0));
     expect(second, equals(1));
 
-    tester.pumpWidget(buildBlock(ViewportAnchor.start));
+    await tester.pumpWidget(buildBlock(ViewportAnchor.start));
 
-    tester.tapAt(target);
+    await tester.tapAt(target);
     expect(first, equals(1));
     expect(second, equals(1));
   });

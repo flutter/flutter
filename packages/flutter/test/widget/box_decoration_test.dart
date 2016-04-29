@@ -5,11 +5,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 void main() {
-  testWidgets('Circles can have uniform borders', (WidgetTester tester) {
-    tester.pumpWidget(
+  testWidgets('Circles can have uniform borders', (WidgetTester tester) async {
+    await tester.pumpWidget(
       new Container(
         padding: new EdgeInsets.all(50.0),
         decoration: new BoxDecoration(
@@ -21,9 +20,9 @@ void main() {
     );
   });
 
-  testWidgets('Bordered Container insets its child', (WidgetTester tester) {
+  testWidgets('Bordered Container insets its child', (WidgetTester tester) async {
     Key key = new Key('outerContainer');
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Center(
         child: new Container(
           key: key,

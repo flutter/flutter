@@ -4,7 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 List<int> items = <int>[0, 1, 2, 3, 4, 5];
 
@@ -28,14 +27,14 @@ Widget buildFrame() {
 }
 
 void main() {
-  testWidgets('LazyBlock is a build function (smoketest)', (WidgetTester tester) {
-    tester.pumpWidget(buildFrame());
+  testWidgets('LazyBlock is a build function (smoketest)', (WidgetTester tester) async {
+    await tester.pumpWidget(buildFrame());
     expect(find.text('0'), findsOneWidget);
     expect(find.text('1'), findsOneWidget);
     expect(find.text('2'), findsOneWidget);
     expect(find.text('3'), findsOneWidget);
     items.removeAt(2);
-    tester.pumpWidget(buildFrame());
+    await tester.pumpWidget(buildFrame());
     expect(find.text('0'), findsOneWidget);
     expect(find.text('1'), findsOneWidget);
     expect(find.text('2'), findsNothing);

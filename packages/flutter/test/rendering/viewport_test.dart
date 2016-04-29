@@ -31,7 +31,7 @@ void main() {
 
     result = new HitTestResult();
     renderer.renderView.hitTest(result, position: new Point(15.0, 0.0));
-    expect(result.path.first.target.runtimeType, equals(TestRenderView));
+    expect(result.path.first.target.runtimeType, equals(RenderView));
 
     result = new HitTestResult();
     renderer.renderView.hitTest(result, position: new Point(15.0, 15.0));

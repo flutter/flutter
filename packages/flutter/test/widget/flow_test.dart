@@ -4,7 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 class TestFlowDelegate extends FlowDelegate {
   TestFlowDelegate({
@@ -32,7 +31,7 @@ class TestFlowDelegate extends FlowDelegate {
 }
 
 void main() {
-  testWidgets('Flow control test', (WidgetTester tester) {
+  testWidgets('Flow control test', (WidgetTester tester) async {
     AnimationController startOffset = new AnimationController.unbounded();
     List<int> log = <int>[];
 
@@ -52,7 +51,7 @@ void main() {
       );
     }
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Flow(
         delegate: new TestFlowDelegate(startOffset: startOffset),
         children: <Widget>[
@@ -67,22 +66,22 @@ void main() {
       )
     );
 
-    tester.tap(find.text('0'));
+    await tester.tap(find.text('0'));
     expect(log, equals(<int>[0]));
-    tester.tap(find.text('1'));
+    await tester.tap(find.text('1'));
     expect(log, equals(<int>[0, 1]));
-    tester.tap(find.text('2'));
+    await tester.tap(find.text('2'));
     expect(log, equals(<int>[0, 1, 2]));
 
     log.clear();
-    tester.tapAt(new Point(20.0, 90.0));
+    await tester.tapAt(new Point(20.0, 90.0));
     expect(log, equals(<int>[1]));
 
     startOffset.value = 50.0;
-    tester.pump();
+    await tester.pump();
 
     log.clear();
-    tester.tapAt(new Point(20.0, 90.0));
+    await tester.tapAt(new Point(20.0, 90.0));
     expect(log, equals(<int>[0]));
   });
 }
