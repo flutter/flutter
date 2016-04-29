@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 /// System services exposed to Flutter apps.
-/// 
+///
 /// To use, import `package:flutter/services.dart`.
 ///
 /// For example, this library includes [fetch], which fetches data from the
@@ -18,8 +18,12 @@ export 'src/services/activity.dart';
 export 'src/services/app_messages.dart';
 export 'src/services/asset_bundle.dart';
 export 'src/services/binding.dart';
+export 'src/services/haptic_feedback.dart';
 export 'src/services/image_cache.dart';
 export 'src/services/image_decoder.dart';
 export 'src/services/image_resource.dart';
 export 'src/services/keyboard.dart';
+export 'src/services/path_provider.dart';
 export 'src/services/shell.dart';
+export 'src/services/system_chrome.dart';
+export 'src/services/system_sound.dart';

@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:ui';
-import 'dart:async';
 
 import 'package:sky_services/activity/activity.mojom.dart';
 
 import 'shell.dart';
 
-export 'package:sky_services/activity/activity.mojom.dart';
+export 'package:sky_services/activity/activity.mojom.dart' show Activity, Intent, ComponentName, StringExtra;
+
 
 // Dart wrapper around Activity mojo service available in Flutter on Android.
 //
@@ -21,7 +21,7 @@ export 'package:sky_services/activity/activity.mojom.dart';
 
 /// Open a document into a new task rooted at the activity launched by
 /// this Intent.
-/// 
+///
 /// See Android's Intent.FLAG_ACTIVITY_NEW_DOCUMENT.
 const int NEW_DOCUMENT = 0x00080000; // ignore: constant_identifier_names
 
@@ -44,24 +44,6 @@ ActivityProxy _initActivityProxy() {
 final ActivityProxy _activityProxy = _initActivityProxy();
 final Activity activity = _activityProxy.ptr;
 
-UserFeedbackProxy _initUserFeedbackProxy() {
-  UserFeedbackProxy proxy = new UserFeedbackProxy.unbound();
-  _activityProxy.ptr.getUserFeedback(proxy);
-  return proxy;
-}
-
-final UserFeedbackProxy _userFeedbackProxy = _initUserFeedbackProxy();
-final UserFeedback userFeedback = _userFeedbackProxy.ptr;
-
-PathServiceProxy _initPathServiceProxy() {
-  PathServiceProxy proxy = new PathServiceProxy.unbound();
-  shell.connectToService(null, proxy);
-  return proxy;
-}
-
-final PathServiceProxy _pathServiceProxy = _initPathServiceProxy();
-final PathService pathService = _pathServiceProxy.ptr;
-
 Color _cachedPrimaryColor;
 String _cachedLabel;
 
@@ -81,7 +63,3 @@ void updateTaskDescription({ String label, Color color }) {
 
   _activityProxy.ptr.setTaskDescription(description);
 }
-
-Future<String> getAppDataDir() async => (await _pathServiceProxy.ptr.getAppDataDir()).path;
-Future<String> getFilesDir() async => (await _pathServiceProxy.ptr.getFilesDir()).path;
-Future<String> getCacheDir() async => (await _pathServiceProxy.ptr.getCacheDir()).path;

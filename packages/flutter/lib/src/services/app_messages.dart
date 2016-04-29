@@ -5,30 +5,28 @@
 import 'dart:async';
 
 import 'package:mojo/core.dart' as core;
-import 'package:sky_services/flutter/platform/app_messages.mojom.dart';
+import 'package:sky_services/flutter/platform/app_messages.mojom.dart' as mojom;
 
 import 'shell.dart';
 
-// APIs for exchanging messages with the host application.
-
-ApplicationMessagesProxy _initHostAppMessagesProxy() {
-  ApplicationMessagesProxy proxy = new ApplicationMessagesProxy.unbound();
+mojom.ApplicationMessagesProxy _initHostAppMessagesProxy() {
+  mojom.ApplicationMessagesProxy proxy = new mojom.ApplicationMessagesProxy.unbound();
   shell.connectToViewAssociatedService(proxy);
   return proxy;
 }
 
-final ApplicationMessagesProxy _hostAppMessagesProxy = _initHostAppMessagesProxy();
+final mojom.ApplicationMessagesProxy _hostAppMessagesProxy = _initHostAppMessagesProxy();
 
 typedef Future<String> HostMessageCallback(String message);
 typedef Object _SendStringResponseFactory(String response);
 
-class _ApplicationMessagesImpl extends ApplicationMessages {
+class _ApplicationMessagesImpl extends mojom.ApplicationMessages {
   final Map<String, HostMessageCallback> handlers = <String, HostMessageCallback>{};
 
   _ApplicationMessagesImpl() {
-    shell.provideService(ApplicationMessages.serviceName,
+    shell.provideService(mojom.ApplicationMessages.serviceName,
       (core.MojoMessagePipeEndpoint endpoint) {
-        ApplicationMessagesStub stub = new ApplicationMessagesStub.fromEndpoint(endpoint);
+        mojom.ApplicationMessagesStub stub = new mojom.ApplicationMessagesStub.fromEndpoint(endpoint);
         stub.impl = this;
       }
     );
@@ -46,6 +44,8 @@ class _ApplicationMessagesImpl extends ApplicationMessages {
 
 final _ApplicationMessagesImpl _appMessages = new _ApplicationMessagesImpl();
 
+/// A service that can be implemented by the host application and the
+/// Flutter framework to exchange application-specific messages.
 class HostMessages {
   /// Send a message to the host application.
   static Future<String> sendToHost(String messageName, String message) async {

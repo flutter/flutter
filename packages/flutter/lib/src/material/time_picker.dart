@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/services.dart' show HapticFeedbackType, userFeedback;
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -129,7 +129,7 @@ class _TimePickerState extends State<TimePicker> {
   _TimePickerMode _mode = _TimePickerMode.hour;
 
   void _handleModeChanged(_TimePickerMode mode) {
-    userFeedback.performHapticFeedback(HapticFeedbackType.virtualKey);
+    HapticFeedback.vibrate();
     setState(() {
       _mode = mode;
     });
