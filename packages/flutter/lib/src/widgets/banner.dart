@@ -7,50 +7,68 @@ import 'dart:math' as math;
 import 'basic.dart';
 import 'framework.dart';
 
-enum BannerLocation { topRight, topLeft, bottomRight, bottomLeft }
+const double _kOffset = 40.0; // distance to bottom of banner, at a 45 degree angle inwards
+const double _kHeight = 12.0; // height of banner
+const double _kBottomOffset = _kOffset + 0.707 * _kHeight; // offset plus sqrt(2)/2 * banner height
+final Rect _kRect = new Rect.fromLTWH(-_kOffset, _kOffset - _kHeight, _kOffset * 2.0, _kHeight);
+const TextStyle _kTextStyles = const TextStyle(
+  color: const Color(0xFFFFFFFF),
+  fontSize: _kHeight * 0.85,
+  fontWeight: FontWeight.w900,
+  textAlign: TextAlign.center,
+  height: 1.0
+);
 
+/// Where to show a [Banner].
+enum BannerLocation {
+  /// Show the banner in the top right corner.
+  topRight,
+
+  /// Show the banner in the top left corner.
+  topLeft,
+
+  /// Show the banner in the bottom right corner.
+  bottomRight,
+
+  /// Show the banner in the bottom left corner.
+  bottomLeft,
+}
+
+/// Paints a [Banner].
 class BannerPainter extends CustomPainter {
+  /// Creates a banner painter.
+  ///
+  /// The message and location arguments are required.
   const BannerPainter({
     this.message,
     this.location
   });
 
+  /// The message to show in the banner.
   final String message;
-  final BannerLocation location;
 
-  static const Color kColor = const Color(0xA0B71C1C);
-  static const double kOffset = 40.0; // distance to bottom of banner, at a 45 degree angle inwards
-  static const double kHeight = 12.0; // height of banner
-  static const double kBottomOffset = kOffset + 0.707 * kHeight; // offset plus sqrt(2)/2 * banner height
-  static const double kFontSize = kHeight * 0.85;
-  static const double kShadowBlur = 4.0; // shadow blur sigma
-  static final Rect kRect = new Rect.fromLTWH(-kOffset, kOffset - kHeight, kOffset * 2.0, kHeight);
-  static const TextStyle kTextStyles = const TextStyle(
-    color: const Color(0xFFFFFFFF),
-    fontSize: kFontSize,
-    fontWeight: FontWeight.w900,
-    textAlign: TextAlign.center,
-    height: 1.0
-  );
+  /// Where to show the banner (e.g., the upper right corder).
+  final BannerLocation location;
 
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paintShadow = new Paint()
       ..color = const Color(0x7F000000)
-      ..maskFilter = new MaskFilter.blur(BlurStyle.normal, kShadowBlur);
+      ..maskFilter = new MaskFilter.blur(BlurStyle.normal, 4.0);
     final Paint paintBanner = new Paint()
-      ..color = kColor;
+      ..color = const Color(0xA0B71C1C);
     canvas
       ..translate(_translationX(size.width), _translationY(size.height))
       ..rotate(_rotation)
-      ..drawRect(kRect, paintShadow)
-      ..drawRect(kRect, paintBanner);
+      ..drawRect(_kRect, paintShadow)
+      ..drawRect(_kRect, paintBanner);
 
+    final double width = _kOffset * 2.0;
     final TextPainter textPainter = new TextPainter()
-      ..text = new TextSpan(style: kTextStyles, text: message)
-      ..layout(maxWidth: kOffset * 2.0);
+      ..text = new TextSpan(style: _kTextStyles, text: message)
+      ..layout(minWidth: width, maxWidth: width);
 
-    textPainter.paint(canvas, kRect.topLeft.toOffset() + new Offset(0.0, (kRect.height - textPainter.height) / 2.0));
+    textPainter.paint(canvas, _kRect.topLeft.toOffset() + new Offset(0.0, (_kRect.height - textPainter.height) / 2.0));
   }
 
   @override
@@ -62,11 +80,11 @@ class BannerPainter extends CustomPainter {
   double _translationX(double width) {
     switch (location) {
       case BannerLocation.bottomRight:
-        return width - kBottomOffset;
+        return width - _kBottomOffset;
       case BannerLocation.topRight:
         return width;
       case BannerLocation.bottomLeft:
-        return kBottomOffset;
+        return _kBottomOffset;
       case BannerLocation.topLeft:
         return 0.0;
     }
@@ -76,7 +94,7 @@ class BannerPainter extends CustomPainter {
     switch (location) {
       case BannerLocation.bottomRight:
       case BannerLocation.bottomLeft:
-        return height - kBottomOffset;
+        return height - _kBottomOffset;
       case BannerLocation.topRight:
       case BannerLocation.topLeft:
         return 0.0;
@@ -95,16 +113,35 @@ class BannerPainter extends CustomPainter {
   }
 }
 
+/// Displays a diagonal message above the corner of another widget.
+///
+/// Useful for showing the execution mode of an app (e.g., that asserts are
+/// enabled.)
+///
+/// See also:
+///
+///  * [CheckedModeBanner]
 class Banner extends StatelessWidget {
+  /// Creates a banner.
+  ///
+  /// The message and location arguments are required.
   Banner({
     Key key,
     this.child,
     this.message,
     this.location
-  }) : super(key: key);
+  }) : super(key: key) {
+    assert(message != null);
+    assert(location != null);
+  }
 
+  /// The widget to show behind the banner.
   final Widget child;
+
+  /// The message to show in the banner.
   final String message;
+
+  /// Where to show the banner (e.g., the upper right corder).
   final BannerLocation location;
 
   @override
@@ -116,14 +153,16 @@ class Banner extends StatelessWidget {
   }
 }
 
-/// Displays a banner saying "SLOW MODE" when running in checked mode.
+/// Displays a [Banner] saying "SLOW MODE" when running in checked mode.
 /// Does nothing in release mode.
 class CheckedModeBanner extends StatelessWidget {
+  /// Creates a checked mode banner.
   CheckedModeBanner({
     Key key,
     this.child
   }) : super(key: key);
 
+  /// The widget to show behind the banner.
   final Widget child;
 
   @override
