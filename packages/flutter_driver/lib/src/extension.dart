@@ -118,7 +118,9 @@ class FlutterDriverExtension {
 
   Future<Health> getHealth(GetHealth command) async => new Health(HealthStatus.ok);
 
-  /// Runs [locator] repeatedly until it finds an [Element] or times out.
+  /// Runs `finder` repeatedly until it finds one or more [Element]s, or times out.
+  ///
+  /// The timeout is five seconds.
   Future<Finder> _waitForElement(Finder finder) {
     // Short-circuit if the element is already on the UI
     if (finder.precache())

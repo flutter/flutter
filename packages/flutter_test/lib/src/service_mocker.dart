@@ -7,7 +7,7 @@ import 'package:mojo/bindings.dart' as bindings;
 
 import 'binding.dart';
 
-/// Tests can use ServiceMocker to register replacement implementations
+/// Tests can use [ServiceMocker] to register replacement implementations
 /// of Mojo services.
 class ServiceMocker {
   ServiceMocker._() {

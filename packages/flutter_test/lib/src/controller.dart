@@ -107,7 +107,7 @@ class WidgetController {
   State/*=T*/ _stateOf/*<T extends State>*/(Element element, Finder finder) {
     if (element is StatefulElement)
       return element.state;
-    throw new StateError('Widget of type ${element.widget.runtimeType} found by ${finder.description} does not correspond to a StatefulWidget.');
+    throw new StateError('Widget of type ${element.widget.runtimeType}, with ${finder.description}, is not a StatefulWidget.');
   }
 
   /// Render objects of all the widgets currently in the widget tree

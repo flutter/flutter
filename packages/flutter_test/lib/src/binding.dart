@@ -144,11 +144,13 @@ class TestWidgetsFlutterBinding extends BindingBase with SchedulerBinding, Gestu
   /// null in that case.
   dynamic takeException() {
     assert(inTest);
-    dynamic result = _pendingException;
+    dynamic result = _pendingException?.exception;
     _pendingException = null;
     return result;
   }
-  dynamic _pendingException;
+  FlutterErrorDetails _pendingException;
+  FlutterExceptionHandler _oldHandler;
+  int _exceptionCount;
 
   /// Called by the [testWidgets] function before a test is executed.
   void preTest() {
@@ -156,6 +158,25 @@ class TestWidgetsFlutterBinding extends BindingBase with SchedulerBinding, Gestu
     assert(_clock == null);
     _fakeAsync = new FakeAsync();
     _clock = fakeAsync.getClock(new DateTime.utc(2015, 1, 1));
+    _oldHandler = FlutterError.onError;
+    _exceptionCount = 0; // number of un-taken exceptions
+    FlutterError.onError = (FlutterErrorDetails details) {
+      if (_pendingException != null) {
+        if (_exceptionCount == 0) {
+          _exceptionCount = 2;
+          FlutterError.dumpErrorToConsole(_pendingException, forceReport: true);
+        } else {
+          _exceptionCount += 1;
+        }
+        FlutterError.dumpErrorToConsole(details, forceReport: true);
+        _pendingException = new FlutterErrorDetails(
+          exception: 'Multiple exceptions ($_exceptionCount) were detected during the running of the current test, and at least one was unexpected.',
+          library: 'Flutter test framework'
+        );
+      } else {
+        _pendingException = details;
+      }
+    };
   }
 
   /// Invoke the callback inside a [FakeAsync] scope on which [pump] can
@@ -184,50 +205,48 @@ class TestWidgetsFlutterBinding extends BindingBase with SchedulerBinding, Gestu
 
   Future<Null> _runTest(Future<Null> callback()) async {
     assert(inTest);
-    FlutterExceptionHandler oldHandler = FlutterError.onError;
-    try {
-      FlutterError.onError = (FlutterErrorDetails details) {
-        if (_pendingException != null) {
-          FlutterError.dumpErrorToConsole(_pendingException);
-          FlutterError.dumpErrorToConsole(details.exception);
-          _pendingException = 'An uncaught exception was thrown.';
-          throw details.exception;
-        }
-        _pendingException = details;
-      };
 
-      // run the test
-      runApp(new Container(key: new UniqueKey())); // Reset the tree to a known state.
+    runApp(new Container(key: new UniqueKey())); // Reset the tree to a known state.
+    pump();
+
+    // run the test
+    try {
       await callback();
       fakeAsync.flushMicrotasks();
-      runApp(new Container(key: new UniqueKey())); // Unmount any remaining widgets.
-      fakeAsync.flushMicrotasks();
-
-      // verify invariants
-      assert(debugAssertNoTransientCallbacks(
-        'An animation is still running even after the widget tree was disposed.'
+    } catch (exception, stack) {
+      // call onError handler above
+      FlutterError.reportError(new FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'Flutter test framework'
       ));
-      assert(() {
-        'A Timer is still running even after the widget tree was disposed.';
-        return fakeAsync.periodicTimerCount == 0;
-      });
-      assert(() {
-        'A Timer is still running even after the widget tree was disposed.';
-        return fakeAsync.nonPeriodicTimerCount == 0;
-      });
-      assert(fakeAsync.microtaskCount == 0); // Shouldn't be possible.
-
-      // check for unexpected exceptions
-      if (_pendingException != null)
-        throw 'An exception (shown above) was thrown during the test.';
-    } finally {
-      FlutterError.onError = oldHandler;
-      if (_pendingException != null) {
-        FlutterError.dumpErrorToConsole(_pendingException);
-        _pendingException = null;
-      }
-      assert(inTest);
     }
+
+    runApp(new Container(key: new UniqueKey())); // Unmount any remaining widgets.
+    pump();
+
+    // verify invariants
+    assert(debugAssertNoTransientCallbacks(
+      'An animation is still running even after the widget tree was disposed.'
+    ));
+    assert(() {
+      'A Timer is still running even after the widget tree was disposed.';
+      return fakeAsync.periodicTimerCount == 0;
+    });
+    assert(() {
+      'A Timer is still running even after the widget tree was disposed.';
+      return fakeAsync.nonPeriodicTimerCount == 0;
+    });
+    assert(fakeAsync.microtaskCount == 0); // Shouldn't be possible.
+
+    // check for unexpected exceptions
+    if (_pendingException != null) {
+      if (_exceptionCount > 1)
+        throw 'Test failed. See exception logs above.';
+      throw 'Test failed. See exception log below.';
+    }
+
+    assert(inTest);
     return null;
   }
 
@@ -235,6 +254,11 @@ class TestWidgetsFlutterBinding extends BindingBase with SchedulerBinding, Gestu
   void postTest() {
     assert(_fakeAsync != null);
     assert(_clock != null);
+    FlutterError.onError = _oldHandler;
+    if (_pendingException != null)
+      FlutterError.dumpErrorToConsole(_pendingException, forceReport: true);
+    _pendingException = null;
+    _exceptionCount = null;
     _clock = null;
     _fakeAsync = null;
   }

@@ -83,6 +83,12 @@ class BitField<T extends dynamic> {
 /// created by [map], [where], [expand], [take], [takeWhile], [skip],
 /// and [skipWhile], and is used by the built-in methods that use an
 /// iterator like [isNotEmpty] and [single].
+///
+/// Because a CachingIterable only walks the underlying data once, it
+/// cannot be used multiple times with the underlying data changing
+/// between each use. You must create a new iterable each time. This
+/// also applies to any iterables derived from this one, e.g. as
+/// returned by `where`.
 class CachingIterable<E> extends IterableBase<E> {
   /// Creates a CachingIterable using the given [Iterator] as the
   /// source of data. The iterator must be non-null and must not throw
@@ -167,8 +173,7 @@ class CachingIterable<E> extends IterableBase<E> {
   }
 
   bool _fillNext() {
-    final bool result = _prefillIterator.moveNext();
-    if (!result)
+    if (!_prefillIterator.moveNext())
       return false;
     _results.add(_prefillIterator.current);
     return true;
@@ -191,10 +196,9 @@ class _LazyListIterator<E> implements Iterator<E> {
 
   @override
   bool moveNext() {
-    if (_index < _owner._results.length)
-      _index += 1;
-    else
+    if (_index >= _owner._results.length)
       return false;
+    _index += 1;
     if (_index == _owner._results.length)
       return _owner._fillNext();
     return true;

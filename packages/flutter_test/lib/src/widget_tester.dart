@@ -22,7 +22,7 @@ typedef Future<Null> WidgetTesterCallback(WidgetTester widgetTester);
 /// The callback can be asynchronous (using `async`/`await` or
 /// using explicit [Future]s).
 ///
-/// This function is uses the [test] function in the test package to
+/// This function uses the [test] function in the test package to
 /// register the given callback as a test. The callback, when run,
 /// will be given a new instance of [WidgetTester]. The [find] object
 /// provides convenient widget [Finder]s for use with the
@@ -35,14 +35,16 @@ typedef Future<Null> WidgetTesterCallback(WidgetTester widgetTester);
 ///       tester.tap(find.text('Save'));
 ///       expect(tester, hasWidget(find.text('Success')));
 ///     });
-void testWidgets(String description, WidgetTesterCallback callback) {
+void testWidgets(String description, WidgetTesterCallback callback, {
+  Timeout timeout: const Timeout(const Duration(seconds: 5))
+}) {
   TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   WidgetTester tester = new WidgetTester._(binding);
   group('-', () {
     setUp(binding.preTest);
     test(description, () => binding.runTest(() => callback(tester)));
     tearDown(binding.postTest);
-  }, timeout: const Timeout(const Duration(seconds: 5)));
+  }, timeout: timeout);
 }
 
 /// Runs the [callback] inside the Flutter benchmark environment.
@@ -63,7 +65,7 @@ void testWidgets(String description, WidgetTesterCallback callback) {
 ///
 /// Example:
 ///
-///     void main() {
+///     main() async {
 ///       await benchmarkWidgets((WidgetTester tester) {
 ///         tester.pumpWidget(new MyWidget());
 ///         final Stopwatch timer = new Stopwatch()..start();

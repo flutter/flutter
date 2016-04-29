@@ -2,11 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 /// Provides an iterable that efficiently returns all the elements
 /// rooted at the given element. See [CachingIterable] for details.
+///
+/// This method must be called again if the tree changes. You cannot
+/// call this function once, then reuse the iterable after having
+/// changed the state of the tree, because the iterable returned by
+/// this function caches the results and only walks the tree once.
+///
+/// The same applies to any iterable obtained indirectly through this
+/// one, for example the results of calling `where` on this iterable
+/// are also cached.
 Iterable<Element> collectAllElementsFrom(Element rootElement) {
   return new CachingIterable<Element>(new _DepthFirstChildIterator(rootElement));
 }

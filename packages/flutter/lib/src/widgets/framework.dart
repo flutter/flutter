@@ -694,8 +694,32 @@ class BuildOwner {
   /// Adds an element to the dirty elements list so that it will be rebuilt
   /// when buildDirtyElements is called.
   void scheduleBuildFor(BuildableElement element) {
-    assert(!_dirtyElements.contains(element));
-    assert(element.dirty);
+    assert(() {
+      if (_dirtyElements.contains(element)) {
+        throw new FlutterError(
+          'scheduleBuildFor() called for a widget for which a build was already scheduled.\n'
+          'The method was invoked for the following element:\n'
+          '  $element\n'
+          'The current dirty list consists of:\n'
+          '  $_dirtyElements\n'
+          'This should not be possible and probably indicates a bug in the widgets framework. '
+          'Please report it: https://github.com/flutter/flutter/issues/new'
+        );
+      }
+      if (!element.dirty) {
+        throw new FlutterError(
+          'scheduleBuildFor() called for a widget that is not marked as dirty.\n'
+          'The method was invoked for the following element:\n'
+          '  $element\n'
+          'This element is not current marked as dirty. Make sure to set the dirty flag before '
+          'calling scheduleBuildFor().\n'
+          'If you did not attempt to call scheduleBuildFor() yourself, then this probably '
+          'indicates a bug in the widgets framework. Please report it: '
+          'https://github.com/flutter/flutter/issues/new'
+        );
+      }
+      return true;
+    });
     if (_dirtyElements.isEmpty && onBuildScheduled != null)
       onBuildScheduled();
     _dirtyElements.add(element);
