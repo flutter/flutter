@@ -253,7 +253,7 @@ class _RenderSlider extends RenderConstrainedBox {
           style: Typography.white.body1.copyWith(fontSize: 10.0),
           text: newLabel
         )
-        ..layoutToMaxIntrinsicWidth();
+        ..layout();
     } else {
       _labelPainter.text = null;
     }

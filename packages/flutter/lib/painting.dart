@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 /// The Flutter painting library.
-/// 
+///
 /// To use, import `package:flutter/painting.dart`.
 ///
 /// This library includes a variety of classes that wrap the Flutter
@@ -24,5 +24,6 @@ export 'src/painting/decoration.dart';
 export 'src/painting/edge_insets.dart';
 export 'src/painting/text_editing.dart';
 export 'src/painting/text_painter.dart';
+export 'src/painting/text_span.dart';
 export 'src/painting/text_style.dart';
 export 'src/painting/transforms.dart';

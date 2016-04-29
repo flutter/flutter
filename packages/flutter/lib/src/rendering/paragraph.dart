@@ -20,8 +20,6 @@ class RenderParagraph extends RenderBox {
 
   final TextPainter _textPainter;
 
-  BoxConstraints _constraintsForCurrentLayout; // when null, we don't have a current layout
-
   /// The text to display
   TextSpan get text => _textPainter.text;
   void set text(TextSpan value) {
@@ -29,27 +27,13 @@ class RenderParagraph extends RenderBox {
     if (_textPainter.text == value)
       return;
     _textPainter.text = value;
-    _constraintsForCurrentLayout = null;
     markNeedsLayout();
   }
 
-  // TODO(abarth): This logic should live in TextPainter and be shared with RenderEditableLine.
   void _layoutText(BoxConstraints constraints) {
     assert(constraints != null);
     assert(constraints.debugAssertIsValid());
-    if (_constraintsForCurrentLayout == constraints)
-      return; // already cached this layout
-    _textPainter.maxWidth = constraints.maxWidth;
-    _textPainter.minWidth = constraints.minWidth;
-    _textPainter.minHeight = constraints.minHeight;
-    _textPainter.maxHeight = constraints.maxHeight;
-    _textPainter.layout();
-    // By default, we shrinkwrap to the intrinsic width.
-    double width = constraints.constrainWidth(_textPainter.maxIntrinsicWidth);
-    _textPainter.minWidth = width;
-    _textPainter.maxWidth = width;
-    _textPainter.layout();
-    _constraintsForCurrentLayout = constraints;
+    _textPainter.layout(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
   }
 
   @override
@@ -66,7 +50,7 @@ class RenderParagraph extends RenderBox {
 
   double _getIntrinsicHeight(BoxConstraints constraints) {
     _layoutText(constraints);
-    return constraints.constrainHeight(_textPainter.size.height);
+    return constraints.constrainHeight(_textPainter.height);
   }
 
   @override

@@ -289,12 +289,7 @@ class RenderChildView extends RenderBox {
         if (_view == null) {
           _debugErrorMessage ??= new TextPainter()
             ..text = new TextSpan(text: 'Child view are supported only when running in Mojo shell.');
-          _debugErrorMessage
-            ..minWidth = size.width
-            ..maxWidth = size.width
-            ..minHeight = size.height
-            ..maxHeight = size.height
-            ..layout();
+          _debugErrorMessage.layout(minWidth: size.width, maxWidth: size.width);
         }
         return true;
       });
