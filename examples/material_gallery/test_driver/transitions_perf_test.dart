@@ -13,8 +13,7 @@ const List<String> demoCategories = const <String>['Demos', 'Components', 'Style
 const List<String> demoNames = const <String>[
   'Weather',
   'Fitness',
-  'Fancy lines'//,
-  /*
+  'Fancy lines',
   'Flexible space toolbar',
   'Floating action button',
   'Buttons',
@@ -45,7 +44,6 @@ const List<String> demoNames = const <String>[
   'Tooltips',
   'Colors',
   'Typography'
-  */
 ];
 
 void main() {

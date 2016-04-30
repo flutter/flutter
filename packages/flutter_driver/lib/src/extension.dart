@@ -210,9 +210,9 @@ class FlutterDriverExtension {
   }
 
   Future<ScrollResult> scrollToVisible(ScrollToVisible command) async {
-    Element target = await _runFinder(command.finder);
+    Finder target = await _waitForElement(_createFinder(command.finder));
     // ScrollableState scrollable = Scrollable.of(context); => null implies failure
-    await Scrollable.ensureVisible(target);
+    await Scrollable.ensureVisible(target.evaluate().single);
     return new ScrollResult();
   }
 
