@@ -159,7 +159,8 @@ class MojoClient {
     mojom.UrlRequest request = new mojom.UrlRequest()
       ..url = url.toString()
       ..headers = mojoHeaders
-      ..method = method;
+      ..method = method
+      ..autoFollowRedirects = true;
     if (body != null) {
       mojo.MojoDataPipe pipe = new mojo.MojoDataPipe();
       request.body = <mojo.MojoDataPipeConsumer>[pipe.consumer];
