@@ -230,13 +230,14 @@ Future<int> startApp(
   return result.started ? 0 : 2;
 }
 
-// start logging
-// start the app
-// scrape obs. port
-// connect via obs.
-// stay alive as long as obs. is alive
-// intercept SIG_QUIT; kill the launched app
-
+/// Start the app and keep the process running during its lifetime:
+///
+/// - start logging
+/// - start the app
+/// - scrape obs. port
+/// - connect via obs.
+/// - stay alive as long as obs. is alive
+/// - intercept SIG_QUIT; kill the launched app
 Future<int> startAppStayResident(
   Device device,
   Toolchain toolchain, {
@@ -360,7 +361,17 @@ Future<int> startAppStayResident(
     complete(0);
   });
 
-  return exitCompleter.future;
+  return exitCompleter.future.then((int exitCode) async {
+    if (observatoryConnection != null) {
+      observatoryConnection.add(JSON.encode(<String, dynamic>{
+
+      }));
+      // WebSocket do not have a flush() method.
+      await new Future<Null>.delayed(new Duration(milliseconds: 100));
+    }
+
+    return exitCode;
+  });
 }
 
 /// Given the value of the --target option, return the path of the Dart file

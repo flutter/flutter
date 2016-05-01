@@ -12,8 +12,8 @@ import 'package:web_socket_channel/io.dart';
 import 'android/android_device.dart';
 import 'application_package.dart';
 import 'base/common.dart';
-import 'base/utils.dart';
 import 'base/os.dart';
+import 'base/utils.dart';
 import 'build_configuration.dart';
 import 'globals.dart';
 import 'ios/devices.dart';
@@ -252,7 +252,7 @@ abstract class Device {
     await client.sendRequest('_clearVMTimeline');
   }
 
-  /// Stops tracing, optionally waiting 
+  /// Stops tracing, optionally waiting
   Future<Map<String, dynamic>> stopTracingAndDownloadTimeline(int observatoryPort, {bool waitForFirstFrame: false}) async {
     rpc.Peer peer;
     try {
