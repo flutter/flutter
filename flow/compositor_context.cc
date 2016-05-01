@@ -5,10 +5,7 @@
 #include "flow/compositor_context.h"
 
 #include "base/logging.h"
-#include "base/trace_event/trace_event.h"
-#include "flow/layers/layer_tree.h"
 #include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkPictureRecorder.h"
 
 namespace flow {
 
@@ -18,39 +15,40 @@ CompositorContext::CompositorContext() {
 CompositorContext::~CompositorContext() {
 }
 
-void CompositorContext::Preroll(GrContext* gr_context, LayerTree* layer_tree) {
-  TRACE_EVENT0("flutter", "CompositorContext::Preroll");
-  engine_time_.SetLapTime(layer_tree->construction_time());
-  Layer::PrerollContext context = {
-    raster_cache_,
-    gr_context,
-    SkRect::MakeEmpty(),
-  };
-  layer_tree->root_layer()->Preroll(&context, SkMatrix());
+void CompositorContext::BeginFrame(ScopedFrame& frame,
+                                   bool enable_instrumentation) {
+  if (enable_instrumentation) {
+    frame_count_.Increment();
+    frame_time_.Start();
+  }
 }
 
-sk_sp<SkPicture> CompositorContext::Record(const SkRect& bounds, Layer* layer) {
-  TRACE_EVENT0("flutter", "CompositorContext::Record");
-  SkRTreeFactory rtree_factory;
-  uint32_t flags = SkPictureRecorder::kComputeSaveLayerInfo_RecordFlag;
-  SkPictureRecorder recorder;
-  Layer::PaintContext paint_context{
-    *recorder.beginRecording(bounds, &rtree_factory, flags),
-    frame_time_,
-    engine_time_,
-  };
-  layer->Paint(paint_context);
-  return recorder.finishRecordingAsPicture();
+void CompositorContext::EndFrame(ScopedFrame& frame,
+                                 bool enable_instrumentation) {
+  raster_cache_.SweepAfterFrame();
+  if (enable_instrumentation) {
+    frame_time_.Stop();
+  }
 }
 
-CompositorContext::Scope::Scope(CompositorContext& context)
-  : context_(context) {
-  context_.frame_time_.Start();
+CompositorContext::ScopedFrame CompositorContext::AcquireFrame(
+    GrContext* gr_context, SkCanvas& canvas, bool instrumentation_enabled) {
+  return ScopedFrame(*this, gr_context, canvas, instrumentation_enabled);
 }
 
-CompositorContext::Scope::~Scope() {
-  context_.raster_cache_.SweepAfterFrame();
-  context_.frame_time_.Stop();
+CompositorContext::ScopedFrame::ScopedFrame(CompositorContext& context,
+                                            GrContext* gr_context,
+                                            SkCanvas& canvas,
+                                            bool instrumentation_enabled)
+    : context_(context), gr_context_(gr_context), canvas_(&canvas),
+      instrumentation_enabled_(instrumentation_enabled) {
+  context_.BeginFrame(*this, instrumentation_enabled_);
+}
+
+CompositorContext::ScopedFrame::ScopedFrame(ScopedFrame&& frame) = default;
+
+CompositorContext::ScopedFrame::~ScopedFrame() {
+  context_.EndFrame(*this, instrumentation_enabled_);
 }
 
 void CompositorContext::OnGrContextDestroyed() {

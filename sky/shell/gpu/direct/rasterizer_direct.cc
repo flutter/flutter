@@ -82,39 +82,50 @@ void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
   if (surface_->GetSize() != size)
     surface_->Resize(size);
 
-  sk_sp<SkPicture> picture;
-
-  EnsureGLContext();
-  CHECK(context_->MakeCurrent(surface_.get()));
+  // There is no way for the compositor to know how long the layer tree
+  // construction took. Fortunately, the layer tree does. Grab that time
+  // for instrumentation.
+  compositor_context_.engine_time().SetLapTime(layer_tree->construction_time());
 
   {
-    flow::CompositorContext::Scope scope(compositor_context_);
-
-    // Preroll.
-    GrContext* gr_context = ganesh_canvas_.gr_context();
-    compositor_context_.Preroll(gr_context, layer_tree.get());
-
-    // Create picture.
-    SkRect bounds = SkRect::MakeWH(layer_tree->frame_size().width(),
-                                   layer_tree->frame_size().height());
-    flow::Layer* layer = layer_tree->root_layer();
-    picture = compositor_context_.Record(bounds, layer);
-
-    // Rasterize.
+    EnsureGLContext();
+    CHECK(context_->MakeCurrent(surface_.get()));
     SkCanvas* canvas = ganesh_canvas_.GetCanvas(
       surface_->GetBackingFrameBufferObject(), layer_tree->frame_size());
+    flow::CompositorContext::ScopedFrame frame =
+        compositor_context_.AcquireFrame(ganesh_canvas_.gr_context(), *canvas);
     canvas->clear(SK_ColorBLACK);
-    canvas->drawPicture(picture.get());
+    layer_tree->Raster(frame);
     canvas->flush();
     surface_->SwapBuffers();
   }
 
-  const auto& tracing_controller = Shell::Shared().tracing_controller();
-  uint32_t threshold = layer_tree->rasterizer_tracing_threshold();
-  double last_lap_ms = compositor_context_.frame_time().LastLap().InMillisecondsF();
-  if (tracing_controller.picture_tracing_enabled() ||
-      (threshold && last_lap_ms > threshold * kOneFrameDuration)) {
-    base::FilePath path = tracing_controller.PictureTracingPathForCurrentTime();
+  // Trace to a file if necessary
+  bool frameExceededThreshold = false;
+  uint32_t thresholdInterval = layer_tree->rasterizer_tracing_threshold();
+  if (thresholdInterval != 0 &&
+      compositor_context_.frame_time().LastLap().InMillisecondsF() >
+          thresholdInterval * kOneFrameDuration) {
+    // While rendering the last frame, if we exceeded the tracing threshold
+    // specified in the layer tree, we force a trace to disk.
+    frameExceededThreshold = true;
+  }
+
+  const auto& tracingController = Shell::Shared().tracing_controller();
+
+  if (frameExceededThreshold || tracingController.picture_tracing_enabled()) {
+    base::FilePath path = tracingController.PictureTracingPathForCurrentTime();
+
+    SkPictureRecorder recoder;
+    recoder.beginRecording(SkRect::MakeWH(size.width(), size.height()));
+
+    {
+      auto frame = compositor_context_.AcquireFrame(
+          nullptr, *recoder.getRecordingCanvas(), false);
+      layer_tree->Raster(frame);
+    }
+
+    sk_sp<SkPicture> picture = recoder.finishRecordingAsPicture();
     SerializePicture(path, picture.get());
   }
 

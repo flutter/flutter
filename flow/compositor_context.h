@@ -8,45 +8,65 @@
 #include <memory>
 #include <string>
 
-#include "base/logging.h"
 #include "base/macros.h"
+#include "base/logging.h"
 #include "flow/instrumentation.h"
 #include "flow/raster_cache.h"
-#include "third_party/skia/include/core/SkPicture.h"
-#include "third_party/skia/include/core/SkRect.h"
-#include "third_party/skia/include/gpu/GrContext.h"
+#include "third_party/skia/include/core/SkCanvas.h"
+#include "third_party/skia/include/core/SkPictureRecorder.h"
 
 namespace flow {
-class Layer;
-class LayerTree;
 
 class CompositorContext {
  public:
-  class Scope {
+  class ScopedFrame {
    public:
-    explicit Scope(CompositorContext& context);
-    ~Scope();
+    SkCanvas& canvas() { return *canvas_; }
+    CompositorContext& context() const { return context_; }
+    GrContext* gr_context() const { return gr_context_; }
+
+    ScopedFrame(ScopedFrame&& frame);
+    ~ScopedFrame();
 
    private:
     CompositorContext& context_;
+    GrContext* gr_context_;
+    SkCanvas* canvas_;
+    const bool instrumentation_enabled_;
 
-    DISALLOW_COPY_AND_ASSIGN(Scope);
+    ScopedFrame(CompositorContext& context,
+                GrContext* gr_context,
+                SkCanvas& canvas,
+                bool instrumentation_enabled);
+
+    friend class CompositorContext;
+
+    DISALLOW_COPY_AND_ASSIGN(ScopedFrame);
   };
 
   CompositorContext();
   ~CompositorContext();
 
-  void Preroll(GrContext* gr_context, LayerTree* layer_tree);
-  sk_sp<SkPicture> Record(const SkRect& bounds, Layer* layer);
+  ScopedFrame AcquireFrame(GrContext* gr_context,
+                           SkCanvas& canvas,
+                           bool instrumentation_enabled = true);
 
   void OnGrContextDestroyed();
 
-  const Stopwatch& frame_time() { return frame_time_; }
+  RasterCache& raster_cache() { return raster_cache_; }
+  const Counter& frame_count() const { return frame_count_; }
+  const Stopwatch& frame_time() const { return frame_time_; }
+  Stopwatch& engine_time() { return engine_time_; };
 
  private:
   RasterCache raster_cache_;
+
+  Counter frame_count_;
   Stopwatch frame_time_;
   Stopwatch engine_time_;
+
+  void BeginFrame(ScopedFrame& frame, bool enable_instrumentation);
+  void EndFrame(ScopedFrame& frame, bool enable_instrumentation);
 
   DISALLOW_COPY_AND_ASSIGN(CompositorContext);
 };

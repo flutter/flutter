@@ -113,21 +113,27 @@ void DiagnosticServer::SkiaPictureTask(Dart_Port port_id) {
   }
 
   Rasterizer* rasterizer = rasterizers[0].get();
-  if (!rasterizer) {
+  if (rasterizer == nullptr) {
     SendNull(port_id);
     return;
   }
 
   flow::LayerTree* layer_tree = rasterizer->GetLastLayerTree();
-  if (!layer_tree) {
+  if (layer_tree == nullptr) {
     SendNull(port_id);
     return;
   }
 
+  SkPictureRecorder recorder;
+  recorder.beginRecording(SkRect::MakeWH(layer_tree->frame_size().width(),
+                                         layer_tree->frame_size().height()));
+
   flow::CompositorContext compositor_context;
-  SkRect bounds = layer_tree->GetBounds();
-  flow::Layer* layer = layer_tree->root_layer();
-  sk_sp<SkPicture> picture = compositor_context.Record(bounds, layer);
+  flow::CompositorContext::ScopedFrame frame = compositor_context.AcquireFrame(
+      nullptr, *recorder.getRecordingCanvas(), false);
+  layer_tree->Raster(frame);
+
+  sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();
 
   SkDynamicMemoryWStream stream;
   sky::PngPixelSerializer serializer;
