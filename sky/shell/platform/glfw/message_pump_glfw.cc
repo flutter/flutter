@@ -48,7 +48,7 @@ void MessagePumpGLFW::Run(Delegate* delegate) {
       continue;
 
     if (delayed_work_time_.is_null()) {
-      glfwPollEvents();
+      glfwWaitEvents();
     } else {
       base::TimeDelta delay = delayed_work_time_ - base::TimeTicks::Now();
       if (delay > base::TimeDelta()) {
