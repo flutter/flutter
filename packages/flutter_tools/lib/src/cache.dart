@@ -190,6 +190,7 @@ class FlutterEngine {
   List<String> _getEngineDirs() {
     List<String> dirs = <String>[
       'android-arm',
+      'android-arm-profile',
       'android-arm-release',
       'android-x64'
     ];
@@ -202,13 +203,18 @@ class FlutterEngine {
     return dirs;
   }
 
-  List<String> _getToolsDirs() {
+  // Return a list of (cache directory path, download URL path) tuples.
+  List<List<String>> _getToolsDirs() {
     if (Platform.isMacOS)
-      return <String>['darwin-x64'];
+      return <List<String>>[['darwin-x64', 'darwin-x64/artifacts.zip']];
     else if (Platform.isLinux)
-      return <String>['linux-x64'];
+      return <List<String>>[
+        ['linux-x64', 'linux-x64/artifacts.zip'],
+        ['android-arm-profile/linux-x64', 'android-arm-profile/linux-x64.zip'],
+        ['android-arm-release/linux-x64', 'android-arm-release/linux-x64.zip'],
+      ];
     else
-      return <String>[];
+      return <List<String>>[];
   }
 
   bool isUpToDate() {
@@ -226,8 +232,8 @@ class FlutterEngine {
         return false;
     }
 
-    for (String dirName in _getToolsDirs()) {
-      Directory dir = new Directory(path.join(engineDir.path, dirName));
+    for (List<String> toolsDir in _getToolsDirs()) {
+      Directory dir = new Directory(path.join(engineDir.path, toolsDir[0]));
       if (!dir.existsSync())
         return false;
     }
@@ -259,11 +265,13 @@ class FlutterEngine {
       }
     }
 
-    for (String dirName in _getToolsDirs()) {
-      Directory dir = new Directory(path.join(engineDir.path, dirName));
+    for (List<String> toolsDir in _getToolsDirs()) {
+      String cacheDir = toolsDir[0];
+      String urlPath = toolsDir[1];
+      Directory dir = new Directory(path.join(engineDir.path, cacheDir));
       if (!dir.existsSync() || allDirty) {
-        await _downloadItem('Downloading engine tools $dirName...',
-          url + dirName + '/artifacts.zip', dir);
+        await _downloadItem('Downloading engine tools $cacheDir...',
+          url + urlPath, dir);
         _makeFilesExecutable(dir);
       }
     }

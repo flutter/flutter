@@ -66,7 +66,6 @@ abstract class FlutterCommand extends Command {
       negatable: false,
       help: 'Build a debug version of your app (the default).');
     argParser.addFlag('profile',
-      hide: true,
       negatable: false,
       help: 'Build a profile (ahead of time compilation) version of your app.');
     argParser.addFlag('release',
