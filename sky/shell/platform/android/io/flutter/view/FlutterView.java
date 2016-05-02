@@ -4,6 +4,7 @@
 
 package io.flutter.view;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.opengl.Matrix;
@@ -51,6 +52,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.domokit.activity.ActivityImpl;
 import org.domokit.editing.KeyboardImpl;
 import org.domokit.editing.KeyboardViewState;
 import org.domokit.raw_keyboard.RawKeyboardServiceImpl;
@@ -85,6 +87,10 @@ public class FlutterView extends SurfaceView
 
     public FlutterView(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        // TODO(abarth): Remove this static and instead make everything that
+        // depends on it into a view-associated service.
+        ActivityImpl.setCurrentActivity((Activity) context);
 
         mMetrics = new ViewportMetrics();
         mMetrics.devicePixelRatio = context.getResources().getDisplayMetrics().density;
@@ -155,6 +161,9 @@ public class FlutterView extends SurfaceView
     }
 
     public void onResume() {
+    }
+
+    public void onPostResume() {
         mSkyEngine.onAppLifecycleStateChanged(AppLifecycleState.RESUMED);
     }
 

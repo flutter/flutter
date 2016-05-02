@@ -27,8 +27,6 @@ if (is_android) {
   android_library("activity_lib") {
     java_files = [
       "src/org/domokit/activity/ActivityImpl.java",
-      "src/org/domokit/activity/PathServiceImpl.java",
-      "src/org/domokit/activity/UserFeedbackImpl.java",
     ]
 
     deps = [
@@ -45,10 +43,6 @@ if (is_ios) {
     sources = [
       "ios/activity_impl.h",
       "ios/activity_impl.mm",
-      "ios/path_service_impl.h",
-      "ios/path_service_impl.mm",
-      "ios/user_feedback_impl.h",
-      "ios/user_feedback_impl.mm",
     ]
     deps = [
       "//base:base",

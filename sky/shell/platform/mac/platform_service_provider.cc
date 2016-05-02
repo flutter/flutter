@@ -39,11 +39,6 @@ void PlatformServiceProvider::ConnectToService(
                                client_handle.Pass()));
     return;
   }
-  if (service_name == ::activity::PathService::Name_) {
-    path_.Create(nullptr, mojo::MakeRequest<::activity::PathService>(
-                              client_handle.Pass()));
-    return;
-  }
   if (service_name == ::activity::Activity::Name_) {
     activity_.Create(
         nullptr, mojo::MakeRequest<::activity::Activity>(client_handle.Pass()));

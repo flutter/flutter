@@ -19,20 +19,10 @@ class ActivityImpl : public ::activity::Activity {
   explicit ActivityImpl(mojo::InterfaceRequest<::activity::Activity> request);
   ~ActivityImpl() override;
 
-  void GetUserFeedback(
-      mojo::InterfaceRequest<::activity::UserFeedback> user_feedback) override;
-
+  // From activity::Activity:
   void StartActivity(::activity::IntentPtr intent) override;
-
   void FinishCurrentActivity() override;
-
   void SetTaskDescription(::activity::TaskDescriptionPtr description) override;
-
-  void SetSystemUIVisibility(
-      ::activity::SystemUiVisibility visibility) override;
-
-  void SetRequestedOrientation(
-      ::activity::ScreenOrientation orientation) override;
 
  private:
   mojo::StrongBinding<::activity::Activity> binding_;

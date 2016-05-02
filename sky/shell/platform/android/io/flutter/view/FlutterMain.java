@@ -32,7 +32,6 @@ import org.chromium.mojo.system.Core;
 import org.chromium.mojo.system.impl.CoreImpl;
 import org.chromium.mojo.system.MessagePipeHandle;
 import org.chromium.mojom.activity.Activity;
-import org.chromium.mojom.activity.PathService;
 import org.chromium.mojom.flutter.platform.HapticFeedback;
 import org.chromium.mojom.flutter.platform.PathProvider;
 import org.chromium.mojom.flutter.platform.SystemChrome;
@@ -42,7 +41,6 @@ import org.chromium.mojom.mojo.NetworkService;
 import org.chromium.mojom.sensors.SensorService;
 import org.chromium.mojom.vsync.VSyncProvider;
 import org.domokit.activity.ActivityImpl;
-import org.domokit.activity.PathServiceImpl;
 import org.domokit.media.MediaServiceImpl;
 import org.domokit.oknet.NetworkServiceImpl;
 import org.domokit.platform.HapticFeedbackImpl;
@@ -144,13 +142,6 @@ public class FlutterMain {
             @Override
             public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
                 Activity.MANAGER.bind(new ActivityImpl(), pipe);
-            }
-        });
-
-        registry.register(PathService.MANAGER.getName(), new ServiceFactory() {
-            @Override
-            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                PathService.MANAGER.bind(new PathServiceImpl(applicationContext), pipe);
             }
         });
 

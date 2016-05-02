@@ -28,66 +28,9 @@ struct TaskDescription {
   uint32 primaryColor;
 };
 
-// TODO(jamesr): This should be called SystemUIVisibility (note case). This name
-// is a workaround for https://github.com/domokit/mojo/issues/445.
-enum SystemUiVisibility {
-  STANDARD,
-  FULLSCREEN,
-  IMMERSIVE,
-};
-
-// See http://developer.android.com/intl/es/reference/android/R.attr.html#screenOrientation
-enum ScreenOrientation {
-  UNSPECIFIED,
-  LANDSCAPE,
-  PORTRAIT,
-  NOSENSOR,
-};
-
-// TODO(abarth): This interface seems very specific to Android. Do we want to
-//               have a higher-level abstraction here? Do we want a collection
-//               of services that only work on specific platforms? We need to
-//               figure out how to rationalize this interface across platforms.
 [ServiceName="activity::Activity"]
 interface Activity {
-  GetUserFeedback(UserFeedback& user_feedback);
-
   StartActivity(Intent intent);
   FinishCurrentActivity();
   SetTaskDescription(TaskDescription description);
-  SetSystemUIVisibility(SystemUiVisibility visibility);
-  SetRequestedOrientation(ScreenOrientation orientation);
-};
-
-[ServiceName="activity::PathService"]
-interface PathService {
-  // Where the application files are.
-  GetAppDataDir() => (string path);
-
-  // Where to store long-term files.
-  GetFilesDir() => (string path);
-
-  // Where to store short-term files.
-  GetCacheDir() => (string path);
-};
-
-enum HapticFeedbackType {
-  LONG_PRESS,
-  VIRTUAL_KEY,
-  KEYBOARD_TAP,
-  CLOCK_TICK,
-};
-
-enum AuralFeedbackType {
-  CLICK,
-  NAVIGATION_LEFT,
-  NAVIGATION_UP,
-  NAVIGATION_RIGHT,
-  NAVIGATION_DOWN,
-};
-
-[ServiceName="activity::UserFeedback"]
-interface UserFeedback {
-  PerformHapticFeedback(HapticFeedbackType type);
-  PerformAuralFeedback(AuralFeedbackType type);
 };

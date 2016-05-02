@@ -21,8 +21,6 @@ import org.chromium.base.TraceEvent;
 import org.chromium.mojom.sky.EventType;
 import org.chromium.mojom.sky.InputEvent;
 
-import org.domokit.activity.ActivityImpl;
-
 import java.io.File;
 import java.util.ArrayList;
 
@@ -74,7 +72,6 @@ public class SkyActivity extends Activity {
         String[] args = getArgsFromIntent(getIntent());
         FlutterMain.ensureInitializationComplete(getApplicationContext(), args);
         mView = new FlutterView(this);
-        ActivityImpl.setCurrentActivity(this);
         setContentView(mView);
         mTracingController = new TracingController(this);
 
@@ -114,14 +111,16 @@ public class SkyActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        ActivityImpl.onResumeActivity(this);
+        if (mView != null) {
+            mView.onResume();
+        }
     }
 
     @Override
     protected void onPostResume() {
         super.onPostResume();
         if (mView != null) {
-            mView.onResume();
+            mView.onPostResume();
         }
     }
 
