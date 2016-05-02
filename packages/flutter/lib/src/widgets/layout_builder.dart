@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'debug.dart';
 import 'framework.dart';
 
 import 'package:flutter/rendering.dart';
@@ -16,9 +17,9 @@ typedef Widget LayoutWidgetBuilder(BuildContext context, Size size);
 /// when the parent constrains the child's size and doesn't depend on the child's
 /// intrinsic size.
 class LayoutBuilder extends RenderObjectWidget {
-  LayoutBuilder({Key key, this.builder}) : super(key: key);
+  LayoutBuilder({ Key key, this.builder }) : super(key: key);
 
-  /// Called at layout time to construct the widget tree. The builder may not
+  /// Called at layout time to construct the widget tree. The builder must not
   /// return null.
   final LayoutWidgetBuilder builder;
 
@@ -81,6 +82,8 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
   void performLayout() {
     if (callback != null)
       invokeLayoutCallback(callback);
+    if (child != null)
+      child.layout(constraints.loosen(), parentUsesSize: false);
   }
 
   @override
@@ -136,24 +139,12 @@ class _LayoutBuilderElement extends RenderObjectElement {
     if (widget.builder == null)
       return;
     owner.lockState(() {
-      // TODO(hansmuller): this code was lifted from ComponentElement.rebuild(). Refactor.
       Widget built;
       try {
         built = widget.builder(this, constraints.biggest);
-        assert(() {
-          if (built == null) {
-            throw new FlutterError(
-              'A build function returned null.\n'
-              'The offending widget is: $widget\n'
-              'Build functions must never return null. '
-              'To return an empty space that causes the building widget to fill available room, return "new Container()". '
-              'To return an empty space that takes as little room as possible, return "new Container(width: 0.0, height: 0.0)".'
-            );
-          }
-          return true;
-        });
+        debugWidgetBuilderValue(widget, built);
       } catch (e, stack) {
-        _debugReportException('building $widget', e, stack);
+        debugReportException('building $widget', e, stack);
         built = new ErrorWidget(e);
       }
 
@@ -161,13 +152,10 @@ class _LayoutBuilderElement extends RenderObjectElement {
         _child = updateChild(_child, built, null);
         assert(_child != null);
       } catch (e, stack) {
-        _debugReportException('building $widget', e, stack);
+        debugReportException('building $widget', e, stack);
         built = new ErrorWidget(e);
         _child = updateChild(null, built, slot);
       }
-
-      _child.renderObject.layout(constraints.loosen(), parentUsesSize: false);
-
     }, building: true);
   }
 
@@ -191,15 +179,4 @@ class _LayoutBuilderElement extends RenderObjectElement {
     renderObject.child = null;
     assert(renderObject == this.renderObject);
   }
-}
-
-
-// TODO(hansmuller): lifted from framework.dart. Unlift this.
-void _debugReportException(String context, dynamic exception, StackTrace stack) {
-  FlutterError.reportError(new FlutterErrorDetails(
-    exception: exception,
-    stack: stack,
-    library: 'widgets library',
-    context: context
-  ));
 }
