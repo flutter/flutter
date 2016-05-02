@@ -74,6 +74,22 @@ class _ApkBuilder {
     _jarsigner = os.which('jarsigner');
   }
 
+  String checkDependencies() {
+    if (!_androidJar.existsSync())
+      return 'Cannot find android.jar at ${_androidJar.path}';
+    if (!_aapt.existsSync())
+      return 'Cannot find aapt at ${_aapt.path}';
+    if (!_dx.existsSync())
+      return 'Cannot find dx at ${_dx.path}';
+    if (!_zipalign.existsSync())
+      return 'Cannot find zipalign at ${_zipalign.path}';
+    if (_jarsigner == null)
+      return 'Cannot find jarsigner in PATH.';
+    if (!_jarsigner.existsSync())
+      return 'Cannot find jarsigner at ${_jarsigner.path}';
+    return null;
+  }
+
   void compileClassesDex(File classesDex, List<File> jars) {
     List<String> packageArgs = <String>[_dx.path,
       '--dex',
@@ -101,6 +117,7 @@ class _ApkBuilder {
   }
 
   void sign(File keystore, String keystorePassword, String keyAlias, String keyPassword, File outputApk) {
+    assert(_jarsigner != null);
     runCheckedSync(<String>[_jarsigner.path,
       '-keystore', keystore.path,
       '-storepass', keystorePassword,
@@ -301,6 +318,11 @@ int _buildApk(
 
   try {
     _ApkBuilder builder = new _ApkBuilder(androidSdk.latestVersion);
+    String error = builder.checkDependencies();
+    if (error != null) {
+      printError(error);
+      return 1;
+    }
 
     File classesDex = new File('${tempDir.path}/classes.dex');
     builder.compileClassesDex(classesDex, components.jars);
