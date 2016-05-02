@@ -1411,7 +1411,13 @@ abstract class BuildableElement extends Element {
     assert(!_dirty);
   }
 
-  /// Called by rebuild() after the appropriate checks have been made.
+  /// Called by [rebuild] after [rebuild] has checked that this element indeed
+  /// needs to build and is still active.
+  ///
+  /// This function is called if this element is marked as needing to be built
+  /// (see [markNeedsBuild]). For example, if [State.setState] is called on its
+  /// associated [State] object or if this element depends on an
+  /// [InheritedElement] that has itself changed.
   void performRebuild();
 
   @override
