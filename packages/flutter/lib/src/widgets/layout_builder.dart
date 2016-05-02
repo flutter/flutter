@@ -123,6 +123,7 @@ class _LayoutBuilderElement extends RenderObjectElement {
 
   @override
   void update(LayoutBuilder newWidget) {
+    assert(widget != newWidget);
     super.update(newWidget);
     assert(widget == newWidget);
     renderObject.callback = _layout;
