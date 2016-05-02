@@ -206,12 +206,12 @@ class FlutterEngine {
   // Return a list of (cache directory path, download URL path) tuples.
   List<List<String>> _getToolsDirs() {
     if (Platform.isMacOS)
-      return <List<String>>[['darwin-x64', 'darwin-x64/artifacts.zip']];
+      return <List<String>>[<String>['darwin-x64', 'darwin-x64/artifacts.zip']];
     else if (Platform.isLinux)
       return <List<String>>[
-        ['linux-x64', 'linux-x64/artifacts.zip'],
-        ['android-arm-profile/linux-x64', 'android-arm-profile/linux-x64.zip'],
-        ['android-arm-release/linux-x64', 'android-arm-release/linux-x64.zip'],
+        <String>['linux-x64', 'linux-x64/artifacts.zip'],
+        <String>['android-arm-profile/linux-x64', 'android-arm-profile/linux-x64.zip'],
+        <String>['android-arm-release/linux-x64', 'android-arm-release/linux-x64.zip'],
       ];
     else
       return <List<String>>[];

@@ -16,7 +16,7 @@ Process daemon;
 //   devices: list devices
 
 Future<Null> main() async {
-  daemon = await Process.start('dart', ['bin/flutter_tools.dart', 'daemon']);
+  daemon = await Process.start('dart', <String>['bin/flutter_tools.dart', 'daemon']);
   print('daemon process started, pid: ${daemon.pid}');
 
   daemon.stdout
@@ -28,15 +28,15 @@ Future<Null> main() async {
   stdout.write('> ');
   stdin.transform(UTF8.decoder).transform(const LineSplitter()).listen((String line) {
     if (line == 'version' || line == 'v') {
-      _send({'method': 'daemon.version'});
+      _send(<String, dynamic>{'method': 'daemon.version'});
     } else if (line == 'shutdown' || line == 'q') {
-      _send({'method': 'daemon.shutdown'});
+      _send(<String, dynamic>{'method': 'daemon.shutdown'});
     } else if (line == 'start') {
-      _send({'method': 'app.start'});
+      _send(<String, dynamic>{'method': 'app.start'});
     } else if (line == 'stopAll') {
-      _send({'method': 'app.stopAll'});
+      _send(<String, dynamic>{'method': 'app.stopAll'});
     } else if (line == 'devices') {
-      _send({'method': 'device.getDevices'});
+      _send(<String, dynamic>{'method': 'device.getDevices'});
     } else {
       print('command not understood: $line');
     }

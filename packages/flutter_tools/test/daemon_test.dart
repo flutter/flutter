@@ -88,7 +88,7 @@ void main() {
         (Map<String, dynamic> result) => responses.add(result),
         notifyingLogger: notifyingLogger
       );
-      commands.add({'id': 0, 'method': 'daemon.shutdown'});
+      commands.add(<String, dynamic>{'id': 0, 'method': 'daemon.shutdown'});
       return daemon.onExit.then((int code) {
         expect(code, 0);
       });
@@ -121,7 +121,7 @@ void main() {
         (Map<String, dynamic> result) => responses.add(result),
         notifyingLogger: notifyingLogger
       );
-      commands.add({'id': 0, 'method': 'device.getDevices'});
+      commands.add(<String, dynamic>{'id': 0, 'method': 'device.getDevices'});
       Map<String, dynamic> response = await responses.stream.where(_notEvent).first;
       expect(response['id'], 0);
       expect(response['result'], isList);

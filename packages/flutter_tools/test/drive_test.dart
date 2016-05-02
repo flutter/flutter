@@ -60,7 +60,7 @@ void main() {
 
     testUsingContext('returns 1 when test file is not found', () {
       withMockDevice();
-      List<String> args = [
+      List<String> args = <String>[
         'drive',
         '--target=/some/app/test/e2e.dart',
       ];
@@ -84,7 +84,7 @@ void main() {
       await memFs.file(testApp).writeAsString('main() {}');
       await memFs.file(testFile).writeAsString('main() {}');
 
-      List<String> args = [
+      List<String> args = <String>[
         'drive',
         '--target=$testApp',
       ];
@@ -102,7 +102,7 @@ void main() {
       useInMemoryFileSystem(cwd: packageDir);
 
       String appFile = '/not/in/my/app.dart';
-      List<String> args = [
+      List<String> args = <String>[
         'drive',
         '--target=$appFile',
       ];
@@ -120,7 +120,7 @@ void main() {
       useInMemoryFileSystem(cwd: packageDir);
 
       String appFile = '/my/app/main.dart';
-      List<String> args = [
+      List<String> args = <String>[
         'drive',
         '--target=$appFile',
       ];
@@ -144,7 +144,7 @@ void main() {
         return new Future<int>.value(0);
       });
       testRunner = expectAsync((List<String> testArgs) {
-        expect(testArgs, [testFile]);
+        expect(testArgs, <String>[testFile]);
         return new Future<int>.value(0);
       });
       appStopper = expectAsync((_) {
@@ -155,7 +155,7 @@ void main() {
       await memFs.file(testApp).writeAsString('main() {}');
       await memFs.file(testFile).writeAsString('main() {}');
 
-      List<String> args = [
+      List<String> args = <String>[
         'drive',
         '--target=$testApp',
       ];
@@ -186,7 +186,7 @@ void main() {
       await memFs.file(testApp).writeAsString('main() {}');
       await memFs.file(testFile).writeAsString('main() {}');
 
-      List<String> args = [
+      List<String> args = <String>[
         'drive',
         '--target=$testApp',
       ];
@@ -243,7 +243,7 @@ void main() {
         Device emulator = new MockDevice();
         when(emulator.name).thenReturn('new-simulator');
         when(IOSSimulatorUtils.instance.getAttachedDevices())
-            .thenReturn([emulator]);
+            .thenReturn(<IOSSimulator>[emulator]);
 
         Device device = await findTargetDevice();
         expect(device.name, 'new-simulator');

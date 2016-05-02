@@ -207,7 +207,7 @@ String _getIOSEngineRevision(ApplicationPackage app) {
 }
 
 Future<Null> _addServicesToBundle(Directory bundle) async {
-  List<Map<String, String>> services = [];
+  List<Map<String, String>> services = <Map<String, String>>[];
   printTrace("Trying to resolve native pub services.");
 
   // Step 1: Parse the service configuration yaml files present in the service
@@ -237,18 +237,18 @@ Future<Null> _copyServiceFrameworks(List<Map<String, String>> services, Director
       continue;
     }
     // Shell out so permissions on the dylib are preserved.
-    runCheckedSync(['/bin/cp', dylib.path, frameworksDirectory.path]);
+    runCheckedSync(<String>['/bin/cp', dylib.path, frameworksDirectory.path]);
   }
 }
 
 void _copyServiceDefinitionsManifest(List<Map<String, String>> services, File manifest) {
   printTrace("Creating service definitions manifest at '${manifest.path}'");
-  List<Map<String, String>> jsonServices = services.map((Map<String, String> service) => {
+  List<Map<String, String>> jsonServices = services.map((Map<String, String> service) => <String, String>{
     'name': service['name'],
     // Since we have already moved it to the Frameworks directory. Strip away
     // the directory and basenames.
     'framework': path.basenameWithoutExtension(service['ios-framework'])
   }).toList();
-  Map<String, dynamic> json = { 'services' : jsonServices };
+  Map<String, dynamic> json = <String, dynamic>{ 'services' : jsonServices };
   manifest.writeAsStringSync(JSON.encode(json), mode: FileMode.WRITE, flush: true);
 }

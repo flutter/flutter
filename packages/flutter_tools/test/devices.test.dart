@@ -14,14 +14,14 @@ void main() {
   group('devices', () {
     testUsingContext('returns 0 when called', () {
       DevicesCommand command = new DevicesCommand();
-      return createTestCommandRunner(command).run(['list']).then((int code) {
+      return createTestCommandRunner(command).run(<String>['list']).then((int code) {
         expect(code, equals(0));
       });
     });
 
     testUsingContext('no error when no connected devices', () {
       DevicesCommand command = new DevicesCommand();
-      return createTestCommandRunner(command).run(['list']).then((int code) {
+      return createTestCommandRunner(command).run(<String>['list']).then((int code) {
         expect(code, equals(0));
         expect(testLogger.statusText, contains('No connected devices'));
       });

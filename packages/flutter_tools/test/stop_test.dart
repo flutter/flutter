@@ -20,7 +20,7 @@ void main() {
       MockAndroidDevice device = new MockAndroidDevice();
       when(device.stopApp(any)).thenReturn(new Future<bool>.value(true));
       testDeviceManager.addDevice(device);
-      return createTestCommandRunner(command).run(['stop']).then((int code) {
+      return createTestCommandRunner(command).run(<String>['stop']).then((int code) {
         expect(code, equals(0));
       });
     });
@@ -32,7 +32,7 @@ void main() {
       when(device.stopApp(any)).thenReturn(new Future<bool>.value(true));
       testDeviceManager.addDevice(device);
 
-      return createTestCommandRunner(command).run(['stop']).then((int code) {
+      return createTestCommandRunner(command).run(<String>['stop']).then((int code) {
         expect(code, equals(0));
       });
     });

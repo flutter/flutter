@@ -14,7 +14,7 @@ void main() {
     testUsingContext('returns 1 when no device is connected', () {
       ListenCommand command = new ListenCommand(singleRun: true);
       applyMocksToCommand(command);
-      return createTestCommandRunner(command).run(['listen']).then((int code) {
+      return createTestCommandRunner(command).run(<String>['listen']).then((int code) {
         expect(code, equals(1));
       });
     });

@@ -105,7 +105,7 @@ String buildAotSnapshot(
   String vmServicePath = path.join(skyEngineSdkExt, 'dart', 'runtime', 'bin', 'vmservice', 'vmservice_io.dart');
   String jniPath = path.join(skyEngineSdkExt, 'dart_jni', 'jni.dart');
 
-  List<String> filePaths = [
+  List<String> filePaths = <String>[
     genSnapshot, vmEntryPoints, vmEntryPointsAndroid, mojoInternalPath, uiPath, vmServicePath, jniPath
   ];
   List<String> missingFiles = filePaths.where((String p) => !FileSystemEntity.isFileSync(p)).toList();
@@ -114,7 +114,7 @@ String buildAotSnapshot(
     return null;
   }
 
-  List<String> genSnapshotCmd = [
+  List<String> genSnapshotCmd = <String>[
     genSnapshot,
     '--vm_isolate_snapshot=$vmIsolateSnapshot',
     '--isolate_snapshot=$isolateSnapshot',
@@ -131,7 +131,7 @@ String buildAotSnapshot(
   ];
 
   if (!(tools.engineRelease || buildMode == BuildMode.release)) {
-    genSnapshotCmd.addAll([
+    genSnapshotCmd.addAll(<String>[
       '--no-checked',
       '--conditional_directives',
     ]);

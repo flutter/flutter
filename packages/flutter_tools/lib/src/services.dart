@@ -51,7 +51,7 @@ Future<Null> parseServiceConfigs(
     }
 
     for (Map<String, String> service in serviceConfig['services']) {
-      services.add({
+      services.add(<String, String>{
         'root': serviceRoot,
         'name': service['name'],
         'android-class': service['android-class'],
@@ -92,12 +92,12 @@ File generateServiceDefinitions(
   String dir, List<Map<String, String>> servicesIn
 ) {
   List<Map<String, String>> services =
-      servicesIn.map((Map<String, String> service) => {
+      servicesIn.map((Map<String, String> service) => <String, String>{
         'name': service['name'],
         'class': service['android-class']
       }).toList();
 
-  Map<String, dynamic> json = { 'services': services };
+  Map<String, dynamic> json = <String, dynamic>{ 'services': services };
   File servicesFile = new File(path.join(dir, 'services.json'));
   servicesFile.writeAsStringSync(JSON.encode(json), mode: FileMode.WRITE, flush: true);
   return servicesFile;
