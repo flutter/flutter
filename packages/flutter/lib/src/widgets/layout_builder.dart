@@ -6,16 +6,20 @@ import 'framework.dart';
 
 import 'package:flutter/rendering.dart';
 
+/// The signature of the [LayoutBuilder] builder function.
 typedef Widget LayoutWidgetBuilder(BuildContext context, Size size);
-
 
 /// Builds a widget tree that can depend on the parent widget's size.
 ///
 /// Similar to the [Builder] widget except that the framework calls the [builder]
-/// function at layout time and provides the parent widget's size.
+/// function at layout time and provides the parent widget's size. This is useful
+/// when the parent constrains the child's size and doesn't depend on the child's
+/// intrinsic size.
 class LayoutBuilder extends RenderObjectWidget {
   LayoutBuilder({Key key, this.builder}) : super(key: key);
 
+  /// Called at layout time to construct the widget tree. The builder may not
+  /// return null.
   final LayoutWidgetBuilder builder;
 
   @override
