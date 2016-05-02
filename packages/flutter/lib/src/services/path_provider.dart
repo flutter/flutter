@@ -41,8 +41,8 @@ class PathProvider {
   ///
   /// Examples:
   ///
-  ///  * iOS: `NSDocumentsDirectory`
-  ///  * Android: The AppData directory.
+  ///  * _iOS_: `NSDocumentsDirectory`
+  ///  * _Android_: The AppData directory.
   static Future<Directory> getApplicationDocumentsDirectory() async {
     return new Directory((await _pathProviderProxy.ptr.applicationDocumentsDirectory()).path);
   }
