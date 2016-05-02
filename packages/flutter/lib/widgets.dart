@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 /// The Flutter widget framework.
-/// 
+///
 /// To use, import `package:flutter/widgets.dart`.
 library widgets;
 
@@ -25,6 +25,7 @@ export 'src/widgets/gesture_detector.dart';
 export 'src/widgets/gridpaper.dart';
 export 'src/widgets/heroes.dart';
 export 'src/widgets/implicit_animations.dart';
+export 'src/widgets/layout_builder.dart';
 export 'src/widgets/lazy_block.dart';
 export 'src/widgets/locale_query.dart';
 export 'src/widgets/media_query.dart';
