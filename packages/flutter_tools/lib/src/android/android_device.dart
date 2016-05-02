@@ -181,7 +181,14 @@ class AndroidDevice extends Device {
     if (!_checkForSupportedAdbVersion() || !_checkForSupportedAndroidVersion())
       return false;
 
-    runCheckedSync(adbCommandForDevice(<String>['install', '-r', app.localPath]));
+    String installOut = runCheckedSync(adbCommandForDevice(<String>['install', '-r', app.localPath]));
+    RegExp failureExp = new RegExp(r'^Failure.*$', multiLine: true);
+    String failure = failureExp.stringMatch(installOut);
+    if (failure != null) {
+      printError('Package install error: $failure');
+      return false;
+    }
+
     runCheckedSync(adbCommandForDevice(<String>['shell', 'echo', '-n', _getSourceSha1(app), '>', _getDeviceSha1Path(app)]));
     return true;
   }
