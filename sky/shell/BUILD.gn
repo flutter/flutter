@@ -136,7 +136,6 @@ if (is_android) {
     sources = [
       "platform/android/io/flutter/view/FlutterView.java",
       "platform/android/io/flutter/view/FlutterMain.java",
-      "platform/android/org/domokit/sky/shell/TracingController.java",
     ]
     jni_package = "sky/shell"
   }
@@ -148,8 +147,6 @@ if (is_android) {
       "platform/android/library_loader.cc",
       "platform/android/platform_view_android.cc",
       "platform/android/platform_view_android.h",
-      "platform/android/tracing_controller.cc",
-      "platform/android/tracing_controller.h",
     ]
 
     deps = [
@@ -180,7 +177,6 @@ if (is_android) {
       "platform/android/io/flutter/view/ServiceRegistry.java",
       "platform/android/org/domokit/sky/shell/SkyActivity.java",
       "platform/android/org/domokit/sky/shell/SkyApplication.java",
-      "platform/android/org/domokit/sky/shell/TracingController.java",
     ]
 
     deps = [

@@ -14,7 +14,6 @@
 #include "sky/engine/bindings/jni/dart_jni.h"
 #include "sky/shell/platform/android/platform_view_android.h"
 #include "sky/shell/platform/android/flutter_main.h"
-#include "sky/shell/platform/android/tracing_controller.h"
 
 namespace {
 
@@ -23,7 +22,6 @@ base::android::RegistrationMethod kSkyRegisteredMethods[] = {
     {"BaseRunLoop", mojo::android::RegisterBaseRunLoop},
     {"FlutterView", sky::shell::PlatformViewAndroid::Register},
     {"FlutterMain", sky::shell::RegisterFlutterMain},
-    {"TracingController", sky::shell::RegisterTracingController},
 };
 
 bool RegisterJNI(JNIEnv* env) {
