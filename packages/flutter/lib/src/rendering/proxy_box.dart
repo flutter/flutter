@@ -374,6 +374,8 @@ class RenderAspectRatio extends RenderProxyBox {
     RenderBox child,
     double aspectRatio
   }) : _aspectRatio = aspectRatio, super(child) {
+    assert(_aspectRatio > 0.0);
+    assert(_aspectRatio.isFinite);
     assert(_aspectRatio != null);
   }
 
@@ -385,6 +387,8 @@ class RenderAspectRatio extends RenderProxyBox {
   double _aspectRatio;
   void set aspectRatio (double newAspectRatio) {
     assert(newAspectRatio != null);
+    assert(newAspectRatio > 0.0);
+    assert(newAspectRatio.isFinite);
     if (_aspectRatio == newAspectRatio)
       return;
     _aspectRatio = newAspectRatio;
@@ -393,22 +397,26 @@ class RenderAspectRatio extends RenderProxyBox {
 
   @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.debugAssertIsValid());
     return constraints.minWidth;
   }
 
   @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    return constraints.maxWidth;
+    assert(constraints.debugAssertIsValid());
+    return constraints.constrainWidth(constraints.maxHeight * aspectRatio);
   }
 
   @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.debugAssertIsValid());
     return constraints.minHeight;
   }
 
   @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    return constraints.maxHeight;
+    assert(constraints.debugAssertIsValid());
+    return constraints.constrainHeight(constraints.maxWidth / aspectRatio);
   }
 
   Size _applyAspectRatio(BoxConstraints constraints) {
