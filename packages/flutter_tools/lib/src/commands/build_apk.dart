@@ -26,6 +26,7 @@ export '../android/android_device.dart' show AndroidDevice;
 const String _kDefaultAndroidManifestPath = 'android/AndroidManifest.xml';
 const String _kDefaultOutputPath = 'build/app.apk';
 const String _kDefaultResourcesPath = 'android/res';
+const String _kDefaultAssetsPath = 'android/assets';
 
 const String _kFlutterManifestPath = 'flutter.yaml';
 const String _kPackagesStatusPath = '.packages';
@@ -224,6 +225,16 @@ class BuildApkCommand extends FlutterCommand {
         return 1;
       }
       extraFiles[keyValue.first] = new File(keyValue.last);
+    }
+
+    if (FileSystemEntity.isDirectorySync(_kDefaultAssetsPath)) {
+      Directory assetsDir = new Directory(_kDefaultAssetsPath);
+      for (FileSystemEntity entity in assetsDir.listSync(recursive: true)) {
+        if (entity is File) {
+          String targetPath = entity.path.substring(assetsDir.path.length);
+          extraFiles["assets/$targetPath"] = entity;
+        }
+      };
     }
 
     // TODO(devoncarew): This command should take an arg for the output type (arm / x64).
