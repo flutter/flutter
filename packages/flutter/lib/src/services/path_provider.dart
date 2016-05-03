@@ -11,7 +11,7 @@ import 'shell.dart';
 
 mojom.PathProviderProxy _initPathProviderProxy() {
   mojom.PathProviderProxy proxy = new mojom.PathProviderProxy.unbound();
-  shell.connectToViewAssociatedService(proxy);
+  shell.connectToService('mojo:flutter_platform', proxy);
   return proxy;
 }
 
