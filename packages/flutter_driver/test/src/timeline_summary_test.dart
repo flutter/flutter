@@ -58,7 +58,7 @@ void main() {
             end(1000),
             begin(2000), end(4000),
           ]).computeAverageFrameBuildTimeMillis(),
-          2
+          2.0
         );
       });
 
@@ -68,7 +68,50 @@ void main() {
             begin(2000), end(4000),
             begin(5000),
           ]).computeAverageFrameBuildTimeMillis(),
-          2
+          2.0
+        );
+      });
+    });
+
+    group('worst_frame_build_time_millis', () {
+      test('returns null when there is no data', () {
+        expect(summarize([]).computeWorstFrameBuildTimeMillis(), isNull);
+      });
+
+      test('computes worst frame build time in milliseconds', () {
+        expect(
+          summarize([
+            begin(1000), end(2000),
+            begin(3000), end(5000),
+          ]).computeWorstFrameBuildTimeMillis(),
+          2.0
+        );
+        expect(
+          summarize([
+            begin(3000), end(5000),
+            begin(1000), end(2000),
+          ]).computeWorstFrameBuildTimeMillis(),
+          2.0
+        );
+      });
+
+      test('skips leading "end" events', () {
+        expect(
+          summarize([
+            end(1000),
+            begin(2000), end(4000),
+          ]).computeWorstFrameBuildTimeMillis(),
+          2.0
+        );
+      });
+
+      test('skips trailing "begin" events', () {
+        expect(
+          summarize([
+            begin(2000), end(4000),
+            begin(5000),
+          ]).computeWorstFrameBuildTimeMillis(),
+          2.0
         );
       });
     });
@@ -96,6 +139,7 @@ void main() {
           ]).summaryJson,
           {
             'average_frame_build_time_millis': 7.0,
+            'worst_frame_build_time_millis': 11.0,
             'missed_frame_build_budget_count': 2,
             'frame_count': 3,
             'frame_build_times': <int>[9000, 1000, 11000],
@@ -131,6 +175,7 @@ void main() {
             await fs.file('/temp/test.timeline_summary.json').readAsString();
         expect(JSON.decode(written), {
           'average_frame_build_time_millis': 7.0,
+          'worst_frame_build_time_millis': 11.0,
           'missed_frame_build_budget_count': 2,
           'frame_count': 3,
           'frame_build_times': <int>[9000, 1000, 11000],
