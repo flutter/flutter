@@ -36,7 +36,7 @@ String _tracingCategoriesToString(List<TracingCategory> categories) {
       case TracingCategory.vm: return 'VM';
     }
   }).join(', ');
-  return "[$contents]";
+  return '[$contents]';
 }
 
 final Logger _log = new Logger('FlutterDriver');
