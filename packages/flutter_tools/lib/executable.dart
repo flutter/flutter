@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:path/path.dart' as path;
 import 'package:stack_trace/stack_trace.dart';
 
 import 'src/base/context.dart';
@@ -84,13 +83,8 @@ Future<Null> main(List<String> args) async {
     context[DeviceManager] = new DeviceManager();
     Doctor.initGlobal();
 
-    if (flutterUsage.isFirstRun) {
-      printStatus(
-        'The Flutter tool anonymously reports feature usage statistics and basic crash reports to Google to\n'
-        'help Google contribute improvements to Flutter over time. Use "flutter config" to control this\n'
-        'behavior. See Google\'s privacy policy: https://www.google.com/intl/en/policies/privacy/\n'
-      );
-    }
+    if (flutterUsage.isFirstRun)
+      flutterUsage.printUsage();
 
     dynamic result = await runner.run(args);
 
@@ -126,7 +120,7 @@ Future<Null> main(List<String> args) async {
         File file = _createCrashReport(args, error, chain);
 
         stderr.writeln(
-          'Crash report written to ${path.relative(file.path)}; '
+          'Crash report written to ${file.path};\n'
           'please let us know at https://github.com/flutter/flutter/issues.');
       }
 

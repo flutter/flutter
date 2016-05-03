@@ -8,6 +8,7 @@ import 'package:usage/src/usage_impl_io.dart';
 import 'package:usage/usage.dart';
 
 import 'base/context.dart';
+import 'globals.dart';
 import 'runner/version.dart';
 
 // TODO(devoncarew): We'll need to do some work on the user agent in order to
@@ -70,6 +71,17 @@ class Usage {
     // events to not be reported. Perhaps we could send the analytics pings
     // out-of-process from flutter_tools?
     return _analytics.waitForLastPing(timeout: new Duration(milliseconds: 250));
+  }
+
+  void printUsage() {
+    printStatus('''
+Flutter - https://flutter.io - version ${FlutterVersion.getVersionString(whitelistBranchName: true)}
+
+  The Flutter tool anonymously reports feature usage statistics and basic crash reports to Google in
+  order to help Google contribute improvements to Flutter over time. Use "flutter config" to control
+  this behavior. See Google's privacy policy: https://www.google.com/intl/en/policies/privacy/
+'''
+    );
   }
 }
 
