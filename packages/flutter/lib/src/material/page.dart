@@ -39,9 +39,15 @@ class _MaterialPageTransition extends AnimatedWidget {
   }
 }
 
-const Duration kMaterialPageRouteTransitionDuration = const Duration(milliseconds: 150);
-
+/// A modal route that replaces the entire screen with a material design transition.
+///
+/// The entrance transition for the page slides the page upwards and fades it
+/// in. The exit transition is the same, but in reverse.
+///
+/// [MaterialApp] creates material page routes for entries in the
+/// [MaterialApp.routes] map.
 class MaterialPageRoute<T> extends PageRoute<T> {
+  /// Creates a page route for use in a material design app.
   MaterialPageRoute({
     this.builder,
     Completer<T> completer,
@@ -51,10 +57,11 @@ class MaterialPageRoute<T> extends PageRoute<T> {
     assert(opaque);
   }
 
+  /// Builds the primary contents of the route.
   final WidgetBuilder builder;
 
   @override
-  Duration get transitionDuration => kMaterialPageRouteTransitionDuration;
+  Duration get transitionDuration => const Duration(milliseconds: 150);
 
   @override
   Color get barrierColor => null;

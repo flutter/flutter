@@ -34,7 +34,7 @@ class TestRoute<T> extends PageRoute<T> {
   final Widget child;
 
   @override
-  Duration get transitionDuration => kMaterialPageRouteTransitionDuration;
+  Duration get transitionDuration => const Duration(milliseconds: 150);
 
   @override
   Color get barrierColor => null;
@@ -46,8 +46,8 @@ class TestRoute<T> extends PageRoute<T> {
 }
 
 void main() {
-  final Duration kTwoTenthsOfTheTransitionDuration = kMaterialPageRouteTransitionDuration * 0.2;
-  final Duration kFourTenthsOfTheTransitionDuration = kMaterialPageRouteTransitionDuration * 0.4;
+  final Duration kTwoTenthsOfTheTransitionDuration = const Duration(milliseconds: 30);
+  final Duration kFourTenthsOfTheTransitionDuration = const Duration(milliseconds: 60);
 
   testWidgets('Check onstage/offstage handling around transitions', (WidgetTester tester) {
 
