@@ -243,7 +243,7 @@ void main() {
         Device emulator = new MockDevice();
         when(emulator.name).thenReturn('new-simulator');
         when(IOSSimulatorUtils.instance.getAttachedDevices())
-            .thenReturn(<IOSSimulator>[emulator]);
+            .thenReturn(<Device>[emulator]);
 
         Device device = await findTargetDevice();
         expect(device.name, 'new-simulator');
