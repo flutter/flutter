@@ -8,6 +8,7 @@ import 'package:usage/src/usage_impl_io.dart';
 import 'package:usage/usage.dart';
 
 import 'base/context.dart';
+import 'globals.dart';
 import 'runner/version.dart';
 
 // TODO(devoncarew): We'll need to do some work on the user agent in order to
@@ -28,6 +29,8 @@ class Usage {
   static Usage get instance => context[Usage] ?? (context[Usage] = new Usage());
 
   Analytics _analytics;
+
+  bool _printedUsage = false;
 
   bool get isFirstRun => _analytics.firstRun;
 
@@ -70,6 +73,27 @@ class Usage {
     // events to not be reported. Perhaps we could send the analytics pings
     // out-of-process from flutter_tools?
     return _analytics.waitForLastPing(timeout: new Duration(milliseconds: 250));
+  }
+
+  void printUsage() {
+    if (_printedUsage)
+      return;
+    _printedUsage = true;
+
+    final String versionString = FlutterVersion.getVersionString(whitelistBranchName: true);
+
+    printStatus('');
+    printStatus('''
+  ╔════════════════════════════════════════════════════════════════════════════════════════════════════╗
+  ║              Welcome to Flutter! - Flutter version $versionString - https://flutter.io             ║
+  ║                                                                                                    ║
+  ║ The Flutter tool anonymously reports feature usage statistics and basic crash reports to Google in ║
+  ║ order to help Google contribute improvements to Flutter over time. See Google's privacy policy:    ║
+  ║ https://www.google.com/intl/en/policies/privacy/                                                   ║
+  ║                                                                                                    ║
+  ║                 Use "flutter config --no-analytics" to disable analytics reporting                 ║
+  ╚════════════════════════════════════════════════════════════════════════════════════════════════════╝
+  ''', emphasis: true);
   }
 }
 

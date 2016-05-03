@@ -143,6 +143,9 @@ class MockUsage implements Usage {
 
   @override
   Future<Null> ensureAnalyticsSent() => new Future<Null>.value();
+
+  @override
+  void printUsage() { }
 }
 
 class _MockUsageTimer implements UsageTimer {
