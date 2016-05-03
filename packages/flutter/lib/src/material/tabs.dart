@@ -19,8 +19,7 @@ import 'ink_well.dart';
 import 'material.dart';
 import 'theme.dart';
 
-typedef void TabSelectedIndexChanged(int selectedIndex);
-typedef void TabLayoutChanged(Size size, List<double> widths);
+typedef void _TabLayoutChanged(Size size, List<double> widths);
 
 // See https://www.google.com/design/spec/components/tabs.html#tabs-specs
 const double _kTabHeight = 46.0;
@@ -178,7 +177,7 @@ class _RenderTabBar extends RenderBox with
 
   Size layoutSize;
   List<double> layoutWidths;
-  TabLayoutChanged onLayoutChanged;
+  _TabLayoutChanged onLayoutChanged;
 
   void reportLayoutChangedIfNeeded() {
     assert(onLayoutChanged != null);
@@ -275,7 +274,7 @@ class _TabBarWrapper extends MultiChildRenderObjectWidget {
   final Rect indicatorRect;
   final bool textAndIcons;
   final bool isScrollable;
-  final TabLayoutChanged onLayoutChanged;
+  final _TabLayoutChanged onLayoutChanged;
 
   @override
   _RenderTabBar createRenderObject(BuildContext context) {
@@ -296,18 +295,36 @@ class _TabBarWrapper extends MultiChildRenderObjectWidget {
   }
 }
 
+/// Signature for building icons for tabs.
+///
+/// See also:
+///
+///  * [TabLabel]
 typedef Widget TabLabelIconBuilder(BuildContext context, Color color);
 
 /// Each TabBar tab can display either a title [text], an icon, or both. An icon
-/// can be specified by either the icon or iconBuilder parameters. In either case
-/// the icon will occupy a 24x24 box above the title text. If iconBuilder is
-/// specified its color parameter is the color that an ordinary icon would have
-/// been drawn with. The color reflects that tab's selection state.
+/// can be specified by either the [icon] or [iconBuilder] parameters. In either
+/// case the icon will occupy a 24x24 box above the title text. If iconBuilder
+/// is specified its color parameter is the color that an ordinary icon would
+/// have been drawn with. The color reflects that tab's selection state.
 class TabLabel {
+  /// Creates a tab label description.
+  ///
+  /// At least one of [text], [icon], or [iconBuilder] must be non-null.
   const TabLabel({ this.text, this.icon, this.iconBuilder });
 
+  /// The text to display as the label of the tab.
   final String text;
+
+  /// Data for an [Icon] to display as the label of the tab.
   final IconData icon;
+
+  /// Called if [icon] is null to build an icon as a label for this tab.
+  ///
+  /// The color argument to this builder is the color that an ordinary icon
+  /// would have been drawn with. The color reflects that tab's selection state.
+  ///
+  /// Return value must be non-null.
   final TabLabelIconBuilder iconBuilder;
 }
 
@@ -408,13 +425,34 @@ class _TabsScrollBehavior extends BoundedBehavior {
   }
 }
 
+/// An abstract interface through which [TabBarSelection] reports changes.
 abstract class TabBarSelectionAnimationListener {
+  /// Called when the status of the [TabBarSelection] animation changes.
   void handleStatusChange(AnimationStatus status);
+
+  /// Called on each animation frame when the [TabBarSelection] animation ticks.
   void handleProgressChange();
+
+  /// Called when the [TabBarSelection] is deactivated.
+  ///
+  /// Implementations typically drop their reference to the [TabBarSelection]
+  /// during this callback.
   void handleSelectionDeactivate();
 }
 
+/// Coordinates the tab selection between a [TabBar] and a [TabBarView].
+///
+/// Place a [TabBarSelection] widget in the tree such that it is a common
+/// ancestor of both the [TabBar] and the [TabBarView]. Both the [TabBar] and
+/// the [TabBarView] can alter which tab is selected. They coodinate by
+/// listening to the selection value stored in a common ancestor
+/// [TabBarSelection] selection widget.
 class TabBarSelection<T> extends StatefulWidget {
+  /// Creates a tab bar selection.
+  ///
+  /// The values argument must be non-null, non-empty, and each value must be
+  /// unique. The value argument must either be null or contained in the values
+  /// argument. The child argument must be non-null.
   TabBarSelection({
     Key key,
     this.value,
@@ -428,10 +466,19 @@ class TabBarSelection<T> extends StatefulWidget {
     assert(child != null);
   }
 
+  /// The current value of the selection.
   final T value;
 
+  /// The list of possible values that the selection can obtain.
   List<T> values;
 
+  /// Called when the value of the selection should change.
+  ///
+  /// The tab bar selection passes the new value to the callback but does not
+  /// actually change state until the parent widget rebuilds the tab bar
+  /// selection with the new value.
+  ///
+  /// If null, the tab bar selection cannot change value.
   final ValueChanged<T> onChanged;
 
   /// The widget below this widget in the tree.
@@ -440,6 +487,7 @@ class TabBarSelection<T> extends StatefulWidget {
   @override
   TabBarSelectionState<T> createState() => new TabBarSelectionState<T>();
 
+  /// The state from the closest instance of this class that encloses the given context.
   static TabBarSelectionState<dynamic/*=T*/> of/*<T>*/(BuildContext context) {
     return context.ancestorStateOfType(new TypeMatcher<TabBarSelectionState<dynamic/*=T*/>>());
   }
