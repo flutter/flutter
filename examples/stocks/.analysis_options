@@ -1,3 +1,0 @@
-analyzer:
-  exclude:
-    - 'lib/i18n/stock_messages_*.dart'
