@@ -28,7 +28,7 @@ class TimelineSummary {
   /// Average amount of time spent per frame in the framework building widgets,
   /// updating layout, painting and compositing.
   ///
-  /// Returns null if no frames were recorded.
+  /// Returns `null` if no frames were recorded.
   double computeAverageFrameBuildTimeMillis() {
     int totalBuildTimeMicros = 0;
     int frameCount = 0;
@@ -46,7 +46,7 @@ class TimelineSummary {
   /// Find amount of time spent in the framework building widgets,
   /// updating layout, painting and compositing on worst frame.
   ///
-  /// Returns null if no frames were recorded.
+  /// Returns `null` if no frames were recorded.
   double computeWorstFrameBuildTimeMillis() {
     int maxBuildTimeMicros = 0;
     int frameCount = 0;

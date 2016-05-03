@@ -54,7 +54,7 @@ class MojoShell {
 
   /// Attempts to connect to an application via the Mojo shell.
   ///
-  /// Returns null if [canConnectToOtherApplications] is false.
+  /// Returns `null` if [canConnectToOtherApplications] is false.
   ApplicationConnection connectToApplication(String url) {
     if (_shell == null)
       return null;
