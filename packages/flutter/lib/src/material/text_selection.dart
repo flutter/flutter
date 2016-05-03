@@ -93,12 +93,7 @@ class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    return new BoxConstraints(
-      minWidth: 0.0,
-      maxWidth: constraints.maxWidth,
-      minHeight: 0.0,
-      maxHeight: constraints.maxHeight
-    );
+    return constraints.loosen();
   }
 
   @override
@@ -146,11 +141,11 @@ class _TextSelectionHandlePainter extends CustomPainter {
 }
 
 /// Builder for material-style copy/paste text selection toolbar.
-Widget textSelectionToolbarBuilder(
+Widget buildTextSelectionToolbar(
     BuildContext context, Point position, TextSelectionDelegate delegate) {
   final Size screenSize = MediaQuery.of(context).size;
   return new ConstrainedBox(
-    constraints: new BoxConstraints(maxWidth: screenSize.width, maxHeight: screenSize.height),
+    constraints: new BoxConstraints.loose(screenSize),
     child: new CustomSingleChildLayout(
       delegate: new _TextSelectionToolbarLayout(position),
       child: new _TextSelectionToolbar(delegate)
@@ -159,7 +154,7 @@ Widget textSelectionToolbarBuilder(
 }
 
 /// Builder for material-style text selection handles.
-Widget textSelectionHandleBuilder(
+Widget buildTextSelectionHandle(
     BuildContext context, TextSelectionHandleType type) {
   Widget handle = new SizedBox(
     width: _kHandleSize,

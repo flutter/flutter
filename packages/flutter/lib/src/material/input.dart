@@ -10,7 +10,7 @@ import 'debug.dart';
 import 'icon.dart';
 import 'icons.dart';
 import 'material.dart';
-import 'text_selection_material.dart';
+import 'text_selection.dart';
 import 'theme.dart';
 
 export 'package:sky_services/editing/editing.mojom.dart' show KeyboardType;
@@ -193,8 +193,8 @@ class _InputState extends State<Input> {
         hideText: config.hideText,
         cursorColor: themeData.textSelectionColor,
         selectionColor: themeData.textSelectionColor,
-        selectionHandleBuilder: textSelectionHandleBuilder,
-        selectionToolbarBuilder: textSelectionToolbarBuilder,
+        selectionHandleBuilder: buildTextSelectionHandle,
+        selectionToolbarBuilder: buildTextSelectionToolbar,
         keyboardType: config.keyboardType,
         onChanged: onChanged,
         onSubmitted: onSubmitted
