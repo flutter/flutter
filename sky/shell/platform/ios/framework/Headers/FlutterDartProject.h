@@ -20,6 +20,8 @@ FLUTTER_EXPORT
                           packages:(NSURL*)dartPackages
     NS_DESIGNATED_INITIALIZER;
 
+- (instancetype)initFromDefaultSourceForConfiguration;
+
 @end
 
 #endif  // FLUTTER_FLUTTERDARTPROJECT_H_

@@ -3,7 +3,32 @@
 // found in the LICENSE file.
 
 #include "sky/shell/platform/ios/framework/Source/FlutterDartProject_Internal.h"
+
+#include "base/command_line.h"
 #include "sky/shell/platform/ios/framework/Source/FlutterDartSource.h"
+#include "sky/shell/switches.h"
+
+namespace {
+
+#if TARGET_IPHONE_SIMULATOR
+
+NSURL* URLForSwitch(const char* name) {
+  auto cmd = *base::CommandLine::ForCurrentProcess();
+  NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+
+  if (cmd.HasSwitch(name)) {
+    auto url = [NSURL fileURLWithPath:@(cmd.GetSwitchValueASCII(name).c_str())];
+    [defaults setURL:url forKey:@(name)];
+    [defaults synchronize];
+    return url;
+  }
+
+  return [defaults URLForKey:@(name)];
+}
+
+#endif  // TARGET_IPHONE_SIMULATOR
+
+}  // namespace
 
 @implementation FlutterDartProject {
   NSBundle* _precompiledDartBundle;
@@ -46,6 +71,24 @@
   }
 
   return self;
+}
+
+#pragma mark - Convenience initializers
+
+- (instancetype)initFromDefaultSourceForConfiguration {
+  #if TARGET_IPHONE_SIMULATOR
+    return [self
+        initWithFLXArchive:URLForSwitch(sky::shell::switches::kFLX)
+                  dartMain:URLForSwitch(sky::shell::switches::kMainDartFile)
+                  packages:URLForSwitch(sky::shell::switches::kPackages)];
+  #else
+    NSString* bundlePath =
+        [[NSBundle mainBundle] pathForResource:@"FlutterApplication"
+                                        ofType:@"framework"
+                                   inDirectory:@"Frameworks"];
+    NSBundle* bundle = [NSBundle bundleWithPath:bundlePath];
+    return [self initWithPrecompiledDartBundle:bundle];
+  #endif
 }
 
 #pragma mark - Common initialization tasks

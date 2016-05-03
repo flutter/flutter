@@ -23,6 +23,12 @@
 #include "sky/shell/shell.h"
 #include "sky/shell/shell_view.h"
 
+void FlutterInit(int argc, const char* argv[]) {
+  NSBundle* bundle = [NSBundle bundleForClass:[FlutterViewController class]];
+  NSString* icuDataPath = [bundle pathForResource:@"icudtl" ofType:@"dat"];
+  sky::shell::PlatformMacMain(argc, argv, icuDataPath.UTF8String);
+}
+
 @implementation FlutterViewController {
   FlutterDartProject* _dartProject;
   UIInterfaceOrientationMask _orientationPreferences;
@@ -63,16 +69,9 @@
 #pragma mark - Common view controller initialization tasks
 
 - (void)performCommonViewControllerInitialization {
-  if (_initialized) {
+  if (_initialized)
     return;
-  }
-
   _initialized = YES;
-
-  NSBundle* bundle = [NSBundle bundleForClass:[self class]];
-  NSString* icuDataPath = [bundle pathForResource:@"icudtl" ofType:@"dat"];
-
-  sky::shell::PlatformMacMain(0, nullptr, icuDataPath.UTF8String);
 
   _orientationPreferences = UIInterfaceOrientationMaskAll;
   _dynamicServiceLoader = [[FlutterDynamicServiceLoader alloc] init];

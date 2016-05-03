@@ -249,14 +249,14 @@ if (is_android) {
     source_set(target_name) {
 
       sources = [
-        "platform/ios/FlutterAppDelegate.h",
-        "platform/ios/FlutterAppDelegate.mm",
         "platform/ios/framework/Headers/Flutter.h",
+        "platform/ios/framework/Headers/FlutterAppDelegate.h",
         "platform/ios/framework/Headers/FlutterDartProject.h",
         "platform/ios/framework/Headers/FlutterMacros.h",
         "platform/ios/framework/Headers/FlutterViewController.h",
         "platform/ios/framework/Source/accessibility_bridge.h",
         "platform/ios/framework/Source/accessibility_bridge.mm",
+        "platform/ios/framework/Source/FlutterAppDelegate.mm",
         "platform/ios/framework/Source/FlutterDartProject.mm",
         "platform/ios/framework/Source/FlutterDartProject_Internal.h",
         "platform/ios/framework/Source/FlutterDartSource.h",
@@ -378,6 +378,7 @@ if (is_android) {
     copy("framework_headers") {
       sources = [
         "platform/ios/framework/Headers/Flutter.h",
+        "platform/ios/framework/Headers/FlutterAppDelegate.h",
         "platform/ios/framework/Headers/FlutterDartProject.h",
         "platform/ios/framework/Headers/FlutterMacros.h",
         "platform/ios/framework/Headers/FlutterViewController.h",

@@ -20,4 +20,7 @@ FLUTTER_EXPORT
 
 @end
 
+// Initializes Flutter for this process. Need only be called once per process.
+FLUTTER_EXPORT void FlutterInit(int argc, const char* argv[]);
+
 #endif  // FLUTTER_FLUTTERVIEWCONTROLLER_H_
