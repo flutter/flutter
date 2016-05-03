@@ -91,11 +91,25 @@ class _Painter extends CustomPainter {
 /// If the OverscrollIndicator's child has more than one Scrollable descendant
 /// the scrollableKey parameter can be used to identify the one to track.
 class OverscrollIndicator extends StatefulWidget {
-  OverscrollIndicator({ Key key, this.scrollableKey, this.child }) : super(key: key) {
+  /// Creates an overscroll indicator.
+  ///
+  /// The [child] argument must not be null.
+  OverscrollIndicator({
+    Key key,
+    this.scrollableKey,
+    this.child
+  }) : super(key: key) {
     assert(child != null);
   }
 
+  /// Identifies the [Scrollable] descendant of child that the overscroll
+  /// indicator will track. Can be null if there's only one [Scrollable]
+  /// descendant.
   final Key scrollableKey;
+
+  /// The overscroll indicator will be stacked on top of this child. The
+  /// indicator will appear when child's [Scrollable] descendant is
+  /// over-scrolled.
   final Widget child;
 
   @override
