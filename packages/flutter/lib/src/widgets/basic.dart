@@ -293,6 +293,14 @@ class ClipOval extends SingleChildRenderObjectWidget {
   ClipOval({ Key key, this.clipper, Widget child }) : super(key: key, child: child);
 
   /// If non-null, determines which clip to use.
+  ///
+  /// The delegate returns a rectangle that describes the axis-aligned
+  /// bounding box of the oval. The oval's axes will themselves also
+  /// be axis-aligned.
+  ///
+  /// If the [clipper] delegate is null, then the oval uses the
+  /// widget's bounding box (the layout dimensions of the render
+  /// object) instead.
   final CustomClipper<Rect> clipper;
 
   @override
@@ -305,6 +313,42 @@ class ClipOval extends SingleChildRenderObjectWidget {
 
   @override
   void didUnmountRenderObject(RenderClipOval renderObject) {
+    renderObject.clipper = null;
+  }
+}
+
+/// Clips its child using a path.
+///
+/// Invokes a callback on a delegate whenever the widget is to be
+/// painted. The callback returns a path and the widget prevents the
+/// child from painting outside the path.
+///
+/// Clipping to a path is expensive. Certain shapes have more
+/// optimized widgets:
+///
+///  * To clip to a rectangle, consider [ClipRect].
+///  * To clip to an oval or circle, consider [ClipOval].
+///  * To clip to a rounded rectangle, consider [ClipRRect].
+class ClipPath extends SingleChildRenderObjectWidget {
+  ClipPath({ Key key, this.clipper, Widget child }) : super(key: key, child: child);
+
+  /// If non-null, determines which clip to use.
+  ///
+  /// The default clip, which is used if this property is null, is the
+  /// bounding box rectangle of the widget. [ClipRect] is a more
+  /// efficient way of obtaining that effect.
+  final CustomClipper<Path> clipper;
+
+  @override
+  RenderClipPath createRenderObject(BuildContext context) => new RenderClipPath(clipper: clipper);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderClipPath renderObject) {
+    renderObject.clipper = clipper;
+  }
+
+  @override
+  void didUnmountRenderObject(RenderClipPath renderObject) {
     renderObject.clipper = null;
   }
 }

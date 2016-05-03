@@ -857,7 +857,13 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   }
 
   T get _defaultClip;
-  T get _clip => _clipper?.getClip(size) ?? _defaultClip;
+  T _clip;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    _clip = _clipper?.getClip(size) ?? _defaultClip;
+  }
 
   @override
   Rect describeApproximatePaintClip(RenderObject child) => _clipper?.getApproximateClipRect(size) ?? Point.origin & size;
@@ -991,6 +997,40 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
       Rect clipBounds = _clip;
       context.pushClipPath(needsCompositing, offset, clipBounds, _getClipPath(clipBounds), super.paint);
     }
+  }
+}
+
+/// Clips its child using a path.
+///
+/// Takes a delegate whose primary method returns a path that should
+/// be used to prevent the child from painting outside the path.
+///
+/// Clipping to a path is expensive. Certain shapes have more
+/// optimized render objects:
+///
+///  * To clip to a rectangle, consider [RenderClipRect].
+///  * To clip to an oval or circle, consider [RenderClipOval].
+///  * To clip to a rounded rectangle, consider [RenderClipRRect].
+class RenderClipPath extends _RenderCustomClip<Path> {
+  RenderClipPath({
+    RenderBox child,
+    CustomClipper<Path> clipper
+  }) : super(child: child, clipper: clipper);
+
+  @override
+  Path get _defaultClip => new Path()..addRect(Point.origin & size);
+
+  @override
+  bool hitTest(HitTestResult result, { Point position }) {
+    if (_clip == null || !_clip.contains(position))
+      return false;
+    return super.hitTest(result, position: position);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null)
+      context.pushClipPath(needsCompositing, offset, Point.origin & size, _clip, super.paint);
   }
 }
 
