@@ -135,7 +135,7 @@ class Daemon {
 
       _domainMap[prefix].handleCommand(name, id, request['params']);
     } catch (error) {
-      _send({'id': id, 'error': _toJsonable(error)});
+      _send(<String, dynamic>{'id': id, 'error': _toJsonable(error)});
     }
   }
 
@@ -181,7 +181,7 @@ abstract class Domain {
   }
 
   void sendEvent(String name, [dynamic args]) {
-    Map<String, dynamic> map = { 'event': name };
+    Map<String, dynamic> map = <String, dynamic>{ 'event': name };
     if (args != null)
       map['params'] = _toJsonable(args);
     _send(map);
@@ -202,13 +202,13 @@ class DaemonDomain extends Domain {
 
     _subscription = daemon.notifyingLogger.onMessage.listen((LogMessage message) {
       if (message.stackTrace != null) {
-        sendEvent('daemon.logMessage', {
+        sendEvent('daemon.logMessage', <String, dynamic>{
           'level': message.level,
           'message': message.message,
           'stackTrace': message.stackTrace.toString()
         });
       } else {
-        sendEvent('daemon.logMessage', {
+        sendEvent('daemon.logMessage', <String, dynamic>{
           'level': message.level,
           'message': message.message
         });

@@ -29,7 +29,7 @@ class SnapshotCompiler {
     assert(mainPath != null);
     assert(snapshotPath != null);
 
-    final List<String> args = [
+    final List<String> args = <String>[
       _path,
       mainPath,
       '--packages=${PackageMap.instance.packagesPath}',

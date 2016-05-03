@@ -56,7 +56,9 @@ class AndroidDevice extends Device {
     if (_isLocalEmulator == null) {
       // http://developer.android.com/ndk/guides/abis.html (x86, armeabi-v7a, ...)
       try {
-        String value = runCheckedSync(adbCommandForDevice(['shell', 'getprop', 'ro.product.cpu.abi']));
+        String value = runCheckedSync(adbCommandForDevice(
+          <String>['shell', 'getprop', 'ro.product.cpu.abi']
+        ));
         _isLocalEmulator = value.startsWith('x86');
       } catch (error) {
         _isLocalEmulator = false;
@@ -164,7 +166,7 @@ class AndroidDevice extends Device {
   @override
   bool isAppInstalled(ApplicationPackage app) {
     // This call takes 400ms - 600ms.
-    if (runCheckedSync(adbCommandForDevice(['shell', 'pm', 'path', app.id])).isEmpty)
+    if (runCheckedSync(adbCommandForDevice(<String>['shell', 'pm', 'path', app.id])).isEmpty)
       return false;
 
     // Check the application SHA.
@@ -405,7 +407,7 @@ class AndroidDevice extends Device {
 ///
 /// [mockAdbOutput] is public for testing.
 List<AndroidDevice> getAdbDevices({ String mockAdbOutput }) {
-  List<AndroidDevice> devices = [];
+  List<AndroidDevice> devices = <AndroidDevice>[];
   List<String> output;
 
   if (mockAdbOutput == null) {

@@ -23,7 +23,7 @@ class Adb {
 
   bool exists() {
     try {
-      runCheckedSync([adbPath, 'version']);
+      runCheckedSync(<String>[adbPath, 'version']);
       return true;
     } catch (exception) {
       return false;
@@ -36,18 +36,18 @@ class Adb {
   ///     Revision eac51f2bb6a8-android
   ///
   /// This method throws if `adb version` fails.
-  String getVersion() => runCheckedSync([adbPath, 'version']);
+  String getVersion() => runCheckedSync(<String>[adbPath, 'version']);
 
   /// Starts the adb server. This will throw if there's an problem starting the
   /// adb server.
   void startServer() {
-    runCheckedSync([adbPath, 'start-server']);
+    runCheckedSync(<String>[adbPath, 'start-server']);
   }
 
   /// Stops the adb server. This will throw if there's an problem stopping the
   /// adb server.
   void killServer() {
-    runCheckedSync([adbPath, 'kill-server']);
+    runCheckedSync(<String>[adbPath, 'kill-server']);
   }
 
   /// Ask the ADB server for its internal version number.

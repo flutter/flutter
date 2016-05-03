@@ -32,7 +32,6 @@ export 'package:flutter/rendering.dart' show
     MaxTileWidthGridDelegate,
     MultiChildLayoutDelegate,
     PaintingContext,
-    PlainTextSpan,
     PointerCancelEvent,
     PointerCancelEventListener,
     PointerDownEvent,

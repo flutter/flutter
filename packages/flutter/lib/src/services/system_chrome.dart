@@ -9,7 +9,7 @@ import 'package:sky_services/flutter/platform/system_chrome.mojom.dart';
 
 import 'shell.dart';
 
-export 'package:sky_services/flutter/platform/system_chrome.mojom.dart' show DeviceOrientation, SystemUIOverlay;
+export 'package:sky_services/flutter/platform/system_chrome.mojom.dart' show DeviceOrientation;
 
 mojom.SystemChromeProxy _initSystemChromeProxy() {
   mojom.SystemChromeProxy proxy = new mojom.SystemChromeProxy.unbound();

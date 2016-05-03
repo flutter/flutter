@@ -21,7 +21,7 @@ void main() {
       when(device.installApp(any)).thenReturn(true);
       testDeviceManager.addDevice(device);
 
-      return createTestCommandRunner(command).run(['install']).then((int code) {
+      return createTestCommandRunner(command).run(<String>['install']).then((int code) {
         expect(code, equals(0));
       });
     });
@@ -35,7 +35,7 @@ void main() {
       when(device.installApp(any)).thenReturn(true);
       testDeviceManager.addDevice(device);
 
-      return createTestCommandRunner(command).run(['install']).then((int code) {
+      return createTestCommandRunner(command).run(<String>['install']).then((int code) {
         expect(code, equals(0));
       });
     });

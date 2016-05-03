@@ -23,7 +23,7 @@ const String _kPath = '/runner';
 String shellPath;
 
 void installHook() {
-  hack.registerPlatformPlugin([TestPlatform.vm], () => new FlutterPlatform());
+  hack.registerPlatformPlugin(<TestPlatform>[TestPlatform.vm], () => new FlutterPlatform());
 }
 
 class _ServerInfo {
@@ -46,7 +46,7 @@ Future<_ServerInfo> _startServer() async {
 
 Future<Process> _startProcess(String mainPath, { String packages }) {
   assert(shellPath != null || _kSkyShell != null); // Please provide the path to the shell in the SKY_SHELL environment variable.
-  return Process.start(shellPath ?? _kSkyShell, [
+  return Process.start(shellPath ?? _kSkyShell, <String>[
     '--enable-checked-mode',
     '--non-interactive',
     '--packages=$packages',

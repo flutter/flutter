@@ -18,7 +18,7 @@ typedef String StringConverter(String string);
 Future<Process> runCommand(List<String> cmd, { String workingDirectory }) async {
   printTrace(cmd.join(' '));
   String executable = cmd[0];
-  List<String> arguments = cmd.length > 1 ? cmd.sublist(1) : [];
+  List<String> arguments = cmd.length > 1 ? cmd.sublist(1) : <String>[];
   Process process = await Process.start(
     executable,
     arguments,

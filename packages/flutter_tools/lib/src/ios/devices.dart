@@ -81,7 +81,7 @@ class IOSDevice extends Device {
     if (!doctor.iosWorkflow.hasIDeviceId)
       return <IOSDevice>[];
 
-    List<IOSDevice> devices = [];
+    List<IOSDevice> devices = <IOSDevice>[];
     for (String id in _getAttachedDeviceIDs(mockIOS)) {
       String name = _getDeviceName(id, mockIOS);
       devices.add(new IOSDevice(id, name: name));
@@ -92,7 +92,7 @@ class IOSDevice extends Device {
   static Iterable<String> _getAttachedDeviceIDs([IOSDevice mockIOS]) {
     String listerPath = (mockIOS != null) ? mockIOS.listerPath : _checkForCommand('idevice_id');
     try {
-      String output = runSync([listerPath, '-l']);
+      String output = runSync(<String>[listerPath, '-l']);
       return output.trim().split('\n').where((String s) => s != null && s.isNotEmpty);
     } catch (e) {
       return <String>[];
@@ -103,17 +103,17 @@ class IOSDevice extends Device {
     String informerPath = (mockIOS != null)
         ? mockIOS.informerPath
         : _checkForCommand('ideviceinfo');
-    return runSync([informerPath, '-k', 'DeviceName', '-u', deviceID]).trim();
+    return runSync(<String>[informerPath, '-k', 'DeviceName', '-u', deviceID]).trim();
   }
 
-  static final Map<String, String> _commandMap = {};
+  static final Map<String, String> _commandMap = <String, String>{};
   static String _checkForCommand(
     String command, [
     String macInstructions = _ideviceinstallerInstructions
   ]) {
     return _commandMap.putIfAbsent(command, () {
       try {
-        command = runCheckedSync(['which', command]).trim();
+        command = runCheckedSync(<String>['which', command]).trim();
       } catch (e) {
         if (Platform.isMacOS) {
           printError('$command not found. $macInstructions');
@@ -128,7 +128,7 @@ class IOSDevice extends Device {
   @override
   bool installApp(ApplicationPackage app) {
     try {
-      runCheckedSync([installerPath, '-i', app.localPath]);
+      runCheckedSync(<String>[installerPath, '-i', app.localPath]);
       return true;
     } catch (e) {
       return false;
@@ -142,7 +142,7 @@ class IOSDevice extends Device {
   @override
   bool isAppInstalled(ApplicationPackage app) {
     try {
-      String apps = runCheckedSync([installerPath, '--list-apps']);
+      String apps = runCheckedSync(<String>[installerPath, '--list-apps']);
       if (new RegExp(app.id, multiLine: true).hasMatch(apps)) {
         return true;
       }
@@ -181,7 +181,7 @@ class IOSDevice extends Device {
     }
 
     // Step 3: Attempt to install the application on the device.
-    int installationResult = await runCommandAndStreamOutput([
+    int installationResult = await runCommandAndStreamOutput(<String>[
       '/usr/bin/env',
       'ios-deploy',
       '--id',

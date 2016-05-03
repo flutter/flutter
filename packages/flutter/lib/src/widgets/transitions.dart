@@ -9,7 +9,6 @@ import 'package:vector_math/vector_math_64.dart' show Matrix4;
 import 'basic.dart';
 import 'framework.dart';
 
-export 'package:flutter/animation.dart' show AnimationDirection;
 export 'package:flutter/rendering.dart' show RelativeRect;
 
 /// A widget that rebuilds when the given animation changes value.

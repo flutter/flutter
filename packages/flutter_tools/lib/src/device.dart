@@ -247,12 +247,12 @@ abstract class Device {
     }
 
     await client.sendRequest('_setVMTimelineFlags',
-        {'recordedStreams': ['Compiler', 'Dart', 'Embedder', 'GC']}
+        <String, dynamic>{'recordedStreams': <String>['Compiler', 'Dart', 'Embedder', 'GC']}
     );
     await client.sendRequest('_clearVMTimeline');
   }
 
-  /// Stops tracing, optionally waiting 
+  /// Stops tracing, optionally waiting
   Future<Map<String, dynamic>> stopTracingAndDownloadTimeline(int observatoryPort, {bool waitForFirstFrame: false}) async {
     rpc.Peer peer;
     try {
@@ -270,7 +270,7 @@ abstract class Device {
 
     if (!waitForFirstFrame) {
       // Stop tracing immediately and get the timeline
-      await peer.sendRequest('_setVMTimelineFlags', {'recordedStreams': '[]'});
+      await peer.sendRequest('_setVMTimelineFlags', <String, dynamic>{'recordedStreams': '[]'});
       timeline = await fetchTimeline();
     } else {
       Completer<Null> whenFirstFrameRendered = new Completer<Null>();
@@ -285,7 +285,7 @@ abstract class Device {
           }
         }
       });
-      await peer.sendRequest('streamListen', {'streamId': 'Timeline'});
+      await peer.sendRequest('streamListen', <String, dynamic>{'streamId': 'Timeline'});
       await whenFirstFrameRendered.future.timeout(
         const Duration(seconds: 10),
         onTimeout: () {
@@ -298,7 +298,7 @@ abstract class Device {
         }
       );
       timeline = await fetchTimeline();
-      await peer.sendRequest('_setVMTimelineFlags', {'recordedStreams': '[]'});
+      await peer.sendRequest('_setVMTimelineFlags', <String, dynamic>{'recordedStreams': '[]'});
     }
 
     return timeline;
