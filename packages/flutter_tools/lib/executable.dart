@@ -83,13 +83,8 @@ Future<Null> main(List<String> args) async {
     context[DeviceManager] = new DeviceManager();
     Doctor.initGlobal();
 
-    if (flutterUsage.isFirstRun)
-      flutterUsage.printUsage();
-
     dynamic result = await runner.run(args);
-
-    if (result is int)
-      _exit(result);
+    _exit(result is int ? result : 0);
   }, onError: (dynamic error, Chain chain) {
     if (error is UsageException) {
       stderr.writeln(error.message);
@@ -167,6 +162,9 @@ String _doctorText() {
 }
 
 Future<Null> _exit(int code) async {
+  if (flutterUsage.isFirstRun)
+    flutterUsage.printUsage();
+
   // Send any last analytics calls that are in progress without overly delaying
   // the tool's exit (we wait a maximum of 250ms).
   if (flutterUsage.enabled) {

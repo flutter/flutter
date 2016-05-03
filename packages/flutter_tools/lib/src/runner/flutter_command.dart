@@ -163,6 +163,9 @@ abstract class FlutterCommand extends Command {
     // Populate the cache.
     await cache.updateAll();
 
+    if (flutterUsage.isFirstRun)
+      flutterUsage.printUsage();
+
     _setupToolchain();
     _setupApplicationPackages();
 

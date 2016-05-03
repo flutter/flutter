@@ -30,6 +30,8 @@ class Usage {
 
   Analytics _analytics;
 
+  bool _printedUsage = false;
+
   bool get isFirstRun => _analytics.firstRun;
 
   bool get enabled => _analytics.enabled;
@@ -74,14 +76,24 @@ class Usage {
   }
 
   void printUsage() {
-    printStatus('''
-Flutter - https://flutter.io - version ${FlutterVersion.getVersionString(whitelistBranchName: true)}
+    if (_printedUsage)
+      return;
+    _printedUsage = true;
 
-  The Flutter tool anonymously reports feature usage statistics and basic crash reports to Google in
-  order to help Google contribute improvements to Flutter over time. Use "flutter config" to control
-  this behavior. See Google's privacy policy: https://www.google.com/intl/en/policies/privacy/
-'''
-    );
+    final String versionString = FlutterVersion.getVersionString(whitelistBranchName: true);
+
+    printStatus('');
+    printStatus('''
+  ╔════════════════════════════════════════════════════════════════════════════════════════════════════╗
+  ║              Welcome to Flutter! - Flutter version $versionString - https://flutter.io             ║
+  ║                                                                                                    ║
+  ║ The Flutter tool anonymously reports feature usage statistics and basic crash reports to Google in ║
+  ║ order to help Google contribute improvements to Flutter over time. See Google's privacy policy:    ║
+  ║ https://www.google.com/intl/en/policies/privacy/                                                   ║
+  ║                                                                                                    ║
+  ║                 Use "flutter config --no-analytics" to disable analytics reporting                 ║
+  ╚════════════════════════════════════════════════════════════════════════════════════════════════════╝
+  ''', emphasis: true);
   }
 }
 
