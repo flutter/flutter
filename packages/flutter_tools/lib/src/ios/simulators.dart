@@ -731,6 +731,11 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
           category == 'searchd')
         return null;
 
+      // assertiond: assertion failed: 15E65 13E230: assertiond + 15801 [3C808658-78EC-3950-A264-79A64E0E463B]: 0x1
+      if (category == 'assertiond' && content.startsWith('assertion failed: ')
+           && content.endsWith(']: 0x1'))
+         return null;
+
       _lastWasFiltered = false;
 
       if (category == 'Runner')
