@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
-
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -11,11 +9,11 @@ import 'colors.dart';
 import 'debug.dart';
 import 'icon.dart';
 import 'icons.dart';
+import 'material.dart';
+import 'text_selection_material.dart';
 import 'theme.dart';
 
 export 'package:sky_services/editing/editing.mojom.dart' show KeyboardType;
-
-const double _kTextSelectionHandleSize = 20.0; // pixels
 
 /// A material design text input field.
 ///
@@ -195,7 +193,8 @@ class _InputState extends State<Input> {
         hideText: config.hideText,
         cursorColor: themeData.textSelectionColor,
         selectionColor: themeData.textSelectionColor,
-        selectionHandleBuilder: _textSelectionHandleBuilder,
+        selectionHandleBuilder: textSelectionHandleBuilder,
+        selectionToolbarBuilder: textSelectionToolbarBuilder,
         keyboardType: config.keyboardType,
         onChanged: onChanged,
         onSubmitted: onSubmitted
@@ -242,37 +241,6 @@ class _InputState extends State<Input> {
       )
     );
   }
-
-  Widget _textSelectionHandleBuilder(
-      BuildContext context, TextSelectionHandleType type) {
-    Widget handle = new SizedBox(
-      width: _kTextSelectionHandleSize,
-      height: _kTextSelectionHandleSize,
-      child: new CustomPaint(
-        painter: new _TextSelectionHandlePainter(
-          color: Theme.of(context).textSelectionHandleColor
-        )
-      )
-    );
-
-    // [handle] is a circle, with a rectangle in the top left quadrant of that
-    // circle (an onion pointing to 10:30). We rotate [handle] to point
-    // straight up or up-right depending on the handle type.
-    switch (type) {
-      case TextSelectionHandleType.left:  // points up-right
-        return new Transform(
-          transform: new Matrix4.identity().rotateZ(math.PI / 2.0),
-          child: handle
-        );
-      case TextSelectionHandleType.right:  // points up-left
-        return handle;
-      case TextSelectionHandleType.collapsed:  // points up
-        return new Transform(
-          transform: new Matrix4.identity().rotateZ(math.PI / 4.0),
-          child: handle
-        );
-    }
-  }
 }
 
 class _FormFieldData {
@@ -305,26 +273,5 @@ class _FormFieldData {
     assert(scope != null);
     scope.form.onSubmitted();
     scope.onFieldChanged();
-  }
-}
-
-/// Draws a single text selection handle. The [type] determines where the handle
-/// points (e.g. the [left] handle points up and to the right).
-class _TextSelectionHandlePainter extends CustomPainter {
-  _TextSelectionHandlePainter({ this.color });
-
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    Paint paint = new Paint()..color = color;
-    double radius = size.width/2.0;
-    canvas.drawCircle(new Point(radius, radius), radius, paint);
-    canvas.drawRect(new Rect.fromLTWH(0.0, 0.0, radius, radius), paint);
-  }
-
-  @override
-  bool shouldRepaint(_TextSelectionHandlePainter oldPainter) {
-    return color != oldPainter.color;
   }
 }
