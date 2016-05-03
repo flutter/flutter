@@ -73,11 +73,11 @@ class Scroll extends CommandWithTarget {
   });
 }
 
-/// Command the driver ensure that the element represented by [finder] has been
-/// scrolled completely into view.  See [Scrollable.ensureVisible].
+/// Command the driver to ensure that the element represented by [finder]
+/// has been scrolled completely into view.
 class ScrollToVisible extends CommandWithTarget {
   @override
-  final String kind = 'scrollToVisible';
+  final String kind = 'scrollIntoView';
 
   ScrollToVisible(SerializableFinder finder) : super(finder);
 

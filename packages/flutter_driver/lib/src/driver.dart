@@ -15,6 +15,30 @@ import 'health.dart';
 import 'message.dart';
 import 'timeline.dart';
 
+enum TracingCategory {
+  all, api, compiler, dart, debugger, embedder, gc, isolate, vm
+}
+
+const List<TracingCategory> _defaultCategories = const <TracingCategory>[TracingCategory.all];
+
+// See https://github.com/dart-lang/sdk/blob/master/runtime/vm/timeline.cc#L32
+String _tracingCategoriesToString(List<TracingCategory> categories) {
+  final String contents = categories.map((TracingCategory category) {
+    switch(category) {
+      case TracingCategory.all: return 'all';
+      case TracingCategory.api: return 'API';
+      case TracingCategory.compiler: return 'Compiler';
+      case TracingCategory.dart: return 'Dart';
+      case TracingCategory.debugger: return 'Debugger';
+      case TracingCategory.embedder: return 'Embedder';
+      case TracingCategory.gc: return 'GC';
+      case TracingCategory.isolate: return 'Isolate';
+      case TracingCategory.vm: return 'VM';
+    }
+  }).join(', ');
+  return "[$contents]";
+}
+
 final Logger _log = new Logger('FlutterDriver');
 
 /// A convenient accessor to frequently used finders.
@@ -211,9 +235,9 @@ class FlutterDriver {
     return await _sendCommand(new Scroll(finder, dx, dy, duration, frequency)).then((Map<String, dynamic> _) => null);
   }
 
-  /// Tell the driver to ensure that the widget located by [finder] has been
-  /// scrolled completely into view. See [Scrollable.ensureVisible].
-  Future<Null> scrollToVisible(SerializableFinder finder) async {
+  /// Scrolls the Scrollable ancestor of the widget located by [finder]
+  /// until the widget is completely visible.
+  Future<Null> scrollIntoView(SerializableFinder finder) async {
     return await _sendCommand(new ScrollToVisible(finder)).then((Map<String, dynamic> _) => null);
   }
 
@@ -223,9 +247,12 @@ class FlutterDriver {
   }
 
   /// Starts recording performance traces.
-  Future<Null> startTracing({ String categories: '[all]' }) async {
+  Future<Null> startTracing({List<TracingCategory> categories: _defaultCategories}) async {
+    assert(categories != null && categories.length > 0);
     try {
-      await _peer.sendRequest(_kSetVMTimelineFlagsMethod, {'recordedStreams': categories});
+      await _peer.sendRequest(_kSetVMTimelineFlagsMethod, {
+        'recordedStreams': _tracingCategoriesToString(categories)
+      });
       return null;
     } catch(error, stackTrace) {
       throw new DriverError(
@@ -257,7 +284,7 @@ class FlutterDriver {
   ///
   /// This is merely a convenience wrapper on top of [startTracing] and
   /// [stopTracingAndDownloadTimeline].
-  Future<Timeline> traceAction(Future<dynamic> action(), { String categories: '[all]' }) async {
+  Future<Timeline> traceAction(Future<dynamic> action(), { List<TracingCategory> categories: _defaultCategories }) async {
     await startTracing(categories: categories);
     await action();
     return stopTracingAndDownloadTimeline();

@@ -69,7 +69,7 @@ void main() {
         // return to the demo menu 2x.
         for(String demoName in demoNames) {
           SerializableFinder menuItem = find.text(demoName);
-          await driver.scrollToVisible(menuItem);
+          await driver.scrollIntoView(menuItem);
           await new Future<Null>.delayed(new Duration(milliseconds: 500));
 
           for(int i = 0; i < 2; i += 1) {
@@ -80,7 +80,11 @@ void main() {
           }
         }
       },
-      categories: '[Dart, GC, Compiler]');
+      categories: const <TracingCategory>[
+        TracingCategory.dart,
+        TracingCategory.gc,
+        TracingCategory.compiler
+      ]);
       new TimelineSummary.summarize(timeline)
         ..writeSummaryToFile('transitions_perf', pretty: true)
         ..writeTimelineToFile('transitions_perf', pretty: true);

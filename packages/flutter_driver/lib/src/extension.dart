@@ -63,7 +63,7 @@ class FlutterDriverExtension {
       'tap': tap,
       'get_text': getText,
       'scroll': scroll,
-      'scrollToVisible': scrollToVisible,
+      'scrollIntoView': scrollIntoView,
       'waitFor': waitFor,
     });
 
@@ -72,7 +72,7 @@ class FlutterDriverExtension {
       'tap': Tap.deserialize,
       'get_text': GetText.deserialize,
       'scroll': Scroll.deserialize,
-      'scrollToVisible': ScrollToVisible.deserialize,
+      'scrollIntoView': ScrollToVisible.deserialize,
       'waitFor': WaitFor.deserialize,
     });
 
@@ -209,9 +209,8 @@ class FlutterDriverExtension {
     return new ScrollResult();
   }
 
-  Future<ScrollResult> scrollToVisible(ScrollToVisible command) async {
+  Future<ScrollResult> scrollIntoView(ScrollToVisible command) async {
     Finder target = await _waitForElement(_createFinder(command.finder));
-    // ScrollableState scrollable = Scrollable.of(context); => null implies failure
     await Scrollable.ensureVisible(target.evaluate().single);
     return new ScrollResult();
   }

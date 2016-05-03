@@ -235,6 +235,31 @@ void main() {
         expect(timeline.events.single.name, 'test event');
       });
     });
+
+    group('traceAction categories', () {
+      test('specify non-default categories', () async {
+        bool actionCalled = false;
+        bool categoriesSpecified = false;
+
+        when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals({'recordedStreams': '[Dart GC Compiler]'}))))
+          .thenAnswer((_) async {
+            categoriesSpecified = true;
+            return null;
+          });
+
+        await driver.traceAction(() {
+          actionCalled = true;
+        },
+        categories: const <TracingCategory>[
+          TracingCategory.dart,
+          TracingCategory.gc,
+          TracingCategory.compiler
+        ]);
+
+        expect(actionCalled, isTrue);
+        expect(categoriesSpecified, isTrue);
+      });
+    });
   });
 }
 
