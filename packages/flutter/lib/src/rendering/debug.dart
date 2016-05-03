@@ -5,6 +5,8 @@
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 
+export 'package:flutter/foundation.dart' show debugPrint;
+
 /// Causes each RenderBox to paint a box around its bounds, and some extra
 /// boxes, such as RenderPadding, to draw construction lines.
 bool debugPaintSizeEnabled = false;
