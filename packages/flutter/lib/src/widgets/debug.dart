@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 
+import 'package:flutter/foundation.dart';
 import 'framework.dart';
 import 'table.dart';
 
@@ -98,4 +99,19 @@ bool debugCheckHasTable(BuildContext context) {
     return true;
   });
   return true;
+}
+
+void debugWidgetBuilderValue(Widget widget, Widget built) {
+  assert(() {
+    if (built == null) {
+      throw new FlutterError(
+        'A build function returned null.\n'
+        'The offending widget is: $widget\n'
+        'Build functions must never return null. '
+        'To return an empty space that causes the building widget to fill available room, return "new Container()". '
+        'To return an empty space that takes as little room as possible, return "new Container(width: 0.0, height: 0.0)".'
+      );
+    }
+    return true;
+  });
 }

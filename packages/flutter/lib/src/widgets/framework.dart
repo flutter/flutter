@@ -1513,18 +1513,7 @@ abstract class ComponentElement extends BuildableElement {
     Widget built;
     try {
       built = _builder(this);
-      assert(() {
-        if (built == null) {
-          throw new FlutterError(
-            'A build function returned null.\n'
-            'The offending widget is: $widget\n'
-            'Build functions must never return null. '
-            'To return an empty space that causes the building widget to fill available room, return "new Container()". '
-            'To return an empty space that takes as little room as possible, return "new Container(width: 0.0, height: 0.0)".'
-          );
-        }
-        return true;
-      });
+      debugWidgetBuilderValue(widget, built);
     } catch (e, stack) {
       _debugReportException('building $_widget', e, stack);
       built = new ErrorWidget(e);

@@ -2897,9 +2897,11 @@ class Builder extends StatelessWidget {
 
   /// Called to obtain the child widget.
   ///
-  /// This function is invoked whether this widget is included in its parent's
+  /// This function is invoked whenever this widget is included in its parent's
   /// build and the old widget (if any) that it synchronizes with has a distinct
-  /// object identity.
+  /// object identity. Typically the parent's build method will construct
+  /// a new tree of widgets and so a new Builder child will not be [identical]
+  /// to the corresponding old one.
   final WidgetBuilder builder;
 
   @override
