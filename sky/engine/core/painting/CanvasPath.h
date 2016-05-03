@@ -8,8 +8,9 @@
 #include "math.h"
 
 #include "sky/engine/core/painting/Offset.h"
-#include "sky/engine/core/painting/Rect.h"
+#include "sky/engine/core/painting/Point.h"
 #include "sky/engine/core/painting/RRect.h"
+#include "sky/engine/core/painting/Rect.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/ThreadSafeRefCounted.h"
@@ -18,6 +19,8 @@
 // Note: There's a very similar class in ../../platform/graphics/Path.h
 // We should probably rationalise these two.
 // (The existence of that class is why this is CanvasPath and not just Path.)
+
+// The Dart side of this is in ../dart/painting.dart
 
 namespace blink {
 class DartLibraryNatives;
@@ -60,6 +63,8 @@ public:
     {
         m_path.reset();
     }
+
+    bool contains(const Point& point) { return m_path.contains(point.sk_point.x(), point.sk_point.y()); }
 
     const SkPath& path() const { return m_path; }
 

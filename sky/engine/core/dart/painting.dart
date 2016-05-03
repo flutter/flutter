@@ -162,6 +162,13 @@ class Path extends NativeFieldWrapperClass2 {
   /// reset to the origin.
   void reset() native "Path_reset";
 
+  /// Tests to see if the point is within the path. (That is, whether
+  /// the point would be in the visible portion of the path if the
+  /// path was used with [Canvas.clipPath].)
+  ///
+  /// Returns true if the point is in the path, and false otherwise.
+  bool contains(Point position) native "Path_contains";
+
   /// Returns a copy of the path with all the segments of every
   /// subpath translated by the given offset.
   Path shift(Offset offset) native "Path_shift";
@@ -357,7 +364,7 @@ class Canvas extends NativeFieldWrapperClass2 {
   ///
   /// Call [restore] to pop the save stack.
   void save() native "Canvas_save";
- 
+
   /// Saves a copy of the current transform and clip on the save
   /// stack, and then creates a new group which subsequent calls will
   /// become a part of. When the save stack is later popped, the group
@@ -380,7 +387,7 @@ class Canvas extends NativeFieldWrapperClass2 {
   ///
   /// Use [save] and [saveLayer] to push state onto the stack.
   void restore() native "Canvas_restore";
-  
+
   /// Returns the number of items on the save stack, including the
   /// initial state. This means it returns 1 for a clean canvas, and
   /// that each call to [save] and [saveLayer] increments it, and that
@@ -388,7 +395,7 @@ class Canvas extends NativeFieldWrapperClass2 {
   ///
   /// This number cannot go below 1.
   int getSaveCount() native "Canvas_getSaveCount";
-  
+
   void translate(double dx, double dy) native "Canvas_translate";
   void scale(double sx, double sy) native "Canvas_scale";
   void rotate(double radians) native "Canvas_rotate";

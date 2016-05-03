@@ -37,6 +37,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Path);
   V(Path, addRRect) \
   V(Path, close) \
   V(Path, reset) \
+  V(Path, contains) \
   V(Path, shift)
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
