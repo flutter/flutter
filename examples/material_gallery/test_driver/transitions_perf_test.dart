@@ -66,20 +66,21 @@ void main() {
           await new Future<Null>.delayed(new Duration(milliseconds: 500));
         }
         // Scroll each demo menu item into view, launch the demo and
-        // return to the demo menu 5x.
+        // return to the demo menu 2x.
         for(String demoName in demoNames) {
           SerializableFinder menuItem = find.text(demoName);
           await driver.scrollToVisible(menuItem);
           await new Future<Null>.delayed(new Duration(milliseconds: 500));
 
-          for(int i = 0; i < 5; i += 1) {
+          for(int i = 0; i < 2; i += 1) {
             await driver.tap(menuItem); // Launch the demo
             await new Future<Null>.delayed(new Duration(milliseconds: 500));
             await driver.tap(find.byTooltip('Back'));
             await new Future<Null>.delayed(new Duration(milliseconds: 1000));
           }
         }
-      });
+      },
+      categories: '[Dart, GC, Compiler]');
       new TimelineSummary.summarize(timeline)
         ..writeSummaryToFile('transitions_perf', pretty: true)
         ..writeTimelineToFile('transitions_perf', pretty: true);

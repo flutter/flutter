@@ -223,9 +223,9 @@ class FlutterDriver {
   }
 
   /// Starts recording performance traces.
-  Future<Null> startTracing() async {
+  Future<Null> startTracing({ categories: '[all]' }) async {
     try {
-      await _peer.sendRequest(_kSetVMTimelineFlagsMethod, {'recordedStreams': '[all]'});
+      await _peer.sendRequest(_kSetVMTimelineFlagsMethod, {'recordedStreams': categories});
       return null;
     } catch(error, stackTrace) {
       throw new DriverError(
@@ -257,8 +257,8 @@ class FlutterDriver {
   ///
   /// This is merely a convenience wrapper on top of [startTracing] and
   /// [stopTracingAndDownloadTimeline].
-  Future<Timeline> traceAction(Future<dynamic> action()) async {
-    await startTracing();
+  Future<Timeline> traceAction(Future<dynamic> action(), { categories: '[all]' }) async {
+    await startTracing(categories: categories);
     await action();
     return stopTracingAndDownloadTimeline();
   }
