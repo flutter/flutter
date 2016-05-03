@@ -115,12 +115,3 @@ void debugWidgetBuilderValue(Widget widget, Widget built) {
     return true;
   });
 }
-
-void debugReportException(String context, dynamic exception, StackTrace stack) {
-  FlutterError.reportError(new FlutterErrorDetails(
-    exception: exception,
-    stack: stack,
-    library: 'widgets library',
-    context: context
-  ));
-}

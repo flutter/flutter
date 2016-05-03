@@ -145,7 +145,7 @@ class _LayoutBuilderElement extends RenderObjectElement {
         built = widget.builder(this, constraints.biggest);
         debugWidgetBuilderValue(widget, built);
       } catch (e, stack) {
-        debugReportException('building $widget', e, stack);
+        _debugReportException('building $widget', e, stack);
         built = new ErrorWidget(e);
       }
 
@@ -153,7 +153,7 @@ class _LayoutBuilderElement extends RenderObjectElement {
         _child = updateChild(_child, built, null);
         assert(_child != null);
       } catch (e, stack) {
-        debugReportException('building $widget', e, stack);
+        _debugReportException('building $widget', e, stack);
         built = new ErrorWidget(e);
         _child = updateChild(null, built, slot);
       }
@@ -180,4 +180,13 @@ class _LayoutBuilderElement extends RenderObjectElement {
     renderObject.child = null;
     assert(renderObject == this.renderObject);
   }
+}
+
+void _debugReportException(String context, dynamic exception, StackTrace stack) {
+  FlutterError.reportError(new FlutterErrorDetails(
+    exception: exception,
+    stack: stack,
+    library: 'widgets library',
+    context: context
+  ));
 }

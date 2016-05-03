@@ -826,7 +826,7 @@ class BuildOwner {
       assert(GlobalKey._debugCheckForDuplicates);
       scheduleMicrotask(GlobalKey._notifyListeners);
     } catch (e, stack) {
-      debugReportException('while finalizing the widget tree', e, stack);
+      _debugReportException('while finalizing the widget tree', e, stack);
     } finally {
       Timeline.finishSync();
     }
@@ -1515,7 +1515,7 @@ abstract class ComponentElement extends BuildableElement {
       built = _builder(this);
       debugWidgetBuilderValue(widget, built);
     } catch (e, stack) {
-      debugReportException('building $_widget', e, stack);
+      _debugReportException('building $_widget', e, stack);
       built = new ErrorWidget(e);
     } finally {
       // We delay marking the element as clean until after calling _builder so
@@ -1527,7 +1527,7 @@ abstract class ComponentElement extends BuildableElement {
       _child = updateChild(_child, built, slot);
       assert(_child != null);
     } catch (e, stack) {
-      debugReportException('building $_widget', e, stack);
+      _debugReportException('building $_widget', e, stack);
       built = new ErrorWidget(e);
       _child = updateChild(null, built, slot);
     }
@@ -2269,4 +2269,13 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
     _children = updateChildren(_children, widget.children, detachedChildren: _detachedChildren);
     _detachedChildren.clear();
   }
+}
+
+void _debugReportException(String context, dynamic exception, StackTrace stack) {
+  FlutterError.reportError(new FlutterErrorDetails(
+    exception: exception,
+    stack: stack,
+    library: 'widgets library',
+    context: context
+  ));
 }
