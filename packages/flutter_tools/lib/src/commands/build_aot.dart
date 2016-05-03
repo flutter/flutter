@@ -94,6 +94,8 @@ String buildAotSnapshot(
   if (!FileSystemEntity.isDirectorySync(packagesPath)) {
     printError('Could not find packages directory: $packagesPath\n' +
                'Did you run `pub get` in this directory?');
+    printError('This is needed to work around ' +
+               'https://github.com/dart-lang/sdk/issues/26362');
     return null;
   }
 
