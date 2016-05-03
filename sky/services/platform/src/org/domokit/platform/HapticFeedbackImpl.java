@@ -10,12 +10,17 @@ import android.view.View;
 
 import org.chromium.mojo.system.MojoException;
 import org.chromium.mojom.flutter.platform.HapticFeedback;
-import org.domokit.activity.ActivityImpl;
 
 /**
  * Android implementation of HapticFeedback.
  */
 public class HapticFeedbackImpl implements HapticFeedback {
+    private final Activity mActivity;
+
+    public HapticFeedbackImpl(Activity activity) {
+        mActivity = activity;
+    }
+
     @Override
     public void close() {}
 
@@ -24,13 +29,7 @@ public class HapticFeedbackImpl implements HapticFeedback {
 
     @Override
     public void vibrate(VibrateResponse callback) {
-        Activity activity = ActivityImpl.getCurrentActivity();
-        if (activity == null) {
-            callback.call(false);
-            return;
-        }
-
-        View view = activity.getWindow().getDecorView();
+        View view = mActivity.getWindow().getDecorView();
         view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
         callback.call(true);
     }

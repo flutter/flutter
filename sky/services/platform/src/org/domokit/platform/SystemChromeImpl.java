@@ -11,14 +11,18 @@ import android.view.View;
 import org.chromium.mojo.system.MojoException;
 import org.chromium.mojom.flutter.platform.DeviceOrientation;
 import org.chromium.mojom.flutter.platform.SystemChrome;
-import org.chromium.mojom.flutter.platform.SystemUiOverlay
-;
-import org.domokit.activity.ActivityImpl;
+import org.chromium.mojom.flutter.platform.SystemUiOverlay;
 
 /**
  * Android implementation of SystemChrome.
  */
 public class SystemChromeImpl implements SystemChrome {
+    private final Activity mActivity;
+
+    public SystemChromeImpl(Activity activity) {
+        mActivity = activity;
+    }
+
     @Override
     public void close() {}
 
@@ -28,12 +32,6 @@ public class SystemChromeImpl implements SystemChrome {
     @Override
     public void setPreferredOrientations(int deviceOrientationMask,
                                          SetPreferredOrientationsResponse callback) {
-        Activity activity = ActivityImpl.getCurrentActivity();
-        if (activity == null) {
-            callback.call(false);
-            return;
-        }
-
         // Currently the Android implementation only supports masks with zero or one
         // selected device orientations.
         int androidOrientation;
@@ -52,19 +50,13 @@ public class SystemChromeImpl implements SystemChrome {
             return;
         }
 
-        activity.setRequestedOrientation(androidOrientation);
+        mActivity.setRequestedOrientation(androidOrientation);
         callback.call(true);
     }
 
     @Override
     public void setEnabledSystemUiOverlays(int overlays,
                                            SetEnabledSystemUiOverlaysResponse callback) {
-        Activity activity = ActivityImpl.getCurrentActivity();
-        if (activity == null) {
-            callback.call(false);
-            return;
-        }
-
         int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
                     View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 
@@ -76,7 +68,7 @@ public class SystemChromeImpl implements SystemChrome {
                      View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
         }
 
-        activity.getWindow().getDecorView().setSystemUiVisibility(flags);
+        mActivity.getWindow().getDecorView().setSystemUiVisibility(flags);
         callback.call(true);
     }
 }

@@ -176,7 +176,7 @@ public class FlutterMain {
         registry.register(HapticFeedback.MANAGER.getName(), new ServiceFactory() {
             @Override
             public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                HapticFeedback.MANAGER.bind(new HapticFeedbackImpl(), pipe);
+                HapticFeedback.MANAGER.bind(new HapticFeedbackImpl((android.app.Activity) context), pipe);
             }
         });
 
@@ -190,14 +190,14 @@ public class FlutterMain {
         registry.register(SystemChrome.MANAGER.getName(), new ServiceFactory() {
             @Override
             public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                SystemChrome.MANAGER.bind(new SystemChromeImpl(), pipe);
+                SystemChrome.MANAGER.bind(new SystemChromeImpl((android.app.Activity) context), pipe);
             }
         });
 
         registry.register(SystemSound.MANAGER.getName(), new ServiceFactory() {
             @Override
             public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                SystemSound.MANAGER.bind(new SystemSoundImpl(), pipe);
+                SystemSound.MANAGER.bind(new SystemSoundImpl((android.app.Activity) context), pipe);
             }
         });
     }

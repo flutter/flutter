@@ -30,8 +30,6 @@ if (is_android) {
       "//base:base_java",
       "//mojo/public/java:bindings",
       "//mojo/public/java:system",
-      "//sky/services/activity:activity_lib",
-      "//sky/services/activity:interfaces_java",
       ":interfaces_java",
     ]
   }
