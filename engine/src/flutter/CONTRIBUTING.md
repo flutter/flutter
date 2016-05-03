@@ -92,6 +92,10 @@ If you're going to be debugging crashes in the engine, make sure you add
 `android/AndroidManifest.xml` file for the Flutter app you are using
 to test the engine.
 
+### iOS
+
+See [this wiki page](https://github.com/flutter/engine/wiki/Flutter-Apps-on-iOS).
+
 ### Desktop (Mac and Linux), for tests
 
  * `gclient sync` to update your dependencies.
