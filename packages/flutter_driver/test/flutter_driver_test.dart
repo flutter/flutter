@@ -239,15 +239,32 @@ void main() {
     group('traceAction categories', () {
       test('specify non-default categories', () async {
         bool actionCalled = false;
-        bool categoriesSpecified = false;
+        bool startTracingCalled = false;
+        bool stopTracingCalled = false;
 
-        when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals({'recordedStreams': '[Dart GC Compiler]'}))))
+        when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals({'recordedStreams': '[Dart, GC, Compiler]'}))))
           .thenAnswer((_) async {
-            categoriesSpecified = true;
+            startTracingCalled = true;
             return null;
           });
 
-        await driver.traceAction(() {
+        when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals({'recordedStreams': '[]'}))))
+          .thenAnswer((_) async {
+            stopTracingCalled = true;
+            return null;
+          });
+
+        when(mockPeer.sendRequest('_getVMTimeline')).thenAnswer((_) async {
+          return <String, dynamic> {
+            'traceEvents': [
+              {
+                'name': 'test event'
+              }
+            ],
+          };
+        });
+
+        Timeline timeline = await driver.traceAction(() {
           actionCalled = true;
         },
         categories: const <TracingCategory>[
@@ -257,7 +274,9 @@ void main() {
         ]);
 
         expect(actionCalled, isTrue);
-        expect(categoriesSpecified, isTrue);
+        expect(startTracingCalled, isTrue);
+        expect(stopTracingCalled, isTrue);
+        expect(timeline.events.single.name, 'test event');
       });
     });
   });

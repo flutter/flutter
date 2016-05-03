@@ -34,6 +34,8 @@ String _tracingCategoriesToString(List<TracingCategory> categories) {
       case TracingCategory.gc: return 'GC';
       case TracingCategory.isolate: return 'Isolate';
       case TracingCategory.vm: return 'VM';
+      default:
+        throw 'Unknown tracing category $category';
     }
   }).join(', ');
   return '[$contents]';
