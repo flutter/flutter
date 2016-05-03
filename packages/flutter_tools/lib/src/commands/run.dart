@@ -416,7 +416,7 @@ Future<Null> _downloadStartupTrace(int observatoryPort, Device device) async {
 
   if (frameworkInitTimestampMicros != null) {
     traceInfo['timeToFrameworkInitMicros'] = frameworkInitTimestampMicros - engineEnterTimestampMicros;
-    traceInfo['timeAfterFrameworkInitMicros'] = timeToFirstFrameMicros - frameworkInitTimestampMicros;
+    traceInfo['timeAfterFrameworkInitMicros'] = firstFrameTimestampMicros - frameworkInitTimestampMicros;
   }
 
   await traceInfoFile.writeAsString(JSON.encode(traceInfo));
