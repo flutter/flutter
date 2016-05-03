@@ -36,7 +36,9 @@ class TextSelectionHandles {
     this.renderObject,
     this.onSelectionHandleChanged,
     this.builder
-  }): _selection = selection;
+  }): _selection = selection {
+    assert(builder != null);
+  }
 
   // TODO(mpcomplete): what if the renderObject is removed or replaced, or
   // moves? Not sure what cases I need to handle, or how to handle them.

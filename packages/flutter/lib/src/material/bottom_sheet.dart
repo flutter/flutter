@@ -52,6 +52,7 @@ class BottomSheet extends StatefulWidget {
     this.builder
   }) : super(key: key) {
     assert(onClosing != null);
+    assert(builder != null);
   }
 
   /// The animation that controls the bottom sheet's position.

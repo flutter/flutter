@@ -2893,7 +2893,9 @@ class KeyedSubtree extends StatelessWidget {
 
 /// A platonic widget that invokes a closure to obtain its child widget.
 class Builder extends StatelessWidget {
-  Builder({ Key key, this.builder }) : super(key: key);
+  Builder({ Key key, this.builder }) : super(key: key) {
+    assert(builder != null);
+  }
 
   /// Called to obtain the child widget.
   ///
@@ -2910,7 +2912,9 @@ class Builder extends StatelessWidget {
 
 typedef Widget StatefulWidgetBuilder(BuildContext context, StateSetter setState);
 class StatefulBuilder extends StatefulWidget {
-  StatefulBuilder({ Key key, this.builder }) : super(key: key);
+  StatefulBuilder({ Key key, this.builder }) : super(key: key) {
+    assert(builder != null);
+  }
 
   final StatefulWidgetBuilder builder;
 

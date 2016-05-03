@@ -15,7 +15,7 @@ import 'scroll_behavior.dart';
 /// Provides children for [LazyBlock] or [LazyBlockViewport].
 ///
 /// See also [LazyBlockBuilder] for an implementation of LazyBlockDelegate based
-/// on an [IndexedBuilder] closure.
+/// on an [IndexedWidgetBuilder] closure.
 abstract class LazyBlockDelegate {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -49,7 +49,7 @@ abstract class LazyBlockDelegate {
   bool shouldRebuild(LazyBlockDelegate oldDelegate);
 }
 
-/// Uses an [IndexedBuilder] to provide children for [LazyBlock].
+/// Uses an [IndexedWidgetBuilder] to provide children for [LazyBlock].
 ///
 /// A LazyBlockBuilder rebuilds the children whenever the [LazyBlock] is
 /// rebuilt, similar to the behavior of [Builder].
@@ -65,13 +65,13 @@ class LazyBlockBuilder extends LazyBlockDelegate {
   ///
   /// This function might be called with index parameters in any order. This
   /// function should return null for indices that exceed the number of children
-  /// provided by this delegate. If this function must not return a null value
+  /// provided by this delegate. This function must not return a null value
   /// for an index if it previously returned a non-null value for that index or
   /// a larger index.
   ///
   /// This function might be called during the build or layout phases of the
   /// pipeline.
-  final IndexedBuilder builder;
+  final IndexedWidgetBuilder builder;
 
   @override
   Widget buildItem(BuildContext context, int index) => builder(context, index);
@@ -478,7 +478,7 @@ class _LazyBlockElement extends RenderObjectElement {
 
   @override
   void performRebuild() {
-    IndexedBuilder builder = widget.delegate.buildItem;
+    IndexedWidgetBuilder builder = widget.delegate.buildItem;
     List<Widget> widgets = <Widget>[];
     for (int i = 0; i < _children.length; ++i) {
       int logicalIndex = _firstChildLogicalIndex + i;
@@ -494,7 +494,7 @@ class _LazyBlockElement extends RenderObjectElement {
   void _layout(BoxConstraints constraints) {
     final double blockExtent = _getMainAxisExtent(renderObject.size);
 
-    final IndexedBuilder builder = widget.delegate.buildItem;
+    final IndexedWidgetBuilder builder = widget.delegate.buildItem;
     final double startLogicalOffset = widget.startOffset;
     final double endLogicalOffset = startLogicalOffset + blockExtent;
     final _RenderLazyBlock block = renderObject;

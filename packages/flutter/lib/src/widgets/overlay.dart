@@ -44,7 +44,9 @@ class OverlayEntry {
   OverlayEntry({
     this.builder,
     bool opaque: false
-  }) : _opaque = opaque;
+  }) : _opaque = opaque {
+    assert(builder != null);
+  }
 
   /// This entry will include the widget built by this builder in the overlay at the entry's position.
   ///
