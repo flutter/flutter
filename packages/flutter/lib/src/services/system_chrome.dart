@@ -13,7 +13,7 @@ export 'package:sky_services/flutter/platform/system_chrome.mojom.dart' show Dev
 
 mojom.SystemChromeProxy _initSystemChromeProxy() {
   mojom.SystemChromeProxy proxy = new mojom.SystemChromeProxy.unbound();
-  shell.connectToViewAssociatedService(proxy);
+  shell.connectToService('mojo:flutter_platform', proxy);
   return proxy;
 }
 

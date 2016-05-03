@@ -13,7 +13,7 @@ export 'package:sky_services/flutter/platform/system_sound.mojom.dart' show Syst
 
 mojom.SystemSoundProxy _initSystemSoundProxy() {
   mojom.SystemSoundProxy proxy = new mojom.SystemSoundProxy.unbound();
-  shell.connectToViewAssociatedService(proxy);
+  shell.connectToService('mojo:flutter_platform', proxy);
   return proxy;
 }
 
