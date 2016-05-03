@@ -26,8 +26,8 @@ const Color _kSnackBackground = const Color(0xFF323232);
 // TODO(ianh): Implement the Tablet version of snackbar if we're "on a tablet".
 
 const Duration _kSnackBarTransitionDuration = const Duration(milliseconds: 250);
-const Duration kSnackBarShortDisplayDuration = const Duration(milliseconds: 1500);
-const Duration kSnackBarMediumDisplayDuration = const Duration(milliseconds: 2750);
+const Duration _kSnackBarShortDisplayDuration = const Duration(milliseconds: 1500);
+const Duration _kSnackBarMediumDisplayDuration = const Duration(milliseconds: 2750);
 const Curve _snackBarHeightCurve = Curves.fastOutSlowIn;
 const Curve _snackBarFadeCurve = const Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
 
@@ -107,7 +107,7 @@ class SnackBar extends StatelessWidget {
     Key key,
     this.content,
     this.action,
-    this.duration: kSnackBarShortDisplayDuration,
+    this.duration: _kSnackBarShortDisplayDuration,
     this.animation
   }) : super(key: key) {
     assert(content != null);

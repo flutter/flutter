@@ -6,8 +6,6 @@ import 'package:flutter/widgets.dart';
 
 import 'material.dart';
 
-const EdgeInsets _kCardMargins = const EdgeInsets.all(4.0);
-
 /// A material design card
 ///
 /// See also:
@@ -16,7 +14,12 @@ const EdgeInsets _kCardMargins = const EdgeInsets.all(4.0);
 ///  * [showDialog]
 ///  * <https://www.google.com/design/spec/components/cards.html>
 class Card extends StatelessWidget {
-  const Card({ Key key, this.child, this.color }) : super(key: key);
+  /// Creates a material design card.
+  const Card({
+    Key key,
+    this.child,
+    this.color
+  }) : super(key: key);
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -27,7 +30,7 @@ class Card extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Container(
-      margin: _kCardMargins,
+      margin: const EdgeInsets.all(4.0),
       child: new Material(
         color: color,
         type: MaterialType.card,

@@ -36,7 +36,13 @@ typedef Future<Null> RefreshCallback();
 
 /// Where the refresh indicator appears: top for over-scrolls at the
 /// start of the scrollable, bottom for over-scrolls at the end.
-enum RefreshIndicatorLocation { top, bottom }
+enum RefreshIndicatorLocation {
+  /// The refresh indicator should appear at the top of the scrollable.
+  top,
+
+  /// The refresh indicator should appear at the bottom of the scrollable.
+  bottom,
+}
 
 /// A widget that supports the Material "swipe to refresh" idiom.
 ///

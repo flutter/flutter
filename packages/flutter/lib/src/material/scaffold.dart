@@ -703,12 +703,19 @@ class ScaffoldState extends State<Scaffold> {
   }
 }
 
+/// An interface for controlling a feature of a [Scaffold].
+///
+/// Commonly obtained from [Scaffold.showSnackBar] or [Scaffold.showBottomSheet].
 class ScaffoldFeatureController<T extends Widget, U> {
   const ScaffoldFeatureController._(this._widget, this._completer, this.close, this.setState);
   final T _widget;
   final Completer<U> _completer;
   Future<U> get closed => _completer.future;
-  final VoidCallback close; // call this to close the bottom sheet or snack bar
+
+  /// Remove the feature (e.g., bottom sheet or snack bar) from the scaffold.
+  final VoidCallback close;
+
+  /// Mark the feature (e.g., bottom sheet or snack bar) as needing to rebuild.
   final StateSetter setState;
 }
 

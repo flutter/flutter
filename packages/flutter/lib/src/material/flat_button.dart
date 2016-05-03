@@ -34,6 +34,10 @@ import 'theme.dart';
 ///  * [DropDownButton]
 ///  * <https://www.google.com/design/spec/components/buttons.html>
 class FlatButton extends StatelessWidget {
+  /// Creates a flat button.
+  ///
+  /// The [child] argument is required and is typically a [Text] widget in all
+  /// caps.
   FlatButton({
     Key key,
     this.onPressed,
@@ -44,7 +48,9 @@ class FlatButton extends StatelessWidget {
     this.textTheme,
     this.colorBrightness,
     this.child
-  }) : super(key: key);
+  }) : super(key: key) {
+    assert(child != null);
+  }
 
   /// The callback that is invoked when the button is tapped or otherwise activated.
   ///
@@ -81,6 +87,8 @@ class FlatButton extends StatelessWidget {
   final ThemeBrightness colorBrightness;
 
   /// The widget below this widget in the tree.
+  ///
+  /// Typically a [Text] widget in all caps.
   final Widget child;
 
   /// Whether the button is enabled or disabled. Buttons are disabled by default. To

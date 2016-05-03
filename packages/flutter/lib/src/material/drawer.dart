@@ -74,26 +74,43 @@ class Drawer extends StatelessWidget {
 
 /// Provides interactive behavior for [Drawer] widgets.
 ///
-/// Drawer controllers are typically created automatically by [Scaffold]
-/// widgets.
+/// Rarely used directly. Drawer controllers are typically created automatically
+/// by [Scaffold] widgets.
+///
+/// The draw controller provides the ability to open and close a drawer, either
+/// via an animation or via user interaction. When closed, the drawer collapses
+/// to a translucent gesture detector that can be used to listen for edge
+/// swipes.
 ///
 /// See also:
 ///
-/// * [Drawer]
-/// * [Scaffold.drawer]
+///  * [Drawer]
+///  * [Scaffold.drawer]
 class DrawerController extends StatefulWidget {
+  /// Creates a controller for a [Drawer].
+  ///
+  /// Rarely used directly.
+  ///
+  /// The [child] argument must not be null and is typically a [Drawer].
   DrawerController({
     GlobalKey key,
     this.child
-  }) : super(key: key);
+  }) : super(key: key) {
+    assert(child != null);
+  }
 
   /// The widget below this widget in the tree.
+  ///
+  /// Typically a [Drawer].
   final Widget child;
 
   @override
   DrawerControllerState createState() => new DrawerControllerState();
 }
 
+/// State for a [DrawerController].
+///
+/// Typically used by a [Scaffold] to [open] and [close] the drawer.
 class DrawerControllerState extends State<DrawerController> {
   @override
   void initState() {
@@ -194,10 +211,14 @@ class DrawerControllerState extends State<DrawerController> {
     }
   }
 
+  /// Starts an animation to open the drawer.
+  ///
+  /// Typically called by [Scaffold.openDrawer].
   void open() {
     _controller.fling(velocity: 1.0);
   }
 
+  /// Starts an animation to close the drawer.
   void close() {
     _controller.fling(velocity: -1.0);
   }

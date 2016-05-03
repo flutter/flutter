@@ -11,11 +11,16 @@ import 'constants.dart';
 const Duration _kToggleDuration = const Duration(milliseconds: 200);
 final Tween<double> _kRadialReactionRadiusTween = new Tween<double>(begin: 0.0, end: kRadialReactionRadius);
 
-// RenderToggleable is a base class for material style toggleable controls with
-// toggle animations. It handles storing the current value, dispatching
-// ValueChanged on a tap gesture and driving a changed animation. Subclasses are
-// responsible for painting.
+/// A base class for material style toggleable controls with toggle animations.
+///
+/// This class handles storing the current value, dispatching ValueChanged on a
+/// tap gesture and driving a changed animation. Subclasses are responsible for
+/// painting.
 abstract class RenderToggleable extends RenderConstrainedBox implements SemanticActionHandler {
+  /// Creates a toggleable render object.
+  ///
+  /// The [value], [activeColor], and [inactiveColor] arguments must not be
+  /// null.
   RenderToggleable({
     bool value,
     Size size,

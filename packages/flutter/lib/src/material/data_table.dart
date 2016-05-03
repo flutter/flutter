@@ -21,9 +21,8 @@ import 'theme.dart';
 import 'theme_data.dart';
 import 'tooltip.dart';
 
+/// Signature for [DataColumn.onSort] callback.
 typedef void DataColumnSortCallback(int columnIndex, bool ascending);
-
-typedef void DataCellEditCallback(Rect cell);
 
 /// Column configuration for a [DataTable].
 ///
@@ -215,7 +214,7 @@ class DataTable extends StatelessWidget {
   /// objects as the table is to have columns, ignoring the leading
   /// checkbox column if any. The [columns] argument must have a
   /// length greater than zero.
-  /// 
+  ///
   /// The [rows] argument must be a list of as many [DataRow] objects
   /// as the table is to have rows, ignoring the leading heading row
   /// that contains the column headings (derived from the [columns]
@@ -563,6 +562,7 @@ class DataTable extends StatelessWidget {
 /// achieve: just put the TableRowInkWell as the direct child of the
 /// [Table], and put the other contents of the cell inside it.)
 class TableRowInkWell extends InkResponse {
+  /// Creates an ink well for a table row.
   TableRowInkWell({
     Key key,
     Widget child,
@@ -700,7 +700,7 @@ class _SortArrowState extends State<_SortArrow> {
       if (config.visible) {
         _opacityController.forward();
       } else {
-        _opacityController.reverse();   
+        _opacityController.reverse();
       }
     }
     if ((_down != newDown) && !skipArrow) {
@@ -741,26 +741,3 @@ class _SortArrowState extends State<_SortArrow> {
   }
 
 }
-
-/* 
-
-TODO(ianh): implement DataTableCard
-
-DataTableCard
- - top: 64px
-   - caption, top left
-      - 20px Roboto Regular, black87
-   - persistent actions, top left
-   - header when there's a selection
-      - accent 50?
-      - show number of selected items
-      - different actions
-   - actions, top right
-      - 24px icons, black54
-
-bottom:
- - 56px
- - handles pagination
-    - 12px Roboto Regular, black54
-
-*/
