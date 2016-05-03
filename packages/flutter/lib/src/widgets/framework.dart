@@ -1472,7 +1472,7 @@ abstract class BuildableElement extends Element {
 }
 
 typedef Widget WidgetBuilder(BuildContext context);
-typedef Widget IndexedBuilder(BuildContext context, int index);
+typedef Widget IndexedWidgetBuilder(BuildContext context, int index);
 
 // See ComponentElement._builder.
 Widget _buildNothing(BuildContext context) => null;

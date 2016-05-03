@@ -17,7 +17,9 @@ typedef Widget LayoutWidgetBuilder(BuildContext context, Size size);
 /// when the parent constrains the child's size and doesn't depend on the child's
 /// intrinsic size.
 class LayoutBuilder extends RenderObjectWidget {
-  LayoutBuilder({ Key key, this.builder }) : super(key: key);
+  LayoutBuilder({ Key key, this.builder }) : super(key: key) {
+    assert(builder != null);
+  }
 
   /// Called at layout time to construct the widget tree. The builder must not
   /// return null.

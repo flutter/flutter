@@ -349,7 +349,9 @@ class AnimatedBuilder extends AnimatedWidget {
     Animation<Object> animation,
     this.builder,
     this.child
-  }) : super(key: key, animation: animation);
+  }) : super(key: key, animation: animation) {
+    assert(builder != null);
+  }
 
   /// Called every time the animation changes value.
   final TransitionBuilder builder;

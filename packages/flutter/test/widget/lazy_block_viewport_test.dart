@@ -61,7 +61,7 @@ void main() {
 
     double offset = 300.0;
 
-    IndexedBuilder itemBuilder = (BuildContext context, int i) {
+    IndexedWidgetBuilder itemBuilder = (BuildContext context, int i) {
       callbackTracker.add(i);
       return new Container(
         key: new ValueKey<int>(i),
@@ -111,7 +111,7 @@ void main() {
 
     double offset = 300.0;
 
-    IndexedBuilder itemBuilder = (BuildContext context, int i) {
+    IndexedWidgetBuilder itemBuilder = (BuildContext context, int i) {
       callbackTracker.add(i);
       return new Container(
         key: new ValueKey<int>(i),
@@ -158,7 +158,7 @@ void main() {
     List<int> callbackTracker = <int>[];
     List<String> text = <String>[];
 
-    IndexedBuilder itemBuilder = (BuildContext context, int i) {
+    IndexedWidgetBuilder itemBuilder = (BuildContext context, int i) {
       callbackTracker.add(i);
       return new Container(
         key: new ValueKey<int>(i),
@@ -201,7 +201,7 @@ void main() {
     StateSetter setState;
     ThemeData themeData = new ThemeData.light();
 
-    IndexedBuilder itemBuilder = (BuildContext context, int i) {
+    IndexedWidgetBuilder itemBuilder = (BuildContext context, int i) {
       return new Container(
         key: new ValueKey<int>(i),
         width: 500.0, // this should be ignored
@@ -242,7 +242,7 @@ void main() {
   });
 
   testWidgets('LazyBlockViewport padding', (WidgetTester tester) {
-    IndexedBuilder itemBuilder = (BuildContext context, int i) {
+    IndexedWidgetBuilder itemBuilder = (BuildContext context, int i) {
       return new Container(
         key: new ValueKey<int>(i),
         width: 500.0, // this should be ignored
