@@ -328,17 +328,12 @@ class _PopupMenu<T> extends StatelessWidget {
 class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
   _PopupMenuRouteLayout(this.position, this.selectedItemOffset);
 
-  final ModalPosition position;
+  final RelativeRect position;
   final double selectedItemOffset;
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    return new BoxConstraints(
-      minWidth: 0.0,
-      maxWidth: constraints.maxWidth,
-      minHeight: 0.0,
-      maxHeight: constraints.maxHeight
-    );
+    return constraints.loosen();
   }
 
   // Put the child wherever position specifies, so long as it will fit within the
@@ -380,13 +375,10 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     this.elevation
   }) : super(completer: completer);
 
-  final ModalPosition position;
+  final RelativeRect position;
   final List<PopupMenuEntry<T>> items;
   final dynamic initialValue;
   final int elevation;
-
-  @override
-  ModalPosition getPosition(BuildContext context) => null;
 
   @override
   Animation<double> createAnimation() {
@@ -416,13 +408,9 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
         selectedItemOffset += items[i].height;
       }
     }
-    final Size screenSize = MediaQuery.of(context).size;
-    return new ConstrainedBox(
-      constraints: new BoxConstraints(maxWidth: screenSize.width, maxHeight: screenSize.height),
-      child: new CustomSingleChildLayout(
-        delegate: new _PopupMenuRouteLayout(position, selectedItemOffset),
-        child: new _PopupMenu<T>(route: this)
-      )
+    return new CustomSingleChildLayout(
+      delegate: new _PopupMenuRouteLayout(position, selectedItemOffset),
+      child: new _PopupMenu<T>(route: this)
     );
   }
 }
@@ -434,7 +422,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// implies the menu's origin.
 Future<dynamic/*=T*/> showMenu/*<T>*/({
   BuildContext context,
-  ModalPosition position,
+  RelativeRect position,
   List<PopupMenuEntry<dynamic/*=T*/>> items,
   dynamic/*=T*/ initialValue,
   int elevation: 8
@@ -518,9 +506,9 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       elevation: config.elevation,
       items: config.itemBuilder(context),
       initialValue: config.initialValue,
-      position: new ModalPosition(
-        left: topLeft.x,
-        top: topLeft.y + (config.initialValue != null ? renderBox.size.height / 2.0 : 0.0)
+      position: new RelativeRect.fromLTRB(
+        topLeft.x, topLeft.y + (config.initialValue != null ? renderBox.size.height / 2.0 : 0.0),
+        0.0, 0.0
       )
     )
     .then((T value) {
