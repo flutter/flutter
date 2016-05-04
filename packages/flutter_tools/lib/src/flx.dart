@@ -54,7 +54,7 @@ class _Asset {
     return new File(source != null ? '$base/$source' : '$base/$relativePath');
   }
 
-  bool get assertFileExists => assetFile.existsSync();
+  bool get assetFileExists => assetFile.existsSync();
 
   /// The delta between what the assetEntry is and the relativePath (e.g.,
   /// packages/material_gallery).
@@ -101,12 +101,13 @@ List<_Asset> _getMaterialAssets(String fontSet) {
 
 /// Given an assetBase location and a flutter.yaml manifest, return a map of
 /// assets to asset variants.
+///
+/// Returns `null` on missing assets.
 Map<_Asset, List<_Asset>> _parseAssets(
   PackageMap packageMap,
   Map<String, dynamic> manifestDescriptor,
   String assetBase, {
-  List<String> excludeDirs: const <String>[],
-  bool complainOnErrors: false
+  List<String> excludeDirs: const <String>[]
 }) {
   Map<_Asset, List<_Asset>> result = <_Asset, List<_Asset>>{};
 
@@ -120,10 +121,9 @@ Map<_Asset, List<_Asset>> _parseAssets(
     for (String asset in manifestDescriptor['assets']) {
       _Asset baseAsset = _resolveAsset(packageMap, assetBase, asset);
 
-      if (!baseAsset.assertFileExists) {
-        if (complainOnErrors)
-          printError('Warning: unable to locate asset entry in flutter.yaml: "$asset".');
-        continue;
+      if (!baseAsset.assetFileExists) {
+        printError('Error: unable to locate asset entry in flutter.yaml: "$asset".');
+        return null;
       }
 
       List<_Asset> variants = <_Asset>[];
@@ -225,7 +225,7 @@ Future<int> _validateManifest(Object manifest) async {
 
 /// Create a [ZipEntry] from the given [_Asset]; the asset must exist.
 ZipEntry _createAssetEntry(_Asset asset) {
-  assert(asset.assertFileExists);
+  assert(asset.assetFileExists);
   return new ZipEntry.fromFile(asset.assetEntry, asset.assetFile);
 }
 
@@ -360,9 +360,11 @@ Future<int> assemble({
     new PackageMap(path.join(assetBasePath, '.packages')),
     manifestDescriptor,
     assetBasePath,
-    excludeDirs: <String>[workingDirPath, path.join(assetBasePath, 'build')],
-    complainOnErrors: true
+    excludeDirs: <String>[workingDirPath, path.join(assetBasePath, 'build')]
   );
+
+  if (assetVariants == null)
+    return 1;
 
   final bool usesMaterialDesign = manifestDescriptor != null &&
     manifestDescriptor['uses-material-design'] == true;
