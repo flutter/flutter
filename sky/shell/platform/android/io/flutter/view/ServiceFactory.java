@@ -6,6 +6,7 @@ package io.flutter.view;
 
 import android.content.Context;
 
+import org.chromium.mojo.bindings.Interface.Binding;
 import org.chromium.mojo.system.Core;
 import org.chromium.mojo.system.MessagePipeHandle;
 
@@ -15,5 +16,5 @@ import org.chromium.mojo.system.MessagePipeHandle;
  * clients.
  **/
 interface ServiceFactory {
-    void connectToService(Context context, Core core, MessagePipeHandle pipe);
+    Binding connectToService(Context context, Core core, MessagePipeHandle pipe);
 }

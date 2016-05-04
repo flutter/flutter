@@ -27,6 +27,7 @@ import org.chromium.base.PathUtils;
 import org.chromium.base.library_loader.LibraryLoader;
 import org.chromium.base.library_loader.LibraryProcessType;
 import org.chromium.base.library_loader.ProcessInitException;
+import org.chromium.mojo.bindings.Interface.Binding;
 import org.chromium.mojo.sensors.SensorServiceImpl;
 import org.chromium.mojo.system.Core;
 import org.chromium.mojo.system.impl.CoreImpl;
@@ -140,64 +141,64 @@ public class FlutterMain {
 
         registry.register(Activity.MANAGER.getName(), new ServiceFactory() {
             @Override
-            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                Activity.MANAGER.bind(new ActivityImpl(), pipe);
+            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                return Activity.MANAGER.bind(new ActivityImpl(), pipe);
             }
         });
 
         registry.register(MediaService.MANAGER.getName(), new ServiceFactory() {
             @Override
-            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                MediaService.MANAGER.bind(new MediaServiceImpl(context, core), pipe);
+            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                return MediaService.MANAGER.bind(new MediaServiceImpl(context, core), pipe);
             }
         });
 
         registry.register(NetworkService.MANAGER.getName(), new ServiceFactory() {
             @Override
-            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                NetworkService.MANAGER.bind(new NetworkServiceImpl(context, core), pipe);
+            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                return NetworkService.MANAGER.bind(new NetworkServiceImpl(context, core), pipe);
             }
         });
 
         registry.register(SensorService.MANAGER.getName(), new ServiceFactory() {
             @Override
-            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                SensorService.MANAGER.bind(new SensorServiceImpl(context), pipe);
+            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                return SensorService.MANAGER.bind(new SensorServiceImpl(context), pipe);
             }
         });
 
         registry.register(VSyncProvider.MANAGER.getName(), new ServiceFactory() {
             @Override
-            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                VSyncProvider.MANAGER.bind(new VSyncProviderImpl(pipe), pipe);
+            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                return VSyncProvider.MANAGER.bind(new VSyncProviderImpl(pipe), pipe);
             }
         });
 
         registry.register(HapticFeedback.MANAGER.getName(), new ServiceFactory() {
             @Override
-            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                HapticFeedback.MANAGER.bind(new HapticFeedbackImpl((android.app.Activity) context), pipe);
+            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                return HapticFeedback.MANAGER.bind(new HapticFeedbackImpl((android.app.Activity) context), pipe);
             }
         });
 
         registry.register(PathProvider.MANAGER.getName(), new ServiceFactory() {
             @Override
-            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                PathProvider.MANAGER.bind(new PathProviderImpl(context), pipe);
+            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                return PathProvider.MANAGER.bind(new PathProviderImpl(context), pipe);
             }
         });
 
         registry.register(SystemChrome.MANAGER.getName(), new ServiceFactory() {
             @Override
-            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                SystemChrome.MANAGER.bind(new SystemChromeImpl((android.app.Activity) context), pipe);
+            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                return SystemChrome.MANAGER.bind(new SystemChromeImpl((android.app.Activity) context), pipe);
             }
         });
 
         registry.register(SystemSound.MANAGER.getName(), new ServiceFactory() {
             @Override
-            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                SystemSound.MANAGER.bind(new SystemSoundImpl((android.app.Activity) context), pipe);
+            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                return SystemSound.MANAGER.bind(new SystemSoundImpl((android.app.Activity) context), pipe);
             }
         });
     }
@@ -239,13 +240,14 @@ public class FlutterMain {
     private static void registerService(ServiceRegistry registry, final String serviceName, final String className) {
         registry.register(serviceName, new ServiceFactory() {
             @Override
-            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
+            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
                 try {
-                    Class.forName(className)
+                    return (Binding) Class.forName(className)
                         .getMethod("connectToService", Context.class, Core.class, MessagePipeHandle.class)
                         .invoke(null, context, core, pipe);
                 } catch(Exception e) {
                     Log.e(TAG, "Failed to register service '" + serviceName + "'", e);
+                    throw new RuntimeException(e);
                 }
             }
         });

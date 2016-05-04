@@ -5,7 +5,11 @@
 package io.flutter.view;
 
 import android.content.Context;
+import android.util.Log;
+import java.util.HashSet;
 
+import org.chromium.mojo.bindings.ConnectionErrorHandler;
+import org.chromium.mojo.bindings.Interface.Binding;
 import org.chromium.mojo.system.Core;
 import org.chromium.mojo.system.MessagePipeHandle;
 import org.chromium.mojo.system.MojoException;
@@ -16,9 +20,12 @@ import org.chromium.mojom.mojo.ServiceProvider;
  * A collection of services.
  **/
 class ServiceProviderImpl implements ServiceProvider {
+    private static final String TAG = "ServiceProviderImpl";
+
     private Core mCore;
     private Context mContext;
     private ServiceRegistry mRegistry;
+    private HashSet<Binding> mBindings = new HashSet<Binding>();
 
     ServiceProviderImpl(Core core, Context context, ServiceRegistry registry) {
         assert core != null;
@@ -41,6 +48,21 @@ class ServiceProviderImpl implements ServiceProvider {
             pipe.close();
             return;
         }
-        factory.connectToService(mContext, mCore, pipe);
+        final Binding binding = factory.connectToService(mContext, mCore, pipe);
+        mBindings.add(binding);
+        binding.registerErrorHandler(new ConnectionErrorHandler() {
+            @Override
+            public void onConnectionError(MojoException e) {
+                Log.w(TAG, "Flutter service provider connection error", e);
+                mBindings.remove(binding);
+            }
+        });
+    }
+
+    public void unbindServices() {
+        for (Binding binding : mBindings) {
+            binding.unbind().close();
+        }
+        mBindings.clear();
     }
 }

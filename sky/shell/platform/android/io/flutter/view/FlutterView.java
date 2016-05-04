@@ -26,6 +26,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 
 import org.chromium.base.JNINamespace;
+import org.chromium.mojo.bindings.Interface.Binding;
 import org.chromium.mojo.bindings.InterfaceRequest;
 import org.chromium.mojo.system.Core;
 import org.chromium.mojo.system.MessagePipeHandle;
@@ -70,7 +71,9 @@ public class FlutterView extends SurfaceView
     private long mNativePlatformView;
     private SkyEngine.Proxy mSkyEngine;
     private ServiceProviderImpl mPlatformServiceProvider;
+    private Binding mPlatformServiceProviderBinding;
     private ServiceProviderImpl mViewServiceProvider;
+    private Binding mViewServiceProviderBinding;
     private ServiceProvider.Proxy mDartServiceProvider;
     private ApplicationMessages.Proxy mFlutterAppMessages;
     private HashMap<String, OnMessageListener> mOnMessageListeners;
@@ -190,6 +193,16 @@ public class FlutterView extends SurfaceView
     }
 
     public void destroy() {
+        if (mPlatformServiceProviderBinding != null) {
+            mPlatformServiceProviderBinding.unbind().close();
+            mPlatformServiceProvider.unbindServices();
+        }
+
+        if (mViewServiceProviderBinding != null) {
+            mViewServiceProviderBinding.unbind().close();
+            mViewServiceProvider.unbindServices();
+        }
+
         getHolder().removeCallback(mSurfaceCallback);
         nativeDetach(mNativePlatformView);
         mNativePlatformView = 0;
@@ -337,22 +350,22 @@ public class FlutterView extends SurfaceView
     private void configureLocalServices(ServiceRegistry registry) {
         registry.register(Keyboard.MANAGER.getName(), new ServiceFactory() {
             @Override
-            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                Keyboard.MANAGER.bind(new KeyboardImpl(context, mKeyboardState), pipe);
+            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                return Keyboard.MANAGER.bind(new KeyboardImpl(context, mKeyboardState), pipe);
             }
         });
 
         registry.register(RawKeyboardService.MANAGER.getName(), new ServiceFactory() {
             @Override
-            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                RawKeyboardService.MANAGER.bind(new RawKeyboardServiceImpl(mRawKeyboardState), pipe);
+            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                return RawKeyboardService.MANAGER.bind(new RawKeyboardServiceImpl(mRawKeyboardState), pipe);
             }
         });
 
         registry.register(ApplicationMessages.MANAGER.getName(), new ServiceFactory() {
             @Override
-            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                ApplicationMessages.MANAGER.bind(new ApplicationMessagesImpl(), pipe);
+            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                return ApplicationMessages.MANAGER.bind(new ApplicationMessagesImpl(), pipe);
             }
         });
     }
@@ -365,16 +378,14 @@ public class FlutterView extends SurfaceView
         mNativePlatformView = nativeAttach(engine.second.passHandle().releaseNativeHandle());
     }
 
-    private ServiceProvider.Proxy getServiceProviderProxy(Core core, ServiceProviderImpl impl) {
-        Pair<ServiceProvider.Proxy, InterfaceRequest<ServiceProvider>> serviceProvider =
-                ServiceProvider.MANAGER.getInterfaceRequest(core);
-        ServiceProvider.MANAGER.bind(impl, serviceProvider.second);
-        return serviceProvider.first;
-    }
-
     public void runFromBundle(String bundlePath, String snapshotPath) {
-        if (mPlatformServiceProvider != null) {
-            mPlatformServiceProvider.close();
+        if (mPlatformServiceProviderBinding != null) {
+            mPlatformServiceProviderBinding.unbind().close();
+            mPlatformServiceProvider.unbindServices();
+        }
+        if (mViewServiceProviderBinding != null) {
+            mViewServiceProviderBinding.unbind().close();
+            mViewServiceProvider.unbindServices();
         }
         if (mDartServiceProvider != null) {
             mDartServiceProvider.close();
@@ -386,10 +397,20 @@ public class FlutterView extends SurfaceView
                 ServiceProvider.MANAGER.getInterfaceRequest(core);
         mDartServiceProvider = dartServiceProvider.first;
 
+        Pair<ServiceProvider.Proxy, InterfaceRequest<ServiceProvider>> platformServiceProvider =
+                ServiceProvider.MANAGER.getInterfaceRequest(core);
+        mPlatformServiceProviderBinding = ServiceProvider.MANAGER.bind(
+                mPlatformServiceProvider, platformServiceProvider.second);
+
+        Pair<ServiceProvider.Proxy, InterfaceRequest<ServiceProvider>> viewServiceProvider =
+                ServiceProvider.MANAGER.getInterfaceRequest(core);
+        mViewServiceProviderBinding = ServiceProvider.MANAGER.bind(
+                mViewServiceProvider, viewServiceProvider.second);
+
         ServicesData services = new ServicesData();
-        services.incomingServices = getServiceProviderProxy(core, mPlatformServiceProvider);
+        services.incomingServices = platformServiceProvider.first;
         services.outgoingServices = dartServiceProvider.second;
-        services.viewServices = getServiceProviderProxy(core, mViewServiceProvider);
+        services.viewServices = viewServiceProvider.first;
         mSkyEngine.setServices(services);
 
         resetAccessibilityTree();

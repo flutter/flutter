@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.HashMap;
 
 import org.chromium.mojo.bindings.ConnectionErrorHandler;
+import org.chromium.mojo.bindings.Interface.Binding;
 import org.chromium.mojo.bindings.InterfaceRequest;
 import org.chromium.mojo.system.Core;
 import org.chromium.mojo.system.MessagePipeHandle;
@@ -46,8 +47,8 @@ public class FirebaseImpl implements org.chromium.mojom.firebase.Firebase {
         mContext = context;
     }
 
-    public static void connectToService(Context context, Core core, MessagePipeHandle pipe) {
-        Firebase.MANAGER.bind(new FirebaseImpl(context), pipe);
+    public static Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
+        return Firebase.MANAGER.bind(new FirebaseImpl(context), pipe);
     }
 
     @Override
