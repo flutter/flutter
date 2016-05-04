@@ -88,13 +88,13 @@ class SlideTransition extends AnimatedWidget {
     Animation<FractionalOffset> position,
     this.transformHitTests: true,
     this.child
-  }) : position = position, super(key: key, animation: position);
+  }) : super(key: key, animation: position);
 
   /// The animation that controls the position of the child.
   ///
   /// If the current value of the position animation is (dx, dy), the child will
   /// be translated horizontally by width * dx and vertically by height * dy.
-  final Animation<FractionalOffset> position;
+  Animation<FractionalOffset> get position => animation;
 
   /// Whether hit testing should be affected by the slide animation.
   ///
@@ -128,15 +128,13 @@ class ScaleTransition extends AnimatedWidget {
     Animation<double> scale,
     this.alignment: FractionalOffset.center,
     this.child
-  }) : scale = scale, super(key: key, animation: scale) {
-    assert(scale != null);
-  }
+  }) : super(key: key, animation: scale);
 
   /// The animation that controls the scale of the child.
   ///
   /// If the current value of the scale animation is v, the child will be
   /// painted v times its normal size.
-  final Animation<double> scale;
+  Animation<double> get scale => animation;
 
   /// The alignment of the origin of the coordainte system in which the scale
   /// takes place, relative to the size of the box.
@@ -170,13 +168,13 @@ class RotationTransition extends AnimatedWidget {
     Key key,
     Animation<double> turns,
     this.child
-  }) : turns = turns, super(key: key, animation: turns);
+  }) : super(key: key, animation: turns);
 
   /// The animation that controls the rotation of the child.
   ///
   /// If the current value of the turns animation is v, the child will be
   /// rotated v * 2 * pi radians before being painted.
-  final Animation<double> turns;
+  Animation<double> get turns => animation;
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -206,7 +204,7 @@ class SizeTransition extends AnimatedWidget {
     Animation<double> sizeFactor,
     this.axisAlignment: 0.5,
     this.child
-  }) : sizeFactor = sizeFactor, super(key: key, animation: sizeFactor) {
+  }) : super(key: key, animation: sizeFactor) {
     assert(axis != null);
   }
 
@@ -216,7 +214,7 @@ class SizeTransition extends AnimatedWidget {
   /// The animation that controls the (clipped) size of the child. If the current value
   /// of sizeFactor is v then the width or height of the widget will be its intrinsic
   /// width or height multiplied by v.
-  final Animation<double> sizeFactor;
+  Animation<double> get sizeFactor => animation;
 
   /// How to align the child along the axis that sizeFactor is modifying.
   final double axisAlignment;
@@ -251,7 +249,7 @@ class FadeTransition extends AnimatedWidget {
     Key key,
     Animation<double> opacity,
     this.child
-  }) : opacity = opacity, super(key: key, animation: opacity);
+  }) : super(key: key, animation: opacity);
 
   /// The animation that controls the opacity of the child.
   ///
@@ -259,7 +257,7 @@ class FadeTransition extends AnimatedWidget {
   /// painted with an opacity of v. For example, if v is 0.5, the child will be
   /// blended 50% with its background. Similarly, if v is 0.0, the child will be
   /// completely transparent.
-  final Animation<double> opacity;
+  Animation<double> get opacity => animation;
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -296,12 +294,10 @@ class PositionedTransition extends AnimatedWidget {
     Key key,
     Animation<RelativeRect> rect,
     this.child
-  }) : rect = rect, super(key: key, animation: rect) {
-    assert(rect != null);
-  }
+  }) : super(key: key, animation: rect);
 
   /// The animation that controls the child's size and position.
-  final Animation<RelativeRect> rect;
+  Animation<RelativeRect> get rect => animation;
 
   /// The widget below this widget in the tree.
   final Widget child;
