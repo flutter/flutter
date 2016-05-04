@@ -15,7 +15,7 @@ void main() {
       LogsCommand command = new LogsCommand();
       applyMocksToCommand(command);
       return createTestCommandRunner(command).run(<String>['-d', 'abc123', 'logs']).then((int code) {
-        expect(code, equals(1));
+        expect(code, 1);
       });
     });
   });

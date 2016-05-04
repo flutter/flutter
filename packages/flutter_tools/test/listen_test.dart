@@ -15,7 +15,7 @@ void main() {
       ListenCommand command = new ListenCommand(singleRun: true);
       applyMocksToCommand(command);
       return createTestCommandRunner(command).run(<String>['listen']).then((int code) {
-        expect(code, equals(1));
+        expect(code, 1);
       });
     });
   });

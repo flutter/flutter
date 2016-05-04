@@ -15,7 +15,7 @@ void main() {
       RunCommand command = new RunCommand();
       applyMocksToCommand(command);
       return createTestCommandRunner(command).run(<String>['run', '-t', 'abc123']).then((int code) {
-        expect(code, equals(1));
+        expect(code, 1);
       });
     });
   });

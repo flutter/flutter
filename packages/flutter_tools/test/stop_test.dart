@@ -21,7 +21,7 @@ void main() {
       when(device.stopApp(any)).thenReturn(new Future<bool>.value(true));
       testDeviceManager.addDevice(device);
       return createTestCommandRunner(command).run(<String>['stop']).then((int code) {
-        expect(code, equals(0));
+        expect(code, 0);
       });
     });
 
@@ -33,7 +33,7 @@ void main() {
       testDeviceManager.addDevice(device);
 
       return createTestCommandRunner(command).run(<String>['stop']).then((int code) {
-        expect(code, equals(0));
+        expect(code, 0);
       });
     });
   });

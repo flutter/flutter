@@ -12,7 +12,7 @@ void main() {
     testUsingContext('stores the requested id', () {
       String deviceId = '1234';
       AndroidDevice device = new AndroidDevice(deviceId);
-      expect(device.id, equals(deviceId));
+      expect(device.id, deviceId);
     });
   });
 
