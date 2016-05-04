@@ -83,7 +83,6 @@ Flutter tests use [package:flutter_test](https://github.com/flutter/flutter/tree
  * `cd packages/flutter_tools`
  * `dart test/all.dart`
 
-`flutter test --flutter-repo` is a shortcut for those working on the flutter repository itself which runs all tests inside the `flutter` package regardless of the current working directory.
 To run all the tests for the entire Flutter repository, the same way that Travis runs them, run `travis/test.sh`.
 
 If you've built [your own flutter engine](#working-on-the-engine-and-the-framework-at-the-same-time), you can pass `--engine-debug` or `--engine-release` to change what flutter shell `flutter test` uses.
