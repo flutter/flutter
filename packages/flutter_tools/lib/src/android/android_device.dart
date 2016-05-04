@@ -435,9 +435,9 @@ List<AndroidDevice> getAdbDevices({ String mockAdbOutput }) {
 
       String deviceID = match[1];
       String deviceState = match[2];
-      Map<String, String> info = <String, String>{};
-
       String rest = match[3];
+
+      Map<String, String> info = <String, String>{};
       if (rest != null && rest.isNotEmpty) {
         rest = rest.trim();
         for (String data in rest.split(' ')) {
