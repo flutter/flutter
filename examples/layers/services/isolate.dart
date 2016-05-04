@@ -181,7 +181,7 @@ class CalculationManager {
     SendPort sender = message.sendPort;
     Calculator calculator = new Calculator(
       onProgressListener: (double completed, double total) {
-        sender.send([ completed, total ]);
+        sender.send(<double>[ completed, total ]);
       },
       onResultListener: (String result) {
         sender.send(result);

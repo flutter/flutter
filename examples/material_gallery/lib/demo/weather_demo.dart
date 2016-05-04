@@ -386,7 +386,7 @@ class Sun extends Node {
 
     if (active) {
       for (Ray ray in _rays) {
-        actions.run(new ActionSequence([
+        actions.run(new ActionSequence(<Action>[
           new ActionDelay(1.5),
           new ActionTween(
             (double a) => ray.opacity = a,
@@ -427,7 +427,7 @@ class Ray extends Sprite {
     double scaleTime = randomSignedDouble() * 2.0 + 4.0;
 
     actions.run(new ActionRepeatForever(
-      new ActionSequence([
+      new ActionSequence(<Action>[
         new ActionTween((double a) => scaleX = a, scaleX, scaleX * 0.5, scaleTime),
         new ActionTween((double a) => scaleX = a, scaleX * 0.5, scaleX, scaleTime)
       ])

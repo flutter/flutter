@@ -380,7 +380,7 @@ class _JumpingJackSide extends Node {
 
   void animateJumping() {
     actions.stopAll();
-    actions.run(new ActionSequence([
+    actions.run(new ActionSequence(<Action>[
       _createPoseAction(null, 0, 0.5),
       new ActionCallFunction(_animateJumpingLoop)
     ]));
