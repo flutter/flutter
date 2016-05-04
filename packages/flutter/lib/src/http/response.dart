@@ -10,7 +10,7 @@ class Response {
   /// Creates a [Response] object with the given fields.
   ///
   /// If [bodyBytes] is non-null, it is used to populate [body].
-  Response.bytes(this.bodyBytes, this.statusCode, { this.headers: const {} });
+  Response.bytes(this.bodyBytes, this.statusCode, { this.headers: const <String, String>{} });
 
   /// The result of decoding [bodyBytes] using ISO-8859-1.
   ///

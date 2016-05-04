@@ -40,19 +40,19 @@ void main() {
 
     FlipWidgetState testWidget = tester.state(find.byType(FlipWidget));
 
-    expect(callbackTracker, equals([0, 1, 2, 3, 4, 5]));
+    expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4, 5]));
 
     callbackTracker.clear();
     testWidget.flip();
     tester.pump();
 
-    expect(callbackTracker, equals([]));
+    expect(callbackTracker, equals(<int>[]));
 
     callbackTracker.clear();
     testWidget.flip();
     tester.pump();
 
-    expect(callbackTracker, equals([0, 1, 2, 3, 4, 5]));
+    expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4, 5]));
   });
 
   testWidgets('HomogeneousViewport vertical', (WidgetTester tester) {
@@ -89,7 +89,7 @@ void main() {
 
     tester.pumpWidget(testWidget);
 
-    expect(callbackTracker, equals([1, 2, 3, 4]));
+    expect(callbackTracker, equals(<int>[1, 2, 3, 4]));
 
     callbackTracker.clear();
 
@@ -98,7 +98,7 @@ void main() {
 
     tester.pumpWidget(testWidget);
 
-    expect(callbackTracker, equals([2, 3, 4]));
+    expect(callbackTracker, equals(<int>[2, 3, 4]));
 
     callbackTracker.clear();
   });
@@ -138,7 +138,7 @@ void main() {
 
     tester.pumpWidget(testWidget);
 
-    expect(callbackTracker, equals([1, 2, 3, 4, 5]));
+    expect(callbackTracker, equals(<int>[1, 2, 3, 4, 5]));
 
     callbackTracker.clear();
 
@@ -147,7 +147,7 @@ void main() {
 
     tester.pumpWidget(testWidget);
 
-    expect(callbackTracker, equals([2, 3, 4, 5]));
+    expect(callbackTracker, equals(<int>[2, 3, 4, 5]));
 
     callbackTracker.clear();
   });
@@ -177,22 +177,22 @@ void main() {
     );
 
     tester.pumpWidget(testWidget);
-    expect(callbackTracker, equals([0, 1]));
+    expect(callbackTracker, equals(<int>[0, 1]));
     callbackTracker.clear();
 
     scrollableKey.currentState.scrollTo(150.0);
     tester.pumpWidget(testWidget);
-    expect(callbackTracker, equals([0, 1, 2]));
+    expect(callbackTracker, equals(<int>[0, 1, 2]));
     callbackTracker.clear();
 
     scrollableKey.currentState.scrollTo(600.0);
     tester.pumpWidget(testWidget);
-    expect(callbackTracker, equals([2, 3]));
+    expect(callbackTracker, equals(<int>[2, 3]));
     callbackTracker.clear();
 
     scrollableKey.currentState.scrollTo(750.0);
     tester.pumpWidget(testWidget);
-    expect(callbackTracker, equals([2, 3, 4]));
+    expect(callbackTracker, equals(<int>[2, 3, 4]));
     callbackTracker.clear();
   });
 

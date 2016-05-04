@@ -15,7 +15,7 @@ class Term extends EquationMember {
 
   @override
   Expression asExpression() =>
-      new Expression([new Term(this.variable, this.coefficient)], 0.0);
+      new Expression(<Term>[new Term(this.variable, this.coefficient)], 0.0);
 
   @override
   bool get isConstant => false;

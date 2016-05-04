@@ -281,12 +281,12 @@ List<TextPainter> _initPainters(List<String> labels) {
 }
 
 List<TextPainter> _initHours() {
-  return _initPainters(['12', '1', '2', '3', '4', '5',
+  return _initPainters(<String>['12', '1', '2', '3', '4', '5',
                         '6', '7', '8', '9', '10', '11']);
 }
 
 List<TextPainter> _initMinutes() {
-  return _initPainters(['00', '05', '10', '15', '20', '25',
+  return _initPainters(<String>['00', '05', '10', '15', '20', '25',
                         '30', '35', '40', '45', '50', '55']);
 }
 

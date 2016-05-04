@@ -44,17 +44,17 @@ void main() {
     TestInherited first = new TestInherited(child: builder);
     tester.pumpWidget(first);
 
-    expect(log, equals([first]));
+    expect(log, equals(<TestInherited>[first]));
 
     TestInherited second = new TestInherited(child: builder, shouldNotify: false);
     tester.pumpWidget(second);
 
-    expect(log, equals([first]));
+    expect(log, equals(<TestInherited>[first]));
 
     TestInherited third = new TestInherited(child: builder, shouldNotify: true);
     tester.pumpWidget(third);
 
-    expect(log, equals([first, third]));
+    expect(log, equals(<TestInherited>[first, third]));
   });
 
   testWidgets('Update inherited when reparenting state', (WidgetTester tester) {
@@ -79,12 +79,12 @@ void main() {
     TestInherited first = build();
     tester.pumpWidget(first);
 
-    expect(log, equals([first]));
+    expect(log, equals(<TestInherited>[first]));
 
     TestInherited second = build();
     tester.pumpWidget(second);
 
-    expect(log, equals([first, second]));
+    expect(log, equals(<TestInherited>[first, second]));
   });
 
   testWidgets('Update inherited when removing node', (WidgetTester tester) {

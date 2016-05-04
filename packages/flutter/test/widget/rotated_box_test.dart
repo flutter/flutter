@@ -46,11 +46,11 @@ void main() {
     expect(box.size.height, equals(175.0));
 
     tester.tapAt(new Point(420.0, 280.0));
-    expect(log, equals(['left']));
+    expect(log, equals(<String>['left']));
     log.clear();
 
     tester.tapAt(new Point(380.0, 320.0));
-    expect(log, equals(['right']));
+    expect(log, equals(<String>['right']));
     log.clear();
   });
 }

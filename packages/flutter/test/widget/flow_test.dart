@@ -68,21 +68,21 @@ void main() {
     );
 
     tester.tap(find.text('0'));
-    expect(log, equals([0]));
+    expect(log, equals(<int>[0]));
     tester.tap(find.text('1'));
-    expect(log, equals([0, 1]));
+    expect(log, equals(<int>[0, 1]));
     tester.tap(find.text('2'));
-    expect(log, equals([0, 1, 2]));
+    expect(log, equals(<int>[0, 1, 2]));
 
     log.clear();
     tester.tapAt(new Point(20.0, 90.0));
-    expect(log, equals([1]));
+    expect(log, equals(<int>[1]));
 
     startOffset.value = 50.0;
     tester.pump();
 
     log.clear();
     tester.tapAt(new Point(20.0, 90.0));
-    expect(log, equals([0]));
+    expect(log, equals(<int>[0]));
   });
 }

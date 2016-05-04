@@ -102,7 +102,7 @@ void main() {
       host,
       (NavigatorTransaction transaction) {
       },
-      [
+      <String>[
         'initial: install',
         'initial: didPush',
         'initial: didChangeNext null',
@@ -115,7 +115,7 @@ void main() {
       (NavigatorTransaction transaction) {
         transaction.push(second = new TestRoute('second'));
       },
-      [
+      <String>[
         'second: install',
         'second: didPush',
         'second: didChangeNext null',
@@ -128,7 +128,7 @@ void main() {
       (NavigatorTransaction transaction) {
         transaction.push(new TestRoute('third'));
       },
-      [
+      <String>[
         'third: install',
         'third: didPush',
         'third: didChangeNext null',
@@ -141,7 +141,7 @@ void main() {
       (NavigatorTransaction transaction) {
         transaction.replace(oldRoute: second, newRoute: new TestRoute('two'));
       },
-      [
+      <String>[
         'two: install',
         'two: didReplace second',
         'two: didChangeNext third',
@@ -155,7 +155,7 @@ void main() {
       (NavigatorTransaction transaction) {
         transaction.pop('hello');
       },
-      [
+      <String>[
         'third: didPop hello',
         'third: dispose',
         'two: didPopNext third',
@@ -167,14 +167,14 @@ void main() {
       (NavigatorTransaction transaction) {
         transaction.pop('good bye');
       },
-      [
+      <String>[
         'two: didPop good bye',
         'two: dispose',
         'initial: didPopNext two',
       ]
     );
     tester.pumpWidget(new Container());
-    expect(results, equals(['initial: dispose']));
+    expect(results, equals(<String>['initial: dispose']));
     expect(routes.isEmpty, isTrue);
     results.clear();
   });
@@ -191,7 +191,7 @@ void main() {
       host,
       (NavigatorTransaction transaction) {
       },
-      [
+      <String>[
         'first: install',
         'first: didPush',
         'first: didChangeNext null',
@@ -204,7 +204,7 @@ void main() {
       (NavigatorTransaction transaction) {
         transaction.push(second = new TestRoute('second'));
       },
-      [
+      <String>[
         'second: install',
         'second: didPush',
         'second: didChangeNext null',
@@ -217,7 +217,7 @@ void main() {
       (NavigatorTransaction transaction) {
         transaction.push(new TestRoute('third'));
       },
-      [
+      <String>[
         'third: install',
         'third: didPush',
         'third: didChangeNext null',
@@ -230,7 +230,7 @@ void main() {
       (NavigatorTransaction transaction) {
         transaction.removeRouteBefore(second);
       },
-      [
+      <String>[
         'first: dispose',
       ]
     );
@@ -240,7 +240,7 @@ void main() {
       (NavigatorTransaction transaction) {
         transaction.pop('good bye');
       },
-      [
+      <String>[
         'third: didPop good bye',
         'third: dispose',
         'second: didPopNext third',
@@ -252,7 +252,7 @@ void main() {
       (NavigatorTransaction transaction) {
         transaction.push(new TestRoute('three'));
       },
-      [
+      <String>[
         'three: install',
         'three: didPush',
         'three: didChangeNext null',
@@ -266,7 +266,7 @@ void main() {
       (NavigatorTransaction transaction) {
         transaction.push(four = new TestRoute('four'));
       },
-      [
+      <String>[
         'four: install',
         'four: didPush',
         'four: didChangeNext null',
@@ -279,7 +279,7 @@ void main() {
       (NavigatorTransaction transaction) {
         transaction.removeRouteBefore(four);
       },
-      [
+      <String>[
         'second: didChangeNext four',
         'three: dispose',
       ]
@@ -290,14 +290,14 @@ void main() {
       (NavigatorTransaction transaction) {
         transaction.pop('the end');
       },
-      [
+      <String>[
         'four: didPop the end',
         'four: dispose',
         'second: didPopNext four',
       ]
     );
     tester.pumpWidget(new Container());
-    expect(results, equals(['second: dispose']));
+    expect(results, equals(<String>['second: dispose']));
     expect(routes.isEmpty, isTrue);
     results.clear();
   });
@@ -314,7 +314,7 @@ void main() {
       host,
       (NavigatorTransaction transaction) {
       },
-      [
+      <String>[
         'A: install',
         'A: didPush',
         'A: didChangeNext null',
@@ -326,7 +326,7 @@ void main() {
       (NavigatorTransaction transaction) {
         transaction.push(new TestRoute('B'));
       },
-      [
+      <String>[
         'B: install',
         'B: didPush',
         'B: didChangeNext null',
@@ -340,7 +340,7 @@ void main() {
       (NavigatorTransaction transaction) {
         transaction.push(routeC = new TestRoute('C'));
       },
-      [
+      <String>[
         'C: install',
         'C: didPush',
         'C: didChangeNext null',
@@ -354,7 +354,7 @@ void main() {
       (NavigatorTransaction transaction) {
         transaction.replaceRouteBefore(anchorRoute: routeC, newRoute: routeB = new TestRoute('b'));
       },
-      [
+      <String>[
         'b: install',
         'b: didReplace B',
         'b: didChangeNext C',
@@ -368,14 +368,14 @@ void main() {
       (NavigatorTransaction transaction) {
         transaction.popUntil(routeB);
       },
-      [
+      <String>[
         'C: didPop null',
         'C: dispose',
         'b: didPopNext C',
       ]
     );
     tester.pumpWidget(new Container());
-    expect(results, equals(['A: dispose', 'b: dispose']));
+    expect(results, equals(<String>['A: dispose', 'b: dispose']));
     expect(routes.isEmpty, isTrue);
     results.clear();
   });

@@ -129,12 +129,12 @@ class RenderEditableLine extends RenderBox {
       // TODO(mpcomplete): This doesn't work well at an RTL/LTR boundary.
       Offset caretOffset = _textPainter.getOffsetForCaret(selection.extent, _caretPrototype);
       Point start = new Point(caretOffset.dx, _contentSize.height) + offset;
-      return [new TextSelectionPoint(localToGlobal(start), null)];
+      return <TextSelectionPoint>[new TextSelectionPoint(localToGlobal(start), null)];
     } else {
       List<ui.TextBox> boxes = _textPainter.getBoxesForSelection(selection);
       Point start = new Point(boxes.first.start, boxes.first.bottom) + offset;
       Point end = new Point(boxes.last.end, boxes.last.bottom) + offset;
-      return [
+      return <TextSelectionPoint>[
         new TextSelectionPoint(localToGlobal(start), boxes.first.direction),
         new TextSelectionPoint(localToGlobal(end), boxes.last.direction),
       ];

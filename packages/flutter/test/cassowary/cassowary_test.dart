@@ -210,7 +210,7 @@ void main() {
     expect((t * cm(2.0)).value, 40.0);
 
     // Expression
-    Expression e = new Expression([t], 0.0);
+    Expression e = new Expression(<Term>[t], 0.0);
     expect((e * cm(2.0)).value, 40.0);
   });
 
@@ -228,7 +228,7 @@ void main() {
     expect((t / cm(2.0)).value, 10.0);
 
     // Expression
-    Expression e = new Expression([t], 0.0);
+    Expression e = new Expression(<Term>[t], 0.0);
     expect((e / cm(2.0)).value, 10.0);
   });
 
@@ -298,7 +298,7 @@ void main() {
     expect(c3.expression.constant, 0.0);
 
     // Expression
-    Constraint c4 = e >= new Expression([new Term(new Variable(2.0), 1.0)], 20.0);
+    Constraint c4 = e >= new Expression(<Term>[new Term(new Variable(2.0), 1.0)], 20.0);
     expect(c4 is Constraint, true);
     expect(c4.expression.terms.length, 3);
     expect(c4.expression.constant, -20.0);
@@ -325,8 +325,8 @@ void main() {
     expect(c3.expression.constant, 0.0);
 
     // Expression
-    Expression e = new Expression([t], 0.0);
-    Constraint c4 = e >= new Expression([new Term(new Variable(2.0), 1.0)], 20.0);
+    Expression e = new Expression(<Term>[t], 0.0);
+    Constraint c4 = e >= new Expression(<Term>[new Term(new Variable(2.0), 1.0)], 20.0);
     expect(c4 is Constraint, true);
     expect(c4.expression.terms.length, 2);
     expect(c4.expression.constant, -20.0);
@@ -352,7 +352,7 @@ void main() {
     ConstantMember c = cm(10.0);
     Param v = new Param(c.value);
     Term t = new Term(v.variable, 1.0);
-    Expression e = new Expression([t], 0.0);
+    Expression e = new Expression(<Term>[t], 0.0);
 
     // Constant
     expect((c * cm(10.0)).value, 100);
@@ -383,7 +383,7 @@ void main() {
     ConstantMember c = cm(10.0);
     Param v = new Param(c.value);
     Term t = new Term(v.variable, 1.0);
-    Expression e = new Expression([t], 0.0);
+    Expression e = new Expression(<Term>[t], 0.0);
 
     expect((c * c).value, 100);
     expect(() => v * v, throwsA(new isInstanceOf<ParserException>()));
@@ -457,13 +457,13 @@ void main() {
 
     Constraint c = (left >= cm(0.0));
 
-    expect(s.addConstraints([
+    expect(s.addConstraints(<Constraint>[
       (left + right).equals(cm(2.0) * mid),
       (right - left >= cm(100.0)),
       c
     ]), Result.success);
 
-    expect(s.addConstraints([(right >= cm(-20.0)), c]),
+    expect(s.addConstraints(<Constraint>[(right >= cm(-20.0)), c]),
         Result.duplicateConstraint);
   });
 
@@ -599,7 +599,7 @@ void main() {
     Param mid = new Param(0.0);
 
     expect(s.addEditVariables(
-         [left.variable, right.variable, mid.variable], 999.0), Result.success);
+         <Variable>[left.variable, right.variable, mid.variable], 999.0), Result.success);
   });
 
   test('bulk_remove_constraints_and_variables', () {
@@ -610,16 +610,16 @@ void main() {
     Param mid = new Param(0.0);
 
     expect(s.addEditVariables(
-         [left.variable, right.variable, mid.variable], 999.0), Result.success);
+         <Variable>[left.variable, right.variable, mid.variable], 999.0), Result.success);
 
     Constraint c1 = left <= mid;
     Constraint c2 = mid <= right;
 
-    expect(s.addConstraints([c1, c2]), Result.success);
+    expect(s.addConstraints(<Constraint>[c1, c2]), Result.success);
 
-    expect(s.removeConstraints([c1, c2]), Result.success);
+    expect(s.removeConstraints(<Constraint>[c1, c2]), Result.success);
 
     expect(s.removeEditVariables(
-                [left.variable, right.variable, mid.variable]), Result.success);
+                <Variable>[left.variable, right.variable, mid.variable]), Result.success);
   });
 }

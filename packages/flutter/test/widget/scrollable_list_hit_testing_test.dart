@@ -43,9 +43,9 @@ void main() {
     expect(find.text('3'), findsOneWidget);
     expect(find.text('4'), findsNothing);
     expect(find.text('5'), findsNothing);
-    expect(tapped, equals([]));
+    expect(tapped, equals(<int>[]));
     tester.tap(find.text('2'));
-    expect(tapped, equals([2]));
+    expect(tapped, equals(<int>[2]));
   });
 
   testWidgets('Tap item after scroll - vertical', (WidgetTester tester) {
@@ -81,11 +81,11 @@ void main() {
     expect(find.text('3'), findsOneWidget);
     expect(find.text('4'), findsNothing);
     expect(find.text('5'), findsNothing);
-    expect(tapped, equals([]));
+    expect(tapped, equals(<int>[]));
     tester.tap(find.text('1'));
-    expect(tapped, equals([1]));
+    expect(tapped, equals(<int>[1]));
     tester.tap(find.text('3'));
-    expect(tapped, equals([1])); // the center of the third item is off-screen so it shouldn't get hit
+    expect(tapped, equals(<int>[1])); // the center of the third item is off-screen so it shouldn't get hit
   });
 
   testWidgets('Padding scroll anchor start', (WidgetTester tester) {
@@ -107,17 +107,17 @@ void main() {
       )
     );
     tester.tapAt(new Point(200.0, 19.0));
-    expect(tapped, equals([]));
+    expect(tapped, equals(<int>[]));
     tester.tapAt(new Point(200.0, 21.0));
-    expect(tapped, equals([0]));
+    expect(tapped, equals(<int>[0]));
     tester.tapAt(new Point(4.0, 400.0));
-    expect(tapped, equals([0]));
+    expect(tapped, equals(<int>[0]));
     tester.tapAt(new Point(6.0, 400.0));
-    expect(tapped, equals([0, 1]));
+    expect(tapped, equals(<int>[0, 1]));
     tester.tapAt(new Point(800.0 - 14.0, 400.0));
-    expect(tapped, equals([0, 1]));
+    expect(tapped, equals(<int>[0, 1]));
     tester.tapAt(new Point(800.0 - 16.0, 400.0));
-    expect(tapped, equals([0, 1, 1]));
+    expect(tapped, equals(<int>[0, 1, 1]));
   });
 
   testWidgets('Padding scroll anchor end', (WidgetTester tester) {
@@ -140,16 +140,16 @@ void main() {
       )
     );
     tester.tapAt(new Point(200.0, 600.0 - 9.0));
-    expect(tapped, equals([]));
+    expect(tapped, equals(<int>[]));
     tester.tapAt(new Point(200.0, 600.0 - 11.0));
-    expect(tapped, equals([5]));
+    expect(tapped, equals(<int>[5]));
     tester.tapAt(new Point(4.0, 200.0));
-    expect(tapped, equals([5]));
+    expect(tapped, equals(<int>[5]));
     tester.tapAt(new Point(6.0, 200.0));
-    expect(tapped, equals([5, 4]));
+    expect(tapped, equals(<int>[5, 4]));
     tester.tapAt(new Point(800.0 - 14.0, 200.0));
-    expect(tapped, equals([5, 4]));
+    expect(tapped, equals(<int>[5, 4]));
     tester.tapAt(new Point(800.0 - 16.0, 200.0));
-    expect(tapped, equals([5, 4, 4]));
+    expect(tapped, equals(<int>[5, 4, 4]));
   });
 }

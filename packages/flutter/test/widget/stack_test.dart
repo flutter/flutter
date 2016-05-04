@@ -155,13 +155,13 @@ void main() {
     expect(find.text('0'), findsOneWidget);
     expect(find.text('1'), findsOneWidget);
     expect(find.text('2'), findsOneWidget);
-    expect(itemsPainted, equals([0]));
+    expect(itemsPainted, equals(<int>[0]));
 
     tester.pumpWidget(buildFrame(1));
-    expect(itemsPainted, equals([1]));
+    expect(itemsPainted, equals(<int>[1]));
 
     tester.pumpWidget(buildFrame(2));
-    expect(itemsPainted, equals([2]));
+    expect(itemsPainted, equals(<int>[2]));
   });
 
   testWidgets('Can hit test an IndexedStack', (WidgetTester tester) {
@@ -180,12 +180,12 @@ void main() {
     tester.pumpWidget(buildFrame(0));
     expect(itemsTapped, isEmpty);
     tester.tap(find.byKey(key));
-    expect(itemsTapped, [0]);
+    expect(itemsTapped, <int>[0]);
 
     tester.pumpWidget(buildFrame(2));
     expect(itemsTapped, isEmpty);
     tester.tap(find.byKey(key));
-    expect(itemsTapped, [2]);
+    expect(itemsTapped, <int>[2]);
   });
 
   testWidgets('Can set width and height', (WidgetTester tester) {

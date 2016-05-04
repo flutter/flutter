@@ -221,7 +221,7 @@ class _InputState extends State<Input> {
       double iconTop = topPadding + (textStyle.fontSize - iconSize) / 2.0;
       child = new Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        children: <Widget>[
           new Container(
             margin: new EdgeInsets.only(right: 16.0, top: iconTop),
             width: config.isDense ? 40.0 : 48.0,

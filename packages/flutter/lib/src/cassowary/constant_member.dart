@@ -4,6 +4,7 @@
 
 import 'expression.dart';
 import 'equation_member.dart';
+import 'term.dart';
 
 class ConstantMember extends EquationMember {
   /// Creates a [ConstantMember] object.
@@ -13,7 +14,7 @@ class ConstantMember extends EquationMember {
   ConstantMember(this.value);
 
   @override
-  Expression asExpression() => new Expression([], this.value);
+  Expression asExpression() => new Expression(<Term>[], this.value);
 
   @override
   final double value;

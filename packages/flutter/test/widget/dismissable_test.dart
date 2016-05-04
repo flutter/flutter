@@ -139,12 +139,12 @@ void main() {
 
     dismissItem(tester, 0, gestureDirection: DismissDirection.startToEnd);
     expect(find.text('0'), findsNothing);
-    expect(dismissedItems, equals([0]));
+    expect(dismissedItems, equals(<int>[0]));
     expect(reportedDismissDirection, DismissDirection.startToEnd);
 
     dismissItem(tester, 1, gestureDirection: DismissDirection.endToStart);
     expect(find.text('1'), findsNothing);
-    expect(dismissedItems, equals([0, 1]));
+    expect(dismissedItems, equals(<int>[0, 1]));
     expect(reportedDismissDirection, DismissDirection.endToStart);
   });
 
@@ -157,12 +157,12 @@ void main() {
 
     dismissItem(tester, 0, gestureDirection: DismissDirection.up);
     expect(find.text('0'), findsNothing);
-    expect(dismissedItems, equals([0]));
+    expect(dismissedItems, equals(<int>[0]));
     expect(reportedDismissDirection, DismissDirection.up);
 
     dismissItem(tester, 1, gestureDirection: DismissDirection.down);
     expect(find.text('1'), findsNothing);
-    expect(dismissedItems, equals([0, 1]));
+    expect(dismissedItems, equals(<int>[0, 1]));
     expect(reportedDismissDirection, DismissDirection.down);
   });
 
@@ -180,7 +180,7 @@ void main() {
 
     dismissItem(tester, 0, gestureDirection: DismissDirection.endToStart);
     expect(find.text('0'), findsNothing);
-    expect(dismissedItems, equals([0]));
+    expect(dismissedItems, equals(<int>[0]));
     dismissItem(tester, 1, gestureDirection: DismissDirection.endToStart);
   });
 
@@ -197,7 +197,7 @@ void main() {
 
     dismissItem(tester, 0, gestureDirection: DismissDirection.startToEnd);
     expect(find.text('0'), findsNothing);
-    expect(dismissedItems, equals([0]));
+    expect(dismissedItems, equals(<int>[0]));
   });
 
   testWidgets('drag-up with DismissDirection.up triggers dismiss', (WidgetTester tester) {
@@ -213,7 +213,7 @@ void main() {
 
     dismissItem(tester, 0, gestureDirection: DismissDirection.up);
     expect(find.text('0'), findsNothing);
-    expect(dismissedItems, equals([0]));
+    expect(dismissedItems, equals(<int>[0]));
   });
 
   testWidgets('drag-down with DismissDirection.down triggers dismiss', (WidgetTester tester) {
@@ -229,7 +229,7 @@ void main() {
 
     dismissItem(tester, 0, gestureDirection: DismissDirection.down);
     expect(find.text('0'), findsNothing);
-    expect(dismissedItems, equals([0]));
+    expect(dismissedItems, equals(<int>[0]));
   });
 
   // This is a regression test for an fn2 bug where dragging a card caused an
