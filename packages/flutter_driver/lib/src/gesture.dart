@@ -73,6 +73,19 @@ class Scroll extends CommandWithTarget {
   });
 }
 
+/// Command the driver to ensure that the element represented by [finder]
+/// has been scrolled completely into view.
+class ScrollIntoView extends CommandWithTarget {
+  @override
+  final String kind = 'scrollIntoView';
+
+  ScrollIntoView(SerializableFinder finder) : super(finder);
+
+  static ScrollIntoView deserialize(Map<String, dynamic> json) {
+    return new ScrollIntoView(SerializableFinder.deserialize(json));
+  }
+}
+
 class ScrollResult extends Result {
   static ScrollResult fromJson(Map<String, dynamic> json) {
     return new ScrollResult();

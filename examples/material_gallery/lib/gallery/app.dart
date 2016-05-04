@@ -44,6 +44,16 @@ final Map<String, WidgetBuilder> kRoutes = <String, WidgetBuilder>{
   TypographyDemo.routeName: (BuildContext context) => new TypographyDemo(),
 };
 
+final ThemeData _kGalleryLightTheme = new ThemeData(
+  brightness: ThemeBrightness.light,
+  primarySwatch: Colors.purple
+);
+
+final ThemeData _kGalleryDarkTheme = new ThemeData(
+  brightness: ThemeBrightness.dark,
+  primarySwatch: Colors.purple
+);
+
 class GalleryApp extends StatefulWidget {
   GalleryApp({ Key key }) : super(key: key);
 
@@ -73,13 +83,3 @@ class GalleryAppState extends State<GalleryApp> {
     );
   }
 }
-
-ThemeData _kGalleryLightTheme = new ThemeData(
-  brightness: ThemeBrightness.light,
-  primarySwatch: Colors.purple
-);
-
-ThemeData _kGalleryDarkTheme = new ThemeData(
-  brightness: ThemeBrightness.dark,
-  primarySwatch: Colors.purple
-);

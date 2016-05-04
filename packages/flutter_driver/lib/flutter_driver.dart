@@ -15,7 +15,8 @@ export 'src/driver.dart' show
   find,
   CommonFinders,
   EvaluatorFunction,
-  FlutterDriver;
+  FlutterDriver,
+  TracingCategory;
 
 export 'src/error.dart' show
   DriverError,
