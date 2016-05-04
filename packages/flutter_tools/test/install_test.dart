@@ -22,7 +22,7 @@ void main() {
       testDeviceManager.addDevice(device);
 
       return createTestCommandRunner(command).run(<String>['install']).then((int code) {
-        expect(code, equals(0));
+        expect(code, 0);
       });
     });
 
@@ -36,7 +36,7 @@ void main() {
       testDeviceManager.addDevice(device);
 
       return createTestCommandRunner(command).run(<String>['install']).then((int code) {
-        expect(code, equals(0));
+        expect(code, 0);
       });
     });
   });

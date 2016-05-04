@@ -38,7 +38,7 @@ void main() {
       return createTestCommandRunner(command).run(
         <String>['analyze', '--no-current-package', '--no-current-directory', dartFileA.path, dartFileB.path]
       ).then((int code) {
-        expect(code, equals(1));
+        expect(code, 1);
         expect(testLogger.errorText, '[warning] The imported libraries \'a.dart\' and \'b.dart\' cannot have the same name \'test\' (${dartFileB.path})\n');
         expect(testLogger.statusText, 'Analyzing 2 entry points...\n');
       });

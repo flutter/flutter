@@ -65,7 +65,7 @@ void main() {
         '--target=/some/app/test/e2e.dart',
       ];
       return createTestCommandRunner(command).run(args).then((int code) {
-        expect(code, equals(1));
+        expect(code, 1);
         BufferLogger buffer = logger;
         expect(buffer.errorText, contains(
           'Test file not found: /some/app/test_driver/e2e_test.dart'
@@ -89,7 +89,7 @@ void main() {
         '--target=$testApp',
       ];
       return createTestCommandRunner(command).run(args).then((int code) {
-        expect(code, equals(1));
+        expect(code, 1);
         BufferLogger buffer = logger;
         expect(buffer.errorText, contains(
           'Application failed to start. Will not run test. Quitting.'
@@ -107,7 +107,7 @@ void main() {
         '--target=$appFile',
       ];
       return createTestCommandRunner(command).run(args).then((int code) {
-        expect(code, equals(1));
+        expect(code, 1);
         BufferLogger buffer = logger;
         expect(buffer.errorText, contains(
           'Application file $appFile is outside the package directory $packageDir'
@@ -125,7 +125,7 @@ void main() {
         '--target=$appFile',
       ];
       return createTestCommandRunner(command).run(args).then((int code) {
-        expect(code, equals(1));
+        expect(code, 1);
         BufferLogger buffer = logger;
         expect(buffer.errorText, contains(
           'Application file main.dart must reside in one of the '
@@ -160,7 +160,7 @@ void main() {
         '--target=$testApp',
       ];
       return createTestCommandRunner(command).run(args).then((int code) {
-        expect(code, equals(0));
+        expect(code, 0);
         BufferLogger buffer = logger;
         expect(buffer.errorText, isEmpty);
       });
@@ -191,7 +191,7 @@ void main() {
         '--target=$testApp',
       ];
       return createTestCommandRunner(command).run(args).then((int code) {
-        expect(code, equals(123));
+        expect(code, 123);
         BufferLogger buffer = logger;
         expect(buffer.errorText, isEmpty);
       });

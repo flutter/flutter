@@ -15,7 +15,7 @@ void main() {
       TraceCommand command = new TraceCommand();
       applyMocksToCommand(command);
       return createTestCommandRunner(command).run(<String>['trace']).then((int code) {
-        expect(code, equals(1));
+        expect(code, 1);
       });
     });
   });
