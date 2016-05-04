@@ -425,6 +425,7 @@ class FlutterCommandRunner extends CommandRunner {
       .listSync(followLinks: false)
       .expand((FileSystemEntity entity) {
         return entity is Directory ? _gatherProjectPaths(entity.path) : <String>[];
-      });
+      })
+      .toList();
   }
 }

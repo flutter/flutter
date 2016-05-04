@@ -100,7 +100,7 @@ class MarkdownStyleRaw {
   Map<String, TextStyle> get styles => _styles;
 
   void _init() {
-    _styles = {
+    _styles = <String, TextStyle>{
       'a': a,
       'p': p,
       'li': p,
