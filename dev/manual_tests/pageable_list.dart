@@ -22,8 +22,12 @@ class PageableListAppState extends State<PageableListApp> {
   @override
   void initState() {
     super.initState();
-    List<Size> cardSizes = [
-      [100.0, 300.0], [300.0, 100.0], [200.0, 400.0], [400.0, 400.0], [300.0, 400.0]
+    List<Size> cardSizes = <List<double>>[
+      <double>[100.0, 300.0],
+      <double>[300.0, 100.0],
+      <double>[200.0, 400.0],
+      <double>[400.0, 400.0],
+      <double>[300.0, 400.0]
     ]
     .map((List<double> args) => new Size(args[0], args[1]))
     .toList();

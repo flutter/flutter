@@ -155,6 +155,7 @@ class SourceStats {
   int files = 0;
   int lines = 0;
 
+  @override
   String toString() => '${_comma(files)} files, ${_comma(lines)} lines';
 }
 
