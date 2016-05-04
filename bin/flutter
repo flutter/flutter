@@ -48,7 +48,7 @@ export PATH="$DART_SDK_PATH/bin:$PATH"
 set +e
 
 if [ $FLUTTER_DEV ]; then
-  "$DART" --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH" "$@"
+  "$DART" --packages="$FLUTTER_TOOLS_DIR/.packages" -c "$SCRIPT_PATH" "$@"
 else
   "$DART" "$SNAPSHOT_PATH" "$@"
 fi

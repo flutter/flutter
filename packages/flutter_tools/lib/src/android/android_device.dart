@@ -313,6 +313,9 @@ class AndroidDevice extends Device {
       includeRobotoFonts: false
     );
 
+    if (localBundlePath == null)
+      return new LaunchResult.failed();
+
     printTrace('Starting bundle for $this.');
 
     return startBundle(

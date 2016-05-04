@@ -50,6 +50,12 @@ class _Asset {
 
   final String source;
 
+  File get assetFile {
+    return new File(source != null ? '$base/$source' : '$base/$relativePath');
+  }
+
+  bool get assertFileExists => assetFile.existsSync();
+
   /// The delta between what the assetEntry is and the relativePath (e.g.,
   /// packages/material_gallery).
   String get symbolicPrefix {
@@ -99,7 +105,8 @@ Map<_Asset, List<_Asset>> _parseAssets(
   PackageMap packageMap,
   Map<String, dynamic> manifestDescriptor,
   String assetBase, {
-  List<String> excludeDirs: const <String>[]
+  List<String> excludeDirs: const <String>[],
+  bool complainOnErrors: false
 }) {
   Map<_Asset, List<_Asset>> result = <_Asset, List<_Asset>>{};
 
@@ -112,6 +119,12 @@ Map<_Asset, List<_Asset>> _parseAssets(
   if (manifestDescriptor.containsKey('assets')) {
     for (String asset in manifestDescriptor['assets']) {
       _Asset baseAsset = _resolveAsset(packageMap, assetBase, asset);
+
+      if (!baseAsset.assertFileExists) {
+        if (complainOnErrors)
+          printError('Warning: unable to locate asset entry in flutter.yaml: "$asset".');
+        continue;
+      }
 
       List<_Asset> variants = <_Asset>[];
       result[baseAsset] = variants;
@@ -196,22 +209,24 @@ Future<int> _validateManifest(Object manifest) async {
   Schema schema = await Schema.createSchemaFromUrl('file://$schemaPath');
 
   Validator validator = new Validator(schema);
-  if (validator.validate(manifest))
+  if (validator.validate(manifest)) {
     return 0;
+  } else {
+    if (validator.errors.length == 1) {
+      printError('Error in flutter.yaml: ${validator.errors.first}');
+    } else {
+      printError('Error in flutter.yaml:');
+      printError('  ' + validator.errors.join('\n  '));
+    }
 
-  printError('Error in flutter.yaml:');
-  printError(validator.errors.join('\n'));
-  return 1;
+    return 1;
+  }
 }
 
+/// Create a [ZipEntry] from the given [_Asset]; the asset must exist.
 ZipEntry _createAssetEntry(_Asset asset) {
-  String source = asset.source ?? asset.relativePath;
-  File file = new File('${asset.base}/$source');
-  if (!file.existsSync()) {
-    printError('Cannot find asset "$source" in directory "${path.absolute(asset.base)}".');
-    return null;
-  }
-  return new ZipEntry.fromFile(asset.assetEntry, file);
+  assert(asset.assertFileExists);
+  return new ZipEntry.fromFile(asset.assetEntry, asset.assetFile);
 }
 
 ZipEntry _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
@@ -242,6 +257,8 @@ ZipEntry _createFontManifest(Map<String, dynamic> manifestDescriptor,
 }
 
 /// Build the flx in the build/ directory and return `localBundlePath` on success.
+///
+/// Return `null` on failure.
 Future<String> buildFlx(
   Toolchain toolchain, {
   String mainPath: defaultMainPath,
@@ -259,10 +276,7 @@ Future<String> buildFlx(
     precompiledSnapshot: precompiledSnapshot,
     includeRobotoFonts: includeRobotoFonts
   );
-  if (result == 0)
-    return localBundlePath;
-  else
-    throw result;
+  return result == 0 ? localBundlePath : null;
 }
 
 /// The result from [buildInTempDir]. Note that this object should be disposed after use.
@@ -346,7 +360,8 @@ Future<int> assemble({
     new PackageMap(path.join(assetBasePath, '.packages')),
     manifestDescriptor,
     assetBasePath,
-    excludeDirs: <String>[workingDirPath, path.join(assetBasePath, 'build')]
+    excludeDirs: <String>[workingDirPath, path.join(assetBasePath, 'build')],
+    complainOnErrors: true
   );
 
   final bool usesMaterialDesign = manifestDescriptor != null &&
