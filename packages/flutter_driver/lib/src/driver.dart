@@ -240,7 +240,7 @@ class FlutterDriver {
   /// Scrolls the Scrollable ancestor of the widget located by [finder]
   /// until the widget is completely visible.
   Future<Null> scrollIntoView(SerializableFinder finder) async {
-    return await _sendCommand(new ScrollToVisible(finder)).then((Map<String, dynamic> _) => null);
+    return await _sendCommand(new ScrollIntoView(finder)).then((Map<String, dynamic> _) => null);
   }
 
   /// Returns the text in the `Text` widget located by [finder].
