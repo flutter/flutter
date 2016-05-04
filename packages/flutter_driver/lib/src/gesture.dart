@@ -25,7 +25,7 @@ class TapResult extends Result {
   }
 
   @override
-  Map<String, dynamic> toJson() => {};
+  Map<String, dynamic> toJson() => <String, dynamic>{};
 }
 
 
@@ -65,7 +65,7 @@ class Scroll extends CommandWithTarget {
   final int frequency;
 
   @override
-  Map<String, String> serialize() => super.serialize()..addAll({
+  Map<String, String> serialize() => super.serialize()..addAll(<String, String>{
     'dx': '$dx',
     'dy': '$dy',
     'duration': '${duration.inMicroseconds}',
@@ -92,5 +92,5 @@ class ScrollResult extends Result {
   }
 
   @override
-  Map<String, dynamic> toJson() => {};
+  Map<String, dynamic> toJson() => <String, dynamic>{};
 }

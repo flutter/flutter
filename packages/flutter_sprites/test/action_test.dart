@@ -158,7 +158,7 @@ void main() {
     ActionTween tween0 = new ActionTween((double a) => value0 = a, 0.0, 1.0, 10.0);
     ActionTween tween1 = new ActionTween((double a) => value1 = a, 0.0, 1.0, 20.0);
 
-    ActionGroup group = new ActionGroup([tween0, tween1]);
+    ActionGroup group = new ActionGroup(<ActionTween>[tween0, tween1]);
     expect(group.duration, closeTo(20.0, epsilon));
 
     group.update(0.0);
@@ -180,7 +180,7 @@ void main() {
     ActionTween tween0 = new ActionTween((double a) => doubleValue = a, 0.0, 1.0, 4.0);
     ActionTween tween1 = new ActionTween((double a) => doubleValue = a, 1.0, 0.0, 12.0);
 
-    ActionSequence sequence = new ActionSequence([tween0, tween1]);
+    ActionSequence sequence = new ActionSequence(<ActionTween>[tween0, tween1]);
     expect(sequence.duration, closeTo(16.0, epsilon));
 
     sequence.update(0.0);
