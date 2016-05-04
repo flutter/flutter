@@ -87,7 +87,7 @@ abstract class InkHighlight {
   /// Whether this part of the material is being visually emphasized.
   bool get active;
 
-  /// The color use to visually represent the emphasis.
+  /// The color of the ink used to emphasize part of the material.
   Color get color;
   void set color(Color value);
 }

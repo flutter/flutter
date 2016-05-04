@@ -55,6 +55,7 @@ class Theme extends InheritedWidget {
 
 /// An animated value that interpolates [ThemeData]s.
 class ThemeDataTween extends Tween<ThemeData> {
+  /// Creates an interpolation between [begin] and [end].
   ThemeDataTween({ ThemeData begin, ThemeData end }) : super(begin: begin, end: end);
 
   @override

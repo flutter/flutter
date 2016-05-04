@@ -218,12 +218,21 @@ class _DropDownRoute<T> extends PopupRoute<_DropDownRouteResult<T>> {
   }
 }
 
+/// An item in a menu created by a [DropDownButton].
+///
+/// The type `T` is the type of the value the entry represents. All the entries
+/// in a given menu must represent values with consistent types.
 class DropDownMenuItem<T> extends StatelessWidget {
+  /// Creates an item for a drop down menu.
+  ///
+  /// The [child] argument is required.
   DropDownMenuItem({
     Key key,
     this.value,
     this.child
-  }) : super(key: key);
+  }) : super(key: key) {
+    assert(child != null);
+  }
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -290,6 +299,9 @@ class DropDownButtonHideUnderline extends InheritedWidget {
 ///  * [FlatButton]
 ///  * <https://www.google.com/design/spec/components/buttons.html#buttons-dropdown-buttons>
 class DropDownButton<T> extends StatefulWidget {
+  /// Creates a drop down button.
+  ///
+  /// The [items] must have distinct values and [value] must be among them.
   DropDownButton({
     Key key,
     this.items,

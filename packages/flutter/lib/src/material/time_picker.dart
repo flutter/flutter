@@ -28,6 +28,10 @@ enum DayPeriod {
 
 /// A value representing a time during the day
 class TimeOfDay {
+  /// Creates a time of day.
+  ///
+  /// The [hour] argument must be between 0 and 23, inclusive. The [minute]
+  /// argument must be between 0 and 59, inclusive.
   const TimeOfDay({ this.hour, this.minute });
 
   /// Returns a new TimeOfDay with the hour and/or minute replaced.
@@ -105,6 +109,12 @@ enum _TimePickerMode { hour, minute }
 ///  * [showTimePicker]
 ///  * <https://www.google.com/design/spec/components/pickers.html#pickers-time-pickers>
 class TimePicker extends StatefulWidget {
+  /// Creates a time picker.
+  ///
+  /// The [selectedTime] must not be null.
+  ///
+  /// Rarely used directly. Instead, consider using [showTimePicker], which
+  /// creates a time picker dialog.
   TimePicker({
     Key key,
     this.selectedTime,

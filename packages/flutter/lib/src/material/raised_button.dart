@@ -32,6 +32,10 @@ import 'theme.dart';
 ///  * [FloatingActionButton]
 ///  * <https://www.google.com/design/spec/components/buttons.html>
 class RaisedButton extends StatelessWidget {
+  /// Creates a raised button.
+  ///
+  /// The [child] argument is required and is typically a [Text] widget in all
+  /// caps.
   RaisedButton({
     Key key,
     this.onPressed,
@@ -79,6 +83,8 @@ class RaisedButton extends StatelessWidget {
   final ThemeBrightness colorBrightness;
 
   /// The widget below this widget in the tree.
+  ///
+  /// Typically a [Text] widget in all caps.
   final Widget child;
 
   /// Whether the button is enabled or disabled. Buttons are disabled by default. To

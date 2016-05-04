@@ -25,6 +25,9 @@ const double _kTextSelectionHandleSize = 20.0; // pixels
 ///
 ///  * <https://www.google.com/design/spec/components/text-fields.html>
 class Input extends StatefulWidget {
+  /// Creates a text input field.
+  ///
+  /// By default, the input uses a keyboard appropriate for text entry.
   Input({
     Key key,
     this.value,
