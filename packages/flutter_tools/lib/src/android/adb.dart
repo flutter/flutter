@@ -166,7 +166,7 @@ class AdbDevice {
     // 'TA95000FQA             device usb:340787200X product:peregrine_retus model:XT1045 device:peregrine'
     // '015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper'
 
-    Match match = deviceRegex.firstMatch(deviceInfo);
+    Match match = kDeviceRegex.firstMatch(deviceInfo);
     id = match[1];
     status = match[2];
 
@@ -185,7 +185,7 @@ class AdbDevice {
       modelID = cleanAdbDeviceName(modelID);
   }
 
-  static final RegExp deviceRegex = new RegExp(r'^(\S+)\s+(\S+)(.*)');
+  static final RegExp kDeviceRegex = new RegExp(r'^(\S+)\s+(\S+)(.*)');
 
   /// Always non-null; something like `TA95000FQA`.
   String id;

@@ -38,5 +38,13 @@ emulator-5612          host features:shell_2
       expect(devices, hasLength(3));
       expect(devices.first.name, 'localhost:36790');
     });
+
+    testUsingContext('android n', () {
+      List<AndroidDevice> devices = getAdbDevices(mockAdbOutput: '''
+ZX1G22JJWR             device usb:3-3 product:shamu model:Nexus_6 device:shamu features:cmd,shell_v2
+''');
+      expect(devices, hasLength(1));
+      expect(devices.first.name, 'Nexus 6');
+    });
   });
 }
