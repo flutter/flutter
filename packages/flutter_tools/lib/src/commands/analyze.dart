@@ -580,7 +580,7 @@ class AnalyzeCommand extends FlutterCommand {
     String expectedTime = argResults['benchmark-expected'];
 
     Map<String, dynamic> data = <String, dynamic>{
-      'time': (stopwatch.elapsedMilliseconds / 1000.0).toStringAsFixed(3),
+      'time': (stopwatch.elapsedMilliseconds / 1000.0),
       'issues': errorCount
     };
 
