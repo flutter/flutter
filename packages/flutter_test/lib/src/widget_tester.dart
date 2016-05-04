@@ -36,13 +36,14 @@ typedef Future<Null> WidgetTesterCallback(WidgetTester widgetTester);
 ///       expect(tester, hasWidget(find.text('Success')));
 ///     });
 void testWidgets(String description, WidgetTesterCallback callback, {
-  Timeout timeout: const Timeout(const Duration(seconds: 5))
+  Timeout timeout: const Timeout(const Duration(seconds: 5)),
+  bool skip
 }) {
   TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   WidgetTester tester = new WidgetTester._(binding);
   group('-', () {
     setUp(binding.preTest);
-    test(description, () => binding.runTest(() => callback(tester)));
+    test(description, () => binding.runTest(() => callback(tester)), skip: skip);
     tearDown(binding.postTest);
   }, timeout: timeout);
 }
