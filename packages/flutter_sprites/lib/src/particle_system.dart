@@ -108,7 +108,13 @@ class ParticleSystem extends Node {
   double tangentialAccelerationVar;
 
   /// The gravity vector of the particle system.
-  Vector2 gravity;
+  Offset get gravity => new Offset(_gravity.x, _gravity.y);
+
+  Vector2 _gravity;
+
+  void set gravity(Offset gravity) {
+    _gravity = new Vector2(gravity.dx, gravity.dy);
+  }
 
   /// The maximum number of particles the system can display at a single time.
   int maxParticles;
@@ -178,7 +184,7 @@ class ParticleSystem extends Node {
                   this.radialAccelerationVar: 0.0,
                   this.tangentialAcceleration: 0.0,
                   this.tangentialAccelerationVar: 0.0,
-                  this.gravity,
+                  Offset gravity,
                   this.maxParticles: 100,
                   this.emissionRate: 50.0,
                   this.colorSequence,
@@ -189,10 +195,11 @@ class ParticleSystem extends Node {
                   this.transferMode: TransferMode.plus,
                   this.numParticlesToEmit: 0,
                   this.autoRemoveOnFinish: true}) {
+    this.gravity = gravity;
     _particles = new List<_Particle>();
     _emitCounter = 0.0;
     // _elapsedTime = 0.0;
-    if (gravity == null) gravity = new Vector2.zero();
+    if (_gravity == null) _gravity = new Vector2.zero();
     if (colorSequence == null) colorSequence = new ColorSequence.fromStartAndEndColor(new Color(0xffffffff), new Color(0x00ffffff));
   }
 
@@ -249,11 +256,11 @@ class ParticleSystem extends Node {
         tangential.scale(particle.accelerations.tangentialAccel);
 
         // (gravity + radial + tangential) * dt
-        Vector2 accel = (gravity + radial + tangential).scale(dt);
+        Vector2 accel = (_gravity + radial + tangential).scale(dt);
         particle.dir += accel;
-      } else if (gravity[0] != 0.0 || gravity[1] != 0) {
+      } else if (_gravity[0] != 0.0 || _gravity[1] != 0) {
         // gravity
-        Vector2 accel = new Vector2.copy(gravity).scale(dt);
+        Vector2 accel = new Vector2.copy(_gravity).scale(dt);
         particle.dir += accel;
       }
 
