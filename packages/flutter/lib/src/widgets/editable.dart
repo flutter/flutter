@@ -154,6 +154,7 @@ class RawInputLine extends Scrollable {
     this.cursorColor,
     this.selectionColor,
     this.selectionHandleBuilder,
+    this.selectionToolbarBuilder,
     this.keyboardType,
     this.onChanged,
     this.onSubmitted
@@ -181,7 +182,13 @@ class RawInputLine extends Scrollable {
   /// The color to use when painting the selection.
   final Color selectionColor;
 
+  /// Optional builder function for a widget that controls the boundary of a
+  /// text selection.
   final TextSelectionHandleBuilder selectionHandleBuilder;
+
+  /// Optional builder function for a set of controls for working with a
+  /// text selection (e.g. copy and paste).
+  final TextSelectionToolbarBuilder selectionToolbarBuilder;
 
   /// The type of keyboard to use for editing the text.
   final KeyboardType keyboardType;
@@ -202,7 +209,7 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
 
   _KeyboardClientImpl _keyboardClient;
   KeyboardHandle _keyboardHandle;
-  TextSelectionHandles _selectionHandles;
+  TextSelectionOverlay _selectionOverlay;
 
   @override
   ScrollBehavior<double, double> createScrollBehavior() => new BoundedBehavior();
@@ -227,12 +234,6 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
       if (_isAttachedToKeyboard)
         _keyboardHandle.setEditingState(_keyboardClient.editingState);
     }
-  }
-
-  @override
-  void dispatchOnScroll() {
-    super.dispatchOnScroll();
-    _selectionHandles?.update(_keyboardClient.inputValue.selection);
   }
 
   bool get _isAttachedToKeyboard => _keyboardHandle != null && _keyboardHandle.attached;
@@ -287,8 +288,8 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
     if (config.onChanged != null)
       config.onChanged(_keyboardClient.inputValue);
     if (_keyboardClient.inputValue.text != config.value.text) {
-      _selectionHandles?.hide();
-      _selectionHandles = null;
+      _selectionOverlay?.hide();
+      _selectionOverlay = null;
     }
   }
 
@@ -307,25 +308,27 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
     if (config.onChanged != null)
       config.onChanged(newInput);
 
-    if (_selectionHandles != null) {
-      _selectionHandles.hide();
-      _selectionHandles = null;
+    if (_selectionOverlay != null) {
+      _selectionOverlay.hide();
+      _selectionOverlay = null;
     }
 
-    if (_keyboardClient.inputValue.text.isNotEmpty &&
-        config.selectionHandleBuilder != null) {
-      _selectionHandles = new TextSelectionHandles(
-        selection: selection,
+    if (newInput.text.isNotEmpty && config.selectionHandleBuilder != null) {
+      _selectionOverlay = new TextSelectionOverlay(
+        input: newInput,
+        context: context,
+        debugRequiredFor: config,
         renderObject: renderObject,
-        onSelectionHandleChanged: _handleSelectionHandleChanged,
-        builder: config.selectionHandleBuilder
+        onSelectionOverlayChanged: _handleSelectionOverlayChanged,
+        handleBuilder: config.selectionHandleBuilder,
+        toolbarBuilder: config.selectionToolbarBuilder
       );
-      _selectionHandles.show(context, debugRequiredFor: config);
+      _selectionOverlay.show();
     }
   }
 
-  void _handleSelectionHandleChanged(TextSelection selection) {
-    InputValue newInput = new InputValue(text: _keyboardClient.inputValue.text, selection: selection);
+  void _handleSelectionOverlayChanged(InputValue newInput) {
+    assert(!newInput.composing.isValid);  // composing range must be empty while selecting
     if (config.onChanged != null)
       config.onChanged(newInput);
   }
@@ -357,7 +360,7 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
     if (_cursorTimer != null)
       _stopCursorTimer();
     scheduleMicrotask(() { // can't hide while disposing, since it triggers a rebuild
-      _selectionHandles?.hide();
+      _selectionOverlay?.hide();
     });
     super.dispose();
   }
@@ -382,13 +385,13 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
     else if (_cursorTimer != null && (!focused || !config.value.selection.isCollapsed))
       _stopCursorTimer();
 
-    if (_selectionHandles != null) {
+    if (_selectionOverlay != null) {
       scheduleMicrotask(() { // can't update while disposing, since it triggers a rebuild
         if (focused) {
-          _selectionHandles.update(config.value.selection);
+          _selectionOverlay.update(config.value);
         } else {
-          _selectionHandles.hide();
-          _selectionHandles = null;
+          _selectionOverlay.hide();
+          _selectionOverlay = null;
         }
       });
     }
