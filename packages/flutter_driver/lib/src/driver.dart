@@ -252,7 +252,7 @@ class FlutterDriver {
   Future<Null> startTracing({List<TracingCategory> categories: _defaultCategories}) async {
     assert(categories != null && categories.length > 0);
     try {
-      await _peer.sendRequest(_kSetVMTimelineFlagsMethod, {
+      await _peer.sendRequest(_kSetVMTimelineFlagsMethod, <String, String>{
         'recordedStreams': _tracingCategoriesToString(categories)
       });
       return null;
@@ -268,7 +268,7 @@ class FlutterDriver {
   /// Stops recording performance traces and downloads the timeline.
   Future<Timeline> stopTracingAndDownloadTimeline() async {
     try {
-      await _peer.sendRequest(_kSetVMTimelineFlagsMethod, {'recordedStreams': '[]'});
+      await _peer.sendRequest(_kSetVMTimelineFlagsMethod, <String, String>{'recordedStreams': '[]'});
       return new Timeline.fromJson(await _peer.sendRequest(_kGetVMTimelineMethod));
     } catch(error, stackTrace) {
       throw new DriverError(

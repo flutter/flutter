@@ -19,7 +19,7 @@ void main() {
     parent.addChild(node0);
     parent.addChild(node1);
 
-    node1.constraints = [(new ConstraintPositionToNode(node0))];
+    node1.constraints = <Constraint>[(new ConstraintPositionToNode(node0))];
 
     node0.position = const Point(100.0, 50.0);
     node1.applyConstraints(0.1);
@@ -37,7 +37,7 @@ void main() {
     parent.addChild(node0);
     parent.addChild(node1);
 
-    node1.constraints = [(new ConstraintRotationToNode(node0))];
+    node1.constraints = <Constraint>[(new ConstraintRotationToNode(node0))];
 
     node1.applyConstraints(0.1);
 
@@ -53,7 +53,7 @@ void main() {
     parent.addChild(node0);
     parent.addChild(node1);
 
-    node1.constraints = [(new ConstraintRotationToNodeRotation(node0, baseRotation: 10.0))];
+    node1.constraints = <Constraint>[(new ConstraintRotationToNodeRotation(node0, baseRotation: 10.0))];
 
     node0.rotation = 90.0;
     node1.applyConstraints(0.1);
@@ -69,7 +69,7 @@ void main() {
     parent.addChild(node0);
 
     Constraint constraint = new ConstraintRotationToMovement();
-    node0.constraints = [constraint];
+    node0.constraints = <Constraint>[constraint];
 
     node0.position = const Point(0.0, 0.0);
     constraint.preUpdate(node0, 0.1);

@@ -91,7 +91,7 @@ abstract class SerializableFinder {
     throw new DriverError('Unsupported search specification type $finderType');
   }
 
-  Map<String, String> serialize() => {
+  Map<String, String> serialize() => <String, String>{
     'finderType': finderType,
   };
 }
@@ -107,7 +107,7 @@ class ByTooltipMessage extends SerializableFinder {
   final String text;
 
   @override
-  Map<String, String> serialize() => super.serialize()..addAll({
+  Map<String, String> serialize() => super.serialize()..addAll(<String, String>{
     'text': text,
   });
 
@@ -126,7 +126,7 @@ class ByText extends SerializableFinder {
   final String text;
 
   @override
-  Map<String, String> serialize() => super.serialize()..addAll({
+  Map<String, String> serialize() => super.serialize()..addAll(<String, String>{
     'text': text,
   });
 
@@ -160,7 +160,7 @@ class ByValueKey extends SerializableFinder {
   final String keyValueType;
 
   @override
-  Map<String, String> serialize() => super.serialize()..addAll({
+  Map<String, String> serialize() => super.serialize()..addAll(<String, String>{
     'keyValueString': keyValueString,
     'keyValueType': keyValueType,
   });
@@ -205,7 +205,7 @@ class GetTextResult extends Result {
   }
 
   @override
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => <String, String>{
     'text': text,
   };
 }

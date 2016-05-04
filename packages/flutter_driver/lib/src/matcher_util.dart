@@ -6,7 +6,7 @@ import 'package:matcher/matcher.dart';
 
 /// Matches [value] against the [matcher].
 MatchResult match(dynamic value, Matcher matcher) {
-  Map<dynamic, dynamic> matchState = {};
+  Map<dynamic, dynamic> matchState = <dynamic, dynamic>{};
   if (matcher.matches(value, matchState)) {
     return new MatchResult._matched();
   } else {

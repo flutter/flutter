@@ -92,7 +92,7 @@ class NineSliceSprite extends NodeWithSize with SpritePaint {
 
     if (_isDirty) {
       // Calcuate vertices and indices.
-      _vertices = [
+      _vertices = <Point>[
         Point.origin,
 
       ];
