@@ -504,6 +504,9 @@ Future<int> buildAndroid(
       mainPath: findMainDartFile(target),
       precompiledSnapshot: isAotBuildMode(buildMode),
       includeRobotoFonts: false);
+
+    if (flxPath == null)
+      return 1;
   }
 
   // Build an AOT snapshot if needed.
