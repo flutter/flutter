@@ -121,7 +121,7 @@ void main() {
       new Focus(
         key: keyParentFocus,
         child: new Row(
-          children: [
+          children: <Widget>[
             new TestFocusable(
               key: keyA,
               no: 'a',
@@ -148,7 +148,7 @@ void main() {
       new Focus(
         key: keyParentFocus,
         child: new Row(
-          children: [
+          children: <Widget>[
             new TestFocusable(
               key: keyA,
               no: 'a',
@@ -174,7 +174,7 @@ void main() {
       new Focus(
         key: keyParentFocus,
         child: new Row(
-          children: [
+          children: <Widget>[
             new TestFocusable(
               key: keyA,
               no: 'a',

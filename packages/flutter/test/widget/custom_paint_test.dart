@@ -41,6 +41,6 @@ void main() {
       )
     ));
 
-    expect(log, equals(['background', 'child', 'foreground']));
+    expect(log, equals(<String>['background', 'child', 'foreground']));
   });
 }

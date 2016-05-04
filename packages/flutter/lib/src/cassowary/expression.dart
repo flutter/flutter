@@ -156,7 +156,7 @@ class Expression extends EquationMember {
   EquationMember operator /(EquationMember m) {
     if (!m.isConstant) {
       throw new ParserException(
-          'The divisor was not a constant expression', [this, m]);
+          'The divisor was not a constant expression', <EquationMember>[this, m]);
       return null;
     }
 

@@ -31,14 +31,14 @@ void main() {
         )
       )
     );
-    expect(log, equals(['getClip']));
+    expect(log, equals(<String>['getClip']));
 
     tester.tapAt(new Point(10.0, 10.0));
-    expect(log, equals(['getClip']));
+    expect(log, equals(<String>['getClip']));
     log.clear();
 
     tester.tapAt(new Point(100.0, 100.0));
-    expect(log, equals(['tap']));
+    expect(log, equals(<String>['tap']));
     log.clear();
   });
 
@@ -52,14 +52,14 @@ void main() {
         )
       )
     );
-    expect(log, equals([]));
+    expect(log, equals(<String>[]));
 
     tester.tapAt(new Point(10.0, 10.0));
-    expect(log, equals([]));
+    expect(log, equals(<String>[]));
     log.clear();
 
     tester.tapAt(new Point(400.0, 300.0));
-    expect(log, equals(['tap']));
+    expect(log, equals(<String>['tap']));
     log.clear();
   });
 }

@@ -316,13 +316,13 @@ void main() {
       new Container(key: new UniqueKey(), child: logger)
     );
 
-    expect(log, equals(['build']));
+    expect(log, equals(<String>['build']));
 
     tester.pumpWidget(
       new Container(key: new UniqueKey(), child: logger)
     );
 
-    expect(log, equals(['build', 'deactivate', 'build']));
+    expect(log, equals(<String>['build', 'deactivate', 'build']));
     log.clear();
 
     tester.pump();
