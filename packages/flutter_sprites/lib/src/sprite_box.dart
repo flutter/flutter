@@ -126,8 +126,6 @@ class SpriteBox extends RenderBox {
 
   List<Node> _constrainedNodes;
 
-  List<PhysicsWorld> _physicsNodes;
-
   Rect _visibleArea;
 
   Rect get visibleArea {
@@ -158,14 +156,12 @@ class SpriteBox extends RenderBox {
   void _registerNode(Node node) {
     _actionControllers = null;
     _eventTargets = null;
-    _physicsNodes = null;
     if (node == null || node.constraints != null) _constrainedNodes = null;
   }
 
   void _deregisterNode(Node node) {
     _actionControllers = null;
     _eventTargets = null;
-    _physicsNodes = null;
     if (node == null || node.constraints != null) _constrainedNodes = null;
   }
 
@@ -356,17 +352,6 @@ class SpriteBox extends RenderBox {
     Matrix4 totalMatrix = new Matrix4.fromFloat64List(canvas.getTotalMatrix());
     _rootNode._visit(canvas, totalMatrix);
 
-    // Draw physics debug
-    if (_physicsNodes == null)
-      _rebuildActionControllersAndPhysicsNodes();
-
-    for (PhysicsWorld world in _physicsNodes) {
-      if (world.drawDebug) {
-        canvas.setMatrix(world._debugDrawTransform.storage);
-        world.paintDebug(canvas);
-      }
-    }
-
     canvas.restore();
   }
 
@@ -398,7 +383,6 @@ class SpriteBox extends RenderBox {
       _callConstraintsPreUpdate(delta);
       _runActions(delta);
       _callUpdate(_rootNode, delta);
-      _callStepPhysics(delta);
       _callConstraintsConstrain(delta);
     }
 
@@ -420,13 +404,11 @@ class SpriteBox extends RenderBox {
 
   void _rebuildActionControllersAndPhysicsNodes() {
     _actionControllers = <ActionController>[];
-    _physicsNodes = <PhysicsWorld>[];
     _addActionControllersAndPhysicsNodes(_rootNode);
   }
 
   void _addActionControllersAndPhysicsNodes(Node node) {
     if (node._actions != null) _actionControllers.add(node._actions);
-    if (node is PhysicsWorld) _physicsNodes.add(node);
 
     for (int i = node.children.length - 1; i >= 0; i--) {
       Node child = node.children[i];
@@ -441,15 +423,6 @@ class SpriteBox extends RenderBox {
       if (!child.paused) {
         _callUpdate(child, dt);
       }
-    }
-  }
-
-  void _callStepPhysics(double dt) {
-    if (_physicsNodes == null)
-      _rebuildActionControllersAndPhysicsNodes();
-
-    for (PhysicsWorld physicsNode in _physicsNodes) {
-      physicsNode._stepPhysics(dt);
     }
   }
 

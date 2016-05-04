@@ -134,72 +134,10 @@ class Node {
   void set rotation(double rotation) {
     assert(rotation != null);
 
-    if (_physicsBody != null && (parent is PhysicsWorld || parent is PhysicsGroup)) {
-      _updatePhysicsRotation(physicsBody, rotation, parent);
-      return;
-    }
-
     _rotation = rotation;
     invalidateTransformMatrix();
   }
 
-  void _updatePhysicsRotation(PhysicsBody body, double rotation, Node physicsParent) {
-    PhysicsWorld world = _physicsWorld(physicsParent);
-    if (world == null) return;
-    world._updateRotation(body, _rotationToPhysics(rotation, physicsParent));
-  }
-
-  PhysicsWorld _physicsWorld(Node parent) {
-    if (parent is PhysicsWorld) {
-      return parent;
-    }
-    else if (parent is PhysicsGroup) {
-      return _physicsWorld(parent.parent);
-    }
-    else {
-      assert(false);
-      return null;
-    }
-  }
-
-  double _rotationToPhysics(double rotation, Node physicsParent) {
-    if (physicsParent is PhysicsWorld) {
-      return rotation;
-    } else if (physicsParent is PhysicsGroup) {
-      return _rotationToPhysics(rotation + physicsParent.rotation, physicsParent.parent);
-    } else {
-      assert(false);
-      return null;
-    }
-  }
-
-  double _rotationFromPhysics(double rotation, Node physicsParent) {
-    if (physicsParent is PhysicsWorld) {
-      return rotation;
-    } else if (physicsParent is PhysicsGroup) {
-      return _rotationToPhysics(rotation - physicsParent.rotation, physicsParent.parent);
-    } else {
-      assert(false);
-      return null;
-    }
-  }
-
-  void _setRotationFromPhysics(double rotation, Node physicsParent) {
-    assert(rotation != null);
-    _rotation = _rotationFromPhysics(rotation, physicsParent);
-    invalidateTransformMatrix();
-  }
-
-  void teleportRotation(double rotation) {
-    assert(rotation != null);
-    if (_physicsBody != null && (parent is PhysicsWorld || parent is PhysicsGroup)) {
-      rotation = _rotationToPhysics(rotation, parent);
-      _physicsBody._body.setTransform(_physicsBody._body.position, radians(rotation));
-      _physicsBody._body.angularVelocity = 0.0;
-      _physicsBody._body.setType(box2d.BodyType.STATIC);
-    }
-    _setRotationFromPhysics(rotation, parent);
-  }
 
   /// The position of this node relative to its parent.
   ///
@@ -209,72 +147,8 @@ class Node {
   void set position(Point position) {
     assert(position != null);
 
-    if (_physicsBody != null && (parent is PhysicsWorld || parent is PhysicsGroup)) {
-      _updatePhysicsPosition(this.physicsBody, position, parent);
-      return;
-    }
-
     _position = position;
     invalidateTransformMatrix();
-  }
-
-  void _updatePhysicsPosition(PhysicsBody body, Point position, Node physicsParent) {
-    PhysicsWorld world = _physicsWorld(physicsParent);
-    if (world == null) return;
-    world._updatePosition(body, _positionToPhysics(position, physicsParent));
-  }
-
-  Point _positionToPhysics(Point position, Node physicsParent) {
-    if (physicsParent is PhysicsWorld) {
-      return position;
-    } else if (physicsParent is PhysicsGroup) {
-      // Transform the position
-      Vector4 parentPos = physicsParent.transformMatrix.transform(new Vector4(position.x, position.y, 0.0, 1.0));
-      Point newPos = new Point(parentPos.x, parentPos.y);
-      return _positionToPhysics(newPos, physicsParent.parent);
-    } else {
-      assert(false);
-      return null;
-    }
-  }
-
-  void _setPositionFromPhysics(Point position, Node physicsParent) {
-    assert(position != null);
-    _position = _positionFromPhysics(position, physicsParent);
-    invalidateTransformMatrix();
-  }
-
-  Point _positionFromPhysics(Point position, Node physicsParent) {
-    if (physicsParent is PhysicsWorld) {
-      return position;
-    } else if (physicsParent is PhysicsGroup) {
-      // Transform the position
-      Vector4 parentPos = physicsParent._inverseMatrix().transform(new Vector4(position.x, position.y, 0.0, 1.0));
-      Point newPos = new Point(parentPos.x, parentPos.y);
-      return _positionToPhysics(newPos, physicsParent.parent);
-    } else {
-      assert(false);
-      return null;
-    }
-  }
-
-  void teleportPosition(Point position) {
-    assert(position != null);
-    PhysicsWorld world = _physicsWorld(parent);
-
-    if (_physicsBody != null && (parent is PhysicsWorld || parent is PhysicsGroup)) {
-      position = _positionToPhysics(position, parent);
-      _physicsBody._body.setTransform(
-        new Vector2(
-          position.x / world.b2WorldToNodeConversionFactor,
-          position.y / world.b2WorldToNodeConversionFactor
-        ),
-        _physicsBody._body.getAngle()
-      );
-      _physicsBody._body.linearVelocity = new Vector2.zero();
-      _physicsBody._body.setType(box2d.BodyType.STATIC);
-    }
-    _setPositionFromPhysics(position, parent);
   }
 
   /// The skew along the x-axis of this node in degrees.
@@ -330,28 +204,8 @@ class Node {
   void set scale(double scale) {
     assert(scale != null);
 
-    if (_physicsBody != null && (parent is PhysicsWorld || parent is PhysicsGroup)) {
-      _updatePhysicsScale(physicsBody, scale, parent);
-    }
-
     _scaleX = _scaleY = scale;
     invalidateTransformMatrix();
-  }
-
-  void _updatePhysicsScale(PhysicsBody body, double scale, Node physicsParent) {
-    if (physicsParent == null) return;
-    _physicsWorld(physicsParent)._updateScale(body, _scaleToPhysics(scale, physicsParent));
-  }
-
-  double _scaleToPhysics(double scale, Node physicsParent) {
-    if (physicsParent is PhysicsWorld) {
-      return scale;
-    } else if (physicsParent is PhysicsGroup) {
-      return _scaleToPhysics(scale * physicsParent.scale, physicsParent.parent);
-    } else {
-      assert(false);
-      return null;
-    }
   }
 
   /// The horizontal scale of this node relative its parent.
@@ -361,7 +215,6 @@ class Node {
 
   void set scaleX(double scaleX) {
     assert(scaleX != null);
-    assert(physicsBody == null);
 
     _scaleX = scaleX;
     invalidateTransformMatrix();
@@ -374,7 +227,6 @@ class Node {
 
   void set scaleY(double scaleY) {
     assert(scaleY != null);
-    assert(physicsBody == null);
 
     _scaleY = scaleY;
     invalidateTransformMatrix();
@@ -403,7 +255,6 @@ class Node {
   void addChild(Node child) {
     assert(child != null);
     assert(child._parent == null);
-    assert(!(child is PhysicsGroup) || this is PhysicsGroup || this is PhysicsWorld);
 
     assert(() {
       Node node = this;
@@ -420,10 +271,6 @@ class Node {
     _childrenLastAddedOrder += 1;
     child._addedOrder = _childrenLastAddedOrder;
     if (_spriteBox != null) _spriteBox._registerNode(child);
-
-    if (child is PhysicsGroup) {
-      child._attachGroup(child, child._world);
-    }
   }
 
   /// Removes a child from this node.
@@ -435,10 +282,6 @@ class Node {
       child._parent = null;
       child._spriteBox = null;
       if (_spriteBox != null) _spriteBox._deregisterNode(child);
-    }
-
-    if (child is PhysicsGroup) {
-      child._detachGroup(child);
     }
   }
 
@@ -585,7 +428,7 @@ class Node {
     return _transformMatrixBoxToNode;
   }
 
-  Matrix4 _inverseMatrix() {
+  Matrix4 inverseTransformMatrix() {
     if (_transformMatrixInverse == null) {
       _transformMatrixInverse = new Matrix4.copy(transformMatrix);
       _transformMatrixInverse.invert();
@@ -790,32 +633,5 @@ class Node {
   ///     }
   bool handleEvent(SpriteBoxEvent event) {
     return false;
-  }
-
-  // Physics
-
-  PhysicsBody _physicsBody;
-
-  /// The physics body associated with this node. If a physics body is assigned,
-  /// and the node is a child of a [PhysicsWorld] or a [PhysicsGroup] the
-  /// node's position and rotation will be controlled by the body.
-  ///
-  ///     myNode.physicsBody = new PhysicsBody(
-  ///       new PhysicsShapeCircle(Point.zero, 20.0)
-  ///     );
-  PhysicsBody get physicsBody => _physicsBody;
-
-  void set physicsBody(PhysicsBody physicsBody) {
-    if (parent != null) {
-      assert(parent is PhysicsWorld);
-
-      if (physicsBody == null) {
-        physicsBody._detach();
-      } else {
-        physicsBody._attach(parent, this);
-      }
-    }
-
-    _physicsBody = physicsBody;
   }
 }
