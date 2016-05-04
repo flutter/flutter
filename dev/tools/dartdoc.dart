@@ -11,7 +11,7 @@ import 'package:path/path.dart' as path;
 /// This script expects to run with the cwd as the root of the flutter repo. It
 /// will generate documentation for the packages in `//packages/` and write the
 /// documentation to `//dev/docs/doc/api/`.
-main(List<String> args) async {
+Future<Null> main(List<String> args) async {
   // If we're run from the `tools` dir, set the cwd to the repo root.
   if (path.basename(Directory.current.path) == 'tools')
     Directory.current = Directory.current.parent.parent;
@@ -104,7 +104,7 @@ List<Directory> _findPackages() {
     .toList();
 }
 
-List<String> _libraryRefs() sync* {
+Iterable<String> _libraryRefs() sync* {
   for (Directory dir in _findPackages()) {
     String dirName = path.basename(dir.path);
 
