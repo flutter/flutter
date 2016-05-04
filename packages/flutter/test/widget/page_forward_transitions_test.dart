@@ -12,9 +12,7 @@ class TestTransition extends AnimatedWidget {
     this.childFirstHalf,
     this.childSecondHalf,
     Animation<double> animation
-  }) : super(key: key, animation: animation) {
-    assert(animation != null);
-  }
+  }) : super(key: key, animation: animation);
 
   final Widget childFirstHalf;
   final Widget childSecondHalf;
