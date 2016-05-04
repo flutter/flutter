@@ -119,12 +119,12 @@ class _DropDownMenu<T> extends StatusTransitionWidget {
     );
 
     final Tween<double> menuTop = new Tween<double>(
-      begin: route.rect.top,
-      end: route.rect.top - route.selectedIndex * route.rect.height - _kMenuVerticalPadding.top
+      begin: route.buttonRect.top,
+      end: route.buttonRect.top - route.selectedIndex * route.buttonRect.height - _kMenuVerticalPadding.top
     );
     final Tween<double> menuBottom = new Tween<double>(
-      begin: route.rect.bottom,
-      end: menuTop.end + route.items.length * route.rect.height + _kMenuVerticalPadding.vertical
+      begin: route.buttonRect.bottom,
+      end: menuTop.end + route.items.length * route.buttonRect.height + _kMenuVerticalPadding.vertical
     );
 
     Widget child = new Material(
@@ -156,6 +156,37 @@ class _DropDownMenu<T> extends StatusTransitionWidget {
   }
 }
 
+class _DropDownMenuRouteLayout extends SingleChildLayoutDelegate {
+  _DropDownMenuRouteLayout(this.buttonRect, this.selectedIndex);
+
+  final Rect buttonRect;
+  final int selectedIndex;
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    return new BoxConstraints(
+      minWidth: buttonRect.width,
+      maxWidth: buttonRect.width,
+      minHeight: 0.0,
+      maxHeight: constraints.maxHeight
+    );
+  }
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    return new Offset(
+      buttonRect.left,
+      buttonRect.top - selectedIndex * buttonRect.height - _kMenuVerticalPadding.top
+    );
+  }
+
+  @override
+  bool shouldRelayout(_DropDownMenuRouteLayout oldDelegate) {
+    return oldDelegate.buttonRect != buttonRect
+        || oldDelegate.selectedIndex != selectedIndex;
+  }
+}
+
 // We box the return value so that the return value can be null. Otherwise,
 // canceling the route (which returns null) would get confused with actually
 // returning a real null value.
@@ -180,14 +211,14 @@ class _DropDownRoute<T> extends PopupRoute<_DropDownRouteResult<T>> {
   _DropDownRoute({
     Completer<_DropDownRouteResult<T>> completer,
     this.items,
+    this.buttonRect,
     this.selectedIndex,
-    this.rect,
     this.elevation: 8
   }) : super(completer: completer);
 
   final List<DropDownMenuItem<T>> items;
+  final Rect buttonRect;
   final int selectedIndex;
-  final Rect rect;
   final int elevation;
 
   @override
@@ -200,21 +231,11 @@ class _DropDownRoute<T> extends PopupRoute<_DropDownRouteResult<T>> {
   Color get barrierColor => null;
 
   @override
-  ModalPosition getPosition(BuildContext context) {
-    RenderBox overlayBox = Overlay.of(context).context.findRenderObject();
-    assert(overlayBox != null); // can't be null; routes get inserted by Navigator which has its own Overlay
-    Size overlaySize = overlayBox.size;
-    RelativeRect menuRect = new RelativeRect.fromSize(rect, overlaySize);
-    return new ModalPosition(
-      top: menuRect.top - selectedIndex * rect.height - _kMenuVerticalPadding.top,
-      left: menuRect.left,
-      right: menuRect.right
-    );
-  }
-
-  @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
-    return new _DropDownMenu<T>(route: this);
+    return new CustomSingleChildLayout(
+      delegate: new _DropDownMenuRouteLayout(buttonRect, selectedIndex),
+      child: new _DropDownMenu<T>(route: this)
+    );
   }
 }
 
@@ -359,13 +380,13 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
 
   void _handleTap() {
     final RenderBox renderBox = indexedStackKey.currentContext.findRenderObject();
-    final Rect rect = renderBox.localToGlobal(Point.origin) & renderBox.size;
+    final Rect buttonRect = renderBox.localToGlobal(Point.origin) & renderBox.size;
     final Completer<_DropDownRouteResult<T>> completer = new Completer<_DropDownRouteResult<T>>();
     Navigator.push(context, new _DropDownRoute<T>(
       completer: completer,
       items: config.items,
+      buttonRect: _kMenuHorizontalPadding.inflateRect(buttonRect),
       selectedIndex: _selectedIndex,
-      rect: _kMenuHorizontalPadding.inflateRect(rect),
       elevation: config.elevation
     ));
     completer.future.then((_DropDownRouteResult<T> newValue) {
