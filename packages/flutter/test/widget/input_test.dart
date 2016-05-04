@@ -296,4 +296,58 @@ void main() {
     expect(inputValue.selection.extentOffset, selection.extentOffset+2);
   });
 
+  testWidgets('Can use selection toolbar', (WidgetTester tester) {
+    GlobalKey inputKey = new GlobalKey();
+    InputValue inputValue = InputValue.empty;
+
+    Widget builder() {
+      return new Overlay(
+        initialEntries: <OverlayEntry>[
+          new OverlayEntry(
+            builder: (BuildContext context) {
+              return new Center(
+                child: new Material(
+                  child: new Input(
+                    value: inputValue,
+                    key: inputKey,
+                    onChanged: (InputValue value) { inputValue = value; }
+                  )
+                )
+              );
+            }
+          )
+        ]
+      );
+    }
+
+    tester.pumpWidget(builder());
+
+    String testValue = 'abc def ghi';
+    enterText(testValue);
+    tester.pumpWidget(builder());
+
+    // Tap the text to bring up the "paste / select all" menu.
+    tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+    tester.pumpWidget(builder());
+
+    // SELECT ALL should select all the text.
+    tester.tap(find.text('SELECT ALL'));
+    tester.pumpWidget(builder());
+    expect(inputValue.selection.baseOffset, 0);
+    expect(inputValue.selection.extentOffset, testValue.length);
+
+    // COPY should reset the selection.
+    tester.tap(find.text('COPY'));
+    tester.pumpWidget(builder());
+    expect(inputValue.selection.isCollapsed, true);
+
+    // Tap again to bring back the menu.
+    tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+    tester.pumpWidget(builder());
+
+    // PASTE right before the 'e'.
+    tester.tap(find.text('PASTE'));
+    tester.pumpWidget(builder());
+    expect(inputValue.text, 'abc d${testValue}ef ghi');
+  });
 }
