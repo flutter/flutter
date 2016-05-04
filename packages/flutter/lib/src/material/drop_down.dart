@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
@@ -24,40 +25,52 @@ const double _kBottomBorderHeight = 2.0;
 const Border _kDropDownUnderline = const Border(bottom: const BorderSide(color: const Color(0xFFBDBDBD), width: _kBottomBorderHeight));
 
 class _DropDownMenuPainter extends CustomPainter {
-  const _DropDownMenuPainter({
-    this.color,
-    this.elevation,
-    this.menuTop,
-    this.menuBottom,
-    this.renderBox
-  });
+  _DropDownMenuPainter({
+    Color color,
+    int elevation,
+    this.buttonRect,
+    this.selectedIndex,
+    Animation<double> resize
+  }) : color = color,
+       elevation = elevation,
+       resize = resize,
+       _painter = new BoxDecoration(
+         backgroundColor: color,
+         borderRadius: 2.0,
+         boxShadow: kElevationToShadow[elevation]
+       ).createBoxPainter(),
+       super(repaint: resize);
 
   final Color color;
   final int elevation;
-  final double menuTop;
-  final double menuBottom;
-  final RenderBox renderBox;
+  final Rect buttonRect;
+  final int selectedIndex;
+  final Animation<double> resize;
+
+  final BoxPainter _painter;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final BoxPainter painter = new BoxDecoration(
-      backgroundColor: color,
-      borderRadius: 2.0,
-      boxShadow: kElevationToShadow[elevation]
-    ).createBoxPainter();
+    final Tween<double> top = new Tween<double>(
+      begin: (selectedIndex * buttonRect.height + _kMenuVerticalPadding.top).clamp(0.0, size.height - buttonRect.height),
+      end: 0.0
+    );
 
-    double top = renderBox.globalToLocal(new Point(0.0, menuTop)).y;
-    double bottom = renderBox.globalToLocal(new Point(0.0, menuBottom)).y;
-    painter.paint(canvas, new Rect.fromLTRB(0.0, top, size.width, bottom));
+    final Tween<double> bottom = new Tween<double>(
+      begin: (top.begin + buttonRect.height).clamp(buttonRect.height, size.height),
+      end: size.height
+    );
+
+    _painter.paint(canvas, new Rect.fromLTRB(0.0, top.evaluate(resize), size.width, bottom.evaluate(resize)));
   }
 
   @override
   bool shouldRepaint(_DropDownMenuPainter oldPainter) {
     return oldPainter.color != color
         || oldPainter.elevation != elevation
-        || oldPainter.menuTop != menuTop
-        || oldPainter.menuBottom != menuBottom
-        || oldPainter.renderBox != renderBox;
+        || oldPainter.buttonRect != buttonRect
+        || oldPainter.selectedIndex != selectedIndex
+        || oldPainter.resize != resize;
   }
 }
 
@@ -84,12 +97,13 @@ class _DropDownMenu<T> extends StatusTransitionWidget {
     final List<Widget> children = <Widget>[];
     for (int itemIndex = 0; itemIndex < route.items.length; ++itemIndex) {
       CurvedAnimation opacity;
+      Interval reverseCurve = const Interval(0.75, 1.0);
       if (itemIndex == route.selectedIndex) {
-        opacity = new CurvedAnimation(parent: route.animation, curve: const Step(0.0), reverseCurve: const Interval(0.75, 1.0));
+        opacity = new CurvedAnimation(parent: route.animation, curve: const Step(0.0), reverseCurve: reverseCurve);
       } else {
         final double start = (0.5 + (itemIndex + 1) * unit).clamp(0.0, 1.0);
         final double end = (start + 1.5 * unit).clamp(0.0, 1.0);
-        opacity = new CurvedAnimation(parent: route.animation, curve: new Interval(start, end), reverseCurve: const Interval(0.75, 1.0));
+        opacity = new CurvedAnimation(parent: route.animation, curve: new Interval(start, end), reverseCurve: reverseCurve);
       }
       children.add(new FadeTransition(
         opacity: opacity,
@@ -106,51 +120,31 @@ class _DropDownMenu<T> extends StatusTransitionWidget {
       ));
     }
 
-    final CurvedAnimation opacity = new CurvedAnimation(
-      parent: route.animation,
-      curve: const Interval(0.0, 0.25),
-      reverseCurve: const Interval(0.75, 1.0)
-    );
-
-    final CurvedAnimation resize = new CurvedAnimation(
-      parent: route.animation,
-      curve: const Interval(0.25, 0.5),
-      reverseCurve: const Step(0.0)
-    );
-
-    final Tween<double> menuTop = new Tween<double>(
-      begin: route.buttonRect.top,
-      end: route.buttonRect.top - route.selectedIndex * route.buttonRect.height - _kMenuVerticalPadding.top
-    );
-    final Tween<double> menuBottom = new Tween<double>(
-      begin: route.buttonRect.bottom,
-      end: menuTop.end + route.items.length * route.buttonRect.height + _kMenuVerticalPadding.vertical
-    );
-
-    Widget child = new Material(
-      type: MaterialType.transparency,
-      child: new Block(
-        padding: _kMenuVerticalPadding,
-        children: children
-      )
-    );
     return new FadeTransition(
-      opacity: opacity,
-      child: new AnimatedBuilder(
-        animation: resize,
-        builder: (BuildContext context, Widget child) {
-          return new CustomPaint(
-            painter: new _DropDownMenuPainter(
-              color: Theme.of(context).canvasColor,
-              elevation: route.elevation,
-              menuTop: menuTop.evaluate(resize),
-              menuBottom: menuBottom.evaluate(resize),
-              renderBox: context.findRenderObject()
-            ),
-            child: child
-          );
-        },
-        child: child
+      opacity: new CurvedAnimation(
+        parent: route.animation,
+        curve: const Interval(0.0, 0.25),
+        reverseCurve: const Interval(0.75, 1.0)
+      ),
+      child: new CustomPaint(
+        painter: new _DropDownMenuPainter(
+          color: Theme.of(context).canvasColor,
+          elevation: route.elevation,
+          buttonRect: route.buttonRect,
+          selectedIndex: route.selectedIndex,
+          resize: new CurvedAnimation(
+            parent: route.animation,
+            curve: const Interval(0.25, 0.5),
+            reverseCurve: const Step(0.0)
+          )
+        ),
+        child: new Material(
+          type: MaterialType.transparency,
+          child: new Block(
+            padding: _kMenuVerticalPadding,
+            children: children
+          )
+        )
       )
     );
   }
@@ -164,20 +158,34 @@ class _DropDownMenuRouteLayout extends SingleChildLayoutDelegate {
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    // The maximum height of a simple menu should be one or more rows less than
+    // the view height. This ensures a tappable area outside of the simple menu
+    // with which to dismiss the menu.
+    //   -- https://www.google.com/design/spec/components/menus.html#menus-simple-menus
+    final double maxHeight = math.max(0.0, constraints.maxHeight - 2 * buttonRect.height);
     return new BoxConstraints(
       minWidth: buttonRect.width,
       maxWidth: buttonRect.width,
       minHeight: 0.0,
-      maxHeight: constraints.maxHeight
+      maxHeight: maxHeight
     );
   }
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    return new Offset(
-      buttonRect.left,
-      buttonRect.top - selectedIndex * buttonRect.height - _kMenuVerticalPadding.top
-    );
+    double top = buttonRect.top - selectedIndex * buttonRect.height - _kMenuVerticalPadding.top;
+    double topPreferredLimit = buttonRect.height;
+    if (top < topPreferredLimit)
+      top = math.min(buttonRect.top, topPreferredLimit);
+    double bottom = top + childSize.height;
+    double bottomPreferredLimit = size.height - buttonRect.height;
+    if (bottom > bottomPreferredLimit) {
+      bottom = math.max(buttonRect.bottom, bottomPreferredLimit);
+      top = bottom - childSize.height;
+    }
+    assert(top >= 0.0);
+    assert(top + childSize.height <= size.height);
+    return new Offset(buttonRect.left, top);
   }
 
   @override
@@ -256,6 +264,8 @@ class DropDownMenuItem<T> extends StatelessWidget {
   }
 
   /// The widget below this widget in the tree.
+  ///
+  /// Typically a [Text] widget.
   final Widget child;
 
   /// The value to return if the user selects this menu item.
@@ -330,6 +340,7 @@ class DropDownButton<T> extends StatefulWidget {
     this.onChanged,
     this.elevation: 8
   }) : super(key: key) {
+    assert(items != null);
     assert(items.where((DropDownMenuItem<T> item) => item.value == value).length == 1);
   }
 
