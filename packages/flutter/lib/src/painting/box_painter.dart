@@ -904,6 +904,18 @@ class FractionalOffset {
     return new Point(rect.left + dx * rect.width, rect.top + dy * rect.height);
   }
 
+  double distanceToNearestCorner(Size size) {
+    final double x = (dx <= 0.5 ? dx : 1.0 - dx) * size.width;
+    final double y = (dy <= 0.5 ? dy : 1.0 - dy) * size.height;
+    return math.sqrt(x * x + y * y);
+  }
+
+  double distanceToFurthestCorner(Size size) {
+    final double x = (dx > 0.5 ? dx : 1.0 - dx) * size.width;
+    final double y = (dy > 0.5 ? dy : 1.0 - dy) * size.height;
+    return math.sqrt(x * x + y * y);
+  }
+
   @override
   bool operator ==(dynamic other) {
     if (other is! FractionalOffset)

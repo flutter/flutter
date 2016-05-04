@@ -183,11 +183,15 @@ class _PopupMenuItemState<T extends PopupMenuItem<dynamic>> extends State<T> {
 /// To show a popup menu, use the [showMenu] function. To create a button that
 /// shows a popup menu, consider using [PopupMenuButton].
 ///
+/// If a CheckedPopupMenuItem item is selected by the user, the [showMenu]
+/// function will return that item's [value]. As the menu dismisses, the
+/// checkmark will animate into or out of view to represent the menu item
+/// changing value to the opposite of its [checked] state.
+///
 /// See also:
 ///
 ///  * [PopupMenuItem]
 ///  * [PopupMenuDivider]
-///  * [CheckedPopupMenuItem]
 ///  * [showMenu]
 ///  * [PopupMenuButton]
 class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
@@ -207,7 +211,9 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
     child: child
   );
 
-  /// Whether to display a checkmark next to the menu item.
+  /// Whether to display a checkmark next to the menu item when the menu is
+  /// displayed. If this menu item is selected, then the checkmark will animate
+  /// to the opposite of this value.
   final bool checked;
 
   @override

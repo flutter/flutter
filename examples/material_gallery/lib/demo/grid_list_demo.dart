@@ -54,21 +54,38 @@ class GridDemoPhotoItem extends StatelessWidget {
     Set<Key> mostValuableKeys = new HashSet<Key>();
     mostValuableKeys.add(photoKey);
 
-    Navigator.push(context, new MaterialPageRoute<Null>(
+    RenderBox photoBox = context.findRenderObject();
+    RenderBox navigatorBox = ModalRoute.of(context).navigator.context.findRenderObject();
+    Size navigatorSize = navigatorBox.size;
+    Point pixelCenter = navigatorBox.globalToLocal(photoBox.localToGlobal(photoBox.size.center(Point.origin)));
+    FractionalOffset fractionalCenter = new FractionalOffset(
+      pixelCenter.x / navigatorSize.width,
+      pixelCenter.y / navigatorSize.height
+    );
+
+    Navigator.push(context, new IrisWipeMaterialPageRoute<Null>(
+      center: fractionalCenter,
       settings: new RouteSettings(
         mostValuableKeys: mostValuableKeys
       ),
       builder: (BuildContext context) {
-        return new Scaffold(
-          appBar: new AppBar(
-            title: new Text(photo.title)
+        return new Theme(
+          data: new ThemeData(
+            brightness: Theme.of(context).brightness,
+            primarySwatch: Colors.teal
           ),
-          body: new Material(
-            child: new Hero(
-              tag: photoHeroTag,
-              child: new AssetImage(
-                name: photo.assetName,
-                fit: ImageFit.cover
+          child: new Scaffold(
+            appBar: new AppBar(
+              title: new Text(photo.title)
+            ),
+            body: new Material(
+              color: Colors.teal[500],
+              child: new Hero(
+                tag: photoHeroTag,
+                child: new AssetImage(
+                  name: photo.assetName,
+                  fit: ImageFit.cover
+                )
               )
             )
           )
@@ -206,16 +223,19 @@ class GridListDemoState extends State<GridListDemo> {
 
   void showTileStyleMenu(BuildContext context) {
     final List<PopupMenuItem<GridDemoTileStyle>> items = <PopupMenuItem<GridDemoTileStyle>>[
-      new PopupMenuItem<GridDemoTileStyle>(
+      new CheckedPopupMenuItem<GridDemoTileStyle>(
         value: GridDemoTileStyle.imageOnly,
+        checked: tileStyle == GridDemoTileStyle.imageOnly,
         child: new Text('Image only')
       ),
-      new PopupMenuItem<GridDemoTileStyle>(
+      new CheckedPopupMenuItem<GridDemoTileStyle>(
         value: GridDemoTileStyle.oneLine,
+        checked: tileStyle == GridDemoTileStyle.oneLine,
         child: new Text('One line')
       ),
-      new PopupMenuItem<GridDemoTileStyle>(
+      new CheckedPopupMenuItem<GridDemoTileStyle>(
         value: GridDemoTileStyle.twoLine,
+        checked: tileStyle == GridDemoTileStyle.twoLine,
         child: new Text('Two line')
       )
     ];

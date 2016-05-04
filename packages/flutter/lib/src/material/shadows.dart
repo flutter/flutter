@@ -12,6 +12,10 @@ import 'package:flutter/painting.dart';
 
 /// Map of elevation offsets used by material design to [BoxShadow] definitions.
 ///
+/// The type of the map is [Map<int, List<BoxShadow>>]. The keys are the
+/// elevation numbers, and the values are the lists of the [BoxShadow]
+/// descriptions for that elevation.
+///
 /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
 ///
 /// Each entry has three shadows which must be combined to obtain the defined
