@@ -403,6 +403,9 @@ class AndroidDevice extends Device {
   }
 }
 
+// 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper
+final RegExp _kDeviceRegex = new RegExp(r'^(\S+)\s+(\S+)(.*)');
+
 /// Return the list of connected ADB devices.
 ///
 /// [mockAdbOutput] is public for testing.
@@ -419,15 +422,6 @@ List<AndroidDevice> getAdbDevices({ String mockAdbOutput }) {
     output = mockAdbOutput.trim().split('\n');
   }
 
-  // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper
-  RegExp deviceRegExLong = new RegExp(
-      r'^(\S+)\s+device\s+.*product:(\S+)\s+model:(\S+)\s+device:(\S+)$');
-
-  // 0149947A0D01500C       device usb:340787200X
-  // emulator-5612          host features:shell_2
-  // emulator-5554          offline
-  RegExp deviceRegExShort = new RegExp(r'^(\S+)\s+(\S+)(\s+\S+)?$');
-
   for (String line in output) {
     // Skip lines like: * daemon started successfully *
     if (line.startsWith('* daemon '))
@@ -436,26 +430,26 @@ List<AndroidDevice> getAdbDevices({ String mockAdbOutput }) {
     if (line.startsWith('List of devices'))
       continue;
 
-    if (deviceRegExLong.hasMatch(line)) {
-      Match match = deviceRegExLong.firstMatch(line);
-      String deviceID = match[1];
-      String productID = match[2];
-      String modelID = match[3];
-      String deviceCodeName = match[4];
+    if (_kDeviceRegex.hasMatch(line)) {
+      Match match = _kDeviceRegex.firstMatch(line);
 
-      if (modelID != null)
-        modelID = cleanAdbDeviceName(modelID);
-
-      devices.add(new AndroidDevice(
-        deviceID,
-        productID: productID,
-        modelID: modelID,
-        deviceCodeName: deviceCodeName
-      ));
-    } else if (deviceRegExShort.hasMatch(line)) {
-      Match match = deviceRegExShort.firstMatch(line);
       String deviceID = match[1];
       String deviceState = match[2];
+      Map<String, String> info = <String, String>{};
+
+      String rest = match[3];
+      if (rest != null && rest.isNotEmpty) {
+        rest = rest.trim();
+        for (String data in rest.split(' ')) {
+          if (data.contains(':')) {
+            List<String> fields = data.split(':');
+            info[fields[0]] = fields[1];
+          }
+        }
+      }
+
+      if (info['model'] != null)
+        info['model'] = cleanAdbDeviceName(info['model']);
 
       if (deviceState == 'unauthorized') {
         printError(
@@ -465,7 +459,12 @@ List<AndroidDevice> getAdbDevices({ String mockAdbOutput }) {
       } else if (deviceState == 'offline') {
         printError('Device $deviceID is offline.');
       } else {
-        devices.add(new AndroidDevice(deviceID, modelID: deviceID));
+        devices.add(new AndroidDevice(
+          deviceID,
+          productID: info['product'],
+          modelID: info['model'] ?? deviceID,
+          deviceCodeName: info['device']
+        ));
       }
     } else {
       printError(
