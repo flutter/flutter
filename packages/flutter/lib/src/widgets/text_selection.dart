@@ -52,6 +52,9 @@ abstract class TextSelectionDelegate {
   void hideToolbar();
 }
 
+// TODO(mpcomplete): need to interact with the system clipboard.
+String _pasteBuffer;
+
 /// Manages a pair of text selection handles to be shown in an Overlay
 /// containing the owning widget.
 class TextSelectionOverlay implements TextSelectionDelegate {
@@ -158,9 +161,6 @@ class TextSelectionOverlay implements TextSelectionDelegate {
     if (onSelectionOverlayChanged != null)
       onSelectionOverlayChanged(value);
   }
-
-  // TODO(mpcomplete): need to interact with the system clipboard.
-  static String _pasteBuffer;
 
   @override
   String get pasteBuffer => _pasteBuffer;
