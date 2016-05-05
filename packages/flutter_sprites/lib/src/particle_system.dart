@@ -108,12 +108,20 @@ class ParticleSystem extends Node {
   double tangentialAccelerationVar;
 
   /// The gravity vector of the particle system.
-  Offset get gravity => new Offset(_gravity.x, _gravity.y);
+  Offset get gravity {
+    if (_gravity == null)
+      return null;
+    else
+      return new Offset(_gravity.x, _gravity.y);
+  }
 
   Vector2 _gravity;
 
   void set gravity(Offset gravity) {
-    _gravity = new Vector2(gravity.dx, gravity.dy);
+    if (gravity == null)
+      _gravity = null;
+    else
+      _gravity = new Vector2(gravity.dx, gravity.dy);
   }
 
   /// The maximum number of particles the system can display at a single time.
