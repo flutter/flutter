@@ -111,7 +111,9 @@ class AnalyzeCommand extends FlutterCommand {
       }
     }
 
-    if (argResults['current-directory']) {
+    //TODO(pq): revisit package and directory defaults
+
+    if (argResults['current-directory']  && !argResults['flutter-repo']) {
       // ./*.dart
       Directory cwd = new Directory('.');
       bool foundOne = false;
@@ -126,7 +128,7 @@ class AnalyzeCommand extends FlutterCommand {
       }
     }
 
-    if (argResults['current-package']) {
+    if (argResults['current-package'] && !argResults['flutter-repo']) {
       // **/.*dart
       Directory cwd = new Directory('.');
       _collectDartFiles(cwd, dartFiles);
@@ -134,7 +136,7 @@ class AnalyzeCommand extends FlutterCommand {
     }
 
     //TODO(ianh): Fix the intl package resource generator
-    //TODO: extract this regexp from the exclude in options.
+    //TODO(pq): extract this regexp from the exclude in options
     RegExp stockExampleFiles = new RegExp('examples/stocks/lib/.*\.dart\$');
 
     if (argResults['flutter-repo']) {
@@ -270,6 +272,10 @@ class AnalyzeCommand extends FlutterCommand {
   }
 
   List<File> _collectDartFiles(Directory dir, List<File> collected, {FileFilter exclude}) {
+    // Bail out in case of a .dartignore.
+    if (FileSystemEntity.isFileSync(path.join(path.dirname(dir.path), '.dartignore')))
+      return collected;
+
     for (FileSystemEntity entity in dir.listSync(recursive: false, followLinks: false)) {
       if (isDartFile(entity) && (exclude == null || !exclude(entity))) {
         collected.add(entity);
@@ -280,6 +286,7 @@ class AnalyzeCommand extends FlutterCommand {
           _collectDartFiles(entity, collected, exclude: exclude);
       }
     }
+
     return collected;
   }
 
