@@ -111,32 +111,31 @@ class AnalyzeCommand extends FlutterCommand {
       }
     }
 
-    //TODO(pq): revisit package and directory defaults
+    //TODO (pq): revisit package and directory defaults
 
     if (argResults['current-directory']  && !argResults['flutter-repo']) {
       // ./*.dart
-      Directory cwd = new Directory('.');
+      Directory currentDirectory = new Directory('.');
       bool foundOne = false;
-      for (FileSystemEntity entry in cwd.listSync()) {
+      for (FileSystemEntity entry in currentDirectory.listSync()) {
         if (isDartFile(entry)) {
           dartFiles.add(entry);
           foundOne = true;
         }
       }
-      if (foundOne) {
-        pubSpecDirectories.add(cwd);
-      }
+      if (foundOne)
+        pubSpecDirectories.add(currentDirectory);
     }
 
     if (argResults['current-package'] && !argResults['flutter-repo']) {
       // **/.*dart
-      Directory cwd = new Directory('.');
-      _collectDartFiles(cwd, dartFiles);
-      pubSpecDirectories.add(cwd);
+      Directory currentDirectory = new Directory('.');
+      _collectDartFiles(currentDirectory, dartFiles);
+      pubSpecDirectories.add(currentDirectory);
     }
 
-    //TODO(ianh): Fix the intl package resource generator
-    //TODO(pq): extract this regexp from the exclude in options
+    //TODO (ianh): Fix the intl package resource generator
+    //TODO (pq): extract this regexp from the exclude in options
     RegExp stockExampleFiles = new RegExp('examples/stocks/lib/.*\.dart\$');
 
     if (argResults['flutter-repo']) {
@@ -200,7 +199,7 @@ class AnalyzeCommand extends FlutterCommand {
       packagesBody.writeln('$package:${path.toUri(packages[package])}');
 
     // save the .packages file to disk
-    //TODO(pq): consider passing package info via a data URI
+    //TODO (pq): consider passing package info via a data URI
     Directory host = Directory.systemTemp.createTempSync('flutter-analyze-');
     String packagesFilePath = path.join(host.path, '.packages');
     new File(packagesFilePath).writeAsStringSync(packagesBody.toString());
@@ -218,7 +217,7 @@ class AnalyzeCommand extends FlutterCommand {
     options.analysisOptionsFile = path.join(ArtifactStore.flutterRoot, 'packages', 'flutter_tools', 'flutter_analysis_options');
     AnalysisDriver analyzer = new AnalysisDriver(options);
 
-    //TODO:(pq): consider error handling
+    //TODO (pq): consider error handling
     List<AnalysisErrorDescription> errors = analyzer.analyze(dartFiles);
 
     int errorCount = 0;
@@ -277,9 +276,8 @@ class AnalyzeCommand extends FlutterCommand {
       return collected;
 
     for (FileSystemEntity entity in dir.listSync(recursive: false, followLinks: false)) {
-      if (isDartFile(entity) && (exclude == null || !exclude(entity))) {
+      if (isDartFile(entity) && (exclude == null || !exclude(entity)))
         collected.add(entity);
-      }
       if (entity is Directory) {
         String name = path.basename(entity.path);
         if (!name.startsWith('.') && name != 'packages')
