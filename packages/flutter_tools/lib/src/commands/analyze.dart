@@ -118,15 +118,8 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('watch', help: 'Run analysis continuously, watching the filesystem for changes.', negatable: false);
     argParser.addOption('dart-sdk', help: 'The path to the Dart SDK.', hide: true);
 
-    // Options to enable a benchmarking mode.
-    argParser.addFlag('benchmark',
-      negatable: false,
-      hide: true
-    );
-    argParser.addOption('benchmark-expected',
-      hide: true,
-      help: 'The time (in seconds) that the benchmark is expected to run.'
-    );
+    // Hidden option to enable a benchmarking mode.
+    argParser.addFlag('benchmark', negatable: false, hide: true);
 
     usesPubOption();
   }
@@ -577,19 +570,12 @@ class AnalyzeCommand extends FlutterCommand {
 
   void _writeBenchmark(Stopwatch stopwatch, int errorCount) {
     final String benchmarkOut = 'analysis_benchmark.json';
-    String expectedTime = argResults['benchmark-expected'];
-
     Map<String, dynamic> data = <String, dynamic>{
       'time': (stopwatch.elapsedMilliseconds / 1000.0),
       'issues': errorCount
     };
-
-    if (expectedTime != null)
-      data['expected'] = expectedTime;
-
     JsonEncoder encoder = new JsonEncoder.withIndent('  ');
     new File(benchmarkOut).writeAsStringSync(encoder.convert(data) + '\n');
-
     printStatus('Analysis benchmark written to $benchmarkOut.');
   }
 }

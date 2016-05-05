@@ -57,7 +57,7 @@ class DeviceManager {
     devices = devices.where((Device device) {
       return (device.id.toLowerCase().startsWith(deviceId) ||
         device.name.toLowerCase().startsWith(deviceId));
-    });
+    }).toList();
 
     return devices.length == 1 ? devices.first : null;
   }
