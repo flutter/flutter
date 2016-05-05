@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui show ImageFilter;
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -1382,12 +1383,20 @@ class RenderFractionalTranslation extends RenderProxyBox {
 /// is provided, to check if the new instance actually represents different
 /// information.
 ///
+/// The most efficient way to trigger a repaint is to supply a repaint argument
+/// to the constructor of the [CustomPainter]. The custom object will listen to
+/// this animation and repaint whenever the animation ticks, avoiding both the
+/// build and layout phases of the pipeline.
+///
 /// The [hitTest] method is invoked when the user interacts with the underlying
 /// render object, to determine if the user hit the object or missed it.
 abstract class CustomPainter {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const CustomPainter();
+  /// Creates a custom painter.
+  ///
+  /// The painter will repaint whenever the [repaint] animation ticks.
+  const CustomPainter({ Animation<dynamic> repaint }) : _repaint = repaint;
+
+  final Animation<dynamic> _repaint;
 
   /// Called whenever the object needs to paint. The given [Canvas] has its
   /// coordinate space configured such that the origin is at the top left of the
@@ -1500,7 +1509,7 @@ class RenderCustomPaint extends RenderProxyBox {
       return;
     CustomPainter oldPainter = _painter;
     _painter = newPainter;
-    _checkForRepaint(_painter, oldPainter);
+    _didUpdatePainter(_painter, oldPainter);
   }
 
   /// The foreground custom paint delegate.
@@ -1525,10 +1534,10 @@ class RenderCustomPaint extends RenderProxyBox {
       return;
     CustomPainter oldPainter = _foregroundPainter;
     _foregroundPainter = newPainter;
-    _checkForRepaint(_foregroundPainter, oldPainter);
+    _didUpdatePainter(_foregroundPainter, oldPainter);
   }
 
-  void _checkForRepaint(CustomPainter newPainter, CustomPainter oldPainter) {
+  void _didUpdatePainter(CustomPainter newPainter, CustomPainter oldPainter) {
     if (newPainter == null) {
       assert(oldPainter != null); // We should be called only for changes.
       markNeedsPaint();
@@ -1537,6 +1546,24 @@ class RenderCustomPaint extends RenderProxyBox {
         newPainter.shouldRepaint(oldPainter)) {
       markNeedsPaint();
     }
+    if (attached) {
+      oldPainter._repaint?.removeListener(markNeedsPaint);
+      newPainter._repaint?.addListener(markNeedsPaint);
+    }
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _painter?._repaint?.addListener(markNeedsPaint);
+    _foregroundPainter?._repaint?.addListener(markNeedsPaint);
+  }
+
+  @override
+  void detach() {
+    _painter?._repaint?.removeListener(markNeedsPaint);
+    _foregroundPainter?._repaint?.removeListener(markNeedsPaint);
+    super.detach();
   }
 
   @override
