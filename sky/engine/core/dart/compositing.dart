@@ -47,7 +47,13 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// Rasterization outside the given rectangle is discarded.
   ///
   /// See [pop] for details about the operation stack.
-  void pushClipRect(Rect rect) native "SceneBuilder_pushClipRect";
+  void pushClipRect(Rect rect) {
+    _pushClipRect(rect.left, rect.right, rect.top, rect.bottom);
+  }
+  void _pushClipRect(double left,
+                     double right,
+                     double top,
+                     double bottom) native "SceneBuilder_pushClipRect";
 
   /// Pushes a rounded-rectangular clip operation onto the operation stack.
   ///
@@ -79,7 +85,10 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// transfer mode.
   ///
   /// See [pop] for details about the operation stack.
-  void pushColorFilter(Color color, TransferMode transferMode) native "SceneBuilder_pushColorFilter";
+  void pushColorFilter(Color color, TransferMode transferMode) {
+    _pushColorFilter(color.value, transferMode.index);
+  }
+  void _pushColorFilter(int color, int transferMode) native "SceneBuilder_pushColorFilter";
 
   /// Pushes a backdrop filter operation onto the operation stack.
   ///
@@ -95,7 +104,20 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// rectangle using the given transfer mode.
   ///
   /// See [pop] for details about the operation stack.
-  void pushShaderMask(Shader shader, Rect maskRect, TransferMode transferMode) native "SceneBuilder_pushShaderMask";
+  void pushShaderMask(Shader shader, Rect maskRect, TransferMode transferMode) {
+    _pushShaderMask(shader,
+                    maskRect.left,
+                    maskRect.right,
+                    maskRect.top,
+                    maskRect.bottom,
+                    transferMode.index);
+  }
+  void _pushShaderMask(Shader shader,
+                       double maskRectLeft,
+                       double maskRectRight,
+                       double maskRectTop,
+                       double maskRectBottom,
+                       int transferMode) native "SceneBuilder_pushShaderMask";
 
   /// Ends the effect of the most recently pushed operation.
   ///
@@ -129,12 +151,26 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// See also the [PerformanceOverlayOption] enum in the rendering library.
   /// for more details.
   // Values above must match constants in //engine/src/sky/compositor/performance_overlay_layer.h
-  void addPerformanceOverlay(int enabledOptions, Rect bounds) native "SceneBuilder_addPerformanceOverlay";
+  void addPerformanceOverlay(int enabledOptions, Rect bounds) {
+    _addPerformanceOverlay(enabledOptions,
+                           bounds.left,
+                           bounds.right,
+                           bounds.top,
+                           bounds.bottom);
+  }
+  void _addPerformanceOverlay(int enabledOptions,
+                              double left,
+                              double right,
+                              double top,
+                              double bottom) native "SceneBuilder_addPerformanceOverlay";
 
   /// Adds a [Picture] to the scene.
   ///
   /// The picture is rasterized at the given offset.
-  void addPicture(Offset offset, Picture picture) native "SceneBuilder_addPicture";
+  void addPicture(Offset offset, Picture picture) {
+    _addPicture(offset.dx, offset.dy, picture);
+  }
+  void _addPicture(double dx, double dy, Picture picture) native "SceneBuilder_addPicture";
 
   /// (mojo-only) Adds a scene rendered by another application to the scene for
   /// this application.
@@ -146,7 +182,20 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
                      double devicePixelRatio,
                      int physicalWidth,
                      int physicalHeight,
-                     int sceneToken) native "SceneBuilder_addChildScene";
+                     int sceneToken) {
+    _addChildScene(offset.dx,
+                   offset.dy,
+                   devicePixelRatio,
+                   physicalWidth,
+                   physicalHeight,
+                   sceneToken);
+  }
+  void _addChildScene(double dx,
+                      double dy,
+                      double devicePixelRatio,
+                      int physicalWidth,
+                      int physicalHeight,
+                      int sceneToken) native "SceneBuilder_addChildScene";
 
   /// Sets a threshold after which additional debugging information should be recorded.
   ///

@@ -88,10 +88,10 @@ void SceneBuilder::pushTransform(const Float64List& matrix4, ExceptionState& es)
     addLayer(std::move(layer));
 }
 
-void SceneBuilder::pushClipRect(const Rect& rect)
+void SceneBuilder::pushClipRect(double left, double right, double top, double bottom)
 {
     std::unique_ptr<flow::ClipRectLayer> layer(new flow::ClipRectLayer());
-    layer->set_clip_rect(rect.sk_rect);
+    layer->set_clip_rect(SkRect::MakeLTRB(left, top, right, bottom));
     addLayer(std::move(layer));
 }
 
@@ -116,11 +116,11 @@ void SceneBuilder::pushOpacity(int alpha)
     addLayer(std::move(layer));
 }
 
-void SceneBuilder::pushColorFilter(CanvasColor color, TransferMode transferMode)
+void SceneBuilder::pushColorFilter(int color, int transferMode)
 {
     std::unique_ptr<flow::ColorFilterLayer> layer(new flow::ColorFilterLayer());
-    layer->set_color(color);
-    layer->set_transfer_mode(transferMode);
+    layer->set_color(static_cast<SkColor>(color));
+    layer->set_transfer_mode(static_cast<SkXfermode::Mode>(transferMode));
     addLayer(std::move(layer));
 }
 
@@ -131,12 +131,17 @@ void SceneBuilder::pushBackdropFilter(ImageFilter* filter)
     addLayer(std::move(layer));
 }
 
-void SceneBuilder::pushShaderMask(Shader* shader, const Rect& maskRect, TransferMode transferMode)
+void SceneBuilder::pushShaderMask(Shader* shader,
+                                  double maskRectLeft,
+                                  double maskRectRight,
+                                  double maskRectTop,
+                                  double maskRectBottom,
+                                  int transferMode)
 {
     std::unique_ptr<flow::ShaderMaskLayer> layer(new flow::ShaderMaskLayer());
     layer->set_shader(shader->shader());
-    layer->set_mask_rect(maskRect.sk_rect);
-    layer->set_transfer_mode(transferMode);
+    layer->set_mask_rect(SkRect::MakeLTRB(maskRectLeft, maskRectTop, maskRectRight, maskRectBottom));
+    layer->set_transfer_mode(static_cast<SkXfermode::Mode>(transferMode));
     addLayer(std::move(layer));
 }
 
@@ -163,40 +168,44 @@ void SceneBuilder::pop()
     m_currentLayer = m_currentLayer->parent();
 }
 
-void SceneBuilder::addPicture(const Offset& offset, Picture* picture)
+void SceneBuilder::addPicture(double dx, double dy, Picture* picture)
 {
     if (!m_currentLayer)
         return;
     std::unique_ptr<flow::PictureLayer> layer(new flow::PictureLayer());
-    layer->set_offset(SkPoint::Make(offset.sk_size.width(), offset.sk_size.height()));
+    layer->set_offset(SkPoint::Make(dx, dy));
     layer->set_picture(picture->toSkia());
     m_currentLayer->Add(std::move(layer));
 }
 
-void SceneBuilder::addChildScene(const Offset& offset,
-                                 double device_pixel_ratio,
-                                 int physical_width,
-                                 int physical_height,
-                                 uint32_t scene_token) {
+void SceneBuilder::addChildScene(double dx,
+                                 double dy,
+                                 double devicePixelRatio,
+                                 int physicalWidth,
+                                 int physicalHeight,
+                                 uint32_t sceneToken) {
     if (!m_currentLayer)
         return;
     std::unique_ptr<flow::ChildSceneLayer> layer(new flow::ChildSceneLayer());
-    layer->set_offset(SkPoint::Make(offset.sk_size.width(), offset.sk_size.height()));
-    layer->set_device_pixel_ratio(device_pixel_ratio);
-    layer->set_physical_size(SkISize::Make(physical_width, physical_height));
+    layer->set_offset(SkPoint::Make(dx, dy));
+    layer->set_device_pixel_ratio(devicePixelRatio);
+    layer->set_physical_size(SkISize::Make(physicalWidth, physicalHeight));
     mojo::gfx::composition::SceneTokenPtr token = mojo::gfx::composition::SceneToken::New();
-    token->value = scene_token;
+    token->value = sceneToken;
     layer->set_scene_token(token.Pass());
     m_currentLayer->Add(std::move(layer));
 }
 
-void SceneBuilder::addPerformanceOverlay(uint64_t enabledOptions, const Rect& bounds)
+void SceneBuilder::addPerformanceOverlay(uint64_t enabledOptions,
+                                         double left,
+                                         double right,
+                                         double top,
+                                         double bottom)
 {
     if (!m_currentLayer)
         return;
     std::unique_ptr<flow::PerformanceOverlayLayer> layer(new flow::PerformanceOverlayLayer(enabledOptions));
-    if (!bounds.is_null)
-      layer->set_paint_bounds(bounds.sk_rect);
+    layer->set_paint_bounds(SkRect::MakeLTRB(left, top, right, bottom));
     m_currentLayer->Add(std::move(layer));
 }
 

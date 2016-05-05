@@ -36,22 +36,32 @@ public:
     ~SceneBuilder() override;
 
     void pushTransform(const Float64List& matrix4, ExceptionState&);
-    void pushClipRect(const Rect& rect);
+    void pushClipRect(double left, double right, double top, double bottom);
     void pushClipRRect(const RRect& rrect);
     void pushClipPath(const CanvasPath* path);
     void pushOpacity(int alpha);
-    void pushColorFilter(CanvasColor color, TransferMode transferMode);
+    void pushColorFilter(int color, int transferMode);
     void pushBackdropFilter(ImageFilter* filter);
-    void pushShaderMask(Shader* shader, const Rect& maskRect, TransferMode transferMode);
+    void pushShaderMask(Shader* shader,
+                        double maskRectLeft,
+                        double maskRectRight,
+                        double maskRectTop,
+                        double maskRectBottom,
+                        int transferMode);
     void pop();
 
-    void addPerformanceOverlay(uint64_t enabledOptions, const Rect& bounds);
-    void addPicture(const Offset& offset, Picture* picture);
-    void addChildScene(const Offset& offset,
-                       double device_pixel_ratio,
-                       int physical_width,
-                       int physical_height,
-                       uint32_t scene_token);
+    void addPerformanceOverlay(uint64_t enabledOptions,
+                               double left,
+                               double right,
+                               double top,
+                               double bottom);
+    void addPicture(double dx, double dy, Picture* picture);
+    void addChildScene(double dx,
+                       double dy,
+                       double devicePixelRatio,
+                       int physicalWidth,
+                       int physicalHeight,
+                       uint32_t sceneToken);
 
     void setRasterizerTracingThreshold(uint32_t frameInterval);
 
