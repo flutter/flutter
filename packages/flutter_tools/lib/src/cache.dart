@@ -192,7 +192,8 @@ class FlutterEngine {
       'android-arm',
       'android-arm-profile',
       'android-arm-release',
-      'android-x64'
+      'android-x64',
+      'android-x86',
     ];
 
     if (Platform.isMacOS)
