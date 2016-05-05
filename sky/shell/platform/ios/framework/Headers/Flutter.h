@@ -5,7 +5,11 @@
 #ifndef FLUTTER_FLUTTER_H_
 #define FLUTTER_FLUTTER_H_
 
+#include "FlutterAppDelegate.h"
+#include "FlutterAsyncMessageListener.h"
+#include "FlutterDartProject.h"
 #include "FlutterMacros.h"
+#include "FlutterMessageListener.h"
 #include "FlutterViewController.h"
 
 #endif  // FLUTTER_FLUTTER_H_

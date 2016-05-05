@@ -251,11 +251,15 @@ if (is_android) {
       sources = [
         "platform/ios/framework/Headers/Flutter.h",
         "platform/ios/framework/Headers/FlutterAppDelegate.h",
+        "platform/ios/framework/Headers/FlutterAsyncMessageListener.h",
         "platform/ios/framework/Headers/FlutterDartProject.h",
         "platform/ios/framework/Headers/FlutterMacros.h",
+        "platform/ios/framework/Headers/FlutterMessageListener.h",
         "platform/ios/framework/Headers/FlutterViewController.h",
         "platform/ios/framework/Source/accessibility_bridge.h",
         "platform/ios/framework/Source/accessibility_bridge.mm",
+        "platform/ios/framework/Source/application_messages_impl.h",
+        "platform/ios/framework/Source/application_messages_impl.mm",
         "platform/ios/framework/Source/FlutterAppDelegate.mm",
         "platform/ios/framework/Source/FlutterDartProject.mm",
         "platform/ios/framework/Source/FlutterDartProject_Internal.h",
@@ -379,8 +383,10 @@ if (is_android) {
       sources = [
         "platform/ios/framework/Headers/Flutter.h",
         "platform/ios/framework/Headers/FlutterAppDelegate.h",
+        "platform/ios/framework/Headers/FlutterAsyncMessageListener.h",
         "platform/ios/framework/Headers/FlutterDartProject.h",
         "platform/ios/framework/Headers/FlutterMacros.h",
+        "platform/ios/framework/Headers/FlutterMessageListener.h",
         "platform/ios/framework/Headers/FlutterViewController.h",
       ]
       outputs = [ "$framework_dir/Headers/{{source_file_part}}" ]

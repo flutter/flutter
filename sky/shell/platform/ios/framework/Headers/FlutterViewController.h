@@ -5,10 +5,12 @@
 #ifndef FLUTTER_FLUTTERVIEWCONTROLLER_H_
 #define FLUTTER_FLUTTERVIEWCONTROLLER_H_
 
-#include "FlutterMacros.h"
-#include "FlutterDartProject.h"
-
 #import <UIKit/UIKit.h>
+
+#include "FlutterAsyncMessageListener.h"
+#include "FlutterDartProject.h"
+#include "FlutterMacros.h"
+#include "FlutterMessageListener.h"
 
 FLUTTER_EXPORT
 @interface FlutterViewController : UIViewController
@@ -17,6 +19,19 @@ FLUTTER_EXPORT
                         nibName:(NSString*)nibNameOrNil
                          bundle:(NSBundle*)nibBundleOrNil
     NS_DESIGNATED_INITIALIZER;
+
+- (void)sendString:(NSString*)message
+   withMessageName:(NSString*)messageName;
+
+- (void)sendString:(NSString*)message
+   withMessageName:(NSString*)messageName
+          callback:(void(^)(NSString*))callback;
+
+- (void)setMessageListener:(NSObject<FlutterMessageListener>*)listener
+       forMessagesWithName:(NSString*)messageName;
+
+- (void)setAsyncMessageListener:(NSObject<FlutterAsyncMessageListener>*)listener
+            forMessagesWithName:(NSString*)messageName;
 
 @end
 

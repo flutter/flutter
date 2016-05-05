@@ -9,6 +9,7 @@
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
 #include "sky/engine/wtf/Assertions.h"
+#include "sky/services/platform/app_messages.mojom.h"
 
 #if TARGET_OS_IPHONE
 #include "sky/services/editing/ios/keyboard_impl.h"
@@ -17,9 +18,14 @@
 namespace sky {
 namespace shell {
 
+typedef base::Callback<
+    void(mojo::InterfaceRequest<flutter::platform::ApplicationMessages>)
+  > AppMesssagesConnector;
+
 class ViewServiceProvider : public mojo::ServiceProvider {
  public:
-  ViewServiceProvider(mojo::InterfaceRequest<mojo::ServiceProvider> request);
+  ViewServiceProvider(AppMesssagesConnector connect_to_app_messages,
+                      mojo::InterfaceRequest<mojo::ServiceProvider> request);
   ~ViewServiceProvider() override;
 
   void ConnectToService(const mojo::String& service_name,
@@ -27,6 +33,7 @@ class ViewServiceProvider : public mojo::ServiceProvider {
 
  private:
   mojo::StrongBinding<mojo::ServiceProvider> binding_;
+  AppMesssagesConnector connect_to_app_messages_;
 #if TARGET_OS_IPHONE
   sky::services::editing::KeyboardFactory keyboard_;
 #endif

@@ -84,7 +84,8 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(
                                           base::Bind(DynamicServiceResolve));
 
   mojo::ServiceProviderPtr view_service_provider;
-  new sky::shell::ViewServiceProvider(mojo::GetProxy(&view_service_provider));
+  new sky::shell::ViewServiceProvider(AppMesssagesConnector(),
+                                      mojo::GetProxy(&view_service_provider));
 
   sky::ServicesDataPtr services = sky::ServicesData::New();
   services->incoming_services = service_provider.Pass();

@@ -4,13 +4,20 @@
 
 #import "sky/shell/platform/ios/framework/Headers/FlutterViewController.h"
 
+#include "base/bind.h"
+#include "base/mac/scoped_block.h"
 #include "base/mac/scoped_nsautorelease_pool.h"
+#include "base/mac/scoped_nsobject.h"
+#include "base/strings/sys_string_conversions.h"
 #include "base/trace_event/trace_event.h"
+#include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
 #include "sky/engine/wtf/MakeUnique.h"
 #include "sky/services/engine/sky_engine.mojom.h"
+#include "sky/services/platform/app_messages.mojom.h"
 #include "sky/services/platform/ios/system_chrome_impl.h"
 #include "sky/services/semantics/semantics.mojom.h"
+#include "sky/shell/platform/ios/framework/Source/application_messages_impl.h"
 #include "sky/shell/platform/ios/framework/Source/flutter_touch_mapper.h"
 #include "sky/shell/platform/ios/framework/Source/FlutterDartProject_Internal.h"
 #include "sky/shell/platform/ios/framework/Source/FlutterDynamicServiceLoader.h"
@@ -30,14 +37,16 @@ void FlutterInit(int argc, const char* argv[]) {
 }
 
 @implementation FlutterViewController {
-  FlutterDartProject* _dartProject;
+  base::scoped_nsprotocol<FlutterDartProject*> _dartProject;
   UIInterfaceOrientationMask _orientationPreferences;
-  FlutterDynamicServiceLoader* _dynamicServiceLoader;
+  base::scoped_nsprotocol<FlutterDynamicServiceLoader*> _dynamicServiceLoader;
   sky::ViewportMetricsPtr _viewportMetrics;
   sky::shell::TouchMapper _touchMapper;
   std::unique_ptr<sky::shell::ShellView> _shellView;
   sky::SkyEnginePtr _engine;
   mojo::ServiceProviderPtr _dartServices;
+  flutter::platform::ApplicationMessagesPtr _appMessageSender;
+  sky::shell::ApplicationMessagesImpl _appMessageReceiver;
   BOOL _initialized;
 }
 
@@ -49,7 +58,7 @@ void FlutterInit(int argc, const char* argv[]) {
   self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
 
   if (self) {
-    _dartProject = [project retain];
+    _dartProject.reset([project retain]);
 
     [self performCommonViewControllerInitialization];
   }
@@ -74,7 +83,7 @@ void FlutterInit(int argc, const char* argv[]) {
   _initialized = YES;
 
   _orientationPreferences = UIInterfaceOrientationMaskAll;
-  _dynamicServiceLoader = [[FlutterDynamicServiceLoader alloc] init];
+  _dynamicServiceLoader.reset([[FlutterDynamicServiceLoader alloc] init]);
   _viewportMetrics = sky::ViewportMetrics::New();
   _shellView =
       WTF::MakeUnique<sky::shell::ShellView>(sky::shell::Shell::Shared());
@@ -160,6 +169,9 @@ void FlutterInit(int argc, const char* argv[]) {
                             [alert release];
                           }
                         }];
+
+  DCHECK(_dartServices);
+  mojo::ConnectToService(_dartServices.get(), &_appMessageSender);
 }
 
 static void DynamicServiceResolve(void* baton,
@@ -178,13 +190,16 @@ static void DynamicServiceResolve(void* baton,
   // the engine could outlive this controller
   auto serviceResolutionCallback = base::Bind(
       &DynamicServiceResolve,
-      base::Unretained(reinterpret_cast<void*>(_dynamicServiceLoader)));
+      base::Unretained(reinterpret_cast<void*>(_dynamicServiceLoader.get())));
 
   new sky::shell::PlatformServiceProvider(serviceProviderProxy.Pass(),
                                           serviceResolutionCallback);
 
   mojo::ServiceProviderPtr viewServiceProvider;
-  new sky::shell::ViewServiceProvider(mojo::GetProxy(&viewServiceProvider));
+  new sky::shell::ViewServiceProvider(
+    base::Bind(&sky::shell::ApplicationMessagesImpl::AddBinding,
+               _appMessageReceiver.GetWeakPtr()),
+    mojo::GetProxy(&viewServiceProvider));
 
   DCHECK(!_dartServices.is_bound());
   sky::ServicesDataPtr services = sky::ServicesData::New();
@@ -435,11 +450,47 @@ static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
 
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-
-  [_dynamicServiceLoader release];
-  [_dartProject release];
-
   [super dealloc];
+}
+
+#pragma mark - Application Messages
+
+- (void)sendString:(NSString*)message
+   withMessageName:(NSString*)messageName {
+  NSAssert(message, @"The message must not be null");
+  NSAssert(messageName, @"The messageName must not be null");
+  _appMessageSender->SendString(messageName.UTF8String, message.UTF8String,
+      [](const mojo::String& response) { });
+}
+
+- (void)sendString:(NSString*)message
+   withMessageName:(NSString*)messageName
+          callback:(void(^)(NSString*))callback {
+  NSAssert(message, @"The message must not be null");
+  NSAssert(messageName, @"The messageName must not be null");
+  NSAssert(callback, @"The callback must not be null");
+  base::mac::ScopedBlock<void(^)(NSString*)> callback_ptr(
+      callback, base::scoped_policy::RETAIN);
+  _appMessageSender->SendString(messageName.UTF8String, message.UTF8String,
+      [callback_ptr](const mojo::String& response) {
+    callback_ptr.get()(base::SysUTF8ToNSString(response));
+  });
+}
+
+- (void)setMessageListener:(NSObject<FlutterMessageListener>*)listener
+       forMessagesWithName:(NSString*)messageName {
+  NSAssert(listener, @"The listener must not be null");
+  NSAssert(messageName, @"The messageName must not be null");
+  _appMessageReceiver.SetMessageListener(messageName.UTF8String,
+      base::scoped_nsprotocol<NSObject<FlutterMessageListener>*>(listener));
+}
+
+- (void)setAsyncMessageListener:(NSObject<FlutterAsyncMessageListener>*)listener
+            forMessagesWithName:(NSString*)messageName {
+  NSAssert(listener, @"The listener must not be null");
+  NSAssert(messageName, @"The messageName must not be null");
+  _appMessageReceiver.SetAsyncMessageListener(messageName.UTF8String,
+      base::scoped_nsprotocol<NSObject<FlutterAsyncMessageListener>*>(listener));
 }
 
 @end
