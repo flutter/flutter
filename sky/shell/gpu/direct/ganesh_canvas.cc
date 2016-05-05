@@ -41,6 +41,22 @@ void GaneshCanvas::SetGrGLInterface(const GrGLInterface* interface) {
   }
 }
 
+bool GaneshCanvas::SelectPixelConfig(GrPixelConfig* config) {
+  static const GrPixelConfig kConfigOptions[] = {
+    kSkia8888_GrPixelConfig,
+    kRGBA_4444_GrPixelConfig,
+  };
+
+  for (size_t i = 0; i < arraysize(kConfigOptions); i++) {
+    if (gr_context_->caps()->isConfigRenderable(kConfigOptions[i], false)) {
+      *config = kConfigOptions[i];
+      return true;
+    }
+  }
+
+  return false;
+}
+
 SkCanvas* GaneshCanvas::GetCanvas(int32_t fbo, const SkISize& size) {
   DCHECK(IsValid());
 
@@ -51,7 +67,7 @@ SkCanvas* GaneshCanvas::GetCanvas(int32_t fbo, const SkISize& size) {
   GrBackendRenderTargetDesc desc;
   desc.fWidth = size.width();
   desc.fHeight = size.height();
-  desc.fConfig = kSkia8888_GrPixelConfig;
+  CHECK(SelectPixelConfig(&desc.fConfig));
   desc.fStencilBits = 8;
   desc.fOrigin = kBottomLeft_GrSurfaceOrigin;
   desc.fRenderTargetHandle = fbo;

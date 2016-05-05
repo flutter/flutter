@@ -29,6 +29,8 @@ class GaneshCanvas {
   GrContext* gr_context() { return gr_context_.get(); }
 
  private:
+  bool SelectPixelConfig(GrPixelConfig* config);
+
   skia::RefPtr<GrContext> gr_context_;
   sk_sp<SkSurface> sk_surface_;
 
