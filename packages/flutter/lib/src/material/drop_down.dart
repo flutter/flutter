@@ -28,7 +28,6 @@ class _DropDownMenuPainter extends CustomPainter {
   _DropDownMenuPainter({
     Color color,
     int elevation,
-    this.buttonRect,
     this.selectedIndex,
     Animation<double> resize
   }) : color = color,
@@ -43,7 +42,6 @@ class _DropDownMenuPainter extends CustomPainter {
 
   final Color color;
   final int elevation;
-  final Rect buttonRect;
   final int selectedIndex;
   final Animation<double> resize;
 
@@ -52,12 +50,12 @@ class _DropDownMenuPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Tween<double> top = new Tween<double>(
-      begin: (selectedIndex * buttonRect.height + _kMenuVerticalPadding.top).clamp(0.0, size.height - buttonRect.height),
+      begin: (selectedIndex * _kMenuItemHeight + _kMenuVerticalPadding.top).clamp(0.0, size.height - _kMenuItemHeight),
       end: 0.0
     );
 
     final Tween<double> bottom = new Tween<double>(
-      begin: (top.begin + buttonRect.height).clamp(buttonRect.height, size.height),
+      begin: (top.begin + _kMenuItemHeight).clamp(_kMenuItemHeight, size.height),
       end: size.height
     );
 
@@ -68,7 +66,6 @@ class _DropDownMenuPainter extends CustomPainter {
   bool shouldRepaint(_DropDownMenuPainter oldPainter) {
     return oldPainter.color != color
         || oldPainter.elevation != elevation
-        || oldPainter.buttonRect != buttonRect
         || oldPainter.selectedIndex != selectedIndex
         || oldPainter.resize != resize;
   }
@@ -130,7 +127,6 @@ class _DropDownMenu<T> extends StatusTransitionWidget {
         painter: new _DropDownMenuPainter(
           color: Theme.of(context).canvasColor,
           elevation: route.elevation,
-          buttonRect: route.buttonRect,
           selectedIndex: route.selectedIndex,
           resize: new CurvedAnimation(
             parent: route.animation,
@@ -140,8 +136,9 @@ class _DropDownMenu<T> extends StatusTransitionWidget {
         ),
         child: new Material(
           type: MaterialType.transparency,
-          child: new Block(
+          child: new ScrollableList(
             padding: _kMenuVerticalPadding,
+            itemExtent: _kMenuItemHeight,
             children: children
           )
         )
@@ -162,10 +159,11 @@ class _DropDownMenuRouteLayout extends SingleChildLayoutDelegate {
     // the view height. This ensures a tappable area outside of the simple menu
     // with which to dismiss the menu.
     //   -- https://www.google.com/design/spec/components/menus.html#menus-simple-menus
-    final double maxHeight = math.max(0.0, constraints.maxHeight - 2 * buttonRect.height);
+    final double maxHeight = math.max(0.0, constraints.maxHeight - 2 * _kMenuItemHeight);
+    final double width = buttonRect.width;
     return new BoxConstraints(
-      minWidth: buttonRect.width,
-      maxWidth: buttonRect.width,
+      minWidth: width,
+      maxWidth: width,
       minHeight: 0.0,
       maxHeight: maxHeight
     );
@@ -173,14 +171,15 @@ class _DropDownMenuRouteLayout extends SingleChildLayoutDelegate {
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    double top = buttonRect.top - selectedIndex * buttonRect.height - _kMenuVerticalPadding.top;
-    double topPreferredLimit = buttonRect.height;
+    final double buttonTop = buttonRect.top;
+    double top = buttonTop - selectedIndex * _kMenuItemHeight - _kMenuVerticalPadding.top;
+    double topPreferredLimit = _kMenuItemHeight;
     if (top < topPreferredLimit)
-      top = math.min(buttonRect.top, topPreferredLimit);
+      top = math.min(buttonTop, topPreferredLimit);
     double bottom = top + childSize.height;
-    double bottomPreferredLimit = size.height - buttonRect.height;
+    double bottomPreferredLimit = size.height - _kMenuItemHeight;
     if (bottom > bottomPreferredLimit) {
-      bottom = math.max(buttonRect.bottom, bottomPreferredLimit);
+      bottom = math.max(buttonTop + _kMenuItemHeight, bottomPreferredLimit);
       top = bottom - childSize.height;
     }
     assert(top >= 0.0);
@@ -277,7 +276,7 @@ class DropDownMenuItem<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Container(
       height: _kMenuItemHeight,
-      padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: _kTopMargin),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: new DefaultTextStyle(
         style: Theme.of(context).textTheme.subhead,
         child: new Baseline(
@@ -363,7 +362,7 @@ class DropDownButton<T> extends StatefulWidget {
 }
 
 class _DropDownButtonState<T> extends State<DropDownButton<T>> {
-  final GlobalKey indexedStackKey = new GlobalKey(debugLabel: 'DropDownButton.IndexedStack');
+  final GlobalKey _itemKey = new GlobalKey(debugLabel: 'DropDownButton item key');
 
   @override
   void initState() {
@@ -390,13 +389,13 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
   }
 
   void _handleTap() {
-    final RenderBox renderBox = indexedStackKey.currentContext.findRenderObject();
-    final Rect buttonRect = renderBox.localToGlobal(Point.origin) & renderBox.size;
+    final RenderBox itemBox = _itemKey.currentContext.findRenderObject();
+    final Rect itemRect = itemBox.localToGlobal(Point.origin) & itemBox.size;
     final Completer<_DropDownRouteResult<T>> completer = new Completer<_DropDownRouteResult<T>>();
     Navigator.push(context, new _DropDownRoute<T>(
       completer: completer,
       items: config.items,
-      buttonRect: _kMenuHorizontalPadding.inflateRect(buttonRect),
+      buttonRect: _kMenuHorizontalPadding.inflateRect(itemRect),
       selectedIndex: _selectedIndex,
       elevation: config.elevation
     ));
@@ -412,27 +411,27 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     Widget result = new Row(
+      mainAxisAlignment: MainAxisAlignment.collapse,
       children: <Widget>[
+        // We use an IndexedStack to make sure we have enough width to show any
+        // possible item as the selected item without changing size.
         new IndexedStack(
           children: config.items,
-          key: indexedStackKey,
+          key: _itemKey,
           index: _selectedIndex,
           alignment: FractionalOffset.topCenter
         ),
-        new Container(
-          child: new Icon(icon: Icons.arrow_drop_down, size: 36.0),
-          padding: const EdgeInsets.only(top: _kTopMargin)
-        )
-      ],
-      mainAxisAlignment: MainAxisAlignment.collapse
+        new Icon(icon: Icons.arrow_drop_down, size: 36.0)
+      ]
     );
     if (DropDownButtonHideUnderline.at(context)) {
       result = new Padding(
-        padding: const EdgeInsets.only(bottom: _kBottomBorderHeight),
+        padding: const EdgeInsets.only(top: _kTopMargin, bottom: _kBottomBorderHeight),
         child: result
       );
     } else {
       result = new Container(
+        padding: const EdgeInsets.only(top: _kTopMargin),
         decoration: const BoxDecoration(border: _kDropDownUnderline),
         child: result
       );
