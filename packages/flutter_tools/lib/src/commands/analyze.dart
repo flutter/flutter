@@ -20,8 +20,6 @@ import '../runner/flutter_command.dart';
 
 
 bool isDartFile(FileSystemEntity entry) => entry is File && entry.path.endsWith('.dart');
-bool isDartTestFile(FileSystemEntity entry) => entry is File && entry.path.endsWith('_test.dart');
-bool isDartBenchmarkFile(FileSystemEntity entry) => entry is File && entry.path.endsWith('_bench.dart');
 
 typedef bool FileFilter(FileSystemEntity entity);
 
