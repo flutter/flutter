@@ -11,101 +11,19 @@ import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart' as yaml;
 
 import '../artifacts.dart';
-import '../base/logger.dart';
-import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_configuration.dart';
+import '../dart/analysis.dart';
 import '../dart/sdk.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
+
 
 bool isDartFile(FileSystemEntity entry) => entry is File && entry.path.endsWith('.dart');
 bool isDartTestFile(FileSystemEntity entry) => entry is File && entry.path.endsWith('_test.dart');
 bool isDartBenchmarkFile(FileSystemEntity entry) => entry is File && entry.path.endsWith('_bench.dart');
 
-RegExp _testFileParser = new RegExp(r'^(.+)_test(\.dart)$');
-
-void _addDriverTest(FileSystemEntity entry, List<String> dartFiles) {
-  if (isDartTestFile(entry)) {
-    final String testFileName = entry.path;
-    dartFiles.add(testFileName);
-    Match groups = _testFileParser.firstMatch(testFileName);
-    assert(groups.groupCount == 2);
-    final String hostFileName = '${groups[1]}${groups[2]}';
-    File hostFile = new File(hostFileName);
-    if (hostFile.existsSync()) {
-      assert(isDartFile(hostFile));
-      dartFiles.add(hostFileName);
-    }
-  }
-}
-
-void _addPackage(String directoryPath, List<String> dartFiles, Set<String> pubSpecDirectories) {
-  final int originalDartFilesCount = dartFiles.length;
-
-  // .../directoryPath/*/bin/*.dart
-  // .../directoryPath/*/lib/main.dart
-  // .../directoryPath/*/test/*_test.dart
-  // .../directoryPath/*/test/*/*_test.dart
-  // .../directoryPath/*/benchmark/*/*_bench.dart
-
-  Directory binDirectory = new Directory(path.join(directoryPath, 'bin'));
-  if (binDirectory.existsSync()) {
-    for (FileSystemEntity subentry in binDirectory.listSync()) {
-      if (isDartFile(subentry))
-        dartFiles.add(subentry.path);
-    }
-  }
-
-  String mainPath = path.join(directoryPath, 'lib', 'main.dart');
-  if (FileSystemEntity.isFileSync(mainPath))
-    dartFiles.add(mainPath);
-
-  Directory testDirectory = new Directory(path.join(directoryPath, 'test'));
-  if (testDirectory.existsSync()) {
-    for (FileSystemEntity entry in testDirectory.listSync()) {
-      if (entry is Directory) {
-        for (FileSystemEntity subentry in entry.listSync()) {
-          if (isDartTestFile(subentry))
-            dartFiles.add(subentry.path);
-        }
-      } else if (isDartTestFile(entry)) {
-        dartFiles.add(entry.path);
-      }
-    }
-  }
-
-  Directory testDriverDirectory = new Directory(path.join(directoryPath, 'test_driver'));
-  if (testDriverDirectory.existsSync()) {
-    for (FileSystemEntity entry in testDriverDirectory.listSync()) {
-      if (entry is Directory) {
-        for (FileSystemEntity subentry in entry.listSync())
-          _addDriverTest(subentry, dartFiles);
-      } else if (isDartTestFile(entry)) {
-        _addDriverTest(entry, dartFiles);
-      }
-    }
-  }
-
-  Directory benchmarkDirectory = new Directory(path.join(directoryPath, 'benchmark'));
-  if (benchmarkDirectory.existsSync()) {
-    for (FileSystemEntity entry in benchmarkDirectory.listSync()) {
-      if (entry is Directory) {
-        for (FileSystemEntity subentry in entry.listSync()) {
-          if (isDartBenchmarkFile(subentry))
-            dartFiles.add(subentry.path);
-        }
-      } else if (isDartBenchmarkFile(entry)) {
-        dartFiles.add(entry.path);
-      }
-    }
-  }
-
-  if (originalDartFilesCount != dartFiles.length)
-    pubSpecDirectories.add(directoryPath);
-}
-
-class FileChanged { }
+typedef bool FileFilter(FileSystemEntity entity);
 
 class AnalyzeCommand extends FlutterCommand {
   AnalyzeCommand() {
@@ -179,16 +97,17 @@ class AnalyzeCommand extends FlutterCommand {
 
   Future<int> _analyzeOnce() async {
     Stopwatch stopwatch = new Stopwatch()..start();
-    Set<String> pubSpecDirectories = new HashSet<String>();
-    List<String> dartFiles = argResults.rest.toList();
+    Set<Directory> pubSpecDirectories = new HashSet<Directory>();
+    List<File> dartFiles = <File>[];
 
-    for (String file in dartFiles) {
+    for (String file in argResults.rest.toList()) {
       file = path.normalize(path.absolute(file));
       String root = path.rootPrefix(file);
+      dartFiles.add(new File(file));
       while (file != root) {
         file = path.dirname(file);
         if (FileSystemEntity.isFileSync(path.join(file, 'pubspec.yaml'))) {
-          pubSpecDirectories.add(file);
+          pubSpecDirectories.add(new Directory(file));
           break;
         }
       }
@@ -196,77 +115,41 @@ class AnalyzeCommand extends FlutterCommand {
 
     if (argResults['current-directory']) {
       // ./*.dart
-      Directory currentDirectory = new Directory('.');
+      Directory cwd = new Directory('.');
       bool foundOne = false;
-      for (FileSystemEntity entry in currentDirectory.listSync()) {
+      for (FileSystemEntity entry in cwd.listSync()) {
         if (isDartFile(entry)) {
-          dartFiles.add(entry.path);
+          dartFiles.add(entry);
           foundOne = true;
         }
       }
-      if (foundOne)
-        pubSpecDirectories.add('.');
+      if (foundOne) {
+        pubSpecDirectories.add(cwd);
+      }
     }
 
-    if (argResults['current-package'])
-      _addPackage('.', dartFiles, pubSpecDirectories);
+    if (argResults['current-package']) {
+      // **/.*dart
+      Directory cwd = new Directory('.');
+      _collectDartFiles(cwd, dartFiles);
+      pubSpecDirectories.add(cwd);
+    }
+
+    //TODO(ianh): Fix the intl package resource generator
+    //TODO: extract this regexp from the exclude in options.
+    RegExp stockExampleFiles = new RegExp('examples/stocks/lib/.*\.dart\$');
 
     if (argResults['flutter-repo']) {
-      //examples/*/ as package
-      //examples/layers/*/ as files
-      //dev/manual_tests/*/ as package
-      //dev/manual_tests/*/ as files
-
-      for (Directory dir in runner.getRepoPackages())
-        _addPackage(dir.path, dartFiles, pubSpecDirectories);
-
-      Directory subdirectory;
-
-      subdirectory = new Directory(path.join(ArtifactStore.flutterRoot, 'examples', 'layers'));
-      if (subdirectory.existsSync()) {
-        bool foundOne = false;
-        for (FileSystemEntity entry in subdirectory.listSync()) {
-          if (entry is Directory) {
-            for (FileSystemEntity subentry in entry.listSync()) {
-              if (isDartFile(subentry)) {
-                dartFiles.add(subentry.path);
-                foundOne = true;
-              }
-            }
-          }
-        }
-        if (foundOne)
-          pubSpecDirectories.add(subdirectory.path);
-      }
-
-      subdirectory = new Directory(path.join(ArtifactStore.flutterRoot, 'dev', 'manual_tests'));
-      if (subdirectory.existsSync()) {
-        bool foundOne = false;
-        for (FileSystemEntity entry in subdirectory.listSync()) {
-          if (entry is Directory) {
-            _addPackage(entry.path, dartFiles, pubSpecDirectories);
-          } else if (isDartFile(entry)) {
-            dartFiles.add(entry.path);
-            foundOne = true;
-          }
-        }
-        if (foundOne)
-          pubSpecDirectories.add(subdirectory.path);
+      for (Directory dir in runner.getRepoPackages()) {
+        _collectDartFiles(dir, dartFiles,
+            exclude: (FileSystemEntity entity) => stockExampleFiles.hasMatch(entity.path));
+        pubSpecDirectories.add(dir);
       }
     }
-
-    dartFiles = dartFiles.map((String directory) => path.normalize(path.absolute(directory))).toSet().toList();
-    dartFiles.sort();
-
-    // prepare a Dart file that references all the above Dart files
-    StringBuffer mainBody = new StringBuffer();
-    for (int index = 0; index < dartFiles.length; index += 1)
-      mainBody.writeln('import \'${dartFiles[index]}\' as file$index;');
-    mainBody.writeln('void main() { }');
 
     // determine what all the various .packages files depend on
     PackageDependencyTracker dependencies = new PackageDependencyTracker();
-    for (Directory directory in pubSpecDirectories.map((String path) => new Directory(path))) {
+    for (Directory directory in pubSpecDirectories) {
       String pubSpecYamlPath = path.join(directory.path, 'pubspec.yaml');
       File pubSpecYamlFile = new File(pubSpecYamlPath);
       if (pubSpecYamlFile.existsSync()) {
@@ -316,150 +199,66 @@ class AnalyzeCommand extends FlutterCommand {
     for (String package in packages.keys)
       packagesBody.writeln('$package:${path.toUri(packages[package])}');
 
-    // save the Dart file and the .packages file to disk
+    // save the .packages file to disk
+    //TODO(pq): consider passing package info via a data URI
     Directory host = Directory.systemTemp.createTempSync('flutter-analyze-');
-    File mainFile = new File(path.join(host.path, 'main.dart'))..writeAsStringSync(mainBody.toString());
-    File optionsFile = new File(path.join(ArtifactStore.flutterRoot, 'packages', 'flutter_tools', 'flutter_analysis_options'));
-    File packagesFile = new File(path.join(host.path, '.packages'))..writeAsStringSync(packagesBody.toString());
+    String packagesFilePath = path.join(host.path, '.packages');
+    new File(packagesFilePath).writeAsStringSync(packagesBody.toString());
 
-    List<String> cmd = <String>[
-      sdkBinaryName('dartanalyzer', sdkLocation: argResults['dart-sdk']),
-      // do not set '--warnings', since that will include the entire Dart SDK
-      '--ignore-unrecognized-flags',
-      '--enable_type_checks',
-      '--package-warnings',
-      '--fatal-warnings',
-      '--fatal-hints',
-      // defines lints
-      '--options', optionsFile.path,
-      '--packages', packagesFile.path,
-      mainFile.path
-    ];
-
-    Status status;
     if (argResults['preamble']) {
       if (dartFiles.length == 1) {
-        status = logger.startProgress('Analyzing ${path.relative(dartFiles.first)}...');
+        logger.printStatus('Analyzing ${path.relative(dartFiles.first.path)}...');
       } else {
-        status = logger.startProgress('Analyzing ${dartFiles.length} entry points...');
+        logger.printStatus('Analyzing ${dartFiles.length} files...');
       }
-      for (String file in dartFiles)
-        printTrace(file);
     }
+    DriverOptions options = new DriverOptions();
+    options.dartSdkPath = argResults['dart-sdk'];
+    options.packageConfigPath = packagesFilePath;
+    options.analysisOptionsFile = path.join(ArtifactStore.flutterRoot, 'packages', 'flutter_tools', 'flutter_analysis_options');
+    AnalysisDriver analyzer = new AnalysisDriver(options);
 
-    printTrace(cmd.join(' '));
-    Process process = await Process.start(
-      cmd[0],
-      cmd.sublist(1),
-      workingDirectory: host.path
-    );
+    //TODO:(pq): consider error handling
+    List<AnalysisErrorDescription> errors = analyzer.analyze(dartFiles);
+
     int errorCount = 0;
-    StringBuffer output = new StringBuffer();
-    process.stdout.transform(UTF8.decoder).listen((String data) {
-      output.write(data);
-    });
-    process.stderr.transform(UTF8.decoder).listen((String data) {
-      // dartanalyzer doesn't seem to ever output anything on stderr
-      errorCount += 1;
-      printError(data);
-    });
-
-    int exitCode = await process.exitCode;
-    status?.stop(showElapsedTime: true);
-
-    List<Pattern> patternsToSkip = <Pattern>[
-      'Analyzing [${mainFile.path}]...',
-      new RegExp('^\\[(hint|error)\\] Unused import \\(${mainFile.path},'),
-      new RegExp(r'^\[.+\] .+ \(.+/\.pub-cache/.+'),
-      new RegExp(r'[0-9]+ (error|warning|hint|lint).+found\.'),
-      new RegExp(r'^$'),
-    ];
-
-    RegExp generalPattern = new RegExp(r'^\[(error|warning|hint|lint)\] (.+) \(([^(),]+), line ([0-9]+), col ([0-9]+)\)$');
-    RegExp conflictingNamesPattern = new RegExp('^The imported libraries \'([^\']+)\' and \'([^\']+)\' cannot have the same name \'([^\']+)\'\$');
-    RegExp missingFilePattern = new RegExp('^Target of URI does not exist: \'([^\')]+)\'\$');
-    RegExp documentAllMembersPattern = new RegExp('^Document all public members\$');
-
-    Set<String> changedFiles = new Set<String>(); // files about which we've complained that they changed
-
-    _SourceCache cache = new _SourceCache(10);
-
     int membersMissingDocumentation = 0;
-    List<String> errorLines = output.toString().split('\n');
-    for (String errorLine in errorLines) {
-      if (patternsToSkip.every((Pattern pattern) => pattern.allMatches(errorLine).isEmpty)) {
-        Match groups = generalPattern.firstMatch(errorLine);
-        if (groups != null) {
-          String level = groups[1];
-          String filename = groups[3];
-          String errorMessage = groups[2];
-          int lineNumber = int.parse(groups[4]);
-          int colNumber = int.parse(groups[5]);
-          try {
-            File source = new File(filename);
-            List<String> sourceLines = cache.getSourceFor(source);
-            if (lineNumber > sourceLines.length)
-              throw new FileChanged();
-            String sourceLine = sourceLines[lineNumber-1];
-            if (colNumber > sourceLine.length)
-              throw new FileChanged();
-            bool shouldIgnore = false;
-            if (documentAllMembersPattern.firstMatch(errorMessage) != null) {
-              // https://github.com/dart-lang/linter/issues/207
-              // https://github.com/dart-lang/linter/issues/208
-              if (isFlutterLibrary(filename)) {
-                if (!argResults['dartdocs']) {
-                  membersMissingDocumentation += 1;
-                  shouldIgnore = true;
-                }
-              } else {
-                shouldIgnore = true;
-              }
-            } else if (filename == mainFile.path) {
-              Match libs = conflictingNamesPattern.firstMatch(errorMessage);
-              Match missing = missingFilePattern.firstMatch(errorMessage);
-              if (libs != null) {
-                errorLine = '[$level] $errorMessage (${dartFiles[lineNumber-1]})'; // strip the reference to the generated main.dart
-              } else if (missing != null) {
-                errorLine = '[$level] File does not exist (${missing[1]})';
-              } else {
-                errorLine += ' (Please file a bug on the "flutter analyze" command saying that you saw this message.)';
-              }
-            } else if (filename.endsWith('.mojom.dart')) {
-              // autogenerated code - TODO(ianh): Fix the Dart mojom compiler
-              shouldIgnore = true;
-            } else if (sourceLines.first.startsWith('// DO NOT EDIT. This is code generated')) {
-              // autogenerated code - TODO(ianh): Fix the intl package resource generator
-              shouldIgnore = true;
-            }
-            if (shouldIgnore)
-              continue;
-          } on FileSystemException catch (exception) {
-            if (changedFiles.add(filename))
-              printError('[warning] Could not read file (${exception.message}${ exception.osError != null ? "; ${exception.osError}" : ""}) ($filename)');
-          } on FileChanged {
-            if (changedFiles.add(filename))
-              printError('[warning] File shrank during analysis ($filename)');
+    for (AnalysisErrorDescription error in errors) {
+      bool shouldIgnore = false;
+      if (error.errorCode.name == 'public_member_api_docs') {
+        // https://github.com/dart-lang/linter/issues/207
+        // https://github.com/dart-lang/linter/issues/208
+        if (isFlutterLibrary(error.source.fullName)) {
+          if (!argResults['dartdocs']) {
+            membersMissingDocumentation += 1;
+            shouldIgnore = true;
           }
+        } else {
+          shouldIgnore = true;
         }
-        printError(errorLine);
-        errorCount += 1;
       }
+      //TODO(ianh): Fix the Dart mojom compiler
+      if (error.source.fullName.endsWith('.mojom.dart'))
+        shouldIgnore = true;
+      if (shouldIgnore)
+        continue;
+      printError(error.asString());
+      errorCount += 1;
     }
+
     stopwatch.stop();
     String elapsed = (stopwatch.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
 
     host.deleteSync(recursive: true);
-
-    if (exitCode < 0 || exitCode > 3) // analyzer exit codes: 0 = nothing, 1 = hints, 2 = warnings, 3 = errors
-      return exitCode;
 
     if (_isBenchmarking)
       _writeBenchmark(stopwatch, errorCount);
 
     if (errorCount > 0) {
       if (membersMissingDocumentation > 0 && argResults['flutter-repo'])
-        printError('[lint] $membersMissingDocumentation public ${ membersMissingDocumentation == 1 ? "member lacks" : "members lack" } documentation');
+        printError('[lint] $membersMissingDocumentation public ${ membersMissingDocumentation == 1 ? "member lacks" : "members lack" } documentation (ran in ${elapsed}s)');
+      else
+        print('(Ran in ${elapsed}s)');
       return 1; // we consider any level of error to be an error exit (we don't report different levels)
     }
     if (argResults['congratulate']) {
@@ -470,6 +269,20 @@ class AnalyzeCommand extends FlutterCommand {
       }
     }
     return 0;
+  }
+
+  List<File> _collectDartFiles(Directory dir, List<File> collected, {FileFilter exclude}) {
+    for (FileSystemEntity entity in dir.listSync(recursive: false, followLinks: false)) {
+      if (isDartFile(entity) && (exclude == null || !exclude(entity))) {
+        collected.add(entity);
+      }
+      if (entity is Directory) {
+        String name = path.basename(entity.path);
+        if (!name.startsWith('.') && name != 'packages')
+          _collectDartFiles(entity, collected, exclude: exclude);
+      }
+    }
+    return collected;
   }
 
   Future<int> _analyzeWatch() async {
@@ -841,22 +654,5 @@ class AnalysisError implements Comparable<AnalysisError> {
   String toString() {
     String relativePath = path.relative(file);
     return '${severity.toLowerCase().padLeft(7)} • $message • $relativePath:$startLine:$startColumn';
-  }
-}
-
-class _SourceCache {
-  _SourceCache(this.cacheSize);
-
-  final int cacheSize;
-  final Map<String, List<String>> _lines = new LinkedHashMap<String, List<String>>();
-
-  List<String> getSourceFor(File file) {
-    if (!_lines.containsKey(file.path)) {
-      if (_lines.length >= cacheSize)
-        _lines.remove(_lines.keys.first);
-      _lines[file.path] = file.readAsLinesSync();
-    }
-
-    return _lines[file.path];
   }
 }
