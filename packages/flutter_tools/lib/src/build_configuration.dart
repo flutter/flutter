@@ -41,6 +41,7 @@ String getNameForHostPlatform(HostPlatform platform) {
 enum TargetPlatform {
   android_arm,
   android_x64,
+  android_x86,
   ios,
   darwin_x64,
   linux_x64

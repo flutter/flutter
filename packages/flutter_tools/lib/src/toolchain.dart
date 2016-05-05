@@ -144,10 +144,9 @@ class ToolConfiguration {
 
       switch (platform) {
         case TargetPlatform.android_arm:
-          type = 'android';
-          break;
         case TargetPlatform.android_x64:
-          type = 'android_sim';
+        case TargetPlatform.android_x86:
+          type = 'android';
           break;
 
         // TODO(devoncarew): We will need an ios vs ios_x86 target (for ios vs. ios_sim).
@@ -165,6 +164,18 @@ class ToolConfiguration {
       String buildOutputPath = 'out/${type}_$_modeStr';
       if (isAotBuildMode(mode))
         buildOutputPath += '_Deploy';
+
+      // Add a suffix for the target architecture.
+      switch (platform) {
+        case TargetPlatform.android_x64:
+          buildOutputPath += '_x64';
+          break;
+        case TargetPlatform.android_x86:
+          buildOutputPath += '_x86';
+          break;
+        default:
+          break;
+      }
 
       return new Directory(path.join(engineSrcPath, buildOutputPath));
     } else {
