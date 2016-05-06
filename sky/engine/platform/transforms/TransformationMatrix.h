@@ -32,7 +32,7 @@
 #include "sky/engine/platform/geometry/IntPoint.h"
 #include "sky/engine/wtf/CPU.h"
 #include "sky/engine/wtf/FastAllocBase.h"
-#include "third_party/skia/include/utils/SkMatrix44.h"
+#include "third_party/skia/include/core/SkMatrix44.h"
 
 namespace blink {
 
