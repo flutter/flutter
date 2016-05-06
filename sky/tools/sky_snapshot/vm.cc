@@ -17,6 +17,11 @@ static const char* kDartArgs[] = {
     "--enable_mirrors=false",
     "--load_deferred_eagerly=true",
     "--conditional_directives",
+    // TODO(chinmaygarde): The experimental interpreter for iOS device targets
+    // does not support all these flags. The build process uses its own version
+    // of this snapshotter. Till support for all these flags is added, make
+    // sure the snapshotter does not error out on unrecognized flags.
+    "--ignore-unrecognized-flags",
 };
 
 void InitDartVM() {

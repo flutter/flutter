@@ -2,6 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if __arm__ || __aarch64__
+#if (__arm__ || __aarch64__)
 #include "Generated/kDartIsolateSnapshotBuffer.c"
 #endif

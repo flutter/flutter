@@ -4,15 +4,21 @@
 
 #include "sky/shell/platform/ios/framework/Source/FlutterDartSource.h"
 
-@implementation FlutterDartSource {
-  NSURL* _dartMain;
-  NSURL* _packages;
-  NSURL* _flxArchive;
-}
+@implementation FlutterDartSource
+
+@synthesize dartMain=_dartMain;
+@synthesize packages=_packages;
+@synthesize flxArchive=_flxArchive;
+@synthesize archiveContainsScriptSnapshot=_archiveContainsScriptSnapshot;
+
+#pragma mark - Convenience Initializers
 
 - (instancetype)init {
   return [self initWithDartMain:nil packages:nil flxArchive:nil];
 }
+
+
+#pragma mark - Designated Initializers
 
 - (instancetype)initWithDartMain:(NSURL*)dartMain
                         packages:(NSURL*)packages
@@ -23,6 +29,30 @@
     _dartMain = [dartMain copy];
     _packages = [packages copy];
     _flxArchive = [flxArchive copy];
+
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+
+    const BOOL dartMainExists =
+        [fileManager fileExistsAtPath:dartMain.absoluteURL.path];
+    const BOOL packagesExists =
+        [fileManager fileExistsAtPath:packages.absoluteURL.path];
+
+    if (!dartMainExists || !packagesExists) {
+      // We cannot actually verify this without opening up the archive. This is
+      // just an assumption.
+      _archiveContainsScriptSnapshot = YES;
+    }
+  }
+
+  return self;
+}
+
+- (instancetype)initWithFLXArchiveWithScriptSnapshot:(NSURL*)flxArchive {
+  self = [super init];
+
+  if (self) {
+    _flxArchive = [flxArchive copy];
+    _archiveContainsScriptSnapshot = YES;
   }
 
   return self;
@@ -56,8 +86,11 @@ static BOOL CheckDartProjectURL(NSMutableString* log,
   BOOL isValid = YES;
 
   isValid &= CheckDartProjectURL(log, _flxArchive, @"FLX archive");
-  isValid &= CheckDartProjectURL(log, _dartMain, @"Dart main");
-  isValid &= CheckDartProjectURL(log, _packages, @"Dart packages");
+
+  if (!_archiveContainsScriptSnapshot) {
+    isValid &= CheckDartProjectURL(log, _dartMain, @"Dart main");
+    isValid &= CheckDartProjectURL(log, _packages, @"Dart packages");
+  }
 
   result(isValid, log);
 }

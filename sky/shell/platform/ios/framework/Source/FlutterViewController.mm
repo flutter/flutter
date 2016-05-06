@@ -10,6 +10,7 @@
 #include "base/mac/scoped_nsobject.h"
 #include "base/strings/sys_string_conversions.h"
 #include "base/trace_event/trace_event.h"
+#include "dart/runtime/include/dart_api.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
 #include "sky/engine/wtf/MakeUnique.h"
@@ -23,8 +24,8 @@
 #include "sky/shell/platform/ios/framework/Source/FlutterDynamicServiceLoader.h"
 #include "sky/shell/platform/ios/framework/Source/FlutterView.h"
 #include "sky/shell/platform/mac/platform_mac.h"
-#include "sky/shell/platform/mac/platform_view_mac.h"
 #include "sky/shell/platform/mac/platform_service_provider.h"
+#include "sky/shell/platform/mac/platform_view_mac.h"
 #include "sky/shell/platform/mac/view_service_provider.h"
 #include "sky/shell/platform_view.h"
 #include "sky/shell/shell.h"
@@ -147,13 +148,10 @@ void FlutterInit(int argc, const char* argv[]) {
 
   [self setupPlatformServiceProvider];
 
-  enum VMType type = VMTypeInvalid;
-
-#if TARGET_IPHONE_SIMULATOR
-  type = VMTypeInterpreter;
-#else
-  type = VMTypePrecompilation;
-#endif
+  // We ask the VM to check what it supports.
+  const enum VMType type = Dart_IsPrecompiledRuntime()
+                               ? VMTypePrecompilation
+                               : VMTypeInterpreter;
 
   [_dartProject launchInEngine:_engine
                 embedderVMType:type

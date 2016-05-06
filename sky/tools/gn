@@ -50,6 +50,11 @@ def to_gn_args(args):
     gn_args['is_debug'] = args.debug
     gn_args['is_clang'] = args.clang and args.target_os not in ['android']
 
+
+    ios_target_cpu = 'arm64'
+    if args.ios_force_armv7:
+      ios_target_cpu = 'arm'
+
     if args.target_os == 'android':
         gn_args['target_os'] = 'android'
         aot = not args.develop
@@ -87,6 +92,8 @@ def to_gn_args(args):
             gn_args['dart_runtime_mode'] = 'release'
     else:
         gn_args['dart_runtime_mode'] = 'develop'
+
+    gn_args['dart_experimental_interpreter'] = args.experimental_interpreter
 
     gn_args['flutter_product_mode'] = (gn_args['dart_runtime_mode'] == 'release')
 
@@ -126,6 +133,7 @@ def parse_args(args):
   # Adding it now unblocks bot/tool work.
   parser.add_argument('--develop', default=True, action='store_true')
   parser.add_argument('--deploy', default=False, dest='develop', action='store_false')
+  parser.add_argument('--experimental-interpreter', default=False, dest='experimental_interpreter', action='store_true')
 
   parser.add_argument('--target-os', type=str, choices=['android', 'ios'])
   parser.add_argument('--android', dest='target_os', action='store_const', const='android')

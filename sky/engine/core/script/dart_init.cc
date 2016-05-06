@@ -457,6 +457,20 @@ void SetServiceIsolateHook(ServiceIsolateHook hook) {
   g_service_isolate_hook = hook;
 }
 
+static bool ShouldEnableCheckedMode() {
+  if (IsRunningPrecompiledCode()) {
+    // Checked mode is never enabled during precompilation. Even snapshot
+    // generation disables checked mode arguments.
+    return false;
+  }
+
+#if ENABLE(DART_STRICT)
+  return true;
+#else
+  return SkySettings::Get().enable_dart_checked_mode;
+#endif
+}
+
 void InitDartVM() {
   TRACE_EVENT0("flutter", __func__);
 
@@ -468,30 +482,23 @@ void InitDartVM() {
   DartMojoInternal::SetHandleWatcherProducerHandle(
       mojo::dart::HandleWatcher::Start());
 
-  bool enable_checked_mode = SkySettings::Get().enable_dart_checked_mode;
-#if ENABLE(DART_STRICT)
-  enable_checked_mode = true;
-#endif
-
-  if (IsRunningPrecompiledCode()) {
-    enable_checked_mode = false;
-  }
-
   Vector<const char*> args;
+
+  // Instruct the VM to ignore unrecognized flags.
+  // There is a lot of diversity in a lot of combinations when it
+  // comes to the arguments the VM supports. And, if the VM comes across a flag
+  // it does not recognize, it exits immediately.
+  args.append("--ignore-unrecognized-flags");
+
   args.append(kDartProfilingArgs, arraysize(kDartProfilingArgs));
+  args.append(kDartMirrorsArgs, arraysize(kDartMirrorsArgs));
+  args.append(kDartBackgroundCompilationArgs,
+              arraysize(kDartBackgroundCompilationArgs));
 
-  if (!IsRunningPrecompiledCode()) {
-    // The version of the VM setup to run precompiled code does not recognize
-    // the mirrors or the background compilation flags. They are never enabled.
-    // Make sure we dont pass in unrecognized flags.
-    args.append(kDartMirrorsArgs, arraysize(kDartMirrorsArgs));
-    args.append(kDartBackgroundCompilationArgs,
-                arraysize(kDartBackgroundCompilationArgs));
-  } else {
+  if (IsRunningPrecompiledCode())
     args.append(kDartPrecompilationArgs, arraysize(kDartPrecompilationArgs));
-  }
 
-  if (enable_checked_mode)
+  if (ShouldEnableCheckedMode())
     args.append(kDartCheckedModeArgs, arraysize(kDartCheckedModeArgs));
 
   if (SkySettings::Get().start_paused)
@@ -502,12 +509,9 @@ void InitDartVM() {
 
   Vector<std::string> dart_flags;
   if (base::CommandLine::ForCurrentProcess()->HasSwitch(kDartFlags)) {
-    // Instruct the VM to ignore unrecognized flags.
-    args.append("--ignore-unrecognized-flags");
     // Split up dart flags by spaces.
     base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
-    std::stringstream ss(
-        command_line.GetSwitchValueNative(kDartFlags));
+    std::stringstream ss(command_line.GetSwitchValueNative(kDartFlags));
     std::istream_iterator<std::string> it(ss);
     std::istream_iterator<std::string> end;
     while (it != end) {

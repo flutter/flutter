@@ -51,7 +51,7 @@ PackageProject() {
   AssertExists $src_dir
 
   local precompilation_flag=""
-  if [ $CURRENT_ARCH != "x86_64" ]; then
+  if [[ $CURRENT_ARCH != "x86_64" ]] && [[ "$DART_EXPERIMENTAL_INTERPRETER" != "1" ]]; then
     precompilation_flag="--precompiled"
   fi
 

@@ -5,14 +5,11 @@
 #include "sky/shell/platform/ios/framework/Source/FlutterDartProject_Internal.h"
 
 #include "base/command_line.h"
+#include "dart/runtime/include/dart_api.h"
 #include "sky/shell/platform/ios/framework/Source/FlutterDartSource.h"
 #include "sky/shell/switches.h"
 
-namespace {
-
-#if TARGET_IPHONE_SIMULATOR
-
-NSURL* URLForSwitch(const char* name) {
+static NSURL* URLForSwitch(const char* name) {
   auto cmd = *base::CommandLine::ForCurrentProcess();
   NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
 
@@ -25,10 +22,6 @@ NSURL* URLForSwitch(const char* name) {
 
   return [defaults URLForKey:@(name)];
 }
-
-#endif  // TARGET_IPHONE_SIMULATOR
-
-}  // namespace
 
 @implementation FlutterDartProject {
   NSBundle* _precompiledDartBundle;
@@ -73,22 +66,60 @@ NSURL* URLForSwitch(const char* name) {
   return self;
 }
 
+- (instancetype)initWithFLXArchiveWithScriptSnapshot:(NSURL*)archiveURL {
+  self = [super init];
+
+  if (self) {
+    _dartSource = [[FlutterDartSource alloc]
+        initWithFLXArchiveWithScriptSnapshot:archiveURL];
+
+    [self checkReadiness];
+  }
+
+  return self;
+}
+
 #pragma mark - Convenience initializers
 
 - (instancetype)initFromDefaultSourceForConfiguration {
-  #if TARGET_IPHONE_SIMULATOR
-    return [self
-        initWithFLXArchive:URLForSwitch(sky::shell::switches::kFLX)
-                  dartMain:URLForSwitch(sky::shell::switches::kMainDartFile)
-                  packages:URLForSwitch(sky::shell::switches::kPackages)];
-  #else
-    NSString* bundlePath =
-        [[NSBundle mainBundle] pathForResource:@"FlutterApplication"
-                                        ofType:@"framework"
-                                   inDirectory:@"Frameworks"];
-    NSBundle* bundle = [NSBundle bundleWithPath:bundlePath];
+  NSString* bundlePath =
+      [[NSBundle mainBundle] pathForResource:@"FlutterApplication"
+                                      ofType:@"framework"
+                                 inDirectory:@"Frameworks"];
+  NSBundle* bundle = [NSBundle bundleWithPath:bundlePath];
+
+  // In both precompilation and non-precompilation cases, we need to bundle
+  // loaded since at least the FLX archive is present in it.
+  [bundle load];
+
+  if (Dart_IsPrecompiledRuntime()) {
+    // Load from an AOTC snapshot.
     return [self initWithPrecompiledDartBundle:bundle];
-  #endif
+  } else {
+    // Load directly from sources if the appropriate command line flags are
+    // specified. If not, try loading from a script snapshot in the framework
+    // bundle.
+    NSURL* flxURL = URLForSwitch(sky::shell::switches::kFLX);
+
+    if (flxURL == nil) {
+      // If the URL was not specified on the command line, look inside the
+      // FlutterApplication bundle.
+      flxURL =
+          [NSURL fileURLWithPath:[bundle pathForResource:@"app" ofType:@"flx"]
+                     isDirectory:NO];
+    }
+
+    NSURL* dartMainURL = URLForSwitch(sky::shell::switches::kMainDartFile);
+    NSURL* dartPackagesURL = URLForSwitch(sky::shell::switches::kPackages);
+
+    return [self initWithFLXArchive:flxURL
+                           dartMain:dartMainURL
+                           packages:dartPackagesURL];
+  }
+
+  NSAssert(NO, @"Unreachable");
+  [self release];
+  return nil;
 }
 
 #pragma mark - Common initialization tasks
@@ -202,9 +233,15 @@ static NSString* NSStringFromVMType(VMType type) {
       return result(NO, message);
     }
 
-    engine->RunFromFile(_dartSource.dartMain.absoluteURL.path.UTF8String,
-                        _dartSource.packages.absoluteURL.path.UTF8String,
-                        _dartSource.flxArchive.absoluteURL.path.UTF8String);
+    if (_dartSource.archiveContainsScriptSnapshot) {
+      engine->RunFromBundle("file://script_snapshot",
+                            _dartSource.flxArchive.absoluteURL.path.UTF8String);
+    } else {
+      engine->RunFromFile(_dartSource.dartMain.absoluteURL.path.UTF8String,
+                          _dartSource.packages.absoluteURL.path.UTF8String,
+                          _dartSource.flxArchive.absoluteURL.path.UTF8String);
+    }
+
     result(YES, @"Success");
   }];
 }

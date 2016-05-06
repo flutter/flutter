@@ -4,4 +4,8 @@
 
 #include "Local.xcconfig"
 
+// This file only exists in case the embedder VM supports the interpreter on the
+// device. If this file is not present, it is not an error.
+#include "Interpreter.xcconfig"
+
 FLUTTER_ARCH_TOOLS_PATH=${SOURCE_ROOT}/Tools/${PLATFORM_NAME}

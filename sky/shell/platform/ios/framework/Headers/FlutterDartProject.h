@@ -20,6 +20,9 @@ FLUTTER_EXPORT
                           packages:(NSURL*)dartPackages
     NS_DESIGNATED_INITIALIZER;
 
+- (instancetype)initWithFLXArchiveWithScriptSnapshot:(NSURL*)archiveURL
+    NS_DESIGNATED_INITIALIZER;
+
 - (instancetype)initFromDefaultSourceForConfiguration;
 
 @end

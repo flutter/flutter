@@ -9,7 +9,6 @@
 
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
-
   FlutterDartProject* project =
       [[FlutterDartProject alloc] initFromDefaultSourceForConfiguration];
 
@@ -19,6 +18,7 @@
       [[FlutterViewController alloc] initWithProject:project
                                              nibName:nil
                                               bundle:nil];
+  [project release];
   window.rootViewController = viewController;
   [viewController release];
   self.window = window;
@@ -31,22 +31,28 @@
 // Use the NSNotificationCenter to notify services when we're opened with URLs.
 // TODO(jackson): Revisit this API once we have more services using URLs to make
 // it more typed and less brittle
-- (BOOL)application:(UIApplication *)app
-            openURL:(NSURL *)url
-            sourceApplication:(NSString *)sourceApplication
-            annotation:(id)annotation
-{
-  NSDictionary *dict = [@{
-    @"handled": [NSMutableDictionary dictionary],
-    @"url": url,
-    @"sourceApplication": sourceApplication,
+- (BOOL)application:(UIApplication*)app
+            openURL:(NSURL*)url
+  sourceApplication:(NSString*)sourceApplication
+         annotation:(id)annotation {
+
+  NSDictionary* dict = [@{
+    @"handled" : [NSMutableDictionary dictionary],
+    @"url" : url,
+    @"sourceApplication" : sourceApplication,
   } mutableCopy];
+
   if (annotation != nil)
     [dict setValue:annotation forKey:@"annotation"];
+
   [[NSNotificationCenter defaultCenter] postNotificationName:@"openURL"
                                                       object:self
                                                     userInfo:dict];
-  return ((NSNumber *)dict[@"handled"][@"value"]).boolValue;
+
+  BOOL handled = ((NSNumber*)dict[@"handled"][@"value"]).boolValue;
+  [dict release];
+
+  return handled;
 }
 
 @end

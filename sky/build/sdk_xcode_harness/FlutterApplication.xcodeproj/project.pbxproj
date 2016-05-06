@@ -18,7 +18,6 @@
 		9E0FB06D1C1A3F5600DDAEFA /* InstructionsSnapshotSource.S in Sources */ = {isa = PBXBuildFile; fileRef = 9E0FB0691C1A3F5600DDAEFA /* InstructionsSnapshotSource.S */; };
 		9E0FB06E1C1A3F5600DDAEFA /* kDartIsolateSnapshotBufferSource.c in Sources */ = {isa = PBXBuildFile; fileRef = 9E0FB06A1C1A3F5600DDAEFA /* kDartIsolateSnapshotBufferSource.c */; };
 		9E0FB06F1C1A3F5600DDAEFA /* kDartVmIsolateSnapshotBufferSource.c in Sources */ = {isa = PBXBuildFile; fileRef = 9E0FB06B1C1A3F5600DDAEFA /* kDartVmIsolateSnapshotBufferSource.c */; };
-		9E40465D1C1B6E9200A4B87C /* icudtl.dat in Resources */ = {isa = PBXBuildFile; fileRef = 9E4046541C1B6A3600A4B87C /* icudtl.dat */; };
 		9E627AD91C582ABB000D800D /* app.flx in Resources */ = {isa = PBXBuildFile; fileRef = 9E627AD81C582ABB000D800D /* app.flx */; };
 		9EA2FB801C6D2D6B00670B03 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9EA2FB7F1C6D2D6B00670B03 /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
@@ -49,7 +48,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		97F908AF1CDC02C500D4520F /* Flutter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Flutter.framework; path = ../iphonesimulator/Flutter.framework; sourceTree = "<group>"; };
+		97F908AF1CDC02C500D4520F /* Flutter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Flutter.framework; path = ../common/Flutter.framework; sourceTree = "<group>"; };
 		9E07CF861BE7F4D200BCD8DE /* FlutterApplication.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FlutterApplication.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E07CF891BE7F4D200BCD8DE /* FlutterApplication.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FlutterApplication.h; sourceTree = "<group>"; };
 		9E07CF8B1BE7F4D200BCD8DE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -65,10 +64,10 @@
 		9E4046501C1B6A3600A4B87C /* EmbedderEntryPoints */ = {isa = PBXFileReference; lastKnownFileType = text; path = EmbedderEntryPoints; sourceTree = "<group>"; };
 		9E4046511C1B6A3600A4B87C /* PackagerInvoke */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = PackagerInvoke; sourceTree = "<group>"; };
 		9E4046531C1B6A3600A4B87C /* SnapshotterInvoke */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = SnapshotterInvoke; sourceTree = "<group>"; };
-		9E4046541C1B6A3600A4B87C /* icudtl.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = icudtl.dat; sourceTree = "<group>"; };
 		9E4046571C1B6A3600A4B87C /* Snapshotter */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = Snapshotter; sourceTree = "<group>"; };
 		9E40465A1C1B6A3600A4B87C /* Snapshotter */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = Snapshotter; sourceTree = "<group>"; };
 		9E40465E1C1B6F7900A4B87C /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig; sourceTree = "<group>"; };
+		9E5CD2D81CD97EFF00D93CCC /* snapshot.dart */ = {isa = PBXFileReference; lastKnownFileType = text; path = snapshot.dart; sourceTree = "<group>"; };
 		9E627AD81C582ABB000D800D /* app.flx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = app.flx; path = Generated/app.flx; sourceTree = "<group>"; };
 		9EA2FB7F1C6D2D6B00670B03 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = ../LaunchScreen.storyboard; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -160,10 +159,10 @@
 		9E40464F1C1B6A3600A4B87C /* common */ = {
 			isa = PBXGroup;
 			children = (
+				9E5CD2D81CD97EFF00D93CCC /* snapshot.dart */,
 				9E4046501C1B6A3600A4B87C /* EmbedderEntryPoints */,
 				9E4046511C1B6A3600A4B87C /* PackagerInvoke */,
 				9E4046531C1B6A3600A4B87C /* SnapshotterInvoke */,
-				9E4046541C1B6A3600A4B87C /* icudtl.dat */,
 				97F908AF1CDC02C500D4520F /* Flutter.framework */,
 			);
 			path = common;
@@ -298,7 +297,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9E40465D1C1B6E9200A4B87C /* icudtl.dat in Resources */,
 				9EA2FB801C6D2D6B00670B03 /* LaunchScreen.storyboard in Resources */,
 				9E07CFA91BE8280A00BCD8DE /* Assets.xcassets in Resources */,
 			);
@@ -492,6 +490,7 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = "";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
