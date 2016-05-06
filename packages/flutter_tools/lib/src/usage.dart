@@ -31,7 +31,7 @@ class Usage {
       runningOnCI = true;
 
     // Check for common CI systems.
-    if (isRunningOnTravis())
+    if (isRunningOnBot)
       runningOnCI = true;
 
     // If we think we're running on a CI system, default to not sending analytics.

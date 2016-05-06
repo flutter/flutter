@@ -102,7 +102,7 @@ Future<Null> main(List<String> args) async {
 
       flutterUsage.sendException(error, chain);
 
-      if (Platform.environment.containsKey('FLUTTER_DEV') || isRunningOnTravis()) {
+      if (Platform.environment.containsKey('FLUTTER_DEV') || isRunningOnBot) {
         // If we're working on the tools themselves, just print the stack trace.
         stderr.writeln('$error');
         stderr.writeln(chain.terse.toString());
