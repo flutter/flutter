@@ -45,15 +45,14 @@ def main():
   shutil.copytree(os.path.join(simulator_sdk, sim_tools),
                   os.path.join(args.dst, sim_tools))
 
-  # TODO(abarth): Add once https://github.com/flutter/engine/pull/2654 lands.
-  # subprocess.call([
-  #   'lipo',
-  #   device_dylib,
-  #   simulator_dylib,
-  #   '-create',
-  #   '-output',
-  #   os.path.join(args.dst, 'Tools/common/Flutter.framework/Flutter')
-  # ])
+  subprocess.call([
+    'lipo',
+    device_dylib,
+    simulator_dylib,
+    '-create',
+    '-output',
+    os.path.join(args.dst, 'Tools/common/Flutter.framework/Flutter')
+  ])
 
 
 if __name__ == '__main__':
