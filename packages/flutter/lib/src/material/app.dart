@@ -16,7 +16,6 @@ const TextStyle _errorTextStyle = const TextStyle(
   fontFamily: 'monospace',
   fontSize: 48.0,
   fontWeight: FontWeight.w900,
-  textAlign: TextAlign.right,
   decoration: TextDecoration.underline,
   decorationColor: const Color(0xFFFFFF00),
   decorationStyle: TextDecorationStyle.double

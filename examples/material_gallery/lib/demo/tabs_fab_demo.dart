@@ -72,18 +72,18 @@ class _TabsFabDemoState extends State<TabsFabDemo> {
   Widget buildTabView(_Page page) {
     return new Builder(
       builder: (BuildContext context) {
-        final TextStyle textStyle = new TextStyle(
-          color: page.labelColor,
-          fontSize: 32.0,
-          textAlign: TextAlign.center
-        );
-
         return new Container(
           key: new ValueKey<String>(page.label),
           padding: const EdgeInsets.fromLTRB(48.0, 48.0, 48.0, 96.0),
           child: new Card(
             child: new Center(
-              child: new Text(page.label, style: textStyle)
+              child: new Text(page.label,
+                style: new TextStyle(
+                  color: page.labelColor,
+                  fontSize: 32.0
+                ),
+                textAlign: TextAlign.center
+              )
             )
           )
         );

@@ -387,7 +387,7 @@ class _Block {
         if (listIndents.last == 'ul') {
           bullet = new Text(
             '•',
-            style: new TextStyle(textAlign: TextAlign.center)
+            textAlign: TextAlign.center
           );
         }
         else {
@@ -395,7 +395,7 @@ class _Block {
             padding: new EdgeInsets.only(right: 5.0),
             child: new Text(
               "${blockPosition + 1}.",
-              style: new TextStyle(textAlign: TextAlign.right)
+              textAlign: TextAlign.right
             )
           );
         }

@@ -100,18 +100,18 @@ class StockRow extends StatelessWidget {
                   new Flexible(
                     child: new Text(
                       lastSale,
-                      style: const TextStyle(textAlign: TextAlign.right)
+                      textAlign: TextAlign.right
                     )
                   ),
                   new Flexible(
                     child: new Text(
                       changeInPrice,
-                      style: const TextStyle(textAlign: TextAlign.right)
+                      textAlign: TextAlign.right
                     )
                   ),
                 ],
                 crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: DefaultTextStyle.of(context).textBaseline
+                textBaseline: DefaultTextStyle.of(context).style.textBaseline
               )
             ),
           ]

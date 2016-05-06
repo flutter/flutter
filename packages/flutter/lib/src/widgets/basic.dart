@@ -1904,40 +1904,84 @@ class RichText extends LeafRenderObjectWidget {
   /// Creates a paragraph of rich text.
   ///
   /// The [text] argument is required to be non-null.
-  RichText({ Key key, this.text }) : super(key: key) {
+  RichText({ Key key, this.text, this.textAlign }) : super(key: key) {
     assert(text != null);
   }
 
   /// The text to display in this widget.
   final TextSpan text;
 
+  /// How the text should be aligned horizontally.
+  final TextAlign textAlign;
+
   @override
-  RenderParagraph createRenderObject(BuildContext context) => new RenderParagraph(text);
+  RenderParagraph createRenderObject(BuildContext context) {
+    return new RenderParagraph(text, textAlign: textAlign);
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderParagraph renderObject) {
-    renderObject.text = text;
+    renderObject
+      ..text = text
+      ..textAlign = textAlign;
   }
 }
 
 /// The text style to apply to descendant [Text] widgets without explicit style.
 class DefaultTextStyle extends InheritedWidget {
+  /// Creates a default text style for the given subtree.
+  ///
+  /// Consider using [DefaultTextStyle.inherit] to inherit styling information
+  /// from a the current default text style for a given [BuildContext].
   DefaultTextStyle({
     Key key,
     this.style,
+    this.textAlign,
     Widget child
   }) : super(key: key, child: child) {
     assert(style != null);
     assert(child != null);
   }
 
+  /// A const-constructible default text style that provides fallback values.
+  ///
+  /// Returned from [of] when the given [BuildContext] doesn't have an enclosing default text style.
+  const DefaultTextStyle.fallback() : style = const TextStyle(), textAlign = null;
+
+  /// Creates a default text style that inherits from the given [BuildContext].
+  ///
+  /// The given [style] is merged with the [style] from the default text style
+  /// for the given [BuildContext] and, if non-null, the given [textAlign]
+  /// replaces the [textAlign] from the default text style for the given
+  /// [BuildContext].
+  factory DefaultTextStyle.inherit({
+    Key key,
+    BuildContext context,
+    TextStyle style,
+    TextAlign textAlign,
+    Widget child
+  }) {
+    DefaultTextStyle parent = DefaultTextStyle.of(context);
+    return new DefaultTextStyle(
+      key: key,
+      style: parent.style.merge(style),
+      textAlign: textAlign ?? parent.textAlign,
+      child: child
+    );
+  }
+
   /// The text style to apply.
   final TextStyle style;
 
-  /// The style from the closest instance of this class that encloses the given context.
-  static TextStyle of(BuildContext context) {
-    DefaultTextStyle result = context.inheritFromWidgetOfExactType(DefaultTextStyle);
-    return result?.style ?? const TextStyle();
+  /// How the text should be aligned horizontally.
+  final TextAlign textAlign;
+
+  /// The closest instance of this class that encloses the given context.
+  ///
+  /// If no such instance exists, returns an instance created by
+  /// [DefaultTextStyle.fallback], which contains fallback values.
+  static DefaultTextStyle of(BuildContext context) {
+    return context.inheritFromWidgetOfExactType(DefaultTextStyle) ?? const DefaultTextStyle.fallback();
   }
 
   @override
@@ -1975,7 +2019,7 @@ class Text extends StatelessWidget {
   ///
   /// If the [style] argument is null, the text will use the style from the
   /// closest enclosing [DefaultTextStyle].
-  Text(this.data, { Key key, this.style }) : super(key: key) {
+  Text(this.data, { Key key, this.style, this.textAlign }) : super(key: key) {
     assert(data != null);
   }
 
@@ -1989,18 +2033,26 @@ class Text extends StatelessWidget {
   /// replace the closest enclosing [DefaultTextStyle].
   final TextStyle style;
 
-  TextStyle _getEffectiveStyle(BuildContext context) {
-    if (style == null || style.inherit)
-      return DefaultTextStyle.of(context).merge(style);
-    else
-      return style;
-  }
+  /// How the text should be aligned horizontally.
+  final TextAlign textAlign;
 
   @override
   Widget build(BuildContext context) {
+    DefaultTextStyle defaultTextStyle;
+    TextStyle effectiveTextStyle = style;
+    if (style == null || style.inherit) {
+      defaultTextStyle ??= DefaultTextStyle.of(context);
+      effectiveTextStyle = defaultTextStyle.style.merge(style);
+    }
+    TextAlign effectiveTextAlign = textAlign;
+    if (effectiveTextAlign == null) {
+      defaultTextStyle ??= DefaultTextStyle.of(context);
+      effectiveTextAlign = defaultTextStyle.textAlign;
+    }
     return new RichText(
+      textAlign: effectiveTextAlign,
       text: new TextSpan(
-        style: _getEffectiveStyle(context),
+        style: effectiveTextStyle,
         text: data
       )
     );

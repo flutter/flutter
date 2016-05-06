@@ -15,7 +15,6 @@ const TextStyle _kTextStyles = const TextStyle(
   color: const Color(0xFFFFFFFF),
   fontSize: _kHeight * 0.85,
   fontWeight: FontWeight.w900,
-  textAlign: TextAlign.center,
   height: 1.0
 );
 
@@ -64,9 +63,10 @@ class BannerPainter extends CustomPainter {
       ..drawRect(_kRect, paintBanner);
 
     final double width = _kOffset * 2.0;
-    final TextPainter textPainter = new TextPainter()
-      ..text = new TextSpan(style: _kTextStyles, text: message)
-      ..layout(minWidth: width, maxWidth: width);
+    final TextPainter textPainter = new TextPainter(
+      text: new TextSpan(style: _kTextStyles, text: message),
+      textAlign: TextAlign.center
+    )..layout(minWidth: width, maxWidth: width);
 
     textPainter.paint(canvas, _kRect.topLeft.toOffset() + new Offset(0.0, (_kRect.height - textPainter.height) / 2.0));
   }

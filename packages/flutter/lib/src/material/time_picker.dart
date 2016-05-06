@@ -274,7 +274,7 @@ List<TextPainter> _initPainters(List<String> labels) {
   for (int i = 0; i < painters.length; ++i) {
     String label = labels[i];
     painters[i] = new TextPainter(
-      new TextSpan(style: style, text: label)
+      text: new TextSpan(style: style, text: label)
     )..layout();
   }
   return painters;
