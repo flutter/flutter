@@ -8,8 +8,9 @@ import 'package:usage/src/usage_impl_io.dart';
 import 'package:usage/usage.dart';
 
 import 'base/context.dart';
+import 'base/utils.dart';
 import 'globals.dart';
-import 'runner/version.dart';
+import 'version.dart';
 
 // TODO(devoncarew): We'll need to do some work on the user agent in order to
 // correctly track usage by operating system (dart-lang/usage/issues/70).
@@ -22,7 +23,19 @@ class Usage {
   Usage() {
     String version = FlutterVersion.getVersionString(whitelistBranchName: true);
     _analytics = new AnalyticsIO(_kFlutterUA, 'flutter', version);
-    _analytics.analyticsOpt = AnalyticsOpt.optOut;
+
+    bool runningOnCI = false;
+
+    // Many CI systems don't do a full git checkout.
+    if (version.startsWith('unknown/'))
+      runningOnCI = true;
+
+    // Check for common CI systems.
+    if (isRunningOnTravis())
+      runningOnCI = true;
+
+    // If we think we're running on a CI system, default to not sending analytics.
+    _analytics.analyticsOpt = runningOnCI ? AnalyticsOpt.optIn : AnalyticsOpt.optOut;
   }
 
   /// Returns [Usage] active in the current app context.
@@ -82,10 +95,14 @@ class Usage {
 
     final String versionString = FlutterVersion.getVersionString(whitelistBranchName: true);
 
+    String welcomeString = 'Welcome to Flutter! - Flutter version $versionString - https://flutter.io';
+    welcomeString = welcomeString.padLeft((welcomeString.length + 100) ~/ 2);
+    welcomeString = welcomeString.padRight(100);
+
     printStatus('');
     printStatus('''
   ╔════════════════════════════════════════════════════════════════════════════════════════════════════╗
-  ║              Welcome to Flutter! - Flutter version $versionString - https://flutter.io             ║
+  ║$welcomeString║
   ║                                                                                                    ║
   ║ The Flutter tool anonymously reports feature usage statistics and basic crash reports to Google in ║
   ║ order to help Google contribute improvements to Flutter over time. See Google's privacy policy:    ║
