@@ -419,7 +419,7 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
           children: config.items,
           key: _itemKey,
           index: _selectedIndex,
-          alignment: FractionalOffset.topCenter
+          alignment: FractionalOffset.centerLeft
         ),
         new Icon(icon: Icons.arrow_drop_down, size: 36.0)
       ]
