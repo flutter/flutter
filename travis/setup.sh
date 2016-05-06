@@ -1,10 +1,8 @@
 #!/bin/bash
 set -ex
 
-# Download dependencies flutter
-./bin/flutter --version
-
-# Disable analytics on the bots (to avoid skewing analytics data).
+# disable analytics on the bots and download Flutter dependencies
 ./bin/flutter config --no-analytics
 
+# run pub get in all the repo packages
 ./bin/flutter update-packages

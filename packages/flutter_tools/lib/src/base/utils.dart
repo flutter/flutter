@@ -8,6 +8,13 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as path;
 
+bool get isRunningOnBot {
+  // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
+  return
+    Platform.environment['TRAVIS'] == 'true' ||
+    Platform.environment['CONTINUOUS_INTEGRATION'] == 'true';
+}
+
 String hex(List<int> bytes) {
   StringBuffer result = new StringBuffer();
   for (int part in bytes)
