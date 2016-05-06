@@ -27,6 +27,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Canvas);
 
 #define FOR_EACH_BINDING(V) \
   V(Canvas, save) \
+  V(Canvas, saveLayerWithoutBounds) \
   V(Canvas, saveLayer) \
   V(Canvas, restore) \
   V(Canvas, getSaveCount) \
@@ -67,10 +68,14 @@ FOR_EACH_BINDING(DART_REGISTER_NATIVE)
 }
 
 PassRefPtr<Canvas> Canvas::create(PictureRecorder* recorder,
-                                  Rect& bounds) {
+                                  double left,
+                                  double top,
+                                  double right,
+                                  double bottom) {
     ASSERT(recorder);
     ASSERT(!recorder->isRecording());
-    PassRefPtr<Canvas> canvas = adoptRef(new Canvas(recorder->beginRecording(bounds)));
+    PassRefPtr<Canvas> canvas = adoptRef(new Canvas(recorder->beginRecording(
+        SkRect::MakeLTRB(left, top, right, bottom))));
     recorder->set_canvas(canvas.get());
     return canvas;
 }
@@ -91,12 +96,22 @@ void Canvas::save()
     m_canvas->save();
 }
 
-void Canvas::saveLayer(const Rect& bounds, const Paint& paint)
+void Canvas::saveLayerWithoutBounds(const Paint& paint) {
+    if (!m_canvas)
+        return;
+    m_canvas->saveLayer(nullptr, paint.paint());
+}
+
+void Canvas::saveLayer(double left,
+                       double top,
+                       double right,
+                       double bottom,
+                       const Paint& paint)
 {
     if (!m_canvas)
         return;
-    m_canvas->saveLayer(!bounds.is_null ? &bounds.sk_rect : nullptr,
-                        paint.paint());
+    SkRect bounds = SkRect::MakeLTRB(left, top, right, bottom);
+    m_canvas->saveLayer(&bounds, paint.paint());
 }
 
 void Canvas::restore()
@@ -113,28 +128,28 @@ int Canvas::getSaveCount()
     return m_canvas->getSaveCount();
 }
 
-void Canvas::translate(float dx, float dy)
+void Canvas::translate(double dx, double dy)
 {
     if (!m_canvas)
         return;
     m_canvas->translate(dx, dy);
 }
 
-void Canvas::scale(float sx, float sy)
+void Canvas::scale(double sx, double sy)
 {
     if (!m_canvas)
         return;
     m_canvas->scale(sx, sy);
 }
 
-void Canvas::rotate(float radians)
+void Canvas::rotate(double radians)
 {
     if (!m_canvas)
         return;
     m_canvas->rotate(radians * 180.0/M_PI);
 }
 
-void Canvas::skew(float sx, float sy)
+void Canvas::skew(double sx, double sy)
 {
     if (!m_canvas)
         return;
@@ -164,11 +179,14 @@ Float64List Canvas::getTotalMatrix()
     return toMatrix4(sk_matrix);
 }
 
-void Canvas::clipRect(const Rect& rect)
+void Canvas::clipRect(double left,
+                      double top,
+                      double right,
+                      double bottom)
 {
     if (!m_canvas)
         return;
-    m_canvas->clipRect(rect.sk_rect);
+    m_canvas->clipRect(SkRect::MakeLTRB(left, top, right, bottom));
 }
 
 void Canvas::clipRRect(const RRect& rrect)
@@ -185,18 +203,19 @@ void Canvas::clipPath(const CanvasPath* path)
     m_canvas->clipPath(path->path(), SkRegion::kIntersect_Op);
 }
 
-void Canvas::drawColor(CanvasColor color, TransferMode transferMode)
+void Canvas::drawColor(int color, int transferMode)
 {
     if (!m_canvas)
         return;
-    m_canvas->drawColor(color, transferMode);
+    m_canvas->drawColor(static_cast<SkColor>(color),
+                        static_cast<SkXfermode::Mode>(transferMode));
 }
 
-void Canvas::drawLine(const Point& p1, const Point& p2, const Paint& paint)
+void Canvas::drawLine(double x1, double y1, double x2, double y2, const Paint& paint)
 {
     if (!m_canvas)
         return;
-    m_canvas->drawLine(p1.sk_point.x(), p1.sk_point.y(), p2.sk_point.x(), p2.sk_point.y(), paint.sk_paint);
+    m_canvas->drawLine(x1, y1, x2, y2, paint.sk_paint);
 }
 
 void Canvas::drawPaint(const Paint& paint)
@@ -206,11 +225,15 @@ void Canvas::drawPaint(const Paint& paint)
     m_canvas->drawPaint(paint.sk_paint);
 }
 
-void Canvas::drawRect(const Rect& rect, const Paint& paint)
+void Canvas::drawRect(double left,
+                      double top,
+                      double right,
+                      double bottom,
+                      const Paint& paint)
 {
     if (!m_canvas)
         return;
-    m_canvas->drawRect(rect.sk_rect, paint.sk_paint);
+    m_canvas->drawRect(SkRect::MakeLTRB(left, top, right, bottom), paint.sk_paint);
 }
 
 void Canvas::drawRRect(const RRect& rrect, const Paint& paint)
@@ -227,18 +250,22 @@ void Canvas::drawDRRect(const RRect& outer, const RRect& inner, const Paint& pai
     m_canvas->drawDRRect(outer.sk_rrect, inner.sk_rrect, paint.sk_paint);
 }
 
-void Canvas::drawOval(const Rect& rect, const Paint& paint)
+void Canvas::drawOval(double left,
+                      double top,
+                      double right,
+                      double bottom,
+                      const Paint& paint)
 {
     if (!m_canvas)
         return;
-    m_canvas->drawOval(rect.sk_rect, paint.sk_paint);
+    m_canvas->drawOval(SkRect::MakeLTRB(left, top, right, bottom), paint.sk_paint);
 }
 
-void Canvas::drawCircle(const Point& c, float radius, const Paint& paint)
+void Canvas::drawCircle(double x, double y, double radius, const Paint& paint)
 {
     if (!m_canvas)
         return;
-    m_canvas->drawCircle(c.sk_point.x(), c.sk_point.y(), radius, paint.sk_paint);
+    m_canvas->drawCircle(x, y, radius, paint.sk_paint);
 }
 
 void Canvas::drawPath(const CanvasPath* path, const Paint& paint)
@@ -249,27 +276,53 @@ void Canvas::drawPath(const CanvasPath* path, const Paint& paint)
     m_canvas->drawPath(path->path(), paint.sk_paint);
 }
 
-void Canvas::drawImage(const CanvasImage* image, const Point& p, const Paint& paint) {
+void Canvas::drawImage(const CanvasImage* image, double x, double y, const Paint& paint) {
     if (!m_canvas)
         return;
     ASSERT(image);
-    m_canvas->drawImage(image->image(), p.sk_point.x(), p.sk_point.y(), paint.paint());
+    m_canvas->drawImage(image->image(), x, y, paint.paint());
 }
 
-void Canvas::drawImageRect(const CanvasImage* image, Rect& src, Rect& dst, const Paint& paint) {
+void Canvas::drawImageRect(const CanvasImage* image,
+                           double srcLeft,
+                           double srcTop,
+                           double srcRight,
+                           double srcBottom,
+                           double dstLeft,
+                           double dstTop,
+                           double dstRight,
+                           double dstBottom,
+                           const Paint& paint) {
     if (!m_canvas)
         return;
     ASSERT(image);
-    m_canvas->drawImageRect(image->image(), src.sk_rect, dst.sk_rect, paint.paint(), SkCanvas::kFast_SrcRectConstraint);
+    m_canvas->drawImageRect(image->image(),
+                            SkRect::MakeLTRB(srcLeft, srcTop, srcRight, srcBottom),
+                            SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom),
+                            paint.paint(),
+                            SkCanvas::kFast_SrcRectConstraint);
 }
 
-void Canvas::drawImageNine(const CanvasImage* image, Rect& center, Rect& dst, const Paint& paint) {
+void Canvas::drawImageNine(const CanvasImage* image,
+                           double centerLeft,
+                           double centerTop,
+                           double centerRight,
+                           double centerBottom,
+                           double dstLeft,
+                           double dstTop,
+                           double dstRight,
+                           double dstBottom,
+                           const Paint& paint) {
     if (!m_canvas)
         return;
     ASSERT(image);
+    SkRect center = SkRect::MakeLTRB(centerLeft, centerTop, centerRight, centerBottom);
     SkIRect icenter;
-    center.sk_rect.round(&icenter);
-    m_canvas->drawImageNine(image->image(), icenter, dst.sk_rect, paint.paint());
+    center.round(&icenter);
+    m_canvas->drawImageNine(image->image(),
+                            icenter,
+                            SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom),
+                            paint.paint());
 }
 
 void Canvas::drawPicture(Picture* picture)
@@ -280,11 +333,11 @@ void Canvas::drawPicture(Picture* picture)
     m_canvas->drawPicture(picture->toSkia().get());
 }
 
-void Canvas::drawParagraph(Paragraph* paragraph, const Offset& offset) {
+void Canvas::drawParagraph(Paragraph* paragraph, double x, double y) {
     if (!m_canvas)
         return;
     ASSERT(paragraph);
-    paragraph->paint(this, offset);
+    paragraph->paint(this, x, y);
 }
 
 void Canvas::drawVertices(SkCanvas::VertexMode vertexMode,

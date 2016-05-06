@@ -44,9 +44,9 @@ bool PictureRecorder::isRecording() {
     return m_canvas && m_canvas->isRecording();
 }
 
-SkCanvas* PictureRecorder::beginRecording(Rect bounds)
+SkCanvas* PictureRecorder::beginRecording(SkRect bounds)
 {
-    return m_pictureRecorder.beginRecording(bounds.sk_rect,
+    return m_pictureRecorder.beginRecording(bounds,
         &m_rtreeFactory, SkPictureRecorder::kComputeSaveLayerInfo_RecordFlag);
 }
 

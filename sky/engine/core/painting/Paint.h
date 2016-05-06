@@ -6,9 +6,7 @@
 #define SKY_ENGINE_CORE_PAINTING_PAINT_H_
 
 #include "sky/engine/core/painting/CanvasColor.h"
-#include "sky/engine/core/painting/PaintingStyle.h"
 #include "sky/engine/core/painting/TransferMode.h"
-#include "sky/engine/core/painting/FilterQuality.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -36,12 +34,6 @@ struct DartConverter<Paint> {
                              int index,
                              Dart_Handle& exception);
 };
-
-class StrokeCap {};
-
-template <>
-struct DartConverter<StrokeCap>
-    : public DartConverterEnum<SkPaint::Cap> {};
 
 }  // namespace blink
 

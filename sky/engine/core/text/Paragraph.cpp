@@ -84,14 +84,14 @@ void Paragraph::layout(double width)
     m_renderView->layout();
 }
 
-void Paragraph::paint(Canvas* canvas, const Offset& offset)
+void Paragraph::paint(Canvas* canvas, double x, double y)
 {
     FontCachePurgePreventer fontCachePurgePreventer;
 
     // Very simplified painting to allow painting an arbitrary (layer-less) subtree.
     RenderBox* box = firstChildBox();
     SkCanvas* skCanvas = canvas->skCanvas();
-    skCanvas->translate(offset.sk_size.width(), offset.sk_size.height());
+    skCanvas->translate(x, y);
 
     GraphicsContext context(skCanvas);
     Vector<RenderBox*> layers;
@@ -102,7 +102,7 @@ void Paragraph::paint(Canvas* canvas, const Offset& offset)
     // Note we're ignoring any layers encountered.
     // TODO(abarth): Remove the concept of RenderLayers.
 
-    skCanvas->translate(-offset.sk_size.width(), -offset.sk_size.height());
+    skCanvas->translate(-x, -y);
 }
 
 std::vector<TextBox> Paragraph::getRectsForRange(unsigned start, unsigned end) {

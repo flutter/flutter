@@ -32,42 +32,80 @@ struct DartConverter<SkCanvas::VertexMode> : public DartConverterInteger<SkCanva
 class Canvas : public ThreadSafeRefCounted<Canvas>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtr<Canvas> create(PictureRecorder* recorder, Rect& bounds);
+    static PassRefPtr<Canvas> create(PictureRecorder* recorder,
+                                     double left,
+                                     double top,
+                                     double right,
+                                     double bottom);
 
     ~Canvas() override;
 
     void save();
-    void saveLayer(const Rect& bounds, const Paint& paint);
+    void saveLayerWithoutBounds(const Paint& paint);
+    void saveLayer(double left,
+                   double top,
+                   double right,
+                   double bottom,
+                   const Paint& paint);
     void restore();
     int getSaveCount();
 
-    void translate(float dx, float dy);
-    void scale(float sx, float sy);
-    void rotate(float radians);
-    void skew(float sx, float sy);
+    void translate(double dx, double dy);
+    void scale(double sx, double sy);
+    void rotate(double radians);
+    void skew(double sx, double sy);
     void transform(const Float64List& matrix4);
     void setMatrix(const Float64List& matrix4);
 
     Float64List getTotalMatrix();
 
-    void clipRect(const Rect& rect);
+    void clipRect(double left,
+                  double top,
+                  double right,
+                  double bottom);
     void clipRRect(const RRect& rrect);
     void clipPath(const CanvasPath* path);
 
-    void drawColor(CanvasColor color, TransferMode transferMode);
-    void drawLine(const Point& p1, const Point& p2, const Paint& paint);
+    void drawColor(int color, int transferMode);
+    void drawLine(double x1, double y1, double x2, double y2, const Paint& paint);
     void drawPaint(const Paint& paint);
-    void drawRect(const Rect& rect, const Paint& paint);
+    void drawRect(double left,
+                  double top,
+                  double right,
+                  double bottom,
+                  const Paint& paint);
     void drawRRect(const RRect& rrect, const Paint& paint);
     void drawDRRect(const RRect& outer, const RRect& inner, const Paint& paint);
-    void drawOval(const Rect& rect, const Paint& paint);
-    void drawCircle(const Point& c, float radius, const Paint& paint);
+    void drawOval(double left,
+                  double top,
+                  double right,
+                  double bottom,
+                  const Paint& paint);
+    void drawCircle(double x, double y, double radius, const Paint& paint);
     void drawPath(const CanvasPath* path, const Paint& paint);
-    void drawImage(const CanvasImage* image, const Point& p, const Paint& paint);
-    void drawImageRect(const CanvasImage* image, Rect& src, Rect& dst, const Paint& paint);
-    void drawImageNine(const CanvasImage* image, Rect& center, Rect& dst, const Paint& paint);
+    void drawImage(const CanvasImage* image, double x, double y, const Paint& paint);
+    void drawImageRect(const CanvasImage* image,
+                       double srcLeft,
+                       double srcTop,
+                       double srcRight,
+                       double srcBottom,
+                       double dstLeft,
+                       double dstTop,
+                       double dstRight,
+                       double dstBottom,
+                       const Paint& paint);
+    void drawImageNine(const CanvasImage* image,
+                       double centerLeft,
+                       double centerTop,
+                       double centerRight,
+                       double centerBottom,
+                       double dstLeft,
+                       double dstTop,
+                       double dstRight,
+                       double dstBottom,
+                       const Paint& paint);
     void drawPicture(Picture* picture);
-    void drawParagraph(Paragraph* paragraph, const Offset& offset);
+    void drawParagraph(Paragraph* paragraph, double x, double y);
 
     void drawVertices(SkCanvas::VertexMode vertexMode,
         const std::vector<Point>& vertices,

@@ -27,7 +27,7 @@ public:
 
     ~PictureRecorder();
 
-    SkCanvas* beginRecording(Rect bounds);
+    SkCanvas* beginRecording(SkRect bounds);
     PassRefPtr<Picture> endRecording();
     bool isRecording();
 

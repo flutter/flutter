@@ -83,15 +83,15 @@ class Paint {
     }
 
     return <dynamic>[
-      style,
+      style.index,
       strokeWidth,
-      strokeCap,
+      strokeCap.index,
       isAntiAlias,
-      color,
-      transferMode,
+      color.value,
+      transferMode.index,
       colorFilter,
       maskFilter,
-      filterQuality,
+      filterQuality.index,
       shader,
     ];
   }

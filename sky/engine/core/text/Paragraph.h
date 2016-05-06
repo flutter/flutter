@@ -33,7 +33,7 @@ public:
     double ideographicBaseline();
 
     void layout(double width);
-    void paint(Canvas* canvas, const Offset& offset);
+    void paint(Canvas* canvas, double x, double y);
 
     std::vector<TextBox> getRectsForRange(unsigned start, unsigned end);
     Dart_Handle getPositionForOffset(const Offset& offset);

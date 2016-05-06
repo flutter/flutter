@@ -356,9 +356,13 @@ class Canvas extends NativeFieldWrapperClass2 {
     if (recorder.isRecording)
       throw new ArgumentError('The given PictureRecorder is already associated with another Canvas.');
     // TODO(ianh): throw if recorder is defunct (https://github.com/flutter/flutter/issues/2531)
-    _constructor(recorder, cullRect);
+    _constructor(recorder, cullRect.left, cullRect.top, cullRect.right, cullRect.bottom);
   }
-  void _constructor(PictureRecorder recorder, Rect cullRect) native "Canvas_constructor";
+  void _constructor(PictureRecorder recorder,
+                    double left,
+                    double top,
+                    double right,
+                    double bottom) native "Canvas_constructor";
 
   /// Saves a copy of the current transform and clip on the save stack.
   ///
@@ -380,7 +384,19 @@ class Canvas extends NativeFieldWrapperClass2 {
   ///
   /// Call [restore] to pop the save stack and apply the paint to the
   /// group.
-  void saveLayer(Rect bounds, Paint paint) native "Canvas_saveLayer"; // TODO(jackson): Paint should be optional, but making it optional causes crash
+  void saveLayer(Rect bounds, Paint paint) {
+    if (bounds == null)
+      _saveLayerWithoutBounds(paint);
+    else
+      _saveLayer(bounds.left, bounds.top, bounds.right, bounds.bottom, paint);
+  }
+  void _saveLayerWithoutBounds(Paint paint) native "Canvas_saveLayerWithoutBounds";
+  // TODO(jackson): Paint should be optional, but making it optional causes crash
+  void _saveLayer(double left,
+                  double top,
+                  double right,
+                  double bottom,
+                  Paint paint) native "Canvas_saveLayer";
 
   /// Pops the current save stack, if there is anything to pop.
   /// Otherwise, does nothing.
@@ -416,27 +432,113 @@ class Canvas extends NativeFieldWrapperClass2 {
   void _setMatrix(Float64List matrix4) native "Canvas_setMatrix";
 
   Float64List getTotalMatrix() native "Canvas_getTotalMatrix";
-  void clipRect(Rect rect) native "Canvas_clipRect";
+  void clipRect(Rect rect) {
+    _clipRect(rect.left, rect.top, rect.right, rect.bottom);
+  }
+  void _clipRect(double left,
+                 double top,
+                 double right,
+                 double bottom) native "Canvas_clipRect";
+
   void clipRRect(RRect rrect) native "Canvas_clipRRect";
+
   void clipPath(Path path) native "Canvas_clipPath";
-  void drawColor(Color color, TransferMode transferMode) native "Canvas_drawColor";
-  void drawLine(Point p1, Point p2, Paint paint) native "Canvas_drawLine";
+
+  void drawColor(Color color, TransferMode transferMode) {
+    _drawColor(color.value, transferMode.index);
+  }
+  void _drawColor(int color, int transferMode) native "Canvas_drawColor";
+
+  void drawLine(Point p1, Point p2, Paint paint) {
+    _drawLine(p1.x, p1.y, p2.x, p2.y, paint);
+  }
+  void _drawLine(double x1, double y1, double x2, double y2, Paint paint) native "Canvas_drawLine";
+
   void drawPaint(Paint paint) native "Canvas_drawPaint";
-  void drawRect(Rect rect, Paint paint) native "Canvas_drawRect";
+
+  void drawRect(Rect rect, Paint paint) {
+    _drawRect(rect.left, rect.top, rect.right, rect.bottom, paint);
+  }
+  void _drawRect(double left,
+                 double top,
+                 double right,
+                 double bottom,
+                 Paint paint) native "Canvas_drawRect";
+
   void drawRRect(RRect rrect, Paint paint) native "Canvas_drawRRect";
+
   void drawDRRect(RRect outer, RRect inner, Paint paint) native "Canvas_drawDRRect";
-  void drawOval(Rect rect, Paint paint) native "Canvas_drawOval";
-  void drawCircle(Point c, double radius, Paint paint) native "Canvas_drawCircle";
+
+  void drawOval(Rect rect, Paint paint) {
+    _drawOval(rect.left, rect.top, rect.right, rect.bottom, paint);
+  }
+  void _drawOval(double left,
+                 double top,
+                 double right,
+                 double bottom,
+                 Paint paint) native "Canvas_drawOval";
+
+  void drawCircle(Point c, double radius, Paint paint) {
+    _drawCircle(c.x, c.y, radius, paint);
+  }
+  void _drawCircle(double x, double y, double radius, Paint paint) native "Canvas_drawCircle";
+
   void drawPath(Path path, Paint paint) native "Canvas_drawPath";
-  void drawImage(Image image, Point p, Paint paint) native "Canvas_drawImage";
+
+  void drawImage(Image image, Point p, Paint paint) {
+    _drawImage(image, p.x, p.y, paint);
+  }
+  void _drawImage(Image image, double x, double y, Paint paint) native "Canvas_drawImage";
 
   /// Draws the src rect from the image into the canvas as dst rect.
   ///
   /// Might sample from outside the src rect by half the width of an applied
   /// filter.
-  void drawImageRect(Image image, Rect src, Rect dst, Paint paint) native "Canvas_drawImageRect";
+  void drawImageRect(Image image, Rect src, Rect dst, Paint paint) {
+    _drawImageRect(image,
+                   src.left,
+                   src.top,
+                   src.right,
+                   src.bottom,
+                   dst.left,
+                   dst.top,
+                   dst.right,
+                   dst.bottom,
+                   paint);
+  }
+  void _drawImageRect(Image image,
+                      double srcLeft,
+                      double srcTop,
+                      double srcRight,
+                      double srcBottom,
+                      double dstLeft,
+                      double dstTop,
+                      double dstRight,
+                      double dstBottom,
+                      Paint paint) native "Canvas_drawImageRect";
 
-  void drawImageNine(Image image, Rect center, Rect dst, Paint paint) native "Canvas_drawImageNine";
+  void drawImageNine(Image image, Rect center, Rect dst, Paint paint) {
+    _drawImageNine(image,
+                   center.left,
+                   center.top,
+                   center.right,
+                   center.bottom,
+                   dst.left,
+                   dst.top,
+                   dst.right,
+                   dst.bottom,
+                   paint);
+  }
+  void _drawImageNine(Image image,
+                      double centerLeft,
+                      double centerTop,
+                      double centerRight,
+                      double centerBottom,
+                      double dstLeft,
+                      double dstTop,
+                      double dstRight,
+                      double dstBottom,
+                      Paint paint) native "Canvas_drawImageNine";
 
   /// Draw the given picture onto the canvas. To create a picture, see
   /// [PictureRecorder].
@@ -445,7 +547,10 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// Draws the text in the given paragraph into this canvas at the given offset.
   ///
   /// Valid only after [Paragraph.layout] has been called on the paragraph.
-  void drawParagraph(Paragraph paragraph, Offset offset) native "Canvas_drawParagraph";
+  void drawParagraph(Paragraph paragraph, Offset offset) {
+    _drawParagraph(paragraph, offset.dx, offset.dy);
+  }
+  void _drawParagraph(Paragraph paragraph, double x, double y) native "Canvas_drawParagraph";
 
   void drawVertices(VertexMode vertexMode,
                     List<Point> vertices,
@@ -469,6 +574,7 @@ class Canvas extends NativeFieldWrapperClass2 {
     }
     _drawVertices(vertexMode.index, vertices, textureCoordinates, colors, transferMode, indicies, paint);
   }
+  // TODO(abarth): Convert to primitives.
   void _drawVertices(int vertexMode,
                      List<Point> vertices,
                      List<Point> textureCoordinates,
@@ -498,6 +604,7 @@ class Canvas extends NativeFieldWrapperClass2 {
     }
     _drawAtlas(image, transforms, rects, colors, mode, cullRect, paint);
   }
+  // TODO(abarth): Convert to primitives.
   void _drawAtlas(Image image,
                   List<RSTransform> transforms,
                   List<Rect> rects,

@@ -6,9 +6,7 @@
 
 #include "sky/engine/core/painting/CanvasColor.h"
 #include "sky/engine/core/painting/ColorFilter.h"
-#include "sky/engine/core/painting/FilterQuality.h"
 #include "sky/engine/core/painting/MaskFilter.h"
-#include "sky/engine/core/painting/PaintingStyle.h"
 #include "sky/engine/core/painting/Shader.h"
 #include "sky/engine/core/painting/TransferMode.h"
 #include "sky/engine/core/script/ui_dart_state.h"
@@ -76,23 +74,23 @@ Paint DartConverter<Paint>::FromDart(Dart_Handle dart_paint) {
   SkPaint& paint = result.sk_paint;
 
   if (!Dart_IsNull(values[kStyle]))
-    paint.setStyle(DartConverter<PaintingStyle>::FromDart(values[kStyle]));
+    paint.setStyle(static_cast<SkPaint::Style>(DartConverter<int>::FromDart(values[kStyle])));
   if (!Dart_IsNull(values[kStrokeWidth]))
     paint.setStrokeWidth(DartConverter<SkScalar>::FromDart(values[kStrokeWidth]));
   if (!Dart_IsNull(values[kStrokeCap]))
-    paint.setStrokeCap(DartConverter<StrokeCap>::FromDart(values[kStrokeCap]));
+    paint.setStrokeCap(static_cast<SkPaint::Cap>(DartConverter<int>::FromDart(values[kStrokeCap])));
   if (!Dart_IsNull(values[kIsAntiAlias]))
     paint.setAntiAlias(DartConverter<bool>::FromDart(values[kIsAntiAlias]));
   if (!Dart_IsNull(values[kColor]))
-    paint.setColor(DartConverter<CanvasColor>::FromDart(values[kColor]));
+    paint.setColor(static_cast<SkColor>(DartConverter<int>::FromDart(values[kColor])));
   if (!Dart_IsNull(values[kTransferMode]))
-    paint.setXfermodeMode(DartConverter<TransferMode>::FromDart(values[kTransferMode]));
+    paint.setXfermodeMode(static_cast<SkXfermode::Mode>(DartConverter<int>::FromDart(values[kTransferMode])));
   if (!Dart_IsNull(values[kColorFilter]))
     paint.setColorFilter(DartConverter<ColorFilter*>::FromDart(values[kColorFilter])->filter());
   if (!Dart_IsNull(values[kMaskFilter]))
     paint.setMaskFilter(DartConverter<MaskFilter*>::FromDart(values[kMaskFilter])->filter());
   if (!Dart_IsNull(values[kFilterQuality]))
-    paint.setFilterQuality(DartConverter<FilterQuality>::FromDart(values[kFilterQuality]));
+    paint.setFilterQuality(static_cast<SkFilterQuality>(DartConverter<int>::FromDart(values[kFilterQuality])));
   if (!Dart_IsNull(values[kShader]))
     paint.setShader(DartConverter<Shader*>::FromDart(values[kShader])->shader());
 
