@@ -261,6 +261,21 @@ class BuildApkCommand extends FlutterCommand {
   }
 }
 
+// Return the directory name within the APK that is used for native code libraries
+// on the given platform.
+String getAbiDirectory(TargetPlatform platform) {
+  switch (platform) {
+    case TargetPlatform.android_arm:
+      return 'armeabi-v7a';
+    case TargetPlatform.android_x64:
+      return 'x86_64';
+    case TargetPlatform.android_x86:
+      return 'x86';
+    default:
+      throw new Exception('Unsupported platform.');
+  }
+}
+
 Future<_ApkComponents> _findApkComponents(
   TargetPlatform platform,
   BuildMode buildMode,
@@ -274,7 +289,7 @@ Future<_ApkComponents> _findApkComponents(
   components.extraFiles = extraFiles != null ? extraFiles : <String, File>{};
 
   if (tools.isLocalEngine) {
-    String abiDir = platform == TargetPlatform.android_arm ? 'armeabi-v7a' : 'x86_64';
+    String abiDir = getAbiDirectory(platform);
     String enginePath = tools.engineSrcPath;
     String buildDir = tools.getEngineArtifactsDirectory(platform, buildMode).path;
 
@@ -348,7 +363,7 @@ int _buildApk(
 
     _AssetBuilder artifactBuilder = new _AssetBuilder(tempDir, 'artifacts');
     artifactBuilder.add(classesDex, 'classes.dex');
-    String abiDir = platform == TargetPlatform.android_arm ? 'armeabi-v7a' : 'x86_64';
+    String abiDir = getAbiDirectory(platform);
     artifactBuilder.add(components.libSkyShell, 'lib/$abiDir/libsky_shell.so');
 
     for (String relativePath in components.extraFiles.keys)

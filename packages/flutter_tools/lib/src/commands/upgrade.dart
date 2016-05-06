@@ -10,7 +10,7 @@ import '../base/process.dart';
 import '../dart/pub.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
-import '../runner/version.dart';
+import '../version.dart';
 
 class UpgradeCommand extends FlutterCommand {
   @override

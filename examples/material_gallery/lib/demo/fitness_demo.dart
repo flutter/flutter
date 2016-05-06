@@ -7,7 +7,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sprites/flutter_sprites.dart';
-import 'package:vector_math/vector_math_64.dart' as vec;
 
 ImageMap _images;
 SpriteSheet _sprites;
@@ -581,7 +580,7 @@ class _FireworksNode extends NodeWithSize {
       speedVar: 50.0,
       startSize: 1.0,
       startSizeVar: 0.5,
-      gravity: new vec.Vector2(0.0, 30.0),
+      gravity: const Offset(0.0, 30.0),
       colorSequence: new ColorSequence.fromStartAndEndColor(startColor, endColor)
     );
     system.position = new Point(randomDouble() * 1024.0, randomDouble() * 1024.0);

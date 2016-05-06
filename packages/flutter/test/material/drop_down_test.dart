@@ -38,6 +38,14 @@ void main() {
     tester.pump();
     tester.pump(const Duration(seconds: 1)); // finish the menu animation
 
+    // We should have two copies of item 5, one in the menu and one in the
+    // button itself.
+    expect(find.text('5').evaluate().length, 2);
+
+    // We should only have one copy of item 19, which is in the button itself.
+    // The copy in the menu shouldn't be in the tree because it's off-screen.
+    expect(find.text('19').evaluate().length, 1);
+
     tester.tap(find.byConfig(button));
 
     // Ideally this would be 4 because the menu would be overscrolled to the

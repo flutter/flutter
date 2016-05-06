@@ -49,23 +49,49 @@ class AndroidDevice extends Device {
   final String modelID;
   final String deviceCodeName;
 
+  Map<String, String> _properties;
   bool _isLocalEmulator;
+  TargetPlatform _platform;
+
+  String _getProperty(String name) {
+    if (_properties == null) {
+      String getpropOutput = runCheckedSync(adbCommandForDevice(<String>['shell', 'getprop']));
+      RegExp propertyExp = new RegExp(r'\[(.*?)\]: \[(.*?)\]');
+      _properties = <String, String>{};
+      for (Match m in propertyExp.allMatches(getpropOutput)) {
+        _properties[m.group(1)] = m.group(2);
+      }
+    }
+    return _properties[name];
+  }
 
   @override
   bool get isLocalEmulator {
     if (_isLocalEmulator == null) {
+      String characteristics = _getProperty('ro.build.characteristics');
+      _isLocalEmulator = characteristics != null && characteristics.contains('emulator');
+    }
+    return _isLocalEmulator;
+  }
+
+  @override
+  TargetPlatform get platform {
+    if (_platform == null) {
       // http://developer.android.com/ndk/guides/abis.html (x86, armeabi-v7a, ...)
-      try {
-        String value = runCheckedSync(adbCommandForDevice(
-          <String>['shell', 'getprop', 'ro.product.cpu.abi']
-        ));
-        _isLocalEmulator = value.startsWith('x86');
-      } catch (error) {
-        _isLocalEmulator = false;
+      switch (_getProperty('ro.product.cpu.abi')) {
+        case 'x86_64':
+          _platform = TargetPlatform.android_x64;
+          break;
+        case 'x86':
+          _platform = TargetPlatform.android_x86;
+          break;
+        default:
+          _platform = TargetPlatform.android_arm;
+          break;
       }
     }
 
-    return _isLocalEmulator;
+    return _platform;
   }
 
   _AdbLogReader _logReader;
@@ -123,9 +149,7 @@ class AndroidDevice extends Device {
       runCheckedSync(<String>[androidSdk.adbPath, 'start-server']);
 
       // Sample output: '22'
-      String sdkVersion = runCheckedSync(
-        adbCommandForDevice(<String>['shell', 'getprop', 'ro.build.version.sdk'])
-      ).trimRight();
+      String sdkVersion = _getProperty('ro.build.version.sdk');
 
       int sdkVersionParsed = int.parse(sdkVersion, onError: (String source) => null);
       if (sdkVersionParsed == null) {
@@ -332,9 +356,6 @@ class AndroidDevice extends Device {
     List<String> command = adbCommandForDevice(<String>['shell', 'am', 'force-stop', app.id]);
     return runCommandAndStreamOutput(command).then((int exitCode) => exitCode == 0);
   }
-
-  @override
-  TargetPlatform get platform => isLocalEmulator ? TargetPlatform.android_x64 : TargetPlatform.android_arm;
 
   @override
   void clearLogs() {
