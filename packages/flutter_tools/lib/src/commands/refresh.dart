@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../android/android_device.dart';
+import '../application_package.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 
@@ -47,17 +48,18 @@ class RefreshCommand extends FlutterCommand {
         return result;
       }
 
+      AndroidDevice device = deviceForCommand;
+
       String activity = argResults['activity'];
       if (activity == null) {
-        if (applicationPackages.android != null) {
-          activity = applicationPackages.android.launchActivity;
+        AndroidApk apk = applicationPackages.getPackageForPlatform(device.platform);
+        if (apk != null) {
+          activity = apk.launchActivity;
         } else {
           printError('Unable to find the activity to be refreshed.');
           return 1;
         }
       }
-
-      AndroidDevice device = deviceForCommand;
 
       bool success = await device.refreshSnapshot(activity, snapshotPath);
       if (!success) {
