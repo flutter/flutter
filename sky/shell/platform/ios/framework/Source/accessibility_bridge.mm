@@ -114,9 +114,10 @@ struct Geometry {
 #pragma mark - UIAccessibility overrides
 
 - (BOOL)isAccessibilityElement {
-  // Per UIAccessibilityContainer, accessibility containers MUST return
-  // NO to -isAccessibilityElement
-  return (_children.count == 0);
+  // Note: hit detection will only apply to elements that report
+  // -isAccessibilityElement of YES. The framework will continue scanning the
+  // entire element tree looking for such a hit.
+  return (_flags->canBeTapped || _children.count == 0);
 }
 
 - (NSString*)accessibilityLabel {
@@ -133,16 +134,24 @@ struct Geometry {
 }
 
 - (CGRect)accessibilityFrame {
+  SkMatrix44 globalTransform = _geometry.transform;
+  for (AccessibilityNode* parent = _parent; parent; parent = parent.parent) {
+    globalTransform = globalTransform * parent->_geometry.transform;
+  }
+
   SkPoint quad[4];
   _geometry.rect.toQuad(quad);
   for (auto& point : quad) {
     SkScalar vector[4] = {point.x(), point.y(), 0, 1};
-    _geometry.transform.mapScalars(vector);
+    globalTransform.mapScalars(vector);
     point.set(vector[0], vector[1]);
   }
-  SkRect result;
-  result.set(quad, 4);
-  return CGRectMake(result.x(), result.y(), result.width(), result.height());
+  SkRect rect;
+  rect.set(quad, 4);
+
+  auto result = CGRectMake(rect.x(), rect.y(), rect.width(), rect.height());
+  return UIAccessibilityConvertFrameToScreenCoordinates(result,
+                                                        _bridge->getView());
 }
 
 #pragma mark - UIAccessibilityElement protocol
