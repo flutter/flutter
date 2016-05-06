@@ -217,10 +217,8 @@ class AnalysisErrorDescription {
   String get errorType {
     ErrorSeverity severity = errorCode.errorSeverity;
     if (severity == ErrorSeverity.INFO) {
-      if (errorCode.type == ErrorType.HINT ||
-          errorCode.type == ErrorType.LINT) {
+      if (errorCode.type == ErrorType.HINT || errorCode.type == ErrorType.LINT)
         return errorCode.type.displayName;
-      }
     }
     return severity.displayName;
   }
