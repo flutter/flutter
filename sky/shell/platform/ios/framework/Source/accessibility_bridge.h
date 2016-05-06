@@ -24,6 +24,36 @@
 
 namespace sky {
 namespace shell {
+class AccessibilityBridge;
+}
+}
+
+@interface AccessibilityNode : NSObject
+
+/**
+ * The globally unique identifier for this node.
+ */
+@property(nonatomic, readonly) uint32_t uid;
+
+/**
+ * The parent of this node in the node tree. Will be nil for the root node and
+ * during transient state changes.
+ */
+@property(nonatomic, readonly) AccessibilityNode* parent;
+
+/**
+ * This node's children in the node tree.
+ */
+@property(nonatomic, readonly) NSArray<AccessibilityNode*>* children;
+
+- (instancetype)init __attribute__((unavailable("Use initWithBridge instead")));
+- (instancetype)initWithBridge:(sky::shell::AccessibilityBridge*)bridge
+                           uid:(uint32_t)uid NS_DESIGNATED_INITIALIZER;
+
+@end
+
+namespace sky {
+namespace shell {
 
 // Class that mediates communication between FlutterView and the Dart layer in
 // order to provide accessibility features.
@@ -38,21 +68,18 @@ class AccessibilityBridge final : public semantics::SemanticsListener {
   ~AccessibilityBridge() override;
 
   void UpdateSemanticsTree(mojo::Array<semantics::SemanticsNodePtr>) override;
+  AccessibilityNode* UpdateNode(const semantics::SemanticsNodePtr& node);
+  void RemoveNode(AccessibilityNode* node);
 
   base::WeakPtr<AccessibilityBridge> AsWeakPtr();
 
+  FlutterView* getView() { return view_; }
+
  private:
-  class Node;
-
-  scoped_refptr<Node> UpdateNode(const semantics::SemanticsNodePtr& node);
-  void RemoveNode(scoped_refptr<Node> node);
-
-  NSArray* CreateAccessibleElements() const NS_RETURNS_RETAINED;
-
   // See class docs above about ownership relationship
   FlutterView* view_;
   semantics::SemanticsServerPtr semantics_server_;
-  std::map<long, scoped_refptr<Node>> nodes_;
+  NSMutableDictionary<NSNumber*, AccessibilityNode*>* nodes_;
 
   mojo::StrongBinding<semantics::SemanticsListener> binding_;
 

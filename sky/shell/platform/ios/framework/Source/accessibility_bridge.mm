@@ -4,14 +4,13 @@
 
 #include "sky/shell/platform/ios/framework/Source/accessibility_bridge.h"
 
-#include <UIKit/UIKit.h>
+#import <UIKit/UIKit.h>
 
 #include "mojo/public/cpp/application/connect.h"
 
-namespace sky {
-namespace shell {
-
 namespace {
+
+static const uint32_t RootNodeId = 0;
 
 // Contains better abstractions than the raw Mojo data structure
 struct Geometry {
@@ -23,163 +22,163 @@ struct Geometry {
     return *this;
   }
 
-  SkMatrix44 transform;
+  SkMatrix44 transform =
+      SkMatrix44(SkMatrix44::Identity_Constructor::kIdentity_Constructor);
   SkRect rect;
 };
 
 }  // anonymous namespace
 
-// Class that holds information about accessibility nodes, which are used
-// to construct iOS accessibility elements
-class AccessibilityBridge::Node final
-    : public base::RefCounted<AccessibilityBridge::Node> {
- public:
-  static const uint32_t kUninitializedNodeId = -1;
+@implementation AccessibilityNode {
+  sky::shell::AccessibilityBridge* _bridge;
 
-  Node(AccessibilityBridge*, const semantics::SemanticsNodePtr&);
-
-  void Update(const semantics::SemanticsNodePtr& node);
-  void PopulateAccessibleElements(NSMutableArray* accessibleElements);
-
-  uint32_t id_ = kUninitializedNodeId;
-  std::vector<scoped_refptr<Node>> children_;
-  Node* parent_ = nullptr;
-
- private:
-  friend class base::RefCounted<Node>;
-
-  ~Node();
-
-  void ValidateGlobalRect();
-  void ValidateGlobalTransform();
-
-  AccessibilityBridge* bridge_;
-
-  semantics::SemanticFlagsPtr flags_;
-  semantics::SemanticStringsPtr strings_;
-  Geometry geometry_;
-
-  std::unique_ptr<SkMatrix44> global_transform_;
-  std::unique_ptr<SkRect> global_rect_;
-
-  DISALLOW_COPY_AND_ASSIGN(Node);
-};
-
-AccessibilityBridge::Node::Node(AccessibilityBridge* bridge,
-                                const semantics::SemanticsNodePtr& node)
-    : bridge_(bridge) {
-  Update(node);
+  semantics::SemanticFlagsPtr _flags;
+  semantics::SemanticStringsPtr _strings;
+  Geometry _geometry;
 }
 
-void AccessibilityBridge::Node::Update(
-    const semantics::SemanticsNodePtr& node) {
-  if (id_ == kUninitializedNodeId) {
-    id_ = node->id;
-  }
-  DCHECK(id_ == node->id);
+#pragma mark - Override base class designated initializers
 
-  if (!node->flags.is_null()) {
-    flags_ = node->flags.Pass();
+// Method declared as unavailable in the interface
+- (instancetype)init {
+  [self release];
+  [super doesNotRecognizeSelector:_cmd];
+  return nil;
+}
+
+#pragma mark - Designated initializers
+
+- (instancetype)initWithBridge:(sky::shell::AccessibilityBridge*)bridge
+                           uid:(uint32_t)uid {
+  DCHECK(bridge != nil) << "bridge must be set";
+  DCHECK(uid >= RootNodeId);
+  self = [super init];
+
+  if (self) {
+    _bridge = bridge;
+    _uid = uid;
   }
 
-  if (!node->strings.is_null()) {
-    strings_ = node->strings.Pass();
+  return self;
+}
+
+#pragma mark - Semantics node methods
+
+- (void)update:(const semantics::SemanticsNodePtr&)mojoNode {
+  DCHECK(_uid == mojoNode->id);
+
+  if (!mojoNode->flags.is_null()) {
+    _flags = mojoNode->flags.Pass();
   }
 
-  if (!node->geometry.is_null()) {
-    geometry_ = node->geometry.Pass();
+  if (!mojoNode->strings.is_null()) {
+    _strings = mojoNode->strings.Pass();
   }
 
-  if (!node->children.is_null()) {
-    // Mark children for removal
-    for (scoped_refptr<Node> child : children_) {
-      DCHECK(child->parent_ != nullptr);
-      child->parent_ = nullptr;
+  if (!mojoNode->geometry.is_null()) {
+    _geometry = mojoNode->geometry;
+  }
+
+  if (!mojoNode->children.is_null()) {
+    // Mark existing children as orphans
+    NSArray* oldChildren = _children;
+    for (AccessibilityNode* child in oldChildren) {
+      DCHECK(child->_parent != nil);
+      child->_parent = nil;
     }
 
     // Set the new list of children
-    std::vector<scoped_refptr<Node>> children;
-    for (const semantics::SemanticsNodePtr& childNode : node->children) {
-      scoped_refptr<Node> child = bridge_->UpdateNode(childNode);
-      child->parent_ = this;
-      children.push_back(child);
+    NSMutableArray* children = [[NSMutableArray alloc] init];
+    _children = children;
+    for (const semantics::SemanticsNodePtr& mojoChild : mojoNode->children) {
+      AccessibilityNode* child = _bridge->UpdateNode(mojoChild);
+      child->_parent = self;
+      [children insertObject:child atIndex:0];
     }
-    children.swap(children_);
 
-    // Remove those children that are still marked for removal
-    for (scoped_refptr<Node> child : children) {
-      if (child->parent_ == nullptr) {
-        bridge_->RemoveNode(child);
+    // Remove those children that are still marked as orphans
+    for (AccessibilityNode* child in oldChildren) {
+      if (child->_parent == nil) {
+        _bridge->RemoveNode(child);
       }
     }
-  }
-
-  global_transform_.release();
-  global_rect_.release();
-}
-
-void AccessibilityBridge::Node::ValidateGlobalTransform() {
-  if (global_transform_ != nullptr) {
-    return;
-  }
-
-  if (parent_ == nullptr) {
-    global_transform_.reset(new SkMatrix44(geometry_.transform));
-  } else {
-    parent_->ValidateGlobalTransform();
-    global_transform_.reset(
-        new SkMatrix44(geometry_.transform * *(parent_->global_transform_)));
+    [oldChildren release];
   }
 }
 
-void AccessibilityBridge::Node::ValidateGlobalRect() {
-  if (global_rect_ != nullptr) {
-    return;
-  }
+- (void)remove {
+  _parent = nil;
+  _bridge->RemoveNode(self);
+}
 
-  ValidateGlobalTransform();
+#pragma mark - UIAccessibility overrides
 
+- (BOOL)isAccessibilityElement {
+  // Per UIAccessibilityContainer, accessibility containers MUST return
+  // NO to -isAccessibilityElement
+  return (_children.count == 0);
+}
+
+- (NSString*)accessibilityLabel {
+  return (_strings.is_null() || _strings->label.get().empty())
+             ? nil
+             : @(_string->label.data());
+}
+
+- (UIAccessibilityTraits)accessibilityTraits {
+  // TODO(tvolkert): We need more semantic info in the mojom definition
+  // in order to distinguish buttons, links, sliders, etc.
+  return _flags->canBeTapped ? UIAccessibilityTraitButton
+                             : UIAccessibilityTraitNone;
+}
+
+- (CGRect)accessibilityFrame {
   SkPoint quad[4];
-  geometry_.rect.toQuad(quad);
+  _geometry.rect.toQuad(quad);
   for (auto& point : quad) {
     SkScalar vector[4] = {point.x(), point.y(), 0, 1};
-    global_transform_->mapScalars(vector);
+    _geometry.transform.mapScalars(vector);
     point.set(vector[0], vector[1]);
   }
-
-  global_rect_.reset(new SkRect());
-  global_rect_.get()->set(quad, 4);
+  SkRect result;
+  result.set(quad, 4);
+  return CGRectMake(result.x(), result.y(), result.width(), result.height());
 }
 
-void AccessibilityBridge::Node::PopulateAccessibleElements(
-    NSMutableArray* accessibleElements) {
-  if (!geometry_.rect.isEmpty()) {
-    UIAccessibilityElement* element = [[UIAccessibilityElement alloc]
-        initWithAccessibilityContainer:bridge_->view_];
-    element.isAccessibilityElement = YES;
-    ValidateGlobalRect();
-    element.accessibilityFrame =
-        CGRectMake(global_rect_->x(), global_rect_->y(), global_rect_->width(),
-                   global_rect_->height());
-    if (flags_->canBeTapped) {
-      // TODO(tvolkert): What about links? We need semantic info in the mojom
-      // definition
-      element.accessibilityTraits = UIAccessibilityTraitButton;
-    }
-    if (!strings_->label.get().empty()) {
-      element.accessibilityLabel =
-          [NSString stringWithUTF8String:strings_->label.data()];
-    }
-    [accessibleElements insertObject:element atIndex:0];
-    [element release];
-  }
+#pragma mark - UIAccessibilityElement protocol
 
-  for (scoped_refptr<Node> child : children_) {
-    child->PopulateAccessibleElements(accessibleElements);
-  }
+- (id)accessibilityContainer {
+  return (_uid == RootNodeId) ? _bridge->getView() : _parent;
 }
 
-AccessibilityBridge::Node::~Node() {}
+#pragma mark - UIAccessibilityContainer overrides
+
+- (NSInteger)accessibilityElementCount {
+  return _children.count;
+}
+
+- (nullable id)accessibilityElementAtIndex:(NSInteger)index {
+  return (index < 0 || index >= (NSInteger)_children.count ? nil
+                                                           : _children[index]);
+}
+
+- (NSInteger)indexOfAccessibilityElement:(id)element {
+  return (_children == nil) ? NSNotFound : [_children indexOfObject:element];
+}
+
+#pragma mark - Misc
+
+- (void)dealloc {
+  [_children release];
+  [super dealloc];
+}
+
+@end
+
+#pragma mark - AccessibilityBridge impl
+
+namespace sky {
+namespace shell {
 
 AccessibilityBridge::AccessibilityBridge(FlutterView* view,
                                          mojo::ServiceProvider* serviceProvider)
@@ -188,17 +187,19 @@ AccessibilityBridge::AccessibilityBridge(FlutterView* view,
   mojo::InterfaceHandle<semantics::SemanticsListener> listener;
   binding_.Bind(&listener);
   semantics_server_->AddSemanticsListener(listener.Pass());
+
+  nodes_ = [[NSMutableDictionary alloc] init];
 }
 
 void AccessibilityBridge::UpdateSemanticsTree(
-    mojo::Array<semantics::SemanticsNodePtr> nodes) {
-  for (const semantics::SemanticsNodePtr& node : nodes) {
-    UpdateNode(node);
+    mojo::Array<semantics::SemanticsNodePtr> mojoNodes) {
+  for (const semantics::SemanticsNodePtr& mojoNode : mojoNodes) {
+    auto node = UpdateNode(mojoNode);
+    if (mojoNode->id == RootNodeId && view_.accessibilityElements == nil) {
+      view_.accessibilityElements = @[ node ];
+    }
   }
-
-  NSArray* accessibleElements = CreateAccessibleElements();
-  view_.accessibilityElements = accessibleElements;
-  [accessibleElements release];
+  DCHECK(view_.accessibilityElements != nil);
 
   UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification,
                                   nil);
@@ -208,45 +209,33 @@ base::WeakPtr<AccessibilityBridge> AccessibilityBridge::AsWeakPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
-scoped_refptr<AccessibilityBridge::Node> AccessibilityBridge::UpdateNode(
-    const semantics::SemanticsNodePtr& node) {
-  scoped_refptr<Node> persistentNode;
-  const auto& iter = nodes_.find(node->id);
-  if (iter == nodes_.end()) {
-    persistentNode = new Node(this, node);
-    nodes_[node->id] = persistentNode;
-  } else {
-    persistentNode = iter->second;
-    persistentNode->Update(node);
+AccessibilityNode* AccessibilityBridge::UpdateNode(
+    const semantics::SemanticsNodePtr& mojoNode) {
+  AccessibilityNode* node = nodes_[@(mojoNode->id)];
+  if (node == nil) {
+    node = [[AccessibilityNode alloc] initWithBridge:this uid:mojoNode->id];
+    DCHECK(nodes_ != nil);
+    nodes_[@(mojoNode->id)] = node;
+    [node release];
   }
-  DCHECK(persistentNode != nullptr);
-  return persistentNode;
+  [node update:mojoNode];
+  return node;
 }
 
-void AccessibilityBridge::RemoveNode(scoped_refptr<Node> node) {
-  DCHECK(nodes_.find(node->id_) != nodes_.end());
-  DCHECK(nodes_.at(node->id_)->parent_ == nullptr);
-  nodes_.erase(node->id_);
-  for (scoped_refptr<Node>& child : node->children_) {
-    child->parent_ = nullptr;
-    RemoveNode(child);
+void AccessibilityBridge::RemoveNode(AccessibilityNode* node) {
+  [node retain];
+  DCHECK(nodes_[@(node.uid)] != nil);
+  DCHECK(nodes_[@(node.uid)].parent == nil);
+  [nodes_ removeObjectForKey:@(node.uid)];
+  for (AccessibilityNode* child in node.children) {
+    [child remove];
   }
+  [node release];
 }
 
-NSArray* AccessibilityBridge::CreateAccessibleElements() const
-    NS_RETURNS_RETAINED {
-  NSMutableArray* accessibleElements = [[NSMutableArray alloc] init];
-  for (const auto& iter : nodes_) {
-    // TODO(tvolkert): There should only ever be 1 root. Keep a reference
-    // to it so we don't have to look for it here.
-    if (iter.second->parent_ == nullptr) {
-      iter.second->PopulateAccessibleElements(accessibleElements);
-    }
-  }
-  return accessibleElements;
+AccessibilityBridge::~AccessibilityBridge() {
+  [nodes_ release];
 }
-
-AccessibilityBridge::~AccessibilityBridge() {}
 
 }  // namespace shell
 }  // namespace sky
