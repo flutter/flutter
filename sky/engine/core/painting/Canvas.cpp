@@ -62,7 +62,7 @@ FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
 void Canvas::RegisterNatives(DartLibraryNatives* natives) {
   natives->Register({
-    { "Canvas_constructor", Canvas_constructor, 3, true },
+    { "Canvas_constructor", Canvas_constructor, 6, true },
 FOR_EACH_BINDING(DART_REGISTER_NATIVE)
   });
 }
