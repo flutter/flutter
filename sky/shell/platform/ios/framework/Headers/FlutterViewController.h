@@ -5,6 +5,7 @@
 #ifndef FLUTTER_FLUTTERVIEWCONTROLLER_H_
 #define FLUTTER_FLUTTERVIEWCONTROLLER_H_
 
+#include <sys/cdefs.h>
 #import <UIKit/UIKit.h>
 
 #include "FlutterAsyncMessageListener.h"
@@ -35,7 +36,11 @@ FLUTTER_EXPORT
 
 @end
 
+__BEGIN_DECLS
+
 // Initializes Flutter for this process. Need only be called once per process.
 FLUTTER_EXPORT void FlutterInit(int argc, const char* argv[]);
+
+__END_DECLS
 
 #endif  // FLUTTER_FLUTTERVIEWCONTROLLER_H_

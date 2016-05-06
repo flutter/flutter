@@ -1,10 +1,12 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
+#import <Flutter/Flutter.h>
 
-int main(int argc, char* argv[]) {
-  NSCAssert(NO, @"Placeholder for Xcode. Should never be run");
-  return EXIT_FAILURE;
+int main(int argc, const char* argv[]) {
+    FlutterInit(argc, argv);
+    return UIApplicationMain(argc, (char**)argv, nil,
+                             NSStringFromClass([FlutterAppDelegate class]));
 }

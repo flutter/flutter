@@ -22,8 +22,7 @@ template("sky_precompilation_sdk") {
     arch_tools_dir = "$tools_dir_name/iphonesimulator"
   }
 
-  snapshotter_copy_gen_target_name = target_name + "_copy_snapshotter"
-  copy(snapshotter_copy_gen_target_name) {
+  copy("copy_snapshotter") {
     snapshotter_target = "//dart/runtime/bin:gen_snapshot($dart_host_toolchain)"
     snapshotter_directory = get_label_info(snapshotter_target, "root_out_dir")
     snapshotter_name = get_label_info(snapshotter_target, "name")
@@ -32,6 +31,25 @@ template("sky_precompilation_sdk") {
     outputs = [  "$sdk_dir/$arch_tools_dir/Snapshotter"  ]
 
     deps = [  snapshotter_target  ]
+  }
+
+  action("copy_flutter_framework") {
+    stamp_file = "$root_build_dir/copy_flutter_framework.stamp"
+    script = "//sky/tools/copy_dir.py"
+
+    inputs = [ "$root_build_dir/Flutter.framework/Flutter" ]
+    outputs = [ "$root_build_dir/$sdk_dir/$tools_dir/Flutter.framework/Flutter" ]
+
+    args = [
+      "--src",
+      rebase_path("$root_build_dir/Flutter.framework"),
+      "--dst",
+      rebase_path("$sdk_dir/$tools_dir/Flutter.framework"),
+      "--stamp",
+      rebase_path(stamp_file),
+    ]
+
+    deps = [  "//sky/shell:flutter_framework"  ]
   }
 
   copy("embedder_entry_points") {
@@ -99,7 +117,8 @@ template("sky_precompilation_sdk") {
 
   group(target_name) {
     deps = [
-      ":$snapshotter_copy_gen_target_name",
+      ":copy_snapshotter",
+      ":copy_flutter_framework",
       ":embedder_entry_points",
       ":$copy_runner_gen_target_name",
       ":$copy_data_gen_target_name",

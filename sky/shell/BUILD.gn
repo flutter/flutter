@@ -401,7 +401,8 @@ if (is_android) {
       outputs = [ "$framework_dir/{{source_file_part}}" ]
     }
 
-    deps = [
+    public_deps = [
+      ":framework_dylib",
       ":framework_headers",
       ":framework_icu",
       ":framework_info_plist",
