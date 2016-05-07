@@ -4,14 +4,13 @@
 
 import 'package:flutter/material.dart';
 
+final TextStyle _kTextStyle = new TextStyle(
+  color: Colors.indigo[400],
+  fontSize: 24.0
+);
+
 class ModalBottomSheetDemo extends StatelessWidget {
   static const String routeName = '/modal-bottom-sheet';
-
-  final TextStyle textStyle = new TextStyle(
-    color: Colors.indigo[400],
-    fontSize: 24.0,
-    textAlign: TextAlign.center
-  );
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +24,10 @@ class ModalBottomSheetDemo extends StatelessWidget {
               return new Container(
                 child: new Padding(
                   padding: const EdgeInsets.all(32.0),
-                  child: new Text('This is the modal bottom sheet. Click anywhere to dismiss.', style: textStyle)
+                  child: new Text('This is the modal bottom sheet. Click anywhere to dismiss.',
+                    style: _kTextStyle,
+                    textAlign: TextAlign.center
+                  )
                 )
               );
             });

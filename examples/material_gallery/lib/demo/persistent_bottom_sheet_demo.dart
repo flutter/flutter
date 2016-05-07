@@ -4,6 +4,11 @@
 
 import 'package:flutter/material.dart';
 
+final TextStyle _kTextStyle = new TextStyle(
+  color: Colors.indigo[400],
+  fontSize: 24.0
+);
+
 class PersistentBottomSheetDemo extends StatefulWidget {
   static const String routeName = '/persistent-bottom-sheet';
 
@@ -13,12 +18,6 @@ class PersistentBottomSheetDemo extends StatefulWidget {
 
 class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-
-  final TextStyle textStyle = new TextStyle(
-    color: Colors.indigo[400],
-    fontSize: 24.0,
-    textAlign: TextAlign.center
-  );
 
   VoidCallback _showBottomSheetCallback;
 
@@ -40,7 +39,10 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
         ),
         child: new Padding(
           padding: const EdgeInsets.all(32.0),
-          child: new Text('This is a Material persistent bottom sheet. Drag downwards to dismiss it.', style: textStyle)
+          child: new Text('This is a Material persistent bottom sheet. Drag downwards to dismiss it.',
+            style: _kTextStyle,
+            textAlign: TextAlign.center
+          )
         )
       );
     })

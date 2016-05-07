@@ -18,7 +18,6 @@ class TextStyle {
     this.fontStyle,
     this.letterSpacing,
     this.wordSpacing,
-    this.textAlign,
     this.textBaseline,
     this.height,
     this.decoration,
@@ -50,10 +49,6 @@ class TextStyle {
   /// The amount of space (in logical pixels) to add at each sequence of white-space (i.e. between each word).
   final double wordSpacing;
 
-  /// How the text should be aligned (applies only to the outermost
-  /// StyledTextSpan, which establishes the container for the text).
-  final TextAlign textAlign;
-
   /// The baseline to use for aligning the text.
   final TextBaseline textBaseline;
 
@@ -82,7 +77,6 @@ class TextStyle {
     FontStyle fontStyle,
     double letterSpacing,
     double wordSpacing,
-    TextAlign textAlign,
     TextBaseline textBaseline,
     double height,
     TextDecoration decoration,
@@ -98,7 +92,6 @@ class TextStyle {
       fontStyle: fontStyle != null ? fontStyle : this.fontStyle,
       letterSpacing: letterSpacing != null ? letterSpacing : this.letterSpacing,
       wordSpacing: wordSpacing != null ? wordSpacing : this.wordSpacing,
-      textAlign: textAlign != null ? textAlign : this.textAlign,
       textBaseline: textBaseline != null ? textBaseline : this.textBaseline,
       height: height != null ? height : this.height,
       decoration: decoration != null ? decoration : this.decoration,
@@ -122,7 +115,6 @@ class TextStyle {
       fontStyle: other.fontStyle,
       letterSpacing: other.letterSpacing,
       wordSpacing: other.wordSpacing,
-      textAlign: other.textAlign,
       textBaseline: other.textBaseline,
       height: other.height,
       decoration: other.decoration,
@@ -146,7 +138,6 @@ class TextStyle {
       fontStyle: t < 0.5 ? begin.fontStyle : end.fontStyle,
       letterSpacing: ui.lerpDouble(begin.letterSpacing ?? end.letterSpacing, end.letterSpacing ?? begin.letterSpacing, t),
       wordSpacing: ui.lerpDouble(begin.wordSpacing ?? end.wordSpacing, end.wordSpacing ?? begin.wordSpacing, t),
-      textAlign: t < 0.5 ? begin.textAlign : end.textAlign,
       textBaseline: t < 0.5 ? begin.textBaseline : end.textBaseline,
       height: ui.lerpDouble(begin.height ?? end.height, end.height ?? begin.height, t),
       decoration: t < 0.5 ? begin.decoration : end.decoration,
@@ -173,7 +164,7 @@ class TextStyle {
   }
 
   /// The style information for paragraphs, encoded for use by `dart:ui`.
-  ui.ParagraphStyle get paragraphStyle {
+  ui.ParagraphStyle getParagraphStyle({ TextAlign textAlign }) {
     return new ui.ParagraphStyle(
       textAlign: textAlign,
       textBaseline: textBaseline,
@@ -200,7 +191,6 @@ class TextStyle {
            fontStyle == typedOther.fontStyle &&
            letterSpacing == typedOther.letterSpacing &&
            wordSpacing == typedOther.wordSpacing &&
-           textAlign == typedOther.textAlign &&
            textBaseline == typedOther.textBaseline &&
            height == typedOther.height &&
            decoration == typedOther.decoration &&
@@ -219,7 +209,6 @@ class TextStyle {
       fontStyle,
       letterSpacing,
       wordSpacing,
-      textAlign,
       textBaseline,
       height,
       decoration,
@@ -283,19 +272,6 @@ class TextStyle {
       result.add('${prefix}letterSpacing: ${letterSpacing}x');
     if (wordSpacing != null)
       result.add('${prefix}wordSpacing: ${wordSpacing}x');
-    if (textAlign != null) {
-      switch (textAlign) {
-        case TextAlign.left:
-          result.add('${prefix}align: left');
-          break;
-        case TextAlign.right:
-          result.add('${prefix}align: right');
-          break;
-        case TextAlign.center:
-          result.add('${prefix}align: center');
-          break;
-      }
-    }
     if (textBaseline != null) {
       switch (textBaseline) {
         case TextBaseline.alphabetic:

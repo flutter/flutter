@@ -174,7 +174,7 @@ class ChartPainter {
         style: _textTheme.body1,
         text: '${gridline.value}'
       );
-      gridline.labelPainter = new TextPainter(text)
+      gridline.labelPainter = new TextPainter(text: text)
         ..layout(maxWidth: _rect.width);
       _horizontalGridlines.add(gridline);
       yScaleWidth = math.max(yScaleWidth, gridline.labelPainter.maxIntrinsicWidth);
@@ -220,7 +220,7 @@ class ChartPainter {
           style: _textTheme.body1,
           text: '${data.indicatorText}'
         );
-        _indicator.labelPainter = new TextPainter(text)
+        _indicator.labelPainter = new TextPainter(text: text)
           ..layout(maxWidth: markerRect.width);
         _indicator.labelPosition = new Point(
           ((_indicator.start.x + _indicator.end.x) / 2.0) - _indicator.labelPainter.maxIntrinsicWidth / 2.0,

@@ -52,7 +52,7 @@ class StockSymbolView extends StatelessWidget {
           ),
           new RichText(
             text: new TextSpan(
-              style: DefaultTextStyle.of(context).merge(new TextStyle(fontSize: 8.0)),
+              style: DefaultTextStyle.of(context).style.merge(new TextStyle(fontSize: 8.0)),
               text: 'Prices may be delayed by ',
               children: <TextSpan>[
                 new TextSpan(text: 'several', style: new TextStyle(fontStyle: FontStyle.italic)),

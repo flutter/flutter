@@ -42,7 +42,7 @@ class RenderEditableLine extends RenderBox {
     this.onSelectionChanged,
     Offset paintOffset: Offset.zero,
     this.onPaintOffsetUpdateNeeded
-  }) : _textPainter = new TextPainter(text),
+  }) : _textPainter = new TextPainter(text: text),
        _cursorColor = cursorColor,
        _showCursor = showCursor,
        _selection = selection,
