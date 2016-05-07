@@ -845,25 +845,29 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
       return;
     CustomClipper<T> oldClipper = _clipper;
     _clipper = newClipper;
-    if (newClipper == null) {
-      assert(oldClipper != null);
-      markNeedsPaint();
-      markNeedsSemanticsUpdate(onlyChanges: true);
-    } else if (oldClipper == null ||
-        oldClipper.runtimeType != oldClipper.runtimeType ||
+    if (newClipper == null || oldClipper == null ||
+        oldClipper.runtimeType != newClipper.runtimeType ||
         newClipper.shouldRepaint(oldClipper)) {
+      _cachedClip = null;
       markNeedsPaint();
       markNeedsSemanticsUpdate(onlyChanges: true);
     }
   }
 
   T get _defaultClip;
-  T _clip;
+
+  T _cachedClip;
+  T get _clip {
+    assert(!needsLayout);
+    if (_cachedClip == null)
+      _cachedClip = _clipper?.getClip(size) ?? _defaultClip;
+    return _cachedClip;
+  }
 
   @override
   void performLayout() {
     super.performLayout();
-    _clip = _clipper?.getClip(size) ?? _defaultClip;
+    _cachedClip = null;
   }
 
   @override
