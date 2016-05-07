@@ -54,50 +54,50 @@ void main() {
         valueLog.add(controller.value);
       });
 
-    expect(log, equals([]));
-    expect(valueLog, equals([]));
+    expect(log, equals(<AnimationStatus>[]));
+    expect(valueLog, equals(<AnimationStatus>[]));
 
     controller.forward();
 
-    expect(log, equals([AnimationStatus.forward]));
-    expect(valueLog, equals([]));
+    expect(log, equals(<AnimationStatus>[AnimationStatus.forward]));
+    expect(valueLog, equals(<AnimationStatus>[]));
 
     controller.reverse();
 
-    expect(log, equals([AnimationStatus.forward, AnimationStatus.dismissed]));
-    expect(valueLog, equals([]));
+    expect(log, equals(<AnimationStatus>[AnimationStatus.forward, AnimationStatus.dismissed]));
+    expect(valueLog, equals(<AnimationStatus>[]));
 
     controller.reverse();
 
-    expect(log, equals([AnimationStatus.forward, AnimationStatus.dismissed]));
-    expect(valueLog, equals([]));
+    expect(log, equals(<AnimationStatus>[AnimationStatus.forward, AnimationStatus.dismissed]));
+    expect(valueLog, equals(<AnimationStatus>[]));
 
     log.clear();
     controller.forward();
 
-    expect(log, equals([AnimationStatus.forward]));
-    expect(valueLog, equals([]));
+    expect(log, equals(<AnimationStatus>[AnimationStatus.forward]));
+    expect(valueLog, equals(<AnimationStatus>[]));
 
     controller.forward();
 
-    expect(log, equals([AnimationStatus.forward]));
-    expect(valueLog, equals([]));
+    expect(log, equals(<AnimationStatus>[AnimationStatus.forward]));
+    expect(valueLog, equals(<AnimationStatus>[]));
 
     controller.reverse();
     log.clear();
 
     WidgetsBinding.instance.handleBeginFrame(const Duration(seconds: 10));
-    expect(log, equals([]));
-    expect(valueLog, equals([]));
+    expect(log, equals(<AnimationStatus>[]));
+    expect(valueLog, equals(<AnimationStatus>[]));
     WidgetsBinding.instance.handleBeginFrame(const Duration(seconds: 20));
-    expect(log, equals([]));
-    expect(valueLog, equals([]));
+    expect(log, equals(<AnimationStatus>[]));
+    expect(valueLog, equals(<AnimationStatus>[]));
     WidgetsBinding.instance.handleBeginFrame(const Duration(seconds: 30));
-    expect(log, equals([]));
-    expect(valueLog, equals([]));
+    expect(log, equals(<AnimationStatus>[]));
+    expect(valueLog, equals(<AnimationStatus>[]));
     WidgetsBinding.instance.handleBeginFrame(const Duration(seconds: 40));
-    expect(log, equals([]));
-    expect(valueLog, equals([]));
+    expect(log, equals(<AnimationStatus>[]));
+    expect(valueLog, equals(<AnimationStatus>[]));
 
     controller.stop();
   });
@@ -118,15 +118,15 @@ void main() {
       });
 
     controller.reverse(from: 0.2);
-    expect(statusLog, equals([ AnimationStatus.reverse ]));
-    expect(valueLog, equals([ 0.2 ]));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.reverse ]));
+    expect(valueLog, equals(<double>[ 0.2 ]));
     expect(controller.value, equals(0.2));
     statusLog.clear();
     valueLog.clear();
 
     controller.forward(from: 0.0);
-    expect(statusLog, equals([ AnimationStatus.dismissed, AnimationStatus.forward ]));
-    expect(valueLog, equals([ 0.0 ]));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.dismissed, AnimationStatus.forward ]));
+    expect(valueLog, equals(<double>[ 0.0 ]));
     expect(controller.value, equals(0.0));
   });
 }

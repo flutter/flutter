@@ -1,5 +1,3 @@
-#!/usr/bin/env dart
-
 // Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -8,10 +6,16 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:path/path.dart' as path;
+
 /// This script expects to run with the cwd as the root of the flutter repo. It
-/// will generate documentation for the packages in `packages/`, and leave the
-/// documentation in `dev/docs/doc/api/`.
-main(List<String> args) async {
+/// will generate documentation for the packages in `//packages/` and write the
+/// documentation to `//dev/docs/doc/api/`.
+Future<Null> main(List<String> args) async {
+  // If we're run from the `tools` dir, set the cwd to the repo root.
+  if (path.basename(Directory.current.path) == 'tools')
+    Directory.current = Directory.current.parent.parent;
+
   // Create the pubspec.yaml file.
   StringBuffer buf = new StringBuffer('''
 name: Flutter
@@ -51,9 +55,9 @@ dependencies:
     '--favicon=favicon.ico',
     '--use-categories'
   ];
-  for (String libraryRef in _libraryRefs()) {
-    String name = _entityName(libraryRef);
 
+  for (String libraryRef in _libraryRefs()) {
+    String name = path.basename(libraryRef);
     args.add('--include-external');
     args.add(name.substring(0, name.length - 5));
   }
@@ -72,21 +76,20 @@ dependencies:
 List<String> _findSkyServicesLibraryNames() {
   Directory skyServicesLocation = new Directory('bin/cache/pkg/sky_services/lib');
   if (!skyServicesLocation.existsSync()) {
-    throw 'Did not find sky_services package location in '
-          '${skyServicesLocation.path}.';
+    throw 'Did not find sky_services package location in ${skyServicesLocation.path}.';
   }
   return skyServicesLocation.listSync(followLinks: false, recursive: true)
       .where((FileSystemEntity entity) {
     return entity is File && entity.path.endsWith('.mojom.dart');
   }).map((FileSystemEntity entity) {
-    String basename = _entityName(entity.path);
+    String basename = path.basename(entity.path);
     basename = basename.substring(0, basename.length-('.dart'.length));
     return basename.replaceAll('.', '_');
   });
 }
 
 List<String> _findPackageNames() {
-  return _findPackages().map((Directory dir) => _entityName(dir.path)).toList();
+  return _findPackages().map((Directory dir) => path.basename(dir.path)).toList();
 }
 
 List<Directory> _findPackages() {
@@ -101,19 +104,15 @@ List<Directory> _findPackages() {
     .toList();
 }
 
-List<String> _libraryRefs() sync* {
+Iterable<String> _libraryRefs() sync* {
   for (Directory dir in _findPackages()) {
-    String dirName = _entityName(dir.path);
+    String dirName = path.basename(dir.path);
 
     for (FileSystemEntity file in new Directory('${dir.path}/lib').listSync()) {
       if (file is File && file.path.endsWith('.dart'))
-        yield '$dirName/${_entityName(file.path)}';
+        yield '$dirName/${path.basename(file.path)}';
     }
   }
-}
-
-String _entityName(String path) {
-  return path.indexOf('/') == -1 ? path : path.substring(path.lastIndexOf('/') + 1);
 }
 
 void _print(Stream<List<int>> stream) {

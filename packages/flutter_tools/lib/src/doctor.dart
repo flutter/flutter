@@ -12,7 +12,7 @@ import 'base/context.dart';
 import 'base/os.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
-import 'runner/version.dart';
+import 'version.dart';
 
 const Map<String, String> _osNames = const <String, String>{
   'macos': 'Mac OS',

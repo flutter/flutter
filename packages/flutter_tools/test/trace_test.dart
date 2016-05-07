@@ -14,8 +14,8 @@ void main() {
     testUsingContext('returns 1 when no Android device is connected', () {
       TraceCommand command = new TraceCommand();
       applyMocksToCommand(command);
-      return createTestCommandRunner(command).run(['trace']).then((int code) {
-        expect(code, equals(1));
+      return createTestCommandRunner(command).run(<String>['trace']).then((int code) {
+        expect(code, 1);
       });
     });
   });

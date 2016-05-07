@@ -16,7 +16,6 @@ const TextStyle _errorTextStyle = const TextStyle(
   fontFamily: 'monospace',
   fontSize: 48.0,
   fontWeight: FontWeight.w900,
-  textAlign: TextAlign.right,
   decoration: TextDecoration.underline,
   decorationColor: const Color(0xFFFFFF00),
   decorationStyle: TextDecorationStyle.double
@@ -165,7 +164,6 @@ class _MaterialAppState extends State<MaterialApp> {
     ThemeData theme = config.theme ?? new ThemeData.fallback();
     Widget result = new AnimatedTheme(
       data: theme,
-      duration: kThemeAnimationDuration,
       child: new WidgetsApp(
         title: config.title,
         textStyle: _errorTextStyle,

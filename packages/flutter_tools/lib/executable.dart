@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:path/path.dart' as path;
 import 'package:stack_trace/stack_trace.dart';
 
 import 'src/base/context.dart';
@@ -84,18 +83,8 @@ Future<Null> main(List<String> args) async {
     context[DeviceManager] = new DeviceManager();
     Doctor.initGlobal();
 
-    if (flutterUsage.isFirstRun) {
-      printStatus(
-        'The Flutter tool anonymously reports feature usage statistics and basic crash reports to Google to\n'
-        'help Google contribute improvements to Flutter over time. Use "flutter config" to control this\n'
-        'behavior. See Google\'s privacy policy: https://www.google.com/intl/en/policies/privacy/\n'
-      );
-    }
-
     dynamic result = await runner.run(args);
-
-    if (result is int)
-      _exit(result);
+    _exit(result is int ? result : 0);
   }, onError: (dynamic error, Chain chain) {
     if (error is UsageException) {
       stderr.writeln(error.message);
@@ -113,7 +102,7 @@ Future<Null> main(List<String> args) async {
 
       flutterUsage.sendException(error, chain);
 
-      if (Platform.environment.containsKey('FLUTTER_DEV')) {
+      if (Platform.environment.containsKey('FLUTTER_DEV') || isRunningOnBot) {
         // If we're working on the tools themselves, just print the stack trace.
         stderr.writeln('$error');
         stderr.writeln(chain.terse.toString());
@@ -126,7 +115,7 @@ Future<Null> main(List<String> args) async {
         File file = _createCrashReport(args, error, chain);
 
         stderr.writeln(
-          'Crash report written to ${path.relative(file.path)}; '
+          'Crash report written to ${file.path};\n'
           'please let us know at https://github.com/flutter/flutter/issues.');
       }
 
@@ -173,6 +162,9 @@ String _doctorText() {
 }
 
 Future<Null> _exit(int code) async {
+  if (flutterUsage.isFirstRun)
+    flutterUsage.printUsage();
+
   // Send any last analytics calls that are in progress without overly delaying
   // the tool's exit (we wait a maximum of 250ms).
   if (flutterUsage.enabled) {

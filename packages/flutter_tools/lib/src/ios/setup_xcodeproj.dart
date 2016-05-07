@@ -36,7 +36,7 @@ bool _inflateXcodeArchive(String directory, List<int> archiveBytes) {
     dir.createSync(recursive: true);
 
     // Unzip the Xcode project into the new empty directory
-    runCheckedSync(['/usr/bin/unzip', tempFile.path, '-d', dir.path]);
+    runCheckedSync(<String>['/usr/bin/unzip', tempFile.path, '-d', dir.path]);
   } catch (error) {
     printTrace('$error');
     return false;

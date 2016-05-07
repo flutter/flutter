@@ -109,7 +109,7 @@ class DriveCommand extends RunCommandBase {
     }
 
     try {
-      return await testRunner([testFile])
+      return await testRunner(<String>[testFile])
         .catchError((dynamic error, dynamic stackTrace) {
           printError('CAUGHT EXCEPTION: $error\n$stackTrace');
           return 1;
@@ -162,7 +162,7 @@ class DriveCommand extends RunCommandBase {
     // if the application is `lib/foo/bar.dart`, the test file is expected to
     // be `test_driver/foo/bar_test.dart`.
     String pathWithNoExtension = path.withoutExtension(path.joinAll(
-      [packageDir, 'test_driver']..addAll(parts.skip(1))));
+      <String>[packageDir, 'test_driver']..addAll(parts.skip(1))));
     return '${pathWithNoExtension}_test${path.extension(appFile)}';
   }
 }

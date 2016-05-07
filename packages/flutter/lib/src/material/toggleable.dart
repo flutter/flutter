@@ -11,11 +11,16 @@ import 'constants.dart';
 const Duration _kToggleDuration = const Duration(milliseconds: 200);
 final Tween<double> _kRadialReactionRadiusTween = new Tween<double>(begin: 0.0, end: kRadialReactionRadius);
 
-// RenderToggleable is a base class for material style toggleable controls with
-// toggle animations. It handles storing the current value, dispatching
-// ValueChanged on a tap gesture and driving a changed animation. Subclasses are
-// responsible for painting.
+/// A base class for material style toggleable controls with toggle animations.
+///
+/// This class handles storing the current value, dispatching ValueChanged on a
+/// tap gesture and driving a changed animation. Subclasses are responsible for
+/// painting.
 abstract class RenderToggleable extends RenderConstrainedBox implements SemanticActionHandler {
+  /// Creates a toggleable render object.
+  ///
+  /// The [value], [activeColor], and [inactiveColor] arguments must not be
+  /// null.
   RenderToggleable({
     bool value,
     Size size,
@@ -52,6 +57,11 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
     )..addListener(markNeedsPaint);
   }
 
+  /// Whether this control is current "active" (checked, on, selected) or "inactive" (unchecked, off, not selected).
+  ///
+  /// When the value changes, this object starts the [positionController] and
+  /// [position] animations to animate the visual appearance of the control to
+  /// the new value.
   bool get value => _value;
   bool _value;
   void set value(bool value) {
@@ -69,6 +79,9 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
       _positionController.reverse();
   }
 
+  /// The color that should be used in the active state (i.e., when [value] is true).
+  ///
+  /// For example, a checkbox should use this color when checked.
   Color get activeColor => _activeColor;
   Color _activeColor;
   void set activeColor(Color value) {
@@ -79,6 +92,9 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
     markNeedsPaint();
   }
 
+  /// The color that should be used in the inactive state (i.e., when [value] is false).
+  ///
+  /// For example, a checkbox should use this color when unchecked.
   Color get inactiveColor => _inactiveColor;
   Color _inactiveColor;
   void set inactiveColor(Color value) {
@@ -89,6 +105,17 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
     markNeedsPaint();
   }
 
+  /// Called when the control changes value.
+  ///
+  /// If the control is tapped, [onChanged] is called immediately with the new
+  /// value. If the control changes value due to an animation (see
+  /// [positionController]), the callback is called when the animation
+  /// completes.
+  ///
+  /// The control is considered interactive (see [isInteractive]) if this
+  /// callback is non-null. If the callback is null, then the control is
+  /// disabled, and non-interactive. A disabled checkbox, for example, is
+  /// displayed using a grey color and its value cannot be changed.
   ValueChanged<bool> get onChanged => _onChanged;
   ValueChanged<bool> _onChanged;
   void set onChanged(ValueChanged<bool> value) {
@@ -102,14 +129,41 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
     }
   }
 
+  /// Whether [value] of this control can be changed by user interaction.
+  ///
+  /// The control is considered interactive if the [onChanged] callback is
+  /// non-null. If the callback is null, then the control is disabled, and
+  /// non-interactive. A disabled checkbox, for example, is displayed using a
+  /// grey color and its value cannot be changed.
   bool get isInteractive => onChanged != null;
 
+  /// The visual value of the control.
+  ///
+  /// When the control is inactive, the [value] is false and this animation has
+  /// the value 0.0. When the control is active, the value is [true] and this
+  /// animation has the value 1.0. When the control is changing from inactive
+  /// to active (or vice versa), [value] is the target value and this animation
+  /// gradually updates from 0.0 to 1.0 (or vice versa).
   CurvedAnimation get position => _position;
   CurvedAnimation _position;
 
+  /// Used by subclasses to manipulate the visual value of the control.
+  ///
+  /// Some controls respond to user input by updating their visual value. For
+  /// example, the thumb of a switch moves from one position to another when
+  /// dragged. These controls manipulate this animation controller to update
+  /// their [position] and eventually trigger an [onChanged] callback when the
+  /// animation reaches either 0.0 or 1.0.
   AnimationController get positionController => _positionController;
   AnimationController _positionController;
 
+  /// Used by subclasses to control the radial reaction animation.
+  ///
+  /// Some controls have a radial ink reaction to user input. This animation
+  /// controller can be used to start or stop these ink reactions.
+  ///
+  /// Subclasses should call [paintRadialReaction] to actually paint the radial
+  /// reaction.
   AnimationController get reactionController => _reactionController;
   AnimationController _reactionController;
   Animation<double> _reaction;
@@ -191,6 +245,12 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
       _tap.addPointer(event);
   }
 
+  /// Used by subclasses to paint the radial ink reaction for this control.
+  ///
+  /// The reaction is painted on the given canvas at the given offset. The
+  /// origin is the center point of the reaction (usually distinct from the
+  /// point at which the user interacted with the control, which is handled
+  /// automatically).
   void paintRadialReaction(Canvas canvas, Offset offset, Point origin) {
     if (!_reaction.isDismissed) {
       // TODO(abarth): We should have a different reaction color when position is zero.

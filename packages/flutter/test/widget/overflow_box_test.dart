@@ -39,7 +39,7 @@ void main() {
       minHeight: 3.0,
       maxHeight: 4.0
     ).debugFillDescription(description);
-    expect(description, [
+    expect(description, <String>[
       'alignment: FractionalOffset(0.5, 0.5)',
       'minWidth: 1.0',
       'maxWidth: 2.0',

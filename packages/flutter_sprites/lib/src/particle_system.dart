@@ -41,6 +41,49 @@ class _ParticleAccelerations {
 /// number of particles can never exceed the [maxParticles] limit.
 class ParticleSystem extends Node {
 
+  ParticleSystem(this.texture,
+                 {this.life: 1.5,
+                  this.lifeVar: 1.0,
+                  this.posVar: Point.origin,
+                  this.startSize: 2.5,
+                  this.startSizeVar: 0.5,
+                  this.endSize: 0.0,
+                  this.endSizeVar: 0.0,
+                  this.startRotation: 0.0,
+                  this.startRotationVar: 0.0,
+                  this.endRotation: 0.0,
+                  this.endRotationVar: 0.0,
+                  this.rotateToMovement : false,
+                  this.direction: 0.0,
+                  this.directionVar: 360.0,
+                  this.speed: 100.0,
+                  this.speedVar: 50.0,
+                  this.radialAcceleration: 0.0,
+                  this.radialAccelerationVar: 0.0,
+                  this.tangentialAcceleration: 0.0,
+                  this.tangentialAccelerationVar: 0.0,
+                  this.maxParticles: 100,
+                  this.emissionRate: 50.0,
+                  this.colorSequence,
+                  this.alphaVar: 0,
+                  this.redVar: 0,
+                  this.greenVar: 0,
+                  this.blueVar: 0,
+                  this.transferMode: TransferMode.plus,
+                  this.numParticlesToEmit: 0,
+                  this.autoRemoveOnFinish: true,
+                  Offset gravity
+  }) {
+    this.gravity = gravity;
+    _particles = new List<_Particle>();
+    _emitCounter = 0.0;
+    // _elapsedTime = 0.0;
+    if (_gravity == null)
+      _gravity = new Vector2.zero();
+    if (colorSequence == null)
+      colorSequence = new ColorSequence.fromStartAndEndColor(new Color(0xffffffff), new Color(0x00ffffff));
+  }
+
   /// The texture used to draw each individual sprite.
   Texture texture;
 
@@ -108,7 +151,21 @@ class ParticleSystem extends Node {
   double tangentialAccelerationVar;
 
   /// The gravity vector of the particle system.
-  Vector2 gravity;
+  Offset get gravity {
+    if (_gravity == null)
+      return null;
+
+    return new Offset(_gravity.x, _gravity.y);
+  }
+
+  Vector2 _gravity;
+
+  void set gravity(Offset gravity) {
+    if (gravity == null)
+      _gravity = null;
+    else
+      _gravity = new Vector2(gravity.dx, gravity.dy);
+  }
 
   /// The maximum number of particles the system can display at a single time.
   int maxParticles;
@@ -156,45 +213,6 @@ class ParticleSystem extends Node {
   static Paint _paint = new Paint()
     ..filterQuality = FilterQuality.low
     ..isAntiAlias = false;
-
-  ParticleSystem(this.texture,
-                 {this.life: 1.5,
-                  this.lifeVar: 1.0,
-                  this.posVar: Point.origin,
-                  this.startSize: 2.5,
-                  this.startSizeVar: 0.5,
-                  this.endSize: 0.0,
-                  this.endSizeVar: 0.0,
-                  this.startRotation: 0.0,
-                  this.startRotationVar: 0.0,
-                  this.endRotation: 0.0,
-                  this.endRotationVar: 0.0,
-                  this.rotateToMovement : false,
-                  this.direction: 0.0,
-                  this.directionVar: 360.0,
-                  this.speed: 100.0,
-                  this.speedVar: 50.0,
-                  this.radialAcceleration: 0.0,
-                  this.radialAccelerationVar: 0.0,
-                  this.tangentialAcceleration: 0.0,
-                  this.tangentialAccelerationVar: 0.0,
-                  this.gravity,
-                  this.maxParticles: 100,
-                  this.emissionRate: 50.0,
-                  this.colorSequence,
-                  this.alphaVar: 0,
-                  this.redVar: 0,
-                  this.greenVar: 0,
-                  this.blueVar: 0,
-                  this.transferMode: TransferMode.plus,
-                  this.numParticlesToEmit: 0,
-                  this.autoRemoveOnFinish: true}) {
-    _particles = new List<_Particle>();
-    _emitCounter = 0.0;
-    // _elapsedTime = 0.0;
-    if (gravity == null) gravity = new Vector2.zero();
-    if (colorSequence == null) colorSequence = new ColorSequence.fromStartAndEndColor(new Color(0xffffffff), new Color(0x00ffffff));
-  }
 
   @override
   void update(double dt) {
@@ -249,11 +267,11 @@ class ParticleSystem extends Node {
         tangential.scale(particle.accelerations.tangentialAccel);
 
         // (gravity + radial + tangential) * dt
-        Vector2 accel = (gravity + radial + tangential).scale(dt);
+        final Vector2 accel = (_gravity + radial + tangential).scale(dt);
         particle.dir += accel;
-      } else if (gravity[0] != 0.0 || gravity[1] != 0) {
+      } else if (_gravity[0] != 0.0 || _gravity[1] != 0) {
         // gravity
-        Vector2 accel = new Vector2.copy(gravity).scale(dt);
+        final Vector2 accel = new Vector2.copy(_gravity).scale(dt);
         particle.dir += accel;
       }
 
@@ -362,7 +380,8 @@ class ParticleSystem extends Node {
 
   @override
   void paint(Canvas canvas) {
-    if (opacity == 0.0) return;
+    if (opacity == 0.0)
+      return;
 
     List<RSTransform> transforms = <RSTransform>[];
     List<Rect> rects = <Rect>[];

@@ -13,7 +13,7 @@ class GetHealth implements Command {
   static GetHealth deserialize(Map<String, String> json) => new GetHealth();
 
   @override
-  Map<String, String> serialize() => const {};
+  Map<String, String> serialize() => const <String, String>{};
 }
 
 /// Application health status.
@@ -42,7 +42,7 @@ class Health extends Result {
   final HealthStatus status;
 
   @override
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => <String, dynamic>{
     'status': _healthStatusIndex.toSimpleName(status)
   };
 }

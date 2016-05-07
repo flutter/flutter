@@ -29,19 +29,59 @@ const double _kMenuVerticalPadding = 8.0;
 const double _kMenuWidthStep = 56.0;
 const double _kMenuScreenPadding = 8.0;
 
+/// A base class for entries in a material design popup menu.
+///
+/// The popup menu widget uses this interface to interact with the menu items.
+/// To show a popup menu, use the [showMenu] function. To create a button that
+/// shows a popup menu, consider using [PopupMenuButton].
+///
+/// The type `T` is the type of the value the entry represents. All the entries
+/// in a given menu must represent values with consistent types.
+///
+/// See also:
+///
+///  * [PopupMenuItem]
+///  * [PopupMenuDivider]
+///  * [CheckedPopupMenuItem]
+///  * [showMenu]
+///  * [PopupMenuButton]
 abstract class PopupMenuEntry<T> extends StatefulWidget {
-  PopupMenuEntry({ Key key }) : super(key: key);
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const PopupMenuEntry({ Key key }) : super(key: key);
 
+  /// The amount of vertical space occupied by this entry.
+  ///
+  /// This value must remain constant for a given instance.
   double get height;
+
+  /// The value that should be returned by [showMenu] when the user selects this entry.
   T get value => null;
-  bool get enabled => true;
+
+  /// Whether the user is permitted to select this entry.
+  bool get enabled;
 }
 
+/// A horizontal divider in a material design popup menu.
+///
+/// This widget adatps the [Divider] for use in popup menus.
+///
+/// See also:
+///
+///  * [PopupMenuItem]
+///  * [showMenu]
+///  * [PopupMenuButton]
 class PopupMenuDivider extends PopupMenuEntry<dynamic> {
+  /// Creates a horizontal divider for a popup menu.
+  ///
+  /// By default, the divider has a height of 16.0 logical pixels.
   PopupMenuDivider({ Key key, this.height: 16.0 }) : super(key: key);
 
   @override
   final double height;
+
+  @override
+  bool get enabled => false;
 
   @override
   _PopupMenuDividerState createState() => new _PopupMenuDividerState();
@@ -52,7 +92,24 @@ class _PopupMenuDividerState extends State<PopupMenuDivider> {
   Widget build(BuildContext context) => new Divider(height: config.height);
 }
 
+/// An item in a material design popup menu.
+///
+/// To show a popup menu, use the [showMenu] function. To create a button that
+/// shows a popup menu, consider using [PopupMenuButton].
+///
+/// To show a checkmark next to a popup menu item, consider using
+/// [CheckedPopupMenuItem].
+///
+/// See also:
+///
+///  * [PopupMenuDivider]
+///  * [CheckedPopupMenuItem]
+///  * [showMenu]
+///  * [PopupMenuButton]
 class PopupMenuItem<T> extends PopupMenuEntry<T> {
+  /// Creates an item for a popup menu.
+  ///
+  /// By default, the item is enabled.
   PopupMenuItem({
     Key key,
     this.value,
@@ -121,7 +178,22 @@ class _PopupMenuItemState<T extends PopupMenuItem<dynamic>> extends State<T> {
   }
 }
 
+/// An item with a checkmark in a material design popup menu.
+///
+/// To show a popup menu, use the [showMenu] function. To create a button that
+/// shows a popup menu, consider using [PopupMenuButton].
+///
+/// See also:
+///
+///  * [PopupMenuItem]
+///  * [PopupMenuDivider]
+///  * [CheckedPopupMenuItem]
+///  * [showMenu]
+///  * [PopupMenuButton]
 class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
+  /// Creates a popup menu item with a checkmark.
+  ///
+  /// By default, the menu item is enabled but unchecked.
   CheckedPopupMenuItem({
     Key key,
     T value,
@@ -135,6 +207,7 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
     child: child
   );
 
+  /// Whether to display a checkmark next to the menu item.
   final bool checked;
 
   @override
@@ -255,17 +328,12 @@ class _PopupMenu<T> extends StatelessWidget {
 class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
   _PopupMenuRouteLayout(this.position, this.selectedItemOffset);
 
-  final ModalPosition position;
+  final RelativeRect position;
   final double selectedItemOffset;
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    return new BoxConstraints(
-      minWidth: 0.0,
-      maxWidth: constraints.maxWidth,
-      minHeight: 0.0,
-      maxHeight: constraints.maxHeight
-    );
+    return constraints.loosen();
   }
 
   // Put the child wherever position specifies, so long as it will fit within the
@@ -307,13 +375,10 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     this.elevation
   }) : super(completer: completer);
 
-  final ModalPosition position;
+  final RelativeRect position;
   final List<PopupMenuEntry<T>> items;
   final dynamic initialValue;
   final int elevation;
-
-  @override
-  ModalPosition getPosition(BuildContext context) => null;
 
   @override
   Animation<double> createAnimation() {
@@ -343,13 +408,9 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
         selectedItemOffset += items[i].height;
       }
     }
-    final Size screenSize = MediaQuery.of(context).size;
-    return new ConstrainedBox(
-      constraints: new BoxConstraints(maxWidth: screenSize.width, maxHeight: screenSize.height),
-      child: new CustomSingleChildLayout(
-        delegate: new _PopupMenuRouteLayout(position, selectedItemOffset),
-        child: new _PopupMenu<T>(route: this)
-      )
+    return new CustomSingleChildLayout(
+      delegate: new _PopupMenuRouteLayout(position, selectedItemOffset),
+      child: new _PopupMenu<T>(route: this)
     );
   }
 }
@@ -361,7 +422,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// implies the menu's origin.
 Future<dynamic/*=T*/> showMenu/*<T>*/({
   BuildContext context,
-  ModalPosition position,
+  RelativeRect position,
   List<PopupMenuEntry<dynamic/*=T*/>> items,
   dynamic/*=T*/ initialValue,
   int elevation: 8
@@ -407,8 +468,10 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// Called when the button is pressed to create the items to show in the menu.
   final PopupMenuItemBuilder<T> itemBuilder;
 
+  /// The value of the menu item, if any, that should be highlighted when the menu opens.
   final T initialValue;
 
+  /// Called when the user selects a value from the popup menu created by this button.
   final PopupMenuItemSelected<T> onSelected;
 
   /// Text that describes the action that will occur when the button is pressed.
@@ -443,9 +506,9 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       elevation: config.elevation,
       items: config.itemBuilder(context),
       initialValue: config.initialValue,
-      position: new ModalPosition(
-        left: topLeft.x,
-        top: topLeft.y + (config.initialValue != null ? renderBox.size.height / 2.0 : 0.0)
+      position: new RelativeRect.fromLTRB(
+        topLeft.x, topLeft.y + (config.initialValue != null ? renderBox.size.height / 2.0 : 0.0),
+        0.0, 0.0
       )
     )
     .then((T value) {

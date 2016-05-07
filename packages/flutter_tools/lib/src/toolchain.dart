@@ -29,7 +29,7 @@ class SnapshotCompiler {
     assert(mainPath != null);
     assert(snapshotPath != null);
 
-    final List<String> args = [
+    final List<String> args = <String>[
       _path,
       mainPath,
       '--packages=${PackageMap.instance.packagesPath}',
@@ -144,10 +144,9 @@ class ToolConfiguration {
 
       switch (platform) {
         case TargetPlatform.android_arm:
-          type = 'android';
-          break;
         case TargetPlatform.android_x64:
-          type = 'android_sim';
+        case TargetPlatform.android_x86:
+          type = 'android';
           break;
 
         // TODO(devoncarew): We will need an ios vs ios_x86 target (for ios vs. ios_sim).
@@ -163,13 +162,24 @@ class ToolConfiguration {
 
       // Return something like 'out/android_Release'.
       String buildOutputPath = 'out/${type}_$_modeStr';
-      if (mode == BuildMode.profile)
+      if (isAotBuildMode(mode))
         buildOutputPath += '_Deploy';
+
+      // Add a suffix for the target architecture.
+      switch (platform) {
+        case TargetPlatform.android_x64:
+          buildOutputPath += '_x64';
+          break;
+        case TargetPlatform.android_x86:
+          buildOutputPath += '_x86';
+          break;
+        default:
+          break;
+      }
 
       return new Directory(path.join(engineSrcPath, buildOutputPath));
     } else {
-      // For now, only suffix for deploy variants.
-      String suffix = mode == BuildMode.release ? '-${getModeName(mode)}' : '';
+      String suffix = mode != BuildMode.debug ? '-${getModeName(mode)}' : '';
 
       // Create something like `android-arm` or `android-arm-release`.
       String dirName = getNameForTargetPlatform(platform) + suffix;

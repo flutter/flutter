@@ -60,12 +60,12 @@ void main() {
 
     testUsingContext('returns 1 when test file is not found', () {
       withMockDevice();
-      List<String> args = [
+      List<String> args = <String>[
         'drive',
         '--target=/some/app/test/e2e.dart',
       ];
       return createTestCommandRunner(command).run(args).then((int code) {
-        expect(code, equals(1));
+        expect(code, 1);
         BufferLogger buffer = logger;
         expect(buffer.errorText, contains(
           'Test file not found: /some/app/test_driver/e2e_test.dart'
@@ -84,12 +84,12 @@ void main() {
       await memFs.file(testApp).writeAsString('main() {}');
       await memFs.file(testFile).writeAsString('main() {}');
 
-      List<String> args = [
+      List<String> args = <String>[
         'drive',
         '--target=$testApp',
       ];
       return createTestCommandRunner(command).run(args).then((int code) {
-        expect(code, equals(1));
+        expect(code, 1);
         BufferLogger buffer = logger;
         expect(buffer.errorText, contains(
           'Application failed to start. Will not run test. Quitting.'
@@ -102,12 +102,12 @@ void main() {
       useInMemoryFileSystem(cwd: packageDir);
 
       String appFile = '/not/in/my/app.dart';
-      List<String> args = [
+      List<String> args = <String>[
         'drive',
         '--target=$appFile',
       ];
       return createTestCommandRunner(command).run(args).then((int code) {
-        expect(code, equals(1));
+        expect(code, 1);
         BufferLogger buffer = logger;
         expect(buffer.errorText, contains(
           'Application file $appFile is outside the package directory $packageDir'
@@ -120,12 +120,12 @@ void main() {
       useInMemoryFileSystem(cwd: packageDir);
 
       String appFile = '/my/app/main.dart';
-      List<String> args = [
+      List<String> args = <String>[
         'drive',
         '--target=$appFile',
       ];
       return createTestCommandRunner(command).run(args).then((int code) {
-        expect(code, equals(1));
+        expect(code, 1);
         BufferLogger buffer = logger;
         expect(buffer.errorText, contains(
           'Application file main.dart must reside in one of the '
@@ -144,7 +144,7 @@ void main() {
         return new Future<int>.value(0);
       });
       testRunner = expectAsync((List<String> testArgs) {
-        expect(testArgs, [testFile]);
+        expect(testArgs, <String>[testFile]);
         return new Future<int>.value(0);
       });
       appStopper = expectAsync((_) {
@@ -155,12 +155,12 @@ void main() {
       await memFs.file(testApp).writeAsString('main() {}');
       await memFs.file(testFile).writeAsString('main() {}');
 
-      List<String> args = [
+      List<String> args = <String>[
         'drive',
         '--target=$testApp',
       ];
       return createTestCommandRunner(command).run(args).then((int code) {
-        expect(code, equals(0));
+        expect(code, 0);
         BufferLogger buffer = logger;
         expect(buffer.errorText, isEmpty);
       });
@@ -186,12 +186,12 @@ void main() {
       await memFs.file(testApp).writeAsString('main() {}');
       await memFs.file(testFile).writeAsString('main() {}');
 
-      List<String> args = [
+      List<String> args = <String>[
         'drive',
         '--target=$testApp',
       ];
       return createTestCommandRunner(command).run(args).then((int code) {
-        expect(code, equals(123));
+        expect(code, 123);
         BufferLogger buffer = logger;
         expect(buffer.errorText, isEmpty);
       });
@@ -243,7 +243,7 @@ void main() {
         Device emulator = new MockDevice();
         when(emulator.name).thenReturn('new-simulator');
         when(IOSSimulatorUtils.instance.getAttachedDevices())
-            .thenReturn([emulator]);
+            .thenReturn(<Device>[emulator]);
 
         Device device = await findTargetDevice();
         expect(device.name, 'new-simulator');

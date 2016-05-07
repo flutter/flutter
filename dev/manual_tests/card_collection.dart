@@ -32,13 +32,12 @@ class CardCollectionState extends State<CardCollection> {
   static const double kCardMargins = 8.0;
   static const double kFixedCardHeight = 100.0;
 
-  final TextStyle backgroundTextStyle =
-    Typography.white.title.copyWith(textAlign: TextAlign.center);
+  final TextStyle backgroundTextStyle = Typography.white.title;
 
   Map<int, Color> _primaryColor = Colors.deepPurple;
   List<CardModel> _cardModels;
   DismissDirection _dismissDirection = DismissDirection.horizontal;
-  TextStyle _textStyle = new TextStyle(textAlign: TextAlign.center);
+  TextAlign _textAlign = TextAlign.center;
   bool _editable = false;
   bool _snapToCenter = false;
   bool _fixedSizeCards = false;
@@ -143,9 +142,9 @@ class CardCollectionState extends State<CardCollection> {
           buildDrawerDirectionRadioItem("Dismiss left", DismissDirection.endToStart, _dismissDirection, _changeDismissDirection, icon: Icons.arrow_back),
           buildDrawerDirectionRadioItem("Dismiss right", DismissDirection.startToEnd, _dismissDirection, _changeDismissDirection, icon: Icons.arrow_forward),
           new Divider(),
-          buildFontRadioItem("Left-align text", new TextStyle(textAlign: TextAlign.left), _textStyle, _changeTextStyle, icon: Icons.format_align_left, enabled: !_editable),
-          buildFontRadioItem("Center-align text", new TextStyle(textAlign: TextAlign.center), _textStyle, _changeTextStyle, icon: Icons.format_align_center, enabled: !_editable),
-          buildFontRadioItem("Right-align text", new TextStyle(textAlign: TextAlign.right), _textStyle, _changeTextStyle, icon: Icons.format_align_right, enabled: !_editable),
+          buildFontRadioItem("Left-align text", TextAlign.left, _textAlign, _changeTextAlign, icon: Icons.format_align_left, enabled: !_editable),
+          buildFontRadioItem("Center-align text", TextAlign.center, _textAlign, _changeTextAlign, icon: Icons.format_align_center, enabled: !_editable),
+          buildFontRadioItem("Right-align text", TextAlign.right, _textAlign, _changeTextAlign, icon: Icons.format_align_right, enabled: !_editable),
           new Divider(),
           new DrawerItem(
             icon: Icons.dvr,
@@ -205,9 +204,9 @@ class CardCollectionState extends State<CardCollection> {
     });
   }
 
-  void _changeTextStyle(TextStyle newTextStyle) {
+  void _changeTextAlign(TextAlign newTextAlign) {
     setState(() {
-      _textStyle = newTextStyle;
+      _textAlign = newTextAlign;
     });
   }
 
@@ -260,14 +259,14 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget buildFontRadioItem(String label, TextStyle itemValue, TextStyle currentValue, ValueChanged<TextStyle> onChanged, { IconData icon, bool enabled: true }) {
+  Widget buildFontRadioItem(String label, TextAlign itemValue, TextAlign currentValue, ValueChanged<TextAlign> onChanged, { IconData icon, bool enabled: true }) {
     return new DrawerItem(
       icon: icon,
       onPressed: enabled ? () { onChanged(itemValue); } : null,
       child: new Row(
         children: <Widget>[
           new Flexible(child: new Text(label)),
-          new Radio<TextStyle>(
+          new Radio<TextAlign>(
             value: itemValue,
             groupValue: currentValue,
             onChanged: enabled ? onChanged : null
@@ -319,16 +318,17 @@ class CardCollectionState extends State<CardCollection> {
                 }
               )
             )
-          : new DefaultTextStyle(
-              style: DefaultTextStyle.of(context).merge(cardLabelStyle).merge(_textStyle).copyWith(
+          : new DefaultTextStyle.inherit(
+              context: context,
+              style: cardLabelStyle.copyWith(
                 fontSize: _varyFontSizes ? 5.0 + index : null
               ),
               child: new Column(
-                children: <Widget>[
-                  new Text(cardModel.inputValue.text)
-                ],
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisAlignment: MainAxisAlignment.center
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  new Text(cardModel.inputValue.text, textAlign: _textAlign)
+                ]
               )
             )
         )
@@ -379,7 +379,12 @@ class CardCollectionState extends State<CardCollection> {
             child: new Row(
               children: <Widget>[
                 leftArrowIcon,
-                new Flexible(child: new Text(backgroundMessage, style: backgroundTextStyle)),
+                new Flexible(
+                  child: new Text(backgroundMessage,
+                    style: backgroundTextStyle,
+                    textAlign: TextAlign.center
+                  )
+                ),
                 rightArrowIcon
               ]
             )

@@ -18,7 +18,7 @@ abstract class ScrollBehavior<T, U> {
   ///
   /// This function is called when a drag gesture ends.
   ///
-  /// Returns null if the behavior is to do nothing.
+  /// Returns `null` if the behavior is to do nothing.
   Simulation createScrollSimulation(T position, U velocity) => null;
 
   /// Returns an animation that ends at the snap offset.
@@ -26,7 +26,7 @@ abstract class ScrollBehavior<T, U> {
   /// This function is called when a drag gesture ends and a
   /// [SnapOffsetCallback] is specified for the scrollable.
   ///
-  /// Returns null if the behavior is to do nothing.
+  /// Returns `null` if the behavior is to do nothing.
   Simulation createSnapScrollSimulation(T startOffset, T endOffset, U startVelocity, U endVelocity) => null;
 
   /// Returns the scroll offset to use when the user attempts to scroll

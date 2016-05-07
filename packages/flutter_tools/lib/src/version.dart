@@ -4,8 +4,8 @@
 
 import 'dart:io';
 
-import '../artifacts.dart';
-import '../base/process.dart';
+import 'artifacts.dart';
+import 'base/process.dart';
 
 final Set<String> kKnownBranchNames = new Set<String>.from(<String>[
   'master',
@@ -64,7 +64,7 @@ class FlutterVersion {
     return new FlutterVersion(flutterRoot != null ? flutterRoot : ArtifactStore.flutterRoot);
   }
 
-  /// Return a short string for the version (`a76bc8e22b/alpha`).
+  /// Return a short string for the version (`alpha/a76bc8e22b`).
   static String getVersionString({ bool whitelistBranchName: false }) {
     final String cwd = ArtifactStore.flutterRoot;
 
@@ -80,7 +80,7 @@ class FlutterVersion {
         branch = 'dev';
     }
 
-    return '$commit/$branch';
+    return '$branch/$commit';
   }
 }
 

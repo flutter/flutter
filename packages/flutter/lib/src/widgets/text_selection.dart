@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
+import 'editable.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'overlay.dart';
@@ -24,71 +25,154 @@ enum TextSelectionHandleType { left, right, collapsed }
 /// Builds a handle of the given type.
 typedef Widget TextSelectionHandleBuilder(BuildContext context, TextSelectionHandleType type);
 
+// Builds a copy/paste toolbar.
+// TODO(mpcomplete): A single position is probably insufficient.
+typedef Widget TextSelectionToolbarBuilder(BuildContext context, Point position, TextSelectionDelegate delegate);
+
 /// The text position that a give selection handle manipulates. Dragging the
 /// [start] handle always moves the [start]/[baseOffset] of the selection.
 enum _TextSelectionHandlePosition { start, end }
 
+/// An interface for manipulating the selection, to be used by the implementor
+/// of the toolbar widget.
+abstract class TextSelectionDelegate {
+  /// Gets the current text input.
+  InputValue get inputValue;
+
+  /// Sets the current text input (replaces the whole line).
+  void set inputValue(InputValue value);
+
+  /// The copy/paste buffer. Application-wide.
+  String get pasteBuffer;
+
+  /// Sets the copy/paste buffer.
+  void set pasteBuffer(String value);
+
+  /// Hides the text selection toolbar.
+  void hideToolbar();
+}
+
+// TODO(mpcomplete): need to interact with the system clipboard.
+String _pasteBuffer;
+
 /// Manages a pair of text selection handles to be shown in an Overlay
 /// containing the owning widget.
-class TextSelectionHandles {
-  TextSelectionHandles({
-    TextSelection selection,
+class TextSelectionOverlay implements TextSelectionDelegate {
+  TextSelectionOverlay({
+    InputValue input,
+    this.context,
+    this.debugRequiredFor,
     this.renderObject,
-    this.onSelectionHandleChanged,
-    this.builder
-  }): _selection = selection;
+    this.onSelectionOverlayChanged,
+    this.handleBuilder,
+    this.toolbarBuilder
+  }): _input = input;
 
+  final BuildContext context;
+  final Widget debugRequiredFor;
   // TODO(mpcomplete): what if the renderObject is removed or replaced, or
   // moves? Not sure what cases I need to handle, or how to handle them.
   final RenderEditableLine renderObject;
-  final ValueChanged<TextSelection> onSelectionHandleChanged;
-  final TextSelectionHandleBuilder builder;
-  TextSelection _selection;
+  final ValueChanged<InputValue> onSelectionOverlayChanged;
+  final TextSelectionHandleBuilder handleBuilder;
+  final TextSelectionToolbarBuilder toolbarBuilder;
+  InputValue _input;
 
   /// A pair of handles. If this is non-null, there are always 2, though the
   /// second is hidden when the selection is collapsed.
   List<OverlayEntry> _handles;
 
+  OverlayEntry _toolbar;
+
+  TextSelection get _selection => _input.selection;
+
   /// Shows the handles by inserting them into the [context]'s overlay.
-  void show(BuildContext context, { Widget debugRequiredFor }) {
+  void show() {
     assert(_handles == null);
     _handles = <OverlayEntry>[
       new OverlayEntry(builder: (BuildContext c) => _buildOverlay(c, _TextSelectionHandlePosition.start)),
       new OverlayEntry(builder: (BuildContext c) => _buildOverlay(c, _TextSelectionHandlePosition.end)),
     ];
+    _toolbar = new OverlayEntry(builder: _buildToolbar);
     Overlay.of(context, debugRequiredFor: debugRequiredFor).insertAll(_handles);
+    Overlay.of(context, debugRequiredFor: debugRequiredFor).insert(_toolbar);
   }
 
   /// Updates the handles after the [selection] has changed.
-  void update(TextSelection newSelection) {
-    _selection = newSelection;
+  void update(InputValue newInput) {
+    _input = newInput;
+    if (_handles == null)
+      return;
     _handles[0].markNeedsBuild();
     _handles[1].markNeedsBuild();
+    _toolbar.markNeedsBuild();
   }
 
   /// Hides the handles.
   void hide() {
+    if (_handles == null)
+      return;
     _handles[0].remove();
     _handles[1].remove();
     _handles = null;
+    _toolbar.remove();
+    _toolbar = null;
   }
 
   Widget _buildOverlay(BuildContext context, _TextSelectionHandlePosition position) {
-    if (_selection.isCollapsed && position == _TextSelectionHandlePosition.end)
+    if ((_selection.isCollapsed && position == _TextSelectionHandlePosition.end) ||
+        handleBuilder == null)
       return new Container();  // hide the second handle when collapsed
     return new _TextSelectionHandleOverlay(
       onSelectionHandleChanged: _handleSelectionHandleChanged,
       renderObject: renderObject,
       selection: _selection,
-      builder: builder,
+      builder: handleBuilder,
       position: position
     );
   }
 
+  Widget _buildToolbar(BuildContext context) {
+    if (toolbarBuilder == null)
+      return new Container();
+
+    // Find the horizontal midpoint, just above the selected text.
+    List<TextSelectionPoint> endpoints = renderObject.getEndpointsForSelection(_selection);
+    Point midpoint = new Point(
+      (endpoints.length == 1) ?
+        endpoints[0].point.x :
+        (endpoints[0].point.x + endpoints[1].point.x) / 2.0,
+      endpoints[0].point.y - renderObject.size.height
+    );
+
+    return toolbarBuilder(context, midpoint, this);
+  }
+
   void _handleSelectionHandleChanged(TextSelection newSelection) {
-    if (onSelectionHandleChanged != null)
-      onSelectionHandleChanged(newSelection);
-    update(newSelection);
+    inputValue = _input.copyWith(selection: newSelection, composing: TextRange.empty);
+  }
+
+  @override
+  InputValue get inputValue => _input;
+
+  @override
+  void set inputValue(InputValue value) {
+    update(value);
+    if (onSelectionOverlayChanged != null)
+      onSelectionOverlayChanged(value);
+  }
+
+  @override
+  String get pasteBuffer => _pasteBuffer;
+
+  @override
+  void set pasteBuffer(String value) {
+    _pasteBuffer = value;
+  }
+
+  @override
+  void hideToolbar() {
+    hide();
   }
 }
 

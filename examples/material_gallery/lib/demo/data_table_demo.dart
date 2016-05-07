@@ -31,7 +31,7 @@ class _DataTableDemoState extends State<DataTableDemo> {
   int _sortColumnIndex;
   bool _sortAscending = true;
 
-  final List<Desert> _deserts = [
+  final List<Desert> _deserts = <Desert>[
     new Desert('Frozen yogurt',      159,  6.0, 24, 4.0,  87, 14,  1),
     new Desert('Ice cream sandwich', 237,  9.0, 37, 4.3, 129,  8,  1),
     new Desert('Eclair',             262, 16.0, 24, 6.0, 337,  6,  7),

@@ -250,7 +250,7 @@ class Solver {
       return Result.badRequiredStrength;
 
     Constraint constraint = new Constraint(
-      new Expression([new Term(variable, 1.0)], 0.0),
+      new Expression(<Term>[new Term(variable, 1.0)], 0.0),
       Relation.equalTo
     );
     constraint.priority = priority;

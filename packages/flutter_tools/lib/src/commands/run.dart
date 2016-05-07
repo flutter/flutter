@@ -199,11 +199,12 @@ Future<int> startApp(
   // Allow any stop commands from above to start work.
   await new Future<Duration>.delayed(Duration.ZERO);
 
-  if (install) {
+  // TODO(devoncarew): This fails for ios devices - we haven't built yet.
+  if (install && device is AndroidDevice) {
     printStatus('Installing $package to $device...');
 
-    // TODO(devoncarew): This fails for ios devices - we haven't built yet.
-    await installApp(device, package);
+    if (!(await installApp(device, package)))
+      return 1;
   }
 
   Map<String, dynamic> platformArgs = <String, dynamic>{};
@@ -291,10 +292,12 @@ Future<int> startAppStayResident(
   // Allow any stop commands from above to start work.
   await new Future<Duration>.delayed(Duration.ZERO);
 
-  printTrace('Running install command.');
-
   // TODO(devoncarew): This fails for ios devices - we haven't built yet.
-  await installApp(device, package);
+  if (device is AndroidDevice) {
+    printTrace('Running install command.');
+    if (!(await installApp(device, package)))
+      return 1;
+  }
 
   Map<String, dynamic> platformArgs;
   if (traceStartup != null)
@@ -424,6 +427,7 @@ Future<Null> _downloadStartupTrace(int observatoryPort, Device device) async {
 
   if (frameworkInitTimestampMicros != null) {
     traceInfo['timeToFrameworkInitMicros'] = frameworkInitTimestampMicros - engineEnterTimestampMicros;
+    traceInfo['timeAfterFrameworkInitMicros'] = firstFrameTimestampMicros - frameworkInitTimestampMicros;
   }
 
   await traceInfoFile.writeAsString(JSON.encode(traceInfo));

@@ -26,8 +26,8 @@ const Color _kSnackBackground = const Color(0xFF323232);
 // TODO(ianh): Implement the Tablet version of snackbar if we're "on a tablet".
 
 const Duration _kSnackBarTransitionDuration = const Duration(milliseconds: 250);
-const Duration kSnackBarShortDisplayDuration = const Duration(milliseconds: 1500);
-const Duration kSnackBarMediumDisplayDuration = const Duration(milliseconds: 2750);
+const Duration _kSnackBarShortDisplayDuration = const Duration(milliseconds: 1500);
+const Duration _kSnackBarMediumDisplayDuration = const Duration(milliseconds: 2750);
 const Curve _snackBarHeightCurve = Curves.fastOutSlowIn;
 const Curve _snackBarFadeCurve = const Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
 
@@ -43,6 +43,9 @@ const Curve _snackBarFadeCurve = const Interval(0.72, 1.0, curve: Curves.fastOut
 ///  * [SnackBar]
 ///  * <https://www.google.com/design/spec/components/snackbars-toasts.html>
 class SnackBarAction extends StatefulWidget {
+  /// Creates an action for a [SnackBar].
+  ///
+  /// The [label] and [onPressed] arguments must be non-null.
   SnackBarAction({Key key, this.label, this.onPressed }) : super(key: key) {
     assert(label != null);
     assert(onPressed != null);
@@ -97,19 +100,34 @@ class _SnackBarActionState extends State<SnackBarAction> {
 ///  * [SnackBarAction]
 ///  * <https://www.google.com/design/spec/components/snackbars-toasts.html>
 class SnackBar extends StatelessWidget {
+  /// Creates a snack bar.
+  ///
+  /// The [content] argument must be non-null.
   SnackBar({
     Key key,
     this.content,
     this.action,
-    this.duration: kSnackBarShortDisplayDuration,
+    this.duration: _kSnackBarShortDisplayDuration,
     this.animation
   }) : super(key: key) {
     assert(content != null);
   }
 
+  /// The primary content of the snack bar.
+  ///
+  /// Typically a [Text] widget.
   final Widget content;
+
+  /// (optional) An action that the user can take based on the snack bar.
+  ///
+  /// For example, the snack bar might let the user undo the operation that
+  /// prompted the snackbar. Snack bars can have at most one action.
   final SnackBarAction action;
+
+  /// The amount of time the snack bar should be displayed.
   final Duration duration;
+
+  /// The animation driving the entrance and exit of the snack bar.
   final Animation<double> animation;
 
   @override
@@ -180,6 +198,7 @@ class SnackBar extends StatelessWidget {
 
   // API for Scaffold.addSnackBar():
 
+  /// Creates an animation controller useful for driving a snack bar's entrance and exit animation.
   static AnimationController createAnimationController() {
     return new AnimationController(
       duration: _kSnackBarTransitionDuration,
@@ -187,6 +206,10 @@ class SnackBar extends StatelessWidget {
     );
   }
 
+  /// Creates a copy of this snack bar but with the animation replaced with the given animation.
+  ///
+  /// If the original snack bar lacks a key, the newly created snack bar will
+  /// use the given fallback key.
   SnackBar withAnimation(Animation<double> newAnimation, { Key fallbackKey }) {
     return new SnackBar(
       key: key ?? fallbackKey,

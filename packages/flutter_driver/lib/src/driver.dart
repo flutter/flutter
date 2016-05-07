@@ -15,13 +15,39 @@ import 'health.dart';
 import 'message.dart';
 import 'timeline.dart';
 
+enum TracingCategory {
+  all, api, compiler, dart, debugger, embedder, gc, isolate, vm
+}
+
+const List<TracingCategory> _defaultCategories = const <TracingCategory>[TracingCategory.all];
+
+// See https://github.com/dart-lang/sdk/blob/master/runtime/vm/timeline.cc#L32
+String _tracingCategoriesToString(List<TracingCategory> categories) {
+  final String contents = categories.map((TracingCategory category) {
+    switch(category) {
+      case TracingCategory.all: return 'all';
+      case TracingCategory.api: return 'API';
+      case TracingCategory.compiler: return 'Compiler';
+      case TracingCategory.dart: return 'Dart';
+      case TracingCategory.debugger: return 'Debugger';
+      case TracingCategory.embedder: return 'Embedder';
+      case TracingCategory.gc: return 'GC';
+      case TracingCategory.isolate: return 'Isolate';
+      case TracingCategory.vm: return 'VM';
+      default:
+        throw 'Unknown tracing category $category';
+    }
+  }).join(', ');
+  return '[$contents]';
+}
+
 final Logger _log = new Logger('FlutterDriver');
 
 /// A convenient accessor to frequently used finders.
 ///
 /// Examples:
 ///
-///     driver.tap(find.byText('Save'));
+///     driver.tap(find.text('Save'));
 ///     driver.scroll(find.byValueKey(42));
 const CommonFinders find = const CommonFinders._();
 
@@ -211,15 +237,24 @@ class FlutterDriver {
     return await _sendCommand(new Scroll(finder, dx, dy, duration, frequency)).then((Map<String, dynamic> _) => null);
   }
 
+  /// Scrolls the Scrollable ancestor of the widget located by [finder]
+  /// until the widget is completely visible.
+  Future<Null> scrollIntoView(SerializableFinder finder) async {
+    return await _sendCommand(new ScrollIntoView(finder)).then((Map<String, dynamic> _) => null);
+  }
+
   /// Returns the text in the `Text` widget located by [finder].
   Future<String> getText(SerializableFinder finder) async {
     return GetTextResult.fromJson(await _sendCommand(new GetText(finder))).text;
   }
 
   /// Starts recording performance traces.
-  Future<Null> startTracing() async {
+  Future<Null> startTracing({List<TracingCategory> categories: _defaultCategories}) async {
+    assert(categories != null && categories.length > 0);
     try {
-      await _peer.sendRequest(_kSetVMTimelineFlagsMethod, {'recordedStreams': '[all]'});
+      await _peer.sendRequest(_kSetVMTimelineFlagsMethod, <String, String>{
+        'recordedStreams': _tracingCategoriesToString(categories)
+      });
       return null;
     } catch(error, stackTrace) {
       throw new DriverError(
@@ -233,7 +268,7 @@ class FlutterDriver {
   /// Stops recording performance traces and downloads the timeline.
   Future<Timeline> stopTracingAndDownloadTimeline() async {
     try {
-      await _peer.sendRequest(_kSetVMTimelineFlagsMethod, {'recordedStreams': '[]'});
+      await _peer.sendRequest(_kSetVMTimelineFlagsMethod, <String, String>{'recordedStreams': '[]'});
       return new Timeline.fromJson(await _peer.sendRequest(_kGetVMTimelineMethod));
     } catch(error, stackTrace) {
       throw new DriverError(
@@ -251,8 +286,8 @@ class FlutterDriver {
   ///
   /// This is merely a convenience wrapper on top of [startTracing] and
   /// [stopTracingAndDownloadTimeline].
-  Future<Timeline> traceAction(Future<dynamic> action()) async {
-    await startTracing();
+  Future<Timeline> traceAction(Future<dynamic> action(), { List<TracingCategory> categories: _defaultCategories }) async {
+    await startTracing(categories: categories);
     await action();
     return stopTracingAndDownloadTimeline();
   }

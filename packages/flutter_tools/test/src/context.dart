@@ -108,7 +108,7 @@ class MockDoctor extends Doctor {
 
 class MockSimControl extends Mock implements SimControl {
   MockSimControl() {
-    when(this.getConnectedDevices()).thenReturn([]);
+    when(this.getConnectedDevices()).thenReturn(<SimDevice>[]);
   }
 }
 
@@ -143,6 +143,9 @@ class MockUsage implements Usage {
 
   @override
   Future<Null> ensureAnalyticsSent() => new Future<Null>.value();
+
+  @override
+  void printUsage() { }
 }
 
 class _MockUsageTimer implements UsageTimer {

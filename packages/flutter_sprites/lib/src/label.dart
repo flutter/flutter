@@ -3,32 +3,31 @@ part of flutter_sprites;
 /// Labels are used to display a string of text in a the node tree. To align
 /// the label, the textAlign property of the [TextStyle] can be set.
 class Label extends Node {
-  /// Creates a new Label with the provided [_text] and [_textStyle].
-  Label(this._text, [this._textStyle]) {
-    if (_textStyle == null) {
-      _textStyle = new TextStyle();
-    }
-  }
-
-  String _text;
+  /// Creates a new Label with the provided [text] and [textStyle].
+  Label(this._text, {
+    TextStyle textStyle,
+    TextAlign textAlign
+  }) : _textStyle = textStyle ?? const TextStyle(),
+       textAlign = textAlign ?? TextAlign.left;
 
   /// The text being drawn by the label.
   String get text => _text;
-
+  String _text;
   void set text(String text) {
     _text = text;
     _painter = null;
   }
 
-  TextStyle _textStyle;
-
   /// The style to draw the text in.
   TextStyle get textStyle => _textStyle;
-
+  TextStyle _textStyle;
   void set textStyle(TextStyle textStyle) {
     _textStyle = textStyle;
     _painter = null;
   }
+
+  /// How the text should be aligned horizontally.
+  TextAlign textAlign;
 
   TextPainter _painter;
   double _width;
@@ -36,14 +35,14 @@ class Label extends Node {
   @override
   void paint(Canvas canvas) {
     if (_painter == null) {
-      _painter = new TextPainter(new TextSpan(style: _textStyle, text: _text))
+      _painter = new TextPainter(text: new TextSpan(style: _textStyle, text: _text))
         ..layout();
     }
 
     Offset offset = Offset.zero;
-    if (_textStyle.textAlign == TextAlign.center) {
+    if (textAlign == TextAlign.center) {
       offset = new Offset(-_width / 2.0, 0.0);
-    } else if (_textStyle.textAlign == TextAlign.right) {
+    } else if (textAlign == TextAlign.right) {
       offset = new Offset(-_width, 0.0);
     }
 

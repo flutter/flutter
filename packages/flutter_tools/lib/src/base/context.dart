@@ -57,6 +57,6 @@ class AppContext {
   }
 
   dynamic runInZone(dynamic method()) {
-    return runZoned(method, zoneValues: {'context': this});
+    return runZoned(method, zoneValues: <String, dynamic>{'context': this});
   }
 }

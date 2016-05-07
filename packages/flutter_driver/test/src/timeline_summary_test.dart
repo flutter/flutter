@@ -28,7 +28,7 @@ void main() {
     group('frame_count', () {
       test('counts frames', () {
         expect(
-          summarize([
+          summarize(<Map<String, dynamic>>[
             begin(1000), end(2000),
             begin(3000), end(5000),
           ]).countFrames(),
@@ -39,12 +39,12 @@ void main() {
 
     group('average_frame_build_time_millis', () {
       test('returns null when there is no data', () {
-        expect(summarize([]).computeAverageFrameBuildTimeMillis(), isNull);
+        expect(summarize(<Map<String, dynamic>>[]).computeAverageFrameBuildTimeMillis(), isNull);
       });
 
       test('computes average frame build time in milliseconds', () {
         expect(
-          summarize([
+          summarize(<Map<String, dynamic>>[
             begin(1000), end(2000),
             begin(3000), end(5000),
           ]).computeAverageFrameBuildTimeMillis(),
@@ -54,28 +54,71 @@ void main() {
 
       test('skips leading "end" events', () {
         expect(
-          summarize([
+          summarize(<Map<String, dynamic>>[
             end(1000),
             begin(2000), end(4000),
           ]).computeAverageFrameBuildTimeMillis(),
-          2
+          2.0
         );
       });
 
       test('skips trailing "begin" events', () {
         expect(
-          summarize([
+          summarize(<Map<String, dynamic>>[
             begin(2000), end(4000),
             begin(5000),
           ]).computeAverageFrameBuildTimeMillis(),
-          2
+          2.0
+        );
+      });
+    });
+
+    group('worst_frame_build_time_millis', () {
+      test('returns null when there is no data', () {
+        expect(summarize(<Map<String, dynamic>>[]).computeWorstFrameBuildTimeMillis(), isNull);
+      });
+
+      test('computes worst frame build time in milliseconds', () {
+        expect(
+          summarize(<Map<String, dynamic>>[
+            begin(1000), end(2000),
+            begin(3000), end(5000),
+          ]).computeWorstFrameBuildTimeMillis(),
+          2.0
+        );
+        expect(
+          summarize(<Map<String, dynamic>>[
+            begin(3000), end(5000),
+            begin(1000), end(2000),
+          ]).computeWorstFrameBuildTimeMillis(),
+          2.0
+        );
+      });
+
+      test('skips leading "end" events', () {
+        expect(
+          summarize(<Map<String, dynamic>>[
+            end(1000),
+            begin(2000), end(4000),
+          ]).computeWorstFrameBuildTimeMillis(),
+          2.0
+        );
+      });
+
+      test('skips trailing "begin" events', () {
+        expect(
+          summarize(<Map<String, dynamic>>[
+            begin(2000), end(4000),
+            begin(5000),
+          ]).computeWorstFrameBuildTimeMillis(),
+          2.0
         );
       });
     });
 
     group('computeMissedFrameBuildBudgetCount', () {
       test('computes the number of missed build budgets', () {
-        TimelineSummary summary = summarize([
+        TimelineSummary summary = summarize(<Map<String, dynamic>>[
           begin(1000), end(10000),
           begin(11000), end(12000),
           begin(13000), end(23000),
@@ -89,13 +132,14 @@ void main() {
     group('summaryJson', () {
       test('computes and returns summary as JSON', () {
         expect(
-          summarize([
+          summarize(<Map<String, dynamic>>[
             begin(1000), end(10000),
             begin(11000), end(12000),
             begin(13000), end(24000),
           ]).summaryJson,
-          {
+          <String, dynamic>{
             'average_frame_build_time_millis': 7.0,
+            'worst_frame_build_time_millis': 11.0,
             'missed_frame_build_budget_count': 2,
             'frame_count': 3,
             'frame_build_times': <int>[9000, 1000, 11000],
@@ -114,7 +158,7 @@ void main() {
       });
 
       test('writes timeline to JSON file', () async {
-        await summarize([{'foo': 'bar'}])
+        await summarize(<Map<String, String>>[<String, String>{'foo': 'bar'}])
           .writeTimelineToFile('test', destinationDirectory: '/temp');
         String written =
             await fs.file('/temp/test.timeline.json').readAsString();
@@ -122,15 +166,16 @@ void main() {
       });
 
       test('writes summary to JSON file', () async {
-        await summarize([
+        await summarize(<Map<String, dynamic>>[
           begin(1000), end(10000),
           begin(11000), end(12000),
           begin(13000), end(24000),
         ]).writeSummaryToFile('test', destinationDirectory: '/temp');
         String written =
             await fs.file('/temp/test.timeline_summary.json').readAsString();
-        expect(JSON.decode(written), {
+        expect(JSON.decode(written), <String, dynamic>{
           'average_frame_build_time_millis': 7.0,
+          'worst_frame_build_time_millis': 11.0,
           'missed_frame_build_budget_count': 2,
           'frame_count': 3,
           'frame_build_times': <int>[9000, 1000, 11000],

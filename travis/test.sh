@@ -6,10 +6,7 @@ export PATH="$PWD/bin:$PWD/bin/cache/dart-sdk/bin:$PATH"
 # analyze all the Dart code in the repo
 flutter analyze --flutter-repo
 
-# keep the rest of this file in sync with
-# //chrome_infra/build/scripts/slave/recipes/flutter/flutter.py
-# see https://github.com/flutter/flutter/blob/master/infra/README.md
-
+# run tests
 (cd packages/flutter; flutter test)
 (cd packages/flutter_driver; dart -c test/all.dart)
 (cd packages/flutter_sprites; flutter test)
@@ -22,3 +19,7 @@ flutter analyze --flutter-repo
 (cd examples/layers; flutter test)
 (cd examples/material_gallery; flutter test)
 (cd examples/stocks; flutter test)
+
+# generate and analyze our large sample app
+dart dev/tools/mega_gallery.dart
+(cd dev/benchmarks/mega_gallery; flutter analyze --watch --benchmark)

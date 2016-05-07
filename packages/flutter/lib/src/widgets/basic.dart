@@ -32,7 +32,6 @@ export 'package:flutter/rendering.dart' show
     MaxTileWidthGridDelegate,
     MultiChildLayoutDelegate,
     PaintingContext,
-    PlainTextSpan,
     PointerCancelEvent,
     PointerCancelEventListener,
     PointerDownEvent,
@@ -294,6 +293,14 @@ class ClipOval extends SingleChildRenderObjectWidget {
   ClipOval({ Key key, this.clipper, Widget child }) : super(key: key, child: child);
 
   /// If non-null, determines which clip to use.
+  ///
+  /// The delegate returns a rectangle that describes the axis-aligned
+  /// bounding box of the oval. The oval's axes will themselves also
+  /// be axis-aligned.
+  ///
+  /// If the [clipper] delegate is null, then the oval uses the
+  /// widget's bounding box (the layout dimensions of the render
+  /// object) instead.
   final CustomClipper<Rect> clipper;
 
   @override
@@ -306,6 +313,42 @@ class ClipOval extends SingleChildRenderObjectWidget {
 
   @override
   void didUnmountRenderObject(RenderClipOval renderObject) {
+    renderObject.clipper = null;
+  }
+}
+
+/// Clips its child using a path.
+///
+/// Invokes a callback on a delegate whenever the widget is to be
+/// painted. The callback returns a path and the widget prevents the
+/// child from painting outside the path.
+///
+/// Clipping to a path is expensive. Certain shapes have more
+/// optimized widgets:
+///
+///  * To clip to a rectangle, consider [ClipRect].
+///  * To clip to an oval or circle, consider [ClipOval].
+///  * To clip to a rounded rectangle, consider [ClipRRect].
+class ClipPath extends SingleChildRenderObjectWidget {
+  ClipPath({ Key key, this.clipper, Widget child }) : super(key: key, child: child);
+
+  /// If non-null, determines which clip to use.
+  ///
+  /// The default clip, which is used if this property is null, is the
+  /// bounding box rectangle of the widget. [ClipRect] is a more
+  /// efficient way of obtaining that effect.
+  final CustomClipper<Path> clipper;
+
+  @override
+  RenderClipPath createRenderObject(BuildContext context) => new RenderClipPath(clipper: clipper);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderClipPath renderObject) {
+    renderObject.clipper = clipper;
+  }
+
+  @override
+  void didUnmountRenderObject(RenderClipPath renderObject) {
     renderObject.clipper = null;
   }
 }
@@ -1861,40 +1904,84 @@ class RichText extends LeafRenderObjectWidget {
   /// Creates a paragraph of rich text.
   ///
   /// The [text] argument is required to be non-null.
-  RichText({ Key key, this.text }) : super(key: key) {
+  RichText({ Key key, this.text, this.textAlign }) : super(key: key) {
     assert(text != null);
   }
 
   /// The text to display in this widget.
   final TextSpan text;
 
+  /// How the text should be aligned horizontally.
+  final TextAlign textAlign;
+
   @override
-  RenderParagraph createRenderObject(BuildContext context) => new RenderParagraph(text);
+  RenderParagraph createRenderObject(BuildContext context) {
+    return new RenderParagraph(text, textAlign: textAlign);
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderParagraph renderObject) {
-    renderObject.text = text;
+    renderObject
+      ..text = text
+      ..textAlign = textAlign;
   }
 }
 
 /// The text style to apply to descendant [Text] widgets without explicit style.
 class DefaultTextStyle extends InheritedWidget {
+  /// Creates a default text style for the given subtree.
+  ///
+  /// Consider using [DefaultTextStyle.inherit] to inherit styling information
+  /// from a the current default text style for a given [BuildContext].
   DefaultTextStyle({
     Key key,
     this.style,
+    this.textAlign,
     Widget child
   }) : super(key: key, child: child) {
     assert(style != null);
     assert(child != null);
   }
 
+  /// A const-constructible default text style that provides fallback values.
+  ///
+  /// Returned from [of] when the given [BuildContext] doesn't have an enclosing default text style.
+  const DefaultTextStyle.fallback() : style = const TextStyle(), textAlign = null;
+
+  /// Creates a default text style that inherits from the given [BuildContext].
+  ///
+  /// The given [style] is merged with the [style] from the default text style
+  /// for the given [BuildContext] and, if non-null, the given [textAlign]
+  /// replaces the [textAlign] from the default text style for the given
+  /// [BuildContext].
+  factory DefaultTextStyle.inherit({
+    Key key,
+    BuildContext context,
+    TextStyle style,
+    TextAlign textAlign,
+    Widget child
+  }) {
+    DefaultTextStyle parent = DefaultTextStyle.of(context);
+    return new DefaultTextStyle(
+      key: key,
+      style: parent.style.merge(style),
+      textAlign: textAlign ?? parent.textAlign,
+      child: child
+    );
+  }
+
   /// The text style to apply.
   final TextStyle style;
 
-  /// The style from the closest instance of this class that encloses the given context.
-  static TextStyle of(BuildContext context) {
-    DefaultTextStyle result = context.inheritFromWidgetOfExactType(DefaultTextStyle);
-    return result?.style ?? const TextStyle();
+  /// How the text should be aligned horizontally.
+  final TextAlign textAlign;
+
+  /// The closest instance of this class that encloses the given context.
+  ///
+  /// If no such instance exists, returns an instance created by
+  /// [DefaultTextStyle.fallback], which contains fallback values.
+  static DefaultTextStyle of(BuildContext context) {
+    return context.inheritFromWidgetOfExactType(DefaultTextStyle) ?? const DefaultTextStyle.fallback();
   }
 
   @override
@@ -1932,7 +2019,7 @@ class Text extends StatelessWidget {
   ///
   /// If the [style] argument is null, the text will use the style from the
   /// closest enclosing [DefaultTextStyle].
-  Text(this.data, { Key key, this.style }) : super(key: key) {
+  Text(this.data, { Key key, this.style, this.textAlign }) : super(key: key) {
     assert(data != null);
   }
 
@@ -1946,18 +2033,26 @@ class Text extends StatelessWidget {
   /// replace the closest enclosing [DefaultTextStyle].
   final TextStyle style;
 
-  TextStyle _getEffectiveStyle(BuildContext context) {
-    if (style == null || style.inherit)
-      return DefaultTextStyle.of(context).merge(style);
-    else
-      return style;
-  }
+  /// How the text should be aligned horizontally.
+  final TextAlign textAlign;
 
   @override
   Widget build(BuildContext context) {
+    DefaultTextStyle defaultTextStyle;
+    TextStyle effectiveTextStyle = style;
+    if (style == null || style.inherit) {
+      defaultTextStyle ??= DefaultTextStyle.of(context);
+      effectiveTextStyle = defaultTextStyle.style.merge(style);
+    }
+    TextAlign effectiveTextAlign = textAlign;
+    if (effectiveTextAlign == null) {
+      defaultTextStyle ??= DefaultTextStyle.of(context);
+      effectiveTextAlign = defaultTextStyle.textAlign;
+    }
     return new RichText(
+      textAlign: effectiveTextAlign,
       text: new TextSpan(
-        style: _getEffectiveStyle(context),
+        style: effectiveTextStyle,
         text: data
       )
     );
@@ -2894,13 +2989,17 @@ class KeyedSubtree extends StatelessWidget {
 
 /// A platonic widget that invokes a closure to obtain its child widget.
 class Builder extends StatelessWidget {
-  Builder({ Key key, this.builder }) : super(key: key);
+  Builder({ Key key, this.builder }) : super(key: key) {
+    assert(builder != null);
+  }
 
   /// Called to obtain the child widget.
   ///
-  /// This function is invoked whether this widget is included in its parent's
+  /// This function is invoked whenever this widget is included in its parent's
   /// build and the old widget (if any) that it synchronizes with has a distinct
-  /// object identity.
+  /// object identity. Typically the parent's build method will construct
+  /// a new tree of widgets and so a new Builder child will not be [identical]
+  /// to the corresponding old one.
   final WidgetBuilder builder;
 
   @override
@@ -2909,7 +3008,9 @@ class Builder extends StatelessWidget {
 
 typedef Widget StatefulWidgetBuilder(BuildContext context, StateSetter setState);
 class StatefulBuilder extends StatefulWidget {
-  StatefulBuilder({ Key key, this.builder }) : super(key: key);
+  StatefulBuilder({ Key key, this.builder }) : super(key: key) {
+    assert(builder != null);
+  }
 
   final StatefulWidgetBuilder builder;
 

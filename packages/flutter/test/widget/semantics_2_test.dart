@@ -74,7 +74,7 @@ void main() {
     expect(client.updates[0].children[1].flags.hasCheckedState, isFalse);
     expect(client.updates[0].children[1].flags.isChecked, isFalse);
     expect(client.updates[0].children[1].strings.label, equals('child2'));
-    expect(client.updates[0].children[1].geometry.transform, equals([1.0,0.0,0.0,0.0, 0.0,1.0,0.0,0.0, 0.0,0.0,1.0,0.0, 0.0,10.0,0.0,1.0]));
+    expect(client.updates[0].children[1].geometry.transform, equals(<double>[1.0,0.0,0.0,0.0, 0.0,1.0,0.0,0.0, 0.0,0.0,1.0,0.0, 0.0,10.0,0.0,1.0]));
     expect(client.updates[0].children[1].geometry.left, equals(0.0));
     expect(client.updates[0].children[1].geometry.top, equals(0.0));
     expect(client.updates[0].children[1].geometry.width, equals(800.0));
@@ -176,7 +176,7 @@ void main() {
     expect(client.updates[0].children[1].flags.hasCheckedState, isFalse);
     expect(client.updates[0].children[1].flags.isChecked, isFalse);
     expect(client.updates[0].children[1].strings.label, equals('child2'));
-    expect(client.updates[0].children[1].geometry.transform, equals([1.0,0.0,0.0,0.0, 0.0,1.0,0.0,0.0, 0.0,0.0,1.0,0.0, 0.0,10.0,0.0,1.0]));
+    expect(client.updates[0].children[1].geometry.transform, equals(<double>[1.0,0.0,0.0,0.0, 0.0,1.0,0.0,0.0, 0.0,0.0,1.0,0.0, 0.0,10.0,0.0,1.0]));
     expect(client.updates[0].children[1].geometry.left, equals(0.0));
     expect(client.updates[0].children[1].geometry.top, equals(0.0));
     expect(client.updates[0].children[1].geometry.width, equals(800.0));

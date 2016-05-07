@@ -30,8 +30,11 @@ class TextPainter {
   ///
   /// The text argument is optional but [text] must be non-null before calling
   /// [layout].
-  TextPainter([ TextSpan text ]) {
-    this.text = text;
+  TextPainter({
+    TextSpan text,
+    TextAlign textAlign
+  }) : _text = text, _textAlign = textAlign {
+    assert(text == null || text.debugAssertValid());
   }
 
   ui.Paragraph _paragraph;
@@ -45,15 +48,19 @@ class TextPainter {
     if (_text == value)
       return;
     _text = value;
-    if (_text != null) {
-      ui.ParagraphBuilder builder = new ui.ParagraphBuilder();
-      _text.build(builder);
-      _paragraph = builder.build(_text.style?.paragraphStyle ?? new ui.ParagraphStyle());
-      _needsLayout = true;
-    } else {
-      _paragraph = null;
-      _needsLayout = false;
-    }
+    _paragraph = null;
+    _needsLayout = true;
+  }
+
+  /// How the text should be aligned horizontally.
+  TextAlign get textAlign => _textAlign;
+  TextAlign _textAlign;
+  void set textAlign(TextAlign value) {
+    if (_textAlign == value)
+      return;
+    _textAlign = value;
+    _paragraph = null;
+    _needsLayout = true;
   }
 
   // Unfortunately, using full precision floating point here causes bad layouts
@@ -129,9 +136,17 @@ class TextPainter {
   /// width as possible while still being greater than or equal to minWidth and
   /// less than or equal to maxWidth.
   void layout({ double minWidth: 0.0, double maxWidth: double.INFINITY }) {
+    assert(_text != null);
     if (!_needsLayout && minWidth == _lastMinWidth && maxWidth == _lastMaxWidth)
       return;
     _needsLayout = false;
+    if (_paragraph == null) {
+      ui.ParagraphBuilder builder = new ui.ParagraphBuilder();
+      _text.build(builder);
+      ui.ParagraphStyle paragraphStyle = _text.style?.getParagraphStyle(textAlign: textAlign);
+      paragraphStyle ??= new ui.ParagraphStyle();
+      _paragraph = builder.build(paragraphStyle);
+    }
     _lastMinWidth = minWidth;
     _lastMaxWidth = maxWidth;
     _paragraph.layout(new ui.ParagraphConstraints(width: maxWidth));

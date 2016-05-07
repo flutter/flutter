@@ -449,6 +449,12 @@ class _MonthPickerState extends State<MonthPicker> {
 ///  * [DatePicker]
 ///  * <https://www.google.com/design/spec/components/pickers.html#pickers-date-pickers>
 class YearPicker extends StatefulWidget {
+  /// Creates a year picker.
+  ///
+  /// The [selectedDate] and [onChanged] arguments must not be null. The
+  /// [lastDate] must be after the [firstDate].
+  ///
+  /// Rarely used directly. Instead, typically used as part of a [DatePicker].
   YearPicker({
     Key key,
     this.selectedDate,

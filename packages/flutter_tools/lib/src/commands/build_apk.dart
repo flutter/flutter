@@ -26,6 +26,7 @@ export '../android/android_device.dart' show AndroidDevice;
 const String _kDefaultAndroidManifestPath = 'android/AndroidManifest.xml';
 const String _kDefaultOutputPath = 'build/app.apk';
 const String _kDefaultResourcesPath = 'android/res';
+const String _kDefaultAssetsPath = 'android/assets';
 
 const String _kFlutterManifestPath = 'flutter.yaml';
 const String _kPackagesStatusPath = '.packages';
@@ -74,6 +75,22 @@ class _ApkBuilder {
     _jarsigner = os.which('jarsigner');
   }
 
+  String checkDependencies() {
+    if (!_androidJar.existsSync())
+      return 'Cannot find android.jar at ${_androidJar.path}';
+    if (!_aapt.existsSync())
+      return 'Cannot find aapt at ${_aapt.path}';
+    if (!_dx.existsSync())
+      return 'Cannot find dx at ${_dx.path}';
+    if (!_zipalign.existsSync())
+      return 'Cannot find zipalign at ${_zipalign.path}';
+    if (_jarsigner == null)
+      return 'Cannot find jarsigner in PATH.';
+    if (!_jarsigner.existsSync())
+      return 'Cannot find jarsigner at ${_jarsigner.path}';
+    return null;
+  }
+
   void compileClassesDex(File classesDex, List<File> jars) {
     List<String> packageArgs = <String>[_dx.path,
       '--dex',
@@ -95,12 +112,13 @@ class _ApkBuilder {
       '-F', outputApk.path,
     ];
     if (resources != null)
-      packageArgs.addAll(['-S', resources.absolute.path]);
+      packageArgs.addAll(<String>['-S', resources.absolute.path]);
     packageArgs.add(artifacts.path);
     runCheckedSync(packageArgs);
   }
 
   void sign(File keystore, String keystorePassword, String keyAlias, String keyPassword, File outputApk) {
+    assert(_jarsigner != null);
     runCheckedSync(<String>[_jarsigner.path,
       '-keystore', keystore.path,
       '-storepass', keystorePassword,
@@ -119,7 +137,7 @@ class _ApkComponents {
   File manifest;
   File icuData;
   List<File> jars;
-  List<Map<String, String>> services = [];
+  List<Map<String, String>> services = <Map<String, String>>[];
   File libSkyShell;
   File debugKeystore;
   Directory resources;
@@ -209,6 +227,16 @@ class BuildApkCommand extends FlutterCommand {
       extraFiles[keyValue.first] = new File(keyValue.last);
     }
 
+    if (FileSystemEntity.isDirectorySync(_kDefaultAssetsPath)) {
+      Directory assetsDir = new Directory(_kDefaultAssetsPath);
+      for (FileSystemEntity entity in assetsDir.listSync(recursive: true)) {
+        if (entity is File) {
+          String targetPath = entity.path.substring(assetsDir.path.length);
+          extraFiles["assets/$targetPath"] = entity;
+        }
+      };
+    }
+
     // TODO(devoncarew): This command should take an arg for the output type (arm / x64).
 
     return await buildAndroid(
@@ -233,6 +261,21 @@ class BuildApkCommand extends FlutterCommand {
   }
 }
 
+// Return the directory name within the APK that is used for native code libraries
+// on the given platform.
+String getAbiDirectory(TargetPlatform platform) {
+  switch (platform) {
+    case TargetPlatform.android_arm:
+      return 'armeabi-v7a';
+    case TargetPlatform.android_x64:
+      return 'x86_64';
+    case TargetPlatform.android_x86:
+      return 'x86';
+    default:
+      throw new Exception('Unsupported platform.');
+  }
+}
+
 Future<_ApkComponents> _findApkComponents(
   TargetPlatform platform,
   BuildMode buildMode,
@@ -246,7 +289,7 @@ Future<_ApkComponents> _findApkComponents(
   components.extraFiles = extraFiles != null ? extraFiles : <String, File>{};
 
   if (tools.isLocalEngine) {
-    String abiDir = platform == TargetPlatform.android_arm ? 'armeabi-v7a' : 'x86_64';
+    String abiDir = getAbiDirectory(platform);
     String enginePath = tools.engineSrcPath;
     String buildDir = tools.getEngineArtifactsDirectory(platform, buildMode).path;
 
@@ -301,6 +344,11 @@ int _buildApk(
 
   try {
     _ApkBuilder builder = new _ApkBuilder(androidSdk.latestVersion);
+    String error = builder.checkDependencies();
+    if (error != null) {
+      printError(error);
+      return 1;
+    }
 
     File classesDex = new File('${tempDir.path}/classes.dex');
     builder.compileClassesDex(classesDex, components.jars);
@@ -315,7 +363,7 @@ int _buildApk(
 
     _AssetBuilder artifactBuilder = new _AssetBuilder(tempDir, 'artifacts');
     artifactBuilder.add(classesDex, 'classes.dex');
-    String abiDir = platform == TargetPlatform.android_arm ? 'armeabi-v7a' : 'x86_64';
+    String abiDir = getAbiDirectory(platform);
     artifactBuilder.add(components.libSkyShell, 'lib/$abiDir/libsky_shell.so');
 
     for (String relativePath in components.extraFiles.keys)
@@ -386,7 +434,7 @@ bool _needsRebuild(String apkPath, String manifest) {
   // Note: This list of dependencies is imperfect, but will do for now. We
   // purposely don't include the .dart files, because we can load those
   // over the network without needing to rebuild (at least on Android).
-  Iterable<FileStat> dependenciesStat = [
+  Iterable<FileStat> dependenciesStat = <String>[
     manifest,
     _kFlutterManifestPath,
     _kPackagesStatusPath
@@ -405,9 +453,6 @@ bool _needsRebuild(String apkPath, String manifest) {
 
   return false;
 }
-
-// Returns true if the selected build mode uses ahead-of-time compilation.
-bool _isAotBuildMode(BuildMode mode) => mode == BuildMode.profile;
 
 Future<int> buildAndroid(
   TargetPlatform platform,
@@ -472,13 +517,16 @@ Future<int> buildAndroid(
     flxPath = await flx.buildFlx(
       toolchain,
       mainPath: findMainDartFile(target),
-      precompiledSnapshot: _isAotBuildMode(buildMode),
+      precompiledSnapshot: isAotBuildMode(buildMode),
       includeRobotoFonts: false);
+
+    if (flxPath == null)
+      return 1;
   }
 
   // Build an AOT snapshot if needed.
-  if (_isAotBuildMode(buildMode) && aotPath == null) {
-    aotPath = buildAotSnapshot(findMainDartFile(target));
+  if (isAotBuildMode(buildMode) && aotPath == null) {
+    aotPath = buildAotSnapshot(findMainDartFile(target), buildMode);
     if (aotPath == null) {
       printError('Failed to build AOT snapshot');
       return 1;
@@ -486,7 +534,7 @@ Future<int> buildAndroid(
   }
 
   if (aotPath != null) {
-    if (!_isAotBuildMode(buildMode)) {
+    if (!isAotBuildMode(buildMode)) {
       printError('AOT snapshot can not be used in build mode $buildMode');
       return 1;
     }

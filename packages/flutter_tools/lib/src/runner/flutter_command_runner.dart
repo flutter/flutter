@@ -18,7 +18,7 @@ import '../build_configuration.dart';
 import '../globals.dart';
 import '../package_map.dart';
 import '../toolchain.dart';
-import 'version.dart';
+import '../version.dart';
 
 const String kFlutterRootEnvironmentVariableName = 'FLUTTER_ROOT'; // should point to //flutter/ (root of flutter/flutter repo)
 const String kFlutterEngineEnvironmentVariableName = 'FLUTTER_ENGINE'; // should point to //engine/src/ (root of flutter/engine repo)
@@ -425,6 +425,7 @@ class FlutterCommandRunner extends CommandRunner {
       .listSync(followLinks: false)
       .expand((FileSystemEntity entity) {
         return entity is Directory ? _gatherProjectPaths(entity.path) : <String>[];
-      });
+      })
+      .toList();
   }
 }

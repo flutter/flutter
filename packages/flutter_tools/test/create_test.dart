@@ -43,10 +43,10 @@ void main() {
       CommandRunner runner = createTestCommandRunner(command);
 
       int code = await runner.run(<String>['create', '--no-pub', temp.path]);
-      expect(code, equals(0));
+      expect(code, 0);
 
       code = await runner.run(<String>['create', '--no-pub', temp.path]);
-      expect(code, equals(0));
+      expect(code, 0);
     });
 
     // Verify that we fail with an error code when the file exists.
@@ -57,7 +57,7 @@ void main() {
       File existingFile = new File("${temp.path.toString()}/bad");
       if (!existingFile.existsSync()) existingFile.createSync();
       int code = await runner.run(<String>['create', existingFile.path]);
-      expect(code, equals(1));
+      expect(code, 1);
     });
   });
 }
@@ -70,7 +70,7 @@ Future<Null> _createAndAnalyzeProject(Directory dir, List<String> createArgs) as
   args.addAll(createArgs);
   args.add(dir.path);
   int code = await runner.run(args);
-  expect(code, equals(0));
+  expect(code, 0);
 
   String mainPath = path.join(dir.path, 'lib', 'main.dart');
   expect(new File(mainPath).existsSync(), true);

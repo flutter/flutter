@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui show ImageFilter;
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -374,6 +375,8 @@ class RenderAspectRatio extends RenderProxyBox {
     RenderBox child,
     double aspectRatio
   }) : _aspectRatio = aspectRatio, super(child) {
+    assert(_aspectRatio > 0.0);
+    assert(_aspectRatio.isFinite);
     assert(_aspectRatio != null);
   }
 
@@ -385,6 +388,8 @@ class RenderAspectRatio extends RenderProxyBox {
   double _aspectRatio;
   void set aspectRatio (double newAspectRatio) {
     assert(newAspectRatio != null);
+    assert(newAspectRatio > 0.0);
+    assert(newAspectRatio.isFinite);
     if (_aspectRatio == newAspectRatio)
       return;
     _aspectRatio = newAspectRatio;
@@ -393,22 +398,26 @@ class RenderAspectRatio extends RenderProxyBox {
 
   @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.debugAssertIsValid());
     return constraints.minWidth;
   }
 
   @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    return constraints.maxWidth;
+    assert(constraints.debugAssertIsValid());
+    return constraints.constrainWidth(constraints.maxHeight * aspectRatio);
   }
 
   @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.debugAssertIsValid());
     return constraints.minHeight;
   }
 
   @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    return constraints.maxHeight;
+    assert(constraints.debugAssertIsValid());
+    return constraints.constrainHeight(constraints.maxWidth / aspectRatio);
   }
 
   Size _applyAspectRatio(BoxConstraints constraints) {
@@ -849,7 +858,13 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   }
 
   T get _defaultClip;
-  T get _clip => _clipper?.getClip(size) ?? _defaultClip;
+  T _clip;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    _clip = _clipper?.getClip(size) ?? _defaultClip;
+  }
 
   @override
   Rect describeApproximatePaintClip(RenderObject child) => _clipper?.getApproximateClipRect(size) ?? Point.origin & size;
@@ -983,6 +998,40 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
       Rect clipBounds = _clip;
       context.pushClipPath(needsCompositing, offset, clipBounds, _getClipPath(clipBounds), super.paint);
     }
+  }
+}
+
+/// Clips its child using a path.
+///
+/// Takes a delegate whose primary method returns a path that should
+/// be used to prevent the child from painting outside the path.
+///
+/// Clipping to a path is expensive. Certain shapes have more
+/// optimized render objects:
+///
+///  * To clip to a rectangle, consider [RenderClipRect].
+///  * To clip to an oval or circle, consider [RenderClipOval].
+///  * To clip to a rounded rectangle, consider [RenderClipRRect].
+class RenderClipPath extends _RenderCustomClip<Path> {
+  RenderClipPath({
+    RenderBox child,
+    CustomClipper<Path> clipper
+  }) : super(child: child, clipper: clipper);
+
+  @override
+  Path get _defaultClip => new Path()..addRect(Point.origin & size);
+
+  @override
+  bool hitTest(HitTestResult result, { Point position }) {
+    if (_clip == null || !_clip.contains(position))
+      return false;
+    return super.hitTest(result, position: position);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null)
+      context.pushClipPath(needsCompositing, offset, Point.origin & size, _clip, super.paint);
   }
 }
 
@@ -1334,12 +1383,20 @@ class RenderFractionalTranslation extends RenderProxyBox {
 /// is provided, to check if the new instance actually represents different
 /// information.
 ///
+/// The most efficient way to trigger a repaint is to supply a repaint argument
+/// to the constructor of the [CustomPainter]. The custom object will listen to
+/// this animation and repaint whenever the animation ticks, avoiding both the
+/// build and layout phases of the pipeline.
+///
 /// The [hitTest] method is invoked when the user interacts with the underlying
 /// render object, to determine if the user hit the object or missed it.
 abstract class CustomPainter {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const CustomPainter();
+  /// Creates a custom painter.
+  ///
+  /// The painter will repaint whenever the [repaint] animation ticks.
+  const CustomPainter({ Animation<dynamic> repaint }) : _repaint = repaint;
+
+  final Animation<dynamic> _repaint;
 
   /// Called whenever the object needs to paint. The given [Canvas] has its
   /// coordinate space configured such that the origin is at the top left of the
@@ -1452,7 +1509,7 @@ class RenderCustomPaint extends RenderProxyBox {
       return;
     CustomPainter oldPainter = _painter;
     _painter = newPainter;
-    _checkForRepaint(_painter, oldPainter);
+    _didUpdatePainter(_painter, oldPainter);
   }
 
   /// The foreground custom paint delegate.
@@ -1477,10 +1534,10 @@ class RenderCustomPaint extends RenderProxyBox {
       return;
     CustomPainter oldPainter = _foregroundPainter;
     _foregroundPainter = newPainter;
-    _checkForRepaint(_foregroundPainter, oldPainter);
+    _didUpdatePainter(_foregroundPainter, oldPainter);
   }
 
-  void _checkForRepaint(CustomPainter newPainter, CustomPainter oldPainter) {
+  void _didUpdatePainter(CustomPainter newPainter, CustomPainter oldPainter) {
     if (newPainter == null) {
       assert(oldPainter != null); // We should be called only for changes.
       markNeedsPaint();
@@ -1489,6 +1546,24 @@ class RenderCustomPaint extends RenderProxyBox {
         newPainter.shouldRepaint(oldPainter)) {
       markNeedsPaint();
     }
+    if (attached) {
+      oldPainter._repaint?.removeListener(markNeedsPaint);
+      newPainter._repaint?.addListener(markNeedsPaint);
+    }
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _painter?._repaint?.addListener(markNeedsPaint);
+    _foregroundPainter?._repaint?.addListener(markNeedsPaint);
+  }
+
+  @override
+  void detach() {
+    _painter?._repaint?.removeListener(markNeedsPaint);
+    _foregroundPainter?._repaint?.removeListener(markNeedsPaint);
+    super.detach();
   }
 
   @override

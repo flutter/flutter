@@ -71,7 +71,7 @@ class SimControl {
     // "template" is but the built-in 'Blank' seems to work. -l causes xcrun to
     // quit after a time limit without killing the simulator. We quit after
     // 1 second.
-    List<String> args = [_xcrunPath, 'instruments', '-w', deviceName, '-t', 'Blank', '-l', '1'];
+    List<String> args = <String>[_xcrunPath, 'instruments', '-w', deviceName, '-t', 'Blank', '-l', '1'];
     printTrace(args.join(' '));
     runDetached(args);
     printStatus('Waiting for iOS Simulator to boot...');
@@ -112,7 +112,7 @@ class SimControl {
 
     // Create new device
     String deviceName = '${deviceType.name} $_kFlutterTestDeviceSuffix';
-    List<String> args = [_xcrunPath, 'simctl', 'create', deviceName, deviceType.identifier, runtime];
+    List<String> args = <String>[_xcrunPath, 'simctl', 'create', deviceName, deviceType.identifier, runtime];
     printTrace(args.join(' '));
     runCheckedSync(args);
 
@@ -275,11 +275,11 @@ class SimControl {
   bool _isAnyConnected() => getConnectedDevices().isNotEmpty;
 
   void install(String deviceId, String appPath) {
-    runCheckedSync([_xcrunPath, 'simctl', 'install', deviceId, appPath]);
+    runCheckedSync(<String>[_xcrunPath, 'simctl', 'install', deviceId, appPath]);
   }
 
   void launch(String deviceId, String appIdentifier, [List<String> launchArgs]) {
-    List<String> args = [_xcrunPath, 'simctl', 'launch', deviceId, appIdentifier];
+    List<String> args = <String>[_xcrunPath, 'simctl', 'launch', deviceId, appIdentifier];
     if (launchArgs != null)
       args.addAll(launchArgs);
     runCheckedSync(args);
@@ -508,7 +508,7 @@ class IOSSimulator extends Device {
   }
 
   bool _applicationIsInstalledAndRunning(ApplicationPackage app) {
-    bool isInstalled = exitsHappy([
+    bool isInstalled = exitsHappy(<String>[
       'xcrun',
       'simctl',
       'get_app_container',
@@ -516,7 +516,7 @@ class IOSSimulator extends Device {
       app.id,
     ]);
 
-    bool isRunning = exitsHappy([
+    bool isRunning = exitsHappy(<String>[
       '/usr/bin/killall',
       'Runner',
     ]);
@@ -730,6 +730,11 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
           category == 'syncdefaultsd' || category == 'companionappd' ||
           category == 'searchd')
         return null;
+
+      // assertiond: assertion failed: 15E65 13E230: assertiond + 15801 [3C808658-78EC-3950-A264-79A64E0E463B]: 0x1
+      if (category == 'assertiond' && content.startsWith('assertion failed: ')
+           && content.endsWith(']: 0x1'))
+         return null;
 
       _lastWasFiltered = false;
 

@@ -36,7 +36,13 @@ typedef Future<Null> RefreshCallback();
 
 /// Where the refresh indicator appears: top for over-scrolls at the
 /// start of the scrollable, bottom for over-scrolls at the end.
-enum RefreshIndicatorLocation { top, bottom }
+enum RefreshIndicatorLocation {
+  /// The refresh indicator should appear at the top of the scrollable.
+  top,
+
+  /// The refresh indicator should appear at the bottom of the scrollable.
+  bottom,
+}
 
 /// A widget that supports the Material "swipe to refresh" idiom.
 ///
@@ -52,6 +58,10 @@ enum RefreshIndicatorLocation { top, bottom }
 ///
 ///  * <https://www.google.com/design/spec/patterns/swipe-to-refresh.html>
 class RefreshIndicator extends StatefulWidget {
+  /// Creates a refresh indicator.
+  ///
+  /// The [refresh] and [child] arguments must be non-null. The default
+  /// [displacement] is 40.0 logical pixels.
   RefreshIndicator({
     Key key,
     this.scrollableKey,
@@ -65,14 +75,13 @@ class RefreshIndicator extends StatefulWidget {
 
   /// Identifies the [Scrollable] descendant of child that will cause the
   /// refresh indicator to appear. Can be null if there's only one
-  /// Scrollable descendant.
+  /// [Scrollable] descendant.
   final Key scrollableKey;
 
   /// The distance from the child's top or bottom edge to where the refresh indicator
   /// will settle. During the drag that exposes the refresh indicator, its actual
   /// displacement may significantly exceed this value.
   final double displacement;
-
 
   /// A function that's called when the user has dragged the refresh indicator
   /// far enough to demonstrate that they want the app to refresh. The returned

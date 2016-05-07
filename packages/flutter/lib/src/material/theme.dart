@@ -8,10 +8,19 @@ import 'theme_data.dart';
 
 export 'theme_data.dart' show ThemeData, ThemeBrightness;
 
+/// The duration over which theme changes animate.
 const Duration kThemeAnimationDuration = const Duration(milliseconds: 200);
 
 /// Applies a theme to descendant widgets.
+///
+/// See also:
+///
+///  * [AnimatedTheme]
+///  * [ThemeData]
 class Theme extends InheritedWidget {
+  /// Applies the given theme [data] to [child].
+  ///
+  /// Both [child] and [data] must be non-null.
   Theme({
     Key key,
     this.data,
@@ -46,6 +55,7 @@ class Theme extends InheritedWidget {
 
 /// An animated value that interpolates [ThemeData]s.
 class ThemeDataTween extends Tween<ThemeData> {
+  /// Creates an interpolation between [begin] and [end].
   ThemeDataTween({ ThemeData begin, ThemeData end }) : super(begin: begin, end: end);
 
   @override
@@ -54,12 +64,20 @@ class ThemeDataTween extends Tween<ThemeData> {
 
 /// Animated version of [Theme] which automatically transitions the colours,
 /// etc, over a given duration whenever the given theme changes.
+///
+/// See also:
+///
+///  * [ThemeData]
 class AnimatedTheme extends ImplicitlyAnimatedWidget {
+  /// Creates an animated theme.
+  ///
+  /// By default, the theme transition uses a linear curve. Both [data] and
+  /// [child] are required.
   AnimatedTheme({
     Key key,
     this.data,
     Curve curve: Curves.linear,
-    Duration duration,
+    Duration duration: kThemeAnimationDuration,
     this.child
   }) : super(key: key, curve: curve, duration: duration) {
     assert(child != null);

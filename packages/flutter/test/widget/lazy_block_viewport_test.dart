@@ -37,19 +37,19 @@ void main() {
 
     FlipWidgetState testWidget = tester.state(find.byType(FlipWidget));
 
-    expect(callbackTracker, equals([0, 1, 2, 3, 4, 5]));
+    expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4, 5]));
 
     callbackTracker.clear();
     testWidget.flip();
     tester.pump();
 
-    expect(callbackTracker, equals([]));
+    expect(callbackTracker, equals(<int>[]));
 
     callbackTracker.clear();
     testWidget.flip();
     tester.pump();
 
-    expect(callbackTracker, equals([0, 1, 2, 3, 4, 5]));
+    expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4, 5]));
   });
 
   testWidgets('LazyBlockViewport vertical', (WidgetTester tester) {
@@ -61,7 +61,7 @@ void main() {
 
     double offset = 300.0;
 
-    IndexedBuilder itemBuilder = (BuildContext context, int i) {
+    IndexedWidgetBuilder itemBuilder = (BuildContext context, int i) {
       callbackTracker.add(i);
       return new Container(
         key: new ValueKey<int>(i),
@@ -84,7 +84,7 @@ void main() {
     tester.pumpWidget(builder());
 
     // 0 is built to find its height
-    expect(callbackTracker, equals([0, 1, 2, 3, 4]));
+    expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4]));
     callbackTracker.clear();
 
     offset = 400.0; // now only 3 should fit, numbered 2-4.
@@ -92,13 +92,13 @@ void main() {
     tester.pumpWidget(builder());
 
     // We build all the children to find their new size.
-    expect(callbackTracker, equals([0, 1, 2, 3, 4]));
+    expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4]));
     callbackTracker.clear();
 
     tester.pumpWidget(builder());
 
     // 0 isn't built because they're not visible.
-    expect(callbackTracker, equals([1, 2, 3, 4]));
+    expect(callbackTracker, equals(<int>[1, 2, 3, 4]));
     callbackTracker.clear();
   });
 
@@ -111,7 +111,7 @@ void main() {
 
     double offset = 300.0;
 
-    IndexedBuilder itemBuilder = (BuildContext context, int i) {
+    IndexedWidgetBuilder itemBuilder = (BuildContext context, int i) {
       callbackTracker.add(i);
       return new Container(
         key: new ValueKey<int>(i),
@@ -135,7 +135,7 @@ void main() {
     tester.pumpWidget(builder());
 
     // 0 is built to find its width
-    expect(callbackTracker, equals([0, 1, 2, 3, 4, 5]));
+    expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4, 5]));
 
     callbackTracker.clear();
 
@@ -144,13 +144,13 @@ void main() {
     tester.pumpWidget(builder());
 
     // We build all the children to find their new size.
-    expect(callbackTracker, equals([0, 1, 2, 3, 4, 5]));
+    expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4, 5]));
     callbackTracker.clear();
 
     tester.pumpWidget(builder());
 
     // 0 isn't built because they're not visible.
-    expect(callbackTracker, equals([1, 2, 3, 4, 5]));
+    expect(callbackTracker, equals(<int>[1, 2, 3, 4, 5]));
     callbackTracker.clear();
   });
 
@@ -158,7 +158,7 @@ void main() {
     List<int> callbackTracker = <int>[];
     List<String> text = <String>[];
 
-    IndexedBuilder itemBuilder = (BuildContext context, int i) {
+    IndexedWidgetBuilder itemBuilder = (BuildContext context, int i) {
       callbackTracker.add(i);
       return new Container(
         key: new ValueKey<int>(i),
@@ -182,18 +182,18 @@ void main() {
 
     tester.pumpWidget(builder());
 
-    expect(callbackTracker, equals([0, 1, 2]));
+    expect(callbackTracker, equals(<int>[0, 1, 2]));
     callbackTracker.clear();
     tester.allWidgets.forEach(collectText);
-    expect(text, equals(['0', '1', '2']));
+    expect(text, equals(<String>['0', '1', '2']));
     text.clear();
 
     tester.pumpWidget(builder());
 
-    expect(callbackTracker, equals([0, 1, 2]));
+    expect(callbackTracker, equals(<int>[0, 1, 2]));
     callbackTracker.clear();
     tester.allWidgets.forEach(collectText);
-    expect(text, equals(['0', '1', '2']));
+    expect(text, equals(<String>['0', '1', '2']));
     text.clear();
   });
 
@@ -201,7 +201,7 @@ void main() {
     StateSetter setState;
     ThemeData themeData = new ThemeData.light();
 
-    IndexedBuilder itemBuilder = (BuildContext context, int i) {
+    IndexedWidgetBuilder itemBuilder = (BuildContext context, int i) {
       return new Container(
         key: new ValueKey<int>(i),
         width: 500.0, // this should be ignored
@@ -242,7 +242,7 @@ void main() {
   });
 
   testWidgets('LazyBlockViewport padding', (WidgetTester tester) {
-    IndexedBuilder itemBuilder = (BuildContext context, int i) {
+    IndexedWidgetBuilder itemBuilder = (BuildContext context, int i) {
       return new Container(
         key: new ValueKey<int>(i),
         width: 500.0, // this should be ignored

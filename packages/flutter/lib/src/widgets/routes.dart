@@ -422,37 +422,15 @@ class _ModalScopeState extends State<_ModalScope> {
       key: new GlobalObjectKey(config.route),
       child: new RepaintBoundary(child: contents)
     );
-    ModalPosition position = config.route.getPosition(context);
-    if (position == null)
-      return contents;
-    return new Positioned(
-      top: position.top,
-      right: position.right,
-      bottom: position.bottom,
-      left: position.left,
-      child: contents
-    );
+    return contents;
   }
 }
 
-/// Where a [ModalRoute] should be positioned within the [Navigator]'s [Overlay].
-class ModalPosition {
-  const ModalPosition({ this.top, this.right, this.bottom, this.left });
-
-  /// The offset of the route's top edge from the top of the overlay.
-  final double top;
-
-  /// The offset of the route's right edge from the right of the overlay.
-  final double right;
-
-  /// The offset of the route's bottom edge from the bottom of the overlay.
-  final double bottom;
-
-  /// The offset of the route's left edge from the left of the overlay.
-  final double left;
-}
-
 /// A route that blocks interaction with previous routes.
+///
+/// ModalRoutes cover the entire [Navigator]. They are not necessarily [opaque],
+/// however; for example, a pop-up menu uses a ModalRoute but only shows the menu
+/// in a small box overlapping the previous route.
 abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T> {
   ModalRoute({
     Completer<T> completer,
@@ -468,7 +446,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   /// Returns the modal route most closely associated with the given context.
   ///
-  /// Returns null if the given context is not associated with a modal route.
+  /// Returns `null` if the given context is not associated with a modal route.
   static ModalRoute<dynamic> of(BuildContext context) {
     _ModalScopeStatus widget = context.inheritFromWidgetOfExactType(_ModalScopeStatus);
     return widget?.route;
@@ -476,11 +454,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
 
   // The API for subclasses to override - used by _ModalScope
-
-  /// Override to provide a position for this route within the [Navigator]'s [Overlay].
-  ///
-  /// By default, the route expands to fill the entire overlay.
-  ModalPosition getPosition(BuildContext context) => null;
 
   /// Override this function to build the primary content of this route.
   ///
@@ -562,6 +535,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   final GlobalKey _subtreeKey = new GlobalKey();
   final PageStorageBucket _storageBucket = new PageStorageBucket();
 
+  // one of the builders
   Widget _buildModalBarrier(BuildContext context) {
     Widget barrier;
     if (barrierColor != null) {
@@ -587,6 +561,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     );
   }
 
+  // one of the builders
   Widget _buildModalScope(BuildContext context) {
     return new _ModalScope(
       key: _scopeKey,

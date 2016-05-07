@@ -395,9 +395,13 @@ class BoxShadow {
 
   final double spreadRadius;
 
+  /// The [blurRadius] in sigmas instead of logical pixels.
+  ///
+  /// See the sigma argument to [MaskFilter.blur].
+  ///
   // See SkBlurMask::ConvertRadiusToSigma().
-  // https://github.com/google/skia/blob/bb5b77db51d2e149ee66db284903572a5aac09be/src/effects/SkBlurMask.cpp#L23
-  double get _blurSigma => blurRadius * 0.57735 + 0.5;
+  // <https://github.com/google/skia/blob/bb5b77db51d2e149ee66db284903572a5aac09be/src/effects/SkBlurMask.cpp#L23>
+  double get blurSigma => blurRadius * 0.57735 + 0.5;
 
   /// Returns a new box shadow with its offset, blurRadius, and spreadRadius scaled by the given factor.
   BoxShadow scale(double factor) {
@@ -1291,7 +1295,7 @@ class _BoxDecorationPainter extends BoxPainter {
     for (BoxShadow boxShadow in _decoration.boxShadow) {
       final Paint paint = new Paint()
         ..color = boxShadow.color
-        ..maskFilter = new MaskFilter.blur(BlurStyle.normal, boxShadow._blurSigma);
+        ..maskFilter = new MaskFilter.blur(BlurStyle.normal, boxShadow.blurSigma);
       final Rect bounds = rect.shift(boxShadow.offset).inflate(boxShadow.spreadRadius);
       _paintBox(canvas, bounds, paint);
     }

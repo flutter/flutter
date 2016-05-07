@@ -34,7 +34,7 @@ void main() {
 
     tester.tap(find.text('X'));
 
-    expect(log, equals([
+    expect(log, equals(<String>[
       'bottom',
       'middle',
       'top',

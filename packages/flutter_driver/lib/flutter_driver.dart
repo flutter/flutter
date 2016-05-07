@@ -15,7 +15,8 @@ export 'src/driver.dart' show
   find,
   CommonFinders,
   EvaluatorFunction,
-  FlutterDriver;
+  FlutterDriver,
+  TracingCategory;
 
 export 'src/error.dart' show
   DriverError,
@@ -32,14 +33,10 @@ export 'src/health.dart' show
   HealthStatus;
 
 export 'src/message.dart' show
-  Message,
   Command,
-  CommandWithTarget,
   Result;
 
 export 'src/timeline_summary.dart' show
-  summarizeTimeline,
-  EventTrace,
   TimelineSummary;
 
 export 'src/timeline.dart' show

@@ -126,7 +126,7 @@ class MojoClient {
 
   Future<mojo.MojoDataPipeConsumer> readDataPipe(dynamic url, { Map<String, String> headers }) async {
     mojom.UrlLoaderProxy loader = new mojom.UrlLoaderProxy.unbound();
-    mojom.UrlRequest request = _prepareRequest('get', url, headers);
+    mojom.UrlRequest request = _prepareRequest('GET', url, headers);
     mojom.UrlResponse response;
     try {
       networkService.ptr.createUrlLoader(loader);

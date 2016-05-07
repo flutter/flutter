@@ -5,14 +5,15 @@
 import 'dart:async';
 
 import 'package:sky_services/flutter/platform/system_chrome.mojom.dart' as mojom;
+import 'package:sky_services/flutter/platform/system_chrome.mojom.dart';
 
 import 'shell.dart';
 
-export 'package:sky_services/flutter/platform/system_chrome.mojom.dart' show DeviceOrientation, SystemUIOverlay;
+export 'package:sky_services/flutter/platform/system_chrome.mojom.dart' show DeviceOrientation;
 
 mojom.SystemChromeProxy _initSystemChromeProxy() {
   mojom.SystemChromeProxy proxy = new mojom.SystemChromeProxy.unbound();
-  shell.connectToViewAssociatedService(proxy);
+  shell.connectToService('mojo:flutter_platform', proxy);
   return proxy;
 }
 
@@ -27,7 +28,7 @@ class SystemChrome {
   ///
   /// Arguments:
   ///
-  ///  * `device_orientation_mask`: A mask of `DeviceOrientation` enum values.
+  ///  * [deviceOrientationMask]: A mask of [DeviceOrientation] enum values.
   ///    The value 0 is synonymous with having all options enabled.
   ///
   /// Return Value:
@@ -44,7 +45,7 @@ class SystemChrome {
   ///
   /// Arguments:
   ///
-  ///  * `style`: A mask of `SystemUIOverlay` enum values that denotes the overlays
+  ///  * [style]: A mask of [SystemUIOverlay] enum values that denotes the overlays
   ///    to show.
   ///
   /// Return Value:

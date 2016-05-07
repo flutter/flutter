@@ -276,6 +276,7 @@ class ThemeData {
   /// The color of text selections in text fields, such as [Input].
   final Color textSelectionColor;
 
+  /// The color of the handles used to adjust what part of the text is currently selected.
   final Color textSelectionHandleColor;
 
   /// A color that contrasts with the [primaryColor], e.g. used as the
@@ -298,6 +299,7 @@ class ThemeData {
   /// A text theme that contrasts with the primary color.
   final TextTheme primaryTextTheme;
 
+  /// An icon theme that contrasts with the primary color.
   final IconThemeData primaryIconTheme;
 
   /// Linearly interpolate between two themes.

@@ -23,7 +23,7 @@ class Adb {
 
   bool exists() {
     try {
-      runCheckedSync([adbPath, 'version']);
+      runCheckedSync(<String>[adbPath, 'version']);
       return true;
     } catch (exception) {
       return false;
@@ -36,18 +36,18 @@ class Adb {
   ///     Revision eac51f2bb6a8-android
   ///
   /// This method throws if `adb version` fails.
-  String getVersion() => runCheckedSync([adbPath, 'version']);
+  String getVersion() => runCheckedSync(<String>[adbPath, 'version']);
 
   /// Starts the adb server. This will throw if there's an problem starting the
   /// adb server.
   void startServer() {
-    runCheckedSync([adbPath, 'start-server']);
+    runCheckedSync(<String>[adbPath, 'start-server']);
   }
 
   /// Stops the adb server. This will throw if there's an problem stopping the
   /// adb server.
   void killServer() {
-    runCheckedSync([adbPath, 'kill-server']);
+    runCheckedSync(<String>[adbPath, 'kill-server']);
   }
 
   /// Ask the ADB server for its internal version number.
@@ -166,7 +166,7 @@ class AdbDevice {
     // 'TA95000FQA             device usb:340787200X product:peregrine_retus model:XT1045 device:peregrine'
     // '015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper'
 
-    Match match = deviceRegex.firstMatch(deviceInfo);
+    Match match = kDeviceRegex.firstMatch(deviceInfo);
     id = match[1];
     status = match[2];
 
@@ -185,7 +185,7 @@ class AdbDevice {
       modelID = cleanAdbDeviceName(modelID);
   }
 
-  static final RegExp deviceRegex = new RegExp(r'^(\S+)\s+(\S+)(.*)');
+  static final RegExp kDeviceRegex = new RegExp(r'^(\S+)\s+(\S+)(.*)');
 
   /// Always non-null; something like `TA95000FQA`.
   String id;

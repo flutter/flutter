@@ -4,11 +4,9 @@
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sprites/flutter_sprites.dart';
-import 'package:vector_math/vector_math_64.dart' as vec;
 
 ImageMap _images;
 SpriteSheet _sprites;
@@ -288,7 +286,7 @@ class _ProgressCircle extends NodeWithSize {
     Paint circlePaint = new Paint()
       ..color = Colors.white30
       ..strokeWidth = 24.0
-      ..style = ui.PaintingStyle.stroke;
+      ..style = PaintingStyle.stroke;
 
     canvas.drawCircle(
       new Point(size.width / 2.0, size.height / 2.0),
@@ -299,7 +297,7 @@ class _ProgressCircle extends NodeWithSize {
     Paint pathPaint = new Paint()
       ..color = Colors.purple[500]
       ..strokeWidth = 25.0
-      ..style = ui.PaintingStyle.stroke;
+      ..style = PaintingStyle.stroke;
 
     double angle = value.clamp(0.0, 1.0) * _kSweep;
     Path path = new Path()
@@ -381,7 +379,7 @@ class _JumpingJackSide extends Node {
 
   void animateJumping() {
     actions.stopAll();
-    actions.run(new ActionSequence([
+    actions.run(new ActionSequence(<Action>[
       _createPoseAction(null, 0, 0.5),
       new ActionCallFunction(_animateJumpingLoop)
     ]));
@@ -582,7 +580,7 @@ class _FireworksNode extends NodeWithSize {
       speedVar: 50.0,
       startSize: 1.0,
       startSizeVar: 0.5,
-      gravity: new vec.Vector2(0.0, 30.0),
+      gravity: const Offset(0.0, 30.0),
       colorSequence: new ColorSequence.fromStartAndEndColor(startColor, endColor)
     );
     system.position = new Point(randomDouble() * 1024.0, randomDouble() * 1024.0);

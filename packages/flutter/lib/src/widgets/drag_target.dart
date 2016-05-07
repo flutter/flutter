@@ -348,6 +348,7 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
 
   @override
   Widget build(BuildContext context) {
+    assert(config.builder != null);
     return new MetaData(
       metaData: this,
       behavior: HitTestBehavior.translucent,

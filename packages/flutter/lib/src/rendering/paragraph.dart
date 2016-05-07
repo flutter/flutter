@@ -11,9 +11,9 @@ import 'semantics.dart';
 /// A render object that displays a paragraph of text
 class RenderParagraph extends RenderBox {
 
-  RenderParagraph(
-    TextSpan text
-  ) : _textPainter = new TextPainter(text) {
+  RenderParagraph(TextSpan text, {
+    TextAlign textAlign
+  }) : _textPainter = new TextPainter(text: text, textAlign: textAlign) {
     assert(text != null);
     assert(text.debugAssertValid());
   }
@@ -23,11 +23,20 @@ class RenderParagraph extends RenderBox {
   /// The text to display
   TextSpan get text => _textPainter.text;
   void set text(TextSpan value) {
-    assert(value.debugAssertValid());
+    assert(value != null);
     if (_textPainter.text == value)
       return;
     _textPainter.text = value;
     markNeedsLayout();
+  }
+
+  /// How the text should be aligned horizontally.
+  TextAlign get textAlign => _textPainter.textAlign;
+  void set textAlign(TextAlign value) {
+    if (_textPainter.textAlign == value)
+      return;
+    _textPainter.textAlign = value;
+    markNeedsPaint();
   }
 
   void _layoutText(BoxConstraints constraints) {
@@ -101,6 +110,9 @@ class RenderParagraph extends RenderBox {
     //
     // TODO(abarth): Make computing the min/max intrinsic width/height
     // a non-destructive operation.
+    //
+    // If you remove this call, make sure that changing the textAlign still
+    // works properly.
     _layoutText(constraints);
     _textPainter.paint(context.canvas, offset);
   }

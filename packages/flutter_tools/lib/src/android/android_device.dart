@@ -49,21 +49,49 @@ class AndroidDevice extends Device {
   final String modelID;
   final String deviceCodeName;
 
+  Map<String, String> _properties;
   bool _isLocalEmulator;
+  TargetPlatform _platform;
+
+  String _getProperty(String name) {
+    if (_properties == null) {
+      String getpropOutput = runCheckedSync(adbCommandForDevice(<String>['shell', 'getprop']));
+      RegExp propertyExp = new RegExp(r'\[(.*?)\]: \[(.*?)\]');
+      _properties = <String, String>{};
+      for (Match m in propertyExp.allMatches(getpropOutput)) {
+        _properties[m.group(1)] = m.group(2);
+      }
+    }
+    return _properties[name];
+  }
 
   @override
   bool get isLocalEmulator {
     if (_isLocalEmulator == null) {
+      String characteristics = _getProperty('ro.build.characteristics');
+      _isLocalEmulator = characteristics != null && characteristics.contains('emulator');
+    }
+    return _isLocalEmulator;
+  }
+
+  @override
+  TargetPlatform get platform {
+    if (_platform == null) {
       // http://developer.android.com/ndk/guides/abis.html (x86, armeabi-v7a, ...)
-      try {
-        String value = runCheckedSync(adbCommandForDevice(['shell', 'getprop', 'ro.product.cpu.abi']));
-        _isLocalEmulator = value.startsWith('x86');
-      } catch (error) {
-        _isLocalEmulator = false;
+      switch (_getProperty('ro.product.cpu.abi')) {
+        case 'x86_64':
+          _platform = TargetPlatform.android_x64;
+          break;
+        case 'x86':
+          _platform = TargetPlatform.android_x86;
+          break;
+        default:
+          _platform = TargetPlatform.android_arm;
+          break;
       }
     }
 
-    return _isLocalEmulator;
+    return _platform;
   }
 
   _AdbLogReader _logReader;
@@ -121,9 +149,7 @@ class AndroidDevice extends Device {
       runCheckedSync(<String>[androidSdk.adbPath, 'start-server']);
 
       // Sample output: '22'
-      String sdkVersion = runCheckedSync(
-        adbCommandForDevice(<String>['shell', 'getprop', 'ro.build.version.sdk'])
-      ).trimRight();
+      String sdkVersion = _getProperty('ro.build.version.sdk');
 
       int sdkVersionParsed = int.parse(sdkVersion, onError: (String source) => null);
       if (sdkVersionParsed == null) {
@@ -164,7 +190,7 @@ class AndroidDevice extends Device {
   @override
   bool isAppInstalled(ApplicationPackage app) {
     // This call takes 400ms - 600ms.
-    if (runCheckedSync(adbCommandForDevice(['shell', 'pm', 'path', app.id])).isEmpty)
+    if (runCheckedSync(adbCommandForDevice(<String>['shell', 'pm', 'path', app.id])).isEmpty)
       return false;
 
     // Check the application SHA.
@@ -181,7 +207,14 @@ class AndroidDevice extends Device {
     if (!_checkForSupportedAdbVersion() || !_checkForSupportedAndroidVersion())
       return false;
 
-    runCheckedSync(adbCommandForDevice(<String>['install', '-r', app.localPath]));
+    String installOut = runCheckedSync(adbCommandForDevice(<String>['install', '-r', app.localPath]));
+    RegExp failureExp = new RegExp(r'^Failure.*$', multiLine: true);
+    String failure = failureExp.stringMatch(installOut);
+    if (failure != null) {
+      printError('Package install error: $failure');
+      return false;
+    }
+
     runCheckedSync(adbCommandForDevice(<String>['shell', 'echo', '-n', _getSourceSha1(app), '>', _getDeviceSha1Path(app)]));
     return true;
   }
@@ -304,6 +337,9 @@ class AndroidDevice extends Device {
       includeRobotoFonts: false
     );
 
+    if (localBundlePath == null)
+      return new LaunchResult.failed();
+
     printTrace('Starting bundle for $this.');
 
     return startBundle(
@@ -320,9 +356,6 @@ class AndroidDevice extends Device {
     List<String> command = adbCommandForDevice(<String>['shell', 'am', 'force-stop', app.id]);
     return runCommandAndStreamOutput(command).then((int exitCode) => exitCode == 0);
   }
-
-  @override
-  TargetPlatform get platform => isLocalEmulator ? TargetPlatform.android_x64 : TargetPlatform.android_arm;
 
   @override
   void clearLogs() {
@@ -394,11 +427,14 @@ class AndroidDevice extends Device {
   }
 }
 
+// 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper
+final RegExp _kDeviceRegex = new RegExp(r'^(\S+)\s+(\S+)(.*)');
+
 /// Return the list of connected ADB devices.
 ///
 /// [mockAdbOutput] is public for testing.
 List<AndroidDevice> getAdbDevices({ String mockAdbOutput }) {
-  List<AndroidDevice> devices = [];
+  List<AndroidDevice> devices = <AndroidDevice>[];
   List<String> output;
 
   if (mockAdbOutput == null) {
@@ -410,15 +446,6 @@ List<AndroidDevice> getAdbDevices({ String mockAdbOutput }) {
     output = mockAdbOutput.trim().split('\n');
   }
 
-  // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper
-  RegExp deviceRegExLong = new RegExp(
-      r'^(\S+)\s+device\s+.*product:(\S+)\s+model:(\S+)\s+device:(\S+)$');
-
-  // 0149947A0D01500C       device usb:340787200X
-  // emulator-5612          host features:shell_2
-  // emulator-5554          offline
-  RegExp deviceRegExShort = new RegExp(r'^(\S+)\s+(\S+)(\s+\S+)?$');
-
   for (String line in output) {
     // Skip lines like: * daemon started successfully *
     if (line.startsWith('* daemon '))
@@ -427,26 +454,26 @@ List<AndroidDevice> getAdbDevices({ String mockAdbOutput }) {
     if (line.startsWith('List of devices'))
       continue;
 
-    if (deviceRegExLong.hasMatch(line)) {
-      Match match = deviceRegExLong.firstMatch(line);
-      String deviceID = match[1];
-      String productID = match[2];
-      String modelID = match[3];
-      String deviceCodeName = match[4];
+    if (_kDeviceRegex.hasMatch(line)) {
+      Match match = _kDeviceRegex.firstMatch(line);
 
-      if (modelID != null)
-        modelID = cleanAdbDeviceName(modelID);
-
-      devices.add(new AndroidDevice(
-        deviceID,
-        productID: productID,
-        modelID: modelID,
-        deviceCodeName: deviceCodeName
-      ));
-    } else if (deviceRegExShort.hasMatch(line)) {
-      Match match = deviceRegExShort.firstMatch(line);
       String deviceID = match[1];
       String deviceState = match[2];
+      String rest = match[3];
+
+      Map<String, String> info = <String, String>{};
+      if (rest != null && rest.isNotEmpty) {
+        rest = rest.trim();
+        for (String data in rest.split(' ')) {
+          if (data.contains(':')) {
+            List<String> fields = data.split(':');
+            info[fields[0]] = fields[1];
+          }
+        }
+      }
+
+      if (info['model'] != null)
+        info['model'] = cleanAdbDeviceName(info['model']);
 
       if (deviceState == 'unauthorized') {
         printError(
@@ -456,7 +483,12 @@ List<AndroidDevice> getAdbDevices({ String mockAdbOutput }) {
       } else if (deviceState == 'offline') {
         printError('Device $deviceID is offline.');
       } else {
-        devices.add(new AndroidDevice(deviceID, modelID: deviceID));
+        devices.add(new AndroidDevice(
+          deviceID,
+          productID: info['product'],
+          modelID: info['model'] ?? deviceID,
+          deviceCodeName: info['device']
+        ));
       }
     } else {
       printError(

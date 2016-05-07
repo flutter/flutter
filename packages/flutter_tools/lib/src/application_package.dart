@@ -103,6 +103,7 @@ ApplicationPackage getApplicationPackageForPlatform(TargetPlatform platform) {
   switch (platform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_x64:
+    case TargetPlatform.android_x86:
       return new AndroidApk.fromCurrentDirectory();
     case TargetPlatform.ios:
       return new IOSApp.fromCurrentDirectory();
@@ -122,6 +123,7 @@ class ApplicationPackageStore {
     switch (platform) {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_x64:
+      case TargetPlatform.android_x86:
         android ??= new AndroidApk.fromCurrentDirectory();
         return android;
       case TargetPlatform.ios:

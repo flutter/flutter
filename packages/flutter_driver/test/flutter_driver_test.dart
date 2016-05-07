@@ -32,7 +32,7 @@ void main() {
       mockVM = new MockVM();
       mockIsolate = new MockIsolate();
       when(mockClient.getVM()).thenReturn(mockVM);
-      when(mockVM.isolates).thenReturn([mockIsolate]);
+      when(mockVM.isolates).thenReturn(<VMRunnableIsolate>[mockIsolate]);
       when(mockIsolate.loadRunnable()).thenReturn(mockIsolate);
       when(mockIsolate.invokeExtension(any, any))
           .thenReturn(new Future<Map<String, dynamic>>.value(<String, String>{'status': 'ok'}));
@@ -126,7 +126,7 @@ void main() {
 
       test('finds by ValueKey', () async {
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
-          expect(i.positionalArguments[1], {
+          expect(i.positionalArguments[1], <String, String>{
             'command': 'tap',
             'finderType': 'ByValueKey',
             'keyValueString': 'foo',
@@ -169,7 +169,7 @@ void main() {
             'keyValueString': '123',
             'keyValueType': 'int'
           });
-          return new Future<Map<String, dynamic>>.value({
+          return new Future<Map<String, dynamic>>.value(<String, String>{
             'text': 'hello'
           });
         });
@@ -191,7 +191,7 @@ void main() {
             'text': 'foo',
             'timeout': '1000',
           });
-          return new Future<Map<String, dynamic>>.value({});
+          return new Future<Map<String, dynamic>>.value(<String, dynamic>{});
         });
         await driver.waitFor(find.byTooltip('foo'), timeout: new Duration(seconds: 1));
       });
@@ -203,13 +203,13 @@ void main() {
         bool startTracingCalled = false;
         bool stopTracingCalled = false;
 
-        when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals({'recordedStreams': '[all]'}))))
+        when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[all]'}))))
           .thenAnswer((_) async {
             startTracingCalled = true;
             return null;
           });
 
-        when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals({'recordedStreams': '[]'}))))
+        when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[]'}))))
           .thenAnswer((_) async {
             stopTracingCalled = true;
             return null;
@@ -217,8 +217,8 @@ void main() {
 
         when(mockPeer.sendRequest('_getVMTimeline')).thenAnswer((_) async {
           return <String, dynamic> {
-            'traceEvents': [
-              {
+            'traceEvents': <dynamic>[
+              <String, String>{
                 'name': 'test event'
               }
             ],
@@ -228,6 +228,50 @@ void main() {
         Timeline timeline = await driver.traceAction(() {
           actionCalled = true;
         });
+
+        expect(actionCalled, isTrue);
+        expect(startTracingCalled, isTrue);
+        expect(stopTracingCalled, isTrue);
+        expect(timeline.events.single.name, 'test event');
+      });
+    });
+
+    group('traceAction categories', () {
+      test('specify non-default categories', () async {
+        bool actionCalled = false;
+        bool startTracingCalled = false;
+        bool stopTracingCalled = false;
+
+        when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[Dart, GC, Compiler]'}))))
+          .thenAnswer((_) async {
+            startTracingCalled = true;
+            return null;
+          });
+
+        when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[]'}))))
+          .thenAnswer((_) async {
+            stopTracingCalled = true;
+            return null;
+          });
+
+        when(mockPeer.sendRequest('_getVMTimeline')).thenAnswer((_) async {
+          return <String, dynamic> {
+            'traceEvents': <dynamic>[
+              <String, String>{
+                'name': 'test event'
+              }
+            ],
+          };
+        });
+
+        Timeline timeline = await driver.traceAction(() {
+          actionCalled = true;
+        },
+        categories: const <TracingCategory>[
+          TracingCategory.dart,
+          TracingCategory.gc,
+          TracingCategory.compiler
+        ]);
 
         expect(actionCalled, isTrue);
         expect(startTracingCalled, isTrue);

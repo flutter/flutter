@@ -8,9 +8,9 @@ import 'package:flutter_driver/src/timeline.dart';
 void main() {
   group('Timeline', () {
     test('parses JSON', () {
-      Timeline timeline = new Timeline.fromJson({
-        'traceEvents': [
-          {
+      Timeline timeline = new Timeline.fromJson(<String, dynamic>{
+        'traceEvents': <Map<String, dynamic>>[
+          <String, dynamic>{
             'name': 'test event',
             'cat': 'test category',
             'ph': 'B',
@@ -19,12 +19,12 @@ void main() {
             'dur': 345,
             'ts': 456,
             'tts': 567,
-            'args': {
+            'args': <String, dynamic>{
               'arg1': true,
             }
           },
           // Tests that we don't choke on missing data
-          {}
+          <String, dynamic>{}
         ]
       });
 
@@ -39,7 +39,7 @@ void main() {
       expect(e1.duration, const Duration(microseconds: 345));
       expect(e1.timestampMicros, 456);
       expect(e1.threadTimestampMicros, 567);
-      expect(e1.arguments, { 'arg1': true });
+      expect(e1.arguments, <String, dynamic>{ 'arg1': true });
 
       TimelineEvent e2 = timeline.events[1];
       expect(e2.name, isNull);

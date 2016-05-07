@@ -146,8 +146,7 @@ class _SemanticsDebuggerEntry {
   static const TextStyle textStyles = const TextStyle(
     color: const Color(0xFF000000),
     fontSize: 10.0,
-    height: 0.8,
-    textAlign: TextAlign.center
+    height: 0.8
   );
 
   TextPainter textPainter;
@@ -185,6 +184,7 @@ class _SemanticsDebuggerEntry {
       textPainter ??= new TextPainter();
       textPainter
         ..text = new TextSpan(style: textStyles, text: message)
+        ..textAlign = TextAlign.center
         ..layout(maxWidth: rect.width);
     } else {
       textPainter = null;

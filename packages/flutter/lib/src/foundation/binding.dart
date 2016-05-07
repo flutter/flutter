@@ -239,7 +239,7 @@ abstract class BindingBase {
         ));
         return new developer.ServiceExtensionResponse.error(
           developer.ServiceExtensionResponse.extensionError,
-          JSON.encode({
+          JSON.encode(<String, dynamic>{
             'exception': caughtException.toString(),
             'stack': caughtStack.toString(),
             'method': method

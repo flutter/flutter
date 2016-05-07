@@ -25,7 +25,7 @@ class TapResult extends Result {
   }
 
   @override
-  Map<String, dynamic> toJson() => {};
+  Map<String, dynamic> toJson() => <String, dynamic>{};
 }
 
 
@@ -65,12 +65,25 @@ class Scroll extends CommandWithTarget {
   final int frequency;
 
   @override
-  Map<String, String> serialize() => super.serialize()..addAll({
+  Map<String, String> serialize() => super.serialize()..addAll(<String, String>{
     'dx': '$dx',
     'dy': '$dy',
     'duration': '${duration.inMicroseconds}',
     'frequency': '$frequency',
   });
+}
+
+/// Command the driver to ensure that the element represented by [finder]
+/// has been scrolled completely into view.
+class ScrollIntoView extends CommandWithTarget {
+  @override
+  final String kind = 'scrollIntoView';
+
+  ScrollIntoView(SerializableFinder finder) : super(finder);
+
+  static ScrollIntoView deserialize(Map<String, dynamic> json) {
+    return new ScrollIntoView(SerializableFinder.deserialize(json));
+  }
 }
 
 class ScrollResult extends Result {
@@ -79,5 +92,5 @@ class ScrollResult extends Result {
   }
 
   @override
-  Map<String, dynamic> toJson() => {};
+  Map<String, dynamic> toJson() => <String, dynamic>{};
 }

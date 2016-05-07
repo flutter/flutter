@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 typedef Widget GalleryDemoBuilder();
@@ -21,8 +23,13 @@ class GalleryItem extends StatelessWidget {
       leading: leading,
       title: new Text(title),
       onTap: () {
-        if (routeName != null)
+        if (routeName != null) {
+          Timeline.instantSync('Start Transition', arguments: <String, String>{
+            'from': '/',
+            'to': routeName
+          });
           Navigator.pushNamed(context, routeName);
+        }
       }
     );
   }

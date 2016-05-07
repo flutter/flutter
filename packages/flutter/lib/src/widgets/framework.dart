@@ -451,7 +451,7 @@ abstract class State<T extends StatefulWidget> {
   /// Called when an Inherited widget in the ancestor chain has changed. Usually
   /// there is nothing to do here; whenever this is called, build() is also
   /// called.
-  void dependenciesChanged(Type affectedWidgetType) { }
+  void dependenciesChanged() { }
 
   @override
   String toString() {
@@ -1120,37 +1120,50 @@ abstract class Element implements BuildContext {
     element.visitChildren(_activateRecursively);
   }
 
+  /// Called when a previously de-activated widget (see [deactivate]) is reused
+  /// instead of being unmounted (see [unmount]).
   void activate() {
     assert(_debugLifecycleState == _ElementLifecycle.inactive);
     assert(widget != null);
     assert(depth != null);
     assert(!_active);
     _active = true;
+    // We unregistered our dependencies in deactivate, but never cleared the list.
+    // Since we're going to be reused, let's clear our list now.
+    _dependencies?.clear();
     _updateInheritance();
     assert(() { _debugLifecycleState = _ElementLifecycle.active; return true; });
   }
 
+  // TODO(ianh): Define activation/deactivation thoroughly (other methods point
+  // here for details).
   void deactivate() {
     assert(_debugLifecycleState == _ElementLifecycle.active);
     assert(widget != null);
     assert(depth != null);
     assert(_active);
-    if (_dependencies != null) {
+    if (_dependencies != null && _dependencies.length > 0) {
       for (InheritedElement dependency in _dependencies)
         dependency._dependents.remove(this);
-      _dependencies.clear();
+      // For expediency, we don't actually clear the list here, even though it's
+      // no longer representative of what we are registered with. If we never
+      // get re-used, it doesn't matter. If we do, then we'll clear the list in
+      // activate(). The benefit of this is that it allows BuildableElement's
+      // activate() implementation to decide whether to rebuild based on whether
+      // we had dependencies here.
     }
     _inheritedWidgets = null;
     _active = false;
     assert(() { _debugLifecycleState = _ElementLifecycle.inactive; return true; });
   }
 
-  /// Called after children have been deactivated.
+  /// Called after children have been deactivated (see [deactivate]).
   void debugDeactivated() {
     assert(_debugLifecycleState == _ElementLifecycle.inactive);
   }
 
-  /// Called when an Element is removed from the tree permanently.
+  /// Called when an Element is removed from the tree permanently after having
+  /// been deactivated (see [deactivate]).
   void unmount() {
     assert(_debugLifecycleState == _ElementLifecycle.inactive);
     assert(widget != null);
@@ -1168,6 +1181,7 @@ abstract class Element implements BuildContext {
 
   Map<Type, InheritedElement> _inheritedWidgets;
   Set<InheritedElement> _dependencies;
+  bool _hadUnsatisfiedDependencies = false;
 
   @override
   InheritedWidget inheritFromWidgetOfExactType(Type targetType) {
@@ -1179,6 +1193,7 @@ abstract class Element implements BuildContext {
       ancestor._dependents.add(this);
       return ancestor.widget;
     }
+    _hadUnsatisfiedDependencies = true;
     return null;
   }
 
@@ -1229,9 +1244,7 @@ abstract class Element implements BuildContext {
       ancestor = ancestor._parent;
   }
 
-  void dependenciesChanged(Type affectedWidgetType) {
-    assert(false);
-  }
+  void dependenciesChanged();
 
   String debugGetCreatorChain(int limit) {
     List<String> chain = <String>[];
@@ -1402,6 +1415,19 @@ abstract class BuildableElement extends Element {
       owner._debugCurrentBuildTarget = this;
      return true;
     });
+    _hadUnsatisfiedDependencies = false;
+    // In theory, we would also clear our actual _dependencies here. However, to
+    // clear it we'd have to notify each of them, unregister from them, and then
+    // reregister as soon as the build function re-dependended on it. So to
+    // avoid faffing around we just never unregister our dependencies except
+    // when we're deactivated. In principle this means we might be getting
+    // notified about widget types we once inherited from but no longer do, but
+    // in practice this is so rare that the extra cost when it does happen is
+    // far outweighed by the avoided work in the common case.
+    // We _do_ clear the list properly any time our ancestor chain changes in a
+    // way that might result in us getting a different Element's Widget for a
+    // particular Type. This avoids the potential of being registered to
+    // multiple identically-typed Widgets' Elements at the same time.
     performRebuild();
     assert(() {
       assert(owner._debugCurrentBuildTarget == this);
@@ -1415,12 +1441,24 @@ abstract class BuildableElement extends Element {
   void performRebuild();
 
   @override
-  void dependenciesChanged(Type affectedWidgetType) {
+  void dependenciesChanged() {
+    assert(_active);
     markNeedsBuild();
   }
 
   @override
+  void activate() {
+    final bool shouldRebuild = ((_dependencies != null && _dependencies.length > 0) || _hadUnsatisfiedDependencies);
+    super.activate(); // clears _dependencies, and sets active to true
+    if (shouldRebuild) {
+      assert(_active); // otherwise markNeedsBuild is a no-op
+      markNeedsBuild();
+    }
+  }
+
+  @override
   void _reassemble() {
+    assert(_active); // otherwise markNeedsBuild is a no-op
     markNeedsBuild();
     super._reassemble();
   }
@@ -1434,7 +1472,7 @@ abstract class BuildableElement extends Element {
 }
 
 typedef Widget WidgetBuilder(BuildContext context);
-typedef Widget IndexedBuilder(BuildContext context, int index);
+typedef Widget IndexedWidgetBuilder(BuildContext context, int index);
 
 // See ComponentElement._builder.
 Widget _buildNothing(BuildContext context) => null;
@@ -1475,18 +1513,7 @@ abstract class ComponentElement extends BuildableElement {
     Widget built;
     try {
       built = _builder(this);
-      assert(() {
-        if (built == null) {
-          throw new FlutterError(
-            'A build function returned null.\n'
-            'The offending widget is: $widget\n'
-            'Build functions must never return null. '
-            'To return an empty space that causes the building widget to fill available room, return "new Container()". '
-            'To return an empty space that takes as little room as possible, return "new Container(width: 0.0, height: 0.0)".'
-          );
-        }
-        return true;
-      });
+      debugWidgetBuilderValue(widget, built);
     } catch (e, stack) {
       _debugReportException('building $_widget', e, stack);
       built = new ErrorWidget(e);
@@ -1613,6 +1640,10 @@ class StatefulElement extends ComponentElement {
   @override
   void activate() {
     super.activate();
+    // Since the State could have observed the deactivate() and thus disposed of
+    // resources allocated in the build function, we have to rebuild the widget
+    // so that its State can reallocate its resources.
+    assert(_active); // otherwise markNeedsBuild is a no-op
     markNeedsBuild();
   }
 
@@ -1641,9 +1672,9 @@ class StatefulElement extends ComponentElement {
   }
 
   @override
-  void dependenciesChanged(Type affectedWidgetType) {
-    super.dependenciesChanged(affectedWidgetType);
-    _state.dependenciesChanged(affectedWidgetType);
+  void dependenciesChanged() {
+    super.dependenciesChanged();
+    _state.dependenciesChanged();
   }
 
   @override
@@ -1677,12 +1708,12 @@ abstract class _ProxyElement extends ComponentElement {
     assert(widget != newWidget);
     super.update(newWidget);
     assert(widget == newWidget);
-    notifyDescendants(oldWidget);
+    notifyClients(oldWidget);
     _dirty = true;
     rebuild();
   }
 
-  void notifyDescendants(_ProxyWidget oldWidget);
+  void notifyClients(_ProxyWidget oldWidget);
 }
 
 class ParentDataElement<T extends RenderObjectWidget> extends _ProxyElement {
@@ -1722,7 +1753,7 @@ class ParentDataElement<T extends RenderObjectWidget> extends _ProxyElement {
   }
 
   @override
-  void notifyDescendants(ParentDataWidget<T> oldWidget) {
+  void notifyClients(ParentDataWidget<T> oldWidget) {
     void notifyChildren(Element child) {
       if (child is RenderObjectElement) {
         child.updateParentData(widget);
@@ -1765,7 +1796,7 @@ class InheritedElement extends _ProxyElement {
   }
 
   @override
-  void notifyDescendants(InheritedWidget oldWidget) {
+  void notifyClients(InheritedWidget oldWidget) {
     if (!widget.updateShouldNotify(oldWidget))
       return;
     dispatchDependenciesChanged();
@@ -1778,16 +1809,17 @@ class InheritedElement extends _ProxyElement {
   /// function at other times if their inherited information changes outside of
   /// the build phase.
   void dispatchDependenciesChanged() {
-    final Type ourRuntimeType = widget.runtimeType;
-    for (Element dependant in _dependents) {
-      dependant.dependenciesChanged(ourRuntimeType);
+    for (Element dependent in _dependents) {
+      dependent.dependenciesChanged();
       assert(() {
         // check that it really is our descendant
-        Element ancestor = dependant._parent;
+        Element ancestor = dependent._parent;
         while (ancestor != this && ancestor != null)
           ancestor = ancestor._parent;
         return ancestor == this;
       });
+      // check that it really deepends on us
+      assert(dependent._dependencies.contains(this));
     }
   }
 }

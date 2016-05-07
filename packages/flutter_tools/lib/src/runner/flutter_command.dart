@@ -66,7 +66,6 @@ abstract class FlutterCommand extends Command {
       negatable: false,
       help: 'Build a debug version of your app (the default).');
     argParser.addFlag('profile',
-      hide: true,
       negatable: false,
       help: 'Build a profile (ahead of time compilation) version of your app.');
     argParser.addFlag('release',
@@ -75,7 +74,7 @@ abstract class FlutterCommand extends Command {
   }
 
   BuildMode getBuildMode() {
-    List<bool> modeFlags = [argResults['debug'], argResults['profile'], argResults['release']];
+    List<bool> modeFlags = <bool>[argResults['debug'], argResults['profile'], argResults['release']];
     if (modeFlags.where((bool flag) => flag).length > 1)
       throw new UsageException('Only one of --debug, --profile, or --release should be specified.', null);
 
@@ -163,6 +162,9 @@ abstract class FlutterCommand extends Command {
 
     // Populate the cache.
     await cache.updateAll();
+
+    if (flutterUsage.isFirstRun)
+      flutterUsage.printUsage();
 
     _setupToolchain();
     _setupApplicationPackages();

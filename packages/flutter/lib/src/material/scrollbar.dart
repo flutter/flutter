@@ -76,11 +76,19 @@ class _Painter extends CustomPainter {
 /// the scrollableKey parameter can be used to identify the one the Scrollbar
 /// should track.
 class Scrollbar extends StatefulWidget {
+  /// Creates a scrollbar.
+  ///
+  /// The child argument must not be null.
   Scrollbar({ Key key, this.scrollableKey, this.child }) : super(key: key) {
     assert(child != null);
   }
 
+  /// Identifies the [Scrollable] descendant of child that the scrollbar will
+  /// track. Can be null if there's only one [Scrollable] descendant.
   final Key scrollableKey;
+
+  /// The scrollbar will be stacked on top of this child. The scrollbar will
+  /// display when child's [Scrollable] descendant is scrolled.
   final Widget child;
 
   @override

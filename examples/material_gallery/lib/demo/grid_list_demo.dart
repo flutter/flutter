@@ -221,9 +221,8 @@ class GridListDemoState extends State<GridListDemo> {
     ];
 
     final EdgeInsets padding = MediaQuery.of(context).padding;
-    final ModalPosition position = new ModalPosition(
-      right: padding.right + 16.0,
-      top: padding.top + 16.0
+    final RelativeRect position = new RelativeRect.fromLTRB(
+      0.0, padding.top + 16.0, padding.right + 16.0, 0.0
     );
 
     showMenu(context: context, position: position, items: items).then((GridDemoTileStyle value) {
