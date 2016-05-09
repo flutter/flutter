@@ -11,31 +11,25 @@ import os
 SRC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 def get_out_dir(args):
-    target_dir = ''
-    if args.target_os == 'android':
-        target_dir += 'android_'
-    elif args.target_os == 'ios':
-        target_dir += 'ios_'
+    if args.target_os is not None:
+        target_dir = [args.target_os]
+    else:
+        target_dir = ['host']
+
+    target_dir.append(args.runtime_mode)
 
     if args.simulator:
-        target_dir += 'sim_'
+        target_dir.append('sim')
 
     if args.debug:
-        target_dir += 'Debug'
-    else:
-        target_dir += 'Release'
-
-    # Currently --develop does not change the out-dir.
-    if not args.develop:
-        target_dir += '_Deploy'
+        target_dir.append('debug')
 
     if args.android_cpu != 'arm':
-        target_dir += '_' + args.android_cpu
-
+        target_dir.append(args.android_cpu)
     if args.ios_force_armv7:
-        target_dir += '_armv7'
+        target_dir.append('armv7')
 
-    return os.path.join('out', target_dir)
+    return os.path.join('out', '_'.join(target_dir))
 
 def to_command_line(gn_args):
     def merge(key, value):
@@ -45,34 +39,40 @@ def to_command_line(gn_args):
     return [merge(x, y) for x, y in gn_args.iteritems()]
 
 def to_gn_args(args):
+    if args.simulator:
+        if args.target_os == 'android':
+            raise Exception('--simulator is not supported on Android')
+        elif args.target_os == 'ios':
+            if args.runtime_mode != 'develop':
+                raise Exception('iOS simulator only supports develop mode')
+
     gn_args = {}
 
     gn_args['is_debug'] = args.debug
     gn_args['is_clang'] = args.clang and args.target_os not in ['android']
 
-
     ios_target_cpu = 'arm64'
     if args.ios_force_armv7:
       ios_target_cpu = 'arm'
 
+    aot = args.runtime_mode != 'develop'
     if args.target_os == 'android':
         gn_args['target_os'] = 'android'
-        aot = not args.develop
     elif args.target_os == 'ios':
         gn_args['target_os'] = 'ios'
         gn_args['ios_deployment_target'] = '7.0'
         gn_args['use_ios_simulator'] = args.simulator
         if args.simulator:
           gn_args['use_libjpeg_turbo'] = False
-          aot = False
         else:
-          # The iOS simulator snapshot is host targetted
+          # Always use AOT on iOS devices until the interpreter stabilizes
           aot = True
     else:
       gn_args['use_aura'] = False
       gn_args['use_system_harfbuzz'] = False
       aot = False
 
+    gn_args['dart_runtime_mode'] = args.runtime_mode
     if args.target_os == 'android':
         gn_args['target_cpu'] = args.android_cpu
     elif args.target_os == 'ios':
@@ -86,12 +86,6 @@ def to_gn_args(args):
     gn_args['flutter_aot'] = aot
     if aot:
         gn_args['dart_target_arch'] = gn_args['target_cpu']
-        if args.debug:
-            gn_args['dart_runtime_mode'] = 'profile'
-        else:
-            gn_args['dart_runtime_mode'] = 'release'
-    else:
-        gn_args['dart_runtime_mode'] = 'develop'
 
     gn_args['dart_experimental_interpreter'] = args.experimental_interpreter
 
@@ -126,13 +120,10 @@ def parse_args(args):
   args = args[1:]
   parser = argparse.ArgumentParser(description='A script run` gn gen`.')
 
-  parser.add_argument('--debug', default=True, action='store_true')
-  parser.add_argument('--release', default=False, dest='debug', action='store_false')
+  parser.add_argument('--debug', default=False, action='store_true')
 
-  # Deploy is a placeholder for https://github.com/flutter/flutter/issues/3263
-  # Adding it now unblocks bot/tool work.
-  parser.add_argument('--develop', default=True, action='store_true')
-  parser.add_argument('--deploy', default=False, dest='develop', action='store_false')
+  parser.add_argument('--runtime-mode', type=str, choices=['develop', 'profile', 'release'], default='develop')
+
   parser.add_argument('--experimental-interpreter', default=False, dest='experimental_interpreter', action='store_true')
 
   parser.add_argument('--target-os', type=str, choices=['android', 'ios'])

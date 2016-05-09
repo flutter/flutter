@@ -4,5 +4,5 @@ set -ex
 PATH="$HOME/depot_tools:$PATH"
 
 sky/tools/gn --debug
-ninja -C out/Debug generate_dart_ui
+ninja -C out/host_develop_debug generate_dart_ui
 travis/analyze.sh

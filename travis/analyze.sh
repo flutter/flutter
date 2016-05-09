@@ -10,7 +10,7 @@ RESULTS=`dartanalyzer                                                          \
   --strong-hints                                                               \
   --fatal-hints                                                                \
   --lints                                                                      \
-  out/Debug/gen/sky/bindings/dart_ui.dart                                      \
+  out/host_develop_debug/gen/sky/bindings/dart_ui.dart                         \
   2>&1                                                                         \
   | grep -v "\[error\] Target of URI does not exist: 'dart:mojo.internal'"     \
   | grep -v "\[error\] Native functions can only be declared in the SDK and code that is loaded through native extensions" \
@@ -23,7 +23,7 @@ RESULTS=`dartanalyzer                                                          \
   | grep -Ev "Unused import .+dart_ui\.dart"                                   \
   | grep -v "\[info\] TODO"                                                    \
   | grep -Ev "[0-9]+ errors.*found."                                           \
-  | grep -v "Analyzing \[out/Debug/gen/sky/bindings/dart_ui.dart\]\.\.\."`
+  | grep -v "Analyzing \[out/host_develop_debug/gen/sky/bindings/dart_ui.dart\]\.\.\."`
 
 echo "$RESULTS"
 if [ -n "$RESULTS" ];
