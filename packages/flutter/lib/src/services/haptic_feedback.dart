@@ -10,7 +10,7 @@ import 'shell.dart';
 
 mojom.HapticFeedbackProxy _initHapticFeedbackProxy() {
   mojom.HapticFeedbackProxy proxy = new mojom.HapticFeedbackProxy.unbound();
-  shell.connectToViewAssociatedService(proxy);
+  shell.connectToService('mojo:flutter_platform', proxy);
   return proxy;
 }
 
