@@ -45,6 +45,7 @@ export 'package:flutter/rendering.dart' show
     RenderObjectPainter,
     ShaderCallback,
     SingleChildLayoutDelegate,
+    TextOverflow,
     ValueChanged,
     ViewportAnchor,
     ViewportDimensions,
@@ -1904,8 +1905,16 @@ class RichText extends LeafRenderObjectWidget {
   /// Creates a paragraph of rich text.
   ///
   /// The [text] argument is required to be non-null.
-  RichText({ Key key, this.text, this.textAlign }) : super(key: key) {
+  RichText({
+    Key key,
+    this.text,
+    this.textAlign,
+    this.softWrap: true,
+    this.overflow: TextOverflow.clip
+  }) : super(key: key) {
     assert(text != null);
+    assert(softWrap != null);
+    assert(overflow != null);
   }
 
   /// The text to display in this widget.
@@ -1914,16 +1923,30 @@ class RichText extends LeafRenderObjectWidget {
   /// How the text should be aligned horizontally.
   final TextAlign textAlign;
 
+  /// Whether the text should break at soft line breaks.
+  ///
+  /// If false, the glyphs in the text will be positioned as if there was unlimited horizontal space.
+  final bool softWrap;
+
+  /// How visual overflow should be handled.
+  final TextOverflow overflow;
+
   @override
   RenderParagraph createRenderObject(BuildContext context) {
-    return new RenderParagraph(text, textAlign: textAlign);
+    return new RenderParagraph(text,
+      textAlign: textAlign,
+      softWrap: softWrap,
+      overflow: overflow
+    );
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderParagraph renderObject) {
     renderObject
       ..text = text
-      ..textAlign = textAlign;
+      ..textAlign = textAlign
+      ..softWrap = softWrap
+      ..overflow = overflow;
   }
 }
 
@@ -1937,16 +1960,24 @@ class DefaultTextStyle extends InheritedWidget {
     Key key,
     this.style,
     this.textAlign,
+    this.softWrap: true,
+    this.overflow: TextOverflow.clip,
     Widget child
   }) : super(key: key, child: child) {
     assert(style != null);
+    assert(softWrap != null);
+    assert(overflow != null);
     assert(child != null);
   }
 
   /// A const-constructible default text style that provides fallback values.
   ///
   /// Returned from [of] when the given [BuildContext] doesn't have an enclosing default text style.
-  const DefaultTextStyle.fallback() : style = const TextStyle(), textAlign = null;
+  const DefaultTextStyle.fallback()
+    : style = const TextStyle(),
+      textAlign = null,
+      softWrap = true,
+      overflow = TextOverflow.clip;
 
   /// Creates a default text style that inherits from the given [BuildContext].
   ///
@@ -1959,6 +1990,8 @@ class DefaultTextStyle extends InheritedWidget {
     BuildContext context,
     TextStyle style,
     TextAlign textAlign,
+    bool softWrap,
+    TextOverflow overflow,
     Widget child
   }) {
     DefaultTextStyle parent = DefaultTextStyle.of(context);
@@ -1966,6 +1999,8 @@ class DefaultTextStyle extends InheritedWidget {
       key: key,
       style: parent.style.merge(style),
       textAlign: textAlign ?? parent.textAlign,
+      softWrap: softWrap ?? parent.softWrap,
+      overflow: overflow ?? parent.overflow,
       child: child
     );
   }
@@ -1975,6 +2010,14 @@ class DefaultTextStyle extends InheritedWidget {
 
   /// How the text should be aligned horizontally.
   final TextAlign textAlign;
+
+  /// Whether the text should break at soft line breaks.
+  ///
+  /// If false, the glyphs in the text will be positioned as if there was unlimited horizontal space.
+  final bool softWrap;
+
+  /// How visual overflow should be handled.
+  final TextOverflow overflow;
 
   /// The closest instance of this class that encloses the given context.
   ///
@@ -2019,7 +2062,13 @@ class Text extends StatelessWidget {
   ///
   /// If the [style] argument is null, the text will use the style from the
   /// closest enclosing [DefaultTextStyle].
-  Text(this.data, { Key key, this.style, this.textAlign }) : super(key: key) {
+  Text(this.data, {
+    Key key,
+    this.style,
+    this.textAlign,
+    this.softWrap,
+    this.overflow
+  }) : super(key: key) {
     assert(data != null);
   }
 
@@ -2036,21 +2085,24 @@ class Text extends StatelessWidget {
   /// How the text should be aligned horizontally.
   final TextAlign textAlign;
 
+  /// Whether the text should break at soft line breaks.
+  ///
+  /// If false, the glyphs in the text will be positioned as if there was unlimited horizontal space.
+  final bool softWrap;
+
+  /// How visual overflow should be handled.
+  final TextOverflow overflow;
+
   @override
   Widget build(BuildContext context) {
-    DefaultTextStyle defaultTextStyle;
+    DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
     TextStyle effectiveTextStyle = style;
-    if (style == null || style.inherit) {
-      defaultTextStyle ??= DefaultTextStyle.of(context);
+    if (style == null || style.inherit)
       effectiveTextStyle = defaultTextStyle.style.merge(style);
-    }
-    TextAlign effectiveTextAlign = textAlign;
-    if (effectiveTextAlign == null) {
-      defaultTextStyle ??= DefaultTextStyle.of(context);
-      effectiveTextAlign = defaultTextStyle.textAlign;
-    }
     return new RichText(
-      textAlign: effectiveTextAlign,
+      textAlign: textAlign ?? defaultTextStyle.textAlign,
+      softWrap: softWrap ?? defaultTextStyle.softWrap,
+      overflow: overflow ?? defaultTextStyle.overflow,
       text: new TextSpan(
         style: effectiveTextStyle,
         text: data

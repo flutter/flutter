@@ -209,7 +209,13 @@ class AppBar extends StatelessWidget {
     toolBarRow.add(new Flexible(
       child: new Padding(
         padding: new EdgeInsets.only(left: 8.0),
-        child: title != null ? new DefaultTextStyle(style: centerStyle, child: title) : null
+        child: title != null ?
+          new DefaultTextStyle(
+            style: centerStyle,
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
+            child: title
+          ) : null
       )
     ));
     if (actions != null)
