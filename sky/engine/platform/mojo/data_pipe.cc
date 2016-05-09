@@ -33,9 +33,8 @@ class DrainJob : public mojo::common::DataPipeDrainer::Client {
   }
 
   void OnDataComplete() override {
-    Platform::current()->GetUITaskRunner()->PostTask(FROM_HERE,
-      base::Bind(callback_, buffer_.release()));
     base::MessageLoop::current()->DeleteSoon(FROM_HERE, this);
+    callback_.Run(buffer_);
   }
 
   base::Callback<void(PassRefPtr<SharedBuffer>)> callback_;
@@ -47,13 +46,10 @@ class DrainJob : public mojo::common::DataPipeDrainer::Client {
 
 } // namespace
 
-
-void DrainDataPipeInBackground(
+void DrainDataPipe(
     mojo::ScopedDataPipeConsumerHandle handle,
     base::Callback<void(PassRefPtr<SharedBuffer>)> callback) {
-  DrainJob* job = new DrainJob(callback);
-  Platform::current()->GetIOTaskRunner()->PostTask(FROM_HERE,
-    base::Bind(&DrainJob::Start, base::Unretained(job), base::Passed(&handle)));
+  (new DrainJob(callback))->Start(handle.Pass());
 }
 
 }  // namespace blink

@@ -19,43 +19,45 @@
 namespace blink {
 namespace {
 
-void DecodeImage(scoped_ptr<DartPersistentValue> callback,
-                 PassRefPtr<SharedBuffer> buffer) {
+sk_sp<SkImage> DecodeImage(PassRefPtr<SharedBuffer> buffer) {
   TRACE_EVENT0("blink", "DecodeImage");
+  OwnPtr<ImageDecoder> decoder =
+      ImageDecoder::create(*buffer.get(), ImageSource::AlphaPremultiplied,
+                           ImageSource::GammaAndColorProfileIgnored);
+  // decoder can be null if the buffer was empty and we couldn't even guess
+  // what type of image to decode.
+  if (!decoder)
+    return nullptr;
+  decoder->setData(buffer.get(), true);
+  if (decoder->failed() || decoder->frameCount() == 0)
+    return nullptr;
+  ImageFrame* imageFrame = decoder->frameBufferAtIndex(0);
+  if (decoder->failed())
+    return nullptr;
+  return SkImage::MakeFromBitmap(imageFrame->getSkBitmap());
+}
 
+void InvokeImageCallback(sk_sp<SkImage> image,
+                         scoped_ptr<DartPersistentValue> callback) {
   DartState* dart_state = callback->dart_state().get();
   if (!dart_state)
     return;
   DartState::Scope scope(dart_state);
-
-  OwnPtr<ImageDecoder> decoder =
-      ImageDecoder::create(*buffer.get(), ImageSource::AlphaPremultiplied,
-                           ImageSource::GammaAndColorProfileIgnored);
-
-  // decoder can be null if the buffer was empty and we couldn't even guess
-  // what type of image to decode.
-  if (!decoder) {
+  if (!image) {
     DartInvoke(callback->value(), {Dart_Null()});
-    return;
+  } else {
+    RefPtr<CanvasImage> resultImage = CanvasImage::create();
+    resultImage->setImage(std::move(image));
+    DartInvoke(callback->value(), {ToDart(resultImage)});
   }
-  decoder->setData(buffer.get(), true);
-  if (decoder->failed() || decoder->frameCount() == 0) {
-    DartInvoke(callback->value(), {Dart_Null()});
-    return;
-  }
-  ImageFrame* imageFrame = decoder->frameBufferAtIndex(0);
-  if (decoder->failed()) {
-    DartInvoke(callback->value(), {Dart_Null()});
-    return;
-  }
-
-  RefPtr<CanvasImage> resultImage = CanvasImage::create();
-  sk_sp<SkImage> skImage = SkImage::MakeFromBitmap(imageFrame->getSkBitmap());
-  resultImage->setImage(std::move(skImage));
-
-  DartInvoke(callback->value(), {ToDart(resultImage)});
 }
 
+void DecodeImageAndInvokeImageCallback(
+    scoped_ptr<DartPersistentValue> callback, PassRefPtr<SharedBuffer> buffer) {
+  sk_sp<SkImage> image = DecodeImage(buffer);
+  Platform::current()->GetUITaskRunner()->PostTask(FROM_HERE,
+    base::Bind(InvokeImageCallback, image, base::Passed(&callback)));
+}
 
 void DecodeImageFromDataPipe(Dart_NativeArguments args) {
   Dart_Handle exception = nullptr;
@@ -76,8 +78,11 @@ void DecodeImageFromDataPipe(Dart_NativeArguments args) {
   scoped_ptr<DartPersistentValue> callback(
       new DartPersistentValue(DartState::Current(), callback_handle));
 
-  DrainDataPipeInBackground(consumer.Pass(),
-      base::Bind(&DecodeImage, base::Passed(&callback)));
+  Platform::current()->GetIOTaskRunner()->PostTask(FROM_HERE,
+    base::Bind(&DrainDataPipe,
+               base::Passed(&consumer),
+               base::Bind(DecodeImageAndInvokeImageCallback,
+                          base::Passed(&callback))));
 }
 
 void DecodeImageFromList(Dart_NativeArguments args) {
@@ -101,8 +106,9 @@ void DecodeImageFromList(Dart_NativeArguments args) {
   buffer->append(reinterpret_cast<const char*>(list.data()),
                  list.num_elements());
 
-  base::MessageLoop::current()->PostTask(FROM_HERE,
-      base::Bind(&DecodeImage, base::Passed(&callback), buffer.release()));
+  Platform::current()->GetIOTaskRunner()->PostTask(FROM_HERE,
+      base::Bind(DecodeImageAndInvokeImageCallback,
+                 base::Passed(&callback), buffer));
 }
 
 }  // namespace

@@ -11,7 +11,7 @@
 
 namespace blink {
 
-void DrainDataPipeInBackground(
+void DrainDataPipe(
     mojo::ScopedDataPipeConsumerHandle handle,
     base::Callback<void(PassRefPtr<SharedBuffer>)> callback);
 
