@@ -6,15 +6,11 @@ import 'dart:collection';
 import 'dart:io';
 
 import 'package:analyzer/file_system/file_system.dart' as file_system;
-import 'package:analyzer/file_system/file_system.dart' show Folder;
 import 'package:analyzer/file_system/physical_file_system.dart';
 import 'package:analyzer/plugin/options.dart';
 import 'package:analyzer/source/analysis_options_provider.dart';
 import 'package:analyzer/source/embedder.dart';
 import 'package:analyzer/source/error_processor.dart';
-import 'package:analyzer/source/package_map_provider.dart';
-import 'package:analyzer/source/package_map_resolver.dart';
-import 'package:analyzer/source/pub_package_map_provider.dart';
 import 'package:analyzer/src/generated/engine.dart';
 import 'package:analyzer/src/generated/error.dart';
 import 'package:analyzer/src/generated/java_io.dart';
@@ -112,16 +108,6 @@ class AnalysisDriver {
     if (options.packageRootPath != null) {
       JavaFile packageDirectory = new JavaFile(options.packageRootPath);
       resolvers.add(new PackageUriResolver(<JavaFile>[packageDirectory]));
-    } else {
-      PubPackageMapProvider pubPackageMapProvider =
-          new PubPackageMapProvider(PhysicalResourceProvider.INSTANCE, sdk);
-      PackageMapInfo packageMapInfo = pubPackageMapProvider.computePackageMap(
-          PhysicalResourceProvider.INSTANCE.getResource('.'));
-      Map<String, List<Folder>> packageMap = packageMapInfo.packageMap;
-      if (packageMap != null) {
-        resolvers.add(new PackageMapUriResolver(
-            PhysicalResourceProvider.INSTANCE, packageMap));
-      }
     }
 
     resolvers.add(new FileUriResolver());
