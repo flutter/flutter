@@ -73,7 +73,8 @@ class AccessibilityBridge final : public semantics::SemanticsListener {
 
   base::WeakPtr<AccessibilityBridge> AsWeakPtr();
 
-  FlutterView* getView() { return view_; }
+  FlutterView* view() { return view_; }
+  semantics::SemanticsServer* server() { return semantics_server_.get(); }
 
  private:
   // See class docs above about ownership relationship

@@ -151,13 +151,13 @@ struct Geometry {
 
   auto result = CGRectMake(rect.x(), rect.y(), rect.width(), rect.height());
   return UIAccessibilityConvertFrameToScreenCoordinates(result,
-                                                        _bridge->getView());
+                                                        _bridge->view());
 }
 
 #pragma mark - UIAccessibilityElement protocol
 
 - (id)accessibilityContainer {
-  return (_uid == RootNodeId) ? _bridge->getView() : _parent;
+  return (_uid == RootNodeId) ? _bridge->view() : _parent;
 }
 
 #pragma mark - UIAccessibilityContainer overrides
@@ -173,6 +173,75 @@ struct Geometry {
 
 - (NSInteger)indexOfAccessibilityElement:(id)element {
   return (_children == nil) ? NSNotFound : [_children indexOfObject:element];
+}
+
+#pragma mark - UIAccessibilityAction overrides
+
+- (BOOL)accessibilityActivate {
+  // TODO(tvolkert): Implement
+  return NO;
+}
+
+- (void)accessibilityIncrement {
+  // TODO(tvolkert): Implement
+}
+
+- (void)accessibilityDecrement {
+  // TODO(tvolkert): Implement
+}
+
+- (BOOL)accessibilityScroll:(UIAccessibilityScrollDirection)direction {
+  BOOL canBeScrolled = NO;
+  switch (direction) {
+    case UIAccessibilityScrollDirectionRight:
+    case UIAccessibilityScrollDirectionLeft:
+      canBeScrolled = _flags->canBeScrolledHorizontally;
+      break;
+    case UIAccessibilityScrollDirectionUp:
+    case UIAccessibilityScrollDirectionDown:
+      canBeScrolled = _flags->canBeScrolledVertically;
+      break;
+    default:
+      // Note: page turning of reading content is not currently supported
+      // (UIAccessibilityScrollDirectionNext,
+      //  UIAccessibilityScrollDirectionPrevious)
+      canBeScrolled = NO;
+  }
+
+  if (!canBeScrolled) {
+    return NO;
+  }
+
+  switch (direction) {
+    case UIAccessibilityScrollDirectionRight:
+      _bridge->server()->ScrollRight(_uid);
+      break;
+    case UIAccessibilityScrollDirectionLeft:
+      _bridge->server()->ScrollLeft(_uid);
+      break;
+    case UIAccessibilityScrollDirectionUp:
+      _bridge->server()->ScrollDown(_uid);
+      break;
+    case UIAccessibilityScrollDirectionDown:
+      _bridge->server()->ScrollUp(_uid);
+      break;
+    default:
+      DCHECK(false) << "Unsupported scroll direction: " << direction;
+  }
+
+  // TODO(tvolkert): provide meaningful string (e.g. "page 2 of 5")
+  UIAccessibilityPostNotification(UIAccessibilityPageScrolledNotification, nil);
+  return YES;
+}
+
+- (BOOL)accessibilityPerformEscape {
+  // TODO(tvolkert): Implement
+  return NO;
+}
+
+- (BOOL)accessibilityPerformMagicTap {
+  // TODO(tvolkert): Implement
+  return NO;
 }
 
 #pragma mark - Misc

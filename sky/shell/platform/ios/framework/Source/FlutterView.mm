@@ -40,34 +40,6 @@
   return YES;
 }
 
-- (BOOL)accessibilityActivate {
-  // TODO(tvolkert): Implement
-  return NO;
-}
-
-- (void)accessibilityIncrement {
-  // TODO(tvolkert): Implement
-}
-
-- (void)accessibilityDecrement {
-  // TODO(tvolkert): Implement
-}
-
-- (BOOL)accessibilityScroll:(UIAccessibilityScrollDirection)direction {
-  // TODO(tvolkert): Implement
-  return NO;
-}
-
-- (BOOL)accessibilityPerformEscape {
-  // TODO(tvolkert): Implement
-  return NO;
-}
-
-- (BOOL)accessibilityPerformMagicTap {
-  // TODO(tvolkert): Implement
-  return NO;
-}
-
 - (void)dealloc {
   delete _accessibilityBridge.get();
   _accessibilityBridge.reset();
