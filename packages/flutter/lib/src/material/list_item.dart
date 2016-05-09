@@ -43,9 +43,7 @@ class ListItem extends StatelessWidget {
     this.enabled: true,
     this.onTap,
     this.onLongPress
-  }) : super(key: key) {
-    assert(isThreeLine ? subtitle != null : true);
-  }
+  }) : super(key: key);
 
   /// A widget to display before the title.
   ///
@@ -149,19 +147,15 @@ class ListItem extends StatelessWidget {
     else
       itemHeight = dense ? 76.0 : 88.0;
 
-    double iconMarginTop = 0.0;
-    if (isThreeLine)
-      iconMarginTop = dense ? 8.0 : 16.0;
-
     // Overall, the list item is a Row() with these children.
     final List<Widget> children = <Widget>[];
 
     if (leading != null) {
       children.add(new Container(
-        margin: new EdgeInsets.only(right: 16.0, top: iconMarginTop),
+        margin: const EdgeInsets.only(right: 16.0),
         width: 40.0,
         child: new Align(
-          alignment: new FractionalOffset(0.0, isThreeLine ? 0.0 : 0.5),
+          alignment: FractionalOffset.centerLeft,
           child: leading
         )
       ));
@@ -173,7 +167,7 @@ class ListItem extends StatelessWidget {
       child: title ?? new Container()
     );
     Widget center = primaryLine;
-    if (isTwoLine || isThreeLine) {
+    if (subtitle != null && (isTwoLine || isThreeLine)) {
       center = new Column(
         mainAxisAlignment: MainAxisAlignment.collapse,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,9 +187,9 @@ class ListItem extends StatelessWidget {
 
     if (trailing != null) {
       children.add(new Container(
-        margin: new EdgeInsets.only(left: 16.0, top: iconMarginTop),
+        margin: const EdgeInsets.only(left: 16.0),
         child: new Align(
-          alignment: new FractionalOffset(1.0, isThreeLine ? 0.0 : 0.5),
+          alignment: FractionalOffset.centerRight,
           child: trailing
         )
       ));
