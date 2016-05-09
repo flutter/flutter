@@ -32,6 +32,17 @@ didReceiveResponse:(NSHTTPURLResponse*)response {
   _response->status_code = response.statusCode;
   _response->url =
       mojo::String(self.originalRequest.URL.absoluteString.UTF8String);
+  NSUInteger headerCount = response.allHeaderFields.count;
+  if (headerCount > 0) {
+    _response->headers = mojo::Array<mojo::HttpHeaderPtr>::New(0);
+    [response.allHeaderFields enumerateKeysAndObjectsUsingBlock:^(
+                                  NSString* key, NSString* value, BOOL* stop) {
+      auto header = mojo::HttpHeader::New();
+      header->name = key.UTF8String;
+      header->value = value.UTF8String;
+      _response->headers.push_back(header.Pass());
+    }];
+  }
   mojo::DataPipe pipe;
   _response->body = pipe.consumer_handle.Pass();
   _producer = pipe.producer_handle.Pass();
