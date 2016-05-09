@@ -187,16 +187,6 @@ class AnalyzeCommand extends FlutterCommand {
       packages['sky_services'] = path.join(buildDir, 'gen/dart-pkg/sky_services/lib');
     }
 
-    StringBuffer packagesBody = new StringBuffer();
-    for (String package in packages.keys)
-      packagesBody.writeln('$package:${path.toUri(packages[package])}');
-
-    // save the .packages file to disk
-    //TODO (pq): consider passing package info via a data URI
-    Directory host = Directory.systemTemp.createTempSync('flutter-analyze-');
-    String packagesFilePath = path.join(host.path, '.packages');
-    new File(packagesFilePath).writeAsStringSync(packagesBody.toString());
-
     if (argResults['preamble']) {
       if (dartFiles.length == 1) {
         logger.printStatus('Analyzing ${path.relative(dartFiles.first.path)}...');
@@ -206,7 +196,7 @@ class AnalyzeCommand extends FlutterCommand {
     }
     DriverOptions options = new DriverOptions();
     options.dartSdkPath = argResults['dart-sdk'];
-    options.packageConfigPath = packagesFilePath;
+    options.packageMap = packages;
     options.analysisOptionsFile = path.join(ArtifactStore.flutterRoot, 'packages', 'flutter_tools', 'flutter_analysis_options');
     AnalysisDriver analyzer = new AnalysisDriver(options);
 
@@ -240,8 +230,6 @@ class AnalyzeCommand extends FlutterCommand {
 
     stopwatch.stop();
     String elapsed = (stopwatch.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
-
-    host.deleteSync(recursive: true);
 
     if (_isBenchmarking)
       _writeBenchmark(stopwatch, errorCount);
