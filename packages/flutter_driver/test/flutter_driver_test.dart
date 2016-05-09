@@ -267,10 +267,10 @@ void main() {
         Timeline timeline = await driver.traceAction(() {
           actionCalled = true;
         },
-        categories: const <TracingCategory>[
-          TracingCategory.dart,
-          TracingCategory.gc,
-          TracingCategory.compiler
+        categories: const <TimelineStream>[
+          TimelineStream.dart,
+          TimelineStream.gc,
+          TimelineStream.compiler
         ]);
 
         expect(actionCalled, isTrue);

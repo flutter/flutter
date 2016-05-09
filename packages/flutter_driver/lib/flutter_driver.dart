@@ -16,7 +16,7 @@ export 'src/driver.dart' show
   CommonFinders,
   EvaluatorFunction,
   FlutterDriver,
-  TracingCategory;
+  TimelineStream;
 
 export 'src/error.dart' show
   DriverError,

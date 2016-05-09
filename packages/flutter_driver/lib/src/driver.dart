@@ -15,25 +15,25 @@ import 'health.dart';
 import 'message.dart';
 import 'timeline.dart';
 
-enum TracingCategory {
+enum TimelineStream {
   all, api, compiler, dart, debugger, embedder, gc, isolate, vm
 }
 
-const List<TracingCategory> _defaultCategories = const <TracingCategory>[TracingCategory.all];
+const List<TimelineStream> _defaultCategories = const <TimelineStream>[TimelineStream.all];
 
 // See https://github.com/dart-lang/sdk/blob/master/runtime/vm/timeline.cc#L32
-String _tracingCategoriesToString(List<TracingCategory> categories) {
-  final String contents = categories.map((TracingCategory category) {
+String _tracingCategoriesToString(List<TimelineStream> categories) {
+  final String contents = categories.map((TimelineStream category) {
     switch(category) {
-      case TracingCategory.all: return 'all';
-      case TracingCategory.api: return 'API';
-      case TracingCategory.compiler: return 'Compiler';
-      case TracingCategory.dart: return 'Dart';
-      case TracingCategory.debugger: return 'Debugger';
-      case TracingCategory.embedder: return 'Embedder';
-      case TracingCategory.gc: return 'GC';
-      case TracingCategory.isolate: return 'Isolate';
-      case TracingCategory.vm: return 'VM';
+      case TimelineStream.all: return 'all';
+      case TimelineStream.api: return 'API';
+      case TimelineStream.compiler: return 'Compiler';
+      case TimelineStream.dart: return 'Dart';
+      case TimelineStream.debugger: return 'Debugger';
+      case TimelineStream.embedder: return 'Embedder';
+      case TimelineStream.gc: return 'GC';
+      case TimelineStream.isolate: return 'Isolate';
+      case TimelineStream.vm: return 'VM';
       default:
         throw 'Unknown tracing category $category';
     }
@@ -249,7 +249,7 @@ class FlutterDriver {
   }
 
   /// Starts recording performance traces.
-  Future<Null> startTracing({List<TracingCategory> categories: _defaultCategories}) async {
+  Future<Null> startTracing({List<TimelineStream> categories: _defaultCategories}) async {
     assert(categories != null && categories.length > 0);
     try {
       await _peer.sendRequest(_kSetVMTimelineFlagsMethod, <String, String>{
@@ -286,7 +286,7 @@ class FlutterDriver {
   ///
   /// This is merely a convenience wrapper on top of [startTracing] and
   /// [stopTracingAndDownloadTimeline].
-  Future<Timeline> traceAction(Future<dynamic> action(), { List<TracingCategory> categories: _defaultCategories }) async {
+  Future<Timeline> traceAction(Future<dynamic> action(), { List<TimelineStream> categories: _defaultCategories }) async {
     await startTracing(categories: categories);
     await action();
     return stopTracingAndDownloadTimeline();
