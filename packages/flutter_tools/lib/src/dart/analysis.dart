@@ -26,7 +26,6 @@ import 'package:analyzer/src/task/options.dart';
 import 'package:cli_util/cli_util.dart' as cli_util;
 import 'package:linter/src/plugin/linter_plugin.dart';
 import 'package:package_config/packages.dart' show Packages;
-import 'package:package_config/packages_file.dart' as pkgfile show parse;
 import 'package:package_config/src/packages_impl.dart' show MapPackages;
 import 'package:path/path.dart' as path;
 import 'package:plugin/manager.dart';
@@ -65,9 +64,10 @@ class AnalysisDriver {
   List<AnalysisErrorInfo> _analyze(Iterable<File> files) {
     context = AnalysisEngine.instance.createAnalysisContext();
     _processAnalysisOptions(context, options);
-    Packages packages = _getPackageConfig();
+    PackageInfo packageInfo = new PackageInfo(options.packageMap);
+    List<UriResolver> resolvers = _getResolvers(context, packageInfo.asMap());
     context.sourceFactory =
-        new SourceFactory(_getResolvers(context, packages), packages);
+        new SourceFactory(resolvers, packageInfo.asPackages());
 
     List<Source> sources = <Source>[];
     ChangeSet changeSet = new ChangeSet();
@@ -93,40 +93,10 @@ class AnalysisDriver {
     return infos;
   }
 
-  Packages _getPackageConfig() {
-    if (options.packageConfigPath != null) {
-      String packageConfigPath = options.packageConfigPath;
-      Uri fileUri = new Uri.file(packageConfigPath);
-      try {
-        File configFile = new File.fromUri(fileUri).absolute;
-        List<int> bytes = configFile.readAsBytesSync();
-        Map<String, Uri> map = pkgfile.parse(bytes, configFile.uri);
-        return new MapPackages(map);
-      } catch (e) {
-        throw new AnalysisDriverException('Unable to create package map.');
-      }
-    }
-    return null;
-  }
-
-  Map<String, List<file_system.Folder>> _getPackageMap(Packages packages) {
-    if (packages == null) return null;
-
-    Map<String, List<file_system.Folder>> folderMap =
-        new Map<String, List<file_system.Folder>>();
-    packages.asMap().forEach((String packagePath, Uri uri) {
-      folderMap[packagePath] = <file_system.Folder>[
-        PhysicalResourceProvider.INSTANCE.getFolder(path.fromUri(uri))
-      ];
-    });
-    return folderMap;
-  }
-
-  List<UriResolver> _getResolvers(
-      InternalAnalysisContext context, Packages packages) {
+  List<UriResolver> _getResolvers(InternalAnalysisContext context,
+      Map<String, List<file_system.Folder>> packageMap) {
     DartSdk sdk = new DirectoryBasedDartSdk(new JavaFile(sdkDir));
     List<UriResolver> resolvers = <UriResolver>[];
-    Map<String, List<file_system.Folder>> packageMap = _getPackageMap(packages);
 
     EmbedderYamlLocator yamlLocator = context.embedderYamlLocator;
     yamlLocator.refresh(packageMap);
@@ -243,8 +213,8 @@ class DriverOptions extends AnalysisOptionsImpl {
   /// The path to the dart SDK.
   String dartSdkPath;
 
-  /// The path to a `.packages` configuration file
-  String packageConfigPath;
+  /// Map of packages to folder paths.
+  Map<String, String> packageMap;
 
   /// The path to the package root.
   String packageRootPath;
@@ -266,6 +236,27 @@ class DriverOptions extends AnalysisOptionsImpl {
 
   /// Error sink for logging.
   IOSink errorSink = stderr;
+}
+
+class PackageInfo {
+  Packages _packages;
+  HashMap<String, List<file_system.Folder>> _map =
+      new HashMap<String, List<file_system.Folder>>();
+  PackageInfo(Map<String, String> packageMap) {
+    Map<String, Uri> packages = new HashMap<String, Uri>();
+    for (String package in packageMap.keys) {
+      String path = packageMap[package];
+      packages[package] = new Uri.directory(path);
+      _map[package] = <file_system.Folder>[
+        PhysicalResourceProvider.INSTANCE.getFolder(path )
+      ];
+    }
+    _packages = new MapPackages(packages);
+  }
+
+  Map<String, List<file_system.Folder>> asMap() => _map;
+
+  Packages asPackages() => _packages;
 }
 
 class _StdLogger extends Logger {
