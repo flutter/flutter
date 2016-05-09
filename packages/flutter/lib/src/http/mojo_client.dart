@@ -180,10 +180,12 @@ class MojoClient {
       ByteData data = await mojo.DataPipeDrainer.drainHandle(response.body);
       Uint8List bodyBytes = new Uint8List.view(data.buffer);
       Map<String, String> headers = <String, String>{};
-      for (mojom.HttpHeader header in response.headers) {
-        String headerName = header.name.toLowerCase();
-        String existingValue = headers[headerName];
-        headers[headerName] = existingValue != null ? '$existingValue, ${header.value}' : header.value;
+      if (response.headers != null) {
+        for (mojom.HttpHeader header in response.headers) {
+          String headerName = header.name.toLowerCase();
+          String existingValue = headers[headerName];
+          headers[headerName] = existingValue != null ? '$existingValue, ${header.value}' : header.value;
+        }
       }
       return new Response.bytes(bodyBytes, response.statusCode, headers: headers);
     } catch (exception, stack) {
