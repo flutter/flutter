@@ -13,6 +13,7 @@ import '../application_package.dart';
 import '../base/file_system.dart';
 import '../base/common.dart';
 import '../base/os.dart';
+import '../build_configuration.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../ios/simulators.dart' show SimControl, IOSSimulatorUtils;
@@ -99,7 +100,7 @@ class DriveCommand extends RunCommandBase {
 
     if (!argResults['use-existing-app']) {
       printStatus('Starting application: ${argResults["target"]}');
-      int result = await appStarter(this);
+      int result = await appStarter(this, getBuildMode());
       if (result != 0) {
         printError('Application failed to start. Will not run test. Quitting.');
         return result;
@@ -228,13 +229,14 @@ Future<Device> findTargetDevice() async {
 }
 
 /// Starts the application on the device given command configuration.
-typedef Future<int> AppStarter(DriveCommand command);
+typedef Future<int> AppStarter(DriveCommand command, BuildMode buildMode);
+
 AppStarter appStarter = startApp;
 void restoreAppStarter() {
   appStarter = startApp;
 }
 
-Future<int> startApp(DriveCommand command) async {
+Future<int> startApp(DriveCommand command, BuildMode buildMode) async {
   String mainPath = findMainDartFile(command.target);
   if (await fs.type(mainPath) != FileSystemEntityType.FILE) {
     printError('Tried to run $mainPath, but that file does not exist.');
@@ -269,7 +271,7 @@ Future<int> startApp(DriveCommand command) async {
     mainPath: mainPath,
     route: command.route,
     debuggingOptions: new DebuggingOptions.enabled(
-      checked: command.checked,
+      checked: buildMode == BuildMode.debug,
       startPaused: true,
       observatoryPort: command.debugPort
     ),
