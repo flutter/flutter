@@ -68,7 +68,7 @@ class GalleryAppState extends State<GalleryApp> {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-      title: 'Flutter Material Gallery',
+      title: 'Flutter Gallery',
       theme: _useLightTheme ? _kGalleryLightTheme : _kGalleryDarkTheme,
       showPerformanceOverlay: _showPerformanceOverlay,
       routes: kRoutes,

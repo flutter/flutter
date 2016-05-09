@@ -11,14 +11,14 @@ const String _introText =
 
 class TooltipDemo extends StatelessWidget {
 
-  static const String routeName = '/tooltip';
+  static const String routeName = '/tooltips';
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Tooltip')
+        title: new Text('Tooltips')
       ),
       body: new Builder(
         builder: (BuildContext context) {

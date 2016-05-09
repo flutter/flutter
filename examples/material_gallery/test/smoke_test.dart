@@ -50,7 +50,7 @@ void smokeDemo(WidgetTester tester, String routeName) {
 }
 
 void main() {
-  testWidgets('Material Gallery app smoke test', (WidgetTester tester) {
+  testWidgets('Flutter gallery app smoke test', (WidgetTester tester) {
     material_gallery_main.main(); // builds the app and schedules a frame but doesn't trigger one
     tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     tester.pump(); // triggers a frame

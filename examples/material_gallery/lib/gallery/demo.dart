@@ -270,7 +270,7 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
           icon: Icons.clear,
           onPressed: () { Navigator.pop(context); }
         ),
-        title: new Text('Example Code')
+        title: new Text('Example code')
       ),
       body: body
     );

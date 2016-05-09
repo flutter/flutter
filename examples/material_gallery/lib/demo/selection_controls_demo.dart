@@ -60,7 +60,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
     ];
 
     return new TabbedComponentDemoScaffold(
-      title: 'Selection Controls',
+      title: 'Selection controls',
       demos: demos
     );
   }
