@@ -214,7 +214,14 @@ class AnalysisErrorDescription {
 
   ErrorCode get errorCode => error.errorCode;
 
-  String get errorType => error.errorCode.type.displayName;
+  String get errorType {
+    ErrorSeverity severity = errorCode.errorSeverity;
+    if (severity == ErrorSeverity.INFO) {
+      if (errorCode.type == ErrorType.HINT || errorCode.type == ErrorType.LINT)
+        return errorCode.type.displayName;
+    }
+    return severity.displayName;
+  }
 
   LineInfo_Location get location => line.getLocation(error.offset);
 
