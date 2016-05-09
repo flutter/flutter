@@ -46,7 +46,7 @@ void PlatformServiceProvider::ConnectToService(
   }
   if (service_name == ::editing::Clipboard::Name_) {
     clipboard_.Create(
-        nullptr, mojo::MakeRequest<::editing::Clipboard>(client_handle.Pass()));
+        nullptr, mojo::InterfaceRequest<::editing::Clipboard>(client_handle.Pass()));
     return;
   }
   if (service_name == flutter::platform::HapticFeedback::Name_) {
