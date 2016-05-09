@@ -13,7 +13,7 @@ Available examples include:
 - **Hello, world** The [hello world app](hello_world) is a basic app that shows
   the text "hello, world."
 
-- **Material Gallery** The [material gallery app](material_gallery) showcases
+- **Flutter gallery** The [flutter gallery app](flutter_gallery) showcases
   Flutter's implementation of [material design](https://www.google.com/design/spec/material-design/introduction.html).
 
 - **Layers** The [layers vignettes](layers) show how to use the various layers
