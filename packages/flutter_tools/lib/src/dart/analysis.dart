@@ -239,20 +239,21 @@ class DriverOptions extends AnalysisOptionsImpl {
 }
 
 class PackageInfo {
-  Packages _packages;
-  HashMap<String, List<file_system.Folder>> _map =
-      new HashMap<String, List<file_system.Folder>>();
   PackageInfo(Map<String, String> packageMap) {
     Map<String, Uri> packages = new HashMap<String, Uri>();
     for (String package in packageMap.keys) {
       String path = packageMap[package];
       packages[package] = new Uri.directory(path);
       _map[package] = <file_system.Folder>[
-        PhysicalResourceProvider.INSTANCE.getFolder(path )
+        PhysicalResourceProvider.INSTANCE.getFolder(path)
       ];
     }
     _packages = new MapPackages(packages);
   }
+
+  Packages _packages;
+  HashMap<String, List<file_system.Folder>> _map =
+      new HashMap<String, List<file_system.Folder>>();
 
   Map<String, List<file_system.Folder>> asMap() => _map;
 
