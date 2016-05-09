@@ -26,6 +26,7 @@ if (is_android) {
 
   android_library("editing_lib") {
     java_files = [
+      "src/org/domokit/editing/ClipboardImpl.java",
       "src/org/domokit/editing/KeyboardImpl.java",
       "src/org/domokit/editing/KeyboardViewState.java",
       "src/org/domokit/editing/InputConnectionAdaptor.java",
@@ -45,6 +46,8 @@ if (is_ios) {
     sources = [
       "ios/keyboard_impl.h",
       "ios/keyboard_impl.mm",
+      "ios/clipboard_impl.h",
+      "ios/clipboard_impl.mm",
     ]
     deps = [
       "//base:base",

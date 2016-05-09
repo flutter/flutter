@@ -12,6 +12,7 @@
 
 #if TARGET_OS_IPHONE
 #include "sky/services/activity/ios/activity_impl.h"
+#include "sky/services/editing/ios/clipboard_impl.h"
 #include "sky/services/media/ios/media_player_impl.h"
 #include "sky/services/media/ios/media_service_impl.h"
 #include "sky/services/platform/ios/haptic_feedback_impl.h"
@@ -51,6 +52,7 @@ class PlatformServiceProvider : public mojo::ServiceProvider {
   flutter::platform::SystemChromeFactory system_chrome_;
   flutter::platform::SystemSoundFactory system_sound_;
   sky::services::activity::ActivityFactory activity_;
+  sky::services::editing::ClipboardFactory clipboard_;
   sky::services::media::MediaPlayerFactory media_player_;
   sky::services::media::MediaServiceFactory media_service_;
   sky::services::vsync::VSyncProviderFactory vsync_;
