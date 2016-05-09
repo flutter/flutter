@@ -10,6 +10,7 @@ import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
 import '../base/common.dart';
+import '../base/logger.dart';
 import '../build_configuration.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -327,12 +328,17 @@ Future<int> startAppStayResident(
   Completer<int> exitCompleter = new Completer<int>();
 
   void complete(int exitCode) {
+    terminal.singleCharMode = false;
     if (!exitCompleter.isCompleted)
       exitCompleter.complete(0);
   };
 
+  // TODO: move a lot of this into a class
+
   // Connect to observatory.
   WebSocket observatoryConnection;
+  String isolateId;
+  int messageId = 0;
 
   if (debuggingOptions.debuggingEnabled) {
     final String localhost = InternetAddress.LOOPBACK_IP_V4.address;
@@ -343,15 +349,80 @@ Future<int> startAppStayResident(
 
     // Listen for observatory connection close.
     observatoryConnection.listen((dynamic data) {
-      // Ignore observatory messages.
+      if (data is String) {
+        Map<String, dynamic> json = JSON.decode(data);
+
+        if (json['method'] == 'streamNotify') {
+          Map<String, dynamic> event = json['params']['event'];
+          if (event['isolate'] != null && isolateId == null)
+            isolateId = event['isolate']['id'];
+        } else if (json['result'] is Map && json['result']['type'] == 'VM') {
+          // isolates: [{
+          //   type: @Isolate, fixedId: true, id: isolates/724543296, name: dev.flx$main, number: 724543296
+          // }]
+          List<dynamic> isolates = json['result']['isolates'];
+          if (isolates.isNotEmpty)
+            isolateId = isolates.first['id'];
+        }
+      }
     }, onDone: () {
       loggingSubscription.cancel();
+      // TODO: print this when quitting in more scenarios
       printStatus('Application finished.');
       complete(0);
     });
+
+    observatoryConnection.add(JSON.encode(<String, dynamic>{
+      'method': 'streamListen',
+      'params': <String, dynamic>{ 'streamId': 'Isolate' },
+      'id': messageId++
+    }));
+
+    observatoryConnection.add(JSON.encode(<String, dynamic>{
+      'method': 'getVM',
+      'id': messageId++
+    }));
   }
 
   printStatus('Application running.');
+
+  terminal.singleCharMode = true;
+
+  stdin.transform(ASCII.decoder).listen((String str) {
+    if (str.length > 0 && str.codeUnitAt(0) == 27) {
+      str = str.substring(1);
+
+      if (str == 'OP') {
+        // F1, help
+        // TODO:
+        print('help');
+      } else if (str == '[15~') {
+        // F5, refresh
+        // TODO:
+        print('refresh');
+      } else if (str == '[21~') {
+        // F10, exit
+        // TODO: move the below into common code
+        loggingSubscription.cancel();
+        printStatus('');
+        complete(0);
+      }
+    } else {
+      str = str.toLowerCase();
+
+      if (str == 'h') {
+        // TODO:
+        print('help');
+      } else if (str == 'r') {
+        print('reload');
+      } else if (str == 'q') {
+        // TODO: move the below into common code
+        loggingSubscription.cancel();
+        printStatus('');
+        complete(0);
+      }
+    }
+  });
 
   // When terminating, close down the log reader.
   ProcessSignal.SIGINT.watch().listen((ProcessSignal signal) {
@@ -365,11 +436,15 @@ Future<int> startAppStayResident(
   });
 
   return exitCompleter.future.then((int exitCode) async {
-    if (observatoryConnection != null) {
+    if (observatoryConnection != null &&
+        observatoryConnection.readyState == WebSocket.OPEN &&
+        isolateId != null) {
       observatoryConnection.add(JSON.encode(<String, dynamic>{
-
+        'method': 'ext.flutter.exit',
+        'params': <String, dynamic>{ 'isolateId': isolateId },
+        'id': messageId++
       }));
-      // WebSocket do not have a flush() method.
+      // WebSockets do not have a flush() method.
       await new Future<Null>.delayed(new Duration(milliseconds: 100));
     }
 

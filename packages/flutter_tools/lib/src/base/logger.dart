@@ -5,13 +5,13 @@
 import 'dart:async';
 import 'dart:io';
 
-final _AnsiTerminal _terminal = new _AnsiTerminal();
+final AnsiTerminal terminal = new AnsiTerminal();
 
 abstract class Logger {
   bool get isVerbose => false;
 
   set supportsColor(bool value) {
-    _terminal.supportsColor = value;
+    terminal.supportsColor = value;
   }
 
   /// Display an error level message to the user. Commands should use this if they
@@ -59,7 +59,7 @@ class StdoutLogger extends Logger {
     _status?.cancel();
     _status = null;
 
-    print(emphasis ? _terminal.writeBold(message) : message);
+    print(emphasis ? terminal.writeBold(message) : message);
   }
 
   @override
@@ -70,7 +70,7 @@ class StdoutLogger extends Logger {
     _status?.cancel();
     _status = null;
 
-    if (_terminal.supportsColor) {
+    if (terminal.supportsColor) {
       _status = new _AnsiStatus(message);
       return _status;
     } else {
@@ -177,23 +177,23 @@ class _LogMessage {
     String prefix = '${millis.toString().padLeft(4)} ms • ';
     String indent = ''.padLeft(prefix.length);
     if (millis >= 100)
-      prefix = _terminal.writeBold(prefix.substring(0, prefix.length - 3)) + ' • ';
+      prefix = terminal.writeBold(prefix.substring(0, prefix.length - 3)) + ' • ';
     String indentMessage = message.replaceAll('\n', '\n$indent');
 
     if (type == _LogType.error) {
-      stderr.writeln(prefix + _terminal.writeBold(indentMessage));
+      stderr.writeln(prefix + terminal.writeBold(indentMessage));
       if (stackTrace != null)
         stderr.writeln(indent + stackTrace.toString().replaceAll('\n', '\n$indent'));
     } else if (type == _LogType.status) {
-      print(prefix + _terminal.writeBold(indentMessage));
+      print(prefix + terminal.writeBold(indentMessage));
     } else {
       print(prefix + indentMessage);
     }
   }
 }
 
-class _AnsiTerminal {
-  _AnsiTerminal() {
+class AnsiTerminal {
+  AnsiTerminal() {
     // TODO(devoncarew): This detection does not work for Windows.
     String term = Platform.environment['TERM'];
     supportsColor = term != null && term != 'dumb';
@@ -205,6 +205,11 @@ class _AnsiTerminal {
   bool supportsColor;
 
   String writeBold(String str) => supportsColor ? '$_bold$str$_reset' : str;
+
+  set singleCharMode(bool value) {
+    stdin.echoMode = !value;
+    stdin.lineMode = !value;
+  }
 }
 
 class _AnsiStatus extends Status {
