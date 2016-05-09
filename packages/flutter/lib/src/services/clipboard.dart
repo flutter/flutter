@@ -25,9 +25,6 @@ class Clipboard {
 
   Clipboard._();
 
-  Clipboard(this._service);
-  final mojom.Clipboard _service;
-
   static void setClipboardData(mojom.ClipboardData clip) {
     _clipboardProxy.ptr.setClipboardData(clip);
   }
