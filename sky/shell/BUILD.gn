@@ -242,89 +242,66 @@ if (is_android) {
   import("//build/config/ios/ios_sdk.gni")
   import("//sky/build/sky_precompilation_sdk.gni")
 
-  template("scaffolding") {
-    assert(defined(invoker.is_framework),
-        "Must specific if the scaffolding is exposed as a framework")
-
-    source_set(target_name) {
-
-      sources = [
-        "platform/ios/framework/Headers/Flutter.h",
-        "platform/ios/framework/Headers/FlutterAppDelegate.h",
-        "platform/ios/framework/Headers/FlutterAsyncMessageListener.h",
-        "platform/ios/framework/Headers/FlutterDartProject.h",
-        "platform/ios/framework/Headers/FlutterMacros.h",
-        "platform/ios/framework/Headers/FlutterMessageListener.h",
-        "platform/ios/framework/Headers/FlutterViewController.h",
-        "platform/ios/framework/Source/accessibility_bridge.h",
-        "platform/ios/framework/Source/accessibility_bridge.mm",
-        "platform/ios/framework/Source/application_messages_impl.h",
-        "platform/ios/framework/Source/application_messages_impl.mm",
-        "platform/ios/framework/Source/FlutterAppDelegate.mm",
-        "platform/ios/framework/Source/FlutterDartProject.mm",
-        "platform/ios/framework/Source/FlutterDartProject_Internal.h",
-        "platform/ios/framework/Source/FlutterDartSource.h",
-        "platform/ios/framework/Source/FlutterDartSource.mm",
-        "platform/ios/framework/Source/FlutterDynamicServiceLoader.h",
-        "platform/ios/framework/Source/FlutterDynamicServiceLoader.mm",
-        "platform/ios/framework/Source/FlutterView.h",
-        "platform/ios/framework/Source/FlutterView.mm",
-        "platform/ios/framework/Source/FlutterViewController.mm",
-        "platform/ios/framework/Source/flutter_touch_mapper.h",
-        "platform/ios/framework/Source/flutter_touch_mapper.mm",
-        "platform/ios/main_ios.mm",
-      ]
-
-      set_sources_assignment_filter([])
-      sources += [
-        "platform/mac/platform_mac.h",
-        "platform/mac/platform_mac.mm",
-        "platform/mac/platform_service_provider.cc",
-        "platform/mac/platform_service_provider.h",
-        "platform/mac/platform_view_mac.h",
-        "platform/mac/platform_view_mac.mm",
-        "platform/mac/view_service_provider.cc",
-        "platform/mac/view_service_provider.h",
-      ]
-      set_sources_assignment_filter(sources_assignment_filter)
-
-      deps = [
-        "//mojo/edk/base_edk",
-        "//mojo/edk/system",
-        "//skia",
-        "//sky/services/activity",
-        "//sky/services/dynamic:embedder",
-        "//sky/services/editing",
-        "//sky/services/media",
-        "//sky/services/ns_net",
-        "//sky/services/semantics",
-        "//sky/services/vsync",
-        "//ui/gl",
-        ":common",
-        ":gpu_direct",
-      ]
-
-      if (invoker.is_framework) {
-        defines = [
-          "FLUTTER_FRAMEWORK"
-        ]
-      }
-    }
-  }
-
-  scaffolding("ios_scaffolding") {
-    is_framework = false
-  }
-
   shared_library("flutter_framework_dylib") {
     output_name = "Flutter"
 
-    scaffolding("framework_scaffolding") {
-      is_framework = true
-    }
+    sources = [
+      "platform/ios/framework/Headers/Flutter.h",
+      "platform/ios/framework/Headers/FlutterAppDelegate.h",
+      "platform/ios/framework/Headers/FlutterAsyncMessageListener.h",
+      "platform/ios/framework/Headers/FlutterDartProject.h",
+      "platform/ios/framework/Headers/FlutterMacros.h",
+      "platform/ios/framework/Headers/FlutterMessageListener.h",
+      "platform/ios/framework/Headers/FlutterViewController.h",
+      "platform/ios/framework/Source/accessibility_bridge.h",
+      "platform/ios/framework/Source/accessibility_bridge.mm",
+      "platform/ios/framework/Source/application_messages_impl.h",
+      "platform/ios/framework/Source/application_messages_impl.mm",
+      "platform/ios/framework/Source/FlutterAppDelegate.mm",
+      "platform/ios/framework/Source/FlutterDartProject.mm",
+      "platform/ios/framework/Source/FlutterDartProject_Internal.h",
+      "platform/ios/framework/Source/FlutterDartSource.h",
+      "platform/ios/framework/Source/FlutterDartSource.mm",
+      "platform/ios/framework/Source/FlutterDynamicServiceLoader.h",
+      "platform/ios/framework/Source/FlutterDynamicServiceLoader.mm",
+      "platform/ios/framework/Source/FlutterView.h",
+      "platform/ios/framework/Source/FlutterView.mm",
+      "platform/ios/framework/Source/FlutterViewController.mm",
+      "platform/ios/framework/Source/flutter_touch_mapper.h",
+      "platform/ios/framework/Source/flutter_touch_mapper.mm",
+    ]
+
+    set_sources_assignment_filter([])
+    sources += [
+      "platform/mac/platform_mac.h",
+      "platform/mac/platform_mac.mm",
+      "platform/mac/platform_service_provider.cc",
+      "platform/mac/platform_service_provider.h",
+      "platform/mac/platform_view_mac.h",
+      "platform/mac/platform_view_mac.mm",
+      "platform/mac/view_service_provider.cc",
+      "platform/mac/view_service_provider.h",
+    ]
+    set_sources_assignment_filter(sources_assignment_filter)
 
     deps = [
-      ":framework_scaffolding"
+      "//mojo/edk/base_edk",
+      "//mojo/edk/system",
+      "//skia",
+      "//sky/services/activity",
+      "//sky/services/dynamic:embedder",
+      "//sky/services/editing",
+      "//sky/services/media",
+      "//sky/services/ns_net",
+      "//sky/services/semantics",
+      "//sky/services/vsync",
+      "//ui/gl",
+      ":common",
+      ":gpu_direct",
+    ]
+
+    defines = [
+      "FLUTTER_FRAMEWORK"
     ]
 
     libs = [
