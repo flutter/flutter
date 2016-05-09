@@ -24,14 +24,14 @@ void ViewServiceProvider::ConnectToService(
   if (service_name == ::flutter::platform::ApplicationMessages::Name_ &&
       !connect_to_app_messages_.is_null()) {
     connect_to_app_messages_.Run(
-        mojo::MakeRequest<::flutter::platform::ApplicationMessages>(
+        mojo::InterfaceRequest<::flutter::platform::ApplicationMessages>(
             client_handle.Pass()));
     return;
   }
 #if TARGET_OS_IPHONE
   if (service_name == ::editing::Keyboard::Name_) {
     keyboard_.Create(
-        nullptr, mojo::MakeRequest<::editing::Keyboard>(client_handle.Pass()));
+        nullptr, mojo::InterfaceRequest<::editing::Keyboard>(client_handle.Pass()));
     return;
   }
 #endif

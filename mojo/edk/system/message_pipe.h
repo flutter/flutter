@@ -14,6 +14,7 @@
 #include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/edk/system/channel_endpoint_client.h"
 #include "mojo/edk/system/dispatcher.h"
+#include "mojo/edk/system/handle.h"
 #include "mojo/edk/system/handle_signals_state.h"
 #include "mojo/edk/system/memory.h"
 #include "mojo/edk/system/message_in_transit.h"
@@ -89,13 +90,13 @@ class MessagePipe final : public ChannelEndpointClient {
   MojoResult WriteMessage(unsigned port,
                           UserPointer<const void> bytes,
                           uint32_t num_bytes,
-                          std::vector<DispatcherTransport>* transports,
+                          std::vector<HandleTransport>* transports,
                           MojoWriteMessageFlags flags);
   MojoResult ReadMessage(unsigned port,
                          UserPointer<void> bytes,
                          UserPointer<uint32_t> num_bytes,
-                         DispatcherVector* dispatchers,
-                         uint32_t* num_dispatchers,
+                         HandleVector* handles,
+                         uint32_t* num_handles,
                          MojoReadMessageFlags flags);
   HandleSignalsState GetHandleSignalsState(unsigned port) const;
   MojoResult AddAwakable(unsigned port,
@@ -117,6 +118,12 @@ class MessagePipe final : public ChannelEndpointClient {
       size_t* actual_size,
       std::vector<platform::ScopedPlatformHandle>* platform_handles);
 
+  // This "implements" |CancelAllAwakables()|, but assumes that |mutex_| is
+  // already held. This is for use by
+  // |MessagePipeDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock()|.
+  void CancelAllAwakablesNoLock(unsigned port)
+      MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
+
   // |ChannelEndpointClient| methods:
   bool OnReadMessage(unsigned port, MessageInTransit* message) override;
   void OnDetachFromChannel(unsigned port) override;
@@ -130,14 +137,13 @@ class MessagePipe final : public ChannelEndpointClient {
   // dispatchers attached. Must be called with |lock_| held.
   MojoResult EnqueueMessageNoLock(unsigned port,
                                   std::unique_ptr<MessageInTransit> message,
-                                  std::vector<DispatcherTransport>* transports)
+                                  std::vector<HandleTransport>* transports)
       MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
 
   // Helper for |EnqueueMessageNoLock()|.
-  MojoResult AttachTransportsNoLock(
-      unsigned port,
-      MessageInTransit* message,
-      std::vector<DispatcherTransport>* transports)
+  MojoResult AttachTransportsNoLock(unsigned port,
+                                    MessageInTransit* message,
+                                    std::vector<HandleTransport>* transports)
       MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
 
   mutable util::Mutex mutex_;

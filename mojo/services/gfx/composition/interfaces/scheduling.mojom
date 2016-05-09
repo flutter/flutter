@@ -42,6 +42,12 @@ interface SceneScheduler {
 
 // Provides timestamp information about a frame which has been scheduled
 // to be drawn.
+//
+// As there may be latency in receiving an updated |FrameInfo| from the
+// system, the consumer of this structure should apply compensation for
+// skipped frames.
+//
+// See |mojo::gfx::composition::FrameTracker|.
 struct FrameInfo {
   // A timestamp indicating when the work of updating the frame was scheduled
   // to begin which may be used to coordinate animations that require a

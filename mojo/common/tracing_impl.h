@@ -7,27 +7,21 @@
 
 #include "base/macros.h"
 #include "mojo/common/trace_provider_impl.h"
-#include "mojo/public/cpp/application/interface_factory.h"
-#include "mojo/services/tracing/interfaces/tracing.mojom.h"
 
 namespace mojo {
 
 class ApplicationImpl;
 
-class TracingImpl : public InterfaceFactory<tracing::TraceProvider> {
+class TracingImpl {
  public:
   TracingImpl();
-  ~TracingImpl() override;
+  ~TracingImpl();
 
   // This connects to the tracing service and registers ourselves to provide
   // tracing data on demand.
   void Initialize(ApplicationImpl* app);
 
  private:
-  // InterfaceFactory<tracing::TraceProvider> implementation.
-  void Create(ApplicationConnection* connection,
-              InterfaceRequest<tracing::TraceProvider> request) override;
-
   TraceProviderImpl provider_impl_;
 
   DISALLOW_COPY_AND_ASSIGN(TracingImpl);

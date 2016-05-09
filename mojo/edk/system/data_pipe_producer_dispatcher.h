@@ -20,6 +20,11 @@ class DataPipe;
 // thread-safe.
 class DataPipeProducerDispatcher final : public Dispatcher {
  public:
+  // The default/standard rights for a data pipe consumer handle.
+  static constexpr MojoHandleRights kDefaultHandleRights =
+      MOJO_HANDLE_RIGHT_TRANSFER | MOJO_HANDLE_RIGHT_READ |
+      MOJO_HANDLE_RIGHT_WRITE;
+
   static util::RefPtr<DataPipeProducerDispatcher> Create() {
     return AdoptRef(new DataPipeProducerDispatcher());
   }
@@ -29,6 +34,7 @@ class DataPipeProducerDispatcher final : public Dispatcher {
 
   // |Dispatcher| public methods:
   Type GetType() const override;
+  bool SupportsEntrypointClass(EntrypointClass entrypoint_class) const override;
 
   // The "opposite" of |SerializeAndClose()|. (Typically this is called by
   // |Dispatcher::Deserialize()|.)
@@ -45,8 +51,9 @@ class DataPipeProducerDispatcher final : public Dispatcher {
   // |Dispatcher| protected methods:
   void CancelAllAwakablesNoLock() override;
   void CloseImplNoLock() override;
-  util::RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock()
-      override;
+  util::RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock(
+      MessagePipe* message_pipe,
+      unsigned port) override;
   MojoResult SetDataPipeProducerOptionsImplNoLock(
       UserPointer<const MojoDataPipeProducerOptions> options) override;
   MojoResult GetDataPipeProducerOptionsImplNoLock(

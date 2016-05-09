@@ -184,7 +184,7 @@ void WindowImpl::ConnectToService(const mojo::String& service_name,
   if (service_name == raw_keyboard::RawKeyboardService::Name_) {
     raw_keyboard_bindings_.AddBinding(
         this,
-        mojo::MakeRequest<raw_keyboard::RawKeyboardService>(handle.Pass()));
+        mojo::InterfaceRequest<raw_keyboard::RawKeyboardService>(handle.Pass()));
   }
 }
 

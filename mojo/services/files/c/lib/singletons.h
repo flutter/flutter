@@ -6,6 +6,7 @@
 #define SERVICES_FILES_C_LIB_SINGLETONS_H_
 
 #include "files/interfaces/directory.mojom.h"
+#include "mojo/public/cpp/bindings/interface_handle.h"
 
 namespace mojio {
 
@@ -31,7 +32,8 @@ void ResetFDTable();
 // Explicitly set the singleton current working directory to |directory| (which
 // should be valid). (The singleton |DirectoryWrapper| will be reset if
 // necessary.) This uses the singleton |ErrnoImpl|.
-void SetCurrentWorkingDirectory(mojo::files::DirectoryPtr directory);
+void SetCurrentWorkingDirectory(
+    mojo::InterfaceHandle<mojo::files::Directory> directory);
 // Gets the current working directory (i.e., the singleton |DirectoryWrapper|).
 // WARNING!!! This returns null if it was not previously set (see above) or has
 // been reset, in which case it will also use the singleton |ErrnoImpl| (to set

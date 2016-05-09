@@ -169,7 +169,7 @@ void FlutterInit(int argc, const char* argv[]) {
                         }];
 
   DCHECK(_dartServices);
-  mojo::ConnectToService(_dartServices.get(), &_appMessageSender);
+  mojo::ConnectToService(_dartServices.get(), mojo::GetProxy(&_appMessageSender));
 }
 
 static void DynamicServiceResolve(void* baton,

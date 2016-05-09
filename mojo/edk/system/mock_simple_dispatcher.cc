@@ -50,6 +50,11 @@ Dispatcher::Type MockSimpleDispatcher::GetType() const {
   return Type::UNKNOWN;
 }
 
+bool MockSimpleDispatcher::SupportsEntrypointClass(
+    EntrypointClass entrypoint_class) const {
+  return false;
+}
+
 MockSimpleDispatcher::MockSimpleDispatcher(
     MojoHandleSignals satisfied_signals,
     MojoHandleSignals satisfiable_signals)
@@ -61,8 +66,10 @@ MockSimpleDispatcher::MockSimpleDispatcher(const HandleSignalsState& state)
 MockSimpleDispatcher::~MockSimpleDispatcher() {}
 
 RefPtr<Dispatcher>
-MockSimpleDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock()
-    MOJO_NO_THREAD_SAFETY_ANALYSIS {
+MockSimpleDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock(
+    MessagePipe* /*message_pipe*/,
+    unsigned /*port*/) MOJO_NO_THREAD_SAFETY_ANALYSIS {
+  CancelAllAwakablesNoLock();
   return MakeRefCounted<MockSimpleDispatcher>(state_);
 }
 

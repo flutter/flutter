@@ -321,14 +321,19 @@ class ShellProxy implements bindings.ProxyBase {
 
 
 class ShellStub extends bindings.Stub {
-  Shell _impl = null;
+  Shell _impl;
 
   ShellStub.fromEndpoint(
-      core.MojoMessagePipeEndpoint endpoint, [this._impl])
-      : super.fromEndpoint(endpoint);
+      core.MojoMessagePipeEndpoint endpoint, [Shell impl])
+      : super.fromEndpoint(endpoint, autoBegin: impl != null) {
+    _impl = impl;
+  }
 
-  ShellStub.fromHandle(core.MojoHandle handle, [this._impl])
-      : super.fromHandle(handle);
+  ShellStub.fromHandle(
+      core.MojoHandle handle, [Shell impl])
+      : super.fromHandle(handle, autoBegin: impl != null) {
+    _impl = impl;
+  }
 
   ShellStub.unbound() : super.unbound();
 
@@ -346,7 +351,9 @@ class ShellStub extends bindings.Stub {
                                                           0,
                                                           message);
     }
-    assert(_impl != null);
+    if (_impl == null) {
+      throw new core.MojoApiError("$this has no implementation set");
+    }
     switch (message.header.type) {
       case _shellMethodConnectToApplicationName:
         var params = _ShellConnectToApplicationParams.deserialize(
@@ -367,8 +374,21 @@ class ShellStub extends bindings.Stub {
 
   Shell get impl => _impl;
   set impl(Shell d) {
-    assert(_impl == null);
+    if (d == null) {
+      throw new core.MojoApiError("$this: Cannot set a null implementation");
+    }
+    if (isBound && (_impl == null)) {
+      beginHandlingEvents();
+    }
     _impl = d;
+  }
+
+  @override
+  void bind(core.MojoMessagePipeEndpoint endpoint) {
+    super.bind(endpoint);
+    if (!isOpen && (_impl != null)) {
+      beginHandlingEvents();
+    }
   }
 
   String toString() {

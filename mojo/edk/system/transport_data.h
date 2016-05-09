@@ -24,7 +24,7 @@ class Channel;
 // in various stages of serialization.
 //
 // The stages are:
-//   - Before reaching |TransportData|: Turn |DispatcherTransport|s into
+//   - Before reaching |TransportData|: Turn |HandleTransport|s into
 //     |Dispatcher|s that are "owned" by (and attached to) a |MessageInTransit|.
 //     This invalidates the handles in the space of the sending application
 //     (and, e.g., if another thread is waiting on such a handle, it'll be
@@ -86,6 +86,8 @@ class TransportData {
   // The maximum total number of platform handles that may be attached.
   static size_t GetMaxPlatformHandles();
 
+  TransportData(std::unique_ptr<HandleVector> handles, Channel* channel);
+  // TODO(vtl): Remove this, once |TransportData| really supports handles.
   TransportData(std::unique_ptr<DispatcherVector> dispatchers,
                 Channel* channel);
 

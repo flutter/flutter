@@ -47,7 +47,7 @@ namespace media {
 struct LinearTransform {
   struct Ratio {
     Ratio() { }
-    Ratio(int32_t _numerator, uint32_t _denominator)
+    Ratio(uint32_t _numerator, uint32_t _denominator)
       : numerator(_numerator),
         denominator(_denominator) {
         Reduce();
@@ -55,7 +55,7 @@ struct LinearTransform {
 
     // Helper which will reduce the fraction numerator/denominator using
     // Euclid's method.
-    static void Reduce(int32_t* numerator, uint32_t* denominator);
+    static void Reduce(uint32_t* numerator, uint32_t* denominator);
 
     // Reduce the internal scaling rational.
     void Reduce() { Reduce(&numerator, &denominator); }
@@ -68,19 +68,19 @@ struct LinearTransform {
     // stored.
     static bool Compose(const Ratio& a, const Ratio& b, Ratio* out);
 
-    int32_t  numerator = 1;
+    uint32_t numerator = 1;
     uint32_t denominator = 1;
   };
 
   LinearTransform() { }
 
-  LinearTransform(int32_t numerator, uint32_t denominator)
+  LinearTransform(uint32_t numerator, uint32_t denominator)
     : scale(numerator, denominator) {}
 
   explicit LinearTransform(const Ratio& s) : scale(s) {}
 
   LinearTransform(int64_t az,
-                  int32_t numerator,
+                  uint32_t numerator,
                   uint32_t denominator,
                   int64_t bz)
     : scale(numerator, denominator),

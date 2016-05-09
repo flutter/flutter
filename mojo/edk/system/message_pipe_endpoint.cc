@@ -15,8 +15,8 @@ void MessagePipeEndpoint::CancelAllAwakables() {
 
 MojoResult MessagePipeEndpoint::ReadMessage(UserPointer<void> /*bytes*/,
                                             UserPointer<uint32_t> /*num_bytes*/,
-                                            DispatcherVector* /*dispatchers*/,
-                                            uint32_t* /*num_dispatchers*/,
+                                            HandleVector* /*handles*/,
+                                            uint32_t* /*num_handles*/,
                                             MojoReadMessageFlags /*flags*/) {
   NOTREACHED();
   return MOJO_RESULT_INTERNAL;

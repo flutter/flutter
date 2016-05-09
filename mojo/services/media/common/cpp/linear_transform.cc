@@ -189,7 +189,7 @@ static bool scale_u64_to_u64(
 static bool linear_transform_s64_to_s64(
     int64_t  val,
     int64_t  basis1,
-    int32_t  numerator,
+    uint32_t numerator,
     uint32_t denominator,
     bool     invert_frac,
     int64_t  basis2,
@@ -212,13 +212,9 @@ static bool linear_transform_s64_to_s64(
     abs_val = val - basis1;
   }
 
-  if (numerator < 0) {
-    is_neg = !is_neg;
-  }
-
   if (!scale_u64_to_u64(abs_val,
-        invert_frac ? denominator : ABS(numerator),
-        invert_frac ? ABS(numerator) : denominator,
+        invert_frac ? denominator : numerator,
+        invert_frac ? numerator : denominator,
         &scaled,
         is_neg)) {
     return false;  // overflow/underflow
@@ -283,18 +279,13 @@ bool LinearTransform::DoReverseTransform(int64_t b_in, int64_t* a_out) const {
       a_out);
 }
 
-void LinearTransform::Ratio::Reduce(int32_t* numerator, uint32_t* denominator) {
+void LinearTransform::Ratio::Reduce(
+    uint32_t* numerator, uint32_t* denominator) {
   MOJO_DCHECK(numerator && denominator);
   if (!numerator || !denominator) { return; }
 
   if (*denominator) {
-    if (*numerator < 0) {
-      *numerator = -(*numerator);
-      internal::Reduce(reinterpret_cast<uint32_t*>(numerator), denominator);
-      *numerator = -(*numerator);
-    } else {
-      internal::Reduce(reinterpret_cast<uint32_t*>(numerator), denominator);
-    }
+    internal::Reduce(reinterpret_cast<uint32_t*>(numerator), denominator);
   } else {
     *numerator = *numerator ? 1 : 0;
   }
@@ -306,18 +297,13 @@ bool LinearTransform::Ratio::Compose(const Ratio& a,
   MOJO_DCHECK(out);
   if (!out) { return false; }
 
-  int64_t  numerator   = static_cast<int64_t>(a.numerator) * b.numerator;
+  uint64_t numerator   = static_cast<uint64_t>(a.numerator) * b.numerator;
   uint64_t denominator = static_cast<uint64_t>(a.denominator) * b.denominator;
 
   if (!numerator || !denominator) {
     out->numerator = numerator ? 1 : 0;
     out->denominator = denominator ? 1 : 0;
     return true;
-  }
-
-  bool negate = (numerator < 0);
-  if (negate) {
-    numerator = -numerator;
   }
 
   internal::Reduce(reinterpret_cast<uint64_t*>(&numerator), &denominator);
@@ -330,9 +316,7 @@ bool LinearTransform::Ratio::Compose(const Ratio& a,
     denominator >>= shift;
   }
 
-  out->numerator = negate
-                 ? -static_cast<int32_t>(numerator)
-                 :  static_cast<int32_t>(numerator);
+  out->numerator = static_cast<uint32_t>(numerator);
   out->denominator = static_cast<uint32_t>(denominator);
   return !lossy;
 }

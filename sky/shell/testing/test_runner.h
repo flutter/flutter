@@ -11,7 +11,6 @@
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
 #include "mojo/common/binding_set.h"
-#include "mojo/public/cpp/application/interface_factory_impl.h"
 #include "sky/services/engine/sky_engine.mojom.h"
 
 namespace sky {

@@ -29,7 +29,6 @@ mojo_sdk_source_set("mojio") {
     "lib/real_errno_impl.h",
     "lib/singletons.cc",
     "lib/singletons.h",
-    "lib/template_util.h",
     "lib/util.cc",
     "lib/util.h",
     "mojio_config.h",
@@ -43,6 +42,7 @@ mojo_sdk_source_set("mojio") {
 
   deps = [
     "../interfaces",
+    "../interfaces:interfaces_sync",
   ]
 
   mojo_sdk_deps = [
@@ -81,12 +81,12 @@ mojo_native_application("apptests") {
 
   deps = [
     ":mojio",
-    "../interfaces",
     "$mojo_sdk_root/mojo/public/cpp/application:standalone",
     "$mojo_sdk_root/mojo/public/cpp/application:test_support_standalone",
     "$mojo_sdk_root/mojo/public/cpp/bindings",
     "$mojo_sdk_root/mojo/public/cpp/environment",
     "$mojo_sdk_root/mojo/public/cpp/system",
+    "../interfaces",
     "//testing/gtest",
   ]
 }

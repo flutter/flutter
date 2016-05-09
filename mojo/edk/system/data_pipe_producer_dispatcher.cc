@@ -18,6 +18,9 @@ using mojo::util::RefPtr;
 namespace mojo {
 namespace system {
 
+// static
+constexpr MojoHandleRights DataPipeProducerDispatcher::kDefaultHandleRights;
+
 void DataPipeProducerDispatcher::Init(RefPtr<DataPipe>&& data_pipe) {
   DCHECK(data_pipe);
   data_pipe_ = std::move(data_pipe);
@@ -25,6 +28,11 @@ void DataPipeProducerDispatcher::Init(RefPtr<DataPipe>&& data_pipe) {
 
 Dispatcher::Type DataPipeProducerDispatcher::GetType() const {
   return Type::DATA_PIPE_PRODUCER;
+}
+
+bool DataPipeProducerDispatcher::SupportsEntrypointClass(
+    EntrypointClass entrypoint_class) const {
+  return (entrypoint_class == EntrypointClass::DATA_PIPE_PRODUCER);
 }
 
 // static
@@ -67,8 +75,12 @@ void DataPipeProducerDispatcher::CloseImplNoLock() {
 }
 
 RefPtr<Dispatcher>
-DataPipeProducerDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock() {
+DataPipeProducerDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock(
+    MessagePipe* /*message_pipe*/,
+    unsigned /*port*/) {
   mutex().AssertHeld();
+
+  CancelAllAwakablesNoLock();
 
   auto dispatcher = DataPipeProducerDispatcher::Create();
   dispatcher->Init(std::move(data_pipe_));

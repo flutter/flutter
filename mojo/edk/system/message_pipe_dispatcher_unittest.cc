@@ -38,10 +38,6 @@ namespace mojo {
 namespace system {
 namespace {
 
-const MojoHandleSignals kAllSignals = MOJO_HANDLE_SIGNAL_READABLE |
-                                      MOJO_HANDLE_SIGNAL_WRITABLE |
-                                      MOJO_HANDLE_SIGNAL_PEER_CLOSED;
-
 TEST(MessagePipeDispatcherTest, Basic) {
   Stopwatch stopwatch;
   int32_t buffer[1];
@@ -70,7 +66,9 @@ TEST(MessagePipeDispatcherTest, Basic) {
     EXPECT_EQ(MOJO_RESULT_ALREADY_EXISTS,
               d0->AddAwakable(&w, MOJO_HANDLE_SIGNAL_WRITABLE, 0, &hss));
     EXPECT_EQ(MOJO_HANDLE_SIGNAL_WRITABLE, hss.satisfied_signals);
-    EXPECT_EQ(kAllSignals, hss.satisfiable_signals);
+    EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE |
+                  MOJO_HANDLE_SIGNAL_PEER_CLOSED,
+              hss.satisfiable_signals);
     // Shouldn't need to remove the waiter (it was not added).
 
     // Add a readable waiter to |d0|, then make it readable (by writing to
@@ -90,7 +88,9 @@ TEST(MessagePipeDispatcherTest, Basic) {
     d0->RemoveAwakable(&w, &hss);
     EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE,
               hss.satisfied_signals);
-    EXPECT_EQ(kAllSignals, hss.satisfiable_signals);
+    EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE |
+                  MOJO_HANDLE_SIGNAL_PEER_CLOSED,
+              hss.satisfiable_signals);
 
     // Try adding a readable waiter when already readable (from above).
     w.Init();
@@ -99,7 +99,9 @@ TEST(MessagePipeDispatcherTest, Basic) {
               d0->AddAwakable(&w, MOJO_HANDLE_SIGNAL_READABLE, 2, &hss));
     EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE,
               hss.satisfied_signals);
-    EXPECT_EQ(kAllSignals, hss.satisfiable_signals);
+    EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE |
+                  MOJO_HANDLE_SIGNAL_PEER_CLOSED,
+              hss.satisfiable_signals);
     // Shouldn't need to remove the waiter (it was not added).
 
     // Make |d0| no longer readable (by reading from it).
@@ -122,7 +124,9 @@ TEST(MessagePipeDispatcherTest, Basic) {
     hss = HandleSignalsState();
     d0->RemoveAwakable(&w, &hss);
     EXPECT_EQ(MOJO_HANDLE_SIGNAL_WRITABLE, hss.satisfied_signals);
-    EXPECT_EQ(kAllSignals, hss.satisfiable_signals);
+    EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE |
+                  MOJO_HANDLE_SIGNAL_PEER_CLOSED,
+              hss.satisfiable_signals);
 
     // Wait for non-zero, finite time for readability on |d0| (will time out).
     w.Init();
@@ -137,7 +141,9 @@ TEST(MessagePipeDispatcherTest, Basic) {
     hss = HandleSignalsState();
     d0->RemoveAwakable(&w, &hss);
     EXPECT_EQ(MOJO_HANDLE_SIGNAL_WRITABLE, hss.satisfied_signals);
-    EXPECT_EQ(kAllSignals, hss.satisfiable_signals);
+    EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE |
+                  MOJO_HANDLE_SIGNAL_PEER_CLOSED,
+              hss.satisfiable_signals);
 
     // Check the peer closed signal.
     w.Init();
@@ -157,6 +163,32 @@ TEST(MessagePipeDispatcherTest, Basic) {
 
     EXPECT_EQ(MOJO_RESULT_OK, d0->Close());
   }
+}
+
+TEST(MessagePipeDispatcherTest, SupportsEntrypointClass) {
+  auto d = MessagePipeDispatcher::Create(
+      MessagePipeDispatcher::kDefaultCreateOptions);
+  ASSERT_TRUE(d);
+
+  // We need to initialize |d|.
+  {
+    auto d_peer = MessagePipeDispatcher::Create(
+        MessagePipeDispatcher::kDefaultCreateOptions);
+    auto mp = MessagePipe::CreateLocalLocal();
+    d->Init(mp.Clone(), 0);
+    d_peer->Init(std::move(mp), 1);
+    EXPECT_EQ(MOJO_RESULT_OK, d_peer->Close());
+  }
+
+  EXPECT_TRUE(d->SupportsEntrypointClass(EntrypointClass::MESSAGE_PIPE));
+  EXPECT_FALSE(d->SupportsEntrypointClass(EntrypointClass::DATA_PIPE_PRODUCER));
+  EXPECT_FALSE(d->SupportsEntrypointClass(EntrypointClass::DATA_PIPE_CONSUMER));
+  EXPECT_FALSE(d->SupportsEntrypointClass(EntrypointClass::BUFFER));
+
+  // TODO(vtl): Check that it actually returns |MOJO_RESULT_INVALID_ARGUMENT|
+  // for methods in unsupported entrypoint classes.
+
+  EXPECT_EQ(MOJO_RESULT_OK, d->Close());
 }
 
 TEST(MessagePipeDispatcherTest, InvalidParams) {
@@ -261,7 +293,9 @@ TEST(MessagePipeDispatcherTest, BasicClosed) {
               d0->AddAwakable(&w, MOJO_HANDLE_SIGNAL_READABLE, 0, &hss));
     EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE,
               hss.satisfied_signals);
-    EXPECT_EQ(kAllSignals, hss.satisfiable_signals);
+    EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE |
+                  MOJO_HANDLE_SIGNAL_PEER_CLOSED,
+              hss.satisfiable_signals);
 
     // Try reading from |d1|; should fail (nothing to read).
     buffer[0] = 0;
@@ -394,7 +428,9 @@ TEST(MessagePipeDispatcherTest, BasicThreaded) {
     EXPECT_EQ(1u, context);
     EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE,
               hss.satisfied_signals);
-    EXPECT_EQ(kAllSignals, hss.satisfiable_signals);
+    EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE |
+                  MOJO_HANDLE_SIGNAL_PEER_CLOSED,
+              hss.satisfiable_signals);
 
     // Now |d1| is already readable. Try waiting for it again.
     {
@@ -409,7 +445,9 @@ TEST(MessagePipeDispatcherTest, BasicThreaded) {
     EXPECT_EQ(MOJO_RESULT_ALREADY_EXISTS, result);
     EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE,
               hss.satisfied_signals);
-    EXPECT_EQ(kAllSignals, hss.satisfiable_signals);
+    EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE |
+                  MOJO_HANDLE_SIGNAL_PEER_CLOSED,
+              hss.satisfiable_signals);
 
     // Consume what we wrote to |d0|.
     buffer[0] = 0;

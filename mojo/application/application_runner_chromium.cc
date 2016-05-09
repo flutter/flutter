@@ -58,7 +58,7 @@ MojoResult ApplicationRunnerChromium::Run(
       loop.reset(new base::MessageLoop(message_loop_type_));
 
     ApplicationImpl impl(delegate_.get(),
-                         MakeRequest<Application>(MakeScopedHandle(
+                         InterfaceRequest<Application>(MakeScopedHandle(
                              MessagePipeHandle(application_request_handle))));
     loop->Run();
   }

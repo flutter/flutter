@@ -19,6 +19,7 @@
 #include "mojo/edk/system/data_pipe_producer_dispatcher.h"
 #include "mojo/edk/system/dispatcher.h"
 #include "mojo/edk/system/handle_signals_state.h"
+#include "mojo/edk/system/handle_transport.h"
 #include "mojo/edk/system/memory.h"
 #include "mojo/edk/system/message_pipe.h"
 #include "mojo/edk/system/message_pipe_dispatcher.h"
@@ -38,10 +39,11 @@ namespace system {
 // Implementation notes
 //
 // Mojo primitives are implemented by the singleton |Core| object. Most calls
-// are for a "primary" handle (the first argument). |Core::GetDispatcher()| is
-// used to look up a |Dispatcher| object for a given handle. That object
-// implements most primitives for that object. The wait primitives are not
-// attached to objects and are implemented by |Core| itself.
+// are for a "primary" handle (the first argument). |Core::GetHandle()| is used
+// to look up a |Handle| (in particular, a |Dispatcher| object) for a given
+// handle value. The |Dispatcher| object implements most primitives for that
+// (conceptual/logical) object. The wait primitives are not attached to objects
+// and are implemented by |Core| itself.
 //
 // Some objects have multiple handles associated to them, e.g., message pipes
 // (which have two). In such a case, there is still a |Dispatcher| (e.g.,
@@ -85,15 +87,15 @@ namespace system {
 //      held.
 
 Core::Core(embedder::PlatformSupport* platform_support)
-    : platform_support_(platform_support) {
-}
+    : platform_support_(platform_support),
+      handle_table_(GetConfiguration().max_handle_table_size) {}
 
 Core::~Core() {
 }
 
-MojoHandle Core::AddDispatcher(Dispatcher* dispatcher) {
+MojoHandle Core::AddHandle(Handle&& handle) {
   MutexLocker locker(&handle_table_mutex_);
-  return handle_table_.AddDispatcher(dispatcher);
+  return handle_table_.AddHandle(std::move(handle));
 }
 
 MojoResult Core::GetDispatcher(MojoHandle handle,
@@ -102,7 +104,11 @@ MojoResult Core::GetDispatcher(MojoHandle handle,
     return MOJO_RESULT_INVALID_ARGUMENT;
 
   MutexLocker locker(&handle_table_mutex_);
-  return handle_table_.GetDispatcher(handle, dispatcher);
+  Handle h;
+  MojoResult rv = handle_table_.GetHandle(handle, &h);
+  if (rv == MOJO_RESULT_OK)
+    *dispatcher = std::move(h.dispatcher);
+  return rv;
 }
 
 MojoResult Core::GetAndRemoveDispatcher(MojoHandle handle,
@@ -111,7 +117,11 @@ MojoResult Core::GetAndRemoveDispatcher(MojoHandle handle,
     return MOJO_RESULT_INVALID_ARGUMENT;
 
   MutexLocker locker(&handle_table_mutex_);
-  return handle_table_.GetAndRemoveDispatcher(handle, dispatcher);
+  Handle h;
+  MojoResult rv = handle_table_.GetAndRemoveHandle(handle, &h);
+  if (rv == MOJO_RESULT_OK)
+    *dispatcher = std::move(h.dispatcher);
+  return rv;
 }
 
 MojoResult Core::AsyncWait(MojoHandle handle,
@@ -137,11 +147,10 @@ MojoResult Core::Close(MojoHandle handle) {
   if (handle == MOJO_HANDLE_INVALID)
     return MOJO_RESULT_INVALID_ARGUMENT;
 
-  RefPtr<Dispatcher> dispatcher;
+  Handle h;
   {
     MutexLocker locker(&handle_table_mutex_);
-    MojoResult result =
-        handle_table_.GetAndRemoveDispatcher(handle, &dispatcher);
+    MojoResult result = handle_table_.GetAndRemoveHandle(handle, &h);
     if (result != MOJO_RESULT_OK)
       return result;
   }
@@ -150,7 +159,7 @@ MojoResult Core::Close(MojoHandle handle) {
   // Note: This is done outside of |handle_table_mutex_|. As a result, there's a
   // race condition that the dispatcher must handle; see the comment in
   // |Dispatcher| in dispatcher.h.
-  return dispatcher->Close();
+  return h.dispatcher->Close();
 }
 
 MojoResult Core::Wait(MojoHandle handle,
@@ -219,8 +228,11 @@ MojoResult Core::CreateMessagePipe(
   std::pair<MojoHandle, MojoHandle> handle_pair;
   {
     MutexLocker locker(&handle_table_mutex_);
-    handle_pair =
-        handle_table_.AddDispatcherPair(dispatcher0.get(), dispatcher1.get());
+    handle_pair = handle_table_.AddHandlePair(
+        Handle(dispatcher0.Clone(),
+               MessagePipeDispatcher::kDefaultHandleRights),
+        Handle(dispatcher1.Clone(),
+               MessagePipeDispatcher::kDefaultHandleRights));
   }
   if (handle_pair.first == MOJO_HANDLE_INVALID) {
     DCHECK_EQ(handle_pair.second, MOJO_HANDLE_INVALID);
@@ -279,7 +291,7 @@ MojoResult Core::WriteMessage(MojoHandle message_pipe_handle,
   // without accessing the handle table. These can be dumb pointers, since their
   // entries in the handle table won't get removed (since they'll be marked as
   // busy).
-  std::vector<DispatcherTransport> transports(num_handles);
+  std::vector<HandleTransport> transports(num_handles);
 
   // When we pass handles, we have to try to take all their dispatchers' locks
   // and mark the handles as busy. If the call succeeds, we then remove the
@@ -331,31 +343,30 @@ MojoResult Core::ReadMessage(MojoHandle message_pipe_handle,
     result = dispatcher->ReadMessage(bytes, num_bytes, nullptr,
                                      &num_handles_value, flags);
   } else {
-    DispatcherVector dispatchers;
-    result = dispatcher->ReadMessage(bytes, num_bytes, &dispatchers,
-                                     &num_handles_value, flags);
-    if (!dispatchers.empty()) {
+    HandleVector hs;
+    result = dispatcher->ReadMessage(bytes, num_bytes, &hs, &num_handles_value,
+                                     flags);
+    if (!hs.empty()) {
       DCHECK_EQ(result, MOJO_RESULT_OK);
       DCHECK(!num_handles.IsNull());
-      DCHECK_LE(dispatchers.size(), static_cast<size_t>(num_handles_value));
+      DCHECK_LE(hs.size(), static_cast<size_t>(num_handles_value));
 
       bool success;
-      UserPointer<MojoHandle>::Writer handles_writer(handles,
-                                                     dispatchers.size());
+      UserPointer<MojoHandle>::Writer handles_writer(handles, hs.size());
       {
         MutexLocker locker(&handle_table_mutex_);
-        success = handle_table_.AddDispatcherVector(
-            dispatchers, handles_writer.GetPointer());
+        success =
+            handle_table_.AddHandleVector(&hs, handles_writer.GetPointer());
       }
       if (success) {
         handles_writer.Commit();
       } else {
-        LOG(ERROR) << "Received message with " << dispatchers.size()
+        LOG(ERROR) << "Received message with " << hs.size()
                    << " handles, but handle table full";
         // Close dispatchers (outside the lock).
-        for (size_t i = 0; i < dispatchers.size(); i++) {
-          if (dispatchers[i])
-            dispatchers[i]->Close();
+        for (size_t i = 0; i < hs.size(); i++) {
+          if (hs[i])
+            hs[i].dispatcher->Close();
         }
         if (result == MOJO_RESULT_OK)
           result = MOJO_RESULT_RESOURCE_EXHAUSTED;
@@ -384,8 +395,11 @@ MojoResult Core::CreateDataPipe(
   std::pair<MojoHandle, MojoHandle> handle_pair;
   {
     MutexLocker locker(&handle_table_mutex_);
-    handle_pair = handle_table_.AddDispatcherPair(producer_dispatcher.get(),
-                                                  consumer_dispatcher.get());
+    handle_pair = handle_table_.AddHandlePair(
+        Handle(producer_dispatcher.Clone(),
+               DataPipeProducerDispatcher::kDefaultHandleRights),
+        Handle(consumer_dispatcher.Clone(),
+               DataPipeConsumerDispatcher::kDefaultHandleRights));
   }
   if (handle_pair.first == MOJO_HANDLE_INVALID) {
     DCHECK_EQ(handle_pair.second, MOJO_HANDLE_INVALID);
@@ -536,7 +550,8 @@ MojoResult Core::CreateSharedBuffer(
     return result;
   }
 
-  MojoHandle h = AddDispatcher(dispatcher.get());
+  MojoHandle h = AddHandle(
+      Handle(dispatcher.Clone(), SharedBufferDispatcher::kDefaultHandleRights));
   if (h == MOJO_HANDLE_INVALID) {
     LOG(ERROR) << "Handle table full";
     dispatcher->Close();
@@ -562,7 +577,9 @@ MojoResult Core::DuplicateBufferHandle(
   if (result != MOJO_RESULT_OK)
     return result;
 
-  MojoHandle new_handle = AddDispatcher(new_dispatcher.get());
+  // TODO(vtl): This should be done with the original handle's rights.
+  MojoHandle new_handle = AddHandle(Handle(
+      new_dispatcher.Clone(), SharedBufferDispatcher::kDefaultHandleRights));
   if (new_handle == MOJO_HANDLE_INVALID) {
     LOG(ERROR) << "Handle table full";
     new_dispatcher->Close();
@@ -641,13 +658,13 @@ MojoResult Core::WaitManyInternal(const MojoHandle* handles,
         return MOJO_RESULT_INVALID_ARGUMENT;
       }
 
-      RefPtr<Dispatcher> dispatcher;
-      MojoResult result = handle_table_.GetDispatcher(handles[i], &dispatcher);
+      Handle handle;
+      MojoResult result = handle_table_.GetHandle(handles[i], &handle);
       if (result != MOJO_RESULT_OK) {
         *result_index = i;
         return result;
       }
-      dispatchers.push_back(std::move(dispatcher));
+      dispatchers.push_back(std::move(handle.dispatcher));
     }
   }
 

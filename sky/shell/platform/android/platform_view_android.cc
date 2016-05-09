@@ -23,7 +23,7 @@ static jlong Attach(JNIEnv* env, jclass clazz, jint skyEngineHandle) {
   auto view = static_cast<PlatformViewAndroid*>(shell_view->view());
   view->SetShellView(std::unique_ptr<ShellView>(shell_view));
   view->ConnectToEngine(
-      mojo::MakeRequest<SkyEngine>(mojo::ScopedMessagePipeHandle(
+      mojo::InterfaceRequest<SkyEngine>(mojo::ScopedMessagePipeHandle(
           mojo::MessagePipeHandle(skyEngineHandle))));
   return reinterpret_cast<jlong>(shell_view->view());
 }

@@ -4,6 +4,6 @@ author: Flutter Authors <flutter-dev@googlegroups.com>
 description: Mojom interfaces associated with Flutter
 homepage: http://flutter.io
 dependencies:
-  mojo_sdk: 0.2.22
+  mojo_sdk: 0.2.24
 environment:
   sdk: '>=1.8.0 <2.0.0'

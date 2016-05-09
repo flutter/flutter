@@ -31,7 +31,7 @@ scoped_refptr<GLContext> GLContext::CreateOffscreen(
   connector->ConnectToApplication("mojo:native_viewport_service",
                                   GetProxy(&native_viewport), nullptr);
   GpuPtr gpu_service;
-  ConnectToService(native_viewport.get(), &gpu_service);
+  ConnectToService(native_viewport.get(), GetProxy(&gpu_service));
   InterfaceHandle<CommandBuffer> command_buffer;
   gpu_service->CreateOffscreenGLES2Context(GetProxy(&command_buffer));
   return new GLContext(command_buffer.Pass());

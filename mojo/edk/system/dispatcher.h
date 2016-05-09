@@ -13,6 +13,8 @@
 #include <vector>
 
 #include "mojo/edk/platform/scoped_platform_handle.h"
+#include "mojo/edk/system/entrypoint_class.h"
+#include "mojo/edk/system/handle.h"
 #include "mojo/edk/system/handle_signals_state.h"
 #include "mojo/edk/system/memory.h"
 #include "mojo/edk/util/mutex.h"
@@ -34,22 +36,24 @@ class PlatformSharedBufferMapping;
 
 namespace system {
 
+class Awakable;
 class Channel;
 class Core;
 class Dispatcher;
-class DispatcherTransport;
+struct Handle;
 class HandleTable;
+class HandleTransport;
 class LocalMessagePipeEndpoint;
+class MessagePipe;
 class ProxyMessagePipeEndpoint;
 class TransportData;
-class Awakable;
 
 using DispatcherVector = std::vector<util::RefPtr<Dispatcher>>;
 
 namespace test {
 
 // Test helper. We need to declare it here so we can friend it.
-DispatcherTransport DispatcherTryStartTransport(Dispatcher* dispatcher);
+HandleTransport HandleTryStartTransport(const Handle& handle);
 
 }  // namespace test
 
@@ -60,6 +64,9 @@ DispatcherTransport DispatcherTryStartTransport(Dispatcher* dispatcher);
 // |mutex()| method).
 class Dispatcher : public util::RefCountedThreadSafe<Dispatcher> {
  public:
+  // Types of dispatchers. Note that these are not necessarily a one-to-one with
+  // implementations of |Dispatcher|: multiple implementations may share the
+  // same type.
   enum class Type {
     UNKNOWN = 0,
     MESSAGE_PIPE,
@@ -70,7 +77,19 @@ class Dispatcher : public util::RefCountedThreadSafe<Dispatcher> {
     // "Private" types (not exposed via the public interface):
     PLATFORM_HANDLE = -1
   };
+
+  // Gets the type of the dispatcher; see |Type| above.
   virtual Type GetType() const = 0;
+
+  // Gets whether the given entrypoint class is supported; see the definition of
+  // |EntrypointClass|. This is ONLY called when a rights check has failed, to
+  // determine whether |MOJO_RESULT_PERMISSION_DENIED| (if the entrypoint class
+  // is supported) or |MOJO_RESULT_INVALID_ARGUMENT| (if not) should be
+  // returned. In the case that the rights check passes, |Core| will proceed
+  // immediately to call the method (so if the method is not supported, it must
+  // still return |MOJO_RESULT_INVALID_ARGUMENT|).
+  virtual bool SupportsEntrypointClass(
+      EntrypointClass entrypoint_class) const = 0;
 
   // These methods implement the various primitives named |Mojo...()|. These
   // take |mutex_| and handle races with |Close()|. Then they call out to
@@ -81,23 +100,25 @@ class Dispatcher : public util::RefCountedThreadSafe<Dispatcher> {
   // possible. If this becomes an issue, we can rethink this.
   MojoResult Close();
 
+  // |EntrypointClass::MESSAGE_PIPE|:
   // |transports| may be non-null if and only if there are handles to be
   // written; not that |this| must not be in |transports|. On success, all the
   // dispatchers in |transports| must have been moved to a closed state; on
   // failure, they should remain in their original state.
   MojoResult WriteMessage(UserPointer<const void> bytes,
                           uint32_t num_bytes,
-                          std::vector<DispatcherTransport>* transports,
+                          std::vector<HandleTransport>* transports,
                           MojoWriteMessageFlags flags);
-  // |dispatchers| must be non-null but empty, if |num_dispatchers| is non-null
-  // and nonzero. On success, it will be set to the dispatchers to be received
-  // (and assigned handles) as part of the message.
+  // |handles| must be non-null but empty if |num_handles| is non-null and
+  // nonzero. On success, it will be set to the handles to be received (and
+  // assigned handle values) as part of the message.
   MojoResult ReadMessage(UserPointer<void> bytes,
                          UserPointer<uint32_t> num_bytes,
-                         DispatcherVector* dispatchers,
-                         uint32_t* num_dispatchers,
+                         HandleVector* handles,
+                         uint32_t* num_handles,
                          MojoReadMessageFlags flags);
 
+  // |EntrypointClass::DATA_PIPE_PRODUCER|:
   MojoResult SetDataPipeProducerOptions(
       UserPointer<const MojoDataPipeProducerOptions> options);
   MojoResult GetDataPipeProducerOptions(
@@ -110,6 +131,8 @@ class Dispatcher : public util::RefCountedThreadSafe<Dispatcher> {
                             UserPointer<uint32_t> buffer_num_bytes,
                             MojoWriteDataFlags flags);
   MojoResult EndWriteData(uint32_t num_bytes_written);
+
+  // |EntrypointClass::DATA_PIPE_CONSUMER|:
   MojoResult SetDataPipeConsumerOptions(
       UserPointer<const MojoDataPipeConsumerOptions> options);
   MojoResult GetDataPipeConsumerOptions(
@@ -123,6 +146,7 @@ class Dispatcher : public util::RefCountedThreadSafe<Dispatcher> {
                            MojoReadDataFlags flags);
   MojoResult EndReadData(uint32_t num_bytes_read);
 
+  // |EntrypointClass::BUFFER|:
   // |options| may be null. |new_dispatcher| must not be null, but
   // |*new_dispatcher| should be null (and will contain the dispatcher for the
   // new handle on success).
@@ -172,20 +196,20 @@ class Dispatcher : public util::RefCountedThreadSafe<Dispatcher> {
   // this, since there are requirements on the handle table (see below).
   //
   // In this special state, only a restricted set of operations is allowed.
-  // These are the ones available as |DispatcherTransport| methods. Other
-  // |Dispatcher| methods must not be called until |DispatcherTransport::End()|
-  // has been called.
+  // These are the ones available as |HandleTransport| methods. Other
+  // |Dispatcher| methods must not be called until |HandleTransport::End()| has
+  // been called.
   class HandleTableAccess {
    private:
     friend class Core;
     friend class HandleTable;
     // Tests also need this, to avoid needing |Core|.
-    friend DispatcherTransport test::DispatcherTryStartTransport(Dispatcher*);
+    friend HandleTransport test::HandleTryStartTransport(const Handle&);
 
     // This must be called under the handle table lock and only if the handle
     // table entry is not marked busy. The caller must maintain a reference to
-    // |dispatcher| until |DispatcherTransport::End()| is called.
-    static DispatcherTransport TryStartTransport(Dispatcher* dispatcher);
+    // |dispatcher| until |HandleTransport::End()| is called.
+    static HandleTransport TryStartTransport(const Handle& handle);
   };
 
   // A |TransportData| may serialize dispatchers that are given to it (and which
@@ -194,7 +218,7 @@ class Dispatcher : public util::RefCountedThreadSafe<Dispatcher> {
   // Note that the |MessageInTransit| "owns" (i.e., has the only ref to) these
   // dispatchers, so there are no locking issues. (There's no lock ordering
   // issue, and in fact no need to take dispatcher locks at all.)
-  // TODO(vtl): Consider making another wrapper similar to |DispatcherTransport|
+  // TODO(vtl): Consider making another wrapper similar to |HandleTransport|
   // (but with an owning, unique reference), and having
   // |CreateEquivalentDispatcherAndCloseImplNoLock()| return that wrapper (and
   // |MessageInTransit|, etc. only holding on to such wrappers).
@@ -238,9 +262,15 @@ class Dispatcher : public util::RefCountedThreadSafe<Dispatcher> {
   virtual void CancelAllAwakablesNoLock() MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
   virtual void CloseImplNoLock() MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
 
-  virtual util::RefPtr<Dispatcher>
-  CreateEquivalentDispatcherAndCloseImplNoLock()
-      MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_) = 0;
+  // This is called by |CreateEquivalentDispatcherAndCloseNoLock()|. It should
+  // "close" this dispatcher and return a new one equivalent to it. Note:
+  // Probably the first thing an implementation should do is call
+  // |CancelAllAwakablesNoLock()| (or equivalent); unlike |CloseNoLock()|,
+  // |CreateEquivalentDispatcherAndCloseNoLock()| does not do this
+  // automatically.
+  virtual util::RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock(
+      MessagePipe* message_pipe,
+      unsigned port) MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_) = 0;
 
   // These are to be overridden by subclasses (if necessary). They are never
   // called after the dispatcher has been closed. See the descriptions of the
@@ -248,12 +278,12 @@ class Dispatcher : public util::RefCountedThreadSafe<Dispatcher> {
   virtual MojoResult WriteMessageImplNoLock(
       UserPointer<const void> bytes,
       uint32_t num_bytes,
-      std::vector<DispatcherTransport>* transports,
+      std::vector<HandleTransport>* transports,
       MojoWriteMessageFlags flags) MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
   virtual MojoResult ReadMessageImplNoLock(UserPointer<void> bytes,
                                            UserPointer<uint32_t> num_bytes,
-                                           DispatcherVector* dispatchers,
-                                           uint32_t* num_dispatchers,
+                                           HandleVector* handles,
+                                           uint32_t* num_handles,
                                            MojoReadMessageFlags flags)
       MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
   virtual MojoResult SetDataPipeProducerOptionsImplNoLock(
@@ -346,7 +376,7 @@ class Dispatcher : public util::RefCountedThreadSafe<Dispatcher> {
 
  private:
   FRIEND_REF_COUNTED_THREAD_SAFE(Dispatcher);
-  friend class DispatcherTransport;
+  friend class HandleTransport;
 
   // Closes the dispatcher. This must be done under lock, and unlike |Close()|,
   // the dispatcher must not be closed already. (This is the "equivalent" of
@@ -358,9 +388,12 @@ class Dispatcher : public util::RefCountedThreadSafe<Dispatcher> {
   // dispatcher -- and close (i.e., disable) this dispatcher. I.e., this
   // dispatcher will look as though it was closed, but the resource it
   // represents will be assigned to the new dispatcher. This must be called
-  // under the dispatcher's lock.
-  util::RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseNoLock()
-      MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
+  // under the dispatcher's lock. If the resulting dispatcher will be put into a
+  // message on a message pipe, then |message_pipe| will be set appropriately
+  // (otherwise, it may be null) and |port| will be set to the destination port.
+  util::RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseNoLock(
+      MessagePipe* message_pipe,
+      unsigned port) MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
 
   // API to serialize dispatchers to a |Channel|, exposed to only
   // |TransportData| (via |TransportData|). They may only be called on a
@@ -368,12 +401,11 @@ class Dispatcher : public util::RefCountedThreadSafe<Dispatcher> {
   // |CoreImpl|'s handle table).
   //
   // TODO(vtl): The serialization API (and related implementation methods,
-  // including |DispatcherTransport|'s methods) is marked
-  // |MOJO_NOT_THREAD_SAFE|. This is because the threading requirements are
-  // somewhat complicated (e.g., |HandleTableAccess::TryStartTransport()| is
-  // really a try-lock function, amongst other things). We could/should do a
-  // more careful job annotating these methods.
-  // https://github.com/domokit/mojo/issues/322
+  // including |HandleTransport|'s methods) is marked |MOJO_NOT_THREAD_SAFE|.
+  // This is because the threading requirements are somewhat complicated (e.g.,
+  // |HandleTableAccess::TryStartTransport()| is really a try-lock function,
+  // amongst other things). We could/should do a more careful job annotating
+  // these methods. https://github.com/domokit/mojo/issues/322
   //
   // Starts the serialization. Returns (via the two "out" parameters) the
   // maximum amount of space that may be needed to serialize this dispatcher to
@@ -411,44 +443,6 @@ class Dispatcher : public util::RefCountedThreadSafe<Dispatcher> {
   bool is_closed_ MOJO_GUARDED_BY(mutex_);
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(Dispatcher);
-};
-
-// Wrapper around a |Dispatcher| pointer, while it's being processed to be
-// passed in a message pipe. See the comment about
-// |Dispatcher::HandleTableAccess| for more details.
-//
-// Note: This class is deliberately "thin" -- no more expensive than a
-// |Dispatcher*|.
-class DispatcherTransport {
- public:
-  DispatcherTransport() : dispatcher_(nullptr) {}
-
-  void End() MOJO_NOT_THREAD_SAFE;
-
-  Dispatcher::Type GetType() const { return dispatcher_->GetType(); }
-  bool IsBusy() const MOJO_NOT_THREAD_SAFE {
-    return dispatcher_->IsBusyNoLock();
-  }
-  void Close() MOJO_NOT_THREAD_SAFE { dispatcher_->CloseNoLock(); }
-  util::RefPtr<Dispatcher> CreateEquivalentDispatcherAndClose()
-      MOJO_NOT_THREAD_SAFE {
-    return dispatcher_->CreateEquivalentDispatcherAndCloseNoLock();
-  }
-
-  bool is_valid() const { return !!dispatcher_; }
-
- protected:
-  Dispatcher* dispatcher() { return dispatcher_; }
-
- private:
-  friend class Dispatcher::HandleTableAccess;
-
-  explicit DispatcherTransport(Dispatcher* dispatcher)
-      : dispatcher_(dispatcher) {}
-
-  Dispatcher* dispatcher_;
-
-  // Copy and assign allowed.
 };
 
 // So logging macros and |DCHECK_EQ()|, etc. work.

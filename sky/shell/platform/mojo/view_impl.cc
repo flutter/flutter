@@ -56,7 +56,7 @@ ViewImpl::ViewImpl(mojo::InterfaceRequest<mojo::ui::ViewOwner> view_owner,
 
   // Views
   mojo::ConnectToService(
-      shell.get(), "mojo:view_manager_service", &view_manager_);
+      shell.get(), "mojo:view_manager_service", mojo::GetProxy(&view_manager_));
   mojo::ui::ViewPtr view;
   mojo::ui::ViewListenerPtr view_listener;
   binding_.Bind(mojo::GetProxy(&view_listener));
@@ -65,7 +65,8 @@ ViewImpl::ViewImpl(mojo::InterfaceRequest<mojo::ui::ViewOwner> view_owner,
   view->GetServiceProvider(mojo::GetProxy(&view_service_provider_));
 
   // Input
-  mojo::ConnectToService(view_service_provider_.get(), &input_connection_);
+  mojo::ConnectToService(view_service_provider_.get(),
+                         mojo::GetProxy(&input_connection_));
   mojo::ui::InputListenerPtr listener;
   listener_binding_.Bind(mojo::GetProxy(&listener));
   input_connection_->SetListener(listener.Pass());
@@ -147,7 +148,7 @@ void ViewImpl::ConnectToService(const mojo::String& service_name,
   if (service_name == raw_keyboard::RawKeyboardService::Name_) {
     raw_keyboard_bindings_.AddBinding(
         this,
-        mojo::MakeRequest<raw_keyboard::RawKeyboardService>(handle.Pass()));
+        mojo::InterfaceRequest<raw_keyboard::RawKeyboardService>(handle.Pass()));
   }
 }
 

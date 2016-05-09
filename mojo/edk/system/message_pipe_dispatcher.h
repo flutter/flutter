@@ -16,12 +16,16 @@ namespace system {
 
 class ChannelEndpoint;
 class MessagePipe;
-class MessagePipeDispatcherTransport;
 
 // This is the |Dispatcher| implementation for message pipes (created by the
 // Mojo primitive |MojoCreateMessagePipe()|). This class is thread-safe.
 class MessagePipeDispatcher final : public Dispatcher {
  public:
+  // The default/standard rights for a message pipe handle.
+  static constexpr MojoHandleRights kDefaultHandleRights =
+      MOJO_HANDLE_RIGHT_TRANSFER | MOJO_HANDLE_RIGHT_READ |
+      MOJO_HANDLE_RIGHT_WRITE;
+
   // The default options to use for |MojoCreateMessagePipe()|. (Real uses
   // should obtain this via |ValidateCreateOptions()| with a null |in_options|;
   // this is exposed directly for testing convenience.)
@@ -47,6 +51,7 @@ class MessagePipeDispatcher final : public Dispatcher {
 
   // |Dispatcher| public methods:
   Type GetType() const override;
+  bool SupportsEntrypointClass(EntrypointClass entrypoint_class) const override;
 
   // Creates a |MessagePipe| with a local endpoint (at port 0) and a proxy
   // endpoint, and creates/initializes a |MessagePipeDispatcher| (attached to
@@ -63,8 +68,6 @@ class MessagePipeDispatcher final : public Dispatcher {
                                                          size_t size);
 
  private:
-  friend class MessagePipeDispatcherTransport;
-
   MessagePipeDispatcher();
   ~MessagePipeDispatcher() override;
 
@@ -79,17 +82,17 @@ class MessagePipeDispatcher final : public Dispatcher {
   // |Dispatcher| protected methods:
   void CancelAllAwakablesNoLock() override;
   void CloseImplNoLock() override;
-  util::RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock()
-      override;
-  MojoResult WriteMessageImplNoLock(
-      UserPointer<const void> bytes,
-      uint32_t num_bytes,
-      std::vector<DispatcherTransport>* transports,
-      MojoWriteMessageFlags flags) override;
+  util::RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock(
+      MessagePipe* message_pipe,
+      unsigned port) override;
+  MojoResult WriteMessageImplNoLock(UserPointer<const void> bytes,
+                                    uint32_t num_bytes,
+                                    std::vector<HandleTransport>* transports,
+                                    MojoWriteMessageFlags flags) override;
   MojoResult ReadMessageImplNoLock(UserPointer<void> bytes,
                                    UserPointer<uint32_t> num_bytes,
-                                   DispatcherVector* dispatchers,
-                                   uint32_t* num_dispatchers,
+                                   HandleVector* handles,
+                                   uint32_t* num_handles,
                                    MojoReadMessageFlags flags) override;
   HandleSignalsState GetHandleSignalsStateImplNoLock() const override;
   MojoResult AddAwakableImplNoLock(Awakable* awakable,
@@ -114,23 +117,6 @@ class MessagePipeDispatcher final : public Dispatcher {
   unsigned port_ MOJO_GUARDED_BY(mutex());
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(MessagePipeDispatcher);
-};
-
-class MessagePipeDispatcherTransport : public DispatcherTransport {
- public:
-  explicit MessagePipeDispatcherTransport(DispatcherTransport transport);
-
-  MessagePipe* GetMessagePipe() {
-    return message_pipe_dispatcher()->GetMessagePipeNoLock();
-  }
-  unsigned GetPort() { return message_pipe_dispatcher()->GetPortNoLock(); }
-
- private:
-  MessagePipeDispatcher* message_pipe_dispatcher() {
-    return static_cast<MessagePipeDispatcher*>(dispatcher());
-  }
-
-  // Copy and assign allowed.
 };
 
 }  // namespace system

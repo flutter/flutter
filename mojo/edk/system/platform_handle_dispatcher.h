@@ -20,6 +20,11 @@ namespace system {
 // the embedder).
 class PlatformHandleDispatcher final : public SimpleDispatcher {
  public:
+  // The default/standard rights for a platform handle (wrapper) handle.
+  static constexpr MojoHandleRights kDefaultHandleRights =
+      MOJO_HANDLE_RIGHT_TRANSFER | MOJO_HANDLE_RIGHT_READ |
+      MOJO_HANDLE_RIGHT_WRITE;
+
   static util::RefPtr<PlatformHandleDispatcher> Create(
       platform::ScopedPlatformHandle platform_handle) {
     return AdoptRef(new PlatformHandleDispatcher(platform_handle.Pass()));
@@ -29,6 +34,7 @@ class PlatformHandleDispatcher final : public SimpleDispatcher {
 
   // |Dispatcher| public methods:
   Type GetType() const override;
+  bool SupportsEntrypointClass(EntrypointClass entrypoint_class) const override;
 
   // The "opposite" of |SerializeAndClose()|. (Typically this is called by
   // |Dispatcher::Deserialize()|.)
@@ -45,8 +51,9 @@ class PlatformHandleDispatcher final : public SimpleDispatcher {
 
   // |Dispatcher| protected methods:
   void CloseImplNoLock() override;
-  util::RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock()
-      override;
+  util::RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock(
+      MessagePipe* message_pipe,
+      unsigned port) override;
   void StartSerializeImplNoLock(Channel* channel,
                                 size_t* max_size,
                                 size_t* max_platform_handles) override

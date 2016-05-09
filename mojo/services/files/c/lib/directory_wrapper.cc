@@ -8,24 +8,27 @@
 
 #include "files/c/lib/errno_impl.h"
 #include "files/c/lib/file_fd_impl.h"
-#include "files/c/lib/template_util.h"
 #include "files/c/lib/util.h"
 #include "files/c/mojio_fcntl.h"
-#include "files/interfaces/file.mojom.h"
 #include "files/interfaces/types.mojom.h"
 #include "mojo/public/cpp/bindings/interface_request.h"
 #include "mojo/public/cpp/environment/logging.h"
 
+using mojo::InterfaceHandle;
+using mojo::SynchronousInterfacePtr;
+
 namespace mojio {
 
-DirectoryWrapper::DirectoryWrapper(ErrnoImpl* errno_impl,
-                                   mojo::files::DirectoryPtr directory)
-    : errno_impl_(errno_impl), directory_(directory.Pass()) {
+DirectoryWrapper::DirectoryWrapper(
+    ErrnoImpl* errno_impl,
+    InterfaceHandle<mojo::files::Directory> directory)
+    : errno_impl_(errno_impl),
+      directory_(SynchronousInterfacePtr<mojo::files::Directory>::Create(
+          directory.Pass())) {
   MOJO_DCHECK(directory_);
 }
 
-DirectoryWrapper::~DirectoryWrapper() {
-}
+DirectoryWrapper::~DirectoryWrapper() {}
 
 // TODO(vtl): This doesn't currently support opening non-files (in particular,
 // directories), but it should.
@@ -70,11 +73,10 @@ std::unique_ptr<FDImpl> DirectoryWrapper::Open(const char* path,
   // TODO(vtl): We currently totally ignore |mode|; maybe we should do something
   // with it?
 
-  mojo::files::FilePtr file;
+  InterfaceHandle<mojo::files::File> file;
   mojo::files::Error error = mojo::files::Error::INTERNAL;
-  directory_->OpenFile(path, mojo::GetProxy(&file), mojo_open_flags,
-                       Capture(&error));
-  if (!directory_.WaitForIncomingResponse()) {
+  if (!directory_->OpenFile(path, mojo::GetProxy(&file), mojo_open_flags,
+                            &error)) {
     // This may be somewhat surprising. The implication is that the CWD is
     // stale, which may be a little strange.
     errno_setter.Set(ESTALE);
@@ -92,20 +94,19 @@ bool DirectoryWrapper::Chdir(const char* path) {
   if (!path)
     return errno_setter.Set(EFAULT);
 
-  mojo::files::DirectoryPtr new_directory;
+  InterfaceHandle<mojo::files::Directory> new_directory;
   mojo::files::Error error = mojo::files::Error::INTERNAL;
-  directory_->OpenDirectory(
-      path, mojo::GetProxy(&new_directory),
-      mojo::files::kOpenFlagRead | mojo::files::kOpenFlagWrite,
-      Capture(&error));
-  if (!directory_.WaitForIncomingResponse()) {
+  if (!directory_->OpenDirectory(
+          path, mojo::GetProxy(&new_directory),
+          mojo::files::kOpenFlagRead | mojo::files::kOpenFlagWrite, &error)) {
     // This may be somewhat surprising. The implication is that the CWD is
     // stale, which may be a little strange.
     return errno_setter.Set(ESTALE);
   }
   if (!errno_setter.Set(ErrorToErrno(error)))
     return false;
-  directory_ = new_directory.Pass();
+  directory_ = SynchronousInterfacePtr<mojo::files::Directory>::Create(
+      new_directory.Pass());
   return true;
 }
 

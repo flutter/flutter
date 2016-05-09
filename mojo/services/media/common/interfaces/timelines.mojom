@@ -1,0 +1,57 @@
+// Copyright 2016 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[DartPackage="mojo_services"]
+module mojo;
+
+// TODO(dalesat): Move out of media to somewhere more generic.
+
+// Represents the relationship between and subject timeline and a reference
+// timeline.
+//
+// To translate a reference timeline value r to the subject timeline, apply
+// the following formula:
+//
+//   (r - reference_time) * subject_delta / reference_delta + subject_time
+//
+// To translate a subject timeline value s to the reference timeline, apply
+// this formula provided subject_delta isn't zero:
+//
+//   (s - subject_time) * reference_delta / subject_delta + reference_time
+//
+struct TimelineTransform {
+  // A value from the reference timeline that correlates to subject_time.
+  int64 reference_time = 0;
+
+  // A value from the subject timeline that correlates to reference_time.
+  int64 subject_time = 0;
+
+  // The change in the reference timeline corresponding to subject_delta.
+  // Cannnot be zero.
+  uint32 reference_delta = 1;
+
+  // The change in the subject timeline corresponding to reference_delta.
+  uint32 subject_delta = 0;
+};
+
+// A push-mode consumer of timeline updates.
+interface TimelineConsumer {
+  const int64 kUnspecifiedTime = 0x7fffffffffffffff;
+
+  // Sets the timeline transform at the indicated effective time. Exactly one
+  // of the effective_*_time values must be kUnspecifiedTime.
+  // effective_subject_time can only be specified if the current subject_delta
+  // isn’t zero. reference_delta may not be zero. subject_time may be
+  // kUnspecifiedTime to indicate that the new transform subject_time should
+  // be inferred from the effective time. The new transform reference_time is
+  // always inferred from the effective time. The callback is called at the
+  // effective time or when a pending operation is cancelled due to a
+  // subsequent call, in which case the 'completed' value is false.
+  SetTimelineTransform(
+      int64 subject_time,
+      uint32 reference_delta,
+      uint32 subject_delta,
+      int64 effective_reference_time,
+      int64 effective_subject_time) => (bool completed);
+};

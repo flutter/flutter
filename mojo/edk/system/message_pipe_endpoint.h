@@ -10,7 +10,7 @@
 #include <memory>
 #include <vector>
 
-#include "mojo/edk/system/dispatcher.h"
+#include "mojo/edk/system/handle.h"
 #include "mojo/edk/system/memory.h"
 #include "mojo/edk/system/message_in_transit.h"
 #include "mojo/public/c/system/handle.h"
@@ -60,8 +60,8 @@ class MessagePipeEndpoint {
   virtual void CancelAllAwakables();
   virtual MojoResult ReadMessage(UserPointer<void> bytes,
                                  UserPointer<uint32_t> num_bytes,
-                                 DispatcherVector* dispatchers,
-                                 uint32_t* num_dispatchers,
+                                 HandleVector* handles,
+                                 uint32_t* num_handles,
                                  MojoReadMessageFlags flags);
   virtual HandleSignalsState GetHandleSignalsState() const;
   virtual MojoResult AddAwakable(Awakable* awakable,

@@ -13,8 +13,12 @@
 #include "files/c/tests/mock_errno_impl.h"
 #include "files/c/tests/mojio_impl_test_base.h"
 #include "files/c/tests/test_utils.h"
+#include "files/interfaces/files.mojom-sync.h"
 #include "files/interfaces/files.mojom.h"
 #include "files/interfaces/types.mojom.h"
+#include "mojo/public/cpp/bindings/synchronous_interface_ptr.h"
+
+using mojo::SynchronousInterfacePtr;
 
 namespace mojio {
 namespace {
@@ -24,11 +28,14 @@ using FileFDImplTest = mojio::test::MojioImplTestBase;
 const int kLastErrorSentinel = -12345;
 
 TEST_F(FileFDImplTest, ConstructClose) {
+  auto dir = SynchronousInterfacePtr<mojo::files::Directory>::Create(
+      directory().Pass());
+
   test::MockErrnoImpl errno_impl(kLastErrorSentinel);
-  FileFDImpl ffdi(&errno_impl,
-                  test::OpenFileAt(&directory(), "my_file",
-                                   mojo::files::kOpenFlagWrite |
-                                       mojo::files::kOpenFlagCreate));
+  FileFDImpl ffdi(
+      &errno_impl,
+      test::OpenFileAt(&dir, "my_file", mojo::files::kOpenFlagWrite |
+                                            mojo::files::kOpenFlagCreate));
   EXPECT_EQ(kLastErrorSentinel, errno_impl.Get());  // No error.
 
   errno_impl.Reset(kLastErrorSentinel);
@@ -37,10 +44,13 @@ TEST_F(FileFDImplTest, ConstructClose) {
 }
 
 TEST_F(FileFDImplTest, Dup) {
-  test::CreateTestFileAt(&directory(), "my_file", 1000);
+  auto dir = SynchronousInterfacePtr<mojo::files::Directory>::Create(
+      directory().Pass());
+
+  test::CreateTestFileAt(&dir, "my_file", 1000);
 
   test::MockErrnoImpl errno_impl(kLastErrorSentinel);
-  FileFDImpl ffdi(&errno_impl, test::OpenFileAt(&directory(), "my_file",
+  FileFDImpl ffdi(&errno_impl, test::OpenFileAt(&dir, "my_file",
                                                 mojo::files::kOpenFlagRead));
   EXPECT_EQ(kLastErrorSentinel, errno_impl.Get());  // No error.
 
@@ -67,10 +77,13 @@ TEST_F(FileFDImplTest, Dup) {
 }
 
 TEST_F(FileFDImplTest, Ftruncate) {
-  test::CreateTestFileAt(&directory(), "my_file", 1000);
+  auto dir = SynchronousInterfacePtr<mojo::files::Directory>::Create(
+      directory().Pass());
+
+  test::CreateTestFileAt(&dir, "my_file", 1000);
 
   test::MockErrnoImpl errno_impl(kLastErrorSentinel);
-  FileFDImpl ffdi(&errno_impl, test::OpenFileAt(&directory(), "my_file",
+  FileFDImpl ffdi(&errno_impl, test::OpenFileAt(&dir, "my_file",
                                                 mojo::files::kOpenFlagWrite));
   EXPECT_EQ(kLastErrorSentinel, errno_impl.Get());  // No error.
 
@@ -78,13 +91,13 @@ TEST_F(FileFDImplTest, Ftruncate) {
   errno_impl.Reset(kLastErrorSentinel);
   EXPECT_TRUE(ffdi.Ftruncate(123));
   EXPECT_EQ(kLastErrorSentinel, errno_impl.Get());  // No error.
-  EXPECT_EQ(123, test::GetFileSize(&directory(), "my_file"));
+  EXPECT_EQ(123, test::GetFileSize(&dir, "my_file"));
 
   // Can also extend.
   errno_impl.Reset(kLastErrorSentinel);
   EXPECT_TRUE(ffdi.Ftruncate(456));
   EXPECT_EQ(kLastErrorSentinel, errno_impl.Get());  // No error.
-  EXPECT_EQ(456, test::GetFileSize(&directory(), "my_file"));
+  EXPECT_EQ(456, test::GetFileSize(&dir, "my_file"));
 
   // TODO(vtl): Check file position after |Ftruncate()|.
 
@@ -95,10 +108,13 @@ TEST_F(FileFDImplTest, Ftruncate) {
 }
 
 TEST_F(FileFDImplTest, Lseek) {
-  test::CreateTestFileAt(&directory(), "my_file", 123);
+  auto dir = SynchronousInterfacePtr<mojo::files::Directory>::Create(
+      directory().Pass());
+
+  test::CreateTestFileAt(&dir, "my_file", 123);
 
   test::MockErrnoImpl errno_impl(kLastErrorSentinel);
-  FileFDImpl ffdi(&errno_impl, test::OpenFileAt(&directory(), "my_file",
+  FileFDImpl ffdi(&errno_impl, test::OpenFileAt(&dir, "my_file",
                                                 mojo::files::kOpenFlagWrite));
   EXPECT_EQ(kLastErrorSentinel, errno_impl.Get());  // No error.
 
@@ -146,14 +162,17 @@ TEST_F(FileFDImplTest, Lseek) {
   expected_contents[5] = 42;
   expected_contents[5 + 1 + 42] = 5;
   expected_contents[123 - 5] = 0;
-  EXPECT_EQ(expected_contents, test::GetFileContents(&directory(), "my_file"));
+  EXPECT_EQ(expected_contents, test::GetFileContents(&dir, "my_file"));
 }
 
 TEST_F(FileFDImplTest, Read) {
-  test::CreateTestFileAt(&directory(), "my_file", 123);
+  auto dir = SynchronousInterfacePtr<mojo::files::Directory>::Create(
+      directory().Pass());
+
+  test::CreateTestFileAt(&dir, "my_file", 123);
 
   test::MockErrnoImpl errno_impl(kLastErrorSentinel);
-  FileFDImpl ffdi(&errno_impl, test::OpenFileAt(&directory(), "my_file",
+  FileFDImpl ffdi(&errno_impl, test::OpenFileAt(&dir, "my_file",
                                                 mojo::files::kOpenFlagRead));
   EXPECT_EQ(kLastErrorSentinel, errno_impl.Get());  // No error.
 
@@ -179,12 +198,15 @@ TEST_F(FileFDImplTest, Read) {
 }
 
 TEST_F(FileFDImplTest, Write) {
+  auto dir = SynchronousInterfacePtr<mojo::files::Directory>::Create(
+      directory().Pass());
+
   test::MockErrnoImpl errno_impl(kLastErrorSentinel);
-  FileFDImpl ffdi(&errno_impl,
-                  test::OpenFileAt(&directory(), "my_file",
-                                   mojo::files::kOpenFlagWrite |
-                                       mojo::files::kOpenFlagCreate |
-                                       mojo::files::kOpenFlagExclusive));
+  FileFDImpl ffdi(
+      &errno_impl,
+      test::OpenFileAt(&dir, "my_file", mojo::files::kOpenFlagWrite |
+                                            mojo::files::kOpenFlagCreate |
+                                            mojo::files::kOpenFlagExclusive));
   EXPECT_EQ(kLastErrorSentinel, errno_impl.Get());  // No error.
 
   // Write something.
@@ -198,8 +220,7 @@ TEST_F(FileFDImplTest, Write) {
   EXPECT_EQ(static_cast<mojio_off_t>(sizeof(kMojio)),
             ffdi.Write(kMojio, sizeof(kMojio)));
 
-  EXPECT_EQ(std::string("hello mojio"),
-            test::GetFileContents(&directory(), "my_file"));
+  EXPECT_EQ(std::string("hello mojio"), test::GetFileContents(&dir, "my_file"));
 
   // Invalid |count| (must fit within |ssize_t|).
   errno_impl.Reset(kLastErrorSentinel);
@@ -208,16 +229,19 @@ TEST_F(FileFDImplTest, Write) {
 }
 
 TEST_F(FileFDImplTest, Fstat) {
-  test::CreateTestFileAt(&directory(), "my_file_0", 0);
-  test::CreateTestFileAt(&directory(), "my_file_1", 512);
-  test::CreateTestFileAt(&directory(), "my_file_2", 513);
+  auto dir = SynchronousInterfacePtr<mojo::files::Directory>::Create(
+      directory().Pass());
+
+  test::CreateTestFileAt(&dir, "my_file_0", 0);
+  test::CreateTestFileAt(&dir, "my_file_1", 512);
+  test::CreateTestFileAt(&dir, "my_file_2", 513);
 
   test::MockErrnoImpl errno_impl(kLastErrorSentinel);
-  FileFDImpl ffdi0(&errno_impl, test::OpenFileAt(&directory(), "my_file_0",
+  FileFDImpl ffdi0(&errno_impl, test::OpenFileAt(&dir, "my_file_0",
                                                  mojo::files::kOpenFlagRead));
-  FileFDImpl ffdi1(&errno_impl, test::OpenFileAt(&directory(), "my_file_1",
+  FileFDImpl ffdi1(&errno_impl, test::OpenFileAt(&dir, "my_file_1",
                                                  mojo::files::kOpenFlagRead));
-  FileFDImpl ffdi2(&errno_impl, test::OpenFileAt(&directory(), "my_file_2",
+  FileFDImpl ffdi2(&errno_impl, test::OpenFileAt(&dir, "my_file_2",
                                                  mojo::files::kOpenFlagRead));
   EXPECT_EQ(kLastErrorSentinel, errno_impl.Get());  // No error.
 
@@ -256,13 +280,16 @@ TEST_F(FileFDImplTest, Fstat) {
 }
 
 TEST_F(FileFDImplTest, Efault) {
+  auto dir = SynchronousInterfacePtr<mojo::files::Directory>::Create(
+      directory().Pass());
+
   test::MockErrnoImpl errno_impl(kLastErrorSentinel);
-  FileFDImpl ffdi(&errno_impl,
-                  test::OpenFileAt(&directory(), "my_file",
-                                   mojo::files::kOpenFlagRead |
-                                       mojo::files::kOpenFlagWrite |
-                                       mojo::files::kOpenFlagCreate |
-                                       mojo::files::kOpenFlagExclusive));
+  FileFDImpl ffdi(
+      &errno_impl,
+      test::OpenFileAt(&dir, "my_file", mojo::files::kOpenFlagRead |
+                                            mojo::files::kOpenFlagWrite |
+                                            mojo::files::kOpenFlagCreate |
+                                            mojo::files::kOpenFlagExclusive));
   EXPECT_EQ(kLastErrorSentinel, errno_impl.Get());  // No error.
 
   errno_impl.Reset(kLastErrorSentinel);

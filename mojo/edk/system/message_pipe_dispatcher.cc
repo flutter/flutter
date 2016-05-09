@@ -8,6 +8,7 @@
 
 #include "base/logging.h"
 #include "mojo/edk/system/configuration.h"
+#include "mojo/edk/system/handle_transport.h"
 #include "mojo/edk/system/local_message_pipe_endpoint.h"
 #include "mojo/edk/system/memory.h"
 #include "mojo/edk/system/message_pipe.h"
@@ -23,6 +24,9 @@ namespace system {
 const unsigned kInvalidPort = static_cast<unsigned>(-1);
 
 // MessagePipeDispatcher -------------------------------------------------------
+
+// static
+constexpr MojoHandleRights MessagePipeDispatcher::kDefaultHandleRights;
 
 // static
 const MojoCreateMessagePipeOptions
@@ -69,6 +73,11 @@ void MessagePipeDispatcher::Init(RefPtr<MessagePipe>&& message_pipe,
 
 Dispatcher::Type MessagePipeDispatcher::GetType() const {
   return Type::MESSAGE_PIPE;
+}
+
+bool MessagePipeDispatcher::SupportsEntrypointClass(
+    EntrypointClass entrypoint_class) const {
+  return (entrypoint_class == EntrypointClass::MESSAGE_PIPE);
 }
 
 // static
@@ -128,8 +137,21 @@ void MessagePipeDispatcher::CloseImplNoLock() {
 }
 
 RefPtr<Dispatcher>
-MessagePipeDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock() {
+MessagePipeDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock(
+    MessagePipe* message_pipe,
+    unsigned port) {
   mutex().AssertHeld();
+
+  // "We" are being sent over our peer.
+  if (message_pipe == message_pipe_.get()) {
+    // A message pipe dispatcher can't be sent over itself (this should be
+    // disallowed by |Core|). Note that |port| is the destination port.
+    DCHECK_EQ(port, port_);
+    // In this case, |message_pipe_|'s mutex should already be held!
+    message_pipe_->CancelAllAwakablesNoLock(port_);
+  } else {
+    CancelAllAwakablesNoLock();
+  }
 
   // TODO(vtl): Currently, there are no options, so we just use
   // |kDefaultCreateOptions|. Eventually, we'll have to duplicate the options
@@ -143,7 +165,7 @@ MessagePipeDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock() {
 MojoResult MessagePipeDispatcher::WriteMessageImplNoLock(
     UserPointer<const void> bytes,
     uint32_t num_bytes,
-    std::vector<DispatcherTransport>* transports,
+    std::vector<HandleTransport>* transports,
     MojoWriteMessageFlags flags) {
   DCHECK(!transports ||
          (transports->size() > 0 &&
@@ -161,12 +183,12 @@ MojoResult MessagePipeDispatcher::WriteMessageImplNoLock(
 MojoResult MessagePipeDispatcher::ReadMessageImplNoLock(
     UserPointer<void> bytes,
     UserPointer<uint32_t> num_bytes,
-    DispatcherVector* dispatchers,
-    uint32_t* num_dispatchers,
+    HandleVector* handles,
+    uint32_t* num_handles,
     MojoReadMessageFlags flags) {
   mutex().AssertHeld();
-  return message_pipe_->ReadMessage(port_, bytes, num_bytes, dispatchers,
-                                    num_dispatchers, flags);
+  return message_pipe_->ReadMessage(port_, bytes, num_bytes, handles,
+                                    num_handles, flags);
 }
 
 HandleSignalsState MessagePipeDispatcher::GetHandleSignalsStateImplNoLock()
@@ -213,15 +235,6 @@ bool MessagePipeDispatcher::EndSerializeAndCloseImplNoLock(
   message_pipe_ = nullptr;
   port_ = kInvalidPort;
   return rv;
-}
-
-// MessagePipeDispatcherTransport ----------------------------------------------
-
-MessagePipeDispatcherTransport::MessagePipeDispatcherTransport(
-    DispatcherTransport transport)
-    : DispatcherTransport(transport) {
-  DCHECK_EQ(message_pipe_dispatcher()->GetType(),
-            Dispatcher::Type::MESSAGE_PIPE);
 }
 
 }  // namespace system

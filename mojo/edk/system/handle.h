@@ -5,6 +5,8 @@
 #ifndef MOJO_EDK_SYSTEM_HANDLE_H_
 #define MOJO_EDK_SYSTEM_HANDLE_H_
 
+#include <vector>
+
 #include "mojo/edk/util/ref_ptr.h"
 #include "mojo/public/c/system/handle.h"
 
@@ -30,8 +32,21 @@ struct Handle {
   Handle& operator=(const Handle&);
   Handle& operator=(Handle&&);
 
+  // Returns a new |Handle| with the same contents as this object. Useful when a
+  // function takes a |Handle&&| argument and the caller wants to retain its
+  // copy (rather than moving it).
+  Handle Clone() const { return *this; }
+
   // A |Handle| tests as true if it actually has a dispatcher.
   explicit operator bool() const { return !!dispatcher; }
+
+  bool operator==(const Handle& rhs) const {
+    return dispatcher == rhs.dispatcher && rights == rhs.rights;
+  }
+
+  bool operator!=(const Handle& rhs) const { return !operator==(rhs); }
+
+  void reset() { *this = Handle(); }
 
   // Note: |dispatcher| is guaranteed to be null if default-constructed or
   // moved-from, but we make no guarantees about the value of |rights| in either
@@ -39,6 +54,8 @@ struct Handle {
   util::RefPtr<Dispatcher> dispatcher;
   MojoHandleRights rights;
 };
+
+using HandleVector = std::vector<Handle>;
 
 }  // namespace system
 }  // namespace mojo

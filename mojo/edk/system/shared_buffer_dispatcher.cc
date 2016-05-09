@@ -34,6 +34,9 @@ struct MOJO_ALIGNAS(8) SerializedSharedBufferDispatcher {
 }  // namespace
 
 // static
+constexpr MojoHandleRights SharedBufferDispatcher::kDefaultHandleRights;
+
+// static
 const MojoCreateSharedBufferOptions
     SharedBufferDispatcher::kDefaultCreateOptions = {
         static_cast<uint32_t>(sizeof(MojoCreateSharedBufferOptions)),
@@ -95,6 +98,11 @@ RefPtr<SharedBufferDispatcher> SharedBufferDispatcher::Create(
 
 Dispatcher::Type SharedBufferDispatcher::GetType() const {
   return Type::SHARED_BUFFER;
+}
+
+bool SharedBufferDispatcher::SupportsEntrypointClass(
+    EntrypointClass entrypoint_class) const {
+  return (entrypoint_class == EntrypointClass::BUFFER);
 }
 
 // static
@@ -211,8 +219,13 @@ void SharedBufferDispatcher::CloseImplNoLock() {
 }
 
 RefPtr<Dispatcher>
-SharedBufferDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock() {
+SharedBufferDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock(
+    MessagePipe* /*message_pipe*/,
+    unsigned /*port*/) {
   mutex().AssertHeld();
+
+  CancelAllAwakablesNoLock();
+
   DCHECK(shared_buffer_);
   return CreateInternal(std::move(shared_buffer_));
 }

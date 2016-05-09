@@ -8,6 +8,8 @@
 #include "mojo/edk/system/configuration.h"
 #include "mojo/edk/system/data_pipe_consumer_dispatcher.h"
 #include "mojo/edk/system/data_pipe_producer_dispatcher.h"
+#include "mojo/edk/system/handle.h"
+#include "mojo/edk/system/handle_transport.h"
 #include "mojo/edk/system/message_pipe_dispatcher.h"
 #include "mojo/edk/system/platform_handle_dispatcher.h"
 #include "mojo/edk/system/shared_buffer_dispatcher.h"
@@ -23,30 +25,28 @@ namespace system {
 namespace test {
 
 // TODO(vtl): Maybe this should be defined in a test-only file instead.
-DispatcherTransport DispatcherTryStartTransport(Dispatcher* dispatcher) {
-  return Dispatcher::HandleTableAccess::TryStartTransport(dispatcher);
+HandleTransport HandleTryStartTransport(const Handle& handle) {
+  return Dispatcher::HandleTableAccess::TryStartTransport(handle);
 }
 
 }  // namespace test
 
-// Dispatcher ------------------------------------------------------------------
-
 // TODO(vtl): The thread-safety analyzer isn't smart enough to deal with the
 // fact that we give up if |TryLock()| fails.
 // static
-DispatcherTransport Dispatcher::HandleTableAccess::TryStartTransport(
-    Dispatcher* dispatcher) MOJO_NO_THREAD_SAFETY_ANALYSIS {
-  DCHECK(dispatcher);
+HandleTransport Dispatcher::HandleTableAccess::TryStartTransport(
+    const Handle& handle) MOJO_NO_THREAD_SAFETY_ANALYSIS {
+  DCHECK(handle.dispatcher);
 
-  if (!dispatcher->mutex_.TryLock())
-    return DispatcherTransport();
+  if (!handle.dispatcher->mutex_.TryLock())
+    return HandleTransport();
 
   // We shouldn't race with things that close dispatchers, since closing can
   // only take place either under |handle_table_mutex_| or when the handle is
   // marked as busy.
-  DCHECK(!dispatcher->is_closed_);
+  DCHECK(!handle.dispatcher->is_closed_);
 
-  return DispatcherTransport(dispatcher);
+  return HandleTransport(handle);
 }
 
 // static
@@ -108,11 +108,10 @@ MojoResult Dispatcher::Close() {
   return MOJO_RESULT_OK;
 }
 
-MojoResult Dispatcher::WriteMessage(
-    UserPointer<const void> bytes,
-    uint32_t num_bytes,
-    std::vector<DispatcherTransport>* transports,
-    MojoWriteMessageFlags flags) {
+MojoResult Dispatcher::WriteMessage(UserPointer<const void> bytes,
+                                    uint32_t num_bytes,
+                                    std::vector<HandleTransport>* transports,
+                                    MojoWriteMessageFlags flags) {
   DCHECK(!transports ||
          (transports->size() > 0 &&
           transports->size() < GetConfiguration().max_message_num_handles));
@@ -126,18 +125,16 @@ MojoResult Dispatcher::WriteMessage(
 
 MojoResult Dispatcher::ReadMessage(UserPointer<void> bytes,
                                    UserPointer<uint32_t> num_bytes,
-                                   DispatcherVector* dispatchers,
-                                   uint32_t* num_dispatchers,
+                                   HandleVector* handles,
+                                   uint32_t* num_handles,
                                    MojoReadMessageFlags flags) {
-  DCHECK(!num_dispatchers || *num_dispatchers == 0 ||
-         (dispatchers && dispatchers->empty()));
+  DCHECK(!num_handles || *num_handles == 0 || (handles && handles->empty()));
 
   MutexLocker locker(&mutex_);
   if (is_closed_)
     return MOJO_RESULT_INVALID_ARGUMENT;
 
-  return ReadMessageImplNoLock(bytes, num_bytes, dispatchers, num_dispatchers,
-                               flags);
+  return ReadMessageImplNoLock(bytes, num_bytes, handles, num_handles, flags);
 }
 
 MojoResult Dispatcher::SetDataPipeProducerOptions(
@@ -300,8 +297,7 @@ void Dispatcher::RemoveAwakable(Awakable* awakable,
   RemoveAwakableImplNoLock(awakable, handle_signals_state);
 }
 
-Dispatcher::Dispatcher() : is_closed_(false) {
-}
+Dispatcher::Dispatcher() : is_closed_(false) {}
 
 Dispatcher::~Dispatcher() {
   // Make sure that |Close()| was called.
@@ -325,7 +321,7 @@ void Dispatcher::CloseImplNoLock() {
 MojoResult Dispatcher::WriteMessageImplNoLock(
     UserPointer<const void> /*bytes*/,
     uint32_t /*num_bytes*/,
-    std::vector<DispatcherTransport>* /*transports*/,
+    std::vector<HandleTransport>* /*transports*/,
     MojoWriteMessageFlags /*flags*/) {
   mutex_.AssertHeld();
   DCHECK(!is_closed_);
@@ -336,8 +332,8 @@ MojoResult Dispatcher::WriteMessageImplNoLock(
 MojoResult Dispatcher::ReadMessageImplNoLock(
     UserPointer<void> /*bytes*/,
     UserPointer<uint32_t> /*num_bytes*/,
-    DispatcherVector* /*dispatchers*/,
-    uint32_t* /*num_dispatchers*/,
+    HandleVector* /*handles*/,
+    uint32_t* /*num_handles*/,
     MojoReadMessageFlags /*flags*/) {
   mutex_.AssertHeld();
   DCHECK(!is_closed_);
@@ -526,13 +522,14 @@ void Dispatcher::CloseNoLock() {
   CloseImplNoLock();
 }
 
-RefPtr<Dispatcher> Dispatcher::CreateEquivalentDispatcherAndCloseNoLock() {
+RefPtr<Dispatcher> Dispatcher::CreateEquivalentDispatcherAndCloseNoLock(
+    MessagePipe* message_pipe,
+    unsigned port) {
   mutex_.AssertHeld();
   DCHECK(!is_closed_);
 
   is_closed_ = true;
-  CancelAllAwakablesNoLock();
-  return CreateEquivalentDispatcherAndCloseImplNoLock();
+  return CreateEquivalentDispatcherAndCloseImplNoLock(message_pipe, port);
 }
 
 void Dispatcher::StartSerialize(Channel* channel,
@@ -570,14 +567,6 @@ bool Dispatcher::EndSerializeAndClose(
 
   return EndSerializeAndCloseImplNoLock(channel, destination, actual_size,
                                         platform_handles);
-}
-
-// DispatcherTransport ---------------------------------------------------------
-
-void DispatcherTransport::End() {
-  DCHECK(dispatcher_);
-  dispatcher_->mutex_.Unlock();
-  dispatcher_ = nullptr;
 }
 
 }  // namespace system

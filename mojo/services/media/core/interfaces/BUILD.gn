@@ -10,5 +10,6 @@ mojom("interfaces") {
     "media_demux.mojom",
     "media_type_converter.mojom",
     "seeking_reader.mojom",
+    "timeline_controller.mojom",
   ]
 }

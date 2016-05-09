@@ -192,7 +192,7 @@ namespace shell {
 AccessibilityBridge::AccessibilityBridge(FlutterView* view,
                                          mojo::ServiceProvider* serviceProvider)
     : view_(view), binding_(this), weak_factory_(this) {
-  mojo::ConnectToService(serviceProvider, &semantics_server_);
+  mojo::ConnectToService(serviceProvider, mojo::GetProxy(&semantics_server_));
   mojo::InterfaceHandle<semantics::SemanticsListener> listener;
   binding_.Bind(&listener);
   semantics_server_->AddSemanticsListener(listener.Pass());

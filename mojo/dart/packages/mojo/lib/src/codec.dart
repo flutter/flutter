@@ -224,7 +224,6 @@ class Encoder {
       }
       var pipe = new core.MojoMessagePipe();
       interface.bind(pipe.endpoints[0]);
-      interface.beginHandlingEvents();
       encodeMessagePipeHandle(pipe.endpoints[1], offset, nullable);
       // Set the version to the version in the stub.
       encodeUint32(interface.version, offset + kSerializedHandleSize);

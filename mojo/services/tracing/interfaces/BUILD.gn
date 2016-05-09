@@ -7,6 +7,9 @@ import("$mojo_sdk_root/mojo/public/tools/bindings/mojom.gni")
 
 mojom("interfaces") {
   sources = [
+    "trace_provider_registry.mojom",
     "tracing.mojom",
   ]
+
+  import_dirs = [ get_path_info("../../", "abspath") ]
 }

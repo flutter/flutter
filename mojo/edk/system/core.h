@@ -9,6 +9,7 @@
 
 #include <functional>
 
+#include "mojo/edk/system/handle.h"
 #include "mojo/edk/system/handle_table.h"
 #include "mojo/edk/system/mapping_table.h"
 #include "mojo/edk/system/memory.h"
@@ -36,6 +37,9 @@ struct HandleSignalsState;
 
 // |Core| is an object that implements the Mojo system calls. All public methods
 // are thread-safe.
+//
+// Convention: |MojoHandle|s are referred to as |handle| or |foo_handle|,
+// whereas |Handle|s are just |h|.
 class Core {
  public:
   // ---------------------------------------------------------------------------
@@ -46,15 +50,16 @@ class Core {
   explicit Core(embedder::PlatformSupport* platform_support);
   virtual ~Core();
 
-  // Adds |dispatcher| to the handle table, returning the handle for it. Returns
-  // |MOJO_HANDLE_INVALID| on failure, namely if the handle table is full.
-  MojoHandle AddDispatcher(Dispatcher* dispatcher);
+  // Adds |handle| (which must have a dispatcher) to the handle table, returning
+  // the handle value for it. Returns |MOJO_HANDLE_INVALID| on failure, namely
+  // if the handle table is full.
+  MojoHandle AddHandle(Handle&& h);
 
-  // Looks up the dispatcher for the given handle. On success, gets the
-  // dispatcher for a given handle. On failure, returns an appropriate result
-  // and leaves |dispatcher| alone), namely |MOJO_RESULT_INVALID_ARGUMENT| if
-  // the handle is invalid or |MOJO_RESULT_BUSY| if the handle is marked as
-  // busy.
+  // Looks up the dispatcher for the given handle value. On success, gets the
+  // dispatcher for a given handle value. On failure, returns an appropriate
+  // result and leaves |dispatcher| alone), namely
+  // |MOJO_RESULT_INVALID_ARGUMENT| if the handle value is invalid or
+  // |MOJO_RESULT_BUSY| if the handle is marked as busy.
   MojoResult GetDispatcher(MojoHandle handle,
                            util::RefPtr<Dispatcher>* dispatcher);
 

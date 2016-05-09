@@ -149,16 +149,21 @@ class MojoEventHandler {
   bool _isInHandler = false;
   bool _isPeerClosed = false;
 
-  MojoEventHandler.fromEndpoint(MojoMessagePipeEndpoint endpoint)
+  MojoEventHandler.fromEndpoint(MojoMessagePipeEndpoint endpoint,
+                                {bool autoBegin: true})
       : _endpoint = endpoint,
         _eventSubscription = new MojoEventSubscription(endpoint.handle) {
-    beginHandlingEvents();
+    if (autoBegin) {
+      beginHandlingEvents();
+    }
   }
 
-  MojoEventHandler.fromHandle(MojoHandle handle)
+  MojoEventHandler.fromHandle(MojoHandle handle, {bool autoBegin: true})
       : _endpoint = new MojoMessagePipeEndpoint(handle),
         _eventSubscription = new MojoEventSubscription(handle) {
-    beginHandlingEvents();
+    if (autoBegin) {
+      beginHandlingEvents();
+    }
   }
 
   MojoEventHandler.unbound();

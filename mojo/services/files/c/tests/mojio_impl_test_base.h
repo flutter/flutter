@@ -7,6 +7,7 @@
 
 #include "files/interfaces/directory.mojom.h"
 #include "mojo/public/cpp/application/application_test_base.h"
+#include "mojo/public/cpp/bindings/interface_handle.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojio {
@@ -22,10 +23,12 @@ class MojioImplTestBase : public mojo::test::ApplicationTestBase {
   void SetUp() override;
 
  protected:
-  mojo::files::DirectoryPtr& directory() { return directory_; }
+  mojo::InterfaceHandle<mojo::files::Directory>& directory() {
+    return directory_;
+  }
 
  private:
-  mojo::files::DirectoryPtr directory_;
+  mojo::InterfaceHandle<mojo::files::Directory> directory_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(MojioImplTestBase);
 };

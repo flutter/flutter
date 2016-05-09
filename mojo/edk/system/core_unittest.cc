@@ -870,15 +870,10 @@ TEST_F(CoreTest, MessagePipeBasicLocalHandlePassing1) {
   EXPECT_STREQ(kHello, buffer);
   EXPECT_EQ(0u, num_handles);
 
-  // Make sure that you can't pass either of the message pipe's handles over
-  // itself.
+  // Make sure that you can't pass a message pipe handle over itself.
   EXPECT_EQ(MOJO_RESULT_BUSY,
             core()->WriteMessage(h_passing[0], UserPointer<const void>(kHello),
                                  kHelloSize, MakeUserPointer(&h_passing[0]), 1,
-                                 MOJO_WRITE_MESSAGE_FLAG_NONE));
-  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
-            core()->WriteMessage(h_passing[0], UserPointer<const void>(kHello),
-                                 kHelloSize, MakeUserPointer(&h_passing[1]), 1,
                                  MOJO_WRITE_MESSAGE_FLAG_NONE));
 
   MojoHandle h_passed[2];
@@ -1601,6 +1596,57 @@ TEST_F(CoreTest, MessagePipeBasicLocalHandlePassing2) {
   EXPECT_EQ(MOJO_RESULT_OK, core()->Close(h_passing[1]));
   EXPECT_EQ(MOJO_RESULT_OK, core()->Close(ph));
   EXPECT_EQ(MOJO_RESULT_OK, core()->Close(ch));
+}
+
+// Tests "faux leak" message pipe handle passing situations.
+TEST_F(CoreTest, MessagePipeBasicLocalHandlePassing3) {
+  {
+    MojoHandle h0 = MOJO_HANDLE_INVALID;
+    MojoHandle h1 = MOJO_HANDLE_INVALID;
+    EXPECT_EQ(MOJO_RESULT_OK,
+              core()->CreateMessagePipe(NullUserPointer(), MakeUserPointer(&h0),
+                                        MakeUserPointer(&h1)));
+
+    // You can send a message pipe's peer handle over itself (and nothing bad
+    // happens).
+    EXPECT_EQ(
+        MOJO_RESULT_OK,
+        core()->WriteMessage(h0, NullUserPointer(), 0, MakeUserPointer(&h1), 1,
+                             MOJO_WRITE_MESSAGE_FLAG_NONE));
+
+    // Of course, there's nothing to do afterwards except close the handle you
+    // have left.
+    EXPECT_EQ(MOJO_RESULT_OK, core()->Close(h0));
+  }
+
+  {
+    MojoHandle h0 = MOJO_HANDLE_INVALID;
+    MojoHandle h1 = MOJO_HANDLE_INVALID;
+    EXPECT_EQ(MOJO_RESULT_OK,
+              core()->CreateMessagePipe(NullUserPointer(), MakeUserPointer(&h0),
+                                        MakeUserPointer(&h1)));
+
+    MojoHandle h_passed[2] = {MOJO_HANDLE_INVALID, MOJO_HANDLE_INVALID};
+    EXPECT_EQ(MOJO_RESULT_OK,
+              core()->CreateMessagePipe(NullUserPointer(),
+                                        MakeUserPointer(&h_passed[0]),
+                                        MakeUserPointer(&h_passed[1])));
+
+    // You can also write |h1| into some other message pipe.
+    EXPECT_EQ(MOJO_RESULT_OK,
+              core()->WriteMessage(h_passed[0], NullUserPointer(), 0,
+                                   MakeUserPointer(&h1), 1,
+                                   MOJO_WRITE_MESSAGE_FLAG_NONE));
+
+    // And then write both ends of that message pipe to |h0|.
+    EXPECT_EQ(MOJO_RESULT_OK,
+              core()->WriteMessage(h0, NullUserPointer(), 0,
+                                   MakeUserPointer(h_passed), 2,
+                                   MOJO_WRITE_MESSAGE_FLAG_NONE));
+
+    // Again, nothing bad happens, but again you can only close |h0|.
+    EXPECT_EQ(MOJO_RESULT_OK, core()->Close(h0));
+  }
 }
 
 struct TestAsyncWaiter {

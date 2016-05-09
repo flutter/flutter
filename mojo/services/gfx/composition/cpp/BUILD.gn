@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("//build/module_args/mojo.gni")
+import("$mojo_sdk_root/mojo/public/mojo_application.gni")
 import("$mojo_sdk_root/mojo/public/mojo_sdk.gni")
 
 mojo_sdk_source_set("cpp") {
@@ -11,10 +12,30 @@ mojo_sdk_source_set("cpp") {
   sources = [
     "formatting.cc",
     "formatting.h",
+    "frame_tracker.cc",
+    "frame_tracker.h",
   ]
 
   deps = [
     "../../../geometry/cpp",
     "../interfaces",
+  ]
+}
+
+mojo_native_application("apptests") {
+  output_name = "gfx_composition_apptests"
+
+  testonly = true
+
+  sources = [
+    "frame_tracker_apptest.cc",
+  ]
+
+  deps = [
+    ":cpp",
+    "$mojo_sdk_root/mojo/public/cpp/application:standalone",
+    "$mojo_sdk_root/mojo/public/cpp/application:test_support_standalone",
+    "../interfaces",
+    "//testing/gtest",
   ]
 }

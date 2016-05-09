@@ -37,7 +37,7 @@ module mojo.media;
 struct TimelineQuad {
   int64  reference_offset = 0;
   int64  target_offset    = 0;
-  int32  reference_delta  = 0;
+  uint32 reference_delta  = 0;
   uint32 target_delta     = 1;
 };
 // end-no-format
@@ -84,16 +84,16 @@ interface RateControl {
 
   // Immediately change the rate of the existing transformation in a fashion
   // which is first order continuous with the current transformation.
-  SetRate(int32 reference_delta, uint32 target_delta);
+  SetRate(uint32 reference_delta, uint32 target_delta);
 
   // Schedule a first order continuous rate change at the specified reference
   // time.
-  SetRateAtReferenceTime(int32 reference_delta,
+  SetRateAtReferenceTime(uint32 reference_delta,
                          uint32 target_delta,
                          int64 reference_time);
 
   // Schedule a first order continuous rate change at the specified target time.
-  SetRateAtTargetTime(int32 reference_delta,
+  SetRateAtTargetTime(uint32 reference_delta,
                       uint32 target_delta,
                       int64 target_time);
 

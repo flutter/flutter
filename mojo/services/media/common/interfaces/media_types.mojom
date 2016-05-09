@@ -7,10 +7,24 @@ module mojo.media;
 
 // Describes the type of media.
 struct MediaType {
+  const string kAudioEncodingAac = "aac";
+  const string kAudioEncodingAmrNb = "amrnb";
+  const string kAudioEncodingAmrWb = "amrwb";
+  const string kAudioEncodingFlac = "flac";
+  const string kAudioEncodingGsmMs = "gsmms";
   const string kAudioEncodingLpcm = "lpcm";
+  const string kAudioEncodingMp3 = "mp3";
+  const string kAudioEncodingPcmALaw = "pcmalaw";
+  const string kAudioEncodingPcmMuLaw = "pcmmulaw";
   const string kAudioEncodingVorbis = "vorbis";
-  const string kVideoEncodingUncompressed = "uncompressed_video";
+
+  const string kVideoEncodingH263 = "h263";
+  const string kVideoEncodingH264 = "h264";
+  const string kVideoEncodingMpeg4 = "mpeg4";
   const string kVideoEncodingTheora = "theora";
+  const string kVideoEncodingUncompressed = "uncompressed_video";
+  const string kVideoEncodingVp3 = "vp3";
+  const string kVideoEncodingVp8 = "vp8";
 
   // Identifies the type’s medium.
   MediaTypeMedium medium;

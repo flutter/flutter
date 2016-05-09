@@ -15,6 +15,7 @@
 #include "mojo/edk/platform/aligned_alloc.h"
 #include "mojo/edk/system/channel_endpoint_id.h"
 #include "mojo/edk/system/dispatcher.h"
+#include "mojo/edk/system/handle.h"
 #include "mojo/edk/system/memory.h"
 #include "mojo/public/cpp/system/macros.h"
 
@@ -183,21 +184,23 @@ class MessageInTransit {
                                  size_t buffer_size,
                                  size_t* next_message_size);
 
-  // Makes this message "own" the given set of dispatchers. The dispatchers must
-  // not be referenced from anywhere else (in particular, not from the handle
-  // table), i.e., each dispatcher must have a reference count of 1. This
-  // message must not already have dispatchers.
+  // Makes this message "own" the given set of handles. Each handle's dispatcher
+  // must not be referenced from anywhere else (in particular, not from any
+  // handle in the handle table), i.e., the dispatcher must have a reference
+  // count of 1. This message must not already have handles.
+  void SetHandles(std::unique_ptr<HandleVector> handles);
+  // TODO(vtl): Delete this.
   void SetDispatchers(std::unique_ptr<DispatcherVector> dispatchers);
 
   // Sets the |TransportData| for this message. This should only be done when
-  // there are no dispatchers and no existing |TransportData|.
+  // there are no handles and no existing |TransportData|.
   void SetTransportData(std::unique_ptr<TransportData> transport_data);
 
-  // Serializes any dispatchers to the secondary buffer. This message must not
+  // Serializes any handles to the secondary buffer. This message must not
   // already have a secondary buffer (so this must only be called once). The
   // caller must ensure (e.g., by holding on to a reference) that |channel|
   // stays alive through the call.
-  void SerializeAndCloseDispatchers(Channel* channel);
+  void SerializeAndCloseHandles(Channel* channel);
 
   // Gets the main buffer and its size (in number of bytes), respectively.
   const void* main_buffer() const { return main_buffer_.get(); }
@@ -229,15 +232,13 @@ class MessageInTransit {
     header()->destination_id = destination_id;
   }
 
-  // Gets the dispatchers attached to this message; this may return null if
-  // there are none. Note that the caller may mutate the set of dispatchers
-  // (e.g., take ownership of all the dispatchers, leaving the vector empty).
-  DispatcherVector* dispatchers() { return dispatchers_.get(); }
+  // Gets the handles attached to this message; this may return null if there
+  // are none. Note that the caller may mutate the set of handles (e.g., take
+  // ownership of all the handles, leaving the vector empty).
+  HandleVector* handles() { return handles_.get(); }
 
-  // Returns true if this message has dispatchers attached.
-  bool has_dispatchers() const {
-    return dispatchers_ && !dispatchers_->empty();
-  }
+  // Returns true if this message has handles attached.
+  bool has_handles() const { return handles_ && !handles_->empty(); }
 
   // Rounds |n| up to a multiple of |kMessageAlignment|.
   static inline size_t RoundUpMessageAlignment(size_t n) {
@@ -254,8 +255,8 @@ class MessageInTransit {
     // Total size of the message, including the header, the message data
     // ("bytes") including padding (to make it a multiple of |kMessageAlignment|
     // bytes), and serialized handle information. Note that this may not be the
-    // correct value if dispatchers are attached but
-    // |SerializeAndCloseDispatchers()| has not been called.
+    // correct value if handles are attached but |SerializeAndCloseHandles()|
+    // has not been called.
     uint32_t total_size;
     Type type;                         // 2 bytes.
     Subtype subtype;                   // 2 bytes.
@@ -280,11 +281,11 @@ class MessageInTransit {
 
   std::unique_ptr<TransportData> transport_data_;  // May be null.
 
-  // Any dispatchers that may be attached to this message. These dispatchers
-  // should be "owned" by this message, i.e., have a ref count of exactly 1. (We
-  // allow a dispatcher entry to be null, in case it couldn't be duplicated for
-  // some reason.)
-  std::unique_ptr<DispatcherVector> dispatchers_;
+  // Any handles that may be attached to this message. These handles should be
+  // "owned" by this message, i.e., their dispatcher have a ref count of exactly
+  // 1. (We allow a handle entry to be "null"/invalid, in case it couldn't be
+  // duplicated for some reason.)
+  std::unique_ptr<HandleVector> handles_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(MessageInTransit);
 };

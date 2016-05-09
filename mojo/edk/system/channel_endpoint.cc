@@ -165,7 +165,7 @@ bool ChannelEndpoint::WriteMessageNoLock(
   DCHECK(local_id_.is_valid());
   DCHECK(remote_id_.is_valid());
 
-  message->SerializeAndCloseDispatchers(channel_);
+  message->SerializeAndCloseHandles(channel_);
   message->set_source_id(local_id_);
   message->set_destination_id(remote_id_);
   return channel_->WriteMessage(std::move(message));

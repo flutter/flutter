@@ -183,6 +183,25 @@ TEST_F(SharedBufferDispatcherTest, CreateAndMapBuffer) {
   EXPECT_EQ('y', static_cast<char*>(mapping1->GetBase())[kSize / 2 + 1]);
 }
 
+TEST_F(SharedBufferDispatcherTest, SupportsEntrypointClass) {
+  MojoResult result = MOJO_RESULT_INTERNAL;
+  auto d = SharedBufferDispatcher::Create(
+      platform_support(), SharedBufferDispatcher::kDefaultCreateOptions, 100u,
+      &result);
+  ASSERT_TRUE(d);
+  EXPECT_EQ(MOJO_RESULT_OK, result);
+
+  EXPECT_FALSE(d->SupportsEntrypointClass(EntrypointClass::MESSAGE_PIPE));
+  EXPECT_FALSE(d->SupportsEntrypointClass(EntrypointClass::DATA_PIPE_PRODUCER));
+  EXPECT_FALSE(d->SupportsEntrypointClass(EntrypointClass::DATA_PIPE_CONSUMER));
+  EXPECT_TRUE(d->SupportsEntrypointClass(EntrypointClass::BUFFER));
+
+  // TODO(vtl): Check that it actually returns |MOJO_RESULT_INVALID_ARGUMENT|
+  // for methods in unsupported entrypoint classes.
+
+  EXPECT_EQ(MOJO_RESULT_OK, d->Close());
+}
+
 TEST_F(SharedBufferDispatcherTest, DuplicateBufferHandle) {
   const uint64_t kSize = 100u;
 

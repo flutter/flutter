@@ -18,6 +18,8 @@
 #include "mojo/edk/system/data_pipe.h"
 #include "mojo/edk/system/data_pipe_consumer_dispatcher.h"
 #include "mojo/edk/system/data_pipe_producer_dispatcher.h"
+#include "mojo/edk/system/handle.h"
+#include "mojo/edk/system/handle_transport.h"
 #include "mojo/edk/system/memory.h"
 #include "mojo/edk/system/message_pipe.h"
 #include "mojo/edk/system/raw_channel.h"
@@ -165,8 +167,8 @@ TEST_F(RemoteDataPipeImplTest, Sanity) {
 TEST_F(RemoteDataPipeImplTest, SendConsumerWithClosedProducer) {
   char read_buffer[100] = {};
   uint32_t read_buffer_size = static_cast<uint32_t>(sizeof(read_buffer));
-  DispatcherVector read_dispatchers;
-  uint32_t read_num_dispatchers = 10;  // Maximum to get.
+  HandleVector read_handles;
+  uint32_t read_num_handles = 10;  // Maximum to get.
   Waiter waiter;
   HandleSignalsState hss;
   uint32_t context = 0;
@@ -175,6 +177,8 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerWithClosedProducer) {
   // This is the consumer dispatcher we'll send.
   auto consumer = DataPipeConsumerDispatcher::Create();
   consumer->Init(dp.Clone());
+  Handle consumer_handle(std::move(consumer),
+                         DataPipeConsumerDispatcher::kDefaultHandleRights);
 
   // Write to the producer and close it, before sending the consumer.
   int32_t elements[10] = {123};
@@ -193,21 +197,20 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerWithClosedProducer) {
             message_pipe(1)->AddAwakable(
                 0, &waiter, MOJO_HANDLE_SIGNAL_READABLE, 123, nullptr));
   {
-    DispatcherTransport transport(
-        test::DispatcherTryStartTransport(consumer.get()));
+    HandleTransport transport(test::HandleTryStartTransport(consumer_handle));
     EXPECT_TRUE(transport.is_valid());
 
-    std::vector<DispatcherTransport> transports;
+    std::vector<HandleTransport> transports;
     transports.push_back(transport);
     EXPECT_EQ(MOJO_RESULT_OK, message_pipe(0)->WriteMessage(
                                   0, NullUserPointer(), 0, &transports,
                                   MOJO_WRITE_MESSAGE_FLAG_NONE));
     transport.End();
 
-    // |consumer| should have been closed. This is |DCHECK()|ed when it is
-    // destroyed.
-    EXPECT_TRUE(consumer->HasOneRef());
-    consumer = nullptr;
+    // |consumer_handle.dispatcher| should have been closed. This is
+    // |DCHECK()|ed when it is destroyed.
+    EXPECT_TRUE(consumer_handle.dispatcher->HasOneRef());
+    consumer_handle.reset();
   }
   EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionTimeout(), &context));
   EXPECT_EQ(123u, context);
@@ -219,21 +222,23 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerWithClosedProducer) {
                 MOJO_HANDLE_SIGNAL_PEER_CLOSED,
             hss.satisfiable_signals);
   EXPECT_EQ(MOJO_RESULT_OK,
-            message_pipe(1)->ReadMessage(
-                0, UserPointer<void>(read_buffer),
-                MakeUserPointer(&read_buffer_size), &read_dispatchers,
-                &read_num_dispatchers, MOJO_READ_MESSAGE_FLAG_NONE));
+            message_pipe(1)->ReadMessage(0, UserPointer<void>(read_buffer),
+                                         MakeUserPointer(&read_buffer_size),
+                                         &read_handles, &read_num_handles,
+                                         MOJO_READ_MESSAGE_FLAG_NONE));
   EXPECT_EQ(0u, static_cast<size_t>(read_buffer_size));
-  EXPECT_EQ(1u, read_dispatchers.size());
-  EXPECT_EQ(1u, read_num_dispatchers);
-  ASSERT_TRUE(read_dispatchers[0]);
-  EXPECT_TRUE(read_dispatchers[0]->HasOneRef());
+  EXPECT_EQ(1u, read_handles.size());
+  EXPECT_EQ(1u, read_num_handles);
+  ASSERT_TRUE(read_handles[0]);
+  EXPECT_TRUE(read_handles[0].dispatcher->HasOneRef());
 
   EXPECT_EQ(Dispatcher::Type::DATA_PIPE_CONSUMER,
-            read_dispatchers[0]->GetType());
+            read_handles[0].dispatcher->GetType());
+  // TODO(vtl): Also check the rights here once they're actually preserved?
   consumer = RefPtr<DataPipeConsumerDispatcher>(
-      static_cast<DataPipeConsumerDispatcher*>(read_dispatchers[0].get()));
-  read_dispatchers.clear();
+      static_cast<DataPipeConsumerDispatcher*>(
+          read_handles[0].dispatcher.get()));
+  read_handles.clear();
 
   waiter.Init();
   hss = HandleSignalsState();
@@ -286,8 +291,8 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerWithClosedProducer) {
 TEST_F(RemoteDataPipeImplTest, SendConsumerDuringTwoPhaseWrite) {
   char read_buffer[100] = {};
   uint32_t read_buffer_size = static_cast<uint32_t>(sizeof(read_buffer));
-  DispatcherVector read_dispatchers;
-  uint32_t read_num_dispatchers = 10;  // Maximum to get.
+  HandleVector read_handles;
+  uint32_t read_num_handles = 10;  // Maximum to get.
   Waiter waiter;
   HandleSignalsState hss;
   uint32_t context = 0;
@@ -296,6 +301,8 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringTwoPhaseWrite) {
   // This is the consumer dispatcher we'll send.
   auto consumer = DataPipeConsumerDispatcher::Create();
   consumer->Init(dp.Clone());
+  Handle consumer_handle(std::move(consumer),
+                         DataPipeConsumerDispatcher::kDefaultHandleRights);
 
   void* write_ptr = nullptr;
   uint32_t num_bytes = 0u;
@@ -312,21 +319,20 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringTwoPhaseWrite) {
             message_pipe(1)->AddAwakable(
                 0, &waiter, MOJO_HANDLE_SIGNAL_READABLE, 123, nullptr));
   {
-    DispatcherTransport transport(
-        test::DispatcherTryStartTransport(consumer.get()));
+    HandleTransport transport(test::HandleTryStartTransport(consumer_handle));
     EXPECT_TRUE(transport.is_valid());
 
-    std::vector<DispatcherTransport> transports;
+    std::vector<HandleTransport> transports;
     transports.push_back(transport);
     EXPECT_EQ(MOJO_RESULT_OK, message_pipe(0)->WriteMessage(
                                   0, NullUserPointer(), 0, &transports,
                                   MOJO_WRITE_MESSAGE_FLAG_NONE));
     transport.End();
 
-    // |consumer| should have been closed. This is |DCHECK()|ed when it is
-    // destroyed.
-    EXPECT_TRUE(consumer->HasOneRef());
-    consumer = nullptr;
+    // |consumer_handle.dispatcher| should have been closed. This is
+    // |DCHECK()|ed when it is destroyed.
+    EXPECT_TRUE(consumer_handle.dispatcher->HasOneRef());
+    consumer_handle.reset();
   }
   EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionTimeout(), &context));
   EXPECT_EQ(123u, context);
@@ -338,21 +344,23 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringTwoPhaseWrite) {
                 MOJO_HANDLE_SIGNAL_PEER_CLOSED,
             hss.satisfiable_signals);
   EXPECT_EQ(MOJO_RESULT_OK,
-            message_pipe(1)->ReadMessage(
-                0, UserPointer<void>(read_buffer),
-                MakeUserPointer(&read_buffer_size), &read_dispatchers,
-                &read_num_dispatchers, MOJO_READ_MESSAGE_FLAG_NONE));
+            message_pipe(1)->ReadMessage(0, UserPointer<void>(read_buffer),
+                                         MakeUserPointer(&read_buffer_size),
+                                         &read_handles, &read_num_handles,
+                                         MOJO_READ_MESSAGE_FLAG_NONE));
   EXPECT_EQ(0u, static_cast<size_t>(read_buffer_size));
-  EXPECT_EQ(1u, read_dispatchers.size());
-  EXPECT_EQ(1u, read_num_dispatchers);
-  ASSERT_TRUE(read_dispatchers[0]);
-  EXPECT_TRUE(read_dispatchers[0]->HasOneRef());
+  EXPECT_EQ(1u, read_handles.size());
+  EXPECT_EQ(1u, read_num_handles);
+  ASSERT_TRUE(read_handles[0]);
+  EXPECT_TRUE(read_handles[0].dispatcher->HasOneRef());
 
   EXPECT_EQ(Dispatcher::Type::DATA_PIPE_CONSUMER,
-            read_dispatchers[0]->GetType());
+            read_handles[0].dispatcher->GetType());
+  // TODO(vtl): Also check the rights here once they're actually preserved?
   consumer = RefPtr<DataPipeConsumerDispatcher>(
-      static_cast<DataPipeConsumerDispatcher*>(read_dispatchers[0].get()));
-  read_dispatchers.clear();
+      static_cast<DataPipeConsumerDispatcher*>(
+          read_handles[0].dispatcher.get()));
+  read_handles.clear();
 
   // Now actually write the data, complete the two-phase write, and close the
   // producer.
@@ -399,8 +407,8 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringTwoPhaseWrite) {
 TEST_F(RemoteDataPipeImplTest, SendConsumerDuringSecondTwoPhaseWrite) {
   char read_buffer[100] = {};
   uint32_t read_buffer_size = static_cast<uint32_t>(sizeof(read_buffer));
-  DispatcherVector read_dispatchers;
-  uint32_t read_num_dispatchers = 10;  // Maximum to get.
+  HandleVector read_handles;
+  uint32_t read_num_handles = 10;  // Maximum to get.
   Waiter waiter;
   HandleSignalsState hss;
   uint32_t context = 0;
@@ -409,6 +417,8 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringSecondTwoPhaseWrite) {
   // This is the consumer dispatcher we'll send.
   auto consumer = DataPipeConsumerDispatcher::Create();
   consumer->Init(dp.Clone());
+  Handle consumer_handle(std::move(consumer),
+                         DataPipeConsumerDispatcher::kDefaultHandleRights);
 
   void* write_ptr = nullptr;
   uint32_t num_bytes = 0u;
@@ -435,21 +445,20 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringSecondTwoPhaseWrite) {
             message_pipe(1)->AddAwakable(
                 0, &waiter, MOJO_HANDLE_SIGNAL_READABLE, 123, nullptr));
   {
-    DispatcherTransport transport(
-        test::DispatcherTryStartTransport(consumer.get()));
+    HandleTransport transport(test::HandleTryStartTransport(consumer_handle));
     EXPECT_TRUE(transport.is_valid());
 
-    std::vector<DispatcherTransport> transports;
+    std::vector<HandleTransport> transports;
     transports.push_back(transport);
     EXPECT_EQ(MOJO_RESULT_OK, message_pipe(0)->WriteMessage(
                                   0, NullUserPointer(), 0, &transports,
                                   MOJO_WRITE_MESSAGE_FLAG_NONE));
     transport.End();
 
-    // |consumer| should have been closed. This is |DCHECK()|ed when it is
-    // destroyed.
-    EXPECT_TRUE(consumer->HasOneRef());
-    consumer = nullptr;
+    // |consumer_handle.dispatcher| should have been closed. This is
+    // |DCHECK()|ed when it is destroyed.
+    EXPECT_TRUE(consumer_handle.dispatcher->HasOneRef());
+    consumer_handle.reset();
   }
   EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionTimeout(), &context));
   EXPECT_EQ(123u, context);
@@ -461,21 +470,23 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringSecondTwoPhaseWrite) {
                 MOJO_HANDLE_SIGNAL_PEER_CLOSED,
             hss.satisfiable_signals);
   EXPECT_EQ(MOJO_RESULT_OK,
-            message_pipe(1)->ReadMessage(
-                0, UserPointer<void>(read_buffer),
-                MakeUserPointer(&read_buffer_size), &read_dispatchers,
-                &read_num_dispatchers, MOJO_READ_MESSAGE_FLAG_NONE));
+            message_pipe(1)->ReadMessage(0, UserPointer<void>(read_buffer),
+                                         MakeUserPointer(&read_buffer_size),
+                                         &read_handles, &read_num_handles,
+                                         MOJO_READ_MESSAGE_FLAG_NONE));
   EXPECT_EQ(0u, static_cast<size_t>(read_buffer_size));
-  EXPECT_EQ(1u, read_dispatchers.size());
-  EXPECT_EQ(1u, read_num_dispatchers);
-  ASSERT_TRUE(read_dispatchers[0]);
-  EXPECT_TRUE(read_dispatchers[0]->HasOneRef());
+  EXPECT_EQ(1u, read_handles.size());
+  EXPECT_EQ(1u, read_num_handles);
+  ASSERT_TRUE(read_handles[0]);
+  EXPECT_TRUE(read_handles[0].dispatcher->HasOneRef());
 
   EXPECT_EQ(Dispatcher::Type::DATA_PIPE_CONSUMER,
-            read_dispatchers[0]->GetType());
+            read_handles[0].dispatcher->GetType());
+  // TODO(vtl): Also check the rights here once they're actually preserved?
   consumer = RefPtr<DataPipeConsumerDispatcher>(
-      static_cast<DataPipeConsumerDispatcher*>(read_dispatchers[0].get()));
-  read_dispatchers.clear();
+      static_cast<DataPipeConsumerDispatcher*>(
+          read_handles[0].dispatcher.get()));
+  read_handles.clear();
 
   // Now actually write the data, complete the two-phase write, and close the
   // producer.

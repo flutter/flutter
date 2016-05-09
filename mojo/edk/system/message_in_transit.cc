@@ -109,13 +109,13 @@ MessageInTransit::MessageInTransit(const View& message_view)
 }
 
 MessageInTransit::~MessageInTransit() {
-  if (dispatchers_) {
-    for (size_t i = 0; i < dispatchers_->size(); i++) {
-      if (!(*dispatchers_)[i])
+  if (handles_) {
+    for (size_t i = 0; i < handles_->size(); i++) {
+      if (!handles_->at(i))
         continue;
 
-      (*dispatchers_)[i]->AssertHasOneRef();
-      (*dispatchers_)[i]->Close();
+      handles_->at(i).dispatcher->AssertHasOneRef();
+      handles_->at(i).dispatcher->Close();
     }
   }
 }
@@ -141,39 +141,51 @@ bool MessageInTransit::GetNextMessageSize(const void* buffer,
   return true;
 }
 
+void MessageInTransit::SetHandles(std::unique_ptr<HandleVector> handles) {
+  DCHECK(handles);
+  DCHECK(!handles_);
+  DCHECK(!transport_data_);
+
+  handles_ = std::move(handles);
+#ifndef NDEBUG
+  for (size_t i = 0; i < handles_->size(); i++) {
+    if (handles_->at(i))
+      handles_->at(i).dispatcher->AssertHasOneRef();
+  }
+#endif
+}
+
 void MessageInTransit::SetDispatchers(
     std::unique_ptr<DispatcherVector> dispatchers) {
   DCHECK(dispatchers);
-  DCHECK(!dispatchers_);
-  DCHECK(!transport_data_);
 
-  dispatchers_ = std::move(dispatchers);
-#ifndef NDEBUG
-  for (size_t i = 0; i < dispatchers_->size(); i++) {
-    if ((*dispatchers_)[i])
-      (*dispatchers_)[i]->AssertHasOneRef();
+  std::unique_ptr<HandleVector> handles(new HandleVector());
+  handles->reserve(dispatchers->size());
+  for (size_t i = 0; i < dispatchers->size(); i++) {
+    handles->push_back(
+        Handle(std::move(dispatchers->at(i)), MOJO_HANDLE_RIGHT_NONE));
   }
-#endif
+  SetHandles(std::move(handles));
 }
 
 void MessageInTransit::SetTransportData(
     std::unique_ptr<TransportData> transport_data) {
   DCHECK(transport_data);
   DCHECK(!transport_data_);
-  DCHECK(!dispatchers_);
+  DCHECK(!handles_);
 
   transport_data_ = std::move(transport_data);
   UpdateTotalSize();
 }
 
-void MessageInTransit::SerializeAndCloseDispatchers(Channel* channel) {
+void MessageInTransit::SerializeAndCloseHandles(Channel* channel) {
   DCHECK(channel);
   DCHECK(!transport_data_);
 
-  if (!dispatchers_ || !dispatchers_->size())
+  if (!handles_ || !handles_->size())
     return;
 
-  transport_data_.reset(new TransportData(std::move(dispatchers_), channel));
+  transport_data_.reset(new TransportData(std::move(handles_), channel));
 
   // Update the sizes in the message header.
   UpdateTotalSize();
@@ -191,8 +203,8 @@ void MessageInTransit::ConstructorHelper(Type type,
   header()->destination_id = ChannelEndpointId();
   header()->num_bytes = num_bytes;
   header()->unused = 0;
-  // Note: If dispatchers are subsequently attached, then |total_size| will have
-  // to be adjusted.
+  // Note: If handles are subsequently attached, then |total_size| will have to
+  // be adjusted.
   UpdateTotalSize();
 }
 

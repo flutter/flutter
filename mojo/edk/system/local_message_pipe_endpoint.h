@@ -33,8 +33,8 @@ class LocalMessagePipeEndpoint final : public MessagePipeEndpoint {
   void CancelAllAwakables() override;
   MojoResult ReadMessage(UserPointer<void> bytes,
                          UserPointer<uint32_t> num_bytes,
-                         DispatcherVector* dispatchers,
-                         uint32_t* num_dispatchers,
+                         HandleVector* handles,
+                         uint32_t* num_handles,
                          MojoReadMessageFlags flags) override;
   HandleSignalsState GetHandleSignalsState() const override;
   MojoResult AddAwakable(Awakable* awakable,

@@ -12,6 +12,8 @@
 #include "files/c/mojio_config.h"
 #include "mojo/public/cpp/environment/logging.h"
 
+using mojo::InterfaceHandle;
+
 namespace mojio {
 namespace singletons {
 
@@ -47,10 +49,11 @@ void ResetFDTable() {
   g_fd_table = nullptr;
 }
 
-void SetCurrentWorkingDirectory(mojo::files::DirectoryPtr directory) {
+void SetCurrentWorkingDirectory(
+    InterfaceHandle<mojo::files::Directory> directory) {
   delete g_current_working_directory;
-  g_current_working_directory =
-      new DirectoryWrapper(GetErrnoImpl(), directory.Pass());
+  g_current_working_directory = new DirectoryWrapper(
+      GetErrnoImpl(), mojo::files::DirectoryPtr::Create(directory.Pass()));
 }
 
 DirectoryWrapper* GetCurrentWorkingDirectory() {

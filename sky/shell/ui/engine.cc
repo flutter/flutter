@@ -107,10 +107,10 @@ void Engine::SetServices(ServicesDataPtr services) {
       // We bind and unbind our Shell here, since this is the only place we use
       // it in this class.
       auto shell = mojo::ShellPtr::Create(services_->shell.Pass());
-      mojo::ConnectToService(shell.get(), "mojo:vsync", &vsync_provider);
+      mojo::ConnectToService(shell.get(), "mojo:vsync", mojo::GetProxy(&vsync_provider));
       services_->shell = shell.Pass();
     } else {
-      mojo::ConnectToService(incoming_services_.get(), &vsync_provider);
+      mojo::ConnectToService(incoming_services_.get(), mojo::GetProxy(&vsync_provider));
     }
     animator_->Reset();
     animator_->set_vsync_provider(vsync_provider.Pass());

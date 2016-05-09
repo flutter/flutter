@@ -19,6 +19,22 @@ using mojo::platform::ScopedPlatformHandle;
 namespace mojo {
 namespace system {
 
+namespace {
+
+// TODO(vtl): Temporary, until |TransportData| really supports handles.
+std::unique_ptr<DispatcherVector> DispatcherVectorFromHandleVector(
+    std::unique_ptr<HandleVector> handles) {
+  DCHECK(handles);
+
+  std::unique_ptr<DispatcherVector> dispatchers(new DispatcherVector());
+  dispatchers->reserve(handles->size());
+  for (size_t i = 0; i < handles->size(); i++)
+    dispatchers->push_back(std::move(handles->at(i).dispatcher));
+  return dispatchers;
+}
+
+}  // namespace
+
 // The maximum amount of space needed per platform handle.
 // (|{Channel,RawChannel}::GetSerializedPlatformHandleSize()| should always
 // return a value which is at most this. This is only used to calculate
@@ -62,6 +78,12 @@ struct TransportData::PrivateStructForCompileAsserts {
                 "sizeof(MessageInTransit::HandleTableEntry) not a multiple of "
                 "alignment");
 };
+
+// TODO(vtl): Make this the real one.
+TransportData::TransportData(std::unique_ptr<HandleVector> handles,
+                             Channel* channel)
+    : TransportData(DispatcherVectorFromHandleVector(std::move(handles)),
+                    channel) {}
 
 TransportData::TransportData(std::unique_ptr<DispatcherVector> dispatchers,
                              Channel* channel)

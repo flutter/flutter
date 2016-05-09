@@ -9,7 +9,6 @@
 #include <utility>
 
 #include "base/logging.h"
-#include "mojo/edk/system/dispatcher.h"
 #include "mojo/edk/system/message_in_transit.h"
 
 namespace mojo {
@@ -70,14 +69,14 @@ void LocalMessagePipeEndpoint::CancelAllAwakables() {
 MojoResult LocalMessagePipeEndpoint::ReadMessage(
     UserPointer<void> bytes,
     UserPointer<uint32_t> num_bytes,
-    DispatcherVector* dispatchers,
-    uint32_t* num_dispatchers,
+    HandleVector* handles,
+    uint32_t* num_handles,
     MojoReadMessageFlags flags) {
   DCHECK(is_open_);
-  DCHECK(!dispatchers || dispatchers->empty());
+  DCHECK(!handles || handles->empty());
 
   const uint32_t max_bytes = num_bytes.IsNull() ? 0 : num_bytes.Get();
-  const uint32_t max_num_dispatchers = num_dispatchers ? *num_dispatchers : 0;
+  const uint32_t max_num_handles = num_handles ? *num_handles : 0;
 
   if (message_queue_.IsEmpty()) {
     return is_peer_open_ ? MOJO_RESULT_SHOULD_WAIT
@@ -95,22 +94,22 @@ MojoResult LocalMessagePipeEndpoint::ReadMessage(
   else
     enough_space = false;
 
-  if (DispatcherVector* queued_dispatchers = message->dispatchers()) {
-    if (num_dispatchers)
-      *num_dispatchers = static_cast<uint32_t>(queued_dispatchers->size());
+  if (HandleVector* queued_handles = message->handles()) {
+    if (num_handles)
+      *num_handles = static_cast<uint32_t>(queued_handles->size());
     if (enough_space) {
-      if (queued_dispatchers->empty()) {
+      if (queued_handles->empty()) {
         // Nothing to do.
-      } else if (queued_dispatchers->size() <= max_num_dispatchers) {
-        DCHECK(dispatchers);
-        dispatchers->swap(*queued_dispatchers);
+      } else if (queued_handles->size() <= max_num_handles) {
+        DCHECK(handles);
+        handles->swap(*queued_handles);
       } else {
         enough_space = false;
       }
     }
   } else {
-    if (num_dispatchers)
-      *num_dispatchers = 0;
+    if (num_handles)
+      *num_handles = 0;
   }
 
   message = nullptr;

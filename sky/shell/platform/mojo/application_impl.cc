@@ -49,7 +49,7 @@ void ApplicationImpl::ConnectToService(const mojo::String& service_name,
                                        mojo::ScopedMessagePipeHandle handle) {
   if (service_name == mojo::ui::ViewProvider::Name_) {
     view_provider_bindings_.AddBinding(
-        this, mojo::MakeRequest<mojo::ui::ViewProvider>(handle.Pass()));
+        this, mojo::InterfaceRequest<mojo::ui::ViewProvider>(handle.Pass()));
   }
 }
 

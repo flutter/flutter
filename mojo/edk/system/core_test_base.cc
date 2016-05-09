@@ -4,6 +4,7 @@
 
 #include "mojo/edk/system/core_test_base.h"
 
+#include <utility>
 #include <vector>
 
 #include "base/logging.h"
@@ -11,6 +12,7 @@
 #include "mojo/edk/system/configuration.h"
 #include "mojo/edk/system/core.h"
 #include "mojo/edk/system/dispatcher.h"
+#include "mojo/edk/system/handle.h"
 #include "mojo/edk/system/memory.h"
 #include "mojo/edk/util/ref_ptr.h"
 #include "mojo/public/cpp/system/macros.h"
@@ -32,8 +34,13 @@ class MockDispatcher : public Dispatcher {
     return AdoptRef(new MockDispatcher(info));
   }
 
-  // |Dispatcher| private methods:
+  // |Dispatcher| public methods:
   Type GetType() const override { return Type::UNKNOWN; }
+
+  bool SupportsEntrypointClass(
+      EntrypointClass entrypoint_class) const override {
+    return true;
+  }
 
  private:
   explicit MockDispatcher(CoreTestBase::MockHandleInfo* info) : info_(info) {
@@ -49,11 +56,10 @@ class MockDispatcher : public Dispatcher {
     mutex().AssertHeld();
   }
 
-  MojoResult WriteMessageImplNoLock(
-      UserPointer<const void> bytes,
-      uint32_t num_bytes,
-      std::vector<DispatcherTransport>* transports,
-      MojoWriteMessageFlags /*flags*/) override {
+  MojoResult WriteMessageImplNoLock(UserPointer<const void> bytes,
+                                    uint32_t num_bytes,
+                                    std::vector<HandleTransport>* transports,
+                                    MojoWriteMessageFlags /*flags*/) override {
     info_->IncrementWriteMessageCallCount();
     mutex().AssertHeld();
 
@@ -68,17 +74,17 @@ class MockDispatcher : public Dispatcher {
 
   MojoResult ReadMessageImplNoLock(UserPointer<void> bytes,
                                    UserPointer<uint32_t> num_bytes,
-                                   DispatcherVector* dispatchers,
-                                   uint32_t* num_dispatchers,
+                                   HandleVector* handles,
+                                   uint32_t* num_handles,
                                    MojoReadMessageFlags /*flags*/) override {
     info_->IncrementReadMessageCallCount();
     mutex().AssertHeld();
 
-    if (num_dispatchers) {
-      *num_dispatchers = 1;
-      if (dispatchers) {
-        // Okay to leave an invalid dispatcher.
-        dispatchers->resize(1);
+    if (num_handles) {
+      *num_handles = 1;
+      if (handles) {
+        // Okay to leave an invalid handle.
+        handles->resize(1);
       }
     }
 
@@ -186,7 +192,10 @@ class MockDispatcher : public Dispatcher {
     mutex().AssertHeld();
   }
 
-  RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock() override {
+  RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock(
+      MessagePipe* /*message_pipe*/,
+      unsigned /*port*/) override {
+    CancelAllAwakablesNoLock();
     return Create(info_);
   }
 
@@ -217,7 +226,11 @@ void CoreTestBase::TearDown() {
 MojoHandle CoreTestBase::CreateMockHandle(CoreTestBase::MockHandleInfo* info) {
   CHECK(core_);
   auto dispatcher = MockDispatcher::Create(info);
-  MojoHandle rv = core_->AddDispatcher(dispatcher.get());
+  MojoHandle rv = core_->AddHandle(
+      Handle(std::move(dispatcher),
+             MOJO_HANDLE_RIGHT_DUPLICATE | MOJO_HANDLE_RIGHT_TRANSFER |
+                 MOJO_HANDLE_RIGHT_READ | MOJO_HANDLE_RIGHT_WRITE |
+                 MOJO_HANDLE_RIGHT_EXECUTE));
   CHECK_NE(rv, MOJO_HANDLE_INVALID);
   return rv;
 }

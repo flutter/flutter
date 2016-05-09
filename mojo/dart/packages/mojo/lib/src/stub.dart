@@ -9,10 +9,12 @@ abstract class Stub extends core.MojoEventHandler {
   bool _isClosing = false;
   Completer _closeCompleter;
 
-  Stub.fromEndpoint(core.MojoMessagePipeEndpoint endpoint)
-      : super.fromEndpoint(endpoint);
+  Stub.fromEndpoint(core.MojoMessagePipeEndpoint endpoint,
+                    {bool autoBegin: true})
+      : super.fromEndpoint(endpoint, autoBegin: autoBegin);
 
-  Stub.fromHandle(core.MojoHandle handle) : super.fromHandle(handle);
+  Stub.fromHandle(core.MojoHandle handle, {bool autoBegin: true})
+      : super.fromHandle(handle, autoBegin: autoBegin);
 
   Stub.unbound() : super.unbound();
 

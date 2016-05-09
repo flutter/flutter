@@ -26,6 +26,9 @@ struct SerializedPlatformHandleDispatcher {
 
 }  // namespace
 
+// static
+constexpr MojoHandleRights PlatformHandleDispatcher::kDefaultHandleRights;
+
 ScopedPlatformHandle PlatformHandleDispatcher::PassPlatformHandle() {
   MutexLocker locker(&mutex());
   return platform_handle_.Pass();
@@ -33,6 +36,11 @@ ScopedPlatformHandle PlatformHandleDispatcher::PassPlatformHandle() {
 
 Dispatcher::Type PlatformHandleDispatcher::GetType() const {
   return Type::PLATFORM_HANDLE;
+}
+
+bool PlatformHandleDispatcher::SupportsEntrypointClass(
+    EntrypointClass entrypoint_class) const {
+  return false;
 }
 
 // static
@@ -73,8 +81,7 @@ PlatformHandleDispatcher::PlatformHandleDispatcher(
     ScopedPlatformHandle platform_handle)
     : platform_handle_(platform_handle.Pass()) {}
 
-PlatformHandleDispatcher::~PlatformHandleDispatcher() {
-}
+PlatformHandleDispatcher::~PlatformHandleDispatcher() {}
 
 void PlatformHandleDispatcher::CloseImplNoLock() {
   mutex().AssertHeld();
@@ -82,8 +89,11 @@ void PlatformHandleDispatcher::CloseImplNoLock() {
 }
 
 RefPtr<Dispatcher>
-PlatformHandleDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock() {
+PlatformHandleDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock(
+    MessagePipe* /*message_pipe*/,
+    unsigned /*port*/) {
   mutex().AssertHeld();
+  CancelAllAwakablesNoLock();
   return Create(platform_handle_.Pass());
 }
 

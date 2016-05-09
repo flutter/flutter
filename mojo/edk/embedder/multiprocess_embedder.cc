@@ -15,6 +15,7 @@
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/channel_manager.h"
 #include "mojo/edk/system/core.h"
+#include "mojo/edk/system/handle.h"
 #include "mojo/edk/system/ipc_support.h"
 #include "mojo/edk/system/message_pipe_dispatcher.h"
 #include "mojo/edk/system/raw_channel.h"
@@ -128,8 +129,9 @@ ScopedMessagePipeHandle ConnectToSlave(
           std::move(did_connect_to_slave_runner), &channel_id);
   *channel_info = new ChannelInfo(channel_id);
 
-  ScopedMessagePipeHandle rv(
-      MessagePipeHandle(internal::g_core->AddDispatcher(dispatcher.get())));
+  ScopedMessagePipeHandle rv(MessagePipeHandle(internal::g_core->AddHandle(
+      system::Handle(std::move(dispatcher),
+                     system::MessagePipeDispatcher::kDefaultHandleRights))));
   CHECK(rv.is_valid());
   return rv;
 }
@@ -154,8 +156,9 @@ ScopedMessagePipeHandle ConnectToMaster(
           std::move(did_connect_to_master_runner), &channel_id);
   *channel_info = new ChannelInfo(channel_id);
 
-  ScopedMessagePipeHandle rv(
-      MessagePipeHandle(internal::g_core->AddDispatcher(dispatcher.get())));
+  ScopedMessagePipeHandle rv(MessagePipeHandle(internal::g_core->AddHandle(
+      system::Handle(std::move(dispatcher),
+                     system::MessagePipeDispatcher::kDefaultHandleRights))));
   CHECK(rv.is_valid());
   return rv;
 }
@@ -176,8 +179,9 @@ ScopedMessagePipeHandle CreateChannelOnIOThread(
       channel_manager->CreateChannelOnIOThread((*channel_info)->channel_id,
                                                platform_handle.Pass());
 
-  ScopedMessagePipeHandle rv(
-      MessagePipeHandle(internal::g_core->AddDispatcher(dispatcher.get())));
+  ScopedMessagePipeHandle rv(MessagePipeHandle(internal::g_core->AddHandle(
+      system::Handle(std::move(dispatcher),
+                     system::MessagePipeDispatcher::kDefaultHandleRights))));
   CHECK(rv.is_valid());
   return rv;
 }
@@ -204,8 +208,9 @@ ScopedMessagePipeHandle CreateChannel(
           },
           std::move(did_create_channel_runner));
 
-  ScopedMessagePipeHandle rv(
-      MessagePipeHandle(internal::g_core->AddDispatcher(dispatcher.get())));
+  ScopedMessagePipeHandle rv(MessagePipeHandle(internal::g_core->AddHandle(
+      system::Handle(std::move(dispatcher),
+                     system::MessagePipeDispatcher::kDefaultHandleRights))));
   CHECK(rv.is_valid());
   return rv;
 }

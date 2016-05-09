@@ -5,8 +5,12 @@
 #include "mojo/common/tracing_impl.h"
 
 #include "base/trace_event/trace_event_impl.h"
-#include "mojo/public/cpp/application/application_connection.h"
 #include "mojo/public/cpp/application/application_impl.h"
+#include "mojo/public/cpp/application/connect.h"
+#include "mojo/public/cpp/bindings/interface_handle.h"
+#include "mojo/public/cpp/bindings/interface_request.h"
+#include "mojo/services/tracing/interfaces/trace_provider_registry.mojom.h"
+#include "mojo/services/tracing/interfaces/tracing.mojom.h"
 
 namespace mojo {
 
@@ -15,8 +19,12 @@ TracingImpl::TracingImpl() {}
 TracingImpl::~TracingImpl() {}
 
 void TracingImpl::Initialize(ApplicationImpl* app) {
-  ApplicationConnection* connection = app->ConnectToApplication("mojo:tracing");
-  connection->AddService(this);
+  tracing::TraceProviderRegistryPtr registry;
+  ConnectToService(app->shell(), "mojo:tracing", GetProxy(&registry));
+
+  mojo::InterfaceHandle<tracing::TraceProvider> provider;
+  provider_impl_.Bind(GetProxy(&provider));
+  registry->RegisterTraceProvider(provider.Pass());
 
 #ifdef NDEBUG
   if (app->HasArg("--early-tracing")) {
@@ -25,11 +33,6 @@ void TracingImpl::Initialize(ApplicationImpl* app) {
 #else
   provider_impl_.ForceEnableTracing();
 #endif
-}
-
-void TracingImpl::Create(ApplicationConnection* connection,
-                         InterfaceRequest<tracing::TraceProvider> request) {
-  provider_impl_.Bind(request.Pass());
 }
 
 }  // namespace mojo

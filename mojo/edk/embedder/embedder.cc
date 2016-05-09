@@ -8,6 +8,7 @@
 #include "mojo/edk/embedder/embedder_internal.h"
 #include "mojo/edk/system/configuration.h"
 #include "mojo/edk/system/core.h"
+#include "mojo/edk/system/handle.h"
 #include "mojo/edk/system/platform_handle_dispatcher.h"
 #include "mojo/edk/util/ref_ptr.h"
 
@@ -54,7 +55,9 @@ MojoResult CreatePlatformHandleWrapper(
       system::PlatformHandleDispatcher::Create(platform_handle.Pass());
 
   DCHECK(internal::g_core);
-  MojoHandle h = internal::g_core->AddDispatcher(dispatcher.get());
+  MojoHandle h = internal::g_core->AddHandle(
+      system::Handle(dispatcher.Clone(),
+                     system::PlatformHandleDispatcher::kDefaultHandleRights));
   if (h == MOJO_HANDLE_INVALID) {
     LOG(ERROR) << "Handle table full";
     dispatcher->Close();

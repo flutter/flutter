@@ -19,6 +19,10 @@ mojo_sdk_source_set("cpp") {
     "mapped_shared_buffer.h",
     "shared_media_buffer_allocator.cc",
     "shared_media_buffer_allocator.h",
+    "timeline_function.cc",
+    "timeline_function.h",
+    "timeline_rate.cc",
+    "timeline_rate.h",
   ]
 
   if (is_posix) {
@@ -36,3 +40,5 @@ mojo_sdk_source_set("cpp") {
     "$mojo_sdk_root/mojo/services/media/common/interfaces",
   ]
 }
+# Look for unit tests in services/media/common/test
+# TODO(dalesat): Move unit tests here using different test infrastructure.

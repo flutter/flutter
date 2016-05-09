@@ -20,6 +20,9 @@ source_set("data_pipe_utils") {
     "//base",
     "//mojo/message_pump",
     "//mojo/public/cpp/environment:environment",
+  ]
+
+  public_deps = [
     "//mojo/public/cpp/system",
   ]
 }

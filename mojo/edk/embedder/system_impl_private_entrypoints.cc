@@ -6,6 +6,7 @@
 #include "mojo/edk/embedder/embedder_internal.h"
 #include "mojo/edk/system/core.h"
 #include "mojo/edk/system/dispatcher.h"
+#include "mojo/edk/system/handle.h"
 #include "mojo/edk/util/ref_ptr.h"
 #include "mojo/public/c/system/buffer.h"
 #include "mojo/public/c/system/data_pipe.h"
@@ -59,7 +60,11 @@ MojoResult MojoSystemImplTransferHandle(MojoSystemImpl from_system,
   if (result != MOJO_RESULT_OK)
     return result;
 
-  MojoHandle created_handle = to_core->AddDispatcher(d.get());
+  // TODO(vtl): The rights should come from the original handle (to be dealt
+  // with when I fix/replace |Core::GetAndRemoveDispatcher()|.
+  MojoHandle created_handle = to_core->AddHandle(mojo::system::Handle(
+      d.Clone(), MOJO_HANDLE_RIGHT_TRANSFER | MOJO_HANDLE_RIGHT_READ |
+                     MOJO_HANDLE_RIGHT_WRITE));
   if (created_handle == MOJO_HANDLE_INVALID) {
     // The handle has been lost, unfortunately. There's no guarentee we can put
     // it back where it came from, or get the original ID back. Holding locks

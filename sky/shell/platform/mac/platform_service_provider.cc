@@ -20,28 +20,28 @@ void PlatformServiceProvider::ConnectToService(
     mojo::ScopedMessagePipeHandle client_handle) {
   if (service_name == mojo::NetworkService::Name_) {
     network_.Create(
-        nullptr, mojo::MakeRequest<mojo::NetworkService>(client_handle.Pass()));
+        nullptr, mojo::InterfaceRequest<mojo::NetworkService>(client_handle.Pass()));
     return;
   }
 #if TARGET_OS_IPHONE
   if (service_name == ::media::MediaPlayer::Name_) {
     media_player_.Create(
-        nullptr, mojo::MakeRequest<::media::MediaPlayer>(client_handle.Pass()));
+        nullptr, mojo::InterfaceRequest<::media::MediaPlayer>(client_handle.Pass()));
     return;
   }
   if (service_name == ::media::MediaService::Name_) {
-    media_service_.Create(nullptr, mojo::MakeRequest<::media::MediaService>(
+    media_service_.Create(nullptr, mojo::InterfaceRequest<::media::MediaService>(
                                        client_handle.Pass()));
     return;
   }
   if (service_name == ::vsync::VSyncProvider::Name_) {
-    vsync_.Create(nullptr, mojo::MakeRequest<::vsync::VSyncProvider>(
+    vsync_.Create(nullptr, mojo::InterfaceRequest<::vsync::VSyncProvider>(
                                client_handle.Pass()));
     return;
   }
   if (service_name == ::activity::Activity::Name_) {
     activity_.Create(
-        nullptr, mojo::MakeRequest<::activity::Activity>(client_handle.Pass()));
+        nullptr, mojo::InterfaceRequest<::activity::Activity>(client_handle.Pass()));
     return;
   }
   if (service_name == ::editing::Clipboard::Name_) {
@@ -51,25 +51,25 @@ void PlatformServiceProvider::ConnectToService(
   }
   if (service_name == flutter::platform::HapticFeedback::Name_) {
     haptic_feedback_.Create(
-        nullptr, mojo::MakeRequest<flutter::platform::HapticFeedback>(
+        nullptr, mojo::InterfaceRequest<flutter::platform::HapticFeedback>(
                      client_handle.Pass()));
     return;
   }
   if (service_name == flutter::platform::PathProvider::Name_) {
     path_provider_.Create(nullptr,
-                          mojo::MakeRequest<flutter::platform::PathProvider>(
+                          mojo::InterfaceRequest<flutter::platform::PathProvider>(
                               client_handle.Pass()));
     return;
   }
   if (service_name == flutter::platform::SystemChrome::Name_) {
     system_chrome_.Create(nullptr,
-                          mojo::MakeRequest<flutter::platform::SystemChrome>(
+                          mojo::InterfaceRequest<flutter::platform::SystemChrome>(
                               client_handle.Pass()));
     return;
   }
   if (service_name == flutter::platform::SystemSound::Name_) {
     system_sound_.Create(nullptr,
-                         mojo::MakeRequest<flutter::platform::SystemSound>(
+                         mojo::InterfaceRequest<flutter::platform::SystemSound>(
                              client_handle.Pass()));
     return;
   }

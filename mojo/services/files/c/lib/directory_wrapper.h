@@ -8,8 +8,11 @@
 #include <memory>
 
 #include "files/c/mojio_sys_types.h"
+#include "files/interfaces/directory.mojom-sync.h"
 #include "files/interfaces/directory.mojom.h"
 #include "mojo/public/c/system/macros.h"
+#include "mojo/public/cpp/bindings/interface_handle.h"
+#include "mojo/public/cpp/bindings/synchronous_interface_ptr.h"
 
 namespace mojio {
 
@@ -18,10 +21,11 @@ class FDImpl;
 
 // TODO(vtl): Probably this should be made into an implementation of |FDImpl|
 // (with additional methods) and renamed |DirectoryFDImpl|, to support opening
-// directories, |openat()|, etc>
+// directories, |openat()|, etc.
 class DirectoryWrapper {
  public:
-  DirectoryWrapper(ErrnoImpl* errno_impl, mojo::files::DirectoryPtr directory);
+  DirectoryWrapper(ErrnoImpl* errno_impl,
+                   mojo::InterfaceHandle<mojo::files::Directory> directory);
   ~DirectoryWrapper();
 
   std::unique_ptr<FDImpl> Open(const char* path, int oflag, mojio_mode_t mode);
@@ -30,11 +34,13 @@ class DirectoryWrapper {
   // TODO(vtl): MkDir(), etc.
 
   // Mostly for tests:
-  mojo::files::DirectoryPtr& directory() { return directory_; }
+  mojo::SynchronousInterfacePtr<mojo::files::Directory>& directory() {
+    return directory_;
+  }
 
  private:
   ErrnoImpl* const errno_impl_;
-  mojo::files::DirectoryPtr directory_;
+  mojo::SynchronousInterfacePtr<mojo::files::Directory> directory_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(DirectoryWrapper);
 };
