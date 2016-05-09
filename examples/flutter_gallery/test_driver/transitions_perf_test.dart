@@ -80,7 +80,7 @@ void main() {
           }
         }
       },
-      categories: const <TimelineStream>[
+      streams: const <TimelineStream>[
         TimelineStream.dart,
         TimelineStream.gc,
         TimelineStream.compiler

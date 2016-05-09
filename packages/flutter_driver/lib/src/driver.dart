@@ -19,12 +19,12 @@ enum TimelineStream {
   all, api, compiler, dart, debugger, embedder, gc, isolate, vm
 }
 
-const List<TimelineStream> _defaultCategories = const <TimelineStream>[TimelineStream.all];
+const List<TimelineStream> _defaultStreams = const <TimelineStream>[TimelineStream.all];
 
 // See https://github.com/dart-lang/sdk/blob/master/runtime/vm/timeline.cc#L32
-String _tracingCategoriesToString(List<TimelineStream> categories) {
-  final String contents = categories.map((TimelineStream category) {
-    switch(category) {
+String _timelineStreamsToString(List<TimelineStream> streams) {
+  final String contents = streams.map((TimelineStream stream) {
+    switch(stream) {
       case TimelineStream.all: return 'all';
       case TimelineStream.api: return 'API';
       case TimelineStream.compiler: return 'Compiler';
@@ -35,7 +35,7 @@ String _tracingCategoriesToString(List<TimelineStream> categories) {
       case TimelineStream.isolate: return 'Isolate';
       case TimelineStream.vm: return 'VM';
       default:
-        throw 'Unknown tracing category $category';
+        throw 'Unknown timeline stream $stream';
     }
   }).join(', ');
   return '[$contents]';
@@ -249,11 +249,11 @@ class FlutterDriver {
   }
 
   /// Starts recording performance traces.
-  Future<Null> startTracing({List<TimelineStream> categories: _defaultCategories}) async {
-    assert(categories != null && categories.length > 0);
+  Future<Null> startTracing({List<TimelineStream> streams: _defaultStreams}) async {
+    assert(streams != null && streams.length > 0);
     try {
       await _peer.sendRequest(_kSetVMTimelineFlagsMethod, <String, String>{
-        'recordedStreams': _tracingCategoriesToString(categories)
+        'recordedStreams': _timelineStreamsToString(streams)
       });
       return null;
     } catch(error, stackTrace) {
@@ -286,8 +286,8 @@ class FlutterDriver {
   ///
   /// This is merely a convenience wrapper on top of [startTracing] and
   /// [stopTracingAndDownloadTimeline].
-  Future<Timeline> traceAction(Future<dynamic> action(), { List<TimelineStream> categories: _defaultCategories }) async {
-    await startTracing(categories: categories);
+  Future<Timeline> traceAction(Future<dynamic> action(), { List<TimelineStream> streams: _defaultStreams }) async {
+    await startTracing(streams: streams);
     await action();
     return stopTracingAndDownloadTimeline();
   }
