@@ -26,9 +26,25 @@ class MockKeyboard implements mojom.Keyboard {
   void setEditingState(mojom.EditingState state) {}
 }
 
+class MockClipboard implements mojom.Clipboard {
+  mojom.ClipboardData _clip;
+
+  @override
+  void setClipboardData(mojom.ClipboardData clip) {
+    _clip = clip;
+  }
+
+  @override
+  dynamic getClipboardData(String format,[Function responseFactory = null]) {
+    return new mojom.ClipboardGetClipboardDataResponseParams()..clip = _clip;
+  }
+}
+
 void main() {
   MockKeyboard mockKeyboard = new MockKeyboard();
   serviceMocker.registerMockService(mojom.Keyboard.serviceName, mockKeyboard);
+  MockClipboard mockClipboard = new MockClipboard();
+  serviceMocker.registerMockService(mojom.Clipboard.serviceName, mockClipboard);
 
   void enterText(String testValue) {
     // Simulate entry of text through the keyboard.
