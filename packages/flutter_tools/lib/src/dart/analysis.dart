@@ -14,7 +14,6 @@ import 'package:analyzer/source/error_processor.dart';
 import 'package:analyzer/src/generated/engine.dart';
 import 'package:analyzer/src/generated/error.dart';
 import 'package:analyzer/src/generated/java_io.dart';
-import 'package:analyzer/src/generated/sdk.dart';
 import 'package:analyzer/src/generated/sdk_io.dart';
 import 'package:analyzer/src/generated/source.dart';
 import 'package:analyzer/src/generated/source_io.dart';
@@ -91,7 +90,9 @@ class AnalysisDriver {
 
   List<UriResolver> _getResolvers(InternalAnalysisContext context,
       Map<String, List<file_system.Folder>> packageMap) {
-    DartSdk sdk = new DirectoryBasedDartSdk(new JavaFile(sdkDir));
+    DirectoryBasedDartSdk sdk = new DirectoryBasedDartSdk(new JavaFile(sdkDir));
+    sdk.analysisOptions = context.analysisOptions;
+    sdk.useSummary = true;
     List<UriResolver> resolvers = <UriResolver>[];
 
     EmbedderYamlLocator yamlLocator = context.embedderYamlLocator;
