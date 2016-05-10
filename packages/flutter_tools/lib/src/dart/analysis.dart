@@ -91,7 +91,9 @@ class AnalysisDriver {
 
   List<UriResolver> _getResolvers(InternalAnalysisContext context,
       Map<String, List<file_system.Folder>> packageMap) {
-    DartSdk sdk = new DirectoryBasedDartSdk(new JavaFile(sdkDir));
+    DirectoryBasedDartSdk sdk = new DirectoryBasedDartSdk(new JavaFile(sdkDir));
+    sdk.analysisOptions = context.analysisOptions;
+    sdk.useSummary = true;
     List<UriResolver> resolvers = <UriResolver>[];
 
     EmbedderYamlLocator yamlLocator = context.embedderYamlLocator;
