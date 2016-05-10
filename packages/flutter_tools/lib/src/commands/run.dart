@@ -99,7 +99,6 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    int result;
     DebuggingOptions options;
 
     if (getBuildMode() != BuildMode.debug) {
@@ -113,7 +112,7 @@ class RunCommand extends RunCommandBase {
     }
 
     if (argResults['resident']) {
-      result = await startAppStayResident(
+      _RunAndStayResident runner = new _RunAndStayResident(
         deviceForCommand,
         toolchain,
         target: target,
@@ -121,8 +120,10 @@ class RunCommand extends RunCommandBase {
         traceStartup: traceStartup,
         buildMode: getBuildMode()
       );
+
+      return runner.run();
     } else {
-      result = await startApp(
+      return startApp(
         deviceForCommand,
         toolchain,
         target: target,
@@ -134,8 +135,6 @@ class RunCommand extends RunCommandBase {
         buildMode: getBuildMode()
       );
     }
-
-    return result;
   }
 }
 
@@ -230,226 +229,6 @@ Future<int> startApp(
     await _downloadStartupTrace(result.observatoryPort, device);
 
   return result.started ? 0 : 2;
-}
-
-/// Start the app and keep the process running during its lifetime:
-///
-/// - start logging
-/// - start the app
-/// - scrape obs. port
-/// - connect via obs.
-/// - stay alive as long as obs. is alive
-/// - intercept SIG_QUIT; kill the launched app
-Future<int> startAppStayResident(
-  Device device,
-  Toolchain toolchain, {
-  String target,
-  DebuggingOptions debuggingOptions,
-  bool traceStartup: false,
-  BuildMode buildMode: BuildMode.debug
-}) async {
-  String mainPath = findMainDartFile(target);
-  if (!FileSystemEntity.isFileSync(mainPath)) {
-    String message = 'Tried to run $mainPath, but that file does not exist.';
-    if (target == null)
-      message += '\nConsider using the -t option to specify the Dart file to start.';
-    printError(message);
-    return 1;
-  }
-
-  ApplicationPackage package = getApplicationPackageForPlatform(device.platform);
-
-  if (package == null) {
-    String message = 'No application found for ${device.platform}.';
-    String hint = _getMissingPackageHintForPlatform(device.platform);
-    if (hint != null)
-      message += '\n$hint';
-    printError(message);
-    return 1;
-  }
-
-  // TODO(devoncarew): We shouldn't have to do type checks here.
-  if (device is AndroidDevice) {
-    printTrace('Running build command.');
-
-    int result = await buildApk(
-      device.platform,
-      toolchain,
-      target: target,
-      buildMode: buildMode
-    );
-
-    if (result != 0)
-      return result;
-  }
-
-  // TODO(devoncarew): Move this into the device.startApp() impls.
-  if (package != null) {
-    printTrace("Stopping app '${package.name}' on ${device.name}.");
-    // We don't wait for the stop command to complete.
-    device.stopApp(package);
-  }
-
-  // Allow any stop commands from above to start work.
-  await new Future<Duration>.delayed(Duration.ZERO);
-
-  // TODO(devoncarew): This fails for ios devices - we haven't built yet.
-  if (device is AndroidDevice) {
-    printTrace('Running install command.');
-    if (!(await installApp(device, package)))
-      return 1;
-  }
-
-  Map<String, dynamic> platformArgs;
-  if (traceStartup != null)
-    platformArgs = <String, dynamic>{ 'trace-startup': traceStartup };
-
-  printStatus('Running ${_getDisplayPath(mainPath)} on ${device.name}...');
-
-  StreamSubscription<String> loggingSubscription = device.logReader.logLines.listen((String line) {
-    if (!line.contains('Observatory listening on http') && !line.contains('Diagnostic server listening on http'))
-      printStatus(line);
-  });
-
-  LaunchResult result = await device.startApp(
-    package,
-    toolchain,
-    mainPath: mainPath,
-    debuggingOptions: debuggingOptions,
-    platformArgs: platformArgs
-  );
-
-  if (!result.started) {
-    printError('Error running application on ${device.name}.');
-    await loggingSubscription.cancel();
-    return 2;
-  }
-
-  Completer<int> exitCompleter = new Completer<int>();
-
-  void complete(int exitCode) {
-    terminal.singleCharMode = false;
-    if (!exitCompleter.isCompleted)
-      exitCompleter.complete(0);
-  };
-
-  // TODO: move a lot of this into a class
-
-  // Connect to observatory.
-  WebSocket observatoryConnection;
-  String isolateId;
-  int messageId = 0;
-
-  if (debuggingOptions.debuggingEnabled) {
-    final String localhost = InternetAddress.LOOPBACK_IP_V4.address;
-    final String url = 'ws://$localhost:${result.observatoryPort}/ws';
-
-    observatoryConnection = await WebSocket.connect(url);
-    printTrace('Connected to observatory port: ${result.observatoryPort}.');
-
-    // Listen for observatory connection close.
-    observatoryConnection.listen((dynamic data) {
-      if (data is String) {
-        Map<String, dynamic> json = JSON.decode(data);
-
-        if (json['method'] == 'streamNotify') {
-          Map<String, dynamic> event = json['params']['event'];
-          if (event['isolate'] != null && isolateId == null)
-            isolateId = event['isolate']['id'];
-        } else if (json['result'] is Map && json['result']['type'] == 'VM') {
-          // isolates: [{
-          //   type: @Isolate, fixedId: true, id: isolates/724543296, name: dev.flx$main, number: 724543296
-          // }]
-          List<dynamic> isolates = json['result']['isolates'];
-          if (isolates.isNotEmpty)
-            isolateId = isolates.first['id'];
-        }
-      }
-    }, onDone: () {
-      loggingSubscription.cancel();
-      // TODO: print this when quitting in more scenarios
-      printStatus('Application finished.');
-      complete(0);
-    });
-
-    observatoryConnection.add(JSON.encode(<String, dynamic>{
-      'method': 'streamListen',
-      'params': <String, dynamic>{ 'streamId': 'Isolate' },
-      'id': messageId++
-    }));
-
-    observatoryConnection.add(JSON.encode(<String, dynamic>{
-      'method': 'getVM',
-      'id': messageId++
-    }));
-  }
-
-  printStatus('Application running.');
-
-  terminal.singleCharMode = true;
-
-  stdin.transform(ASCII.decoder).listen((String str) {
-    if (str.length > 0 && str.codeUnitAt(0) == 27) {
-      str = str.substring(1);
-
-      if (str == 'OP') {
-        // F1, help
-        // TODO:
-        print('help');
-      } else if (str == '[15~') {
-        // F5, refresh
-        // TODO:
-        print('refresh');
-      } else if (str == '[21~') {
-        // F10, exit
-        // TODO: move the below into common code
-        loggingSubscription.cancel();
-        printStatus('');
-        complete(0);
-      }
-    } else {
-      str = str.toLowerCase();
-
-      if (str == 'h') {
-        // TODO:
-        print('help');
-      } else if (str == 'r') {
-        print('reload');
-      } else if (str == 'q') {
-        // TODO: move the below into common code
-        loggingSubscription.cancel();
-        printStatus('');
-        complete(0);
-      }
-    }
-  });
-
-  // When terminating, close down the log reader.
-  ProcessSignal.SIGINT.watch().listen((ProcessSignal signal) {
-    loggingSubscription.cancel();
-    printStatus('');
-    complete(0);
-  });
-  ProcessSignal.SIGTERM.watch().listen((ProcessSignal signal) {
-    loggingSubscription.cancel();
-    complete(0);
-  });
-
-  return exitCompleter.future.then((int exitCode) async {
-    if (observatoryConnection != null &&
-        observatoryConnection.readyState == WebSocket.OPEN &&
-        isolateId != null) {
-      observatoryConnection.add(JSON.encode(<String, dynamic>{
-        'method': 'ext.flutter.exit',
-        'params': <String, dynamic>{ 'isolateId': isolateId },
-        'id': messageId++
-      }));
-      // WebSockets do not have a flush() method.
-      await new Future<Null>.delayed(new Duration(milliseconds: 100));
-    }
-
-    return exitCode;
-  });
 }
 
 /// Given the value of the --target option, return the path of the Dart file
@@ -562,4 +341,228 @@ String _getMissingPackageHintForPlatform(TargetPlatform platform) {
 String _getDisplayPath(String fullPath) {
   String cwd = Directory.current.path + Platform.pathSeparator;
   return fullPath.startsWith(cwd) ?  fullPath.substring(cwd.length) : fullPath;
+}
+
+class _RunAndStayResident {
+  _RunAndStayResident(
+    this.device,
+    this.toolchain, {
+    this.target,
+    this.debuggingOptions,
+    this.traceStartup : false,
+    this.buildMode : BuildMode.debug
+  });
+
+  final Device device;
+  final Toolchain toolchain;
+  final String target;
+  final DebuggingOptions debuggingOptions;
+  final bool traceStartup;
+  final BuildMode buildMode;
+
+  Completer<int> _exitCompleter;
+  StreamSubscription<String> _loggingSubscription;
+
+  WebSocket _observatoryConnection;
+  String _isolateId;
+  int _messageId = 0;
+
+  /// Start the app and keep the process running during its lifetime.
+  Future<int> run() async {
+    String mainPath = findMainDartFile(target);
+    if (!FileSystemEntity.isFileSync(mainPath)) {
+      String message = 'Tried to run $mainPath, but that file does not exist.';
+      if (target == null)
+        message += '\nConsider using the -t option to specify the Dart file to start.';
+      printError(message);
+      return 1;
+    }
+
+    ApplicationPackage package = getApplicationPackageForPlatform(device.platform);
+
+    if (package == null) {
+      String message = 'No application found for ${device.platform}.';
+      String hint = _getMissingPackageHintForPlatform(device.platform);
+      if (hint != null)
+        message += '\n$hint';
+      printError(message);
+      return 1;
+    }
+
+    // TODO(devoncarew): We shouldn't have to do type checks here.
+    if (device is AndroidDevice) {
+      printTrace('Running build command.');
+
+      int result = await buildApk(
+        device.platform,
+        toolchain,
+        target: target,
+        buildMode: buildMode
+      );
+
+      if (result != 0)
+        return result;
+    }
+
+    // TODO(devoncarew): Move this into the device.startApp() impls.
+    if (package != null) {
+      printTrace("Stopping app '${package.name}' on ${device.name}.");
+      // We don't wait for the stop command to complete.
+      device.stopApp(package);
+    }
+
+    // Allow any stop commands from above to start work.
+    await new Future<Duration>.delayed(Duration.ZERO);
+
+    // TODO(devoncarew): This fails for ios devices - we haven't built yet.
+    if (device is AndroidDevice) {
+      printTrace('Running install command.');
+      if (!(await installApp(device, package)))
+        return 1;
+    }
+
+    Map<String, dynamic> platformArgs;
+    if (traceStartup != null)
+      platformArgs = <String, dynamic>{ 'trace-startup': traceStartup };
+
+    printStatus('Running ${_getDisplayPath(mainPath)} on ${device.name}...');
+
+    _loggingSubscription = device.logReader.logLines.listen((String line) {
+      if (!line.contains('Observatory listening on http') && !line.contains('Diagnostic server listening on http'))
+        printStatus(line);
+    });
+
+    LaunchResult result = await device.startApp(
+      package,
+      toolchain,
+      mainPath: mainPath,
+      debuggingOptions: debuggingOptions,
+      platformArgs: platformArgs
+    );
+
+    if (!result.started) {
+      printError('Error running application on ${device.name}.');
+      await _loggingSubscription.cancel();
+      return 2;
+    }
+
+    _exitCompleter = new Completer<int>();
+
+    // Connect to observatory.
+    if (debuggingOptions.debuggingEnabled) {
+      final String localhost = InternetAddress.LOOPBACK_IP_V4.address;
+      final String url = 'ws://$localhost:${result.observatoryPort}/ws';
+
+      _observatoryConnection = await WebSocket.connect(url);
+      printTrace('Connected to observatory port: ${result.observatoryPort}.');
+
+      // Listen for observatory connection close.
+      _observatoryConnection.listen((dynamic data) {
+        if (data is String) {
+          Map<String, dynamic> json = JSON.decode(data);
+
+          if (json['method'] == 'streamNotify') {
+            Map<String, dynamic> event = json['params']['event'];
+            if (event['isolate'] != null && _isolateId == null)
+              _isolateId = event['isolate']['id'];
+          } else if (json['result'] != null && json['result']['type'] == 'VM') {
+            // isolates: [{
+            //   type: @Isolate, fixedId: true, id: isolates/724543296, name: dev.flx$main, number: 724543296
+            // }]
+            List<dynamic> isolates = json['result']['isolates'];
+            if (isolates.isNotEmpty)
+              _isolateId = isolates.first['id'];
+          } else if (json['error'] != null) {
+            printError('Error: ${json['error']['message']}.');
+            printTrace(data);
+          }
+        }
+      }, onDone: () {
+        _handleExit();
+      });
+
+      _observatoryConnection.add(JSON.encode(<String, dynamic>{
+        'method': 'streamListen',
+        'params': <String, dynamic>{ 'streamId': 'Isolate' },
+        'id': _messageId++
+      }));
+
+      _observatoryConnection.add(JSON.encode(<String, dynamic>{
+        'method': 'getVM',
+        'id': _messageId++
+      }));
+    }
+
+    printStatus('Application running.');
+    _printHelp();
+
+    terminal.singleCharMode = true;
+
+    terminal.onCharInput.listen((String code) {
+      String lower = code.toLowerCase();
+
+      if (lower == 'h' || code == AnsiTerminal.KEY_F1) {
+        // F1, help
+        _printHelp();
+      } else if (lower == 'r' || code == AnsiTerminal.KEY_F5) {
+        // F5, refresh
+        _handleRefresh();
+      } else if (lower == 'q' || code == AnsiTerminal.KEY_F10) {
+        // F10, exit
+        _handleExit();
+      }
+    });
+
+    ProcessSignal.SIGINT.watch().listen((ProcessSignal signal) {
+      _handleExit();
+    });
+    ProcessSignal.SIGTERM.watch().listen((ProcessSignal signal) {
+      _handleExit();
+    });
+
+    return _exitCompleter.future.then((int exitCode) async {
+      if (_observatoryConnection != null &&
+          _observatoryConnection.readyState == WebSocket.OPEN &&
+          _isolateId != null) {
+        _observatoryConnection.add(JSON.encode(<String, dynamic>{
+          'method': 'ext.flutter.exit',
+          'params': <String, dynamic>{ 'isolateId': _isolateId },
+          'id': _messageId++
+        }));
+        // WebSockets do not have a flush() method.
+        await new Future<Null>.delayed(new Duration(milliseconds: 100));
+      }
+
+      return exitCode;
+    });
+  }
+
+  void _printHelp() {
+    printStatus('Type "h" or F1 for help, "r" or F5 to restart the app, and "q", F10, or ctrl-c to quit.');
+  }
+
+  void _handleRefresh() {
+    if (_observatoryConnection == null) {
+      printError('Debugging is not enabled.');
+    } else {
+      printStatus('Re-starting application...');
+
+      // TODO(devoncarew): Show an error if the isolate reload fails.
+      _observatoryConnection.add(JSON.encode(<String, dynamic>{
+        'method': 'isolateReload',
+        'params': <String, dynamic>{ 'isolateId': _isolateId },
+        'id': _messageId++
+      }));
+    }
+  }
+
+  void _handleExit() {
+    if (!_exitCompleter.isCompleted) {
+      _loggingSubscription?.cancel();
+      printStatus('');
+      printStatus('Application finished.');
+      terminal.singleCharMode = false;
+      _exitCompleter.complete(0);
+    }
+  }
 }
