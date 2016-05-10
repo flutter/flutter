@@ -33,7 +33,7 @@ class UpgradeCommand extends FlutterCommand {
       return 1;
     }
 
-    printStatus('Upgrading Flutter...');
+    printStatus('Upgrading Flutter from ${ArtifactStore.flutterRoot}...');
 
     int code = await runCommandAndStreamOutput(
       <String>['git', 'pull', '--ff-only'],

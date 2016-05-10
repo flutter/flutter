@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/commands/create.dart';
+import 'package:flutter_tools/src/dart/sdk.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
@@ -76,7 +77,7 @@ Future<Null> _createAndAnalyzeProject(Directory dir, List<String> createArgs) as
   expect(new File(mainPath).existsSync(), true);
   String flutterToolsPath = path.absolute(path.join('bin', 'flutter_tools.dart'));
   ProcessResult exec = Process.runSync(
-    'dart', <String>[flutterToolsPath, 'analyze'],
+    '$dartSdkPath/bin/dart', <String>[flutterToolsPath, 'analyze'],
     workingDirectory: dir.path
   );
   if (exec.exitCode != 0) {
