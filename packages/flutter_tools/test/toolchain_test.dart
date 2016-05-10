@@ -29,10 +29,6 @@ void main() {
       );
 
       expect(
-        toolConfig.getToolsDirectory(platform: HostPlatform.linux_x64).path,
-        endsWith('cache/artifacts/engine/linux-x64')
-      );
-      expect(
         toolConfig.getEngineArtifactsDirectory(TargetPlatform.android_arm, BuildMode.debug).path,
         endsWith('cache/artifacts/engine/android-arm')
       );
@@ -48,18 +44,8 @@ void main() {
       toolConfig.engineRelease = true;
 
       expect(
-        toolConfig.getToolsDirectory(platform: HostPlatform.linux_x64).path,
-        'engine/out/Release'
-      );
-      expect(
         toolConfig.getEngineArtifactsDirectory(TargetPlatform.android_arm, BuildMode.debug).path,
-        'engine/out/android_Release'
-      );
-
-      toolConfig.engineRelease = false;
-      expect(
-        toolConfig.getToolsDirectory(platform: HostPlatform.linux_x64).path,
-        'engine/out/Debug'
+        'engine/out/android_debug'
       );
     });
   });

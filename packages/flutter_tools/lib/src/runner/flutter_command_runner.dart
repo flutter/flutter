@@ -101,13 +101,13 @@ class FlutterCommandRunner extends CommandRunner {
         help:
             'Path to your Android Debug out directory, if you are building Flutter locally.\n'
             'This path is relative to --engine-src-path. Not normally required.',
-        defaultsTo: 'out/android_Debug/');
+        defaultsTo: 'out/android_debug_unopt/');
     argParser.addOption('android-release-build-path',
         hide: !verboseHelp,
         help:
             'Path to your Android Release out directory, if you are building Flutter locally.\n'
             'This path is relative to --engine-src-path. Not normally required.',
-        defaultsTo: 'out/android_Release/');
+        defaultsTo: 'out/android_debug/');
     argParser.addOption('ios-debug-build-path',
         hide: !verboseHelp,
         help:

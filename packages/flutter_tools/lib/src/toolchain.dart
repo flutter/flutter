@@ -98,34 +98,7 @@ class ToolConfiguration {
   /// The engine mode to use (only relevent when [engineSrcPath] is set).
   bool engineRelease;
 
-  /// Used to override the directory calculated from engineSrcPath (--engine-out-dir).
-  String engineOutDir;
-
-  bool get isLocalEngine => engineSrcPath != null || engineOutDir != null;
-
-  String get _modeStr => engineRelease ? 'Release' : 'Debug';
-
-  /// The directory that contains development tools for the given platform. This
-  /// includes things like `sky_shell` and `sky_snapshot`.
-  ///
-  /// If [platform] is not specified it defaults to [getCurrentHostPlatform].
-  Directory getToolsDirectory({ HostPlatform platform }) {
-    Directory dir = _getToolsDirectory(platform: platform);
-    if (dir != null)
-      printTrace('Using engine tools dir: ${dir.path}');
-    return dir;
-  }
-
-  Directory _getToolsDirectory({ HostPlatform platform }) {
-    platform ??= getCurrentHostPlatform();
-
-    if (engineSrcPath != null) {
-      return new Directory(path.join(engineSrcPath, 'out/$_modeStr'));
-    } else {
-      Directory engineDir = _cache.getArtifactDirectory('engine');
-      return new Directory(path.join(engineDir.path, getNameForHostPlatform(platform)));
-    }
-  }
+  bool get isLocalEngine => engineSrcPath != null;
 
   /// Return the directory that contains engine artifacts for the given targets.
   /// This directory might contain artifacts like `libsky_shell.so`.
@@ -137,47 +110,46 @@ class ToolConfiguration {
   }
 
   Directory _getEngineArtifactsDirectory(TargetPlatform platform, BuildMode mode) {
-    if (engineOutDir != null) {
-      return new Directory(engineOutDir);
-    } else if (engineSrcPath != null) {
-      String type;
+    if (engineSrcPath != null) {
+      List<String> buildDir = <String>[];
 
       switch (platform) {
         case TargetPlatform.android_arm:
         case TargetPlatform.android_x64:
         case TargetPlatform.android_x86:
-          type = 'android';
+          buildDir.add('android');
           break;
 
         // TODO(devoncarew): We will need an ios vs ios_x86 target (for ios vs. ios_sim).
         case TargetPlatform.ios:
-          type = 'ios';
+          buildDir.add('ios');
           break;
 
         // These targets don't have engine artifacts.
         case TargetPlatform.darwin_x64:
         case TargetPlatform.linux_x64:
-          return null;
+          buildDir.add('host');
+          break;
       }
 
-      // Return something like 'out/android_Release'.
-      String buildOutputPath = 'out/${type}_$_modeStr';
-      if (isAotBuildMode(mode))
-        buildOutputPath += '_Deploy';
+      buildDir.add(getModeName(mode));
+
+      if (!engineRelease)
+        buildDir.add('unopt');
 
       // Add a suffix for the target architecture.
       switch (platform) {
         case TargetPlatform.android_x64:
-          buildOutputPath += '_x64';
+          buildDir.add('x64');
           break;
         case TargetPlatform.android_x86:
-          buildOutputPath += '_x86';
+          buildDir.add('x86');
           break;
         default:
           break;
       }
 
-      return new Directory(path.join(engineSrcPath, buildOutputPath));
+      return new Directory(path.join(engineSrcPath, 'out', buildDir.join('_')));
     } else {
       String suffix = mode != BuildMode.debug ? '-${getModeName(mode)}' : '';
 
