@@ -544,21 +544,22 @@ void InitDartVM() {
 
   {
     TRACE_EVENT0("flutter", "Dart_Initialize");
-    CHECK(Dart_Initialize(reinterpret_cast<uint8_t*>(
-                              DART_SYMBOL(kDartVmIsolateSnapshotBuffer)),
-                          PrecompiledInstructionsSymbolIfPresent(),
-                          PrecompiledDataSnapshotSymbolIfPresent(),
-                          IsolateCreateCallback,
-                          nullptr,  // Isolate interrupt callback.
-                          nullptr,
-                          IsolateShutdownCallback,
-                          ThreadExitCallback,
-                          // File IO callbacks.
-                          nullptr, nullptr, nullptr, nullptr,
-                          // Entroy source
-                          nullptr,
-                          // VM service assets archive
-                          GetVMServiceAssetsArchiveCallback) == nullptr);
+    char* init_error = Dart_Initialize(
+        reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartVmIsolateSnapshotBuffer)),
+        PrecompiledInstructionsSymbolIfPresent(),
+        PrecompiledDataSnapshotSymbolIfPresent(), IsolateCreateCallback,
+        nullptr,  // Isolate interrupt callback.
+        nullptr, IsolateShutdownCallback, ThreadExitCallback,
+        // File IO callbacks.
+        nullptr, nullptr, nullptr, nullptr,
+        // Entroy source
+        nullptr,
+        // VM service assets archive
+        GetVMServiceAssetsArchiveCallback);
+    LOG_IF(ERROR, init_error != nullptr)
+        << "Error while initializing the Dart VM: " << init_error;
+    CHECK(init_error == nullptr);
+    free(init_error);
 
     // Send the earliest available timestamp in the application lifecycle to
     // timeline. The difference between this timestamp and the time we render the
