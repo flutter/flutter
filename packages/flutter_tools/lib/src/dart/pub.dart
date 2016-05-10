@@ -11,6 +11,7 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../cache.dart';
 import '../globals.dart';
+import 'sdk.dart';
 
 bool _shouldRunPubGet({ File pubSpecYaml, File dotPackages }) {
   if (!dotPackages.existsSync())

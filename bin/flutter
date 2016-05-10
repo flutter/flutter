@@ -37,14 +37,6 @@ if [ ! -f "$SNAPSHOT_PATH" ] || [ ! -f "$STAMP_PATH" ] || [ `cat "$STAMP_PATH"` 
   echo $REVISION > "$STAMP_PATH"
 fi
 
-# Add our internalized version of the Dart SDK to the path ahead of any other
-# versions that might be installed on this machine.
-#
-# TODO(abarth): We should teach flutter_tools to our version of the Dart SDK
-#               explicitly instead of relying upon the PATH.
-#
-export PATH="$DART_SDK_PATH/bin:$PATH"
-
 set +e
 
 if [ $FLUTTER_DEV ]; then

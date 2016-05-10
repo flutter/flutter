@@ -6,9 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
-
-import '../dart/sdk.dart';
 import '../globals.dart';
 
 typedef String StringConverter(String string);
@@ -89,13 +86,6 @@ String runCheckedSync(List<String> cmd, {
 /// Run cmd and return stdout.
 String runSync(List<String> cmd, { String workingDirectory }) {
   return _runWithLoggingSync(cmd, workingDirectory: workingDirectory);
-}
-
-/// Return the platform specific name for the given Dart SDK binary. So, `pub`
-/// ==> `pub.bat`.  The default SDK location can be overridden with a specified
-/// [sdkLocation].
-String sdkBinaryName(String name, { String sdkLocation }) {
-  return path.absolute(path.join(sdkLocation ?? dartSdkPath, 'bin', Platform.isWindows ? '$name.bat' : name));
 }
 
 bool exitsHappy(List<String> cli) {
