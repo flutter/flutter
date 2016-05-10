@@ -21,8 +21,8 @@ def get_out_dir(args):
     if args.simulator:
         target_dir.append('sim')
 
-    if args.debug:
-        target_dir.append('debug')
+    if args.unoptimized:
+        target_dir.append('unopt')
 
     if args.android_cpu != 'arm':
         target_dir.append(args.android_cpu)
@@ -43,19 +43,19 @@ def to_gn_args(args):
         if args.target_os == 'android':
             raise Exception('--simulator is not supported on Android')
         elif args.target_os == 'ios':
-            if args.runtime_mode != 'develop':
-                raise Exception('iOS simulator only supports develop mode')
+            if args.runtime_mode != 'debug':
+                raise Exception('iOS simulator only supports the debug runtime mode')
 
     gn_args = {}
 
-    gn_args['is_debug'] = args.debug
+    gn_args['is_debug'] = args.unoptimized
     gn_args['is_clang'] = args.clang and args.target_os not in ['android']
 
     ios_target_cpu = 'arm64'
     if args.ios_force_armv7:
       ios_target_cpu = 'arm'
 
-    aot = args.runtime_mode != 'develop'
+    aot = args.runtime_mode != 'debug'
     if args.target_os == 'android':
         gn_args['target_os'] = 'android'
     elif args.target_os == 'ios':
@@ -72,7 +72,11 @@ def to_gn_args(args):
       gn_args['use_system_harfbuzz'] = False
       aot = False
 
-    gn_args['dart_runtime_mode'] = args.runtime_mode
+    if args.runtime_mode == 'debug':
+        gn_args['dart_runtime_mode'] = 'develop'
+    else:
+        gn_args['dart_runtime_mode'] = args.runtime_mode
+
     if args.target_os == 'android':
         gn_args['target_cpu'] = args.android_cpu
     elif args.target_os == 'ios':
@@ -120,9 +124,9 @@ def parse_args(args):
   args = args[1:]
   parser = argparse.ArgumentParser(description='A script run` gn gen`.')
 
-  parser.add_argument('--debug', default=False, action='store_true')
+  parser.add_argument('--unoptimized', default=False, action='store_true')
 
-  parser.add_argument('--runtime-mode', type=str, choices=['develop', 'profile', 'release'], default='develop')
+  parser.add_argument('--runtime-mode', type=str, choices=['debug', 'profile', 'release'], default='debug')
 
   parser.add_argument('--experimental-interpreter', default=False, dest='experimental_interpreter', action='store_true')
 
