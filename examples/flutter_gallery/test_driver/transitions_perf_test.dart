@@ -80,10 +80,10 @@ void main() {
           }
         }
       },
-      categories: const <TracingCategory>[
-        TracingCategory.dart,
-        TracingCategory.gc,
-        TracingCategory.compiler
+      streams: const <TimelineStream>[
+        TimelineStream.dart,
+        TimelineStream.gc,
+        TimelineStream.compiler
       ]);
       new TimelineSummary.summarize(timeline)
         ..writeSummaryToFile('transitions_perf', pretty: true)
