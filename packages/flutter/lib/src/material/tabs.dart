@@ -345,7 +345,12 @@ class _Tab extends StatelessWidget {
   Widget _buildLabelText() {
     assert(label.text != null);
     TextStyle style = new TextStyle(color: color);
-    return new Text(label.text, style: style);
+    return new Text(
+      label.text,
+      style: style,
+      softWrap: false,
+      overflow: TextOverflow.fade
+    );
   }
 
   Widget _buildLabelIcon(BuildContext context) {
@@ -371,15 +376,15 @@ class _Tab extends StatelessWidget {
       labelContent = _buildLabelIcon(context);
     } else {
       labelContent = new Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           new Container(
             child: _buildLabelIcon(context),
             margin: const EdgeInsets.only(bottom: 10.0)
           ),
           _buildLabelText()
-        ],
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center
+        ]
       );
     }
 

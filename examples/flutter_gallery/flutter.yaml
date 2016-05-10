@@ -1,4 +1,4 @@
-name: material_gallery
+name: flutter_gallery
 uses-material-design: true
 assets:
   - assets/flutter_logo.png

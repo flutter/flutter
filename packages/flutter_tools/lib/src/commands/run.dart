@@ -21,10 +21,12 @@ import 'install.dart';
 
 abstract class RunCommandBase extends FlutterCommand {
   RunCommandBase() {
-    argParser.addFlag('checked',
-        negatable: true,
-        defaultsTo: true,
-        help: 'Toggle Dart\'s checked mode.');
+    addBuildModeFlags();
+
+    // TODO(devoncarew): This flag is ignored, and should be removed once tools
+    // no longer pass in `--checked`.
+    argParser.addFlag('checked', negatable: true, hide: true);
+
     argParser.addFlag('trace-startup',
         negatable: true,
         defaultsTo: false,
@@ -34,7 +36,6 @@ abstract class RunCommandBase extends FlutterCommand {
     usesTargetOption();
   }
 
-  bool get checked => argResults['checked'];
   bool get traceStartup => argResults['trace-startup'];
   String get target => argResults['target'];
   String get route => argResults['route'];
@@ -51,7 +52,6 @@ class RunCommand extends RunCommandBase {
   final List<String> aliases = <String>['start'];
 
   RunCommand() {
-    addBuildModeFlags();
     argParser.addFlag('full-restart',
         defaultsTo: true,
         help: 'Stop any currently running application process before running the app.');
@@ -105,7 +105,7 @@ class RunCommand extends RunCommandBase {
       options = new DebuggingOptions.disabled();
     } else {
       options = new DebuggingOptions.enabled(
-        checked: checked,
+        checked: getBuildMode() == BuildMode.debug,
         startPaused: argResults['start-paused'],
         observatoryPort: debugPort
       );

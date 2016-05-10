@@ -57,7 +57,7 @@ class _Asset {
   bool get assetFileExists => assetFile.existsSync();
 
   /// The delta between what the assetEntry is and the relativePath (e.g.,
-  /// packages/material_gallery).
+  /// packages/flutter_gallery).
   String get symbolicPrefix {
     if (_assetEntry == null || _assetEntry == relativePath)
       return null;

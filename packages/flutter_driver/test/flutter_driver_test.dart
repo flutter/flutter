@@ -236,8 +236,8 @@ void main() {
       });
     });
 
-    group('traceAction categories', () {
-      test('specify non-default categories', () async {
+    group('traceAction with timeline streams', () {
+      test('specify non-default timeline streams', () async {
         bool actionCalled = false;
         bool startTracingCalled = false;
         bool stopTracingCalled = false;
@@ -267,10 +267,10 @@ void main() {
         Timeline timeline = await driver.traceAction(() {
           actionCalled = true;
         },
-        categories: const <TracingCategory>[
-          TracingCategory.dart,
-          TracingCategory.gc,
-          TracingCategory.compiler
+        streams: const <TimelineStream>[
+          TimelineStream.dart,
+          TimelineStream.gc,
+          TimelineStream.compiler
         ]);
 
         expect(actionCalled, isTrue);

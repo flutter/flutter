@@ -8,7 +8,7 @@
 
     <application android:name="org.domokit.sky.shell.SkyApplication" android:label="complex_layout" android:icon="@mipmap/ic_launcher">
         <activity android:name="org.domokit.sky.shell.SkyActivity"
-                  android:launchMode="singleTask"
+                  android:launchMode="singleTop"
                   android:theme="@android:style/Theme.Black.NoTitleBar"
                   android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection"
                   android:hardwareAccelerated="true"

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Make `n` copies of material_gallery.
+/// Make `n` copies of flutter_gallery.
 
 import 'dart:io';
 
@@ -27,13 +27,13 @@ void main(List<String> args) {
   ArgResults results = argParser.parse(args);
 
   if (results['help']) {
-    print('Generate n copies of material_gallery.\n');
+    print('Generate n copies of flutter_gallery.\n');
     print('usage: dart mega_gallery.dart <options>');
     print(argParser.usage);
     exit(0);
   }
 
-  Directory source = new Directory(_normalize('examples/material_gallery'));
+  Directory source = new Directory(_normalize('examples/flutter_gallery'));
   Directory out = new Directory(_normalize(results['out']));
 
   if (results['delete']) {
@@ -55,10 +55,10 @@ void main(List<String> args) {
 
   print('Stats:');
   print('  packages/flutter           : ${getStatsFor(new Directory("packages/flutter"))}');
-  print('  examples/material_gallery  : ${getStatsFor(new Directory("examples/material_gallery"))}');
+  print('  examples/flutter_gallery  : ${getStatsFor(new Directory("examples/flutter_gallery"))}');
   print('');
 
-  print('Making $copies copies of material_gallery:');
+  print('Making $copies copies of flutter_gallery:');
 
   Directory lib = _dir(out, 'lib');
   if (lib.existsSync())

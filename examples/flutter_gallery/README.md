@@ -1,6 +1,6 @@
-# Flutter Material Gallery
+# Flutter gallery
 
-Demo app for the Material Design widgets implemented in Flutter.
+Demo app for the Material Design widgets and other features provided by Flutter.
 
 ## Icon
 

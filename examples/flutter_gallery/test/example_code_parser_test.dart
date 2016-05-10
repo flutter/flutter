@@ -5,12 +5,12 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
-import 'package:material_gallery/gallery/example_code_parser.dart';
+import 'package:flutter_gallery/gallery/example_code_parser.dart';
 import 'package:mojo/core.dart' as core;
 import 'package:test/test.dart';
 
 void main() {
-  test('Material Gallery example code parser test', () async {
+  test('Flutter gallery example code parser test', () async {
     TestAssetBundle bundle = new TestAssetBundle();
 
     String codeSnippet0 = await getExampleCode('test_0', bundle);
