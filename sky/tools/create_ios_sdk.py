@@ -14,13 +14,20 @@ def main():
   parser = argparse.ArgumentParser(description='Creates the Flutter iOS SDK')
 
   parser.add_argument('--dst', type=str, required=True)
+  parser.add_argument('--device-out-dir', type=str, required=True)
+  parser.add_argument('--simulator-out-dir', type=str, required=True)
+
   args = parser.parse_args()
 
-  device_sdk = 'out/ios_Release/Flutter'
-  simulator_sdk = 'out/ios_sim_Release/Flutter'
+  device_sdk = os.path.join(args.device_out_dir, 'Flutter')
+  simulator_sdk = os.path.join(args.simulator_out_dir, 'Flutter')
 
-  device_dylib = 'out/ios_Release/Flutter.framework/Flutter'
-  simulator_dylib = 'out/ios_sim_Release/Flutter.framework/Flutter'
+  flutter_framework_binary = 'Flutter.framework/Flutter'
+
+  device_dylib = os.path.join(args.device_out_dir,
+      flutter_framework_binary)
+  simulator_dylib = os.path.join(args.simulator_out_dir,
+      flutter_framework_binary)
 
   if not os.path.isdir(device_sdk):
     print 'Cannot find iOS device SDK at', device_sdk
