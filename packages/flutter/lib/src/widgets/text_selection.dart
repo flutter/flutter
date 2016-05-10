@@ -42,18 +42,9 @@ abstract class TextSelectionDelegate {
   /// Sets the current text input (replaces the whole line).
   void set inputValue(InputValue value);
 
-  /// The copy/paste buffer. Application-wide.
-  String get pasteBuffer;
-
-  /// Sets the copy/paste buffer.
-  void set pasteBuffer(String value);
-
   /// Hides the text selection toolbar.
   void hideToolbar();
 }
-
-// TODO(mpcomplete): need to interact with the system clipboard.
-String _pasteBuffer;
 
 /// Manages a pair of text selection handles to be shown in an Overlay
 /// containing the owning widget.
@@ -160,14 +151,6 @@ class TextSelectionOverlay implements TextSelectionDelegate {
     update(value);
     if (onSelectionOverlayChanged != null)
       onSelectionOverlayChanged(value);
-  }
-
-  @override
-  String get pasteBuffer => _pasteBuffer;
-
-  @override
-  void set pasteBuffer(String value) {
-    _pasteBuffer = value;
   }
 
   @override

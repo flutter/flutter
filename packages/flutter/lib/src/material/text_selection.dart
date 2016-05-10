@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter/services.dart';
 
 import 'flat_button.dart';
 import 'icon_button.dart';
@@ -32,8 +34,9 @@ class _TextSelectionToolbar extends StatelessWidget {
     }
     items.add(new FlatButton(
       child: new Text('PASTE'),
-      onPressed: delegate.pasteBuffer != null ? _handlePaste : null)
-    );
+      // TODO(mpcomplete): This should probably be grayed-out if there is nothing to paste.
+      onPressed: _handlePaste
+    ));
     if (value.selection.isCollapsed) {
       items.add(new FlatButton(child: new Text('SELECT ALL'), onPressed: _handleSelectAll));
     }
@@ -50,8 +53,7 @@ class _TextSelectionToolbar extends StatelessWidget {
   }
 
   void _handleCut() {
-    InputValue value = this.value;
-    delegate.pasteBuffer = value.selection.textInside(value.text);
+    Clipboard.setClipboardData(new ClipboardData()..text = value.selection.textInside(value.text));
     delegate.inputValue = new InputValue(
       text: value.selection.textBefore(value.text) + value.selection.textAfter(value.text),
       selection: new TextSelection.collapsed(offset: value.selection.start)
@@ -60,7 +62,7 @@ class _TextSelectionToolbar extends StatelessWidget {
   }
 
   void _handleCopy() {
-    delegate.pasteBuffer = value.selection.textInside(value.text);
+    Clipboard.setClipboardData(new ClipboardData()..text = value.selection.textInside(value.text));
     delegate.inputValue = new InputValue(
       text: value.text,
       selection: new TextSelection.collapsed(offset: value.selection.end)
@@ -68,11 +70,15 @@ class _TextSelectionToolbar extends StatelessWidget {
     delegate.hideToolbar();
   }
 
-  void _handlePaste() {
-    delegate.inputValue = new InputValue(
-      text: value.selection.textBefore(value.text) + delegate.pasteBuffer + value.selection.textAfter(value.text),
-      selection: new TextSelection.collapsed(offset: value.selection.start + delegate.pasteBuffer.length)
-    );
+  Future<Null> _handlePaste() async {
+    InputValue value = this.value;  // Snapshot the input before using `await`.
+    ClipboardData clip = await Clipboard.getClipboardData(Clipboard.kTextPlain);
+    if (clip != null) {
+      delegate.inputValue = new InputValue(
+        text: value.selection.textBefore(value.text) + clip.text + value.selection.textAfter(value.text),
+        selection: new TextSelection.collapsed(offset: value.selection.start + clip.text.length)
+      );
+    }
     delegate.hideToolbar();
   }
 
