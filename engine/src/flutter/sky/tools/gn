@@ -26,8 +26,6 @@ def get_out_dir(args):
 
     if args.android_cpu != 'arm':
         target_dir.append(args.android_cpu)
-    if args.ios_force_armv7:
-        target_dir.append('armv7')
 
     return os.path.join('out', '_'.join(target_dir))
 
@@ -52,8 +50,6 @@ def to_gn_args(args):
     gn_args['is_clang'] = args.clang and args.target_os not in ['android']
 
     ios_target_cpu = 'arm64'
-    if args.ios_force_armv7:
-      ios_target_cpu = 'arm'
 
     aot = args.runtime_mode != 'debug'
     if args.target_os == 'android':
@@ -82,8 +78,6 @@ def to_gn_args(args):
     elif args.target_os == 'ios':
         if args.simulator:
             gn_args['target_cpu'] = 'x64'
-        elif args.ios_force_armv7:
-            gn_args['target_cpu'] = 'arm'
         else:
             gn_args['target_cpu'] = 'arm64'
 
@@ -134,7 +128,6 @@ def parse_args(args):
   parser.add_argument('--android', dest='target_os', action='store_const', const='android')
   parser.add_argument('--android-cpu', type=str, choices=['arm', 'x64', 'x86'], default='arm')
   parser.add_argument('--ios', dest='target_os', action='store_const', const='ios')
-  parser.add_argument('--ios-force-armv7', dest='ios_force_armv7', action='store_true', default=False)
   parser.add_argument('--simulator', action='store_true', default=False)
 
   parser.add_argument('--goma', default=True, action='store_true')
