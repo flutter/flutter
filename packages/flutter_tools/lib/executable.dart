@@ -23,6 +23,7 @@ import 'src/commands/drive.dart';
 import 'src/commands/install.dart';
 import 'src/commands/listen.dart';
 import 'src/commands/logs.dart';
+import 'src/commands/setup.dart';
 import 'src/commands/precache.dart';
 import 'src/commands/refresh.dart';
 import 'src/commands/run.dart';
@@ -70,6 +71,7 @@ Future<Null> main(List<String> args) async {
     ..addCommand(new RunCommand())
     ..addCommand(new RunMojoCommand(hidden: !verboseHelp))
     ..addCommand(new ScreenshotCommand())
+    ..addCommand(new SetupCommand(hidden: !verboseHelp))
     ..addCommand(new SkiaCommand())
     ..addCommand(new StopCommand())
     ..addCommand(new TestCommand())

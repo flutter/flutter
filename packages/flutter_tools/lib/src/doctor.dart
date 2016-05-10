@@ -37,7 +37,7 @@ class Doctor {
     if (_iosWorkflow.appliesToHostPlatform)
       _validators.add(_iosWorkflow);
 
-    _validators.add(new _AtomValidator());
+    _validators.add(new AtomValidator());
   }
 
   static void initGlobal() {
@@ -94,8 +94,9 @@ class Doctor {
   }
 
   /// Print verbose information about the state of installed tooling.
-  void diagnose() {
+  bool diagnose() {
     bool firstLine = true;
+    bool doctorResult = true;
 
     for (DoctorValidator validator in _validators) {
       if (!firstLine)
@@ -103,6 +104,9 @@ class Doctor {
       firstLine = false;
 
       ValidationResult result = validator.validate();
+
+      if (result.type == ValidationType.missing)
+        doctorResult = false;
 
       if (result.statusInfo != null)
         printStatus('${result.leadingBox} ${validator.title} (${result.statusInfo})');
@@ -119,6 +123,8 @@ class Doctor {
         }
       }
     }
+
+    return doctorResult;
   }
 
   bool get canListAnything => workflows.any((Workflow workflow) => workflow.canListDevices);
@@ -214,8 +220,13 @@ class _FlutterValidator extends DoctorValidator {
   }
 }
 
-class _AtomValidator extends DoctorValidator {
-  _AtomValidator() : super('Atom - a lightweight development environment for Flutter');
+class AtomValidator extends DoctorValidator {
+  AtomValidator() : super('Atom - a lightweight development environment for Flutter');
+
+  static File getConfigFile() {
+    // ~/.atom/config.cson
+    return new File(path.join(_getAtomHomePath(), 'config.cson'));
+  }
 
   static String _getAtomHomePath() {
     final Map<String, String> env = Platform.environment;
@@ -241,8 +252,7 @@ class _AtomValidator extends DoctorValidator {
       installCount++;
     }
 
-    String flutterPluginPath = path.join(_getAtomHomePath(), 'packages', 'flutter');
-    if (!FileSystemEntity.isDirectorySync(flutterPluginPath)) {
+    if (!hasPackage('flutter')) {
       messages.add(new ValidationMessage.error(
         'Flutter plugin not installed; this adds Flutter specific functionality to Atom.\n'
         'Install the \'flutter\' plugin in Atom or run \'apm install flutter\'.'
@@ -251,6 +261,7 @@ class _AtomValidator extends DoctorValidator {
       installCount++;
 
       try {
+        String flutterPluginPath = path.join(_getAtomHomePath(), 'packages', 'flutter');
         File packageFile = new File(path.join(flutterPluginPath, 'package.json'));
         dynamic packageInfo = JSON.decode(packageFile.readAsStringSync());
         String version = packageInfo['version'];
@@ -266,5 +277,10 @@ class _AtomValidator extends DoctorValidator {
         : installCount == 1 ? ValidationType.partial : ValidationType.missing,
       messages
     );
+  }
+
+  bool hasPackage(String packageName) {
+    String packagePath = path.join(_getAtomHomePath(), 'packages', packageName);
+    return FileSystemEntity.isDirectorySync(packagePath);
   }
 }
