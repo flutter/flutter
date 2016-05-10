@@ -7,7 +7,7 @@
 	<key>CFBundleExecutable</key>
 	<string>Runner</string>
 	<key>CFBundleIdentifier</key>
-	<string>io.flutter.example.hello_world</string>
+	<string>io.flutter.example.helloworld</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

@@ -193,7 +193,7 @@ String _createAndroidIdentifier(String name) {
 
 String _createUTIIdentifier(String name) {
   // Create a UTI (https://en.wikipedia.org/wiki/Uniform_Type_Identifier) from a base name
-  RegExp disallowed = new RegExp(r"[^a-zA-Z0-9\-.\u0080-\uffff]+");
+  RegExp disallowed = new RegExp(r"[^a-zA-Z0-9\-\.\u0080-\uffff]+");
   name = camelCase(name).replaceAll(disallowed, '');
   name = name.isEmpty ? 'untitled' : name;
   return 'com.yourcompany.$name';
