@@ -434,19 +434,33 @@ class FlutterCommandRunner extends CommandRunner {
 
   /// Check that the Flutter being run is the one we're expecting.
   void _checkFlutterCopy() {
-    String cwd = path.normalize(path.absolute(Directory.current.path));
+    String directory = path.normalize(path.absolute(Directory.current.path));
 
-    // Check if the cwd is a flutter dir. `bin/flutter` and `bin/cache/engine.stamp`
-    // exist.
-    if (FileSystemEntity.isFileSync(path.join(cwd, 'bin/flutter')) &&
-        FileSystemEntity.isFileSync(path.join(cwd, 'bin/cache/engine.stamp'))) {
-      if (cwd != ArtifactStore.flutterRoot) {
-        printError(
-          'Warning: the active Flutter is not the one from the current directory.\n'
-          '  Active Flutter   : ${ArtifactStore.flutterRoot}\n'
-          '  Current directory: $cwd\n'
-        );
+    // Check if the cwd is a flutter dir.
+    while (directory.isNotEmpty) {
+      if (_isDirectoryFlutterRepo(directory)) {
+        if (directory != ArtifactStore.flutterRoot) {
+          printError(
+            'Warning: the active Flutter is not the one from the current directory.\n'
+            '  Active Flutter   : ${ArtifactStore.flutterRoot}\n'
+            '  Current directory: $directory\n'
+          );
+        }
+
+        break;
       }
+
+      String parent = path.dirname(directory);
+      if (parent == directory)
+        break;
+      directory = parent;
     }
+  }
+
+  // Check if `bin/flutter` and `bin/cache/engine.stamp` exist.
+  bool _isDirectoryFlutterRepo(String directory) {
+    return
+      FileSystemEntity.isFileSync(path.join(directory, 'bin/flutter')) &&
+      FileSystemEntity.isFileSync(path.join(directory, 'bin/cache/engine.stamp'));
   }
 }
