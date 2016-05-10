@@ -114,10 +114,6 @@ static const char* kDartTraceStartupArgs[]{
     "--timeline_recorder=endless",
 };
 
-static const char* kVmCompleteTimelineArgs[]{
-    "--complete_timeline",
-};
-
 const char kFileUriPrefix[] = "file://";
 
 const char kDartFlags[] = "dart-flags";
@@ -510,9 +506,6 @@ void InitDartVM() {
 
   if (SkySettings::Get().trace_startup)
     args.append(kDartTraceStartupArgs, arraysize(kDartTraceStartupArgs));
-
-  if (SkySettings::Get().vm_complete_timeline)
-    args.append(kVmCompleteTimelineArgs, arraysize(kVmCompleteTimelineArgs));
 
   Vector<std::string> dart_flags;
   if (base::CommandLine::ForCurrentProcess()->HasSwitch(kDartFlags)) {
