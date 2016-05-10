@@ -16,12 +16,14 @@
 #include "sky/engine/public/platform/sky_settings.h"
 #include "sky/shell/shell.h"
 #include "sky/shell/platform/mojo/content_handler_impl.h"
+#include "sky/shell/platform/mojo/dart_tracing.h"
 
 namespace sky {
 namespace shell {
 namespace {
 
 const char kEnableCheckedMode[] = "--enable-checked-mode";
+const char kVmCompleteTimeline[] = "--vm-complete-timeline";
 
 }  // namespace
 
@@ -35,11 +37,15 @@ class MojoApp : public mojo::ApplicationDelegate,
   // Overridden from ApplicationDelegate:
   void Initialize(mojo::ApplicationImpl* app) override {
     mojo::icu::Initialize(app);
+    // Tracing of content handler.
     tracing_.Initialize(app);
+    // Tracing of isolates and VM.
+    dart_tracing_.Initialize(app);
 
     blink::SkySettings settings;
     settings.enable_observatory = true;
     settings.enable_dart_checked_mode = app->HasArg(kEnableCheckedMode);
+    settings.vm_complete_timeline = app->HasArg(kVmCompleteTimeline);
     blink::SkySettings::Set(settings);
 
     Shell::Init();
@@ -58,6 +64,7 @@ class MojoApp : public mojo::ApplicationDelegate,
   }
 
   mojo::TracingImpl tracing_;
+  dart::DartTracingImpl dart_tracing_;
 
   DISALLOW_COPY_AND_ASSIGN(MojoApp);
 };
