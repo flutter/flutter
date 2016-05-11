@@ -62,30 +62,38 @@ Building and running the code
 Run the following steps, from the `src` directory created in the steps above:
 
  * `gclient sync` to update your dependencies.
- * `./sky/tools/gn --android` to prepare your build files.
- * `ninja -C out/android_Debug` to build an Android Debug binary.
+ * `./sky/tools/gn --android --unoptimized` to prepare your build files.
+ * `ninja -C out/android_debug_unopt` to actually build the Android binary.
+
+This builds a debug-enabled ("unoptimized") binary configured to run Dart in
+checked mode ("debug"). There are other versions, [discussed on the wiki](https://github.com/flutter/flutter/wiki/Flutter's-modes).
 
 To run an example with your locally built binary, you'll also need to clone
 [the main Flutter repository](https://github.com/flutter/flutter). See
 [the instructions for contributing](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md)
-to the main Flutter repository for detailed instructions.
+to the main Flutter repository for detailed instructions. For your convenience,
+the `engine` and `flutter` directories should be in the same parent directory.
 
 Once you've got everything set up, you can run an example using your locally
 built engine by switching to that example's directory, running `pub get` to make
 sure its dependencies have been downloaded, and using `flutter run` with an
-explicit `--engine-src-path` pointing at the `src` directory. Make sure you have
+explicit `--engine-src-path` pointing at the `engine/src` directory. Make sure you have
 a device connected over USB and debugging enabled on that device:
 
  * `cd /path/to/flutter/examples/hello_world`
  * `pub get`
  * `../../bin/flutter run --engine-src-path /path/to/engine/src`
 
+If you put the `engine` and `flutter` directories side-by-side, you can use
+`--engine-debug` instead of the tedious `--engine-src-path /path/to/engine/src`,
+and the `flutter` tool will automatically determine the path.
+
 You can also specify a particular Dart file to run if you want to run an example
 that doesn't have a `lib/main.dart` file using the `-t` command-line option. For
 example, to run the `tabs.dart` example in the `examples/widgets` directory on a
 connected Android device, from that directory you would run:
 
- * `flutter run --engine-src-path /path/to/engine/src -t tabs.dart`
+ * `flutter run --engine-debug -t tabs.dart`
 
 If you're going to be debugging crashes in the engine, make sure you add
 `android:debuggable="true"` to the `<application>` element in the
@@ -100,11 +108,38 @@ See [this wiki page](https://github.com/flutter/engine/wiki/Flutter-Apps-on-iOS)
 
  * `gclient sync` to update your dependencies.
  * `./sky/tools/gn` to prepare your build files.
- * `ninja -C out/Debug` to build a desktop Debug binary.
+ * `ninja -C out/host_debug_unopt` to build a desktop unoptimized binary.
 
 To run the tests, you'll also need to clone [the main Flutter repository](https://github.com/flutter/flutter).
 See [the instructions for contributing](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md)
 to the main Flutter repository for detailed instructions.
+
+### Building all the builds that matter on Linux and Android
+
+The following script will update all the builds that matter if you're developing on Linux and testing on Android:
+
+```bash
+set -ex
+
+cd ~/dev/engine/src
+git fetch upstream
+git rebase upstream/master
+gclient sync
+
+sky/tools/gn --unoptimized --runtime-mode=debug
+sky/tools/gn --android --unoptimized --runtime-mode=debug
+sky/tools/gn --android --unoptimized --runtime-mode=profile
+sky/tools/gn --android --unoptimized --runtime-mode=release
+sky/tools/gn --android --runtime-mode=debug
+sky/tools/gn --android --runtime-mode=profile
+sky/tools/gn --android --runtime-mode=release
+
+cd out
+ls | xargs -n 1 ninja -C
+
+flutter update-packages --upgrade
+```
+
 
 Contributing code
 -----------------
