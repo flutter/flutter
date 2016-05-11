@@ -11,6 +11,7 @@ final Set<String> kKnownBranchNames = new Set<String>.from(<String>[
   'master',
   'alpha',
   'hackathon',
+  'codelab',
   'beta'
 ]);
 
