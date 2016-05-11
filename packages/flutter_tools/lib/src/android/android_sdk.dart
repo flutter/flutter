@@ -164,8 +164,7 @@ class AndroidSdk {
         return version.major == platformVersion;
       }).toList());
 
-      if (buildToolsVersion == null)
-        buildToolsVersion = Version.primary(buildTools);
+      buildToolsVersion ??= Version.primary(buildTools);
 
       if (buildToolsVersion == null)
         return null;
