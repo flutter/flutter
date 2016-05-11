@@ -248,7 +248,6 @@ Future<int> startApp(DriveCommand command, BuildMode buildMode) async {
     printTrace('Building an APK.');
     int result = await build_apk.buildApk(
       command.device.platform,
-      command.toolchain,
       target: command.target
     );
 
@@ -267,7 +266,6 @@ Future<int> startApp(DriveCommand command, BuildMode buildMode) async {
   printTrace('Starting application.');
   LaunchResult result = await command.device.startApp(
     package,
-    command.toolchain,
     mainPath: mainPath,
     route: command.route,
     debuggingOptions: new DebuggingOptions.enabled(

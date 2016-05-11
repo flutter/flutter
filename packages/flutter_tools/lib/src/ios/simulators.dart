@@ -16,7 +16,6 @@ import '../device.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
 import '../service_protocol.dart';
-import '../toolchain.dart';
 import 'mac.dart';
 
 const String _xcrunPath = '/usr/bin/xcrun';
@@ -437,8 +436,7 @@ class IOSSimulator extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage app,
-    Toolchain toolchain, {
+    ApplicationPackage app, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
@@ -446,7 +444,7 @@ class IOSSimulator extends Device {
   }) async {
     printTrace('Building ${app.name} for $id.');
 
-    if (!(await _setupUpdatedApplicationBundle(app, toolchain)))
+    if (!(await _setupUpdatedApplicationBundle(app)))
       return new LaunchResult.failed();
 
     ServiceProtocolDiscovery observatoryDiscovery;
@@ -524,8 +522,8 @@ class IOSSimulator extends Device {
     return isInstalled && isRunning;
   }
 
-  Future<bool> _setupUpdatedApplicationBundle(ApplicationPackage app, Toolchain toolchain) async {
-    bool sideloadResult = await _sideloadUpdatedAssetsForInstalledApplicationBundle(app, toolchain);
+  Future<bool> _setupUpdatedApplicationBundle(ApplicationPackage app) async {
+    bool sideloadResult = await _sideloadUpdatedAssetsForInstalledApplicationBundle(app);
 
     if (!sideloadResult)
       return false;
@@ -558,8 +556,8 @@ class IOSSimulator extends Device {
   }
 
   Future<bool> _sideloadUpdatedAssetsForInstalledApplicationBundle(
-      ApplicationPackage app, Toolchain toolchain) async {
-    return (await flx.build(toolchain, precompiledSnapshot: true)) == 0;
+      ApplicationPackage app) async {
+    return (await flx.build(precompiledSnapshot: true)) == 0;
   }
 
   @override

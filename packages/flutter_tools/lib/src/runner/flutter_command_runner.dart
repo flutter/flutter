@@ -73,6 +73,7 @@ class FlutterCommandRunner extends CommandRunner {
         help:
             'Set this if you are building Flutter locally and want to use the release build products.\n'
             'The --engine-release option is not compatible with the listen command on iOS devices and simulators.');
+
     argParser.addOption('engine-src-path',
         hide: !verboseHelp,
         help:
@@ -80,6 +81,13 @@ class FlutterCommandRunner extends CommandRunner {
             'Defaults to \$$kFlutterEngineEnvironmentVariableName if set, otherwise defaults to the path given in your pubspec.yaml\n'
             'dependency_overrides for $kFlutterEnginePackageName, if any, or, failing that, tries to guess at the location\n'
             'based on the value of the --flutter-root option.');
+
+    argParser.addOption('local-engine',
+        hide: !verboseHelp,
+        help:
+            'Name of a build output within the engine out directory, if you are building Flutter locally.\n'
+            'Use this to select a specific version of the engine if you have built multiple engine targets.\n'
+            'This path is relative to --engine-src-path/out.');
 
     argParser.addOption('host-debug-build-path',
         hide: !verboseHelp,
@@ -220,6 +228,7 @@ class FlutterCommandRunner extends CommandRunner {
     // Set up the tooling configuration.
     if (enginePath != null) {
       ToolConfiguration.instance.engineSrcPath = enginePath;
+      ToolConfiguration.instance.engineBuildPath = _findEngineBuildPath(globalResults, enginePath);
 
       if (globalResults.wasParsed('engine-release'))
         ToolConfiguration.instance.engineRelease = globalResults['engine-release'];
@@ -285,6 +294,35 @@ class FlutterCommandRunner extends CommandRunner {
     }
 
     return engineSourcePath;
+  }
+
+  String _findEngineBuildPath(ArgResults globalResults, String enginePath) {
+    String localEngine;
+    if (globalResults['local-engine'] != null) {
+      localEngine = globalResults['local-engine'];
+    } else {
+      // This is a temporary hack to find an engine build in the same way that we found the toolchain.
+      // TODO(jsimmons): delete this and make --local-engine mandatory when BuildConfigurations are removed.
+      for (BuildConfiguration config in buildConfigurations) {
+        if (FileSystemEntity.isDirectorySync(config.buildDir)) {
+          localEngine = path.basename(config.buildDir);
+          break;
+        }
+      }
+
+      if (localEngine == null) {
+        printError('You must specify --local-engine if you are using a locally built engine.');
+        throw new ProcessExit(2);
+      }
+    }
+
+    String engineBuildPath = path.join(enginePath, 'out', localEngine);
+    if (!FileSystemEntity.isDirectorySync(engineBuildPath)) {
+      printError('No Flutter engine build found at $engineBuildPath.');
+      throw new ProcessExit(2);
+    }
+
+    return engineBuildPath;
   }
 
   List<BuildConfiguration> _createBuildConfigurations(ArgResults globalResults) {

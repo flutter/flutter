@@ -9,6 +9,7 @@ import 'package:path/path.dart' as path;
 
 import '../android/android_device.dart';
 import '../application_package.dart';
+import '../flx.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 
@@ -39,7 +40,7 @@ class RefreshCommand extends FlutterCommand {
     try {
       String snapshotPath = path.join(tempDir.path, 'snapshot_blob.bin');
 
-      int result = await toolchain.compiler.createSnapshot(
+      int result = await createSnapshot(
         mainPath: argResults['target'],
         snapshotPath: snapshotPath
       );

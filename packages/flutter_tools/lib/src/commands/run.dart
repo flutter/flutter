@@ -15,7 +15,6 @@ import '../build_configuration.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
-import '../toolchain.dart';
 import 'build_apk.dart';
 import 'install.dart';
 
@@ -118,7 +117,6 @@ class RunCommand extends RunCommandBase {
     if (argResults['resident']) {
       _RunAndStayResident runner = new _RunAndStayResident(
         deviceForCommand,
-        toolchain,
         target: target,
         debuggingOptions: options,
         traceStartup: traceStartup,
@@ -129,7 +127,6 @@ class RunCommand extends RunCommandBase {
     } else {
       return startApp(
         deviceForCommand,
-        toolchain,
         target: target,
         stop: argResults['full-restart'],
         install: true,
@@ -143,8 +140,7 @@ class RunCommand extends RunCommandBase {
 }
 
 Future<int> startApp(
-  Device device,
-  Toolchain toolchain, {
+  Device device, {
   String target,
   bool stop: true,
   bool install: true,
@@ -179,7 +175,6 @@ Future<int> startApp(
 
     int result = await buildApk(
       device.platform,
-      toolchain,
       target: target,
       buildMode: buildMode
     );
@@ -220,7 +215,6 @@ Future<int> startApp(
 
   LaunchResult result = await device.startApp(
     package,
-    toolchain,
     mainPath: mainPath,
     route: route,
     debuggingOptions: debuggingOptions,
@@ -349,8 +343,7 @@ String _getDisplayPath(String fullPath) {
 
 class _RunAndStayResident {
   _RunAndStayResident(
-    this.device,
-    this.toolchain, {
+    this.device, {
     this.target,
     this.debuggingOptions,
     this.traceStartup : false,
@@ -358,7 +351,6 @@ class _RunAndStayResident {
   });
 
   final Device device;
-  final Toolchain toolchain;
   final String target;
   final DebuggingOptions debuggingOptions;
   final bool traceStartup;
@@ -399,7 +391,6 @@ class _RunAndStayResident {
 
       int result = await buildApk(
         device.platform,
-        toolchain,
         target: target,
         buildMode: buildMode
       );
@@ -438,7 +429,6 @@ class _RunAndStayResident {
 
     LaunchResult result = await device.startApp(
       package,
-      toolchain,
       mainPath: mainPath,
       debuggingOptions: debuggingOptions,
       platformArgs: platformArgs
