@@ -35,7 +35,13 @@ enum HostPlatform {
 }
 
 String getNameForHostPlatform(HostPlatform platform) {
-  return getEnumName(platform).replaceAll('_', '-');
+  switch (platform) {
+    case HostPlatform.darwin_x64:
+      return "mac_release";
+    case HostPlatform.linux_x64:
+      return "linux-x64";
+  }
+  assert(false);
 }
 
 enum TargetPlatform {
@@ -48,7 +54,21 @@ enum TargetPlatform {
 }
 
 String getNameForTargetPlatform(TargetPlatform platform) {
-  return getEnumName(platform).replaceAll('_', '-');
+  switch (platform) {
+    case TargetPlatform.android_arm:
+      return "android-arm";
+    case TargetPlatform.android_x64:
+      return "android-x64";
+    case TargetPlatform.android_x86:
+      return "android-x86";
+    case TargetPlatform.ios:
+      return "ios_release";
+    case TargetPlatform.darwin_x64:
+      return "mac_release";
+    case TargetPlatform.linux_x64:
+      return "linux-x64";
+  }
+  assert(false);
 }
 
 HostPlatform getCurrentHostPlatform() {
