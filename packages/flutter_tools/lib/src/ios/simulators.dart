@@ -15,7 +15,7 @@ import '../build_configuration.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
-import '../service_protocol.dart';
+import '../protocol_discovery.dart';
 import '../toolchain.dart';
 import 'mac.dart';
 
@@ -449,11 +449,11 @@ class IOSSimulator extends Device {
     if (!(await _setupUpdatedApplicationBundle(app, toolchain)))
       return new LaunchResult.failed();
 
-    ServiceProtocolDiscovery observatoryDiscovery;
+    ProtocolDiscovery observatoryDiscovery;
 
     if (debuggingOptions.debuggingEnabled) {
-      observatoryDiscovery = new ServiceProtocolDiscovery(
-        logReader, ServiceProtocolDiscovery.kObservatoryService);
+      observatoryDiscovery = new ProtocolDiscovery(
+        logReader, ProtocolDiscovery.kObservatoryService);
     }
 
     // Prepare launch arguments.
