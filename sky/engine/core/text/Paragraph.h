@@ -37,6 +37,7 @@ public:
 
     std::vector<TextBox> getRectsForRange(unsigned start, unsigned end);
     Dart_Handle getPositionForOffset(const Offset& offset);
+    Dart_Handle getWordBoundary(unsigned offset);
 
     RenderView* renderView() const { return m_renderView.get(); }
 

@@ -674,6 +674,13 @@ abstract class Paragraph extends NativeFieldWrapperClass2 {
     return new TextPosition(offset: encoded[0], affinity: TextAffinity.values[encoded[1]]);
   }
   List<int> _getPositionForOffset(Offset offset) native "Paragraph_getPositionForOffset";
+
+  /// Returns the [start, end] of the word at the given offset. Characters not
+  /// part of a word, such as spaces, symbols, and punctuation, have word breaks
+  /// on both sides. In such cases, this method will return [offset, offset+1].
+  /// Word boundaries are defined more precisely in Unicode Standard Annex #29
+  /// http://www.unicode.org/reports/tr29/#Word_Boundaries
+  List<int> getWordBoundary(int offset) native "Paragraph_getWordBoundary";
 }
 
 /// Builds a [Paragraph] containing text with the given styling information.

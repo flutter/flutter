@@ -11,6 +11,7 @@
 #include "sky/engine/core/rendering/style/RenderStyle.h"
 #include "sky/engine/platform/fonts/FontCache.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "sky/engine/platform/text/TextBoundaries.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/tonic/dart_args.h"
 #include "sky/engine/tonic/dart_binding_macros.h"
@@ -29,6 +30,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Paragraph);
   V(Paragraph, alphabeticBaseline) \
   V(Paragraph, ideographicBaseline) \
   V(Paragraph, layout) \
+  V(Paragraph, getWordBoundary) \
   V(Paragraph, getRectsForRange) \
   V(Paragraph, getPositionForOffset)
 
@@ -150,6 +152,29 @@ Dart_Handle Paragraph::getPositionForOffset(const Offset& offset) {
   Dart_Handle result = Dart_NewList(2);
   Dart_ListSetAt(result, 0, ToDart(absoluteOffsetForPosition(position)));
   Dart_ListSetAt(result, 1, ToDart(static_cast<int>(position.affinity())));
+  return result;
+}
+
+Dart_Handle Paragraph::getWordBoundary(unsigned offset) {
+  String text;
+  int start, end;
+
+  for (RenderObject* object = m_renderView.get(); object; object = object->nextInPreOrder()) {
+    if (!object->isText())
+      continue;
+    RenderText* renderText = toRenderText(object);
+    text.append(renderText->text());
+  }
+
+  TextBreakIterator* it = wordBreakIterator(text, 0, text.length());
+  end = it->following(offset);
+  if (end < 0)
+      end = it->last();
+  start = it->previous();
+
+  Dart_Handle result = Dart_NewList(2);
+  Dart_ListSetAt(result, 0, ToDart(start));
+  Dart_ListSetAt(result, 1, ToDart(end));
   return result;
 }
 
