@@ -248,10 +248,8 @@ class AndroidDevice extends Device {
     ProtocolDiscovery diagnosticDiscovery;
 
     if (options.debuggingEnabled) {
-      observatoryDiscovery = new ProtocolDiscovery(
-        logReader, ProtocolDiscovery.kObservatoryService);
-      diagnosticDiscovery = new ProtocolDiscovery(
-        logReader, ProtocolDiscovery.kDiagnosticService);
+      observatoryDiscovery = new ProtocolDiscovery(logReader, ProtocolDiscovery.kObservatoryService);
+      diagnosticDiscovery = new ProtocolDiscovery(logReader, ProtocolDiscovery.kDiagnosticService);
     }
 
     List<String> cmd = adbCommandForDevice(<String>[
@@ -296,13 +294,11 @@ class AndroidDevice extends Device {
         int observatoryLocalPort = await options.findBestObservatoryPort();
         // TODO(devoncarew): Remember the forwarding information (so we can later remove the
         // port forwarding).
-        await _forwardPort(ProtocolDiscovery.kObservatoryService,
-            observatoryDevicePort, observatoryLocalPort);
+        await _forwardPort(ProtocolDiscovery.kObservatoryService, observatoryDevicePort, observatoryLocalPort);
         int diagnosticDevicePort = devicePorts[1];
         printTrace('diagnostic port = $diagnosticDevicePort');
         int diagnosticLocalPort = await options.findBestDiagnosticPort();
-        await _forwardPort(ProtocolDiscovery.kDiagnosticService,
-            diagnosticDevicePort, diagnosticLocalPort);
+        await _forwardPort(ProtocolDiscovery.kDiagnosticService, diagnosticDevicePort, diagnosticLocalPort);
         return new LaunchResult.succeeded(
           observatoryPort: observatoryLocalPort,
           diagnosticPort: diagnosticLocalPort

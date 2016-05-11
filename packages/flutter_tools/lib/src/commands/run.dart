@@ -7,6 +7,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
+import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
+import 'package:web_socket_channel/io.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
@@ -367,7 +369,7 @@ class _RunAndStayResident {
   Completer<int> _exitCompleter;
   StreamSubscription<String> _loggingSubscription;
 
-  WebSocket _observatoryConnection;
+  rpc.Peer _observatory;
   String _isolateId;
   int _messageId = 0;
 
@@ -454,13 +456,17 @@ class _RunAndStayResident {
 
     // Connect to observatory.
     if (debuggingOptions.debuggingEnabled) {
-      final String localhost = InternetAddress.LOOPBACK_IP_V4.address;
-      final String url = 'ws://$localhost:${result.observatoryPort}/ws';
-
-      _observatoryConnection = await WebSocket.connect(url);
+      _observatory = await _connectToObservatory(result.observatoryPort);
       printTrace('Connected to observatory port: ${result.observatoryPort}.');
 
+      _observatory.registerMethod('streamNotify', (rpc.Parameters event) {
+        Map<String, dynamic> data = event.asMap;
+
+      });
+
       // Listen for observatory connection close.
+      _observatory.listen();
+
       _observatoryConnection.listen((dynamic data) {
         if (data is String) {
           Map<String, dynamic> json = JSON.decode(data);
@@ -485,11 +491,9 @@ class _RunAndStayResident {
         _handleExit();
       });
 
-      _observatoryConnection.add(JSON.encode(<String, dynamic>{
-        'method': 'streamListen',
-        'params': <String, dynamic>{ 'streamId': 'Isolate' },
-        'id': _messageId++
-      }));
+      _observatory.sendRequest('streamListen', <String, dynamic>{
+        'streamId': 'Isolate'
+      });
 
       _observatoryConnection.add(JSON.encode(<String, dynamic>{
         'method': 'getVM',
@@ -525,14 +529,11 @@ class _RunAndStayResident {
     });
 
     return _exitCompleter.future.then((int exitCode) async {
-      if (_observatoryConnection != null &&
-          _observatoryConnection.readyState == WebSocket.OPEN &&
-          _isolateId != null) {
-        _observatoryConnection.add(JSON.encode(<String, dynamic>{
-          'method': 'ext.flutter.exit',
-          'params': <String, dynamic>{ 'isolateId': _isolateId },
-          'id': _messageId++
-        }));
+      if (_observatory != null && !_observatory.isClosed && _isolateId != null) {
+        _observatory.sendRequest('ext.flutter.exit', <String, dynamic>{
+          'isolateId': _isolateId
+        });
+
         // WebSockets do not have a flush() method.
         await new Future<Null>.delayed(new Duration(milliseconds: 100));
       }
@@ -541,22 +542,28 @@ class _RunAndStayResident {
     });
   }
 
+  Future<rpc.Peer> _connectToObservatory(int observatoryPort) async {
+    Uri uri = new Uri(scheme: 'ws', host: '127.0.0.1', port: observatoryPort, path: 'ws');
+    WebSocket ws = await WebSocket.connect(uri.toString());
+    rpc.Peer peer = new rpc.Peer(new IOWebSocketChannel(ws));
+    peer.listen();
+    return peer;
+  }
+
   void _printHelp() {
     printStatus('Type "h" or F1 for help, "r" or F5 to restart the app, and "q", F10, or ctrl-c to quit.');
   }
 
   void _handleRefresh() {
-    if (_observatoryConnection == null) {
+    if (_observatory == null) {
       printError('Debugging is not enabled.');
     } else {
       printStatus('Re-starting application...');
 
       // TODO(devoncarew): Show an error if the isolate reload fails.
-      _observatoryConnection.add(JSON.encode(<String, dynamic>{
-        'method': 'isolateReload',
-        'params': <String, dynamic>{ 'isolateId': _isolateId },
-        'id': _messageId++
-      }));
+      _observatory.sendRequest('isolateReload', <String, dynamic>{
+        'isolateId': _isolateId
+      });
     }
   }
 

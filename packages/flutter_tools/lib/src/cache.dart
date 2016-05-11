@@ -13,7 +13,7 @@ import 'base/logger.dart';
 import 'base/os.dart';
 import 'globals.dart';
 
-/// A warpper around the `bin/cache/` directory.
+/// A wrapper around the `bin/cache/` directory.
 class Cache {
   /// [rootOverride] is configurable for testing.
   Cache({ Directory rootOverride }) {

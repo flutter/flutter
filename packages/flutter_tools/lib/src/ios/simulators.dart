@@ -451,10 +451,8 @@ class IOSSimulator extends Device {
 
     ProtocolDiscovery observatoryDiscovery;
 
-    if (debuggingOptions.debuggingEnabled) {
-      observatoryDiscovery = new ProtocolDiscovery(
-        logReader, ProtocolDiscovery.kObservatoryService);
-    }
+    if (debuggingOptions.debuggingEnabled)
+      observatoryDiscovery = new ProtocolDiscovery(logReader, ProtocolDiscovery.kObservatoryService);
 
     // Prepare launch arguments.
     List<String> args = <String>[

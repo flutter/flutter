@@ -252,8 +252,11 @@ abstract class Device {
     await client.sendRequest('_clearVMTimeline');
   }
 
-  /// Stops tracing, optionally waiting
-  Future<Map<String, dynamic>> stopTracingAndDownloadTimeline(int observatoryPort, {bool waitForFirstFrame: false}) async {
+  /// Stops tracing; optionally wait for first frame.
+  Future<Map<String, dynamic>> stopTracingAndDownloadTimeline(
+    int observatoryPort, {
+    bool waitForFirstFrame: false
+  }) async {
     rpc.Peer peer;
     try {
       peer = await _connectToObservatory(observatoryPort);
