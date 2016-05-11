@@ -93,9 +93,9 @@ class GdbClient(object):
 
         eval_commands = ['target remote localhost:%d' % args.gdb_port]
 
-        debug_out_path = os.path.join(flutter_root, 'out/android_Debug')
+        debug_out_path = os.path.join(flutter_root, 'out/android_debug_unopt')
         if not os.path.exists(os.path.join(debug_out_path, 'libsky_shell.so')):
-            print 'Unable to find libsky_shell.so. Make sure you have completed an android_Debug build'
+            print 'Unable to find libsky_shell.so. Make sure you have completed an android_debug_unopt build'
             return 1
         eval_commands.append('set solib-search-path %s:%s' %
                              (debug_out_path, GdbClient.SYSTEM_LIBS_PATH))
