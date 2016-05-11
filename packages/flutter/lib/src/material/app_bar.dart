@@ -53,12 +53,10 @@ class AppBar extends StatelessWidget {
     this.padding: EdgeInsets.zero,
     double expandedHeight,
     double collapsedHeight,
-    double minimumHeight,
-    double actualHeight
+    double minimumHeight
   }) : _expandedHeight = expandedHeight,
        _collapsedHeight = collapsedHeight,
        _minimumHeight = minimumHeight,
-       _actualHeight = actualHeight,
        super(key: key) {
     assert((flexibleSpace != null) ? tabBar == null : true);
     assert((tabBar != null) ? flexibleSpace == null : true);
@@ -116,7 +114,6 @@ class AppBar extends StatelessWidget {
   final double _expandedHeight;
   final double _collapsedHeight;
   final double _minimumHeight;
-  final double _actualHeight;
 
   /// Creates a copy of this app bar but with the given fields replaced with the new values.
   AppBar copyWith({
@@ -130,8 +127,7 @@ class AppBar extends StatelessWidget {
     TextTheme textTheme,
     EdgeInsets padding,
     double expandedHeight,
-    double collapsedHeight,
-    double actualHeight
+    double collapsedHeight
   }) {
     return new AppBar(
       key: key ?? this.key,
@@ -145,8 +141,7 @@ class AppBar extends StatelessWidget {
       textTheme: textTheme ?? this.textTheme,
       padding: padding ?? this.padding,
       expandedHeight: expandedHeight ?? this._expandedHeight,
-      collapsedHeight: collapsedHeight ?? this._collapsedHeight,
-      actualHeight: actualHeight ?? this._actualHeight
+      collapsedHeight: collapsedHeight ?? this._collapsedHeight
     );
   }
 
@@ -162,20 +157,18 @@ class AppBar extends StatelessWidget {
 
   double get minimumHeight => _minimumHeight ?? _tabBarHeight ?? _toolBarHeight;
 
-  double get actualHeight => _actualHeight ?? expandedHeight;
-
   // Defines the opacity of the toolbar's text and icons.
-  double _toolBarOpacity(double statusBarHeight) {
-    return ((actualHeight - (_tabBarHeight ?? 0.0) - statusBarHeight) / _toolBarHeight).clamp(0.0, 1.0);
+  double _toolBarOpacity(double appBarHeight, double statusBarHeight) {
+    return ((appBarHeight - (_tabBarHeight ?? 0.0) - statusBarHeight) / _toolBarHeight).clamp(0.0, 1.0);
   }
 
-  double _tabBarOpacity(double statusBarHeight) {
+  double _tabBarOpacity(double appBarHeight, double statusBarHeight) {
     final double tabBarHeight = _tabBarHeight ?? 0.0;
-    return ((actualHeight - statusBarHeight) / tabBarHeight).clamp(0.0, 1.0);
+    return ((appBarHeight - statusBarHeight) / tabBarHeight).clamp(0.0, 1.0);
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildForSize(BuildContext context, Size size) {
+    assert(size.height < double.INFINITY);
     final double statusBarHeight = MediaQuery.of(context).padding.top;
     final ThemeData theme = Theme.of(context);
 
@@ -183,7 +176,7 @@ class AppBar extends StatelessWidget {
     TextStyle centerStyle = textTheme?.title ?? theme.primaryTextTheme.title;
     TextStyle sideStyle = textTheme?.body1 ?? theme.primaryTextTheme.body1;
 
-    final double toolBarOpacity = _toolBarOpacity(statusBarHeight);
+    final double toolBarOpacity = _toolBarOpacity(size.height, statusBarHeight);
     if (toolBarOpacity != 1.0) {
       final double opacity = const Interval(0.25, 1.0, curve: Curves.ease).transform(toolBarOpacity);
       if (centerStyle?.color != null)
@@ -232,7 +225,7 @@ class AppBar extends StatelessWidget {
       )
     );
 
-    final double tabBarOpacity = _tabBarOpacity(statusBarHeight);
+    final double tabBarOpacity = _tabBarOpacity(size.height, statusBarHeight);
     if (tabBar != null) {
       appBar = new Column(
         children: <Widget>[
@@ -289,4 +282,6 @@ class AppBar extends StatelessWidget {
     return appBar;
   }
 
+  @override
+  Widget build(BuildContext context) => new LayoutBuilder(builder: _buildForSize);
 }
