@@ -23,9 +23,12 @@ abstract class RunCommandBase extends FlutterCommand {
   RunCommandBase() {
     addBuildModeFlags();
 
-    // TODO(devoncarew): This flag is ignored, and should be removed once tools
-    // no longer pass in `--checked`.
-    argParser.addFlag('checked', negatable: true, hide: true);
+    // TODO(devoncarew): Remove in favor of --debug/--profile/--release.
+    argParser.addFlag('checked',
+        negatable: true,
+        defaultsTo: true,
+        help: 'Run the application in checked ("slow") mode.\n'
+          'Note: this flag will be removed in favor of the --debug/--profile/--release flags.');
 
     argParser.addFlag('trace-startup',
         negatable: true,
@@ -105,7 +108,8 @@ class RunCommand extends RunCommandBase {
       options = new DebuggingOptions.disabled();
     } else {
       options = new DebuggingOptions.enabled(
-        checked: getBuildMode() == BuildMode.debug,
+        // TODO(devoncarew): Check this to 'getBuildMode() == BuildMode.debug'.
+        checked: argResults['checked'],
         startPaused: argResults['start-paused'],
         observatoryPort: debugPort
       );
