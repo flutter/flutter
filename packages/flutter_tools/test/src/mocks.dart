@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:flutter_tools/src/toolchain.dart';
 import 'package:mockito/mockito.dart';
 
 class MockApplicationPackageStore extends ApplicationPackageStore {
@@ -26,13 +25,6 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
       iosProjectBundleId: 'io.flutter.ios.mock'
     )
   );
-}
-
-class MockSnapshotCompiler extends Mock implements SnapshotCompiler {
-}
-
-class MockToolchain extends Toolchain {
-  MockToolchain() : super(compiler: new MockSnapshotCompiler());
 }
 
 class MockAndroidDevice extends Mock implements AndroidDevice {
@@ -74,6 +66,5 @@ class MockDeviceLogReader extends DeviceLogReader {
 void applyMocksToCommand(FlutterCommand command) {
   command
     ..applicationPackages = new MockApplicationPackageStore()
-    ..toolchain = new MockToolchain()
     ..commandValidator = () => true;
 }

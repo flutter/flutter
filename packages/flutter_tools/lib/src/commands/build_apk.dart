@@ -17,7 +17,6 @@ import '../flx.dart' as flx;
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../services.dart';
-import '../toolchain.dart';
 import 'build_aot.dart';
 import 'run.dart';
 
@@ -242,7 +241,6 @@ class BuildApkCommand extends FlutterCommand {
     return await buildAndroid(
       TargetPlatform.android_arm,
       mode,
-      toolchain: toolchain,
       force: true,
       manifest: argResults['manifest'],
       resources: argResults['resources'],
@@ -457,7 +455,6 @@ bool _needsRebuild(String apkPath, String manifest) {
 Future<int> buildAndroid(
   TargetPlatform platform,
   BuildMode buildMode, {
-  Toolchain toolchain,
   bool force: false,
   String manifest: _kDefaultAndroidManifestPath,
   String resources,
@@ -515,7 +512,6 @@ Future<int> buildAndroid(
   } else {
     // Build the FLX.
     flxPath = await flx.buildFlx(
-      toolchain,
       mainPath: findMainDartFile(target),
       precompiledSnapshot: isAotBuildMode(buildMode),
       includeRobotoFonts: false);
@@ -556,8 +552,7 @@ Future<int> buildAndroid(
 }
 
 Future<int> buildApk(
-  TargetPlatform platform,
-  Toolchain toolchain, {
+  TargetPlatform platform, {
   String target,
   BuildMode buildMode: BuildMode.debug
 }) async {
@@ -569,7 +564,6 @@ Future<int> buildApk(
   int result = await buildAndroid(
     platform,
     buildMode,
-    toolchain: toolchain,
     force: false,
     target: target
   );

@@ -60,7 +60,6 @@ class ListenCommand extends RunCommandBase {
 
       result = await startApp(
         deviceForCommand,
-        toolchain,
         target: target,
         install: firstTime,
         stop: true,

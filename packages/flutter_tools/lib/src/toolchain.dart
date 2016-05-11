@@ -2,77 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import 'artifacts.dart';
 import 'base/context.dart';
-import 'base/process.dart';
 import 'build_configuration.dart';
 import 'cache.dart';
 import 'globals.dart';
-import 'package_map.dart';
 
-class SnapshotCompiler {
-  SnapshotCompiler(this._path);
-
-  final String _path;
-
-  Future<int> createSnapshot({
-    String mainPath,
-    String snapshotPath,
-    String depfilePath,
-    String buildOutputPath
-  }) {
-    assert(mainPath != null);
-    assert(snapshotPath != null);
-
-    final List<String> args = <String>[
-      _path,
-      mainPath,
-      '--packages=${PackageMap.instance.packagesPath}',
-      '--snapshot=$snapshotPath'
-    ];
-    if (depfilePath != null)
-      args.add('--depfile=$depfilePath');
-    if (buildOutputPath != null)
-      args.add('--build-output=$buildOutputPath');
-    return runCommandAndStreamOutput(args);
-  }
-}
-
-// TODO(devoncarew): This should instead take a host platform and target platform.
-
-String _getCompilerPath(BuildConfiguration config) {
-  if (config.type != BuildType.prebuilt) {
-    String compilerPath = path.join(config.buildDir, 'clang_x64', 'sky_snapshot');
-    if (FileSystemEntity.isFileSync(compilerPath))
-      return compilerPath;
-    compilerPath = path.join(config.buildDir, 'sky_snapshot');
-    if (FileSystemEntity.isFileSync(compilerPath))
-      return compilerPath;
-    return null;
-  }
-  Artifact artifact = ArtifactStore.getArtifact(
-    type: ArtifactType.snapshot, hostPlatform: config.hostPlatform);
-  return ArtifactStore.getPath(artifact);
-}
-
-class Toolchain {
-  Toolchain({ this.compiler });
-
-  final SnapshotCompiler compiler;
-
-  static Toolchain forConfigs(List<BuildConfiguration> configs) {
-    for (BuildConfiguration config in configs) {
-      String compilerPath = _getCompilerPath(config);
-      if (compilerPath != null)
-        return new Toolchain(compiler: new SnapshotCompiler(compilerPath));
-    }
-    return null;
-  }
+enum HostTool {
+  SkySnapshot,
 }
 
 /// A ToolConfiguration can return the tools directory for the current host platform
@@ -94,6 +34,9 @@ class ToolConfiguration {
 
   /// Override using the artifacts from the cache directory (--engine-src-path).
   String engineSrcPath;
+
+  /// Path to a local engine build acting as a source for artifacts (--local-engine).
+  String engineBuildPath;
 
   /// The engine mode to use (only relevent when [engineSrcPath] is set).
   bool engineRelease;
@@ -157,6 +100,19 @@ class ToolConfiguration {
       String dirName = getNameForTargetPlatform(platform) + suffix;
       Directory engineDir = _cache.getArtifactDirectory('engine');
       return new Directory(path.join(engineDir.path, dirName));
+    }
+  }
+
+  String getHostToolPath(HostTool tool) {
+    if (tool != HostTool.SkySnapshot)
+      throw new Exception('Unexpected host tool: $tool');
+
+    if (isLocalEngine) {
+      return path.join(engineBuildPath, 'clang_x64', 'sky_snapshot');
+    } else {
+      return path.join(_cache.getArtifactDirectory('engine').path,
+                       getNameForHostPlatform(getCurrentHostPlatform()),
+                       'sky_snapshot');
     }
   }
 }

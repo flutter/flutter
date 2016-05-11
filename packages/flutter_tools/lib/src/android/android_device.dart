@@ -15,7 +15,6 @@ import '../device.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
 import '../service_protocol.dart';
-import '../toolchain.dart';
 import 'adb.dart';
 import 'android.dart';
 
@@ -322,8 +321,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage package,
-    Toolchain toolchain, {
+    ApplicationPackage package, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
@@ -333,7 +331,6 @@ class AndroidDevice extends Device {
       return new LaunchResult.failed();
 
     String localBundlePath = await flx.buildFlx(
-      toolchain,
       mainPath: mainPath,
       includeRobotoFonts: false
     );

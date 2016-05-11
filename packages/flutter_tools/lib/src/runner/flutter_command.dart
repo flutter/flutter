@@ -14,7 +14,6 @@ import '../device.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
 import '../package_map.dart';
-import '../toolchain.dart';
 import '../usage.dart';
 import 'flutter_command_runner.dart';
 
@@ -84,10 +83,6 @@ abstract class FlutterCommand extends Command {
     if (argResults['release'])
       mode = BuildMode.release;
     return mode;
-  }
-
-  void _setupToolchain() {
-    toolchain ??= Toolchain.forConfigs(buildConfigurations);
   }
 
   void _setupApplicationPackages() {
@@ -166,7 +161,6 @@ abstract class FlutterCommand extends Command {
     if (flutterUsage.isFirstRun)
       flutterUsage.printUsage();
 
-    _setupToolchain();
     _setupApplicationPackages();
 
     String commandPath = usagePath;
@@ -215,5 +209,4 @@ abstract class FlutterCommand extends Command {
   Device get deviceForCommand => _deviceForCommand;
 
   ApplicationPackageStore applicationPackages;
-  Toolchain toolchain;
 }

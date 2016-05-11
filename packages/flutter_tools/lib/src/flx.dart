@@ -14,6 +14,7 @@ import 'package:yaml/yaml.dart';
 
 import 'artifacts.dart';
 import 'base/file_system.dart' show ensureDirectoryExists;
+import 'base/process.dart';
 import 'globals.dart';
 import 'package_map.dart';
 import 'toolchain.dart';
@@ -32,6 +33,28 @@ const String _kSnapshotKey = 'snapshot_blob.bin';
 
 const String _kFontSetMaterial = 'material';
 const String _kFontSetRoboto = 'roboto';
+
+Future<int> createSnapshot({
+  String mainPath,
+  String snapshotPath,
+  String depfilePath,
+  String buildOutputPath
+}) {
+  assert(mainPath != null);
+  assert(snapshotPath != null);
+
+  final List<String> args = <String>[
+    tools.getHostToolPath(HostTool.SkySnapshot),
+    mainPath,
+    '--packages=${PackageMap.instance.packagesPath}',
+    '--snapshot=$snapshotPath'
+  ];
+  if (depfilePath != null)
+    args.add('--depfile=$depfilePath');
+  if (buildOutputPath != null)
+    args.add('--build-output=$buildOutputPath');
+  return runCommandAndStreamOutput(args);
+}
 
 class _Asset {
   _Asset({ this.base, String assetEntry, this.relativePath, this.source }) {
@@ -259,8 +282,7 @@ ZipEntry _createFontManifest(Map<String, dynamic> manifestDescriptor,
 /// Build the flx in the build/ directory and return `localBundlePath` on success.
 ///
 /// Return `null` on failure.
-Future<String> buildFlx(
-  Toolchain toolchain, {
+Future<String> buildFlx({
   String mainPath: defaultMainPath,
   bool precompiledSnapshot: false,
   bool includeRobotoFonts: true
@@ -269,7 +291,6 @@ Future<String> buildFlx(
   String localBundlePath = path.join('build', 'app.flx');
   String localSnapshotPath = path.join('build', 'snapshot_blob.bin');
   result = await build(
-    toolchain,
     snapshotPath: localSnapshotPath,
     outputPath: localBundlePath,
     mainPath: mainPath,
@@ -292,8 +313,7 @@ class DirectoryResult {
   }
 }
 
-Future<int> build(
-  Toolchain toolchain, {
+Future<int> build({
   String mainPath: defaultMainPath,
   String manifestPath: defaultManifestPath,
   String outputPath: defaultFlxOutputPath,
@@ -321,7 +341,7 @@ Future<int> build(
 
     // In a precompiled snapshot, the instruction buffer contains script
     // content equivalents
-    int result = await toolchain.compiler.createSnapshot(
+    int result = await createSnapshot(
       mainPath: mainPath,
       snapshotPath: snapshotPath,
       depfilePath: depfilePath

@@ -7,7 +7,6 @@ import 'dart:async';
 import '../flx.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
-import '../toolchain.dart';
 
 class BuildFlxCommand extends FlutterCommand {
   BuildFlxCommand() {
@@ -16,7 +15,6 @@ class BuildFlxCommand extends FlutterCommand {
     // This option is still referenced by the iOS build scripts. We should
     // remove it once we've updated those build scripts.
     argParser.addOption('asset-base', help: 'Ignored. Will be removed.', hide: true);
-    argParser.addOption('compiler');
     argParser.addOption('manifest', defaultsTo: defaultManifestPath);
     argParser.addOption('private-key', defaultsTo: defaultPrivateKeyPath);
     argParser.addOption('output-file', abbr: 'o', defaultsTo: defaultFlxOutputPath);
@@ -39,14 +37,9 @@ class BuildFlxCommand extends FlutterCommand {
 
   @override
   Future<int> runInProject() async {
-    String compilerPath = argResults['compiler'];
-    if (compilerPath != null)
-      toolchain = new Toolchain(compiler: new SnapshotCompiler(compilerPath));
-
     String outputPath = argResults['output-file'];
 
     return await build(
-      toolchain,
       mainPath: argResults['target'],
       manifestPath: argResults['manifest'],
       outputPath: outputPath,

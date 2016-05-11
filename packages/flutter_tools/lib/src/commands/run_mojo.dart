@@ -167,7 +167,6 @@ class RunMojoCommand extends FlutterCommand {
       String mainPath = findMainDartFile(argResults['target']);
 
       int result = await flx.build(
-        toolchain,
         mainPath: mainPath,
         outputPath: targetApp
       );

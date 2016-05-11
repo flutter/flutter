@@ -14,7 +14,6 @@ import '../base/process.dart';
 import '../build_configuration.dart';
 import '../device.dart';
 import '../globals.dart';
-import '../toolchain.dart';
 import 'mac.dart';
 
 const String _ideviceinstallerInstructions =
@@ -154,8 +153,7 @@ class IOSDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage app,
-    Toolchain toolchain, {
+    ApplicationPackage app, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
