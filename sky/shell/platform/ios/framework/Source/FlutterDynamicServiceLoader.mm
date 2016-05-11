@@ -49,12 +49,11 @@
     return;
   }
 
-  mojo::String dylib_path(
-      [[NSBundle bundleForClass:[FlutterDynamicServiceLoader class]]
-          pathForResource:_containerFramework
-                   ofType:@"dylib"
-              inDirectory:@"Frameworks"]
-          .UTF8String);
+  mojo::String dylib_path([[NSBundle mainBundle]
+                              pathForResource:_containerFramework
+                                       ofType:@"dylib"
+                                  inDirectory:@"Frameworks"]
+                              .UTF8String);
 
   _definition = sky::services::DynamicServiceDefinition::Initialize(dylib_path);
 
