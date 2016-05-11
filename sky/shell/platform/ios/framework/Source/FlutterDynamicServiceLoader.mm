@@ -121,9 +121,9 @@
 }
 
 - (void)populateServiceDefinitions {
-  NSString* definitionsPath = [[NSBundle bundleForClass:[self class]]
-      pathForResource:@"ServiceDefinitions"
-               ofType:@"json"];
+  NSString* definitionsPath =
+      [[NSBundle mainBundle] pathForResource:@"ServiceDefinitions"
+                                      ofType:@"json"];
 
   if (definitionsPath.length == 0) {
     LOG(INFO) << "Could not find the service definitions manifest. No custom "
