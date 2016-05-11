@@ -8,6 +8,8 @@
 #include "sky/tools/sky_snapshot/loader.h"
 #include "sky/tools/sky_snapshot/logging.h"
 
+#include <iostream>
+
 extern "C" {
 extern void* kDartVmIsolateSnapshotBuffer;
 extern void* kDartIsolateSnapshotBuffer;
@@ -26,10 +28,15 @@ static const char* kDartArgs[] = {
 
 void InitDartVM() {
   CHECK(Dart_SetVMFlags(arraysize(kDartArgs), kDartArgs));
-  CHECK(Dart_Initialize(
-            reinterpret_cast<uint8_t*>(&kDartVmIsolateSnapshotBuffer), nullptr,
-            nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-            nullptr, nullptr, nullptr, nullptr, nullptr) == nullptr);
+  char* init_message = Dart_Initialize(
+      reinterpret_cast<uint8_t*>(&kDartVmIsolateSnapshotBuffer), nullptr,
+      nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+      nullptr, nullptr, nullptr, nullptr);
+  if (init_message != nullptr) {
+    std::cerr << "Dart_Initialize Error: " << init_message << std::endl;
+    free(init_message);
+    CHECK(false);
+  }
 }
 
 Dart_Isolate CreateDartIsolate() {
