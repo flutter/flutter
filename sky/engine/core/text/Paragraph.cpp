@@ -157,7 +157,7 @@ Dart_Handle Paragraph::getPositionForOffset(const Offset& offset) {
 
 Dart_Handle Paragraph::getWordBoundary(unsigned offset) {
   String text;
-  int start, end;
+  int start = 0, end = 0;
 
   for (RenderObject* object = m_renderView.get(); object; object = object->nextInPreOrder()) {
     if (!object->isText())
@@ -167,10 +167,12 @@ Dart_Handle Paragraph::getWordBoundary(unsigned offset) {
   }
 
   TextBreakIterator* it = wordBreakIterator(text, 0, text.length());
-  end = it->following(offset);
-  if (end < 0)
-      end = it->last();
-  start = it->previous();
+  if (it) {
+    end = it->following(offset);
+    if (end < 0)
+        end = it->last();
+    start = it->previous();
+  }
 
   Dart_Handle result = Dart_NewList(2);
   Dart_ListSetAt(result, 0, ToDart(start));
