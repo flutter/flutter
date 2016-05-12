@@ -1994,6 +1994,8 @@ class DefaultTextStyle extends InheritedWidget {
     TextOverflow overflow,
     Widget child
   }) {
+    assert(context != null);
+    assert(child != null);
     DefaultTextStyle parent = DefaultTextStyle.of(context);
     return new DefaultTextStyle(
       key: key,
