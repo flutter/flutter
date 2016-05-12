@@ -103,7 +103,7 @@ class Usage {
   ║ Flutter over time. See Google's privacy policy:                            ║
   ║ https://www.google.com/intl/en/policies/privacy/                           ║
   ║                                                                            ║
-  ║ Use "flutter config --no-analytics" to disable analytics reporting         ║
+  ║ Use "flutter config --no-analytics" to disable analytics reporting.        ║
   ╚════════════════════════════════════════════════════════════════════════════╝
   ''', emphasis: true);
   }
