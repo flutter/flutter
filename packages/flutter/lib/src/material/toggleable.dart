@@ -64,7 +64,7 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
   /// the new value.
   bool get value => _value;
   bool _value;
-  void set value(bool value) {
+  set value(bool value) {
     assert(value != null);
     if (value == _value)
       return;
@@ -84,7 +84,7 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
   /// For example, a checkbox should use this color when checked.
   Color get activeColor => _activeColor;
   Color _activeColor;
-  void set activeColor(Color value) {
+  set activeColor(Color value) {
     assert(value != null);
     if (value == _activeColor)
       return;
@@ -97,7 +97,7 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
   /// For example, a checkbox should use this color when unchecked.
   Color get inactiveColor => _inactiveColor;
   Color _inactiveColor;
-  void set inactiveColor(Color value) {
+  set inactiveColor(Color value) {
     assert(value != null);
     if (value == _inactiveColor)
       return;
@@ -118,7 +118,7 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
   /// displayed using a grey color and its value cannot be changed.
   ValueChanged<bool> get onChanged => _onChanged;
   ValueChanged<bool> _onChanged;
-  void set onChanged(ValueChanged<bool> value) {
+  set onChanged(ValueChanged<bool> value) {
     if (value == _onChanged)
       return;
     final bool wasInteractive = isInteractive;

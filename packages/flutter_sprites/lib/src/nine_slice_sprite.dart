@@ -28,7 +28,7 @@ class NineSliceSprite extends NodeWithSize with SpritePaint {
 
   Texture _texture;
 
-  void set texture(Texture texture) {
+  set texture(Texture texture) {
     _texture = texture;
     _isDirty = true;
     if (texture == null) {
@@ -49,7 +49,7 @@ class NineSliceSprite extends NodeWithSize with SpritePaint {
 
   EdgeInsets _insets;
 
-  void set insets(EdgeInsets insets) {
+  set insets(EdgeInsets insets) {
     assert(insets != null);
     _insets = insets;
     _isDirty = true;
@@ -61,13 +61,13 @@ class NineSliceSprite extends NodeWithSize with SpritePaint {
 
   bool _drawCenterPart = true;
 
-  void set drawCenterPart(bool drawCenterPart) {
+  set drawCenterPart(bool drawCenterPart) {
     _drawCenterPart = drawCenterPart;
     _isDirty = true;
   }
 
   @override
-  void set size(Size size) {
+  set size(Size size) {
     super.size = size;
     _isDirty = true;
   }

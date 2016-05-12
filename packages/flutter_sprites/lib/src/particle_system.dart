@@ -160,7 +160,7 @@ class ParticleSystem extends Node {
 
   Vector2 _gravity;
 
-  void set gravity(Offset gravity) {
+  set gravity(Offset gravity) {
     if (gravity == null)
       _gravity = null;
     else

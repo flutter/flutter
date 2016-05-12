@@ -69,7 +69,7 @@ abstract class SimulationGroup extends Simulation {
   }
 
   @override
-  void set tolerance(Tolerance t) {
+  set tolerance(Tolerance t) {
     currentSimulation.tolerance = t;
     super.tolerance = t;
   }

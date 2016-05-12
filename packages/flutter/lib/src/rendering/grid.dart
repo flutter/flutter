@@ -384,7 +384,7 @@ class RenderGrid extends RenderVirtualViewport<GridParentData> {
   /// The delegate that controls the layout of the children.
   GridDelegate get delegate => _delegate;
   GridDelegate _delegate;
-  void set delegate (GridDelegate newDelegate) {
+  set delegate (GridDelegate newDelegate) {
     assert(newDelegate != null);
     if (_delegate == newDelegate)
       return;
@@ -396,7 +396,7 @@ class RenderGrid extends RenderVirtualViewport<GridParentData> {
   }
 
   @override
-  void set mainAxis(Axis value) {
+  set mainAxis(Axis value) {
     assert(() {
       if (value != Axis.vertical)
         throw new FlutterError('RenderGrid doesn\'t yet support horizontal scrolling.');
@@ -414,7 +414,7 @@ class RenderGrid extends RenderVirtualViewport<GridParentData> {
   /// the virtual child i to the indices of its children.
   int get virtualChildBase => _virtualChildBase;
   int _virtualChildBase;
-  void set virtualChildBase(int value) {
+  set virtualChildBase(int value) {
     assert(value != null);
     if (_virtualChildBase == value)
       return;

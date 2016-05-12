@@ -44,7 +44,7 @@ class RenderParagraph extends RenderBox {
 
   /// The text to display
   TextSpan get text => _textPainter.text;
-  void set text(TextSpan value) {
+  set text(TextSpan value) {
     assert(value != null);
     if (_textPainter.text == value)
       return;
@@ -56,7 +56,7 @@ class RenderParagraph extends RenderBox {
 
   /// How the text should be aligned horizontally.
   TextAlign get textAlign => _textPainter.textAlign;
-  void set textAlign(TextAlign value) {
+  set textAlign(TextAlign value) {
     if (_textPainter.textAlign == value)
       return;
     _textPainter.textAlign = value;
@@ -68,7 +68,7 @@ class RenderParagraph extends RenderBox {
   /// If false, the glyphs in the text will be positioned as if there was unlimited horizontal space.
   bool get softWrap => _softWrap;
   bool _softWrap;
-  void set softWrap(bool value) {
+  set softWrap(bool value) {
     assert(value != null);
     if (_softWrap == value)
       return;
@@ -79,7 +79,7 @@ class RenderParagraph extends RenderBox {
   /// How visual overflow should be handled.
   TextOverflow get overflow => _overflow;
   TextOverflow _overflow;
-  void set overflow(TextOverflow value) {
+  set overflow(TextOverflow value) {
     assert(value != null);
     if (_overflow == value)
       return;

@@ -60,7 +60,7 @@ class OverlayEntry {
   /// entries below that entry for efficiency.
   bool get opaque => _opaque;
   bool _opaque;
-  void set opaque (bool value) {
+  set opaque (bool value) {
     if (_opaque == value)
       return;
     assert(_overlay != null);

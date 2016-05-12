@@ -74,7 +74,7 @@ class SpriteBox extends RenderBox {
   // Root node for drawing
   NodeWithSize _rootNode;
 
-  void set rootNode (NodeWithSize value) {
+  set rootNode (NodeWithSize value) {
     if (value == _rootNode) return;
 
     // Ensure that the root node has a size
@@ -105,7 +105,7 @@ class SpriteBox extends RenderBox {
   // Transformation mode
   SpriteBoxTransformMode _transformMode;
 
-  void set transformMode (SpriteBoxTransformMode value) {
+  set transformMode (SpriteBoxTransformMode value) {
     if (value == _transformMode)
       return;
     _transformMode = value;

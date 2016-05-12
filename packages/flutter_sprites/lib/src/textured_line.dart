@@ -22,7 +22,7 @@ class TexturedLinePainter {
 
   List<Point> get points => _points;
 
-  void set points(List<Point> points) {
+  set points(List<Point> points) {
     _points = points;
     _calculatedTextureStops = null;
   }
@@ -33,7 +33,7 @@ class TexturedLinePainter {
 
   Texture get texture => _texture;
 
-  void set texture(Texture texture) {
+  set texture(Texture texture) {
     _texture = texture;
     if (texture == null) {
       _cachedPaint = new Paint();
@@ -71,7 +71,7 @@ class TexturedLinePainter {
 
   double get textureLoopLength => textureLoopLength;
 
-  void set textureLoopLength(double textureLoopLength) {
+  set textureLoopLength(double textureLoopLength) {
     _textureLoopLength = textureLoopLength;
     _calculatedTextureStops = null;
   }

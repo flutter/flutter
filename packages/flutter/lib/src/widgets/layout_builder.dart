@@ -37,7 +37,7 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
 
   LayoutCallback get callback => _callback;
   LayoutCallback _callback;
-  void set callback(LayoutCallback value) {
+  set callback(LayoutCallback value) {
     if (value == _callback)
       return;
     _callback = value;

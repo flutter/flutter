@@ -43,7 +43,7 @@ Widget buildFrame() {
 ScrollableState get scrollableState => scrollableListKey.currentState;
 
 double get scrollOffset =>  scrollableState.scrollOffset;
-void set scrollOffset(double value) {
+set scrollOffset(double value) {
   scrollableState.scrollTo(value);
 }
 

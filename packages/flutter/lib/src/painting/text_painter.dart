@@ -43,7 +43,7 @@ class TextPainter {
   /// The (potentially styled) text to paint.
   TextSpan get text => _text;
   TextSpan _text;
-  void set text(TextSpan value) {
+  set text(TextSpan value) {
     assert(value == null || value.debugAssertValid());
     if (_text == value)
       return;
@@ -55,7 +55,7 @@ class TextPainter {
   /// How the text should be aligned horizontally.
   TextAlign get textAlign => _textAlign;
   TextAlign _textAlign;
-  void set textAlign(TextAlign value) {
+  set textAlign(TextAlign value) {
     if (_textAlign == value)
       return;
     _textAlign = value;

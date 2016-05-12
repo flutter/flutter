@@ -57,5 +57,5 @@ class Param extends EquationMember {
   double get value => variable.value;
 
   String get name => variable.name;
-  void set name(String name) { variable.name = name; }
+  set name(String name) { variable.name = name; }
 }

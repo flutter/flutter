@@ -57,7 +57,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// The constraints used for the root layout.
   ViewConfiguration get configuration => _configuration;
   ViewConfiguration _configuration;
-  void set configuration(ViewConfiguration value) {
+  set configuration(ViewConfiguration value) {
     if (configuration == value)
       return;
     _configuration = value;
