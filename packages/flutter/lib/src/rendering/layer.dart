@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:developer';
 import 'dart:ui' as ui show ImageFilter, Picture, SceneBuilder;
 import 'dart:ui' show Offset;
 
@@ -105,7 +106,9 @@ class PictureLayer extends Layer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    builder.addPicture(layerOffset, picture);
+    Timeline.timeSync('PictureLayer::addToScene', () {
+      builder.addPicture(layerOffset, picture);
+    });
   }
 }
 
@@ -120,13 +123,15 @@ class ChildSceneLayer extends Layer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    builder.addChildScene(
-      offset + layerOffset,
-      devicePixelRatio,
-      physicalWidth,
-      physicalHeight,
-      sceneToken.value
-    );
+    Timeline.timeSync('ChildSceneLayer::addToScene', () {
+      builder.addChildScene(
+        offset + layerOffset,
+        devicePixelRatio,
+        physicalWidth,
+        physicalHeight,
+        sceneToken.value
+      );
+    });
   }
 
   @override
@@ -159,8 +164,11 @@ class PerformanceOverlayLayer extends Layer {
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     assert(optionsMask != null);
-    builder.addPerformanceOverlay(optionsMask, overlayRect.shift(layerOffset));
-    builder.setRasterizerTracingThreshold(rasterizerThreshold);
+    Timeline.timeSync('PerformanceOverlayLayer::addToScene', () {
+      builder.addPerformanceOverlay(
+          optionsMask, overlayRect.shift(layerOffset));
+      builder.setRasterizerTracingThreshold(rasterizerThreshold);
+    });
   }
 }
 
@@ -252,7 +260,9 @@ class ContainerLayer extends Layer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    addChildrenToScene(builder, layerOffset);
+    Timeline.timeSync('ContainerLayer::addToScene', () {
+      addChildrenToScene(builder, layerOffset);
+    });
   }
 
   /// Uploads all of this layer's children to the engine
@@ -292,7 +302,9 @@ class OffsetLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    addChildrenToScene(builder, offset + layerOffset);
+    Timeline.timeSync('OffsetLayer::addToScene', () {
+      addChildrenToScene(builder, offset + layerOffset);
+    });
   }
 
   @override
@@ -314,9 +326,11 @@ class ClipRectLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    builder.pushClipRect(clipRect.shift(layerOffset));
-    addChildrenToScene(builder, layerOffset);
-    builder.pop();
+    Timeline.timeSync('ClipRectLayer::addToScene', () {
+      builder.pushClipRect(clipRect.shift(layerOffset));
+      addChildrenToScene(builder, layerOffset);
+      builder.pop();
+    });
   }
 
   @override
@@ -337,9 +351,11 @@ class ClipRRectLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    builder.pushClipRRect(clipRRect.shift(layerOffset));
-    addChildrenToScene(builder, layerOffset);
-    builder.pop();
+    Timeline.timeSync('ClipRRectLayer::addToScene', () {
+      builder.pushClipRRect(clipRRect.shift(layerOffset));
+      addChildrenToScene(builder, layerOffset);
+      builder.pop();
+    });
   }
 
   @override
@@ -360,9 +376,11 @@ class ClipPathLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    builder.pushClipPath(clipPath.shift(layerOffset));
-    addChildrenToScene(builder, layerOffset);
-    builder.pop();
+    Timeline.timeSync('ClipPathLayer::addToScene', () {
+      builder.pushClipPath(clipPath.shift(layerOffset));
+      addChildrenToScene(builder, layerOffset);
+      builder.pop();
+    });
   }
 
   @override
@@ -381,11 +399,14 @@ class TransformLayer extends OffsetLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    Matrix4 offsetTransform = new Matrix4.identity();
-    offsetTransform.translate(offset.dx + layerOffset.dx, offset.dy + layerOffset.dy);
-    builder.pushTransform((offsetTransform * transform).storage);
-    addChildrenToScene(builder, Offset.zero);
-    builder.pop();
+    Timeline.timeSync('TransformLayer::addToScene', () {
+      Matrix4 offsetTransform = new Matrix4.identity();
+      offsetTransform.translate(
+          offset.dx + layerOffset.dx, offset.dy + layerOffset.dy);
+      builder.pushTransform((offsetTransform * transform).storage);
+      addChildrenToScene(builder, Offset.zero);
+      builder.pop();
+    });
   }
 
   @override
@@ -408,9 +429,11 @@ class OpacityLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    builder.pushOpacity(alpha);
-    addChildrenToScene(builder, layerOffset);
-    builder.pop();
+    Timeline.timeSync('OpacityLayer::addToScene', () {
+      builder.pushOpacity(alpha);
+      addChildrenToScene(builder, layerOffset);
+      builder.pop();
+    });
   }
 
   @override
@@ -435,9 +458,11 @@ class ShaderMaskLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    builder.pushShaderMask(shader, maskRect.shift(layerOffset), transferMode);
-    addChildrenToScene(builder, layerOffset);
-    builder.pop();
+    Timeline.timeSync('ShaderMaskLayer::addToScene', () {
+      builder.pushShaderMask(shader, maskRect.shift(layerOffset), transferMode);
+      addChildrenToScene(builder, layerOffset);
+      builder.pop();
+    });
   }
 
   @override
@@ -458,8 +483,10 @@ class BackdropFilterLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    builder.pushBackdropFilter(filter);
-    addChildrenToScene(builder, layerOffset);
-    builder.pop();
+    Timeline.timeSync('BackdropFilterLayer::addToScene', () {
+      builder.pushBackdropFilter(filter);
+      addChildrenToScene(builder, layerOffset);
+      builder.pop();
+    });
   }
 }
