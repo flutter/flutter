@@ -93,23 +93,18 @@ class Usage {
       return;
     _printedUsage = true;
 
-    final String versionString = FlutterVersion.getVersionString(whitelistBranchName: true);
-
-    String welcomeString = 'Welcome to Flutter! - Flutter version $versionString - https://flutter.io';
-    welcomeString = welcomeString.padLeft((welcomeString.length + 100) ~/ 2);
-    welcomeString = welcomeString.padRight(100);
-
     printStatus('');
     printStatus('''
-  ╔════════════════════════════════════════════════════════════════════════════════════════════════════╗
-  ║$welcomeString║
-  ║                                                                                                    ║
-  ║ The Flutter tool anonymously reports feature usage statistics and basic crash reports to Google in ║
-  ║ order to help Google contribute improvements to Flutter over time. See Google's privacy policy:    ║
-  ║ https://www.google.com/intl/en/policies/privacy/                                                   ║
-  ║                                                                                                    ║
-  ║                 Use "flutter config --no-analytics" to disable analytics reporting                 ║
-  ╚════════════════════════════════════════════════════════════════════════════════════════════════════╝
+  ╔════════════════════════════════════════════════════════════════════════════╗
+  ║                 Welcome to Flutter! - https://flutter.io                   ║
+  ║                                                                            ║
+  ║ The Flutter tool anonymously reports feature usage statistics and basic    ║
+  ║ crash reports to Google in order to help Google contribute improvements to ║
+  ║ Flutter over time. See Google's privacy policy:                            ║
+  ║ https://www.google.com/intl/en/policies/privacy/                           ║
+  ║                                                                            ║
+  ║ Use "flutter config --no-analytics" to disable analytics reporting         ║
+  ╚════════════════════════════════════════════════════════════════════════════╝
   ''', emphasis: true);
   }
 }
