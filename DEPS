@@ -88,10 +88,6 @@ deps = {
   'src/third_party/mesa/src':
    Var('chromium_git') + '/chromium/deps/mesa.git' + '@' + '071d25db04c23821a12a8b260ab9d96a097402f0',
 
-  # TODO(jackson): Remove this once we're able to build Firebase on its own Travis instance
-  'src/third_party/firebase':
-   'https://github.com/collinjackson/firebase-sdk.git@master',
-
   'src/third_party/gcm':
    'https://github.com/flutter/flutter_gcm.git@master',
 }
