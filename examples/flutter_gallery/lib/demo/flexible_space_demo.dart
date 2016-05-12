@@ -124,10 +124,25 @@ class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
           ],
           flexibleSpace: new FlexibleSpaceBar(
             title : new Text('Ali Connors'),
-            background: new AssetImage(
-              name: 'packages/flutter_gallery_assets/ali_connors.png',
-              fit: ImageFit.cover,
-              height: _appBarHeight
+            background: new Stack(
+              children: <Widget>[
+                new AssetImage(
+                  name: 'packages/flutter_gallery_assets/ali_connors.png',
+                  fit: ImageFit.cover,
+                  height: _appBarHeight
+                ),
+                // This gradient ensures that the toolbar icons are distinct
+                // against the background image.
+                new DecoratedBox(
+                  decoration: new BoxDecoration(
+                    gradient: new LinearGradient(
+                      begin: const FractionalOffset(0.5, 0.0),
+                      end: const FractionalOffset(0.5, 0.30),
+                      colors: <Color>[const Color(0x60000000), const Color(0x00000000)]
+                    )
+                  )
+                )
+              ]
             )
           )
         ),
@@ -150,7 +165,14 @@ class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
                     '(323) 555-6789',
                     'Work'
                   ]
-                )
+                ),
+                new _ContactItem(
+                  icon: Icons.message,
+                  lines: <String>[
+                    '(650) 555-6789',
+                    'Home'
+                  ]
+                ),
               ]
             ),
             new _ContactCategory(
@@ -192,6 +214,35 @@ class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
                     '126 Severyns Ave',
                     'Mountain View, CA',
                     'Jet Travel'
+                  ]
+                )
+              ]
+            ),
+            new _ContactCategory(
+              icon: Icons.today,
+              children: <Widget>[
+                new _ContactItem(
+                  lines: <String>[
+                    'Birthday',
+                    'January 9th, 1989'
+                  ]
+                ),
+                new _ContactItem(
+                  lines: <String>[
+                    'Wedding anniversary',
+                    'June 21st, 2014'
+                  ]
+                ),
+                new _ContactItem(
+                  lines: <String>[
+                    'First day in office',
+                    'January 20th, 2015'
+                  ]
+                ),
+                new _ContactItem(
+                  lines: <String>[
+                    'Last day in office',
+                    'August 9th, 2015'
                   ]
                 )
               ]
