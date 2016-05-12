@@ -9,9 +9,9 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
-import '../artifacts.dart';
 import '../base/context.dart';
 import '../base/process.dart';
+import '../cache.dart';
 import '../globals.dart';
 import '../services.dart';
 import 'setup_xcodeproj.dart';
@@ -184,7 +184,7 @@ bool _checkXcodeVersion() {
 }
 
 bool _validateEngineRevision(ApplicationPackage app) {
-  String skyRevision = ArtifactStore.engineRevision;
+  String skyRevision = Cache.engineRevision;
   String iosRevision = _getIOSEngineRevision(app);
 
   if (iosRevision != skyRevision) {

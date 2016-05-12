@@ -12,9 +12,9 @@ import 'package:json_schema/json_schema.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
-import 'artifacts.dart';
 import 'base/file_system.dart' show ensureDirectoryExists;
 import 'base/process.dart';
+import 'cache.dart';
 import 'globals.dart';
 import 'package_map.dart';
 import 'toolchain.dart';
@@ -93,7 +93,7 @@ class _Asset {
 }
 
 Map<String, dynamic> _readMaterialFontsManifest() {
-  String fontsPath = path.join(path.absolute(ArtifactStore.flutterRoot),
+  String fontsPath = path.join(path.absolute(Cache.flutterRoot),
       'packages', 'flutter_tools', 'schema', 'material_fonts.yaml');
 
   return loadYaml(new File(fontsPath).readAsStringSync());
@@ -112,7 +112,7 @@ List<_Asset> _getMaterialAssets(String fontSet) {
     for (Map<String, dynamic> font in family['fonts']) {
       String assetKey = font['asset'];
       result.add(new _Asset(
-        base: '${ArtifactStore.flutterRoot}/bin/cache/artifacts/material_fonts',
+        base: '${Cache.flutterRoot}/bin/cache/artifacts/material_fonts',
         source: path.basename(assetKey),
         relativePath: assetKey
       ));
@@ -227,7 +227,7 @@ dynamic _loadManifest(String manifestPath) {
 }
 
 Future<int> _validateManifest(Object manifest) async {
-  String schemaPath = path.join(path.absolute(ArtifactStore.flutterRoot),
+  String schemaPath = path.join(path.absolute(Cache.flutterRoot),
       'packages', 'flutter_tools', 'schema', 'flutter_yaml.json');
   Schema schema = await Schema.createSchemaFromUrl('file://$schemaPath');
 

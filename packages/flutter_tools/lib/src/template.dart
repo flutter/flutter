@@ -7,7 +7,7 @@ import 'dart:io';
 import 'package:mustache4dart/mustache4dart.dart' as mustache;
 import 'package:path/path.dart' as path;
 
-import 'artifacts.dart';
+import 'cache.dart';
 import 'globals.dart';
 
 const String _kTemplateExtension = '.tmpl';
@@ -122,7 +122,7 @@ class Template {
 }
 
 Directory _templateDirectoryInPackage(String name) {
-  String templatesDir = path.join(ArtifactStore.flutterRoot,
+  String templatesDir = path.join(Cache.flutterRoot,
       'packages', 'flutter_tools', 'templates');
   return new Directory(path.join(templatesDir, name));
 }

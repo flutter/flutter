@@ -8,7 +8,6 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../android/android.dart' as android;
-import '../artifacts.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
@@ -64,7 +63,7 @@ class CreateCommand extends FlutterCommand {
       return 2;
     }
 
-    if (ArtifactStore.flutterRoot == null) {
+    if (Cache.flutterRoot == null) {
       printError('Neither the --flutter-root command line flag nor the FLUTTER_ROOT environment\n'
         'variable was specified. Unable to find package:flutter.');
       return 2;
@@ -72,7 +71,7 @@ class CreateCommand extends FlutterCommand {
 
     await Cache.instance.updateAll();
 
-    String flutterRoot = path.absolute(ArtifactStore.flutterRoot);
+    String flutterRoot = path.absolute(Cache.flutterRoot);
 
     String flutterPackagesDirectory = path.join(flutterRoot, 'packages');
     String flutterPackagePath = path.join(flutterPackagesDirectory, 'flutter');

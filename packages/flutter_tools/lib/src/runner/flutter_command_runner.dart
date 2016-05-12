@@ -10,10 +10,10 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
 import '../android/android_sdk.dart';
-import '../artifacts.dart';
 import '../base/context.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
+import '../cache.dart';
 import '../globals.dart';
 import '../package_map.dart';
 import '../toolchain.dart';
@@ -128,9 +128,9 @@ class FlutterCommandRunner extends CommandRunner {
     if (globalResults.wasParsed('color'))
       logger.supportsColor = globalResults['color'];
 
-    // we must set ArtifactStore.flutterRoot early because other features use it
+    // we must set Cache.flutterRoot early because other features use it
     // (e.g. enginePath's initialiser uses it)
-    ArtifactStore.flutterRoot = path.normalize(path.absolute(globalResults['flutter-root']));
+    Cache.flutterRoot = path.normalize(path.absolute(globalResults['flutter-root']));
 
     _checkFlutterCopy();
 
@@ -159,7 +159,7 @@ class FlutterCommandRunner extends CommandRunner {
 
     if (globalResults['version']) {
       flutterUsage.sendCommand('version');
-      printStatus(FlutterVersion.getVersion(ArtifactStore.flutterRoot).toString());
+      printStatus(FlutterVersion.getVersion(Cache.flutterRoot).toString());
       return new Future<int>.value(0);
     }
 
@@ -185,7 +185,7 @@ class FlutterCommandRunner extends CommandRunner {
       } on FileSystemException { } on FormatException { }
 
       if (engineSourcePath == null)
-        engineSourcePath = _tryEnginePath(path.join(ArtifactStore.flutterRoot, '../engine/src'));
+        engineSourcePath = _tryEnginePath(path.join(Cache.flutterRoot, '../engine/src'));
 
       if (engineSourcePath == null) {
         printError('Unable to detect local Flutter engine build directory.\n'
@@ -225,13 +225,13 @@ class FlutterCommandRunner extends CommandRunner {
   }
 
   static void initFlutterRoot() {
-    if (ArtifactStore.flutterRoot == null)
-      ArtifactStore.flutterRoot = _defaultFlutterRoot;
+    if (Cache.flutterRoot == null)
+      Cache.flutterRoot = _defaultFlutterRoot;
   }
 
   /// Get all pub packages in the Flutter repo.
   List<Directory> getRepoPackages() {
-    return _gatherProjectPaths(path.absolute(ArtifactStore.flutterRoot))
+    return _gatherProjectPaths(path.absolute(Cache.flutterRoot))
       .map((String dir) => new Directory(dir))
       .toList();
   }
@@ -258,10 +258,10 @@ class FlutterCommandRunner extends CommandRunner {
     // Check if the cwd is a flutter dir.
     while (directory.isNotEmpty) {
       if (_isDirectoryFlutterRepo(directory)) {
-        if (directory != ArtifactStore.flutterRoot) {
+        if (directory != Cache.flutterRoot) {
           printError(
             'Warning: the active Flutter is not the one from the current directory.\n'
-            '  Active Flutter   : ${ArtifactStore.flutterRoot}\n'
+            '  Active Flutter   : ${Cache.flutterRoot}\n'
             '  Current directory: $directory\n'
           );
         }
