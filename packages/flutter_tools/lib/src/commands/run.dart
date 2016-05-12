@@ -11,7 +11,7 @@ import 'package:path/path.dart' as path;
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/logger.dart';
-import '../build_configuration.dart';
+import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';

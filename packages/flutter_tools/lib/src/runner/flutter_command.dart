@@ -8,7 +8,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 
 import '../application_package.dart';
-import '../build_configuration.dart';
+import '../build_info.dart';
 import '../dart/pub.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
@@ -42,8 +42,6 @@ abstract class FlutterCommand extends Command {
   bool _usesPubOption = false;
 
   bool get shouldRunPub => _usesPubOption && argResults['pub'];
-
-  List<BuildConfiguration> get buildConfigurations => runner.buildConfigurations;
 
   void usesTargetOption() {
     argParser.addOption('target',

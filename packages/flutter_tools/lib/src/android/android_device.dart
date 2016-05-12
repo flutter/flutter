@@ -10,7 +10,7 @@ import '../android/android_sdk.dart';
 import '../application_package.dart';
 import '../base/os.dart';
 import '../base/process.dart';
-import '../build_configuration.dart';
+import '../build_info.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';

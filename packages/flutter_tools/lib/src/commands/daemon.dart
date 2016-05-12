@@ -10,7 +10,7 @@ import '../android/android_device.dart';
 import '../application_package.dart';
 import '../base/context.dart';
 import '../base/logger.dart';
-import '../build_configuration.dart';
+import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../ios/devices.dart';

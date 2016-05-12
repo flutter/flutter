@@ -4,7 +4,7 @@
 
 import 'dart:io';
 
-import 'package:flutter_tools/src/build_configuration.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/toolchain.dart';
 import 'package:test/test.dart';
@@ -41,7 +41,7 @@ void main() {
     testUsingContext('using enginePath', () {
       ToolConfiguration toolConfig = new ToolConfiguration();
       toolConfig.engineSrcPath = 'engine';
-      toolConfig.engineRelease = true;
+      toolConfig.engineBuildPath = 'engine/out/android_debug';
 
       expect(
         toolConfig.getEngineArtifactsDirectory(TargetPlatform.android_arm, BuildMode.debug).path,

@@ -14,7 +14,7 @@ import 'application_package.dart';
 import 'base/common.dart';
 import 'base/os.dart';
 import 'base/utils.dart';
-import 'build_configuration.dart';
+import 'build_info.dart';
 import 'globals.dart';
 import 'ios/devices.dart';
 import 'ios/simulators.dart';

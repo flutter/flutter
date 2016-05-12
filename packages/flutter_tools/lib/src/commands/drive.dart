@@ -13,7 +13,7 @@ import '../application_package.dart';
 import '../base/file_system.dart';
 import '../base/common.dart';
 import '../base/os.dart';
-import '../build_configuration.dart';
+import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../ios/simulators.dart' show SimControl, IOSSimulatorUtils;
