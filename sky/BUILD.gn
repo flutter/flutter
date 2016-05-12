@@ -39,7 +39,7 @@ group("sky") {
   # TODO(mpcomplete): This is temporary until we move GCM and Firebase
   # out of the engine repo.
   if (enable_firebase) {
-    deps += [ "//sky/services/firebase" ]
+    deps += [ "//third_party/firebase" ]
   }
 
   if (enable_gcm) {
