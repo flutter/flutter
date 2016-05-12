@@ -218,7 +218,7 @@ class RenderChildView extends RenderBox {
   /// The child to display.
   ChildViewConnection get child => _child;
   ChildViewConnection _child;
-  void set child (ChildViewConnection value) {
+  set child (ChildViewConnection value) {
     if (value == _child)
       return;
     if (attached && _child != null) {
@@ -242,7 +242,7 @@ class RenderChildView extends RenderBox {
   /// The device pixel ratio to provide the child.
   double get scale => _scale;
   double _scale;
-  void set scale (double value) {
+  set scale (double value) {
     if (value == _scale)
       return;
     _scale = value;

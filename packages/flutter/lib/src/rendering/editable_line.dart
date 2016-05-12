@@ -62,7 +62,7 @@ class RenderEditableLine extends RenderBox {
   /// The text to display
   TextSpan get text => _textPainter.text;
   final TextPainter _textPainter;
-  void set text(TextSpan value) {
+  set text(TextSpan value) {
     if (_textPainter.text == value)
       return;
     TextSpan oldStyledText = _textPainter.text;
@@ -74,7 +74,7 @@ class RenderEditableLine extends RenderBox {
 
   Color get cursorColor => _cursorColor;
   Color _cursorColor;
-  void set cursorColor(Color value) {
+  set cursorColor(Color value) {
     if (_cursorColor == value)
       return;
     _cursorColor = value;
@@ -83,7 +83,7 @@ class RenderEditableLine extends RenderBox {
 
   bool get showCursor => _showCursor;
   bool _showCursor;
-  void set showCursor(bool value) {
+  set showCursor(bool value) {
     if (_showCursor == value)
       return;
     _showCursor = value;
@@ -92,7 +92,7 @@ class RenderEditableLine extends RenderBox {
 
   Color get selectionColor => _selectionColor;
   Color _selectionColor;
-  void set selectionColor(Color value) {
+  set selectionColor(Color value) {
     if (_selectionColor == value)
       return;
     _selectionColor = value;
@@ -103,7 +103,7 @@ class RenderEditableLine extends RenderBox {
 
   TextSelection get selection => _selection;
   TextSelection _selection;
-  void set selection(TextSelection value) {
+  set selection(TextSelection value) {
     if (_selection == value)
       return;
     _selection = value;
@@ -113,7 +113,7 @@ class RenderEditableLine extends RenderBox {
 
   Offset get paintOffset => _paintOffset;
   Offset _paintOffset;
-  void set paintOffset(Offset value) {
+  set paintOffset(Offset value) {
     if (_paintOffset == value)
       return;
     _paintOffset = value;
@@ -232,19 +232,8 @@ class RenderEditableLine extends RenderBox {
   }
 
   TextSelection _selectWordAtOffset(TextPosition position) {
-    // TODO(mpcomplete): Placeholder. Need to ask the engine for this info to do
-    // it correctly.
-    String str = text.toPlainText();
-    int start = position.offset - 1;
-    while (start >= 0 && str[start] != ' ')
-      --start;
-    ++start;
-
-    int end = position.offset;
-    while (end < str.length && str[end] != ' ')
-      ++end;
-
-    return new TextSelection(baseOffset: start, extentOffset: end);
+    TextRange word = _textPainter.getWordBoundary(position);
+    return new TextSelection(baseOffset: word.start, extentOffset: word.end);
   }
 
   Rect _caretPrototype;

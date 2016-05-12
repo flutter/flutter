@@ -163,7 +163,7 @@ class ProxyAnimation extends Animation<double>
   /// will be transparently updated to be listening to the new parent animation.
   Animation<double> get parent => _parent;
   Animation<double> _parent;
-  void set parent(Animation<double> value) {
+  set parent(Animation<double> value) {
     if (value == _parent)
       return;
     if (_parent != null) {

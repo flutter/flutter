@@ -511,7 +511,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// widgets being animated as part of the transition.
   bool get offstage => _offstage;
   bool _offstage = false;
-  void set offstage (bool value) {
+  set offstage (bool value) {
     if (_offstage == value)
       return;
     _offstage = value;

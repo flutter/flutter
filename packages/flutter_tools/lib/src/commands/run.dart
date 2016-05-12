@@ -11,11 +11,10 @@ import 'package:path/path.dart' as path;
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/logger.dart';
-import '../build_configuration.dart';
+import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
-import '../toolchain.dart';
 import 'build_apk.dart';
 import 'install.dart';
 
@@ -23,9 +22,12 @@ abstract class RunCommandBase extends FlutterCommand {
   RunCommandBase() {
     addBuildModeFlags();
 
-    // TODO(devoncarew): This flag is ignored, and should be removed once tools
-    // no longer pass in `--checked`.
-    argParser.addFlag('checked', negatable: true, hide: true);
+    // TODO(devoncarew): Remove in favor of --debug/--profile/--release.
+    argParser.addFlag('checked',
+        negatable: true,
+        defaultsTo: true,
+        help: 'Run the application in checked ("slow") mode.\n'
+          'Note: this flag will be removed in favor of the --debug/--profile/--release flags.');
 
     argParser.addFlag('trace-startup',
         negatable: true,
@@ -105,7 +107,8 @@ class RunCommand extends RunCommandBase {
       options = new DebuggingOptions.disabled();
     } else {
       options = new DebuggingOptions.enabled(
-        checked: getBuildMode() == BuildMode.debug,
+        // TODO(devoncarew): Check this to 'getBuildMode() == BuildMode.debug'.
+        checked: argResults['checked'],
         startPaused: argResults['start-paused'],
         observatoryPort: debugPort
       );
@@ -114,7 +117,6 @@ class RunCommand extends RunCommandBase {
     if (argResults['resident']) {
       _RunAndStayResident runner = new _RunAndStayResident(
         deviceForCommand,
-        toolchain,
         target: target,
         debuggingOptions: options,
         traceStartup: traceStartup,
@@ -125,7 +127,6 @@ class RunCommand extends RunCommandBase {
     } else {
       return startApp(
         deviceForCommand,
-        toolchain,
         target: target,
         stop: argResults['full-restart'],
         install: true,
@@ -139,8 +140,7 @@ class RunCommand extends RunCommandBase {
 }
 
 Future<int> startApp(
-  Device device,
-  Toolchain toolchain, {
+  Device device, {
   String target,
   bool stop: true,
   bool install: true,
@@ -175,7 +175,6 @@ Future<int> startApp(
 
     int result = await buildApk(
       device.platform,
-      toolchain,
       target: target,
       buildMode: buildMode
     );
@@ -216,7 +215,6 @@ Future<int> startApp(
 
   LaunchResult result = await device.startApp(
     package,
-    toolchain,
     mainPath: mainPath,
     route: route,
     debuggingOptions: debuggingOptions,
@@ -345,8 +343,7 @@ String _getDisplayPath(String fullPath) {
 
 class _RunAndStayResident {
   _RunAndStayResident(
-    this.device,
-    this.toolchain, {
+    this.device, {
     this.target,
     this.debuggingOptions,
     this.traceStartup : false,
@@ -354,7 +351,6 @@ class _RunAndStayResident {
   });
 
   final Device device;
-  final Toolchain toolchain;
   final String target;
   final DebuggingOptions debuggingOptions;
   final bool traceStartup;
@@ -395,7 +391,6 @@ class _RunAndStayResident {
 
       int result = await buildApk(
         device.platform,
-        toolchain,
         target: target,
         buildMode: buildMode
       );
@@ -434,7 +429,6 @@ class _RunAndStayResident {
 
     LaunchResult result = await device.startApp(
       package,
-      toolchain,
       mainPath: mainPath,
       debuggingOptions: debuggingOptions,
       platformArgs: platformArgs

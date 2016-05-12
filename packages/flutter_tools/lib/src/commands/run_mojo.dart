@@ -7,9 +7,8 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import '../artifacts.dart';
 import '../base/process.dart';
-import '../build_configuration.dart';
+import '../build_info.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
 import '../runner/flutter_command.dart';
@@ -73,19 +72,6 @@ class RunMojoCommand extends FlutterCommand {
     return _makePathAbsolute(path.join(argResults['mojo-path'], 'out', mojoBuildType, 'mojo_shell'));
   }
 
-  BuildConfiguration _getCurrentHostConfig() {
-    BuildConfiguration result;
-    TargetPlatform target = argResults['android'] ?
-      TargetPlatform.android_arm : getCurrentHostPlatformAsTarget();
-    for (BuildConfiguration config in buildConfigurations) {
-      if (config.targetPlatform == target) {
-        result = config;
-        break;
-      }
-    }
-    return result;
-  }
-
   Future<List<String>> _getShellConfig(String targetApp) async {
     List<String> args = <String>[];
 
@@ -93,17 +79,8 @@ class RunMojoCommand extends FlutterCommand {
     final String command = useDevtools ? _getDevtoolsPath() : _getMojoShellPath();
     args.add(command);
 
-    BuildConfiguration config = _getCurrentHostConfig();
-
-    String flutterPath;
-    if (config == null || config.type == BuildType.prebuilt) {
-      TargetPlatform targetPlatform = argResults['android'] ? TargetPlatform.android_arm : TargetPlatform.linux_x64;
-      Artifact artifact = ArtifactStore.getArtifact(type: ArtifactType.mojo, targetPlatform: targetPlatform);
-      flutterPath = _makePathAbsolute(ArtifactStore.getPath(artifact));
-    } else {
-      String localPath = path.join(config.buildDir, 'flutter.mojo');
-      flutterPath = _makePathAbsolute(localPath);
-    }
+    TargetPlatform targetPlatform = argResults['android'] ? TargetPlatform.android_arm : TargetPlatform.linux_x64;
+    String flutterPath = path.join(tools.getEngineArtifactsDirectory(targetPlatform, BuildMode.debug).path, 'flutter.mojo');
 
     if (argResults['android'])
       args.add('--android');
@@ -167,7 +144,6 @@ class RunMojoCommand extends FlutterCommand {
       String mainPath = findMainDartFile(argResults['target']);
 
       int result = await flx.build(
-        toolchain,
         mainPath: mainPath,
         outputPath: targetApp
       );

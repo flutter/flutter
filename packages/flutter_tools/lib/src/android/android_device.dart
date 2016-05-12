@@ -10,12 +10,11 @@ import '../android/android_sdk.dart';
 import '../application_package.dart';
 import '../base/os.dart';
 import '../base/process.dart';
-import '../build_configuration.dart';
+import '../build_info.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
 import '../service_protocol.dart';
-import '../toolchain.dart';
 import 'adb.dart';
 import 'android.dart';
 
@@ -190,7 +189,8 @@ class AndroidDevice extends Device {
   @override
   bool isAppInstalled(ApplicationPackage app) {
     // This call takes 400ms - 600ms.
-    if (runCheckedSync(adbCommandForDevice(<String>['shell', 'pm', 'path', app.id])).isEmpty)
+    String listOut = runCheckedSync(adbCommandForDevice(<String>['shell', 'pm', 'list', 'packages', app.id]));
+    if (!LineSplitter.split(listOut).contains("package:${app.id}"))
       return false;
 
     // Check the application SHA.
@@ -321,8 +321,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage package,
-    Toolchain toolchain, {
+    ApplicationPackage package, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
@@ -332,7 +331,6 @@ class AndroidDevice extends Device {
       return new LaunchResult.failed();
 
     String localBundlePath = await flx.buildFlx(
-      toolchain,
       mainPath: mainPath,
       includeRobotoFonts: false
     );

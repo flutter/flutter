@@ -12,7 +12,6 @@ import 'package:yaml/yaml.dart' as yaml;
 
 import '../artifacts.dart';
 import '../base/utils.dart';
-import '../build_configuration.dart';
 import '../dart/analysis.dart';
 import '../dart/sdk.dart';
 import '../globals.dart';
@@ -181,10 +180,9 @@ class AnalyzeCommand extends FlutterCommand {
     Map<String, String> packages = dependencies.asPackageMap();
 
     // override the sky_engine and sky_services packages if the user is using a local build
-    String buildDir = buildConfigurations.firstWhere((BuildConfiguration config) => config.testable, orElse: () => null)?.buildDir;
-    if (buildDir != null) {
-      packages['sky_engine'] = path.join(buildDir, 'gen/dart-pkg/sky_engine/lib');
-      packages['sky_services'] = path.join(buildDir, 'gen/dart-pkg/sky_services/lib');
+    if (tools.engineBuildPath != null) {
+      packages['sky_engine'] = path.join(tools.engineBuildPath, 'gen/dart-pkg/sky_engine/lib');
+      packages['sky_services'] = path.join(tools.engineBuildPath, 'gen/dart-pkg/sky_services/lib');
     }
 
     if (argResults['preamble']) {

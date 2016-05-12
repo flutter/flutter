@@ -8,7 +8,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../base/process.dart';
-import '../build_configuration.dart';
+import '../build_info.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import 'run.dart';
@@ -132,7 +132,7 @@ String buildAotSnapshot(
     '--no-sim-use-hardfp',
   ];
 
-  if (!(tools.engineRelease || buildMode == BuildMode.release)) {
+  if (buildMode != BuildMode.release) {
     genSnapshotCmd.addAll(<String>[
       '--no-checked',
       '--conditional_directives',

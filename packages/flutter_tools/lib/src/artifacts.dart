@@ -6,7 +6,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import 'build_configuration.dart';
+import 'build_info.dart';
 import 'globals.dart';
 
 enum ArtifactType {

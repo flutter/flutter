@@ -7,7 +7,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:xml/xml.dart' as xml;
 
-import 'build_configuration.dart';
+import 'build_info.dart';
 import 'ios/plist_utils.dart';
 
 abstract class ApplicationPackage {

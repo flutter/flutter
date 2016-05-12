@@ -50,7 +50,7 @@ class RenderPerformanceOverlay extends RenderBox {
   /// PerformanceOverlayOption to enable.
   int get optionsMask => _optionsMask;
   int _optionsMask;
-  void set optionsMask(int mask) {
+  set optionsMask(int mask) {
     if (mask == _optionsMask)
       return;
     _optionsMask = mask;
@@ -59,7 +59,7 @@ class RenderPerformanceOverlay extends RenderBox {
 
   int get rasterizerThreshold => _rasterizerThreshold;
   int _rasterizerThreshold;
-  void set rasterizerThreshold (int threshold) {
+  set rasterizerThreshold (int threshold) {
     if (threshold == _rasterizerThreshold)
       return;
     _rasterizerThreshold = threshold;

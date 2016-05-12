@@ -507,7 +507,7 @@ class ScaffoldState extends State<Scaffold> {
 
   bool _shouldShowBackArrow;
 
-  Widget _getModifiedAppBar({ EdgeInsets padding, int elevation, double actualHeight}) {
+  Widget _getModifiedAppBar({ EdgeInsets padding, int elevation}) {
     AppBar appBar = config.appBar;
     if (appBar == null)
       return null;
@@ -535,8 +535,7 @@ class ScaffoldState extends State<Scaffold> {
     return appBar.copyWith(
       elevation: elevation ?? appBar.elevation ?? 4,
       padding: new EdgeInsets.only(top: padding.top),
-      leading: leading,
-      actualHeight: actualHeight
+      leading: leading
     );
   }
 
@@ -562,7 +561,7 @@ class ScaffoldState extends State<Scaffold> {
     _appBarController.value = (expandedHeight - height) / expandedHeight;
     return new SizedBox(
       height: height,
-      child: _getModifiedAppBar(padding: padding, actualHeight: height)
+      child: _getModifiedAppBar(padding: padding)
     );
   }
 
@@ -581,7 +580,7 @@ class ScaffoldState extends State<Scaffold> {
         _appBarController.value = (expandedHeight - height) / expandedHeight;
         appBar = new SizedBox(
           height: height,
-          child: _getModifiedAppBar(padding: padding, actualHeight: height)
+          child: _getModifiedAppBar(padding: padding)
         );
       }
     } else if (_scrollOffset > expandedHeight) {
@@ -593,7 +592,7 @@ class ScaffoldState extends State<Scaffold> {
         _appBarController.value = (expandedHeight - _floatingAppBarHeight) / expandedHeight;
         appBar = new SizedBox(
           height: _floatingAppBarHeight,
-          child: _getModifiedAppBar(padding: padding, actualHeight: _floatingAppBarHeight)
+          child: _getModifiedAppBar(padding: padding)
         );
       }
     } else {
@@ -602,7 +601,7 @@ class ScaffoldState extends State<Scaffold> {
       _appBarController.value = (expandedHeight - height) / expandedHeight;
       appBar = new SizedBox(
         height: height,
-        child: _getModifiedAppBar(padding: padding, elevation: 0, actualHeight: height)
+        child: _getModifiedAppBar(padding: padding, elevation: 0)
       );
       _floatingAppBarHeight = 0.0;
 
@@ -633,8 +632,8 @@ class ScaffoldState extends State<Scaffold> {
     if (config.appBarBehavior == AppBarBehavior.anchor) {
       final double expandedHeight = (config.appBar?.expandedHeight ?? 0.0) + padding.top;
       final Widget appBar = new ConstrainedBox(
-          child: _getModifiedAppBar(padding: padding, actualHeight: expandedHeight),
-        constraints: new BoxConstraints(maxHeight: expandedHeight)
+        constraints: new BoxConstraints(maxHeight: expandedHeight),
+        child: _getModifiedAppBar(padding: padding)
       );
       _addIfNonNull(children, appBar, _ScaffoldSlot.appBar);
     } else {

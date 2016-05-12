@@ -37,7 +37,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
 
   double get itemExtent => _itemExtent;
   double _itemExtent;
-  void set itemExtent (double newValue) {
+  set itemExtent (double newValue) {
     assert(newValue != null);
     if (_itemExtent == newValue)
       return;
@@ -47,7 +47,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
 
   EdgeInsets get padding => _padding;
   EdgeInsets _padding;
-  void set padding (EdgeInsets newValue) {
+  set padding (EdgeInsets newValue) {
     if (_padding == newValue)
       return;
     _padding = newValue;

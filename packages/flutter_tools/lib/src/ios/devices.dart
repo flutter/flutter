@@ -11,10 +11,9 @@ import 'package:path/path.dart' as path;
 import '../application_package.dart';
 import '../base/os.dart';
 import '../base/process.dart';
-import '../build_configuration.dart';
+import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
-import '../toolchain.dart';
 import 'mac.dart';
 
 const String _ideviceinstallerInstructions =
@@ -154,8 +153,7 @@ class IOSDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage app,
-    Toolchain toolchain, {
+    ApplicationPackage app, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,

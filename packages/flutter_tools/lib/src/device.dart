@@ -14,11 +14,10 @@ import 'application_package.dart';
 import 'base/common.dart';
 import 'base/os.dart';
 import 'base/utils.dart';
-import 'build_configuration.dart';
+import 'build_info.dart';
 import 'globals.dart';
 import 'ios/devices.dart';
 import 'ios/simulators.dart';
-import 'toolchain.dart';
 
 /// A class to get all available devices.
 class DeviceManager {
@@ -181,8 +180,7 @@ abstract class Device {
   /// [platformArgs] allows callers to pass platform-specific arguments to the
   /// start call.
   Future<LaunchResult> startApp(
-    ApplicationPackage package,
-    Toolchain toolchain, {
+    ApplicationPackage package, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,

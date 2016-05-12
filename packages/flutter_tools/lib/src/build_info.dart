@@ -4,8 +4,6 @@
 
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
-
 import 'base/utils.dart';
 import 'globals.dart';
 
@@ -35,7 +33,13 @@ enum HostPlatform {
 }
 
 String getNameForHostPlatform(HostPlatform platform) {
-  return getEnumName(platform).replaceAll('_', '-');
+  switch (platform) {
+    case HostPlatform.darwin_x64:
+      return "mac_debug";
+    case HostPlatform.linux_x64:
+      return "linux-x64";
+  }
+  assert(false);
 }
 
 enum TargetPlatform {
@@ -48,7 +52,21 @@ enum TargetPlatform {
 }
 
 String getNameForTargetPlatform(TargetPlatform platform) {
-  return getEnumName(platform).replaceAll('_', '-');
+  switch (platform) {
+    case TargetPlatform.android_arm:
+      return "android-arm";
+    case TargetPlatform.android_x64:
+      return "android-x64";
+    case TargetPlatform.android_x86:
+      return "android-x86";
+    case TargetPlatform.ios:
+      return "ios_release";
+    case TargetPlatform.darwin_x64:
+      return "mac_debug";
+    case TargetPlatform.linux_x64:
+      return "linux-x64";
+  }
+  assert(false);
 }
 
 HostPlatform getCurrentHostPlatform() {
@@ -60,38 +78,4 @@ HostPlatform getCurrentHostPlatform() {
   printError('Unsupported host platform, defaulting to Linux');
 
   return HostPlatform.linux_x64;
-}
-
-TargetPlatform getCurrentHostPlatformAsTarget() {
-  if (Platform.isMacOS)
-    return TargetPlatform.darwin_x64;
-  if (Platform.isLinux)
-    return TargetPlatform.linux_x64;
-  printError('Unsupported host platform, defaulting to Linux');
-  return TargetPlatform.linux_x64;
-}
-
-class BuildConfiguration {
-  BuildConfiguration.prebuilt({
-    this.hostPlatform,
-    this.targetPlatform,
-    this.testable: false
-  }) : type = BuildType.prebuilt, buildDir = null;
-
-  BuildConfiguration.local({
-    this.type,
-    this.hostPlatform,
-    this.targetPlatform,
-    String enginePath,
-    String buildPath,
-    this.testable: false
-  }) : buildDir = path.normalize(path.join(enginePath, buildPath)) {
-    assert(type == BuildType.debug || type == BuildType.release);
-  }
-
-  final BuildType type;
-  final HostPlatform hostPlatform;
-  final TargetPlatform targetPlatform;
-  final String buildDir;
-  final bool testable;
 }
