@@ -68,6 +68,7 @@ void PerformanceOverlayLayer::Paint(PaintContext& context) {
   if (!options_)
     return;
 
+  TRACE_EVENT0("flutter", "PerformanceOverlayLayer::Paint");
   SkScalar x = paint_bounds().x();
   SkScalar y = paint_bounds().y();
   SkScalar width = paint_bounds().width();

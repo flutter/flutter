@@ -13,6 +13,7 @@ ColorFilterLayer::~ColorFilterLayer() {
 }
 
 void ColorFilterLayer::Paint(PaintContext& context) {
+  TRACE_EVENT0("flutter", "ColorFilterLayer::Paint");
   sk_sp<SkColorFilter> color_filter =
       SkColorFilter::MakeModeFilter(color_, transfer_mode_);
   SkPaint paint;

@@ -13,6 +13,7 @@ OpacityLayer::~OpacityLayer() {
 }
 
 void OpacityLayer::Paint(PaintContext& context) {
+  TRACE_EVENT0("flutter", "OpacityLayer::Paint");
   SkPaint paint;
   paint.setAlpha(alpha_);
 

@@ -31,12 +31,14 @@ void PictureLayer::Paint(PaintContext& context) {
   DCHECK(picture_);
 
   if (image_) {
+    TRACE_EVENT1("flutter", "PictureLayer::Paint", "image", "prerolled");
     SkRect rect = picture_->cullRect().makeOffset(offset_.x(), offset_.y());
     context.canvas.drawImageRect(image_.get(), rect, nullptr,
                                  SkCanvas::kFast_SrcRectConstraint);
     if (kDebugCheckerboardRasterizedLayers)
       DrawCheckerboard(&context.canvas, rect);
   } else {
+    TRACE_EVENT1("flutter", "PictureLayer::Paint", "image", "normal");
     SkAutoCanvasRestore save(&context.canvas, true);
     context.canvas.translate(offset_.x(), offset_.y());
     context.canvas.drawPicture(picture_.get());

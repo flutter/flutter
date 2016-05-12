@@ -20,6 +20,7 @@ void TransformLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 }
 
 void TransformLayer::Paint(PaintContext& context) {
+  TRACE_EVENT0("flutter", "TransformLayer::Paint");
   SkAutoCanvasRestore save(&context.canvas, true);
   context.canvas.concat(transform_);
   PaintChildren(context);

@@ -10,6 +10,7 @@
 
 #include "base/logging.h"
 #include "base/macros.h"
+#include "base/trace_event/trace_event.h"
 #include "flow/instrumentation.h"
 #include "flow/raster_cache.h"
 #include "skia/ext/refptr.h"
