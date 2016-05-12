@@ -232,19 +232,8 @@ class RenderEditableLine extends RenderBox {
   }
 
   TextSelection _selectWordAtOffset(TextPosition position) {
-    // TODO(mpcomplete): Placeholder. Need to ask the engine for this info to do
-    // it correctly.
-    String str = text.toPlainText();
-    int start = position.offset - 1;
-    while (start >= 0 && str[start] != ' ')
-      --start;
-    ++start;
-
-    int end = position.offset;
-    while (end < str.length && str[end] != ' ')
-      ++end;
-
-    return new TextSelection(baseOffset: start, extentOffset: end);
+    TextRange word = _textPainter.getWordBoundary(position);
+    return new TextSelection(baseOffset: word.start, extentOffset: word.end);
   }
 
   Rect _caretPrototype;
