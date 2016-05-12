@@ -7,7 +7,6 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import 'artifacts.dart';
 import 'base/context.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
@@ -22,6 +21,20 @@ class Cache {
 
   Directory _rootOverride;
 
+  // Initialized by FlutterCommandRunner on startup.
+  static String flutterRoot;
+
+  static String _engineRevision;
+
+  static String get engineRevision {
+    if (_engineRevision == null) {
+      File revisionFile = new File(path.join(flutterRoot, 'bin', 'cache', 'engine.version'));
+      if (revisionFile.existsSync())
+        _engineRevision = revisionFile.readAsStringSync().trim();
+    }
+    return _engineRevision;
+  }
+
   static Cache get instance => context[Cache] ?? (context[Cache] = new Cache());
 
   /// Return the top-level directory in the cache; this is `bin/cache`.
@@ -29,7 +42,7 @@ class Cache {
     if (_rootOverride != null)
       return new Directory(path.join(_rootOverride.path, 'bin', 'cache'));
     else
-      return new Directory(path.join(ArtifactStore.flutterRoot, 'bin', 'cache'));
+      return new Directory(path.join(flutterRoot, 'bin', 'cache'));
   }
 
   /// Return a directory in the cache dir. For `pkg`, this will return `bin/cache/pkg`.

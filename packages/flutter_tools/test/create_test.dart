@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
 import 'package:path/path.dart' as path;
@@ -38,7 +38,7 @@ void main() {
 
     // Verify that we can regenerate over an existing project.
     testUsingContext('can re-gen over existing project', () async {
-      ArtifactStore.flutterRoot = '../..';
+      Cache.flutterRoot = '../..';
 
       CreateCommand command = new CreateCommand();
       CommandRunner runner = createTestCommandRunner(command);
@@ -52,7 +52,7 @@ void main() {
 
     // Verify that we fail with an error code when the file exists.
     testUsingContext('fails when file exists', () async {
-      ArtifactStore.flutterRoot = '../..';
+      Cache.flutterRoot = '../..';
       CreateCommand command = new CreateCommand();
       CommandRunner runner = createTestCommandRunner(command);
       File existingFile = new File("${temp.path.toString()}/bad");
@@ -64,7 +64,7 @@ void main() {
 }
 
 Future<Null> _createAndAnalyzeProject(Directory dir, List<String> createArgs) async {
-  ArtifactStore.flutterRoot = '../..';
+  Cache.flutterRoot = '../..';
   CreateCommand command = new CreateCommand();
   CommandRunner runner = createTestCommandRunner(command);
   List<String> args = <String>['create'];

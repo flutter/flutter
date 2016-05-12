@@ -5,9 +5,9 @@
 import 'dart:async';
 import 'dart:io';
 
-import '../artifacts.dart';
 import '../base/process.dart';
 import '../dart/pub.dart';
+import '../cache.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
@@ -27,17 +27,17 @@ class UpgradeCommand extends FlutterCommand {
     try {
       runCheckedSync(<String>[
         'git', 'rev-parse', '@{u}'
-      ], workingDirectory: ArtifactStore.flutterRoot);
+      ], workingDirectory: Cache.flutterRoot);
     } catch (e) {
       printError('Unable to upgrade Flutter: no upstream repository configured.');
       return 1;
     }
 
-    printStatus('Upgrading Flutter from ${ArtifactStore.flutterRoot}...');
+    printStatus('Upgrading Flutter from ${Cache.flutterRoot}...');
 
     int code = await runCommandAndStreamOutput(
       <String>['git', 'pull', '--ff-only'],
-      workingDirectory: ArtifactStore.flutterRoot,
+      workingDirectory: Cache.flutterRoot,
       mapFunction: (String line) => matchesGitLine(line) ? null : line
     );
 
@@ -49,10 +49,10 @@ class UpgradeCommand extends FlutterCommand {
     printStatus('Upgrading engine...');
     code = await runCommandAndStreamOutput(<String>[
       'bin/flutter', '--no-color', 'precache'
-    ], workingDirectory: ArtifactStore.flutterRoot);
+    ], workingDirectory: Cache.flutterRoot);
 
     printStatus('');
-    printStatus(FlutterVersion.getVersion(ArtifactStore.flutterRoot).toString());
+    printStatus(FlutterVersion.getVersion(Cache.flutterRoot).toString());
 
     if (FileSystemEntity.isFileSync('pubspec.yaml')) {
       printStatus('');
