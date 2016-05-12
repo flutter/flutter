@@ -37,7 +37,7 @@ enum HostPlatform {
 String getNameForHostPlatform(HostPlatform platform) {
   switch (platform) {
     case HostPlatform.darwin_x64:
-      return "mac_release";
+      return "mac_debug";
     case HostPlatform.linux_x64:
       return "linux-x64";
   }
@@ -64,7 +64,7 @@ String getNameForTargetPlatform(TargetPlatform platform) {
     case TargetPlatform.ios:
       return "ios_release";
     case TargetPlatform.darwin_x64:
-      return "mac_release";
+      return "mac_debug";
     case TargetPlatform.linux_x64:
       return "linux-x64";
   }
