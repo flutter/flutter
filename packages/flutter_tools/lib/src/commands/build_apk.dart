@@ -12,7 +12,7 @@ import '../base/file_system.dart' show ensureDirectoryExists;
 import '../base/os.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
-import '../build_configuration.dart';
+import '../build_info.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
 import '../runner/flutter_command.dart';

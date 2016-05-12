@@ -7,13 +7,19 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import 'base/context.dart';
-import 'build_configuration.dart';
+import 'build_info.dart';
 import 'cache.dart';
 import 'globals.dart';
 
 enum HostTool {
   SkySnapshot,
+  SkyShell,
 }
+
+const Map<HostTool, String> _kHostToolFileName = const <HostTool, String>{
+  HostTool.SkySnapshot: 'sky_snapshot',
+  HostTool.SkyShell: 'sky_shell',
+};
 
 /// A ToolConfiguration can return the tools directory for the current host platform
 /// and the engine artifact directory for a given target platform. It is configurable
@@ -38,9 +44,6 @@ class ToolConfiguration {
   /// Path to a local engine build acting as a source for artifacts (--local-engine).
   String engineBuildPath;
 
-  /// The engine mode to use (only relevent when [engineSrcPath] is set).
-  bool engineRelease;
-
   bool get isLocalEngine => engineSrcPath != null;
 
   /// Return the directory that contains engine artifacts for the given targets.
@@ -53,46 +56,8 @@ class ToolConfiguration {
   }
 
   Directory _getEngineArtifactsDirectory(TargetPlatform platform, BuildMode mode) {
-    if (engineSrcPath != null) {
-      List<String> buildDir = <String>[];
-
-      switch (platform) {
-        case TargetPlatform.android_arm:
-        case TargetPlatform.android_x64:
-        case TargetPlatform.android_x86:
-          buildDir.add('android');
-          break;
-
-        // TODO(devoncarew): We will need an ios vs ios_x86 target (for ios vs. ios_sim).
-        case TargetPlatform.ios:
-          buildDir.add('ios');
-          break;
-
-        // These targets don't have engine artifacts.
-        case TargetPlatform.darwin_x64:
-        case TargetPlatform.linux_x64:
-          buildDir.add('host');
-          break;
-      }
-
-      buildDir.add(getModeName(mode));
-
-      if (!engineRelease)
-        buildDir.add('unopt');
-
-      // Add a suffix for the target architecture.
-      switch (platform) {
-        case TargetPlatform.android_x64:
-          buildDir.add('x64');
-          break;
-        case TargetPlatform.android_x86:
-          buildDir.add('x86');
-          break;
-        default:
-          break;
-      }
-
-      return new Directory(path.join(engineSrcPath, 'out', buildDir.join('_')));
+    if (engineBuildPath != null) {
+      return new Directory(engineBuildPath);
     } else {
       String suffix = mode != BuildMode.debug ? '-${getModeName(mode)}' : '';
 
@@ -104,15 +69,25 @@ class ToolConfiguration {
   }
 
   String getHostToolPath(HostTool tool) {
-    if (tool != HostTool.SkySnapshot)
-      throw new Exception('Unexpected host tool: $tool');
-
-    if (isLocalEngine) {
-      return path.join(engineBuildPath, 'clang_x64', 'sky_snapshot');
-    } else {
+    if (engineBuildPath == null) {
       return path.join(_cache.getArtifactDirectory('engine').path,
                        getNameForHostPlatform(getCurrentHostPlatform()),
-                       'sky_snapshot');
+                       _kHostToolFileName[tool]);
     }
+
+    if (tool == HostTool.SkySnapshot) {
+      String clangPath = path.join(engineBuildPath, 'clang_x64', 'sky_snapshot');
+      if (FileSystemEntity.isFileSync(clangPath))
+        return clangPath;
+      return path.join(engineBuildPath, 'sky_snapshot');
+    } else if (tool == HostTool.SkyShell) {
+      if (getCurrentHostPlatform() == HostPlatform.linux_x64) {
+        return path.join(engineBuildPath, 'sky_shell');
+      } else if (getCurrentHostPlatform() == HostPlatform.darwin_x64) {
+        return path.join(engineBuildPath, 'SkyShell.app', 'Contents', 'MacOS', 'SkyShell');
+      }
+    }
+
+    throw 'Unexpected host tool: $tool';
   }
 }

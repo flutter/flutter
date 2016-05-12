@@ -11,7 +11,7 @@ import 'package:path/path.dart' as path;
 import '../application_package.dart';
 import '../base/os.dart';
 import '../base/process.dart';
-import '../build_configuration.dart';
+import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
 import 'mac.dart';
