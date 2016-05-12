@@ -115,7 +115,7 @@ class ImageCache {
   /// extraneous elements are evicted immediately. Setting this to zero and then
   /// returning it to its original value will therefore immediately clear the
   /// cache.
-  void set maximumSize(int value) {
+  set maximumSize(int value) {
     assert(value != null);
     assert(value >= 0);
     if (value == maximumSize)

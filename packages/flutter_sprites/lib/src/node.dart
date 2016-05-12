@@ -93,7 +93,7 @@ class Node {
     return _constraints;
   }
 
-  void set constraints(List<Constraint> constraints) {
+  set constraints(List<Constraint> constraints) {
     _constraints = constraints;
     if (_spriteBox != null) _spriteBox._constrainedNodes = null;
   }
@@ -131,7 +131,7 @@ class Node {
   ///     myNode.rotation = 45.0;
   double get rotation => _rotation;
 
-  void set rotation(double rotation) {
+  set rotation(double rotation) {
     assert(rotation != null);
 
     _rotation = rotation;
@@ -144,7 +144,7 @@ class Node {
   ///     myNode.position = new Point(42.0, 42.0);
   Point get position => _position;
 
-  void set position(Point position) {
+  set position(Point position) {
     assert(position != null);
 
     _position = position;
@@ -156,7 +156,7 @@ class Node {
   ///     myNode.skewX = 45.0;
   double get skewX => _skewX;
 
-  void set skewX (double skewX) {
+  set skewX (double skewX) {
     assert(skewX != null);
     _skewX = skewX;
     invalidateTransformMatrix();
@@ -167,7 +167,7 @@ class Node {
   ///     myNode.skewY = 45.0;
   double get skewY => _skewY;
 
-  void set skewY (double skewY) {
+  set skewY (double skewY) {
     assert(skewY != null);
     _skewY = skewY;
     invalidateTransformMatrix();
@@ -183,7 +183,7 @@ class Node {
   ///     nodeBehind.zPosition = -1.0;
   double get zPosition => _zPosition;
 
-  void set zPosition(double zPosition) {
+  set zPosition(double zPosition) {
     assert(zPosition != null);
     _zPosition = zPosition;
     if (_parent != null) {
@@ -201,7 +201,7 @@ class Node {
     return _scaleX;
   }
 
-  void set scale(double scale) {
+  set scale(double scale) {
     assert(scale != null);
 
     _scaleX = _scaleY = scale;
@@ -213,7 +213,7 @@ class Node {
   ///     myNode.scaleX = 5.0;
   double get scaleX => _scaleX;
 
-  void set scaleX(double scaleX) {
+  set scaleX(double scaleX) {
     assert(scaleX != null);
 
     _scaleX = scaleX;
@@ -225,7 +225,7 @@ class Node {
   ///     myNode.scaleY = 5.0;
   double get scaleY => _scaleY;
 
-  void set scaleY(double scaleY) {
+  set scaleY(double scaleY) {
     assert(scaleY != null);
 
     _scaleY = scaleY;
@@ -599,7 +599,7 @@ class Node {
   ///     }
   bool get userInteractionEnabled => _userInteractionEnabled;
 
-  void set userInteractionEnabled(bool userInteractionEnabled) {
+  set userInteractionEnabled(bool userInteractionEnabled) {
     _userInteractionEnabled = userInteractionEnabled;
     if (_spriteBox != null) _spriteBox._eventTargets = null;
   }

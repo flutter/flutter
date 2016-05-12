@@ -89,7 +89,7 @@ abstract class InkHighlight {
 
   /// The color of the ink used to emphasize part of the material.
   Color get color;
-  void set color(Color value);
+  set color(Color value);
 }
 
 /// An interface for creating [InkSplash]s and [InkHighlight]s on a material.
@@ -596,7 +596,7 @@ class _InkHighlight extends InkFeature implements InkHighlight {
   Color _color;
 
   @override
-  void set color(Color value) {
+  set color(Color value) {
     if (value == _color)
       return;
     _color = value;

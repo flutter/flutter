@@ -148,7 +148,7 @@ abstract class RenderDecoratedSector extends RenderSector {
 
   BoxDecoration _decoration;
   BoxDecoration get decoration => _decoration;
-  void set decoration (BoxDecoration value) {
+  set decoration (BoxDecoration value) {
     if (value == _decoration)
       return;
     _decoration = value;
@@ -220,7 +220,7 @@ class RenderSectorRing extends RenderSectorWithChildren {
 
   double _desiredDeltaRadius;
   double get desiredDeltaRadius => _desiredDeltaRadius;
-  void set desiredDeltaRadius(double value) {
+  set desiredDeltaRadius(double value) {
     assert(value != null);
     if (_desiredDeltaRadius != value) {
       _desiredDeltaRadius = value;
@@ -230,7 +230,7 @@ class RenderSectorRing extends RenderSectorWithChildren {
 
   double _padding;
   double get padding => _padding;
-  void set padding(double value) {
+  set padding(double value) {
     // TODO(ianh): avoid code duplication
     assert(value != null);
     if (_padding != value) {
@@ -334,7 +334,7 @@ class RenderSectorSlice extends RenderSectorWithChildren {
 
   double _desiredDeltaTheta;
   double get desiredDeltaTheta => _desiredDeltaTheta;
-  void set desiredDeltaTheta(double value) {
+  set desiredDeltaTheta(double value) {
     assert(value != null);
     if (_desiredDeltaTheta != value) {
       _desiredDeltaTheta = value;
@@ -344,7 +344,7 @@ class RenderSectorSlice extends RenderSectorWithChildren {
 
   double _padding;
   double get padding => _padding;
-  void set padding(double value) {
+  set padding(double value) {
     // TODO(ianh): avoid code duplication
     assert(value != null);
     if (_padding != value) {
@@ -442,7 +442,7 @@ class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChil
 
   double _innerRadius;
   double get innerRadius => _innerRadius;
-  void set innerRadius(double value) {
+  set innerRadius(double value) {
     _innerRadius = value;
     markNeedsLayout();
   }

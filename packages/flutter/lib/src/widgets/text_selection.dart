@@ -40,7 +40,7 @@ abstract class TextSelectionDelegate {
   InputValue get inputValue;
 
   /// Sets the current text input (replaces the whole line).
-  void set inputValue(InputValue value);
+  set inputValue(InputValue value);
 
   /// Hides the text selection toolbar.
   void hideToolbar();
@@ -147,7 +147,7 @@ class TextSelectionOverlay implements TextSelectionDelegate {
   InputValue get inputValue => _input;
 
   @override
-  void set inputValue(InputValue value) {
+  set inputValue(InputValue value) {
     update(value);
     if (onSelectionOverlayChanged != null)
       onSelectionOverlayChanged(value);

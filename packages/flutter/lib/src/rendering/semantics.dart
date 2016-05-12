@@ -80,7 +80,7 @@ class SemanticsNode extends AbstractNode {
 
   Matrix4 get transform => _transform;
   Matrix4 _transform; // defaults to null, which we say means the identity matrix
-  void set transform (Matrix4 value) {
+  set transform (Matrix4 value) {
     if (!MatrixUtils.matrixEquals(_transform, value)) {
       _transform = value;
       _markDirty();
@@ -89,7 +89,7 @@ class SemanticsNode extends AbstractNode {
 
   Rect get rect => _rect;
   Rect _rect = Rect.zero;
-  void set rect (Rect value) {
+  set rect (Rect value) {
     assert(value != null);
     if (_rect != value) {
       _rect = value;
@@ -119,34 +119,34 @@ class SemanticsNode extends AbstractNode {
   }
 
   bool get mergeAllDescendantsIntoThisNode => _flags[_SemanticFlags.mergeAllDescendantsIntoThisNode];
-  void set mergeAllDescendantsIntoThisNode(bool value) => _setFlag(_SemanticFlags.mergeAllDescendantsIntoThisNode, value);
+  set mergeAllDescendantsIntoThisNode(bool value) => _setFlag(_SemanticFlags.mergeAllDescendantsIntoThisNode, value);
 
   bool get _inheritedMergeAllDescendantsIntoThisNode => _flags[_SemanticFlags.inheritedMergeAllDescendantsIntoThisNode];
-  void set _inheritedMergeAllDescendantsIntoThisNode(bool value) => _setFlag(_SemanticFlags.inheritedMergeAllDescendantsIntoThisNode, value);
+  set _inheritedMergeAllDescendantsIntoThisNode(bool value) => _setFlag(_SemanticFlags.inheritedMergeAllDescendantsIntoThisNode, value);
 
   bool get _shouldMergeAllDescendantsIntoThisNode => mergeAllDescendantsIntoThisNode || _inheritedMergeAllDescendantsIntoThisNode;
 
   bool get canBeTapped => _flags[_SemanticFlags.canBeTapped];
-  void set canBeTapped(bool value) => _setFlag(_SemanticFlags.canBeTapped, value, needsHandler: true);
+  set canBeTapped(bool value) => _setFlag(_SemanticFlags.canBeTapped, value, needsHandler: true);
 
   bool get canBeLongPressed => _flags[_SemanticFlags.canBeLongPressed];
-  void set canBeLongPressed(bool value) => _setFlag(_SemanticFlags.canBeLongPressed, value, needsHandler: true);
+  set canBeLongPressed(bool value) => _setFlag(_SemanticFlags.canBeLongPressed, value, needsHandler: true);
 
   bool get canBeScrolledHorizontally => _flags[_SemanticFlags.canBeScrolledHorizontally];
-  void set canBeScrolledHorizontally(bool value) => _setFlag(_SemanticFlags.canBeScrolledHorizontally, value, needsHandler: true);
+  set canBeScrolledHorizontally(bool value) => _setFlag(_SemanticFlags.canBeScrolledHorizontally, value, needsHandler: true);
 
   bool get canBeScrolledVertically => _flags[_SemanticFlags.canBeScrolledVertically];
-  void set canBeScrolledVertically(bool value) => _setFlag(_SemanticFlags.canBeScrolledVertically, value, needsHandler: true);
+  set canBeScrolledVertically(bool value) => _setFlag(_SemanticFlags.canBeScrolledVertically, value, needsHandler: true);
 
   bool get hasCheckedState => _flags[_SemanticFlags.hasCheckedState];
-  void set hasCheckedState(bool value) => _setFlag(_SemanticFlags.hasCheckedState, value);
+  set hasCheckedState(bool value) => _setFlag(_SemanticFlags.hasCheckedState, value);
 
   bool get isChecked => _flags[_SemanticFlags.isChecked];
-  void set isChecked(bool value) => _setFlag(_SemanticFlags.isChecked, value);
+  set isChecked(bool value) => _setFlag(_SemanticFlags.isChecked, value);
 
   String get label => _label;
   String _label = '';
-  void set label(String value) {
+  set label(String value) {
     assert(value != null);
     if (_label != value) {
       _label = value;

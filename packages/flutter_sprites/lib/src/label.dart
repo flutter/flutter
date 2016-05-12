@@ -13,7 +13,7 @@ class Label extends Node {
   /// The text being drawn by the label.
   String get text => _text;
   String _text;
-  void set text(String text) {
+  set text(String text) {
     _text = text;
     _painter = null;
   }
@@ -21,7 +21,7 @@ class Label extends Node {
   /// The style to draw the text in.
   TextStyle get textStyle => _textStyle;
   TextStyle _textStyle;
-  void set textStyle(TextStyle textStyle) {
+  set textStyle(TextStyle textStyle) {
     _textStyle = textStyle;
     _painter = null;
   }

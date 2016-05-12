@@ -421,7 +421,7 @@ class RenderTable extends RenderBox {
 
   int get columns => _columns;
   int _columns;
-  void set columns(int value) {
+  set columns(int value) {
     assert(value != null);
     assert(value >= 0);
     if (value == columns)
@@ -449,7 +449,7 @@ class RenderTable extends RenderBox {
 
   int get rows => _rows;
   int _rows;
-  void set rows(int value) {
+  set rows(int value) {
     assert(value != null);
     assert(value >= 0);
     if (value == rows)
@@ -467,7 +467,7 @@ class RenderTable extends RenderBox {
 
   Map<int, TableColumnWidth> get columnWidths => new Map<int, TableColumnWidth>.unmodifiable(_columnWidths);
   Map<int, TableColumnWidth> _columnWidths;
-  void set columnWidths(Map<int, TableColumnWidth> value) {
+  set columnWidths(Map<int, TableColumnWidth> value) {
     value ??= new HashMap<int, TableColumnWidth>();
     if (_columnWidths == value)
       return;
@@ -484,7 +484,7 @@ class RenderTable extends RenderBox {
 
   TableColumnWidth get defaultColumnWidth => _defaultColumnWidth;
   TableColumnWidth _defaultColumnWidth;
-  void set defaultColumnWidth(TableColumnWidth value) {
+  set defaultColumnWidth(TableColumnWidth value) {
     assert(value != null);
     if (defaultColumnWidth == value)
       return;
@@ -494,7 +494,7 @@ class RenderTable extends RenderBox {
 
   TableBorder get border => _border;
   TableBorder _border;
-  void set border(TableBorder value) {
+  set border(TableBorder value) {
     if (border == value)
       return;
     _border = value;
@@ -504,7 +504,7 @@ class RenderTable extends RenderBox {
   List<Decoration> get rowDecorations => new List<Decoration>.unmodifiable(_rowDecorations ?? const <Decoration>[]);
   List<Decoration> _rowDecorations;
   List<BoxPainter> _rowDecorationPainters;
-  void set rowDecorations(List<Decoration> value) {
+  set rowDecorations(List<Decoration> value) {
     if (_rowDecorations == value)
       return;
     _removeListenersIfNeeded();
@@ -535,7 +535,7 @@ class RenderTable extends RenderBox {
 
   TableCellVerticalAlignment get defaultVerticalAlignment => _defaultVerticalAlignment;
   TableCellVerticalAlignment _defaultVerticalAlignment;
-  void set defaultVerticalAlignment (TableCellVerticalAlignment value) {
+  set defaultVerticalAlignment (TableCellVerticalAlignment value) {
     if (_defaultVerticalAlignment == value)
       return;
     _defaultVerticalAlignment = value;
@@ -544,7 +544,7 @@ class RenderTable extends RenderBox {
 
   TextBaseline get textBaseline => _textBaseline;
   TextBaseline _textBaseline;
-  void set textBaseline (TextBaseline value) {
+  set textBaseline (TextBaseline value) {
     if (_textBaseline == value)
       return;
     _textBaseline = value;

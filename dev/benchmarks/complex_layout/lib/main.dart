@@ -30,7 +30,7 @@ class ComplexLayoutAppState extends State<ComplexLayoutApp> {
 
   bool _lightTheme = true;
   bool get lightTheme => _lightTheme;
-  void set lightTheme(bool value) {
+  set lightTheme(bool value) {
     setState(() {
       _lightTheme = value;
     });

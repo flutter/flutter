@@ -1929,7 +1929,7 @@ abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> implem
   ChildType _child;
   /// The render object's unique child
   ChildType get child => _child;
-  void set child (ChildType value) {
+  set child (ChildType value) {
     if (_child != null)
       dropChild(_child);
     _child = value;
