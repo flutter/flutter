@@ -20,6 +20,7 @@ void ClipRectLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 }
 
 void ClipRectLayer::Paint(PaintContext& context) {
+  TRACE_EVENT0("flutter", "ClipRectLayer::Paint");
   SkAutoCanvasRestore save(&context.canvas, true);
   context.canvas.clipRect(paint_bounds());
   PaintChildren(context);

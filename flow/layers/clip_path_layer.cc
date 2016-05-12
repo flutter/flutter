@@ -20,6 +20,7 @@ void ClipPathLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 }
 
 void ClipPathLayer::Paint(PaintContext& context) {
+  TRACE_EVENT0("flutter", "ClipPathLayer::Paint");
   SkAutoCanvasRestore save(&context.canvas, false);
   context.canvas.saveLayer(&paint_bounds(), nullptr);
   context.canvas.clipPath(clip_path_);

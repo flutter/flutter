@@ -25,6 +25,7 @@ void ChildSceneLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 }
 
 void ChildSceneLayer::Paint(PaintContext& context) {
+  TRACE_EVENT0("flutter", "ChildSceneLayer::Paint");
 }
 
 void ChildSceneLayer::UpdateScene(mojo::gfx::composition::SceneUpdate* update,

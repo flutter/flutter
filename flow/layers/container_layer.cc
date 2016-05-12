@@ -18,6 +18,7 @@ void ContainerLayer::Add(std::unique_ptr<Layer> layer) {
 }
 
 void ContainerLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
+  TRACE_EVENT0("flutter", "ContainerLayer::Preroll");
   PrerollChildren(context, matrix);
   set_paint_bounds(context->child_paint_bounds);
 }
@@ -34,6 +35,7 @@ void ContainerLayer::PrerollChildren(PrerollContext* context,
 }
 
 void ContainerLayer::PaintChildren(PaintContext& context) const {
+  TRACE_EVENT0("flutter", "ContainerLayer::PaintChildren");
   for (auto& layer : layers_)
     layer->Paint(context);
 }
