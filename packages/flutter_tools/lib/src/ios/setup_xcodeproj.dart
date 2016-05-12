@@ -7,9 +7,9 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import '../artifacts.dart';
 import '../base/process.dart';
-import '../build_configuration.dart';
+import '../build_info.dart';
+import '../cache.dart';
 import '../globals.dart';
 import '../runner/flutter_command_runner.dart';
 
@@ -85,7 +85,7 @@ bool xcodeProjectRequiresUpdate() {
     return true;
   }
 
-  if (revisionFile.readAsStringSync() != ArtifactStore.engineRevision) {
+  if (revisionFile.readAsStringSync() != Cache.engineRevision) {
     printTrace("The revision stamp and the Flutter engine revision differ. Project needs to be updated.");
     return true;
   }
@@ -121,7 +121,7 @@ Future<int> setupXcodeProjectHarness(String flutterProjectPath) async {
   // Step 4: Write the REVISION file
   File revisionFile = new File(path.join(xcodeprojPath, 'REVISION'));
   revisionFile.createSync();
-  revisionFile.writeAsStringSync(ArtifactStore.engineRevision);
+  revisionFile.writeAsStringSync(Cache.engineRevision);
 
   // Step 5: Tell the user the location of the generated project.
   printStatus('Xcode project created in $iosFilesPath/.');

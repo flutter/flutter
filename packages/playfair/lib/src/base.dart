@@ -79,7 +79,7 @@ class _RenderChart extends RenderConstrainedBox {
   final ChartPainter _painter;
 
   ChartData get data => _painter.data;
-  void set data(ChartData value) {
+  set data(ChartData value) {
     assert(value != null);
     if (value == _painter.data)
       return;
@@ -88,7 +88,7 @@ class _RenderChart extends RenderConstrainedBox {
   }
 
   TextTheme get textTheme => _painter.textTheme;
-  void set textTheme(TextTheme value) {
+  set textTheme(TextTheme value) {
     assert(value != null);
     if (value == _painter.textTheme)
       return;
@@ -125,7 +125,7 @@ class ChartPainter {
 
   ChartData _data;
   ChartData get data => _data;
-  void set data(ChartData value) {
+  set data(ChartData value) {
     assert(data != null);
     if (_data == value)
       return;
@@ -135,7 +135,7 @@ class ChartPainter {
 
   TextTheme _textTheme;
   TextTheme get textTheme => _textTheme;
-  void set textTheme(TextTheme value) {
+  set textTheme(TextTheme value) {
     assert(value != null);
     if (_textTheme == value)
       return;

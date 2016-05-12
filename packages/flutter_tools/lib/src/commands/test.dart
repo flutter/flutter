@@ -8,11 +8,10 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:test/src/executable.dart' as executable; // ignore: implementation_imports
 
-import '../artifacts.dart';
-import '../build_configuration.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../test/flutter_platform.dart' as loader;
+import '../toolchain.dart';
 
 class TestCommand extends FlutterCommand {
   TestCommand() {
@@ -40,23 +39,6 @@ class TestCommand extends FlutterCommand {
     }
     return true;
   };
-
-  Future<String> _getShellPath(BuildConfiguration config) async {
-    if (config.type == BuildType.prebuilt) {
-      Artifact artifact = ArtifactStore.getArtifact(
-        type: ArtifactType.shell, targetPlatform: config.targetPlatform);
-      return ArtifactStore.getPath(artifact);
-    } else {
-      switch (config.targetPlatform) {
-        case TargetPlatform.linux_x64:
-          return path.join(config.buildDir, 'sky_shell');
-        case TargetPlatform.darwin_x64:
-          return path.join(config.buildDir, 'SkyShell.app', 'Contents', 'MacOS', 'SkyShell');
-        default:
-          throw new Exception('Unsupported platform.');
-      }
-    }
-  }
 
   Iterable<String> _findTests(Directory directory) {
     return directory.listSync(recursive: true, followLinks: false)
@@ -102,27 +84,13 @@ class TestCommand extends FlutterCommand {
     testArgs.insert(0, '--');
     if (Platform.environment['TERM'] == 'dumb')
       testArgs.insert(0, '--no-color');
-    List<BuildConfiguration> configs = buildConfigurations;
-    bool foundOne = false;
+
     loader.installHook();
-    for (BuildConfiguration config in configs) {
-      if (!config.testable)
-        continue;
-      foundOne = true;
-      loader.shellPath = path.absolute(await _getShellPath(config));
-      if (!FileSystemEntity.isFileSync(loader.shellPath)) {
-          printError('Cannot find Flutter shell at ${loader.shellPath}');
-        return 1;
-      }
-      await _runTests(testArgs, testDir);
-      if (exitCode != 0)
-        return exitCode;
-    }
-    if (!foundOne) {
-      printError('At least one of --engine-debug or --engine-release must be set, to specify the local build products to test.');
+    loader.shellPath = tools.getHostToolPath(HostTool.SkyShell);
+    if (!FileSystemEntity.isFileSync(loader.shellPath)) {
+        printError('Cannot find Flutter shell at ${loader.shellPath}');
       return 1;
     }
-
-    return 0;
+    return await _runTests(testArgs, testDir);
   }
 }

@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import '../application_package.dart';
-import '../build_configuration.dart';
+import '../build_info.dart';
 import '../globals.dart';
 import '../ios/mac.dart';
 import '../runner/flutter_command.dart';

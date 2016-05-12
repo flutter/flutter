@@ -147,10 +147,7 @@ class AndroidSdk {
         .toList();
     }
 
-    // Here we match up platforms with cooresponding build-tools. If we don't
-    // have a match, we don't return anything for that platform version. So if
-    // the user only has 'android-22' and 'build-tools/19.0.0', we don't find
-    // an Android sdk.
+    // Match up platforms with the best cooresponding build-tools.
     _sdkVersions = platforms.map((String platformName) {
       int platformVersion;
 
@@ -166,6 +163,8 @@ class AndroidSdk {
       Version buildToolsVersion = Version.primary(buildTools.where((Version version) {
         return version.major == platformVersion;
       }).toList());
+
+      buildToolsVersion ??= Version.primary(buildTools);
 
       if (buildToolsVersion == null)
         return null;

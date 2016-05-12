@@ -6,11 +6,11 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import '../artifacts.dart';
+import '../cache.dart';
 
 /// Locate the Dart SDK.
 String get dartSdkPath {
-  return path.join(ArtifactStore.flutterRoot, 'bin', 'cache', 'dart-sdk');
+  return path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk');
 }
 
 /// Return the platform specific name for the given Dart SDK binary. So, `pub`

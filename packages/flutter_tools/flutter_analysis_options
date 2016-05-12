@@ -31,7 +31,7 @@ linter:
     - annotate_overrides
     - avoid_as
     - avoid_init_to_null
-    # - avoid_return_types_on_setters # https://github.com/dart-lang/linter/issues/202
+    - avoid_return_types_on_setters
     - camel_case_types
     # - constant_identifier_names # https://github.com/dart-lang/linter/issues/204 (and 203)
     - empty_constructor_bodies

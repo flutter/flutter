@@ -116,7 +116,7 @@ class AnimationController extends Animation<double>
   ///
   /// Value listeners are notified even if this does not change the value.
   /// Status listeners are notified if the animation was previously playing.
-  void set value(double newValue) {
+  set value(double newValue) {
     assert(newValue != null);
     stop();
     _value = newValue.clamp(lowerBound, upperBound);

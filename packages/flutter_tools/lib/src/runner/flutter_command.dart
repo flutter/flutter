@@ -8,13 +8,12 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 
 import '../application_package.dart';
-import '../build_configuration.dart';
+import '../build_info.dart';
 import '../dart/pub.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
 import '../package_map.dart';
-import '../toolchain.dart';
 import '../usage.dart';
 import 'flutter_command_runner.dart';
 
@@ -43,8 +42,6 @@ abstract class FlutterCommand extends Command {
   bool _usesPubOption = false;
 
   bool get shouldRunPub => _usesPubOption && argResults['pub'];
-
-  List<BuildConfiguration> get buildConfigurations => runner.buildConfigurations;
 
   void usesTargetOption() {
     argParser.addOption('target',
@@ -84,10 +81,6 @@ abstract class FlutterCommand extends Command {
     if (argResults['release'])
       mode = BuildMode.release;
     return mode;
-  }
-
-  void _setupToolchain() {
-    toolchain ??= Toolchain.forConfigs(buildConfigurations);
   }
 
   void _setupApplicationPackages() {
@@ -166,7 +159,6 @@ abstract class FlutterCommand extends Command {
     if (flutterUsage.isFirstRun)
       flutterUsage.printUsage();
 
-    _setupToolchain();
     _setupApplicationPackages();
 
     String commandPath = usagePath;
@@ -215,5 +207,4 @@ abstract class FlutterCommand extends Command {
   Device get deviceForCommand => _deviceForCommand;
 
   ApplicationPackageStore applicationPackages;
-  Toolchain toolchain;
 }

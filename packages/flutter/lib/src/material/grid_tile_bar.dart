@@ -85,10 +85,14 @@ class GridTileBar extends StatelessWidget {
             children: <Widget>[
               new DefaultTextStyle(
                 style: Typography.white.subhead,
+                softWrap: false,
+                overflow: TextOverflow.ellipsis,
                 child: title
               ),
               new DefaultTextStyle(
                 style: Typography.white.caption,
+                softWrap: false,
+                overflow: TextOverflow.ellipsis,
                 child: subtitle
               )
             ]
@@ -100,6 +104,8 @@ class GridTileBar extends StatelessWidget {
         new Flexible(
           child: new DefaultTextStyle(
             style: Typography.white.subhead,
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
             child: title ?? subtitle
           )
         )

@@ -31,23 +31,23 @@ class Photo {
 
 const String photoHeroTag = 'Photo';
 
-typedef void PhotoFavoriteCallback(Photo photo);
+typedef void BannerTapCallback(Photo photo);
 
 class GridDemoPhotoItem extends StatelessWidget {
   GridDemoPhotoItem({
     Key key,
     this.photo,
     this.tileStyle,
-    this.onPressedFavorite
+    this.onBannerTap
   }) : super(key: key) {
     assert(photo != null && photo.isValid);
     assert(tileStyle != null);
-    assert(onPressedFavorite != null);
+    assert(onBannerTap != null);
   }
 
   final Photo photo;
   final GridDemoTileStyle tileStyle;
-  final PhotoFavoriteCallback onPressedFavorite;
+  final BannerTapCallback onBannerTap; // User taps on the photo's header or footer.
 
   void showPhoto(BuildContext context) {
     Key photoKey = new Key(photo.assetName);
@@ -99,28 +99,32 @@ class GridDemoPhotoItem extends StatelessWidget {
 
       case GridDemoTileStyle.oneLine:
         return new GridTile(
-          header: new GridTileBar(
-            backgroundColor: Colors.black45,
-            leading: new IconButton(
-              icon: icon,
-              color: Colors.white,
-              onPressed: () { onPressedFavorite(photo); }
-            ),
-            title: new Text(photo.title)
+          header: new GestureDetector(
+            onTap: () { onBannerTap(photo); },
+            child: new GridTileBar(
+              title: new Text(photo.title),
+              backgroundColor: Colors.black45,
+              leading: new Icon(
+                icon: icon,
+                color: Colors.white
+              )
+            )
           ),
           child: image
         );
 
       case GridDemoTileStyle.twoLine:
         return new GridTile(
-          footer: new GridTileBar(
-            backgroundColor: Colors.black45,
-            title: new Text(photo.title),
-            subtitle: new Text(photo.caption),
-            trailing: new IconButton(
-              icon: icon,
-              color: Colors.white,
-              onPressed: () { onPressedFavorite(photo); }
+          footer: new GestureDetector(
+            onTap: () { onBannerTap(photo); },
+            child: new GridTileBar(
+              backgroundColor: Colors.black45,
+              title: new Text(photo.title),
+              subtitle: new Text(photo.caption),
+              trailing: new Icon(
+                icon: icon,
+                color: Colors.white
+              )
             )
           ),
           child: image
@@ -204,31 +208,9 @@ class GridListDemoState extends State<GridListDemo> {
     ),
   ];
 
-  void showTileStyleMenu(BuildContext context) {
-    final List<PopupMenuItem<GridDemoTileStyle>> items = <PopupMenuItem<GridDemoTileStyle>>[
-      new PopupMenuItem<GridDemoTileStyle>(
-        value: GridDemoTileStyle.imageOnly,
-        child: new Text('Image only')
-      ),
-      new PopupMenuItem<GridDemoTileStyle>(
-        value: GridDemoTileStyle.oneLine,
-        child: new Text('One line')
-      ),
-      new PopupMenuItem<GridDemoTileStyle>(
-        value: GridDemoTileStyle.twoLine,
-        child: new Text('Two line')
-      )
-    ];
-
-    final EdgeInsets padding = MediaQuery.of(context).padding;
-    final RelativeRect position = new RelativeRect.fromLTRB(
-      0.0, padding.top + 16.0, padding.right + 16.0, 0.0
-    );
-
-    showMenu(context: context, position: position, items: items).then((GridDemoTileStyle value) {
-      setState(() {
-        tileStyle = value;
-      });
+  void changeTileStyle(GridDemoTileStyle value) {
+    setState(() {
+      tileStyle = value;
     });
   }
 
@@ -242,10 +224,22 @@ class GridListDemoState extends State<GridListDemo> {
       appBar: new AppBar(
         title: new Text('Grid list'),
         actions: <Widget>[
-          new IconButton(
-            icon: Icons.more_vert,
-            onPressed: () { showTileStyleMenu(context); },
-            tooltip: 'Show menu'
+          new PopupMenuButton<GridDemoTileStyle>(
+            onSelected: changeTileStyle,
+            itemBuilder: (BuildContext context) => <PopupMenuItem<GridDemoTileStyle>>[
+              new PopupMenuItem<GridDemoTileStyle>(
+                value: GridDemoTileStyle.imageOnly,
+                child: new Text('Image only')
+              ),
+              new PopupMenuItem<GridDemoTileStyle>(
+                value: GridDemoTileStyle.oneLine,
+                child: new Text('One line')
+              ),
+              new PopupMenuItem<GridDemoTileStyle>(
+                value: GridDemoTileStyle.twoLine,
+                child: new Text('Two line')
+              )
+            ]
           )
         ]
       ),
@@ -264,7 +258,7 @@ class GridListDemoState extends State<GridListDemo> {
                 return new GridDemoPhotoItem(
                   photo: photo,
                   tileStyle: tileStyle,
-                  onPressedFavorite: (Photo photo) {
+                  onBannerTap: (Photo photo) {
                     setState(() {
                       photo.isFavorite = !photo.isFavorite;
                     });

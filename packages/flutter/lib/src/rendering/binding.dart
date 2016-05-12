@@ -94,7 +94,7 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   RenderView _renderView;
   /// Sets the given [RenderView] object (which must not be null), and its tree, to
   /// be the new render tree to display. The previous tree, if any, is detached.
-  void set renderView(RenderView value) {
+  set renderView(RenderView value) {
     assert(value != null);
     if (_renderView == value)
       return;

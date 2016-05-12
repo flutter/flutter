@@ -2,78 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import 'artifacts.dart';
 import 'base/context.dart';
-import 'base/process.dart';
-import 'build_configuration.dart';
+import 'build_info.dart';
 import 'cache.dart';
 import 'globals.dart';
-import 'package_map.dart';
 
-class SnapshotCompiler {
-  SnapshotCompiler(this._path);
-
-  final String _path;
-
-  Future<int> createSnapshot({
-    String mainPath,
-    String snapshotPath,
-    String depfilePath,
-    String buildOutputPath
-  }) {
-    assert(mainPath != null);
-    assert(snapshotPath != null);
-
-    final List<String> args = <String>[
-      _path,
-      mainPath,
-      '--packages=${PackageMap.instance.packagesPath}',
-      '--snapshot=$snapshotPath'
-    ];
-    if (depfilePath != null)
-      args.add('--depfile=$depfilePath');
-    if (buildOutputPath != null)
-      args.add('--build-output=$buildOutputPath');
-    return runCommandAndStreamOutput(args);
-  }
+enum HostTool {
+  SkySnapshot,
+  SkyShell,
 }
 
-// TODO(devoncarew): This should instead take a host platform and target platform.
-
-String _getCompilerPath(BuildConfiguration config) {
-  if (config.type != BuildType.prebuilt) {
-    String compilerPath = path.join(config.buildDir, 'clang_x64', 'sky_snapshot');
-    if (FileSystemEntity.isFileSync(compilerPath))
-      return compilerPath;
-    compilerPath = path.join(config.buildDir, 'sky_snapshot');
-    if (FileSystemEntity.isFileSync(compilerPath))
-      return compilerPath;
-    return null;
-  }
-  Artifact artifact = ArtifactStore.getArtifact(
-    type: ArtifactType.snapshot, hostPlatform: config.hostPlatform);
-  return ArtifactStore.getPath(artifact);
-}
-
-class Toolchain {
-  Toolchain({ this.compiler });
-
-  final SnapshotCompiler compiler;
-
-  static Toolchain forConfigs(List<BuildConfiguration> configs) {
-    for (BuildConfiguration config in configs) {
-      String compilerPath = _getCompilerPath(config);
-      if (compilerPath != null)
-        return new Toolchain(compiler: new SnapshotCompiler(compilerPath));
-    }
-    return null;
-  }
-}
+const Map<HostTool, String> _kHostToolFileName = const <HostTool, String>{
+  HostTool.SkySnapshot: 'sky_snapshot',
+  HostTool.SkyShell: 'sky_shell',
+};
 
 /// A ToolConfiguration can return the tools directory for the current host platform
 /// and the engine artifact directory for a given target platform. It is configurable
@@ -95,8 +41,8 @@ class ToolConfiguration {
   /// Override using the artifacts from the cache directory (--engine-src-path).
   String engineSrcPath;
 
-  /// The engine mode to use (only relevent when [engineSrcPath] is set).
-  bool engineRelease;
+  /// Path to a local engine build acting as a source for artifacts (--local-engine).
+  String engineBuildPath;
 
   bool get isLocalEngine => engineSrcPath != null;
 
@@ -110,46 +56,8 @@ class ToolConfiguration {
   }
 
   Directory _getEngineArtifactsDirectory(TargetPlatform platform, BuildMode mode) {
-    if (engineSrcPath != null) {
-      List<String> buildDir = <String>[];
-
-      switch (platform) {
-        case TargetPlatform.android_arm:
-        case TargetPlatform.android_x64:
-        case TargetPlatform.android_x86:
-          buildDir.add('android');
-          break;
-
-        // TODO(devoncarew): We will need an ios vs ios_x86 target (for ios vs. ios_sim).
-        case TargetPlatform.ios:
-          buildDir.add('ios');
-          break;
-
-        // These targets don't have engine artifacts.
-        case TargetPlatform.darwin_x64:
-        case TargetPlatform.linux_x64:
-          buildDir.add('host');
-          break;
-      }
-
-      buildDir.add(getModeName(mode));
-
-      if (!engineRelease)
-        buildDir.add('unopt');
-
-      // Add a suffix for the target architecture.
-      switch (platform) {
-        case TargetPlatform.android_x64:
-          buildDir.add('x64');
-          break;
-        case TargetPlatform.android_x86:
-          buildDir.add('x86');
-          break;
-        default:
-          break;
-      }
-
-      return new Directory(path.join(engineSrcPath, 'out', buildDir.join('_')));
+    if (engineBuildPath != null) {
+      return new Directory(engineBuildPath);
     } else {
       String suffix = mode != BuildMode.debug ? '-${getModeName(mode)}' : '';
 
@@ -158,5 +66,28 @@ class ToolConfiguration {
       Directory engineDir = _cache.getArtifactDirectory('engine');
       return new Directory(path.join(engineDir.path, dirName));
     }
+  }
+
+  String getHostToolPath(HostTool tool) {
+    if (engineBuildPath == null) {
+      return path.join(_cache.getArtifactDirectory('engine').path,
+                       getNameForHostPlatform(getCurrentHostPlatform()),
+                       _kHostToolFileName[tool]);
+    }
+
+    if (tool == HostTool.SkySnapshot) {
+      String clangPath = path.join(engineBuildPath, 'clang_x64', 'sky_snapshot');
+      if (FileSystemEntity.isFileSync(clangPath))
+        return clangPath;
+      return path.join(engineBuildPath, 'sky_snapshot');
+    } else if (tool == HostTool.SkyShell) {
+      if (getCurrentHostPlatform() == HostPlatform.linux_x64) {
+        return path.join(engineBuildPath, 'sky_shell');
+      } else if (getCurrentHostPlatform() == HostPlatform.darwin_x64) {
+        return path.join(engineBuildPath, 'SkyShell.app', 'Contents', 'MacOS', 'SkyShell');
+      }
+    }
+
+    throw 'Unexpected host tool: $tool';
   }
 }

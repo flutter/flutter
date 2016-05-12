@@ -357,7 +357,7 @@ class DelayedMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Dela
 
   Duration get delay => _delay;
   Duration _delay;
-  void set delay(Duration value) {
+  set delay(Duration value) {
     assert(value != null);
     _delay = value;
   }

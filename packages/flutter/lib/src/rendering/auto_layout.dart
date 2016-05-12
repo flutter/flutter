@@ -51,7 +51,7 @@ class AutoLayoutParentData extends ContainerBoxParentDataMixin<RenderBox> {
 
   AutoLayoutRect get rect => _rect;
   AutoLayoutRect _rect;
-  void set rect(AutoLayoutRect value) {
+  set rect(AutoLayoutRect value) {
     if (_rect == value)
       return;
     if (_rect != null)
@@ -142,7 +142,7 @@ class RenderAutoLayout extends RenderBox
 
   AutoLayoutDelegate get delegate => _delegate;
   AutoLayoutDelegate _delegate;
-  void set delegate(AutoLayoutDelegate newDelegate) {
+  set delegate(AutoLayoutDelegate newDelegate) {
     if (_delegate == newDelegate)
       return;
     AutoLayoutDelegate oldDelegate = _delegate;

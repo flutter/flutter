@@ -50,7 +50,7 @@ class IconsDemoState extends State<IconsDemo> {
       size: size,
       icon: icon,
       color: iconColor,
-      tooltip: "${enabled ? 'enabled' : 'disabled'} icon button",
+      tooltip: "${enabled ? 'Enabled' : 'Disabled'} icon button",
       onPressed: enabled ? handleIconButtonPress : null
     );
   }

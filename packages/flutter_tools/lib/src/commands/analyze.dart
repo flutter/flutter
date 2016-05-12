@@ -10,9 +10,8 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart' as yaml;
 
-import '../artifacts.dart';
 import '../base/utils.dart';
-import '../build_configuration.dart';
+import '../cache.dart';
 import '../dart/analysis.dart';
 import '../dart/sdk.dart';
 import '../globals.dart';
@@ -67,7 +66,7 @@ class AnalyzeCommand extends FlutterCommand {
 
   List<String> flutterRootComponents;
   bool isFlutterLibrary(String filename) {
-    flutterRootComponents ??= path.normalize(path.absolute(ArtifactStore.flutterRoot)).split(path.separator);
+    flutterRootComponents ??= path.normalize(path.absolute(Cache.flutterRoot)).split(path.separator);
     List<String> filenameComponents = path.normalize(path.absolute(filename)).split(path.separator);
     if (filenameComponents.length < flutterRootComponents.length + 4) // the 4: 'packages', package_name, 'lib', file_name
       return false;
@@ -181,10 +180,9 @@ class AnalyzeCommand extends FlutterCommand {
     Map<String, String> packages = dependencies.asPackageMap();
 
     // override the sky_engine and sky_services packages if the user is using a local build
-    String buildDir = buildConfigurations.firstWhere((BuildConfiguration config) => config.testable, orElse: () => null)?.buildDir;
-    if (buildDir != null) {
-      packages['sky_engine'] = path.join(buildDir, 'gen/dart-pkg/sky_engine/lib');
-      packages['sky_services'] = path.join(buildDir, 'gen/dart-pkg/sky_services/lib');
+    if (tools.engineBuildPath != null) {
+      packages['sky_engine'] = path.join(tools.engineBuildPath, 'gen/dart-pkg/sky_engine/lib');
+      packages['sky_services'] = path.join(tools.engineBuildPath, 'gen/dart-pkg/sky_services/lib');
     }
 
     if (argResults['preamble']) {
@@ -197,7 +195,7 @@ class AnalyzeCommand extends FlutterCommand {
     DriverOptions options = new DriverOptions();
     options.dartSdkPath = argResults['dart-sdk'];
     options.packageMap = packages;
-    options.analysisOptionsFile = path.join(ArtifactStore.flutterRoot, 'packages', 'flutter_tools', 'flutter_analysis_options');
+    options.analysisOptionsFile = path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'flutter_analysis_options');
     AnalysisDriver analyzer = new AnalysisDriver(options);
 
     //TODO (pq): consider error handling
@@ -398,11 +396,11 @@ class PackageDependency {
   }
   bool get hasConflict => values.length > 1;
   bool get hasConflictAffectingFlutterRepo {
-    assert(path.isAbsolute(ArtifactStore.flutterRoot));
+    assert(path.isAbsolute(Cache.flutterRoot));
     for (List<String> targetSources in values.values) {
       for (String source in targetSources) {
         assert(path.isAbsolute(source));
-        if (path.isWithin(ArtifactStore.flutterRoot, source))
+        if (path.isWithin(Cache.flutterRoot, source))
           return true;
       }
     }

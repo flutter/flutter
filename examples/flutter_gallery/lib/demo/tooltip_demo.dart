@@ -44,7 +44,7 @@ class TooltipDemo extends StatelessWidget {
                   size: 48.0,
                   icon: Icons.call,
                   color: theme.primaryColor,
-                  tooltip: 'place a phone call',
+                  tooltip: 'Place a phone call',
                   onPressed: () {
                     Scaffold.of(context).showSnackBar(new SnackBar(
                        content: new Text('That was an ordinary tap.')

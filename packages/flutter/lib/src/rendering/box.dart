@@ -537,7 +537,7 @@ abstract class RenderBox extends RenderObject {
   }
   bool get hasSize => _size != null;
   Size _size;
-  void set size(Size value) {
+  set size(Size value) {
     assert(!(debugDoingThisResize && debugDoingThisLayout));
     assert(sizedByParent || !debugDoingThisResize);
     assert(() {

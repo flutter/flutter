@@ -9,8 +9,8 @@ import 'package:path/path.dart' as path;
 
 import '../base/os.dart';
 import '../base/process.dart';
+import '../cache.dart';
 import '../doctor.dart';
-import '../artifacts.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 
@@ -113,7 +113,7 @@ class SetupCommand extends FlutterCommand {
     //   dartlang:
     //     sdkLocation: "..."
 
-    String flutterRoot = path.normalize(path.absolute(ArtifactStore.flutterRoot));
+    String flutterRoot = path.normalize(path.absolute(Cache.flutterRoot));
     String sdkLocation = path.join(flutterRoot, 'bin/cache/dart-sdk');
 
     File file = AtomValidator.getConfigFile();

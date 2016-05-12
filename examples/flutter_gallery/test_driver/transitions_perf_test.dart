@@ -3,8 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert' show JsonEncoder;
 
+import 'package:file/file.dart';
+import 'package:file/io.dart';
 import 'package:flutter_driver/flutter_driver.dart';
+import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 // Warning: the following strings must be kept in sync with GalleryHome.
@@ -46,6 +50,41 @@ const List<String> demoNames = const <String>[
   'Typography'
 ];
 
+
+Future<Null> saveDurationsHistogram(List<Map<String, dynamic>> events) async {
+  final Map<String, List<int>> durations = new Map<String, List<int>>();
+  Map<String, dynamic> startEvent;
+
+  // Save the duration of the first frame after each 'Start Transition' event.
+  for (Map<String, dynamic> event in events) {
+    final String eventName = event['name'];
+    if (eventName == 'Start Transition') {
+      assert(startEvent == null);
+      startEvent = event;
+    } else if (startEvent != null && eventName == 'Frame') {
+      final String routeName = startEvent['args']['to'];
+      durations[routeName] ??= new List<int>();
+      durations[routeName].add(event['dur']);
+      startEvent = null;
+    }
+  }
+
+  // Verify that the durations data is valid.
+  if (durations.keys.isEmpty)
+    throw 'no "Start Transition" timeline events found';
+  for(String routeName in durations.keys) {
+    if (durations[routeName] == null || durations[routeName].length != 2)
+      throw 'invalid timeline data for $routeName transition';
+  }
+
+  // Save the durations Map to a file.
+  final String destinationDirectory = 'build';
+  final FileSystem fs = new LocalFileSystem();
+  await fs.directory(destinationDirectory).create(recursive: true);
+  final File file = fs.file(path.join(destinationDirectory, 'transition_durations.timeline.json'));
+  await file.writeAsString(new JsonEncoder.withIndent('  ').convert(durations));
+}
+
 void main() {
   group('flutter gallery transitions', () {
     FlutterDriver driver;
@@ -81,13 +120,14 @@ void main() {
         }
       },
       streams: const <TimelineStream>[
-        TimelineStream.dart,
-        TimelineStream.gc,
-        TimelineStream.compiler
+        TimelineStream.dart
       ]);
-      new TimelineSummary.summarize(timeline)
-        ..writeSummaryToFile('transitions_perf', pretty: true)
-        ..writeTimelineToFile('transitions_perf', pretty: true);
-    }, timeout: new Timeout(new Duration(minutes: 15)));
+
+      // Save the duration (in microseconds) of the first timeline Frame event
+      // that follows a 'Start Transition' event. The Gallery app adds a
+      // 'Start Transition' event when a demo is launched (see GalleryItem).
+      saveDurationsHistogram(timeline.json['traceEvents']);
+
+    }, timeout: new Timeout(new Duration(minutes: 5)));
   });
 }

@@ -8,7 +8,7 @@ import 'dart:io';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../device.dart';
-import '../build_configuration.dart';
+import '../build_info.dart';
 import '../globals.dart';
 import 'run.dart';
 
@@ -60,7 +60,6 @@ class ListenCommand extends RunCommandBase {
 
       result = await startApp(
         deviceForCommand,
-        toolchain,
         target: target,
         install: firstTime,
         stop: true,
