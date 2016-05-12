@@ -3,23 +3,23 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
-import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
-import 'package:web_socket_channel/io.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/logger.dart';
+import '../base/utils.dart';
 import '../build_configuration.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../observatory.dart';
 import '../runner/flutter_command.dart';
 import '../toolchain.dart';
 import 'build_apk.dart';
 import 'install.dart';
+import 'trace.dart';
 
 abstract class RunCommandBase extends FlutterCommand {
   RunCommandBase() {
@@ -33,7 +33,7 @@ abstract class RunCommandBase extends FlutterCommand {
           'Note: this flag will be removed in favor of the --debug/--profile/--release flags.');
 
     argParser.addFlag('trace-startup',
-        negatable: true,
+        negatable: false,
         defaultsTo: false,
         help: 'Start tracing during startup.');
     argParser.addOption('route',
@@ -65,7 +65,7 @@ class RunCommand extends RunCommandBase {
         negatable: false,
         help: 'Start in a paused mode and wait for a debugger to connect.');
     argParser.addOption('debug-port',
-        help: 'Listen to the given port for a debug connection (defaults to $defaultObservatoryPort).');
+        help: 'Listen to the given port for a debug connection (defaults to $kDefaultObservatoryPort).');
     usesPubOption();
 
     // A temporary, hidden flag to experiment with a different run style.
@@ -75,6 +75,8 @@ class RunCommand extends RunCommandBase {
         negatable: false,
         hide: true,
         help: 'Stay resident after running the app.');
+    // Hidden option to enable a benchmarking mode.
+    argParser.addFlag('benchmark', negatable: false, hide: true);
   }
 
   @override
@@ -110,7 +112,7 @@ class RunCommand extends RunCommandBase {
       options = new DebuggingOptions.disabled();
     } else {
       options = new DebuggingOptions.enabled(
-        // TODO(devoncarew): Check this to 'getBuildMode() == BuildMode.debug'.
+        // TODO(devoncarew): Change this to 'getBuildMode() == BuildMode.debug'.
         checked: argResults['checked'],
         startPaused: argResults['start-paused'],
         observatoryPort: debugPort
@@ -126,7 +128,7 @@ class RunCommand extends RunCommandBase {
         buildMode: getBuildMode()
       );
 
-      return runner.run(traceStartup: traceStartup);
+      return runner.run(traceStartup: traceStartup, benchmark: argResults['benchmark']);
     } else {
       return startApp(
         deviceForCommand,
@@ -136,6 +138,7 @@ class RunCommand extends RunCommandBase {
         install: true,
         debuggingOptions: options,
         traceStartup: traceStartup,
+        benchmark: argResults['benchmark'],
         route: route,
         buildMode: getBuildMode()
       );
@@ -151,6 +154,7 @@ Future<int> startApp(
   bool install: true,
   DebuggingOptions debuggingOptions,
   bool traceStartup: false,
+  bool benchmark: false,
   String route,
   BuildMode buildMode: BuildMode.debug
 }) async {
@@ -173,6 +177,8 @@ Future<int> startApp(
     printError(message);
     return 1;
   }
+
+  Stopwatch stopwatch = new Stopwatch()..start();
 
   // TODO(devoncarew): We shouldn't have to do type checks here.
   if (install && device is AndroidDevice) {
@@ -228,10 +234,22 @@ Future<int> startApp(
     platformArgs: platformArgs
   );
 
-  if (!result.started)
+  stopwatch.stop();
+
+  if (!result.started) {
     printError('Error running application on ${device.name}.');
-  else if (traceStartup)
-    await _downloadStartupTrace(result.observatoryPort, device);
+  } else if (traceStartup) {
+    try {
+      Observatory observatory = await Observatory.connect(result.observatoryPort);
+      await _downloadStartupTrace(observatory);
+    } catch (error) {
+      printError('Error connecting to observatory: $error');
+      return 1;
+    }
+  }
+
+  if (benchmark)
+    _writeBenchmark(stopwatch);
 
   return result.started ? 0 : 2;
 }
@@ -246,87 +264,6 @@ String findMainDartFile([String target]) {
     return path.join(targetPath, 'lib', 'main.dart');
   else
     return targetPath;
-}
-
-Future<Null> _downloadStartupTrace(int observatoryPort, Device device) async {
-  Map<String, dynamic> timeline = await device.stopTracingAndDownloadTimeline(
-    observatoryPort,
-    waitForFirstFrame: true
-  );
-
-  int extractInstantEventTimestamp(String eventName) {
-    List<Map<String, dynamic>> events = timeline['traceEvents'];
-    Map<String, dynamic> event = events
-        .firstWhere((Map<String, dynamic> event) => event['name'] == eventName, orElse: () => null);
-    if (event == null)
-      return null;
-    return event['ts'];
-  }
-
-  int engineEnterTimestampMicros = extractInstantEventTimestamp(flutterEngineMainEnterEventName);
-  int frameworkInitTimestampMicros = extractInstantEventTimestamp(frameworkInitEventName);
-  int firstFrameTimestampMicros = extractInstantEventTimestamp(firstUsefulFrameEventName);
-
-  if (engineEnterTimestampMicros == null) {
-    printError('Engine start event is missing in the timeline. Cannot compute startup time.');
-    return null;
-  }
-
-  if (firstFrameTimestampMicros == null) {
-    printError('First frame event is missing in the timeline. Cannot compute startup time.');
-    return null;
-  }
-
-  File traceInfoFile = new File('build/start_up_info.json');
-  int timeToFirstFrameMicros = firstFrameTimestampMicros - engineEnterTimestampMicros;
-  Map<String, dynamic> traceInfo = <String, dynamic>{
-    'engineEnterTimestampMicros': engineEnterTimestampMicros,
-    'timeToFirstFrameMicros': timeToFirstFrameMicros,
-  };
-
-  if (frameworkInitTimestampMicros != null) {
-    traceInfo['timeToFrameworkInitMicros'] = frameworkInitTimestampMicros - engineEnterTimestampMicros;
-    traceInfo['timeAfterFrameworkInitMicros'] = firstFrameTimestampMicros - frameworkInitTimestampMicros;
-  }
-
-  await traceInfoFile.writeAsString(JSON.encode(traceInfo));
-
-  String timeToFirstFrameMessage;
-  if (timeToFirstFrameMicros > 1000000) {
-    timeToFirstFrameMessage = '${(timeToFirstFrameMicros / 1000000).toStringAsFixed(2)} seconds';
-  } else {
-    timeToFirstFrameMessage = '${timeToFirstFrameMicros ~/ 1000} milliseconds';
-  }
-
-  printStatus('Time to first frame $timeToFirstFrameMessage');
-  printStatus('Saved startup trace info in ${traceInfoFile.path}');
-}
-
-/// Delay until the Observatory / service protocol is available.
-///
-/// This does not fail if we're unable to connect, and times out after the given
-/// [timeout].
-Future<Null> delayUntilObservatoryAvailable(String host, int port, {
-  Duration timeout: const Duration(seconds: 10)
-}) async {
-  printTrace('Waiting until Observatory is available (port $port).');
-
-  final String url = 'ws://$host:$port/ws';
-  printTrace('Looking for the observatory at $url.');
-  Stopwatch stopwatch = new Stopwatch()..start();
-
-  while (stopwatch.elapsed <= timeout) {
-    try {
-      WebSocket ws = await WebSocket.connect(url);
-      printTrace('Connected to the observatory port.');
-      ws.close().catchError((dynamic error) => null);
-      return;
-    } catch (error) {
-      await new Future<Null>.delayed(new Duration(milliseconds: 250));
-    }
-  }
-
-  printTrace('Unable to connect to the observatory.');
 }
 
 String _getMissingPackageHintForPlatform(TargetPlatform platform) {
@@ -366,11 +303,11 @@ class _RunAndStayResident {
   Completer<int> _exitCompleter;
   StreamSubscription<String> _loggingSubscription;
 
-  rpc.Peer _observatory;
+  Observatory observatory;
   String _isolateId;
 
   /// Start the app and keep the process running during its lifetime.
-  Future<int> run({ bool traceStartup: false }) async {
+  Future<int> run({ bool traceStartup: false, bool benchmark: false }) async {
     String mainPath = findMainDartFile(target);
     if (!FileSystemEntity.isFileSync(mainPath)) {
       String message = 'Tried to run $mainPath, but that file does not exist.';
@@ -390,6 +327,8 @@ class _RunAndStayResident {
       printError(message);
       return 1;
     }
+
+    Stopwatch stopwatch = new Stopwatch()..start();
 
     // TODO(devoncarew): We shouldn't have to do type checks here.
     if (device is AndroidDevice) {
@@ -448,41 +387,38 @@ class _RunAndStayResident {
       return 2;
     }
 
+    stopwatch.stop();
+
     _exitCompleter = new Completer<int>();
 
     // Connect to observatory.
     if (debuggingOptions.debuggingEnabled) {
-      _observatory = await _connectToObservatory(result.observatoryPort);
+      observatory = await Observatory.connect(result.observatoryPort);
       printTrace('Connected to observatory port: ${result.observatoryPort}.');
 
-      _observatory.registerMethod('streamNotify', (rpc.Parameters event) {
-        Map<String, dynamic> data = event.asMap;
-        if (data['isolate'] != null && _isolateId == null)
-          _isolateId = data['isolate']['id'];
+      observatory.onIsolateEvent.listen((Event event) {
+        if (event['isolate'] != null)
+          _isolateId = event['isolate']['id'];
       });
+      observatory.streamListen('Isolate');
 
       // Listen for observatory connection close.
-      _observatory.listen().whenComplete(() {
+      observatory.done.whenComplete(() {
         _handleExit();
       });
 
-      _observatory.sendRequest('streamListen', <String, dynamic>{
-        'streamId': 'Isolate'
-      });
-
-      _observatory.sendRequest('getVM').then((Map<String, dynamic> response) {
-        List<dynamic> isolates = response['isolates'];
-        if (isolates.isNotEmpty)
-          _isolateId = isolates.first['id'];
+      observatory.getVM().then((VM vm) {
+        if (vm.isolates.isNotEmpty)
+          _isolateId = vm.isolates.first['id'];
       });
     }
 
     printStatus('Application running.');
 
-    if (_observatory != null && traceStartup) {
+    if (observatory != null && traceStartup) {
       printStatus('Downloading startup trace info...');
 
-      await _downloadStartupTrace(result.observatoryPort, device);
+      await _downloadStartupTrace(observatory);
 
       _handleExit();
     } else {
@@ -513,11 +449,16 @@ class _RunAndStayResident {
       });
     }
 
+    if (benchmark) {
+      _writeBenchmark(stopwatch);
+      new Future<Null>.delayed(new Duration(seconds: 2)).then((_) {
+        _handleExit();
+      });
+    }
+
     return _exitCompleter.future.then((int exitCode) async {
-      if (_observatory != null && !_observatory.isClosed && _isolateId != null) {
-        _observatory.sendRequest('ext.flutter.exit', <String, dynamic>{
-          'isolateId': _isolateId
-        });
+      if (observatory != null && !observatory.isClosed && _isolateId != null) {
+        observatory.flutterExit(_isolateId);
 
         // WebSockets do not have a flush() method.
         await new Future<Null>.delayed(new Duration(milliseconds: 100));
@@ -527,26 +468,17 @@ class _RunAndStayResident {
     });
   }
 
-  Future<rpc.Peer> _connectToObservatory(int observatoryPort) async {
-    Uri uri = new Uri(scheme: 'ws', host: '127.0.0.1', port: observatoryPort, path: 'ws');
-    WebSocket ws = await WebSocket.connect(uri.toString());
-    rpc.Peer peer = new rpc.Peer(new IOWebSocketChannel(ws));
-    return peer;
-  }
-
   void _printHelp() {
     printStatus('Type "h" or F1 for help, "r" or F5 to restart the app, and "q", F10, or ctrl-c to quit.');
   }
 
   void _handleRefresh() {
-    if (_observatory == null) {
+    if (observatory == null) {
       printError('Debugging is not enabled.');
     } else {
       printStatus('Re-starting application...');
 
-      _observatory.sendRequest('isolateReload', <String, dynamic>{
-        'isolateId': _isolateId
-      }).catchError((dynamic error) {
+      observatory.isolateReload(_isolateId).catchError((dynamic error) {
         printError('Error restarting app: $error');
       });
     }
@@ -561,4 +493,60 @@ class _RunAndStayResident {
       _exitCompleter.complete(0);
     }
   }
+}
+
+Future<Null> _downloadStartupTrace(Observatory observatory) async {
+  Tracing tracing = new Tracing(observatory);
+
+  Map<String, dynamic> timeline = await tracing.stopTracingAndDownloadTimeline(
+    waitForFirstFrame: true
+  );
+
+  int extractInstantEventTimestamp(String eventName) {
+    List<Map<String, dynamic>> events = timeline['traceEvents'];
+    Map<String, dynamic> event = events.firstWhere(
+      (Map<String, dynamic> event) => event['name'] == eventName, orElse: () => null
+    );
+    return event == null ? null : event['ts'];
+  }
+
+  int engineEnterTimestampMicros = extractInstantEventTimestamp(kFlutterEngineMainEnterEventName);
+  int frameworkInitTimestampMicros = extractInstantEventTimestamp(kFrameworkInitEventName);
+  int firstFrameTimestampMicros = extractInstantEventTimestamp(kFirstUsefulFrameEventName);
+
+  if (engineEnterTimestampMicros == null) {
+    printError('Engine start event is missing in the timeline. Cannot compute startup time.');
+    return null;
+  }
+
+  if (firstFrameTimestampMicros == null) {
+    printError('First frame event is missing in the timeline. Cannot compute startup time.');
+    return null;
+  }
+
+  File traceInfoFile = new File('build/start_up_info.json');
+  int timeToFirstFrameMicros = firstFrameTimestampMicros - engineEnterTimestampMicros;
+  Map<String, dynamic> traceInfo = <String, dynamic>{
+    'engineEnterTimestampMicros': engineEnterTimestampMicros,
+    'timeToFirstFrameMicros': timeToFirstFrameMicros,
+  };
+
+  if (frameworkInitTimestampMicros != null) {
+    traceInfo['timeToFrameworkInitMicros'] = frameworkInitTimestampMicros - engineEnterTimestampMicros;
+    traceInfo['timeAfterFrameworkInitMicros'] = firstFrameTimestampMicros - frameworkInitTimestampMicros;
+  }
+
+  traceInfoFile.writeAsStringSync(encodeJson(traceInfo));
+
+  printStatus('Time to first frame: ${timeToFirstFrameMicros ~/ 1000}ms.');
+  printStatus('Saved startup trace info in ${traceInfoFile.path}.');
+}
+
+void _writeBenchmark(Stopwatch stopwatch) {
+  final String benchmarkOut = 'refresh_benchmark.json';
+  Map<String, dynamic> data = <String, dynamic>{
+    'time': stopwatch.elapsedMilliseconds
+  };
+  new File(benchmarkOut).writeAsStringSync(encodeJson(data));
+  printStatus('Run benchmark written to $benchmarkOut ($data).');
 }

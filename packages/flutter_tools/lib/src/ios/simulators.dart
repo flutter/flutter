@@ -396,20 +396,17 @@ class IOSSimulator extends Device {
     RegExp versionExp = new RegExp(r'iPhone ([0-9])+');
     Match match = versionExp.firstMatch(name);
 
-    if (match == null) {
-      // Not an iPhone. All available non-iPhone simulators are compatible.
+    // Not an iPhone. All available non-iPhone simulators are compatible.
+    if (match == null)
       return true;
-    }
 
-    if (int.parse(match.group(1)) > 5) {
-      // iPhones 6 and above are always fine.
+    // iPhones 6 and above are always fine.
+    if (int.parse(match.group(1)) > 5)
       return true;
-    }
 
     // The 's' subtype of 5 is compatible.
-    if (name.contains('iPhone 5s')) {
+    if (name.contains('iPhone 5s'))
       return true;
-    }
 
     _supportMessage = "The simulator version is too old. Choose an iPhone 5s or above.";
     return false;
