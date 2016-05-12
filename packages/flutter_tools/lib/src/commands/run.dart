@@ -123,11 +123,10 @@ class RunCommand extends RunCommandBase {
         toolchain,
         target: target,
         debuggingOptions: options,
-        traceStartup: traceStartup,
         buildMode: getBuildMode()
       );
 
-      return runner.run();
+      return runner.run(traceStartup: traceStartup);
     } else {
       return startApp(
         deviceForCommand,
@@ -355,7 +354,6 @@ class _RunAndStayResident {
     this.toolchain, {
     this.target,
     this.debuggingOptions,
-    this.traceStartup : false,
     this.buildMode : BuildMode.debug
   });
 
@@ -363,7 +361,6 @@ class _RunAndStayResident {
   final Toolchain toolchain;
   final String target;
   final DebuggingOptions debuggingOptions;
-  final bool traceStartup;
   final BuildMode buildMode;
 
   Completer<int> _exitCompleter;
@@ -371,10 +368,9 @@ class _RunAndStayResident {
 
   rpc.Peer _observatory;
   String _isolateId;
-  int _messageId = 0;
 
   /// Start the app and keep the process running during its lifetime.
-  Future<int> run() async {
+  Future<int> run({ bool traceStartup: false }) async {
     String mainPath = findMainDartFile(target);
     if (!FileSystemEntity.isFileSync(mainPath)) {
       String message = 'Tried to run $mainPath, but that file does not exist.';
@@ -461,33 +457,12 @@ class _RunAndStayResident {
 
       _observatory.registerMethod('streamNotify', (rpc.Parameters event) {
         Map<String, dynamic> data = event.asMap;
-
+        if (data['isolate'] != null && _isolateId == null)
+          _isolateId = data['isolate']['id'];
       });
 
       // Listen for observatory connection close.
-      _observatory.listen();
-
-      _observatoryConnection.listen((dynamic data) {
-        if (data is String) {
-          Map<String, dynamic> json = JSON.decode(data);
-
-          if (json['method'] == 'streamNotify') {
-            Map<String, dynamic> event = json['params']['event'];
-            if (event['isolate'] != null && _isolateId == null)
-              _isolateId = event['isolate']['id'];
-          } else if (json['result'] != null && json['result']['type'] == 'VM') {
-            // isolates: [{
-            //   type: @Isolate, fixedId: true, id: isolates/724543296, name: dev.flx$main, number: 724543296
-            // }]
-            List<dynamic> isolates = json['result']['isolates'];
-            if (isolates.isNotEmpty)
-              _isolateId = isolates.first['id'];
-          } else if (json['error'] != null) {
-            printError('Error: ${json['error']['message']}.');
-            printTrace(data);
-          }
-        }
-      }, onDone: () {
+      _observatory.listen().whenComplete(() {
         _handleExit();
       });
 
@@ -495,38 +470,48 @@ class _RunAndStayResident {
         'streamId': 'Isolate'
       });
 
-      _observatoryConnection.add(JSON.encode(<String, dynamic>{
-        'method': 'getVM',
-        'id': _messageId++
-      }));
+      _observatory.sendRequest('getVM').then((Map<String, dynamic> response) {
+        List<dynamic> isolates = response['isolates'];
+        if (isolates.isNotEmpty)
+          _isolateId = isolates.first['id'];
+      });
     }
 
     printStatus('Application running.');
-    _printHelp();
 
-    terminal.singleCharMode = true;
+    if (_observatory != null && traceStartup) {
+      printStatus('Downloading startup trace info...');
 
-    terminal.onCharInput.listen((String code) {
-      String lower = code.toLowerCase();
+      await _downloadStartupTrace(result.observatoryPort, device);
 
-      if (lower == 'h' || code == AnsiTerminal.KEY_F1) {
-        // F1, help
-        _printHelp();
-      } else if (lower == 'r' || code == AnsiTerminal.KEY_F5) {
-        // F5, refresh
-        _handleRefresh();
-      } else if (lower == 'q' || code == AnsiTerminal.KEY_F10) {
-        // F10, exit
+      _handleExit();
+    } else {
+      _printHelp();
+
+      terminal.singleCharMode = true;
+
+      terminal.onCharInput.listen((String code) {
+        String lower = code.toLowerCase();
+
+        if (lower == 'h' || code == AnsiTerminal.KEY_F1) {
+          // F1, help
+          _printHelp();
+        } else if (lower == 'r' || code == AnsiTerminal.KEY_F5) {
+          // F5, refresh
+          _handleRefresh();
+        } else if (lower == 'q' || code == AnsiTerminal.KEY_F10) {
+          // F10, exit
+          _handleExit();
+        }
+      });
+
+      ProcessSignal.SIGINT.watch().listen((ProcessSignal signal) {
         _handleExit();
-      }
-    });
-
-    ProcessSignal.SIGINT.watch().listen((ProcessSignal signal) {
-      _handleExit();
-    });
-    ProcessSignal.SIGTERM.watch().listen((ProcessSignal signal) {
-      _handleExit();
-    });
+      });
+      ProcessSignal.SIGTERM.watch().listen((ProcessSignal signal) {
+        _handleExit();
+      });
+    }
 
     return _exitCompleter.future.then((int exitCode) async {
       if (_observatory != null && !_observatory.isClosed && _isolateId != null) {
@@ -546,7 +531,6 @@ class _RunAndStayResident {
     Uri uri = new Uri(scheme: 'ws', host: '127.0.0.1', port: observatoryPort, path: 'ws');
     WebSocket ws = await WebSocket.connect(uri.toString());
     rpc.Peer peer = new rpc.Peer(new IOWebSocketChannel(ws));
-    peer.listen();
     return peer;
   }
 
@@ -560,19 +544,20 @@ class _RunAndStayResident {
     } else {
       printStatus('Re-starting application...');
 
-      // TODO(devoncarew): Show an error if the isolate reload fails.
       _observatory.sendRequest('isolateReload', <String, dynamic>{
         'isolateId': _isolateId
+      }).catchError((dynamic error) {
+        printError('Error restarting app: $error');
       });
     }
   }
 
   void _handleExit() {
+    terminal.singleCharMode = false;
+
     if (!_exitCompleter.isCompleted) {
       _loggingSubscription?.cancel();
-      printStatus('');
       printStatus('Application finished.');
-      terminal.singleCharMode = false;
       _exitCompleter.complete(0);
     }
   }
