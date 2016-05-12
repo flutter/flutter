@@ -229,4 +229,9 @@ class TextPainter {
     return _paragraph.getPositionForOffset(offset);
   }
 
+  TextRange getWordBoundary(TextPosition position) {
+    assert(!_needsLayout);
+    List<int> indices = _paragraph.getWordBoundary(position.offset);
+    return new TextRange(start: indices[0], end: indices[1]);
+  }
 }
