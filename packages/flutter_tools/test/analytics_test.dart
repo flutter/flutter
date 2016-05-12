@@ -5,7 +5,7 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/config.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
@@ -22,7 +22,7 @@ void main() {
     bool wasEnabled;
 
     setUp(() {
-      ArtifactStore.flutterRoot = '../..';
+      Cache.flutterRoot = '../..';
       wasEnabled = flutterUsage.enabled;
       temp = Directory.systemTemp.createTempSync('flutter_tools');
     });

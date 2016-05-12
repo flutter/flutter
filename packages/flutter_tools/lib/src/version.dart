@@ -4,8 +4,8 @@
 
 import 'dart:io';
 
-import 'artifacts.dart';
 import 'base/process.dart';
+import 'cache.dart';
 
 final Set<String> kKnownBranchNames = new Set<String>.from(<String>[
   'master',
@@ -48,7 +48,7 @@ class FlutterVersion {
   String _frameworkAge;
   String get frameworkAge => _frameworkAge;
 
-  String get engineRevision => ArtifactStore.engineRevision;
+  String get engineRevision => Cache.engineRevision;
   String get engineRevisionShort => _shortGitRevision(engineRevision);
 
   String _runGit(String command) => runSync(command.split(' '), workingDirectory: flutterRoot);
@@ -62,12 +62,12 @@ class FlutterVersion {
   }
 
   static FlutterVersion getVersion([String flutterRoot]) {
-    return new FlutterVersion(flutterRoot != null ? flutterRoot : ArtifactStore.flutterRoot);
+    return new FlutterVersion(flutterRoot != null ? flutterRoot : Cache.flutterRoot);
   }
 
   /// Return a short string for the version (`alpha/a76bc8e22b`).
   static String getVersionString({ bool whitelistBranchName: false }) {
-    final String cwd = ArtifactStore.flutterRoot;
+    final String cwd = Cache.flutterRoot;
 
     String commit = _shortGitRevision(_runSync('git', <String>['rev-parse', 'HEAD'], cwd));
     commit = commit.isEmpty ? 'unknown' : commit;
