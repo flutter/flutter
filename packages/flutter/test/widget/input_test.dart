@@ -342,8 +342,13 @@ void main() {
     enterText(testValue);
     tester.pumpWidget(builder());
 
-    // Tap the text to bring up the "paste / select all" menu.
+    // Tap the selection handle to bring up the "paste / select all" menu.
     tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+    tester.pumpWidget(builder());
+    RenderEditableLine renderLine = findRenderEditableLine(tester);
+    List<TextSelectionPoint> endpoints = renderLine.getEndpointsForSelection(
+        inputValue.selection);
+    tester.tapAt(endpoints[0].point + new Offset(1.0, 1.0));
     tester.pumpWidget(builder());
 
     // SELECT ALL should select all the text.
@@ -359,6 +364,10 @@ void main() {
 
     // Tap again to bring back the menu.
     tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+    tester.pumpWidget(builder());
+    renderLine = findRenderEditableLine(tester);
+    endpoints = renderLine.getEndpointsForSelection(inputValue.selection);
+    tester.tapAt(endpoints[0].point + new Offset(1.0, 1.0));
     tester.pumpWidget(builder());
 
     // PASTE right before the 'e'.

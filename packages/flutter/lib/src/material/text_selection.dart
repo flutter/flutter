@@ -37,11 +37,12 @@ class _TextSelectionToolbar extends StatelessWidget {
       // TODO(mpcomplete): This should probably be grayed-out if there is nothing to paste.
       onPressed: _handlePaste
     ));
-    if (value.selection.isCollapsed) {
-      items.add(new FlatButton(child: new Text('SELECT ALL'), onPressed: _handleSelectAll));
+    if (value.text.isNotEmpty) {
+      if (value.selection.isCollapsed)
+        items.add(new FlatButton(child: new Text('SELECT ALL'), onPressed: _handleSelectAll));
+      // TODO(mpcomplete): implement `more` menu.
+      items.add(new IconButton(icon: Icons.more_vert));
     }
-    // TODO(mpcomplete): implement `more` menu.
-    items.add(new IconButton(icon: Icons.more_vert));
 
     return new Material(
       elevation: 1,
