@@ -15,8 +15,10 @@
 #include "base/mac/scoped_nsautorelease_pool.h"
 #include "base/message_loop/message_loop.h"
 #include "base/trace_event/trace_event.h"
+#include "dart/runtime/include/dart_tools_api.h"
 #include "mojo/edk/embedder/embedder.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
+#include "sky/engine/core/start_up.h"
 #include "sky/engine/wtf/MakeUnique.h"
 #include "sky/shell/shell.h"
 #include "sky/shell/switches.h"
@@ -54,6 +56,7 @@ static void RedirectIOConnectionsToSyslog() {
 class EmbedderState {
  public:
   EmbedderState(int argc, const char* argv[], std::string icu_data_path) {
+    blink::engine_main_enter_ts = Dart_TimelineGetMicros();
     CHECK([NSThread isMainThread])
         << "Embedder initialization must occur on the main platform thread";
 
