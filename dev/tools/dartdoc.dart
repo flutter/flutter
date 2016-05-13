@@ -8,9 +8,16 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
+const String DOC_ROOT = 'dev/docs/doc/';
+
 /// This script expects to run with the cwd as the root of the flutter repo. It
 /// will generate documentation for the packages in `//packages/` and write the
 /// documentation to `//dev/docs/doc/api/`.
+/// 
+/// This script also updates the index.html file so that it can be placed
+/// at the root of docs.flutter.io. We are keeping the files inside of
+/// docs.flutter.io/flutter for now, so we need to manipulate paths
+/// a bit. See https://github.com/flutter/flutter/issues/3900 for more info.
 Future<Null> main(List<String> args) async {
   // If we're run from the `tools` dir, set the cwd to the repo root.
   if (path.basename(Directory.current.path) == 'tools')
@@ -70,7 +77,42 @@ dependencies:
   process = await Process.start('pub', args, workingDirectory: 'dev/docs');
   _print(process.stdout);
   _print(process.stderr);
-  exit(await process.exitCode);
+  int exitCode = await process.exitCode;
+
+  if (exitCode != 0)
+    exit(exitCode);
+
+  createIndexAndCleanup();
+}
+
+/// Creates a custom index.html because we try to maintain old
+/// paths. Cleanup unused index.html files no longer needed.
+void createIndexAndCleanup() {
+  renameApiDir();
+  copyIndexToRootOfDocs();
+  addHtmlBaseToIndex();
+  putRedirectInOldIndexLocation();
+}
+
+Directory renameApiDir() {
+  return new Directory('$DOC_ROOT/api').renameSync('$DOC_ROOT/flutter');
+}
+
+File copyIndexToRootOfDocs() {
+  return new File('$DOC_ROOT/flutter/index.html').copySync('$DOC_ROOT/index.html');
+}
+
+void addHtmlBaseToIndex() {
+  File indexFile = new File('$DOC_ROOT/index.html');
+  String indexContents = indexFile.readAsStringSync();
+  indexContents.replaceFirst('</title>\n',
+    '</title>\n  <base href="./flutter/">\n');
+  indexFile.writeAsStringSync(indexContents);
+}
+
+void putRedirectInOldIndexLocation() {
+  String metaTag = '<meta http-equiv="refresh" content="0;URL=../index.html">';
+  new File('$DOC_ROOT/flutter/index.html').writeAsStringSync(metaTag);
 }
 
 List<String> _findSkyServicesLibraryNames() {
