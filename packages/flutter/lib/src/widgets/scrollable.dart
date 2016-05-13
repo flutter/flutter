@@ -11,6 +11,7 @@ import 'package:flutter/gestures.dart';
 import 'package:meta/meta.dart';
 
 import 'basic.dart';
+import 'clamp_overscrolls.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'notification_listener.dart';
@@ -715,8 +716,12 @@ class _ScrollableViewportState extends ScrollableState<ScrollableViewport> {
 
   @override
   Widget buildContent(BuildContext context) {
+    final bool clampOverscrolls = ClampOverscrolls.of(context);
+    final double clampedScrollOffset = clampOverscrolls
+      ? scrollOffset.clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset)
+      : scrollOffset;
     return new Viewport(
-      paintOffset: scrollOffsetToPixelDelta(scrollOffset),
+      paintOffset: scrollOffsetToPixelDelta(clampedScrollOffset),
       mainAxis: config.scrollDirection,
       anchor: config.scrollAnchor,
       onPaintOffsetUpdateNeeded: _handlePaintOffsetUpdateNeeded,

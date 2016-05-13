@@ -161,9 +161,11 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
           )
         ]
       ),
-      body: new Block(
-        padding: new EdgeInsets.all(4.0),
-        children: leaveBehindItems.map(buildItem).toList()
+      body: new PlatformScrollBehavior(
+        child: new Block(
+          padding: new EdgeInsets.all(4.0),
+          children: leaveBehindItems.map(buildItem).toList()
+        )
       )
     );
   }

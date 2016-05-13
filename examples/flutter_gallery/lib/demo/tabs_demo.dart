@@ -58,21 +58,24 @@ class TabsDemoState extends State<TabsDemo> {
         ),
         body: new TabBarView<_Page>(
           children: _pages.map((_Page page) {
-            return new Block(
-              padding: new EdgeInsets.only(top: kTextTabBarHeight + kToolBarHeight + statusBarHeight),
-              scrollableKey: page.key,
-              onScroll: (double value) { _scrollOffset = value; },
-              children: new List<Widget>.generate(6, (int i) {
-                return new Container(
-                  padding: const EdgeInsets.all(8.0),
-                  height: 192.0,
-                  child: new Card(
-                    child: new Center(
-                      child: new Text('Tab $page.label, item $i')
+            return new ClampOverscrolls(
+              value: true,
+              child: new Block(
+                padding: new EdgeInsets.only(top: kTextTabBarHeight + kToolBarHeight + statusBarHeight),
+                scrollableKey: page.key,
+                onScroll: (double value) { _scrollOffset = value; },
+                children: new List<Widget>.generate(6, (int i) {
+                  return new Container(
+                    padding: const EdgeInsets.all(8.0),
+                    height: 192.0,
+                    child: new Card(
+                      child: new Center(
+                        child: new Text('Tab $page.label, item $i')
+                      )
                     )
-                  )
-                );
-              })
+                  );
+                })
+              )
             );
           }).toList()
         )

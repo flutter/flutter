@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart' show lowerBound;
 import 'package:flutter/rendering.dart';
 
+import 'clamp_overscrolls.dart';
 import 'framework.dart';
 import 'scroll_behavior.dart';
 import 'scrollable.dart';
@@ -64,8 +65,12 @@ class _ScrollableGridState extends ScrollableState<ScrollableGrid> {
 
   @override
   Widget buildContent(BuildContext context) {
+    final bool clampOverscrolls = ClampOverscrolls.of(context);
+    final double clampedScrollOffset = clampOverscrolls
+      ? scrollOffset.clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset)
+      : scrollOffset;
     return new GridViewport(
-      startOffset: scrollOffset,
+      startOffset: clampedScrollOffset,
       delegate: config.delegate,
       onExtentsChanged: _handleExtentsChanged,
       children: config.children
