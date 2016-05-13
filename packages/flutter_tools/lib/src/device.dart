@@ -225,23 +225,21 @@ abstract class Device {
 }
 
 class DebuggingOptions {
-  DebuggingOptions.enabled({
-    this.checked: true,
+  DebuggingOptions.enabled(this.buildMode, {
     this.startPaused: false,
     this.observatoryPort,
     this.diagnosticPort
    }) : debuggingEnabled = true;
 
-  DebuggingOptions.disabled() :
+  DebuggingOptions.disabled(this.buildMode) :
     debuggingEnabled = false,
-    checked = false,
     startPaused = false,
     observatoryPort = null,
     diagnosticPort = null;
 
   final bool debuggingEnabled;
 
-  final bool checked;
+  final BuildMode buildMode;
   final bool startPaused;
   final int observatoryPort;
   final int diagnosticPort;

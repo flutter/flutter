@@ -269,7 +269,7 @@ class AndroidDevice extends Device {
     if (route != null)
       cmd.addAll(<String>['--es', 'route', route]);
     if (options.debuggingEnabled) {
-      if (options.checked)
+      if (options.buildMode == BuildMode.debug)
         cmd.addAll(<String>['--ez', 'enable-checked-mode', 'true']);
       if (options.startPaused)
         cmd.addAll(<String>['--ez', 'start-paused', 'true']);
@@ -334,6 +334,7 @@ class AndroidDevice extends Device {
 
     String localBundlePath = await flx.buildFlx(
       mainPath: mainPath,
+      precompiledSnapshot: isAotBuildMode(debuggingOptions.buildMode),
       includeRobotoFonts: false
     );
 

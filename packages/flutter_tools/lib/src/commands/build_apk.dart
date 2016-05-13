@@ -452,7 +452,10 @@ Future<int> buildAndroid(
     };
   }
 
-  if (!force && !_needsRebuild(outputFile, manifest, extraFiles)) {
+  // In debug (JIT) mode, the snapshot lives in the FLX, and we can skip the APK
+  // rebuild if none of the resources in the APK are stale.
+  // In AOT modes, the snapshot lives in the APK, so the APK must be rebuilt.
+  if (!isAotBuildMode(buildMode) && !force && !_needsRebuild(outputFile, manifest, extraFiles)) {
     printTrace('APK up to date; skipping build step.');
     return 0;
   }
