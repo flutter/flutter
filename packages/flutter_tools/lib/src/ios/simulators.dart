@@ -15,6 +15,7 @@ import '../build_info.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
+import '../observatory.dart';
 import '../protocol_discovery.dart';
 import 'mac.dart';
 
@@ -553,6 +554,21 @@ class IOSSimulator extends Device {
   Future<bool> _sideloadUpdatedAssetsForInstalledApplicationBundle(
       ApplicationPackage app) async {
     return (await flx.build(precompiledSnapshot: true)) == 0;
+  }
+
+  @override
+  Future<bool> restartApp(
+    ApplicationPackage package,
+    LaunchResult result, {
+    String mainPath,
+    Observatory observatory
+  }) async {
+    return observatory.isolateReload(observatory.mainIsolateId).then((Response response) {
+      return true;
+    }).catchError((dynamic error) {
+      printError('Error restarting app: $error');
+      return false;
+    });
   }
 
   @override

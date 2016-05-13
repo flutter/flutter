@@ -17,7 +17,6 @@ import '../dart/sdk.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 
-
 bool isDartFile(FileSystemEntity entry) => entry is File && entry.path.endsWith('.dart');
 
 typedef bool FileFilter(FileSystemEntity entity);

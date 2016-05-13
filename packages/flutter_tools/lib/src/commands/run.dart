@@ -300,7 +300,8 @@ class _RunAndStayResident {
   StreamSubscription<String> _loggingSubscription;
 
   Observatory observatory;
-  String _isolateId;
+
+  // TODO: don't let uncaught errors kill the process
 
   /// Start the app and keep the process running during its lifetime.
   Future<int> run({ bool traceStartup: false, bool benchmark: false }) async {
@@ -324,7 +325,7 @@ class _RunAndStayResident {
       return 1;
     }
 
-    Stopwatch stopwatch = new Stopwatch()..start();
+    Stopwatch startTime = new Stopwatch()..start();
 
     // TODO(devoncarew): We shouldn't have to do type checks here.
     if (device is AndroidDevice) {
@@ -381,7 +382,7 @@ class _RunAndStayResident {
       return 2;
     }
 
-    stopwatch.stop();
+    startTime.stop();
 
     _exitCompleter = new Completer<int>();
 
@@ -390,20 +391,26 @@ class _RunAndStayResident {
       observatory = await Observatory.connect(result.observatoryPort);
       printTrace('Connected to observatory port: ${result.observatoryPort}.');
 
-      observatory.onIsolateEvent.listen((Event event) {
-        if (event['isolate'] != null)
-          _isolateId = event['isolate']['id'];
-      });
-      observatory.streamListen('Isolate');
+      observatory.trackMainIsolate();
+
+      // TODO: notify when there is an isolate
+
+      // TODO: notify when that isolate reaches a certain state
+
+      if (benchmark) {
+        observatory.streamListen('Extension');
+        observatory.onEvent('Extension').listen((Event event) {
+          printTrace(event.toString());
+        });
+
+        observatory.onIsolateEvent.listen((Event event) {
+          printTrace(event.toString());
+        });
+      }
 
       // Listen for observatory connection close.
       observatory.done.whenComplete(() {
         _handleExit();
-      });
-
-      observatory.getVM().then((VM vm) {
-        if (vm.isolates.isNotEmpty)
-          _isolateId = vm.isolates.first['id'];
       });
     }
 
@@ -428,7 +435,7 @@ class _RunAndStayResident {
           _printHelp();
         } else if (lower == 'r' || code == AnsiTerminal.KEY_F5) {
           // F5, refresh
-          _handleRefresh();
+          _handleRefresh(package, result, mainPath);
         } else if (lower == 'q' || code == AnsiTerminal.KEY_F10) {
           // F10, exit
           _handleExit();
@@ -443,16 +450,45 @@ class _RunAndStayResident {
       });
     }
 
+    Stopwatch restartTime;
+
     if (benchmark) {
-      _writeBenchmark(stopwatch);
-      new Future<Null>.delayed(new Duration(seconds: 2)).then((_) {
-        _handleExit();
-      });
+      // TODO: wait some delay for it to be fully started
+
+      await new Future<Null>.delayed(new Duration(seconds: 4));
+
+      restartTime = new Stopwatch()..start();
+
+      // Touch the file.
+      File mainFile = new File(mainPath);
+      mainFile.writeAsBytesSync(mainFile.readAsBytesSync());
+
+      // TODO: restore the route
+
+      bool relaunch = await device.restartApp(
+        package,
+        result,
+        mainPath: mainPath,
+        observatory: observatory
+      );
+
+      // TODO: wait for the start up event 'ServiceExtensionAdded'
+
+      if (!relaunch)
+        restartTime = null;
+
+      restartTime?.stop();
+
+      await new Future<Null>.delayed(new Duration(seconds: 4));
+
+      _writeBenchmark(startTime, restartTime);
+
+      _handleExit();
     }
 
     return _exitCompleter.future.then((int exitCode) async {
-      if (observatory != null && !observatory.isClosed && _isolateId != null) {
-        observatory.flutterExit(_isolateId);
+      if (observatory != null && !observatory.isClosed && observatory.mainIsolateId != null) {
+        observatory.flutterExit(observatory.mainIsolateId);
 
         // WebSockets do not have a flush() method.
         await new Future<Null>.delayed(new Duration(milliseconds: 100));
@@ -466,15 +502,30 @@ class _RunAndStayResident {
     printStatus('Type "h" or F1 for help, "r" or F5 to restart the app, and "q", F10, or ctrl-c to quit.');
   }
 
-  void _handleRefresh() {
+  Future<Null> _handleRefresh(ApplicationPackage package, LaunchResult result, String mainPath) async {
     if (observatory == null) {
       printError('Debugging is not enabled.');
     } else {
       printStatus('Re-starting application...');
 
-      observatory.isolateReload(_isolateId).catchError((dynamic error) {
-        printError('Error restarting app: $error');
-      });
+      // TODO: time the restart
+      Stopwatch stopwatch = new Stopwatch()..start();
+
+      bool restartResult = await device.restartApp(
+        package,
+        result,
+        mainPath: mainPath,
+        observatory: observatory
+      );
+
+      if (restartResult) {
+        // TODO: Wait for frame paint or some such
+
+      }
+
+      // observatory.isolateReload(observatory.mainIsolateId).catchError((dynamic error) {
+      //   printError('Error restarting app: $error');
+      // });
     }
   }
 
@@ -536,11 +587,15 @@ Future<Null> _downloadStartupTrace(Observatory observatory) async {
   printStatus('Saved startup trace info in ${traceInfoFile.path}.');
 }
 
-void _writeBenchmark(Stopwatch stopwatch) {
+void _writeBenchmark(Stopwatch startTime, [Stopwatch restartTime]) {
   final String benchmarkOut = 'refresh_benchmark.json';
   Map<String, dynamic> data = <String, dynamic>{
-    'time': stopwatch.elapsedMilliseconds
+    'start': startTime.elapsedMilliseconds,
+    'time': (restartTime ?? startTime).elapsedMilliseconds // time and restart are the same
   };
+  if (restartTime != null)
+    data['restart'] = restartTime.elapsedMilliseconds;
+
   new File(benchmarkOut).writeAsStringSync(toPrettyJson(data));
   printStatus('Run benchmark written to $benchmarkOut ($data).');
 }

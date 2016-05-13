@@ -26,6 +26,8 @@ class Observatory {
   final rpc.Peer peer;
   final int port;
 
+  String mainIsolateId;
+
   Map<String, StreamController<Event>> _eventControllers = <String, StreamController<Event>>{};
 
   bool get isClosed => peer.isClosed;
@@ -52,6 +54,21 @@ class Observatory {
   void _handleStreamNotify(Map<String, dynamic> data) {
     Event event = new Event(data['event']);
     _getEventController(data['streamId']).add(event);
+  }
+
+  Future<Null> trackMainIsolate() {
+    onIsolateEvent.listen((Event event) {
+      if (mainIsolateId == null && event.kind == 'IsolateStart')
+        mainIsolateId = event.isolate.id;
+      else if (event.kind == 'IsolateExit' && event.isolate.id == mainIsolateId)
+        mainIsolateId = null;
+    });
+    streamListen('Isolate');
+
+    return getVM().then((VM vm) {
+      if (vm.isolates.isNotEmpty)
+        mainIsolateId = vm.isolates.first['id'];
+    });
   }
 
   // Requests
@@ -104,6 +121,8 @@ class Response {
 
   final Map<String, dynamic> response;
 
+  String get type => response['type'];
+
   dynamic operator[](String key) => response[key];
 
   @override
@@ -116,15 +135,16 @@ class VM extends Response {
   List<dynamic> get isolates => response['isolates'];
 }
 
-class Event {
-  Event(this.event);
+class Event extends Response {
+  Event(Map<String, dynamic> response) : super(response);
 
-  final Map<String, dynamic> event;
+  String get kind => response['kind'];
+  IsolateRef get isolate => new IsolateRef.from(response['isolate']);
+}
 
-  String get kind => event['kind'];
+class IsolateRef extends Response {
+  IsolateRef(Map<String, dynamic> response) : super(response);
+  factory IsolateRef.from(dynamic ref) => ref == null ? null : new IsolateRef(ref);
 
-  dynamic operator[](String key) => event[key];
-
-  @override
-  String toString() => event.toString();
+  String get id => response['id'];
 }

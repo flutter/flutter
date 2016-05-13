@@ -13,6 +13,7 @@ import 'base/os.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'globals.dart';
+import 'observatory.dart';
 import 'ios/devices.dart';
 import 'ios/simulators.dart';
 
@@ -182,6 +183,15 @@ abstract class Device {
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs
+  });
+
+  /// Restart the given app; the application will already have been launched with
+  /// [startApp].
+  Future<bool> restartApp(
+    ApplicationPackage package,
+    LaunchResult result, {
+    String mainPath,
+    Observatory observatory
   });
 
   /// Stop an app package on the current device.
