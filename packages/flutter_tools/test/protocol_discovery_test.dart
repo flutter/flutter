@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'package:test/test.dart';
 
-import 'package:flutter_tools/src/service_protocol.dart';
+import 'package:flutter_tools/src/protocol_discovery.dart';
+import 'package:test/test.dart';
 
 import 'src/mocks.dart';
 
@@ -13,8 +13,8 @@ void main() {
   group('service_protocol', () {
     test('Discovery Heartbeat', () async {
       MockDeviceLogReader logReader = new MockDeviceLogReader();
-      ServiceProtocolDiscovery discoverer =
-          new ServiceProtocolDiscovery(logReader, ServiceProtocolDiscovery.kObservatoryService);
+      ProtocolDiscovery discoverer =
+          new ProtocolDiscovery(logReader, ProtocolDiscovery.kObservatoryService);
 
       // Get next port future.
       Future<int> nextPort = discoverer.nextPort();

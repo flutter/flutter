@@ -6,9 +6,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
-import 'package:web_socket_channel/io.dart';
-
 import 'android/android_device.dart';
 import 'application_package.dart';
 import 'base/common.dart';
@@ -225,82 +222,6 @@ abstract class Device {
         '${getNameForTargetPlatform(device.platform)}$supportIndicator');
     }
   }
-
-
-  Future<rpc.Peer> _connectToObservatory(int observatoryPort) async {
-    Uri uri = new Uri(scheme: 'ws', host: '127.0.0.1', port: observatoryPort, path: 'ws');
-    WebSocket ws = await WebSocket.connect(uri.toString());
-    rpc.Peer peer = new rpc.Peer(new IOWebSocketChannel(ws));
-    peer.listen();
-    return peer;
-  }
-
-  Future<Null> startTracing(int observatoryPort) async {
-    rpc.Client client;
-    try {
-      client = await _connectToObservatory(observatoryPort);
-    } catch (e) {
-      printError('Error connecting to observatory: $e');
-      return;
-    }
-
-    await client.sendRequest('_setVMTimelineFlags',
-        <String, dynamic>{'recordedStreams': <String>['Compiler', 'Dart', 'Embedder', 'GC']}
-    );
-    await client.sendRequest('_clearVMTimeline');
-  }
-
-  /// Stops tracing, optionally waiting
-  Future<Map<String, dynamic>> stopTracingAndDownloadTimeline(int observatoryPort, {bool waitForFirstFrame: false}) async {
-    rpc.Peer peer;
-    try {
-      peer = await _connectToObservatory(observatoryPort);
-    } catch (e) {
-      printError('Error connecting to observatory: $e');
-      return null;
-    }
-
-    Future<Map<String, dynamic>> fetchTimeline() async {
-      return await peer.sendRequest('_getVMTimeline');
-    }
-
-    Map<String, dynamic> timeline;
-
-    if (!waitForFirstFrame) {
-      // Stop tracing immediately and get the timeline
-      await peer.sendRequest('_setVMTimelineFlags', <String, dynamic>{'recordedStreams': '[]'});
-      timeline = await fetchTimeline();
-    } else {
-      Completer<Null> whenFirstFrameRendered = new Completer<Null>();
-      peer.registerMethod('streamNotify', (rpc.Parameters params) {
-        Map<String, dynamic> data = params.asMap;
-        if (data['streamId'] == 'Timeline') {
-          List<Map<String, dynamic>> events = data['event']['timelineEvents'];
-          for (Map<String, dynamic> event in events) {
-            if (event['name'] == firstUsefulFrameEventName) {
-              whenFirstFrameRendered.complete();
-            }
-          }
-        }
-      });
-      await peer.sendRequest('streamListen', <String, dynamic>{'streamId': 'Timeline'});
-      await whenFirstFrameRendered.future.timeout(
-        const Duration(seconds: 10),
-        onTimeout: () {
-          printError(
-            'Timed out waiting for the first frame event. Either the '
-            'application failed to start, or the event was missed because '
-            '"flutter run" took too long to subscribe to timeline events.'
-          );
-          return null;
-        }
-      );
-      timeline = await fetchTimeline();
-      await peer.sendRequest('_setVMTimelineFlags', <String, dynamic>{'recordedStreams': '[]'});
-    }
-
-    return timeline;
-  }
 }
 
 class DebuggingOptions {
@@ -332,7 +253,7 @@ class DebuggingOptions {
   Future<int> findBestObservatoryPort() {
     if (hasObservatoryPort)
       return new Future<int>.value(observatoryPort);
-    return findPreferredPort(observatoryPort ?? defaultObservatoryPort);
+    return findPreferredPort(observatoryPort ?? kDefaultObservatoryPort);
   }
 
   bool get hasDiagnosticPort => diagnosticPort != null;
@@ -340,7 +261,7 @@ class DebuggingOptions {
   /// Return the user specified diagnostic port. If that isn't available,
   /// return [defaultObservatoryPort], or a port close to that one.
   Future<int> findBestDiagnosticPort() {
-    return findPreferredPort(diagnosticPort ?? defaultDiagnosticPort);
+    return findPreferredPort(diagnosticPort ?? kDefaultDiagnosticPort);
   }
 }
 

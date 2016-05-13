@@ -14,7 +14,7 @@ import '../build_info.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
-import '../service_protocol.dart';
+import '../protocol_discovery.dart';
 import 'adb.dart';
 import 'android.dart';
 
@@ -243,14 +243,12 @@ class AndroidDevice extends Device {
 
     runCheckedSync(adbCommandForDevice(<String>['push', bundlePath, _deviceBundlePath]));
 
-    ServiceProtocolDiscovery observatoryDiscovery;
-    ServiceProtocolDiscovery diagnosticDiscovery;
+    ProtocolDiscovery observatoryDiscovery;
+    ProtocolDiscovery diagnosticDiscovery;
 
     if (options.debuggingEnabled) {
-      observatoryDiscovery = new ServiceProtocolDiscovery(
-        logReader, ServiceProtocolDiscovery.kObservatoryService);
-      diagnosticDiscovery = new ServiceProtocolDiscovery(
-        logReader, ServiceProtocolDiscovery.kDiagnosticService);
+      observatoryDiscovery = new ProtocolDiscovery(logReader, ProtocolDiscovery.kObservatoryService);
+      diagnosticDiscovery = new ProtocolDiscovery(logReader, ProtocolDiscovery.kDiagnosticService);
     }
 
     List<String> cmd = adbCommandForDevice(<String>[
@@ -295,13 +293,11 @@ class AndroidDevice extends Device {
         int observatoryLocalPort = await options.findBestObservatoryPort();
         // TODO(devoncarew): Remember the forwarding information (so we can later remove the
         // port forwarding).
-        await _forwardPort(ServiceProtocolDiscovery.kObservatoryService,
-            observatoryDevicePort, observatoryLocalPort);
+        await _forwardPort(ProtocolDiscovery.kObservatoryService, observatoryDevicePort, observatoryLocalPort);
         int diagnosticDevicePort = devicePorts[1];
         printTrace('diagnostic port = $diagnosticDevicePort');
         int diagnosticLocalPort = await options.findBestDiagnosticPort();
-        await _forwardPort(ServiceProtocolDiscovery.kDiagnosticService,
-            diagnosticDevicePort, diagnosticLocalPort);
+        await _forwardPort(ProtocolDiscovery.kDiagnosticService, diagnosticDevicePort, diagnosticLocalPort);
         return new LaunchResult.succeeded(
           observatoryPort: observatoryLocalPort,
           diagnosticPort: diagnosticLocalPort

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
@@ -58,6 +59,10 @@ File getUniqueFile(Directory dir, String baseName, String ext) {
       return file;
     i++;
   }
+}
+
+String toPrettyJson(Object jsonable) {
+  return new JsonEncoder.withIndent('  ').convert(jsonable) + '\n';
 }
 
 /// A class to maintain a list of items, fire events when items are added or
