@@ -6,6 +6,8 @@ import 'dart:async';
 
 final AppContext _defaultContext = new AppContext();
 
+typedef void ErrorHandler(dynamic error);
+
 /// A singleton for application functionality. This singleton can be different
 /// on a per-Zone basis.
 AppContext get context {
@@ -56,7 +58,10 @@ class AppContext {
     }
   }
 
-  dynamic runInZone(dynamic method()) {
-    return runZoned(method, zoneValues: <String, dynamic>{'context': this});
+  dynamic runInZone(dynamic method(), { ErrorHandler onError }) {
+    return runZoned(method,
+      zoneValues: <String, dynamic>{'context': this},
+      onError: onError
+    );
   }
 }
