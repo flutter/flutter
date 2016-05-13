@@ -56,9 +56,9 @@ abstract class BindingBase {
     initServiceExtensions();
     assert(_debugServiceExtensionsRegistered);
 
-    developer.Timeline.finishSync();
-
     developer.postEvent('Flutter.FrameworkInitialization', <String, dynamic>{});
+
+    developer.Timeline.finishSync();
   }
 
   static bool _debugInitialized = false;
