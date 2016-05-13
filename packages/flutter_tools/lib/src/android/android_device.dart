@@ -62,7 +62,7 @@ class AndroidDevice extends Device {
         for (Match m in propertyExp.allMatches(getpropOutput))
           _properties[m.group(1)] = m.group(2);
       } catch (error, trace) {
-        printError('Error reteiving device properties: $error');
+        printError('Error retrieving device properties: $error');
         printTrace(trace.toString());
       }
     }

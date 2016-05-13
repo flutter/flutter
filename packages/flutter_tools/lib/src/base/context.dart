@@ -59,8 +59,9 @@ class AppContext {
   }
 
   dynamic runInZone(dynamic method(), { ErrorHandler onError }) {
-    return runZoned(method,
-      zoneValues: <String, dynamic>{'context': this},
+    return runZoned(
+      method,
+      zoneValues: <String, dynamic>{ 'context': this },
       onError: onError
     );
   }
