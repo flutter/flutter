@@ -40,7 +40,7 @@ class SyntaxHighlighterStyle {
   final TextStyle constantStyle;
 }
 
-abstract class SyntaxHighlighter { //ignore: one_member_abstracts
+abstract class SyntaxHighlighter { // ignore: one_member_abstracts
   TextSpan format(String src);
 }
 
