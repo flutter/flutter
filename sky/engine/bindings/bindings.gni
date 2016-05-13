@@ -8,10 +8,11 @@ import("//sky/engine/config.gni")
 bindings_output_dir = "$root_gen_dir/sky/bindings"
 
 dart_host_toolchain = host_toolchain
+
+# During precompilation, a 64 bit Dart VM cannot generate code for a 32 bit
+# architecture (and vice-versa). The snapshotter that is running on the host
+# needs to know about the target architecture and built accordingly.
 if (target_os == "ios" && !use_ios_simulator) {
-  # During precompilation, a 64 bit Dart VM cannot generate code for a 32 bit
-  # architecture (and vice-versa). The snapshotter that is running on the host
-  # needs to know about the target architecture and built accordingly.
   if (target_cpu == "arm") {
     dart_host_toolchain = "//build/toolchain/mac:clang_i386"
   } else if (target_cpu == "arm64") {
@@ -20,9 +21,15 @@ if (target_os == "ios" && !use_ios_simulator) {
     assert(false, "Unknown active architecture on iOS")
   }
 }
+
 if (target_os == "android" && flutter_aot) {
-  if (host_os == "linux" && target_cpu == "arm") {
-    dart_host_toolchain = "//build/toolchain/linux:clang_x86"
+  if (target_cpu == "arm") {
+    if (host_os == "linux") {
+      dart_host_toolchain = "//build/toolchain/linux:clang_x86"
+    }
+    if (host_os == "mac") {
+      dart_host_toolchain = "//build/toolchain/mac:clang_i386"
+    }
   }
 }
 
