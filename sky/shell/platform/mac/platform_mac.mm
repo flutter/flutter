@@ -39,6 +39,11 @@ static void InitializeLogging() {
 
 static void RedirectIOConnectionsToSyslog() {
 #if TARGET_OS_IPHONE
+  if (base::CommandLine::ForCurrentProcess()->HasSwitch(
+          sky::shell::switches::kNoRedirectToSyslog)) {
+    return;
+  }
+
   asl_log_descriptor(NULL, NULL, ASL_LEVEL_INFO, STDOUT_FILENO,
                      ASL_LOG_DESCRIPTOR_WRITE);
   asl_log_descriptor(NULL, NULL, ASL_LEVEL_NOTICE, STDERR_FILENO,
@@ -52,9 +57,9 @@ class EmbedderState {
     CHECK([NSThread isMainThread])
         << "Embedder initialization must occur on the main platform thread";
 
-    RedirectIOConnectionsToSyslog();
-
     base::CommandLine::Init(argc, argv);
+
+    RedirectIOConnectionsToSyslog();
 
     InitializeLogging();
 

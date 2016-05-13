@@ -21,6 +21,7 @@ extern const char kStartPaused[];
 extern const char kTraceStartup[];
 extern const char kDeviceObservatoryPort[];
 extern const char kAotSnapshotPath[];
+extern const char kNoRedirectToSyslog[];
 
 void PrintUsage(const std::string& executable_name);
 
