@@ -36,8 +36,9 @@ const Curve _kTabIndicatorLeadingCurve = Curves.easeOut;
 const Curve _kTabIndicatorTrailingCurve = Curves.easeIn;
 
 // The scrollOffset (velocity) provided to fling() is pixels/ms, and the
-// tolerance velocity is pixels/sec.
-final double _kMinFlingVelocity = kPixelScrollTolerance.velocity / 2000.0;
+// tolerance velocity is pixels/sec. The additional factor of 5 is to further
+// increase sensitivity to swipe gestures and was determined "experimentally".
+final double _kMinFlingVelocity = kPixelScrollTolerance.velocity / 5000.0;
 
 class _TabBarParentData extends ContainerBoxParentDataMixin<RenderBox> { }
 
