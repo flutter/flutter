@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:developer' as developer;
+
 import 'framework.dart';
 import 'overlay.dart';
 
@@ -358,6 +360,7 @@ class NavigatorState extends State<Navigator> {
       if (oldRoute != null)
         oldRoute.didChangeNext(route);
       config.observer?.didPush(route, oldRoute);
+      developer.postEvent('Flutter.Route', <String, dynamic>{ 'route': route.toString() });
     });
     assert(() { _debugLocked = false; return true; });
   }
