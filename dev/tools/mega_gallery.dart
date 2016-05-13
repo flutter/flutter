@@ -53,12 +53,11 @@ void main(List<String> args) {
     copies = int.parse(results['copies']);
   }
 
-  print('Stats:');
-  print('  packages/flutter           : ${getStatsFor(new Directory("packages/flutter"))}');
-  print('  examples/flutter_gallery  : ${getStatsFor(new Directory("examples/flutter_gallery"))}');
+  print('Making $copies copies of flutter_gallery.');
   print('');
-
-  print('Making $copies copies of flutter_gallery:');
+  print('Stats:');
+  print('  packages/flutter            : ${getStatsFor(new Directory("packages/flutter"))}');
+  print('  examples/flutter_gallery    : ${getStatsFor(new Directory("examples/flutter_gallery"))}');
 
   Directory lib = _dir(out, 'lib');
   if (lib.existsSync())
@@ -82,7 +81,7 @@ void main(List<String> args) {
   _file(out, '.dartignore').writeAsStringSync('');
 
   // Count source lines and number of files; tell how to run it.
-  print('  ${path.relative(results["out"])}: ${getStatsFor(out)}');
+  print('  ${path.relative(results["out"])} : ${getStatsFor(out)}');
 }
 
 // TODO(devoncarew): Create an entry-point that builds a UI with all `n` copies.
@@ -156,7 +155,7 @@ class SourceStats {
   int lines = 0;
 
   @override
-  String toString() => '${_comma(files)} files, ${_comma(lines)} lines';
+  String toString() => '${_comma(files).padLeft(3)} files, ${_comma(lines).padLeft(6)} lines';
 }
 
 SourceStats getStatsFor(Directory dir, [SourceStats stats]) {
