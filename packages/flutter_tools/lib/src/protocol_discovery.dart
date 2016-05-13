@@ -7,9 +7,9 @@ import 'dart:async';
 import 'device.dart';
 
 /// Discover service protocol ports on devices.
-class ServiceProtocolDiscovery {
+class ProtocolDiscovery {
   /// [logReader] - a [DeviceLogReader] to look for service messages in.
-  ServiceProtocolDiscovery(DeviceLogReader logReader, String serviceName)
+  ProtocolDiscovery(DeviceLogReader logReader, String serviceName)
       : _logReader = logReader, _serviceName = serviceName {
     assert(_logReader != null);
     _subscription = _logReader.logLines.listen(_onLine);
