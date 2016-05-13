@@ -400,8 +400,7 @@ class TransformLayer extends OffsetLayer {
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     Timeline.startSync('TransformLayer::addToScene');
     Matrix4 offsetTransform = new Matrix4.identity();
-    offsetTransform.translate(
-        offset.dx + layerOffset.dx, offset.dy + layerOffset.dy);
+    offsetTransform.translate(offset.dx + layerOffset.dx, offset.dy + layerOffset.dy);
     builder.pushTransform((offsetTransform * transform).storage);
     addChildrenToScene(builder, Offset.zero);
     builder.pop();
