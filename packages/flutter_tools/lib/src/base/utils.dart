@@ -61,7 +61,7 @@ File getUniqueFile(Directory dir, String baseName, String ext) {
   }
 }
 
-String encodeJson(Object jsonable) {
+String toPrettyJson(Object jsonable) {
   return new JsonEncoder.withIndent('  ').convert(jsonable) + '\n';
 }
 

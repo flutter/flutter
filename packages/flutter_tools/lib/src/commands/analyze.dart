@@ -376,7 +376,7 @@ class AnalyzeCommand extends FlutterCommand {
       'time': (stopwatch.elapsedMilliseconds / 1000.0),
       'issues': errorCount
     };
-    new File(benchmarkOut).writeAsStringSync(encodeJson(data));
+    new File(benchmarkOut).writeAsStringSync(toPrettyJson(data));
     printStatus('Analysis benchmark written to $benchmarkOut ($data).');
   }
 }

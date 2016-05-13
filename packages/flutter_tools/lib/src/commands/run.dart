@@ -32,7 +32,7 @@ abstract class RunCommandBase extends FlutterCommand {
           'Note: this flag will be removed in favor of the --debug/--profile/--release flags.');
 
     argParser.addFlag('trace-startup',
-        negatable: false,
+        negatable: true,
         defaultsTo: false,
         help: 'Start tracing during startup.');
     argParser.addOption('route',
@@ -74,7 +74,11 @@ class RunCommand extends RunCommandBase {
         negatable: false,
         hide: true,
         help: 'Stay resident after running the app.');
-    // Hidden option to enable a benchmarking mode.
+
+    // Hidden option to enable a benchmarking mode. This will run the given
+    // application, measure the startup time and the app restart time, write the
+    // results out to 'refresh_benchmark.json', and exit. This flag is intended
+    // for use in generating automated flutter benchmarks.
     argParser.addFlag('benchmark', negatable: false, hide: true);
   }
 
@@ -526,7 +530,7 @@ Future<Null> _downloadStartupTrace(Observatory observatory) async {
     traceInfo['timeAfterFrameworkInitMicros'] = firstFrameTimestampMicros - frameworkInitTimestampMicros;
   }
 
-  traceInfoFile.writeAsStringSync(encodeJson(traceInfo));
+  traceInfoFile.writeAsStringSync(toPrettyJson(traceInfo));
 
   printStatus('Time to first frame: ${timeToFirstFrameMicros ~/ 1000}ms.');
   printStatus('Saved startup trace info in ${traceInfoFile.path}.');
@@ -537,6 +541,6 @@ void _writeBenchmark(Stopwatch stopwatch) {
   Map<String, dynamic> data = <String, dynamic>{
     'time': stopwatch.elapsedMilliseconds
   };
-  new File(benchmarkOut).writeAsStringSync(encodeJson(data));
+  new File(benchmarkOut).writeAsStringSync(toPrettyJson(data));
   printStatus('Run benchmark written to $benchmarkOut ($data).');
 }
