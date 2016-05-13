@@ -17,7 +17,7 @@ const double _kCaretWidth = 1.0; // pixels
 final String _kZeroWidthSpace = new String.fromCharCode(0x200B);
 
 /// Called when the user changes the selection (including cursor location).
-typedef void SelectionChangedHandler(TextSelection selection, RenderEditableLine renderObject);
+typedef void SelectionChangedHandler(TextSelection selection, RenderEditableLine renderObject, bool longPress);
 
 /// Represents a global screen coordinate of the point in a selection, and the
 /// text direction at that point.
@@ -128,7 +128,7 @@ class RenderEditableLine extends RenderBox {
     if (selection.isCollapsed) {
       // TODO(mpcomplete): This doesn't work well at an RTL/LTR boundary.
       Offset caretOffset = _textPainter.getOffsetForCaret(selection.extent, _caretPrototype);
-      Point start = new Point(caretOffset.dx, _contentSize.height) + offset;
+      Point start = new Point(caretOffset.dx, size.height) + offset;
       return <TextSelectionPoint>[new TextSelectionPoint(localToGlobal(start), null)];
     } else {
       List<ui.TextBox> boxes = _textPainter.getBoxesForSelection(selection);
@@ -212,7 +212,7 @@ class RenderEditableLine extends RenderBox {
     _lastTapDownPosition = null;
     if (onSelectionChanged != null) {
       TextPosition position = _textPainter.getPositionForOffset(globalToLocal(global).toOffset());
-      onSelectionChanged(new TextSelection.fromPosition(position), this);
+      onSelectionChanged(new TextSelection.fromPosition(position), this, false);
     }
   }
 
@@ -227,12 +227,15 @@ class RenderEditableLine extends RenderBox {
     _longPressPosition = null;
     if (onSelectionChanged != null) {
       TextPosition position = _textPainter.getPositionForOffset(globalToLocal(global).toOffset());
-      onSelectionChanged(_selectWordAtOffset(position), this);
+      onSelectionChanged(_selectWordAtOffset(position), this, true);
     }
   }
 
   TextSelection _selectWordAtOffset(TextPosition position) {
     TextRange word = _textPainter.getWordBoundary(position);
+    // When long-pressing past the end of the text, we want a collapsed cursor.
+    if (position.offset >= word.end)
+      return new TextSelection.fromPosition(position);
     return new TextSelection(baseOffset: word.start, extentOffset: word.end);
   }
 

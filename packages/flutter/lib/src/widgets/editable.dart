@@ -299,7 +299,7 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
       config.onSubmitted(_keyboardClient.inputValue);
   }
 
-  void _handleSelectionChanged(TextSelection selection, RenderEditableLine renderObject) {
+  void _handleSelectionChanged(TextSelection selection, RenderEditableLine renderObject, bool longPress) {
     // Note that this will show the keyboard for all selection changes on the
     // EditableLineWidget, not just changes triggered by user gestures.
     requestKeyboard();
@@ -313,7 +313,7 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
       _selectionOverlay = null;
     }
 
-    if (newInput.text.isNotEmpty && config.selectionHandleBuilder != null) {
+    if (config.selectionHandleBuilder != null) {
       _selectionOverlay = new TextSelectionOverlay(
         input: newInput,
         context: context,
@@ -323,7 +323,10 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
         handleBuilder: config.selectionHandleBuilder,
         toolbarBuilder: config.selectionToolbarBuilder
       );
-      _selectionOverlay.show();
+      if (newInput.text.isNotEmpty || longPress)
+        _selectionOverlay.showHandles();
+      if (longPress)
+        _selectionOverlay.showToolbar();
     }
   }
 

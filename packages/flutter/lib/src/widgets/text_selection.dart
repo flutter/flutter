@@ -73,40 +73,49 @@ class TextSelectionOverlay implements TextSelectionDelegate {
   /// second is hidden when the selection is collapsed.
   List<OverlayEntry> _handles;
 
+  /// A copy/paste toolbar.
   OverlayEntry _toolbar;
 
   TextSelection get _selection => _input.selection;
 
   /// Shows the handles by inserting them into the [context]'s overlay.
-  void show() {
+  void showHandles() {
     assert(_handles == null);
     _handles = <OverlayEntry>[
       new OverlayEntry(builder: (BuildContext c) => _buildOverlay(c, _TextSelectionHandlePosition.start)),
       new OverlayEntry(builder: (BuildContext c) => _buildOverlay(c, _TextSelectionHandlePosition.end)),
     ];
-    _toolbar = new OverlayEntry(builder: _buildToolbar);
     Overlay.of(context, debugRequiredFor: debugRequiredFor).insertAll(_handles);
+  }
+
+  /// Shows the toolbar by inserting it into the [context]'s overlay.
+  void showToolbar() {
+    assert(_toolbar == null);
+    _toolbar = new OverlayEntry(builder: _buildToolbar);
     Overlay.of(context, debugRequiredFor: debugRequiredFor).insert(_toolbar);
   }
 
-  /// Updates the handles after the [selection] has changed.
+  /// Updates the overlay after the [selection] has changed.
   void update(InputValue newInput) {
-    _input = newInput;
-    if (_handles == null)
+    if (_input == newInput)
       return;
-    _handles[0].markNeedsBuild();
-    _handles[1].markNeedsBuild();
-    _toolbar.markNeedsBuild();
+
+    _input = newInput;
+    if (_handles != null) {
+      _handles[0].markNeedsBuild();
+      _handles[1].markNeedsBuild();
+    }
+    _toolbar?.markNeedsBuild();
   }
 
-  /// Hides the handles.
+  /// Hides the overlay.
   void hide() {
-    if (_handles == null)
-      return;
-    _handles[0].remove();
-    _handles[1].remove();
-    _handles = null;
-    _toolbar.remove();
+    if (_handles != null) {
+      _handles[0].remove();
+      _handles[1].remove();
+      _handles = null;
+    }
+    _toolbar?.remove();
     _toolbar = null;
   }
 
@@ -116,6 +125,7 @@ class TextSelectionOverlay implements TextSelectionDelegate {
       return new Container();  // hide the second handle when collapsed
     return new _TextSelectionHandleOverlay(
       onSelectionHandleChanged: _handleSelectionHandleChanged,
+      onSelectionHandleTapped: _handleSelectionHandleTapped,
       renderObject: renderObject,
       selection: _selection,
       builder: handleBuilder,
@@ -143,6 +153,17 @@ class TextSelectionOverlay implements TextSelectionDelegate {
     inputValue = _input.copyWith(selection: newSelection, composing: TextRange.empty);
   }
 
+  void _handleSelectionHandleTapped() {
+    if (inputValue.selection.isCollapsed) {
+      if (_toolbar != null) {
+        _toolbar?.remove();
+        _toolbar = null;
+      } else {
+        showToolbar();
+      }
+    }
+  }
+
   @override
   InputValue get inputValue => _input;
 
@@ -167,6 +188,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
     this.position,
     this.renderObject,
     this.onSelectionHandleChanged,
+    this.onSelectionHandleTapped,
     this.builder
   }) : super(key: key);
 
@@ -174,6 +196,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
   final _TextSelectionHandlePosition position;
   final RenderEditableLine renderObject;
   final ValueChanged<TextSelection> onSelectionHandleChanged;
+  final VoidCallback onSelectionHandleTapped;
   final TextSelectionHandleBuilder builder;
 
   @override
@@ -217,6 +240,10 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
     config.onSelectionHandleChanged(newSelection);
   }
 
+  void _handleTap() {
+    config.onSelectionHandleTapped();
+  }
+
   @override
   Widget build(BuildContext context) {
     List<TextSelectionPoint> endpoints = config.renderObject.getEndpointsForSelection(config.selection);
@@ -240,6 +267,7 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
     return new GestureDetector(
       onHorizontalDragStart: _handleDragStart,
       onHorizontalDragUpdate: _handleDragUpdate,
+      onTap: _handleTap,
       child: new Stack(
         children: <Widget>[
           new Positioned(
