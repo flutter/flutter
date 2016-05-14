@@ -64,13 +64,17 @@ class DaemonCommand extends FlutterCommand {
       }, daemonCommand: this, notifyingLogger: notifyingLogger);
 
       return daemon.onExit;
-    });
+    }, onError: _handleError);
   }
 
   dynamic _jsonEncodeObject(dynamic object) {
     if (object is Device)
       return _deviceToMap(object);
     return object;
+  }
+
+  void _handleError(dynamic error) {
+    printError('Error from flutter daemon: $error');
   }
 }
 

@@ -40,7 +40,7 @@ linter:
     - library_names
     - library_prefixes
     - non_constant_identifier_names
-    # - one_member_abstracts # https://github.com/dart-lang/linter/issues/203
+    - one_member_abstracts
     - package_api_docs
     - package_names
     - package_prefixed_library_names

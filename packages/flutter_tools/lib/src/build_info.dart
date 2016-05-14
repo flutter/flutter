@@ -35,9 +35,9 @@ enum HostPlatform {
 String getNameForHostPlatform(HostPlatform platform) {
   switch (platform) {
     case HostPlatform.darwin_x64:
-      return "mac_debug";
+      return 'darwin-x64';
     case HostPlatform.linux_x64:
-      return "linux-x64";
+      return 'linux-x64';
   }
   assert(false);
 }
@@ -54,17 +54,17 @@ enum TargetPlatform {
 String getNameForTargetPlatform(TargetPlatform platform) {
   switch (platform) {
     case TargetPlatform.android_arm:
-      return "android-arm";
+      return 'android-arm';
     case TargetPlatform.android_x64:
-      return "android-x64";
+      return 'android-x64';
     case TargetPlatform.android_x86:
-      return "android-x86";
+      return 'android-x86';
     case TargetPlatform.ios:
-      return "ios_release";
+      return 'ios_release';
     case TargetPlatform.darwin_x64:
-      return "mac_debug";
+      return 'darwin-x64';
     case TargetPlatform.linux_x64:
-      return "linux-x64";
+      return 'linux-x64';
   }
   assert(false);
 }
