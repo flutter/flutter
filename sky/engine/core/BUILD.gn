@@ -73,10 +73,16 @@ static_library("core") {
     "//sky/services/pointer:interfaces",
     "//dart/runtime/bin:embedded_dart_io",
     "//dart/runtime:libdart",
-    "//dart/runtime/observatory:embedded_observatory_archive",
     "//dart/runtime/vm:libdart_platform",
     "//mojo/services/navigation/interfaces",
   ]
+
+  if (!flutter_product_mode) {
+    # Only include observatory assets in non-product modes.
+    deps += [
+      "//dart/runtime/observatory:embedded_observatory_archive",
+    ]
+  }
 
   sources = sky_core_files
 

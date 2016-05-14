@@ -51,11 +51,15 @@
 namespace dart {
 namespace observatory {
 
+#if !FLUTTER_PRODUCT_MODE
+
 // These two symbols are defined in |observatory_archive.cc| which is generated
 // by the |//dart/runtime/observatory:archive_observatory| rule. Both of these
 // symbols will be part of the data segment and therefore are read only.
 extern unsigned int observatory_assets_archive_len;
 extern const uint8_t* observatory_assets_archive;
+
+#endif  // !FLUTTER_PRODUCT_MODE
 
 }  // namespace observatory
 }  // namespace dart
@@ -252,9 +256,13 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
 }
 
 Dart_Handle GetVMServiceAssetsArchiveCallback() {
+#if FLUTTER_PRODUCT_MODE
+  return nullptr;
+#else   // FLUTTER_PRODUCT_MODE
   return DartConverter<Uint8List>::ToDart(
       ::dart::observatory::observatory_assets_archive,
       ::dart::observatory::observatory_assets_archive_len);
+#endif  // FLUTTER_PRODUCT_MODE
 }
 
 static const char kStdoutStreamId[] = "Stdout";
