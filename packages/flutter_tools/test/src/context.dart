@@ -121,6 +121,12 @@ class MockUsage implements Usage {
   bool get isFirstRun => false;
 
   @override
+  bool get suppressAnalytics => false;
+
+  @override
+  set suppressAnalytics(bool value) { }
+
+  @override
   bool get enabled => true;
 
   @override
