@@ -246,25 +246,27 @@ class GridListDemoState extends State<GridListDemo> {
       body: new Column(
         children: <Widget>[
           new Flexible(
-            child: new ScrollableGrid(
-              delegate: new FixedColumnCountGridDelegate(
-                columnCount: (orientation == Orientation.portrait) ? 2 : 3,
-                rowSpacing: 4.0,
-                columnSpacing: 4.0,
-                padding: const EdgeInsets.all(4.0),
-                tileAspectRatio: (orientation == Orientation.portrait) ? 1.0 : 1.3
-              ),
-              children: photos.map((Photo photo) {
-                return new GridDemoPhotoItem(
-                  photo: photo,
-                  tileStyle: tileStyle,
-                  onBannerTap: (Photo photo) {
-                    setState(() {
-                      photo.isFavorite = !photo.isFavorite;
-                    });
-                  }
-                );
-              })
+            child: new PlatformScrollBehavior(
+              child: new ScrollableGrid(
+                delegate: new FixedColumnCountGridDelegate(
+                  columnCount: (orientation == Orientation.portrait) ? 2 : 3,
+                  rowSpacing: 4.0,
+                  columnSpacing: 4.0,
+                  padding: const EdgeInsets.all(4.0),
+                  tileAspectRatio: (orientation == Orientation.portrait) ? 1.0 : 1.3
+                ),
+                children: photos.map((Photo photo) {
+                  return new GridDemoPhotoItem(
+                    photo: photo,
+                    tileStyle: tileStyle,
+                    onBannerTap: (Photo photo) {
+                      setState(() {
+                        photo.isFavorite = !photo.isFavorite;
+                      });
+                    }
+                  );
+                })
+              )
             )
           ),
           new DemoBottomBar(

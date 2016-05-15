@@ -146,108 +146,111 @@ class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
             )
           )
         ),
-        body: new Block(
-          padding: new EdgeInsets.only(top: _appBarHeight + statusBarHeight),
-          children: <Widget>[
-            new _ContactCategory(
-              icon: Icons.call,
-              children: <Widget>[
-                new _ContactItem(
-                  icon: Icons.message,
-                  lines: <String>[
-                    '(650) 555-1234',
-                    'Mobile'
-                  ]
-                ),
-                new _ContactItem(
-                  icon: Icons.message,
-                  lines: <String>[
-                    '(323) 555-6789',
-                    'Work'
-                  ]
-                ),
-                new _ContactItem(
-                  icon: Icons.message,
-                  lines: <String>[
-                    '(650) 555-6789',
-                    'Home'
-                  ]
-                ),
-              ]
-            ),
-            new _ContactCategory(
-              icon: Icons.email,
-              children: <Widget>[
-                new _ContactItem(
-                  lines: <String>[
-                    'ali_connors@example.com',
-                    'Personal'
-                  ]
-                ),
-                new _ContactItem(
-                  lines: <String>[
-                    'aliconnors@example.com',
-                    'Work'
-                  ]
-                )
-              ]
-            ),
-            new _ContactCategory(
-              icon: Icons.location_on,
-              children: <Widget>[
-                new _ContactItem(
-                  lines: <String>[
-                    '2000 Main Street',
-                    'San Francisco, CA',
-                    'Home'
-                  ]
-                ),
-                new _ContactItem(
-                  lines: <String>[
-                    '1600 Amphitheater Parkway',
-                    'Mountain View, CA',
-                    'Work'
-                  ]
-                ),
-                new _ContactItem(
-                  lines: <String>[
-                    '126 Severyns Ave',
-                    'Mountain View, CA',
-                    'Jet Travel'
-                  ]
-                )
-              ]
-            ),
-            new _ContactCategory(
-              icon: Icons.today,
-              children: <Widget>[
-                new _ContactItem(
-                  lines: <String>[
-                    'Birthday',
-                    'January 9th, 1989'
-                  ]
-                ),
-                new _ContactItem(
-                  lines: <String>[
-                    'Wedding anniversary',
-                    'June 21st, 2014'
-                  ]
-                ),
-                new _ContactItem(
-                  lines: <String>[
-                    'First day in office',
-                    'January 20th, 2015'
-                  ]
-                ),
-                new _ContactItem(
-                  lines: <String>[
-                    'Last day in office',
-                    'August 9th, 2015'
-                  ]
-                )
-              ]
-            )
-          ]
+        body: new ClampOverscrolls(
+          value: true,
+          child: new Block(
+            padding: new EdgeInsets.only(top: _appBarHeight + statusBarHeight),
+            children: <Widget>[
+              new _ContactCategory(
+                icon: Icons.call,
+                children: <Widget>[
+                  new _ContactItem(
+                    icon: Icons.message,
+                    lines: <String>[
+                      '(650) 555-1234',
+                      'Mobile'
+                    ]
+                  ),
+                  new _ContactItem(
+                    icon: Icons.message,
+                    lines: <String>[
+                      '(323) 555-6789',
+                      'Work'
+                    ]
+                  ),
+                  new _ContactItem(
+                    icon: Icons.message,
+                    lines: <String>[
+                      '(650) 555-6789',
+                      'Home'
+                    ]
+                  ),
+                ]
+              ),
+              new _ContactCategory(
+                icon: Icons.email,
+                children: <Widget>[
+                  new _ContactItem(
+                    lines: <String>[
+                      'ali_connors@example.com',
+                      'Personal'
+                    ]
+                  ),
+                  new _ContactItem(
+                    lines: <String>[
+                      'aliconnors@example.com',
+                      'Work'
+                    ]
+                  )
+                ]
+              ),
+              new _ContactCategory(
+                icon: Icons.location_on,
+                children: <Widget>[
+                  new _ContactItem(
+                    lines: <String>[
+                      '2000 Main Street',
+                      'San Francisco, CA',
+                      'Home'
+                    ]
+                  ),
+                  new _ContactItem(
+                    lines: <String>[
+                      '1600 Amphitheater Parkway',
+                      'Mountain View, CA',
+                      'Work'
+                    ]
+                  ),
+                  new _ContactItem(
+                    lines: <String>[
+                      '126 Severyns Ave',
+                      'Mountain View, CA',
+                      'Jet Travel'
+                    ]
+                  )
+                ]
+              ),
+              new _ContactCategory(
+                icon: Icons.today,
+                children: <Widget>[
+                  new _ContactItem(
+                    lines: <String>[
+                      'Birthday',
+                      'January 9th, 1989'
+                    ]
+                  ),
+                  new _ContactItem(
+                    lines: <String>[
+                      'Wedding anniversary',
+                      'June 21st, 2014'
+                    ]
+                  ),
+                  new _ContactItem(
+                    lines: <String>[
+                      'First day in office',
+                      'January 20th, 2015'
+                    ]
+                  ),
+                  new _ContactItem(
+                    lines: <String>[
+                      'Last day in office',
+                      'August 9th, 2015'
+                    ]
+                  )
+                ]
+              )
+            ]
+          )
         )
       )
     );

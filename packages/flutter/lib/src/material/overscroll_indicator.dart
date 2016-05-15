@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async' show Timer;
+import 'dart:io' show Platform;
 
 import 'package:flutter/widgets.dart';
 
@@ -222,6 +223,29 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
           value: true
         )
       )
+    );
+  }
+}
+
+class PlatformScrollBehavior extends StatelessWidget {
+  PlatformScrollBehavior({
+    Key key,
+    this.scrollableKey,
+    this.child
+  }) : super(key: key) {
+    assert(child != null);
+  }
+
+  final Key scrollableKey;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (Platform.isIOS || Platform.isMacOS)
+      return child;
+    return new OverscrollIndicator(
+      scrollableKey: scrollableKey,
+      child: child
     );
   }
 }

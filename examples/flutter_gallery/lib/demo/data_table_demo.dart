@@ -65,82 +65,86 @@ class _DataTableDemoState extends State<DataTableDemo> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(title: new Text('Data tables')),
-      body: new Block(
-        children: <Widget>[
-          new Material(
-            child: new IntrinsicHeight(
-              child: new Block(
-                scrollDirection: Axis.horizontal,
-                children: <Widget>[
-                  new DataTable(
-                    sortColumnIndex: _sortColumnIndex,
-                    sortAscending: _sortAscending,
-                    columns: <DataColumn>[
-                      new DataColumn(
-                        label: new Text('Dessert (100g serving)'),
-                        onSort: (int columnIndex, bool ascending) => _sort/*<String>*/((Desert d) => d.name, columnIndex, ascending)
-                      ),
-                      new DataColumn(
-                        label: new Text('Calories'),
-                        tooltip: 'The total amount of food energy in the given serving size.',
-                        numeric: true,
-                        onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.calories, columnIndex, ascending)
-                      ),
-                      new DataColumn(
-                        label: new Text('Fat (g)'),
-                        numeric: true,
-                        onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.fat, columnIndex, ascending)
-                      ),
-                      new DataColumn(
-                        label: new Text('Carbs (g)'),
-                        numeric: true,
-                        onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.carbs, columnIndex, ascending)
-                      ),
-                      new DataColumn(
-                        label: new Text('Protein (g)'),
-                        numeric: true,
-                        onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.protein, columnIndex, ascending)
-                      ),
-                      new DataColumn(
-                        label: new Text('Sodium (mg)'),
-                        numeric: true,
-                        onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.sodium, columnIndex, ascending)
-                      ),
-                      new DataColumn(
-                        label: new Text('Calcium (%)'),
-                        tooltip: 'The amount of calcium as a percentage of the recommended daily amount.',
-                        numeric: true,
-                        onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.calcium, columnIndex, ascending)
-                      ),
-                      new DataColumn(
-                        label: new Text('Iron (%)'),
-                        numeric: true,
-                        onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.iron, columnIndex, ascending)
-                      ),
-                    ],
-                    rows: _deserts.map/*<DataRow>*/((Desert desert) {
-                      return new DataRow(
-                        key: new ValueKey<Desert>(desert),
-                        selected: desert.selected,
-                        onSelectChanged: (bool selected) { setState(() { desert.selected = selected; }); },
-                        cells: <DataCell>[
-                          new DataCell(new Text('${desert.name}')),
-                          new DataCell(new Text('${desert.calories}')),
-                          new DataCell(new Text('${desert.fat.toStringAsFixed(1)}')),
-                          new DataCell(new Text('${desert.carbs}')),
-                          new DataCell(new Text('${desert.protein.toStringAsFixed(1)}')),
-                          new DataCell(new Text('${desert.sodium}')),
-                          new DataCell(new Text('${desert.calcium}%')),
-                          new DataCell(new Text('${desert.iron}%')),
-                        ]
-                      );
-                    }).toList(growable: false)
+      body: new PlatformScrollBehavior(
+        child: new Block(
+          children: <Widget>[
+            new Material(
+              child: new IntrinsicHeight(
+                child: new PlatformScrollBehavior(
+                  child: new Block(
+                    scrollDirection: Axis.horizontal,
+                    children: <Widget>[
+                      new DataTable(
+                        sortColumnIndex: _sortColumnIndex,
+                        sortAscending: _sortAscending,
+                        columns: <DataColumn>[
+                          new DataColumn(
+                            label: new Text('Dessert (100g serving)'),
+                            onSort: (int columnIndex, bool ascending) => _sort/*<String>*/((Desert d) => d.name, columnIndex, ascending)
+                          ),
+                          new DataColumn(
+                            label: new Text('Calories'),
+                            tooltip: 'The total amount of food energy in the given serving size.',
+                            numeric: true,
+                            onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.calories, columnIndex, ascending)
+                          ),
+                          new DataColumn(
+                            label: new Text('Fat (g)'),
+                            numeric: true,
+                            onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.fat, columnIndex, ascending)
+                          ),
+                          new DataColumn(
+                            label: new Text('Carbs (g)'),
+                            numeric: true,
+                            onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.carbs, columnIndex, ascending)
+                          ),
+                          new DataColumn(
+                            label: new Text('Protein (g)'),
+                            numeric: true,
+                            onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.protein, columnIndex, ascending)
+                          ),
+                          new DataColumn(
+                            label: new Text('Sodium (mg)'),
+                            numeric: true,
+                            onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.sodium, columnIndex, ascending)
+                          ),
+                          new DataColumn(
+                            label: new Text('Calcium (%)'),
+                            tooltip: 'The amount of calcium as a percentage of the recommended daily amount.',
+                            numeric: true,
+                            onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.calcium, columnIndex, ascending)
+                          ),
+                          new DataColumn(
+                            label: new Text('Iron (%)'),
+                            numeric: true,
+                            onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.iron, columnIndex, ascending)
+                          ),
+                        ],
+                        rows: _deserts.map/*<DataRow>*/((Desert desert) {
+                          return new DataRow(
+                            key: new ValueKey<Desert>(desert),
+                            selected: desert.selected,
+                            onSelectChanged: (bool selected) { setState(() { desert.selected = selected; }); },
+                            cells: <DataCell>[
+                              new DataCell(new Text('${desert.name}')),
+                              new DataCell(new Text('${desert.calories}')),
+                              new DataCell(new Text('${desert.fat.toStringAsFixed(1)}')),
+                              new DataCell(new Text('${desert.carbs}')),
+                              new DataCell(new Text('${desert.protein.toStringAsFixed(1)}')),
+                              new DataCell(new Text('${desert.sodium}')),
+                              new DataCell(new Text('${desert.calcium}%')),
+                              new DataCell(new Text('${desert.iron}%')),
+                            ]
+                          );
+                        }).toList(growable: false)
+                      )
+                    ]
                   )
-                ]
+                )
               )
             )
-          )
-        ]
+          ]
+        )
       )
     );
   }

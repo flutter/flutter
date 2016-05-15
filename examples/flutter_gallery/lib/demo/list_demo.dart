@@ -191,7 +191,7 @@ class ListDemoState extends State<ListDemo> {
           )
         ]
       ),
-      body: new OverscrollIndicator(
+      body: new PlatformScrollBehavior(
         child: new Scrollbar(
           child: new MaterialList(
             type: _itemType,
