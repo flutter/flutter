@@ -11,6 +11,9 @@ import 'framework.dart';
 import 'scrollable.dart';
 import 'virtual_viewport.dart';
 
+/// A vertically scrollable grid.
+///
+/// Requires that delegate places its children in row-major order.
 class ScrollableGrid extends StatelessWidget {
   ScrollableGrid({
     Key key,
@@ -95,69 +98,6 @@ class ScrollableGrid extends StatelessWidget {
     );
   }
 }
-
-/// A vertically scrollable grid.
-///
-/// Requires that delegate places its children in row-major order.
-/*
-class ScrollableGrid extends Scrollable {
-  ScrollableGrid({
-    Key key,
-    double initialScrollOffset,
-    ScrollListener onScrollStart,
-    ScrollListener onScroll,
-    ScrollListener onScrollEnd,
-    SnapOffsetCallback snapOffsetCallback,
-    this.delegate,
-    this.children
-  }) : super(
-    key: key,
-    initialScrollOffset: initialScrollOffset,
-    // TODO(abarth): Support horizontal offsets. For horizontally scrolling
-    // grids. For horizontally scrolling grids, we'll probably need to use a
-    // delegate that places children in column-major order.
-    scrollDirection: Axis.vertical,
-    onScrollStart: onScrollStart,
-    onScroll: onScroll,
-    onScrollEnd: onScrollEnd,
-    snapOffsetCallback: snapOffsetCallback
-  );
-
-  final GridDelegate delegate;
-  final Iterable<Widget> children;
-
-  @override
-  ScrollableState createState() => new _ScrollableGridState();
-}
-
-class _ScrollableGridState extends ScrollableState<ScrollableGrid> {
-  @override
-  ExtentScrollBehavior createScrollBehavior() => new OverscrollBehavior();
-
-  @override
-  ExtentScrollBehavior get scrollBehavior => super.scrollBehavior;
-
-  void _handleExtentsChanged(double contentExtent, double containerExtent) {
-    setState(() {
-      didUpdateScrollBehavior(scrollBehavior.updateExtents(
-        contentExtent: contentExtent,
-        containerExtent: containerExtent,
-        scrollOffset: scrollOffset
-      ));
-    });
-  }
-
-  @override
-  Widget buildContent(BuildContext context) {
-    return new GridViewport(
-      startOffset: scrollOffset,
-      delegate: config.delegate,
-      onExtentsChanged: _handleExtentsChanged,
-      children: config.children
-    );
-  }
-}
-*/
 
 class GridViewport extends VirtualViewportFromIterable {
   GridViewport({
