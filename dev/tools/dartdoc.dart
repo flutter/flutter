@@ -8,7 +8,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-const String DOC_ROOT = 'dev/docs/doc';
+const String kDocRoot = 'dev/docs/doc';
 
 /// This script expects to run with the cwd as the root of the flutter repo. It
 /// will generate documentation for the packages in `//packages/` and write the
@@ -88,7 +88,7 @@ dependencies:
 /// Creates a custom index.html because we try to maintain old
 /// paths. Cleanup unused index.html files no longer needed.
 void createIndexAndCleanup() {
-  print('\nCreating a custom index.html in $DOC_ROOT/index.html');
+  print('\nCreating a custom index.html in $kDocRoot/index.html');
   renameApiDir();
   copyIndexToRootOfDocs();
   addHtmlBaseToIndex();
@@ -96,16 +96,16 @@ void createIndexAndCleanup() {
   print('\nDocs ready to go!');
 }
 
-Directory renameApiDir() {
-  return new Directory('$DOC_ROOT/api').renameSync('$DOC_ROOT/flutter');
+void renameApiDir() {
+  new Directory('$kDocRoot/api').renameSync('$kDocRoot/flutter');
 }
 
 File copyIndexToRootOfDocs() {
-  return new File('$DOC_ROOT/flutter/index.html').copySync('$DOC_ROOT/index.html');
+  return new File('$kDocRoot/flutter/index.html').copySync('$kDocRoot/index.html');
 }
 
 void addHtmlBaseToIndex() {
-  File indexFile = new File('$DOC_ROOT/index.html');
+  File indexFile = new File('$kDocRoot/index.html');
   String indexContents = indexFile.readAsStringSync();
   indexContents = indexContents.replaceFirst('</title>\n',
     '</title>\n  <base href="./flutter/">\n');
@@ -114,7 +114,7 @@ void addHtmlBaseToIndex() {
 
 void putRedirectInOldIndexLocation() {
   String metaTag = '<meta http-equiv="refresh" content="0;URL=../index.html">';
-  new File('$DOC_ROOT/flutter/index.html').writeAsStringSync(metaTag);
+  new File('$kDocRoot/flutter/index.html').writeAsStringSync(metaTag);
 }
 
 List<String> findSkyServicesLibraryNames() {
