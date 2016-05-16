@@ -4,6 +4,7 @@
 
 import("//build/config/templates/templates.gni")
 import("//sky/engine/bindings/bindings.gni")
+import("//sky/build/template.gni")
 
 template("sky_precompilation_sdk") {
   assert(is_ios, "The precompilation SDK is only supported for iOS targets")
@@ -68,20 +69,29 @@ template("sky_precompilation_sdk") {
 
   copy("copy_sdk_xcode_harness") {
     sources = [
-      "//sky/build/sdk_xcode_harness/Flutter.xcconfig",
       "//sky/build/sdk_xcode_harness/FlutterApplication",
       "//sky/build/sdk_xcode_harness/FlutterApplication.xcodeproj",
       "//sky/build/sdk_xcode_harness/Local.xcconfig",
       "//sky/build/sdk_xcode_harness/Runner",
     ]
 
-    if (dart_experimental_interpreter) {
-      sources += [
-        "//sky/build/sdk_xcode_harness/Interpreter.xcconfig",
-      ]
-    }
-
     outputs = [  "$sdk_dir/{{source_file_part}}"  ]
+  }
+
+  render_template("flutter_xcconfig") {
+    template = "//sky/build/sdk_xcode_harness/Flutter.xcconfig.tmpl"
+    output = "$sdk_dir/Flutter.xcconfig"
+    stamp_file = "$root_build_dir/expand_flutter_xcconfig.stamp"
+
+    variables = [
+      "interpreter"
+    ]
+
+    if (dart_experimental_interpreter) {
+      variables += [ "1" ]
+    } else {
+      variables += [ "0" ]
+    }
   }
 
   # All user editable files are copied to the out directory so that developers
@@ -97,12 +107,13 @@ template("sky_precompilation_sdk") {
 
   group(target_name) {
     deps = [
-      ":copy_snapshotter",
       ":copy_flutter_framework",
-      ":embedder_entry_points",
-      ":precompilation_xcode_scripts",
       ":copy_sdk_xcode_harness",
+      ":copy_snapshotter",
       ":copy_user_editable_files",
+      ":embedder_entry_points",
+      ":flutter_xcconfig",
+      ":precompilation_xcode_scripts",
     ]
   }
 }
