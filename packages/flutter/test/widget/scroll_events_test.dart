@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 
 Widget _buildScroller({Key key, List<String> log}) {
   return new ScrollableViewport(
-    key: key,
+    scrollableKey: key,
     onScrollStart: (double scrollOffset) {
       log.add('scrollstart');
     },

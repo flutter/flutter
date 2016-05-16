@@ -24,6 +24,7 @@ final Tolerance kPixelScrollTolerance = new Tolerance(
   distance: 1.0 / ui.window.devicePixelRatio // logical pixels
 );
 
+typedef Widget ScrollBuilder(BuildContext context, ScrollableState state);
 typedef void ScrollListener(double scrollOffset);
 typedef double SnapOffsetCallback(double scrollOffset, Size containerSize);
 
@@ -34,7 +35,7 @@ typedef double SnapOffsetCallback(double scrollOffset, Size containerSize);
 ///
 /// Widgets that subclass [Scrollable] typically use state objects that subclass
 /// [ScrollableState].
-abstract class Scrollable extends StatefulWidget {
+class Scrollable extends StatefulWidget {
   Scrollable({
     Key key,
     this.initialScrollOffset,
@@ -43,7 +44,8 @@ abstract class Scrollable extends StatefulWidget {
     this.onScrollStart,
     this.onScroll,
     this.onScrollEnd,
-    this.snapOffsetCallback
+    this.snapOffsetCallback,
+    this.builder
   }) : super(key: key) {
     assert(scrollDirection == Axis.vertical || scrollDirection == Axis.horizontal);
     assert(scrollAnchor == ViewportAnchor.start || scrollAnchor == ViewportAnchor.end);
@@ -105,6 +107,8 @@ abstract class Scrollable extends StatefulWidget {
   /// If the callback simply returns its first argument (the offset),
   /// then it is as if the callback was null.
   final SnapOffsetCallback snapOffsetCallback;
+
+  final ScrollBuilder builder;
 
   /// The state from the closest instance of this class that encloses the given context.
   static ScrollableState of(BuildContext context) {
@@ -176,7 +180,7 @@ abstract class Scrollable extends StatefulWidget {
   }
 
   @override
-  ScrollableState createState();
+  ScrollableState createState() => new ScrollableState<Scrollable>();
 }
 
 /// Contains the state for common scrolling widgets that scroll only
@@ -219,7 +223,7 @@ abstract class Scrollable extends StatefulWidget {
 /// terms of the [pixelOffsetToScrollOffset] and
 /// [scrollOffsetToPixelOffset] methods.
 @optionalTypeArgs
-abstract class ScrollableState<T extends Scrollable> extends State<T> {
+class ScrollableState<T extends Scrollable> extends State<T> {
   @override
   void initState() {
     super.initState();
@@ -306,14 +310,14 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   /// Scroll behaviors control where the boundaries of the scrollable are placed
   /// and how the scrolling physics should behave near those boundaries and
   /// after the user stops directly manipulating the scrollable.
-  ScrollBehavior<double, double> get scrollBehavior {
+  ExtentScrollBehavior get scrollBehavior {
     return _scrollBehavior ??= createScrollBehavior();
   }
-  ScrollBehavior<double, double> _scrollBehavior;
+  ExtentScrollBehavior _scrollBehavior;
 
   /// Subclasses should override this function to create the [ScrollBehavior]
   /// they desire.
-  ScrollBehavior<double, double> createScrollBehavior();
+  ExtentScrollBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior();
 
   bool _scrollOffsetIsInBounds(double scrollOffset) {
     if (scrollBehavior is! ExtentScrollBehavior)
@@ -612,7 +616,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     return const <Type, GestureRecognizerFactory>{};
   }
 
-  /// Subclasses should override this function to build the interior of their
+  /// Subclasses can override this function to build the interior of their
   /// scrollable widget. Scrollable wraps the returned widget in a
   /// [GestureDetector] to observe the user's interaction with this widget and
   /// to adjust the scroll offset accordingly.
@@ -628,7 +632,10 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   /// This callback should be used to update the scroll behavior, if
   /// necessary, and then to call [updateGestureDetector] to update
   /// the gesture detectors accordingly.
-  Widget buildContent(BuildContext context);
+  Widget buildContent(BuildContext context) {
+    // TBD: if config.builder is null throw a sensible error.
+    return config.builder(context, this);
+  }
 }
 
 /// Indicates if a [ScrollNotification] indicates the start, end or the
@@ -658,69 +665,133 @@ class ScrollNotification extends Notification {
   final ScrollableState scrollable;
 }
 
-/// A simple scrollable widget that has a single child. Use this widget if
+/// A simple scrolling widget that has a single child. Use this widget if
 /// you are not worried about offscreen widgets consuming resources.
-class ScrollableViewport extends Scrollable {
+class ScrollableViewport extends StatefulWidget {
   ScrollableViewport({
     Key key,
-    double initialScrollOffset,
-    Axis scrollDirection: Axis.vertical,
-    ViewportAnchor scrollAnchor: ViewportAnchor.start,
-    ScrollListener onScrollStart,
-    ScrollListener onScroll,
-    ScrollListener onScrollEnd,
+    this.initialScrollOffset,
+    this.scrollDirection: Axis.vertical,
+    this.scrollAnchor: ViewportAnchor.start,
+    this.onScrollStart,
+    this.onScroll,
+    this.onScrollEnd,
+    this.snapOffsetCallback,
+    this.scrollableKey,
     this.child
-  }) : super(
-    key: key,
-    scrollDirection: scrollDirection,
-    scrollAnchor: scrollAnchor,
-    initialScrollOffset: initialScrollOffset,
-    onScrollStart: onScrollStart,
-    onScroll: onScroll,
-    onScrollEnd: onScrollEnd
-  );
+  }) : super(key: key);
 
-  /// The widget below this widget in the tree.
+  /// The scroll offset this widget should use when first created.
+  final double initialScrollOffset;
+
+  /// The axis along which this widget should scroll.
+  final Axis scrollDirection;
+
+  /// Whether to place first child at the start of the container or
+  /// the last child at the end of the container, when the scrollable
+  /// has not been scrolled and has no initial scroll offset.
+  ///
+  /// For example, if the [scrollDirection] is [Axis.vertical] and
+  /// there are enough items to overflow the container, then
+  /// [ViewportAnchor.start] means that the top of the first item
+  /// should be aligned with the top of the scrollable with the last
+  /// item below the bottom, and [ViewportAnchor.end] means the bottom
+  /// of the last item should be aligned with the bottom of the
+  /// scrollable, with the first item above the top.
+  ///
+  /// This also affects whether, when an item is added or removed, the
+  /// displacement will be towards the first item or the last item.
+  /// Continuing the earlier example, if a new item is inserted in the
+  /// middle of the list, in the [ViewportAnchor.start] case the items
+  /// after it (with greater indices, down to the item with the
+  /// highest index) will be pushed down, while in the
+  /// [ViewportAnchor.end] case the items before it (with lower
+  /// indices, up to the item with the index 0) will be pushed up.
+  ///
+  /// Subclasses may ignore this value if, for instance, they do not
+  /// have a concept of an anchor, or have more complicated behavior
+  /// (e.g. they would by default put the middle item in the middle of
+  /// the container).
+  final ViewportAnchor scrollAnchor;
+
+  /// Called whenever this widget starts to scroll.
+  final ScrollListener onScrollStart;
+
+  /// Called whenever this widget's scroll offset changes.
+  final ScrollListener onScroll;
+
+  /// Called whenever this widget stops scrolling.
+  final ScrollListener onScrollEnd;
+
+  /// Called to determine the offset to which scrolling should snap,
+  /// when handling a fling.
+  ///
+  /// This callback, if set, will be called with the offset that the
+  /// Scrollable would have scrolled to in the absence of this
+  /// callback, and a Size describing the size of the Scrollable
+  /// itself.
+  ///
+  /// The callback's return value is used as the new scroll offset to
+  /// aim for.
+  ///
+  /// If the callback simply returns its first argument (the offset),
+  /// then it is as if the callback was null.
+  final SnapOffsetCallback snapOffsetCallback;
+
+  /// The key for the Scrollable created by this widget.
+  final Key scrollableKey;
+
+  /// The widget that will be scrolled. It will become the child of a Scrollable.
   final Widget child;
 
   @override
-  ScrollableState createState() => new _ScrollableViewportState();
+  _ScrollableViewportState createState() => new _ScrollableViewportState();
 }
 
-class _ScrollableViewportState extends ScrollableState<ScrollableViewport> {
-  @override
-  OverscrollWhenScrollableBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior();
-
-  @override
-  OverscrollWhenScrollableBehavior get scrollBehavior => super.scrollBehavior;
-
+class _ScrollableViewportState extends State<ScrollableViewport> {
   double _viewportSize = 0.0;
   double _childSize = 0.0;
 
-  Offset _handlePaintOffsetUpdateNeeded(ViewportDimensions dimensions) {
+  Offset _handlePaintOffsetUpdateNeeded(ScrollableState state, ViewportDimensions dimensions) {
     // We make various state changes here but don't have to do so in a
     // setState() callback because we are called during layout and all
     // we're updating is the new offset, which we are providing to the
     // render object via our return value.
     _viewportSize = config.scrollDirection == Axis.vertical ? dimensions.containerSize.height : dimensions.containerSize.width;
     _childSize = config.scrollDirection == Axis.vertical ? dimensions.contentSize.height : dimensions.contentSize.width;
-    didUpdateScrollBehavior(scrollBehavior.updateExtents(
+    state.didUpdateScrollBehavior(state.scrollBehavior.updateExtents(
       contentExtent: _childSize,
       containerExtent: _viewportSize,
-      scrollOffset: scrollOffset
+      scrollOffset: state.scrollOffset
     ));
-    updateGestureDetector();
-    return scrollOffsetToPixelDelta(scrollOffset);
+    state.updateGestureDetector();
+    return state.scrollOffsetToPixelDelta(state.scrollOffset);
+  }
+
+  Widget _buildContent(BuildContext context, ScrollableState state) {
+    return new Viewport(
+      paintOffset: state.scrollOffsetToPixelDelta(state.scrollOffset),
+      mainAxis: config.scrollDirection,
+      anchor: config.scrollAnchor,
+      onPaintOffsetUpdateNeeded: (ViewportDimensions dimensions) {
+        return _handlePaintOffsetUpdateNeeded(state, dimensions);
+      },
+      child: config.child
+    );
   }
 
   @override
-  Widget buildContent(BuildContext context) {
-    return new Viewport(
-      paintOffset: scrollOffsetToPixelDelta(scrollOffset),
-      mainAxis: config.scrollDirection,
-      anchor: config.scrollAnchor,
-      onPaintOffsetUpdateNeeded: _handlePaintOffsetUpdateNeeded,
-      child: config.child
+  Widget build(BuildContext context) {
+    return new Scrollable(
+      key: config.scrollableKey,
+      initialScrollOffset: config.initialScrollOffset,
+      scrollDirection: config.scrollDirection,
+      scrollAnchor: config.scrollAnchor,
+      onScrollStart: config.onScrollStart,
+      onScroll: config.onScroll,
+      onScrollEnd: config.onScrollEnd,
+      snapOffsetCallback: config.snapOffsetCallback,
+      builder: _buildContent
     );
   }
 }
