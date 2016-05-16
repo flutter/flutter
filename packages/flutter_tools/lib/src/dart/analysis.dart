@@ -92,7 +92,9 @@ class AnalysisDriver {
       Map<String, List<file_system.Folder>> packageMap) {
     DirectoryBasedDartSdk sdk = new DirectoryBasedDartSdk(new JavaFile(sdkDir));
     sdk.analysisOptions = context.analysisOptions;
-    sdk.useSummary = true;
+    // TODO(pq): re-enable once we have a proper story for SDK summaries
+    // in the presence of embedders (https://github.com/dart-lang/sdk/issues/26467).
+    sdk.useSummary = false;
     List<UriResolver> resolvers = <UriResolver>[];
 
     EmbedderYamlLocator yamlLocator = context.embedderYamlLocator;
