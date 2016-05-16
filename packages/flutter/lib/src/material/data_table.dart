@@ -403,7 +403,6 @@ class DataTable extends StatelessWidget {
   }
 
   Widget _buildDataCell({
-    BuildContext context,
     EdgeInsets padding,
     Widget label,
     bool numeric,
@@ -422,8 +421,7 @@ class DataTable extends StatelessWidget {
       height: _kDataRowHeight,
       child: new Align(
         alignment: new FractionalOffset(numeric ? 1.0 : 0.0, 0.5), // TODO(ianh): RTL for non-numeric
-        child: new DefaultTextStyle.inherit(
-          context: context,
+        child: new DefaultTextStyle(
           style: new TextStyle(
             // TODO(ianh): font family should be Roboto; see https://github.com/flutter/flutter/issues/3116
             fontSize: 13.0,
@@ -530,7 +528,6 @@ class DataTable extends StatelessWidget {
       for (DataRow row in rows) {
         DataCell cell = row.cells[dataColumnIndex];
         tableRows[rowIndex].children[displayColumnIndex] = _buildDataCell(
-          context: context,
           padding: padding,
           label: cell.widget,
           numeric: column.numeric,

@@ -116,7 +116,7 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> {
             child: new TwoLevelListItem(
               onTap: _handleOnTap,
               leading: config.leading,
-              title: new DefaultTextStyle.explicit(
+              title: new DefaultTextStyle(
                 style: Theme.of(context).textTheme.subhead.copyWith(color: _headerColor.evaluate(_easeInAnimation)),
                 child: config.title
               ),

@@ -920,7 +920,7 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
 
     Widget contents = new IconTheme(
       data: iconTheme,
-      child: new DefaultTextStyle.explicit(
+      child: new DefaultTextStyle(
         style: textStyle,
         child: new _TabBarWrapper(
           children: tabs,

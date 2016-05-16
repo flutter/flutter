@@ -187,7 +187,7 @@ class WidgetsAppState<T extends WidgetsApp> extends State<T> implements WidgetsB
       )
     );
     if (config.textStyle != null) {
-      new DefaultTextStyle.explicit(
+      new DefaultTextStyle(
         style: config.textStyle,
         child: result
       );

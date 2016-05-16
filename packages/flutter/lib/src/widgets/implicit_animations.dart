@@ -560,8 +560,7 @@ class _AnimatedDefaultTextStyleState extends AnimatedWidgetBaseState<AnimatedDef
 
   @override
   Widget build(BuildContext context) {
-    return new DefaultTextStyle.inherit(
-      context: context,
+    return new DefaultTextStyle(
       style: _style.evaluate(animation),
       child: config.child
     );

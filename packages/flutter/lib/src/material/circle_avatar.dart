@@ -52,7 +52,7 @@ class CircleAvatar extends StatelessWidget {
         shape: BoxShape.circle
       ),
       child: new Center(
-        child: new DefaultTextStyle.explicit(
+        child: new DefaultTextStyle(
           style: theme.primaryTextTheme.title,
           child: child
         )
