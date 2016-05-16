@@ -507,7 +507,11 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           crossSize = math.max(crossSize, _getCrossSize(child));
         }
         if (crossAxisAlignment == CrossAxisAlignment.baseline) {
-          assert(textBaseline != null && 'To use FlexAlignItems.baseline, you must also specify which baseline to use using the "baseline" argument.' is String);
+          assert(() {
+            if (textBaseline == null)
+              throw new FlutterError('To use FlexAlignItems.baseline, you must also specify which baseline to use using the "baseline" argument.');
+            return true;
+          });
           double distance = child.getDistanceToBaseline(textBaseline, onlyReal: true);
           if (distance != null)
             maxBaselineDistance = math.max(maxBaselineDistance, distance);
