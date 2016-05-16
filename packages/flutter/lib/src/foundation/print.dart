@@ -8,6 +8,8 @@ import 'dart:collection';
 /// Signature for [debugPrint] implementations.
 typedef void DebugPrintCallback(String message, { int wrapWidth });
 
+const bool _kThrottlePrint = false;
+
 /// Prints a message to the console, which you can access using the "flutter"
 /// tool's "logs" command ("flutter logs").
 ///
@@ -47,7 +49,7 @@ void _debugPrintTask() {
     _debugPrintStopwatch.reset();
     _debugPrintedCharacters = 0;
   }
-  while (_debugPrintedCharacters < _kDebugPrintCapacity && _debugPrintBuffer.length > 0) {
+  while ((!_kThrottlePrint || _debugPrintedCharacters < _kDebugPrintCapacity) && _debugPrintBuffer.length > 0) {
     String line = _debugPrintBuffer.removeFirst();
     _debugPrintedCharacters += line.length; // TODO(ianh): Use the UTF-8 byte length instead
     print(line);
