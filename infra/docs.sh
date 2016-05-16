@@ -16,5 +16,5 @@ cp dev/docs/google2ed1af765c529f57.html dev/docs/doc
 
 # Upload the docs.
 if [ "$1" = "--upload" ]; then
-  gsutil -m rsync -d -r dev/docs/doc/ gs://docs.flutter.io/
+  gsutil -m -z "js,json,html,css" cp dev/docs/doc/ gs://docs.flutter.io/
 fi
