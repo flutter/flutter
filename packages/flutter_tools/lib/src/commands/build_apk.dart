@@ -177,9 +177,6 @@ class BuildApkCommand extends FlutterCommand {
     argParser.addOption('aot-path',
       help: 'Path to the ahead-of-time compiled snapshot directory.\n'
             'If this is not provided, an AOT snapshot will be built.');
-    argParser.addOption('add-file',
-      help: 'Add a file to the APK (must have the format <path/in/APK>=<local/file/path>).',
-      allowMultiple: true);
     argParser.addOption('keystore',
       help: 'Path to the keystore used to sign the app.');
     argParser.addOption('keystore-password',
@@ -213,7 +210,6 @@ class BuildApkCommand extends FlutterCommand {
       target: argResults['target'],
       flxPath: argResults['flx'],
       aotPath: argResults['aot-path'],
-      addFiles: argResults['add-file'],
       keystore: (argResults['keystore'] ?? '').isEmpty ? null : new ApkKeystoreInfo(
         keystore: argResults['keystore'],
         password: argResults['keystore-password'],
@@ -430,7 +426,6 @@ Future<int> buildAndroid(
   String target,
   String flxPath,
   String aotPath,
-  List<String> addFiles,
   ApkKeystoreInfo keystore
 }) async {
   // Validate that we can find an android sdk.
@@ -447,15 +442,6 @@ Future<int> buildAndroid(
   }
 
   Map<String, File> extraFiles = <String, File>{};
-  for (String addFile in addFiles ?? <String>[]) {
-    List<String> keyValue = addFile.split('=');
-    if (keyValue.length != 2) {
-      printError('add-file option must have the format <path/in/APK>=<local/file/path>');
-      return 1;
-    }
-    extraFiles[keyValue.first] = new File(keyValue.last);
-  }
-
   if (FileSystemEntity.isDirectorySync(_kDefaultAssetsPath)) {
     Directory assetsDir = new Directory(_kDefaultAssetsPath);
     for (FileSystemEntity entity in assetsDir.listSync(recursive: true)) {
