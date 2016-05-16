@@ -9,8 +9,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 
 import 'flat_button.dart';
-import 'icon_button.dart';
-import 'icons.dart';
 import 'material.dart';
 import 'theme.dart';
 
