@@ -46,6 +46,7 @@ target_os = ["android"]
  * `cd src` (Change to the directory that `gclient sync` created in your `engine` directory.)
  * `git remote add upstream git@github.com:flutter/engine.git` (So that you fetch from the master repository, not your clone, when running `git fetch` et al.)
  * Run `./tools/android/download_android_tools.py` to add Android dependencies to your tree. You will need to run this command again if you ever run `git clean -xdf`, since that deletes these dependencies. (`git clean -df` is fine since it skips these `.gitignore`d files.)
+ * Add `.../engine/src/third_party/dart-sdk/dart-sdk/bin/` to your path so that you can run the `pub` tool more easily.
  * Add `.../engine/src/third_party/android_tools/sdk/platform-tools` to your path so that you can run the `adb` tool more easily. This is also required by the `flutter` tool, which is used to run Flutter apps.
  * Make sure you are still in the `src` directory that the `gclient sync` step created earlier.
  * If you're on Linux, run `sudo ./build/install-build-deps-android.sh`

@@ -134,6 +134,12 @@ hooks = [
     'action': ['python', 'src/tools/clang/scripts/update.py', '--if-needed'],
   },
   {
+    # Pull dart sdk if needed
+    'name': 'dart',
+    'pattern': '.',
+    'action': ['python', 'src/tools/dart/update.py'],
+  },
+  {
     # Update LASTCHANGE. This is also run by export_tarball.py in
     # src/tools/export_tarball - please keep them in sync.
     'name': 'lastchange',
