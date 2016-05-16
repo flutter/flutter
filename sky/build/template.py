@@ -11,7 +11,7 @@ import sys
 import os
 import itertools
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../../third_party'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../third_party'))
 import jinja2
 from jinja2 import Environment, FileSystemLoader
 
