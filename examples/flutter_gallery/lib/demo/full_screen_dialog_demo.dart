@@ -31,7 +31,7 @@ class DateTimeItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
-    return new DefaultTextStyle(
+    return new DefaultTextStyle.explicit(
       style: theme.textTheme.subhead,
       child: new Row(
         children: <Widget>[

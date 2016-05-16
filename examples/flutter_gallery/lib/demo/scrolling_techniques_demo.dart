@@ -26,8 +26,8 @@ class _BarGraphic extends StatelessWidget {
       width: 200.0,
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       decoration: new BoxDecoration(backgroundColor: color),
-      child: new DefaultTextStyle(
-        style: Theme.of(context).textTheme.body1.copyWith(color: Colors.white),
+      child: new DefaultTextStyle.explicit(
+        style: Typography.white.body1,
         child: new Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[

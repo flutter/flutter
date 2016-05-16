@@ -83,13 +83,13 @@ class GridTileBar extends StatelessWidget {
           child: new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              new DefaultTextStyle(
+              new DefaultTextStyle.explicit(
                 style: Typography.white.subhead,
                 softWrap: false,
                 overflow: TextOverflow.ellipsis,
                 child: title
               ),
-              new DefaultTextStyle(
+              new DefaultTextStyle.explicit(
                 style: Typography.white.caption,
                 softWrap: false,
                 overflow: TextOverflow.ellipsis,
@@ -102,7 +102,7 @@ class GridTileBar extends StatelessWidget {
     } else if (title != null || subtitle != null) {
       children.add(
         new Flexible(
-          child: new DefaultTextStyle(
+          child: new DefaultTextStyle.explicit(
             style: Typography.white.subhead,
             softWrap: false,
             overflow: TextOverflow.ellipsis,

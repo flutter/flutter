@@ -84,7 +84,7 @@ class ColorSwatchTabView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<Widget> colorItems =  swatch.colors.keys.map((int index) {
-      return new DefaultTextStyle(
+      return new DefaultTextStyle.explicit(
         style: index > swatch.threshold ? whiteTextStyle : blackTextStyle,
         child: new ColorItem(index: index, color: swatch.colors[index])
       );
@@ -93,7 +93,7 @@ class ColorSwatchTabView extends StatelessWidget {
 
     if (swatch.accentColors != null) {
       colorItems.addAll(swatch.accentColors.keys.map((int index) {
-        return new DefaultTextStyle(
+        return new DefaultTextStyle.explicit(
           style: index > swatch.threshold ? whiteTextStyle : blackTextStyle,
           child: new ColorItem(index: index, color: swatch.accentColors[index], prefix: 'A')
         );

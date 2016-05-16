@@ -18,7 +18,7 @@ class _ContactCategory extends StatelessWidget {
       decoration: new BoxDecoration(
         border: new Border(bottom: new BorderSide(color: Theme.of(context).dividerColor))
       ),
-      child: new DefaultTextStyle(
+      child: new DefaultTextStyle.explicit(
         style: Theme.of(context).textTheme.subhead,
         child: new Row(
           children: <Widget>[
