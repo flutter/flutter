@@ -434,7 +434,13 @@ class AndroidDevice extends Device {
       return false;
     }
 
-    runCheckedSync(adbCommandForDevice(<String>['push', snapshotPath, _deviceSnapshotPath]));
+    RunResult result = await runAsync(
+      adbCommandForDevice(<String>['push', snapshotPath, _deviceSnapshotPath])
+    );
+    if (result.exitCode != 0) {
+      printStatus(result.toString());
+      return false;
+    }
 
     List<String> cmd = adbCommandForDevice(<String>[
       'shell', 'am', 'start',
@@ -444,8 +450,10 @@ class AndroidDevice extends Device {
       '--es', 'snapshot', _deviceSnapshotPath,
       activity,
     ]);
-    runCheckedSync(cmd);
-    return true;
+    result = await runAsync(cmd);
+    if (result.exitCode != 0)
+      printStatus(result.toString());
+    return result.exitCode == 0;
   }
 
   @override

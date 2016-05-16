@@ -168,6 +168,9 @@ class Event extends Response {
 
   String get kind => response['kind'];
   IsolateRef get isolate => new IsolateRef.from(response['isolate']);
+
+  /// Only valid for [kind] == `Extension`.
+  String get extensionKind => response['extensionKind'];
 }
 
 class IsolateRef extends Response {

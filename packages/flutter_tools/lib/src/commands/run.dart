@@ -495,9 +495,8 @@ class _RunAndStayResident {
     } else {
       Status status = logger.startProgress('Re-starting application...');
 
-      // TODO(devoncarew): Change this to a Flutter 'app started' event.
-      Future<Event> extensionAddedEvent = observatory.onIsolateEvent
-        .where((Event event) => event.kind == 'ServiceExtensionAdded')
+      Future<Event> extensionAddedEvent = observatory.onExtensionEvent
+        .where((Event event) => event.extensionKind == 'Flutter.FrameworkInitialization')
         .first;
 
       bool restartResult = await device.restartApp(
