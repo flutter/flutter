@@ -44,10 +44,18 @@ class Usage {
   Analytics _analytics;
 
   bool _printedUsage = false;
+  bool _suppressAnalytics = false;
 
   bool get isFirstRun => _analytics.firstRun;
 
   bool get enabled => _analytics.enabled;
+
+  bool get suppressAnalytics => _suppressAnalytics || _analytics.firstRun;
+
+  /// Suppress analytics for this session.
+  set suppressAnalytics(bool value) {
+    _suppressAnalytics = value;
+  }
 
   /// Enable or disable reporting analytics.
   set enabled(bool value) {
@@ -55,24 +63,24 @@ class Usage {
   }
 
   void sendCommand(String command) {
-    if (!isFirstRun)
+    if (!suppressAnalytics)
       _analytics.sendScreenView(command);
   }
 
   void sendEvent(String category, String parameter) {
-    if (!isFirstRun)
+    if (!suppressAnalytics)
       _analytics.sendEvent(category, parameter);
   }
 
   UsageTimer startTimer(String event) {
-    if (isFirstRun)
+    if (suppressAnalytics)
       return new _MockUsageTimer();
     else
       return new UsageTimer._(event, _analytics.startTimer(event, category: 'flutter'));
   }
 
   void sendException(dynamic exception, StackTrace trace) {
-    if (!isFirstRun)
+    if (!suppressAnalytics)
       _analytics.sendException('${exception.runtimeType}; ${sanitizeStacktrace(trace)}');
   }
 

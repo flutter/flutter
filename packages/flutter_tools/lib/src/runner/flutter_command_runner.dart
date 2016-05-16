@@ -44,6 +44,10 @@ class FlutterCommandRunner extends CommandRunner {
         negatable: true,
         hide: !verboseHelp,
         help: 'Whether to use terminal colors.');
+    argParser.addFlag('suppress-analytics',
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'Suppress analytics reporting when this command runs.');
 
     String packagesHelp;
     if (FileSystemEntity.isFileSync('.packages'))
@@ -128,9 +132,12 @@ class FlutterCommandRunner extends CommandRunner {
     if (globalResults.wasParsed('color'))
       logger.supportsColor = globalResults['color'];
 
-    // we must set Cache.flutterRoot early because other features use it
-    // (e.g. enginePath's initialiser uses it)
+    // We must set Cache.flutterRoot early because other features use it (e.g.
+    // enginePath's initialiser uses it).
     Cache.flutterRoot = path.normalize(path.absolute(globalResults['flutter-root']));
+
+    if (globalResults['suppress-analytics'])
+      flutterUsage.suppressAnalytics = true;
 
     _checkFlutterCopy();
 
