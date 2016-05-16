@@ -98,9 +98,11 @@ void createIndexAndCleanup() {
 }
 
 void removeOldFlutterDocsDir() {
-  Directory flutterDocsDir = new Directory('$kDocRoot/flutter');
-  if (flutterDocsDir.existsSync())
-    flutterDocsDir.deleteSync(recursive: true);
+  try {
+    new Directory('$kDocRoot/flutter').deleteSync(recursive: true);
+  } catch(e) {
+    // If the directory does not exist, that's OK.
+  }
 }
 
 void renameApiDir() {
