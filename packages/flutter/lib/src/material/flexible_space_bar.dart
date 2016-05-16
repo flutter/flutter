@@ -130,7 +130,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
               scale: new Tween<double>(begin: 1.5, end: 1.0).animate(scaleAndAlignCurve),
               child: new Align(
                 alignment: new FractionalOffset(0.0, 1.0),
-                child: new DefaultTextStyle(style: titleStyle, child: config.title)
+                child: new DefaultTextStyle.explicit(style: titleStyle, child: config.title)
               )
             )
           )

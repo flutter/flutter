@@ -1954,9 +1954,12 @@ class RichText extends LeafRenderObjectWidget {
 class DefaultTextStyle extends InheritedWidget {
   /// Creates a default text style for the given subtree.
   ///
+  /// Can be used only with a [TextStyle] whose [TextStyle.inherit] field is
+  /// false.
+  ///
   /// Consider using [DefaultTextStyle.inherit] to inherit styling information
   /// from a the current default text style for a given [BuildContext].
-  DefaultTextStyle({
+  DefaultTextStyle.explicit({
     Key key,
     this.style,
     this.textAlign,
@@ -1968,6 +1971,20 @@ class DefaultTextStyle extends InheritedWidget {
     assert(softWrap != null);
     assert(overflow != null);
     assert(child != null);
+    assert(() {
+      if (style.inherit) {
+        throw new FlutterError(
+          'Inherited style cannot be used with DefaultTextStyle.explicit.\n'
+          'DefaultTextStyle.explicit does not inherit styles from the '
+          'DefaultTextStyle for the current BuildContext. Please either use an '
+          'explicit text style (i.e., one without the "inherit" flag set to '
+          'true) or use the DefaultTextStyle.inherit constructor, which does '
+          'inherit styles from the DefaultTextStyle for the current '
+          'BuildContext.'
+        );
+      }
+      return true;
+    });
   }
 
   /// A const-constructible default text style that provides fallback values.
@@ -1997,7 +2014,7 @@ class DefaultTextStyle extends InheritedWidget {
     assert(context != null);
     assert(child != null);
     DefaultTextStyle parent = DefaultTextStyle.of(context);
-    return new DefaultTextStyle(
+    return new DefaultTextStyle.explicit(
       key: key,
       style: parent.style.merge(style),
       textAlign: textAlign ?? parent.textAlign,

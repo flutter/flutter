@@ -277,7 +277,7 @@ class DropDownMenuItem<T> extends StatelessWidget {
     return new Container(
       height: _kMenuItemHeight,
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: new DefaultTextStyle(
+      child: new DefaultTextStyle.explicit(
         style: Theme.of(context).textTheme.subhead,
         child: new Baseline(
           baselineType: TextBaseline.alphabetic,

@@ -71,7 +71,7 @@ class Dialog extends StatelessWidget {
         padding = new EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0);
       dialogBody.add(new Padding(
         padding: padding,
-        child: new DefaultTextStyle(
+        child: new DefaultTextStyle.explicit(
           style: Theme.of(context).textTheme.title,
           child: title
         )
@@ -84,7 +84,7 @@ class Dialog extends StatelessWidget {
         padding = const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0);
       dialogBody.add(new Padding(
         padding: padding,
-        child: new DefaultTextStyle(
+        child: new DefaultTextStyle.explicit(
           style: Theme.of(context).textTheme.subhead,
           child: content
         )

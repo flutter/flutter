@@ -53,7 +53,7 @@ class DrawerHeader extends StatelessWidget {
           new Flexible(child: new Container()),
           new Container(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: new DefaultTextStyle(
+            child: new DefaultTextStyle.explicit(
               style: Theme.of(context).textTheme.body2,
               child: child
             )
