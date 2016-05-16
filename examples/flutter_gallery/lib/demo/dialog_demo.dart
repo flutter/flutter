@@ -197,6 +197,14 @@ class DialogDemoState extends State<DialogDemo> {
             }
           )
         ]
+        // Add a little space between the buttons
+        .map((Widget button) {
+          return new Container(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: button
+          );
+        })
+        .toList()
       )
     );
   }
