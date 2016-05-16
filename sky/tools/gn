@@ -85,7 +85,7 @@ def to_gn_args(args):
     if aot:
         gn_args['dart_target_arch'] = gn_args['target_cpu']
 
-    gn_args['dart_experimental_interpreter'] = args.experimental_interpreter
+    gn_args['dart_experimental_interpreter'] = args.runtime_mode == 'debug'
 
     gn_args['flutter_product_mode'] = (gn_args['dart_runtime_mode'] == 'release')
 
@@ -121,8 +121,6 @@ def parse_args(args):
   parser.add_argument('--unoptimized', default=False, action='store_true')
 
   parser.add_argument('--runtime-mode', type=str, choices=['debug', 'profile', 'release'], default='debug')
-
-  parser.add_argument('--experimental-interpreter', default=False, dest='experimental_interpreter', action='store_true')
 
   parser.add_argument('--target-os', type=str, choices=['android', 'ios'])
   parser.add_argument('--android', dest='target_os', action='store_const', const='android')
