@@ -6,8 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  testWidgets('Block inside LazyBlock', (WidgetTester tester) {
-    tester.pumpWidget(new LazyBlock(
+  testWidgets('Block inside LazyBlock', (WidgetTester tester) async {
+    await tester.pumpWidget(new LazyBlock(
       delegate: new LazyBlockChildren(
         children: <Widget>[
           new Block(

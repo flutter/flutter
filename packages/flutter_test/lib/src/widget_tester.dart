@@ -5,11 +5,14 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
+import 'package:test/test.dart' as test_package;
 
 import 'binding.dart';
-import 'finders.dart';
 import 'controller.dart';
+import 'finders.dart';
+import 'test_async_utils.dart';
+
+export 'package:test/test.dart' hide expect;
 
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef Future<Null> WidgetTesterCallback(WidgetTester widgetTester);
@@ -36,15 +39,15 @@ typedef Future<Null> WidgetTesterCallback(WidgetTester widgetTester);
 ///       expect(tester, hasWidget(find.text('Success')));
 ///     });
 void testWidgets(String description, WidgetTesterCallback callback, {
-  Timeout timeout: const Timeout(const Duration(seconds: 5)),
-  bool skip
+  bool skip: false,
+  test_package.Timeout timeout
 }) {
   TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   WidgetTester tester = new WidgetTester._(binding);
-  group('-', () {
-    setUp(binding.preTest);
-    test(description, () => binding.runTest(() => callback(tester)), skip: skip);
-    tearDown(binding.postTest);
+  timeout ??= binding.defaultTestTimeout;
+  test_package.group('-', () {
+    test_package.test(description, () => binding.runTest(() => callback(tester)), skip: skip);
+    test_package.tearDown(binding.postTest);
   }, timeout: timeout);
 }
 
@@ -75,15 +78,47 @@ void testWidgets(String description, WidgetTesterCallback callback, {
 ///           tester.pump();
 ///         }
 ///         timer.stop();
-///         print('Time taken: ${timer.elapsedMilliseconds}ms');
+///         debugPrint('Time taken: ${timer.elapsedMilliseconds}ms');
 ///       });
 ///       exit(0);
 ///     }
 Future<Null> benchmarkWidgets(WidgetTesterCallback callback) {
   assert(false); // Don't run benchmarks in checked mode.
   TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  assert(binding is! AutomatedTestWidgetsFlutterBinding);
   WidgetTester tester = new WidgetTester._(binding);
   return binding.runTest(() => callback(tester)) ?? new Future<Null>.value();
+}
+
+/// Assert that `actual` matches `matcher`.
+///
+/// See [test_package.expect] for details. This is a variant of that function
+/// that additionally verifies that there are no asynchronous APIs
+/// that have not yet resolved.
+void expect(dynamic actual, dynamic matcher, {
+  String reason,
+  bool verbose: false,
+  dynamic formatter
+}) {
+  TestAsyncUtils.guardSync();
+  test_package.expect(actual, matcher, reason: reason, verbose: verbose, formatter: formatter);
+}
+
+/// Assert that `actual` matches `matcher`.
+///
+/// See [test_package.expect] for details. This variant will _not_ check that
+/// there are no outstanding asynchronous API requests. As such, it can be
+/// called from, e.g., callbacks that are run during build or layout, or in the
+/// completion handlers of futures that execute in response to user input.
+///
+/// Generally, it is better to use [expect], which does include checks to ensure
+/// that asynchronous APIs are not being called.
+void expectSync(dynamic actual, dynamic matcher, {
+  String reason,
+  bool verbose: false,
+  dynamic formatter
+}) {
+  test_package.expect(actual, matcher, reason: reason, verbose: verbose, formatter: formatter);
 }
 
 /// Class that programmatically interacts with widgets and the test environment.
@@ -100,17 +135,25 @@ class WidgetTester extends WidgetController {
   /// flushes microtasks, by calling [pump] with the same duration (if any).
   /// The supplied [EnginePhase] is the final phase reached during the pump pass;
   /// if not supplied, the whole pass is executed.
-  void pumpWidget(Widget widget, [ Duration duration, EnginePhase phase ]) {
-    runApp(widget);
-    binding.pump(duration, phase);
+  Future<Null> pumpWidget(Widget widget, [
+    Duration duration,
+    EnginePhase phase = EnginePhase.sendSemanticsTree
+  ]) {
+    return TestAsyncUtils.guard(() {
+      runApp(widget);
+      return binding.pump(duration, phase);
+    });
   }
 
   /// Triggers a sequence of frames for [duration] amount of time.
   ///
   /// This is a convenience function that just calls
   /// [TestWidgetsFlutterBinding.pump].
-  void pump([ Duration duration, EnginePhase phase ]) {
-    binding.pump(duration, phase);
+  Future<Null> pump([
+    Duration duration,
+    EnginePhase phase = EnginePhase.sendSemanticsTree
+  ]) {
+    return TestAsyncUtils.guard(() => binding.pump(duration, phase));
   }
 
   /// Returns the exception most recently caught by the Flutter framework.
@@ -120,12 +163,14 @@ class WidgetTester extends WidgetController {
     return binding.takeException();
   }
 
+  /// Acts as if the application went idle.
+  ///
   /// Runs all remaining microtasks, including those scheduled as a result of
   /// running them, until there are no more microtasks scheduled.
   ///
   /// Does not run timers. May result in an infinite loop or run out of memory
   /// if microtasks continue to recursively schedule new microtasks.
-  void flushMicrotasks() {
-    binding.fakeAsync.flushMicrotasks();
+  Future<Null> idle() {
+    return TestAsyncUtils.guard(() => binding.idle());
   }
 }

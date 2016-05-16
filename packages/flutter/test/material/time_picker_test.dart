@@ -4,14 +4,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:test/test.dart';
 
 void main() {
-  testWidgets('tap-select an hour', (WidgetTester tester) {
+  testWidgets('tap-select an hour', (WidgetTester tester) async {
     Key _timePickerKey = new UniqueKey();
     TimeOfDay _selectedTime = const TimeOfDay(hour: 7, minute: 0);
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return new Material(
@@ -38,30 +37,30 @@ void main() {
     Point center = tester.getCenter(find.byKey(_timePickerKey));
 
     Point hour0 = new Point(center.x, center.y - 50.0); // 12:00 AM
-    tester.tapAt(hour0);
+    await tester.tapAt(hour0);
     expect(_selectedTime.hour, equals(0));
 
     Point hour3 = new Point(center.x + 50.0, center.y);
-    tester.tapAt(hour3);
+    await tester.tapAt(hour3);
     expect(_selectedTime.hour, equals(3));
 
     Point hour6 = new Point(center.x, center.y + 50.0);
-    tester.tapAt(hour6);
+    await tester.tapAt(hour6);
     expect(_selectedTime.hour, equals(6));
 
     Point hour9 = new Point(center.x - 50.0, center.y);
-    tester.tapAt(hour9);
+    await tester.tapAt(hour9);
     expect(_selectedTime.hour, equals(9));
 
-    tester.pump(const Duration(seconds: 1)); // Finish gesture animation.
-    tester.pump(const Duration(seconds: 1)); // Finish settling animation.
+    await tester.pump(const Duration(seconds: 1)); // Finish gesture animation.
+    await tester.pump(const Duration(seconds: 1)); // Finish settling animation.
   });
 
-  testWidgets('drag-select an hour', (WidgetTester tester) {
+  testWidgets('drag-select an hour', (WidgetTester tester) async {
     Key _timePickerKey = new UniqueKey();
     TimeOfDay _selectedTime = const TimeOfDay(hour: 7, minute: 0);
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return new Material(
@@ -91,32 +90,34 @@ void main() {
     Point hour6 = new Point(center.x, center.y + 50.0);
     Point hour9 = new Point(center.x - 50.0, center.y);
 
-    tester.startGesture(hour3)
-      ..moveBy(hour0 - hour3)
-      ..up();
+    TestGesture gesture;
+
+    gesture = await tester.startGesture(hour3);
+    await gesture.moveBy(hour0 - hour3);
+    await gesture.up();
     expect(_selectedTime.hour, equals(0));
-    tester.pump(const Duration(seconds: 1)); // Finish gesture animation.
-    tester.pump(const Duration(seconds: 1)); // Finish settling animation.
+    await tester.pump(const Duration(seconds: 1)); // Finish gesture animation.
+    await tester.pump(const Duration(seconds: 1)); // Finish settling animation.
 
-    tester.startGesture(hour0)
-      ..moveBy(hour3 - hour0)
-      ..up();
+    gesture = await tester.startGesture(hour0);
+    await gesture.moveBy(hour3 - hour0);
+    await gesture.up();
     expect(_selectedTime.hour, equals(3));
-    tester.pump(const Duration(seconds: 1));
-    tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
 
-    tester.startGesture(hour3)
-      ..moveBy(hour6 - hour3)
-      ..up();
+    gesture = await tester.startGesture(hour3);
+    await gesture.moveBy(hour6 - hour3);
+    await gesture.up();
     expect(_selectedTime.hour, equals(6));
-    tester.pump(const Duration(seconds: 1));
-    tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
 
-    tester.startGesture(hour6)
-      ..moveBy(hour9 - hour6)
-      ..up();
+    gesture = await tester.startGesture(hour6);
+    await gesture.moveBy(hour9 - hour6);
+    await gesture.up();
     expect(_selectedTime.hour, equals(9));
-    tester.pump(const Duration(seconds: 1));
-    tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
   });
 }

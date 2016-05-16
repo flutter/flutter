@@ -5,11 +5,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
-Size _getSize(WidgetTester tester, BoxConstraints constraints, double aspectRatio) {
+Future<Size> _getSize(WidgetTester tester, BoxConstraints constraints, double aspectRatio) async {
   Key childKey = new UniqueKey();
-  tester.pumpWidget(
+  await tester.pumpWidget(
     new Center(
       child: new ConstrainedBox(
         constraints: constraints,
@@ -27,14 +26,14 @@ Size _getSize(WidgetTester tester, BoxConstraints constraints, double aspectRati
 }
 
 void main() {
-  testWidgets('Aspect ratio control test', (WidgetTester tester) {
-    expect(_getSize(tester, new BoxConstraints.loose(new Size(500.0, 500.0)), 2.0), equals(new Size(500.0, 250.0)));
-    expect(_getSize(tester, new BoxConstraints.loose(new Size(500.0, 500.0)), 0.5), equals(new Size(250.0, 500.0)));
+  testWidgets('Aspect ratio control test', (WidgetTester tester) async {
+    expect(await _getSize(tester, new BoxConstraints.loose(new Size(500.0, 500.0)), 2.0), equals(new Size(500.0, 250.0)));
+    expect(await _getSize(tester, new BoxConstraints.loose(new Size(500.0, 500.0)), 0.5), equals(new Size(250.0, 500.0)));
   });
 
-  testWidgets('Aspect ratio infinite width', (WidgetTester tester) {
+  testWidgets('Aspect ratio infinite width', (WidgetTester tester) async {
     Key childKey = new UniqueKey();
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Center(
         child: new Viewport(
           mainAxis: Axis.horizontal,

@@ -5,21 +5,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:test/test.dart';
 
 const Size _kTestViewSize = const Size(800.0, 600.0);
 
 class OffscreenRenderView extends RenderView {
-  OffscreenRenderView() {
-    configuration = new ViewConfiguration(size: _kTestViewSize);
-  }
-
-  @override
-  void scheduleInitialFrame() {
-    scheduleInitialLayout();
-    scheduleInitialPaint(new TransformLayer(transform: new Matrix4.identity()));
-    // Don't call SchedulerBinding.instance.ensureVisualUpdate()
-  }
+  OffscreenRenderView() : super(configuration: new ViewConfiguration(size: _kTestViewSize));
 
   @override
   void compositeFrame() {
@@ -109,7 +99,7 @@ class TriggerableState extends State<TriggerableWidget> {
 }
 
 void main() {
-  testWidgets('no crosstalk between widget build owners', (WidgetTester tester) {
+  testWidgets('no crosstalk between widget build owners', (WidgetTester tester) async {
     Trigger trigger1 = new Trigger();
     Counter counter1 = new Counter();
     Trigger trigger2 = new Trigger();
@@ -119,7 +109,7 @@ void main() {
     expect(counter1.count, equals(0));
     expect(counter2.count, equals(0));
     // Lay out the "onscreen" in the default test binding
-    tester.pumpWidget(new TriggerableWidget(trigger: trigger1, counter: counter1));
+    await tester.pumpWidget(new TriggerableWidget(trigger: trigger1, counter: counter1));
     // Only the "onscreen" widget should have built
     expect(counter1.count, equals(1));
     expect(counter2.count, equals(0));
@@ -135,7 +125,7 @@ void main() {
     expect(counter1.count, equals(1));
     expect(counter2.count, equals(1));
     // Pump the "onscreen" layout
-    tester.pump();
+    await tester.pump();
     // Only the "onscreen" widget should have rebuilt
     expect(counter1.count, equals(2));
     expect(counter2.count, equals(1));
@@ -153,7 +143,7 @@ void main() {
     expect(counter1.count, equals(2));
     expect(counter2.count, equals(3));
     // Pump the "onscreen" layout
-    tester.pump();
+    await tester.pump();
     // Now both widgets should have rebuilt
     expect(counter1.count, equals(3));
     expect(counter2.count, equals(3));

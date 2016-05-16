@@ -4,10 +4,9 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:test/test.dart';
 
 void main() {
-  testWidgets('Drop down screen edges', (WidgetTester tester) {
+  testWidgets('Drop down screen edges', (WidgetTester tester) async {
     int value = 4;
     List<DropDownMenuItem<int>> items = <DropDownMenuItem<int>>[];
     for (int i = 0; i < 20; ++i)
@@ -23,7 +22,7 @@ void main() {
       items: items
     );
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new MaterialApp(
         home: new Material(
           child: new Align(
@@ -34,9 +33,9 @@ void main() {
       )
     );
 
-    tester.tap(find.text('4'));
-    tester.pump();
-    tester.pump(const Duration(seconds: 1)); // finish the menu animation
+    await tester.tap(find.text('4'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the menu animation
 
     // We should have two copies of item 5, one in the menu and one in the
     // button itself.
@@ -46,7 +45,7 @@ void main() {
     // The copy in the menu shouldn't be in the tree because it's off-screen.
     expect(find.text('19').evaluate().length, 1);
 
-    tester.tap(find.byConfig(button));
+    await tester.tap(find.byConfig(button));
 
     // Ideally this would be 4 because the menu would be overscrolled to the
     // correct position, but currently we just reposition the menu so that it
@@ -55,8 +54,8 @@ void main() {
 
     // TODO(abarth): Remove these calls to pump once navigator cleans up its
     // pop transitions.
-    tester.pump();
-    tester.pump(const Duration(seconds: 1)); // finish the menu animation
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the menu animation
 
   });
 }

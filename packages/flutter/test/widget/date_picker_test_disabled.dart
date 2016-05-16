@@ -4,10 +4,9 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:test/test.dart';
 
 void main() {
-  testWidgets('Can select a day', (WidgetTester tester) {
+  testWidgets('Can select a day', (WidgetTester tester) async {
     DateTime currentValue;
 
     Widget widget = new Material(
@@ -25,15 +24,15 @@ void main() {
       )
     );
 
-    tester.pumpWidget(widget);
+    await tester.pumpWidget(widget);
 
     expect(currentValue, isNull);
-    tester.tap(find.text('2015'));
-    tester.pumpWidget(widget);
-    tester.tap(find.text('2014'));
-    tester.pumpWidget(widget);
+    await tester.tap(find.text('2015'));
+    await tester.pumpWidget(widget);
+    await tester.tap(find.text('2014'));
+    await tester.pumpWidget(widget);
     expect(currentValue, equals(new DateTime(2014, 6, 9)));
-    tester.tap(find.text('30'));
+    await tester.tap(find.text('30'));
     expect(currentValue, equals(new DateTime(2013, 1, 30)));
   });
 }

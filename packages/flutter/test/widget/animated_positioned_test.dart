@@ -5,15 +5,14 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 void main() {
-  testWidgets('AnimatedPositioned - basics', (WidgetTester tester) {
+  testWidgets('AnimatedPositioned - basics', (WidgetTester tester) async {
     GlobalKey key = new GlobalKey();
 
     RenderBox box;
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new AnimatedPositioned(
@@ -31,12 +30,12 @@ void main() {
     box = key.currentContext.findRenderObject();
     expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
 
-    tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext.findRenderObject();
     expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new AnimatedPositioned(
@@ -54,24 +53,24 @@ void main() {
     box = key.currentContext.findRenderObject();
     expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
 
-    tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext.findRenderObject();
     expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(50.0 - (50.0 - 37.0) / 2.0 + (70.0 - (70.0 - 59.0) / 2.0) / 2.0,
                                                                                 30.0 + (31.0 - 30.0) / 2.0 + (110.0 - (110.0 - 71.0) / 2.0) / 2.0)));
 
-    tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext.findRenderObject();
     expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(37.0 + 59.0 / 2.0, 31.0 + 71.0 / 2.0)));
   });
 
-  testWidgets('AnimatedPositioned - interrupted animation', (WidgetTester tester) {
+  testWidgets('AnimatedPositioned - interrupted animation', (WidgetTester tester) async {
     GlobalKey key = new GlobalKey();
 
     RenderBox box;
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new AnimatedPositioned(
@@ -89,12 +88,12 @@ void main() {
     box = key.currentContext.findRenderObject();
     expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(50.0, 50.0)));
 
-    tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext.findRenderObject();
     expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(50.0, 50.0)));
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new AnimatedPositioned(
@@ -112,12 +111,12 @@ void main() {
     box = key.currentContext.findRenderObject();
     expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(50.0, 50.0)));
 
-    tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext.findRenderObject();
     expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(100.0, 100.0)));
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new AnimatedPositioned(
@@ -135,23 +134,23 @@ void main() {
     box = key.currentContext.findRenderObject();
     expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(100.0, 100.0)));
 
-    tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext.findRenderObject();
     expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(150.0, 150.0)));
 
-    tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext.findRenderObject();
     expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(200.0, 200.0)));
   });
 
-  testWidgets('AnimatedPositioned - switching variables', (WidgetTester tester) {
+  testWidgets('AnimatedPositioned - switching variables', (WidgetTester tester) async {
     GlobalKey key = new GlobalKey();
 
     RenderBox box;
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new AnimatedPositioned(
@@ -169,12 +168,12 @@ void main() {
     box = key.currentContext.findRenderObject();
     expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(50.0, 50.0)));
 
-    tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext.findRenderObject();
     expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(50.0, 50.0)));
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new AnimatedPositioned(
@@ -192,12 +191,12 @@ void main() {
     box = key.currentContext.findRenderObject();
     expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(350.0, 50.0)));
 
-    tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext.findRenderObject();
     expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(350.0, 100.0)));
 
-    tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext.findRenderObject();
     expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(350.0, 150.0)));

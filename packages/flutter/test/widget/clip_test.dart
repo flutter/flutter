@@ -4,7 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:test/test.dart';
 
 final List<String> log = <String>[];
 
@@ -20,8 +19,8 @@ class PathClipper extends CustomClipper<Path> {
 }
 
 void main() {
-  testWidgets('ClipPath', (WidgetTester tester) {
-    tester.pumpWidget(
+  testWidgets('ClipPath', (WidgetTester tester) async {
+    await tester.pumpWidget(
       new ClipPath(
         clipper: new PathClipper(),
         child: new GestureDetector(
@@ -33,17 +32,17 @@ void main() {
     );
     expect(log, equals(<String>['getClip']));
 
-    tester.tapAt(new Point(10.0, 10.0));
+    await tester.tapAt(new Point(10.0, 10.0));
     expect(log, equals(<String>['getClip']));
     log.clear();
 
-    tester.tapAt(new Point(100.0, 100.0));
+    await tester.tapAt(new Point(100.0, 100.0));
     expect(log, equals(<String>['tap']));
     log.clear();
   });
 
-  testWidgets('ClipOval', (WidgetTester tester) {
-    tester.pumpWidget(
+  testWidgets('ClipOval', (WidgetTester tester) async {
+    await tester.pumpWidget(
       new ClipOval(
         child: new GestureDetector(
           behavior: HitTestBehavior.opaque,
@@ -54,11 +53,11 @@ void main() {
     );
     expect(log, equals(<String>[]));
 
-    tester.tapAt(new Point(10.0, 10.0));
+    await tester.tapAt(new Point(10.0, 10.0));
     expect(log, equals(<String>[]));
     log.clear();
 
-    tester.tapAt(new Point(400.0, 300.0));
+    await tester.tapAt(new Point(400.0, 300.0));
     expect(log, equals(<String>['tap']));
     log.clear();
   });

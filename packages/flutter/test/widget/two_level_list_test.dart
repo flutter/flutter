@@ -5,10 +5,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:test/test.dart';
 
 void main() {
-  testWidgets('TwoLeveList basics', (WidgetTester tester) {
+  testWidgets('TwoLeveList basics', (WidgetTester tester) async {
     final Key topKey = new UniqueKey();
     final Key sublistKey = new UniqueKey();
     final Key bottomKey = new UniqueKey();
@@ -36,7 +35,7 @@ void main() {
       }
     };
 
-    tester.pumpWidget(new MaterialApp(routes: routes));
+    await tester.pumpWidget(new MaterialApp(routes: routes));
 
     expect(find.text('Top'), findsOneWidget);
     expect(find.text('Sublist'), findsOneWidget);
@@ -52,9 +51,9 @@ void main() {
     expect(getHeight(topKey), equals(getHeight(sublistKey) - 2.0));
     expect(getHeight(bottomKey), equals(getHeight(sublistKey) - 2.0));
 
-    tester.tap(find.text('Sublist'));
-    tester.pump(const Duration(seconds: 1));
-    tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('Sublist'));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
 
     expect(find.text('Top'), findsOneWidget);
     expect(find.text('Sublist'), findsOneWidget);

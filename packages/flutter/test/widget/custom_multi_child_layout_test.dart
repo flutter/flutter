@@ -5,7 +5,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 class TestMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
   BoxConstraints getSizeConstraints;
@@ -75,9 +74,9 @@ class PreferredSizeDelegate extends MultiChildLayoutDelegate {
 }
 
 void main() {
-  testWidgets('Control test for CustomMultiChildLayout', (WidgetTester tester) {
+  testWidgets('Control test for CustomMultiChildLayout', (WidgetTester tester) async {
     TestMultiChildLayoutDelegate delegate = new TestMultiChildLayoutDelegate();
-    tester.pumpWidget(buildFrame(delegate));
+    await tester.pumpWidget(buildFrame(delegate));
 
     expect(delegate.getSizeConstraints.minWidth, 0.0);
     expect(delegate.getSizeConstraints.maxWidth, 800.0);
@@ -93,9 +92,9 @@ void main() {
     expect(delegate.performLayoutIsChild, false);
   });
 
-  testWidgets('Test MultiChildDelegate shouldRelayout method', (WidgetTester tester) {
+  testWidgets('Test MultiChildDelegate shouldRelayout method', (WidgetTester tester) async {
     TestMultiChildLayoutDelegate delegate = new TestMultiChildLayoutDelegate();
-    tester.pumpWidget(buildFrame(delegate));
+    await tester.pumpWidget(buildFrame(delegate));
 
     // Layout happened because the delegate was set.
     expect(delegate.performLayoutSize, isNotNull); // i.e. layout happened
@@ -104,21 +103,21 @@ void main() {
     // Layout did not happen because shouldRelayout() returned false.
     delegate = new TestMultiChildLayoutDelegate();
     delegate.shouldRelayoutValue = false;
-    tester.pumpWidget(buildFrame(delegate));
+    await tester.pumpWidget(buildFrame(delegate));
     expect(delegate.shouldRelayoutCalled, isTrue);
     expect(delegate.performLayoutSize, isNull);
 
     // Layout happened because shouldRelayout() returned true.
     delegate = new TestMultiChildLayoutDelegate();
     delegate.shouldRelayoutValue = true;
-    tester.pumpWidget(buildFrame(delegate));
+    await tester.pumpWidget(buildFrame(delegate));
     expect(delegate.shouldRelayoutCalled, isTrue);
     expect(delegate.performLayoutSize, isNotNull);
   });
 
-  testWidgets('Nested CustomMultiChildLayouts', (WidgetTester tester) {
+  testWidgets('Nested CustomMultiChildLayouts', (WidgetTester tester) async {
     TestMultiChildLayoutDelegate delegate = new TestMultiChildLayoutDelegate();
-    tester.pumpWidget(new Center(
+    await tester.pumpWidget(new Center(
       child: new CustomMultiChildLayout(
         children: <Widget>[
           new LayoutId(
@@ -139,9 +138,9 @@ void main() {
 
   });
 
-  testWidgets('Loose constraints', (WidgetTester tester) {
+  testWidgets('Loose constraints', (WidgetTester tester) async {
     Key key = new UniqueKey();
-    tester.pumpWidget(new Center(
+    await tester.pumpWidget(new Center(
       child: new CustomMultiChildLayout(
         key: key,
         delegate: new PreferredSizeDelegate(preferredSize: new Size(300.0, 200.0))
@@ -152,7 +151,7 @@ void main() {
     expect(box.size.width, equals(300.0));
     expect(box.size.height, equals(200.0));
 
-    tester.pumpWidget(new Center(
+    await tester.pumpWidget(new Center(
       child: new CustomMultiChildLayout(
         key: key,
         delegate: new PreferredSizeDelegate(preferredSize: new Size(350.0, 250.0))

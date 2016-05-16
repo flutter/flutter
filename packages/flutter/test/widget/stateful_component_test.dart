@@ -5,12 +5,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 import 'test_widgets.dart';
 
 void main() {
-  testWidgets('Stateful widget smoke test', (WidgetTester tester) {
+  testWidgets('Stateful widget smoke test', (WidgetTester tester) async {
 
     void checkTree(BoxDecoration expectedDecoration) {
       SingleChildRenderObjectElement element = tester.element(
@@ -22,7 +21,7 @@ void main() {
       expect(renderObject.decoration, equals(expectedDecoration));
     }
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new FlipWidget(
         left: new DecoratedBox(decoration: kBoxDecorationA),
         right: new DecoratedBox(decoration: kBoxDecorationB)
@@ -31,7 +30,7 @@ void main() {
 
     checkTree(kBoxDecorationA);
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new FlipWidget(
         left: new DecoratedBox(decoration: kBoxDecorationB),
         right: new DecoratedBox(decoration: kBoxDecorationA)
@@ -42,11 +41,11 @@ void main() {
 
     flipStatefulWidget(tester);
 
-    tester.pump();
+    await tester.pump();
 
     checkTree(kBoxDecorationA);
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new FlipWidget(
         left: new DecoratedBox(decoration: kBoxDecorationA),
         right: new DecoratedBox(decoration: kBoxDecorationB)
@@ -56,8 +55,8 @@ void main() {
     checkTree(kBoxDecorationB);
   });
 
-  testWidgets('Don\'t rebuild subwidgets', (WidgetTester tester) {
-    tester.pumpWidget(
+  testWidgets('Don\'t rebuild subwidgets', (WidgetTester tester) async {
+    await tester.pumpWidget(
       new FlipWidget(
         key: new Key('rebuild test'),
         left: new TestBuildCounter(),
@@ -69,7 +68,7 @@ void main() {
 
     flipStatefulWidget(tester);
 
-    tester.pump();
+    await tester.pump();
 
     expect(TestBuildCounter.buildCount, equals(1));
   });

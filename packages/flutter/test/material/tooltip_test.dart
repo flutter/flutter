@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:test/test.dart';
 
 import '../widget/test_semantics.dart';
 
@@ -26,9 +25,9 @@ import '../widget/test_semantics.dart';
 // production code.
 
 void main() {
-  testWidgets('Does tooltip end up in the right place - center', (WidgetTester tester) {
+  testWidgets('Does tooltip end up in the right place - center', (WidgetTester tester) async {
     GlobalKey key = new GlobalKey();
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Overlay(
         initialEntries: <OverlayEntry>[
           new OverlayEntry(
@@ -62,7 +61,7 @@ void main() {
       )
     );
     (key.currentState as dynamic).showTooltip(); // before using "as dynamic" in your code, see note top of file
-    tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
      *      o            * y=0
@@ -77,9 +76,9 @@ void main() {
     expect(tip.localToGlobal(tip.size.topLeft(Point.origin)), equals(const Point(284.0, 20.0)));
   });
 
-  testWidgets('Does tooltip end up in the right place - top left', (WidgetTester tester) {
+  testWidgets('Does tooltip end up in the right place - top left', (WidgetTester tester) async {
     GlobalKey key = new GlobalKey();
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Overlay(
         initialEntries: <OverlayEntry>[
           new OverlayEntry(
@@ -113,7 +112,7 @@ void main() {
       )
     );
     (key.currentState as dynamic).showTooltip(); // before using "as dynamic" in your code, see note top of file
-    tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
      *o                  * y=0
@@ -129,9 +128,9 @@ void main() {
     expect(tip.localToGlobal(tip.size.topLeft(Point.origin)), equals(const Point(10.0, 20.0)));
   });
 
-  testWidgets('Does tooltip end up in the right place - center prefer above fits', (WidgetTester tester) {
+  testWidgets('Does tooltip end up in the right place - center prefer above fits', (WidgetTester tester) async {
     GlobalKey key = new GlobalKey();
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Overlay(
         initialEntries: <OverlayEntry>[
           new OverlayEntry(
@@ -165,7 +164,7 @@ void main() {
       )
     );
     (key.currentState as dynamic).showTooltip(); // before using "as dynamic" in your code, see note top of file
-    tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
      *        ___        * }-100.0 margin
@@ -183,9 +182,9 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).y, equals(200.0));
   });
 
-  testWidgets('Does tooltip end up in the right place - center prefer above does not fit', (WidgetTester tester) {
+  testWidgets('Does tooltip end up in the right place - center prefer above does not fit', (WidgetTester tester) async {
     GlobalKey key = new GlobalKey();
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Overlay(
         initialEntries: <OverlayEntry>[
           new OverlayEntry(
@@ -219,7 +218,7 @@ void main() {
       )
     );
     (key.currentState as dynamic).showTooltip(); // before using "as dynamic" in your code, see note top of file
-    tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     // we try to put it here but it doesn't fit:
     /********************* 800x600 screen
@@ -248,9 +247,9 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).y, equals(499.0));
   });
 
-  testWidgets('Does tooltip end up in the right place - center prefer below fits', (WidgetTester tester) {
+  testWidgets('Does tooltip end up in the right place - center prefer below fits', (WidgetTester tester) async {
     GlobalKey key = new GlobalKey();
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Overlay(
         initialEntries: <OverlayEntry>[
           new OverlayEntry(
@@ -284,7 +283,7 @@ void main() {
       )
     );
     (key.currentState as dynamic).showTooltip(); // before using "as dynamic" in your code, see note top of file
-    tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
      *                   *
@@ -301,9 +300,9 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).y, equals(500.0));
   });
 
-  testWidgets('Does tooltip end up in the right place - way off to the right', (WidgetTester tester) {
+  testWidgets('Does tooltip end up in the right place - way off to the right', (WidgetTester tester) async {
     GlobalKey key = new GlobalKey();
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Overlay(
         initialEntries: <OverlayEntry>[
           new OverlayEntry(
@@ -337,7 +336,7 @@ void main() {
       )
     );
     (key.currentState as dynamic).showTooltip(); // before using "as dynamic" in your code, see note top of file
-    tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
      *                   *
@@ -356,9 +355,9 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).y, equals(320.0));
   });
 
-  testWidgets('Does tooltip end up in the right place - near the edge', (WidgetTester tester) {
+  testWidgets('Does tooltip end up in the right place - near the edge', (WidgetTester tester) async {
     GlobalKey key = new GlobalKey();
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Overlay(
         initialEntries: <OverlayEntry>[
           new OverlayEntry(
@@ -392,7 +391,7 @@ void main() {
       )
     );
     (key.currentState as dynamic).showTooltip(); // before using "as dynamic" in your code, see note top of file
-    tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
      *                   *
@@ -411,10 +410,10 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).y, equals(320.0));
   });
 
-  testWidgets('Does tooltip contribute semantics', (WidgetTester tester) {
+  testWidgets('Does tooltip contribute semantics', (WidgetTester tester) async {
     TestSemanticsListener client = new TestSemanticsListener();
     GlobalKey key = new GlobalKey();
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Overlay(
         initialEntries: <OverlayEntry>[
           new OverlayEntry(
@@ -460,7 +459,7 @@ void main() {
     // before using "as dynamic" in your code, see note top of file
     (key.currentState as dynamic).showTooltip(); // this triggers a rebuild of the semantics because the tree changes
 
-    tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
     expect(client.updates.length, equals(2));
     expect(client.updates[0].id, equals(0));
     expect(client.updates[0].flags.canBeTapped, isFalse);

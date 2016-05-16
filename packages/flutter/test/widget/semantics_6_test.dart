@@ -5,14 +5,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:test/test.dart';
 
 void main() {
-  testWidgets('Semantics 6 - SemanticsDebugger smoke test', (WidgetTester tester) {
+  testWidgets('Semantics 6 - SemanticsDebugger smoke test', (WidgetTester tester) async {
 
     // This is a smoketest to verify that adding a debugger doesn't crash.
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new Semantics(),
@@ -26,7 +25,7 @@ void main() {
       )
     );
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new SemanticsDebugger(
         child: new Stack(
           children: <Widget>[

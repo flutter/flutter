@@ -4,12 +4,11 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 void main() {
-  testWidgets('Transform origin', (WidgetTester tester) {
+  testWidgets('Transform origin', (WidgetTester tester) async {
     bool didReceiveTap = false;
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new Positioned(
@@ -50,15 +49,15 @@ void main() {
     );
 
     expect(didReceiveTap, isFalse);
-    tester.tapAt(new Point(110.0, 110.0));
+    await tester.tapAt(new Point(110.0, 110.0));
     expect(didReceiveTap, isFalse);
-    tester.tapAt(new Point(190.0, 150.0));
+    await tester.tapAt(new Point(190.0, 150.0));
     expect(didReceiveTap, isTrue);
   });
 
-  testWidgets('Transform alignment', (WidgetTester tester) {
+  testWidgets('Transform alignment', (WidgetTester tester) async {
     bool didReceiveTap = false;
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new Positioned(
@@ -99,15 +98,15 @@ void main() {
     );
 
     expect(didReceiveTap, isFalse);
-    tester.tapAt(new Point(110.0, 110.0));
+    await tester.tapAt(new Point(110.0, 110.0));
     expect(didReceiveTap, isFalse);
-    tester.tapAt(new Point(190.0, 150.0));
+    await tester.tapAt(new Point(190.0, 150.0));
     expect(didReceiveTap, isTrue);
   });
 
-  testWidgets('Transform offset + alignment', (WidgetTester tester) {
+  testWidgets('Transform offset + alignment', (WidgetTester tester) async {
     bool didReceiveTap = false;
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new Positioned(
@@ -149,9 +148,9 @@ void main() {
     );
 
     expect(didReceiveTap, isFalse);
-    tester.tapAt(new Point(110.0, 110.0));
+    await tester.tapAt(new Point(110.0, 110.0));
     expect(didReceiveTap, isFalse);
-    tester.tapAt(new Point(190.0, 150.0));
+    await tester.tapAt(new Point(190.0, 150.0));
     expect(didReceiveTap, isTrue);
   });
 }

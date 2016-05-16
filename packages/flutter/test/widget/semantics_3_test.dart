@@ -5,16 +5,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:test/test.dart';
 
 import 'test_semantics.dart';
 
 void main() {
-  testWidgets('Semantics 3', (WidgetTester tester) {
+  testWidgets('Semantics 3', (WidgetTester tester) async {
     TestSemanticsListener client = new TestSemanticsListener();
 
     // implicit annotators
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Container(
         child: new Semantics(
           label: 'test',
@@ -45,7 +44,7 @@ void main() {
     client.updates.clear();
 
     // remove one
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Container(
         child: new Container(
           child: new Semantics(
@@ -73,7 +72,7 @@ void main() {
     client.updates.clear();
 
     // change what it says
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Container(
         child: new Container(
           child: new Semantics(
@@ -101,7 +100,7 @@ void main() {
     client.updates.clear();
 
     // add a node
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Container(
         child: new Semantics(
           checked: true,
@@ -132,7 +131,7 @@ void main() {
     client.updates.clear();
 
     // make no changes
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Container(
         child: new Semantics(
           checked: true,

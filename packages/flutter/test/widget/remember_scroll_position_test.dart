@@ -4,7 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:test/test.dart';
 
 class ThePositiveNumbers extends StatelessWidget {
   @override
@@ -22,9 +21,9 @@ class ThePositiveNumbers extends StatelessWidget {
 }
 
 void main() {
-  testWidgets('whether we remember our scroll position', (WidgetTester tester) {
+  testWidgets('whether we remember our scroll position', (WidgetTester tester) async {
     GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
-    tester.pumpWidget(new Navigator(
+    await tester.pumpWidget(new Navigator(
       key: navigatorKey,
       onGenerateRoute: (RouteSettings settings) {
         if (settings.name == '/')
@@ -49,7 +48,7 @@ void main() {
 
     ScrollableState targetState = tester.state(find.byType(ScrollableLazyList));
     targetState.scrollTo(1000.0);
-    tester.pump(new Duration(seconds: 1));
+    await tester.pump(new Duration(seconds: 1));
 
     // we're 600 pixels high, each item is 100 pixels high, scroll position is
     // 1000, so we should have exactly 6 items, 10..15.
@@ -69,8 +68,8 @@ void main() {
     navigatorKey.currentState.openTransaction(
       (NavigatorTransaction transaction) => transaction.pushNamed('/second')
     );
-    tester.pump(); // navigating always takes two frames
-    tester.pump(new Duration(seconds: 1));
+    await tester.pump(); // navigating always takes two frames
+    await tester.pump(new Duration(seconds: 1));
 
     // same as the first list again
     expect(find.text('0'), findsOneWidget);
@@ -86,8 +85,8 @@ void main() {
     navigatorKey.currentState.openTransaction(
       (NavigatorTransaction transaction) => transaction.pop()
     );
-    tester.pump(); // navigating always takes two frames
-    tester.pump(new Duration(seconds: 1));
+    await tester.pump(); // navigating always takes two frames
+    await tester.pump(new Duration(seconds: 1));
 
     // we're 600 pixels high, each item is 100 pixels high, scroll position is
     // 1000, so we should have exactly 6 items, 10..15.

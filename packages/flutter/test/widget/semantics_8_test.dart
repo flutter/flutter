@@ -5,15 +5,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:test/test.dart';
 
 import 'test_semantics.dart';
 
 void main() {
-  testWidgets('Semantics 8 - Merging with reset', (WidgetTester tester) {
+  testWidgets('Semantics 8 - Merging with reset', (WidgetTester tester) async {
     TestSemanticsListener client = new TestSemanticsListener();
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new MergeSemantics(
         child: new Semantics(
           container: true,
@@ -52,7 +51,7 @@ void main() {
     client.updates.clear();
 
     // switch the order of the inner Semantics node to trigger a reset
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new MergeSemantics(
         child: new Semantics(
           container: true,
