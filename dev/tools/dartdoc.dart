@@ -89,11 +89,20 @@ dependencies:
 /// paths. Cleanup unused index.html files no longer needed.
 void createIndexAndCleanup() {
   print('\nCreating a custom index.html in $kDocRoot/index.html');
+  removeOldFlutterDocsDir();
   renameApiDir();
   copyIndexToRootOfDocs();
   addHtmlBaseToIndex();
   putRedirectInOldIndexLocation();
   print('\nDocs ready to go!');
+}
+
+void removeOldFlutterDocsDir() {
+  try {
+    new Directory('$kDocRoot/flutter').deleteSync(recursive: true);
+  } catch(e) {
+    // If the directory does not exist, that's OK.
+  }
 }
 
 void renameApiDir() {
