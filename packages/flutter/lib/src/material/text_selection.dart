@@ -40,8 +40,6 @@ class _TextSelectionToolbar extends StatelessWidget {
     if (value.text.isNotEmpty) {
       if (value.selection.isCollapsed)
         items.add(new FlatButton(child: new Text('SELECT ALL'), onPressed: _handleSelectAll));
-      // TODO(mpcomplete): implement `more` menu.
-      items.add(new IconButton(icon: Icons.more_vert));
     }
 
     return new Material(
