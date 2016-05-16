@@ -204,7 +204,7 @@ class IOSDevice extends Device {
     String mainPath,
     Observatory observatory
   }) async {
-    return observatory.isolateReload(observatory.mainIsolateId).then((Response response) {
+    return observatory.isolateReload(observatory.firstIsolateId).then((Response response) {
       return true;
     }).catchError((dynamic error) {
       printError('Error restarting app: $error');

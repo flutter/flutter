@@ -301,10 +301,17 @@ class _RunAndStayResident {
 
   Observatory observatory;
 
-  // TODO: don't let uncaught errors kill the process
-
   /// Start the app and keep the process running during its lifetime.
-  Future<int> run({ bool traceStartup: false, bool benchmark: false }) async {
+  Future<int> run({ bool traceStartup: false, bool benchmark: false }) {
+    // Don't let uncaught errors kill the process.
+    return runZoned(() {
+      return _run(traceStartup: traceStartup, benchmark: benchmark);
+    }, onError: (dynamic error) {
+      printError('Exception from flutter run: $error');
+    });
+  }
+
+  Future<int> _run({ bool traceStartup: false, bool benchmark: false }) async {
     String mainPath = findMainDartFile(target);
     if (!FileSystemEntity.isFileSync(mainPath)) {
       String message = 'Tried to run $mainPath, but that file does not exist.';
@@ -391,21 +398,16 @@ class _RunAndStayResident {
       observatory = await Observatory.connect(result.observatoryPort);
       printTrace('Connected to observatory port: ${result.observatoryPort}.');
 
-      observatory.trackMainIsolate();
+      observatory.onExtensionEvent.listen((Event event) {
+        printTrace(event.toString());
+      });
 
-      // TODO: notify when there is an isolate
-
-      // TODO: notify when that isolate reaches a certain state
+      observatory.onIsolateEvent.listen((Event event) {
+        printTrace(event.toString());
+      });
 
       if (benchmark) {
-        observatory.streamListen('Extension');
-        observatory.onEvent('Extension').listen((Event event) {
-          printTrace(event.toString());
-        });
-
-        observatory.onIsolateEvent.listen((Event event) {
-          printTrace(event.toString());
-        });
+        await observatory.waitHasIsolate();
       }
 
       // Listen for observatory connection close.
@@ -450,48 +452,32 @@ class _RunAndStayResident {
       });
     }
 
-    Stopwatch restartTime;
-
     if (benchmark) {
-      // TODO: wait some delay for it to be fully started
-
       await new Future<Null>.delayed(new Duration(seconds: 4));
-
-      restartTime = new Stopwatch()..start();
 
       // Touch the file.
       File mainFile = new File(mainPath);
       mainFile.writeAsBytesSync(mainFile.readAsBytesSync());
 
-      // TODO: restore the route
-
-      bool relaunch = await device.restartApp(
-        package,
-        result,
-        mainPath: mainPath,
-        observatory: observatory
-      );
-
-      // TODO: wait for the start up event 'ServiceExtensionAdded'
-
-      if (!relaunch)
-        restartTime = null;
-
-      restartTime?.stop();
-
-      await new Future<Null>.delayed(new Duration(seconds: 4));
-
-      _writeBenchmark(startTime, restartTime);
-
+      Stopwatch restartTime = new Stopwatch()..start();
+      bool restarted = await _handleRefresh(package, result, mainPath);
+      restartTime.stop();
+      _writeBenchmark(startTime, restarted ? restartTime : null);
+      await new Future<Null>.delayed(new Duration(seconds: 2));
       _handleExit();
     }
 
     return _exitCompleter.future.then((int exitCode) async {
-      if (observatory != null && !observatory.isClosed && observatory.mainIsolateId != null) {
-        observatory.flutterExit(observatory.mainIsolateId);
-
-        // WebSockets do not have a flush() method.
-        await new Future<Null>.delayed(new Duration(milliseconds: 100));
+      try {
+        if (observatory != null && !observatory.isClosed) {
+          if (observatory.isolates.isNotEmpty) {
+            observatory.flutterExit(observatory.firstIsolateId);
+            // The Dart WebSockets API does not have a flush() method.
+            await new Future<Null>.delayed(new Duration(milliseconds: 100));
+          }
+        }
+      } catch (error) {
+        stderr.writeln(error.toString());
       }
 
       return exitCode;
@@ -502,14 +488,17 @@ class _RunAndStayResident {
     printStatus('Type "h" or F1 for help, "r" or F5 to restart the app, and "q", F10, or ctrl-c to quit.');
   }
 
-  Future<Null> _handleRefresh(ApplicationPackage package, LaunchResult result, String mainPath) async {
+  Future<bool> _handleRefresh(ApplicationPackage package, LaunchResult result, String mainPath) async {
     if (observatory == null) {
       printError('Debugging is not enabled.');
+      return false;
     } else {
-      printStatus('Re-starting application...');
+      Status status = logger.startProgress('Re-starting application...');
 
-      // TODO: time the restart
-      Stopwatch stopwatch = new Stopwatch()..start();
+      // TODO(devoncarew): Change this to a Flutter 'app started' event.
+      Future<Event> extensionAddedEvent = observatory.onIsolateEvent
+        .where((Event event) => event.kind == 'ServiceExtensionAdded')
+        .first;
 
       bool restartResult = await device.restartApp(
         package,
@@ -518,14 +507,15 @@ class _RunAndStayResident {
         observatory: observatory
       );
 
-      if (restartResult) {
-        // TODO: Wait for frame paint or some such
+      status.stop(showElapsedTime: true);
 
+      if (restartResult) {
+        // TODO(devoncarew): We should restore the route here.
+
+        await extensionAddedEvent;
       }
 
-      // observatory.isolateReload(observatory.mainIsolateId).catchError((dynamic error) {
-      //   printError('Error restarting app: $error');
-      // });
+      return restartResult;
     }
   }
 
