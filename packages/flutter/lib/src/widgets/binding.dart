@@ -208,6 +208,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
     if (_needToReportFirstFrame) {
       if (_thisFrameWasUseful) {
         developer.Timeline.instantSync('Widgets completed first useful frame');
+        developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
         _needToReportFirstFrame = false;
       } else {
         _thisFrameWasUseful = true;
