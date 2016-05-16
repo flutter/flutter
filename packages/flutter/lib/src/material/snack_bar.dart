@@ -137,7 +137,7 @@ class SnackBar extends StatelessWidget {
       new Flexible(
         child: new Container(
           margin: const EdgeInsets.symmetric(vertical: _kSingleLineVerticalPadding),
-          child: new DefaultTextStyle.explicit(
+          child: new DefaultTextStyle(
             style: Typography.white.subhead,
             child: content
           )

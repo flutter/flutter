@@ -82,7 +82,7 @@ class Chip extends StatelessWidget {
       ));
     }
 
-    children.add(new DefaultTextStyle.explicit(
+    children.add(new DefaultTextStyle(
       style: _kLabelStyle,
       child: label
     ));

@@ -203,7 +203,7 @@ class AppBar extends StatelessWidget {
       child: new Padding(
         padding: new EdgeInsets.only(left: 8.0),
         child: title != null ?
-          new DefaultTextStyle.explicit(
+          new DefaultTextStyle(
             style: centerStyle,
             softWrap: false,
             overflow: TextOverflow.ellipsis,
@@ -218,7 +218,7 @@ class AppBar extends StatelessWidget {
       height: kToolBarHeight,
       child: new IconTheme(
         data: iconTheme,
-        child: new DefaultTextStyle.explicit(
+        child: new DefaultTextStyle(
           style: sideStyle,
           child: new Row(children: toolBarRow)
         )

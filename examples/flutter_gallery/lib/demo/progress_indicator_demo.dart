@@ -94,7 +94,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(title: new Text('Progress indicators')),
-      body: new DefaultTextStyle.explicit(
+      body: new DefaultTextStyle(
         style: Theme.of(context).textTheme.title,
         child: new GestureDetector(
           onTap: _handleTap,

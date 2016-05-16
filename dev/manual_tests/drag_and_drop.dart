@@ -97,7 +97,7 @@ class ExampleDragSource extends StatelessWidget {
     if (heavy)
       size *= kHeavyMultiplier;
 
-    Widget contents = new DefaultTextStyle.explicit(
+    Widget contents = new DefaultTextStyle(
       style: Theme.of(context).textTheme.body1,
       textAlign: TextAlign.center,
       child: new Dot(
@@ -185,7 +185,7 @@ class MovableBall extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget ball = new DefaultTextStyle.explicit(
+    Widget ball = new DefaultTextStyle(
       style: Typography.white.body1,
       textAlign: TextAlign.center,
       child: new Dot(

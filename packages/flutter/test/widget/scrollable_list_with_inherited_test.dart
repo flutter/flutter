@@ -14,8 +14,7 @@ Widget buildCard(BuildContext context, int index) {
   return new Container(
     key: new ValueKey<int>(items[index]),
     height: 100.0,
-    child: new DefaultTextStyle.inherit(
-      context: context,
+    child: new DefaultTextStyle(
       style: new TextStyle(fontSize: 2.0 + items.length.toDouble()),
       child: new Text('${items[index]}')
     )
