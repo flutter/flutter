@@ -102,19 +102,24 @@ class RenderErrorBox extends RenderBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     try {
-      context.canvas.drawRect(offset & size, new Paint() .. color = backgroundColor);
+      context.canvas.drawRect(offset & size, new Paint()..color = backgroundColor);
       double width;
+      double height;
       if (_paragraph != null) {
         // See the comment in the RenderErrorBox constructor. This is not the
         // code you want to be copying and pasting. :-)
         if (parent is RenderBox) {
           RenderBox parentBox = parent;
           width = parentBox.size.width;
+          height = parentBox.size.height;
         } else {
           width = size.width;
+          height = size.height;
         }
         _paragraph.layout(new ui.ParagraphConstraints(width: width));
-        context.canvas.drawParagraph(_paragraph, offset);
+        double dy = (height - _paragraph.height) / 2.0;
+        Offset delta = new Offset(0.0, dy > 0.0 ? dy : 0.0);
+        context.canvas.drawParagraph(_paragraph, offset + delta);
       }
     } catch (e) { }
   }
