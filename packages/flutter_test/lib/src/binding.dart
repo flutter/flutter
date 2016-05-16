@@ -339,17 +339,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void initInstances() {
-    debugPrint = _synchronousDebugPrint;
+    debugPrint = debugPrintSynchronously;
     super.initInstances();
     ui.window.onBeginFrame = null;
-  }
-
-  void _synchronousDebugPrint(String message, { int wrapWidth }) {
-    if (wrapWidth != null) {
-      print(message.split('\n').expand((String line) => debugWordWrap(line, wrapWidth)).join('\n'));
-    } else {
-      print(message);
-    }
   }
 
   FakeAsync _fakeAsync;

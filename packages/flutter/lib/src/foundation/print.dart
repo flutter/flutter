@@ -14,18 +14,33 @@ typedef void DebugPrintCallback(String message, { int wrapWidth });
 /// If a wrapWidth is provided, each line of the message is word-wrapped to that
 /// width. (Lines may be separated by newline characters, as in '\n'.)
 ///
-/// This function very crudely attempts to throttle the rate at which messages
-/// are sent to avoid data loss on Android. This means that interleaving calls
-/// to this function (directly or indirectly via [debugDumpRenderTree] or
-/// [debugDumpApp]) and to the Dart [print] method can result in out-of-order
-/// messages in the logs.
+/// By default, this function very crudely attempts to throttle the rate at
+/// which messages are sent to avoid data loss on Android. This means that
+/// interleaving calls to this function (directly or indirectly via
+/// [debugDumpRenderTree] or [debugDumpApp]) and to the Dart [print] method can
+/// result in out-of-order messages in the logs.
 ///
 /// The implementation of this function can be replaced by setting the
-/// variable to a new implementation that matches the
+/// [debugPrint] variable to a new implementation that matches the
 /// [DebugPrintCallback] signature. For example, flutter_test does this.
-DebugPrintCallback debugPrint = _defaultDebugPrint;
+///
+/// The default value is [debugPrintThrottled]. For a version that acts
+/// identically but does not throttle, use [debugPrintSynchronously].
+DebugPrintCallback debugPrint = debugPrintThrottled;
 
-void _defaultDebugPrint(String message, { int wrapWidth }) {
+/// Alternative implementation of [debugPrint] that does not throttle.
+/// Used by tests.
+void debugPrintSynchronously(String message, { int wrapWidth }) {
+  if (wrapWidth != null) {
+    print(message.split('\n').expand((String line) => debugWordWrap(line, wrapWidth)).join('\n'));
+  } else {
+    print(message);
+  }
+}
+
+/// Implementation of [debugPrint] that throttles messages. This avoids dropping
+/// messages on platforms that rate-limit their logging (for example, Android).
+void debugPrintThrottled(String message, { int wrapWidth }) {
   if (wrapWidth != null) {
     _debugPrintBuffer.addAll(message.split('\n').expand((String line) => debugWordWrap(line, wrapWidth)));
   } else {
