@@ -46,7 +46,8 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
       value: _value ? 1.0 : 0.0
     );
     _position = new CurvedAnimation(
-      parent: _positionController
+      parent: _positionController,
+      curve: Curves.linear
     )..addListener(markNeedsPaint)
      ..addStatusListener(_handlePositionStateChanged);
 
