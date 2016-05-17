@@ -717,11 +717,6 @@ class ScrollableViewport extends StatefulWidget {
   /// highest index) will be pushed down, while in the
   /// [ViewportAnchor.end] case the items before it (with lower
   /// indices, up to the item with the index 0) will be pushed up.
-  ///
-  /// Subclasses may ignore this value if, for instance, they do not
-  /// have a concept of an anchor, or have more complicated behavior
-  /// (e.g. they would by default put the middle item in the middle of
-  /// the container).
   final ViewportAnchor scrollAnchor;
 
   /// Called whenever this widget starts to scroll.
