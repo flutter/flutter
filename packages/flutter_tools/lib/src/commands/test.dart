@@ -56,8 +56,14 @@ class TestCommand extends FlutterCommand {
   Future<int> _runTests(List<String> testArgs, Directory testDirectory) async {
     Directory currentDirectory = Directory.current;
     try {
-      Directory.current = testDirectory;
-      return await executable.main(testArgs);
+      if (testDirectory != null) {
+        printTrace('switching to directory $testDirectory to run tests');
+        Directory.current = testDirectory;
+      }
+      printTrace('running test package with arguments: $testArgs');
+      await executable.main(testArgs);
+      printTrace('test package returned with exit code $exitCode');
+      return exitCode;
     } finally {
       Directory.current = currentDirectory;
     }
@@ -70,9 +76,10 @@ class TestCommand extends FlutterCommand {
     if (!projectRootValidator())
       return 1;
 
-    Directory testDir = _currentPackageTestDir;
+    Directory testDir;
 
     if (testArgs.isEmpty) {
+      testDir = _currentPackageTestDir;
       if (!testDir.existsSync()) {
         printError("Test directory '${testDir.path}' not found.");
         return 1;
