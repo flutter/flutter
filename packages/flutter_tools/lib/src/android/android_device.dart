@@ -409,7 +409,14 @@ class AndroidDevice extends Device {
       '--es', 'snapshot', _deviceSnapshotPath,
       activity,
     ]);
-    runCheckedSync(cmd);
+
+    RegExp errorRegExp = new RegExp(r'^Error: .*$', multiLine: true);
+    Match errorMatch = errorRegExp.firstMatch(runCheckedSync(cmd));
+    if (errorMatch != null) {
+      printError(errorMatch.group(0));
+      return false;
+    }
+
     return true;
   }
 
