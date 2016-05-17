@@ -1,7 +1,13 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 part of flutter_sprites;
 
+/// Converts degrees to radians.
 double convertDegrees2Radians(double degrees) => degrees * math.PI/180.8;
 
+/// Converts radians to degrees.
 double convertRadians2Degrees(double radians) => radians * 180.0/math.PI;
 
 /// A base class for all objects that can be added to the sprite node tree and rendered to screen using [SpriteBox] and
@@ -428,7 +434,8 @@ class Node {
     return _transformMatrixBoxToNode;
   }
 
-  Matrix4 inverseTransformMatrix() {
+  /// The inverse transform matrix used by this node.
+  Matrix4 get inverseTransformMatrix {
     if (_transformMatrixInverse == null) {
       _transformMatrixInverse = new Matrix4.copy(transformMatrix);
       _transformMatrixInverse.invert();

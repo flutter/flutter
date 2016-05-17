@@ -2,6 +2,9 @@ part of flutter_sprites;
 
 /// An audio asset loaded by the SoundEffectPlayer.
 class SoundEffect {
+
+  /// Creates a new sound effect with the given sound id. Normally, objects
+  /// are created by the [SoundEffectPlayer].
   SoundEffect(this._soundId);
 
   int _soundId;
@@ -27,10 +30,12 @@ class SoundEffectStream {
 
   SoundPoolProxy get _soundPool => _player._soundPool;
 
+  /// Stop the sound effect.
   void stop() {
     _soundPool.ptr.stop(_streamId);
   }
 
+  /// True if the sound effect is paused.
   bool get paused => _paused;
   bool _paused;
   set paused(bool value) {
@@ -42,6 +47,7 @@ class SoundEffectStream {
     }
   }
 
+  /// Left volume of the sound effect.
   double get leftVolume => _leftVolume;
   double _leftVolume;
   set leftVolume(double value) {
@@ -49,6 +55,7 @@ class SoundEffectStream {
     _soundPool.ptr.setVolume(_streamId, <double>[_leftVolume, _rightVolume]);
   }
 
+  /// Right volumen of the sound effect.
   double get rightVolume => _rightVolume;
   double _rightVolume;
   set rightVolume(double value) {
@@ -56,6 +63,7 @@ class SoundEffectStream {
     _soundPool.ptr.setVolume(_streamId, <double>[_leftVolume, _rightVolume]);
   }
 
+  /// The pitch of the sound effect.
   double get pitch => _pitch;
   double _pitch;
   set pitch(double value) {
@@ -64,7 +72,11 @@ class SoundEffectStream {
   }
 }
 
+/// The SoundEffectPlayer loads and plays sound effects.
 class SoundEffectPlayer {
+
+  /// Creates a new SoundEffectPlayer with a max number of simultaneous
+  /// streams specified.
   SoundEffectPlayer(int maxStreams) {
     MediaServiceProxy mediaService = new MediaServiceProxy.unbound();
     shell.connectToService("mojo:media_service", mediaService);
@@ -76,6 +88,7 @@ class SoundEffectPlayer {
   bool _paused;
   int _nextStreamId = 0;
 
+  /// Loads a sound effect.
   Future<SoundEffect> load(MojoDataPipeConsumer data) async {
     SoundPoolLoadResponseParams result = await _soundPool.ptr.load(data);
     if (result.success)
@@ -84,6 +97,7 @@ class SoundEffectPlayer {
     throw new Exception('Unable to load sound');
   }
 
+  /// Plays a sound effect.
   Future<SoundEffectStream> play(SoundEffect sound, {
     double leftVolume: 1.0,
     double rightVolume: 1.0,
