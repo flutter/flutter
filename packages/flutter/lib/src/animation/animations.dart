@@ -123,15 +123,23 @@ abstract class AnimationWithParentMixin<T> {
   // keep these next five dartdocs in sync with the dartdocs in Animation<T>
 
   /// Calls the listener every time the value of the animation changes.
+  ///
+  /// Listeners can be removed with [removeListener].
   void addListener(VoidCallback listener) => parent.addListener(listener);
 
   /// Stop calling the listener every time the value of the animation changes.
+  ///
+  /// Listeners can be added with [addListener].
   void removeListener(VoidCallback listener) => parent.removeListener(listener);
 
   /// Calls listener every time the status of the animation changes.
+  ///
+  /// Listeners can be removed with [removeStatusListener].
   void addStatusListener(AnimationStatusListener listener) => parent.addStatusListener(listener);
 
   /// Stops calling the listener every time the status of the animation changes.
+  ///
+  /// Listeners can be added with [addStatusListener].
   void removeStatusListener(AnimationStatusListener listener) => parent.removeStatusListener(listener);
 
   /// The current status of this animation.
@@ -146,6 +154,11 @@ abstract class AnimationWithParentMixin<T> {
 /// its value.
 class ProxyAnimation extends Animation<double>
   with AnimationLazyListenerMixin, AnimationLocalListenersMixin, AnimationLocalStatusListenersMixin {
+
+  /// Creates a proxy animation.
+  ///
+  /// If the animation argument is omitted, the proxy animation will have the
+  /// status [AnimationStatus.dismissed] and a value of 0.0.
   ProxyAnimation([Animation<double> animation]) {
     _parent = animation;
     if (_parent == null) {
@@ -224,7 +237,13 @@ class ProxyAnimation extends Animation<double>
 /// animation.
 class ReverseAnimation extends Animation<double>
   with AnimationLazyListenerMixin, AnimationLocalStatusListenersMixin {
-  ReverseAnimation(this.parent);
+
+  /// Creates a reverse animation.
+  ///
+  /// The parent argument must not be null.
+  ReverseAnimation(this.parent) {
+    assert(parent != null);
+  }
 
   /// The animation whose value and direction this animation is reversing.
   final Animation<double> parent;
@@ -296,9 +315,12 @@ class ReverseAnimation extends Animation<double>
 ///
 /// If you want to apply a [Curve] to a [Tween], consider using [CurveTween].
 class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<double> {
+  /// Creates a curved animation.
+  ///
+  /// The parent and curve arguments must not be null.
   CurvedAnimation({
     this.parent,
-    this.curve: Curves.linear,
+    this.curve,
     this.reverseCurve
   }) {
     assert(parent != null);
@@ -362,7 +384,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   String toString() {
     if (reverseCurve == null)
       return '$parent\u27A9$curve';
-    if (_useForwardCurve) 
+    if (_useForwardCurve)
      return '$parent\u27A9$curve\u2092\u2099/$reverseCurve';
     return '$parent\u27A9$curve/$reverseCurve\u2092\u2099';
   }
@@ -382,6 +404,11 @@ enum _TrainHoppingMode { minimize, maximize }
 /// object down.
 class TrainHoppingAnimation extends Animation<double>
   with AnimationEagerListenerMixin, AnimationLocalListenersMixin, AnimationLocalStatusListenersMixin {
+
+  /// Creates a train-hopping animation.
+  ///
+  /// The current train argument must not be null but the next train argument
+  /// can be null.
   TrainHoppingAnimation(this._currentTrain, this._nextTrain, { this.onSwitchedTrain }) {
     assert(_currentTrain != null);
     if (_nextTrain != null) {

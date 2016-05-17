@@ -31,8 +31,13 @@ abstract class AnimationLazyListenerMixin implements _ListenerMixin {
       didStopListening();
   }
 
+  /// Called when the number of listeners changes from zero to one.
   void didStartListening();
+
+  /// Called when the number of listeners changes from one to zero.
   void didStopListening();
+
+  /// Whether there are any listeners.
   bool get isListening => _listenerCounter > 0;
 }
 
@@ -53,14 +58,27 @@ abstract class AnimationEagerListenerMixin implements _ListenerMixin {
 /// all the registered listeners when notifyListeners is invoked.
 abstract class AnimationLocalListenersMixin extends _ListenerMixin {
   final List<VoidCallback> _listeners = <VoidCallback>[];
+
+  /// Calls the listener every time the value of the animation changes.
+  ///
+  /// Listeners can be removed with [removeListener].
   void addListener(VoidCallback listener) {
     didRegisterListener();
     _listeners.add(listener);
   }
+
+  /// Stop calling the listener every time the value of the animation changes.
+  ///
+  /// Listeners can be added with [addListener].
   void removeListener(VoidCallback listener) {
     _listeners.remove(listener);
     didUnregisterListener();
   }
+
+  /// Calls all the listeners.
+  ///
+  /// If listeners are added or removed during this function, the modifications
+  /// will not change which listeners are called during this iteration.
   void notifyListeners() {
     List<VoidCallback> localListeners = new List<VoidCallback>.from(_listeners);
     for (VoidCallback listener in localListeners)
@@ -73,14 +91,27 @@ abstract class AnimationLocalListenersMixin extends _ListenerMixin {
 /// invoked.
 abstract class AnimationLocalStatusListenersMixin extends _ListenerMixin {
   final List<AnimationStatusListener> _statusListeners = <AnimationStatusListener>[];
+
+  /// Calls listener every time the status of the animation changes.
+  ///
+  /// Listeners can be removed with [removeStatusListener].
   void addStatusListener(AnimationStatusListener listener) {
     didRegisterListener();
     _statusListeners.add(listener);
   }
+
+  /// Stops calling the listener every time the status of the animation changes.
+  ///
+  /// Listeners can be added with [addStatusListener].
   void removeStatusListener(AnimationStatusListener listener) {
     _statusListeners.remove(listener);
     didUnregisterListener();
   }
+
+  /// Calls all the status listeners.
+  ///
+  /// If listeners are added or removed during this function, the modifications
+  /// will not change which listeners are called during this iteration.
   void notifyStatusListeners(AnimationStatus status) {
     List<AnimationStatusListener> localListeners = new List<AnimationStatusListener>.from(_statusListeners);
     for (AnimationStatusListener listener in localListeners)

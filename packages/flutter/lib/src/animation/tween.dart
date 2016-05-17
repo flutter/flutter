@@ -82,6 +82,9 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 /// different than calling the `animate()` method twice, which results in two [Animation]
 /// separate objects, each configured with a single [Tween].
 class Tween<T extends dynamic> extends Animatable<T> {
+  /// Creates a tween.
+  ///
+  /// The [begin] and [end] arguments must not be null.
   Tween({ this.begin, this.end });
 
   /// The value this variable has at the beginning of the animation.
@@ -115,6 +118,9 @@ class Tween<T extends dynamic> extends Animatable<T> {
 /// This class specializes the interpolation of Tween<Color> to be
 /// appropriate for colors.
 class ColorTween extends Tween<Color> {
+  /// Creates a color tween.
+  ///
+  /// The [begin] and [end] arguments must not be null.
   ColorTween({ Color begin, Color end }) : super(begin: begin, end: end);
 
   @override
@@ -126,6 +132,9 @@ class ColorTween extends Tween<Color> {
 /// This class specializes the interpolation of Tween<Size> to be
 /// appropriate for rectangles.
 class SizeTween extends Tween<Size> {
+  /// Creates a size tween.
+  ///
+  /// The [begin] and [end] arguments must not be null.
   SizeTween({ Size begin, Size end }) : super(begin: begin, end: end);
 
   @override
@@ -137,6 +146,9 @@ class SizeTween extends Tween<Size> {
 /// This class specializes the interpolation of Tween<Rect> to be
 /// appropriate for rectangles.
 class RectTween extends Tween<Rect> {
+  /// Creates a rect tween.
+  ///
+  /// The [begin] and [end] arguments must not be null.
   RectTween({ Rect begin, Rect end }) : super(begin: begin, end: end);
 
   @override
@@ -153,6 +165,9 @@ class RectTween extends Tween<Rect> {
 /// This is the closest approximation to a linear tween that is
 /// possible with an integer. Compare to [StepTween].
 class IntTween extends Tween<int> {
+  /// Creates an int tween.
+  ///
+  /// The [begin] and [end] arguments must not be null.
   IntTween({ int begin, int end }) : super(begin: begin, end: end);
 
   // The inherited lerp() function doesn't work with ints because it multiplies
@@ -171,6 +186,9 @@ class IntTween extends Tween<int> {
 /// This results in a value that is never greater than the equivalent
 /// value from a linear double interpolation. Compare to [IntTween].
 class StepTween extends Tween<int> {
+  /// Creates a step tween.
+  ///
+  /// The [begin] and [end] arguments must not be null.
   StepTween({ int begin, int end }) : super(begin: begin, end: end);
 
   // The inherited lerp() function doesn't work with ints because it multiplies
@@ -185,7 +203,12 @@ class StepTween extends Tween<int> {
 /// a curve to an existing [Animation] object whereas [CurveTween] can be
 /// chained with another [Tween] prior to receiving the underlying [Animation].
 class CurveTween extends Animatable<double> {
-  CurveTween({ this.curve });
+  /// Creates a curve tween.
+  ///
+  /// The [curve] argument must not be null.
+  CurveTween({ this.curve }) {
+    assert(curve != null);
+  }
 
   /// The curve to use when transforming the value of the animation.
   Curve curve;
