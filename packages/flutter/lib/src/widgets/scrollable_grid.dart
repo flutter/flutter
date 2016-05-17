@@ -27,6 +27,10 @@ class ScrollableGrid extends StatelessWidget {
     this.children
   }) : super(key: key);
 
+  // Warning: keep the dartdoc comments that follow in sync with the copies in
+  // Scrollable, LazyBlock, ScrollableViewport, ScrollableList, and
+  // ScrollableLazyList. And see: https://github.com/dart-lang/dartdoc/issues/1161.
+
   /// The scroll offset this widget should use when first created.
   final double initialScrollOffset;
 
