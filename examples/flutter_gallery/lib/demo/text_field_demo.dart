@@ -82,6 +82,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
             new Input(
               hintText: 'Where can we reach you?',
               labelText: 'Phone Number',
+              keyboardType: KeyboardType.phone,
               formField: new FormField<String>(
                 setter: (String val) { person.phoneNumber = val; },
                 validator: _validatePhoneNumber
