@@ -64,6 +64,10 @@ class ScrollableList extends StatelessWidget {
     assert(itemExtent != null);
   }
 
+  // Warning: keep the dartdoc comments that follow in sync with the copies in
+  // Scrollable, LazyBlock, ScrollableLazyList, ScrollableViewport, and
+  // ScrollableGrid. And see: https://github.com/dart-lang/dartdoc/issues/1161.
+
   /// The scroll offset this widget should use when first created.
   final double initialScrollOffset;
 
@@ -90,11 +94,6 @@ class ScrollableList extends StatelessWidget {
   /// highest index) will be pushed down, while in the
   /// [ViewportAnchor.end] case the items before it (with lower
   /// indices, up to the item with the index 0) will be pushed up.
-  ///
-  /// Subclasses may ignore this value if, for instance, they do not
-  /// have a concept of an anchor, or have more complicated behavior
-  /// (e.g. they would by default put the middle item in the middle of
-  /// the container).
   final ViewportAnchor scrollAnchor;
 
   /// Called whenever this widget starts to scroll.
@@ -399,6 +398,10 @@ class ScrollableLazyList extends StatelessWidget {
     assert(itemCount != null || scrollAnchor == ViewportAnchor.start);
   }
 
+  // Warning: keep the dartdoc comments that follow in sync with the copies in
+  // Scrollable, LazyBlock, ScrollableViewport, ScrollableList, and
+  // ScrollableGrid. And see: https://github.com/dart-lang/dartdoc/issues/1161.
+
   /// The scroll offset this widget should use when first created.
   final double initialScrollOffset;
 
@@ -425,11 +428,6 @@ class ScrollableLazyList extends StatelessWidget {
   /// highest index) will be pushed down, while in the
   /// [ViewportAnchor.end] case the items before it (with lower
   /// indices, up to the item with the index 0) will be pushed up.
-  ///
-  /// Subclasses may ignore this value if, for instance, they do not
-  /// have a concept of an anchor, or have more complicated behavior
-  /// (e.g. they would by default put the middle item in the middle of
-  /// the container).
   final ViewportAnchor scrollAnchor;
 
   /// Called whenever this widget starts to scroll.
