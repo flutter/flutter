@@ -384,6 +384,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   Animation<double> createAnimation() {
     return new CurvedAnimation(
       parent: super.createAnimation(),
+      curve: Curves.linear,
       reverseCurve: new Interval(0.0, _kMenuCloseIntervalEnd)
     );
   }
