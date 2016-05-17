@@ -124,6 +124,12 @@ class MojoClient {
     });
   }
 
+  /// Sends an HTTP GET request with the given headers to the given URL, which can
+  /// be a [Uri] or a [String], and returns a Future that completes to the body of
+  /// the response as a [mojo.MojoDataPipeConsumer].
+  ///
+  /// The Future will emit a [ClientException] if the response doesn't have a
+  /// success status code.
   Future<mojo.MojoDataPipeConsumer> readDataPipe(dynamic url, { Map<String, String> headers }) async {
     mojom.UrlLoaderProxy loader = new mojom.UrlLoaderProxy.unbound();
     mojom.UrlRequest request = _prepareRequest('GET', url, headers);

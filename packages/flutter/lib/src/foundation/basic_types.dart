@@ -28,16 +28,21 @@ typedef T ValueGetter<T>();
 /// Signature for callbacks that filter an iterable.
 typedef Iterable<T> IterableFilter<T>(Iterable<T> input);
 
+/// The largest SMI value.
+///
+/// See <https://www.dartlang.org/articles/numeric-computation/#smis-and-mints>
+const int kMaxUnsignedSMI = 0x3FFFFFFFFFFFFFFF;
+
 /// A BitField over an enum (or other class whose values implement "index").
-/// Only the first 63 values of the enum can be used as indices.
+/// Only the first 62 values of the enum can be used as indices.
 class BitField<T extends dynamic> {
-  static const int _kSMIBits = 63; // see https://www.dartlang.org/articles/numeric-computation/#smis-and-mints
+  static const int _kSMIBits = 62; // see https://www.dartlang.org/articles/numeric-computation/#smis-and-mints
   static const int _kAllZeros = 0;
-  static const int _kAllOnes = 0x7FFFFFFFFFFFFFFF; // 2^(_kSMIBits+1)-1
+  static const int _kAllOnes = kMaxUnsignedSMI; // 2^(_kSMIBits+1)-1
 
   /// Creates a bit field of all zeros.
   ///
-  /// The given length must be at most 63.
+  /// The given length must be at most 62.
   BitField(this._length) : _bits = _kAllZeros {
     assert(_length <= _kSMIBits);
   }
@@ -47,7 +52,7 @@ class BitField<T extends dynamic> {
   /// If the value argument is true, the bits are filled with ones. Otherwise,
   /// the bits are filled with zeros.
   ///
-  /// The given length must be at most 63.
+  /// The given length must be at most 62.
   BitField.filled(this._length, bool value) : _bits = value ? _kAllOnes : _kAllZeros {
     assert(_length <= _kSMIBits);
   }
