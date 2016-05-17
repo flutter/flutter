@@ -3,6 +3,11 @@ set -ex
 
 export PATH="$PWD/bin:$PWD/bin/cache/dart-sdk/bin:$PATH"
 
+apropos trace
+
+echo 'void main() { print("hello"); }' > test.dart
+bin/cache/artifacts/engine/linux-x64/sky_shell test.dart
+
 # analyze all the Dart code in the repo
 flutter analyze --flutter-repo
 

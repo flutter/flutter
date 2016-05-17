@@ -1,14 +1,10 @@
-language: dart
 sudo: false
-dart:
-  - stable
 addons:
   apt:
     sources:
     - ubuntu-toolchain-r-test
     packages:
-    - gcc-4.8
-    - g++-4.8
+    - libstdc++6 # sky_shell binary depends on /usr/lib/x86_64-linux-gnu/libstdc++.so.6 version GLIBCXX_3.4.18
 before_script:
   - ./travis/setup.sh
 script:
