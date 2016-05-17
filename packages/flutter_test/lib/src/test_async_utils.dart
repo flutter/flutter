@@ -289,7 +289,7 @@ class TestAsyncUtils {
           break;
         }
         if (index < stack.length) {
-          final RegExp callerPattern = new RegExp(r'^#[0-9]+ .* \((.+):([0-9]+)(?::[0-9]+)?\)$');
+          final RegExp callerPattern = new RegExp(r'^#[0-9]+ .* \((.+?):([0-9]+)(?::[0-9]+)?\)$');
           final Match callerMatch = callerPattern.matchAsPrefix(stack[index]); // extract the caller's info
           if (callerMatch != null) {
             assert(callerMatch.groupCount == 2);
