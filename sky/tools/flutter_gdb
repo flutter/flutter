@@ -41,14 +41,21 @@ def _find_package_pid(adb_path, package):
 
 
 class GdbClient(object):
-    GDB_LOCAL_PATH = ('third_party/android_tools/ndk/toolchains/arm-linux-androideabi-4.9/'
-                      'prebuilt/linux-x86_64/bin/arm-linux-androideabi-gdb')
     SYSTEM_LIBS_PATH = '/tmp/flutter_gdb_device_libs'
+
+    def _gdb_local_path(self):
+        GDB_LOCAL_PATH = ('third_party/android_tools/ndk/toolchains/arm-linux-androideabi-4.9/'
+                          'prebuilt/%s-x86_64/bin/arm-linux-androideabi-gdb')
+        if sys.platform.startswith('darwin'):
+            return GDB_LOCAL_PATH % 'darwin'
+        else:
+            return GDB_LOCAL_PATH % 'linux'
 
     def add_subparser(self, subparsers):
         parser = subparsers.add_parser('client',
             help='run a GDB client')
         parser.add_argument('package', type=str)
+        parser.add_argument('--local-engine', type=str, default='android_debug_unopt')
         parser.add_argument('--gdb-port', type=int, default=8888)
         parser.add_argument('--no-pull-libs', action="store_false",
             default=True, dest="pull_libs",
@@ -93,14 +100,14 @@ class GdbClient(object):
 
         eval_commands = ['target remote localhost:%d' % args.gdb_port]
 
-        debug_out_path = os.path.join(flutter_root, 'out/android_debug_unopt')
+        debug_out_path = os.path.join(flutter_root, 'out/%s' % args.local_engine)
         if not os.path.exists(os.path.join(debug_out_path, 'libsky_shell.so')):
-            print 'Unable to find libsky_shell.so. Make sure you have completed an android_debug_unopt build'
+            print 'Unable to find libsky_shell.so. Make sure you have completed a %s build' % args.local_engine
             return 1
         eval_commands.append('set solib-search-path %s:%s' %
                              (debug_out_path, GdbClient.SYSTEM_LIBS_PATH))
 
-        exec_command = [os.path.join(flutter_root, GdbClient.GDB_LOCAL_PATH)]
+        exec_command = [os.path.join(flutter_root, self._gdb_local_path())]
         for command in eval_commands:
             exec_command += ['--eval-command', command]
 
