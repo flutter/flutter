@@ -75,10 +75,10 @@ void main() {
       return result;
     };
 
-    GlobalKey<ScrollableState<ScrollableLazyList>> scrollableKey = new GlobalKey<ScrollableState<ScrollableLazyList>>();
+    GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>();
     FlipWidget testWidget = new FlipWidget(
       left: new ScrollableLazyList(
-        key: scrollableKey,
+        scrollableKey: scrollableKey,
         itemBuilder: itemBuilder,
         itemExtent: 200.0,
         initialScrollOffset: 300.0
@@ -123,10 +123,10 @@ void main() {
       return result;
     };
 
-    GlobalKey<ScrollableState<ScrollableLazyList>> scrollableKey = new GlobalKey<ScrollableState<ScrollableLazyList>>();
+    GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>();
     FlipWidget testWidget = new FlipWidget(
       left: new ScrollableLazyList(
-        key: scrollableKey,
+        scrollableKey: scrollableKey,
         itemBuilder: itemBuilder,
         itemExtent: 200.0,
         initialScrollOffset: 300.0,
@@ -167,9 +167,9 @@ void main() {
       return result;
     };
 
-    GlobalKey<ScrollableState<ScrollableLazyList>> scrollableKey = new GlobalKey<ScrollableState<ScrollableLazyList>>();
+    GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>();
     Widget testWidget = new ScrollableLazyList(
-      key: scrollableKey,
+      scrollableKey: scrollableKey,
       itemBuilder: itemBuilder,
       itemExtent: 300.0,
       itemCount: 10

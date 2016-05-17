@@ -46,7 +46,7 @@ void main() {
     expect(find.text('10'), findsNothing);
     expect(find.text('100'), findsNothing);
 
-    ScrollableState targetState = tester.state(find.byType(ScrollableLazyList));
+    ScrollableState targetState = tester.state(find.byType(Scrollable));
     targetState.scrollTo(1000.0);
     await tester.pump(new Duration(seconds: 1));
 

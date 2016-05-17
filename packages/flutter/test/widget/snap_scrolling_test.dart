@@ -29,7 +29,7 @@ Widget buildFrame() {
     child: new Container(
       height: itemExtent * 2.0,
       child: new ScrollableList(
-        key: scrollableListKey,
+        scrollableKey: scrollableListKey,
         snapOffsetCallback: snapOffsetCallback,
         scrollDirection: scrollDirection,
         itemExtent: itemExtent,

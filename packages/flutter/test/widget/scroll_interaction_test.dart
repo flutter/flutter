@@ -13,8 +13,8 @@ void main() {
       ]
     ));
 
-    ScrollableState<ScrollableViewport> scrollable =
-        tester.state/*<ScrollableState<ScrollableViewport>>*/(find.byType(ScrollableViewport));
+    ScrollableState scrollable =
+      tester.state/*<ScrollableState>*/(find.byType(Scrollable));
 
     expect(scrollable.scrollOffset, equals(0.0));
 
