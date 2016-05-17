@@ -416,7 +416,22 @@ abstract class State<T extends StatefulWidget> {
       }
       return true;
     });
-    fn();
+    dynamic result = fn() as dynamic;
+    assert(() {
+      if (result is Future) {
+        throw new FlutterError(
+          'setState() callback argument returned a Future.\n'
+          'The setState() method on $this was invoked with a closure or method that '
+          'returned a Future. Maybe it is marked as "async".\n'
+          'Instead of performing asynchronous work inside a call to setState(), first '
+          'execute the work (without updating the widget state), and then synchronously '
+          'update the state inside a call to setState().'
+        );
+      }
+      // We ignore other types of return values so that you can do things like:
+      //   setState(() => x = 3);
+      return true;
+    });
     _element.markNeedsBuild();
   }
 
