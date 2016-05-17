@@ -7,20 +7,48 @@ import 'constants.dart';
 import 'events.dart';
 import 'recognizer.dart';
 
+/// Signature for when a pointer that might cause a tap has contacted the screen
+/// at a particular location.
 typedef void GestureTapDownCallback(Point globalPosition);
+
+/// Signature for when a pointer that will trigger a tap has stopped contacting
+/// the screen at a particular location.
 typedef void GestureTapUpCallback(Point globalPosition);
+
+/// Signature for when a tap has occurred.
 typedef void GestureTapCallback();
+
+/// Signature for when the pointer that previously triggered a
+/// [GestureTapDownCallback] will not end up causing a tap.
 typedef void GestureTapCancelCallback();
 
-/// TapGestureRecognizer is a tap recognizer that tracks only one primary
-/// pointer per gesture. That is, during tap recognition, extra pointer events
-/// are ignored: down-1, down-2, up-1, up-2 produces only one tap on up-1.
+/// Recognizes taps.
+///
+/// [TapGestureRecognizer] considers all the pointers involved in the pointer
+/// event sequence as contributing to one gesture. For this reason, extra
+/// pointer interactions during a tap sequence are not recognized as additional
+/// taps. Fo example, down-1, down-2, up-1, up-2 produces only one tap on up-1.
+///
+/// See also:
+///
+///  * [MultiTapGestureRecognizer]
 class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
+  /// Creates a tap gesture recognizer.
   TapGestureRecognizer() : super(deadline: kPressTimeout);
 
+  /// A pointer that might cause a tap has contacted the screen at a particular
+  /// location.
   GestureTapDownCallback onTapDown;
+
+  /// A pointer that will trigger a tap has stopped contacting the screen at a
+  /// particular location.
   GestureTapUpCallback onTapUp;
+
+  /// A tap has occurred.
   GestureTapCallback onTap;
+
+  /// The pointer that previously triggered [onTapDown] will not end up causing
+  /// a tap.
   GestureTapCancelCallback onTapCancel;
 
   bool _sentTapDown = false;

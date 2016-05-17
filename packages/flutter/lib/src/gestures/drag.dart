@@ -63,10 +63,22 @@ bool _isFlingGesture(Velocity velocity) {
 }
 
 abstract class _DragGestureRecognizer<T extends dynamic> extends OneSequenceGestureRecognizer {
+  /// A pointer has contacted the screen and might begin to move.
   GestureDragDownCallback onDown;
+
+  /// A pointer has contacted the screen and has begun to move.
   GestureDragStartCallback onStart;
+
+  /// A pointer that is in contact with the screen and moving has moved again.
   _GesturePolymorphicUpdateCallback<T> onUpdate;
+
+  /// A pointer that was previously in contact with the screen and moving is no
+  /// longer in contact with the screen and was moving at a specific velocity
+  /// when it stopped contacting the screen.
   GestureDragEndCallback onEnd;
+
+  /// Signature for when the pointer that previously triggered [onDown] did not
+  /// complete.
   GestureDragCancelCallback onCancel;
 
   _DragState _state = _DragState.ready;
@@ -168,6 +180,10 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends OneSequenceGest
 /// Recognizes movement in the vertical direction.
 ///
 /// Used for vertical scrolling.
+///
+/// See also:
+///
+///  * [VerticalMultiDragGestureRecognizer]
 class VerticalDragGestureRecognizer extends _DragGestureRecognizer<double> {
   @override
   double get _initialPendingDragDelta => 0.0;
@@ -185,6 +201,10 @@ class VerticalDragGestureRecognizer extends _DragGestureRecognizer<double> {
 /// Recognizes movement in the horizontal direction.
 ///
 /// Used for horizontal scrolling.
+///
+/// See also:
+///
+///  * [HorizontalMultiDragGestureRecognizer]
 class HorizontalDragGestureRecognizer extends _DragGestureRecognizer<double> {
   @override
   double get _initialPendingDragDelta => 0.0;
@@ -200,6 +220,11 @@ class HorizontalDragGestureRecognizer extends _DragGestureRecognizer<double> {
 }
 
 /// Recognizes movement both horizontally and vertically.
+///
+/// See also:
+///
+///  * [ImmediateMultiDragGestureRecognizer]
+///  * [DelayedMultiDragGestureRecognizer]
 class PanGestureRecognizer extends _DragGestureRecognizer<Offset> {
   @override
   Offset get _initialPendingDragDelta => Offset.zero;
