@@ -27,5 +27,5 @@ if [ "$1" = "--upload" ]; then
   gsutil -m rsync -d -r dev/docs/doc/ gs://docs.flutter.io/
 
   # Ensure compressable files are gzipped and then stored.
-  gsutil -m cp -r -z "js,json,html,css" dev/docs/doc/ gs://docs.flutter.io/
+  gsutil -m cp -r -z "js,json,html,css" dev/docs/doc/* gs://docs.flutter.io/
 fi
