@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'basic_types.dart';
 import 'print.dart';
 
 /// Signature for [FlutterError.onException] handler.
@@ -29,6 +30,7 @@ class FlutterErrorDetails {
     this.stack,
     this.library: 'Flutter framework',
     this.context,
+    this.stackFilter,
     this.informationCollector,
     this.silent: false
   });
@@ -40,8 +42,14 @@ class FlutterErrorDetails {
   /// The stack trace from where the [exception] was thrown (as opposed to where
   /// it was caught).
   ///
-  /// StackTrace objects are opaque except for their [toString] function. A
-  /// stack trace is not expected to be machine-readable.
+  /// StackTrace objects are opaque except for their [toString] function.
+  ///
+  /// If this field is not null, then the [stackFilter] callback, if any, will
+  /// be invoked with the result of calling [toString] on this object and
+  /// splitting that result on line breaks. If there's no [stackFilter]
+  /// callback, then [FlutterError.defaultStackFilter] is used instead. That
+  /// function expects the stack to be in the format used by
+  /// [StackTrace.toString].
   final StackTrace stack;
 
   /// A human-readable brief name describing the library that caught the error
@@ -52,6 +60,22 @@ class FlutterErrorDetails {
   /// A human-readable description of where the error was caught (as opposed to
   /// where it was thrown).
   final String context;
+
+  /// A callback which filters the [stack] trace. Receives an iterable of
+  /// strings representing the frames encoded in the way that
+  /// [StackTrace.toString()] provides. Should return an iterable of lines to
+  /// output for the stack.
+  ///
+  /// If this is not provided, then [FlutterError.dumpErrorToConsole] will use
+  /// [FlutterError.defaultStackFilter] instead.
+  ///
+  /// If the [FlutterError.defaultStackFilter] behavior is desired, then the
+  /// callback should manually call that function. That function expects the
+  /// incoming list to be in the [StackTrace.toString()] format. The output of
+  /// that function, however, does not always follow this format.
+  ///
+  /// This won't be called if [stack] is null.
+  final IterableFilter<String> stackFilter;
 
   /// A callback which, when invoked with a [StringBuffer] will write to that buffer
   /// information that could help with debugging the problem.
@@ -153,7 +177,7 @@ class FlutterError extends AssertionError {
       return;
     if (_errorCount == 0 || forceReport) {
       final String header = '\u2550\u2550\u2561 EXCEPTION CAUGHT BY ${details.library} \u255E'.toUpperCase();
-      final String footer = '\u2501' * _kWrapWidth;
+      final String footer = '\u2550' * _kWrapWidth;
       debugPrint('$header${"\u2550" * (footer.length - header.length)}');
       final String verb = 'thrown${ details.context != null ? " ${details.context}" : ""}';
       if (details.exception is NullThrownError) {
@@ -188,7 +212,14 @@ class FlutterError extends AssertionError {
       }
       if (details.stack != null) {
         debugPrint('When the exception was thrown, this was the stack:', wrapWidth: _kWrapWidth);
-        debugPrint('${details.stack}$footer'); // StackTrace objects include a trailing newline
+        Iterable<String> stackLines = details.stack.toString().trimRight().split('\n');
+        if (details.stackFilter != null) {
+          stackLines = details.stackFilter(stackLines);
+        } else {
+          stackLines = defaultStackFilter(stackLines);
+        }
+        debugPrint(stackLines.join('\n'), wrapWidth: _kWrapWidth);
+        debugPrint(footer);
       } else {
         debugPrint(footer);
       }
@@ -196,6 +227,65 @@ class FlutterError extends AssertionError {
       debugPrint('Another exception was thrown: ${details.exception.toString().split("\n")[0]}');
     }
     _errorCount += 1;
+  }
+
+  /// Converts a stack to a string that is more readable by omitting stack
+  /// frames that correspond to Dart internals.
+  ///
+  /// This is the default filter used by [dumpErrorToConsole] if the
+  /// [FlutterErrorDetails] object has no [FlutterErrorDetails.stackFilter]
+  /// callback.
+  ///
+  /// This function expects its input to be in the format used by
+  /// [StackTrace.toString()]. The output of this function is similar to that
+  /// format but the frame numbers will not be consecutive (frames are elided)
+  /// and the final line may be prose rather than a stack frame.
+  static Iterable<String> defaultStackFilter(Iterable<String> frames) {
+    final List<String> result = <String>[];
+    final List<String> filteredPackages = <String>[
+      'dart:async-patch',
+      'dart:async',
+      'package:stack_trace',
+    ];
+    final List<String> filteredClasses = <String>[
+      '_FakeAsync',
+    ];
+    final RegExp stackParser = new RegExp(r'^#[0-9]+ +([^.]+).* \(([^/]*)/[^:]+:[0-9]+(?::[0-9]+)?\)$');
+    final RegExp packageParser = new RegExp(r'^([^:]+):(.+)$');
+    final List<String> skipped = <String>[];
+    for (String line in frames) {
+      Match match = stackParser.firstMatch(line);
+      if (match != null) {
+        assert(match.groupCount == 2);
+        if (filteredPackages.contains(match.group(2))) {
+          Match packageMatch = packageParser.firstMatch(match.group(2));
+          if (packageMatch != null && packageMatch.group(1) == 'package') {
+            skipped.add('package ${packageMatch.group(2)}'); // avoid "package package:foo"
+          } else {
+            skipped.add('package ${match.group(2)}');
+          }
+          continue;
+        }
+        if (filteredClasses.contains(match.group(1))) {
+          skipped.add('class ${match.group(1)}');
+          continue;
+        }
+      }
+      result.add(line);
+    }
+    if (skipped == 1) {
+      result.add('(elided one frame from ${skipped.single})');
+    } else if (skipped.length > 1) {
+      List<String> where = new Set<String>.from(skipped).toList()..sort();
+      if (where.length > 1)
+        where[where.length - 1] = 'and ${where.last}';
+      if (where.length > 2) {
+        result.add('(elided ${skipped.length} frames from ${where.join(", ")})');
+      } else {
+        result.add('(elided ${skipped.length} frames from ${where.join(" ")})');
+      }
+    }
+    return result;
   }
 
   /// Calls [onError] with the given details, unless it is null.

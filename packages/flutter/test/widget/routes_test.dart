@@ -6,7 +6,6 @@ import 'dart:collection';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 final List<String> results = <String>[];
 
@@ -76,28 +75,28 @@ class TestRoute extends Route<String> {
 
 }
 
-void runNavigatorTest(
+Future<Null> runNavigatorTest(
   WidgetTester tester,
   NavigatorState host,
   NavigatorTransactionCallback test,
   List<String> expectations
-) {
+) async {
   expect(host, isNotNull);
   host.openTransaction(test);
   expect(results, equals(expectations));
   results.clear();
-  tester.pump();
+  await tester.pump();
 }
 
 void main() {
-  testWidgets('Route management - push, replace, pop', (WidgetTester tester) {
+  testWidgets('Route management - push, replace, pop', (WidgetTester tester) async {
     GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
-    tester.pumpWidget(new Navigator(
+    await tester.pumpWidget(new Navigator(
       key: navigatorKey,
       onGenerateRoute: (_) => new TestRoute('initial')
     ));
     NavigatorState host = navigatorKey.currentState;
-    runNavigatorTest(
+    await runNavigatorTest(
       tester,
       host,
       (NavigatorTransaction transaction) {
@@ -109,7 +108,7 @@ void main() {
       ]
     );
     TestRoute second;
-    runNavigatorTest(
+    await runNavigatorTest(
       tester,
       host,
       (NavigatorTransaction transaction) {
@@ -122,7 +121,7 @@ void main() {
         'initial: didChangeNext second',
       ]
     );
-    runNavigatorTest(
+    await runNavigatorTest(
       tester,
       host,
       (NavigatorTransaction transaction) {
@@ -135,7 +134,7 @@ void main() {
         'second: didChangeNext third',
       ]
     );
-    runNavigatorTest(
+    await runNavigatorTest(
       tester,
       host,
       (NavigatorTransaction transaction) {
@@ -149,7 +148,7 @@ void main() {
         'second: dispose',
       ]
     );
-    runNavigatorTest(
+    await runNavigatorTest(
       tester,
       host,
       (NavigatorTransaction transaction) {
@@ -161,7 +160,7 @@ void main() {
         'two: didPopNext third',
       ]
     );
-    runNavigatorTest(
+    await runNavigatorTest(
       tester,
       host,
       (NavigatorTransaction transaction) {
@@ -173,20 +172,20 @@ void main() {
         'initial: didPopNext two',
       ]
     );
-    tester.pumpWidget(new Container());
+    await tester.pumpWidget(new Container());
     expect(results, equals(<String>['initial: dispose']));
     expect(routes.isEmpty, isTrue);
     results.clear();
   });
 
-  testWidgets('Route management - push, remove, pop', (WidgetTester tester) {
+  testWidgets('Route management - push, remove, pop', (WidgetTester tester) async {
     GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
-    tester.pumpWidget(new Navigator(
+    await tester.pumpWidget(new Navigator(
       key: navigatorKey,
       onGenerateRoute: (_) => new TestRoute('first')
     ));
     NavigatorState host = navigatorKey.currentState;
-    runNavigatorTest(
+    await runNavigatorTest(
       tester,
       host,
       (NavigatorTransaction transaction) {
@@ -198,7 +197,7 @@ void main() {
       ]
     );
     TestRoute second;
-    runNavigatorTest(
+    await runNavigatorTest(
       tester,
       host,
       (NavigatorTransaction transaction) {
@@ -211,7 +210,7 @@ void main() {
         'first: didChangeNext second',
       ]
     );
-    runNavigatorTest(
+    await runNavigatorTest(
       tester,
       host,
       (NavigatorTransaction transaction) {
@@ -224,7 +223,7 @@ void main() {
         'second: didChangeNext third',
       ]
     );
-    runNavigatorTest(
+    await runNavigatorTest(
       tester,
       host,
       (NavigatorTransaction transaction) {
@@ -234,7 +233,7 @@ void main() {
         'first: dispose',
       ]
     );
-    runNavigatorTest(
+    await runNavigatorTest(
       tester,
       host,
       (NavigatorTransaction transaction) {
@@ -246,7 +245,7 @@ void main() {
         'second: didPopNext third',
       ]
     );
-    runNavigatorTest(
+    await runNavigatorTest(
       tester,
       host,
       (NavigatorTransaction transaction) {
@@ -260,7 +259,7 @@ void main() {
       ]
     );
     TestRoute four;
-    runNavigatorTest(
+    await runNavigatorTest(
       tester,
       host,
       (NavigatorTransaction transaction) {
@@ -273,7 +272,7 @@ void main() {
         'three: didChangeNext four',
       ]
     );
-    runNavigatorTest(
+    await runNavigatorTest(
       tester,
       host,
       (NavigatorTransaction transaction) {
@@ -284,7 +283,7 @@ void main() {
         'three: dispose',
       ]
     );
-    runNavigatorTest(
+    await runNavigatorTest(
       tester,
       host,
       (NavigatorTransaction transaction) {
@@ -296,20 +295,20 @@ void main() {
         'second: didPopNext four',
       ]
     );
-    tester.pumpWidget(new Container());
+    await tester.pumpWidget(new Container());
     expect(results, equals(<String>['second: dispose']));
     expect(routes.isEmpty, isTrue);
     results.clear();
   });
 
-  testWidgets('Route management - push, replace, popUntil', (WidgetTester tester) {
+  testWidgets('Route management - push, replace, popUntil', (WidgetTester tester) async {
     GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
-    tester.pumpWidget(new Navigator(
+    await tester.pumpWidget(new Navigator(
       key: navigatorKey,
       onGenerateRoute: (_) => new TestRoute('A')
     ));
     NavigatorState host = navigatorKey.currentState;
-    runNavigatorTest(
+    await runNavigatorTest(
       tester,
       host,
       (NavigatorTransaction transaction) {
@@ -320,7 +319,7 @@ void main() {
         'A: didChangeNext null',
       ]
     );
-    runNavigatorTest(
+    await runNavigatorTest(
       tester,
       host,
       (NavigatorTransaction transaction) {
@@ -334,7 +333,7 @@ void main() {
       ]
     );
     TestRoute routeC;
-    runNavigatorTest(
+    await runNavigatorTest(
       tester,
       host,
       (NavigatorTransaction transaction) {
@@ -348,7 +347,7 @@ void main() {
       ]
     );
     TestRoute routeB;
-    runNavigatorTest(
+    await runNavigatorTest(
       tester,
       host,
       (NavigatorTransaction transaction) {
@@ -362,7 +361,7 @@ void main() {
         'B: dispose',
       ]
     );
-    runNavigatorTest(
+    await runNavigatorTest(
       tester,
       host,
       (NavigatorTransaction transaction) {
@@ -374,7 +373,7 @@ void main() {
         'b: didPopNext C',
       ]
     );
-    tester.pumpWidget(new Container());
+    await tester.pumpWidget(new Container());
     expect(results, equals(<String>['A: dispose', 'b: dispose']));
     expect(routes.isEmpty, isTrue);
     results.clear();

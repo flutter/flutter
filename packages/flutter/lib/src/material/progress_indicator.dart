@@ -62,7 +62,11 @@ abstract class ProgressIndicator extends StatefulWidget {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('${(value.clamp(0.0, 1.0) * 100.0).toStringAsFixed(1)}%');
+    if (value != null) {
+      description.add('${(value.clamp(0.0, 1.0) * 100.0).toStringAsFixed(1)}%');
+    } else {
+      description.add('<indeterminate>');
+    }
   }
 }
 

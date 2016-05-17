@@ -7,7 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gallery/gallery/app.dart' as flutter_gallery_app;
 import 'package:flutter_gallery/gallery/item.dart' as flutter_gallery_item;
 import 'package:flutter_gallery/main.dart' as flutter_gallery_main;
-import 'package:test/test.dart';
 
 // Warning: the following strings must be kept in sync with GalleryHome.
 const List<String> demoCategories = const <String>['Demos', 'Components', 'Style'];
@@ -32,34 +31,39 @@ Finder findBackButton(WidgetTester tester) => byTooltip(tester, 'Back');
 // Start a gallery demo and then go back. This function assumes that the
 // we're starting on home route and that the submenu that contains the demo
 // called 'name' is already open.
-void smokeDemo(WidgetTester tester, String routeName) {
+Future<Null> smokeDemo(WidgetTester tester, String routeName) async {
   // Ensure that we're (likely to be) on the home page
   final Finder menuItem = findGalleryItemByRouteName(tester, routeName);
   expect(menuItem, findsOneWidget);
 
-  tester.tap(menuItem);
-  tester.pump(); // Launch the demo.
-  tester.pump(const Duration(seconds: 1)); // Wait until the demo has opened.
+  await tester.tap(menuItem);
+  await tester.pump(); // Launch the demo.
+  await tester.pump(const Duration(seconds: 1)); // Wait until the demo has opened.
 
   // Go back
   Finder backButton = findBackButton(tester);
   expect(backButton, findsOneWidget);
-  tester.tap(backButton);
-  tester.pump(); // Start the navigator pop "back" operation.
-  tester.pump(const Duration(seconds: 1)); // Wait until it has finished.
+  await tester.tap(backButton);
+  await tester.pump(); // Start the navigator pop "back" operation.
+  await tester.pump(const Duration(seconds: 1)); // Wait until it has finished.
+  return null;
 }
 
 void main() {
-  testWidgets('Flutter gallery app smoke test', (WidgetTester tester) {
+  TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  if (binding is LiveTestWidgetsFlutterBinding)
+    binding.allowAllFrames = true;
+
+  testWidgets('Flutter Gallery app smoke test', (WidgetTester tester) async {
     flutter_gallery_main.main(); // builds the app and schedules a frame but doesn't trigger one
-    tester.pump(); // see https://github.com/flutter/flutter/issues/1865
-    tester.pump(); // triggers a frame
+    await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
+    await tester.pump(); // triggers a frame
 
     // Expand the demo category submenus.
     for (String category in demoCategories.reversed) {
-      tester.tap(find.text(category));
-      tester.pump();
-      tester.pump(const Duration(seconds: 1)); // Wait until the menu has expanded.
+      await tester.tap(find.text(category));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1)); // Wait until the menu has expanded.
     }
 
     final List<double> scrollDeltas = new List<double>();
@@ -74,25 +78,25 @@ void main() {
     // Launch each demo and then scroll that item out of the way.
     for (int i = 0; i < routeNames.length; i += 1) {
       final String routeName = routeNames[i];
-      smokeDemo(tester, routeName);
-      tester.scroll(findGalleryItemByRouteName(tester, routeName), new Offset(0.0, scrollDeltas[i]));
-      tester.pump();
+      await smokeDemo(tester, routeName);
+      await tester.scroll(findGalleryItemByRouteName(tester, routeName), new Offset(0.0, scrollDeltas[i]));
+      await tester.pump();
     }
 
     Finder navigationMenuButton = findNavigationMenuButton(tester);
     expect(navigationMenuButton, findsOneWidget);
-    tester.tap(navigationMenuButton);
-    tester.pump(); // Start opening drawer.
-    tester.pump(const Duration(seconds: 1)); // Wait until it's really opened.
+    await tester.tap(navigationMenuButton);
+    await tester.pump(); // Start opening drawer.
+    await tester.pump(const Duration(seconds: 1)); // Wait until it's really opened.
 
     // switch theme
-    tester.tap(find.text('Dark'));
-    tester.pump();
-    tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
+    await tester.tap(find.text('Dark'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
 
     // switch theme
-    tester.tap(find.text('Light'));
-    tester.pump();
-    tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
+    await tester.tap(find.text('Light'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
   }, skip: true);
 }

@@ -5,14 +5,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 void main() {
 
-  testWidgets('Drawer control test', (WidgetTester tester) {
+  testWidgets('Drawer control test', (WidgetTester tester) async {
     GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
     BuildContext savedContext;
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new MaterialApp(
         home: new Builder(
           builder: (BuildContext context) {
@@ -26,23 +25,23 @@ void main() {
         )
       )
     );
-    tester.pump(); // no effect
+    await tester.pump(); // no effect
     expect(find.text('drawer'), findsNothing);
     scaffoldKey.currentState.openDrawer();
-    tester.pump(); // drawer should be starting to animate in
+    await tester.pump(); // drawer should be starting to animate in
     expect(find.text('drawer'), findsOneWidget);
-    tester.pump(new Duration(seconds: 1)); // animation done
+    await tester.pump(new Duration(seconds: 1)); // animation done
     expect(find.text('drawer'), findsOneWidget);
     Navigator.pop(savedContext);
-    tester.pump(); // drawer should be starting to animate away
+    await tester.pump(); // drawer should be starting to animate away
     expect(find.text('drawer'), findsOneWidget);
-    tester.pump(new Duration(seconds: 1)); // animation done
+    await tester.pump(new Duration(seconds: 1)); // animation done
     expect(find.text('drawer'), findsNothing);
   });
 
-  testWidgets('Drawer tap test', (WidgetTester tester) {
+  testWidgets('Drawer tap test', (WidgetTester tester) async {
     GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new MaterialApp(
         home: new Scaffold(
           key: scaffoldKey,
@@ -51,30 +50,30 @@ void main() {
         )
       )
     );
-    tester.pump(); // no effect
+    await tester.pump(); // no effect
     expect(find.text('drawer'), findsNothing);
     scaffoldKey.currentState.openDrawer();
-    tester.pump(); // drawer should be starting to animate in
+    await tester.pump(); // drawer should be starting to animate in
     expect(find.text('drawer'), findsOneWidget);
-    tester.pump(new Duration(seconds: 1)); // animation done
+    await tester.pump(new Duration(seconds: 1)); // animation done
     expect(find.text('drawer'), findsOneWidget);
-    tester.tap(find.text('drawer'));
-    tester.pump(); // nothing should have happened
+    await tester.tap(find.text('drawer'));
+    await tester.pump(); // nothing should have happened
     expect(find.text('drawer'), findsOneWidget);
-    tester.pump(new Duration(seconds: 1)); // ditto
+    await tester.pump(new Duration(seconds: 1)); // ditto
     expect(find.text('drawer'), findsOneWidget);
-    tester.tapAt(const Point(750.0, 100.0)); // on the mask
-    tester.pump();
-    tester.pump(new Duration(milliseconds: 10));
+    await tester.tapAt(const Point(750.0, 100.0)); // on the mask
+    await tester.pump();
+    await tester.pump(new Duration(milliseconds: 10));
     // drawer should be starting to animate away
     expect(find.text('drawer'), findsOneWidget);
-    tester.pump(new Duration(seconds: 1)); // animation done
+    await tester.pump(new Duration(seconds: 1)); // animation done
     expect(find.text('drawer'), findsNothing);
   });
 
-  testWidgets('Drawer drag cancel resume', (WidgetTester tester) {
+  testWidgets('Drawer drag cancel resume', (WidgetTester tester) async {
     GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new MaterialApp(
         home: new Scaffold(
           key: scaffoldKey,
@@ -97,32 +96,32 @@ void main() {
     );
     expect(find.text('drawer'), findsNothing);
     scaffoldKey.currentState.openDrawer();
-    tester.pump(); // drawer should be starting to animate in
+    await tester.pump(); // drawer should be starting to animate in
     expect(find.text('drawer'), findsOneWidget);
-    tester.pump(new Duration(seconds: 1)); // animation done
+    await tester.pump(new Duration(seconds: 1)); // animation done
     expect(find.text('drawer'), findsOneWidget);
 
-    tester.tapAt(const Point(750.0, 100.0)); // on the mask
-    tester.pump();
-    tester.pump(new Duration(milliseconds: 10));
+    await tester.tapAt(const Point(750.0, 100.0)); // on the mask
+    await tester.pump();
+    await tester.pump(new Duration(milliseconds: 10));
     // drawer should be starting to animate away
     RenderBox textBox = tester.renderObject(find.text('drawer'));
     double textLeft = textBox.localToGlobal(Point.origin).x;
     expect(textLeft, lessThan(0.0));
 
-    TestGesture gesture = tester.startGesture(new Point(100.0, 100.0));
+    TestGesture gesture = await tester.startGesture(new Point(100.0, 100.0));
     // drawer should be stopped.
-    tester.pump();
-    tester.pump(new Duration(milliseconds: 10));
+    await tester.pump();
+    await tester.pump(new Duration(milliseconds: 10));
     expect(textBox.localToGlobal(Point.origin).x, equals(textLeft));
 
-    gesture.moveBy(new Offset(0.0, -50.0));
+    await gesture.moveBy(new Offset(0.0, -50.0));
     // drawer should be returning to visible
-    tester.pump();
-    tester.pump(new Duration(seconds: 1));
+    await tester.pump();
+    await tester.pump(new Duration(seconds: 1));
     expect(textBox.localToGlobal(Point.origin).x, equals(0.0));
 
-    gesture.up();
+    await gesture.up();
   });
 
 }

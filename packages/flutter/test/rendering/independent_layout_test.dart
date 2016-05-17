@@ -29,6 +29,11 @@ class TestLayout {
 }
 
 void main() {
+  final ViewConfiguration testConfiguration = new ViewConfiguration(
+    size: const Size(800.0, 600.0),
+    devicePixelRatio: 1.0
+  );
+
   test('onscreen layout does not affect offscreen', () {
     TestLayout onscreen = new TestLayout();
     TestLayout offscreen = new TestLayout();
@@ -37,15 +42,15 @@ void main() {
     expect(offscreen.child.hasSize, isFalse);
     expect(offscreen.painted, isFalse);
     // Attach the offscreen to a custom render view and owner
-    RenderView renderView = new TestRenderView();
+    RenderView renderView = new RenderView(configuration: testConfiguration);
     PipelineOwner pipelineOwner = new PipelineOwner();
     renderView.attach(pipelineOwner);
     renderView.child = offscreen.root;
     renderView.scheduleInitialFrame();
     // Lay out the onscreen in the default binding
-    layout(onscreen.root, phase: EnginePhase.layout);
+    layout(onscreen.root, phase: EnginePhase.paint);
     expect(onscreen.child.hasSize, isTrue);
-    expect(onscreen.painted, isFalse);
+    expect(onscreen.painted, isTrue);
     expect(onscreen.child.size, equals(const Size(800.0, 10.0)));
     // Make sure the offscreen didn't get laid out
     expect(offscreen.child.hasSize, isFalse);
@@ -54,6 +59,9 @@ void main() {
     pipelineOwner.flushLayout();
     expect(offscreen.child.hasSize, isTrue);
     expect(offscreen.painted, isFalse);
+    pipelineOwner.flushCompositingBits();
+    pipelineOwner.flushPaint();
+    expect(offscreen.painted, isTrue);
   });
   test('offscreen layout does not affect onscreen', () {
     TestLayout onscreen = new TestLayout();
@@ -63,7 +71,7 @@ void main() {
     expect(offscreen.child.hasSize, isFalse);
     expect(offscreen.painted, isFalse);
     // Attach the offscreen to a custom render view and owner
-    RenderView renderView = new TestRenderView();
+    RenderView renderView = new RenderView(configuration: testConfiguration);
     PipelineOwner pipelineOwner = new PipelineOwner();
     renderView.attach(pipelineOwner);
     renderView.child = offscreen.root;
@@ -72,13 +80,16 @@ void main() {
     pipelineOwner.flushLayout();
     expect(offscreen.child.hasSize, isTrue);
     expect(offscreen.painted, isFalse);
+    pipelineOwner.flushCompositingBits();
+    pipelineOwner.flushPaint();
+    expect(offscreen.painted, isTrue);
     // Make sure the onscreen didn't get laid out
     expect(onscreen.child.hasSize, isFalse);
     expect(onscreen.painted, isFalse);
     // Now lay out the onscreen in the default binding
-    layout(onscreen.root, phase: EnginePhase.layout);
+    layout(onscreen.root, phase: EnginePhase.paint);
     expect(onscreen.child.hasSize, isTrue);
-    expect(onscreen.painted, isFalse);
+    expect(onscreen.painted, isTrue);
     expect(onscreen.child.size, equals(const Size(800.0, 10.0)));
   });
 }

@@ -5,12 +5,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:test/test.dart';
 
 import 'test_widgets.dart';
 
 void main() {
-  testWidgets('LazyBlockViewport mount/dismount smoke test', (WidgetTester tester) {
+  testWidgets('LazyBlockViewport mount/dismount smoke test', (WidgetTester tester) async {
     List<int> callbackTracker = <int>[];
 
     // the root view is 800x600 in the test environment
@@ -33,7 +32,7 @@ void main() {
       );
     }
 
-    tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
 
     FlipWidgetState testWidget = tester.state(find.byType(FlipWidget));
 
@@ -41,18 +40,18 @@ void main() {
 
     callbackTracker.clear();
     testWidget.flip();
-    tester.pump();
+    await tester.pump();
 
     expect(callbackTracker, equals(<int>[]));
 
     callbackTracker.clear();
     testWidget.flip();
-    tester.pump();
+    await tester.pump();
 
     expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4, 5]));
   });
 
-  testWidgets('LazyBlockViewport vertical', (WidgetTester tester) {
+  testWidgets('LazyBlockViewport vertical', (WidgetTester tester) async {
     List<int> callbackTracker = <int>[];
 
     // the root view is 800x600 in the test environment
@@ -81,7 +80,7 @@ void main() {
       );
     }
 
-    tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
 
     // 0 is built to find its height
     expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4]));
@@ -89,20 +88,20 @@ void main() {
 
     offset = 400.0; // now only 3 should fit, numbered 2-4.
 
-    tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
 
     // We build all the children to find their new size.
     expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4]));
     callbackTracker.clear();
 
-    tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
 
     // 0 isn't built because they're not visible.
     expect(callbackTracker, equals(<int>[1, 2, 3, 4]));
     callbackTracker.clear();
   });
 
-  testWidgets('LazyBlockViewport horizontal', (WidgetTester tester) {
+  testWidgets('LazyBlockViewport horizontal', (WidgetTester tester) async {
     List<int> callbackTracker = <int>[];
 
     // the root view is 800x600 in the test environment
@@ -132,7 +131,7 @@ void main() {
       );
     }
 
-    tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
 
     // 0 is built to find its width
     expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4, 5]));
@@ -141,20 +140,20 @@ void main() {
 
     offset = 400.0; // now only 4 should fit, numbered 2-5.
 
-    tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
 
     // We build all the children to find their new size.
     expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4, 5]));
     callbackTracker.clear();
 
-    tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
 
     // 0 isn't built because they're not visible.
     expect(callbackTracker, equals(<int>[1, 2, 3, 4, 5]));
     callbackTracker.clear();
   });
 
-  testWidgets('LazyBlockViewport reinvoke builders', (WidgetTester tester) {
+  testWidgets('LazyBlockViewport reinvoke builders', (WidgetTester tester) async {
     List<int> callbackTracker = <int>[];
     List<String> text = <String>[];
 
@@ -180,24 +179,24 @@ void main() {
       );
     }
 
-    tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
 
     expect(callbackTracker, equals(<int>[0, 1, 2]));
     callbackTracker.clear();
-    tester.allWidgets.forEach(collectText);
+    await tester.allWidgets.forEach(collectText);
     expect(text, equals(<String>['0', '1', '2']));
     text.clear();
 
-    tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
 
     expect(callbackTracker, equals(<int>[0, 1, 2]));
     callbackTracker.clear();
-    tester.allWidgets.forEach(collectText);
+    await tester.allWidgets.forEach(collectText);
     expect(text, equals(<String>['0', '1', '2']));
     text.clear();
   });
 
-  testWidgets('LazyBlockViewport reinvoke builders', (WidgetTester tester) {
+  testWidgets('LazyBlockViewport reinvoke builders', (WidgetTester tester) async {
     StateSetter setState;
     ThemeData themeData = new ThemeData.light();
 
@@ -217,7 +216,7 @@ void main() {
       delegate: new LazyBlockBuilder(builder: itemBuilder)
     );
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new StatefulBuilder(
         builder: (BuildContext context, StateSetter setter) {
           setState = setter;
@@ -234,14 +233,14 @@ void main() {
       themeData = new ThemeData(primarySwatch: Colors.green);
     });
 
-    tester.pump();
+    await tester.pump();
 
     widget = tester.firstWidget(find.byType(DecoratedBox));
     decoraton = widget.decoration;
     expect(decoraton.backgroundColor, equals(Colors.green[500]));
   });
 
-  testWidgets('LazyBlockViewport padding', (WidgetTester tester) {
+  testWidgets('LazyBlockViewport padding', (WidgetTester tester) async {
     IndexedWidgetBuilder itemBuilder = (BuildContext context, int i) {
       return new Container(
         key: new ValueKey<int>(i),
@@ -254,7 +253,7 @@ void main() {
       );
     };
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new LazyBlockViewport(
         padding: new EdgeInsets.fromLTRB(7.0, 3.0, 5.0, 11.0),
         delegate: new LazyBlockBuilder(builder: itemBuilder)
@@ -267,7 +266,7 @@ void main() {
     expect(firstBox.size.width, equals(800.0 - 12.0));
   });
 
-  testWidgets('Underflow extents', (WidgetTester tester) {
+  testWidgets('Underflow extents', (WidgetTester tester) async {
     double lastContentExtent;
     double lastContainerExtent;
     double lastMinScrollOffset;
@@ -277,7 +276,7 @@ void main() {
       lastMinScrollOffset = minScrollOffset;
     }
 
-    tester.pumpWidget(new LazyBlockViewport(
+    await tester.pumpWidget(new LazyBlockViewport(
       onExtentsChanged: handleExtendsChanged,
       delegate: new LazyBlockChildren(
         children: <Widget>[

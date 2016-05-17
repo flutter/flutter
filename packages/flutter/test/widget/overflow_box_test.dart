@@ -5,12 +5,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 void main() {
-  testWidgets('OverflowBox control test', (WidgetTester tester) {
+  testWidgets('OverflowBox control test', (WidgetTester tester) async {
     GlobalKey inner = new GlobalKey();
-    tester.pumpWidget(new Align(
+    await tester.pumpWidget(new Align(
       alignment: const FractionalOffset(1.0, 1.0),
       child: new SizedBox(
         width: 10.0,
@@ -31,7 +30,7 @@ void main() {
     expect(box.size, equals(const Size(100.0, 50.0)));
   });
 
-  testWidgets('OverflowBox implements debugFillDescription', (WidgetTester tester) {
+  testWidgets('OverflowBox implements debugFillDescription', (WidgetTester tester) async {
     List<String> description = <String>[];
     new OverflowBox(
       minWidth: 1.0,

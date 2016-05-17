@@ -4,7 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:test/test.dart';
 
 Key firstKey = new Key('first');
 Key secondKey = new Key('second');
@@ -42,9 +41,9 @@ class ThreeRoute extends MaterialPageRoute<Null> {
 }
 
 void main() {
-  testWidgets('Heroes animate', (WidgetTester tester) {
+  testWidgets('Heroes animate', (WidgetTester tester) async {
 
-    tester.pumpWidget(new MaterialApp(routes: routes));
+    await tester.pumpWidget(new MaterialApp(routes: routes));
 
     // the initial setup.
 
@@ -52,8 +51,8 @@ void main() {
     expect(find.byKey(firstKey), isInCard);
     expect(find.byKey(secondKey), findsNothing);
 
-    tester.tap(find.text('two'));
-    tester.pump(); // begin navigation
+    await tester.tap(find.text('two'));
+    await tester.pump(); // begin navigation
 
     // at this stage, the second route is off-stage, so that we can form the
     // hero party.
@@ -63,7 +62,7 @@ void main() {
     expect(find.byKey(secondKey), isOffStage);
     expect(find.byKey(secondKey), isInCard);
 
-    tester.pump();
+    await tester.pump();
 
     // at this stage, the heroes have just gone on their journey, we are
     // seeing them at t=16ms. The original page no longer contains the hero.
@@ -72,7 +71,7 @@ void main() {
     expect(find.byKey(secondKey), isOnStage);
     expect(find.byKey(secondKey), isNotInCard);
 
-    tester.pump();
+    await tester.pump();
 
     // t=32ms for the journey. Surely they are still at it.
 
@@ -80,7 +79,7 @@ void main() {
     expect(find.byKey(secondKey), isOnStage);
     expect(find.byKey(secondKey), isNotInCard);
 
-    tester.pump(new Duration(seconds: 1));
+    await tester.pump(new Duration(seconds: 1));
 
     // t=1.032s for the journey. The journey has ended (it ends this frame, in
     // fact). The hero should now be in the new page, on-stage.
@@ -89,7 +88,7 @@ void main() {
     expect(find.byKey(secondKey), isOnStage);
     expect(find.byKey(secondKey), isInCard);
 
-    tester.pump();
+    await tester.pump();
 
     // Should not change anything.
 
@@ -99,8 +98,8 @@ void main() {
 
     // Now move on to view 3
 
-    tester.tap(find.text('three'));
-    tester.pump(); // begin navigation
+    await tester.tap(find.text('three'));
+    await tester.pump(); // begin navigation
 
     // at this stage, the second route is off-stage, so that we can form the
     // hero party.
@@ -110,7 +109,7 @@ void main() {
     expect(find.byKey(thirdKey), isOffStage);
     expect(find.byKey(thirdKey), isInCard);
 
-    tester.pump();
+    await tester.pump();
 
     // at this stage, the heroes have just gone on their journey, we are
     // seeing them at t=16ms. The original page no longer contains the hero.
@@ -119,7 +118,7 @@ void main() {
     expect(find.byKey(thirdKey), isOnStage);
     expect(find.byKey(thirdKey), isNotInCard);
 
-    tester.pump();
+    await tester.pump();
 
     // t=32ms for the journey. Surely they are still at it.
 
@@ -127,7 +126,7 @@ void main() {
     expect(find.byKey(thirdKey), isOnStage);
     expect(find.byKey(thirdKey), isNotInCard);
 
-    tester.pump(new Duration(seconds: 1));
+    await tester.pump(new Duration(seconds: 1));
 
     // t=1.032s for the journey. The journey has ended (it ends this frame, in
     // fact). The hero should now be in the new page, on-stage.
@@ -136,7 +135,7 @@ void main() {
     expect(find.byKey(thirdKey), isOnStage);
     expect(find.byKey(thirdKey), isInCard);
 
-    tester.pump();
+    await tester.pump();
 
     // Should not change anything.
 

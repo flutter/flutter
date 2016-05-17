@@ -130,73 +130,108 @@ class LazyBlockChildren extends LazyBlockDelegate {
 /// Prefer [ScrollableList] when all the children have the same height because
 /// it can use that property to be more efficient. Prefer [ScrollableViewport]
 /// when there is only one child.
-class LazyBlock extends Scrollable {
+class LazyBlock extends StatelessWidget {
   LazyBlock({
     Key key,
-    double initialScrollOffset,
-    Axis scrollDirection: Axis.vertical,
-    ScrollListener onScrollStart,
-    ScrollListener onScroll,
-    ScrollListener onScrollEnd,
-    SnapOffsetCallback snapOffsetCallback,
-    this.delegate,
-    this.padding
-  }) : super(
-    key: key,
-    initialScrollOffset: initialScrollOffset,
-    scrollDirection: scrollDirection,
-    onScrollStart: onScrollStart,
-    onScroll: onScroll,
-    onScrollEnd: onScrollEnd,
-    snapOffsetCallback: snapOffsetCallback
-  );
+    this.initialScrollOffset,
+    this.scrollDirection: Axis.vertical,
+    this.onScrollStart,
+    this.onScroll,
+    this.onScrollEnd,
+    this.snapOffsetCallback,
+    this.scrollableKey,
+    this.padding,
+    this.delegate
+  }) : super(key: key);
+
+  /// The scroll offset this widget should use when first created.
+  final double initialScrollOffset;
+
+  /// The axis along which this widget should scroll.
+  final Axis scrollDirection;
+
+  /// Called whenever this widget starts to scroll.
+  final ScrollListener onScrollStart;
+
+  /// Called whenever this widget's scroll offset changes.
+  final ScrollListener onScroll;
+
+  /// Called whenever this widget stops scrolling.
+  final ScrollListener onScrollEnd;
+
+  /// Called to determine the offset to which scrolling should snap,
+  /// when handling a fling.
+  ///
+  /// This callback, if set, will be called with the offset that the
+  /// Scrollable would have scrolled to in the absence of this
+  /// callback, and a Size describing the size of the Scrollable
+  /// itself.
+  ///
+  /// The callback's return value is used as the new scroll offset to
+  /// aim for.
+  ///
+  /// If the callback simply returns its first argument (the offset),
+  /// then it is as if the callback was null.
+  final SnapOffsetCallback snapOffsetCallback;
+
+  /// The key for the Scrollable created by this widget.
+  final Key scrollableKey;
+
+  /// The amount of space by which to inset the children inside the viewport.
+  final EdgeInsets padding;
 
   /// Provides children for this widget.
   ///
   /// See [LazyBlockDelegate] for details.
   final LazyBlockDelegate delegate;
 
-  /// The amount of space by which to inset the children inside the viewport.
-  final EdgeInsets padding;
-
-  @override
-  ScrollableState<LazyBlock> createState() => new _LazyBlockState();
-}
-
-class _LazyBlockState extends ScrollableState<LazyBlock> {
-  @override
-  BoundedBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior();
-
-  @override
-  BoundedBehavior get scrollBehavior => super.scrollBehavior;
-
-  void _handleExtentsChanged(double contentExtent, double containerExtent, double minScrollOffset) {
-    setState(() {
-      didUpdateScrollBehavior(scrollBehavior.updateExtents(
+  void _handleExtentsChanged(
+      ScrollableState state,
+      double contentExtent,
+      double containerExtent,
+      double minScrollOffset) {
+    state.setState(() {
+      final BoundedBehavior scrollBehavior = state.scrollBehavior;
+      state.didUpdateScrollBehavior(scrollBehavior.updateExtents(
         contentExtent: contentExtent,
         containerExtent: containerExtent,
         minScrollOffset: minScrollOffset,
-        scrollOffset: scrollOffset
+        scrollOffset: state.scrollOffset
       ));
     });
   }
 
-  @override
-  Widget buildContent(BuildContext context) {
+  Widget _buildContent(BuildContext context, ScrollableState state) {
     final bool clampOverscrolls = ClampOverscrolls.of(context);
     final double startOffset = clampOverscrolls
-      ? scrollOffset.clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset)
-      : scrollOffset;
+      ? state.scrollOffset.clamp(state.scrollBehavior.minScrollOffset, state.scrollBehavior.maxScrollOffset)
+      : state.scrollOffset;
     Widget viewport = new LazyBlockViewport(
       startOffset: startOffset,
-      mainAxis: config.scrollDirection,
-      padding: config.padding,
-      onExtentsChanged: _handleExtentsChanged,
-      delegate: config.delegate
+      mainAxis: scrollDirection,
+      padding: padding,
+      onExtentsChanged: (double contentExtent, double containerExtent, double minScrollOffset) {
+        _handleExtentsChanged(state, contentExtent, containerExtent, minScrollOffset);
+      },
+      delegate: delegate
     );
     if (clampOverscrolls)
       viewport = new ClampOverscrolls(value: false, child: viewport);
     return viewport;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scrollable(
+      key: scrollableKey,
+      initialScrollOffset: initialScrollOffset,
+      scrollDirection: scrollDirection,
+      onScrollStart: onScrollStart,
+      onScroll: onScroll,
+      onScrollEnd: onScrollEnd,
+      snapOffsetCallback: snapOffsetCallback,
+      builder: _buildContent
+    );
   }
 }
 

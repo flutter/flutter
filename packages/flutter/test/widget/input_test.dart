@@ -6,7 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:sky_services/editing/editing.mojom.dart' as mojom;
-import 'package:test/test.dart';
 
 class MockKeyboard implements mojom.Keyboard {
   mojom.KeyboardClient client;
@@ -55,7 +54,7 @@ void main() {
       ..composingExtent = testValue.length);
   }
 
-  testWidgets('Editable text has consistent size', (WidgetTester tester) {
+  testWidgets('Editable text has consistent size', (WidgetTester tester) async {
     GlobalKey inputKey = new GlobalKey();
     InputValue inputValue = InputValue.empty;
 
@@ -72,32 +71,32 @@ void main() {
       );
     }
 
-    tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
 
     RenderBox findInputBox() => tester.renderObject(find.byKey(inputKey));
 
     RenderBox inputBox = findInputBox();
     Size emptyInputSize = inputBox.size;
 
-    void checkText(String testValue) {
+    Future<Null> checkText(String testValue) {
       enterText(testValue);
 
       // Check that the onChanged event handler fired.
       expect(inputValue.text, equals(testValue));
 
-      tester.pumpWidget(builder());
+      return tester.pumpWidget(builder());
     }
 
-    checkText(' ');
+    await checkText(' ');
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, equals(emptyInputSize));
 
-    checkText('Test');
+    await checkText('Test');
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, equals(emptyInputSize));
   });
 
-  testWidgets('Cursor blinks', (WidgetTester tester) {
+  testWidgets('Cursor blinks', (WidgetTester tester) async {
     GlobalKey inputKey = new GlobalKey();
 
     Widget builder() {
@@ -111,36 +110,36 @@ void main() {
       );
     }
 
-    tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
 
     RawInputLineState editableText = tester.state(find.byType(RawInputLine));
 
     // Check that the cursor visibility toggles after each blink interval.
-    void checkCursorToggle() {
+    Future<Null> checkCursorToggle() async {
       bool initialShowCursor = editableText.cursorCurrentlyVisible;
-      tester.pump(editableText.cursorBlinkInterval);
+      await tester.pump(editableText.cursorBlinkInterval);
       expect(editableText.cursorCurrentlyVisible, equals(!initialShowCursor));
-      tester.pump(editableText.cursorBlinkInterval);
+      await tester.pump(editableText.cursorBlinkInterval);
       expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
-      tester.pump(editableText.cursorBlinkInterval ~/ 10);
+      await tester.pump(editableText.cursorBlinkInterval ~/ 10);
       expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
-      tester.pump(editableText.cursorBlinkInterval);
+      await tester.pump(editableText.cursorBlinkInterval);
       expect(editableText.cursorCurrentlyVisible, equals(!initialShowCursor));
-      tester.pump(editableText.cursorBlinkInterval);
+      await tester.pump(editableText.cursorBlinkInterval);
       expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
     }
 
-    checkCursorToggle();
+    await checkCursorToggle();
 
     // Try the test again with a nonempty EditableText.
     mockKeyboard.client.updateEditingState(new mojom.EditingState()
       ..text = 'X'
       ..selectionBase = 1
       ..selectionExtent = 1);
-    checkCursorToggle();
+    await checkCursorToggle();
   });
 
-  testWidgets('hideText control test', (WidgetTester tester) {
+  testWidgets('hideText control test', (WidgetTester tester) async {
     GlobalKey inputKey = new GlobalKey();
 
     Widget builder() {
@@ -155,7 +154,7 @@ void main() {
       );
     }
 
-    tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
 
     const String testValue = 'ABC';
     mockKeyboard.client.updateEditingState(new mojom.EditingState()
@@ -163,7 +162,7 @@ void main() {
       ..selectionBase = testValue.length
       ..selectionExtent = testValue.length);
 
-    tester.pump();
+    await tester.pump();
   });
 
   // Returns the first RenderEditableLine.
@@ -192,7 +191,7 @@ void main() {
     return endpoints[0].point;
   }
 
-  testWidgets('Can long press to select', (WidgetTester tester) {
+  testWidgets('Can long press to select', (WidgetTester tester) async {
     GlobalKey inputKey = new GlobalKey();
     InputValue inputValue = InputValue.empty;
 
@@ -216,29 +215,29 @@ void main() {
       );
     }
 
-    tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
 
     String testValue = 'abc def ghi';
     enterText(testValue);
     expect(inputValue.text, testValue);
 
-    tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
 
     expect(inputValue.selection.isCollapsed, true);
 
     // Long press the 'e' to select 'def'.
     Point ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
-    TestGesture gesture = tester.startGesture(ePos, pointer: 7);
-    tester.pump(const Duration(seconds: 2));
-    gesture.up();
-    tester.pump();
+    TestGesture gesture = await tester.startGesture(ePos, pointer: 7);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
+    await tester.pump();
 
     // 'def' is selected.
     expect(inputValue.selection.baseOffset, testValue.indexOf('d'));
     expect(inputValue.selection.extentOffset, testValue.indexOf('f')+1);
   });
 
-  testWidgets('Can drag handles to change selection', (WidgetTester tester) {
+  testWidgets('Can drag handles to change selection', (WidgetTester tester) async {
     GlobalKey inputKey = new GlobalKey();
     InputValue inputValue = InputValue.empty;
 
@@ -262,19 +261,19 @@ void main() {
       );
     }
 
-    tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
 
     String testValue = 'abc def ghi';
     enterText(testValue);
 
-    tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
 
     // Long press the 'e' to select 'def'.
     Point ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
-    TestGesture gesture = tester.startGesture(ePos, pointer: 7);
-    tester.pump(const Duration(seconds: 2));
-    gesture.up();
-    tester.pump();
+    TestGesture gesture = await tester.startGesture(ePos, pointer: 7);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
+    await tester.pump();
 
     TextSelection selection = inputValue.selection;
 
@@ -288,12 +287,12 @@ void main() {
     // of the handle.
     Point handlePos = endpoints[1].point + new Offset(1.0, 1.0);
     Point newHandlePos = textOffsetToPosition(tester, selection.extentOffset+2);
-    gesture = tester.startGesture(handlePos, pointer: 7);
-    tester.pump();
-    gesture.moveTo(newHandlePos);
-    tester.pump();
-    gesture.up();
-    tester.pump();
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
 
     expect(inputValue.selection.baseOffset, selection.baseOffset);
     expect(inputValue.selection.extentOffset, selection.extentOffset+2);
@@ -301,18 +300,18 @@ void main() {
     // Drag the left handle 2 letters to the left.
     handlePos = endpoints[0].point + new Offset(-1.0, 1.0);
     newHandlePos = textOffsetToPosition(tester, selection.baseOffset-2);
-    gesture = tester.startGesture(handlePos, pointer: 7);
-    tester.pump();
-    gesture.moveTo(newHandlePos);
-    tester.pump();
-    gesture.up();
-    tester.pumpWidget(builder());
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpWidget(builder());
 
     expect(inputValue.selection.baseOffset, selection.baseOffset-2);
     expect(inputValue.selection.extentOffset, selection.extentOffset+2);
   });
 
-  testWidgets('Can use selection toolbar', (WidgetTester tester) {
+  testWidgets('Can use selection toolbar', (WidgetTester tester) async {
     GlobalKey inputKey = new GlobalKey();
     InputValue inputValue = InputValue.empty;
 
@@ -336,43 +335,43 @@ void main() {
       );
     }
 
-    tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
 
     String testValue = 'abc def ghi';
     enterText(testValue);
-    tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
 
     // Tap the selection handle to bring up the "paste / select all" menu.
-    tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
-    tester.pumpWidget(builder());
+    await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+    await tester.pumpWidget(builder());
     RenderEditableLine renderLine = findRenderEditableLine(tester);
     List<TextSelectionPoint> endpoints = renderLine.getEndpointsForSelection(
         inputValue.selection);
-    tester.tapAt(endpoints[0].point + new Offset(1.0, 1.0));
-    tester.pumpWidget(builder());
+    await tester.tapAt(endpoints[0].point + new Offset(1.0, 1.0));
+    await tester.pumpWidget(builder());
 
     // SELECT ALL should select all the text.
-    tester.tap(find.text('SELECT ALL'));
-    tester.pumpWidget(builder());
+    await tester.tap(find.text('SELECT ALL'));
+    await tester.pumpWidget(builder());
     expect(inputValue.selection.baseOffset, 0);
     expect(inputValue.selection.extentOffset, testValue.length);
 
     // COPY should reset the selection.
-    tester.tap(find.text('COPY'));
-    tester.pumpWidget(builder());
+    await tester.tap(find.text('COPY'));
+    await tester.pumpWidget(builder());
     expect(inputValue.selection.isCollapsed, true);
 
     // Tap again to bring back the menu.
-    tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
-    tester.pumpWidget(builder());
+    await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+    await tester.pumpWidget(builder());
     renderLine = findRenderEditableLine(tester);
     endpoints = renderLine.getEndpointsForSelection(inputValue.selection);
-    tester.tapAt(endpoints[0].point + new Offset(1.0, 1.0));
-    tester.pumpWidget(builder());
+    await tester.tapAt(endpoints[0].point + new Offset(1.0, 1.0));
+    await tester.pumpWidget(builder());
 
     // PASTE right before the 'e'.
-    tester.tap(find.text('PASTE'));
-    tester.pumpWidget(builder());
+    await tester.tap(find.text('PASTE'));
+    await tester.pumpWidget(builder());
     expect(inputValue.text, 'abc d${testValue}ef ghi');
   });
 }

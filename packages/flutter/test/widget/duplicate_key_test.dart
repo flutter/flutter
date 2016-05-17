@@ -54,14 +54,14 @@ Widget builder() {
 }
 
 void main() {
-  testWidgets('duplicate key smoke test', (WidgetTester tester) {
-    tester.pumpWidget(builder());
+  testWidgets('duplicate key smoke test', (WidgetTester tester) async {
+    await tester.pumpWidget(builder());
     StatefulLeafState leaf = tester.firstState(find.byType(StatefulLeaf));
     leaf.test();
-    tester.pump();
+    await tester.pump();
     Item lastItem = items[1];
     items.remove(lastItem);
     items.insert(0, lastItem);
-    tester.pumpWidget(builder()); // this marks the app dirty and rebuilds it
+    await tester.pumpWidget(builder()); // this marks the app dirty and rebuilds it
   });
 }

@@ -5,12 +5,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:test/test.dart';
 
 import 'test_semantics.dart';
 
 void main() {
-  testWidgets('Semantics 4', (WidgetTester tester) {
+  testWidgets('Semantics 4', (WidgetTester tester) async {
     TestSemanticsListener client = new TestSemanticsListener();
 
     //    O
@@ -19,7 +18,7 @@ void main() {
     //     / \     C=node with checked
     //    C   C*   *=node removed next pass
     //
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new Semantics(
@@ -60,7 +59,7 @@ void main() {
     //  L* LC      C=node with checked
     //             *=node removed next pass
     //
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new Semantics(
@@ -90,7 +89,7 @@ void main() {
     //    OLC      L=node with label
     //             C=node with checked
     //
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new Semantics(),

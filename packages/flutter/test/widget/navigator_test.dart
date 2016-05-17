@@ -4,7 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:test/test.dart';
 
 class FirstWidget extends StatelessWidget {
   @override
@@ -68,38 +67,38 @@ class ThirdWidget extends StatelessWidget {
 }
 
 void main() {
-  testWidgets('Can navigator navigate to and from a stateful widget', (WidgetTester tester) {
+  testWidgets('Can navigator navigate to and from a stateful widget', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => new FirstWidget(),
       '/second': (BuildContext context) => new SecondWidget(),
     };
 
-    tester.pumpWidget(new MaterialApp(routes: routes));
+    await tester.pumpWidget(new MaterialApp(routes: routes));
 
     expect(find.text('X'), findsOneWidget);
     expect(find.text('Y'), findsNothing);
 
-    tester.tap(find.text('X'));
-    tester.pump(const Duration(milliseconds: 10));
+    await tester.tap(find.text('X'));
+    await tester.pump(const Duration(milliseconds: 10));
 
     expect(find.text('X'), findsOneWidget);
     expect(find.text('Y'), findsOneWidget);
 
-    tester.pump(const Duration(milliseconds: 10));
-    tester.pump(const Duration(milliseconds: 10));
-    tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(milliseconds: 10));
+    await tester.pump(const Duration(milliseconds: 10));
+    await tester.pump(const Duration(seconds: 1));
 
-    tester.tap(find.text('Y'));
-    tester.pump(const Duration(milliseconds: 10));
-    tester.pump(const Duration(milliseconds: 10));
-    tester.pump(const Duration(milliseconds: 10));
-    tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('Y'));
+    await tester.pump(const Duration(milliseconds: 10));
+    await tester.pump(const Duration(milliseconds: 10));
+    await tester.pump(const Duration(milliseconds: 10));
+    await tester.pump(const Duration(seconds: 1));
 
     expect(find.text('X'), findsOneWidget);
     expect(find.text('Y'), findsNothing);
   });
 
-  testWidgets('Navigator.openTransaction fails gracefully when not found in context', (WidgetTester tester) {
+  testWidgets('Navigator.openTransaction fails gracefully when not found in context', (WidgetTester tester) async {
     Key targetKey = new Key('foo');
     dynamic exception;
     Widget widget = new ThirdWidget(
@@ -108,8 +107,8 @@ void main() {
         exception = e;
       }
     );
-    tester.pumpWidget(widget);
-    tester.tap(find.byKey(targetKey));
+    await tester.pumpWidget(widget);
+    await tester.tap(find.byKey(targetKey));
     expect(exception, new isInstanceOf<FlutterError>());
     expect('$exception', startsWith('openTransaction called with a context'));
   });

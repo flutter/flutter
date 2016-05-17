@@ -5,11 +5,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 void main() {
 
-  testWidgets('Can animate position data', (WidgetTester tester) {
+  testWidgets('Can animate position data', (WidgetTester tester) async {
 
     final RelativeRectTween rect = new RelativeRectTween(
       begin: new RelativeRect.fromRect(
@@ -35,7 +34,7 @@ void main() {
       positions.add(boxParentData.offset);
     }
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Center(
         child: new Container(
           height: 100.0,
@@ -55,15 +54,15 @@ void main() {
     ); // t=0
     recordMetrics();
     controller.forward();
-    tester.pump(); // t=0 again
+    await tester.pump(); // t=0 again
     recordMetrics();
-    tester.pump(const Duration(seconds: 1)); // t=1
+    await tester.pump(const Duration(seconds: 1)); // t=1
     recordMetrics();
-    tester.pump(const Duration(seconds: 1)); // t=2
+    await tester.pump(const Duration(seconds: 1)); // t=2
     recordMetrics();
-    tester.pump(const Duration(seconds: 3)); // t=5
+    await tester.pump(const Duration(seconds: 3)); // t=5
     recordMetrics();
-    tester.pump(const Duration(seconds: 5)); // t=10
+    await tester.pump(const Duration(seconds: 5)); // t=10
     recordMetrics();
 
     expect(sizes, equals(<Size>[const Size(10.0, 10.0), const Size(10.0, 10.0), const Size(10.0, 10.0), const Size(10.0, 10.0), const Size(10.0, 10.0), const Size(10.0, 10.0)]));

@@ -4,10 +4,9 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 void main() {
-  testWidgets('setState() overbuild test', (WidgetTester tester) {
+  testWidgets('setState() overbuild test', (WidgetTester tester) async {
     List<String> log = <String>[];
     Builder inner = new Builder(
       builder: (BuildContext context) {
@@ -16,7 +15,7 @@ void main() {
       }
     );
     int value = 0;
-    tester.pumpWidget(new Builder(
+    await tester.pumpWidget(new Builder(
       builder: (BuildContext context) {
         log.add('outer');
         return new StatefulBuilder(
@@ -40,8 +39,8 @@ void main() {
       }
     ));
     log.add('---');
-    tester.tap(find.text('inner'));;
-    tester.pump();
+    await tester.tap(find.text('inner'));;
+    await tester.pump();
     log.add('---');
     expect(log, equals(<String>[
       'outer',

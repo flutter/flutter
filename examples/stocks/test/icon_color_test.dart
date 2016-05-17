@@ -9,7 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stocks/main.dart' as stocks;
 import 'package:stocks/stock_data.dart' as stock_data;
-import 'package:test/test.dart';
 
 Element findElementOfExactWidgetTypeGoingDown(Element node, Type targetType) {
   void walker(Element child) {
@@ -52,27 +51,27 @@ void checkIconColor(WidgetTester tester, String label, Color color) {
 void main() {
   stock_data.StockDataFetcher.actuallyFetchData = false;
 
-  testWidgets("Test icon colors", (WidgetTester tester) {
+  testWidgets("Test icon colors", (WidgetTester tester) async {
     stocks.main(); // builds the app and schedules a frame but doesn't trigger one
-    tester.pump(); // see https://github.com/flutter/flutter/issues/1865
-    tester.pump(); // triggers a frame
+    await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
+    await tester.pump(); // triggers a frame
 
     // sanity check
     expect(find.text('MARKET'), findsOneWidget);
     expect(find.text('Help & Feedback'), findsNothing);
-    tester.pump(new Duration(seconds: 2));
+    await tester.pump(new Duration(seconds: 2));
     expect(find.text('MARKET'), findsOneWidget);
     expect(find.text('Help & Feedback'), findsNothing);
 
     // drag the drawer out
     Point left = new Point(0.0, ui.window.size.height / 2.0);
     Point right = new Point(ui.window.size.width, left.y);
-    TestGesture gesture = tester.startGesture(left);
-    tester.pump();
-    gesture.moveTo(right);
-    tester.pump();
-    gesture.up();
-    tester.pump();
+    TestGesture gesture = await tester.startGesture(left);
+    await tester.pump();
+    await gesture.moveTo(right);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
     expect(find.text('MARKET'), findsOneWidget);
     expect(find.text('Help & Feedback'), findsOneWidget);
 
@@ -82,10 +81,10 @@ void main() {
     checkIconColor(tester, 'Help & Feedback', Colors.black26); // disabled
 
     // switch to dark mode
-    tester.tap(find.text('Pessimistic'));
-    tester.pump(); // get the tap and send the notification that the theme has changed
-    tester.pump(); // start the theme transition
-    tester.pump(const Duration(seconds: 5)); // end the transition
+    await tester.tap(find.text('Pessimistic'));
+    await tester.pump(); // get the tap and send the notification that the theme has changed
+    await tester.pump(); // start the theme transition
+    await tester.pump(const Duration(seconds: 5)); // end the transition
 
     // check the colour of the icon - dark mode
     checkIconColor(tester, 'Stock List', Colors.redAccent[200]); // theme accent color

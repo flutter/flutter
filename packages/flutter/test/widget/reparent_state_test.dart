@@ -4,7 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 class StateMarker extends StatefulWidget {
   StateMarker({ Key key, this.child }) : super(key: key);
@@ -50,12 +49,12 @@ class DeactivateLoggerState extends State<DeactivateLogger> {
 }
 
 void main() {
-  testWidgets('can reparent state', (WidgetTester tester) {
+  testWidgets('can reparent state', (WidgetTester tester) async {
     GlobalKey left = new GlobalKey();
     GlobalKey right = new GlobalKey();
 
     StateMarker grandchild = new StateMarker();
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new Container(
@@ -81,7 +80,7 @@ void main() {
     grandchildState.marker = "grandchild";
 
     StateMarker newGrandchild = new StateMarker();
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new Container(
@@ -107,7 +106,7 @@ void main() {
     expect(newGrandchildState, equals(grandchildState));
     expect(newGrandchildState.marker, equals("grandchild"));
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Center(
         child: new Container(
           child: new StateMarker(
@@ -123,12 +122,12 @@ void main() {
     expect(right.currentState, isNull);
   });
 
-  testWidgets('can reparent state with multichild widgets', (WidgetTester tester) {
+  testWidgets('can reparent state with multichild widgets', (WidgetTester tester) async {
     GlobalKey left = new GlobalKey();
     GlobalKey right = new GlobalKey();
 
     StateMarker grandchild = new StateMarker();
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new StateMarker(key: left),
@@ -150,7 +149,7 @@ void main() {
     grandchildState.marker = "grandchild";
 
     StateMarker newGrandchild = new StateMarker();
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new StateMarker(
@@ -172,7 +171,7 @@ void main() {
     expect(newGrandchildState, equals(grandchildState));
     expect(newGrandchildState.marker, equals("grandchild"));
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Center(
         child: new Container(
           child: new StateMarker(
@@ -188,15 +187,15 @@ void main() {
     expect(right.currentState, isNull);
   });
 
-  testWidgets('can with scrollable list', (WidgetTester tester) {
+  testWidgets('can with scrollable list', (WidgetTester tester) async {
     GlobalKey key = new GlobalKey();
 
-    tester.pumpWidget(new StateMarker(key: key));
+    await tester.pumpWidget(new StateMarker(key: key));
 
     StateMarkerState keyState = key.currentState;
     keyState.marker = "marked";
 
-    tester.pumpWidget(new ScrollableList(
+    await tester.pumpWidget(new ScrollableList(
       itemExtent: 100.0,
       children: <Widget>[
         new Container(
@@ -210,16 +209,16 @@ void main() {
     expect(key.currentState, equals(keyState));
     expect(keyState.marker, equals("marked"));
 
-    tester.pumpWidget(new StateMarker(key: key));
+    await tester.pumpWidget(new StateMarker(key: key));
 
     expect(key.currentState, equals(keyState));
     expect(keyState.marker, equals("marked"));
   });
 
-  testWidgets('Reparent during update children', (WidgetTester tester) {
+  testWidgets('Reparent during update children', (WidgetTester tester) async {
     GlobalKey key = new GlobalKey();
 
-    tester.pumpWidget(new Stack(
+    await tester.pumpWidget(new Stack(
       children: <Widget>[
         new StateMarker(key: key),
         new Container(width: 100.0, height: 100.0),
@@ -229,7 +228,7 @@ void main() {
     StateMarkerState keyState = key.currentState;
     keyState.marker = "marked";
 
-    tester.pumpWidget(new Stack(
+    await tester.pumpWidget(new Stack(
       children: <Widget>[
         new Container(width: 100.0, height: 100.0),
         new StateMarker(key: key),
@@ -239,7 +238,7 @@ void main() {
     expect(key.currentState, equals(keyState));
     expect(keyState.marker, equals("marked"));
 
-    tester.pumpWidget(new Stack(
+    await tester.pumpWidget(new Stack(
       children: <Widget>[
         new StateMarker(key: key),
         new Container(width: 100.0, height: 100.0),
@@ -250,10 +249,10 @@ void main() {
     expect(keyState.marker, equals("marked"));
   });
 
-  testWidgets('Reparent to child during update children', (WidgetTester tester) {
+  testWidgets('Reparent to child during update children', (WidgetTester tester) async {
     GlobalKey key = new GlobalKey();
 
-    tester.pumpWidget(new Stack(
+    await tester.pumpWidget(new Stack(
       children: <Widget>[
         new Container(width: 100.0, height: 100.0),
         new StateMarker(key: key),
@@ -264,7 +263,7 @@ void main() {
     StateMarkerState keyState = key.currentState;
     keyState.marker = "marked";
 
-    tester.pumpWidget(new Stack(
+    await tester.pumpWidget(new Stack(
       children: <Widget>[
         new Container(width: 100.0, height: 100.0, child: new StateMarker(key: key)),
         new Container(width: 100.0, height: 100.0),
@@ -274,7 +273,7 @@ void main() {
     expect(key.currentState, equals(keyState));
     expect(keyState.marker, equals("marked"));
 
-    tester.pumpWidget(new Stack(
+    await tester.pumpWidget(new Stack(
       children: <Widget>[
         new Container(width: 100.0, height: 100.0),
         new StateMarker(key: key),
@@ -285,7 +284,7 @@ void main() {
     expect(key.currentState, equals(keyState));
     expect(keyState.marker, equals("marked"));
 
-    tester.pumpWidget(new Stack(
+    await tester.pumpWidget(new Stack(
       children: <Widget>[
         new Container(width: 100.0, height: 100.0),
         new Container(width: 100.0, height: 100.0, child: new StateMarker(key: key)),
@@ -295,7 +294,7 @@ void main() {
     expect(key.currentState, equals(keyState));
     expect(keyState.marker, equals("marked"));
 
-    tester.pumpWidget(new Stack(
+    await tester.pumpWidget(new Stack(
       children: <Widget>[
         new Container(width: 100.0, height: 100.0),
         new StateMarker(key: key),
@@ -307,25 +306,25 @@ void main() {
     expect(keyState.marker, equals("marked"));
   });
 
-  testWidgets('Deactivate implies build', (WidgetTester tester) {
+  testWidgets('Deactivate implies build', (WidgetTester tester) async {
     GlobalKey key = new GlobalKey();
     List<String> log = <String>[];
     DeactivateLogger logger = new DeactivateLogger(key: key, log: log);
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Container(key: new UniqueKey(), child: logger)
     );
 
     expect(log, equals(<String>['build']));
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Container(key: new UniqueKey(), child: logger)
     );
 
     expect(log, equals(<String>['build', 'deactivate', 'build']));
     log.clear();
 
-    tester.pump();
+    await tester.pump();
     expect(log, isEmpty);
   });
 }

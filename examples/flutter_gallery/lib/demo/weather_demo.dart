@@ -41,7 +41,7 @@ class _WeatherDemoState extends State<WeatherDemo> {
       'packages/flutter_gallery_assets/icon-snow.png'
     ]);
 
-    String json = await DefaultAssetBundle.of(context).loadString('packages/flutter_gallery_assets/weathersprites.json');
+    String json = await bundle.loadString('packages/flutter_gallery_assets/weathersprites.json');
     _sprites = new SpriteSheet(_images['packages/flutter_gallery_assets/weathersprites.png'], json);
   }
 

@@ -5,14 +5,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:test/test.dart';
 
 import 'test_semantics.dart';
 
 void main() {
-  testWidgets('Does FlatButton contribute semantics', (WidgetTester tester) {
+  testWidgets('Does FlatButton contribute semantics', (WidgetTester tester) async {
     TestSemanticsListener client = new TestSemanticsListener();
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Material(
         child: new Center(
           child: new FlatButton(

@@ -5,7 +5,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 const double itemExtent = 100.0;
 Axis scrollDirection = Axis.vertical;
@@ -52,7 +51,7 @@ Widget widgetBuilder() {
   );
 }
 
-void dismissElement(WidgetTester tester, Finder finder, { DismissDirection gestureDirection }) {
+Future<Null> dismissElement(WidgetTester tester, Finder finder, { DismissDirection gestureDirection }) async {
   assert(tester.any(finder));
   assert(gestureDirection != DismissDirection.horizontal);
   assert(gestureDirection != DismissDirection.vertical);
@@ -86,25 +85,25 @@ void dismissElement(WidgetTester tester, Finder finder, { DismissDirection gestu
       fail("unsupported gestureDirection");
   }
 
-  TestGesture gesture = tester.startGesture(downLocation, pointer: 5);
-  gesture.moveTo(upLocation);
-  gesture.up();
+  TestGesture gesture = await tester.startGesture(downLocation, pointer: 5);
+  await gesture.moveTo(upLocation);
+  await gesture.up();
 }
 
-void dismissItem(WidgetTester tester, int item, { DismissDirection gestureDirection }) {
+Future<Null> dismissItem(WidgetTester tester, int item, { DismissDirection gestureDirection }) async {
   assert(gestureDirection != DismissDirection.horizontal);
   assert(gestureDirection != DismissDirection.vertical);
 
   Finder itemFinder = find.text(item.toString());
   expect(itemFinder, findsOneWidget);
 
-  dismissElement(tester, itemFinder, gestureDirection: gestureDirection);
+  await dismissElement(tester, itemFinder, gestureDirection: gestureDirection);
 
-  tester.pumpWidget(widgetBuilder()); // start the slide
-  tester.pumpWidget(widgetBuilder(), const Duration(seconds: 1)); // finish the slide and start shrinking...
-  tester.pumpWidget(widgetBuilder()); // first frame of shrinking animation
-  tester.pumpWidget(widgetBuilder(), const Duration(seconds: 1)); // finish the shrinking and call the callback...
-  tester.pumpWidget(widgetBuilder()); // rebuild after the callback removes the entry
+  await tester.pumpWidget(widgetBuilder()); // start the slide
+  await tester.pumpWidget(widgetBuilder(), const Duration(seconds: 1)); // finish the slide and start shrinking...
+  await tester.pumpWidget(widgetBuilder()); // first frame of shrinking animation
+  await tester.pumpWidget(widgetBuilder(), const Duration(seconds: 1)); // finish the shrinking and call the callback...
+  await tester.pumpWidget(widgetBuilder()); // rebuild after the callback removes the entry
 }
 
 class Test1215DismissableWidget extends StatelessWidget {
@@ -130,104 +129,104 @@ void main() {
     background = null;
   });
 
-  testWidgets('Horizontal drag triggers dismiss scrollDirection=vertical', (WidgetTester tester) {
+  testWidgets('Horizontal drag triggers dismiss scrollDirection=vertical', (WidgetTester tester) async {
     scrollDirection = Axis.vertical;
     dismissDirection = DismissDirection.horizontal;
 
-    tester.pumpWidget(widgetBuilder());
+    await tester.pumpWidget(widgetBuilder());
     expect(dismissedItems, isEmpty);
 
-    dismissItem(tester, 0, gestureDirection: DismissDirection.startToEnd);
+    await dismissItem(tester, 0, gestureDirection: DismissDirection.startToEnd);
     expect(find.text('0'), findsNothing);
     expect(dismissedItems, equals(<int>[0]));
     expect(reportedDismissDirection, DismissDirection.startToEnd);
 
-    dismissItem(tester, 1, gestureDirection: DismissDirection.endToStart);
+    await dismissItem(tester, 1, gestureDirection: DismissDirection.endToStart);
     expect(find.text('1'), findsNothing);
     expect(dismissedItems, equals(<int>[0, 1]));
     expect(reportedDismissDirection, DismissDirection.endToStart);
   });
 
-  testWidgets('Vertical drag triggers dismiss scrollDirection=horizontal', (WidgetTester tester) {
+  testWidgets('Vertical drag triggers dismiss scrollDirection=horizontal', (WidgetTester tester) async {
     scrollDirection = Axis.horizontal;
     dismissDirection = DismissDirection.vertical;
 
-    tester.pumpWidget(widgetBuilder());
+    await tester.pumpWidget(widgetBuilder());
     expect(dismissedItems, isEmpty);
 
-    dismissItem(tester, 0, gestureDirection: DismissDirection.up);
+    await dismissItem(tester, 0, gestureDirection: DismissDirection.up);
     expect(find.text('0'), findsNothing);
     expect(dismissedItems, equals(<int>[0]));
     expect(reportedDismissDirection, DismissDirection.up);
 
-    dismissItem(tester, 1, gestureDirection: DismissDirection.down);
+    await dismissItem(tester, 1, gestureDirection: DismissDirection.down);
     expect(find.text('1'), findsNothing);
     expect(dismissedItems, equals(<int>[0, 1]));
     expect(reportedDismissDirection, DismissDirection.down);
   });
 
-  testWidgets('drag-left with DismissDirection.left triggers dismiss', (WidgetTester tester) {
+  testWidgets('drag-left with DismissDirection.left triggers dismiss', (WidgetTester tester) async {
     scrollDirection = Axis.vertical;
     dismissDirection = DismissDirection.endToStart;
 
-    tester.pumpWidget(widgetBuilder());
+    await tester.pumpWidget(widgetBuilder());
     expect(dismissedItems, isEmpty);
 
-    dismissItem(tester, 0, gestureDirection: DismissDirection.startToEnd);
+    await dismissItem(tester, 0, gestureDirection: DismissDirection.startToEnd);
     expect(find.text('0'), findsOneWidget);
     expect(dismissedItems, isEmpty);
-    dismissItem(tester, 1, gestureDirection: DismissDirection.startToEnd);
+    await dismissItem(tester, 1, gestureDirection: DismissDirection.startToEnd);
 
-    dismissItem(tester, 0, gestureDirection: DismissDirection.endToStart);
+    await dismissItem(tester, 0, gestureDirection: DismissDirection.endToStart);
     expect(find.text('0'), findsNothing);
     expect(dismissedItems, equals(<int>[0]));
-    dismissItem(tester, 1, gestureDirection: DismissDirection.endToStart);
+    await dismissItem(tester, 1, gestureDirection: DismissDirection.endToStart);
   });
 
-  testWidgets('drag-right with DismissDirection.right triggers dismiss', (WidgetTester tester) {
+  testWidgets('drag-right with DismissDirection.right triggers dismiss', (WidgetTester tester) async {
     scrollDirection = Axis.vertical;
     dismissDirection = DismissDirection.startToEnd;
 
-    tester.pumpWidget(widgetBuilder());
+    await tester.pumpWidget(widgetBuilder());
     expect(dismissedItems, isEmpty);
 
-    dismissItem(tester, 0, gestureDirection: DismissDirection.endToStart);
+    await dismissItem(tester, 0, gestureDirection: DismissDirection.endToStart);
     expect(find.text('0'), findsOneWidget);
     expect(dismissedItems, isEmpty);
 
-    dismissItem(tester, 0, gestureDirection: DismissDirection.startToEnd);
+    await dismissItem(tester, 0, gestureDirection: DismissDirection.startToEnd);
     expect(find.text('0'), findsNothing);
     expect(dismissedItems, equals(<int>[0]));
   });
 
-  testWidgets('drag-up with DismissDirection.up triggers dismiss', (WidgetTester tester) {
+  testWidgets('drag-up with DismissDirection.up triggers dismiss', (WidgetTester tester) async {
     scrollDirection = Axis.horizontal;
     dismissDirection = DismissDirection.up;
 
-    tester.pumpWidget(widgetBuilder());
+    await tester.pumpWidget(widgetBuilder());
     expect(dismissedItems, isEmpty);
 
-    dismissItem(tester, 0, gestureDirection: DismissDirection.down);
+    await dismissItem(tester, 0, gestureDirection: DismissDirection.down);
     expect(find.text('0'), findsOneWidget);
     expect(dismissedItems, isEmpty);
 
-    dismissItem(tester, 0, gestureDirection: DismissDirection.up);
+    await dismissItem(tester, 0, gestureDirection: DismissDirection.up);
     expect(find.text('0'), findsNothing);
     expect(dismissedItems, equals(<int>[0]));
   });
 
-  testWidgets('drag-down with DismissDirection.down triggers dismiss', (WidgetTester tester) {
+  testWidgets('drag-down with DismissDirection.down triggers dismiss', (WidgetTester tester) async {
     scrollDirection = Axis.horizontal;
     dismissDirection = DismissDirection.down;
 
-    tester.pumpWidget(widgetBuilder());
+    await tester.pumpWidget(widgetBuilder());
     expect(dismissedItems, isEmpty);
 
-    dismissItem(tester, 0, gestureDirection: DismissDirection.up);
+    await dismissItem(tester, 0, gestureDirection: DismissDirection.up);
     expect(find.text('0'), findsOneWidget);
     expect(dismissedItems, isEmpty);
 
-    dismissItem(tester, 0, gestureDirection: DismissDirection.down);
+    await dismissItem(tester, 0, gestureDirection: DismissDirection.down);
     expect(find.text('0'), findsNothing);
     expect(dismissedItems, equals(<int>[0]));
   });
@@ -238,23 +237,23 @@ void main() {
   // now since we migrated to the new repo. The bug was fixed by
   // https://github.com/flutter/engine/pull/1134 at the time, and later made
   // irrelevant by fn3, but just in case...
-  testWidgets('Verify that drag-move events do not assert', (WidgetTester tester) {
+  testWidgets('Verify that drag-move events do not assert', (WidgetTester tester) async {
     scrollDirection = Axis.horizontal;
     dismissDirection = DismissDirection.down;
 
-    tester.pumpWidget(widgetBuilder());
+    await tester.pumpWidget(widgetBuilder());
     Point location = tester.getTopLeft(find.text('0'));
     Offset offset = new Offset(0.0, 5.0);
-    TestGesture gesture = tester.startGesture(location, pointer: 5);
-    gesture.moveBy(offset);
-    tester.pumpWidget(widgetBuilder());
-    gesture.moveBy(offset);
-    tester.pumpWidget(widgetBuilder());
-    gesture.moveBy(offset);
-    tester.pumpWidget(widgetBuilder());
-    gesture.moveBy(offset);
-    tester.pumpWidget(widgetBuilder());
-    gesture.up();
+    TestGesture gesture = await tester.startGesture(location, pointer: 5);
+    await gesture.moveBy(offset);
+    await tester.pumpWidget(widgetBuilder());
+    await gesture.moveBy(offset);
+    await tester.pumpWidget(widgetBuilder());
+    await gesture.moveBy(offset);
+    await tester.pumpWidget(widgetBuilder());
+    await gesture.moveBy(offset);
+    await tester.pumpWidget(widgetBuilder());
+    await gesture.up();
   });
 
   // This one is for a case where dssmissing a widget above a previously
@@ -263,8 +262,8 @@ void main() {
   // died in the migration to the new repo). Don't copy this test; it doesn't
   // actually remove the dismissed widget, which is a violation of the
   // Dismissable contract. This is not an example of good practice.
-  testWidgets('dismissing bottom then top (smoketest)', (WidgetTester tester) {
-    tester.pumpWidget(new Center(
+  testWidgets('dismissing bottom then top (smoketest)', (WidgetTester tester) async {
+    await tester.pumpWidget(new Center(
       child: new Container(
         width: 100.0,
         height: 1000.0,
@@ -278,30 +277,30 @@ void main() {
     ));
     expect(find.text('1'), findsOneWidget);
     expect(find.text('2'), findsOneWidget);
-    dismissElement(tester, find.text('2'), gestureDirection: DismissDirection.startToEnd);
-    tester.pump(); // start the slide away
-    tester.pump(new Duration(seconds: 1)); // finish the slide away
+    await dismissElement(tester, find.text('2'), gestureDirection: DismissDirection.startToEnd);
+    await tester.pump(); // start the slide away
+    await tester.pump(new Duration(seconds: 1)); // finish the slide away
     expect(find.text('1'), findsOneWidget);
     expect(find.text('2'), findsNothing);
-    dismissElement(tester, find.text('1'), gestureDirection: DismissDirection.startToEnd);
-    tester.pump(); // start the slide away
-    tester.pump(new Duration(seconds: 1)); // finish the slide away (at which point the child is no longer included in the tree)
+    await dismissElement(tester, find.text('1'), gestureDirection: DismissDirection.startToEnd);
+    await tester.pump(); // start the slide away
+    await tester.pump(new Duration(seconds: 1)); // finish the slide away (at which point the child is no longer included in the tree)
     expect(find.text('1'), findsNothing);
     expect(find.text('2'), findsNothing);
   });
 
-  testWidgets('Dismissable starts from the full size when collapsing', (WidgetTester tester) {
+  testWidgets('Dismissable starts from the full size when collapsing', (WidgetTester tester) async {
     scrollDirection = Axis.vertical;
     dismissDirection = DismissDirection.horizontal;
     background = new Text('background');
 
-    tester.pumpWidget(widgetBuilder());
+    await tester.pumpWidget(widgetBuilder());
     expect(dismissedItems, isEmpty);
 
     Finder itemFinder = find.text('0');
     expect(itemFinder, findsOneWidget);
-    dismissElement(tester, itemFinder, gestureDirection: DismissDirection.startToEnd);
-    tester.pump();
+    await dismissElement(tester, itemFinder, gestureDirection: DismissDirection.startToEnd);
+    await tester.pump();
 
     expect(find.text('background'), findsNWidgets(5));
     RenderBox backgroundBox = tester.firstRenderObject(find.text('background'));

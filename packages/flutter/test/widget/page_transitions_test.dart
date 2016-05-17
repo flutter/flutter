@@ -4,7 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:test/test.dart';
 
 class TestOverlayRoute extends OverlayRoute<Null> {
   @override
@@ -13,7 +12,7 @@ class TestOverlayRoute extends OverlayRoute<Null> {
 }
 
 void main() {
-  testWidgets('Check onstage/offstage handling around transitions', (WidgetTester tester) {
+  testWidgets('Check onstage/offstage handling around transitions', (WidgetTester tester) async {
     GlobalKey containerKey1 = new GlobalKey();
     GlobalKey containerKey2 = new GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -21,7 +20,7 @@ void main() {
       '/settings': (_) => new Container(key: containerKey2, child: new Text('Settings')),
     };
 
-    tester.pumpWidget(new MaterialApp(routes: routes));
+    await tester.pumpWidget(new MaterialApp(routes: routes));
 
     expect(find.text('Home'), isOnStage);
     expect(find.text('Settings'), findsNothing);
@@ -31,19 +30,19 @@ void main() {
     Navigator.pushNamed(containerKey1.currentContext, '/settings');
     expect(Navigator.canPop(containerKey1.currentContext), isTrue);
 
-    tester.pump();
+    await tester.pump();
 
     expect(find.text('Home'), isOnStage);
     expect(find.text('Settings'), isOffStage);
     expect(find.text('Overlay'), findsNothing);
 
-    tester.pump(const Duration(milliseconds: 16));
+    await tester.pump(const Duration(milliseconds: 16));
 
     expect(find.text('Home'), isOnStage);
     expect(find.text('Settings'), isOnStage);
     expect(find.text('Overlay'), findsNothing);
 
-    tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
 
     expect(find.text('Home'), findsNothing);
     expect(find.text('Settings'), isOnStage);
@@ -51,13 +50,13 @@ void main() {
 
     Navigator.push(containerKey2.currentContext, new TestOverlayRoute());
 
-    tester.pump();
+    await tester.pump();
 
     expect(find.text('Home'), findsNothing);
     expect(find.text('Settings'), isOnStage);
     expect(find.text('Overlay'), isOnStage);
 
-    tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
 
     expect(find.text('Home'), findsNothing);
     expect(find.text('Settings'), isOnStage);
@@ -65,13 +64,13 @@ void main() {
 
     expect(Navigator.canPop(containerKey2.currentContext), isTrue);
     Navigator.pop(containerKey2.currentContext);
-    tester.pump();
+    await tester.pump();
 
     expect(find.text('Home'), findsNothing);
     expect(find.text('Settings'), isOnStage);
     expect(find.text('Overlay'), findsNothing);
 
-    tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
 
     expect(find.text('Home'), findsNothing);
     expect(find.text('Settings'), isOnStage);
@@ -79,13 +78,13 @@ void main() {
 
     expect(Navigator.canPop(containerKey2.currentContext), isTrue);
     Navigator.pop(containerKey2.currentContext);
-    tester.pump();
+    await tester.pump();
 
     expect(find.text('Home'), isOnStage);
     expect(find.text('Settings'), isOnStage);
     expect(find.text('Overlay'), findsNothing);
 
-    tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
 
     expect(find.text('Home'), isOnStage);
     expect(find.text('Settings'), findsNothing);

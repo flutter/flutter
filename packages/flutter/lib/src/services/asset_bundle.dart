@@ -15,16 +15,51 @@ import 'image_decoder.dart';
 import 'image_resource.dart';
 import 'shell.dart';
 
+/// A collection of resources used by the application.
+///
+/// Asset bundles contain resources, such as images and strings, that can be
+/// used by an application. Access to these resources is asynchronous so that
+/// they can be transparently loaded over a network (e.g., from a
+/// [NetworkAssetBundle]) or from the local file system without blocking the
+/// application's user interface.
+///
+/// Applications have a [rootBundle], which contains the resources that were
+/// packaged with the application when it was built. To add resources to the
+/// [rootBundle] for your application, add them to the `assets` section of your
+/// `flutter.yaml` manifest.
+///
+/// Rather than accessing the [rootBundle] global static directly, consider
+/// obtaining the [AssetBundle] for the current [BuildContext] using
+/// [DefaultAssetBundle.of]. This layer of indirection lets ancestor widgets
+/// substitute a different [AssetBundle] (e.g., for testing or localization) at
+/// runtime rather than directly replying upon the [rootBundle] created at build
+/// time. For convenience, the [WidgetsApp] or [MaterialApp] widget at the top
+/// of the widget hierarchy configures the [DefaultAssetBundle] to be the
+/// [rootBundle].
+///
+/// See also:
+///
+///  * [DefaultAssetBundle]
+///  * [NetworkAssetBundle]
+///  * [rootBundle]
 abstract class AssetBundle {
+  /// Retrieve an image from the asset bundle.
   ImageResource loadImage(String key);
+
+  /// Retrieve string from the asset bundle.
   Future<String> loadString(String key);
+
+  /// Retrieve a binary resource from the asset bundle as a data stream.
   Future<core.MojoDataPipeConsumer> load(String key);
 
   @override
   String toString() => '$runtimeType@$hashCode()';
 }
 
+/// An [AssetBundle] that loads resources over the network.
 class NetworkAssetBundle extends AssetBundle {
+  /// Creates an network asset bundle that resolves asset keys as URLs relative
+  /// to the given base URL.
   NetworkAssetBundle(Uri baseUrl) : _baseUrl = baseUrl;
 
   final Uri _baseUrl;
@@ -36,6 +71,9 @@ class NetworkAssetBundle extends AssetBundle {
     return await http.readDataPipe(_urlFromKey(key));
   }
 
+  /// Retrieve an image from the asset bundle.
+  ///
+  /// Images are cached in the [imageCache].
   @override
   ImageResource loadImage(String key) => imageCache.load(_urlFromKey(key));
 
@@ -48,19 +86,24 @@ class NetworkAssetBundle extends AssetBundle {
   String toString() => '$runtimeType@$hashCode($_baseUrl)';
 }
 
+/// An [AssetBundle] that adds a layer of caching to an asset bundle.
 abstract class CachingAssetBundle extends AssetBundle {
-  final Map<String, ImageResource> imageResourceCache =
+  final Map<String, ImageResource> _imageResourceCache =
     <String, ImageResource>{};
   final Map<String, Future<String>> _stringCache =
     <String, Future<String>>{};
 
+  /// Override to alter how images are retrieved from the underlying [AssetBundle].
+  ///
+  /// For example, the resolution-aware asset bundle created by [AssetVendor]
+  /// overrides this function to fetch an image with the appropriate resolution.
   Future<ImageInfo> fetchImage(String key) async {
     return new ImageInfo(image: await decodeImageFromDataPipe(await load(key)));
   }
 
   @override
   ImageResource loadImage(String key) {
-    return imageResourceCache.putIfAbsent(key, () {
+    return _imageResourceCache.putIfAbsent(key, () {
       return new ImageResource(fetchImage(key));
     });
   }
@@ -77,9 +120,12 @@ abstract class CachingAssetBundle extends AssetBundle {
   }
 }
 
+/// An [AssetBundle] that loads resources from a Mojo service.
 class MojoAssetBundle extends CachingAssetBundle {
+  /// Creates an [AssetBundle] interface around the given [AssetBundleProxy] Mojo service.
   MojoAssetBundle(this._bundle);
 
+  /// Retrieves the asset bundle located at the given URL, unpacks it, and provides it contents.
   factory MojoAssetBundle.fromNetwork(String relativeUrl) {
     AssetBundleProxy bundle = new AssetBundleProxy.unbound();
     _fetchAndUnpackBundle(relativeUrl, bundle);
@@ -110,4 +156,23 @@ AssetBundle _initRootBundle() {
   return new MojoAssetBundle(new AssetBundleProxy.fromHandle(handle));
 }
 
+/// The [AssetBundle] from which this application was loaded.
+///
+/// The [rootBundle] contains the resources that were packaged with the
+/// application when it was built. To add resources to the [rootBundle] for your
+/// application, add them to the `assets` section of your `flutter.yaml`
+/// manifest.
+///
+/// Rather than using [rootBundle] directly, consider obtaining the
+/// [AssetBundle] for the current [BuildContext] using [DefaultAssetBundle.of].
+/// This layer of indirection lets ancestor widgets substitute a different
+/// [AssetBundle] (e.g., for testing or localization) at runtime rather than
+/// directly replying upon the [rootBundle] created at build time. For
+/// convenience, the [WidgetsApp] or [MaterialApp] widget at the top of the
+/// widget hierarchy configures the [DefaultAssetBundle] to be the [rootBundle].
+///
+/// See also:
+///
+///  * [DefaultAssetBundle]
+///  * [NetworkAssetBundle]
 final AssetBundle rootBundle = _initRootBundle();

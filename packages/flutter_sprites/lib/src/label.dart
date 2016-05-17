@@ -37,6 +37,7 @@ class Label extends Node {
     if (_painter == null) {
       _painter = new TextPainter(text: new TextSpan(style: _textStyle, text: _text))
         ..layout();
+      _width = _painter.size.width;
     }
 
     Offset offset = Offset.zero;
