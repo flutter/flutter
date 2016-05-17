@@ -1,0 +1,12 @@
+name: calculator
+description: A new flutter project.
+dependencies:
+  flutter:
+    path: ../../packages/flutter
+
+dev_dependencies:
+  test: any # flutter_test provides the version constraints
+  flutter_test:
+    path: ../../packages/flutter_test
+  flutter_driver:
+    path: ../../packages/flutter_driver
