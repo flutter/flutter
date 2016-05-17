@@ -68,7 +68,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   @override
   void rejectGesture(int pointer) { }
 
-  /// Called when the number of pointers this recognizers is tracking changes from one to zero.
+  /// Called when the number of pointers this recognizer is tracking changes from one to zero.
   ///
   /// The given pointer ID is the ID of the last pointer this recognizer was
   /// tracking.
@@ -141,7 +141,7 @@ enum GestureRecognizerState {
   /// The recognizer is ready to start recognizing a gesture.
   ready,
 
-  /// The sequence of pointer events seen thus far are consistent with the
+  /// The sequence of pointer events seen thus far is consistent with the
   /// gesture the recognizer is attempting to recognize but the gesture has not
   /// been accepted definitively.
   possible,
