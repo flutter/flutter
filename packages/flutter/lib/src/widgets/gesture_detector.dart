@@ -178,8 +178,15 @@ class GestureDetector extends StatelessWidget {
   /// The pointer that previously triggered [onPanDown] did not complete.
   final GesturePanCancelCallback onPanCancel;
 
+  /// The pointers in contact with the screen have begun established a focal
+  /// point and initial scale of 1.0.
   final GestureScaleStartCallback onScaleStart;
+
+  /// The pointers in contact with the screen have indicated a new focal point
+  /// and/or scale.
   final GestureScaleUpdateCallback onScaleUpdate;
+
+  /// The pointers are no longer in contact with the screen.
   final GestureScaleEndCallback onScaleEnd;
 
   /// How this gesture detector should behave during hit testing.
