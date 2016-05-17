@@ -11,17 +11,17 @@ import 'package:analyzer/plugin/options.dart';
 import 'package:analyzer/source/analysis_options_provider.dart';
 import 'package:analyzer/source/embedder.dart';
 import 'package:analyzer/source/error_processor.dart';
-import 'package:analyzer/src/generated/engine.dart';
-import 'package:analyzer/src/generated/error.dart';
-import 'package:analyzer/src/generated/java_io.dart';
-import 'package:analyzer/src/generated/sdk_io.dart';
-import 'package:analyzer/src/generated/source.dart';
-import 'package:analyzer/src/generated/source_io.dart';
-import 'package:analyzer/src/task/options.dart';
+import 'package:analyzer/src/generated/engine.dart'; // ignore: implementation_imports
+import 'package:analyzer/src/generated/error.dart'; // ignore: implementation_imports
+import 'package:analyzer/src/generated/java_io.dart'; // ignore: implementation_imports
+import 'package:analyzer/src/generated/sdk_io.dart'; // ignore: implementation_imports
+import 'package:analyzer/src/generated/source.dart'; // ignore: implementation_imports
+import 'package:analyzer/src/generated/source_io.dart'; // ignore: implementation_imports
+import 'package:analyzer/src/task/options.dart'; // ignore: implementation_imports
 import 'package:cli_util/cli_util.dart' as cli_util;
-import 'package:linter/src/plugin/linter_plugin.dart';
+import 'package:linter/src/plugin/linter_plugin.dart'; // ignore: implementation_imports
 import 'package:package_config/packages.dart' show Packages;
-import 'package:package_config/src/packages_impl.dart' show MapPackages;
+import 'package:package_config/src/packages_impl.dart' show MapPackages; // ignore: implementation_imports
 import 'package:path/path.dart' as path;
 import 'package:plugin/manager.dart';
 import 'package:plugin/plugin.dart';
