@@ -14,16 +14,44 @@ enum _DragState {
   accepted,
 }
 
+/// Signature for when a pointer has contacted the screen and might begin to move.
 typedef void GestureDragDownCallback(Point globalPosition);
+
+/// Signature for when a pointer has contacted the screen and has begun to move.
 typedef void GestureDragStartCallback(Point globalPosition);
+
+/// Signature for when a pointer that is in contact with the screen and moving
+/// in a direction (e.g., vertically or horizontally) has moved in that
+/// direction.
 typedef void GestureDragUpdateCallback(double delta);
+
+/// Signature for when a pointer that was previously in contact with the screen
+/// and moving in a direction (e.g., vertically or horizontally) is no longer in
+/// contact with the screen and was moving at a specific velocity when it
+/// stopped contacting the screen.
 typedef void GestureDragEndCallback(Velocity velocity);
+
+/// Signature for when the pointer that previously triggered a
+/// [GestureDragDownCallback] did not complete.
 typedef void GestureDragCancelCallback();
 
+/// Signature for when a pointer has contacted the screen and might begin to move.
 typedef void GesturePanDownCallback(Point globalPosition);
+
+/// Signature for when a pointer has contacted the screen and has begun to move.
 typedef void GesturePanStartCallback(Point globalPosition);
+
+/// Signature for when a pointer that is in contact with the screen and moving
+/// has moved again.
 typedef void GesturePanUpdateCallback(Offset delta);
+
+/// Signature for when a pointer that was previously in contact with the screen
+/// and moving is no longer in contact with the screen and was moving at a
+/// specific velocity when it stopped contacting the screen.
 typedef void GesturePanEndCallback(Velocity velocity);
+
+/// Signature for when the pointer that previously triggered a
+/// [GesturePanDownCallback] did not complete.
 typedef void GesturePanCancelCallback();
 
 typedef void _GesturePolymorphicUpdateCallback<T>(T delta);
@@ -137,6 +165,9 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends OneSequenceGest
   }
 }
 
+/// Recognizes movement in the vertical direction.
+///
+/// Used for vertical scrolling.
 class VerticalDragGestureRecognizer extends _DragGestureRecognizer<double> {
   @override
   double get _initialPendingDragDelta => 0.0;
@@ -151,6 +182,9 @@ class VerticalDragGestureRecognizer extends _DragGestureRecognizer<double> {
   String toStringShort() => 'vertical drag';
 }
 
+/// Recognizes movement in the horizontal direction.
+///
+/// Used for horizontal scrolling.
 class HorizontalDragGestureRecognizer extends _DragGestureRecognizer<double> {
   @override
   double get _initialPendingDragDelta => 0.0;
@@ -165,6 +199,7 @@ class HorizontalDragGestureRecognizer extends _DragGestureRecognizer<double> {
   String toStringShort() => 'horizontal drag';
 }
 
+/// Recognizes movement both horizontally and vertically.
 class PanGestureRecognizer extends _DragGestureRecognizer<Offset> {
   @override
   Offset get _initialPendingDragDelta => Offset.zero;

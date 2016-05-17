@@ -4,6 +4,8 @@
 
 import 'dart:ui' show Point, Offset;
 
+import 'package:flutter/foundation.dart';
+
 export 'dart:ui' show Point, Offset;
 
 /// The kind of pointer device.
@@ -21,18 +23,70 @@ enum PointerDeviceKind {
   mouse
 }
 
+/// The bit of [PointerEvent.buttons] that corresponds to the primary mouse button.
+///
+/// The primary mouse button is typically the left button on the top of the
+/// mouse but can be reconfigured to be a different physical button.
 const int kPrimaryMouseButton = 0x01;
+
+/// The bit of [PointerEvent.buttons] that corresponds to the secondary mouse button.
+///
+/// The secondary mouse button is typically the right button on the top of the
+/// mouse but can be reconfigured to be a different physical button.
 const int kSecondaryMouseButton = 0x02;
+
+/// The bit of [PointerEvent.buttons] that corresponds to the primary stylus button.
+///
+/// The primary stylus button is typically the top of the stylus and near the
+/// tip but can be reconfigured to be a different physical button.
 const int kPrimaryStylusButton = 0x02;
+
+/// The bit of [PointerEvent.buttons] that corresponds to the middle mouse button.
+///
+/// The middle mouse button is typically between the left and right buttons on
+/// the top of the mouse but can be reconfigured to be a different physical
+/// button.
 const int kMiddleMouseButton = 0x04;
+
+/// The bit of [PointerEvent.buttons] that corresponds to the secondary stylus button.
+///
+/// The secondary stylus button is typically on the end of the stylus fartherest
+/// from the tip but can be reconfigured to be a different physical button.
 const int kSecondaryStylusButton = 0x04;
+
+/// The bit of [PointerEvent.buttons] that corresponds to the back mouse button.
+///
+/// The back mouse button is typically on the left side of the mouse but can be
+/// reconfigured to be a different physical button.
 const int kBackMouseButton = 0x08;
-const int forwardMouseButton = 0x10;
-int nthMouseButton(int number) => kPrimaryMouseButton << (number - 1);
-int nthStylusButton(int number) => kPrimaryStylusButton << (number - 1);
+
+/// The bit of [PointerEvent.buttons] that corresponds to the forward mouse button.
+///
+/// The forward mouse button is typically on the right side of the mouse but can
+/// be reconfigured to be a different physical button.
+const int kForwardMouseButton = 0x10;
+
+/// The bit of [PointerEvent.buttons] that corresponds to the nth mouse button.
+///
+/// The number argument can be at most 62.
+///
+/// See [kPrimaryMouseButton], [kSecondaryMouseButton], [kMiddleMouseButton],
+/// [kBackMouseButton], and [kForwardMouseButton] for semantic names for some
+/// mouse buttons.
+int nthMouseButton(int number) => (kPrimaryMouseButton << (number - 1)) & kMaxUnsignedSMI;
+
+/// The bit of [PointerEvent.buttons] that corresponds to the nth stylus button.
+///
+/// The number argument can be at most 62.
+///
+/// See [kPrimaryStylusButton] and [kSecondaryStylusButton] for semantic names
+/// for some stylus buttons.
+int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMaxUnsignedSMI;
 
 /// Base class for touch, stylus, or mouse events.
 abstract class PointerEvent {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const PointerEvent({
     this.timeStamp: Duration.ZERO,
     this.pointer: 0,
@@ -78,14 +132,14 @@ abstract class PointerEvent {
   /// upside-down stylus with both its primary and secondary buttons pressed.
   final int buttons;
 
-  // Set if the pointer is currently down. For touch and stylus pointers, this
-  // means the object (finger, pen) is in contact with the input surface. For
-  // mice, it means a button is pressed.
+  /// Set if the pointer is currently down. For touch and stylus pointers, this
+  /// means the object (finger, pen) is in contact with the input surface. For
+  /// mice, it means a button is pressed.
   final bool down;
 
-  // Set if an application from a different security domain is in any way
-  // obscuring this application's window. (Aspirational; not currently
-  // implemented.)
+  /// Set if an application from a different security domain is in any way
+  /// obscuring this application's window. (Aspirational; not currently
+  /// implemented.)
   final bool obscured;
 
   /// The pressure of the touch as a number ranging from 0.0, indicating a touch
@@ -174,6 +228,7 @@ abstract class PointerEvent {
   @override
   String toString() => '$runtimeType($position)';
 
+  /// Returns a complete textual description of this event.
   String toStringFull() {
     return '$runtimeType('
              'timeStamp: $timeStamp, '
@@ -205,6 +260,9 @@ abstract class PointerEvent {
 /// For example, the pointer might be hovering above the device, having not yet
 /// made contact with the surface of the device.
 class PointerAddedEvent extends PointerEvent {
+  /// Creates a pointer added event.
+  ///
+  /// All of the argument must be non-null.
   const PointerAddedEvent({
     Duration timeStamp: Duration.ZERO,
     int pointer: 0,
@@ -241,6 +299,9 @@ class PointerAddedEvent extends PointerEvent {
 /// For example, the pointer might have drifted out of the device's hover
 /// detection range or might have been disconnected from the system entirely.
 class PointerRemovedEvent extends PointerEvent {
+  /// Creates a pointer removed event.
+  ///
+  /// All of the argument must be non-null.
   const PointerRemovedEvent({
     Duration timeStamp: Duration.ZERO,
     int pointer: 0,
@@ -267,6 +328,9 @@ class PointerRemovedEvent extends PointerEvent {
 
 /// The pointer has made contact with the device.
 class PointerDownEvent extends PointerEvent {
+  /// Creates a pointer down event.
+  ///
+  /// All of the argument must be non-null.
   const PointerDownEvent({
     Duration timeStamp: Duration.ZERO,
     int pointer: 0,
@@ -308,6 +372,9 @@ class PointerDownEvent extends PointerEvent {
 
 /// The pointer has moved with respect to the device.
 class PointerMoveEvent extends PointerEvent {
+  /// Creates a pointer move event.
+  ///
+  /// All of the argument must be non-null.
   const PointerMoveEvent({
     Duration timeStamp: Duration.ZERO,
     int pointer: 0,
@@ -353,6 +420,9 @@ class PointerMoveEvent extends PointerEvent {
 
 /// The pointer has stopped making contact with the device.
 class PointerUpEvent extends PointerEvent {
+  /// Creates a pointer up event.
+  ///
+  /// All of the argument must be non-null.
   const PointerUpEvent({
     Duration timeStamp: Duration.ZERO,
     int pointer: 0,
@@ -388,6 +458,9 @@ class PointerUpEvent extends PointerEvent {
 
 /// The input from the pointer is no longer directed towards this receiver.
 class PointerCancelEvent extends PointerEvent {
+  /// Creates a pointer cancel event.
+  ///
+  /// All of the argument must be non-null.
   const PointerCancelEvent({
     Duration timeStamp: Duration.ZERO,
     int pointer: 0,
