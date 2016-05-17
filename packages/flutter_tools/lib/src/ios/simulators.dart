@@ -457,7 +457,7 @@ class IOSSimulator extends Device {
     ];
 
     if (debuggingOptions.debuggingEnabled) {
-      if (debuggingOptions.checked)
+      if (debuggingOptions.buildMode == BuildMode.debug)
         args.add("--enable-checked-mode");
       if (debuggingOptions.startPaused)
         args.add("--start-paused");
