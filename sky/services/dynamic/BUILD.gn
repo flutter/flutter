@@ -29,19 +29,29 @@ source_set("embedder") {
   ]
 }
 
-source_set("sdk_lib") {
-  sources = [
-    "dynamic_service.c",
-    "dynamic_service.h",
-    "dynamic_service_dylib.cc",
-    "dynamic_service_dylib.h",
-    "dynamic_service_macros.h",
-  ]
+lib_sources = [
+  "dynamic_service.c",
+  "dynamic_service.h",
+  "dynamic_service_dylib.cc",
+  "dynamic_service_dylib.h",
+  "dynamic_service_macros.h",
+]
 
-  deps = [
-    "//mojo/public/c/system",
-    "//mojo/public/cpp/bindings",
-    "//mojo/public/cpp/environment:standalone",
-    "//mojo/public/platform/native:system",
-  ]
+lib_deps = [
+  "//mojo/public/c/system",
+  "//mojo/public/cpp/bindings",
+  "//mojo/public/cpp/environment:standalone",
+  "//mojo/public/platform/native:system",
+]
+
+static_library("sdk_lib_archive") {
+  complete_static_lib = true
+  output_name = "FlutterService"
+  sources = lib_sources
+  deps = lib_deps
+}
+
+source_set("sdk_lib") {
+  sources = lib_sources
+  deps = lib_deps
 }
