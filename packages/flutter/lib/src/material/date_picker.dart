@@ -11,6 +11,8 @@ import 'package:intl/intl.dart';
 
 import 'colors.dart';
 import 'debug.dart';
+import 'icons.dart';
+import 'icon_button.dart';
 import 'ink_well.dart';
 import 'theme.dart';
 import 'typography.dart';
@@ -88,8 +90,6 @@ class _DatePickerState extends State<DatePicker> {
       config.onChanged(dateTime);
   }
 
-  static const double _calendarHeight = _kMaxDayPickerHeight;
-
   @override
   Widget build(BuildContext context) {
     Widget header = new _DatePickerHeader(
@@ -104,8 +104,7 @@ class _DatePickerState extends State<DatePicker> {
           selectedDate: config.selectedDate,
           onChanged: _handleDayChanged,
           firstDate: config.firstDate,
-          lastDate: config.lastDate,
-          itemExtent: _calendarHeight
+          lastDate: config.lastDate
         );
         break;
       case _DatePickerMode.year:
@@ -122,7 +121,7 @@ class _DatePickerState extends State<DatePicker> {
       children: <Widget>[
         header,
         new Container(
-          height: _calendarHeight,
+          height: _kMaxDayPickerHeight,
           child: picker
         )
       ]
@@ -154,11 +153,11 @@ class _DatePickerHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context);
-    TextTheme headerTheme = theme.primaryTextTheme;
+    ThemeData themeData = Theme.of(context);
+    TextTheme headerTextTheme = themeData.primaryTextTheme;
     Color dayColor;
     Color yearColor;
-    switch(theme.primaryColorBrightness) {
+    switch(themeData.primaryColorBrightness) {
       case ThemeBrightness.light:
         dayColor = mode == _DatePickerMode.day ? Colors.black87 : Colors.black54;
         yearColor = mode == _DatePickerMode.year ? Colors.black87 : Colors.black54;
@@ -168,34 +167,43 @@ class _DatePickerHeader extends StatelessWidget {
         yearColor = mode == _DatePickerMode.year ? Colors.white : Colors.white70;
         break;
     }
-    TextStyle dayStyle = headerTheme.display3.copyWith(color: dayColor, height: 1.0, fontSize: 100.0);
-    TextStyle monthStyle = headerTheme.headline.copyWith(color: dayColor, height: 1.0);
-    TextStyle yearStyle = headerTheme.headline.copyWith(color: yearColor, height: 1.0);
+    TextStyle dayStyle = headerTextTheme.display1.copyWith(color: dayColor, height: 1.4);
+    TextStyle yearStyle = headerTextTheme.subhead.copyWith(color: yearColor, height: 1.4);
+
+    Color backgroundColor;
+    switch (themeData.brightness) {
+      case ThemeBrightness.light:
+        backgroundColor = themeData.primaryColor;
+        break;
+      case ThemeBrightness.dark:
+        backgroundColor = themeData.backgroundColor;
+        break;
+    }
 
     return new Container(
-      padding: new EdgeInsets.all(10.0),
-      decoration: new BoxDecoration(backgroundColor: theme.primaryColor),
+      height: 100.0,
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      decoration: new BoxDecoration(backgroundColor: backgroundColor),
       child: new Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          new GestureDetector(
-            onTap: () => _handleChangeMode(_DatePickerMode.day),
-            child: new Text(new DateFormat('MMM').format(selectedDate).toUpperCase(), style: monthStyle)
-          ),
-          new GestureDetector(
-            onTap: () => _handleChangeMode(_DatePickerMode.day),
-            child: new Text(new DateFormat('d').format(selectedDate), style: dayStyle)
-          ),
           new GestureDetector(
             onTap: () => _handleChangeMode(_DatePickerMode.year),
             child: new Text(new DateFormat('yyyy').format(selectedDate), style: yearStyle)
-          )
+          ),
+          new GestureDetector(
+            onTap: () => _handleChangeMode(_DatePickerMode.day),
+            child: new Text(new DateFormat('MMMEd').format(selectedDate), style: dayStyle)
+          ),
         ]
       )
     );
   }
 }
 
-const double _kDayPickerRowHeight = 30.0;
+const Duration _kMonthScrollDuration = const Duration(milliseconds: 200);
+const double _kDayPickerRowHeight = 42.0;
 const int _kMaxDayPickerRowCount = 6; // A 31 day month that starts on Saturday.
 // Two extra rows: one for the day-of-week header and one for the month header.
 const double _kMaxDayPickerHeight = _kDayPickerRowHeight * (_kMaxDayPickerRowCount + 2);
@@ -269,10 +277,6 @@ class DayPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
-    final TextStyle headerStyle = themeData.textTheme.caption.copyWith(fontWeight: FontWeight.w700);
-    final TextStyle monthStyle = headerStyle.copyWith(fontSize: 14.0, height: 24.0 / 14.0);
-    final TextStyle dayStyle = headerStyle.copyWith(fontWeight: FontWeight.w500);
-
     final int year = displayedMonth.year;
     final int month = displayedMonth.month;
     // Dart's Date time constructor is very forgiving and will understand
@@ -281,7 +285,7 @@ class DayPicker extends StatelessWidget {
     // This assumes a start day of SUNDAY, but could be changed.
     final int firstWeekday = new DateTime(year, month).weekday % 7;
     final List<Widget> labels = <Widget>[];
-    labels.addAll(_getDayHeaders(headerStyle));
+    labels.addAll(_getDayHeaders(themeData.textTheme.caption));
     for (int i = 0; true; ++i) {
       final int day = i - firstWeekday + 1;
       if (day > daysInMonth)
@@ -290,13 +294,12 @@ class DayPicker extends StatelessWidget {
         labels.add(new Container());
       } else {
         BoxDecoration decoration;
-        TextStyle itemStyle = dayStyle;
+        TextStyle itemStyle = themeData.textTheme.body1;
 
         if (selectedDate.year == year && selectedDate.month == month && selectedDate.day == day) {
           // The selected day gets a circle background highlight, and a contrasting text color.
-          final ThemeData theme = Theme.of(context);
-          itemStyle = itemStyle.copyWith(
-            color: (theme.brightness == ThemeBrightness.light) ? Colors.white : Colors.black87
+          itemStyle = themeData.textTheme.body2.copyWith(
+            color: (themeData.brightness == ThemeBrightness.light) ? Colors.white : Colors.black87
           );
           decoration = new BoxDecoration(
             backgroundColor: themeData.accentColor,
@@ -304,7 +307,7 @@ class DayPicker extends StatelessWidget {
           );
         } else if (currentDate.year == year && currentDate.month == month && currentDate.day == day) {
           // The current day gets a different text color.
-          itemStyle = itemStyle.copyWith(color: themeData.accentColor);
+          itemStyle = themeData.textTheme.body2.copyWith(color: themeData.accentColor);
         }
 
         labels.add(new GestureDetector(
@@ -323,15 +326,24 @@ class DayPicker extends StatelessWidget {
       }
     }
 
-    return new Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: <Widget>[
-        new Text(new DateFormat('MMMM y').format(displayedMonth), style: monthStyle),
-        new CustomGrid(
-          delegate: _kDayPickerGridDelegate,
-          children: labels
-        )
-      ]
+    return new Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: new Column(
+        children: <Widget>[
+          new Container(
+            height: _kDayPickerRowHeight,
+            child: new Center(
+              child: new Text(new DateFormat('yMMMM').format(displayedMonth),
+                style: themeData.textTheme.subhead
+              )
+            )
+          ),
+          new CustomGrid(
+            delegate: _kDayPickerGridDelegate,
+            children: labels
+          )
+        ]
+      )
     );
   }
 }
@@ -356,8 +368,7 @@ class MonthPicker extends StatefulWidget {
     this.selectedDate,
     this.onChanged,
     this.firstDate,
-    this.lastDate,
-    this.itemExtent
+    this.lastDate
   }) : super(key: key) {
     assert(selectedDate != null);
     assert(onChanged != null);
@@ -379,9 +390,6 @@ class MonthPicker extends StatefulWidget {
   /// The latest date the user is permitted to pick.
   final DateTime lastDate;
 
-  /// The amount of vertical space to use for each month in the picker.
-  final double itemExtent;
-
   @override
   _MonthPickerState createState() => new _MonthPickerState();
 }
@@ -393,8 +401,15 @@ class _MonthPickerState extends State<MonthPicker> {
     _updateCurrentDate();
   }
 
+  @override
+  void didUpdateConfig(MonthPicker oldConfig) {
+    if (config.selectedDate != oldConfig.selectedDate)
+      _dayPickerListKey = new GlobalKey<ScrollableState>();
+  }
+
   DateTime _currentDate;
   Timer _timer;
+  GlobalKey<ScrollableState> _dayPickerListKey = new GlobalKey<ScrollableState>();
 
   void _updateCurrentDate() {
     _currentDate = new DateTime.now();
@@ -420,7 +435,7 @@ class _MonthPickerState extends State<MonthPicker> {
     for (int i = 0; i < count; ++i) {
       DateTime displayedMonth = new DateTime(startDate.year + i ~/ 12, startDate.month + i % 12);
       result.add(new DayPicker(
-        key: new ObjectKey(displayedMonth),
+        key: new ValueKey<DateTime>(displayedMonth),
         selectedDate: config.selectedDate,
         currentDate: _currentDate,
         onChanged: config.onChanged,
@@ -430,14 +445,46 @@ class _MonthPickerState extends State<MonthPicker> {
     return result;
   }
 
+  void _handleNextMonth() {
+    ScrollableState state = _dayPickerListKey.currentState;
+    state?.scrollTo(state.scrollOffset.round() + 1.0, duration: _kMonthScrollDuration);
+  }
+
+  void _handlePreviousMonth() {
+    ScrollableState state = _dayPickerListKey.currentState;
+    state?.scrollTo(state.scrollOffset.round() - 1.0, duration: _kMonthScrollDuration);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return new ScrollableLazyList(
-      key: new ValueKey<DateTime>(config.selectedDate),
-      initialScrollOffset: config.itemExtent * _monthDelta(config.firstDate, config.selectedDate),
-      itemExtent: config.itemExtent,
-      itemCount: _monthDelta(config.firstDate, config.lastDate) + 1,
-      itemBuilder: _buildItems
+    return new Stack(
+      children: <Widget>[
+        new PageableLazyList(
+          key: _dayPickerListKey,
+          initialScrollOffset: _monthDelta(config.firstDate, config.selectedDate).toDouble(),
+          scrollDirection: Axis.horizontal,
+          itemCount: _monthDelta(config.firstDate, config.lastDate) + 1,
+          itemBuilder: _buildItems
+        ),
+        new Positioned(
+          top: 0.0,
+          left: 8.0,
+          child: new IconButton(
+            icon: Icons.chevron_left,
+            tooltip: 'Previous month',
+            onPressed: _handlePreviousMonth
+          )
+        ),
+        new Positioned(
+          top: 0.0,
+          right: 8.0,
+          child: new IconButton(
+            icon: Icons.chevron_right,
+            tooltip: 'Next month',
+            onPressed: _handleNextMonth
+          )
+        )
+      ]
     );
   }
 
@@ -500,29 +547,22 @@ class _YearPickerState extends State<YearPicker> {
   static const double _itemExtent = 50.0;
 
   List<Widget> _buildItems(BuildContext context, int start, int count) {
-    TextStyle style = Theme.of(context).textTheme.body1.copyWith(color: Colors.black54);
-    List<Widget> items = new List<Widget>();
+    final ThemeData themeData = Theme.of(context);
+    final TextStyle style = themeData.textTheme.body1;
+    final List<Widget> items = new List<Widget>();
     for (int i = start; i < start + count; i++) {
-      int year = config.firstDate.year + i;
-      String label = year.toString();
-      Widget item = new InkWell(
-        key: new Key(label),
+      final int year = config.firstDate.year + i;
+      final TextStyle itemStyle = year == config.selectedDate.year ?
+        themeData.textTheme.headline.copyWith(color: themeData.accentColor) : style;
+      items.add(new InkWell(
+        key: new ValueKey<int>(year),
         onTap: () {
-          DateTime result = new DateTime(year, config.selectedDate.month, config.selectedDate.day);
-          config.onChanged(result);
+          config.onChanged(new DateTime(year, config.selectedDate.month, config.selectedDate.day));
         },
-        child: new Container(
-          height: _itemExtent,
-          decoration: year == config.selectedDate.year ? new BoxDecoration(
-            backgroundColor: Theme.of(context).backgroundColor,
-            shape: BoxShape.circle
-          ) : null,
-          child: new Center(
-            child: new Text(label, style: style)
-          )
+        child: new Center(
+          child: new Text(year.toString(), style: itemStyle)
         )
-      );
-      items.add(item);
+      ));
     }
     return items;
   }
