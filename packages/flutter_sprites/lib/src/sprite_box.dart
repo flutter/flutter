@@ -1,26 +1,36 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 part of flutter_sprites;
 
-/// Options for setting up a [SpriteBox].
-///
-///  * [nativePoints]: use the same points as the parent [Widget].
-///  * [letterbox]: use the size of the root node for the coordinate system, and constrain the aspect ratio and trim off
-///    areas that end up outside the screen.
-///  * [stretch]: use the size of the root node for the coordinate system, and scale it to fit the size of the box.
-///  * [scaleToFit]: similar to the letterbox option, but instead of trimming areas the sprite system will be scaled
-///    down to fit the box.
-///  * [fixedWidth]: use the width of the root node to set the size of the coordinate system, and change
-///    the height of the root node to fit the box.
-///  * [fixedHeight]: use the height of the root node to set the size of the coordinate system, and change
-///    the width of the root node to fit the box.
+/// Options for setting up a [SpriteBox]'s coordinate system.
 enum SpriteBoxTransformMode {
+  /// Use the same points as the parent [Widget].
   nativePoints,
+
+  /// Use the size of the root node for the coordinate system, and constrain the
+  /// aspect ratio and trim off areas that end up outside the screen.
   letterbox,
+
+  /// Use the size of the root node for the coordinate system, and scale it to
+  /// fit the size of the box.
   stretch,
+
+  /// Similar to the letterbox option, but instead of trimming areas the sprite
+  /// system will be scaled down to fit the box.
   scaleToFit,
+
+  /// Use the width of the root node to set the size of the coordinate system,
+  /// and change the height of the root node to fit the box.
   fixedWidth,
+
+  /// Use the height of the root node to set the size of the coordinate system,
+  /// and change the width of the root node to fit the box.
   fixedHeight,
 }
 
+/// A [RenderBox] that draws a sprite world represented by a [Node] tree.
 class SpriteBox extends RenderBox {
 
   // Setup
@@ -71,31 +81,6 @@ class SpriteBox extends RenderBox {
 
   // Member variables
 
-  // Root node for drawing
-  NodeWithSize _rootNode;
-
-  set rootNode (NodeWithSize value) {
-    if (value == _rootNode) return;
-
-    // Ensure that the root node has a size
-    assert(_transformMode == SpriteBoxTransformMode.nativePoints
-      || value.size.width > 0);
-    assert(_transformMode == SpriteBoxTransformMode.nativePoints
-      || value.size.height > 0);
-
-    // Remove sprite box references
-    if (_rootNode != null)
-      _removeSpriteBoxReference(_rootNode);
-
-    // Update the value
-    _rootNode = value;
-    _actionControllers = null;
-
-    // Add new references
-    _addSpriteBoxReference(_rootNode);
-    markNeedsLayout();
-  }
-
   // Tracking of frame rate and updates
   Duration _lastTimeStamp;
   double _frameRate = 0.0;
@@ -126,13 +111,15 @@ class SpriteBox extends RenderBox {
 
   List<Node> _constrainedNodes;
 
-  Rect _visibleArea;
-
+  /// A rectangle that represents the visible area of the sprite world's
+  /// coordinate system.
   Rect get visibleArea {
     if (_visibleArea == null)
       _calcTransformMatrix();
     return _visibleArea;
   }
+
+  Rect _visibleArea;
 
   bool _initialized = false;
 
@@ -142,6 +129,30 @@ class SpriteBox extends RenderBox {
   ///
   ///     var rootNode = mySpriteBox.rootNode;
   NodeWithSize get rootNode => _rootNode;
+
+  NodeWithSize _rootNode;
+
+  set rootNode (NodeWithSize value) {
+    if (value == _rootNode) return;
+
+    // Ensure that the root node has a size
+    assert(_transformMode == SpriteBoxTransformMode.nativePoints
+      || value.size.width > 0);
+    assert(_transformMode == SpriteBoxTransformMode.nativePoints
+      || value.size.height > 0);
+
+    // Remove sprite box references
+    if (_rootNode != null)
+      _removeSpriteBoxReference(_rootNode);
+
+    // Update the value
+    _rootNode = value;
+    _actionControllers = null;
+
+    // Add new references
+    _addSpriteBoxReference(_rootNode);
+    markNeedsLayout();
+  }
 
   @override
   void performLayout() {

@@ -1,3 +1,7 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 part of flutter_sprites;
 
 /// A texture represents a rectangular area of an image and is typically used to draw a sprite to the screen.
@@ -65,6 +69,7 @@ class Texture {
   ///     myTexture.pivot = new Point(0.5, 0.5);
   Point pivot;
 
+  /// Creates a new Texture from a part of the current texture.
   Texture textureFromRect(Rect rect, [String name = null]) {
     assert(rect != null);
     assert(!rotated);
@@ -73,6 +78,8 @@ class Texture {
     return new Texture._fromSpriteFrame(image, name, rect.size, false, false, srcFrame, dstFrame, new Point(0.5, 0.5));
   }
 
+  /// Draws the texture to a [Canvas] at a specified [position] and with the
+  /// specified [paint].
   void drawTexture(Canvas canvas, Point position, Paint paint) {
     // Get drawing position
     double x = position.x;

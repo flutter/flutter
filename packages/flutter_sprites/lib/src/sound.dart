@@ -1,3 +1,7 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 part of flutter_sprites;
 
 /// An audio asset loaded by the SoundEffectPlayer.
@@ -12,6 +16,8 @@ class SoundEffect {
 
 /// A sound being played by the SoundEffectPlayer.
 class SoundEffectStream {
+
+  /// Creates a new SoundEffectStream.
   SoundEffectStream(SoundEffectPlayer player, int streamId, {
     double leftVolume,
     double rightVolume,
@@ -120,6 +126,7 @@ class SoundEffectPlayer {
     throw new Exception('Unable to play sound');
   }
 
+  /// Set to true to pause a sound effect.
   bool get paused => _paused;
 
   set paused(bool value) {
@@ -132,23 +139,43 @@ class SoundEffectPlayer {
   }
 }
 
+/// Callback used by [SoundTrack].
 typedef void SoundTrackCallback(SoundTrack soundTrack);
+
+/// Callback used by [SoundTrack].
 typedef void SoundTrackBufferingCallback(SoundTrack soundTrack, int index);
 
+/// A sound track is typically longer than a [SoundEffect]. Use sound tracks to
+/// play back music or ambient sounds.
 class SoundTrack {
   MediaPlayerProxy _player;
 
+  /// Called when the sound has finished playing.
   SoundTrackCallback onSoundComplete;
+
+  /// Called when a seek operation has finished.
   SoundTrackCallback onSeekComplete;
+
+  /// Called when buffering is being performed.
   SoundTrackBufferingCallback onBufferingUpdate;
+
+  /// If true, the sound track will automatically loop.
   bool loop;
+
+  /// The current playback time.
   double time;
+
+  /// The volume the sound track is currently played at.
   double volume;
 }
 
 SoundTrackPlayer _sharedSoundTrackPlayer;
 
+/// Loads and plays [SoundTrack]s.
 class SoundTrackPlayer {
+
+  /// Creates a new [SoundTrackPlayer], typically you will want to use the
+  /// [sharedInstance] method to receive the player.
   SoundTrackPlayer() {
     _mediaService = new MediaServiceProxy.unbound();
     shell.connectToService("mojo:media_service", _mediaService);
@@ -158,10 +185,13 @@ class SoundTrackPlayer {
 
   Set<SoundTrack> _soundTracks = new HashSet<SoundTrack>();
 
+  /// Retrives a singleton object of the SoundTrackPlayer, use this method
+  /// in favor for the constructor.
   static SoundTrackPlayer sharedInstance() {
     return _sharedSoundTrackPlayer ??= new SoundTrackPlayer();
   }
 
+  /// Loads a [SoundTrack].
   Future<SoundTrack> load(Future<MojoDataPipeConsumer> pipe) async {
     // Create media player
     SoundTrack soundTrack = new SoundTrack();
@@ -172,11 +202,13 @@ class SoundTrackPlayer {
     return soundTrack;
   }
 
+  /// Unloads a [SoundTrack] from memory.
   void unload(SoundTrack soundTrack) {
     stop(soundTrack);
     _soundTracks.remove(soundTrack);
   }
 
+  /// Plays a [SoundTrack].
   void play(SoundTrack soundTrack, {
     bool loop: false,
     double volume: 1.0,
@@ -189,15 +221,19 @@ class SoundTrackPlayer {
     _soundTracks.add(soundTrack);
   }
 
+  /// Stops a [SoundTrack]. You may also want to call the [unload] method to
+  /// remove if from memory if you are not planning to play it again.
   void stop(SoundTrack track) {
     track._player.ptr.pause();
   }
 
+  /// Pauses all [SoundTrack]s that are currently playing.
   void pauseAll() {
     for (SoundTrack soundTrack in _soundTracks)
       soundTrack._player.ptr.pause();
   }
 
+  /// Resumes all [SoundTrack]s that have been loaded by this player.
   void resumeAll() {
     for (SoundTrack soundTrack in _soundTracks)
       soundTrack._player.ptr.start();
