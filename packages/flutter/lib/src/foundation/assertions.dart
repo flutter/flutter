@@ -198,31 +198,48 @@ class FlutterError extends AssertionError {
         debugPrint('The following $errorName was $verb:', wrapWidth: _kWrapWidth);
         debugPrint('${details.exception}', wrapWidth: _kWrapWidth);
       }
+      Iterable<String> stackLines = (details.stack != null) ? details.stack.toString().trimRight().split('\n') : null;
       if ((details.exception is AssertionError) && (details.exception is! FlutterError)) {
-        debugPrint('Either the assertion indicates an error in the framework itself, or we should '
-                   'provide substantially more information in this error message to help you determine '
-                   'and fix the underlying cause.', wrapWidth: _kWrapWidth);
-        debugPrint('In either case, please report this assertion by filing a bug on GitHub:', wrapWidth: _kWrapWidth);
-        debugPrint('  https://github.com/flutter/flutter/issues/new');
-      }
-      if (details.informationCollector != null) {
-        StringBuffer information = new StringBuffer();
-        details.informationCollector(information);
-        debugPrint(information.toString(), wrapWidth: _kWrapWidth);
+        bool ourFault = true;
+        if (stackLines != null) {
+          List<String> stackList = stackLines.take(2).toList();
+          if (stackList.length >= 2) {
+            final RegExp throwPattern = new RegExp(r'^#0 +_AssertionError._throwNew \(dart:.+\)$');
+            final RegExp assertPattern = new RegExp(r'^#1 +[^(]+ \((.+?):([0-9]+)(?::[0-9]+)?\)$');
+            if (throwPattern.hasMatch(stackList[0])) {
+              final Match assertMatch = assertPattern.firstMatch(stackList[1]);
+              if (assertMatch != null) {
+                assert(assertMatch.groupCount == 2);
+                final RegExp ourLibraryPattern = new RegExp(r'^package:flutter/');
+                ourFault = ourLibraryPattern.hasMatch(assertMatch.group(1));
+              }
+            }
+          }
+        }
+        if (ourFault) {
+          debugPrint('\nEither the assertion indicates an error in the framework itself, or we should '
+                     'provide substantially more information in this error message to help you determine '
+                     'and fix the underlying cause.', wrapWidth: _kWrapWidth);
+          debugPrint('In either case, please report this assertion by filing a bug on GitHub:', wrapWidth: _kWrapWidth);
+          debugPrint('  https://github.com/flutter/flutter/issues/new');
+        }
       }
       if (details.stack != null) {
-        debugPrint('When the exception was thrown, this was the stack:', wrapWidth: _kWrapWidth);
-        Iterable<String> stackLines = details.stack.toString().trimRight().split('\n');
+        debugPrint('\nWhen the exception was thrown, this was the stack:', wrapWidth: _kWrapWidth);
         if (details.stackFilter != null) {
           stackLines = details.stackFilter(stackLines);
         } else {
           stackLines = defaultStackFilter(stackLines);
         }
-        debugPrint(stackLines.join('\n'), wrapWidth: _kWrapWidth);
-        debugPrint(footer);
-      } else {
-        debugPrint(footer);
+        for (String line in stackLines)
+          debugPrint(line, wrapWidth: _kWrapWidth);
       }
+      if (details.informationCollector != null) {
+        StringBuffer information = new StringBuffer();
+        details.informationCollector(information);
+        debugPrint('\n$information', wrapWidth: _kWrapWidth);
+      }
+      debugPrint(footer);
     } else {
       debugPrint('Another exception was thrown: ${details.exception.toString().split("\n")[0]}');
     }

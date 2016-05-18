@@ -179,17 +179,22 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   FlutterExceptionHandler _oldExceptionHandler;
   FlutterErrorDetails _pendingExceptionDetails;
 
+  static const TextStyle _kMessageStyle = const TextStyle(
+    color: const Color(0xFF917FFF),
+    fontSize: 40.0
+  );
+
   static final Widget _kPreTestMessage = new Center(
     child: new Text(
       'Test starting...',
-      style: const TextStyle(color: const Color(0xFFFF0000))
+      style: _kMessageStyle
     )
   );
 
   static final Widget _kPostTestMessage = new Center(
     child: new Text(
       'Test finished.',
-      style: const TextStyle(color: const Color(0xFFFF0000))
+      style: _kMessageStyle
     )
   );
 
