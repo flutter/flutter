@@ -240,7 +240,7 @@ if (is_android) {
 } else if (is_ios) {
   import("//build/config/ios/rules.gni")
   import("//build/config/ios/ios_sdk.gni")
-  import("//sky/build/sky_precompilation_sdk.gni")
+  import("//sky/build/sky_ios_sdk.gni")
 
   shared_library("flutter_framework_dylib") {
     output_name = "Flutter"
@@ -388,7 +388,7 @@ if (is_android) {
     ]
   }
 
-  sky_precompilation_sdk("shell") {
+  sky_ios_sdk("shell") {
     sdk_name = "Flutter"
   }
 } else if (is_linux) {

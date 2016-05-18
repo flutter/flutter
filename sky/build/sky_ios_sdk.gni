@@ -6,8 +6,8 @@ import("//build/config/templates/templates.gni")
 import("//sky/engine/bindings/bindings.gni")
 import("//sky/build/template.gni")
 
-template("sky_precompilation_sdk") {
-  assert(is_ios, "The precompilation SDK is only supported for iOS targets")
+template("sky_ios_sdk") {
+  assert(is_ios)
 
   assert(defined(invoker.sdk_name), "The SDK name must be defined")
 
@@ -39,7 +39,10 @@ template("sky_precompilation_sdk") {
     script = "//sky/tools/copy_dir.py"
 
     inputs = [ "$root_build_dir/Flutter.framework/Flutter" ]
-    outputs = [ "$root_build_dir/$sdk_dir/$tools_dir/Flutter.framework/Flutter" ]
+    outputs = [
+      "$sdk_dir",
+      "$sdk_dir/$tools_dir/Flutter.framework/Flutter"
+    ]
 
     args = [
       "--src",
@@ -58,7 +61,7 @@ template("sky_precompilation_sdk") {
     outputs = [  "$sdk_dir/$tools_dir/EmbedderEntryPoints"  ]
   }
 
-  copy("precompilation_xcode_scripts") {
+  copy("ios_xcode_scripts") {
     sources = [
       "//sky/build/SnapshotterInvoke",
       "//sky/build/PackagerInvoke",
@@ -105,7 +108,25 @@ template("sky_precompilation_sdk") {
     outputs = [  "$root_out_dir/{{source_file_part}}"  ]
   }
 
-  group(target_name) {
+  # This archive is only for local consumption by the tools. It is not suitable
+  # for distribution since it only contains artifacts for a single architecture.
+  # It is the responsibility of the buildbot to construct universal binaries
+  # to create an SDK archive suitable for distribution.
+  action("create_sdk_archive") {
+    script = "//sky/build/zip_directory.py"
+
+    archive_name = "FlutterXcode.zip"
+
+    sources = [ sdk_dir ]
+    outputs = [ "$root_out_dir/$archive_name" ]
+
+    args = [
+      "--input-directory",
+      rebase_path(sdk_dir, root_build_dir),
+      "--output-archive",
+      rebase_path("$root_out_dir/$archive_name", root_build_dir),
+    ]
+
     deps = [
       ":copy_flutter_framework",
       ":copy_sdk_xcode_harness",
@@ -113,7 +134,13 @@ template("sky_precompilation_sdk") {
       ":copy_user_editable_files",
       ":embedder_entry_points",
       ":flutter_xcconfig",
-      ":precompilation_xcode_scripts",
+      ":ios_xcode_scripts",
+    ]
+  }
+
+  group(target_name) {
+    deps = [
+      ":create_sdk_archive",
     ]
   }
 }
