@@ -34,11 +34,12 @@ class DatePicker extends StatefulWidget {
   /// Rather than creating a date picker directly, consider using
   /// [showDatePicker] to show a date picker in a dialog.
   DatePicker({
+    Key key,
     this.selectedDate,
     this.onChanged,
     this.firstDate,
     this.lastDate
-  }) {
+  }) : super(key: key) {
     assert(selectedDate != null);
     assert(firstDate != null);
     assert(lastDate != null);
@@ -87,7 +88,7 @@ class _DatePickerState extends State<DatePicker> {
       config.onChanged(dateTime);
   }
 
-  static const double _calendarHeight = 210.0;
+  static const double _calendarHeight = _kMaxDayPickerHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -117,14 +118,14 @@ class _DatePickerState extends State<DatePicker> {
         break;
     }
     return new Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         header,
         new Container(
           height: _calendarHeight,
           child: picker
         )
-      ],
-      crossAxisAlignment: CrossAxisAlignment.stretch
+      ]
     );
   }
 
@@ -132,7 +133,12 @@ class _DatePickerState extends State<DatePicker> {
 
 // Shows the selected date in large font and toggles between year and day mode
 class _DatePickerHeader extends StatelessWidget {
-  _DatePickerHeader({ this.selectedDate, this.mode, this.onModeChanged }) {
+  _DatePickerHeader({
+    Key key,
+    this.selectedDate,
+    this.mode,
+    this.onModeChanged
+  }) : super(key: key) {
     assert(selectedDate != null);
     assert(mode != null);
   }
@@ -173,21 +179,42 @@ class _DatePickerHeader extends StatelessWidget {
         children: <Widget>[
           new GestureDetector(
             onTap: () => _handleChangeMode(_DatePickerMode.day),
-            child: new Text(new DateFormat("MMM").format(selectedDate).toUpperCase(), style: monthStyle)
+            child: new Text(new DateFormat('MMM').format(selectedDate).toUpperCase(), style: monthStyle)
           ),
           new GestureDetector(
             onTap: () => _handleChangeMode(_DatePickerMode.day),
-            child: new Text(new DateFormat("d").format(selectedDate), style: dayStyle)
+            child: new Text(new DateFormat('d').format(selectedDate), style: dayStyle)
           ),
           new GestureDetector(
             onTap: () => _handleChangeMode(_DatePickerMode.year),
-            child: new Text(new DateFormat("yyyy").format(selectedDate), style: yearStyle)
+            child: new Text(new DateFormat('yyyy').format(selectedDate), style: yearStyle)
           )
         ]
       )
     );
   }
 }
+
+const double _kDayPickerRowHeight = 30.0;
+const int _kMaxDayPickerRowCount = 6; // A 31 day month that starts on Saturday.
+// Two extra rows: one for the day-of-week header and one for the month header.
+const double _kMaxDayPickerHeight = _kDayPickerRowHeight * (_kMaxDayPickerRowCount + 2);
+
+class _DayPickerGridDelegate extends GridDelegateWithInOrderChildPlacement {
+  @override
+  GridSpecification getGridSpecification(BoxConstraints constraints, int childCount) {
+    assert(constraints.maxWidth < double.INFINITY);
+    final int columnCount = DateTime.DAYS_PER_WEEK;
+    return new GridSpecification.fromRegularTiles(
+      tileWidth: constraints.maxWidth / columnCount,
+      tileHeight: _kDayPickerRowHeight,
+      columnCount: columnCount,
+      rowCount: (childCount / columnCount).ceil()
+    );
+  }
+}
+
+final _DayPickerGridDelegate _kDayPickerGridDelegate = new _DayPickerGridDelegate();
 
 /// Displays the days of a given month and allows choosing a day.
 ///
@@ -205,11 +232,12 @@ class DayPicker extends StatelessWidget {
   ///
   /// Rarely used directly. Instead, typically used as part of a [DatePicker].
   DayPicker({
+    Key key,
     this.selectedDate,
     this.currentDate,
     this.onChanged,
     this.displayedMonth
-  }) {
+  }) : super(key: key) {
     assert(selectedDate != null);
     assert(currentDate != null);
     assert(onChanged != null);
@@ -230,50 +258,36 @@ class DayPicker extends StatelessWidget {
   /// The month whose days are displayed by this picker.
   final DateTime displayedMonth;
 
+  List<Widget> _getDayHeaders(TextStyle headerStyle) {
+    final DateFormat dateFormat = new DateFormat();
+    final DateSymbols symbols = dateFormat.dateSymbols;
+    return symbols.NARROWWEEKDAYS.map((String weekDay) {
+      return new Center(child: new Text(weekDay, style: headerStyle));
+    }).toList(growable: false);
+  }
+
   @override
   Widget build(BuildContext context) {
-    ThemeData themeData = Theme.of(context);
-    TextStyle headerStyle = themeData.textTheme.caption.copyWith(fontWeight: FontWeight.w700);
-    TextStyle monthStyle = headerStyle.copyWith(fontSize: 14.0, height: 24.0 / 14.0);
-    TextStyle dayStyle = headerStyle.copyWith(fontWeight: FontWeight.w500);
-    DateFormat dateFormat = new DateFormat();
-    DateSymbols symbols = dateFormat.dateSymbols;
+    final ThemeData themeData = Theme.of(context);
+    final TextStyle headerStyle = themeData.textTheme.caption.copyWith(fontWeight: FontWeight.w700);
+    final TextStyle monthStyle = headerStyle.copyWith(fontSize: 14.0, height: 24.0 / 14.0);
+    final TextStyle dayStyle = headerStyle.copyWith(fontWeight: FontWeight.w500);
 
-    List<Text> headers = <Text>[];
-    for (String weekDay in symbols.NARROWWEEKDAYS) {
-      headers.add(new Text(weekDay, style: headerStyle));
-    }
-    List<Widget> rows = <Widget>[
-      new Text(new DateFormat("MMMM y").format(displayedMonth), style: monthStyle),
-      new Flex(
-        children: headers,
-        mainAxisAlignment: MainAxisAlignment.spaceAround
-      )
-    ];
-    int year = displayedMonth.year;
-    int month = displayedMonth.month;
+    final int year = displayedMonth.year;
+    final int month = displayedMonth.month;
     // Dart's Date time constructor is very forgiving and will understand
     // month 13 as January of the next year. :)
-    int daysInMonth = new DateTime(year, month + 1).difference(new DateTime(year, month)).inDays;
-    int firstDay =  new DateTime(year, month).day;
-    int weeksShown = 6;
-    List<int> days = <int>[
-      DateTime.SUNDAY,
-      DateTime.MONDAY,
-      DateTime.TUESDAY,
-      DateTime.WEDNESDAY,
-      DateTime.THURSDAY,
-      DateTime.FRIDAY,
-      DateTime.SATURDAY
-    ];
-    int daySlots = weeksShown * days.length;
-    List<Widget> labels = <Widget>[];
-    for (int i = 0; i < daySlots; i++) {
-      // This assumes a start day of SUNDAY, but could be changed.
-      int day = i - firstDay + 1;
-      Widget item;
-      if (day < 1 || day > daysInMonth) {
-        item = new Text("");
+    final int daysInMonth = new DateTime(year, month + 1).difference(new DateTime(year, month)).inDays;
+    // This assumes a start day of SUNDAY, but could be changed.
+    final int firstWeekday = new DateTime(year, month).weekday % 7;
+    final List<Widget> labels = <Widget>[];
+    labels.addAll(_getDayHeaders(headerStyle));
+    for (int i = 0; true; ++i) {
+      final int day = i - firstWeekday + 1;
+      if (day > daysInMonth)
+        break;
+      if (day < 1) {
+        labels.add(new Container());
       } else {
         BoxDecoration decoration;
         TextStyle itemStyle = dayStyle;
@@ -293,31 +307,32 @@ class DayPicker extends StatelessWidget {
           itemStyle = itemStyle.copyWith(color: themeData.accentColor);
         }
 
-        item = new GestureDetector(
-          behavior: HitTestBehavior.translucent,
+        labels.add(new GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: () {
             DateTime result = new DateTime(year, month, day);
             onChanged(result);
           },
           child: new Container(
-            height: 30.0,
             decoration: decoration,
             child: new Center(
               child: new Text(day.toString(), style: itemStyle)
             )
           )
-        );
+        ));
       }
-      labels.add(new Flexible(child: item));
-    }
-    for (int w = 0; w < weeksShown; w++) {
-      int startIndex = w * days.length;
-      rows.add(new Row(
-        children: labels.sublist(startIndex, startIndex + days.length)
-      ));
     }
 
-    return new Column(children: rows);
+    return new Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        new Text(new DateFormat('MMMM y').format(displayedMonth), style: monthStyle),
+        new CustomGrid(
+          delegate: _kDayPickerGridDelegate,
+          children: labels
+        )
+      ]
+    );
   }
 }
 
@@ -399,22 +414,18 @@ class _MonthPickerState extends State<MonthPicker> {
     return (endDate.year - startDate.year) * 12 + endDate.month - startDate.month;
   }
 
-  List<Widget> buildItems(BuildContext context, int start, int count) {
-    List<Widget> result = new List<Widget>();
-    DateTime startDate = new DateTime(config.firstDate.year + start ~/ 12, config.firstDate.month + start % 12);
+  List<Widget> _buildItems(BuildContext context, int start, int count) {
+    final List<Widget> result = new List<Widget>();
+    final DateTime startDate = new DateTime(config.firstDate.year + start ~/ 12, config.firstDate.month + start % 12);
     for (int i = 0; i < count; ++i) {
       DateTime displayedMonth = new DateTime(startDate.year + i ~/ 12, startDate.month + i % 12);
-      Widget item = new Container(
-        height: config.itemExtent,
+      result.add(new DayPicker(
         key: new ObjectKey(displayedMonth),
-        child: new DayPicker(
-          selectedDate: config.selectedDate,
-          currentDate: _currentDate,
-          onChanged: config.onChanged,
-          displayedMonth: displayedMonth
-        )
-      );
-      result.add(item);
+        selectedDate: config.selectedDate,
+        currentDate: _currentDate,
+        onChanged: config.onChanged,
+        displayedMonth: displayedMonth
+      ));
     }
     return result;
   }
@@ -426,7 +437,7 @@ class _MonthPickerState extends State<MonthPicker> {
       initialScrollOffset: config.itemExtent * _monthDelta(config.firstDate, config.selectedDate),
       itemExtent: config.itemExtent,
       itemCount: _monthDelta(config.firstDate, config.lastDate) + 1,
-      itemBuilder: buildItems
+      itemBuilder: _buildItems
     );
   }
 
@@ -488,7 +499,7 @@ class YearPicker extends StatefulWidget {
 class _YearPickerState extends State<YearPicker> {
   static const double _itemExtent = 50.0;
 
-  List<Widget> buildItems(BuildContext context, int start, int count) {
+  List<Widget> _buildItems(BuildContext context, int start, int count) {
     TextStyle style = Theme.of(context).textTheme.body1.copyWith(color: Colors.black54);
     List<Widget> items = new List<Widget>();
     for (int i = start; i < start + count; i++) {
@@ -522,7 +533,7 @@ class _YearPickerState extends State<YearPicker> {
     return new ScrollableLazyList(
       itemExtent: _itemExtent,
       itemCount: config.lastDate.year - config.firstDate.year + 1,
-      itemBuilder: buildItems
+      itemBuilder: _buildItems
     );
   }
 }
