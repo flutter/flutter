@@ -191,13 +191,11 @@ class ListDemoState extends State<ListDemo> {
           )
         ]
       ),
-      body: new OverscrollIndicator(
-        child: new Scrollbar(
-          child: new MaterialList(
-            type: _itemType,
-            padding: new EdgeInsets.symmetric(vertical: _dense ? 4.0 : 8.0),
-            children: listItems
-          )
+      body: new Scrollbar(
+        child: new MaterialList(
+          type: _itemType,
+          padding: new EdgeInsets.symmetric(vertical: _dense ? 4.0 : 8.0),
+          children: listItems
         )
       )
     );

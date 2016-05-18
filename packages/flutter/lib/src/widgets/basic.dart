@@ -47,6 +47,7 @@ export 'package:flutter/rendering.dart' show
     SingleChildLayoutDelegate,
     TextOverflow,
     ValueChanged,
+    ValueGetter,
     ViewportAnchor,
     ViewportDimensions,
     ViewportDimensionsChangeCallback;
@@ -1582,7 +1583,7 @@ class CustomGrid extends GridRenderObjectWidgetBase {
 
 /// Uses a grid layout with a fixed column count.
 ///
-/// For details about the grid layout algorithm, see [FixedColumnCountGridDelegate].
+/// For details about the grid layout algorithm, see [MaxTileWidthGridDelegate].
 class FixedColumnCountGrid extends GridRenderObjectWidgetBase {
   FixedColumnCountGrid({
     Key key,

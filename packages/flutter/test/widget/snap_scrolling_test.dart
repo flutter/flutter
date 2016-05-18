@@ -60,7 +60,7 @@ void main() {
 
     Duration dt = const Duration(seconds: 2);
 
-    fling(0.8);
+    fling(1.0);
     await tester.pump(); // Start the scheduler at 0.0
     await tester.pump(dt);
     expect(scrollOffset, closeTo(200.0, 1.0));

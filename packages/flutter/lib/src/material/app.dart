@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show Platform;
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'overscroll_indicator.dart';
 import 'page.dart';
 import 'theme.dart';
 
@@ -190,6 +193,12 @@ class _MaterialAppState extends State<MaterialApp> {
       return true;
     });
 
-    return result;
+    Widget _iosScroll(Widget scrollWidget) => scrollWidget;
+    Widget _defaultScroll(Widget scrollWidget) => new OverscrollIndicator(child: scrollWidget);
+
+    return new ScrollConfiguration(
+      wrapScrollWidget: (Platform.isIOS || Platform.isMacOS) ? _iosScroll : _defaultScroll,
+      child: result
+    );
   }
 }

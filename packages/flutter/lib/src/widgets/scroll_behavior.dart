@@ -220,8 +220,14 @@ class OverscrollWhenScrollableBehavior extends OverscrollBehavior {
 
   @override
   Simulation createScrollSimulation(double position, double velocity) {
-    if (isScrollable || position < minScrollOffset || position > maxScrollOffset)
+    if (isScrollable || position < minScrollOffset || position > maxScrollOffset) {
+      // If the triggering gesture starts at or beyond the contentExtent's limits
+      // then the simulation only serves to settle the scrollOffset back to its
+      // minimum or maximum value.
+      if (position < minScrollOffset || position > maxScrollOffset)
+        velocity = 0.0;
       return super.createScrollSimulation(position, velocity);
+    }
     return null;
   }
 
