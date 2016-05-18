@@ -581,10 +581,29 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
+  void initRenderView() {
+    assert(renderView == null);
+    renderView = new _LiveTestRenderView(configuration: createViewConfiguration());
+    renderView.scheduleInitialFrame();
+  }
+
+  @override
+  _LiveTestRenderView get renderView => super.renderView;
+
+  @override
   void dispatchEvent(PointerEvent event, HitTestResult result, {
     TestBindingEventSource source: TestBindingEventSource.device
   }) {
     if (source == TestBindingEventSource.test) {
+      if (!renderView._pointers.containsKey(event.pointer)) {
+        assert(event.down);
+        renderView._pointers[event.pointer] = new _LiveTestPointerRecord(event.pointer, event.position);
+      } else {
+        renderView._pointers[event.pointer].position = event.position;
+        if (!event.down)
+          renderView._pointers[event.pointer].decay = _kPointerDecay;
+      }
+      renderView.markNeedsPaint();
       super.dispatchEvent(event, result, source: source);
       return;
     }
@@ -663,6 +682,64 @@ class _TestViewConfiguration extends ViewConfiguration {
 
   @override
   String toString() => 'TestViewConfiguration';
+}
+
+const int _kPointerDecay = -2;
+
+class _LiveTestPointerRecord {
+  _LiveTestPointerRecord(
+    int pointer,
+    this.position
+  ) : pointer = pointer,
+      color = new HSVColor.fromAHSV(0.8, (35.0 * pointer) % 360.0, 1.0, 1.0).toColor(),
+      decay = 1;
+  final int pointer;
+  final Color color;
+  Point position;
+  int decay; // >0 means down, <0 means up, increases by one each time, removed at 0
+}
+
+class _LiveTestRenderView extends RenderView {
+  _LiveTestRenderView({
+    ViewConfiguration configuration
+  }) : super(configuration: configuration);
+
+  final Map<int, _LiveTestPointerRecord> _pointers = <int, _LiveTestPointerRecord>{};
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    assert(offset == Offset.zero);
+    super.paint(context, offset);
+    if (_pointers.isNotEmpty) {
+      final double radius = configuration.size.shortestSide * 0.05;
+      final Path path = new Path()
+        ..addOval(new Rect.fromCircle(center: Point.origin, radius: radius))
+        ..moveTo(0.0, -radius * 2.0)
+        ..lineTo(0.0, radius * 2.0)
+        ..moveTo(-radius * 2.0, 0.0)
+        ..lineTo(radius * 2.0, 0.0);
+      final Canvas canvas = context.canvas;
+      final Paint paint = new Paint()
+        ..strokeWidth = radius / 10.0
+        ..style = PaintingStyle.stroke;
+      bool dirty = false;
+      for (int pointer in _pointers.keys) {
+        _LiveTestPointerRecord record = _pointers[pointer];
+        paint.color = record.color.withOpacity(record.decay < 0 ? (record.decay / (_kPointerDecay - 1)) : 1.0);
+        canvas.drawPath(path.shift(record.position.toOffset()), paint);
+        if (record.decay < 0)
+          dirty = true;
+        record.decay += 1;
+      }
+      _pointers
+        .keys
+        .where((int pointer) => _pointers[pointer].decay == 0)
+        .toList()
+        .forEach((int pointer) { _pointers.remove(pointer); });
+      if (dirty)
+        scheduleMicrotask(markNeedsPaint);
+    }
+  }
 }
 
 class _EmptyStack implements StackTrace {
