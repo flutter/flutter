@@ -38,6 +38,9 @@ enum BorderStyle {
 
 /// A side of a border of a box.
 class BorderSide {
+  /// Creates the side of a border.
+  ///
+  /// By default, the border is 1.0 logical pixels wide and solid black.
   const BorderSide({
     this.color: const Color(0xFF000000),
     this.width: 1.0,
@@ -134,6 +137,9 @@ class BorderSide {
 
 /// A border of a box, comprised of four sides.
 class Border {
+  /// Creates a border.
+  ///
+  /// All the sides of the border default to [BorderSide.none].
   const Border({
     this.top: BorderSide.none,
     this.right: BorderSide.none,
@@ -222,6 +228,7 @@ class Border {
     );
   }
 
+  /// Paints the border within the given rect on the given canvas.
   void paint(Canvas canvas, Rect rect, {
     BoxShape shape: BoxShape.rectangle,
     double borderRadius: null
@@ -373,14 +380,19 @@ class Border {
 
 /// A shadow cast by a box.
 ///
-/// Note: BoxShadow can cast non-rectangular shadows if the box is
-/// non-rectangular (e.g., has a border radius or a circular shape).
+/// BoxShadow can cast non-rectangular shadows if the box is non-rectangular
+/// (e.g., has a border radius or a circular shape).
+///
 /// This class is similar to CSS box-shadow.
 class BoxShadow {
+  /// Creates a box shadow.
+  ///
+  /// By default, the shadow is solid black with zero [offset], [blurRadius],
+  /// and [spreadRadius].
   const BoxShadow({
-    this.color,
-    this.offset,
-    this.blurRadius,
+    this.color: const Color(0xFF000000),
+    this.offset: Offset.zero,
+    this.blurRadius: 0.0,
     this.spreadRadius: 0.0
   });
 
@@ -393,6 +405,7 @@ class BoxShadow {
   /// The standard deviation of the Gaussian to convolve with the box's shape.
   final double blurRadius;
 
+  /// The amount the box should be inflated prior to applying the blur.
   final double spreadRadius;
 
   /// The [blurRadius] in sigmas instead of logical pixels.
@@ -479,11 +492,17 @@ abstract class Gradient {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const Gradient();
+
+  /// Creates a [Shader] for this gradient to fill the given rect.
   Shader createShader(Rect rect);
 }
 
 /// A 2D linear gradient.
 class LinearGradient extends Gradient {
+  /// Creates a linear graident.
+  ///
+  /// The [colors] argument must not be null. If [stops] is non-null, it must
+  /// have the same length as [colors].
   const LinearGradient({
     this.begin: FractionalOffset.centerLeft,
     this.end: FractionalOffset.centerRight,
@@ -510,13 +529,14 @@ class LinearGradient extends Gradient {
 
   /// The colors the gradient should obtain at each of the stops.
   ///
-  /// Note: This list must have the same length as [stops].
+  /// If [stops] is non-null, this list must have the same length as [stops].
   final List<Color> colors;
 
-  /// A list of values from 0.0 to 1.0 that denote fractions of the vector from start to end.
+  /// A list of values from 0.0 to 1.0 that denote fractions of the vector from
+  /// start to end.
   ///
-  /// Note: If specified, this list must have the same length as [colors]. Otherwise the colors
-  /// are distributed evenly between [begin] and [end].
+  /// If non-null, this list must have the same length as [colors]. Otherwise
+  /// the colors are distributed evenly between [begin] and [end].
   final List<double> stops;
 
   /// How this gradient should tile the plane.
@@ -573,6 +593,10 @@ class LinearGradient extends Gradient {
 
 /// A 2D radial gradient.
 class RadialGradient extends Gradient {
+  /// Creates a radial graident.
+  ///
+  /// The [colors] argument must not be null. If [stops] is non-null, it must
+  /// have the same length as [colors].
   const RadialGradient({
     this.center: FractionalOffset.center,
     this.radius: 0.5,
@@ -598,7 +622,7 @@ class RadialGradient extends Gradient {
 
   /// The colors the gradient should obtain at each of the stops.
   ///
-  /// Note: This list must have the same length as [stops].
+  /// If [stops] is non-null, this list must have the same length as [stops].
   final List<Color> colors;
 
   /// A list of values from 0.0 to 1.0 that denote concentric rings.
@@ -606,7 +630,9 @@ class RadialGradient extends Gradient {
   /// The rings are centered at [center] and have a radius equal to the value of
   /// the stop times [radius].
   ///
-  /// Note: This list must have the same length as [colors].
+  /// If non-null, this list must have the same length as [colors]. Otherwise
+  /// the colors are distributed evenly between the [center] and the ring at
+  /// [radius].
   final List<double> stops;
 
   /// How this gradient should tile the plane.
@@ -855,51 +881,96 @@ void paintImage({
 /// FractionalOffset(1.0, 0.0) represents the top right of the Size,
 /// FractionalOffset(0.0, 1.0) represents the bottom left of the Size,
 class FractionalOffset {
+  /// Creates a fractional offset.
+  ///
+  /// The [dx] and [dy] arguments must not be null.
   const FractionalOffset(this.dx, this.dy);
 
+  /// The distance fraction in the horizontal direction.
+  ///
+  /// A value of 0.0 cooresponds to the leftmost edge. A value of 1.0
+  /// cooresponds to the rightmost edge.
   final double dx;
+
+  /// The distance fraction in the vertical direction.
+  ///
+  /// A value of 0.0 cooresponds to the topmost edge. A value of 1.0
+  /// cooresponds to the bottommost edge.
   final double dy;
 
+  /// The top left corner.
   static const FractionalOffset topLeft = const FractionalOffset(0.0, 0.0);
+
+  /// The center point along the top edge.
   static const FractionalOffset topCenter = const FractionalOffset(0.5, 0.0);
+
+  /// The top right corner.
   static const FractionalOffset topRight = const FractionalOffset(1.0, 0.0);
 
+  /// The bottom left corner.
   static const FractionalOffset bottomLeft = const FractionalOffset(0.0, 1.0);
+
+  /// The center point along the bottom edge.
   static const FractionalOffset bottomCenter = const FractionalOffset(0.5, 1.0);
+
+  /// The bottom right corner.
   static const FractionalOffset bottomRight = const FractionalOffset(1.0, 1.0);
 
+  /// The center point along the left edge.
   static const FractionalOffset centerLeft = const FractionalOffset(0.0, 0.5);
+
+  /// The center point along the right edge.
   static const FractionalOffset centerRight = const FractionalOffset(1.0, 0.5);
 
+  /// The center point, both horizontally and vertically.
   static const FractionalOffset center = const FractionalOffset(0.5, 0.5);
 
+  /// Returns the negation of the given fractional offset.
   FractionalOffset operator -() {
     return new FractionalOffset(-dx, -dy);
   }
+
+  /// Returns the difference between two fractional offsets.
   FractionalOffset operator -(FractionalOffset other) {
     return new FractionalOffset(dx - other.dx, dy - other.dy);
   }
+
+  /// Returns the sum of two fractional offsets.
   FractionalOffset operator +(FractionalOffset other) {
     return new FractionalOffset(dx + other.dx, dy + other.dy);
   }
+
+  /// Scales the fractional offset in each dimension by the given factor.
   FractionalOffset operator *(double other) {
     return new FractionalOffset(dx * other, dy * other);
   }
+
+  /// Divides the fractional offset in each dimension by the given factor.
   FractionalOffset operator /(double other) {
     return new FractionalOffset(dx / other, dy / other);
   }
+
+  /// Integer divides the fractional offset in each dimension by the given factor.
   FractionalOffset operator ~/(double other) {
     return new FractionalOffset((dx ~/ other).toDouble(), (dy ~/ other).toDouble());
   }
+
+  /// Computes the remainder in each dimension by the given factor.
   FractionalOffset operator %(double other) {
     return new FractionalOffset(dx % other, dy % other);
   }
+
+  /// Returns the offset that is this fraction in the direction of the given offset.
   Offset alongOffset(Offset other) {
     return new Offset(dx * other.dx, dy * other.dy);
   }
+
+  /// Returns the offset that is this fraction within the given size.
   Offset alongSize(Size other) {
     return new Offset(dx * other.width, dy * other.height);
   }
+
+  /// Returns the point that is this fraction within the given rect.
   Point withinRect(Rect rect) {
     return new Point(rect.left + dx * rect.width, rect.top + dy * rect.height);
   }
@@ -915,6 +986,12 @@ class FractionalOffset {
 
   @override
   int get hashCode => hashValues(dx, dy);
+
+  /// Linearly interpolate between two EdgeInsets.
+  ///
+  /// If either is null, this function interpolates from [FractionalOffset.topLeft].
+  // TODO(abarth): Consider interpolating from [FractionalOffset.center] instead
+  // to remove upper-left bias.
   static FractionalOffset lerp(FractionalOffset a, FractionalOffset b, double t) {
     if (a == null && b == null)
       return null;
@@ -931,6 +1008,9 @@ class FractionalOffset {
 
 /// A background image for a box.
 class BackgroundImage {
+  /// Creates a background image.
+  ///
+  /// The [image] argument must not be null.
   BackgroundImage({
     ImageResource image,
     this.fit,
@@ -1041,13 +1121,23 @@ enum BoxShape {
 
 /// An immutable description of how to paint a box.
 class BoxDecoration extends Decoration {
+  /// Creates a box decoration.
+  ///
+  /// * If [backgroundColor] is null, this decoration does not paint a background color.
+  /// * If [backgroundImage] is null, this decoration does not paint a background image.
+  /// * If [border] is null, this decoration does not paint a border.
+  /// * If [borderRadius] is null, this decoration use more efficient background
+  ///   painting commands. The [borderRadius] argument must be be null if [shape] is
+  ///   [BoxShape.circle].
+  /// * If [boxShadow] is null, this decoration does not paint a shadow.
+  /// * If [gradient] is null, this decoration does not paint gradients.
   const BoxDecoration({
-    this.backgroundColor, // null = don't draw background color
-    this.backgroundImage, // null = don't draw background image
-    this.border, // null = don't draw border
-    this.borderRadius, // null = use more efficient background drawing; note that this must be null for circles
-    this.boxShadow, // null = don't draw shadows
-    this.gradient, // null = don't allocate gradient objects
+    this.backgroundColor,
+    this.backgroundImage,
+    this.border,
+    this.borderRadius,
+    this.boxShadow,
+    this.gradient,
     this.shape: BoxShape.rectangle
   });
 
@@ -1319,7 +1409,7 @@ class _BoxDecorationPainter extends BoxPainter {
       image: image,
       colorFilter: backgroundImage.colorFilter,
       alignment: backgroundImage.alignment,
-      fit:  backgroundImage.fit,
+      fit: backgroundImage.fit,
       repeat: backgroundImage.repeat
     );
   }
