@@ -8,6 +8,7 @@ void main() {
   test('stack manipulation: reportExpectCall', () {
     try {
       expect(false, isTrue);
+      throw 'unexpectedly did not throw';
     } catch (e, stack) {
       StringBuffer information = new StringBuffer();
       expect(reportExpectCall(stack, information), 3);
