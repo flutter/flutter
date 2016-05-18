@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart' as test_package;
 
@@ -154,6 +155,14 @@ class WidgetTester extends WidgetController {
     EnginePhase phase = EnginePhase.sendSemanticsTree
   ]) {
     return TestAsyncUtils.guard(() => binding.pump(duration, phase));
+  }
+
+  @override
+  Future<Null> sendEventToBinding(PointerEvent event, HitTestResult result) {
+    return TestAsyncUtils.guard(() async {
+      binding.dispatchEvent(event, result, source: TestBindingEventSource.test);
+      return null;
+    });
   }
 
   /// Returns the exception most recently caught by the Flutter framework.
