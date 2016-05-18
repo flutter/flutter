@@ -151,11 +151,9 @@ abstract class MultiDragPointerState {
 
 /// Recognizes movement on a per-pointer basis.
 ///
-/// In contrast to [HorizontalDragGestureRecognizer],
-/// [VerticalDragGestureRecognizer], and [PanGestureRecognizer],
-/// [MultiDragGestureRecognizer] watches each pointer separately, which means
-/// multiple drags can be recognized concurrently if multiple pointers are in
-/// contact with the screen.
+/// In contrast to [DragGestureRecognizer], [MultiDragGestureRecognizer] watches
+/// each pointer separately, which means multiple drags can be recognized
+/// concurrently if multiple pointers are in contact with the screen.
 ///
 /// [MultiDragGestureRecognizer] is not intended to be used directly. Instead,
 /// consider using one of its subclasses to recognize specific types for drag
