@@ -4,7 +4,7 @@
 
 part of flutter_sprites;
 
-/// Callback used by the [ActionCallFunction].
+/// Signature for callbacks used by the [ActionCallFunction].
 typedef void ActionCallback();
 
 /// Actions are used to animate properties of nodes or any other type of

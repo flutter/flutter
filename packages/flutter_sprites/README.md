@@ -29,7 +29,7 @@ The first thing you need to do to use Flutter Sprites is to setup a SpriteWidget
       }
     }
 
-By default the SpriteWidget uses letterboxing to display its contents. This means that the size that you give the root node will determine how the SpriteWidget's contents will be scaled to fit. If it doesn't fit perfectly in the area of the widget, either its top and bottom or the left and right side will be trimmed. You can optionally pass in a parameter to the SpriteWidget for other scaling options depending on your needs.
+The root node that you provide the SpriteWidget is a NodeWithSize, the size of the root node defines the coordinate system used by the SpriteWidget. By default the SpriteWidget uses letterboxing to display its contents. This means that the size that you give the root node will determine how the SpriteWidget's contents will be scaled to fit. If it doesn't fit perfectly in the area of the widget, either its top and bottom or the left and right side will be trimmed. You can optionally pass in a parameter to the SpriteWidget for other scaling options depending on your needs.
 
 ## Adding objects to your node graph
 Your SpriteWidget manages a node graph, the root node is the NodeWithSize that is passed in to the SpriteWidget when it's created. To render sprites, particles systems, or any other objects simply add them to the node graph.
@@ -51,7 +51,7 @@ Each node in the node graph has a transform. The transform is inherited by its c
 You can manipulate the transform by setting the position, rotation, scale, and skew properties.
 
 ## Sprites, textures, and sprite sheets
-The most common node type is the Sprite node. A sprite simply draws an image to the screen. Sprites can be drawn from Image objects or Texture objects. A texture is a part of an Image. Using a SpriteSheet you can pack several texture elements within a single image. This saves space in the device's gpu memory and also make drawing faster. Currently Flutter Sprites supports sprite sheets in json format and produced with a tool such as TexturePacker. You can create a SpriteSheet with a definition in json and an image:
+The most common node type is the Sprite node. A sprite simply draws an image to the screen. Sprites can be drawn from Image objects or Texture objects. A texture is a part of an Image. Using a SpriteSheet you can pack several texture elements within a single image. This saves space in the device's gpu memory and also make drawing faster. Currently Flutter Sprites supports sprite sheets in json format and produced with a tool such as TexturePacker. It's uncommon to manually edit the sprite sheet files. You can create a SpriteSheet with a definition in json and an image:
 
     SpriteSheet sprites = new SpriteSheet(myImage, jsonCode);
     Texture texture = sprites['texture.png'];
@@ -61,13 +61,33 @@ Each time a new frame is rendered to screen Flutter Sprites will perform a numbe
 
 This is the order things will happen:
 
-- Handle input events
-- Run animation actions
-- Call update functions on nodes
-- Apply constraints 
-- Render the frame to screen
+1. Handle input events
+2. Run animation actions
+3. Call update functions on nodes
+4. Apply constraints 
+5. Render the frame to screen
 
 Read more about each of the different phases below.
+
+## Handling user input
+You can subclass any node type to handle touches. To receive touches, you need to set the userInteractionEnabled property to true and override the handleEvent method. If the node you are subclassing doesn't have a size, you will also need to override the isPointInside method.
+
+    class EventHandlingNode extends NodeWithSize {
+      EventHandlingNode(Size size) : super(size) {
+        userInteractionEnabled = true;
+      }
+      
+      @override handleEvent(SpriteBoxEvent event) {
+        if (event.type == PointerDownEvent)
+          ...
+        else if (event.type == PointerMoveEvent)
+          ...
+        
+        return true;
+      }
+    }
+
+If you want your node to receive multiple touches, set the handleMultiplePointers property to true. Each touch down or dragged touch will generate a separate call to the handleEvent method, you can distinguish each touch by its pointer property.
 
 ## Animating using actions
 Flutter Sprites provides easy to use functions for animating nodes through actions. You can combine simple action blocks to create more complex animations.
@@ -124,8 +144,19 @@ It's possible to create more complex actions by composing them in any way:
       	action1
       ])
     ]);
+    
+## Handle update events
+Each frame, update events are sent to each node in the current node tree. Override the update method to manually do animations or to perform game logic.
 
-## Constraints
+    MyNode extends Node {
+      @override
+      update(double dt) {
+        // Move the node at a constant speed
+      	position += new Offset(dt * 1.0, 0.0);
+      }
+    }
+
+## Defining constraints
 Constraints are used to constrain properties of nodes. They can be used to position nodes relative other nodes, or adjust the rotation or scale. You can apply more than one constraint to a single node.
 
 For example, you can use a constraint to make a node follow another node at a specific distance with a specified dampening. The dampening will smoothen out the following node's movement.
@@ -140,7 +171,7 @@ For example, you can use a constraint to make a node follow another node at a sp
 
 Constraints are applied at the end of the frame cycle. If you need them to be applied at any other time, you can directly call the applyConstraints method of a Node object.
 
-## Custom drawing
+## Perform custom drawing
 Flutter Sprites provides a default set of drawing primitives, but there are cases where you may want to perform custom drawing. To do this you will need to subclass either the Node or NodeWithSize class and override the paint method:
 
     class RedCircle extends Node {
@@ -170,27 +201,7 @@ If you are overriding a NodeWithSize you may want to call applyTransformForPivot
       );
     }
 
-## Handling user input
-You can subclass any node type to handle touches. To receive touches, you need to set the userInteractionEnabled property to true and override the handleEvent method. If the node you are subclassing doesn't have a size, you will also need to override the isPointInside method.
-
-    class EventHandlingNode extends NodeWithSize {
-      EventHandlingNode(Size size) : super(size) {
-        userInteractionEnabled = true;
-      }
-      
-      @override handleEvent(SpriteBoxEvent event) {
-        if (event.type == PointerDownEvent)
-          ...
-        else if (event.type == PointerMoveEvent)
-          ...
-        
-        return true;
-      }
-    }
-
-If you want your node to receive multiple touches, set the handleMultiplePointers property to true. Each touch down or dragged touch will generate a separate call to the handleEvent method, you can distinguish each touch by its pointer property.
-
-## Particle systems
+## Add effects using particle systems
 Particle systems are great for creating effects such as rain, smoke, or fire. It's easy to setup a particle system, but there are very many properties that can be tweaked. The best way of to get a feel for how they work is to simply play around with the them.
 
 This is an example of how a particle system can be created, configured, and added to the scene:

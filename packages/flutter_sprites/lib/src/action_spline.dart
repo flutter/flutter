@@ -21,7 +21,7 @@ Point _cardinalSplineAt(Point p0, Point p1, Point p2, Point p3, double tension, 
   return new Point(x, y);
 }
 
-/// Callback used by the [ActionSpline] to set a [Point] value.
+/// Signature for callbacks used by the [ActionSpline] to set a [Point] value.
 typedef void PointSetterCallback(Point value);
 
 /// The spline action is used to animate a point along a spline definied by

@@ -139,10 +139,10 @@ class SoundEffectPlayer {
   }
 }
 
-/// Callback used by [SoundTrack].
+/// Signature for callbacks used by [SoundTrack].
 typedef void SoundTrackCallback(SoundTrack soundTrack);
 
-/// Callback used by [SoundTrack].
+/// Signature for callbacks used by [SoundTrack].
 typedef void SoundTrackBufferingCallback(SoundTrack soundTrack, int index);
 
 /// A sound track is typically longer than a [SoundEffect]. Use sound tracks to
