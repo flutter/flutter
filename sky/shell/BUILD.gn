@@ -463,7 +463,14 @@ if (is_android) {
     ]
   }
 
-  mac_app("shell") {
+  executable("shell_standalone") {
+    output_name = "sky_shell"
+    deps = [
+      ":mac_scaffolding",
+    ]
+  }
+
+  mac_app("shell_application") {
     app_name = "SkyShell"
     info_plist = "platform/mac/Info.plist"
 
@@ -479,6 +486,13 @@ if (is_android) {
     deps = [
       ":mac_scaffolding",
       ":sky_resources",
+    ]
+  }
+
+  group("shell") {
+    deps = [
+      ":shell_application",
+      ":shell_standalone",
     ]
   }
 } else {
