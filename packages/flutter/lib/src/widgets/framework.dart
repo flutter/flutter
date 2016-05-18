@@ -115,7 +115,7 @@ typedef void GlobalKeyRemoveListener(GlobalKey key);
 /// [UniqueKey] instead.
 @optionalTypeArgs
 abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
-  /// Constructs a LabeledGlobalKey, which is a GlobalKey with a label used for debugging.
+  /// Creates a LabeledGlobalKey, which is a GlobalKey with a label used for debugging.
   /// The label is not used for comparing the identity of the key.
   factory GlobalKey({ String debugLabel }) => new LabeledGlobalKey<T>(debugLabel); // the label is purely for debugging purposes and is otherwise ignored
 
@@ -564,7 +564,7 @@ abstract class RenderObjectWidget extends Widget {
   @override
   RenderObjectElement createElement();
 
-  /// Constructs an instance of the RenderObject class that this
+  /// Creates an instance of the RenderObject class that this
   /// RenderObjectWidget represents, using the configuration described by this
   /// RenderObjectWidget.
   RenderObject createRenderObject(BuildContext context);

@@ -25,7 +25,7 @@ const double _kMaxHeight = 100000.0;
 /// Again to help simplify the class, this box tries to be 100000.0 pixels wide
 /// and high, to approximate being infinitely high but without using infinities.
 class RenderErrorBox extends RenderBox {
-  /// Constructs a RenderErrorBox render object.
+  /// Creates a RenderErrorBox render object.
   ///
   /// A message can optionally be provided. If a message is provided, an attempt
   /// will be made to render the message when the box paints.

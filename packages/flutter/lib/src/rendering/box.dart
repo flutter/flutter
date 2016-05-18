@@ -41,9 +41,9 @@ enum Axis {
 /// * `0.0 <= minWidth <= maxWidth <= double.INFINITY`
 /// * `0.0 <= minHeight <= maxHeight <= double.INFINITY`
 ///
-/// Note: `double.INFINITY` is a legal value for each constraint.
+/// [double.INFINITY] is a legal value for each constraint.
 class BoxConstraints extends Constraints {
-  /// Constructs box constraints with the given constraints
+  /// Creates box constraints with the given constraints.
   const BoxConstraints({
     this.minWidth: 0.0,
     this.maxWidth: double.INFINITY,
@@ -51,19 +51,30 @@ class BoxConstraints extends Constraints {
     this.maxHeight: double.INFINITY
   });
 
+  /// The minimum width that satisfies the constraints.
   final double minWidth;
+
+  /// The maximum width that satisfies the constraints.
+  ///
+  /// Might be [double.INFINITY].
   final double maxWidth;
+
+  /// The minimum height that satisfies the constraints.
   final double minHeight;
+
+  /// The maximum height that satisfies the constraints.
+  ///
+  /// Might be [double.INFINITY].
   final double maxHeight;
 
-  /// Constructs box constraints that is respected only by the given size.
+  /// Creates box constraints that is respected only by the given size.
   BoxConstraints.tight(Size size)
     : minWidth = size.width,
       maxWidth = size.width,
       minHeight = size.height,
       maxHeight = size.height;
 
-  /// Constructs box constraints that require the given width or height.
+  /// Creates box constraints that require the given width or height.
   const BoxConstraints.tightFor({
     double width,
     double height
@@ -72,14 +83,14 @@ class BoxConstraints extends Constraints {
       minHeight = height != null ? height : 0.0,
       maxHeight = height != null ? height : double.INFINITY;
 
-  /// Constructs box constraints that forbid sizes larger than the given size.
+  /// Creates box constraints that forbid sizes larger than the given size.
   BoxConstraints.loose(Size size)
     : minWidth = 0.0,
       maxWidth = size.width,
       minHeight = 0.0,
       maxHeight = size.height;
 
-  /// Constructs box constraints that expand to fill another box contraints.
+  /// Creates box constraints that expand to fill another box contraints.
   ///
   /// If width or height is given, the constraints will require exactly the
   /// given value in the given dimension.

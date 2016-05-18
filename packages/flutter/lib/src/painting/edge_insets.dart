@@ -11,14 +11,14 @@ import 'basic_types.dart';
 /// Typically used for an offset from each of the four sides of a box. For
 /// example, the padding inside a box can be represented using this class.
 class EdgeInsets {
-  /// Constructs insets from offsets from the left, top, right, and bottom.
+  /// Creates insets from offsets from the left, top, right, and bottom.
   const EdgeInsets.fromLTRB(this.left, this.top, this.right, this.bottom);
 
-  /// Constructs insets where all the offsets are value.
+  /// Creates insets where all the offsets are value.
   const EdgeInsets.all(double value)
       : left = value, top = value, right = value, bottom = value;
 
-  /// Constructs insets with only the given values non-zero.
+  /// Creates insets with only the given values non-zero.
   const EdgeInsets.only({
     this.left: 0.0,
     this.top: 0.0,
@@ -26,11 +26,12 @@ class EdgeInsets {
     this.bottom: 0.0
   });
 
-  /// Constructs insets with symmetrical vertical and horizontal offsets.
+  /// Creates insets with symmetrical vertical and horizontal offsets.
   const EdgeInsets.symmetric({ double vertical: 0.0,
                              double horizontal: 0.0 })
     : left = horizontal, top = vertical, right = horizontal, bottom = vertical;
 
+  /// Creates insets that match the given window padding.
   EdgeInsets.fromWindowPadding(ui.WindowPadding padding)
     : left = padding.left, top = padding.top, right = padding.right, bottom = padding.bottom;
 
@@ -61,10 +62,16 @@ class EdgeInsets {
   /// An EdgeInsets with top and bottom as well as left and right flipped.
   EdgeInsets get flipped => new EdgeInsets.fromLTRB(left, top, right, bottom);
 
+  /// Returns a new rect that is bigger than the given rect in each direction by
+  /// the amount of inset in each direction. Specifically, the left edge of the
+  /// rect is moved left by [left], the top edge of the rect is moved up by
+  /// [top], the right edge of the rect is moved right by [right], and the
+  /// bottom edge of the rect is moved down by [bottom].
   Rect inflateRect(Rect rect) {
     return new Rect.fromLTRB(rect.left - left, rect.top - top, rect.right + right, rect.bottom + bottom);
   }
 
+  /// Returns the difference between two EdgeInsets.
   EdgeInsets operator -(EdgeInsets other) {
     return new EdgeInsets.fromLTRB(
       left - other.left,
@@ -74,6 +81,7 @@ class EdgeInsets {
     );
   }
 
+  /// Returns the sum of two EdgeInsets.
   EdgeInsets operator +(EdgeInsets other) {
     return new EdgeInsets.fromLTRB(
       left + other.left,
@@ -83,6 +91,7 @@ class EdgeInsets {
     );
   }
 
+  /// Scales the EdgeInsets in each dimension by the given factor.
   EdgeInsets operator *(double other) {
     return new EdgeInsets.fromLTRB(
       left * other,
@@ -92,6 +101,7 @@ class EdgeInsets {
     );
   }
 
+  /// Divides the EdgeInsets in each dimension by the given factor.
   EdgeInsets operator /(double other) {
     return new EdgeInsets.fromLTRB(
       left / other,
@@ -101,6 +111,7 @@ class EdgeInsets {
     );
   }
 
+  /// Integer divides the EdgeInsets in each dimension by the given factor.
   EdgeInsets operator ~/(double other) {
     return new EdgeInsets.fromLTRB(
       (left ~/ other).toDouble(),
@@ -110,6 +121,7 @@ class EdgeInsets {
     );
   }
 
+  /// Computes the remainder in each dimension by the given factor.
   EdgeInsets operator %(double other) {
     return new EdgeInsets.fromLTRB(
       left % other,

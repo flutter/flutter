@@ -1316,7 +1316,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// Subclasses that set [sizedByParent] to true should override this function
   /// to compute their size.
   ///
-  /// Note: This function is called only if [sizedByParent] is true.
+  /// This function is called only if [sizedByParent] is true.
   void performResize();
 
   /// Do the work of computing the layout for this render object.
