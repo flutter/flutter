@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert' show JSON;
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -388,7 +389,13 @@ int _signApk(
 }
 
 // Returns true if the apk is out of date and needs to be rebuilt.
-bool _needsRebuild(String apkPath, String manifest, Map<String, File> extraFiles) {
+bool _needsRebuild(
+  String apkPath,
+  String manifest,
+  TargetPlatform platform,
+  BuildMode buildMode,
+  Map<String, File> extraFiles
+) {
   FileStat apkStat = FileStat.statSync(apkPath);
   // Note: This list of dependencies is imperfect, but will do for now. We
   // purposely don't include the .dart files, because we can load those
@@ -411,6 +418,11 @@ bool _needsRebuild(String apkPath, String manifest, Map<String, File> extraFiles
   }
 
   if (!FileSystemEntity.isFileSync('$apkPath.sha1'))
+    return true;
+
+  String lastBuildType = _readBuildMeta(path.dirname(apkPath))['targetBuildType'];
+  String targetBuildType = _getTargetBuildTypeToken(platform, buildMode, new File(apkPath));
+  if (lastBuildType != targetBuildType)
     return true;
 
   return false;
@@ -455,7 +467,9 @@ Future<int> buildAndroid(
   // In debug (JIT) mode, the snapshot lives in the FLX, and we can skip the APK
   // rebuild if none of the resources in the APK are stale.
   // In AOT modes, the snapshot lives in the APK, so the APK must be rebuilt.
-  if (!isAotBuildMode(buildMode) && !force && !_needsRebuild(outputFile, manifest, extraFiles)) {
+  if (!isAotBuildMode(buildMode) &&
+      !force &&
+      !_needsRebuild(outputFile, manifest, platform, buildMode, extraFiles)) {
     printTrace('APK up to date; skipping build step.');
     return 0;
   }
@@ -525,7 +539,15 @@ Future<int> buildAndroid(
     }
   }
 
-  return _buildApk(platform, buildMode, components, flxPath, keystore, outputFile);
+  int result = _buildApk(platform, buildMode, components, flxPath, keystore, outputFile);
+  if (result == 0) {
+    _writeBuildMetaEntry(
+      path.dirname(outputFile),
+      'targetBuildType',
+      _getTargetBuildTypeToken(platform, buildMode, new File(outputFile))
+    );
+  }
+  return result;
 }
 
 Future<int> buildApk(
@@ -546,4 +568,27 @@ Future<int> buildApk(
   );
 
   return result;
+}
+
+Map<String, dynamic> _readBuildMeta(String buildDirectoryPath) {
+  File buildMetaFile = new File(path.join(buildDirectoryPath, 'build_meta.json'));
+  if (buildMetaFile.existsSync())
+    return JSON.decode(buildMetaFile.readAsStringSync());
+  return <String, dynamic>{};
+}
+
+void _writeBuildMetaEntry(String buildDirectoryPath, String key, dynamic value) {
+  Map<String, dynamic> meta = _readBuildMeta(buildDirectoryPath);
+  meta[key] = value;
+  File buildMetaFile = new File(path.join(buildDirectoryPath, 'build_meta.json'));
+  buildMetaFile.writeAsStringSync(toPrettyJson(meta));
+}
+
+String _getTargetBuildTypeToken(TargetPlatform platform, BuildMode buildMode, File outputBinary) {
+  String buildType = getNameForTargetPlatform(platform) + '-' + getModeName(buildMode);
+  if (tools.isLocalEngine)
+    buildType += ' [${tools.engineBuildPath}]';
+  if (outputBinary.existsSync())
+    buildType += ' [${outputBinary.lastModifiedSync().millisecondsSinceEpoch}]';
+  return buildType;
 }

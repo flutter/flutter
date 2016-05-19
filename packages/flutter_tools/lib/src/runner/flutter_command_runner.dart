@@ -222,7 +222,7 @@ class FlutterCommandRunner extends CommandRunner {
       throw new ProcessExit(2);
     }
 
-    String engineBuildPath = path.join(enginePath, 'out', localEngine);
+    String engineBuildPath = path.normalize(path.join(enginePath, 'out', localEngine));
     if (!FileSystemEntity.isDirectorySync(engineBuildPath)) {
       printError('No Flutter engine build found at $engineBuildPath.');
       throw new ProcessExit(2);
