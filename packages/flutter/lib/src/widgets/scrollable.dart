@@ -854,7 +854,7 @@ class Block extends StatelessWidget {
     if (padding != null)
       contents = new Padding(padding: padding, child: contents);
     return new ScrollableViewport(
-      key: scrollableKey,
+      scrollableKey: scrollableKey,
       initialScrollOffset: initialScrollOffset,
       scrollDirection: scrollDirection,
       scrollAnchor: scrollAnchor,

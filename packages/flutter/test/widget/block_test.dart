@@ -105,4 +105,18 @@ void main() {
     expect(first, equals(1));
     expect(second, equals(1));
   });
+
+  testWidgets('Block scrollableKey', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/4046
+    // The Block's scrollableKey needs to become its Scrollable descendant's key.
+    final GlobalKey<ScrollableState<Scrollable>> key = new GlobalKey<ScrollableState<Scrollable>>();
+    Widget buildBlock() {
+      return new Block(
+        scrollableKey: key,
+        children: <Widget>[new Text("A"), new Text("B"), new Text("C")]
+      );
+    }
+    await tester.pumpWidget(buildBlock());
+    expect(key.currentState.scrollOffset, 0.0);
+  });
 }
