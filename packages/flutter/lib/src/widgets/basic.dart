@@ -1583,7 +1583,7 @@ class CustomGrid extends GridRenderObjectWidgetBase {
 
 /// Uses a grid layout with a fixed column count.
 ///
-/// For details about the grid layout algorithm, see [MaxTileWidthGridDelegate].
+/// For details about the grid layout algorithm, see [FixedColumnCountGridDelegate].
 class FixedColumnCountGrid extends GridRenderObjectWidgetBase {
   FixedColumnCountGrid({
     Key key,

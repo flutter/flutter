@@ -9,7 +9,7 @@ typedef Widget ViewportBuilder(BuildContext context, ScrollableState state, doub
 
 /// If true, the ClampOverscroll's [Scrollable] descendant will clamp its
 /// viewport's scrollOffsets to the [ScrollBehavior]'s min and max values.
-/// In this case the Scrollable's scrollOffset will still over and undershoot
+/// In this case the Scrollable's scrollOffset will still over- and undershoot
 /// the ScrollBehavior's limits, but the viewport itself will not.
 class ClampOverscrolls extends InheritedWidget {
   ClampOverscrolls({

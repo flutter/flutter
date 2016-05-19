@@ -2,36 +2,50 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'basic.dart';
 import 'framework.dart';
 import 'scroll_behavior.dart';
 
-typedef Widget WrapScrollWidget(Widget scrollWidget);
+class ScrollConfigurationDelegate {
+  /// Returns the ScrollBehavior to be used by generic scrolling containers like
+  /// [Block]. Returns a new [OverscrollWhenScrollableBehavior] by default.
+  ExtentScrollBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior();
+
+  /// Generic scrolling containers like [Block] will apply this function to the
+  /// Scrollable they create. It can be used to add widgets that wrap the
+  /// Scrollable, like scrollbars or overscroll indicators. By default the
+  /// [scrollWidget] parameter is returned unchanged.
+  Widget wrapScrollWidget(Widget scrollWidget) => scrollWidget;
+
+  /// Overrides should return true if the this ScrollConfigurationDelegate has
+  /// changed in a way that requires rebuilding its scrolling container descendants.
+  /// Returns false by default.
+  bool updateShouldNotify(ScrollConfigurationDelegate old) => false;
+}
 
 class ScrollConfiguration extends InheritedWidget {
   ScrollConfiguration({
     Key key,
-    this.createScrollBehavior,
-    this.wrapScrollWidget,
+    this.delegate,
     Widget child
-  }) : super(key: key, child: child);
+  }) : super(key: key, child: child) {
+    assert(delegate != null);
+  }
 
-  final ValueGetter<ExtentScrollBehavior> createScrollBehavior;
+  static final ScrollConfigurationDelegate _defaultDelegate = new ScrollConfigurationDelegate();
 
-  final WrapScrollWidget wrapScrollWidget;
+  final ScrollConfigurationDelegate delegate;
 
-  static ScrollConfiguration of(BuildContext context) {
-    return context.inheritFromWidgetOfExactType(ScrollConfiguration);
+  static ScrollConfigurationDelegate of(BuildContext context) {
+    ScrollConfiguration configuration = context.inheritFromWidgetOfExactType(ScrollConfiguration);
+    return configuration?.delegate ?? _defaultDelegate;
   }
 
   static Widget wrap(BuildContext context, Widget scrollWidget) {
-    WrapScrollWidget wrap = of(context)?.wrapScrollWidget;
-    return (wrap != null) ? wrap(scrollWidget) : scrollWidget;
+    return of(context).wrapScrollWidget(scrollWidget);
   }
 
   @override
   bool updateShouldNotify(ScrollConfiguration old) {
-   return createScrollBehavior != old.createScrollBehavior ||
-      wrapScrollWidget != wrapScrollWidget;
+    return delegate.updateShouldNotify(old.delegate);
   }
 }

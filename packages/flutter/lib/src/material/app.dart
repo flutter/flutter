@@ -144,6 +144,13 @@ class MaterialApp extends StatefulWidget {
   _MaterialAppState createState() => new _MaterialAppState();
 }
 
+class _IndicatorScrollConfigurationDelegate extends ScrollConfigurationDelegate {
+  @override
+  Widget wrapScrollWidget(Widget scrollWidget) => new OverscrollIndicator(child: scrollWidget);
+}
+final ScrollConfigurationDelegate _indicatorScroll = new _IndicatorScrollConfigurationDelegate();
+final ScrollConfigurationDelegate _bounceScroll = new ScrollConfigurationDelegate();
+
 class _MaterialAppState extends State<MaterialApp> {
   final HeroController _heroController = new HeroController();
 
@@ -193,11 +200,8 @@ class _MaterialAppState extends State<MaterialApp> {
       return true;
     });
 
-    Widget _iosScroll(Widget scrollWidget) => scrollWidget;
-    Widget _defaultScroll(Widget scrollWidget) => new OverscrollIndicator(child: scrollWidget);
-
     return new ScrollConfiguration(
-      wrapScrollWidget: (Platform.isIOS || Platform.isMacOS) ? _iosScroll : _defaultScroll,
+      delegate: (Platform.isIOS || Platform.isMacOS) ? _bounceScroll : _indicatorScroll,
       child: result
     );
   }
