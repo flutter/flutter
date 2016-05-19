@@ -12,22 +12,20 @@ import 'base/utils.dart';
 import 'globals.dart';
 import 'version.dart';
 
-// TODO(devoncarew): We'll need to do some work on the user agent in order to
-// correctly track usage by operating system (dart-lang/usage/issues/70).
-
 // TODO(devoncarew): We'll want to find a way to send (sanitized) command parameters.
 
 const String _kFlutterUA = 'UA-67589403-5';
 
 class Usage {
-  Usage() {
-    String version = FlutterVersion.getVersionString(whitelistBranchName: true);
-    _analytics = new AnalyticsIO(_kFlutterUA, 'flutter', version);
+  /// Create a new Usage instance; [versionOverride] is used for testing.
+  Usage({ String settingsName: 'flutter', String versionOverride }) {
+    String version = versionOverride ?? FlutterVersion.getVersionString(whitelistBranchName: true);
+    _analytics = new AnalyticsIO(_kFlutterUA, settingsName, version);
 
     bool runningOnCI = false;
 
     // Many CI systems don't do a full git checkout.
-    if (version.startsWith('unknown/'))
+    if (version.endsWith('/unknown'))
       runningOnCI = true;
 
     // Check for common CI systems.

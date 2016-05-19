@@ -78,4 +78,16 @@ void main() {
       Usage: new Usage()
     });
   });
+
+  group('analytics bots', () {
+    testUsingContext('don\'t send on bots', () async {
+      int count = 0;
+      flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
+
+      await createTestCommandRunner().run(<String>['--version']);
+      expect(count, 0);
+    }, overrides: <Type, dynamic>{
+      Usage: new Usage(settingsName: 'flutter_bot_test', versionOverride: 'dev/unknown')
+    });
+  });
 }
