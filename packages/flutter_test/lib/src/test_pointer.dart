@@ -107,9 +107,12 @@ class TestPointer {
   }
 }
 
-/// An callback that can dispatch events and returns a future that
+/// Signature for a callback that can dispatch events and returns a future that
 /// completes when the event dispatch is complete.
-typedef Future<Null> AsyncHitTestDispatcher(PointerEvent event, HitTestResult result);
+typedef Future<Null> EventDispatcher(PointerEvent event, HitTestResult result);
+
+/// Signature for callbacks that perform hit-testing at a given location.
+typedef HitTestResult HitTester(Point location);
 
 /// A class for performing gestures in tests.
 ///
@@ -124,28 +127,21 @@ class TestGesture {
   /// By default, the pointer ID used is 1. This can be overridden by
   /// providing the `pointer` argument.
   ///
-  /// By default, the global binding is used for hit testing. The
-  /// object to use for hit testing can be overridden by providing
-  /// `hitTestTarget`.
-  ///
-  /// An object to use for dispatching events must be provided via the
-  /// `dispatcher` argument.
+  /// A function to use for hit testing should be provided via the `hitTester`
+  /// argument, and a function to use for dispatching events should be provided
+  /// via the `dispatcher` argument.
   static Future<TestGesture> down(Point downLocation, {
     int pointer: 1,
-    HitTestable target,
-    AsyncHitTestDispatcher dispatcher
+    HitTester hitTester,
+    EventDispatcher dispatcher
   }) async {
+    assert(hitTester != null);
     assert(dispatcher != null);
     final Completer<TestGesture> completer = new Completer<TestGesture>();
     TestGesture result;
     TestAsyncUtils.guard(() async {
-      // hit test
-      final HitTestResult hitTestResult = new HitTestResult();
-      target ??= GestureBinding.instance;
-      assert(target != null);
-      target.hitTest(hitTestResult, downLocation);
-
       // dispatch down event
+      final HitTestResult hitTestResult = hitTester(downLocation);
       final TestPointer testPointer = new TestPointer(pointer);
       await dispatcher(testPointer.down(downLocation), hitTestResult);
 
@@ -158,7 +154,7 @@ class TestGesture {
     return completer.future;
   }
 
-  final AsyncHitTestDispatcher _dispatcher;
+  final EventDispatcher _dispatcher;
   final HitTestResult _result;
   final TestPointer _pointer;
 

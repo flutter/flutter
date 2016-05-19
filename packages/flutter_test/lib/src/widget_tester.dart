@@ -5,9 +5,11 @@
 import 'dart:async';
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart' as test_package;
 
+import 'all_elements.dart';
 import 'binding.dart';
 import 'controller.dart';
 import 'finders.dart';
@@ -123,8 +125,11 @@ void expectSync(dynamic actual, dynamic matcher, {
 }
 
 /// Class that programmatically interacts with widgets and the test environment.
-class WidgetTester extends WidgetController {
-  WidgetTester._(TestWidgetsFlutterBinding binding) : super(binding);
+class WidgetTester extends WidgetController implements HitTestDispatcher {
+  WidgetTester._(TestWidgetsFlutterBinding binding) : super(binding) {
+    if (binding is LiveTestWidgetsFlutterBinding)
+      binding.deviceEventDispatcher = this;
+  }
 
   /// The binding instance used by the testing framework.
   @override
@@ -158,11 +163,114 @@ class WidgetTester extends WidgetController {
   }
 
   @override
+  HitTestResult hitTestOnBinding(Point location) {
+    location = binding.localToGlobal(location);
+    return super.hitTestOnBinding(location);
+  }
+
+  @override
   Future<Null> sendEventToBinding(PointerEvent event, HitTestResult result) {
     return TestAsyncUtils.guard(() async {
       binding.dispatchEvent(event, result, source: TestBindingEventSource.test);
       return null;
     });
+  }
+
+  /// Handler for device events caught by the binding in live test mode.
+  @override
+  void dispatchEvent(PointerEvent event, HitTestResult result) {
+    if (event is PointerDownEvent) {
+      final RenderObject innerTarget = result.path.firstWhere(
+        (HitTestEntry candidate) => candidate.target is RenderObject,
+        orElse: () => null
+      )?.target;
+      if (innerTarget == null)
+        return null;
+      final Element innerTargetElement = collectAllElementsFrom(binding.renderViewElement)
+        .lastWhere((Element element) => element.renderObject == innerTarget);
+      final List<Element> candidates = <Element>[];
+      innerTargetElement.visitAncestorElements((Element element) {
+        candidates.add(element);
+        return true;
+      });
+      assert(candidates.isNotEmpty);
+      String descendantText;
+      int numberOfWithTexts = 0;
+      int numberOfTypes = 0;
+      int totalNumber = 0;
+      print('Some possible finders for the widgets at ${binding.globalToLocal(event.position)}:');
+      for (Element element in candidates) {
+        if (totalNumber > 10)
+          break;
+        totalNumber += 1;
+
+        if (element.widget is Text) {
+          assert(descendantText == null);
+          final Text widget = element.widget;
+          final Iterable<Element> matches = find.text(widget.data).evaluate();
+          descendantText = widget.data;
+          if (matches.length == 1) {
+            print('  find.text(\'${widget.data}\')');
+            continue;
+          }
+        }
+
+        if (element.widget.key is ValueKey<dynamic>) {
+          final ValueKey<dynamic> key = element.widget.key;
+          String keyLabel;
+          if ((key is ValueKey<int> ||
+               key is ValueKey<double> ||
+               key is ValueKey<bool>)) {
+            keyLabel = 'const ${element.widget.key.runtimeType}(${key.value})';
+          } else if (key is ValueKey<String>) {
+            keyLabel = 'const ${element.widget.key.runtimeType}(\'${key.value}\')';
+          }
+          if (keyLabel != null) {
+            final Iterable<Element> matches = find.byKey(key).evaluate();
+            if (matches.length == 1) {
+              print('  find.byKey($keyLabel)');
+              continue;
+            }
+          }
+        }
+
+        if (!_isPrivate(element.widget.runtimeType)) {
+          if (numberOfTypes < 5) {
+            final Iterable<Element> matches = find.byType(element.widget.runtimeType).evaluate();
+            if (matches.length == 1) {
+              print('  find.byType(${element.widget.runtimeType})');
+              numberOfTypes += 1;
+              continue;
+            }
+          }
+
+          if (descendantText != null && numberOfWithTexts < 5) {
+            final Iterable<Element> matches = find.widgetWithText(element.widget.runtimeType, descendantText).evaluate();
+            if (matches.length == 1) {
+              print('  find.widgetWithText(${element.widget.runtimeType}, \'$descendantText\')');
+              numberOfWithTexts += 1;
+              continue;
+            }
+          }
+        }
+
+        if (!_isPrivate(element.runtimeType)) {
+          final Iterable<Element> matches = find.byElementType(element.runtimeType).evaluate();
+          if (matches.length == 1) {
+            print('  find.byElementType(${element.runtimeType})');
+            continue;
+          }
+        }
+
+        totalNumber -= 1; // if we got here, we didn't actually find something to say about it
+      }
+      if (totalNumber == 0)
+        print('  <could not come up with any unique finders>');
+    }
+  }
+
+  bool _isPrivate(Type type) {
+    return '_'.matchAsPrefix(type.toString()) != null;
   }
 
   /// Returns the exception most recently caught by the Flutter framework.
