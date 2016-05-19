@@ -130,8 +130,13 @@ class Focus extends StatefulWidget {
       if (debugOnlyFocusedKey?.currentContext == null)
         debugOnlyFocusedKey = context.widget.key;
       if (debugOnlyFocusedKey != context.widget.key) {
-        debugPrint('Tried to focus widgets with two different keys: $debugOnlyFocusedKey and ${context.widget.key}');
-        assert('If you have more than one focusable widget, then you should put them inside a Focus.' == true);
+        throw new FlutterError(
+          'Missing Focus scope.\n'
+          'Two focusable widgets with different keys, $debugOnlyFocusedKey and ${context.widget.key}, '
+          'exist in the widget tree simultaneously, but they have no Focus widget ancestor.\n'
+          'If you have more than one focusable widget, then you should put them inside a Focus. '
+          'Normally, this is done for you using a Route, via Navigator, WidgetsApp, or MaterialApp.'
+        );
       }
       return true;
     });

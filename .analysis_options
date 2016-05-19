@@ -1,8 +1,4 @@
 # Specify analysis options.
-#
-# Note that until there is a default "all-in" lint rule-set we need
-# to opt-in to all desired lints (https://github.com/dart-lang/sdk/issues/25843).
-# For a list of lints, see: http://dart-lang.github.io/linter/lints/
 
 # This file is the .analysis_options file used by Flutter editors, such as
 # Atom. It is very similar to flutter_tools/flutter_analysis_options; the only
@@ -23,33 +19,52 @@ analyzer:
     strong_mode_down_cast_composite: ignore
     # we allow having TODOs in the code
     todo: ignore
+
 linter:
   rules:
+    # these are in the same order as http://dart-lang.github.io/linter/lints/
+    # to make maintenance easier
+
+    # error rules
     - avoid_empty_else
+    # - comment_references
+    - control_flow_in_finally
+    - hash_and_equals
+    # - iterable_contains_unrelated_type
+    - test_types_in_equals
+    - throw_in_finally
+    - unrelated_type_equality_checks
+
+    # style rules
     - always_declare_return_types
     - always_specify_types
     - annotate_overrides
     - avoid_as
     - avoid_init_to_null
-    # - avoid_return_types_on_setters # https://github.com/dart-lang/linter/issues/202
+    - avoid_return_types_on_setters
+    - await_only_futures
     - camel_case_types
-    # - constant_identifier_names # https://github.com/dart-lang/linter/issues/204 (and 203)
+    # - constant_identifier_names
+    - control_flow_in_finally
     - empty_constructor_bodies
-    - hash_and_equals
-    # - implementation_imports # https://github.com/dart-lang/linter/issues/203
+    - implementation_imports
     - library_names
     - library_prefixes
     - non_constant_identifier_names
-    # - one_member_abstracts # https://github.com/dart-lang/linter/issues/203
+    - one_member_abstracts
+    # - overriden_field
     - package_api_docs
-    - package_names
     - package_prefixed_library_names
     - prefer_is_not_empty
+    # - public_member_api_docs
     - slash_for_doc_comments
     - sort_constructors_first
     - sort_unnamed_constructors_first
     - super_goes_last
-    - type_annotate_public_apis # subset of always_specify_types
+    # - type_annotate_public_apis # subset of always_specify_types
     - type_init_formals
     - unnecessary_brace_in_string_interp
     - unnecessary_getters_setters
+
+    # pub rules
+    - package_names

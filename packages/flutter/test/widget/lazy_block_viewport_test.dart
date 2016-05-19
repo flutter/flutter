@@ -183,7 +183,7 @@ void main() {
 
     expect(callbackTracker, equals(<int>[0, 1, 2]));
     callbackTracker.clear();
-    await tester.allWidgets.forEach(collectText);
+    tester.allWidgets.forEach(collectText);
     expect(text, equals(<String>['0', '1', '2']));
     text.clear();
 
@@ -191,7 +191,7 @@ void main() {
 
     expect(callbackTracker, equals(<int>[0, 1, 2]));
     callbackTracker.clear();
-    await tester.allWidgets.forEach(collectText);
+    tester.allWidgets.forEach(collectText);
     expect(text, equals(<String>['0', '1', '2']));
     text.clear();
   });
