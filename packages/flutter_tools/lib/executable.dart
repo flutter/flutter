@@ -42,7 +42,7 @@ import 'src/runner/flutter_command_runner.dart';
 
 /// Main entry point for commands.
 ///
-/// This function is intended to be used from the [flutter] command line tool.
+/// This function is intended to be used from the `flutter` command line tool.
 Future<Null> main(List<String> args) async {
   bool help = args.contains('-h') || args.contains('--help');
   bool verbose = args.contains('-v') || args.contains('--verbose');

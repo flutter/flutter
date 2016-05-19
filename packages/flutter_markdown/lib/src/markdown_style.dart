@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'markdown.dart';
 import 'markdown_style_raw.dart';
 
 /// Style used for rendering markdown formatted text using the [MarkdownBody]

@@ -5,8 +5,8 @@ part of flutter_sprites;
 /// constraints property.
 ///
 /// Constrains are applied after the update calls are
-/// completed. They can also be applied at any time by calling a [Node]'s
-/// [applyConstraints] method. It's possible to create custom constraints by
+/// completed. They can also be applied at any time by calling
+/// [Node.applyConstraints]. It's possible to create custom constraints by
 /// overriding this class and implementing the [constrain] method.
 abstract class Constraint {
   /// Called before the node's update method is called. This method can be
