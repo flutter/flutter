@@ -421,7 +421,7 @@ bool _needsRebuild(
     return true;
 
   String lastBuildType = _readBuildMeta(path.dirname(apkPath))['targetBuildType'];
-  String targetBuildType = _getTargetBuildTypeToken(platform, buildMode);
+  String targetBuildType = _getTargetBuildTypeToken(platform, buildMode, new File(apkPath));
   if (lastBuildType != targetBuildType)
     return true;
 
@@ -540,8 +540,13 @@ Future<int> buildAndroid(
   }
 
   int result = _buildApk(platform, buildMode, components, flxPath, keystore, outputFile);
-  if (result == 0)
-    _writeBuildMetaEntry(path.dirname(outputFile), 'targetBuildType', _getTargetBuildTypeToken(platform, buildMode));
+  if (result == 0) {
+    _writeBuildMetaEntry(
+      path.dirname(outputFile),
+      'targetBuildType',
+      _getTargetBuildTypeToken(platform, buildMode, new File(outputFile))
+    );
+  }
   return result;
 }
 
@@ -579,9 +584,11 @@ void _writeBuildMetaEntry(String buildDirectoryPath, String key, dynamic value) 
   buildMetaFile.writeAsStringSync(toPrettyJson(meta));
 }
 
-String _getTargetBuildTypeToken(TargetPlatform platform, BuildMode buildMode) {
+String _getTargetBuildTypeToken(TargetPlatform platform, BuildMode buildMode, File outputBinary) {
   String buildType = getNameForTargetPlatform(platform) + '-' + getModeName(buildMode);
   if (tools.isLocalEngine)
     buildType += ' [${tools.engineBuildPath}]';
+  if (outputBinary.existsSync())
+    buildType += ' [${outputBinary.lastModifiedSync().millisecondsSinceEpoch}]';
   return buildType;
 }
