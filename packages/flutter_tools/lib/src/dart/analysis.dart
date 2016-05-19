@@ -196,8 +196,13 @@ class AnalysisErrorDescription {
 }
 
 class DriverOptions extends AnalysisOptionsImpl {
-  @override
-  int cacheSize = 512;
+
+  DriverOptions() {
+    // Set defaults.
+    cacheSize = 512;
+    lint = true;
+    generateSdkErrors = false;
+  }
 
   /// The path to the dart SDK.
   String dartSdkPath;
@@ -211,14 +216,8 @@ class DriverOptions extends AnalysisOptionsImpl {
   /// The path to analysis options.
   String analysisOptionsFile;
 
-  @override
-  bool generateSdkErrors = false;
-
   /// Analysis options map.
   Map<Object, Object> analysisOptions;
-
-  @override
-  bool lint = true;
 
   /// Out sink for logging.
   IOSink outSink = stdout;
