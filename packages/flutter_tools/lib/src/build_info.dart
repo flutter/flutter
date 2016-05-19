@@ -79,7 +79,3 @@ HostPlatform getCurrentHostPlatform() {
 
   return HostPlatform.linux_x64;
 }
-
-String getTargetBuildTypeName(TargetPlatform platform, BuildMode buildMode) {
-  return getNameForTargetPlatform(platform) + '-' + getModeName(buildMode);
-}

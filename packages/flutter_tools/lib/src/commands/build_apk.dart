@@ -421,7 +421,7 @@ bool _needsRebuild(
     return true;
 
   String lastBuildType = _readBuildMeta(path.dirname(apkPath))['targetBuildType'];
-  String targetBuildType = getTargetBuildTypeName(platform, buildMode);
+  String targetBuildType = _getTargetBuildTypeToken(platform, buildMode);
   if (lastBuildType != targetBuildType)
     return true;
 
@@ -541,7 +541,7 @@ Future<int> buildAndroid(
 
   int result = _buildApk(platform, buildMode, components, flxPath, keystore, outputFile);
   if (result == 0)
-    _writeBuildMetaEntry(path.dirname(outputFile), 'targetBuildType', getTargetBuildTypeName(platform, buildMode));
+    _writeBuildMetaEntry(path.dirname(outputFile), 'targetBuildType', _getTargetBuildTypeToken(platform, buildMode));
   return result;
 }
 
@@ -577,4 +577,11 @@ void _writeBuildMetaEntry(String buildDirectoryPath, String key, dynamic value) 
   meta[key] = value;
   File buildMetaFile = new File(path.join(buildDirectoryPath, 'build_meta.json'));
   buildMetaFile.writeAsStringSync(toPrettyJson(meta));
+}
+
+String _getTargetBuildTypeToken(TargetPlatform platform, BuildMode buildMode) {
+  String buildType = getNameForTargetPlatform(platform) + '-' + getModeName(buildMode);
+  if (tools.isLocalEngine)
+    buildType += ' [${tools.engineBuildPath}]';
+  return buildType;
 }
