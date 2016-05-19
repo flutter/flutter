@@ -4,7 +4,8 @@
 # found in the LICENSE file.
 
 RunCommand() {
-  $@ >/dev/null
+  echo "♦ " $@
+  $@
   return $?
 }
 
