@@ -39,7 +39,9 @@ abstract class Action {
     _finished = false;
   }
 
-  /// The duration of this action in seconds.
+  /// The total time it will take to complete the action, in seconds.
+  ///
+  ///     double myTime = myAction.duration;
   double get duration => 0.0;
 }
 
@@ -54,9 +56,6 @@ abstract class ActionInterval extends Action {
   /// [duration] to specify how long time the action will take to complete.
   ActionInterval([this._duration = 0.0, this.curve]);
 
-  /// The total time it will take to complete the action, in seconds.
-  ///
-  ///     double myTime = myAction.duration;
   @override
   double get duration => _duration;
   double _duration;
