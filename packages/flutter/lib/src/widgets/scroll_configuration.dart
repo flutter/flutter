@@ -27,9 +27,7 @@ class ScrollConfiguration extends InheritedWidget {
     Key key,
     this.delegate,
     Widget child
-  }) : super(key: key, child: child) {
-    assert(delegate != null);
-  }
+  }) : super(key: key, child: child);
 
   static final ScrollConfigurationDelegate _defaultDelegate = new ScrollConfigurationDelegate();
 
@@ -46,6 +44,6 @@ class ScrollConfiguration extends InheritedWidget {
 
   @override
   bool updateShouldNotify(ScrollConfiguration old) {
-    return delegate.updateShouldNotify(old.delegate);
+    return delegate?.updateShouldNotify(old.delegate) ?? false;
   }
 }

@@ -326,8 +326,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
   /// or its createScrollBehavior callback is null, then return a new instance
   /// of [OverscrollWhenScrollableBehavior].
   ExtentScrollBehavior createScrollBehavior() {
-    final ValueGetter<ExtentScrollBehavior> create = ScrollConfiguration.of(context)?.createScrollBehavior;
-    return create != null ? create() : new OverscrollWhenScrollableBehavior();
+    return ScrollConfiguration.of(context)?.createScrollBehavior();
   }
 
   bool _scrollOffsetIsInBounds(double scrollOffset) {
