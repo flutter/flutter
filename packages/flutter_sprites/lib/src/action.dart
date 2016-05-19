@@ -40,8 +40,6 @@ abstract class Action {
   }
 
   /// The total time it will take to complete the action, in seconds.
-  ///
-  ///     double myTime = myAction.duration;
   double get duration => 0.0;
 }
 
