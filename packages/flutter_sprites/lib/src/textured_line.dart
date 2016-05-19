@@ -4,7 +4,9 @@
 
 part of flutter_sprites;
 
-/// A [Node] that draws a polyline from a list of points using the provided [Texture].
+/// A [Node] that draws a polyline from a list of points using the provided
+/// [Texture]. The textured line draws static lines. If you want to create an
+/// animated line, consider using the [EffectLine] instead.
 class TexturedLine extends Node {
 
   /// Creates a new TexturedLine.

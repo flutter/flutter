@@ -222,7 +222,7 @@ class EffectLine extends Node {
     _painter.paint(canvas);
   }
 
-  /// Adds a new point to the line.
+  /// Adds a new point to the end of the line.
   void addPoint(Point point) {
     // Skip duplicate points
     if (points.length > 0 && point.x == points[points.length - 1].x && point.y == points[points.length - 1].y)

@@ -43,17 +43,18 @@ abstract class Action {
   double get duration => 0.0;
 }
 
-/// Callback for setting properties, used by [ActionTween].
+/// Signature for callbacks for setting properties, used by [ActionTween].
 typedef void SetterCallback(dynamic value);
 
 /// The abstract class for an action that changes properties over a time
 /// interval, optionally using an easing curve.
 abstract class ActionInterval extends Action {
 
-  /// Creates a new ActionInterval, call this if you are overriding this class.
+  /// Creates a new ActionInterval, typically you will want to pass in a
+  /// [duration] to specify how long time the action will take to complete.
   ActionInterval([this._duration = 0.0, this.curve]);
 
-  /// The duration, in seconds, of the action.
+  /// The total time it will take to complete the action, in seconds.
   ///
   ///     double myTime = myAction.duration;
   @override
@@ -93,7 +94,7 @@ abstract class ActionInterval extends Action {
   }
 }
 
-/// An action that repeats an action a fixed number of times.
+/// An action that repeats another action a fixed number of times.
 class ActionRepeat extends ActionInterval {
 
   /// The number of times the [action] is repeated.

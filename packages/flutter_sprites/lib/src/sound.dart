@@ -7,8 +7,8 @@ part of flutter_sprites;
 /// An audio asset loaded by the SoundEffectPlayer.
 class SoundEffect {
 
-  /// Creates a new sound effect with the given sound id. Normally, objects
-  /// are created by the [SoundEffectPlayer].
+  /// Creates a new sound effect with the given sound id. Normally,
+  /// SoundEffect objects are created through the [SoundEffectPlayer].
   SoundEffect(this._soundId);
 
   int _soundId;
@@ -17,7 +17,8 @@ class SoundEffect {
 /// A sound being played by the SoundEffectPlayer.
 class SoundEffectStream {
 
-  /// Creates a new SoundEffectStream.
+  /// Creates a new SoundEffectStream. Typically SoundEffectStream objects are
+  /// created by the SoundEffectPlayer.
   SoundEffectStream(SoundEffectPlayer player, int streamId, {
     double leftVolume,
     double rightVolume,
@@ -53,7 +54,7 @@ class SoundEffectStream {
     }
   }
 
-  /// Left volume of the sound effect.
+  /// Left volume of the sound effect, valid values are 0.0 to 1.0.
   double get leftVolume => _leftVolume;
   double _leftVolume;
   set leftVolume(double value) {
@@ -61,7 +62,7 @@ class SoundEffectStream {
     _soundPool.ptr.setVolume(_streamId, <double>[_leftVolume, _rightVolume]);
   }
 
-  /// Right volumen of the sound effect.
+  /// Right volume of the sound effect, valid values are 0.0 to 1.0.
   double get rightVolume => _rightVolume;
   double _rightVolume;
   set rightVolume(double value) {
@@ -69,7 +70,8 @@ class SoundEffectStream {
     _soundPool.ptr.setVolume(_streamId, <double>[_leftVolume, _rightVolume]);
   }
 
-  /// The pitch of the sound effect.
+  /// The pitch of the sound effect, a value of 1.0 plays back the sound effect
+  /// at normal speed. Cannot be negative.
   double get pitch => _pitch;
   double _pitch;
   set pitch(double value) {
@@ -162,10 +164,11 @@ class SoundTrack {
   /// If true, the sound track will automatically loop.
   bool loop;
 
-  /// The current playback time.
+  /// The current playback time in seconds.
   double time;
 
-  /// The volume the sound track is currently played at.
+  /// The volume the sound track is currently played at, valid range is 0.0 to
+  /// 1.0.
   double volume;
 }
 

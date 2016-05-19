@@ -31,6 +31,8 @@ The first thing you need to do to use Flutter Sprites is to setup a SpriteWidget
 
 The root node that you provide the SpriteWidget is a NodeWithSize, the size of the root node defines the coordinate system used by the SpriteWidget. By default the SpriteWidget uses letterboxing to display its contents. This means that the size that you give the root node will determine how the SpriteWidget's contents will be scaled to fit. If it doesn't fit perfectly in the area of the widget, either its top and bottom or the left and right side will be trimmed. You can optionally pass in a parameter to the SpriteWidget for other scaling options depending on your needs.
 
+When you have added the SpriteWidget to your app's build method it will automatically start running animations and handling user input. There is no need for any other extra setup.
+
 ## Adding objects to your node graph
 Your SpriteWidget manages a node graph, the root node is the NodeWithSize that is passed in to the SpriteWidget when it's created. To render sprites, particles systems, or any other objects simply add them to the node graph.
 
@@ -91,6 +93,8 @@ If you want your node to receive multiple touches, set the handleMultiplePointer
 
 ## Animating using actions
 Flutter Sprites provides easy to use functions for animating nodes through actions. You can combine simple action blocks to create more complex animations.
+
+To execute an action animation you first build the action itself, then pass it to the run method of a nodes action manager (see the Tweens section below for an example).
 
 ### Tweens
 Tweens are the simplest building block for creating an animation. It will interpolate a value or property over a specified time period. You provide the ActionTween class with a setter function, its start and end value, and the duration for the tween.
