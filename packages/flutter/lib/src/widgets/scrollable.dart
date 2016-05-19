@@ -51,6 +51,10 @@ class Scrollable extends StatefulWidget {
     assert(scrollAnchor == ViewportAnchor.start || scrollAnchor == ViewportAnchor.end);
   }
 
+  // Warning: keep the dartdoc comments that follow in sync with the copies in
+  // ScrollableViewport, LazyBlock, ScrollableLazyList, ScrollableList, and
+  // ScrollableGrid. And see: https://github.com/dart-lang/dartdoc/issues/1161.
+
   /// The scroll offset this widget should use when first created.
   final double initialScrollOffset;
 
@@ -616,6 +620,8 @@ class ScrollableState<T extends Scrollable> extends State<T> {
     return const <Type, GestureRecognizerFactory>{};
   }
 
+  /// Calls the widget's [builder] by default.
+  ///
   /// Subclasses can override this function to build the interior of their
   /// scrollable widget. Scrollable wraps the returned widget in a
   /// [GestureDetector] to observe the user's interaction with this widget and
@@ -633,7 +639,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
   /// necessary, and then to call [updateGestureDetector] to update
   /// the gesture detectors accordingly.
   Widget buildContent(BuildContext context) {
-    // TBD: if config.builder is null throw a sensible error.
+    assert(config.builder != null);
     return config.builder(context, this);
   }
 }
@@ -681,6 +687,10 @@ class ScrollableViewport extends StatefulWidget {
     this.child
   }) : super(key: key);
 
+  // Warning: keep the dartdoc comments that follow in sync with the copies in
+  // Scrollable, LazyBlock, ScrollableLazyList, ScrollableList, and
+  // ScrollableGrid. And see: https://github.com/dart-lang/dartdoc/issues/1161.
+
   /// The scroll offset this widget should use when first created.
   final double initialScrollOffset;
 
@@ -707,11 +717,6 @@ class ScrollableViewport extends StatefulWidget {
   /// highest index) will be pushed down, while in the
   /// [ViewportAnchor.end] case the items before it (with lower
   /// indices, up to the item with the index 0) will be pushed up.
-  ///
-  /// Subclasses may ignore this value if, for instance, they do not
-  /// have a concept of an anchor, or have more complicated behavior
-  /// (e.g. they would by default put the middle item in the middle of
-  /// the container).
   final ViewportAnchor scrollAnchor;
 
   /// Called whenever this widget starts to scroll.

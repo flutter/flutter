@@ -18,12 +18,8 @@ enum PageableListFlingBehavior {
   stopAtNextPage
 }
 
-/// Scrollable widget that scrolls one "page" at a time.
-///
-/// In a pageable list, one child is visible at a time. Scrolling the list
-/// reveals either the next or previous child.
-class PageableList extends Scrollable {
-  PageableList({
+abstract class PageableListBase extends Scrollable {
+  PageableListBase({
     Key key,
     double initialScrollOffset,
     Axis scrollDirection: Axis.vertical,
@@ -36,8 +32,7 @@ class PageableList extends Scrollable {
     this.itemsSnapAlignment: PageableListFlingBehavior.stopAtNextPage,
     this.onPageChanged,
     this.duration: const Duration(milliseconds: 200),
-    this.curve: Curves.ease,
-    this.children
+    this.curve: Curves.ease
   }) : super(
     key: key,
     initialScrollOffset: initialScrollOffset,
@@ -66,19 +61,102 @@ class PageableList extends Scrollable {
   /// The animation curve to use when animating to a given page.
   final Curve curve;
 
+  int get _itemCount;
+}
+
+/// Scrollable widget that scrolls one "page" at a time.
+///
+/// In a pageable list, one child is visible at a time. Scrolling the list
+/// reveals either the next or previous child.
+class PageableList extends PageableListBase {
+  PageableList({
+    Key key,
+    double initialScrollOffset,
+    Axis scrollDirection: Axis.vertical,
+    ViewportAnchor scrollAnchor: ViewportAnchor.start,
+    ScrollListener onScrollStart,
+    ScrollListener onScroll,
+    ScrollListener onScrollEnd,
+    SnapOffsetCallback snapOffsetCallback,
+    bool itemsWrap: false,
+    PageableListFlingBehavior itemsSnapAlignment: PageableListFlingBehavior.stopAtNextPage,
+    ValueChanged<int> onPageChanged,
+    Duration duration: const Duration(milliseconds: 200),
+    Curve curve: Curves.ease,
+    this.children
+  }) : super(
+    key: key,
+    initialScrollOffset: initialScrollOffset,
+    scrollDirection: scrollDirection,
+    scrollAnchor: scrollAnchor,
+    onScrollStart: onScrollStart,
+    onScroll: onScroll,
+    onScrollEnd: onScrollEnd,
+    snapOffsetCallback: snapOffsetCallback,
+    itemsWrap: itemsWrap,
+    itemsSnapAlignment: itemsSnapAlignment,
+    onPageChanged: onPageChanged,
+    duration: duration,
+    curve: curve
+  );
+
   /// The list of pages themselves.
   final Iterable<Widget> children;
+
+  @override
+  int get _itemCount => children?.length ?? 0;
 
   @override
   PageableListState<PageableList> createState() => new PageableListState<PageableList>();
 }
 
-/// State for a [PageableList] widget.
-///
-/// Widgets that subclass [PageableList] can subclass this class to have
-/// sensible default behaviors for pageable lists.
-class PageableListState<T extends PageableList> extends ScrollableState<T> {
-  int get _itemCount => config.children?.length ?? 0;
+class PageableLazyList extends PageableListBase {
+  PageableLazyList({
+    Key key,
+    double initialScrollOffset,
+    Axis scrollDirection: Axis.vertical,
+    ViewportAnchor scrollAnchor: ViewportAnchor.start,
+    ScrollListener onScrollStart,
+    ScrollListener onScroll,
+    ScrollListener onScrollEnd,
+    SnapOffsetCallback snapOffsetCallback,
+    PageableListFlingBehavior itemsSnapAlignment: PageableListFlingBehavior.stopAtNextPage,
+    ValueChanged<int> onPageChanged,
+    Duration duration: const Duration(milliseconds: 200),
+    Curve curve: Curves.ease,
+    this.itemCount,
+    this.itemBuilder
+  }) : super(
+    key: key,
+    initialScrollOffset: initialScrollOffset,
+    scrollDirection: scrollDirection,
+    scrollAnchor: scrollAnchor,
+    onScrollStart: onScrollStart,
+    onScroll: onScroll,
+    onScrollEnd: onScrollEnd,
+    snapOffsetCallback: snapOffsetCallback,
+    itemsWrap: false,
+    itemsSnapAlignment: itemsSnapAlignment,
+    onPageChanged: onPageChanged,
+    duration: duration,
+    curve: curve
+  );
+
+  /// The total number of list items.
+  final int itemCount;
+
+  /// A function that returns the pages themselves.
+  final ItemListBuilder itemBuilder;
+
+  @override
+  int get _itemCount => itemCount ?? 0;
+
+  @override
+  _PageableLazyListState createState() => new _PageableLazyListState();
+}
+
+abstract class _PageableListStateBase<T extends PageableListBase> extends ScrollableState<T> {
+  int get _itemCount => config._itemCount;
   int _previousItemCount;
 
   double get _pixelsPerScrollUnit {
@@ -124,7 +202,7 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
   }
 
   @override
-  void didUpdateConfig(PageableList oldConfig) {
+  void didUpdateConfig(PageableListBase oldConfig) {
     super.didUpdateConfig(oldConfig);
 
     bool scrollBehaviorUpdateNeeded = config.scrollDirection != oldConfig.scrollDirection;
@@ -147,17 +225,6 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
       containerExtent: 1.0,
       scrollOffset: scrollOffset
     ));
-  }
-
-  @override
-  Widget buildContent(BuildContext context) {
-    return new PageViewport(
-      itemsWrap: config.itemsWrap,
-      mainAxis: config.scrollDirection,
-      anchor: config.scrollAnchor,
-      startOffset: scrollOffset,
-      children: config.children
-    );
   }
 
   UnboundedBehavior _unboundedBehavior;
@@ -216,15 +283,44 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
   }
 }
 
-class PageViewport extends VirtualViewportFromIterable {
-  PageViewport({
-    this.startOffset: 0.0,
-    this.mainAxis: Axis.vertical,
-    this.anchor: ViewportAnchor.start,
-    this.itemsWrap: false,
-    this.overlayPainter,
-    this.children
-  }) {
+/// State for a [PageableList] widget.
+///
+/// Widgets that subclass [PageableList] can subclass this class to have
+/// sensible default behaviors for pageable lists.
+class PageableListState<T extends PageableList> extends _PageableListStateBase<T> {
+  @override
+  Widget buildContent(BuildContext context) {
+    return new PageViewport(
+      itemsWrap: config.itemsWrap,
+      mainAxis: config.scrollDirection,
+      anchor: config.scrollAnchor,
+      startOffset: scrollOffset,
+      children: config.children
+    );
+  }
+}
+
+class _PageableLazyListState extends _PageableListStateBase<PageableLazyList> {
+  @override
+  Widget buildContent(BuildContext context) {
+    return new LazyPageViewport(
+      mainAxis: config.scrollDirection,
+      anchor: config.scrollAnchor,
+      startOffset: scrollOffset,
+      itemCount: config.itemCount,
+      itemBuilder: config.itemBuilder
+    );
+  }
+}
+
+class _VirtualPageViewport extends VirtualViewport {
+  _VirtualPageViewport(
+    this.startOffset,
+    this.mainAxis,
+    this.anchor,
+    this.itemsWrap,
+    this.overlayPainter
+  ) {
     assert(mainAxis != null);
   }
 
@@ -237,20 +333,17 @@ class PageViewport extends VirtualViewportFromIterable {
   final RenderObjectPainter overlayPainter;
 
   @override
-  final Iterable<Widget> children;
-
-  @override
   RenderList createRenderObject(BuildContext context) => new RenderList();
 
   @override
-  _PageViewportElement createElement() => new _PageViewportElement(this);
+  _VirtualPageViewportElement createElement() => new _VirtualPageViewportElement(this);
 }
 
-class _PageViewportElement extends VirtualViewportElement {
-  _PageViewportElement(PageViewport widget) : super(widget);
+class _VirtualPageViewportElement extends VirtualViewportElement {
+  _VirtualPageViewportElement(_VirtualPageViewport widget) : super(widget);
 
   @override
-  PageViewport get widget => super.widget;
+  _VirtualPageViewport get widget => super.widget;
 
   @override
   RenderList get renderObject => super.renderObject;
@@ -279,7 +372,7 @@ class _PageViewportElement extends VirtualViewportElement {
   }
 
   @override
-  void updateRenderObject(PageViewport oldWidget) {
+  void updateRenderObject(_VirtualPageViewport oldWidget) {
     renderObject
       ..mainAxis = widget.mainAxis
       ..overlayPainter = widget.overlayPainter;
@@ -341,4 +434,47 @@ class _PageViewportElement extends VirtualViewportElement {
     _updateViewportDimensions();
     super.layout(constraints);
   }
+}
+
+class PageViewport extends _VirtualPageViewport with VirtualViewportFromIterable {
+  PageViewport({
+    double startOffset: 0.0,
+    Axis mainAxis: Axis.vertical,
+    ViewportAnchor anchor: ViewportAnchor.start,
+    bool itemsWrap: false,
+    RenderObjectPainter overlayPainter,
+    this.children
+  }) : super(
+    startOffset,
+    mainAxis,
+    anchor,
+    itemsWrap,
+    overlayPainter
+  );
+
+  @override
+  final Iterable<Widget> children;
+}
+
+class LazyPageViewport extends _VirtualPageViewport with VirtualViewportFromBuilder {
+  LazyPageViewport({
+    double startOffset: 0.0,
+    Axis mainAxis: Axis.vertical,
+    ViewportAnchor anchor: ViewportAnchor.start,
+    RenderObjectPainter overlayPainter,
+    this.itemCount,
+    this.itemBuilder
+  }) : super(
+    startOffset,
+    mainAxis,
+    anchor,
+    false, // Don't support wrapping yet.
+    overlayPainter
+  );
+
+  @override
+  final int itemCount;
+
+  @override
+  final ItemListBuilder itemBuilder;
 }

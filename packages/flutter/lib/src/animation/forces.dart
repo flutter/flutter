@@ -18,6 +18,10 @@ abstract class Force {
 
 /// A factory for spring-based physics simulations.
 class SpringForce extends Force {
+  /// Creates a spring force.
+  ///
+  /// The [spring], [left], and [right] arguments must not be null. The [left]
+  /// argument defaults to 0.0 and the [right] argument defaults to 1.0.
   const SpringForce(this.spring, { this.left: 0.0, this.right: 1.0 });
 
   /// The description of the spring to be used in the created simulations.

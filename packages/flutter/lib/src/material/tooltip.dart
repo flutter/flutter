@@ -8,59 +8,58 @@ import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
-import 'theme.dart';
+import 'typography.dart';
 
-const double _kDefaultTooltipBorderRadius = 2.0;
-const double _kDefaultTooltipHeight = 32.0;
-const EdgeInsets _kDefaultTooltipPadding = const EdgeInsets.symmetric(horizontal: 16.0);
-const double _kDefaultVerticalTooltipOffset = 24.0;
-const EdgeInsets _kDefaultTooltipScreenEdgeMargin = const EdgeInsets.all(10.0);
-const Duration _kDefaultTooltipFadeDuration = const Duration(milliseconds: 200);
-const Duration _kDefaultTooltipShowDuration = const Duration(seconds: 2);
+const double _kScreenEdgeMargin = 10.0;
+const Duration _kFadeDuration = const Duration(milliseconds: 200);
+const Duration _kShowDuration = const Duration(seconds: 2);
 
+/// A material design tooltip.
+///
+/// Tooltips provide text labels that help explain the function of a button or
+/// other user interface action. Wrap the button in a [Tooltip] widget to
+/// show a label when the widget long pressed (or when the user takes some
+/// other appropriate action).
+///
+/// Many widgets, such as [IconButton], [FloatingActionButton], and
+/// [PopupMenuButton] have a `tooltip` property that, when non-null, causes the
+/// widget to include a [Tooltip] in its build.
+///
+/// Tooltips improve the accessibility of visual widgets by proving a textual
+/// representation of the widget, which, for example, can be vocalized by a
+/// screen reader.
+///
+/// See also:
+///
+///  * <https://www.google.com/design/spec/components/tooltips.html>
 class Tooltip extends StatefulWidget {
+  /// Creates a tooltip.
+  ///
+  /// By default, tooltips prefer to appear below the [child] widget when the
+  /// user long presses on the widget.
+  ///
+  /// The [message] argument cannot be null.
   Tooltip({
     Key key,
     this.message,
-    this.backgroundColor,
-    this.textColor,
-    this.style,
-    this.opacity: 0.9,
-    this.borderRadius: _kDefaultTooltipBorderRadius,
-    this.height: _kDefaultTooltipHeight,
-    this.padding: _kDefaultTooltipPadding,
-    this.verticalOffset: _kDefaultVerticalTooltipOffset,
-    this.screenEdgeMargin: _kDefaultTooltipScreenEdgeMargin,
+    this.height: 32.0,
+    this.padding: const EdgeInsets.symmetric(horizontal: 16.0),
+    this.verticalOffset: 24.0,
     this.preferBelow: true,
-    this.fadeDuration: _kDefaultTooltipFadeDuration,
-    this.showDuration: _kDefaultTooltipShowDuration,
     this.child
   }) : super(key: key) {
     assert(message != null);
-    assert(opacity != null);
-    assert(borderRadius != null);
     assert(height != null);
     assert(padding != null);
     assert(verticalOffset != null);
-    assert(screenEdgeMargin != null);
     assert(preferBelow != null);
-    assert(fadeDuration != null);
-    assert(showDuration != null);
     assert(child != null);
   }
 
+  /// The text to display in the tooltip.
   final String message;
 
-  final Color backgroundColor;
-
-  final Color textColor;
-
-  final TextStyle style;
-
-  final double opacity;
-
-  final double borderRadius;
-
+  /// The amount of vertical space the tooltip should occupy (inside its padding).
   final double height;
 
   /// The amount of space by which to inset the child.
@@ -68,15 +67,15 @@ class Tooltip extends StatefulWidget {
   /// Defaults to 16.0 logical pixels in each direction.
   final EdgeInsets padding;
 
+  /// The amount of vertical distance between the widget and the displayed tooltip.
   final double verticalOffset;
 
-  final EdgeInsets screenEdgeMargin;
-
+  /// Whether the tooltip defaults to being displayed below the widget.
+  ///
+  /// Defaults to true. If there is insufficient space to display the tooltip in
+  /// the preferred direction, the tooltip will be displayed in the opposite
+  /// direction.
   final bool preferBelow;
-
-  final Duration fadeDuration;
-
-  final Duration showDuration;
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -94,7 +93,6 @@ class Tooltip extends StatefulWidget {
 }
 
 class _TooltipState extends State<Tooltip> {
-
   AnimationController _controller;
   OverlayEntry _entry;
   Timer _timer;
@@ -102,42 +100,36 @@ class _TooltipState extends State<Tooltip> {
   @override
   void initState() {
     super.initState();
-    _controller = new AnimationController(duration: config.fadeDuration)
-      ..addStatusListener((AnimationStatus status) {
-        switch (status) {
-          case AnimationStatus.completed:
-            assert(_entry != null);
-            assert(_timer == null);
-            resetShowTimer();
-            break;
-          case AnimationStatus.dismissed:
-            assert(_entry != null);
-            assert(_timer == null);
-            _entry.remove();
-            _entry = null;
-            break;
-          default:
-            break;
-        }
-      });
+    _controller = new AnimationController(duration: _kFadeDuration)
+      ..addStatusListener(_handleStatusChanged);
+  }
+
+  void _handleStatusChanged(AnimationStatus status) {
+    switch (status) {
+      case AnimationStatus.completed:
+        assert(_entry != null);
+        assert(_timer == null);
+        resetShowTimer();
+        break;
+      case AnimationStatus.dismissed:
+        assert(_entry != null);
+        assert(_timer == null);
+        _entry.remove();
+        _entry = null;
+        break;
+      default:
+        break;
+    }
   }
 
   @override
   void didUpdateConfig(Tooltip oldConfig) {
     super.didUpdateConfig(oldConfig);
-    if (config.fadeDuration != oldConfig.fadeDuration)
-      _controller.duration = config.fadeDuration;
     if (_entry != null &&
         (config.message != oldConfig.message ||
-         config.backgroundColor != oldConfig.backgroundColor ||
-         config.style != oldConfig.style ||
-         config.textColor != oldConfig.textColor ||
-         config.borderRadius != oldConfig.borderRadius ||
          config.height != oldConfig.height ||
          config.padding != oldConfig.padding ||
-         config.opacity != oldConfig.opacity ||
          config.verticalOffset != oldConfig.verticalOffset ||
-         config.screenEdgeMargin != oldConfig.screenEdgeMargin ||
          config.preferBelow != oldConfig.preferBelow))
       _entry.markNeedsBuild();
   }
@@ -145,7 +137,7 @@ class _TooltipState extends State<Tooltip> {
   void resetShowTimer() {
     assert(_controller.status == AnimationStatus.completed);
     assert(_entry != null);
-    _timer = new Timer(config.showDuration, hideTooltip);
+    _timer = new Timer(_kShowDuration, hideTooltip);
   }
 
   void showTooltip() {
@@ -153,22 +145,16 @@ class _TooltipState extends State<Tooltip> {
       RenderBox box = context.findRenderObject();
       Point target = box.localToGlobal(box.size.center(Point.origin));
       _entry = new OverlayEntry(builder: (BuildContext context) {
-        TextStyle textStyle = (config.style ?? Theme.of(context).textTheme.body1).copyWith(color: config.textColor ?? Colors.white);
         return new _TooltipOverlay(
           message: config.message,
-          backgroundColor: config.backgroundColor ?? Colors.grey[700],
-          style: textStyle,
-          borderRadius: config.borderRadius,
           height: config.height,
           padding: config.padding,
-          opacity: config.opacity,
           animation: new CurvedAnimation(
             parent: _controller,
             curve: Curves.ease
           ),
           target: target,
           verticalOffset: config.verticalOffset,
-          screenEdgeMargin: config.screenEdgeMargin,
           preferBelow: config.preferBelow
         );
       });
@@ -198,6 +184,15 @@ class _TooltipState extends State<Tooltip> {
   }
 
   @override
+  void dispose() {
+    _controller.stop();
+    _entry?.remove();
+    _entry = null;
+    assert(_timer == null);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     assert(Overlay.of(context, debugRequiredFor: config) != null);
     return new GestureDetector(
@@ -216,12 +211,11 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   _TooltipPositionDelegate({
     this.target,
     this.verticalOffset,
-    this.screenEdgeMargin,
     this.preferBelow
   });
+
   final Point target;
   final double verticalOffset;
-  final EdgeInsets screenEdgeMargin;
   final bool preferBelow;
 
   @override
@@ -230,21 +224,21 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   @override
   Offset getPositionForChild(Size size, Size childSize) {
     // VERTICAL DIRECTION
-    final bool fitsBelow = target.y + verticalOffset + childSize.height <= size.height - screenEdgeMargin.bottom;
-    final bool fitsAbove = target.y - verticalOffset - childSize.height >= screenEdgeMargin.top;
+    final bool fitsBelow = target.y + verticalOffset + childSize.height <= size.height - _kScreenEdgeMargin;
+    final bool fitsAbove = target.y - verticalOffset - childSize.height >= _kScreenEdgeMargin;
     final bool tooltipBelow = preferBelow ? fitsBelow || !fitsAbove : !(fitsAbove || !fitsBelow);
     double y;
     if (tooltipBelow)
-      y = math.min(target.y + verticalOffset, size.height - screenEdgeMargin.bottom);
+      y = math.min(target.y + verticalOffset, size.height - _kScreenEdgeMargin);
     else
-      y = math.max(target.y - verticalOffset - childSize.height, screenEdgeMargin.top);
+      y = math.max(target.y - verticalOffset - childSize.height, _kScreenEdgeMargin);
     // HORIZONTAL DIRECTION
-    double normalizedTargetX = target.x.clamp(screenEdgeMargin.left, size.width - screenEdgeMargin.right);
+    double normalizedTargetX = target.x.clamp(_kScreenEdgeMargin, size.width - _kScreenEdgeMargin);
     double x;
-    if (normalizedTargetX < screenEdgeMargin.left + childSize.width / 2.0) {
-      x = screenEdgeMargin.left;
-    } else if (normalizedTargetX > size.width - screenEdgeMargin.right - childSize.width / 2.0) {
-      x = size.width - screenEdgeMargin.right - childSize.width;
+    if (normalizedTargetX < _kScreenEdgeMargin + childSize.width / 2.0) {
+      x = _kScreenEdgeMargin;
+    } else if (normalizedTargetX > size.width - _kScreenEdgeMargin - childSize.width / 2.0) {
+      x = size.width - _kScreenEdgeMargin - childSize.width;
     } else {
       x = normalizedTargetX - childSize.width / 2.0;
     }
@@ -255,7 +249,6 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   bool shouldRelayout(_TooltipPositionDelegate oldDelegate) {
     return target != oldDelegate.target
         || verticalOffset != oldDelegate.verticalOffset
-        || screenEdgeMargin != oldDelegate.screenEdgeMargin
         || preferBelow != oldDelegate.preferBelow;
   }
 }
@@ -264,30 +257,20 @@ class _TooltipOverlay extends StatelessWidget {
   _TooltipOverlay({
     Key key,
     this.message,
-    this.backgroundColor,
-    this.style,
-    this.borderRadius,
     this.height,
     this.padding,
-    this.opacity,
     this.animation,
     this.target,
     this.verticalOffset,
-    this.screenEdgeMargin,
     this.preferBelow
   }) : super(key: key);
 
   final String message;
-  final Color backgroundColor;
-  final TextStyle style;
-  final double opacity;
-  final double borderRadius;
   final double height;
   final EdgeInsets padding;
   final Animation<double> animation;
   final Point target;
   final double verticalOffset;
-  final EdgeInsets screenEdgeMargin;
   final bool preferBelow;
 
   @override
@@ -302,23 +285,22 @@ class _TooltipOverlay extends StatelessWidget {
           delegate: new _TooltipPositionDelegate(
             target: target,
             verticalOffset: verticalOffset,
-            screenEdgeMargin: screenEdgeMargin,
             preferBelow: preferBelow
           ),
           child: new FadeTransition(
             opacity: animation,
             child: new Opacity(
-              opacity: opacity,
+              opacity: 0.9,
               child: new Container(
                 decoration: new BoxDecoration(
-                  backgroundColor: backgroundColor,
-                  borderRadius: borderRadius
+                  backgroundColor: Colors.grey[700],
+                  borderRadius: 2.0
                 ),
                 height: height,
                 padding: padding,
                 child: new Center(
                   widthFactor: 1.0,
-                  child: new Text(message, style: style)
+                  child: new Text(message, style: Typography.white.body1)
                 )
               )
             )

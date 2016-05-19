@@ -8,6 +8,13 @@ export 'dart:ui' show TextAffinity, TextPosition;
 
 /// A range of characters in a string of text.
 class TextRange {
+  /// Creates a text range.
+  ///
+  /// The [start] and [end] arguments must not be null. Both the [start] and
+  /// [end] must either be greater than or equal to zero or both exactly -1.
+  ///
+  /// Instead of creating an empty text range, consider using the [empty]
+  /// constant.
   const TextRange({ this.start, this.end });
 
   /// A text range that starts and ends at offset.
@@ -19,9 +26,13 @@ class TextRange {
   static const TextRange empty = const TextRange(start: -1, end: -1);
 
   /// The index of the first character in the range.
+  ///
+  /// If [start] and [end] are both -1, the text range is empty.
   final int start;
 
   /// The next index after the characters in this range.
+  ///
+  /// If [start] and [end] are both -1, the text range is empty.
   final int end;
 
   /// Whether this range represents a valid position in the text.
@@ -74,6 +85,9 @@ class TextRange {
 
 /// A range of text that represents a selection.
 class TextSelection extends TextRange {
+  /// Creates a text selection.
+  ///
+  /// The [baseOffset] and [extentOffset] arguments must not be null.
   const TextSelection({
     int baseOffset,
     int extentOffset,
@@ -86,11 +100,23 @@ class TextSelection extends TextRange {
          end: baseOffset < extentOffset ? extentOffset : baseOffset
        );
 
+  /// Creates a collapsed selection at the given offset.
+  ///
+  /// A collapsed selection starts and ends at the same offset, which means it
+  /// contains zero characters but instead serves as an insertion point in the
+  /// text.
+  ///
+  /// The [offset] argument must not be null.
   const TextSelection.collapsed({
     int offset,
     this.affinity: TextAffinity.downstream
   }) : baseOffset = offset, extentOffset = offset, isDirectional = false, super.collapsed(offset);
 
+  /// Creates a collapsed selection at the given text position.
+  ///
+  /// A collapsed selection starts and ends at the same offset, which means it
+  /// contains zero characters but instead serves as an insertion point in the
+  /// text.
   TextSelection.fromPosition(TextPosition position)
     : baseOffset = position.offset,
       extentOffset = position.offset,

@@ -269,8 +269,7 @@ Future<int> startApp(DriveCommand command, BuildMode buildMode) async {
     mainPath: mainPath,
     route: command.route,
     debuggingOptions: new DebuggingOptions.enabled(
-      // TODO(devoncarew): Change this to 'buildMode == BuildMode.debug'.
-      checked: command.argResults['checked'],
+      buildMode,
       startPaused: true,
       observatoryPort: command.debugPort
     ),

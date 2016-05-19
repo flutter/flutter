@@ -4,7 +4,16 @@
 
 import 'dart:ui' show Color, lerpDouble, hashValues;
 
+/// A color represented using [alpha], [hue], [saturation], and [value].
+///
+/// An [HSVColor] is represented in a parameter space that's motivated by human
+/// perception. The representation is useful for some color computations (e.g.,
+/// rotating the hue through the colors of the rainbow).
 class HSVColor {
+  /// Creates a color.
+  ///
+  /// All the arguments must not be null and be in their respective ranges. See
+  /// the fields for each parameter for a description of their ranges.
   const HSVColor.fromAHSV(this.alpha, this.hue, this.saturation, this.value);
 
   /// Alpha, from 0.0 to 1.0.
@@ -19,18 +28,22 @@ class HSVColor {
   /// Value, from 0.0 to 1.0.
   final double value;
 
+  /// Returns a copy of this color with the alpha parameter replaced with the given value.
   HSVColor withAlpha(double alpha) {
     return new HSVColor.fromAHSV(alpha, hue, saturation, value);
   }
 
+  /// Returns a copy of this color with the hue parameter replaced with the given value.
   HSVColor withHue(double hue) {
     return new HSVColor.fromAHSV(alpha, hue, saturation, value);
   }
 
+  /// Returns a copy of this color with the saturation parameter replaced with the given value.
   HSVColor withSaturation(double saturation) {
     return new HSVColor.fromAHSV(alpha, hue, saturation, value);
   }
 
+  /// Returns a copy of this color with the value parameter replaced with the given value.
   HSVColor withValue(double value) {
     return new HSVColor.fromAHSV(alpha, hue, saturation, value);
   }

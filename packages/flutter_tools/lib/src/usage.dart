@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:usage/src/usage_impl_io.dart';
+import 'package:usage/src/usage_impl_io.dart'; // ignore: implementation_imports
 import 'package:usage/usage.dart';
 
 import 'base/context.dart';

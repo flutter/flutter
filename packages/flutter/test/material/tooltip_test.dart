@@ -43,10 +43,7 @@ void main() {
                       height: 20.0,
                       padding: const EdgeInsets.all(5.0),
                       verticalOffset: 20.0,
-                      screenEdgeMargin: const EdgeInsets.all(10.0),
                       preferBelow: false,
-                      fadeDuration: const Duration(seconds: 1),
-                      showDuration: const Duration(seconds: 2),
                       child: new Container(
                         width: 0.0,
                         height: 0.0
@@ -94,10 +91,7 @@ void main() {
                       height: 20.0,
                       padding: const EdgeInsets.all(5.0),
                       verticalOffset: 20.0,
-                      screenEdgeMargin: const EdgeInsets.all(10.0),
                       preferBelow: false,
-                      fadeDuration: const Duration(seconds: 1),
-                      showDuration: const Duration(seconds: 2),
                       child: new Container(
                         width: 0.0,
                         height: 0.0
@@ -146,10 +140,7 @@ void main() {
                       height: 100.0,
                       padding: const EdgeInsets.all(0.0),
                       verticalOffset: 100.0,
-                      screenEdgeMargin: const EdgeInsets.all(100.0),
                       preferBelow: false,
-                      fadeDuration: const Duration(seconds: 1),
-                      showDuration: const Duration(seconds: 2),
                       child: new Container(
                         width: 0.0,
                         height: 0.0
@@ -167,7 +158,7 @@ void main() {
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
-     *        ___        * }-100.0 margin
+     *        ___        * }- 10.0 margin
      *       |___|       * }-100.0 height
      *         |         * }-100.0 vertical offset
      *         o         * y=300.0
@@ -197,13 +188,10 @@ void main() {
                     child: new Tooltip(
                       key: key,
                       message: 'TIP',
-                      height: 100.0,
+                      height: 190.0,
                       padding: const EdgeInsets.all(0.0),
                       verticalOffset: 100.0,
-                      screenEdgeMargin: const EdgeInsets.all(100.0),
                       preferBelow: false,
-                      fadeDuration: const Duration(seconds: 1),
-                      showDuration: const Duration(seconds: 2),
                       child: new Container(
                         width: 0.0,
                         height: 0.0
@@ -222,8 +210,8 @@ void main() {
 
     // we try to put it here but it doesn't fit:
     /********************* 800x600 screen
-     *        ___        * }-100.0 margin
-     *       |___|       * }-100.0 height (starts at y=99.0)
+     *        ___        * }- 10.0 margin
+     *       |___|       * }-190.0 height (starts at y=9.0)
      *         |         * }-100.0 vertical offset
      *         o         * y=299.0
      *                   *
@@ -237,14 +225,14 @@ void main() {
      *                   *
      *         o         * y=299.0
      *        _|_        * }-100.0 vertical offset
-     *       |___|       * }-100.0 height
-     *                   * }-100.0 margin
+     *       |___|       * }-190.0 height
+     *                   * }- 10.0 margin
      *********************/
 
     RenderBox tip = tester.renderObject(find.text('TIP')).parent;
-    expect(tip.size.height, equals(100.0));
+    expect(tip.size.height, equals(190.0));
     expect(tip.localToGlobal(tip.size.topLeft(Point.origin)).y, equals(399.0));
-    expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).y, equals(499.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).y, equals(589.0));
   });
 
   testWidgets('Does tooltip end up in the right place - center prefer below fits', (WidgetTester tester) async {
@@ -262,13 +250,10 @@ void main() {
                     child: new Tooltip(
                       key: key,
                       message: 'TIP',
-                      height: 100.0,
+                      height: 190.0,
                       padding: const EdgeInsets.all(0.0),
                       verticalOffset: 100.0,
-                      screenEdgeMargin: const EdgeInsets.all(100.0),
                       preferBelow: true,
-                      fadeDuration: const Duration(seconds: 1),
-                      showDuration: const Duration(seconds: 2),
                       child: new Container(
                         width: 0.0,
                         height: 0.0
@@ -290,14 +275,14 @@ void main() {
      *                   *
      *         o         * y=300.0
      *        _|_        * }-100.0 vertical offset
-     *       |___|       * }-100.0 height
-     *                   * }-100.0 margin
+     *       |___|       * }-190.0 height
+     *                   * }- 10.0 margin
      *********************/
 
     RenderBox tip = tester.renderObject(find.text('TIP')).parent;
-    expect(tip.size.height, equals(100.0));
+    expect(tip.size.height, equals(190.0));
     expect(tip.localToGlobal(tip.size.topLeft(Point.origin)).y, equals(400.0));
-    expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).y, equals(500.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).y, equals(590.0));
   });
 
   testWidgets('Does tooltip end up in the right place - way off to the right', (WidgetTester tester) async {
@@ -318,10 +303,7 @@ void main() {
                       height: 10.0,
                       padding: const EdgeInsets.all(0.0),
                       verticalOffset: 10.0,
-                      screenEdgeMargin: const EdgeInsets.all(10.0),
                       preferBelow: true,
-                      fadeDuration: const Duration(seconds: 1),
-                      showDuration: const Duration(seconds: 2),
                       child: new Container(
                         width: 0.0,
                         height: 0.0
@@ -373,10 +355,7 @@ void main() {
                       height: 10.0,
                       padding: const EdgeInsets.all(0.0),
                       verticalOffset: 10.0,
-                      screenEdgeMargin: const EdgeInsets.all(10.0),
                       preferBelow: true,
-                      fadeDuration: const Duration(seconds: 1),
-                      showDuration: const Duration(seconds: 2),
                       child: new Container(
                         width: 0.0,
                         height: 0.0
@@ -426,8 +405,6 @@ void main() {
                     child: new Tooltip(
                       key: key,
                       message: 'TIP',
-                      fadeDuration: const Duration(seconds: 1),
-                      showDuration: const Duration(seconds: 2),
                       child: new Container(width: 0.0, height: 0.0)
                     )
                   ),

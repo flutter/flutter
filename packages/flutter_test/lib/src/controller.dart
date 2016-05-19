@@ -32,6 +32,7 @@ class WidgetController {
     return finder.evaluate().isNotEmpty;
   }
 
+
   /// All widgets currently in the widget tree (lazy pre-order traversal).
   ///
   /// Can contain duplicates, since widgets can be used in multiple
@@ -46,6 +47,9 @@ class WidgetController {
   ///
   /// Throws a [StateError] if `finder` is empty or matches more than
   /// one widget.
+  ///
+  /// * Use [firstWidget] if you expect to match several widgets but only want the first.
+  /// * Use [widgetList] if you expect to match several widgets and want all of them.
   Widget/*=T*/ widget/*<T extends Widget>*/(Finder finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().single.widget;
@@ -55,10 +59,22 @@ class WidgetController {
   /// traversal of the widget tree.
   ///
   /// Throws a [StateError] if `finder` is empty.
+  ///
+  /// * Use [widget] if you only expect to match one widget.
   Widget/*=T*/ firstWidget/*<T extends Widget>*/(Finder finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().first.widget;
   }
+
+  /// The matching widgets in the widget tree.
+  ///
+  /// * Use [widget] if you only expect to match one widget.
+  /// * Use [firstWidget] if you expect to match several but only want the first.
+  Iterable<Widget/*=T*/> widgetList/*<T extends Widget>*/(Finder finder) {
+    TestAsyncUtils.guardSync();
+    return finder.evaluate().map((Element element) => element.widget);
+  }
+
 
   /// All elements currently in the widget tree (lazy pre-order traversal).
   ///
@@ -74,6 +90,9 @@ class WidgetController {
   ///
   /// Throws a [StateError] if `finder` is empty or matches more than
   /// one element.
+  ///
+  /// * Use [firstElement] if you expect to match several elements but only want the first.
+  /// * Use [elementList] if you expect to match several elements and want all of them.
   Element/*=T*/ element/*<T extends Element>*/(Finder finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().single;
@@ -83,10 +102,22 @@ class WidgetController {
   /// traversal of the widget tree.
   ///
   /// Throws a [StateError] if `finder` is empty.
+  ///
+  /// * Use [element] if you only expect to match one element.
   Element/*=T*/ firstElement/*<T extends Element>*/(Finder finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().first;
   }
+
+  /// The matching elements in the widget tree.
+  ///
+  /// * Use [element] if you only expect to match one element.
+  /// * Use [firstElement] if you expect to match several but only want the first.
+  Iterable<Element/*=T*/> elementList/*<T extends Element>*/(Finder finder) {
+    TestAsyncUtils.guardSync();
+    return finder.evaluate();
+  }
+
 
   /// All states currently in the widget tree (lazy pre-order traversal).
   ///
@@ -104,6 +135,9 @@ class WidgetController {
   ///
   /// Throws a [StateError] if `finder` is empty, matches more than
   /// one state, or matches a widget that has no state.
+  ///
+  /// * Use [firstState] if you expect to match several states but only want the first.
+  /// * Use [stateList] if you expect to match several states and want all of them.
   State/*=T*/ state/*<T extends State>*/(Finder finder) {
     TestAsyncUtils.guardSync();
     return _stateOf/*<T>*/(finder.evaluate().single, finder);
@@ -114,9 +148,23 @@ class WidgetController {
   ///
   /// Throws a [StateError] if `finder` is empty or if the first
   /// matching widget has no state.
+  ///
+  /// * Use [state] if you only expect to match one state.
   State/*=T*/ firstState/*<T extends State>*/(Finder finder) {
     TestAsyncUtils.guardSync();
     return _stateOf/*<T>*/(finder.evaluate().first, finder);
+  }
+
+  /// The matching states in the widget tree.
+  ///
+  /// Throws a [StateError] if any of the elements in `finder` match a widget
+  /// that has no state.
+  ///
+  /// * Use [state] if you only expect to match one state.
+  /// * Use [firstState] if you expect to match several but only want the first.
+  Iterable<State/*=T*/> stateList/*<T extends State>*/(Finder finder) {
+    TestAsyncUtils.guardSync();
+    return finder.evaluate().map((Element element) => _stateOf/*<T>*/(element, finder));
   }
 
   State/*=T*/ _stateOf/*<T extends State>*/(Element element, Finder finder) {
@@ -125,6 +173,7 @@ class WidgetController {
       return element.state;
     throw new StateError('Widget of type ${element.widget.runtimeType}, with ${finder.description}, is not a StatefulWidget.');
   }
+
 
   /// Render objects of all the widgets currently in the widget tree
   /// (lazy pre-order traversal).
@@ -143,6 +192,9 @@ class WidgetController {
   ///
   /// Throws a [StateError] if `finder` is empty or matches more than
   /// one widget (even if they all have the same render object).
+  ///
+  /// * Use [firstRenderObject] if you expect to match several render objects but only want the first.
+  /// * Use [renderObjectList] if you expect to match several render objects and want all of them.
   RenderObject/*=T*/ renderObject/*<T extends RenderObject>*/(Finder finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().single.renderObject;
@@ -152,9 +204,20 @@ class WidgetController {
   /// depth-first pre-order traversal of the widget tree.
   ///
   /// Throws a [StateError] if `finder` is empty.
+  ///
+  /// * Use [renderObject] if you only expect to match one render object.
   RenderObject/*=T*/ firstRenderObject/*<T extends RenderObject>*/(Finder finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().first.renderObject;
+  }
+
+  /// The render objects of the matching widgets in the widget tree.
+  ///
+  /// * Use [renderObject] if you only expect to match one render object.
+  /// * Use [firstRenderObject] if you expect to match several but only want the first.
+  Iterable<RenderObject/*=T*/> renderObjectList/*<T extends RenderObject>*/(Finder finder) {
+    TestAsyncUtils.guardSync();
+    return finder.evaluate().map((Element element) => element.renderObject);
   }
 
 
@@ -214,13 +277,13 @@ class WidgetController {
       const int kMoveCount = 50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
       final double timeStampDelta = 1000.0 * offset.distance / (kMoveCount * velocity);
       double timeStamp = 0.0;
-      await _dispatchEvent(p.down(startLocation, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
+      await sendEventToBinding(p.down(startLocation, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
       for (int i = 0; i <= kMoveCount; i++) {
         final Point location = startLocation + Offset.lerp(Offset.zero, offset, i / kMoveCount);
-        await _dispatchEvent(p.move(location, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
+        await sendEventToBinding(p.move(location, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
         timeStamp += timeStampDelta;
       }
-      await _dispatchEvent(p.up(timeStamp: new Duration(milliseconds: timeStamp.round())), result);
+      await sendEventToBinding(p.up(timeStamp: new Duration(milliseconds: timeStamp.round())), result);
       return null;
     });
   }
@@ -248,7 +311,7 @@ class WidgetController {
   /// Begins a gesture at a particular point, and returns the
   /// [TestGesture] object which you can use to continue the gesture.
   Future<TestGesture> startGesture(Point downLocation, { int pointer: 1 }) {
-    return TestGesture.down(downLocation, pointer: pointer, dispatcher: _dispatchEvent);
+    return TestGesture.down(downLocation, pointer: pointer, dispatcher: sendEventToBinding);
   }
 
   HitTestResult _hitTest(Point location) {
@@ -257,9 +320,12 @@ class WidgetController {
     return result;
   }
 
-  Future<Null> _dispatchEvent(PointerEvent event, HitTestResult result) {
-    binding.dispatchEvent(event, result);
-    return new Future<Null>.value();
+  /// Forwards the given pointer event to the binding.
+  Future<Null> sendEventToBinding(PointerEvent event, HitTestResult result) {
+    return TestAsyncUtils.guard(() async {
+      binding.dispatchEvent(event, result);
+      return null;
+    });
   }
 
 

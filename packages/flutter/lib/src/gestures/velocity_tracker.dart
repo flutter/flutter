@@ -214,6 +214,9 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
 
 /// A velocity in two dimensions.
 class Velocity {
+  /// Creates a velocity.
+  ///
+  /// The [pixelsPerSecond] argument must not be null.
   const Velocity({ this.pixelsPerSecond });
 
   /// A velocity that isn't moving at all.
@@ -222,11 +225,16 @@ class Velocity {
   /// The number of pixels per second of velocity in the x and y directions.
   final Offset pixelsPerSecond;
 
+  /// Return the negation of a velocity.
   Velocity operator -() => new Velocity(pixelsPerSecond: -pixelsPerSecond);
+
+  /// Return the difference of two velocities.
   Velocity operator -(Velocity other) {
     return new Velocity(
         pixelsPerSecond: pixelsPerSecond - other.pixelsPerSecond);
   }
+
+  /// Return the sum of two velocities.
   Velocity operator +(Velocity other) {
     return new Velocity(
         pixelsPerSecond: pixelsPerSecond + other.pixelsPerSecond);
@@ -264,6 +272,7 @@ class VelocityTracker {
   /// before assuming the pointer stopped.
   static const Duration kAssumePointerMoveStoppedTime = const Duration(milliseconds: 40);
 
+  /// Creates a velocity tracker.
   VelocityTracker() : _strategy = _createStrategy();
 
   Duration _lastTimeStamp = const Duration();

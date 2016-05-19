@@ -8,7 +8,6 @@ import 'dart:io';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../device.dart';
-import '../build_info.dart';
 import '../globals.dart';
 import 'run.dart';
 
@@ -63,7 +62,7 @@ class ListenCommand extends RunCommandBase {
         target: target,
         install: firstTime,
         stop: true,
-        debuggingOptions: new DebuggingOptions.enabled(checked: getBuildMode() == BuildMode.debug),
+        debuggingOptions: new DebuggingOptions.enabled(getBuildMode()),
         traceStartup: traceStartup,
         route: route
       );

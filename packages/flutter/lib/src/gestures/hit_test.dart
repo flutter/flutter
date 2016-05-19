@@ -6,6 +6,10 @@ import 'events.dart';
 
 /// An object that can hit-test pointers.
 abstract class HitTestable { // ignore: one_member_abstracts
+  /// Check whether the given position hits this object.
+  ///
+  /// If this given position hits this object, consider adding a [HitTestEntry]
+  /// to the given hit test result.
   void hitTest(HitTestResult result, Point position);
 }
 
@@ -26,6 +30,7 @@ abstract class HitTestTarget { // ignore: one_member_abstracts
 /// Subclass this object to pass additional information from the hit test phase
 /// to the event propagation phase.
 class HitTestEntry {
+  /// Creates a hit test entry.
   const HitTestEntry(this.target);
 
   /// The [HitTestTarget] encountered during the hit test.
@@ -37,6 +42,10 @@ class HitTestEntry {
 
 /// The result of performing a hit test.
 class HitTestResult {
+  /// Creates a hit test result.
+  ///
+  /// If the [path] argument is null, the [path] field will be initialized with
+  /// and empty list.
   HitTestResult({ List<HitTestEntry> path })
     : path = path ?? <HitTestEntry>[];
 

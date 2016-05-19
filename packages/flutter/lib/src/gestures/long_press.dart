@@ -7,12 +7,19 @@ import 'constants.dart';
 import 'events.dart';
 import 'recognizer.dart';
 
+/// Signature for when a pointer has remained in contact with the screen at the
+/// same location for a long period of time.
 typedef void GestureLongPressCallback();
 
-/// The user has pressed down at this location for a long period of time.
+/// Recognizes when the user has pressed down at the same location for a long
+/// period of time.
 class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
+  /// Creates a long-press gesture recognizer.
+  ///
+  /// Consider assigning the [onLongPress] callback after creating this object.
   LongPressGestureRecognizer() : super(deadline: kLongPressTimeout);
 
+  /// Called when a long-press is recongized.
   GestureLongPressCallback onLongPress;
 
   @override

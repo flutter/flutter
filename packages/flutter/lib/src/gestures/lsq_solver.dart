@@ -85,23 +85,42 @@ class _Matrix {
   }
 }
 
+/// An nth degree polynomial fit to a dataset.
 class PolynomialFit {
+  /// Creates a polynomial fit of the given degree.
+  ///
+  /// There are n + 1 coefficients in a fit of degree n.
   PolynomialFit(int degree) : coefficients = new Float64List(degree + 1);
 
+  /// The polynomial coefficients of the fit.
   final List<double> coefficients;
+
+  /// An indicator of the quality of the fit.
+  ///
+  /// Larger values indicate greater quality.
   double confidence;
 }
 
+/// Uses the least-squares algorithm to fit a polynomial to a set of data.
 class LeastSquaresSolver {
+  /// Creates a least-squares solver.
+  ///
+  /// The [x], [y], and [w] arguments must be non-null.
   LeastSquaresSolver(this.x, this.y, this.w) {
     assert(x.length == y.length);
     assert(y.length == w.length);
   }
 
+  /// The x-coordinates of each data point.
   final List<double> x;
+
+  /// The y-coordinates of each data point.
   final List<double> y;
+
+  /// The weight to use for each data point.
   final List<double> w;
 
+  /// Fits a polynomial of the given degree to the data points.
   PolynomialFit solve(int degree) {
     if (degree > x.length) // Not enough data to fit a curve.
       return null;

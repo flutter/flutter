@@ -180,6 +180,7 @@ Future<Null> _exit(int code) async {
 
   // Give the task / timer queue one cycle through before we hard exit.
   await Timer.run(() {
+    printTrace('exiting with code $code');
     exit(code);
   });
 }

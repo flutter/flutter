@@ -115,7 +115,7 @@ typedef void GlobalKeyRemoveListener(GlobalKey key);
 /// [UniqueKey] instead.
 @optionalTypeArgs
 abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
-  /// Constructs a LabeledGlobalKey, which is a GlobalKey with a label used for debugging.
+  /// Creates a LabeledGlobalKey, which is a GlobalKey with a label used for debugging.
   /// The label is not used for comparing the identity of the key.
   factory GlobalKey({ String debugLabel }) => new LabeledGlobalKey<T>(debugLabel); // the label is purely for debugging purposes and is otherwise ignored
 
@@ -416,7 +416,22 @@ abstract class State<T extends StatefulWidget> {
       }
       return true;
     });
-    fn();
+    dynamic result = fn() as dynamic;
+    assert(() {
+      if (result is Future) {
+        throw new FlutterError(
+          'setState() callback argument returned a Future.\n'
+          'The setState() method on $this was invoked with a closure or method that '
+          'returned a Future. Maybe it is marked as "async".\n'
+          'Instead of performing asynchronous work inside a call to setState(), first '
+          'execute the work (without updating the widget state), and then synchronously '
+          'update the state inside a call to setState().'
+        );
+      }
+      // We ignore other types of return values so that you can do things like:
+      //   setState(() => x = 3);
+      return true;
+    });
     _element.markNeedsBuild();
   }
 
@@ -549,7 +564,7 @@ abstract class RenderObjectWidget extends Widget {
   @override
   RenderObjectElement createElement();
 
-  /// Constructs an instance of the RenderObject class that this
+  /// Creates an instance of the RenderObject class that this
   /// RenderObjectWidget represents, using the configuration described by this
   /// RenderObjectWidget.
   RenderObject createRenderObject(BuildContext context);

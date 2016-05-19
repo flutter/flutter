@@ -12,17 +12,28 @@ import 'events.dart';
 import 'pointer_router.dart';
 import 'recognizer.dart';
 
+/// Signature for callback when the user has tapped the screen at the same
+/// location twice in quick succession.
 typedef void GestureDoubleTapCallback();
 
+/// Signature used by [MultiTapGestureRecognizer] for when a pointer that might
+/// cause a tap has contacted the screen at a particular location.
 typedef void GestureMultiTapDownCallback(Point globalPosition, int pointer);
+
+/// Signature used by [MultiTapGestureRecognizer] for when a pointer that will
+/// trigger a tap has stopped contacting the screen at a particular location.
 typedef void GestureMultiTapUpCallback(Point globalPosition, int pointer);
+
+/// Signature used by [MultiTapGestureRecognizer] for when a tap has occurred.
 typedef void GestureMultiTapCallback(int pointer);
+
+/// Signature for when the pointer that previously triggered a
+/// [GestureMultiTapDownCallback] will not end up causing a tap.
 typedef void GestureMultiTapCancelCallback(int pointer);
 
 /// TapTracker helps track individual tap sequences as part of a
 /// larger gesture.
 class _TapTracker {
-
   _TapTracker({ PointerDownEvent event, this.entry })
     : pointer = event.pointer,
       _initialPosition = event.position;
@@ -51,10 +62,10 @@ class _TapTracker {
     Offset offset = event.position - _initialPosition;
     return offset.distance <= tolerance;
   }
-
 }
 
-
+/// Recognizes when the user has tapped the screen at the same location twice in
+/// quick succession.
 class DoubleTapGestureRecognizer extends GestureRecognizer {
   // Implementation notes:
   // The double tap recognizer can be in one of four states. There's no
@@ -76,6 +87,8 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   // - The long timer between taps expires
   // - The gesture arena decides we have been rejected wholesale
 
+  /// Called when the user has tapped the screen at the same location twice in
+  /// quick succession.
   GestureDoubleTapCallback onDoubleTap;
 
   Timer _doubleTapTimer;
@@ -94,10 +107,10 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
       entry: GestureBinding.instance.gestureArena.add(event.pointer, this)
     );
     _trackers[event.pointer] = tracker;
-    tracker.startTrackingPointer(handleEvent);
+    tracker.startTrackingPointer(_handleEvent);
   }
 
-  void handleEvent(PointerEvent event) {
+  void _handleEvent(PointerEvent event) {
     _TapTracker tracker = _trackers[event.pointer];
     assert(tracker != null);
     if (event is PointerUpEvent) {
@@ -188,7 +201,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   }
 
   void _freezeTracker(_TapTracker tracker) {
-    tracker.stopTrackingPointer(handleEvent);
+    tracker.stopTrackingPointer(_handleEvent);
   }
 
   void _startDoubleTapTimer() {
@@ -293,20 +306,44 @@ class _TapGesture extends _TapTracker {
 
 }
 
-/// MultiTapGestureRecognizer is a tap recognizer that treats taps
-/// independently. That is, each pointer sequence that could resolve to a tap
-/// does so independently of others: down-1, down-2, up-1, up-2 produces two
-/// taps, on up-1 and up-2.
+/// Recognizes taps on a per-pointer basis.
+///
+/// [MultiTapGestureRecognizer] considers each sequence of pointer events that
+/// could constitute a tap independently of other pointers: For example, down-1,
+/// down-2, up-1, up-2 produces two taps, on up-1 and up-2.
+///
+/// See also:
+///
+///  * [TapGestureRecognizer]
 class MultiTapGestureRecognizer extends GestureRecognizer {
+  /// Creates a multi-tap gesture recognizer.
+  ///
+  /// The [longTapDelay] defaults to [Duration.ZERO], which means
+  /// [onLongTapDown] is called immediately after [onTapDown].
   MultiTapGestureRecognizer({
     this.longTapDelay: Duration.ZERO
   });
 
+  /// A pointer that might cause a tap has contacted the screen at a particular
+  /// location.
   GestureMultiTapDownCallback onTapDown;
+
+  /// A pointer that will trigger a tap has stopped contacting the screen at a
+  /// particular location.
   GestureMultiTapUpCallback onTapUp;
+
+  /// A tap has occurred.
   GestureMultiTapCallback onTap;
+
+  /// The pointer that previously triggered [onTapDown] will not end up causing
+  /// a tap.
   GestureMultiTapCancelCallback onTapCancel;
+
+  /// The amount of time between [onTapDown] and [onLongTapDown].
   Duration longTapDelay;
+
+  /// A pointer that might cause a tap is still in contact with the screen at a
+  /// particular location after [longTapDelay].
   GestureMultiTapDownCallback onLongTapDown;
 
   final Map<int, _TapGesture> _gestureMap = new Map<int, _TapGesture>();

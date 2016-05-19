@@ -20,16 +20,51 @@ import 'package:vector_math/vector_math_64.dart';
 import 'test_async_utils.dart';
 import 'stack_manipulation.dart';
 
-/// Enumeration of possible phases to reach in
-/// [WidgetTester.pumpWidget] and [TestWidgetsFlutterBinding.pump].
-// TODO(ianh): Merge with identical code in the rendering test code.
+/// Phases that can be reached by [WidgetTester.pumpWidget] and
+/// [TestWidgetsFlutterBinding.pump].
+// TODO(ianh): Merge with near-identical code in the rendering test code.
 enum EnginePhase {
+  /// The build phase in the widgets library. See [BuildOwner.buildDirtyElements].
+  build,
+
+  /// The layout phase in the rendering library. See [PipelineOwner.flushLayout].
   layout,
+
+  /// The compositing bits update phase in the rendering library. See
+  /// [PipelineOwner.flushCompositingBits].
   compositingBits,
+
+  /// The paint phase in the rendering library. See [PipelineOwner.flushPaint].
   paint,
+
+  /// The compositing phase in the rendering library. See
+  /// [RenderView.compositeFrame]. This is the phase in which data is sent to
+  /// the GPU. If semantics are not enabled, then this is the last phase.
   composite,
+
+  /// The semantics building phase in the rendering library. See
+  /// [PipelineOwner.flushSemantics].
   flushSemantics,
-  sendSemanticsTree
+
+  /// The final phase in the rendering library, wherein semantics information is
+  /// sent to the embedder. See [SemanticsNode.sendSemanticsTree].
+  sendSemanticsTree,
+}
+
+/// Parts of the system that can generate pointer events that reach the test
+/// binding.
+///
+/// This is used to identify how to handle events in the
+/// [LiveTestWidgetsFlutterBinding]. See
+/// [TestWidgetsFlutterBinding.dispatchEvent].
+enum TestBindingEventSource {
+  /// The pointer event came from the test framework itself, e.g. from a
+  /// [TestGesture] created by [WidgetTester.startGesture].
+  test,
+
+  /// The pointer event came from the system, presumably as a result of the user
+  /// interactive directly with the device while the test was running.
+  device,
 }
 
 const Size _kTestViewportSize = const Size(800.0, 600.0);
@@ -74,6 +109,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     super.initInstances();
   }
 
+  /// Whether there is currently a test executing.
   bool get inTest;
 
   /// The default test timeout for tests when using this binding.
@@ -112,6 +148,14 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     return new Future<Null>.value();
   }
 
+  @override
+  void dispatchEvent(PointerEvent event, HitTestResult result, {
+    TestBindingEventSource source: TestBindingEventSource.device
+  }) {
+    assert(source == TestBindingEventSource.test);
+    super.dispatchEvent(event, result);
+  }
+
   /// Returns the exception most recently caught by the Flutter framework.
   ///
   /// Call this if you expect an exception during a test. If an exception is
@@ -135,17 +179,22 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   FlutterExceptionHandler _oldExceptionHandler;
   FlutterErrorDetails _pendingExceptionDetails;
 
+  static const TextStyle _kMessageStyle = const TextStyle(
+    color: const Color(0xFF917FFF),
+    fontSize: 40.0
+  );
+
   static final Widget _kPreTestMessage = new Center(
     child: new Text(
       'Test starting...',
-      style: const TextStyle(color: const Color(0xFFFF0000))
+      style: _kMessageStyle
     )
   );
 
   static final Widget _kPostTestMessage = new Center(
     child: new Text(
       'Test finished.',
-      style: const TextStyle(color: const Color(0xFFFF0000))
+      style: _kMessageStyle
     )
   );
 
@@ -385,6 +434,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   void beginFrame() {
     assert(inTest);
     buildOwner.buildDirtyElements();
+    if (_phase == EnginePhase.build)
+      return;
     assert(renderView != null);
     pipelineOwner.flushLayout();
     if (_phase == EnginePhase.layout)
@@ -439,11 +490,11 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   void _verifyInvariants() {
     super._verifyInvariants();
     assert(() {
-      'A Timer is still running even after the widget tree was disposed.';
+      'A periodic Timer is still running even after the widget tree was disposed.';
       return _fakeAsync.periodicTimerCount == 0;
     });
     assert(() {
-      'A Timer is still running even after the widget tree was disposed.';
+      'A Timer is still pending even after the widget tree was disposed.';
       return _fakeAsync.nonPeriodicTimerCount == 0;
     });
     assert(_fakeAsync.microtaskCount == 0); // Shouldn't be possible.
@@ -535,6 +586,37 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
+  void initRenderView() {
+    assert(renderView == null);
+    renderView = new _LiveTestRenderView(configuration: createViewConfiguration());
+    renderView.scheduleInitialFrame();
+  }
+
+  @override
+  _LiveTestRenderView get renderView => super.renderView;
+
+  @override
+  void dispatchEvent(PointerEvent event, HitTestResult result, {
+    TestBindingEventSource source: TestBindingEventSource.device
+  }) {
+    if (source == TestBindingEventSource.test) {
+      if (!renderView._pointers.containsKey(event.pointer)) {
+        assert(event.down);
+        renderView._pointers[event.pointer] = new _LiveTestPointerRecord(event.pointer, event.position);
+      } else {
+        renderView._pointers[event.pointer].position = event.position;
+        if (!event.down)
+          renderView._pointers[event.pointer].decay = _kPointerDecay;
+      }
+      renderView.markNeedsPaint();
+      super.dispatchEvent(event, result, source: source);
+      return;
+    }
+    // we eat all device events for now
+    // TODO(ianh): do something useful with device events
+  }
+
+  @override
   Future<Null> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsTree ]) {
     assert(newPhase == EnginePhase.sendSemanticsTree);
     assert(inTest);
@@ -605,6 +687,64 @@ class _TestViewConfiguration extends ViewConfiguration {
 
   @override
   String toString() => 'TestViewConfiguration';
+}
+
+const int _kPointerDecay = -2;
+
+class _LiveTestPointerRecord {
+  _LiveTestPointerRecord(
+    int pointer,
+    this.position
+  ) : pointer = pointer,
+      color = new HSVColor.fromAHSV(0.8, (35.0 * pointer) % 360.0, 1.0, 1.0).toColor(),
+      decay = 1;
+  final int pointer;
+  final Color color;
+  Point position;
+  int decay; // >0 means down, <0 means up, increases by one each time, removed at 0
+}
+
+class _LiveTestRenderView extends RenderView {
+  _LiveTestRenderView({
+    ViewConfiguration configuration
+  }) : super(configuration: configuration);
+
+  final Map<int, _LiveTestPointerRecord> _pointers = <int, _LiveTestPointerRecord>{};
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    assert(offset == Offset.zero);
+    super.paint(context, offset);
+    if (_pointers.isNotEmpty) {
+      final double radius = configuration.size.shortestSide * 0.05;
+      final Path path = new Path()
+        ..addOval(new Rect.fromCircle(center: Point.origin, radius: radius))
+        ..moveTo(0.0, -radius * 2.0)
+        ..lineTo(0.0, radius * 2.0)
+        ..moveTo(-radius * 2.0, 0.0)
+        ..lineTo(radius * 2.0, 0.0);
+      final Canvas canvas = context.canvas;
+      final Paint paint = new Paint()
+        ..strokeWidth = radius / 10.0
+        ..style = PaintingStyle.stroke;
+      bool dirty = false;
+      for (int pointer in _pointers.keys) {
+        _LiveTestPointerRecord record = _pointers[pointer];
+        paint.color = record.color.withOpacity(record.decay < 0 ? (record.decay / (_kPointerDecay - 1)) : 1.0);
+        canvas.drawPath(path.shift(record.position.toOffset()), paint);
+        if (record.decay < 0)
+          dirty = true;
+        record.decay += 1;
+      }
+      _pointers
+        .keys
+        .where((int pointer) => _pointers[pointer].decay == 0)
+        .toList()
+        .forEach((int pointer) { _pointers.remove(pointer); });
+      if (dirty)
+        scheduleMicrotask(markNeedsPaint);
+    }
+  }
 }
 
 class _EmptyStack implements StackTrace {

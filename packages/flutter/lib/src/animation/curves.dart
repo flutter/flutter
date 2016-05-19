@@ -36,17 +36,26 @@ abstract class Curve {
 }
 
 /// The identity map over the unit interval.
+///
+/// See [Curves.linear] for an instance of this class.
 class Linear extends Curve {
-  const Linear();
+  const Linear._();
 
   @override
   double transform(double t) => t;
 }
 
 /// A sawtooth curve that repeats a given number of times over the unit interval.
+///
+/// The curve rises linearly from 0.0 to 1.0 and then falls discontinuously back
+/// to 0.0 each iteration.
 class SawTooth extends Curve {
+  /// Creates a sawtooth curve.
+  ///
+  /// The [count] argument must not be null.
   const SawTooth(this.count);
 
+  /// The number of repetitions of the sawtooth pattern in the unit interval.
   final int count;
 
   @override
@@ -61,8 +70,11 @@ class SawTooth extends Curve {
   }
 }
 
-/// A curve that is 0.0 until start, then curved from 0.0 to 1.0 at end, then 1.0.
+/// A curve that is 0.0 until [start], then curved from 0.0 to 1.0 at [end], then 1.0.
 class Interval extends Curve {
+  /// Creates an interval curve.
+  ///
+  /// The [start] and [end] arguments must not be null.
   const Interval(this.start, this.end, { this.curve: Curves.linear });
 
   /// The smallest value for which this interval is 0.0.
@@ -97,11 +109,14 @@ class Interval extends Curve {
 
 /// A curve that is 0.0 until it hits the threshold, then it jumps to 1.0.
 class Step extends Curve {
+  /// Creates a step cruve.
+  ///
+  /// The [threshold] argument must not be null.
   const Step(this.threshold);
 
   /// The value before which the curve is 0.0 and after which the curve is 1.0.
   ///
-  /// At exactly step, the curve has the value 1.0.
+  /// When t is exactly [threshold], the curve has the value 1.0.
   final double threshold;
 
   @override
@@ -115,12 +130,46 @@ class Step extends Curve {
 }
 
 /// A cubic polynomial mapping of the unit interval.
+///
+/// See [Curves] for a number of commonly used cubic curves.
+///
+/// See also:
+///
+///  * [Curves.ease]
+///  * [Curves.easeIn]
+///  * [Curves.easeOut]
+///  * [Curves.easeInOut]
 class Cubic extends Curve {
+  /// Creates a cubic curve.
+  ///
+  /// Rather than creating a new instance, consider using one of the common
+  /// cubic curves in [Curves].
+  ///
+  /// The [a], [b], [c], and [d] arguments must not be null.
   const Cubic(this.a, this.b, this.c, this.d);
 
+  /// The x coordinate of the first control point.
+  ///
+  /// The line through the point (0, 0) and the first control point is tangent
+  /// to the curve at the point (0, 0).
   final double a;
+
+  /// The y coordinate of the first control point.
+  ///
+  /// The line through the point (0, 0) and the first control point is tangent
+  /// to the curve at the point (0, 0).
   final double b;
+
+  /// The x coordinate of the second control point.
+  ///
+  /// The line through the point (1, 1) and the second control point is tangent
+  /// to the curve at the point (1, 1).
   final double c;
+
+  /// The y coordinate of the second control point.
+  ///
+  /// The line through the point (1, 1) and the second control point is tangent
+  /// to the curve at the point (1, 1).
   final double d;
 
   @override
@@ -160,9 +209,17 @@ double _bounce(double t) {
 }
 
 /// A curve that is the reversed inversion of its given curve.
+///
+/// This curve evalutes the given curve in reverse (i.e., from 1.0 to 0.0 as t
+/// increases from 0.0 to 1.0) and returns the inverse of the given curve's value
+/// (i.e., 1.0 minus the given curve's value).
 class FlippedCurve extends Curve {
-  FlippedCurve(this.curve);
+  /// Creates a flipped curve.
+  ///
+  /// The [curve] argument must not be null.
+  const FlippedCurve(this.curve);
 
+  /// The curve that is being flipped.
   final Curve curve;
 
   @override
@@ -175,8 +232,10 @@ class FlippedCurve extends Curve {
 }
 
 /// An oscillating curve that grows in magnitude.
+///
+/// See [Curves.bounceIn] for an instance of this class.
 class BounceInCurve extends Curve {
-  const BounceInCurve();
+  const BounceInCurve._();
 
   @override
   double transform(double t) {
@@ -185,8 +244,10 @@ class BounceInCurve extends Curve {
 }
 
 /// An oscillating curve that shrink in magnitude.
+///
+/// See [Curves.bounceOut] for an instance of this class.
 class BounceOutCurve extends Curve {
-  const BounceOutCurve();
+  const BounceOutCurve._();
 
   @override
   double transform(double t) {
@@ -195,8 +256,10 @@ class BounceOutCurve extends Curve {
 }
 
 /// An oscillating curve that first grows and then shrink in magnitude.
+///
+/// See [Curves.bounceInOut] for an instance of this class.
 class BounceInOutCurve extends Curve {
-  const BounceInOutCurve();
+  const BounceInOutCurve._();
 
   @override
   double transform(double t) {
@@ -209,8 +272,12 @@ class BounceInOutCurve extends Curve {
 
 /// An oscillating curve that grows in magnitude while overshooting its bounds.
 class ElasticInCurve extends Curve {
+  /// Creates an elastic-in curve.
+  ///
+  /// Rather than creating a new instance, consider using [Curves.elasticIn].
   const ElasticInCurve([this.period = 0.4]);
 
+  /// The duration of the oscillation.
   final double period;
 
   @override
@@ -228,8 +295,12 @@ class ElasticInCurve extends Curve {
 
 /// An oscillating curve that shrinks in magnitude while overshooting its bounds.
 class ElasticOutCurve extends Curve {
+  /// Creates an elastic-out curve.
+  ///
+  /// Rather than creating a new instance, consider using [Curves.elasticOut].
   const ElasticOutCurve([this.period = 0.4]);
 
+  /// The duration of the oscillation.
   final double period;
 
   @override
@@ -246,8 +317,12 @@ class ElasticOutCurve extends Curve {
 
 /// An oscillating curve that grows and then shrinks in magnitude while overshooting its bounds.
 class ElasticInOutCurve extends Curve {
+  /// Creates an elastic-in-out curve.
+  ///
+  /// Rather than creating a new instance, consider using [Curves.elasticInOut].
   const ElasticInOutCurve([this.period = 0.4]);
 
+  /// The duration of the oscillation.
   final double period;
 
   @override
@@ -271,7 +346,7 @@ class Curves {
   Curves._();
 
   /// A linear animation curve
-  static const Linear linear = const Linear();
+  static const Linear linear = const Linear._();
 
   /// A cubic animation curve that speeds up quickly and ends slowly.
   static const Cubic ease = const Cubic(0.25, 0.1, 0.25, 1.0);
@@ -286,13 +361,13 @@ class Curves {
   static const Cubic easeInOut = const Cubic(0.42, 0.0, 0.58, 1.0);
 
   /// An oscillating curve that grows in magnitude.
-  static const BounceInCurve bounceIn = const BounceInCurve();
+  static const BounceInCurve bounceIn = const BounceInCurve._();
 
   /// An oscillating curve that first grows and then shrink in magnitude.
-  static const BounceOutCurve bounceOut = const BounceOutCurve();
+  static const BounceOutCurve bounceOut = const BounceOutCurve._();
 
   /// An oscillating curve that first grows and then shrink in magnitude.
-  static const BounceInOutCurve bounceInOut = const BounceInOutCurve();
+  static const BounceInOutCurve bounceInOut = const BounceInOutCurve._();
 
   /// An oscillating curve that grows in magnitude while overshootings its bounds.
   static const ElasticInCurve elasticIn = const ElasticInCurve();
