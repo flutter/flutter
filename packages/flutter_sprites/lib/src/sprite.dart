@@ -1,3 +1,7 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 part of flutter_sprites;
 
 /// A Sprite is a [Node] that renders a bitmap image to the screen.
@@ -84,6 +88,8 @@ class Sprite extends NodeWithSize with SpritePaint {
   }
 }
 
+/// Defines properties, such as [opacity] and [transferMode] that are shared
+/// between [Node]s that render textures to screen.
 abstract class SpritePaint {
   double _opacity = 1.0;
 

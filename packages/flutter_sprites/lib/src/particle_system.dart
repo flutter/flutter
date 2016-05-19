@@ -1,3 +1,7 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 part of flutter_sprites;
 
 class _Particle {
@@ -41,6 +45,8 @@ class _ParticleAccelerations {
 /// number of particles can never exceed the [maxParticles] limit.
 class ParticleSystem extends Node {
 
+  /// Creates a new particle system with the given properties. The only
+  /// required parameter is the texture, all other parameters are optional.
   ParticleSystem(this.texture,
                  {this.life: 1.5,
                   this.lifeVar: 1.0,
@@ -208,6 +214,8 @@ class ParticleSystem extends Node {
   double _emitCounter;
   int _numEmittedParticles = 0;
 
+  /// The over all opacity of the particle system. This value is multiplied by
+  /// the opacity of the individual particles.
   double opacity = 1.0;
 
   static Paint _paint = new Paint()

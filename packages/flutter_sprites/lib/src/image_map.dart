@@ -4,12 +4,18 @@
 
 part of flutter_sprites;
 
+/// The ImageMap is a helper class for loading and keeping references to
+/// multiple images.
 class ImageMap {
+
+  /// Creates a new ImageMap where images will be loaded from the specified
+  /// [bundle].
   ImageMap(AssetBundle bundle) : _bundle = bundle;
 
   final AssetBundle _bundle;
   final Map<String, ui.Image> _images = new Map<String, ui.Image>();
 
+  /// Loads a list of images given their urls.
   Future<List<ui.Image>> load(List<String> urls) {
     return Future.wait(urls.map(_loadImage));
   }
@@ -20,6 +26,9 @@ class ImageMap {
     return image;
   }
 
+  /// Returns a preloaded image, given its [url].
   ui.Image getImage(String url) => _images[url];
+
+  /// Returns a preloaded image, given its [url].
   ui.Image operator [](String url) => _images[url];
 }
