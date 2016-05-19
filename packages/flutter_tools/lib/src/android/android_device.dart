@@ -56,14 +56,15 @@ class AndroidDevice extends Device {
     if (_properties == null) {
       _properties = <String, String>{};
 
-      try {
-        String getpropOutput = runCheckedSync(adbCommandForDevice(<String>['shell', 'getprop']));
+      List<String> propCommand = adbCommandForDevice(<String>['shell', 'getprop']);
+      printTrace(propCommand.join(' '));
+      ProcessResult result = Process.runSync(propCommand.first, propCommand.sublist(1));
+      if (result.exitCode == 0) {
         RegExp propertyExp = new RegExp(r'\[(.*?)\]: \[(.*?)\]');
-        for (Match m in propertyExp.allMatches(getpropOutput))
-          _properties[m.group(1)] = m.group(2);
-      } catch (error, trace) {
-        printError('Error retrieving device properties: $error');
-        printTrace(trace.toString());
+        for (Match match in propertyExp.allMatches(result.stdout))
+          _properties[match.group(1)] = match.group(2);
+      } else {
+        printError('Error retrieving device properties for $name.');
       }
     }
 
