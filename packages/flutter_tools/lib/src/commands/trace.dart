@@ -33,7 +33,7 @@ class TraceCommand extends FlutterCommand {
   final String name = 'trace';
 
   @override
-  final String description = 'Start and stop tracing for a running Flutter app (Android only).';
+  final String description = 'Start and stop tracing for a running Flutter app.';
 
   @override
   final String usageFooter =
