@@ -570,16 +570,18 @@ void InitDartVM() {
     free(init_error);
 
     // Send the earliest available timestamp in the application lifecycle to
-    // timeline. The difference between this timestamp and the time we render the
-    // very first frame gives us a good idea about Flutter's startup time.
+    // timeline. The difference between this timestamp and the time we render
+    // the very first frame gives us a good idea about Flutter's startup time.
+    // Use a duration event so about:tracing will consider this event when
+    // deciding the earliest event to use as time 0.
     if (blink::engine_main_enter_ts != 0) {
-      Dart_TimelineEvent("FlutterEngineMainEnter",    // label
-                         blink::engine_main_enter_ts, // timestamp0
-                         0,                           // timestamp1_or_async_id
-                         Dart_Timeline_Event_Instant, // event type
-                         0,                           // argument_count
-                         nullptr,                     // argument_names
-                         nullptr                      // argument_values
+      Dart_TimelineEvent("FlutterEngineMainEnter",     // label
+                         blink::engine_main_enter_ts,  // timestamp0
+                         blink::engine_main_enter_ts,  // timestamp1_or_async_id
+                         Dart_Timeline_Event_Duration, // event type
+                         0,                            // argument_count
+                         nullptr,                      // argument_names
+                         nullptr                       // argument_values
                          );
     }
   }
