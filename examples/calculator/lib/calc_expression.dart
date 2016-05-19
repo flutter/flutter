@@ -7,63 +7,75 @@
 /// We need to represent pieces of numbers because the user may have only
 /// entered a partial expression so far.
 class ExpressionToken {
-  String stringRep;
+  final String stringRep;
 
   ExpressionToken(this.stringRep);
 
-  String toString() {
-    return stringRep;
-  }
+  @override
+  String toString() => stringRep;
 }
 
-// A token that represents an integer.
-class IntToken extends ExpressionToken {
-  int number;
+/// A token that represents a number.
+class NumberToken extends ExpressionToken {
+  final num number;
 
-  IntToken(String stringRep) : super(stringRep) {
-    number = int.parse(stringRep);
-  }
+  NumberToken(String stringRep, num number)
+      : this.number = number,
+        super(stringRep);
+
+  NumberToken.fromNumber(num number) : this("$number", number);
 }
 
-// A token that represents a floating point number.
-class FloatToken extends ExpressionToken {
-  double number;
+/// A token that represents an integer.
+class IntToken extends NumberToken {
+  IntToken(String stringRep) : super(stringRep, int.parse(stringRep));
+}
 
-  FloatToken(String stringRep) : super(stringRep) {
-    var toParse = stringRep;
+/// A token that represents a floating point number.
+class FloatToken extends NumberToken {
+  FloatToken(String stringRep) : super(stringRep, _parse(stringRep));
+
+  static double _parse(String stringRep) {
+    String toParse = stringRep;
     if (toParse.startsWith(".")) {
       toParse = "0" + toParse;
     }
     if (toParse.endsWith(".")) {
       toParse = toParse + "0";
     }
-    number = double.parse(toParse);
+    return double.parse(toParse);
   }
 }
 
-// A token that represents a number that is the result of a computation.
-class ResultToken extends ExpressionToken {
-  num number;
+/// A token that represents a number that is the result of a computation.
+class ResultToken extends NumberToken {
+  ResultToken(num number) : super.fromNumber(round(number));
 
-  ResultToken(num number)
-      : super("$number"),
-        this.number = number;
+  // rounds |number| to 14 digits of precision. A double precision
+  // floating point number is guaranteed to have at least this many
+  // decimal digits of precision. If the inputs
+  static num round(num number) {
+    if (number is int) {
+      return number;
+    }
+    return double.parse(number.toStringAsPrecision(14));
+  }
 }
 
-// A token that represents the unary minus prefix.
+/// A token that represents the unary minus prefix.
 class LeadingNegToken extends ExpressionToken {
   LeadingNegToken() : super("-");
 }
 
 enum Operation { Addition, Subtraction, Multiplication, Division }
 
-// A token that represents an arithmetic operation symbol.
+/// A token that represents an arithmetic operation symbol.
 class OperationToken extends ExpressionToken {
   Operation operation;
 
   OperationToken(Operation operation)
-      : super(opString(operation)),
-        this.operation = operation;
+      : this.operation = operation,
+        super(opString(operation));
 
   static String opString(Operation operation) {
     switch (operation) {
@@ -79,8 +91,8 @@ class OperationToken extends ExpressionToken {
   }
 }
 
-// As the user taps different keys the current expression can be in one
-// of several states.
+/// As the user taps different keys the current expression can be in one
+/// of several states.
 enum ExpressionState {
   // The expression is empty or an operation symbol was just entered.
   // A new number must be started now.
@@ -97,13 +109,13 @@ enum ExpressionState {
   Result,
 }
 
-// An expression that can be displayed in a calculator. It is the result
-// of a sequence of user entries. It is represented by a sequence of tokens.
-// Note that the tokens are not in one to one correspondence with the
-// key taps because we use one token per number, not one token per digit.
-// A CalcExpression is immutable. The append* methods return a new
-// CalcExpression that represents the appropriate expression when one
-// additional key tap occurs.
+/// An expression that can be displayed in a calculator. It is the result
+/// of a sequence of user entries. It is represented by a sequence of tokens.
+/// Note that the tokens are not in one to one correspondence with the
+/// key taps because we use one token per number, not one token per digit.
+/// A CalcExpression is immutable. The append* methods return a new
+/// CalcExpression that represents the appropriate expression when one
+/// additional key tap occurs.
 class CalcExpression {
   // The tokens comprising the expression.
   final List<ExpressionToken> _list;
@@ -123,19 +135,20 @@ class CalcExpression {
 
   // The string representation of the expression. This will be displayed
   // in the calculator's display panel.
+  @override
   String toString() {
-    var buffer = new StringBuffer("");
+    StringBuffer buffer = new StringBuffer("");
     buffer.writeAll(_list);
     return buffer.toString();
   }
 
-  // Append a digit to the current expression and return a new expression
-  // representing the result. Returns null to indicate that it is not legal
-  // to append a digit in the current state.
+  /// Append a digit to the current expression and return a new expression
+  /// representing the result. Returns null to indicate that it is not legal
+  /// to append a digit in the current state.
   CalcExpression appendDigit(int digit) {
-    var newState = ExpressionState.Number;
-    var newToken;
-    var outList = _list.toList();
+    ExpressionState newState = ExpressionState.Number;
+    ExpressionToken newToken;
+    List<ExpressionToken> outList = _list.toList();
     switch (state) {
       case ExpressionState.Start:
         // Start a new number with digit.
@@ -147,12 +160,12 @@ class CalcExpression {
         newToken = new IntToken("-$digit");
         break;
       case ExpressionState.Number:
-        var last = outList.removeLast();
+        ExpressionToken last = outList.removeLast();
         newToken = new IntToken(last.stringRep + "$digit");
         break;
       case ExpressionState.Point:
       case ExpressionState.NumberWithPoint:
-        var last = outList.removeLast();
+        ExpressionToken last = outList.removeLast();
         newState = ExpressionState.NumberWithPoint;
         newToken = new FloatToken(last.stringRep + "$digit");
         break;
@@ -164,19 +177,19 @@ class CalcExpression {
     return new CalcExpression(outList, newState);
   }
 
-  // Append a point to the current expression and return a new expression
-  // representing the result. Returns null to indicate that it is not legal
-  // to append a point in the current state.
+  /// Append a point to the current expression and return a new expression
+  /// representing the result. Returns null to indicate that it is not legal
+  /// to append a point in the current state.
   CalcExpression appendPoint() {
-    var newToken;
-    var outList = _list.toList();
+    ExpressionToken newToken;
+    List<ExpressionToken> outList = _list.toList();
     switch (state) {
       case ExpressionState.Start:
         newToken = new FloatToken(".");
         break;
       case ExpressionState.LeadingNeg:
       case ExpressionState.Number:
-        var last = outList.removeLast();
+        ExpressionToken last = outList.removeLast();
         newToken = new FloatToken(last.stringRep + ".");
         break;
       case ExpressionState.Point:
@@ -189,9 +202,9 @@ class CalcExpression {
     return new CalcExpression(outList, ExpressionState.Point);
   }
 
-  // Append an operation symbol to the current expression and return a new
-  // expression representing the result. Returns null to indicate that it is not
-  // legal to append an operation symbol in the current state.
+  /// Append an operation symbol to the current expression and return a new
+  /// expression representing the result. Returns null to indicate that it is not
+  /// legal to append an operation symbol in the current state.
   CalcExpression appendOperation(Operation op) {
     switch (state) {
       case ExpressionState.Start:
@@ -204,14 +217,14 @@ class CalcExpression {
       case ExpressionState.Result:
         break;
     }
-    var outList = _list.toList();
+    List<ExpressionToken> outList = _list.toList();
     outList.add(new OperationToken(op));
     return new CalcExpression(outList, ExpressionState.Start);
   }
 
-  // Append a leading minus sign to the current expression and return a new
-  // expression representing the result. Returns null to indicate that it is not
-  // legal to append a leading minus sign in the current state.
+  /// Append a leading minus sign to the current expression and return a new
+  /// expression representing the result. Returns null to indicate that it is not
+  /// legal to append a leading minus sign in the current state.
   CalcExpression appendLeadingNeg() {
     switch (state) {
       case ExpressionState.Start:
@@ -224,16 +237,16 @@ class CalcExpression {
         // Cannot enter leading neg now.
         return null;
     }
-    var outList = _list.toList();
+    List<ExpressionToken> outList = _list.toList();
     outList.add(new LeadingNegToken());
     return new CalcExpression(outList, ExpressionState.LeadingNeg);
   }
 
-  // Append a minus sign to the current expression and return a new expression
-  // representing the result. Returns null to indicate that it is not legal
-  // to append a minus sign in the current state. Depending on the current
-  // state the minus sign will be interpretted as either a leading negative
-  // sign or a subtraction operation.
+  /// Append a minus sign to the current expression and return a new expression
+  /// representing the result. Returns null to indicate that it is not legal
+  /// to append a minus sign in the current state. Depending on the current
+  /// state the minus sign will be interpretted as either a leading negative
+  /// sign or a subtraction operation.
   CalcExpression appendMinus() {
     switch (state) {
       case ExpressionState.Start:
@@ -247,9 +260,9 @@ class CalcExpression {
     }
   }
 
-  // Computes the result of the current expression and returns a new
-  // ResultExpression containing the result. Returns null to indicate that
-  // it is not legal to compute a result in the current state.
+  /// Computes the result of the current expression and returns a new
+  /// ResultExpression containing the result. Returns null to indicate that
+  /// it is not legal to compute a result in the current state.
   CalcExpression computeResult() {
     switch (state) {
       case ExpressionState.Start:
@@ -265,15 +278,14 @@ class CalcExpression {
 
     // We make a copy of _list because CalcExpressions are supposed to
     // be immutable.
-    var list = _list.toList();
+    List<ExpressionToken> list = _list.toList();
     // We obey order-of-operations by computing the sum of the "terms",
     // where a "term" is defined to be a sequence of numbers separated by
     // multiplcation or division symbols.
-    var currentTermValue = removeNextTerm(list);
+    num currentTermValue = removeNextTerm(list);
     while (list.length > 0) {
-      var opToken = list.removeAt(0);
-      assert(opToken is OperationToken);
-      var nextTermValue = removeNextTerm(list);
+      OperationToken opToken = list.removeAt(0);
+      num nextTermValue = removeNextTerm(list);
       switch (opToken.operation) {
         case Operation.Addition:
           currentTermValue += nextTermValue;
@@ -287,7 +299,7 @@ class CalcExpression {
           assert(false);
       }
     }
-    var outList = new List<ExpressionToken>();
+    List<ExpressionToken> outList = new List<ExpressionToken>();
     outList.add(new ResultToken(currentTermValue));
     return new CalcExpression(outList, ExpressionState.Result);
   }
@@ -297,12 +309,12 @@ class CalcExpression {
   // and division symbols.
   static num removeNextTerm(List<ExpressionToken> list) {
     assert(list != null && list.length >= 1);
-    var firstNumToken = list.removeAt(0);
-    assert(firstNumToken is IntToken || firstNumToken is FloatToken);
-    var currentValue = firstNumToken.number;
+    NumberToken firstNumToken = list.removeAt(0);
+    num currentValue = firstNumToken.number;
     while (list.length > 0) {
-      var isDivision = false;
-      switch ((list[0] as OperationToken).operation) {
+      bool isDivision = false;
+      OperationToken nextOpToken = list[0];
+      switch (nextOpToken.operation) {
         case Operation.Addition:
         case Operation.Subtraction:
           // We have reached the end of the current term
@@ -315,9 +327,8 @@ class CalcExpression {
       // Remove the operation token.
       list.removeAt(0);
       // Remove the next number token.
-      var nextNumToken = list.removeAt(0);
-      assert(nextNumToken is IntToken || nextNumToken is FloatToken);
-      var nextNumber = nextNumToken.number;
+      NumberToken nextNumToken = list.removeAt(0);
+      num nextNumber = nextNumToken.number;
       if (isDivision) {
         currentValue /= nextNumber;
       } else {

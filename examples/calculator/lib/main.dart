@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+
 import 'calc_expression.dart';
 
 // A calculator application.
@@ -24,18 +25,18 @@ class _CalculatorState extends State<Calculator> {
   // As the user taps keys we update the current |_expression| and we also
   // keep a stack of previous expressions so we can return to earlier states
   // when the user hits the DEL key.
-  List<CalcExpression> _expressionStack = <CalcExpression>[];
+  final List<CalcExpression> _expressionStack = <CalcExpression>[];
   CalcExpression _expression = new CalcExpression.Empty();
 
   // Make |expression| the current expression and push the previous current
   // expression onto the stack.
-  pushExpression(CalcExpression expression) {
+  void pushExpression(CalcExpression expression) {
     _expressionStack.add(_expression);
     _expression = expression;
   }
 
   // Pop the top expression off of the stack and make it the current expression.
-  popCalcExpression() {
+  void popCalcExpression() {
     if (_expressionStack.length > 0) {
       _expression = _expressionStack.removeLast();
     } else {
@@ -44,13 +45,13 @@ class _CalculatorState extends State<Calculator> {
   }
 
   // Set |resultExpression| to the currrent expression and clear the stack.
-  setResult(CalcExpression resultExpression) {
+  void setResult(CalcExpression resultExpression) {
     _expressionStack.clear();
     _expression = resultExpression;
   }
 
-  onNumberTap(int n) {
-    var expression = _expression.appendDigit(n);
+  void onNumberTap(int n) {
+    CalcExpression expression = _expression.appendDigit(n);
     if (expression != null) {
       setState(() {
         pushExpression(expression);
@@ -58,8 +59,8 @@ class _CalculatorState extends State<Calculator> {
     }
   }
 
-  onPointTap() {
-    var expression = _expression.appendPoint();
+  void onPointTap() {
+    CalcExpression expression = _expression.appendPoint();
     if (expression != null) {
       setState(() {
         pushExpression(expression);
@@ -67,8 +68,8 @@ class _CalculatorState extends State<Calculator> {
     }
   }
 
-  onPlusTap() {
-    var expression = _expression.appendOperation(Operation.Addition);
+  void onPlusTap() {
+    CalcExpression expression = _expression.appendOperation(Operation.Addition);
     if (expression != null) {
       setState(() {
         pushExpression(expression);
@@ -76,8 +77,8 @@ class _CalculatorState extends State<Calculator> {
     }
   }
 
-  onMinusTap() {
-    var expression = _expression.appendMinus();
+  void onMinusTap() {
+    CalcExpression expression = _expression.appendMinus();
     if (expression != null) {
       setState(() {
         pushExpression(expression);
@@ -85,8 +86,9 @@ class _CalculatorState extends State<Calculator> {
     }
   }
 
-  onMultTap() {
-    var expression = _expression.appendOperation(Operation.Multiplication);
+  void onMultTap() {
+    CalcExpression expression =
+        _expression.appendOperation(Operation.Multiplication);
     if (expression != null) {
       setState(() {
         pushExpression(expression);
@@ -94,8 +96,8 @@ class _CalculatorState extends State<Calculator> {
     }
   }
 
-  onDivTap() {
-    var expression = _expression.appendOperation(Operation.Division);
+  void onDivTap() {
+    CalcExpression expression = _expression.appendOperation(Operation.Division);
     if (expression != null) {
       setState(() {
         pushExpression(expression);
@@ -103,8 +105,8 @@ class _CalculatorState extends State<Calculator> {
     }
   }
 
-  onEqualsTap() {
-    var resultExpression = _expression.computeResult();
+  void onEqualsTap() {
+    CalcExpression resultExpression = _expression.computeResult();
     if (resultExpression != null) {
       setState(() {
         setResult(resultExpression);
@@ -112,7 +114,7 @@ class _CalculatorState extends State<Calculator> {
     }
   }
 
-  onDelTap() {
+  void onDelTap() {
     setState(() {
       popCalcExpression();
     });
@@ -152,6 +154,7 @@ class KeyPad extends StatelessWidget {
   final int _flex;
   final _CalculatorState calcState;
 
+  @override
   Widget build(BuildContext context) {
     return new Flexible(
         flex: _flex,
@@ -167,6 +170,7 @@ class MainKeyPad extends StatelessWidget {
 
   MainKeyPad({this.calcState});
 
+  @override
   Widget build(BuildContext context) {
     return new Flexible(
         // We set flex equal to the number of columns so that the main keypad
@@ -207,6 +211,7 @@ class OpKeyPad extends StatelessWidget {
 
   OpKeyPad({this.calcState});
 
+  @override
   Widget build(BuildContext context) {
     return new Flexible(child: new Material(
         type: MaterialType.canvas,
@@ -227,6 +232,7 @@ class KeyRow extends StatelessWidget {
 
   KeyRow(this.keys);
 
+  @override
   Widget build(BuildContext context) {
     return new Flexible(child: new Row(
         mainAxisAlignment: MainAxisAlignment.center, children: this.keys));
@@ -240,13 +246,10 @@ class CalcKey extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Flexible(child: new Container(
-        child: new InkResponse(
-            onTap: this.onTap,
-            child: new Center(child: new Text(this.text,
-                style: new TextStyle(
-                    color: Colors.white,
-                    fontSize: 32.0))))));
+    return new Flexible(child: new Container(child: new InkResponse(
+        onTap: this.onTap,
+        child: new Center(child: new Text(this.text,
+            style: new TextStyle(color: Colors.white, fontSize: 32.0))))));
   }
 }
 
