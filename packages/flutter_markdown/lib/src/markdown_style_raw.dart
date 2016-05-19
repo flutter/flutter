@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+import 'markdown.dart';
 
 /// Style used for rendering markdown formatted text using the [MarkdownBody]
 /// widget.

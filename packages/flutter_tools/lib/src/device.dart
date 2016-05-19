@@ -247,7 +247,7 @@ class DebuggingOptions {
   bool get hasObservatoryPort => observatoryPort != null;
 
   /// Return the user specified observatory port. If that isn't available,
-  /// return [defaultObservatoryPort], or a port close to that one.
+  /// return [kDefaultObservatoryPort], or a port close to that one.
   Future<int> findBestObservatoryPort() {
     if (hasObservatoryPort)
       return new Future<int>.value(observatoryPort);
@@ -257,7 +257,7 @@ class DebuggingOptions {
   bool get hasDiagnosticPort => diagnosticPort != null;
 
   /// Return the user specified diagnostic port. If that isn't available,
-  /// return [defaultObservatoryPort], or a port close to that one.
+  /// return [kDefaultDiagnosticPort], or a port close to that one.
   Future<int> findBestDiagnosticPort() {
     return findPreferredPort(diagnosticPort ?? kDefaultDiagnosticPort);
   }
