@@ -153,7 +153,8 @@ class IOSDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage app, {
+    ApplicationPackage app,
+    BuildMode mode, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
@@ -163,8 +164,8 @@ class IOSDevice extends Device {
     // TODO(devoncarew): Handle startPaused, debugPort.
     printTrace('Building ${app.name} for $id');
 
-    // Step 1: Install the precompiled application if necessary.
-    bool buildResult = await buildIOSXcodeProject(app, buildForDevice: true);
+    // Step 1: Install the precompiled/DBC application if necessary.
+    bool buildResult = await buildIOSXcodeProject(app, mode, buildForDevice: true);
     if (!buildResult) {
       printError('Could not build the precompiled application for the device.');
       return new LaunchResult.failed();

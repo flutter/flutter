@@ -175,9 +175,10 @@ abstract class Device {
   /// Start an app package on the current device.
   ///
   /// [platformArgs] allows callers to pass platform-specific arguments to the
-  /// start call.
+  /// start call. The build mode is not used by all platforms.
   Future<LaunchResult> startApp(
-    ApplicationPackage package, {
+    ApplicationPackage package,
+    BuildMode mode, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,

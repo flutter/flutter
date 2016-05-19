@@ -266,6 +266,7 @@ Future<int> startApp(DriveCommand command, BuildMode buildMode) async {
   printTrace('Starting application.');
   LaunchResult result = await command.device.startApp(
     package,
+    buildMode,
     mainPath: mainPath,
     route: command.route,
     debuggingOptions: new DebuggingOptions.enabled(
