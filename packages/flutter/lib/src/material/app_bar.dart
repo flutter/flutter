@@ -30,8 +30,8 @@ import 'typography.dart';
 ///
 /// The AppBar displays the toolbar widgets, [leading], [title],
 /// and [actions], above the [tabBar] (if any). If a [flexibleSpace] widget is
-/// specified then it is stacked behind the toolbar and tabBar. The [Scaffold]
-/// typically creates the appBar with an initial height equal to [expandedHeight].
+/// specified then it is stacked behind the toolbar and tabbar. The [Scaffold]
+/// typically creates the appbar with an initial height equal to [expandedHeight].
 ///
 /// See also:
 ///
