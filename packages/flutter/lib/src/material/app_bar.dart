@@ -20,13 +20,18 @@ import 'typography.dart';
 
 /// A material design app bar.
 ///
-/// An app bar consists of a tool bar and potentially other widgets, such as a
+/// An app bar consists of a toolbar and potentially other widgets, such as a
 /// [TabBar] and a [FlexibleSpaceBar]. App bars typically expose one or more
 /// common actions with [IconButtons]s which are optionally followed by a
 /// [PopupMenuButton] for less common operations.
 ///
 /// App bars are most commonly used in the [Scaffold.appBar] property, which
 /// places the app bar at the top of the app.
+///
+/// The AppBar displays the toolbar widgets, [leading], [title],
+/// and [actions], above the [tabBar] (if any). If a [flexibleSpace] widget is
+/// specified then it is stacked behind the toolbar and tabBar. The [Scaffold]
+/// typically creates the appBar with an initial height equal to [expandedHeight].
 ///
 /// See also:
 ///
@@ -57,10 +62,7 @@ class AppBar extends StatelessWidget {
   }) : _expandedHeight = expandedHeight,
        _collapsedHeight = collapsedHeight,
        _minimumHeight = minimumHeight,
-       super(key: key) {
-    assert((flexibleSpace != null) ? tabBar == null : true);
-    assert((tabBar != null) ? flexibleSpace == null : true);
-  }
+       super(key: key);
 
   /// A widget to display before the [title].
   ///
@@ -85,7 +87,9 @@ class AppBar extends StatelessWidget {
   /// last action.
   final List<Widget> actions;
 
-  /// A widget to aid in building scroll-based collapsing app bar effects.
+  /// This widget is stacked behind the toolbar and the tabbar and it is not
+  /// inset by the specified [padding]. It's height will be the same as the
+  /// the app bar's overall height.
   ///
   /// Typically a [FlexibleSpaceBar]. See [FlexibleSpaceBar] for details.
   final Widget flexibleSpace;
@@ -109,6 +113,8 @@ class AppBar extends StatelessWidget {
   final TextTheme textTheme;
 
   /// The amount of space by which to inset the contents of the app bar.
+  /// The [Scaffold] increases padding.top by the height of the system
+  /// status bar so that the toolbar appears below the status bar.
   final EdgeInsets padding;
 
   final double _expandedHeight;
@@ -149,10 +155,15 @@ class AppBar extends StatelessWidget {
 
   double get _toolBarHeight => kToolBarHeight;
 
-  /// The height of this app bar when fully expanded.
+  /// By default: the height of the toolbar and the tabbar (if any).
+  /// The [Scaffold] gives its appbar this height initially. If a
+  /// [flexibleSpace] widget is specified this height should be big
+  /// enough to accommodate whatever that widget contains.
   double get expandedHeight => _expandedHeight ?? (_toolBarHeight + (_tabBarHeight ?? 0.0));
 
-  /// The height of this app bar when fully collapsed.
+  /// By default: the height of the toolbar and the tabbar (if any).
+  /// If the height of the app bar is constrained to be less than this value
+  /// the toolbar and tabbar are scrolled upwards, out of view.
   double get collapsedHeight => _collapsedHeight ?? (_toolBarHeight + (_tabBarHeight ?? 0.0));
 
   double get minimumHeight => _minimumHeight ?? _tabBarHeight ?? _toolBarHeight;
@@ -228,6 +239,7 @@ class AppBar extends StatelessWidget {
     final double tabBarOpacity = _tabBarOpacity(size.height, statusBarHeight);
     if (tabBar != null) {
       appBar = new Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           appBar,
           tabBarOpacity == 1.0 ? tabBar : new Opacity(
@@ -238,37 +250,37 @@ class AppBar extends StatelessWidget {
       );
     }
 
+    // The padding applies to the toolbar and tabbar, not the flexible space.
+    // The incoming padding parameter's top value typically equals the height
+    // of the status bar - so that the toolbar appears below the status bar.
     EdgeInsets combinedPadding = new EdgeInsets.symmetric(horizontal: 8.0);
     if (padding != null)
       combinedPadding += padding;
+    appBar = new Padding(
+      padding: combinedPadding,
+      child: appBar
+    );
 
     // If the appBar's height shrinks below collapsedHeight, it will be clipped and bottom
-    // justified. This is so that the toolBar/tabBar appear to move upwards as the appBar's
-    // height is reduced.
+    // justified. This is so that the toolbar and the tabbar appear to move upwards as
+    // the appBar's height is reduced below collapsedHeight.
     final double paddedCollapsedHeight = collapsedHeight + combinedPadding.top + combinedPadding.bottom;
-    appBar = new ConstrainedBox(
-      constraints: new BoxConstraints(maxHeight: paddedCollapsedHeight),
-      child: new Padding(
-        padding: new EdgeInsets.only(left: combinedPadding.left, right: combinedPadding.right),
-        child: new ClipRect(
-          child: new OverflowBox(
-            alignment: FractionalOffset.bottomLeft, // bottom justify
-            minHeight: paddedCollapsedHeight,
-            maxHeight: paddedCollapsedHeight,
-            child: new Padding(
-              padding: new EdgeInsets.only(top: combinedPadding.top, bottom: combinedPadding.bottom),
-              child: appBar
-            )
-          )
+    if (size.height < paddedCollapsedHeight) {
+      appBar = new ClipRect(
+        child: new OverflowBox(
+          alignment: FractionalOffset.bottomLeft,
+          minHeight: paddedCollapsedHeight,
+          maxHeight: paddedCollapsedHeight,
+          child: appBar
         )
-      )
-    );
+      );
+    }
 
     if (flexibleSpace != null) {
       appBar = new Stack(
         children: <Widget>[
           flexibleSpace,
-          new Align(child: appBar, alignment: FractionalOffset.topLeft)
+          appBar
         ]
       );
     }
