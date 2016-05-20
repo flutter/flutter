@@ -56,7 +56,7 @@ USB and debugging enabled on that device.
 
 You can also specify a particular Dart file to run if you want to run an example
 that doesn't have a `lib/main.dart` file using the `-t` command-line option. For
-example, to run the `spinning_square.dart` example in the [examples/layers](examples/layers)
+example, to run the `widgets/spinning_square.dart` example in the [examples/layers](examples/layers)
 directory on a connected Android device, from that directory you would run:
 `flutter run -t widgets/spinning_square.dart`
 
