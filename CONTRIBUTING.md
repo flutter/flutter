@@ -51,14 +51,14 @@ example's directory, run `pub get` to make sure its dependencies have been
 downloaded, and use `flutter run`. Make sure you have a device connected over
 USB and debugging enabled on that device.
 
- * `cd examples/hello_world; flutter run`
+ * `cd examples/hello_world`
+ * `flutter run`
 
 You can also specify a particular Dart file to run if you want to run an example
 that doesn't have a `lib/main.dart` file using the `-t` command-line option. For
-example, to run the `tabs.dart` example in the [examples/widgets](examples/widgets)
+example, to run the `spinning_square.dart` example in the [examples/layers](examples/layers)
 directory on a connected Android device, from that directory you would run:
-
- * `flutter run -t tabs.dart`
+`flutter run -t widgets/spinning_square.dart`
 
 When running code from the examples directory, any changes you make to the
 example code, as well as any changes to Dart code in the
@@ -83,10 +83,10 @@ Flutter tests use [package:flutter_test](https://github.com/flutter/flutter/tree
  * `cd packages/flutter_tools`
  * `dart test/all.dart`
 
-To run all the tests for the entire Flutter repository, the same way that Travis runs them, run `travis/test.sh`.
+To run all the tests for the entire Flutter repository, the same way that Travis runs them, run `dev/bots/test.sh`.
 
 If you've built [your own flutter engine](#working-on-the-engine-and-the-framework-at-the-same-time), you can pass `--engine-debug` or `--engine-release` to change what flutter shell `flutter test` uses.
-To do this with the `travis/test.sh` script, you can use the `FLUTTER_ENGINE` environment variable.
+To do this with the `dev/bots/test.sh` script, you can use the `FLUTTER_ENGINE` environment variable.
 
 Note: Flutter tests are headless, you won't see any UI. You can use
 `print` to generate console output or you can interact with the DartVM
@@ -130,7 +130,7 @@ detailed message before sending the pull request.
 Once you've gotten an LGTM from a project maintainer, submit your changes to the
 `master` branch using one of the following methods:
 
-* Wait for one of the project maintainers to submit it for you
+* Wait for one of the project maintainers to submit it for you.
 * Click the green "Merge pull request" button on the GitHub UI of your pull
   request (requires commit access)
 * `git push upstream name_of_your_branch:master` (requires commit access)
