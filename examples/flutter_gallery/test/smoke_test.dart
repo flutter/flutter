@@ -98,5 +98,5 @@ void main() {
     await tester.tap(find.text('Light'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
-  }, skip: true);
+  });
 }
