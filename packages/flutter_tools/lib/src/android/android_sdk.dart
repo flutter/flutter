@@ -29,6 +29,9 @@ const Map<String, int> _namedVersionMap = const <String, int> {
 };
 
 /// Locate ADB. Prefer to use one from an Android SDK, if we can locate that.
+/// This should be used over accessing androidSdk.adbPath directly because it
+/// will work for those users who have Android Platform Tools installed but
+/// not the full SDK.
 String getAdbPath([AndroidSdk existingSdk]) {
   if (existingSdk?.adbPath != null)
     return existingSdk.adbPath;
