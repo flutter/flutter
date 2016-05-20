@@ -73,4 +73,16 @@ void main() {
     expect(expression.state, equals(ExpressionState.Result));
     expect(expression.toString(), equals("4"));
   });
+
+  test('Test minus -3 - -2 = -1', () {
+    CalcExpression expression = new CalcExpression.Empty();
+    expression = expression.appendMinus();
+    expression = expression.appendDigit(3);
+    expression = expression.appendMinus();
+    expression = expression.appendMinus();
+    expression = expression.appendDigit(2);
+    expression = expression.computeResult();
+    expect(expression.state, equals(ExpressionState.Result));
+    expect(expression.toString(), equals("-1"));
+  });
 }
