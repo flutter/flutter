@@ -290,7 +290,7 @@ class FlutterError extends AssertionError {
       }
       result.add(line);
     }
-    if (skipped == 1) {
+    if (skipped.length == 1) {
       result.add('(elided one frame from ${skipped.single})');
     } else if (skipped.length > 1) {
       List<String> where = new Set<String>.from(skipped).toList()..sort();

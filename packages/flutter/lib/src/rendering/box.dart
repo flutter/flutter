@@ -963,6 +963,11 @@ abstract class RenderBox extends RenderObject {
 
   int _debugActivePointers = 0;
 
+  /// Override this function to handle pointer events that hit this render object.
+  ///
+  /// For [RenderBox] objects, the `entry` argument is a [BoxHitTestEntry]. From this
+  /// object you can determine the [PointerDownEvent]'s position in local coordinates.
+  /// (This is useful because [PointerEvent.position] is in global coordinates.)
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     super.handleEvent(event, entry);

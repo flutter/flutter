@@ -78,7 +78,7 @@ class SimControl {
     bool connected = false;
     int attempted = 0;
     while (!connected && attempted < 20) {
-      connected = await _isAnyConnected();
+      connected = _isAnyConnected();
       if (!connected) {
         printStatus('Still waiting for iOS Simulator to boot...');
         await new Future<Null>.delayed(new Duration(seconds: 1));

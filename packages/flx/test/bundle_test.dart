@@ -24,7 +24,7 @@ Future<Null> main() async {
   final Uint8List kTestBytes = new Uint8List.fromList(<int>[1, 2, 3]);
 
   // Create a temp dir and file for the bundle.
-  Directory tempDir = await Directory.systemTemp.createTempSync('bundle_test');
+  Directory tempDir = Directory.systemTemp.createTempSync('bundle_test');
   String bundlePath = tempDir.path + '/bundle.flx';
 
   AsymmetricKeyPair<PublicKey, PrivateKey> keyPair = keyPairFromPrivateKeyBytes(kPrivateKeyDER);

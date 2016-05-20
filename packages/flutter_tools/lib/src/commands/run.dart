@@ -205,7 +205,7 @@ Future<int> startApp(
   if (install && device is AndroidDevice) {
     printStatus('Installing $package to $device...');
 
-    if (!(await installApp(device, package)))
+    if (!(installApp(device, package)))
       return 1;
   }
 
@@ -345,7 +345,7 @@ class _RunAndStayResident {
     // TODO(devoncarew): This fails for ios devices - we haven't built yet.
     if (device is AndroidDevice) {
       printTrace('Running install command.');
-      if (!(await installApp(device, package)))
+      if (!(installApp(device, package)))
         return 1;
     }
 
