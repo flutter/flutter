@@ -273,7 +273,7 @@ class WidgetController {
       assert(offset.distance > 0.0);
       assert(velocity != 0.0);   // velocity is pixels/second
       final TestPointer p = new TestPointer(pointer);
-      final HitTestResult result = _hitTest(startLocation);
+      final HitTestResult result = hitTestOnBinding(startLocation);
       const int kMoveCount = 50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
       final double timeStampDelta = 1000.0 * offset.distance / (kMoveCount * velocity);
       double timeStamp = 0.0;
@@ -311,10 +311,11 @@ class WidgetController {
   /// Begins a gesture at a particular point, and returns the
   /// [TestGesture] object which you can use to continue the gesture.
   Future<TestGesture> startGesture(Point downLocation, { int pointer: 1 }) {
-    return TestGesture.down(downLocation, pointer: pointer, dispatcher: sendEventToBinding);
+    return TestGesture.down(downLocation, pointer: pointer, hitTester: hitTestOnBinding, dispatcher: sendEventToBinding);
   }
 
-  HitTestResult _hitTest(Point location) {
+  /// Forwards the given location to the binding's hitTest logic.
+  HitTestResult hitTestOnBinding(Point location) {
     final HitTestResult result = new HitTestResult();
     binding.hitTest(result, location);
     return result;

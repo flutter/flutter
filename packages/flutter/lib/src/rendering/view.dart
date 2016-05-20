@@ -71,7 +71,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     if (configuration == value)
       return;
     _configuration = value;
-    replaceRootLayer(new TransformLayer(transform: _configuration.toMatrix()));
+    replaceRootLayer(new TransformLayer(transform: configuration.toMatrix()));
     markNeedsLayout();
   }
 
@@ -79,7 +79,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   void scheduleInitialFrame() {
     assert(owner != null);
     scheduleInitialLayout();
-    scheduleInitialPaint(new TransformLayer(transform: _configuration.toMatrix()));
+    scheduleInitialPaint(new TransformLayer(transform: configuration.toMatrix()));
     owner.requestVisualUpdate();
   }
 

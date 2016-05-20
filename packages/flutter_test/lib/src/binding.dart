@@ -148,6 +148,16 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     return new Future<Null>.value();
   }
 
+  /// Convert the given point from the global coodinate system (as used by
+  /// pointer events from the device) to the coordinate system used by the
+  /// tests (an 800 by 600 window).
+  Point globalToLocal(Point point) => point;
+
+  /// Convert the given point from the coordinate system used by the tests (an
+  /// 800 by 600 window) to the global coodinate system (as used by pointer
+  /// events from the device).
+  Point localToGlobal(Point point) => point;
+
   @override
   void dispatchEvent(PointerEvent event, HitTestResult result, {
     TestBindingEventSource source: TestBindingEventSource.device
@@ -595,25 +605,37 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   _LiveTestRenderView get renderView => super.renderView;
 
+  /// An object to which real device events should be routed.
+  ///
+  /// Normally, device events are silently dropped. However, if this property is
+  /// set to a non-null value, then the events will be routed to its
+  /// [HitTestDispatcher.dispatchEvent] method instead.
+  ///
+  /// Events dispatched by [TestGesture] are not affected by this.
+  HitTestDispatcher deviceEventDispatcher;
+
   @override
   void dispatchEvent(PointerEvent event, HitTestResult result, {
     TestBindingEventSource source: TestBindingEventSource.device
   }) {
-    if (source == TestBindingEventSource.test) {
-      if (!renderView._pointers.containsKey(event.pointer)) {
-        assert(event.down);
-        renderView._pointers[event.pointer] = new _LiveTestPointerRecord(event.pointer, event.position);
-      } else {
-        renderView._pointers[event.pointer].position = event.position;
-        if (!event.down)
-          renderView._pointers[event.pointer].decay = _kPointerDecay;
-      }
-      renderView.markNeedsPaint();
-      super.dispatchEvent(event, result, source: source);
-      return;
+    switch (source) {
+      case TestBindingEventSource.test:
+        if (!renderView._pointers.containsKey(event.pointer)) {
+          assert(event.down);
+          renderView._pointers[event.pointer] = new _LiveTestPointerRecord(event.pointer, event.position);
+        } else {
+          renderView._pointers[event.pointer].position = event.position;
+          if (!event.down)
+            renderView._pointers[event.pointer].decay = _kPointerDecay;
+        }
+        renderView.markNeedsPaint();
+        super.dispatchEvent(event, result, source: source);
+        break;
+      case TestBindingEventSource.device:
+        if (deviceEventDispatcher != null)
+          deviceEventDispatcher.dispatchEvent(event, result);
+        break;
     }
-    // we eat all device events for now
-    // TODO(ianh): do something useful with device events
   }
 
   @override
@@ -654,8 +676,31 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   ViewConfiguration createViewConfiguration() {
-    final double actualWidth = ui.window.size.width * ui.window.devicePixelRatio;
-    final double actualHeight = ui.window.size.height * ui.window.devicePixelRatio;
+    return new _TestViewConfiguration(
+      // TODO(ianh): that these are not the same is https://github.com/flutter/flutter/issues/1360
+      _getMatrix(ui.window.devicePixelRatio),
+      _getMatrix(1.0)
+    );
+  }
+
+  @override
+  Point globalToLocal(Point point) {
+    Matrix4 transform = renderView.configuration.toHitTestMatrix();
+    double det = transform.invert();
+    assert(det != 0.0);
+    Point result = MatrixUtils.transformPoint(transform, point);
+    return result;
+  }
+
+  @override
+  Point localToGlobal(Point point) {
+    Matrix4 transform = renderView.configuration.toHitTestMatrix();
+    return MatrixUtils.transformPoint(transform, point);
+  }
+
+  Matrix4 _getMatrix(double devicePixelRatio) {
+    final double actualWidth = ui.window.size.width * devicePixelRatio;
+    final double actualHeight = ui.window.size.height * devicePixelRatio;
     final double desiredWidth = _kTestViewportSize.width;
     final double desiredHeight = _kTestViewportSize.height;
     double scale, shiftX, shiftY;
@@ -671,19 +716,22 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     final Matrix4 matrix = new Matrix4.compose(
       new Vector3(shiftX, shiftY, 0.0), // translation
       new Quaternion.identity(), // rotation
-      new Vector3(scale, scale, 0.0) // scale
+      new Vector3(scale, scale, 1.0) // scale
     );
-    return new _TestViewConfiguration(matrix);
+    return matrix;
   }
 }
 
 class _TestViewConfiguration extends ViewConfiguration {
-  _TestViewConfiguration(this.matrix) : super(size: _kTestViewportSize);
+  _TestViewConfiguration(this.paintMatrix, this.hitTestMatrix) : super(size: _kTestViewportSize);
 
-  final Matrix4 matrix;
+  final Matrix4 paintMatrix;
+  final Matrix4 hitTestMatrix;
 
   @override
-  Matrix4 toMatrix() => matrix;
+  Matrix4 toMatrix() => paintMatrix.clone();
+
+  Matrix4 toHitTestMatrix() => hitTestMatrix.clone();
 
   @override
   String toString() => 'TestViewConfiguration';
@@ -709,7 +757,19 @@ class _LiveTestRenderView extends RenderView {
     ViewConfiguration configuration
   }) : super(configuration: configuration);
 
+  @override
+  _TestViewConfiguration get configuration => super.configuration;
+
   final Map<int, _LiveTestPointerRecord> _pointers = <int, _LiveTestPointerRecord>{};
+
+  @override
+  bool hitTest(HitTestResult result, { Point position }) {
+    Matrix4 transform = configuration.toHitTestMatrix();
+    double det = transform.invert();
+    assert(det != 0.0);
+    position = MatrixUtils.transformPoint(transform, position);
+    return super.hitTest(result, position: position);
+  }
 
   @override
   void paint(PaintingContext context, Offset offset) {
