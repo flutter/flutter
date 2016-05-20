@@ -326,6 +326,8 @@ class ScrollableState<T extends Scrollable> extends State<T> {
   /// or its createScrollBehavior callback is null, then return a new instance
   /// of [OverscrollWhenScrollableBehavior].
   ExtentScrollBehavior createScrollBehavior() {
+    // TODO(hansmuller): this will not be called when the ScrollConfiguration changes.
+    // An override of dependenciesChanged() is probably needed.
     return ScrollConfiguration.of(context)?.createScrollBehavior();
   }
 

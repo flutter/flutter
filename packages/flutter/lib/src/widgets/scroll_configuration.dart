@@ -22,6 +22,14 @@ class ScrollConfigurationDelegate {
   bool updateShouldNotify(ScrollConfigurationDelegate old) => false;
 }
 
+/// Used by descendants to initialize and wrap the [Scrollable] widgets
+/// they create.
+///
+/// Classes that create Scrollables are not required to depend on this
+/// Widget. The following general purpose scrolling widgets do depend
+/// on ScrollConfiguration: Block, LazyBlock, ScrollableViewport,
+/// ScrollableList, ScrollableLazyList. The Scrollable base class uses
+/// ScrollConfiguration to create its [ScrollBehavior].
 class ScrollConfiguration extends InheritedWidget {
   ScrollConfiguration({
     Key key,
@@ -31,13 +39,20 @@ class ScrollConfiguration extends InheritedWidget {
 
   static final ScrollConfigurationDelegate _defaultDelegate = new ScrollConfigurationDelegate();
 
+  /// Defines the ScrollBehavior and scrollable wrapper for descendants.
   final ScrollConfigurationDelegate delegate;
 
+  /// The delegate property of the closest instance of this class that encloses
+  /// the given context.
+  ///
+  /// If no such instance exists, returns an instance of the
+  /// [ScrollConfigurationDelegate] base class.
   static ScrollConfigurationDelegate of(BuildContext context) {
     ScrollConfiguration configuration = context.inheritFromWidgetOfExactType(ScrollConfiguration);
     return configuration?.delegate ?? _defaultDelegate;
   }
 
+  /// A utility function that calls [ScrollConfigurationDelegate.wrapScrollWidget].
   static Widget wrap(BuildContext context, Widget scrollWidget) {
     return of(context).wrapScrollWidget(scrollWidget);
   }

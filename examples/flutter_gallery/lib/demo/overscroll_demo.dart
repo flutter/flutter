@@ -43,7 +43,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
         break;
     }
 
-    // Note: the default ScrollConfiguration doesn't include the
+    // The default ScrollConfiguration doesn't include the
     // OverscrollIndicator. That's what we want, since this demo
     // adds the OverscrollIndicator itself.
     Widget body = new ScrollConfiguration(

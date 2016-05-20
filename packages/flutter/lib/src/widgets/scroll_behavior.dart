@@ -9,6 +9,11 @@ import 'package:flutter/physics.dart';
 const double _kSecondsPerMillisecond = 1000.0;
 const double _kScrollDrag = 0.025;
 
+// TODO(hansmuller): Simplify these classes. We're no longer using the ScrollBehavior<T, U>
+// base class directly. Only LazyBlock uses BoundedBehavior's updateExtents minScrollOffset
+// parameter; simpler to move that into ExtentScrollBehavior.  All of the classes should
+// be called FooScrollBehavior.
+
 /// An interface for controlling the behavior of scrollable widgets.
 ///
 /// The type argument T is the type that describes the scroll offset.
