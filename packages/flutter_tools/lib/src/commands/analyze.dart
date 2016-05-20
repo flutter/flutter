@@ -230,7 +230,7 @@ class AnalyzeCommand extends FlutterCommand {
     String elapsed = (stopwatch.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
 
     if (_isBenchmarking)
-      _writeBenchmark(stopwatch, errorCount);
+      _writeBenchmark(stopwatch, errorCount, membersMissingDocumentation);
 
     if (errorCount > 0) {
       if (membersMissingDocumentation > 0 && argResults['flutter-repo'])
@@ -346,7 +346,7 @@ class AnalyzeCommand extends FlutterCommand {
       printStatus('$errorsMessage • analyzed $files, $seconds seconds');
 
       if (firstAnalysis && _isBenchmarking) {
-        _writeBenchmark(analysisTimer, issueCount);
+        _writeBenchmark(analysisTimer, issueCount, -1); // TODO(ianh): track members missing dartdocs instead of saying -1
         server.dispose().then((_) => exit(0));
       }
 
@@ -370,11 +370,12 @@ class AnalyzeCommand extends FlutterCommand {
     return false;
   }
 
-  void _writeBenchmark(Stopwatch stopwatch, int errorCount) {
+  void _writeBenchmark(Stopwatch stopwatch, int errorCount, int membersMissingDocumentation) {
     final String benchmarkOut = 'analysis_benchmark.json';
     Map<String, dynamic> data = <String, dynamic>{
       'time': (stopwatch.elapsedMilliseconds / 1000.0),
-      'issues': errorCount
+      'issues': errorCount,
+      'missingDartDocs': membersMissingDocumentation
     };
     new File(benchmarkOut).writeAsStringSync(toPrettyJson(data));
     printStatus('Analysis benchmark written to $benchmarkOut ($data).');
