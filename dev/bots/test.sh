@@ -19,10 +19,11 @@ flutter analyze --flutter-repo
 (cd packages/flx; dart -c test/all.dart)
 
 (cd dev/manual_tests; flutter test)
+(cd examples/calculator; flutter test)
 (cd examples/hello_world; flutter test)
 (cd examples/layers; flutter test)
-(cd examples/flutter_gallery; flutter test)
 (cd examples/stocks; flutter test)
+(cd examples/flutter_gallery; flutter test)
 
 # generate and analyze our large sample app
 dart dev/tools/mega_gallery.dart
