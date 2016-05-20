@@ -47,6 +47,7 @@ export 'package:flutter/rendering.dart' show
     SingleChildLayoutDelegate,
     TextOverflow,
     ValueChanged,
+    ValueGetter,
     ViewportAnchor,
     ViewportDimensions,
     ViewportDimensionsChangeCallback;

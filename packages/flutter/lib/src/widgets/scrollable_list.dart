@@ -4,46 +4,13 @@
 
 import 'dart:math' as math;
 
+import 'clamp_overscrolls.dart';
 import 'framework.dart';
-import 'scroll_behavior.dart';
+import 'scroll_configuration.dart';
 import 'scrollable.dart';
 import 'virtual_viewport.dart';
 
 import 'package:flutter/rendering.dart';
-
-/// If true, the ClampOverscroll's [Scrollable] descendant will clamp its
-/// viewport's scrollOffsets to the [ScrollBehavior]'s min and max values.
-/// In this case the Scrollable's scrollOffset will still over and undershoot
-/// the ScrollBehavior's limits, but the viewport itself will not.
-class ClampOverscrolls extends InheritedWidget {
-  ClampOverscrolls({
-    Key key,
-    this.value,
-    Widget child
-  }) : super(key: key, child: child) {
-    assert(value != null);
-    assert(child != null);
-  }
-
-  /// True if the [Scrollable] descendant should clamp its viewport's scrollOffset
-  /// values when they are less than the [ScrollBehavior]'s minimum or greater than
-  /// its maximum.
-  final bool value;
-
-  static bool of(BuildContext context) {
-    final ClampOverscrolls result = context.inheritFromWidgetOfExactType(ClampOverscrolls);
-    return result?.value ?? false;
-  }
-
-  @override
-  bool updateShouldNotify(ClampOverscrolls old) => value != old.value;
-
-  @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('value: $value');
-  }
-}
 
 class ScrollableList extends StatelessWidget {
   ScrollableList({
@@ -144,16 +111,12 @@ class ScrollableList extends StatelessWidget {
     });
   }
 
-  Widget _buildContent(BuildContext context, ScrollableState state) {
-    final bool clampOverscrolls = ClampOverscrolls.of(context);
-    final double listScrollOffset = clampOverscrolls
-      ? state.scrollOffset.clamp(state.scrollBehavior.minScrollOffset, state.scrollBehavior.maxScrollOffset)
-      : state.scrollOffset;
-    Widget viewport = new ListViewport(
+  Widget _buildViewport(BuildContext context, ScrollableState state, double scrollOffset) {
+    return new ListViewport(
       onExtentsChanged: (double contentExtent, double containerExtent) {
         _handleExtentsChanged(state, contentExtent, containerExtent);
       },
-      scrollOffset: listScrollOffset,
+      scrollOffset: scrollOffset,
       mainAxis: scrollDirection,
       anchor: scrollAnchor,
       itemExtent: itemExtent,
@@ -161,14 +124,15 @@ class ScrollableList extends StatelessWidget {
       padding: padding,
       children: children
     );
-    if (clampOverscrolls)
-      viewport = new ClampOverscrolls(value: false, child: viewport);
-    return viewport;
+  }
+
+  Widget _buildContent(BuildContext context, ScrollableState state) {
+    return ClampOverscrolls.buildViewport(context, state, _buildViewport);
   }
 
   @override
   Widget build(BuildContext context) {
-    return new Scrollable(
+    final Widget result = new Scrollable(
       key: scrollableKey,
       initialScrollOffset: initialScrollOffset,
       scrollDirection: scrollDirection,
@@ -179,6 +143,7 @@ class ScrollableList extends StatelessWidget {
       snapOffsetCallback: snapOffsetCallback,
       builder: _buildContent
     );
+    return ScrollConfiguration.wrap(context, result);
   }
 }
 
@@ -477,12 +442,12 @@ class ScrollableLazyList extends StatelessWidget {
     });
   }
 
-  Widget _buildContent(BuildContext context, ScrollableState state) {
+  Widget _buildViewport(BuildContext context, ScrollableState state, double scrollOffset) {
     return new LazyListViewport(
       onExtentsChanged: (double contentExtent, double containerExtent) {
         _handleExtentsChanged(state, contentExtent, containerExtent);
       },
-      scrollOffset: state.scrollOffset,
+      scrollOffset: scrollOffset,
       mainAxis: scrollDirection,
       anchor: scrollAnchor,
       itemExtent: itemExtent,
@@ -492,9 +457,13 @@ class ScrollableLazyList extends StatelessWidget {
     );
   }
 
+  Widget _buildContent(BuildContext context, ScrollableState state) {
+    return ClampOverscrolls.buildViewport(context, state, _buildViewport);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return new Scrollable(
+    final Widget result = new Scrollable(
       key: scrollableKey,
       initialScrollOffset: initialScrollOffset,
       scrollDirection: scrollDirection,
@@ -505,6 +474,7 @@ class ScrollableLazyList extends StatelessWidget {
       snapOffsetCallback: snapOffsetCallback,
       builder: _buildContent
     );
+    return ScrollConfiguration.wrap(context, result);
   }
 }
 

@@ -11,11 +11,13 @@ import 'package:flutter/gestures.dart';
 import 'package:meta/meta.dart';
 
 import 'basic.dart';
+import 'clamp_overscrolls.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'notification_listener.dart';
 import 'page_storage.dart';
 import 'scroll_behavior.dart';
+import 'scroll_configuration.dart';
 
 /// The accuracy to which scrolling is computed.
 final Tolerance kPixelScrollTolerance = new Tolerance(
@@ -319,9 +321,15 @@ class ScrollableState<T extends Scrollable> extends State<T> {
   }
   ExtentScrollBehavior _scrollBehavior;
 
-  /// Subclasses should override this function to create the [ScrollBehavior]
-  /// they desire.
-  ExtentScrollBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior();
+  /// Use the value returned by [ScrollConfiguration.createScrollBehavior].
+  /// If this widget doesn't have a ScrollConfiguration ancestor,
+  /// or its createScrollBehavior callback is null, then return a new instance
+  /// of [OverscrollWhenScrollableBehavior].
+  ExtentScrollBehavior createScrollBehavior() {
+    // TODO(hansmuller): this will not be called when the ScrollConfiguration changes.
+    // An override of dependenciesChanged() is probably needed.
+    return ScrollConfiguration.of(context)?.createScrollBehavior();
+  }
 
   bool _scrollOffsetIsInBounds(double scrollOffset) {
     if (scrollBehavior is! ExtentScrollBehavior)
@@ -773,9 +781,9 @@ class _ScrollableViewportState extends State<ScrollableViewport> {
     return state.scrollOffsetToPixelDelta(state.scrollOffset);
   }
 
-  Widget _buildContent(BuildContext context, ScrollableState state) {
+  Widget _buildViewport(BuildContext context, ScrollableState state, double scrollOffset) {
     return new Viewport(
-      paintOffset: state.scrollOffsetToPixelDelta(state.scrollOffset),
+      paintOffset: state.scrollOffsetToPixelDelta(scrollOffset),
       mainAxis: config.scrollDirection,
       anchor: config.scrollAnchor,
       onPaintOffsetUpdateNeeded: (ViewportDimensions dimensions) {
@@ -785,9 +793,13 @@ class _ScrollableViewportState extends State<ScrollableViewport> {
     );
   }
 
+  Widget _buildContent(BuildContext context, ScrollableState state) {
+    return ClampOverscrolls.buildViewport(context, state, _buildViewport);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return new Scrollable(
+    final Widget result = new Scrollable(
       key: config.scrollableKey,
       initialScrollOffset: config.initialScrollOffset,
       scrollDirection: config.scrollDirection,
@@ -798,6 +810,7 @@ class _ScrollableViewportState extends State<ScrollableViewport> {
       snapOffsetCallback: config.snapOffsetCallback,
       builder: _buildContent
     );
+    return ScrollConfiguration.wrap(context, result);
   }
 }
 

@@ -7,7 +7,9 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart' show lowerBound;
 import 'package:flutter/rendering.dart';
 
+import 'clamp_overscrolls.dart';
 import 'framework.dart';
+import 'scroll_configuration.dart';
 import 'scrollable.dart';
 import 'virtual_viewport.dart';
 
@@ -74,9 +76,9 @@ class ScrollableGrid extends StatelessWidget {
     });
   }
 
-  Widget _buildContent(BuildContext context, ScrollableState state) {
+  Widget _buildViewport(BuildContext context, ScrollableState state, double scrollOffset) {
     return new GridViewport(
-      startOffset: state.scrollOffset,
+      startOffset: scrollOffset,
       delegate: delegate,
       onExtentsChanged: (double contentExtent, double containerExtent) {
         _handleExtentsChanged(state, contentExtent, containerExtent);
@@ -85,9 +87,13 @@ class ScrollableGrid extends StatelessWidget {
     );
   }
 
+  Widget _buildContent(BuildContext context, ScrollableState state) {
+    return ClampOverscrolls.buildViewport(context, state, _buildViewport);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return new Scrollable(
+    final Widget result = new Scrollable(
       key: scrollableKey,
       initialScrollOffset: initialScrollOffset,
       // TODO(abarth): Support horizontal offsets. For horizontally scrolling
@@ -100,6 +106,7 @@ class ScrollableGrid extends StatelessWidget {
       snapOffsetCallback: snapOffsetCallback,
       builder: _buildContent
     );
+    return ScrollConfiguration.wrap(context, result);
   }
 }
 
