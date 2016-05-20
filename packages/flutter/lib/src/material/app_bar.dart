@@ -113,7 +113,7 @@ class AppBar extends StatelessWidget {
   final TextTheme textTheme;
 
   /// The amount of space by which to inset the contents of the app bar.
-  /// The [Scaffold] increases padding.top by the height of the system
+  /// The [Scaffold] increases [padding.top] by the height of the system
   /// status bar so that the toolbar appears below the status bar.
   final EdgeInsets padding;
 
@@ -155,13 +155,13 @@ class AppBar extends StatelessWidget {
 
   double get _toolBarHeight => kToolBarHeight;
 
-  /// By default: the height of the toolbar and the tabbar (if any).
+  /// By default, the height of the toolbar and the tabbar (if any).
   /// The [Scaffold] gives its appbar this height initially. If a
   /// [flexibleSpace] widget is specified this height should be big
   /// enough to accommodate whatever that widget contains.
   double get expandedHeight => _expandedHeight ?? (_toolBarHeight + (_tabBarHeight ?? 0.0));
 
-  /// By default: the height of the toolbar and the tabbar (if any).
+  /// By default, the height of the toolbar and the tabbar (if any).
   /// If the height of the app bar is constrained to be less than this value
   /// the toolbar and tabbar are scrolled upwards, out of view.
   double get collapsedHeight => _collapsedHeight ?? (_toolBarHeight + (_tabBarHeight ?? 0.0));
