@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:calculator/main.dart' as calculator;
+import 'package:flutter_gallery/calculator/interface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -14,9 +14,7 @@ void main() {
   // We press the "1" and the "2" buttons and check that the display
   // reads "12".
   testWidgets('Flutter calculator app smoke test', (WidgetTester tester)  async {
-    calculator.main(); // builds the app and schedules a frame but doesn't trigger one
-    await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
-    await tester.pump(); // triggers a frame
+    await tester.pumpWidget(new Calculator());
 
     Finder oneButton = find.widgetWithText(InkResponse, '1');
     expect(oneButton, findsOneWidget);

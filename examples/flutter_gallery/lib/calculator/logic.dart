@@ -35,8 +35,10 @@ class FloatToken extends NumberToken {
 
   static double _parse(String stringRep) {
     String toParse = stringRep;
-    if (toParse.startsWith('.')) toParse = '0' + toParse;
-    if (toParse.endsWith('.')) toParse = toParse + '0';
+    if (toParse.startsWith('.'))
+      toParse = '0' + toParse;
+    if (toParse.endsWith('.'))
+      toParse = toParse + '0';
     return double.parse(toParse);
   }
 }
@@ -45,11 +47,12 @@ class FloatToken extends NumberToken {
 class ResultToken extends NumberToken {
   ResultToken(num number) : super.fromNumber(round(number));
 
-  // rounds |number| to 14 digits of precision. A double precision
-  // floating point number is guaranteed to have at least this many
-  // decimal digits of precision.
+  /// rounds `number` to 14 digits of precision. A double precision
+  /// floating point number is guaranteed to have at least this many
+  /// decimal digits of precision.
   static num round(num number) {
-    if (number is int) return number;
+    if (number is int)
+      return number;
     return double.parse(number.toStringAsPrecision(14));
   }
 }
@@ -64,8 +67,8 @@ enum Operation { Addition, Subtraction, Multiplication, Division }
 /// A token that represents an arithmetic operation symbol.
 class OperationToken extends ExpressionToken {
   OperationToken(Operation operation)
-      : this.operation = operation,
-        super(opString(operation));
+   : operation = operation,
+     super(opString(operation));
 
   Operation operation;
 
@@ -86,18 +89,23 @@ class OperationToken extends ExpressionToken {
 /// As the user taps different keys the current expression can be in one
 /// of several states.
 enum ExpressionState {
-  // The expression is empty or an operation symbol was just entered.
-  // A new number must be started now.
+  /// The expression is empty or an operation symbol was just entered.
+  /// A new number must be started now.
   Start,
-  // A minus sign was entered as a leading negative prefix.
+
+  /// A minus sign was entered as a leading negative prefix.
   LeadingNeg,
-  // We are in the midst of a number without a point.
+
+  /// We are in the midst of a number without a point.
   Number,
-  // A point was just entered.
+
+  /// A point was just entered.
   Point,
-  // We are in the midst of a number with a point.
+
+  /// We are in the midst of a number with a point.
   NumberWithPoint,
-  // A result is being displayed
+
+  /// A result is being displayed
   Result,
 }
 
@@ -112,21 +120,21 @@ class CalcExpression {
   CalcExpression(this._list, this.state);
 
   CalcExpression.Empty()
-      : this(new List<ExpressionToken>(), ExpressionState.Start);
+    : this(<ExpressionToken>[], ExpressionState.Start);
 
   CalcExpression.Result(FloatToken result)
-      : _list = new List<ExpressionToken>(),
-        state = ExpressionState.Result {
+    : _list = <ExpressionToken>[],
+      state = ExpressionState.Result {
     _list.add(result);
   }
 
-  // The tokens comprising the expression.
+  /// The tokens comprising the expression.
   final List<ExpressionToken> _list;
-  // The state of the expression.
+  /// The state of the expression.
   final ExpressionState state;
 
-  // The string representation of the expression. This will be displayed
-  // in the calculator's display panel.
+  /// The string representation of the expression. This will be displayed
+  /// in the calculator's display panel.
   @override
   String toString() {
     StringBuffer buffer = new StringBuffer('');
@@ -296,9 +304,9 @@ class CalcExpression {
     return new CalcExpression(outList, ExpressionState.Result);
   }
 
-  // Removes the next "term" from |list| and returns its numeric value.
-  // A "term" is a sequence of number tokens separated by multiplication
-  // and division symbols.
+  /// Removes the next "term" from `list` and returns its numeric value.
+  /// A "term" is a sequence of number tokens separated by multiplication
+  /// and division symbols.
   static num removeNextTerm(List<ExpressionToken> list) {
     assert(list != null && list.length >= 1);
     final NumberToken firstNumToken = list.removeAt(0);
