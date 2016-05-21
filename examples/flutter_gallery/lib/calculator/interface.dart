@@ -4,38 +4,32 @@
 
 import 'package:flutter/material.dart';
 
-import 'calc_expression.dart';
-
-// A calculator application.
-void main() {
-  runApp(new MaterialApp(
-      title: 'Calculator',
-      theme: new ThemeData(primarySwatch: Colors.blue),
-      home: new Calculator()));
-}
+import 'logic.dart';
 
 class Calculator extends StatefulWidget {
   Calculator({Key key}) : super(key: key);
+
+  static const String routeName = '/calculator';
 
   @override
   _CalculatorState createState() => new _CalculatorState();
 }
 
 class _CalculatorState extends State<Calculator> {
-  // As the user taps keys we update the current |_expression| and we also
-  // keep a stack of previous expressions so we can return to earlier states
-  // when the user hits the DEL key.
+  /// As the user taps keys we update the current `_expression` and we also
+  /// keep a stack of previous expressions so we can return to earlier states
+  /// when the user hits the DEL key.
   final List<CalcExpression> _expressionStack = <CalcExpression>[];
   CalcExpression _expression = new CalcExpression.Empty();
 
-  // Make |expression| the current expression and push the previous current
+  // Make `expression` the current expression and push the previous current
   // expression onto the stack.
   void pushExpression(CalcExpression expression) {
     _expressionStack.add(_expression);
     _expression = expression;
   }
 
-  // Pop the top expression off of the stack and make it the current expression.
+  /// Pop the top expression off of the stack and make it the current expression.
   void popCalcExpression() {
     if (_expressionStack.length > 0) {
       _expression = _expressionStack.removeLast();
@@ -44,7 +38,7 @@ class _CalculatorState extends State<Calculator> {
     }
   }
 
-  // Set |resultExpression| to the currrent expression and clear the stack.
+  /// Set `resultExpression` to the currrent expression and clear the stack.
   void setResult(CalcExpression resultExpression) {
     _expressionStack.clear();
     _expression = resultExpression;
@@ -69,8 +63,7 @@ class _CalculatorState extends State<Calculator> {
   }
 
   void handlePlusTap() {
-    final CalcExpression expression =
-        _expression.appendOperation(Operation.Addition);
+    final CalcExpression expression = _expression.appendOperation(Operation.Addition);
     if (expression != null) {
       setState(() {
         pushExpression(expression);
@@ -88,8 +81,7 @@ class _CalculatorState extends State<Calculator> {
   }
 
   void handleMultTap() {
-    final CalcExpression expression =
-        _expression.appendOperation(Operation.Multiplication);
+    final CalcExpression expression = _expression.appendOperation(Operation.Multiplication);
     if (expression != null) {
       setState(() {
         pushExpression(expression);
@@ -98,8 +90,7 @@ class _CalculatorState extends State<Calculator> {
   }
 
   void handleDivTap() {
-    final CalcExpression expression =
-        _expression.appendOperation(Operation.Division);
+    final CalcExpression expression = _expression.appendOperation(Operation.Division);
     if (expression != null) {
       setState(() {
         pushExpression(expression);
@@ -125,13 +116,15 @@ class _CalculatorState extends State<Calculator> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-        appBar: new AppBar(title: new Text('Calculator')),
-        body: new Column(children: <Widget>[
-          // Give the key-pad 3/5 of the vertical space and the display
-          // 2/5.
+      appBar: new AppBar(title: new Text('Calculator')),
+      body: new Column(
+        children: <Widget>[
+          // Give the key-pad 3/5 of the vertical space and the display 2/5.
           new CalcDisplay(2, _expression.toString()),
           new KeyPad(3, calcState: this)
-        ]));
+        ]
+      )
+    );
   }
 }
 
@@ -144,9 +137,14 @@ class CalcDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Flexible(
-        flex: _flex,
-        child: new Center(child: new Text(_contents,
-            style: const TextStyle(color: Colors.black, fontSize: 24.0))));
+      flex: _flex,
+      child: new Center(
+        child: new Text(
+          _contents,
+          style: const TextStyle(color: Colors.black, fontSize: 24.0)
+        )
+      )
+    );
   }
 }
 
@@ -159,11 +157,14 @@ class KeyPad extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Flexible(
-        flex: _flex,
-        child: new Row(children: <Widget>[
+      flex: _flex,
+      child: new Row(
+        children: <Widget>[
           new MainKeyPad(calcState: calcState),
           new OpKeyPad(calcState: calcState),
-        ]));
+        ]
+      )
+    );
   }
 }
 
@@ -175,36 +176,39 @@ class MainKeyPad extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Flexible(
-        // We set flex equal to the number of columns so that the main keypad
-        // and the op keypad have sizes proportional to their number of
-        // columns.
-        flex: 3,
-        child: new Material(
-            type: MaterialType.canvas,
-            elevation: 12,
-            color: Colors.grey[800],
-            child: new Column(children: <Widget>[
-              new KeyRow(<Widget>[
-                new NumberKey(7, calcState),
-                new NumberKey(8, calcState),
-                new NumberKey(9, calcState)
-              ]),
-              new KeyRow(<Widget>[
-                new NumberKey(4, calcState),
-                new NumberKey(5, calcState),
-                new NumberKey(6, calcState)
-              ]),
-              new KeyRow(<Widget>[
-                new NumberKey(1, calcState),
-                new NumberKey(2, calcState),
-                new NumberKey(3, calcState)
-              ]),
-              new KeyRow(<Widget>[
-                new CalcKey('.', calcState.handlePointTap),
-                new NumberKey(0, calcState),
-                new CalcKey('=', calcState.handleEqualsTap),
-              ])
-            ])));
+      // We set flex equal to the number of columns so that the main keypad
+      // and the op keypad have sizes proportional to their number of
+      // columns.
+      flex: 3,
+      child: new Material(
+        elevation: 12,
+        color: Colors.grey[800],
+        child: new Column(
+          children: <Widget>[
+            new KeyRow(<Widget>[
+              new NumberKey(7, calcState),
+              new NumberKey(8, calcState),
+              new NumberKey(9, calcState)
+            ]),
+            new KeyRow(<Widget>[
+              new NumberKey(4, calcState),
+              new NumberKey(5, calcState),
+              new NumberKey(6, calcState)
+            ]),
+            new KeyRow(<Widget>[
+              new NumberKey(1, calcState),
+              new NumberKey(2, calcState),
+              new NumberKey(3, calcState)
+            ]),
+            new KeyRow(<Widget>[
+              new CalcKey('.', calcState.handlePointTap),
+              new NumberKey(0, calcState),
+              new CalcKey('=', calcState.handleEqualsTap),
+            ])
+          ]
+        )
+      )
+    );
   }
 }
 
@@ -215,17 +219,21 @@ class OpKeyPad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Flexible(child: new Material(
-        type: MaterialType.canvas,
+    return new Flexible(
+      child: new Material(
         elevation: 24,
         color: Colors.grey[700],
-        child: new Column(children: <Widget>[
-          new CalcKey('DEL', calcState.handleDelTap),
-          new CalcKey('\u00F7', calcState.handleDivTap),
-          new CalcKey('\u00D7', calcState.handleMultTap),
-          new CalcKey('-', calcState.handleMinusTap),
-          new CalcKey('+', calcState.handlePlusTap)
-        ])));
+        child: new Column(
+          children: <Widget>[
+            new CalcKey('\u232B', calcState.handleDelTap),
+            new CalcKey('\u00F7', calcState.handleDivTap),
+            new CalcKey('\u00D7', calcState.handleMultTap),
+            new CalcKey('-', calcState.handleMinusTap),
+            new CalcKey('+', calcState.handlePlusTap)
+          ]
+        )
+      )
+    );
   }
 }
 
@@ -236,28 +244,41 @@ class KeyRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Flexible(child: new Row(
-        mainAxisAlignment: MainAxisAlignment.center, children: this.keys));
+    return new Flexible(
+      child: new Row(
+        mainAxisAlignment: MainAxisAlignment.center, children: this.keys
+      )
+    );
   }
 }
 
 class CalcKey extends StatelessWidget {
+  CalcKey(this.text, this.onTap);
+
   final String text;
   final GestureTapCallback onTap;
-  CalcKey(this.text, this.onTap);
 
   @override
   Widget build(BuildContext context) {
-    return new Flexible(child: new Container(child: new InkResponse(
-        onTap: this.onTap,
-        child: new Center(child: new Text(this.text,
-            style: const TextStyle(color: Colors.white, fontSize: 32.0))))));
+    return new Flexible(
+//      child: new Container(
+        child: new InkResponse(
+          onTap: this.onTap,
+          child: new Center(
+            child: new Text(
+              this.text,
+              style: const TextStyle(color: Colors.white, fontSize: 32.0)
+            )
+          )
+        )
+//      )
+    );
   }
 }
 
 class NumberKey extends CalcKey {
   NumberKey(int value, _CalculatorState calcState)
-      : super('$value', () {
-          calcState.handleNumberTap(value);
-        });
+    : super('$value', () {
+        calcState.handleNumberTap(value);
+      });
 }

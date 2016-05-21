@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:calculator/calc_expression.dart';
+import 'package:flutter_gallery/calculator/logic.dart';
 import 'package:test/test.dart';
 
 void main() {
