@@ -80,7 +80,7 @@ class AppBar extends StatelessWidget {
   /// of the app.
   final Widget title;
 
-  /// Widgets to display after the title.
+  /// Widgets to display after the title widget.
   ///
   /// Typically these widgets are [IconButton]s representing common operations.
   /// For less common operations, consider using a [PopupMenuButton] as the
