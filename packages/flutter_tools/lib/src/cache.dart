@@ -269,8 +269,7 @@ class FlutterEngine {
     for (String pkgName in _getPackageDirs()) {
       Directory dir = new Directory(path.join(pkgDir.path, pkgName));
       if (!dir.existsSync() || allDirty) {
-        await _downloadItem('Downloading engine package $pkgName...',
-          url + pkgName + '.zip', pkgDir);
+        await _downloadItem('Downloading package $pkgName...', url + pkgName + '.zip', pkgDir);
       }
     }
 
@@ -288,8 +287,7 @@ class FlutterEngine {
       String urlPath = toolsDir[1];
       Directory dir = new Directory(path.join(engineDir.path, cacheDir));
       if (!dir.existsSync() || allDirty) {
-        await _downloadItem('Downloading engine tools $cacheDir...',
-          url + urlPath, dir);
+        await _downloadItem('Downloading $cacheDir tools...', url + urlPath, dir);
         _makeFilesExecutable(dir);
       }
     }

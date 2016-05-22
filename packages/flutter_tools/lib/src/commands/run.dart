@@ -45,9 +45,6 @@ class RunCommand extends RunCommandBase {
   @override
   final String description = 'Run your Flutter app on an attached device.';
 
-  @override
-  final List<String> aliases = <String>['start'];
-
   RunCommand() {
     argParser.addFlag('full-restart',
         defaultsTo: true,
