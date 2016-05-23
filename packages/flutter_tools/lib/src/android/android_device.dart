@@ -522,6 +522,8 @@ class _AdbLogReader extends DeviceLogReader {
 
   final AndroidDevice device;
 
+  bool _lastWasFiltered = false;
+
   StreamController<String> _linesController;
   Process _process;
 
@@ -537,9 +539,6 @@ class _AdbLogReader extends DeviceLogReader {
     String lastTimestamp = device.lastLogcatTimestamp;
     if (lastTimestamp != null)
       args.addAll(<String>['-T', lastTimestamp]);
-    args.addAll(<String>[
-      '-s', 'flutter:V', 'FlutterMain:V', 'FlutterView:V', 'AndroidRuntime:W', 'ActivityManager:W', 'System.err:W', '*:F'
-    ]);
     runCommand(device.adbCommandForDevice(args)).then((Process process) {
       _process = process;
       _process.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);
@@ -552,11 +551,38 @@ class _AdbLogReader extends DeviceLogReader {
     });
   }
 
+  // 'W/ActivityManager: '
+  static final RegExp _logFormat = new RegExp(r'^[VDIWEF]\/[^:]+:\s+');
+
+  static final List<RegExp> _whitelistedTags = <RegExp>[
+    new RegExp(r'^[VDIWEF]\/flutter[^:]*:\s+', caseSensitive: false),
+    new RegExp(r'^[WEF]\/AndroidRuntime:\s+'),
+    new RegExp(r'^[WEF]\/ActivityManager:\s+'),
+    new RegExp(r'^[WEF]\/System\.err:\s+'),
+    new RegExp(r'^[F]\/[\S^:]+:\s+')
+  ];
+
   void _onLine(String line) {
-    // Filter out some noisy ActivityManager notifications.
-    if (line.startsWith('W/ActivityManager: getRunningAppProcesses'))
-      return;
-    _linesController.add(line);
+    if (_logFormat.hasMatch(line)) {
+      // Filter out some noisy ActivityManager notifications.
+      if (line.startsWith('W/ActivityManager: getRunningAppProcesses'))
+        return;
+
+      // Filter on approved names and levels.
+      for (RegExp regex in _whitelistedTags) {
+        if (regex.hasMatch(line)) {
+          _lastWasFiltered = false;
+          _linesController.add(line);
+          return;
+        }
+      }
+
+      _lastWasFiltered = true;
+    } else {
+      // If it doesn't match the log pattern at all, pass it through.
+      if (!_lastWasFiltered)
+        _linesController.add(line);
+    }
   }
 
   void _stop() {
