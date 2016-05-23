@@ -38,6 +38,7 @@ class BuildAotCommand extends FlutterCommand {
   Future<int> runInProject() async {
     String outputPath = buildAotSnapshot(
       findMainDartFile(argResults['target']),
+      TargetPlatform.android_arm,
       getBuildMode(),
       outputPath: argResults['output-dir']
     );
@@ -56,6 +57,7 @@ String _getSdkExtensionPath(String packagesPath, String package) {
 
 String buildAotSnapshot(
   String mainPath,
+  TargetPlatform platform,
   BuildMode buildMode, {
   String outputPath: _kDefaultAotOutputDir
 }) {
@@ -69,14 +71,15 @@ String buildAotSnapshot(
   String engineSrc = tools.engineSrcPath;
   if (engineSrc != null) {
     entryPointsDir  = path.join(engineSrc, 'sky', 'engine', 'bindings');
-    String engineOut = tools.getEngineArtifactsDirectory(
-        TargetPlatform.android_arm, buildMode).path;
-
-    String host32BitToolchain = getCurrentHostPlatform() == HostPlatform.darwin_x64 ? 'clang_i386' : 'clang_x86';
-    genSnapshot = path.join(engineOut, host32BitToolchain, 'gen_snapshot');
+    String engineOut = tools.getEngineArtifactsDirectory(platform, buildMode).path;
+    if (platform == TargetPlatform.ios) {
+      genSnapshot = path.join(engineOut, 'clang_x64', 'gen_snapshot');
+    } else {
+      String host32BitToolchain = getCurrentHostPlatform() == HostPlatform.darwin_x64 ? 'clang_i386' : 'clang_x86';
+      genSnapshot = path.join(engineOut, host32BitToolchain, 'gen_snapshot');
+    }
   } else {
-    String artifactsDir = tools.getEngineArtifactsDirectory(
-        TargetPlatform.android_arm, buildMode).path;
+    String artifactsDir = tools.getEngineArtifactsDirectory(platform, buildMode).path;
     entryPointsDir = artifactsDir;
     String hostToolsDir = path.join(artifactsDir, getNameForHostPlatform(getCurrentHostPlatform()));
     genSnapshot = path.join(hostToolsDir, 'gen_snapshot');
@@ -90,7 +93,6 @@ String buildAotSnapshot(
   String rodataBlob = path.join(outputDir.path, 'snapshot_aot_rodata');
 
   String vmEntryPoints = path.join(entryPointsDir, 'dart_vm_entry_points.txt');
-  String vmEntryPointsAndroid = path.join(entryPointsDir, 'dart_vm_entry_points_android.txt');
 
   String packagesPath = path.absolute(Directory.current.path, 'packages');
   if (!FileSystemEntity.isDirectorySync(packagesPath)) {
@@ -107,11 +109,46 @@ String buildAotSnapshot(
   String skyEngineSdkExt = _getSdkExtensionPath(packagesPath, 'sky_engine');
   String uiPath = path.join(skyEngineSdkExt, 'dart_ui.dart');
   String vmServicePath = path.join(skyEngineSdkExt, 'dart', 'runtime', 'bin', 'vmservice', 'vmservice_io.dart');
-  String jniPath = path.join(skyEngineSdkExt, 'dart_jni', 'jni.dart');
 
   List<String> filePaths = <String>[
-    genSnapshot, vmEntryPoints, vmEntryPointsAndroid, mojoInternalPath, uiPath, vmServicePath, jniPath
+    genSnapshot,
+    vmEntryPoints,
+    mojoInternalPath,
+    uiPath,
+    vmServicePath,
   ];
+
+  // These paths are used only on Android.
+  String vmEntryPointsAndroid;
+  String jniPathAndroid;
+
+  // These paths are used only on iOS.
+  String snapshotDartIOS;
+  String assembly;
+
+  switch (platform) {
+    case TargetPlatform.android_arm:
+    case TargetPlatform.android_x64:
+    case TargetPlatform.android_x86:
+      vmEntryPointsAndroid = path.join(entryPointsDir, 'dart_vm_entry_points_android.txt');
+      jniPathAndroid = path.join(skyEngineSdkExt, 'dart_jni', 'jni.dart');
+      filePaths.addAll(<String>[
+        vmEntryPointsAndroid,
+        jniPathAndroid,
+      ]);
+      break;
+    case TargetPlatform.ios:
+      snapshotDartIOS = path.join(entryPointsDir, 'snapshot.dart');
+      assembly = path.join(outputDir.path, 'snapshot_assembly.S');
+      filePaths.addAll(<String>[
+        snapshotDartIOS,
+      ]);
+      break;
+    case TargetPlatform.darwin_x64:
+    case TargetPlatform.linux_x64:
+      assert(false);
+  }
+
   List<String> missingFiles = filePaths.where((String p) => !FileSystemEntity.isFileSync(p)).toList();
   if (missingFiles.isNotEmpty) {
     printError('Missing files: $missingFiles');
@@ -122,17 +159,34 @@ String buildAotSnapshot(
     genSnapshot,
     '--vm_isolate_snapshot=$vmIsolateSnapshot',
     '--isolate_snapshot=$isolateSnapshot',
-    '--instructions_blob=$instructionsBlob',
-    '--rodata_blob=$rodataBlob',
     '--embedder_entry_points_manifest=$vmEntryPoints',
-    '--embedder_entry_points_manifest=$vmEntryPointsAndroid',
     '--package_root=$packagesPath',
     '--url_mapping=dart:mojo.internal,$mojoInternalPath',
     '--url_mapping=dart:ui,$uiPath',
     '--url_mapping=dart:vmservice_sky,$vmServicePath',
-    '--url_mapping=dart:jni,$jniPath',
-    '--no-sim-use-hardfp',
   ];
+
+  switch (platform) {
+    case TargetPlatform.android_arm:
+    case TargetPlatform.android_x64:
+    case TargetPlatform.android_x86:
+      genSnapshotCmd.addAll(<String>[
+        '--rodata_blob=$rodataBlob',
+        '--instructions_blob=$instructionsBlob',
+        '--embedder_entry_points_manifest=$vmEntryPointsAndroid',
+        '--url_mapping=dart:jni,$jniPathAndroid',
+        '--no-sim-use-hardfp',
+      ]);
+      break;
+    case TargetPlatform.ios:
+      genSnapshotCmd.addAll(<String>[
+        '--assembly=$assembly'
+      ]);
+      break;
+    case TargetPlatform.darwin_x64:
+    case TargetPlatform.linux_x64:
+      assert(false);
+  }
 
   if (buildMode != BuildMode.release) {
     genSnapshotCmd.addAll(<String>[
@@ -145,6 +199,45 @@ String buildAotSnapshot(
 
   printStatus('Building snapshot...');
   runCheckedSync(genSnapshotCmd);
+
+  // On iOS, we use Xcode to compile the snapshot into a static library that the
+  // end-developer can link into their app.
+  if (platform == TargetPlatform.ios) {
+    printStatus('Building app.a...');
+
+    // These names are known to from the engine.
+    const String kDartVmIsolateSnapshotBuffer = 'kDartVmIsolateSnapshotBuffer';
+    const String kDartIsolateSnapshotBuffer = 'kDartIsolateSnapshotBuffer';
+
+    runCheckedSync(<String>['mv', vmIsolateSnapshot, path.join(outputDir.path, kDartVmIsolateSnapshotBuffer)]);
+    runCheckedSync(<String>['mv', isolateSnapshot, path.join(outputDir.path, kDartIsolateSnapshotBuffer)]);
+
+    String kDartVmIsolateSnapshotBufferC = path.join(outputDir.path, '$kDartVmIsolateSnapshotBuffer.c');
+    String kDartIsolateSnapshotBufferC = path.join(outputDir.path, '$kDartIsolateSnapshotBuffer.c');
+
+    runCheckedSync(<String>[
+      'xxd', '--include', kDartVmIsolateSnapshotBuffer, path.basename(kDartVmIsolateSnapshotBufferC)
+    ], workingDirectory: outputDir.path);
+    runCheckedSync(<String>[
+      'xxd', '--include', kDartIsolateSnapshotBuffer, path.basename(kDartIsolateSnapshotBufferC)
+    ], workingDirectory: outputDir.path);
+
+    String assemblyO = path.join(outputDir.path, 'snapshot_assembly.o');
+    String kDartVmIsolateSnapshotBufferO = path.join(outputDir.path, '$kDartVmIsolateSnapshotBuffer.o');
+    String kDartIsolateSnapshotBufferO = path.join(outputDir.path, '$kDartIsolateSnapshotBuffer.o');
+
+    runCheckedSync(<String>['xcrun', 'cc', '-c', assembly, '-o', assemblyO]);
+    runCheckedSync(<String>['xcrun', 'cc', '-c', kDartVmIsolateSnapshotBufferC, '-o', kDartVmIsolateSnapshotBufferO]);
+    runCheckedSync(<String>['xcrun', 'cc', '-c', kDartIsolateSnapshotBufferC, '-o', kDartIsolateSnapshotBufferO]);
+
+    String appLib = path.join(outputDir.path, 'app.a');
+
+    runCheckedSync(<String>['rm', '-f', appLib]);
+    runCheckedSync(<String>[
+      'xcrun', 'ar', 'rcs', appLib,
+      assemblyO, kDartVmIsolateSnapshotBufferO, kDartIsolateSnapshotBufferO,
+    ]);
+  }
 
   return outputPath;
 }

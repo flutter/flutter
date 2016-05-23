@@ -513,7 +513,7 @@ Future<int> buildAndroid(
 
   // Build an AOT snapshot if needed.
   if (isAotBuildMode(buildMode) && aotPath == null) {
-    aotPath = buildAotSnapshot(findMainDartFile(target), buildMode);
+    aotPath = buildAotSnapshot(findMainDartFile(target), platform, buildMode);
     if (aotPath == null) {
       printError('Failed to build AOT snapshot');
       return 1;
