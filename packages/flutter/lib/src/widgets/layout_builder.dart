@@ -119,7 +119,7 @@ class _LayoutBuilderElement extends RenderObjectElement {
 
   @override
   void mount(Element parent, dynamic newSlot) {
-    super.mount(parent, newSlot);    // Creates the renderObject.
+    super.mount(parent, newSlot); // Creates the renderObject.
     renderObject.callback = _layout; // The _child will be built during layout.
   }
 
@@ -130,6 +130,14 @@ class _LayoutBuilderElement extends RenderObjectElement {
     assert(widget == newWidget);
     renderObject.callback = _layout;
     renderObject.markNeedsLayout();
+  }
+
+  @override
+  void performRebuild() {
+    // This gets called if markNeedsBuild() is called on us.
+    // That might happen if, e.g., our builder uses Inherited widgets.
+    renderObject.markNeedsLayout();
+    super.performRebuild(); // calls widget.updateRenderObject
   }
 
   @override

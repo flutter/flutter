@@ -116,4 +116,51 @@ void main() {
     box = tester.renderObject(find.byKey(childKey));
     expect(box.size, equals(const Size(100.0, 200.0)));
   });
+
+  testWidgets('LayoutBuilder and Inherited -- do not rebuild when not using inherited', (WidgetTester tester) async {
+    int built = 0;
+    Widget target = new LayoutBuilder(
+      builder: (BuildContext context, Size size) {
+        built += 1;
+        return new Container();
+      }
+    );
+    expect(built, 0);
+
+    await tester.pumpWidget(new MediaQuery(
+      data: new MediaQueryData(size: const Size(400.0, 300.0)),
+      child: target
+    ));
+    expect(built, 1);
+
+    await tester.pumpWidget(new MediaQuery(
+      data: new MediaQueryData(size: const Size(300.0, 400.0)),
+      child: target
+    ));
+    expect(built, 1);
+  });
+
+  testWidgets('LayoutBuilder and Inherited -- do rebuild when using inherited', (WidgetTester tester) async {
+    int built = 0;
+    Widget target = new LayoutBuilder(
+      builder: (BuildContext context, Size size) {
+        built += 1;
+        MediaQuery.of(context);
+        return new Container();
+      }
+    );
+    expect(built, 0);
+
+    await tester.pumpWidget(new MediaQuery(
+      data: new MediaQueryData(size: const Size(400.0, 300.0)),
+      child: target
+    ));
+    expect(built, 1);
+
+    await tester.pumpWidget(new MediaQuery(
+      data: new MediaQueryData(size: const Size(300.0, 400.0)),
+      child: target
+    ));
+    expect(built, 2);
+  });
 }

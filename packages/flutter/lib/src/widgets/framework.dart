@@ -1825,7 +1825,6 @@ class InheritedElement extends _ProxyElement {
   /// the build phase.
   void dispatchDependenciesChanged() {
     for (Element dependent in _dependents) {
-      dependent.dependenciesChanged();
       assert(() {
         // check that it really is our descendant
         Element ancestor = dependent._parent;
@@ -1835,6 +1834,7 @@ class InheritedElement extends _ProxyElement {
       });
       // check that it really deepends on us
       assert(dependent._dependencies.contains(this));
+      dependent.dependenciesChanged();
     }
   }
 }
