@@ -347,7 +347,7 @@ class AnalyzeCommand extends FlutterCommand {
 
       if (firstAnalysis && _isBenchmarking) {
         _writeBenchmark(analysisTimer, issueCount, -1); // TODO(ianh): track members missing dartdocs instead of saying -1
-        server.dispose().then((_) => exit(0));
+        server.dispose().then((_) => exit(issueCount > 0 ? 1 : 0));
       }
 
       firstAnalysis = false;
