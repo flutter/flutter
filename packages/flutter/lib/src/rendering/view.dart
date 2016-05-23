@@ -17,17 +17,26 @@ import 'binding.dart';
 class ViewConfiguration {
   const ViewConfiguration({
     this.size: Size.zero,
+    this.devicePixelRatio: 1.0,
     this.orientation
   });
 
   /// The size of the output surface.
   final Size size;
 
+  /// The pixel density of the output surface.
+  final double devicePixelRatio;
+
   /// The orientation of the output surface (aspirational).
   final int orientation;
 
+  /// Creates a transformation matrix that applies the [devicePixelRatio].
+  Matrix4 toMatrix() {
+    return new Matrix4.diagonal3Values(devicePixelRatio, devicePixelRatio, 1.0);
+  }
+
   @override
-  String toString() => '$size';
+  String toString() => '$size at ${devicePixelRatio}x';
 }
 
 /// The root of the render tree.
@@ -38,8 +47,9 @@ class ViewConfiguration {
 class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox> {
   RenderView({
     RenderBox child,
-    this.timeForRotation: const Duration(microseconds: 83333)
-  }) {
+    this.timeForRotation: const Duration(microseconds: 83333),
+    ViewConfiguration configuration
+  }) : _configuration = configuration {
     this.child = child;
   }
 
@@ -61,19 +71,16 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     if (configuration == value)
       return;
     _configuration = value;
+    replaceRootLayer(new TransformLayer(transform: configuration.toMatrix()));
     markNeedsLayout();
-  }
-
-  Matrix4 get _logicalToDeviceTransform {
-    double devicePixelRatio = ui.window.devicePixelRatio;
-    return new Matrix4.diagonal3Values(devicePixelRatio, devicePixelRatio, 1.0);
   }
 
   /// Bootstrap the rendering pipeline by scheduling the first frame.
   void scheduleInitialFrame() {
+    assert(owner != null);
     scheduleInitialLayout();
-    scheduleInitialPaint(new TransformLayer(transform: _logicalToDeviceTransform));
-    RendererBinding.instance.ensureVisualUpdate();
+    scheduleInitialPaint(new TransformLayer(transform: configuration.toMatrix()));
+    owner.requestVisualUpdate();
   }
 
   // We never call layout() on this class, so this should never get
@@ -127,11 +134,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   void compositeFrame() {
     Timeline.startSync('Compositing');
     try {
-      final TransformLayer transformLayer = layer;
-      transformLayer.transform = _logicalToDeviceTransform;
       ui.SceneBuilder builder = new ui.SceneBuilder();
-      transformLayer.addToScene(builder, Offset.zero);
-      assert(layer == transformLayer);
+      layer.addToScene(builder, Offset.zero);
       ui.Scene scene = builder.build();
       ui.window.render(scene);
       scene.dispose();

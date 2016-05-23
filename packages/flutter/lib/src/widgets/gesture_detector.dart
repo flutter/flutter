@@ -111,8 +111,8 @@ class GestureDetector extends StatelessWidget {
   /// A tap has occurred.
   final GestureTapCallback onTap;
 
-  /// The pointer that previously triggered the [onTapDown] will not end up
-  /// causing a tap.
+  /// The pointer that previously triggered [onTapDown] will not end up causing
+  /// a tap.
   final GestureTapCancelCallback onTapCancel;
 
   /// The user has tapped the screen at the same location twice in quick
@@ -138,8 +138,8 @@ class GestureDetector extends StatelessWidget {
   /// specific velocity when it stopped contacting the screen.
   final GestureDragEndCallback onVerticalDragEnd;
 
-  /// The pointer that previously triggered the [onVerticalDragDown] did not
-  /// end up moving vertically.
+  /// The pointer that previously triggered [onVerticalDragDown] did not
+  /// complete.
   final GestureDragCancelCallback onVerticalDragCancel;
 
   /// A pointer has contacted the screen and might begin to move horizontally.
@@ -157,18 +157,36 @@ class GestureDetector extends StatelessWidget {
   /// specific velocity when it stopped contacting the screen.
   final GestureDragEndCallback onHorizontalDragEnd;
 
-  /// The pointer that previously triggered the [onHorizontalDragDown] did not
-  /// end up moving horizontally.
+  /// The pointer that previously triggered [onHorizontalDragDown] did not
+  /// complete.
   final GestureDragCancelCallback onHorizontalDragCancel;
 
+  /// A pointer has contacted the screen and might begin to move.
   final GesturePanDownCallback onPanDown;
+
+  /// A pointer has contacted the screen and has begun to move.
   final GesturePanStartCallback onPanStart;
+
+  /// A pointer that is in contact with the screen and moving has moved again.
   final GesturePanUpdateCallback onPanUpdate;
+
+  /// A pointer that was previously in contact with the screen and moving
+  /// is no longer in contact with the screen and was moving at a specific
+  /// velocity when it stopped contacting the screen.
   final GesturePanEndCallback onPanEnd;
+
+  /// The pointer that previously triggered [onPanDown] did not complete.
   final GesturePanCancelCallback onPanCancel;
 
+  /// The pointers in contact with the screen have established a focal point and
+  /// initial scale of 1.0.
   final GestureScaleStartCallback onScaleStart;
+
+  /// The pointers in contact with the screen have indicated a new focal point
+  /// and/or scale.
   final GestureScaleUpdateCallback onScaleUpdate;
+
+  /// The pointers are no longer in contact with the screen.
   final GestureScaleEndCallback onScaleEnd;
 
   /// How this gesture detector should behave during hit testing.

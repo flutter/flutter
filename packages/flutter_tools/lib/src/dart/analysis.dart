@@ -11,17 +11,17 @@ import 'package:analyzer/plugin/options.dart';
 import 'package:analyzer/source/analysis_options_provider.dart';
 import 'package:analyzer/source/embedder.dart';
 import 'package:analyzer/source/error_processor.dart';
-import 'package:analyzer/src/generated/engine.dart';
-import 'package:analyzer/src/generated/error.dart';
-import 'package:analyzer/src/generated/java_io.dart';
-import 'package:analyzer/src/generated/sdk_io.dart';
-import 'package:analyzer/src/generated/source.dart';
-import 'package:analyzer/src/generated/source_io.dart';
-import 'package:analyzer/src/task/options.dart';
+import 'package:analyzer/src/generated/engine.dart'; // ignore: implementation_imports
+import 'package:analyzer/src/generated/error.dart'; // ignore: implementation_imports
+import 'package:analyzer/src/generated/java_io.dart'; // ignore: implementation_imports
+import 'package:analyzer/src/generated/sdk_io.dart'; // ignore: implementation_imports
+import 'package:analyzer/src/generated/source.dart'; // ignore: implementation_imports
+import 'package:analyzer/src/generated/source_io.dart'; // ignore: implementation_imports
+import 'package:analyzer/src/task/options.dart'; // ignore: implementation_imports
 import 'package:cli_util/cli_util.dart' as cli_util;
-import 'package:linter/src/plugin/linter_plugin.dart';
+import 'package:linter/src/plugin/linter_plugin.dart'; // ignore: implementation_imports
 import 'package:package_config/packages.dart' show Packages;
-import 'package:package_config/src/packages_impl.dart' show MapPackages;
+import 'package:package_config/src/packages_impl.dart' show MapPackages; // ignore: implementation_imports
 import 'package:path/path.dart' as path;
 import 'package:plugin/manager.dart';
 import 'package:plugin/plugin.dart';
@@ -92,7 +92,9 @@ class AnalysisDriver {
       Map<String, List<file_system.Folder>> packageMap) {
     DirectoryBasedDartSdk sdk = new DirectoryBasedDartSdk(new JavaFile(sdkDir));
     sdk.analysisOptions = context.analysisOptions;
-    sdk.useSummary = true;
+    // TODO(pq): re-enable once we have a proper story for SDK summaries
+    // in the presence of embedders (https://github.com/dart-lang/sdk/issues/26467).
+    sdk.useSummary = false;
     List<UriResolver> resolvers = <UriResolver>[];
 
     EmbedderYamlLocator yamlLocator = context.embedderYamlLocator;
@@ -194,8 +196,13 @@ class AnalysisErrorDescription {
 }
 
 class DriverOptions extends AnalysisOptionsImpl {
-  @override
-  int cacheSize = 512;
+
+  DriverOptions() {
+    // Set defaults.
+    cacheSize = 512;
+    lint = true;
+    generateSdkErrors = false;
+  }
 
   /// The path to the dart SDK.
   String dartSdkPath;
@@ -209,14 +216,8 @@ class DriverOptions extends AnalysisOptionsImpl {
   /// The path to analysis options.
   String analysisOptionsFile;
 
-  @override
-  bool generateSdkErrors = false;
-
   /// Analysis options map.
   Map<Object, Object> analysisOptions;
-
-  @override
-  bool lint = true;
 
   /// Out sink for logging.
   IOSink outSink = stdout;

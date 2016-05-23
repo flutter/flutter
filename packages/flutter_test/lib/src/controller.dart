@@ -2,13 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'test_pointer.dart';
-import 'finders.dart';
 import 'all_elements.dart';
+import 'finders.dart';
+import 'test_async_utils.dart';
+import 'test_pointer.dart';
 
 /// Class that programmatically interacts with widgets.
 ///
@@ -24,13 +27,18 @@ class WidgetController {
   // a good message otherwise, in all the generic methods below
 
   /// Checks if `finder` exists in the tree.
-  bool any(Finder finder) => finder.evaluate().isNotEmpty;
+  bool any(Finder finder) {
+    TestAsyncUtils.guardSync();
+    return finder.evaluate().isNotEmpty;
+  }
+
 
   /// All widgets currently in the widget tree (lazy pre-order traversal).
   ///
   /// Can contain duplicates, since widgets can be used in multiple
   /// places in the widget tree.
   Iterable<Widget> get allWidgets {
+    TestAsyncUtils.guardSync();
     return allElements
            .map((Element element) => element.widget);
   }
@@ -39,7 +47,11 @@ class WidgetController {
   ///
   /// Throws a [StateError] if `finder` is empty or matches more than
   /// one widget.
+  ///
+  /// * Use [firstWidget] if you expect to match several widgets but only want the first.
+  /// * Use [widgetList] if you expect to match several widgets and want all of them.
   Widget/*=T*/ widget/*<T extends Widget>*/(Finder finder) {
+    TestAsyncUtils.guardSync();
     return finder.evaluate().single.widget;
   }
 
@@ -47,9 +59,22 @@ class WidgetController {
   /// traversal of the widget tree.
   ///
   /// Throws a [StateError] if `finder` is empty.
+  ///
+  /// * Use [widget] if you only expect to match one widget.
   Widget/*=T*/ firstWidget/*<T extends Widget>*/(Finder finder) {
+    TestAsyncUtils.guardSync();
     return finder.evaluate().first.widget;
   }
+
+  /// The matching widgets in the widget tree.
+  ///
+  /// * Use [widget] if you only expect to match one widget.
+  /// * Use [firstWidget] if you expect to match several but only want the first.
+  Iterable<Widget/*=T*/> widgetList/*<T extends Widget>*/(Finder finder) {
+    TestAsyncUtils.guardSync();
+    return finder.evaluate().map((Element element) => element.widget);
+  }
+
 
   /// All elements currently in the widget tree (lazy pre-order traversal).
   ///
@@ -57,6 +82,7 @@ class WidgetController {
   /// immediately, but rather a chunk at a time as the iteration progresses
   /// using [Iterator.moveNext].
   Iterable<Element> get allElements {
+    TestAsyncUtils.guardSync();
     return collectAllElementsFrom(binding.renderViewElement);
   }
 
@@ -64,7 +90,11 @@ class WidgetController {
   ///
   /// Throws a [StateError] if `finder` is empty or matches more than
   /// one element.
+  ///
+  /// * Use [firstElement] if you expect to match several elements but only want the first.
+  /// * Use [elementList] if you expect to match several elements and want all of them.
   Element/*=T*/ element/*<T extends Element>*/(Finder finder) {
+    TestAsyncUtils.guardSync();
     return finder.evaluate().single;
   }
 
@@ -72,9 +102,22 @@ class WidgetController {
   /// traversal of the widget tree.
   ///
   /// Throws a [StateError] if `finder` is empty.
+  ///
+  /// * Use [element] if you only expect to match one element.
   Element/*=T*/ firstElement/*<T extends Element>*/(Finder finder) {
+    TestAsyncUtils.guardSync();
     return finder.evaluate().first;
   }
+
+  /// The matching elements in the widget tree.
+  ///
+  /// * Use [element] if you only expect to match one element.
+  /// * Use [firstElement] if you expect to match several but only want the first.
+  Iterable<Element/*=T*/> elementList/*<T extends Element>*/(Finder finder) {
+    TestAsyncUtils.guardSync();
+    return finder.evaluate();
+  }
+
 
   /// All states currently in the widget tree (lazy pre-order traversal).
   ///
@@ -82,6 +125,7 @@ class WidgetController {
   /// immediately, but rather a chunk at a time as the iteration progresses
   /// using [Iterator.moveNext].
   Iterable<State> get allStates {
+    TestAsyncUtils.guardSync();
     return allElements
            .where((Element element) => element is StatefulElement)
            .map((StatefulElement element) => element.state);
@@ -91,7 +135,11 @@ class WidgetController {
   ///
   /// Throws a [StateError] if `finder` is empty, matches more than
   /// one state, or matches a widget that has no state.
+  ///
+  /// * Use [firstState] if you expect to match several states but only want the first.
+  /// * Use [stateList] if you expect to match several states and want all of them.
   State/*=T*/ state/*<T extends State>*/(Finder finder) {
+    TestAsyncUtils.guardSync();
     return _stateOf/*<T>*/(finder.evaluate().single, finder);
   }
 
@@ -100,15 +148,32 @@ class WidgetController {
   ///
   /// Throws a [StateError] if `finder` is empty or if the first
   /// matching widget has no state.
+  ///
+  /// * Use [state] if you only expect to match one state.
   State/*=T*/ firstState/*<T extends State>*/(Finder finder) {
+    TestAsyncUtils.guardSync();
     return _stateOf/*<T>*/(finder.evaluate().first, finder);
   }
 
+  /// The matching states in the widget tree.
+  ///
+  /// Throws a [StateError] if any of the elements in `finder` match a widget
+  /// that has no state.
+  ///
+  /// * Use [state] if you only expect to match one state.
+  /// * Use [firstState] if you expect to match several but only want the first.
+  Iterable<State/*=T*/> stateList/*<T extends State>*/(Finder finder) {
+    TestAsyncUtils.guardSync();
+    return finder.evaluate().map((Element element) => _stateOf/*<T>*/(element, finder));
+  }
+
   State/*=T*/ _stateOf/*<T extends State>*/(Element element, Finder finder) {
+    TestAsyncUtils.guardSync();
     if (element is StatefulElement)
       return element.state;
     throw new StateError('Widget of type ${element.widget.runtimeType}, with ${finder.description}, is not a StatefulWidget.');
   }
+
 
   /// Render objects of all the widgets currently in the widget tree
   /// (lazy pre-order traversal).
@@ -118,6 +183,7 @@ class WidgetController {
   /// render object of its child; only [RenderObjectWidget]s have
   /// their own render object.
   Iterable<RenderObject> get allRenderObjects {
+    TestAsyncUtils.guardSync();
     return allElements
            .map((Element element) => element.renderObject);
   }
@@ -126,7 +192,11 @@ class WidgetController {
   ///
   /// Throws a [StateError] if `finder` is empty or matches more than
   /// one widget (even if they all have the same render object).
+  ///
+  /// * Use [firstRenderObject] if you expect to match several render objects but only want the first.
+  /// * Use [renderObjectList] if you expect to match several render objects and want all of them.
   RenderObject/*=T*/ renderObject/*<T extends RenderObject>*/(Finder finder) {
+    TestAsyncUtils.guardSync();
     return finder.evaluate().single.renderObject;
   }
 
@@ -134,14 +204,27 @@ class WidgetController {
   /// depth-first pre-order traversal of the widget tree.
   ///
   /// Throws a [StateError] if `finder` is empty.
+  ///
+  /// * Use [renderObject] if you only expect to match one render object.
   RenderObject/*=T*/ firstRenderObject/*<T extends RenderObject>*/(Finder finder) {
+    TestAsyncUtils.guardSync();
     return finder.evaluate().first.renderObject;
+  }
+
+  /// The render objects of the matching widgets in the widget tree.
+  ///
+  /// * Use [renderObject] if you only expect to match one render object.
+  /// * Use [firstRenderObject] if you expect to match several but only want the first.
+  Iterable<RenderObject/*=T*/> renderObjectList/*<T extends RenderObject>*/(Finder finder) {
+    TestAsyncUtils.guardSync();
+    return finder.evaluate().map((Element element) => element.renderObject);
   }
 
 
   /// Returns a list of all the [Layer] objects in the rendering.
   List<Layer> get layers => _walkLayers(binding.renderView.layer).toList();
   Iterable<Layer> _walkLayers(Layer layer) sync* {
+    TestAsyncUtils.guardSync();
     yield layer;
     if (layer is ContainerLayer) {
       ContainerLayer root = layer;
@@ -160,15 +243,18 @@ class WidgetController {
   /// the given widget, assuming it is exposed. If the center of the
   /// widget is not exposed, this might send events to another
   /// object.
-  void tap(Finder finder, { int pointer: 1 }) {
-    tapAt(getCenter(finder), pointer: pointer);
+  Future<Null> tap(Finder finder, { int pointer: 1 }) {
+    return tapAt(getCenter(finder), pointer: pointer);
   }
 
   /// Dispatch a pointer down / pointer up sequence at the given
   /// location.
-  void tapAt(Point location, { int pointer: 1 }) {
-    startGesture(location, pointer: pointer)
-      ..up();
+  Future<Null> tapAt(Point location, { int pointer: 1 }) {
+    return TestAsyncUtils.guard(() async {
+      TestGesture gesture = await startGesture(location, pointer: pointer);
+      await gesture.up();
+      return null;
+    });
   }
 
   /// Attempts a fling gesture starting from the center of the given
@@ -176,27 +262,30 @@ class WidgetController {
   ///
   /// If the middle of the widget is not exposed, this might send
   /// events to another object.
-  void fling(Finder finder, Offset offset, double velocity, { int pointer: 1 }) {
-    flingFrom(getCenter(finder), offset, velocity, pointer: pointer);
+  Future<Null> fling(Finder finder, Offset offset, double velocity, { int pointer: 1 }) {
+    return flingFrom(getCenter(finder), offset, velocity, pointer: pointer);
   }
 
   /// Attempts a fling gesture starting from the given location,
   /// moving the given distance, reaching the given velocity.
-  void flingFrom(Point startLocation, Offset offset, double velocity, { int pointer: 1 }) {
-    assert(offset.distance > 0.0);
-    assert(velocity != 0.0);   // velocity is pixels/second
-    final TestPointer p = new TestPointer(pointer);
-    final HitTestResult result = _hitTest(startLocation);
-    const int kMoveCount = 50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
-    final double timeStampDelta = 1000.0 * offset.distance / (kMoveCount * velocity);
-    double timeStamp = 0.0;
-    binding.dispatchEvent(p.down(startLocation, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
-    for (int i = 0; i <= kMoveCount; i++) {
-      final Point location = startLocation + Offset.lerp(Offset.zero, offset, i / kMoveCount);
-      binding.dispatchEvent(p.move(location, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
-      timeStamp += timeStampDelta;
-    }
-    binding.dispatchEvent(p.up(timeStamp: new Duration(milliseconds: timeStamp.round())), result);
+  Future<Null> flingFrom(Point startLocation, Offset offset, double velocity, { int pointer: 1 }) {
+    return TestAsyncUtils.guard(() async {
+      assert(offset.distance > 0.0);
+      assert(velocity != 0.0);   // velocity is pixels/second
+      final TestPointer p = new TestPointer(pointer);
+      final HitTestResult result = hitTestOnBinding(startLocation);
+      const int kMoveCount = 50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
+      final double timeStampDelta = 1000.0 * offset.distance / (kMoveCount * velocity);
+      double timeStamp = 0.0;
+      await sendEventToBinding(p.down(startLocation, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
+      for (int i = 0; i <= kMoveCount; i++) {
+        final Point location = startLocation + Offset.lerp(Offset.zero, offset, i / kMoveCount);
+        await sendEventToBinding(p.move(location, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
+        timeStamp += timeStampDelta;
+      }
+      await sendEventToBinding(p.up(timeStamp: new Duration(milliseconds: timeStamp.round())), result);
+      return null;
+    });
   }
 
   /// Attempts to drag the given widget by the given offset, by
@@ -204,28 +293,40 @@ class WidgetController {
   ///
   /// If the middle of the widget is not exposed, this might send
   /// events to another object.
-  void scroll(Finder finder, Offset offset, { int pointer: 1 }) {
-    scrollAt(getCenter(finder), offset, pointer: pointer);
+  Future<Null> scroll(Finder finder, Offset offset, { int pointer: 1 }) {
+    return scrollAt(getCenter(finder), offset, pointer: pointer);
   }
 
   /// Attempts a drag gesture consisting of a pointer down, a move by
   /// the given offset, and a pointer up.
-  void scrollAt(Point startLocation, Offset offset, { int pointer: 1 }) {
-    startGesture(startLocation, pointer: pointer)
-      ..moveBy(offset)
-      ..up();
+  Future<Null> scrollAt(Point startLocation, Offset offset, { int pointer: 1 }) {
+    return TestAsyncUtils.guard(() async {
+      TestGesture gesture = await startGesture(startLocation, pointer: pointer);
+      await gesture.moveBy(offset);
+      await gesture.up();
+      return null;
+    });
   }
 
   /// Begins a gesture at a particular point, and returns the
   /// [TestGesture] object which you can use to continue the gesture.
-  TestGesture startGesture(Point downLocation, { int pointer: 1 }) {
-    return new TestGesture(downLocation, pointer: pointer);
+  Future<TestGesture> startGesture(Point downLocation, { int pointer: 1 }) {
+    return TestGesture.down(downLocation, pointer: pointer, hitTester: hitTestOnBinding, dispatcher: sendEventToBinding);
   }
 
-  HitTestResult _hitTest(Point location) {
+  /// Forwards the given location to the binding's hitTest logic.
+  HitTestResult hitTestOnBinding(Point location) {
     final HitTestResult result = new HitTestResult();
     binding.hitTest(result, location);
     return result;
+  }
+
+  /// Forwards the given pointer event to the binding.
+  Future<Null> sendEventToBinding(PointerEvent event, HitTestResult result) {
+    return TestAsyncUtils.guard(() async {
+      binding.dispatchEvent(event, result);
+      return null;
+    });
   }
 
 
@@ -260,6 +361,7 @@ class WidgetController {
   }
 
   Point _getElementPoint(Finder finder, Point sizeToPoint(Size size)) {
+    TestAsyncUtils.guardSync();
     Element element = finder.evaluate().single;
     RenderBox box = element.renderObject;
     assert(box != null);
@@ -269,6 +371,7 @@ class WidgetController {
   /// Returns the size of the given widget. This is only valid once
   /// the widget's render object has been laid out at least once.
   Size getSize(Finder finder) {
+    TestAsyncUtils.guardSync();
     Element element = finder.evaluate().single;
     RenderBox box = element.renderObject;
     assert(box != null);

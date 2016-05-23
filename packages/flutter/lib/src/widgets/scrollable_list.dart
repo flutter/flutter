@@ -4,122 +4,146 @@
 
 import 'dart:math' as math;
 
+import 'clamp_overscrolls.dart';
 import 'framework.dart';
-import 'scroll_behavior.dart';
+import 'scroll_configuration.dart';
 import 'scrollable.dart';
 import 'virtual_viewport.dart';
 
 import 'package:flutter/rendering.dart';
 
-/// If true, the ClampOverscroll's [Scrollable] descendant will clamp its
-/// viewport's scrollOffsets to the [ScrollBehavior]'s min and max values.
-/// In this case the Scrollable's scrollOffset will still over and undershoot
-/// the ScrollBehavior's limits, but the viewport itself will not.
-class ClampOverscrolls extends InheritedWidget {
-  ClampOverscrolls({
-    Key key,
-    this.value,
-    Widget child
-  }) : super(key: key, child: child) {
-    assert(value != null);
-    assert(child != null);
-  }
-
-  /// True if the [Scrollable] descendant should clamp its viewport's scrollOffset
-  /// values when they are less than the [ScrollBehavior]'s minimum or greater than
-  /// its maximum.
-  final bool value;
-
-  static bool of(BuildContext context) {
-    final ClampOverscrolls result = context.inheritFromWidgetOfExactType(ClampOverscrolls);
-    return result?.value ?? false;
-  }
-
-  @override
-  bool updateShouldNotify(ClampOverscrolls old) => value != old.value;
-
-  @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('value: $value');
-  }
-}
-
-class ScrollableList extends Scrollable {
+class ScrollableList extends StatelessWidget {
   ScrollableList({
     Key key,
-    double initialScrollOffset,
-    Axis scrollDirection: Axis.vertical,
-    ViewportAnchor scrollAnchor: ViewportAnchor.start,
-    ScrollListener onScrollStart,
-    ScrollListener onScroll,
-    ScrollListener onScrollEnd,
-    SnapOffsetCallback snapOffsetCallback,
+    this.initialScrollOffset,
+    this.scrollDirection: Axis.vertical,
+    this.scrollAnchor: ViewportAnchor.start,
+    this.onScrollStart,
+    this.onScroll,
+    this.onScrollEnd,
+    this.snapOffsetCallback,
+    this.scrollableKey,
     this.itemExtent,
     this.itemsWrap: false,
     this.padding,
     this.children
-  }) : super(
-    key: key,
-    initialScrollOffset: initialScrollOffset,
-    scrollDirection: scrollDirection,
-    scrollAnchor: scrollAnchor,
-    onScrollStart: onScrollStart,
-    onScroll: onScroll,
-    onScrollEnd: onScrollEnd,
-    snapOffsetCallback: snapOffsetCallback
-  ) {
+  }) : super(key: key) {
     assert(itemExtent != null);
   }
 
+  // Warning: keep the dartdoc comments that follow in sync with the copies in
+  // Scrollable, LazyBlock, ScrollableLazyList, ScrollableViewport, and
+  // ScrollableGrid. And see: https://github.com/dart-lang/dartdoc/issues/1161.
+
+  /// The scroll offset this widget should use when first created.
+  final double initialScrollOffset;
+
+  /// The axis along which this widget should scroll.
+  final Axis scrollDirection;
+
+  /// Whether to place first child at the start of the container or
+  /// the last child at the end of the container, when the scrollable
+  /// has not been scrolled and has no initial scroll offset.
+  ///
+  /// For example, if the [scrollDirection] is [Axis.vertical] and
+  /// there are enough items to overflow the container, then
+  /// [ViewportAnchor.start] means that the top of the first item
+  /// should be aligned with the top of the scrollable with the last
+  /// item below the bottom, and [ViewportAnchor.end] means the bottom
+  /// of the last item should be aligned with the bottom of the
+  /// scrollable, with the first item above the top.
+  ///
+  /// This also affects whether, when an item is added or removed, the
+  /// displacement will be towards the first item or the last item.
+  /// Continuing the earlier example, if a new item is inserted in the
+  /// middle of the list, in the [ViewportAnchor.start] case the items
+  /// after it (with greater indices, down to the item with the
+  /// highest index) will be pushed down, while in the
+  /// [ViewportAnchor.end] case the items before it (with lower
+  /// indices, up to the item with the index 0) will be pushed up.
+  final ViewportAnchor scrollAnchor;
+
+  /// Called whenever this widget starts to scroll.
+  final ScrollListener onScrollStart;
+
+  /// Called whenever this widget's scroll offset changes.
+  final ScrollListener onScroll;
+
+  /// Called whenever this widget stops scrolling.
+  final ScrollListener onScrollEnd;
+
+  /// Called to determine the offset to which scrolling should snap,
+  /// when handling a fling.
+  ///
+  /// This callback, if set, will be called with the offset that the
+  /// Scrollable would have scrolled to in the absence of this
+  /// callback, and a Size describing the size of the Scrollable
+  /// itself.
+  ///
+  /// The callback's return value is used as the new scroll offset to
+  /// aim for.
+  ///
+  /// If the callback simply returns its first argument (the offset),
+  /// then it is as if the callback was null.
+  final SnapOffsetCallback snapOffsetCallback;
+
+  /// The key for the Scrollable created by this widget.
+  final Key scrollableKey;
+
+  /// The height of each item if [scrollDirection] is Axis.vertical, otherwise the width of each item.
   final double itemExtent;
+
   final bool itemsWrap;
 
   /// The amount of space by which to inset the children inside the viewport.
   final EdgeInsets padding;
 
+  /// The axis along which this widget should scroll.
   final Iterable<Widget> children;
 
-  @override
-  ScrollableState createState() => new _ScrollableListState();
-}
-
-class _ScrollableListState extends ScrollableState<ScrollableList> {
-  @override
-  ExtentScrollBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior();
-
-  @override
-  ExtentScrollBehavior get scrollBehavior => super.scrollBehavior;
-
-  void _handleExtentsChanged(double contentExtent, double containerExtent) {
-    setState(() {
-      didUpdateScrollBehavior(scrollBehavior.updateExtents(
-        contentExtent: config.itemsWrap ? double.INFINITY : contentExtent,
+  void _handleExtentsChanged(ScrollableState state, double contentExtent, double containerExtent) {
+    state.setState(() {
+      state.didUpdateScrollBehavior(state.scrollBehavior.updateExtents(
+        contentExtent: itemsWrap ? double.INFINITY : contentExtent,
         containerExtent: containerExtent,
-        scrollOffset: scrollOffset
+        scrollOffset: state.scrollOffset
       ));
     });
   }
 
-  @override
-  Widget buildContent(BuildContext context) {
-    final bool clampOverscrolls = ClampOverscrolls.of(context);
-    final double listScrollOffset = clampOverscrolls
-      ? scrollOffset.clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset)
-      : scrollOffset;
-    Widget viewport = new ListViewport(
-      onExtentsChanged: _handleExtentsChanged,
-      scrollOffset: listScrollOffset,
-      mainAxis: config.scrollDirection,
-      anchor: config.scrollAnchor,
-      itemExtent: config.itemExtent,
-      itemsWrap: config.itemsWrap,
-      padding: config.padding,
-      children: config.children
+  Widget _buildViewport(BuildContext context, ScrollableState state, double scrollOffset) {
+    return new ListViewport(
+      onExtentsChanged: (double contentExtent, double containerExtent) {
+        _handleExtentsChanged(state, contentExtent, containerExtent);
+      },
+      scrollOffset: scrollOffset,
+      mainAxis: scrollDirection,
+      anchor: scrollAnchor,
+      itemExtent: itemExtent,
+      itemsWrap: itemsWrap,
+      padding: padding,
+      children: children
     );
-    if (clampOverscrolls)
-      viewport = new ClampOverscrolls(value: false, child: viewport);
-    return viewport;
+  }
+
+  Widget _buildContent(BuildContext context, ScrollableState state) {
+    return ClampOverscrolls.buildViewport(context, state, _buildViewport);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Widget result = new Scrollable(
+      key: scrollableKey,
+      initialScrollOffset: initialScrollOffset,
+      scrollDirection: scrollDirection,
+      scrollAnchor: scrollAnchor,
+      onScrollStart: onScrollStart,
+      onScroll: onScroll,
+      onScrollEnd: onScrollEnd,
+      snapOffsetCallback: snapOffsetCallback,
+      builder: _buildContent
+    );
+    return ScrollConfiguration.wrap(context, result);
   }
 }
 
@@ -318,71 +342,139 @@ class ListViewport extends _VirtualListViewport with VirtualViewportFromIterable
 /// ScrollDirection.vertical itemExtent is the height of each item. Use this
 /// widget when you have a large number of children or when you are concerned
 /// about offscreen widgets consuming resources.
-class ScrollableLazyList extends Scrollable {
+class ScrollableLazyList extends StatelessWidget {
   ScrollableLazyList({
     Key key,
-    double initialScrollOffset,
-    Axis scrollDirection: Axis.vertical,
-    ViewportAnchor scrollAnchor: ViewportAnchor.start,
-    ScrollListener onScroll,
-    SnapOffsetCallback snapOffsetCallback,
+    this.initialScrollOffset,
+    this.scrollDirection: Axis.vertical,
+    this.scrollAnchor: ViewportAnchor.start,
+    this.onScrollStart,
+    this.onScroll,
+    this.onScrollEnd,
+    this.snapOffsetCallback,
+    this.scrollableKey,
     this.itemExtent,
     this.itemCount,
     this.itemBuilder,
     this.padding
-  }) : super(
-    key: key,
-    initialScrollOffset: initialScrollOffset,
-    scrollDirection: scrollDirection,
-    scrollAnchor: scrollAnchor,
-    onScroll: onScroll,
-    snapOffsetCallback: snapOffsetCallback
-  ) {
+  }) : super(key: key) {
     assert(itemExtent != null);
     assert(itemBuilder != null);
     assert(itemCount != null || scrollAnchor == ViewportAnchor.start);
   }
 
+  // Warning: keep the dartdoc comments that follow in sync with the copies in
+  // Scrollable, LazyBlock, ScrollableViewport, ScrollableList, and
+  // ScrollableGrid. And see: https://github.com/dart-lang/dartdoc/issues/1161.
+
+  /// The scroll offset this widget should use when first created.
+  final double initialScrollOffset;
+
+  /// The axis along which this widget should scroll.
+  final Axis scrollDirection;
+
+  /// Whether to place first child at the start of the container or
+  /// the last child at the end of the container, when the scrollable
+  /// has not been scrolled and has no initial scroll offset.
+  ///
+  /// For example, if the [scrollDirection] is [Axis.vertical] and
+  /// there are enough items to overflow the container, then
+  /// [ViewportAnchor.start] means that the top of the first item
+  /// should be aligned with the top of the scrollable with the last
+  /// item below the bottom, and [ViewportAnchor.end] means the bottom
+  /// of the last item should be aligned with the bottom of the
+  /// scrollable, with the first item above the top.
+  ///
+  /// This also affects whether, when an item is added or removed, the
+  /// displacement will be towards the first item or the last item.
+  /// Continuing the earlier example, if a new item is inserted in the
+  /// middle of the list, in the [ViewportAnchor.start] case the items
+  /// after it (with greater indices, down to the item with the
+  /// highest index) will be pushed down, while in the
+  /// [ViewportAnchor.end] case the items before it (with lower
+  /// indices, up to the item with the index 0) will be pushed up.
+  final ViewportAnchor scrollAnchor;
+
+  /// Called whenever this widget starts to scroll.
+  final ScrollListener onScrollStart;
+
+  /// Called whenever this widget's scroll offset changes.
+  final ScrollListener onScroll;
+
+  /// Called whenever this widget stops scrolling.
+  final ScrollListener onScrollEnd;
+
+  /// when handling a fling.
+  ///
+  /// This callback, if set, will be called with the offset that the
+  /// Scrollable would have scrolled to in the absence of this
+  /// callback, and a Size describing the size of the Scrollable
+  /// itself.
+  ///
+  /// The callback's return value is used as the new scroll offset to
+  /// aim for.
+  ///
+  /// If the callback simply returns its first argument (the offset),
+  /// then it is as if the callback was null.
+  final SnapOffsetCallback snapOffsetCallback;
+
+  /// The key for the Scrollable created by this widget.
+  final Key scrollableKey;
+
+  /// The height of each item if [scrollDirection] is Axis.vertical, otherwise the width of each item.
   final double itemExtent;
+
+  /// The total number of list items.
   final int itemCount;
+
   final ItemListBuilder itemBuilder;
 
-  /// The amount of space by which to inset the children inside the viewport.
+  /// The insets for the entire list.
   final EdgeInsets padding;
 
-  @override
-  ScrollableState createState() => new _ScrollableLazyListState();
-}
-
-class _ScrollableLazyListState extends ScrollableState<ScrollableLazyList> {
-  @override
-  ExtentScrollBehavior createScrollBehavior() => new OverscrollBehavior();
-
-  @override
-  ExtentScrollBehavior get scrollBehavior => super.scrollBehavior;
-
-  void _handleExtentsChanged(double contentExtent, double containerExtent) {
-    setState(() {
-      didUpdateScrollBehavior(scrollBehavior.updateExtents(
+  void _handleExtentsChanged(ScrollableState state, double contentExtent, double containerExtent) {
+    state.setState(() {
+      state.didUpdateScrollBehavior(state.scrollBehavior.updateExtents(
         contentExtent: contentExtent,
         containerExtent: containerExtent,
-        scrollOffset: scrollOffset
+        scrollOffset: state.scrollOffset
       ));
     });
   }
 
-  @override
-  Widget buildContent(BuildContext context) {
+  Widget _buildViewport(BuildContext context, ScrollableState state, double scrollOffset) {
     return new LazyListViewport(
-      onExtentsChanged: _handleExtentsChanged,
+      onExtentsChanged: (double contentExtent, double containerExtent) {
+        _handleExtentsChanged(state, contentExtent, containerExtent);
+      },
       scrollOffset: scrollOffset,
-      mainAxis: config.scrollDirection,
-      anchor: config.scrollAnchor,
-      itemExtent: config.itemExtent,
-      itemCount: config.itemCount,
-      itemBuilder: config.itemBuilder,
-      padding: config.padding
+      mainAxis: scrollDirection,
+      anchor: scrollAnchor,
+      itemExtent: itemExtent,
+      itemCount: itemCount,
+      itemBuilder: itemBuilder,
+      padding: padding
     );
+  }
+
+  Widget _buildContent(BuildContext context, ScrollableState state) {
+    return ClampOverscrolls.buildViewport(context, state, _buildViewport);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Widget result = new Scrollable(
+      key: scrollableKey,
+      initialScrollOffset: initialScrollOffset,
+      scrollDirection: scrollDirection,
+      scrollAnchor: scrollAnchor,
+      onScrollStart: onScrollStart,
+      onScroll: onScroll,
+      onScrollEnd: onScrollEnd,
+      snapOffsetCallback: snapOffsetCallback,
+      builder: _buildContent
+    );
+    return ScrollConfiguration.wrap(context, result);
   }
 }
 

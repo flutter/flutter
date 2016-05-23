@@ -1,6 +1,13 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 part of flutter_sprites;
 
+/// Provides a virtual joystick that can easily be added to your sprite scene.
 class VirtualJoystick extends NodeWithSize {
+
+  /// Creates a new virtual joystick.
   VirtualJoystick() : super(new Size(160.0, 160.0)) {
     userInteractionEnabled = true;
     handleMultiplePointers = false;
@@ -17,11 +24,15 @@ class VirtualJoystick extends NodeWithSize {
       ..style = PaintingStyle.stroke;
   }
 
-  Point _value = Point.origin;
+  /// Reads the current value of the joystick. A point with from (-1.0, -1.0)
+  /// to (1.0, 1.0). If the joystick isn't moved it will return (0.0, 0.0).
   Point get value => _value;
+  Point _value = Point.origin;
 
-  bool _isDown = false;
+  /// True if the user is currently touching the joystick.
   bool get isDown => _isDown;
+  bool _isDown = false;
+
 
   Point _pointerDownAt;
   Point _center;

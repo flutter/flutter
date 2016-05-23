@@ -5,14 +5,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 void main() {
-  testWidgets('Comparing coordinates', (WidgetTester tester) {
+  testWidgets('Comparing coordinates', (WidgetTester tester) async {
     Key keyA = new GlobalKey();
     Key keyB = new GlobalKey();
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Stack(
         children: <Widget>[
           new Positioned(

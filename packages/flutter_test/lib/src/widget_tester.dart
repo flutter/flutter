@@ -4,12 +4,18 @@
 
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
+import 'package:test/test.dart' as test_package;
 
+import 'all_elements.dart';
 import 'binding.dart';
-import 'finders.dart';
 import 'controller.dart';
+import 'finders.dart';
+import 'test_async_utils.dart';
+
+export 'package:test/test.dart' hide expect;
 
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef Future<Null> WidgetTesterCallback(WidgetTester widgetTester);
@@ -36,15 +42,15 @@ typedef Future<Null> WidgetTesterCallback(WidgetTester widgetTester);
 ///       expect(tester, hasWidget(find.text('Success')));
 ///     });
 void testWidgets(String description, WidgetTesterCallback callback, {
-  Timeout timeout: const Timeout(const Duration(seconds: 5)),
-  bool skip
+  bool skip: false,
+  test_package.Timeout timeout
 }) {
   TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   WidgetTester tester = new WidgetTester._(binding);
-  group('-', () {
-    setUp(binding.preTest);
-    test(description, () => binding.runTest(() => callback(tester)), skip: skip);
-    tearDown(binding.postTest);
+  timeout ??= binding.defaultTestTimeout;
+  test_package.group('-', () {
+    test_package.test(description, () => binding.runTest(() => callback(tester)), skip: skip);
+    test_package.tearDown(binding.postTest);
   }, timeout: timeout);
 }
 
@@ -75,20 +81,55 @@ void testWidgets(String description, WidgetTesterCallback callback, {
 ///           tester.pump();
 ///         }
 ///         timer.stop();
-///         print('Time taken: ${timer.elapsedMilliseconds}ms');
+///         debugPrint('Time taken: ${timer.elapsedMilliseconds}ms');
 ///       });
 ///       exit(0);
 ///     }
 Future<Null> benchmarkWidgets(WidgetTesterCallback callback) {
   assert(false); // Don't run benchmarks in checked mode.
   TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  assert(binding is! AutomatedTestWidgetsFlutterBinding);
   WidgetTester tester = new WidgetTester._(binding);
   return binding.runTest(() => callback(tester)) ?? new Future<Null>.value();
 }
 
+/// Assert that `actual` matches `matcher`.
+///
+/// See [test_package.expect] for details. This is a variant of that function
+/// that additionally verifies that there are no asynchronous APIs
+/// that have not yet resolved.
+void expect(dynamic actual, dynamic matcher, {
+  String reason,
+  bool verbose: false,
+  dynamic formatter
+}) {
+  TestAsyncUtils.guardSync();
+  test_package.expect(actual, matcher, reason: reason, verbose: verbose, formatter: formatter);
+}
+
+/// Assert that `actual` matches `matcher`.
+///
+/// See [test_package.expect] for details. This variant will _not_ check that
+/// there are no outstanding asynchronous API requests. As such, it can be
+/// called from, e.g., callbacks that are run during build or layout, or in the
+/// completion handlers of futures that execute in response to user input.
+///
+/// Generally, it is better to use [expect], which does include checks to ensure
+/// that asynchronous APIs are not being called.
+void expectSync(dynamic actual, dynamic matcher, {
+  String reason,
+  bool verbose: false,
+  dynamic formatter
+}) {
+  test_package.expect(actual, matcher, reason: reason, verbose: verbose, formatter: formatter);
+}
+
 /// Class that programmatically interacts with widgets and the test environment.
-class WidgetTester extends WidgetController {
-  WidgetTester._(TestWidgetsFlutterBinding binding) : super(binding);
+class WidgetTester extends WidgetController implements HitTestDispatcher {
+  WidgetTester._(TestWidgetsFlutterBinding binding) : super(binding) {
+    if (binding is LiveTestWidgetsFlutterBinding)
+      binding.deviceEventDispatcher = this;
+  }
 
   /// The binding instance used by the testing framework.
   @override
@@ -100,17 +141,136 @@ class WidgetTester extends WidgetController {
   /// flushes microtasks, by calling [pump] with the same duration (if any).
   /// The supplied [EnginePhase] is the final phase reached during the pump pass;
   /// if not supplied, the whole pass is executed.
-  void pumpWidget(Widget widget, [ Duration duration, EnginePhase phase ]) {
-    runApp(widget);
-    binding.pump(duration, phase);
+  Future<Null> pumpWidget(Widget widget, [
+    Duration duration,
+    EnginePhase phase = EnginePhase.sendSemanticsTree
+  ]) {
+    return TestAsyncUtils.guard(() {
+      runApp(widget);
+      return binding.pump(duration, phase);
+    });
   }
 
   /// Triggers a sequence of frames for [duration] amount of time.
   ///
   /// This is a convenience function that just calls
   /// [TestWidgetsFlutterBinding.pump].
-  void pump([ Duration duration, EnginePhase phase ]) {
-    binding.pump(duration, phase);
+  Future<Null> pump([
+    Duration duration,
+    EnginePhase phase = EnginePhase.sendSemanticsTree
+  ]) {
+    return TestAsyncUtils.guard(() => binding.pump(duration, phase));
+  }
+
+  @override
+  HitTestResult hitTestOnBinding(Point location) {
+    location = binding.localToGlobal(location);
+    return super.hitTestOnBinding(location);
+  }
+
+  @override
+  Future<Null> sendEventToBinding(PointerEvent event, HitTestResult result) {
+    return TestAsyncUtils.guard(() async {
+      binding.dispatchEvent(event, result, source: TestBindingEventSource.test);
+      return null;
+    });
+  }
+
+  /// Handler for device events caught by the binding in live test mode.
+  @override
+  void dispatchEvent(PointerEvent event, HitTestResult result) {
+    if (event is PointerDownEvent) {
+      final RenderObject innerTarget = result.path.firstWhere(
+        (HitTestEntry candidate) => candidate.target is RenderObject,
+        orElse: () => null
+      )?.target;
+      if (innerTarget == null)
+        return null;
+      final Element innerTargetElement = collectAllElementsFrom(binding.renderViewElement)
+        .lastWhere((Element element) => element.renderObject == innerTarget);
+      final List<Element> candidates = <Element>[];
+      innerTargetElement.visitAncestorElements((Element element) {
+        candidates.add(element);
+        return true;
+      });
+      assert(candidates.isNotEmpty);
+      String descendantText;
+      int numberOfWithTexts = 0;
+      int numberOfTypes = 0;
+      int totalNumber = 0;
+      print('Some possible finders for the widgets at ${binding.globalToLocal(event.position)}:');
+      for (Element element in candidates) {
+        if (totalNumber > 10)
+          break;
+        totalNumber += 1;
+
+        if (element.widget is Text) {
+          assert(descendantText == null);
+          final Text widget = element.widget;
+          final Iterable<Element> matches = find.text(widget.data).evaluate();
+          descendantText = widget.data;
+          if (matches.length == 1) {
+            print('  find.text(\'${widget.data}\')');
+            continue;
+          }
+        }
+
+        if (element.widget.key is ValueKey<dynamic>) {
+          final ValueKey<dynamic> key = element.widget.key;
+          String keyLabel;
+          if ((key is ValueKey<int> ||
+               key is ValueKey<double> ||
+               key is ValueKey<bool>)) {
+            keyLabel = 'const ${element.widget.key.runtimeType}(${key.value})';
+          } else if (key is ValueKey<String>) {
+            keyLabel = 'const ${element.widget.key.runtimeType}(\'${key.value}\')';
+          }
+          if (keyLabel != null) {
+            final Iterable<Element> matches = find.byKey(key).evaluate();
+            if (matches.length == 1) {
+              print('  find.byKey($keyLabel)');
+              continue;
+            }
+          }
+        }
+
+        if (!_isPrivate(element.widget.runtimeType)) {
+          if (numberOfTypes < 5) {
+            final Iterable<Element> matches = find.byType(element.widget.runtimeType).evaluate();
+            if (matches.length == 1) {
+              print('  find.byType(${element.widget.runtimeType})');
+              numberOfTypes += 1;
+              continue;
+            }
+          }
+
+          if (descendantText != null && numberOfWithTexts < 5) {
+            final Iterable<Element> matches = find.widgetWithText(element.widget.runtimeType, descendantText).evaluate();
+            if (matches.length == 1) {
+              print('  find.widgetWithText(${element.widget.runtimeType}, \'$descendantText\')');
+              numberOfWithTexts += 1;
+              continue;
+            }
+          }
+        }
+
+        if (!_isPrivate(element.runtimeType)) {
+          final Iterable<Element> matches = find.byElementType(element.runtimeType).evaluate();
+          if (matches.length == 1) {
+            print('  find.byElementType(${element.runtimeType})');
+            continue;
+          }
+        }
+
+        totalNumber -= 1; // if we got here, we didn't actually find something to say about it
+      }
+      if (totalNumber == 0)
+        print('  <could not come up with any unique finders>');
+    }
+  }
+
+  bool _isPrivate(Type type) {
+    return '_'.matchAsPrefix(type.toString()) != null;
   }
 
   /// Returns the exception most recently caught by the Flutter framework.
@@ -120,12 +280,14 @@ class WidgetTester extends WidgetController {
     return binding.takeException();
   }
 
+  /// Acts as if the application went idle.
+  ///
   /// Runs all remaining microtasks, including those scheduled as a result of
   /// running them, until there are no more microtasks scheduled.
   ///
   /// Does not run timers. May result in an infinite loop or run out of memory
   /// if microtasks continue to recursively schedule new microtasks.
-  void flushMicrotasks() {
-    binding.fakeAsync.flushMicrotasks();
+  Future<Null> idle() {
+    return TestAsyncUtils.guard(() => binding.idle());
   }
 }

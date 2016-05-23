@@ -36,7 +36,7 @@ class FrictionSimulation extends Simulation {
   /// velocity, and the velocities must be in the direction appropriate for the
   /// particle to start from the start position and reach the end position.
   factory FrictionSimulation.through(double startPosition, double endPosition, double startVelocity, double endVelocity) {
-    assert(startVelocity.sign == endVelocity.sign);
+    assert(startVelocity == 0.0 || endVelocity == 0.0 || startVelocity.sign == endVelocity.sign);
     assert(startVelocity.abs() >= endVelocity.abs());
     assert((endPosition - startPosition).sign == startVelocity.sign);
     return new FrictionSimulation(

@@ -68,7 +68,7 @@ class TabsDemoState extends State<TabsDemo> {
                   height: 192.0,
                   child: new Card(
                     child: new Center(
-                      child: new Text('Tab $page.label, item $i')
+                      child: new Text('Tab ${page.label}, item $i')
                     )
                   )
                 );

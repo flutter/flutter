@@ -4,7 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 class TestCustomPainter extends CustomPainter {
   TestCustomPainter({ this.log, this.name });
@@ -22,9 +21,9 @@ class TestCustomPainter extends CustomPainter {
 }
 
 void main() {
-  testWidgets('Control test for custom painting', (WidgetTester tester) {
+  testWidgets('Control test for custom painting', (WidgetTester tester) async {
     List<String> log = <String>[];
-    tester.pumpWidget(new CustomPaint(
+    await tester.pumpWidget(new CustomPaint(
       painter: new TestCustomPainter(
         log: log,
         name: 'background'

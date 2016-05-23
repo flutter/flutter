@@ -4,13 +4,12 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 void main() {
-  testWidgets('Events bubble up the tree', (WidgetTester tester) {
+  testWidgets('Events bubble up the tree', (WidgetTester tester) async {
     List<String> log = new List<String>();
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Listener(
         onPointerDown: (_) {
           log.add('top');
@@ -32,7 +31,7 @@ void main() {
       )
     );
 
-    tester.tap(find.text('X'));
+    await tester.tap(find.text('X'));
 
     expect(log, equals(<String>[
       'bottom',

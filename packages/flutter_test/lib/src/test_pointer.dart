@@ -2,7 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/gestures.dart';
+
+import 'test_async_utils.dart';
 
 export 'dart:ui' show Point;
 
@@ -62,6 +66,7 @@ class TestPointer {
     return new PointerMoveEvent(
       timeStamp: timeStamp,
       pointer: pointer,
+      down: _isDown,
       position: newLocation,
       delta: delta
     );
@@ -102,68 +107,81 @@ class TestPointer {
   }
 }
 
+/// Signature for a callback that can dispatch events and returns a future that
+/// completes when the event dispatch is complete.
+typedef Future<Null> EventDispatcher(PointerEvent event, HitTestResult result);
+
+/// Signature for callbacks that perform hit-testing at a given location.
+typedef HitTestResult HitTester(Point location);
+
 /// A class for performing gestures in tests.
 ///
 /// The simplest way to create a [TestGesture] is to call
 /// [WidgetTester.startGesture].
 class TestGesture {
+  TestGesture._(this._dispatcher, this._result, this._pointer);
+
   /// Create a [TestGesture] by starting with a pointerDown at the
   /// given point.
   ///
   /// By default, the pointer ID used is 1. This can be overridden by
   /// providing the `pointer` argument.
   ///
-  /// By default, the global binding is used both for hit testing and
-  /// for dispatching of events. The object to use for hit testing can
-  /// be overridden by providing `hitTestTarget`, and the object to
-  /// use for dispatching events can be overridden by providing an
-  /// `dispatcher`.
-  factory TestGesture(Point downLocation, {
+  /// A function to use for hit testing should be provided via the `hitTester`
+  /// argument, and a function to use for dispatching events should be provided
+  /// via the `dispatcher` argument.
+  static Future<TestGesture> down(Point downLocation, {
     int pointer: 1,
-    HitTestable target,
-    HitTestDispatcher dispatcher
-  }) {
-    // hit test
-    final HitTestResult result = new HitTestResult();
-    target ??= GestureBinding.instance;
-    assert(target != null);
-    target.hitTest(result, downLocation);
-
-    // dispatch down event
-    final TestPointer testPointer = new TestPointer(pointer);
-    dispatcher ??= GestureBinding.instance;
+    HitTester hitTester,
+    EventDispatcher dispatcher
+  }) async {
+    assert(hitTester != null);
     assert(dispatcher != null);
-    dispatcher.dispatchEvent(testPointer.down(downLocation), result);
+    final Completer<TestGesture> completer = new Completer<TestGesture>();
+    TestGesture result;
+    TestAsyncUtils.guard(() async {
+      // dispatch down event
+      final HitTestResult hitTestResult = hitTester(downLocation);
+      final TestPointer testPointer = new TestPointer(pointer);
+      await dispatcher(testPointer.down(downLocation), hitTestResult);
 
-    // create a TestGesture
-    return new TestGesture._(dispatcher, result, testPointer);
+      // create a TestGesture
+      result = new TestGesture._(dispatcher, hitTestResult, testPointer);
+      return null;
+    }).whenComplete(() {
+      completer.complete(result);
+    });
+    return completer.future;
   }
 
-  const TestGesture._(this._dispatcher, this._result, this._pointer);
-
-  final HitTestDispatcher _dispatcher;
+  final EventDispatcher _dispatcher;
   final HitTestResult _result;
   final TestPointer _pointer;
 
   /// Send a move event moving the pointer by the given offset.
-  void moveBy(Offset offset) {
+  Future<Null> moveBy(Offset offset) {
     assert(_pointer._isDown);
-    moveTo(_pointer.location + offset);
+    return moveTo(_pointer.location + offset);
   }
 
   /// Send a move event moving the pointer to the given location.
-  void moveTo(Point location) {
-    assert(_pointer._isDown);
-    _dispatcher.dispatchEvent(_pointer.move(location), _result);
+  Future<Null> moveTo(Point location) {
+    return TestAsyncUtils.guard(() {
+      assert(_pointer._isDown);
+      return _dispatcher(_pointer.move(location), _result);
+    });
   }
 
   /// End the gesture by releasing the pointer.
   ///
   /// The object is no longer usable after this method has been called.
-  void up() {
-    assert(_pointer._isDown);
-    _dispatcher.dispatchEvent(_pointer.up(), _result);
-    assert(!_pointer._isDown);
+  Future<Null> up() {
+    return TestAsyncUtils.guard(() async {
+      assert(_pointer._isDown);
+      await _dispatcher(_pointer.up(), _result);
+      assert(!_pointer._isDown);
+      return null;
+    });
   }
 
   /// End the gesture by canceling the pointer (as would happen if the
@@ -171,9 +189,12 @@ class TestGesture {
   /// for instance).
   ///
   /// The object is no longer usable after this method has been called.
-  void cancel() {
-    assert(_pointer._isDown);
-    _dispatcher.dispatchEvent(_pointer.cancel(), _result);
-    assert(!_pointer._isDown);
+  Future<Null> cancel() {
+    return TestAsyncUtils.guard(() async {
+      assert(_pointer._isDown);
+      await _dispatcher(_pointer.cancel(), _result);
+      assert(!_pointer._isDown);
+      return null;
+    });
   }
 }

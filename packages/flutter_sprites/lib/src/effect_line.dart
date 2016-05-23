@@ -1,18 +1,42 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 part of flutter_sprites;
 
+/// Used by [EffectLine] to determine how the width of the line is calculated.
 enum EffectLineWidthMode {
+
+  /// Linear interpolation between minWidth at the start and maxWidth at the
+  /// end of the line.
   linear,
+
+  /// Creates a barrel shaped line, with minWidth at the end points of the line
+  /// and maxWidth at the middle.
   barrel,
 }
 
+/// Used by [EffectLine] to determine how the texture of the line is animated.
 enum EffectLineAnimationMode {
+
+  /// The texture of the line isn't animated.
   none,
+
+  /// The texture of the line is scrolling.
   scroll,
+
+  /// The texture of the line is set to a random position at every frame. This
+  /// mode is useful for creating flashing or electricity styled effects.
   random,
 }
 
+/// The EffectLine class is using the [TexturedLine] class to draw animated
+/// lines. These can be used to draw things such as smoke trails, electricity
+/// effects, or other animated types of lines.
 class EffectLine extends Node {
 
+  /// Creates a new EffectLine with the specified parameters. Only the
+  /// [texture] parameter is required, all other parameters are optional.
   EffectLine({
     this.texture: null,
     this.transferMode: TransferMode.dstOver,
@@ -49,22 +73,41 @@ class EffectLine extends Node {
     _painter.textureLoopLength = textureLoopLength;
   }
 
+  /// The texture used to draw the line.
   final Texture texture;
 
+  /// The transfer mode used to draw the line, default is
+  /// [TransferMode.dstOver].
   final TransferMode transferMode;
 
+  /// Mode used to calculate the width of the line.
   final EffectLineWidthMode widthMode;
+
+  /// The width of the line at its thinnest point.
   final double minWidth;
+
+  /// The width of the line at its thickest point.
   final double maxWidth;
+
+  /// The speed at which the line is growing, defined in points per second.
   final double widthGrowthSpeed;
 
+  /// The mode used to animate the texture of the line.
   final EffectLineAnimationMode animationMode;
+
+  /// The speed of which the texture of the line is scrolling. This property
+  /// is only used if the [animationMode] is set to
+  /// [EffectLineAnimationMode.scroll].
   final double scrollSpeed;
-  ColorSequence _colorSequence;
+
+  /// Color gradient used to draw the line, from start to finish.
   ColorSequence get colorSequence => _colorSequence;
 
-  List<Point> _points;
+  ColorSequence _colorSequence;
 
+  /// List of points that make up the line. Typically, you will only want to
+  /// set this at the beginning. Then use [addPoint] to add additional points
+  /// to the line.
   List<Point> get points => _points;
 
   set points(List<Point> points) {
@@ -75,15 +118,26 @@ class EffectLine extends Node {
     }
   }
 
+  List<Point> _points;
+
   List<double> _pointAges;
   List<Color> _colors;
   List<double> _widths;
 
+  /// The time it takes for an added point to fade out. It's total life time is
+  /// [fadeDuration] + [fadeAfterDelay].
   final double fadeDuration;
+
+  /// The time it takes until an added point starts to fade out.
   final double fadeAfterDelay;
 
+  /// The length, in points, that the texture is stretched to. If the
+  /// textureLoopLength is shorter than the line, the texture will be looped.
   final double textureLoopLength;
 
+  /// True if the line should be simplified by removing points that are close
+  /// to other points. This makes drawing faster, but can result in a slight
+  /// jittering effect when points are added.
   final bool simplify;
 
   TexturedLinePainter _painter;
@@ -168,6 +222,7 @@ class EffectLine extends Node {
     _painter.paint(canvas);
   }
 
+  /// Adds a new point to the end of the line.
   void addPoint(Point point) {
     // Skip duplicate points
     if (points.length > 0 && point.x == points[points.length - 1].x && point.y == points[points.length - 1].y)

@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show Platform;
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'overscroll_indicator.dart';
 import 'page.dart';
 import 'theme.dart';
 
@@ -141,6 +144,13 @@ class MaterialApp extends StatefulWidget {
   _MaterialAppState createState() => new _MaterialAppState();
 }
 
+class _IndicatorScrollConfigurationDelegate extends ScrollConfigurationDelegate {
+  @override
+  Widget wrapScrollWidget(Widget scrollWidget) => new OverscrollIndicator(child: scrollWidget);
+}
+final ScrollConfigurationDelegate _indicatorScroll = new _IndicatorScrollConfigurationDelegate();
+final ScrollConfigurationDelegate _bounceScroll = new ScrollConfigurationDelegate();
+
 class _MaterialAppState extends State<MaterialApp> {
   final HeroController _heroController = new HeroController();
 
@@ -190,6 +200,9 @@ class _MaterialAppState extends State<MaterialApp> {
       return true;
     });
 
-    return result;
+    return new ScrollConfiguration(
+      delegate: (Platform.isIOS || Platform.isMacOS) ? _bounceScroll : _indicatorScroll,
+      child: result
+    );
   }
 }

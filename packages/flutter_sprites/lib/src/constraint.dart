@@ -1,3 +1,7 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 part of flutter_sprites;
 
 /// A constraint limits or otherwise controls a [Node]'s properties, such as
@@ -5,8 +9,8 @@ part of flutter_sprites;
 /// constraints property.
 ///
 /// Constrains are applied after the update calls are
-/// completed. They can also be applied at any time by calling a [Node]'s
-/// [applyConstraints] method. It's possible to create custom constraints by
+/// completed. They can also be applied at any time by calling
+/// [Node.applyConstraints]. It's possible to create custom constraints by
 /// overriding this class and implementing the [constrain] method.
 abstract class Constraint {
   /// Called before the node's update method is called. This method can be
@@ -139,8 +143,13 @@ class ConstraintPositionToNode extends Constraint {
   /// same parent, but they need to be added to the same [SpriteBox].
   ConstraintPositionToNode(this.targetNode, {this.dampening, this.offset: Offset.zero});
 
+  /// Target node to follow.
   final Node targetNode;
+
+  /// Offset to the target node.
   final Offset offset;
+
+  /// Dampening used when following the [targetNode], value between 0.0 and 1.0.
   final double dampening;
 
   @override

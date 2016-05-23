@@ -20,6 +20,7 @@ import '../observatory.dart';
 import '../protocol_discovery.dart';
 import 'adb.dart';
 import 'android.dart';
+import 'android_sdk.dart';
 
 const String _defaultAdbPath = 'adb';
 
@@ -59,14 +60,15 @@ class AndroidDevice extends Device {
     if (_properties == null) {
       _properties = <String, String>{};
 
-      try {
-        String getpropOutput = runCheckedSync(adbCommandForDevice(<String>['shell', 'getprop']));
+      List<String> propCommand = adbCommandForDevice(<String>['shell', 'getprop']);
+      printTrace(propCommand.join(' '));
+      ProcessResult result = Process.runSync(propCommand.first, propCommand.sublist(1));
+      if (result.exitCode == 0) {
         RegExp propertyExp = new RegExp(r'\[(.*?)\]: \[(.*?)\]');
-        for (Match m in propertyExp.allMatches(getpropOutput))
-          _properties[m.group(1)] = m.group(2);
-      } catch (error, trace) {
-        printError('Error retrieving device properties: $error');
-        printTrace(trace.toString());
+        for (Match match in propertyExp.allMatches(result.stdout))
+          _properties[match.group(1)] = match.group(2);
+      } else {
+        printError('Error retrieving device properties for $name.');
       }
     }
 
@@ -106,7 +108,7 @@ class AndroidDevice extends Device {
   _AndroidDevicePortForwarder _portForwarder;
 
   List<String> adbCommandForDevice(List<String> args) {
-    return <String>[androidSdk.adbPath, '-s', id]..addAll(args);
+    return <String>[getAdbPath(androidSdk), '-s', id]..addAll(args);
   }
 
   bool _isValidAdbVersion(String adbVersion) {
@@ -137,10 +139,10 @@ class AndroidDevice extends Device {
       return false;
 
     try {
-      String adbVersion = runCheckedSync(<String>[androidSdk.adbPath, 'version']);
+      String adbVersion = runCheckedSync(<String>[getAdbPath(androidSdk), 'version']);
       if (_isValidAdbVersion(adbVersion))
         return true;
-      printError('The ADB at "${androidSdk.adbPath}" is too old; please install version 1.0.32 or later.');
+      printError('The ADB at "${getAdbPath(androidSdk)}" is too old; please install version 1.0.32 or later.');
     } catch (error, trace) {
       printError('Error running ADB: $error', trace);
     }
@@ -154,7 +156,7 @@ class AndroidDevice extends Device {
       // output lines like this, which we want to ignore:
       //   adb server is out of date.  killing..
       //   * daemon started successfully *
-      runCheckedSync(<String>[androidSdk.adbPath, 'start-server']);
+      runCheckedSync(<String>[getAdbPath(androidSdk), 'start-server']);
 
       // Sample output: '22'
       String sdkVersion = _getProperty('ro.build.version.sdk');
@@ -272,7 +274,7 @@ class AndroidDevice extends Device {
     if (route != null)
       cmd.addAll(<String>['--es', 'route', route]);
     if (options.debuggingEnabled) {
-      if (options.checked)
+      if (options.buildMode == BuildMode.debug)
         cmd.addAll(<String>['--ez', 'enable-checked-mode', 'true']);
       if (options.startPaused)
         cmd.addAll(<String>['--ez', 'start-paused', 'true']);
@@ -337,6 +339,7 @@ class AndroidDevice extends Device {
 
     String localBundlePath = await flx.buildFlx(
       mainPath: mainPath,
+      precompiledSnapshot: isAotBuildMode(debuggingOptions.buildMode),
       includeRobotoFonts: false
     );
 
@@ -451,9 +454,19 @@ class AndroidDevice extends Device {
       activity,
     ]);
     result = await runAsync(cmd);
-    if (result.exitCode != 0)
+    if (result.exitCode != 0) {
       printStatus(result.toString());
-    return result.exitCode == 0;
+      return false;
+    }
+
+    final RegExp errorRegExp = new RegExp(r'^Error: .*$', multiLine: true);
+    Match errorMatch = errorRegExp.firstMatch(result.processResult.stdout);
+    if (errorMatch != null) {
+      printError(errorMatch.group(0));
+      return false;
+    }
+
+    return true;
   }
 
   @override

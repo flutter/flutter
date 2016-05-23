@@ -7,20 +7,53 @@ import 'recognizer.dart';
 import 'constants.dart';
 import 'events.dart';
 
+/// The possible states of a [ScaleGestureRecognizer].
 enum ScaleState {
+  /// The recognizer is ready to start recognizing a gesture.
   ready,
+
+  /// The sequence of pointer events seen thus far is consistent with a scale
+  /// gesture but the gesture has not been accepted definitively.
   possible,
+
+  /// The sequence of pointer events seen thus far has been accepted
+  /// definitively as a scale gesture.
   accepted,
-  started
+
+  /// The sequence of pointer events seen thus far has been accepted
+  /// definitively as a scale gesture and the pointers established a focal point
+  /// and initial scale.
+  started,
 }
 
+/// Signature for when the pointers in contact with the screen have established
+/// a focal point and initial scale of 1.0.
 typedef void GestureScaleStartCallback(Point focalPoint);
+
+/// Signature for when the pointers in contact with the screen have indicated a
+/// new focal point and/or scale.
 typedef void GestureScaleUpdateCallback(double scale, Point focalPoint);
+
+/// Signature for when the pointers are no longer in contact with the screen.
 typedef void GestureScaleEndCallback();
 
+/// Recognizes a scale gesture.
+///
+/// [ScaleGestureRecognizer] tracks the pointers in contact with the screen and
+/// calculates their focal point and indiciated scale. When a focal pointer is
+/// established, the recognizer calls [onStart]. As the focal point and scale
+/// change, the recognizer calls [onUpdate]. When the pointers are no longer in
+/// contact with the screen, the recognizer calls [onEnd].
 class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
+  /// The pointers in contact with the screen have established a focal point and
+  /// initial scale of 1.0.
   GestureScaleStartCallback onStart;
+
+  /// The pointers in contact with the screen have indicated a new focal point
+  /// and/or scale.
   GestureScaleUpdateCallback onUpdate;
+
+  /// The pointers are no longer in contact with the screen.
   GestureScaleEndCallback onEnd;
 
   ScaleState _state = ScaleState.ready;

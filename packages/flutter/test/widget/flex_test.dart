@@ -5,12 +5,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 void main() {
-  testWidgets('Can hit test flex children of stacks', (WidgetTester tester) {
+  testWidgets('Can hit test flex children of stacks', (WidgetTester tester) async {
     bool didReceiveTap = false;
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Container(
         decoration: const BoxDecoration(
           backgroundColor: const Color(0xFF00FF00)
@@ -45,15 +44,15 @@ void main() {
       )
     );
 
-    tester.tap(find.text('X'));
+    await tester.tap(find.text('X'));
     expect(didReceiveTap, isTrue);
   });
 
-  testWidgets('Row and FlexJustifyContent.collapse', (WidgetTester tester) {
+  testWidgets('Row and FlexJustifyContent.collapse', (WidgetTester tester) async {
     final Key flexKey = new Key('flexKey');
 
     // Row without mainAxisAlignment: FlexJustifyContent.collapse
-    tester.pumpWidget(new Center(
+    await tester.pumpWidget(new Center(
       child: new Row(
         children: <Widget>[
           new Container(width: 10.0, height: 100.0),
@@ -67,7 +66,7 @@ void main() {
     expect(renderBox.size.height, equals(100.0));
 
     // Row with mainAxisAlignment: FlexJustifyContent.collapse
-    tester.pumpWidget(new Center(
+    await tester.pumpWidget(new Center(
       child: new Row(
         children: <Widget>[
           new Container(width: 10.0, height: 100.0),
@@ -82,11 +81,11 @@ void main() {
     expect(renderBox.size.height, equals(100.0));
   });
 
-  testWidgets('Column and FlexJustifyContent.collapse', (WidgetTester tester) {
+  testWidgets('Column and FlexJustifyContent.collapse', (WidgetTester tester) async {
     final Key flexKey = new Key('flexKey');
 
     // Column without mainAxisAlignment: FlexJustifyContent.collapse
-    tester.pumpWidget(new Center(
+    await tester.pumpWidget(new Center(
       child: new Column(
         children: <Widget>[
           new Container(width: 100.0, height: 100.0),
@@ -100,7 +99,7 @@ void main() {
     expect(renderBox.size.height, equals(600.0));
 
     // Column with mainAxisAlignment: FlexJustifyContent.collapse
-    tester.pumpWidget(new Center(
+    await tester.pumpWidget(new Center(
       child: new Column(
         children: <Widget>[
           new Container(width: 100.0, height: 100.0),
@@ -115,10 +114,10 @@ void main() {
     expect(renderBox.size.height, equals(250.0));
   });
 
-  testWidgets('Can layout at zero size', (WidgetTester tester) {
+  testWidgets('Can layout at zero size', (WidgetTester tester) async {
     final Key childKey = new Key('childKey');
 
-    tester.pumpWidget(new Center(
+    await tester.pumpWidget(new Center(
       child: new Container(
         width: 0.0,
         height: 0.0,
@@ -139,7 +138,7 @@ void main() {
     expect(renderBox.size.width, equals(0.0));
     expect(renderBox.size.height, equals(100.0));
 
-    tester.pumpWidget(new Center(
+    await tester.pumpWidget(new Center(
       child: new Container(
         width: 0.0,
         height: 0.0,

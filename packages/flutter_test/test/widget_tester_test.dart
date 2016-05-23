@@ -4,16 +4,15 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:test/test.dart';
 
 void main() {
   group('findsOneWidget', () {
-    testWidgets('finds exactly one widget', (WidgetTester tester) {
-      tester.pumpWidget(new Text('foo'));
+    testWidgets('finds exactly one widget', (WidgetTester tester) async {
+      await tester.pumpWidget(new Text('foo'));
       expect(find.text('foo'), findsOneWidget);
     });
 
-    testWidgets('fails with a descriptive message', (WidgetTester tester) {
+    testWidgets('fails with a descriptive message', (WidgetTester tester) async {
       TestFailure failure;
       try {
         expect(find.text('foo'), findsOneWidget);
@@ -30,12 +29,12 @@ void main() {
   });
 
   group('findsNothing', () {
-    testWidgets('finds no widgets', (WidgetTester tester) {
+    testWidgets('finds no widgets', (WidgetTester tester) async {
       expect(find.text('foo'), findsNothing);
     });
 
-    testWidgets('fails with a descriptive message', (WidgetTester tester) {
-      tester.pumpWidget(new Text('foo'));
+    testWidgets('fails with a descriptive message', (WidgetTester tester) async {
+      await tester.pumpWidget(new Text('foo'));
 
       TestFailure failure;
       try {

@@ -42,7 +42,7 @@ import 'src/runner/flutter_command_runner.dart';
 
 /// Main entry point for commands.
 ///
-/// This function is intended to be used from the [flutter] command line tool.
+/// This function is intended to be used from the `flutter` command line tool.
 Future<Null> main(List<String> args) async {
   bool help = args.contains('-h') || args.contains('--help');
   bool verbose = args.contains('-v') || args.contains('--verbose');
@@ -91,8 +91,10 @@ Future<Null> main(List<String> args) async {
     if (error is UsageException) {
       stderr.writeln(error.message);
       stderr.writeln();
-      stderr.writeln("Run 'flutter -h' (or 'flutter <command> -h') for available "
-        "flutter commands and options.");
+      stderr.writeln(
+        "Run 'flutter -h' (or 'flutter <command> -h') for available "
+        "flutter commands and options."
+      );
       // Argument error exit code.
       _exit(64);
     } else if (error is ProcessExit) {
@@ -118,7 +120,8 @@ Future<Null> main(List<String> args) async {
 
         stderr.writeln(
           'Crash report written to ${file.path};\n'
-          'please let us know at https://github.com/flutter/flutter/issues.');
+          'please let us know at https://github.com/flutter/flutter/issues.'
+        );
       }
 
       _exit(1);
@@ -129,21 +132,21 @@ Future<Null> main(List<String> args) async {
 File _createCrashReport(List<String> args, dynamic error, Chain chain) {
   File crashFile = getUniqueFile(Directory.current, 'flutter', 'log');
 
-  StringBuffer buf = new StringBuffer();
+  StringBuffer buffer = new StringBuffer();
 
-  buf.writeln('Flutter crash report; please file at https://github.com/flutter/flutter/issues.\n');
+  buffer.writeln('Flutter crash report; please file at https://github.com/flutter/flutter/issues.\n');
 
-  buf.writeln('## command\n');
-  buf.writeln('flutter ${args.join(' ')}\n');
+  buffer.writeln('## command\n');
+  buffer.writeln('flutter ${args.join(' ')}\n');
 
-  buf.writeln('## exception\n');
-  buf.writeln('$error\n');
-  buf.writeln('```\n${chain.terse}```\n');
+  buffer.writeln('## exception\n');
+  buffer.writeln('$error\n');
+  buffer.writeln('```\n${chain.terse}```\n');
 
-  buf.writeln('## flutter doctor\n');
-  buf.writeln('```\n${_doctorText()}```');
+  buffer.writeln('## flutter doctor\n');
+  buffer.writeln('```\n${_doctorText()}```');
 
-  crashFile.writeAsStringSync(buf.toString());
+  crashFile.writeAsStringSync(buffer.toString());
 
   return crashFile;
 }
@@ -179,7 +182,8 @@ Future<Null> _exit(int code) async {
   logger.flush();
 
   // Give the task / timer queue one cycle through before we hard exit.
-  await Timer.run(() {
+  Timer.run(() {
+    printTrace('exiting with code $code');
     exit(code);
   });
 }

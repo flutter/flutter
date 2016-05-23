@@ -5,12 +5,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 void main() {
-  testWidgets('FractionallySizedBox', (WidgetTester tester) {
+  testWidgets('FractionallySizedBox', (WidgetTester tester) async {
     GlobalKey inner = new GlobalKey();
-    tester.pumpWidget(new OverflowBox(
+    await tester.pumpWidget(new OverflowBox(
       minWidth: 0.0,
       maxWidth: 100.0,
       minHeight: 0.0,

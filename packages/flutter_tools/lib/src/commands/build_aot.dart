@@ -71,7 +71,9 @@ String buildAotSnapshot(
     entryPointsDir  = path.join(engineSrc, 'sky', 'engine', 'bindings');
     String engineOut = tools.getEngineArtifactsDirectory(
         TargetPlatform.android_arm, buildMode).path;
-    genSnapshot = path.join(engineOut, 'clang_x86', 'gen_snapshot');
+
+    String host32BitToolchain = getCurrentHostPlatform() == HostPlatform.darwin_x64 ? 'clang_i386' : 'clang_x86';
+    genSnapshot = path.join(engineOut, host32BitToolchain, 'gen_snapshot');
   } else {
     String artifactsDir = tools.getEngineArtifactsDirectory(
         TargetPlatform.android_arm, buildMode).path;

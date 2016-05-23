@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
+import '../calculator/interface.dart';
 import '../demo/all.dart';
 import 'drawer.dart';
 import 'header.dart';
@@ -76,6 +77,7 @@ class GalleryHomeState extends State<GalleryHome> {
               new GalleryItem(title: 'Weather', routeName: WeatherDemo.routeName),
               new GalleryItem(title: 'Fitness', routeName: FitnessDemo.routeName),
               new GalleryItem(title: 'Fancy lines', routeName: DrawingDemo.routeName),
+              new GalleryItem(title: 'Calculator', routeName: Calculator.routeName),
               new GalleryItem(title: 'Flexible space toolbar', routeName: FlexibleSpaceDemo.routeName),
               new GalleryItem(title: 'Floating action button', routeName: TabsFabDemo.routeName),
             ]

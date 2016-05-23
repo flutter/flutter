@@ -5,7 +5,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:sky_services/editing/editing.mojom.dart' as mojom;
-import 'package:test/test.dart';
 
 class MockKeyboard implements mojom.Keyboard {
   mojom.KeyboardClient client;
@@ -41,7 +40,7 @@ void main() {
       ..composingExtent = testValue.length);
   }
 
-  testWidgets('Setter callback is called', (WidgetTester tester) {
+  testWidgets('Setter callback is called', (WidgetTester tester) async {
     GlobalKey inputKey = new GlobalKey();
     String fieldValue;
 
@@ -60,21 +59,21 @@ void main() {
       );
     }
 
-    tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
 
-    void checkText(String testValue) {
+    Future<Null> checkText(String testValue) {
       enterText(testValue);
 
       // Check that the FormField's setter was called.
       expect(fieldValue, equals(testValue));
-      tester.pumpWidget(builder());
+      return tester.pumpWidget(builder());
     }
 
-    checkText('Test');
-    checkText('');
+    await checkText('Test');
+    await checkText('');
   });
 
-  testWidgets('Validator sets the error text', (WidgetTester tester) {
+  testWidgets('Validator sets the error text', (WidgetTester tester) async {
     GlobalKey inputKey = new GlobalKey();
     String errorText(String input) => input + '/error';
 
@@ -93,21 +92,22 @@ void main() {
       );
     }
 
-    tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
 
-    void checkErrorText(String testValue) {
+    Future<Null> checkErrorText(String testValue) async {
       enterText(testValue);
-      tester.pumpWidget(builder());
+      await tester.pumpWidget(builder());
 
       // Check for a new Text widget with our error text.
       expect(find.text(errorText(testValue)), findsOneWidget);
+      return null;
     }
 
-    checkErrorText('Test');
-    checkErrorText('');
+    await checkErrorText('Test');
+    await checkErrorText('');
   });
 
-  testWidgets('Multiple Inputs communicate', (WidgetTester tester) {
+  testWidgets('Multiple Inputs communicate', (WidgetTester tester) async {
     GlobalKey inputKey = new GlobalKey();
     GlobalKey focusKey = new GlobalKey();
     // Input 1's text value.
@@ -142,21 +142,22 @@ void main() {
       );
     }
 
-    tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
     Focus.moveTo(inputKey);
-    tester.pump();
+    await tester.pump();
 
-    void checkErrorText(String testValue) {
+    Future<Null> checkErrorText(String testValue) async {
       enterText(testValue);
-      tester.pumpWidget(builder());
+      await tester.pumpWidget(builder());
 
       expect(fieldValue, equals(testValue));
 
       // Check for a new Text widget with our error text.
       expect(find.text(errorText(testValue)), findsOneWidget);
+      return null;
     }
 
-    checkErrorText('Test');
-    checkErrorText('');
+    await checkErrorText('Test');
+    await checkErrorText('');
   });
 }

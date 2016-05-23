@@ -37,22 +37,20 @@ if [ ! -f "$SNAPSHOT_PATH" ] || [ ! -f "$STAMP_PATH" ] || [ `cat "$STAMP_PATH"` 
   echo $REVISION > "$STAMP_PATH"
 fi
 
-set +e
-
 if [ $FLUTTER_DEV ]; then
   "$DART" --packages="$FLUTTER_TOOLS_DIR/.packages" -c "$SCRIPT_PATH" "$@"
 else
+  set +e
+  "$DART" "$SNAPSHOT_PATH" "$@"
+
+  # The VM exits with code 253 if the snapshot version is out-of-date.
+  # If it is, we need to snapshot it again.
+  EXIT_CODE=$?
+  if [ $EXIT_CODE != 253 ]; then
+    exit $EXIT_CODE
+  fi
+
+  set -e
+  "$DART" --snapshot="$SNAPSHOT_PATH" --package="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
   "$DART" "$SNAPSHOT_PATH" "$@"
 fi
-
-# The VM exits with code 253 if the snapshot version is out-of-date.
-# If it is, we need to snapshot it again.
-EXIT_CODE=$?
-if [ $EXIT_CODE != 253 ]; then
-  exit $EXIT_CODE
-fi
-
-set -e
-
-"$DART" --snapshot="$SNAPSHOT_PATH" --package="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
-"$DART" "$SNAPSHOT_PATH" "$@"

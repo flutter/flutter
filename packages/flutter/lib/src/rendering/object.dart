@@ -703,6 +703,13 @@ class _ForkingSemanticsFragment extends _SemanticsFragment {
 }
 
 class PipelineOwner {
+  PipelineOwner({ this.onNeedVisualUpdate });
+  final VoidCallback onNeedVisualUpdate;
+
+  void requestVisualUpdate() {
+    if (onNeedVisualUpdate != null)
+      onNeedVisualUpdate();
+  }
 
   List<RenderObject> _nodesNeedingLayout = <RenderObject>[];
   bool _debugDoingLayout = false;
@@ -1094,9 +1101,10 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
           debugPrintStack();
         return true;
       });
-      if (owner != null)
+      if (owner != null) {
         owner._nodesNeedingLayout.add(this);
-      RendererBinding.instance.ensureVisualUpdate();
+        owner.requestVisualUpdate();
+      }
     }
   }
 
@@ -1308,7 +1316,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// Subclasses that set [sizedByParent] to true should override this function
   /// to compute their size.
   ///
-  /// Note: This function is called only if [sizedByParent] is true.
+  /// This function is called only if [sizedByParent] is true.
   void performResize();
 
   /// Do the work of computing the layout for this render object.
@@ -1502,9 +1510,10 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       // If we always have our own layer, then we can just repaint
       // ourselves without involving any other nodes.
       assert(_layer != null);
-      if (owner != null)
+      if (owner != null) {
         owner._nodesNeedingPaint.add(this);
-      RendererBinding.instance.ensureVisualUpdate();
+        owner.requestVisualUpdate();
+      }
     } else if (parent is RenderObject) {
       // We don't have our own layer; one of our ancestors will take
       // care of updating the layer we're in and when they do that
@@ -1518,7 +1527,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       // then we have to paint ourselves, since nobody else can paint
       // us. We don't add ourselves to _nodesNeedingPaint in this
       // case, because the root is always told to paint regardless.
-      RendererBinding.instance.ensureVisualUpdate();
+      if (owner != null)
+        owner.requestVisualUpdate();
     }
   }
 
@@ -1538,6 +1548,22 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(_needsPaint);
     owner._nodesNeedingPaint.add(this);
   }
+
+  /// Replace the layer. This is only valid for the root of a render
+  /// object subtree (whatever object [scheduleInitialPaint] was
+  /// called on).
+  ///
+  /// This might be called if, e.g., the device pixel ratio changed.
+  void replaceRootLayer(ContainerLayer rootLayer) {
+    assert(attached);
+    assert(parent is! RenderObject);
+    assert(!owner._debugDoingPaint);
+    assert(isRepaintBoundary);
+    assert(_layer != null); // use scheduleInitialPaint the first time
+    _layer = rootLayer;
+    markNeedsPaint();
+  }
+
   void _paintWithContext(PaintingContext context, Offset offset) {
     assert(!_debugDoingThisPaint);
     assert(!_needsLayout);
@@ -1636,7 +1662,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(owner._semanticsEnabled == false);
     owner._semanticsEnabled = true;
     owner._nodesNeedingSemantics.add(this);
-    RendererBinding.instance.ensureVisualUpdate();
+    owner.requestVisualUpdate();
   }
 
   /// Whether this RenderObject introduces a new box for accessibility purposes.

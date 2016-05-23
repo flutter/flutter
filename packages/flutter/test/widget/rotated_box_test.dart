@@ -4,14 +4,13 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:test/test.dart';
 
 void main() {
-  testWidgets('Rotated box control test', (WidgetTester tester) {
+  testWidgets('Rotated box control test', (WidgetTester tester) async {
     List<String> log = <String>[];
     Key rotatedBoxKey = new UniqueKey();
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Center(
         child: new RotatedBox(
           key: rotatedBoxKey,
@@ -45,11 +44,11 @@ void main() {
     expect(box.size.width, equals(65.0));
     expect(box.size.height, equals(175.0));
 
-    tester.tapAt(new Point(420.0, 280.0));
+    await tester.tapAt(new Point(420.0, 280.0));
     expect(log, equals(<String>['left']));
     log.clear();
 
-    tester.tapAt(new Point(380.0, 320.0));
+    await tester.tapAt(new Point(380.0, 320.0));
     expect(log, equals(<String>['right']));
     log.clear();
   });

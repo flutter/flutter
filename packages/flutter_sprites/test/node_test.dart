@@ -6,7 +6,6 @@ import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_sprites/flutter_sprites.dart';
-import 'package:test/test.dart';
 
 void main() {
   test("Node - adding and removing children", () {
@@ -69,11 +68,11 @@ void main() {
     expect(child1.spriteBox, isNull);
   });
 
-  testWidgets("Node - transformations", (WidgetTester tester) {
+  testWidgets("Node - transformations", (WidgetTester tester) async {
     const double epsilon = 0.01;
 
     NodeWithSize rootNode = new NodeWithSize(const Size(1024.0, 1024.0));
-    tester.pumpWidget(new SpriteWidget(rootNode));
+    await tester.pumpWidget(new SpriteWidget(rootNode));
 
     // Translations and transformations adding up correctly.
     Node child0 = new Node();

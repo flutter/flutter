@@ -46,7 +46,20 @@ class _FrameCallbackEntry {
   _FrameCallbackEntry(this.callback, { bool rescheduling: false }) {
     assert(() {
       if (rescheduling) {
-        assert(currentCallbackStack != null);
+        assert(() {
+          if (currentCallbackStack == null) {
+            throw new FlutterError(
+              'addFrameCallback or scheduleFrameCallback called with rescheduling true, but no callback is in scope.\n'
+              'The "rescheduling" argument should only be set to true if the '
+              'callback is being reregistered from within the callback itself, '
+              'and only then if the callback itself is entirely synchronous. '
+              'If this is the initial registration of the callback, or if the '
+              'callback is asynchronous, then do not use the "rescheduling" '
+              'argument.'
+            );
+          }
+          return true;
+        });
         stack = currentCallbackStack;
       } else {
         stack = StackTrace.current;
@@ -176,10 +189,17 @@ abstract class SchedulerBinding extends BindingBase {
   /// Adds the given callback to the list of frame callbacks and ensures that a
   /// frame is scheduled.
   ///
-  /// If `rescheduling` is true, the call must be in the context of a
-  /// frame callback, and for debugging purposes the stack trace
-  /// stored for this callback will be the same stack trace as for the
-  /// current callback.
+  /// If this is a one-off registration, ignore the `rescheduling` argument.
+  ///
+  /// If this is a callback that will be reregistered each time it fires, then
+  /// when you reregister the callback, set the `rescheduling` argument to true.
+  /// This has no effect in release builds, but in debug builds, it ensures that
+  /// the stack trace that is stored for this callback is the original stack
+  /// trace for when the callback was _first_ registered, rather than the stack
+  /// trace for when the callback is reregistered. This makes it easier to track
+  /// down the original reason that a particular callback was invoked. If
+  /// `rescheduling` is true, the call must be in the context of a frame
+  /// callback.
   ///
   /// Callbacks registered with this method can be canceled using
   /// [cancelFrameCallbackWithId].
@@ -200,10 +220,17 @@ abstract class SchedulerBinding extends BindingBase {
   /// a frame is requested. To register a callback and ensure that a
   /// frame is immediately scheduled, use [scheduleFrameCallback].
   ///
-  /// If `rescheduling` is true, the call must be in the context of a
-  /// frame callback, and for debugging purposes the stack trace
-  /// stored for this callback will be the same stack trace as for the
-  /// current callback.
+  /// If this is a one-off registration, ignore the `rescheduling` argument.
+  ///
+  /// If this is a callback that will be reregistered each time it fires, then
+  /// when you reregister the callback, set the `rescheduling` argument to true.
+  /// This has no effect in release builds, but in debug builds, it ensures that
+  /// the stack trace that is stored for this callback is the original stack
+  /// trace for when the callback was _first_ registered, rather than the stack
+  /// trace for when the callback is reregistered. This makes it easier to track
+  /// down the original reason that a particular callback was invoked. If
+  /// `rescheduling` is true, the call must be in the context of a frame
+  /// callback.
   ///
   /// Callbacks registered with this method can be canceled using
   /// [cancelFrameCallbackWithId].
@@ -308,10 +335,12 @@ abstract class SchedulerBinding extends BindingBase {
     _postFrameCallbacks.add(callback);
   }
 
-  // Whether this scheduler as requested that handleBeginFrame be called soon.
+  /// Whether this scheduler as requested that handleBeginFrame be called soon.
+  bool get hasScheduledFrame => _hasScheduledFrame;
   bool _hasScheduledFrame = false;
 
-  // Whether this scheduler is currently producing a frame in handleBeginFrame.
+  /// Whether this scheduler is currently producing a frame in [handleBeginFrame].
+  bool get isProducingFrame => _isProducingFrame;
   bool _isProducingFrame = false;
 
   /// If necessary, schedules a new frame by calling
@@ -388,6 +417,7 @@ abstract class SchedulerBinding extends BindingBase {
   void _invokeFrameCallback(FrameCallback callback, Duration timeStamp, [ StackTrace callbackStack ]) {
     assert(callback != null);
     assert(_FrameCallbackEntry.currentCallbackStack == null);
+    // TODO(ianh): Consider using a Zone instead to track the current callback registration stack
     assert(() { _FrameCallbackEntry.currentCallbackStack = callbackStack; return true; });
     try {
       callback(timeStamp);
@@ -398,8 +428,12 @@ abstract class SchedulerBinding extends BindingBase {
         library: 'scheduler library',
         context: 'during a scheduler callback',
         informationCollector: (callbackStack == null) ? null : (StringBuffer information) {
-          // callbackStack ends with a newline, so don't introduce one artificially here
-          information.write('When this callback was registered, this was the stack:\n$callbackStack');
+          information.writeln(
+            '\nThis exception was thrown in the context of a scheduler callback. '
+            'When the scheduler callback was _registered_ (as opposed to when the '
+            'exception was thrown), this was the stack:'
+          );
+          FlutterError.defaultStackFilter(callbackStack.toString().trimRight().split('\n')).forEach(information.writeln);
         }
       ));
     }

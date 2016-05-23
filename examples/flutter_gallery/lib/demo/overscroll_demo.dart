@@ -43,17 +43,22 @@ class OverscrollDemoState extends State<OverscrollDemo> {
         break;
     }
 
-    Widget body = new MaterialList(
-      type: MaterialListType.threeLine,
-      padding: const EdgeInsets.all(8.0),
-      children: _items.map((String item) {
-        return new ListItem(
-          isThreeLine: true,
-          leading: new CircleAvatar(child: new Text(item)),
-          title: new Text('This item represents $item.'),
-          subtitle: new Text('Even more additional list item information appears on line three.')
-        );
-      })
+    // The default ScrollConfiguration doesn't include the
+    // OverscrollIndicator. That's what we want, since this demo
+    // adds the OverscrollIndicator itself.
+    Widget body = new ScrollConfiguration(
+      child: new MaterialList(
+        type: MaterialListType.threeLine,
+        padding: const EdgeInsets.all(8.0),
+        children: _items.map((String item) {
+          return new ListItem(
+            isThreeLine: true,
+            leading: new CircleAvatar(child: new Text(item)),
+            title: new Text('This item represents $item.'),
+            subtitle: new Text('Even more additional list item information appears on line three.')
+          );
+        })
+      )
     );
     switch(_type) {
       case IndicatorType.overscroll:
@@ -91,5 +96,4 @@ class OverscrollDemoState extends State<OverscrollDemo> {
       body: body
     );
   }
-
 }

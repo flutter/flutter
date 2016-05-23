@@ -51,7 +51,19 @@ Future<Process> _startProcess(String mainPath, { String packages }) {
     '--non-interactive',
     '--packages=$packages',
     mainPath,
-  ]);
+  ], environment: <String, String>{ 'FLUTTER_TEST': 'true' });
+}
+
+void _attachStandardStreams(Process process) {
+  for (Stream<List<int>> stream in
+      <Stream<List<int>>>[process.stderr, process.stdout]) {
+    stream.transform(UTF8.decoder)
+      .transform(const LineSplitter())
+      .listen((String line) {
+        if (line != null)
+          print('Shell: $line');
+      });
+  }
 }
 
 class FlutterPlatform extends PlatformPlugin {
@@ -92,6 +104,8 @@ void main() {
     Process process = await _startProcess(
       listenerFile.path, packages: PackageMap.instance.packagesPath
     );
+
+    _attachStandardStreams(process);
 
     void finalize() {
       if (process != null) {

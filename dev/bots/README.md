@@ -2,14 +2,19 @@
 
 This directory exists to support building Flutter on our build infrastructure.
 
-The results of such builds are viewable at
-https://build.chromium.org/p/client.flutter/waterfall
+The results of such builds are viewable at:
+* https://build.chromium.org/p/client.flutter/waterfall
+* https://travis-ci.org/flutter/flutter/builds (limited checking used just for PRs on github)
 
-The external master pages do not allow forcing new builds. Contact
-@eseidelGoogle or another member of Google's Flutter team if you need to do
-that.
+The external master pages for the chromium infra bots do not allow
+forcing new builds. Contact @eseidelGoogle or another member of
+Google's Flutter team if you need to do that.
 
-Our infrastructure is broken into two parts.  A buildbot master specified by our
+The Travis-based bots are trivial, and just run a couple of shell
+scripts. The rest of this document discusses only the chromium infra
+bots.
+
+This infrastructure is broken into two parts. A buildbot master specified by our
 [builders.pyl](https://chromium.googlesource.com/chromium/tools/build.git/+/master/masters/master.client.flutter/builders.pyl)
 file, and a [set of
 recipes](https://chromium.googlesource.com/chromium/tools/build.git/+/master/scripts/slave/recipes/flutter)

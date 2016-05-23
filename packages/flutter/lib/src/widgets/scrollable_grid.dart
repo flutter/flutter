@@ -7,69 +7,106 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart' show lowerBound;
 import 'package:flutter/rendering.dart';
 
+import 'clamp_overscrolls.dart';
 import 'framework.dart';
-import 'scroll_behavior.dart';
+import 'scroll_configuration.dart';
 import 'scrollable.dart';
 import 'virtual_viewport.dart';
 
 /// A vertically scrollable grid.
 ///
 /// Requires that delegate places its children in row-major order.
-class ScrollableGrid extends Scrollable {
+class ScrollableGrid extends StatelessWidget {
   ScrollableGrid({
     Key key,
-    double initialScrollOffset,
-    ScrollListener onScrollStart,
-    ScrollListener onScroll,
-    ScrollListener onScrollEnd,
-    SnapOffsetCallback snapOffsetCallback,
+    this.initialScrollOffset,
+    this.onScrollStart,
+    this.onScroll,
+    this.onScrollEnd,
+    this.snapOffsetCallback,
+    this.scrollableKey,
     this.delegate,
     this.children
-  }) : super(
-    key: key,
-    initialScrollOffset: initialScrollOffset,
-    // TODO(abarth): Support horizontal offsets. For horizontally scrolling
-    // grids. For horizontally scrolling grids, we'll probably need to use a
-    // delegate that places children in column-major order.
-    scrollDirection: Axis.vertical,
-    onScrollStart: onScrollStart,
-    onScroll: onScroll,
-    onScrollEnd: onScrollEnd,
-    snapOffsetCallback: snapOffsetCallback
-  );
+  }) : super(key: key);
+
+  // Warning: keep the dartdoc comments that follow in sync with the copies in
+  // Scrollable, LazyBlock, ScrollableViewport, ScrollableList, and
+  // ScrollableLazyList. And see: https://github.com/dart-lang/dartdoc/issues/1161.
+
+  /// The scroll offset this widget should use when first created.
+  final double initialScrollOffset;
+
+  /// Called whenever this widget starts to scroll.
+  final ScrollListener onScrollStart;
+
+  /// Called whenever this widget's scroll offset changes.
+  final ScrollListener onScroll;
+
+  /// Called whenever this widget stops scrolling.
+  final ScrollListener onScrollEnd;
+
+  /// Called to determine the offset to which scrolling should snap,
+  /// when handling a fling.
+  ///
+  /// This callback, if set, will be called with the offset that the
+  /// Scrollable would have scrolled to in the absence of this
+  /// callback, and a Size describing the size of the Scrollable
+  /// itself.
+  ///
+  /// The callback's return value is used as the new scroll offset to
+  /// aim for.
+  ///
+  /// If the callback simply returns its first argument (the offset),
+  /// then it is as if the callback was null.
+  final SnapOffsetCallback snapOffsetCallback;
+
+  /// The key for the Scrollable created by this widget.
+  final Key scrollableKey;
 
   final GridDelegate delegate;
   final Iterable<Widget> children;
 
-  @override
-  ScrollableState createState() => new _ScrollableGridState();
-}
-
-class _ScrollableGridState extends ScrollableState<ScrollableGrid> {
-  @override
-  ExtentScrollBehavior createScrollBehavior() => new OverscrollBehavior();
-
-  @override
-  ExtentScrollBehavior get scrollBehavior => super.scrollBehavior;
-
-  void _handleExtentsChanged(double contentExtent, double containerExtent) {
-    setState(() {
-      didUpdateScrollBehavior(scrollBehavior.updateExtents(
+  void _handleExtentsChanged(ScrollableState state, double contentExtent, double containerExtent) {
+    state.setState(() {
+      state.didUpdateScrollBehavior(state.scrollBehavior.updateExtents(
         contentExtent: contentExtent,
         containerExtent: containerExtent,
-        scrollOffset: scrollOffset
+        scrollOffset: state.scrollOffset
       ));
     });
   }
 
-  @override
-  Widget buildContent(BuildContext context) {
+  Widget _buildViewport(BuildContext context, ScrollableState state, double scrollOffset) {
     return new GridViewport(
       startOffset: scrollOffset,
-      delegate: config.delegate,
-      onExtentsChanged: _handleExtentsChanged,
-      children: config.children
+      delegate: delegate,
+      onExtentsChanged: (double contentExtent, double containerExtent) {
+        _handleExtentsChanged(state, contentExtent, containerExtent);
+      },
+      children: children
     );
+  }
+
+  Widget _buildContent(BuildContext context, ScrollableState state) {
+    return ClampOverscrolls.buildViewport(context, state, _buildViewport);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Widget result = new Scrollable(
+      key: scrollableKey,
+      initialScrollOffset: initialScrollOffset,
+      // TODO(abarth): Support horizontal offsets. For horizontally scrolling
+      // grids. For horizontally scrolling grids, we'll probably need to use a
+      // delegate that places children in column-major order.
+      scrollDirection: Axis.vertical,
+      onScrollStart: onScrollStart,
+      onScroll: onScroll,
+      onScrollEnd: onScrollEnd,
+      snapOffsetCallback: snapOffsetCallback,
+      builder: _buildContent
+    );
+    return ScrollConfiguration.wrap(context, result);
   }
 }
 

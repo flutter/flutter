@@ -6,17 +6,14 @@ import 'package:flutter/gestures.dart';
 import 'package:test/test.dart';
 import 'velocity_tracker_data.dart';
 
-const int kNumIters = 10000;
-const int kBatchSize = 1000;
-const int kBatchOffset = 50;
-const int kNumMarks = 130;
+const int _kNumIters = 10000;
 
 void main() {
   test('Dart velocity tracker performance', () {
     VelocityTracker tracker = new VelocityTracker();
     Stopwatch watch = new Stopwatch();
     watch.start();
-    for (int i = 0; i < kNumIters; i++) {
+    for (int i = 0; i < _kNumIters; i++) {
       for (PointerEvent event in velocityEventData) {
         if (event is PointerDownEvent || event is PointerMoveEvent)
           tracker.addPosition(event.timeStamp, event.position);

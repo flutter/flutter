@@ -7,20 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
-const Size _kTestViewSize = const Size(800.0, 600.0);
-
-class TestRenderView extends RenderView {
-  TestRenderView() {
-    configuration = new ViewConfiguration(size: _kTestViewSize);
-  }
-
-  @override
-  void scheduleInitialFrame() {
-    scheduleInitialLayout();
-    scheduleInitialPaint(new TransformLayer(transform: new Matrix4.identity()));
-  }
-}
-
 enum EnginePhase {
   layout,
   compositingBits,
@@ -31,14 +17,6 @@ enum EnginePhase {
 }
 
 class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, ServicesBinding, RendererBinding, GestureBinding {
-  @override
-  void initRenderView() {
-    if (renderView == null) {
-      renderView = new TestRenderView();
-      renderView.scheduleInitialFrame();
-    }
-  }
-
   EnginePhase phase = EnginePhase.composite;
 
   @override

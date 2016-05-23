@@ -5,18 +5,17 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 void main() {
-  testWidgets('Align smoke test', (WidgetTester tester) {
-    tester.pumpWidget(
+  testWidgets('Align smoke test', (WidgetTester tester) async {
+    await tester.pumpWidget(
       new Align(
         child: new Container(),
         alignment: const FractionalOffset(0.75, 0.75)
       )
     );
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Align(
         child: new Container(),
         alignment: const FractionalOffset(0.5, 0.5)
@@ -24,9 +23,9 @@ void main() {
     );
   });
 
-  testWidgets('Shrink wraps in finite space', (WidgetTester tester) {
+  testWidgets('Shrink wraps in finite space', (WidgetTester tester) async {
     GlobalKey alignKey = new GlobalKey();
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new ScrollableViewport(
         child: new Align(
           key: alignKey,

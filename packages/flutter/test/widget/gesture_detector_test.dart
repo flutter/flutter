@@ -4,10 +4,9 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 void main() {
-  testWidgets('Uncontested scrolls start immediately', (WidgetTester tester) {
+  testWidgets('Uncontested scrolls start immediately', (WidgetTester tester) async {
     bool didStartDrag = false;
     double updatedDragDelta;
     bool didEndDrag = false;
@@ -29,35 +28,35 @@ void main() {
       )
     );
 
-    tester.pumpWidget(widget);
+    await tester.pumpWidget(widget);
     expect(didStartDrag, isFalse);
     expect(updatedDragDelta, isNull);
     expect(didEndDrag, isFalse);
 
     Point firstLocation = new Point(10.0, 10.0);
-    TestGesture gesture = tester.startGesture(firstLocation, pointer: 7);
+    TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
     expect(didStartDrag, isTrue);
     didStartDrag = false;
     expect(updatedDragDelta, isNull);
     expect(didEndDrag, isFalse);
 
     Point secondLocation = new Point(10.0, 9.0);
-    gesture.moveTo(secondLocation);
+    await gesture.moveTo(secondLocation);
     expect(didStartDrag, isFalse);
     expect(updatedDragDelta, -1.0);
     updatedDragDelta = null;
     expect(didEndDrag, isFalse);
 
-    gesture.up();
+    await gesture.up();
     expect(didStartDrag, isFalse);
     expect(updatedDragDelta, isNull);
     expect(didEndDrag, isTrue);
     didEndDrag = false;
 
-    tester.pumpWidget(new Container());
+    await tester.pumpWidget(new Container());
   });
 
-  testWidgets('Match two scroll gestures in succession', (WidgetTester tester) {
+  testWidgets('Match two scroll gestures in succession', (WidgetTester tester) async {
     int gestureCount = 0;
     double dragDistance = 0.0;
 
@@ -75,28 +74,28 @@ void main() {
         )
       )
     );
-    tester.pumpWidget(widget);
+    await tester.pumpWidget(widget);
 
-    TestGesture gesture = tester.startGesture(downLocation, pointer: 7);
-    gesture.moveTo(upLocation);
-    gesture.up();
+    TestGesture gesture = await tester.startGesture(downLocation, pointer: 7);
+    await gesture.moveTo(upLocation);
+    await gesture.up();
 
-    gesture = tester.startGesture(downLocation, pointer: 7);
-    gesture.moveTo(upLocation);
-    gesture.up();
+    gesture = await tester.startGesture(downLocation, pointer: 7);
+    await gesture.moveTo(upLocation);
+    await gesture.up();
 
     expect(gestureCount, 2);
     expect(dragDistance, 20.0);
 
-    tester.pumpWidget(new Container());
+    await tester.pumpWidget(new Container());
   });
 
-  testWidgets('Pan doesn\'t crash', (WidgetTester tester) {
+  testWidgets('Pan doesn\'t crash', (WidgetTester tester) async {
     bool didStartPan = false;
     Offset panDelta;
     bool didEndPan = false;
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new GestureDetector(
         onPanStart: (_) {
           didStartPan = true;
@@ -119,7 +118,7 @@ void main() {
     expect(panDelta, isNull);
     expect(didEndPan, isFalse);
 
-    tester.scrollAt(new Point(10.0, 10.0), new Offset(20.0, 30.0));
+    await tester.scrollAt(new Point(10.0, 10.0), new Offset(20.0, 30.0));
 
     expect(didStartPan, isTrue);
     expect(panDelta.dx, 20.0);
@@ -127,12 +126,12 @@ void main() {
     expect(didEndPan, isTrue);
   });
 
-  testWidgets('Translucent', (WidgetTester tester) {
+  testWidgets('Translucent', (WidgetTester tester) async {
     bool didReceivePointerDown;
     bool didTap;
 
-    void pumpWidgetTree(HitTestBehavior behavior) {
-      tester.pumpWidget(
+    Future<Null> pumpWidgetTree(HitTestBehavior behavior) {
+      return tester.pumpWidget(
         new Stack(
           children: <Widget>[
             new Listener(
@@ -164,29 +163,29 @@ void main() {
 
     didReceivePointerDown = false;
     didTap = false;
-    pumpWidgetTree(null);
-    tester.tapAt(new Point(10.0, 10.0));
+    await pumpWidgetTree(null);
+    await tester.tapAt(new Point(10.0, 10.0));
     expect(didReceivePointerDown, isTrue);
     expect(didTap, isTrue);
 
     didReceivePointerDown = false;
     didTap = false;
-    pumpWidgetTree(HitTestBehavior.deferToChild);
-    tester.tapAt(new Point(10.0, 10.0));
+    await pumpWidgetTree(HitTestBehavior.deferToChild);
+    await tester.tapAt(new Point(10.0, 10.0));
     expect(didReceivePointerDown, isTrue);
     expect(didTap, isFalse);
 
     didReceivePointerDown = false;
     didTap = false;
-    pumpWidgetTree(HitTestBehavior.opaque);
-    tester.tapAt(new Point(10.0, 10.0));
+    await pumpWidgetTree(HitTestBehavior.opaque);
+    await tester.tapAt(new Point(10.0, 10.0));
     expect(didReceivePointerDown, isFalse);
     expect(didTap, isTrue);
 
     didReceivePointerDown = false;
     didTap = false;
-    pumpWidgetTree(HitTestBehavior.translucent);
-    tester.tapAt(new Point(10.0, 10.0));
+    await pumpWidgetTree(HitTestBehavior.translucent);
+    await tester.tapAt(new Point(10.0, 10.0));
     expect(didReceivePointerDown, isTrue);
     expect(didTap, isTrue);
 

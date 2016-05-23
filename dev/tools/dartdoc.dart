@@ -8,9 +8,16 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
+const String kDocRoot = 'dev/docs/doc';
+
 /// This script expects to run with the cwd as the root of the flutter repo. It
 /// will generate documentation for the packages in `//packages/` and write the
 /// documentation to `//dev/docs/doc/api/`.
+/// 
+/// This script also updates the index.html file so that it can be placed
+/// at the root of docs.flutter.io. We are keeping the files inside of
+/// docs.flutter.io/flutter for now, so we need to manipulate paths
+/// a bit. See https://github.com/flutter/flutter/issues/3900 for more info.
 Future<Null> main(List<String> args) async {
   // If we're run from the `tools` dir, set the cwd to the repo root.
   if (path.basename(Directory.current.path) == 'tools')
@@ -21,7 +28,7 @@ Future<Null> main(List<String> args) async {
 name: Flutter
 dependencies:
 ''');
-  for (String package in _findPackageNames()) {
+  for (String package in findPackageNames()) {
     buf.writeln('  $package:');
     buf.writeln('    path: ../../packages/$package');
   }
@@ -32,15 +39,15 @@ dependencies:
   libDir.createSync();
 
   StringBuffer contents = new StringBuffer('library temp_doc;\n\n');
-  for (String libraryRef in _libraryRefs()) {
+  for (String libraryRef in libraryRefs()) {
     contents.writeln('import \'package:$libraryRef\';');
   }
   new File('dev/docs/lib/temp_doc.dart').writeAsStringSync(contents.toString());
 
   // Run pub.
   Process process = await Process.start('pub', <String>['get'], workingDirectory: 'dev/docs');
-  _print(process.stdout);
-  _print(process.stderr);
+  printStream(process.stdout);
+  printStream(process.stderr);
   int code = await process.exitCode;
   if (code != 0)
     exit(code);
@@ -56,24 +63,70 @@ dependencies:
     '--use-categories'
   ];
 
-  for (String libraryRef in _libraryRefs()) {
+  for (String libraryRef in libraryRefs()) {
     String name = path.basename(libraryRef);
     args.add('--include-external');
     args.add(name.substring(0, name.length - 5));
   }
 
-  _findSkyServicesLibraryNames().forEach((String libName) {
+  findSkyServicesLibraryNames().forEach((String libName) {
     args.add('--include-external');
     args.add(libName);
   });
 
   process = await Process.start('pub', args, workingDirectory: 'dev/docs');
-  _print(process.stdout);
-  _print(process.stderr);
-  exit(await process.exitCode);
+  printStream(process.stdout);
+  printStream(process.stderr);
+  int exitCode = await process.exitCode;
+
+  if (exitCode != 0)
+    exit(exitCode);
+
+  createIndexAndCleanup();
 }
 
-List<String> _findSkyServicesLibraryNames() {
+/// Creates a custom index.html because we try to maintain old
+/// paths. Cleanup unused index.html files no longer needed.
+void createIndexAndCleanup() {
+  print('\nCreating a custom index.html in $kDocRoot/index.html');
+  removeOldFlutterDocsDir();
+  renameApiDir();
+  copyIndexToRootOfDocs();
+  addHtmlBaseToIndex();
+  putRedirectInOldIndexLocation();
+  print('\nDocs ready to go!');
+}
+
+void removeOldFlutterDocsDir() {
+  try {
+    new Directory('$kDocRoot/flutter').deleteSync(recursive: true);
+  } catch(e) {
+    // If the directory does not exist, that's OK.
+  }
+}
+
+void renameApiDir() {
+  new Directory('$kDocRoot/api').renameSync('$kDocRoot/flutter');
+}
+
+File copyIndexToRootOfDocs() {
+  return new File('$kDocRoot/flutter/index.html').copySync('$kDocRoot/index.html');
+}
+
+void addHtmlBaseToIndex() {
+  File indexFile = new File('$kDocRoot/index.html');
+  String indexContents = indexFile.readAsStringSync();
+  indexContents = indexContents.replaceFirst('</title>\n',
+    '</title>\n  <base href="./flutter/">\n');
+  indexFile.writeAsStringSync(indexContents);
+}
+
+void putRedirectInOldIndexLocation() {
+  String metaTag = '<meta http-equiv="refresh" content="0;URL=../index.html">';
+  new File('$kDocRoot/flutter/index.html').writeAsStringSync(metaTag);
+}
+
+List<String> findSkyServicesLibraryNames() {
   Directory skyServicesLocation = new Directory('bin/cache/pkg/sky_services/lib');
   if (!skyServicesLocation.existsSync()) {
     throw 'Did not find sky_services package location in ${skyServicesLocation.path}.';
@@ -88,11 +141,11 @@ List<String> _findSkyServicesLibraryNames() {
   });
 }
 
-List<String> _findPackageNames() {
-  return _findPackages().map((Directory dir) => path.basename(dir.path)).toList();
+List<String> findPackageNames() {
+  return findPackages().map((Directory dir) => path.basename(dir.path)).toList();
 }
 
-List<Directory> _findPackages() {
+List<Directory> findPackages() {
   return new Directory('packages')
     .listSync()
     .where((FileSystemEntity entity) => entity is Directory)
@@ -104,8 +157,8 @@ List<Directory> _findPackages() {
     .toList();
 }
 
-Iterable<String> _libraryRefs() sync* {
-  for (Directory dir in _findPackages()) {
+Iterable<String> libraryRefs() sync* {
+  for (Directory dir in findPackages()) {
     String dirName = path.basename(dir.path);
 
     for (FileSystemEntity file in new Directory('${dir.path}/lib').listSync()) {
@@ -115,7 +168,7 @@ Iterable<String> _libraryRefs() sync* {
   }
 }
 
-void _print(Stream<List<int>> stream) {
+void printStream(Stream<List<int>> stream) {
   stream
     .transform(UTF8.decoder)
     .transform(const LineSplitter())

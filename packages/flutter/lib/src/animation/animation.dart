@@ -44,15 +44,23 @@ abstract class Animation<T> {
   // keep these next five dartdocs in sync with the dartdocs in AnimationWithParentMixin<T>
 
   /// Calls the listener every time the value of the animation changes.
+  ///
+  /// Listeners can be removed with [removeListener].
   void addListener(VoidCallback listener);
 
   /// Stop calling the listener every time the value of the animation changes.
+  ///
+  /// Listeners can be added with [addListener].
   void removeListener(VoidCallback listener);
 
   /// Calls listener every time the status of the animation changes.
+  ///
+  /// Listeners can be removed with [removeStatusListener].
   void addStatusListener(AnimationStatusListener listener);
 
   /// Stops calling the listener every time the status of the animation changes.
+  ///
+  /// Listeners can be added with [addStatusListener].
   void removeStatusListener(AnimationStatusListener listener);
 
   /// The current status of this animation.

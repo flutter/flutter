@@ -1,5 +1,10 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 part of flutter_sprites;
 
+/// Signature for callbacks used by the [ActionCallFunction].
 typedef void ActionCallback();
 
 /// Actions are used to animate properties of nodes or any other type of
@@ -34,19 +39,21 @@ abstract class Action {
     _finished = false;
   }
 
+  /// The total time it will take to complete the action, in seconds.
   double get duration => 0.0;
 }
 
+/// Signature for callbacks for setting properties, used by [ActionTween].
 typedef void SetterCallback(dynamic value);
 
 /// The abstract class for an action that changes properties over a time
 /// interval, optionally using an easing curve.
 abstract class ActionInterval extends Action {
+
+  /// Creates a new ActionInterval, typically you will want to pass in a
+  /// [duration] to specify how long time the action will take to complete.
   ActionInterval([this._duration = 0.0, this.curve]);
 
-  /// The duration, in seconds, of the action.
-  ///
-  ///     double myTime = myAction.duration;
   @override
   double get duration => _duration;
   double _duration;
@@ -84,9 +91,13 @@ abstract class ActionInterval extends Action {
   }
 }
 
-/// An action that repeats an action a fixed number of times.
+/// An action that repeats another action a fixed number of times.
 class ActionRepeat extends ActionInterval {
+
+  /// The number of times the [action] is repeated.
   final int numRepeats;
+
+  /// The action that is repeated.
   final ActionInterval action;
   int _lastFinishedRepeat = -1;
 
@@ -119,6 +130,8 @@ class ActionRepeat extends ActionInterval {
 
 /// An action that repeats an action an indefinite number of times.
 class ActionRepeatForever extends Action {
+
+  /// The action that is repeated indefinitely.
   final ActionInterval action;
   double _elapsedInAction = 0.0;
 
@@ -325,6 +338,8 @@ abstract class ActionInstant extends Action {
     _finished = true;
   }
 
+  /// Called when the action is executed. If you are implementing your own
+  /// ActionInstant, override this method.
   void fire();
 }
 
@@ -546,6 +561,8 @@ class ActionController {
     }
   }
 
+  /// Steps the action forward by the specified time, typically there is no need
+  /// to directly call this method.
   void step(double dt) {
     for (int i = _actions.length - 1; i >= 0; i--) {
       Action action = _actions[i];

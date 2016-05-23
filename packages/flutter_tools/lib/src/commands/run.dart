@@ -24,13 +24,6 @@ abstract class RunCommandBase extends FlutterCommand {
   RunCommandBase() {
     addBuildModeFlags();
 
-    // TODO(devoncarew): Remove in favor of --debug/--profile/--release.
-    argParser.addFlag('checked',
-        negatable: true,
-        defaultsTo: true,
-        help: 'Run the application in checked ("slow") mode.\n'
-          'Note: this flag will be removed in favor of the --debug/--profile/--release flags.');
-
     argParser.addFlag('trace-startup',
         negatable: true,
         defaultsTo: false,
@@ -112,11 +105,10 @@ class RunCommand extends RunCommandBase {
     DebuggingOptions options;
 
     if (getBuildMode() != BuildMode.debug) {
-      options = new DebuggingOptions.disabled();
+      options = new DebuggingOptions.disabled(getBuildMode());
     } else {
       options = new DebuggingOptions.enabled(
-        // TODO(devoncarew): Change this to 'getBuildMode() == BuildMode.debug'.
-        checked: argResults['checked'],
+        getBuildMode(),
         startPaused: argResults['start-paused'],
         observatoryPort: debugPort
       );
@@ -213,7 +205,7 @@ Future<int> startApp(
   if (install && device is AndroidDevice) {
     printStatus('Installing $package to $device...');
 
-    if (!(await installApp(device, package)))
+    if (!(installApp(device, package)))
       return 1;
   }
 
@@ -361,7 +353,7 @@ class _RunAndStayResident {
     // TODO(devoncarew): This fails for ios devices - we haven't built yet.
     if (device is AndroidDevice) {
       printTrace('Running install command.');
-      if (!(await installApp(device, package)))
+      if (!(installApp(device, package)))
         return 1;
     }
 

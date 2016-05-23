@@ -1,10 +1,20 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 part of flutter_sprites;
 
+/// A [Node] that draws a polyline from a list of points using the provided
+/// [Texture]. The textured line draws static lines. If you want to create an
+/// animated line, consider using the [EffectLine] instead.
 class TexturedLine extends Node {
+
+  /// Creates a new TexturedLine.
   TexturedLine(List<Point> points, List<Color> colors, List<double> widths, [Texture texture, List<double> textureStops]) {
     painter = new TexturedLinePainter(points, colors, widths, texture, textureStops);
   }
 
+  /// The painter used to draw the line.
   TexturedLinePainter painter;
 
   @override
@@ -13,25 +23,33 @@ class TexturedLine extends Node {
   }
 }
 
+/// Draws a polyline to a [Canvas] from a list of points using the provided [Texture].
 class TexturedLinePainter {
   TexturedLinePainter(this._points, this.colors, this.widths, [Texture texture, this.textureStops]) {
     this.texture = texture;
   }
 
-  List<Point> _points;
-
+  /// The points that makes up the polyline.
   List<Point> get points => _points;
+
+  List<Point> _points;
 
   set points(List<Point> points) {
     _points = points;
     _calculatedTextureStops = null;
   }
 
+  /// The color of each point on the polyline. The color of the line will be
+  /// interpolated between the points.
   List<Color> colors;
-  List<double> widths;
-  Texture _texture;
 
+  /// The width of the line at each point on the polyline.
+  List<double> widths;
+
+  /// The texture this line will be drawn using.
   Texture get texture => _texture;
+
+  Texture _texture;
 
   set texture(Texture texture) {
     _texture = texture;
@@ -47,41 +65,51 @@ class TexturedLinePainter {
     }
   }
 
+  /// Defines the position in the texture for each point on the polyline.
   List<double> textureStops;
 
-  List<double> _calculatedTextureStops;
-
+  /// The [textureStops] used if no explicit texture stops has been provided.
   List<double> get calculatedTextureStops {
     if (_calculatedTextureStops == null)
       _calculateTextureStops();
     return _calculatedTextureStops;
   }
 
+  List<double> _calculatedTextureStops;
+
   double _length;
 
+  /// The length of the line.
   double get length {
     if (_calculatedTextureStops == null)
       _calculateTextureStops();
     return _length;
   }
 
+  /// The offset of the texture on the line.
   double textureStopOffset = 0.0;
 
-  double _textureLoopLength;
-
+  /// The length, in points, that the texture is stretched to. If the
+  /// textureLoopLength is shorter than the line, the texture will be looped.
   double get textureLoopLength => textureLoopLength;
+
+  double _textureLoopLength;
 
   set textureLoopLength(double textureLoopLength) {
     _textureLoopLength = textureLoopLength;
     _calculatedTextureStops = null;
   }
 
+  /// If true, the textured line attempts to remove artifacts at sharp corners
+  /// on the polyline.
   bool removeArtifacts = true;
 
+  /// The [TransferMode] used to draw the line to the [Canvas].
   TransferMode transferMode = TransferMode.srcOver;
 
   Paint _cachedPaint = new Paint();
 
+  /// Paints the line to the [canvas].
   void paint(Canvas canvas) {
     // Check input values
     assert(_points != null);

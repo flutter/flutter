@@ -5,14 +5,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 void main() {
-  testWidgets('LayoutBuilder parent size', (WidgetTester tester) {
+  testWidgets('LayoutBuilder parent size', (WidgetTester tester) async {
     Size layoutBuilderSize;
     Key childKey = new UniqueKey();
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Center(
         child: new SizedBox(
           width: 100.0,
@@ -36,14 +35,14 @@ void main() {
     expect(box.size, equals(const Size(50.0, 100.0)));
   });
 
-  testWidgets('LayoutBuilder stateful child', (WidgetTester tester) {
+  testWidgets('LayoutBuilder stateful child', (WidgetTester tester) async {
     Size layoutBuilderSize;
     StateSetter setState;
     Key childKey = new UniqueKey();
     double childWidth = 10.0;
     double childHeight = 20.0;
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new LayoutBuilder(
         builder: (BuildContext context, Size size) {
           layoutBuilderSize = size;
@@ -69,19 +68,19 @@ void main() {
       childWidth = 100.0;
       childHeight = 200.0;
     });
-    tester.pump();
+    await tester.pump();
     box = tester.renderObject(find.byKey(childKey));
     expect(box.size, equals(const Size(100.0, 200.0)));
   });
 
-  testWidgets('LayoutBuilder stateful parent', (WidgetTester tester) {
+  testWidgets('LayoutBuilder stateful parent', (WidgetTester tester) async {
     Size layoutBuilderSize;
     StateSetter setState;
     Key childKey = new UniqueKey();
     double childWidth = 10.0;
     double childHeight = 20.0;
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Center(
         child: new StatefulBuilder(
           builder: (BuildContext context, StateSetter setter) {
@@ -113,7 +112,7 @@ void main() {
       childWidth = 100.0;
       childHeight = 200.0;
     });
-    tester.pump();
+    await tester.pump();
     box = tester.renderObject(find.byKey(childKey));
     expect(box.size, equals(const Size(100.0, 200.0)));
   });

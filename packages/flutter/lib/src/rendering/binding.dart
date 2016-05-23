@@ -25,6 +25,7 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   void initInstances() {
     super.initInstances();
     _instance = this;
+    _pipelineOwner = new PipelineOwner(onNeedVisualUpdate: ensureVisualUpdate);
     ui.window.onMetricsChanged = handleMetricsChanged;
     initRenderView();
     initSemantics();
@@ -78,16 +79,15 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   ///
   /// Called automatically when the binding is created.
   void initRenderView() {
-    if (renderView == null) {
-      renderView = new RenderView();
-      renderView.scheduleInitialFrame();
-    }
-    handleMetricsChanged(); // configures renderView's metrics
+    assert(renderView == null);
+    renderView = new RenderView(configuration: createViewConfiguration());
+    renderView.scheduleInitialFrame();
   }
 
   /// The render tree's owner, which maintains dirty state for layout,
   /// composite, paint, and accessibility semantics
-  final PipelineOwner pipelineOwner = new PipelineOwner();
+  PipelineOwner get pipelineOwner => _pipelineOwner;
+  PipelineOwner _pipelineOwner;
 
   /// The render tree that's attached to the output surface.
   RenderView get renderView => _renderView;
@@ -109,7 +109,24 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   /// See [ui.window.onMetricsChanged].
   void handleMetricsChanged() {
     assert(renderView != null);
-    renderView.configuration = new ViewConfiguration(size: ui.window.size);
+    renderView.configuration = createViewConfiguration();
+  }
+
+  /// Returns a [ViewConfiguration] configured for the [RenderView] based on the
+  /// current environment.
+  ///
+  /// This is called during construction and also in response to changes to the
+  /// system metrics.
+  ///
+  /// Bindings can override this method to change what size or device pixel
+  /// ratio the [RenderView] will use. For example, the testing framework uses
+  /// this to force the display into 800x600 when a test is run on the device
+  /// using `flutter run`.
+  ViewConfiguration createViewConfiguration() {
+    return new ViewConfiguration(
+      size: ui.window.size,
+      devicePixelRatio: ui.window.devicePixelRatio
+    );
   }
 
   /// Prepares the rendering library to handle semantics requests from the engine.

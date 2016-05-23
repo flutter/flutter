@@ -1,3 +1,7 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 part of flutter_sprites;
 
 /// Labels are used to display a string of text in a the node tree. To align
@@ -37,6 +41,7 @@ class Label extends Node {
     if (_painter == null) {
       _painter = new TextPainter(text: new TextSpan(style: _textStyle, text: _text))
         ..layout();
+      _width = _painter.size.width;
     }
 
     Offset offset = Offset.zero;

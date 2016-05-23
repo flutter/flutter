@@ -4,7 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 class TestFocusable extends StatelessWidget {
   TestFocusable({
@@ -29,11 +28,11 @@ class TestFocusable extends StatelessWidget {
 }
 
 void main() {
-  testWidgets('Can have multiple focused children and they update accordingly', (WidgetTester tester) {
+  testWidgets('Can have multiple focused children and they update accordingly', (WidgetTester tester) async {
     GlobalKey keyFocus = new GlobalKey();
     GlobalKey keyA = new GlobalKey();
     GlobalKey keyB = new GlobalKey();
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Focus(
         key: keyFocus,
         child: new Column(
@@ -56,36 +55,36 @@ void main() {
     expect(find.text('A FOCUSED'), findsOneWidget);
     expect(find.text('b'), findsOneWidget);
     expect(find.text('B FOCUSED'), findsNothing);
-    tester.tap(find.text('A FOCUSED'));
-    tester.pump();
+    await tester.tap(find.text('A FOCUSED'));
+    await tester.pump();
     expect(find.text('a'), findsNothing);
     expect(find.text('A FOCUSED'), findsOneWidget);
     expect(find.text('b'), findsOneWidget);
     expect(find.text('B FOCUSED'), findsNothing);
-    tester.tap(find.text('A FOCUSED'));
-    tester.pump();
+    await tester.tap(find.text('A FOCUSED'));
+    await tester.pump();
     expect(find.text('a'), findsNothing);
     expect(find.text('A FOCUSED'), findsOneWidget);
     expect(find.text('b'), findsOneWidget);
     expect(find.text('B FOCUSED'), findsNothing);
-    tester.tap(find.text('b'));
-    tester.pump();
+    await tester.tap(find.text('b'));
+    await tester.pump();
     expect(find.text('a'), findsOneWidget);
     expect(find.text('A FOCUSED'), findsNothing);
     expect(find.text('b'), findsNothing);
     expect(find.text('B FOCUSED'), findsOneWidget);
-    tester.tap(find.text('a'));
-    tester.pump();
+    await tester.tap(find.text('a'));
+    await tester.pump();
     expect(find.text('a'), findsNothing);
     expect(find.text('A FOCUSED'), findsOneWidget);
     expect(find.text('b'), findsOneWidget);
     expect(find.text('B FOCUSED'), findsNothing);
   });
 
-  testWidgets('Can blur', (WidgetTester tester) {
+  testWidgets('Can blur', (WidgetTester tester) async {
     GlobalKey keyFocus = new GlobalKey();
     GlobalKey keyA = new GlobalKey();
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Focus(
         key: keyFocus,
         child: new TestFocusable(
@@ -101,23 +100,23 @@ void main() {
     expect(find.text('A FOCUSED'), findsNothing);
 
     Focus.moveTo(keyA);
-    tester.pump();
+    await tester.pump();
 
     expect(find.text('a'), findsNothing);
     expect(find.text('A FOCUSED'), findsOneWidget);
 
     Focus.clear(keyA.currentContext);
-    tester.pump();
+    await tester.pump();
 
     expect(find.text('a'), findsOneWidget);
     expect(find.text('A FOCUSED'), findsNothing);
   });
 
-  testWidgets('Can move focus to scope', (WidgetTester tester) {
+  testWidgets('Can move focus to scope', (WidgetTester tester) async {
     GlobalKey keyParentFocus = new GlobalKey();
     GlobalKey keyChildFocus = new GlobalKey();
     GlobalKey keyA = new GlobalKey();
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Focus(
         key: keyParentFocus,
         child: new Row(
@@ -137,14 +136,14 @@ void main() {
     expect(find.text('A FOCUSED'), findsNothing);
 
     Focus.moveTo(keyA);
-    tester.pump();
+    await tester.pump();
 
     expect(find.text('a'), findsNothing);
     expect(find.text('A FOCUSED'), findsOneWidget);
 
     Focus.moveScopeTo(keyChildFocus, context: keyA.currentContext);
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Focus(
         key: keyParentFocus,
         child: new Row(
@@ -170,7 +169,7 @@ void main() {
     expect(find.text('a'), findsOneWidget);
     expect(find.text('A FOCUSED'), findsNothing);
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Focus(
         key: keyParentFocus,
         child: new Row(
@@ -190,7 +189,7 @@ void main() {
     expect(find.text('a'), findsOneWidget);
     expect(find.text('A FOCUSED'), findsNothing);
 
-    tester.pump();
+    await tester.pump();
 
     expect(find.text('a'), findsNothing);
     expect(find.text('A FOCUSED'), findsOneWidget);

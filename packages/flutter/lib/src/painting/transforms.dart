@@ -9,6 +9,7 @@ import 'package:vector_math/vector_math_64.dart';
 
 import 'basic_types.dart';
 
+/// Utility functions for working with matrices.
 class MatrixUtils {
   MatrixUtils._();
 
@@ -68,6 +69,7 @@ class MatrixUtils {
         && a.storage[15] == b.storage[15];
   }
 
+  /// Whether the given matrix is the identity matrix.
   static bool isIdentity(Matrix4 a) {
     assert(a != null);
     return a.storage[0] == 1.0 // col 1
@@ -88,6 +90,10 @@ class MatrixUtils {
         && a.storage[15] == 1.0;
   }
 
+  /// Applies the given matrix as a perspective transform to the given point.
+  ///
+  /// This function assumes the given point has a z-coordinate of 0.0. The
+  /// z-coordinate of the result is ignored.
   static Point transformPoint(Matrix4 transform, Point point) {
     Vector3 position3 = new Vector3(point.x, point.y, 0.0);
     Vector3 transformed3 = transform.perspectiveTransform(position3);
@@ -101,6 +107,12 @@ class MatrixUtils {
     return math.max(a, math.max(b, math.max(c, d)));
   }
 
+  /// Returns a rect that bounds the result of applying the given matrix as a
+  /// perspective transform to the given rect.
+  ///
+  /// This function assumes the given rect is in the plane with z equals 0.0.
+  /// The transformed rect is then projected back into the plane with z equals
+  /// 0.0 before computing its bounding rect.
   static Rect transformRect(Rect rect, Matrix4 transform) {
     assert(rect != null);
     assert(transform.determinant != 0.0);

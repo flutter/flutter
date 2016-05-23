@@ -6,13 +6,12 @@ import 'dart:ui' as ui;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 void main() {
-  testWidgets('MediaQuery has a default', (WidgetTester tester) {
+  testWidgets('MediaQuery has a default', (WidgetTester tester) async {
     Size size;
 
-    tester.pumpWidget(
+    await tester.pumpWidget(
       new Builder(
         builder: (BuildContext context) {
           size = MediaQuery.of(context).size;

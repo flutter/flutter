@@ -4,5 +4,5 @@ packages
 pubspec.lock
 
 pubspec.yaml
-doc/api/
+doc/
 lib/
