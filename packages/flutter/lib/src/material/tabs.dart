@@ -667,13 +667,13 @@ class TabBar<T> extends Scrollable {
   /// share of the available space.
   final bool isScrollable;
 
-  /// The color of the line that appears below the selected tab. If it's
-  /// null then the value of the Theme's indicatorColor property is used.
+  /// The color of the line that appears below the selected tab. If this parameter
+  /// is null then the value of the Theme's indicatorColor property is used.
   final Color indicatorColor;
 
-  /// The color for selected tab labels. The unselected tab labels are rendered
-  /// with the same color rendered at 70% opacity. If null the color of the theme's
-  /// body2 text color is used.
+  /// The color of selected tab labels. Unselected tab labels are rendered
+  /// with the same color rendered at 70% opacity. If this parameter is null then
+  /// the color of the theme's body2 text color is used.
   final Color labelColor;
 
   double get minimumHeight {
