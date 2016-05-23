@@ -147,31 +147,35 @@ class _TimePickerState extends State<TimePicker> {
 
   @override
   Widget build(BuildContext context) {
-    Widget header = new _TimePickerHeader(
-      selectedTime: config.selectedTime,
-      mode: _mode,
-      onModeChanged: _handleModeChanged,
-      onChanged: config.onChanged
-    );
     return new Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        header,
-        new AspectRatio(
-          aspectRatio: 1.0,
+        new _TimePickerHeader(
+          selectedTime: config.selectedTime,
+          mode: _mode,
+          onModeChanged: _handleModeChanged,
+          onChanged: config.onChanged
+        ),
+        new Center(
           child: new Container(
-            margin: const EdgeInsets.all(12.0),
-            child: new _Dial(
-              mode: _mode,
-              selectedTime: config.selectedTime,
-              onChanged: config.onChanged
+            margin: const EdgeInsets.all(16.0),
+            width: 300.0,
+            child: new AspectRatio(
+              aspectRatio: 1.0,
+              child: new _Dial(
+                mode: _mode,
+                selectedTime: config.selectedTime,
+                onChanged: config.onChanged
+              )
             )
           )
         )
-      ],
-      crossAxisAlignment: CrossAxisAlignment.stretch
+      ]
     );
   }
 }
+
+const double _kHeaderFontSize = 65.0;
 
 // TODO(ianh): Localize!
 class _TimePickerHeader extends StatelessWidget {
@@ -202,12 +206,11 @@ class _TimePickerHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context);
-    TextTheme headerTheme = theme.primaryTextTheme;
-
+    ThemeData themeData = Theme.of(context);
+    TextTheme headerTextTheme = themeData.primaryTextTheme;
     Color activeColor;
     Color inactiveColor;
-    switch(theme.primaryColorBrightness) {
+    switch(themeData.primaryColorBrightness) {
       case ThemeBrightness.light:
         activeColor = Colors.black87;
         inactiveColor = Colors.black54;
@@ -217,59 +220,84 @@ class _TimePickerHeader extends StatelessWidget {
         inactiveColor = Colors.white70;
         break;
     }
-    TextStyle activeStyle = headerTheme.display3.copyWith(color: activeColor);
-    TextStyle inactiveStyle = headerTheme.display3.copyWith(color: inactiveColor);
+
+    Color backgroundColor;
+    switch (themeData.brightness) {
+      case ThemeBrightness.light:
+        backgroundColor = themeData.primaryColor;
+        break;
+      case ThemeBrightness.dark:
+        backgroundColor = themeData.backgroundColor;
+        break;
+    }
+
+    TextStyle activeStyle = headerTextTheme.display3.copyWith(
+      fontSize: _kHeaderFontSize, color: activeColor
+    );
+    TextStyle inactiveStyle = headerTextTheme.display3.copyWith(
+      fontSize: _kHeaderFontSize, color: inactiveColor
+    );
 
     TextStyle hourStyle = mode == _TimePickerMode.hour ? activeStyle : inactiveStyle;
     TextStyle minuteStyle = mode == _TimePickerMode.minute ? activeStyle : inactiveStyle;
 
-    TextStyle amStyle = headerTheme.subhead.copyWith(
+    TextStyle amStyle = headerTextTheme.subhead.copyWith(
       color: selectedTime.period == DayPeriod.am ? activeColor: inactiveColor
     );
-    TextStyle pmStyle = headerTheme.subhead.copyWith(
+    TextStyle pmStyle = headerTextTheme.subhead.copyWith(
       color: selectedTime.period == DayPeriod.pm ? activeColor: inactiveColor
     );
 
     return new Container(
-      padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 20.0),
-      decoration: new BoxDecoration(backgroundColor: theme.primaryColor),
+      height: 100.0,
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      decoration: new BoxDecoration(backgroundColor: backgroundColor),
       child: new Row(
         children: <Widget>[
-          new GestureDetector(
-            onTap: () => _handleChangeMode(_TimePickerMode.hour),
-            child: new Text(selectedTime.hourOfPeriodLabel, style: hourStyle)
+          new Flexible(
+            child: new Align(
+              alignment: FractionalOffset.centerRight,
+              child: new GestureDetector(
+                onTap: () => _handleChangeMode(_TimePickerMode.hour),
+                child: new Text(selectedTime.hourOfPeriodLabel, style: hourStyle)
+              )
+            )
           ),
           new Text(':', style: inactiveStyle),
-          new GestureDetector(
-            onTap: () => _handleChangeMode(_TimePickerMode.minute),
-            child: new Text(selectedTime.minuteLabel, style: minuteStyle)
-          ),
-          new GestureDetector(
-            onTap: _handleChangeDayPeriod,
-            behavior: HitTestBehavior.opaque,
-            child: new Container(
-              padding: const EdgeInsets.only(left: 16.0, right: 24.0),
-              child: new Column(
+          new Flexible(
+            child: new Align(
+              alignment: FractionalOffset.centerLeft,
+              child: new Row(
                 children: <Widget>[
-                  new Text('AM', style: amStyle),
-                  new Container(
-                    padding: const EdgeInsets.only(top: 4.0),
-                    child: new Text('PM', style: pmStyle)
+                  new GestureDetector(
+                    onTap: () => _handleChangeMode(_TimePickerMode.minute),
+                    child: new Text(selectedTime.minuteLabel, style: minuteStyle)
                   ),
-                ],
-                mainAxisAlignment: MainAxisAlignment.end
+                  new Container(width: 16.0, height: 0.0),
+                  new GestureDetector(
+                    onTap: _handleChangeDayPeriod,
+                    behavior: HitTestBehavior.opaque,
+                    child: new Column(
+                      mainAxisAlignment: MainAxisAlignment.collapse,
+                      children: <Widget>[
+                        new Text('AM', style: amStyle),
+                        new Container(width: 0.0, height: 8.0),
+                        new Text('PM', style: pmStyle),
+                      ]
+                    )
+                  )
+                ]
               )
             )
           )
-        ],
-        mainAxisAlignment: MainAxisAlignment.end
+        ]
       )
     );
   }
 }
 
-List<TextPainter> _initPainters(List<String> labels) {
-  TextStyle style = Typography.black.subhead.copyWith(height: 1.0);
+List<TextPainter> _initPainters(TextTheme textTheme, List<String> labels) {
+  TextStyle style = textTheme.subhead;
   List<TextPainter> painters = new List<TextPainter>(labels.length);
   for (int i = 0; i < painters.length; ++i) {
     String label = labels[i];
@@ -280,25 +308,31 @@ List<TextPainter> _initPainters(List<String> labels) {
   return painters;
 }
 
-List<TextPainter> _initHours() {
-  return _initPainters(<String>['12', '1', '2', '3', '4', '5',
-                        '6', '7', '8', '9', '10', '11']);
+List<TextPainter> _initHours(TextTheme textTheme) {
+  return _initPainters(textTheme, <String>[
+    '12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'
+  ]);
 }
 
-List<TextPainter> _initMinutes() {
-  return _initPainters(<String>['00', '05', '10', '15', '20', '25',
-                        '30', '35', '40', '45', '50', '55']);
+List<TextPainter> _initMinutes(TextTheme textTheme) {
+  return _initPainters(textTheme, <String>[
+    '00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55'
+  ]);
 }
 
 class _DialPainter extends CustomPainter {
   const _DialPainter({
-    this.labels,
-    this.primaryColor,
+    this.primaryLabels,
+    this.secondaryLabels,
+    this.backgroundColor,
+    this.accentColor,
     this.theta
   });
 
-  final List<TextPainter> labels;
-  final Color primaryColor;
+  final List<TextPainter> primaryLabels;
+  final List<TextPainter> secondaryLabels;
+  final Color backgroundColor;
+  final Color accentColor;
   final double theta;
 
   @override
@@ -306,7 +340,7 @@ class _DialPainter extends CustomPainter {
     double radius = size.shortestSide / 2.0;
     Offset center = new Offset(size.width / 2.0, size.height / 2.0);
     Point centerPoint = center.toPoint();
-    canvas.drawCircle(centerPoint, radius, new Paint()..color = Colors.grey[200]);
+    canvas.drawCircle(centerPoint, radius, new Paint()..color = backgroundColor);
 
     const double labelPadding = 24.0;
     double labelRadius = radius - labelPadding;
@@ -315,28 +349,44 @@ class _DialPainter extends CustomPainter {
                                  -labelRadius * math.sin(theta));
     }
 
-    Paint primaryPaint = new Paint()
-      ..color = primaryColor;
-    Point currentPoint = getOffsetForTheta(theta).toPoint();
-    canvas.drawCircle(centerPoint, 4.0, primaryPaint);
-    canvas.drawCircle(currentPoint, labelPadding - 4.0, primaryPaint);
-    primaryPaint.strokeWidth = 2.0;
-    canvas.drawLine(centerPoint, currentPoint, primaryPaint);
+    void paintLabels(List<TextPainter> labels) {
+      double labelThetaIncrement = -_kTwoPi / labels.length;
+      double labelTheta = math.PI / 2.0;
 
-    double labelThetaIncrement = -_kTwoPi / labels.length;
-    double labelTheta = math.PI / 2.0;
-
-    for (TextPainter label in labels) {
-      Offset labelOffset = new Offset(-label.width / 2.0, -label.height / 2.0);
-      label.paint(canvas, getOffsetForTheta(labelTheta) + labelOffset);
-      labelTheta += labelThetaIncrement;
+      for (TextPainter label in labels) {
+        Offset labelOffset = new Offset(-label.width / 2.0, -label.height / 2.0);
+        label.paint(canvas, getOffsetForTheta(labelTheta) + labelOffset);
+        labelTheta += labelThetaIncrement;
+      }
     }
+
+    paintLabels(primaryLabels);
+
+    final Paint selectorPaint = new Paint()
+      ..color = accentColor;
+    final Point focusedPoint = getOffsetForTheta(theta).toPoint();
+    final double focusedRadius = labelPadding - 4.0;
+    canvas.drawCircle(centerPoint, 4.0, selectorPaint);
+    canvas.drawCircle(focusedPoint, focusedRadius, selectorPaint);
+    selectorPaint.strokeWidth = 2.0;
+    canvas.drawLine(centerPoint, focusedPoint, selectorPaint);
+
+    final Rect focusedRect = new Rect.fromCircle(
+      center: focusedPoint, radius: focusedRadius
+    );
+    canvas
+      ..saveLayer(focusedRect, new Paint())
+      ..clipPath(new Path()..addOval(focusedRect));
+    paintLabels(secondaryLabels);
+    canvas.restore();
   }
 
   @override
   bool shouldRepaint(_DialPainter oldPainter) {
-    return oldPainter.labels != labels
-        || oldPainter.primaryColor != primaryColor
+    return oldPainter.primaryLabels != primaryLabels
+        || oldPainter.secondaryLabels != secondaryLabels
+        || oldPainter.backgroundColor != backgroundColor
+        || oldPainter.accentColor != accentColor
         || oldPainter.theta != theta;
   }
 }
@@ -464,19 +514,64 @@ class _DialState extends State<_Dial> {
     _animateTo(_getThetaForTime(config.selectedTime));
   }
 
-  final List<TextPainter> _hours = _initHours();
-  final List<TextPainter> _minutes = _initMinutes();
+  final List<TextPainter> _hoursWhite = _initHours(Typography.white);
+  final List<TextPainter> _hoursBlack = _initHours(Typography.black);
+  final List<TextPainter> _minutesWhite = _initMinutes(Typography.white);
+  final List<TextPainter> _minutesBlack = _initMinutes(Typography.black);
 
   @override
   Widget build(BuildContext context) {
+    ThemeData themeData = Theme.of(context);
+
+    Color backgroundColor;
+    switch (themeData.brightness) {
+      case ThemeBrightness.light:
+        backgroundColor = Colors.grey[200];
+        break;
+      case ThemeBrightness.dark:
+        backgroundColor = themeData.backgroundColor;
+        break;
+    }
+
+    List<TextPainter> primaryLabels;
+    List<TextPainter> secondaryLabels;
+    switch (config.mode) {
+      case _TimePickerMode.hour:
+        switch (themeData.brightness) {
+          case ThemeBrightness.light:
+            primaryLabels = _hoursBlack;
+            secondaryLabels = _hoursWhite;
+            break;
+          case ThemeBrightness.dark:
+            primaryLabels = _hoursWhite;
+            secondaryLabels = _hoursBlack;
+            break;
+        }
+        break;
+      case _TimePickerMode.minute:
+        switch (themeData.brightness) {
+          case ThemeBrightness.light:
+            primaryLabels = _minutesBlack;
+            secondaryLabels = _minutesWhite;
+            break;
+          case ThemeBrightness.dark:
+            primaryLabels = _minutesWhite;
+            secondaryLabels = _minutesBlack;
+            break;
+        }
+        break;
+    }
+
     return new GestureDetector(
       onPanStart: _handlePanStart,
       onPanUpdate: _handlePanUpdate,
       onPanEnd: _handlePanEnd,
       child: new CustomPaint(
         painter: new _DialPainter(
-          labels: config.mode == _TimePickerMode.hour ? _hours : _minutes,
-          primaryColor: Theme.of(context).primaryColor,
+          primaryLabels: primaryLabels,
+          secondaryLabels: secondaryLabels,
+          backgroundColor: backgroundColor,
+          accentColor: themeData.accentColor,
           theta: _theta.value
         )
       )
