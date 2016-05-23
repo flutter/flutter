@@ -215,7 +215,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher {
       int numberOfWithTexts = 0;
       int numberOfTypes = 0;
       int totalNumber = 0;
-      print('Some possible finders for the widgets at ${binding.globalToLocal(event.position)}:');
+      debugPrint('Some possible finders for the widgets at ${binding.globalToLocal(event.position)}:');
       for (Element element in candidates) {
         if (totalNumber > 10)
           break;
@@ -227,7 +227,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher {
           final Iterable<Element> matches = find.text(widget.data).evaluate();
           descendantText = widget.data;
           if (matches.length == 1) {
-            print('  find.text(\'${widget.data}\')');
+            debugPrint('  find.text(\'${widget.data}\')');
             continue;
           }
         }
@@ -245,7 +245,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher {
           if (keyLabel != null) {
             final Iterable<Element> matches = find.byKey(key).evaluate();
             if (matches.length == 1) {
-              print('  find.byKey($keyLabel)');
+              debugPrint('  find.byKey($keyLabel)');
               continue;
             }
           }
@@ -255,7 +255,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher {
           if (numberOfTypes < 5) {
             final Iterable<Element> matches = find.byType(element.widget.runtimeType).evaluate();
             if (matches.length == 1) {
-              print('  find.byType(${element.widget.runtimeType})');
+              debugPrint('  find.byType(${element.widget.runtimeType})');
               numberOfTypes += 1;
               continue;
             }
@@ -264,7 +264,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher {
           if (descendantText != null && numberOfWithTexts < 5) {
             final Iterable<Element> matches = find.widgetWithText(element.widget.runtimeType, descendantText).evaluate();
             if (matches.length == 1) {
-              print('  find.widgetWithText(${element.widget.runtimeType}, \'$descendantText\')');
+              debugPrint('  find.widgetWithText(${element.widget.runtimeType}, \'$descendantText\')');
               numberOfWithTexts += 1;
               continue;
             }
@@ -274,7 +274,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher {
         if (!_isPrivate(element.runtimeType)) {
           final Iterable<Element> matches = find.byElementType(element.runtimeType).evaluate();
           if (matches.length == 1) {
-            print('  find.byElementType(${element.runtimeType})');
+            debugPrint('  find.byElementType(${element.runtimeType})');
             continue;
           }
         }
@@ -282,7 +282,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher {
         totalNumber -= 1; // if we got here, we didn't actually find something to say about it
       }
       if (totalNumber == 0)
-        print('  <could not come up with any unique finders>');
+        debugPrint('  <could not come up with any unique finders>');
     }
   }
 
