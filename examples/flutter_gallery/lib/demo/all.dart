@@ -4,6 +4,7 @@
 
 export 'buttons_demo.dart';
 export 'cards_demo.dart';
+export 'calculator_demo.dart';
 export 'chip_demo.dart';
 export 'colors_demo.dart';
 export 'data_table_demo.dart';
