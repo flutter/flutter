@@ -17,9 +17,6 @@ class DevicesCommand extends FlutterCommand {
   final String description = 'List all connected devices.';
 
   @override
-  final List<String> aliases = <String>['list'];
-
-  @override
   bool get requiresProjectRoot => false;
 
   @override
