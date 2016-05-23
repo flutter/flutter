@@ -42,7 +42,7 @@
 
 namespace blink {
 
-FontCustomPlatformData::FontCustomPlatformData(PassRefPtr<SkTypeface> typeface)
+FontCustomPlatformData::FontCustomPlatformData(sk_sp<SkTypeface> typeface)
     : m_typeface(typeface)
 {
 }
@@ -54,7 +54,7 @@ FontCustomPlatformData::~FontCustomPlatformData()
 FontPlatformData FontCustomPlatformData::fontPlatformData(float size, bool bold, bool italic, FontOrientation orientation, FontWidthVariant)
 {
     ASSERT(m_typeface);
-    return FontPlatformData(m_typeface.get(), "", size, bold && !m_typeface->isBold(), italic && !m_typeface->isItalic(), orientation);
+    return FontPlatformData(m_typeface, "", size, bold && !m_typeface->isBold(), italic && !m_typeface->isItalic(), orientation);
 }
 
 PassOwnPtr<FontCustomPlatformData> FontCustomPlatformData::create(SharedBuffer* buffer)
@@ -62,11 +62,11 @@ PassOwnPtr<FontCustomPlatformData> FontCustomPlatformData::create(SharedBuffer* 
     ASSERT_ARG(buffer, buffer);
 
     SkMemoryStream* stream = new SkMemoryStream(buffer->getAsSkData().get());
-    RefPtr<SkTypeface> typeface = adoptRef(SkTypeface::CreateFromStream(stream));
+    sk_sp<SkTypeface> typeface = SkTypeface::MakeFromStream(stream);
     if (!typeface)
         return nullptr;
 
-    return adoptPtr(new FontCustomPlatformData(typeface.release()));
+    return adoptPtr(new FontCustomPlatformData(typeface));
 }
 
 bool FontCustomPlatformData::supportsFormat(const String& format)

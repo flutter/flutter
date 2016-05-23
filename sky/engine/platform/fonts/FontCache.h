@@ -40,6 +40,7 @@
 #include "sky/engine/wtf/text/CString.h"
 #include "sky/engine/wtf/text/WTFString.h"
 #include "sky/engine/wtf/unicode/Unicode.h"
+#include "third_party/skia/include/core/SkRefCnt.h"
 
 #if OS(ANDROID)
 #include <unicode/uscript.h>
@@ -128,7 +129,7 @@ private:
     FontPlatformData* createFontPlatformData(const FontDescription&, const FontFaceCreationParams&, float fontSize);
 
     // Implemented on skia platforms.
-    PassRefPtr<SkTypeface> createTypeface(const FontDescription&, const FontFaceCreationParams&, CString& name);
+    sk_sp<SkTypeface> createTypeface(const FontDescription&, const FontFaceCreationParams&, CString& name);
 
     PassRefPtr<SimpleFontData> fontDataFromFontPlatformData(const FontPlatformData*, ShouldRetain = Retain);
     PassRefPtr<SimpleFontData> fallbackOnStandardFontStyle(const FontDescription&, UChar32);

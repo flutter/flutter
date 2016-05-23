@@ -76,7 +76,7 @@ FontPlatformData::FontPlatformData(const FontPlatformData& src)
 {
 }
 
-FontPlatformData::FontPlatformData(PassRefPtr<SkTypeface> tf, const char* family, float textSize, bool syntheticBold, bool syntheticItalic, FontOrientation orientation, bool subpixelTextPosition)
+FontPlatformData::FontPlatformData(sk_sp<SkTypeface> tf, const char* family, float textSize, bool syntheticBold, bool syntheticItalic, FontOrientation orientation, bool subpixelTextPosition)
     : m_typeface(tf)
     , m_family(family)
     , m_textSize(textSize)

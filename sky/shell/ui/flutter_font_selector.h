@@ -52,8 +52,9 @@ class FlutterFontSelector : public blink::FontSelector {
 
   void parseFontManifest();
 
-  SkTypeface* getTypefaceAsset(const blink::FontDescription& font_description,
-                               const AtomicString& family_name);
+  sk_sp<SkTypeface> getTypefaceAsset(
+      const blink::FontDescription& font_description,
+      const AtomicString& family_name);
 
   scoped_refptr<mojo::asset_bundle::ZipAssetBundle> zip_asset_bundle_;
 

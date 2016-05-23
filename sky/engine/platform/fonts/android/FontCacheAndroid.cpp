@@ -51,7 +51,7 @@ static AtomicString getFamilyNameForCharacter(UChar32 c, const FontDescription& 
         fontLocale = fontDescription.locale().ascii();
         bcp47Locales[localeCount++] = fontLocale.data();
     }
-    RefPtr<SkTypeface> typeface = adoptRef(fm->matchFamilyStyleCharacter(0, SkFontStyle(), bcp47Locales, localeCount, c));
+    sk_sp<SkTypeface> typeface(fm->matchFamilyStyleCharacter(0, SkFontStyle(), bcp47Locales, localeCount, c));
     if (!typeface)
         return emptyAtom;
 

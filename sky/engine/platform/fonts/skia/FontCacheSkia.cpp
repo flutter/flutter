@@ -213,22 +213,19 @@ PassRefPtr<SimpleFontData> FontCache::getLastResortFallbackFont(const FontDescri
     return fontDataFromFontPlatformData(fontPlatformData, shouldRetain);
 }
 
-PassRefPtr<SkTypeface> FontCache::createTypeface(const FontDescription& fontDescription, const FontFaceCreationParams& creationParams, CString& name)
+sk_sp<SkTypeface> FontCache::createTypeface(const FontDescription& fontDescription, const FontFaceCreationParams& creationParams, CString& name)
 {
 #if !OS(WIN) && !OS(ANDROID) && !OS(IOS) && !OS(MACOSX)
     if (creationParams.creationType() == CreateFontByFciIdAndTtcIndex) {
         // TODO(dro): crbug.com/381620 Use creationParams.ttcIndex() after
         // https://code.google.com/p/skia/issues/detail?id=1186 gets fixed.
-        SkTypeface* typeface = nullptr;
+        sk_sp<SkTypeface> typeface;
         if (Platform::current()->sandboxSupport())
-            typeface = SkTypeface::CreateFromStream(streamForFontconfigInterfaceId(creationParams.fontconfigInterfaceId()));
+            typeface = SkTypeface::MakeFromStream(streamForFontconfigInterfaceId(creationParams.fontconfigInterfaceId()));
         else
-            typeface = SkTypeface::CreateFromFile(creationParams.filename().data());
+            typeface = SkTypeface::MakeFromFile(creationParams.filename().data());
 
-        if (typeface)
-            return adoptRef(typeface);
-        else
-            return nullptr;
+        return typeface;
     }
 #endif
 
@@ -244,9 +241,9 @@ PassRefPtr<SkTypeface> FontCache::createTypeface(const FontDescription& fontDesc
 
     SkFontStyle style = toSkiaFontStyle(fontDescription);
     RefPtr<SkFontMgr> fm = adoptRef(SkFontMgr::RefDefault());
-    RefPtr<SkTypeface> typeface = adoptRef(fm->matchFamilyStyle(name.data(), style));
+    sk_sp<SkTypeface> typeface(fm->matchFamilyStyle(name.data(), style));
     if (typeface)
-        return typeface.release();
+        return typeface;
 
     int legacyStyle = SkTypeface::kNormal;
     if (fontDescription.weight() >= FontWeight600)
@@ -257,14 +254,14 @@ PassRefPtr<SkTypeface> FontCache::createTypeface(const FontDescription& fontDesc
     // FIXME: Use fm, SkFontStyle and matchFamilyStyle instead of this legacy
     // API. To make this work, we need to understand the extra fallback behavior
     // in CreateFromName.
-    return adoptRef(SkTypeface::CreateFromName(name.data(), static_cast<SkTypeface::Style>(legacyStyle)));
+    return SkTypeface::MakeFromName(name.data(), static_cast<SkTypeface::Style>(legacyStyle));
 }
 
 #if !OS(WIN)
 FontPlatformData* FontCache::createFontPlatformData(const FontDescription& fontDescription, const FontFaceCreationParams& creationParams, float fontSize)
 {
     CString name;
-    RefPtr<SkTypeface> tf(createTypeface(fontDescription, creationParams, name));
+    sk_sp<SkTypeface> tf = createTypeface(fontDescription, creationParams, name);
     if (!tf)
         return 0;
 

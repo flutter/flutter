@@ -46,7 +46,7 @@ struct FlutterFontSelector::FlutterFontAttributes {
 struct FlutterFontSelector::TypefaceAsset {
   TypefaceAsset();
   ~TypefaceAsset();
-  RefPtr<SkTypeface> typeface;
+  sk_sp<SkTypeface> typeface;
   std::vector<uint8_t> data;
 };
 
@@ -193,8 +193,8 @@ PassRefPtr<FontData> FlutterFontSelector::getFontData(
   RefPtr<SimpleFontData> font_data = font_platform_data_cache_.get(key);
 
   if (font_data == nullptr) {
-    SkTypeface* typeface = getTypefaceAsset(font_description, family_name);
-    if (typeface == nullptr)
+    sk_sp<SkTypeface> typeface = getTypefaceAsset(font_description, family_name);
+    if (!typeface)
       return nullptr;
 
     bool synthetic_bold =
@@ -219,7 +219,7 @@ PassRefPtr<FontData> FlutterFontSelector::getFontData(
   return font_data;
 }
 
-SkTypeface* FlutterFontSelector::getTypefaceAsset(
+sk_sp<SkTypeface> FlutterFontSelector::getTypefaceAsset(
     const FontDescription& font_description,
     const AtomicString& family_name) {
   auto family_iter = font_family_map_.find(family_name);
@@ -242,7 +242,7 @@ SkTypeface* FlutterFontSelector::getTypefaceAsset(
   auto typeface_iter = typeface_cache_.find(asset_path);
   if (typeface_iter != typeface_cache_.end()) {
     const TypefaceAsset* cache_asset = typeface_iter->second.get();
-    return cache_asset ? cache_asset->typeface.get() : nullptr;
+    return cache_asset ? cache_asset->typeface : nullptr;
   }
 
   std::unique_ptr<TypefaceAsset> typeface_asset(new TypefaceAsset);
@@ -255,14 +255,14 @@ SkTypeface* FlutterFontSelector::getTypefaceAsset(
   SkAutoTUnref<SkFontMgr> font_mgr(SkFontMgr::RefDefault());
   SkMemoryStream* typeface_stream = new SkMemoryStream(
       typeface_asset->data.data(), typeface_asset->data.size());
-  typeface_asset->typeface = adoptRef(
+  typeface_asset->typeface = sk_sp<SkTypeface>(
       font_mgr->createFromStream(typeface_stream));
   if (typeface_asset->typeface == nullptr) {
     typeface_cache_.insert(std::make_pair(asset_path, nullptr));
     return nullptr;
   }
 
-  SkTypeface* result = typeface_asset->typeface.get();
+  sk_sp<SkTypeface> result = typeface_asset->typeface;
   typeface_cache_.insert(std::make_pair(
       asset_path, std::move(typeface_asset)));
 

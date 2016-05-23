@@ -39,6 +39,7 @@
 #include "sky/engine/wtf/Noncopyable.h"
 #include "sky/engine/wtf/RefPtr.h"
 #include "sky/engine/wtf/text/WTFString.h"
+#include "third_party/skia/include/core/SkRefCnt.h"
 
 class SkTypeface;
 
@@ -58,8 +59,8 @@ public:
     static bool supportsFormat(const String&);
 
 private:
-    explicit FontCustomPlatformData(PassRefPtr<SkTypeface>);
-    RefPtr<SkTypeface> m_typeface;
+    explicit FontCustomPlatformData(sk_sp<SkTypeface>);
+    sk_sp<SkTypeface> m_typeface;
 };
 
 } // namespace blink

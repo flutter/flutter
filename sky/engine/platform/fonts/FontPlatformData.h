@@ -62,7 +62,7 @@ public:
     FontPlatformData();
     FontPlatformData(float textSize, bool syntheticBold, bool syntheticItalic);
     FontPlatformData(const FontPlatformData&);
-    FontPlatformData(PassRefPtr<SkTypeface>, const char* name, float textSize, bool syntheticBold, bool syntheticItalic, FontOrientation = Horizontal, bool subpixelTextPosition = defaultUseSubpixelPositioning());
+    FontPlatformData(sk_sp<SkTypeface>, const char* name, float textSize, bool syntheticBold, bool syntheticItalic, FontOrientation = Horizontal, bool subpixelTextPosition = defaultUseSubpixelPositioning());
     FontPlatformData(const FontPlatformData& src, float textSize);
     ~FontPlatformData();
 
@@ -107,7 +107,7 @@ private:
     bool static defaultUseSubpixelPositioning();
     void querySystemForRenderStyle(bool useSkiaSubpixelPositioning);
 
-    RefPtr<SkTypeface> m_typeface;
+    sk_sp<SkTypeface> m_typeface;
     CString m_family;
     float m_textSize;
     bool m_syntheticBold;
