@@ -652,7 +652,9 @@ class TabBar<T> extends Scrollable {
   TabBar({
     Key key,
     this.labels,
-    this.isScrollable: false
+    this.isScrollable: false,
+    this.indicatorColor,
+    this.labelColor
   }) : super(key: key, scrollDirection: Axis.horizontal);
 
   /// The labels to display in the tabs.
@@ -664,6 +666,15 @@ class TabBar<T> extends Scrollable {
   /// and the entire [TabBar] is scrollable. Otherwise each tab gets an equal
   /// share of the available space.
   final bool isScrollable;
+
+  /// The color of the line that appears below the selected tab. If it's
+  /// null then the value of the Theme's indicatorColor property is used.
+  final Color indicatorColor;
+
+  /// The color for selected tab labels. The unselected tab labels are rendered
+  /// with the same color rendered at 70% opacity. If null the color of the theme's
+  /// body2 text color is used.
+  final Color labelColor;
 
   double get minimumHeight {
     for (TabLabel label in labels.values) {
@@ -900,7 +911,7 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
 
     ThemeData themeData = Theme.of(context);
     Color backgroundColor = Material.of(context).color;
-    Color indicatorColor = themeData.indicatorColor;
+    Color indicatorColor = config.indicatorColor ?? themeData.indicatorColor;
     if (indicatorColor == backgroundColor) {
       // ThemeData tries to avoid this by having indicatorColor avoid being the
       // primaryColor. However, it's possible that the tab bar is on a
@@ -914,13 +925,14 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
 
     final TextStyle textStyle = themeData.primaryTextTheme.body2;
     final IconThemeData iconTheme = themeData.primaryIconTheme;
-    final Color textColor = themeData.primaryTextTheme.body2.color.withAlpha(0xB2); // 70% alpha
+    final Color selectedLabelColor = config.labelColor ?? themeData.primaryTextTheme.body2.color;
+    final Color labelColor = selectedLabelColor.withAlpha(0xB2); // 70% alpha
 
     List<Widget> tabs = <Widget>[];
     bool textAndIcons = false;
     int tabIndex = 0;
     for (TabLabel label in config.labels.values) {
-      tabs.add(_toTab(label, tabIndex++, textColor, indicatorColor));
+      tabs.add(_toTab(label, tabIndex++, labelColor, selectedLabelColor));
       if (label.text != null && (label.icon != null || label.iconBuilder != null))
         textAndIcons = true;
     }
