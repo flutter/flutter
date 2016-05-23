@@ -24,6 +24,7 @@ Hyphenator* loadHybFile(const char* fn) {
     }
     uint8_t* buf = new uint8_t[size];
     size_t read_size = fread(buf, 1, size, f);
+    fclose(f);
     if (read_size < size) {
         fprintf(stderr, "error reading %s\n", fn);
         delete[] buf;
