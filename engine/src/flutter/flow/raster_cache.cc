@@ -22,7 +22,7 @@ static const int kRasterThreshold = 3;
 static bool isWorthRasterizing(SkPicture* picture) {
   // TODO(abarth): We should find a better heuristic here that lets us avoid
   // wasting memory on trivial layers that are easy to re-rasterize every frame.
-  return picture->approximateOpCount() > 10 || picture->hasText();
+  return picture->approximateOpCount() > 10;
 }
 
 #endif

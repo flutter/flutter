@@ -21,7 +21,7 @@ vars = {
   'chromium_git': 'https://chromium.googlesource.com',
   'mojo_sdk_revision': '55352570f8c52ca1282dcfa26a4a32adc08495d6',
   'base_revision': '672b04e54b937ec899429a6bd5409c5a6300d151',
-  'skia_revision': '3ccf2e75ed92adb3c2c289e0cb95901d162df394',
+  'skia_revision': '8cc209111876b7c78b5ec577c9221d8ed5e21024',
 
   # Note: When updating the Dart revision, ensure that all entries that are
   # dependencies of dart are also updated
