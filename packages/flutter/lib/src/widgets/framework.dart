@@ -461,6 +461,10 @@ abstract class State<T extends StatefulWidget> {
   /// The given build context object contains information about the location in
   /// the tree at which this widget is being built. For example, the context
   /// provides the set of inherited widgets for this location in the tree.
+  ///
+  /// The context argument is always the same as [State.context]. This argument
+  /// is provided redundantly here to match the [WidgetBuilder] function
+  /// signature used by [StatelessWidget.build] and other widgets.
   Widget build(BuildContext context);
 
   /// Called when an Inherited widget in the ancestor chain has changed. Usually
