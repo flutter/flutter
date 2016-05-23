@@ -7,7 +7,7 @@ import 'dart:io';
 import 'package:package_config/packages_file.dart' as packages_file;
 import 'package:path/path.dart' as path;
 
-const String _kPackages = '.packages';
+const String kPackagesFileName = '.packages';
 
 Map<String, Uri> _parse(String packagesPath) {
   List<int> source = new File(packagesPath).readAsBytesSync();

@@ -9,8 +9,8 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
+import 'dart/package_map.dart';
 import 'globals.dart';
-import 'package_map.dart';
 
 const String _kFlutterManifestPath = 'flutter.yaml';
 const String _kFlutterServicesManifestPath = 'flutter_services.yaml';

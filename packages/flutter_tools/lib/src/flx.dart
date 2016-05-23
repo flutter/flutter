@@ -15,8 +15,8 @@ import 'package:yaml/yaml.dart';
 import 'base/file_system.dart' show ensureDirectoryExists;
 import 'base/process.dart';
 import 'cache.dart';
+import 'dart/package_map.dart';
 import 'globals.dart';
-import 'package_map.dart';
 import 'toolchain.dart';
 import 'zip.dart';
 
