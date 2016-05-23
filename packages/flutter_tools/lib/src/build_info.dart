@@ -60,7 +60,7 @@ String getNameForTargetPlatform(TargetPlatform platform) {
     case TargetPlatform.android_x86:
       return 'android-x86';
     case TargetPlatform.ios:
-      return 'ios_release';
+      return 'ios';
     case TargetPlatform.darwin_x64:
       return 'darwin-x64';
     case TargetPlatform.linux_x64:

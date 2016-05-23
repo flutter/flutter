@@ -433,7 +433,8 @@ class IOSSimulator extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage app, {
+    ApplicationPackage app,
+    BuildMode mode, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
@@ -531,7 +532,8 @@ class IOSSimulator extends Device {
 
   Future<bool> _buildAndInstallApplicationBundle(ApplicationPackage app) async {
     // Step 1: Build the Xcode project.
-    bool buildResult = await buildIOSXcodeProject(app, buildForDevice: false);
+    // The build mode for the simulator is always debug.
+    bool buildResult = await buildIOSXcodeProject(app, BuildMode.debug, buildForDevice: false);
     if (!buildResult) {
       printError('Could not build the application for the simulator.');
       return false;

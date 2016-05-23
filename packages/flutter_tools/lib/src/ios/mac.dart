@@ -11,6 +11,7 @@ import 'package:path/path.dart' as path;
 import '../application_package.dart';
 import '../base/context.dart';
 import '../base/process.dart';
+import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart';
 import '../services.dart';
@@ -96,13 +97,13 @@ bool _xcodeVersionCheckValid(int major, int minor) {
   return false;
 }
 
-Future<bool> buildIOSXcodeProject(ApplicationPackage app,
+Future<bool> buildIOSXcodeProject(ApplicationPackage app, BuildMode mode,
     { bool buildForDevice, bool codesign: true }) async {
   String flutterProjectPath = Directory.current.path;
 
-  if (xcodeProjectRequiresUpdate()) {
+  if (xcodeProjectRequiresUpdate(mode)) {
     printTrace('Initializing the Xcode project.');
-    if ((await setupXcodeProjectHarness(flutterProjectPath)) != 0) {
+    if ((await setupXcodeProjectHarness(flutterProjectPath, mode)) != 0) {
       printError('Could not initialize the Xcode project.');
       return false;
     }
@@ -200,7 +201,9 @@ bool _validateEngineRevision(ApplicationPackage app) {
 String _getIOSEngineRevision(ApplicationPackage app) {
   File revisionFile = new File(path.join(app.localPath, 'REVISION'));
   if (revisionFile.existsSync()) {
-    return revisionFile.readAsStringSync().trim();
+    // The format is 'REVISION-mode'. We only need the revision.
+    String revisionStamp = revisionFile.readAsStringSync().trim();
+    return revisionStamp.split('-')[0];
   } else {
     return null;
   }

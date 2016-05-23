@@ -210,7 +210,7 @@ class FlutterEngine {
     ];
 
     if (Platform.isMacOS)
-      dirs.add('ios_release');
+      dirs.addAll(<String>['ios', 'ios-profile', 'ios-release']);
     else if (Platform.isLinux)
       dirs.add('linux-x64');
 

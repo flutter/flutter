@@ -12,6 +12,7 @@ import '../runner/flutter_command.dart';
 
 class BuildIOSCommand extends FlutterCommand {
   BuildIOSCommand() {
+    addBuildModeFlags();
     argParser.addFlag('simulator', help: 'Build for the iOS simulator instead of the device.');
     argParser.addFlag('codesign', negatable: true, defaultsTo: true,
         help: 'Codesign the application bundle (only available on device builds).');
@@ -49,8 +50,9 @@ class BuildIOSCommand extends FlutterCommand {
 
     printStatus('Building $app for $logTarget...');
 
-    bool result = await buildIOSXcodeProject(app,
-        buildForDevice: !forSimulator, codesign: shouldCodesign);
+    bool result = await buildIOSXcodeProject(app, getBuildMode(),
+        buildForDevice: !forSimulator,
+        codesign: shouldCodesign);
 
     if (!result) {
       printError('Encountered error while building for $logTarget.');

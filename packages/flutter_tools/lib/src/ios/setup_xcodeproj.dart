@@ -75,7 +75,7 @@ void updateXcodeLocalProperties(String projectPath) {
   localsFile.writeAsStringSync(localsBuffer.toString());
 }
 
-bool xcodeProjectRequiresUpdate() {
+bool xcodeProjectRequiresUpdate(BuildMode mode) {
   File revisionFile = new File(path.join(Directory.current.path, 'ios', '.generated', 'REVISION'));
 
   // If the revision stamp does not exist, the Xcode project definitely requires
@@ -85,8 +85,9 @@ bool xcodeProjectRequiresUpdate() {
     return true;
   }
 
-  if (revisionFile.readAsStringSync() != Cache.engineRevision) {
-    printTrace("The revision stamp and the Flutter engine revision differ. Project needs to be updated.");
+  if (revisionFile.readAsStringSync() != '${Cache.engineRevision}-${getModeName(mode)}') {
+    printTrace("The revision stamp and the Flutter engine revision differ or the build mode has changed.");
+    printTrace("Project needs to be updated.");
     return true;
   }
 
@@ -94,12 +95,12 @@ bool xcodeProjectRequiresUpdate() {
   return false;
 }
 
-Future<int> setupXcodeProjectHarness(String flutterProjectPath) async {
+Future<int> setupXcodeProjectHarness(String flutterProjectPath, BuildMode mode) async {
   // Step 1: Fetch the archive from the cloud
   String iosFilesPath = path.join(flutterProjectPath, 'ios');
   String xcodeprojPath = path.join(iosFilesPath, '.generated');
 
-  Directory toolDir = tools.getEngineArtifactsDirectory(TargetPlatform.ios, BuildMode.debug);
+  Directory toolDir = tools.getEngineArtifactsDirectory(TargetPlatform.ios, mode);
   File archiveFile = new File(path.join(toolDir.path, 'FlutterXcode.zip'));
   List<int> archiveBytes = archiveFile.readAsBytesSync();
 
@@ -121,7 +122,7 @@ Future<int> setupXcodeProjectHarness(String flutterProjectPath) async {
   // Step 4: Write the REVISION file
   File revisionFile = new File(path.join(xcodeprojPath, 'REVISION'));
   revisionFile.createSync();
-  revisionFile.writeAsStringSync(Cache.engineRevision);
+  revisionFile.writeAsStringSync('${Cache.engineRevision}-${getModeName(mode)}');
 
   // Step 5: Tell the user the location of the generated project.
   printStatus('Xcode project created in $iosFilesPath/.');

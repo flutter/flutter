@@ -215,6 +215,7 @@ Future<int> startApp(
 
   LaunchResult result = await device.startApp(
     package,
+    buildMode,
     mainPath: mainPath,
     route: route,
     debuggingOptions: debuggingOptions,
@@ -359,6 +360,7 @@ class _RunAndStayResident {
 
     LaunchResult result = await device.startApp(
       package,
+      buildMode,
       mainPath: mainPath,
       debuggingOptions: debuggingOptions,
       platformArgs: platformArgs
