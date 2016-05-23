@@ -9,11 +9,11 @@ import 'package:args/command_runner.dart';
 
 import '../application_package.dart';
 import '../build_info.dart';
+import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
-import '../package_map.dart';
 import '../usage.dart';
 import 'flutter_command_runner.dart';
 

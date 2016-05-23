@@ -14,8 +14,8 @@ import '../base/context.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../cache.dart';
+import '../dart/package_map.dart';
 import '../globals.dart';
-import '../package_map.dart';
 import '../toolchain.dart';
 import '../version.dart';
 
@@ -50,10 +50,10 @@ class FlutterCommandRunner extends CommandRunner {
         help: 'Suppress analytics reporting when this command runs.');
 
     String packagesHelp;
-    if (FileSystemEntity.isFileSync('.packages'))
-      packagesHelp = '\n(defaults to ".packages")';
+    if (FileSystemEntity.isFileSync(kPackagesFileName))
+      packagesHelp = '\n(defaults to "$kPackagesFileName")';
     else
-      packagesHelp = '\n(required, since the current directory does not contain a ".packages" file)';
+      packagesHelp = '\n(required, since the current directory does not contain a "$kPackagesFileName" file)';
     argParser.addOption('packages',
         hide: !verboseHelp,
         help: 'Path to your ".packages" file.$packagesHelp');
@@ -139,10 +139,11 @@ class FlutterCommandRunner extends CommandRunner {
     if (globalResults['suppress-analytics'])
       flutterUsage.suppressAnalytics = true;
 
-    _checkFlutterCopy();
+    if (!_checkFlutterCopy())
+      return new Future<int>.value(1);
 
     PackageMap.instance = new PackageMap(path.normalize(path.absolute(
-      globalResults.wasParsed('packages') ? globalResults['packages'] : '.packages'
+      globalResults.wasParsed('packages') ? globalResults['packages'] : kPackagesFileName
     )));
 
     // See if the user specified a specific device.
@@ -258,18 +259,20 @@ class FlutterCommandRunner extends CommandRunner {
       .toList();
   }
 
-  /// Check that the Flutter being run is the one we're expecting.
-  void _checkFlutterCopy() {
+  bool _checkFlutterCopy() {
+    // If the current directory is contained by a flutter repo, check that it's
+    // the same flutter that is currently running.
     String directory = path.normalize(path.absolute(Directory.current.path));
 
     // Check if the cwd is a flutter dir.
     while (directory.isNotEmpty) {
       if (_isDirectoryFlutterRepo(directory)) {
         if (directory != Cache.flutterRoot) {
+          // Warn, but continue execution.
           printError(
-            'Warning: the active Flutter is not the one from the current directory.\n'
-            '  Active Flutter   : ${Cache.flutterRoot}\n'
-            '  Current directory: $directory\n'
+            'Warning - the active Flutter is not the one from the current directory:\n'
+            '  active Flutter   : ${Cache.flutterRoot}\n'
+            '  current directory: $directory\n'
           );
         }
 
@@ -281,6 +284,30 @@ class FlutterCommandRunner extends CommandRunner {
         break;
       directory = parent;
     }
+
+    // Check that the flutter running is that same as the one referenced in the pubspec.
+    if (FileSystemEntity.isFileSync(kPackagesFileName)) {
+      PackageMap packageMap = new PackageMap(kPackagesFileName);
+      Uri flutterUri = packageMap.map['flutter'];
+
+      if (flutterUri != null && (flutterUri.scheme == 'file' || flutterUri.scheme == '')) {
+        // .../flutter/packages/flutter/lib
+        Uri rootUri = flutterUri.resolve('../../..');
+        String flutterPath = path.normalize(new File.fromUri(rootUri).absolute.path);
+
+        if (flutterPath != Cache.flutterRoot) {
+          // Warn and exit the app.
+          printError(
+            'Warning - the active Flutter is different from the one referenced in your pubspec:\n'
+            '  active Flutter   : ${Cache.flutterRoot}\n'
+            '  pubspec reference: $flutterPath'
+          );
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 
   // Check if `bin/flutter` and `bin/cache/engine.stamp` exist.

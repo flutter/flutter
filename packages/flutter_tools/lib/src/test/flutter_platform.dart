@@ -14,7 +14,7 @@ import 'package:test/src/backend/test_platform.dart'; // ignore: implementation_
 import 'package:test/src/runner/plugin/platform.dart'; // ignore: implementation_imports
 import 'package:test/src/runner/plugin/hack_register_platform.dart' as hack; // ignore: implementation_imports
 
-import '../package_map.dart';
+import '../dart/package_map.dart';
 
 final String _kSkyShell = Platform.environment['SKY_SHELL'];
 const String _kHost = '127.0.0.1';
