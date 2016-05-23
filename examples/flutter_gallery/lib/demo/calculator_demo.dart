@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'logic.dart';
+import 'calculator_logic.dart';
 
 class Calculator extends StatefulWidget {
   Calculator({Key key}) : super(key: key);
