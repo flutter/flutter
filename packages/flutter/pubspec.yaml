@@ -22,8 +22,6 @@ dependencies:
 dev_dependencies:
   flutter_test:
     path: ../flutter_test
-  stocks: # for the benchmarks
-    path: ../../examples/stocks
 
 environment:
   sdk: '>=1.12.0 <2.0.0'

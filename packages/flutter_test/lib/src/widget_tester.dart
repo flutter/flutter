@@ -65,14 +65,18 @@ void testWidgets(String description, WidgetTesterCallback callback, {
 /// The callback can be asynchronous (using `async`/`await` or using
 /// explicit [Future]s). If it is, then [benchmarkWidgets] will return
 /// a [Future] that completes when the callback's does. Otherwise, it
-/// will return a widget that is always complete.
+/// will return a Future that is always complete.
+///
+/// If the callback is asynchronous, make sure you `await` the call
+/// to [benchmarkWidgets], otherwise it won't run!
 ///
 /// Benchmarks must not be run in checked mode. To avoid this, this
-/// function will assert if it is run in checked mode.
+/// function will print a big message if it is run in checked mode.
 ///
 /// Example:
 ///
 ///     main() async {
+///       assert(false); // fail in checked mode
 ///       await benchmarkWidgets((WidgetTester tester) {
 ///         tester.pumpWidget(new MyWidget());
 ///         final Stopwatch timer = new Stopwatch()..start();
@@ -86,7 +90,20 @@ void testWidgets(String description, WidgetTesterCallback callback, {
 ///       exit(0);
 ///     }
 Future<Null> benchmarkWidgets(WidgetTesterCallback callback) {
-  assert(false); // Don't run benchmarks in checked mode.
+  assert(() {
+    print('┏╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┓');
+    print('┇ ⚠ THIS BENCHMARK IS BEING RUN WITH ASSERTS ENABLED ⚠  ┇');
+    print('┡╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┦');
+    print('│                                                       │');
+    print('│  Numbers obtained from a benchmark while asserts are  │');
+    print('│  enabled will not accurately reflect the performance  │');
+    print('│  that will be experienced by end users using release  ╎');
+    print('│  builds. Benchmarks should be run using this command  ┆');
+    print('│  line:  flutter run --release -t benchmark.dart       ┊');
+    print('│                                                        ');
+    print('└─────────────────────────────────────────────────╌┄┈  🐢');
+    return true;
+  });
   TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   assert(binding is! AutomatedTestWidgetsFlutterBinding);
   WidgetTester tester = new WidgetTester._(binding);

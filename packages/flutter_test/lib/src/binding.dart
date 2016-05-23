@@ -67,7 +67,7 @@ enum TestBindingEventSource {
   device,
 }
 
-const Size _kTestViewportSize = const Size(800.0, 600.0);
+const Size _kDefaultTestViewportSize = const Size(800.0, 600.0);
 
 /// Base class for bindings used by widgets library tests.
 ///
@@ -94,9 +94,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   static WidgetsBinding ensureInitialized() {
     if (WidgetsBinding.instance == null) {
       if (Platform.environment.containsKey('FLUTTER_TEST')) {
-        new AutomatedTestWidgetsFlutterBinding._();
+        new AutomatedTestWidgetsFlutterBinding();
       } else {
-        new LiveTestWidgetsFlutterBinding._();
+        new LiveTestWidgetsFlutterBinding();
       }
     }
     assert(WidgetsBinding.instance is TestWidgetsFlutterBinding);
@@ -394,8 +394,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 /// This binding controls time, allowing tests to verify long
 /// animation sequences without having to execute them in real time.
 class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
-  AutomatedTestWidgetsFlutterBinding._();
-
   @override
   void initInstances() {
     debugPrint = debugPrintSynchronously;
@@ -542,8 +540,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 /// doesn't trigger a paint, since then you could not see anything
 /// anyway.)
 class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
-  LiveTestWidgetsFlutterBinding._();
-
   @override
   bool get inTest => _inTest;
   bool _inTest = false;
@@ -676,11 +672,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   ViewConfiguration createViewConfiguration() {
-    return new _TestViewConfiguration(
-      // TODO(ianh): that these are not the same is https://github.com/flutter/flutter/issues/1360
-      _getMatrix(ui.window.devicePixelRatio),
-      _getMatrix(1.0)
-    );
+    return new TestViewConfiguration();
   }
 
   @override
@@ -697,12 +689,23 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     Matrix4 transform = renderView.configuration.toHitTestMatrix();
     return MatrixUtils.transformPoint(transform, point);
   }
+}
 
-  Matrix4 _getMatrix(double devicePixelRatio) {
+/// A [ViewConfiguration] that pretends the display is of a particular size. The
+/// size is in logical pixels. The resulting ViewConfiguration maps the given
+/// size onto the actual display using the [ImageFit.contain] algorithm.
+class TestViewConfiguration extends ViewConfiguration {
+  /// Creates a [TestViewConfiguration] with the given size. Defaults to 800x600.
+  TestViewConfiguration({ Size size: _kDefaultTestViewportSize })
+    : _paintMatrix = _getMatrix(size, ui.window.devicePixelRatio),
+      _hitTestMatrix = _getMatrix(size, 1.0),
+      super(size: size);
+
+  static Matrix4 _getMatrix(Size size, double devicePixelRatio) {
     final double actualWidth = ui.window.size.width * devicePixelRatio;
     final double actualHeight = ui.window.size.height * devicePixelRatio;
-    final double desiredWidth = _kTestViewportSize.width;
-    final double desiredHeight = _kTestViewportSize.height;
+    final double desiredWidth = size.width;
+    final double desiredHeight = size.height;
     double scale, shiftX, shiftY;
     if ((actualWidth / actualHeight) > (desiredWidth / desiredHeight)) {
       scale = actualHeight / desiredHeight;
@@ -720,18 +723,24 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     );
     return matrix;
   }
-}
 
-class _TestViewConfiguration extends ViewConfiguration {
-  _TestViewConfiguration(this.paintMatrix, this.hitTestMatrix) : super(size: _kTestViewportSize);
-
-  final Matrix4 paintMatrix;
-  final Matrix4 hitTestMatrix;
+  final Matrix4 _paintMatrix;
+  final Matrix4 _hitTestMatrix;
 
   @override
-  Matrix4 toMatrix() => paintMatrix.clone();
+  Matrix4 toMatrix() => _paintMatrix.clone();
 
-  Matrix4 toHitTestMatrix() => hitTestMatrix.clone();
+  /// Provides the transformation matrix that converts coordinates in the test
+  /// coordinate space to coordinates in logical pixels on the real display.
+  ///
+  /// This is essenitally the same as [toMatrix] but ignoring the device pixel
+  /// ratio.
+  ///
+  /// This is useful because pointers are described in logical pixels, as
+  /// opposed to graphics which are expressed in physical pixels.
+  // TODO(ianh): We should make graphics and pointers use the same coordinate space.
+  //             See: https://github.com/flutter/flutter/issues/1360
+  Matrix4 toHitTestMatrix() => _hitTestMatrix.clone();
 
   @override
   String toString() => 'TestViewConfiguration';
@@ -758,7 +767,9 @@ class _LiveTestRenderView extends RenderView {
   }) : super(configuration: configuration);
 
   @override
-  _TestViewConfiguration get configuration => super.configuration;
+  TestViewConfiguration get configuration => super.configuration;
+  @override
+  set configuration(TestViewConfiguration value) { super.configuration = value; }
 
   final Map<int, _LiveTestPointerRecord> _pointers = <int, _LiveTestPointerRecord>{};
 
