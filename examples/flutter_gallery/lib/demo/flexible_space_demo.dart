@@ -47,9 +47,11 @@ class _ContactItem extends StatelessWidget {
     columnChildren.add(new Text(lines.last, style: Theme.of(context).textTheme.caption));
 
     List<Widget> rowChildren = <Widget>[
-      new Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: columnChildren
+      new Flexible(
+        child: new Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: columnChildren
+        )
       )
     ];
     if (icon != null) {
