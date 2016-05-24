@@ -4,10 +4,11 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:ui' show hashValues;
+import 'dart:ui' show hashValues, Image;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/http.dart' as http;
+import 'package:mojo/core.dart' as mojo;
 
 import 'image_decoder.dart';
 import 'image_resource.dart';
@@ -53,10 +54,14 @@ class _UrlFetcher implements ImageProvider {
   @override
   Future<ImageInfo> loadImage() async {
     try {
-      return new ImageInfo(
-        image: await decodeImageFromDataPipe(await http.readDataPipe(Uri.base.resolve(_url))),
-        scale: _scale
-      );
+      final Uri resolvedUrl = Uri.base.resolve(_url);
+      final mojo.MojoDataPipeConsumer dataPipe = await http.readDataPipe(resolvedUrl);
+      if (dataPipe == null)
+        throw 'Unable to read data from: $resolvedUrl';
+      final Image image = await decodeImageFromDataPipe(dataPipe);
+      if (image == null)
+        throw 'Unable to decode image data from: $resolvedUrl';
+      return new ImageInfo(image: image, scale: _scale);
     } catch (exception, stack) {
       FlutterError.reportError(new FlutterErrorDetails(
         exception: exception,
