@@ -111,11 +111,12 @@ String _buildAotSnapshot(
     return null;
   }
 
-  String entryPointsDir, genSnapshot;
+  String entryPointsDir, dartEntryPointsDir, genSnapshot;
 
   String engineSrc = tools.engineSrcPath;
   if (engineSrc != null) {
     entryPointsDir  = path.join(engineSrc, 'sky', 'engine', 'bindings');
+    dartEntryPointsDir = path.join(engineSrc, 'dart', 'runtime', 'bin');
     String engineOut = tools.getEngineArtifactsDirectory(platform, buildMode).path;
     if (platform == TargetPlatform.ios) {
       genSnapshot = path.join(engineOut, 'clang_x64', 'gen_snapshot');
@@ -126,6 +127,7 @@ String _buildAotSnapshot(
   } else {
     String artifactsDir = tools.getEngineArtifactsDirectory(platform, buildMode).path;
     entryPointsDir = artifactsDir;
+    dartEntryPointsDir = entryPointsDir;
     if (platform == TargetPlatform.ios) {
       genSnapshot = path.join(artifactsDir, 'gen_snapshot');
     } else {
@@ -142,6 +144,7 @@ String _buildAotSnapshot(
   String rodataBlob = path.join(outputDir.path, 'snapshot_aot_rodata');
 
   String vmEntryPoints = path.join(entryPointsDir, 'dart_vm_entry_points.txt');
+  String ioEntryPoints = path.join(dartEntryPointsDir, 'dart_io_entries.txt');
 
   String packagesPath = path.absolute(Directory.current.path, 'packages');
   if (!FileSystemEntity.isDirectorySync(packagesPath)) {
@@ -168,6 +171,7 @@ String _buildAotSnapshot(
   List<String> filePaths = <String>[
     genSnapshot,
     vmEntryPoints,
+    ioEntryPoints,
     mojoInternalPath,
     uiPath,
     jniPath,
@@ -220,9 +224,8 @@ String _buildAotSnapshot(
   ];
 
   if (!interpreter) {
-    genSnapshotCmd.addAll(<String>[
-      '--embedder_entry_points_manifest=$vmEntryPoints',
-    ]);
+    genSnapshotCmd.add('--embedder_entry_points_manifest=$vmEntryPoints');
+    genSnapshotCmd.add('--embedder_entry_points_manifest=$ioEntryPoints');
   }
 
   switch (platform) {
