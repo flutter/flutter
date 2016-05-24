@@ -9,7 +9,9 @@ import 'theme.dart';
 
 const double _kDrawerHeaderHeight = 140.0;
 
-/// The top-most region of a material design drawer.
+/// The top-most region of a material design drawer. The header's [background]
+/// widget extends behind the system status bar and its [content] widget is
+/// stacked on top of the background and below the status bar.
 ///
 /// Part of the material design [Drawer].
 ///
@@ -24,10 +26,15 @@ class DrawerHeader extends StatelessWidget {
   /// Creates a material design drawer header.
   ///
   /// Requires one of its ancestors to be a [Material] widget.
-  const DrawerHeader({ Key key, this.child }) : super(key: key);
+  const DrawerHeader({ Key key, this.background, this.content }) : super(key: key);
 
-  /// The widget below this widget in the tree.
-  final Widget child;
+  /// A widget that extends behind the system status bar and is stacked
+  /// behind the [content] widget.
+  final Widget background;
+
+  /// A widget that's positioned below the status bar and stacked on top of the
+  /// [background] widget. Typically a view of the user's id.
+  final Widget content;
 
   @override
   Widget build(BuildContext context) {
@@ -35,10 +42,8 @@ class DrawerHeader extends StatelessWidget {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
     return new Container(
       height: statusBarHeight + _kDrawerHeaderHeight,
+      margin: const EdgeInsets.only(bottom: 7.0), // 8 less 1 for the bottom border.
       decoration: new BoxDecoration(
-        // TODO(jackson): This class should usually render the user's
-        // preferred banner image rather than a solid background
-        backgroundColor: Theme.of(context).cardColor,
         border: const Border(
           bottom: const BorderSide(
             color: const Color(0xFFD1D9E1),
@@ -46,16 +51,17 @@ class DrawerHeader extends StatelessWidget {
           )
         )
       ),
-      padding: const EdgeInsets.only(bottom: 7.0),
-      margin: const EdgeInsets.only(bottom: 8.0),
-      child: new Column(
+      child: new Stack(
         children: <Widget>[
-          new Flexible(child: new Container()),
-          new Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          background ?? new Container(),
+          new Positioned(
+            top: statusBarHeight + 16.0,
+            left: 16.0,
+            right: 16.0,
+            bottom: 8.0,
             child: new DefaultTextStyle(
               style: Theme.of(context).textTheme.body2,
-              child: child
+              child: content
             )
           )
         ]

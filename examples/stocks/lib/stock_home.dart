@@ -124,7 +124,7 @@ class StockHomeState extends State<StockHome> {
   Widget _buildDrawer(BuildContext context) {
     return new Drawer(
       child: new Block(children: <Widget>[
-        new DrawerHeader(child: new Text('Stocks')),
+        new DrawerHeader(content: new Center(child: new Text('Stocks'))),
         new DrawerItem(
           icon: Icons.assessment,
           selected: true,

@@ -32,7 +32,9 @@ class GalleryDrawer extends StatelessWidget {
     return new Drawer(
       child: new Block(
         children: <Widget>[
-          new DrawerHeader(child: new Text('Flutter gallery')),
+          new DrawerHeader(
+            content: new Center(child: new Text('Flutter gallery'))
+          ),
           new DrawerItem(
             icon: Icons.brightness_5,
             onPressed: () { onThemeChanged(true); },
