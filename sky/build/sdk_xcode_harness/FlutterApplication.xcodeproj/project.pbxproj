@@ -7,30 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9707A0011CF50D0600D0751C /* app.so in Frameworks */ = {isa = PBXBuildFile; fileRef = 9707A0001CF50D0600D0751C /* app.so */; };
+		9707A0021CF50D2B00D0751C /* app.so in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9707A0001CF50D0600D0751C /* app.so */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		977A86B71CF4CD4700432945 /* app.flx in Resources */ = {isa = PBXBuildFile; fileRef = 977A86B51CF4CD4700432945 /* app.flx */; };
 		97950E411CDC05A500964A31 /* Flutter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 97F908AF1CDC02C500D4520F /* Flutter.framework */; };
 		97950E421CDC05A500964A31 /* Flutter.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 97F908AF1CDC02C500D4520F /* Flutter.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		9E07CF8A1BE7F4D200BCD8DE /* FlutterApplication.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E07CF891BE7F4D200BCD8DE /* FlutterApplication.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9E07CFA91BE8280A00BCD8DE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9E07CFA81BE8280A00BCD8DE /* Assets.xcassets */; };
-		9E07CFB51BE82D2600BCD8DE /* FlutterApplication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E07CF861BE7F4D200BCD8DE /* FlutterApplication.framework */; };
-		9E07CFB61BE82D2600BCD8DE /* FlutterApplication.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9E07CF861BE7F4D200BCD8DE /* FlutterApplication.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		9E07CFBA1BE82DFF00BCD8DE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E07CF9D1BE8280A00BCD8DE /* main.m */; };
-		9E0FB06C1C1A3F5600DDAEFA /* FlutterApplication.c in Sources */ = {isa = PBXBuildFile; fileRef = 9E0FB0681C1A3F5600DDAEFA /* FlutterApplication.c */; };
-		9E0FB06D1C1A3F5600DDAEFA /* InstructionsSnapshotSource.S in Sources */ = {isa = PBXBuildFile; fileRef = 9E0FB0691C1A3F5600DDAEFA /* InstructionsSnapshotSource.S */; };
-		9E0FB06E1C1A3F5600DDAEFA /* kDartIsolateSnapshotBufferSource.c in Sources */ = {isa = PBXBuildFile; fileRef = 9E0FB06A1C1A3F5600DDAEFA /* kDartIsolateSnapshotBufferSource.c */; };
-		9E0FB06F1C1A3F5600DDAEFA /* kDartVmIsolateSnapshotBufferSource.c in Sources */ = {isa = PBXBuildFile; fileRef = 9E0FB06B1C1A3F5600DDAEFA /* kDartVmIsolateSnapshotBufferSource.c */; };
-		9E627AD91C582ABB000D800D /* app.flx in Resources */ = {isa = PBXBuildFile; fileRef = 9E627AD81C582ABB000D800D /* app.flx */; };
 		9EA2FB801C6D2D6B00670B03 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9EA2FB7F1C6D2D6B00670B03 /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		9E07CFB71BE82D2600BCD8DE /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 9E07CF7D1BE7F4D200BCD8DE /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 9E07CF851BE7F4D200BCD8DE;
-			remoteInfo = FlutterApplication;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		9E07CFB91BE82D2600BCD8DE /* Embed Frameworks */ = {
@@ -39,7 +24,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				9E07CFB61BE82D2600BCD8DE /* FlutterApplication.framework in Embed Frameworks */,
+				9707A0021CF50D2B00D0751C /* app.so in Embed Frameworks */,
 				97950E421CDC05A500964A31 /* Flutter.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -48,56 +33,55 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		9707A0001CF50D0600D0751C /* app.so */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = app.so; path = FlutterApplication/Generated/app.so; sourceTree = "<group>"; };
+		977A86B11CF4C36100432945 /* BuildFlutterApp */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = BuildFlutterApp; sourceTree = "<group>"; };
+		977A86B51CF4CD4700432945 /* app.flx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = app.flx; path = FlutterApplication/Generated/app.flx; sourceTree = "<group>"; };
 		97F908AF1CDC02C500D4520F /* Flutter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Flutter.framework; path = ../common/Flutter.framework; sourceTree = "<group>"; };
-		9E07CF861BE7F4D200BCD8DE /* FlutterApplication.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FlutterApplication.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		9E07CF891BE7F4D200BCD8DE /* FlutterApplication.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FlutterApplication.h; sourceTree = "<group>"; };
-		9E07CF8B1BE7F4D200BCD8DE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9E07CF9A1BE8280A00BCD8DE /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E07CF9D1BE8280A00BCD8DE /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		9E07CFA81BE8280A00BCD8DE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = ../Assets.xcassets; sourceTree = SOURCE_ROOT; };
 		9E07CFAD1BE8280A00BCD8DE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = ../Info.plist; sourceTree = SOURCE_ROOT; };
-		9E0FB0681C1A3F5600DDAEFA /* FlutterApplication.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FlutterApplication.c; sourceTree = "<group>"; };
-		9E0FB0691C1A3F5600DDAEFA /* InstructionsSnapshotSource.S */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = InstructionsSnapshotSource.S; sourceTree = "<group>"; };
-		9E0FB06A1C1A3F5600DDAEFA /* kDartIsolateSnapshotBufferSource.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kDartIsolateSnapshotBufferSource.c; sourceTree = "<group>"; };
-		9E0FB06B1C1A3F5600DDAEFA /* kDartVmIsolateSnapshotBufferSource.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kDartVmIsolateSnapshotBufferSource.c; sourceTree = "<group>"; };
 		9E40464B1C1B64B500A4B87C /* Flutter.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Flutter.xcconfig; sourceTree = "<group>"; };
-		9E4046501C1B6A3600A4B87C /* EmbedderEntryPoints */ = {isa = PBXFileReference; lastKnownFileType = text; path = EmbedderEntryPoints; sourceTree = "<group>"; };
-		9E4046511C1B6A3600A4B87C /* PackagerInvoke */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = PackagerInvoke; sourceTree = "<group>"; };
-		9E4046531C1B6A3600A4B87C /* SnapshotterInvoke */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = SnapshotterInvoke; sourceTree = "<group>"; };
-		9E4046571C1B6A3600A4B87C /* Snapshotter */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = Snapshotter; sourceTree = "<group>"; };
-		9E40465A1C1B6A3600A4B87C /* Snapshotter */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = Snapshotter; sourceTree = "<group>"; };
 		9E40465E1C1B6F7900A4B87C /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig; sourceTree = "<group>"; };
-		9E5CD2D81CD97EFF00D93CCC /* snapshot.dart */ = {isa = PBXFileReference; lastKnownFileType = text; path = snapshot.dart; sourceTree = "<group>"; };
-		9E627AD81C582ABB000D800D /* app.flx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = app.flx; path = Generated/app.flx; sourceTree = "<group>"; };
 		9EA2FB7F1C6D2D6B00670B03 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = ../LaunchScreen.storyboard; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		9E07CF821BE7F4D200BCD8DE /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		9E07CF971BE8280A00BCD8DE /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9E07CFB51BE82D2600BCD8DE /* FlutterApplication.framework in Frameworks */,
 				97950E411CDC05A500964A31 /* Flutter.framework in Frameworks */,
+				9707A0011CF50D0600D0751C /* app.so in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		977A86B21CF4CCF700432945 /* FlutterApplication */ = {
+			isa = PBXGroup;
+			children = (
+				977A86B31CF4CD0200432945 /* Generated */,
+			);
+			name = FlutterApplication;
+			sourceTree = "<group>";
+		};
+		977A86B31CF4CD0200432945 /* Generated */ = {
+			isa = PBXGroup;
+			children = (
+				9707A0001CF50D0600D0751C /* app.so */,
+				977A86B51CF4CD4700432945 /* app.flx */,
+			);
+			name = Generated;
+			sourceTree = "<group>";
+		};
 		9E07CF7C1BE7F4D200BCD8DE = {
 			isa = PBXGroup;
 			children = (
+				977A86B21CF4CCF700432945 /* FlutterApplication */,
 				9E40465E1C1B6F7900A4B87C /* Local.xcconfig */,
 				9E40464B1C1B64B500A4B87C /* Flutter.xcconfig */,
-				9E07CF881BE7F4D200BCD8DE /* FlutterApplication */,
 				9E07CF9B1BE8280A00BCD8DE /* Runner */,
 				9E40462C1C1B617500A4B87C /* Tools */,
 				9E07CF871BE7F4D200BCD8DE /* Products */,
@@ -107,24 +91,9 @@
 		9E07CF871BE7F4D200BCD8DE /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				9E07CF861BE7F4D200BCD8DE /* FlutterApplication.framework */,
 				9E07CF9A1BE8280A00BCD8DE /* Runner.app */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		9E07CF881BE7F4D200BCD8DE /* FlutterApplication */ = {
-			isa = PBXGroup;
-			children = (
-				9E627AD71C582AB1000D800D /* Resources */,
-				9E07CF891BE7F4D200BCD8DE /* FlutterApplication.h */,
-				9E0FB0681C1A3F5600DDAEFA /* FlutterApplication.c */,
-				9E0FB0691C1A3F5600DDAEFA /* InstructionsSnapshotSource.S */,
-				9E0FB06A1C1A3F5600DDAEFA /* kDartIsolateSnapshotBufferSource.c */,
-				9E0FB06B1C1A3F5600DDAEFA /* kDartVmIsolateSnapshotBufferSource.c */,
-				9E07CF8B1BE7F4D200BCD8DE /* Info.plist */,
-			);
-			path = FlutterApplication;
 			sourceTree = "<group>";
 		};
 		9E07CF9B1BE8280A00BCD8DE /* Runner */ = {
@@ -150,8 +119,6 @@
 			isa = PBXGroup;
 			children = (
 				9E40464F1C1B6A3600A4B87C /* common */,
-				9E4046551C1B6A3600A4B87C /* iphoneos */,
-				9E4046581C1B6A3600A4B87C /* iphonesimulator */,
 			);
 			path = Tools;
 			sourceTree = "<group>";
@@ -159,78 +126,20 @@
 		9E40464F1C1B6A3600A4B87C /* common */ = {
 			isa = PBXGroup;
 			children = (
-				9E5CD2D81CD97EFF00D93CCC /* snapshot.dart */,
-				9E4046501C1B6A3600A4B87C /* EmbedderEntryPoints */,
-				9E4046511C1B6A3600A4B87C /* PackagerInvoke */,
-				9E4046531C1B6A3600A4B87C /* SnapshotterInvoke */,
 				97F908AF1CDC02C500D4520F /* Flutter.framework */,
+				977A86B11CF4C36100432945 /* BuildFlutterApp */,
 			);
 			path = common;
 			sourceTree = "<group>";
 		};
-		9E4046551C1B6A3600A4B87C /* iphoneos */ = {
-			isa = PBXGroup;
-			children = (
-				9E4046571C1B6A3600A4B87C /* Snapshotter */,
-			);
-			path = iphoneos;
-			sourceTree = "<group>";
-		};
-		9E4046581C1B6A3600A4B87C /* iphonesimulator */ = {
-			isa = PBXGroup;
-			children = (
-				9E40465A1C1B6A3600A4B87C /* Snapshotter */,
-			);
-			path = iphonesimulator;
-			sourceTree = "<group>";
-		};
-		9E627AD71C582AB1000D800D /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				9E627AD81C582ABB000D800D /* app.flx */,
-			);
-			name = Resources;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
-/* Begin PBXHeadersBuildPhase section */
-		9E07CF831BE7F4D200BCD8DE /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				9E07CF8A1BE7F4D200BCD8DE /* FlutterApplication.h in Headers */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXHeadersBuildPhase section */
-
 /* Begin PBXNativeTarget section */
-		9E07CF851BE7F4D200BCD8DE /* FlutterApplication */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 9E07CF8E1BE7F4D200BCD8DE /* Build configuration list for PBXNativeTarget "FlutterApplication" */;
-			buildPhases = (
-				9EBB2F351BF675C200177634 /* Ensure `pub get` */,
-				9E07CFF21BEAB2E800BCD8DE /* Run FLX Packager + Optional Script Snapshotter */,
-				9E07CFCD1BE98FCD00BCD8DE /* Generate Precompiled Snapshot */,
-				9E07CF811BE7F4D200BCD8DE /* Sources */,
-				9E07CF821BE7F4D200BCD8DE /* Frameworks */,
-				9E07CF831BE7F4D200BCD8DE /* Headers */,
-				9E07CF841BE7F4D200BCD8DE /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = FlutterApplication;
-			productName = FlutterApplication;
-			productReference = 9E07CF861BE7F4D200BCD8DE /* FlutterApplication.framework */;
-			productType = "com.apple.product-type.framework";
-		};
 		9E07CF991BE8280A00BCD8DE /* Runner */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 9E07CFB01BE8280A00BCD8DE /* Build configuration list for PBXNativeTarget "Runner" */;
 			buildPhases = (
+				977A86B01CF4C31F00432945 /* ShellScript */,
 				9E07CF961BE8280A00BCD8DE /* Sources */,
 				9E07CF971BE8280A00BCD8DE /* Frameworks */,
 				9E07CF981BE8280A00BCD8DE /* Resources */,
@@ -241,7 +150,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				9E07CFB81BE82D2600BCD8DE /* PBXTargetDependency */,
 			);
 			name = Runner;
 			productName = Runner;
@@ -257,9 +165,6 @@
 				LastUpgradeCheck = 0710;
 				ORGANIZATIONNAME = Flutter;
 				TargetAttributes = {
-					9E07CF851BE7F4D200BCD8DE = {
-						CreatedOnToolsVersion = 7.1;
-					};
 					9E07CF991BE8280A00BCD8DE = {
 						CreatedOnToolsVersion = 7.1;
 					};
@@ -278,25 +183,17 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				9E07CF851BE7F4D200BCD8DE /* FlutterApplication */,
 				9E07CF991BE8280A00BCD8DE /* Runner */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		9E07CF841BE7F4D200BCD8DE /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				9E627AD91C582ABB000D800D /* app.flx in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		9E07CF981BE8280A00BCD8DE /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				977A86B71CF4CD4700432945 /* app.flx in Resources */,
 				9EA2FB801C6D2D6B00670B03 /* LaunchScreen.storyboard in Resources */,
 				9E07CFA91BE8280A00BCD8DE /* Assets.xcassets in Resources */,
 			);
@@ -305,6 +202,21 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		977A86B01CF4C31F00432945 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+				"$(SOURCE_ROOT)/FlutterApplication/Generated/app.so",
+				"$(SOURCE_ROOT)/FlutterApplication/Generated/app.flx",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "${SOURCE_ROOT}/Tools/common/BuildFlutterApp ${FLUTTER_APPLICATION_PATH}";
+		};
 		9E046CD71C9CA1AC00A1E391 /* Copy Extra Assets */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -318,36 +230,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "RESOURCES_DIR=${SOURCE_ROOT}/../Resources\nAPPLICATION_BUNDLE=${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}\n\nshopt -s dotglob\n\nif [ -d \"${RESOURCES_DIR}\" ]; then\n  ditto ${RESOURCES_DIR}/ ${APPLICATION_BUNDLE}\nfi\n";
-			showEnvVarsInLog = 0;
-		};
-		9E07CFCD1BE98FCD00BCD8DE /* Generate Precompiled Snapshot */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Generate Precompiled Snapshot";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "${SOURCE_ROOT}/Tools/common/SnapshotterInvoke ${FLUTTER_APPLICATION_PATH}";
-			showEnvVarsInLog = 0;
-		};
-		9E07CFF21BEAB2E800BCD8DE /* Run FLX Packager + Optional Script Snapshotter */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Run FLX Packager + Optional Script Snapshotter";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "${SOURCE_ROOT}/Tools/common/PackagerInvoke ${FLUTTER_APPLICATION_PATH}";
 			showEnvVarsInLog = 0;
 		};
 		9EA2FB831C6E940F00670B03 /* Copy Native Service Assets */ = {
@@ -365,36 +247,9 @@
 			shellScript = "SERVICE_FRAMEWORKS_DIR=${SOURCE_ROOT}/Frameworks\nSERVICE_DEFINITIONS=${SOURCE_ROOT}/ServiceDefinitions.json\nAPPLICATION_BUNDLE=${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}\n\n# Copy Service Dylibs\nif [ -d \"${SERVICE_FRAMEWORKS_DIR}\" ]; then\nditto ${SERVICE_FRAMEWORKS_DIR} ${APPLICATION_BUNDLE}/Frameworks\nfi\n\n# Copy Service Definitions\nif [ -f \"${SERVICE_DEFINITIONS}\" ]; then\ncp ${SERVICE_DEFINITIONS} ${APPLICATION_BUNDLE}/\nfi\n";
 			showEnvVarsInLog = 0;
 		};
-		9EBB2F351BF675C200177634 /* Ensure `pub get` */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${FLUTTER_APPLICATION_PATH}/pubspec.yaml",
-			);
-			name = "Ensure `pub get`";
-			outputPaths = (
-				"${FLUTTER_APPLICATION_PATH}/.packages",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "set -e\npushd ${FLUTTER_APPLICATION_PATH}\n${DART_SDK_PATH}/bin/pub get\npopd\n";
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		9E07CF811BE7F4D200BCD8DE /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				9E0FB06D1C1A3F5600DDAEFA /* InstructionsSnapshotSource.S in Sources */,
-				9E0FB06E1C1A3F5600DDAEFA /* kDartIsolateSnapshotBufferSource.c in Sources */,
-				9E0FB06F1C1A3F5600DDAEFA /* kDartVmIsolateSnapshotBufferSource.c in Sources */,
-				9E0FB06C1C1A3F5600DDAEFA /* FlutterApplication.c in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		9E07CF961BE8280A00BCD8DE /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -404,14 +259,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		9E07CFB81BE82D2600BCD8DE /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 9E07CF851BE7F4D200BCD8DE /* FlutterApplication */;
-			targetProxy = 9E07CFB71BE82D2600BCD8DE /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		9E07CF8C1BE7F4D200BCD8DE /* Debug */ = {
@@ -508,46 +355,6 @@
 			};
 			name = Release;
 		};
-		9E07CF8F1BE7F4D200BCD8DE /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DEAD_CODE_STRIPPING = NO;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = FlutterApplication/Info.plist;
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				LINK_WITH_STANDARD_LIBRARIES = NO;
-				OTHER_LDFLAGS = "-lSystem";
-				PRODUCT_BUNDLE_IDENTIFIER = io.flutter.application.FlutterApplication;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-			};
-			name = Debug;
-		};
-		9E07CF901BE7F4D200BCD8DE /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DEAD_CODE_STRIPPING = NO;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = FlutterApplication/Info.plist;
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				LINK_WITH_STANDARD_LIBRARIES = NO;
-				OTHER_LDFLAGS = "-lSystem";
-				PRODUCT_BUNDLE_IDENTIFIER = io.flutter.application.FlutterApplication;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-			};
-			name = Release;
-		};
 		9E07CFAE1BE8280A00BCD8DE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -559,6 +366,10 @@
 				INFOPLIST_FILE = ../Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/FlutterApplication/Generated",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -574,6 +385,10 @@
 				INFOPLIST_FILE = ../Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/FlutterApplication/Generated",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -586,15 +401,6 @@
 			buildConfigurations = (
 				9E07CF8C1BE7F4D200BCD8DE /* Debug */,
 				9E07CF8D1BE7F4D200BCD8DE /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		9E07CF8E1BE7F4D200BCD8DE /* Build configuration list for PBXNativeTarget "FlutterApplication" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				9E07CF8F1BE7F4D200BCD8DE /* Debug */,
-				9E07CF901BE7F4D200BCD8DE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

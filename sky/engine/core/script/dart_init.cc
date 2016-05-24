@@ -298,8 +298,7 @@ const char* kDataSnapshotName = "kDataSnapshot";
 
 #if OS(IOS)
 
-const char* kDartApplicationLibraryPath =
-    "FlutterApplication.framework/FlutterApplication";
+const char* kDartApplicationLibraryPath = "app.so";
 
 static void* DartLookupSymbolInLibrary(const char* symbol_name,
                                        const char* library) {
