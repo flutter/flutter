@@ -69,6 +69,24 @@ String getNameForTargetPlatform(TargetPlatform platform) {
   assert(false);
 }
 
+TargetPlatform getTargetPlatformForName(String platform) {
+  switch (platform) {
+    case 'android-arm':
+      return TargetPlatform.android_arm;
+    case 'android-x64':
+      return TargetPlatform.android_x64;
+    case 'android-x86':
+      return TargetPlatform.android_x86;
+    case 'ios':
+      return TargetPlatform.ios;
+    case 'darwin-x64':
+      return TargetPlatform.darwin_x64;
+    case 'linux-x64':
+      return TargetPlatform.linux_x64;
+  }
+  return null;
+}
+
 HostPlatform getCurrentHostPlatform() {
   if (Platform.isMacOS)
     return HostPlatform.darwin_x64;
