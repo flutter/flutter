@@ -30,7 +30,8 @@ class BuildAotCommand extends FlutterCommand {
       ..addOption('target-platform',
         defaultsTo: 'android-arm',
         allowed: <String>['android-arm', 'ios']
-      );
+      )
+      ..addFlag('interpreter');
   }
 
   @override
@@ -51,7 +52,8 @@ class BuildAotCommand extends FlutterCommand {
       findMainDartFile(argResults['target']),
       platform,
       getBuildMode(),
-      outputPath: argResults['output-dir']
+      outputPath: argResults['output-dir'],
+      interpreter: argResults['interpreter']
     );
     if (outputPath == null)
       return 1;
@@ -70,7 +72,8 @@ String buildAotSnapshot(
   String mainPath,
   TargetPlatform platform,
   BuildMode buildMode, {
-  String outputPath: _kDefaultAotOutputDir
+  String outputPath: _kDefaultAotOutputDir,
+  bool interpreter: false
 }) {
   if (!isAotBuildMode(buildMode)) {
     printError('${getModeName(buildMode)} mode does not support AOT compilation.');
@@ -124,6 +127,7 @@ String buildAotSnapshot(
 
   String skyEngineSdkExt = _getSdkExtensionPath(packagesPath, 'sky_engine');
   String uiPath = path.join(skyEngineSdkExt, 'dart_ui.dart');
+  String jniPath = path.join(skyEngineSdkExt, 'dart_jni', 'jni.dart');
   String vmServicePath = path.join(skyEngineSdkExt, 'dart', 'runtime', 'bin', 'vmservice', 'vmservice_io.dart');
 
   List<String> filePaths = <String>[
@@ -131,12 +135,12 @@ String buildAotSnapshot(
     vmEntryPoints,
     mojoInternalPath,
     uiPath,
+    jniPath,
     vmServicePath,
   ];
 
   // These paths are used only on Android.
   String vmEntryPointsAndroid;
-  String jniPathAndroid;
 
   // These paths are used only on iOS.
   String snapshotDartIOS;
@@ -147,10 +151,8 @@ String buildAotSnapshot(
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
       vmEntryPointsAndroid = path.join(entryPointsDir, 'dart_vm_entry_points_android.txt');
-      jniPathAndroid = path.join(skyEngineSdkExt, 'dart_jni', 'jni.dart');
       filePaths.addAll(<String>[
         vmEntryPointsAndroid,
-        jniPathAndroid,
       ]);
       break;
     case TargetPlatform.ios:
@@ -175,12 +177,18 @@ String buildAotSnapshot(
     genSnapshot,
     '--vm_isolate_snapshot=$vmIsolateSnapshot',
     '--isolate_snapshot=$isolateSnapshot',
-    '--embedder_entry_points_manifest=$vmEntryPoints',
     '--package_root=$packagesPath',
     '--url_mapping=dart:mojo.internal,$mojoInternalPath',
     '--url_mapping=dart:ui,$uiPath',
+    '--url_mapping=dart:jni,$jniPath',
     '--url_mapping=dart:vmservice_sky,$vmServicePath',
   ];
+
+  if (!interpreter) {
+    genSnapshotCmd.addAll(<String>[
+      '--embedder_entry_points_manifest=$vmEntryPoints',
+    ]);
+  }
 
   switch (platform) {
     case TargetPlatform.android_arm:
@@ -190,14 +198,11 @@ String buildAotSnapshot(
         '--rodata_blob=$rodataBlob',
         '--instructions_blob=$instructionsBlob',
         '--embedder_entry_points_manifest=$vmEntryPointsAndroid',
-        '--url_mapping=dart:jni,$jniPathAndroid',
         '--no-sim-use-hardfp',
       ]);
       break;
     case TargetPlatform.ios:
-      genSnapshotCmd.addAll(<String>[
-        '--assembly=$assembly'
-      ]);
+      genSnapshotCmd.add(interpreter ? snapshotDartIOS : '--assembly=$assembly');
       break;
     case TargetPlatform.darwin_x64:
     case TargetPlatform.linux_x64:
@@ -242,17 +247,22 @@ String buildAotSnapshot(
     String kDartVmIsolateSnapshotBufferO = path.join(outputDir.path, '$kDartVmIsolateSnapshotBuffer.o');
     String kDartIsolateSnapshotBufferO = path.join(outputDir.path, '$kDartIsolateSnapshotBuffer.o');
 
-    runCheckedSync(<String>['xcrun', 'cc', '-c', assembly, '-o', assemblyO]);
+    if (!interpreter)
+      runCheckedSync(<String>['xcrun', 'cc', '-c', assembly, '-o', assemblyO]);
     runCheckedSync(<String>['xcrun', 'cc', '-c', kDartVmIsolateSnapshotBufferC, '-o', kDartVmIsolateSnapshotBufferO]);
     runCheckedSync(<String>['xcrun', 'cc', '-c', kDartIsolateSnapshotBufferC, '-o', kDartIsolateSnapshotBufferO]);
 
     String appLib = path.join(outputDir.path, 'app.a');
 
     runCheckedSync(<String>['rm', '-f', appLib]);
-    runCheckedSync(<String>[
+    List<String> archiveCommand = <String>[
       'xcrun', 'ar', 'rcs', appLib,
-      assemblyO, kDartVmIsolateSnapshotBufferO, kDartIsolateSnapshotBufferO,
-    ]);
+      kDartVmIsolateSnapshotBufferO,
+      kDartIsolateSnapshotBufferO,
+    ];
+    if (!interpreter)
+      archiveCommand.add(assemblyO);
+    runCheckedSync(archiveCommand);
   }
 
   return outputPath;
