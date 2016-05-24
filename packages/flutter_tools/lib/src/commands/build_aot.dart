@@ -100,8 +100,12 @@ String buildAotSnapshot(
   } else {
     String artifactsDir = tools.getEngineArtifactsDirectory(platform, buildMode).path;
     entryPointsDir = artifactsDir;
-    String hostToolsDir = path.join(artifactsDir, getNameForHostPlatform(getCurrentHostPlatform()));
-    genSnapshot = path.join(hostToolsDir, 'gen_snapshot');
+    if (platform == TargetPlatform.ios) {
+      genSnapshot = path.join(artifactsDir, 'gen_snapshot');
+    } else {
+      String hostToolsDir = path.join(artifactsDir, getNameForHostPlatform(getCurrentHostPlatform()));
+      genSnapshot = path.join(hostToolsDir, 'gen_snapshot');
+    }
   }
 
   Directory outputDir = new Directory(outputPath);
@@ -224,7 +228,7 @@ String buildAotSnapshot(
   // On iOS, we use Xcode to compile the snapshot into a static library that the
   // end-developer can link into their app.
   if (platform == TargetPlatform.ios) {
-    printStatus('Building app.a...');
+    printStatus('Building app.so...');
 
     // These names are known to from the engine.
     const String kDartVmIsolateSnapshotBuffer = 'kDartVmIsolateSnapshotBuffer';
@@ -252,17 +256,16 @@ String buildAotSnapshot(
     runCheckedSync(<String>['xcrun', 'cc', '-c', kDartVmIsolateSnapshotBufferC, '-o', kDartVmIsolateSnapshotBufferO]);
     runCheckedSync(<String>['xcrun', 'cc', '-c', kDartIsolateSnapshotBufferC, '-o', kDartIsolateSnapshotBufferO]);
 
-    String appLib = path.join(outputDir.path, 'app.a');
+    String appSo = path.join(outputDir.path, 'app.so');
 
-    runCheckedSync(<String>['rm', '-f', appLib]);
-    List<String> archiveCommand = <String>[
-      'xcrun', 'ar', 'rcs', appLib,
+    List<String> linkCommand = <String>[
+      'xcrun', 'ld', '-dylib', '-o', appSo,
       kDartVmIsolateSnapshotBufferO,
       kDartIsolateSnapshotBufferO,
     ];
     if (!interpreter)
-      archiveCommand.add(assemblyO);
-    runCheckedSync(archiveCommand);
+      linkCommand.add(assemblyO);
+    runCheckedSync(linkCommand);
   }
 
   return outputPath;
