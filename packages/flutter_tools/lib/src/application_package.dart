@@ -11,22 +11,18 @@ import 'build_info.dart';
 import 'ios/plist_utils.dart';
 
 abstract class ApplicationPackage {
-  /// Path to the actual apk or bundle.
-  final String localPath;
+  /// Path to the package's root folder.
+  final String rootPath;
 
   /// Package ID from the Android Manifest or equivalent.
   final String id;
 
-  /// File name of the apk or bundle.
-  final String name;
-
-  ApplicationPackage({
-    String localPath,
-    this.id
-  }) : localPath = localPath, name = path.basename(localPath) {
-    assert(localPath != null);
+  ApplicationPackage({this.rootPath, this.id}) {
+    assert(rootPath != null);
     assert(id != null);
   }
+
+  String get name;
 
   String get displayName => name;
 
@@ -35,14 +31,19 @@ abstract class ApplicationPackage {
 }
 
 class AndroidApk extends ApplicationPackage {
+  /// Path to the actual apk file.
+  final String apkPath;
+
   /// The path to the activity that should be launched.
   final String launchActivity;
 
   AndroidApk({
-    String localPath,
+    String buildDir,
     String id,
+    this.apkPath,
     this.launchActivity
-  }) : super(localPath: localPath, id: id) {
+  }) : super(rootPath: buildDir, id: id) {
+    assert(apkPath != null);
     assert(launchActivity != null);
   }
 
@@ -71,16 +72,25 @@ class AndroidApk extends ApplicationPackage {
     if (id == null || launchActivity == null)
       return null;
 
-    String localPath = path.join('build', 'app.apk');
-    return new AndroidApk(localPath: localPath, id: id, launchActivity: launchActivity);
+    return new AndroidApk(
+      buildDir: 'build',
+      id: id,
+      apkPath: path.join('build', 'app.apk'),
+      launchActivity: launchActivity
+    );
   }
+
+  @override
+  String get name => path.basename(apkPath);
 }
 
 class IOSApp extends ApplicationPackage {
+  static final String kBundleName = 'Runner.app';
+
   IOSApp({
-    String iosProjectDir,
-    String iosProjectBundleId
-  }) : super(localPath: iosProjectDir, id: iosProjectBundleId);
+    String projectDir,
+    String projectBundleId
+  }) : super(rootPath: projectDir, id: projectBundleId);
 
   factory IOSApp.fromCurrentDirectory() {
     if (getCurrentHostPlatform() != HostPlatform.darwin_x64)
@@ -91,12 +101,25 @@ class IOSApp extends ApplicationPackage {
     if (value == null)
       return null;
 
-    String projectDir = path.join('ios', '.generated');
-    return new IOSApp(iosProjectDir: projectDir, iosProjectBundleId: value);
+    return new IOSApp(
+      projectDir: path.join('ios', '.generated'),
+      projectBundleId: value
+    );
   }
 
   @override
+  String get name => kBundleName;
+
+  @override
   String get displayName => id;
+
+  String get simulatorBundlePath => _buildAppPath('iphonesimulator');
+
+  String get deviceBundlePath => _buildAppPath('iphoneos');
+
+  String _buildAppPath(String type) {
+    return path.join(rootPath, 'build', 'Release-$type', kBundleName);
+  }
 }
 
 ApplicationPackage getApplicationPackageForPlatform(TargetPlatform platform) {

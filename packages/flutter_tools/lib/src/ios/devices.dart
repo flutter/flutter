@@ -6,8 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
-
 import '../application_package.dart';
 import '../base/os.dart';
 import '../base/process.dart';
@@ -127,7 +125,8 @@ class IOSDevice extends Device {
   @override
   bool installApp(ApplicationPackage app) {
     try {
-      runCheckedSync(<String>[installerPath, '-i', app.localPath]);
+      IOSApp iosApp = app;
+      runCheckedSync(<String>[installerPath, '-i', iosApp.deviceBundlePath]);
       return true;
     } catch (e) {
       return false;
@@ -172,7 +171,8 @@ class IOSDevice extends Device {
     }
 
     // Step 2: Check that the application exists at the specified path.
-    Directory bundle = new Directory(path.join(app.localPath, 'build', 'Release-iphoneos', 'Runner.app'));
+    IOSApp iosApp = app;
+    Directory bundle = new Directory(iosApp.deviceBundlePath);
     bool bundleExists = bundle.existsSync();
     if (!bundleExists) {
       printError('Could not find the built application bundle at ${bundle.path}.');
@@ -187,6 +187,7 @@ class IOSDevice extends Device {
       id,
       '--bundle',
       bundle.path,
+      '--justlaunch',
     ]);
 
     if (installationResult != 0) {

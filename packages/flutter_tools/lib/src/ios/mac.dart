@@ -120,7 +120,7 @@ Future<bool> buildIOSXcodeProject(ApplicationPackage app, BuildMode mode,
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
 
-  await _addServicesToBundle(new Directory(app.localPath));
+  await _addServicesToBundle(new Directory(app.rootPath));
 
   List<String> commands = <String>[
     '/usr/bin/env',
@@ -151,7 +151,7 @@ Future<bool> buildIOSXcodeProject(ApplicationPackage app, BuildMode mode,
   printTrace(commands.join(' '));
 
   ProcessResult result = Process.runSync(
-    commands.first, commands.sublist(1), workingDirectory: app.localPath
+    commands.first, commands.sublist(1), workingDirectory: app.rootPath
   );
 
   if (result.exitCode != 0) {
@@ -199,7 +199,7 @@ bool _validateEngineRevision(ApplicationPackage app) {
 }
 
 String _getIOSEngineRevision(ApplicationPackage app) {
-  File revisionFile = new File(path.join(app.localPath, 'REVISION'));
+  File revisionFile = new File(path.join(app.rootPath, 'REVISION'));
   if (revisionFile.existsSync()) {
     // The format is 'REVISION-mode'. We only need the revision.
     String revisionStamp = revisionFile.readAsStringSync().trim();
