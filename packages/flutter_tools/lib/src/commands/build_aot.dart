@@ -9,6 +9,7 @@ import 'package:path/path.dart' as path;
 
 import '../base/process.dart';
 import '../build_info.dart';
+import '../dart/sdk.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import 'run.dart';
@@ -118,6 +119,12 @@ String buildAotSnapshot(
   String vmEntryPoints = path.join(entryPointsDir, 'dart_vm_entry_points.txt');
 
   String packagesPath = path.absolute(Directory.current.path, 'packages');
+  if (!FileSystemEntity.isDirectorySync(packagesPath)) {
+    printStatus('Missing packages directory. Running `pub get` to work around\n' +
+               'https://github.com/dart-lang/sdk/issues/26362');
+    // We don't use [pubGet] because we explicitly want to avoid --no-package-symlinks.
+    runCheckedSync(<String>[sdkBinaryName('pub'), 'get', '--no-precompile']);
+  }
   if (!FileSystemEntity.isDirectorySync(packagesPath)) {
     printError('Could not find packages directory: $packagesPath\n' +
                'Did you run `pub get` in this directory?');
