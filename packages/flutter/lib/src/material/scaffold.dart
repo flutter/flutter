@@ -547,11 +547,17 @@ class ScaffoldState extends State<Scaffold> {
     final ScrollableState scrollable = notification.scrollable;
     if ((scrollable.config.scrollDirection == Axis.vertical) &&
         (config.scrollableKey == null || config.scrollableKey == scrollable.config.key)) {
-      final double newScrollOffset = scrollable.scrollOffset;
-      setState(() {
-        _scrollOffsetDelta = _scrollOffset - newScrollOffset;
-        _scrollOffset = newScrollOffset;
-      });
+      double newScrollOffset = scrollable.scrollOffset;
+      if (ClampOverscrolls.of(scrollable.context)) {
+        ExtentScrollBehavior limits = scrollable.scrollBehavior;
+        newScrollOffset = newScrollOffset.clamp(limits.minScrollOffset, limits.maxScrollOffset);
+      }
+      if (_scrollOffset != newScrollOffset) {
+        setState(() {
+          _scrollOffsetDelta = _scrollOffset - newScrollOffset;
+          _scrollOffset = newScrollOffset;
+        });
+      }
     }
     return false;
   }
