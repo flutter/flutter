@@ -118,7 +118,7 @@ class IOSApp extends ApplicationPackage {
   String get deviceBundlePath => _buildAppPath('iphoneos');
 
   String _buildAppPath(String type) {
-    return path.join(rootPath, 'build', 'Release-${type}', kBundleName);
+    return path.join(rootPath, 'build', 'Release-$type', kBundleName);
   }
 }
 
