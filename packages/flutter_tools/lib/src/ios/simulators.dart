@@ -424,6 +424,7 @@ class IOSSimulator extends Device {
   @override
   bool isAppInstalled(ApplicationPackage app) {
     try {
+      // TODO(tvolkert): This logic is wrong; simulatorHomeDirectory always exists
       String simulatorHomeDirectory = _getSimulatorAppHomeDirectory(app);
       return FileSystemEntity.isDirectorySync(simulatorHomeDirectory);
     } catch (e) {
@@ -540,7 +541,7 @@ class IOSSimulator extends Device {
     }
 
     // Step 2: Assert that the Xcode project was successfully built.
-    Directory bundle = new Directory(path.join(app.localPath, 'build', 'Release-iphonesimulator', 'Runner.app'));
+    Directory bundle = new Directory(app.localPath);
     bool bundleExists = await bundle.exists();
     if (!bundleExists) {
       printError('Could not find the built application bundle at ${bundle.path}.');

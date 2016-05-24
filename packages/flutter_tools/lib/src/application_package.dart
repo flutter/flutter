@@ -11,6 +11,9 @@ import 'build_info.dart';
 import 'ios/plist_utils.dart';
 
 abstract class ApplicationPackage {
+  /// Path to the package's root folder.
+  final String rootPath;
+
   /// Path to the actual apk or bundle.
   final String localPath;
 
@@ -20,10 +23,11 @@ abstract class ApplicationPackage {
   /// File name of the apk or bundle.
   final String name;
 
-  ApplicationPackage({
-    String localPath,
-    this.id
-  }) : localPath = localPath, name = path.basename(localPath) {
+  ApplicationPackage({String rootPath, String localPath, this.id})
+      : rootPath = rootPath,
+        localPath = localPath,
+        name = path.basename(localPath) {
+    assert(rootPath != null);
     assert(localPath != null);
     assert(id != null);
   }
@@ -39,10 +43,11 @@ class AndroidApk extends ApplicationPackage {
   final String launchActivity;
 
   AndroidApk({
-    String localPath,
+    String androidBuildDir,
+    String androidApkPath,
     String id,
     this.launchActivity
-  }) : super(localPath: localPath, id: id) {
+  }) : super(rootPath: androidBuildDir, localPath: androidApkPath, id: id) {
     assert(launchActivity != null);
   }
 
@@ -71,16 +76,25 @@ class AndroidApk extends ApplicationPackage {
     if (id == null || launchActivity == null)
       return null;
 
-    String localPath = path.join('build', 'app.apk');
-    return new AndroidApk(localPath: localPath, id: id, launchActivity: launchActivity);
+    return new AndroidApk(
+      androidBuildDir: 'build',
+      androidApkPath: path.join('build', 'app.apk'),
+      id: id,
+      launchActivity: launchActivity
+    );
   }
 }
 
 class IOSApp extends ApplicationPackage {
   IOSApp({
     String iosProjectDir,
+    String iosAppPath,
     String iosProjectBundleId
-  }) : super(localPath: iosProjectDir, id: iosProjectBundleId);
+  }) : super(
+    rootPath: iosProjectDir,
+    localPath: iosAppPath,
+    id: iosProjectBundleId
+  );
 
   factory IOSApp.fromCurrentDirectory() {
     if (getCurrentHostPlatform() != HostPlatform.darwin_x64)
@@ -92,7 +106,11 @@ class IOSApp extends ApplicationPackage {
       return null;
 
     String projectDir = path.join('ios', '.generated');
-    return new IOSApp(iosProjectDir: projectDir, iosProjectBundleId: value);
+    return new IOSApp(
+      iosProjectDir: projectDir,
+      iosAppPath: path.join(projectDir, 'build', 'Release-iphoneos', 'Runner.app'),
+      iosProjectBundleId: value
+    );
   }
 
   @override

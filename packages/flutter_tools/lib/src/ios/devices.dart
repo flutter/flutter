@@ -172,7 +172,7 @@ class IOSDevice extends Device {
     }
 
     // Step 2: Check that the application exists at the specified path.
-    Directory bundle = new Directory(path.join(app.localPath, 'build', 'Release-iphoneos', 'Runner.app'));
+    Directory bundle = new Directory(app.localPath);
     bool bundleExists = bundle.existsSync();
     if (!bundleExists) {
       printError('Could not find the built application bundle at ${bundle.path}.');
@@ -187,6 +187,7 @@ class IOSDevice extends Device {
       id,
       '--bundle',
       bundle.path,
+      '--justlaunch',
     ]);
 
     if (installationResult != 0) {
