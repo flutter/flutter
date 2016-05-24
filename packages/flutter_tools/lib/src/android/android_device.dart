@@ -187,7 +187,7 @@ class AndroidDevice extends Device {
   }
 
   String _getSourceSha1(ApplicationPackage app) {
-    File shaFile = new File('${app.localPath}.sha1');
+    File shaFile = new File('${app.apkPath}.sha1');
     return shaFile.existsSync() ? shaFile.readAsStringSync() : '';
   }
 
@@ -207,15 +207,15 @@ class AndroidDevice extends Device {
 
   @override
   bool installApp(ApplicationPackage app) {
-    if (!FileSystemEntity.isFileSync(app.localPath)) {
-      printError('"${app.localPath}" does not exist.');
+    if (!FileSystemEntity.isFileSync(app.apkPath)) {
+      printError('"${app.apkPath}" does not exist.');
       return false;
     }
 
     if (!_checkForSupportedAdbVersion() || !_checkForSupportedAndroidVersion())
       return false;
 
-    String installOut = runCheckedSync(adbCommandForDevice(<String>['install', '-r', app.localPath]));
+    String installOut = runCheckedSync(adbCommandForDevice(<String>['install', '-r', app.apkPath]));
     RegExp failureExp = new RegExp(r'^Failure.*$', multiLine: true);
     String failure = failureExp.stringMatch(installOut);
     if (failure != null) {

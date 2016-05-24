@@ -127,7 +127,7 @@ class IOSDevice extends Device {
   @override
   bool installApp(ApplicationPackage app) {
     try {
-      runCheckedSync(<String>[installerPath, '-i', app.localPath]);
+      runCheckedSync(<String>[installerPath, '-i', app.deviceBundlePath]);
       return true;
     } catch (e) {
       return false;
@@ -172,7 +172,7 @@ class IOSDevice extends Device {
     }
 
     // Step 2: Check that the application exists at the specified path.
-    Directory bundle = new Directory(app.localPath);
+    Directory bundle = new Directory(app.deviceBundlePath);
     bool bundleExists = bundle.existsSync();
     if (!bundleExists) {
       printError('Could not find the built application bundle at ${bundle.path}.');

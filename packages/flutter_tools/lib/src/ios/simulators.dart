@@ -363,7 +363,7 @@ class IOSSimulator extends Device {
   @override
   bool installApp(ApplicationPackage app) {
     try {
-      SimControl.instance.install(id, app.localPath);
+      SimControl.instance.install(id, app.simulatorBundlePath);
       return true;
     } catch (e) {
       return false;
@@ -541,7 +541,7 @@ class IOSSimulator extends Device {
     }
 
     // Step 2: Assert that the Xcode project was successfully built.
-    Directory bundle = new Directory(app.localPath);
+    Directory bundle = new Directory(app.simulatorBundlePath);
     bool bundleExists = await bundle.exists();
     if (!bundleExists) {
       printError('Could not find the built application bundle at ${bundle.path}.');
