@@ -25,7 +25,12 @@ class BuildAotCommand extends FlutterCommand {
     usesTargetOption();
     addBuildModeFlags();
     usesPubOption();
-    argParser.addOption('output-dir', defaultsTo: _kDefaultAotOutputDir);
+    argParser
+      ..addOption('output-dir', defaultsTo: _kDefaultAotOutputDir)
+      ..addOption('target-platform',
+        defaultsTo: 'android-arm',
+        allowed: <String>['android-arm', 'ios']
+      );
   }
 
   @override
@@ -36,9 +41,15 @@ class BuildAotCommand extends FlutterCommand {
 
   @override
   Future<int> runInProject() async {
+    String targetPlatform = argResults['target-platform'];
+    TargetPlatform platform = getTargetPlatformForName(targetPlatform);
+    if (platform == null) {
+      printError('Unknown platform: $targetPlatform');
+      return 1;
+    }
     String outputPath = buildAotSnapshot(
       findMainDartFile(argResults['target']),
-      TargetPlatform.android_arm,
+      platform,
       getBuildMode(),
       outputPath: argResults['output-dir']
     );
@@ -63,6 +74,11 @@ String buildAotSnapshot(
 }) {
   if (!isAotBuildMode(buildMode)) {
     printError('${getModeName(buildMode)} mode does not support AOT compilation.');
+    return null;
+  }
+
+  if (platform != TargetPlatform.android_arm && platform != TargetPlatform.ios) {
+    printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
     return null;
   }
 

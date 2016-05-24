@@ -22,7 +22,7 @@ class BuildIOSCommand extends FlutterCommand {
   final String name = 'ios';
 
   @override
-  final String description = 'Build an iOS application bundle (Mac OSX host only).';
+  final String description = 'Build an iOS application bundle (Mac OS X host only).';
 
   @override
   Future<int> runInProject() async {
@@ -46,7 +46,7 @@ class BuildIOSCommand extends FlutterCommand {
       printStatus('You will have to manually codesign before deploying to device.');
     }
 
-    String logTarget = forSimulator ? "simulator" : "device";
+    String logTarget = forSimulator ? 'simulator' : 'device';
 
     printStatus('Building $app for $logTarget...');
 
