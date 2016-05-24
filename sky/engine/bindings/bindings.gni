@@ -52,11 +52,14 @@ template("dart_precompile") {
       "//dart/runtime/bin:gen_snapshot($dart_host_toolchain)",
       "//sky/engine/bindings:generate_dart_ui"
     ]
+    dart_io_entry_points_manifest =
+        "//dart/runtime/bin/dart_io_entries.txt"
     embedder_entry_points_manifest =
         "//sky/engine/bindings/dart_vm_entry_points.txt"
     inputs = [
       "//dart/runtime/tools/create_snapshot_bin.py",
       "//sky/engine/bindings/internals.dart",
+      dart_io_entry_points_manifest,
       embedder_entry_points_manifest,
     ] + rebase_path(dart_mojo_internal_sdk_sources,
                     "",
@@ -94,6 +97,8 @@ template("dart_precompile") {
       rebase_path(assembly_path, root_build_dir),
       "--embedder_entry_points_manifest",
       rebase_path(embedder_entry_points_manifest, root_build_dir),
+      "--embedder_entry_points_manifest",
+      rebase_path(dart_io_entry_points_manifest, root_build_dir),
       "--target_os",
       target_os,
       "--url_mapping=dart:mojo.internal,$dart_mojo_internal_path",
