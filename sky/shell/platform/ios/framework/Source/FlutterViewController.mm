@@ -31,6 +31,9 @@
 #include "sky/shell/shell.h"
 #include "sky/shell/shell_view.h"
 
+@interface FlutterViewController() <UIAlertViewDelegate>
+@end
+
 void FlutterInit(int argc, const char* argv[]) {
   NSBundle* bundle = [NSBundle bundleForClass:[FlutterViewController class]];
   NSString* icuDataPath = [bundle pathForResource:@"icudtl" ofType:@"dat"];
@@ -141,6 +144,11 @@ void FlutterInit(int argc, const char* argv[]) {
 
 #pragma mark - Initializing the engine
 
+- (void)alertView:(UIAlertView*)alertView
+clickedButtonAtIndex:(NSInteger)buttonIndex {
+  exit(0);
+}
+
 - (void)connectToEngineAndLoad {
   TRACE_EVENT0("flutter", "connectToEngineAndLoad");
 
@@ -160,7 +168,7 @@ void FlutterInit(int argc, const char* argv[]) {
                             UIAlertView* alert = [[UIAlertView alloc]
                                     initWithTitle:@"Launch Error"
                                           message:message
-                                         delegate:nil
+                                         delegate:self
                                 cancelButtonTitle:@"OK"
                                 otherButtonTitles:nil];
                             [alert show];
