@@ -9,7 +9,7 @@ import 'binding.dart';
 /// Signature for the [onTick] constructor argument of the [Ticker] class.
 ///
 /// The argument is the time that the object had spent enabled so far
-/// at the time of the callback being invoked.
+/// at the time of the callback being called.
 typedef void TickerCallback(Duration elapsed);
 
 /// Calls its callback once per animation frame.
@@ -28,7 +28,7 @@ class Ticker {
   int _animationId;
   Duration _startTime;
 
-  /// Whether this ticker has scheduled a call to invoke its callback
+  /// Whether this ticker has scheduled a call to call its callback
   /// on the next frame.
   bool get isTicking => _completer != null;
 

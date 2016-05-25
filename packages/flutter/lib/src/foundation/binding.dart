@@ -125,8 +125,7 @@ abstract class BindingBase {
   /// name "ext.flutter.name"), which takes no arguments and returns
   /// no value.
   ///
-  /// Invokes the `callback` callback when the service extension is
-  /// invoked.
+  /// Calls the `callback` callback when the service extension is called.
   void registerSignalServiceExtension({
     @required String name,
     @required VoidCallback callback
@@ -149,11 +148,11 @@ abstract class BindingBase {
   /// than "true" is considered equivalent to "false". Other arguments
   /// are ignored.)
   ///
-  /// Invokes the `getter` callback to obtain the value when
-  /// responding to the service extension method being invoked.
+  /// Calls the `getter` callback to obtain the value when
+  /// responding to the service extension method being called.
   ///
-  /// Invokes the `setter` callback with the new value when the
-  /// service extension method is invoked with a new value.
+  /// Calls the `setter` callback with the new value when the
+  /// service extension method is called with a new value.
   void registerBoolServiceExtension({
     String name,
     @required ValueGetter<bool> getter,
@@ -178,11 +177,11 @@ abstract class BindingBase {
   /// that can be parsed by [double.parse], and can be omitted to read
   /// the current value. (Other arguments are ignored.)
   ///
-  /// Invokes the `getter` callback to obtain the value when
-  /// responding to the service extension method being invoked.
+  /// Calls the `getter` callback to obtain the value when
+  /// responding to the service extension method being called.
   ///
-  /// Invokes the `setter` callback with the new value when the
-  /// service extension method is invoked with a new value.
+  /// Calls the `setter` callback with the new value when the
+  /// service extension method is called with a new value.
   void registerNumericServiceExtension({
     @required String name,
     @required ValueGetter<double> getter,
@@ -202,7 +201,7 @@ abstract class BindingBase {
   }
 
   /// Registers a service extension method with the given name (full
-  /// name "ext.flutter.name"). The given callback is invoked when the
+  /// name "ext.flutter.name"). The given callback is called when the
   /// extension method is called. The callback must return a [Future]
   /// that either eventually completes to a return value in the form
   /// of a name/value map where the values can all be converted to

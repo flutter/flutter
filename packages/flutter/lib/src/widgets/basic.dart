@@ -321,7 +321,7 @@ class ClipOval extends SingleChildRenderObjectWidget {
 
 /// Clips its child using a path.
 ///
-/// Invokes a callback on a delegate whenever the widget is to be
+/// Calls a callback on a delegate whenever the widget is to be
 /// painted. The callback returns a path and the widget prevents the
 /// child from painting outside the path.
 ///
@@ -3042,7 +3042,7 @@ class KeyedSubtree extends StatelessWidget {
   Widget build(BuildContext context) => child;
 }
 
-/// A platonic widget that invokes a closure to obtain its child widget.
+/// A platonic widget that calls a closure to obtain its child widget.
 class Builder extends StatelessWidget {
   Builder({ Key key, this.builder }) : super(key: key) {
     assert(builder != null);
@@ -3050,7 +3050,7 @@ class Builder extends StatelessWidget {
 
   /// Called to obtain the child widget.
   ///
-  /// This function is invoked whenever this widget is included in its parent's
+  /// This function is called whenever this widget is included in its parent's
   /// build and the old widget (if any) that it synchronizes with has a distinct
   /// object identity. Typically the parent's build method will construct
   /// a new tree of widgets and so a new Builder child will not be [identical]

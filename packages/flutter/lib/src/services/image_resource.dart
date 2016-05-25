@@ -86,7 +86,7 @@ class ImageResource {
       try {
         listener(_image);
       } catch (exception, stack) {
-        _handleImageError('by a synchronously-invoked image listener', exception, stack);
+        _handleImageError('by a synchronously-called image listener', exception, stack);
       }
     }
   }

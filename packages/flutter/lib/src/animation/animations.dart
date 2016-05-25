@@ -79,9 +79,9 @@ class AlwaysStoppedAnimation<T> extends Animation<T> {
   /// Creates an [AlwaysStoppedAnimation] with the given value.
   ///
   /// Since the [value] and [status] of an [AlwaysStoppedAnimation] can never
-  /// change, the listeners can never be invoked. It is therefore safe to reuse
+  /// change, the listeners can never be called. It is therefore safe to reuse
   /// an [AlwaysStoppedAnimation] instance in multiple places. If the [value] to
-  /// be used is known at compile time, the constructor should be invoked as a
+  /// be used is known at compile time, the constructor should be called as a
   /// `const` constructor.
   const AlwaysStoppedAnimation(this.value);
 

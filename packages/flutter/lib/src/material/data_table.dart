@@ -62,7 +62,7 @@ class DataColumn {
   /// right-aligned.
   final bool numeric;
 
-  /// Invoked when the user asks to sort the table using this column.
+  /// Called when the user asks to sort the table using this column.
   ///
   /// If null, the column will not be considered sortable.
   ///
@@ -99,7 +99,7 @@ class DataRow {
   /// If the table never changes once created, no key is necessary.
   final LocalKey key;
 
-  /// Invoked when the user selects or unselects a selectable row.
+  /// Called when the user selects or unselects a selectable row.
   ///
   /// If this is not null, then the row is selectable. The current
   /// selection state of the row is given by [selected].
@@ -179,9 +179,9 @@ class DataCell {
   /// the icon will have no effect.
   final bool showEditIcon;
 
-  /// Invoked if the cell is tapped.
+  /// Called if the cell is tapped.
   ///
-  /// If non-null, tapping the cell will invoke this callback. If
+  /// If non-null, tapping the cell will call this callback. If
   /// null, tapping the cell will attempt to select the row (if
   /// [TableRow.onSelectChanged] is provided).
   final VoidCallback onTap;

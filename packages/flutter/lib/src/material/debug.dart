@@ -12,7 +12,7 @@ import 'scaffold.dart';
 /// Used by many material design widgets to make sure that they are
 /// only used in contexts where they can print ink onto some material.
 ///
-/// To invoke this function, use the following pattern, typically in the
+/// To call this function, use the following pattern, typically in the
 /// relevant Widget's [build] method:
 ///
 /// ```dart
@@ -51,7 +51,7 @@ bool debugCheckHasMaterial(BuildContext context) {
 /// For example, the [AppBar] in some situations requires a Scaffold
 /// to do the right thing with scrolling.
 ///
-/// To invoke this function, use the following pattern, typically in the
+/// To call this function, use the following pattern, typically in the
 /// relevant Widget's [build] method:
 ///
 /// ```dart

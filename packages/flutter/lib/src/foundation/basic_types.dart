@@ -14,9 +14,9 @@ typedef void ValueChanged<T>(T value);
 /// Signature for callbacks that report that a value has been set.
 ///
 /// This is the same signature as [ValueChanged], but is used when the
-/// callback is invoked even if the underlying value has not changed.
+/// callback is called even if the underlying value has not changed.
 /// For example, service extensions use this callback because they
-/// invoke the callback whenever the extension is invoked with a
+/// call the callback whenever the extension is called with a
 /// value, regardless of whether the given value is new or not.
 typedef void ValueSetter<T>(T value);
 

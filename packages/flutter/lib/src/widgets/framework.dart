@@ -421,7 +421,7 @@ abstract class State<T extends StatefulWidget> {
       if (result is Future) {
         throw new FlutterError(
           'setState() callback argument returned a Future.\n'
-          'The setState() method on $this was invoked with a closure or method that '
+          'The setState() method on $this was called with a closure or method that '
           'returned a Future. Maybe it is marked as "async".\n'
           'Instead of performing asynchronous work inside a call to setState(), first '
           'execute the work (without updating the widget state), and then synchronously '
@@ -717,7 +717,7 @@ class BuildOwner {
       if (_dirtyElements.contains(element)) {
         throw new FlutterError(
           'scheduleBuildFor() called for a widget for which a build was already scheduled.\n'
-          'The method was invoked for the following element:\n'
+          'The method was called for the following element:\n'
           '  $element\n'
           'The current dirty list consists of:\n'
           '  $_dirtyElements\n'
@@ -728,7 +728,7 @@ class BuildOwner {
       if (!element.dirty) {
         throw new FlutterError(
           'scheduleBuildFor() called for a widget that is not marked as dirty.\n'
-          'The method was invoked for the following element:\n'
+          'The method was called for the following element:\n'
           '  $element\n'
           'This element is not current marked as dirty. Make sure to set the dirty flag before '
           'calling scheduleBuildFor().\n'
@@ -1520,7 +1520,7 @@ abstract class ComponentElement extends BuildableElement {
     rebuild();
   }
 
-  /// Reinvokes the build() method of the [StatelessWidget] object (for
+  /// Calls the build() method of the [StatelessWidget] object (for
   /// stateless widgets) or the [State] object (for stateful widgets) and
   /// then updates the widget tree.
   ///

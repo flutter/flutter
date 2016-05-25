@@ -212,7 +212,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// test failures.
   bool showAppDumpInErrors = false;
 
-  /// Invoke the callback inside a [FakeAsync] scope on which [pump] can
+  /// Call the callback inside a [FakeAsync] scope on which [pump] can
   /// advance time.
   ///
   /// Returns a future which completes when the test has run.

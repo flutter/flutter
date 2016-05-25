@@ -104,7 +104,7 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
     _renderView.attach(pipelineOwner);
   }
 
-  /// Invoked when the system metrics change.
+  /// Called when the system metrics change.
   ///
   /// See [ui.window.onMetricsChanged].
   void handleMetricsChanged() {

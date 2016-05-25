@@ -1388,7 +1388,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
 /// this animation and repaint whenever the animation ticks, avoiding both the
 /// build and layout phases of the pipeline.
 ///
-/// The [hitTest] method is invoked when the user interacts with the underlying
+/// The [hitTest] method is called when the user interacts with the underlying
 /// render object, to determine if the user hit the object or missed it.
 abstract class CustomPainter {
   /// Creates a custom painter.
@@ -1439,9 +1439,9 @@ abstract class CustomPainter {
   ///
   /// If the method returns `false`, then the paint call might be optimized away.
   ///
-  /// It's possible that the [paint] method will get invoked even if
+  /// It's possible that the [paint] method will get called even if
   /// [shouldRepaint] returns `false` (e.g. if an ancestor or descendant needed to
-  /// be repainted). It's also possible that the [paint] method will get invoked
+  /// be repainted). It's also possible that the [paint] method will get called
   /// without [shouldRepaint] being called at all (e.g. if the box changes
   /// size).
   ///
@@ -1489,7 +1489,7 @@ class RenderCustomPaint extends RenderProxyBox {
 
   /// The background custom paint delegate.
   ///
-  /// This painter, if non-null, is invoked to paint behind the children.
+  /// This painter, if non-null, is called to paint behind the children.
   CustomPainter get painter => _painter;
   CustomPainter _painter;
   /// Set a new background custom paint delegate.
@@ -1497,11 +1497,11 @@ class RenderCustomPaint extends RenderProxyBox {
   /// If the new delegate is the same as the previous one, this does nothing.
   ///
   /// If the new delegate is the same class as the previous one, then the new
-  /// delegate has its [CustomPainter.shouldRepaint] invoked; if the result is
-  /// `true`, then the delegate will be invoked.
+  /// delegate has its [CustomPainter.shouldRepaint] called; if the result is
+  /// `true`, then the delegate will be called.
   ///
   /// If the new delegate is a different class than the previous one, then the
-  /// delegate will be invoked.
+  /// delegate will be called.
   ///
   /// If the new value is null, then there is no background custom painter.
   set painter (CustomPainter newPainter) {
@@ -1514,7 +1514,7 @@ class RenderCustomPaint extends RenderProxyBox {
 
   /// The foreground custom paint delegate.
   ///
-  /// This painter, if non-null, is invoked to paint in front of the children.
+  /// This painter, if non-null, is called to paint in front of the children.
   CustomPainter get foregroundPainter => _foregroundPainter;
   CustomPainter _foregroundPainter;
   /// Set a new foreground custom paint delegate.
@@ -1522,11 +1522,11 @@ class RenderCustomPaint extends RenderProxyBox {
   /// If the new delegate is the same as the previous one, this does nothing.
   ///
   /// If the new delegate is the same class as the previous one, then the new
-  /// delegate has its [CustomPainter.shouldRepaint] invoked; if the result is
-  /// `true`, then the delegate will be invoked.
+  /// delegate has its [CustomPainter.shouldRepaint] called; if the result is
+  /// `true`, then the delegate will be called.
   ///
   /// If the new delegate is a different class than the previous one, then the
-  /// delegate will be invoked.
+  /// delegate will be called.
   ///
   /// If the new value is null, then there is no foreground custom painter.
   set foregroundPainter (CustomPainter newPainter) {
@@ -1633,7 +1633,7 @@ typedef void PointerMoveEventListener(PointerMoveEvent event);
 typedef void PointerUpEventListener(PointerUpEvent event);
 typedef void PointerCancelEventListener(PointerCancelEvent event);
 
-/// Invokes the callbacks in response to pointer events.
+/// Calls the callbacks in response to pointer events.
 class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   RenderPointerListener({
     this.onPointerDown,

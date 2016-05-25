@@ -81,7 +81,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   // _firstTap records the successful tap.
   // Second tap in progress: Much like the "first tap in progress" state, but
   // _firstTap is non-null.  If a tap completes successfully while in this
-  // state, the callback is invoked and the state is reset.
+  // state, the callback is called and the state is reset.
   // There are various other scenarios that cause the state to reset:
   // - All in-progress taps are rejected (by time, distance, pointercancel, etc)
   // - The long timer between taps expires

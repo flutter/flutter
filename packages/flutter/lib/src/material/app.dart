@@ -99,7 +99,7 @@ class MaterialApp extends StatefulWidget {
   /// in this map for the [Navigator.defaultRouteName] route (`'/'`).
   ///
   /// If a route is requested that is not specified in this table (or
-  /// by [home]), then the [onGenerateRoute] callback is invoked to
+  /// by [home]), then the [onGenerateRoute] callback is called to
   /// build the page instead.
   final Map<String, WidgetBuilder> routes;
 
@@ -107,7 +107,7 @@ class MaterialApp extends StatefulWidget {
   /// named route.
   final RouteFactory onGenerateRoute;
 
-  /// Callback that is invoked when the operating system changes the
+  /// Callback that is called when the operating system changes the
   /// current locale.
   final LocaleChangedCallback onLocaleChanged;
 

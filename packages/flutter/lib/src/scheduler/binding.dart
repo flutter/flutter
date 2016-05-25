@@ -26,7 +26,7 @@ double timeDilation = 1.0;
 /// common time base.
 typedef void FrameCallback(Duration timeStamp);
 
-/// Signature for the [SchedulerBinding.schedulingStrategy] callback. Invoked
+/// Signature for the [SchedulerBinding.schedulingStrategy] callback. Called
 /// whenever the system needs to decide whether a task at a given
 /// priority needs to be run.
 ///
@@ -142,7 +142,7 @@ abstract class SchedulerBinding extends BindingBase {
     _hasRequestedAnEventLoopCallback = true;
   }
 
-  /// Invoked by the system when there is time to run tasks.
+  /// Called by the system when there is time to run tasks.
   void handleEventLoopCallback() {
     _hasRequestedAnEventLoopCallback = false;
     _runTasks();
@@ -177,7 +177,7 @@ abstract class SchedulerBinding extends BindingBase {
   /// The current number of transient frame callbacks scheduled.
   ///
   /// This is reset to zero just before all the currently scheduled
-  /// transient callbacks are invoked, at the start of a frame.
+  /// transient callbacks are called, at the start of a frame.
   ///
   /// This number is primarily exposed so that tests can verify that
   /// there are no unexpected transient callbacks still registered
@@ -197,7 +197,7 @@ abstract class SchedulerBinding extends BindingBase {
   /// the stack trace that is stored for this callback is the original stack
   /// trace for when the callback was _first_ registered, rather than the stack
   /// trace for when the callback is reregistered. This makes it easier to track
-  /// down the original reason that a particular callback was invoked. If
+  /// down the original reason that a particular callback was called. If
   /// `rescheduling` is true, the call must be in the context of a frame
   /// callback.
   ///
@@ -216,7 +216,7 @@ abstract class SchedulerBinding extends BindingBase {
   /// These callbacks are executed in the order in which they have
   /// been added.
   ///
-  /// Callbacks registered with this method will not be invoked until
+  /// Callbacks registered with this method will not be called until
   /// a frame is requested. To register a callback and ensure that a
   /// frame is immediately scheduled, use [scheduleFrameCallback].
   ///
@@ -228,7 +228,7 @@ abstract class SchedulerBinding extends BindingBase {
   /// the stack trace that is stored for this callback is the original stack
   /// trace for when the callback was _first_ registered, rather than the stack
   /// trace for when the callback is reregistered. This makes it easier to track
-  /// down the original reason that a particular callback was invoked. If
+  /// down the original reason that a particular callback was called. If
   /// `rescheduling` is true, the call must be in the context of a frame
   /// callback.
   ///
@@ -259,7 +259,7 @@ abstract class SchedulerBinding extends BindingBase {
   /// This is expected to be called at the end of tests (the
   /// flutter_test framework does it automatically in normal cases).
   ///
-  /// Invoke this method when you expect there to be no transient
+  /// Call this method when you expect there to be no transient
   /// callbacks registered, in an assert statement with a message that
   /// you want printed when a transient callback is registered:
   ///
@@ -305,7 +305,7 @@ abstract class SchedulerBinding extends BindingBase {
 
   /// Adds a persistent frame callback.
   ///
-  /// Persistent callbacks are invoked after transient
+  /// Persistent callbacks are called after transient
   /// (non-persistent) frame callbacks.
   ///
   /// Does *not* request a new frame. Conceptually, persistent frame
@@ -346,7 +346,7 @@ abstract class SchedulerBinding extends BindingBase {
   /// If necessary, schedules a new frame by calling
   /// [ui.window.scheduleFrame].
   ///
-  /// After this is called, the engine will (eventually) invoke
+  /// After this is called, the engine will (eventually) call
   /// [handleBeginFrame]. (This call might be delayed, e.g. if the
   /// device's screen is turned off it will typically be delayed until
   /// the screen is on and the application is visible.)
@@ -409,7 +409,7 @@ abstract class SchedulerBinding extends BindingBase {
     Timeline.finishSync();
   }
 
-  // Invokes the given [callback] with [timestamp] as argument.
+  // Calls the given [callback] with [timestamp] as argument.
   //
   // Wraps the callback in a try/catch and forwards any error to
   // [debugSchedulerExceptionHandler], if set. If not set, then simply prints
