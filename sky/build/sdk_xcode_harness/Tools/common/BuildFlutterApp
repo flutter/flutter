@@ -47,11 +47,17 @@ BuildApp() {
       interpreter_flag=""
     fi
 
+    local local_engine_flag=""
+    if [[ -n "$LOCAL_ENGINE" ]]; then
+      local_engine_flag="--local-engine=$LOCAL_ENGINE"
+    fi
+
     RunCommand ${FLUTTER_ROOT}/bin/flutter --suppress-analytics build aot \
       --target-platform=ios                                               \
       --release                                                           \
       --output-dir=${derived_dir}                                         \
-      ${interpreter_flag}
+      ${interpreter_flag}                                                 \
+      ${local_engine_flag}
 
     if [[ $? -ne 0 ]]; then
       EchoError "Failed to build $1."
