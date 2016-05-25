@@ -215,7 +215,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "${SOURCE_ROOT}/Tools/common/BuildFlutterApp ${FLUTTER_APPLICATION_PATH}";
+			shellScript = "/bin/sh ${SOURCE_ROOT}/Tools/common/BuildFlutterApp ${FLUTTER_APPLICATION_PATH}";
 		};
 		9E046CD71C9CA1AC00A1E391 /* Copy Extra Assets */ = {
 			isa = PBXShellScriptBuildPhase;
