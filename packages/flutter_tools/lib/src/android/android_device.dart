@@ -294,20 +294,32 @@ class AndroidDevice extends Device {
       printTrace('Waiting for observatory port to be available...');
 
       try {
-        Future<List<int>> scrapeServicePorts = Future.wait(
-          <Future<int>>[observatoryDiscovery.nextPort(), diagnosticDiscovery.nextPort()]
-        );
-        List<int> devicePorts = await scrapeServicePorts.timeout(new Duration(seconds: 20));
-        int observatoryDevicePort = devicePorts[0];
+        int observatoryDevicePort, diagnosticDevicePort;
+
+        if (options.buildMode == BuildMode.debug) {
+          Future<List<int>> scrapeServicePorts = Future.wait(
+            <Future<int>>[observatoryDiscovery.nextPort(), diagnosticDiscovery.nextPort()]
+          );
+          List<int> devicePorts = await scrapeServicePorts.timeout(new Duration(seconds: 20));
+          observatoryDevicePort = devicePorts[0];
+          diagnosticDevicePort = devicePorts[1];
+        } else {
+          observatoryDevicePort = await observatoryDiscovery.nextPort().timeout(new Duration(seconds: 20));
+        }
+
         printTrace('observatory port = $observatoryDevicePort');
         int observatoryLocalPort = await options.findBestObservatoryPort();
         // TODO(devoncarew): Remember the forwarding information (so we can later remove the
         // port forwarding).
         await _forwardPort(ProtocolDiscovery.kObservatoryService, observatoryDevicePort, observatoryLocalPort);
-        int diagnosticDevicePort = devicePorts[1];
-        printTrace('diagnostic port = $diagnosticDevicePort');
-        int diagnosticLocalPort = await options.findBestDiagnosticPort();
-        await _forwardPort(ProtocolDiscovery.kDiagnosticService, diagnosticDevicePort, diagnosticLocalPort);
+
+        int diagnosticLocalPort;
+        if (diagnosticDevicePort != null) {
+          printTrace('diagnostic port = $diagnosticDevicePort');
+          diagnosticLocalPort = await options.findBestDiagnosticPort();
+          await _forwardPort(ProtocolDiscovery.kDiagnosticService, diagnosticDevicePort, diagnosticLocalPort);
+        }
+
         return new LaunchResult.succeeded(
           observatoryPort: observatoryLocalPort,
           diagnosticPort: diagnosticLocalPort

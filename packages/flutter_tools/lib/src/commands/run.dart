@@ -101,7 +101,7 @@ class RunCommand extends RunCommandBase {
 
     DebuggingOptions options;
 
-    if (getBuildMode() != BuildMode.debug) {
+    if (getBuildMode() == BuildMode.release) {
       options = new DebuggingOptions.disabled(getBuildMode());
     } else {
       options = new DebuggingOptions.enabled(
