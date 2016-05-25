@@ -151,7 +151,8 @@ Future<bool> buildIOSXcodeProject(ApplicationPackage app, BuildMode mode,
   printTrace(commands.join(' '));
 
   ProcessResult result = Process.runSync(
-    commands.first, commands.sublist(1), workingDirectory: app.rootPath
+    commands.first, commands.sublist(1), workingDirectory: app.rootPath,
+    environment: childEnvironmentOverrides
   );
 
   if (result.exitCode != 0) {

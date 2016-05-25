@@ -10,6 +10,8 @@ import '../globals.dart';
 
 typedef String StringConverter(String string);
 
+final Map<String, String> childEnvironmentOverrides = new Map<String, String>();
+
 /// This runs the command in the background from the specified working
 /// directory. Completes when the process has been started.
 Future<Process> runCommand(List<String> cmd, { String workingDirectory }) async {
@@ -19,7 +21,8 @@ Future<Process> runCommand(List<String> cmd, { String workingDirectory }) async 
   Process process = await Process.start(
     executable,
     arguments,
-    workingDirectory: workingDirectory
+    workingDirectory: workingDirectory,
+    environment: childEnvironmentOverrides
   );
   return process;
 }
@@ -108,8 +111,11 @@ String _runWithLoggingSync(List<String> cmd, {
   if (truncateCommand && cmdText.length > 160)
     cmdText = cmdText.substring(0, 160) + '…';
   printTrace(cmdText);
-  ProcessResult results =
-      Process.runSync(cmd[0], cmd.getRange(1, cmd.length).toList(), workingDirectory: workingDirectory);
+  ProcessResult results = Process.runSync(
+    cmd[0], cmd.getRange(1, cmd.length).toList(),
+    workingDirectory: workingDirectory,
+    environment: childEnvironmentOverrides
+  );
 
   printTrace('Exit code ${results.exitCode} from: ${cmd.join(' ')}');
 
