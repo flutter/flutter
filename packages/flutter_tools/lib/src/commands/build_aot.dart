@@ -258,18 +258,32 @@ String buildAotSnapshot(
     String kDartVmIsolateSnapshotBufferO = path.join(outputDir.path, '$kDartVmIsolateSnapshotBuffer.o');
     String kDartIsolateSnapshotBufferO = path.join(outputDir.path, '$kDartIsolateSnapshotBuffer.o');
 
+    List<String> commonBuildOptions = <String>['-arch', 'arm64', '-miphoneos-version-min=8.0'];
     if (!interpreter)
-      runCheckedSync(<String>['xcrun', 'cc', '-c', assembly, '-o', assemblyO]);
-    runCheckedSync(<String>['xcrun', 'cc', '-c', kDartVmIsolateSnapshotBufferC, '-o', kDartVmIsolateSnapshotBufferO]);
-    runCheckedSync(<String>['xcrun', 'cc', '-c', kDartIsolateSnapshotBufferC, '-o', kDartIsolateSnapshotBufferO]);
+      runCheckedSync(<String>['xcrun', 'cc']
+        ..addAll(commonBuildOptions)
+        ..addAll(<String>['-c', assembly, '-o', assemblyO]));
+    runCheckedSync(<String>['xcrun', 'cc']
+      ..addAll(commonBuildOptions)
+      ..addAll(<String>['-c', kDartVmIsolateSnapshotBufferC, '-o', kDartVmIsolateSnapshotBufferO]));
+    runCheckedSync(<String>['xcrun', 'cc']
+      ..addAll(commonBuildOptions)
+      ..addAll(<String>['-c', kDartIsolateSnapshotBufferC, '-o', kDartIsolateSnapshotBufferO]));
 
     String appSo = path.join(outputDir.path, 'app.so');
 
-    List<String> linkCommand = <String>[
-      'xcrun', 'ld', '-dylib', '-o', appSo,
-      kDartVmIsolateSnapshotBufferO,
-      kDartIsolateSnapshotBufferO,
-    ];
+    List<String> linkCommand = <String>['xcrun', 'clang']
+      ..addAll(commonBuildOptions)
+      ..addAll(<String>[
+        '-dynamiclib',
+        '-nostdlib',
+        '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
+        '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
+        '-install_name', '@rpath/app.so',
+        '-o', appSo,
+        kDartVmIsolateSnapshotBufferO,
+        kDartIsolateSnapshotBufferO,
+    ]);
     if (!interpreter)
       linkCommand.add(assemblyO);
     runCheckedSync(linkCommand);
