@@ -88,7 +88,7 @@ Loader::Loader() {
 }
 
 void Loader::LoadPackagesMap(const base::FilePath& packages) {
-  packages_ = base::MakeAbsoluteFilePath(packages);
+  packages_ = packages;
   dependencies_.insert(packages_.AsUTF8Unsafe());
   std::string packages_source;
   if (!base::ReadFileToString(packages_, &packages_source)) {
