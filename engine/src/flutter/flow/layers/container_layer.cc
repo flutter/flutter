@@ -35,7 +35,8 @@ void ContainerLayer::PrerollChildren(PrerollContext* context,
 }
 
 void ContainerLayer::PaintChildren(PaintContext& context) const {
-  TRACE_EVENT0("flutter", "ContainerLayer::PaintChildren");
+  // Intentionally not tracing here as there should be no self-time
+  // and the trace event on this common function has a small overhead.
   for (auto& layer : layers_)
     layer->Paint(context);
 }
