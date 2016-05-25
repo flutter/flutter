@@ -7,11 +7,13 @@ set -e
 
 function follow_links() {
   file="$1"
+  cd -P "${file%/*}"
   while [ -h "$file" ]; do
     # On Mac OS, readlink -f doesn't work.
+    cd -P "${file%/*}"
     file="$(readlink "$file")"
   done
-  echo "$file"
+  echo "$PWD/${file##*/}"
 }
 
 PROG_NAME="$(follow_links "$BASH_SOURCE")"
