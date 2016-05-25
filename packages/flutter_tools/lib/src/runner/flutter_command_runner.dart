@@ -21,6 +21,7 @@ import '../version.dart';
 
 const String kFlutterRootEnvironmentVariableName = 'FLUTTER_ROOT'; // should point to //flutter/ (root of flutter/flutter repo)
 const String kFlutterEngineEnvironmentVariableName = 'FLUTTER_ENGINE'; // should point to //engine/src/ (root of flutter/engine repo)
+const String kFlutterBuildConfigEnvironmentVariableName = 'FLUTTER_BUILD_CONFIG'; // the directory in the out directory to use for local builds
 const String kSnapshotFileName = 'flutter_tools.snapshot'; // in //flutter/bin/cache/
 const String kFlutterToolsScriptFileName = 'flutter_tools.dart'; // in //flutter/packages/flutter_tools/bin/
 const String kFlutterEnginePackageName = 'sky_engine';
@@ -76,6 +77,7 @@ class FlutterCommandRunner extends CommandRunner {
         hide: !verboseHelp,
         help:
             'Name of a build output within the engine out directory, if you are building Flutter locally.\n'
+            'Defaults to \$$kFlutterBuildConfigEnvironmentVariableName if set.\n'
             'Use this to select a specific version of the engine if you have built multiple engine targets.\n'
             'This path is relative to --local-engine-src-path/out.');
   }
@@ -154,6 +156,11 @@ class FlutterCommandRunner extends CommandRunner {
     if (enginePath != null) {
       ToolConfiguration.instance.engineSrcPath = enginePath;
       ToolConfiguration.instance.engineBuildPath = _findEngineBuildPath(globalResults, enginePath);
+      // Forwards configuration information to recursive runs of the tool.
+      if (globalResults['local-engine-src-path'] != null)
+        childEnvironmentOverrides[kFlutterEngineEnvironmentVariableName] = globalResults['local-engine-src-path'];
+      if (globalResults['local-engine'] != null)
+        childEnvironmentOverrides[kFlutterBuildConfigEnvironmentVariableName] = globalResults['local-engine'];
     }
 
     // The Android SDK could already have been set by tests.
@@ -180,10 +187,12 @@ class FlutterCommandRunner extends CommandRunner {
     return null;
   }
 
+  String _getLocalBuildConfig(ArgResults globalResults) => globalResults['local-engine'] ?? Platform.environment[kFlutterBuildConfigEnvironmentVariableName];
+
   String _findEnginePath(ArgResults globalResults) {
     String engineSourcePath = globalResults['local-engine-src-path'] ?? Platform.environment[kFlutterEngineEnvironmentVariableName];
 
-    if (engineSourcePath == null && globalResults['local-engine'] != null) {
+    if (engineSourcePath == null && _getLocalBuildConfig(globalResults) != null) {
       try {
         Uri engineUri = PackageMap.instance.map[kFlutterEnginePackageName];
         engineSourcePath = path.dirname(path.dirname(path.dirname(path.dirname(engineUri.path))));
@@ -215,15 +224,13 @@ class FlutterCommandRunner extends CommandRunner {
   }
 
   String _findEngineBuildPath(ArgResults globalResults, String enginePath) {
-    String localEngine;
-    if (globalResults['local-engine'] != null) {
-      localEngine = globalResults['local-engine'];
-    } else {
+    String buildConfig = _getLocalBuildConfig(globalResults);
+    if (buildConfig == null) {
       printError('You must specify --local-engine if you are using a locally built engine.');
       throw new ProcessExit(2);
     }
 
-    String engineBuildPath = path.normalize(path.join(enginePath, 'out', localEngine));
+    String engineBuildPath = path.normalize(path.join(enginePath, 'out', buildConfig));
     if (!FileSystemEntity.isDirectorySync(engineBuildPath)) {
       printError('No Flutter engine build found at $engineBuildPath.');
       throw new ProcessExit(2);
