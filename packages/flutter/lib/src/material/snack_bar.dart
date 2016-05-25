@@ -54,9 +54,9 @@ class SnackBarAction extends StatefulWidget {
   /// The button label.
   final String label;
 
-  /// The callback to be invoked when the button is pressed. Must not be null.
+  /// The callback to be called when the button is pressed. Must not be null.
   ///
-  /// This callback will be invoked at most once each time this action is
+  /// This callback will be called at most once each time this action is
   /// displayed in a [SnackBar].
   final VoidCallback onPressed;
 

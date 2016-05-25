@@ -464,7 +464,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
     if (endScrollOffset.isNaN)
       return null;
 
-    final double snappedScrollOffset = snapScrollOffset(endScrollOffset); // invokes the config.snapOffsetCallback callback
+    final double snappedScrollOffset = snapScrollOffset(endScrollOffset); // Calls the config.snapOffsetCallback callback
     if (!_scrollOffsetIsInBounds(snappedScrollOffset))
       return null;
 

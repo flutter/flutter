@@ -7,7 +7,7 @@ This is an implementation of the Cassowary constraint solving algorithm in Dart.
 A solver is the object that accepts constraints and updates member variables in an attempt to satisfy the same. It is rarely the case that the user will have to create a solver. Instead, one will be vended by Flutter.
 
 # Parameters
-In order to create constraints, the user needs to take specific parameter objects vended by elements in the view hierarchy and create expression from these. Constraints can then be obtained from these expressions. If the solver needs to update these parameters to satisfy constraints, it will invoke callbacks on these parameters.
+In order to create constraints, the user needs to take specific parameter objects vended by elements in the view hierarchy and create expression from these. Constraints can then be obtained from these expressions. If the solver needs to update these parameters to satisfy constraints, it will call callbacks on these parameters.
 
 # Constructing Constraints
 

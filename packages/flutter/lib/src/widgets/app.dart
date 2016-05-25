@@ -66,7 +66,7 @@ class WidgetsApp extends StatefulWidget {
   /// named route.
   final RouteFactory onGenerateRoute;
 
-  /// Callback that is invoked when the operating system changes the
+  /// Callback that is called when the operating system changes the
   /// current locale.
   final LocaleChangedCallback onLocaleChanged;
 

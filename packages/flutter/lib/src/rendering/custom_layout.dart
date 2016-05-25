@@ -40,7 +40,7 @@ abstract class MultiChildLayoutDelegate {
   ///
   /// Call this from your [performLayout] function to lay out each
   /// child. Every child must be laid out using this function exactly
-  /// once each time the [performLayout] function is invoked.
+  /// once each time the [performLayout] function is called.
   Size layoutChild(Object childId, BoxConstraints constraints) {
     final RenderBox child = _idToChild[childId];
     assert(() {

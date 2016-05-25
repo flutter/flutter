@@ -33,7 +33,7 @@ class _AsyncScope {
 /// ```
 ///
 /// It does this while still allowing nested calls, e.g. so that you can
-/// invoke [expect] from inside callbacks.
+/// call [expect] from inside callbacks.
 ///
 /// You can use this in your own test functions, if you have some asynchronous
 /// functions that must be used with "await". Wrap the contents of the function
@@ -50,7 +50,7 @@ class TestAsyncUtils {
 
   static List<_AsyncScope> _scopeStack = <_AsyncScope>[];
 
-  /// Invokes the given callback in a new async scope. The callback argument is
+  /// Calls the given callback in a new async scope. The callback argument is
   /// the asynchronous body of the calling method. The calling method is said to
   /// be "guarded". Nested calls to guarded methods from within the body of this
   /// one are fine, but calls to other guarded methods from outside the body of
@@ -215,7 +215,7 @@ class TestAsyncUtils {
       if (collidingGuarder.className == null && collidingGuarder.methodName == 'expect') {
         message.writeln(
           'If you are confident that all test APIs are being called using "await", and '
-          'this expect() call is not being invoked at the top level but is itself being '
+          'this expect() call is not being called at the top level but is itself being '
           'called from some sort of callback registered before the ${originalGuarder.methodName} '
           'method was called, then consider using expectSync() instead.'
         );

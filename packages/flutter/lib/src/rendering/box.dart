@@ -854,7 +854,7 @@ abstract class RenderBox extends RenderObject {
       if (needsLayout) {
         throw new FlutterError(
           'Cannot hit test a dirty render box.\n'
-          'The hitTest() method was invoked on this RenderBox:\n'
+          'The hitTest() method was called on this RenderBox:\n'
           '  $this\n'
           'Unfortunately, since this object has been marked as needing layout, its geometry is not known at this time. '
           'This means it cannot be accurately hit-tested. Make sure to only mark nodes as needing layout during a pipeline '
@@ -866,7 +866,7 @@ abstract class RenderBox extends RenderObject {
       if (!hasSize) {
         throw new FlutterError(
           'Cannot hit test a render box with no size.\n'
-          'The hitTest() method was invoked on this RenderBox:\n'
+          'The hitTest() method was called on this RenderBox:\n'
           '  $this\n'
           'Although this node is not marked as needing layout, its size is not set. A RenderBox object must have an '
           'explicit size before it can be hit-tested. Make sure that the RenderBox in question sets its size during layout.'

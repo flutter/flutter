@@ -14,7 +14,7 @@ import 'node.dart';
 
 /// The type of function returned by [RenderObject.getSemanticAnnotators()].
 ///
-/// These callbacks are invoked with the [SemanticsNode] object that
+/// These callbacks are called with the [SemanticsNode] object that
 /// corresponds to the [RenderObject]. (One [SemanticsNode] can
 /// correspond to multiple [RenderObject] objects.)
 ///

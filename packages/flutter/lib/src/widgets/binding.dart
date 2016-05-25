@@ -110,7 +110,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   /// observers).
   bool removeObserver(WidgetsBindingObserver observer) => _observers.remove(observer);
 
-  /// Invoked when the system metrics change.
+  /// Called when the system metrics change.
   ///
   /// Notifies all the observers using
   /// [WidgetsBindingObserver.didChangeMetrics].
@@ -123,7 +123,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
       observer.didChangeMetrics();
   }
 
-  /// Invoked when the system locale changes.
+  /// Called when the system locale changes.
   ///
   /// Calls [dispatchLocaleChanged] to notify the binding observers.
   ///
@@ -140,7 +140,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
       observer.didChangeLocale(locale);
   }
 
-  /// Invoked when the system pops the current route.
+  /// Called when the system pops the current route.
   ///
   /// This first notifies the binding observers (using
   /// [WidgetsBindingObserver.didPopRoute]), in registration order,
@@ -161,7 +161,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
     activity.finishCurrentActivity();
   }
 
-  /// Invoked when the application lifecycle state changes.
+  /// Called when the application lifecycle state changes.
   ///
   /// Notifies all the observers using
   /// [WidgetsBindingObserver.didChangeAppLifecycleState].

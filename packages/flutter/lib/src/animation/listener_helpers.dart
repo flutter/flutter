@@ -55,7 +55,7 @@ abstract class AnimationEagerListenerMixin implements _ListenerMixin {
 }
 
 /// A mixin that implements the addListener/removeListener protocol and notifies
-/// all the registered listeners when notifyListeners is invoked.
+/// all the registered listeners when notifyListeners is called.
 abstract class AnimationLocalListenersMixin extends _ListenerMixin {
   final List<VoidCallback> _listeners = <VoidCallback>[];
 
@@ -88,7 +88,7 @@ abstract class AnimationLocalListenersMixin extends _ListenerMixin {
 
 /// A mixin that implements the addStatusListener/removeStatusListener protocol
 /// and notifies all the registered listeners when notifyStatusListeners is
-/// invoked.
+/// called.
 abstract class AnimationLocalStatusListenersMixin extends _ListenerMixin {
   final List<AnimationStatusListener> _statusListeners = <AnimationStatusListener>[];
 

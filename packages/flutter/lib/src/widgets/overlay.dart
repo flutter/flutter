@@ -50,7 +50,7 @@ class OverlayEntry {
 
   /// This entry will include the widget built by this builder in the overlay at the entry's position.
   ///
-  /// To cause this builder to be invoked again, call [markNeedsBuild] on this
+  /// To cause this builder to be called again, call [markNeedsBuild] on this
   /// overlay entry.
   final WidgetBuilder builder;
 

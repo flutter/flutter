@@ -135,7 +135,7 @@ class ImageCache {
   ///
   /// If the given [ImageProvider] has already been used and is still in the
   /// cache, then the [ImageResource] object is immediately usable and the
-  /// provider is not invoked.
+  /// provider is not called.
   ImageResource loadProvider(ImageProvider provider) {
     ImageResource result = _cache[provider];
     if (result != null) {

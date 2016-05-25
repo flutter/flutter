@@ -17,7 +17,7 @@ mojom.HapticFeedbackProxy _initHapticFeedbackProxy() {
 final mojom.HapticFeedbackProxy _hapticFeedbackProxy = _initHapticFeedbackProxy();
 
 /// Allows access to the haptic feedback interface on the device. This API is
-/// intentionally terse since it invokes default platform behavior. It is not
+/// intentionally terse since it calls default platform behavior. It is not
 /// suitable for use if you require more flexible access to device sensors and
 /// peripherals.
 class HapticFeedback {

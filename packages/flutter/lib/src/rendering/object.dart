@@ -1346,7 +1346,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   VoidCallback _performLayout = _doNothing;
 
   /// Allows this render object to mutate its child list during layout and
-  /// invokes callback.
+  /// calls callback.
   void invokeLayoutCallback(LayoutCallback callback) {
     assert(_debugMutationsLocked);
     assert(_debugDoingThisLayout);
@@ -1374,7 +1374,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   //    N = newAngle-oldAngle
   // ...but the rendering is expected to remain the same, pixel for
   // pixel, on the output device. Then, the layout() method or
-  // equivalent will be invoked.
+  // equivalent will be called.
 
 
   // PAINTING

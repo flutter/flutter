@@ -19,7 +19,7 @@ import 'ios/simulators.dart';
 /// A class to get all available devices.
 class DeviceManager {
   /// Constructing DeviceManagers is cheap; they only do expensive work if some
-  /// of their methods are invoked.
+  /// of their methods are called.
   DeviceManager() {
     // Register the known discoverers.
     _deviceDiscoverers.add(new AndroidDevices());

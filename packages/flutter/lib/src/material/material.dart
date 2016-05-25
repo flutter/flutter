@@ -110,7 +110,7 @@ abstract class MaterialInkController {
   /// The ink splash is clipped only to the edges of the [Material].
   /// This is the default.
   ///
-  /// When the splash is removed, onRemoved will be invoked.
+  /// When the splash is removed, onRemoved will be called.
   InkSplash splashAt({
     RenderBox referenceBox,
     Point position,

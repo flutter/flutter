@@ -45,7 +45,7 @@ class FlutterErrorDetails {
   /// StackTrace objects are opaque except for their [toString] function.
   ///
   /// If this field is not null, then the [stackFilter] callback, if any, will
-  /// be invoked with the result of calling [toString] on this object and
+  /// be called with the result of calling [toString] on this object and
   /// splitting that result on line breaks. If there's no [stackFilter]
   /// callback, then [FlutterError.defaultStackFilter] is used instead. That
   /// function expects the stack to be in the format used by
@@ -77,11 +77,11 @@ class FlutterErrorDetails {
   /// This won't be called if [stack] is null.
   final IterableFilter<String> stackFilter;
 
-  /// A callback which, when invoked with a [StringBuffer] will write to that buffer
+  /// A callback which, when called with a [StringBuffer] will write to that buffer
   /// information that could help with debugging the problem.
   ///
   /// Information collector callbacks can be expensive, so the generated information
-  /// should be cached, rather than the callback being invoked multiple times.
+  /// should be cached, rather than the callback being called multiple times.
   ///
   /// The text written to the information argument may contain newlines but should
   /// not end with a newline.
@@ -139,7 +139,7 @@ class FlutterError extends AssertionError {
 
   /// Called whenever the Flutter framework catches an error.
   ///
-  /// The default behavior is to invoke [dumpErrorToConsole].
+  /// The default behavior is to call [dumpErrorToConsole].
   ///
   /// You can set this to your own function to override this default behavior.
   /// For example, you could report all errors to your server.
