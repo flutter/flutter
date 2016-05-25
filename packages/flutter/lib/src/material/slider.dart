@@ -170,7 +170,7 @@ final Color _kActiveTrackColor = Colors.grey[500];
 final Tween<double> _kReactionRadiusTween = new Tween<double>(begin: _kThumbRadius, end: _kReactionRadius);
 final Tween<double> _kThumbRadiusTween = new Tween<double>(begin: _kThumbRadius, end: _kActiveThumbRadius);
 final ColorTween _kTrackColorTween = new ColorTween(begin: _kInactiveTrackColor, end: _kActiveTrackColor);
-final ColorTween _kTickColorTween = new ColorTween(begin: _kInactiveTrackColor, end: Colors.black54);
+final ColorTween _kTickColorTween = new ColorTween(begin: Colors.transparent, end: Colors.black54);
 final Duration _kDiscreteTransitionDuration = const Duration(milliseconds: 500);
 
 const double _kLabelBalloonRadius = 14.0;
@@ -350,8 +350,11 @@ class _RenderSlider extends RenderConstrainedBox {
     if (enabled) {
       if (value > 0.0)
         canvas.drawRect(new Rect.fromLTRB(trackLeft, trackTop, trackActive, trackBottom), primaryPaint);
-      if (value < 1.0)
-        canvas.drawRect(new Rect.fromLTRB(trackActive, trackTop, trackRight, trackBottom), trackPaint);
+      if (value < 1.0) {
+        final bool hasBalloon = _reaction.status != AnimationStatus.dismissed && label != null;
+        final double trackActiveDelta = hasBalloon ? 0.0 : thumbRadius - 1.0;
+        canvas.drawRect(new Rect.fromLTRB(trackActive + trackActiveDelta, trackTop, trackRight, trackBottom), trackPaint);
+      }
     } else {
       if (value > 0.0)
         canvas.drawRect(new Rect.fromLTRB(trackLeft, trackTop, trackActive - _kDisabledThumbRadius - 2, trackBottom), trackPaint);
@@ -368,7 +371,7 @@ class _RenderSlider extends RenderConstrainedBox {
         if (dx >= 3 * tickWidth) {
           final Paint tickPaint = new Paint()..color = _kTickColorTween.evaluate(_reaction);
           for (int i = 0; i <= divisions; i += 1) {
-            double left = trackLeft + i * dx;
+            final double left = trackLeft + i * dx;
             canvas.drawRect(new Rect.fromLTRB(left, trackTop, left + tickWidth, trackBottom), tickPaint);
           }
         }
@@ -395,10 +398,22 @@ class _RenderSlider extends RenderConstrainedBox {
         _labelPainter.paint(canvas, labelOffset);
         return;
       } else {
-        Paint reactionPaint = new Paint()..color = _activeColor.withAlpha(kRadialReactionAlpha);
+        final Color reactionBaseColor = value == 0.0 ? _kActiveTrackColor : _activeColor;
+        final Paint reactionPaint = new Paint()..color = reactionBaseColor.withAlpha(kRadialReactionAlpha);
         canvas.drawCircle(thumbCenter, _kReactionRadiusTween.evaluate(_reaction), reactionPaint);
       }
     }
-    canvas.drawCircle(thumbCenter, thumbRadius, primaryPaint);
+
+    Paint thumbPaint = primaryPaint;
+    double thumbRadiusDelta = 0.0;
+    if (value == 0.0) {
+      thumbPaint = trackPaint;
+      // This is destructive to trackPaint.
+      thumbPaint
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.0;
+      thumbRadiusDelta = -1.0;
+    }
+    canvas.drawCircle(thumbCenter, thumbRadius + thumbRadiusDelta, thumbPaint);
   }
 }
