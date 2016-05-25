@@ -85,6 +85,19 @@ TEST_F(WordBreakerTest, postfixAndPrefix) {
     EXPECT_EQ((ssize_t)NELEM(buf), breaker.wordEnd());
 }
 
+TEST_F(WordBreakerTest, MyanmarKinzi) {
+    uint16_t buf[] = {0x1004, 0x103A, 0x1039, 0x1000, 0x102C};  // NGA, ASAT, VIRAMA, KA, UU
+    WordBreaker breaker;
+    icu::Locale burmese("my");
+    breaker.setLocale(burmese);
+    breaker.setText(buf, NELEM(buf));
+    EXPECT_EQ(0, breaker.current());
+
+    EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end of string
+    EXPECT_EQ(0, breaker.wordStart());
+    EXPECT_EQ((ssize_t)NELEM(buf), breaker.wordEnd());
+}
+
 TEST_F(WordBreakerTest, zwjEmojiSequences) {
     uint16_t buf[] = {
         // man + zwj + heart + zwj + man
