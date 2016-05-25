@@ -7,15 +7,18 @@ set -e
 
 function follow_links() {
   file="$1"
+  cd -P "${file%/*}"
   while [ -h "$file" ]; do
     # On Mac OS, readlink -f doesn't work.
+    cd -P "${file%/*}"
     file="$(readlink "$file")"
   done
-  echo "$file"
+  echo "$PWD/${file##*/}"
 }
 
 PROG_NAME="$(follow_links "$BASH_SOURCE")"
 BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
+echo $BIN_DIR
 export FLUTTER_ROOT="$(cd "${BIN_DIR}/.." ; pwd -P)"
 
 FLUTTER_TOOLS_DIR="$FLUTTER_ROOT/packages/flutter_tools"
@@ -26,6 +29,7 @@ DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"
 
 DART="$DART_SDK_PATH/bin/dart"
 
+echo $FLUTTER_ROOT
 REVISION=`(cd "$FLUTTER_ROOT"; git rev-parse HEAD)`
 if [ ! -f "$SNAPSHOT_PATH" ] || [ ! -f "$STAMP_PATH" ] || [ `cat "$STAMP_PATH"` != "$REVISION" ] || [ "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]; then
   "$FLUTTER_ROOT/bin/cache/update_dart_sdk.sh"
