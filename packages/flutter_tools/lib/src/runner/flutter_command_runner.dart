@@ -273,12 +273,13 @@ class FlutterCommandRunner extends CommandRunner {
     // Check if the cwd is a flutter dir.
     while (directory.isNotEmpty) {
       if (_isDirectoryFlutterRepo(directory)) {
-        if (directory != Cache.flutterRoot) {
-          // Warn, but continue execution.
+        if (!_compareResolvedPaths(directory, Cache.flutterRoot)) {
           printError(
-            'Warning - the active Flutter is not the one from the current directory:\n'
-            '  active Flutter   : ${Cache.flutterRoot}\n'
+            'Warning: the \'flutter\' tool you are currently running is not the one from the current directory:\n'
+            '  running Flutter  : ${Cache.flutterRoot}\n'
             '  current directory: $directory\n'
+            'This can happen when you have multiple copies of flutter installed. Please check your system path to verify\n'
+            'that you\'re running the expected version (run \'flutter --version\' to see which flutter is on your path).\n'
           );
         }
 
@@ -301,14 +302,15 @@ class FlutterCommandRunner extends CommandRunner {
         Uri rootUri = flutterUri.resolve('../../..');
         String flutterPath = path.normalize(new File.fromUri(rootUri).absolute.path);
 
-        if (flutterPath != Cache.flutterRoot) {
-          // Warn and exit the app.
+        if (!_compareResolvedPaths(flutterPath, Cache.flutterRoot)) {
           printError(
-            'Warning - the active Flutter is different from the one referenced in your pubspec:\n'
-            '  active Flutter   : ${Cache.flutterRoot}\n'
-            '  pubspec reference: $flutterPath'
+            'Warning: the \'flutter\' tool you are currently running is different from the one referenced in your pubspec.yaml:\n'
+            '  running Flutter  : ${Cache.flutterRoot}\n'
+            '  pubspec reference: $flutterPath\n'
+            'This can happen when you have multiple copies of flutter installed. Please check your system path to verify\n'
+            'that you\'re running the expected version (run \'flutter --version\' to see which flutter is on your path). You\n'
+            'can also change which flutter your project points to by editing the \'flutter:\' path in your pubspec.yaml file.\n'
           );
-          return false;
         }
       }
     }
@@ -322,4 +324,11 @@ class FlutterCommandRunner extends CommandRunner {
       FileSystemEntity.isFileSync(path.join(directory, 'bin/flutter')) &&
       FileSystemEntity.isFileSync(path.join(directory, 'bin/cache/engine.stamp'));
   }
+}
+
+bool _compareResolvedPaths(String path1, String path2) {
+  path1 = new Directory(path.absolute(path1)).resolveSymbolicLinksSync();
+  path2 = new Directory(path.absolute(path2)).resolveSymbolicLinksSync();
+
+  return path1 == path2;
 }
