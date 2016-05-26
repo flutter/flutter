@@ -271,14 +271,12 @@ Vector2 _computeMiter(Vector2 lineA, Vector2 lineB) {
 
   double dot = dot2(miter, new Vector2(-lineA[1], lineA[0]));
   if (dot.abs() < 0.1) {
-    miter = _vectorNormal(lineA).normalize();
+    miter = _vectorNormal(lineA)..normalize();
     return miter;
   }
 
   double miterLength = 1.0 / dot;
-  miter = miter.scale(miterLength);
-
-  return miter;
+  return miter..scale(miterLength);
 }
 
 Vector2 _vectorNormal(Vector2 v) {
@@ -287,7 +285,7 @@ Vector2 _vectorNormal(Vector2 v) {
 
 Vector2 _vectorDirection(Vector2 a, Vector2 b) {
   Vector2 result = a - b;
-  return result.normalize();
+  return result..normalize();
 }
 
 List<Vector2> _computeMiterList(List<Vector2> points, bool closed) {

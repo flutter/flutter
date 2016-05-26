@@ -29,7 +29,7 @@ void main() {
               width: 100.0,
               height: 100.0,
               child: new Transform(
-                transform: new Matrix4.identity().scale(0.5, 0.5),
+                transform: new Matrix4.diagonal3Values(0.5, 0.5, 1.0),
                 origin: new Offset(100.0, 50.0),
                 child: new GestureDetector(
                   onTap: () {
@@ -78,7 +78,7 @@ void main() {
               width: 100.0,
               height: 100.0,
               child: new Transform(
-                transform: new Matrix4.identity().scale(0.5, 0.5),
+                transform: new Matrix4.diagonal3Values(0.5, 0.5, 1.0),
                 alignment: new FractionalOffset(1.0, 0.5),
                 child: new GestureDetector(
                   onTap: () {
@@ -127,7 +127,7 @@ void main() {
               width: 100.0,
               height: 100.0,
               child: new Transform(
-                transform: new Matrix4.identity().scale(0.5, 0.5),
+                transform: new Matrix4.diagonal3Values(0.5, 0.5, 1.0),
                 origin: new Offset(100.0, 0.0),
                 alignment: new FractionalOffset(0.0, 0.5),
                 child: new GestureDetector(

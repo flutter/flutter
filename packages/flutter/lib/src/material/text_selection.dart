@@ -175,14 +175,14 @@ Widget buildTextSelectionHandle(
   switch (type) {
     case TextSelectionHandleType.left:  // points up-right
       return new Transform(
-        transform: new Matrix4.identity().rotateZ(math.PI / 2.0),
+        transform: new Matrix4.rotationZ(math.PI / 2.0),
         child: handle
       );
     case TextSelectionHandleType.right:  // points up-left
       return handle;
     case TextSelectionHandleType.collapsed:  // points up
       return new Transform(
-        transform: new Matrix4.identity().rotateZ(math.PI / 4.0),
+        transform: new Matrix4.rotationZ(math.PI / 4.0),
         child: handle
       );
   }

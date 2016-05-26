@@ -52,7 +52,7 @@ class Node3D extends Node {
                                      0.0, 1.0, 0.0, 0.0,
                                      0.0, 0.0, 1.0, -1.0/_projectionDepth,
                                      0.0, 0.0, 0.0, 1.0);
-    matrix = matrix.multiply(projection);
+    matrix.multiply(projection);
 
     // Rotate around x and y axis
     matrix.rotateY(radians(_rotationY));

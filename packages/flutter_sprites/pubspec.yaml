@@ -5,7 +5,7 @@ author: Flutter Authors <flutter-dev@googlegroups.com>
 homepage: http://flutter.io
 
 dependencies:
-  box2d: '>=0.2.0 <0.3.0'
+  box2d: '>=0.3.0 <0.4.0'
   flutter:
     path: ../flutter
 

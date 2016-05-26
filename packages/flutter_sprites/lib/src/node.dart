@@ -413,10 +413,10 @@ class Node {
     if (_parent == null) {
       // Base case, we are at the top
       assert(this == _spriteBox.rootNode);
-      _transformMatrixNodeToBox = new Matrix4.copy(_spriteBox.transformMatrix).multiply(transformMatrix);
+      _transformMatrixNodeToBox = _spriteBox.transformMatrix.clone()..multiply(transformMatrix);
     }
     else {
-      _transformMatrixNodeToBox = new Matrix4.copy(_parent._nodeToBoxMatrix()).multiply(transformMatrix);
+      _transformMatrixNodeToBox = _parent._nodeToBoxMatrix().clone()..multiply(transformMatrix);
     }
     return _transformMatrixNodeToBox;
   }
