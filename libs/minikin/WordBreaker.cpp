@@ -76,12 +76,20 @@ static bool isBreakValid(const uint16_t* buf, size_t bufEnd, size_t i) {
     if (codePoint == CHAR_SOFT_HYPHEN) {
         return false;
     }
+    // For Myanmar kinzi sequences, created by <consonant, ASAT, VIRAMA, consonant>. This is to go
+    // around a bug in ICU line breaking: http://bugs.icu-project.org/trac/ticket/12561. To avoid
+    // too much looking around in the strings, we simply avoid breaking after any Myanmar virama,
+    // where no line break could be imagined, since the Myanmar virama is a pure stacker.
+    if (codePoint == 0x1039) {  // MYANMAR SIGN VIRAMA
+        return false;
+    }
+
     uint32_t next_codepoint;
     size_t next_offset = i;
     U16_NEXT(buf, next_offset, bufEnd, next_codepoint);
 
     // Proposed change to LB24 from http://www.unicode.org/L2/L2016/16043r-line-break-pr-po.txt
-    //(AL | HL) × (PR | PO)
+    // (AL | HL) × (PR | PO)
     int32_t lineBreak = u_getIntPropertyValue(codePoint, UCHAR_LINE_BREAK);
     if (lineBreak == U_LB_ALPHABETIC || lineBreak == U_LB_HEBREW_LETTER) {
         lineBreak = u_getIntPropertyValue(next_codepoint, UCHAR_LINE_BREAK);
