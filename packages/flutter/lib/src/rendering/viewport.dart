@@ -192,7 +192,7 @@ class RenderViewportBase extends RenderBox {
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     final Offset effectivePaintOffset = _effectivePaintOffset;
-    super.applyPaintTransform(child, transform.translate(effectivePaintOffset.dx, effectivePaintOffset.dy));
+    super.applyPaintTransform(child, transform..translate(effectivePaintOffset.dx, effectivePaintOffset.dy));
   }
 
   @override

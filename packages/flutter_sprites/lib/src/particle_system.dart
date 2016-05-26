@@ -261,7 +261,7 @@ class ParticleSystem extends Node {
       // Radial acceleration
       Vector2 radial;
         if (particle.pos[0] != 0 || particle.pos[1] != 0) {
-          radial = new Vector2.copy(particle.pos).normalize();
+          radial = new Vector2.copy(particle.pos)..normalize();
         } else {
           radial = new Vector2.zero();
         }
@@ -275,11 +275,11 @@ class ParticleSystem extends Node {
         tangential.scale(particle.accelerations.tangentialAccel);
 
         // (gravity + radial + tangential) * dt
-        final Vector2 accel = (_gravity + radial + tangential).scale(dt);
+        final Vector2 accel = (_gravity + radial + tangential)..scale(dt);
         particle.dir += accel;
       } else if (_gravity[0] != 0.0 || _gravity[1] != 0) {
         // gravity
-        final Vector2 accel = new Vector2.copy(_gravity).scale(dt);
+        final Vector2 accel = _gravity.clone()..scale(dt);
         particle.dir += accel;
       }
 
@@ -334,7 +334,7 @@ class ParticleSystem extends Node {
     double dirRadians = convertDegrees2Radians(direction + directionVar * randomSignedDouble());
     Vector2 dirVector = new Vector2(math.cos(dirRadians), math.sin(dirRadians));
     double speedFinal = speed + speedVar * randomSignedDouble();
-    particle.dir = dirVector.scale(speedFinal);
+    particle.dir = dirVector..scale(speedFinal);
 
     // Accelerations
     if (radialAcceleration != 0.0 || radialAccelerationVar != 0.0 ||
