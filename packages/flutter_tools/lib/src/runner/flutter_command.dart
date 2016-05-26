@@ -65,13 +65,13 @@ abstract class FlutterCommand extends Command {
 
     argParser.addFlag('debug',
       negatable: false,
-      help: 'Build a debug version of your app.');
+      help: 'Build a debug version of your app${defaultToRelease ? '' : ' (default mode)'}.');
     argParser.addFlag('profile',
       negatable: false,
       help: 'Build a version of your app specialized for performance profiling.');
     argParser.addFlag('release',
       negatable: false,
-      help: 'Build a release version of your app.');
+      help: 'Build a release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
   }
 
   BuildMode getBuildMode() {
