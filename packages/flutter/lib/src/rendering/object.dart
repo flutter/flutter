@@ -185,10 +185,20 @@ class PaintingContext {
 
   static final Paint _disableAntialias = new Paint()..isAntiAlias = false;
 
-  /// Push a performance overlay.
+  /// Adds a performance overlay to the scene.
   ///
-  /// Performance overlays are always composited because they're drawn by the
-  /// compositor.
+  /// * `offset` is the offset from the origin of the canvas' coordinate system
+  ///   to the origin of the caller's coordinate system.
+  /// * `optionsMask` is a mask is created by shifting 1 by the index of the
+  ///   specific [PerformanceOverlayOption] to enable.
+  /// * `rasterizerThreshold` is an integer specifying the number of frame
+  ///   intervals that the rasterizer must miss before it decides that the frame
+  ///   is suitable for capturing an SkPicture trace for further analysis.
+  /// * `size` is the size of the overlay to draw. The upper left corner of the
+  ///   overlay will be placed at the origin of the caller's coodinate system.
+  ///
+  /// Performance overlays are always composited because they display data that
+  /// isn't available until the compositing phase.
   void pushPerformanceOverlay(Offset offset, int optionsMask, int rasterizerThreshold, Size size) {
     _stopRecordingIfNeeded();
     _appendLayer(new PerformanceOverlayLayer(
@@ -209,11 +219,16 @@ class PaintingContext {
     ));
   }
 
-  /// Push a rectangular clip rect.
+  /// Clip further painting using a rectangle.
   ///
-  /// This function will call painter synchronously with a painting context that
-  /// is clipped by the given clip. The given clip should not incorporate the
-  /// painting offset.
+  /// * `needsCompositing` is whether the child needs compositing. Typically
+  ///   matches the value of [RenderObject.needsCompositing] for the caller.
+  /// * `offset` is the offset from the origin of the canvas' coordinate system
+  ///   to the origin of the caller's coordinate system.
+  /// * `clipRect` is rectangle (in the caller's coodinate system) to use to
+  ///   clip the painting done by [painter].
+  /// * `painter` is a callback that will paint with the [clipRect] applied. This
+  ///   function calls the [painter] synchronously.
   void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter) {
     Rect offsetClipRect = clipRect.shift(offset);
     if (needsCompositing) {
@@ -231,11 +246,18 @@ class PaintingContext {
     }
   }
 
-  /// Push a rounded-rect clip rect.
+  /// Clip further painting using a rounded rectangle.
   ///
-  /// This function will call painter synchronously with a painting context that
-  /// is clipped by the given clip. The given clip should not incorporate the
-  /// painting offset.
+  /// * `needsCompositing` is whether the child needs compositing. Typically
+  ///   matches the value of [RenderObject.needsCompositing] for the caller.
+  /// * `offset` is the offset from the origin of the canvas' coordinate system
+  ///   to the origin of the caller's coordinate system.
+  /// * `bounds` is the region of the canvas (in the caller's coodinate system)
+  ///   into which `painter` will paint in.
+  /// * `clipRRect` is the rounded-rectangle (in the caller's coodinate system)
+  ///   to use to clip the painting done by `painter`.
+  /// * `painter` is a callback that will paint with the `clipRRect` applied. This
+  ///   function calls the `painter` synchronously.
   void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter) {
     Rect offsetBounds = bounds.shift(offset);
     RRect offsetClipRRect = clipRRect.shift(offset);
@@ -254,11 +276,18 @@ class PaintingContext {
     }
   }
 
-  /// Push a path clip.
+  /// Clip further painting using a path.
   ///
-  /// This function will call painter synchronously with a painting context that
-  /// is clipped by the given clip. The given clip should not incorporate the
-  /// painting offset.
+  /// * `needsCompositing` is whether the child needs compositing. Typically
+  ///   matches the value of [RenderObject.needsCompositing] for the caller.
+  /// * `offset` is the offset from the origin of the canvas' coordinate system
+  ///   to the origin of the caller's coordinate system.
+  /// * `bounds` is the region of the canvas (in the caller's coodinate system)
+  ///   into which `painter` will paint in.
+  /// * `clipPath` is the path (in the coodinate system of the caller) to use to
+  ///   clip the painting done by `painter`.
+  /// * `painter` is a callback that will paint with the `clipPath` applied. This
+  ///   function calls the `painter` synchronously.
   void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter) {
     Rect offsetBounds = bounds.shift(offset);
     Path offsetClipPath = clipPath.shift(offset);
@@ -277,11 +306,15 @@ class PaintingContext {
     }
   }
 
-  /// Push a transform.
+  /// Transform further painting using a matrix.
   ///
-  /// This function will call painter synchronously with a painting context that
-  /// is transformed by the given transform. The given transform should not
-  /// incorporate the painting offset.
+  /// * `needsCompositing` is whether the child needs compositing. Typically
+  ///   matches the value of [RenderObject.needsCompositing] for the caller.
+  /// * `offset` is the offset from the origin of the canvas' coordinate system
+  ///   to the origin of the caller's coordinate system.
+  /// * `transform` is the matrix to apply to the paiting done by `painter`.
+  /// * `painter` is a callback that will paint with the `transform` applied. This
+  ///   function calls the `painter` synchronously.
   void pushTransform(bool needsCompositing, Offset offset, Matrix4 transform, PaintingContextCallback painter) {
     if (needsCompositing) {
       _stopRecordingIfNeeded();
@@ -301,10 +334,15 @@ class PaintingContext {
     }
   }
 
-  /// Push an opacity layer.
+  /// Blend further paiting with an alpha value.
   ///
-  /// This function will call painter synchronously with a painting context that
-  /// will be blended with the given alpha value.
+  /// * `offset` is the offset from the origin of the canvas' coordinate system
+  ///   to the origin of the caller's coordinate system.
+  /// * `alpha` is the alpha value to use when blending the painting done by
+  ///   `painter`. An alpha value of 0 means the painting is fully transparent
+  ///   and an alpha value of 255 means the painting is fully opaque.
+  /// * `painter` is a callback that will paint with the `alpha` applied. This
+  ///   function calls the `painter` synchronously.
   void pushOpacity(Offset offset, int alpha, PaintingContextCallback painter) {
     _stopRecordingIfNeeded();
     OpacityLayer opacityLayer = new OpacityLayer(alpha: alpha);
@@ -314,10 +352,18 @@ class PaintingContext {
     childContext._stopRecordingIfNeeded();
   }
 
-  /// Push a shader mask.
+  /// Apply a mask derived from a shader to further painting.
   ///
-  /// This function will call painter synchronously with a painting context that
-  /// will be masked with the given shader.
+  /// * `offset` is the offset from the origin of the canvas' coordinate system
+  ///   to the origin of the caller's coordinate system.
+  /// * `shader` is the shader that will generate the mask. The shader operates
+  ///   in the coordinate system of the caller.
+  /// * `maskRect` is the region of the canvas (in the coodinate system of the
+  ///   caller) in which to apply the mask.
+  /// * `transferMode` is the [TransferMode] to use when applying the shader to
+  ///   the painting done by `painter`.
+  /// * `painter` is a callback that will paint with the mask applied. This
+  ///   function calls the `painter` synchronously.
   void pushShaderMask(Offset offset, Shader shader, Rect maskRect, TransferMode transferMode, PaintingContextCallback painter) {
     _stopRecordingIfNeeded();
     ShaderMaskLayer shaderLayer = new ShaderMaskLayer(
@@ -335,6 +381,7 @@ class PaintingContext {
   ///
   /// This function applies a filter to the existing painted content and then
   /// synchronously calls the painter to paint on top of the filtered backdrop.
+  // TODO(abarth): I don't quite understand how this API is supposed to work.
   void pushBackdropFilter(Offset offset, ui.ImageFilter filter, PaintingContextCallback painter) {
     _stopRecordingIfNeeded();
     BackdropFilterLayer backdropFilterLayer = new BackdropFilterLayer(filter: filter);

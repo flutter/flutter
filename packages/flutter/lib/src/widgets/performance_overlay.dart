@@ -38,6 +38,8 @@ class PerformanceOverlay extends LeafRenderObjectWidget {
       ),
       super(key: key);
 
+  /// The mask is created by shifting 1 by the index of the specific
+  /// [PerformanceOverlayOption] to enable.
   final int optionsMask;
 
   /// The rasterizer threshold is an integer specifying the number of frame
