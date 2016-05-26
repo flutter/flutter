@@ -562,7 +562,7 @@ class IOSSimulator extends Device {
     LaunchResult result, {
     String mainPath,
     Observatory observatory
-  }) async {
+  }) {
     return observatory.isolateReload(observatory.firstIsolateId).then((Response response) {
       return true;
     }).catchError((dynamic error) {

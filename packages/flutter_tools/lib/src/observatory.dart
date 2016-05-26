@@ -36,7 +36,7 @@ class Observatory {
   final int port;
 
   List<IsolateRef> isolates = <IsolateRef>[];
-  Completer<IsolateRef> _hasIsolateCompleter;
+  Completer<IsolateRef> _waitFirstIsolateCompleter;
 
   Map<String, StreamController<Event>> _eventControllers = <String, StreamController<Event>>{};
 
@@ -74,17 +74,18 @@ class Observatory {
     _getEventController(data['streamId']).add(event);
   }
 
-  Future<IsolateRef> waitHasIsolate() {
-    if (isolates.isNotEmpty) {
-      return new Future<IsolateRef>.value(isolates.first);
-    } else {
-      _hasIsolateCompleter = new Completer<IsolateRef>();
+  Future<IsolateRef> get waitFirstIsolate async {
+    if (isolates.isNotEmpty)
+      return isolates.first;
 
-      return getVM().then((VM vm) {
-        for (IsolateRef isolate in vm.isolates)
-          _addIsolate(isolate);
-      });
-    }
+    _waitFirstIsolateCompleter = new Completer<IsolateRef>();
+
+    getVM().then((VM vm) {
+      for (IsolateRef isolate in vm.isolates)
+        _addIsolate(isolate);
+    });
+
+    return _waitFirstIsolateCompleter.future;
   }
 
   // Requests
@@ -136,9 +137,9 @@ class Observatory {
     if (!isolates.contains(isolate)) {
       isolates.add(isolate);
 
-      if (_hasIsolateCompleter != null) {
-        _hasIsolateCompleter.complete(isolate);
-        _hasIsolateCompleter = null;
+      if (_waitFirstIsolateCompleter != null) {
+        _waitFirstIsolateCompleter.complete(isolate);
+        _waitFirstIsolateCompleter = null;
       }
     }
   }

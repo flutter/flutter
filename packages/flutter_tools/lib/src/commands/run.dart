@@ -395,9 +395,8 @@ class _RunAndStayResident {
         printTrace(event.toString());
       });
 
-      if (benchmark) {
-        await observatory.waitHasIsolate();
-      }
+      if (benchmark)
+        await observatory.waitFirstIsolate;
 
       // Listen for observatory connection close.
       observatory.done.whenComplete(() {
