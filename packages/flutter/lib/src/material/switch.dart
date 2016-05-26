@@ -195,8 +195,20 @@ class _RenderSwitch extends RenderToggleable {
   set activeThumbDecoration(Decoration value) {
     if (value == _activeThumbDecoration)
       return;
+    _removeActiveThumbListenerIfNeeded();
     _activeThumbDecoration = value;
+    _addActiveThumbListenerIfNeeded();
     markNeedsPaint();
+  }
+
+  void _addActiveThumbListenerIfNeeded() {
+    if (attached && _activeThumbDecoration != null && _activeThumbDecoration.needsListeners)
+      _activeThumbDecoration.addChangeListener(markNeedsPaint);
+  }
+
+  void _removeActiveThumbListenerIfNeeded() {
+    if (attached && _activeThumbDecoration != null && _activeThumbDecoration.needsListeners)
+      _activeThumbDecoration.removeChangeListener(markNeedsPaint);
   }
 
   Decoration get inactiveThumbDecoration => _inactiveThumbDecoration;
@@ -204,8 +216,20 @@ class _RenderSwitch extends RenderToggleable {
   set inactiveThumbDecoration(Decoration value) {
     if (value == _inactiveThumbDecoration)
       return;
+    _removeInactiveThumbListenerIfNeeded();
     _inactiveThumbDecoration = value;
+    _addInactiveThumbListenerIfNeeded();
     markNeedsPaint();
+  }
+
+  void _addInactiveThumbListenerIfNeeded() {
+    if (attached && _inactiveThumbDecoration != null && _inactiveThumbDecoration.needsListeners)
+      _inactiveThumbDecoration.addChangeListener(markNeedsPaint);
+  }
+
+  void _removeInactiveThumbListenerIfNeeded() {
+    if (attached && _inactiveThumbDecoration != null && _inactiveThumbDecoration.needsListeners)
+      _inactiveThumbDecoration.removeChangeListener(markNeedsPaint);
   }
 
   Color get activeTrackColor => _activeTrackColor;
@@ -226,6 +250,20 @@ class _RenderSwitch extends RenderToggleable {
       return;
     _inactiveTrackColor = value;
     markNeedsPaint();
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _addInactiveThumbListenerIfNeeded();
+    _addActiveThumbListenerIfNeeded();
+  }
+
+  @override
+  void detach() {
+    _removeActiveThumbListenerIfNeeded();
+    _removeInactiveThumbListenerIfNeeded();
+    super.detach();
   }
 
   double get _trackInnerLength => size.width - 2.0 * kRadialReactionRadius;
