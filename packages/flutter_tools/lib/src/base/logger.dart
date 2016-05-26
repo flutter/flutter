@@ -11,6 +11,8 @@ final AnsiTerminal terminal = new AnsiTerminal();
 abstract class Logger {
   bool get isVerbose => false;
 
+  bool quiet = false;
+
   set supportsColor(bool value) {
     terminal.supportsColor = value;
   }
