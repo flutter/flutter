@@ -41,15 +41,15 @@ BuildApp() {
 
   RunCommand pushd ${project_path}
 
+  local local_engine_flag=""
+  if [[ -n "$LOCAL_ENGINE" ]]; then
+    local_engine_flag="--local-engine=$LOCAL_ENGINE"
+  fi
+
   if [[ $CURRENT_ARCH != "x86_64" ]]; then
     local interpreter_flag="--interpreter"
     if [[ "$DART_EXPERIMENTAL_INTERPRETER" != "1" ]]; then
       interpreter_flag=""
-    fi
-
-    local local_engine_flag=""
-    if [[ -n "$LOCAL_ENGINE" ]]; then
-      local_engine_flag="--local-engine=$LOCAL_ENGINE"
     fi
 
     RunCommand ${FLUTTER_ROOT}/bin/flutter --suppress-analytics build aot \
@@ -75,6 +75,7 @@ BuildApp() {
   RunCommand ${FLUTTER_ROOT}/bin/flutter --suppress-analytics build flx \
     --output-file=${derived_dir}/app.flx                                \
     ${precompilation_flag}                                              \
+    ${local_engine_flag}                                                \
 
   if [[ $? -ne 0 ]]; then
     EchoError "Failed to package $1."
