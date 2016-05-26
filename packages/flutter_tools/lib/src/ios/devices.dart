@@ -145,7 +145,7 @@ class IOSDevice extends Device {
     }
 
     try {
-      String stdout = runCheckedSync(<String>[installerPath, '-i', iosApp.deviceBundlePath]);
+      runCheckedSync(<String>[installerPath, '-i', iosApp.deviceBundlePath]);
       return true;
     } catch (e) {
       return false;
