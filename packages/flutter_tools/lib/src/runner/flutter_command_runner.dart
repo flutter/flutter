@@ -274,13 +274,12 @@ class FlutterCommandRunner extends CommandRunner {
     while (directory.isNotEmpty) {
       if (_isDirectoryFlutterRepo(directory)) {
         if (!_compareResolvedPaths(directory, Cache.flutterRoot)) {
-          // Warn, but continue execution.
           printError(
-            'Warning - the running Flutter is not the one from the current directory:\n'
+            'Warning: the \'flutter\' tool you are currently running is not the one from the current directory:\n'
             '  running Flutter  : ${Cache.flutterRoot}\n'
             '  current directory: $directory\n'
             'This can happen when you have multiple copies of flutter installed. Please check your system path to verify\n'
-            'that you\'re running the expected version (run \'flutter --version\' to which flutter is on your path).\n'
+            'that you\'re running the expected version (run \'flutter --version\' to see which flutter is on your path).\n'
           );
         }
 
@@ -305,11 +304,11 @@ class FlutterCommandRunner extends CommandRunner {
 
         if (!_compareResolvedPaths(flutterPath, Cache.flutterRoot)) {
           printError(
-            'Warning - the running Flutter is different from the one referenced in your pubspec:\n'
+            'Warning: the \'flutter\' tool you are currently running is different from the one referenced in your pubspec.yaml:\n'
             '  running Flutter  : ${Cache.flutterRoot}\n'
             '  pubspec reference: $flutterPath\n'
             'This can happen when you have multiple copies of flutter installed. Please check your system path to verify\n'
-            'that you\'re running the expected version (run \'flutter --version\' to which flutter is on your path). You\n'
+            'that you\'re running the expected version (run \'flutter --version\' to see which flutter is on your path). You\n'
             'can also change which flutter your project points to by editing the \'flutter:\' path in your pubspec.yaml file.\n'
           );
         }
