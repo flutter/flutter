@@ -70,6 +70,9 @@ void updateXcodeLocalProperties(String projectPath) {
   String dartSDKPath = path.normalize(path.join(Platform.resolvedExecutable, '..', '..'));
   localsBuffer.writeln('DART_SDK_PATH=$dartSDKPath');
 
+  if (tools.isLocalEngine)
+    localsBuffer.writeln('LOCAL_ENGINE=${tools.engineBuildPath}');
+
   File localsFile = new File(path.join(projectPath, 'ios', '.generated', 'Local.xcconfig'));
   localsFile.createSync(recursive: true);
   localsFile.writeAsStringSync(localsBuffer.toString());
