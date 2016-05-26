@@ -484,10 +484,10 @@ class Padding extends SingleChildRenderObjectWidget {
 /// This widget will be as big as possible if its dimensions are constrained and
 /// [widthFactor] and [heightFactor] are null. If a dimension is unconstrained
 /// and the corresponding size factor is null then the widget will match its
-/// child's size in that dimension. If [widthFactor] is non-null then this
-/// widget's width will be the child's width multiplied by widthFactor. If
-/// [heightFactor] is non-null then this widget's height will be the child's
-/// height multiplied by heightFactor.
+/// child's size in that dimension. If a size factor is non-null then the
+/// corresponding dimension of this widget will be the product of the child's
+/// dimension and the size factor. For example if widthFactor is 0.5 then
+/// the width of this widget will always be half of the child's width.
 ///
 /// See also:
 ///
