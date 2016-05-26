@@ -474,22 +474,27 @@ class Padding extends SingleChildRenderObjectWidget {
   }
 }
 
-/// Aligns its child box within itself.
+/// Aligns its child within itself and optionally sizes itself based on the
+/// child's size.
 ///
 /// For example, to align a box at the bottom right, you would pass this box a
 /// tight constraint that is bigger than the child's natural size,
 /// with an alignment of [FractionalOffset.bottomRight].
 ///
-/// By default, sizes to be as big as possible in both axes. If either axis is
-/// unconstrained, then in that direction it will be sized to fit the child's
-/// dimensions. Using widthFactor and heightFactor you can force this latter
-/// behavior in all cases.
+/// This widget will be as big as possible if its dimensions are constrained and
+/// [widthFactor] and [heightFactor] are null. If a dimension is unconstrained
+/// and the corresponding size factor is null then the widget will match its
+/// child's size in that dimension. If a size factor is non-null then the
+/// corresponding dimension of this widget will be the product of the child's
+/// dimension and the size factor. For example if widthFactor is 0.5 then
+/// the width of this widget will always be half of the child's width.
 ///
 /// See also:
 ///
 ///  * [CustomSingleChildLayout]
 ///  * [Center] (which is the same as [Align] but with the [alignment] always
 ///    set to [FractionalOffset.center])
+///  * [FractionallySizedBox] which sizes its child based on its own size.
 class Align extends SingleChildRenderObjectWidget {
   /// Creates an alignment widget.
   ///
@@ -745,31 +750,34 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
   }
 }
 
-/// Sizes itself to a fraction of the total available space.
+/// An overflow box that sizes its child to a fraction of the total available space.
+/// For more details about the layout algorithm, see [RenderFractionallySizedOverflowBox].
 ///
-/// See [RenderFractionallySizedOverflowBox] for details.
+/// See also:
+/// * [Align] which can size itself based on its child's size.
+/// * [OverflowBox]
 class FractionallySizedBox extends SingleChildRenderObjectWidget {
   FractionallySizedBox({
     Key key,
     this.alignment: FractionalOffset.center,
-    this.width,
-    this.height,
+    this.widthFactor,
+    this.heightFactor,
     Widget child
   }) : super(key: key, child: child) {
     assert(alignment != null && alignment.dx != null && alignment.dy != null);
   }
 
-  /// If non-null, the factor of the incoming width to use.
+  /// If non-null, the fraction of the incoming width given to the child.
   ///
   /// If non-null, the child is given a tight width constraint that is the max
   /// incoming width constraint multipled by this factor.
-  final double width;
+  final double widthFactor;
 
-  /// If non-null, the factor of the incoming height to use.
+  /// If non-null, the fraction of the incoming height to give to the child.
   ///
   /// If non-null, the child is given a tight height constraint that is the max
   /// incoming height constraint multipled by this factor.
-  final double height;
+  final double heightFactor;
 
   /// How to align the child.
   ///
@@ -785,26 +793,26 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   @override
   RenderFractionallySizedOverflowBox createRenderObject(BuildContext context) => new RenderFractionallySizedOverflowBox(
     alignment: alignment,
-    widthFactor: width,
-    heightFactor: height
+    widthFactor: widthFactor,
+    heightFactor: heightFactor
   );
 
   @override
   void updateRenderObject(BuildContext context, RenderFractionallySizedOverflowBox renderObject) {
     renderObject
       ..alignment = alignment
-      ..widthFactor = width
-      ..heightFactor = height;
+      ..widthFactor = widthFactor
+      ..heightFactor = heightFactor;
   }
 
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('alignment: $alignment');
-    if (width != null)
-      description.add('width: $width');
-    if (height != null)
-      description.add('height: $height');
+    if (widthFactor != null)
+      description.add('widthFactor: $widthFactor');
+    if (heightFactor != null)
+      description.add('heightFactor: $heightFactor');
   }
 }
 
