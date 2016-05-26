@@ -32,7 +32,7 @@ dependencies:
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so here we pin it
   # precisely.
-  test: 0.12.13+1
+  test: 0.12.13+4
 
   # Pinned in flutter_test as well.
   analyzer: 0.27.4-alpha.6
