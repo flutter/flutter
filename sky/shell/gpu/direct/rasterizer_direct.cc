@@ -62,6 +62,10 @@ void RasterizerDirect::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widge
   // isolates. During this time, we are free to create the context. Thus
   // avoiding a delay when the first frame is painted.
   EnsureGLContext();
+  CHECK(context_->MakeCurrent(surface_.get()));
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
+  surface_->SwapBuffers();
 }
 
 void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
