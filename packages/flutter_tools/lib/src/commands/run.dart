@@ -22,7 +22,7 @@ import 'trace.dart';
 
 abstract class RunCommandBase extends FlutterCommand {
   RunCommandBase() {
-    addBuildModeFlags();
+    addBuildModeFlags(defaultToRelease: false);
 
     argParser.addFlag('trace-startup',
         negatable: true,
@@ -97,6 +97,11 @@ class RunCommand extends RunCommandBase {
         printError('Invalid port for `--debug-port`: $error');
         return 1;
       }
+    }
+
+    if (deviceForCommand.isLocalEmulator && !isEmulatorBuildMode(getBuildMode())) {
+      printError('${toTitleCase(getModeName(getBuildMode()))} mode is not supported for emulators.');
+      return 1;
     }
 
     DebuggingOptions options;

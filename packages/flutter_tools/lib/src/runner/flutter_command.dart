@@ -43,6 +43,8 @@ abstract class FlutterCommand extends Command {
 
   bool get shouldRunPub => _usesPubOption && argResults['pub'];
 
+  BuildMode _defaultBuildMode;
+
   void usesTargetOption() {
     argParser.addOption('target',
       abbr: 't',
@@ -58,29 +60,31 @@ abstract class FlutterCommand extends Command {
     _usesPubOption = true;
   }
 
-  void addBuildModeFlags() {
+  void addBuildModeFlags({ bool defaultToRelease: true }) {
+    _defaultBuildMode = defaultToRelease ? BuildMode.release : BuildMode.debug;
+
     argParser.addFlag('debug',
       negatable: false,
-      help: 'Build a debug version of your app (the default).');
+      help: 'Build a debug version of your app${defaultToRelease ? '' : ' (default mode)'}.');
     argParser.addFlag('profile',
       negatable: false,
-      help: 'Build a profile (ahead of time compilation) version of your app.');
+      help: 'Build a version of your app specialized for performance profiling.');
     argParser.addFlag('release',
       negatable: false,
-      help: 'Build a release version of your app.');
+      help: 'Build a release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
   }
 
   BuildMode getBuildMode() {
     List<bool> modeFlags = <bool>[argResults['debug'], argResults['profile'], argResults['release']];
     if (modeFlags.where((bool flag) => flag).length > 1)
-      throw new UsageException('Only one of --debug, --profile, or --release should be specified.', null);
-
-    BuildMode mode = BuildMode.debug;
+      throw new UsageException('Only one of --debug, --profile, or --release can be specified.', null);
+    if (argResults['debug'])
+      return BuildMode.debug;
     if (argResults['profile'])
-      mode = BuildMode.profile;
+      return BuildMode.profile;
     if (argResults['release'])
-      mode = BuildMode.release;
-    return mode;
+      return BuildMode.release;
+    return _defaultBuildMode;
   }
 
   void _setupApplicationPackages() {

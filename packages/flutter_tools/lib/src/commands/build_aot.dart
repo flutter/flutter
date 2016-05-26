@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../base/process.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../dart/sdk.dart';
 import '../globals.dart';
@@ -69,6 +70,8 @@ String _getSdkExtensionPath(String packagesPath, String package) {
   return path.join(path.dirname(packageDir.resolveSymbolicLinksSync()), 'sdk_ext');
 }
 
+/// Build an AOT snapshot. Return `null` (and log to `printError`) if the method
+/// fails.
 String buildAotSnapshot(
   String mainPath,
   TargetPlatform platform,
@@ -76,8 +79,30 @@ String buildAotSnapshot(
   String outputPath: _kDefaultAotOutputDir,
   bool interpreter: false
 }) {
+  try {
+    return _buildAotSnapshot(
+      mainPath,
+      platform,
+      buildMode,
+      outputPath: outputPath,
+      interpreter: interpreter
+    );
+  } on String catch (error) {
+    // Catch the String exceptions thrown from the `runCheckedSync` methods below.
+    printError(error);
+    return null;
+  }
+}
+
+String _buildAotSnapshot(
+  String mainPath,
+  TargetPlatform platform,
+  BuildMode buildMode, {
+  String outputPath: _kDefaultAotOutputDir,
+  bool interpreter: false
+}) {
   if (!isAotBuildMode(buildMode)) {
-    printError('${getModeName(buildMode)} mode does not support AOT compilation.');
+    printError('${toTitleCase(getModeName(buildMode))} mode does not support AOT compilation.');
     return null;
   }
 
@@ -120,8 +145,7 @@ String buildAotSnapshot(
 
   String packagesPath = path.absolute(Directory.current.path, 'packages');
   if (!FileSystemEntity.isDirectorySync(packagesPath)) {
-    printStatus('Missing packages directory. Running `pub get` to work around\n' +
-               'https://github.com/dart-lang/sdk/issues/26362');
+    printStatus('Missing packages directory; running `pub get` (to work around https://github.com/dart-lang/sdk/issues/26362).');
     // We don't use [pubGet] because we explicitly want to avoid --no-package-symlinks.
     runCheckedSync(<String>[sdkBinaryName('pub'), 'get', '--no-precompile']);
   }
@@ -229,8 +253,10 @@ String buildAotSnapshot(
 
   genSnapshotCmd.add(mainPath);
 
-  printStatus('Building snapshot...');
-  runCheckedSync(genSnapshotCmd);
+  String typeName = path.basename(tools.getEngineArtifactsDirectory(platform, buildMode).path);
+  printStatus('Building snapshot in ${getModeName(buildMode)} mode ($typeName)...');
+
+  runCheckedSync(genSnapshotCmd, truncateCommand: true);
 
   // On iOS, we use Xcode to compile the snapshot into a static library that the
   // end-developer can link into their app.
