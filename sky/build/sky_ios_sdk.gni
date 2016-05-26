@@ -48,7 +48,6 @@ template("sky_ios_sdk") {
     sources = [
       "//sky/build/sdk_xcode_harness/FlutterApplication",
       "//sky/build/sdk_xcode_harness/FlutterApplication.xcodeproj",
-      "//sky/build/sdk_xcode_harness/Local.xcconfig",
       "//sky/build/sdk_xcode_harness/Runner",
     ]
 
@@ -69,6 +68,17 @@ template("sky_ios_sdk") {
     } else {
       variables += [ "0" ]
     }
+  }
+
+  render_template("local_xcconfig") {
+    template = "//sky/build/sdk_xcode_harness/Local.xcconfig.tmpl"
+    output = "$sdk_dir/Local.xcconfig"
+    stamp_file = "$root_build_dir/expand_local_xcconfig.stamp"
+
+    variables = [
+      "local_engine",
+      rebase_path(root_build_dir, ""),
+    ]
   }
 
   # All user editable files are copied to the out directory so that developers
@@ -107,6 +117,7 @@ template("sky_ios_sdk") {
       ":copy_user_editable_files",
       ":flutter_xcconfig",
       ":ios_xcode_scripts",
+      ":local_xcconfig",
     ]
   }
 
