@@ -87,45 +87,43 @@ class RenderParagraph extends RenderBox {
     markNeedsPaint();
   }
 
-  void _layoutText(BoxConstraints constraints) {
-    assert(constraints != null);
-    assert(constraints.debugAssertIsValid());
-    _textPainter.layout(minWidth: constraints.minWidth, maxWidth: _softWrap ? constraints.maxWidth : double.INFINITY);
+  void _layoutText({ double minWidth: 0.0, double maxWidth: double.INFINITY }) {
+    _textPainter.layout(minWidth: minWidth, maxWidth: _softWrap ? maxWidth : double.INFINITY);
   }
 
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    _layoutText(constraints);
-    return constraints.constrainWidth(_textPainter.minIntrinsicWidth);
+  double getMinIntrinsicWidth(double height) {
+    _layoutText();
+    return _textPainter.minIntrinsicWidth;
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    _layoutText(constraints);
-    return constraints.constrainWidth(_textPainter.maxIntrinsicWidth);
+  double getMaxIntrinsicWidth(double height) {
+    _layoutText();
+    return _textPainter.maxIntrinsicWidth;
   }
 
-  double _getIntrinsicHeight(BoxConstraints constraints) {
-    _layoutText(constraints);
-    return constraints.constrainHeight(_textPainter.height);
-  }
-
-  @override
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return _getIntrinsicHeight(constraints);
+  double _getIntrinsicHeight(double width) {
+    _layoutText(minWidth: width, maxWidth: width);
+    return _textPainter.height;
   }
 
   @override
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return _getIntrinsicHeight(constraints);
+  double getMinIntrinsicHeight(double width) {
+    return _getIntrinsicHeight(width);
+  }
+
+  @override
+  double getMaxIntrinsicHeight(double width) {
+    return _getIntrinsicHeight(width);
   }
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(!needsLayout);
-    _layoutText(constraints);
+    assert(constraints != null);
+    assert(constraints.debugAssertIsValid());
+    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     return _textPainter.computeDistanceToActualBaseline(baseline);
   }
 
@@ -136,7 +134,7 @@ class RenderParagraph extends RenderBox {
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     if (event is! PointerDownEvent)
       return;
-    _layoutText(constraints);
+    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     Offset offset = entry.localPosition.toOffset();
     TextPosition position = _textPainter.getPositionForOffset(offset);
     TextSpan span = _textPainter.text.getSpanForPosition(position);
@@ -149,7 +147,7 @@ class RenderParagraph extends RenderBox {
 
   @override
   void performLayout() {
-    _layoutText(constraints);
+    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     size = constraints.constrain(_textPainter.size);
 
     final bool didOverflowWidth = size.width < _textPainter.width;
@@ -200,7 +198,7 @@ class RenderParagraph extends RenderBox {
     //
     // If you remove this call, make sure that changing the textAlign still
     // works properly.
-    _layoutText(constraints);
+    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     final Canvas canvas = context.canvas;
     if (_hasVisualOverflow) {
       final Rect bounds = offset & size;

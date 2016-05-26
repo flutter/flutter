@@ -43,35 +43,31 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   bool get _isVertical => quarterTurns % 2 == 1;
 
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    if (child != null)
-      return _isVertical ? child.getMinIntrinsicHeight(constraints.flipped) : child.getMinIntrinsicWidth(constraints);
-    return super.getMinIntrinsicWidth(constraints);
+  double getMinIntrinsicWidth(double height) {
+    if (child == null)
+      return 0.0;
+    return _isVertical ? child.getMinIntrinsicHeight(height) : child.getMinIntrinsicWidth(height);
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    if (child != null)
-      return _isVertical ? child.getMaxIntrinsicHeight(constraints.flipped) : child.getMaxIntrinsicWidth(constraints);
-    return super.getMaxIntrinsicWidth(constraints);
+  double getMaxIntrinsicWidth(double height) {
+    if (child == null)
+      return 0.0;
+    return _isVertical ? child.getMaxIntrinsicHeight(height) : child.getMaxIntrinsicWidth(height);
   }
 
   @override
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    if (child != null)
-      return _isVertical ? child.getMinIntrinsicWidth(constraints.flipped) : child.getMinIntrinsicHeight(constraints);
-    return super.getMinIntrinsicHeight(constraints);
+  double getMinIntrinsicHeight(double width) {
+    if (child == null)
+      return 0.0;
+    return _isVertical ? child.getMinIntrinsicWidth(width) : child.getMinIntrinsicHeight(width);
   }
 
   @override
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    if (child != null)
-      return _isVertical ? child.getMaxIntrinsicWidth(constraints.flipped) : child.getMaxIntrinsicHeight(constraints);
-    return super.getMaxIntrinsicHeight(constraints);
+  double getMaxIntrinsicHeight(double width) {
+    if (child == null)
+      return 0.0;
+    return _isVertical ? child.getMaxIntrinsicWidth(width) : child.getMaxIntrinsicHeight(width);
   }
 
   Matrix4 _paintTransform;

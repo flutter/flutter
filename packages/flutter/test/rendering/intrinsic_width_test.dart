@@ -7,29 +7,30 @@ import 'package:test/test.dart';
 
 import 'rendering_tester.dart';
 
+// before using this, consider using RenderSizedBox from rendering_tester.dart
 class RenderTestBox extends RenderBox {
   RenderTestBox(this._intrinsicDimensions);
 
   final BoxConstraints _intrinsicDimensions;
 
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    return constraints.constrainWidth(_intrinsicDimensions.minWidth);
+  double getMinIntrinsicWidth(double height) {
+    return _intrinsicDimensions.minWidth;
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    return constraints.constrainWidth(_intrinsicDimensions.maxWidth);
+  double getMaxIntrinsicWidth(double height) {
+    return _intrinsicDimensions.maxWidth;
   }
 
   @override
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    return constraints.constrainHeight(_intrinsicDimensions.minHeight);
+  double getMinIntrinsicHeight(double width) {
+    return _intrinsicDimensions.minHeight;
   }
 
   @override
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    return constraints.constrainHeight(_intrinsicDimensions.maxHeight);
+  double getMaxIntrinsicHeight(double width) {
+    return _intrinsicDimensions.maxHeight;
   }
 
   @override

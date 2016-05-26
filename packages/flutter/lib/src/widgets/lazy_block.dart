@@ -368,48 +368,28 @@ class _RenderLazyBlock extends RenderVirtualViewport<_LazyBlockParentData> {
     return true;
   }
 
-  double getIntrinsicWidth(BoxConstraints constraints) {
-    switch (mainAxis) {
-      case Axis.horizontal:
-        return constraints.constrainWidth(0.0);
-      case Axis.vertical:
-        assert(_debugThrowIfNotCheckingIntrinsics());
-        return constraints.constrainWidth(0.0);
-    }
+  @override
+  double getMinIntrinsicWidth(double height) {
+    assert(_debugThrowIfNotCheckingIntrinsics());
+    return 0.0;
   }
 
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return getIntrinsicWidth(constraints);
+  double getMaxIntrinsicWidth(double height) {
+    assert(_debugThrowIfNotCheckingIntrinsics());
+    return 0.0;
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return getIntrinsicWidth(constraints);
-  }
-
-  double getIntrinsicHeight(BoxConstraints constraints) {
-    switch (mainAxis) {
-      case Axis.horizontal:
-        return constraints.constrainHeight(0.0);
-      case Axis.vertical:
-        assert(_debugThrowIfNotCheckingIntrinsics());
-        return constraints.constrainHeight(0.0);
-    }
+  double getMinIntrinsicHeight(double width) {
+    assert(_debugThrowIfNotCheckingIntrinsics());
+    return 0.0;
   }
 
   @override
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return getIntrinsicHeight(constraints);
-  }
-
-  @override
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return getIntrinsicHeight(constraints);
+  double getMaxIntrinsicHeight(double width) {
+    assert(_debugThrowIfNotCheckingIntrinsics());
+    return 0.0;
   }
 
   @override
