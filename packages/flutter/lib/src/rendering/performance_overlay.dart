@@ -47,7 +47,7 @@ class RenderPerformanceOverlay extends RenderBox {
       _rasterizerThreshold = rasterizerThreshold;
 
   /// The mask is created by shifting 1 by the index of the specific
-  /// PerformanceOverlayOption to enable.
+  /// [PerformanceOverlayOption] to enable.
   int get optionsMask => _optionsMask;
   int _optionsMask;
   set optionsMask(int mask) {
