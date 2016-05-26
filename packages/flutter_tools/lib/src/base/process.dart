@@ -32,8 +32,7 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
   RegExp filter,
   StringConverter mapFunction
 }) async {
-  Process process = await runCommand(cmd,
-                                     workingDirectory: workingDirectory);
+  Process process = await runCommand(cmd, workingDirectory: workingDirectory);
   process.stdout
     .transform(UTF8.decoder)
     .transform(const LineSplitter())
@@ -82,6 +81,18 @@ String runCheckedSync(List<String> cmd, {
   return _runWithLoggingSync(
     cmd, workingDirectory: workingDirectory, checked: true, noisyErrors: true, truncateCommand: truncateCommand
   );
+}
+
+Future<RunResult> runAsync(List<String> cmd, { String workingDirectory }) async {
+  printTrace(cmd.join(' '));
+  ProcessResult results = await Process.run(
+    cmd[0],
+    cmd.getRange(1, cmd.length).toList(),
+    workingDirectory: workingDirectory
+  );
+  RunResult runResults = new RunResult(results);
+  printTrace(runResults.toString());
+  return runResults;
 }
 
 /// Run cmd and return stdout.
@@ -145,4 +156,22 @@ class ProcessExit implements Exception {
 
   @override
   String toString() => message;
+}
+
+class RunResult {
+  RunResult(this.processResult);
+
+  final ProcessResult processResult;
+
+  int get exitCode => processResult.exitCode;
+
+  @override
+  String toString() {
+    StringBuffer out = new StringBuffer();
+    if (processResult.stdout.isNotEmpty)
+      out.writeln(processResult.stdout);
+    if (processResult.stderr.isNotEmpty)
+      out.writeln(processResult.stderr);
+    return out.toString().trimRight();
+  }
 }

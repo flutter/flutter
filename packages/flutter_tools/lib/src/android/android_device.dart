@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:path/path.dart' as path;
+
 import '../android/android_sdk.dart';
 import '../application_package.dart';
 import '../base/os.dart';
@@ -14,6 +16,7 @@ import '../build_info.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
+import '../observatory.dart';
 import '../protocol_discovery.dart';
 import 'adb.dart';
 import 'android.dart';
@@ -370,6 +373,39 @@ class AndroidDevice extends Device {
   }
 
   @override
+  Future<bool> restartApp(
+    ApplicationPackage package,
+    LaunchResult result, {
+    String mainPath,
+    Observatory observatory
+  }) async {
+    Directory tempDir = await Directory.systemTemp.createTemp('flutter_tools');
+
+    try {
+      String snapshotPath = path.join(tempDir.path, 'snapshot_blob.bin');
+      int result = await flx.createSnapshot(mainPath: mainPath, snapshotPath: snapshotPath);
+
+      if (result != 0) {
+        printError('Failed to run the Flutter compiler; exit code: $result');
+        return false;
+      }
+
+      AndroidApk apk = package;
+      String androidActivity = apk.launchActivity;
+      bool success = await refreshSnapshot(androidActivity, snapshotPath);
+
+      if (!success) {
+        printError('Error refreshing snapshot on $this.');
+        return false;
+      }
+
+      return true;
+    } finally {
+      tempDir.deleteSync(recursive: true);
+    }
+  }
+
+  @override
   Future<bool> stopApp(ApplicationPackage app) {
     List<String> command = adbCommandForDevice(<String>['shell', 'am', 'force-stop', app.id]);
     return runCommandAndStreamOutput(command).then((int exitCode) => exitCode == 0);
@@ -416,7 +452,13 @@ class AndroidDevice extends Device {
       return false;
     }
 
-    runCheckedSync(adbCommandForDevice(<String>['push', snapshotPath, _deviceSnapshotPath]));
+    RunResult result = await runAsync(
+      adbCommandForDevice(<String>['push', snapshotPath, _deviceSnapshotPath])
+    );
+    if (result.exitCode != 0) {
+      printStatus(result.toString());
+      return false;
+    }
 
     List<String> cmd = adbCommandForDevice(<String>[
       'shell', 'am', 'start',
@@ -426,9 +468,14 @@ class AndroidDevice extends Device {
       '--es', 'snapshot', _deviceSnapshotPath,
       activity,
     ]);
+    result = await runAsync(cmd);
+    if (result.exitCode != 0) {
+      printStatus(result.toString());
+      return false;
+    }
 
-    RegExp errorRegExp = new RegExp(r'^Error: .*$', multiLine: true);
-    Match errorMatch = errorRegExp.firstMatch(runCheckedSync(cmd));
+    final RegExp errorRegExp = new RegExp(r'^Error: .*$', multiLine: true);
+    Match errorMatch = errorRegExp.firstMatch(result.processResult.stdout);
     if (errorMatch != null) {
       printError(errorMatch.group(0));
       return false;

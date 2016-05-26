@@ -295,10 +295,18 @@ class _RunAndStayResident {
   StreamSubscription<String> _loggingSubscription;
 
   Observatory observatory;
-  String _isolateId;
 
   /// Start the app and keep the process running during its lifetime.
-  Future<int> run({ bool traceStartup: false, bool benchmark: false }) async {
+  Future<int> run({ bool traceStartup: false, bool benchmark: false }) {
+    // Don't let uncaught errors kill the process.
+    return runZoned(() {
+      return _run(traceStartup: traceStartup, benchmark: benchmark);
+    }, onError: (dynamic error) {
+      printError('Exception from flutter run: $error');
+    });
+  }
+
+  Future<int> _run({ bool traceStartup: false, bool benchmark: false }) async {
     String mainPath = findMainDartFile(target);
     if (!FileSystemEntity.isFileSync(mainPath)) {
       String message = 'Tried to run $mainPath, but that file does not exist.';
@@ -319,7 +327,7 @@ class _RunAndStayResident {
       return 1;
     }
 
-    Stopwatch stopwatch = new Stopwatch()..start();
+    Stopwatch startTime = new Stopwatch()..start();
 
     // TODO(devoncarew): We shouldn't have to do type checks here.
     if (device is AndroidDevice) {
@@ -377,7 +385,7 @@ class _RunAndStayResident {
       return 2;
     }
 
-    stopwatch.stop();
+    startTime.stop();
 
     _exitCompleter = new Completer<int>();
 
@@ -386,20 +394,20 @@ class _RunAndStayResident {
       observatory = await Observatory.connect(result.observatoryPort);
       printTrace('Connected to observatory port: ${result.observatoryPort}.');
 
-      observatory.onIsolateEvent.listen((Event event) {
-        if (event['isolate'] != null)
-          _isolateId = event['isolate']['id'];
+      observatory.onExtensionEvent.listen((Event event) {
+        printTrace(event.toString());
       });
-      observatory.streamListen('Isolate');
+
+      observatory.onIsolateEvent.listen((Event event) {
+        printTrace(event.toString());
+      });
+
+      if (benchmark)
+        await observatory.waitFirstIsolate;
 
       // Listen for observatory connection close.
       observatory.done.whenComplete(() {
         _handleExit();
-      });
-
-      observatory.getVM().then((VM vm) {
-        if (vm.isolates.isNotEmpty)
-          _isolateId = vm.isolates.first['id'];
       });
     }
 
@@ -425,7 +433,7 @@ class _RunAndStayResident {
           _printHelp();
         } else if (lower == 'r' || code == AnsiTerminal.KEY_F5) {
           // F5, refresh
-          _handleRefresh();
+          _handleRefresh(package, result, mainPath);
         } else if (lower == 'q' || code == AnsiTerminal.KEY_F10) {
           // F10, exit
           _handleExit();
@@ -441,18 +449,31 @@ class _RunAndStayResident {
     }
 
     if (benchmark) {
-      _writeBenchmark(stopwatch);
-      new Future<Null>.delayed(new Duration(seconds: 2)).then((_) {
-        _handleExit();
-      });
+      await new Future<Null>.delayed(new Duration(seconds: 4));
+
+      // Touch the file.
+      File mainFile = new File(mainPath);
+      mainFile.writeAsBytesSync(mainFile.readAsBytesSync());
+
+      Stopwatch restartTime = new Stopwatch()..start();
+      bool restarted = await _handleRefresh(package, result, mainPath);
+      restartTime.stop();
+      _writeBenchmark(startTime, restarted ? restartTime : null);
+      await new Future<Null>.delayed(new Duration(seconds: 2));
+      _handleExit();
     }
 
     return _exitCompleter.future.then((int exitCode) async {
-      if (observatory != null && !observatory.isClosed && _isolateId != null) {
-        observatory.flutterExit(_isolateId);
-
-        // WebSockets do not have a flush() method.
-        await new Future<Null>.delayed(new Duration(milliseconds: 100));
+      try {
+        if (observatory != null && !observatory.isClosed) {
+          if (observatory.isolates.isNotEmpty) {
+            observatory.flutterExit(observatory.firstIsolateId);
+            // The Dart WebSockets API does not have a flush() method.
+            await new Future<Null>.delayed(new Duration(milliseconds: 100));
+          }
+        }
+      } catch (error) {
+        stderr.writeln(error.toString());
       }
 
       return exitCode;
@@ -463,15 +484,33 @@ class _RunAndStayResident {
     printStatus('Type "h" or F1 for help, "r" or F5 to restart the app, and "q", F10, or ctrl-c to quit.');
   }
 
-  void _handleRefresh() {
+  Future<bool> _handleRefresh(ApplicationPackage package, LaunchResult result, String mainPath) async {
     if (observatory == null) {
       printError('Debugging is not enabled.');
+      return false;
     } else {
-      printStatus('Re-starting application...');
+      Status status = logger.startProgress('Re-starting application...');
 
-      observatory.isolateReload(_isolateId).catchError((dynamic error) {
-        printError('Error restarting app: $error');
-      });
+      Future<Event> extensionAddedEvent = observatory.onExtensionEvent
+        .where((Event event) => event.extensionKind == 'Flutter.FrameworkInitialization')
+        .first;
+
+      bool restartResult = await device.restartApp(
+        package,
+        result,
+        mainPath: mainPath,
+        observatory: observatory
+      );
+
+      status.stop(showElapsedTime: true);
+
+      if (restartResult) {
+        // TODO(devoncarew): We should restore the route here.
+
+        await extensionAddedEvent;
+      }
+
+      return restartResult;
     }
   }
 
@@ -533,11 +572,15 @@ Future<Null> _downloadStartupTrace(Observatory observatory) async {
   printStatus('Saved startup trace info in ${traceInfoFile.path}.');
 }
 
-void _writeBenchmark(Stopwatch stopwatch) {
+void _writeBenchmark(Stopwatch startTime, [Stopwatch restartTime]) {
   final String benchmarkOut = 'refresh_benchmark.json';
   Map<String, dynamic> data = <String, dynamic>{
-    'time': stopwatch.elapsedMilliseconds
+    'start': startTime.elapsedMilliseconds,
+    'time': (restartTime ?? startTime).elapsedMilliseconds // time and restart are the same
   };
+  if (restartTime != null)
+    data['restart'] = restartTime.elapsedMilliseconds;
+
   new File(benchmarkOut).writeAsStringSync(toPrettyJson(data));
   printStatus('Run benchmark written to $benchmarkOut ($data).');
 }

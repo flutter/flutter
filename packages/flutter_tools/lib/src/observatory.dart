@@ -13,6 +13,15 @@ class Observatory {
     peer.registerMethod('streamNotify', (rpc.Parameters event) {
       _handleStreamNotify(event.asMap);
     });
+
+    onIsolateEvent.listen((Event event) {
+      if (event.kind == 'IsolateStart') {
+        _addIsolate(event.isolate);
+      } else if (event.kind == 'IsolateExit') {
+        String removedId = event.isolate.id;
+        isolates.removeWhere((IsolateRef ref) => ref.id == removedId);
+      }
+    });
   }
 
   static Future<Observatory> connect(int port) async {
@@ -26,19 +35,30 @@ class Observatory {
   final rpc.Peer peer;
   final int port;
 
+  List<IsolateRef> isolates = <IsolateRef>[];
+  Completer<IsolateRef> _waitFirstIsolateCompleter;
+
   Map<String, StreamController<Event>> _eventControllers = <String, StreamController<Event>>{};
+
+  Set<String> _listeningFor = new Set<String>();
 
   bool get isClosed => peer.isClosed;
   Future<Null> get done => peer.done;
 
+  String get firstIsolateId => isolates.isEmpty ? null : isolates.first.id;
+
   // Events
 
+  Stream<Event> get onExtensionEvent => onEvent('Extension');
   // IsolateStart, IsolateRunnable, IsolateExit, IsolateUpdate, ServiceExtensionAdded
-  Stream<Event> get onIsolateEvent => _getEventController('Isolate').stream;
-  Stream<Event> get onTimelineEvent => _getEventController('Timeline').stream;
+  Stream<Event> get onIsolateEvent => onEvent('Isolate');
+  Stream<Event> get onTimelineEvent => onEvent('Timeline');
 
   // Listen for a specific event name.
-  Stream<Event> onEvent(String streamName) => _getEventController(streamName).stream;
+  Stream<Event> onEvent(String streamId) {
+    streamListen(streamId);
+    return _getEventController(streamId).stream;
+  }
 
   StreamController<Event> _getEventController(String eventName) {
     StreamController<Event> controller = _eventControllers[eventName];
@@ -54,16 +74,31 @@ class Observatory {
     _getEventController(data['streamId']).add(event);
   }
 
+  Future<IsolateRef> get waitFirstIsolate async {
+    if (isolates.isNotEmpty)
+      return isolates.first;
+
+    _waitFirstIsolateCompleter = new Completer<IsolateRef>();
+
+    getVM().then((VM vm) {
+      for (IsolateRef isolate in vm.isolates)
+        _addIsolate(isolate);
+    });
+
+    return _waitFirstIsolateCompleter.future;
+  }
+
   // Requests
 
   Future<Response> sendRequest(String method, [Map<String, dynamic> args]) {
     return peer.sendRequest(method, args).then((dynamic result) => new Response(result));
   }
 
-  Future<Response> streamListen(String streamId) {
-    return sendRequest('streamListen', <String, dynamic>{
-      'streamId': streamId
-    });
+  Future<Null> streamListen(String streamId) async {
+    if (!_listeningFor.contains(streamId)) {
+      _listeningFor.add(streamId);
+      sendRequest('streamListen', <String, dynamic>{ 'streamId': streamId });
+    }
   }
 
   Future<VM> getVM() {
@@ -97,12 +132,25 @@ class Observatory {
       'isolateId': isolateId
     }).then((dynamic result) => new Response(result));
   }
+
+  void _addIsolate(IsolateRef isolate) {
+    if (!isolates.contains(isolate)) {
+      isolates.add(isolate);
+
+      if (_waitFirstIsolateCompleter != null) {
+        _waitFirstIsolateCompleter.complete(isolate);
+        _waitFirstIsolateCompleter = null;
+      }
+    }
+  }
 }
 
 class Response {
   Response(this.response);
 
   final Map<String, dynamic> response;
+
+  String get type => response['type'];
 
   dynamic operator[](String key) => response[key];
 
@@ -113,18 +161,35 @@ class Response {
 class VM extends Response {
   VM(Map<String, dynamic> response) : super(response);
 
-  List<dynamic> get isolates => response['isolates'];
+  List<IsolateRef> get isolates => response['isolates'].map((dynamic ref) => new IsolateRef(ref)).toList();
 }
 
-class Event {
-  Event(this.event);
+class Event extends Response {
+  Event(Map<String, dynamic> response) : super(response);
 
-  final Map<String, dynamic> event;
+  String get kind => response['kind'];
+  IsolateRef get isolate => new IsolateRef.from(response['isolate']);
 
-  String get kind => event['kind'];
+  /// Only valid for [kind] == `Extension`.
+  String get extensionKind => response['extensionKind'];
+}
 
-  dynamic operator[](String key) => event[key];
+class IsolateRef extends Response {
+  IsolateRef(Map<String, dynamic> response) : super(response);
+  factory IsolateRef.from(dynamic ref) => ref == null ? null : new IsolateRef(ref);
+
+  String get id => response['id'];
 
   @override
-  String toString() => event.toString();
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! IsolateRef)
+      return false;
+    final IsolateRef typedOther = other;
+    return id == typedOther.id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
 }
