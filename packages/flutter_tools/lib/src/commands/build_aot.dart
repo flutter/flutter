@@ -258,8 +258,6 @@ String _buildAotSnapshot(
 
   runCheckedSync(genSnapshotCmd, truncateCommand: true);
 
-  // On iOS, we use Xcode to compile the snapshot into a static library that the
-  // end-developer can link into their app.
   if (platform == TargetPlatform.ios) {
     printStatus('Building app.so...');
 
@@ -310,9 +308,16 @@ String _buildAotSnapshot(
         kDartVmIsolateSnapshotBufferO,
         kDartIsolateSnapshotBufferO,
     ]);
+
     if (!interpreter)
       linkCommand.add(assemblyO);
+
     runCheckedSync(linkCommand);
+
+    if (buildMode == BuildMode.release) {
+      printStatus('Stripping \'$appSo\' for release mode');
+      runCheckedSync(<String>['xcrun', 'strip', appSo]);
+    }
   }
 
   return outputPath;
