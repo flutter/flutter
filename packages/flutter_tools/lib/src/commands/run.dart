@@ -412,7 +412,8 @@ class _RunAndStayResident {
 
       _handleExit();
     } else {
-      _printHelp();
+      if (!logger.quiet)
+        _printHelp();
 
       terminal.singleCharMode = true;
 

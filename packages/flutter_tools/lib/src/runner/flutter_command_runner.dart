@@ -34,6 +34,10 @@ class FlutterCommandRunner extends CommandRunner {
         abbr: 'v',
         negatable: false,
         help: 'Noisy logging, including all shell commands executed.');
+    argParser.addFlag('quiet',
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'Reduce the amount of output from some commands.');
     argParser.addOption('device-id',
         abbr: 'd',
         help: 'Target device id.');
@@ -128,6 +132,8 @@ class FlutterCommandRunner extends CommandRunner {
     // Check for verbose.
     if (globalResults['verbose'])
       context[Logger] = new VerboseLogger();
+
+    logger.quiet = globalResults['quiet'];
 
     if (globalResults.wasParsed('color'))
       logger.supportsColor = globalResults['color'];
