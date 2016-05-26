@@ -17,8 +17,8 @@ void main() {
       alignment: const FractionalOffset(0.0, 0.0),
       child: new Center(
         child: new FractionallySizedBox(
-          width: 0.5,
-          height: 0.25,
+          widthFactor: 0.5,
+          heightFactor: 0.25,
           child: new Container(
             key: inner
           )
