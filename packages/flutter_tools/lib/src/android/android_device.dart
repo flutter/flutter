@@ -229,6 +229,22 @@ class AndroidDevice extends Device {
     return true;
   }
 
+  @override
+  bool uninstallApp(ApplicationPackage app) {
+    if (!_checkForSupportedAdbVersion() || !_checkForSupportedAndroidVersion())
+      return false;
+
+    String uninstallOut = runCheckedSync(adbCommandForDevice(<String>['uninstall', app.id]));
+    RegExp failureExp = new RegExp(r'^Failure.*$', multiLine: true);
+    String failure = failureExp.stringMatch(uninstallOut);
+    if (failure != null) {
+      printError('Package uninstall error: $failure');
+      return false;
+    }
+
+    return true;
+  }
+
   Future<Null> _forwardPort(String service, int devicePort, int port) async {
     try {
       // Set up port forwarding for observatory.

@@ -277,6 +277,10 @@ class SimControl {
     runCheckedSync(<String>[_xcrunPath, 'simctl', 'install', deviceId, appPath]);
   }
 
+  void uninstall(String deviceId, String appId) {
+    runCheckedSync(<String>[_xcrunPath, 'simctl', 'uninstall', deviceId, appId]);
+  }
+
   void launch(String deviceId, String appIdentifier, [List<String> launchArgs]) {
     List<String> args = <String>[_xcrunPath, 'simctl', 'launch', deviceId, appIdentifier];
     if (launchArgs != null)
@@ -361,10 +365,31 @@ class IOSSimulator extends Device {
   }
 
   @override
+  bool isAppInstalled(ApplicationPackage app) {
+    return exitsHappy(<String>[
+      'xcrun',
+      'simctl',
+      'get_app_container',
+      'booted',
+      app.id,
+    ]);
+  }
+
+  @override
   bool installApp(ApplicationPackage app) {
     try {
       IOSApp iosApp = app;
       SimControl.instance.install(id, iosApp.simulatorBundlePath);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @override
+  bool uninstallApp(ApplicationPackage app) {
+    try {
+      SimControl.instance.uninstall(id, app.id);
       return true;
     } catch (e) {
       return false;
@@ -420,17 +445,6 @@ class IOSSimulator extends Device {
       return "Supported";
 
     return _supportMessage != null ? _supportMessage : "Unknown";
-  }
-
-  @override
-  bool isAppInstalled(ApplicationPackage app) {
-    try {
-      // TODO(tvolkert): This logic is wrong; simulatorHomeDirectory always exists
-      String simulatorHomeDirectory = _getSimulatorAppHomeDirectory(app);
-      return FileSystemEntity.isDirectorySync(simulatorHomeDirectory);
-    } catch (e) {
-      return false;
-    }
   }
 
   @override
@@ -504,13 +518,7 @@ class IOSSimulator extends Device {
   }
 
   bool _applicationIsInstalledAndRunning(ApplicationPackage app) {
-    bool isInstalled = exitsHappy(<String>[
-      'xcrun',
-      'simctl',
-      'get_app_container',
-      'booted',
-      app.id,
-    ]);
+    bool isInstalled = isAppInstalled(app);
 
     bool isRunning = exitsHappy(<String>[
       '/usr/bin/killall',

@@ -148,8 +148,14 @@ abstract class Device {
   /// Whether it is an emulated device running on localhost.
   bool get isLocalEmulator;
 
+  /// Check if a version of the given app is already installed
+  bool isAppInstalled(ApplicationPackage app);
+
   /// Install an app package on the current device
   bool installApp(ApplicationPackage app);
+
+  /// Uninstall an app package from the current device
+  bool uninstallApp(ApplicationPackage app);
 
   /// Check if the device is supported by Flutter
   bool isSupported();
@@ -157,9 +163,6 @@ abstract class Device {
   // String meant to be displayed to the user indicating if the device is
   // supported by Flutter, and, if not, why.
   String supportMessage() => isSupported() ? "Supported" : "Unsupported";
-
-  /// Check if the current version of the given app is already installed
-  bool isAppInstalled(ApplicationPackage app);
 
   TargetPlatform get platform;
 

@@ -261,6 +261,8 @@ Future<int> startApp(DriveCommand command, BuildMode buildMode) async {
   printTrace('Installing application package.');
   ApplicationPackage package = command.applicationPackages
       .getPackageForPlatform(command.device.platform);
+  if (command.device.isAppInstalled(package))
+    command.device.uninstallApp(package);
   command.device.installApp(package);
 
   printTrace('Starting application.');

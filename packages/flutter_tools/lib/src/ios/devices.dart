@@ -123,21 +123,6 @@ class IOSDevice extends Device {
   }
 
   @override
-  bool installApp(ApplicationPackage app) {
-    try {
-      IOSApp iosApp = app;
-      runCheckedSync(<String>[installerPath, '-i', iosApp.deviceBundlePath]);
-      return true;
-    } catch (e) {
-      return false;
-    }
-    return false;
-  }
-
-  @override
-  bool isSupported() => true;
-
-  @override
   bool isAppInstalled(ApplicationPackage app) {
     try {
       String apps = runCheckedSync(<String>[installerPath, '--list-apps']);
@@ -149,6 +134,36 @@ class IOSDevice extends Device {
     }
     return false;
   }
+
+  @override
+  bool installApp(ApplicationPackage app) {
+    IOSApp iosApp = app;
+    Directory bundle = new Directory(iosApp.deviceBundlePath);
+    if (!bundle.existsSync()) {
+      printError("Could not find application bundle at ${bundle.path}; have you run 'flutter build ios'?");
+      return false;
+    }
+
+    try {
+      String stdout = runCheckedSync(<String>[installerPath, '-i', iosApp.deviceBundlePath]);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @override
+  bool uninstallApp(ApplicationPackage app) {
+    try {
+      runCheckedSync(<String>[installerPath, '-U', app.id]);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @override
+  bool isSupported() => true;
 
   @override
   Future<LaunchResult> startApp(
@@ -173,8 +188,7 @@ class IOSDevice extends Device {
     // Step 2: Check that the application exists at the specified path.
     IOSApp iosApp = app;
     Directory bundle = new Directory(iosApp.deviceBundlePath);
-    bool bundleExists = bundle.existsSync();
-    if (!bundleExists) {
+    if (!bundle.existsSync()) {
       printError('Could not find the built application bundle at ${bundle.path}.');
       return new LaunchResult.failed();
     }
