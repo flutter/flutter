@@ -82,15 +82,7 @@ static NSURL* URLForSwitch(const char* name) {
 #pragma mark - Convenience initializers
 
 - (instancetype)initFromDefaultSourceForConfiguration {
-  NSString* bundlePath =
-      [[NSBundle mainBundle] pathForResource:@"FlutterApplication"
-                                      ofType:@"framework"
-                                 inDirectory:@"Frameworks"];
-  NSBundle* bundle = [NSBundle bundleWithPath:bundlePath];
-
-  // In both precompilation and non-precompilation cases, we need to bundle
-  // loaded since at least the FLX archive is present in it.
-  [bundle load];
+  NSBundle* bundle = [NSBundle mainBundle];
 
   if (Dart_IsPrecompiledRuntime()) {
     // Load from an AOTC snapshot.
