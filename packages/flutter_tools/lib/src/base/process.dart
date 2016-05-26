@@ -77,6 +77,7 @@ Future<Process> runDetached(List<String> cmd) {
 }
 
 /// Run cmd and return stdout.
+///
 /// Throws an error if cmd exits with a non-zero value.
 String runCheckedSync(List<String> cmd, {
   String workingDirectory, bool truncateCommand: false

@@ -39,6 +39,12 @@ String camelCase(String str) {
   return str;
 }
 
+String toTitleCase(String str) {
+  if (str.isEmpty)
+    return str;
+  return str.substring(0, 1).toUpperCase() + str.substring(1);
+}
+
 /// Return the plural of the given word (`cat(s)`).
 String pluralize(String word, int count) => count == 1 ? word : word + 's';
 
