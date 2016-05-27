@@ -279,6 +279,12 @@ class FlutterEngine {
       if (!dir.existsSync() || allDirty) {
         await _downloadItem('Downloading engine artifacts $dirName...',
           url + dirName + '/artifacts.zip', dir);
+        File frameworkZip = new File(path.join(dir.path, 'Flutter.framework.zip'));
+        if (frameworkZip.existsSync()) {
+          Directory framework = new Directory(path.join(dir.path, 'Flutter.framework'));
+          framework.createSync();
+          os.unzip(frameworkZip, framework);
+        }
       }
     }
 
