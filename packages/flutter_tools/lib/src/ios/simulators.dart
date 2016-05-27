@@ -273,6 +273,16 @@ class SimControl {
 
   bool _isAnyConnected() => getConnectedDevices().isNotEmpty;
 
+  bool isInstalled(String appId) {
+    return exitsHappy(<String>[
+      _xcrunPath,
+      'simctl',
+      'get_app_container',
+      'booted',
+      appId,
+    ]);
+  }
+
   void install(String deviceId, String appPath) {
     runCheckedSync(<String>[_xcrunPath, 'simctl', 'install', deviceId, appPath]);
   }
@@ -366,13 +376,7 @@ class IOSSimulator extends Device {
 
   @override
   bool isAppInstalled(ApplicationPackage app) {
-    return exitsHappy(<String>[
-      'xcrun',
-      'simctl',
-      'get_app_container',
-      'booted',
-      app.id,
-    ]);
+    return SimControl.instance.isInstalled(app.id);
   }
 
   @override
