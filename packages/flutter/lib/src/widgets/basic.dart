@@ -760,8 +760,8 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 /// For more details about the layout algorithm, see [RenderFractionallySizedOverflowBox].
 ///
 /// See also:
-///  * [Align] (which sizes itself based on its child's size and positions
-///    the child according to a [FractionalOffset] value)
+/// * [Align] (which sizes itself based on its child's size and positions
+///   the child according to a [FractionalOffset] value)
 /// * [OverflowBox]
 class FractionallySizedBox extends SingleChildRenderObjectWidget {
   FractionallySizedBox({
