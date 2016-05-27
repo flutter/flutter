@@ -274,6 +274,8 @@ Future<int> startApp(DriveCommand command) async {
   printTrace('Installing application package.');
   ApplicationPackage package = command.applicationPackages
       .getPackageForPlatform(command.device.platform);
+  if (command.device.isAppInstalled(package))
+    command.device.uninstallApp(package);
   command.device.installApp(package);
 
   Map<String, dynamic> platformArgs = <String, dynamic>{};

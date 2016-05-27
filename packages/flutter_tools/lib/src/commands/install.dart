@@ -34,8 +34,11 @@ bool installApp(Device device, ApplicationPackage package) {
   if (package == null)
     return false;
 
-  if (device.isAppInstalled(package))
-    return true;
+  if (device.isAppInstalled(package)) {
+    printStatus('Uninstalling old version...');
+    if (!device.uninstallApp(package))
+      printError('Warning: uninstalling old version failed');
+  }
 
   return device.installApp(package);
 }
