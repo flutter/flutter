@@ -14,11 +14,15 @@ typedef void PointerRoute(PointerEvent event);
 /// A routing table for [PointerEvent] events.
 class PointerRouter {
   final Map<int, LinkedHashSet<PointerRoute>> _routeMap = new Map<int, LinkedHashSet<PointerRoute>>();
+  final LinkedHashSet<PointerRoute> _globalRoutes = new LinkedHashSet<PointerRoute>();
 
   /// Adds a route to the routing table.
   ///
   /// Whenever this object routes a [PointerEvent] corresponding to
   /// pointer, call route.
+  ///
+  /// Routes added reentrantly within [PointerRouter.route] will take effect when
+  /// routing the next event.
   void addRoute(int pointer, PointerRoute route) {
     LinkedHashSet<PointerRoute> routes = _routeMap.putIfAbsent(pointer, () => new LinkedHashSet<PointerRoute>());
     assert(!routes.contains(route));
@@ -29,6 +33,9 @@ class PointerRouter {
   ///
   /// No longer call route when routing a [PointerEvent] corresponding to
   /// pointer. Requires that this route was previously added to the router.
+  ///
+  /// Routes removed reentrantly within [PointerRouter.route] will take effect
+  /// immediately.
   void removeRoute(int pointer, PointerRoute route) {
     assert(_routeMap.containsKey(pointer));
     LinkedHashSet<PointerRoute> routes = _routeMap[pointer];
@@ -38,34 +45,65 @@ class PointerRouter {
       _routeMap.remove(pointer);
   }
 
+  /// Adds a route to the global entry in the routing table.
+  ///
+  /// Whenever this object routes a [PointerEvent], call route.
+  ///
+  /// Routes added reentrantly within [PointerRouter.route] will take effect when
+  /// routing the next event.
+  void addGlobalRoute(PointerRoute route) {
+    assert(!_globalRoutes.contains(route));
+    _globalRoutes.add(route);
+  }
+
+  /// Removes a route from the global entry in the routing table.
+  ///
+  /// No longer call route when routing a [PointerEvent]. Requires that this
+  /// route was previously added via [addGlobalRoute].
+  ///
+  /// Routes removed reentrantly within [PointerRouter.route] will take effect
+  /// immediately.
+  void removeGlobalRoute(PointerRoute route) {
+    assert(_globalRoutes.contains(route));
+    _globalRoutes.remove(route);
+  }
+
+  void _dispatch(PointerEvent event, PointerRoute route) {
+    try {
+      route(event);
+    } catch (exception, stack) {
+      FlutterError.reportError(new FlutterErrorDetailsForPointerRouter(
+        exception: exception,
+        stack: stack,
+        library: 'gesture library',
+        context: 'while routing a pointer event',
+        router: this,
+        route: route,
+        event: event,
+        informationCollector: (StringBuffer information) {
+          information.writeln('Event:');
+          information.write('  $event');
+        }
+      ));
+    }
+  }
+
   /// Calls the routes registered for this pointer event.
   ///
   /// Routes are called in the order in which they were added to the
   /// PointerRouter object.
   void route(PointerEvent event) {
     LinkedHashSet<PointerRoute> routes = _routeMap[event.pointer];
-    if (routes == null)
-      return;
-    for (PointerRoute route in new List<PointerRoute>.from(routes)) {
-      if (!routes.contains(route))
-        continue;
-      try {
-        route(event);
-      } catch (exception, stack) {
-        FlutterError.reportError(new FlutterErrorDetailsForPointerRouter(
-          exception: exception,
-          stack: stack,
-          library: 'gesture library',
-          context: 'while routing a pointer event',
-          router: this,
-          route: route,
-          event: event,
-          informationCollector: (StringBuffer information) {
-            information.writeln('Event:');
-            information.write('  $event');
-          }
-        ));
+    List<PointerRoute> globalRoutes = new List<PointerRoute>.from(_globalRoutes);
+    if (routes != null) {
+      for (PointerRoute route in new List<PointerRoute>.from(routes)) {
+        if (routes.contains(route))
+          _dispatch(event, route);
       }
+    }
+    for (PointerRoute route in globalRoutes) {
+      if (_globalRoutes.contains(route))
+        _dispatch(event, route);
     }
   }
 }
@@ -112,4 +150,3 @@ class FlutterErrorDetailsForPointerRouter extends FlutterErrorDetails {
   /// The pointer event that was being routed when the exception was raised.
   final PointerEvent event;
 }
-
