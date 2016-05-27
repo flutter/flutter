@@ -258,7 +258,7 @@ String _buildAotSnapshot(
 
   runCheckedSync(genSnapshotCmd, truncateCommand: true);
 
-  // On iOS, we use Xcode to compile the snapshot into a static library that the
+  // On iOS, we use Xcode to compile the snapshot into a dynamic library that the
   // end-developer can link into their app.
   if (platform == TargetPlatform.ios) {
     printStatus('Building app.so...');
@@ -302,7 +302,6 @@ String _buildAotSnapshot(
       ..addAll(commonBuildOptions)
       ..addAll(<String>[
         '-dynamiclib',
-        '-nostdlib',
         '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
         '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
         '-install_name', '@rpath/app.so',
