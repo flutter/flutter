@@ -102,9 +102,11 @@ class DriveCommand extends RunCommandBase {
       printStatus('Starting application: ${argResults["target"]}');
 
       if (getBuildMode() == BuildMode.release) {
+        // This is because we need VM service to be able to drive the app.
         printError(
-          'Flutter Driver does not support running in release mode. '
-          'Use --profile mode for testing application performance. '
+          'Flutter Driver does not support running in release mode.\n'
+          '\n'
+          'Use --profile mode for testing application performance.\n'
           'Use --debug (default) mode for testing correctness (with assertions).'
         );
         return 1;
