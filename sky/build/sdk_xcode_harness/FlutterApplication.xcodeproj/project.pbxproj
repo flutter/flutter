@@ -210,8 +210,6 @@
 			inputPaths = (
 			);
 			outputPaths = (
-				"$(SOURCE_ROOT)/FlutterApplication/Generated/app.so",
-				"$(SOURCE_ROOT)/FlutterApplication/Generated/app.flx",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
