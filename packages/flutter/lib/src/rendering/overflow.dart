@@ -9,6 +9,7 @@ import 'object.dart';
 /// without making the child available for hit testing, and without taking any
 /// room in the parent.
 class RenderOffStage extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
+  /// Creates an off-stage render object.
   RenderOffStage({ RenderBox child }) {
     this.child = child;
   }

@@ -11,29 +11,38 @@ import 'object.dart';
 /// for constraints. Also sets up and manages implicit constraints and edit
 /// variables.
 class AutoLayoutRect {
-  AutoLayoutRect() {
-    _left = new al.Param();
-    _right = new al.Param();
-    _top = new al.Param();
-    _bottom = new al.Param();
-  }
+  /// Creates parameters for a rectangle for use with auto layout.
+  AutoLayoutRect()
+    : left = new al.Param(),
+      right = new al.Param(),
+      top = new al.Param(),
+      bottom = new al.Param();
 
-  al.Param _left;
-  al.Param _right;
-  al.Param _top;
-  al.Param _bottom;
+  /// A parameter that represents the left edge of the rectangle.
+  final al.Param left;
 
-  al.Param get left => _left;
-  al.Param get right => _right;
-  al.Param get top => _top;
-  al.Param get bottom => _bottom;
+  /// A parameter that represents the right edge of the rectangle.
+  final al.Param right;
 
-  al.Expression get width => _right - _left;
-  al.Expression get height => _bottom - _top;
+  /// A parameter that represents the top edge of the rectangle.
+  final al.Param top;
 
-  al.Expression get horizontalCenter => (_left + _right) / al.cm(2.0);
-  al.Expression get verticalCenter => (_top + _bottom) / al.cm(2.0);
+  /// A parameter that represents the bottom edge of the rectangle.
+  final al.Param bottom;
 
+  /// An expression that represents the horizontal extent of the rectangle.
+  al.Expression get width => right - left;
+
+  /// An expression that represents the vertical extent of the rectangle.
+  al.Expression get height => bottom - top;
+
+  /// An expression that represents halfway between the left and right edges of the rectangle.
+  al.Expression get horizontalCenter => (left + right) / al.cm(2.0);
+
+  /// An expression that represents halfway between the top and bottom edges of the rectangle.
+  al.Expression get verticalCenter => (top + bottom) / al.cm(2.0);
+
+  /// Constraints that require that this rect contains the given rect.
   List<al.Constraint> contains(AutoLayoutRect other) {
     return <al.Constraint>[
       other.left >= left,
@@ -44,11 +53,14 @@ class AutoLayoutRect {
   }
 }
 
+/// Parent data for use with [RenderAutoLayout].
 class AutoLayoutParentData extends ContainerBoxParentDataMixin<RenderBox> {
+  /// Creates parent data associated with the given render box.
   AutoLayoutParentData(this._renderBox);
 
   final RenderBox _renderBox;
 
+  /// Parameters that represent the size and position of the render box.
   AutoLayoutRect get rect => _rect;
   AutoLayoutRect _rect;
   set rect(AutoLayoutRect value) {
@@ -63,13 +75,13 @@ class AutoLayoutParentData extends ContainerBoxParentDataMixin<RenderBox> {
 
   BoxConstraints get _constraintsFromSolver {
     return new BoxConstraints.tightFor(
-      width: _rect._right.value - _rect._left.value,
-      height: _rect._bottom.value - _rect._top.value
+      width: _rect.right.value - _rect.left.value,
+      height: _rect.bottom.value - _rect.top.value
     );
   }
 
   Offset get _offsetFromSolver {
-    return new Offset(_rect._left.value, _rect._top.value);
+    return new Offset(_rect.left.value, _rect.top.value);
   }
 
   List<al.Constraint> _implicitConstraints;
@@ -106,40 +118,66 @@ class AutoLayoutParentData extends ContainerBoxParentDataMixin<RenderBox> {
   /// may return null.
   List<al.Constraint> _constructImplicitConstraints() {
     return <al.Constraint>[
-      _rect._left >= al.cm(0.0), // The left edge must be positive.
-      _rect._right >= _rect._left, // Width must be positive.
-      // Why don't we need something similar for the top and the bottom?
+      _rect.left >= al.cm(0.0), // The left edge must be positive.
+      _rect.right >= _rect.left, // Width must be positive.
+      // TODO(chinmay): Check whether we need something similar for the top and
+      // bottom.
     ];
   }
 }
 
+/// Subclass to control the layout of a [RenderAutoLayout].
 abstract class AutoLayoutDelegate {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const AutoLayoutDelegate();
 
+  /// Returns the constraints to use when computing layout.
+  ///
+  /// The `parent` argument contains the parameters for the parent's position
+  /// and size. Typical implementations will return constraints that determine
+  /// the size and position of each child.
+  ///
+  /// The delegate interface does not provide a mechanism for obtaining the
+  /// parameters for children. Subclasses are expected to obtain those
+  /// parameters through some other mechanism.
   List<al.Constraint> getConstraints(AutoLayoutRect parent);
+
+  /// Override this method to return true when new constraints need to be generated.
   bool shouldUpdateConstraints(AutoLayoutDelegate oldDelegate);
 }
 
+/// Uses the cassowary constraint solver to automatically size and position children.
 class RenderAutoLayout extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, AutoLayoutParentData>,
          RenderBoxContainerDefaultsMixin<RenderBox, AutoLayoutParentData> {
-
+  /// Creates a render box that automatically sizes and positions its children.
   RenderAutoLayout({
     AutoLayoutDelegate delegate,
     List<RenderBox> children
   }) : _delegate = delegate, _needToUpdateConstraints = (delegate != null) {
     _solver.addEditVariables(<al.Variable>[
-        _rect._left.variable,
-        _rect._right.variable,
-        _rect._top.variable,
-        _rect._bottom.variable
+        _rect.left.variable,
+        _rect.right.variable,
+        _rect.top.variable,
+        _rect.bottom.variable
       ], al.Priority.required - 1);
 
     addAll(children);
   }
 
+  /// The delegate that generates constraints for the layout.
+  ///
+  /// If the new delegate is the same as the previous one, this does nothing.
+  ///
+  /// If the new delegate is the same class as the previous one, then the new
+  /// delegate has its [AutoLayoutDelegate.shouldUpdateConstraints] called; if
+  /// the result is `true`, then the delegate will be called.
+  ///
+  /// If the new delegate is a different class than the previous one, then the
+  /// delegate will be called.
+  ///
+  /// If the delgate is null, the layout is unconstrained.
   AutoLayoutDelegate get delegate => _delegate;
   AutoLayoutDelegate _delegate;
   set delegate(AutoLayoutDelegate newDelegate) {
@@ -228,10 +266,10 @@ class RenderAutoLayout extends RenderBox
 
     if (size != _previousSize) {
       _solver
-        ..suggestValueForVariable(_rect._left.variable, 0.0)
-        ..suggestValueForVariable(_rect._top.variable, 0.0)
-        ..suggestValueForVariable(_rect._bottom.variable, size.height)
-        ..suggestValueForVariable(_rect._right.variable, size.width);
+        ..suggestValueForVariable(_rect.left.variable, 0.0)
+        ..suggestValueForVariable(_rect.top.variable, 0.0)
+        ..suggestValueForVariable(_rect.bottom.variable, size.height)
+        ..suggestValueForVariable(_rect.right.variable, size.width);
       _previousSize = size;
       needToFlushUpdates = true;
     }

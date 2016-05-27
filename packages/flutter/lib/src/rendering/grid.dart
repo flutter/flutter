@@ -33,6 +33,16 @@ List<double> _generateRegularOffsets(int count, double size) {
   return result;
 }
 
+/// Specifies the geometry of tiles in a grid.
+///
+/// A grid specificiation divides a fixed width and height into a certain number
+/// of rows and columns, each with a specific size.
+///
+/// See also:
+///
+///  * [CustomGrid]
+///  * [GridDelegate]
+///  * [RenderGrid]
 class GridSpecification {
   /// Creates a grid specification from an explicit list of offsets.
   GridSpecification.fromOffsets({
@@ -118,7 +128,17 @@ class GridSpecification {
 }
 
 /// Where to place a child within a grid.
+///
+/// See also:
+///
+///  * [CustomGrid]
+///  * [GridDelegate]
+///  * [RenderGrid]
 class GridChildPlacement {
+  /// Creates a placement for a child in a grid.
+  ///
+  /// The [column] and [row] arguments must not be null. By default, the child
+  /// spans a single column and row.
   GridChildPlacement({
     this.column,
     this.row,
@@ -186,6 +206,9 @@ abstract class GridDelegate {
 
 /// A [GridDelegate] the places its children in order throughout the grid.
 abstract class GridDelegateWithInOrderChildPlacement extends GridDelegate {
+  /// Initializes [columnSpacing], [rowSpacing], and [padding] for subclasses.
+  ///
+  /// By default, the [columnSpacing], [rowSpacing], and [padding] are zero.
   GridDelegateWithInOrderChildPlacement({
     this.columnSpacing: 0.0,
     this.rowSpacing: 0.0,
@@ -202,7 +225,7 @@ abstract class GridDelegateWithInOrderChildPlacement extends GridDelegate {
   /// The vertical distance between rows.
   final double rowSpacing;
 
-  // Insets for the entire grid.
+  /// Insets for the entire grid.
   final EdgeInsets padding;
 
   @override
@@ -225,6 +248,9 @@ abstract class GridDelegateWithInOrderChildPlacement extends GridDelegate {
 
 /// A [GridDelegate] that divides the grid's width evenly amount a fixed number of columns.
 class FixedColumnCountGridDelegate extends GridDelegateWithInOrderChildPlacement {
+  /// Creates a grid delegate that uses a fixed column count.
+  ///
+  /// The [columnCount] argument must not be null.
   FixedColumnCountGridDelegate({
     this.columnCount,
     double columnSpacing: 0.0,
@@ -286,6 +312,9 @@ class FixedColumnCountGridDelegate extends GridDelegateWithInOrderChildPlacement
 ///  - The tile width is at most [maxTileWidth].
 ///
 class MaxTileWidthGridDelegate extends GridDelegateWithInOrderChildPlacement {
+  /// Creates a grid delegate that uses a max tile width.
+  ///
+  /// The [maxTileWidth] argument must not be null.
   MaxTileWidthGridDelegate({
     this.maxTileWidth,
     this.tileAspectRatio: 1.0,
@@ -363,6 +392,9 @@ class GridParentData extends ContainerBoxParentDataMixin<RenderBox> {
 /// Additionally, grid layout materializes all of its children, which makes it
 /// most useful for grids containing a moderate number of tiles.
 class RenderGrid extends RenderVirtualViewport<GridParentData> {
+  /// Creates a grid render object.
+  ///
+  /// The [delegate] argument must not be null.
   RenderGrid({
     List<RenderBox> children,
     GridDelegate delegate,
@@ -382,6 +414,17 @@ class RenderGrid extends RenderVirtualViewport<GridParentData> {
   }
 
   /// The delegate that controls the layout of the children.
+  ///
+  /// If the new delegate is the same as the previous one, this does nothing.
+  ///
+  /// If the new delegate is the same class as the previous one, then the new
+  /// delegate has its [GridDelegate.shouldRelayout] called; if the result is
+  /// `true`, then the delegate will be called.
+  ///
+  /// If the new delegate is a different class than the previous one, then the
+  /// delegate will be called.
+  ///
+  /// The delegate must not be null.
   GridDelegate get delegate => _delegate;
   GridDelegate _delegate;
   set delegate (GridDelegate newDelegate) {
@@ -457,6 +500,10 @@ class RenderGrid extends RenderVirtualViewport<GridParentData> {
     return defaultComputeDistanceToHighestActualBaseline(baseline);
   }
 
+  /// The specification of this grid.
+  ///
+  /// The grid specification cannot be set directly. Instead, set a [delegate]
+  /// to control the specification.
   GridSpecification get specification => _specification;
   GridSpecification _specification;
   int _specificationChildCount;

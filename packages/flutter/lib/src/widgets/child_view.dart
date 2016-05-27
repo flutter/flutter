@@ -27,7 +27,9 @@ class _ChildViewWidget extends LeafRenderObjectWidget {
   _ChildViewWidget({
     ChildViewConnection child,
     this.scale
-  }) : child = child, super(key: new GlobalObjectKey(child));
+  }) : child = child, super(key: new GlobalObjectKey(child)) {
+    assert(scale != null);
+  }
 
   final ChildViewConnection child;
   final double scale;

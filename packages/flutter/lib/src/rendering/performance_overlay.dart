@@ -57,6 +57,9 @@ class RenderPerformanceOverlay extends RenderBox {
     markNeedsPaint();
   }
 
+  /// The rasterizer threshold is an integer specifying the number of frame
+  /// intervals that the rasterizer must miss before it decides that the frame
+  /// is suitable for capturing an SkPicture trace for further analysis.
   int get rasterizerThreshold => _rasterizerThreshold;
   int _rasterizerThreshold;
   set rasterizerThreshold (int threshold) {
@@ -82,7 +85,7 @@ class RenderPerformanceOverlay extends RenderBox {
     return constraints.constrainWidth(0.0);
   }
 
-  double get intrinsicHeight {
+  double get _intrinsicHeight {
     const double kDefaultGraphHeight = 80.0;
     double result = 0.0;
     if ((optionsMask | (1 << PerformanceOverlayOption.displayRasterizerStatistics.index) > 0) ||
@@ -96,17 +99,17 @@ class RenderPerformanceOverlay extends RenderBox {
 
   @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
-    return constraints.constrainHeight(intrinsicHeight);
+    return constraints.constrainHeight(_intrinsicHeight);
   }
 
   @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    return constraints.constrainHeight(intrinsicHeight);
+    return constraints.constrainHeight(_intrinsicHeight);
   }
 
   @override
   void performResize() {
-    size = constraints.constrain(new Size(double.INFINITY, intrinsicHeight));
+    size = constraints.constrain(new Size(double.INFINITY, _intrinsicHeight));
   }
 
   @override

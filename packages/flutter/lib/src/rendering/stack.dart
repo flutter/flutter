@@ -49,6 +49,7 @@ class RelativeRect {
     );
   }
 
+  /// A rect that covers the entire container.
   static final RelativeRect fill = new RelativeRect.fromLTRB(0.0, 0.0, 0.0, 0.0);
 
   /// Distance from the left side of the container to the left side of this rectangle.

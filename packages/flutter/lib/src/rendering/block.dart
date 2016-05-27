@@ -25,7 +25,9 @@ typedef double _Constrainer(double value);
 class RenderBlock extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, BlockParentData>,
          RenderBoxContainerDefaultsMixin<RenderBox, BlockParentData> {
-
+  /// Creates a block render object.
+  ///
+  /// By default, the block positions children along the vertical axis.
   RenderBlock({
     List<RenderBox> children,
     Axis mainAxis: Axis.vertical

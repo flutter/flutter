@@ -11,7 +11,20 @@ import 'viewport.dart';
 /// Parent data for use with [RenderList].
 class ListParentData extends ContainerBoxParentDataMixin<RenderBox> { }
 
+/// A linear layout of children intended for use as a virtual viewport.
+///
+/// Children are layout out in order along the main axis. If [itemExtent] is
+/// non-null, each child is required to have exactly [itemExtent] extent in the
+/// main axis. If [itemExtent] is null, each child is required to have the same
+/// extent in the main axis as the list itself.
+///
+/// In the cross axis, the render list expands to fill the available space and
+/// each child is required to have the same extent in the cross axis as the list
+/// itself.
 class RenderList extends RenderVirtualViewport<ListParentData> {
+  /// Creates a render list.
+  ///
+  /// By default, the list is oriented vertically and anchored at the start.
   RenderList({
     List<RenderBox> children,
     double itemExtent,
@@ -35,16 +48,20 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
     addAll(children);
   }
 
+  /// The main-axis extent of each item in the list.
+  ///
+  /// If [itemExtent] is null, the items are required to match the main-axis
+  /// extent of the list itself.
   double get itemExtent => _itemExtent;
   double _itemExtent;
   set itemExtent (double newValue) {
-    assert(newValue != null);
     if (_itemExtent == newValue)
       return;
     _itemExtent = newValue;
     markNeedsLayout();
   }
 
+  /// The amount of space by which to inset the children inside the list.
   EdgeInsets get padding => _padding;
   EdgeInsets _padding;
   set padding (EdgeInsets newValue) {

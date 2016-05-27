@@ -24,6 +24,9 @@ enum ViewportAnchor {
 
 /// The interior and exterior dimensions of a viewport.
 class ViewportDimensions {
+  /// Creates dimensions for a viewport.
+  ///
+  /// By default, the content and container sizes are zero.
   const ViewportDimensions({
     this.contentSize: Size.zero,
     this.containerSize: Size.zero

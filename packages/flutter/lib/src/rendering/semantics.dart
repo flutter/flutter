@@ -22,19 +22,30 @@ import 'node.dart';
 /// contract that semantic annotators must follow.
 typedef void SemanticAnnotator(SemanticsNode semantics);
 
-/// Interface for RenderObjects to implement when they want to support
+/// Interface for [RenderObject]s to implement when they want to support
 /// being tapped, etc.
 ///
 /// These handlers will only be called if the relevant flag is set
-/// (e.g. handleSemanticTap() will only be called if canBeTapped is
-/// true, handleSemanticScrollDown() will only be called if
-/// canBeScrolledVertically is true, etc).
+/// (e.g. [handleSemanticTap]() will only be called if
+/// [SemanticsNode.canBeTapped] is true, [handleSemanticScrollDown]() will only
+/// be called if [SemanticsNode.canBeScrolledVertically] is true, etc).
 abstract class SemanticActionHandler {
+  /// Called when the user taps on the render object.
   void handleSemanticTap() { }
+
+  /// Called when the user presses on the render object for a long period of time.
   void handleSemanticLongPress() { }
+
+  /// Called when the user scrolls to the left.
   void handleSemanticScrollLeft() { }
+
+  /// Called when the user scrolls to the right.
   void handleSemanticScrollRight() { }
+
+  /// Called when the user scrolls up.
   void handleSemanticScrollUp() { }
+
+  /// Called when the user scrolls down.
   void handleSemanticScrollDown() { }
 }
 
@@ -49,14 +60,30 @@ enum _SemanticFlags {
   isChecked,
 }
 
+/// Signature for a function that is called for each [SemanticsNode].
+///
+/// Return false to stop visiting nodes.
 typedef bool SemanticsNodeVisitor(SemanticsNode node);
 
+/// A node that represents some semantic data.
+///
+/// The semantics tree is maintained during the semantics phase of the pipeline
+/// (i.e., during [PipelineOwner.flushSemantics]), which happens after
+/// compositing. The semantics tree is then uploaded into the engine for use
+/// by assistive technology.
 class SemanticsNode extends AbstractNode {
+  /// Creates a semantic node.
+  ///
+  /// Each semantic node has a unique identifier that is assigned when the node
+  /// is created.
   SemanticsNode({
     SemanticActionHandler handler
   }) : _id = _generateNewId(),
        _actionHandler = handler;
 
+  /// Creates a semantic node to represent the root of the semantics tree.
+  ///
+  /// The root node is assigned an identifier of zero.
   SemanticsNode.root({
     SemanticActionHandler handler,
     Object owner
@@ -78,8 +105,13 @@ class SemanticsNode extends AbstractNode {
   // GEOMETRY
   // These are automatically handled by RenderObject's own logic
 
+  /// The transform from this node's coordinate system to its parent's coordinate system.
+  ///
+  /// By default, the transform is null, which represents the identity
+  /// transformation (i.e., that this node has the same coorinate system as its
+  /// parent).
   Matrix4 get transform => _transform;
-  Matrix4 _transform; // defaults to null, which we say means the identity matrix
+  Matrix4 _transform;
   set transform (Matrix4 value) {
     if (!MatrixUtils.matrixEquals(_transform, value)) {
       _transform = value;
@@ -87,6 +119,7 @@ class SemanticsNode extends AbstractNode {
     }
   }
 
+  /// The bounding box for this node in its coordinate system.
   Rect get rect => _rect;
   Rect _rect = Rect.zero;
   set rect (Rect value) {
@@ -97,6 +130,7 @@ class SemanticsNode extends AbstractNode {
     }
   }
 
+  /// Whether [rect] might have been influenced by clips applied by ancestors.
   bool wasAffectedByClip = false;
 
 
@@ -118,6 +152,7 @@ class SemanticsNode extends AbstractNode {
     return _actionHandler != null && _flags[flag];
   }
 
+  /// Whether all this node and all of its descendants should be treated as one logical entity.
   bool get mergeAllDescendantsIntoThisNode => _flags[_SemanticFlags.mergeAllDescendantsIntoThisNode];
   set mergeAllDescendantsIntoThisNode(bool value) => _setFlag(_SemanticFlags.mergeAllDescendantsIntoThisNode, value);
 
@@ -126,24 +161,31 @@ class SemanticsNode extends AbstractNode {
 
   bool get _shouldMergeAllDescendantsIntoThisNode => mergeAllDescendantsIntoThisNode || _inheritedMergeAllDescendantsIntoThisNode;
 
+  /// Whether this node responds to tap gestures.
   bool get canBeTapped => _flags[_SemanticFlags.canBeTapped];
   set canBeTapped(bool value) => _setFlag(_SemanticFlags.canBeTapped, value, needsHandler: true);
 
+  /// Whether this node responds to long-press gestures.
   bool get canBeLongPressed => _flags[_SemanticFlags.canBeLongPressed];
   set canBeLongPressed(bool value) => _setFlag(_SemanticFlags.canBeLongPressed, value, needsHandler: true);
 
+  /// Whether this node responds to horizontal scrolling.
   bool get canBeScrolledHorizontally => _flags[_SemanticFlags.canBeScrolledHorizontally];
   set canBeScrolledHorizontally(bool value) => _setFlag(_SemanticFlags.canBeScrolledHorizontally, value, needsHandler: true);
 
+  /// Whether this node responds to vertical scrolling.
   bool get canBeScrolledVertically => _flags[_SemanticFlags.canBeScrolledVertically];
   set canBeScrolledVertically(bool value) => _setFlag(_SemanticFlags.canBeScrolledVertically, value, needsHandler: true);
 
+  /// Whether this node has Boolean state that can be controlled by the user.
   bool get hasCheckedState => _flags[_SemanticFlags.hasCheckedState];
   set hasCheckedState(bool value) => _setFlag(_SemanticFlags.hasCheckedState, value);
 
+  /// If this node has Boolean state that can be controlled by the user, whether that state is on or off, cooresponding to `true` and `false`, respectively.
   bool get isChecked => _flags[_SemanticFlags.isChecked];
   set isChecked(bool value) => _setFlag(_SemanticFlags.isChecked, value);
 
+  /// A textual description of this node.
   String get label => _label;
   String _label = '';
   set label(String value) {
@@ -154,6 +196,7 @@ class SemanticsNode extends AbstractNode {
     }
   }
 
+  /// Restore this node to its default state.
   void reset() {
     bool hadInheritedMergeAllDescendantsIntoThisNode = _inheritedMergeAllDescendantsIntoThisNode;
     _flags.reset();
@@ -164,6 +207,8 @@ class SemanticsNode extends AbstractNode {
   }
 
   List<SemanticsNode> _newChildren;
+
+  /// Append the given children as children of this node.
   void addChildren(Iterable<SemanticsNode> children) {
     _newChildren ??= <SemanticsNode>[];
     _newChildren.addAll(children);
@@ -189,8 +234,16 @@ class SemanticsNode extends AbstractNode {
   }
 
   List<SemanticsNode> _children;
+
+  /// Whether this node has a non-zero number of children.
   bool get hasChildren => _children?.isNotEmpty ?? false;
   bool _dead = false;
+
+  /// Called during the compilation phase after all the children of this node have been compiled.
+  ///
+  /// This function lets the semantic node respond to all the changes to its
+  /// child list for the given frame at once instead of needing to process the
+  /// changes incrementally as new children are compiled.
   void finalizeChildren() {
     if (_children != null) {
       for (SemanticsNode child in _children)
@@ -353,8 +406,23 @@ class SemanticsNode extends AbstractNode {
   }
 
   static List<mojom.SemanticsListener> _listeners;
+
+  /// Whether there are currently any consumers of semantic data.
+  ///
+  /// If there are no consumers of semantic data, there is no need to compile
+  /// semantic data into a [SemanticsNode] tree.
   static bool get hasListeners => _listeners != null && _listeners.length > 0;
-  static VoidCallback onSemanticsEnabled; // set by the binding
+
+  /// Called when the first consumer of semantic data arrives.
+  ///
+  /// Typically set by [RendererBinding].
+  static VoidCallback onSemanticsEnabled;
+
+  /// Add a consumer of semantic data.
+  ///
+  /// After the [PipelineOwner] updates the semantic data for a given frame, it
+  /// calls [sendSemanticsTree], which uploads the data to each listener
+  /// registered with this function.
   static void addListener(mojom.SemanticsListener listener) {
     if (!hasListeners) {
       assert(onSemanticsEnabled != null); // initialise the binding _before_ adding listeners
@@ -364,6 +432,7 @@ class SemanticsNode extends AbstractNode {
     _listeners.add(listener);
   }
 
+  /// Uploads the semantics tree to the listeners registered with [addListener].
   static void sendSemanticsTree() {
     assert(hasListeners);
     for (SemanticsNode oldNode in _detachedNodes) {
@@ -430,7 +499,7 @@ class SemanticsNode extends AbstractNode {
     _dirtyNodes.clear();
   }
 
-  static SemanticActionHandler getSemanticActionHandlerForId(int id, { _SemanticFlags neededFlag }) {
+  static SemanticActionHandler _getSemanticActionHandlerForId(int id, { _SemanticFlags neededFlag }) {
     assert(neededFlag != null);
     SemanticsNode result = _nodes[id];
     if (result != null && result._shouldMergeAllDescendantsIntoThisNode && !result._canHandle(neededFlag)) {
@@ -463,6 +532,7 @@ class SemanticsNode extends AbstractNode {
            ')';
   }
 
+  /// Returns a string representation of this node and its descendants.
   String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
     String result = '$prefixLineOne$this\n';
     if (_children != null && _children.isNotEmpty) {
@@ -476,39 +546,42 @@ class SemanticsNode extends AbstractNode {
   }
 }
 
+/// Exposes the [SemanticsNode] tree to the underlying platform.
 class SemanticsServer extends mojom.SemanticsServer {
   @override
   void addSemanticsListener(mojom.SemanticsListenerProxy listener) {
+    // TODO(abarth): We should remove the listener when this pipe closes.
+    // See <https://github.com/flutter/flutter/issues/3342>.
     SemanticsNode.addListener(listener.ptr);
   }
 
   @override
   void tap(int nodeID) {
-    SemanticsNode.getSemanticActionHandlerForId(nodeID, neededFlag: _SemanticFlags.canBeTapped)?.handleSemanticTap();
+    SemanticsNode._getSemanticActionHandlerForId(nodeID, neededFlag: _SemanticFlags.canBeTapped)?.handleSemanticTap();
   }
 
   @override
   void longPress(int nodeID) {
-    SemanticsNode.getSemanticActionHandlerForId(nodeID, neededFlag: _SemanticFlags.canBeLongPressed)?.handleSemanticLongPress();
+    SemanticsNode._getSemanticActionHandlerForId(nodeID, neededFlag: _SemanticFlags.canBeLongPressed)?.handleSemanticLongPress();
   }
 
   @override
   void scrollLeft(int nodeID) {
-    SemanticsNode.getSemanticActionHandlerForId(nodeID, neededFlag: _SemanticFlags.canBeScrolledHorizontally)?.handleSemanticScrollLeft();
+    SemanticsNode._getSemanticActionHandlerForId(nodeID, neededFlag: _SemanticFlags.canBeScrolledHorizontally)?.handleSemanticScrollLeft();
   }
 
   @override
   void scrollRight(int nodeID) {
-    SemanticsNode.getSemanticActionHandlerForId(nodeID, neededFlag: _SemanticFlags.canBeScrolledHorizontally)?.handleSemanticScrollRight();
+    SemanticsNode._getSemanticActionHandlerForId(nodeID, neededFlag: _SemanticFlags.canBeScrolledHorizontally)?.handleSemanticScrollRight();
   }
 
   @override
   void scrollUp(int nodeID) {
-    SemanticsNode.getSemanticActionHandlerForId(nodeID, neededFlag: _SemanticFlags.canBeScrolledVertically)?.handleSemanticScrollUp();
+    SemanticsNode._getSemanticActionHandlerForId(nodeID, neededFlag: _SemanticFlags.canBeScrolledVertically)?.handleSemanticScrollUp();
   }
 
   @override
   void scrollDown(int nodeID) {
-    SemanticsNode.getSemanticActionHandlerForId(nodeID, neededFlag: _SemanticFlags.canBeScrolledVertically)?.handleSemanticScrollDown();
+    SemanticsNode._getSemanticActionHandlerForId(nodeID, neededFlag: _SemanticFlags.canBeScrolledVertically)?.handleSemanticScrollDown();
   }
 }
