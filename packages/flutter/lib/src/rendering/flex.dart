@@ -90,7 +90,10 @@ typedef double _ChildSizingFunction(RenderBox child, BoxConstraints constraints)
 /// positioned along the cross axis according to the [crossAxisAlignment] property.
 class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, FlexParentData>,
                                         RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData> {
-
+  /// Creates a flex render object.
+  ///
+  /// By default, the flex layout is horizontal and children are aligned to the
+  /// start of the main axis and the center of the cross axis.
   RenderFlex({
     List<RenderBox> children,
     FlexDirection direction: FlexDirection.horizontal,

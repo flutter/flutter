@@ -10,6 +10,7 @@ import 'object.dart';
 
 /// Parent data used by [RenderTable] for its children.
 class TableCellParentData extends BoxParentData {
+  /// Where this cell should be placed vertically.
   TableCellVerticalAlignment verticalAlignment;
 
   /// The column that the child was in the last time it was laid out.
@@ -74,7 +75,7 @@ abstract class TableColumnWidth {
 /// A flex value can be provided. If specified (and non-null), the
 /// column will participate in the distribution of remaining space
 /// once all the non-flexible columns have been sized.
-class IntrinsicColumnWidth extends TableColumnWidth { 
+class IntrinsicColumnWidth extends TableColumnWidth {
   const IntrinsicColumnWidth({ double flex }) : _flex = flex;
 
   @override
@@ -500,7 +501,7 @@ class RenderTable extends RenderBox {
     _border = value;
     markNeedsPaint();
   }
- 
+
   List<Decoration> get rowDecorations => new List<Decoration>.unmodifiable(_rowDecorations ?? const <Decoration>[]);
   List<Decoration> _rowDecorations;
   List<BoxPainter> _rowDecorationPainters;
@@ -830,7 +831,7 @@ class RenderTable extends RenderBox {
       // least as big as the target width.
       double targetWidth;
       if (maxWidthConstraint.isFinite) {
-        targetWidth = maxWidthConstraint; 
+        targetWidth = maxWidthConstraint;
       } else {
         targetWidth = minWidthConstraint;
       }
@@ -1098,7 +1099,7 @@ class RenderTable extends RenderBox {
     for (int index = 0; index < _children.length; index += 1) {
       RenderBox child = _children[index];
       if (child != null) {
-        final BoxParentData childParentData = child.parentData; 
+        final BoxParentData childParentData = child.parentData;
         context.paintChild(child, childParentData.offset + offset);
       }
     }

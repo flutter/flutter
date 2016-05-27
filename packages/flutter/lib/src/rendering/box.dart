@@ -238,39 +238,43 @@ class BoxConstraints extends Constraints {
            (minHeight <= size.height) && (size.height <= maxHeight);
   }
 
-  BoxConstraints operator*(double other) {
+  /// Scales each constraint parameter by the given factor.
+  BoxConstraints operator*(double factor) {
     return new BoxConstraints(
-      minWidth: minWidth * other,
-      maxWidth: maxWidth * other,
-      minHeight: minHeight * other,
-      maxHeight: maxHeight * other
+      minWidth: minWidth * factor,
+      maxWidth: maxWidth * factor,
+      minHeight: minHeight * factor,
+      maxHeight: maxHeight * factor
     );
   }
 
-  BoxConstraints operator/(double other) {
+  /// Scales each constraint parameter by the inverse of the given factor.
+  BoxConstraints operator/(double factor) {
     return new BoxConstraints(
-      minWidth: minWidth / other,
-      maxWidth: maxWidth / other,
-      minHeight: minHeight / other,
-      maxHeight: maxHeight / other
+      minWidth: minWidth / factor,
+      maxWidth: maxWidth / factor,
+      minHeight: minHeight / factor,
+      maxHeight: maxHeight / factor
     );
   }
 
-  BoxConstraints operator~/(double other) {
+  /// Scales each constraint parameter by the inverse of the given factor, rounded to the nearest integer.
+  BoxConstraints operator~/(double factor) {
     return new BoxConstraints(
-      minWidth: (minWidth ~/ other).toDouble(),
-      maxWidth: (maxWidth ~/ other).toDouble(),
-      minHeight: (minHeight ~/ other).toDouble(),
-      maxHeight: (maxHeight ~/ other).toDouble()
+      minWidth: (minWidth ~/ factor).toDouble(),
+      maxWidth: (maxWidth ~/ factor).toDouble(),
+      minHeight: (minHeight ~/ factor).toDouble(),
+      maxHeight: (maxHeight ~/ factor).toDouble()
     );
   }
 
-  BoxConstraints operator%(double other) {
+  /// Computes the remainder of each constraint parameter by the given value.
+  BoxConstraints operator%(double value) {
     return new BoxConstraints(
-      minWidth: minWidth % other,
-      maxWidth: maxWidth % other,
-      minHeight: minHeight % other,
-      maxHeight: maxHeight % other
+      minWidth: minWidth % value,
+      maxWidth: maxWidth % value,
+      minHeight: minHeight % value,
+      maxHeight: maxHeight % value
     );
   }
 
@@ -374,6 +378,10 @@ class BoxConstraints extends Constraints {
     return isNormalized;
   }
 
+  /// Returns a box constraints that [isNormalized].
+  ///
+  /// The returned [maxWidth] is at least as large as the [minWidth]. Similarly,
+  /// the returned [maxHeight] is at least as large as the [minHeight].
   BoxConstraints normalize() {
     return new BoxConstraints(
       minWidth: minWidth,
@@ -425,6 +433,9 @@ class BoxConstraints extends Constraints {
 
 /// A hit test entry used by [RenderBox].
 class BoxHitTestEntry extends HitTestEntry {
+  /// Creates a box hit test entry.
+  ///
+  /// The [localPosition] argument must not be null.
   const BoxHitTestEntry(RenderBox target, this.localPosition) : super(target);
 
   @override
@@ -515,6 +526,9 @@ abstract class RenderBox extends RenderObject {
     return constraints.constrainHeight(0.0);
   }
 
+  /// Whether this render object has undergone layout and has a [size].
+  bool get hasSize => _size != null;
+
   /// The size of this render box computed during layout.
   ///
   /// This value is stale whenever this object is marked as needing layout.
@@ -546,7 +560,6 @@ abstract class RenderBox extends RenderObject {
     });
     return _size;
   }
-  bool get hasSize => _size != null;
   Size _size;
   set size(Size value) {
     assert(!(debugDoingThisResize && debugDoingThisLayout));
@@ -996,6 +1009,10 @@ abstract class RenderBox extends RenderObject {
       return true;
     });
   }
+
+  /// In debug mode, paints a border around this render box.
+  ///
+  /// Called for every [RenderBox] when [debugPaintSizeEnabled] is true.
   void debugPaintSize(PaintingContext context, Offset offset) {
     assert(() {
       Paint paint = new Paint()
@@ -1006,6 +1023,10 @@ abstract class RenderBox extends RenderObject {
       return true;
     });
   }
+
+  /// In debug mode, paints a line for each baseline.
+  ///
+  /// Called for every [RenderBox] when [debugPaintBaselinesEnabled] is true.
   void debugPaintBaselines(PaintingContext context, Offset offset) {
     assert(() {
       Paint paint = new Paint()
@@ -1033,6 +1054,10 @@ abstract class RenderBox extends RenderObject {
       return true;
     });
   }
+
+  /// In debug mode, paints a rectangle if this render box has received more pointer downs than pointer up events.
+  ///
+  /// Called for every [RenderBox] when [debugPaintPointersEnabled] is true.
   void debugPaintPointers(PaintingContext context, Offset offset) {
     assert(() {
       if (_debugActivePointers > 0) {
@@ -1127,8 +1152,13 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
     }
   }
 
+  /// Returns a list containing the children of this render object.
+  ///
+  /// This function is useful when you need random-access to the children of
+  /// this render object. If you're accessing the children in order, consider
+  /// walking the child list directly.
   List<ChildType> getChildrenAsList() {
-    List<ChildType> result = <ChildType>[];
+    final List<ChildType> result = <ChildType>[];
     RenderBox child = firstChild;
     while (child != null) {
       final ParentDataType childParentData = child.parentData;
@@ -1139,7 +1169,14 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
   }
 }
 
+/// An interpolation between two fractional offsets.
+///
+/// This class specializes the interpolation of Tween<FractionalOffset> to be
+/// appropriate for rectangles.
 class FractionalOffsetTween extends Tween<FractionalOffset> {
+  /// Creates a fractional offset tween.
+  ///
+  /// The [begin] and [end] arguments must not be null.
   FractionalOffsetTween({ FractionalOffset begin, FractionalOffset end }) : super(begin: begin, end: end);
 
   @override

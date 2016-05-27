@@ -66,6 +66,7 @@ bool debugPrintMarkNeedsLayoutStacks = false;
 /// Check the intrinsic sizes of each [RenderBox] during layout.
 bool debugCheckIntrinsicSizes = false;
 
+/// Returns a list of strings representing the given transform in a format useful for [RenderObject.debugFillDescription].
 List<String> debugDescribeTransform(Matrix4 transform) {
   List<String> matrix = transform.toString().split('\n').map((String s) => '  $s').toList();
   matrix.removeLast();

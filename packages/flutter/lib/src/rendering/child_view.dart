@@ -208,10 +208,14 @@ class ChildViewConnection {
 
 /// (mojo-only) A view of a child application.
 class RenderChildView extends RenderBox {
+  /// Creates a child view render object.
+  ///
+  /// The [scale] argument must not be null.
   RenderChildView({
     ChildViewConnection child,
     double scale
   }) : _scale = scale {
+    assert(scale != null);
     this.child = child;
   }
 
@@ -243,6 +247,7 @@ class RenderChildView extends RenderBox {
   double get scale => _scale;
   double _scale;
   set scale (double value) {
+    assert(value != null);
     if (value == _scale)
       return;
     _scale = value;

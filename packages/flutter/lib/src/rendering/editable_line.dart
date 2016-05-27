@@ -22,7 +22,12 @@ typedef void SelectionChangedHandler(TextSelection selection, RenderEditableLine
 /// Represents a global screen coordinate of the point in a selection, and the
 /// text direction at that point.
 class TextSelectionPoint {
-  TextSelectionPoint(this.point, this.direction);
+  /// Creates a description of a point in a text selection.
+  ///
+  /// The [point] argument must not be null.
+  TextSelectionPoint(this.point, this.direction) {
+    assert(point != null);
+  }
 
   /// Screen coordinates of the lower left or lower right corner of the selection.
   final Point point;
@@ -33,6 +38,7 @@ class TextSelectionPoint {
 
 /// A single line of editable text.
 class RenderEditableLine extends RenderBox {
+  /// Creates a render object for a single line of editable text.
   RenderEditableLine({
     TextSpan text,
     Color cursorColor,
@@ -56,7 +62,10 @@ class RenderEditableLine extends RenderBox {
       ..onLongPress = _handleLongPress;
   }
 
+  /// Called when the selection changes.
   SelectionChangedHandler onSelectionChanged;
+
+  /// Called when the inner or outer dimensions of this render object change.
   ViewportDimensionsChangeCallback onPaintOffsetUpdateNeeded;
 
   /// The text to display
@@ -72,6 +81,7 @@ class RenderEditableLine extends RenderBox {
     markNeedsLayout();
   }
 
+  /// The color to use when painting the cursor.
   Color get cursorColor => _cursorColor;
   Color _cursorColor;
   set cursorColor(Color value) {
@@ -81,6 +91,7 @@ class RenderEditableLine extends RenderBox {
     markNeedsPaint();
   }
 
+  /// Whether to paint the cursor.
   bool get showCursor => _showCursor;
   bool _showCursor;
   set showCursor(bool value) {
@@ -90,6 +101,7 @@ class RenderEditableLine extends RenderBox {
     markNeedsPaint();
   }
 
+  /// The color to use when painting the selection.
   Color get selectionColor => _selectionColor;
   Color _selectionColor;
   set selectionColor(Color value) {
@@ -101,6 +113,7 @@ class RenderEditableLine extends RenderBox {
 
   List<ui.TextBox> _selectionRects;
 
+  /// The region of text that is selected, if any.
   TextSelection get selection => _selection;
   TextSelection _selection;
   set selection(TextSelection value) {
@@ -111,6 +124,11 @@ class RenderEditableLine extends RenderBox {
     markNeedsPaint();
   }
 
+  /// The offset at which the text should be painted.
+  ///
+  /// If the text content is larger than the editable line itself, the editable
+  /// line clips the text. This property controls which part of the text is
+  /// visible by shifting the text by the given offset before clipping.
   Offset get paintOffset => _paintOffset;
   Offset _paintOffset;
   set paintOffset(Offset value) {
@@ -120,8 +138,18 @@ class RenderEditableLine extends RenderBox {
     markNeedsPaint();
   }
 
+  /// Returns the global coordinates of the endpoints of the given selection.
+  ///
+  /// If the selection is collapsed (and therefore occupies a single point), the
+  /// returned list is of length one. Otherwise, the selection is not collapsed
+  /// and the returned list is of length two. In this case, however, the two
+  /// points might actually be co-located (e.g., because of a bidirectional
+  /// selection that contains some text but whose ends meet in the middle).
   List<TextSelectionPoint> getEndpointsForSelection(TextSelection selection) {
-    _textPainter.layout(); // TODO(mpcomplete): is this hacky?
+    // TODO(mpcomplete): We should be more disciplined about when we dirty the
+    // layout state of the text painter so that we can know that the layout is
+    // clean at this point. 
+    _textPainter.layout();
 
     Offset offset = _paintOffset + new Offset(0.0, -_kCaretHeightOffset);
 
@@ -141,9 +169,10 @@ class RenderEditableLine extends RenderBox {
     }
   }
 
-  TextPosition getPositionForPoint(Point global) {
-    global += -paintOffset;
-    return _textPainter.getPositionForOffset(globalToLocal(global).toOffset());
+  /// Returns the position in the text for the given global coordinate.
+  TextPosition getPositionForPoint(Point globalPosition) {
+    globalPosition += -paintOffset;
+    return _textPainter.getPositionForOffset(globalToLocal(globalPosition).toOffset());
   }
 
   Size _contentSize;

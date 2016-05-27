@@ -32,6 +32,11 @@ export 'package:flutter/gestures.dart' show
 /// for render objects that wish to mimic most, but not all, of the properties
 /// of their child.
 class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
+  /// Creates a proxy render box.
+  ///
+  /// Proxy render boxes are rarely created directly because they simply proxy
+  /// the render box protocol to [child]. Instead, consider using one of the
+  /// subclasses.
   RenderProxyBox([RenderBox child = null]) {
     this.child = child;
   }

@@ -73,8 +73,13 @@ abstract class Layer {
   @override
   String toString() => '$runtimeType';
 
+  /// The object responsible for creating this layer.
+  ///
+  /// Defaults to the value of [RenderObject.debugCreator] for the render object
+  /// that created this layer. Used in debug messages.
   dynamic debugCreator;
 
+  /// Returns a string representation of this layer and its descendants.
   String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
     String result = '$prefixLineOne$this\n';
     final String childrenDescription = debugDescribeChildren(prefixOtherLines);
@@ -88,11 +93,13 @@ abstract class Layer {
     return result;
   }
 
+  /// Add additional information to the given description for use by [toStringDeep].
   void debugFillDescription(List<String> description) {
     if (debugCreator != null)
       description.add('creator: $debugCreator');
   }
 
+  /// Returns a description of this layer's children for use by [toStringDeep].
   String debugDescribeChildren(String prefix) => '';
 }
 
@@ -109,8 +116,15 @@ class PictureLayer extends Layer {
   }
 }
 
+/// (mojo-only) A layer that represents content from another process.
 class ChildSceneLayer extends Layer {
-  ChildSceneLayer({ this.offset, this.devicePixelRatio, this.physicalWidth, this.physicalHeight, this.sceneToken });
+  ChildSceneLayer({
+    this.offset,
+    this.devicePixelRatio,
+    this.physicalWidth,
+    this.physicalHeight,
+    this.sceneToken
+  });
 
   Offset offset;
   double devicePixelRatio;
@@ -142,6 +156,7 @@ class ChildSceneLayer extends Layer {
 /// A layer that indicates to the compositor that it should display
 /// certain performance statistics within it.
 class PerformanceOverlayLayer extends Layer {
+  /// Creates a layer that displays a performance overlay.
   PerformanceOverlayLayer({
     this.overlayRect,
     this.optionsMask,
@@ -151,9 +166,13 @@ class PerformanceOverlayLayer extends Layer {
   /// The rectangle in this layer's coodinate system that the overlay should occupy.
   Rect overlayRect;
 
-  /// A mask specifying the statistics to display.
+  /// The mask is created by shifting 1 by the index of the specific
+  /// [PerformanceOverlayOption] to enable.
   final int optionsMask;
 
+  /// The rasterizer threshold is an integer specifying the number of frame
+  /// intervals that the rasterizer must miss before it decides that the frame
+  /// is suitable for capturing an SkPicture trace for further analysis.
   final int rasterizerThreshold;
 
   @override
@@ -163,7 +182,6 @@ class PerformanceOverlayLayer extends Layer {
     builder.setRasterizerTracingThreshold(rasterizerThreshold);
   }
 }
-
 
 /// A composited layer that has a list of children
 class ContainerLayer extends Layer {
@@ -284,7 +302,19 @@ class ContainerLayer extends Layer {
   }
 }
 
+/// A layer that is displayed at an offset from its parent layer.
+///
+/// Offset layers are key to efficient repainting because they are created by
+/// repaint boundaries in the [RenderObject] tree (see
+/// [RenderObject.isRepaintBoundary]). When a render object that is a repaint
+/// boundary is asked to paint at given offset in a [PaintingContext], the
+/// render object first checks whether it needs to repaint itself. If not, it
+/// reuses its existing [OffsetLayer] (and its entire subtree) by mutating its
+/// [offset] property, cutting off the paint walk.
 class OffsetLayer extends ContainerLayer {
+  /// Creates an offset layer.
+  ///
+  /// By default, [offset] is zero.
   OffsetLayer({ this.offset: Offset.zero });
 
   /// Offset from parent in the parent's coordinate system.
@@ -305,12 +335,14 @@ class OffsetLayer extends ContainerLayer {
 
 /// A composite layer that clips its children using a rectangle
 class ClipRectLayer extends ContainerLayer {
+  /// Creates a layer with a rectangular clip.
+  ///
+  /// The [clipRect] property must be non-null before the compositing phase of
+  /// the pipeline.
   ClipRectLayer({ this.clipRect });
 
   /// The rectangle to clip in the parent's coordinate system
   Rect clipRect;
-  // TODO(abarth): Why is the rectangle in the parent's coordinate system
-  // instead of in the coordinate system of this layer?
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
@@ -328,12 +360,14 @@ class ClipRectLayer extends ContainerLayer {
 
 /// A composite layer that clips its children using a rounded rectangle
 class ClipRRectLayer extends ContainerLayer {
+  /// Creates a layer with a rounded-rectangular clip.
+  ///
+  /// The [clipRRect] property must be non-null before the compositing phase of
+  /// the pipeline.
   ClipRRectLayer({ this.clipRRect });
 
   /// The rounded-rect to clip in the parent's coordinate system
   RRect clipRRect;
-  // TODO(abarth): Why is the rounded-rect in the parent's coordinate system
-  // instead of in the coordinate system of this layer?
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
@@ -351,12 +385,14 @@ class ClipRRectLayer extends ContainerLayer {
 
 /// A composite layer that clips its children using a path
 class ClipPathLayer extends ContainerLayer {
+  /// Creates a layer with a path-based clip.
+  ///
+  /// The [clipPath] property must be non-null before the compositing phase of
+  /// the pipeline.
   ClipPathLayer({ this.clipPath });
 
   /// The path to clip in the parent's coordinate system
   Path clipPath;
-  // TODO(abarth): Why is the path in the parent's coordinate system instead of
-  // in the coordinate system of this layer?
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
@@ -374,7 +410,14 @@ class ClipPathLayer extends ContainerLayer {
 
 /// A composited layer that applies a transformation matrix to its children
 class TransformLayer extends OffsetLayer {
-  TransformLayer({ Offset offset: Offset.zero, this.transform }): super(offset: offset);
+  /// Creates a transform layer.
+  ///
+  /// The [transform] property must be non-null before the compositing phase of
+  /// the pipeline.
+  TransformLayer({
+    Offset offset: Offset.zero,
+    this.transform
+  }): super(offset: offset);
 
   /// The matrix to apply
   Matrix4 transform;
@@ -398,6 +441,10 @@ class TransformLayer extends OffsetLayer {
 
 /// A composited layer that makes its children partially transparent
 class OpacityLayer extends ContainerLayer {
+  /// Creates an opacity layer.
+  ///
+  /// The [alpha] property must be non-null before the compositing phase of
+  /// the pipeline.
   OpacityLayer({ this.alpha });
 
   /// The amount to multiply into the alpha channel
@@ -422,6 +469,10 @@ class OpacityLayer extends ContainerLayer {
 
 /// A composited layer that applies a shader to hits children.
 class ShaderMaskLayer extends ContainerLayer {
+  /// Creates a shader mask layer.
+  ///
+  /// The [shader], [maskRect], and [transferMode] properties must be non-null
+  /// before the compositing phase of the pipeline.
   ShaderMaskLayer({ this.shader, this.maskRect, this.transferMode });
 
   /// The shader to apply to the children.
@@ -451,6 +502,10 @@ class ShaderMaskLayer extends ContainerLayer {
 
 /// A composited layer that applies a filter to the existing contents of the scene.
 class BackdropFilterLayer extends ContainerLayer {
+  /// Creates a backdrop filter layer.
+  ///
+  /// The [filter] property must be non-null before the compositing phase of the
+  /// pipeline.
   BackdropFilterLayer({ this.filter });
 
   /// The filter to apply to the existing contents of the scene.

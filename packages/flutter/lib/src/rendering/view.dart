@@ -15,6 +15,9 @@ import 'binding.dart';
 
 /// The layout constraints for the root render object.
 class ViewConfiguration {
+  /// Creates a view configuration.
+  ///
+  /// By default, the view has zero [size] and a [devicePixelRatio] of 1.0.
   const ViewConfiguration({
     this.size: Size.zero,
     this.devicePixelRatio: 1.0,

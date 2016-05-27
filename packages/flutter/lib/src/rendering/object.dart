@@ -35,6 +35,10 @@ class ParentData {
   String toString() => '<none>';
 }
 
+/// Signature for painting into a [PaintingContext].
+///
+/// The `offset` argument is the offset from the origin of the coordinate system
+/// of the [PaintingContext.canvas] to the coordinate system of the callee.
 typedef void PaintingContextCallback(PaintingContext context, Offset offset);
 
 /// A place to paint.
@@ -208,6 +212,7 @@ class PaintingContext {
     ));
   }
 
+  /// (mojo-only) Draws content from another process.
   void pushChildScene(Offset offset, double devicePixelRatio, int physicalWidth, int physicalHeight, mojom.SceneToken sceneToken) {
     _stopRecordingIfNeeded();
     _appendLayer(new ChildSceneLayer(
@@ -458,9 +463,11 @@ abstract class Constraints {
   });
 }
 
+/// Signature for a function that is called for each [RenderObject].
 typedef void RenderObjectVisitor(RenderObject child);
+
+/// Signature for a function that is called during layout.
 typedef void LayoutCallback(Constraints constraints);
-typedef double ExtentCallback(Constraints constraints);
 
 class _SemanticsGeometry {
   _SemanticsGeometry() : transform = new Matrix4.identity();
@@ -975,6 +982,9 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// Override in subclasses with children and call the visitor for each child
   void visitChildren(RenderObjectVisitor visitor) { }
 
+  /// The object responsible for creating this render object.
+  ///
+  /// Used in debug messages.
   dynamic debugCreator;
   void _debugReportException(String method, dynamic exception, StackTrace stack) {
     FlutterError.reportError(new FlutterErrorDetailsForRendering(
@@ -1601,7 +1611,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// called on).
   ///
   /// This might be called if, e.g., the device pixel ratio changed.
-  void replaceRootLayer(ContainerLayer rootLayer) {
+  void replaceRootLayer(OffsetLayer rootLayer) {
     assert(attached);
     assert(parent is! RenderObject);
     assert(!owner._debugDoingPaint);
