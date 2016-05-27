@@ -245,38 +245,44 @@ class AtomValidator extends DoctorValidator {
 
     bool atomDirExists = FileSystemEntity.isDirectorySync(_getAtomHomePath());
     if (!atomDirExists) {
-      messages.add(new ValidationMessage.error(
-        'Atom not installed; download at https://atom.io.'
-      ));
-    } else {
-      installCount++;
-    }
-
-    if (!hasPackage('flutter')) {
-      messages.add(new ValidationMessage.error(
-        'Flutter plugin not installed; this adds Flutter specific functionality to Atom.\n'
-        'Install the \'flutter\' plugin in Atom or run \'apm install flutter\'.'
-      ));
+      messages.add(new ValidationMessage.error('Atom not installed; download at https://atom.io.'));
     } else {
       installCount++;
 
-      try {
-        String flutterPluginPath = path.join(_getAtomHomePath(), 'packages', 'flutter');
-        File packageFile = new File(path.join(flutterPluginPath, 'package.json'));
-        dynamic packageInfo = JSON.decode(packageFile.readAsStringSync());
-        String version = packageInfo['version'];
-        messages.add(new ValidationMessage('Atom installed; Flutter plugin version $version'));
-      } catch (error) {
-        printTrace('Unable to read flutter plugin version: $error');
-      }
+      if (!_validateHasPackage(messages, 'flutter', 'Flutter'))
+        installCount++;
+
+      if (!_validateHasPackage(messages, 'dartlang', 'Dart'))
+        installCount++;
     }
 
     return new ValidationResult(
-      installCount == 2
+      installCount == 3
         ? ValidationType.installed
         : installCount == 1 ? ValidationType.partial : ValidationType.missing,
       messages
     );
+  }
+
+  bool _validateHasPackage(List<ValidationMessage> messages, String packageName, String description) {
+    if (!hasPackage(packageName)) {
+      messages.add(new ValidationMessage(
+        '$packageName plugin not installed; this adds $description specific functionality to Atom.\n'
+        'Install the plugin from Atom or run \'apm install $packageName\'.'
+      ));
+      return true;
+    } else {
+      try {
+        String flutterPluginPath = path.join(_getAtomHomePath(), 'packages', packageName);
+        File packageFile = new File(path.join(flutterPluginPath, 'package.json'));
+        Map<String, dynamic> packageInfo = JSON.decode(packageFile.readAsStringSync());
+        String version = packageInfo['version'];
+        messages.add(new ValidationMessage('$packageName plugin version $version'));
+      } catch (error) {
+        printTrace('Unable to read $packageName plugin version: $error');
+      }
+      return false;
+    }
   }
 
   bool hasPackage(String packageName) {
