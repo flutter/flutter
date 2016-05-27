@@ -38,7 +38,7 @@ void main() {
       targetDeviceFinder = () {
         throw 'Unexpected call to targetDeviceFinder';
       };
-      appStarter = (_, __) {
+      appStarter = (_) {
         throw 'Unexpected call to appStarter';
       };
       testRunner = (_) {
@@ -75,7 +75,7 @@ void main() {
 
     testUsingContext('returns 1 when app fails to run', () async {
       withMockDevice();
-      appStarter = expectAsync((_, __) async => 1);
+      appStarter = expectAsync((_) async => 1);
 
       String testApp = '/some/app/test_driver/e2e.dart';
       String testFile = '/some/app/test_driver/e2e_test.dart';
@@ -140,7 +140,7 @@ void main() {
       String testApp = '/some/app/test/e2e.dart';
       String testFile = '/some/app/test_driver/e2e_test.dart';
 
-      appStarter = expectAsync((_, __) {
+      appStarter = expectAsync((_) {
         return new Future<int>.value(0);
       });
       testRunner = expectAsync((List<String> testArgs) {
@@ -172,7 +172,7 @@ void main() {
       String testApp = '/some/app/test/e2e.dart';
       String testFile = '/some/app/test_driver/e2e_test.dart';
 
-      appStarter = expectAsync((_, __) {
+      appStarter = expectAsync((_) {
         return new Future<int>.value(0);
       });
       testRunner = expectAsync((_) {

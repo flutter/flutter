@@ -100,7 +100,19 @@ class DriveCommand extends RunCommandBase {
 
     if (!argResults['use-existing-app']) {
       printStatus('Starting application: ${argResults["target"]}');
-      int result = await appStarter(this, getBuildMode());
+
+      if (getBuildMode() == BuildMode.release) {
+        // This is because we need VM service to be able to drive the app.
+        printError(
+          'Flutter Driver does not support running in release mode.\n'
+          '\n'
+          'Use --profile mode for testing application performance.\n'
+          'Use --debug (default) mode for testing correctness (with assertions).'
+        );
+        return 1;
+      }
+
+      int result = await appStarter(this);
       if (result != 0) {
         printError('Application failed to start. Will not run test. Quitting.');
         return result;
@@ -229,14 +241,14 @@ Future<Device> findTargetDevice() async {
 }
 
 /// Starts the application on the device given command configuration.
-typedef Future<int> AppStarter(DriveCommand command, BuildMode buildMode);
+typedef Future<int> AppStarter(DriveCommand command);
 
 AppStarter appStarter = startApp;
 void restoreAppStarter() {
   appStarter = startApp;
 }
 
-Future<int> startApp(DriveCommand command, BuildMode buildMode) async {
+Future<int> startApp(DriveCommand command) async {
   String mainPath = findMainDartFile(command.target);
   if (await fs.type(mainPath) != FileSystemEntityType.FILE) {
     printError('Tried to run $mainPath, but that file does not exist.');
@@ -248,7 +260,8 @@ Future<int> startApp(DriveCommand command, BuildMode buildMode) async {
     printTrace('Building an APK.');
     int result = await build_apk.buildApk(
       command.device.platform,
-      target: command.target
+      target: command.target,
+      buildMode: command.getBuildMode()
     );
 
     if (result != 0)
@@ -263,20 +276,22 @@ Future<int> startApp(DriveCommand command, BuildMode buildMode) async {
       .getPackageForPlatform(command.device.platform);
   command.device.installApp(package);
 
+  Map<String, dynamic> platformArgs = <String, dynamic>{};
+  if (command.traceStartup)
+    platformArgs['trace-startup'] = command.traceStartup;
+
   printTrace('Starting application.');
   LaunchResult result = await command.device.startApp(
     package,
-    buildMode,
+    command.getBuildMode(),
     mainPath: mainPath,
     route: command.route,
     debuggingOptions: new DebuggingOptions.enabled(
-      buildMode,
+      command.getBuildMode(),
       startPaused: true,
       observatoryPort: command.debugPort
     ),
-    platformArgs: <String, dynamic>{
-      'trace-startup': command.traceStartup,
-    }
+    platformArgs: platformArgs
   );
 
   return result.started ? 0 : 2;
