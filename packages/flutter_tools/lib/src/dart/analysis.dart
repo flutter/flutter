@@ -90,22 +90,20 @@ class AnalysisDriver {
 
   List<UriResolver> _getResolvers(InternalAnalysisContext context,
       Map<String, List<file_system.Folder>> packageMap) {
-    DirectoryBasedDartSdk sdk = new DirectoryBasedDartSdk(new JavaFile(sdkDir));
-    sdk.analysisOptions = context.analysisOptions;
-    // TODO(pq): re-enable once we have a proper story for SDK summaries
-    // in the presence of embedders (https://github.com/dart-lang/sdk/issues/26467).
-    sdk.useSummary = false;
-    List<UriResolver> resolvers = <UriResolver>[];
 
     EmbedderYamlLocator yamlLocator = context.embedderYamlLocator;
     yamlLocator.refresh(packageMap);
 
-    EmbedderUriResolver embedderUriResolver =
-        new EmbedderUriResolver(yamlLocator.embedderYamls);
-    if (embedderUriResolver.length == 0) {
-      resolvers.add(new DartUriResolver(sdk));
+    EmbedderSdk sdk = new EmbedderSdk(yamlLocator.embedderYamls);
+    sdk.analysisOptions = context.analysisOptions;
+    // TODO(pq): support embedder summaries (https://github.com/dart-lang/sdk/issues/26467).
+    //sdk.useSummary = false;
+
+    List<UriResolver> resolvers = <UriResolver>[];
+    if (sdk.urlMappings.isNotEmpty) {
+      resolvers.add(new EmbedderUriResolver(sdk));
     } else {
-      resolvers.add(embedderUriResolver);
+      resolvers.add(new DartUriResolver(new DirectoryBasedDartSdk(new JavaFile(sdkDir))));
     }
 
     if (options.packageRootPath != null) {
