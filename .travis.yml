@@ -14,6 +14,3 @@ before_script:
   - ./dev/bots/setup.sh
 script:
   - ./dev/bots/test.sh
-cache:
-  directories:
-    - $HOME/.pub-cache
