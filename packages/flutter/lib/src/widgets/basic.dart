@@ -486,15 +486,16 @@ class Padding extends SingleChildRenderObjectWidget {
 /// and the corresponding size factor is null then the widget will match its
 /// child's size in that dimension. If a size factor is non-null then the
 /// corresponding dimension of this widget will be the product of the child's
-/// dimension and the size factor. For example if widthFactor is 0.5 then
-/// the width of this widget will always be half of the child's width.
+/// dimension and the size factor. For example if widthFactor is 2.0 then
+/// the width of this widget will always be twice its child's width.
 ///
 /// See also:
 ///
 ///  * [CustomSingleChildLayout]
 ///  * [Center] (which is the same as [Align] but with the [alignment] always
 ///    set to [FractionalOffset.center])
-///  * [FractionallySizedBox] which sizes its child based on its own size.
+///  * [FractionallySizedBox] (which sizes its child based on a fraction of its own
+///    size and positions the child according to a [FractionalOffset] value)
 class Align extends SingleChildRenderObjectWidget {
   /// Creates an alignment widget.
   ///
@@ -574,7 +575,10 @@ class Center extends Align {
 /// See also:
 ///
 ///  * [SingleChildLayoutDelegate]
-///  * [Align] (which positions a single child according to a [FractionalOffset])
+///  * [Align] (which sizes itself based on its child's size and positions
+///    the child according to a [FractionalOffset] value)
+///  * [FractionallySizedBox] (which sizes its child based on a fraction of its own
+///    size and positions the child according to a [FractionalOffset] value)
 ///  * [CustomMultiChildLayout] (which uses a delegate to position multiple
 ///    children)
 class CustomSingleChildLayout extends SingleChildRenderObjectWidget {
@@ -602,6 +606,8 @@ class CustomSingleChildLayout extends SingleChildRenderObjectWidget {
 }
 
 /// Metadata for identifying children in a [CustomMultiChildLayout].
+/// The [MultiChildLayoutDelegate] hasChild, layoutChild, and positionChild
+/// methods use these identifiers.
 class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
   /// Marks a child with a layout identifier.
   ///
@@ -649,7 +655,7 @@ const List<Widget> _emptyWidgetList = const <Widget>[];
 /// See also:
 ///
 /// * [MultiChildLayoutDelegate]
-/// * [CustomSingleChildLayout]
+/// * [CustomSingleChildLayout] (which defers the layout of its single child to a delegate)
 /// * [Stack]
 /// * [Flow]
 class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
@@ -750,11 +756,12 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
   }
 }
 
-/// An overflow box that sizes its child to a fraction of the total available space.
+/// Sizes its child to a fraction of the total available space.
 /// For more details about the layout algorithm, see [RenderFractionallySizedOverflowBox].
 ///
 /// See also:
-/// * [Align] which can size itself based on its child's size.
+/// * [Align] (which sizes itself based on its child's size and positions
+///   the child according to a [FractionalOffset] value)
 /// * [OverflowBox]
 class FractionallySizedBox extends SingleChildRenderObjectWidget {
   FractionallySizedBox({
@@ -773,7 +780,7 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   /// incoming width constraint multipled by this factor.
   final double widthFactor;
 
-  /// If non-null, the fraction of the incoming height to give to the child.
+  /// If non-null, the fraction of the incoming height given to the child.
   ///
   /// If non-null, the child is given a tight height constraint that is the max
   /// incoming height constraint multipled by this factor.
@@ -1361,7 +1368,8 @@ abstract class StackRenderObjectWidgetBase extends MultiChildRenderObjectWidget 
 /// See also:
 ///
 ///  * [Flow]
-///  * [Align] (which positions a single child according to a [FractionalOffset])
+///  * [Align] (which sizes itself based on its child's size and positions
+///    the child according to a [FractionalOffset] value)
 ///  * [CustomSingleChildLayout]
 ///  * [CustomMultiChildLayout]
 class Stack extends StackRenderObjectWidgetBase {
