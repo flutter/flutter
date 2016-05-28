@@ -7,6 +7,7 @@
 #include "base/logging.h"
 #include "dart/runtime/include/dart_api.h"
 #include "sky/engine/core/script/embedder_resources.h"
+#include "sky/engine/tonic/dart_converter.h"
 #include "sky/engine/tonic/dart_error.h"
 #include "sky/engine/tonic/dart_library_natives.h"
 
@@ -38,6 +39,7 @@ namespace {
 static Dart_LibraryTagHandler g_embedder_tag_handler;
 static DartLibraryNatives* g_natives;
 static EmbedderResources* g_resources;
+static int observatory_port_;
 
 Dart_NativeFunction GetNativeFunction(Dart_Handle name,
                                       int argument_count,
@@ -61,7 +63,15 @@ void DartServiceIsolate::TriggerResourceLoad(Dart_NativeArguments args) {
 }
 
 void DartServiceIsolate::NotifyServerState(Dart_NativeArguments args) {
-  // NO-OP.
+  Dart_Handle exception = nullptr;
+  int port = DartConverter<int>::FromArguments(args, 1, exception);
+  if (!exception) {
+    observatory_port_ = port;
+  }
+}
+
+int DartServiceIsolate::GetObservatoryPort() {
+  return observatory_port_;
 }
 
 void DartServiceIsolate::Shutdown(Dart_NativeArguments args) {

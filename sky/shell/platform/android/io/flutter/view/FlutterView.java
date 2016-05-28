@@ -5,7 +5,11 @@
 package io.flutter.view;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.opengl.Matrix;
 import android.graphics.Rect;
@@ -24,6 +28,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import org.chromium.base.JNINamespace;
 import org.chromium.mojo.bindings.Interface.Binding;
@@ -68,6 +74,8 @@ public class FlutterView extends SurfaceView
              AccessibilityManager.TouchExplorationStateChangeListener {
     private static final String TAG = "FlutterView";
 
+    private static final String ACTION_DISCOVER = "io.flutter.view.DISCOVER";
+
     private long mNativePlatformView;
     private SkyEngine.Proxy mSkyEngine;
     private ServiceProviderImpl mPlatformServiceProvider;
@@ -83,6 +91,7 @@ public class FlutterView extends SurfaceView
     private final KeyboardViewState mKeyboardState;
     private final RawKeyboardServiceState mRawKeyboardState;
     private final AccessibilityManager mAccessibilityManager;
+    private BroadcastReceiver discoveryReceiver;
 
     public FlutterView(Context context) {
         this(context, null);
@@ -139,6 +148,11 @@ public class FlutterView extends SurfaceView
         mAsyncOnMessageListeners = new HashMap<String, OnMessageListenerAsync>();
 
         setLocale(getResources().getConfiguration().locale);
+
+        if ((context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            discoveryReceiver = new DiscoveryReceiver();
+            context.registerReceiver(discoveryReceiver, new IntentFilter(ACTION_DISCOVER));
+        }
     }
 
     @Override
@@ -193,6 +207,10 @@ public class FlutterView extends SurfaceView
     }
 
     public void destroy() {
+        if (discoveryReceiver != null) {
+            getContext().unregisterReceiver(discoveryReceiver);
+        }
+
         if (mPlatformServiceProviderBinding != null) {
             mPlatformServiceProviderBinding.unbind().close();
             mPlatformServiceProvider.unbindServices();
@@ -439,6 +457,7 @@ public class FlutterView extends SurfaceView
     }
 
     private static native long nativeAttach(int inputObserverHandle);
+    private static native int nativeGetObservatoryPort();
     private static native void nativeDetach(long nativePlatformViewAndroid);
     private static native void nativeSurfaceCreated(long nativePlatformViewAndroid,
                                                     Surface surface);
@@ -645,6 +664,19 @@ public class FlutterView extends SurfaceView
         @Override
         public void send(String reply) {
             callback.call(reply);
+        }
+    }
+
+    /** Broadcast receiver used to discover active Flutter instances. */
+    private class DiscoveryReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            JSONObject discover = new JSONObject();
+            try {
+                discover.put("id", getContext().getPackageName());
+                discover.put("observatoryPort", nativeGetObservatoryPort());
+                Log.i(TAG, "DISCOVER: " + discover);
+            } catch (JSONException e) {}
         }
     }
 }

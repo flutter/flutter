@@ -11,6 +11,7 @@
 #include "base/bind.h"
 #include "base/location.h"
 #include "jni/FlutterView_jni.h"
+#include "sky/engine/core/script/dart_service_isolate.h"
 #include "sky/shell/gpu/direct/surface_notifications_direct.h"
 #include "sky/shell/shell.h"
 #include "sky/shell/shell_view.h"
@@ -26,6 +27,10 @@ static jlong Attach(JNIEnv* env, jclass clazz, jint skyEngineHandle) {
       mojo::InterfaceRequest<SkyEngine>(mojo::ScopedMessagePipeHandle(
           mojo::MessagePipeHandle(skyEngineHandle))));
   return reinterpret_cast<jlong>(shell_view->view());
+}
+
+jint GetObservatoryPort(JNIEnv* env, jclass clazz) {
+  return blink::DartServiceIsolate::GetObservatoryPort();
 }
 
 // static

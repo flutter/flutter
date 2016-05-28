@@ -21,6 +21,8 @@ class DartServiceIsolate {
                       bool running_precompiled,
                       char** error);
 
+  static int GetObservatoryPort();
+
  private:
   // Native entries.
   static void TriggerResourceLoad(Dart_NativeArguments args);
