@@ -57,8 +57,10 @@ class LogRecord {
   final String loggerName;
   final String message;
 
+  String get levelDescription => level.toString().split(".").last;
+
   @override
-  String toString() => '[${"$level".split(".").last}] $loggerName: $message';
+  String toString() => '[${levelDescription.padRight(5)}] $loggerName: $message';
 }
 
 /// Package-private; users should use other public logging libraries.
