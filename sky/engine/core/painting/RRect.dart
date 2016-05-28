@@ -220,6 +220,7 @@ class RRect {
     );
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -233,7 +234,9 @@ class RRect {
     return true;
   }
 
+  @override
   int get hashCode => hashList(_value);
 
+  @override
   String toString() => "RRect.fromLTRBXY(${left.toStringAsFixed(1)}, ${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, ${bottom.toStringAsFixed(1)}, ${radiusX.toStringAsFixed(1)}, ${radiusY.toStringAsFixed(1)})";
 }

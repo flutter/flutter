@@ -19,6 +19,9 @@ class Rect {
   }
 
   /// Construct a rectangle from its left and top edges, its width, and its height.
+  ///
+  /// To construct a [Rect] from a [Point] or [Offset] and a [Size], you can use
+  /// the rectangle constructor operator `&`. See [Point.&] and [Offset.&].
   Rect.fromLTWH(double left, double top, double width, double height) {
     _value
       ..[0] = left
@@ -101,20 +104,52 @@ class Rect {
     return w < h ? w : h;
   }
 
-  /// The point halfway between the left and right and the top and bottom edges of this rectangle.
-  Point get center => new Point(left + width / 2.0, top + height / 2.0);
 
   /// The point at the intersection of the top and left edges of this rectangle.
+  ///
+  /// See also [Size.topLeft].
   Point get topLeft => new Point(left, top);
 
+  /// The point at the center of the top edge of this rectangle.
+  ///
+  /// See also [Size.topCenter].
+  Point get topCenter => new Point(left + width / 2.0, top);
+
   /// The point at the intersection of the top and right edges of this rectangle.
+  ///
+  /// See also [Size.topRight].
   Point get topRight => new Point(right, top);
 
+  /// The point at the center of the left edge of this rectangle.
+  ///
+  /// See also [Size.centerLeft].
+  Point get centerLeft => new Point(left, top + height / 2.0);
+
+  /// The point halfway between the left and right and the top and bottom edges of this rectangle.
+  ///
+  /// See also [Size.center].
+  Point get center => new Point(left + width / 2.0, top + height / 2.0);
+
+  /// The point at the center of the right edge of this rectangle.
+  ///
+  /// See also [Size.centerLeft].
+  Point get centerRight => new Point(right, top + height / 2.0);
+
   /// The point at the intersection of the bottom and left edges of this rectangle.
+  ///
+  /// See also [Size.bottomLeft].
   Point get bottomLeft => new Point(left, bottom);
 
+  /// The point at the center of the bottom edge of this rectangle.
+  ///
+  /// See also [Size.bottomLeft].
+  Point get bottomCenter => new Point(left + width / 2.0, bottom);
+
   /// The point at the intersection of the bottom and right edges of this rectangle.
+  ///
+  /// See also [Size.bottomRight].
   Point get bottomRight => new Point(right, bottom);
+
 
   /// Whether the given point lies between the left and right and the top and bottom edges of this rectangle.
   ///
@@ -143,6 +178,7 @@ class Rect {
     );
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -156,7 +192,9 @@ class Rect {
     return true;
   }
 
+  @override
   int get hashCode => hashList(_value);
 
+  @override
   String toString() => "Rect.fromLTRB(${left.toStringAsFixed(1)}, ${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, ${bottom.toStringAsFixed(1)})";
 }

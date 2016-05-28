@@ -99,6 +99,7 @@ class Color {
     );
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (other is! Color)
       return false;
@@ -106,7 +107,9 @@ class Color {
     return value == typedOther.value;
   }
 
+  @override
   int get hashCode => _value.hashCode;
 
+  @override
   String toString() => "Color(0x${_value.toRadixString(16).padLeft(8, '0')})";
 }

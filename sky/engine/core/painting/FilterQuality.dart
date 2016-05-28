@@ -11,8 +11,24 @@ part of dart_ui;
 ///
 /// See [Paint.filterQuality].
 enum FilterQuality {
+  /// Fastest possible filtering, albeit also the lowest quality.
+  ///
+  /// Typically this implies nearest-neighbour filtering.
   none,
+
+  /// Better quality than [none], faster than [medium].
+  ///
+  /// Typically this implies bilinear interpolation.
   low,
+
+  /// Better quality than [low], faster than [high].
+  ///
+  /// Typically this implies a combination of bilinear interpolation and
+  /// pyramidal parametric prefiltering (mipmaps).
   medium,
+
+  /// Best possible quality filtering, albeit also the slowest.
+  ///
+  /// Typically this implies bicubic interpolation or better.
   high,
 }

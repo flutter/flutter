@@ -22,6 +22,7 @@ abstract class Image extends NativeFieldWrapperClass2 {
   /// after this method is called.
   void dispose() native "Image_dispose";
 
+  @override
   String toString() => '[$width\u00D7$height]';
 }
 
@@ -56,7 +57,6 @@ void decodeImageFromList(Uint8List list, ImageDecoderCallback callback)
 /// Paths can be drawn on canvases using [Canvas.drawPath], and can
 /// used to create clip regions using [Canvas.clipPath].
 class Path extends NativeFieldWrapperClass2 {
-
   /// Create a new empty [Path] object.
   Path() { _constructor(); }
   void _constructor() native "Path_constructor";
@@ -178,20 +178,55 @@ class Path extends NativeFieldWrapperClass2 {
 enum BlurStyle {
   // These mirror SkBlurStyle and must be kept in sync.
 
-  /// Fuzzy inside and outside.
+  /// Fuzzy inside and outside. This is useful for painting shadows that are
+  /// offset from the shape that ostensible is casting the shadow.
   normal,
 
-  /// Solid inside, fuzzy outside.
+  /// Solid inside, fuzzy outside. This corresponds to drawing the shape, and
+  /// additionally drawing the blur. This can make objects appear brighter,
+  /// maybe even as if they were fluorescent.
   solid,
 
-  /// Nothing inside, fuzzy outside.
+  /// Nothing inside, fuzzy outside. This is useful for painting shadows for
+  /// partially transparent shapes, when they are painted separately but without
+  /// an offset, so that the shadow doesn't paint below the shape.
   outer,
 
-  /// Fuzzy inside, nothing outside.
+  /// Fuzzy inside, nothing outside. This can make shapes appear to be lit from
+  /// within.
   inner,
 }
 
+/// A mask filter to apply to shapes as they are painted. A mask filter is a
+/// function that takes a bitmap of color pixels, and returns another bitmap of
+/// color pixels.
+///
+/// Instances of this class are used with [Paint.maskFilter] on [Paint] objects.
 class MaskFilter extends NativeFieldWrapperClass2 {
+  /// Creates a mask filter that takes the shape being drawn and blurs it.
+  ///
+  /// This is commonly used to approximate shadows.
+  ///
+  /// The `style` argument controls the kind of effect to draw; see [BlurStyle].
+  ///
+  /// The `sigma` argument controls the size of the effect. It is the standard
+  /// deviation of the Gaussian blur to apply. The value must be greater than
+  /// zero. The sigma corresponds to very roughly half the radius of the effect
+  /// in pixels.
+  ///
+  /// If the `ignoreTransform` argument is set, then the current transform is
+  /// ignored when computing the blur. This makes the operation cheaper, but
+  /// lowers the quality of the effect. In particular, it means that the sigma
+  /// will be relative to the device pixel coordinate space, rather than the
+  /// logical pixel coordinate space, which means the blur will look different
+  /// on different devices.
+  ///
+  /// If the `highQuality` argument is set, then the quality of the blur may be
+  /// slightly improved, at the cost of making the operation even more
+  /// expensive.
+  ///
+  /// Even in the best conditions and with the lowest quality settings, a blur
+  /// is an expensive operation and blurs should therefore be used sparingly.
   MaskFilter.blur(BlurStyle style, double sigma, {
     bool ignoreTransform: false,
     bool highQuality: false
@@ -211,10 +246,22 @@ class MaskFilter extends NativeFieldWrapperClass2 {
   }
 }
 
-/// A description of a filter to apply when drawing with a particular [Paint].
+/// A description of a color filter to apply when drawing a shape or compositing
+/// a layer with a particular [Paint]. A color filter is a function that takes
+/// two colors, and outputs one color. When applied during compositing, it is
+/// independently applied to each pixel of the layer being drawn before the
+/// entire layer is merged with the destination.
 ///
-/// See [Paint.colorFilter].
+/// Instances of this class are used with [Paint.colorFilter] on [Paint]
+/// objects.
 class ColorFilter extends NativeFieldWrapperClass2 {
+  /// Creates a color filter that applies the transfer mode given as the second
+  /// argument. The source color is the one given as the first argument, and the
+  /// destination color is the one from the layer being composited.
+  ///
+  /// The output of this filter is then composited into the background according
+  /// to the [Paint.transferMode], using the output of this filter as the source
+  /// and the background as the destination.
   ColorFilter.mode(Color color, TransferMode transferMode) {
     _constructor(color, transferMode);
   }
@@ -241,7 +288,7 @@ class ImageFilter extends NativeFieldWrapperClass2 {
   // }
   // void _initPicture(Picture picture) native "ImageFilter_initPicture";
 
-  /// Applies a Gaussian blur.
+  /// Creates an image filter that applies a Gaussian blur.
   ImageFilter.blur({ double sigmaX: 0.0, double sigmaY: 0.0 }) {
     _constructor();
     _initBlur(sigmaX, sigmaY);
@@ -250,7 +297,7 @@ class ImageFilter extends NativeFieldWrapperClass2 {
 }
 
 /// Base class for objects such as [Gradient] and [ImageShader] which
-/// correspond to shaders.
+/// correspond to shaders as used by [Paint.shader].
 abstract class Shader extends NativeFieldWrapperClass2 { }
 
 /// Defines what happens at the edge of the gradient.
@@ -263,6 +310,10 @@ enum TileMode {
   mirror
 }
 
+/// A shader (as used by [Paint.shader]) that renders a color gradient.
+///
+/// There are two useful types of gradients, created by [new Gradient.linear]
+/// and [new Griadent.radial].
 class Gradient extends Shader {
   /// Creates a Gradient object that is not initialized.
   ///
@@ -271,10 +322,13 @@ class Gradient extends Shader {
   Gradient();
   void _constructor() native "Gradient_constructor";
 
-  /// Creates a linear gradient from [endPoint[0]] to [endPoint[1]]. If
-  /// [colorStops] is provided, [colorStops[i]] is a number from 0 to 1 that
-  /// specifies where [color[i]] begins in the gradient.
-  // TODO(mpcomplete): Maybe pass a list of (color, colorStop) pairs instead?
+  /// Creates a linear gradient from `endPoint[0]` to `endPoint[1]`. If
+  /// `colorStops` is provided, `colorStops[i]` is a number from 0 to 1 that
+  /// specifies where `color[i]` begins in the gradient. If `colorStops` is not
+  /// provided, then two stops at 0.0 and 1.0 are implied. The behavior before
+  /// and after the radius is described by the `tileMode` argument.
+  // TODO(mpcomplete): Consider passing a list of (color, colorStop) pairs
+  // instead.
   Gradient.linear(List<Point> endPoints,
                   List<Color> colors,
                   [List<double> colorStops = null,
@@ -287,10 +341,12 @@ class Gradient extends Shader {
   }
   void _initLinear(List<Point> endPoints, List<Color> colors, List<double> colorStops, int tileMode) native "Gradient_initLinear";
 
-  /// Creates a radial gradient centered at [center] that ends at [radius]
-  /// distance from the center. If [colorStops] is provided, [colorStops[i]] is
-  /// a number from 0 to 1 that specifies where [color[i]] begins in the
-  /// gradient.
+  /// Creates a radial gradient centered at `center` that ends at `radius`
+  /// distance from the center. If `colorStops` is provided, `colorStops[i]` is
+  /// a number from 0 to 1 that specifies where `color[i]` begins in the
+  /// gradient. If `colorStops` is not provided, then two stops at 0.0 and 1.0
+  /// are implied. The behavior before and after the radius is described by the
+  /// `tileMode` argument.
   Gradient.radial(Point center,
                   double radius,
                   List<Color> colors,
@@ -308,7 +364,13 @@ class Gradient extends Shader {
   }
 }
 
+/// A shader (as used by [Paint.shader]) that tiles an image.
 class ImageShader extends Shader {
+  /// Creates an image-tiling shader. The first argument specifies the image to
+  /// tile. The second and third arguments specify the [TileMode] for the x
+  /// direction and y direction respectively. The fourth argument gives the
+  /// matrix to apply to the effect. All the arguments are required and must not
+  /// be null.
   ImageShader(Image image, TileMode tmx, TileMode tmy, Float64List matrix4) {
     if (image == null)
       throw new ArgumentError("[image] argument cannot be null");
@@ -338,6 +400,18 @@ enum VertexMode {
 /// [Canvas] objects are used in creating [Picture] objects, which can
 /// themselves be used with a [SceneBuilder] to build a [Scene]. In
 /// normal usage, however, this is all handled by the framework.
+///
+/// A canvas has a current transformation matrix which is applied to all
+/// operations. Initially, the transformation matrix is the identity transform.
+/// It can be modified using the [translate], [scale], [rotate], [skew],
+/// [transform], and [setMatrix] methods.
+///
+/// A canvas also has a current clip region which is applied to all operations.
+/// Initially, the clip region is infinite. It can be modified using the
+/// [clipRect], [clipRRect], and [clipPath] methods.
+///
+/// The current transform and clip can be saved and restored using the stack
+/// managed by the [save], [saveLayer], and [restore] methods.
 class Canvas extends NativeFieldWrapperClass2 {
   /// Creates a canvas for recording graphical operations into the
   /// given picture recorder.
@@ -369,21 +443,20 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// Call [restore] to pop the save stack.
   void save() native "Canvas_save";
 
-  /// Saves a copy of the current transform and clip on the save
-  /// stack, and then creates a new group which subsequent calls will
-  /// become a part of. When the save stack is later popped, the group
-  /// will be flattened and have the given paint applied.
+  /// Saves a copy of the current transform and clip on the save stack, and then
+  /// creates a new group which subsequent calls will become a part of. When the
+  /// save stack is later popped, the group will be flattened into a layer and
+  /// have the given `paint`'s [Paint.colorFilter] and [Paint.transferMode]
+  /// applied.
   ///
-  /// This lets you create composite effects, for example making a
-  /// group of drawing commands semi-transparent. Without using
-  /// [saveLayer], each part of the group would be painted
-  /// individually, so where they overlap would be darker than where
-  /// they do not. By using [saveLayer] to group them together, they
-  /// can be drawn with an opaque color at first, and then the entire
-  /// group can be made transparent using the [saveLayer]'s paint.
+  /// This lets you create composite effects, for example making a group of
+  /// drawing commands semi-transparent. Without using [saveLayer], each part of
+  /// the group would be painted individually, so where they overlap would be
+  /// darker than where they do not. By using [saveLayer] to group them
+  /// together, they can be drawn with an opaque color at first, and then the
+  /// entire group can be made transparent using the [saveLayer]'s paint.
   ///
-  /// Call [restore] to pop the save stack and apply the paint to the
-  /// group.
+  /// Call [restore] to pop the save stack and apply the paint to the group.
   void saveLayer(Rect bounds, Paint paint) {
     if (bounds == null)
       _saveLayerWithoutBounds(paint);
@@ -402,6 +475,9 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// Otherwise, does nothing.
   ///
   /// Use [save] and [saveLayer] to push state onto the stack.
+  ///
+  /// If the state was pushed with with [saveLayer], then this call will also
+  /// cause the new layer to be composited into the previous layer.
   void restore() native "Canvas_restore";
 
   /// Returns the number of items on the save stack, including the
@@ -412,11 +488,26 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// This number cannot go below 1.
   int getSaveCount() native "Canvas_getSaveCount";
 
+  /// Add a translation to the current transform, shifting the coordinate space
+  /// horizontally by the first argument and vertically by the second argument.
   void translate(double dx, double dy) native "Canvas_translate";
+
+  /// Add an axis-aligned scale to the current transform, scaling by the first
+  /// argument in the horizontal direction and the second in the vertical
+  /// direction.
   void scale(double sx, double sy) native "Canvas_scale";
+
+  /// Add a rotation to the current transform. The argument is in radians clockwise.
   void rotate(double radians) native "Canvas_rotate";
+
+  /// Add an axis-aligned skew to the current transform, with the first argument
+  /// being the horizontal skew in radians clockwise around the origin, and the
+  /// second argument being the vertical skew in radians clockwise around the
+  /// origin.
   void skew(double sx, double sy) native "Canvas_skew";
 
+  /// Multiply the current transform by the specified 4⨉4 transformation matrix
+  /// specified as a list of values in column-major order.
   void transform(Float64List matrix4) {
     if (matrix4.length != 16)
       throw new ArgumentError("[matrix4] must have 16 entries.");
@@ -424,6 +515,8 @@ class Canvas extends NativeFieldWrapperClass2 {
   }
   void _transform(Float64List matrix4) native "Canvas_transform";
 
+  /// Replaces the current transform with the specified 4⨉4 transformation
+  /// matrix specified as a list of values in column-major order.
   void setMatrix(Float64List matrix4) {
     if (matrix4.length != 16)
       throw new ArgumentError("[matrix4] must have 16 entries.");
@@ -431,7 +524,12 @@ class Canvas extends NativeFieldWrapperClass2 {
   }
   void _setMatrix(Float64List matrix4) native "Canvas_setMatrix";
 
+  /// Returns the current 4⨉4 transformation matrix as a list of 16 values in
+  /// column-major order.
   Float64List getTotalMatrix() native "Canvas_getTotalMatrix";
+
+  /// Reduces the clip region to the intersection of the current clip and the
+  /// given rectangle.
   void clipRect(Rect rect) {
     _clipRect(rect.left, rect.top, rect.right, rect.bottom);
   }
@@ -440,22 +538,37 @@ class Canvas extends NativeFieldWrapperClass2 {
                  double right,
                  double bottom) native "Canvas_clipRect";
 
+  /// Reduces the clip region to the intersection of the current clip and the
+  /// given rounded rectangle.
   void clipRRect(RRect rrect) native "Canvas_clipRRect";
 
+  /// Reduces the clip region to the intersection of the current clip and the
+  /// given [Path].
   void clipPath(Path path) native "Canvas_clipPath";
 
+  /// Paints the given [Color] onto the canvas, applying the given
+  /// [TransferMode], with the given color being the source and the background
+  /// being the destination.
   void drawColor(Color color, TransferMode transferMode) {
     _drawColor(color.value, transferMode.index);
   }
   void _drawColor(int color, int transferMode) native "Canvas_drawColor";
 
+  /// Draws a line between the given [Point]s using the given paint. The line is
+  /// stroked, the value of the [Paint.style] is ignored for this call.
   void drawLine(Point p1, Point p2, Paint paint) {
     _drawLine(p1.x, p1.y, p2.x, p2.y, paint);
   }
   void _drawLine(double x1, double y1, double x2, double y2, Paint paint) native "Canvas_drawLine";
 
+  /// Fills the canvas with the given [Paint].
+  ///
+  /// To fill the canvas with a solid color and transfer mode, consider
+  /// [drawColor] instead.
   void drawPaint(Paint paint) native "Canvas_drawPaint";
 
+  /// Draws a rectangle with the given [Paint]. Whether the rectangle is filled
+  /// or stroked (or both) is controlled by [Paint.style].
   void drawRect(Rect rect, Paint paint) {
     _drawRect(rect.left, rect.top, rect.right, rect.bottom, paint);
   }
@@ -465,10 +578,20 @@ class Canvas extends NativeFieldWrapperClass2 {
                  double bottom,
                  Paint paint) native "Canvas_drawRect";
 
+  /// Draws a rounded rectangle with the given [Paint]. Whether the rectangle is
+  /// filled or stroked (or both) is controlled by [Paint.style].
   void drawRRect(RRect rrect, Paint paint) native "Canvas_drawRRect";
 
+  /// Draws a shape consisting of the difference between two rounded rectangles
+  /// with the given [Paint]. Whether this shape is filled or stroked (or both)
+  /// is controlled by [Paint.style].
+  ///
+  /// This shape is almost but not quite entirely unlike an annulus.
   void drawDRRect(RRect outer, RRect inner, Paint paint) native "Canvas_drawDRRect";
 
+  /// Draws an axis-aligned oval that fills the given axis-aligned rectangle
+  /// with the given [Paint]. Whether the oval is filled or stroked (or both) is
+  /// controlled by [Paint.style].
   void drawOval(Rect rect, Paint paint) {
     _drawOval(rect.left, rect.top, rect.right, rect.bottom, paint);
   }
@@ -478,22 +601,32 @@ class Canvas extends NativeFieldWrapperClass2 {
                  double bottom,
                  Paint paint) native "Canvas_drawOval";
 
+  /// Draws a circle centered at the point given by the first two arguments and
+  /// that has the radius given by the third argument, with the [Paint] given in
+  /// the fourth argument. Whether the circle is filled or stroked (or both) is
+  /// controlled by [Paint.style].
   void drawCircle(Point c, double radius, Paint paint) {
     _drawCircle(c.x, c.y, radius, paint);
   }
   void _drawCircle(double x, double y, double radius, Paint paint) native "Canvas_drawCircle";
 
+  /// Draws the given [Path] with the given [Paint]. Whether this shape is
+  /// filled or stroked (or both) is controlled by [Paint.style]. If the path is
+  /// filled, then subpaths within it are implicitly closed (see [Path.close]).
   void drawPath(Path path, Paint paint) native "Canvas_drawPath";
 
+  /// Draws the given [Image] into the canvas with its top-left corner at the
+  /// given [Point]. The image is composited into the canvas using the given [Paint].
   void drawImage(Image image, Point p, Paint paint) {
     _drawImage(image, p.x, p.y, paint);
   }
   void _drawImage(Image image, double x, double y, Paint paint) native "Canvas_drawImage";
 
-  /// Draws the src rect from the image into the canvas as dst rect.
+  /// Draws the subset of the given image described by the `src` argument into
+  /// the canvas in the axis-aligned rectangle given by the `dst` argument.
   ///
-  /// Might sample from outside the src rect by half the width of an applied
-  /// filter.
+  /// This might sample from outside the `src` rect by up to half the width of
+  /// an applied filter.
   void drawImageRect(Image image, Rect src, Rect dst, Paint paint) {
     _drawImageRect(image,
                    src.left,
@@ -517,6 +650,19 @@ class Canvas extends NativeFieldWrapperClass2 {
                       double dstBottom,
                       Paint paint) native "Canvas_drawImageRect";
 
+  /// Draws the given [Image] into the canvas using the given [Paint].
+  ///
+  /// The image is drawn in nine portions described by splitting the image by
+  /// drawing two horizontal lines and two vertical lines, where the `center`
+  /// argument describes the rectangle formed by the four points where these
+  /// four lines intersect each other. (This forms a 3-by-3 grid of regions,
+  /// the center region being described by the `center` argument.)
+  ///
+  /// The four regions in the corners are drawn, without scaling, in the four
+  /// corners of the destination rectangle described by `dst`. The remaining
+  /// five regions are drawn by stretching them to fit such that they exactly
+  /// cover the destination rectangle while maintaining their relative
+  /// positions.
   void drawImageNine(Image image, Rect center, Rect dst, Paint paint) {
     _drawImageNine(image,
                    center.left,

@@ -14,7 +14,7 @@ part of dart_ui;
 /// can be used to blend the pixels. The image below shows the effects
 /// of these modes.
 /// 
-/// [![Open Skia fiddle to view image.](https://fiddle.skia.org/i/871ab434ce53a611e5eb2b662c69d154_raster.png)](https://fiddle.skia.org/c/871ab434ce53a611e5eb2b662c69d154)
+/// [![Open Skia fiddle to view image.](https://flutter.io/images/transfer_mode.png)](https://fiddle.skia.org/c/864acd0659c7a866ea7296a3184b8bdd)
 ///
 /// See [Paint.transferMode].
 enum TransferMode {
