@@ -20,6 +20,7 @@
 using mojo::embedder::internal::g_core;
 using mojo::system::Core;
 using mojo::system::Dispatcher;
+using mojo::system::Handle;
 using mojo::system::MakeUserPointer;
 using mojo::util::RefPtr;
 
@@ -55,23 +56,23 @@ MojoResult MojoSystemImplTransferHandle(MojoSystemImpl from_system,
   if (result_handle == nullptr)
     return MOJO_RESULT_INVALID_ARGUMENT;
 
-  RefPtr<Dispatcher> d;
-  MojoResult result = from_core->GetAndRemoveDispatcher(handle, &d);
+  Handle h;
+  MojoResult result = from_core->GetAndRemoveHandle(handle, &h);
   if (result != MOJO_RESULT_OK)
     return result;
 
-  // TODO(vtl): The rights should come from the original handle (to be dealt
-  // with when I fix/replace |Core::GetAndRemoveDispatcher()|.
-  MojoHandle created_handle = to_core->AddHandle(mojo::system::Handle(
-      d.Clone(), MOJO_HANDLE_RIGHT_TRANSFER | MOJO_HANDLE_RIGHT_READ |
-                     MOJO_HANDLE_RIGHT_WRITE));
+  MojoHandle created_handle =
+      to_core->AddHandle(Handle(h.dispatcher.Clone(), h.rights));
   if (created_handle == MOJO_HANDLE_INVALID) {
     // The handle has been lost, unfortunately. There's no guarentee we can put
     // it back where it came from, or get the original ID back. Holding locks
     // for multiple cores risks deadlock, so that isn't a solution. This case
     // should not happen for reasonable uses of this API, however.
+    // TODO(vtl): This behaviour is pretty crappy. This can be fixed by marking
+    // the original handle as busy and only removing it on success, though
+    // that'd require some work.
     LOG(ERROR) << "Could not transfer handle";
-    d->Close();
+    h.dispatcher->Close();
     return MOJO_RESULT_RESOURCE_EXHAUSTED;
   }
 
@@ -89,6 +90,34 @@ MojoResult MojoSystemImplClose(MojoSystemImpl system, MojoHandle handle) {
   mojo::system::Core* core = static_cast<mojo::system::Core*>(system);
   DCHECK(core);
   return core->Close(handle);
+}
+
+MojoResult MojoSystemImplGetRights(MojoSystemImpl system,
+                                   MojoHandle handle,
+                                   MojoHandleRights* rights) {
+  mojo::system::Core* core = static_cast<mojo::system::Core*>(system);
+  DCHECK(core);
+  return core->GetRights(handle, MakeUserPointer(rights));
+}
+
+MojoResult MojoSystemImplDuplicateHandleWithReducedRights(
+    MojoSystemImpl system,
+    MojoHandle handle,
+    MojoHandleRights rights_to_remove,
+    MojoHandle* new_handle) {
+  mojo::system::Core* core = static_cast<mojo::system::Core*>(system);
+  DCHECK(core);
+  return core->DuplicateHandleWithReducedRights(handle, rights_to_remove,
+                                                MakeUserPointer(new_handle));
+}
+
+MojoResult MojoSystemImplDuplicateHandle(MojoSystemImpl system,
+                                         MojoHandle handle,
+                                         MojoHandle* new_handle) {
+  mojo::system::Core* core = static_cast<mojo::system::Core*>(system);
+  DCHECK(core);
+  return core->DuplicateHandleWithReducedRights(handle, MOJO_HANDLE_RIGHT_NONE,
+                                                MakeUserPointer(new_handle));
 }
 
 MojoResult MojoSystemImplWait(MojoSystemImpl system,

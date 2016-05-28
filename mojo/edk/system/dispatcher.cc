@@ -108,6 +108,15 @@ MojoResult Dispatcher::Close() {
   return MOJO_RESULT_OK;
 }
 
+MojoResult Dispatcher::DuplicateDispatcher(
+    util::RefPtr<Dispatcher>* new_dispatcher) {
+  MutexLocker locker(&mutex_);
+  if (is_closed_)
+    return MOJO_RESULT_INVALID_ARGUMENT;
+
+  return DuplicateDispatcherImplNoLock(new_dispatcher);
+}
+
 MojoResult Dispatcher::WriteMessage(UserPointer<const void> bytes,
                                     uint32_t num_bytes,
                                     std::vector<HandleTransport>* transports,
@@ -316,6 +325,17 @@ void Dispatcher::CloseImplNoLock() {
   DCHECK(is_closed_);
   // This may not need to do anything. Dispatchers should override this to do
   // any actual close-time cleanup necessary.
+}
+
+MojoResult Dispatcher::DuplicateDispatcherImplNoLock(
+    util::RefPtr<Dispatcher>* new_dispatcher) {
+  mutex_.AssertHeld();
+  DCHECK(!is_closed_);
+  // By default, this is not supported. However, this should only be reachable
+  // if a handle has the |MOJO_HANDLE_RIGHT_DUPLICATE| right, which it should
+  // only have if it is supported.
+  NOTREACHED();
+  return MOJO_RESULT_INTERNAL;
 }
 
 MojoResult Dispatcher::WriteMessageImplNoLock(

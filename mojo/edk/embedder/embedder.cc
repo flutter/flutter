@@ -73,17 +73,20 @@ MojoResult PassWrappedPlatformHandle(MojoHandle platform_handle_wrapper_handle,
   DCHECK(platform_handle);
 
   DCHECK(internal::g_core);
-  RefPtr<system::Dispatcher> dispatcher;
-  MojoResult result = internal::g_core->GetDispatcher(
-      platform_handle_wrapper_handle, &dispatcher);
+  system::Handle h;
+  MojoResult result =
+      internal::g_core->GetHandle(platform_handle_wrapper_handle, &h);
   if (result != MOJO_RESULT_OK)
     return result;
 
-  if (dispatcher->GetType() != system::Dispatcher::Type::PLATFORM_HANDLE)
+  if (h.dispatcher->GetType() != system::Dispatcher::Type::PLATFORM_HANDLE)
     return MOJO_RESULT_INVALID_ARGUMENT;
 
+  if (!h.has_all_rights(MOJO_HANDLE_RIGHT_READ | MOJO_HANDLE_RIGHT_WRITE))
+    return MOJO_RESULT_PERMISSION_DENIED;
+
   *platform_handle =
-      static_cast<system::PlatformHandleDispatcher*>(dispatcher.get())
+      static_cast<system::PlatformHandleDispatcher*>(h.dispatcher.get())
           ->PassPlatformHandle();
   return MOJO_RESULT_OK;
 }

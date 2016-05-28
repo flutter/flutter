@@ -10,32 +10,33 @@
 
 namespace mojo {
 
-// These methods are intentionally not implemented so that there is a link
-// error if someone uses them in a Chromium-environment.
-#if 0
-Environment::Environment() {
-}
+// TODO(vtl): Probably we should share the following async waiter and logger
+// code with the "standalone" implementation. (The only difference is what the
+// |internal::kDefault...| are.)
 
-Environment::Environment(const MojoAsyncWaiter* default_async_waiter,
-                         const MojoLogger* default_logger) {
-}
-
-Environment::~Environment() {
-}
-#endif
+const MojoAsyncWaiter* g_default_async_waiter = &internal::kDefaultAsyncWaiter;
+const MojoLogger* g_default_logger = &internal::kDefaultLogger;
 
 // static
 const MojoAsyncWaiter* Environment::GetDefaultAsyncWaiter() {
-  return &internal::kDefaultAsyncWaiter;
+  return g_default_async_waiter;
+}
+
+// static
+void Environment::SetDefaultAsyncWaiter(const MojoAsyncWaiter* async_waiter) {
+  g_default_async_waiter =
+      async_waiter ? async_waiter : &internal::kDefaultAsyncWaiter;
 }
 
 // static
 const MojoLogger* Environment::GetDefaultLogger() {
-  return &internal::kDefaultLogger;
+  return g_default_logger;
 }
 
 // static
-void Environment::SetDefaultLogger(const MojoLogger* logger) {}
+void Environment::SetDefaultLogger(const MojoLogger* logger) {
+  g_default_logger = logger ? logger : &internal::kDefaultLogger;
+}
 
 // static
 void Environment::InstantiateDefaultRunLoop() {

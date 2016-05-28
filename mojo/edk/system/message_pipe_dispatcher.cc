@@ -77,7 +77,8 @@ Dispatcher::Type MessagePipeDispatcher::GetType() const {
 
 bool MessagePipeDispatcher::SupportsEntrypointClass(
     EntrypointClass entrypoint_class) const {
-  return (entrypoint_class == EntrypointClass::MESSAGE_PIPE);
+  return (entrypoint_class == EntrypointClass::NONE ||
+          entrypoint_class == EntrypointClass::MESSAGE_PIPE);
 }
 
 // static

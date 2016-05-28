@@ -30,12 +30,6 @@ void ActivityImpl::SetTaskDescription(
   // No counterpart on iOS but is a benign operation. So no asserts.
 }
 
-void ActivityFactory::Create(
-    mojo::ApplicationConnection* connection,
-    mojo::InterfaceRequest<::activity::Activity> request) {
-  new ActivityImpl(request.Pass());
-}
-
 }  // namespace activity
 }  // namespace services
 }  // namespace sky

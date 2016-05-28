@@ -63,9 +63,4 @@ void NetworkServiceImpl::CreateHostResolver(
   DCHECK(false);
 }
 
-void NetworkServiceFactory::Create(ApplicationConnection* connection,
-                                   InterfaceRequest<NetworkService> request) {
-  new NetworkServiceImpl(request.Pass());
-}
-
 }  // namespace mojo

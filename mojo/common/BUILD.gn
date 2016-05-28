@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//mojo/public/mojo_application.gni")
 import("//mojo/public/tools/bindings/mojom.gni")
 import("//testing/test.gni")
 
@@ -40,13 +41,13 @@ source_set("tests") {
   ]
 }
 
-test("mojo_common_unittests") {
+mojo_native_application("mojo_common_apptests") {
+  testonly = true
+
   deps = [
     ":tests",
-    "//mojo/data_pipe_utils:tests",
-    "//mojo/edk/test:run_all_unittests",
-    "//mojo/environment:chromium",
-    "//mojo/message_pump:tests",
+    "//mojo/application",
+    "//mojo/application:test_support",
   ]
 }
 

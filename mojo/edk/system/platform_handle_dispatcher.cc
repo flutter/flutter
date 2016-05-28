@@ -40,7 +40,7 @@ Dispatcher::Type PlatformHandleDispatcher::GetType() const {
 
 bool PlatformHandleDispatcher::SupportsEntrypointClass(
     EntrypointClass entrypoint_class) const {
-  return false;
+  return (entrypoint_class == EntrypointClass::NONE);
 }
 
 // static

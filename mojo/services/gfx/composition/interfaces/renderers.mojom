@@ -8,6 +8,7 @@ module mojo.gfx.composition;
 import "mojo/services/geometry/interfaces/geometry.mojom";
 import "mojo/services/gfx/composition/interfaces/hit_tests.mojom";
 import "mojo/services/gfx/composition/interfaces/scene_token.mojom";
+import "mojo/services/gfx/composition/interfaces/scheduling.mojom";
 
 // The renderer is a service which renders a scene graph to a display.
 //
@@ -35,6 +36,9 @@ interface Renderer {
 
   // Dissociates the root scene from the renderer.
   ClearRootScene();
+
+  // Gets a scheduler to receive frame timing information for the renderer.
+  GetScheduler(FrameScheduler& scheduler);
 
   // Provides an interface which can be used to perform hit tests on the
   // contents of the renderer's scene graph.

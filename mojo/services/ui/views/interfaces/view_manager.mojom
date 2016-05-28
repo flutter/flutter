@@ -67,4 +67,30 @@ interface ViewManager {
   CreateViewTree(mojo.ui.ViewTree& view_tree,
                  mojo.ui.ViewTreeListener view_tree_listener,
                  string? label);
+
+  // Registers a view associate with the view manager.
+  //
+  // The services provided by |view_associate| will be made available to views.
+  //
+  // You receive a |view_associate_owner| which will receive a connection error
+  // callback if |view_associate| is closed. Conversely, the service for
+  // |view_associate| will be destroyed if |view_associate_owner| is destroyed.
+  //
+  // |label| is used to identify the ViewAssociate for debug purposes.
+  //
+  // TODO(mikejurka): This method should only be made accessible to trusted
+  // services, once we have a security story
+  RegisterViewAssociate(mojo.ui.ViewAssociate view_associate,
+    mojo.ui.ViewAssociateOwner& view_associate_owner, string? label);
+
+  // Tells the view manager we've registered all our view associates.
+  //
+  // This allows it to prevent views from requesting services from ViewAssociate
+  // before all the ViewAssociates have been registered.
+  //
+  // TODO(mikejurka): This method should only be made accessible to trusted
+  // services, once we have a security story
+  // TODO(mikejurka): We should remove this method once we have a way of
+  // dynamically registering and unregistering ViewAssociates
+  FinishedRegisteringViewAssociates();
 };

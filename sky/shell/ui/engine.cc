@@ -97,9 +97,9 @@ void Engine::SetServices(ServicesDataPtr services) {
         incoming_services_.get());
   }
 
-  if (services_->scene_scheduler) {
+  if (services_->frame_scheduler) {
     animator_->Reset();
-    animator_->set_scene_scheduler(services_->scene_scheduler.Pass());
+    animator_->set_frame_scheduler(services_->frame_scheduler.Pass());
   } else {
 #if defined(OS_ANDROID) || defined(OS_IOS)
     vsync::VSyncProviderPtr vsync_provider;

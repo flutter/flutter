@@ -6,11 +6,11 @@
 #define MOJO_ICU_ICU_H_
 
 namespace mojo {
-class ApplicationImpl;
+class ApplicationConnector;
 
 namespace icu {
 
-void Initialize(ApplicationImpl* app);
+void Initialize(ApplicationConnector* application_connector);
 
 }  // namespace icu
 }  // namespace mojo

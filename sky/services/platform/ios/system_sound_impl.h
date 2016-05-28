@@ -6,7 +6,6 @@
 #define SKY_SERVICES_PLATFORM_IOS_SYSTEM_SOUND_IMPL_H_
 
 #include "base/macros.h"
-#include "mojo/public/cpp/application/interface_factory.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "sky/services/platform/system_sound.mojom.h"
 
@@ -25,12 +24,6 @@ class SystemSoundImpl : public SystemSound {
   mojo::StrongBinding<SystemSound> binding_;
 
   DISALLOW_COPY_AND_ASSIGN(SystemSoundImpl);
-};
-
-class SystemSoundFactory : public mojo::InterfaceFactory<SystemSound> {
- public:
-  void Create(mojo::ApplicationConnection* connection,
-              mojo::InterfaceRequest<SystemSound> request) override;
 };
 
 }  // namespace platform

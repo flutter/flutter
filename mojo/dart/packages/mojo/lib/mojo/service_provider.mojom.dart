@@ -108,27 +108,59 @@ class _ServiceProviderServiceDescription implements service_describer.ServiceDes
 
 abstract class ServiceProvider {
   static const String serviceName = null;
-  void connectToService(String interfaceName, core.MojoMessagePipeEndpoint pipe);
-}
 
-
-class _ServiceProviderProxyImpl extends bindings.Proxy {
-  _ServiceProviderProxyImpl.fromEndpoint(
-      core.MojoMessagePipeEndpoint endpoint) : super.fromEndpoint(endpoint);
-
-  _ServiceProviderProxyImpl.fromHandle(core.MojoHandle handle) :
-      super.fromHandle(handle);
-
-  _ServiceProviderProxyImpl.unbound() : super.unbound();
-
-  static _ServiceProviderProxyImpl newFromEndpoint(
-      core.MojoMessagePipeEndpoint endpoint) {
-    assert(endpoint.setDescription("For _ServiceProviderProxyImpl"));
-    return new _ServiceProviderProxyImpl.fromEndpoint(endpoint);
+  static service_describer.ServiceDescription _cachedServiceDescription;
+  static service_describer.ServiceDescription get serviceDescription {
+    if (_cachedServiceDescription == null) {
+      _cachedServiceDescription = new _ServiceProviderServiceDescription();
+    }
+    return _cachedServiceDescription;
   }
 
-  service_describer.ServiceDescription get serviceDescription =>
-    new _ServiceProviderServiceDescription();
+  static ServiceProviderProxy connectToService(
+      bindings.ServiceConnector s, String url, [String serviceName]) {
+    ServiceProviderProxy p = new ServiceProviderProxy.unbound();
+    String name = serviceName ?? ServiceProvider.serviceName;
+    if ((name == null) || name.isEmpty) {
+      throw new core.MojoApiError(
+          "If an interface has no ServiceName, then one must be provided.");
+    }
+    s.connectToService(url, p, name);
+    return p;
+  }
+  void connectToService_(String interfaceName, core.MojoMessagePipeEndpoint pipe);
+}
+
+abstract class ServiceProviderInterface
+    implements bindings.MojoInterface<ServiceProvider>,
+               ServiceProvider {
+  factory ServiceProviderInterface([ServiceProvider impl]) =>
+      new ServiceProviderStub.unbound(impl);
+  factory ServiceProviderInterface.fromEndpoint(
+      core.MojoMessagePipeEndpoint endpoint,
+      [ServiceProvider impl]) =>
+      new ServiceProviderStub.fromEndpoint(endpoint, impl);
+}
+
+abstract class ServiceProviderInterfaceRequest
+    implements bindings.MojoInterface<ServiceProvider>,
+               ServiceProvider {
+  factory ServiceProviderInterfaceRequest() =>
+      new ServiceProviderProxy.unbound();
+}
+
+class _ServiceProviderProxyControl
+    extends bindings.ProxyMessageHandler
+    implements bindings.ProxyControl<ServiceProvider> {
+  _ServiceProviderProxyControl.fromEndpoint(
+      core.MojoMessagePipeEndpoint endpoint) : super.fromEndpoint(endpoint);
+
+  _ServiceProviderProxyControl.fromHandle(
+      core.MojoHandle handle) : super.fromHandle(handle);
+
+  _ServiceProviderProxyControl.unbound() : super.unbound();
+
+  String get serviceName => ServiceProvider.serviceName;
 
   void handleResponse(bindings.ServiceMessage message) {
     switch (message.header.type) {
@@ -139,60 +171,32 @@ class _ServiceProviderProxyImpl extends bindings.Proxy {
     }
   }
 
+  ServiceProvider get impl => null;
+  set impl(ServiceProvider _) {
+    throw new core.MojoApiError("The impl of a Proxy cannot be set.");
+  }
+
+  @override
   String toString() {
     var superString = super.toString();
-    return "_ServiceProviderProxyImpl($superString)";
+    return "_ServiceProviderProxyControl($superString)";
   }
 }
 
-
-class _ServiceProviderProxyCalls implements ServiceProvider {
-  _ServiceProviderProxyImpl _proxyImpl;
-
-  _ServiceProviderProxyCalls(this._proxyImpl);
-    void connectToService(String interfaceName, core.MojoMessagePipeEndpoint pipe) {
-      if (!_proxyImpl.isBound) {
-        _proxyImpl.proxyError("The Proxy is closed.");
-        return;
-      }
-      var params = new _ServiceProviderConnectToServiceParams();
-      params.interfaceName = interfaceName;
-      params.pipe = pipe;
-      _proxyImpl.sendMessage(params, _serviceProviderMethodConnectToServiceName);
-    }
-}
-
-
-class ServiceProviderProxy implements bindings.ProxyBase {
-  final bindings.Proxy impl;
-  ServiceProvider ptr;
-
-  ServiceProviderProxy(_ServiceProviderProxyImpl proxyImpl) :
-      impl = proxyImpl,
-      ptr = new _ServiceProviderProxyCalls(proxyImpl);
-
+class ServiceProviderProxy
+    extends bindings.Proxy<ServiceProvider>
+    implements ServiceProvider,
+               ServiceProviderInterface,
+               ServiceProviderInterfaceRequest {
   ServiceProviderProxy.fromEndpoint(
-      core.MojoMessagePipeEndpoint endpoint) :
-      impl = new _ServiceProviderProxyImpl.fromEndpoint(endpoint) {
-    ptr = new _ServiceProviderProxyCalls(impl);
-  }
+      core.MojoMessagePipeEndpoint endpoint)
+      : super(new _ServiceProviderProxyControl.fromEndpoint(endpoint));
 
-  ServiceProviderProxy.fromHandle(core.MojoHandle handle) :
-      impl = new _ServiceProviderProxyImpl.fromHandle(handle) {
-    ptr = new _ServiceProviderProxyCalls(impl);
-  }
+  ServiceProviderProxy.fromHandle(core.MojoHandle handle)
+      : super(new _ServiceProviderProxyControl.fromHandle(handle));
 
-  ServiceProviderProxy.unbound() :
-      impl = new _ServiceProviderProxyImpl.unbound() {
-    ptr = new _ServiceProviderProxyCalls(impl);
-  }
-
-  factory ServiceProviderProxy.connectToService(
-      bindings.ServiceConnector s, String url, [String serviceName]) {
-    ServiceProviderProxy p = new ServiceProviderProxy.unbound();
-    s.connectToService(url, p, serviceName);
-    return p;
-  }
+  ServiceProviderProxy.unbound()
+      : super(new _ServiceProviderProxyControl.unbound());
 
   static ServiceProviderProxy newFromEndpoint(
       core.MojoMessagePipeEndpoint endpoint) {
@@ -200,50 +204,40 @@ class ServiceProviderProxy implements bindings.ProxyBase {
     return new ServiceProviderProxy.fromEndpoint(endpoint);
   }
 
-  String get serviceName => ServiceProvider.serviceName;
 
-  Future close({bool immediate: false}) => impl.close(immediate: immediate);
-
-  Future responseOrError(Future f) => impl.responseOrError(f);
-
-  Future get errorFuture => impl.errorFuture;
-
-  int get version => impl.version;
-
-  Future<int> queryVersion() => impl.queryVersion();
-
-  void requireVersion(int requiredVersion) {
-    impl.requireVersion(requiredVersion);
-  }
-
-  String toString() {
-    return "ServiceProviderProxy($impl)";
+  void connectToService_(String interfaceName, core.MojoMessagePipeEndpoint pipe) {
+    if (!ctrl.isBound) {
+      ctrl.proxyError("The Proxy is closed.");
+      return;
+    }
+    var params = new _ServiceProviderConnectToServiceParams();
+    params.interfaceName = interfaceName;
+    params.pipe = pipe;
+    ctrl.sendMessage(params,
+        _serviceProviderMethodConnectToServiceName);
   }
 }
 
-
-class ServiceProviderStub extends bindings.Stub {
+class _ServiceProviderStubControl
+    extends bindings.StubMessageHandler
+    implements bindings.StubControl<ServiceProvider> {
   ServiceProvider _impl;
 
-  ServiceProviderStub.fromEndpoint(
+  _ServiceProviderStubControl.fromEndpoint(
       core.MojoMessagePipeEndpoint endpoint, [ServiceProvider impl])
       : super.fromEndpoint(endpoint, autoBegin: impl != null) {
     _impl = impl;
   }
 
-  ServiceProviderStub.fromHandle(
+  _ServiceProviderStubControl.fromHandle(
       core.MojoHandle handle, [ServiceProvider impl])
       : super.fromHandle(handle, autoBegin: impl != null) {
     _impl = impl;
   }
 
-  ServiceProviderStub.unbound() : super.unbound();
+  _ServiceProviderStubControl.unbound([this._impl]) : super.unbound();
 
-  static ServiceProviderStub newFromEndpoint(
-      core.MojoMessagePipeEndpoint endpoint) {
-    assert(endpoint.setDescription("For ServiceProviderStub"));
-    return new ServiceProviderStub.fromEndpoint(endpoint);
-  }
+  String get serviceName => ServiceProvider.serviceName;
 
 
 
@@ -260,7 +254,7 @@ class ServiceProviderStub extends bindings.Stub {
       case _serviceProviderMethodConnectToServiceName:
         var params = _ServiceProviderConnectToServiceParams.deserialize(
             message.payload);
-        _impl.connectToService(params.interfaceName, params.pipe);
+        _impl.connectToService_(params.interfaceName, params.pipe);
         break;
       default:
         throw new bindings.MojoCodecError("Unexpected message name");
@@ -288,19 +282,40 @@ class ServiceProviderStub extends bindings.Stub {
     }
   }
 
+  @override
   String toString() {
     var superString = super.toString();
-    return "ServiceProviderStub($superString)";
+    return "_ServiceProviderStubControl($superString)";
   }
 
   int get version => 0;
+}
 
-  static service_describer.ServiceDescription _cachedServiceDescription;
-  static service_describer.ServiceDescription get serviceDescription {
-    if (_cachedServiceDescription == null) {
-      _cachedServiceDescription = new _ServiceProviderServiceDescription();
-    }
-    return _cachedServiceDescription;
+class ServiceProviderStub
+    extends bindings.Stub<ServiceProvider>
+    implements ServiceProvider,
+               ServiceProviderInterface,
+               ServiceProviderInterfaceRequest {
+  ServiceProviderStub.unbound([ServiceProvider impl])
+      : super(new _ServiceProviderStubControl.unbound(impl));
+
+  ServiceProviderStub.fromEndpoint(
+      core.MojoMessagePipeEndpoint endpoint, [ServiceProvider impl])
+      : super(new _ServiceProviderStubControl.fromEndpoint(endpoint, impl));
+
+  ServiceProviderStub.fromHandle(
+      core.MojoHandle handle, [ServiceProvider impl])
+      : super(new _ServiceProviderStubControl.fromHandle(handle, impl));
+
+  static ServiceProviderStub newFromEndpoint(
+      core.MojoMessagePipeEndpoint endpoint) {
+    assert(endpoint.setDescription("For ServiceProviderStub"));
+    return new ServiceProviderStub.fromEndpoint(endpoint);
+  }
+
+
+  void connectToService_(String interfaceName, core.MojoMessagePipeEndpoint pipe) {
+    return impl.connectToService_(interfaceName, pipe);
   }
 }
 

@@ -46,12 +46,6 @@ void ClipboardImpl::GetClipboardData(
   callback.Run(clip.Pass());
 }
 
-void ClipboardFactory::Create(
-    mojo::ApplicationConnection* connection,
-    mojo::InterfaceRequest<::editing::Clipboard> request) {
-  new ClipboardImpl(request.Pass());
-}
-
 }  // namespace editing
 }  // namespace services
 }  // namespace sky

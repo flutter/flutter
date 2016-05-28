@@ -7,7 +7,6 @@ module mojo;
 
 import "input_events/interfaces/input_events.mojom";
 
-[ServiceName="mojo::NativeViewportEventDispatcher"]
 interface NativeViewportEventDispatcher {
   OnEvent(Event event) => ();
 };

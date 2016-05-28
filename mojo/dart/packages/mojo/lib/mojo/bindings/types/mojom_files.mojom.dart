@@ -207,7 +207,7 @@ class MojomFileGraph extends bindings.Struct {
   ];
   Map<String, MojomFile> files = null;
   Map<String, mojom_types_mojom.UserDefinedType> resolvedTypes = null;
-  Map<String, mojom_types_mojom.UserDefinedValue> resolvedValues = null;
+  Map<String, mojom_types_mojom.DeclaredConstant> resolvedConstants = null;
 
   MojomFileGraph() : super(kVersions.last.size);
 
@@ -325,7 +325,7 @@ class MojomFileGraph extends bindings.Struct {
       {
         decoder1.decodeDataHeaderForMap();
         List<String> keys0;
-        List<mojom_types_mojom.UserDefinedValue> values0;
+        List<mojom_types_mojom.DeclaredConstant> values0;
         {
           
           var decoder2 = decoder1.decodePointer(bindings.ArrayDataHeader.kHeaderSize, false);
@@ -342,19 +342,16 @@ class MojomFileGraph extends bindings.Struct {
           
           var decoder2 = decoder1.decodePointer(bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize, false);
           {
-            var si2 = decoder2.decodeDataHeaderForUnionArray(keys0.length);
-            values0 = new List<mojom_types_mojom.UserDefinedValue>(si2.numElements);
+            var si2 = decoder2.decodeDataHeaderForPointerArray(keys0.length);
+            values0 = new List<mojom_types_mojom.DeclaredConstant>(si2.numElements);
             for (int i2 = 0; i2 < si2.numElements; ++i2) {
               
-                values0[i2] = mojom_types_mojom.UserDefinedValue.decode(decoder2, bindings.ArrayDataHeader.kHeaderSize + bindings.kUnionSize * i2);
-                if (values0[i2] == null) {
-                  throw new bindings.MojoCodecError(
-                    'Trying to decode null union for non-nullable mojom_types_mojom.UserDefinedValue.');
-                }
+              var decoder3 = decoder2.decodePointer(bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i2, false);
+              values0[i2] = mojom_types_mojom.DeclaredConstant.decode(decoder3);
             }
           }
         }
-        result.resolvedValues = new Map<String, mojom_types_mojom.UserDefinedValue>.fromIterables(
+        result.resolvedConstants = new Map<String, mojom_types_mojom.DeclaredConstant>.fromIterables(
             keys0, values0);
       }
     }
@@ -418,12 +415,12 @@ class MojomFileGraph extends bindings.Struct {
       rethrow;
     }
     try {
-      if (resolvedValues == null) {
+      if (resolvedConstants == null) {
         encoder0.encodeNullPointer(24, false);
       } else {
         var encoder1 = encoder0.encoderForMap(24);
-        var keys0 = resolvedValues.keys.toList();
-        var values0 = resolvedValues.values.toList();
+        var keys0 = resolvedConstants.keys.toList();
+        var values0 = resolvedConstants.values.toList();
         
         {
           var encoder2 = encoder1.encodePointerArray(keys0.length, bindings.ArrayDataHeader.kHeaderSize, bindings.kUnspecifiedArrayLength);
@@ -433,15 +430,15 @@ class MojomFileGraph extends bindings.Struct {
         }
         
         {
-          var encoder2 = encoder1.encodeUnionArray(values0.length, bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize, bindings.kUnspecifiedArrayLength);
+          var encoder2 = encoder1.encodePointerArray(values0.length, bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize, bindings.kUnspecifiedArrayLength);
           for (int i1 = 0; i1 < values0.length; ++i1) {
-            encoder2.encodeUnion(values0[i1], bindings.ArrayDataHeader.kHeaderSize + bindings.kUnionSize * i1, false);
+            encoder2.encodeStruct(values0[i1], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i1, false);
           }
         }
       }
     } on bindings.MojoCodecError catch(e) {
       e.message = "Error encountered while encoding field "
-          "resolvedValues of struct MojomFileGraph: $e";
+          "resolvedConstants of struct MojomFileGraph: $e";
       rethrow;
     }
   }
@@ -450,14 +447,14 @@ class MojomFileGraph extends bindings.Struct {
     return "MojomFileGraph("
            "files: $files" ", "
            "resolvedTypes: $resolvedTypes" ", "
-           "resolvedValues: $resolvedValues" ")";
+           "resolvedConstants: $resolvedConstants" ")";
   }
 
   Map toJson() {
     Map map = new Map();
     map["files"] = files;
     map["resolvedTypes"] = resolvedTypes;
-    map["resolvedValues"] = resolvedValues;
+    map["resolvedConstants"] = resolvedConstants;
     return map;
   }
 }

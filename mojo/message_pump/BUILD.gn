@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//mojo/public/mojo_application.gni")
+
 source_set("message_pump") {
   sources = [
     "handle_watcher.cc",
@@ -19,7 +21,7 @@ source_set("message_pump") {
   ]
 }
 
-source_set("tests") {
+mojo_native_application("mojo_message_pump_apptests") {
   testonly = true
 
   sources = [
@@ -30,8 +32,10 @@ source_set("tests") {
   deps = [
     ":message_pump",
     "//base",
-    "//base/test:test_support",
     "//base:message_loop_tests",
+    "//base/test:test_support",
+    "//mojo/application",
+    "//mojo/application:test_support",
     "//mojo/public/cpp/system",
     "//mojo/public/cpp/test_support:test_utils",
     "//testing/gtest",

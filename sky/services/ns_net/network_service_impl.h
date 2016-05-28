@@ -6,7 +6,6 @@
 #define SKY_SERVICES_NSNET_NETWORK_SERVICE_IMPL_H_
 
 #include "base/macros.h"
-#include "mojo/public/cpp/application/interface_factory.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/services/network/interfaces/network_service.mojom.h"
 
@@ -43,12 +42,6 @@ class NetworkServiceImpl : public NetworkService {
   StrongBinding<NetworkService> binding_;
 
   DISALLOW_COPY_AND_ASSIGN(NetworkServiceImpl);
-};
-
-class NetworkServiceFactory : public InterfaceFactory<NetworkService> {
- public:
-  void Create(ApplicationConnection* connection,
-              InterfaceRequest<NetworkService> request) override;
 };
 
 }  // namespace mojo

@@ -7,7 +7,6 @@
 
 #include "base/files/file_path.h"
 #include "base/macros.h"
-#include "mojo/public/cpp/application/interface_factory.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "sky/services/media/media.mojom.h"
 
@@ -45,12 +44,6 @@ class MediaPlayerImpl : public ::media::MediaPlayer {
   void reset();
 
   DISALLOW_COPY_AND_ASSIGN(MediaPlayerImpl);
-};
-
-class MediaPlayerFactory : public mojo::InterfaceFactory<::media::MediaPlayer> {
- public:
-  void Create(mojo::ApplicationConnection* connection,
-              mojo::InterfaceRequest<::media::MediaPlayer> request) override;
 };
 
 }  // namespace media

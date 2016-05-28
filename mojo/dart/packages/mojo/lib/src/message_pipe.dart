@@ -84,9 +84,9 @@ class MojoMessagePipeEndpoint {
     }
 
     // handles may be null, otherwise convert to ints.
-    List<int> mojoHandles;
+    List mojoHandles;
     if (handles != null) {
-      mojoHandles = new List<int>(handles.length);
+      mojoHandles = new List(handles.length);
       for (int i = 0; i < handles.length; i++) {
         mojoHandles[i] = handles[i].h;
       }

@@ -48,6 +48,10 @@ struct Handle {
 
   void reset() { *this = Handle(); }
 
+  bool has_all_rights(MojoHandleRights required_rights) const {
+    return (rights & required_rights) == required_rights;
+  }
+
   // Note: |dispatcher| is guaranteed to be null if default-constructed or
   // moved-from, but we make no guarantees about the value of |rights| in either
   // case.

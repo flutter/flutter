@@ -30,8 +30,8 @@ void ViewServiceProvider::ConnectToService(
   }
 #if TARGET_OS_IPHONE
   if (service_name == ::editing::Keyboard::Name_) {
-    keyboard_.Create(
-        nullptr, mojo::InterfaceRequest<::editing::Keyboard>(client_handle.Pass()));
+    new sky::services::editing::KeyboardImpl(
+        mojo::InterfaceRequest<::editing::Keyboard>(client_handle.Pass()));
     return;
   }
 #endif

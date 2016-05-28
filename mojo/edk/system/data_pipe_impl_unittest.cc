@@ -316,7 +316,7 @@ class RemoteDataPipeImplTestHelper : public DataPipeImplTestHelper {
     ASSERT_EQ(1u, read_num_handles);
     ASSERT_TRUE(read_handles[0]);
     EXPECT_TRUE(read_handles[0].dispatcher->HasOneRef());
-    // TODO(vtl): Also check the rights here once they're actually preserved?
+    EXPECT_EQ(handle_to_send.rights, read_handles[0].rights);
 
     *handle_to_receive = std::move(read_handles[0]);
   }

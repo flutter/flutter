@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//mojo/public/mojo_application.gni")
+
 source_set("data_pipe_utils") {
   sources = [
     "data_pipe_drainer.cc",
@@ -27,7 +29,7 @@ source_set("data_pipe_utils") {
   ]
 }
 
-source_set("tests") {
+mojo_native_application("mojo_data_pipe_utils_apptests") {
   testonly = true
 
   sources = [
@@ -37,6 +39,8 @@ source_set("tests") {
   deps = [
     ":data_pipe_utils",
     "//base",
+    "//mojo/application",
+    "//mojo/application:test_support",
     "//testing/gtest",
   ]
 }

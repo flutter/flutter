@@ -27,6 +27,23 @@ MojoResult MojoClose(MojoHandle handle) {
   return g_core->Close(handle);
 }
 
+MojoResult MojoGetRights(MojoHandle handle, MojoHandleRights* rights) {
+  return g_core->GetRights(handle, MakeUserPointer(rights));
+}
+
+MojoResult MojoDuplicateHandleWithReducedRights(
+    MojoHandle handle,
+    MojoHandleRights rights_to_remove,
+    MojoHandle* new_handle) {
+  return g_core->DuplicateHandleWithReducedRights(handle, rights_to_remove,
+                                                  MakeUserPointer(new_handle));
+}
+
+MojoResult MojoDuplicateHandle(MojoHandle handle, MojoHandle* new_handle) {
+  return g_core->DuplicateHandleWithReducedRights(
+      handle, MOJO_HANDLE_RIGHT_NONE, MakeUserPointer(new_handle));
+}
+
 MojoResult MojoWait(MojoHandle handle,
                     MojoHandleSignals signals,
                     MojoDeadline deadline,

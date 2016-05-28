@@ -17,19 +17,13 @@ MediaServiceImpl::~MediaServiceImpl() {}
 
 void MediaServiceImpl::CreatePlayer(
     mojo::InterfaceRequest<::media::MediaPlayer> player) {
-  media_player_.Create(nullptr, player.Pass());
+  new MediaPlayerImpl(player.Pass());
 }
 
 void MediaServiceImpl::CreateSoundPool(
     mojo::InterfaceRequest<::media::SoundPool> pool,
     int32_t max_streams) {
-  sound_pool_.Create(nullptr, pool.Pass());
-}
-
-void MediaServiceFactory::Create(
-    mojo::ApplicationConnection* connection,
-    mojo::InterfaceRequest<::media::MediaService> request) {
-  new MediaServiceImpl(request.Pass());
+  new SoundPoolImpl(pool.Pass());
 }
 
 }  // namespace media

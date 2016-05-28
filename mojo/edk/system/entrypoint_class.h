@@ -15,6 +15,10 @@ namespace system {
 // |SupportsEntrypointClass()| indicates that the method's class is not
 // supported.
 enum class EntrypointClass {
+  // Not an entrypoint; all implementations of
+  // |Dispatcher::SupportsEntrypointClass()| should return true for this:
+  NONE,
+
   // |Dispatcher::ReadMessage()|, |Dispatcher::WriteMessage()|:
   MESSAGE_PIPE,
 

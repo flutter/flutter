@@ -98,7 +98,13 @@ class Dispatcher : public util::RefCountedThreadSafe<Dispatcher> {
   // NOTE(vtl): This puts a big lock around each dispatcher (i.e., handle), and
   // prevents the various |...ImplNoLock()|s from releasing the lock as soon as
   // possible. If this becomes an issue, we can rethink this.
+
+  // No |EntrypointClass|:
+  // All dispatchers must support this.
   MojoResult Close();
+  // This actually supports |MojoDuplicateHandle[WithReducedRights]()|; rights
+  // are handled by |Core|.
+  MojoResult DuplicateDispatcher(util::RefPtr<Dispatcher>* new_dispatcher);
 
   // |EntrypointClass::MESSAGE_PIPE|:
   // |transports| may be non-null if and only if there are handles to be
@@ -261,6 +267,12 @@ class Dispatcher : public util::RefCountedThreadSafe<Dispatcher> {
   // when the dispatcher is being closed.
   virtual void CancelAllAwakablesNoLock() MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
   virtual void CloseImplNoLock() MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
+
+  //  All dispatcher types whose handles may ever have the
+  // |MOJO_HANDLE_RIGHT_DUPLICATE| right must override this.
+  virtual MojoResult DuplicateDispatcherImplNoLock(
+      util::RefPtr<Dispatcher>* new_dispatcher)
+      MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
 
   // This is called by |CreateEquivalentDispatcherAndCloseNoLock()|. It should
   // "close" this dispatcher and return a new one equivalent to it. Note:

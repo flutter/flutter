@@ -6,7 +6,6 @@
 #define SKY_SERVICES_PLATFORM_IOS_SYSTEM_CHROME_IMPL_H_
 
 #include "base/macros.h"
-#include "mojo/public/cpp/application/interface_factory.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "sky/services/platform/system_chrome.mojom.h"
 
@@ -31,12 +30,6 @@ class SystemChromeImpl : public SystemChrome {
   mojo::StrongBinding<SystemChrome> binding_;
 
   DISALLOW_COPY_AND_ASSIGN(SystemChromeImpl);
-};
-
-class SystemChromeFactory : public mojo::InterfaceFactory<SystemChrome> {
- public:
-  void Create(mojo::ApplicationConnection* connection,
-              mojo::InterfaceRequest<SystemChrome> request) override;
 };
 
 extern const char* const kOrientationUpdateNotificationName;

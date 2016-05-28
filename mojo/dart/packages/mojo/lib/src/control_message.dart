@@ -15,19 +15,19 @@ class ControlMessageHandler {
   static bool _isRunOrClose(ServiceMessage message) =>
       (message.header.type == icm.kRunOrClosePipeMessageId);
 
-  static Future<Message> handleMessage(Stub stub,
+  static Future<Message> handleMessage(StubControl stubControl,
                                        int interface_version,
                                        ServiceMessage message) {
     assert(isControlMessage(message));
     if (_isRun(message)) {
-      return _handleRun(stub, interface_version, message);
+      return _handleRun(stubControl, interface_version, message);
     } else {
       assert(_isRunOrClose(message));
-      return _handleRunOrClose(stub, interface_version, message);
+      return _handleRunOrClose(stubControl, interface_version, message);
     }
   }
 
-  static Future<Message> _handleRun(Stub stub,
+  static Future<Message> _handleRun(StubControl stubControl,
                                     int interface_version,
                                     ServiceMessage message) {
     // Construct RunMessage response.
@@ -38,13 +38,13 @@ class ControlMessageHandler {
     response.queryVersionResult.version = interface_version;
     // Return response.
     return new Future.value(
-        stub.buildResponseWithId(response,
-                                 icm.kRunMessageId,
-                                 message.header.requestId,
-                                 MessageHeader.kMessageIsResponse));
+        stubControl.buildResponseWithId(response,
+                                        icm.kRunMessageId,
+                                        message.header.requestId,
+                                        MessageHeader.kMessageIsResponse));
   }
 
-  static Future _handleRunOrClose(Stub stub,
+  static Future _handleRunOrClose(StubControl stubControl,
                                   int interface_version,
                                   ServiceMessage message) {
     // Deserialize message.
@@ -53,7 +53,7 @@ class ControlMessageHandler {
     var requiredVersion = params.requireVersion.version;
     if (interface_version < requiredVersion) {
       // Stub does not implement required version. Close the pipe immediately.
-      stub.close(immediate: true);
+      stubControl.close(immediate: true);
     }
     return null;
   }

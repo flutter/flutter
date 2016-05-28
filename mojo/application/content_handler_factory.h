@@ -6,14 +6,18 @@
 #define MOJO_APPLICATION_CONTENT_HANDLER_FACTORY_H_
 
 #include "base/memory/scoped_ptr.h"
-#include "mojo/public/cpp/application/interface_factory.h"
+#include "mojo/public/cpp/application/service_provider_impl.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
 #include "mojo/services/content_handler/interfaces/content_handler.mojom.h"
 #include "mojo/services/network/interfaces/url_loader.mojom.h"
 
 namespace mojo {
 
-class ContentHandlerFactory : public InterfaceFactory<ContentHandler> {
+struct ConnectionContext;
+
+// TODO(vtl): Nuke this class. Now it's only a "namespace" for stuff, most of
+// which is overcomplicated.
+class ContentHandlerFactory {
  public:
   class HandledApplicationHolder {
    public:
@@ -46,17 +50,9 @@ class ContentHandlerFactory : public InterfaceFactory<ContentHandler> {
                         URLResponsePtr response) override;
   };
 
-  explicit ContentHandlerFactory(Delegate* delegate);
-  ~ContentHandlerFactory() override;
-
- private:
-  // From InterfaceFactory:
-  void Create(ApplicationConnection* connection,
-              InterfaceRequest<ContentHandler> request) override;
-
-  Delegate* delegate_;
-
-  DISALLOW_COPY_AND_ASSIGN(ContentHandlerFactory);
+  // For use with |ServiceProviderImpl::AddService<ContentHandler>()|.
+  static ServiceProviderImpl::InterfaceRequestHandler<ContentHandler>
+  GetInterfaceRequestHandler(Delegate* delegate);
 };
 
 template <class A>

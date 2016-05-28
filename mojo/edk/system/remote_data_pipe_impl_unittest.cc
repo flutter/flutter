@@ -234,7 +234,8 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerWithClosedProducer) {
 
   EXPECT_EQ(Dispatcher::Type::DATA_PIPE_CONSUMER,
             read_handles[0].dispatcher->GetType());
-  // TODO(vtl): Also check the rights here once they're actually preserved?
+  EXPECT_EQ(DataPipeConsumerDispatcher::kDefaultHandleRights,
+            read_handles[0].rights);
   consumer = RefPtr<DataPipeConsumerDispatcher>(
       static_cast<DataPipeConsumerDispatcher*>(
           read_handles[0].dispatcher.get()));
@@ -356,7 +357,8 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringTwoPhaseWrite) {
 
   EXPECT_EQ(Dispatcher::Type::DATA_PIPE_CONSUMER,
             read_handles[0].dispatcher->GetType());
-  // TODO(vtl): Also check the rights here once they're actually preserved?
+  EXPECT_EQ(DataPipeConsumerDispatcher::kDefaultHandleRights,
+            read_handles[0].rights);
   consumer = RefPtr<DataPipeConsumerDispatcher>(
       static_cast<DataPipeConsumerDispatcher*>(
           read_handles[0].dispatcher.get()));
@@ -482,7 +484,8 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringSecondTwoPhaseWrite) {
 
   EXPECT_EQ(Dispatcher::Type::DATA_PIPE_CONSUMER,
             read_handles[0].dispatcher->GetType());
-  // TODO(vtl): Also check the rights here once they're actually preserved?
+  EXPECT_EQ(DataPipeConsumerDispatcher::kDefaultHandleRights,
+            read_handles[0].rights);
   consumer = RefPtr<DataPipeConsumerDispatcher>(
       static_cast<DataPipeConsumerDispatcher*>(
           read_handles[0].dispatcher.get()));

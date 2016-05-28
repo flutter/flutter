@@ -14,11 +14,6 @@ SystemChromeImpl::SystemChromeImpl(mojo::InterfaceRequest<SystemChrome> request)
 
 SystemChromeImpl::~SystemChromeImpl() {}
 
-void SystemChromeFactory::Create(mojo::ApplicationConnection* connection,
-                                 mojo::InterfaceRequest<SystemChrome> request) {
-  new SystemChromeImpl(request.Pass());
-}
-
 /// Desugars a typed enum value and checks if it is set in a mask
 template <class T,
           class = typename std::enable_if<std::is_enum<T>::value>::type>

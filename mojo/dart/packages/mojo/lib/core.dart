@@ -5,15 +5,16 @@
 library core;
 
 import 'dart:async';
-import 'dart:collection';
 import 'dart:isolate';
-import 'dart:mojo.internal';
 import 'dart:typed_data';
+
+import 'src/internal.dart';
 
 part 'src/buffer.dart';
 part 'src/data_pipe.dart';
 part 'src/drain_data.dart';
-part 'src/event_stream.dart';
+part 'src/event_subscription.dart';
+part 'src/event_handler.dart';
 part 'src/fill_data.dart';
 part 'src/handle.dart';
 part 'src/message_pipe.dart';

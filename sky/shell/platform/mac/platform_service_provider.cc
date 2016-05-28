@@ -19,58 +19,58 @@ void PlatformServiceProvider::ConnectToService(
     const mojo::String& service_name,
     mojo::ScopedMessagePipeHandle client_handle) {
   if (service_name == mojo::NetworkService::Name_) {
-    network_.Create(
-        nullptr, mojo::InterfaceRequest<mojo::NetworkService>(client_handle.Pass()));
+    new mojo::NetworkServiceImpl(
+        mojo::InterfaceRequest<mojo::NetworkService>(client_handle.Pass()));
     return;
   }
 #if TARGET_OS_IPHONE
   if (service_name == ::media::MediaPlayer::Name_) {
-    media_player_.Create(
-        nullptr, mojo::InterfaceRequest<::media::MediaPlayer>(client_handle.Pass()));
+    new sky::services::media::MediaPlayerImpl(
+        mojo::InterfaceRequest<::media::MediaPlayer>(client_handle.Pass()));
     return;
   }
   if (service_name == ::media::MediaService::Name_) {
-    media_service_.Create(nullptr, mojo::InterfaceRequest<::media::MediaService>(
-                                       client_handle.Pass()));
+    new sky::services::media::MediaServiceImpl(
+        mojo::InterfaceRequest<::media::MediaService>(client_handle.Pass()));
     return;
   }
   if (service_name == ::vsync::VSyncProvider::Name_) {
-    vsync_.Create(nullptr, mojo::InterfaceRequest<::vsync::VSyncProvider>(
-                               client_handle.Pass()));
+    new sky::services::vsync::VsyncProviderImpl(
+        mojo::InterfaceRequest<::vsync::VSyncProvider>(client_handle.Pass()));
     return;
   }
   if (service_name == ::activity::Activity::Name_) {
-    activity_.Create(
-        nullptr, mojo::InterfaceRequest<::activity::Activity>(client_handle.Pass()));
+    new sky::services::activity::ActivityImpl(
+        mojo::InterfaceRequest<::activity::Activity>(client_handle.Pass()));
     return;
   }
   if (service_name == ::editing::Clipboard::Name_) {
-    clipboard_.Create(
-        nullptr, mojo::InterfaceRequest<::editing::Clipboard>(client_handle.Pass()));
+    new sky::services::editing::ClipboardImpl(
+        mojo::InterfaceRequest<::editing::Clipboard>(client_handle.Pass()));
     return;
   }
   if (service_name == flutter::platform::HapticFeedback::Name_) {
-    haptic_feedback_.Create(
-        nullptr, mojo::InterfaceRequest<flutter::platform::HapticFeedback>(
-                     client_handle.Pass()));
+    new flutter::platform::HapticFeedbackImpl(
+        mojo::InterfaceRequest<flutter::platform::HapticFeedback>(
+            client_handle.Pass()));
     return;
   }
   if (service_name == flutter::platform::PathProvider::Name_) {
-    path_provider_.Create(nullptr,
-                          mojo::InterfaceRequest<flutter::platform::PathProvider>(
-                              client_handle.Pass()));
+    new flutter::platform::PathProviderImpl(
+        mojo::InterfaceRequest<flutter::platform::PathProvider>(
+            client_handle.Pass()));
     return;
   }
   if (service_name == flutter::platform::SystemChrome::Name_) {
-    system_chrome_.Create(nullptr,
-                          mojo::InterfaceRequest<flutter::platform::SystemChrome>(
-                              client_handle.Pass()));
+    new flutter::platform::SystemChromeImpl(
+        mojo::InterfaceRequest<flutter::platform::SystemChrome>(
+            client_handle.Pass()));
     return;
   }
   if (service_name == flutter::platform::SystemSound::Name_) {
-    system_sound_.Create(nullptr,
-                         mojo::InterfaceRequest<flutter::platform::SystemSound>(
-                             client_handle.Pass()));
+    new flutter::platform::SystemSoundImpl(
+        mojo::InterfaceRequest<flutter::platform::SystemSound>(
+            client_handle.Pass()));
     return;
   }
 #endif

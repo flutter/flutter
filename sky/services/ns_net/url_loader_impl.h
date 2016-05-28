@@ -6,7 +6,6 @@
 #define SKY_SERVICES_NSNET_URLLOADER_IMPL_H_
 
 #include "base/macros.h"
-#include "mojo/public/cpp/application/interface_factory.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/services/network/interfaces/url_loader.mojom.h"
 

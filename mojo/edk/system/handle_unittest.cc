@@ -114,6 +114,51 @@ TEST(HandleTest, Basic) {
   }
 }
 
+TEST(HandleTest, HasAllRights) {
+  {
+    Handle h;
+
+    EXPECT_TRUE(h.has_all_rights(MOJO_HANDLE_RIGHT_NONE));
+    EXPECT_FALSE(h.has_all_rights(MOJO_HANDLE_RIGHT_DUPLICATE));
+    EXPECT_FALSE(h.has_all_rights(MOJO_HANDLE_RIGHT_TRANSFER));
+    EXPECT_FALSE(h.has_all_rights(MOJO_HANDLE_RIGHT_READ));
+    EXPECT_FALSE(h.has_all_rights(MOJO_HANDLE_RIGHT_WRITE));
+    EXPECT_FALSE(h.has_all_rights(MOJO_HANDLE_RIGHT_GET_OPTIONS));
+    EXPECT_FALSE(h.has_all_rights(MOJO_HANDLE_RIGHT_SET_OPTIONS));
+    EXPECT_FALSE(h.has_all_rights(MOJO_HANDLE_RIGHT_MAP_READABLE));
+    EXPECT_FALSE(h.has_all_rights(MOJO_HANDLE_RIGHT_MAP_WRITABLE));
+    EXPECT_FALSE(h.has_all_rights(MOJO_HANDLE_RIGHT_MAP_EXECUTABLE));
+  }
+
+  {
+    Handle h(MakeRefCounted<test::MockSimpleDispatcher>(),
+             MOJO_HANDLE_RIGHT_DUPLICATE | MOJO_HANDLE_RIGHT_READ);
+
+    EXPECT_TRUE(h.has_all_rights(MOJO_HANDLE_RIGHT_NONE));
+    EXPECT_TRUE(h.has_all_rights(MOJO_HANDLE_RIGHT_DUPLICATE));
+    EXPECT_FALSE(h.has_all_rights(MOJO_HANDLE_RIGHT_TRANSFER));
+    EXPECT_TRUE(h.has_all_rights(MOJO_HANDLE_RIGHT_READ));
+    EXPECT_FALSE(h.has_all_rights(MOJO_HANDLE_RIGHT_WRITE));
+    EXPECT_FALSE(h.has_all_rights(MOJO_HANDLE_RIGHT_GET_OPTIONS));
+    EXPECT_FALSE(h.has_all_rights(MOJO_HANDLE_RIGHT_SET_OPTIONS));
+    EXPECT_FALSE(h.has_all_rights(MOJO_HANDLE_RIGHT_MAP_READABLE));
+    EXPECT_FALSE(h.has_all_rights(MOJO_HANDLE_RIGHT_MAP_WRITABLE));
+    EXPECT_FALSE(h.has_all_rights(MOJO_HANDLE_RIGHT_MAP_EXECUTABLE));
+
+    EXPECT_TRUE(
+        h.has_all_rights(MOJO_HANDLE_RIGHT_DUPLICATE | MOJO_HANDLE_RIGHT_READ));
+    EXPECT_FALSE(h.has_all_rights(MOJO_HANDLE_RIGHT_DUPLICATE |
+                                  MOJO_HANDLE_RIGHT_READ |
+                                  MOJO_HANDLE_RIGHT_WRITE));
+    EXPECT_FALSE(h.has_all_rights(MOJO_HANDLE_RIGHT_DUPLICATE |
+                                  MOJO_HANDLE_RIGHT_WRITE));
+    EXPECT_FALSE(h.has_all_rights(MOJO_HANDLE_RIGHT_GET_OPTIONS |
+                                  MOJO_HANDLE_RIGHT_SET_OPTIONS));
+
+    EXPECT_EQ(MOJO_RESULT_OK, h.dispatcher->Close());
+  }
+}
+
 }  // namespace
 }  // namespace system
 }  // namespace mojo

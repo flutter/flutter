@@ -27,11 +27,6 @@ import "mojo/services/ui/views/interfaces/view_tree_token.mojom";
 // This mechanism is designed to avoid a potential explosion in complexity
 // if all features which depend on the state of views were implemented
 // in one place.
-//
-// TODO(jeffbrown): In the current implementation, the view manager binds
-// to a hard coded set of associates at start up time which can be overridden
-// from the command-line.  We should find a better way to register associates
-// once we decide how the system as a whole should be initialized.
 [ServiceName="mojo::ui::ViewAssociate"]
 interface ViewAssociate {
   // Connects to the associate.
@@ -64,6 +59,15 @@ interface ViewAssociate {
                            string service_name,
                            handle<message_pipe> pipe);
 };
+
+// ViewAssociateOwner is used as a transferable reference which can
+// be passed to a ViewAssociate's intended container as part of a request to
+// register the ViewAssociate with the ViewManager. The ViewAssociateOwner will
+// get a connection error callback if the corresponding ViewAssociate is
+// destroyed, and similarly the ViewAssociate that it owns will be killed if
+// this object is destroyed.
+[ServiceName="mojo::ui::ViewAssociateOwner"]
+interface ViewAssociateOwner {};
 
 // Provides information about the services offered by an associate.
 struct ViewAssociateInfo {

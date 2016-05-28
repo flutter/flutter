@@ -14,11 +14,6 @@ SystemSoundImpl::SystemSoundImpl(mojo::InterfaceRequest<SystemSound> request)
 
 SystemSoundImpl::~SystemSoundImpl() {}
 
-void SystemSoundFactory::Create(mojo::ApplicationConnection* connection,
-                                mojo::InterfaceRequest<SystemSound> request) {
-  new SystemSoundImpl(request.Pass());
-}
-
 void SystemSoundImpl::Play(SystemSoundType type, const PlayCallback& callback) {
   base::mac::ScopedNSAutoreleasePool pool;
 

@@ -60,8 +60,7 @@ class MojoSharedBuffer {
       return null;
     }
 
-    List result =
-        MojoSharedBufferNatives.GetInformation(handle.h);
+    List result = MojoSharedBufferNatives.GetInformation(handle.h);
 
     if (result[0] != MojoResult.kOk) {
       _status = result[0];

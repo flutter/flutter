@@ -4,13 +4,71 @@
 
 part of bindings;
 
+/// The object that [ProxyMessageHandler.errorFuture] completes with when there
+/// is an error.
 class ProxyError {
   final String message;
   ProxyError(this.message);
   String toString() => "ProxyError: $message";
 }
 
-abstract class Proxy extends core.MojoEventHandler {
+/// Generated ProxyControl classes implement this interface.
+/// ProxyControl objects are accessible through the [ctrl] field on Proxies.
+abstract class ProxyControl<T> implements ProxyMessageHandler {
+  // TODO(zra): This is only used by ApplicationConnection.requestService(), so
+  // try to remove when/after ApplicationConnection is removed/refactored.
+  String get serviceName;
+
+  // Currently we don't have impl hooked up to anything for Proxies, but we have
+  // the field here so that there is a consistent interface with Stubs. By
+  // having the field here we can also retain the option of hooking a proxy
+  // up to something other than the remote implementation in the future.
+  T impl;
+}
+
+/// Generated Proxy classes extend this base class.
+class Proxy<T> implements MojoInterface<T> {
+  // In general it's probalby better to avoid adding fields and methods to this
+  // class. Names added to this class have to be mangled by Mojo bindings
+  // generation to avoid name conflicts.
+
+  /// Proxies control the ProxyMessageHandler by way of this [ProxyControl]
+  /// object.
+  final ProxyControl<T> ctrl;
+
+  Proxy(this.ctrl);
+
+  /// This is a convenience method that simply forwards to ctrl.close().
+  /// If a Mojo interface has a method 'close', its name will be mangled to be
+  /// 'close_'.
+  Future close({bool immediate: false}) => ctrl.close(immediate: immediate);
+
+  /// This is a convenience method that simply forwards to
+  /// ctrl.responseOrError(). If a Mojo interface has a method
+  /// 'responseOrError', its name will be mangled to be 'responseOrError_'.
+  Future responseOrError(Future f) => ctrl.responseOrError(f);
+
+  /// This getter and setter pair is for convenience and simply forwards to
+  /// ctrl.impl. If a Mojo interface has a method 'close', its name will be
+  /// mangled to be 'impl_'.
+  T get impl => ctrl.impl;
+  set impl(T impl) {
+    ctrl.impl = impl;
+  }
+}
+
+/// Generated Proxy classes have a factory Proxy.connectToService which takes
+/// a ServiceConnector, a url, and optionally a service name and returns a
+/// bound Proxy. For example, every class extending the Application base class
+/// in package:mojo/application.dart inherits an implementation of the
+/// ServiceConnector interface.
+abstract class ServiceConnector {
+  /// Connects [proxy] to the service called [serviceName] that lives at [url].
+  void connectToService(String url, Proxy proxy, [String serviceName]);
+}
+
+abstract class ProxyMessageHandler extends core.MojoEventHandler
+                                   implements MojoInterfaceControl {
   HashMap<int, Completer> _completerMap = new HashMap<int, Completer>();
   Completer _errorCompleter = new Completer();
   Set<Completer> _errorCompleters;
@@ -18,14 +76,18 @@ abstract class Proxy extends core.MojoEventHandler {
   int _version = 0;
   int _pendingCount = 0;
 
-  Proxy.fromEndpoint(core.MojoMessagePipeEndpoint endpoint)
+  ProxyMessageHandler.fromEndpoint(core.MojoMessagePipeEndpoint endpoint)
       : super.fromEndpoint(endpoint);
 
-  Proxy.fromHandle(core.MojoHandle handle) : super.fromHandle(handle);
+  ProxyMessageHandler.fromHandle(core.MojoHandle handle)
+      : super.fromHandle(handle);
 
-  Proxy.unbound() : super.unbound();
+  ProxyMessageHandler.unbound() : super.unbound();
 
-  void handleResponse(ServiceMessage reader);
+  /// The function that handles responses to sent proxy message. It should be
+  /// implemented by the generated ProxyControl classes that extend
+  /// [ProxyMessageHandler].
+  void handleResponse(ServiceMessage msg);
 
   /// If there is an error in using this proxy, this future completes with
   /// a ProxyError.
@@ -40,6 +102,7 @@ abstract class Proxy extends core.MojoEventHandler {
   /// Note: The description is null or incomplete if type info is unavailable.
   service_describer.ServiceDescription get description => null;
 
+  @override
   void handleRead() {
     var result = endpoint.queryAndRead();
     if ((result.data == null) || (result.dataLength == 0)) {
@@ -61,6 +124,7 @@ abstract class Proxy extends core.MojoEventHandler {
     }
   }
 
+  @override
   void handleWrite() {
     proxyError("Unexpected writable signal");
   }
@@ -71,9 +135,9 @@ abstract class Proxy extends core.MojoEventHandler {
     // complete.
     _completerMap.clear();
 
-    // Signal to any pending calls that the Proxy is closed.
+    // Signal to any pending calls that the ProxyMessageHandler is closed.
     if (_pendingCount > 0) {
-      proxyError("The Proxy is closed.");
+      proxyError("The ProxyMessageHandler is closed.");
     }
 
     return super.close(immediate: immediate);
@@ -81,7 +145,7 @@ abstract class Proxy extends core.MojoEventHandler {
 
   void sendMessage(Struct message, int name) {
     if (!isBound) {
-      proxyError("The Proxy is closed.");
+      proxyError("The ProxyMessageHandler is closed.");
       return;
     }
     if (!isOpen) {
@@ -99,7 +163,7 @@ abstract class Proxy extends core.MojoEventHandler {
   Future sendMessageWithRequestId(Struct message, int name, int id, int flags) {
     var completer = new Completer();
     if (!isBound) {
-      proxyError("The Proxy is closed.");
+      proxyError("The ProxyMessageHandler is closed.");
       return completer.future;
     }
     if (!isOpen) {
@@ -126,9 +190,10 @@ abstract class Proxy extends core.MojoEventHandler {
   // Need a getter for this for access in subclasses.
   HashMap<int, Completer> get completerMap => _completerMap;
 
+  @override
   String toString() {
     var superString = super.toString();
-    return "Proxy(${superString})";
+    return "ProxyMessageHandler(${superString})";
   }
 
   /// Queries the max version that the remote side supports.
@@ -186,7 +251,7 @@ abstract class Proxy extends core.MojoEventHandler {
   /// Example usage:
   ///
   /// try {
-  ///   result = await MyProxy.responseOrError(MyProxy.ptr.call(a,b,c));
+  ///   result = await myProxy.responseOrError(myProxy.call(a,b,c));
   /// } catch (e) {
   ///   ...
   /// }
@@ -240,21 +305,4 @@ abstract class Proxy extends core.MojoEventHandler {
     }
     c.complete(response);
   }
-}
-
-/// Generated Proxy classes implement this interface.
-abstract class ProxyBase {
-  final Proxy impl = null;
-  final String serviceName = null;
-  Object get ptr;
-}
-
-/// Generated Proxy classes have a factory Proxy.connectToService which takes
-/// a ServiceConnector, a url, and optionally a service name and returns a
-/// bound Proxy. For example, every class extending the Application base class
-/// in package:mojo/application.dart inherits and implementation of the
-/// ServiceConnector interface.
-abstract class ServiceConnector {
-  /// Connects [proxy] to the service called [serviceName] that lives at [url].
-  void connectToService(String url, ProxyBase proxy, [String serviceName]);
 }

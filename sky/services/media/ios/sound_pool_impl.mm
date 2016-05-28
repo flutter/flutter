@@ -298,12 +298,6 @@ void SoundPoolImpl::ResumeAll() {
   [sound_pool_ resumeAll];
 }
 
-void SoundPoolFactory::Create(
-    mojo::ApplicationConnection* connection,
-    mojo::InterfaceRequest<::media::SoundPool> request) {
-  new SoundPoolImpl(request.Pass());
-}
-
 }  // namespace media
 }  // namespace services
 }  // namespace sky

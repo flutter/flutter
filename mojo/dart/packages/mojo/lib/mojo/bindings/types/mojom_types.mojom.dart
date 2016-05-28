@@ -1414,10 +1414,9 @@ class MojomUnion extends bindings.Struct {
 
 class EnumValue extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
-    const bindings.StructDataHeader(48, 0)
+    const bindings.StructDataHeader(40, 0)
   ];
   DeclarationData declData = null;
-  String enumTypeKey = null;
   Value initializerValue = null;
   int intValue = 0;
 
@@ -1463,15 +1462,11 @@ class EnumValue extends bindings.Struct {
     }
     if (mainDataHeader.version >= 0) {
       
-      result.enumTypeKey = decoder0.decodeString(16, false);
+        result.initializerValue = Value.decode(decoder0, 16);
     }
     if (mainDataHeader.version >= 0) {
       
-        result.initializerValue = Value.decode(decoder0, 24);
-    }
-    if (mainDataHeader.version >= 0) {
-      
-      result.intValue = decoder0.decodeInt32(40);
+      result.intValue = decoder0.decodeInt32(32);
     }
     return result;
   }
@@ -1486,21 +1481,14 @@ class EnumValue extends bindings.Struct {
       rethrow;
     }
     try {
-      encoder0.encodeString(enumTypeKey, 16, false);
-    } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "enumTypeKey of struct EnumValue: $e";
-      rethrow;
-    }
-    try {
-      encoder0.encodeUnion(initializerValue, 24, true);
+      encoder0.encodeUnion(initializerValue, 16, true);
     } on bindings.MojoCodecError catch(e) {
       e.message = "Error encountered while encoding field "
           "initializerValue of struct EnumValue: $e";
       rethrow;
     }
     try {
-      encoder0.encodeInt32(intValue, 40);
+      encoder0.encodeInt32(intValue, 32);
     } on bindings.MojoCodecError catch(e) {
       e.message = "Error encountered while encoding field "
           "intValue of struct EnumValue: $e";
@@ -1511,7 +1499,6 @@ class EnumValue extends bindings.Struct {
   String toString() {
     return "EnumValue("
            "declData: $declData" ", "
-           "enumTypeKey: $enumTypeKey" ", "
            "initializerValue: $initializerValue" ", "
            "intValue: $intValue" ")";
   }
@@ -1519,7 +1506,6 @@ class EnumValue extends bindings.Struct {
   Map toJson() {
     Map map = new Map();
     map["declData"] = declData;
-    map["enumTypeKey"] = enumTypeKey;
     map["initializerValue"] = initializerValue;
     map["intValue"] = intValue;
     return map;
@@ -1914,16 +1900,16 @@ class MojomInterface extends bindings.Struct {
 }
 
 
-class UserValueReference extends bindings.Struct {
+class ConstantReference extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(24, 0)
   ];
   String identifier = null;
-  String valueKey = null;
+  String constantKey = null;
 
-  UserValueReference() : super(kVersions.last.size);
+  ConstantReference() : super(kVersions.last.size);
 
-  static UserValueReference deserialize(bindings.Message message) {
+  static ConstantReference deserialize(bindings.Message message) {
     var decoder = new bindings.Decoder(message);
     var result = decode(decoder);
     if (decoder.excessHandles != null) {
@@ -1932,11 +1918,11 @@ class UserValueReference extends bindings.Struct {
     return result;
   }
 
-  static UserValueReference decode(bindings.Decoder decoder0) {
+  static ConstantReference decode(bindings.Decoder decoder0) {
     if (decoder0 == null) {
       return null;
     }
-    UserValueReference result = new UserValueReference();
+    ConstantReference result = new ConstantReference();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
     if (mainDataHeader.version <= kVersions.last.version) {
@@ -1962,7 +1948,7 @@ class UserValueReference extends bindings.Struct {
     }
     if (mainDataHeader.version >= 0) {
       
-      result.valueKey = decoder0.decodeString(16, true);
+      result.constantKey = decoder0.decodeString(16, false);
     }
     return result;
   }
@@ -1973,28 +1959,128 @@ class UserValueReference extends bindings.Struct {
       encoder0.encodeString(identifier, 8, false);
     } on bindings.MojoCodecError catch(e) {
       e.message = "Error encountered while encoding field "
-          "identifier of struct UserValueReference: $e";
+          "identifier of struct ConstantReference: $e";
       rethrow;
     }
     try {
-      encoder0.encodeString(valueKey, 16, true);
+      encoder0.encodeString(constantKey, 16, false);
     } on bindings.MojoCodecError catch(e) {
       e.message = "Error encountered while encoding field "
-          "valueKey of struct UserValueReference: $e";
+          "constantKey of struct ConstantReference: $e";
       rethrow;
     }
   }
 
   String toString() {
-    return "UserValueReference("
+    return "ConstantReference("
            "identifier: $identifier" ", "
-           "valueKey: $valueKey" ")";
+           "constantKey: $constantKey" ")";
   }
 
   Map toJson() {
     Map map = new Map();
     map["identifier"] = identifier;
-    map["valueKey"] = valueKey;
+    map["constantKey"] = constantKey;
+    return map;
+  }
+}
+
+
+class EnumValueReference extends bindings.Struct {
+  static const List<bindings.StructDataHeader> kVersions = const [
+    const bindings.StructDataHeader(32, 0)
+  ];
+  String identifier = null;
+  String enumTypeKey = null;
+  int enumValueIndex = 0;
+
+  EnumValueReference() : super(kVersions.last.size);
+
+  static EnumValueReference deserialize(bindings.Message message) {
+    var decoder = new bindings.Decoder(message);
+    var result = decode(decoder);
+    if (decoder.excessHandles != null) {
+      decoder.excessHandles.forEach((h) => h.close());
+    }
+    return result;
+  }
+
+  static EnumValueReference decode(bindings.Decoder decoder0) {
+    if (decoder0 == null) {
+      return null;
+    }
+    EnumValueReference result = new EnumValueReference();
+
+    var mainDataHeader = decoder0.decodeStructDataHeader();
+    if (mainDataHeader.version <= kVersions.last.version) {
+      // Scan in reverse order to optimize for more recent versions.
+      for (int i = kVersions.length - 1; i >= 0; --i) {
+        if (mainDataHeader.version >= kVersions[i].version) {
+          if (mainDataHeader.size == kVersions[i].size) {
+            // Found a match.
+            break;
+          }
+          throw new bindings.MojoCodecError(
+              'Header size doesn\'t correspond to known version size.');
+        }
+      }
+    } else if (mainDataHeader.size < kVersions.last.size) {
+      throw new bindings.MojoCodecError(
+        'Message newer than the last known version cannot be shorter than '
+        'required by the last known version.');
+    }
+    if (mainDataHeader.version >= 0) {
+      
+      result.identifier = decoder0.decodeString(8, false);
+    }
+    if (mainDataHeader.version >= 0) {
+      
+      result.enumTypeKey = decoder0.decodeString(16, false);
+    }
+    if (mainDataHeader.version >= 0) {
+      
+      result.enumValueIndex = decoder0.decodeUint32(24);
+    }
+    return result;
+  }
+
+  void encode(bindings.Encoder encoder) {
+    var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
+    try {
+      encoder0.encodeString(identifier, 8, false);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "identifier of struct EnumValueReference: $e";
+      rethrow;
+    }
+    try {
+      encoder0.encodeString(enumTypeKey, 16, false);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "enumTypeKey of struct EnumValueReference: $e";
+      rethrow;
+    }
+    try {
+      encoder0.encodeUint32(enumValueIndex, 24);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "enumValueIndex of struct EnumValueReference: $e";
+      rethrow;
+    }
+  }
+
+  String toString() {
+    return "EnumValueReference("
+           "identifier: $identifier" ", "
+           "enumTypeKey: $enumTypeKey" ", "
+           "enumValueIndex: $enumValueIndex" ")";
+  }
+
+  Map toJson() {
+    Map map = new Map();
+    map["identifier"] = identifier;
+    map["enumTypeKey"] = enumTypeKey;
+    map["enumValueIndex"] = enumValueIndex;
     return map;
   }
 }
@@ -3285,7 +3371,8 @@ class DefaultFieldValue extends bindings.Union {
 
 enum ValueTag {
   literalValue,
-  userValueReference,
+  constantReference,
+  enumValueReference,
   builtinValue,
   unknown
 }
@@ -3293,14 +3380,16 @@ enum ValueTag {
 class Value extends bindings.Union {
   static final _tagToInt = const {
     ValueTag.literalValue: 0,
-    ValueTag.userValueReference: 1,
-    ValueTag.builtinValue: 2,
+    ValueTag.constantReference: 1,
+    ValueTag.enumValueReference: 2,
+    ValueTag.builtinValue: 3,
   };
 
   static final _intToTag = const {
     0: ValueTag.literalValue,
-    1: ValueTag.userValueReference,
-    2: ValueTag.builtinValue,
+    1: ValueTag.constantReference,
+    2: ValueTag.enumValueReference,
+    3: ValueTag.builtinValue,
   };
 
   var _data;
@@ -3318,15 +3407,26 @@ class Value extends bindings.Union {
     _tag = ValueTag.literalValue;
     _data = value;
   }
-  UserValueReference get userValueReference {
-    if (_tag != ValueTag.userValueReference) {
-      throw new bindings.UnsetUnionTagError(_tag, ValueTag.userValueReference);
+  ConstantReference get constantReference {
+    if (_tag != ValueTag.constantReference) {
+      throw new bindings.UnsetUnionTagError(_tag, ValueTag.constantReference);
     }
     return _data;
   }
 
-  set userValueReference(UserValueReference value) {
-    _tag = ValueTag.userValueReference;
+  set constantReference(ConstantReference value) {
+    _tag = ValueTag.constantReference;
+    _data = value;
+  }
+  EnumValueReference get enumValueReference {
+    if (_tag != ValueTag.enumValueReference) {
+      throw new bindings.UnsetUnionTagError(_tag, ValueTag.enumValueReference);
+    }
+    return _data;
+  }
+
+  set enumValueReference(EnumValueReference value) {
+    _tag = ValueTag.enumValueReference;
     _data = value;
   }
   BuiltinConstantValue get builtinValue {
@@ -3355,10 +3455,15 @@ class Value extends bindings.Union {
         var decoder1 = decoder0.decodePointer(offset + 8, false);
         result.literalValue = LiteralValue.decode(decoder1, 0);
         break;
-      case ValueTag.userValueReference:
+      case ValueTag.constantReference:
         
         var decoder1 = decoder0.decodePointer(offset + 8, false);
-        result.userValueReference = UserValueReference.decode(decoder1);
+        result.constantReference = ConstantReference.decode(decoder1);
+        break;
+      case ValueTag.enumValueReference:
+        
+        var decoder1 = decoder0.decodePointer(offset + 8, false);
+        result.enumValueReference = EnumValueReference.decode(decoder1);
         break;
       case ValueTag.builtinValue:
         
@@ -3383,8 +3488,11 @@ class Value extends bindings.Union {
       case ValueTag.literalValue:
         encoder0.encodeNestedUnion(literalValue, offset + 8, false);
         break;
-      case ValueTag.userValueReference:
-        encoder0.encodeStruct(userValueReference, offset + 8, false);
+      case ValueTag.constantReference:
+        encoder0.encodeStruct(constantReference, offset + 8, false);
+        break;
+      case ValueTag.enumValueReference:
+        encoder0.encodeStruct(enumValueReference, offset + 8, false);
         break;
       case ValueTag.builtinValue:
         encoder0.encodeEnum(builtinValue, offset + 8);
@@ -3400,8 +3508,11 @@ class Value extends bindings.Union {
       case ValueTag.literalValue:
         result += "literalValue";
         break;
-      case ValueTag.userValueReference:
-        result += "userValueReference";
+      case ValueTag.constantReference:
+        result += "constantReference";
+        break;
+      case ValueTag.enumValueReference:
+        result += "enumValueReference";
         break;
       case ValueTag.builtinValue:
         result += "builtinValue";
@@ -3748,111 +3859,6 @@ class LiteralValue extends bindings.Union {
         break;
       case LiteralValueTag.uint64Value:
         result += "uint64Value";
-        break;
-      default:
-        result += "unknown";
-    }
-    result += ": $_data)";
-    return result;
-  }
-}
-
-
-enum UserDefinedValueTag {
-  enumValue,
-  declaredConstant,
-  unknown
-}
-
-class UserDefinedValue extends bindings.Union {
-  static final _tagToInt = const {
-    UserDefinedValueTag.enumValue: 0,
-    UserDefinedValueTag.declaredConstant: 1,
-  };
-
-  static final _intToTag = const {
-    0: UserDefinedValueTag.enumValue,
-    1: UserDefinedValueTag.declaredConstant,
-  };
-
-  var _data;
-  UserDefinedValueTag _tag = UserDefinedValueTag.unknown;
-
-  UserDefinedValueTag get tag => _tag;
-  EnumValue get enumValue {
-    if (_tag != UserDefinedValueTag.enumValue) {
-      throw new bindings.UnsetUnionTagError(_tag, UserDefinedValueTag.enumValue);
-    }
-    return _data;
-  }
-
-  set enumValue(EnumValue value) {
-    _tag = UserDefinedValueTag.enumValue;
-    _data = value;
-  }
-  DeclaredConstant get declaredConstant {
-    if (_tag != UserDefinedValueTag.declaredConstant) {
-      throw new bindings.UnsetUnionTagError(_tag, UserDefinedValueTag.declaredConstant);
-    }
-    return _data;
-  }
-
-  set declaredConstant(DeclaredConstant value) {
-    _tag = UserDefinedValueTag.declaredConstant;
-    _data = value;
-  }
-
-  static UserDefinedValue decode(bindings.Decoder decoder0, int offset) {
-    int size = decoder0.decodeUint32(offset);
-    if (size == 0) {
-      return null;
-    }
-    UserDefinedValue result = new UserDefinedValue();
-
-    
-    UserDefinedValueTag tag = _intToTag[decoder0.decodeUint32(offset + 4)];
-    switch (tag) {
-      case UserDefinedValueTag.enumValue:
-        
-        var decoder1 = decoder0.decodePointer(offset + 8, false);
-        result.enumValue = EnumValue.decode(decoder1);
-        break;
-      case UserDefinedValueTag.declaredConstant:
-        
-        var decoder1 = decoder0.decodePointer(offset + 8, false);
-        result.declaredConstant = DeclaredConstant.decode(decoder1);
-        break;
-      default:
-        throw new bindings.MojoCodecError("Bad union tag: $tag");
-    }
-
-    return result;
-  }
-
-  void encode(bindings.Encoder encoder0, int offset) {
-    
-    encoder0.encodeUint32(16, offset);
-    encoder0.encodeUint32(_tagToInt[_tag], offset + 4);
-    switch (_tag) {
-      case UserDefinedValueTag.enumValue:
-        encoder0.encodeStruct(enumValue, offset + 8, false);
-        break;
-      case UserDefinedValueTag.declaredConstant:
-        encoder0.encodeStruct(declaredConstant, offset + 8, false);
-        break;
-      default:
-        throw new bindings.MojoCodecError("Bad union tag: $_tag");
-    }
-  }
-
-  String toString() {
-    String result = "UserDefinedValue(";
-    switch (_tag) {
-      case UserDefinedValueTag.enumValue:
-        result += "enumValue";
-        break;
-      case UserDefinedValueTag.declaredConstant:
-        result += "declaredConstant";
         break;
       default:
         result += "unknown";

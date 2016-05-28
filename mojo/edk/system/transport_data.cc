@@ -19,22 +19,6 @@ using mojo::platform::ScopedPlatformHandle;
 namespace mojo {
 namespace system {
 
-namespace {
-
-// TODO(vtl): Temporary, until |TransportData| really supports handles.
-std::unique_ptr<DispatcherVector> DispatcherVectorFromHandleVector(
-    std::unique_ptr<HandleVector> handles) {
-  DCHECK(handles);
-
-  std::unique_ptr<DispatcherVector> dispatchers(new DispatcherVector());
-  dispatchers->reserve(handles->size());
-  for (size_t i = 0; i < handles->size(); i++)
-    dispatchers->push_back(std::move(handles->at(i).dispatcher));
-  return dispatchers;
-}
-
-}  // namespace
-
 // The maximum amount of space needed per platform handle.
 // (|{Channel,RawChannel}::GetSerializedPlatformHandleSize()| should always
 // return a value which is at most this. This is only used to calculate
@@ -79,19 +63,13 @@ struct TransportData::PrivateStructForCompileAsserts {
                 "alignment");
 };
 
-// TODO(vtl): Make this the real one.
 TransportData::TransportData(std::unique_ptr<HandleVector> handles,
                              Channel* channel)
-    : TransportData(DispatcherVectorFromHandleVector(std::move(handles)),
-                    channel) {}
-
-TransportData::TransportData(std::unique_ptr<DispatcherVector> dispatchers,
-                             Channel* channel)
     : buffer_size_() {
-  DCHECK(dispatchers);
+  DCHECK(handles);
   DCHECK(channel);
 
-  const size_t num_handles = dispatchers->size();
+  const size_t num_handles = handles->size();
   DCHECK_GT(num_handles, 0u);
 
   // The offset to the start of the (Mojo) handle table.
@@ -108,11 +86,12 @@ TransportData::TransportData(std::unique_ptr<DispatcherVector> dispatchers,
   std::vector<size_t> all_max_platform_handles(num_handles);
 #endif
   for (size_t i = 0; i < num_handles; i++) {
-    if (Dispatcher* dispatcher = (*dispatchers)[i].get()) {
+    if (handles->at(i)) {
       size_t max_size = 0;
       size_t max_platform_handles = 0;
       Dispatcher::TransportDataAccess::StartSerialize(
-          dispatcher, channel, &max_size, &max_platform_handles);
+          handles->at(i).dispatcher.get(), channel, &max_size,
+          &max_platform_handles);
 
       DCHECK_LE(max_size, kMaxSerializedDispatcherSize);
       estimated_size += MessageInTransit::RoundUpMessageAlignment(max_size);
@@ -159,8 +138,8 @@ TransportData::TransportData(std::unique_ptr<DispatcherVector> dispatchers,
       buffer_.get() + handle_table_start_offset);
   size_t current_offset = serialized_dispatcher_start_offset;
   for (size_t i = 0; i < num_handles; i++) {
-    Dispatcher* dispatcher = (*dispatchers)[i].get();
-    if (!dispatcher) {
+    Handle& handle = handles->at(i);
+    if (!handle) {
       static_assert(static_cast<int32_t>(Dispatcher::Type::UNKNOWN) == 0,
                     "Value of Dispatcher::Type::UNKNOWN must be 0");
       continue;
@@ -174,12 +153,12 @@ TransportData::TransportData(std::unique_ptr<DispatcherVector> dispatchers,
     void* destination = buffer_.get() + current_offset;
     size_t actual_size = 0;
     if (Dispatcher::TransportDataAccess::EndSerializeAndClose(
-            dispatcher, channel, destination, &actual_size,
+            handle.dispatcher.get(), channel, destination, &actual_size,
             platform_handles_.get())) {
-      handle_table[i].type = static_cast<int32_t>(dispatcher->GetType());
+      handle_table[i].type = static_cast<int32_t>(handle.dispatcher->GetType());
       handle_table[i].offset = static_cast<uint32_t>(current_offset);
       handle_table[i].size = static_cast<uint32_t>(actual_size);
-// (Okay to not set |unused| since we cleared the entire buffer.)
+      handle_table[i].rights = handle.rights;
 
 #if DCHECK_IS_ON()
       DCHECK_LE(actual_size, all_max_sizes[i]);
@@ -212,8 +191,6 @@ TransportData::TransportData(std::unique_ptr<DispatcherVector> dispatchers,
   // There's no aligned realloc, so it's no good way to release unused space (if
   // we overshot our estimated space requirements).
   buffer_size_ = current_offset;
-
-  // |dispatchers_| will be destroyed as it goes out of scope.
 }
 
 TransportData::TransportData(
@@ -331,7 +308,7 @@ void TransportData::GetPlatformHandleTable(const void* transport_data_buffer,
 }
 
 // static
-std::unique_ptr<DispatcherVector> TransportData::DeserializeDispatchers(
+std::unique_ptr<HandleVector> TransportData::DeserializeHandles(
     const void* buffer,
     size_t buffer_size,
     std::unique_ptr<std::vector<ScopedPlatformHandle>> platform_handles,
@@ -342,8 +319,7 @@ std::unique_ptr<DispatcherVector> TransportData::DeserializeDispatchers(
 
   const Header* header = static_cast<const Header*>(buffer);
   const size_t num_handles = header->num_handles;
-  std::unique_ptr<DispatcherVector> dispatchers(
-      new DispatcherVector(num_handles));
+  std::unique_ptr<HandleVector> handles(new HandleVector(num_handles));
 
   const HandleTableEntry* handle_table =
       reinterpret_cast<const HandleTableEntry*>(
@@ -357,11 +333,13 @@ std::unique_ptr<DispatcherVector> TransportData::DeserializeDispatchers(
     DCHECK_LE(offset + size, buffer_size);
 
     const void* source = static_cast<const char*>(buffer) + offset;
-    (*dispatchers)[i] = Dispatcher::TransportDataAccess::Deserialize(
-        channel, handle_table[i].type, source, size, platform_handles.get());
+    (*handles)[i] = Handle(Dispatcher::TransportDataAccess::Deserialize(
+                               channel, handle_table[i].type, source, size,
+                               platform_handles.get()),
+                           handle_table[i].rights);
   }
 
-  return dispatchers;
+  return handles;
 }
 
 }  // namespace system

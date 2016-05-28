@@ -20,6 +20,17 @@ namespace mojo {
 namespace system {
 namespace {
 
+const MojoHandleRights kDefaultMessagePipeHandleRights =
+    MOJO_HANDLE_RIGHT_TRANSFER | MOJO_HANDLE_RIGHT_READ |
+    MOJO_HANDLE_RIGHT_WRITE | MOJO_HANDLE_RIGHT_GET_OPTIONS |
+    MOJO_HANDLE_RIGHT_SET_OPTIONS;
+const MojoHandleRights kDefaultDataPipeProducerHandleRights =
+    MOJO_HANDLE_RIGHT_TRANSFER | MOJO_HANDLE_RIGHT_WRITE |
+    MOJO_HANDLE_RIGHT_GET_OPTIONS | MOJO_HANDLE_RIGHT_SET_OPTIONS;
+const MojoHandleRights kDefaultDataPipeConsumerHandleRights =
+    MOJO_HANDLE_RIGHT_TRANSFER | MOJO_HANDLE_RIGHT_READ |
+    MOJO_HANDLE_RIGHT_GET_OPTIONS | MOJO_HANDLE_RIGHT_SET_OPTIONS;
+
 const MojoHandleSignalsState kEmptyMojoHandleSignalsState = {0u, 0u};
 const MojoHandleSignalsState kFullMojoHandleSignalsState = {~0u, ~0u};
 
@@ -43,6 +54,35 @@ TEST_F(CoreTest, Basic) {
   MojoHandle h = CreateMockHandle(&info);
   EXPECT_EQ(1u, info.GetCtorCallCount());
   EXPECT_NE(h, MOJO_HANDLE_INVALID);
+
+  MojoHandleRights rights = MOJO_HANDLE_RIGHT_NONE;
+  EXPECT_EQ(MOJO_RESULT_OK, core()->GetRights(h, MakeUserPointer(&rights)));
+  EXPECT_EQ(kDefaultMockHandleRights, rights);
+
+  MojoHandle h_dup = MOJO_HANDLE_INVALID;
+  EXPECT_EQ(MOJO_RESULT_OK,
+            core()->DuplicateHandleWithReducedRights(
+                h, MOJO_HANDLE_RIGHT_DUPLICATE, MakeUserPointer(&h_dup)));
+  EXPECT_EQ(1u, info.GetDuplicateDispatcherCallCount());
+  EXPECT_NE(h_dup, MOJO_HANDLE_INVALID);
+  EXPECT_NE(h_dup, h);
+  rights = MOJO_HANDLE_RIGHT_NONE;
+  EXPECT_EQ(MOJO_RESULT_OK, core()->GetRights(h_dup, MakeUserPointer(&rights)));
+  EXPECT_EQ(kDefaultMockHandleRights & ~MOJO_HANDLE_RIGHT_DUPLICATE, rights);
+  MojoHandle h_denied = MOJO_HANDLE_INVALID;
+  EXPECT_EQ(MOJO_RESULT_PERMISSION_DENIED,
+            core()->DuplicateHandleWithReducedRights(
+                h_dup, MOJO_HANDLE_RIGHT_NONE, MakeUserPointer(&h_denied)));
+  EXPECT_EQ(1u, info.GetDuplicateDispatcherCallCount());
+  EXPECT_EQ(MOJO_HANDLE_INVALID, h_denied);
+
+  EXPECT_EQ(0u, info.GetDtorCallCount());
+  EXPECT_EQ(0u, info.GetCloseCallCount());
+  EXPECT_EQ(0u, info.GetCancelAllAwakablesCallCount());
+  EXPECT_EQ(MOJO_RESULT_OK, core()->Close(h_dup));
+  EXPECT_EQ(1u, info.GetDtorCallCount());
+  EXPECT_EQ(1u, info.GetCloseCallCount());
+  EXPECT_EQ(1u, info.GetCancelAllAwakablesCallCount());
 
   EXPECT_EQ(0u, info.GetWriteMessageCallCount());
   EXPECT_EQ(MOJO_RESULT_OK,
@@ -176,13 +216,14 @@ TEST_F(CoreTest, Basic) {
   EXPECT_EQ(0u, hss.satisfied_signals);
   EXPECT_EQ(0u, hss.satisfiable_signals);
 
-  EXPECT_EQ(0u, info.GetDtorCallCount());
-  EXPECT_EQ(0u, info.GetCloseCallCount());
-  EXPECT_EQ(0u, info.GetCancelAllAwakablesCallCount());
-  EXPECT_EQ(MOJO_RESULT_OK, core()->Close(h));
-  EXPECT_EQ(1u, info.GetCancelAllAwakablesCallCount());
-  EXPECT_EQ(1u, info.GetCloseCallCount());
+  // |h| shares |info| with |h_dup|, which was closed above.
   EXPECT_EQ(1u, info.GetDtorCallCount());
+  EXPECT_EQ(1u, info.GetCloseCallCount());
+  EXPECT_EQ(1u, info.GetCancelAllAwakablesCallCount());
+  EXPECT_EQ(MOJO_RESULT_OK, core()->Close(h));
+  EXPECT_EQ(2u, info.GetDtorCallCount());
+  EXPECT_EQ(2u, info.GetCloseCallCount());
+  EXPECT_EQ(2u, info.GetCancelAllAwakablesCallCount());
 
   // No awakables should ever have ever been added.
   EXPECT_EQ(0u, info.GetRemoveAwakableCallCount());
@@ -202,6 +243,31 @@ TEST_F(CoreTest, InvalidArguments) {
     EXPECT_EQ(1u, info.GetCloseCallCount());
     EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT, core()->Close(h));
     EXPECT_EQ(1u, info.GetCloseCallCount());
+  }
+
+  // |GetRights()|:
+  {
+    MojoHandleRights rights = MOJO_HANDLE_RIGHT_NONE;
+    EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+              core()->GetRights(MOJO_HANDLE_INVALID, MakeUserPointer(&rights)));
+    EXPECT_EQ(0u, rights);
+    EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+              core()->GetRights(10, MakeUserPointer(&rights)));
+    EXPECT_EQ(0u, rights);
+  }
+
+  // |DuplicateHandleWithReducedRights()|:
+  {
+    MojoHandle h = MOJO_HANDLE_INVALID;
+    EXPECT_EQ(
+        MOJO_RESULT_INVALID_ARGUMENT,
+        core()->DuplicateHandleWithReducedRights(
+            MOJO_HANDLE_INVALID, MOJO_HANDLE_RIGHT_NONE, MakeUserPointer(&h)));
+    EXPECT_EQ(MOJO_HANDLE_INVALID, h);
+    EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+              core()->DuplicateHandleWithReducedRights(
+                  10, MOJO_HANDLE_RIGHT_NONE, MakeUserPointer(&h)));
+    EXPECT_EQ(MOJO_HANDLE_INVALID, h);
   }
 
   // |Wait()|:
@@ -556,6 +622,27 @@ TEST_F(CoreTest, InvalidArguments) {
 TEST_F(CoreTest, InvalidArgumentsDeath) {
   const char kMemoryCheckFailedRegex[] = "Check failed";
 
+  // |GetRights()|:
+  {
+    MockHandleInfo info;
+    MojoHandle h = CreateMockHandle(&info);
+    EXPECT_DEATH_IF_SUPPORTED(core()->GetRights(h, NullUserPointer()),
+                              kMemoryCheckFailedRegex);
+
+    EXPECT_EQ(MOJO_RESULT_OK, core()->Close(h));
+  }
+
+  // |DuplicateHandleWithReducedRights()|:
+  {
+    MockHandleInfo info;
+    MojoHandle h = CreateMockHandle(&info);
+    EXPECT_DEATH_IF_SUPPORTED(core()->DuplicateHandleWithReducedRights(
+                                  h, MOJO_HANDLE_RIGHT_NONE, NullUserPointer()),
+                              kMemoryCheckFailedRegex);
+
+    EXPECT_EQ(MOJO_RESULT_OK, core()->Close(h));
+  }
+
   // |WaitMany()|:
   {
     MojoHandle handle = MOJO_HANDLE_INVALID;
@@ -632,7 +719,7 @@ TEST_F(CoreTest, InvalidArgumentsDeath) {
 //    same/different signals)
 
 TEST_F(CoreTest, MessagePipe) {
-  MojoHandle h[2];
+  MojoHandle h[2] = {MOJO_HANDLE_INVALID, MOJO_HANDLE_INVALID};
   MojoHandleSignalsState hss[2];
   uint32_t result_index;
 
@@ -643,6 +730,24 @@ TEST_F(CoreTest, MessagePipe) {
   EXPECT_NE(h[0], MOJO_HANDLE_INVALID);
   EXPECT_NE(h[1], MOJO_HANDLE_INVALID);
   EXPECT_NE(h[0], h[1]);
+
+  // Both should have the correct rights.
+  MojoHandleRights rights = MOJO_HANDLE_RIGHT_NONE;
+  EXPECT_EQ(MOJO_RESULT_OK, core()->GetRights(h[0], MakeUserPointer(&rights)));
+  EXPECT_EQ(kDefaultMessagePipeHandleRights, rights);
+  rights = MOJO_HANDLE_RIGHT_NONE;
+  EXPECT_EQ(MOJO_RESULT_OK, core()->GetRights(h[1], MakeUserPointer(&rights)));
+  EXPECT_EQ(kDefaultMessagePipeHandleRights, rights);
+
+  // Neither should be duplicatable.
+  MojoHandle h_denied = MOJO_HANDLE_INVALID;
+  EXPECT_EQ(MOJO_RESULT_PERMISSION_DENIED,
+            core()->DuplicateHandleWithReducedRights(
+                h[0], MOJO_HANDLE_RIGHT_NONE, MakeUserPointer(&h_denied)));
+  EXPECT_EQ(MOJO_RESULT_PERMISSION_DENIED,
+            core()->DuplicateHandleWithReducedRights(
+                h[1], MOJO_HANDLE_RIGHT_NONE, MakeUserPointer(&h_denied)));
+  EXPECT_EQ(MOJO_HANDLE_INVALID, h_denied);
 
   // Neither should be readable.
   MojoHandleSignals signals[2] = {MOJO_HANDLE_SIGNAL_READABLE,
@@ -944,6 +1049,12 @@ TEST_F(CoreTest, MessagePipeBasicLocalHandlePassing1) {
   // fails. See above note.
   EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT, core()->Close(h_passed[1]));
 
+  // Check that |h_received| still has the expected rights.
+  MojoHandleRights rights = MOJO_HANDLE_RIGHT_NONE;
+  EXPECT_EQ(MOJO_RESULT_OK,
+            core()->GetRights(h_received, MakeUserPointer(&rights)));
+  EXPECT_EQ(kDefaultMessagePipeHandleRights, rights);
+
   // Write to |h_passed[0]|. Should receive on |h_received|.
   EXPECT_EQ(MOJO_RESULT_OK,
             core()->WriteMessage(h_passed[0], UserPointer<const void>(kHello),
@@ -976,7 +1087,9 @@ TEST_F(CoreTest, MessagePipeBasicLocalHandlePassing1) {
 }
 
 TEST_F(CoreTest, DataPipe) {
-  MojoHandle ph, ch;  // p is for producer and c is for consumer.
+  // p is for producer and c is for consumer.
+  MojoHandle ph = MOJO_HANDLE_INVALID;
+  MojoHandle ch = MOJO_HANDLE_INVALID;
   MojoHandleSignalsState hss;
 
   EXPECT_EQ(MOJO_RESULT_OK,
@@ -986,6 +1099,24 @@ TEST_F(CoreTest, DataPipe) {
   EXPECT_NE(ph, MOJO_HANDLE_INVALID);
   EXPECT_NE(ch, MOJO_HANDLE_INVALID);
   EXPECT_NE(ph, ch);
+
+  // Both should have the correct rights.
+  MojoHandleRights rights = MOJO_HANDLE_RIGHT_NONE;
+  EXPECT_EQ(MOJO_RESULT_OK, core()->GetRights(ph, MakeUserPointer(&rights)));
+  EXPECT_EQ(kDefaultDataPipeProducerHandleRights, rights);
+  rights = MOJO_HANDLE_RIGHT_NONE;
+  EXPECT_EQ(MOJO_RESULT_OK, core()->GetRights(ch, MakeUserPointer(&rights)));
+  EXPECT_EQ(kDefaultDataPipeConsumerHandleRights, rights);
+
+  // Neither should be duplicatable.
+  MojoHandle h_denied = MOJO_HANDLE_INVALID;
+  EXPECT_EQ(MOJO_RESULT_PERMISSION_DENIED,
+            core()->DuplicateHandleWithReducedRights(
+                ph, MOJO_HANDLE_RIGHT_NONE, MakeUserPointer(&h_denied)));
+  EXPECT_EQ(MOJO_RESULT_PERMISSION_DENIED,
+            core()->DuplicateHandleWithReducedRights(
+                ch, MOJO_HANDLE_RIGHT_NONE, MakeUserPointer(&h_denied)));
+  EXPECT_EQ(MOJO_HANDLE_INVALID, h_denied);
 
   // Producer should be never-readable, but already writable.
   hss = kEmptyMojoHandleSignalsState;
@@ -1411,6 +1542,12 @@ TEST_F(CoreTest, MessagePipeBasicLocalHandlePassing2) {
   // above note.
   EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT, core()->Close(ch));
 
+  // Check that |ch_received| still has the expected rights.
+  MojoHandleRights rights = MOJO_HANDLE_RIGHT_NONE;
+  EXPECT_EQ(MOJO_RESULT_OK,
+            core()->GetRights(ch_received, MakeUserPointer(&rights)));
+  EXPECT_EQ(kDefaultDataPipeConsumerHandleRights, rights);
+
   // Write to |ph|. Should receive on |ch_received|.
   num_bytes = kWorldSize;
   EXPECT_EQ(MOJO_RESULT_OK,
@@ -1470,6 +1607,12 @@ TEST_F(CoreTest, MessagePipeBasicLocalHandlePassing2) {
   // |ph| should no longer be valid; check that trying to close it fails. See
   // above note.
   EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT, core()->Close(ph));
+
+  // Check that |ph_received| still has the expected rights.
+  rights = MOJO_HANDLE_RIGHT_NONE;
+  EXPECT_EQ(MOJO_RESULT_OK,
+            core()->GetRights(ph_received, MakeUserPointer(&rights)));
+  EXPECT_EQ(kDefaultDataPipeProducerHandleRights, rights);
 
   // Write to |ph_received|. Should receive on |ch_received|.
   num_bytes = kHelloSize;
@@ -1681,7 +1824,8 @@ TEST_F(CoreTest, AsyncWait) {
   EXPECT_EQ(MOJO_RESULT_OK, core()->Close(h));
 }
 
-// TODO(vtl): Test |DuplicateBufferHandle()| and |MapBuffer()|.
+// TODO(vtl): Test |CreateSharedBuffer()|, |DuplicateBufferHandle()|, and
+// |MapBuffer()|.
 
 }  // namespace
 }  // namespace system

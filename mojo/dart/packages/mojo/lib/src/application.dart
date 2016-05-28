@@ -6,20 +6,20 @@ part of application;
 
 class _ApplicationImpl implements application_mojom.Application {
   application_mojom.ApplicationStub _stub;
-  shell_mojom.ShellProxy shell;
+  shell_mojom.ShellInterface shell;
   Application _application;
 
   _ApplicationImpl(
       Application application, core.MojoMessagePipeEndpoint endpoint) {
     _application = application;
     _stub = new application_mojom.ApplicationStub.fromEndpoint(endpoint, this);
-    _stub.onError = ((_) => close());
+    _stub.ctrl.onError = ((_) => close());
   }
 
   _ApplicationImpl.fromHandle(Application application, core.MojoHandle handle) {
     _application = application;
     _stub = new application_mojom.ApplicationStub.fromHandle(handle, this);
-    _stub.onError = ((_) => close());
+    _stub.ctrl.onError = ((_) => close());
   }
 
   _ApplicationImpl.fromStub(Application application,
@@ -27,23 +27,26 @@ class _ApplicationImpl implements application_mojom.Application {
     _application = application;
     _stub = applicationStub;
     _stub.impl = this;
-    _stub.onError = ((_) => close());
+    _stub.ctrl.onError = ((_) => close());
   }
 
   set onError(core.ErrorHandler f) {
-    _stub.onError = f;
+    _stub.ctrl.onError = f;
   }
 
-  void initialize(
-      bindings.ProxyBase shellProxy, List<String> args, String url) {
+  void initialize(shell_mojom.ShellInterface shellInterface,
+                  List<String> args,
+                  String url) {
     assert(shell == null);
-    shell = shellProxy;
+    shell = shellInterface;
     _application.initialize(args, url);
   }
 
   @override
-  void acceptConnection(String requestorUrl, ServiceProviderStub services,
-          bindings.ProxyBase exposedServices, String resolvedUrl) =>
+  void acceptConnection(String requestorUrl,
+                        ServiceProviderInterfaceRequest services,
+                        ServiceProviderInterface exposedServices,
+                        String resolvedUrl) =>
       _application._acceptConnection(
           requestorUrl, services, exposedServices, resolvedUrl);
 
@@ -97,16 +100,15 @@ abstract class Application implements bindings.ServiceConnector {
   // Returns a connection to the app at |url|.
   ApplicationConnection connectToApplication(String url) {
     var proxy = new ServiceProviderProxy.unbound();
-    var stub = new ServiceProviderStub.unbound();
-    _applicationImpl.shell.ptr.connectToApplication(url, proxy, stub);
-    var connection = new ApplicationConnection(stub, proxy);
+    _applicationImpl.shell.connectToApplication(url, proxy, null);
+    var connection = new ApplicationConnection(null, proxy);
     _applicationConnections.add(connection);
     return connection;
   }
 
-  void connectToService(String url, bindings.ProxyBase proxy,
+  void connectToService(String url, bindings.MojoInterface iface,
       [String serviceName]) {
-    connectToApplication(url).requestService(proxy, serviceName);
+    connectToApplication(url).requestService(iface, serviceName);
   }
 
   void requestQuit() {}

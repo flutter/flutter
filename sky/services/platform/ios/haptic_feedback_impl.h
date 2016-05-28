@@ -6,7 +6,6 @@
 #define SKY_SERVICES_PLATFORM_IOS_HAPTIC_FEEDBACK_IMPL_H_
 
 #include "base/macros.h"
-#include "mojo/public/cpp/application/interface_factory.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "sky/services/platform/haptic_feedback.mojom.h"
 
@@ -25,12 +24,6 @@ class HapticFeedbackImpl : public HapticFeedback {
   mojo::StrongBinding<HapticFeedback> binding_;
 
   DISALLOW_COPY_AND_ASSIGN(HapticFeedbackImpl);
-};
-
-class HapticFeedbackFactory : public mojo::InterfaceFactory<HapticFeedback> {
- public:
-  void Create(mojo::ApplicationConnection* connection,
-              mojo::InterfaceRequest<HapticFeedback> request) override;
 };
 
 }  // namespace platform

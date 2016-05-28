@@ -4,7 +4,7 @@
 
 #include "mojo/application/content_handler_factory.h"
 
-#include <set>
+#include <map>
 
 #include "base/bind.h"
 #include "base/callback.h"
@@ -14,7 +14,6 @@
 #include "base/trace_event/trace_event.h"
 #include "mojo/application/application_runner_chromium.h"
 #include "mojo/message_pump/message_pump_mojo.h"
-#include "mojo/public/cpp/application/application_connection.h"
 #include "mojo/public/cpp/application/application_delegate.h"
 #include "mojo/public/cpp/application/application_impl.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
@@ -112,11 +111,13 @@ class ContentHandlerImpl : public ContentHandler {
 
 }  // namespace
 
-ContentHandlerFactory::ContentHandlerFactory(Delegate* delegate)
-    : delegate_(delegate) {
-}
-
-ContentHandlerFactory::~ContentHandlerFactory() {
+// static
+ServiceProviderImpl::InterfaceRequestHandler<ContentHandler>
+ContentHandlerFactory::GetInterfaceRequestHandler(Delegate* delegate) {
+  return [delegate](const ConnectionContext& connection_context,
+                    InterfaceRequest<ContentHandler> content_handler_request) {
+    new ContentHandlerImpl(delegate, content_handler_request.Pass());
+  };
 }
 
 void ContentHandlerFactory::ManagedDelegate::RunApplication(
@@ -127,11 +128,6 @@ void ContentHandlerFactory::ManagedDelegate::RunApplication(
       this->CreateApplication(application_request.Pass(), response.Pass());
   if (application)
     loop.Run();
-}
-
-void ContentHandlerFactory::Create(ApplicationConnection* connection,
-                                   InterfaceRequest<ContentHandler> request) {
-  new ContentHandlerImpl(delegate_, request.Pass());
 }
 
 }  // namespace mojo

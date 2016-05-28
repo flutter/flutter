@@ -31,9 +31,9 @@ class Animator {
 
   void set_vsync_provider(vsync::VSyncProviderPtr vsync_provider);
 
-  void set_scene_scheduler(
-      mojo::InterfaceHandle<mojo::gfx::composition::SceneScheduler> scene_scheduler) {
-    scene_scheduler_ = mojo::gfx::composition::SceneSchedulerPtr::Create(scene_scheduler.Pass());
+  void set_frame_scheduler(
+      mojo::InterfaceHandle<mojo::gfx::composition::FrameScheduler> frame_scheduler) {
+    frame_scheduler_ = mojo::gfx::composition::FrameSchedulerPtr::Create(frame_scheduler.Pass());
   }
 
 
@@ -46,7 +46,7 @@ class Animator {
   Engine::Config config_;
   rasterizer::RasterizerPtr rasterizer_;
   Engine* engine_;
-  mojo::gfx::composition::SceneSchedulerPtr scene_scheduler_;
+  mojo::gfx::composition::FrameSchedulerPtr frame_scheduler_;
   vsync::VSyncProviderPtr vsync_provider_;
   int outstanding_requests_;
   bool did_defer_frame_request_;

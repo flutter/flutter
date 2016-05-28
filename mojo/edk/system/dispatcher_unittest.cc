@@ -141,6 +141,7 @@ TEST(DispatcherTest, Basic) {
 
 enum class DispatcherOp {
   CLOSE = 0,
+  DUPLICATE_DISPATCHER,
   WRITE_MESSAGE,
   READ_MESSAGE,
   SET_DATA_PIPE_PRODUCER_OPTIONS,
@@ -176,6 +177,18 @@ void ThreadSafetyStressHelper(ManualResetWaitableEvent* event,
       MojoResult r = dispatcher->Close();
       EXPECT_TRUE(r == MOJO_RESULT_OK || r == MOJO_RESULT_INVALID_ARGUMENT)
           << "Result: " << r;
+      break;
+    }
+    case DispatcherOp::DUPLICATE_DISPATCHER: {
+      RefPtr<Dispatcher> new_dispatcher;
+      MojoResult r = dispatcher->DuplicateDispatcher(&new_dispatcher);
+      if (r == MOJO_RESULT_OK) {
+        EXPECT_TRUE(new_dispatcher);
+        EXPECT_EQ(MOJO_RESULT_OK, new_dispatcher->Close());
+      } else {
+        EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT, r);
+        EXPECT_FALSE(new_dispatcher);
+      }
       break;
     }
     case DispatcherOp::WRITE_MESSAGE:

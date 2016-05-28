@@ -17,11 +17,6 @@ PathProviderImpl::PathProviderImpl(mojo::InterfaceRequest<PathProvider> request)
 
 PathProviderImpl::~PathProviderImpl() {}
 
-void PathProviderFactory::Create(mojo::ApplicationConnection* connection,
-                                 mojo::InterfaceRequest<PathProvider> request) {
-  new PathProviderImpl(request.Pass());
-}
-
 static std::string GetDirectoryOfType(NSSearchPathDirectory dir) {
   base::mac::ScopedNSAutoreleasePool pool;
   NSArray* paths =

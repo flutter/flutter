@@ -11,13 +11,14 @@
 #include "mojo/message_pump/message_pump_mojo.h"
 #include "mojo/public/cpp/application/application_delegate.h"
 #include "mojo/public/cpp/application/application_impl.h"
+#include "mojo/public/cpp/application/application_impl_base.h"
 #include "mojo/public/cpp/system/handle.h"
 #include "mojo/public/cpp/system/message_pipe.h"
 
 namespace mojo {
 
 // static
-void ApplicationImpl::Terminate() {
+void ApplicationImplBase::Terminate() {
   if (base::MessageLoop::current()->is_running())
     base::MessageLoop::current()->Quit();
 }

@@ -249,7 +249,7 @@ MOJO_MULTIPROCESS_TEST_CHILD_MAIN(CheckSharedBuffer) {
   CHECK_EQ(num_handles, 1u);
 
   CHECK_EQ(handles[0].dispatcher->GetType(), Dispatcher::Type::SHARED_BUFFER);
-  // TODO(vtl): Also check the rights here once they're actually preserved?
+  CHECK_EQ(handles[0].rights, SharedBufferDispatcher::kDefaultHandleRights);
 
   RefPtr<SharedBufferDispatcher> dispatcher(
       static_cast<SharedBufferDispatcher*>(handles[0].dispatcher.get()));
@@ -437,7 +437,8 @@ MOJO_MULTIPROCESS_TEST_CHILD_MAIN(CheckPlatformHandleFile) {
   for (size_t i = 0; i < num_read_handles; ++i) {
     CHECK_EQ(read_handles[i].dispatcher->GetType(),
              Dispatcher::Type::PLATFORM_HANDLE);
-    // TODO(vtl): Also check the rights here once they're actually preserved?
+    CHECK_EQ(read_handles[i].rights,
+             PlatformHandleDispatcher::kDefaultHandleRights);
 
     RefPtr<PlatformHandleDispatcher> dispatcher(
         static_cast<PlatformHandleDispatcher*>(

@@ -5,26 +5,25 @@
 [DartPackage="mojo_services"]
 module mojo.gfx.composition;
 
-// Provides support for scheduling drawing and composition operations
-// for a particular scene.
+// Provides support for scheduling drawing and composition operations.
 //
-// Instances of this interface must be obtained from a |Scene|.  This interface
-// is modeled separately so as to allow applications to use different threads
-// for scheduling work as opposed to publishing scene updates.
-interface SceneScheduler {
+// Instances of this interface must be obtained from a |Scene| or |Renderer|.
+interface FrameScheduler {
   // Asks the compositor to invoke the callback when it is a good time to
   // draw the next frame.
   //
   // The rate at which the callback is invoked may depend on how the scene
   // has been embedded.  The scene will only receive frame callbacks while
   // it is attached to a scene graph which the compositor has been asked
-  // to renderer since timing information ultimately derives from the
+  // to render since timing information ultimately derives from the
   // renderer.  If the same scene is being rendered to multiple destinations
-  // with different timing requirements, the compositor will perform rate
-  // adaptation as required behind the scenes.
+  // with different timing requirements, the compositor will couple the
+  // scene scheduling to one of the renderers.
   //
   // The returned |frame_info| provides information about the frame to
-  // be drawn.
+  // be drawn.  This information should be passed to a
+  // |mojo::gfx::composition::FrameTracker| to apply compensation for
+  // skipped frames before using it.
   //
   // TODO(jeffbrown): Consider whether we should have the callback be invoked
   // immediately rather than on schedule, letting the client set its own

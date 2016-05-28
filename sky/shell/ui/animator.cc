@@ -131,8 +131,8 @@ void Animator::OnFrameComplete() {
 }
 
 bool Animator::AwaitVSync() {
-  if (scene_scheduler_) {
-    scene_scheduler_->ScheduleFrame(
+  if (frame_scheduler_) {
+    frame_scheduler_->ScheduleFrame(
         base::Bind(&Animator::Animate, weak_factory_.GetWeakPtr()));
     return true;
   } else if (vsync_provider_) {

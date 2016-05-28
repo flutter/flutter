@@ -14,18 +14,18 @@ class LocalServiceProvider implements ServiceProvider {
 
   LocalServiceProvider(this.connection, this._stub) {
     _stub.impl = this;
-    if (!_stub.isOpen) {
+    if (!_stub.ctrl.isOpen) {
       throw new core.MojoApiError("The service provider stub must be open");
     }
   }
 
   set onError(Function f) {
-    _stub.onError = f;
+    _stub.ctrl.onError = f;
   }
 
   Future close({bool immediate: false}) => _stub.close(immediate: immediate);
 
-  void connectToService(
+  void connectToService_(
       String interfaceName, core.MojoMessagePipeEndpoint pipe) {
     if (connection._nameToServiceFactory.containsKey(interfaceName)) {
       connection._nameToServiceFactory[interfaceName](pipe);
@@ -49,8 +49,8 @@ class LocalServiceProvider implements ServiceProvider {
 /// [Application.acceptConnection].
 ///
 /// To request a service (e.g. `Foo`) from the remote application:
-///   var fooProxy =
-///       applicationConnection.requestService(new FooProxy.unbound());
+///   var foo = new FooInterfaceRequest();
+///   applicationConnection.requestService(foo);
 ///
 /// To provide a service to the remote application, specify a function that
 /// instantiantes a service. For example:
@@ -62,6 +62,9 @@ class LocalServiceProvider implements ServiceProvider {
 /// To handle requests for services beyond those set up with [provideService],
 /// set [fallbackServiceFactory] to a function that instantiates a service as in
 /// the [provideService] case, or closes the pipe.
+// TODO(vtl): Once "exposed_services" is removed from Shell's
+// ConnectToApplication() (and Application's AcceptConnection(), etc.), this
+// class will be a bit of overkill. https://github.com/domokit/mojo/issues/762
 class ApplicationConnection {
   ServiceProviderProxy remoteServiceProvider;
   LocalServiceProvider _localServiceProvider;
@@ -87,25 +90,24 @@ class ApplicationConnection {
     _fallbackServiceFactory = f;
   }
 
-  bindings.ProxyBase requestService(bindings.ProxyBase proxy,
-      [String serviceName]) {
-    if (proxy.impl.isBound ||
+  void requestService(bindings.MojoInterface iface, [String serviceName]) {
+    if (iface.ctrl.isBound ||
         (remoteServiceProvider == null) ||
-        !remoteServiceProvider.impl.isBound) {
+        !remoteServiceProvider.ctrl.isBound) {
       throw new core.MojoApiError(
-          "The proxy is bound, or there is no remove service provider proxy");
+          "The interface is already bound, "
+          "or there is no remote service provider");
     }
 
-    var name = serviceName ?? proxy.serviceName;
+    var name = serviceName ?? iface.ctrl.serviceName;
     if ((name == null) || name.isEmpty) {
       throw new core.MojoApiError(
           "If an interface has no ServiceName, then one must be provided.");
     }
 
     var pipe = new core.MojoMessagePipe();
-    proxy.impl.bind(pipe.endpoints[0]);
-    remoteServiceProvider.ptr.connectToService(name, pipe.endpoints[1]);
-    return proxy;
+    iface.ctrl.bind(pipe.endpoints[0]);
+    remoteServiceProvider.connectToService_(name, pipe.endpoints[1]);
   }
 
   /// Prepares this connection to provide the specified service when a call for

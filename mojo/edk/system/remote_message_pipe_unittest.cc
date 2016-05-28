@@ -690,7 +690,8 @@ TEST_F(RemoteMessagePipeTest, HandlePassing) {
 
   EXPECT_EQ(Dispatcher::Type::MESSAGE_PIPE,
             read_handles[0].dispatcher->GetType());
-  // TODO(vtl): Also check the rights here once they're actually preserved.
+  EXPECT_EQ(MessagePipeDispatcher::kDefaultHandleRights,
+            read_handles[0].rights);
   dispatcher = RefPtr<MessagePipeDispatcher>(
       static_cast<MessagePipeDispatcher*>(read_handles[0].dispatcher.get()));
 
@@ -879,7 +880,8 @@ TEST_F(RemoteMessagePipeTest, HandlePassingHalfClosed) {
 
   EXPECT_EQ(Dispatcher::Type::MESSAGE_PIPE,
             read_handles[0].dispatcher->GetType());
-  // TODO(vtl): Also check the rights here once they're actually preserved.
+  EXPECT_EQ(MessagePipeDispatcher::kDefaultHandleRights,
+            read_handles[0].rights);
   dispatcher = RefPtr<MessagePipeDispatcher>(
       static_cast<MessagePipeDispatcher*>(read_handles[0].dispatcher.get()));
 
@@ -1012,7 +1014,8 @@ TEST_F(RemoteMessagePipeTest, SharedBufferPassing) {
 
   EXPECT_EQ(Dispatcher::Type::SHARED_BUFFER,
             read_handles[0].dispatcher->GetType());
-  // TODO(vtl): Also check the rights here once they're actually preserved.
+  EXPECT_EQ(SharedBufferDispatcher::kDefaultHandleRights,
+            read_handles[0].rights);
   dispatcher = RefPtr<SharedBufferDispatcher>(
       static_cast<SharedBufferDispatcher*>(read_handles[0].dispatcher.get()));
 
@@ -1126,7 +1129,8 @@ TEST_F(RemoteMessagePipeTest, PlatformHandlePassing) {
 
   EXPECT_EQ(Dispatcher::Type::PLATFORM_HANDLE,
             read_handles[0].dispatcher->GetType());
-  // TODO(vtl): Also check the rights here once they're actually preserved.
+  EXPECT_EQ(PlatformHandleDispatcher::kDefaultHandleRights,
+            read_handles[0].rights);
   dispatcher = RefPtr<PlatformHandleDispatcher>(
       static_cast<PlatformHandleDispatcher*>(read_handles[0].dispatcher.get()));
 
@@ -1265,7 +1269,8 @@ TEST_F(RemoteMessagePipeTest, PassMessagePipeHandleAcrossAndBack) {
 
   EXPECT_EQ(Dispatcher::Type::MESSAGE_PIPE,
             read_handles[0].dispatcher->GetType());
-  // TODO(vtl): Also check the rights here once they're actually preserved.
+  EXPECT_EQ(MessagePipeDispatcher::kDefaultHandleRights,
+            read_handles[0].rights);
   handle = std::move(read_handles[0]);
   read_handles.clear();
 
@@ -1324,7 +1329,8 @@ TEST_F(RemoteMessagePipeTest, PassMessagePipeHandleAcrossAndBack) {
 
   EXPECT_EQ(Dispatcher::Type::MESSAGE_PIPE,
             read_handles[0].dispatcher->GetType());
-  // TODO(vtl): Also check the rights here once they're actually preserved.
+  EXPECT_EQ(MessagePipeDispatcher::kDefaultHandleRights,
+            read_handles[0].rights);
   dispatcher = RefPtr<MessagePipeDispatcher>(
       static_cast<MessagePipeDispatcher*>(read_handles[0].dispatcher.get()));
   read_handles.clear();

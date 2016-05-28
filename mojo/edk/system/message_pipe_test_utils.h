@@ -9,6 +9,7 @@
 
 #include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/edk/system/channel.h"
+#include "mojo/edk/system/handle_signals_state.h"
 #include "mojo/edk/system/test/test_io_thread.h"
 #include "mojo/edk/test/multiprocess_test_helper.h"
 #include "mojo/edk/util/ref_ptr.h"

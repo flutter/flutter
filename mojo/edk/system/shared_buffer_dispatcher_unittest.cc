@@ -191,6 +191,7 @@ TEST_F(SharedBufferDispatcherTest, SupportsEntrypointClass) {
   ASSERT_TRUE(d);
   EXPECT_EQ(MOJO_RESULT_OK, result);
 
+  EXPECT_TRUE(d->SupportsEntrypointClass(EntrypointClass::NONE));
   EXPECT_FALSE(d->SupportsEntrypointClass(EntrypointClass::MESSAGE_PIPE));
   EXPECT_FALSE(d->SupportsEntrypointClass(EntrypointClass::DATA_PIPE_PRODUCER));
   EXPECT_FALSE(d->SupportsEntrypointClass(EntrypointClass::DATA_PIPE_CONSUMER));
@@ -200,6 +201,49 @@ TEST_F(SharedBufferDispatcherTest, SupportsEntrypointClass) {
   // for methods in unsupported entrypoint classes.
 
   EXPECT_EQ(MOJO_RESULT_OK, d->Close());
+}
+
+TEST_F(SharedBufferDispatcherTest, DuplicateDispatcher) {
+  const uint64_t kSize = 100u;
+
+  MojoResult result = MOJO_RESULT_INTERNAL;
+  auto dispatcher1 = SharedBufferDispatcher::Create(
+      platform_support(), SharedBufferDispatcher::kDefaultCreateOptions, kSize,
+      &result);
+  EXPECT_EQ(MOJO_RESULT_OK, result);
+
+  // Map and write something.
+  std::unique_ptr<PlatformSharedBufferMapping> mapping;
+  EXPECT_EQ(
+      MOJO_RESULT_OK,
+      dispatcher1->MapBuffer(0u, kSize, MOJO_MAP_BUFFER_FLAG_NONE, &mapping));
+  static_cast<char*>(mapping->GetBase())[0] = 'x';
+  mapping.reset();
+
+  // Duplicate |dispatcher1| and then close it.
+  RefPtr<Dispatcher> dispatcher2;
+  EXPECT_EQ(MOJO_RESULT_OK, dispatcher1->DuplicateDispatcher(&dispatcher2));
+  ASSERT_TRUE(dispatcher2);
+  EXPECT_EQ(Dispatcher::Type::SHARED_BUFFER, dispatcher2->GetType());
+
+  EXPECT_EQ(MOJO_RESULT_OK, dispatcher1->Close());
+
+  // Make sure that |dispatcher2| still reports the right information.
+  MojoBufferInformation info = {};
+  EXPECT_EQ(MOJO_RESULT_OK,
+            dispatcher2->GetBufferInformation(
+                MakeUserPointer(&info), static_cast<uint32_t>(sizeof(info))));
+  EXPECT_EQ(sizeof(MojoBufferInformation), info.struct_size);
+  EXPECT_EQ(MOJO_BUFFER_INFORMATION_FLAG_NONE, info.flags);
+  EXPECT_EQ(kSize, info.num_bytes);
+
+  // Map |dispatcher2| and read something.
+  EXPECT_EQ(
+      MOJO_RESULT_OK,
+      dispatcher2->MapBuffer(0u, kSize, MOJO_MAP_BUFFER_FLAG_NONE, &mapping));
+  EXPECT_EQ('x', static_cast<char*>(mapping->GetBase())[0]);
+
+  EXPECT_EQ(MOJO_RESULT_OK, dispatcher2->Close());
 }
 
 TEST_F(SharedBufferDispatcherTest, DuplicateBufferHandle) {

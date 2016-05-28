@@ -5,7 +5,6 @@
 #include "mojo/icu/icu.h"
 
 #include "mojo/icu/constants.h"
-#include "mojo/public/cpp/application/application_impl.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/services/icu_data/interfaces/icu_data.mojom.h"
 #include "third_party/icu/source/common/unicode/putil.h"
@@ -34,7 +33,7 @@ class Callback {
 
 }  // namespace
 
-void Initialize(ApplicationImpl* app) {
+void Initialize(ApplicationConnector* application_connector) {
 #if !defined(OS_ANDROID)
   // On desktop platforms, the icu data table is stored in a file on disk, which
   // can be loaded using base.
@@ -43,7 +42,7 @@ void Initialize(ApplicationImpl* app) {
 #endif
 
   icu_data::ICUDataPtr icu_data;
-  ConnectToService(app->shell(), "mojo:icu_data", GetProxy(&icu_data));
+  ConnectToService(application_connector, "mojo:icu_data", GetProxy(&icu_data));
   icu_data->Map(kDataHash, Callback());
   icu_data.WaitForIncomingResponse();
 }

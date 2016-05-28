@@ -6,7 +6,6 @@
 #define SKY_SERVICES_VSYNC_IOS_VSYNCPROVIDERIMPL_H_
 
 #include "base/macros.h"
-#include "mojo/public/cpp/application/interface_factory.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/services/vsync/interfaces/vsync.mojom.h"
 
@@ -32,13 +31,6 @@ class VsyncProviderImpl : public ::vsync::VSyncProvider {
   VSyncClient* client_;
 
   DISALLOW_COPY_AND_ASSIGN(VsyncProviderImpl);
-};
-
-class VSyncProviderFactory
-    : public mojo::InterfaceFactory<::vsync::VSyncProvider> {
- public:
-  void Create(mojo::ApplicationConnection* connection,
-              mojo::InterfaceRequest<::vsync::VSyncProvider> request) override;
 };
 
 }  // namespace vsync

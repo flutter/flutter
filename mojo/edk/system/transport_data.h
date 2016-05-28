@@ -13,6 +13,8 @@
 #include "mojo/edk/platform/aligned_alloc.h"
 #include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/edk/system/dispatcher.h"
+#include "mojo/edk/system/handle.h"
+#include "mojo/public/c/system/handle.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -87,9 +89,6 @@ class TransportData {
   static size_t GetMaxPlatformHandles();
 
   TransportData(std::unique_ptr<HandleVector> handles, Channel* channel);
-  // TODO(vtl): Remove this, once |TransportData| really supports handles.
-  TransportData(std::unique_ptr<DispatcherVector> dispatchers,
-                Channel* channel);
 
   // This is used for users of |MessageInTransit|/|TransportData|/|RawChannel|
   // that want to simply transport data and platform handles, and not
@@ -138,10 +137,10 @@ class TransportData {
                                      size_t* num_platform_handles,
                                      const void** platform_handle_table);
 
-  // Deserializes dispatchers from the given (serialized) transport data buffer
+  // Deserializes handles from the given (serialized) transport data buffer
   // (typically from a |MessageInTransit::View|) and vector of platform handles.
   // |buffer| should be non-null and |buffer_size| should be nonzero.
-  static std::unique_ptr<DispatcherVector> DeserializeDispatchers(
+  static std::unique_ptr<HandleVector> DeserializeHandles(
       const void* buffer,
       size_t buffer_size,
       std::unique_ptr<std::vector<platform::ScopedPlatformHandle>>
@@ -168,7 +167,7 @@ class TransportData {
     int32_t type;     // From |Dispatcher::Type| (|UNKNOWN| for "invalid").
     uint32_t offset;  // Relative to the start of the "secondary buffer".
     uint32_t size;    // (Not including any padding.)
-    uint32_t unused;
+    MojoHandleRights rights;
   };
 
   const Header* header() const {

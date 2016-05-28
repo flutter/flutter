@@ -9,9 +9,9 @@
 #include "mojo/common/tracing_impl.h"
 #include "mojo/icu/icu.h"
 #include "mojo/public/c/system/main.h"
-#include "mojo/public/cpp/application/application_connection.h"
 #include "mojo/public/cpp/application/application_delegate.h"
 #include "mojo/public/cpp/application/application_impl.h"
+#include "mojo/public/cpp/application/connect.h"
 #include "mojo/services/content_handler/interfaces/content_handler.mojom.h"
 #include "sky/engine/public/platform/sky_settings.h"
 #include "sky/shell/shell.h"
@@ -25,8 +25,7 @@ const char kEnableCheckedMode[] = "--enable-checked-mode";
 
 }  // namespace
 
-class MojoApp : public mojo::ApplicationDelegate,
-                public mojo::InterfaceFactory<mojo::ContentHandler> {
+class MojoApp : public mojo::ApplicationDelegate {
  public:
   MojoApp() {}
   ~MojoApp() override { }
@@ -34,7 +33,10 @@ class MojoApp : public mojo::ApplicationDelegate,
  private:
   // Overridden from ApplicationDelegate:
   void Initialize(mojo::ApplicationImpl* app) override {
-    mojo::icu::Initialize(app);
+    mojo::ApplicationConnectorPtr application_connector =
+        mojo::ApplicationConnectorPtr::Create(
+            mojo::CreateApplicationConnector(app->shell()));
+    mojo::icu::Initialize(application_connector.get());
     tracing_.Initialize(app);
 
     blink::SkySettings settings;
@@ -46,15 +48,13 @@ class MojoApp : public mojo::ApplicationDelegate,
   }
 
   bool ConfigureIncomingConnection(
-      mojo::ApplicationConnection* connection) override {
-    connection->AddService<mojo::ContentHandler>(this);
+      mojo::ServiceProviderImpl* service_provider_impl) override {
+    service_provider_impl->AddService<mojo::ContentHandler>(
+      [](const mojo::ConnectionContext& connection_context,
+         mojo::InterfaceRequest<mojo::ContentHandler> request) {
+        new ContentHandlerImpl(request.Pass());
+      });
     return true;
-  }
-
-  // Overridden from InterfaceFactory<ContentHandler>
-  void Create(mojo::ApplicationConnection* connection,
-              mojo::InterfaceRequest<mojo::ContentHandler> request) override {
-    new ContentHandlerImpl(request.Pass());
   }
 
   mojo::TracingImpl tracing_;

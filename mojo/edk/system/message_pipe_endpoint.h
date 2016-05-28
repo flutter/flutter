@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "mojo/edk/system/handle.h"
+#include "mojo/edk/system/handle_signals_state.h"
 #include "mojo/edk/system/memory.h"
 #include "mojo/edk/system/message_in_transit.h"
 #include "mojo/public/c/system/handle.h"

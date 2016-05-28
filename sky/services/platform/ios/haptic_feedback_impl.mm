@@ -14,12 +14,6 @@ HapticFeedbackImpl::HapticFeedbackImpl(
 
 HapticFeedbackImpl::~HapticFeedbackImpl() {}
 
-void HapticFeedbackFactory::Create(
-    mojo::ApplicationConnection* connection,
-    mojo::InterfaceRequest<HapticFeedback> request) {
-  new HapticFeedbackImpl(request.Pass());
-}
-
 void HapticFeedbackImpl::Vibrate(const VibrateCallback& callback) {
   AudioServicesPlayAlertSound(kSystemSoundID_Vibrate);
 }

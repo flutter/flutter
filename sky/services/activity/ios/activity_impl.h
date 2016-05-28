@@ -6,7 +6,6 @@
 #define SKY_SERVICES_ACTIVITY_IOS_ACTIVITY_IMPL_H_
 
 #include "base/macros.h"
-#include "mojo/public/cpp/application/interface_factory.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "sky/services/activity/activity.mojom.h"
 
@@ -28,13 +27,6 @@ class ActivityImpl : public ::activity::Activity {
   mojo::StrongBinding<::activity::Activity> binding_;
 
   DISALLOW_COPY_AND_ASSIGN(ActivityImpl);
-};
-
-class ActivityFactory
-    : public mojo::InterfaceFactory<::activity::Activity> {
- public:
-  void Create(mojo::ApplicationConnection* connection,
-              mojo::InterfaceRequest<::activity::Activity> request) override;
 };
 
 }  // namespace activity

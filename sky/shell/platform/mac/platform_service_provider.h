@@ -45,18 +45,6 @@ class PlatformServiceProvider : public mojo::ServiceProvider {
  private:
   DynamicServiceProviderCallback dynamic_service_provider_;
   mojo::StrongBinding<mojo::ServiceProvider> binding_;
-  mojo::NetworkServiceFactory network_;
-#if TARGET_OS_IPHONE
-  flutter::platform::HapticFeedbackFactory haptic_feedback_;
-  flutter::platform::PathProviderFactory path_provider_;
-  flutter::platform::SystemChromeFactory system_chrome_;
-  flutter::platform::SystemSoundFactory system_sound_;
-  sky::services::activity::ActivityFactory activity_;
-  sky::services::editing::ClipboardFactory clipboard_;
-  sky::services::media::MediaPlayerFactory media_player_;
-  sky::services::media::MediaServiceFactory media_service_;
-  sky::services::vsync::VSyncProviderFactory vsync_;
-#endif
 
   DISALLOW_COPY_AND_ASSIGN(PlatformServiceProvider);
 };

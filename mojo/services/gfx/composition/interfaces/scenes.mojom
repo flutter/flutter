@@ -117,8 +117,8 @@ const uint32 kSceneVersionNone = 0;
 //
 // SCHEDULING
 //
-// The scene provides support for scheduling update via its associated
-// |SceneScheduler| interface.  Use the scheduler to obtain frame timing
+// The scene provides support for scheduling frames via its associated
+// |FrameScheduler| interface.  Use the scheduler to obtain frame timing
 // information and to throttle updates to match the display refresh rate
 // (ie. with vsync).
 interface Scene {
@@ -155,8 +155,8 @@ interface Scene {
   // introducing cycles in the scene's nodes; the connection will be closed.
   Publish(SceneMetadata? metadata);
 
-  // Gets a scheduler for scheduling upcoming scene operations.
-  GetScheduler(SceneScheduler& scheduler);
+  // Gets a scheduler to receive frame timing information for the scene.
+  GetScheduler(FrameScheduler& scheduler);
 };
 
 // An interface applications may implement to receive events from a scene.

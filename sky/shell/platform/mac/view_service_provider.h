@@ -34,9 +34,6 @@ class ViewServiceProvider : public mojo::ServiceProvider {
  private:
   mojo::StrongBinding<mojo::ServiceProvider> binding_;
   AppMesssagesConnector connect_to_app_messages_;
-#if TARGET_OS_IPHONE
-  sky::services::editing::KeyboardFactory keyboard_;
-#endif
 
   DISALLOW_COPY_AND_ASSIGN(ViewServiceProvider);
 };

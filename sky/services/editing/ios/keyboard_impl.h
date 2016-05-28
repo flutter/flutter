@@ -6,7 +6,6 @@
 #define SKY_SERVICES_KEYBOARD_IOS_KEYBOARD_SERVICE_IMPL_H_
 
 #include "base/macros.h"
-#include "mojo/public/cpp/application/interface_factory.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "sky/services/editing/editing.mojom.h"
 
@@ -35,14 +34,6 @@ class KeyboardImpl : public ::editing::Keyboard {
   KeyboardClient* client_;
 
   DISALLOW_COPY_AND_ASSIGN(KeyboardImpl);
-};
-
-class KeyboardFactory
-    : public mojo::InterfaceFactory<::editing::Keyboard> {
- public:
-  void Create(
-      mojo::ApplicationConnection* connection,
-      mojo::InterfaceRequest<::editing::Keyboard> request) override;
 };
 
 }  // namespace editing

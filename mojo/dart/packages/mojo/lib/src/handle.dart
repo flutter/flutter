@@ -5,11 +5,15 @@
 part of core;
 
 class MojoHandle {
+  // TODO(floitsch): get the INVALID value from the backing internal
+  // implementation.
   static const int INVALID = 0;
   static const int DEADLINE_INDEFINITE = -1;
 
-  int _h;
-  int get h => _h;
+  // The type of this field is determined by the backing internal
+  // implementation.
+  Object _h;
+  Object get h => _h;
 
   MojoHandle(this._h, {String description}) {
     MojoHandleNatives.addOpenHandle(_h, description: description);

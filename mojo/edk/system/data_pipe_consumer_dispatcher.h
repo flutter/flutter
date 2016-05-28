@@ -23,7 +23,7 @@ class DataPipeConsumerDispatcher final : public Dispatcher {
   // The default/standard rights for a data pipe consumer handle.
   static constexpr MojoHandleRights kDefaultHandleRights =
       MOJO_HANDLE_RIGHT_TRANSFER | MOJO_HANDLE_RIGHT_READ |
-      MOJO_HANDLE_RIGHT_WRITE;
+      MOJO_HANDLE_RIGHT_GET_OPTIONS | MOJO_HANDLE_RIGHT_SET_OPTIONS;
 
   static util::RefPtr<DataPipeConsumerDispatcher> Create() {
     return AdoptRef(new DataPipeConsumerDispatcher());

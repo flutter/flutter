@@ -210,68 +210,51 @@ class Encoder {
       encodeHandle(value != null ? value.handle : null, offset, nullable);
 
   void encodeInterface(
-      core.MojoEventHandler interface, int offset, bool nullable) {
-    if (interface == null) {
+      MojoInterface mojoInterface, int offset, bool nullable) {
+    if (mojoInterface == null) {
       encodeInvalideHandle(offset, nullable);
       // Set the version field to 0.
       encodeUint32(0, offset + kSerializedHandleSize);
       return;
     }
-    if (interface is Stub) {
-      if (interface.isBound) {
-        throw new MojoCodecError(
-            'Cannot encode a bound stub for an interface');
-      }
+    if (!mojoInterface.ctrl.isBound) {
       var pipe = new core.MojoMessagePipe();
-      interface.bind(pipe.endpoints[0]);
+      mojoInterface.ctrl.bind(pipe.endpoints[0]);
       encodeMessagePipeHandle(pipe.endpoints[1], offset, nullable);
       // Set the version to the version in the stub.
-      encodeUint32(interface.version, offset + kSerializedHandleSize);
-    } else if (interface is Proxy) {
-      if (!interface.isBound) {
-        throw new MojoCodecError(
-            'Cannot encode an unbound proxy for an interface');
-      }
-      if (!interface.isOpen) {
+      encodeUint32(mojoInterface.ctrl.version, offset + kSerializedHandleSize);
+    } else {
+      if (!mojoInterface.ctrl.isOpen) {
         // Make sure that we are listening so that state for the proxy is
         // cleaned up when the message is sent and the handle is closed.
-        interface.beginHandlingEvents();
+        mojoInterface.ctrl.beginHandlingEvents();
       }
-      encodeMessagePipeHandle(interface.endpoint, offset, nullable);
+      encodeMessagePipeHandle(mojoInterface.ctrl.endpoint, offset, nullable);
       // Set the version to the current version of the proxy.
-      encodeUint32(interface.version, offset + kSerializedHandleSize);
-    } else {
-      throw new MojoCodecError('Cannot encode an unknown MojoEventHandler');
+      encodeUint32(mojoInterface.ctrl.version, offset + kSerializedHandleSize);
     }
   }
 
-  void encodeInterfaceRequest(Object request, int offset, bool nullable) {
-    if (request == null) {
+  void encodeInterfaceRequest(
+      MojoInterface mojoInterface, int offset, bool nullable) {
+    if (mojoInterface == null) {
       encodeInvalideHandle(offset, nullable);
       return;
     }
-    if (request is ProxyBase) {
-      if (request.impl.isBound) {
-        throw new MojoCodecError(
-            'Cannot encode a bound proxy for an interface request');
-      }
+    if (!mojoInterface.ctrl.isBound) {
       var pipe = new core.MojoMessagePipe();
-      request.impl.bind(pipe.endpoints[0]);
-      request.impl.beginHandlingEvents();
+      mojoInterface.ctrl.bind(pipe.endpoints[0]);
+      mojoInterface.ctrl.beginHandlingEvents();
       encodeMessagePipeHandle(pipe.endpoints[1], offset, nullable);
-    } else if (request is Stub) {
-      if (!request.isBound) {
-        throw new MojoCodecError(
-            'Cannot encode an unbound stub for an interface request');
-      }
-      if (!request.isOpen) {
+    } else {
+      if (!mojoInterface.ctrl.isOpen) {
         // Make sure that we are listening so that state for the stub is
         // cleaned up when the message is sent and the handle is closed.
-        request.beginHandlingEvents();
+        mojoInterface.ctrl.beginHandlingEvents();
       }
-      encodeMessagePipeHandle(request.endpoint, offset, nullable);
+      encodeMessagePipeHandle(mojoInterface.ctrl.endpoint, offset, nullable);
       // Set the version to the current version of the stub.
-      encodeUint32(request.version, offset + kSerializedHandleSize);
+      encodeUint32(mojoInterface.ctrl.version, offset + kSerializedHandleSize);
     }
   }
 
@@ -746,19 +729,19 @@ class Decoder {
   core.MojoSharedBuffer decodeSharedBufferHandle(int offset, bool nullable) =>
       new core.MojoSharedBuffer(decodeHandle(offset, nullable));
 
-  ProxyBase decodeServiceInterface(
+  MojoInterface decodeServiceInterface(
       int offset, bool nullable, Function clientFactory) {
     var endpoint = decodeMessagePipeHandle(offset, nullable);
     var version = decodeUint32(offset + kSerializedHandleSize);
     if (!endpoint.handle.isValid) {
       return null;
     }
-    ProxyBase client = clientFactory(endpoint);
-    client.impl._version = version;
+    Proxy client = clientFactory(endpoint);
+    client.ctrl._version = version;
     return client;
   }
 
-  Stub decodeInterfaceRequest(
+  MojoInterface decodeInterfaceRequest(
       int offset, bool nullable, Function interfaceFactory) {
     var endpoint = decodeMessagePipeHandle(offset, nullable);
     return endpoint.handle.isValid ? interfaceFactory(endpoint) : null;

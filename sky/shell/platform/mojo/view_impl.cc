@@ -74,7 +74,7 @@ ViewImpl::ViewImpl(mojo::InterfaceRequest<mojo::ui::ViewOwner> view_owner,
   // Compositing
   mojo::gfx::composition::ScenePtr scene;
   view->CreateScene(mojo::GetProxy(&scene));
-  scene->GetScheduler(mojo::GetProxy(&services->scene_scheduler));
+  scene->GetScheduler(mojo::GetProxy(&services->frame_scheduler));
   services->view = view.Pass();
 
   // Engine

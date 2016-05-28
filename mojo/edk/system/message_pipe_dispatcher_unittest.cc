@@ -180,6 +180,7 @@ TEST(MessagePipeDispatcherTest, SupportsEntrypointClass) {
     EXPECT_EQ(MOJO_RESULT_OK, d_peer->Close());
   }
 
+  EXPECT_TRUE(d->SupportsEntrypointClass(EntrypointClass::NONE));
   EXPECT_TRUE(d->SupportsEntrypointClass(EntrypointClass::MESSAGE_PIPE));
   EXPECT_FALSE(d->SupportsEntrypointClass(EntrypointClass::DATA_PIPE_PRODUCER));
   EXPECT_FALSE(d->SupportsEntrypointClass(EntrypointClass::DATA_PIPE_CONSUMER));

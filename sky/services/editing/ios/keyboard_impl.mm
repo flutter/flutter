@@ -157,12 +157,6 @@ void KeyboardImpl::Hide() {
   [client_ hide];
 }
 
-void KeyboardFactory::Create(
-    mojo::ApplicationConnection* connection,
-    mojo::InterfaceRequest<::editing::Keyboard> request) {
-  new KeyboardImpl(request.Pass());
-}
-
 }  // namespace editing
 }  // namespace services
 }  // namespace sky

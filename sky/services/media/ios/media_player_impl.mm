@@ -162,12 +162,6 @@ void MediaPlayerImpl::SetLooping(bool looping) {
   [audio_client_ setLooping:looping];
 }
 
-void MediaPlayerFactory::Create(
-    mojo::ApplicationConnection* connection,
-    mojo::InterfaceRequest<::media::MediaPlayer> request) {
-  new MediaPlayerImpl(request.Pass());
-}
-
 }  // namespace media
 }  // namespace services
 }  // namespace sky

@@ -408,7 +408,7 @@ void Channel::OnReadMessageForEndpoint(
   std::unique_ptr<MessageInTransit> message(new MessageInTransit(message_view));
   if (message_view.transport_data_buffer_size() > 0) {
     DCHECK(message_view.transport_data_buffer());
-    message->SetDispatchers(TransportData::DeserializeDispatchers(
+    message->SetHandles(TransportData::DeserializeHandles(
         message_view.transport_data_buffer(),
         message_view.transport_data_buffer_size(), std::move(platform_handles),
         this));

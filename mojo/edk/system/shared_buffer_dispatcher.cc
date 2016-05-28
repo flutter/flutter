@@ -102,7 +102,8 @@ Dispatcher::Type SharedBufferDispatcher::GetType() const {
 
 bool SharedBufferDispatcher::SupportsEntrypointClass(
     EntrypointClass entrypoint_class) const {
-  return (entrypoint_class == EntrypointClass::BUFFER);
+  return (entrypoint_class == EntrypointClass::NONE ||
+          entrypoint_class == EntrypointClass::BUFFER);
 }
 
 // static
@@ -216,6 +217,15 @@ void SharedBufferDispatcher::CloseImplNoLock() {
   mutex().AssertHeld();
   DCHECK(shared_buffer_);
   shared_buffer_ = nullptr;
+}
+
+MojoResult SharedBufferDispatcher::DuplicateDispatcherImplNoLock(
+    util::RefPtr<Dispatcher>* new_dispatcher) {
+  mutex().AssertHeld();
+
+  // Note: Since this is "duplicate", we keep our ref to |shared_buffer_|.
+  *new_dispatcher = CreateInternal(shared_buffer_.Clone());
+  return MOJO_RESULT_OK;
 }
 
 RefPtr<Dispatcher>

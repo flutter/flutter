@@ -6,7 +6,6 @@
 #define SKY_SERVICES_MEDIA_IOS_SOUND_POOL_IMPL_H_
 
 #include "base/macros.h"
-#include "mojo/public/cpp/application/interface_factory.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "sky/services/media/media.mojom.h"
 #include "sky/services/media/ios/media_player_impl.h"
@@ -62,12 +61,6 @@ class SoundPoolImpl : public ::media::SoundPool {
                     bool success);
 
   DISALLOW_COPY_AND_ASSIGN(SoundPoolImpl);
-};
-
-class SoundPoolFactory : public mojo::InterfaceFactory<::media::SoundPool> {
- public:
-  void Create(mojo::ApplicationConnection* connection,
-              mojo::InterfaceRequest<::media::SoundPool> request) override;
 };
 
 }  // namespace media

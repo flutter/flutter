@@ -1,148 +1,24 @@
-// Copyright 2014 The Chromium Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 part of core;
 
-class MojoEventSubscription {
-  // The underlying Mojo handle.
-  MojoHandle _handle;
-
-  // The send port that we give to the handle watcher to notify us of handle
-  // events.
-  SendPort _sendPort;
-
-  // The receive port on which we listen and receive events from the handle
-  // watcher.
-  RawReceivePort _receivePort;
-
-  // The signals on this handle that we're interested in.
-  int _signals;
-
-  // Whether subscribe() has been called.
-  bool _isSubscribed;
-
-  MojoEventSubscription(MojoHandle handle,
-      [int signals = MojoHandleSignals.kPeerClosedReadable])
-      : _handle = handle,
-        _signals = signals,
-        _isSubscribed = false {
-    if (!MojoHandle.registerFinalizer(this)) {
-      throw new MojoInternalError("Failed to register the MojoHandle.");
-    }
-  }
-
-  Future close({bool immediate: false}) => _close(immediate: immediate);
-
-  void subscribe(void handler(int event)) {
-    if (_isSubscribed) {
-      throw new MojoApiError("Already subscribed: $this.");
-    }
-    _receivePort = new RawReceivePort(handler);
-    _sendPort = _receivePort.sendPort;
-
-    if (_signals != MojoHandleSignals.kNone) {
-      int res = MojoHandleWatcher.add(_handle.h, _sendPort, _signals);
-      if (res != MojoResult.kOk) {
-        throw new MojoInternalError("MojoHandleWatcher add failed: $res");
-      }
-    }
-    _isSubscribed = true;
-  }
-
-  bool enableSignals([int signals]) {
-    if (signals != null) {
-      _signals = signals;
-    }
-    if (_isSubscribed) {
-      return MojoHandleWatcher.add(_handle.h, _sendPort, _signals) ==
-          MojoResult.kOk;
-    }
-    return false;
-  }
-
-  bool enableReadEvents() =>
-      enableSignals(MojoHandleSignals.kPeerClosedReadable);
-  bool enableWriteEvents() => enableSignals(MojoHandleSignals.kWritable);
-  bool enableAllEvents() => enableSignals(MojoHandleSignals.kReadWrite);
-
-  /// End the subscription by removing the handle from the handle watcher and
-  /// closing the Dart port, but do not close the underlying handle. The handle
-  /// can then be reused, or closed at a later time.
-  void unsubscribe({bool immediate: false}) {
-    if ((_handle == null) || !_isSubscribed || (_receivePort == null)) {
-      throw new MojoApiError("Cannont unsubscribe from a MojoEventSubscription "
-                             "that has not been subscribed to");
-    }
-    MojoHandleWatcher.remove(_handle.h);
-    _receivePort.close();
-    _receivePort = null;
-    _sendPort = null;
-    _isSubscribed = false;
-  }
-
-  Future _close({bool immediate: false, bool local: false}) {
-    if (_handle != null) {
-      if (_isSubscribed && !local) {
-        return _handleWatcherClose(immediate: immediate).then((result) {
-          // If the handle watcher is gone, then close the handle ourselves.
-          if (result != MojoResult.kOk) {
-            _localClose();
-          }
-        });
-      } else {
-        _localClose();
-      }
-    }
-    return new Future.value(null);
-  }
-
-  Future _handleWatcherClose({bool immediate: false}) {
-    assert(_handle != null);
-    MojoHandleNatives.removeOpenHandle(_handle.h);
-    return MojoHandleWatcher.close(_handle.h, wait: !immediate).then((r) {
-      if (_receivePort != null) {
-        _receivePort.close();
-        _receivePort = null;
-      }
-      return r;
-    });
-  }
-
-  void _localClose() {
-    if (_handle != null) {
-      _handle.close();
-      _handle = null;
-    }
-    if (_receivePort != null) {
-      _receivePort.close();
-      _receivePort = null;
-    }
-  }
-
-  bool get readyRead => _handle.readyRead;
-  bool get readyWrite => _handle.readyWrite;
-  int get signals => _signals;
-
-  String toString() => "$_handle";
-}
-
-/// Object returned to pipe's error handlers containing both the thrown error
-/// and the associated stack trace.
-class MojoHandlerError {
+/// The object passed to the handler's error handling function containing both
+/// the thrown error and the associated stack trace.
+class MojoEventHandlerError {
   final Object error;
   final StackTrace stacktrace;
 
-  MojoHandlerError(this.error, this.stacktrace);
+  MojoEventHandlerError(this.error, this.stacktrace);
 
+  @override
   String toString() => error.toString();
 }
 
-typedef void ErrorHandler(MojoHandlerError e);
+typedef void ErrorHandler(MojoEventHandlerError e);
 
 class MojoEventHandler {
-  ErrorHandler onError;
-
   MojoMessagePipeEndpoint _endpoint;
   MojoEventSubscription _eventSubscription;
   bool _isOpen = false;
@@ -167,6 +43,29 @@ class MojoEventHandler {
   }
 
   MojoEventHandler.unbound();
+
+  /// The event handler calls the [handleRead] method when the underlying Mojo
+  /// message pipe endpoint has a message available to be read. Implementers
+  /// should read, decode, and handle the message. If [handleRead] throws
+  /// an exception derived from [Error], the exception will be thrown into the
+  /// root zone, and the application will end. Otherwise, the exception object
+  /// will be passed to [onError] if it has been set, and the exception will
+  /// not be propagated to the root zone.
+  void handleRead() {}
+
+  /// Like [handleRead] but indicating that the underlying message pipe endpoint
+  /// is ready for writing.
+  void handleWrite() {}
+
+  /// Called when [handleRead] or [handleWrite] throw an exception generated by
+  /// Mojo library code. Other exceptions will be re-thrown.
+  ErrorHandler onError;
+
+  MojoMessagePipeEndpoint get endpoint => _endpoint;
+  bool get isOpen => _isOpen;
+  bool get isInHandler => _isInHandler;
+  bool get isBound => _endpoint != null;
+  bool get isPeerClosed => _isPeerClosed;
 
   void bind(MojoMessagePipeEndpoint endpoint) {
     if (isBound) {
@@ -252,6 +151,10 @@ class MojoEventHandler {
     return result != null ? result : new Future.value(null);
   }
 
+  @override
+  String toString() => "MojoEventHandler("
+      "isOpen: $_isOpen, isBound: $isBound, endpoint: $_endpoint)";
+
   void _tryHandleEvent(int event) {
     // This callback is running in the handler for a RawReceivePort. All
     // exceptions rethrown or not caught here will be unhandled exceptions in
@@ -271,7 +174,7 @@ class MojoEventHandler {
     } catch (e, s) {
       close(immediate: true).then((_) {
         if (onError != null) {
-          onError(new MojoHandlerError(e, s));
+          onError(new MojoEventHandlerError(e, s));
         }
       });
     }
@@ -302,26 +205,4 @@ class MojoEventHandler {
       });
     }
   }
-
-  /// The event handler calls the [handleRead] method when the underlying Mojo
-  /// message pipe endpoint has a message available to be read. Implementers
-  /// should read, decode, and handle the message. If [handleRead] throws
-  /// an exception derived from [Error], the exception will be thrown into the
-  /// root zone, and the application will end. Otherwise, the exception object
-  /// will be passed to [onError] if it has been set, and the exception will
-  /// not be propagated to the root zone.
-  void handleRead() {}
-
-  /// Like [handleRead] but indicating that the underlying message pipe endpoint
-  /// is ready for writing.
-  void handleWrite() {}
-
-  MojoMessagePipeEndpoint get endpoint => _endpoint;
-  bool get isOpen => _isOpen;
-  bool get isInHandler => _isInHandler;
-  bool get isBound => _endpoint != null;
-  bool get isPeerClosed => _isPeerClosed;
-
-  String toString() => "MojoEventHandler("
-      "isOpen: $_isOpen, isBound: $isBound, endpoint: $_endpoint)";
 }

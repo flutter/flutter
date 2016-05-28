@@ -85,12 +85,6 @@ void VsyncProviderImpl::AwaitVSync(const AwaitVSyncCallback& callback) {
   [client_ await:callback];
 }
 
-void VSyncProviderFactory::Create(
-    mojo::ApplicationConnection* connection,
-    mojo::InterfaceRequest<::vsync::VSyncProvider> request) {
-  new VsyncProviderImpl(request.Pass());
-}
-
 }  // namespace vsync
 }  // namespace services
 }  // namespace sky

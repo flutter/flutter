@@ -32,7 +32,8 @@ Dispatcher::Type DataPipeConsumerDispatcher::GetType() const {
 
 bool DataPipeConsumerDispatcher::SupportsEntrypointClass(
     EntrypointClass entrypoint_class) const {
-  return (entrypoint_class == EntrypointClass::DATA_PIPE_CONSUMER);
+  return (entrypoint_class == EntrypointClass::NONE ||
+          entrypoint_class == EntrypointClass::DATA_PIPE_CONSUMER);
 }
 
 // static

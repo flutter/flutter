@@ -17,8 +17,8 @@ class _ShellConnectToApplicationParams extends bindings.Struct {
     const bindings.StructDataHeader(32, 0)
   ];
   String applicationUrl = null;
-  Object services = null;
-  Object exposedServices = null;
+  service_provider_mojom.ServiceProviderInterfaceRequest services = null;
+  service_provider_mojom.ServiceProviderInterface exposedServices = null;
 
   _ShellConnectToApplicationParams() : super(kVersions.last.size);
 
@@ -113,7 +113,7 @@ class _ShellCreateApplicationConnectorParams extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(16, 0)
   ];
-  Object applicationConnectorRequest = null;
+  application_connector_mojom.ApplicationConnectorInterfaceRequest applicationConnectorRequest = null;
 
   _ShellCreateApplicationConnectorParams() : super(kVersions.last.size);
 
@@ -195,28 +195,60 @@ class _ShellServiceDescription implements service_describer.ServiceDescription {
 
 abstract class Shell {
   static const String serviceName = null;
-  void connectToApplication(String applicationUrl, Object services, Object exposedServices);
-  void createApplicationConnector(Object applicationConnectorRequest);
-}
 
-
-class _ShellProxyImpl extends bindings.Proxy {
-  _ShellProxyImpl.fromEndpoint(
-      core.MojoMessagePipeEndpoint endpoint) : super.fromEndpoint(endpoint);
-
-  _ShellProxyImpl.fromHandle(core.MojoHandle handle) :
-      super.fromHandle(handle);
-
-  _ShellProxyImpl.unbound() : super.unbound();
-
-  static _ShellProxyImpl newFromEndpoint(
-      core.MojoMessagePipeEndpoint endpoint) {
-    assert(endpoint.setDescription("For _ShellProxyImpl"));
-    return new _ShellProxyImpl.fromEndpoint(endpoint);
+  static service_describer.ServiceDescription _cachedServiceDescription;
+  static service_describer.ServiceDescription get serviceDescription {
+    if (_cachedServiceDescription == null) {
+      _cachedServiceDescription = new _ShellServiceDescription();
+    }
+    return _cachedServiceDescription;
   }
 
-  service_describer.ServiceDescription get serviceDescription =>
-    new _ShellServiceDescription();
+  static ShellProxy connectToService(
+      bindings.ServiceConnector s, String url, [String serviceName]) {
+    ShellProxy p = new ShellProxy.unbound();
+    String name = serviceName ?? Shell.serviceName;
+    if ((name == null) || name.isEmpty) {
+      throw new core.MojoApiError(
+          "If an interface has no ServiceName, then one must be provided.");
+    }
+    s.connectToService(url, p, name);
+    return p;
+  }
+  void connectToApplication(String applicationUrl, service_provider_mojom.ServiceProviderInterfaceRequest services, service_provider_mojom.ServiceProviderInterface exposedServices);
+  void createApplicationConnector(application_connector_mojom.ApplicationConnectorInterfaceRequest applicationConnectorRequest);
+}
+
+abstract class ShellInterface
+    implements bindings.MojoInterface<Shell>,
+               Shell {
+  factory ShellInterface([Shell impl]) =>
+      new ShellStub.unbound(impl);
+  factory ShellInterface.fromEndpoint(
+      core.MojoMessagePipeEndpoint endpoint,
+      [Shell impl]) =>
+      new ShellStub.fromEndpoint(endpoint, impl);
+}
+
+abstract class ShellInterfaceRequest
+    implements bindings.MojoInterface<Shell>,
+               Shell {
+  factory ShellInterfaceRequest() =>
+      new ShellProxy.unbound();
+}
+
+class _ShellProxyControl
+    extends bindings.ProxyMessageHandler
+    implements bindings.ProxyControl<Shell> {
+  _ShellProxyControl.fromEndpoint(
+      core.MojoMessagePipeEndpoint endpoint) : super.fromEndpoint(endpoint);
+
+  _ShellProxyControl.fromHandle(
+      core.MojoHandle handle) : super.fromHandle(handle);
+
+  _ShellProxyControl.unbound() : super.unbound();
+
+  String get serviceName => Shell.serviceName;
 
   void handleResponse(bindings.ServiceMessage message) {
     switch (message.header.type) {
@@ -227,70 +259,32 @@ class _ShellProxyImpl extends bindings.Proxy {
     }
   }
 
+  Shell get impl => null;
+  set impl(Shell _) {
+    throw new core.MojoApiError("The impl of a Proxy cannot be set.");
+  }
+
+  @override
   String toString() {
     var superString = super.toString();
-    return "_ShellProxyImpl($superString)";
+    return "_ShellProxyControl($superString)";
   }
 }
 
-
-class _ShellProxyCalls implements Shell {
-  _ShellProxyImpl _proxyImpl;
-
-  _ShellProxyCalls(this._proxyImpl);
-    void connectToApplication(String applicationUrl, Object services, Object exposedServices) {
-      if (!_proxyImpl.isBound) {
-        _proxyImpl.proxyError("The Proxy is closed.");
-        return;
-      }
-      var params = new _ShellConnectToApplicationParams();
-      params.applicationUrl = applicationUrl;
-      params.services = services;
-      params.exposedServices = exposedServices;
-      _proxyImpl.sendMessage(params, _shellMethodConnectToApplicationName);
-    }
-    void createApplicationConnector(Object applicationConnectorRequest) {
-      if (!_proxyImpl.isBound) {
-        _proxyImpl.proxyError("The Proxy is closed.");
-        return;
-      }
-      var params = new _ShellCreateApplicationConnectorParams();
-      params.applicationConnectorRequest = applicationConnectorRequest;
-      _proxyImpl.sendMessage(params, _shellMethodCreateApplicationConnectorName);
-    }
-}
-
-
-class ShellProxy implements bindings.ProxyBase {
-  final bindings.Proxy impl;
-  Shell ptr;
-
-  ShellProxy(_ShellProxyImpl proxyImpl) :
-      impl = proxyImpl,
-      ptr = new _ShellProxyCalls(proxyImpl);
-
+class ShellProxy
+    extends bindings.Proxy<Shell>
+    implements Shell,
+               ShellInterface,
+               ShellInterfaceRequest {
   ShellProxy.fromEndpoint(
-      core.MojoMessagePipeEndpoint endpoint) :
-      impl = new _ShellProxyImpl.fromEndpoint(endpoint) {
-    ptr = new _ShellProxyCalls(impl);
-  }
+      core.MojoMessagePipeEndpoint endpoint)
+      : super(new _ShellProxyControl.fromEndpoint(endpoint));
 
-  ShellProxy.fromHandle(core.MojoHandle handle) :
-      impl = new _ShellProxyImpl.fromHandle(handle) {
-    ptr = new _ShellProxyCalls(impl);
-  }
+  ShellProxy.fromHandle(core.MojoHandle handle)
+      : super(new _ShellProxyControl.fromHandle(handle));
 
-  ShellProxy.unbound() :
-      impl = new _ShellProxyImpl.unbound() {
-    ptr = new _ShellProxyCalls(impl);
-  }
-
-  factory ShellProxy.connectToService(
-      bindings.ServiceConnector s, String url, [String serviceName]) {
-    ShellProxy p = new ShellProxy.unbound();
-    s.connectToService(url, p, serviceName);
-    return p;
-  }
+  ShellProxy.unbound()
+      : super(new _ShellProxyControl.unbound());
 
   static ShellProxy newFromEndpoint(
       core.MojoMessagePipeEndpoint endpoint) {
@@ -298,50 +292,51 @@ class ShellProxy implements bindings.ProxyBase {
     return new ShellProxy.fromEndpoint(endpoint);
   }
 
-  String get serviceName => Shell.serviceName;
 
-  Future close({bool immediate: false}) => impl.close(immediate: immediate);
-
-  Future responseOrError(Future f) => impl.responseOrError(f);
-
-  Future get errorFuture => impl.errorFuture;
-
-  int get version => impl.version;
-
-  Future<int> queryVersion() => impl.queryVersion();
-
-  void requireVersion(int requiredVersion) {
-    impl.requireVersion(requiredVersion);
+  void connectToApplication(String applicationUrl, service_provider_mojom.ServiceProviderInterfaceRequest services, service_provider_mojom.ServiceProviderInterface exposedServices) {
+    if (!ctrl.isBound) {
+      ctrl.proxyError("The Proxy is closed.");
+      return;
+    }
+    var params = new _ShellConnectToApplicationParams();
+    params.applicationUrl = applicationUrl;
+    params.services = services;
+    params.exposedServices = exposedServices;
+    ctrl.sendMessage(params,
+        _shellMethodConnectToApplicationName);
   }
-
-  String toString() {
-    return "ShellProxy($impl)";
+  void createApplicationConnector(application_connector_mojom.ApplicationConnectorInterfaceRequest applicationConnectorRequest) {
+    if (!ctrl.isBound) {
+      ctrl.proxyError("The Proxy is closed.");
+      return;
+    }
+    var params = new _ShellCreateApplicationConnectorParams();
+    params.applicationConnectorRequest = applicationConnectorRequest;
+    ctrl.sendMessage(params,
+        _shellMethodCreateApplicationConnectorName);
   }
 }
 
-
-class ShellStub extends bindings.Stub {
+class _ShellStubControl
+    extends bindings.StubMessageHandler
+    implements bindings.StubControl<Shell> {
   Shell _impl;
 
-  ShellStub.fromEndpoint(
+  _ShellStubControl.fromEndpoint(
       core.MojoMessagePipeEndpoint endpoint, [Shell impl])
       : super.fromEndpoint(endpoint, autoBegin: impl != null) {
     _impl = impl;
   }
 
-  ShellStub.fromHandle(
+  _ShellStubControl.fromHandle(
       core.MojoHandle handle, [Shell impl])
       : super.fromHandle(handle, autoBegin: impl != null) {
     _impl = impl;
   }
 
-  ShellStub.unbound() : super.unbound();
+  _ShellStubControl.unbound([this._impl]) : super.unbound();
 
-  static ShellStub newFromEndpoint(
-      core.MojoMessagePipeEndpoint endpoint) {
-    assert(endpoint.setDescription("For ShellStub"));
-    return new ShellStub.fromEndpoint(endpoint);
-  }
+  String get serviceName => Shell.serviceName;
 
 
 
@@ -391,19 +386,43 @@ class ShellStub extends bindings.Stub {
     }
   }
 
+  @override
   String toString() {
     var superString = super.toString();
-    return "ShellStub($superString)";
+    return "_ShellStubControl($superString)";
   }
 
   int get version => 0;
+}
 
-  static service_describer.ServiceDescription _cachedServiceDescription;
-  static service_describer.ServiceDescription get serviceDescription {
-    if (_cachedServiceDescription == null) {
-      _cachedServiceDescription = new _ShellServiceDescription();
-    }
-    return _cachedServiceDescription;
+class ShellStub
+    extends bindings.Stub<Shell>
+    implements Shell,
+               ShellInterface,
+               ShellInterfaceRequest {
+  ShellStub.unbound([Shell impl])
+      : super(new _ShellStubControl.unbound(impl));
+
+  ShellStub.fromEndpoint(
+      core.MojoMessagePipeEndpoint endpoint, [Shell impl])
+      : super(new _ShellStubControl.fromEndpoint(endpoint, impl));
+
+  ShellStub.fromHandle(
+      core.MojoHandle handle, [Shell impl])
+      : super(new _ShellStubControl.fromHandle(handle, impl));
+
+  static ShellStub newFromEndpoint(
+      core.MojoMessagePipeEndpoint endpoint) {
+    assert(endpoint.setDescription("For ShellStub"));
+    return new ShellStub.fromEndpoint(endpoint);
+  }
+
+
+  void connectToApplication(String applicationUrl, service_provider_mojom.ServiceProviderInterfaceRequest services, service_provider_mojom.ServiceProviderInterface exposedServices) {
+    return impl.connectToApplication(applicationUrl, services, exposedServices);
+  }
+  void createApplicationConnector(application_connector_mojom.ApplicationConnectorInterfaceRequest applicationConnectorRequest) {
+    return impl.createApplicationConnector(applicationConnectorRequest);
   }
 }
 

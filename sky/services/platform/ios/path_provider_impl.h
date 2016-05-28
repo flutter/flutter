@@ -6,7 +6,6 @@
 #define SKY_SERVICES_PLATFORM_IOS_PATH_PROVIDER_IMPL_H_
 
 #include "base/macros.h"
-#include "mojo/public/cpp/application/interface_factory.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "sky/services/platform/path_provider.mojom.h"
 
@@ -28,12 +27,6 @@ class PathProviderImpl : public PathProvider {
   mojo::StrongBinding<PathProvider> binding_;
 
   DISALLOW_COPY_AND_ASSIGN(PathProviderImpl);
-};
-
-class PathProviderFactory : public mojo::InterfaceFactory<PathProvider> {
- public:
-  void Create(mojo::ApplicationConnection* connection,
-              mojo::InterfaceRequest<PathProvider> request) override;
 };
 
 }  // namespace platform

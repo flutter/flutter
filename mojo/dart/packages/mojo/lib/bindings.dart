@@ -17,6 +17,7 @@ import 'package:mojo/mojo/bindings/types/service_describer.mojom.dart'
 part 'src/control_message.dart';
 part 'src/codec.dart';
 part 'src/enum.dart';
+part 'src/interfaces.dart';
 part 'src/message.dart';
 part 'src/proxy.dart';
 part 'src/struct.dart';

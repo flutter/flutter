@@ -10,6 +10,7 @@
 
 #include "base/logging.h"
 #include "mojo/edk/system/configuration.h"
+#include "mojo/edk/system/dispatcher.h"
 #include "mojo/edk/system/transport_data.h"
 
 using mojo::platform::AlignedAlloc;
@@ -153,19 +154,6 @@ void MessageInTransit::SetHandles(std::unique_ptr<HandleVector> handles) {
       handles_->at(i).dispatcher->AssertHasOneRef();
   }
 #endif
-}
-
-void MessageInTransit::SetDispatchers(
-    std::unique_ptr<DispatcherVector> dispatchers) {
-  DCHECK(dispatchers);
-
-  std::unique_ptr<HandleVector> handles(new HandleVector());
-  handles->reserve(dispatchers->size());
-  for (size_t i = 0; i < dispatchers->size(); i++) {
-    handles->push_back(
-        Handle(std::move(dispatchers->at(i)), MOJO_HANDLE_RIGHT_NONE));
-  }
-  SetHandles(std::move(handles));
 }
 
 void MessageInTransit::SetTransportData(

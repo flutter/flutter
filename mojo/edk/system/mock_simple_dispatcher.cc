@@ -52,7 +52,7 @@ Dispatcher::Type MockSimpleDispatcher::GetType() const {
 
 bool MockSimpleDispatcher::SupportsEntrypointClass(
     EntrypointClass entrypoint_class) const {
-  return false;
+  return (entrypoint_class == EntrypointClass::NONE);
 }
 
 MockSimpleDispatcher::MockSimpleDispatcher(
@@ -64,6 +64,12 @@ MockSimpleDispatcher::MockSimpleDispatcher(const HandleSignalsState& state)
     : state_(state) {}
 
 MockSimpleDispatcher::~MockSimpleDispatcher() {}
+
+MojoResult MockSimpleDispatcher::DuplicateDispatcherImplNoLock(
+    util::RefPtr<Dispatcher>* new_dispatcher) {
+  *new_dispatcher = MakeRefCounted<MockSimpleDispatcher>(state_);
+  return MOJO_RESULT_OK;
+}
 
 RefPtr<Dispatcher>
 MockSimpleDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock(

@@ -5,7 +5,6 @@
 [DartPackage="mojo_services"]
 module mojo.media;
 
-import "mojo/services/files/interfaces/types.mojom";
 import "mojo/services/media/common/interfaces/media_common.mojom";
 
 // Reader with seek semantics.

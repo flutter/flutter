@@ -6,7 +6,6 @@
 
 #include "files/interfaces/files.mojom-sync.h"
 #include "files/interfaces/files.mojom.h"
-#include "mojo/public/cpp/application/application_impl.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/cpp/bindings/interface_request.h"
 #include "mojo/public/cpp/bindings/synchronous_interface_ptr.h"
@@ -27,8 +26,7 @@ void MojioImplTestBase::SetUp() {
   mojo::test::ApplicationTestBase::SetUp();
 
   SynchronousInterfacePtr<mojo::files::Files> files;
-  mojo::ConnectToService(application_impl()->shell(), "mojo:files",
-                         GetSynchronousProxy(&files));
+  mojo::ConnectToService(shell(), "mojo:files", GetSynchronousProxy(&files));
 
   mojo::files::Error error = mojo::files::Error::INTERNAL;
   MOJO_CHECK(

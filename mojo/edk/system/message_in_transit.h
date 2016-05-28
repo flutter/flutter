@@ -14,7 +14,6 @@
 
 #include "mojo/edk/platform/aligned_alloc.h"
 #include "mojo/edk/system/channel_endpoint_id.h"
-#include "mojo/edk/system/dispatcher.h"
 #include "mojo/edk/system/handle.h"
 #include "mojo/edk/system/memory.h"
 #include "mojo/public/cpp/system/macros.h"
@@ -189,8 +188,6 @@ class MessageInTransit {
   // handle in the handle table), i.e., the dispatcher must have a reference
   // count of 1. This message must not already have handles.
   void SetHandles(std::unique_ptr<HandleVector> handles);
-  // TODO(vtl): Delete this.
-  void SetDispatchers(std::unique_ptr<DispatcherVector> dispatchers);
 
   // Sets the |TransportData| for this message. This should only be done when
   // there are no handles and no existing |TransportData|.

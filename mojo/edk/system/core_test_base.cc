@@ -56,6 +56,13 @@ class MockDispatcher : public Dispatcher {
     mutex().AssertHeld();
   }
 
+  MojoResult DuplicateDispatcherImplNoLock(
+      util::RefPtr<Dispatcher>* new_dispatcher) override {
+    info_->IncrementDuplicateDispatcherCallCount();
+    *new_dispatcher = MockDispatcher::Create(info_);
+    return MOJO_RESULT_OK;
+  }
+
   MojoResult WriteMessageImplNoLock(UserPointer<const void> bytes,
                                     uint32_t num_bytes,
                                     std::vector<HandleTransport>* transports,
@@ -208,6 +215,9 @@ class MockDispatcher : public Dispatcher {
 
 // CoreTestBase ----------------------------------------------------------------
 
+// static
+constexpr MojoHandleRights CoreTestBase::kDefaultMockHandleRights;
+
 CoreTestBase::CoreTestBase()
     : platform_support_(embedder::CreateSimplePlatformSupport()) {}
 
@@ -226,11 +236,13 @@ void CoreTestBase::TearDown() {
 MojoHandle CoreTestBase::CreateMockHandle(CoreTestBase::MockHandleInfo* info) {
   CHECK(core_);
   auto dispatcher = MockDispatcher::Create(info);
-  MojoHandle rv = core_->AddHandle(
-      Handle(std::move(dispatcher),
-             MOJO_HANDLE_RIGHT_DUPLICATE | MOJO_HANDLE_RIGHT_TRANSFER |
-                 MOJO_HANDLE_RIGHT_READ | MOJO_HANDLE_RIGHT_WRITE |
-                 MOJO_HANDLE_RIGHT_EXECUTE));
+  MojoHandle rv = core_->AddHandle(Handle(
+      std::move(dispatcher),
+      MOJO_HANDLE_RIGHT_DUPLICATE | MOJO_HANDLE_RIGHT_TRANSFER |
+          MOJO_HANDLE_RIGHT_READ | MOJO_HANDLE_RIGHT_WRITE |
+          MOJO_HANDLE_RIGHT_GET_OPTIONS | MOJO_HANDLE_RIGHT_SET_OPTIONS |
+          MOJO_HANDLE_RIGHT_MAP_READABLE | MOJO_HANDLE_RIGHT_MAP_WRITABLE |
+          MOJO_HANDLE_RIGHT_MAP_EXECUTABLE));
   CHECK_NE(rv, MOJO_HANDLE_INVALID);
   return rv;
 }
@@ -254,6 +266,11 @@ unsigned CoreTestBase_MockHandleInfo::GetDtorCallCount() const {
 unsigned CoreTestBase_MockHandleInfo::GetCloseCallCount() const {
   MutexLocker locker(&mutex_);
   return close_call_count_;
+}
+
+unsigned CoreTestBase_MockHandleInfo::GetDuplicateDispatcherCallCount() const {
+  MutexLocker locker(&mutex_);
+  return duplicate_dispatcher_call_count_;
 }
 
 unsigned CoreTestBase_MockHandleInfo::GetWriteMessageCallCount() const {
@@ -350,6 +367,11 @@ void CoreTestBase_MockHandleInfo::IncrementDtorCallCount() {
 void CoreTestBase_MockHandleInfo::IncrementCloseCallCount() {
   MutexLocker locker(&mutex_);
   close_call_count_++;
+}
+
+void CoreTestBase_MockHandleInfo::IncrementDuplicateDispatcherCallCount() {
+  MutexLocker locker(&mutex_);
+  duplicate_dispatcher_call_count_++;
 }
 
 void CoreTestBase_MockHandleInfo::IncrementWriteMessageCallCount() {

@@ -8,24 +8,25 @@
 //
 // Example application that uses this log client to talk to the log service:
 //
-//  class MyDelegate : public mojo::ApplicationDelegate {
+//  class MyApp : public mojo::ApplicationImplBase {
 //   public:
-//    void Initialize(mojo::ApplicationImpl* app) override {
+//    void OnInitialize() override {
 //      LogPtr log;
-//      app->ConnectToService("mojo:log", &log);
+//      mojo::ConnectToService(shell(), "mojo:log", &log);
 //      mojo::log::InitializeLogger(std::move(log),
-//                                  ApplicationRunner::GetDefaultLogger());
-//      mojo::ApplicationRunner::SetDefaultLogger(mojo::log::GetLogger());
+//                                  mojo::Environment::GetDefaultLogger());
+//      mojo::Environment::SetDefaultLogger(mojo::log::GetLogger());
 //    }
 //
-//    void Quit() {
+//    void OnQuit() override {
 //      mojo::log::DestroyLogger();
 //    }
 //  };
 //
 //  MojoResult MojoMain(MojoHandle app_request) {
-//    mojo::ApplicationRunner runner(new MyDelegate);
-//    return runner.Run(app_request);
+//    MyApp app;
+//    mojo::RunApplication(&app);
+//    return MOJO_RESULT_OK;
 //  }
 
 #ifndef MOJO_SERVICES_LOG_CPP_LOG_CLIENT_H_

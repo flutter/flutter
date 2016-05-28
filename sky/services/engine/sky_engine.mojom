@@ -34,7 +34,7 @@ struct ServicesData {
   mojo.ServiceProvider&? outgoing_services;
   mojo.ui.View? view;
   mojo.ServiceProvider? view_services;
-  mojo.gfx.composition.SceneScheduler? scene_scheduler;
+  mojo.gfx.composition.FrameScheduler? frame_scheduler;
 };
 
 [ServiceName="sky::SkyEngine"]
