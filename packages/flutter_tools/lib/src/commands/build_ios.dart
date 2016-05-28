@@ -64,22 +64,9 @@ class BuildIOSCommand extends FlutterCommand {
       return 1;
     }
 
-    if (result.output != null) {
-      // TODO(devoncarew): We're printing the size of the (uncompressed) .app directory
-      // here, but what we really care about is the size of the installed .ipa file.
-      double size = _calcDirectorySize(new Directory(result.output)) / (1024 * 1024);
-      printStatus('Built ${result.output} (${size.toStringAsFixed(1)}MB).');
-    }
+    if (result.output != null)
+      printStatus('Built ${result.output}.');
 
     return 0;
-  }
-
-  int _calcDirectorySize(Directory directory) {
-    int size = 0;
-    for (FileSystemEntity entity in directory.listSync(recursive: true, followLinks: false)) {
-      if (entity is File)
-        size += entity.lengthSync();
-    }
-    return size;
   }
 }

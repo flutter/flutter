@@ -541,8 +541,8 @@ Future<int> buildAndroid(
   status.stop(showElapsedTime: true);
 
   if (result == 0) {
-    double size = new File(outputFile).lengthSync() / (1024 * 1024);
-    printStatus('Built $outputFile (${size.toStringAsFixed(1)}MB).');
+    File apkFile = new File(outputFile);
+    printStatus('Built $outputFile (${getSizeAsMB(apkFile.lengthSync())}).');
 
     _writeBuildMetaEntry(
       path.dirname(outputFile),
