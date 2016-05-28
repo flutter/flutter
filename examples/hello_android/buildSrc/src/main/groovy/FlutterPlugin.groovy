@@ -19,7 +19,7 @@ import org.gradle.api.tasks.TaskAction
 
 class FlutterPlugin implements Plugin<Project> {
     private File sdkDir
-    private File engineSrcDir
+    private String localEngine
 
     @Override
     void apply(Project project) {
@@ -56,13 +56,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        String engineSrcPath = properties.getProperty("flutter.engineSrcPath")
-        if (engineSrcPath != null) {
-            engineSrcDir = project.file(engineSrcPath)
-            if (!engineSrcDir.isDirectory()) {
-                throw new GradleException("flutter.engineSrcPath must be a Flutter engine source directory")
-            }
-        }
+        localEngine = properties.getProperty("flutter.localEngine")
 
         project.extensions.create("flutter", FlutterExtension)
         project.dependencies.add("compile", project.files(flutterJar))
@@ -78,7 +72,7 @@ class FlutterPlugin implements Plugin<Project> {
             sdkDir this.sdkDir
             sourceDir project.file(project.flutter.source)
             intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter")
-            engineSrcDir this.engineSrcDir
+            localEngine this.localEngine
         }
 
         project.android.applicationVariants.all { variant ->
@@ -106,7 +100,7 @@ class FlutterTask extends DefaultTask {
     @OutputDirectory
     File intermediateDir
 
-    File engineSrcDir
+    String localEngine
 
     String getFlxPath() {
         return "${intermediateDir}/app.flx"
@@ -122,8 +116,8 @@ class FlutterTask extends DefaultTask {
         project.exec {
             executable "${sdkDir}/bin/flutter"
             workingDir sourceDir
-            if (engineSrcDir != null) {
-              args "--engine-src-path", engineSrcDir
+            if (localEngine != null) {
+              args "--local-engine", localEngine
             }
             args "build", "flx"
             args "-o", flxPath
