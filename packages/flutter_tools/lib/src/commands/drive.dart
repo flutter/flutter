@@ -126,9 +126,10 @@ class DriveCommand extends RunCommandBase {
 
     // Check for the existance of a `packages/` directory; pub test does not yet
     // support running without symlinks.
-    // TODO(devoncarew): Remove once https://github.com/dart-lang/test/issues/327 is fixed.
     if (!new io.Directory('packages').existsSync()) {
-      Status status = logger.startProgress('Running pub get...');
+      Status status = logger.startProgress(
+        'Missing packages directory; running `pub get` (to work around https://github.com/dart-lang/test/issues/327):'
+      );
       await runAsync(<String>[sdkBinaryName('pub'), 'get', '--no-precompile']);
       status.stop(showElapsedTime: true);
     }
