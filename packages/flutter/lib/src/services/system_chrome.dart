@@ -12,9 +12,7 @@ import 'shell.dart';
 export 'package:sky_services/flutter/platform/system_chrome.mojom.dart' show DeviceOrientation;
 
 mojom.SystemChromeProxy _initSystemChromeProxy() {
-  mojom.SystemChromeProxy proxy = new mojom.SystemChromeProxy.unbound();
-  shell.connectToService('mojo:flutter_platform', proxy);
-  return proxy;
+  return shell.connectToApplicationService('mojo:flutter_platform', mojom.SystemChrome.connectToService);
 }
 
 final mojom.SystemChromeProxy _systemChromeProxy = _initSystemChromeProxy();
@@ -36,7 +34,7 @@ class SystemChrome {
   ///   boolean indicating if the orientation mask is valid and the changes
   ///   could be conveyed successfully to the embedder.
   static Future<bool> setPreferredOrientations(int deviceOrientationMask) async {
-    return (await _systemChromeProxy.ptr.setPreferredOrientations(deviceOrientationMask)).success;
+    return (await _systemChromeProxy.setPreferredOrientations(deviceOrientationMask)).success;
   }
 
   /// Specifies the set of overlays visible on the embedder when the
@@ -58,6 +56,6 @@ class SystemChrome {
   ///   If the overlay is unsupported on the platform, enabling or disabling
   ///   that overlay is a no-op and always return true.
   static Future<bool> setEnabledSystemUIOverlays(int overlaysMask) async {
-    return (await _systemChromeProxy.ptr.setEnabledSystemUiOverlays(overlaysMask)).success;
+    return (await _systemChromeProxy.setEnabledSystemUiOverlays(overlaysMask)).success;
   }
 }

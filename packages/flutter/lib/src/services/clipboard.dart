@@ -11,9 +11,7 @@ import 'shell.dart';
 export 'package:sky_services/editing/editing.mojom.dart' show ClipboardData;
 
 mojom.ClipboardProxy _initClipboardProxy() {
-  mojom.ClipboardProxy proxy = new mojom.ClipboardProxy.unbound();
-  shell.connectToService('mojo:clipboard', proxy);
-  return proxy;
+  return shell.connectToApplicationService('mojo:clipboard', mojom.Clipboard.connectToService);
 }
 
 final mojom.ClipboardProxy _clipboardProxy = _initClipboardProxy();
@@ -26,10 +24,10 @@ class Clipboard {
   Clipboard._();
 
   static void setClipboardData(mojom.ClipboardData clip) {
-    _clipboardProxy.ptr.setClipboardData(clip);
+    _clipboardProxy.setClipboardData(clip);
   }
 
   static Future<mojom.ClipboardData> getClipboardData(String format) async {
-    return (await _clipboardProxy.ptr.getClipboardData(format)).clip;
+    return (await _clipboardProxy.getClipboardData(format)).clip;
   }
 }

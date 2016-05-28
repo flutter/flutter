@@ -135,8 +135,8 @@ class MojoClient {
     mojom.UrlRequest request = _prepareRequest('GET', url, headers);
     mojom.UrlResponse response;
     try {
-      networkService.ptr.createUrlLoader(loader);
-      response = (await loader.ptr.start(request)).response;
+      networkService.createUrlLoader(loader);
+      response = (await loader.start(request)).response;
     } catch (exception, stack) {
       FlutterError.reportError(new FlutterErrorDetails(
         exception: exception,
@@ -181,8 +181,8 @@ class MojoClient {
     mojom.UrlLoaderProxy loader = new mojom.UrlLoaderProxy.unbound();
     mojom.UrlRequest request = _prepareRequest(method, url, headers, body, encoding);
     try {
-      networkService.ptr.createUrlLoader(loader);
-      mojom.UrlResponse response = (await loader.ptr.start(request)).response;
+      networkService.createUrlLoader(loader);
+      mojom.UrlResponse response = (await loader.start(request)).response;
       ByteData data = await mojo.DataPipeDrainer.drainHandle(response.body);
       Uint8List bodyBytes = new Uint8List.view(data.buffer);
       Map<String, String> headers = <String, String>{};
@@ -215,9 +215,7 @@ class MojoClient {
   }
 
   static mojom.NetworkServiceProxy _initNetworkService() {
-    mojom.NetworkServiceProxy proxy = new mojom.NetworkServiceProxy.unbound();
-    shell.connectToService("mojo:authenticated_network_service", proxy);
-    return proxy;
+    return shell.connectToApplicationService('mojo:authenticated_network_service', mojom.NetworkService.connectToService);
   }
 
   /// A handle to the [NetworkService] object used by [MojoClient].

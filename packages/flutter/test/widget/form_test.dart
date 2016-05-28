@@ -6,7 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:sky_services/editing/editing.mojom.dart' as mojom;
 
-class MockKeyboard implements mojom.Keyboard {
+class MockKeyboard extends mojom.KeyboardProxy {
+  MockKeyboard() : super.unbound();
+
   mojom.KeyboardClient client;
 
   @override
@@ -28,7 +30,7 @@ void main() {
   MockKeyboard mockKeyboard = new MockKeyboard();
 
   setUpAll(() {
-    serviceMocker.registerMockService(mojom.Keyboard.serviceName, mockKeyboard);
+    serviceMocker.registerMockService(mockKeyboard);
   });
 
   void enterText(String testValue) {

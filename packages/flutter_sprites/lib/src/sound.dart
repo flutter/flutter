@@ -39,7 +39,7 @@ class SoundEffectStream {
 
   /// Stop the sound effect.
   void stop() {
-    _soundPool.ptr.stop(_streamId);
+    _soundPool.stop(_streamId);
   }
 
   /// True if the sound effect is paused.
@@ -48,9 +48,9 @@ class SoundEffectStream {
   set paused(bool value) {
     _paused = value;
     if (_paused) {
-      _soundPool.ptr.pause(_streamId);
+      _soundPool.pause(_streamId);
     } else {
-      _soundPool.ptr.resume(_streamId);
+      _soundPool.resume(_streamId);
     }
   }
 
@@ -59,7 +59,7 @@ class SoundEffectStream {
   double _leftVolume;
   set leftVolume(double value) {
     _leftVolume = value;
-    _soundPool.ptr.setVolume(_streamId, <double>[_leftVolume, _rightVolume]);
+    _soundPool.setVolume(_streamId, <double>[_leftVolume, _rightVolume]);
   }
 
   /// Right volume of the sound effect, valid values are 0.0 to 1.0.
@@ -67,7 +67,7 @@ class SoundEffectStream {
   double _rightVolume;
   set rightVolume(double value) {
     _rightVolume = value;
-    _soundPool.ptr.setVolume(_streamId, <double>[_leftVolume, _rightVolume]);
+    _soundPool.setVolume(_streamId, <double>[_leftVolume, _rightVolume]);
   }
 
   /// The pitch of the sound effect, a value of 1.0 plays back the sound effect
@@ -76,7 +76,7 @@ class SoundEffectStream {
   double _pitch;
   set pitch(double value) {
     _pitch = value;
-    _soundPool.ptr.setRate(_streamId, _pitch);
+    _soundPool.setRate(_streamId, _pitch);
   }
 }
 
@@ -86,10 +86,11 @@ class SoundEffectPlayer {
   /// Creates a new SoundEffectPlayer with a max number of simultaneous
   /// streams specified.
   SoundEffectPlayer(int maxStreams) {
-    MediaServiceProxy mediaService = new MediaServiceProxy.unbound();
-    shell.connectToService("mojo:media_service", mediaService);
+    MediaServiceProxy mediaService = shell.connectToApplicationService(
+      'mojo:media_service', MediaService.connectToService
+    );
     _soundPool = new SoundPoolProxy.unbound();
-    mediaService.ptr.createSoundPool(_soundPool, maxStreams);
+    mediaService.createSoundPool(_soundPool, maxStreams);
   }
 
   SoundPoolProxy _soundPool;
@@ -98,7 +99,7 @@ class SoundEffectPlayer {
 
   /// Loads a sound effect.
   Future<SoundEffect> load(MojoDataPipeConsumer data) async {
-    SoundPoolLoadResponseParams result = await _soundPool.ptr.load(data);
+    SoundPoolLoadResponseParams result = await _soundPool.load(data);
     if (result.success)
       return new SoundEffect(result.soundId);
 
@@ -113,7 +114,7 @@ class SoundEffectPlayer {
     double pitch: 1.0
   }) async {
     int streamId = _nextStreamId++;
-    SoundPoolPlayResponseParams result = await _soundPool.ptr.play(
+    SoundPoolPlayResponseParams result = await _soundPool.play(
       sound._soundId, streamId, <double>[leftVolume, rightVolume], loop, pitch
     );
 
@@ -134,9 +135,9 @@ class SoundEffectPlayer {
   set paused(bool value) {
     _paused = value;
     if (_paused) {
-      _soundPool.ptr.pauseAll();
+      _soundPool.pauseAll();
     } else {
-      _soundPool.ptr.resumeAll();
+      _soundPool.resumeAll();
     }
   }
 }
@@ -180,8 +181,9 @@ class SoundTrackPlayer {
   /// Creates a new [SoundTrackPlayer], typically you will want to use the
   /// [sharedInstance] method to receive the player.
   SoundTrackPlayer() {
-    _mediaService = new MediaServiceProxy.unbound();
-    shell.connectToService("mojo:media_service", _mediaService);
+    _mediaService = shell.connectToApplicationService(
+      'mojo:media_service', MediaService.connectToService
+    );
   }
 
   MediaServiceProxy _mediaService;
@@ -199,9 +201,9 @@ class SoundTrackPlayer {
     // Create media player
     SoundTrack soundTrack = new SoundTrack();
     soundTrack._player = new MediaPlayerProxy.unbound();
-    _mediaService.ptr.createPlayer(soundTrack._player);
+    _mediaService.createPlayer(soundTrack._player);
 
-    await soundTrack._player.ptr.prepare(await pipe);
+    await soundTrack._player.prepare(await pipe);
     return soundTrack;
   }
 
@@ -217,28 +219,29 @@ class SoundTrackPlayer {
     double volume: 1.0,
     double startTime: 0.0
   }) {
-    soundTrack._player.ptr.setLooping(loop);
-    soundTrack._player.ptr.setVolume(volume);
-    soundTrack._player.ptr.seekTo((startTime * 1000.0).toInt());
-    soundTrack._player.ptr.start();
+    soundTrack._player
+      ..setLooping(loop)
+      ..setVolume(volume)
+      ..seekTo((startTime * 1000.0).toInt())
+      ..start();
     _soundTracks.add(soundTrack);
   }
 
   /// Stops a [SoundTrack]. You may also want to call the [unload] method to
   /// remove if from memory if you are not planning to play it again.
   void stop(SoundTrack track) {
-    track._player.ptr.pause();
+    track._player.pause();
   }
 
   /// Pauses all [SoundTrack]s that are currently playing.
   void pauseAll() {
     for (SoundTrack soundTrack in _soundTracks)
-      soundTrack._player.ptr.pause();
+      soundTrack._player.pause();
   }
 
   /// Resumes all [SoundTrack]s that have been loaded by this player.
   void resumeAll() {
     for (SoundTrack soundTrack in _soundTracks)
-      soundTrack._player.ptr.start();
+      soundTrack._player.start();
   }
 }

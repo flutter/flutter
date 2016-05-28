@@ -10,9 +10,7 @@ import 'package:sky_services/flutter/platform/path_provider.mojom.dart' as mojom
 import 'shell.dart';
 
 mojom.PathProviderProxy _initPathProviderProxy() {
-  mojom.PathProviderProxy proxy = new mojom.PathProviderProxy.unbound();
-  shell.connectToService('mojo:flutter_platform', proxy);
-  return proxy;
+  return shell.connectToApplicationService('mojo:flutter_platform', mojom.PathProvider.connectToService);
 }
 
 final mojom.PathProviderProxy _pathProviderProxy = _initPathProviderProxy();
@@ -32,7 +30,7 @@ class PathProvider {
   ///  * _iOS_: `NSTemporaryDirectory()`
   ///  * _Android_: `getCacheDir()` on the context.
   static Future<Directory> getTemporaryDirectory() async {
-    return new Directory((await _pathProviderProxy.ptr.temporaryDirectory()).path);
+    return new Directory((await _pathProviderProxy.temporaryDirectory()).path);
   }
 
   /// Path to a directory where the application may place files that are private
@@ -44,6 +42,6 @@ class PathProvider {
   ///  * _iOS_: `NSDocumentsDirectory`
   ///  * _Android_: The AppData directory.
   static Future<Directory> getApplicationDocumentsDirectory() async {
-    return new Directory((await _pathProviderProxy.ptr.applicationDocumentsDirectory()).path);
+    return new Directory((await _pathProviderProxy.applicationDocumentsDirectory()).path);
   }
 }

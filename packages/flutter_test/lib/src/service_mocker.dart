@@ -7,6 +7,15 @@ import 'package:mojo/bindings.dart' as bindings;
 
 import 'binding.dart';
 
+class _MockServiceConnector extends bindings.ServiceConnector {
+  String serviceName;
+
+  @override
+  void connectToService(String url, bindings.Proxy<dynamic> proxy, [String serviceName]) {
+    this.serviceName = serviceName;
+  }
+}
+
 /// Tests can use [ServiceMocker] to register replacement implementations
 /// of Mojo services.
 class ServiceMocker {
@@ -16,23 +25,18 @@ class ServiceMocker {
   }
 
   // Map of interface names to mock implementations.
-  Map<String, Object> _interfaceMocks = <String, Object>{};
+  Map<String, bindings.Proxy<dynamic>> _interfaceMocks = <String, bindings.Proxy<dynamic>>{};
 
-  bool _connectToService(String url, bindings.ProxyBase proxy) {
-    Object mock = _interfaceMocks[proxy.serviceName];
-    if (mock != null) {
-      // Replace the proxy's implementation of the service interface with the
-      // mock. The mojom bindings put the "ptr" field on all proxies.
-      (proxy as dynamic).ptr = mock;
-      return true;
-    } else {
-      return false;
-    }
+  bindings.Proxy<dynamic> _connectToService(String url, ServiceConnectionCallback callback) {
+    // TODO(abarth): This is quite awkward. See <https://github.com/domokit/mojo/issues/786>.
+    _MockServiceConnector connector = new _MockServiceConnector();
+    callback(connector, url);
+    return _interfaceMocks[connector.serviceName];
   }
 
   /// Provide a mock implementation for a Mojo interface.
-  void registerMockService(String interfaceName, Object mock) {
-    _interfaceMocks[interfaceName] = mock;
+  void registerMockService(bindings.Proxy<dynamic> mock) {
+    _interfaceMocks[mock.ctrl.serviceName] = mock;
   }
 }
 
