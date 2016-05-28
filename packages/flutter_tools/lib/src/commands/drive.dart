@@ -308,7 +308,8 @@ void restoreTestRunner() {
 
 Future<int> runTests(List<String> testArgs) async {
   printTrace('Running driver tests.');
-  await executable.main(testArgs);
+  List<String> args = testArgs.toList()..add('-rexpanded');
+  await executable.main(args);
   return io.exitCode;
 }
 
