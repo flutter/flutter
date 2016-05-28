@@ -97,7 +97,7 @@ bool _xcodeVersionCheckValid(int major, int minor) {
   return false;
 }
 
-Future<bool> buildIOSXcodeProject(ApplicationPackage app, BuildMode mode,
+Future<XcodeBuildResult> buildXcodeProject(ApplicationPackage app, BuildMode mode,
     { bool buildForDevice, bool codesign: true }) async {
   String flutterProjectPath = Directory.current.path;
 
@@ -105,17 +105,17 @@ Future<bool> buildIOSXcodeProject(ApplicationPackage app, BuildMode mode,
     printTrace('Initializing the Xcode project.');
     if ((await setupXcodeProjectHarness(flutterProjectPath, mode)) != 0) {
       printError('Could not initialize the Xcode project.');
-      return false;
+      return new XcodeBuildResult(false);
     }
   } else {
    updateXcodeLocalProperties(flutterProjectPath);
   }
 
   if (!_validateEngineRevision(app))
-    return false;
+    return new XcodeBuildResult(false);
 
   if (!_checkXcodeVersion())
-    return false;
+    return new XcodeBuildResult(false);
 
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
@@ -148,20 +148,30 @@ Future<bool> buildIOSXcodeProject(ApplicationPackage app, BuildMode mode,
     commands.addAll(<String>['-sdk', 'iphonesimulator', '-arch', 'x86_64']);
   }
 
-  printTrace(commands.join(' '));
-
-  ProcessResult result = Process.runSync(
-    commands.first, commands.sublist(1), workingDirectory: app.rootPath
-  );
+  RunResult result = await runAsync(commands, workingDirectory: app.rootPath);
 
   if (result.exitCode != 0) {
     if (result.stderr.isNotEmpty)
       printStatus(result.stderr);
     if (result.stdout.isNotEmpty)
       printStatus(result.stdout);
+    return new XcodeBuildResult(false);
+  } else {
+    // Look for 'clean build/Release-iphoneos/Runner.app'.
+    RegExp regexp = new RegExp(r' clean (\S*\.app)$', multiLine: true);
+    Match match = regexp.firstMatch(result.stdout);
+    String outputDir;
+    if (match != null)
+      outputDir = path.join(app.rootPath, match.group(1));
+    return new XcodeBuildResult(true, outputDir);
   }
+}
 
-  return result.exitCode == 0;
+class XcodeBuildResult {
+  XcodeBuildResult(this.success, [this.output]);
+
+  final bool success;
+  final String output;
 }
 
 final RegExp _xcodeVersionRegExp = new RegExp(r'Xcode (\d+)\..*');

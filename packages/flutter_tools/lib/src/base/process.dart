@@ -164,6 +164,8 @@ class RunResult {
   final ProcessResult processResult;
 
   int get exitCode => processResult.exitCode;
+  String get stdout => processResult.stdout;
+  String get stderr => processResult.stderr;
 
   @override
   String toString() {

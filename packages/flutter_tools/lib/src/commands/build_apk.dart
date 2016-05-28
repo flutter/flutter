@@ -11,6 +11,7 @@ import 'package:path/path.dart' as path;
 import '../android/android_sdk.dart';
 import '../base/file_system.dart' show ensureDirectoryExists;
 import '../base/os.dart';
+import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -347,9 +348,6 @@ int _buildApk(
     File apkShaFile = new File('$outputFile.sha1');
     apkShaFile.writeAsStringSync(calculateSha(finalApk));
 
-    double size = finalApk.lengthSync() / (1024 * 1024);
-    printStatus('Built ${finalApk.path} (${size.toStringAsFixed(1)}MB).');
-
     return 0;
   } finally {
     tempDir.deleteSync(recursive: true);
@@ -492,7 +490,7 @@ Future<int> buildAndroid(
   }
 
   String typeName = path.basename(tools.getEngineArtifactsDirectory(platform, buildMode).path);
-  printStatus('Building APK in ${getModeName(buildMode)} mode ($typeName)...');
+  Status status = logger.startProgress('Building APK in ${getModeName(buildMode)} mode ($typeName)...');
 
   if (flxPath != null && flxPath.isNotEmpty) {
     if (!FileSystemEntity.isFileSync(flxPath)) {
@@ -513,7 +511,7 @@ Future<int> buildAndroid(
 
   // Build an AOT snapshot if needed.
   if (isAotBuildMode(buildMode) && aotPath == null) {
-    aotPath = buildAotSnapshot(findMainDartFile(target), platform, buildMode);
+    aotPath = await buildAotSnapshot(findMainDartFile(target), platform, buildMode);
     if (aotPath == null) {
       printError('Failed to build AOT snapshot');
       return 1;
@@ -540,13 +538,19 @@ Future<int> buildAndroid(
   }
 
   int result = _buildApk(platform, buildMode, components, flxPath, keystore, outputFile);
+  status.stop(showElapsedTime: true);
+
   if (result == 0) {
+    double size = new File(outputFile).lengthSync() / (1024 * 1024);
+    printStatus('Built $outputFile (${size.toStringAsFixed(1)}MB).');
+
     _writeBuildMetaEntry(
       path.dirname(outputFile),
       'targetBuildType',
       _getTargetBuildTypeToken(platform, buildMode, new File(outputFile))
     );
   }
+
   return result;
 }
 
