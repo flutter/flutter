@@ -91,6 +91,9 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
 /// size. Padding then sizes itself to its child's size, inflated by the
 /// padding, effectively creating empty space around the child.
 class RenderPadding extends RenderShiftedBox {
+  /// Creates a render object that insets its child.
+  ///
+  /// The [padding] argument must not be null and must have non-negative insets.
   RenderPadding({
     EdgeInsets padding,
     RenderBox child
@@ -219,12 +222,16 @@ class RenderPadding extends RenderShiftedBox {
   }
 }
 
+/// Abstract class for one-child-layout render boxes that use a
+/// [FractionalOffset] to align their children.
 abstract class RenderAligningShiftedBox extends RenderShiftedBox {
+  /// Initializes member variables for subclasses.
+  ///
+  /// The [alignment] argument must not be null.
   RenderAligningShiftedBox({
-    RenderBox child,
-    FractionalOffset alignment: FractionalOffset.center
-  }) : _alignment = alignment,
-       super(child) {
+    FractionalOffset alignment: FractionalOffset.center,
+    RenderBox child
+  }) : _alignment = alignment, super(child) {
     assert(alignment != null && alignment.dx != null && alignment.dy != null);
   }
 
@@ -274,7 +281,7 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   }
 }
 
-/// Aligns its child box within itself.
+/// Positions its child using a [FractionalOffset].
 ///
 /// For example, to align a box at the bottom right, you would pass this box a
 /// tight constraint that is bigger than the child's natural size,
@@ -285,6 +292,7 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
 /// dimensions. Using widthFactor and heightFactor you can force this latter
 /// behavior in all cases.
 class RenderPositionedBox extends RenderAligningShiftedBox {
+  /// Creates a render object that positions its child.
   RenderPositionedBox({
     RenderBox child,
     double widthFactor,
@@ -427,6 +435,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
 /// child inside a larger parent, use [RenderPositionedBox] and
 /// [RenderConstrainedBox] rather than RenderOverflowBox.
 class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
+  /// Creates a render object that lets its child overflow itself.
   RenderConstrainedOverflowBox({
     RenderBox child,
     double minWidth,
@@ -543,9 +552,12 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   }
 }
 
-/// A render box that's a specific size but passes its original constraints
+/// A render box that is a specific size but passes its original constraints
 /// through to its child, which will probably overflow.
 class RenderSizedOverflowBox extends RenderAligningShiftedBox {
+  /// Creates a render box of a given size that lets its child overflow.
+  ///
+  /// The [requestedSize] argument must not be null.
   RenderSizedOverflowBox({
     RenderBox child,
     Size requestedSize,
@@ -617,6 +629,10 @@ class RenderSizedOverflowBox extends RenderAligningShiftedBox {
 ///
 /// It then tries to size itself to the size of its child.
 class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
+  /// Creates a render box that sizes its child to a fraction of the total available space.
+  ///
+  /// If non-null, the [widthFactor] and [heightFactor] arguments must be
+  /// non-negative.
   RenderFractionallySizedOverflowBox({
     RenderBox child,
     double widthFactor,
@@ -755,6 +771,9 @@ class SingleChildLayoutDelegate {
 /// of the parent, but the size of the parent cannot depend on the size of the
 /// child.
 class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
+  /// Creates a render box that defers its layout to a delgate.
+  ///
+  /// The [delegate] argument must not be null.
   RenderCustomSingleChildLayoutBox({
     RenderBox child,
     SingleChildLayoutDelegate delegate

@@ -48,6 +48,9 @@ class ViewConfiguration {
 /// bootstrapping the rendering pipeline. The view has a unique child
 /// [RenderBox], which is required to fill the entire output surface.
 class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox> {
+  /// Creates the root of the render tree.
+  ///
+  /// Typically created by the binding (e.g., [RendererBinding]).
   RenderView({
     RenderBox child,
     this.timeForRotation: const Duration(microseconds: 83333),
@@ -115,6 +118,13 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     assert(false); // nobody tells the screen to rotate, the whole rotate() dance is started from our performResize()
   }
 
+  /// Determines the set of render objects located at the given position.
+  ///
+  /// Returns true if the given point is contained in this render object or one
+  /// of its descendants. Adds any render objects that contain the point to the
+  /// given hit test result.
+  ///
+  /// The [position] argument is in the coordinate system of the render view.
   bool hitTest(HitTestResult result, { Point position }) {
     if (child != null)
       child.hitTest(result, position: position);
