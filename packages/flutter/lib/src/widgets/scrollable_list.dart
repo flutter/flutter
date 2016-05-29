@@ -155,8 +155,7 @@ class _VirtualListViewport extends VirtualViewport {
     this.anchor,
     this.itemExtent,
     this.itemsWrap,
-    this.padding,
-    this.overlayPainter
+    this.padding
   ) {
     assert(mainAxis != null);
     assert(itemExtent != null);
@@ -169,7 +168,6 @@ class _VirtualListViewport extends VirtualViewport {
   final double itemExtent;
   final bool itemsWrap;
   final EdgeInsets padding;
-  final RenderObjectPainter overlayPainter;
 
   double get _leadingPadding {
     switch (mainAxis) {
@@ -237,8 +235,7 @@ class _VirtualListViewportElement extends VirtualViewportElement {
       ..mainAxis = widget.mainAxis
       ..anchor = widget.anchor
       ..itemExtent = widget.itemExtent
-      ..padding = widget.padding
-      ..overlayPainter = widget.overlayPainter;
+      ..padding = widget.padding;
     super.updateRenderObject(oldWidget);
   }
 
@@ -320,7 +317,6 @@ class ListViewport extends _VirtualListViewport with VirtualViewportFromIterable
     double itemExtent,
     bool itemsWrap: false,
     EdgeInsets padding,
-    RenderObjectPainter overlayPainter,
     this.children
   }) : super(
     onExtentsChanged,
@@ -329,8 +325,7 @@ class ListViewport extends _VirtualListViewport with VirtualViewportFromIterable
     anchor,
     itemExtent,
     itemsWrap,
-    padding,
-    overlayPainter
+    padding
   );
 
   @override
@@ -486,7 +481,6 @@ class LazyListViewport extends _VirtualListViewport with VirtualViewportFromBuil
     ViewportAnchor anchor: ViewportAnchor.start,
     double itemExtent,
     EdgeInsets padding,
-    RenderObjectPainter overlayPainter,
     this.itemCount,
     this.itemBuilder
   }) : super(
@@ -496,8 +490,7 @@ class LazyListViewport extends _VirtualListViewport with VirtualViewportFromBuil
     anchor,
     itemExtent,
     false, // Don't support wrapping yet.
-    padding,
-    overlayPainter
+    padding
   );
 
   @override

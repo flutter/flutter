@@ -85,12 +85,10 @@ class RenderViewportBase extends RenderBox {
   RenderViewportBase(
     Offset paintOffset,
     Axis mainAxis,
-    ViewportAnchor anchor,
-    RenderObjectPainter overlayPainter
+    ViewportAnchor anchor
   ) : _paintOffset = paintOffset,
       _mainAxis = mainAxis,
-      _anchor = anchor,
-      _overlayPainter = overlayPainter {
+      _anchor = anchor {
     assert(paintOffset != null);
     assert(mainAxis != null);
     assert(_offsetIsSane(_paintOffset, mainAxis));
@@ -150,31 +148,6 @@ class RenderViewportBase extends RenderBox {
     markNeedsSemanticsUpdate();
   }
 
-  RenderObjectPainter get overlayPainter => _overlayPainter;
-  RenderObjectPainter _overlayPainter;
-  set overlayPainter(RenderObjectPainter value) {
-    if (_overlayPainter == value)
-      return;
-    if (attached)
-      _overlayPainter?.detach();
-    _overlayPainter = value;
-    if (attached)
-      _overlayPainter?.attach(this);
-    markNeedsPaint();
-  }
-
-  @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    _overlayPainter?.attach(this);
-  }
-
-  @override
-  void detach() {
-    super.detach();
-    _overlayPainter?.detach();
-  }
-
   ViewportDimensions get dimensions => _dimensions;
   ViewportDimensions _dimensions = ViewportDimensions.zero;
   set dimensions(ViewportDimensions value) {
@@ -204,8 +177,6 @@ class RenderViewportBase extends RenderBox {
     description.add('paintOffset: $paintOffset');
     description.add('mainAxis: $mainAxis');
     description.add('anchor: $anchor');
-    if (overlayPainter != null)
-      description.add('overlay painter: $overlayPainter');
   }
 }
 
@@ -224,9 +195,8 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
     Offset paintOffset: Offset.zero,
     Axis mainAxis: Axis.vertical,
     ViewportAnchor anchor: ViewportAnchor.start,
-    RenderObjectPainter overlayPainter,
     this.onPaintOffsetUpdateNeeded
-  }) : super(paintOffset, mainAxis, anchor, overlayPainter) {
+  }) : super(paintOffset, mainAxis, anchor) {
     this.child = child;
   }
 
@@ -314,7 +284,6 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
 
       void paintContents(PaintingContext context, Offset offset) {
         context.paintChild(child, offset + effectivePaintOffset);
-        _overlayPainter?.paint(context, offset);
       }
 
       if (_shouldClipAtPaintOffset(effectivePaintOffset)) {
@@ -357,11 +326,10 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
     LayoutCallback callback,
     Offset paintOffset: Offset.zero,
     Axis mainAxis: Axis.vertical,
-    ViewportAnchor anchor: ViewportAnchor.start,
-    RenderObjectPainter overlayPainter
+    ViewportAnchor anchor: ViewportAnchor.start
   }) : _virtualChildCount = virtualChildCount,
        _callback = callback,
-       super(paintOffset, mainAxis, anchor, overlayPainter);
+       super(paintOffset, mainAxis, anchor);
 
   int get virtualChildCount => _virtualChildCount;
   int _virtualChildCount;
@@ -392,7 +360,6 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
 
   void _paintContents(PaintingContext context, Offset offset) {
     defaultPaint(context, offset + _effectivePaintOffset);
-    _overlayPainter?.paint(context, offset);
   }
 
   @override

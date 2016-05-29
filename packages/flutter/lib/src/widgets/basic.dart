@@ -42,7 +42,6 @@ export 'package:flutter/rendering.dart' show
     PointerUpEvent,
     PointerUpEventListener,
     RelativeRect,
-    RenderObjectPainter,
     ShaderCallback,
     SingleChildLayoutDelegate,
     TextOverflow,
@@ -1147,7 +1146,6 @@ class Viewport extends SingleChildRenderObjectWidget {
     this.paintOffset: Offset.zero,
     this.mainAxis: Axis.vertical,
     this.anchor: ViewportAnchor.start,
-    this.overlayPainter,
     this.onPaintOffsetUpdateNeeded,
     Widget child
   }) : super(key: key, child: child) {
@@ -1169,11 +1167,6 @@ class Viewport extends SingleChildRenderObjectWidget {
 
   final ViewportAnchor anchor;
 
-  /// Paints an overlay over the viewport.
-  ///
-  /// Often used to paint scroll bars.
-  final RenderObjectPainter overlayPainter;
-
   /// Called when the interior or exterior dimensions of the viewport change.
   final ViewportDimensionsChangeCallback onPaintOffsetUpdateNeeded;
 
@@ -1183,8 +1176,7 @@ class Viewport extends SingleChildRenderObjectWidget {
       paintOffset: paintOffset,
       mainAxis: mainAxis,
       anchor: anchor,
-      onPaintOffsetUpdateNeeded: onPaintOffsetUpdateNeeded,
-      overlayPainter: overlayPainter
+      onPaintOffsetUpdateNeeded: onPaintOffsetUpdateNeeded
     );
   }
 
@@ -1195,8 +1187,7 @@ class Viewport extends SingleChildRenderObjectWidget {
       ..mainAxis = mainAxis
       ..anchor = anchor
       ..paintOffset = paintOffset
-      ..onPaintOffsetUpdateNeeded = onPaintOffsetUpdateNeeded
-      ..overlayPainter = overlayPainter;
+      ..onPaintOffsetUpdateNeeded = onPaintOffsetUpdateNeeded;
   }
 }
 

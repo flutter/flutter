@@ -33,7 +33,6 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
     Offset paintOffset: Offset.zero,
     Axis mainAxis: Axis.vertical,
     ViewportAnchor anchor: ViewportAnchor.start,
-    RenderObjectPainter overlayPainter,
     LayoutCallback callback
   }) : _itemExtent = itemExtent,
        _padding = padding,
@@ -42,7 +41,6 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
          paintOffset: paintOffset,
          mainAxis: mainAxis,
          anchor: anchor,
-         overlayPainter: overlayPainter,
          callback: callback
        ) {
     addAll(children);
