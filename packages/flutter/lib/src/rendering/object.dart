@@ -397,28 +397,6 @@ class PaintingContext {
   }
 }
 
-/// An encapsulation of a renderer and a paint() method.
-///
-/// A renderer may allow its paint() method to be augmented or redefined by
-/// providing a Painter. See for example overlayPainter in BlockViewport.
-abstract class RenderObjectPainter {
-  RenderObject get renderObject => _renderObject;
-  RenderObject _renderObject;
-
-  void attach(RenderObject renderObject) {
-    assert(_renderObject == null);
-    assert(renderObject != null);
-    _renderObject = renderObject;
-  }
-
-  void detach() {
-    assert(_renderObject != null);
-    _renderObject = null;
-  }
-
-  void paint(PaintingContext context, Offset offset);
-}
-
 /// An abstract set of layout constraints.
 ///
 /// Concrete layout models (such as box) will create concrete subclasses to

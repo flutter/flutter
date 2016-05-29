@@ -318,8 +318,7 @@ class _VirtualPageViewport extends VirtualViewport {
     this.startOffset,
     this.mainAxis,
     this.anchor,
-    this.itemsWrap,
-    this.overlayPainter
+    this.itemsWrap
   ) {
     assert(mainAxis != null);
   }
@@ -330,7 +329,6 @@ class _VirtualPageViewport extends VirtualViewport {
   final Axis mainAxis;
   final ViewportAnchor anchor;
   final bool itemsWrap;
-  final RenderObjectPainter overlayPainter;
 
   @override
   RenderList createRenderObject(BuildContext context) => new RenderList();
@@ -374,8 +372,7 @@ class _VirtualPageViewportElement extends VirtualViewportElement {
   @override
   void updateRenderObject(_VirtualPageViewport oldWidget) {
     renderObject
-      ..mainAxis = widget.mainAxis
-      ..overlayPainter = widget.overlayPainter;
+      ..mainAxis = widget.mainAxis;
     super.updateRenderObject(oldWidget);
   }
 
@@ -442,14 +439,12 @@ class PageViewport extends _VirtualPageViewport with VirtualViewportFromIterable
     Axis mainAxis: Axis.vertical,
     ViewportAnchor anchor: ViewportAnchor.start,
     bool itemsWrap: false,
-    RenderObjectPainter overlayPainter,
     this.children
   }) : super(
     startOffset,
     mainAxis,
     anchor,
-    itemsWrap,
-    overlayPainter
+    itemsWrap
   );
 
   @override
@@ -461,15 +456,13 @@ class LazyPageViewport extends _VirtualPageViewport with VirtualViewportFromBuil
     double startOffset: 0.0,
     Axis mainAxis: Axis.vertical,
     ViewportAnchor anchor: ViewportAnchor.start,
-    RenderObjectPainter overlayPainter,
     this.itemCount,
     this.itemBuilder
   }) : super(
     startOffset,
     mainAxis,
     anchor,
-    false, // Don't support wrapping yet.
-    overlayPainter
+    false // Don't support wrapping yet.
   );
 
   @override
