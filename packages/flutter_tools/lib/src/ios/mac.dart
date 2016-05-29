@@ -108,7 +108,7 @@ Future<XcodeBuildResult> buildXcodeProject(ApplicationPackage app, BuildMode mod
       return new XcodeBuildResult(false);
     }
   } else {
-   updateXcodeLocalProperties(flutterProjectPath);
+   updateXcodeGeneratedProperties(flutterProjectPath, mode);
   }
 
   if (!_validateEngineRevision(app))
