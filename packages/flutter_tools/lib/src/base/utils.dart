@@ -71,6 +71,11 @@ String toPrettyJson(Object jsonable) {
   return new JsonEncoder.withIndent('  ').convert(jsonable) + '\n';
 }
 
+/// Return a String - with units - for the size in MB of the given number of bytes.
+String getSizeAsMB(int bytesLength) {
+  return '${(bytesLength / (1024 * 1024)).toStringAsFixed(1)}MB';
+}
+
 /// A class to maintain a list of items, fire events when items are added or
 /// removed, and calculate a diff of changes when a new list of items is
 /// available.

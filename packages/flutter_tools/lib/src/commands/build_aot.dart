@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
+import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -50,17 +51,22 @@ class BuildAotCommand extends FlutterCommand {
       printError('Unknown platform: $targetPlatform');
       return 1;
     }
-    String outputPath = buildAotSnapshot(
+
+    String typeName = path.basename(tools.getEngineArtifactsDirectory(platform, getBuildMode()).path);
+    Status status = logger.startProgress('Building AOT snapshot in ${getModeName(getBuildMode())} mode ($typeName)...');
+    String outputPath = await buildAotSnapshot(
       findMainDartFile(argResults['target']),
       platform,
       getBuildMode(),
       outputPath: argResults['output-dir'],
       interpreter: argResults['interpreter']
     );
+    status.stop(showElapsedTime: true);
+
     if (outputPath == null)
       return 1;
 
-    printStatus('Built $outputPath.');
+    printStatus('Built to $outputPath${Platform.pathSeparator}.');
     return 0;
   }
 }
@@ -72,13 +78,13 @@ String _getSdkExtensionPath(String packagesPath, String package) {
 
 /// Build an AOT snapshot. Return `null` (and log to `printError`) if the method
 /// fails.
-String buildAotSnapshot(
+Future<String> buildAotSnapshot(
   String mainPath,
   TargetPlatform platform,
   BuildMode buildMode, {
   String outputPath: _kDefaultAotOutputDir,
   bool interpreter: false
-}) {
+}) async {
   try {
     return _buildAotSnapshot(
       mainPath,
@@ -94,13 +100,13 @@ String buildAotSnapshot(
   }
 }
 
-String _buildAotSnapshot(
+Future<String> _buildAotSnapshot(
   String mainPath,
   TargetPlatform platform,
   BuildMode buildMode, {
   String outputPath: _kDefaultAotOutputDir,
   bool interpreter: false
-}) {
+}) async {
   if (!isAotBuildMode(buildMode)) {
     printError('${toTitleCase(getModeName(buildMode))} mode does not support AOT compilation.');
     return null;
@@ -253,10 +259,11 @@ String _buildAotSnapshot(
 
   genSnapshotCmd.add(mainPath);
 
-  String typeName = path.basename(tools.getEngineArtifactsDirectory(platform, buildMode).path);
-  printStatus('Building snapshot in ${getModeName(buildMode)} mode ($typeName)...');
-
-  runCheckedSync(genSnapshotCmd, truncateCommand: true);
+  RunResult results = await runAsync(genSnapshotCmd);
+  if (results.exitCode != 0) {
+    printStatus(results.toString());
+    return null;
+  }
 
   // On iOS, we use Xcode to compile the snapshot into a dynamic library that the
   // end-developer can link into their app.

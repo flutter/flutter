@@ -548,8 +548,8 @@ class IOSSimulator extends Device {
   Future<bool> _buildAndInstallApplicationBundle(ApplicationPackage app) async {
     // Step 1: Build the Xcode project.
     // The build mode for the simulator is always debug.
-    bool buildResult = await buildIOSXcodeProject(app, BuildMode.debug, buildForDevice: false);
-    if (!buildResult) {
+    XcodeBuildResult buildResult = await buildXcodeProject(app, BuildMode.debug, buildForDevice: false);
+    if (!buildResult.success) {
       printError('Could not build the application for the simulator.');
       return false;
     }

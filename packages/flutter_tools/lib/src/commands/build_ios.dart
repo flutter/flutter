@@ -4,7 +4,10 @@
 
 import 'dart:async';
 
+import 'package:path/path.dart' as path;
+
 import '../application_package.dart';
+import '../base/logger.dart';
 import '../build_info.dart';
 import '../globals.dart';
 import '../ios/mac.dart';
@@ -42,24 +45,26 @@ class BuildIOSCommand extends FlutterCommand {
     bool shouldCodesign = argResults['codesign'];
 
     if (!forSimulator && !shouldCodesign) {
-      printStatus('Warning: Building for device with codesigning disabled.');
-      printStatus('You will have to manually codesign before deploying to device.');
+      printStatus('Warning: Building for device with codesigning disabled. You will '
+        'have to manually codesign before deploying to device.');
     }
 
     String logTarget = forSimulator ? 'simulator' : 'device';
 
-    printStatus('Building $app for $logTarget...');
-
-    bool result = await buildIOSXcodeProject(app, getBuildMode(),
+    String typeName = path.basename(tools.getEngineArtifactsDirectory(TargetPlatform.ios, getBuildMode()).path);
+    Status status = logger.startProgress('Building $app for $logTarget ($typeName)...');
+    XcodeBuildResult result = await buildXcodeProject(app, getBuildMode(),
         buildForDevice: !forSimulator,
         codesign: shouldCodesign);
+    status.stop(showElapsedTime: true);
 
-    if (!result) {
+    if (!result.success) {
       printError('Encountered error while building for $logTarget.');
       return 1;
     }
 
-    printStatus('Built in ios/.generated.');
+    if (result.output != null)
+      printStatus('Built ${result.output}.');
 
     return 0;
   }
