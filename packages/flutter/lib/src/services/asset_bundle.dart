@@ -8,7 +8,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/http.dart' as http;
 import 'package:mojo/core.dart' as core;
-import 'package:mojo_services/mojo/asset_bundle/asset_bundle.mojom.dart';
+import 'package:mojo_services/mojo/asset_bundle/asset_bundle.mojom.dart' as mojom;
 
 import 'image_cache.dart';
 import 'image_decoder.dart';
@@ -122,29 +122,29 @@ abstract class CachingAssetBundle extends AssetBundle {
 
 /// An [AssetBundle] that loads resources from a Mojo service.
 class MojoAssetBundle extends CachingAssetBundle {
-  /// Creates an [AssetBundle] interface around the given [AssetBundleProxy] Mojo service.
+  /// Creates an [AssetBundle] interface around the given [mojom.AssetBundleProxy] Mojo service.
   MojoAssetBundle(this._bundle);
 
   /// Retrieves the asset bundle located at the given URL, unpacks it, and provides it contents.
   factory MojoAssetBundle.fromNetwork(String relativeUrl) {
-    AssetBundleProxy bundle = new AssetBundleProxy.unbound();
+    mojom.AssetBundleProxy bundle = new mojom.AssetBundleProxy.unbound();
     _fetchAndUnpackBundle(relativeUrl, bundle);
     return new MojoAssetBundle(bundle);
   }
 
-  static Future<Null> _fetchAndUnpackBundle(String relativeUrl, AssetBundleProxy bundle) async {
+  static Future<Null> _fetchAndUnpackBundle(String relativeUrl, mojom.AssetBundleProxy bundle) async {
     core.MojoDataPipeConsumer bundleData = await http.readDataPipe(Uri.base.resolve(relativeUrl));
-    AssetUnpackerProxy unpacker = new AssetUnpackerProxy.unbound();
-    shell.connectToService("mojo:asset_bundle", unpacker);
-    unpacker.ptr.unpackZipStream(bundleData, bundle);
+    mojom.AssetUnpackerProxy unpacker = shell.connectToApplicationService(
+      'mojo:asset_bundle', mojom.AssetUnpacker.connectToService);
+    unpacker.unpackZipStream(bundleData, bundle);
     unpacker.close();
   }
 
-  AssetBundleProxy _bundle;
+  mojom.AssetBundleProxy _bundle;
 
   @override
   Future<core.MojoDataPipeConsumer> load(String key) async {
-    return (await _bundle.ptr.getAsStream(key)).assetData;
+    return (await _bundle.getAsStream(key)).assetData;
   }
 }
 
@@ -153,7 +153,7 @@ AssetBundle _initRootBundle() {
   if (h == core.MojoHandle.INVALID)
     return new NetworkAssetBundle(Uri.base);
   core.MojoHandle handle = new core.MojoHandle(h);
-  return new MojoAssetBundle(new AssetBundleProxy.fromHandle(handle));
+  return new MojoAssetBundle(new mojom.AssetBundleProxy.fromHandle(handle));
 }
 
 /// The [AssetBundle] from which this application was loaded.

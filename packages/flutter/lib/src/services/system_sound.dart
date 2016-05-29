@@ -12,9 +12,7 @@ import 'shell.dart';
 export 'package:sky_services/flutter/platform/system_sound.mojom.dart' show SystemSoundType;
 
 mojom.SystemSoundProxy _initSystemSoundProxy() {
-  mojom.SystemSoundProxy proxy = new mojom.SystemSoundProxy.unbound();
-  shell.connectToService('mojo:flutter_platform', proxy);
-  return proxy;
+  return shell.connectToApplicationService('mojo:flutter_platform', mojom.SystemSound.connectToService);
 }
 
 final mojom.SystemSoundProxy _systemChromeProxy = _initSystemSoundProxy();
@@ -33,6 +31,6 @@ class SystemSound {
   ///   successfully conveyed to the embedder. No sound may actually play if the
   ///   device is muted or the sound was not available on the platform.
   static Future<bool> play(SystemSoundType type) async {
-    return (await _systemChromeProxy.ptr.play(type)).success;
+    return (await _systemChromeProxy.play(type)).success;
   }
 }

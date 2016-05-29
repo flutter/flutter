@@ -34,15 +34,15 @@ mojom.ViewProxy _initViewProxy() {
 // view keys, which means any scheme for sharing the view host also needs to
 // provide a mechanism for coordinating about view keys.
 final mojom.ViewProxy _viewProxy = _initViewProxy();
-final mojom.View _view = _viewProxy?.ptr;
+final mojom.View _view = _viewProxy;
 
 mojom.ViewContainer _initViewContainer() {
   if (_view == null)
     return null;
   mojom.ViewContainerProxy viewContainerProxy = new mojom.ViewContainerProxy.unbound();
   _view.getContainer(viewContainerProxy);
-  viewContainerProxy.ptr.setListener(new mojom.ViewContainerListenerStub.unbound()..impl = _ViewContainerListenerImpl.instance);
-  return viewContainerProxy.ptr;
+  viewContainerProxy.setListener(new mojom.ViewContainerListenerStub.unbound()..impl = _ViewContainerListenerImpl.instance);
+  return viewContainerProxy;
 }
 
 final mojom.ViewContainer _viewContainer = _initViewContainer();
@@ -75,12 +75,13 @@ class _ViewContainerListenerImpl extends mojom.ViewContainerListener {
 class ChildViewConnection {
   /// Establishes a connection to the app at the given URL.
   ChildViewConnection({ String url }) {
-    mojom.ViewProviderProxy viewProvider = new mojom.ViewProviderProxy.unbound();
-    shell.connectToService(url, viewProvider);
+    mojom.ViewProviderProxy viewProvider = shell.connectToApplicationService(
+      url, mojom.ViewProvider.connectToService
+    );
     mojom.ServiceProviderProxy incomingServices = new mojom.ServiceProviderProxy.unbound();
     mojom.ServiceProviderStub outgoingServices = new mojom.ServiceProviderStub.unbound();
     _viewOwner = new mojom.ViewOwnerProxy.unbound();
-    viewProvider.ptr.createView(_viewOwner, incomingServices, outgoingServices);
+    viewProvider.createView(_viewOwner, incomingServices, outgoingServices);
     viewProvider.close();
     _connection = new ApplicationConnection(outgoingServices, incomingServices);
   }

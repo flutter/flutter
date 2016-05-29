@@ -10,10 +10,80 @@ import 'package:mojo/core.dart' as core;
 import 'package:mojo/mojo/service_provider.mojom.dart' as mojom;
 import 'package:mojo/mojo/shell.mojom.dart' as mojom;
 
-/// Signature for replacements for [shell.connectToService]. Implementations
-/// should return true if they handled the request, or false if the request
-/// should fall through to the default requestService.
-typedef bool OverrideConnectToService(String url, Object proxy);
+/// Signature for connecting to services. The generated mojom.dart code has
+/// static functions that match this signature on the interface objects. For
+/// example, the `mojom.Foo` interface has a `mojom.Foo.connectToService`
+/// function that matches this signature.
+typedef bindings.Proxy<dynamic> ServiceConnectionCallback(
+    bindings.ServiceConnector s, String url, [String serviceName]);
+
+/// Signature for replacements for [shell.connectToApplicationService]. If the
+/// function returns `null`, then [shell.connectToApplicationService] will fall
+/// back to its default behavior.
+typedef bindings.Proxy<dynamic> OverrideConnectToService(String url, ServiceConnectionCallback callback);
+
+ApplicationConnection _initEmbedderConnection() {
+  core.MojoHandle incomingServicesHandle = new core.MojoHandle(ui.MojoServices.takeIncomingServices());
+  core.MojoHandle outgoingServicesHandle = new core.MojoHandle(ui.MojoServices.takeOutgoingServices());
+  if (!incomingServicesHandle.isValid || !outgoingServicesHandle.isValid)
+    return null;
+  mojom.ServiceProviderProxy incomingServices = new mojom.ServiceProviderProxy.fromHandle(incomingServicesHandle);
+  mojom.ServiceProviderStub outgoingServices = new mojom.ServiceProviderStub.fromHandle(outgoingServicesHandle);
+  return new ApplicationConnection(outgoingServices, incomingServices);
+}
+
+mojom.ShellProxy _takeShell() {
+  core.MojoHandle shellHandle = new core.MojoHandle(ui.MojoServices.takeShell());
+  if (!shellHandle.isValid)
+    return null;
+  return new mojom.ShellProxy.fromHandle(shellHandle);
+}
+
+mojom.ServiceProviderProxy _takeViewServices() {
+  core.MojoHandle services = new core.MojoHandle(ui.MojoServices.takeViewServices());
+  if (!services.isValid)
+    return null;
+  return new mojom.ServiceProviderProxy.fromHandle(services);
+}
+
+class _ShellServiceConnector extends bindings.ServiceConnector {
+  @override
+  void connectToService(String url, bindings.Proxy<dynamic> proxy, [String serviceName]) {
+    final MojoShell instance = MojoShell.instance;
+    if (url == null || instance._shell == null) {
+      // If the application URL is null, it means the service to connect
+      // to is one provided by the embedder.
+      // If the applircation URL isn't null but there's no shell, then
+      // ask the embedder in case it provides it. (For example, if you're
+      // running on Android without the Mojo shell, then you can obtain
+      // the media service from the embedder directly, instead of having
+      // to ask the media application for it.)
+      // This makes it easier to write an application that works both
+      // with and without a Mojo environment.
+      instance._embedderConnection?.requestService(proxy);
+      return;
+    }
+    mojom.ServiceProviderProxy services = new mojom.ServiceProviderProxy.unbound();
+    instance._shell.connectToApplication(url, services, null);
+    core.MojoMessagePipe pipe = new core.MojoMessagePipe();
+    proxy.ctrl.bind(pipe.endpoints[0]);
+    services.connectToService_(serviceName, pipe.endpoints[1]);
+    services.close();
+  }
+}
+
+class _ViewAssociatedServiceConnector extends bindings.ServiceConnector {
+  final mojom.ServiceProviderProxy _viewServices = _takeViewServices();
+
+  @override
+  void connectToService(String url, bindings.Proxy<dynamic> proxy, [String serviceName]) {
+    if (_viewServices != null) {
+      core.MojoMessagePipe pipe = new core.MojoMessagePipe();
+      proxy.ctrl.bind(pipe.endpoints[0]);
+      _viewServices.connectToService_(serviceName, pipe.endpoints[1]);
+    }
+  }
+}
 
 /// Manages connections with embedder-provided services.
 class MojoShell {
@@ -30,24 +100,11 @@ class MojoShell {
   static MojoShell get instance => _instance;
   static MojoShell _instance;
 
-  static mojom.ShellProxy _initShellProxy() {
-    core.MojoHandle shellHandle = new core.MojoHandle(ui.MojoServices.takeShell());
-    if (!shellHandle.isValid)
-      return null;
-    return new mojom.ShellProxy.fromHandle(shellHandle);
-  }
-  final mojom.Shell _shell = _initShellProxy()?.ptr;
-
-  static ApplicationConnection _initEmbedderConnection() {
-    core.MojoHandle incomingServicesHandle = new core.MojoHandle(ui.MojoServices.takeIncomingServices());
-    core.MojoHandle outgoingServicesHandle = new core.MojoHandle(ui.MojoServices.takeOutgoingServices());
-    if (!incomingServicesHandle.isValid || !outgoingServicesHandle.isValid)
-      return null;
-    mojom.ServiceProviderProxy incomingServices = new mojom.ServiceProviderProxy.fromHandle(incomingServicesHandle);
-    mojom.ServiceProviderStub outgoingServices = new mojom.ServiceProviderStub.fromHandle(outgoingServicesHandle);
-    return new ApplicationConnection(outgoingServices, incomingServices);
-  }
   final ApplicationConnection _embedderConnection = _initEmbedderConnection();
+  final mojom.Shell _shell = _takeShell();
+
+  final _ShellServiceConnector _shellServiceConnector = new _ShellServiceConnector();
+  final _ViewAssociatedServiceConnector _viewServiceConnector = new _ViewAssociatedServiceConnector();
 
   /// Whether [connectToApplication] is able to connect to other applications.
   bool get canConnectToOtherApplications => _shell != null;
@@ -83,45 +140,20 @@ class MojoShell {
   /// and then invoke the method `bar()` on it:
   ///
   /// ```dart
-  /// mojom.FooProxy foo = new mojom.FooProxy.unbound();
-  /// shell.connectToService("mojo:foo", foo);
-  /// foo.ptr.bar();
+  /// mojom.FooProxy foo = shell.connectToApplicationService(
+  ///    "mojo:foo", mojom.Foo.connectToService);
+  /// foo.bar();
   /// ```
   ///
   /// For examples of mojom files, see the `sky_services` package.
   ///
   /// See also [connectToViewAssociatedService].
-  void connectToService(String url, bindings.ProxyBase proxy) {
-    if (overrideConnectToService != null && overrideConnectToService(url, proxy))
-      return;
-    if (url == null || _shell == null) {
-      // If the application URL is null, it means the service to connect
-      // to is one provided by the embedder.
-      // If the applircation URL isn't null but there's no shell, then
-      // ask the embedder in case it provides it. (For example, if you're
-      // running on Android without the Mojo shell, then you can obtain
-      // the media service from the embedder directly, instead of having
-      // to ask the media application for it.)
-      // This makes it easier to write an application that works both
-      // with and without a Mojo environment.
-      _embedderConnection?.requestService(proxy);
-      return;
-    }
-    mojom.ServiceProviderProxy services = new mojom.ServiceProviderProxy.unbound();
-    _shell.connectToApplication(url, services, null);
-    core.MojoMessagePipe pipe = new core.MojoMessagePipe();
-    proxy.impl.bind(pipe.endpoints[0]);
-    services.ptr.connectToService(proxy.serviceName, pipe.endpoints[1]);
-    services.close();
+  bindings.Proxy<dynamic> connectToApplicationService(String url, ServiceConnectionCallback callback) {
+    bindings.Proxy<dynamic> proxy;
+    if (overrideConnectToService != null)
+      proxy = overrideConnectToService(url, callback);
+    return proxy ?? callback(_shellServiceConnector, url);
   }
-
-  static mojom.ServiceProviderProxy _takeViewServices() {
-    core.MojoHandle services = new core.MojoHandle(ui.MojoServices.takeViewServices());
-    if (!services.isValid)
-      return null;
-    return new mojom.ServiceProviderProxy.fromHandle(services);
-  }
-  final mojom.ServiceProviderProxy _viewServices = _takeViewServices();
 
   /// Attempts to connect to a service provided specifically for the current
   /// view by the embedder or host platform.
@@ -136,26 +168,23 @@ class MojoShell {
   /// `bar()` on it:
   ///
   /// ```dart
-  /// mojom.FooProxy foo = new mojom.FooProxy.unbound();
-  /// shell.connectToViewAssociatedService(foo);
-  /// foo.ptr.bar();
+  /// mojom.FooProxy foo = shell.connectToViewAssociatedService(
+  ///   mojom.Foo.connectToService);
+  /// foo.bar();
   /// ```
   ///
   /// For examples of mojom files, see the `sky_services` package.
   ///
   /// See also [connectToService].
-  void connectToViewAssociatedService(bindings.ProxyBase proxy) {
-    if (overrideConnectToService != null && overrideConnectToService(null, proxy))
-      return;
-    if (_viewServices == null)
-      return;
-    core.MojoMessagePipe pipe = new core.MojoMessagePipe();
-    proxy.impl.bind(pipe.endpoints[0]);
-    _viewServices.ptr.connectToService(proxy.serviceName, pipe.endpoints[1]);
+  bindings.Proxy<dynamic> connectToViewAssociatedService(ServiceConnectionCallback callback) {
+    bindings.Proxy<dynamic> proxy;
+    if (overrideConnectToService != null)
+      proxy = overrideConnectToService(null, callback);
+    return proxy ?? callback(_viewServiceConnector, null);
   }
 
   /// Registers a service to expose to the embedder.
-  /// 
+  ///
   /// For example, suppose a Flutter application wanted to provide a service
   /// `Foo` to the embedder, that a mojom file declaring `Foo` was imported with
   /// the prefix `mojom`, that `package:mojo/core.dart` was imported with the
@@ -163,7 +192,7 @@ class MojoShell {
   /// the class `MyFooImplementation`. The following code, run during the
   /// binding initialization (i.e. during the same call stack as the call to the
   /// [new MojoShell] constructor) would achieve this:
-  /// 
+  ///
   /// ```dart
   /// shell.provideService(mojom.Foo.serviceName, (core.MojoMessagePipeEndpoint endpoint) {
   ///   mojom.FooStub foo = new mojom.FooStub.fromEndpoint(endpoint);

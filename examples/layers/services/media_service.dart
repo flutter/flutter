@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:sky_services/media/media.mojom.dart';
+import 'package:sky_services/media/media.mojom.dart' as mojom;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -24,25 +24,25 @@ class PianoKey {
   final Color color;
   final String soundUrl;
 
-  final MediaPlayerProxy player = new MediaPlayerProxy.unbound();
+  final mojom.MediaPlayerProxy player = new mojom.MediaPlayerProxy.unbound();
 
-  bool get isPlayerOpen => player.impl.isOpen;
+  bool get isPlayerOpen => player.ctrl.isOpen;
 
   void down() {
     if (!isPlayerOpen) return;
-    player.ptr.seekTo(0);
-    player.ptr.start();
+    player.seekTo(0);
+    player.start();
   }
 
   void up() {
     if (!isPlayerOpen) return;
-    player.ptr.pause();
+    player.pause();
   }
 
-  Future<Null> load(MediaServiceProxy mediaService) async {
+  Future<Null> load(mojom.MediaServiceProxy mediaService) async {
     try {
-      mediaService.ptr.createPlayer(player);
-      await player.ptr.prepare(await http.readDataPipe(soundUrl));
+      mediaService.createPlayer(player);
+      await player.prepare(await http.readDataPipe(soundUrl));
     } catch (e) {
       print("Error: failed to load sound file $soundUrl");
       player.close();
@@ -61,9 +61,10 @@ class PianoApp extends StatelessWidget {
   ];
 
   Future<Null> loadSounds() async {
-    MediaServiceProxy mediaService = new MediaServiceProxy.unbound();
+    mojom.MediaServiceProxy mediaService = shell.connectToApplicationService(
+      'mojo:media_service', mojom.MediaService.connectToService
+    );
     try {
-      shell.connectToService("mojo:media_service", mediaService);
       List<Future<Null>> pending = <Future<Null>>[];
       for (PianoKey key in keys)
         pending.add(key.load(mediaService));

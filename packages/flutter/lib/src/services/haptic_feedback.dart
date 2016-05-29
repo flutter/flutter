@@ -9,9 +9,7 @@ import 'package:sky_services/flutter/platform/haptic_feedback.mojom.dart' as moj
 import 'shell.dart';
 
 mojom.HapticFeedbackProxy _initHapticFeedbackProxy() {
-  mojom.HapticFeedbackProxy proxy = new mojom.HapticFeedbackProxy.unbound();
-  shell.connectToService('mojo:flutter_platform', proxy);
-  return proxy;
+  return shell.connectToApplicationService('mojo:flutter_platform', mojom.HapticFeedback.connectToService);
 }
 
 final mojom.HapticFeedbackProxy _hapticFeedbackProxy = _initHapticFeedbackProxy();
@@ -39,6 +37,6 @@ class HapticFeedback {
   ///   feedback if the device does not have a vibrator or one is disabled in
   ///   system settings.
   static Future<bool> vibrate() async {
-    return (await _hapticFeedbackProxy.ptr.vibrate()).success;
+    return (await _hapticFeedbackProxy.vibrate()).success;
   }
 }

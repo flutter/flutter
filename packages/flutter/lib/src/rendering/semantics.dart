@@ -552,7 +552,7 @@ class SemanticsServer extends mojom.SemanticsServer {
   void addSemanticsListener(mojom.SemanticsListenerProxy listener) {
     // TODO(abarth): We should remove the listener when this pipe closes.
     // See <https://github.com/flutter/flutter/issues/3342>.
-    SemanticsNode.addListener(listener.ptr);
+    SemanticsNode.addListener(listener);
   }
 
   @override

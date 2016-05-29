@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:sky_services/editing/editing.mojom.dart' as mojom;
 
-class MockKeyboard implements mojom.Keyboard {
+class MockKeyboard extends mojom.KeyboardProxy {
+  MockKeyboard() : super.unbound();
+
   mojom.KeyboardClient client;
 
   @override
@@ -25,7 +27,9 @@ class MockKeyboard implements mojom.Keyboard {
   void setEditingState(mojom.EditingState state) {}
 }
 
-class MockClipboard implements mojom.Clipboard {
+class MockClipboard extends mojom.ClipboardProxy {
+  MockClipboard() : super.unbound();
+
   mojom.ClipboardData _clip;
 
   @override
@@ -41,9 +45,9 @@ class MockClipboard implements mojom.Clipboard {
 
 void main() {
   MockKeyboard mockKeyboard = new MockKeyboard();
-  serviceMocker.registerMockService(mojom.Keyboard.serviceName, mockKeyboard);
+  serviceMocker.registerMockService(mockKeyboard);
   MockClipboard mockClipboard = new MockClipboard();
-  serviceMocker.registerMockService(mojom.Clipboard.serviceName, mockClipboard);
+  serviceMocker.registerMockService(mockClipboard);
 
   void enterText(String testValue) {
     // Simulate entry of text through the keyboard.

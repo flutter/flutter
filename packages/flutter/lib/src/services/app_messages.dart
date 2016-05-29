@@ -10,9 +10,7 @@ import 'package:sky_services/flutter/platform/app_messages.mojom.dart' as mojom;
 import 'shell.dart';
 
 mojom.ApplicationMessagesProxy _initHostAppMessagesProxy() {
-  mojom.ApplicationMessagesProxy proxy = new mojom.ApplicationMessagesProxy.unbound();
-  shell.connectToViewAssociatedService(proxy);
-  return proxy;
+  return shell.connectToViewAssociatedService(mojom.ApplicationMessages.connectToService);
 }
 
 final mojom.ApplicationMessagesProxy _hostAppMessagesProxy = _initHostAppMessagesProxy();
@@ -49,7 +47,7 @@ final _ApplicationMessagesImpl _appMessages = new _ApplicationMessagesImpl();
 class HostMessages {
   /// Send a message to the host application.
   static Future<String> sendToHost(String messageName, String message) async {
-    return (await _hostAppMessagesProxy.ptr.sendString(messageName, message)).reply;
+    return (await _hostAppMessagesProxy.sendString(messageName, message)).reply;
   }
 
   /// Register a callback for messages received from the host application.

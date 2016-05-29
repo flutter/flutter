@@ -36,13 +36,11 @@ const int NEW_TASK = 0x10000000; // ignore: constant_identifier_names
 const int MULTIPLE_TASK = 0x08000000; // ignore: constant_identifier_names
 
 ActivityProxy _initActivityProxy() {
-  ActivityProxy activity = new ActivityProxy.unbound();
-  shell.connectToService("mojo:android", activity);
-  return activity;
+  return shell.connectToApplicationService('mojo:android', Activity.connectToService);
 }
 
 final ActivityProxy _activityProxy = _initActivityProxy();
-final Activity activity = _activityProxy.ptr;
+final Activity activity = _activityProxy;
 
 Color _cachedPrimaryColor;
 String _cachedLabel;
@@ -61,5 +59,5 @@ void updateTaskDescription({ String label, Color color }) {
     ..label = label
     ..primaryColor = color?.value ?? 0;
 
-  _activityProxy.ptr.setTaskDescription(description);
+  _activityProxy.setTaskDescription(description);
 }

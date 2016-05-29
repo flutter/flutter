@@ -83,10 +83,8 @@ class KeyboardHandle {
 }
 
 mojom.KeyboardProxy _initKeyboardProxy() {
-  mojom.KeyboardProxy proxy = new mojom.KeyboardProxy.unbound();
-  shell.connectToViewAssociatedService(proxy);
-  return proxy;
+  return shell.connectToViewAssociatedService(mojom.Keyboard.connectToService);
 }
 
 final mojom.KeyboardProxy _keyboardProxy = _initKeyboardProxy();
-final Keyboard keyboard = new Keyboard(_keyboardProxy.ptr);
+final Keyboard keyboard = new Keyboard(_keyboardProxy);
