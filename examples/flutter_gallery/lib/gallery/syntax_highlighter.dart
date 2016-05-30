@@ -234,7 +234,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
         continue;
       }
 
-      // Metadata
+      // Meta data
       if (_scanner.scan(new RegExp(r"@\w+"))) {
         _spans.add(new _HighlightSpan(
           _HighlightType.keyword,
