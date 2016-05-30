@@ -734,18 +734,72 @@ class _ForkingSemanticsFragment extends _SemanticsFragment {
   }
 }
 
+/// The pipeline owner manages the rendering pipeline.
+///
+/// The pipeline owner provides an interface for driving the rendering pipeline
+/// and stores the state about which render objects have requested to be visited
+/// in each stage of the pipeline. To flush the pipeline, call the following
+/// functions in order:
+///
+/// 1. [flushLayout] updates any render objects that need to compute their
+///    layout. During this phase, the size and position of each render
+///    object is calculated. Render objects might dirty their painting or
+///    compositing state during this phase.
+/// 2. [flushCompositingBits] updates any render objects that have dirty
+///    compositing bits. During this phase, each render object learns whether
+///    any of its children require compositing. This information is used during
+///    the painting phase when selecting how to implement visual effects such as
+///    clipping. If a render object has a composited child, its needs to use a
+///    [Layer] to create the clip in order for the clip to apply to the
+///    composited child (which will be painted into its own [Layer]).
+/// 3. [flushPaint] visites any render objects that need to paint. During this
+///    phase, render objects get a chance to record painting commands into
+///    [PictureLayer]s and construct other composited [Layer]s.
+/// 4. Finally, if [SemanticsNode.hasListeners] is true, [flushSemantics] will
+///    compile the semantics for the render objects. This semantic information
+///    is used by assistive technology to improve the accessibility of the
+///    render tree.
+///
+/// The [RendererBinding] holds the pipeline owner for the render objects that
+/// are visible on screen. You can create other pipeline owners to manage
+/// off-screen objects, which can flush their pipelines independently of the
+/// on-screen render objects.
 class PipelineOwner {
+  /// Creates a pipeline owner.
+  ///
+  /// Typically created by the binding (e.g., [RendererBinding]), but can be
+  /// created separately from the binding to drive off-screen render objects
+  /// through the rendering pipeline.
   PipelineOwner({ this.onNeedVisualUpdate });
+
+  /// Called when a render object associated with this pipeline owner wishes to
+  /// update its visual appearance.
+  ///
+  /// Typical implementations of this function will schedule a task to flush the
+  /// various stages of the pipeline. This function might be called multiple
+  /// times in quick succession. Implementations should take care to discard
+  /// duplicate calls quickly.
   final VoidCallback onNeedVisualUpdate;
 
+  /// Calls [onNeedVisualUpdate] if [onNeedVisualUpdate] is not null.
+  ///
+  /// Used to notify the pipeline owner that an associated render object wishes
+  /// to update its visual appearance.
   void requestVisualUpdate() {
     if (onNeedVisualUpdate != null)
       onNeedVisualUpdate();
   }
 
   List<RenderObject> _nodesNeedingLayout = <RenderObject>[];
-  bool _debugDoingLayout = false;
+
+  /// Whether this pipeline is currently in the layout phase.
+  ///
+  /// Specifically, whether [flushLayout] is currently running.
+  ///
+  /// Only valid when asserts are enabled.
   bool get debugDoingLayout => _debugDoingLayout;
+  bool _debugDoingLayout = false;
+
   /// Update the layout information for all dirty render objects.
   ///
   /// This function is one of the core stages of the rendering pipeline. Layout
@@ -789,8 +843,15 @@ class PipelineOwner {
   }
 
   List<RenderObject> _nodesNeedingPaint = <RenderObject>[];
-  bool _debugDoingPaint = false;
+
+  /// Whether this pipeline is currently in the paint phase.
+  ///
+  /// Specifically, whether [flushPaint] is currently running.
+  ///
+  /// Only valid when asserts are enabled.
   bool get debugDoingPaint => _debugDoingPaint;
+  bool _debugDoingPaint = false;
+
   /// Update the display lists for all render objects.
   ///
   /// This function is one of the core stages of the rendering pipeline.
@@ -820,6 +881,13 @@ class PipelineOwner {
   bool _debugDoingSemantics = false;
   List<RenderObject> _nodesNeedingSemantics = <RenderObject>[];
 
+  /// Update the semantics for all render objects.
+  ///
+  /// This function is one of the core stages of the rendering pipeline. The
+  /// semantics are compiled after painting and only after
+  /// [RenderObject.scheduleInitialSemantics] has been called.
+  ///
+  /// See [FlutterBinding] for an example of how this function is used.
   void flushSemantics() {
     Timeline.startSync('Semantics');
     assert(_semanticsEnabled);
@@ -878,7 +946,7 @@ void _doNothing() { }
 /// The [RenderBox] subclass introduces the opinion that the layout
 /// system uses cartesian coordinates.
 abstract class RenderObject extends AbstractNode implements HitTestTarget {
-
+  /// Initializes internal fields for subclasses.
   RenderObject() {
     _needsCompositing = isRepaintBoundary || alwaysNeedsCompositing;
     _performLayout = performLayout;
@@ -919,7 +987,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// You can call this function to set up the parent data for child before the
   /// child is added to the parent's child list.
   void setupParentData(RenderObject child) {
-    assert(debugCanPerformMutations);
+    assert(_debugCanPerformMutations);
     if (child.parentData is! ParentData)
       child.parentData = new ParentData();
   }
@@ -930,7 +998,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// in other cases will lead to an inconsistent tree and probably cause crashes.
   @override
   void adoptChild(RenderObject child) {
-    assert(debugCanPerformMutations);
+    assert(_debugCanPerformMutations);
     assert(child != null);
     setupParentData(child);
     super.adoptChild(child);
@@ -944,7 +1012,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// in other cases will lead to an inconsistent tree and probably cause crashes.
   @override
   void dropChild(RenderObject child) {
-    assert(debugCanPerformMutations);
+    assert(_debugCanPerformMutations);
     assert(child != null);
     assert(child.parentData != null);
     child._cleanRelayoutSubtreeRoot();
@@ -1005,26 +1073,65 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     ));
   }
 
-  bool _debugDoingThisResize = false;
+  /// Whether [performResize] for this render object is currently running.
+  ///
+  /// Only valid when asserts are enabled. In release builds, always returns
+  /// false.
   bool get debugDoingThisResize => _debugDoingThisResize;
-  bool _debugDoingThisLayout = false;
+  bool _debugDoingThisResize = false;
+
+  /// Whether [performLayout] for this render object is currently running.
+  ///
+  /// Only valid when asserts are enabled. In release builds, always returns
+  /// false.
   bool get debugDoingThisLayout => _debugDoingThisLayout;
-  static RenderObject _debugActiveLayout;
+  bool _debugDoingThisLayout = false;
+
+  /// The render object that is actively computing layout.
+  ///
+  /// Only valid when asserts are enabled. In release builds, always returns
+  /// null.
   static RenderObject get debugActiveLayout => _debugActiveLayout;
-  bool _debugMutationsLocked = false;
-  bool _debugCanParentUseSize;
+  static RenderObject _debugActiveLayout;
+
+  /// Whether the parent render object is permitted to use this render object's
+  /// size.
+  ///
+  /// Determined by the `parentUsesSize` parameter to [layout].
+  ///
+  /// Only valid when asserts are enabled. In release builds, always returns
+  /// null.
   bool get debugCanParentUseSize => _debugCanParentUseSize;
-  bool get debugCanPerformMutations {
-    RenderObject node = this;
-    while (true) {
-      if (node._doingThisLayoutWithCallback)
-        return true;
-      if (node._debugMutationsLocked)
-        return false;
-      if (node.parent is! RenderObject)
-        return true;
-      node = node.parent;
-    }
+  bool _debugCanParentUseSize;
+
+  bool _debugMutationsLocked = false;
+
+  /// Whether tree mutations are currently permitted.
+  ///
+  /// Only valid when asserts are enabled. In release builds, always returns
+  /// null.
+  bool get _debugCanPerformMutations {
+    bool result;
+    assert(() {
+      RenderObject node = this;
+      while (true) {
+        if (node._doingThisLayoutWithCallback) {
+          result = true;
+          break;
+        }
+        if (node._debugMutationsLocked) {
+          result = false;
+          break;
+        }
+        if (node.parent is! RenderObject) {
+          result = true;
+          break;
+        }
+        node = node.parent;
+      }
+      return true;
+    });
+    return result;
   }
 
   @override
@@ -1085,7 +1192,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// debugAssertDoesMeetConstraints(), and should not be checked in
   /// release mode (where it will always be false).
   static bool debugCheckingIntrinsics = false;
-  bool debugAncestorsAlreadyMarkedNeedsLayout() {
+  bool _debugAncestorsAlreadyMarkedNeedsLayout() {
     if (_relayoutSubtreeRoot == null)
       return true; // we haven't yet done layout even once, so there's nothing for us to do
     RenderObject node = this;
@@ -1115,9 +1222,9 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// computing its layout information, this function will also mark the parent
   /// as needing layout.
   void markNeedsLayout() {
-    assert(debugCanPerformMutations);
+    assert(_debugCanPerformMutations);
     if (_needsLayout) {
-      assert(debugAncestorsAlreadyMarkedNeedsLayout());
+      assert(_debugAncestorsAlreadyMarkedNeedsLayout());
       return;
     }
     _needsLayout = true;
@@ -1414,10 +1521,19 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   // PAINTING
 
-  bool _debugDoingThisPaint = false;
+  /// Whether [paint] for this render object is currently running.
+  ///
+  /// Only valid when asserts are enabled. In release builds, always returns
+  /// false.
   bool get debugDoingThisPaint => _debugDoingThisPaint;
-  static RenderObject _debugActivePaint;
+  bool _debugDoingThisPaint = false;
+
+  /// The render object that is actively painting.
+  ///
+  /// Only valid when asserts are enabled. In release builds, always returns
+  /// null.
   static RenderObject get debugActivePaint => _debugActivePaint;
+  static RenderObject _debugActivePaint;
 
   /// Whether this render object repaints separately from its parent.
   ///
@@ -1711,7 +1827,15 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   bool _needsSemanticsGeometryUpdate = true;
   SemanticsNode _semantics;
 
-  SemanticsNode get debugSemantics { // only exposed for testing and debugging
+  /// The semantics of this render object.
+  ///
+  /// Exposed only for testing and debugging. To learn about the semantics of
+  /// render objects in production, register as a listener using
+  /// [SemanticsNode.addListener].
+  ///
+  /// Only valid when asserts are enabled. In release builds, always returns
+  /// null.
+  SemanticsNode get debugSemantics {
     SemanticsNode result;
     assert(() {
       result = _semantics;

@@ -41,9 +41,28 @@ enum PerformanceOverlayOption {
   visualizeEngineStatistics,
 }
 
+/// Displays performance statistics.
+///
+/// The overlay show two time series. The first shows how much time was required
+/// on this thread to produce each frame. The second shows how much time was
+/// required on the GPU thread to produce each frame. Ideally, both these values
+/// would be less than the total frame budget for the hardware on which the app
+/// is running. For example, if the hardware has a screen that updates at 60 Hz,
+/// each thread should ideally spend less than 16ms producing each frame. This
+/// ideal condition is indicated by a green vertical line for each thread.
+/// Otherwise, the performance overlay shows a red vertical line.
+///
+/// The simplest way to show the performance overlay is to set
+/// [MaterialApp.showPerformanceOverlay] or [WidgetsApp.showPerformanceOverlay]
+/// to `true`.
 class RenderPerformanceOverlay extends RenderBox {
-  RenderPerformanceOverlay({ int optionsMask: 0, int rasterizerThreshold: 0 })
-    : _optionsMask = optionsMask,
+  /// Creates a performance overlay render object.
+  ///
+  /// The [optionsMask] and [rasterizerThreshold] arguments must not be null.
+  RenderPerformanceOverlay({
+    int optionsMask: 0,
+    int rasterizerThreshold: 0
+  }) : _optionsMask = optionsMask,
       _rasterizerThreshold = rasterizerThreshold;
 
   /// The mask is created by shifting 1 by the index of the specific
@@ -51,6 +70,7 @@ class RenderPerformanceOverlay extends RenderBox {
   int get optionsMask => _optionsMask;
   int _optionsMask;
   set optionsMask(int mask) {
+    assert(mask != null);
     if (mask == _optionsMask)
       return;
     _optionsMask = mask;
@@ -63,6 +83,7 @@ class RenderPerformanceOverlay extends RenderBox {
   int get rasterizerThreshold => _rasterizerThreshold;
   int _rasterizerThreshold;
   set rasterizerThreshold (int threshold) {
+    assert(threshold != null);
     if (threshold == _rasterizerThreshold)
       return;
     _rasterizerThreshold = threshold;
