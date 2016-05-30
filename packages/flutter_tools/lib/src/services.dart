@@ -24,7 +24,7 @@ dynamic _loadYamlFile(String path) {
 }
 
 /// Loads all services specified in `flutter.yaml`. Parses each service config file,
-/// storing metadata in [services] and the list of jar files in [jars].
+/// storing meta data in [services] and the list of jar files in [jars].
 Future<Null> parseServiceConfigs(
   List<Map<String, String>> services, { List<File> jars }
 ) async {

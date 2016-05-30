@@ -142,6 +142,9 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 }
 
 /// Applies a filter to the existing painted content and then paints [child].
+///
+/// This effect is relatively expensive, especially if the filter is non-local,
+/// such as a blur.
 class BackdropFilter extends SingleChildRenderObjectWidget {
   /// Creates a backdrop filter.
   ///
@@ -207,12 +210,12 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 
 /// Provides a canvas on which to draw during the paint phase.
 ///
-/// When asked to paint, [CustomPaint] first ask its [painter] to paint on the
+/// When asked to paint, [CustomPaint] first asks its [painter] to paint on the
 /// current canvas, then it paints its child, and then, after painting its
-/// child, it ask its [foregroundPainter] to paint. The coodinate system of the
+/// child, it asks its [foregroundPainter] to paint. The coodinate system of the
 /// canvas matches the coordinate system of the [CustomPaint] object. The
 /// painters are expected to paint within a rectangle starting at the origin and
-/// encompassing a region of the given size. (If the painters paints outside
+/// encompassing a region of the given size. (If the painters paint outside
 /// those bounds, there might be insufficient memory allocated to rasterize the
 /// painting commands and the resulting behavior is undefined.)
 ///
@@ -224,10 +227,10 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [CustomPainter],
+///  * [CustomPainter]
 ///  * [Canvas]
 class CustomPaint extends SingleChildRenderObjectWidget {
-  /// Creates a widget that delgates its painting.
+  /// Creates a widget that delegates its painting.
   CustomPaint({ Key key, this.painter, this.foregroundPainter, Widget child })
     : super(key: key, child: child);
 
@@ -261,8 +264,8 @@ class CustomPaint extends SingleChildRenderObjectWidget {
 /// Clips its child using a rectangle.
 ///
 /// By default, [ClipRect] prevents its child from painting outside its
-/// bounds, but the size and location of the clip can be customized using a
-/// custome [clipper].
+/// bounds, but the size and location of the clip rect can be customized using a
+/// custom [clipper].
 class ClipRect extends SingleChildRenderObjectWidget {
   /// Creates a rectangular clip.
   ///
@@ -322,9 +325,9 @@ class ClipRRect extends SingleChildRenderObjectWidget {
 
 /// Clips its child using an oval.
 ///
-/// By default, inscribes an oval into its layout dimensions and prevents its
-/// child from painting outside that oval, but the size and location of the clip
-/// can be customized using a custom [clipper].
+/// By default, inscribes an axis-aligned oval into its layout dimensions and
+/// prevents its child from painting outside that oval, but the size and
+/// location of the clip oval can be customized using a custom [clipper].
 class ClipOval extends SingleChildRenderObjectWidget {
   /// Creates an oval-shaped clip.
   ///
@@ -665,7 +668,7 @@ class CustomSingleChildLayout extends SingleChildRenderObjectWidget {
   }
 }
 
-/// Metadata for identifying children in a [CustomMultiChildLayout].
+/// Meta data for identifying children in a [CustomMultiChildLayout].
 /// The [MultiChildLayoutDelegate] hasChild, layoutChild, and positionChild
 /// methods use these identifiers.
 class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
@@ -1033,7 +1036,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
   /// with the center of the parent.
   final FractionalOffset alignment;
 
-  /// The size this render box should attempt to be.
+  /// The size this widget should attempt to be.
   final Size size;
 
   @override
@@ -2947,18 +2950,18 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
   RenderRepaintBoundary createRenderObject(BuildContext context) => new RenderRepaintBoundary();
 }
 
-/// Is invisible during hit testing.
+/// A widget that os invisible during hit testing.
 ///
 /// When [ignoring] is `true`, this widget (and its subtree) is invisible
 /// to hit testing. It still consumes space during layout and paints its child
-/// as usual. It just cannot be the target of located events because it returns
+/// as usual. It just cannot be the target of located events, because it returns
 /// `false` from [hitTest].
 ///
 /// When [ignoringSemantics] is `true`, the subtree will be invisible to
 /// the semantics layer (and thus e.g. accessibility tools). If
 /// [ignoringSemantics] is null, it uses the value of [ignoring].
 class IgnorePointer extends SingleChildRenderObjectWidget {
-  /// Creates a widget that is invisivle to hit testing.
+  /// Creates a widget that is invisible to hit testing.
   ///
   /// The [ignoring] argument must not be null. If [ignoringSemantics], this
   /// render object will be ignored for semantics if [ignoring] is true.
@@ -2999,8 +3002,13 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 }
 
 /// Holds opaque meta data in the render tree.
+///
+/// Useful for decorating the render tree with information that will be consumed
+/// later. For example, you could store information in the render tree that will
+/// be used when the user interacts with the render tree but has no visual
+/// impact prior to the interaction.
 class MetaData extends SingleChildRenderObjectWidget {
-  /// Creates a widget that hold opaque metadata.
+  /// Creates a widget that hold opaque meta data.
   ///
   /// The [behavior] argument defaults to [HitTestBehavior.deferToChild].
   MetaData({
