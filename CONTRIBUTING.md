@@ -85,8 +85,9 @@ Flutter tests use [package:flutter_test](https://github.com/flutter/flutter/tree
 
 To run all the tests for the entire Flutter repository, the same way that Travis runs them, run `dev/bots/test.sh`.
 
-If you've built [your own flutter engine](#working-on-the-engine-and-the-framework-at-the-same-time), you can pass `--engine-debug` or `--engine-release` to change what flutter shell `flutter test` uses.
-To do this with the `dev/bots/test.sh` script, you can use the `FLUTTER_ENGINE` environment variable.
+If you've built [your own flutter engine](#working-on-the-engine-and-the-framework-at-the-same-time), you can pass `--local-engine` to change what flutter shell `flutter test` uses. For example,
+if you built an engine in the `out/host_debug_unopt` directory, you can pass
+`--local-engine=host_debug_unopt` to run the tests in that engine.
 
 Note: Flutter tests are headless, you won't see any UI. You can use
 `print` to generate console output or you can interact with the DartVM
@@ -161,18 +162,15 @@ the following steps.
    underneath the directory that contains the `.gclient` file.
 
 3. To run tests on your host machine, build one of the host configurations
-   (e.g., `out/Debug`). To run examples on Android, build one of the Android
-   configurations (e.g., `out/android_Debug`).
+   (e.g., `out/host_debug_unopt`). To run examples on Android, build one of the
+   Android configurations (e.g., `out/android_debug_unopt`).
 
 You should now be able to run the tests against your locally built
-engine using the `flutter test --engine-debug` command. To run one of the
-examples on your device using your locally built engine, use the
-`--engine-debug` option to the `flutter` tool:
+engine using the `flutter test --local-engine=host_debug_unopt` command. To run
+one of the examples on your device using your locally built engine, use the
+`--local-engine=android_debug_unopt` option to the `flutter` tool:
 
- * `flutter run --engine-debug`
-
-If you want to test the release version instead of the debug version,
-use `--engine-release` instead of `--engine-debug`.
+ * `flutter run --local-engine=android_debug_unopt`
 
 Making a breaking change to the engine
 --------------------------------------
