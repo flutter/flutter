@@ -76,6 +76,13 @@ String getSizeAsMB(int bytesLength) {
   return '${(bytesLength / (1024 * 1024)).toStringAsFixed(1)}MB';
 }
 
+/// Return a relative path if [fullPath] is contained by the cwd, else return an
+/// absolute path.
+String getDisplayPath(String fullPath) {
+  String cwd = Directory.current.path + Platform.pathSeparator;
+  return fullPath.startsWith(cwd) ?  fullPath.substring(cwd.length) : fullPath;
+}
+
 /// A class to maintain a list of items, fire events when items are added or
 /// removed, and calculate a diff of changes when a new list of items is
 /// available.

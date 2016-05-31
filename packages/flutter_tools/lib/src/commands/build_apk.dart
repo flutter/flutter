@@ -10,17 +10,17 @@ import 'package:path/path.dart' as path;
 
 import '../android/android_sdk.dart';
 import '../base/file_system.dart' show ensureDirectoryExists;
-import '../base/os.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
+import '../run.dart';
 import '../runner/flutter_command.dart';
 import '../services.dart';
 import 'build_aot.dart';
-import 'run.dart';
 
 export '../android/android_device.dart' show AndroidDevice;
 

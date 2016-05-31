@@ -11,8 +11,8 @@ import '../base/process.dart';
 import '../build_info.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
+import '../run.dart';
 import '../runner/flutter_command.dart';
-import 'run.dart';
 
 const String _kDefaultBundlePath = 'build/app.flx';
 
