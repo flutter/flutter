@@ -77,23 +77,23 @@ the `engine` and `flutter` directories should be in the same parent directory.
 Once you've got everything set up, you can run an example using your locally
 built engine by switching to that example's directory, running `pub get` to make
 sure its dependencies have been downloaded, and using `flutter run` with an
-explicit `--engine-src-path` pointing at the `engine/src` directory. Make sure you have
-a device connected over USB and debugging enabled on that device:
+explicit `--local-engine-src-path` pointing at the `engine/src` directory. Make
+sure you have a device connected over USB and debugging enabled on that device:
 
  * `cd /path/to/flutter/examples/hello_world`
  * `pub get`
- * `../../bin/flutter run --engine-src-path /path/to/engine/src`
+ * `../../bin/flutter run --local-engine-src-path /path/to/engine/src --local-engine=android_debug_unopt`
 
-If you put the `engine` and `flutter` directories side-by-side, you can use
-`--engine-debug` instead of the tedious `--engine-src-path /path/to/engine/src`,
-and the `flutter` tool will automatically determine the path.
+If you put the `engine` and `flutter` directories side-by-side, you can skip the
+tedious `--local-engine-src-path` option and the `flutter` tool will
+automatically determine the path.
 
 You can also specify a particular Dart file to run if you want to run an example
 that doesn't have a `lib/main.dart` file using the `-t` command-line option. For
 example, to run the `tabs.dart` example in the `examples/widgets` directory on a
 connected Android device, from that directory you would run:
 
- * `flutter run --engine-debug -t tabs.dart`
+ * `flutter run --local-engine=android_debug_unopt -t tabs.dart`
 
 If you're going to be debugging crashes in the engine, make sure you add
 `android:debuggable="true"` to the `<application>` element in the
