@@ -394,10 +394,10 @@ class _RunAndStayResident {
       observatory = await Observatory.connect(result.observatoryPort);
       printTrace('Connected to observatory port: ${result.observatoryPort}.');
 
+      observatory.populateIsolateInfo();
       observatory.onExtensionEvent.listen((Event event) {
         printTrace(event.toString());
       });
-
       observatory.onIsolateEvent.listen((Event event) {
         printTrace(event.toString());
       });
