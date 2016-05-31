@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -12,7 +13,7 @@ import 'typography.dart';
 
 const double _kScreenEdgeMargin = 10.0;
 const Duration _kFadeDuration = const Duration(milliseconds: 200);
-const Duration _kShowDuration = const Duration(seconds: 2);
+const Duration _kShowDuration = const Duration(milliseconds: 1500);
 
 /// A material design tooltip.
 ///
@@ -105,21 +106,8 @@ class _TooltipState extends State<Tooltip> {
   }
 
   void _handleStatusChanged(AnimationStatus status) {
-    switch (status) {
-      case AnimationStatus.completed:
-        assert(_entry != null);
-        assert(_timer == null);
-        resetShowTimer();
-        break;
-      case AnimationStatus.dismissed:
-        assert(_entry != null);
-        assert(_timer == null);
-        _entry.remove();
-        _entry = null;
-        break;
-      default:
-        break;
-    }
+    if (status == AnimationStatus.dismissed)
+      _removeEntry();
   }
 
   @override
@@ -134,61 +122,58 @@ class _TooltipState extends State<Tooltip> {
       _entry.markNeedsBuild();
   }
 
-  void resetShowTimer() {
-    assert(_controller.status == AnimationStatus.completed);
-    assert(_entry != null);
-    _timer = new Timer(_kShowDuration, hideTooltip);
+  void ensureTooltipVisible() {
+    if (_entry != null)
+      return;  // Already visible.
+    RenderBox box = context.findRenderObject();
+    Point target = box.localToGlobal(box.size.center(Point.origin));
+    _entry = new OverlayEntry(builder: (BuildContext context) {
+      return new _TooltipOverlay(
+        message: config.message,
+        height: config.height,
+        padding: config.padding,
+        animation: new CurvedAnimation(
+          parent: _controller,
+          curve: Curves.ease
+        ),
+        target: target,
+        verticalOffset: config.verticalOffset,
+        preferBelow: config.preferBelow
+      );
+    });
+    Overlay.of(context, debugRequiredFor: config).insert(_entry);
+    GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
+    _controller.forward();
   }
 
-  void showTooltip() {
-    if (_entry == null) {
-      RenderBox box = context.findRenderObject();
-      Point target = box.localToGlobal(box.size.center(Point.origin));
-      _entry = new OverlayEntry(builder: (BuildContext context) {
-        return new _TooltipOverlay(
-          message: config.message,
-          height: config.height,
-          padding: config.padding,
-          animation: new CurvedAnimation(
-            parent: _controller,
-            curve: Curves.ease
-          ),
-          target: target,
-          verticalOffset: config.verticalOffset,
-          preferBelow: config.preferBelow
-        );
-      });
-      Overlay.of(context, debugRequiredFor: config).insert(_entry);
-    }
-    _timer?.cancel();
-    if (_controller.status != AnimationStatus.completed) {
-      _timer = null;
-      _controller.forward();
-    } else {
-      resetShowTimer();
-    }
-  }
-
-  void hideTooltip() {
+  void _removeEntry() {
     assert(_entry != null);
     _timer?.cancel();
     _timer = null;
-    _controller.reverse();
+    _entry.remove();
+    _entry = null;
+    GestureBinding.instance.pointerRouter.removeGlobalRoute(_handlePointerEvent);
+  }
+
+  void _handlePointerEvent(PointerEvent event) {
+    assert(_entry != null);
+    if (event is PointerUpEvent || event is PointerCancelEvent)
+      _timer = new Timer(_kShowDuration, _controller.reverse);
+    else if (event is PointerDownEvent)
+      _controller.reverse();
   }
 
   @override
   void deactivate() {
     if (_entry != null)
-      hideTooltip();
+      _controller.reverse();
     super.deactivate();
   }
 
   @override
   void dispose() {
-    _controller.stop();
-    _entry?.remove();
-    _entry = null;
-    assert(_timer == null);
+    if (_entry != null)
+      _removeEntry();
     super.dispose();
   }
 
@@ -197,7 +182,7 @@ class _TooltipState extends State<Tooltip> {
     assert(Overlay.of(context, debugRequiredFor: config) != null);
     return new GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onLongPress: showTooltip,
+      onLongPress: ensureTooltipVisible,
       excludeFromSemantics: true,
       child: new Semantics(
         label: config.message,
