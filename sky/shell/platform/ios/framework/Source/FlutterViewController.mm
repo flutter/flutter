@@ -483,20 +483,32 @@ static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
   });
 }
 
-- (void)setMessageListener:(NSObject<FlutterMessageListener>*)listener
-       forMessagesWithName:(NSString*)messageName {
+- (void)addMessageListener:(NSObject<FlutterMessageListener>*)listener {
   NSAssert(listener, @"The listener must not be null");
+  NSString* messageName = listener.messageName;
   NSAssert(messageName, @"The messageName must not be null");
-  _appMessageReceiver.SetMessageListener(messageName.UTF8String,
-      base::scoped_nsprotocol<NSObject<FlutterMessageListener>*>(listener));
+  _appMessageReceiver.SetMessageListener(messageName.UTF8String, listener);
 }
 
-- (void)setAsyncMessageListener:(NSObject<FlutterAsyncMessageListener>*)listener
-            forMessagesWithName:(NSString*)messageName {
+- (void)removeMessageListener:(NSObject<FlutterMessageListener>*)listener {
   NSAssert(listener, @"The listener must not be null");
+  NSString* messageName = listener.messageName;
   NSAssert(messageName, @"The messageName must not be null");
-  _appMessageReceiver.SetAsyncMessageListener(messageName.UTF8String,
-      base::scoped_nsprotocol<NSObject<FlutterAsyncMessageListener>*>(listener));
+  _appMessageReceiver.SetMessageListener(messageName.UTF8String, nil);
+}
+
+- (void)addAsyncMessageListener:(NSObject<FlutterAsyncMessageListener>*)listener {
+  NSAssert(listener, @"The listener must not be null");
+  NSString* messageName = listener.messageName;
+  NSAssert(messageName, @"The messageName must not be null");
+  _appMessageReceiver.SetAsyncMessageListener(messageName.UTF8String, listener);
+}
+
+- (void)removeAsyncMessageListener:(NSObject<FlutterAsyncMessageListener>*)listener {
+  NSAssert(listener, @"The listener must not be null");
+  NSString* messageName = listener.messageName;
+  NSAssert(messageName, @"The messageName must not be null");
+  _appMessageReceiver.SetAsyncMessageListener(messageName.UTF8String, nil);
 }
 
 @end

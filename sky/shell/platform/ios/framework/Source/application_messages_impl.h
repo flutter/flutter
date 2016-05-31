@@ -8,7 +8,6 @@
 #include <unordered_map>
 
 #include "base/memory/weak_ptr.h"
-#include "base/mac/scoped_nsobject.h"
 #include "mojo/common/binding_set.h"
 #include "sky/services/platform/app_messages.mojom.h"
 #include "sky/shell/platform/ios/framework/Headers/FlutterAsyncMessageListener.h"
@@ -27,11 +26,11 @@ class ApplicationMessagesImpl : public flutter::platform::ApplicationMessages {
 
   void SetMessageListener(
       const std::string& message_name,
-      base::scoped_nsprotocol<NSObject<FlutterMessageListener>*> listener);
+      NSObject<FlutterMessageListener>* listener);
 
   void SetAsyncMessageListener(
       const std::string& message_name,
-      base::scoped_nsprotocol<NSObject<FlutterAsyncMessageListener>*> listener);
+      NSObject<FlutterAsyncMessageListener>* listener);
 
  private:
   void SendString(const mojo::String& message_name,
@@ -40,11 +39,9 @@ class ApplicationMessagesImpl : public flutter::platform::ApplicationMessages {
 
   mojo::BindingSet<flutter::platform::ApplicationMessages> binding_;
   std::unordered_map<
-      std::string,
-      base::scoped_nsprotocol<NSObject<FlutterMessageListener>*>> listeners_;
+      std::string, NSObject<FlutterMessageListener>*> listeners_;
   std::unordered_map<
-      std::string,
-      base::scoped_nsprotocol<NSObject<FlutterAsyncMessageListener>*>> async_listeners_;
+      std::string, NSObject<FlutterAsyncMessageListener>*> async_listeners_;
 
   base::WeakPtrFactory<ApplicationMessagesImpl> weak_factory_;
 };

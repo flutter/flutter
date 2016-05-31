@@ -28,11 +28,13 @@ FLUTTER_EXPORT
    withMessageName:(NSString*)messageName
           callback:(void(^)(NSString*))callback;
 
-- (void)setMessageListener:(NSObject<FlutterMessageListener>*)listener
-       forMessagesWithName:(NSString*)messageName;
+- (void)addMessageListener:(NSObject<FlutterMessageListener>*)listener;
 
-- (void)setAsyncMessageListener:(NSObject<FlutterAsyncMessageListener>*)listener
-            forMessagesWithName:(NSString*)messageName;
+- (void)removeMessageListener:(NSObject<FlutterMessageListener>*)listener;
+
+- (void)addAsyncMessageListener:(NSObject<FlutterAsyncMessageListener>*)listener;
+
+- (void)removeAsyncMessageListener:(NSObject<FlutterAsyncMessageListener>*)listener;
 
 @end
 

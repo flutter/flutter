@@ -14,6 +14,8 @@ FLUTTER_EXPORT
 
 - (NSString*)didReceiveString:(NSString*)message;
 
+@property(readonly, strong, nonatomic) NSString* messageName;
+
 @end
 
 #endif  // FLUTTER_FLUTTERMESSAGELISTENER_H_

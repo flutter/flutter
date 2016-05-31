@@ -26,14 +26,20 @@ void ApplicationMessagesImpl::AddBinding(
 
 void ApplicationMessagesImpl::SetMessageListener(
     const std::string& message_name,
-    base::scoped_nsprotocol<NSObject<FlutterMessageListener>*> listener) {
-  listeners_[message_name] = listener;
+    NSObject<FlutterMessageListener>* listener) {
+  if (listener)
+    listeners_[message_name] = listener;
+  else
+    listeners_.erase(message_name);
 }
 
 void ApplicationMessagesImpl::SetAsyncMessageListener(
     const std::string& message_name,
-    base::scoped_nsprotocol<NSObject<FlutterAsyncMessageListener>*> listener) {
-  async_listeners_[message_name] = listener;
+    NSObject<FlutterAsyncMessageListener>* listener) {
+  if (listener)
+    async_listeners_[message_name] = listener;
+  else
+    async_listeners_.erase(message_name);
 }
 
 void ApplicationMessagesImpl::SendString(

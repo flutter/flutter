@@ -15,6 +15,8 @@ FLUTTER_EXPORT
 - (void)didReceiveString:(NSString*)message
                 callback:(void(^)(NSString*))sendResponse;
 
+@property(readonly, strong, nonatomic) NSString* messageName;
+
 @end
 
 #endif  // FLUTTER_FLUTTERASYNCMESSAGELISTENER_H_
