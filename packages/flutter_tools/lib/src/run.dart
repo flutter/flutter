@@ -30,6 +30,8 @@ String findMainDartFile([String target]) {
     return targetPath;
 }
 
+// TODO: split out the cli part of the UI from this class
+
 class RunAndStayResident {
   RunAndStayResident(
     this.device, {
@@ -56,6 +58,11 @@ class RunAndStayResident {
     }, onError: (dynamic error) {
       printError('Exception from flutter run: $error');
     });
+  }
+
+  Future<Null> stop() {
+    _stopLogger();
+    return _stopApp();
   }
 
   Future<int> _run({ bool traceStartup: false, bool benchmark: false }) async {
@@ -146,10 +153,10 @@ class RunAndStayResident {
       observatory = await Observatory.connect(result.observatoryPort);
       printTrace('Connected to observatory port: ${result.observatoryPort}.');
 
+      observatory.populateIsolateInfo();
       observatory.onExtensionEvent.listen((Event event) {
         printTrace(event.toString());
       });
-
       observatory.onIsolateEvent.listen((Event event) {
         printTrace(event.toString());
       });
@@ -159,7 +166,10 @@ class RunAndStayResident {
 
       // Listen for observatory connection close.
       observatory.done.whenComplete(() {
-        _handleExit();
+        if (!_exitCompleter.isCompleted) {
+          printStatus('Application finished.');
+          _exitCompleter.complete(0);
+        }
       });
     }
 
@@ -170,7 +180,8 @@ class RunAndStayResident {
 
       await downloadStartupTrace(observatory);
 
-      _handleExit();
+      if (!_exitCompleter.isCompleted)
+        _exitCompleter.complete(0);
     } else {
       if (!logger.quiet)
         _printHelp();
@@ -188,15 +199,19 @@ class RunAndStayResident {
           _handleRefresh(package, result, mainPath);
         } else if (lower == 'q' || code == AnsiTerminal.KEY_F10) {
           // F10, exit
-          _handleExit();
+          _stopApp();
         }
       });
 
       ProcessSignal.SIGINT.watch().listen((ProcessSignal signal) {
-        _handleExit();
+        _resetTerminal();
+        _stopLogger();
+        _stopApp();
       });
       ProcessSignal.SIGTERM.watch().listen((ProcessSignal signal) {
-        _handleExit();
+        _resetTerminal();
+        _stopLogger();
+        _stopApp();
       });
     }
 
@@ -212,22 +227,12 @@ class RunAndStayResident {
       restartTime.stop();
       writeRunBenchmarkFile(startTime, restarted ? restartTime : null);
       await new Future<Null>.delayed(new Duration(seconds: 2));
-      _handleExit();
+      stop();
     }
 
     return _exitCompleter.future.then((int exitCode) async {
-      try {
-        if (observatory != null && !observatory.isClosed) {
-          if (observatory.isolates.isNotEmpty) {
-            observatory.flutterExit(observatory.firstIsolateId);
-            // The Dart WebSockets API does not have a flush() method.
-            await new Future<Null>.delayed(new Duration(milliseconds: 100));
-          }
-        }
-      } catch (error) {
-        stderr.writeln(error.toString());
-      }
-
+      _resetTerminal();
+      _stopLogger();
       return exitCode;
     });
   }
@@ -258,7 +263,6 @@ class RunAndStayResident {
 
       if (restartResult) {
         // TODO(devoncarew): We should restore the route here.
-
         await extensionAddedEvent;
       }
 
@@ -266,14 +270,26 @@ class RunAndStayResident {
     }
   }
 
-  void _handleExit() {
-    terminal.singleCharMode = false;
+  void _stopLogger() {
+    _loggingSubscription?.cancel();
+  }
 
-    if (!_exitCompleter.isCompleted) {
-      _loggingSubscription?.cancel();
-      printStatus('Application finished.');
-      _exitCompleter.complete(0);
+  void _resetTerminal() {
+    terminal.singleCharMode = false;
+  }
+
+  Future<Null> _stopApp() {
+    if (observatory != null && !observatory.isClosed) {
+      if (observatory.isolates.isNotEmpty) {
+        observatory.flutterExit(observatory.firstIsolateId);
+        return new Future<Null>.delayed(new Duration(milliseconds: 100));
+      }
     }
+
+    if (!_exitCompleter.isCompleted)
+      _exitCompleter.complete(0);
+
+    return new Future<Null>.value();
   }
 }
 

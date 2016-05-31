@@ -7,7 +7,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import '../android/android_device.dart';
-import '../application_package.dart';
 import '../base/context.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
@@ -15,10 +14,11 @@ import '../device.dart';
 import '../globals.dart';
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
+import '../run.dart';
 import '../runner/flutter_command.dart';
 import 'run.dart';
 
-const String protocolVersion = '0.1.0';
+const String protocolVersion = '0.2.0';
 
 /// A server process command. This command will start up a long-lived server.
 /// It reads JSON-RPC based commands from stdin, executes them, and returns
@@ -237,15 +237,24 @@ class DaemonDomain extends Domain {
   }
 }
 
+// TODO: app events:
+
+// TODO: started
+// TODO: debugPort
+// TODO: stdout
+// TODO: stderr
+// TODO: stopped
+
 /// This domain responds to methods like [start] and [stop].
 ///
-/// It'll be extended to fire events for when applications start, stop, and
-/// log data.
+/// It fires events for application start, stop, stdout, and stderr.
 class AppDomain extends Domain {
   AppDomain(Daemon daemon) : super(daemon, 'app') {
     registerHandler('start', start);
     registerHandler('stop', stop);
   }
+
+  List<AppInstance> _apps = <AppInstance>[];
 
   Future<dynamic> start(Map<String, dynamic> args) async {
     if (args == null || args['deviceId'] is! String)
@@ -282,28 +291,30 @@ class AppDomain extends Domain {
     return null;
   }
 
+  // TODO: document the updated params
+
   Future<bool> stop(dynamic args) async {
-    if (args == null || args['deviceId'] is! String)
-      throw "deviceId is required";
-    Device device = await _getDevice(args['deviceId']);
-    if (device == null)
-      throw "device '${args['deviceId']}' not found";
+    if (args == null || args['appId'] is! String)
+      throw "appId is required";
+    AppInstance app = _getApp(args['appId']);
+    if (app == null)
+      throw "app '${args['appId']}' not found";
 
-    if (args['projectDirectory'] is! String)
-      throw "projectDirectory is required";
-    String projectDirectory = args['projectDirectory'];
-    if (!FileSystemEntity.isDirectorySync(projectDirectory))
-      throw "'$projectDirectory' does not exist";
+    // TODO: Set a timeout if the kill doesn't happen for a while.
+    // Stop logging from the app, and remove it from the list of apps (after ~2 seconds).
 
-    Directory cwd = Directory.current;
-    Directory.current = new Directory(projectDirectory);
+    return app.stop().then((_) {
+      // TODO: ?
+      return true;
+    }).catchError((dynamic error) {
+      // TODO: send error over the app stream
 
-    try {
-      ApplicationPackage app = command.applicationPackages.getPackageForPlatform(device.platform);
-      return device.stopApp(app);
-    } finally {
-      Directory.current = cwd;
-    }
+      return false;
+    });
+  }
+
+  AppInstance _getApp(String id) {
+    return _apps.firstWhere((AppInstance app) => app.id == id, orElse: () => null);
   }
 
   Future<Device> _getDevice(String deviceId) async {
@@ -418,6 +429,15 @@ class NotifyingLogger extends Logger {
     printStatus(message);
     return new Status();
   }
+}
+
+class AppInstance {
+  AppInstance(this.id);
+
+  final String id;
+  RunAndStayResident runner;
+
+  Future<Null> stop() => runner.stop();
 }
 
 class LogMessage {
