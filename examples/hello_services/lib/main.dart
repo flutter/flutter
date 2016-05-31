@@ -57,10 +57,10 @@ class _HelloServicesState extends State<HelloServices> {
   }
 
   void _onReceivedLocation(String json) {
-    Map<String, double> reply = JSON.decode(json);
+    Map<String, num> reply = JSON.decode(json);
     setState(() {
-      _latitude = reply['latitude'];
-      _longitude = reply['longitude'];
+      _latitude = reply['latitude'].toDouble();
+      _longitude = reply['longitude'].toDouble();
     });
   }
 }
