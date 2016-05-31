@@ -1,0 +1,4 @@
+mmm -j8 frameworks/minikin/tests/perftests &&
+adb push $OUT/data/benchmarktest/minikin_perftests/minikin_perftests \
+    /data/benchmarktest/minikin_perftests/minikin_perftests &&
+adb shell /data/benchmarktest/minikin_perftests/minikin_perftests
