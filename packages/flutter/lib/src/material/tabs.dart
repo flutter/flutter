@@ -100,47 +100,40 @@ class _RenderTabBar extends RenderBox with
   }
 
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    BoxConstraints widthConstraints =
-        new BoxConstraints(maxWidth: constraints.maxWidth, maxHeight: constraints.maxHeight);
-
+  double getMinIntrinsicWidth(double height) {
     double maxWidth = 0.0;
     RenderBox child = firstChild;
     while (child != null) {
-      maxWidth = math.max(maxWidth, child.getMinIntrinsicWidth(widthConstraints));
+      maxWidth = math.max(maxWidth, child.getMinIntrinsicWidth(height));
       final _TabBarParentData childParentData = child.parentData;
       child = childParentData.nextSibling;
     }
-    double width = isScrollable ? maxWidth : maxWidth * childCount;
-    return constraints.constrainWidth(width);
+    return isScrollable ? maxWidth : maxWidth * childCount;
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    BoxConstraints widthConstraints =
-        new BoxConstraints(maxWidth: constraints.maxWidth, maxHeight: constraints.maxHeight);
-
+  double getMaxIntrinsicWidth(double height) {
     double maxWidth = 0.0;
+    double totalWidth = 0.0;
     RenderBox child = firstChild;
     while (child != null) {
-      maxWidth = math.max(maxWidth, child.getMaxIntrinsicWidth(widthConstraints));
+      double childWidth = child.getMaxIntrinsicWidth(height);
+      maxWidth = math.max(maxWidth, childWidth);
+      totalWidth += childWidth;
       final _TabBarParentData childParentData = child.parentData;
       child = childParentData.nextSibling;
     }
-    double width = isScrollable ? maxWidth : maxWidth * childCount;
-    return constraints.constrainWidth(width);
+    return isScrollable ? totalWidth : maxWidth * childCount;
   }
 
   double get _tabHeight => textAndIcons ? _kTextAndIconTabHeight : _kTabHeight;
   double get _tabBarHeight => _tabHeight + _kTabIndicatorHeight;
 
-  double _getIntrinsicHeight(BoxConstraints constraints) => constraints.constrainHeight(_tabBarHeight);
+  @override
+  double getMinIntrinsicHeight(double width) => _tabBarHeight;
 
   @override
-  double getMinIntrinsicHeight(BoxConstraints constraints) => _getIntrinsicHeight(constraints);
-
-  @override
-  double getMaxIntrinsicHeight(BoxConstraints constraints) => _getIntrinsicHeight(constraints);
+  double getMaxIntrinsicHeight(double width) => _tabBarHeight;
 
   void layoutFixedWidthTabs() {
     double tabWidth = size.width / childCount;

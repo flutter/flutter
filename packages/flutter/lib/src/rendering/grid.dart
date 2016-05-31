@@ -181,26 +181,34 @@ abstract class GridDelegate {
 
   /// Returns the minimum width that this grid could be without failing to paint
   /// its contents within itself.
-  double getMinIntrinsicWidth(BoxConstraints constraints, int childCount) {
-    return constraints.constrainWidth(_getGridSize(constraints, childCount).width);
+  ///
+  /// For more details, see [RenderBox.getMinIntrinsicWidth].
+  double getMinIntrinsicWidth(double height, int childCount) {
+    return _getGridSize(new BoxConstraints.tightForFinite(height: height), childCount).width;
   }
 
   /// Returns the smallest width beyond which increasing the width never
   /// decreases the preferred height.
-  double getMaxIntrinsicWidth(BoxConstraints constraints, int childCount) {
-    return constraints.constrainWidth(_getGridSize(constraints, childCount).width);
+  ///
+  /// For more details, see [RenderBox.getMaxIntrinsicWidth].
+  double getMaxIntrinsicWidth(double height, int childCount) {
+    return _getGridSize(new BoxConstraints.tightForFinite(height: height), childCount).width;
   }
 
   /// Return the minimum height that this grid could be without failing to paint
   /// its contents within itself.
-  double getMinIntrinsicHeight(BoxConstraints constraints, int childCount) {
-    return constraints.constrainHeight(_getGridSize(constraints, childCount).height);
+  ///
+  /// For more details, see [RenderBox.getMinIntrinsicHeight].
+  double getMinIntrinsicHeight(double width, int childCount) {
+    return _getGridSize(new BoxConstraints.tightForFinite(width: width), childCount).height;
   }
 
   /// Returns the smallest height beyond which increasing the height never
   /// decreases the preferred width.
-  double getMaxIntrinsicHeight(BoxConstraints constraints, int childCount) {
-    return constraints.constrainHeight(_getGridSize(constraints, childCount).height);
+  ///
+  /// For more details, see [RenderBox.getMaxIntrinsicHeight].
+  double getMaxIntrinsicHeight(double width, int childCount) {
+    return _getGridSize(new BoxConstraints.tightForFinite(width: width), childCount).height;
   }
 }
 
@@ -293,13 +301,13 @@ class FixedColumnCountGridDelegate extends GridDelegateWithInOrderChildPlacement
   }
 
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints, int childCount) {
-    return constraints.constrainWidth(0.0);
+  double getMinIntrinsicWidth(double height, int childCount) {
+    return 0.0;
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints, int childCount) {
-    return constraints.constrainWidth(0.0);
+  double getMaxIntrinsicWidth(double height, int childCount) {
+    return 0.0;
   }
 }
 
@@ -359,13 +367,13 @@ class MaxTileWidthGridDelegate extends GridDelegateWithInOrderChildPlacement {
   }
 
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints, int childCount) {
-    return constraints.constrainWidth(0.0);
+  double getMinIntrinsicWidth(double height, int childCount) {
+    return 0.0;
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints, int childCount) {
-    return constraints.constrainWidth(maxTileWidth * childCount);
+  double getMaxIntrinsicWidth(double height, int childCount) {
+    return maxTileWidth * childCount;
   }
 }
 
@@ -470,27 +478,23 @@ class RenderGrid extends RenderVirtualViewport<GridParentData> {
   }
 
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return _delegate.getMinIntrinsicWidth(constraints, virtualChildCount);
+  double getMinIntrinsicWidth(double height) {
+    return _delegate.getMinIntrinsicWidth(height, virtualChildCount);
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return _delegate.getMaxIntrinsicWidth(constraints, virtualChildCount);
+  double getMaxIntrinsicWidth(double height) {
+    return _delegate.getMaxIntrinsicWidth(height, virtualChildCount);
   }
 
   @override
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return _delegate.getMinIntrinsicHeight(constraints, virtualChildCount);
+  double getMinIntrinsicHeight(double width) {
+    return _delegate.getMinIntrinsicHeight(width, virtualChildCount);
   }
 
   @override
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return _delegate.getMaxIntrinsicHeight(constraints, virtualChildCount);
+  double getMaxIntrinsicHeight(double width) {
+    return _delegate.getMaxIntrinsicHeight(width, virtualChildCount);
   }
 
   @override

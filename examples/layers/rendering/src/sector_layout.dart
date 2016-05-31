@@ -454,38 +454,42 @@ class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChil
   }
 
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
+  double getMinIntrinsicWidth(double height) {
     if (child == null)
-      return super.getMinIntrinsicWidth(constraints);
-    return getIntrinsicDimensions(constraints).width;
+      return 0.0;
+    return getIntrinsicDimensions(height: height).width;
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
+  double getMaxIntrinsicWidth(double height) {
     if (child == null)
-      return super.getMaxIntrinsicWidth(constraints);
-    return getIntrinsicDimensions(constraints).width;
+      return 0.0;
+    return getIntrinsicDimensions(height: height).width;
   }
 
   @override
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
+  double getMinIntrinsicHeight(double width) {
     if (child == null)
-      return super.getMinIntrinsicHeight(constraints);
-    return getIntrinsicDimensions(constraints).height;
+      return 0.0;
+    return getIntrinsicDimensions(width: width).height;
   }
 
   @override
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
+  double getMaxIntrinsicHeight(double width) {
     if (child == null)
-      return super.getMaxIntrinsicHeight(constraints);
-    return getIntrinsicDimensions(constraints).height;
+      return 0.0;
+    return getIntrinsicDimensions(width: width).height;
   }
 
-  Size getIntrinsicDimensions(BoxConstraints constraints) {
+  Size getIntrinsicDimensions({
+    double width: double.INFINITY,
+    double height: double.INFINITY
+  }) {
     assert(child is RenderSector);
     assert(child.parentData is SectorParentData);
-    assert(constraints.maxWidth < double.INFINITY || constraints.maxHeight < double.INFINITY);
-    double maxChildDeltaRadius = math.min(constraints.maxWidth, constraints.maxHeight) / 2.0 - innerRadius;
+    assert(width != null);
+    assert(height != null);
+    double maxChildDeltaRadius = math.min(width, height) / 2.0 - innerRadius;
     SectorDimensions childDimensions = child.getIntrinsicDimensions(new SectorConstraints(maxDeltaRadius: maxChildDeltaRadius), innerRadius);
     double dimension = (innerRadius + childDimensions.deltaRadius) * 2.0;
     return constraints.constrain(new Size(dimension, dimension));

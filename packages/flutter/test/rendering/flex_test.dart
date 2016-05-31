@@ -35,10 +35,10 @@ void main() {
     BoxConstraints viewport = new BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
     layout(flex, constraints: viewport);
     expect(flexible.size.height, equals(0.0));
-    expect(flex.getMinIntrinsicHeight(viewport), equals(100.0));
-    expect(flex.getMaxIntrinsicHeight(viewport), equals(100.0));
-    expect(flex.getMinIntrinsicWidth(viewport), equals(100.0));
-    expect(flex.getMaxIntrinsicWidth(viewport), equals(100.0));
+    expect(flex.getMinIntrinsicHeight(100.0), equals(200.0));
+    expect(flex.getMaxIntrinsicHeight(100.0), equals(200.0));
+    expect(flex.getMinIntrinsicWidth(100.0), equals(0.0));
+    expect(flex.getMaxIntrinsicWidth(100.0), equals(0.0));
   });
 
   test('Horizontal Overflow', () {
@@ -57,10 +57,10 @@ void main() {
     BoxConstraints viewport = new BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
     layout(flex, constraints: viewport);
     expect(flexible.size.width, equals(0.0));
-    expect(flex.getMinIntrinsicHeight(viewport), equals(100.0));
-    expect(flex.getMaxIntrinsicHeight(viewport), equals(100.0));
-    expect(flex.getMinIntrinsicWidth(viewport), equals(100.0));
-    expect(flex.getMaxIntrinsicWidth(viewport), equals(100.0));
+    expect(flex.getMinIntrinsicHeight(100.0), equals(0.0));
+    expect(flex.getMaxIntrinsicHeight(100.0), equals(0.0));
+    expect(flex.getMinIntrinsicWidth(100.0), equals(200.0));
+    expect(flex.getMaxIntrinsicWidth(100.0), equals(200.0));
   });
 
   test('Vertical Flipped Constraints', () {
@@ -72,7 +72,7 @@ void main() {
     );
     BoxConstraints viewport = new BoxConstraints(maxHeight: 200.0, maxWidth: 1000.0);
     layout(flex, constraints: viewport);
-    expect(flex.getMaxIntrinsicWidth(viewport) , equals(1000.0));
+    expect(flex.getMaxIntrinsicWidth(200.0), equals(0.0));
   });
 
   // We can't right a horizontal version of the above test due to

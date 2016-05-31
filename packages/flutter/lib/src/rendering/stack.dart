@@ -224,78 +224,37 @@ abstract class RenderStackBase extends RenderBox
     }
   }
 
-  @override
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    double width = constraints.minWidth;
+  double _getIntrinsicDimension(double mainChildSizeGetter(RenderBox child)) {
+    double extent = 0.0;
     RenderBox child = firstChild;
     while (child != null) {
       final StackParentData childParentData = child.parentData;
       if (!childParentData.isPositioned)
-        width = math.max(width, child.getMinIntrinsicWidth(constraints));
+        extent = math.max(extent, mainChildSizeGetter(child));
       assert(child.parentData == childParentData);
       child = childParentData.nextSibling;
     }
-    assert(width == constraints.constrainWidth(width));
-    return width;
+    return extent;
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    bool hasNonPositionedChildren = false;
-    double width = constraints.minWidth;
-    RenderBox child = firstChild;
-    while (child != null) {
-      final StackParentData childParentData = child.parentData;
-      if (!childParentData.isPositioned) {
-        hasNonPositionedChildren = true;
-        width = math.max(width, child.getMaxIntrinsicWidth(constraints));
-      }
-      assert(child.parentData == childParentData);
-      child = childParentData.nextSibling;
-    }
-    if (!hasNonPositionedChildren)
-      return constraints.constrainWidth();
-    assert(width == constraints.constrainWidth(width));
-    return width;
+  double getMinIntrinsicWidth(double height) {
+    return _getIntrinsicDimension((RenderBox child) => child.getMinIntrinsicWidth(height));
   }
 
   @override
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    double height = constraints.minHeight;
-    RenderBox child = firstChild;
-    while (child != null) {
-      final StackParentData childParentData = child.parentData;
-      if (!childParentData.isPositioned)
-        height = math.max(height, child.getMinIntrinsicHeight(constraints));
-      assert(child.parentData == childParentData);
-      child = childParentData.nextSibling;
-    }
-    assert(height == constraints.constrainHeight(height));
-    return height;
+  double getMaxIntrinsicWidth(double height) {
+    return _getIntrinsicDimension((RenderBox child) => child.getMaxIntrinsicWidth(height));
   }
 
   @override
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    bool hasNonPositionedChildren = false;
-    double height = constraints.minHeight;
-    RenderBox child = firstChild;
-    while (child != null) {
-      final StackParentData childParentData = child.parentData;
-      if (!childParentData.isPositioned) {
-        hasNonPositionedChildren = true;
-        height = math.max(height, child.getMaxIntrinsicHeight(constraints));
-      }
-      assert(child.parentData == childParentData);
-      child = childParentData.nextSibling;
-    }
-    if (!hasNonPositionedChildren)
-      return constraints.constrainHeight();
-    assert(height == constraints.constrainHeight(height));
-    return height;
+  double getMinIntrinsicHeight(double width) {
+    return _getIntrinsicDimension((RenderBox child) => child.getMinIntrinsicHeight(width));
+  }
+
+  @override
+  double getMaxIntrinsicHeight(double width) {
+    return _getIntrinsicDimension((RenderBox child) => child.getMaxIntrinsicHeight(width));
   }
 
   @override

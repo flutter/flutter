@@ -205,31 +205,27 @@ class RenderImage extends RenderBox {
   }
 
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
+  double getMinIntrinsicWidth(double height) {
     if (_width == null && _height == null)
-      return constraints.constrainWidth(0.0);
-    return _sizeForConstraints(constraints).width;
+      return 0.0;
+    return _sizeForConstraints(new BoxConstraints.tightForFinite(height: height)).width;
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return _sizeForConstraints(constraints).width;
+  double getMaxIntrinsicWidth(double height) {
+    return _sizeForConstraints(new BoxConstraints.tightForFinite(height: height)).width;
   }
 
   @override
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
+  double getMinIntrinsicHeight(double width) {
     if (_width == null && _height == null)
-      return constraints.constrainHeight(0.0);
-    return _sizeForConstraints(constraints).height;
+      return 0.0;
+    return _sizeForConstraints(new BoxConstraints.tightForFinite(width: width)).height;
   }
 
   @override
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return _sizeForConstraints(constraints).height;
+  double getMaxIntrinsicHeight(double width) {
+    return _sizeForConstraints(new BoxConstraints.tightForFinite(width: width)).height;
   }
 
   @override

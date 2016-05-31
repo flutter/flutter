@@ -240,24 +240,40 @@ class RenderFlow extends RenderBox
   @override
   bool get isRepaintBoundary => true;
 
+  // TODO(ianh): It's a bit dubious to be using the getSize function from the delegate to
+  // figure out the intrinsic dimensions. We really should either not support intrinsics,
+  // or we should expose intrinsic delegate callbacks and throw if they're not implemented.
+
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    return _getSize(constraints).width;
+  double getMinIntrinsicWidth(double height) {
+    final double width = _getSize(new BoxConstraints.tightForFinite(height: height)).width;
+    if (width.isFinite)
+      return width;
+    return 0.0;
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    return _getSize(constraints).width;
+  double getMaxIntrinsicWidth(double height) {
+    final double width = _getSize(new BoxConstraints.tightForFinite(height: height)).width;
+    if (width.isFinite)
+      return width;
+    return 0.0;
   }
 
   @override
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    return _getSize(constraints).height;
+  double getMinIntrinsicHeight(double width) {
+    final double height = _getSize(new BoxConstraints.tightForFinite(width: width)).height;
+    if (height.isFinite)
+      return height;
+    return 0.0;
   }
 
   @override
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    return _getSize(constraints).height;
+  double getMaxIntrinsicHeight(double width) {
+    final double height = _getSize(new BoxConstraints.tightForFinite(width: width)).height;
+    if (height.isFinite)
+      return height;
+    return 0.0;
   }
 
   @override

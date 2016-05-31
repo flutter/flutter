@@ -192,27 +192,13 @@ class RenderEditableLine extends RenderBox {
   }
 
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return constraints.constrainWidth(0.0);
+  double getMinIntrinsicHeight(double width) {
+    return _preferredHeight;
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return constraints.constrainWidth(0.0);
-  }
-
-  @override
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return constraints.constrainHeight(_preferredHeight);
-  }
-
-  @override
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return constraints.constrainHeight(_preferredHeight);
+  double getMaxIntrinsicHeight(double width) {
+    return _preferredHeight;
   }
 
   @override

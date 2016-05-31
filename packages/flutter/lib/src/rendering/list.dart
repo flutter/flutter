@@ -87,7 +87,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
   double get _preferredExtent {
     if (itemExtent == null)
       return double.INFINITY;
-    int count = virtualChildCount;
+    final int count = virtualChildCount;
     if (count == null)
       return double.INFINITY;
     double extent = itemExtent * count;
@@ -96,44 +96,52 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
     return extent;
   }
 
-  double _getIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
+  double _getIntrinsicWidth() {
     switch (mainAxis) {
       case Axis.vertical:
-        return constraints.constrainWidth(0.0);
+        assert(debugThrowIfNotCheckingIntrinsics());
+        return 0.0;
       case Axis.horizontal:
-        return constraints.constrainWidth(_preferredExtent);
+        final double width = _preferredExtent;
+        if (width.isFinite)
+          return width;
+        assert(debugThrowIfNotCheckingIntrinsics());
+        return 0.0;
     }
   }
 
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    return _getIntrinsicWidth(constraints);
+  double getMinIntrinsicWidth(double height) {
+    return _getIntrinsicWidth();
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    return _getIntrinsicWidth(constraints);
+  double getMaxIntrinsicWidth(double height) {
+    return _getIntrinsicWidth();
   }
 
-  double _getIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
+  double _getIntrinsicHeight() {
     switch (mainAxis) {
       case Axis.vertical:
-        return constraints.constrainHeight(_preferredExtent);
+        final double height = _preferredExtent;
+        if (height.isFinite)
+          return height;
+        assert(debugThrowIfNotCheckingIntrinsics());
+        return 0.0;
       case Axis.horizontal:
-        return constraints.constrainHeight(0.0);
+        assert(debugThrowIfNotCheckingIntrinsics());
+        return 0.0;
     }
   }
 
   @override
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    return _getIntrinsicHeight(constraints);
+  double getMinIntrinsicHeight(double width) {
+    return _getIntrinsicHeight();
   }
 
   @override
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    return _getIntrinsicHeight(constraints);
+  double getMaxIntrinsicHeight(double width) {
+    return _getIntrinsicHeight();
   }
 
   @override
