@@ -377,6 +377,7 @@ abstract class State<T extends StatefulWidget> {
   ///
   /// If you override this, make sure your method starts with a call to
   /// super.initState().
+  @mustCallSuper
   void initState() {
     assert(_debugLifecycleState == _StateLifecycle.created);
     assert(() { _debugLifecycleState = _StateLifecycle.initialized; return true; });
@@ -441,6 +442,7 @@ abstract class State<T extends StatefulWidget> {
   /// Use this to clean up any links between this state and other
   /// elements in the tree (e.g. if you have provided an ancestor with
   /// a pointer to a descendant's renderObject).
+  @mustCallSuper
   void deactivate() { }
 
   /// Called when this object is removed from the tree permanently.
@@ -449,6 +451,7 @@ abstract class State<T extends StatefulWidget> {
   ///
   /// If you override this, make sure to end your method with a call to
   /// super.dispose().
+  @mustCallSuper
   void dispose() {
     assert(_debugLifecycleState == _StateLifecycle.ready);
     assert(() { _debugLifecycleState = _StateLifecycle.defunct; return true; });
@@ -987,6 +990,7 @@ abstract class Element implements BuildContext {
   /// created. Use this to initialize state that depends on having a parent. For
   /// state that is independent of the position in the tree, it's better to just
   /// initialize the Element in the constructor.
+  @mustCallSuper
   void mount(Element parent, dynamic newSlot) {
     assert(_debugLifecycleState == _ElementLifecycle.initial);
     assert(widget != null);
@@ -1010,6 +1014,7 @@ abstract class Element implements BuildContext {
   }
 
   /// Called when an Element receives a new configuration widget.
+  @mustCallSuper
   void update(Widget newWidget) {
     assert(_debugLifecycleState == _ElementLifecycle.active);
     assert(widget != null);
@@ -1141,6 +1146,7 @@ abstract class Element implements BuildContext {
 
   /// Called when a previously de-activated widget (see [deactivate]) is reused
   /// instead of being unmounted (see [unmount]).
+  @mustCallSuper
   void activate() {
     assert(_debugLifecycleState == _ElementLifecycle.inactive);
     assert(widget != null);
@@ -1156,6 +1162,7 @@ abstract class Element implements BuildContext {
 
   // TODO(ianh): Define activation/deactivation thoroughly (other methods point
   // here for details).
+  @mustCallSuper
   void deactivate() {
     assert(_debugLifecycleState == _ElementLifecycle.active);
     assert(widget != null);
@@ -1183,6 +1190,7 @@ abstract class Element implements BuildContext {
 
   /// Called when an Element is removed from the tree permanently after having
   /// been deactivated (see [deactivate]).
+  @mustCallSuper
   void unmount() {
     assert(_debugLifecycleState == _ElementLifecycle.inactive);
     assert(widget != null);

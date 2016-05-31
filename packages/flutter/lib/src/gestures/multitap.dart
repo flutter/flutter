@@ -157,6 +157,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   @override
   void dispose() {
     _reset();
+    super.dispose();
   }
 
   void _reset() {
@@ -400,6 +401,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
       gesture.cancel();
     // Rejection of each gesture should cause it to be removed from our map
     assert(_gestureMap.isEmpty);
+    super.dispose();
   }
 
   @override

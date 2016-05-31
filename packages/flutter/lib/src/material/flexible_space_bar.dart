@@ -59,6 +59,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
   void deactivate() {
     _scaffoldAnimation?.removeListener(_handleTick);
     _scaffoldAnimation = null;
+    super.deactivate();
   }
 
   @override
