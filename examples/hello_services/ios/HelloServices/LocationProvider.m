@@ -4,7 +4,11 @@
 
 #import "LocationProvider.h"
 
-@implementation LocationProvider
+#import <CoreLocation/CoreLocation.h>
+
+@implementation LocationProvider {
+    CLLocationManager* _locationManager;
+}
 
 @synthesize messageName = _messageName;
 
@@ -16,9 +20,16 @@
 }
 
 - (NSString*)didReceiveString:(NSString*)message {
+    if (_locationManager == nil) {
+        _locationManager = [[CLLocationManager alloc] init];
+        [_locationManager startMonitoringSignificantLocationChanges];
+    }
+
+    CLLocation* location = _locationManager.location;
+
     NSDictionary* response = @{
-        @"latitude": @3.29334,
-        @"longitude": @8.2492492
+        @"latitude": @(location.coordinate.latitude),
+        @"longitude": @(location.coordinate.longitude),
     };
 
     NSData* data = [NSJSONSerialization dataWithJSONObject:response options:0 error:nil];
