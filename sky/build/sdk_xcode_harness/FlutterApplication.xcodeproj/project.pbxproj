@@ -242,7 +242,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "SERVICE_FRAMEWORKS_DIR=${SOURCE_ROOT}/Frameworks\nSERVICE_DEFINITIONS=${SOURCE_ROOT}/ServiceDefinitions.json\nAPPLICATION_BUNDLE=${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}\n\n# Copy Service Dylibs\nif [ -d \"${SERVICE_FRAMEWORKS_DIR}\" ]; then\nditto ${SERVICE_FRAMEWORKS_DIR} ${APPLICATION_BUNDLE}/Frameworks\nfi\n\n# Copy Service Definitions\nif [ -f \"${SERVICE_DEFINITIONS}\" ]; then\ncp ${SERVICE_DEFINITIONS} ${APPLICATION_BUNDLE}/\nfi\n";
+			shellScript = "set -e\n\nSERVICE_FRAMEWORKS_DIR=${SOURCE_ROOT}/Frameworks\nSERVICE_DEFINITIONS=${SOURCE_ROOT}/ServiceDefinitions.json\nAPPLICATION_BUNDLE=${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}\n\n# Copy Service Dylibs\nif [ -d \"${SERVICE_FRAMEWORKS_DIR}\" ]; then\nditto ${SERVICE_FRAMEWORKS_DIR} ${APPLICATION_BUNDLE}/Frameworks\nfi\n\n# Codesign Service Dylibs\nDYLIBS=\"${APPLICATION_BUNDLE}/Frameworks/*.dylib\"\nfor dylib in $DYLIBS; do\nxcrun codesign                                      \\\n--force                                         \\\n--sign ${EXPANDED_CODE_SIGN_IDENTITY}           \\\n--preserve-metadata=identifier,entitlements     \\\n--timestamp=none                                \\\n\"${dylib}\"                                      \\\n\ndone\n\n# Copy Service Definitions\nif [ -f \"${SERVICE_DEFINITIONS}\" ]; then\ncp ${SERVICE_DEFINITIONS} ${APPLICATION_BUNDLE}/\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
