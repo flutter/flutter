@@ -179,7 +179,7 @@ enum BlurStyle {
   // These mirror SkBlurStyle and must be kept in sync.
 
   /// Fuzzy inside and outside. This is useful for painting shadows that are
-  /// offset from the shape that ostensible is casting the shadow.
+  /// offset from the shape that ostensibly is casting the shadow.
   normal,
 
   /// Solid inside, fuzzy outside. This corresponds to drawing the shape, and
