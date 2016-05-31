@@ -237,6 +237,23 @@ class DaemonDomain extends Domain {
   }
 }
 
+/// Return the device matching the deviceId field in the args.
+Future<Device> _getDevice(Daemon daemon, Map<String, dynamic> args) async {
+  if (args == null || args['deviceId'] is! String)
+    throw 'deviceId is required';
+
+  List<Device> devices = await daemon.deviceDomain.getDevices();
+  Device device = devices.firstWhere(
+    (Device device) => device.id == args['deviceId'],
+    orElse: () => null
+  );
+
+  if (device == null)
+    throw "device '${args['deviceId']}' not found";
+
+  return device;
+}
+
 /// This domain responds to methods like [start] and [stop].
 ///
 /// It'll be extended to fire events for when applications start, stop, and
@@ -245,14 +262,11 @@ class AppDomain extends Domain {
   AppDomain(Daemon daemon) : super(daemon, 'app') {
     registerHandler('start', start);
     registerHandler('stop', stop);
+    registerHandler('discover', discover);
   }
 
   Future<dynamic> start(Map<String, dynamic> args) async {
-    if (args == null || args['deviceId'] is! String)
-      throw "deviceId is required";
-    Device device = await _getDevice(args['deviceId']);
-    if (device == null)
-      throw "device '${args['deviceId']}' not found";
+    Device device = await _getDevice(daemon, args);
 
     if (args['projectDirectory'] is! String)
       throw "projectDirectory is required";
@@ -282,12 +296,8 @@ class AppDomain extends Domain {
     return null;
   }
 
-  Future<bool> stop(dynamic args) async {
-    if (args == null || args['deviceId'] is! String)
-      throw "deviceId is required";
-    Device device = await _getDevice(args['deviceId']);
-    if (device == null)
-      throw "device '${args['deviceId']}' not found";
+  Future<bool> stop(Map<String, dynamic> args) async {
+    Device device = await _getDevice(daemon, args);
 
     if (args['projectDirectory'] is! String)
       throw "projectDirectory is required";
@@ -306,9 +316,12 @@ class AppDomain extends Domain {
     }
   }
 
-  Future<Device> _getDevice(String deviceId) async {
-    List<Device> devices = await daemon.deviceDomain.getDevices();
-    return devices.firstWhere((Device device) => device.id == deviceId, orElse: () => null);
+  Future<List<Map<String, dynamic>>> discover(Map<String, dynamic> args) async {
+    Device device = await _getDevice(daemon, args);
+    List<DiscoveredApp> apps = await device.discoverApps();
+    return apps.map((DiscoveredApp app) =>
+      <String, dynamic>{'id': app.id, 'observatoryDevicePort': app.observatoryPort}
+    ).toList();
   }
 }
 
@@ -321,6 +334,8 @@ class DeviceDomain extends Domain {
     registerHandler('getDevices', getDevices);
     registerHandler('enable', enable);
     registerHandler('disable', disable);
+    registerHandler('forward', forward);
+    registerHandler('unforward', unforward);
 
     PollingDeviceDiscovery deviceDiscovery = new AndroidDevices();
     if (deviceDiscovery.supportsPlatform)
@@ -367,6 +382,36 @@ class DeviceDomain extends Domain {
       discoverer.stopPolling();
     }
     return new Future<Null>.value();
+  }
+
+  /// Forward a host port to a device port.
+  Future<Map<String, dynamic>> forward(Map<String, dynamic> args) async {
+    Device device = await _getDevice(daemon, args);
+
+    if (args['devicePort'] is! int)
+      throw 'devicePort is required';
+    int devicePort = args['devicePort'];
+
+    int hostPort = args['hostPort'];
+
+    hostPort = await device.portForwarder.forward(devicePort, hostPort: hostPort);
+
+    return <String, dynamic>{'hostPort': hostPort};
+  }
+
+  /// Removes a forwarded port.
+  Future<Null> unforward(Map<String, dynamic> args) async {
+    Device device = await _getDevice(daemon, args);
+
+    if (args['devicePort'] is! int)
+      throw 'devicePort is required';
+    int devicePort = args['devicePort'];
+
+    if (args['hostPort'] is! int)
+      throw 'hostPort is required';
+    int hostPort = args['hostPort'];
+
+    device.portForwarder.unforward(new ForwardedPort(hostPort, devicePort));
   }
 
   @override
