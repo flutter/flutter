@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 /// An abstract node in a tree
 ///
 /// AbstractNode has as notion of depth, attachment, and parent, but does not
@@ -73,6 +75,7 @@ class AbstractNode {
   ///
   /// Typically called only from the parent's attach(), and to mark the root of
   /// a tree attached.
+  @mustCallSuper
   void attach(Object owner) {
     assert(owner != null);
     assert(_owner == null);
@@ -83,6 +86,7 @@ class AbstractNode {
   ///
   /// Typically called only from the parent's detach(), and to mark the root of
   /// a tree detached.
+  @mustCallSuper
   void detach() {
     assert(_owner != null);
     _owner = null;

@@ -620,6 +620,7 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
     }
     assert(_animationListeners.isEmpty);
     _writeValue();
+    super.deactivate();
   }
 
   @override

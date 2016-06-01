@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:ui' show Point, Offset;
 
+import 'package:meta/meta.dart';
+
 import 'arena.dart';
 import 'binding.dart';
 import 'constants.dart';
@@ -40,6 +42,7 @@ abstract class GestureRecognizer extends GestureArenaMember {
   /// when the object is no longer needed (e.g. when a gesture
   /// recogniser is being unregistered from a [GestureDetector], the
   /// GestureDetector widget calls this method).
+  @mustCallSuper
   void dispose() { }
 
   /// Returns a very short pretty description of the gesture that the
@@ -89,6 +92,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
       GestureBinding.instance.pointerRouter.removeRoute(pointer, handleEvent);
     _trackedPointers.clear();
     assert(_entries.isEmpty);
+    super.dispose();
   }
 
   /// Causes events related to the given pointer ID to be routed to this recognizer.
