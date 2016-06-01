@@ -448,7 +448,7 @@ class RenderAspectRatio extends RenderProxyBox {
     }
 
     // Similar to RenderImage, we iteratively attempt to fit within the given
-    // constraings while maintaining the given aspect ratio. The order of
+    // constraints while maintaining the given aspect ratio. The order of
     // applying the constraints is also biased towards inferring the height
     // from the width.
 

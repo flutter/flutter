@@ -91,6 +91,17 @@ class DataRow {
     this.cells
   });
 
+  /// Creates the configuration for a row of a [DataTable], deriving
+  /// the key from a row index.
+  ///
+  /// The [cells] argument must not be null.
+  DataRow.byIndex({
+    int index,
+    this.selected: false,
+    this.onSelectChanged,
+    this.cells
+  }) : key = new ValueKey<int>(index);
+
   /// A [Key] that uniquely identifies this row. This is used to
   /// ensure that if a row is added or removed, any stateful widgets
   /// related to this row (e.g. an in-progress checkbox animation)
@@ -154,6 +165,8 @@ class DataCell {
     this.onTap
   });
 
+  static final DataCell empty = new DataCell(new Container(width: 0.0, height: 0.0));
+
   /// The data for the row.
   ///
   /// Typically a [Text] widget or a [DropDownButton] widget.
@@ -196,16 +209,19 @@ class DataCell {
 /// dimensions to use for each column, and once to actually lay out
 /// the table given the results of the negotiation.
 ///
-// /// For this reason, if you have a lot of data (say, more than a dozen
-// /// rows with a dozen columns, though the precise limits depend on the
-// /// target device), it is suggested that you use a [DataCard] which
-// /// automatically splits the data into multiple pages.
-// ///
+/// For this reason, if you have a lot of data (say, more than a dozen
+/// rows with a dozen columns, though the precise limits depend on the
+/// target device), it is suggested that you use a
+/// [PaginatedDataTable] which automatically splits the data into
+/// multiple pages.
+// TODO(ianh): Also suggest [ScrollingDataTable] once we have it.
+///
 /// See also:
 ///
 ///  * [DataColumn]
 ///  * [DataRow]
 ///  * [DataCell]
+///  * [PaginatedDataTable]
 ///  * <https://www.google.com/design/spec/components/data-tables.html>
 class DataTable extends StatelessWidget {
   /// Creates a widget describing a data table.
@@ -213,7 +229,7 @@ class DataTable extends StatelessWidget {
   /// The [columns] argument must be a list of as many [DataColumn]
   /// objects as the table is to have columns, ignoring the leading
   /// checkbox column if any. The [columns] argument must have a
-  /// length greater than zero.
+  /// length greater than zero and cannot be null.
   ///
   /// The [rows] argument must be a list of as many [DataRow] objects
   /// as the table is to have rows, ignoring the leading heading row
@@ -237,15 +253,16 @@ class DataTable extends StatelessWidget {
     List<DataColumn> columns,
     this.sortColumnIndex,
     this.sortAscending: true,
+    this.onSelectAll,
     this.rows
   }) : columns = columns,
        _onlyTextColumn = _initOnlyTextColumn(columns), super(key: key) {
     assert(columns != null);
     assert(columns.length > 0);
+    assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length));
     assert(sortAscending != null);
     assert(rows != null);
     assert(!rows.any((DataRow row) => row.cells.length != columns.length));
-    assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length));
   }
 
   /// The configuration and labels for the columns in the table.
@@ -276,6 +293,17 @@ class DataTable extends StatelessWidget {
   /// table).
   final bool sortAscending;
 
+  /// Invoked when the user selects or unselects every row, using the
+  /// checkbox in the heading row.
+  ///
+  /// If this is null, then the [DataRow.onSelectChanged] callback of
+  /// every row in the table is invoked appropriately instead.
+  ///
+  /// To control whether a particular row is selectable or not, see
+  /// [DataRow.onSelectChanged]. This callback is only relevant if any
+  /// row is selectable.
+  final ValueSetter<bool> onSelectAll;
+
   /// The data to show in each row (excluding the row that contains
   /// the column headings). Must be non-null, but may be empty.
   final List<DataRow> rows;
@@ -304,9 +332,13 @@ class DataTable extends StatelessWidget {
   static final LocalKey _headingRowKey = new UniqueKey();
 
   void _handleSelectAll(bool checked) {
-    for (DataRow row in rows) {
-      if ((row.onSelectChanged != null) && (row.selected != checked))
-        row.onSelectChanged(checked);
+    if (onSelectAll != null) {
+      onSelectAll(checked);
+    } else {
+      for (DataRow row in rows) {
+        if ((row.onSelectChanged != null) && (row.selected != checked))
+          row.onSelectChanged(checked);
+      }
     }
   }
 
