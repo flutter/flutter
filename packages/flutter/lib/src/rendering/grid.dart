@@ -292,6 +292,10 @@ abstract class GridDelegateWithInOrderChildPlacement extends GridDelegate {
 
 
 /// A [GridDelegate] that divides the grid's width evenly for a fixed number of columns.
+///
+/// Grids using this delegate cannot validly be placed inside an unconstrained
+/// horizontal space, since they attempt to divide the incoming horizontal
+/// maximum width constraint.
 class FixedColumnCountGridDelegate extends GridDelegateWithInOrderChildPlacement {
   /// Creates a grid delegate that uses a fixed column count.
   ///
@@ -349,7 +353,17 @@ class FixedColumnCountGridDelegate extends GridDelegateWithInOrderChildPlacement
     return 0.0;
   }
 
-  // TODO(ianh): Provide efficient intrinsic height functions.
+  @override
+  double getMinIntrinsicHeight(double width, int childCount) {
+    // TODO(ianh): Strictly, this should examine the children.
+    return 0.0;
+  }
+
+  @override
+  double getMaxIntrinsicHeight(double width, int childCount) {
+    // TODO(ianh): Strictly, this should examine the children.
+    return 0.0;
+  }
 }
 
 /// A [GridDelegate] that fills the width with a variable number of tiles.
