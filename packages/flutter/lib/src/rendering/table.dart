@@ -717,7 +717,7 @@ class RenderTable extends RenderBox {
     // winner of the 2016 world's most expensive intrinsic dimension function award
     // honorable mention, most likely to improve if taught about memoization award
     assert(_children.length == rows * columns);
-    final List<double> widths = _computeColumnWidths(constraints);
+    final List<double> widths = _computeColumnWidths(new BoxConstraints.tightForFinite(width: width));
     double rowTop = 0.0;
     for (int y = 0; y < rows; y += 1) {
       double rowHeight = 0.0;
@@ -773,6 +773,7 @@ class RenderTable extends RenderBox {
   }
 
   List<double> _computeColumnWidths(BoxConstraints constraints) {
+    assert(constraints != null);
     assert(_children.length == rows * columns);
     // We apply the constraints to the column widths in the order of
     // least important to most important:
