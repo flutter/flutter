@@ -24,3 +24,9 @@ build/
 xcuserdata
 
 *.moved-aside
+
+Flutter/app.flx
+Flutter/app.so
+Flutter/app.zip
+Flutter/Flutter.framework
+Flutter/Generated.xcconfig

@@ -13,72 +13,15 @@ template("sky_ios_sdk") {
 
   sdk_name = invoker.sdk_name
   sdk_dir = "$root_out_dir/$sdk_name"
-  tools_dir = "Tools/common"
-
-  action("copy_flutter_framework") {
-    stamp_file = "$root_build_dir/copy_flutter_framework.stamp"
-    script = "//sky/tools/copy_dir.py"
-
-    inputs = [ "$root_build_dir/Flutter.framework/Flutter" ]
-    outputs = [
-      "$sdk_dir",
-      "$sdk_dir/$tools_dir/Flutter.framework/Flutter"
-    ]
-
-    args = [
-      "--src",
-      rebase_path("$root_build_dir/Flutter.framework"),
-      "--dst",
-      rebase_path("$sdk_dir/$tools_dir/Flutter.framework"),
-      "--stamp",
-      rebase_path(stamp_file),
-    ]
-
-    deps = [  "//sky/shell:flutter_framework"  ]
-  }
-
-  copy("ios_xcode_scripts") {
-    sources = [
-      "//sky/build/sdk_xcode_harness/$tools_dir/BuildFlutterApp",
-    ]
-    outputs = [  "$sdk_dir/$tools_dir/{{source_file_part}}"  ]
-  }
 
   copy("copy_sdk_xcode_harness") {
     sources = [
-      "//sky/build/sdk_xcode_harness/FlutterApplication",
+      "//sky/build/sdk_xcode_harness/Flutter",
       "//sky/build/sdk_xcode_harness/FlutterApplication.xcodeproj",
       "//sky/build/sdk_xcode_harness/Runner",
     ]
 
     outputs = [  "$sdk_dir/{{source_file_part}}"  ]
-  }
-
-  render_template("flutter_xcconfig") {
-    template = "//sky/build/sdk_xcode_harness/Flutter.xcconfig.tmpl"
-    output = "$sdk_dir/Flutter.xcconfig"
-    stamp_file = "$root_build_dir/expand_flutter_xcconfig.stamp"
-
-    variables = [
-      "interpreter"
-    ]
-
-    if (dart_experimental_interpreter) {
-      variables += [ "1" ]
-    } else {
-      variables += [ "0" ]
-    }
-  }
-
-  render_template("local_xcconfig") {
-    template = "//sky/build/sdk_xcode_harness/Local.xcconfig.tmpl"
-    output = "$sdk_dir/Local.xcconfig"
-    stamp_file = "$root_build_dir/expand_local_xcconfig.stamp"
-
-    variables = [
-      "local_engine",
-      rebase_path(root_build_dir, ""),
-    ]
   }
 
   # All user editable files are copied to the out directory so that developers
@@ -92,38 +35,10 @@ template("sky_ios_sdk") {
     outputs = [  "$root_out_dir/{{source_file_part}}"  ]
   }
 
-  # This archive is only for local consumption by the tools. It is not suitable
-  # for distribution since it only contains artifacts for a single architecture.
-  # It is the responsibility of the buildbot to construct universal binaries
-  # to create an SDK archive suitable for distribution.
-  action("create_sdk_archive") {
-    script = "//sky/build/zip_directory.py"
-
-    archive_name = "FlutterXcode.zip"
-
-    sources = [ sdk_dir ]
-    outputs = [ "$root_out_dir/$archive_name" ]
-
-    args = [
-      "--input-directory",
-      rebase_path(sdk_dir, root_build_dir),
-      "--output-archive",
-      rebase_path("$root_out_dir/$archive_name", root_build_dir),
-    ]
-
-    deps = [
-      ":copy_flutter_framework",
-      ":copy_sdk_xcode_harness",
-      ":copy_user_editable_files",
-      ":flutter_xcconfig",
-      ":ios_xcode_scripts",
-      ":local_xcconfig",
-    ]
-  }
-
   group(target_name) {
     deps = [
-      ":create_sdk_archive",
+      ":copy_sdk_xcode_harness",
+      ":copy_user_editable_files",
     ]
   }
 }
