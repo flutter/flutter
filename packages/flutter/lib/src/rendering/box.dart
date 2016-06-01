@@ -7,6 +7,7 @@ import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
@@ -815,6 +816,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// Subclasses should override this function to supply the distances to their
   /// baselines.
+  @protected
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(_debugDoingBaseline);
     return null;
@@ -1035,6 +1037,7 @@ abstract class RenderBox extends RenderObject {
 
   /// Override this function if this render object can be hit even if its
   /// children were not hit.
+  @protected
   bool hitTestSelf(Point position) => false;
 
   /// Override this function to check whether any children are located at the
@@ -1043,6 +1046,7 @@ abstract class RenderBox extends RenderObject {
   /// Typically children should be hit tested in reverse paint order so that
   /// hit tests at locations where children overlap hit the child that is
   /// visually "on top" (i.e., paints later).
+  @protected
   bool hitTestChildren(HitTestResult result, { Point position }) => false;
 
   /// Multiply the transform from the parent's coordinate system to this box's
@@ -1149,6 +1153,7 @@ abstract class RenderBox extends RenderObject {
   /// In debug mode, paints a border around this render box.
   ///
   /// Called for every [RenderBox] when [debugPaintSizeEnabled] is true.
+  @protected
   void debugPaintSize(PaintingContext context, Offset offset) {
     assert(() {
       Paint paint = new Paint()
@@ -1163,6 +1168,7 @@ abstract class RenderBox extends RenderObject {
   /// In debug mode, paints a line for each baseline.
   ///
   /// Called for every [RenderBox] when [debugPaintBaselinesEnabled] is true.
+  @protected
   void debugPaintBaselines(PaintingContext context, Offset offset) {
     assert(() {
       Paint paint = new Paint()
@@ -1194,6 +1200,7 @@ abstract class RenderBox extends RenderObject {
   /// In debug mode, paints a rectangle if this render box has received more pointer downs than pointer up events.
   ///
   /// Called for every [RenderBox] when [debugPaintPointersEnabled] is true.
+  @protected
   void debugPaintPointers(PaintingContext context, Offset offset) {
     assert(() {
       if (_debugActivePointers > 0) {
