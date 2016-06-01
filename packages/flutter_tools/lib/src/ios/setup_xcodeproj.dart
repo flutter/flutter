@@ -11,7 +11,6 @@ import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart';
-import '../runner/flutter_command_runner.dart';
 
 bool _inflateXcodeArchive(String directory, List<int> archiveBytes) {
   printStatus('Unzipping Xcode project to local directory...');
@@ -55,25 +54,25 @@ bool _inflateXcodeArchive(String directory, List<int> archiveBytes) {
   return true;
 }
 
-void updateXcodeLocalProperties(String projectPath) {
+void updateXcodeGeneratedProperties(String projectPath, BuildMode mode) {
   StringBuffer localsBuffer = new StringBuffer();
 
   localsBuffer.writeln('// This is a generated file; do not edit or check into version control.');
 
-  String flutterRoot = path.normalize(Platform.environment[kFlutterRootEnvironmentVariableName]);
+  String flutterRoot = path.normalize(Cache.flutterRoot);
   localsBuffer.writeln('FLUTTER_ROOT=$flutterRoot');
 
   // This holds because requiresProjectRoot is true for this command
   String applicationRoot = path.normalize(Directory.current.path);
   localsBuffer.writeln('FLUTTER_APPLICATION_PATH=$applicationRoot');
 
-  String dartSDKPath = path.normalize(path.join(Platform.resolvedExecutable, '..', '..'));
-  localsBuffer.writeln('DART_SDK_PATH=$dartSDKPath');
+  String flutterFrameworkDir = path.normalize(tools.getEngineArtifactsDirectory(TargetPlatform.ios, mode).path);
+  localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=$flutterFrameworkDir');
 
   if (tools.isLocalEngine)
     localsBuffer.writeln('LOCAL_ENGINE=${tools.engineBuildPath}');
 
-  File localsFile = new File(path.join(projectPath, 'ios', '.generated', 'Local.xcconfig'));
+  File localsFile = new File(path.join(projectPath, 'ios', '.generated', 'Flutter', 'Generated.xcconfig'));
   localsFile.createSync(recursive: true);
   localsFile.writeAsStringSync(localsBuffer.toString());
 }
@@ -119,8 +118,8 @@ Future<int> setupXcodeProjectHarness(String flutterProjectPath, BuildMode mode) 
     return 1;
   }
 
-  // Step 3: Populate the Local.xcconfig with project specific paths
-  updateXcodeLocalProperties(flutterProjectPath);
+  // Step 3: Populate the Generated.xcconfig with project specific paths
+  updateXcodeGeneratedProperties(flutterProjectPath, mode);
 
   // Step 4: Write the REVISION file
   File revisionFile = new File(path.join(xcodeprojPath, 'REVISION'));
