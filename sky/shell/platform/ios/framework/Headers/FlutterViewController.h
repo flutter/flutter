@@ -21,12 +21,11 @@ FLUTTER_EXPORT
                          bundle:(NSBundle*)nibBundleOrNil
     NS_DESIGNATED_INITIALIZER;
 
-- (void)sendString:(NSString*)message
-   withMessageName:(NSString*)messageName;
+- (void)sendString:(NSString*)message withMessageName:(NSString*)messageName;
 
 - (void)sendString:(NSString*)message
    withMessageName:(NSString*)messageName
-          callback:(void(^)(NSString*))callback;
+          callback:(void (^)(NSString*))callback;
 
 - (void)addMessageListener:(NSObject<FlutterMessageListener>*)listener;
 

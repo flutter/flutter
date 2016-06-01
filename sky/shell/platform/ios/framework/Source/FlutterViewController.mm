@@ -31,7 +31,7 @@
 #include "sky/shell/shell.h"
 #include "sky/shell/shell_view.h"
 
-@interface FlutterViewController() <UIAlertViewDelegate>
+@interface FlutterViewController ()<UIAlertViewDelegate>
 @end
 
 void FlutterInit(int argc, const char* argv[]) {
@@ -145,7 +145,7 @@ void FlutterInit(int argc, const char* argv[]) {
 #pragma mark - Initializing the engine
 
 - (void)alertView:(UIAlertView*)alertView
-clickedButtonAtIndex:(NSInteger)buttonIndex {
+    clickedButtonAtIndex:(NSInteger)buttonIndex {
   exit(0);
 }
 
@@ -157,9 +157,8 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
   [self setupPlatformServiceProvider];
 
   // We ask the VM to check what it supports.
-  const enum VMType type = Dart_IsPrecompiledRuntime()
-                               ? VMTypePrecompilation
-                               : VMTypeInterpreter;
+  const enum VMType type =
+      Dart_IsPrecompiledRuntime() ? VMTypePrecompilation : VMTypeInterpreter;
 
   [_dartProject launchInEngine:_engine
                 embedderVMType:type
@@ -177,7 +176,8 @@ clickedButtonAtIndex:(NSInteger)buttonIndex {
                         }];
 
   DCHECK(_dartServices);
-  mojo::ConnectToService(_dartServices.get(), mojo::GetProxy(&_appMessageSender));
+  mojo::ConnectToService(_dartServices.get(),
+                         mojo::GetProxy(&_appMessageSender));
 }
 
 static void DynamicServiceResolve(void* baton,
@@ -203,9 +203,9 @@ static void DynamicServiceResolve(void* baton,
 
   mojo::ServiceProviderPtr viewServiceProvider;
   new sky::shell::ViewServiceProvider(
-    base::Bind(&sky::shell::ApplicationMessagesImpl::AddBinding,
-               _appMessageReceiver.GetWeakPtr()),
-    mojo::GetProxy(&viewServiceProvider));
+      base::Bind(&sky::shell::ApplicationMessagesImpl::AddBinding,
+                 _appMessageReceiver.GetWeakPtr()),
+      mojo::GetProxy(&viewServiceProvider));
 
   DCHECK(!_dartServices.is_bound());
   sky::ServicesDataPtr services = sky::ServicesData::New();
@@ -461,26 +461,26 @@ static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
 
 #pragma mark - Application Messages
 
-- (void)sendString:(NSString*)message
-   withMessageName:(NSString*)messageName {
+- (void)sendString:(NSString*)message withMessageName:(NSString*)messageName {
   NSAssert(message, @"The message must not be null");
   NSAssert(messageName, @"The messageName must not be null");
   _appMessageSender->SendString(messageName.UTF8String, message.UTF8String,
-      [](const mojo::String& response) { });
+                                [](const mojo::String& response) {});
 }
 
 - (void)sendString:(NSString*)message
    withMessageName:(NSString*)messageName
-          callback:(void(^)(NSString*))callback {
+          callback:(void (^)(NSString*))callback {
   NSAssert(message, @"The message must not be null");
   NSAssert(messageName, @"The messageName must not be null");
   NSAssert(callback, @"The callback must not be null");
-  base::mac::ScopedBlock<void(^)(NSString*)> callback_ptr(
+  base::mac::ScopedBlock<void (^)(NSString*)> callback_ptr(
       callback, base::scoped_policy::RETAIN);
-  _appMessageSender->SendString(messageName.UTF8String, message.UTF8String,
+  _appMessageSender->SendString(
+      messageName.UTF8String, message.UTF8String,
       [callback_ptr](const mojo::String& response) {
-    callback_ptr.get()(base::SysUTF8ToNSString(response));
-  });
+        callback_ptr.get()(base::SysUTF8ToNSString(response));
+      });
 }
 
 - (void)addMessageListener:(NSObject<FlutterMessageListener>*)listener {
