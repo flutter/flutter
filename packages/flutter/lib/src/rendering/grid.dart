@@ -382,7 +382,7 @@ class MaxTileWidthGridDelegate extends GridDelegateWithInOrderChildPlacement {
 
   @override
   GridSpecification getGridSpecification(BoxConstraints constraints, int childCount) {
-    if (constraints.maxWidth.isInfinite) {
+    if (!constraints.maxWidth.isFinite) {
       // if we're unbounded, just shrink-wrap around a single line of tiles
       return new GridSpecification.fromRegularTiles(
         tileWidth: maxTileWidth,

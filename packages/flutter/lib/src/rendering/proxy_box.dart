@@ -554,7 +554,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     if (child == null)
       return 0.0;
     double childResult = child.getMaxIntrinsicWidth(height);
-    assert(!childResult.isInfinite);
+    assert(childResult.isFinite);
     return _applyStep(childResult, _stepWidth);
   }
 
