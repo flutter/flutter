@@ -6,7 +6,7 @@ import 'dart:async';
 
 final AppContext _defaultContext = new AppContext();
 
-typedef void ErrorHandler(dynamic error);
+typedef void ErrorHandler(dynamic error, StackTrace stackTrace);
 
 /// A singleton for application functionality. This singleton can be different
 /// on a per-Zone basis.
@@ -58,7 +58,9 @@ class AppContext {
     }
   }
 
-  dynamic runInZone(dynamic method(), { ErrorHandler onError }) {
+  dynamic runInZone(dynamic method(), {
+    ZoneBinaryCallback<dynamic, dynamic, StackTrace> onError
+  }) {
     return runZoned(
       method,
       zoneValues: <String, dynamic>{ 'context': this },

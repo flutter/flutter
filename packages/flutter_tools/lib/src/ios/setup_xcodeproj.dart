@@ -11,7 +11,6 @@ import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart';
-import '../runner/flutter_command_runner.dart';
 
 bool _inflateXcodeArchive(String directory, List<int> archiveBytes) {
   printStatus('Unzipping Xcode project to local directory...');
@@ -60,8 +59,7 @@ void updateXcodeLocalProperties(String projectPath) {
 
   localsBuffer.writeln('// This is a generated file; do not edit or check into version control.');
 
-  String flutterRoot = path.normalize(Platform.environment[kFlutterRootEnvironmentVariableName]);
-  localsBuffer.writeln('FLUTTER_ROOT=$flutterRoot');
+  localsBuffer.writeln('FLUTTER_ROOT=${Cache.flutterRoot}');
 
   // This holds because requiresProjectRoot is true for this command
   String applicationRoot = path.normalize(Directory.current.path);

@@ -12,7 +12,7 @@ Process daemon;
 //   version: print version
 //   shutdown: terminate the server
 //   start: start an app
-//   stopAll: stop any running app
+//   stop: stop any running app
 //   devices: list devices
 
 Future<Null> main() async {
@@ -27,18 +27,26 @@ Future<Null> main() async {
 
   stdout.write('> ');
   stdin.transform(UTF8.decoder).transform(const LineSplitter()).listen((String line) {
+    String word = line.split(' ').first;
+
     if (line == 'version' || line == 'v') {
       _send(<String, dynamic>{'method': 'daemon.version'});
     } else if (line == 'shutdown' || line == 'q') {
       _send(<String, dynamic>{'method': 'daemon.shutdown'});
-    } else if (line == 'start') {
-      _send(<String, dynamic>{'method': 'app.start'});
-    } else if (line == 'stopAll') {
-      _send(<String, dynamic>{'method': 'app.stopAll'});
+    } else if (word == 'start') {
+      _send(<String, dynamic>{
+        'method': 'app.start',
+        'params': <String, dynamic> {
+          'deviceId': line.split(' ')[1],
+          'projectDirectory': line.split(' ')[2]
+        }
+      });
+    } else if (line == 'stop') {
+      _send(<String, dynamic>{'method': 'app.stop'});
     } else if (line == 'devices') {
       _send(<String, dynamic>{'method': 'device.getDevices'});
     } else {
-      print('command not understood: $line');
+      _send(<String, dynamic>{'method': line.trim()});
     }
     stdout.write('> ');
   });
@@ -55,5 +63,5 @@ void _send(Map<String, dynamic> map) {
   map['id'] = id++;
   String str = '[${JSON.encode(map)}]';
   daemon.stdin.writeln(str);
-  print('==> $str');
+  print('  ==> $str');
 }

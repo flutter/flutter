@@ -118,8 +118,7 @@ class RunCommand extends RunCommandBase {
       RunAndStayResident runner = new RunAndStayResident(
         deviceForCommand,
         target: target,
-        debuggingOptions: options,
-        buildMode: getBuildMode()
+        debuggingOptions: options
       );
 
       return runner.run(traceStartup: traceStartup, benchmark: argResults['benchmark']);

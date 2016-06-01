@@ -37,13 +37,13 @@ class RunAndStayResident {
     this.device, {
     this.target,
     this.debuggingOptions,
-    this.buildMode : BuildMode.debug
+    this.usesTerminalUI: true
   });
 
   final Device device;
   final String target;
   final DebuggingOptions debuggingOptions;
-  final BuildMode buildMode;
+  final bool usesTerminalUI;
 
   Completer<int> _exitCompleter;
   StreamSubscription<String> _loggingSubscription;
@@ -55,8 +55,8 @@ class RunAndStayResident {
     // Don't let uncaught errors kill the process.
     return runZoned(() {
       return _run(traceStartup: traceStartup, benchmark: benchmark);
-    }, onError: (dynamic error) {
-      printError('Exception from flutter run: $error');
+    }, onError: (dynamic error, StackTrace stackTrace) {
+      printError('Exception from flutter run: $error', stackTrace);
     });
   }
 
@@ -95,7 +95,7 @@ class RunAndStayResident {
       int result = await buildApk(
         device.platform,
         target: target,
-        buildMode: buildMode
+        buildMode: debuggingOptions.buildMode
       );
 
       if (result != 0)
@@ -132,7 +132,7 @@ class RunAndStayResident {
 
     LaunchResult result = await device.startApp(
       package,
-      buildMode,
+      debuggingOptions.buildMode,
       mainPath: mainPath,
       debuggingOptions: debuggingOptions,
       platformArgs: platformArgs
@@ -183,25 +183,26 @@ class RunAndStayResident {
       if (!_exitCompleter.isCompleted)
         _exitCompleter.complete(0);
     } else {
-      if (!logger.quiet)
-        _printHelp();
-
-      terminal.singleCharMode = true;
-
-      terminal.onCharInput.listen((String code) {
-        String lower = code.toLowerCase();
-
-        if (lower == 'h' || code == AnsiTerminal.KEY_F1) {
-          // F1, help
+      if (usesTerminalUI) {
+        if (!logger.quiet)
           _printHelp();
-        } else if (lower == 'r' || code == AnsiTerminal.KEY_F5) {
-          // F5, refresh
-          _handleRefresh(package, result, mainPath);
-        } else if (lower == 'q' || code == AnsiTerminal.KEY_F10) {
-          // F10, exit
-          _stopApp();
-        }
-      });
+
+        terminal.singleCharMode = true;
+        terminal.onCharInput.listen((String code) {
+          String lower = code.toLowerCase();
+
+          if (lower == 'h' || code == AnsiTerminal.KEY_F1) {
+            // F1, help
+            _printHelp();
+          } else if (lower == 'r' || code == AnsiTerminal.KEY_F5) {
+            // F5, refresh
+            _handleRefresh(package, result, mainPath);
+          } else if (lower == 'q' || code == AnsiTerminal.KEY_F10) {
+            // F10, exit
+            _stopApp();
+          }
+        });
+      }
 
       ProcessSignal.SIGINT.watch().listen((ProcessSignal signal) {
         _resetTerminal();
@@ -275,7 +276,8 @@ class RunAndStayResident {
   }
 
   void _resetTerminal() {
-    terminal.singleCharMode = false;
+    if (usesTerminalUI)
+      terminal.singleCharMode = false;
   }
 
   Future<Null> _stopApp() {

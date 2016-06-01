@@ -22,6 +22,16 @@ enum BuildMode {
 
 String getModeName(BuildMode mode) => getEnumName(mode);
 
+BuildMode parseBuildMode(String mode) {
+  if (mode == 'debug')
+    return BuildMode.debug;
+  if (mode == 'profile')
+    return BuildMode.profile;
+  if (mode == 'release')
+    return BuildMode.release;
+  return null;
+}
+
 // Returns true if the selected build mode uses ahead-of-time compilation.
 bool isAotBuildMode(BuildMode mode) {
   return mode == BuildMode.profile || mode == BuildMode.release;

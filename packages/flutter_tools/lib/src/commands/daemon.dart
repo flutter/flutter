@@ -16,7 +16,6 @@ import '../ios/devices.dart';
 import '../ios/simulators.dart';
 import '../run.dart';
 import '../runner/flutter_command.dart';
-import 'run.dart';
 
 const String protocolVersion = '0.2.0';
 
@@ -73,14 +72,15 @@ class DaemonCommand extends FlutterCommand {
     return object;
   }
 
-  void _handleError(dynamic error) {
-    printError('Error from flutter daemon: $error');
+  dynamic _handleError(dynamic error, StackTrace stackTrace) {
+    printError('Error from flutter daemon: $error', stackTrace);
+    return null;
   }
 }
 
 typedef void DispatchComand(Map<String, dynamic> command);
 
-typedef Future<dynamic> CommandHandler(dynamic args);
+typedef Future<dynamic> CommandHandler(Map<String, dynamic> args);
 
 class Daemon {
   Daemon(Stream<Map<String, dynamic>> commandStream, this.sendCommand, {
@@ -137,7 +137,7 @@ class Daemon {
       if (_domainMap[prefix] == null)
         throw 'no domain for method: $method';
 
-      _domainMap[prefix].handleCommand(name, id, request['params']);
+      _domainMap[prefix].handleCommand(name, id, request['params'] ?? <String, dynamic>{});
     } catch (error) {
       _send(<String, dynamic>{'id': id, 'error': _toJsonable(error)});
     }
@@ -168,7 +168,7 @@ abstract class Domain {
   @override
   String toString() => name;
 
-  void handleCommand(String command, dynamic id, dynamic args) {
+  void handleCommand(String command, dynamic id, Map<String, dynamic> args) {
     new Future<dynamic>.sync(() {
       if (_handlers.containsKey(command))
         return _handlers[command](args);
@@ -192,6 +192,24 @@ abstract class Domain {
   }
 
   void _send(Map<String, dynamic> map) => daemon._send(map);
+
+  String _getArgAsString(Map<String, dynamic> args, String name, { bool required: false }) {
+    if (required && !args.containsKey(name))
+      throw "$name is required";
+    dynamic val = args[name];
+    if (val != null && val is! String)
+      throw "$name is not a string";
+    return val;
+  }
+
+  bool _getArgAsBool(Map<String, dynamic> args, String name, { bool required: false }) {
+    if (required && !args.containsKey(name))
+      throw "$name is required";
+    dynamic val = args[name];
+    if (val != null && val is! bool)
+      throw "$name is not a boolean";
+    return val;
+  }
 
   void dispose() { }
 }
@@ -222,11 +240,11 @@ class DaemonDomain extends Domain {
 
   StreamSubscription<LogMessage> _subscription;
 
-  Future<String> version(dynamic args) {
+  Future<String> version(Map<String, dynamic> args) {
     return new Future<String>.value(protocolVersion);
   }
 
-  Future<Null> shutdown(dynamic args) {
+  Future<Null> shutdown(Map<String, dynamic> args) {
     Timer.run(() => daemon.shutdown());
     return new Future<Null>.value();
   }
@@ -237,68 +255,91 @@ class DaemonDomain extends Domain {
   }
 }
 
-// TODO: app events:
-
-// TODO: started
-// TODO: debugPort
-// TODO: stdout
-// TODO: stderr
-// TODO: stopped
+// TODO: debugPort (port)
+// TODO: stdout (text)
+// TODO: stderr (text)
 
 /// This domain responds to methods like [start] and [stop].
 ///
-/// It fires events for application start, stop, stdout, and stderr.
+/// It fires events for application start, stop, and stdout and stderr.
 class AppDomain extends Domain {
   AppDomain(Daemon daemon) : super(daemon, 'app') {
     registerHandler('start', start);
     registerHandler('stop', stop);
   }
 
+  static int _nextAppId = 0;
+
+  static String _getNextAppId() => 'app-${_nextAppId++}';
+
   List<AppInstance> _apps = <AppInstance>[];
 
-  Future<dynamic> start(Map<String, dynamic> args) async {
-    if (args == null || args['deviceId'] is! String)
-      throw "deviceId is required";
-    Device device = await _getDevice(args['deviceId']);
-    if (device == null)
-      throw "device '${args['deviceId']}' not found";
+  // TODO: document the updated params
+  // TODO: document the return value
 
-    if (args['projectDirectory'] is! String)
-      throw "projectDirectory is required";
-    String projectDirectory = args['projectDirectory'];
+  Future<dynamic> start(Map<String, dynamic> args) async {
+    String deviceId = _getArgAsString(args, 'deviceId', required: true);
+    String projectDirectory = _getArgAsString(args, 'projectDirectory', required: true);
+    bool startPaused = _getArgAsBool(args, 'startPaused');
+    // TODO(devoncarew): Use the route param.
+    String route = _getArgAsString(args, 'route'); // ignore: unused_local_variable
+    String mode = _getArgAsString(args, 'mode');
+    String target = _getArgAsString(args, 'target');
+
+    Device device = await _getDevice(deviceId);
+    if (device == null)
+      throw "device '$deviceId' not found";
+
     if (!FileSystemEntity.isDirectorySync(projectDirectory))
       throw "'$projectDirectory' does not exist";
 
+    BuildMode buildMode = parseBuildMode(mode) ?? BuildMode.debug;
+    DebuggingOptions options;
+
+    if (buildMode == BuildMode.release)
+      options = new DebuggingOptions.disabled(buildMode);
+    else
+      options = new DebuggingOptions.enabled(buildMode, startPaused: startPaused);
+
     // We change the current working directory for the duration of the `start` command.
-    // TODO(devoncarew): Make flutter_tools work better with commands run from any directory.
     Directory cwd = Directory.current;
     Directory.current = new Directory(projectDirectory);
 
-    try {
-      int result = await startApp(
-        device,
-        stop: true,
-        target: args['target'],
-        route: args['route']
-      );
+    RunAndStayResident runner = new RunAndStayResident(
+      device,
+      target: target,
+      debuggingOptions: options,
+      usesTerminalUI: false
+    );
+    AppInstance app = new AppInstance(_getNextAppId(), runner);
 
-      if (result != 0)
-        throw 'Error starting app: $result';
-    } finally {
+    _sendAppEvent(app, 'start', <String, dynamic>{
+      'directory': projectDirectory,
+      'target': target
+    });
+
+    // TODO: send app stdout/stderr
+    // TODO: send app debug info
+
+    runner.run().then((_) {
+      _sendAppEvent(app, 'stop');
+    }).catchError((dynamic error) {
+      _sendAppEvent(app, 'stop', <String, dynamic>{ 'error' : error.toString() });
+    }).whenComplete(() {
       Directory.current = cwd;
-    }
+    });
 
-    return null;
+    return <String, dynamic> { 'appId': app.id };
   }
 
   // TODO: document the updated params
 
-  Future<bool> stop(dynamic args) async {
-    if (args == null || args['appId'] is! String)
-      throw "appId is required";
-    AppInstance app = _getApp(args['appId']);
+  Future<bool> stop(Map<String, dynamic> args) async {
+    String appId = _getArgAsString(args, 'appId', required: true);
+
+    AppInstance app = _getApp(appId);
     if (app == null)
-      throw "app '${args['appId']}' not found";
+      throw "app '$appId' not found";
 
     // TODO: Set a timeout if the kill doesn't happen for a while.
     // Stop logging from the app, and remove it from the list of apps (after ~2 seconds).
@@ -320,6 +361,13 @@ class AppDomain extends Domain {
   Future<Device> _getDevice(String deviceId) async {
     List<Device> devices = await daemon.deviceDomain.getDevices();
     return devices.firstWhere((Device device) => device.id == deviceId, orElse: () => null);
+  }
+
+  void _sendAppEvent(AppInstance app, String name, [Map<String, dynamic> args]) {
+    Map<String, dynamic> eventArgs = <String, dynamic> { 'appId': app.id };
+    if (args != null)
+      eventArgs.addAll(args);
+    sendEvent('app.$name', eventArgs);
   }
 }
 
@@ -357,7 +405,7 @@ class DeviceDomain extends Domain {
 
   List<PollingDeviceDiscovery> _discoverers = <PollingDeviceDiscovery>[];
 
-  Future<List<Device>> getDevices([dynamic args]) {
+  Future<List<Device>> getDevices([Map<String, dynamic> args]) {
     List<Device> devices = _discoverers.expand((PollingDeviceDiscovery discoverer) {
       return discoverer.devices;
     }).toList();
@@ -365,7 +413,7 @@ class DeviceDomain extends Domain {
   }
 
   /// Enable device events.
-  Future<Null> enable(dynamic args) {
+  Future<Null> enable(Map<String, dynamic> args) {
     for (PollingDeviceDiscovery discoverer in _discoverers) {
       discoverer.startPolling();
     }
@@ -373,7 +421,7 @@ class DeviceDomain extends Domain {
   }
 
   /// Disable device events.
-  Future<Null> disable(dynamic args) {
+  Future<Null> disable(Map<String, dynamic> args) {
     for (PollingDeviceDiscovery discoverer in _discoverers) {
       discoverer.stopPolling();
     }
@@ -432,10 +480,10 @@ class NotifyingLogger extends Logger {
 }
 
 class AppInstance {
-  AppInstance(this.id);
+  AppInstance(this.id, [this.runner]);
 
   final String id;
-  RunAndStayResident runner;
+  final RunAndStayResident runner;
 
   Future<Null> stop() => runner.stop();
 }
