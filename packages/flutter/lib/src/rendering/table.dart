@@ -892,7 +892,6 @@ class RenderTable extends RenderBox {
           if (flexes[x] != null) {
             final double newWidth = widths[x] - deficit * flexes[x] / totalFlex;
             assert(newWidth.isFinite);
-            assert(newWidth >= 0.0);
             if (newWidth <= minWidths[x]) {
               // shrank to minimum
               deficit -= widths[x] - minWidths[x];
@@ -904,6 +903,7 @@ class RenderTable extends RenderBox {
               widths[x] = newWidth;
               newTotalFlex += flexes[x];
             }
+            assert(widths[x] >= 0.0);
           }
         }
         totalFlex = newTotalFlex;
