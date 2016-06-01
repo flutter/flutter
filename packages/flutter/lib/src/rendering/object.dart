@@ -1169,19 +1169,24 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     }
   }
 
-  bool _needsLayout = true;
   /// Whether this render object's layout information is dirty.
   bool get needsLayout => _needsLayout;
+  bool _needsLayout = true;
+
   RenderObject _relayoutSubtreeRoot;
   bool _doingThisLayoutWithCallback = false;
-  Constraints _constraints;
+
   /// The layout constraints most recently supplied by the parent.
+  @protected
   Constraints get constraints => _constraints;
+  Constraints _constraints;
+
   /// Verify that the object's constraints are being met. Override
   /// this function in a subclass to verify that your state matches
   /// the constraints object. This function is only called in checked
   /// mode and only when needsLayout is false. If the constraints are
   /// not met, it should assert or throw an exception.
+  @protected
   void debugAssertDoesMeetConstraints();
 
   /// When true, debugAssertDoesMeetConstraints() is currently
@@ -1449,6 +1454,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// Returning false is always correct, but returning true can be more
   /// efficient when computing the size of this render object because we don't
   /// need to recompute the size if the constraints don't change.
+  @protected
   bool get sizedByParent => false;
 
   /// Updates the render objects size using only the constraints.
@@ -1566,6 +1572,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///
   /// You must call markNeedsCompositingBitsUpdate() if the value of this
   /// getter changes.
+  @protected
   bool get alwaysNeedsCompositing => false;
 
   OffsetLayer _layer;
