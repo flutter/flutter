@@ -916,18 +916,21 @@ abstract class RenderBox extends RenderObject {
           return result;
         }
 
-        final double minIntrinsicWidth = testIntrinsic(getMinIntrinsicWidth, 'getMinIntrinsicWidth', constraints.maxWidth);
-        final double maxIntrinsicWidth = testIntrinsic(getMaxIntrinsicWidth, 'getMaxIntrinsicWidth', constraints.maxWidth);
-        if (minIntrinsicWidth > maxIntrinsicWidth) {
-          failures.writeln(' * getMinIntrinsicWidth(${constraints.maxWidth}) returned a larger value ($minIntrinsicWidth) than getMaxIntrinsicWidth(${constraints.maxWidth}) ($maxIntrinsicWidth)');
-          failureCount += 1;
+        void testIntrinsicsForValues(double getMin(double extent), double getMax(double extent), String name, double constraint) {
+          final double min = testIntrinsic(getMin, 'getMinIntrinsic$name', constraint);
+          final double max = testIntrinsic(getMax, 'getMaxIntrinsic$name', constraint);
+          if (min > max) {
+            failures.writeln(' * getMinIntrinsic$name($constraint) returned a larger value ($min) than getMaxIntrinsic$name($constraint) ($max)');
+            failureCount += 1;
+          }
         }
-        final double minIntrinsicHeight = testIntrinsic(getMinIntrinsicHeight, 'getMinIntrinsicHeight', constraints.maxHeight);
-        final double maxIntrinsicHeight = testIntrinsic(getMaxIntrinsicHeight, 'getMaxIntrinsicHeight', constraints.maxHeight);
-        if (minIntrinsicHeight > maxIntrinsicHeight) {
-          failures.writeln(' * getMinIntrinsicHeight(${constraints.maxHeight}) returned a larger value ($minIntrinsicHeight) than getMaxIntrinsicHeight(${constraints.maxHeight}) ($maxIntrinsicHeight)');
-          failureCount += 1;
-        }
+
+        testIntrinsicsForValues(getMinIntrinsicWidth, getMaxIntrinsicWidth, 'Width', double.INFINITY);
+        testIntrinsicsForValues(getMinIntrinsicHeight, getMaxIntrinsicHeight, 'Height', double.INFINITY);
+        if (constraints.hasBoundedWidth)
+          testIntrinsicsForValues(getMinIntrinsicWidth, getMaxIntrinsicWidth, 'Width', constraints.maxWidth);
+        if (constraints.hasBoundedHeight)
+          testIntrinsicsForValues(getMinIntrinsicHeight, getMaxIntrinsicHeight, 'Height', constraints.maxHeight);
 
         // TODO(ianh): Test that values are internally consistent in more ways than the above.
 

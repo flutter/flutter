@@ -77,11 +77,11 @@ class RenderBlock extends RenderBox
     assert(() {
       switch (mainAxis) {
         case Axis.horizontal:
-          if (constraints.maxWidth.isInfinite)
+          if (!constraints.hasBoundedWidth)
             return true;
           break;
         case Axis.vertical:
-          if (constraints.maxHeight.isInfinite)
+          if (!constraints.hasBoundedHeight)
             return true;
           break;
       }
@@ -97,11 +97,11 @@ class RenderBlock extends RenderBox
     assert(() {
       switch (mainAxis) {
         case Axis.horizontal:
-          if (!constraints.maxHeight.isInfinite)
+          if (constraints.hasBoundedHeight)
             return true;
           break;
         case Axis.vertical:
-          if (!constraints.maxWidth.isInfinite)
+          if (constraints.hasBoundedWidth)
             return true;
           break;
       }
