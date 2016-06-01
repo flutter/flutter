@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:meta/meta.dart';
 import 'package:mojo_services/mojo/gfx/composition/scene_token.mojom.dart' as mojom;
 import 'package:vector_math/vector_math_64.dart';
 
@@ -29,6 +30,7 @@ export 'package:flutter/foundation.dart' show FlutterError, InformationCollector
 /// to other children.
 class ParentData {
   /// Called when the RenderObject is removed from the tree.
+  @mustCallSuper
   void detach() { }
 
   @override
@@ -1438,6 +1440,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// property isn't used when debugCanParentUseSize isn't set, then that
   /// subclass should override debugResetSize() to reapply the current values of
   /// debugCanParentUseSize to that state.
+  @protected
   void debugResetSize() { }
 
   /// Whether the constraints are the only input to the sizing algorithm (in
@@ -1459,6 +1462,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// to compute their size.
   ///
   /// This function is called only if [sizedByParent] is true.
+  @protected
   void performResize();
 
   /// Do the work of computing the layout for this render object.
@@ -1480,6 +1484,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// parentUsesSize ensures that this render object will undergo layout if the
   /// child undergoes layout. Otherwise, the child can changes its layout
   /// information without informing this render object.
+  @protected
   void performLayout();
 
   // We cache a closure to performLayout so that the callsite is monomorphic.
@@ -1489,6 +1494,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   /// Allows this render object to mutate its child list during layout and
   /// calls callback.
+  @protected
   void invokeLayoutCallback(LayoutCallback callback) {
     assert(_debugMutationsLocked);
     assert(_debugDoingThisLayout);
@@ -1754,6 +1760,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   Rect get paintBounds;
 
   /// Override this function to paint debugging information.
+  @protected
   void debugPaint(PaintingContext context, Offset offset) { }
 
   /// Paint this render object into the given context at the given offset.
@@ -2094,6 +2101,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// Returns a list of strings describing the current node's fields, one field
   /// per string. Subclasses should override this to have their information
   /// included in toStringDeep().
+  @protected
   void debugFillDescription(List<String> description) {
     if (debugCreator != null)
       description.add('creator: $debugCreator');
@@ -2103,6 +2111,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   /// Returns a string describing the current node's descendants. Each line of
   /// the subtree in the output should be indented by the prefix argument.
+  @protected
   String debugDescribeChildren(String prefix) => '';
 
 }
