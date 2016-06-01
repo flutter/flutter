@@ -196,15 +196,13 @@ class LazyBlock extends StatelessWidget {
       double contentExtent,
       double containerExtent,
       double minScrollOffset) {
-    state.setState(() {
-      final BoundedBehavior scrollBehavior = state.scrollBehavior;
-      state.didUpdateScrollBehavior(scrollBehavior.updateExtents(
-        contentExtent: contentExtent,
-        containerExtent: containerExtent,
-        minScrollOffset: minScrollOffset,
-        scrollOffset: state.scrollOffset
-      ));
-    });
+    final BoundedBehavior scrollBehavior = state.scrollBehavior;
+    state.didUpdateScrollBehavior(scrollBehavior.updateExtents(
+      contentExtent: contentExtent,
+      containerExtent: containerExtent,
+      minScrollOffset: minScrollOffset,
+      scrollOffset: state.scrollOffset
+    ));
   }
 
   Widget _buildViewport(BuildContext context, ScrollableState state, double scrollOffset) {

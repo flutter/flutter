@@ -35,6 +35,12 @@ class ComplexLayoutAppState extends State<ComplexLayoutApp> {
       _lightTheme = value;
     });
   }
+
+  void toggleAnimationSpeed() {
+    setState(() {
+      timeDilation = (timeDilation != 1.0) ? 1.0 : 5.0;
+    });
+  }
 }
 
 class ComplexLayout extends StatefulWidget {
@@ -566,12 +572,6 @@ class GalleryDrawer extends StatelessWidget {
     ComplexLayoutApp.of(context).lightTheme = value;
   }
 
-  void _toggleAnimationSpeed(BuildContext context) {
-    ComplexLayoutApp.of(context).setState(() {
-      timeDilation = (timeDilation != 1.0) ? 1.0 : 5.0;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return new Drawer(
@@ -612,13 +612,13 @@ class GalleryDrawer extends StatelessWidget {
           new DrawerItem(
             icon: Icons.hourglass_empty,
             selected: timeDilation != 1.0,
-            onPressed: () { _toggleAnimationSpeed(context); },
+            onPressed: () { ComplexLayoutApp.of(context).toggleAnimationSpeed(); },
             child: new Row(
               children: <Widget>[
                 new Flexible(child: new Text('Animate Slowly')),
                 new Checkbox(
                   value: timeDilation != 1.0,
-                  onChanged: (bool value) { _toggleAnimationSpeed(context); }
+                  onChanged: (bool value) { ComplexLayoutApp.of(context).toggleAnimationSpeed(); }
                 )
               ]
             )

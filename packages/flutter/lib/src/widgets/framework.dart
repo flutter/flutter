@@ -405,6 +405,7 @@ abstract class State<T extends StatefulWidget> {
   /// If you just change the state directly without calling setState(), then the
   /// widget will not be scheduled for rebuilding, meaning that its rendering
   /// will not be updated.
+  @protected
   void setState(VoidCallback fn) {
     assert(() {
       if (_debugLifecycleState == _StateLifecycle.defunct) {

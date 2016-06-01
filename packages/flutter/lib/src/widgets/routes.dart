@@ -394,6 +394,13 @@ class _ModalScopeState extends State<_ModalScope> {
     });
   }
 
+  void _didChangeRouteOffStage() {
+    setState(() {
+      // We use the route's offstage bool in our build function, which means our
+      // state has changed.
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget contents = new PageStorage(
@@ -515,14 +522,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     if (_offstage == value)
       return;
     _offstage = value;
-    _scopeKey.currentState?.setState(() {
-      // _offstage is the value we're setting, but since there might not be a
-      // state, we set it outside of this callback (which will only be called if
-      // there's a state currently built).
-      // _scopeKey is the key for the _ModalScope built in _buildModalScope().
-      // When we mark that state dirty, it'll rebuild itself, and use our
-      // offstage (via their config.route.offstage) when building.
-    });
+    _scopeKey.currentState?._didChangeRouteOffStage();
   }
 
   /// The build context for the subtree containing the primary content of this route.
