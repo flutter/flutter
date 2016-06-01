@@ -185,6 +185,7 @@ class _MarkdownBodyRawState extends State<MarkdownBodyRaw> {
 
   @override
   void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
     description.add('cached blocks identity: ${_cachedBlocks.hashCode}');
   }
 }

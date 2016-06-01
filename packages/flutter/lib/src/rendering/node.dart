@@ -97,6 +97,7 @@ class AbstractNode {
   AbstractNode get parent => _parent;
 
   /// Subclasses should call this function when they acquire a new child.
+  @mustCallSuper
   void adoptChild(AbstractNode child) {
     assert(child != null);
     assert(child._parent == null);
@@ -114,6 +115,7 @@ class AbstractNode {
   }
 
   /// Subclasses should call this function when they lose a child.
+  @mustCallSuper
   void dropChild(AbstractNode child) {
     assert(child != null);
     assert(child._parent == this);

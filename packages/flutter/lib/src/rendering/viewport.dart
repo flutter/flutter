@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui show window;
 
+import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
@@ -355,6 +356,7 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
   /// This is a convenience function for subclasses to call from their
   /// intrinsic-sizing functions if they don't have a good way to generate the
   /// numbers.
+  @protected
   bool debugThrowIfNotCheckingIntrinsics() {
     assert(() {
       if (!RenderObject.debugCheckingIntrinsics) {
@@ -372,25 +374,25 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
 
   @override
   double getMinIntrinsicWidth(double height) {
-    assert(debugThrowIfNotCheckingIntrinsics);
+    assert(debugThrowIfNotCheckingIntrinsics());
     return 0.0;
   }
 
   @override
   double getMaxIntrinsicWidth(double height) {
-    assert(debugThrowIfNotCheckingIntrinsics);
+    assert(debugThrowIfNotCheckingIntrinsics());
     return 0.0;
   }
 
   @override
   double getMinIntrinsicHeight(double width) {
-    assert(debugThrowIfNotCheckingIntrinsics);
+    assert(debugThrowIfNotCheckingIntrinsics());
     return 0.0;
   }
 
   @override
   double getMaxIntrinsicHeight(double width) {
-    assert(debugThrowIfNotCheckingIntrinsics);
+    assert(debugThrowIfNotCheckingIntrinsics());
     return 0.0;
   }
 
