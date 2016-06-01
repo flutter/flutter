@@ -74,9 +74,9 @@ class Observatory {
     _getEventController(data['streamId']).add(event);
   }
 
-  void populateIsolateInfo() {
+  Future<Null> populateIsolateInfo() async {
     // Calling this has the side effect of populating the isolate information.
-    waitFirstIsolate;
+    await waitFirstIsolate;
   }
 
   Future<IsolateRef> get waitFirstIsolate async {
