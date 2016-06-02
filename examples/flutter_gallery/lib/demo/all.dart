@@ -25,6 +25,7 @@ export 'persistent_bottom_sheet_demo.dart';
 export 'progress_indicator_demo.dart';
 export 'scrollable_tabs_demo.dart';
 export 'selection_controls_demo.dart';
+export 'shrine_demo.dart';
 export 'slider_demo.dart';
 export 'snack_bar_demo.dart';
 export 'tabs_demo.dart';

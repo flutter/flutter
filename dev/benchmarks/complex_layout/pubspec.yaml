@@ -6,7 +6,7 @@ dependencies:
     path: ../../../packages/flutter
   flutter_driver:
     path: ../../../packages/flutter_driver
-  flutter_gallery_assets: '0.0.16'
+  flutter_gallery_assets: '0.0.18'
 
 dev_dependencies:
   flutter_test:

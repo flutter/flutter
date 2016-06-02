@@ -32,6 +32,10 @@ abstract class Route<T> {
   /// Called after install() when the route is pushed onto the navigator.
   void didPush() { }
 
+  /// When this route is popped (see [Navigator.pop]) if the result isn't
+  /// specified or if it's null, this value will be used instead.
+  T get currentResult => null;
+
   /// Called after install() when the route replaced another in the navigator.
   void didReplace(Route<dynamic> oldRoute) { }
 
@@ -427,7 +431,7 @@ class NavigatorState extends State<Navigator> {
     assert(route._navigator == this);
     bool debugPredictedWouldPop;
     assert(() { debugPredictedWouldPop = !route.willHandlePopInternally; return true; });
-    if (route.didPop(result)) {
+    if (route.didPop(result ?? route.currentResult)) {
       assert(debugPredictedWouldPop);
       if (_history.length > 1) {
         setState(() {
@@ -564,11 +568,12 @@ class NavigatorTransaction {
   /// (if any) is notified using its didPop() method, and the previous route is
   /// notified using [Route.didChangeNext].
   ///
-  /// If non-null, [result] will be used as the result of the route. Routes
-  /// such as dialogs or popup menus typically use this mechanism to return the
-  /// value selected by the user to the widget that created their route. The
-  /// type of [result], if provided, must match the type argument of the class
-  /// of the current route. (In practice, this is usually "dynamic".)
+  /// If non-null, [result] will be used as the result of the route, otherwise
+  /// the route's [Route.currentValue] will be used. Routes such as dialogs or
+  /// popup menus typically use this mechanism to return the value selected by
+  /// the user to the widget that created their route. The type of [result],
+  /// if provided, must match the type argument of the class of the current
+  /// route. (In practice, this is usually "dynamic".)
   ///
   /// Returns true if a route was popped; returns false if there are no further
   /// previous routes.

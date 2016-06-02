@@ -1,0 +1,46 @@
+// Copyright 2016 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+
+import 'shrine/shrine_home.dart' show ShrineHome;
+import 'shrine/shrine_theme.dart' show ShrineTheme;
+
+// This code would ordinarily be part of the MaterialApp's home. It's being
+// used by the ShrineDemo and by each route pushed from there because this
+// isn't a standalone app with its own main() and MaterialApp.
+Widget buildShrine(Widget child) {
+  return new Theme(
+    data: new ThemeData(primarySwatch: Colors.grey),
+    child: new IconTheme(
+      data: new IconThemeData(color: const Color(0xFF707070)),
+      child: new ShrineTheme(
+        child: child
+      )
+    )
+  );
+}
+
+// In a standalone version of this app, MaterialPageRoute<T> could be used directly.
+class ShrinePageRoute<T> extends MaterialPageRoute<T> {
+  ShrinePageRoute({
+    WidgetBuilder builder,
+    Completer<T> completer,
+    RouteSettings settings: const RouteSettings()
+  }) : super(builder: builder, completer: completer, settings: settings);
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
+    return buildShrine(super.buildPage(context, animation, forwardAnimation));
+  }
+}
+
+class ShrineDemo extends StatelessWidget {
+  static const String routeName = '/shrine'; // Used by the Gallery app.
+
+  @override
+  Widget build(BuildContext context) => buildShrine(new ShrineHome());
+}
