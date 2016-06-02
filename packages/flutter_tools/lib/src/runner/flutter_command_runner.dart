@@ -148,9 +148,8 @@ class FlutterCommandRunner extends CommandRunner {
     if (!_checkFlutterCopy())
       return new Future<int>.value(1);
 
-    PackageMap.instance = new PackageMap(path.normalize(path.absolute(
-      globalResults.wasParsed('packages') ? globalResults['packages'] : kPackagesFileName
-    )));
+    if (globalResults.wasParsed('packages'))
+      path.normalize(path.absolute(globalResults['packages']));
 
     // See if the user specified a specific device.
     deviceManager.specifiedDeviceId = globalResults['device-id'];
@@ -191,7 +190,7 @@ class FlutterCommandRunner extends CommandRunner {
 
     if (engineSourcePath == null && globalResults['local-engine'] != null) {
       try {
-        Uri engineUri = PackageMap.instance.map[kFlutterEnginePackageName];
+        Uri engineUri = PackageMap.createGlobalInstance().map[kFlutterEnginePackageName];
         engineSourcePath = path.dirname(path.dirname(path.dirname(path.dirname(engineUri.path))));
         bool dirExists = FileSystemEntity.isDirectorySync(path.join(engineSourcePath, 'out'));
         if (engineSourcePath == '/' || engineSourcePath.isEmpty || !dirExists)

@@ -51,10 +51,18 @@ class RunAndStayResident {
   Observatory observatory;
 
   /// Start the app and keep the process running during its lifetime.
-  Future<int> run({ bool traceStartup: false, bool benchmark: false }) {
+  Future<int> run({
+    bool traceStartup: false,
+    bool benchmark: false,
+    Completer<int> observatoryPortCompleter
+  }) {
     // Don't let uncaught errors kill the process.
     return runZoned(() {
-      return _run(traceStartup: traceStartup, benchmark: benchmark);
+      return _run(
+        traceStartup: traceStartup,
+        benchmark: benchmark,
+        observatoryPortCompleter: observatoryPortCompleter
+      );
     }, onError: (dynamic error, StackTrace stackTrace) {
       printError('Exception from flutter run: $error', stackTrace);
     });
@@ -65,7 +73,11 @@ class RunAndStayResident {
     return _stopApp();
   }
 
-  Future<int> _run({ bool traceStartup: false, bool benchmark: false }) async {
+  Future<int> _run({
+    bool traceStartup: false,
+    bool benchmark: false,
+    Completer<int> observatoryPortCompleter
+  }) async {
     String mainPath = findMainDartFile(target);
     if (!FileSystemEntity.isFileSync(mainPath)) {
       String message = 'Tried to run $mainPath, but that file does not exist.';
@@ -145,6 +157,9 @@ class RunAndStayResident {
     }
 
     startTime.stop();
+
+    if (observatoryPortCompleter != null && result.hasObservatory)
+      observatoryPortCompleter.complete(result.observatoryPort);
 
     _exitCompleter = new Completer<int>();
 

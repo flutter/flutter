@@ -17,6 +17,16 @@ Map<String, Uri> _parse(String packagesPath) {
 class PackageMap {
   PackageMap(this.packagesPath);
 
+  static PackageMap createGlobalInstance() => new PackageMap(globalPackagesPath);
+
+  static String get globalPackagesPath => _globalPackagesPath ?? kPackagesFileName;
+
+  static set globalPackagesPath(String value) {
+    _globalPackagesPath = value;
+  }
+
+  static String _globalPackagesPath;
+
   final String packagesPath;
 
   Map<String, Uri> get map {
@@ -25,8 +35,6 @@ class PackageMap {
     return _map;
   }
   Map<String, Uri> _map;
-
-  static PackageMap instance;
 
   String checkValid() {
     if (FileSystemEntity.isFileSync(packagesPath))

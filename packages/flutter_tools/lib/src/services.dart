@@ -30,7 +30,7 @@ Future<Null> parseServiceConfigs(
 ) async {
   Map<String, Uri> packageMap;
   try {
-    packageMap = PackageMap.instance.map;
+    packageMap = PackageMap.createGlobalInstance().map;
   } on FormatException catch(e) {
     printTrace('Invalid ".packages" file while parsing service configs:\n$e');
     return;

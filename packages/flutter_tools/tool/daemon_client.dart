@@ -27,22 +27,29 @@ Future<Null> main() async {
 
   stdout.write('> ');
   stdin.transform(UTF8.decoder).transform(const LineSplitter()).listen((String line) {
-    String word = line.split(' ').first;
+    List<String> words = line.split(' ');
 
     if (line == 'version' || line == 'v') {
       _send(<String, dynamic>{'method': 'daemon.version'});
     } else if (line == 'shutdown' || line == 'q') {
       _send(<String, dynamic>{'method': 'daemon.shutdown'});
-    } else if (word == 'start') {
+    } else if (words.first == 'start') {
       _send(<String, dynamic>{
         'method': 'app.start',
         'params': <String, dynamic> {
-          'deviceId': line.split(' ')[1],
-          'projectDirectory': line.split(' ')[2]
+          'deviceId': words[1],
+          'projectDirectory': words[2]
         }
       });
-    } else if (line == 'stop') {
-      _send(<String, dynamic>{'method': 'app.stop'});
+    } else if (words.first == 'stop') {
+      if (words.length > 1) {
+        _send(<String, dynamic>{
+          'method': 'app.stop',
+          'params': <String, dynamic> { 'appId': words[1] }
+        });
+      } else {
+        _send(<String, dynamic>{'method': 'app.stop'});
+      }
     } else if (line == 'devices') {
       _send(<String, dynamic>{'method': 'device.getDevices'});
     } else {
@@ -63,5 +70,5 @@ void _send(Map<String, dynamic> map) {
   map['id'] = id++;
   String str = '[${JSON.encode(map)}]';
   daemon.stdin.writeln(str);
-  print('  ==> $str');
+  print('==> $str');
 }

@@ -311,23 +311,37 @@ class AppDomain extends Domain {
       debuggingOptions: options,
       usesTerminalUI: false
     );
-    AppInstance app = new AppInstance(_getNextAppId(), runner);
 
+    AppInstance app = new AppInstance(_getNextAppId(), runner);
+    _apps.add(app);
     _sendAppEvent(app, 'start', <String, dynamic>{
       'directory': projectDirectory,
       'target': target
     });
 
     // TODO: send app stdout/stderr
-    // TODO: send app debug info
+    Completer<int> observatoryPortCompleter;
 
-    runner.run().then((_) {
-      _sendAppEvent(app, 'stop');
-    }).catchError((dynamic error) {
-      _sendAppEvent(app, 'stop', <String, dynamic>{ 'error' : error.toString() });
-    }).whenComplete(() {
-      Directory.current = cwd;
-    });
+    if (options.debuggingEnabled) {
+      observatoryPortCompleter = new Completer<int>();
+      observatoryPortCompleter.future.then((int port) {
+        _sendAppEvent(app, 'debugPort', <String, dynamic>{ 'port': port });
+      });
+    }
+
+    // TODO: fix - stackoverflowexception
+    // AppContext appContext = new AppContext();
+    // appContext[Logger] = new _AppRunLogger(this, app);
+    // appContext.runInZone(() {
+      runner.run(observatoryPortCompleter: observatoryPortCompleter).then((_) {
+        _sendAppEvent(app, 'stop');
+      }).catchError((dynamic error) {
+        _sendAppEvent(app, 'stop', <String, dynamic>{ 'error' : error.toString() });
+      }).whenComplete(() {
+        Directory.current = cwd;
+        _apps.remove(app);
+      });
+    // });
 
     return <String, dynamic> { 'appId': app.id };
   }
@@ -486,6 +500,43 @@ class AppInstance {
   final RunAndStayResident runner;
 
   Future<Null> stop() => runner.stop();
+}
+
+class _AppRunLogger extends Logger {
+  _AppRunLogger(this.domain, this.app);
+
+  final AppDomain domain;
+  final AppInstance app;
+
+  @override
+  void printError(String message, [StackTrace stackTrace]) {
+    if (stackTrace != null) {
+      domain._sendAppEvent(app, 'log', <String, dynamic>{
+        'log': message,
+        'stackTrace': stackTrace.toString(),
+        'error': true
+      });
+    } else {
+      domain._sendAppEvent(app, 'log', <String, dynamic>{
+        'log': message,
+        'error': true
+      });
+    }
+  }
+
+  @override
+  void printStatus(String message, { bool emphasis: false }) {
+    domain._sendAppEvent(app, 'log', <String, dynamic>{ 'log': message });
+  }
+
+  @override
+  void printTrace(String message) { }
+
+  @override
+  Status startProgress(String message) {
+    printStatus(message);
+    return new Status();
+  }
 }
 
 class LogMessage {

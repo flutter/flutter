@@ -102,7 +102,7 @@ void main() {
 ''');
 
     Process process = await _startProcess(
-      listenerFile.path, packages: PackageMap.instance.packagesPath
+      listenerFile.path, packages: PackageMap.globalPackagesPath
     );
 
     _attachStandardStreams(process);

@@ -46,7 +46,7 @@ Future<int> createSnapshot({
   final List<String> args = <String>[
     tools.getHostToolPath(HostTool.SkySnapshot),
     mainPath,
-    '--packages=${PackageMap.instance.packagesPath}',
+    '--packages=${path.absolute(PackageMap.globalPackagesPath)}',
     '--snapshot=$snapshotPath'
   ];
   if (depfilePath != null)
