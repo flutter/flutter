@@ -13,6 +13,7 @@ import '../base/context.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../flx.dart' as flx;
 import '../globals.dart';
 import '../services.dart';
 import 'setup_xcodeproj.dart';
@@ -97,18 +98,23 @@ bool _xcodeVersionCheckValid(int major, int minor) {
   return false;
 }
 
-Future<XcodeBuildResult> buildXcodeProject(ApplicationPackage app, BuildMode mode,
-    { bool buildForDevice, bool codesign: true }) async {
+Future<XcodeBuildResult> buildXcodeProject({
+  ApplicationPackage app,
+  BuildMode mode,
+  String target: flx.defaultMainPath,
+  bool buildForDevice,
+  bool codesign: true
+}) async {
   String flutterProjectPath = Directory.current.path;
 
   if (xcodeProjectRequiresUpdate(mode)) {
     printTrace('Initializing the Xcode project.');
-    if ((await setupXcodeProjectHarness(flutterProjectPath, mode)) != 0) {
+    if ((await setupXcodeProjectHarness(flutterProjectPath, mode, target)) != 0) {
       printError('Could not initialize the Xcode project.');
       return new XcodeBuildResult(false);
     }
   } else {
-   updateXcodeGeneratedProperties(flutterProjectPath, mode);
+   updateXcodeGeneratedProperties(flutterProjectPath, mode, target);
   }
 
   if (!_validateEngineRevision(app))

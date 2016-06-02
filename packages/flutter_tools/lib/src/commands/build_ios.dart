@@ -15,6 +15,7 @@ import '../runner/flutter_command.dart';
 
 class BuildIOSCommand extends FlutterCommand {
   BuildIOSCommand() {
+    usesTargetOption();
     addBuildModeFlags();
     argParser.addFlag('simulator', help: 'Build for the iOS simulator instead of the device.');
     argParser.addFlag('codesign', negatable: true, defaultsTo: true,
@@ -53,9 +54,13 @@ class BuildIOSCommand extends FlutterCommand {
 
     String typeName = path.basename(tools.getEngineArtifactsDirectory(TargetPlatform.ios, getBuildMode()).path);
     Status status = logger.startProgress('Building $app for $logTarget ($typeName)...');
-    XcodeBuildResult result = await buildXcodeProject(app, getBuildMode(),
-        buildForDevice: !forSimulator,
-        codesign: shouldCodesign);
+    XcodeBuildResult result = await buildXcodeProject(
+      app: app,
+      mode: getBuildMode(),
+      target: argResults['target'],
+      buildForDevice: !forSimulator,
+      codesign: shouldCodesign
+    );
     status.stop(showElapsedTime: true);
 
     if (!result.success) {

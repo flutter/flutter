@@ -54,7 +54,7 @@ bool _inflateXcodeArchive(String directory, List<int> archiveBytes) {
   return true;
 }
 
-void updateXcodeGeneratedProperties(String projectPath, BuildMode mode) {
+void updateXcodeGeneratedProperties(String projectPath, BuildMode mode, String target) {
   StringBuffer localsBuffer = new StringBuffer();
 
   localsBuffer.writeln('// This is a generated file; do not edit or check into version control.');
@@ -65,6 +65,9 @@ void updateXcodeGeneratedProperties(String projectPath, BuildMode mode) {
   // This holds because requiresProjectRoot is true for this command
   String applicationRoot = path.normalize(Directory.current.path);
   localsBuffer.writeln('FLUTTER_APPLICATION_PATH=$applicationRoot');
+
+  // Relative to FLUTTER_APPLICATION_PATH, which is [Directory.current].
+  localsBuffer.writeln('FLUTTER_TARGET=$target');
 
   String flutterFrameworkDir = path.normalize(tools.getEngineArtifactsDirectory(TargetPlatform.ios, mode).path);
   localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=$flutterFrameworkDir');
@@ -97,7 +100,7 @@ bool xcodeProjectRequiresUpdate(BuildMode mode) {
   return false;
 }
 
-Future<int> setupXcodeProjectHarness(String flutterProjectPath, BuildMode mode) async {
+Future<int> setupXcodeProjectHarness(String flutterProjectPath, BuildMode mode, String target) async {
   // Step 1: Fetch the archive from the cloud
   String iosFilesPath = path.join(flutterProjectPath, 'ios');
   String xcodeprojPath = path.join(iosFilesPath, '.generated');
@@ -119,7 +122,7 @@ Future<int> setupXcodeProjectHarness(String flutterProjectPath, BuildMode mode) 
   }
 
   // Step 3: Populate the Generated.xcconfig with project specific paths
-  updateXcodeGeneratedProperties(flutterProjectPath, mode);
+  updateXcodeGeneratedProperties(flutterProjectPath, mode, target);
 
   // Step 4: Write the REVISION file
   File revisionFile = new File(path.join(xcodeprojPath, 'REVISION'));

@@ -49,6 +49,7 @@ BuildApp() {
 
     RunCommand ${FLUTTER_ROOT}/bin/flutter --suppress-analytics build aot \
       --target-platform=ios                                               \
+      --target=${FLUTTER_TARGET}                                          \
       --release                                                           \
       ${interpreter_flag}                                                 \
       ${local_engine_flag}
@@ -69,6 +70,7 @@ BuildApp() {
   fi
 
   RunCommand ${FLUTTER_ROOT}/bin/flutter --suppress-analytics build flx \
+    --target=${FLUTTER_TARGET}                                          \
     --output-file=${derived_dir}/app.flx                                \
     ${precompilation_flag}                                              \
     ${local_engine_flag}                                                \
