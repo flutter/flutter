@@ -1939,8 +1939,9 @@ class Flow extends MultiChildRenderObjectWidget {
   /// repainting the children when the flow repaints.
   Flow({
     Key key,
-    List<Widget> children: _emptyWidgetList,
-    this.delegate
+    this.delegate,
+    this.projection,
+    List<Widget> children: _emptyWidgetList
   }) : super(key: key, children: RepaintBoundary.wrapAll(children)) {
     assert(delegate != null);
   }
@@ -1952,8 +1953,9 @@ class Flow extends MultiChildRenderObjectWidget {
   /// a repaint boundary.
   Flow.unwrapped({
     Key key,
-    List<Widget> children: _emptyWidgetList,
-    this.delegate
+    this.delegate,
+    this.projection,
+    List<Widget> children: _emptyWidgetList
   }) : super(key: key, children: children) {
     assert(delegate != null);
   }
@@ -1961,13 +1963,21 @@ class Flow extends MultiChildRenderObjectWidget {
   /// The delegate that controls the transformation matrices of the children.
   final FlowDelegate delegate;
 
+  /// A matrix that is applied before painting each child.
+  ///
+  /// Useful for setting up a common perspective projection matrix. If `null`,
+  /// defaults to the identity matrix. Using `null` is more efficient than using
+  /// an actual identity matrix.
+  final Matrix4 projection;
+
   @override
-  RenderFlow createRenderObject(BuildContext context) => new RenderFlow(delegate: delegate);
+  RenderFlow createRenderObject(BuildContext context) => new RenderFlow(delegate: delegate, projection: projection);
 
   @override
   void updateRenderObject(BuildContext context, RenderFlow renderObject) {
     renderObject
-      ..delegate = delegate;
+      ..delegate = delegate
+      ..projection = projection;
   }
 }
 

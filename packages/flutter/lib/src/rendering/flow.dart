@@ -179,8 +179,9 @@ class RenderFlow extends RenderBox
   /// [isRepaintBounday].
   RenderFlow({
     List<RenderBox> children,
-    FlowDelegate delegate
-  }) : _delegate = delegate {
+    FlowDelegate delegate,
+    Matrix4 projection
+  }) : _delegate = delegate, _projection = projection {
     assert(delegate != null);
     addAll(children);
   }
@@ -218,6 +219,20 @@ class RenderFlow extends RenderBox
       oldDelegate._repaint?.removeListener(markNeedsPaint);
       newDelegate._repaint?.addListener(markNeedsPaint);
     }
+  }
+
+  /// A matrix that is applied before painting each child.
+  ///
+  /// Useful for setting up a common perspective projection matrix. If `null`,
+  /// defaults to the identity matrix. Using `null` is more efficient than using
+  /// an actual identity matrix.
+  Matrix4 get projection => _projection;
+  Matrix4 _projection;
+  set projection (Matrix4 newProjection) {
+    if (_projection == newProjection)
+      return;
+    _projection = newProjection;
+    markNeedsPaint();
   }
 
   @override
@@ -332,6 +347,9 @@ class RenderFlow extends RenderBox
     // still be hit tested at the correct location.
     if (opacity == 0.0)
       return;
+
+    if (_projection != null)
+      transform = _projection * transform;
 
     void painter(PaintingContext context, Offset offset) {
       context.paintChild(child, offset);
