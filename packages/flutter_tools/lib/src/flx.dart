@@ -188,7 +188,12 @@ Map<_Asset, List<_Asset>> _parseAssets(
         String asset = font['asset'];
         if (asset == null) continue;
 
-        _Asset baseAsset = new _Asset(base: assetBase, relativePath: asset);
+        _Asset baseAsset = _resolveAsset(packageMap, assetBase, asset);
+        if (!baseAsset.assetFileExists) {
+          printError('Error: unable to locate asset entry in flutter.yaml: "$asset".');
+          return null;
+        }
+
         result[baseAsset] = <_Asset>[];
       }
     }
