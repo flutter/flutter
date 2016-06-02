@@ -75,7 +75,6 @@ class GalleryHomeState extends State<GalleryHome> {
             children: <Widget>[
               new GalleryItem(title: 'Weather', routeName: WeatherDemo.routeName),
               new GalleryItem(title: 'Fitness', routeName: FitnessDemo.routeName),
-              new GalleryItem(title: 'Fancy lines', routeName: DrawingDemo.routeName),
               new GalleryItem(title: 'Calculator', routeName: Calculator.routeName),
               new GalleryItem(title: 'Flexible space toolbar', routeName: FlexibleSpaceDemo.routeName),
               new GalleryItem(title: 'Floating action button', routeName: TabsFabDemo.routeName),
