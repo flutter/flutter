@@ -402,6 +402,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
   /// If there are no in-progress scrolling physics, this function scrolls to
   /// the given offset instead.
   void didUpdateScrollBehavior(double newScrollOffset) {
+    setState(() { /* The scroll behavior is part of our build state. */ });
     assert(_controller.isAnimating || _simulation == null);
     if (_numberOfInProgressScrolls > 0) {
       if (_simulation != null) {

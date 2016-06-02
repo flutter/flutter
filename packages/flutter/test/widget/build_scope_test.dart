@@ -37,11 +37,11 @@ class ProbeWidgetState extends State<ProbeWidget> {
 class BadWidget extends StatelessWidget {
   BadWidget(this.parentState);
 
-  final State parentState;
+  final BadWidgetParentState parentState;
 
   @override
   Widget build(BuildContext context) {
-    parentState.setState(() {});
+    parentState._markNeedsBuild();
     return new Container();
   }
 }
@@ -52,6 +52,13 @@ class BadWidgetParent extends StatefulWidget {
 }
 
 class BadWidgetParentState extends State<BadWidgetParent> {
+  void _markNeedsBuild() {
+    setState(() {
+      // Our state didn't really change, but we're doing something pathological
+      // here to trigger an interesting scenario to test.
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return new BadWidget(this);

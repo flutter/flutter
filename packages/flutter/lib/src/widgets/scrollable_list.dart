@@ -102,13 +102,11 @@ class ScrollableList extends StatelessWidget {
   final Iterable<Widget> children;
 
   void _handleExtentsChanged(ScrollableState state, double contentExtent, double containerExtent) {
-    state.setState(() {
-      state.didUpdateScrollBehavior(state.scrollBehavior.updateExtents(
-        contentExtent: itemsWrap ? double.INFINITY : contentExtent,
-        containerExtent: containerExtent,
-        scrollOffset: state.scrollOffset
-      ));
-    });
+    state.didUpdateScrollBehavior(state.scrollBehavior.updateExtents(
+      contentExtent: itemsWrap ? double.INFINITY : contentExtent,
+      containerExtent: containerExtent,
+      scrollOffset: state.scrollOffset
+    ));
   }
 
   Widget _buildViewport(BuildContext context, ScrollableState state, double scrollOffset) {
@@ -428,13 +426,11 @@ class ScrollableLazyList extends StatelessWidget {
   final EdgeInsets padding;
 
   void _handleExtentsChanged(ScrollableState state, double contentExtent, double containerExtent) {
-    state.setState(() {
-      state.didUpdateScrollBehavior(state.scrollBehavior.updateExtents(
-        contentExtent: contentExtent,
-        containerExtent: containerExtent,
-        scrollOffset: state.scrollOffset
-      ));
-    });
+    state.didUpdateScrollBehavior(state.scrollBehavior.updateExtents(
+      contentExtent: contentExtent,
+      containerExtent: containerExtent,
+      scrollOffset: state.scrollOffset
+    ));
   }
 
   Widget _buildViewport(BuildContext context, ScrollableState state, double scrollOffset) {
