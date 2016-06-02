@@ -587,3 +587,10 @@ class _FireworksNode extends NodeWithSize {
     addChild(system);
   }
 }
+
+void main() {
+  runApp(new MaterialApp(
+    title: 'Fitness',
+    home: new FitnessDemo()
+  ));
+}
