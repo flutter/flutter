@@ -557,3 +557,10 @@ class Snow extends Node {
     }
   }
 }
+
+void main() {
+  runApp(new MaterialApp(
+    title: 'Weather',
+    home: new WeatherDemo()
+  ));
+}
