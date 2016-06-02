@@ -118,6 +118,9 @@ class PictureLayer extends Layer {
 
 /// (mojo-only) A layer that represents content from another process.
 class ChildSceneLayer extends Layer {
+  /// Creates a layer that displays content rendered by another process.
+  ///
+  /// All of the arguments must not be null.
   ChildSceneLayer({
     this.offset,
     this.devicePixelRatio,
@@ -126,10 +129,19 @@ class ChildSceneLayer extends Layer {
     this.sceneToken
   });
 
+  /// Offset from parent in the parent's coordinate system.
   Offset offset;
+
+  /// The number of physical pixels the child should produce for each logical pixel.
   double devicePixelRatio;
+
+  /// The horizontal extent of the child, in physical pixels.
   int physicalWidth;
+
+  /// The vertical extent of the child, in physical pixels.
   int physicalHeight;
+
+  /// The composited scene that will contain the content rendered by the child.
   mojom.SceneToken sceneToken;
 
   @override

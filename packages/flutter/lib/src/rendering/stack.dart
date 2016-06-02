@@ -5,6 +5,8 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble, hashValues;
 
+import 'package:meta/meta.dart';
+
 import 'box.dart';
 import 'object.dart';
 
@@ -197,10 +199,50 @@ class StackParentData extends ContainerBoxParentDataMixin<RenderBox> {
   }
 }
 
-abstract class RenderStackBase extends RenderBox
+/// Implements the stack layout algorithm
+///
+/// In a stack layout, the children are positioned on top of each other in the
+/// order in which they appear in the child list. First, the non-positioned
+/// children (those with null values for top, right, bottom, and left) are
+/// laid out and initially placed in the upper-left corner of the stack. The
+/// stack is then sized to enclose all of the non-positioned children. If there
+/// are no non-positioned children, the stack becomes as large as possible.
+///
+/// The final location of non-positioned children is determined by the alignment
+/// parameter. The left of each non-positioned child becomes the
+/// difference between the child's width and the stack's width scaled by
+/// alignment.x. The top of each non-positioned child is computed
+/// similarly and scaled by alignment.y. So if the alignment x and y properties
+/// are 0.0 (the default) then the non-positioned children remain in the
+/// upper-left corner. If the alignment x and y properties are 0.5 then the
+/// non-positioned children are centered within the stack.
+///
+/// Next, the positioned children are laid out. If a child has top and bottom
+/// values that are both non-null, the child is given a fixed height determined
+/// by subtracting the sum of the top and bottom values from the height of the stack.
+/// Similarly, if the child has right and left values that are both non-null,
+/// the child is given a fixed width derived from the stack's width.
+/// Otherwise, the child is given unbounded constraints in the non-fixed dimensions.
+///
+/// Once the child is laid out, the stack positions the child
+/// according to the top, right, bottom, and left properties of their
+/// [StackParentData]. For example, if the bottom value is 10.0, the
+/// bottom edge of the child will be inset 10.0 pixels from the bottom
+/// edge of the stack. If the child extends beyond the bounds of the
+/// stack, the stack will clip the child's painting to the bounds of
+/// the stack.
+///
+/// See also:
+///
+///  * [RenderFlow]
+class RenderStack extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, StackParentData>,
          RenderBoxContainerDefaultsMixin<RenderBox, StackParentData> {
-  RenderStackBase({
+  /// Creates a stack render object.
+  ///
+  /// By default, the non-positioned children of the stack are aligned by their
+  /// top left corners.
+  RenderStack({
     List<RenderBox> children,
     FractionalOffset alignment: FractionalOffset.topLeft
   }) : _alignment = alignment {
@@ -215,6 +257,12 @@ abstract class RenderStackBase extends RenderBox
       child.parentData = new StackParentData();
   }
 
+  /// How to align the non-positioned children in the stack.
+  ///
+  /// The non-positioned children are placed relative to each other such that
+  /// the points determined by [alignment] are co-located. For example, if the
+  /// [alignment] is [FractionalOffset.topLeft], then the top left corner of
+  /// each non-positioned child will be located at the same global coordinate.
   FractionalOffset get alignment => _alignment;
   FractionalOffset _alignment;
   set alignment (FractionalOffset value) {
@@ -350,7 +398,14 @@ abstract class RenderStackBase extends RenderBox
     return defaultHitTestChildren(result, position: position);
   }
 
-  void paintStack(PaintingContext context, Offset offset);
+  /// Override in subclasses to customize how the stack paints.
+  ///
+  /// By default, the stack uses [defaultPaint]. This function is called by
+  /// [paint] after potentially applying a clip to contain visual overflow.
+  @protected
+  void paintStack(PaintingContext context, Offset offset) {
+    defaultPaint(context, offset);
+  }
 
   @override
   void paint(PaintingContext context, Offset offset) {
@@ -365,63 +420,15 @@ abstract class RenderStackBase extends RenderBox
   Rect describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Point.origin & size : null;
 }
 
-/// Implements the stack layout algorithm
-///
-/// In a stack layout, the children are positioned on top of each other in the
-/// order in which they appear in the child list. First, the non-positioned
-/// children (those with null values for top, right, bottom, and left) are
-/// laid out and initially placed in the upper-left corner of the stack. The
-/// stack is then sized to enclose all of the non-positioned children. If there
-/// are no non-positioned children, the stack becomes as large as possible.
-///
-/// The final location of non-positioned children is determined by the alignment
-/// parameter. The left of each non-positioned child becomes the
-/// difference between the child's width and the stack's width scaled by
-/// alignment.x. The top of each non-positioned child is computed
-/// similarly and scaled by alignment.y. So if the alignment x and y properties
-/// are 0.0 (the default) then the non-positioned children remain in the
-/// upper-left corner. If the alignment x and y properties are 0.5 then the
-/// non-positioned children are centered within the stack.
-///
-/// Next, the positioned children are laid out. If a child has top and bottom
-/// values that are both non-null, the child is given a fixed height determined
-/// by subtracting the sum of the top and bottom values from the height of the stack.
-/// Similarly, if the child has right and left values that are both non-null,
-/// the child is given a fixed width derived from the stack's width.
-/// Otherwise, the child is given unbounded constraints in the non-fixed dimensions.
-///
-/// Once the child is laid out, the stack positions the child
-/// according to the top, right, bottom, and left properties of their
-/// [StackParentData]. For example, if the bottom value is 10.0, the
-/// bottom edge of the child will be inset 10.0 pixels from the bottom
-/// edge of the stack. If the child extends beyond the bounds of the
-/// stack, the stack will clip the child's painting to the bounds of
-/// the stack.
-///
-/// See also:
-///
-///  * [RenderFlow]
-class RenderStack extends RenderStackBase {
-  RenderStack({
-    List<RenderBox> children,
-    FractionalOffset alignment: FractionalOffset.topLeft
-  }) : super(
-   children: children,
-   alignment: alignment
- );
-
-  @override
-  void paintStack(PaintingContext context, Offset offset) {
-    defaultPaint(context, offset);
-  }
-}
-
 /// Implements the same layout algorithm as RenderStack but only paints the child
 /// specified by index.
 ///
 /// Although only one child is displayed, the cost of the layout algorithm is
 /// still O(N), like an ordinary stack.
-class RenderIndexedStack extends RenderStackBase {
+class RenderIndexedStack extends RenderStack {
+  /// Creates a stack render object that paints a single child.
+  ///
+  /// The [index] argument must not be null.
   RenderIndexedStack({
     List<RenderBox> children,
     FractionalOffset alignment: FractionalOffset.topLeft,
@@ -433,6 +440,7 @@ class RenderIndexedStack extends RenderStackBase {
     assert(index != null);
   }
 
+  /// The index of the child to show.
   int get index => _index;
   int _index;
   set index (int value) {

@@ -1988,6 +1988,9 @@ class RenderMetaData extends RenderProxyBoxWithHitTestBehavior {
 /// Listens for the specified gestures from the semantics server (e.g.
 /// an accessibility tool).
 class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticActionHandler {
+  /// Creates a render object that listens for specific semantic gestures.
+  ///
+  /// The [scrollFactor] argument must not be null.
   RenderSemanticsGestureHandler({
     RenderBox child,
     GestureTapCallback onTap,
@@ -2001,6 +2004,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
        _onVerticalDragUpdate = onVerticalDragUpdate,
        super(child);
 
+   /// Called when the user taps on the render object.
   GestureTapCallback get onTap => _onTap;
   GestureTapCallback _onTap;
   set onTap(GestureTapCallback value) {
@@ -2013,6 +2017,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
       markNeedsSemanticsUpdate(onlyChanges: hasSemantics == didHaveSemantics);
   }
 
+  /// Called when the user presses on the render object for a long period of time.
   GestureLongPressCallback get onLongPress => _onLongPress;
   GestureLongPressCallback _onLongPress;
   set onLongPress(GestureLongPressCallback value) {
@@ -2025,6 +2030,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
       markNeedsSemanticsUpdate(onlyChanges: hasSemantics == didHaveSemantics);
   }
 
+  /// Called when the user scrolls to the left or to the right.
   GestureDragUpdateCallback get onHorizontalDragUpdate => _onHorizontalDragUpdate;
   GestureDragUpdateCallback _onHorizontalDragUpdate;
   set onHorizontalDragUpdate(GestureDragUpdateCallback value) {
@@ -2037,6 +2043,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
       markNeedsSemanticsUpdate(onlyChanges: hasSemantics == didHaveSemantics);
   }
 
+  /// Called when the user scrolls up or down.
   GestureDragUpdateCallback get onVerticalDragUpdate => _onVerticalDragUpdate;
   GestureDragUpdateCallback _onVerticalDragUpdate;
   set onVerticalDragUpdate(GestureDragUpdateCallback value) {
@@ -2113,8 +2120,11 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
   }
 }
 
-/// Add annotations to the SemanticsNode for this subtree.
+/// Add annotations to the [SemanticsNode] for this subtree.
 class RenderSemanticAnnotations extends RenderProxyBox {
+  /// Creates a render object that attaches a semantic annotation.
+  ///
+  /// The [container] argument must not be null.
   RenderSemanticAnnotations({
     RenderBox child,
     bool container: false,
@@ -2197,6 +2207,7 @@ class RenderSemanticAnnotations extends RenderProxyBox {
 /// form part of a single conceptual widget, e.g. a checkbox, a label,
 /// and the gesture detector that goes with them.
 class RenderMergeSemantics extends RenderProxyBox {
+  /// Creates a render object that merges the semantics from its descendants.
   RenderMergeSemantics({ RenderBox child }) : super(child);
 
   @override
@@ -2210,6 +2221,7 @@ class RenderMergeSemantics extends RenderProxyBox {
 /// Useful e.g. for hiding text that is redundant with other text next
 /// to it (e.g. text included only for the visual effect).
 class RenderExcludeSemantics extends RenderProxyBox {
+  /// Creates a render object that ignores the semantics of its subtree.
   RenderExcludeSemantics({ RenderBox child }) : super(child);
 
   @override

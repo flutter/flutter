@@ -343,6 +343,17 @@ abstract class SchedulerBinding extends BindingBase {
   bool get isProducingFrame => _isProducingFrame;
   bool _isProducingFrame = false;
 
+  /// Schedules a new frame using [scheduleFrame] if this object is not
+  /// currently producing a frame.
+  ///
+  /// After this is called, the framework ensures that the end of the
+  /// [handleBeginFrame] function will (eventually) be reached.
+  void ensureVisualUpdate() {
+    if (_isProducingFrame)
+      return;
+    scheduleFrame();
+  }
+
   /// If necessary, schedules a new frame by calling
   /// [ui.window.scheduleFrame].
   ///
@@ -350,12 +361,6 @@ abstract class SchedulerBinding extends BindingBase {
   /// [handleBeginFrame]. (This call might be delayed, e.g. if the
   /// device's screen is turned off it will typically be delayed until
   /// the screen is on and the application is visible.)
-  void ensureVisualUpdate() {
-    if (_isProducingFrame)
-      return;
-    scheduleFrame();
-  }
-
   void scheduleFrame() {
     if (_hasScheduledFrame)
       return;

@@ -1415,14 +1415,6 @@ class BlockBody extends MultiChildRenderObjectWidget {
   }
 }
 
-/// A base class for widgets that accept [Positioned] children.
-abstract class StackRenderObjectWidgetBase extends MultiChildRenderObjectWidget {
-  StackRenderObjectWidgetBase({
-    List<Widget> children: _emptyWidgetList,
-    Key key
-  }) : super(key: key, children: children);
-}
-
 /// Uses the stack layout algorithm for its children.
 ///
 /// This class is useful if you want to overlap several children in a
@@ -1446,7 +1438,11 @@ abstract class StackRenderObjectWidgetBase extends MultiChildRenderObjectWidget 
 ///    the child according to a [FractionalOffset] value)
 ///  * [CustomSingleChildLayout]
 ///  * [CustomMultiChildLayout]
-class Stack extends StackRenderObjectWidgetBase {
+class Stack extends MultiChildRenderObjectWidget {
+  /// Creates a stack widget.
+  ///
+  /// By default, the non-positioned children of the stack are aligned by their
+  /// top left corners.
   Stack({
     Key key,
     List<Widget> children: _emptyWidgetList,
@@ -1454,6 +1450,11 @@ class Stack extends StackRenderObjectWidgetBase {
   }) : super(key: key, children: children);
 
   /// How to align the non-positioned children in the stack.
+  ///
+  /// The non-positioned children are placed relative to each other such that
+  /// the points determined by [alignment] are co-located. For example, if the
+  /// [alignment] is [FractionalOffset.topLeft], then the top left corner of
+  /// each non-positioned child will be located at the same global coordinate.
   final FractionalOffset alignment;
 
   @override
@@ -1466,21 +1467,21 @@ class Stack extends StackRenderObjectWidgetBase {
 }
 
 /// A [Stack] that shows a single child from a list of children.
-class IndexedStack extends StackRenderObjectWidgetBase {
+class IndexedStack extends Stack {
+  /// Creates a stack widget that paints a single child.
+  ///
+  /// The [index] argument must not be null.
   IndexedStack({
     Key key,
     List<Widget> children: _emptyWidgetList,
-    this.alignment: FractionalOffset.topLeft,
+    FractionalOffset alignment: FractionalOffset.topLeft,
     this.index: 0
-  }) : super(key: key, children: children) {
+  }) : super(key: key, alignment: alignment, children: children) {
     assert(index != null);
   }
 
   /// The index of the child to show.
   final int index;
-
-  /// How to align the non-positioned children in the stack.
-  final FractionalOffset alignment;
 
   @override
   RenderIndexedStack createRenderObject(BuildContext context) => new RenderIndexedStack(index: index, alignment: alignment);
@@ -1498,7 +1499,7 @@ class IndexedStack extends StackRenderObjectWidgetBase {
 /// This widget must be a descendant of a [Stack], and the path from this widget
 /// to its enclosing [Stack] must contain only [StatelessWidget]s or
 /// [StatefulWidget]s (not other kinds of widgets, like [RenderObjectWidget]s).
-class Positioned extends ParentDataWidget<StackRenderObjectWidgetBase> {
+class Positioned extends ParentDataWidget<Stack> {
   /// Creates a Positioned object with the given values.
   ///
   /// Only two out of the three horizontal values ([left], [right],
