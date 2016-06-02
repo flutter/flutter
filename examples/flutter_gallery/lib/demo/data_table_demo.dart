@@ -121,7 +121,7 @@ class DesertDataSource extends DataTableSource {
   int get rowCount => _deserts.length;
 
   @override
-  bool get isRowCountApproximate => true;
+  bool get isRowCountApproximate => false;
 }
 
 class DataTableDemo extends StatefulWidget {
@@ -132,6 +132,7 @@ class DataTableDemo extends StatefulWidget {
 }
 
 class _DataTableDemoState extends State<DataTableDemo> {
+  int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
   int _sortColumnIndex;
   bool _sortAscending = true;
   DesertDataSource _deserts = new DesertDataSource();
@@ -149,63 +150,57 @@ class _DataTableDemoState extends State<DataTableDemo> {
     return new Scaffold(
       appBar: new AppBar(title: new Text('Data tables')),
       body: new Block(
+        padding: const EdgeInsets.all(20.0),
         children: <Widget>[
-          new IntrinsicHeight(
-            child: new Block(
-              padding: const EdgeInsets.all(20.0),
-              scrollDirection: Axis.horizontal,
-              children: <Widget>[
-                new PaginatedDataTable(
-                  rowsPerPage: 10,
-                  sortColumnIndex: _sortColumnIndex,
-                  sortAscending: _sortAscending,
-                  columns: <DataColumn>[
-                    new DataColumn(
-                      label: new Text('Dessert (100g serving)'),
-                      onSort: (int columnIndex, bool ascending) => _sort/*<String>*/((Desert d) => d.name, columnIndex, ascending)
-                    ),
-                    new DataColumn(
-                      label: new Text('Calories'),
-                      tooltip: 'The total amount of food energy in the given serving size.',
-                      numeric: true,
-                      onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.calories, columnIndex, ascending)
-                    ),
-                    new DataColumn(
-                      label: new Text('Fat (g)'),
-                      numeric: true,
-                      onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.fat, columnIndex, ascending)
-                    ),
-                    new DataColumn(
-                      label: new Text('Carbs (g)'),
-                      numeric: true,
-                      onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.carbs, columnIndex, ascending)
-                    ),
-                    new DataColumn(
-                      label: new Text('Protein (g)'),
-                      numeric: true,
-                      onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.protein, columnIndex, ascending)
-                    ),
-                    new DataColumn(
-                      label: new Text('Sodium (mg)'),
-                      numeric: true,
-                      onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.sodium, columnIndex, ascending)
-                    ),
-                    new DataColumn(
-                      label: new Text('Calcium (%)'),
-                      tooltip: 'The amount of calcium as a percentage of the recommended daily amount.',
-                      numeric: true,
-                      onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.calcium, columnIndex, ascending)
-                    ),
-                    new DataColumn(
-                      label: new Text('Iron (%)'),
-                      numeric: true,
-                      onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.iron, columnIndex, ascending)
-                    ),
-                  ],
-                  source: _deserts
-                )
-              ]
-            )
+          new PaginatedDataTable(
+            rowsPerPage: _rowsPerPage,
+            onRowsPerPageChanged: (int value) { setState(() { _rowsPerPage = value; }); },
+            sortColumnIndex: _sortColumnIndex,
+            sortAscending: _sortAscending,
+            columns: <DataColumn>[
+              new DataColumn(
+                label: new Text('Dessert (100g serving)'),
+                onSort: (int columnIndex, bool ascending) => _sort/*<String>*/((Desert d) => d.name, columnIndex, ascending)
+              ),
+              new DataColumn(
+                label: new Text('Calories'),
+                tooltip: 'The total amount of food energy in the given serving size.',
+                numeric: true,
+                onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.calories, columnIndex, ascending)
+              ),
+              new DataColumn(
+                label: new Text('Fat (g)'),
+                numeric: true,
+                onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.fat, columnIndex, ascending)
+              ),
+              new DataColumn(
+                label: new Text('Carbs (g)'),
+                numeric: true,
+                onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.carbs, columnIndex, ascending)
+              ),
+              new DataColumn(
+                label: new Text('Protein (g)'),
+                numeric: true,
+                onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.protein, columnIndex, ascending)
+              ),
+              new DataColumn(
+                label: new Text('Sodium (mg)'),
+                numeric: true,
+                onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.sodium, columnIndex, ascending)
+              ),
+              new DataColumn(
+                label: new Text('Calcium (%)'),
+                tooltip: 'The amount of calcium as a percentage of the recommended daily amount.',
+                numeric: true,
+                onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.calcium, columnIndex, ascending)
+              ),
+              new DataColumn(
+                label: new Text('Iron (%)'),
+                numeric: true,
+                onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.iron, columnIndex, ascending)
+              ),
+            ],
+            source: _deserts
           )
         ]
       )

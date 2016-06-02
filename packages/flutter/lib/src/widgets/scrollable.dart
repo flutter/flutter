@@ -721,10 +721,11 @@ class ScrollNotification extends Notification {
 ///
 /// See also:
 ///
-///  * [ScrollableList]
-///  * [PageableList]
-///  * [ScrollableGrid]
-///  * [LazyBlock]
+///  * [ScrollableList], if you have many identically-sized children.
+///  * [PageableList], if you have children that each take the entire screen.
+///  * [ScrollableGrid], if your children are in a grid pattern.
+///  * [LazyBlock], if you have many children of varying sizes.
+///  * [Block], if your single child is a [BlockBody] or a [Column].
 class ScrollableViewport extends StatelessWidget {
   /// Creates a simple scrolling widget that has a single child.
   ///
@@ -849,14 +850,18 @@ class ScrollableViewport extends StatelessWidget {
 /// arrange in a block layout and that might exceed the height of its container
 /// (and therefore need to scroll).
 ///
-/// If you have a large number of children, consider using [LazyBlock] (if the
-/// children have variable height) or [ScrollableList] (if the children all have
-/// the same fixed height).
+/// If you have a large number of children, or if you always expect this to need
+/// to scroll, consider using [LazyBlock] (if the children have variable height)
+/// or [ScrollableList] (if the children all have the same fixed height), as
+/// they avoid doing work for children that are not visible.
+///
+/// If you have a single child, then use [ScrollableViewport] directly.
 ///
 /// See also:
 ///
-///  * [ScrollableList]
-///  * [LazyBlock]
+///  * [ScrollableViewport], if you only have one child
+///  * [ScrollableList], if all your children are the same height
+///  * [LazyBlock], if you have children with varying heights
 class Block extends StatelessWidget {
   /// Creates a scrollable array of children.
   Block({
