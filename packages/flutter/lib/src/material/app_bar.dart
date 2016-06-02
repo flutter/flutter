@@ -183,7 +183,7 @@ class AppBar extends StatelessWidget {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
     final ThemeData theme = Theme.of(context);
 
-    IconThemeData iconTheme = theme.primaryIconTheme;
+    IconThemeData iconTheme = IconTheme.of(context) ?? theme.primaryIconTheme;
     TextStyle centerStyle = textTheme?.title ?? theme.primaryTextTheme.title;
     TextStyle sideStyle = textTheme?.body1 ?? theme.primaryTextTheme.body1;
 

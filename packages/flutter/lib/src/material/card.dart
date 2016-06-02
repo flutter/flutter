@@ -17,8 +17,9 @@ class Card extends StatelessWidget {
   /// Creates a material design card.
   const Card({
     Key key,
-    this.child,
-    this.color
+    this.color,
+    this.elevation: 2,
+    this.child
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
@@ -27,6 +28,9 @@ class Card extends StatelessWidget {
   /// The color of material used for this card.
   final Color color;
 
+  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
+  final int elevation;
+
   @override
   Widget build(BuildContext context) {
     return new Container(
@@ -34,7 +38,7 @@ class Card extends StatelessWidget {
       child: new Material(
         color: color,
         type: MaterialType.card,
-        elevation: 2,
+        elevation: elevation,
         child: child
       )
     );

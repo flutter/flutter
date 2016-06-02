@@ -39,3 +39,7 @@ assets:
   - packages/flutter_gallery_assets/landscape_11.jpg
   - packages/flutter_gallery_assets/shadow.png
   - lib/gallery/example_code.dart
+fonts:
+  - family: AbrilFatface
+    fonts:
+      - asset: packages/flutter_gallery_assets/shrine/fonts/abrilfatface/AbrilFatface-Regular.ttf
