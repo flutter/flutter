@@ -13,7 +13,9 @@ bool get isRunningOnBot {
   // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
   return
     Platform.environment['TRAVIS'] == 'true' ||
-    Platform.environment['CONTINUOUS_INTEGRATION'] == 'true';
+    Platform.environment['CONTINUOUS_INTEGRATION'] == 'true' ||
+  // CHORME_HEADLESS is one property set on Flutter's Chrome Infra bots.
+    Platform.environment['CHORME_HEADLESS'] == '1';
 }
 
 String hex(List<int> bytes) {
