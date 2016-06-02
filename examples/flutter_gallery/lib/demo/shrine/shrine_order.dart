@@ -131,7 +131,7 @@ class OrderPage extends StatefulWidget {
 }
 
 /// Displays a product's OrderItem above photos of all of the other products
-/// arranged in two columns. Enables used to specify a quantity and add an
+/// arranged in two columns. Enables the user to specify a quantity and add an
 /// order to the shopping cart.
 class _OrderPageState extends State<OrderPage> {
   final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>(debugLabel: 'Order Page');
