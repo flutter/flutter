@@ -7,7 +7,6 @@ import 'package:flutter/widgets.dart';
 
 import '../demo/all.dart';
 import 'drawer.dart';
-import 'header.dart';
 import 'item.dart';
 
 const double _kFlexibleSpaceMaxHeight = 256.0;
@@ -60,8 +59,7 @@ class GalleryHomeState extends State<GalleryHome> {
       appBar: new AppBar(
         expandedHeight: _kFlexibleSpaceMaxHeight,
         flexibleSpace: new FlexibleSpaceBar(
-          title: new Text('Flutter gallery'),
-          background: new GalleryHeader()
+          title: new Text('Flutter gallery')
         )
       ),
       appBarBehavior: AppBarBehavior.under,
