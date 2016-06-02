@@ -84,10 +84,10 @@ void main() {
     layout(table);
     table.setFlatChildren(3, <RenderBox>[new RenderPositionedBox(), child1, new RenderPositionedBox(),
                                          child2, new RenderPositionedBox(), child3]);
-    layout(table);
+    pumpFrame();
     table.setFlatChildren(3, <RenderBox>[new RenderPositionedBox(), child1, new RenderPositionedBox(),
                                          child2, new RenderPositionedBox(), child3]);
-    layout(table);
+    pumpFrame();
     expect(table.columns, equals(3));
     expect(table.rows, equals(2));
   });

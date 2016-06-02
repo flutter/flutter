@@ -46,7 +46,8 @@ TestRenderingFlutterBinding _renderer;
 TestRenderingFlutterBinding get renderer => _renderer;
 
 void layout(RenderBox box, { BoxConstraints constraints, EnginePhase phase: EnginePhase.layout }) {
-  assert(box != null); // if you want to just repump the last box, call pumpFrame().
+  assert(box != null); // If you want to just repump the last box, call pumpFrame().
+  assert(box.parent == null); // We stick the box in another, so you can't reuse it easily, sorry.
 
   _renderer ??= new TestRenderingFlutterBinding();
 
