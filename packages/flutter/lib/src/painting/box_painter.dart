@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui show Image, Gradient, lerpDouble;
 
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 
 import 'basic_types.dart';
 import 'decoration.dart';
@@ -761,10 +762,41 @@ Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, Im
 }
 
 /// Paints an image into the given rectangle in the canvas.
+///
+///  * `canvas`: The canvas onto which the image will be painted.
+///  * `rect`: The region of the canvas into which the image will be painted.
+///    The image might not fill the entire rectangle (e.g., depending on the
+///    `fit`).
+///  * `image`: The image to paint onto the canvas.
+///  * `colorFilter`: If non-null, the color filter to apply when painting the
+///    image.
+///  * `fit`: How the image should be inscribed into `rect`. If null, the
+///    default behavior depends on `centerSlice`. If `centerSlice` is also null,
+///    the default behavior is [ImageFit.scaleDown]. If `centerSlice` is
+///    non-null, the default behavior is [ImageFit.fill]. See [ImageFit] for
+///    details.
+///  * `repeat`: If the image does not fill `rect`, whether and how the image
+///    should be repeated to fill `rect`. By default, the image is not repeated.
+///    See [ImageRepeat] for details.
+///  * `centerSlice`: The image is drawn in nine portions described by splitting
+///    the image by drawing two horizontal lines and two vertical lines, where
+///    `centerSlice` describes the rectangle formed by the four points where
+///    these four lines intersect each other. (This forms a 3-by-3 grid
+///    of regions, the center region being described by `centerSlice`.)
+///    The four regions in the corners are drawn, without scaling, in the four
+///    corners of the destination rectangle defined by applying `fit`. The
+///    remaining five regions are drawn by stretching them to fit such that they
+///    exactly cover the destination rectangle while maintaining their relative
+///    positions.
+///  * `alignment`: How the destination rectangle defined by applying `fit` is
+///    aligned within `rect`. For example, if `fit` is [ImageFit.contain] and
+///    `alignment` is [FractionalOffset.bottomRight], the image will be as large
+///    as possible within `rect` and placed with its bottom right corner at the
+///    bottom right corner of `rect`.
 void paintImage({
-  Canvas canvas,
-  Rect rect,
-  ui.Image image,
+  @required Canvas canvas,
+  @required Rect rect,
+  @required ui.Image image,
   ColorFilter colorFilter,
   ImageFit fit,
   ImageRepeat repeat: ImageRepeat.noRepeat,
