@@ -43,6 +43,7 @@ void FlutterInit(int argc, const char* argv[]) {
 @implementation FlutterViewController {
   base::scoped_nsprotocol<FlutterDartProject*> _dartProject;
   UIInterfaceOrientationMask _orientationPreferences;
+  UIStatusBarStyle _statusBarStyle;
   base::scoped_nsprotocol<FlutterDynamicServiceLoader*> _dynamicServiceLoader;
   sky::ViewportMetricsPtr _viewportMetrics;
   sky::shell::TouchMapper _touchMapper;
@@ -87,6 +88,7 @@ void FlutterInit(int argc, const char* argv[]) {
   _initialized = YES;
 
   _orientationPreferences = UIInterfaceOrientationMaskAll;
+  _statusBarStyle = UIStatusBarStyleDefault;
   _dynamicServiceLoader.reset([[FlutterDynamicServiceLoader alloc] init]);
   _viewportMetrics = sky::ViewportMetrics::New();
   _shellView =
@@ -114,6 +116,11 @@ void FlutterInit(int argc, const char* argv[]) {
   [center addObserver:self
              selector:@selector(onOrientationPreferencesUpdated:)
                  name:@(flutter::platform::kOrientationUpdateNotificationName)
+               object:nil];
+
+  [center addObserver:self
+             selector:@selector(onPreferredStatusBarStyleUpdated:)
+                 name:@(flutter::platform::kOverlayStyleUpdateNotificationName)
                object:nil];
 
   [center addObserver:self
@@ -450,13 +457,36 @@ static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
   [super viewWillDisappear:animated];
 }
 
-- (UIStatusBarStyle)preferredStatusBarStyle {
-  return UIStatusBarStyleLightContent;
-}
-
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [super dealloc];
+}
+
+#pragma mark - Status bar style
+
+- (UIStatusBarStyle)preferredStatusBarStyle {
+  return _statusBarStyle;
+}
+
+- (void)onPreferredStatusBarStyleUpdated:(NSNotification*)notification {
+  // Notifications may not be on the iOS UI thread
+  dispatch_async(dispatch_get_main_queue(), ^{
+    NSDictionary* info = notification.userInfo;
+
+    NSNumber* update =
+        info[@(flutter::platform::kOverlayStyleUpdateNotificationKey)];
+
+    if (update == nil) {
+      return;
+    }
+
+    NSInteger style = update.integerValue;
+
+    if (style != _statusBarStyle) {
+      _statusBarStyle = static_cast<UIStatusBarStyle>(style);
+      [self setNeedsStatusBarAppearanceUpdate];
+    }
+  });
 }
 
 #pragma mark - Application Messages
@@ -497,14 +527,16 @@ static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
   _appMessageReceiver.SetMessageListener(messageName.UTF8String, nil);
 }
 
-- (void)addAsyncMessageListener:(NSObject<FlutterAsyncMessageListener>*)listener {
+- (void)addAsyncMessageListener:
+    (NSObject<FlutterAsyncMessageListener>*)listener {
   NSAssert(listener, @"The listener must not be null");
   NSString* messageName = listener.messageName;
   NSAssert(messageName, @"The messageName must not be null");
   _appMessageReceiver.SetAsyncMessageListener(messageName.UTF8String, listener);
 }
 
-- (void)removeAsyncMessageListener:(NSObject<FlutterAsyncMessageListener>*)listener {
+- (void)removeAsyncMessageListener:
+    (NSObject<FlutterAsyncMessageListener>*)listener {
   NSAssert(listener, @"The listener must not be null");
   NSString* messageName = listener.messageName;
   NSAssert(messageName, @"The messageName must not be null");

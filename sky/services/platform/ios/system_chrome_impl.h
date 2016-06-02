@@ -22,9 +22,17 @@ class SystemChromeImpl : public SystemChrome {
       uint32_t device_orientation_mask,
       const SetPreferredOrientationsCallback& callback) override;
 
+  void SetApplicationSwitcherDescription(
+      ApplicationSwitcherDescriptionPtr description,
+      const SetApplicationSwitcherDescriptionCallback& callback) override;
+
   void SetEnabledSystemUIOverlays(
       uint32_t overlays,
       const SetEnabledSystemUIOverlaysCallback& callback) override;
+
+  void SetSystemUIOverlayStyle(
+      SystemUIOverlayStyle style,
+      const SetSystemUIOverlayStyleCallback& callback) override;
 
  private:
   mojo::StrongBinding<SystemChrome> binding_;
@@ -34,6 +42,8 @@ class SystemChromeImpl : public SystemChrome {
 
 extern const char* const kOrientationUpdateNotificationName;
 extern const char* const kOrientationUpdateNotificationKey;
+extern const char* const kOverlayStyleUpdateNotificationName;
+extern const char* const kOverlayStyleUpdateNotificationKey;
 
 }  // namespace platform
 }  // namespace flutter

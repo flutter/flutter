@@ -4,6 +4,7 @@
 
 #include "sky/services/platform/ios/system_chrome_impl.h"
 #include "base/mac/scoped_nsautorelease_pool.h"
+#include <UIKit/UIApplication.h>
 #include <UIKit/UIKit.h>
 
 namespace flutter {
@@ -59,8 +60,15 @@ void SystemChromeImpl::SetPreferredOrientations(
   callback.Run(true);
 }
 
+void SystemChromeImpl::SetApplicationSwitcherDescription(
+    ApplicationSwitcherDescriptionPtr description,
+    const SetApplicationSwitcherDescriptionCallback& callback) {
+  // No counterpart on iOS but is a benign operation. So no asserts.
+  callback.Run(true);
+}
+
 void SystemChromeImpl::SetEnabledSystemUIOverlays(
-    uint32_t overlays,
+    uint32_t overlay_mask,
     const SetEnabledSystemUIOverlaysCallback& callback) {
   // Checks if the top status bar should be visible. This platform ignores all
   // other overlays
@@ -71,15 +79,56 @@ void SystemChromeImpl::SetEnabledSystemUIOverlays(
   // to be able to modify this on the fly. The key used is
   // UIViewControllerBasedStatusBarAppearance
   [UIApplication sharedApplication].statusBarHidden =
-      !IsSet(overlays, SystemUIOverlay::Top);
+      !IsSet(overlay_mask, SystemUIOverlay::Top);
+
+  callback.Run(true);
+}
+
+void SystemChromeImpl::SetSystemUIOverlayStyle(
+    SystemUIOverlayStyle style,
+    const SetSystemUIOverlayStyleCallback& callback) {
+  base::mac::ScopedNSAutoreleasePool pool;
+
+  UIStatusBarStyle statusBarStyle;
+  switch (style) {
+    case SystemUIOverlayStyle::Light:
+      statusBarStyle = UIStatusBarStyleLightContent;
+      break;
+    case SystemUIOverlayStyle::Dark:
+      statusBarStyle = UIStatusBarStyleDefault;
+      break;
+  }
+
+  NSNumber* infoValue = [[NSBundle mainBundle]
+      objectForInfoDictionaryKey:@"UIViewControllerBasedStatusBarAppearance"];
+  Boolean delegateToViewController =
+      (infoValue == nil || [infoValue boolValue]);
+
+  if (delegateToViewController) {
+    // This notification is respected by the iOS embedder
+    [[NSNotificationCenter defaultCenter]
+        postNotificationName:@(kOverlayStyleUpdateNotificationName)
+                      object:nil
+                    userInfo:@{
+                      @(kOverlayStyleUpdateNotificationKey) : @(statusBarStyle)
+                    }];
+  } else {
+    // Note: -[UIApplication setStatusBarStyle] is deprecated in iOS9
+    // in favor of delegating to the view controller
+    [[UIApplication sharedApplication] setStatusBarStyle:statusBarStyle];
+  }
 
   callback.Run(true);
 }
 
 const char* const kOrientationUpdateNotificationName =
-    "SystemChromeOrientationNotificationName";
+    "io.flutter.SystemChromeOrientationNotificationName";
 const char* const kOrientationUpdateNotificationKey =
-    "SystemChromeOrientationNotificationName";
+    "io.flutter.SystemChromeOrientationNotificationKey";
+const char* const kOverlayStyleUpdateNotificationName =
+    "io.flutter.SystemChromeOverlayNotificationName";
+const char* const kOverlayStyleUpdateNotificationKey =
+    "io.flutter.SystemChromeOverlayNotificationKey";
 
 }  // namespace platform
 }  // namespace flutter

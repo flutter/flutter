@@ -6,9 +6,11 @@ package org.domokit.platform;
 
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
+import android.os.Build;
 import android.view.View;
 
 import org.chromium.mojo.system.MojoException;
+import org.chromium.mojom.flutter.platform.ApplicationSwitcherDescription;
 import org.chromium.mojom.flutter.platform.DeviceOrientation;
 import org.chromium.mojom.flutter.platform.SystemChrome;
 import org.chromium.mojom.flutter.platform.SystemUiOverlay;
@@ -55,6 +57,31 @@ public class SystemChromeImpl implements SystemChrome {
     }
 
     @Override
+    public void setApplicationSwitcherDescription(
+        ApplicationSwitcherDescription description,
+        SetApplicationSwitcherDescriptionResponse callback) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            callback.call(true);
+            return;
+        }
+
+        int color = description.primaryColor;
+        if (color != 0) { // 0 means color isn't set, use system default
+            color = color | 0xFF000000; // color must be opaque if set
+        }
+
+        mActivity.setTaskDescription(
+            new android.app.ActivityManager.TaskDescription(
+                description.label,
+                null,
+                color
+            )
+        );
+
+        callback.call(true);
+    }
+
+    @Override
     public void setEnabledSystemUiOverlays(int overlays,
                                            SetEnabledSystemUiOverlaysResponse callback) {
         int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
@@ -69,6 +96,14 @@ public class SystemChromeImpl implements SystemChrome {
         }
 
         mActivity.getWindow().getDecorView().setSystemUiVisibility(flags);
+        callback.call(true);
+    }
+
+    @Override
+    public void setSystemUiOverlayStyle(int style, SetSystemUiOverlayStyleResponse callback) {
+        // You can change the navigation bar color (including translucent colors)
+        // in Android, but you can't change the color of the navigation buttons,
+        // so LIGHT vs DARK effectively isn't supported in Android.
         callback.call(true);
     }
 }
