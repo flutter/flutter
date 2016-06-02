@@ -10,7 +10,6 @@ export 'colors_demo.dart';
 export 'data_table_demo.dart';
 export 'date_picker_demo.dart';
 export 'dialog_demo.dart';
-export 'drawing_demo.dart';
 export 'drop_down_demo.dart';
 export 'fitness_demo.dart';
 export 'flexible_space_demo.dart';
