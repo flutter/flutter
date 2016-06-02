@@ -83,7 +83,7 @@ class Observatory {
     if (isolates.isNotEmpty)
       return isolates.first;
 
-    _waitFirstIsolateCompleter = new Completer<IsolateRef>();
+    _waitFirstIsolateCompleter ??= new Completer<IsolateRef>();
 
     getVM().then((VM vm) {
       for (IsolateRef isolate in vm.isolates)
