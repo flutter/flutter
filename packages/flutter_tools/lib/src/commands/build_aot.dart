@@ -107,7 +107,7 @@ Future<String> _buildAotSnapshot(
   String outputPath: _kDefaultAotOutputDir,
   bool interpreter: false
 }) async {
-  if (!isAotBuildMode(buildMode)) {
+  if (!isAotBuildMode(buildMode) && !interpreter) {
     printError('${toTitleCase(getModeName(buildMode))} mode does not support AOT compilation.');
     return null;
   }

@@ -57,17 +57,23 @@ BuildApp() {
     local_engine_flag="--local-engine=$LOCAL_ENGINE"
   fi
 
+  local flutter_mode="release"
+  if [[ -n "$FLUTTER_MODE" ]]; then
+    flutter_mode=${FLUTTER_MODE}
+  fi
+
   if [[ $CURRENT_ARCH != "x86_64" ]]; then
-    local interpreter_flag="--interpreter"
-    if [[ "$DART_EXPERIMENTAL_INTERPRETER" != "1" ]]; then
-      interpreter_flag=""
+    local aot_flags=""
+    if [[ "$flutter_mode" == "debug" ]]; then
+      aot_flags="--interpreter --debug"
+    else
+      aot_flags="--${flutter_mode}"
     fi
 
     RunCommand ${FLUTTER_ROOT}/bin/flutter --suppress-analytics build aot \
       --target-platform=ios                                               \
       --target=${target_path}                                             \
-      --release                                                           \
-      ${interpreter_flag}                                                 \
+      ${aot_flags}                                                        \
       ${local_engine_flag}
 
     if [[ $? -ne 0 ]]; then
@@ -81,7 +87,7 @@ BuildApp() {
   fi
 
   local precompilation_flag=""
-  if [[ $CURRENT_ARCH != "x86_64" ]] && [[ "$DART_EXPERIMENTAL_INTERPRETER" != "1" ]]; then
+  if [[ $CURRENT_ARCH != "x86_64" ]] && [[ "$flutter_mode" != "debug" ]]; then
     precompilation_flag="--precompiled"
   fi
 
