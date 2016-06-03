@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 import 'package:mojo/core.dart' as core;
 
 import 'media_query.dart';
@@ -26,8 +27,11 @@ abstract class _AssetResolver { // ignore: one_member_abstracts
 // Wraps an underlying [AssetBundle] and forwards calls after resolving the
 // asset key.
 class _ResolvingAssetBundle extends CachingAssetBundle {
+  _ResolvingAssetBundle({ this.bundle, this.resolver }) {
+    assert(bundle != null);
+    assert(resolver != null);
+  }
 
-  _ResolvingAssetBundle({ this.bundle, this.resolver });
   final AssetBundle bundle;
   final _AssetResolver resolver;
 
@@ -197,22 +201,28 @@ class _ResolutionAwareAssetResolver extends _VariantAssetResolver {
 /// icons/2.0x/heart.png
 /// ```
 class AssetVendor extends StatefulWidget {
+  /// Creates a widget that establishes an asset resolution strategy for its descendants.
   AssetVendor({
     Key key,
-    this.bundle,
+    @required this.bundle,
     this.devicePixelRatio,
-    this.child,
-    this.imageDecoder: decodeImageFromDataPipe
-  }) : super(key: key);
+    this.imageDecoder: decodeImageFromDataPipe,
+    this.child
+  }) : super(key: key) {
+    assert(bundle != null);
+  }
 
+  /// The bundle from which to load the assets.
   final AssetBundle bundle;
 
+  /// If non-null, the device pixel ratio to assume when selecting assets.
   final double devicePixelRatio;
+
+  /// The function to use for decoding images.
+  final ImageDecoder imageDecoder;
 
   /// The widget below this widget in the tree.
   final Widget child;
-
-  final ImageDecoder imageDecoder;
 
   @override
   _AssetVendorState createState() => new _AssetVendorState();

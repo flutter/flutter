@@ -5,6 +5,7 @@
 import 'dart:collection';
 
 import 'package:flutter/rendering.dart';
+import 'package:meta/meta.dart';
 
 import 'debug.dart';
 import 'framework.dart';
@@ -239,8 +240,11 @@ class _TableElement extends RenderObjectElement {
 }
 
 class TableCell extends ParentDataWidget<Table> {
-  TableCell({ Key key, this.verticalAlignment, Widget child })
-    : super(key: key, child: child);
+  TableCell({
+    Key key,
+    this.verticalAlignment,
+    @required Widget child
+  }) : super(key: key, child: child);
 
   final TableCellVerticalAlignment verticalAlignment;
 

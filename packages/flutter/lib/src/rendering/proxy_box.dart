@@ -1093,8 +1093,8 @@ enum DecorationPosition {
 class RenderDecoratedBox extends RenderProxyBox {
   /// Creates a decorated box.
   ///
-  /// Both the [decoration] and the [position] arguments are required. By
-  /// default the decoration paints behind the child.
+  /// The [decoration] and [position] arguments must not be null. By default the
+  /// decoration paints behind the child.
   RenderDecoratedBox({
     Decoration decoration,
     DecorationPosition position: DecorationPosition.background,

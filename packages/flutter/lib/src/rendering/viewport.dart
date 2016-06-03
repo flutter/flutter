@@ -193,10 +193,10 @@ typedef Offset ViewportDimensionsChangeCallback(ViewportDimensions dimensions);
 
 /// A render object that's bigger on the inside.
 ///
-/// The child of a viewport can layout to a larger size than the viewport
-/// itself. If that happens, only a portion of the child will be visible through
-/// the viewport. The portion of the child that is visible can be controlled
-/// with the [paintOffset].
+/// The child of a viewport can layout to a larger size along the viewport's
+/// [mainAxis] than the viewport itself. If that happens, only a portion of the
+/// child will be visible through the viewport. The portion of the child that is
+/// visible can be controlled with the [paintOffset].
 ///
 /// See also:
 ///
@@ -334,10 +334,10 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
 
 /// A render object that shows a subset of its children.
 ///
-/// The children of a viewport can layout to a larger size than the viewport
-/// itself. If that happens, only a subset of the children will be visible
-/// through the viewport. The subset of children that are visible can be
-/// controlled with the [paintOffset].
+/// The children of a viewport can layout to a larger size along the viewport's
+/// [mainAxis] than the viewport itself. If that happens, only a subset of the
+/// children will be visible through the viewport. The subset of children that
+/// are visible can be controlled with the [paintOffset].
 ///
 /// See also:
 ///

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 import 'icon_theme_data.dart';
 
@@ -10,10 +11,10 @@ import 'icon_theme_data.dart';
 class IconTheme extends InheritedWidget {
   /// Creates an icon theme that controls the color and opacity of descendant widgets.
   ///
-  /// Both data and child arguments are required to be non-null.
+  /// Both [data] and [child] arguments must not be null.
   IconTheme({
     Key key,
-    this.data,
+    @required this.data,
     Widget child
   }) : super(key: key, child: child) {
     assert(data != null);

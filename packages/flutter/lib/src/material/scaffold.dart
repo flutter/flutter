@@ -744,6 +744,8 @@ class ScaffoldFeatureController<T extends Widget, U> {
   const ScaffoldFeatureController._(this._widget, this._completer, this.close, this.setState);
   final T _widget;
   final Completer<U> _completer;
+
+  /// Completes when the feature controlled by this object is no longer visible.
   Future<U> get closed => _completer.future;
 
   /// Remove the feature (e.g., bottom sheet or snack bar) from the scaffold.
