@@ -12,13 +12,13 @@ void main() {
     bool didEndDrag = false;
 
     Widget widget = new GestureDetector(
-      onVerticalDragStart: (_) {
+      onVerticalDragStart: (DragStartDetails details) {
         didStartDrag = true;
       },
-      onVerticalDragUpdate: (double scrollDelta) {
-        updatedDragDelta = scrollDelta;
+      onVerticalDragUpdate: (DragUpdateDetails details) {
+        updatedDragDelta = details.primaryDelta;
       },
-      onVerticalDragEnd: (Velocity velocity) {
+      onVerticalDragEnd: (DragEndDetails details) {
         didEndDrag = true;
       },
       child: new Container(
@@ -64,10 +64,10 @@ void main() {
     Point upLocation = new Point(10.0, 20.0);
 
     Widget widget = new GestureDetector(
-      onVerticalDragUpdate: (double delta) { dragDistance += delta; },
-      onVerticalDragEnd: (Velocity velocity) { gestureCount += 1; },
-      onHorizontalDragUpdate: (_) { fail("gesture should not match"); },
-      onHorizontalDragEnd: (Velocity velocity) { fail("gesture should not match"); },
+      onVerticalDragUpdate: (DragUpdateDetails details) { dragDistance += details.primaryDelta; },
+      onVerticalDragEnd: (DragEndDetails details) { gestureCount += 1; },
+      onHorizontalDragUpdate: (DragUpdateDetails details) { fail("gesture should not match"); },
+      onHorizontalDragEnd: (DragEndDetails details) { fail("gesture should not match"); },
       child: new Container(
         decoration: const BoxDecoration(
           backgroundColor: const Color(0xFF00FF00)
@@ -97,13 +97,13 @@ void main() {
 
     await tester.pumpWidget(
       new GestureDetector(
-        onPanStart: (_) {
+        onPanStart: (DragStartDetails details) {
           didStartPan = true;
         },
-        onPanUpdate: (Offset delta) {
-          panDelta = delta;
+        onPanUpdate: (DragUpdateDetails details) {
+          panDelta = details.delta;
         },
-        onPanEnd: (_) {
+        onPanEnd: (DragEndDetails details) {
           didEndPan = true;
         },
         child: new Container(

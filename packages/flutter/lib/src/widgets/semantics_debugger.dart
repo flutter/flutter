@@ -66,9 +66,9 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> {
       _lastPointerDownLocation = null;
     });
   }
-  void _handlePanEnd(Velocity velocity) {
+  void _handlePanEnd(DragEndDetails details) {
     assert(_lastPointerDownLocation != null);
-    _SemanticsDebuggerListener.instance.handlePanEnd(_lastPointerDownLocation, velocity);
+    _SemanticsDebuggerListener.instance.handlePanEnd(_lastPointerDownLocation, details.velocity);
     setState(() {
       _lastPointerDownLocation = null;
     });

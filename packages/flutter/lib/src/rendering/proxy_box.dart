@@ -2102,26 +2102,42 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
 
   @override
   void handleSemanticScrollLeft() {
-    if (onHorizontalDragUpdate != null)
-      onHorizontalDragUpdate(size.width * -scrollFactor);
+    if (onHorizontalDragUpdate != null) {
+      final double primaryDelta = size.width * -scrollFactor;
+      onHorizontalDragUpdate(new DragUpdateDetails(
+        delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta
+      ));
+    }
   }
 
   @override
   void handleSemanticScrollRight() {
-    if (onHorizontalDragUpdate != null)
-      onHorizontalDragUpdate(size.width * scrollFactor);
+    if (onHorizontalDragUpdate != null) {
+      final double primaryDelta = size.width * scrollFactor;
+      onHorizontalDragUpdate(new DragUpdateDetails(
+        delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta
+      ));
+    }
   }
 
   @override
   void handleSemanticScrollUp() {
-    if (onVerticalDragUpdate != null)
-      onVerticalDragUpdate(size.height * -scrollFactor);
+    if (onVerticalDragUpdate != null) {
+      final double primaryDelta = size.height * -scrollFactor;
+      onVerticalDragUpdate(new DragUpdateDetails(
+        delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta
+      ));
+    }
   }
 
   @override
   void handleSemanticScrollDown() {
-    if (onVerticalDragUpdate != null)
-      onVerticalDragUpdate(size.height * scrollFactor);
+    if (onVerticalDragUpdate != null) {
+      final double primaryDelta = size.height * scrollFactor;
+      onVerticalDragUpdate(new DragUpdateDetails(
+        delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta
+      ));
+    }
   }
 }
 

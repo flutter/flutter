@@ -14,51 +14,96 @@ enum _DragState {
   accepted,
 }
 
+/// Details for [GestureDragDownCallback].
+class DragDownDetails {
+  /// Creates details for a [GestureDragDownCallback].
+  ///
+  /// The [globalPosition] argument must not be null.
+  DragDownDetails({ this.globalPosition: Point.origin }) {
+    assert(globalPosition != null);
+  }
+
+  /// The global position at which the pointer contacted the screen.
+  final Point globalPosition;
+}
+
 /// Signature for when a pointer has contacted the screen and might begin to move.
-typedef void GestureDragDownCallback(Point globalPosition);
+typedef void GestureDragDownCallback(DragDownDetails details);
+
+/// Details for [GestureDragStartCallback].
+class DragStartDetails {
+  /// Creates details for a [GestureDragStartCallback].
+  ///
+  /// The [globalPosition] argument must not be null.
+  DragStartDetails({ this.globalPosition: Point.origin }) {
+    assert(globalPosition != null);
+  }
+
+  /// The global position at which the pointer contacted the screen.
+  final Point globalPosition;
+}
 
 /// Signature for when a pointer has contacted the screen and has begun to move.
-typedef void GestureDragStartCallback(Point globalPosition);
+typedef void GestureDragStartCallback(DragStartDetails details);
+
+/// Details for [GestureDragUpdateCallback].
+class DragUpdateDetails {
+  /// Creates details for a [DragUpdateDetails].
+  ///
+  /// The [delta] argument must not be null.
+  ///
+  /// If [primaryDelta] is non-null, then its value must match one of the
+  /// coordinates of [delta] and the other coordinate must be zero.
+  DragUpdateDetails({
+    this.delta: Offset.zero,
+    this.primaryDelta: 0.0
+  }) {
+    assert(primaryDelta == null
+        || (primaryDelta == delta.dx && delta.dy == 0.0)
+        || (primaryDelta == delta.dy && delta.dx == 0.0));
+  }
+
+  /// The amount the pointer has moved since the previous update.
+  ///
+  /// If the [GestureDragUpdateCallback] is for a one-dimensional drag (e.g.,
+  /// a horizontal or vertical drag), then this offset contains only the delta
+  /// in that direction (i.e., the coordinate in the other direction is zero).
+  final Offset delta;
+
+  /// The amount the pointer has moved along the primary axis since the previous
+  /// update.
+  ///
+  /// If the [GestureDragUpdateCallback] is for a one-dimensional drag (e.g.,
+  /// a horizontal or vertical drag), then this value contains the non-zero
+  /// component of [delta]. Otherwise, if the [GestureDragUpdateCallback] is for
+  /// a two-dimensional drag (e.g., a pan), then this value is zero.
+  final double primaryDelta;
+}
 
 /// Signature for when a pointer that is in contact with the screen and moving
-/// in a direction (e.g., vertically or horizontally) has moved in that
-/// direction.
-typedef void GestureDragUpdateCallback(double delta);
+/// has moved again.
+typedef void GestureDragUpdateCallback(DragUpdateDetails details);
+
+/// Details for [GestureDragEndCallback].
+class DragEndDetails {
+  /// Creates details for a [GestureDragEndCallback].
+  ///
+  /// The [velocity] argument must not be null.
+  DragEndDetails({ this.velocity: Velocity.zero }) {
+    assert(velocity != null);
+  }
+
+  /// The velocity the pointer was moving when it stopped contacting the screen.
+  final Velocity velocity;
+}
 
 /// Signature for when a pointer that was previously in contact with the screen
-/// and moving in a direction (e.g., vertically or horizontally) is no longer in
-/// contact with the screen and was moving at a specific velocity when it
-/// stopped contacting the screen.
-typedef void GestureDragEndCallback(Velocity velocity);
+/// and moving is no longer in contact with the screen.
+typedef void GestureDragEndCallback(DragEndDetails details);
 
 /// Signature for when the pointer that previously triggered a
 /// [GestureDragDownCallback] did not complete.
 typedef void GestureDragCancelCallback();
-
-/// Signature for when a pointer has contacted the screen and might begin to move.
-typedef void GesturePanDownCallback(Point globalPosition);
-
-/// Signature for when a pointer has contacted the screen and has begun to move.
-typedef void GesturePanStartCallback(Point globalPosition);
-
-/// Signature for when a pointer that is in contact with the screen and moving
-/// has moved again.
-typedef void GesturePanUpdateCallback(Offset delta);
-
-/// Signature for when a pointer that was previously in contact with the screen
-/// and moving is no longer in contact with the screen and was moving at a
-/// specific velocity when it stopped contacting the screen.
-typedef void GesturePanEndCallback(Velocity velocity);
-
-/// Signature for when the pointer that previously triggered a
-/// [GesturePanDownCallback] did not complete.
-typedef void GesturePanCancelCallback();
-
-/// Signature for when a pointer that is in contact with the screen and moving
-/// has moved again. For one-dimensional drags (e.g., horizontal or vertical),
-/// T is `double`, as in [GestureDragUpdateCallback]. For two-dimensional drags
-/// (e.g., pans), T is `Offset`, as in GesturePanUpdateCallback.
-typedef void GesturePolymorphicUpdateCallback<T>(T delta);
 
 bool _isFlingGesture(Velocity velocity) {
   assert(velocity != null);
@@ -82,9 +127,7 @@ bool _isFlingGesture(Velocity velocity) {
 ///  * [HorizontalDragGestureRecognizer]
 ///  * [VerticalDragGestureRecognizer]
 ///  * [PanGestureRecognizer]
-// Having T extend dynamic makes it possible to use the += operator on
-// _pendingDragDelta without causing an analysis error.
-abstract class DragGestureRecognizer<T extends dynamic> extends OneSequenceGestureRecognizer {
+abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// A pointer has contacted the screen and might begin to move.
   GestureDragDownCallback onDown;
 
@@ -92,7 +135,7 @@ abstract class DragGestureRecognizer<T extends dynamic> extends OneSequenceGestu
   GestureDragStartCallback onStart;
 
   /// A pointer that is in contact with the screen and moving has moved again.
-  GesturePolymorphicUpdateCallback<T> onUpdate;
+  GestureDragUpdateCallback onUpdate;
 
   /// A pointer that was previously in contact with the screen and moving is no
   /// longer in contact with the screen and was moving at a specific velocity
@@ -104,10 +147,10 @@ abstract class DragGestureRecognizer<T extends dynamic> extends OneSequenceGestu
 
   _DragState _state = _DragState.ready;
   Point _initialPosition;
-  T _pendingDragDelta;
+  Offset _pendingDragOffset;
 
-  T get _initialPendingDragDelta;
-  T _getDragDelta(PointerEvent event);
+  Offset _getDeltaForDetails(Offset delta);
+  double _getPrimaryDeltaForDetails(Offset delta);
   bool get _hasSufficientPendingDragDeltaToAccept;
 
   Map<int, VelocityTracker> _velocityTrackers = new Map<int, VelocityTracker>();
@@ -119,9 +162,9 @@ abstract class DragGestureRecognizer<T extends dynamic> extends OneSequenceGestu
     if (_state == _DragState.ready) {
       _state = _DragState.possible;
       _initialPosition = event.position;
-      _pendingDragDelta = _initialPendingDragDelta;
+      _pendingDragOffset = Offset.zero;
       if (onDown != null)
-        onDown(_initialPosition);
+        onDown(new DragDownDetails(globalPosition: _initialPosition));
     }
   }
 
@@ -132,12 +175,16 @@ abstract class DragGestureRecognizer<T extends dynamic> extends OneSequenceGestu
       VelocityTracker tracker = _velocityTrackers[event.pointer];
       assert(tracker != null);
       tracker.addPosition(event.timeStamp, event.position);
-      T delta = _getDragDelta(event);
+      Offset delta = event.delta;
       if (_state == _DragState.accepted) {
-        if (onUpdate != null)
-          onUpdate(delta);
+        if (onUpdate != null) {
+          onUpdate(new DragUpdateDetails(
+            delta: _getDeltaForDetails(delta),
+            primaryDelta: _getPrimaryDeltaForDetails(delta)
+          ));
+        }
       } else {
-        _pendingDragDelta += delta;
+        _pendingDragOffset += delta;
         if (_hasSufficientPendingDragDeltaToAccept)
           resolve(GestureDisposition.accepted);
       }
@@ -149,12 +196,16 @@ abstract class DragGestureRecognizer<T extends dynamic> extends OneSequenceGestu
   void acceptGesture(int pointer) {
     if (_state != _DragState.accepted) {
       _state = _DragState.accepted;
-      T delta = _pendingDragDelta;
-      _pendingDragDelta = _initialPendingDragDelta;
+      Offset delta = _pendingDragOffset;
+      _pendingDragOffset = Offset.zero;
       if (onStart != null)
-        onStart(_initialPosition);
-      if (delta != _initialPendingDragDelta && onUpdate != null)
-        onUpdate(delta);
+        onStart(new DragStartDetails(globalPosition: _initialPosition));
+      if (delta != Offset.zero && onUpdate != null) {
+        onUpdate(new DragUpdateDetails(
+          delta: _getDeltaForDetails(delta),
+          primaryDelta: _getPrimaryDeltaForDetails(delta)
+        ));
+      }
     }
   }
 
@@ -183,9 +234,9 @@ abstract class DragGestureRecognizer<T extends dynamic> extends OneSequenceGestu
         final Offset pixelsPerSecond = velocity.pixelsPerSecond;
         if (pixelsPerSecond.distanceSquared > kMaxFlingVelocity * kMaxFlingVelocity)
           velocity = new Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * kMaxFlingVelocity);
-        onEnd(velocity);
+        onEnd(new DragEndDetails(velocity: velocity));
       } else {
-        onEnd(Velocity.zero);
+        onEnd(new DragEndDetails(velocity: Velocity.zero));
       }
     }
     _velocityTrackers.clear();
@@ -205,15 +256,15 @@ abstract class DragGestureRecognizer<T extends dynamic> extends OneSequenceGestu
 /// See also:
 ///
 ///  * [VerticalMultiDragGestureRecognizer]
-class VerticalDragGestureRecognizer extends DragGestureRecognizer<double> {
+class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   @override
-  double get _initialPendingDragDelta => 0.0;
+  bool get _hasSufficientPendingDragDeltaToAccept => _pendingDragOffset.dy.abs() > kTouchSlop;
 
   @override
-  double _getDragDelta(PointerEvent event) => event.delta.dy;
+  Offset _getDeltaForDetails(Offset delta) => new Offset(0.0, delta.dy);
 
   @override
-  bool get _hasSufficientPendingDragDeltaToAccept => _pendingDragDelta.abs() > kTouchSlop;
+  double _getPrimaryDeltaForDetails(Offset delta) => delta.dy;
 
   @override
   String toStringShort() => 'vertical drag';
@@ -226,15 +277,15 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer<double> {
 /// See also:
 ///
 ///  * [HorizontalMultiDragGestureRecognizer]
-class HorizontalDragGestureRecognizer extends DragGestureRecognizer<double> {
+class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   @override
-  double get _initialPendingDragDelta => 0.0;
+  bool get _hasSufficientPendingDragDeltaToAccept => _pendingDragOffset.dx.abs() > kTouchSlop;
 
   @override
-  double _getDragDelta(PointerEvent event) => event.delta.dx;
+  Offset _getDeltaForDetails(Offset delta) => new Offset(delta.dx, 0.0);
 
   @override
-  bool get _hasSufficientPendingDragDeltaToAccept => _pendingDragDelta.abs() > kTouchSlop;
+  double _getPrimaryDeltaForDetails(Offset delta) => delta.dx;
 
   @override
   String toStringShort() => 'horizontal drag';
@@ -246,17 +297,17 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer<double> {
 ///
 ///  * [ImmediateMultiDragGestureRecognizer]
 ///  * [DelayedMultiDragGestureRecognizer]
-class PanGestureRecognizer extends DragGestureRecognizer<Offset> {
-  @override
-  Offset get _initialPendingDragDelta => Offset.zero;
-
-  @override
-  Offset _getDragDelta(PointerEvent event) => event.delta;
-
+class PanGestureRecognizer extends DragGestureRecognizer {
   @override
   bool get _hasSufficientPendingDragDeltaToAccept {
-    return _pendingDragDelta.distance > kPanSlop;
+    return _pendingDragOffset.distance > kPanSlop;
   }
+
+  @override
+  Offset _getDeltaForDetails(Offset delta) => delta;
+
+  @override
+  double _getPrimaryDeltaForDetails(Offset delta) => null;
 
   @override
   String toStringShort() => 'pan';

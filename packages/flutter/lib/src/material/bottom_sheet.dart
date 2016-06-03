@@ -97,17 +97,17 @@ class _BottomSheetState extends State<BottomSheet> {
 
   bool get _dismissUnderway => config.animationController.status == AnimationStatus.reverse;
 
-  void _handleDragUpdate(double delta) {
+  void _handleDragUpdate(DragUpdateDetails details) {
     if (_dismissUnderway)
       return;
-    config.animationController.value -= delta / (_childHeight ?? delta);
+    config.animationController.value -= details.primaryDelta / (_childHeight ?? details.primaryDelta);
   }
 
-  void _handleDragEnd(Velocity velocity) {
+  void _handleDragEnd(DragEndDetails details) {
     if (_dismissUnderway)
       return;
-    if (velocity.pixelsPerSecond.dy > _kMinFlingVelocity) {
-      double flingVelocity = -velocity.pixelsPerSecond.dy / _childHeight;
+    if (details.velocity.pixelsPerSecond.dy > _kMinFlingVelocity) {
+      double flingVelocity = -details.velocity.pixelsPerSecond.dy / _childHeight;
       config.animationController.fling(velocity: flingVelocity);
       if (flingVelocity < 0.0)
         config.onClosing();

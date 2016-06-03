@@ -270,21 +270,21 @@ class _RenderSwitch extends RenderToggleable {
 
   HorizontalDragGestureRecognizer _drag;
 
-  void _handleDragStart(Point globalPosition) {
+  void _handleDragStart(DragStartDetails details) {
     if (onChanged != null)
       reactionController.forward();
   }
 
-  void _handleDragUpdate(double delta) {
+  void _handleDragUpdate(DragUpdateDetails details) {
     if (onChanged != null) {
       position
         ..curve = null
         ..reverseCurve = null;
-      positionController.value += delta / _trackInnerLength;
+      positionController.value += details.primaryDelta / _trackInnerLength;
     }
   }
 
-  void _handleDragEnd(Velocity velocity) {
+  void _handleDragEnd(DragEndDetails details) {
     if (position.value >= 0.5)
       positionController.forward();
     else

@@ -104,7 +104,7 @@ void main() {
     bool isDangerousStack = false;
 
     bool dragStartRecognized = false;
-    drag.onStart = (Point globalPosition) {
+    drag.onStart = (DragStartDetails details) {
       expect(isDangerousStack, isFalse);
       dragStartRecognized = true;
     };
