@@ -74,9 +74,10 @@ class DragUpdateDetails {
   /// update.
   ///
   /// If the [GestureDragUpdateCallback] is for a one-dimensional drag (e.g.,
-  /// a horizontal or vertical drag), then this value contains the non-zero
-  /// component of [delta]. Otherwise, if the [GestureDragUpdateCallback] is for
-  /// a two-dimensional drag (e.g., a pan), then this value is zero.
+  /// a horizontal or vertical drag), then this value contains the component of
+  /// [delta] along the primary axis (e.g., horizontal or vertical,
+  /// respectively). Otherwise, if the [GestureDragUpdateCallback] is for a
+  /// two-dimensional drag (e.g., a pan), then this value is null.
   final double primaryDelta;
 }
 
