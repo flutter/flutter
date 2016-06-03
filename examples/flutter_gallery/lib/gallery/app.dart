@@ -10,6 +10,7 @@ import 'home.dart';
 
 // Warning: this list must be in the same order that the demos appear in GalleryHome.
 final Map<String, WidgetBuilder> kRoutes = <String, WidgetBuilder>{
+  PestoDemo.routeName: (BuildContext context) => new PestoDemo(),
   ShrineDemo.routeName: (BuildContext context) => new ShrineDemo(),
   Calculator.routeName: (BuildContext context) => new Calculator(),
   ContactsDemo.routeName: (BuildContext context) => new ContactsDemo(),
