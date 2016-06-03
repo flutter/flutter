@@ -121,6 +121,7 @@ class _CalculatorState extends State<Calculator> {
         children: <Widget>[
           // Give the key-pad 3/5 of the vertical space and the display 2/5.
           new CalcDisplay(2, _expression.toString()),
+          new Divider(height: 1.0),
           new KeyPad(3, calcState: this)
         ]
       )
@@ -141,7 +142,7 @@ class CalcDisplay extends StatelessWidget {
       child: new Center(
         child: new Text(
           _contents,
-          style: const TextStyle(color: Colors.black, fontSize: 24.0)
+          style: const TextStyle(fontSize: 24.0)
         )
       )
     );
@@ -156,13 +157,21 @@ class KeyPad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Flexible(
-      flex: _flex,
-      child: new Row(
-        children: <Widget>[
-          new MainKeyPad(calcState: calcState),
-          new OpKeyPad(calcState: calcState),
-        ]
+    return new Theme(
+      data: new ThemeData(
+        primarySwatch: Colors.purple,
+        brightness: ThemeBrightness.dark
+      ),
+      child: new Flexible(
+        flex: _flex,
+        child: new Material(
+          child: new Row(
+            children: <Widget>[
+              new MainKeyPad(calcState: calcState),
+              new OpKeyPad(calcState: calcState),
+            ]
+          )
+        )
       )
     );
   }
@@ -180,33 +189,29 @@ class MainKeyPad extends StatelessWidget {
       // and the op keypad have sizes proportional to their number of
       // columns.
       flex: 3,
-      child: new Material(
-        elevation: 12,
-        color: Colors.grey[800],
-        child: new Column(
-          children: <Widget>[
-            new KeyRow(<Widget>[
-              new NumberKey(7, calcState),
-              new NumberKey(8, calcState),
-              new NumberKey(9, calcState)
-            ]),
-            new KeyRow(<Widget>[
-              new NumberKey(4, calcState),
-              new NumberKey(5, calcState),
-              new NumberKey(6, calcState)
-            ]),
-            new KeyRow(<Widget>[
-              new NumberKey(1, calcState),
-              new NumberKey(2, calcState),
-              new NumberKey(3, calcState)
-            ]),
-            new KeyRow(<Widget>[
-              new CalcKey('.', calcState.handlePointTap),
-              new NumberKey(0, calcState),
-              new CalcKey('=', calcState.handleEqualsTap),
-            ])
-          ]
-        )
+      child: new Column(
+        children: <Widget>[
+          new KeyRow(<Widget>[
+            new NumberKey(7, calcState),
+            new NumberKey(8, calcState),
+            new NumberKey(9, calcState)
+          ]),
+          new KeyRow(<Widget>[
+            new NumberKey(4, calcState),
+            new NumberKey(5, calcState),
+            new NumberKey(6, calcState)
+          ]),
+          new KeyRow(<Widget>[
+            new NumberKey(1, calcState),
+            new NumberKey(2, calcState),
+            new NumberKey(3, calcState)
+          ]),
+          new KeyRow(<Widget>[
+            new CalcKey('.', calcState.handlePointTap),
+            new NumberKey(0, calcState),
+            new CalcKey('=', calcState.handleEqualsTap),
+          ])
+        ]
       )
     );
   }
@@ -219,10 +224,10 @@ class OpKeyPad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData themeData = Theme.of(context);
     return new Flexible(
       child: new Material(
-        elevation: 24,
-        color: Colors.grey[700],
+        color: themeData.backgroundColor,
         child: new Column(
           children: <Widget>[
             new CalcKey('\u232B', calcState.handleDelTap),
@@ -260,18 +265,19 @@ class CalcKey extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Orientation orientation = MediaQuery.of(context).orientation;
     return new Flexible(
-//      child: new Container(
-        child: new InkResponse(
-          onTap: this.onTap,
-          child: new Center(
-            child: new Text(
-              this.text,
-              style: const TextStyle(color: Colors.white, fontSize: 32.0)
+      child: new InkResponse(
+        onTap: this.onTap,
+        child: new Center(
+          child: new Text(
+            this.text,
+            style: new TextStyle(
+              fontSize: (orientation == Orientation.portrait) ? 32.0 : 24.0
             )
           )
         )
-//      )
+      )
     );
   }
 }
