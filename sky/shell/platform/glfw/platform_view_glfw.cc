@@ -21,7 +21,7 @@ PlatformViewGLFW::~PlatformViewGLFW() {}
 void PlatformViewGLFW::SurfaceCreated(gfx::AcceleratedWidget widget) {
   DCHECK(window_ == gfx::kNullAcceleratedWidget);
   window_ = widget;
-  SurfaceNotificationsDirect::NotifyCreated(config_, window_);
+  SurfaceNotificationsDirect::NotifyCreated(config_, window_, nullptr);
 }
 
 void PlatformViewGLFW::SurfaceDestroyed() {

@@ -5,6 +5,7 @@
 #ifndef SKY_SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_H_
 #define SKY_SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_H_
 
+#include "base/synchronization/waitable_event.h"
 #include "sky/shell/platform_view.h"
 
 struct ANativeWindow;
@@ -36,6 +37,7 @@ class PlatformViewAndroid : public PlatformView {
   // |Detach|, which will eventually cause |~PlatformViewAndroid|.
   std::unique_ptr<ShellView> shell_view_;
   gfx::AcceleratedWidget window_;
+  base::WaitableEvent did_draw_;
 
   DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroid);
 };

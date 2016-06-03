@@ -6,6 +6,7 @@
 #define SKY_SHELL_GPU_DIRECT_RASTERIZER_H_
 
 #include "base/memory/weak_ptr.h"
+#include "base/synchronization/waitable_event.h"
 #include "flow/compositor_context.h"
 #include "skia/ext/refptr.h"
 #include "sky/shell/gpu/direct/ganesh_canvas.h"
@@ -35,7 +36,8 @@ class RasterizerDirect : public Rasterizer {
   void ConnectToRasterizer(
       mojo::InterfaceRequest<rasterizer::Rasterizer> request) override;
 
-  void OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget);
+  void OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget,
+                                    base::WaitableEvent* did_draw);
   void OnOutputSurfaceDestroyed();
 
   flow::LayerTree* GetLastLayerTree() override;

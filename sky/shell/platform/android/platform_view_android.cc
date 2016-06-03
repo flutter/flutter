@@ -43,7 +43,7 @@ PlatformView* PlatformView::Create(const Config& config) {
 }
 
 PlatformViewAndroid::PlatformViewAndroid(const Config& config)
-  : PlatformView(config), window_(nullptr) {
+  : PlatformView(config), window_(nullptr), did_draw_(false, false) {
 }
 
 PlatformViewAndroid::~PlatformViewAndroid() {
@@ -65,7 +65,8 @@ void PlatformViewAndroid::SurfaceCreated(JNIEnv* env, jobject obj, jobject jsurf
     base::android::ScopedJavaLocalFrame scoped_local_reference_frame(env);
     window_ = ANativeWindow_fromSurface(env, jsurface);
   }
-  SurfaceNotificationsDirect::NotifyCreated(config_, window_);
+  SurfaceNotificationsDirect::NotifyCreated(config_, window_, &did_draw_);
+  did_draw_.Wait();
 }
 
 void PlatformViewAndroid::SurfaceDestroyed(JNIEnv* env, jobject obj) {

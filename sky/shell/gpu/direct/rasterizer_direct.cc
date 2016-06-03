@@ -52,7 +52,8 @@ void RasterizerDirect::ConnectToRasterizer(
   Shell::Shared().AddRasterizer(GetWeakRasterizerPtr());
 }
 
-void RasterizerDirect::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) {
+void RasterizerDirect::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget,
+                                                    base::WaitableEvent* did_draw) {
   gfx::SurfaceConfiguration config;
   config.stencil_bits = 8;
   surface_ = gfx::GLSurface::CreateViewGLSurface(widget, config);
@@ -66,6 +67,8 @@ void RasterizerDirect::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widge
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
   surface_->SwapBuffers();
+  if (did_draw)
+    did_draw->Signal();
 }
 
 void RasterizerDirect::Draw(uint64_t layer_tree_ptr,

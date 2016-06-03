@@ -14,13 +14,15 @@ namespace sky {
 namespace shell {
 
 void SurfaceNotificationsDirect::NotifyCreated(
-    const PlatformView::Config& config, gfx::AcceleratedWidget widget) {
+    const PlatformView::Config& config,
+    gfx::AcceleratedWidget widget,
+    base::WaitableEvent* did_draw) {
   RasterizerDirect* rasterizer = static_cast<RasterizerDirect*>(config.rasterizer);
   config.ui_task_runner->PostTask(
       FROM_HERE, base::Bind(&UIDelegate::OnOutputSurfaceCreated,
                             config.ui_delegate,
                             base::Bind(&RasterizerDirect::OnAcceleratedWidgetAvailable,
-                                       rasterizer->GetWeakPtr(), widget)));
+                                       rasterizer->GetWeakPtr(), widget, did_draw)));
 }
 
 void SurfaceNotificationsDirect::NotifyDestroyed(
