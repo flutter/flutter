@@ -8,11 +8,11 @@ import 'package:flutter/scheduler.dart' show timeDilation;
 import '../demo/all.dart';
 import 'home.dart';
 
+// Warning: this list must be in the same order that the demos appear in GalleryHome.
 final Map<String, WidgetBuilder> kRoutes = <String, WidgetBuilder>{
   ShrineDemo.routeName: (BuildContext context) => new ShrineDemo(),
   Calculator.routeName: (BuildContext context) => new Calculator(),
-  FlexibleSpaceDemo.routeName: (BuildContext context) => new FlexibleSpaceDemo(),
-  TabsFabDemo.routeName: (BuildContext context) => new TabsFabDemo(),
+  ContactsDemo.routeName: (BuildContext context) => new ContactsDemo(),
   ButtonsDemo.routeName: (BuildContext context) => new ButtonsDemo(),
   CardsDemo.routeName: (BuildContext context) => new CardsDemo(),
   ChipDemo.routeName: (BuildContext context) => new ChipDemo(),
@@ -21,6 +21,7 @@ final Map<String, WidgetBuilder> kRoutes = <String, WidgetBuilder>{
   DialogDemo.routeName: (BuildContext context) => new DialogDemo(),
   DropDownDemo.routeName: (BuildContext context) => new DropDownDemo(),
   TwoLevelListDemo.routeName: (BuildContext context) => new TwoLevelListDemo(),
+  TabsFabDemo.routeName: (BuildContext context) => new TabsFabDemo(),
   GridListDemo.routeName: (BuildContext context) => new GridListDemo(),
   IconsDemo.routeName: (BuildContext context) => new IconsDemo(),
   LeaveBehindDemo.routeName: (BuildContext context) => new LeaveBehindDemo(),

@@ -36,9 +36,9 @@ class VendorItem extends StatelessWidget {
             child: new ClipRRect(
               xRadius: 12.0,
               yRadius: 12.0,
-              child: new NetworkImage(
+              child: new AssetImage(
                 fit: ImageFit.cover,
-                src: vendor.avatarUrl
+                name: vendor.avatarAsset
               )
             )
           ),
