@@ -10,17 +10,17 @@ class Vendor {
   const Vendor({
     this.name,
     this.description,
-    this.avatarUrl
+    this.avatarAsset
   });
 
   final String name;
   final String description;
-  final String avatarUrl;
+  final String avatarAsset;
 
   bool isValid() {
     return name != null &&
       description != null &&
-      avatarUrl != null;
+      avatarAsset != null;
   }
 
   @override

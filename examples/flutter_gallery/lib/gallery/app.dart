@@ -11,7 +11,7 @@ import 'home.dart';
 final Map<String, WidgetBuilder> kRoutes = <String, WidgetBuilder>{
   ShrineDemo.routeName: (BuildContext context) => new ShrineDemo(),
   Calculator.routeName: (BuildContext context) => new Calculator(),
-  FlexibleSpaceDemo.routeName: (BuildContext context) => new FlexibleSpaceDemo(),
+  ContactsDemo.routeName: (BuildContext context) => new ContactsDemo(),
   TabsFabDemo.routeName: (BuildContext context) => new TabsFabDemo(),
   ButtonsDemo.routeName: (BuildContext context) => new ButtonsDemo(),
   CardsDemo.routeName: (BuildContext context) => new CardsDemo(),

@@ -6,7 +6,7 @@ import 'shrine_types.dart';
 
 const Vendor _ali = const Vendor(
   name: 'Ali’s shop',
-  avatarUrl: 'https://www.gstatic.com/angular/material-adaptive/shrine/ali-connors.png',
+  avatarAsset: 'packages/flutter_gallery_assets/shrine/vendors/ali-connors.png',
   description:
     'Ali Connor’s makes custom goods for folks of all shapes and sizes '
     'made by hand and sometimes by machine, but always with love and care. '
@@ -15,7 +15,7 @@ const Vendor _ali = const Vendor(
 
 const Vendor _sandra = const Vendor(
   name: 'Sandra’s shop',
-  avatarUrl: 'https://www.gstatic.com/angular/material-adaptive/shrine/sandra-adams.jpg',
+  avatarAsset: 'packages/flutter_gallery_assets/shrine/vendors/sandra-adams.jpg',
   description:
     'Sandra specializes in furniture, beauty and travel products with a classic vibe. '
     'Custom orders are available if you’re looking for a certain color or material.'
@@ -23,7 +23,7 @@ const Vendor _sandra = const Vendor(
 
 const Vendor _trevor = const Vendor(
   name: 'Trevor’s shop',
-  avatarUrl: 'https://www.gstatic.com/angular/material-adaptive/shrine/zach.jpg',
+  avatarAsset: 'packages/flutter_gallery_assets/shrine/vendors/zach.jpg',
   description:
     'Trevor makes great stuff for awesome people like you.  Super cool and extra '
     'awesome all of his shop’s goods are handmade with love. Custom orders are '
@@ -32,7 +32,7 @@ const Vendor _trevor = const Vendor(
 
 const Vendor _peter = const Vendor(
   name: 'Peter’s shop',
-  avatarUrl: 'https://www.gstatic.com/angular/material-adaptive/shrine/peter-carlsson.png',
+  avatarAsset: 'packages/flutter_gallery_assets/shrine/vendors/peter-carlsson.png',
   description:
     'Peter makes great stuff for awesome people like you.  Super cool and extra '
     'awesome all of his shop’s goods are handmade with love. Custom orders are '
@@ -41,7 +41,7 @@ const Vendor _peter = const Vendor(
 
 const Vendor _stella = const Vendor(
   name: 'Stella’s shop',
-  avatarUrl: 'https://www.gstatic.com/angular/material-adaptive/shrine/16c477b.jpg',
+  avatarAsset: 'packages/flutter_gallery_assets/shrine/vendors/16c477b.jpg',
   description:
     'Stella sells awesome stuff at lovely prices. made by hand and sometimes by '
     'machine, but always with love and care. Custom orders are available upon request '

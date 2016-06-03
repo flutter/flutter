@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 export 'buttons_demo.dart';
+export 'contacts_demo.dart';
 export 'cards_demo.dart';
 export 'calculator_demo.dart';
 export 'chip_demo.dart';
@@ -11,7 +12,6 @@ export 'data_table_demo.dart';
 export 'date_picker_demo.dart';
 export 'dialog_demo.dart';
 export 'drop_down_demo.dart';
-export 'flexible_space_demo.dart';
 export 'grid_list_demo.dart';
 export 'icons_demo.dart';
 export 'leave_behind_demo.dart';

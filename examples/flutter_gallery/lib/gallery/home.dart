@@ -73,8 +73,7 @@ class GalleryHomeState extends State<GalleryHome> {
             children: <Widget>[
               new GalleryItem(title: 'Shrine', routeName: ShrineDemo.routeName),
               new GalleryItem(title: 'Calculator', routeName: Calculator.routeName),
-              new GalleryItem(title: 'Flexible space toolbar', routeName: FlexibleSpaceDemo.routeName),
-              new GalleryItem(title: 'Floating action button', routeName: TabsFabDemo.routeName),
+              new GalleryItem(title: 'Contacts', routeName: ContactsDemo.routeName)
             ]
           ),
           new TwoLevelSublist(
@@ -89,6 +88,7 @@ class GalleryHomeState extends State<GalleryHome> {
               new GalleryItem(title: 'Dialog', routeName: DialogDemo.routeName),
               new GalleryItem(title: 'Drop-down button', routeName: DropDownDemo.routeName),
               new GalleryItem(title: 'Expand/collapse list control', routeName: TwoLevelListDemo.routeName),
+              new GalleryItem(title: 'Floating action button', routeName: TabsFabDemo.routeName),
               new GalleryItem(title: 'Grid', routeName: GridListDemo.routeName),
               new GalleryItem(title: 'Icons', routeName: IconsDemo.routeName),
               new GalleryItem(title: 'Leave-behind list items', routeName: LeaveBehindDemo.routeName),
