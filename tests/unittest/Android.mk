@@ -45,9 +45,9 @@ LOCAL_MODULE := minikin_tests
 LOCAL_MODULE_TAGS := tests
 
 GEN := $(addprefix $(minikin_tests_root_for_test_zip)/, $(font_src_files))
-$(GEN): PRIVATE_PATH := $(LOCAL_PATH)
+$(GEN): PRIVATE_PATH := $(LOCAL_PATH)/../
 $(GEN): PRIVATE_CUSTOM_TOOL = cp $< $@
-$(GEN): $(minikin_tests_root_for_test_zip)/data/% : $(LOCAL_PATH)/data/%
+$(GEN): $(minikin_tests_root_for_test_zip)/data/% : $(LOCAL_PATH)/../data/%
 	$(transform-generated-source)
 LOCAL_GENERATED_SOURCES += $(GEN)
 
@@ -70,21 +70,22 @@ LOCAL_STATIC_LIBRARIES += \
     libxml2
 
 LOCAL_SRC_FILES += \
+    ../util/FontTestUtils.cpp \
+    ../util/MinikinFontForTest.cpp \
+    ../util/UnicodeUtils.cpp \
     FontCollectionTest.cpp \
     FontCollectionItemizeTest.cpp \
     FontFamilyTest.cpp \
     FontLanguageListCacheTest.cpp \
-    FontTestUtils.cpp \
     HbFontCacheTest.cpp \
-    MinikinFontForTest.cpp \
     MinikinInternalTest.cpp \
     GraphemeBreakTests.cpp \
     LayoutUtilsTest.cpp \
-    UnicodeUtils.cpp \
     WordBreakerTests.cpp
 
 LOCAL_C_INCLUDES := \
-    $(LOCAL_PATH)/../libs/minikin/ \
+    $(LOCAL_PATH)/../../libs/minikin/ \
+    $(LOCAL_PATH)/../util \
     external/harfbuzz_ng/src \
     external/libxml2/include \
     external/skia/src/core
