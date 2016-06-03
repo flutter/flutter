@@ -102,8 +102,8 @@ class AnalyzeCommand extends FlutterCommand {
       }
     }
 
-    bool currentDirectory = argResults['current-directory'] && dartFiles.isEmpty;
-    bool currentPackage = argResults['current-package'] && dartFiles.isEmpty;
+    bool currentDirectory = argResults['current-directory'] && (argResults.wasParsed('current-directory') || dartFiles.isEmpty);
+    bool currentPackage = argResults['current-package'] && (argResults.wasParsed('current-package') || dartFiles.isEmpty);
     bool flutterRepo = argResults['flutter-repo'];
 
     //TODO (pq): revisit package and directory defaults
