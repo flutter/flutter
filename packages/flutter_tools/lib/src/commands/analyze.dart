@@ -102,9 +102,13 @@ class AnalyzeCommand extends FlutterCommand {
       }
     }
 
+    bool currentDirectory = argResults['current-directory'] && dartFiles.isEmpty;
+    bool currentPackage = argResults['current-package'] && dartFiles.isEmpty;
+    bool flutterRepo = argResults['flutter-repo'];
+
     //TODO (pq): revisit package and directory defaults
 
-    if (argResults['current-directory']  && !argResults['flutter-repo']) {
+    if (currentDirectory  && !flutterRepo) {
       // ./*.dart
       Directory currentDirectory = new Directory('.');
       bool foundOne = false;
@@ -118,7 +122,7 @@ class AnalyzeCommand extends FlutterCommand {
         pubSpecDirectories.add(currentDirectory);
     }
 
-    if (argResults['current-package'] && !argResults['flutter-repo']) {
+    if (currentPackage && !flutterRepo) {
       // **/.*dart
       Directory currentDirectory = new Directory('.');
       _collectDartFiles(currentDirectory, dartFiles);
@@ -129,7 +133,7 @@ class AnalyzeCommand extends FlutterCommand {
     //TODO (pq): extract this regexp from the exclude in options
     RegExp stockExampleFiles = new RegExp('examples/stocks/lib/.*\.dart\$');
 
-    if (argResults['flutter-repo']) {
+    if (flutterRepo) {
       for (Directory dir in runner.getRepoPackages()) {
         _collectDartFiles(dir, dartFiles,
             exclude: (FileSystemEntity entity) => stockExampleFiles.hasMatch(entity.path));
