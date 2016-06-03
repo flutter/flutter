@@ -47,10 +47,18 @@ Future<Null> smokeDemo(WidgetTester tester, String routeName) async {
       .pump(const Duration(seconds: 1)); // Wait until the demo has opened.
 
   // Go back
-  Finder backButton = findBackButton(tester);
-  expect(backButton, findsOneWidget);
-  await tester.tap(backButton);
-  await tester.pump(); // Start the navigator pop "back" operation.
+  if (routeName == '/pesto') {
+    // TODO(mpcomplete): workaround for Pesto, which has a drawer instead of a
+    // back button. Figure out how to have both.
+    Finder drawer = find.byType(Scaffold); // get a Widget for the BuildContext
+    expect(drawer, findsOneWidget);
+    Navigator.pop(drawer.evaluate().first);
+  } else {
+    Finder backButton = findBackButton(tester);
+    expect(backButton, findsOneWidget);
+    await tester.tap(backButton);
+    await tester.pump(); // Start the pop "back" operation.
+  }
   await tester.pump(const Duration(seconds: 1)); // Wait until it has finished.
   return null;
 }

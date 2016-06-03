@@ -71,6 +71,7 @@ class GalleryHomeState extends State<GalleryHome> {
             leading: new Icon(icon: Icons.star),
             title: new Text('Demos'),
             children: <Widget>[
+              new GalleryItem(title: 'Pesto', routeName: PestoDemo.routeName),
               new GalleryItem(title: 'Shrine', routeName: ShrineDemo.routeName),
               new GalleryItem(title: 'Calculator', routeName: Calculator.routeName),
               new GalleryItem(title: 'Contacts', routeName: ContactsDemo.routeName)

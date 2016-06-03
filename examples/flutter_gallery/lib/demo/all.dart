@@ -20,6 +20,7 @@ export 'menu_demo.dart';
 export 'modal_bottom_sheet_demo.dart';
 export 'overscroll_demo.dart';
 export 'page_selector_demo.dart';
+export 'pesto_demo.dart';
 export 'persistent_bottom_sheet_demo.dart';
 export 'progress_indicator_demo.dart';
 export 'scrollable_tabs_demo.dart';
