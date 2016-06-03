@@ -1,4 +1,4 @@
-mmm -j8 frameworks/minikin/tests &&
+mmm -j8 frameworks/minikin/tests/unittests &&
 adb push $OUT/data/nativetest/minikin_tests/minikin_tests \
     /data/nativetest/minikin_tests/minikin_tests &&
 adb push frameworks/minikin/tests/data /data/nativetest/minikin_tests/ &&
