@@ -522,7 +522,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
     _simulation = null;
   }
 
-  void _handleDragStart(_) {
+  void _handleDragStart(DragStartDetails details) {
     _startScroll();
   }
 
@@ -542,12 +542,12 @@ class ScrollableState<T extends Scrollable> extends State<T> {
     new ScrollNotification(this, ScrollNotificationKind.started).dispatch(context);
   }
 
-  void _handleDragUpdate(double delta) {
-    scrollBy(pixelOffsetToScrollOffset(delta));
+  void _handleDragUpdate(DragUpdateDetails details) {
+    scrollBy(pixelOffsetToScrollOffset(details.primaryDelta));
   }
 
-  Future<Null> _handleDragEnd(Velocity velocity) {
-    double scrollVelocity = pixelDeltaToScrollOffset(velocity.pixelsPerSecond) / Duration.MILLISECONDS_PER_SECOND;
+  Future<Null> _handleDragEnd(DragEndDetails details) {
+    double scrollVelocity = pixelDeltaToScrollOffset(details.velocity.pixelsPerSecond) / Duration.MILLISECONDS_PER_SECOND;
     return fling(scrollVelocity).then(_endScroll);
   }
 

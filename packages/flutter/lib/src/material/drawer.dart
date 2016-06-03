@@ -173,7 +173,7 @@ class DrawerControllerState extends State<DrawerController> {
 
   AnimationController _controller;
 
-  void _handleDragDown(Point position) {
+  void _handleDragDown(DragDownDetails details) {
     _controller.stop();
     _ensureHistoryEntry();
   }
@@ -195,15 +195,15 @@ class DrawerControllerState extends State<DrawerController> {
     return _kWidth; // drawer not being shown currently
   }
 
-  void _move(double delta) {
-    _controller.value += delta / _width;
+  void _move(DragUpdateDetails details) {
+    _controller.value += details.primaryDelta / _width;
   }
 
-  void _settle(Velocity velocity) {
+  void _settle(DragEndDetails details) {
     if (_controller.isDismissed)
       return;
-    if (velocity.pixelsPerSecond.dx.abs() >= _kMinFlingVelocity) {
-      _controller.fling(velocity: velocity.pixelsPerSecond.dx / _width);
+    if (details.velocity.pixelsPerSecond.dx.abs() >= _kMinFlingVelocity) {
+      _controller.fling(velocity: details.velocity.pixelsPerSecond.dx / _width);
     } else if (_controller.value < 0.5) {
       close();
     } else {

@@ -489,24 +489,24 @@ class _DialState extends State<_Dial> {
   Point _position;
   Point _center;
 
-  void _handlePanStart(Point globalPosition) {
+  void _handlePanStart(DragStartDetails details) {
     assert(!_dragging);
     _dragging = true;
     RenderBox box = context.findRenderObject();
-    _position = box.globalToLocal(globalPosition);
+    _position = box.globalToLocal(details.globalPosition);
     double radius = box.size.shortestSide / 2.0;
     _center = new Point(radius, radius);
     _updateThetaForPan();
     _notifyOnChangedIfNeeded();
   }
 
-  void _handlePanUpdate(Offset delta) {
-    _position += delta;
+  void _handlePanUpdate(DragUpdateDetails details) {
+    _position += details.delta;
     _updateThetaForPan();
     _notifyOnChangedIfNeeded();
   }
 
-  void _handlePanEnd(Velocity velocity) {
+  void _handlePanEnd(DragEndDetails details) {
     assert(_dragging);
     _dragging = false;
     _position = null;

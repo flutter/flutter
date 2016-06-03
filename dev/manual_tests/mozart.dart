@@ -48,7 +48,7 @@ class WindowDecoration extends StatelessWidget {
   final WindowSide side;
   final Color color;
   final GestureTapCallback onTap;
-  final GesturePanUpdateCallback onPanUpdate;
+  final GestureDragUpdateCallback onPanUpdate;
 
   @override
   Widget build(BuildContext context) {
@@ -106,18 +106,18 @@ class _WindowState extends State<Window> {
   Offset _offset = Offset.zero;
   Size _size = _kInitialWindowSize;
 
-  void _handleResizerDrag(Offset delta) {
+  void _handleResizerDrag(DragUpdateDetails details) {
     setState(() {
       _size = new Size(
-        math.max(0.0, _size.width + delta.dx),
-        math.max(0.0, _size.height + delta.dy)
+        math.max(0.0, _size.width + details.delta.dx),
+        math.max(0.0, _size.height + details.delta.dy)
       );
     });
   }
 
-  void _handleRepositionDrag(Offset delta) {
+  void _handleRepositionDrag(DragUpdateDetails details) {
     setState(() {
-      _offset += delta;
+      _offset += details.delta;
     });
   }
 

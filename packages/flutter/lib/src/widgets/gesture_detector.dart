@@ -9,6 +9,10 @@ import 'basic.dart';
 import 'framework.dart';
 
 export 'package:flutter/gestures.dart' show
+  DragDownDetails,
+  DragStartDetails,
+  DragUpdateDetails,
+  DragEndDetails,
   GestureTapDownCallback,
   GestureTapUpCallback,
   GestureTapCallback,
@@ -19,11 +23,6 @@ export 'package:flutter/gestures.dart' show
   GestureDragUpdateCallback,
   GestureDragEndCallback,
   GestureDragCancelCallback,
-  GesturePanDownCallback,
-  GesturePanStartCallback,
-  GesturePanUpdateCallback,
-  GesturePanEndCallback,
-  GesturePanCancelCallback,
   GestureScaleStartCallback,
   GestureScaleUpdateCallback,
   GestureScaleEndCallback,
@@ -162,21 +161,21 @@ class GestureDetector extends StatelessWidget {
   final GestureDragCancelCallback onHorizontalDragCancel;
 
   /// A pointer has contacted the screen and might begin to move.
-  final GesturePanDownCallback onPanDown;
+  final GestureDragDownCallback onPanDown;
 
   /// A pointer has contacted the screen and has begun to move.
-  final GesturePanStartCallback onPanStart;
+  final GestureDragStartCallback onPanStart;
 
   /// A pointer that is in contact with the screen and moving has moved again.
-  final GesturePanUpdateCallback onPanUpdate;
+  final GestureDragUpdateCallback onPanUpdate;
 
   /// A pointer that was previously in contact with the screen and moving
   /// is no longer in contact with the screen and was moving at a specific
   /// velocity when it stopped contacting the screen.
-  final GesturePanEndCallback onPanEnd;
+  final GestureDragEndCallback onPanEnd;
 
   /// The pointer that previously triggered [onPanDown] did not complete.
-  final GesturePanCancelCallback onPanCancel;
+  final GestureDragCancelCallback onPanCancel;
 
   /// The pointers in contact with the screen have established a focal point and
   /// initial scale of 1.0.
@@ -474,16 +473,16 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
       recognizer.onLongPress();
   }
 
-  void _handleHorizontalDragUpdate(double delta) {
+  void _handleHorizontalDragUpdate(DragUpdateDetails updateDetails) {
     {
       HorizontalDragGestureRecognizer recognizer = owner._recognizers[HorizontalDragGestureRecognizer];
       if (recognizer != null) {
         if (recognizer.onStart != null)
-          recognizer.onStart(Point.origin);
+          recognizer.onStart(new DragStartDetails());
         if (recognizer.onUpdate != null)
-          recognizer.onUpdate(delta);
+          recognizer.onUpdate(updateDetails);
         if (recognizer.onEnd != null)
-          recognizer.onEnd(Velocity.zero);
+          recognizer.onEnd(new DragEndDetails());
         return;
       }
     }
@@ -491,27 +490,27 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
       PanGestureRecognizer recognizer = owner._recognizers[PanGestureRecognizer];
       if (recognizer != null) {
         if (recognizer.onStart != null)
-          recognizer.onStart(Point.origin);
+          recognizer.onStart(new DragStartDetails());
         if (recognizer.onUpdate != null)
-          recognizer.onUpdate(new Offset(delta, 0.0));
+          recognizer.onUpdate(updateDetails);
         if (recognizer.onEnd != null)
-          recognizer.onEnd(Velocity.zero);
+          recognizer.onEnd(new DragEndDetails());
         return;
       }
     }
     assert(false);
   }
 
-  void _handleVerticalDragUpdate(double delta) {
+  void _handleVerticalDragUpdate(DragUpdateDetails updateDetails) {
     {
       VerticalDragGestureRecognizer recognizer = owner._recognizers[VerticalDragGestureRecognizer];
       if (recognizer != null) {
         if (recognizer.onStart != null)
-          recognizer.onStart(Point.origin);
+          recognizer.onStart(new DragStartDetails());
         if (recognizer.onUpdate != null)
-          recognizer.onUpdate(delta);
+          recognizer.onUpdate(updateDetails);
         if (recognizer.onEnd != null)
-          recognizer.onEnd(Velocity.zero);
+          recognizer.onEnd(new DragEndDetails());
         return;
       }
     }
@@ -519,11 +518,11 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
       PanGestureRecognizer recognizer = owner._recognizers[PanGestureRecognizer];
       if (recognizer != null) {
         if (recognizer.onStart != null)
-          recognizer.onStart(Point.origin);
+          recognizer.onStart(new DragStartDetails());
         if (recognizer.onUpdate != null)
-          recognizer.onUpdate(new Offset(0.0, delta));
+          recognizer.onUpdate(updateDetails);
         if (recognizer.onEnd != null)
-          recognizer.onEnd(Velocity.zero);
+          recognizer.onEnd(new DragEndDetails());
         return;
       }
     }
