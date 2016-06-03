@@ -92,39 +92,6 @@ class FloatingActionButton extends StatefulWidget {
 }
 
 class _FloatingActionButtonState extends State<FloatingActionButton> {
-  Animation<double> _childSegue;
-  AnimationController _childSegueController;
-
-  @override
-  void initState() {
-    super.initState();
-    _childSegueController = new AnimationController(duration: _kChildSegue)
-      ..forward();
-    _childSegue = new Tween<double>(
-      begin: -0.125,
-      end: 0.0
-    ).animate(new CurvedAnimation(
-      parent: _childSegueController,
-      curve: _kChildSegueInterval
-    ));
-  }
-
-  @override
-  void dispose() {
-    _childSegueController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void didUpdateConfig(FloatingActionButton oldConfig) {
-    super.didUpdateConfig(oldConfig);
-    if (Widget.canUpdate(oldConfig.child, config.child) && config.backgroundColor == oldConfig.backgroundColor)
-      return;
-    _childSegueController
-      ..value = 0.0
-      ..forward();
-  }
-
   bool _highlight = false;
 
   void _handleHighlightChanged(bool value) {
@@ -146,10 +113,7 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
     Widget result = new Center(
       child: new IconTheme(
         data: new IconThemeData(color: iconColor),
-        child: new RotationTransition(
-          turns: _childSegue,
-          child: config.child
-        )
+        child: config.child
       )
     );
 

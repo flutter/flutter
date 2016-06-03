@@ -7,6 +7,7 @@ import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
@@ -82,6 +83,15 @@ class BoxConstraints extends Constraints {
       maxWidth = width != null ? width : double.INFINITY,
       minHeight = height != null ? height : 0.0,
       maxHeight = height != null ? height : double.INFINITY;
+
+  /// Creates box constraints that require the given width or height, except if they are infinite.
+  const BoxConstraints.tightForFinite({
+    double width: double.INFINITY,
+    double height: double.INFINITY
+  }): minWidth = width != double.INFINITY ? width : 0.0,
+      maxWidth = width != double.INFINITY ? width : double.INFINITY,
+      minHeight = height != double.INFINITY ? height : 0.0,
+      maxHeight = height != double.INFINITY ? height : double.INFINITY;
 
   /// Creates box constraints that forbid sizes larger than the given size.
   BoxConstraints.loose(Size size)
@@ -486,44 +496,164 @@ abstract class RenderBox extends RenderObject {
       child.parentData = new BoxParentData();
   }
 
-  /// Returns the minimum width that this box could be without failing to paint
-  /// its contents within itself.
+  /// Returns the minimum width that this box could be without failing to
+  /// correctly paint its contents within itself, without clipping.
+  ///
+  /// The height argument may give a specific height to assume. The given height
+  /// can be infinite, meaning that the intrinsic width in an unconstrained
+  /// environment is being requested. The given height should never be negative
+  /// or null.
   ///
   /// Override in subclasses that implement [performLayout].
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return constraints.constrainWidth(0.0);
+  ///
+  /// If the layout algorithm is independent of the context (e.g. it always
+  /// tries to be a particular size), or if the layout algorithm is
+  /// width-in-height-out, or if the layout algorithm uses both the incoming
+  /// width and height constraints (e.g. it always sizes itself to
+  /// [BoxConstraints.biggest]), then the `height` argument should be ignored.
+  ///
+  /// If the layout algorithm is strictly height-in-width-out, or is
+  /// height-in-width-out when the width is unconstrained, then the height
+  /// argument is the height to use.
+  ///
+  /// This function should never return a negative or infinite value.
+  ///
+  /// ## Examples
+  ///
+  /// ### Text
+  ///
+  /// Text is the canonical example of a width-in-height-out algorithm. The
+  /// `height` argument is therefore ignored.
+  ///
+  /// Consider the string "Hello World" The _maximum_ intrinsic width (as
+  /// returned from [getMaxIntrinsicWidth]) would be the width of the string
+  /// with no line breaks.
+  ///
+  /// The minimum intrinsic width would be the width of the widest word, "Hello"
+  /// or "World". If the text is rendered in an even narrower width, however, it
+  /// might still not overflow. For example, maybe the rendering would put a
+  /// line-break half-way through the words, as in "Hel⁞lo⁞Wor⁞ld". However,
+  /// this wouldn't be a _correct_ rendering, and [getMinIntrinsicWidth] is
+  /// supposed to render the minimum width that the box could be without failing
+  /// to _correctly_ paint the contents within itself.
+  ///
+  /// The minimum intrinsic _height_ for a given width smaller than the minimum
+  /// intrinsic width could therefore be greater than the minimum intrinsic
+  /// height for the minimum intrinsic width.
+  ///
+  /// ### Viewports (e.g. scrolling lists)
+  ///
+  /// Some render boxes are intended to clip their children. For example, the
+  /// render box for a scrolling list might always size itself to its parents'
+  /// size (or rather, to the maximum incoming constraints), regardless of the
+  /// children's sizes, and then clip the children and position them based on
+  /// the current scroll offset.
+  ///
+  /// The intrinsic dimensions in these cases still depend on the children, even
+  /// though the layout algorithm sizes the box in a way independent of the
+  /// children. It is the size that is needed to paint the box's contents (in
+  /// this case, the children) _without clipping_ that matters.
+  ///
+  /// In many cases, viewports do not have efficient access to all the children,
+  /// and therefore cannot actually return a valid answer. In this case, when
+  /// [RenderObject.debugCheckingIntrinsics] is false and asserts are enabled,
+  /// the intrinsic functions should throw; in other cases, they should return
+  /// 0.0. See [RenderVirtualViewport.debugThrowIfNotCheckingIntrinsics].
+  ///
+  /// ### Aspect-ratio-driven boxes
+  ///
+  /// Some boxes always return a fixed size based on the constraints. For these
+  /// boxes, the intrinsic functions should return the appropriate size when the
+  /// incoming `height` or `width` argument is finite, treating that as a tight
+  /// constraint in the respective direction and treating the other direction's
+  /// constraints as unbounded. This is because the definitions of
+  /// [getMinIntrinsicWidth] and [getMinIntrinsicHeight] are in terms of what
+  /// the dimensions _could be_, and such boxes can only be one size in such
+  /// cases.
+  ///
+  /// When the incoming argument is not finite, then they should return the
+  /// actual intrinsic dimensions based on the contents, as any other box would.
+  double getMinIntrinsicWidth(double height) {
+    return 0.0;
   }
 
   /// Returns the smallest width beyond which increasing the width never
-  /// decreases the preferred height.
+  /// decreases the preferred height. The preferred height is the value that
+  /// would be returned by [getMinIntrinsicHeight] for that width.
   ///
   /// Override in subclasses that implement [performLayout].
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return constraints.constrainWidth(0.0);
+  ///
+  /// If the layout algorithm is strictly height-in-width-out, or is
+  /// height-in-width-out when the width is unconstrained, then this should
+  /// return the same value as [getMinIntrinsicWidth] for the same height.
+  ///
+  /// Otherwise, the height argument should be ignored, and the returned value
+  /// should be equal to or bigger than the value returned by
+  /// [getMinIntrinsicWidth].
+  ///
+  /// The value returned by this method might not match the size that the object
+  /// would actually take. For example, a [RenderBox] subclass that always
+  /// exactly sizes itself using [BoxConstraints.biggest] might well size itself
+  /// bigger than its max intrinsic size.
+  ///
+  /// This function should never return a negative or infinite value.
+  ///
+  /// See also examples in the definition of [getMinIntrinsicWidth].
+  double getMaxIntrinsicWidth(double height) {
+    return 0.0;
   }
 
-  /// Return the minimum height that this box could be without failing to paint
-  /// its contents within itself.
+  /// Returns the minimum height that this box could be without failing to
+  /// correctly paint its contents within itself, without clipping.
+  ///
+  /// The width argument may give a specific width to assume. The given width
+  /// can be infinite, meaning that the intrinsic height in an unconstrained
+  /// environment is being requested. The given width should never be negative
+  /// or null.
   ///
   /// Override in subclasses that implement [performLayout].
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return constraints.constrainHeight(0.0);
+  ///
+  /// If the layout algorithm is independent of the context (e.g. it always
+  /// tries to be a particular size), or if the layout algorithm is
+  /// height-in-width-out, or if the layout algorithm uses both the incoming
+  /// height and width constraints (e.g. it always sizes itself to
+  /// [BoxConstraints.biggest]), then the `width` argument should be ignored.
+  ///
+  /// If the layout algorithm is strictly width-in-height-out, or is
+  /// width-in-height-out when the height is unconstrained, then the width
+  /// argument is the width to use.
+  ///
+  /// This function should never return a negative or infinite value.
+  ///
+  /// See also examples in the definition of [getMinIntrinsicWidth].
+  double getMinIntrinsicHeight(double width) {
+    return 0.0;
   }
 
   /// Returns the smallest height beyond which increasing the height never
-  /// decreases the preferred width.
-  ///
-  /// If the layout algorithm used is width-in-height-out, i.e. the height
-  /// depends on the width and not vice versa, then this will return the same
-  /// as getMinIntrinsicHeight().
+  /// decreases the preferred width. The preferred width is the value that
+  /// would be returned by [getMinIntrinsicWidth] for that height.
   ///
   /// Override in subclasses that implement [performLayout].
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return constraints.constrainHeight(0.0);
+  ///
+  /// If the layout algorithm is strictly width-in-height-out, or is
+  /// width-in-height-out when the height is unconstrained, then this should
+  /// return the same value as [getMinIntrinsicHeight] for the same width.
+  ///
+  /// Otherwise, the width argument should be ignored, and the returned value
+  /// should be equal to or bigger than the value returned by
+  /// [getMinIntrinsicHeight].
+  ///
+  /// The value returned by this method might not match the size that the object
+  /// would actually take. For example, a [RenderBox] subclass that always
+  /// exactly sizes itself using [BoxConstraints.biggest] might well size itself
+  /// bigger than its max intrinsic size.
+  ///
+  /// This function should never return a negative or infinite value.
+  ///
+  /// See also examples in the definition of [getMinIntrinsicWidth].
+  double getMaxIntrinsicHeight(double width) {
+    return 0.0;
   }
 
   /// Whether this render object has undergone layout and has a [size].
@@ -686,6 +816,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// Subclasses should override this function to supply the distances to their
   /// baselines.
+  @protected
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(_debugDoingBaseline);
     return null;
@@ -766,40 +897,50 @@ abstract class RenderBox extends RenderObject {
         );
       }
       if (_debugNeedsIntrinsicSizeCheck || debugCheckIntrinsicSizes) {
-        // verify that the intrinsics are also within the constraints
+        // verify that the intrinsics are sane
         assert(!RenderObject.debugCheckingIntrinsics);
         RenderObject.debugCheckingIntrinsics = true;
-        double intrinsic;
         StringBuffer failures = new StringBuffer();
         int failureCount = 0;
-        intrinsic = getMinIntrinsicWidth(constraints);
-        if (intrinsic != constraints.constrainWidth(intrinsic)) {
-          failures.writeln(' * getMinIntrinsicWidth() -- returned: w=$intrinsic');
-          failureCount += 1;
+
+        double testIntrinsic(double function(double extent), String name, double constraint) {
+          final double result = function(constraint);
+          if (result < 0) {
+            failures.writeln(' * $name($constraint) returned a negative value: $result');
+            failureCount += 1;
+          }
+          if (!result.isFinite) {
+            failures.writeln(' * $name($constraint) returned a non-finite value: $result');
+            failureCount += 1;
+          }
+          return result;
         }
-        intrinsic = getMaxIntrinsicWidth(constraints);
-        if (intrinsic != constraints.constrainWidth(intrinsic)) {
-          failures.writeln(' * getMaxIntrinsicWidth() -- returned: w=$intrinsic');
-          failureCount += 1;
+
+        void testIntrinsicsForValues(double getMin(double extent), double getMax(double extent), String name, double constraint) {
+          final double min = testIntrinsic(getMin, 'getMinIntrinsic$name', constraint);
+          final double max = testIntrinsic(getMax, 'getMaxIntrinsic$name', constraint);
+          if (min > max) {
+            failures.writeln(' * getMinIntrinsic$name($constraint) returned a larger value ($min) than getMaxIntrinsic$name($constraint) ($max)');
+            failureCount += 1;
+          }
         }
-        intrinsic = getMinIntrinsicHeight(constraints);
-        if (intrinsic != constraints.constrainHeight(intrinsic)) {
-          failures.writeln(' * getMinIntrinsicHeight() -- returned: h=$intrinsic');
-          failureCount += 1;
-        }
-        intrinsic = getMaxIntrinsicHeight(constraints);
-        if (intrinsic != constraints.constrainHeight(intrinsic)) {
-          failures.writeln(' * getMaxIntrinsicHeight() -- returned: h=$intrinsic');
-          failureCount += 1;
-        }
+
+        testIntrinsicsForValues(getMinIntrinsicWidth, getMaxIntrinsicWidth, 'Width', double.INFINITY);
+        testIntrinsicsForValues(getMinIntrinsicHeight, getMaxIntrinsicHeight, 'Height', double.INFINITY);
+        if (constraints.hasBoundedWidth)
+          testIntrinsicsForValues(getMinIntrinsicWidth, getMaxIntrinsicWidth, 'Width', constraints.maxWidth);
+        if (constraints.hasBoundedHeight)
+          testIntrinsicsForValues(getMinIntrinsicHeight, getMaxIntrinsicHeight, 'Height', constraints.maxHeight);
+
+        // TODO(ianh): Test that values are internally consistent in more ways than the above.
+
         RenderObject.debugCheckingIntrinsics = false;
         _debugNeedsIntrinsicSizeCheck = false;
         if (failures.isNotEmpty) {
           assert(failureCount > 0);
           throw new FlutterError(
-            'The intrinsic dimension methods of the $runtimeType class returned values that violate the given constraints.\n'
-            'The constraints were: $constraints\n'
-            'The following method${failureCount > 1 ? "s" : ""} returned values outside of those constraints:\n'
+            'The intrinsic dimension methods of the $runtimeType class returned values that violate the intrinsic protocol contract.\n'
+            'The following ${failureCount > 1 ? "failures" : "failure"} was detected:\n'
             '$failures'
             'If you are not writing your own RenderBox subclass, then this is not\n'
             'your fault. Contact support: https://github.com/flutter/flutter/issues/new'
@@ -899,6 +1040,7 @@ abstract class RenderBox extends RenderObject {
 
   /// Override this function if this render object can be hit even if its
   /// children were not hit.
+  @protected
   bool hitTestSelf(Point position) => false;
 
   /// Override this function to check whether any children are located at the
@@ -907,6 +1049,7 @@ abstract class RenderBox extends RenderObject {
   /// Typically children should be hit tested in reverse paint order so that
   /// hit tests at locations where children overlap hit the child that is
   /// visually "on top" (i.e., paints later).
+  @protected
   bool hitTestChildren(HitTestResult result, { Point position }) => false;
 
   /// Multiply the transform from the parent's coordinate system to this box's
@@ -1013,6 +1156,7 @@ abstract class RenderBox extends RenderObject {
   /// In debug mode, paints a border around this render box.
   ///
   /// Called for every [RenderBox] when [debugPaintSizeEnabled] is true.
+  @protected
   void debugPaintSize(PaintingContext context, Offset offset) {
     assert(() {
       Paint paint = new Paint()
@@ -1027,6 +1171,7 @@ abstract class RenderBox extends RenderObject {
   /// In debug mode, paints a line for each baseline.
   ///
   /// Called for every [RenderBox] when [debugPaintBaselinesEnabled] is true.
+  @protected
   void debugPaintBaselines(PaintingContext context, Offset offset) {
     assert(() {
       Paint paint = new Paint()
@@ -1058,6 +1203,7 @@ abstract class RenderBox extends RenderObject {
   /// In debug mode, paints a rectangle if this render box has received more pointer downs than pointer up events.
   ///
   /// Called for every [RenderBox] when [debugPaintPointersEnabled] is true.
+  @protected
   void debugPaintPointers(PaintingContext context, Offset offset) {
     assert(() {
       if (_debugActivePointers > 0) {

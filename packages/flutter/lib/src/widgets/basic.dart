@@ -847,12 +847,18 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   ///
   /// If non-null, the child is given a tight width constraint that is the max
   /// incoming width constraint multipled by this factor.
+  ///
+  /// If null, the incoming width constraints are passed to the child
+  /// unmodified.
   final double widthFactor;
 
   /// If non-null, the fraction of the incoming height given to the child.
   ///
   /// If non-null, the child is given a tight height constraint that is the max
   /// incoming height constraint multipled by this factor.
+  ///
+  /// If null, the incoming height constraints are passed to the child
+  /// unmodified.
   final double heightFactor;
 
   /// How to align the child.

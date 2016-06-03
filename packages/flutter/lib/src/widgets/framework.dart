@@ -287,7 +287,16 @@ abstract class Widget {
     return '$name(${data.join("; ")})';
   }
 
+  @protected
+  @mustCallSuper
   void debugFillDescription(List<String> description) { }
+
+  /// Lets [Element.debugFillDescription] call the @protected method
+  /// [debugFillDescription]. This pattern prevents other unwanted callers
+  /// outside this library.
+  void _debugFillDescription(List<String> description) {
+    debugFillDescription(description);
+  }
 
   static bool canUpdate(Widget oldWidget, Widget newWidget) {
     return oldWidget.runtimeType == newWidget.runtimeType &&
@@ -315,6 +324,7 @@ abstract class StatelessWidget extends Widget {
   /// The given build context object contains information about the location in
   /// the tree at which this widget is being built. For example, the context
   /// provides the set of inherited widgets for this location in the tree.
+  @protected
   Widget build(BuildContext context);
 }
 
@@ -377,6 +387,7 @@ abstract class State<T extends StatefulWidget> {
   ///
   /// If you override this, make sure your method starts with a call to
   /// super.initState().
+  @mustCallSuper
   void initState() {
     assert(_debugLifecycleState == _StateLifecycle.created);
     assert(() { _debugLifecycleState = _StateLifecycle.initialized; return true; });
@@ -441,6 +452,7 @@ abstract class State<T extends StatefulWidget> {
   /// Use this to clean up any links between this state and other
   /// elements in the tree (e.g. if you have provided an ancestor with
   /// a pointer to a descendant's renderObject).
+  @mustCallSuper
   void deactivate() { }
 
   /// Called when this object is removed from the tree permanently.
@@ -449,6 +461,7 @@ abstract class State<T extends StatefulWidget> {
   ///
   /// If you override this, make sure to end your method with a call to
   /// super.dispose().
+  @mustCallSuper
   void dispose() {
     assert(_debugLifecycleState == _StateLifecycle.ready);
     assert(() { _debugLifecycleState = _StateLifecycle.defunct; return true; });
@@ -465,11 +478,13 @@ abstract class State<T extends StatefulWidget> {
   /// The context argument is always the same as [State.context]. This argument
   /// is provided redundantly here to match the [WidgetBuilder] function
   /// signature used by [StatelessWidget.build] and other widgets.
+  @protected
   Widget build(BuildContext context);
 
   /// Called when an Inherited widget in the ancestor chain has changed. Usually
   /// there is nothing to do here; whenever this is called, build() is also
   /// called.
+  @mustCallSuper
   void dependenciesChanged() { }
 
   @override
@@ -479,6 +494,8 @@ abstract class State<T extends StatefulWidget> {
     return '$runtimeType(${data.join("; ")})';
   }
 
+  @protected
+  @mustCallSuper
   void debugFillDescription(List<String> description) {
     description.add('$hashCode');
     assert(() {
@@ -958,6 +975,7 @@ abstract class Element implements BuildContext {
   /// The updateChild() method returns the new child, if it had to create one,
   /// or the child that was passed in, if it just had to update the child, or
   /// null, if it removed the child and did not replace it.
+  @protected
   Element updateChild(Element child, Widget newWidget, dynamic newSlot) {
     if (newWidget == null) {
       if (child != null)
@@ -987,6 +1005,7 @@ abstract class Element implements BuildContext {
   /// created. Use this to initialize state that depends on having a parent. For
   /// state that is independent of the position in the tree, it's better to just
   /// initialize the Element in the constructor.
+  @mustCallSuper
   void mount(Element parent, dynamic newSlot) {
     assert(_debugLifecycleState == _ElementLifecycle.initial);
     assert(widget != null);
@@ -1010,6 +1029,7 @@ abstract class Element implements BuildContext {
   }
 
   /// Called when an Element receives a new configuration widget.
+  @mustCallSuper
   void update(Widget newWidget) {
     assert(_debugLifecycleState == _ElementLifecycle.active);
     assert(widget != null);
@@ -1024,6 +1044,7 @@ abstract class Element implements BuildContext {
   /// Called by MultiChildRenderObjectElement, and other RenderObjectElement
   /// subclasses that have multiple children, to update the slot of a particular
   /// child when the child is moved in its child list.
+  @protected
   void updateSlotForChild(Element child, dynamic newSlot) {
     assert(_debugLifecycleState == _ElementLifecycle.active);
     assert(child != null);
@@ -1083,6 +1104,7 @@ abstract class Element implements BuildContext {
     return element;
   }
 
+  @protected
   Element inflateWidget(Widget newWidget, dynamic newSlot) {
     assert(newWidget != null);
     Key key = newWidget.key;
@@ -1115,6 +1137,7 @@ abstract class Element implements BuildContext {
     });
   }
 
+  @protected
   void deactivateChild(Element child) {
     assert(child != null);
     assert(child._parent == this);
@@ -1141,6 +1164,7 @@ abstract class Element implements BuildContext {
 
   /// Called when a previously de-activated widget (see [deactivate]) is reused
   /// instead of being unmounted (see [unmount]).
+  @mustCallSuper
   void activate() {
     assert(_debugLifecycleState == _ElementLifecycle.inactive);
     assert(widget != null);
@@ -1156,6 +1180,7 @@ abstract class Element implements BuildContext {
 
   // TODO(ianh): Define activation/deactivation thoroughly (other methods point
   // here for details).
+  @mustCallSuper
   void deactivate() {
     assert(_debugLifecycleState == _ElementLifecycle.active);
     assert(widget != null);
@@ -1177,12 +1202,14 @@ abstract class Element implements BuildContext {
   }
 
   /// Called after children have been deactivated (see [deactivate]).
+  @mustCallSuper
   void debugDeactivated() {
     assert(_debugLifecycleState == _ElementLifecycle.inactive);
   }
 
   /// Called when an Element is removed from the tree permanently after having
   /// been deactivated (see [deactivate]).
+  @mustCallSuper
   void unmount() {
     assert(_debugLifecycleState == _ElementLifecycle.inactive);
     assert(widget != null);
@@ -1263,7 +1290,8 @@ abstract class Element implements BuildContext {
       ancestor = ancestor._parent;
   }
 
-  void dependenciesChanged();
+  @mustCallSuper
+  void dependenciesChanged() { }
 
   String debugGetCreatorChain(int limit) {
     List<String> chain = <String>[];
@@ -1289,6 +1317,8 @@ abstract class Element implements BuildContext {
     return '$name(${data.join("; ")})';
   }
 
+  @protected
+  @mustCallSuper
   void debugFillDescription(List<String> description) {
     if (depth == null)
       description.add('no depth');
@@ -1297,7 +1327,7 @@ abstract class Element implements BuildContext {
     } else {
       if (widget.key != null)
         description.add('${widget.key}');
-      widget.debugFillDescription(description);
+      widget._debugFillDescription(description);
     }
   }
 
@@ -1340,6 +1370,7 @@ class ErrorWidget extends LeafRenderObjectWidget {
 
   @override
   void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
     description.add('message: ' + _stringify(message));
   }
 }
@@ -1457,10 +1488,12 @@ abstract class BuildableElement extends Element {
   }
 
   /// Called by rebuild() after the appropriate checks have been made.
+  @protected
   void performRebuild();
 
   @override
   void dependenciesChanged() {
+    super.dependenciesChanged();
     assert(_active);
     markNeedsBuild();
   }
@@ -1732,6 +1765,7 @@ abstract class _ProxyElement extends ComponentElement {
     rebuild();
   }
 
+  @protected
   void notifyClients(_ProxyWidget oldWidget);
 }
 
@@ -1827,6 +1861,7 @@ class InheritedElement extends _ProxyElement {
   /// returns true. Subclasses of [InheritedElement] might wish to call this
   /// function at other times if their inherited information changes outside of
   /// the build phase.
+  @protected
   void dispatchDependenciesChanged() {
     for (Element dependent in _dependents) {
       assert(() {
@@ -1878,7 +1913,7 @@ abstract class RenderObjectElement extends BuildableElement {
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
     _renderObject = widget.createRenderObject(this);
-    assert(() { debugUpdateRenderObjectOwner(); return true; });
+    assert(() { _debugUpdateRenderObjectOwner(); return true; });
     assert(_slot == newSlot);
     attachRenderObject(newSlot);
     _dirty = false;
@@ -1888,12 +1923,12 @@ abstract class RenderObjectElement extends BuildableElement {
   void update(RenderObjectWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
-    assert(() { debugUpdateRenderObjectOwner(); return true; });
+    assert(() { _debugUpdateRenderObjectOwner(); return true; });
     widget.updateRenderObject(this, renderObject);
     _dirty = false;
   }
 
-  void debugUpdateRenderObjectOwner() {
+  void _debugUpdateRenderObjectOwner() {
     _renderObject.debugCreator = debugGetCreatorChain(10);
   }
 
@@ -1907,6 +1942,7 @@ abstract class RenderObjectElement extends BuildableElement {
   /// Attempts to update the given old children list using the given new
   /// widgets, removing obsolete elements and introducing new ones as necessary,
   /// and then returns the new child list.
+  @protected
   List<Element> updateChildren(List<Element> oldChildren, List<Widget> newWidgets, { Set<Element> detachedChildren }) {
     assert(oldChildren != null);
     assert(newWidgets != null);
@@ -2107,8 +2143,13 @@ abstract class RenderObjectElement extends BuildableElement {
     _slot = null;
   }
 
+  @protected
   void insertChildRenderObject(RenderObject child, dynamic slot);
+
+  @protected
   void moveChildRenderObject(RenderObject child, dynamic slot);
+
+  @protected
   void removeChildRenderObject(RenderObject child);
 
   @override

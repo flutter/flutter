@@ -17,35 +17,31 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
   }
 
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
+  double getMinIntrinsicWidth(double height) {
     if (child != null)
-      return child.getMinIntrinsicWidth(constraints);
-    return super.getMinIntrinsicWidth(constraints);
+      return child.getMinIntrinsicWidth(height);
+    return 0.0;
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
+  double getMaxIntrinsicWidth(double height) {
     if (child != null)
-      return child.getMaxIntrinsicWidth(constraints);
-    return super.getMaxIntrinsicWidth(constraints);
+      return child.getMaxIntrinsicWidth(height);
+    return 0.0;
   }
 
   @override
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
+  double getMinIntrinsicHeight(double width) {
     if (child != null)
-      return child.getMinIntrinsicHeight(constraints);
-    return super.getMinIntrinsicHeight(constraints);
+      return child.getMinIntrinsicHeight(width);
+    return 0.0;
   }
 
   @override
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
+  double getMaxIntrinsicHeight(double width) {
     if (child != null)
-      return child.getMaxIntrinsicHeight(constraints);
-    return super.getMaxIntrinsicHeight(constraints);
+      return child.getMaxIntrinsicHeight(width);
+    return 0.0;
   }
 
   @override
@@ -115,39 +111,39 @@ class RenderPadding extends RenderShiftedBox {
   }
 
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    double totalPadding = padding.left + padding.right;
-    if (child != null)
-      return constraints.constrainWidth(child.getMinIntrinsicWidth(constraints.deflate(padding)) + totalPadding);
-    return constraints.constrainWidth(totalPadding);
+  double getMinIntrinsicWidth(double height) {
+    final double totalHorizontalPadding = padding.left + padding.right;
+    final double totalVerticalPadding = padding.top + padding.bottom;
+    if (child != null) // next line relies on double.INFINITY absorption
+      return child.getMinIntrinsicWidth(height - totalVerticalPadding) + totalHorizontalPadding;
+    return totalHorizontalPadding;
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    double totalPadding = padding.left + padding.right;
-    if (child != null)
-      return constraints.constrainWidth(child.getMaxIntrinsicWidth(constraints.deflate(padding)) + totalPadding);
-    return constraints.constrainWidth(totalPadding);
+  double getMaxIntrinsicWidth(double height) {
+    final double totalHorizontalPadding = padding.left + padding.right;
+    final double totalVerticalPadding = padding.top + padding.bottom;
+    if (child != null) // next line relies on double.INFINITY absorption
+      return child.getMaxIntrinsicWidth(height - totalVerticalPadding) + totalHorizontalPadding;
+    return totalHorizontalPadding;
   }
 
   @override
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    double totalPadding = padding.top + padding.bottom;
-    if (child != null)
-      return constraints.constrainHeight(child.getMinIntrinsicHeight(constraints.deflate(padding)) + totalPadding);
-    return constraints.constrainHeight(totalPadding);
+  double getMinIntrinsicHeight(double width) {
+    final double totalHorizontalPadding = padding.left + padding.right;
+    final double totalVerticalPadding = padding.top + padding.bottom;
+    if (child != null) // next line relies on double.INFINITY absorption
+      return child.getMinIntrinsicHeight(width - totalHorizontalPadding) + totalVerticalPadding;
+    return totalVerticalPadding;
   }
 
   @override
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    double totalPadding = padding.top + padding.bottom;
-    if (child != null)
-      return constraints.constrainHeight(child.getMaxIntrinsicHeight(constraints.deflate(padding)) + totalPadding);
-    return constraints.constrainHeight(totalPadding);
+  double getMaxIntrinsicHeight(double width) {
+    final double totalHorizontalPadding = padding.left + padding.right;
+    final double totalVerticalPadding = padding.top + padding.bottom;
+    if (child != null) // next line relies on double.INFINITY absorption
+      return child.getMaxIntrinsicHeight(width - totalHorizontalPadding) + totalVerticalPadding;
+    return totalVerticalPadding;
   }
 
   @override
@@ -503,30 +499,6 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   }
 
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return constraints.minWidth;
-  }
-
-  @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return constraints.minWidth;
-  }
-
-  @override
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return constraints.minHeight;
-  }
-
-  @override
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return constraints.minHeight;
-  }
-
-  @override
   bool get sizedByParent => true;
 
   @override
@@ -579,27 +551,23 @@ class RenderSizedOverflowBox extends RenderAligningShiftedBox {
   }
 
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return constraints.constrainWidth(_requestedSize.width);
+  double getMinIntrinsicWidth(double height) {
+    return _requestedSize.width;
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return constraints.constrainWidth(_requestedSize.width);
+  double getMaxIntrinsicWidth(double height) {
+    return _requestedSize.width;
   }
 
   @override
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return constraints.constrainHeight(_requestedSize.height);
+  double getMinIntrinsicHeight(double width) {
+    return _requestedSize.height;
   }
 
   @override
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return constraints.constrainHeight(_requestedSize.height);
+  double getMaxIntrinsicHeight(double width) {
+    return _requestedSize.height;
   }
 
   @override
@@ -649,7 +617,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   ///
   /// If non-null, the child is given a tight width constraint that is the max
   /// incoming width constraint multipled by this factor.  If null, the child is
-  /// given the incoming width constraings.
+  /// given the incoming width constraints.
   double get widthFactor => _widthFactor;
   double _widthFactor;
   set widthFactor (double value) {
@@ -664,7 +632,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   ///
   /// If non-null, the child is given a tight height constraint that is the max
   /// incoming width constraint multipled by this factor.  If null, the child is
-  /// given the incoming width constraings.
+  /// given the incoming width constraints.
   double get heightFactor => _heightFactor;
   double _heightFactor;
   set heightFactor (double value) {
@@ -699,35 +667,51 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   }
 
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    if (child != null)
-      return constraints.constrainWidth(child.getMinIntrinsicWidth(_getInnerConstraints(constraints)));
-    return constraints.constrainWidth(_getInnerConstraints(constraints).constrainWidth(0.0));
+  double getMinIntrinsicWidth(double height) {
+    double result;
+    if (child == null) {
+      result = super.getMinIntrinsicWidth(height);
+    } else { // the following line relies on double.INFINITY absorption
+      result = child.getMinIntrinsicWidth(height * (_heightFactor ?? 1.0));
+    }
+    assert(result.isFinite);
+    return result / (_widthFactor ?? 1.0);
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    if (child != null)
-      return constraints.constrainWidth(child.getMaxIntrinsicWidth(_getInnerConstraints(constraints)));
-    return constraints.constrainWidth(_getInnerConstraints(constraints).constrainWidth(0.0));
+  double getMaxIntrinsicWidth(double height) {
+    double result;
+    if (child == null) {
+      result = super.getMaxIntrinsicWidth(height);
+    } else { // the following line relies on double.INFINITY absorption
+      result = child.getMaxIntrinsicWidth(height * (_heightFactor ?? 1.0));
+    }
+    assert(result.isFinite);
+    return result / (_widthFactor ?? 1.0);
   }
 
   @override
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    if (child != null)
-      return constraints.constrainHeight(child.getMinIntrinsicHeight(_getInnerConstraints(constraints)));
-    return constraints.constrainHeight(_getInnerConstraints(constraints).constrainHeight(0.0));
+  double getMinIntrinsicHeight(double width) {
+    double result;
+    if (child == null) {
+      result = super.getMinIntrinsicHeight(width);
+    } else { // the following line relies on double.INFINITY absorption
+      result = child.getMinIntrinsicHeight(width * (_widthFactor ?? 1.0));
+    }
+    assert(result.isFinite);
+    return result / (_heightFactor ?? 1.0);
   }
 
   @override
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    if (child != null)
-      return constraints.constrainHeight(child.getMaxIntrinsicHeight(_getInnerConstraints(constraints)));
-    return constraints.constrainHeight(_getInnerConstraints(constraints).constrainHeight(0.0));
+  double getMaxIntrinsicHeight(double width) {
+    double result;
+    if (child == null) {
+      result = super.getMaxIntrinsicHeight(width);
+    } else { // the following line relies on double.INFINITY absorption
+      result = child.getMaxIntrinsicHeight(width * (_widthFactor ?? 1.0));
+    }
+    assert(result.isFinite);
+    return result / (_heightFactor ?? 1.0);
   }
 
   @override
@@ -797,28 +781,40 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
     return constraints.constrain(_delegate.getSize(constraints));
   }
 
+  // TODO(ianh): It's a bit dubious to be using the getSize function from the delegate to
+  // figure out the intrinsic dimensions. We really should either not support intrinsics,
+  // or we should expose intrinsic delegate callbacks and throw if they're not implemented.
+
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return _getSize(constraints).width;
+  double getMinIntrinsicWidth(double height) {
+    final double width = _getSize(new BoxConstraints.tightForFinite(height: height)).width;
+    if (width.isFinite)
+      return width;
+    return 0.0;
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return _getSize(constraints).width;
+  double getMaxIntrinsicWidth(double height) {
+    final double width = _getSize(new BoxConstraints.tightForFinite(height: height)).width;
+    if (width.isFinite)
+      return width;
+    return 0.0;
   }
 
   @override
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return _getSize(constraints).height;
+  double getMinIntrinsicHeight(double width) {
+    final double height = _getSize(new BoxConstraints.tightForFinite(width: width)).height;
+    if (height.isFinite)
+      return height;
+    return 0.0;
   }
 
   @override
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return _getSize(constraints).height;
+  double getMaxIntrinsicHeight(double width) {
+    final double height = _getSize(new BoxConstraints.tightForFinite(width: width)).height;
+    if (height.isFinite)
+      return height;
+    return 0.0;
   }
 
   @override

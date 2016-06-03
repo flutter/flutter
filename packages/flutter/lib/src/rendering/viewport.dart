@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui show window;
 
+import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
@@ -218,35 +219,31 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
   }
 
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
+  double getMinIntrinsicWidth(double height) {
     if (child != null)
-      return constraints.constrainWidth(child.getMinIntrinsicWidth(_getInnerConstraints(constraints)));
-    return super.getMinIntrinsicWidth(constraints);
+      return child.getMinIntrinsicWidth(height);
+    return 0.0;
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
+  double getMaxIntrinsicWidth(double height) {
     if (child != null)
-      return constraints.constrainWidth(child.getMaxIntrinsicWidth(_getInnerConstraints(constraints)));
-    return super.getMaxIntrinsicWidth(constraints);
+      return child.getMaxIntrinsicWidth(height);
+    return 0.0;
   }
 
   @override
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
+  double getMinIntrinsicHeight(double width) {
     if (child != null)
-      return constraints.constrainHeight(child.getMinIntrinsicHeight(_getInnerConstraints(constraints)));
-    return super.getMinIntrinsicHeight(constraints);
+      return child.getMinIntrinsicHeight(width);
+    return 0.0;
   }
 
   @override
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
+  double getMaxIntrinsicHeight(double width) {
     if (child != null)
-      return constraints.constrainHeight(child.getMaxIntrinsicHeight(_getInnerConstraints(constraints)));
-    return super.getMaxIntrinsicHeight(constraints);
+      return child.getMaxIntrinsicHeight(width);
+    return 0.0;
   }
 
   // We don't override computeDistanceToActualBaseline(), because we
@@ -351,6 +348,52 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
       return;
     _callback = value;
     markNeedsLayout();
+  }
+
+  /// Throws an exception if asserts are enabled, unless the
+  /// [RenderObject.debugCheckingIntrinsics] flag is set.
+  ///
+  /// This is a convenience function for subclasses to call from their
+  /// intrinsic-sizing functions if they don't have a good way to generate the
+  /// numbers.
+  @protected
+  bool debugThrowIfNotCheckingIntrinsics() {
+    assert(() {
+      if (!RenderObject.debugCheckingIntrinsics) {
+        throw new FlutterError(
+          'RenderVirtualViewport does not support returning intrinsic dimensions.\n'
+          'Calculating the intrinsic dimensions would require walking the entire '
+          'child list, which cannot reliably and efficiently be done for render '
+          'objects that potentially generate their child list during layout.'
+        );
+      }
+      return true;
+    });
+    return true;
+  }
+
+  @override
+  double getMinIntrinsicWidth(double height) {
+    assert(debugThrowIfNotCheckingIntrinsics());
+    return 0.0;
+  }
+
+  @override
+  double getMaxIntrinsicWidth(double height) {
+    assert(debugThrowIfNotCheckingIntrinsics());
+    return 0.0;
+  }
+
+  @override
+  double getMinIntrinsicHeight(double width) {
+    assert(debugThrowIfNotCheckingIntrinsics());
+    return 0.0;
+  }
+
+  @override
+  double getMaxIntrinsicHeight(double width) {
+    assert(debugThrowIfNotCheckingIntrinsics());
+    return 0.0;
   }
 
   @override

@@ -179,32 +179,77 @@ abstract class GridDelegate {
     return getGridSpecification(constraints, childCount).gridSize;
   }
 
+  // TODO(ianh): It's a bit dubious to be using the getSize function from the delegate to
+  // figure out the intrinsic dimensions. We really should either not support intrinsics,
+  // or we should expose intrinsic delegate callbacks and throw if they're not implemented.
+
   /// Returns the minimum width that this grid could be without failing to paint
   /// its contents within itself.
-  double getMinIntrinsicWidth(BoxConstraints constraints, int childCount) {
-    return constraints.constrainWidth(_getGridSize(constraints, childCount).width);
+  ///
+  /// Override this to provide a more efficient solution. The default
+  /// implementation actually instantiates a grid specification and measures the
+  /// grid at the given height and child count.
+  ///
+  /// For more details, see [RenderBox.getMinIntrinsicWidth].
+  double getMinIntrinsicWidth(double height, int childCount) {
+    final double width = _getGridSize(new BoxConstraints.tightForFinite(height: height), childCount).width;
+    if (width.isFinite)
+      return width;
+    return 0.0;
   }
 
   /// Returns the smallest width beyond which increasing the width never
   /// decreases the preferred height.
-  double getMaxIntrinsicWidth(BoxConstraints constraints, int childCount) {
-    return constraints.constrainWidth(_getGridSize(constraints, childCount).width);
+  ///
+  /// Override this to provide a more efficient solution. The default
+  /// implementation actually instantiates a grid specification and measures the
+  /// grid at the given height and child count.
+  ///
+  /// For more details, see [RenderBox.getMaxIntrinsicWidth].
+  double getMaxIntrinsicWidth(double height, int childCount) {
+    final double width = _getGridSize(new BoxConstraints.tightForFinite(height: height), childCount).width;
+    if (width.isFinite)
+      return width;
+    return 0.0;
   }
 
   /// Return the minimum height that this grid could be without failing to paint
   /// its contents within itself.
-  double getMinIntrinsicHeight(BoxConstraints constraints, int childCount) {
-    return constraints.constrainHeight(_getGridSize(constraints, childCount).height);
+  ///
+  /// Override this to provide a more efficient solution. The default
+  /// implementation actually instantiates a grid specification and measures the
+  /// grid at the given width and child count.
+  ///
+  /// For more details, see [RenderBox.getMinIntrinsicHeight].
+  double getMinIntrinsicHeight(double width, int childCount) {
+    final double height = _getGridSize(new BoxConstraints.tightForFinite(width: width), childCount).height;
+    if (height.isFinite)
+      return height;
+    return 0.0;
   }
 
   /// Returns the smallest height beyond which increasing the height never
   /// decreases the preferred width.
-  double getMaxIntrinsicHeight(BoxConstraints constraints, int childCount) {
-    return constraints.constrainHeight(_getGridSize(constraints, childCount).height);
+  ///
+  /// Override this to provide a more efficient solution. The default
+  /// implementation actually instantiates a grid specification and measures the
+  /// grid at the given width and child count.
+  ///
+  /// For more details, see [RenderBox.getMaxIntrinsicHeight].
+  double getMaxIntrinsicHeight(double width, int childCount) {
+    final double height = _getGridSize(new BoxConstraints.tightForFinite(width: width), childCount).height;
+    if (height.isFinite)
+      return height;
+    return 0.0;
   }
 }
 
 /// A [GridDelegate] the places its children in order throughout the grid.
+///
+/// Subclasses must still provide a mechanism for sizing the grid by
+/// implementing [getGridSpecification], and should also provide efficent
+/// versions of the intrinsic sizing functions ([getMinIntrinsicWidth] and
+/// company).
 abstract class GridDelegateWithInOrderChildPlacement extends GridDelegate {
   /// Initializes [columnSpacing], [rowSpacing], and [padding] for subclasses.
   ///
@@ -246,7 +291,11 @@ abstract class GridDelegateWithInOrderChildPlacement extends GridDelegate {
 }
 
 
-/// A [GridDelegate] that divides the grid's width evenly amount a fixed number of columns.
+/// A [GridDelegate] that divides the grid's width evenly for a fixed number of columns.
+///
+/// Grids using this delegate cannot validly be placed inside an unconstrained
+/// horizontal space, since they attempt to divide the incoming horizontal
+/// maximum width constraint.
 class FixedColumnCountGridDelegate extends GridDelegateWithInOrderChildPlacement {
   /// Creates a grid delegate that uses a fixed column count.
   ///
@@ -293,13 +342,27 @@ class FixedColumnCountGridDelegate extends GridDelegateWithInOrderChildPlacement
   }
 
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints, int childCount) {
-    return constraints.constrainWidth(0.0);
+  double getMinIntrinsicWidth(double height, int childCount) {
+    // TODO(ianh): Strictly, this should examine the children.
+    return 0.0;
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints, int childCount) {
-    return constraints.constrainWidth(0.0);
+  double getMaxIntrinsicWidth(double height, int childCount) {
+    // TODO(ianh): Strictly, this should examine the children.
+    return 0.0;
+  }
+
+  @override
+  double getMinIntrinsicHeight(double width, int childCount) {
+    // TODO(ianh): Strictly, this should examine the children.
+    return 0.0;
+  }
+
+  @override
+  double getMaxIntrinsicHeight(double width, int childCount) {
+    // TODO(ianh): Strictly, this should examine the children.
+    return 0.0;
   }
 }
 
@@ -310,7 +373,6 @@ class FixedColumnCountGridDelegate extends GridDelegateWithInOrderChildPlacement
 ///
 ///  - The tile width evenly divides the width of the grid.
 ///  - The tile width is at most [maxTileWidth].
-///
 class MaxTileWidthGridDelegate extends GridDelegateWithInOrderChildPlacement {
   /// Creates a grid delegate that uses a max tile width.
   ///
@@ -334,7 +396,18 @@ class MaxTileWidthGridDelegate extends GridDelegateWithInOrderChildPlacement {
 
   @override
   GridSpecification getGridSpecification(BoxConstraints constraints, int childCount) {
-    assert(constraints.maxWidth < double.INFINITY);
+    if (!constraints.maxWidth.isFinite) {
+      // if we're unbounded, just shrink-wrap around a single line of tiles
+      return new GridSpecification.fromRegularTiles(
+        tileWidth: maxTileWidth,
+        tileHeight: maxTileWidth / tileAspectRatio,
+        columnCount: childCount,
+        rowCount: 1,
+        columnSpacing: columnSpacing,
+        rowSpacing: rowSpacing,
+        padding: padding
+      );
+    }
     final double gridWidth = math.max(0.0, constraints.maxWidth - padding.horizontal);
     int columnCount = (gridWidth / maxTileWidth).ceil();
     int rowCount = (childCount / columnCount).ceil();
@@ -359,14 +432,17 @@ class MaxTileWidthGridDelegate extends GridDelegateWithInOrderChildPlacement {
   }
 
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints, int childCount) {
-    return constraints.constrainWidth(0.0);
+  double getMinIntrinsicWidth(double height, int childCount) {
+    // TODO(ianh): Strictly, this should examine the children.
+    return 0.0;
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints, int childCount) {
-    return constraints.constrainWidth(maxTileWidth * childCount);
+  double getMaxIntrinsicWidth(double height, int childCount) {
+    return maxTileWidth * childCount;
   }
+
+  // TODO(ianh): Provide efficient intrinsic height functions.
 }
 
 /// Parent data for use with [RenderGrid]
@@ -470,27 +546,23 @@ class RenderGrid extends RenderVirtualViewport<GridParentData> {
   }
 
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return _delegate.getMinIntrinsicWidth(constraints, virtualChildCount);
+  double getMinIntrinsicWidth(double height) {
+    return _delegate.getMinIntrinsicWidth(height, virtualChildCount);
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return _delegate.getMaxIntrinsicWidth(constraints, virtualChildCount);
+  double getMaxIntrinsicWidth(double height) {
+    return _delegate.getMaxIntrinsicWidth(height, virtualChildCount);
   }
 
   @override
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return _delegate.getMinIntrinsicHeight(constraints, virtualChildCount);
+  double getMinIntrinsicHeight(double width) {
+    return _delegate.getMinIntrinsicHeight(width, virtualChildCount);
   }
 
   @override
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return _delegate.getMaxIntrinsicHeight(constraints, virtualChildCount);
+  double getMaxIntrinsicHeight(double width) {
+    return _delegate.getMaxIntrinsicHeight(width, virtualChildCount);
   }
 
   @override

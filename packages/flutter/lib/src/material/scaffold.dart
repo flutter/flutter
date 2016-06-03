@@ -17,7 +17,8 @@ import 'material.dart';
 import 'snack_bar.dart';
 
 const double _kFloatingActionButtonMargin = 16.0; // TODO(hmuller): should be device dependent
-const Duration _kFloatingActionButtonSegue = const Duration(milliseconds: 400);
+const Duration _kFloatingActionButtonSegue = const Duration(milliseconds: 200);
+final Tween<double> _kFloatingActionButtonTurnTween = new Tween<double>(begin: -0.125, end: 0.0);
 
 /// The Scaffold's appbar is the toolbar, tabbar, and the "flexible space" that's
 /// stacked behind them. The Scaffold's appBarBehavior defines how the appbar
@@ -131,9 +132,7 @@ class _FloatingActionButtonTransition extends StatefulWidget {
   _FloatingActionButtonTransition({
     Key key,
     this.child
-  }) : super(key: key) {
-    assert(child != null);
-  }
+  }) : super(key: key);
 
   final Widget child;
 
@@ -142,60 +141,91 @@ class _FloatingActionButtonTransition extends StatefulWidget {
 }
 
 class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTransition> {
-  final AnimationController controller = new AnimationController(duration: _kFloatingActionButtonSegue);
-  Widget oldChild;
+  final AnimationController _previousController = new AnimationController(duration: _kFloatingActionButtonSegue);
+  final AnimationController _currentController = new AnimationController(duration: _kFloatingActionButtonSegue);
+
+  CurvedAnimation _previousAnimation;
+  CurvedAnimation _currentAnimation;
+  Widget _previousChild;
 
   @override
   void initState() {
     super.initState();
-    controller.forward().then((_) {
-      oldChild = null;
-    });
+    _previousAnimation = new CurvedAnimation(
+      parent: _previousController,
+      curve: Curves.easeIn
+    );
+    _currentAnimation = new CurvedAnimation(
+      parent: _currentController,
+      curve: Curves.easeIn
+    );
+
+    _previousController.addStatusListener(_handleAnimationStatusChanged);
+    _currentController.forward();
   }
 
   @override
   void dispose() {
-    controller.stop();
+    _previousController.stop();
+    _currentController.stop();
     super.dispose();
   }
 
   @override
   void didUpdateConfig(_FloatingActionButtonTransition oldConfig) {
-    if (Widget.canUpdate(oldConfig.child, config.child))
+    final bool oldChildIsNull = oldConfig.child == null;
+    final bool newChildIsNull = config.child == null;
+    if (oldChildIsNull == newChildIsNull && oldConfig.child?.key == config.child?.key)
       return;
-    oldChild = oldConfig.child;
-    controller
-      ..value = 0.0
-      ..forward().then((_) {
-        oldChild = null;
-      });
+    if (_previousController.status == AnimationStatus.dismissed) {
+      final double currentValue = _currentController.value;
+      if (currentValue == 0.0 || oldConfig.child == null) {
+        // The current child hasn't started its entrance animation yet. We can
+        // just skip directly to the new child's entrance.
+        _previousChild = null;
+        if (config.child != null)
+          _currentController.forward();
+      } else {
+        // Otherwise, we need to copy the state from the current controller to
+        // the previous controller and run an exit animation for the previous
+        // widget before running the entrance animation for the new child.
+        _previousChild = oldConfig.child;
+        _previousController
+          ..value = currentValue
+          ..reverse();
+        _currentController.value = 0.0;
+      }
+    }
+  }
+
+  void _handleAnimationStatusChanged(AnimationStatus status) {
+    setState(() {
+      if (status == AnimationStatus.dismissed) {
+        assert(_currentController.status == AnimationStatus.dismissed);
+        if (config.child != null)
+          _currentController.forward();
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> children = new List<Widget>();
-    if (oldChild != null) {
+    if (_previousAnimation.status != AnimationStatus.dismissed) {
       children.add(new ScaleTransition(
-        // TODO(abarth): We should use ReversedAnimation here.
-        scale: new Tween<double>(
-          begin: 1.0,
-          end: 0.0
-        ).animate(new CurvedAnimation(
-          parent: controller,
-          curve: const Interval(0.0, 0.5, curve: Curves.easeIn)
-        )),
-        child: oldChild
+        scale: _previousAnimation,
+        child: _previousChild
       ));
     }
-
-    children.add(new ScaleTransition(
-      scale: new CurvedAnimation(
-        parent: controller,
-        curve: const Interval(0.5, 1.0, curve: Curves.easeIn)
-      ),
-      child: config.child
-    ));
-
+    if (_currentAnimation.status != AnimationStatus.dismissed) {
+      children.add(new ScaleTransition(
+        scale: _currentAnimation,
+        child: new RotationTransition(
+          turns: _kFloatingActionButtonTurnTween.animate(_currentAnimation),
+          child: config.child
+        )
+      ));
+    }
     return new Stack(children: children);
   }
 }
@@ -664,13 +694,12 @@ class ScaffoldState extends State<Scaffold> {
     if (_snackBars.isNotEmpty)
       _addIfNonNull(children, _snackBars.first._widget, _ScaffoldSlot.snackBar);
 
-    if (config.floatingActionButton != null) {
-      final Widget fab = new _FloatingActionButtonTransition(
-        key: new ValueKey<Key>(config.floatingActionButton.key),
+    children.add(new LayoutId(
+      id: _ScaffoldSlot.floatingActionButton,
+      child: new _FloatingActionButtonTransition(
         child: config.floatingActionButton
-      );
-      children.add(new LayoutId(child: fab, id: _ScaffoldSlot.floatingActionButton));
-    }
+      )
+    ));
 
     if (config.drawer != null) {
       children.add(new LayoutId(

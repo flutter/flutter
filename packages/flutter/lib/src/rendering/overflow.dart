@@ -15,18 +15,6 @@ class RenderOffStage extends RenderBox with RenderObjectWithChildMixin<RenderBox
   }
 
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints) => constraints.minWidth;
-
-  @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints) => constraints.minWidth;
-
-  @override
-  double getMinIntrinsicHeight(BoxConstraints constraints) => constraints.minHeight;
-
-  @override
-  double getMaxIntrinsicHeight(BoxConstraints constraints) => constraints.minHeight;
-
-  @override
   bool get sizedByParent => true;
 
   @override

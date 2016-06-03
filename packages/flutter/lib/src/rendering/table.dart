@@ -82,7 +82,7 @@ class IntrinsicColumnWidth extends TableColumnWidth {
   double minIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) {
     double result = 0.0;
     for (RenderBox cell in cells)
-      result = math.max(result, cell.getMinIntrinsicWidth(const BoxConstraints()));
+      result = math.max(result, cell.getMinIntrinsicWidth(double.INFINITY));
     return result;
   }
 
@@ -90,7 +90,7 @@ class IntrinsicColumnWidth extends TableColumnWidth {
   double maxIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) {
     double result = 0.0;
     for (RenderBox cell in cells)
-      result = math.max(result, cell.getMaxIntrinsicWidth(const BoxConstraints()));
+      result = math.max(result, cell.getMaxIntrinsicWidth(double.INFINITY));
     return result;
   }
 
@@ -689,38 +689,35 @@ class RenderTable extends RenderBox {
   }
 
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
+  double getMinIntrinsicWidth(double height) {
     assert(_children.length == rows * columns);
     double totalMinWidth = 0.0;
     for (int x = 0; x < columns; x += 1) {
       TableColumnWidth columnWidth = _columnWidths[x] ?? defaultColumnWidth;
       Iterable<RenderBox> columnCells = column(x);
-      totalMinWidth += columnWidth.minIntrinsicWidth(columnCells, constraints.maxWidth);
+      totalMinWidth += columnWidth.minIntrinsicWidth(columnCells, double.INFINITY);
     }
-    return constraints.constrainWidth(totalMinWidth);
+    return totalMinWidth;
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
+  double getMaxIntrinsicWidth(double height) {
     assert(_children.length == rows * columns);
     double totalMaxWidth = 0.0;
     for (int x = 0; x < columns; x += 1) {
       TableColumnWidth columnWidth = _columnWidths[x] ?? defaultColumnWidth;
       Iterable<RenderBox> columnCells = column(x);
-      totalMaxWidth += columnWidth.maxIntrinsicWidth(columnCells, constraints.maxWidth);
+      totalMaxWidth += columnWidth.maxIntrinsicWidth(columnCells, double.INFINITY);
     }
-    return constraints.constrainWidth(totalMaxWidth);
+    return totalMaxWidth;
   }
 
   @override
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
+  double getMinIntrinsicHeight(double width) {
     // winner of the 2016 world's most expensive intrinsic dimension function award
     // honorable mention, most likely to improve if taught about memoization award
-    assert(constraints.debugAssertIsValid());
     assert(_children.length == rows * columns);
-    final List<double> widths = _computeColumnWidths(constraints);
+    final List<double> widths = _computeColumnWidths(new BoxConstraints.tightForFinite(width: width));
     double rowTop = 0.0;
     for (int y = 0; y < rows; y += 1) {
       double rowHeight = 0.0;
@@ -728,16 +725,16 @@ class RenderTable extends RenderBox {
         final int xy = x + y * columns;
         RenderBox child = _children[xy];
         if (child != null)
-          rowHeight = math.max(rowHeight, child.getMaxIntrinsicHeight(new BoxConstraints.tightFor(width: widths[x])));
+          rowHeight = math.max(rowHeight, child.getMaxIntrinsicHeight(widths[x]));
       }
       rowTop += rowHeight;
     }
-    return constraints.constrainHeight(rowTop);
+    return rowTop;
   }
 
   @override
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    return getMinIntrinsicHeight(constraints);
+  double getMaxIntrinsicHeight(double width) {
+    return getMinIntrinsicHeight(width);
   }
 
   double _baselineDistance;
@@ -776,6 +773,7 @@ class RenderTable extends RenderBox {
   }
 
   List<double> _computeColumnWidths(BoxConstraints constraints) {
+    assert(constraints != null);
     assert(_children.length == rows * columns);
     // We apply the constraints to the column widths in the order of
     // least important to most important:
@@ -894,7 +892,6 @@ class RenderTable extends RenderBox {
           if (flexes[x] != null) {
             final double newWidth = widths[x] - deficit * flexes[x] / totalFlex;
             assert(newWidth.isFinite);
-            assert(newWidth >= 0.0);
             if (newWidth <= minWidths[x]) {
               // shrank to minimum
               deficit -= widths[x] - minWidths[x];
@@ -906,6 +903,7 @@ class RenderTable extends RenderBox {
               widths[x] = newWidth;
               newTotalFlex += flexes[x];
             }
+            assert(widths[x] >= 0.0);
           }
         }
         totalFlex = newTotalFlex;

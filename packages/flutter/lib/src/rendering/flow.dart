@@ -76,7 +76,7 @@ abstract class FlowDelegate {
   /// By default, the children will receive the given constraints, which are the
   /// constrains the constraints used to size the container. The children need
   /// not respect the given constraints, but they are required to respect the
-  /// returned constraints. For example, the incoming constraings might require
+  /// returned constraints. For example, the incoming constraints might require
   /// the container to have a width of exactly 100.0 and a height of exactly
   /// 100.0, but this function might give the children looser constraints that
   /// let them be larger or smaller than 100.0 by 100.0.
@@ -240,24 +240,40 @@ class RenderFlow extends RenderBox
   @override
   bool get isRepaintBoundary => true;
 
+  // TODO(ianh): It's a bit dubious to be using the getSize function from the delegate to
+  // figure out the intrinsic dimensions. We really should either not support intrinsics,
+  // or we should expose intrinsic delegate callbacks and throw if they're not implemented.
+
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    return _getSize(constraints).width;
+  double getMinIntrinsicWidth(double height) {
+    final double width = _getSize(new BoxConstraints.tightForFinite(height: height)).width;
+    if (width.isFinite)
+      return width;
+    return 0.0;
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    return _getSize(constraints).width;
+  double getMaxIntrinsicWidth(double height) {
+    final double width = _getSize(new BoxConstraints.tightForFinite(height: height)).width;
+    if (width.isFinite)
+      return width;
+    return 0.0;
   }
 
   @override
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    return _getSize(constraints).height;
+  double getMinIntrinsicHeight(double width) {
+    final double height = _getSize(new BoxConstraints.tightForFinite(width: width)).height;
+    if (height.isFinite)
+      return height;
+    return 0.0;
   }
 
   @override
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    return _getSize(constraints).height;
+  double getMaxIntrinsicHeight(double width) {
+    final double height = _getSize(new BoxConstraints.tightForFinite(width: width)).height;
+    if (height.isFinite)
+      return height;
+    return 0.0;
   }
 
   @override

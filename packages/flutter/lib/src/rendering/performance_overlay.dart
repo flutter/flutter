@@ -97,13 +97,13 @@ class RenderPerformanceOverlay extends RenderBox {
   bool get alwaysNeedsCompositing => true;
 
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    return constraints.constrainWidth(0.0);
+  double getMinIntrinsicWidth(double height) {
+    return 0.0;
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    return constraints.constrainWidth(0.0);
+  double getMaxIntrinsicWidth(double height) {
+    return 0.0;
   }
 
   double get _intrinsicHeight {
@@ -119,13 +119,13 @@ class RenderPerformanceOverlay extends RenderBox {
   }
 
   @override
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    return constraints.constrainHeight(_intrinsicHeight);
+  double getMinIntrinsicHeight(double width) {
+    return _intrinsicHeight;
   }
 
   @override
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    return constraints.constrainHeight(_intrinsicHeight);
+  double getMaxIntrinsicHeight(double width) {
+    return _intrinsicHeight;
   }
 
   @override

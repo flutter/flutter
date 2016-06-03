@@ -54,23 +54,13 @@ class RenderErrorBox extends RenderBox {
   ui.Paragraph _paragraph;
 
   @override
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    return constraints.constrainWidth(0.0);
+  double getMaxIntrinsicWidth(double height) {
+    return _kMaxWidth;
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    return constraints.constrainWidth(_kMaxWidth);
-  }
-
-  @override
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    return constraints.constrainHeight(0.0);
-  }
-
-  @override
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    return constraints.constrainHeight(_kMaxHeight);
+  double getMaxIntrinsicHeight(double width) {
+    return _kMaxHeight;
   }
 
   @override

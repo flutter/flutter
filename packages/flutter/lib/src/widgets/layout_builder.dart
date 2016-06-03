@@ -44,32 +44,42 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
     markNeedsLayout();
   }
 
-  double getIntrinsicWidth(BoxConstraints constraints) => constraints.constrainWidth();
-
-  double getIntrinsicHeight(BoxConstraints constraints) => constraints.constrainHeight();
-
-  @override
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return getIntrinsicWidth(constraints);
+  bool _debugThrowIfNotCheckingIntrinsics() {
+    assert(() {
+      if (!RenderObject.debugCheckingIntrinsics) {
+        throw new FlutterError(
+          'LayoutBuilder does not support returning intrinsic dimensions.\n'
+          'Calculating the intrinsic dimensions would require running the layout callback speculatively, '
+          'which might mutate the live render object tree.'
+        );
+      }
+      return true;
+    });
+    return true;
   }
 
   @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return getIntrinsicWidth(constraints);
+  double getMinIntrinsicWidth(double height) {
+    assert(_debugThrowIfNotCheckingIntrinsics());
+    return 0.0;
   }
 
   @override
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return getIntrinsicHeight(constraints);
+  double getMaxIntrinsicWidth(double height) {
+    assert(_debugThrowIfNotCheckingIntrinsics());
+    return 0.0;
   }
 
   @override
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsValid());
-    return getIntrinsicHeight(constraints);
+  double getMinIntrinsicHeight(double width) {
+    assert(_debugThrowIfNotCheckingIntrinsics());
+    return 0.0;
+  }
+
+  @override
+  double getMaxIntrinsicHeight(double width) {
+    assert(_debugThrowIfNotCheckingIntrinsics());
+    return 0.0;
   }
 
   @override
@@ -85,7 +95,7 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
     if (callback != null)
       invokeLayoutCallback(callback);
     if (child != null)
-      child.layout(constraints.loosen(), parentUsesSize: false);
+      child.layout(constraints.loosen());
   }
 
   @override

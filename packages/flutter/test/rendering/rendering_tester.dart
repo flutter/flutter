@@ -91,7 +91,33 @@ class RenderSizedBox extends RenderBox {
   final Size _size;
 
   @override
-  void performLayout() {
+  double getMinIntrinsicWidth(double height) {
+    return _size.width;
+  }
+
+  @override
+  double getMaxIntrinsicWidth(double height) {
+    return _size.width;
+  }
+
+  @override
+  double getMinIntrinsicHeight(double width) {
+    return _size.height;
+  }
+
+  @override
+  double getMaxIntrinsicHeight(double width) {
+    return _size.height;
+  }
+
+  @override
+  bool get sizedByParent => true;
+
+  @override
+  void performResize() {
     size = constraints.constrain(_size);
   }
+
+  @override
+  void performLayout() { }
 }

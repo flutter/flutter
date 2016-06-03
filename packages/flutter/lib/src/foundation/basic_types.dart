@@ -4,6 +4,8 @@
 
 import 'dart:collection';
 
+// COMMON SIGNATURES
+
 export 'dart:ui' show VoidCallback;
 
 /// Signature for callbacks that report that an underlying value has changed.
@@ -27,6 +29,9 @@ typedef T ValueGetter<T>();
 
 /// Signature for callbacks that filter an iterable.
 typedef Iterable<T> IterableFilter<T>(Iterable<T> input);
+
+
+// BITFIELD
 
 /// The largest SMI value.
 ///
@@ -85,6 +90,9 @@ class BitField<T extends dynamic> {
     _bits = value ? _kAllOnes : _kAllZeros;
   }
 }
+
+
+// LAZY CACHING ITERATOR
 
 /// A lazy caching version of [Iterable].
 ///

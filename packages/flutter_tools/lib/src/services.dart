@@ -46,7 +46,7 @@ Future<Null> parseServiceConfigs(
     String serviceRoot = packageMap[service].path;
     dynamic serviceConfig = _loadYamlFile('$serviceRoot/$_kFlutterServicesManifestPath');
     if (serviceConfig == null) {
-      printStatus('No $_kFlutterServicesManifestPath found for service "$serviceRoot". Skipping.');
+      printStatus('No $_kFlutterServicesManifestPath found for service "$serviceRoot"; skipping.');
       continue;
     }
 
@@ -59,7 +59,7 @@ Future<Null> parseServiceConfigs(
       });
     }
 
-    if (jars != null) {
+    if (jars != null && serviceConfig['jars'] is Iterable) {
       for (String jar in serviceConfig['jars'])
         jars.add(new File(await getServiceFromUrl(jar, serviceRoot, service, unzip: false)));
     }
