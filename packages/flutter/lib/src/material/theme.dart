@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 import 'theme_data.dart';
 
@@ -20,10 +21,10 @@ const Duration kThemeAnimationDuration = const Duration(milliseconds: 200);
 class Theme extends InheritedWidget {
   /// Applies the given theme [data] to [child].
   ///
-  /// Both [child] and [data] must be non-null.
+  /// The [data] and [child] arguments must not be null.
   Theme({
     Key key,
-    this.data,
+    @required this.data,
     Widget child
   }) : super(key: key, child: child) {
     assert(child != null);
@@ -71,11 +72,11 @@ class ThemeDataTween extends Tween<ThemeData> {
 class AnimatedTheme extends ImplicitlyAnimatedWidget {
   /// Creates an animated theme.
   ///
-  /// By default, the theme transition uses a linear curve. Both [data] and
-  /// [child] are required.
+  /// By default, the theme transition uses a linear curve. The [data] and
+  /// [child] arguments must not be null.
   AnimatedTheme({
     Key key,
-    this.data,
+    @required this.data,
     Curve curve: Curves.linear,
     Duration duration: kThemeAnimationDuration,
     this.child

@@ -165,6 +165,7 @@ class DataCell {
     this.onTap
   });
 
+  /// A cell that has no content and has zero width and height.
   static final DataCell empty = new DataCell(new Container(width: 0.0, height: 0.0));
 
   /// The data for the row.

@@ -147,7 +147,7 @@ abstract class AutoLayoutDelegate {
   bool shouldUpdateConstraints(AutoLayoutDelegate oldDelegate);
 }
 
-/// Uses the cassowary constraint solver to automatically size and position children.
+/// A render object that uses the cassowary constraint solver to automatically size and position children.
 class RenderAutoLayout extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, AutoLayoutParentData>,
          RenderBoxContainerDefaultsMixin<RenderBox, AutoLayoutParentData> {

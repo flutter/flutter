@@ -37,15 +37,19 @@ class Dialog extends StatelessWidget {
   /// of the dialog.
   final Widget title;
 
-  // Padding around the title; uses material design default if none is supplied
-  // If there is no title, no padding will be provided
+  /// Padding around the title.
+  ///
+  /// Uses material design default if none is supplied. If there is no title, no
+  /// padding will be provided.
   final EdgeInsets titlePadding;
 
   /// The (optional) content of the dialog is displayed in the center of the
   /// dialog in a lighter font.
   final Widget content;
 
-  // Padding around the content; uses material design default if none is supplied
+  /// Padding around the content.
+  ///
+  /// Uses material design default if none is supplied.
   final EdgeInsets contentPadding;
 
   /// The (optional) set of actions that are displayed at the bottom of the

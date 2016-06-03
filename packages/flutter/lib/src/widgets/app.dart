@@ -7,6 +7,7 @@ import 'dart:ui' as ui show window;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 
 import 'asset_vendor.dart';
 import 'banner.dart';
@@ -20,6 +21,7 @@ import 'performance_overlay.dart';
 import 'semantics_debugger.dart';
 import 'title.dart';
 
+/// Signature for a function that is called when the operating system changes the current locale.
 typedef Future<LocaleQueryData> LocaleChangedCallback(Locale locale);
 
 /// A convenience class that wraps a number of widgets that are commonly
@@ -32,13 +34,15 @@ typedef Future<LocaleQueryData> LocaleChangedCallback(Locale locale);
 /// The [onGenerateRoute] argument is required, and corresponds to
 /// [Navigator.onGenerateRoute].
 class WidgetsApp extends StatefulWidget {
+  /// Creates a widget that wraps a number of widgets that are commonly
+  /// required for an application.
   WidgetsApp({
     Key key,
+    @required this.onGenerateRoute,
     this.title,
     this.textStyle,
     this.color,
     this.navigatorObserver,
-    this.onGenerateRoute,
     this.onLocaleChanged,
     this.showPerformanceOverlay: false,
     this.showSemanticsDebugger: false,
@@ -96,16 +100,17 @@ class WidgetsApp extends StatefulWidget {
   /// The observer for the Navigator created for this app.
   final NavigatorObserver navigatorObserver;
 
+  /// If true, forces the performance overlay to be visible in all instances.
+  ///
+  /// Used by `showPerformanceOverlay` observatory extension.
   static bool showPerformanceOverlayOverride = false;
 
   @override
-  WidgetsAppState<WidgetsApp> createState() => new WidgetsAppState<WidgetsApp>();
+  _WidgetsAppState createState() => new _WidgetsAppState();
 }
 
-class WidgetsAppState<T extends WidgetsApp> extends State<T> implements WidgetsBindingObserver {
-
+class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserver {
   GlobalObjectKey _navigator;
-
   LocaleQueryData _localeData;
 
   @override

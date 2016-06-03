@@ -856,7 +856,7 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
 class RenderBaseline extends RenderShiftedBox {
   /// Creates a [RenderBaseline] object.
   ///
-  /// The [baseline] and [baselineType] arguments are required.
+  /// The [baseline] and [baselineType] arguments must not be null.
   RenderBaseline({
     RenderBox child,
     double baseline,

@@ -105,7 +105,7 @@ class PolynomialFit {
 class LeastSquaresSolver {
   /// Creates a least-squares solver.
   ///
-  /// The [x], [y], and [w] arguments must be non-null.
+  /// The [x], [y], and [w] arguments must not be null.
   LeastSquaresSolver(this.x, this.y, this.w) {
     assert(x.length == y.length);
     assert(y.length == w.length);
