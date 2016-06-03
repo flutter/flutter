@@ -23,7 +23,21 @@ AssertExists() {
 }
 
 BuildApp() {
-  local project_path=${FLUTTER_APPLICATION_PATH}
+  local project_path="${SOURCE_ROOT}/.."
+  if [[ -n "$FLUTTER_APPLICATION_PATH" ]]; then
+    project_path=${FLUTTER_APPLICATION_PATH}
+  fi
+
+  local target_path="lib/main.dart"
+  if [[ -n "$FLUTTER_TARGET" ]]; then
+    target_path=${FLUTTER_TARGET}
+  fi
+
+  local framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/ios-release"
+  if [[ -n "$FLUTTER_FRAMEWORK_DIR" ]]; then
+    framework_path="${FLUTTER_FRAMEWORK_DIR}"
+  fi
+
   AssertExists ${project_path}
 
   local derived_dir=${SOURCE_ROOT}/Flutter
@@ -33,8 +47,10 @@ BuildApp() {
   RunCommand rm -f ${derived_dir}/Flutter.framework
   RunCommand rm -f ${derived_dir}/app.so
   RunCommand rm -f ${derived_dir}/app.flx
-  RunCommand cp -r ${FLUTTER_FRAMEWORK_DIR}/Flutter.framework ${derived_dir}
+  RunCommand cp -r ${framework_path}/Flutter.framework ${derived_dir}
   RunCommand pushd ${project_path}
+
+  AssertExists ${target_path}
 
   local local_engine_flag=""
   if [[ -n "$LOCAL_ENGINE" ]]; then
@@ -49,7 +65,7 @@ BuildApp() {
 
     RunCommand ${FLUTTER_ROOT}/bin/flutter --suppress-analytics build aot \
       --target-platform=ios                                               \
-      --target=${FLUTTER_TARGET}                                          \
+      --target=${target_path}                                             \
       --release                                                           \
       ${interpreter_flag}                                                 \
       ${local_engine_flag}
@@ -70,7 +86,7 @@ BuildApp() {
   fi
 
   RunCommand ${FLUTTER_ROOT}/bin/flutter --suppress-analytics build flx \
-    --target=${FLUTTER_TARGET}                                          \
+    --target=${target_path}                                             \
     --output-file=${derived_dir}/app.flx                                \
     ${precompilation_flag}                                              \
     ${local_engine_flag}                                                \
