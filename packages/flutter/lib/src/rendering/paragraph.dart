@@ -92,30 +92,30 @@ class RenderParagraph extends RenderBox {
   }
 
   @override
-  double getMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(double height) {
     _layoutText();
     return _textPainter.minIntrinsicWidth;
   }
 
   @override
-  double getMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(double height) {
     _layoutText();
     return _textPainter.maxIntrinsicWidth;
   }
 
-  double _getIntrinsicHeight(double width) {
+  double _computeIntrinsicHeight(double width) {
     _layoutText(minWidth: width, maxWidth: width);
     return _textPainter.height;
   }
 
   @override
-  double getMinIntrinsicHeight(double width) {
-    return _getIntrinsicHeight(width);
+  double computeMinIntrinsicHeight(double width) {
+    return _computeIntrinsicHeight(width);
   }
 
   @override
-  double getMaxIntrinsicHeight(double width) {
-    return _getIntrinsicHeight(width);
+  double computeMaxIntrinsicHeight(double width) {
+    return _computeIntrinsicHeight(width);
   }
 
   @override

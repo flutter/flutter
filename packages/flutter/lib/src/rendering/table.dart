@@ -819,7 +819,7 @@ class RenderTable extends RenderBox {
   }
 
   @override
-  double getMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(double height) {
     assert(_children.length == rows * columns);
     double totalMinWidth = 0.0;
     for (int x = 0; x < columns; x += 1) {
@@ -831,7 +831,7 @@ class RenderTable extends RenderBox {
   }
 
   @override
-  double getMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(double height) {
     assert(_children.length == rows * columns);
     double totalMaxWidth = 0.0;
     for (int x = 0; x < columns; x += 1) {
@@ -843,7 +843,7 @@ class RenderTable extends RenderBox {
   }
 
   @override
-  double getMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(double width) {
     // winner of the 2016 world's most expensive intrinsic dimension function award
     // honorable mention, most likely to improve if taught about memoization award
     assert(_children.length == rows * columns);
@@ -863,8 +863,8 @@ class RenderTable extends RenderBox {
   }
 
   @override
-  double getMaxIntrinsicHeight(double width) {
-    return getMinIntrinsicHeight(width);
+  double computeMaxIntrinsicHeight(double width) {
+    return computeMinIntrinsicHeight(width);
   }
 
   double _baselineDistance;
