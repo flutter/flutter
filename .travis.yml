@@ -1,4 +1,8 @@
 sudo: false
+os:
+  - linux
+  - osx
+osx_image: xcode7.2
 addons:
   apt:
     # sky_shell binary depends on /usr/lib/x86_64-linux-gnu/libstdc++.so.6 version GLIBCXX_3.4.18
@@ -10,6 +14,3 @@ before_script:
   - ./dev/bots/setup.sh
 script:
   - ./dev/bots/test.sh
-cache:
-  directories:
-    - $HOME/.pub-cache
