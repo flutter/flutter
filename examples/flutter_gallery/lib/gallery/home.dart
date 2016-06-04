@@ -87,7 +87,6 @@ class GalleryHomeState extends State<GalleryHome> {
               new GalleryItem(title: 'Date picker', routeName: DatePickerDemo.routeName),
               new GalleryItem(title: 'Data tables', routeName: DataTableDemo.routeName),
               new GalleryItem(title: 'Dialog', routeName: DialogDemo.routeName),
-              new GalleryItem(title: 'Drop-down button', routeName: DropDownDemo.routeName),
               new GalleryItem(title: 'Expand/collapse list control', routeName: TwoLevelListDemo.routeName),
               new GalleryItem(title: 'Floating action button', routeName: TabsFabDemo.routeName),
               new GalleryItem(title: 'Grid', routeName: GridListDemo.routeName),
