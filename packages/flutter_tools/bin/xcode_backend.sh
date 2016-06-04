@@ -33,7 +33,20 @@ BuildApp() {
     target_path=${FLUTTER_TARGET}
   fi
 
-  local framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/ios-release"
+  local flutter_mode="release"
+  if [[ -n "$FLUTTER_MODE" ]]; then
+    flutter_mode=${FLUTTER_MODE}
+  fi
+
+  local artifact_variant="unknown"
+  case "$flutter_mode" in
+    release) artifact_variant="ios-release";;
+    profile) artifact_variant="ios-profile";;
+    debug) artifact_variant="ios";;
+    *) echo "Unknown FLUTTER_MODE: $FLUTTER_MODE";;
+  esac
+
+  local framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/${artifact_variant}"
   if [[ -n "$FLUTTER_FRAMEWORK_DIR" ]]; then
     framework_path="${FLUTTER_FRAMEWORK_DIR}"
   fi
@@ -55,11 +68,6 @@ BuildApp() {
   local local_engine_flag=""
   if [[ -n "$LOCAL_ENGINE" ]]; then
     local_engine_flag="--local-engine=$LOCAL_ENGINE"
-  fi
-
-  local flutter_mode="release"
-  if [[ -n "$FLUTTER_MODE" ]]; then
-    flutter_mode=${FLUTTER_MODE}
   fi
 
   if [[ $CURRENT_ARCH != "x86_64" ]]; then
