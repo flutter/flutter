@@ -9,7 +9,24 @@ import 'package:sky_services/sky/input_event.mojom.dart' as mojom;
 import 'basic.dart';
 import 'framework.dart';
 
+/// A widget that calls a callback whenever the user presses a key on a keyboard.
+///
+/// A [RawKeyboardListener] is useful for listening to raw key events and
+/// hardware buttons that are represented as keys. Typically used by games and
+/// other apps that use keyboards for purposes other than text entry.
+///
+/// For text entry, consider using a [RawInputLine], which integrates with
+/// on-screen keyboards and input method editors (IMEs).
+///
+/// See also:
+///
+///  * [RawInputLine], which should be used instead of this widget for text
+///    entry.
 class RawKeyboardListener extends StatefulWidget {
+  /// Creates a widget that receives raw keyboard events.
+  ///
+  /// For text entry, consider using a [RawInputLine], which integrates with
+  /// on-screen keyboards and input method editors (IMEs).
   RawKeyboardListener({
     Key key,
     this.focused: false,
@@ -19,8 +36,13 @@ class RawKeyboardListener extends StatefulWidget {
     assert(child != null);
   }
 
+  /// Whether this widget should actually listen for raw keyboard events.
+  ///
+  /// Typically set to the value returned by [Focus.at] for the [GlobalKey] of
+  /// the widget that builds the raw keyboard listener.
   final bool focused;
 
+  /// Called whenever this widget receives a raw keyboard event.
   final ValueChanged<mojom.InputEvent> onKey;
 
   /// The widget below this widget in the tree.

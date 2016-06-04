@@ -9,9 +9,15 @@ import 'media_query.dart';
 
 export 'package:flutter/rendering.dart' show ChildViewConnection;
 
+/// (mojo-only) A widget that is replaced by content from another process.
+///
+/// Requires a [MediaQuery] ancestor to provide appropriate media information to
+/// the child.
 class ChildView extends StatelessWidget {
+  /// Creates a widget that is replaced by content from another process.
   ChildView({ Key key, this.child }) : super(key: key);
 
+  /// A connection to the child whose content will replace this widget.
   final ChildViewConnection child;
 
   @override

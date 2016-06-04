@@ -7,6 +7,7 @@ import 'framework.dart';
 
 /// A widget whose child can be mutated.
 class Placeholder extends StatefulWidget {
+  /// Creates a widget whose child can be mutated.
   Placeholder({ Key key }) : super(key: key);
 
   @override

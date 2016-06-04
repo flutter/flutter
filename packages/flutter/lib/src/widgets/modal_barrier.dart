@@ -8,8 +8,9 @@ import 'gesture_detector.dart';
 import 'navigator.dart';
 import 'transitions.dart';
 
-/// Prevents the user from interacting with widgets behind itself.
+/// A widget that prevents the user from interacting with widgets behind itself.
 class ModalBarrier extends StatelessWidget {
+  /// Creates a widget that blocks user interaction.
   ModalBarrier({
     Key key,
     this.color,
@@ -45,8 +46,9 @@ class ModalBarrier extends StatelessWidget {
   }
 }
 
-/// Prevents the user from interacting with widgets behind itself.
+/// A widget that prevents the user from interacting with widgets behind itself.
 class AnimatedModalBarrier extends AnimatedWidget {
+  /// Creates a widget that blocks user interaction.
   AnimatedModalBarrier({
     Key key,
     Animation<Color> color,
@@ -62,7 +64,7 @@ class AnimatedModalBarrier extends AnimatedWidget {
   @override
   Widget build(BuildContext context) {
     return new ModalBarrier(
-      color: color.value,
+      color: color?.value,
       dismissable: dismissable
     );
   }

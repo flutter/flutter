@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import 'framework.dart';
 
 /// Superclass for locale-specific data provided by the application.
@@ -9,10 +11,11 @@ class LocaleQueryData { } // TODO(ianh): We need a better type here. This doesn'
 
 /// Establishes a subtree in which locale queries resolve to the given data.
 class LocaleQuery extends InheritedWidget {
+  /// Creates a widget that provides [LocaleQueryData] to its descendants.
   LocaleQuery({
     Key key,
-    this.data,
-    Widget child
+    @required this.data,
+    @required Widget child
   }) : super(key: key, child: child) {
     assert(child != null);
   }

@@ -124,6 +124,7 @@ class MimicOverlayEntry {
 
 /// A widget that copies the appearance of another widget.
 class Mimic extends StatelessWidget {
+  /// Creates a widget that copies the appearance of another widget.
   Mimic({ Key key, this.original }) : super(key: key);
 
   /// A handle to the widget that this widget should copy.
@@ -142,6 +143,7 @@ class Mimic extends StatelessWidget {
 /// This widget's State, [MimicableState], contains an API for initiating the
 /// mimic operation.
 class Mimicable extends StatefulWidget {
+  /// Creates a widget that can be copies by a [Mimic].
   Mimicable({ Key key, this.child }) : super(key: key);
 
   /// The widget below this widget in the tree.

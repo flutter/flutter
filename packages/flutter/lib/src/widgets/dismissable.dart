@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import 'basic.dart';
 import 'transitions.dart';
 import 'framework.dart';
@@ -14,6 +16,7 @@ const double _kMinFlingVelocityDelta = 400.0;
 const double _kFlingVelocityScale = 1.0 / 300.0;
 const double _kDismissThreshold = 0.4;
 
+/// Signature used by [Dismissable] to indicate that it has been dismissed in the given `direction`.
 typedef void DismissDirectionCallback(DismissDirection direction);
 
 /// The direction in which a [Dismissable] can be dismissed.
@@ -39,7 +42,7 @@ enum DismissDirection {
   down
 }
 
-/// Can be dismissed by dragging in the indicated [direction].
+/// A widget that can be dismissed by dragging in the indicated [direction].
 ///
 /// Dragging or flinging this widget in the [DismissDirection] causes the child
 /// to slide out of view. Following the slide animation, if [resizeDuration] is
@@ -56,8 +59,16 @@ enum DismissDirection {
 /// list item, it must have a key that distinguishes it from the other items and
 /// its [onDismissed] callback must remove the item from the list.
 class Dismissable extends StatefulWidget {
+  /// Creates a widget that can be dismissed.
+  ///
+  /// The [key] argument must not be null because [Dismissable]s are commonly
+  /// used in lists and removed from the list when dismissed. Without keys, the
+  /// default behavior is to sync widgets based on their index in the list,
+  /// which means the item after the dismissed item would be synced with the
+  /// state of the dismissed item. Using keys causes the widgets to sync
+  /// according to their keys and avoids this pitfall.
   Dismissable({
-    Key key,
+    @required Key key,
     this.child,
     this.background,
     this.secondaryBackground,

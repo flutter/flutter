@@ -57,6 +57,11 @@ typedef void ImageListener(ImageInfo image);
 /// ImageResource objects can also represent an image that hasn't finished
 /// loading.
 class ImageResource {
+  /// Creates an image resource.
+  ///
+  /// The image resource awaits the given [Future]. When the future resolves,
+  /// it notifies the [ImageListener]s that have been registered with
+  /// [addListener].
   ImageResource(this._futureImage) {
     _futureImage.then(
       _handleImageLoaded,

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import 'framework.dart';
 
 class _StorageEntryIdentifier {
@@ -88,13 +90,18 @@ class PageStorageBucket {
   }
 }
 
-/// Establishes a page storage bucket for this widget subtree.
+/// A widget that establishes a page storage bucket for this widget subtree.
 class PageStorage extends StatelessWidget {
+  /// Creates a widget that provides a storage bucket for its descendants.
+  ///
+  /// The [bucket] argument must not be null.
   PageStorage({
     Key key,
-    this.child,
-    this.bucket
-  }) : super(key: key);
+    @required this.bucket,
+    this.child
+  }) : super(key: key) {
+    assert(bucket != null);
+  }
 
   /// The widget below this widget in the tree.
   final Widget child;
