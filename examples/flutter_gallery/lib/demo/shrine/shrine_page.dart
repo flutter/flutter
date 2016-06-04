@@ -29,11 +29,13 @@ class ShrinePage extends StatelessWidget {
           child: new Text('SHRINE', style: ShrineTheme.of(context).appBarTitleStyle)
         ),
         backgroundColor: Theme.of(context).canvasColor,
-        actions: <Widget>[  // TODO(hansmuller): implement the actions.
+        actions: <Widget>[
           new IconButton(
             icon: Icons.shopping_cart,
             tooltip: 'Shopping cart',
-            onPressed: () { /* activate the button for now */ }
+            onPressed: () {
+              // TODO(hansmuller): implement the action.
+            }
           ),
           new PopupMenuButton<ShrineAction>(
             itemBuilder: (BuildContext context) => <PopupMenuItem<ShrineAction>>[
@@ -49,7 +51,20 @@ class ShrinePage extends StatelessWidget {
                 value: ShrineAction.emptyCart,
                 child: new Text('Empty shopping cart')
               )
-            ]
+            ],
+            onSelected: (ShrineAction action) {
+              switch (action) {
+                case ShrineAction.sortByPrice:
+                  // TODO(hansmuller): implement the action.
+                  break;
+                case ShrineAction.sortByProduct:
+                  // TODO(hansmuller): implement the action.
+                  break;
+                case ShrineAction.emptyCart:
+                  // TODO(hansmuller): implement the action.
+                  break;
+              }
+            }
           )
         ]
       ),
