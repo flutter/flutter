@@ -20,7 +20,6 @@ final Map<String, WidgetBuilder> kRoutes = <String, WidgetBuilder>{
   DatePickerDemo.routeName: (BuildContext context) => new DatePickerDemo(),
   DataTableDemo.routeName: (BuildContext context) => new DataTableDemo(),
   DialogDemo.routeName: (BuildContext context) => new DialogDemo(),
-  DropDownDemo.routeName: (BuildContext context) => new DropDownDemo(),
   TwoLevelListDemo.routeName: (BuildContext context) => new TwoLevelListDemo(),
   TabsFabDemo.routeName: (BuildContext context) => new TabsFabDemo(),
   GridListDemo.routeName: (BuildContext context) => new GridListDemo(),
