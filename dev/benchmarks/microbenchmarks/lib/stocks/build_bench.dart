@@ -8,8 +8,6 @@ import 'package:stocks/stock_data.dart' as stock_data;
 
 const Duration kBenchmarkTime = const Duration(seconds: 15);
 
-void _doNothing() { }
-
 Future<Null> main() async {
   assert(false); // don't run this in checked mode! Use --release.
   stock_data.StockDataFetcher.actuallyFetchData = false;
@@ -26,12 +24,12 @@ Future<Null> main() async {
     await tester.pump(const Duration(seconds: 1)); // Complete drawer animation
 
 
-    final stocks.StocksAppState appState = tester.state(find.byType(stocks.StocksApp));
+    final BuildableElement appState = tester.element(find.byType(stocks.StocksApp));
     final BuildOwner buildOwner = WidgetsBinding.instance.buildOwner;
 
     watch.start();
     while (watch.elapsed < kBenchmarkTime) {
-      appState.setState(_doNothing);
+      appState.markNeedsBuild();
       buildOwner.buildDirtyElements();
       iterations += 1;
     }

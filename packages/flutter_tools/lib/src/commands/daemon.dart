@@ -211,6 +211,15 @@ abstract class Domain {
     return val;
   }
 
+  int _getArgAsInt(Map<String, dynamic> args, String name, { bool required: false }) {
+    if (required && !args.containsKey(name))
+      throw "$name is required";
+    dynamic val = args[name];
+    if (val != null && val is! int)
+      throw "$name is not an int";
+    return val;
+  }
+
   void dispose() { }
 }
 
@@ -255,17 +264,15 @@ class DaemonDomain extends Domain {
   }
 }
 
-// TODO: debugPort (port)
-// TODO: stdout (text)
-// TODO: stderr (text)
-
 /// This domain responds to methods like [start] and [stop].
 ///
 /// It fires events for application start, stop, and stdout and stderr.
 class AppDomain extends Domain {
   AppDomain(Daemon daemon) : super(daemon, 'app') {
     registerHandler('start', start);
+    registerHandler('restart', restart);
     registerHandler('stop', stop);
+    registerHandler('discover', discover);
   }
 
   static int _nextAppId = 0;
@@ -276,7 +283,6 @@ class AppDomain extends Domain {
 
   // TODO: document the updated params
   // TODO: document the return value
-
   Future<dynamic> start(Map<String, dynamic> args) async {
     String deviceId = _getArgAsString(args, 'deviceId', required: true);
     String projectDirectory = _getArgAsString(args, 'projectDirectory', required: true);
@@ -286,7 +292,7 @@ class AppDomain extends Domain {
     String mode = _getArgAsString(args, 'mode');
     String target = _getArgAsString(args, 'target');
 
-    Device device = await _getDevice(deviceId);
+    Device device = daemon.deviceDomain._getDevice(deviceId);
     if (device == null)
       throw "device '$deviceId' not found";
 
@@ -316,10 +322,9 @@ class AppDomain extends Domain {
     _apps.add(app);
     _sendAppEvent(app, 'start', <String, dynamic>{
       'directory': projectDirectory,
-      'target': target
+      'deviceId': deviceId
     });
 
-    // TODO: send app stdout/stderr
     Completer<int> observatoryPortCompleter;
 
     if (options.debuggingEnabled) {
@@ -329,10 +334,7 @@ class AppDomain extends Domain {
       });
     }
 
-    // TODO: fix - stackoverflowexception
-    // AppContext appContext = new AppContext();
-    // appContext[Logger] = new _AppRunLogger(this, app);
-    // appContext.runInZone(() {
+    app._runInZone(this, () {
       runner.run(observatoryPortCompleter: observatoryPortCompleter).then((_) {
         _sendAppEvent(app, 'stop');
       }).catchError((dynamic error) {
@@ -341,13 +343,25 @@ class AppDomain extends Domain {
         Directory.current = cwd;
         _apps.remove(app);
       });
-    // });
+    });
 
     return <String, dynamic> { 'appId': app.id };
   }
 
-  // TODO: document the updated params
+  // TODO: document the params
+  Future<bool> restart(Map<String, dynamic> args) async {
+    String appId = _getArgAsString(args, 'appId', required: true);
 
+    AppInstance app = _getApp(appId);
+    if (app == null)
+      throw "app '$appId' not found";
+
+    return app._runInZone(this, () {
+      return app.restart();
+    });
+  }
+
+  // TODO: document the updated params
   Future<bool> stop(Map<String, dynamic> args) async {
     String appId = _getArgAsString(args, 'appId', required: true);
 
@@ -355,26 +369,32 @@ class AppDomain extends Domain {
     if (app == null)
       throw "app '$appId' not found";
 
-    // TODO: Set a timeout if the kill doesn't happen for a while.
-    // Stop logging from the app, and remove it from the list of apps (after ~2 seconds).
-
-    return app.stop().then((_) {
-      // TODO: ?
+    return app.stop().timeout(new Duration(seconds: 5)).then((_) {
       return true;
     }).catchError((dynamic error) {
-      // TODO: send error over the app stream
-
+      _sendAppEvent(app, 'log', <String, dynamic>{ 'log': '$error', 'error': true });
+      app.closeLogger();
+      _apps.remove(app);
       return false;
     });
   }
 
-  AppInstance _getApp(String id) {
-    return _apps.firstWhere((AppInstance app) => app.id == id, orElse: () => null);
+  // TODO: doc
+  Future<List<Map<String, dynamic>>> discover(Map<String, dynamic> args) async {
+    String deviceId = _getArgAsString(args, 'deviceId', required: true);
+
+    Device device = daemon.deviceDomain._getDevice(deviceId);
+    if (device == null)
+      throw "device '$deviceId' not found";
+
+    List<DiscoveredApp> apps = await device.discoverApps();
+    return apps.map((DiscoveredApp app) {
+      return <String, dynamic>{ 'id': app.id, 'observatoryDevicePort': app.observatoryPort };
+    }).toList();
   }
 
-  Future<Device> _getDevice(String deviceId) async {
-    List<Device> devices = await daemon.deviceDomain.getDevices();
-    return devices.firstWhere((Device device) => device.id == deviceId, orElse: () => null);
+  AppInstance _getApp(String id) {
+    return _apps.firstWhere((AppInstance app) => app.id == id, orElse: () => null);
   }
 
   void _sendAppEvent(AppInstance app, String name, [Map<String, dynamic> args]) {
@@ -394,6 +414,8 @@ class DeviceDomain extends Domain {
     registerHandler('getDevices', getDevices);
     registerHandler('enable', enable);
     registerHandler('disable', disable);
+    registerHandler('forward', forward);
+    registerHandler('unforward', unforward);
 
     PollingDeviceDiscovery deviceDiscovery = new AndroidDevices();
     if (deviceDiscovery.supportsPlatform)
@@ -428,25 +450,60 @@ class DeviceDomain extends Domain {
 
   /// Enable device events.
   Future<Null> enable(Map<String, dynamic> args) {
-    for (PollingDeviceDiscovery discoverer in _discoverers) {
+    for (PollingDeviceDiscovery discoverer in _discoverers)
       discoverer.startPolling();
-    }
     return new Future<Null>.value();
   }
 
   /// Disable device events.
   Future<Null> disable(Map<String, dynamic> args) {
-    for (PollingDeviceDiscovery discoverer in _discoverers) {
+    for (PollingDeviceDiscovery discoverer in _discoverers)
       discoverer.stopPolling();
-    }
     return new Future<Null>.value();
+  }
+
+  // TODO: doc
+  /// Forward a host port to a device port.
+  Future<Map<String, dynamic>> forward(Map<String, dynamic> args) async {
+    String deviceId = _getArgAsString(args, 'deviceId', required: true);
+    int devicePort = _getArgAsInt(args, 'devicePort', required: true);
+    int hostPort = _getArgAsInt(args, 'hostPort');
+
+    Device device = daemon.deviceDomain._getDevice(deviceId);
+    if (device == null)
+      throw "device '$deviceId' not found";
+
+    hostPort = await device.portForwarder.forward(devicePort, hostPort: hostPort);
+
+    return <String, dynamic>{ 'hostPort': hostPort };
+  }
+
+  // TODO: doc
+  /// Removes a forwarded port.
+  Future<Null> unforward(Map<String, dynamic> args) async {
+    String deviceId = _getArgAsString(args, 'deviceId', required: true);
+    int devicePort = _getArgAsInt(args, 'devicePort', required: true);
+    int hostPort = _getArgAsInt(args, 'hostPort', required: true);
+
+    Device device = daemon.deviceDomain._getDevice(deviceId);
+    if (device == null)
+      throw "device '$deviceId' not found";
+
+    device.portForwarder.unforward(new ForwardedPort(hostPort, devicePort));
   }
 
   @override
   void dispose() {
-    for (PollingDeviceDiscovery discoverer in _discoverers) {
+    for (PollingDeviceDiscovery discoverer in _discoverers)
       discoverer.dispose();
-    }
+  }
+
+  /// Return the device matching the deviceId field in the args.
+  Device _getDevice(String deviceId) {
+    List<Device> devices = _discoverers.expand((PollingDeviceDiscovery discoverer) {
+      return discoverer.devices;
+    }).toList();
+    return devices.firstWhere((Device device) => device.id == deviceId, orElse: () => null);
   }
 }
 
@@ -499,25 +556,42 @@ class AppInstance {
   final String id;
   final RunAndStayResident runner;
 
+  AppContext _appContext;
+
+  Future<bool> restart() => runner.restart();
+
   Future<Null> stop() => runner.stop();
+
+  void closeLogger() {
+    _AppRunLogger logger = _appContext[Logger];
+    logger.close();
+  }
+
+  dynamic _runInZone(AppDomain domain, dynamic method()) {
+    if (_appContext == null) {
+      _appContext = new AppContext();
+      _appContext[Logger] = new _AppRunLogger(domain, this);
+    }
+    return _appContext.runInZone(method);
+  }
 }
 
 class _AppRunLogger extends Logger {
   _AppRunLogger(this.domain, this.app);
 
-  final AppDomain domain;
+  AppDomain domain;
   final AppInstance app;
 
   @override
   void printError(String message, [StackTrace stackTrace]) {
     if (stackTrace != null) {
-      domain._sendAppEvent(app, 'log', <String, dynamic>{
+      domain?._sendAppEvent(app, 'log', <String, dynamic>{
         'log': message,
         'stackTrace': stackTrace.toString(),
         'error': true
       });
     } else {
-      domain._sendAppEvent(app, 'log', <String, dynamic>{
+      domain?._sendAppEvent(app, 'log', <String, dynamic>{
         'log': message,
         'error': true
       });
@@ -526,7 +600,7 @@ class _AppRunLogger extends Logger {
 
   @override
   void printStatus(String message, { bool emphasis: false }) {
-    domain._sendAppEvent(app, 'log', <String, dynamic>{ 'log': message });
+    domain?._sendAppEvent(app, 'log', <String, dynamic>{ 'log': message });
   }
 
   @override
@@ -536,6 +610,10 @@ class _AppRunLogger extends Logger {
   Status startProgress(String message) {
     printStatus(message);
     return new Status();
+  }
+
+  void close() {
+    domain = null;
   }
 }
 

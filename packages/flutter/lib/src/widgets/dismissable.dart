@@ -151,7 +151,7 @@ class _DismissableState extends State<Dismissable> {
     return box.size;
   }
 
-  void _handleDragStart(_) {
+  void _handleDragStart(DragStartDetails details) {
     _dragUnderway = true;
     if (_moveController.isAnimating) {
       _dragExtent = _moveController.value * _findSize().width * _dragExtent.sign;
@@ -165,11 +165,12 @@ class _DismissableState extends State<Dismissable> {
     });
   }
 
-  void _handleDragUpdate(double delta) {
+  void _handleDragUpdate(DragUpdateDetails details) {
     if (!_isActive || _moveController.isAnimating)
       return;
 
-    double oldDragExtent = _dragExtent;
+    final double delta = details.primaryDelta;
+    final double oldDragExtent = _dragExtent;
     switch (config.direction) {
       case DismissDirection.horizontal:
       case DismissDirection.vertical:
@@ -236,14 +237,14 @@ class _DismissableState extends State<Dismissable> {
     return false;
   }
 
-  void _handleDragEnd(Velocity velocity) {
+  void _handleDragEnd(DragEndDetails details) {
     if (!_isActive || _moveController.isAnimating)
       return;
     _dragUnderway = false;
     if (_moveController.isCompleted) {
       _startResizeAnimation();
-    } else if (_isFlingGesture(velocity)) {
-      double flingVelocity = _directionIsXAxis ? velocity.pixelsPerSecond.dx : velocity.pixelsPerSecond.dy;
+    } else if (_isFlingGesture(details.velocity)) {
+      double flingVelocity = _directionIsXAxis ? details.velocity.pixelsPerSecond.dx : details.velocity.pixelsPerSecond.dy;
       _dragExtent = flingVelocity.sign;
       _moveController.fling(velocity: flingVelocity.abs() * _kFlingVelocityScale);
     } else if (_moveController.value > _kDismissThreshold) {

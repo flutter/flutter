@@ -42,7 +42,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // end animation
 
     // Open Flexible space toolbar
-    await tester.tap(find.text('Flexible space toolbar'));
+    await tester.tap(find.text('Contacts'));
     await tester.pump(); // start animation
     await tester.pump(const Duration(seconds: 1)); // end animation
 

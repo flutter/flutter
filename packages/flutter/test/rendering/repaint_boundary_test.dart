@@ -25,13 +25,13 @@ void main() {
     );
     layout(a, phase: EnginePhase.flushSemantics);
     c.opacity = 0.9;
-    layout(a, phase: EnginePhase.flushSemantics);
+    pumpFrame(phase: EnginePhase.flushSemantics);
     a.opacity = 0.8;
     c.opacity = 0.8;
-    layout(a, phase: EnginePhase.flushSemantics);
+    pumpFrame(phase: EnginePhase.flushSemantics);
     a.opacity = 0.7;
     b.opacity = 0.7;
     c.opacity = 0.7;
-    layout(a, phase: EnginePhase.flushSemantics);
+    pumpFrame(phase: EnginePhase.flushSemantics);
   });
 }

@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import '../application_package.dart';
+import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
@@ -23,6 +24,11 @@ class StopCommand extends FlutterCommand {
   Future<int> runInProject() async {
     Device device = deviceForCommand;
     ApplicationPackage app = applicationPackages.getPackageForPlatform(device.platform);
+    if (app == null) {
+      String platformName = getNameForTargetPlatform(device.platform);
+      printError('No Flutter application for $platformName found in the current directory.');
+      return 1;
+    }
     printStatus('Stopping apps on ${device.name}.');
     return await device.stopApp(app) ? 0 : 1;
   }

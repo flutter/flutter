@@ -7,7 +7,6 @@ import 'package:flutter/widgets.dart';
 
 import '../demo/all.dart';
 import 'drawer.dart';
-import 'header.dart';
 import 'item.dart';
 
 const double _kFlexibleSpaceMaxHeight = 256.0;
@@ -60,8 +59,7 @@ class GalleryHomeState extends State<GalleryHome> {
       appBar: new AppBar(
         expandedHeight: _kFlexibleSpaceMaxHeight,
         flexibleSpace: new FlexibleSpaceBar(
-          title: new Text('Flutter gallery'),
-          background: new GalleryHeader()
+          title: new Text('Flutter gallery')
         )
       ),
       appBarBehavior: AppBarBehavior.under,
@@ -73,12 +71,10 @@ class GalleryHomeState extends State<GalleryHome> {
             leading: new Icon(icon: Icons.star),
             title: new Text('Demos'),
             children: <Widget>[
-              new GalleryItem(title: 'Weather', routeName: WeatherDemo.routeName),
-              new GalleryItem(title: 'Fitness', routeName: FitnessDemo.routeName),
-              new GalleryItem(title: 'Fancy lines', routeName: DrawingDemo.routeName),
+              new GalleryItem(title: 'Pesto', routeName: PestoDemo.routeName),
+              new GalleryItem(title: 'Shrine', routeName: ShrineDemo.routeName),
               new GalleryItem(title: 'Calculator', routeName: Calculator.routeName),
-              new GalleryItem(title: 'Flexible space toolbar', routeName: FlexibleSpaceDemo.routeName),
-              new GalleryItem(title: 'Floating action button', routeName: TabsFabDemo.routeName),
+              new GalleryItem(title: 'Contacts', routeName: ContactsDemo.routeName)
             ]
           ),
           new TwoLevelSublist(
@@ -91,8 +87,8 @@ class GalleryHomeState extends State<GalleryHome> {
               new GalleryItem(title: 'Date picker', routeName: DatePickerDemo.routeName),
               new GalleryItem(title: 'Data tables', routeName: DataTableDemo.routeName),
               new GalleryItem(title: 'Dialog', routeName: DialogDemo.routeName),
-              new GalleryItem(title: 'Drop-down button', routeName: DropDownDemo.routeName),
               new GalleryItem(title: 'Expand/collapse list control', routeName: TwoLevelListDemo.routeName),
+              new GalleryItem(title: 'Floating action button', routeName: TabsFabDemo.routeName),
               new GalleryItem(title: 'Grid', routeName: GridListDemo.routeName),
               new GalleryItem(title: 'Icons', routeName: IconsDemo.routeName),
               new GalleryItem(title: 'Leave-behind list items', routeName: LeaveBehindDemo.routeName),

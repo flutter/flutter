@@ -6,11 +6,9 @@ dependencies:
 
   flutter:
     path: ../../packages/flutter
-  flutter_sprites:
-    path: ../../packages/flutter_sprites
   flutter_markdown:
     path: ../../packages/flutter_markdown
-  flutter_gallery_assets: '0.0.16'
+  flutter_gallery_assets: '0.0.20'
 
 dev_dependencies:
   test: any # flutter_test provides the version constraints

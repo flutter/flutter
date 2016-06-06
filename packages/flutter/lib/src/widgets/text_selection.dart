@@ -205,12 +205,12 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
 
 class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay> {
   Point _dragPosition;
-  void _handleDragStart(Point position) {
-    _dragPosition = position;
+  void _handleDragStart(DragStartDetails details) {
+    _dragPosition = details.globalPosition;
   }
 
-  void _handleDragUpdate(double delta) {
-    _dragPosition += new Offset(delta, 0.0);
+  void _handleDragUpdate(DragUpdateDetails details) {
+    _dragPosition += details.delta;
     TextPosition position = config.renderObject.getPositionForPoint(_dragPosition);
 
     if (config.selection.isCollapsed) {

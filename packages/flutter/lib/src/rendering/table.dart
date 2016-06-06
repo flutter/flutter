@@ -76,6 +76,9 @@ abstract class TableColumnWidth {
 /// column will participate in the distribution of remaining space
 /// once all the non-flexible columns have been sized.
 class IntrinsicColumnWidth extends TableColumnWidth {
+  /// Creates a column width based on intrinsic sizing.
+  ///
+  /// This sizing algorithm is very expensive.
   const IntrinsicColumnWidth({ double flex }) : _flex = flex;
 
   @override
@@ -104,7 +107,12 @@ class IntrinsicColumnWidth extends TableColumnWidth {
 ///
 /// This is the cheapest way to size a column.
 class FixedColumnWidth extends TableColumnWidth {
+  /// Creates a column width based on a fixed number of logical pixels.
+  ///
+  /// The [value] argument must not be null.
   const FixedColumnWidth(this.value);
+
+  /// The width the column should occupy in logical pixels.
   final double value;
 
   @override
@@ -125,7 +133,14 @@ class FixedColumnWidth extends TableColumnWidth {
 ///
 /// This is a cheap way to size a column.
 class FractionColumnWidth extends TableColumnWidth {
+  /// Creates a column width based on a fraction of the table's constraints'
+  /// maxWidth.
+  ///
+  /// The [value] argument must not be null.
   const FractionColumnWidth(this.value);
+
+  /// The fraction of the table's constraints' maxWidth that this column should
+  /// occupy.
   final double value;
 
   @override
@@ -154,7 +169,14 @@ class FractionColumnWidth extends TableColumnWidth {
 ///
 /// This is a cheap way to size a column.
 class FlexColumnWidth extends TableColumnWidth {
+  /// Creates a column width based on a fraction of the remaining space once all
+  /// the other columns have been laid out.
+  ///
+  /// The [value] argument must not be null.
   const FlexColumnWidth([this.value = 1.0]);
+
+  /// The reaction of the of the remaining space once all the other columns have
+  /// been laid out that this column should occupy.
   final double value;
 
   @override
@@ -187,8 +209,13 @@ class FlexColumnWidth extends TableColumnWidth {
 /// Both specifications are evaluated, so if either specification is
 /// expensive, so is this.
 class MaxColumnWidth extends TableColumnWidth {
+  /// Creates a column width that is the maximum of two other column widths.
   const MaxColumnWidth(this.a, this.b);
+
+  /// A lower bound for the width of this column.
   final TableColumnWidth a;
+
+  /// Another lower bound for the width of this column.
   final TableColumnWidth b;
 
   @override
@@ -233,8 +260,13 @@ class MaxColumnWidth extends TableColumnWidth {
 /// Both specifications are evaluated, so if either specification is
 /// expensive, so is this.
 class MinColumnWidth extends TableColumnWidth {
-  const MinColumnWidth(this.a, this.b); // at most as big as a or b
+  /// Creates a column width that is the minimum of two other column widths.
+  const MinColumnWidth(this.a, this.b);
+
+  /// An upper bound for the width of this column.
   final TableColumnWidth a;
+
+  /// Another upper bound for the width of this column.
   final TableColumnWidth b;
 
   @override
@@ -273,6 +305,9 @@ class MinColumnWidth extends TableColumnWidth {
 /// This is like [Border], with the addition of two sides: the inner
 /// horizontal borders and the inner vertical borders.
 class TableBorder extends Border {
+  /// Creates a border for a table.
+  ///
+  /// All the sides of the border default to [BorderSide.none].
   const TableBorder({
     BorderSide top: BorderSide.none,
     BorderSide right: BorderSide.none,
@@ -287,6 +322,7 @@ class TableBorder extends Border {
     left: left
   );
 
+  /// A uniform border with all sides the same color and width.
   factory TableBorder.all({
     Color color: const Color(0xFF000000),
     double width: 1.0
@@ -295,6 +331,8 @@ class TableBorder extends Border {
     return new TableBorder(top: side, right: side, bottom: side, left: side, horizontalInside: side, verticalInside: side);
   }
 
+  /// Creates a border for a table where all the interior sides use the same
+  /// styling and all the exterior sides use the same styling.
   factory TableBorder.symmetric({
     BorderSide inside: BorderSide.none,
     BorderSide outside: BorderSide.none
@@ -309,9 +347,36 @@ class TableBorder extends Border {
     );
   }
 
+  /// The horizontal interior sides of this border.
   final BorderSide horizontalInside;
 
+  /// The vertical interior sides of this border.
   final BorderSide verticalInside;
+
+  @override
+  bool get isUniform {
+    assert(horizontalInside != null);
+    assert(verticalInside != null);
+    if (!super.isUniform)
+      return false;
+
+    final Color topColor = top.color;
+    if (horizontalInside.color != topColor ||
+        verticalInside.color != topColor)
+      return false;
+
+    final double topWidth = top.width;
+    if (horizontalInside.width != topWidth ||
+        verticalInside.width != topWidth)
+      return false;
+
+    final BorderStyle topStyle = top.style;
+    if (horizontalInside.style != topStyle ||
+        verticalInside.style != topStyle)
+      return false;
+
+    return true;
+  }
 
   @override
   TableBorder scale(double t) {
@@ -325,6 +390,7 @@ class TableBorder extends Border {
     );
   }
 
+  /// Linearly interpolate between two table borders.
   static TableBorder lerp(TableBorder a, TableBorder b, double t) {
     if (a == null && b == null)
       return null;
@@ -376,6 +442,9 @@ enum TableCellVerticalAlignment {
   /// baseline. Cells with no baseline are top-aligned instead. The baseline
   /// used is specified by [RenderTable.baseline]. It is not valid to use the
   /// baseline value if [RenderTable.baseline] is not specified.
+  ///
+  /// This vertial alignment is relatively expensive because it causes the table
+  /// to compute the baseline for each cell in the row.
   baseline,
 
   /// Cells with this alignment are sized to be as tall as the row, then made to fit the row.
@@ -385,6 +454,17 @@ enum TableCellVerticalAlignment {
 
 /// A table where the columns and rows are sized to fit the contents of the cells.
 class RenderTable extends RenderBox {
+  /// Creates a table render object.
+  ///
+  ///  * `columns` must either be null or non-negative. If `columns` is null,
+  ///    the number of columns will be inferred from length of the first sublist
+  ///    of `children`.
+  ///  * `rows` must either be null or non-negative. If `rows` is null, the
+  ///    number of rows will be inferred from the `children`. If `rows` is not
+  ///    null, then `children` must be null.
+  ///  * `children` must either be null or contain lists of all the same length.
+  ///    if `children` is not null, then `rows` must be null.
+  ///  * [defaultColumnWidth] must not be null.
   RenderTable({
     int columns,
     int rows,
@@ -420,6 +500,13 @@ class RenderTable extends RenderBox {
   // _children.length must be rows * columns
   List<RenderBox> _children = const <RenderBox>[];
 
+  /// The number of vertical alignment lines in this table.
+  ///
+  /// Changing the number of columns will remove any children that no longer fit
+  /// in the table.
+  ///
+  /// Changing the number of columns is an expensive operation because the table
+  /// needs to rearranage its internal representation.
   int get columns => _columns;
   int _columns;
   set columns(int value) {
@@ -448,6 +535,10 @@ class RenderTable extends RenderBox {
     markNeedsLayout();
   }
 
+  /// The number of horizontal alignment lines in this table.
+  ///
+  /// Changing the number of rows will remove any children that no longer fit
+  /// in the table.
   int get rows => _rows;
   int _rows;
   set rows(int value) {
@@ -466,6 +557,15 @@ class RenderTable extends RenderBox {
     markNeedsLayout();
   }
 
+  /// How the horizontal extents of the columns of this table should be determined.
+  ///
+  /// If the [Map] has a null entry for a given column, the table uses the
+  /// [defaultColumnWidth] instead.
+  ///
+  /// The layout performance of the table depends critically on which column
+  /// sizing algorithms are used here. In particular, [IntrinsicColumnWidth] is
+  /// quite expensive because it needs to measure each cell in the column to
+  /// determine the intrinsic size of the column.
   Map<int, TableColumnWidth> get columnWidths => new Map<int, TableColumnWidth>.unmodifiable(_columnWidths);
   Map<int, TableColumnWidth> _columnWidths;
   set columnWidths(Map<int, TableColumnWidth> value) {
@@ -476,6 +576,7 @@ class RenderTable extends RenderBox {
     markNeedsLayout();
   }
 
+  /// Determines how the width of column with the given index is determined.
   void setColumnWidth(int column, TableColumnWidth value) {
     if (_columnWidths[column] == value)
       return;
@@ -483,6 +584,10 @@ class RenderTable extends RenderBox {
     markNeedsLayout();
   }
 
+  /// How to determine with widths of columns that don't have an explicit sizing algorithm.
+  ///
+  /// Specifically, the [defaultColumnWidth] is used for column `i` if
+  /// `columnWidths[i]` is null.
   TableColumnWidth get defaultColumnWidth => _defaultColumnWidth;
   TableColumnWidth _defaultColumnWidth;
   set defaultColumnWidth(TableColumnWidth value) {
@@ -493,6 +598,7 @@ class RenderTable extends RenderBox {
     markNeedsLayout();
   }
 
+  /// The style to use when painting the boundary and interior divisions of the table.
   TableBorder get border => _border;
   TableBorder _border;
   set border(TableBorder value) {
@@ -502,6 +608,11 @@ class RenderTable extends RenderBox {
     markNeedsPaint();
   }
 
+  /// The decorations to use for each row of the table.
+  ///
+  /// Row decorations fill the horizontal and vertical extent of each row in
+  /// the table, unlike decorations for individual cells, which might not fill
+  /// either.
   List<Decoration> get rowDecorations => new List<Decoration>.unmodifiable(_rowDecorations ?? const <Decoration>[]);
   List<Decoration> _rowDecorations;
   List<BoxPainter> _rowDecorationPainters;
@@ -534,6 +645,7 @@ class RenderTable extends RenderBox {
     }
   }
 
+  /// How cells that do not explicitly specify a vertical alignment are aligned vertically.
   TableCellVerticalAlignment get defaultVerticalAlignment => _defaultVerticalAlignment;
   TableCellVerticalAlignment _defaultVerticalAlignment;
   set defaultVerticalAlignment (TableCellVerticalAlignment value) {
@@ -543,6 +655,7 @@ class RenderTable extends RenderBox {
     markNeedsLayout();
   }
 
+  /// The text baseline to use when aligning rows using [TableCellVerticalAlignment.baseline].
   TextBaseline get textBaseline => _textBaseline;
   TextBaseline _textBaseline;
   set textBaseline (TextBaseline value) {
@@ -558,6 +671,14 @@ class RenderTable extends RenderBox {
       child.parentData = new TableCellParentData();
   }
 
+  /// Replaces the children of this table with the given cells.
+  ///
+  /// The cells are divided into the specified number of columns before
+  /// replacing the existing children.
+  ///
+  /// If the new cells contain any existing children of the table, those
+  /// children are simply moved to their new location in the table rather than
+  /// removed from the table and re-added.
   void setFlatChildren(int columns, List<RenderBox> cells) {
     if (cells == _children && columns == _columns)
       return;
@@ -617,6 +738,7 @@ class RenderTable extends RenderBox {
     markNeedsLayout();
   }
 
+  /// Replaces the children of this table with the given cells.
   void setChildren(List<List<RenderBox>> cells) {
     // TODO(ianh): Make this smarter, like setFlatChildren
     if (cells == null) {
@@ -635,6 +757,9 @@ class RenderTable extends RenderBox {
     assert(_children.length == rows * columns);
   }
 
+  /// Adds a row to the end of the table.
+  ///
+  /// The newly added children must not already have parents.
   void addRow(List<RenderBox> cells) {
     assert(cells.length == columns);
     assert(_children.length == rows * columns);
@@ -647,6 +772,11 @@ class RenderTable extends RenderBox {
     markNeedsLayout();
   }
 
+  /// Replaces the child at the given position with the given child.
+  ///
+  /// If the given child is already located at the given position, this function
+  /// does not modify the table. Otherwise, the given child must not already
+  /// have a parent.
   void setChild(int x, int y, RenderBox value) {
     assert(x != null);
     assert(y != null);

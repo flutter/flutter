@@ -39,11 +39,11 @@ class _FitnessDemoContentsState extends State<_FitnessDemoContents> {
   Future<Null> _loadAssets(AssetBundle bundle) async {
     _images = new ImageMap(bundle);
     await _images.load(<String>[
-      'packages/flutter_gallery_assets/jumpingjack.png',
+      'packages/flutter_gallery_assets/fitness_demo/jumpingjack.png',
     ]);
 
-    String json = await DefaultAssetBundle.of(context).loadString('packages/flutter_gallery_assets/jumpingjack.json');
-    _sprites = new SpriteSheet(_images['packages/flutter_gallery_assets/jumpingjack.png'], json);
+    String json = await DefaultAssetBundle.of(context).loadString('packages/flutter_gallery_assets/fitness_demo/jumpingjack.json');
+    _sprites = new SpriteSheet(_images['packages/flutter_gallery_assets/fitness_demo/jumpingjack.png'], json);
   }
 
   @override
@@ -586,4 +586,11 @@ class _FireworksNode extends NodeWithSize {
     system.position = new Point(randomDouble() * 1024.0, randomDouble() * 1024.0);
     addChild(system);
   }
+}
+
+void main() {
+  runApp(new MaterialApp(
+    title: 'Fitness',
+    home: new FitnessDemo()
+  ));
 }

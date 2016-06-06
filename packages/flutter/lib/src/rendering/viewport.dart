@@ -83,6 +83,12 @@ class ViewportDimensions {
 /// have a child model. See [RenderViewport] for a viewport with a single child
 /// and [RenderVirtualViewport] for a viewport with multiple children.
 class RenderViewportBase extends RenderBox {
+  /// Initializes fields for subclasses.
+  ///
+  /// The [paintOffset] and [mainAxis] arguments must not be null.
+  ///
+  /// This constructor uses positional arguments rather than named arguments to
+  /// work around limitations of mixins.
   RenderViewportBase(
     Offset paintOffset,
     Axis mainAxis,
@@ -149,6 +155,7 @@ class RenderViewportBase extends RenderBox {
     markNeedsSemanticsUpdate();
   }
 
+  /// The interior and exterior extent of the viewport.
   ViewportDimensions get dimensions => _dimensions;
   ViewportDimensions _dimensions = ViewportDimensions.zero;
   set dimensions(ViewportDimensions value) {
@@ -181,16 +188,23 @@ class RenderViewportBase extends RenderBox {
   }
 }
 
+/// Signature for notifications about [RenderViewport] dimensions changing.
 typedef Offset ViewportDimensionsChangeCallback(ViewportDimensions dimensions);
 
 /// A render object that's bigger on the inside.
 ///
-/// The child of a viewport can layout to a larger size than the viewport
-/// itself. If that happens, only a portion of the child will be visible through
-/// the viewport. The portion of the child that is visible is controlled by the
-/// paint offset.
+/// The child of a viewport can layout to a larger size along the viewport's
+/// [mainAxis] than the viewport itself. If that happens, only a portion of the
+/// child will be visible through the viewport. The portion of the child that is
+/// visible can be controlled with the [paintOffset].
+///
+/// See also:
+///
+///  * [RenderVirtualViewport] (which works with more than one child)
 class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<RenderBox> {
-
+  /// Creates a render object that's bigger on the inside.
+  ///
+  /// The [paintOffset] and [mainAxis] arguments must not be null.
   RenderViewport({
     RenderBox child,
     Offset paintOffset: Offset.zero,
@@ -203,6 +217,9 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
 
   /// Called during [layout] to report the dimensions of the viewport
   /// and its child.
+  ///
+  /// The return value of this function is used as the new [paintOffset] and
+  /// must not be null.
   ViewportDimensionsChangeCallback onPaintOffsetUpdateNeeded;
 
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
@@ -315,9 +332,24 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
   }
 }
 
+/// A render object that shows a subset of its children.
+///
+/// The children of a viewport can layout to a larger size along the viewport's
+/// [mainAxis] than the viewport itself. If that happens, only a subset of the
+/// children will be visible through the viewport. The subset of children that
+/// are visible can be controlled with the [paintOffset].
+///
+/// See also:
+///
+///  * [RenderList] (which arranges its children linearly)
+///  * [RenderGrid] (which arranges its children into tiles)
+///  * [RenderViewport] (which is easier to use with a single child)
 abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<RenderBox>>
     extends RenderViewportBase with ContainerRenderObjectMixin<RenderBox, T>,
                                     RenderBoxContainerDefaultsMixin<RenderBox, T> {
+  /// Initializes fields for subclasses.
+  ///
+  /// The [paintOffset] and [mainAxis] arguments must not be null.
   RenderVirtualViewport({
     int virtualChildCount,
     LayoutCallback callback,
@@ -328,6 +360,9 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
        _callback = callback,
        super(paintOffset, mainAxis, anchor);
 
+  /// The overall number of children this viewport could potentially display.
+  ///
+  /// If null, the viewport might display an unbounded number of children.
   int get virtualChildCount => _virtualChildCount;
   int _virtualChildCount;
   set virtualChildCount(int value) {

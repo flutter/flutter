@@ -159,14 +159,14 @@ abstract class MaterialInkController {
 class Material extends StatefulWidget {
   /// Creates a piece of material.
   ///
-  /// Both the type and the elevation arguments are required.
+  /// The [type] and the [elevation] arguments must not be null.
   Material({
     Key key,
-    this.child,
     this.type: MaterialType.canvas,
     this.elevation: 0,
     this.color,
-    this.textStyle
+    this.textStyle,
+    this.child
   }) : super(key: key) {
     assert(type != null);
     assert(elevation != null);

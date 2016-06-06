@@ -8,21 +8,33 @@ assets:
   - assets/section_components.png
   - assets/section_patterns.png
   - assets/section_usability.png
+  - packages/flutter_gallery_assets/pesto/avatar.jpg
+  - packages/flutter_gallery_assets/pesto/image10.jpg
+  - packages/flutter_gallery_assets/pesto/image11.jpg
+  - packages/flutter_gallery_assets/pesto/image12.jpg
+  - packages/flutter_gallery_assets/pesto/image13.jpg
+  - packages/flutter_gallery_assets/pesto/image1.jpg
+  - packages/flutter_gallery_assets/pesto/image2.jpg
+  - packages/flutter_gallery_assets/pesto/image3.jpg
+  - packages/flutter_gallery_assets/pesto/image4.jpg
+  - packages/flutter_gallery_assets/pesto/image5.jpg
+  - packages/flutter_gallery_assets/pesto/image6.jpg
+  - packages/flutter_gallery_assets/pesto/image7.jpg
+  - packages/flutter_gallery_assets/pesto/image8.jpg
+  - packages/flutter_gallery_assets/pesto/image9.jpg
+  - packages/flutter_gallery_assets/pesto/logo_small.png
+  - packages/flutter_gallery_assets/pesto/logo_medium.png
+  - packages/flutter_gallery_assets/pesto/logo_big.png
+  - packages/flutter_gallery_assets/pesto/fish.png
+  - packages/flutter_gallery_assets/pesto/healthy.png
+  - packages/flutter_gallery_assets/pesto/main.png
+  - packages/flutter_gallery_assets/pesto/meat.png
+  - packages/flutter_gallery_assets/pesto/quick.png
+  - packages/flutter_gallery_assets/pesto/spicy.png
+  - packages/flutter_gallery_assets/pesto/veggie.png
   - packages/flutter_gallery_assets/ali_connors.png
-  - packages/flutter_gallery_assets/sun.png
-  - packages/flutter_gallery_assets/clouds-0.png
-  - packages/flutter_gallery_assets/clouds-1.png
-  - packages/flutter_gallery_assets/ray.png
-  - packages/flutter_gallery_assets/sun.png
-  - packages/flutter_gallery_assets/weathersprites.json
-  - packages/flutter_gallery_assets/weathersprites.png
-  - packages/flutter_gallery_assets/icon-sun.png
-  - packages/flutter_gallery_assets/icon-rain.png
-  - packages/flutter_gallery_assets/icon-snow.png
   - packages/flutter_gallery_assets/kangaroo_valley_safari.png
   - packages/flutter_gallery_assets/top_10_australian_beaches.png
-  - packages/flutter_gallery_assets/jumpingjack.json
-  - packages/flutter_gallery_assets/jumpingjack.png
   - packages/flutter_gallery_assets/grain.png
   - packages/flutter_gallery_assets/fancylines.png
   - packages/flutter_gallery_assets/landscape_0.jpg
@@ -37,5 +49,18 @@ assets:
   - packages/flutter_gallery_assets/landscape_9.jpg
   - packages/flutter_gallery_assets/landscape_10.jpg
   - packages/flutter_gallery_assets/landscape_11.jpg
-  - packages/flutter_gallery_assets/shadow.png
   - lib/gallery/example_code.dart
+  - packages/flutter_gallery_assets/shrine/vendors/16c477b.jpg
+  - packages/flutter_gallery_assets/shrine/vendors/ali-connors.png
+  - packages/flutter_gallery_assets/shrine/vendors/peter-carlsson.png
+  - packages/flutter_gallery_assets/shrine/vendors/sandra-adams.jpg
+  - packages/flutter_gallery_assets/shrine/vendors/zach.jpg
+fonts:
+  - family: Raleway
+    fonts:
+      - asset: packages/flutter_gallery_assets/pesto/fonts/Raleway-Regular.ttf
+      - asset: packages/flutter_gallery_assets/pesto/fonts/Raleway-Medium.ttf
+      - asset: packages/flutter_gallery_assets/pesto/fonts/Raleway-SemiBold.ttf
+  - family: AbrilFatface
+    fonts:
+      - asset: packages/flutter_gallery_assets/shrine/fonts/abrilfatface/AbrilFatface-Regular.ttf

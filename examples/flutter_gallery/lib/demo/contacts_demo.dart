@@ -70,14 +70,14 @@ class _ContactItem extends StatelessWidget {
   }
 }
 
-class FlexibleSpaceDemo extends StatefulWidget {
-  static const String routeName = '/flexible-space';
+class ContactsDemo extends StatefulWidget {
+  static const String routeName = '/contacts';
 
   @override
-  FlexibleSpaceDemoState createState() => new FlexibleSpaceDemoState();
+  ContactsDemoState createState() => new ContactsDemoState();
 }
 
-class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
+class ContactsDemoState extends State<ContactsDemo> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   final double _appBarHeight = 256.0;
   AppBarBehavior _appBarBehavior = AppBarBehavior.scroll;

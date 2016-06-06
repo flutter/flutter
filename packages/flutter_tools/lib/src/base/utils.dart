@@ -11,9 +11,11 @@ import 'package:path/path.dart' as path;
 
 bool get isRunningOnBot {
   // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
+  // CHROME_HEADLESS is one property set on Flutter's Chrome Infra bots.
   return
     Platform.environment['TRAVIS'] == 'true' ||
-    Platform.environment['CONTINUOUS_INTEGRATION'] == 'true';
+    Platform.environment['CONTINUOUS_INTEGRATION'] == 'true' ||
+    Platform.environment['CHROME_HEADLESS'] == '1';
 }
 
 String hex(List<int> bytes) {

@@ -31,7 +31,7 @@ import 'theme.dart';
 class Icon extends StatelessWidget {
   /// Creates an icon.
   ///
-  /// The size argument is required to be non-null.
+  /// The [size] argument most not be null.
   Icon({
     Key key,
     this.icon,

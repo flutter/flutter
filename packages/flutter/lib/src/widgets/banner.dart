@@ -4,6 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:meta/meta.dart';
+
 import 'basic.dart';
 import 'framework.dart';
 
@@ -37,10 +39,10 @@ enum BannerLocation {
 class BannerPainter extends CustomPainter {
   /// Creates a banner painter.
   ///
-  /// The message and location arguments are required.
+  /// The [message] and [location] arguments must not be null.
   const BannerPainter({
-    this.message,
-    this.location
+    @required this.message,
+    @required this.location
   });
 
   /// The message to show in the banner.
@@ -124,7 +126,7 @@ class BannerPainter extends CustomPainter {
 class Banner extends StatelessWidget {
   /// Creates a banner.
   ///
-  /// The message and location arguments are required.
+  /// The [message] and [location] arguments must not be null.
   Banner({
     Key key,
     this.child,

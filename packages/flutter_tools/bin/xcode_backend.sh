@@ -23,7 +23,34 @@ AssertExists() {
 }
 
 BuildApp() {
-  local project_path=${FLUTTER_APPLICATION_PATH}
+  local project_path="${SOURCE_ROOT}/.."
+  if [[ -n "$FLUTTER_APPLICATION_PATH" ]]; then
+    project_path=${FLUTTER_APPLICATION_PATH}
+  fi
+
+  local target_path="lib/main.dart"
+  if [[ -n "$FLUTTER_TARGET" ]]; then
+    target_path=${FLUTTER_TARGET}
+  fi
+
+  local flutter_mode="release"
+  if [[ -n "$FLUTTER_MODE" ]]; then
+    flutter_mode=${FLUTTER_MODE}
+  fi
+
+  local artifact_variant="unknown"
+  case "$flutter_mode" in
+    release) artifact_variant="ios-release";;
+    profile) artifact_variant="ios-profile";;
+    debug) artifact_variant="ios";;
+    *) echo "Unknown FLUTTER_MODE: $FLUTTER_MODE";;
+  esac
+
+  local framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/${artifact_variant}"
+  if [[ -n "$FLUTTER_FRAMEWORK_DIR" ]]; then
+    framework_path="${FLUTTER_FRAMEWORK_DIR}"
+  fi
+
   AssertExists ${project_path}
 
   local derived_dir=${SOURCE_ROOT}/Flutter
@@ -33,8 +60,10 @@ BuildApp() {
   RunCommand rm -f ${derived_dir}/Flutter.framework
   RunCommand rm -f ${derived_dir}/app.so
   RunCommand rm -f ${derived_dir}/app.flx
-  RunCommand cp -r ${FLUTTER_FRAMEWORK_DIR}/Flutter.framework ${derived_dir}
+  RunCommand cp -r ${framework_path}/Flutter.framework ${derived_dir}
   RunCommand pushd ${project_path}
+
+  AssertExists ${target_path}
 
   local local_engine_flag=""
   if [[ -n "$LOCAL_ENGINE" ]]; then
@@ -42,16 +71,17 @@ BuildApp() {
   fi
 
   if [[ $CURRENT_ARCH != "x86_64" ]]; then
-    local interpreter_flag="--interpreter"
-    if [[ "$DART_EXPERIMENTAL_INTERPRETER" != "1" ]]; then
-      interpreter_flag=""
+    local aot_flags=""
+    if [[ "$flutter_mode" == "debug" ]]; then
+      aot_flags="--interpreter --debug"
+    else
+      aot_flags="--${flutter_mode}"
     fi
 
     RunCommand ${FLUTTER_ROOT}/bin/flutter --suppress-analytics build aot \
       --target-platform=ios                                               \
-      --target=${FLUTTER_TARGET}                                          \
-      --release                                                           \
-      ${interpreter_flag}                                                 \
+      --target=${target_path}                                             \
+      ${aot_flags}                                                        \
       ${local_engine_flag}
 
     if [[ $? -ne 0 ]]; then
@@ -65,12 +95,12 @@ BuildApp() {
   fi
 
   local precompilation_flag=""
-  if [[ $CURRENT_ARCH != "x86_64" ]] && [[ "$DART_EXPERIMENTAL_INTERPRETER" != "1" ]]; then
+  if [[ $CURRENT_ARCH != "x86_64" ]] && [[ "$flutter_mode" != "debug" ]]; then
     precompilation_flag="--precompiled"
   fi
 
   RunCommand ${FLUTTER_ROOT}/bin/flutter --suppress-analytics build flx \
-    --target=${FLUTTER_TARGET}                                          \
+    --target=${target_path}                                             \
     --output-file=${derived_dir}/app.flx                                \
     ${precompilation_flag}                                              \
     ${local_engine_flag}                                                \

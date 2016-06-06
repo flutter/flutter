@@ -17,6 +17,7 @@ AppContext get context {
 
 class AppContext {
   Map<Type, dynamic> _instances = <Type, dynamic>{};
+  Zone _zone;
 
   bool isSet(Type type) {
     if (_instances.containsKey(type))
@@ -30,7 +31,7 @@ class AppContext {
     if (_instances.containsKey(type))
       return _instances[type];
 
-    AppContext parent = _calcParent(Zone.current);
+    AppContext parent = _calcParent(_zone ?? Zone.current);
     return parent?.getVariable(type);
   }
 
@@ -62,9 +63,18 @@ class AppContext {
     ZoneBinaryCallback<dynamic, dynamic, StackTrace> onError
   }) {
     return runZoned(
-      method,
+      () => _run(method),
       zoneValues: <String, dynamic>{ 'context': this },
       onError: onError
     );
+  }
+
+  dynamic _run(dynamic method()) async {
+    try {
+      _zone = Zone.current;
+      return await method();
+    } finally {
+      _zone = null;
+    }
   }
 }

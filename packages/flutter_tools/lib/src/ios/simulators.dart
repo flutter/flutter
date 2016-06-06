@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:path/path.dart' as path;
 
@@ -700,7 +701,6 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   final IOSSimulator device;
 
   StreamController<String> _linesController;
-  bool _lastWasFiltered = false;
 
   // We log from two files: the device and the system log.
   Process _deviceProcess;
@@ -736,15 +736,14 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   static final RegExp _mapRegex = new RegExp(r'\S+ +\S+ +\S+ \S+ (.+)\[\d+\]\)?: (.*)$');
 
   // Jan 31 19:23:28 --- last message repeated 1 time ---
-  static final RegExp _lastMessageRegex = new RegExp(r'\S+ +\S+ +\S+ --- (.*) ---$');
+  static final RegExp _lastMessageSingleRegex = new RegExp(r'\S+ +\S+ +\S+ --- last message repeated 1 time ---$');
+  static final RegExp _lastMessageMultipleRegex = new RegExp(r'\S+ +\S+ +\S+ --- last message repeated (\d+) times ---$');
 
   static final RegExp _flutterRunnerRegex = new RegExp(r' FlutterRunner\[\d+\] ');
 
   String _filterDeviceLine(String string) {
     Match match = _mapRegex.matchAsPrefix(string);
     if (match != null) {
-      _lastWasFiltered = true;
-
       // Filter out some messages that clearly aren't related to Flutter.
       if (string.contains(': could not find icon for representation -> com.apple.'))
         return null;
@@ -762,23 +761,33 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
            && content.endsWith(']: 0x1'))
          return null;
 
-      _lastWasFiltered = false;
-
       if (category == 'Runner')
         return content;
       return '$category: $content';
     }
-    match = _lastMessageRegex.matchAsPrefix(string);
-    if (match != null && !_lastWasFiltered)
-      return '(${match.group(1)})';
+    match = _lastMessageSingleRegex.matchAsPrefix(string);
+    if (match != null)
+      return null;
     return string;
   }
 
+  String _lastLine;
+
   void _onDeviceLine(String line) {
-    String filteredLine = _filterDeviceLine(line);
-    if (filteredLine == null)
-      return;
-    _linesController.add(filteredLine);
+    Match multi = _lastMessageMultipleRegex.matchAsPrefix(line);
+
+    if (multi != null) {
+      if (_lastLine != null) {
+        int repeat = int.parse(multi.group(1));
+        repeat = math.max(0, math.min(100, repeat));
+        for (int i = 0; i < repeat; i++)
+          _linesController.add(_lastLine);
+      }
+    } else {
+      _lastLine = _filterDeviceLine(line);
+      if (_lastLine != null)
+        _linesController.add(_lastLine);
+    }
   }
 
   String _filterSystemLog(String string) {

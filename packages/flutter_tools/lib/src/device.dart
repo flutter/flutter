@@ -205,6 +205,10 @@ abstract class Device {
 
   Future<bool> takeScreenshot(File outputFile) => new Future<bool>.error('unimplemented');
 
+  /// Find the apps that are currently running on this device.
+  Future<List<DiscoveredApp>> discoverApps() =>
+      new Future<List<DiscoveredApp>>.value(<DiscoveredApp>[]);
+
   @override
   int get hashCode => id.hashCode;
 
@@ -332,4 +336,11 @@ abstract class DeviceLogReader {
 
   @override
   String toString() => name;
+}
+
+/// Describes an app running on the device.
+class DiscoveredApp {
+  DiscoveredApp(this.id, this.observatoryPort);
+  final String id;
+  final int observatoryPort;
 }

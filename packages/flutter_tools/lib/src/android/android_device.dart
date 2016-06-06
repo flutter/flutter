@@ -513,6 +513,28 @@ class AndroidDevice extends Device {
 
     return new Future<bool>.value(true);
   }
+
+  @override
+  Future<List<DiscoveredApp>> discoverApps() {
+    RegExp discoverExp = new RegExp(r'DISCOVER: (.*)');
+    List<DiscoveredApp> result = <DiscoveredApp>[];
+    StreamSubscription<String> logs = logReader.logLines.listen((String line) {
+      Match match = discoverExp.firstMatch(line);
+      if (match != null) {
+        Map<String, dynamic> app = JSON.decode(match.group(1));
+        result.add(new DiscoveredApp(app['id'], app['observatoryPort']));
+      }
+    });
+
+    runCheckedSync(adbCommandForDevice(<String>[
+      'shell', 'am', 'broadcast', '-a', 'io.flutter.view.DISCOVER'
+    ]));
+
+    return new Future<List<DiscoveredApp>>.delayed(new Duration(seconds: 1), () {
+      logs.cancel();
+      return result;
+    });
+  }
 }
 
 // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper

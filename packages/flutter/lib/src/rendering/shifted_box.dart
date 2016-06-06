@@ -115,7 +115,7 @@ class RenderPadding extends RenderShiftedBox {
     final double totalHorizontalPadding = padding.left + padding.right;
     final double totalVerticalPadding = padding.top + padding.bottom;
     if (child != null) // next line relies on double.INFINITY absorption
-      return child.getMinIntrinsicWidth(height - totalVerticalPadding) + totalHorizontalPadding;
+      return child.getMinIntrinsicWidth(math.max(0.0, height - totalVerticalPadding)) + totalHorizontalPadding;
     return totalHorizontalPadding;
   }
 
@@ -124,7 +124,7 @@ class RenderPadding extends RenderShiftedBox {
     final double totalHorizontalPadding = padding.left + padding.right;
     final double totalVerticalPadding = padding.top + padding.bottom;
     if (child != null) // next line relies on double.INFINITY absorption
-      return child.getMaxIntrinsicWidth(height - totalVerticalPadding) + totalHorizontalPadding;
+      return child.getMaxIntrinsicWidth(math.max(0.0, height - totalVerticalPadding)) + totalHorizontalPadding;
     return totalHorizontalPadding;
   }
 
@@ -133,7 +133,7 @@ class RenderPadding extends RenderShiftedBox {
     final double totalHorizontalPadding = padding.left + padding.right;
     final double totalVerticalPadding = padding.top + padding.bottom;
     if (child != null) // next line relies on double.INFINITY absorption
-      return child.getMinIntrinsicHeight(width - totalHorizontalPadding) + totalVerticalPadding;
+      return child.getMinIntrinsicHeight(math.max(0.0, width - totalHorizontalPadding)) + totalVerticalPadding;
     return totalVerticalPadding;
   }
 
@@ -142,7 +142,7 @@ class RenderPadding extends RenderShiftedBox {
     final double totalHorizontalPadding = padding.left + padding.right;
     final double totalVerticalPadding = padding.top + padding.bottom;
     if (child != null) // next line relies on double.INFINITY absorption
-      return child.getMaxIntrinsicHeight(width - totalHorizontalPadding) + totalVerticalPadding;
+      return child.getMaxIntrinsicHeight(math.max(0.0, width - totalHorizontalPadding)) + totalVerticalPadding;
     return totalVerticalPadding;
   }
 
@@ -856,7 +856,7 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
 class RenderBaseline extends RenderShiftedBox {
   /// Creates a [RenderBaseline] object.
   ///
-  /// The [baseline] and [baselineType] arguments are required.
+  /// The [baseline] and [baselineType] arguments must not be null.
   RenderBaseline({
     RenderBox child,
     double baseline,

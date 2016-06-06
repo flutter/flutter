@@ -5,6 +5,8 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
+
 import 'box.dart';
 import 'object.dart';
 import 'viewport.dart';
@@ -170,6 +172,11 @@ abstract class GridDelegate {
   GridSpecification getGridSpecification(BoxConstraints constraints, int childCount);
 
   /// Override this function to control where children are placed in the grid.
+  ///
+  /// During layout, the grid calls this function for each child, passing the
+  /// [placementData] associated with that child as context. The returned
+  /// [GridChildPlacement] is then used to determine the size and position of
+  /// that child within the grid.
   GridChildPlacement getChildPlacement(GridSpecification specification, int index, Object placementData);
 
   /// Override this method to return true when the children need to be laid out.
@@ -301,7 +308,7 @@ class FixedColumnCountGridDelegate extends GridDelegateWithInOrderChildPlacement
   ///
   /// The [columnCount] argument must not be null.
   FixedColumnCountGridDelegate({
-    this.columnCount,
+    @required this.columnCount,
     double columnSpacing: 0.0,
     double rowSpacing: 0.0,
     EdgeInsets padding: EdgeInsets.zero,
@@ -378,7 +385,7 @@ class MaxTileWidthGridDelegate extends GridDelegateWithInOrderChildPlacement {
   ///
   /// The [maxTileWidth] argument must not be null.
   MaxTileWidthGridDelegate({
-    this.maxTileWidth,
+    @required this.maxTileWidth,
     this.tileAspectRatio: 1.0,
     double columnSpacing: 0.0,
     double rowSpacing: 0.0,
@@ -447,7 +454,7 @@ class MaxTileWidthGridDelegate extends GridDelegateWithInOrderChildPlacement {
 
 /// Parent data for use with [RenderGrid]
 class GridParentData extends ContainerBoxParentDataMixin<RenderBox> {
-  /// Opaque data passed to the getChildPlacement method of the grid's [GridDelegate].
+  /// Opaque data passed to the [GridDelegate.getChildPlacement] method of the grid's [GridDelegate].
   Object placementData;
 
   @override

@@ -50,8 +50,19 @@ Future<Null> main() async {
       } else {
         _send(<String, dynamic>{'method': 'app.stop'});
       }
+    } else if (words.first == 'restart') {
+      if (words.length > 1) {
+        _send(<String, dynamic>{
+          'method': 'app.restart',
+          'params': <String, dynamic> { 'appId': words[1] }
+        });
+      } else {
+        _send(<String, dynamic>{'method': 'app.restart'});
+      }
     } else if (line == 'devices') {
       _send(<String, dynamic>{'method': 'device.getDevices'});
+    } else if (line == 'enable') {
+      _send(<String, dynamic>{'method': 'device.enable'});
     } else {
       _send(<String, dynamic>{'method': line.trim()});
     }

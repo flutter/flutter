@@ -31,18 +31,18 @@ class _WeatherDemoState extends State<WeatherDemo> {
   Future<Null> _loadAssets(AssetBundle bundle) async {
     _images = new ImageMap(bundle);
     await _images.load(<String>[
-      'packages/flutter_gallery_assets/clouds-0.png',
-      'packages/flutter_gallery_assets/clouds-1.png',
-      'packages/flutter_gallery_assets/ray.png',
-      'packages/flutter_gallery_assets/sun.png',
-      'packages/flutter_gallery_assets/weathersprites.png',
-      'packages/flutter_gallery_assets/icon-sun.png',
-      'packages/flutter_gallery_assets/icon-rain.png',
-      'packages/flutter_gallery_assets/icon-snow.png'
+      'packages/flutter_gallery_assets/weather_demo/clouds-0.png',
+      'packages/flutter_gallery_assets/weather_demo/clouds-1.png',
+      'packages/flutter_gallery_assets/weather_demo/ray.png',
+      'packages/flutter_gallery_assets/weather_demo/sun.png',
+      'packages/flutter_gallery_assets/weather_demo/weathersprites.png',
+      'packages/flutter_gallery_assets/weather_demo/icon-sun.png',
+      'packages/flutter_gallery_assets/weather_demo/icon-rain.png',
+      'packages/flutter_gallery_assets/weather_demo/icon-snow.png'
     ]);
 
-    String json = await bundle.loadString('packages/flutter_gallery_assets/weathersprites.json');
-    _sprites = new SpriteSheet(_images['packages/flutter_gallery_assets/weathersprites.png'], json);
+    String json = await bundle.loadString('packages/flutter_gallery_assets/weather_demo/weathersprites.json');
+    _sprites = new SpriteSheet(_images['packages/flutter_gallery_assets/weather_demo/weathersprites.png'], json);
   }
 
   @override
@@ -97,7 +97,7 @@ class _WeatherDemoState extends State<WeatherDemo> {
                       });
                     },
                     selected: weatherWorld.weatherType == WeatherType.sun,
-                    icon: "packages/flutter_gallery_assets/icon-sun.png"
+                    icon: "packages/flutter_gallery_assets/weather_demo/icon-sun.png"
                   ),
                   new WeatherButton(
                     onPressed: () {
@@ -106,7 +106,7 @@ class _WeatherDemoState extends State<WeatherDemo> {
                       });
                     },
                     selected: weatherWorld.weatherType == WeatherType.rain,
-                    icon: "packages/flutter_gallery_assets/icon-rain.png"
+                    icon: "packages/flutter_gallery_assets/weather_demo/icon-rain.png"
                   ),
                   new WeatherButton(
                     onPressed: () {
@@ -115,7 +115,7 @@ class _WeatherDemoState extends State<WeatherDemo> {
                       });
                     },
                     selected: weatherWorld.weatherType == WeatherType.snow,
-                    icon: "packages/flutter_gallery_assets/icon-snow.png"
+                    icon: "packages/flutter_gallery_assets/weather_demo/icon-snow.png"
                   )
                 ]
               )
@@ -192,7 +192,7 @@ class WeatherWorld extends NodeWithSize {
     addChild(_background);
 
     _cloudsSharp = new CloudLayer(
-      image: _images['packages/flutter_gallery_assets/clouds-0.png'],
+      image: _images['packages/flutter_gallery_assets/weather_demo/clouds-0.png'],
       rotated: false,
       dark: false,
       loopTime: 20.0
@@ -200,7 +200,7 @@ class WeatherWorld extends NodeWithSize {
     addChild(_cloudsSharp);
 
     _cloudsDark = new CloudLayer(
-      image: _images['packages/flutter_gallery_assets/clouds-1.png'],
+      image: _images['packages/flutter_gallery_assets/weather_demo/clouds-1.png'],
       rotated: true,
       dark: true,
       loopTime: 40.0
@@ -208,7 +208,7 @@ class WeatherWorld extends NodeWithSize {
     addChild(_cloudsDark);
 
     _cloudsSoft = new CloudLayer(
-      image: _images['packages/flutter_gallery_assets/clouds-1.png'],
+      image: _images['packages/flutter_gallery_assets/weather_demo/clouds-1.png'],
       rotated: false,
       dark: false,
       loopTime: 60.0
@@ -352,7 +352,7 @@ const double _kNumSunRays = 50.0;
 
 class Sun extends Node {
   Sun() {
-    _sun = new Sprite.fromImage(_images['packages/flutter_gallery_assets/sun.png']);
+    _sun = new Sprite.fromImage(_images['packages/flutter_gallery_assets/weather_demo/sun.png']);
     _sun.scale = 4.0;
     _sun.transferMode = TransferMode.plus;
     addChild(_sun);
@@ -413,7 +413,7 @@ class Ray extends Sprite {
   double _rotationSpeed;
   double maxOpacity;
 
-  Ray() : super.fromImage(_images['packages/flutter_gallery_assets/ray.png']) {
+  Ray() : super.fromImage(_images['packages/flutter_gallery_assets/weather_demo/ray.png']) {
     pivot = const Point(0.0, 0.5);
     transferMode = TransferMode.plus;
     rotation = randomDouble() * 360.0;
@@ -556,4 +556,11 @@ class Snow extends Node {
       }
     }
   }
+}
+
+void main() {
+  runApp(new MaterialApp(
+    title: 'Weather',
+    home: new WeatherDemo()
+  ));
 }

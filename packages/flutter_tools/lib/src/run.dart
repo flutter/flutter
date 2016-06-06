@@ -45,7 +45,11 @@ class RunAndStayResident {
   final DebuggingOptions debuggingOptions;
   final bool usesTerminalUI;
 
-  Completer<int> _exitCompleter;
+  ApplicationPackage _package;
+  String _mainPath;
+  LaunchResult _result;
+
+  Completer<int> _exitCompleter = new Completer<int>();
   StreamSubscription<String> _loggingSubscription;
 
   Observatory observatory;
@@ -68,6 +72,35 @@ class RunAndStayResident {
     });
   }
 
+  Future<bool> restart() async {
+    if (observatory == null) {
+      printError('Debugging is not enabled.');
+      return false;
+    } else {
+      Status status = logger.startProgress('Re-starting application...');
+
+      Future<Event> extensionAddedEvent = observatory.onExtensionEvent
+        .where((Event event) => event.extensionKind == 'Flutter.FrameworkInitialization')
+        .first;
+
+      bool restartResult = await device.restartApp(
+        _package,
+        _result,
+        mainPath: _mainPath,
+        observatory: observatory
+      );
+
+      status.stop(showElapsedTime: true);
+
+      if (restartResult) {
+        // TODO(devoncarew): We should restore the route here.
+        await extensionAddedEvent;
+      }
+
+      return restartResult;
+    }
+  }
+
   Future<Null> stop() {
     _stopLogger();
     return _stopApp();
@@ -78,18 +111,18 @@ class RunAndStayResident {
     bool benchmark: false,
     Completer<int> observatoryPortCompleter
   }) async {
-    String mainPath = findMainDartFile(target);
-    if (!FileSystemEntity.isFileSync(mainPath)) {
-      String message = 'Tried to run $mainPath, but that file does not exist.';
+    _mainPath = findMainDartFile(target);
+    if (!FileSystemEntity.isFileSync(_mainPath)) {
+      String message = 'Tried to run $_mainPath, but that file does not exist.';
       if (target == null)
         message += '\nConsider using the -t option to specify the Dart file to start.';
       printError(message);
       return 1;
     }
 
-    ApplicationPackage package = getApplicationPackageForPlatform(device.platform);
+    _package = getApplicationPackageForPlatform(device.platform);
 
-    if (package == null) {
+    if (_package == null) {
       String message = 'No application found for ${device.platform}.';
       String hint = getMissingPackageHintForPlatform(device.platform);
       if (hint != null)
@@ -115,10 +148,10 @@ class RunAndStayResident {
     }
 
     // TODO(devoncarew): Move this into the device.startApp() impls.
-    if (package != null) {
-      printTrace("Stopping app '${package.name}' on ${device.name}.");
+    if (_package != null) {
+      printTrace("Stopping app '${_package.name}' on ${device.name}.");
       // We don't wait for the stop command to complete.
-      device.stopApp(package);
+      device.stopApp(_package);
     }
 
     // Allow any stop commands from above to start work.
@@ -127,7 +160,7 @@ class RunAndStayResident {
     // TODO(devoncarew): This fails for ios devices - we haven't built yet.
     if (device is AndroidDevice) {
       printTrace('Running install command.');
-      if (!(installApp(device, package)))
+      if (!(installApp(device, _package)))
         return 1;
     }
 
@@ -135,22 +168,22 @@ class RunAndStayResident {
     if (traceStartup != null)
       platformArgs = <String, dynamic>{ 'trace-startup': traceStartup };
 
-    printStatus('Running ${getDisplayPath(mainPath)} on ${device.name}...');
+    printStatus('Running ${getDisplayPath(_mainPath)} on ${device.name}...');
 
     _loggingSubscription = device.logReader.logLines.listen((String line) {
       if (!line.contains('Observatory listening on http') && !line.contains('Diagnostic server listening on http'))
         printStatus(line);
     });
 
-    LaunchResult result = await device.startApp(
-      package,
+    _result = await device.startApp(
+      _package,
       debuggingOptions.buildMode,
-      mainPath: mainPath,
+      mainPath: _mainPath,
       debuggingOptions: debuggingOptions,
       platformArgs: platformArgs
     );
 
-    if (!result.started) {
+    if (!_result.started) {
       printError('Error running application on ${device.name}.');
       await _loggingSubscription.cancel();
       return 2;
@@ -158,15 +191,13 @@ class RunAndStayResident {
 
     startTime.stop();
 
-    if (observatoryPortCompleter != null && result.hasObservatory)
-      observatoryPortCompleter.complete(result.observatoryPort);
-
-    _exitCompleter = new Completer<int>();
+    if (observatoryPortCompleter != null && _result.hasObservatory)
+      observatoryPortCompleter.complete(_result.observatoryPort);
 
     // Connect to observatory.
     if (debuggingOptions.debuggingEnabled) {
-      observatory = await Observatory.connect(result.observatoryPort);
-      printTrace('Connected to observatory port: ${result.observatoryPort}.');
+      observatory = await Observatory.connect(_result.observatoryPort);
+      printTrace('Connected to observatory port: ${_result.observatoryPort}.');
 
       observatory.populateIsolateInfo();
       observatory.onExtensionEvent.listen((Event event) {
@@ -210,8 +241,8 @@ class RunAndStayResident {
             // F1, help
             _printHelp();
           } else if (lower == 'r' || code == AnsiTerminal.KEY_F5) {
-            // F5, refresh
-            _handleRefresh(package, result, mainPath);
+            // F5, restart
+            restart();
           } else if (lower == 'q' || code == AnsiTerminal.KEY_F10) {
             // F10, exit
             _stopApp();
@@ -235,11 +266,11 @@ class RunAndStayResident {
       await new Future<Null>.delayed(new Duration(seconds: 4));
 
       // Touch the file.
-      File mainFile = new File(mainPath);
+      File mainFile = new File(_mainPath);
       mainFile.writeAsBytesSync(mainFile.readAsBytesSync());
 
       Stopwatch restartTime = new Stopwatch()..start();
-      bool restarted = await _handleRefresh(package, result, mainPath);
+      bool restarted = await restart();
       restartTime.stop();
       writeRunBenchmarkFile(startTime, restarted ? restartTime : null);
       await new Future<Null>.delayed(new Duration(seconds: 2));
@@ -255,35 +286,6 @@ class RunAndStayResident {
 
   void _printHelp() {
     printStatus('Type "h" or F1 for help, "r" or F5 to restart the app, and "q", F10, or ctrl-c to quit.');
-  }
-
-  Future<bool> _handleRefresh(ApplicationPackage package, LaunchResult result, String mainPath) async {
-    if (observatory == null) {
-      printError('Debugging is not enabled.');
-      return false;
-    } else {
-      Status status = logger.startProgress('Re-starting application...');
-
-      Future<Event> extensionAddedEvent = observatory.onExtensionEvent
-        .where((Event event) => event.extensionKind == 'Flutter.FrameworkInitialization')
-        .first;
-
-      bool restartResult = await device.restartApp(
-        package,
-        result,
-        mainPath: mainPath,
-        observatory: observatory
-      );
-
-      status.stop(showElapsedTime: true);
-
-      if (restartResult) {
-        // TODO(devoncarew): We should restore the route here.
-        await extensionAddedEvent;
-      }
-
-      return restartResult;
-    }
   }
 
   void _stopLogger() {

@@ -35,7 +35,7 @@ public class ExampleActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         FlutterMain.ensureInitializationComplete(getApplicationContext(), null);
-        setContentView(R.layout.flutter_layout);
+        setContentView(R.layout.hello_services_layout);
 
         flutterView = (FlutterView) findViewById(R.id.flutter_view);
         File appBundle = new File(PathUtils.getDataDirectory(this), FlutterMain.APP_BUNDLE);
@@ -150,8 +150,13 @@ public class ExampleActivity extends Activity {
 
         JSONObject reply = new JSONObject();
         try {
-            reply.put("latitude", location.getLatitude());
-            reply.put("longitude", location.getLongitude());
+            if (location != null) {
+              reply.put("latitude", location.getLatitude());
+              reply.put("longitude", location.getLongitude());
+            } else {
+              reply.put("latitude", 0);
+              reply.put("longitude", 0);
+            }
         } catch (JSONException e) {
             Log.e(TAG, "JSON exception", e);
             return null;

@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 import 'constants.dart';
 import 'divider.dart';
@@ -453,9 +454,12 @@ typedef List<PopupMenuEntry<T>> PopupMenuItemBuilder<T>(BuildContext context);
 /// the selected menu item. If child is null then a standard 'navigation/more_vert'
 /// icon is created.
 class PopupMenuButton<T> extends StatefulWidget {
+  /// Creates a button that shows a popup menu.
+  ///
+  /// The [itemBuilder] argument must not be null.
   PopupMenuButton({
     Key key,
-    this.itemBuilder,
+    @required this.itemBuilder,
     this.initialValue,
     this.onSelected,
     this.tooltip: 'Show menu',

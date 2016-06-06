@@ -75,7 +75,7 @@ void main() {
 
     StatefulElement outerElement = tester.element(find.byKey(outerKey));
     expect(outerElement.state.config, equals(outer2));
-    outerElement.state.setState(() {});
+    outerElement.markNeedsBuild();
     await tester.pump();
 
     expect(tester.element(find.byKey(innerKey)), equals(innerElement));

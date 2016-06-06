@@ -20,12 +20,12 @@ void main() {
     };
 
     Offset updatedScrollDelta;
-    pan.onUpdate = (Offset offset) {
-      updatedScrollDelta = offset;
+    pan.onUpdate = (DragUpdateDetails details) {
+      updatedScrollDelta = details.delta;
     };
 
     bool didEndPan = false;
-    pan.onEnd = (Velocity velocity) {
+    pan.onEnd = (DragEndDetails details) {
       didEndPan = true;
     };
 
@@ -85,12 +85,12 @@ void main() {
     };
 
     double updatedDelta;
-    drag.onUpdate = (double delta) {
-      updatedDelta = delta;
+    drag.onUpdate = (DragUpdateDetails details) {
+      updatedDelta = details.primaryDelta;
     };
 
     bool didEndDrag = false;
-    drag.onEnd = (Velocity velocity) {
+    drag.onEnd = (DragEndDetails details) {
       didEndDrag = true;
     };
 

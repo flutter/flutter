@@ -15,11 +15,8 @@ import 'package:test/test.dart';
 const List<String> demoCategories = const <String>['Demos', 'Components', 'Style'];
 
 const List<String> demoNames = const <String>[
-  'Weather',
-  'Fitness',
-  'Fancy lines',
-  'Flexible space toolbar',
-  'Floating action button',
+  'Shrine',
+  'Contacts',
   'Buttons',
   'Cards',
   'Chips',
@@ -28,6 +25,7 @@ const List<String> demoNames = const <String>[
   'Dialog',
   'Drop-down button',
   'Expand/collapse list control',
+  'Floating action button',
   'Grid',
   'Icons',
   'Leave-behind list items',

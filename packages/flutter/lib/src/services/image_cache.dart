@@ -142,6 +142,7 @@ class ImageCache {
   /// cache, then the [ImageResource] object is immediately usable and the
   /// provider is not called.
   ImageResource loadProvider(ImageProvider provider) {
+    assert(provider != null);
     ImageResource result = _cache[provider];
     if (result != null) {
       _cache.remove(provider);

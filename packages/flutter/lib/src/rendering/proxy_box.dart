@@ -530,18 +530,10 @@ class RenderIntrinsicWidth extends RenderProxyBox {
   }
 
   static double _applyStep(double input, double step) {
+    assert(input.isFinite);
     if (step == null)
       return input;
     return (input / step).ceil() * step;
-  }
-
-  BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
-    assert(child != null);
-    if (constraints.hasTightWidth)
-      return constraints;
-    final double width = child.getMaxIntrinsicWidth(constraints.maxHeight);
-    assert(width == constraints.constrainWidth(width));
-    return constraints.tighten(width: _applyStep(width, _stepWidth));
   }
 
   @override
@@ -553,36 +545,46 @@ class RenderIntrinsicWidth extends RenderProxyBox {
   double getMaxIntrinsicWidth(double height) {
     if (child == null)
       return 0.0;
-    double childResult = child.getMaxIntrinsicWidth(height);
-    assert(childResult.isFinite);
-    return _applyStep(childResult, _stepWidth);
+    final double width = child.getMaxIntrinsicWidth(height);
+    return _applyStep(width, _stepWidth);
   }
 
   @override
   double getMinIntrinsicHeight(double width) {
     if (child == null)
       return 0.0;
-    double childResult = child.getMinIntrinsicHeight(_getInnerConstraints(new BoxConstraints.tightForFinite(width: width)).maxWidth);
-    assert(childResult.isFinite);
-    return _applyStep(childResult, _stepHeight);
+    if (!width.isFinite)
+      width = getMaxIntrinsicWidth(double.INFINITY);
+    assert(width.isFinite);
+    final double height = child.getMinIntrinsicHeight(width);
+    return _applyStep(height, _stepHeight);
   }
 
   @override
   double getMaxIntrinsicHeight(double width) {
     if (child == null)
       return 0.0;
-    double childResult = child.getMaxIntrinsicHeight(_getInnerConstraints(new BoxConstraints.tightForFinite(width: width)).maxWidth);
-    assert(childResult.isFinite);
-    return _applyStep(childResult, _stepHeight);
+    if (!width.isFinite)
+      width = getMaxIntrinsicWidth(double.INFINITY);
+    assert(width.isFinite);
+    final double height = child.getMaxIntrinsicHeight(width);
+    return _applyStep(height, _stepHeight);
   }
 
   @override
   void performLayout() {
     if (child != null) {
-      BoxConstraints childConstraints = _getInnerConstraints(constraints);
-      assert(childConstraints.hasTightWidth);
-      if (_stepHeight != null)
-        childConstraints.tighten(height: getMaxIntrinsicHeight(childConstraints.maxWidth));
+      BoxConstraints childConstraints = constraints;
+      if (!childConstraints.hasTightWidth) {
+        final double width = child.getMaxIntrinsicWidth(childConstraints.maxHeight);
+        assert(width.isFinite);
+        childConstraints = childConstraints.tighten(width: _applyStep(width, _stepWidth));
+      }
+      if (_stepHeight != null) {
+        final double height = child.getMaxIntrinsicHeight(childConstraints.maxWidth);
+        assert(height.isFinite);
+        childConstraints = childConstraints.tighten(height: _applyStep(height, _stepHeight));
+      }
       child.layout(childConstraints, parentUsesSize: true);
       size = child.size;
     } else {
@@ -611,27 +613,24 @@ class RenderIntrinsicHeight extends RenderProxyBox {
     RenderBox child
   }) : super(child);
 
-  BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
-    assert(child != null);
-    if (constraints.hasTightHeight)
-      return constraints;
-    final double height = child.getMaxIntrinsicHeight(constraints.maxWidth);
-    assert(height == constraints.constrainHeight(height));
-    return constraints.tighten(height: height);
-  }
-
   @override
   double getMinIntrinsicWidth(double height) {
     if (child == null)
       return 0.0;
-    return child.getMinIntrinsicWidth(_getInnerConstraints(new BoxConstraints.tightForFinite(height: height)).maxHeight);
+    if (!height.isFinite)
+      height = child.getMaxIntrinsicHeight(double.INFINITY);
+    assert(height.isFinite);
+    return child.getMinIntrinsicWidth(height);
   }
 
   @override
   double getMaxIntrinsicWidth(double height) {
     if (child == null)
       return 0.0;
-    return child.getMaxIntrinsicWidth(_getInnerConstraints(new BoxConstraints.tightForFinite(height: height)).maxHeight);
+    if (!height.isFinite)
+      height = child.getMaxIntrinsicHeight(double.INFINITY);
+    assert(height.isFinite);
+    return child.getMaxIntrinsicWidth(height);
   }
 
   @override
@@ -642,7 +641,13 @@ class RenderIntrinsicHeight extends RenderProxyBox {
   @override
   void performLayout() {
     if (child != null) {
-      child.layout(_getInnerConstraints(constraints), parentUsesSize: true);
+      BoxConstraints childConstraints = constraints;
+      if (!childConstraints.hasTightHeight) {
+        final double height = child.getMaxIntrinsicHeight(childConstraints.maxWidth);
+        assert(height.isFinite);
+        childConstraints = childConstraints.tighten(height: height);
+      }
+      child.layout(childConstraints, parentUsesSize: true);
       size = child.size;
     } else {
       performResize();
@@ -1088,8 +1093,8 @@ enum DecorationPosition {
 class RenderDecoratedBox extends RenderProxyBox {
   /// Creates a decorated box.
   ///
-  /// Both the [decoration] and the [position] arguments are required. By
-  /// default the decoration paints behind the child.
+  /// The [decoration] and [position] arguments must not be null. By default the
+  /// decoration paints behind the child.
   RenderDecoratedBox({
     Decoration decoration,
     DecorationPosition position: DecorationPosition.background,
@@ -1988,6 +1993,9 @@ class RenderMetaData extends RenderProxyBoxWithHitTestBehavior {
 /// Listens for the specified gestures from the semantics server (e.g.
 /// an accessibility tool).
 class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticActionHandler {
+  /// Creates a render object that listens for specific semantic gestures.
+  ///
+  /// The [scrollFactor] argument must not be null.
   RenderSemanticsGestureHandler({
     RenderBox child,
     GestureTapCallback onTap,
@@ -2001,6 +2009,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
        _onVerticalDragUpdate = onVerticalDragUpdate,
        super(child);
 
+   /// Called when the user taps on the render object.
   GestureTapCallback get onTap => _onTap;
   GestureTapCallback _onTap;
   set onTap(GestureTapCallback value) {
@@ -2013,6 +2022,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
       markNeedsSemanticsUpdate(onlyChanges: hasSemantics == didHaveSemantics);
   }
 
+  /// Called when the user presses on the render object for a long period of time.
   GestureLongPressCallback get onLongPress => _onLongPress;
   GestureLongPressCallback _onLongPress;
   set onLongPress(GestureLongPressCallback value) {
@@ -2025,6 +2035,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
       markNeedsSemanticsUpdate(onlyChanges: hasSemantics == didHaveSemantics);
   }
 
+  /// Called when the user scrolls to the left or to the right.
   GestureDragUpdateCallback get onHorizontalDragUpdate => _onHorizontalDragUpdate;
   GestureDragUpdateCallback _onHorizontalDragUpdate;
   set onHorizontalDragUpdate(GestureDragUpdateCallback value) {
@@ -2037,6 +2048,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
       markNeedsSemanticsUpdate(onlyChanges: hasSemantics == didHaveSemantics);
   }
 
+  /// Called when the user scrolls up or down.
   GestureDragUpdateCallback get onVerticalDragUpdate => _onVerticalDragUpdate;
   GestureDragUpdateCallback _onVerticalDragUpdate;
   set onVerticalDragUpdate(GestureDragUpdateCallback value) {
@@ -2090,31 +2102,50 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
 
   @override
   void handleSemanticScrollLeft() {
-    if (onHorizontalDragUpdate != null)
-      onHorizontalDragUpdate(size.width * -scrollFactor);
+    if (onHorizontalDragUpdate != null) {
+      final double primaryDelta = size.width * -scrollFactor;
+      onHorizontalDragUpdate(new DragUpdateDetails(
+        delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta
+      ));
+    }
   }
 
   @override
   void handleSemanticScrollRight() {
-    if (onHorizontalDragUpdate != null)
-      onHorizontalDragUpdate(size.width * scrollFactor);
+    if (onHorizontalDragUpdate != null) {
+      final double primaryDelta = size.width * scrollFactor;
+      onHorizontalDragUpdate(new DragUpdateDetails(
+        delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta
+      ));
+    }
   }
 
   @override
   void handleSemanticScrollUp() {
-    if (onVerticalDragUpdate != null)
-      onVerticalDragUpdate(size.height * -scrollFactor);
+    if (onVerticalDragUpdate != null) {
+      final double primaryDelta = size.height * -scrollFactor;
+      onVerticalDragUpdate(new DragUpdateDetails(
+        delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta
+      ));
+    }
   }
 
   @override
   void handleSemanticScrollDown() {
-    if (onVerticalDragUpdate != null)
-      onVerticalDragUpdate(size.height * scrollFactor);
+    if (onVerticalDragUpdate != null) {
+      final double primaryDelta = size.height * scrollFactor;
+      onVerticalDragUpdate(new DragUpdateDetails(
+        delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta
+      ));
+    }
   }
 }
 
-/// Add annotations to the SemanticsNode for this subtree.
+/// Add annotations to the [SemanticsNode] for this subtree.
 class RenderSemanticAnnotations extends RenderProxyBox {
+  /// Creates a render object that attaches a semantic annotation.
+  ///
+  /// The [container] argument must not be null.
   RenderSemanticAnnotations({
     RenderBox child,
     bool container: false,
@@ -2197,6 +2228,7 @@ class RenderSemanticAnnotations extends RenderProxyBox {
 /// form part of a single conceptual widget, e.g. a checkbox, a label,
 /// and the gesture detector that goes with them.
 class RenderMergeSemantics extends RenderProxyBox {
+  /// Creates a render object that merges the semantics from its descendants.
   RenderMergeSemantics({ RenderBox child }) : super(child);
 
   @override
@@ -2210,6 +2242,7 @@ class RenderMergeSemantics extends RenderProxyBox {
 /// Useful e.g. for hiding text that is redundant with other text next
 /// to it (e.g. text included only for the visual effect).
 class RenderExcludeSemantics extends RenderProxyBox {
+  /// Creates a render object that ignores the semantics of its subtree.
   RenderExcludeSemantics({ RenderBox child }) : super(child);
 
   @override

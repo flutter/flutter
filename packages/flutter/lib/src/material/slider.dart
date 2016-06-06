@@ -290,24 +290,24 @@ class _RenderSlider extends RenderConstrainedBox {
     return dragValue;
   }
 
-  void _handleDragStart(Point globalPosition) {
+  void _handleDragStart(DragStartDetails details) {
     if (onChanged != null) {
       _active = true;
-      _currentDragValue = (globalToLocal(globalPosition).x - _kReactionRadius) / _trackLength;
+      _currentDragValue = (globalToLocal(details.globalPosition).x - _kReactionRadius) / _trackLength;
       onChanged(_discretizedCurrentDragValue);
       _reactionController.forward();
       markNeedsPaint();
     }
   }
 
-  void _handleDragUpdate(double delta) {
+  void _handleDragUpdate(DragUpdateDetails details) {
     if (onChanged != null) {
-      _currentDragValue += delta / _trackLength;
+      _currentDragValue += details.primaryDelta / _trackLength;
       onChanged(_discretizedCurrentDragValue);
     }
   }
 
-  void _handleDragEnd(Velocity velocity) {
+  void _handleDragEnd(DragEndDetails details) {
     if (_active) {
       _active = false;
       _currentDragValue = 0.0;

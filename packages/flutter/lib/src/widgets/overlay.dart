@@ -63,14 +63,13 @@ class OverlayEntry {
   set opaque (bool value) {
     if (_opaque == value)
       return;
+    _opaque = value;
     assert(_overlay != null);
-    _overlay.setState(() {
-      _opaque = value;
-    });
+    _overlay._didChangeEntryOpacity();
   }
 
   OverlayState _overlay;
-  final GlobalKey _key = new GlobalKey();
+  final GlobalKey<_OverlayEntryState> _key = new GlobalKey<_OverlayEntryState>();
 
   /// Remove this entry from the overlay.
   void remove() {
@@ -82,7 +81,7 @@ class OverlayEntry {
   ///
   /// You need to call this function if the output of [builder] has changed.
   void markNeedsBuild() {
-    _key.currentState?.setState(() { /* the state that changed is in the builder */ });
+    _key.currentState?._markNeedsBuild();
   }
 
   @override
@@ -101,6 +100,10 @@ class _OverlayEntry extends StatefulWidget {
 class _OverlayEntryState extends State<_OverlayEntry> {
   @override
   Widget build(BuildContext context) => config.entry.builder(context);
+
+  void _markNeedsBuild() {
+    setState(() { /* the state that changed is in the builder */ });
+  }
 }
 
 /// A [Stack] of entries that can be managed independently.
@@ -243,6 +246,13 @@ class OverlayState extends State<Overlay> {
       return true;
     });
     return result;
+  }
+
+  void _didChangeEntryOpacity() {
+    setState(() {
+      // We use the opacity of the entry in our build function, which means we
+      // our state has changed.
+    });
   }
 
   @override

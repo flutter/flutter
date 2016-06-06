@@ -11,5 +11,5 @@ android {
 }
 
 flutter {
-    source 'src/flutter'
+    source '../..'
 }
