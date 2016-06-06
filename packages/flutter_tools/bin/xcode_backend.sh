@@ -33,17 +33,17 @@ BuildApp() {
     target_path=${FLUTTER_TARGET}
   fi
 
-  local flutter_mode="release"
-  if [[ -n "$FLUTTER_MODE" ]]; then
-    flutter_mode=${FLUTTER_MODE}
+  local build_mode="release"
+  if [[ -n "$FLUTTER_BUILD_MODE" ]]; then
+    build_mode=${FLUTTER_BUILD_MODE}
   fi
 
   local artifact_variant="unknown"
-  case "$flutter_mode" in
+  case "$build_mode" in
     release) artifact_variant="ios-release";;
     profile) artifact_variant="ios-profile";;
     debug) artifact_variant="ios";;
-    *) echo "Unknown FLUTTER_MODE: $FLUTTER_MODE";;
+    *) echo "Unknown FLUTTER_BUILD_MODE: $FLUTTER_BUILD_MODE";;
   esac
 
   local framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/${artifact_variant}"
@@ -72,10 +72,10 @@ BuildApp() {
 
   if [[ $CURRENT_ARCH != "x86_64" ]]; then
     local aot_flags=""
-    if [[ "$flutter_mode" == "debug" ]]; then
+    if [[ "$build_mode" == "debug" ]]; then
       aot_flags="--interpreter --debug"
     else
-      aot_flags="--${flutter_mode}"
+      aot_flags="--${build_mode}"
     fi
 
     RunCommand ${FLUTTER_ROOT}/bin/flutter --suppress-analytics build aot \
@@ -95,7 +95,7 @@ BuildApp() {
   fi
 
   local precompilation_flag=""
-  if [[ $CURRENT_ARCH != "x86_64" ]] && [[ "$flutter_mode" != "debug" ]]; then
+  if [[ $CURRENT_ARCH != "x86_64" ]] && [[ "$build_mode" != "debug" ]]; then
     precompilation_flag="--precompiled"
   fi
 

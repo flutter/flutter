@@ -11,6 +11,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Plugin
 import org.gradle.api.Task
+import org.gradle.api.file.CopySpec
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.InputDirectory
@@ -18,7 +19,8 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 
 class FlutterPlugin implements Plugin<Project> {
-    private File sdkDir
+    private File flutterRoot
+    private String buildMode
     private String localEngine
 
     @Override
@@ -26,13 +28,21 @@ class FlutterPlugin implements Plugin<Project> {
         Properties properties = new Properties()
         properties.load(project.rootProject.file("local.properties").newDataInputStream())
 
-        String sdkPath = properties.getProperty("flutter.sdk")
-        if (sdkPath == null) {
+        String flutterRootPath = properties.getProperty("flutter.sdk")
+        if (flutterRootPath == null) {
             throw new GradleException("flutter.sdk must be defined in local.properties")
         }
-        sdkDir = project.file(sdkPath)
-        if (!sdkDir.isDirectory()) {
+        flutterRoot = project.file(flutterRootPath)
+        if (!flutterRoot.isDirectory()) {
             throw new GradleException("flutter.sdk must point to the Flutter SDK directory")
+        }
+
+        buildMode = properties.getProperty("flutter.buildMode")
+        if (buildMode == null) {
+            buildMode = "release"
+        }
+        if (!["debug", "profile", "release"].contains(buildMode)) {
+            throw new GradleException("flutter.buildMode must be one of \"debug\", \"profile\", or \"release\" but was \"${buildMode}\"")
         }
 
         File flutterJar
@@ -43,11 +53,20 @@ class FlutterPlugin implements Plugin<Project> {
                 throw new GradleException("flutter.jar must point to a Flutter engine JAR")
             }
         } else {
-            flutterJar = new File(sdkDir, Joiner.on(File.separatorChar).join(
-                "bin", "cache", "artifacts", "engine", "android-arm", "flutter.jar"))
+            // TODO(abarth): Support x64 and x86 in addition to arm.
+            String artifactType = "unknown";
+            if (buildMode == "debug") {
+                artifactType = "android-arm"
+            } else if (buildMode == "profile") {
+                artifactType = "android-arm-profile"
+            } else if (buildMode == "release") {
+                artifactType = "android-arm-release"
+            }
+            flutterJar = new File(flutterRoot, Joiner.on(File.separatorChar).join(
+                "bin", "cache", "artifacts", "engine", artifactType, "flutter.jar"))
             if (!flutterJar.isFile()) {
                 project.exec {
-                    executable "${sdkDir}/bin/flutter"
+                    executable "${flutterRoot}/bin/flutter"
                     args "precache"
                 }
                 if (!flutterJar.isFile()) {
@@ -69,18 +88,19 @@ class FlutterPlugin implements Plugin<Project> {
         }
 
         FlutterTask flutterTask = project.tasks.create("flutterBuild", FlutterTask) {
-            sdkDir this.sdkDir
+            flutterRoot this.flutterRoot
+            buildMode this.buildMode
+            localEngine this.localEngine
             sourceDir project.file(project.flutter.source)
             intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter")
-            localEngine this.localEngine
         }
 
         project.android.applicationVariants.all { variant ->
-            Task copyFlxTask = project.tasks.create(name: "copyFlx${variant.name.capitalize()}", type: Copy) {
+            Task copyFlxTask = project.tasks.create(name: "copyFlutterAssets${variant.name.capitalize()}", type: Copy) {
                 dependsOn flutterTask
                 dependsOn variant.mergeAssets
-                from flutterTask.flxPath
                 into variant.mergeAssets.outputDir
+                with flutterTask.assets
             }
             variant.outputs[0].processResources.dependsOn(copyFlxTask)
         }
@@ -92,7 +112,9 @@ class FlutterExtension {
 }
 
 class FlutterTask extends DefaultTask {
-    File sdkDir
+    File flutterRoot
+    String buildMode
+    String localEngine
 
     @InputDirectory
     File sourceDir
@@ -100,10 +122,16 @@ class FlutterTask extends DefaultTask {
     @OutputDirectory
     File intermediateDir
 
-    String localEngine
-
-    String getFlxPath() {
-        return "${intermediateDir}/app.flx"
+    CopySpec getAssets() {
+        return project.copySpec {
+            from "${intermediateDir}/app.flx"
+            if (buildMode != 'debug') {
+                from "${intermediateDir}/snapshot_aot_instr"
+                from "${intermediateDir}/snapshot_aot_isolate"
+                from "${intermediateDir}/snapshot_aot_rodata"
+                from "${intermediateDir}/snapshot_aot_vmisolate"
+            }
+        }
     }
 
     @TaskAction
@@ -113,16 +141,35 @@ class FlutterTask extends DefaultTask {
         }
 
         intermediateDir.mkdirs()
+
+        if (buildMode != "debug") {
+          project.exec {
+            executable "${flutterRoot}/bin/flutter"
+            workingDir sourceDir
+            if (localEngine != null) {
+              args "--local-engine", localEngine
+            }
+            args "build", "aot"
+            args "--target-platform", "android-arm"
+            args "--output-dir", "${intermediateDir}"
+            args "--${buildMode}"
+          }
+        }
+
         project.exec {
-            executable "${sdkDir}/bin/flutter"
+            executable "${flutterRoot}/bin/flutter"
             workingDir sourceDir
             if (localEngine != null) {
               args "--local-engine", localEngine
             }
             args "build", "flx"
-            args "-o", flxPath
-            args "--snapshot", "${intermediateDir}/snapshot_blob.bin"
-            args "--depfile", "${intermediateDir}/snapshot_blob.bin.d"
+            args "--output-file", "${intermediateDir}/app.flx"
+            if (buildMode != "debug") {
+              args "--precompiled"
+            } else {
+              args "--snapshot", "${intermediateDir}/snapshot_blob.bin"
+              args "--depfile", "${intermediateDir}/snapshot_blob.bin.d"
+            }
             args "--working-dir", "${intermediateDir}/flx"
         }
     }
