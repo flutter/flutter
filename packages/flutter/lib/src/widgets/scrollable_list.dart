@@ -101,18 +101,10 @@ class ScrollableList extends StatelessWidget {
   /// The axis along which this widget should scroll.
   final Iterable<Widget> children;
 
-  void _handleExtentsChanged(ScrollableState state, double contentExtent, double containerExtent) {
-    state.didUpdateScrollBehavior(state.scrollBehavior.updateExtents(
-      contentExtent: itemsWrap ? double.INFINITY : contentExtent,
-      containerExtent: containerExtent,
-      scrollOffset: state.scrollOffset
-    ));
-  }
-
   Widget _buildViewport(BuildContext context, ScrollableState state, double scrollOffset) {
     return new ListViewport(
       onExtentsChanged: (double contentExtent, double containerExtent) {
-        _handleExtentsChanged(state, contentExtent, containerExtent);
+        state.handleExtentsChanged(itemsWrap ? double.INFINITY : contentExtent, containerExtent);
       },
       scrollOffset: scrollOffset,
       mainAxis: scrollDirection,
@@ -425,19 +417,9 @@ class ScrollableLazyList extends StatelessWidget {
   /// The insets for the entire list.
   final EdgeInsets padding;
 
-  void _handleExtentsChanged(ScrollableState state, double contentExtent, double containerExtent) {
-    state.didUpdateScrollBehavior(state.scrollBehavior.updateExtents(
-      contentExtent: contentExtent,
-      containerExtent: containerExtent,
-      scrollOffset: state.scrollOffset
-    ));
-  }
-
   Widget _buildViewport(BuildContext context, ScrollableState state, double scrollOffset) {
     return new LazyListViewport(
-      onExtentsChanged: (double contentExtent, double containerExtent) {
-        _handleExtentsChanged(state, contentExtent, containerExtent);
-      },
+      onExtentsChanged: state.handleExtentsChanged,
       scrollOffset: scrollOffset,
       mainAxis: scrollDirection,
       anchor: scrollAnchor,

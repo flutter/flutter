@@ -66,21 +66,11 @@ class ScrollableGrid extends StatelessWidget {
   final GridDelegate delegate;
   final Iterable<Widget> children;
 
-  void _handleExtentsChanged(ScrollableState state, double contentExtent, double containerExtent) {
-    state.didUpdateScrollBehavior(state.scrollBehavior.updateExtents(
-      contentExtent: contentExtent,
-      containerExtent: containerExtent,
-      scrollOffset: state.scrollOffset
-    ));
-  }
-
   Widget _buildViewport(BuildContext context, ScrollableState state, double scrollOffset) {
     return new GridViewport(
       startOffset: scrollOffset,
       delegate: delegate,
-      onExtentsChanged: (double contentExtent, double containerExtent) {
-        _handleExtentsChanged(state, contentExtent, containerExtent);
-      },
+      onExtentsChanged: state.handleExtentsChanged,
       children: children
     );
   }

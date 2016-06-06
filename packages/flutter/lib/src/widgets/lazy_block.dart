@@ -197,27 +197,19 @@ class LazyBlock extends StatelessWidget {
   /// See [LazyBlockDelegate] for details.
   final LazyBlockDelegate delegate;
 
-  void _handleExtentsChanged(
-      ScrollableState state,
-      double contentExtent,
-      double containerExtent,
-      double minScrollOffset) {
-    final BoundedBehavior scrollBehavior = state.scrollBehavior;
-    state.didUpdateScrollBehavior(scrollBehavior.updateExtents(
-      contentExtent: contentExtent,
-      containerExtent: containerExtent,
-      minScrollOffset: minScrollOffset,
-      scrollOffset: state.scrollOffset
-    ));
-  }
-
   Widget _buildViewport(BuildContext context, ScrollableState state, double scrollOffset) {
     return new LazyBlockViewport(
       startOffset: scrollOffset,
       mainAxis: scrollDirection,
       padding: padding,
       onExtentsChanged: (double contentExtent, double containerExtent, double minScrollOffset) {
-        _handleExtentsChanged(state, contentExtent, containerExtent, minScrollOffset);
+        final BoundedBehavior scrollBehavior = state.scrollBehavior;
+        state.didUpdateScrollBehavior(scrollBehavior.updateExtents(
+          contentExtent: contentExtent,
+          containerExtent: containerExtent,
+          minScrollOffset: minScrollOffset,
+          scrollOffset: state.scrollOffset
+        ));
       },
       delegate: delegate
     );
