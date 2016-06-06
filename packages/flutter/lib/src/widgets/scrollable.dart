@@ -38,6 +38,9 @@ typedef double SnapOffsetCallback(double scrollOffset, Size containerSize);
 /// Widgets that subclass [Scrollable] typically use state objects that subclass
 /// [ScrollableState].
 class Scrollable extends StatefulWidget {
+  /// Initializes fields for subclasses.
+  ///
+  /// The [scrollDirection] and [scrollAnchor] arguments must not be null.
   Scrollable({
     Key key,
     this.initialScrollOffset,

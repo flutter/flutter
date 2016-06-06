@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import 'basic.dart';
 import 'framework.dart';
 
@@ -42,7 +44,7 @@ class OverlayEntry {
   /// [Overlay.of] and then call [OverlayState.insert]. To remove the entry,
   /// call [remove] on the overlay entry itself.
   OverlayEntry({
-    this.builder,
+    @required this.builder,
     bool opaque: false
   }) : _opaque = opaque {
     assert(builder != null);

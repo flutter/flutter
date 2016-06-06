@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import 'framework.dart';
 import 'overlay.dart';
 
@@ -79,6 +81,7 @@ abstract class Route<T> {
 
 /// Data that might be useful in constructing a [Route].
 class RouteSettings {
+  /// Creates data used to construct routes.
   const RouteSettings({
     this.name,
     this.mostValuableKeys,
@@ -86,6 +89,8 @@ class RouteSettings {
   });
 
   /// The name of the route (e.g., "/settings").
+  ///
+  /// If null, the route is anonymous.
   final String name;
 
   /// The set of keys that are most relevant for constructoring [Hero]
@@ -132,7 +137,7 @@ class NavigatorObserver {
   void didPop(Route<dynamic> route, Route<dynamic> previousRoute) { }
 }
 
-/// Manages a set of child widgets with a stack discipline.
+/// A widget that manages a set of child widgets with a stack discipline.
 ///
 /// Many apps have a navigator near the top of their widget hierarchy in order
 /// to display their logical history using an [Overlay] with the most recently
@@ -141,10 +146,13 @@ class NavigatorObserver {
 /// around in the overlay. Similarly, the navigator can be used to show a dialog
 /// by positioning the dialog widget above the current page.
 class Navigator extends StatefulWidget {
+  /// Creates a widget that maintains a stack-based history of child widgets.
+  ///
+  /// The [onGenerateRoute] argument must not be null.
   Navigator({
     Key key,
     this.initialRoute,
-    this.onGenerateRoute,
+    @required this.onGenerateRoute,
     this.onUnknownRoute,
     this.observer
   }) : super(key: key) {

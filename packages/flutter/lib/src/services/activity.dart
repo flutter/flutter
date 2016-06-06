@@ -40,6 +40,8 @@ ActivityProxy _initActivityProxy() {
 }
 
 final ActivityProxy _activityProxy = _initActivityProxy();
+
+/// A singleton for interacting with the current Android activity.
 final Activity activity = _activityProxy;
 
 Color _cachedPrimaryColor;

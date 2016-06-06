@@ -255,12 +255,18 @@ void debugDumpApp() {
   debugPrint(WidgetsBinding.instance.renderViewElement.toStringDeep());
 }
 
-/// This class provides a bridge from a RenderObject to an Element tree. The
-/// given container is the RenderObject that the Element tree should be inserted
-/// into. It must be a RenderObject that implements the
-/// RenderObjectWithChildMixin protocol. The type argument T is the kind of
-/// RenderObject that the container expects as its child.
+/// A bridge from a [RenderObject] to an [Element] tree.
+///
+/// The given container is the [RenderObject] that the [Element] tree should be
+/// inserted into. It must be a [RenderObject] that implements the
+/// [RenderObjectWithChildMixin] protocol. The type argument `T` is the kind of
+/// [RenderObject] that the container expects as its child.
+///
+/// Used by [runApp] to bootstrap applications.
 class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWidget {
+  /// Creates a bridge from a [RenderObject] to an [Element] tree.
+  ///
+  /// Used by [WidgetsBinding] to attach the root widget to the [RenderView].
   RenderObjectToWidgetAdapter({
     this.child,
     RenderObjectWithChildMixin<T> container,
@@ -270,8 +276,10 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   /// The widget below this widget in the tree.
   final Widget child;
 
+  /// The [RenderObject] that is the parent of the [Element] created by this widget.
   final RenderObjectWithChildMixin<T> container;
 
+  /// A short description of this widget used by debugging aids.
   final String debugShortDescription;
 
   @override
@@ -283,6 +291,12 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   @override
   void updateRenderObject(BuildContext context, RenderObject renderObject) { }
 
+  /// Inflate this widget and actually set the resulting [RenderObject] as the child of [container].
+  ///
+  /// If `element` is null, this function will create a new element. Otherwise,
+  /// the given element will be updated with this widget.
+  ///
+  /// Used by [runApp] to bootstrap applications.
   RenderObjectToWidgetElement<T> attachToRenderTree(BuildOwner owner, [RenderObjectToWidgetElement<T> element]) {
     owner.lockState(() {
       if (element == null) {
@@ -300,15 +314,22 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   String toStringShort() => debugShortDescription ?? super.toStringShort();
 }
 
-/// This element class is the instantiation of a [RenderObjectToWidgetAdapter].
-/// It can only be used as the root of an Element tree (it cannot be mounted
-/// into another Element, it's parent must be null).
+/// A [RootRenderObjectElement] that is hosted by a [RenderObject].
 ///
-/// In typical usage, it will be instantiated for a RenderObjectToWidgetAdapter
-/// whose container is the RenderView that connects to the Flutter engine. In
+/// This element class is the instantiation of a [RenderObjectToWidgetAdapter]
+/// widget. It can be used only as the root of an [Element] tree (it cannot be
+/// mounted into another [Element]; it's parent must be null).
+///
+/// In typical usage, it will be instantiated for a [RenderObjectToWidgetAdapter]
+/// whose container is the [RenderView] that connects to the Flutter engine. In
 /// this usage, it is normally instantiated by the bootstrapping logic in the
-/// WidgetsFlutterBinding singleton created by runApp().
+/// [WidgetsFlutterBinding] singleton created by [runApp].
 class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObjectElement {
+  /// Creates an element that is hosted by a [RenderObject].
+  ///
+  /// The [RenderObject] created by this element is not automatically set as a
+  /// child of the hosting [RenderObject]. To actually attach this element to
+  /// the render tree, call [RenderObjectToWidgetAdapter.attachToRenderTree].
   RenderObjectToWidgetElement(RenderObjectToWidgetAdapter<T> widget) : super(widget);
 
   @override

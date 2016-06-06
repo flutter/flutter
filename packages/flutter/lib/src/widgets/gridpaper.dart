@@ -47,9 +47,11 @@ class _GridPaperPainter extends CustomPainter {
   bool hitTest(Point position) => false;
 }
 
-/// Draws a rectalinear grid of 1px width lines at the specified color and interval.
-/// Useful with a Stack for visualizing your layout along a grid.
+/// A widget that draws a rectilinear grid of 1px wide lines.
+///
+/// Useful with a [Stack] for visualizing your layout along a grid.
 class GridPaper extends StatelessWidget {
+  /// Creates a widget that draws a rectilinear grid of 1px wide lines.
   GridPaper({
     Key key,
     this.color: const Color(0x7FC3E8F3),

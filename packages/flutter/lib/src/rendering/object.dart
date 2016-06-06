@@ -2092,7 +2092,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// This description is often somewhat long.
   ///
   /// This includes the same information for this RenderObject as given by
-  /// [toStringDeep()], but does not recurse to any children.
+  /// [toStringDeep], but does not recurse to any children.
   String toStringShallow() {
     RenderObject debugPreviousActiveLayout = _debugActiveLayout;
     _debugActiveLayout = null;
@@ -2105,9 +2105,9 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     return result.toString();
   }
 
-  /// Returns a list of strings describing the current node's fields, one field
-  /// per string. Subclasses should override this to have their information
-  /// included in toStringDeep().
+  /// Accumulates a list of strings describing the current node's fields, one
+  /// field per string. Subclasses should override this to have their
+  /// information included in [toStringDeep].
   @protected
   void debugFillDescription(List<String> description) {
     if (debugCreator != null)

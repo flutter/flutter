@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import 'basic.dart';
 import 'framework.dart';
 import 'media_query.dart';
@@ -94,8 +96,11 @@ class _FocusScope extends InheritedWidget {
 /// widgets), then the widget this this global key actually has the focus in the
 /// entire system.
 class Focus extends StatefulWidget {
+  /// Creates a scope for managing focus.
+  ///
+  /// The [key] argument must not be null.
   Focus({
-    GlobalKey key,
+    @required GlobalKey key,
     this.child
   }) : super(key: key) {
     assert(key != null);

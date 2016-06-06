@@ -5,10 +5,14 @@
 import 'basic.dart';
 import 'framework.dart';
 
+import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 /// An interpolation between two [BoxConstraint]s.
 class BoxConstraintsTween extends Tween<BoxConstraints> {
+  /// Creates a box constraints tween.
+  ///
+  /// The [begin] and [end] arguments must not be null.
   BoxConstraintsTween({ BoxConstraints begin, BoxConstraints end }) : super(begin: begin, end: end);
 
   @override
@@ -17,6 +21,9 @@ class BoxConstraintsTween extends Tween<BoxConstraints> {
 
 /// An interpolation between two [Decoration]s.
 class DecorationTween extends Tween<Decoration> {
+  /// Creates a decoration tween.
+  ///
+  /// The [begin] and [end] arguments must not be null.
   DecorationTween({ Decoration begin, Decoration end }) : super(begin: begin, end: end);
 
   @override
@@ -25,6 +32,9 @@ class DecorationTween extends Tween<Decoration> {
 
 /// An interpolation between two [EdgeInsets]s.
 class EdgeInsetsTween extends Tween<EdgeInsets> {
+  /// Creates an edge insets tween.
+  ///
+  /// The [begin] and [end] arguments must not be null.
   EdgeInsetsTween({ EdgeInsets begin, EdgeInsets end }) : super(begin: begin, end: end);
 
   @override
@@ -35,12 +45,15 @@ class EdgeInsetsTween extends Tween<EdgeInsets> {
 ///
 /// Currently this class works only for translations.
 class Matrix4Tween extends Tween<Matrix4> {
+  /// Creates a [Matrix4] tween.
+  ///
+  /// The [begin] and [end] arguments must not be null.
   Matrix4Tween({ Matrix4 begin, Matrix4 end }) : super(begin: begin, end: end);
 
   @override
   Matrix4 lerp(double t) {
-    // TODO(mpcomplete): Animate the full matrix. Will animating the cells
-    // separately work?
+    // TODO(abarth): We should use [Matrix4.decompose] and animate the
+    // decomposed parameters instead of just animating the translation.
     Vector3 beginT = begin.getTranslation();
     Vector3 endT = end.getTranslation();
     Vector3 lerpT = beginT*(1.0-t) + endT*t;
@@ -52,6 +65,9 @@ class Matrix4Tween extends Tween<Matrix4> {
 ///
 /// This will not work well if the styles don't set the same fields.
 class TextStyleTween extends Tween<TextStyle> {
+  /// Creates a text style tween.
+  ///
+  /// The [begin] and [end] arguments must not be null.
   TextStyleTween({ TextStyle begin, TextStyle end }) : super(begin: begin, end: end);
 
   @override
@@ -61,10 +77,13 @@ class TextStyleTween extends Tween<TextStyle> {
 /// An abstract widget for building widgets that gradually change their
 /// values over a period of time.
 abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
+  /// Initializes fields for subclasses.
+  ///
+  /// The [curve] and [duration] arguments must not be null.
   ImplicitlyAnimatedWidget({
     Key key,
     this.curve: Curves.linear,
-    this.duration
+    @required this.duration
   }) : super(key: key) {
     assert(curve != null);
     assert(duration != null);
@@ -196,6 +215,9 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 /// likely want to use a subclass of [Transition] or use an
 /// [AnimationController] yourself.
 class AnimatedContainer extends ImplicitlyAnimatedWidget {
+  /// Creates a container that animates its parameters implicitly.
+  ///
+  /// The [curve] and [duration] arguments must not be null.
   AnimatedContainer({
     Key key,
     this.child,
@@ -208,7 +230,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
     this.width,
     this.height,
     Curve curve: Curves.linear,
-    Duration duration
+    @required Duration duration
   }) : super(key: key, curve: curve, duration: duration) {
     assert(decoration == null || decoration.debugAssertValid());
     assert(foregroundDecoration == null || foregroundDecoration.debugAssertValid());
@@ -333,6 +355,14 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
 ///
 /// Only works if it's the child of a [Stack].
 class AnimatedPositioned extends ImplicitlyAnimatedWidget {
+  /// Creates a widget that animates its position implicitly.
+  ///
+  /// Only two out of the three horizontal values ([left], [right],
+  /// [width]), and only two out of the three vertical values ([top],
+  /// [bottom], [height]), can be set. In each case, at least one of
+  /// the three must be null.
+  ///
+  /// The [curve] and [duration] arguments must not be null.
   AnimatedPositioned({
     Key key,
     this.child,
@@ -343,18 +373,21 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     this.width,
     this.height,
     Curve curve: Curves.linear,
-    Duration duration
+    @required Duration duration
   }) : super(key: key, curve: curve, duration: duration) {
     assert(left == null || right == null || width == null);
     assert(top == null || bottom == null || height == null);
   }
 
+  /// Creates a widget that animates the rectangle it occupies implicitly.
+  ///
+  /// The [curve] and [duration] arguments must not be null.
   AnimatedPositioned.fromRect({
     Key key,
     this.child,
     Rect rect,
     Curve curve: Curves.linear,
-    Duration duration
+    @required Duration duration
   }) : left = rect.left,
        top = rect.top,
        width = rect.width,
@@ -466,12 +499,16 @@ class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositione
 ///
 /// Animating an opacity is relatively expensive.
 class AnimatedOpacity extends ImplicitlyAnimatedWidget {
+  /// Creates a widget that animates its opacity implicitly.
+  ///
+  /// The [opacity] argument must not be null and must be between 0.0 and 1.0,
+  /// inclusive. The [curve] and [duration] arguments must not be null.
   AnimatedOpacity({
     Key key,
     this.child,
     this.opacity,
     Curve curve: Curves.linear,
-    Duration duration
+    @required Duration duration
   }) : super(key: key, curve: curve, duration: duration) {
     assert(opacity != null && opacity >= 0.0 && opacity <= 1.0);
   }
@@ -520,12 +557,15 @@ class _AnimatedOpacityState extends AnimatedWidgetBaseState<AnimatedOpacity> {
 /// descendant [Text] widgets without explicit style) over a given
 /// duration whenever the given style changes.
 class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
+  /// Creates a widget that animates the default text style implicitly.
+  ///
+  /// The [child], [style], [curve], and [duration] arguments must not be null.
   AnimatedDefaultTextStyle({
     Key key,
-    this.child,
-    this.style,
+    @required this.child,
+    @required this.style,
     Curve curve: Curves.linear,
-    Duration duration
+    @required Duration duration
   }) : super(key: key, curve: curve, duration: duration) {
     assert(style != null);
     assert(child != null);

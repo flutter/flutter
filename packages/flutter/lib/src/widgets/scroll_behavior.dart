@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/physics.dart';
+import 'package:meta/meta.dart';
 
 const double _kSecondsPerMillisecond = 1000.0;
 const double _kScrollDrag = 0.025;
@@ -47,6 +48,12 @@ abstract class ScrollBehavior<T, U> {
     debugFillDescription(description);
     return '$runtimeType(${description.join("; ")})';
   }
+
+  /// Accumulates a list of strings describing the current node's fields, one
+  /// field per string. Subclasses should override this to have their
+  /// information included in [toString].
+  @protected
+  @mustCallSuper
   void debugFillDescription(List<String> description) {
     description.add(isScrollable ? 'scrollable' : 'not scrollable');
   }
@@ -55,6 +62,7 @@ abstract class ScrollBehavior<T, U> {
 /// A scroll behavior for a scrollable widget with linear extent (i.e.
 /// that only scrolls along one axis).
 abstract class ExtentScrollBehavior extends ScrollBehavior<double, double> {
+  /// Creates a scroll behavior for a scrollable widget with linear extent.
   ExtentScrollBehavior({ double contentExtent: 0.0, double containerExtent: 0.0 })
     : _contentExtent = contentExtent, _containerExtent = containerExtent;
 
@@ -102,6 +110,7 @@ abstract class ExtentScrollBehavior extends ScrollBehavior<double, double> {
 
 /// A scroll behavior that prevents the user from exceeding scroll bounds.
 class BoundedBehavior extends ExtentScrollBehavior {
+  /// Creates a scroll behavior that does not overscroll.
   BoundedBehavior({
     double contentExtent: 0.0,
     double containerExtent: 0.0,
@@ -154,6 +163,7 @@ Simulation _createSnapScrollSimulation(double startOffset, double endOffset, dou
 
 /// A scroll behavior that does not prevent the user from exeeding scroll bounds.
 class UnboundedBehavior extends ExtentScrollBehavior {
+  /// Creates a scroll behavior with no scrolling limits.
   UnboundedBehavior({ double contentExtent: 0.0, double containerExtent: 0.0 })
     : super(contentExtent: contentExtent, containerExtent: containerExtent);
 
@@ -184,6 +194,7 @@ class UnboundedBehavior extends ExtentScrollBehavior {
 
 /// A scroll behavior that lets the user scroll beyond the scroll bounds with some resistance.
 class OverscrollBehavior extends BoundedBehavior {
+  /// Creates a scroll behavior that resists, but does not prevent, scrolling beyond its limits.
   OverscrollBehavior({ double contentExtent: 0.0, double containerExtent: 0.0, double minScrollOffset: 0.0 })
     : super(contentExtent: contentExtent, containerExtent: containerExtent, minScrollOffset: minScrollOffset);
 
@@ -217,6 +228,7 @@ class OverscrollBehavior extends BoundedBehavior {
 
 /// A scroll behavior that lets the user scroll beyond the scroll bounds only when the bounds are disjoint.
 class OverscrollWhenScrollableBehavior extends OverscrollBehavior {
+  /// Creates a scroll behavior that allows overscrolling only when some amount of scrolling is already possible.
   OverscrollWhenScrollableBehavior({ double contentExtent: 0.0, double containerExtent: 0.0, double minScrollOffset: 0.0 })
     : super(contentExtent: contentExtent, containerExtent: containerExtent, minScrollOffset: minScrollOffset);
 

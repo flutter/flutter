@@ -69,6 +69,7 @@ abstract class OverlayRoute<T> extends Route<T> {
 
 /// A route with entrance and exit transitions.
 abstract class TransitionRoute<T> extends OverlayRoute<T> {
+  /// Creates a route with entrance and exit transitions.
   TransitionRoute({
     Completer<T> popCompleter,
     Completer<T> transitionCompleter
@@ -146,6 +147,9 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     }
   }
 
+  /// The animation for the route being pushed on top of this route. This
+  /// animation lets this route coordinate with the entrance and exit transition
+  /// of routes pushed on top of this route.
   Animation<double> get forwardAnimation => _forwardAnimation;
   final ProxyAnimation _forwardAnimation = new ProxyAnimation(kAlwaysDismissedAnimation);
 
@@ -246,6 +250,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     super.dispose();
   }
 
+  /// A short description of this route useful for debugging.
   String get debugLabel => '$runtimeType';
 
   @override
@@ -254,6 +259,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 
 /// An entry in the history of a [LocalHistoryRoute].
 class LocalHistoryEntry {
+  /// Creates an entry in the history of a [LocalHistoryRoute].
   LocalHistoryEntry({ this.onRemove });
 
   /// Called when this entry is removed from the history of its associated [LocalHistoryRoute].
@@ -439,6 +445,7 @@ class _ModalScopeState extends State<_ModalScope> {
 /// however; for example, a pop-up menu uses a ModalRoute but only shows the menu
 /// in a small box overlapping the previous route.
 abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T> {
+  /// Creates a route that blocks interaction with previous routes.
   ModalRoute({
     Completer<T> completer,
     this.settings: const RouteSettings()
@@ -582,6 +589,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
 /// A modal route that overlays a widget over the current route.
 abstract class PopupRoute<T> extends ModalRoute<T> {
+  /// Creates a modal route that overlays a widget over the current route.
   PopupRoute({ Completer<T> completer }) : super(completer: completer);
 
   @override

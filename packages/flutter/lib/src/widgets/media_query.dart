@@ -4,6 +4,8 @@
 
 import 'dart:ui' as ui;
 
+import 'package:meta/meta.dart';
+
 import 'basic.dart';
 import 'framework.dart';
 
@@ -74,10 +76,13 @@ class MediaQueryData {
 
 /// Establishes a subtree in which media queries resolve to the given data.
 class MediaQuery extends InheritedWidget {
+  /// Creates a widget that provides [MediaQueryData] to its descendants.
+  ///
+  /// The [data] and [child] arguments must not be null.
   MediaQuery({
     Key key,
-    this.data,
-    Widget child
+    @required this.data,
+    @required Widget child
   }) : super(key: key, child: child) {
     assert(child != null);
     assert(data != null);

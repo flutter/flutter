@@ -5,7 +5,13 @@
 import 'framework.dart';
 import 'scroll_behavior.dart';
 
+/// Controls how [Scrollable] widgets in a subtree behave.
+///
+/// Used by [ScrollConfiguration].
 class ScrollConfigurationDelegate {
+  /// Creates a delegate with sensible default behaviors.
+  const ScrollConfigurationDelegate();
+
   /// Returns the ScrollBehavior to be used by generic scrolling containers like
   /// [Block]. Returns a new [OverscrollWhenScrollableBehavior] by default.
   ExtentScrollBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior();
@@ -22,14 +28,13 @@ class ScrollConfigurationDelegate {
   bool updateShouldNotify(ScrollConfigurationDelegate old) => false;
 }
 
-/// Used by descendants to initialize and wrap the [Scrollable] widgets
-/// they create.
+/// A widget that controls descendant [Scrollable] widgets.
 ///
 /// Classes that create Scrollables are not required to depend on this
 /// Widget. The following general purpose scrolling widgets do depend
-/// on ScrollConfiguration: Block, LazyBlock, ScrollableViewport,
-/// ScrollableList, ScrollableLazyList. The Scrollable base class uses
-/// ScrollConfiguration to create its [ScrollBehavior].
+/// on [ScrollConfiguration]: [Block], [LazyBlock], [ScrollableViewport],
+/// [ScrollableList], [ScrollableLazyList]. The [Scrollable] base class uses
+/// [ScrollConfiguration] to create its [ScrollBehavior].
 class ScrollConfiguration extends InheritedWidget {
   ScrollConfiguration({
     Key key,
@@ -37,7 +42,7 @@ class ScrollConfiguration extends InheritedWidget {
     Widget child
   }) : super(key: key, child: child);
 
-  static final ScrollConfigurationDelegate _defaultDelegate = new ScrollConfigurationDelegate();
+  static final ScrollConfigurationDelegate _defaultDelegate = const ScrollConfigurationDelegate();
 
   /// Defines the ScrollBehavior and scrollable wrapper for descendants.
   final ScrollConfigurationDelegate delegate;

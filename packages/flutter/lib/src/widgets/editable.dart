@@ -5,8 +5,9 @@
 import 'dart:async';
 
 import 'package:flutter/rendering.dart' show RenderEditableLine, SelectionChangedHandler;
-import 'package:sky_services/editing/editing.mojom.dart' as mojom;
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
+import 'package:sky_services/editing/editing.mojom.dart' as mojom;
 
 import 'basic.dart';
 import 'framework.dart';
@@ -85,8 +86,17 @@ class _KeyboardClientImpl implements mojom.KeyboardClient {
   }
 }
 
-/// Configurable state of an input field.
+/// Configuration information for an input field.
+///
+/// An [InputValue] contains the text for the input field as well as the
+/// selection extent and the composing range.
 class InputValue {
+  /// Creates configuration information for an input field
+  ///
+  /// The selection and composing range must be within the text.
+  ///
+  /// The [text], [selection], and [composing] arguments must not be null but
+  /// each have default values.
   const InputValue({
     this.text: '',
     this.selection: const TextSelection.collapsed(offset: -1),
@@ -99,9 +109,10 @@ class InputValue {
   /// The range of text that is currently selected.
   final TextSelection selection;
 
-  // The range of text that is still being composed.
+  /// The range of text that is still being composed.
   final TextRange composing;
 
+  /// An input value that corresponds to the empty string with no selection and no composing range.
   static const InputValue empty = const InputValue();
 
   @override
@@ -145,9 +156,12 @@ class InputValue {
 /// This control is not intended to be used directly. Instead, consider using
 /// [Input], which provides focus management and material design.
 class RawInputLine extends Scrollable {
+  /// Creates a basic single-line input control.
+  ///
+  /// The [value] argument must not be null.
   RawInputLine({
     Key key,
-    this.value,
+    @required this.value,
     this.focusKey,
     this.hideText: false,
     this.style,
@@ -162,7 +176,9 @@ class RawInputLine extends Scrollable {
     key: key,
     initialScrollOffset: 0.0,
     scrollDirection: Axis.horizontal
-  );
+  ) {
+    assert(value != null);
+  }
 
   /// The string being displayed in this widget.
   final InputValue value;
@@ -203,6 +219,7 @@ class RawInputLine extends Scrollable {
   RawInputLineState createState() => new RawInputLineState();
 }
 
+/// State for a [RawInputLine].
 class RawInputLineState extends ScrollableState<RawInputLine> {
   Timer _cursorTimer;
   bool _showCursor = false;
@@ -276,6 +293,13 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
     }
   }
 
+  /// Express interest in interacting with the keyboard.
+  ///
+  /// If this control is already attached to the keyboard, this function will
+  /// request that the keyboard become visible. Otherwise, this function will
+  /// ask the focus system that it become focused. If successful in acquiring
+  /// focus, the control will then attach to the keyboard and request that the
+  /// keyboard become visible.
   void requestKeyboard() {
     if (_isAttachedToKeyboard) {
       _keyboardHandle.show();

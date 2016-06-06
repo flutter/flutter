@@ -28,6 +28,10 @@ export 'package:flutter/gestures.dart' show
   GestureScaleEndCallback,
   Velocity;
 
+/// Signature for creating gesture recognizers.
+///
+/// The `recognizer` argument is the gesture recognizer that currently occupies
+/// the slot for which a gesture recognizer is being created.
 typedef GestureRecognizer GestureRecognizerFactory(GestureRecognizer recognizer);
 
 /// A widget that detects gestures.
@@ -40,6 +44,17 @@ typedef GestureRecognizer GestureRecognizerFactory(GestureRecognizer recognizer)
 ///
 /// See http://flutter.io/gestures/ for additional information.
 class GestureDetector extends StatelessWidget {
+  /// Creates a widget that detects gestures.
+  ///
+  /// Pan and scale callbacks cannot be used simultaneously because scale is a
+  /// superset of pan. Simply use the scale callbacks instead.
+  ///
+  /// Horizontal and vertical drag callbacks cannot be used simultaneously
+  /// because a combination of a horizontal and vertical drag is a pan. Simply
+  /// use the pan callbacks instead.
+  ///
+  /// By default, gesture detectors contribute semantic information to the tree
+  /// that is used by assistive technology.
   GestureDetector({
     Key key,
     this.child,
@@ -296,6 +311,10 @@ class GestureDetector extends StatelessWidget {
 /// RawGestureDetector is useful primarily when developing your
 /// own gesture recognizers.
 class RawGestureDetector extends StatefulWidget {
+  /// Creates a widget that detects gestures.
+  ///
+  /// By default, gesture detectors contribute semantic information to the tree
+  /// that is used by assistive technology.
   RawGestureDetector({
     Key key,
     this.child,
@@ -310,6 +329,7 @@ class RawGestureDetector extends StatefulWidget {
   /// The widget below this widget in the tree.
   final Widget child;
 
+  /// The gestures that this widget will attempt to recognize.
   final Map<Type, GestureRecognizerFactory> gestures;
 
   /// How this gesture detector should behave during hit testing.
@@ -326,8 +346,8 @@ class RawGestureDetector extends StatefulWidget {
   RawGestureDetectorState createState() => new RawGestureDetectorState();
 }
 
+/// State for a [RawGestureDetector].
 class RawGestureDetectorState extends State<RawGestureDetector> {
-
   Map<Type, GestureRecognizer> _recognizers = const <Type, GestureRecognizer>{};
 
   @override
