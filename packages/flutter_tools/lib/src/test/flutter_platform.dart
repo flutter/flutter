@@ -15,6 +15,7 @@ import 'package:test/src/runner/plugin/platform.dart'; // ignore: implementation
 import 'package:test/src/runner/plugin/hack_register_platform.dart' as hack; // ignore: implementation_imports
 
 import '../dart/package_map.dart';
+import '../globals.dart';
 
 final String _kSkyShell = Platform.environment['SKY_SHELL'];
 const String _kHost = '127.0.0.1';
@@ -46,12 +47,15 @@ Future<_ServerInfo> _startServer() async {
 
 Future<Process> _startProcess(String mainPath, { String packages }) {
   assert(shellPath != null || _kSkyShell != null); // Please provide the path to the shell in the SKY_SHELL environment variable.
-  return Process.start(shellPath ?? _kSkyShell, <String>[
+  String executable = shellPath ?? _kSkyShell;
+  List<String> arguments = <String>[
     '--enable-checked-mode',
     '--non-interactive',
     '--packages=$packages',
-    mainPath,
-  ], environment: <String, String>{ 'FLUTTER_TEST': 'true' });
+    mainPath
+  ];
+  printTrace('$executable ${arguments.join(' ')}');
+  return Process.start(executable, arguments, environment: <String, String>{ 'FLUTTER_TEST': 'true' });
 }
 
 void _attachStandardStreams(Process process) {

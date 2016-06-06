@@ -149,7 +149,7 @@ class FlutterCommandRunner extends CommandRunner {
       return new Future<int>.value(1);
 
     if (globalResults.wasParsed('packages'))
-      path.normalize(path.absolute(globalResults['packages']));
+      PackageMap.globalPackagesPath = path.normalize(path.absolute(globalResults['packages']));
 
     // See if the user specified a specific device.
     deviceManager.specifiedDeviceId = globalResults['device-id'];
