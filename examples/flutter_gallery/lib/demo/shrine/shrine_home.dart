@@ -268,26 +268,30 @@ class _ShrineHomeState extends State<ShrineHome> {
     final Product featured = _products.firstWhere((Product product) => product.featureDescription != null);
     return new ShrinePage(
       body: new ScrollableViewport(
-        child: new Column(
-          children: <Widget>[
-            new Container(
-              margin: new EdgeInsets.only(bottom: 8.0),
-              child: new FeatureItem(product: featured)
-            ),
-            new FixedColumnCountGrid(
-              columnCount: 2,
-              rowSpacing: 8.0,
-              columnSpacing: 8.0,
-              padding: const EdgeInsets.all(8.0),
-              tileAspectRatio: 160.0 / 216.0, // width/height
-              children: _products.map((Product product) {
-                return new ProductItem(
-                  product: product,
-                  onPressed: () { showOrderPage(product); }
-                );
-              }).toList()
-            )
-          ]
+        child: new RepaintBoundary(
+          child: new Column(
+            children: <Widget>[
+              new Container(
+                margin: new EdgeInsets.only(bottom: 8.0),
+                child: new FeatureItem(product: featured)
+              ),
+              new FixedColumnCountGrid(
+                columnCount: 2,
+                rowSpacing: 8.0,
+                columnSpacing: 8.0,
+                padding: const EdgeInsets.all(8.0),
+                tileAspectRatio: 160.0 / 216.0, // width/height
+                children: _products.map((Product product) {
+                  return new RepaintBoundary(
+                    child: new ProductItem(
+                      product: product,
+                      onPressed: () { showOrderPage(product); }
+                    )
+                  );
+                }).toList()
+              )
+            ]
+          )
         )
       )
     );

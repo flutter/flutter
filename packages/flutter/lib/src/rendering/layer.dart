@@ -7,6 +7,7 @@ import 'dart:ui' show Offset;
 
 import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
+import 'package:meta/meta.dart';
 import 'package:mojo_services/mojo/gfx/composition/scene_token.mojom.dart' as mojom;
 
 import 'debug.dart';
@@ -30,6 +31,7 @@ abstract class Layer {
   Layer _previousSibling;
 
   /// Removes this layer from its parent layer's child list
+  @mustCallSuper
   void detach() {
     if (_parent != null)
       _parent._remove(this);
@@ -94,12 +96,15 @@ abstract class Layer {
   }
 
   /// Add additional information to the given description for use by [toStringDeep].
+  @protected
+  @mustCallSuper
   void debugFillDescription(List<String> description) {
     if (debugCreator != null)
       description.add('creator: $debugCreator');
   }
 
   /// Returns a description of this layer's children for use by [toStringDeep].
+  @protected
   String debugDescribeChildren(String prefix) => '';
 }
 
