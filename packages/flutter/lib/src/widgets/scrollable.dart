@@ -418,6 +418,24 @@ class ScrollableState<T extends Scrollable> extends State<T> {
     scrollTo(newScrollOffset);
   }
 
+  /// Updates the scroll behavior for the new content and container extent.
+  ///
+  /// For convenience, this function combines three common operations:
+  ///
+  ///  1. Updating the scroll behavior extents with
+  ///     [ExtentScrollBehavior.updateExtents].
+  ///  2. Notifying this object that the scroll behavior was updated with
+  ///     [didUpdateScrollBehavior].
+  ///  3. Updating this object's gesture detector with [updateGestureDetector].
+  void handleExtentsChanged(double contentExtent, double containerExtent) {
+    didUpdateScrollBehavior(scrollBehavior.updateExtents(
+      contentExtent: contentExtent,
+      containerExtent: containerExtent,
+      scrollOffset: scrollOffset
+    ));
+    updateGestureDetector();
+  }
+
   /// Fling the scroll offset with the given velocity.
   ///
   /// Calling this function starts a physics-based animation of the scroll
@@ -685,7 +703,7 @@ class ScrollNotification extends Notification {
 
 /// A simple scrolling widget that has a single child. Use this widget if
 /// you are not worried about offscreen widgets consuming resources.
-class ScrollableViewport extends StatefulWidget {
+class ScrollableViewport extends StatelessWidget {
   ScrollableViewport({
     Key key,
     this.initialScrollOffset,
@@ -761,39 +779,18 @@ class ScrollableViewport extends StatefulWidget {
   /// The widget that will be scrolled. It will become the child of a Scrollable.
   final Widget child;
 
-  @override
-  _ScrollableViewportState createState() => new _ScrollableViewportState();
-}
-
-class _ScrollableViewportState extends State<ScrollableViewport> {
-  double _viewportSize = 0.0;
-  double _childSize = 0.0;
-
-  Offset _handlePaintOffsetUpdateNeeded(ScrollableState state, ViewportDimensions dimensions) {
-    // We make various state changes here but don't have to do so in a
-    // setState() callback because we are called during layout and all
-    // we're updating is the new offset, which we are providing to the
-    // render object via our return value.
-    _viewportSize = config.scrollDirection == Axis.vertical ? dimensions.containerSize.height : dimensions.containerSize.width;
-    _childSize = config.scrollDirection == Axis.vertical ? dimensions.contentSize.height : dimensions.contentSize.width;
-    state.didUpdateScrollBehavior(state.scrollBehavior.updateExtents(
-      contentExtent: _childSize,
-      containerExtent: _viewportSize,
-      scrollOffset: state.scrollOffset
-    ));
-    state.updateGestureDetector();
-    return state.scrollOffsetToPixelDelta(state.scrollOffset);
-  }
-
   Widget _buildViewport(BuildContext context, ScrollableState state, double scrollOffset) {
     return new Viewport(
       paintOffset: state.scrollOffsetToPixelDelta(scrollOffset),
-      mainAxis: config.scrollDirection,
-      anchor: config.scrollAnchor,
+      mainAxis: scrollDirection,
+      anchor: scrollAnchor,
       onPaintOffsetUpdateNeeded: (ViewportDimensions dimensions) {
-        return _handlePaintOffsetUpdateNeeded(state, dimensions);
+        final double contentExtent = scrollDirection == Axis.vertical ? dimensions.contentSize.height : dimensions.contentSize.width;
+        final double containerExtent = scrollDirection == Axis.vertical ? dimensions.containerSize.height : dimensions.containerSize.width;
+        state.handleExtentsChanged(contentExtent, containerExtent);
+        return state.scrollOffsetToPixelDelta(state.scrollOffset);
       },
-      child: config.child
+      child: child
     );
   }
 
@@ -804,14 +801,14 @@ class _ScrollableViewportState extends State<ScrollableViewport> {
   @override
   Widget build(BuildContext context) {
     final Widget result = new Scrollable(
-      key: config.scrollableKey,
-      initialScrollOffset: config.initialScrollOffset,
-      scrollDirection: config.scrollDirection,
-      scrollAnchor: config.scrollAnchor,
-      onScrollStart: config.onScrollStart,
-      onScroll: config.onScroll,
-      onScrollEnd: config.onScrollEnd,
-      snapOffsetCallback: config.snapOffsetCallback,
+      key: scrollableKey,
+      initialScrollOffset: initialScrollOffset,
+      scrollDirection: scrollDirection,
+      scrollAnchor: scrollAnchor,
+      onScrollStart: onScrollStart,
+      onScroll: onScroll,
+      onScrollEnd: onScrollEnd,
+      snapOffsetCallback: snapOffsetCallback,
       builder: _buildContent
     );
     return ScrollConfiguration.wrap(context, result);
