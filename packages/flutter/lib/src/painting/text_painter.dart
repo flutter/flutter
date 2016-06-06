@@ -38,7 +38,7 @@ class TextPainter {
   }
 
   ui.Paragraph _paragraph;
-  bool _needsLayout = false;
+  bool _needsLayout = true;
 
   /// The (potentially styled) text to paint.
   TextSpan get text => _text;
