@@ -281,9 +281,7 @@ class AppDomain extends Domain {
 
   List<AppInstance> _apps = <AppInstance>[];
 
-  // TODO: document the updated params
-  // TODO: document the return value
-  Future<dynamic> start(Map<String, dynamic> args) async {
+  Future<Map<String, dynamic>> start(Map<String, dynamic> args) async {
     String deviceId = _getArgAsString(args, 'deviceId', required: true);
     String projectDirectory = _getArgAsString(args, 'projectDirectory', required: true);
     bool startPaused = _getArgAsBool(args, 'startPaused');
@@ -345,10 +343,9 @@ class AppDomain extends Domain {
       });
     });
 
-    return <String, dynamic> { 'appId': app.id };
+    return <String, dynamic>{ 'appId': app.id };
   }
 
-  // TODO: document the params
   Future<bool> restart(Map<String, dynamic> args) async {
     String appId = _getArgAsString(args, 'appId', required: true);
 
@@ -361,7 +358,6 @@ class AppDomain extends Domain {
     });
   }
 
-  // TODO: document the updated params
   Future<bool> stop(Map<String, dynamic> args) async {
     String appId = _getArgAsString(args, 'appId', required: true);
 
@@ -379,7 +375,6 @@ class AppDomain extends Domain {
     });
   }
 
-  // TODO: doc
   Future<List<Map<String, dynamic>>> discover(Map<String, dynamic> args) async {
     String deviceId = _getArgAsString(args, 'deviceId', required: true);
 
@@ -389,7 +384,10 @@ class AppDomain extends Domain {
 
     List<DiscoveredApp> apps = await device.discoverApps();
     return apps.map((DiscoveredApp app) {
-      return <String, dynamic>{ 'id': app.id, 'observatoryDevicePort': app.observatoryPort };
+      return <String, dynamic>{
+        'id': app.id,
+        'observatoryDevicePort': app.observatoryPort
+      };
     }).toList();
   }
 
@@ -462,7 +460,6 @@ class DeviceDomain extends Domain {
     return new Future<Null>.value();
   }
 
-  // TODO: doc
   /// Forward a host port to a device port.
   Future<Map<String, dynamic>> forward(Map<String, dynamic> args) async {
     String deviceId = _getArgAsString(args, 'deviceId', required: true);
@@ -478,7 +475,6 @@ class DeviceDomain extends Domain {
     return <String, dynamic>{ 'hostPort': hostPort };
   }
 
-  // TODO: doc
   /// Removes a forwarded port.
   Future<Null> unforward(Map<String, dynamic> args) async {
     String deviceId = _getArgAsString(args, 'deviceId', required: true);
@@ -489,7 +485,7 @@ class DeviceDomain extends Domain {
     if (device == null)
       throw "device '$deviceId' not found";
 
-    device.portForwarder.unforward(new ForwardedPort(hostPort, devicePort));
+    return device.portForwarder.unforward(new ForwardedPort(hostPort, devicePort));
   }
 
   @override

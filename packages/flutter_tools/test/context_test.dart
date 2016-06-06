@@ -14,7 +14,7 @@ void main() {
       BufferLogger mockLogger = new BufferLogger();
       context[Logger] = mockLogger;
 
-      context.runInZone(() {
+      await context.runInZone(() {
         printError('foo bar');
       });
 
@@ -28,7 +28,7 @@ void main() {
       BufferLogger mockLogger = new BufferLogger();
       context[Logger] = mockLogger;
 
-      context.runInZone(() {
+      await context.runInZone(() {
         printStatus('foo bar');
       });
 
@@ -42,7 +42,7 @@ void main() {
       BufferLogger mockLogger = new BufferLogger();
       context[Logger] = mockLogger;
 
-      context.runInZone(() {
+      await context.runInZone(() {
         printTrace('foo bar');
       });
 
