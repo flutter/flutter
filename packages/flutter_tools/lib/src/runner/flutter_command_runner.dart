@@ -40,7 +40,7 @@ class FlutterCommandRunner extends CommandRunner {
         help: 'Reduce the amount of output from some commands.');
     argParser.addOption('device-id',
         abbr: 'd',
-        help: 'Target device id.');
+        help: 'Target device id or name (prefixes allowed).');
     argParser.addFlag('version',
         negatable: false,
         help: 'Reports the version of this tool.');
