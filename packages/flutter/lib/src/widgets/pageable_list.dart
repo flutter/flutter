@@ -14,12 +14,39 @@ import 'virtual_viewport.dart';
 
 /// Controls how a pageable list should behave during a fling.
 enum PageableListFlingBehavior {
+  /// A fling gesture can scroll the list by more than one page.
   canFlingAcrossMultiplePages,
+
+  /// A fling gesture can scroll the list by at most one page.
   stopAtNextPage
 }
 
-abstract class PageableListBase extends Scrollable {
-  PageableListBase({
+/// A base class for widgets that display one page at a time.
+///
+/// [Pageable] widgets are similar to [Scrollable] except that they display a
+/// single child at a time. When being scrolled, they can display adjacent
+/// pages, but when the user stops scrolling, they settle their scroll offset to
+/// a value that shows a single page.
+///
+/// [Pageable] uses different units for its scroll offset than [Scrollable]. One
+/// unit of scroll offset cooresponds to one child widget, which means a scroll
+/// offset of 2.75 indicates that the viewport is three quarters of the way
+/// between the child with index 2 and the child with index 3.
+///
+/// Widgets that subclass [Pageable] typically use state objects that subclass
+/// [PageableState].
+///
+/// See also:
+///
+///  * [PageableList], which pages through an iterable list of children.
+///  * [PageableLazyList], which pages through a lazily constructed list of
+///    children.
+abstract class Pageable extends Scrollable {
+  /// Initializes fields for subclasses.
+  ///
+  /// The [scrollDirection], [scrollAnchor], and [itemsSnapAlignment] arguments
+  /// must not be null.
+  Pageable({
     Key key,
     double initialScrollOffset,
     Axis scrollDirection: Axis.vertical,
@@ -64,11 +91,21 @@ abstract class PageableListBase extends Scrollable {
   int get _itemCount;
 }
 
-/// Scrollable widget that scrolls one "page" at a time.
+/// A widget that pages through an iterable list of children.
 ///
-/// In a pageable list, one child is visible at a time. Scrolling the list
-/// reveals either the next or previous child.
-class PageableList extends PageableListBase {
+/// A [PageableList] displays a single child at a time. When being scrolled, it
+/// can display adjacent pages, but when the user stops scrolling, it settles
+/// its scroll offset to a value that shows a single page.
+///
+/// See also:
+///
+///  * [PageableLazyList], which pages through a lazily constructed list of
+///    children.
+class PageableList extends Pageable {
+  /// Creates a widget that pages through an iterable list of children.
+  ///
+  /// The [scrollDirection], [scrollAnchor], and [itemsSnapAlignment] arguments
+  /// must not be null.
   PageableList({
     Key key,
     double initialScrollOffset,
@@ -110,7 +147,20 @@ class PageableList extends PageableListBase {
   PageableListState<PageableList> createState() => new PageableListState<PageableList>();
 }
 
-class PageableLazyList extends PageableListBase {
+/// A widget that pages through a lazily constructed list of children.
+///
+/// A [PageableList] displays a single child at a time. When being scrolled, it
+/// can display adjacent pages, but when the user stops scrolling, it settles
+/// its scroll offset to a value that shows a single page.
+///
+/// See also:
+///
+///  * [PageableList], which pages through an iterable list of children.
+class PageableLazyList extends Pageable {
+  /// Creates a widget that pages through a lazily constructed list of children.
+  ///
+  /// The [scrollDirection], [scrollAnchor], and [itemsSnapAlignment] arguments
+  /// must not be null.
   PageableLazyList({
     Key key,
     double initialScrollOffset,
@@ -155,7 +205,12 @@ class PageableLazyList extends PageableListBase {
   _PageableLazyListState createState() => new _PageableLazyListState();
 }
 
-abstract class _PageableListStateBase<T extends PageableListBase> extends ScrollableState<T> {
+/// State for widgets that subclass [Pageable].
+///
+/// Specializes [ScrollableState] to support page-based scrolling.
+///
+/// Subclasses typically override [buildContent] to build viewports.
+abstract class PageableState<T extends Pageable> extends ScrollableState<T> {
   int get _itemCount => config._itemCount;
   int _previousItemCount;
 
@@ -202,7 +257,7 @@ abstract class _PageableListStateBase<T extends PageableListBase> extends Scroll
   }
 
   @override
-  void didUpdateConfig(PageableListBase oldConfig) {
+  void didUpdateConfig(Pageable oldConfig) {
     super.didUpdateConfig(oldConfig);
 
     bool scrollBehaviorUpdateNeeded = config.scrollDirection != oldConfig.scrollDirection;
@@ -287,7 +342,7 @@ abstract class _PageableListStateBase<T extends PageableListBase> extends Scroll
 ///
 /// Widgets that subclass [PageableList] can subclass this class to have
 /// sensible default behaviors for pageable lists.
-class PageableListState<T extends PageableList> extends _PageableListStateBase<T> {
+class PageableListState<T extends PageableList> extends PageableState<T> {
   @override
   Widget buildContent(BuildContext context) {
     return new PageViewport(
@@ -300,7 +355,7 @@ class PageableListState<T extends PageableList> extends _PageableListStateBase<T
   }
 }
 
-class _PageableLazyListState extends _PageableListStateBase<PageableLazyList> {
+class _PageableLazyListState extends PageableState<PageableLazyList> {
   @override
   Widget buildContent(BuildContext context) {
     return new LazyPageViewport(
@@ -321,13 +376,37 @@ class _VirtualPageViewport extends VirtualViewport {
     this.itemsWrap
   ) {
     assert(mainAxis != null);
+    assert(anchor != null);
   }
 
   @override
   final double startOffset;
 
+  /// The axis along which the viewport is bigger on the inside than the outside.
   final Axis mainAxis;
+
+  /// Whether to place first child at the start of the container or the last
+  /// child at the end of the container, when the viewport has not been offset.
+  ///
+  /// For example, if the [mainAxis] is [Axis.vertical] and
+  /// there are enough items to overflow the container, then
+  /// [ViewportAnchor.start] means that the top of the first item
+  /// should be aligned with the top of the viewport with the last
+  /// item below the bottom, and [ViewportAnchor.end] means the bottom
+  /// of the last item should be aligned with the bottom of the
+  /// viewport, with the first item above the top.
+  ///
+  /// This also affects whether, when an item is added or removed, the
+  /// displacement will be towards the first item or the last item.
+  /// Continuing the earlier example, if a new item is inserted in the
+  /// middle of the list, in the [ViewportAnchor.start] case the items
+  /// after it (with greater indices, down to the item with the
+  /// highest index) will be pushed down, while in the
+  /// [ViewportAnchor.end] case the items before it (with lower
+  /// indices, up to the item with the index 0) will be pushed up.
   final ViewportAnchor anchor;
+
+  /// Whether the first item should be revealed after scrolling past the last item.
   final bool itemsWrap;
 
   @override
@@ -433,7 +512,21 @@ class _VirtualPageViewportElement extends VirtualViewportElement {
   }
 }
 
+/// A virtual viewport that displays a single child at a time.
+///
+/// Useful for [Pageable] widgets.
+///
+/// One unit of start offset cooresponds to one child widget, which means a
+/// start offset of 2.75 indicates that the viewport is three quarters of the
+/// way between the child with index 2 and the child with index 3.
+///
+/// [PageViewport] differs from [LazyPageViewport] in that [PageViewport] uses
+/// an [Iterable] list of children. That makes [PageViewport] suitable for a
+/// large (but not extremely large or infinite) list of children.
 class PageViewport extends _VirtualPageViewport with VirtualViewportFromIterable {
+  /// Creates a virtual viewport that displays a single child at a time.
+  ///
+  /// The [mainAxis] and [anchor] arguments must not be null.
   PageViewport({
     double startOffset: 0.0,
     Axis mainAxis: Axis.vertical,
@@ -451,7 +544,22 @@ class PageViewport extends _VirtualPageViewport with VirtualViewportFromIterable
   final Iterable<Widget> children;
 }
 
+/// A virtual viewport that displays a single child at a time.
+///
+/// Useful for [Pageable] widgets.
+///
+/// One unit of start offset cooresponds to one child widget, which means a
+/// start offset of 2.75 indicates that the viewport is three quarters of the
+/// way between the child with index 2 and the child with index 3.
+///
+/// [LazyPageViewport] differs from [PageViewport] in that [LazyPageViewport]
+/// uses an [ItemListBuilder] to lazily create children. That makes
+/// [LazyPageViewport] suitable for an extremely large or infinite list of
+/// children but alos makes it more verbose than [PageViewport].
 class LazyPageViewport extends _VirtualPageViewport with VirtualViewportFromBuilder {
+  /// Creates a virtual viewport that displays a single child at a time.
+  ///
+  /// The [mainAxis] and [anchor] arguments must not be null.
   LazyPageViewport({
     double startOffset: 0.0,
     Axis mainAxis: Axis.vertical,

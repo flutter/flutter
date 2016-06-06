@@ -24,8 +24,9 @@ abstract class Notification {
   }
 }
 
-/// Listens for [Notification]s bubbling up the tree.
+/// A widget that listens for [Notification]s bubbling up the tree.
 class NotificationListener<T extends Notification> extends StatelessWidget {
+  /// Creates a widget that listens for notifications.
   NotificationListener({
     Key key,
     this.child,

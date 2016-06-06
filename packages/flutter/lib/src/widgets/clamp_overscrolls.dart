@@ -2,30 +2,42 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import 'framework.dart';
 import 'scrollable.dart';
 
+/// Signature for building the contents of a scrollable widget.
+///
+/// Typically returns a tree of widgets that includes the viewport that will be
+/// scrolled to the given `scrollOffset`.
 typedef Widget ViewportBuilder(BuildContext context, ScrollableState state, double scrollOffset);
 
-/// If true, the ClampOverscroll's [Scrollable] descendant will clamp its
+/// A widget that controls whether [Scrollable] descendants will overscroll.
+///
+/// If `true`, the ClampOverscroll's [Scrollable] descendant will clamp its
 /// viewport's scrollOffsets to the [ScrollBehavior]'s min and max values.
 /// In this case the Scrollable's scrollOffset will still over- and undershoot
 /// the ScrollBehavior's limits, but the viewport itself will not.
 class ClampOverscrolls extends InheritedWidget {
+  /// Creates a widget that controls whether [Scrollable] descendants will overscroll.
+  ///
+  /// The [value] and [child] arguments must not be null.
   ClampOverscrolls({
     Key key,
-    this.value,
-    Widget child
+    @required this.value,
+    @required Widget child
   }) : super(key: key, child: child) {
     assert(value != null);
     assert(child != null);
   }
 
-  /// True if the [Scrollable] descendant should clamp its viewport's scrollOffset
-  /// values when they are less than the [ScrollBehavior]'s minimum or greater than
-  /// its maximum.
+  /// Whether [Scrollable] descendants should clamp their viewport's
+  /// scrollOffset values when they are less than the [ScrollBehavior]'s minimum
+  /// or greater than its maximum.
   final bool value;
 
+  /// Whether a [Scrollable] widget within the given context should overscroll.
   static bool of(BuildContext context) {
     final ClampOverscrolls result = context.inheritFromWidgetOfExactType(ClampOverscrolls);
     return result?.value ?? false;
@@ -47,7 +59,6 @@ class ClampOverscrolls extends InheritedWidget {
      viewport = new ClampOverscrolls(value: false, child: viewport);
    return viewport;
   }
-
 
   @override
   bool updateShouldNotify(ClampOverscrolls old) => value != old.value;

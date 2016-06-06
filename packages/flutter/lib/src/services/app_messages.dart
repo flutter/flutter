@@ -15,7 +15,9 @@ mojom.ApplicationMessagesProxy _initHostAppMessagesProxy() {
 
 final mojom.ApplicationMessagesProxy _hostAppMessagesProxy = _initHostAppMessagesProxy();
 
+/// Signature for receiving [HostMessages].
 typedef Future<String> HostMessageCallback(String message);
+
 typedef Object _SendStringResponseFactory(String response);
 
 class _ApplicationMessagesImpl extends mojom.ApplicationMessages {

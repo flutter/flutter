@@ -274,6 +274,9 @@ class FadeTransition extends AnimatedWidget {
 /// appropriate for rectangles that are described in terms of offsets from
 /// other rectangles.
 class RelativeRectTween extends Tween<RelativeRect> {
+  /// Creates a relative rect tween.
+  ///
+  /// The [begin] and [end] arguments must not be null.
   RelativeRectTween({ RelativeRect begin, RelativeRect end })
     : super(begin: begin, end: end);
 

@@ -23,10 +23,14 @@ class Clipboard {
 
   Clipboard._();
 
+  /// Stores the given clipboard data on the clipboard.
   static void setClipboardData(mojom.ClipboardData clip) {
     _clipboardProxy.setClipboardData(clip);
   }
 
+  /// Retrieves data from the clipboard that matches the given format.
+  ///
+  ///  * `format` is a media type, such as `text/plain`.
   static Future<mojom.ClipboardData> getClipboardData(String format) async {
     return (await _clipboardProxy.getClipboardData(format)).clip;
   }

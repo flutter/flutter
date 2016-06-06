@@ -11,6 +11,7 @@ import 'routes.dart';
 
 /// A modal route that replaces the entire screen.
 abstract class PageRoute<T> extends ModalRoute<T> {
+  /// Creates a modal route that replaces the entire screen.
   PageRoute({
     Completer<T> completer,
     RouteSettings settings: const RouteSettings()

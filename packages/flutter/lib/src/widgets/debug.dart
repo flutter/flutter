@@ -101,6 +101,12 @@ bool debugCheckHasTable(BuildContext context) {
   return true;
 }
 
+/// Asserts that the `built` widget is not null.
+///
+/// Used when the given `widget` calls a builder function to check that the
+/// function returned a non-null value, as typically required.
+///
+/// Does nothing when asserts are disabled.
 void debugWidgetBuilderValue(Widget widget, Widget built) {
   assert(() {
     if (built == null) {

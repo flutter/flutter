@@ -6,6 +6,7 @@ import 'debug.dart';
 import 'framework.dart';
 
 import 'package:flutter/rendering.dart';
+import 'package:meta/meta.dart';
 
 /// The signature of the [LayoutBuilder] builder function.
 typedef Widget LayoutWidgetBuilder(BuildContext context, Size size);
@@ -17,7 +18,13 @@ typedef Widget LayoutWidgetBuilder(BuildContext context, Size size);
 /// when the parent constrains the child's size and doesn't depend on the child's
 /// intrinsic size.
 class LayoutBuilder extends RenderObjectWidget {
-  LayoutBuilder({ Key key, this.builder }) : super(key: key) {
+  /// Creates a widget that defers its building until layout.
+  ///
+  /// The [builder] argument must not be null.
+  LayoutBuilder({
+    Key key,
+    @required this.builder
+  }) : super(key: key) {
     assert(builder != null);
   }
 

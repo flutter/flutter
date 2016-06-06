@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
+import 'package:meta/meta.dart';
 
 import 'basic.dart';
 import 'clamp_overscrolls.dart';
@@ -133,8 +134,12 @@ class LazyBlockChildren extends LazyBlockDelegate {
 /// it can use that property to be more efficient. Prefer [ScrollableViewport]
 /// when there is only one child.
 class LazyBlock extends StatelessWidget {
+  /// Creates an infinite scrolling list of variable height children.
+  ///
+  /// The [delegate] argument must not be null.
   LazyBlock({
     Key key,
+    @required this.delegate,
     this.initialScrollOffset,
     this.scrollDirection: Axis.vertical,
     this.onScrollStart,
@@ -142,9 +147,10 @@ class LazyBlock extends StatelessWidget {
     this.onScrollEnd,
     this.snapOffsetCallback,
     this.scrollableKey,
-    this.padding,
-    this.delegate
-  }) : super(key: key);
+    this.padding
+  }) : super(key: key) {
+    assert(delegate != null);
+  }
 
   // Warning: keep the dartdoc comments that follow in sync with the copies in
   // Scrollable, ScrollableGrid, ScrollableViewport, ScrollableList, and
@@ -276,13 +282,16 @@ typedef void LazyBlockExtentsChangedCallback(double contentExtent, double contai
 ///
 /// For a scrollable version of this widget, see [LazyBlock].
 class LazyBlockViewport extends RenderObjectWidget {
+  /// Creates a viewport on an infinite list of variable height children.
+  ///
+  /// The [delegate] argument must not be null.
   LazyBlockViewport({
     Key key,
+    @required this.delegate,
     this.startOffset: 0.0,
     this.mainAxis: Axis.vertical,
     this.padding,
-    this.onExtentsChanged,
-    this.delegate
+    this.onExtentsChanged
   }) : super(key: key) {
     assert(delegate != null);
   }

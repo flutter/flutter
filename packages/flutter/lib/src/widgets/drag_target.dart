@@ -5,18 +5,29 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 
 import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
 import 'overlay.dart';
 
+/// Signature for determining whether the given data will be accepted by a [DragTarget].
 typedef bool DragTargetWillAccept<T>(T data);
+
+/// Signature for causing a [DragTarget] to accept the given data.
 typedef void DragTargetAccept<T>(T data);
+
+/// Signature for building children of a [DragTarget].
+///
+/// The `candidateData` argument contains the list of drag data that is hovering
+/// over this [DragTarget] and that has passed [DragTarget.onWillAccept]. The
+/// `rejectedData` argument contains the list of drag data that is hovering over
+/// this [DragTarget] and that will not be accepted by the [DragTarget].
 typedef Widget DragTargetBuilder<T>(BuildContext context, List<T> candidateData, List<dynamic> rejectedData);
 
-/// Called when a [Draggable] is dropped without being accepted by a [DragTarget].
-typedef void OnDraggableCanceled(Velocity velocity, Offset offset);
+/// Signature for when a [Draggable] is dropped without being accepted by a [DragTarget].
+typedef void DraggableCanceledCallback(Velocity velocity, Offset offset);
 
 /// Where the [Draggable] should be anchored during a drag.
 enum DragAnchor {
@@ -40,12 +51,16 @@ enum DragAnchor {
 
 /// Subclass this widget to customize the gesture used to start a drag.
 abstract class DraggableBase<T> extends StatefulWidget {
+  /// Initializes fields for subclasses.
+  ///
+  /// The [child] and [feedback] arguments must not be null. If
+  /// [maxSimultaneousDrags] is non-null, it must be positive.
   DraggableBase({
     Key key,
+    @required this.child,
+    @required this.feedback,
     this.data,
-    this.child,
     this.childWhenDragging,
-    this.feedback,
     this.feedbackOffset: Offset.zero,
     this.dragAnchor: DragAnchor.child,
     this.maxSimultaneousDrags,
@@ -56,6 +71,7 @@ abstract class DraggableBase<T> extends StatefulWidget {
     assert(maxSimultaneousDrags == null || maxSimultaneousDrags > 0);
   }
 
+  /// The data that will be dropped by this draggable.
   final T data;
 
   /// The widget below this widget in the tree.
@@ -85,7 +101,7 @@ abstract class DraggableBase<T> extends StatefulWidget {
   final int maxSimultaneousDrags;
 
   /// Called when the draggable is dropped without being accepted by a [DragTarget].
-  final OnDraggableCanceled onDraggableCanceled;
+  final DraggableCanceledCallback onDraggableCanceled;
 
   /// Should return a new MultiDragGestureRecognizer instance
   /// constructed with the given arguments.
@@ -97,22 +113,26 @@ abstract class DraggableBase<T> extends StatefulWidget {
 
 /// Makes its child draggable starting from tap down.
 class Draggable<T> extends DraggableBase<T> {
+  /// Creates a widget that can be dragged starting from tap down.
+  ///
+  /// The [child] and [feedback] arguments must not be null. If
+  /// [maxSimultaneousDrags] is non-null, it must be positive.
   Draggable({
     Key key,
+    @required Widget child,
+    @required Widget feedback,
     T data,
-    Widget child,
     Widget childWhenDragging,
-    Widget feedback,
     Offset feedbackOffset: Offset.zero,
     DragAnchor dragAnchor: DragAnchor.child,
     int maxSimultaneousDrags,
-    OnDraggableCanceled onDraggableCanceled
+    DraggableCanceledCallback onDraggableCanceled
   }) : super(
     key: key,
-    data: data,
     child: child,
-    childWhenDragging: childWhenDragging,
     feedback: feedback,
+    data: data,
+    childWhenDragging: childWhenDragging,
     feedbackOffset: feedbackOffset,
     dragAnchor: dragAnchor,
     maxSimultaneousDrags: maxSimultaneousDrags,
@@ -128,22 +148,26 @@ class Draggable<T> extends DraggableBase<T> {
 /// Makes its child draggable. When competing with other gestures,
 /// this will only start the drag horizontally.
 class HorizontalDraggable<T> extends DraggableBase<T> {
+  /// Creates a widget that can be dragged.
+  ///
+  /// The [child] and [feedback] arguments must not be null. If
+  /// [maxSimultaneousDrags] is non-null, it must be positive.
   HorizontalDraggable({
     Key key,
+    @required Widget child,
+    @required Widget feedback,
     T data,
-    Widget child,
     Widget childWhenDragging,
-    Widget feedback,
     Offset feedbackOffset: Offset.zero,
     DragAnchor dragAnchor: DragAnchor.child,
     int maxSimultaneousDrags,
-    OnDraggableCanceled onDraggableCanceled
+    DraggableCanceledCallback onDraggableCanceled
   }) : super(
     key: key,
-    data: data,
     child: child,
-    childWhenDragging: childWhenDragging,
     feedback: feedback,
+    data: data,
+    childWhenDragging: childWhenDragging,
     feedbackOffset: feedbackOffset,
     dragAnchor: dragAnchor,
     maxSimultaneousDrags: maxSimultaneousDrags,
@@ -159,22 +183,26 @@ class HorizontalDraggable<T> extends DraggableBase<T> {
 /// Makes its child draggable. When competing with other gestures,
 /// this will only start the drag vertically.
 class VerticalDraggable<T> extends DraggableBase<T> {
+  /// Creates a widget that can be dragged.
+  ///
+  /// The [child] and [feedback] arguments must not be null. If
+  /// [maxSimultaneousDrags] is non-null, it must be positive.
   VerticalDraggable({
     Key key,
+    @required Widget child,
+    @required Widget feedback,
     T data,
-    Widget child,
     Widget childWhenDragging,
-    Widget feedback,
     Offset feedbackOffset: Offset.zero,
     DragAnchor dragAnchor: DragAnchor.child,
     int maxSimultaneousDrags,
-    OnDraggableCanceled onDraggableCanceled
+    DraggableCanceledCallback onDraggableCanceled
   }) : super(
     key: key,
-    data: data,
     child: child,
-    childWhenDragging: childWhenDragging,
     feedback: feedback,
+    data: data,
+    childWhenDragging: childWhenDragging,
     feedbackOffset: feedbackOffset,
     dragAnchor: dragAnchor,
     maxSimultaneousDrags: maxSimultaneousDrags,
@@ -189,22 +217,26 @@ class VerticalDraggable<T> extends DraggableBase<T> {
 
 /// Makes its child draggable starting from long press.
 class LongPressDraggable<T> extends DraggableBase<T> {
+  /// Creates a widget that can be dragged starting from long press.
+  ///
+  /// The [child] and [feedback] arguments must not be null. If
+  /// [maxSimultaneousDrags] is non-null, it must be positive.
   LongPressDraggable({
     Key key,
+    @required Widget child,
+    @required Widget feedback,
     T data,
-    Widget child,
     Widget childWhenDragging,
-    Widget feedback,
     Offset feedbackOffset: Offset.zero,
     DragAnchor dragAnchor: DragAnchor.child,
     int maxSimultaneousDrags,
-    OnDraggableCanceled onDraggableCanceled
+    DraggableCanceledCallback onDraggableCanceled
   }) : super(
     key: key,
-    data: data,
     child: child,
-    childWhenDragging: childWhenDragging,
     feedback: feedback,
+    data: data,
+    childWhenDragging: childWhenDragging,
     feedbackOffset: feedbackOffset,
     dragAnchor: dragAnchor,
     maxSimultaneousDrags: maxSimultaneousDrags,
@@ -224,7 +256,6 @@ class LongPressDraggable<T> extends DraggableBase<T> {
 }
 
 class _DraggableState<T> extends State<DraggableBase<T>> {
-
   @override
   void initState() {
     super.initState();
@@ -286,11 +317,14 @@ class _DraggableState<T> extends State<DraggableBase<T>> {
   }
 }
 
-/// Receives data when a [Draggable] widget is dropped.
+/// A widget that receives data when a [Draggable] widget is dropped.
 class DragTarget<T> extends StatefulWidget {
+  /// Creates a widget that receives drags.
+  ///
+  /// The [builder] argument must not be null.
   const DragTarget({
     Key key,
-    this.builder,
+    @required this.builder,
     this.onWillAccept,
     this.onAccept
   }) : super(key: key);
