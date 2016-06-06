@@ -148,15 +148,19 @@ class RenderParagraph extends RenderBox {
   @override
   void performLayout() {
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
-    size = constraints.constrain(_textPainter.size);
+    // We grab _textPainter.size here because assigning to `size` will trigger
+    // us to validate our intrinsic sizes, which will change _textPainter's
+    // layout because the intrinsic size calculations are destructive.
+    final Size textSize = _textPainter.size;
+    size = constraints.constrain(textSize);
 
-    final bool didOverflowWidth = size.width < _textPainter.width;
+    final bool didOverflowWidth = size.width < textSize.width;
     // TODO(abarth): We're only measuring the sizes of the line boxes here. If
     // the glyphs draw outside the line boxes, we might think that there isn't
     // visual overflow when there actually is visual overflow. This can become
     // a problem if we start having horizontal overflow and introduce a clip
     // that affects the actual (but undetected) vertical overflow.
-    _hasVisualOverflow = didOverflowWidth || size.height < _textPainter.height;
+    _hasVisualOverflow = didOverflowWidth || size.height < textSize.height;
     if (didOverflowWidth) {
       switch (_overflow) {
         case TextOverflow.clip:
