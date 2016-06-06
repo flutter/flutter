@@ -192,7 +192,7 @@ void main() {
     List<TextSelectionPoint> endpoints = renderLine.getEndpointsForSelection(
         new TextSelection.collapsed(offset: offset));
     expect(endpoints.length, 1);
-    return endpoints[0].point;
+    return endpoints[0].point + new Offset(0.0, -2.0);
   }
 
   testWidgets('Can long press to select', (WidgetTester tester) async {
