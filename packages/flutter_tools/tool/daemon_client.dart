@@ -12,7 +12,7 @@ Process daemon;
 //   version: print version
 //   shutdown: terminate the server
 //   start: start an app
-//   stop: stop any running app
+//   stop: stop a running app
 //   devices: list devices
 
 Future<Null> main() async {

@@ -546,32 +546,34 @@ class NotifyingLogger extends Logger {
   }
 }
 
+/// A running application, started by this daemon.
 class AppInstance {
   AppInstance(this.id, [this.runner]);
 
   final String id;
   final RunAndStayResident runner;
 
-  AppContext _appContext;
+  _AppRunLogger _logger;
 
   Future<bool> restart() => runner.restart();
 
   Future<Null> stop() => runner.stop();
 
   void closeLogger() {
-    _AppRunLogger logger = _appContext[Logger];
-    logger.close();
+    _logger.close();
   }
 
   dynamic _runInZone(AppDomain domain, dynamic method()) {
-    if (_appContext == null) {
-      _appContext = new AppContext();
-      _appContext[Logger] = new _AppRunLogger(domain, this);
-    }
-    return _appContext.runInZone(method);
+    if (_logger == null)
+      _logger = new _AppRunLogger(domain, this);
+
+    AppContext appContext = new AppContext();
+    appContext[Logger] = _logger;
+    return appContext.runInZone(method);
   }
 }
 
+/// A [Logger] which sends log messages to a listening daemon client.
 class _AppRunLogger extends Logger {
   _AppRunLogger(this.domain, this.app);
 
