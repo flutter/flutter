@@ -56,14 +56,9 @@ class RunCommand extends RunCommandBase {
     argParser.addOption('debug-port',
         help: 'Listen to the given port for a debug connection (defaults to $kDefaultObservatoryPort).');
     usesPubOption();
-
-    // A temporary, hidden flag to experiment with a different run style.
-    // TODO(devoncarew): Remove this.
     argParser.addFlag('resident',
-        defaultsTo: false,
-        negatable: false,
-        hide: true,
-        help: 'Stay resident after running the app.');
+        defaultsTo: true,
+        help: 'Don\'t terminate the \'flutter run\' process after starting the application.');
 
     // Hidden option to enable a benchmarking mode. This will run the given
     // application, measure the startup time and the app restart time, write the
