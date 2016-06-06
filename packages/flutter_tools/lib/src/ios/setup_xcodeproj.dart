@@ -70,7 +70,7 @@ void updateXcodeGeneratedProperties(String projectPath, BuildMode mode, String t
   localsBuffer.writeln('FLUTTER_TARGET=$target');
 
   // The runtime mode for the current build.
-  localsBuffer.writeln('FLUTTER_MODE=${getModeName(mode)}');
+  localsBuffer.writeln('FLUTTER_BUILD_MODE=${getModeName(mode)}');
 
   String flutterFrameworkDir = path.normalize(tools.getEngineArtifactsDirectory(TargetPlatform.ios, mode).path);
   localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=$flutterFrameworkDir');
