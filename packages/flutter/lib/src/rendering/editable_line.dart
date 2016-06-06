@@ -148,10 +148,10 @@ class RenderEditableLine extends RenderBox {
   List<TextSelectionPoint> getEndpointsForSelection(TextSelection selection) {
     // TODO(mpcomplete): We should be more disciplined about when we dirty the
     // layout state of the text painter so that we can know that the layout is
-    // clean at this point. 
+    // clean at this point.
     _textPainter.layout();
 
-    Offset offset = _paintOffset + new Offset(0.0, -_kCaretHeightOffset);
+    Offset offset = _paintOffset;
 
     if (selection.isCollapsed) {
       // TODO(mpcomplete): This doesn't work well at an RTL/LTR boundary.
@@ -278,15 +278,8 @@ class RenderEditableLine extends RenderBox {
   void _paintSelection(Canvas canvas, Offset effectiveOffset) {
     assert(_selectionRects != null);
     Paint paint = new Paint()..color = _selectionColor;
-    for (ui.TextBox box in _selectionRects) {
-      Rect selectionRect = new Rect.fromLTWH(
-        effectiveOffset.dx + box.left,
-        effectiveOffset.dy + _kCaretHeightOffset,
-        box.right - box.left,
-        size.height - 2.0 * _kCaretHeightOffset
-      );
-      canvas.drawRect(selectionRect, paint);
-    }
+    for (ui.TextBox box in _selectionRects)
+      canvas.drawRect(box.toRect().shift(effectiveOffset), paint);
   }
 
   void _paintContents(PaintingContext context, Offset offset) {
