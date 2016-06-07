@@ -29,6 +29,7 @@ Future<Process> runCommand(List<String> cmd, { String workingDirectory }) async 
 Future<int> runCommandAndStreamOutput(List<String> cmd, {
   String workingDirectory,
   String prefix: '',
+  bool trace: false,
   RegExp filter,
   StringConverter mapFunction
 }) async {
@@ -40,8 +41,13 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
     .listen((String line) {
       if (mapFunction != null)
         line = mapFunction(line);
-      if (line != null)
-        printStatus('$prefix$line');
+      if (line != null) {
+        String message = '$prefix$line';
+        if (trace)
+          printTrace(message);
+        else
+          printStatus(message);
+      }
     });
   process.stderr
     .transform(UTF8.decoder)
