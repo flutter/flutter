@@ -107,7 +107,7 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
     if (materialColor == null) {
       ThemeData themeData = Theme.of(context);
       materialColor = themeData.accentColor;
-      iconColor = themeData.accentColorBrightness == ThemeBrightness.dark ? Colors.white : Colors.black;
+      iconColor = themeData.accentColorBrightness == Brightness.dark ? Colors.white : Colors.black;
     }
 
     Widget result = new Center(

@@ -14,7 +14,7 @@ final Map<double, String> _kLogoImages = <double, String>{
   170.0: 'packages/flutter_gallery_assets/pesto/logo_big.png',
 };
 final ThemeData _kTheme = new ThemeData(
-  brightness: ThemeBrightness.light,
+  brightness: Brightness.light,
   primarySwatch: Colors.teal,
   accentColor: Colors.redAccent[200]
 );

@@ -117,10 +117,10 @@ class _InputState extends State<Input> {
     Color activeColor = themeData.hintColor;
     if (focused) {
       switch (themeData.brightness) {
-        case ThemeBrightness.dark:
+        case Brightness.dark:
           activeColor = themeData.accentColor;
           break;
-        case ThemeBrightness.light:
+        case Brightness.light:
           activeColor = themeData.primaryColor;
           break;
       }

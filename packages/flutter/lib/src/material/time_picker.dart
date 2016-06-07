@@ -211,11 +211,11 @@ class _TimePickerHeader extends StatelessWidget {
     Color activeColor;
     Color inactiveColor;
     switch(themeData.primaryColorBrightness) {
-      case ThemeBrightness.light:
+      case Brightness.light:
         activeColor = Colors.black87;
         inactiveColor = Colors.black54;
         break;
-      case ThemeBrightness.dark:
+      case Brightness.dark:
         activeColor = Colors.white;
         inactiveColor = Colors.white70;
         break;
@@ -223,10 +223,10 @@ class _TimePickerHeader extends StatelessWidget {
 
     Color backgroundColor;
     switch (themeData.brightness) {
-      case ThemeBrightness.light:
+      case Brightness.light:
         backgroundColor = themeData.primaryColor;
         break;
-      case ThemeBrightness.dark:
+      case Brightness.dark:
         backgroundColor = themeData.backgroundColor;
         break;
     }
@@ -525,10 +525,10 @@ class _DialState extends State<_Dial> {
 
     Color backgroundColor;
     switch (themeData.brightness) {
-      case ThemeBrightness.light:
+      case Brightness.light:
         backgroundColor = Colors.grey[200];
         break;
-      case ThemeBrightness.dark:
+      case Brightness.dark:
         backgroundColor = themeData.backgroundColor;
         break;
     }
@@ -538,11 +538,11 @@ class _DialState extends State<_Dial> {
     switch (config.mode) {
       case _TimePickerMode.hour:
         switch (themeData.brightness) {
-          case ThemeBrightness.light:
+          case Brightness.light:
             primaryLabels = _hoursBlack;
             secondaryLabels = _hoursWhite;
             break;
-          case ThemeBrightness.dark:
+          case Brightness.dark:
             primaryLabels = _hoursWhite;
             secondaryLabels = _hoursBlack;
             break;
@@ -550,11 +550,11 @@ class _DialState extends State<_Dial> {
         break;
       case _TimePickerMode.minute:
         switch (themeData.brightness) {
-          case ThemeBrightness.light:
+          case Brightness.light:
             primaryLabels = _minutesBlack;
             secondaryLabels = _minutesWhite;
             break;
-          case ThemeBrightness.dark:
+          case Brightness.dark:
             primaryLabels = _minutesWhite;
             secondaryLabels = _minutesBlack;
             break;

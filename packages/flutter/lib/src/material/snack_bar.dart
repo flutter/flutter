@@ -175,7 +175,7 @@ class SnackBar extends StatelessWidget {
                 margin: const EdgeInsets.symmetric(horizontal: _kSideMargins),
                 child: new Theme(
                   data: new ThemeData(
-                    brightness: ThemeBrightness.dark,
+                    brightness: Brightness.dark,
                     accentColor: theme.accentColor,
                     accentColorBrightness: theme.accentColorBrightness,
                     textTheme: Typography.white

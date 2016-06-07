@@ -45,12 +45,12 @@ final Map<String, WidgetBuilder> kRoutes = <String, WidgetBuilder>{
 };
 
 final ThemeData _kGalleryLightTheme = new ThemeData(
-  brightness: ThemeBrightness.light,
+  brightness: Brightness.light,
   primarySwatch: Colors.purple
 );
 
 final ThemeData _kGalleryDarkTheme = new ThemeData(
-  brightness: ThemeBrightness.dark,
+  brightness: Brightness.dark,
   primarySwatch: Colors.purple
 );
 

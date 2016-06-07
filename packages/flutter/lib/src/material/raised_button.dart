@@ -80,7 +80,7 @@ class RaisedButton extends StatelessWidget {
   /// The theme brightness to use for this button.
   ///
   /// Defaults to the brightness from [ThemeData.brightness].
-  final ThemeBrightness colorBrightness;
+  final Brightness colorBrightness;
 
   /// The widget below this widget in the tree.
   ///
@@ -98,9 +98,9 @@ class RaisedButton extends StatelessWidget {
       if (disabledColor != null)
         return disabledColor;
       switch (Theme.of(context).brightness) {
-        case ThemeBrightness.light:
+        case Brightness.light:
           return Colors.black12;
-        case ThemeBrightness.dark:
+        case Brightness.dark:
           return Colors.white12;
       }
     }

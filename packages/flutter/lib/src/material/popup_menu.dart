@@ -159,7 +159,7 @@ class _PopupMenuItemState<T extends PopupMenuItem<dynamic>> extends State<T> {
       )
     );
     if (!config.enabled) {
-      final bool isDark = theme.brightness == ThemeBrightness.dark;
+      final bool isDark = theme.brightness == Brightness.dark;
       item = new IconTheme(
         data: new IconThemeData(opacity: isDark ? 0.5 : 0.38),
         child: item

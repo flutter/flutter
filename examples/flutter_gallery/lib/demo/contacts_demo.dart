@@ -87,7 +87,7 @@ class ContactsDemoState extends State<ContactsDemo> {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
     return new Theme(
       data: new ThemeData(
-        brightness: ThemeBrightness.light,
+        brightness: Brightness.light,
         primarySwatch: Colors.indigo
       ),
       child: new Scaffold(
