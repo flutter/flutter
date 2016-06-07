@@ -127,14 +127,14 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
       config.onHighlightChanged(value);
   }
 
-  void _handleTapDown(Point position) {
+  void _handleTapDown(TapDownDetails details) {
     RenderBox referenceBox = context.findRenderObject();
     assert(Material.of(context) != null);
     InkSplash splash;
     RectCallback rectCallback = config.getRectCallback(referenceBox);
     splash = Material.of(context).splashAt(
       referenceBox: referenceBox,
-      position: referenceBox.globalToLocal(position),
+      position: referenceBox.globalToLocal(details.globalPosition),
       color: Theme.of(context).splashColor,
       containedInkWell: config.containedInkWell,
       rectCallback: config.containedInkWell ? rectCallback : null,

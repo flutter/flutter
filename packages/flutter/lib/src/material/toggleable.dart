@@ -213,9 +213,9 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
     }
   }
 
-  void _handleTapDown(Point globalPosition) {
+  void _handleTapDown(TapDownDetails details) {
     if (isInteractive) {
-      _downPosition = globalToLocal(globalPosition);
+      _downPosition = globalToLocal(details.globalPosition);
       _reactionController.forward();
     }
   }
@@ -225,7 +225,7 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
       onChanged(!_value);
   }
 
-  void _handleTapUp(Point globalPosition) {
+  void _handleTapUp(TapUpDetails details) {
     _downPosition = null;
     if (isInteractive)
       _reactionController.reverse();

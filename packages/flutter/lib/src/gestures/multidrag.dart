@@ -8,6 +8,7 @@ import 'dart:ui' show Point, Offset;
 import 'arena.dart';
 import 'binding.dart';
 import 'constants.dart';
+import 'drag.dart';
 import 'events.dart';
 import 'recognizer.dart';
 import 'velocity_tracker.dart';
@@ -17,12 +18,14 @@ typedef Drag GestureMultiDragStartCallback(Point position);
 
 /// Interface for receiving updates about drags from a [MultiDragGestureRecognizer].
 abstract class Drag {
-  /// The pointer has moved by the given offset.
-  void move(Offset offset) { }
+  /// The pointer has moved.
+  void update(DragUpdateDetails details) { }
 
-  /// The pointer is no longer in contact with the screen and was moving at a
-  /// given velocity when it stopped contacting the screen.
-  void end(Velocity velocity) { }
+  /// The pointer is no longer in contact with the screen.
+  ///
+  /// The velocity at which the pointer was moving when it stopped contacting
+  /// the screen is available in the `details`.
+  void end(DragEndDetails details) { }
 
   /// The input from the pointer is no longer directed towards this receiver.
   ///
@@ -76,7 +79,7 @@ abstract class MultiDragPointerState {
     _velocityTracker.addPosition(event.timeStamp, event.position);
     if (_client != null) {
       assert(pendingDelta == null);
-      _client.move(event.delta);
+      _client.update(new DragUpdateDetails(delta: event.delta));
     } else {
       assert(pendingDelta != null);
       _pendingDelta += event.delta;
@@ -113,7 +116,7 @@ abstract class MultiDragPointerState {
     assert(client != null);
     assert(pendingDelta != null);
     _client = client;
-    _client.move(pendingDelta);
+    _client.update(new DragUpdateDetails(delta: pendingDelta));
     _pendingDelta = null;
   }
 
@@ -121,7 +124,7 @@ abstract class MultiDragPointerState {
     assert(_arenaEntry != null);
     if (_client != null) {
       assert(pendingDelta == null);
-      _client.end(_velocityTracker.getVelocity());
+      _client.end(new DragEndDetails(velocity: _velocityTracker.getVelocity() ?? Velocity.zero));
       _client = null;
     } else {
       assert(pendingDelta != null);
