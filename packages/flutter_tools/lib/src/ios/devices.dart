@@ -203,7 +203,7 @@ class IOSDevice extends Device {
       '--bundle',
       bundle.path,
       '--justlaunch',
-    ]);
+    ], trace: true);
 
     if (installationResult != 0) {
       printError('Could not install ${bundle.path} on $id.');
