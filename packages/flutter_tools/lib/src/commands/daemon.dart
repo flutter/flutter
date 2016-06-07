@@ -137,7 +137,7 @@ class Daemon {
       if (_domainMap[prefix] == null)
         throw 'no domain for method: $method';
 
-      _domainMap[prefix].handleCommand(name, id, request['params'] ?? <String, dynamic>{});
+      _domainMap[prefix].handleCommand(name, id, request['params'] ?? const <String, dynamic>{});
     } catch (error) {
       _send(<String, dynamic>{'id': id, 'error': _toJsonable(error)});
     }
@@ -193,25 +193,25 @@ abstract class Domain {
 
   void _send(Map<String, dynamic> map) => daemon._send(map);
 
-  String _getArgAsString(Map<String, dynamic> args, String name, { bool required: false }) {
+  String _getStringArg(Map<String, dynamic> args, String name, { bool required: false }) {
     if (required && !args.containsKey(name))
       throw "$name is required";
     dynamic val = args[name];
     if (val != null && val is! String)
-      throw "$name is not a string";
+      throw "$name is not a String";
     return val;
   }
 
-  bool _getArgAsBool(Map<String, dynamic> args, String name, { bool required: false }) {
+  bool _getBoolArg(Map<String, dynamic> args, String name, { bool required: false }) {
     if (required && !args.containsKey(name))
       throw "$name is required";
     dynamic val = args[name];
     if (val != null && val is! bool)
-      throw "$name is not a boolean";
+      throw "$name is not a bool";
     return val;
   }
 
-  int _getArgAsInt(Map<String, dynamic> args, String name, { bool required: false }) {
+  int _getIntArg(Map<String, dynamic> args, String name, { bool required: false }) {
     if (required && !args.containsKey(name))
       throw "$name is required";
     dynamic val = args[name];
@@ -282,13 +282,13 @@ class AppDomain extends Domain {
   List<AppInstance> _apps = <AppInstance>[];
 
   Future<Map<String, dynamic>> start(Map<String, dynamic> args) async {
-    String deviceId = _getArgAsString(args, 'deviceId', required: true);
-    String projectDirectory = _getArgAsString(args, 'projectDirectory', required: true);
-    bool startPaused = _getArgAsBool(args, 'startPaused');
+    String deviceId = _getStringArg(args, 'deviceId', required: true);
+    String projectDirectory = _getStringArg(args, 'projectDirectory', required: true);
+    bool startPaused = _getBoolArg(args, 'startPaused');
     // TODO(devoncarew): Use the route param.
-    String route = _getArgAsString(args, 'route'); // ignore: unused_local_variable
-    String mode = _getArgAsString(args, 'mode');
-    String target = _getArgAsString(args, 'target');
+    String route = _getStringArg(args, 'route'); // ignore: unused_local_variable
+    String mode = _getStringArg(args, 'mode');
+    String target = _getStringArg(args, 'target');
 
     Device device = daemon.deviceDomain._getDevice(deviceId);
     if (device == null)
@@ -297,13 +297,20 @@ class AppDomain extends Domain {
     if (!FileSystemEntity.isDirectorySync(projectDirectory))
       throw "'$projectDirectory' does not exist";
 
-    BuildMode buildMode = parseBuildMode(mode) ?? BuildMode.debug;
+    BuildMode buildMode = getBuildModeForName(mode) ?? BuildMode.debug;
     DebuggingOptions options;
 
-    if (buildMode == BuildMode.release)
-      options = new DebuggingOptions.disabled(buildMode);
-    else
-      options = new DebuggingOptions.enabled(buildMode, startPaused: startPaused);
+    switch (buildMode) {
+      case BuildMode.debug:
+      case BuildMode.profile:
+        options = new DebuggingOptions.enabled(buildMode, startPaused: startPaused);
+        break;
+      case BuildMode.release:
+        options = new DebuggingOptions.disabled(buildMode);
+        break;
+      default:
+        throw 'unhandle build mode: $buildMode';
+    }
 
     // We change the current working directory for the duration of the `start` command.
     Directory cwd = Directory.current;
@@ -347,7 +354,7 @@ class AppDomain extends Domain {
   }
 
   Future<bool> restart(Map<String, dynamic> args) async {
-    String appId = _getArgAsString(args, 'appId', required: true);
+    String appId = _getStringArg(args, 'appId', required: true);
 
     AppInstance app = _getApp(appId);
     if (app == null)
@@ -359,7 +366,7 @@ class AppDomain extends Domain {
   }
 
   Future<bool> stop(Map<String, dynamic> args) async {
-    String appId = _getArgAsString(args, 'appId', required: true);
+    String appId = _getStringArg(args, 'appId', required: true);
 
     AppInstance app = _getApp(appId);
     if (app == null)
@@ -376,7 +383,7 @@ class AppDomain extends Domain {
   }
 
   Future<List<Map<String, dynamic>>> discover(Map<String, dynamic> args) async {
-    String deviceId = _getArgAsString(args, 'deviceId', required: true);
+    String deviceId = _getStringArg(args, 'deviceId', required: true);
 
     Device device = daemon.deviceDomain._getDevice(deviceId);
     if (device == null)
@@ -462,9 +469,9 @@ class DeviceDomain extends Domain {
 
   /// Forward a host port to a device port.
   Future<Map<String, dynamic>> forward(Map<String, dynamic> args) async {
-    String deviceId = _getArgAsString(args, 'deviceId', required: true);
-    int devicePort = _getArgAsInt(args, 'devicePort', required: true);
-    int hostPort = _getArgAsInt(args, 'hostPort');
+    String deviceId = _getStringArg(args, 'deviceId', required: true);
+    int devicePort = _getIntArg(args, 'devicePort', required: true);
+    int hostPort = _getIntArg(args, 'hostPort');
 
     Device device = daemon.deviceDomain._getDevice(deviceId);
     if (device == null)
@@ -477,9 +484,9 @@ class DeviceDomain extends Domain {
 
   /// Removes a forwarded port.
   Future<Null> unforward(Map<String, dynamic> args) async {
-    String deviceId = _getArgAsString(args, 'deviceId', required: true);
-    int devicePort = _getArgAsInt(args, 'devicePort', required: true);
-    int hostPort = _getArgAsInt(args, 'hostPort', required: true);
+    String deviceId = _getStringArg(args, 'deviceId', required: true);
+    int devicePort = _getIntArg(args, 'devicePort', required: true);
+    int hostPort = _getIntArg(args, 'hostPort', required: true);
 
     Device device = daemon.deviceDomain._getDevice(deviceId);
     if (device == null)

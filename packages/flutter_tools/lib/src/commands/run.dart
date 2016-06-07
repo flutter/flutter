@@ -123,6 +123,8 @@ class RunCommand extends RunCommandBase {
 
       return runner.run(traceStartup: traceStartup, benchmark: argResults['benchmark']);
     } else {
+      // TODO(devoncarew): Remove this path and support the `--no-resident` option
+      // using the `RunAndStayResident` class.
       return startApp(
         deviceForCommand,
         target: target,

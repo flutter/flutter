@@ -22,7 +22,7 @@ enum BuildMode {
 
 String getModeName(BuildMode mode) => getEnumName(mode);
 
-BuildMode parseBuildMode(String mode) {
+BuildMode getBuildModeForName(String mode) {
   if (mode == 'debug')
     return BuildMode.debug;
   if (mode == 'profile')
