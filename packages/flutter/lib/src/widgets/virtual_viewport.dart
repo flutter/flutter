@@ -4,11 +4,12 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/rendering.dart';
+import 'package:meta/meta.dart';
+
 import 'basic.dart';
 import 'debug.dart';
 import 'framework.dart';
-
-import 'package:flutter/rendering.dart';
 
 /// Signature for reporting the interior and exterior dimensions of a viewport.
 ///
@@ -34,12 +35,15 @@ abstract class _WidgetProvider {
   Widget getChild(int i);
 }
 
-/// Materializes a contiguous subset of its children.
+/// An element that materializes a contiguous subset of its children.
 ///
 /// This class is a building block for building a widget that has more children
 /// than it wishes to display at any given time. For example, [ScrollableList]
 /// uses this element to materialize only those children that are visible.
 abstract class VirtualViewportElement extends RenderObjectElement {
+  /// Creates an element that materializes a contiguous subset of its children.
+  ///
+  /// The [widget] argument must not be null.
   VirtualViewportElement(VirtualViewport widget) : super(widget);
 
   @override
@@ -123,6 +127,9 @@ abstract class VirtualViewportElement extends RenderObjectElement {
     renderObject.paintOffset = scrollOffsetToPixelDelta(widget.startOffset - startOffsetBase);
   }
 
+  /// Copies the configuration described by [widget] to this element's [renderObject].
+  @protected
+  @mustCallSuper
   void updateRenderObject(VirtualViewport oldWidget) {
     renderObject.virtualChildCount = _widgetProvider.virtualChildCount;
 

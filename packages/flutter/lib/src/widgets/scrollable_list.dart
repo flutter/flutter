@@ -4,15 +4,37 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/rendering.dart';
+import 'package:meta/meta.dart';
+
 import 'clamp_overscrolls.dart';
 import 'framework.dart';
 import 'scroll_configuration.dart';
 import 'scrollable.dart';
 import 'virtual_viewport.dart';
 
-import 'package:flutter/rendering.dart';
-
+/// A scrollable list of children that have equal size.
+///
+/// [ScrollableList] differs from [ScrollableLazyList] in that [ScrollableList]
+/// uses an [Iterable] list of children. That makes [ScrollableList] suitable
+/// for a large (but not extremely large or infinite) list of children.
+///
+/// [ScrollableList] differs from [LazyBlock] in that [ScrollableList] requires
+/// each of its children to be the same size. That makes [ScrollableList] more
+/// efficient but less flexible than [LazyBlock].
+///
+/// Prefer [ScrollableViewport] when there is only one child.
+///
+/// See also:
+///
+///  * [ScrollableLazyList]
+///  * [LazyBlock]
+///  * [ScrollableViewport]
 class ScrollableList extends StatelessWidget {
+  /// Creats a scrollable list of children that have equal size.
+  ///
+  /// The [scrollDirection], [scrollAnchor], and [itemExtent] arguments must not
+  /// be null.
   ScrollableList({
     Key key,
     this.initialScrollOffset,
@@ -23,11 +45,13 @@ class ScrollableList extends StatelessWidget {
     this.onScrollEnd,
     this.snapOffsetCallback,
     this.scrollableKey,
-    this.itemExtent,
+    @required this.itemExtent,
     this.itemsWrap: false,
     this.padding,
     this.children
   }) : super(key: key) {
+    assert(scrollDirection != null);
+    assert(scrollAnchor != null);
     assert(itemExtent != null);
   }
 
@@ -93,12 +117,13 @@ class ScrollableList extends StatelessWidget {
   /// The height of each item if [scrollDirection] is Axis.vertical, otherwise the width of each item.
   final double itemExtent;
 
+  /// Whether the first item should be revealed after scrolling past the last item.
   final bool itemsWrap;
 
   /// The amount of space by which to inset the children inside the viewport.
   final EdgeInsets padding;
 
-  /// The axis along which this widget should scroll.
+  /// The children, some of which might be materialized.
   final Iterable<Widget> children;
 
   Widget _buildViewport(BuildContext context, ScrollableState state, double scrollOffset) {
@@ -148,15 +173,51 @@ class _VirtualListViewport extends VirtualViewport {
     this.padding
   ) {
     assert(mainAxis != null);
+    assert(anchor != null);
     assert(itemExtent != null);
   }
 
+  /// Called when the interior or exterior dimensions of the viewport change.
   final ExtentsChangedCallback onExtentsChanged;
+
+  /// The [startOffset] without taking the [padding] into account.
   final double scrollOffset;
+
+  /// The direction in which the children are permitted to be larger than the viewport.
+  ///
+  /// The children are given layout constraints that are fully unconstrained
+  /// along the main axis (e.g., children can be as tall as they want if the
+  /// main axis is vertical).
   final Axis mainAxis;
+
+  /// Whether to place first child at the start of the container or the last
+  /// child at the end of the container, when the viewport has not been offset.
+  ///
+  /// For example, if the [mainAxis] is [Axis.vertical] and
+  /// there are enough items to overflow the container, then
+  /// [ViewportAnchor.start] means that the top of the first item
+  /// should be aligned with the top of the viewport with the last
+  /// item below the bottom, and [ViewportAnchor.end] means the bottom
+  /// of the last item should be aligned with the bottom of the
+  /// viewport, with the first item above the top.
+  ///
+  /// This also affects whether, when an item is added or removed, the
+  /// displacement will be towards the first item or the last item.
+  /// Continuing the earlier example, if a new item is inserted in the
+  /// middle of the list, in the [ViewportAnchor.start] case the items
+  /// after it (with greater indices, down to the item with the
+  /// highest index) will be pushed down, while in the
+  /// [ViewportAnchor.end] case the items before it (with lower
+  /// indices, up to the item with the index 0) will be pushed up.
   final ViewportAnchor anchor;
+
+  /// The height of each item if [scrollDirection] is Axis.vertical, otherwise the width of each item.
   final double itemExtent;
+
+  /// Whether the first item should be revealed after scrolling past the last item.
   final bool itemsWrap;
+
+  /// The amount of space by which to inset the children inside the viewport.
   final EdgeInsets padding;
 
   double get _leadingPadding {
@@ -298,13 +359,35 @@ class _VirtualListViewportElement extends VirtualViewportElement {
   }
 }
 
+/// A virtual viewport onto a list of equally sized children.
+///
+/// [ListViewport] differs from [LazyListViewport] in that [ListViewport]
+/// uses an [Iterable] list of children. That makes [ListViewport] suitable
+/// for a large (but not extremely large or infinite) list of children.
+///
+/// [ListViewport] differs from [LazyBlockViewport] in that [ListViewport]
+/// requires each of its children to be the same size. That makes [ListViewport]
+/// more efficient but less flexible than [LazyBlockViewport].
+///
+/// Prefer [Viewport] when there is only one child.
+///
+/// Used by [ScrollableList].
+///
+/// See also:
+///
+///  * [LazyListViewport]
+///  * [LazyBlockViewport]
+///  * [GridViewport]
 class ListViewport extends _VirtualListViewport with VirtualViewportFromIterable {
+  /// Creates a virtual viewport onto a list of equally sized children.
+  ///
+  /// The [mainAxis], [anchor], and [itemExtent] arguments must not be null.
   ListViewport({
     ExtentsChangedCallback onExtentsChanged,
     double scrollOffset: 0.0,
     Axis mainAxis: Axis.vertical,
     ViewportAnchor anchor: ViewportAnchor.start,
-    double itemExtent,
+    @required double itemExtent,
     bool itemsWrap: false,
     EdgeInsets padding,
     this.children
@@ -322,12 +405,27 @@ class ListViewport extends _VirtualListViewport with VirtualViewportFromIterable
   final Iterable<Widget> children;
 }
 
-/// An optimized scrollable widget for a large number of children that are all
-/// the same size (extent) in the scrollDirection. For example for
-/// ScrollDirection.vertical itemExtent is the height of each item. Use this
-/// widget when you have a large number of children or when you are concerned
-/// about offscreen widgets consuming resources.
+/// An infinite scrollable list of children that have equal size.
+///
+/// [ScrollableLazyList] differs from [ScrollableList] in that
+/// [ScrollableLazyList] uses an [ItemListBuilder] to lazily create children.
+/// That makes [ScrollableLazyList] suitable for an extremely large or infinite
+/// list of children but also makes it more verbose than [ScrollableList].
+///
+/// [ScrollableLazyList] differs from [LazyBlock] in that [ScrollableLazyList]
+/// requires each of its children to be the same size. That makes
+/// [ScrollableLazyList] more efficient but less flexible than [LazyBlock].
+///
+/// See also:
+///
+///  * [ScrollableList]
+///  * [LazyBlock]
 class ScrollableLazyList extends StatelessWidget {
+  /// Creates an infinite scrollable list of children that have equal size.
+  ///
+  /// The [scrollDirection], [scrollAnchor], [itemExtent], and [itemBuilder]
+  /// arguments must not be null. The [itemCount] argument must not be null
+  /// unless the [scrollAnchor] argument is [ViewportAnchor.start].
   ScrollableLazyList({
     Key key,
     this.initialScrollOffset,
@@ -338,9 +436,9 @@ class ScrollableLazyList extends StatelessWidget {
     this.onScrollEnd,
     this.snapOffsetCallback,
     this.scrollableKey,
-    this.itemExtent,
+    @required this.itemExtent,
     this.itemCount,
-    this.itemBuilder,
+    @required this.itemBuilder,
     this.padding
   }) : super(key: key) {
     assert(itemExtent != null);
@@ -412,9 +510,21 @@ class ScrollableLazyList extends StatelessWidget {
   /// The total number of list items.
   final int itemCount;
 
+  /// Returns a widget representing the item with the given index.
+  ///
+  /// This function might be called with index parameters in any order. This
+  /// function should return null for indices that exceed the number of children
+  /// (i.e., [itemCount] if non-null). If this function must not return a null
+  /// value for an index if it previously returned a non-null value for that
+  /// index or a larger index.
+  ///
+  /// This function might be called during the build or layout phases of the
+  /// pipeline.
+  ///
+  /// The returned widget might or might not be cached by [ScrollableLazyList].
   final ItemListBuilder itemBuilder;
 
-  /// The insets for the entire list.
+  /// The amount of space by which to inset the children inside the viewport.
   final EdgeInsets padding;
 
   Widget _buildViewport(BuildContext context, ScrollableState state, double scrollOffset) {
@@ -451,16 +561,38 @@ class ScrollableLazyList extends StatelessWidget {
   }
 }
 
+/// A virtual viewport onto an extremely large or infinite list of equally sized children.
+///
+/// [LazyListViewport] differs from [ListViewport] in that [LazyListViewport]
+/// uses an [ItemListBuilder] to lazily create children. That makes
+/// [LazyListViewport] suitable for an extremely large or infinite list of
+/// children but also makes it more verbose than [ListViewport].
+///
+/// [LazyListViewport] differs from [LazyBlockViewport] in that
+/// [LazyListViewport] requires each of its children to be the same size. That
+/// makes [LazyListViewport] more efficient but less flexible than
+/// [LazyBlockViewport].
+///
+/// Used by [ScrollableLazyList].
+///
+/// See also:
+///
+///  * [ListViewport]
+///  * [LazyBlockViewport]
 class LazyListViewport extends _VirtualListViewport with VirtualViewportFromBuilder {
+  /// Creates a virtual viewport onto an extremely large or infinite list of equally sized children.
+  ///
+  /// The [mainAxis], [anchor], [itemExtent], and [itemBuilder] arguments must
+  /// not be null.
   LazyListViewport({
     ExtentsChangedCallback onExtentsChanged,
     double scrollOffset: 0.0,
     Axis mainAxis: Axis.vertical,
     ViewportAnchor anchor: ViewportAnchor.start,
-    double itemExtent,
+    @required double itemExtent,
     EdgeInsets padding,
     this.itemCount,
-    this.itemBuilder
+    @required this.itemBuilder
   }) : super(
     onExtentsChanged,
     scrollOffset,
@@ -469,7 +601,9 @@ class LazyListViewport extends _VirtualListViewport with VirtualViewportFromBuil
     itemExtent,
     false, // Don't support wrapping yet.
     padding
-  );
+  ) {
+    assert(itemBuilder != null);
+  }
 
   @override
   final int itemCount;

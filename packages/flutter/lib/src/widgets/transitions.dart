@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'basic.dart';
@@ -19,10 +20,12 @@ export 'package:flutter/rendering.dart' show RelativeRect;
 /// For more complex case involving additional state, consider using
 /// [AnimatedBuilder].
 abstract class AnimatedWidget extends StatefulWidget {
+  /// Creates a widget that rebuilds when the given animation changes value.
+  ///
   /// The [animation] argument is required.
   AnimatedWidget({
     Key key,
-    this.animation
+    @required this.animation
   }) : super(key: key) {
     assert(animation != null);
   }
@@ -342,11 +345,11 @@ typedef Widget TransitionBuilder(BuildContext context, Widget child);
 class AnimatedBuilder extends AnimatedWidget {
   /// Creates an animated builder.
   ///
-  /// The [animation] argument is required.
+  /// The [animation] and [builder] arguments must not be null.
   AnimatedBuilder({
     Key key,
-    Animation<Object> animation,
-    this.builder,
+    @required Animation<Object> animation,
+    @required this.builder,
     this.child
   }) : super(key: key, animation: animation) {
     assert(builder != null);

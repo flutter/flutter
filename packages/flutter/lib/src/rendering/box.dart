@@ -186,11 +186,11 @@ class BoxConstraints extends Constraints {
   }
 
   /// Returns box constraints with the same width constraints but with
-  /// unconstrainted height.
+  /// unconstrained height.
   BoxConstraints widthConstraints() => new BoxConstraints(minWidth: minWidth, maxWidth: maxWidth);
 
   /// Returns box constraints with the same height constraints but with
-  /// unconstrainted width
+  /// unconstrained width
   BoxConstraints heightConstraints() => new BoxConstraints(minHeight: minHeight, maxHeight: maxHeight);
 
   /// Returns the width that both satisfies the constraints and is as close as

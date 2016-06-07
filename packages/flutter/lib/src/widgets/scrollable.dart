@@ -26,8 +26,17 @@ final Tolerance kPixelScrollTolerance = new Tolerance(
   distance: 1.0 / ui.window.devicePixelRatio // logical pixels
 );
 
+/// Signature for building a widget based on [ScrollableState].
 typedef Widget ScrollBuilder(BuildContext context, ScrollableState state);
+
+/// Signature for callbacks that receive a scroll offset.
+///
+/// Used by [Scrollable.onScrollStart], [Scrollable.onScroll], and [Scrollable.onScrollEnd].
 typedef void ScrollListener(double scrollOffset);
+
+/// Signature for determining the offset at which scrolling should snap.
+///
+/// Used by [Scrollable.snapOffsetCallback].
 typedef double SnapOffsetCallback(double scrollOffset, Size containerSize);
 
 /// A base class for scrollable widgets.
@@ -117,6 +126,9 @@ class Scrollable extends StatefulWidget {
   /// then it is as if the callback was null.
   final SnapOffsetCallback snapOffsetCallback;
 
+  /// Using to build the content of this widget.
+  ///
+  /// See [buildContent] for details.
   final ScrollBuilder builder;
 
   /// The state from the closest instance of this class that encloses the given context.
@@ -692,18 +704,31 @@ enum ScrollNotificationKind {
 
 /// Indicates that a descendant scrollable has scrolled.
 class ScrollNotification extends Notification {
+  /// Creates a notification about scrolling.
   ScrollNotification(this.scrollable, this.kind);
 
-  // Indicates if we're at the start, end or the middle of a scroll.
+  /// Indicates if we're at the start, middle, or end of a scroll.
   final ScrollNotificationKind kind;
 
   /// The scrollable that scrolled.
   final ScrollableState scrollable;
 }
 
-/// A simple scrolling widget that has a single child. Use this widget if
-/// you are not worried about offscreen widgets consuming resources.
+/// A simple scrolling widget that has a single child.
+///
+/// Use this widget if you are not worried about offscreen widgets consuming
+/// resources.
+///
+/// See also:
+///
+///  * [ScrollableList]
+///  * [PageableList]
+///  * [ScrollableGrid]
+///  * [LazyBlock]
 class ScrollableViewport extends StatelessWidget {
+  /// Creates a simple scrolling widget that has a single child.
+  ///
+  /// The [scrollDirection] and [scrollAnchor] arguments must not be null.
   ScrollableViewport({
     Key key,
     this.initialScrollOffset,
@@ -715,7 +740,10 @@ class ScrollableViewport extends StatelessWidget {
     this.snapOffsetCallback,
     this.scrollableKey,
     this.child
-  }) : super(key: key);
+  }) : super(key: key) {
+    assert(scrollDirection != null);
+    assert(scrollAnchor != null);
+  }
 
   // Warning: keep the dartdoc comments that follow in sync with the copies in
   // Scrollable, LazyBlock, ScrollableLazyList, ScrollableList, and
@@ -815,14 +843,22 @@ class ScrollableViewport extends StatelessWidget {
   }
 }
 
-/// A mashup of [ScrollableViewport] and [BlockBody]. Useful when you have a small,
-/// fixed number of children that you wish to arrange in a block layout and that
-/// might exceed the height of its container (and therefore need to scroll).
+/// A mashup of [ScrollableViewport] and [BlockBody].
+///
+/// Useful when you have a small, fixed number of children that you wish to
+/// arrange in a block layout and that might exceed the height of its container
+/// (and therefore need to scroll).
 ///
 /// If you have a large number of children, consider using [LazyBlock] (if the
 /// children have variable height) or [ScrollableList] (if the children all have
 /// the same fixed height).
+///
+/// See also:
+///
+///  * [ScrollableList]
+///  * [LazyBlock]
 class Block extends StatelessWidget {
+  /// Creates a scrollable array of children.
   Block({
     Key key,
     this.children: const <Widget>[],
@@ -839,6 +875,7 @@ class Block extends StatelessWidget {
     assert(!children.any((Widget child) => child == null));
   }
 
+  /// The children, all of which are materialized.
   final List<Widget> children;
 
   /// The amount of space by which to inset the children inside the viewport.
@@ -847,7 +884,29 @@ class Block extends StatelessWidget {
   /// The scroll offset this widget should use when first created.
   final double initialScrollOffset;
 
+  /// The axis along which this widget should scroll.
   final Axis scrollDirection;
+
+  /// Whether to place first child at the start of the container or
+  /// the last child at the end of the container, when the scrollable
+  /// has not been scrolled and has no initial scroll offset.
+  ///
+  /// For example, if the [scrollDirection] is [Axis.vertical] and
+  /// there are enough items to overflow the container, then
+  /// [ViewportAnchor.start] means that the top of the first item
+  /// should be aligned with the top of the scrollable with the last
+  /// item below the bottom, and [ViewportAnchor.end] means the bottom
+  /// of the last item should be aligned with the bottom of the
+  /// scrollable, with the first item above the top.
+  ///
+  /// This also affects whether, when an item is added or removed, the
+  /// displacement will be towards the first item or the last item.
+  /// Continuing the earlier example, if a new item is inserted in the
+  /// middle of the list, in the [ViewportAnchor.start] case the items
+  /// after it (with greater indices, down to the item with the
+  /// highest index) will be pushed down, while in the
+  /// [ViewportAnchor.end] case the items before it (with lower
+  /// indices, up to the item with the index 0) will be pushed up.
   final ViewportAnchor scrollAnchor;
 
   /// Called whenever this widget starts to scroll.

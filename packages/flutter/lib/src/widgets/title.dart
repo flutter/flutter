@@ -5,13 +5,14 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-/// Controls the description of this app in the operating system.
+/// A widget that describes this app in the operating system.
 class Title extends StatelessWidget {
+  /// Creates a widget that describes this app to the operating system.
   Title({
     Key key,
     this.title,
-    this.child,
-    this.color
+    this.color,
+    this.child
   }) : super(key: key) {
     assert(color == null || color.alpha == 0xFF);
   }

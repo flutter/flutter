@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import 'framework.dart';
 import 'scroll_behavior.dart';
 
@@ -36,13 +38,18 @@ class ScrollConfigurationDelegate {
 /// [ScrollableList], [ScrollableLazyList]. The [Scrollable] base class uses
 /// [ScrollConfiguration] to create its [ScrollBehavior].
 class ScrollConfiguration extends InheritedWidget {
+  /// Creates a widget that controls descendant [Scrollable] widgets.
+  ///
+  /// If the [delegate] argument is null, the scroll configuration for this
+  /// subtree is controlled by the default implementation of
+  /// [ScrollConfigurationDelegate].
   ScrollConfiguration({
     Key key,
     this.delegate,
-    Widget child
+    @required Widget child
   }) : super(key: key, child: child);
 
-  static final ScrollConfigurationDelegate _defaultDelegate = const ScrollConfigurationDelegate();
+  static const ScrollConfigurationDelegate _defaultDelegate = const ScrollConfigurationDelegate();
 
   /// Defines the ScrollBehavior and scrollable wrapper for descendants.
   final ScrollConfigurationDelegate delegate;

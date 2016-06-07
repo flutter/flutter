@@ -11,11 +11,14 @@ import 'basic.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 
-/// Visualizes the semantics for the child.
+/// A widget that visualizes the semantics for the child.
 ///
 /// This widget is useful for understand how an app presents itself to
 /// accessibility technology.
 class SemanticsDebugger extends StatefulWidget {
+  /// Creates a widget that visualizes the semantics for the child.
+  ///
+  /// The [child] argument must not be null.
   const SemanticsDebugger({ Key key, this.child }) : super(key: key);
 
   /// The widget below this widget in the tree.
