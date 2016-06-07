@@ -4,27 +4,11 @@
 
 import 'dart:ui' show Color, hashValues;
 
+import 'package:flutter/widgets.dart';
+
 import 'colors.dart';
 import 'icon_theme_data.dart';
 import 'typography.dart';
-
-/// The contrast needs of a color.
-///
-/// This is used to describe the contrast needs of a theme as a whole
-/// ([ThemeData.brightness]), its primary color
-/// ([ThemeData.primaryColorBrightness]), and its accent color
-/// ([ThemeData.accentColorBrightness]).
-enum ThemeBrightness {
-  /// The color is dark, and will require a light text color to achieve readable contrast.
-  ///
-  /// For example, the color might be dark grey, requiring white text.
-  dark,
-
-  /// The color is right, and will require a dark text color to achieve readable contrast.
-  ///
-  /// For example, the color might be bright white, requiring black text.
-  light,
-}
 
 // Deriving these values is black magic. The spec claims that pressed buttons
 // have a highlight of 0x66999999, but that's clearly wrong. The videos in the
@@ -68,12 +52,12 @@ class ThemeData {
   /// See <https://www.google.com/design/spec/style/color.html> for
   /// more discussion on how to pick the right colors.
   factory ThemeData({
-    ThemeBrightness brightness,
+    Brightness brightness,
     Map<int, Color> primarySwatch,
     Color primaryColor,
-    ThemeBrightness primaryColorBrightness,
+    Brightness primaryColorBrightness,
     Color accentColor,
-    ThemeBrightness accentColorBrightness,
+    Brightness accentColorBrightness,
     Color canvasColor,
     Color cardColor,
     Color dividerColor,
@@ -93,13 +77,13 @@ class ThemeData {
     TextTheme primaryTextTheme,
     IconThemeData primaryIconTheme
   }) {
-    brightness ??= ThemeBrightness.light;
-    final bool isDark = brightness == ThemeBrightness.dark;
+    brightness ??= Brightness.light;
+    final bool isDark = brightness == Brightness.dark;
     primarySwatch ??= Colors.blue;
     primaryColor ??= isDark ? Colors.grey[900] : primarySwatch[500];
-    primaryColorBrightness ??= ThemeBrightness.dark;
+    primaryColorBrightness ??= Brightness.dark;
     accentColor ??= isDark ? Colors.tealAccent[200] : primarySwatch[500];
-    accentColorBrightness ??= ThemeBrightness.dark;
+    accentColorBrightness ??= Brightness.dark;
     canvasColor ??= isDark ? Colors.grey[850] : Colors.grey[50];
     cardColor ??= isDark ? Colors.grey[800] : Colors.white;
     dividerColor ??= isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000);
@@ -116,8 +100,8 @@ class ThemeData {
     hintColor ??= isDark ? const Color(0x42FFFFFF) : const Color(0x4C000000);
     errorColor ??= Colors.red[700];
     textTheme ??= isDark ? Typography.white : Typography.black;
-    primaryTextTheme ??= primaryColorBrightness == ThemeBrightness.dark ? Typography.white : Typography.black;
-    primaryIconTheme ??= primaryColorBrightness == ThemeBrightness.dark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
+    primaryTextTheme ??= primaryColorBrightness == Brightness.dark ? Typography.white : Typography.black;
+    primaryIconTheme ??= primaryColorBrightness == Brightness.dark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     return new ThemeData.raw(
       brightness: brightness,
       primaryColor: primaryColor,
@@ -202,10 +186,10 @@ class ThemeData {
   }
 
   /// A default light blue theme.
-  factory ThemeData.light() => new ThemeData(brightness: ThemeBrightness.light);
+  factory ThemeData.light() => new ThemeData(brightness: Brightness.light);
 
   /// A default dark theme with a teal accent color.
-  factory ThemeData.dark() => new ThemeData(brightness: ThemeBrightness.dark);
+  factory ThemeData.dark() => new ThemeData(brightness: Brightness.dark);
 
   /// The default theme. Same as [new ThemeData.light].
   ///
@@ -216,20 +200,20 @@ class ThemeData {
   /// like buttons to determine what color to pick when not using the primary or
   /// accent color.
   ///
-  /// When the ThemeBrightness is dark, the canvas, card, and primary colors are
-  /// all dark. When the ThemeBrightness is light, the canvas and card colors
+  /// When the [Brightness] is dark, the canvas, card, and primary colors are
+  /// all dark. When the [Brightness] is light, the canvas and card colors
   /// are bright, and the primary color's darkness varies as described by
   /// primaryColorBrightness. The primaryColor does not contrast well with the
   /// card and canvas colors when the brightness is dark; when the brightness is
   /// dark, use Colors.white or the accentColor for a contrasting color.
-  final ThemeBrightness brightness;
+  final Brightness brightness;
 
   /// The background color for major parts of the app (toolbars, tab bars, etc)
   final Color primaryColor;
 
   /// The brightness of the primaryColor. Used to determine the color of text and
   /// icons placed on top of the primary color (e.g. toolbar text).
-  final ThemeBrightness primaryColorBrightness;
+  final Brightness primaryColorBrightness;
 
   /// The foreground color for widgets (knobs, text, etc)
   final Color accentColor;
@@ -237,7 +221,7 @@ class ThemeData {
   /// The brightness of the accentColor. Used to determine the color of text
   /// and icons placed on top of the accent color (e.g. the icons on a floating
   /// action button).
-  final ThemeBrightness accentColorBrightness;
+  final Brightness accentColorBrightness;
 
   /// The color of [Material] when it is of infinite extent, e.g. the
   /// body of a [Scaffold].

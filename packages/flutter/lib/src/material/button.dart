@@ -129,7 +129,7 @@ class MaterialButton extends StatefulWidget {
   /// The theme brightness to use for this button.
   ///
   /// Defaults to the brightness from [ThemeData.brightness].
-  final ThemeBrightness colorBrightness;
+  final Brightness colorBrightness;
 
   /// The color scheme to use for this button's text.
   ///
@@ -193,7 +193,7 @@ class MaterialButton extends StatefulWidget {
 class _MaterialButtonState extends State<MaterialButton> {
   bool _highlight = false;
 
-  ThemeBrightness get _colorBrightness {
+  Brightness get _colorBrightness {
     return config.colorBrightness ?? Theme.of(context).brightness;
   }
 
@@ -206,17 +206,17 @@ class _MaterialButtonState extends State<MaterialButton> {
           return Theme.of(context).accentColor;
         case ButtonTextTheme.normal:
           switch (_colorBrightness) {
-            case ThemeBrightness.light:
+            case Brightness.light:
               return Colors.black87;
-            case ThemeBrightness.dark:
+            case Brightness.dark:
               return Colors.white;
           }
       }
     } else {
       switch (_colorBrightness) {
-        case ThemeBrightness.light:
+        case Brightness.light:
           return Colors.black26;
-        case ThemeBrightness.dark:
+        case Brightness.dark:
           return Colors.white30;
       }
     }

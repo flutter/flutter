@@ -7,7 +7,7 @@ import 'package:meta/meta.dart';
 
 import 'theme_data.dart';
 
-export 'theme_data.dart' show ThemeData, ThemeBrightness;
+export 'theme_data.dart' show ThemeData;
 
 /// The duration over which theme changes animate.
 const Duration kThemeAnimationDuration = const Duration(milliseconds: 200);

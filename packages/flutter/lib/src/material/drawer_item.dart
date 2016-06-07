@@ -54,13 +54,13 @@ class DrawerItem extends StatelessWidget {
 
   Color _getIconColor(ThemeData themeData) {
     switch (themeData.brightness) {
-      case ThemeBrightness.light:
+      case Brightness.light:
         if (selected)
           return themeData.primaryColor;
         if (onPressed == null)
           return Colors.black26;
         return Colors.black45;
-      case ThemeBrightness.dark:
+      case Brightness.dark:
         if (selected)
           return themeData.accentColor;
         if (onPressed == null)
@@ -73,9 +73,9 @@ class DrawerItem extends StatelessWidget {
     TextStyle result = themeData.textTheme.body2;
     if (selected) {
       switch (themeData.brightness) {
-        case ThemeBrightness.light:
+        case Brightness.light:
           return result.copyWith(color: themeData.primaryColor);
-        case ThemeBrightness.dark:
+        case Brightness.dark:
           return result.copyWith(color: themeData.accentColor);
       }
     }

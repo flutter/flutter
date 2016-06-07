@@ -58,17 +58,17 @@ class Icon extends StatelessWidget {
   /// brightness.
   final Color color;
 
-  Color _getDefaultColorForThemeBrightness(ThemeBrightness brightness) {
+  Color _getDefaultColorForBrightness(Brightness brightness) {
     switch (brightness) {
-      case ThemeBrightness.dark:
+      case Brightness.dark:
         return Colors.white;
-      case ThemeBrightness.light:
+      case Brightness.light:
         return Colors.black;
     }
   }
 
   Color _getDefaultColor(BuildContext context) {
-    return IconTheme.of(context)?.color ?? _getDefaultColorForThemeBrightness(Theme.of(context).brightness);
+    return IconTheme.of(context)?.color ?? _getDefaultColorForBrightness(Theme.of(context).brightness);
   }
 
   @override

@@ -158,11 +158,11 @@ class _DatePickerHeader extends StatelessWidget {
     Color dayColor;
     Color yearColor;
     switch(themeData.primaryColorBrightness) {
-      case ThemeBrightness.light:
+      case Brightness.light:
         dayColor = mode == _DatePickerMode.day ? Colors.black87 : Colors.black54;
         yearColor = mode == _DatePickerMode.year ? Colors.black87 : Colors.black54;
         break;
-      case ThemeBrightness.dark:
+      case Brightness.dark:
         dayColor = mode == _DatePickerMode.day ? Colors.white : Colors.white70;
         yearColor = mode == _DatePickerMode.year ? Colors.white : Colors.white70;
         break;
@@ -172,10 +172,10 @@ class _DatePickerHeader extends StatelessWidget {
 
     Color backgroundColor;
     switch (themeData.brightness) {
-      case ThemeBrightness.light:
+      case Brightness.light:
         backgroundColor = themeData.primaryColor;
         break;
-      case ThemeBrightness.dark:
+      case Brightness.dark:
         backgroundColor = themeData.backgroundColor;
         break;
     }
@@ -299,7 +299,7 @@ class DayPicker extends StatelessWidget {
         if (selectedDate.year == year && selectedDate.month == month && selectedDate.day == day) {
           // The selected day gets a circle background highlight, and a contrasting text color.
           itemStyle = themeData.textTheme.body2.copyWith(
-            color: (themeData.brightness == ThemeBrightness.light) ? Colors.white : Colors.black87
+            color: (themeData.brightness == Brightness.light) ? Colors.white : Colors.black87
           );
           decoration = new BoxDecoration(
             backgroundColor: themeData.accentColor,

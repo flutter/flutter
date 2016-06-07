@@ -40,6 +40,7 @@ class WidgetsApp extends StatefulWidget {
     Key key,
     @required this.onGenerateRoute,
     this.title,
+    this.brightness,
     this.textStyle,
     this.color,
     this.navigatorObserver,
@@ -55,6 +56,9 @@ class WidgetsApp extends StatefulWidget {
 
   /// A one-line description of this app for use in the window manager.
   final String title;
+
+  /// The overall brightness of the app, describing its contrast needs.
+  final Brightness brightness;
 
   /// The default text style for [Text] in the application.
   final TextStyle textStyle;
@@ -180,6 +184,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
           devicePixelRatio: ui.window.devicePixelRatio,
           child: new Title(
             title: config.title,
+            brightness: config.brightness,
             color: config.color,
             child: new Navigator(
               key: _navigator,

@@ -80,7 +80,7 @@ class Switch extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     ThemeData themeData = Theme.of(context);
-    final bool isDark = themeData.brightness == ThemeBrightness.dark;
+    final bool isDark = themeData.brightness == Brightness.dark;
 
     Color activeThumbColor = activeColor ?? themeData.accentColor;
     Color activeTrackColor = activeThumbColor.withAlpha(0x80);

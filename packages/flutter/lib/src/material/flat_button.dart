@@ -84,7 +84,7 @@ class FlatButton extends StatelessWidget {
   /// The theme brightness to use for this button.
   ///
   /// Defaults to the brightness from [ThemeData.brightness].
-  final ThemeBrightness colorBrightness;
+  final Brightness colorBrightness;
 
   /// The widget below this widget in the tree.
   ///
