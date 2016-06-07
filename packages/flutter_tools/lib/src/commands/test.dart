@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:test/src/executable.dart' as executable; // ignore: implementation_imports
 
+import '../dart/package_map.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../test/flutter_platform.dart' as loader;
@@ -58,6 +59,7 @@ class TestCommand extends FlutterCommand {
     try {
       if (testDirectory != null) {
         printTrace('switching to directory $testDirectory to run tests');
+        PackageMap.globalPackagesPath = path.normalize(path.absolute(PackageMap.globalPackagesPath));
         Directory.current = testDirectory;
       }
       printTrace('running test package with arguments: $testArgs');

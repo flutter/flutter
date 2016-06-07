@@ -94,6 +94,44 @@ void main() {
       });
     });
 
+    _testUsingContext('daemon.start', () async {
+      DaemonCommand command = new DaemonCommand();
+      applyMocksToCommand(command);
+
+      StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
+      StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
+      daemon = new Daemon(
+        commands.stream,
+        (Map<String, dynamic> result) => responses.add(result),
+        daemonCommand: command,
+        notifyingLogger: notifyingLogger
+      );
+
+      commands.add(<String, dynamic>{ 'id': 0, 'method': 'app.start' });
+      Map<String, dynamic> response = await responses.stream.where(_notEvent).first;
+      expect(response['id'], 0);
+      expect(response['error'], contains('deviceId is required'));
+    });
+
+    _testUsingContext('daemon.restart', () async {
+      DaemonCommand command = new DaemonCommand();
+      applyMocksToCommand(command);
+
+      StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
+      StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
+      daemon = new Daemon(
+        commands.stream,
+        (Map<String, dynamic> result) => responses.add(result),
+        daemonCommand: command,
+        notifyingLogger: notifyingLogger
+      );
+
+      commands.add(<String, dynamic>{ 'id': 0, 'method': 'app.restart' });
+      Map<String, dynamic> response = await responses.stream.where(_notEvent).first;
+      expect(response['id'], 0);
+      expect(response['error'], contains('appId is required'));
+    });
+
     _testUsingContext('daemon.stop', () async {
       DaemonCommand command = new DaemonCommand();
       applyMocksToCommand(command);
@@ -110,7 +148,7 @@ void main() {
       commands.add(<String, dynamic>{ 'id': 0, 'method': 'app.stop' });
       Map<String, dynamic> response = await responses.stream.where(_notEvent).first;
       expect(response['id'], 0);
-      expect(response['error'], contains('deviceId is required'));
+      expect(response['error'], contains('appId is required'));
     });
 
     _testUsingContext('device.getDevices', () async {

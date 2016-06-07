@@ -20,6 +20,7 @@ import '../dart/sdk.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../ios/simulators.dart' show SimControl, IOSSimulatorUtils;
+import '../run.dart';
 import 'build_apk.dart' as build_apk;
 import 'run.dart';
 

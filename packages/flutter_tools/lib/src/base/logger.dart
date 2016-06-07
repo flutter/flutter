@@ -214,7 +214,6 @@ class AnsiTerminal {
   String writeBold(String str) => supportsColor ? '$_bold$str$_reset' : str;
 
   set singleCharMode(bool value) {
-    stdin.echoMode = !value;
     stdin.lineMode = !value;
   }
 

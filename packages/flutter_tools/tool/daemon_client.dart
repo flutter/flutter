@@ -12,7 +12,7 @@ Process daemon;
 //   version: print version
 //   shutdown: terminate the server
 //   start: start an app
-//   stopAll: stop any running app
+//   stop: stop a running app
 //   devices: list devices
 
 Future<Null> main() async {
@@ -27,18 +27,44 @@ Future<Null> main() async {
 
   stdout.write('> ');
   stdin.transform(UTF8.decoder).transform(const LineSplitter()).listen((String line) {
+    List<String> words = line.split(' ');
+
     if (line == 'version' || line == 'v') {
       _send(<String, dynamic>{'method': 'daemon.version'});
     } else if (line == 'shutdown' || line == 'q') {
       _send(<String, dynamic>{'method': 'daemon.shutdown'});
-    } else if (line == 'start') {
-      _send(<String, dynamic>{'method': 'app.start'});
-    } else if (line == 'stopAll') {
-      _send(<String, dynamic>{'method': 'app.stopAll'});
+    } else if (words.first == 'start') {
+      _send(<String, dynamic>{
+        'method': 'app.start',
+        'params': <String, dynamic> {
+          'deviceId': words[1],
+          'projectDirectory': words[2]
+        }
+      });
+    } else if (words.first == 'stop') {
+      if (words.length > 1) {
+        _send(<String, dynamic>{
+          'method': 'app.stop',
+          'params': <String, dynamic> { 'appId': words[1] }
+        });
+      } else {
+        _send(<String, dynamic>{'method': 'app.stop'});
+      }
+    } else if (words.first == 'restart') {
+      if (words.length > 1) {
+        _send(<String, dynamic>{
+          'method': 'app.restart',
+          'params': <String, dynamic> { 'appId': words[1] }
+        });
+      } else {
+        _send(<String, dynamic>{'method': 'app.restart'});
+      }
     } else if (line == 'devices') {
       _send(<String, dynamic>{'method': 'device.getDevices'});
+    } else if (line == 'enable') {
+      _send(<String, dynamic>{'method': 'device.enable'});
     } else {
-      print('command not understood: $line');
+      _send(<String, dynamic>{'method': line.trim()});
     }
     stdout.write('> ');
   });

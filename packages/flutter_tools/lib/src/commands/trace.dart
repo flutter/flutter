@@ -147,3 +147,52 @@ class Tracing {
     return timeline.response;
   }
 }
+
+/// Download the startup trace information from the given observatory client and
+/// store it to build/start_up_info.json.
+Future<Null> downloadStartupTrace(Observatory observatory) async {
+  Tracing tracing = new Tracing(observatory);
+
+  Map<String, dynamic> timeline = await tracing.stopTracingAndDownloadTimeline(
+    waitForFirstFrame: true
+  );
+
+  int extractInstantEventTimestamp(String eventName) {
+    List<Map<String, dynamic>> events = timeline['traceEvents'];
+    Map<String, dynamic> event = events.firstWhere(
+      (Map<String, dynamic> event) => event['name'] == eventName, orElse: () => null
+    );
+    return event == null ? null : event['ts'];
+  }
+
+  int engineEnterTimestampMicros = extractInstantEventTimestamp(kFlutterEngineMainEnterEventName);
+  int frameworkInitTimestampMicros = extractInstantEventTimestamp(kFrameworkInitEventName);
+  int firstFrameTimestampMicros = extractInstantEventTimestamp(kFirstUsefulFrameEventName);
+
+  if (engineEnterTimestampMicros == null) {
+    printError('Engine start event is missing in the timeline. Cannot compute startup time.');
+    return null;
+  }
+
+  if (firstFrameTimestampMicros == null) {
+    printError('First frame event is missing in the timeline. Cannot compute startup time.');
+    return null;
+  }
+
+  File traceInfoFile = new File('build/start_up_info.json');
+  int timeToFirstFrameMicros = firstFrameTimestampMicros - engineEnterTimestampMicros;
+  Map<String, dynamic> traceInfo = <String, dynamic>{
+    'engineEnterTimestampMicros': engineEnterTimestampMicros,
+    'timeToFirstFrameMicros': timeToFirstFrameMicros,
+  };
+
+  if (frameworkInitTimestampMicros != null) {
+    traceInfo['timeToFrameworkInitMicros'] = frameworkInitTimestampMicros - engineEnterTimestampMicros;
+    traceInfo['timeAfterFrameworkInitMicros'] = firstFrameTimestampMicros - frameworkInitTimestampMicros;
+  }
+
+  traceInfoFile.writeAsStringSync(toPrettyJson(traceInfo));
+
+  printStatus('Time to first frame: ${timeToFirstFrameMicros ~/ 1000}ms.');
+  printStatus('Saved startup trace info in ${traceInfoFile.path}.');
+}

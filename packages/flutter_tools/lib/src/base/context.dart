@@ -6,7 +6,7 @@ import 'dart:async';
 
 final AppContext _defaultContext = new AppContext();
 
-typedef void ErrorHandler(dynamic error);
+typedef void ErrorHandler(dynamic error, StackTrace stackTrace);
 
 /// A singleton for application functionality. This singleton can be different
 /// on a per-Zone basis.
@@ -17,6 +17,7 @@ AppContext get context {
 
 class AppContext {
   Map<Type, dynamic> _instances = <Type, dynamic>{};
+  Zone _zone;
 
   bool isSet(Type type) {
     if (_instances.containsKey(type))
@@ -30,7 +31,7 @@ class AppContext {
     if (_instances.containsKey(type))
       return _instances[type];
 
-    AppContext parent = _calcParent(Zone.current);
+    AppContext parent = _calcParent(_zone ?? Zone.current);
     return parent?.getVariable(type);
   }
 
@@ -58,11 +59,22 @@ class AppContext {
     }
   }
 
-  dynamic runInZone(dynamic method(), { ErrorHandler onError }) {
+  dynamic runInZone(dynamic method(), {
+    ZoneBinaryCallback<dynamic, dynamic, StackTrace> onError
+  }) {
     return runZoned(
-      method,
+      () => _run(method),
       zoneValues: <String, dynamic>{ 'context': this },
       onError: onError
     );
+  }
+
+  dynamic _run(dynamic method()) async {
+    try {
+      _zone = Zone.current;
+      return await method();
+    } finally {
+      _zone = null;
+    }
   }
 }
