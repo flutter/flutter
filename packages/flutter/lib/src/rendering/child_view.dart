@@ -127,7 +127,7 @@ class ChildViewConnection {
     assert(_viewKey == null);
     assert(_viewInfo == null);
     _viewKey = _nextViewKey++;
-    _viewContainer?.addChild(_viewKey, _viewOwner.impl);
+    _viewContainer?.addChild(_viewKey, _viewOwner);
     _viewOwner = null;
     assert(!_ViewContainerListenerImpl.instance._connections.containsKey(_viewKey));
     _ViewContainerListenerImpl.instance._connections[_viewKey] = this;
