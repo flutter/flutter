@@ -37,14 +37,35 @@ class SystemChrome {
     return (await _systemChromeProxy.setPreferredOrientations(deviceOrientationMask)).success;
   }
 
+  /// Specifies the description of the current state of the application as it
+  /// pertains to the application switcher (a.k.a "recent tasks").
+  ///
+  /// Arguments:
+  ///
+  ///  * [description]: The application description.
+  ///
+  /// Return Value:
+  ///
+  ///   boolean indicating if the description was conveyed successfully to the
+  ///   embedder.
+  ///
+  /// Platform Specific Notes:
+  ///
+  ///   If application-specified metadata is unsupported on the platform,
+  ///   specifying it is a no-op and always return true.
+  static Future<bool> setApplicationSwitcherDescription(mojom.ApplicationSwitcherDescription description) async {
+    return (await _systemChromeProxy.setApplicationSwitcherDescription(
+      description)).success;
+  }
+
   /// Specifies the set of overlays visible on the embedder when the
   /// application is running. The embedder may choose to ignore unsupported
   /// overlays
   ///
   /// Arguments:
   ///
-  ///  * [style]: A mask of [SystemUIOverlay] enum values that denotes the overlays
-  ///    to show.
+  ///  * [overlaysMask]: A mask of [SystemUIOverlay] enum values that denotes
+  ///    the overlays to show.
   ///
   /// Return Value:
   ///
@@ -56,6 +77,29 @@ class SystemChrome {
   ///   If the overlay is unsupported on the platform, enabling or disabling
   ///   that overlay is a no-op and always return true.
   static Future<bool> setEnabledSystemUIOverlays(int overlaysMask) async {
-    return (await _systemChromeProxy.setEnabledSystemUiOverlays(overlaysMask)).success;
+    return (await _systemChromeProxy.setEnabledSystemUiOverlays(
+      overlaysMask)).success;
+  }
+
+  /// Specifies the style of the system overlays that are visible on the
+  /// embedder (if any). The embedder may choose to ignore unsupported
+  /// overlays.
+  ///
+  /// Arguments:
+  ///
+  ///  * [style]: A [SystemUiOverlayStyle] enum value denoting the style to use
+  ///
+  /// Return Value:
+  ///
+  ///   boolean indicating if the preference was conveyed successfully to the
+  ///   embedder.
+  ///
+  /// Platform Specific Notes:
+  ///
+  ///   If the overlay is unsupported on the platform, enabling or disabling
+  ///   that overlay is a no-op and always return true.
+  static Future<bool> setSystemUIOverlayStyle(SystemUiOverlayStyle style) async {
+    return (await _systemChromeProxy.setSystemUiOverlayStyle(
+      style)).success;
   }
 }

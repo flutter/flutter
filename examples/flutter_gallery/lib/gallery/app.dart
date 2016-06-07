@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
+import 'package:flutter/services.dart';
+import 'package:sky_services/flutter/platform/system_chrome.mojom.dart' as mojom;
 
 import '../demo/all.dart';
 import 'home.dart';
@@ -65,6 +67,13 @@ class GalleryAppState extends State<GalleryApp> {
   bool _useLightTheme = true;
   bool _showPerformanceOverlay = false;
 
+  void _onThemeChanged(bool useLightTheme) {
+    SystemChrome.setSystemUIOverlayStyle(useLightTheme
+        ? mojom.SystemUiOverlayStyle.dark
+        : mojom.SystemUiOverlayStyle.light);
+    setState(() { _useLightTheme = useLightTheme; });
+  }
+
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
@@ -74,7 +83,7 @@ class GalleryAppState extends State<GalleryApp> {
       routes: kRoutes,
       home: new GalleryHome(
         useLightTheme: _useLightTheme,
-        onThemeChanged: (bool value) { setState(() { _useLightTheme = value; }); },
+        onThemeChanged: _onThemeChanged,
         showPerformanceOverlay: _showPerformanceOverlay,
         onShowPerformanceOverlayChanged: (bool value) { setState(() { _showPerformanceOverlay = value; }); },
         timeDilation: timeDilation,
