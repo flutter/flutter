@@ -23,7 +23,6 @@ const List<String> demoNames = const <String>[
   'Date picker',
   'Data tables',
   'Dialog',
-  'Drop-down button',
   'Expand/collapse list control',
   'Floating action button',
   'Grid',
