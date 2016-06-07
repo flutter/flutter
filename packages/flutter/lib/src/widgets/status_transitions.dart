@@ -2,14 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import 'basic.dart';
 import 'framework.dart';
 
 /// A widget that rebuilds when the given animation changes status.
 abstract class StatusTransitionWidget extends StatefulWidget {
+  /// Initializes fields for subclasses.
+  ///
+  /// The [animation] argument must not be null.
   StatusTransitionWidget({
     Key key,
-    this.animation
+    @required this.animation
   }) : super(key: key) {
     assert(animation != null);
   }
@@ -17,6 +22,8 @@ abstract class StatusTransitionWidget extends StatefulWidget {
   /// The animation to which this widget is listening.
   final Animation<double> animation;
 
+  /// Override this function to build widgets that depend on the current status
+  /// of the animation.
   Widget build(BuildContext context);
 
   @override

@@ -382,7 +382,11 @@ class _VirtualPageViewport extends VirtualViewport {
   @override
   final double startOffset;
 
-  /// The axis along which the viewport is bigger on the inside than the outside.
+  /// The direction in which the children are permitted to be larger than the viewport.
+  ///
+  /// The children are given layout constraints that are fully unconstrained
+  /// along the main axis (e.g., children can be as tall as they want if the
+  /// main axis is vertical).
   final Axis mainAxis;
 
   /// Whether to place first child at the start of the container or the last
@@ -555,7 +559,7 @@ class PageViewport extends _VirtualPageViewport with VirtualViewportFromIterable
 /// [LazyPageViewport] differs from [PageViewport] in that [LazyPageViewport]
 /// uses an [ItemListBuilder] to lazily create children. That makes
 /// [LazyPageViewport] suitable for an extremely large or infinite list of
-/// children but alos makes it more verbose than [PageViewport].
+/// children but also makes it more verbose than [PageViewport].
 class LazyPageViewport extends _VirtualPageViewport with VirtualViewportFromBuilder {
   /// Creates a virtual viewport that displays a single child at a time.
   ///

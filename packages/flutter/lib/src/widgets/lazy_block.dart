@@ -112,7 +112,7 @@ class LazyBlockChildren extends LazyBlockDelegate {
   }
 }
 
-/// An infinite scrolling list of variable height children.
+/// An infinite scrolling list of variably-sized children.
 ///
 /// [LazyBlock] is a general-purpose scrollable list for a large (or infinite)
 /// number of children that might not all have the same height. Rather than
@@ -130,7 +130,7 @@ class LazyBlockChildren extends LazyBlockDelegate {
 /// [scrollOffset] is expensive because [LazyBlock] computes the size of every
 /// child between the old scroll offset and the new scroll offset.
 ///
-/// Prefer [ScrollableList] when all the children have the same height because
+/// Prefer [ScrollableList] when all the children have the same size because
 /// it can use that property to be more efficient. Prefer [ScrollableViewport]
 /// when there is only one child.
 class LazyBlock extends StatelessWidget {
@@ -297,11 +297,11 @@ class LazyBlockViewport extends RenderObjectWidget {
   /// horizontal viewports, the offset is from the left of the viewport.
   final double startOffset;
 
-  /// The direction in which the children are permitted to be larger than the viewport
+  /// The direction in which the children are permitted to be larger than the viewport.
   ///
-  /// The children are given layout constraints that are fully unconstrainted
-  /// along the main axis (e.g., children can be as tall as it wants if the main
-  /// axis is vertical).
+  /// The children are given layout constraints that are fully unconstrained
+  /// along the main axis (e.g., children can be as tall as they want if the
+  /// main axis is vertical).
   final Axis mainAxis;
 
   /// The amount of space by which to inset the children inside the viewport.

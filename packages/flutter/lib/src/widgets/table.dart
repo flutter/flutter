@@ -21,10 +21,26 @@ export 'package:flutter/rendering.dart' show
     TableCellVerticalAlignment,
     TableColumnWidth;
 
+/// A horizontal group of cells in a [Table].
 class TableRow {
+  /// Creates a row in a [Table].
   const TableRow({ this.key, this.decoration, this.children });
+
+  /// An identifier for the row.
   final LocalKey key;
+
+  /// A decoration to paint behind this row.
+  ///
+  /// Row decorations fill the horizontal and vertical extent of each row in
+  /// the table, unlike decorations for individual cells, which might not fill
+  /// either.
   final Decoration decoration;
+
+  /// The widgets that comprise the cells in this row.
+  ///
+  /// Children may be wrapped in [TableCell] widgets to provide per-cell
+  /// configuration to the [Table], but children are not required to be wrapped
+  /// in [TableCell] widgets.
   final List<Widget> children;
 
   @override
@@ -53,11 +69,15 @@ class _TableElementRow {
   final List<Element> children;
 }
 
-/// Uses the table layout algorithm for its children.
+/// A widget that uses the table layout algorithm for its children.
 ///
 /// For details about the table layout algorithm, see [RenderTable].
 /// To control the alignment of children, see [TableCell].
 class Table extends RenderObjectWidget {
+  /// Creates a table.
+  ///
+  /// The [children], [defaultColumnWidth], and [defaultVerticalAlignment]
+  /// arguments must not be null.
   Table({
     Key key,
     List<TableRow> children: const <TableRow>[],
@@ -82,11 +102,33 @@ class Table extends RenderObjectWidget {
     assert(!children.any((TableRow row1) => row1.key != null && children.any((TableRow row2) => row1 != row2 && row1.key == row2.key)));
   }
 
+  /// The rows of the table.
   final List<TableRow> children;
+
+  /// How the horizontal extents of the columns of this table should be determined.
+  ///
+  /// If the [Map] has a null entry for a given column, the table uses the
+  /// [defaultColumnWidth] instead.
+  ///
+  /// The layout performance of the table depends critically on which column
+  /// sizing algorithms are used here. In particular, [IntrinsicColumnWidth] is
+  /// quite expensive because it needs to measure each cell in the column to
+  /// determine the intrinsic size of the column.
   final Map<int, TableColumnWidth> columnWidths;
+
+  /// How to determine with widths of columns that don't have an explicit sizing algorithm.
+  ///
+  /// Specifically, the [defaultColumnWidth] is used for column `i` if
+  /// `columnWidths[i]` is null.
   final TableColumnWidth defaultColumnWidth;
+
+  /// The style to use when painting the boundary and interior divisions of the table.
   final TableBorder border;
+
+  /// How cells that do not explicitly specify a vertical alignment are aligned vertically.
   final TableCellVerticalAlignment defaultVerticalAlignment;
+
+  /// The text baseline to use when aligning rows using [TableCellVerticalAlignment.baseline].
   final TextBaseline textBaseline;
 
   final List<Decoration> _rowDecorations;
@@ -239,13 +281,21 @@ class _TableElement extends RenderObjectElement {
   }
 }
 
+/// A widget that controls how a child of a [Table] is aligned.
+///
+/// A [TableCell] widget must be a descendant of a [Table], and the path from
+/// the [TableCell] widget to its enclosing [Table] must contain only
+/// [TableRow]s, [StatelessWidget]s, or [StatefulWidget]s (not
+/// other kinds of widgets, like [RenderObjectWidget]s).
 class TableCell extends ParentDataWidget<Table> {
+  /// Creates a widget that controls how a child of a [Table] is aligned.
   TableCell({
     Key key,
     this.verticalAlignment,
     @required Widget child
   }) : super(key: key, child: child);
 
+  /// How this cell is aligned vertically.
   final TableCellVerticalAlignment verticalAlignment;
 
   @override

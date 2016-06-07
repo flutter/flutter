@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart' show lowerBound;
 import 'package:flutter/rendering.dart';
+import 'package:meta/meta.dart';
 
 import 'clamp_overscrolls.dart';
 import 'framework.dart';
@@ -15,8 +16,17 @@ import 'virtual_viewport.dart';
 
 /// A vertically scrollable grid.
 ///
-/// Requires that delegate places its children in row-major order.
+/// Requires that [delegate] places its children in row-major order.
+///
+/// See also:
+///
+///  * [CustomGrid]
+///  * [ScrollableList]
+///  * [ScrollableViewport]
 class ScrollableGrid extends StatelessWidget {
+  /// Creates a vertically scrollable grid.
+  ///
+  /// The [delegate] argument must not be null.
   ScrollableGrid({
     Key key,
     this.initialScrollOffset,
@@ -25,9 +35,11 @@ class ScrollableGrid extends StatelessWidget {
     this.onScrollEnd,
     this.snapOffsetCallback,
     this.scrollableKey,
-    this.delegate,
+    @required this.delegate,
     this.children
-  }) : super(key: key);
+  }) : super(key: key) {
+    assert(delegate != null);
+  }
 
   // Warning: keep the dartdoc comments that follow in sync with the copies in
   // Scrollable, LazyBlock, ScrollableViewport, ScrollableList, and
@@ -63,7 +75,10 @@ class ScrollableGrid extends StatelessWidget {
   /// The key for the Scrollable created by this widget.
   final Key scrollableKey;
 
+  /// The delegate that controls the layout of the children.
   final GridDelegate delegate;
+
+  /// The children that will be placed in the grid.
   final Iterable<Widget> children;
 
   Widget _buildViewport(BuildContext context, ScrollableState state, double scrollOffset) {
@@ -98,24 +113,38 @@ class ScrollableGrid extends StatelessWidget {
   }
 }
 
+/// A virtual viewport onto a grid of widgets.
+///
+/// Used by [ScrollableGrid].
+///
+/// See also:
+///
+///  * [ListViewport]
+///  * [LazyListViewport]
 class GridViewport extends VirtualViewportFromIterable {
+  /// Creates a virtual viewport onto a grid of widgets.
+  ///
+  /// The [delegate] argument must not be null.
   GridViewport({
     this.startOffset,
     this.delegate,
     this.onExtentsChanged,
     this.children
-  });
+  }) {
+    assert(delegate != null);
+  }
 
   @override
   final double startOffset;
+
+  /// The delegate that controls the layout of the children.
   final GridDelegate delegate;
+
+  /// Called when the interior or exterior dimensions of the viewport change.
   final ExtentsChangedCallback onExtentsChanged;
 
   @override
   final Iterable<Widget> children;
-
-  // TODO(abarth): Support horizontal grids.
-  Axis get mainAxis => Axis.vertical;
 
   @override
   RenderGrid createRenderObject(BuildContext context) => new RenderGrid(delegate: delegate);

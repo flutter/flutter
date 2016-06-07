@@ -582,18 +582,18 @@ abstract class InheritedWidget extends _ProxyWidget {
 abstract class RenderObjectWidget extends Widget {
   const RenderObjectWidget({ Key key }) : super(key: key);
 
-  /// RenderObjectWidgets always inflate to a RenderObjectElement subclass.
+  /// RenderObjectWidgets always inflate to a [RenderObjectElement] subclass.
   @override
   RenderObjectElement createElement();
 
-  /// Creates an instance of the RenderObject class that this
-  /// RenderObjectWidget represents, using the configuration described by this
-  /// RenderObjectWidget.
+  /// Creates an instance of the [RenderObject] class that this
+  /// [RenderObjectWidget] represents, using the configuration described by this
+  /// [RenderObjectWidget].
   RenderObject createRenderObject(BuildContext context);
 
-  /// Copies the configuration described by this RenderObjectWidget to the given
-  /// RenderObject, which must be of the same type as returned by this class'
-  /// createRenderObject(BuildContext context).
+  /// Copies the configuration described by this [RenderObjectWidget] to the
+  /// given [RenderObject], which will be of the same type as returned by this
+  /// object's [createRenderObject].
   void updateRenderObject(BuildContext context, RenderObject renderObject) { }
 
   void didUnmountRenderObject(RenderObject renderObject) { }

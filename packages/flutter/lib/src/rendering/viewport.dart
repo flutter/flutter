@@ -125,9 +125,9 @@ class RenderViewportBase extends RenderBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// The direction in which the child is permitted to be larger than the viewport
+  /// The direction in which the child is permitted to be larger than the viewport.
   ///
-  /// The child is given layout constraints that are fully unconstrainted along
+  /// The child is given layout constraints that are fully unconstrained along
   /// the main axis (e.g., the child can be as tall as it wants if the main axis
   /// is vertical).
   Axis get mainAxis => _mainAxis;
