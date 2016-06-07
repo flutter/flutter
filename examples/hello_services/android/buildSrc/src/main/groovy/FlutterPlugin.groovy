@@ -87,10 +87,16 @@ class FlutterPlugin implements Plugin<Project> {
             throw new GradleException("Must provide Flutter source directory")
         }
 
+        String target = project.flutter.target;
+        if (target == null) {
+            target = 'lib/main.dart'
+        }
+
         FlutterTask flutterTask = project.tasks.create("flutterBuild", FlutterTask) {
             flutterRoot this.flutterRoot
             buildMode this.buildMode
             localEngine this.localEngine
+            targetPath target
             sourceDir project.file(project.flutter.source)
             intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter")
         }
@@ -109,12 +115,14 @@ class FlutterPlugin implements Plugin<Project> {
 
 class FlutterExtension {
     String source
+    String target
 }
 
 class FlutterTask extends DefaultTask {
     File flutterRoot
     String buildMode
     String localEngine
+    String targetPath
 
     @InputDirectory
     File sourceDir
@@ -150,6 +158,7 @@ class FlutterTask extends DefaultTask {
               args "--local-engine", localEngine
             }
             args "build", "aot"
+            args "--target", targetPath
             args "--target-platform", "android-arm"
             args "--output-dir", "${intermediateDir}"
             args "--${buildMode}"
@@ -163,6 +172,7 @@ class FlutterTask extends DefaultTask {
               args "--local-engine", localEngine
             }
             args "build", "flx"
+            args "--target", targetPath
             args "--output-file", "${intermediateDir}/app.flx"
             if (buildMode != "debug") {
               args "--precompiled"
