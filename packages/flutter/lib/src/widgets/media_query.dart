@@ -71,7 +71,7 @@ class MediaQueryData {
   );
 
   @override
-  String toString() => '$runtimeType($size, $orientation)';
+  String toString() => '$runtimeType(size: $size, devicePixelRatio: $devicePixelRatio, padding: $padding)';
 }
 
 /// Establishes a subtree in which media queries resolve to the given data.
