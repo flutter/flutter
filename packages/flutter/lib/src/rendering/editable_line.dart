@@ -217,8 +217,8 @@ class RenderEditableLine extends RenderBox {
 
   Point _lastTapDownPosition;
   Point _longPressPosition;
-  void _handleTapDown(Point globalPosition) {
-    _lastTapDownPosition = globalPosition + -paintOffset;
+  void _handleTapDown(TapDownDetails details) {
+    _lastTapDownPosition = details.globalPosition + -paintOffset;
   }
 
   void _handleTap() {

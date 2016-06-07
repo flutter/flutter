@@ -26,6 +26,8 @@ export 'package:flutter/gestures.dart' show
   GestureScaleStartCallback,
   GestureScaleUpdateCallback,
   GestureScaleEndCallback,
+  TapDownDetails,
+  TapUpDetails,
   Velocity;
 
 /// Signature for creating gesture recognizers.
@@ -479,9 +481,9 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
     TapGestureRecognizer recognizer = owner._recognizers[TapGestureRecognizer];
     assert(recognizer != null);
     if (recognizer.onTapDown != null)
-      recognizer.onTapDown(Point.origin);
+      recognizer.onTapDown(new TapDownDetails());
     if (recognizer.onTapUp != null)
-      recognizer.onTapUp(Point.origin);
+      recognizer.onTapUp(new TapUpDetails());
     if (recognizer.onTap != null)
       recognizer.onTap();
   }

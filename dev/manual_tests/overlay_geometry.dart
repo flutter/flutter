@@ -108,7 +108,7 @@ class CardBuilder extends LazyBlockDelegate {
     CardModel cardModel = cardModels[index];
     return new GestureDetector(
       key: cardModel.key,
-      onTapUp: (Point globalPosition) { onTapUp(cardModel.targetKey, globalPosition); },
+      onTapUp: (TapUpDetails details) { onTapUp(cardModel.targetKey, details.globalPosition); },
       child: new Card(
         key: cardModel.targetKey,
         color: cardModel.color,

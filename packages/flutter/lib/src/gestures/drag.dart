@@ -56,7 +56,7 @@ class DragUpdateDetails {
   /// coordinates of [delta] and the other coordinate must be zero.
   DragUpdateDetails({
     this.delta: Offset.zero,
-    this.primaryDelta: 0.0
+    this.primaryDelta
   }) {
     assert(primaryDelta == null
         || (primaryDelta == delta.dx && delta.dy == 0.0)
@@ -90,7 +90,7 @@ class DragEndDetails {
   /// Creates details for a [GestureDragEndCallback].
   ///
   /// The [velocity] argument must not be null.
-  DragEndDetails({ this.velocity: Velocity.zero }) {
+  DragEndDetails({ this.velocity }) {
     assert(velocity != null);
   }
 
@@ -100,6 +100,9 @@ class DragEndDetails {
 
 /// Signature for when a pointer that was previously in contact with the screen
 /// and moving is no longer in contact with the screen.
+///
+/// The velocity at which the pointer was moving when it stopped contacting
+/// the screen is available in the `details`.
 typedef void GestureDragEndCallback(DragEndDetails details);
 
 /// Signature for when the pointer that previously triggered a

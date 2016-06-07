@@ -416,7 +416,7 @@ class _DragAvatar<T> extends Drag {
     _entry = new OverlayEntry(builder: _build);
     overlay.insert(_entry);
     _position = initialPosition;
-    update(initialPosition);
+    updateDrag(initialPosition);
   }
 
   final T data;
@@ -433,22 +433,22 @@ class _DragAvatar<T> extends Drag {
 
   // Drag API
   @override
-  void move(Offset offset) {
-    _position += offset;
-    update(_position);
+  void update(DragUpdateDetails details) {
+    _position += details.delta;
+    updateDrag(_position);
   }
 
   @override
-  void end(Velocity velocity) {
-    finish(_DragEndKind.dropped, velocity);
+  void end(DragEndDetails details) {
+    finishDrag(_DragEndKind.dropped, details.velocity);
   }
 
   @override
   void cancel() {
-    finish(_DragEndKind.canceled);
+    finishDrag(_DragEndKind.canceled);
   }
 
-  void update(Point globalPosition) {
+  void updateDrag(Point globalPosition) {
     _lastOffset = globalPosition - dragStartPoint;
     _entry.markNeedsBuild();
     HitTestResult result = new HitTestResult();
@@ -505,7 +505,7 @@ class _DragAvatar<T> extends Drag {
     _enteredTargets.clear();
   }
 
-  void finish(_DragEndKind endKind, [Velocity velocity]) {
+  void finishDrag(_DragEndKind endKind, [Velocity velocity]) {
     bool wasAccepted = false;
     if (endKind == _DragEndKind.dropped && _activeTarget != null) {
       _activeTarget.didDrop(data);

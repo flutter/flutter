@@ -7,13 +7,45 @@ import 'constants.dart';
 import 'events.dart';
 import 'recognizer.dart';
 
-/// Signature for when a pointer that might cause a tap has contacted the screen
-/// at a particular location.
-typedef void GestureTapDownCallback(Point globalPosition);
+/// Details for [GestureTapDownCallback], such as position.
+class TapDownDetails {
+  /// Creates details for a [GestureTapDownCallback].
+  ///
+  /// The [globalPosition] argument must not be null.
+  TapDownDetails({ this.globalPosition: Point.origin }) {
+    assert(globalPosition != null);
+  }
+
+  /// The global position at which the pointer contacted the screen.
+  final Point globalPosition;
+}
+
+/// Signature for when a pointer that might cause a tap has contacted the
+/// screen.
+///
+/// The position at which the pointer contacted the screen is available in the
+/// `details`.
+typedef void GestureTapDownCallback(TapDownDetails details);
+
+/// Details for [GestureTapUpCallback], such as position.
+class TapUpDetails {
+  /// Creates details for a [GestureTapUpCallback].
+  ///
+  /// The [globalPosition] argument must not be null.
+  TapUpDetails({ this.globalPosition: Point.origin }) {
+    assert(globalPosition != null);
+  }
+
+  /// The global position at which the pointer contacted the screen.
+  final Point globalPosition;
+}
 
 /// Signature for when a pointer that will trigger a tap has stopped contacting
-/// the screen at a particular location.
-typedef void GestureTapUpCallback(Point globalPosition);
+/// the screen.
+///
+/// The position at which the pointer stopped contacting the screen is available
+/// in the `details`.
+typedef void GestureTapUpCallback(TapUpDetails details);
 
 /// Signature for when a tap has occurred.
 typedef void GestureTapCallback();
@@ -102,7 +134,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void _checkDown() {
     if (!_sentTapDown) {
       if (onTapDown != null)
-        onTapDown(initialPosition);
+        onTapDown(new TapDownDetails(globalPosition: initialPosition));
       _sentTapDown = true;
     }
   }
@@ -111,7 +143,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     if (_wonArena && _finalPosition != null) {
       resolve(GestureDisposition.accepted);
       if (onTapUp != null)
-        onTapUp(_finalPosition);
+        onTapUp(new TapUpDetails(globalPosition: _finalPosition));
       if (onTap != null)
         onTap();
       _reset();

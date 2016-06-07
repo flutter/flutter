@@ -11,6 +11,7 @@ import 'constants.dart';
 import 'events.dart';
 import 'pointer_router.dart';
 import 'recognizer.dart';
+import 'tap.dart';
 
 /// Signature for callback when the user has tapped the screen at the same
 /// location twice in quick succession.
@@ -18,11 +19,11 @@ typedef void GestureDoubleTapCallback();
 
 /// Signature used by [MultiTapGestureRecognizer] for when a pointer that might
 /// cause a tap has contacted the screen at a particular location.
-typedef void GestureMultiTapDownCallback(Point globalPosition, int pointer);
+typedef void GestureMultiTapDownCallback(int pointer, TapDownDetails details);
 
 /// Signature used by [MultiTapGestureRecognizer] for when a pointer that will
 /// trigger a tap has stopped contacting the screen at a particular location.
-typedef void GestureMultiTapUpCallback(Point globalPosition, int pointer);
+typedef void GestureMultiTapUpCallback(int pointer, TapUpDetails details);
 
 /// Signature used by [MultiTapGestureRecognizer] for when a tap has occurred.
 typedef void GestureMultiTapCallback(int pointer);
@@ -358,7 +359,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
       longTapDelay: longTapDelay
     );
     if (onTapDown != null)
-      onTapDown(event.position, event.pointer);
+      onTapDown(event.pointer, new TapDownDetails(globalPosition: event.position));
   }
 
   @override
@@ -379,7 +380,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
     _gestureMap.remove(pointer);
     if (resolution == _TapResolution.tap) {
       if (onTapUp != null)
-        onTapUp(globalPosition, pointer);
+        onTapUp(pointer, new TapUpDetails(globalPosition: globalPosition));
       if (onTap != null)
         onTap(pointer);
     } else {
@@ -391,7 +392,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
   void _handleLongTap(int pointer, Point lastPosition) {
     assert(_gestureMap.containsKey(pointer));
     if (onLongTapDown != null)
-      onLongTapDown(lastPosition, pointer);
+      onLongTapDown(pointer, new TapDownDetails(globalPosition: lastPosition));
   }
 
   @override

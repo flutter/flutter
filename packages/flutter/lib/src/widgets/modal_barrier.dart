@@ -28,7 +28,7 @@ class ModalBarrier extends StatelessWidget {
     return new Semantics(
       container: true,
       child: new GestureDetector(
-        onTapDown: (Point position) {
+        onTapDown: (TapDownDetails details) {
           if (dismissable)
             Navigator.pop(context);
         },
