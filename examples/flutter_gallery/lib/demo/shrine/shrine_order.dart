@@ -162,7 +162,10 @@ class _OrderPageState extends State<OrderPage> {
       floatingActionButton: new FloatingActionButton(
         onPressed: () {
           updateOrder(inCart: true);
-          showSnackBarMessage('There are ${currentOrder.quantity} items in the shopping cart');
+          final int n = currentOrder.quantity;
+          showSnackBarMessage(
+            'There ${ n == 1 ? "is one item" : "are $n items" } in the shopping cart.'
+          );
         },
         backgroundColor: const Color(0xFF16F0F0),
         child: new Icon(
