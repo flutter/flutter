@@ -114,16 +114,12 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   ///
   /// Use [startTrackingPointer] to add the routes in the first place.
   void stopTrackingPointer(int pointer) {
-    GestureBinding.instance.pointerRouter.removeRoute(pointer, handleEvent);
-    _trackedPointers.remove(pointer);
-    if (_trackedPointers.isEmpty)
-      didStopTrackingLastPointer(pointer);
-  }
-
-  /// Calls [stopTrackingPointer] if the pointer with the given ID is being tracked by this recognizer.
-  void ensureNotTrackingPointer(int pointer) {
-    if (_trackedPointers.contains(pointer))
-      stopTrackingPointer(pointer);
+    if (_trackedPointers.contains(pointer)) {
+      GestureBinding.instance.pointerRouter.removeRoute(pointer, handleEvent);
+      _trackedPointers.remove(pointer);
+      if (_trackedPointers.isEmpty)
+        didStopTrackingLastPointer(pointer);
+    }
   }
 
   /// Stops tracking the pointer associated with the given event if the event is
