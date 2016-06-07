@@ -12,6 +12,8 @@ import '../base/process.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../observatory.dart';
+import '../protocol_discovery.dart';
 import 'mac.dart';
 
 const String _ideviceinstallerInstructions =
@@ -33,6 +35,7 @@ class IOSDevice extends Device {
     _installerPath = _checkForCommand('ideviceinstaller');
     _listerPath = _checkForCommand('idevice_id');
     _informerPath = _checkForCommand('ideviceinfo');
+    _iproxyPath = _checkForCommand('iproxy');
     _debuggerPath = _checkForCommand('idevicedebug');
     _loggerPath = _checkForCommand('idevicesyslog');
     _pusherPath = _checkForCommand(
@@ -51,6 +54,9 @@ class IOSDevice extends Device {
 
   String _informerPath;
   String get informerPath => _informerPath;
+
+  String _iproxyPath;
+  String get iproxyPath => _iproxyPath;
 
   String _debuggerPath;
   String get debuggerPath => _debuggerPath;
@@ -194,7 +200,20 @@ class IOSDevice extends Device {
     }
 
     // Step 3: Attempt to install the application on the device.
-    int installationResult = await runCommandAndStreamOutput(<String>[
+    List<String> launchArguments = <String>[];
+
+    if (debuggingOptions.startPaused)
+      launchArguments.add("--start-paused");
+
+    if (debuggingOptions.debuggingEnabled) {
+      launchArguments.add("--enable-checked-mode");
+
+      // Note: We do NOT need to set the observatory port since this is going to
+      // be setup on the device. Let it pick a port automatically. We will check
+      // the port picked and scrape that later.
+    }
+
+    List<String> launchCommand = <String>[
       '/usr/bin/env',
       'ios-deploy',
       '--id',
@@ -202,14 +221,109 @@ class IOSDevice extends Device {
       '--bundle',
       bundle.path,
       '--justlaunch',
-    ], trace: true);
+    ];
+
+    if (launchArguments.length > 0) {
+      launchCommand.add('--args');
+      launchCommand.add('"${launchArguments.join(" ")}"');
+    }
+
+    int installationResult = -1;
+    int localObsPort;
+    int localDiagPort;
+
+    if (!debuggingOptions.debuggingEnabled || mode == BuildMode.release) {
+      // If debugging is not enabled, just launch the application and continue.
+      printTrace("Debugging is not enabled");
+      installationResult = await runCommandAndStreamOutput(launchCommand, trace: true);
+    } else {
+      // Debugging is enabled, look for the observatory and diagnostic server
+      // ports post launch.
+      printTrace("Debugging is enabled, connecting to observatory and the diagnostic server");
+
+      Future<int> launch = runCommandAndStreamOutput(launchCommand, trace: true);
+
+      List<int> ports = await launch.then((int result) async {
+        installationResult = result;
+
+        if (result != 0) {
+          printTrace("Failed to launch the application on device.");
+          return <int>[null, null];
+        }
+
+        printTrace("Application launched on the device. Attempting to forward ports.");
+
+        return Future.wait(<Future<int>>[
+          _acquireAndForwardPort(ProtocolDiscovery.kObservatoryService, debuggingOptions.observatoryPort),
+          _acquireAndForwardPort(ProtocolDiscovery.kDiagnosticService, debuggingOptions.diagnosticPort),
+        ]);
+
+      });
+
+      printTrace("Local Observatory Port: ${ports[0]}");
+      printTrace("Local Diagnostic Server Port: ${ports[1]}");
+
+      localObsPort = ports[0];
+      localDiagPort = ports[1];
+    }
 
     if (installationResult != 0) {
       printError('Could not install ${bundle.path} on $id.');
       return new LaunchResult.failed();
     }
 
-    return new LaunchResult.succeeded();
+    return new LaunchResult.succeeded(observatoryPort: localObsPort, diagnosticPort: localDiagPort);
+  }
+
+  Future<int> _acquireAndForwardPort(String serviceName, int localPort) async {
+    Duration stepTimeout = const Duration(seconds: 10);
+
+    Future<int> remote = new ProtocolDiscovery(logReader, serviceName).nextPort();
+
+    int remotePort = await remote.timeout(stepTimeout,
+        onTimeout: () {
+      printTrace("Timeout while attempting to retrieve remote port for $serviceName");
+      return null;
+    });
+
+    if (remotePort == null) {
+      printTrace("Could not read port on device for $serviceName");
+      return null;
+    }
+
+    if ((localPort == null) || (localPort == 0)) {
+      localPort = await findAvailablePort();
+      printTrace("Auto selected local port to $localPort");
+    }
+
+    int forwardResult = await portForwarder.forward(remotePort,
+        hostPort: localPort).timeout(stepTimeout, onTimeout: () {
+      printTrace("Timeout while atempting to foward port for $serviceName");
+      return null;
+    });
+
+    if (forwardResult == null) {
+      printTrace("Could not foward remote $serviceName port $remotePort to local port $localPort");
+      return null;
+    }
+
+    printTrace("Successfully forwarded remote $serviceName port $remotePort to $localPort.");
+    return localPort;
+  }
+
+  @override
+  Future<bool> restartApp(
+    ApplicationPackage package,
+    LaunchResult result, {
+    String mainPath,
+    Observatory observatory
+  }) async {
+    return observatory.isolateReload(observatory.firstIsolateId).then((Response response) {
+      return true;
+    }).catchError((dynamic error) {
+      printError('Error restarting app: $error');
+      return false;
+    });
   }
 
   @override
@@ -306,11 +420,16 @@ class _IOSDeviceLogReader extends DeviceLogReader {
     });
   }
 
-  static final RegExp _runnerRegex = new RegExp(r'FlutterRunner');
+  // Match for lines like "Runner[297] <Notice>: " in syslog.
+  static final RegExp _runnerRegex = new RegExp(r'Runner\[[\d]+\] <[A-Za-z]+>: ');
 
   void _onLine(String line) {
-    if (_runnerRegex.hasMatch(line))
-      _linesController.add(line);
+    Match match = _runnerRegex.firstMatch(line);
+
+    if (match != null) {
+      // Only display the log line after the initial device and executable information.
+      _linesController.add(line.substring(match.end));
+    }
   }
 
   void _stop() {
@@ -319,16 +438,14 @@ class _IOSDeviceLogReader extends DeviceLogReader {
 }
 
 class _IOSDevicePortForwarder extends DevicePortForwarder {
-  _IOSDevicePortForwarder(this.device);
+  _IOSDevicePortForwarder(this.device) : _forwardedPorts = new List<ForwardedPort>();
 
   final IOSDevice device;
 
+  final List<ForwardedPort> _forwardedPorts;
+
   @override
-  List<ForwardedPort> get forwardedPorts {
-    final List<ForwardedPort> ports = <ForwardedPort>[];
-    // TODO(chinmaygarde): Implement.
-    return ports;
-  }
+  List<ForwardedPort> get forwardedPorts => _forwardedPorts;
 
   @override
   Future<int> forward(int devicePort, {int hostPort: null}) async {
@@ -336,12 +453,42 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
       // Auto select host port.
       hostPort = await findAvailablePort();
     }
-    // TODO(chinmaygarde): Implement.
-    return hostPort;
+
+    // Usage: iproxy LOCAL_TCP_PORT DEVICE_TCP_PORT UDID
+    Process process = await runCommand(<String>[
+      device.iproxyPath,
+      hostPort.toString(),
+      devicePort.toString(),
+      device.id,
+    ]);
+
+    ForwardedPort forwardedPort = new ForwardedPort.withContext(hostPort,
+        devicePort, process);
+
+    printTrace("Forwarded port $forwardedPort");
+
+    _forwardedPorts.add(forwardedPort);
+
+    return 1;
   }
 
   @override
   Future<Null> unforward(ForwardedPort forwardedPort) async {
-    // TODO(chinmaygarde): Implement.
+    if (!_forwardedPorts.remove(forwardedPort)) {
+      // Not in list. Nothing to remove.
+      return null;
+    }
+
+    printTrace("Unforwarding port $forwardedPort");
+
+    Process process = forwardedPort.context;
+
+    if (process != null) {
+      Process.killPid(process.pid);
+    } else {
+      printError("Forwarded port did not have a valid process");
+    }
+
+    return null;
   }
 }
