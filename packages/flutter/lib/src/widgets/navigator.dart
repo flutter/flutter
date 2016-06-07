@@ -71,11 +71,28 @@ abstract class Route<T> {
   void dispose() { }
 
   /// Whether this route is the top-most route on the navigator.
+  ///
+  /// If this is true, then [isActive] is also true.
   bool get isCurrent {
     if (_navigator == null)
       return false;
     assert(_navigator._history.contains(this));
     return _navigator._history.last == this;
+  }
+
+  /// Whether this route is on the navigator.
+  ///
+  /// If the route is not only active, but also the current route (the top-most
+  /// route), then [isCurrent] will also be true.
+  ///
+  /// If a later route is entirely opaque, then the route will be active but not
+  /// rendered. In particular, it's possible for a route to be active but for
+  /// stateful widgets within the route to not be instantiated.
+  bool get isActive {
+    if (_navigator == null)
+      return false;
+    assert(_navigator._history.contains(this));
+    return true;
   }
 }
 

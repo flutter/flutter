@@ -2,12 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
 
 import 'card.dart';
 import 'data_table.dart';
 import 'data_table_source.dart';
+import 'drop_down.dart';
+import 'icon_button.dart';
+import 'icon_theme.dart';
+import 'icon_theme_data.dart';
+import 'icons.dart';
 import 'progress_indicator.dart';
+import 'theme.dart';
 
 /// A wrapper for [DataTable] that obtains data lazily from a [DataTableSource]
 /// and displays it one page at a time. The widget is presented as a [Card].
@@ -33,6 +42,9 @@ class PaginatedDataTable extends StatefulWidget {
   /// [DataTableSource] with each new instance of the [PaginatedDataTable]
   /// widget unless the data table really is to now show entirely different
   /// data from a new source.
+  ///
+  /// The [rowsPerPage] and [availableRowsPerPage] must not be null (though they
+  /// both have defaults, so don't have to be specified).
   PaginatedDataTable({
     Key key,
     this.columns,
@@ -41,7 +53,8 @@ class PaginatedDataTable extends StatefulWidget {
     this.onSelectAll,
     this.initialFirstRowIndex: 0,
     this.onPageChanged,
-    this.rowsPerPage: 10,
+    this.rowsPerPage: defaultRowsPerPage,
+    this.availableRowsPerPage: const <int>[defaultRowsPerPage, defaultRowsPerPage * 2, defaultRowsPerPage * 5, defaultRowsPerPage * 10],
     this.onRowsPerPageChanged,
     this.source
   }) : super(key: key) {
@@ -49,6 +62,10 @@ class PaginatedDataTable extends StatefulWidget {
     assert(columns.length > 0);
     assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length));
     assert(sortAscending != null);
+    assert(rowsPerPage != null);
+    assert(rowsPerPage > 0);
+    assert(availableRowsPerPage != null);
+    assert(availableRowsPerPage.contains(rowsPerPage));
     assert(source != null);
   }
 
@@ -76,12 +93,30 @@ class PaginatedDataTable extends StatefulWidget {
   final int initialFirstRowIndex;
 
   /// Invoked when the user switches to another page.
+  ///
+  /// The value is the index of the first row on the currently displayed page.
   final ValueChanged<int> onPageChanged;
 
   /// The number of rows to show on each page.
   ///
-  /// See also [onRowsPerPageChanged].
+  /// See also:
+  ///
+  /// * [onRowsPerPageChanged]
+  /// * [defaultRowsPerPage]
   final int rowsPerPage;
+
+  /// The default value for [rowsPerPage].
+  ///
+  /// Useful when initializing the field that will hold the current
+  /// [rowsPerPage], when implemented [onRowsPerPageChanged].
+  static const int defaultRowsPerPage = 10;
+
+  /// The options to offer for the rowsPerPage.
+  ///
+  /// The current [rowsPerPage] must be a value in this list.
+  ///
+  /// The values in this list should be sorted in ascending order.
+  final List<int> availableRowsPerPage;
 
   /// Invoked when the user selects a different number of rows per page.
   ///
@@ -142,11 +177,15 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
   }
 
   /// Ensures that the given row is visible.
-  void pageTo(double rowIndex) {
+  void pageTo(int rowIndex) {
+    final int oldFirstRowIndex = _firstRowIndex;
     setState(() {
       final int rowsPerPage = config.rowsPerPage;
       _firstRowIndex = (rowIndex ~/ rowsPerPage) * rowsPerPage;
     });
+    if ((config.onPageChanged != null) &&
+        (oldFirstRowIndex != _firstRowIndex))
+      config.onPageChanged(_firstRowIndex);
   }
 
   DataRow _getBlankRowFor(int index) {
@@ -198,40 +237,97 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
 
   @override
   Widget build(BuildContext context) {
-    final List<DataRow> rows = _getRows(_firstRowIndex, config.rowsPerPage);
-    Widget table = new DataTable(
-      key: _tableKey,
-      columns: config.columns,
-      sortColumnIndex: config.sortColumnIndex,
-      sortAscending: config.sortAscending,
-      onSelectAll: config.onSelectAll,
-      rows: rows
-    );
+    final TextStyle textStyle = Theme.of(context).textTheme.caption;
+    final List<Widget> footerWidgets = <Widget>[];
+    if (config.onRowsPerPageChanged != null) {
+      List<Widget> availableRowsPerPage = config.availableRowsPerPage
+        .where((int value) => value <= _rowCount)
+        .map/*<DropDownMenuItem<int>>*/((int value) {
+          return new DropDownMenuItem<int>(
+            value: value,
+            child: new Text('$value')
+          );
+        })
+        .toList();
+      footerWidgets.addAll(<Widget>[
+        new Text('Rows per page:'),
+        new DropDownButtonHideUnderline(
+          child: new DropDownButton<int>(
+            items: availableRowsPerPage,
+            value: config.rowsPerPage,
+            onChanged: config.onRowsPerPageChanged,
+            style: textStyle,
+            iconSize: 24.0
+          )
+        ),
+      ]);
+    }
+    footerWidgets.addAll(<Widget>[
+      new Container(width: 32.0),
+      new Text(
+        '${_firstRowIndex + 1}\u2013${_firstRowIndex + config.rowsPerPage} ${ _rowCountApproximate ? "of about" : "of" } $_rowCount'
+      ),
+      new Container(width: 32.0),
+      new IconButton(
+        padding: EdgeInsets.zero,
+        icon: Icons.chevron_left,
+        onPressed: _firstRowIndex <= 0 ? null : () {
+          pageTo(math.max(_firstRowIndex - config.rowsPerPage, 0));
+        }
+      ),
+      new Container(width: 24.0),
+      new IconButton(
+        padding: EdgeInsets.zero,
+        icon: Icons.chevron_right,
+        onPressed: (!_rowCountApproximate && (_firstRowIndex + config.rowsPerPage >= _rowCount)) ? null : () {
+          pageTo(_firstRowIndex + config.rowsPerPage);
+        }
+      ),
+      new Container(width: 14.0),
+    ]);
     return new Card(
       // TODO(ianh): data table card headers
-      child: table
-      // TODO(ianh): data table card footers: prev/next page, rows per page, etc
+      /*
+         - title, top left
+            - 20px Roboto Regular, black87
+         - persistent actions, top left
+         - header when there's a selection
+            - accent 50?
+            - show number of selected items
+            - different actions
+         - actions, top right
+            - 24px icons, black54
+      */
+      child: new BlockBody(
+        children: <Widget>[
+          new ScrollableViewport(
+            scrollDirection: Axis.horizontal,
+            child: new DataTable(
+              key: _tableKey,
+              columns: config.columns,
+              sortColumnIndex: config.sortColumnIndex,
+              sortAscending: config.sortAscending,
+              onSelectAll: config.onSelectAll,
+              rows: _getRows(_firstRowIndex, config.rowsPerPage)
+            )
+          ),
+          new DefaultTextStyle(
+            style: textStyle,
+            child: new IconTheme(
+              data: new IconThemeData(
+                opacity: 0.54
+              ),
+              child: new Container(
+                height: 56.0,
+                child: new Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: footerWidgets
+                )
+              )
+            )
+          )
+        ]
+      )
     );
   }
 }
-
-/*
-
-DataTableCard
- - top: 64px
-   - caption, top left
-      - 20px Roboto Regular, black87
-   - persistent actions, top left
-   - header when there's a selection
-      - accent 50?
-      - show number of selected items
-      - different actions
-   - actions, top right
-      - 24px icons, black54
-
-bottom:
- - 56px
- - handles pagination
-    - 12px Roboto Regular, black54
-
-*/

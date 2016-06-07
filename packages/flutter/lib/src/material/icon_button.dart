@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 import 'debug.dart';
 import 'icon.dart';
@@ -35,12 +36,18 @@ class IconButton extends StatelessWidget {
   /// be used in many other places as well.
   ///
   /// Requires one of its ancestors to be a [Material] widget.
+  ///
+  /// The [size], [padding], and [alignment] arguments must not be null (though
+  /// they each have default values).
+  ///
+  /// The [icon] argument must be specified. See [Icons] for a list of icons to
+  /// use for this argument.
   const IconButton({
     Key key,
     this.size: 24.0,
     this.padding: const EdgeInsets.all(8.0),
     this.alignment: FractionalOffset.center,
-    this.icon,
+    @required this.icon,
     this.color,
     this.disabledColor,
     this.onPressed,
@@ -48,16 +55,24 @@ class IconButton extends StatelessWidget {
   }) : super(key: key);
 
   /// The size of the icon inside the button.
+  ///
+  /// This property must not be null. It defaults to 24.0.
   final double size;
 
   /// The padding around the button's icon. The entire padded icon will react
   /// to input gestures.
+  ///
+  /// This property must not be null. It defaults to 8.0 padding on all sides.
   final EdgeInsets padding;
 
   /// Defines how the icon is positioned within the IconButton.
+  ///
+  /// This property must not be null. It defaults to [FractionalOffset.center].
   final FractionalOffset alignment;
 
-  /// The icon to display inside the button.
+  /// The icon to display inside the button, from the list in [Icons].
+  ///
+  /// This property must not be null.
   final IconData icon;
 
   /// The color to use for the icon inside the button, if the icon is enabled.

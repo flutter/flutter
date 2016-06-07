@@ -16,7 +16,6 @@ import 'theme.dart';
 import 'material.dart';
 
 const Duration _kDropDownMenuDuration = const Duration(milliseconds: 300);
-const double _kTopMargin = 6.0;
 const double _kMenuItemHeight = 48.0;
 const EdgeInsets _kMenuVerticalPadding = const EdgeInsets.symmetric(vertical: 8.0);
 const EdgeInsets _kMenuHorizontalPadding = const EdgeInsets.symmetric(horizontal: 36.0);
@@ -136,6 +135,7 @@ class _DropDownMenu<T> extends StatusTransitionWidget {
         ),
         child: new Material(
           type: MaterialType.transparency,
+          textStyle: route.style,
           child: new ScrollableList(
             padding: _kMenuVerticalPadding,
             itemExtent: _kMenuItemHeight,
@@ -182,8 +182,17 @@ class _DropDownMenuRouteLayout extends SingleChildLayoutDelegate {
       bottom = math.max(buttonTop + _kMenuItemHeight, bottomPreferredLimit);
       top = bottom - childSize.height;
     }
-    assert(top >= 0.0);
-    assert(top + childSize.height <= size.height);
+    assert(() {
+      final Rect container = Point.origin & size;
+      if (container.intersect(buttonRect) == buttonRect) {
+        // If the button was entirely on-screen, then verify
+        // that the menu is also on-screen.
+        // If the button was a bit off-screen, then, oh well.
+        assert(top >= 0.0);
+        assert(top + childSize.height <= size.height);
+      }
+      return true;
+    });
     return new Offset(buttonRect.left, top);
   }
 
@@ -220,13 +229,27 @@ class _DropDownRoute<T> extends PopupRoute<_DropDownRouteResult<T>> {
     this.items,
     this.buttonRect,
     this.selectedIndex,
-    this.elevation: 8
-  }) : super(completer: completer);
+    this.elevation: 8,
+    TextStyle style
+  }) : _style = style, super(completer: completer) {
+    assert(style != null);
+  }
 
   final List<DropDownMenuItem<T>> items;
   final Rect buttonRect;
   final int selectedIndex;
   final int elevation;
+
+  TextStyle get style => _style;
+  TextStyle _style;
+  set style (TextStyle value) {
+    assert(value != null);
+    if (_style == value)
+      return;
+    setState(() {
+      _style = value;
+    });
+  }
 
   @override
   Duration get transitionDuration => _kDropDownMenuDuration;
@@ -277,13 +300,10 @@ class DropDownMenuItem<T> extends StatelessWidget {
     return new Container(
       height: _kMenuItemHeight,
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: new DefaultTextStyle(
-        style: Theme.of(context).textTheme.subhead,
-        child: new Baseline(
-          baselineType: TextBaseline.alphabetic,
-          baseline: _kMenuItemHeight - _kBaselineOffsetFromBottom,
-          child: child
-        )
+      child: new Baseline(
+        baselineType: TextBaseline.alphabetic,
+        baseline: _kMenuItemHeight - _kBaselineOffsetFromBottom,
+        child: child
       )
     );
   }
@@ -332,12 +352,17 @@ class DropDownButton<T> extends StatefulWidget {
   /// Creates a drop down button.
   ///
   /// The [items] must have distinct values and [value] must be among them.
+  ///
+  /// The [elevation] and [iconSize] arguments must not be null (they both have
+  /// defaults, so do not need to be specified).
   DropDownButton({
     Key key,
     this.items,
     this.value,
     this.onChanged,
-    this.elevation: 8
+    this.elevation: 8,
+    this.style,
+    this.iconSize: 36.0
   }) : super(key: key) {
     assert(items != null);
     assert(items.where((DropDownMenuItem<T> item) => item.value == value).length == 1);
@@ -356,6 +381,18 @@ class DropDownButton<T> extends StatefulWidget {
   ///
   /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
   final int elevation;
+
+  /// The text style to use for text in the drop down button and the drop down
+  /// menu that appears when you tap the button.
+  ///
+  /// Defaults to the [TextTheme.subhead] value of the current
+  /// [ThemeData.textTheme] of the current [Theme].
+  final TextStyle style;
+
+  /// The size to use for the drop-down button's down arrow icon button.
+  ///
+  /// Defaults to 36.0.
+  final double iconSize;
 
   @override
   _DropDownButtonState<T> createState() => new _DropDownButtonState<T>();
@@ -388,18 +425,26 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
     }
   }
 
+  TextStyle get _textStyle => config.style ?? Theme.of(context).textTheme.subhead;
+
+  _DropDownRoute<T> _currentRoute;
+
   void _handleTap() {
+    assert(_currentRoute == null);
     final RenderBox itemBox = _itemKey.currentContext.findRenderObject();
     final Rect itemRect = itemBox.localToGlobal(Point.origin) & itemBox.size;
     final Completer<_DropDownRouteResult<T>> completer = new Completer<_DropDownRouteResult<T>>();
-    Navigator.push(context, new _DropDownRoute<T>(
+    _currentRoute = new _DropDownRoute<T>(
       completer: completer,
       items: config.items,
       buttonRect: _kMenuHorizontalPadding.inflateRect(itemRect),
       selectedIndex: _selectedIndex,
-      elevation: config.elevation
-    ));
+      elevation: config.elevation,
+      style: _textStyle
+    );
+    Navigator.push(context, _currentRoute);
     completer.future.then((_DropDownRouteResult<T> newValue) {
+      _currentRoute = null;
       if (!mounted || newValue == null)
         return;
       if (config.onChanged != null)
@@ -410,28 +455,28 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    Widget result = new Row(
-      mainAxisAlignment: MainAxisAlignment.collapse,
-      children: <Widget>[
-        // We use an IndexedStack to make sure we have enough width to show any
-        // possible item as the selected item without changing size.
-        new IndexedStack(
-          children: config.items,
-          key: _itemKey,
-          index: _selectedIndex,
-          alignment: FractionalOffset.centerLeft
-        ),
-        new Icon(icon: Icons.arrow_drop_down, size: 36.0)
-      ]
+    final TextStyle style = _textStyle;
+    if (_currentRoute != null)
+      _currentRoute.style = style;
+    Widget result = new DefaultTextStyle(
+      style: style,
+      child: new Row(
+        mainAxisAlignment: MainAxisAlignment.collapse,
+        children: <Widget>[
+          // We use an IndexedStack to make sure we have enough width to show any
+          // possible item as the selected item without changing size.
+          new IndexedStack(
+            key: _itemKey,
+            index: _selectedIndex,
+            alignment: FractionalOffset.centerLeft,
+            children: config.items
+          ),
+          new Icon(icon: Icons.arrow_drop_down, size: config.iconSize)
+        ]
+      )
     );
-    if (DropDownButtonHideUnderline.at(context)) {
-      result = new Padding(
-        padding: const EdgeInsets.only(top: _kTopMargin, bottom: _kBottomBorderHeight),
-        child: result
-      );
-    } else {
+    if (!DropDownButtonHideUnderline.at(context)) {
       result = new Container(
-        padding: const EdgeInsets.only(top: _kTopMargin),
         decoration: const BoxDecoration(border: _kDropDownUnderline),
         child: result
       );

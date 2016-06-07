@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import 'basic.dart';
 import 'focus.dart';
 import 'framework.dart';
@@ -400,11 +402,8 @@ class _ModalScopeState extends State<_ModalScope> {
     });
   }
 
-  void _didChangeRouteOffStage() {
-    setState(() {
-      // We use the route's offstage bool in our build function, which means our
-      // state has changed.
-    });
+  void _routeSetState(VoidCallback fn) {
+    setState(fn);
   }
 
   @override
@@ -464,6 +463,28 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   static ModalRoute<dynamic> of(BuildContext context) {
     _ModalScopeStatus widget = context.inheritFromWidgetOfExactType(_ModalScopeStatus);
     return widget?.route;
+  }
+
+  /// Whenever you need to change internal state for a ModalRoute object, make
+  /// the change in a function that you pass to setState(), as in:
+  ///
+  /// ```dart
+  /// setState(() { myState = newValue });
+  /// ```
+  ///
+  /// If you just change the state directly without calling setState(), then the
+  /// route will not be scheduled for rebuilding, meaning that its rendering
+  /// will not be updated.
+  @protected
+  void setState(VoidCallback fn) {
+    if (_scopeKey.currentState != null) {
+      _scopeKey.currentState._routeSetState(fn);
+    } else {
+      // The route isn't currently visible, so we don't have to call its setState
+      // method, but we do still need to call the fn callback, otherwise the state
+      // in the route won't be updated!
+      fn();
+    }
   }
 
 
@@ -528,8 +549,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   set offstage (bool value) {
     if (_offstage == value)
       return;
-    _offstage = value;
-    _scopeKey.currentState?._didChangeRouteOffStage();
+    setState(() {
+      _offstage = value;
+    });
   }
 
   /// The build context for the subtree containing the primary content of this route.

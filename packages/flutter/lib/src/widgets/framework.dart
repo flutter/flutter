@@ -400,7 +400,9 @@ abstract class State<T extends StatefulWidget> {
   /// Whenever you need to change internal state for a State object, make the
   /// change in a function that you pass to setState(), as in:
   ///
-  ///    setState(() { myState = newValue });
+  /// ```dart
+  /// setState(() { myState = newValue });
+  /// ```
   ///
   /// If you just change the state directly without calling setState(), then the
   /// widget will not be scheduled for rebuilding, meaning that its rendering
