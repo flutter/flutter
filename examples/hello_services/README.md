@@ -15,8 +15,8 @@ Create an `ios/Flutter/Generated.xcconfig` file with this entry:
 
 There are a number of other parameters you can control with this file:
 
- * `FLUTTER_APPLICATION_PATH`: The path that contains your `pubspec.yaml` file
-   relative to your `xcodeproj` file.
+ * `FLUTTER_APPLICATION_PATH`: The path to the directory that contains your
+   `pubspec.yaml` file relative to your `xcodeproj` file.
  * `FLUTTER_BUILD_MODE`: Whether to build for `debug`, `profile`, or `release`.
    Defaults to `release`.
  * `FLUTTER_TARGET`: The path to your `main.dart` relative to your
@@ -47,10 +47,18 @@ There are a number of other parameters you can control with this file:
    `android-arm-release` version of `flutter.jar` in the `bin/cache` directory
    of the Flutter SDK.
 
+See `android/app/build.gradle` for project specific settings, including:
+
+ * `source`: The path to the directory that contains your `pubspec.yaml` file
+   relative to your `build.gradle` file.
+ * `target`: The path to your `main.dart` relative to your `pubspec.yaml`.
+   Defaults to `lib/main.dart`.
+
 ### Build
 
-To build direction with gradle, use the following commands:
+To build directly with `gradle`, use the following commands:
 
+ * `cd android`
  * `gradle wrapper`
  * `./gradlew build`
 
