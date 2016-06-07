@@ -160,7 +160,7 @@ class KeyPad extends StatelessWidget {
     return new Theme(
       data: new ThemeData(
         primarySwatch: Colors.purple,
-        brightness: ThemeBrightness.dark
+        brightness: Brightness.dark
       ),
       child: new Flexible(
         flex: _flex,

@@ -145,7 +145,7 @@ void main() {
   runApp(new MaterialApp(
     title: 'PageableList',
     theme: new ThemeData(
-      brightness: ThemeBrightness.light,
+      brightness: Brightness.light,
       primarySwatch: Colors.blue,
       accentColor: Colors.redAccent[200]
     ),

@@ -66,12 +66,12 @@ class StocksAppState extends State<StocksApp> {
     switch (_configuration.stockMode) {
       case StockMode.optimistic:
         return new ThemeData(
-          brightness: ThemeBrightness.light,
+          brightness: Brightness.light,
           primarySwatch: Colors.purple
         );
       case StockMode.pessimistic:
         return new ThemeData(
-          brightness: ThemeBrightness.dark,
+          brightness: Brightness.dark,
           accentColor: Colors.redAccent[200]
         );
     }
