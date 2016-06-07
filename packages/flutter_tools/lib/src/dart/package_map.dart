@@ -17,8 +17,6 @@ Map<String, Uri> _parse(String packagesPath) {
 class PackageMap {
   PackageMap(this.packagesPath);
 
-  static PackageMap createGlobalInstance() => new PackageMap(globalPackagesPath);
-
   static String get globalPackagesPath => _globalPackagesPath ?? kPackagesFileName;
 
   static set globalPackagesPath(String value) {

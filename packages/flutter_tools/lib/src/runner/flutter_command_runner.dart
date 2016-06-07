@@ -190,7 +190,7 @@ class FlutterCommandRunner extends CommandRunner {
 
     if (engineSourcePath == null && globalResults['local-engine'] != null) {
       try {
-        Uri engineUri = PackageMap.createGlobalInstance().map[kFlutterEnginePackageName];
+        Uri engineUri = new PackageMap(PackageMap.globalPackagesPath).map[kFlutterEnginePackageName];
         engineSourcePath = path.dirname(path.dirname(path.dirname(path.dirname(engineUri.path))));
         bool dirExists = FileSystemEntity.isDirectorySync(path.join(engineSourcePath, 'out'));
         if (engineSourcePath == '/' || engineSourcePath.isEmpty || !dirExists)

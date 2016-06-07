@@ -193,7 +193,7 @@ abstract class FlutterCommand extends Command {
 
     // Validate the current package map only if we will not be running "pub get" later.
     if (!(_usesPubOption && argResults['pub'])) {
-      String error = PackageMap.createGlobalInstance().checkValid();
+      String error = new PackageMap(PackageMap.globalPackagesPath).checkValid();
       if (error != null) {
         printError(error);
         return false;
