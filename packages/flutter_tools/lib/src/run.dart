@@ -56,14 +56,16 @@ class RunAndStayResident {
   Future<int> run({
     bool traceStartup: false,
     bool benchmark: false,
-    Completer<int> observatoryPortCompleter
+    Completer<int> observatoryPortCompleter,
+    String route
   }) {
     // Don't let uncaught errors kill the process.
     return runZoned(() {
       return _run(
         traceStartup: traceStartup,
         benchmark: benchmark,
-        observatoryPortCompleter: observatoryPortCompleter
+        observatoryPortCompleter: observatoryPortCompleter,
+        route: route
       );
     }, onError: (dynamic error, StackTrace stackTrace) {
       printError('Exception from flutter run: $error', stackTrace);
@@ -107,7 +109,8 @@ class RunAndStayResident {
   Future<int> _run({
     bool traceStartup: false,
     bool benchmark: false,
-    Completer<int> observatoryPortCompleter
+    Completer<int> observatoryPortCompleter,
+    String route
   }) async {
     _mainPath = findMainDartFile(target);
     if (!FileSystemEntity.isFileSync(_mainPath)) {
@@ -178,7 +181,8 @@ class RunAndStayResident {
       debuggingOptions.buildMode,
       mainPath: _mainPath,
       debuggingOptions: debuggingOptions,
-      platformArgs: platformArgs
+      platformArgs: platformArgs,
+      route: route
     );
 
     if (!_result.started) {

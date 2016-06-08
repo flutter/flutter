@@ -285,8 +285,7 @@ class AppDomain extends Domain {
     String deviceId = _getStringArg(args, 'deviceId', required: true);
     String projectDirectory = _getStringArg(args, 'projectDirectory', required: true);
     bool startPaused = _getBoolArg(args, 'startPaused');
-    // TODO(devoncarew): Use the route param.
-    String route = _getStringArg(args, 'route'); // ignore: unused_local_variable
+    String route = _getStringArg(args, 'route');
     String mode = _getStringArg(args, 'mode');
     String target = _getStringArg(args, 'target');
 
@@ -340,7 +339,7 @@ class AppDomain extends Domain {
     }
 
     app._runInZone(this, () {
-      runner.run(observatoryPortCompleter: observatoryPortCompleter).then((_) {
+      runner.run(observatoryPortCompleter: observatoryPortCompleter, route: route).then((_) {
         _sendAppEvent(app, 'stop');
       }).catchError((dynamic error) {
         _sendAppEvent(app, 'stop', <String, dynamic>{ 'error' : error.toString() });
