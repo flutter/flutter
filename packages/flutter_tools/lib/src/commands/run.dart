@@ -116,7 +116,11 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: options
       );
 
-      return runner.run(traceStartup: traceStartup, benchmark: argResults['benchmark']);
+      return runner.run(
+        traceStartup: traceStartup,
+        benchmark: argResults['benchmark'],
+        route: route
+      );
     } else {
       // TODO(devoncarew): Remove this path and support the `--no-resident` option
       // using the `RunAndStayResident` class.
