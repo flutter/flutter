@@ -30,8 +30,6 @@ String findMainDartFile([String target]) {
     return targetPath;
 }
 
-// TODO: split out the cli part of the UI from this class
-
 class RunAndStayResident {
   RunAndStayResident(
     this.device, {
