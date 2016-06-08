@@ -192,12 +192,12 @@ class RenderEditableLine extends RenderBox {
   }
 
   @override
-  double getMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(double width) {
     return _preferredHeight;
   }
 
   @override
-  double getMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(double width) {
     return _preferredHeight;
   }
 

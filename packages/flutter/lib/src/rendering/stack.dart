@@ -286,22 +286,22 @@ class RenderStack extends RenderBox
   }
 
   @override
-  double getMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(double height) {
     return _getIntrinsicDimension((RenderBox child) => child.getMinIntrinsicWidth(height));
   }
 
   @override
-  double getMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(double height) {
     return _getIntrinsicDimension((RenderBox child) => child.getMaxIntrinsicWidth(height));
   }
 
   @override
-  double getMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(double width) {
     return _getIntrinsicDimension((RenderBox child) => child.getMinIntrinsicHeight(width));
   }
 
   @override
-  double getMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(double width) {
     return _getIntrinsicDimension((RenderBox child) => child.getMaxIntrinsicHeight(width));
   }
 

@@ -212,11 +212,12 @@ abstract class GridDelegate {
   /// Returns the minimum width that this grid could be without failing to paint
   /// its contents within itself.
   ///
-  /// Override this to provide a more efficient solution. The default
-  /// implementation actually instantiates a grid specification and measures the
-  /// grid at the given height and child count.
+  /// Override this to provide a more efficient or more correct solution. The
+  /// default implementation actually instantiates a grid specification and
+  /// measures the grid at the given height and child count.
   ///
-  /// For more details, see [RenderBox.getMinIntrinsicWidth].
+  /// For more details on implementing this method, see
+  /// [RenderBox.computeMinIntrinsicWidth].
   double getMinIntrinsicWidth(double height, int childCount) {
     final double width = _getGridSize(new BoxConstraints.tightForFinite(height: height), childCount).width;
     if (width.isFinite)
@@ -227,11 +228,12 @@ abstract class GridDelegate {
   /// Returns the smallest width beyond which increasing the width never
   /// decreases the preferred height.
   ///
-  /// Override this to provide a more efficient solution. The default
-  /// implementation actually instantiates a grid specification and measures the
-  /// grid at the given height and child count.
+  /// Override this to provide a more efficient or more correct solution. The
+  /// default implementation actually instantiates a grid specification and
+  /// measures the grid at the given height and child count.
   ///
-  /// For more details, see [RenderBox.getMaxIntrinsicWidth].
+  /// For more details on implementing this method, see
+  /// [RenderBox.computeMaxIntrinsicWidth].
   double getMaxIntrinsicWidth(double height, int childCount) {
     final double width = _getGridSize(new BoxConstraints.tightForFinite(height: height), childCount).width;
     if (width.isFinite)
@@ -242,11 +244,12 @@ abstract class GridDelegate {
   /// Return the minimum height that this grid could be without failing to paint
   /// its contents within itself.
   ///
-  /// Override this to provide a more efficient solution. The default
-  /// implementation actually instantiates a grid specification and measures the
-  /// grid at the given width and child count.
+  /// Override this to provide a more efficient or more correct solution. The
+  /// default implementation actually instantiates a grid specification and
+  /// measures the grid at the given height and child count.
   ///
-  /// For more details, see [RenderBox.getMinIntrinsicHeight].
+  /// For more details on implementing this method, see
+  /// [RenderBox.computeMinIntrinsicHeight].
   double getMinIntrinsicHeight(double width, int childCount) {
     final double height = _getGridSize(new BoxConstraints.tightForFinite(width: width), childCount).height;
     if (height.isFinite)
@@ -257,11 +260,12 @@ abstract class GridDelegate {
   /// Returns the smallest height beyond which increasing the height never
   /// decreases the preferred width.
   ///
-  /// Override this to provide a more efficient solution. The default
-  /// implementation actually instantiates a grid specification and measures the
-  /// grid at the given width and child count.
+  /// Override this to provide a more efficient or more correct solution. The
+  /// default implementation actually instantiates a grid specification and
+  /// measures the grid at the given height and child count.
   ///
-  /// For more details, see [RenderBox.getMaxIntrinsicHeight].
+  /// For more details on implementing this method, see
+  /// [RenderBox.computeMaxIntrinsicHeight].
   double getMaxIntrinsicHeight(double width, int childCount) {
     final double height = _getGridSize(new BoxConstraints.tightForFinite(width: width), childCount).height;
     if (height.isFinite)
@@ -581,22 +585,22 @@ class RenderGrid extends RenderVirtualViewport<GridParentData> {
   }
 
   @override
-  double getMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(double height) {
     return _delegate.getMinIntrinsicWidth(height, virtualChildCount);
   }
 
   @override
-  double getMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(double height) {
     return _delegate.getMaxIntrinsicWidth(height, virtualChildCount);
   }
 
   @override
-  double getMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(double width) {
     return _delegate.getMinIntrinsicHeight(width, virtualChildCount);
   }
 
   @override
-  double getMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(double width) {
     return _delegate.getMaxIntrinsicHeight(width, virtualChildCount);
   }
 

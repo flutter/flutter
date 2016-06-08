@@ -97,12 +97,12 @@ class RenderPerformanceOverlay extends RenderBox {
   bool get alwaysNeedsCompositing => true;
 
   @override
-  double getMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(double height) {
     return 0.0;
   }
 
   @override
-  double getMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(double height) {
     return 0.0;
   }
 
@@ -119,12 +119,12 @@ class RenderPerformanceOverlay extends RenderBox {
   }
 
   @override
-  double getMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(double width) {
     return _intrinsicHeight;
   }
 
   @override
-  double getMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(double width) {
     return _intrinsicHeight;
   }
 

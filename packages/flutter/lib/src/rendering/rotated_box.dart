@@ -43,28 +43,28 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   bool get _isVertical => quarterTurns % 2 == 1;
 
   @override
-  double getMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(double height) {
     if (child == null)
       return 0.0;
     return _isVertical ? child.getMinIntrinsicHeight(height) : child.getMinIntrinsicWidth(height);
   }
 
   @override
-  double getMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(double height) {
     if (child == null)
       return 0.0;
     return _isVertical ? child.getMaxIntrinsicHeight(height) : child.getMaxIntrinsicWidth(height);
   }
 
   @override
-  double getMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(double width) {
     if (child == null)
       return 0.0;
     return _isVertical ? child.getMinIntrinsicWidth(width) : child.getMinIntrinsicHeight(width);
   }
 
   @override
-  double getMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(double width) {
     if (child == null)
       return 0.0;
     return _isVertical ? child.getMaxIntrinsicWidth(width) : child.getMaxIntrinsicHeight(width);

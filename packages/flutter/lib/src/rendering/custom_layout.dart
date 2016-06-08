@@ -244,7 +244,7 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   // or we should expose intrinsic delegate callbacks and throw if they're not implemented.
 
   @override
-  double getMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(double height) {
     final double width = _getSize(new BoxConstraints.tightForFinite(height: height)).width;
     if (width.isFinite)
       return width;
@@ -252,7 +252,7 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   }
 
   @override
-  double getMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(double height) {
     final double width = _getSize(new BoxConstraints.tightForFinite(height: height)).width;
     if (width.isFinite)
       return width;
@@ -260,7 +260,7 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   }
 
   @override
-  double getMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(double width) {
     final double height = _getSize(new BoxConstraints.tightForFinite(width: width)).height;
     if (height.isFinite)
       return height;
@@ -268,7 +268,7 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   }
 
   @override
-  double getMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(double width) {
     final double height = _getSize(new BoxConstraints.tightForFinite(width: width)).height;
     if (height.isFinite)
       return height;

@@ -96,7 +96,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
     return extent;
   }
 
-  double _getIntrinsicWidth() {
+  double _computeIntrinsicWidth() {
     switch (mainAxis) {
       case Axis.vertical:
         assert(debugThrowIfNotCheckingIntrinsics());
@@ -111,16 +111,16 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
   }
 
   @override
-  double getMinIntrinsicWidth(double height) {
-    return _getIntrinsicWidth();
+  double computeMinIntrinsicWidth(double height) {
+    return _computeIntrinsicWidth();
   }
 
   @override
-  double getMaxIntrinsicWidth(double height) {
-    return _getIntrinsicWidth();
+  double computeMaxIntrinsicWidth(double height) {
+    return _computeIntrinsicWidth();
   }
 
-  double _getIntrinsicHeight() {
+  double _computeIntrinsicHeight() {
     switch (mainAxis) {
       case Axis.vertical:
         final double height = _preferredExtent;
@@ -135,13 +135,13 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
   }
 
   @override
-  double getMinIntrinsicHeight(double width) {
-    return _getIntrinsicHeight();
+  double computeMinIntrinsicHeight(double width) {
+    return _computeIntrinsicHeight();
   }
 
   @override
-  double getMaxIntrinsicHeight(double width) {
-    return _getIntrinsicHeight();
+  double computeMaxIntrinsicHeight(double width) {
+    return _computeIntrinsicHeight();
   }
 
   @override

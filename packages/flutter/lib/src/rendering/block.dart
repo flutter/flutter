@@ -180,7 +180,7 @@ class RenderBlock extends RenderBox
   }
 
   @override
-  double getMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(double height) {
     switch (mainAxis) {
       case Axis.horizontal:
         return _getIntrinsicMainAxis((RenderBox child) => child.getMinIntrinsicWidth(height));
@@ -190,7 +190,7 @@ class RenderBlock extends RenderBox
   }
 
   @override
-  double getMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(double height) {
     switch (mainAxis) {
       case Axis.horizontal:
         return _getIntrinsicMainAxis((RenderBox child) => child.getMaxIntrinsicWidth(height));
@@ -200,7 +200,7 @@ class RenderBlock extends RenderBox
   }
 
   @override
-  double getMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(double width) {
     switch (mainAxis) {
       case Axis.horizontal:
         return _getIntrinsicMainAxis((RenderBox child) => child.getMinIntrinsicHeight(width));
@@ -210,7 +210,7 @@ class RenderBlock extends RenderBox
   }
 
   @override
-  double getMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(double width) {
     switch (mainAxis) {
       case Axis.horizontal:
         return _getIntrinsicMainAxis((RenderBox child) => child.getMaxIntrinsicHeight(width));

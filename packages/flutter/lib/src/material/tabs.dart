@@ -100,7 +100,7 @@ class _RenderTabBar extends RenderBox with
   }
 
   @override
-  double getMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(double height) {
     double maxWidth = 0.0;
     RenderBox child = firstChild;
     while (child != null) {
@@ -112,7 +112,7 @@ class _RenderTabBar extends RenderBox with
   }
 
   @override
-  double getMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(double height) {
     double maxWidth = 0.0;
     double totalWidth = 0.0;
     RenderBox child = firstChild;
@@ -130,10 +130,10 @@ class _RenderTabBar extends RenderBox with
   double get _tabBarHeight => _tabHeight + _kTabIndicatorHeight;
 
   @override
-  double getMinIntrinsicHeight(double width) => _tabBarHeight;
+  double computeMinIntrinsicHeight(double width) => _tabBarHeight;
 
   @override
-  double getMaxIntrinsicHeight(double width) => _tabBarHeight;
+  double computeMaxIntrinsicHeight(double width) => _tabBarHeight;
 
   void layoutFixedWidthTabs() {
     double tabWidth = size.width / childCount;
