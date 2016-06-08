@@ -471,6 +471,26 @@ class BoxParentData extends ParentData {
 /// ContainerRenderObjectMixin.
 abstract class ContainerBoxParentDataMixin<ChildType extends RenderObject> extends BoxParentData with ContainerParentDataMixin<ChildType> { }
 
+enum _IntrinsicDimension { minWidth, maxWidth, minHeight, maxHeight }
+class _IntrinsicDimensionsCacheEntry {
+  _IntrinsicDimensionsCacheEntry(this.dimension, this.argument);
+
+  final _IntrinsicDimension dimension;
+  final double argument;
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other is! _IntrinsicDimensionsCacheEntry)
+      return false;
+    final _IntrinsicDimensionsCacheEntry typedOther = other;
+    return dimension == typedOther.dimension &&
+           argument == typedOther.argument;
+  }
+
+  @override
+  int get hashCode => hashValues(dimension, argument);
+}
+
 /// A render object in a 2D cartesian coordinate system.
 ///
 /// The size of each box is expressed as a width and a height. Each box has its
@@ -496,6 +516,28 @@ abstract class RenderBox extends RenderObject {
       child.parentData = new BoxParentData();
   }
 
+  Map<_IntrinsicDimensionsCacheEntry, double> _cachedIntrinsicDimensions;
+
+  double _computeIntrinsicDimension(_IntrinsicDimension dimension, double argument, double computer(double argument)) {
+    assert(RenderObject.debugCheckingIntrinsics || !debugDoingThisResize); // performResize should not depend on anything except the incoming constraints
+    bool shouldCache = true;
+    assert(() {
+      // we don't want the checked-mode intrinsic tests to affect
+      // who gets marked dirty, etc.
+      if (RenderObject.debugCheckingIntrinsics)
+        shouldCache = false;
+      return true;
+    });
+    if (shouldCache) {
+      _cachedIntrinsicDimensions ??= <_IntrinsicDimensionsCacheEntry, double>{};
+      return _cachedIntrinsicDimensions.putIfAbsent(
+        new _IntrinsicDimensionsCacheEntry(dimension, argument),
+        () => computer(argument)
+      );
+    }
+    return computer(argument);
+  }
+
   /// Returns the minimum width that this box could be without failing to
   /// correctly paint its contents within itself, without clipping.
   ///
@@ -504,7 +546,25 @@ abstract class RenderBox extends RenderObject {
   /// environment is being requested. The given height should never be negative
   /// or null.
   ///
-  /// Override in subclasses that implement [performLayout].
+  /// This function should only be called on one's children. Calling this
+  /// function couples the child with the parent so that when the child's layout
+  /// changes, the parent is notified (via [markNeedsLayout]).
+  ///
+  /// Calling this function is expensive and as it can result in O(N^2)
+  /// behavior.
+  ///
+  /// Do not override this function. Instead, implement [computeMinIntrinsicWidth].
+  @mustCallSuper
+  double getMinIntrinsicWidth(double height) {
+    return _computeIntrinsicDimension(_IntrinsicDimension.minWidth, height, computeMinIntrinsicWidth);
+  }
+
+  /// Computes the value returned by [getMinIntrinsicWidth]. Do not call this
+  /// function directly, instead, call [getMinIntrinsicWidth].
+  ///
+  /// Override in subclasses that implement [performLayout]. This method should
+  /// return the minimum width that this box could be without failing to
+  /// correctly paint its contents within itself, without clipping.
   ///
   /// If the layout algorithm is independent of the context (e.g. it always
   /// tries to be a particular size), or if the layout algorithm is
@@ -516,6 +576,10 @@ abstract class RenderBox extends RenderObject {
   /// height-in-width-out when the width is unconstrained, then the height
   /// argument is the height to use.
   ///
+  /// If this algorithm depends on the intrinsic dimensions of a child, the
+  /// intrinsic dimensions of that child should be obtained using the functions
+  /// whose names start with `get`, not `compute`.
+  ///
   /// This function should never return a negative or infinite value.
   ///
   /// ## Examples
@@ -526,14 +590,14 @@ abstract class RenderBox extends RenderObject {
   /// `height` argument is therefore ignored.
   ///
   /// Consider the string "Hello World" The _maximum_ intrinsic width (as
-  /// returned from [getMaxIntrinsicWidth]) would be the width of the string
+  /// returned from [computeMaxIntrinsicWidth]) would be the width of the string
   /// with no line breaks.
   ///
   /// The minimum intrinsic width would be the width of the widest word, "Hello"
   /// or "World". If the text is rendered in an even narrower width, however, it
   /// might still not overflow. For example, maybe the rendering would put a
   /// line-break half-way through the words, as in "Hel⁞lo⁞Wor⁞ld". However,
-  /// this wouldn't be a _correct_ rendering, and [getMinIntrinsicWidth] is
+  /// this wouldn't be a _correct_ rendering, and [computeMinIntrinsicWidth] is
   /// supposed to render the minimum width that the box could be without failing
   /// to _correctly_ paint the contents within itself.
   ///
@@ -567,13 +631,14 @@ abstract class RenderBox extends RenderObject {
   /// incoming `height` or `width` argument is finite, treating that as a tight
   /// constraint in the respective direction and treating the other direction's
   /// constraints as unbounded. This is because the definitions of
-  /// [getMinIntrinsicWidth] and [getMinIntrinsicHeight] are in terms of what
-  /// the dimensions _could be_, and such boxes can only be one size in such
-  /// cases.
+  /// [computeMinIntrinsicWidth] and [computeMinIntrinsicHeight] are in terms of
+  /// what the dimensions _could be_, and such boxes can only be one size in
+  /// such cases.
   ///
   /// When the incoming argument is not finite, then they should return the
   /// actual intrinsic dimensions based on the contents, as any other box would.
-  double getMinIntrinsicWidth(double height) {
+  @protected
+  double computeMinIntrinsicWidth(double height) {
     return 0.0;
   }
 
@@ -581,25 +646,50 @@ abstract class RenderBox extends RenderObject {
   /// decreases the preferred height. The preferred height is the value that
   /// would be returned by [getMinIntrinsicHeight] for that width.
   ///
-  /// Override in subclasses that implement [performLayout].
+  /// This function should only be called on one's children. Calling this
+  /// function couples the child with the parent so that when the child's layout
+  /// changes, the parent is notified (via [markNeedsLayout]).
+  ///
+  /// Calling this function is expensive and as it can result in O(N^2)
+  /// behavior.
+  ///
+  /// Do not override this function. Instead, implement
+  /// [computeMaxIntrinsicWidth].
+  @mustCallSuper
+  double getMaxIntrinsicWidth(double height) {
+    return _computeIntrinsicDimension(_IntrinsicDimension.maxWidth, height, computeMaxIntrinsicWidth);
+  }
+
+  /// Computes the value returned by [getMaxIntrinsicWidth]. Do not call this
+  /// function directly, instead, call [getMaxIntrinsicWidth].
+  ///
+  /// Override in subclasses that implement [performLayout]. This should return
+  /// the smallest width beyond which increasing the width never decreases the
+  /// preferred height. The preferred height is the value that would be returned
+  /// by [computeMinIntrinsicHeight] for that width.
   ///
   /// If the layout algorithm is strictly height-in-width-out, or is
   /// height-in-width-out when the width is unconstrained, then this should
-  /// return the same value as [getMinIntrinsicWidth] for the same height.
+  /// return the same value as [computeMinIntrinsicWidth] for the same height.
   ///
   /// Otherwise, the height argument should be ignored, and the returned value
   /// should be equal to or bigger than the value returned by
-  /// [getMinIntrinsicWidth].
+  /// [computeMinIntrinsicWidth].
   ///
   /// The value returned by this method might not match the size that the object
   /// would actually take. For example, a [RenderBox] subclass that always
   /// exactly sizes itself using [BoxConstraints.biggest] might well size itself
   /// bigger than its max intrinsic size.
   ///
+  /// If this algorithm depends on the intrinsic dimensions of a child, the
+  /// intrinsic dimensions of that child should be obtained using the functions
+  /// whose names start with `get`, not `compute`.
+  ///
   /// This function should never return a negative or infinite value.
   ///
-  /// See also examples in the definition of [getMinIntrinsicWidth].
-  double getMaxIntrinsicWidth(double height) {
+  /// See also examples in the definition of [computeMinIntrinsicWidth].
+  @protected
+  double computeMaxIntrinsicWidth(double height) {
     return 0.0;
   }
 
@@ -611,7 +701,26 @@ abstract class RenderBox extends RenderObject {
   /// environment is being requested. The given width should never be negative
   /// or null.
   ///
-  /// Override in subclasses that implement [performLayout].
+  /// This function should only be called on one's children. Calling this
+  /// function couples the child with the parent so that when the child's layout
+  /// changes, the parent is notified (via [markNeedsLayout]).
+  ///
+  /// Calling this function is expensive and as it can result in O(N^2)
+  /// behavior.
+  ///
+  /// Do not override this function. Instead, implement
+  /// [computeMinIntrinsicHeight].
+  @mustCallSuper
+  double getMinIntrinsicHeight(double width) {
+    return _computeIntrinsicDimension(_IntrinsicDimension.minHeight, width, computeMinIntrinsicHeight);
+  }
+
+  /// Computes the value returned by [getMinIntrinsicHeight]. Do not call this
+  /// function directly, instead, call [getMinIntrinsicHeight].
+  ///
+  /// Override in subclasses that implement [performLayout]. Should return the
+  /// minimum height that this box could be without failing to correctly paint
+  /// its contents within itself, without clipping.
   ///
   /// If the layout algorithm is independent of the context (e.g. it always
   /// tries to be a particular size), or if the layout algorithm is
@@ -623,10 +732,15 @@ abstract class RenderBox extends RenderObject {
   /// width-in-height-out when the height is unconstrained, then the width
   /// argument is the width to use.
   ///
+  /// If this algorithm depends on the intrinsic dimensions of a child, the
+  /// intrinsic dimensions of that child should be obtained using the functions
+  /// whose names start with `get`, not `compute`.
+  ///
   /// This function should never return a negative or infinite value.
   ///
-  /// See also examples in the definition of [getMinIntrinsicWidth].
-  double getMinIntrinsicHeight(double width) {
+  /// See also examples in the definition of [computeMinIntrinsicWidth].
+  @protected
+  double computeMinIntrinsicHeight(double height) {
     return 0.0;
   }
 
@@ -634,25 +748,50 @@ abstract class RenderBox extends RenderObject {
   /// decreases the preferred width. The preferred width is the value that
   /// would be returned by [getMinIntrinsicWidth] for that height.
   ///
-  /// Override in subclasses that implement [performLayout].
+  /// This function should only be called on one's children. Calling this
+  /// function couples the child with the parent so that when the child's layout
+  /// changes, the parent is notified (via [markNeedsLayout]).
+  ///
+  /// Calling this function is expensive and as it can result in O(N^2)
+  /// behavior.
+  ///
+  /// Do not override this function. Instead, implement
+  /// [computeMaxIntrinsicHeight].
+  @mustCallSuper
+  double getMaxIntrinsicHeight(double width) {
+    return _computeIntrinsicDimension(_IntrinsicDimension.maxHeight, width, computeMaxIntrinsicHeight);
+  }
+
+  /// Computes the value returned by [getMaxIntrinsicHeight]. Do not call this
+  /// function directly, instead, call [getMaxIntrinsicHeight].
+  ///
+  /// Override in subclasses that implement [performLayout]. Should return the
+  /// smallest height beyond which increasing the height never decreases the
+  /// preferred width. The preferred width is the value that would be returned
+  /// by [computeMinIntrinsicWidth] for that height.
   ///
   /// If the layout algorithm is strictly width-in-height-out, or is
   /// width-in-height-out when the height is unconstrained, then this should
-  /// return the same value as [getMinIntrinsicHeight] for the same width.
+  /// return the same value as [computeMinIntrinsicHeight] for the same width.
   ///
   /// Otherwise, the width argument should be ignored, and the returned value
   /// should be equal to or bigger than the value returned by
-  /// [getMinIntrinsicHeight].
+  /// [computeMinIntrinsicHeight].
   ///
   /// The value returned by this method might not match the size that the object
   /// would actually take. For example, a [RenderBox] subclass that always
   /// exactly sizes itself using [BoxConstraints.biggest] might well size itself
   /// bigger than its max intrinsic size.
   ///
+  /// If this algorithm depends on the intrinsic dimensions of a child, the
+  /// intrinsic dimensions of that child should be obtained using the functions
+  /// whose names start with `get`, not `compute`.
+  ///
   /// This function should never return a negative or infinite value.
   ///
-  /// See also examples in the definition of [getMinIntrinsicWidth].
-  double getMaxIntrinsicHeight(double width) {
+  /// See also examples in the definition of [computeMinIntrinsicWidth].
+  @protected
+  double computeMaxIntrinsicHeight(double height) {
     return 0.0;
   }
 
@@ -749,7 +888,6 @@ abstract class RenderBox extends RenderObject {
   }
 
   Map<TextBaseline, double> _cachedBaselines;
-  bool _ancestorUsesBaseline = false;
   static bool _debugDoingBaseline = false;
   static bool _debugSetDoingBaseline(bool value) {
     _debugDoingBaseline = value;
@@ -795,9 +933,9 @@ abstract class RenderBox extends RenderObject {
   /// This function must only be called from [getDistanceToBaseline] and
   /// [computeDistanceToActualBaseline]. Do not call this function directly from
   /// outside those two methods.
+  @mustCallSuper
   double getDistanceToActualBaseline(TextBaseline baseline) {
     assert(_debugDoingBaseline);
-    _ancestorUsesBaseline = true;
     if (_cachedBaselines == null)
       _cachedBaselines = new Map<TextBaseline, double>();
     _cachedBaselines.putIfAbsent(baseline, () => computeDistanceToActualBaseline(baseline));
@@ -953,20 +1091,19 @@ abstract class RenderBox extends RenderObject {
 
   @override
   void markNeedsLayout() {
-    if (_cachedBaselines != null && _cachedBaselines.isNotEmpty) {
-      // if we have cached data, then someone must have used our data
-      assert(_ancestorUsesBaseline);
-      final RenderObject parent = this.parent;
-      parent?.markNeedsLayout();
-      assert(parent == this.parent);
-      // Now that they're dirty, we can forget that they used the
-      // baseline. If they use it again, then we'll set the bit
-      // again, and if we get dirty again, we'll notify them again.
-      _ancestorUsesBaseline = false;
-      _cachedBaselines.clear();
-    } else {
-      // if we've never cached any data, then nobody can have used it
-      assert(!_ancestorUsesBaseline);
+    if ((_cachedBaselines != null && _cachedBaselines.isNotEmpty) ||
+        (_cachedIntrinsicDimensions != null && _cachedIntrinsicDimensions.isNotEmpty)) {
+      // If we have cached data, then someone must have used our data.
+      // Since the parent will shortly be marked dirty, we can forget that they
+      // used the baseline and/or intrinsic dimensions. If they use them again,
+      // then we'll fill the cache again, and if we get dirty again, we'll
+      // notify them again.
+      _cachedBaselines?.clear();
+      _cachedIntrinsicDimensions?.clear();
+       if (parent is RenderObject) {
+        markParentNeedsLayout();
+        return;
+      }
     }
     super.markNeedsLayout();
   }

@@ -42,28 +42,28 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
   }
 
   @override
-  double getMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(double height) {
     if (child != null)
       return child.getMinIntrinsicWidth(height);
     return 0.0;
   }
 
   @override
-  double getMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(double height) {
     if (child != null)
       return child.getMaxIntrinsicWidth(height);
     return 0.0;
   }
 
   @override
-  double getMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(double width) {
     if (child != null)
       return child.getMinIntrinsicHeight(width);
     return 0.0;
   }
 
   @override
-  double getMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(double width) {
     if (child != null)
       return child.getMaxIntrinsicHeight(width);
     return 0.0;
@@ -195,32 +195,32 @@ class RenderConstrainedBox extends RenderProxyBox {
   }
 
   @override
-  double getMinIntrinsicWidth(double height) {
-    final double width = super.getMinIntrinsicWidth(height);
+  double computeMinIntrinsicWidth(double height) {
+    final double width = super.computeMinIntrinsicWidth(height);
     if (_additionalConstraints.hasBoundedWidth)
       return _additionalConstraints.constrainWidth(width);
     return width;
   }
 
   @override
-  double getMaxIntrinsicWidth(double height) {
-    final double width = super.getMaxIntrinsicWidth(height);
+  double computeMaxIntrinsicWidth(double height) {
+    final double width = super.computeMaxIntrinsicWidth(height);
     if (_additionalConstraints.hasBoundedWidth)
       return _additionalConstraints.constrainWidth(width);
     return width;
   }
 
   @override
-  double getMinIntrinsicHeight(double width) {
-    final double height = super.getMinIntrinsicHeight(width);
+  double computeMinIntrinsicHeight(double width) {
+    final double height = super.computeMinIntrinsicHeight(width);
     if (_additionalConstraints.hasBoundedHeight)
       return _additionalConstraints.constrainHeight(height);
     return height;
   }
 
   @override
-  double getMaxIntrinsicHeight(double width) {
-    final double height = super.getMaxIntrinsicHeight(width);
+  double computeMaxIntrinsicHeight(double width) {
+    final double height = super.computeMaxIntrinsicHeight(width);
     if (_additionalConstraints.hasBoundedHeight)
       return _additionalConstraints.constrainHeight(height);
     return height;
@@ -381,7 +381,7 @@ class RenderAspectRatio extends RenderProxyBox {
   }
 
   @override
-  double getMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(double height) {
     if (height.isFinite)
       return height * _aspectRatio;
     if (child != null)
@@ -390,7 +390,7 @@ class RenderAspectRatio extends RenderProxyBox {
   }
 
   @override
-  double getMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(double height) {
     if (height.isFinite)
       return height * _aspectRatio;
     if (child != null)
@@ -399,7 +399,7 @@ class RenderAspectRatio extends RenderProxyBox {
   }
 
   @override
-  double getMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(double width) {
     if (width.isFinite)
       return width / _aspectRatio;
     if (child != null)
@@ -408,7 +408,7 @@ class RenderAspectRatio extends RenderProxyBox {
   }
 
   @override
-  double getMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(double width) {
     if (width.isFinite)
       return width / _aspectRatio;
     if (child != null)
@@ -537,12 +537,12 @@ class RenderIntrinsicWidth extends RenderProxyBox {
   }
 
   @override
-  double getMinIntrinsicWidth(double height) {
-    return getMaxIntrinsicWidth(height);
+  double computeMinIntrinsicWidth(double height) {
+    return computeMaxIntrinsicWidth(height);
   }
 
   @override
-  double getMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(double height) {
     if (child == null)
       return 0.0;
     final double width = child.getMaxIntrinsicWidth(height);
@@ -550,22 +550,22 @@ class RenderIntrinsicWidth extends RenderProxyBox {
   }
 
   @override
-  double getMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(double width) {
     if (child == null)
       return 0.0;
     if (!width.isFinite)
-      width = getMaxIntrinsicWidth(double.INFINITY);
+      width = computeMaxIntrinsicWidth(double.INFINITY);
     assert(width.isFinite);
     final double height = child.getMinIntrinsicHeight(width);
     return _applyStep(height, _stepHeight);
   }
 
   @override
-  double getMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(double width) {
     if (child == null)
       return 0.0;
     if (!width.isFinite)
-      width = getMaxIntrinsicWidth(double.INFINITY);
+      width = computeMaxIntrinsicWidth(double.INFINITY);
     assert(width.isFinite);
     final double height = child.getMaxIntrinsicHeight(width);
     return _applyStep(height, _stepHeight);
@@ -614,7 +614,7 @@ class RenderIntrinsicHeight extends RenderProxyBox {
   }) : super(child);
 
   @override
-  double getMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(double height) {
     if (child == null)
       return 0.0;
     if (!height.isFinite)
@@ -624,7 +624,7 @@ class RenderIntrinsicHeight extends RenderProxyBox {
   }
 
   @override
-  double getMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(double height) {
     if (child == null)
       return 0.0;
     if (!height.isFinite)
@@ -634,8 +634,8 @@ class RenderIntrinsicHeight extends RenderProxyBox {
   }
 
   @override
-  double getMinIntrinsicHeight(double width) {
-    return getMaxIntrinsicHeight(width);
+  double computeMinIntrinsicHeight(double width) {
+    return computeMaxIntrinsicHeight(width);
   }
 
   @override

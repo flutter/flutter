@@ -1199,7 +1199,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// debugAssertDoesMeetConstraints(), and should not be checked in
   /// release mode (where it will always be false).
   static bool debugCheckingIntrinsics = false;
-  bool _debugAncestorsAlreadyMarkedNeedsLayout() {
+  bool _debugSubtreeRelayoutRootAlreadyMarkedNeedsLayout() {
     if (_relayoutSubtreeRoot == null)
       return true; // we haven't yet done layout even once, so there's nothing for us to do
     RenderObject node = this;
@@ -1214,47 +1214,81 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     return true;
   }
 
-  /// Mark this render object's layout information as dirty.
+  /// Mark this render object's layout information as dirty, and either register
+  /// this object with its [PipelineOwner], or defer to the parent, depending on
+  /// whether this object is a relayout boundary or not respectively.
+  ///
+  /// ## Background
   ///
   /// Rather than eagerly updating layout information in response to writes into
-  /// this render object, we instead mark the layout information as dirty, which
+  /// a render object, we instead mark the layout information as dirty, which
   /// schedules a visual update. As part of the visual update, the rendering
-  /// pipeline will update this render object's layout information.
+  /// pipeline updates the render object's layout information.
   ///
   /// This mechanism batches the layout work so that multiple sequential writes
   /// are coalesced, removing redundant computation.
   ///
-  /// Causes [needsLayout] to return true for this render object. If the parent
-  /// render object indicated that it uses the size of this render object in
-  /// computing its layout information, this function will also mark the parent
-  /// as needing layout.
+  /// If a render object's parent indicates that it uses the size of one of its
+  /// render object children when computing its layout information, this
+  /// function, when called for the child, will also mark the parent as needing
+  /// layout. In that case, since both the parent and the child need to have
+  /// their layout recomputed, the pipeline owner is only notified about the
+  /// parent; when the parent is laid out, it will call the child's [layout]
+  /// method and thus the child will be laid out as well.
+  ///
+  /// Once [markNeedsLayout] has been called on a render object, [needsLayout]
+  /// returns true for that render object until just after the pipeline owner
+  /// has called [layout] on the render object.
+  ///
+  /// ## Special cases
+  ///
+  /// Some subclasses of [RenderObject], notably [RenderBox], have other
+  /// situations in which the parent needs to be notified if the child is
+  /// dirtied. Such subclasses override markNeedsLayout and either call
+  /// `super.markNeedsLayout()`, in the normal case, or call
+  /// [markParentNeedsLayout], in the case where the parent neds to be laid out
+  /// as well as the child.
   void markNeedsLayout() {
     assert(_debugCanPerformMutations);
     if (_needsLayout) {
-      assert(_debugAncestorsAlreadyMarkedNeedsLayout());
+      assert(_debugSubtreeRelayoutRootAlreadyMarkedNeedsLayout());
       return;
     }
-    _needsLayout = true;
     assert(_relayoutSubtreeRoot != null);
     if (_relayoutSubtreeRoot != this) {
-      final RenderObject parent = this.parent;
-      if (!_doingThisLayoutWithCallback) {
-        parent.markNeedsLayout();
-      } else {
-        assert(parent._debugDoingThisLayout);
-      }
-      assert(parent == this.parent);
+      markParentNeedsLayout();
     } else {
-      assert(() {
-        if (debugPrintMarkNeedsLayoutStacks)
-          debugPrintStack();
-        return true;
-      });
+      _needsLayout = true;
       if (owner != null) {
+        assert(() {
+          if (debugPrintMarkNeedsLayoutStacks)
+            debugPrintStack();
+          return true;
+        });
         owner._nodesNeedingLayout.add(this);
         owner.requestVisualUpdate();
       }
     }
+  }
+
+  /// Mark this render object's layout information as dirty, and then defer to
+  /// the parent.
+  ///
+  /// This function should only be called from [markNeedsLayout] implementations
+  /// of subclasses that introduce more reasons for deferring the handling of
+  /// dirty layout to the parent. See [markNeedsLayout] for details.
+  ///
+  /// Only call this if [parent] is not null.
+  @protected
+  void markParentNeedsLayout() {
+    _needsLayout = true;
+    final RenderObject parent = this.parent;
+    if (!_doingThisLayoutWithCallback) {
+      parent.markNeedsLayout();
+    } else {
+      assert(parent._debugDoingThisLayout);
+    }
+    assert(parent == this.parent);
   }
 
   void _cleanRelayoutSubtreeRoot() {
