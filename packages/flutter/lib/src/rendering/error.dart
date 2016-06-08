@@ -54,12 +54,12 @@ class RenderErrorBox extends RenderBox {
   ui.Paragraph _paragraph;
 
   @override
-  double getMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(double height) {
     return _kMaxWidth;
   }
 
   @override
-  double getMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(double width) {
     return _kMaxHeight;
   }
 

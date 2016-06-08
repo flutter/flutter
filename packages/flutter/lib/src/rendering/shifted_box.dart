@@ -17,28 +17,28 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
   }
 
   @override
-  double getMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(double height) {
     if (child != null)
       return child.getMinIntrinsicWidth(height);
     return 0.0;
   }
 
   @override
-  double getMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(double height) {
     if (child != null)
       return child.getMaxIntrinsicWidth(height);
     return 0.0;
   }
 
   @override
-  double getMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(double width) {
     if (child != null)
       return child.getMinIntrinsicHeight(width);
     return 0.0;
   }
 
   @override
-  double getMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(double width) {
     if (child != null)
       return child.getMaxIntrinsicHeight(width);
     return 0.0;
@@ -111,7 +111,7 @@ class RenderPadding extends RenderShiftedBox {
   }
 
   @override
-  double getMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(double height) {
     final double totalHorizontalPadding = padding.left + padding.right;
     final double totalVerticalPadding = padding.top + padding.bottom;
     if (child != null) // next line relies on double.INFINITY absorption
@@ -120,7 +120,7 @@ class RenderPadding extends RenderShiftedBox {
   }
 
   @override
-  double getMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(double height) {
     final double totalHorizontalPadding = padding.left + padding.right;
     final double totalVerticalPadding = padding.top + padding.bottom;
     if (child != null) // next line relies on double.INFINITY absorption
@@ -129,7 +129,7 @@ class RenderPadding extends RenderShiftedBox {
   }
 
   @override
-  double getMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(double width) {
     final double totalHorizontalPadding = padding.left + padding.right;
     final double totalVerticalPadding = padding.top + padding.bottom;
     if (child != null) // next line relies on double.INFINITY absorption
@@ -138,7 +138,7 @@ class RenderPadding extends RenderShiftedBox {
   }
 
   @override
-  double getMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(double width) {
     final double totalHorizontalPadding = padding.left + padding.right;
     final double totalVerticalPadding = padding.top + padding.bottom;
     if (child != null) // next line relies on double.INFINITY absorption
@@ -551,22 +551,22 @@ class RenderSizedOverflowBox extends RenderAligningShiftedBox {
   }
 
   @override
-  double getMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(double height) {
     return _requestedSize.width;
   }
 
   @override
-  double getMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(double height) {
     return _requestedSize.width;
   }
 
   @override
-  double getMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(double width) {
     return _requestedSize.height;
   }
 
   @override
-  double getMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(double width) {
     return _requestedSize.height;
   }
 
@@ -667,10 +667,10 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   }
 
   @override
-  double getMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(double height) {
     double result;
     if (child == null) {
-      result = super.getMinIntrinsicWidth(height);
+      result = super.computeMinIntrinsicWidth(height);
     } else { // the following line relies on double.INFINITY absorption
       result = child.getMinIntrinsicWidth(height * (_heightFactor ?? 1.0));
     }
@@ -679,10 +679,10 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   }
 
   @override
-  double getMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(double height) {
     double result;
     if (child == null) {
-      result = super.getMaxIntrinsicWidth(height);
+      result = super.computeMaxIntrinsicWidth(height);
     } else { // the following line relies on double.INFINITY absorption
       result = child.getMaxIntrinsicWidth(height * (_heightFactor ?? 1.0));
     }
@@ -691,10 +691,10 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   }
 
   @override
-  double getMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(double width) {
     double result;
     if (child == null) {
-      result = super.getMinIntrinsicHeight(width);
+      result = super.computeMinIntrinsicHeight(width);
     } else { // the following line relies on double.INFINITY absorption
       result = child.getMinIntrinsicHeight(width * (_widthFactor ?? 1.0));
     }
@@ -703,10 +703,10 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   }
 
   @override
-  double getMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(double width) {
     double result;
     if (child == null) {
-      result = super.getMaxIntrinsicHeight(width);
+      result = super.computeMaxIntrinsicHeight(width);
     } else { // the following line relies on double.INFINITY absorption
       result = child.getMaxIntrinsicHeight(width * (_widthFactor ?? 1.0));
     }
@@ -786,7 +786,7 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
   // or we should expose intrinsic delegate callbacks and throw if they're not implemented.
 
   @override
-  double getMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(double height) {
     final double width = _getSize(new BoxConstraints.tightForFinite(height: height)).width;
     if (width.isFinite)
       return width;
@@ -794,7 +794,7 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
   }
 
   @override
-  double getMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(double height) {
     final double width = _getSize(new BoxConstraints.tightForFinite(height: height)).width;
     if (width.isFinite)
       return width;
@@ -802,7 +802,7 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
   }
 
   @override
-  double getMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(double width) {
     final double height = _getSize(new BoxConstraints.tightForFinite(width: width)).height;
     if (height.isFinite)
       return height;
@@ -810,7 +810,7 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
   }
 
   @override
-  double getMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(double width) {
     final double height = _getSize(new BoxConstraints.tightForFinite(width: width)).height;
     if (height.isFinite)
       return height;

@@ -236,28 +236,28 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
   }
 
   @override
-  double getMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(double height) {
     if (child != null)
       return child.getMinIntrinsicWidth(height);
     return 0.0;
   }
 
   @override
-  double getMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(double height) {
     if (child != null)
       return child.getMaxIntrinsicWidth(height);
     return 0.0;
   }
 
   @override
-  double getMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(double width) {
     if (child != null)
       return child.getMinIntrinsicHeight(width);
     return 0.0;
   }
 
   @override
-  double getMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(double width) {
     if (child != null)
       return child.getMaxIntrinsicHeight(width);
     return 0.0;
@@ -408,25 +408,25 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
   }
 
   @override
-  double getMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(double height) {
     assert(debugThrowIfNotCheckingIntrinsics());
     return 0.0;
   }
 
   @override
-  double getMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(double height) {
     assert(debugThrowIfNotCheckingIntrinsics());
     return 0.0;
   }
 
   @override
-  double getMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(double width) {
     assert(debugThrowIfNotCheckingIntrinsics());
     return 0.0;
   }
 
   @override
-  double getMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(double width) {
     assert(debugThrowIfNotCheckingIntrinsics());
     return 0.0;
   }

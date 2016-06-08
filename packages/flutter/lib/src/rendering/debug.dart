@@ -61,6 +61,11 @@ double debugRepaintRainbowHueIncrement = 2.0;
 bool debugPrintMarkNeedsPaintStacks = false;
 
 /// Log the call stacks that mark render objects as needing layout.
+///
+/// For sanity, this only logs the stack traces of cases where an object is
+/// added to the list of nodes needing layout. This avoids printing multiple
+/// redundant stack traces as a single [RenderObject.markNeedsLayout] call walks
+/// up the tree.
 bool debugPrintMarkNeedsLayoutStacks = false;
 
 /// Check the intrinsic sizes of each [RenderBox] during layout.
