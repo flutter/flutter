@@ -27,11 +27,11 @@ bool _debugIsMonotonic(List<double> offsets) {
   return result;
 }
 
-List<double> _generateRegularOffsets(int count, double size) {
+List<double> _generateRegularOffsets(int count, double extent) {
   final int length = count + 1;
   final List<double> result = new Float64List(length);
   for (int i = 0; i < length; ++i)
-    result[i] = i * size;
+    result[i] = i * extent;
   return result;
 }
 
@@ -62,20 +62,26 @@ class GridSpecification {
   }
 
   /// Creates a grid specification containing a certain number of equally sized tiles.
-  /// The tileWidth is the sum of the width of the child it will contain and
-  /// columnSpacing (even if columnCount is 1). Similarly tileHeight is child's height
-  /// plus rowSpacing. If the tiles are to completely fill the grid, then their size
-  /// should be based on the grid's padded interior.
+  ///
+  /// The `tileWidth` and `tileHeight` is the horizontal and vertical
+  /// (respectively) extent that each child will be allocated in the grid. The
+  /// tiles will have [columnSpacing] space between them horizontally and
+  /// [rowSpacing] space between them vertically.
+  ///
+  /// If the tiles are to completely fill the grid, then their size should be
+  /// based on the grid's padded interior and the column and row spacing.
   GridSpecification.fromRegularTiles({
     double tileWidth,
     double tileHeight,
     int columnCount,
     int rowCount,
-    this.rowSpacing: 0.0,
-    this.columnSpacing: 0.0,
+    double columnSpacing: 0.0,
+    double rowSpacing: 0.0,
     this.padding: EdgeInsets.zero
-  }) : columnOffsets = _generateRegularOffsets(columnCount, tileWidth),
-       rowOffsets = _generateRegularOffsets(rowCount, tileHeight) {
+  }) : columnOffsets = _generateRegularOffsets(columnCount, tileWidth + columnSpacing),
+       rowOffsets = _generateRegularOffsets(rowCount, tileHeight + rowSpacing),
+       columnSpacing = columnSpacing,
+       rowSpacing = rowSpacing {
     assert(_debugIsMonotonic(columnOffsets));
     assert(_debugIsMonotonic(rowOffsets));
     assert(columnSpacing != null && columnSpacing >= 0.0);
@@ -85,10 +91,14 @@ class GridSpecification {
 
   /// The offsets of the column boundaries in the grid.
   ///
-  /// The first offset is the offset of the left edge of the left-most column
+  /// The first offset is the offset of the left edge of the left-most tile
   /// from the left edge of the interior of the grid's padding (0.0 if the padding
-  /// is EdgeOffsets.zero). The last offset is the offset of the right edge of
-  /// the right-most column from the left edge of the interior of the grid's padding.
+  /// is EdgeOffsets.zero). The difference between successive entries is the
+  /// tile width plus the column spacing.
+  ///
+  /// The last offset is the offset of the right edge of the right-most tile
+  /// from the left edge of the interior of the grid's padding (less the
+  /// [columnSpacing]).
   ///
   /// If there are n columns in the grid, there should be n + 1 entries in this
   /// list. The right edge of the last column is defined as columnOffsets(n), i.e.
@@ -97,21 +107,25 @@ class GridSpecification {
 
   /// The offsets of the row boundaries in the grid.
   ///
-  /// The first offset is the offset of the top edge of the top-most row from
+  /// The first offset is the offset of the top edge of the top-most tile from
   /// the top edge of the interior of the grid's padding (usually if the padding
-  /// is EdgeOffsets.zero). The last offset is the offset of the bottom edge of
-  /// the bottom-most column from the top edge of the interior of the grid's padding.
+  /// is EdgeOffsets.zero). The difference between successive entries is the
+  /// tile height plus the row spacing
+  ///
+  /// The last offset is the offset of the bottom edge of the bottom-most tile
+  /// from the top edge of the interior of the grid's padding. (less the
+  /// [rowSpacing])
   ///
   /// If there are n rows in the grid, there should be n + 1 entries in this
   /// list. The bottom edge of the last row is defined as rowOffsets(n), i.e.
   /// the top edge of an extra row.
   final List<double> rowOffsets;
 
-  /// The vertical distance between rows.
-  final double rowSpacing;
-
-  /// The horizontal distance between columns.
+  /// The horizontal padding between columns.
   final double columnSpacing;
+
+  /// The vertical padding between rows.
+  final double rowSpacing;
 
   /// The interior padding of the grid.
   ///
@@ -120,7 +134,12 @@ class GridSpecification {
   final EdgeInsets padding;
 
   /// The size of the grid.
-  Size get gridSize => new Size(columnOffsets.last + padding.horizontal, rowOffsets.last + padding.vertical);
+  Size get gridSize {
+    return new Size(
+      columnOffsets.last + padding.horizontal - columnSpacing,
+      rowOffsets.last + padding.vertical - rowSpacing
+    );
+  }
 
   /// The number of columns in this grid.
   int get columnCount => columnOffsets.length - 1;
@@ -271,10 +290,10 @@ abstract class GridDelegateWithInOrderChildPlacement extends GridDelegate {
     assert(padding != null && padding.isNonNegative);
   }
 
-  /// The horizontal distance between columns.
+  /// The horizontal padding between columns.
   final double columnSpacing;
 
-  /// The vertical distance between rows.
+  /// The vertical padding between rows.
   final double rowSpacing;
 
   /// Insets for the entire grid.
@@ -327,9 +346,11 @@ class FixedColumnCountGridDelegate extends GridDelegateWithInOrderChildPlacement
   @override
   GridSpecification getGridSpecification(BoxConstraints constraints, int childCount) {
     assert(constraints.maxWidth < double.INFINITY);
-    int rowCount = (childCount / columnCount).ceil();
-    double tileWidth = math.max(0.0, constraints.maxWidth - padding.horizontal + columnSpacing) / columnCount;
-    double tileHeight = tileWidth / tileAspectRatio;
+    final int rowCount = (childCount / columnCount).ceil();
+    final double interiorWidth = constraints.maxWidth - padding.horizontal;
+    final double columnWidth = interiorWidth / columnCount;
+    final double tileWidth = math.max(0.0, columnWidth - columnSpacing);
+    final double tileHeight = tileWidth / tileAspectRatio;
     return new GridSpecification.fromRegularTiles(
       tileWidth: tileWidth,
       tileHeight: tileHeight,
@@ -416,10 +437,17 @@ class MaxTileWidthGridDelegate extends GridDelegateWithInOrderChildPlacement {
       );
     }
     final double gridWidth = math.max(0.0, constraints.maxWidth - padding.horizontal);
-    int columnCount = (gridWidth / maxTileWidth).ceil();
-    int rowCount = (childCount / columnCount).ceil();
-    double tileWidth = gridWidth / columnCount;
-    double tileHeight = tileWidth / tileAspectRatio;
+    // We inflate the gridWidth by columnSpacing because the columnSpacing for
+    // the rightmost tile in the grid doesn't actually consume space in the
+    // grid because the rightmost tile is flush to the right interior edge of
+    // the grid.
+    final double totalColumnExtent = gridWidth + columnSpacing;
+    final double maxColumnWidth = maxTileWidth + columnSpacing;
+    final int columnCount = (totalColumnExtent / maxColumnWidth).ceil();
+    final int rowCount = (childCount / columnCount).ceil();
+    final double columnWidth = totalColumnExtent / columnCount;
+    final double tileWidth = columnWidth - columnSpacing;
+    final double tileHeight = tileWidth / tileAspectRatio;
     return new GridSpecification.fromRegularTiles(
       tileWidth: tileWidth,
       tileHeight: tileHeight,
@@ -618,13 +646,13 @@ class RenderGrid extends RenderVirtualViewport<GridParentData> {
       assert(placement.column + placement.columnSpan < _specification.columnOffsets.length);
       assert(placement.row + placement.rowSpan < _specification.rowOffsets.length);
 
-      double tileLeft = gridLeftPadding + _specification.columnOffsets[placement.column];
-      double tileRight = gridLeftPadding + _specification.columnOffsets[placement.column + placement.columnSpan];
-      double tileTop = gridTopPadding + _specification.rowOffsets[placement.row];
-      double tileBottom =  gridTopPadding + _specification.rowOffsets[placement.row + placement.rowSpan];
+      final double tileLeft = gridLeftPadding + _specification.columnOffsets[placement.column];
+      final double tileRight = gridLeftPadding + _specification.columnOffsets[placement.column + placement.columnSpan] - _specification.columnSpacing;
+      final double tileTop = gridTopPadding + _specification.rowOffsets[placement.row];
+      final double tileBottom =  gridTopPadding + _specification.rowOffsets[placement.row + placement.rowSpan] - _specification.rowSpacing;
 
-      double childWidth = math.max(0.0, tileRight - tileLeft - _specification.columnSpacing);
-      double childHeight = math.max(0.0, tileBottom - tileTop - _specification.rowSpacing);
+      final double childWidth = math.max(0.0, tileRight - tileLeft);
+      final double childHeight = math.max(0.0, tileBottom - tileTop);
 
       child.layout(new BoxConstraints(
         minWidth: childWidth,

@@ -69,22 +69,19 @@ class _PestoDemoState extends State<PestoDemo> {
           child: new Icon(icon: Icons.edit),
           onPressed: () { }
         ),
-        body: new Block(
-          padding: new EdgeInsets.only(top: _kAppBarHeight + statusBarHeight),
-          children: <Widget>[
-            new Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: new MaxTileWidthGrid(
-                maxTileWidth: 500.0,
-                children: recipes.map(
-                  (Recipe recipe) => new _RecipeCard(
-                    recipe: recipe,
-                    onTap: () { _showRecipe(context, recipe); }
-                  )
-                ).toList()
-              )
+        body: new ScrollableGrid(
+          delegate: new MaxTileWidthGridDelegate(
+            maxTileWidth: 500.0,
+            rowSpacing: 8.0,
+            columnSpacing: 8.0,
+            padding: new EdgeInsets.fromLTRB(8.0, 8.0 + _kAppBarHeight + statusBarHeight, 8.0, 8.0)
+          ),
+          children: recipes.map(
+            (Recipe recipe) => new _RecipeCard(
+              recipe: recipe,
+              onTap: () { _showRecipe(context, recipe); }
             )
-          ]
+          )
         )
       )
     );
@@ -200,42 +197,39 @@ class _RecipeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Padding(
-      padding: const EdgeInsets.all(4.0),
-      child: new GestureDetector(
-        onTap: onTap,
-        child: new Card(
-          child: new Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              new AssetImage(
-                name: recipe.imagePath,
-                fit: ImageFit.scaleDown
-              ),
-              new Flexible(
-                child: new Row(
-                  children: <Widget>[
-                    new Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: new AssetImage(
-                        width: 48.0,
-                        height: 48.0,
-                        name: recipe.ingredientsImagePath
-                      )
-                    ),
-                    new Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        new Text(recipe.name, style: titleStyle),
-                        new Text(recipe.author, style: authorStyle),
-                      ]
+    return new GestureDetector(
+      onTap: onTap,
+      child: new Card(
+        child: new Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            new AssetImage(
+              name: recipe.imagePath,
+              fit: ImageFit.scaleDown
+            ),
+            new Flexible(
+              child: new Row(
+                children: <Widget>[
+                  new Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: new AssetImage(
+                      width: 48.0,
+                      height: 48.0,
+                      name: recipe.ingredientsImagePath
                     )
-                  ]
-                )
+                  ),
+                  new Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      new Text(recipe.name, style: titleStyle),
+                      new Text(recipe.author, style: authorStyle),
+                    ]
+                  )
+                ]
               )
-            ]
-          )
+            )
+          ]
         )
       )
     );
