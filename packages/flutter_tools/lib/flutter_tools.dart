@@ -13,6 +13,7 @@ Future<int> assembleFlx({
   Map<String, dynamic> manifestDescriptor: const <String, dynamic>{},
   File snapshotFile: null,
   String assetBasePath: flx.defaultAssetBasePath,
+  Map<String, String> assetPathOverrides: const <String, String>{},
   String outputPath: flx.defaultFlxOutputPath,
   String privateKeyPath: flx.defaultPrivateKeyPath
 }) async {
@@ -20,6 +21,7 @@ Future<int> assembleFlx({
     manifestDescriptor: manifestDescriptor,
     snapshotFile: snapshotFile,
     assetBasePath: assetBasePath,
+    assetPathOverrides: assetPathOverrides,
     outputPath: outputPath,
     privateKeyPath: privateKeyPath
   );
