@@ -35,8 +35,6 @@ assets:
   - packages/flutter_gallery_assets/ali_connors.png
   - packages/flutter_gallery_assets/kangaroo_valley_safari.png
   - packages/flutter_gallery_assets/top_10_australian_beaches.png
-  - packages/flutter_gallery_assets/grain.png
-  - packages/flutter_gallery_assets/fancylines.png
   - packages/flutter_gallery_assets/landscape_0.jpg
   - packages/flutter_gallery_assets/landscape_1.jpg
   - packages/flutter_gallery_assets/landscape_2.jpg

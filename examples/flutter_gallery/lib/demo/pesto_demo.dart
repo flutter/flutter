@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 const String _kUserName = 'Jonathan';
@@ -13,6 +15,7 @@ final Map<double, String> _kLogoImages = <double, String>{
   70.0: 'packages/flutter_gallery_assets/pesto/logo_medium.png',
   170.0: 'packages/flutter_gallery_assets/pesto/logo_big.png',
 };
+
 final ThemeData _kTheme = new ThemeData(
   brightness: Brightness.light,
   primarySwatch: Colors.teal,
@@ -108,12 +111,18 @@ class _PestoDemoState extends State<PestoDemo> {
           double bestHeight = _kLogoImages.keys.lastWhere(
             (double height) => appBarHeight >= height
           );
+          // Extra padding. Calculated to give about 16px on the bottom for the
+          // `small` logo at its native size, and 30px for the `medium`.
+          double extraPadding = min(0.19 * appBarHeight + 5.4, 40.0);
           return new Padding(
-            padding: new EdgeInsets.only(top: statusBarHeight),
+            padding: new EdgeInsets.only(
+              top: statusBarHeight + 0.5 * extraPadding,
+              bottom: extraPadding
+            ),
             child: new Center(
               child: new AssetImage(
                 name: _kLogoImages[bestHeight],
-                fit: ImageFit.none
+                fit: ImageFit.scaleDown
               )
             )
           );
