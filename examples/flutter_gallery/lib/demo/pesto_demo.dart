@@ -171,7 +171,7 @@ class _PestoDemoState extends State<PestoDemo> {
           ),
           new Divider(),
           new DrawerItem(
-            new Text('Return to Gallery'),
+            child: new Text('Return to Gallery'),
             onPressed: () {
               Navigator.openTransaction(context, (NavigatorTransaction transaction) {
                 transaction.pop();  // Close the Drawer
