@@ -128,7 +128,7 @@ class FlutterCommandRunner extends CommandRunner {
   }
 
   @override
-  Future<int> runCommand(ArgResults globalResults) {
+  Future<int> runCommand(ArgResults globalResults) async {
     // Check for verbose.
     if (globalResults['verbose'])
       context[Logger] = new VerboseLogger();
@@ -142,11 +142,13 @@ class FlutterCommandRunner extends CommandRunner {
     // enginePath's initialiser uses it).
     Cache.flutterRoot = path.normalize(path.absolute(globalResults['flutter-root']));
 
+    await Cache.lock();
+
     if (globalResults['suppress-analytics'])
       flutterUsage.suppressAnalytics = true;
 
     if (!_checkFlutterCopy())
-      return new Future<int>.value(1);
+      return 1;
 
     if (globalResults.wasParsed('packages'))
       PackageMap.globalPackagesPath = path.normalize(path.absolute(globalResults['packages']));
@@ -173,10 +175,10 @@ class FlutterCommandRunner extends CommandRunner {
     if (globalResults['version']) {
       flutterUsage.sendCommand('version');
       printStatus(FlutterVersion.getVersion(Cache.flutterRoot).toString());
-      return new Future<int>.value(0);
+      return 0;
     }
 
-    return super.runCommand(globalResults);
+    return await super.runCommand(globalResults);
   }
 
   String _tryEnginePath(String enginePath) {

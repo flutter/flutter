@@ -7,6 +7,7 @@ import 'dart:io';
 
 import '../base/os.dart';
 import '../base/process.dart';
+import '../cache.dart';
 import '../device.dart';
 import '../globals.dart';
 import 'run.dart';
@@ -43,6 +44,8 @@ class ListenCommand extends RunCommandBase {
 
     if (watchCommand == null)
       return 1;
+
+    Cache.releaseLockEarly();
 
     printStatus('Listening for changes in '
       '${directories.map((String name) => "'$name${Platform.pathSeparator}'").join(', ')}'

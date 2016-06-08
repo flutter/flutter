@@ -10,6 +10,7 @@ import '../android/android_device.dart';
 import '../base/context.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../ios/devices.dart';
@@ -47,6 +48,8 @@ class DaemonCommand extends FlutterCommand {
     AppContext appContext = new AppContext();
     NotifyingLogger notifyingLogger = new NotifyingLogger();
     appContext[Logger] = notifyingLogger;
+
+    Cache.releaseLockEarly();
 
     return appContext.runInZone(() {
       Stream<Map<String, dynamic>> commandStream = stdin

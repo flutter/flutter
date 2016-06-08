@@ -3,3 +3,4 @@
 artifacts/
 dart-sdk/
 pkg/
+lockfile
