@@ -10,7 +10,6 @@ import 'colors.dart';
 // TODO(eseidel): Font weights are supposed to be language relative.
 // TODO(jackson): Baseline should be language relative.
 // These values are for English-like text.
-// TODO(ianh): There's no font-family specified here.
 
 /// Material design text theme.
 ///
