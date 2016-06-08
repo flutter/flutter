@@ -168,7 +168,17 @@ class _PestoDemoState extends State<PestoDemo> {
             child: new Text('Favorites'),
             selected: config.showFavorites,
             onPressed: () { _showFavorites(context); }
-          )
+          ),
+          new Divider(),
+          new DrawerItem(
+            new Text('Return to Gallery'),
+            onPressed: () {
+              Navigator.openTransaction(context, (NavigatorTransaction transaction) {
+                transaction.pop();  // Close the Drawer
+                transaction.pop();  // Go back to the gallery
+              });
+            }
+          ),
         ]
       )
     );
