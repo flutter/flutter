@@ -14,7 +14,7 @@ import 'version.dart';
 
 // TODO(devoncarew): We'll want to find a way to send (sanitized) command parameters.
 
-const String _kFlutterUA = 'UA-67589403-5';
+const String _kFlutterUA = 'UA-67589403-6';
 
 class Usage {
   /// Create a new Usage instance; [versionOverride] is used for testing.
