@@ -353,15 +353,14 @@ class SpriteBox extends RenderBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
-    canvas.save();
-
     // Move to correct coordinate space before drawing
-    canvas.translate(offset.dx, offset.dy);
-    canvas.transform(transformMatrix.storage);
+    canvas
+      ..save()
+      ..translate(offset.dx, offset.dy)
+      ..transform(transformMatrix.storage);
 
     // Draw the sprite tree
-    Matrix4 totalMatrix = new Matrix4.fromFloat64List(canvas.getTotalMatrix());
-    _rootNode._visit(canvas, totalMatrix);
+    _rootNode._visit(canvas);
 
     canvas.restore();
   }
