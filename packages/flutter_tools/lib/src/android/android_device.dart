@@ -382,7 +382,7 @@ class AndroidDevice extends Device {
     return startBundle(
       package,
       localBundlePath,
-      traceStartup: platformArgs['trace-startup'],
+      traceStartup: platformArgs['trace-startup'] ?? false,
       route: route,
       options: debuggingOptions
     );
