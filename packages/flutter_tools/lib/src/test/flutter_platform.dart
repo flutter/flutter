@@ -72,11 +72,11 @@ void _attachStandardStreams(Process process) {
 
 class FlutterPlatform extends PlatformPlugin {
   @override
-  StreamChannel<String> loadChannel(String mainPath, TestPlatform platform) {
+  StreamChannel<dynamic> loadChannel(String mainPath, TestPlatform platform) {
     return StreamChannelCompleter.fromFuture(_startTest(mainPath));
   }
 
-  Future<StreamChannel<String>> _startTest(String mainPath) async {
+  Future<StreamChannel<dynamic>> _startTest(String mainPath) async {
     _ServerInfo info = await _startServer();
     Directory tempDir = Directory.systemTemp.createTempSync(
         'dart_test_listener');
@@ -126,16 +126,16 @@ void main() {
 
     try {
       WebSocket socket = await info.socket;
-      StreamChannel<String> channel = new StreamChannel<String>(socket.map(JSON.decode), socket);
+      StreamChannel<dynamic> channel = new StreamChannel<dynamic>(socket.map(JSON.decode), socket);
       return channel.transformStream(
-        new StreamTransformer<String, String>.fromHandlers(
-          handleDone: (EventSink<String> sink) {
+        new StreamTransformer<dynamic, dynamic>.fromHandlers(
+          handleDone: (EventSink<dynamic> sink) {
             finalize();
             sink.close();
           }
         )
-      ).transformSink(new StreamSinkTransformer<String, String>.fromHandlers(
-        handleData: (String data, StreamSink<String> sink) {
+      ).transformSink(new StreamSinkTransformer<dynamic, String>.fromHandlers(
+        handleData: (dynamic data, StreamSink<String> sink) {
           sink.add(JSON.encode(data));
         },
         handleDone: (EventSink<String> sink) {
