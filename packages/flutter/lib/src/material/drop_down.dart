@@ -70,13 +70,40 @@ class _DropDownMenuPainter extends CustomPainter {
   }
 }
 
-class _DropDownMenu<T> extends StatusTransitionWidget {
+class _DropDownMenu<T> extends StatefulWidget {
   _DropDownMenu({
     Key key,
     _DropDownRoute<T> route
-  }) : route = route, super(key: key, animation: route.animation);
+  }) : route = route, super(key: key);
 
   final _DropDownRoute<T> route;
+
+  @override
+  _DropDownMenuState<T> createState() => new _DropDownMenuState<T>();
+}
+
+class _DropDownMenuState<T> extends State<_DropDownMenu<T>> {
+  CurvedAnimation _fadeOpacity;
+  CurvedAnimation _resize;
+
+  @override
+  void initState() {
+    super.initState();
+    // We need to hold these animations as state because of their curve
+    // direction. When the route's animation reverses, if we were to recreate
+    // the CurvedAnimation objects in build, we'd lose
+    // CurvedAnimation._curveDirection.
+    _fadeOpacity = new CurvedAnimation(
+      parent: config.route.animation,
+      curve: const Interval(0.0, 0.25),
+      reverseCurve: const Interval(0.75, 1.0)
+    );
+    _resize = new CurvedAnimation(
+      parent: config.route.animation,
+      curve: const Interval(0.25, 0.5),
+      reverseCurve: const Step(0.0)
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,17 +116,17 @@ class _DropDownMenu<T> extends StatusTransitionWidget {
     // When the menu is dismissed we just fade the entire thing out
     // in the first 0.25s.
 
+    final _DropDownRoute<T> route = config.route;
     final double unit = 0.5 / (route.items.length + 1.5);
     final List<Widget> children = <Widget>[];
     for (int itemIndex = 0; itemIndex < route.items.length; ++itemIndex) {
       CurvedAnimation opacity;
-      Interval reverseCurve = const Interval(0.75, 1.0);
       if (itemIndex == route.selectedIndex) {
-        opacity = new CurvedAnimation(parent: route.animation, curve: const Step(0.0), reverseCurve: reverseCurve);
+        opacity = new CurvedAnimation(parent: route.animation, curve: const Step(0.0));
       } else {
         final double start = (0.5 + (itemIndex + 1) * unit).clamp(0.0, 1.0);
         final double end = (start + 1.5 * unit).clamp(0.0, 1.0);
-        opacity = new CurvedAnimation(parent: route.animation, curve: new Interval(start, end), reverseCurve: reverseCurve);
+        opacity = new CurvedAnimation(parent: route.animation, curve: new Interval(start, end));
       }
       children.add(new FadeTransition(
         opacity: opacity,
@@ -117,21 +144,13 @@ class _DropDownMenu<T> extends StatusTransitionWidget {
     }
 
     return new FadeTransition(
-      opacity: new CurvedAnimation(
-        parent: route.animation,
-        curve: const Interval(0.0, 0.25),
-        reverseCurve: const Interval(0.75, 1.0)
-      ),
+      opacity: _fadeOpacity,
       child: new CustomPaint(
         painter: new _DropDownMenuPainter(
           color: Theme.of(context).canvasColor,
           elevation: route.elevation,
           selectedIndex: route.selectedIndex,
-          resize: new CurvedAnimation(
-            parent: route.animation,
-            curve: const Interval(0.25, 0.5),
-            reverseCurve: const Step(0.0)
-          )
+          resize: _resize
         ),
         child: new Material(
           type: MaterialType.transparency,
@@ -456,8 +475,7 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final TextStyle style = _textStyle;
-    if (_currentRoute != null)
-      _currentRoute.style = style;
+    _currentRoute?.style = style;
     Widget result = new DefaultTextStyle(
       style: style,
       child: new Row(
