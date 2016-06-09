@@ -34,12 +34,14 @@ class _ContactCategory extends StatelessWidget {
 }
 
 class _ContactItem extends StatelessWidget {
-  _ContactItem({ Key key, this.icon, this.lines }) : super(key: key) {
+  _ContactItem({ Key key, this.icon, this.lines, this.tooltip, this.onPressed }) : super(key: key) {
     assert(lines.length > 1);
   }
 
   final IconData icon;
   final List<String> lines;
+  final String tooltip;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +59,7 @@ class _ContactItem extends StatelessWidget {
     if (icon != null) {
       rowChildren.add(new SizedBox(
         width: 72.0,
-        child: new Icon(icon: icon, color: Theme.of(context).disabledColor)
+        child: new IconButton(icon: icon, onPressed: onPressed)
       ));
     }
     return new Padding(
@@ -98,10 +100,10 @@ class ContactsDemoState extends State<ContactsDemo> {
           actions: <Widget>[
             new IconButton(
               icon: Icons.create,
-              tooltip: 'Search',
+              tooltip: 'Edit',
               onPressed: () {
                 _scaffoldKey.currentState.showSnackBar(new SnackBar(
-                  content: new Text('Not supported.')
+                  content: new Text('This is actually just a demo. Editing isn\'t supported.')
                 ));
               }
             ),
@@ -155,6 +157,12 @@ class ContactsDemoState extends State<ContactsDemo> {
               children: <Widget>[
                 new _ContactItem(
                   icon: Icons.message,
+                  tooltip: 'Send message',
+                  onPressed: () {
+                    _scaffoldKey.currentState.showSnackBar(new SnackBar(
+                      content: new Text('Pretend that this opened your SMS application.')
+                    ));
+                  },
                   lines: <String>[
                     '(650) 555-1234',
                     'Mobile'
@@ -162,6 +170,12 @@ class ContactsDemoState extends State<ContactsDemo> {
                 ),
                 new _ContactItem(
                   icon: Icons.message,
+                  tooltip: 'Send message',
+                  onPressed: () {
+                    _scaffoldKey.currentState.showSnackBar(new SnackBar(
+                      content: new Text('In this demo, this button doesn\'t do anything.')
+                    ));
+                  },
                   lines: <String>[
                     '(323) 555-6789',
                     'Work'
@@ -169,6 +183,12 @@ class ContactsDemoState extends State<ContactsDemo> {
                 ),
                 new _ContactItem(
                   icon: Icons.message,
+                  tooltip: 'Send message',
+                  onPressed: () {
+                    _scaffoldKey.currentState.showSnackBar(new SnackBar(
+                      content: new Text('Imagine if you will, a messaging application.')
+                    ));
+                  },
                   lines: <String>[
                     '(650) 555-6789',
                     'Home'
@@ -180,12 +200,26 @@ class ContactsDemoState extends State<ContactsDemo> {
               icon: Icons.email,
               children: <Widget>[
                 new _ContactItem(
+                  icon: Icons.email,
+                  tooltip: 'Send personal e-mail',
+                  onPressed: () {
+                    _scaffoldKey.currentState.showSnackBar(new SnackBar(
+                      content: new Text('Here, your e-mail application would open.')
+                    ));
+                  },
                   lines: <String>[
                     'ali_connors@example.com',
                     'Personal'
                   ]
                 ),
                 new _ContactItem(
+                  icon: Icons.email,
+                  tooltip: 'Send work e-mail',
+                  onPressed: () {
+                    _scaffoldKey.currentState.showSnackBar(new SnackBar(
+                      content: new Text('This is a demo, so this button does not actually work.')
+                    ));
+                  },
                   lines: <String>[
                     'aliconnors@example.com',
                     'Work'
@@ -197,6 +231,13 @@ class ContactsDemoState extends State<ContactsDemo> {
               icon: Icons.location_on,
               children: <Widget>[
                 new _ContactItem(
+                  icon: Icons.map,
+                  tooltip: 'Open map',
+                  onPressed: () {
+                    _scaffoldKey.currentState.showSnackBar(new SnackBar(
+                      content: new Text('This would show a map of San Francisco.')
+                    ));
+                  },
                   lines: <String>[
                     '2000 Main Street',
                     'San Francisco, CA',
@@ -204,6 +245,13 @@ class ContactsDemoState extends State<ContactsDemo> {
                   ]
                 ),
                 new _ContactItem(
+                  icon: Icons.map,
+                  tooltip: 'Open map',
+                  onPressed: () {
+                    _scaffoldKey.currentState.showSnackBar(new SnackBar(
+                      content: new Text('This would show a map of Mountain View.')
+                    ));
+                  },
                   lines: <String>[
                     '1600 Amphitheater Parkway',
                     'Mountain View, CA',
@@ -211,6 +259,13 @@ class ContactsDemoState extends State<ContactsDemo> {
                   ]
                 ),
                 new _ContactItem(
+                  icon: Icons.map,
+                  tooltip: 'Open map',
+                  onPressed: () {
+                    _scaffoldKey.currentState.showSnackBar(new SnackBar(
+                      content: new Text('This would also show a map, if this was not a demo.')
+                    ));
+                  },
                   lines: <String>[
                     '126 Severyns Ave',
                     'Mountain View, CA',
