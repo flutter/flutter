@@ -10,7 +10,10 @@ dependencies:
     path: ../../packages/flutter_markdown
   # Also update dev/benchmarks/complex_layout/pubspec.yaml
   # and examples/flutter_gallery/pubspec.yaml
-  flutter_gallery_assets: '0.0.21'
+  flutter_gallery_assets:
+    git:
+      url: https://flutter.googlesource.com/gallery-assets
+      ref: 5c9118f9e6005c9fef6f1a340e5c475494c2ba80
 
 dev_dependencies:
   test: any # flutter_test provides the version constraints
