@@ -300,8 +300,8 @@ class ReverseAnimation extends Animation<double>
 /// [CurvedAnimation] is useful when you want to apply a non-linear [Curve] to
 /// an animation object wrapped in the [CurvedAnimation].
 ///
-/// For example, the following code snippet shows how you can apply a curve to a linear animation
-/// produced by an [AnimationController]:
+/// For example, the following code snippet shows how you can apply a curve to a
+/// linear animation produced by an [AnimationController]:
 ///
 /// ``` dart
 ///     final AnimationController controller =
@@ -309,9 +309,10 @@ class ReverseAnimation extends Animation<double>
 ///     final CurvedAnimation animation =
 ///         new CurvedAnimation(parent: controller, curve: Curves.ease);
 ///```
-/// Depending on the given curve, the output of the [CurvedAnimation] could have a wider range
-/// than its input. For example, elastic curves such as [Curves.elasticIn] will significantly
-/// overshoot or undershoot the default range of 0.0 to 1.0.
+/// Depending on the given curve, the output of the [CurvedAnimation] could have
+/// a wider range than its input. For example, elastic curves such as
+/// [Curves.elasticIn] will significantly overshoot or undershoot the default
+/// range of 0.0 to 1.0.
 ///
 /// If you want to apply a [Curve] to a [Tween], consider using [CurveTween].
 class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<double> {
@@ -325,7 +326,8 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   }) {
     assert(parent != null);
     assert(curve != null);
-    parent.addStatusListener(_handleStatusChanged);
+    _updateCurveDirection(parent.status);
+    parent.addStatusListener(_updateCurveDirection);
   }
 
   /// The animation to which this animation applies a curve.
@@ -337,6 +339,16 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
 
   /// The curve to use in the reverse direction.
   ///
+  /// If the parent animation changes direction without first reaching the
+  /// [AnimationStatus.completed] or [AnimationStatus.dismissed] status, the
+  /// [CurvedAnimation] stays on the same curve (albeit in the opposite
+  /// direction) to avoid visual discontinuities.
+  ///
+  /// If you use a non-null [reverseCurve], you might want to hold this object
+  /// in a [State] object rather than recreating it each time your widget builds
+  /// in order to take advantage of the state in this object that avoids visual
+  /// discontinuities.
+  ///
   /// If this field is null, uses [curve] in both directions.
   Curve reverseCurve;
 
@@ -347,7 +359,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   /// a animation is used to animate.
   AnimationStatus _curveDirection;
 
-  void _handleStatusChanged(AnimationStatus status) {
+  void _updateCurveDirection(AnimationStatus status) {
     switch (status) {
       case AnimationStatus.dismissed:
       case AnimationStatus.completed:
