@@ -1017,7 +1017,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(_debugCanPerformMutations);
     assert(child != null);
     assert(child.parentData != null);
-    child._cleanRelayoutSubtreeRoot();
+    child._cleanRelayoutBoundary();
     child.parentData.detach();
     child.parentData = null;
     super.dropChild(child);
@@ -1145,7 +1145,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     super.attach(owner);
     // If the node was dirtied in some way while unattached, make sure to add
     // it to the appropriate dirty list now that an owner is available
-    if (_needsLayout && _relayoutSubtreeRoot != null) {
+    if (_needsLayout && _relayoutBoundary != null) {
       // Don't enter this block if we've never laid out at all;
       // scheduleInitialLayout() will handle it
       _needsLayout = false;
@@ -1173,7 +1173,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   bool get needsLayout => _needsLayout;
   bool _needsLayout = true;
 
-  RenderObject _relayoutSubtreeRoot;
+  RenderObject _relayoutBoundary;
   bool _doingThisLayoutWithCallback = false;
 
   /// The layout constraints most recently supplied by the parent.
@@ -1200,17 +1200,17 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// release mode (where it will always be false).
   static bool debugCheckingIntrinsics = false;
   bool _debugSubtreeRelayoutRootAlreadyMarkedNeedsLayout() {
-    if (_relayoutSubtreeRoot == null)
+    if (_relayoutBoundary == null)
       return true; // we haven't yet done layout even once, so there's nothing for us to do
     RenderObject node = this;
-    while (node != _relayoutSubtreeRoot) {
-      assert(node._relayoutSubtreeRoot == _relayoutSubtreeRoot);
+    while (node != _relayoutBoundary) {
+      assert(node._relayoutBoundary == _relayoutBoundary);
       assert(node.parent != null);
       node = node.parent;
       if ((!node._needsLayout) && (!node._debugDoingThisLayout))
         return false;
     }
-    assert(node._relayoutSubtreeRoot == node);
+    assert(node._relayoutBoundary == node);
     return true;
   }
 
@@ -1254,8 +1254,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       assert(_debugSubtreeRelayoutRootAlreadyMarkedNeedsLayout());
       return;
     }
-    assert(_relayoutSubtreeRoot != null);
-    if (_relayoutSubtreeRoot != this) {
+    assert(_relayoutBoundary != null);
+    if (_relayoutBoundary != this) {
       markParentNeedsLayout();
     } else {
       _needsLayout = true;
@@ -1291,12 +1291,12 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(parent == this.parent);
   }
 
-  void _cleanRelayoutSubtreeRoot() {
-    if (_relayoutSubtreeRoot != this) {
-      _relayoutSubtreeRoot = null;
+  void _cleanRelayoutBoundary() {
+    if (_relayoutBoundary != this) {
+      _relayoutBoundary = null;
       _needsLayout = true;
       visitChildren((RenderObject child) {
-        child._cleanRelayoutSubtreeRoot();
+        child._cleanRelayoutBoundary();
       });
     }
   }
@@ -1311,8 +1311,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(attached);
     assert(parent is! RenderObject);
     assert(!owner._debugDoingLayout);
-    assert(_relayoutSubtreeRoot == null);
-    _relayoutSubtreeRoot = this;
+    assert(_relayoutBoundary == null);
+    _relayoutBoundary = this;
     assert(() {
       _debugCanParentUseSize = false;
       return true;
@@ -1321,7 +1321,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   }
 
   void _layoutWithoutResize() {
-    assert(_relayoutSubtreeRoot == this);
+    assert(_relayoutBoundary == this);
     RenderObject debugPreviousActiveLayout;
     assert(!_debugMutationsLocked);
     assert(!_doingThisLayoutWithCallback);
@@ -1404,17 +1404,17 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(!_debugDoingThisResize);
     assert(!_debugDoingThisLayout);
     final RenderObject parent = this.parent;
-    RenderObject relayoutSubtreeRoot;
+    RenderObject relayoutBoundary;
     if (!parentUsesSize || sizedByParent || constraints.isTight || parent is! RenderObject)
-      relayoutSubtreeRoot = this;
+      relayoutBoundary = this;
     else
-      relayoutSubtreeRoot = parent._relayoutSubtreeRoot;
+      relayoutBoundary = parent._relayoutBoundary;
     assert(parent == this.parent);
     assert(() {
       _debugCanParentUseSize = parentUsesSize;
       return true;
     });
-    if (!needsLayout && constraints == _constraints && relayoutSubtreeRoot == _relayoutSubtreeRoot) {
+    if (!needsLayout && constraints == _constraints && relayoutBoundary == _relayoutBoundary) {
       assert(() {
         // in case parentUsesSize changed since the last invocation, set size
         // to itself, so it has the right internal debug values.
@@ -1431,7 +1431,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       return;
     }
     _constraints = constraints;
-    _relayoutSubtreeRoot = relayoutSubtreeRoot;
+    _relayoutBoundary = relayoutBoundary;
     assert(!_debugMutationsLocked);
     assert(!_doingThisLayoutWithCallback);
     assert(() {
@@ -2087,14 +2087,14 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   @override
   String toString() {
     String header = '$runtimeType';
-    if (_relayoutSubtreeRoot != null && _relayoutSubtreeRoot != this) {
+    if (_relayoutBoundary != null && _relayoutBoundary != this) {
       int count = 1;
       RenderObject target = parent;
-      while (target != null && target != _relayoutSubtreeRoot) {
+      while (target != null && target != _relayoutBoundary) {
         target = target.parent;
         count += 1;
       }
-      header += ' relayoutSubtreeRoot=up$count';
+      header += ' relayoutBoundary=up$count';
     }
     if (_needsLayout)
       header += ' NEEDS-LAYOUT';
