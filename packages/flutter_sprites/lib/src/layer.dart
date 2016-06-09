@@ -30,16 +30,16 @@ class Layer extends Node with SpritePaint {
     ..isAntiAlias = false;
 
   @override
-  void _prePaint(Canvas canvas, Matrix4 matrix) {
-    super._prePaint(canvas, matrix);
+  void _prePaint(Canvas canvas) {
+    super._prePaint(canvas);
 
     _updatePaint(_cachedPaint);
     canvas.saveLayer(layerRect, _cachedPaint);
   }
 
   @override
-  void _postPaint(Canvas canvas, Matrix4 totalMatrix) {
+  void _postPaint(Canvas canvas) {
     canvas.restore();
-    super._postPaint(canvas, totalMatrix);
+    super._postPaint(canvas);
   }
 }
