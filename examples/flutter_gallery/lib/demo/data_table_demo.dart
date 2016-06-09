@@ -91,6 +91,8 @@ class DesertDataSource extends DataTableSource {
     notifyListeners();
   }
 
+  int _selectedCount = 0;
+
   @override
   DataRow getRow(int index) {
     assert(index >= 0);
@@ -101,8 +103,12 @@ class DesertDataSource extends DataTableSource {
       index: index,
       selected: desert.selected,
       onSelectChanged: (bool value) {
-        desert.selected = value;
-        notifyListeners();
+        if (desert.selected != value) {
+          _selectedCount += value ? 1 : -1;
+          assert(_selectedCount >= 0);
+          desert.selected = value;
+          notifyListeners();
+        }
       },
       cells: <DataCell>[
         new DataCell(new Text('${desert.name}')),
@@ -122,6 +128,16 @@ class DesertDataSource extends DataTableSource {
 
   @override
   bool get isRowCountApproximate => false;
+
+  @override
+  int get selectedRowCount => _selectedCount;
+
+  void _selectAll(bool checked) {
+    for (Desert desert in _deserts)
+      desert.selected = checked;
+    _selectedCount = checked ? _deserts.length : 0;
+    notifyListeners();
+  }
 }
 
 class DataTableDemo extends StatefulWidget {
@@ -135,10 +151,10 @@ class _DataTableDemoState extends State<DataTableDemo> {
   int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
   int _sortColumnIndex;
   bool _sortAscending = true;
-  DesertDataSource _deserts = new DesertDataSource();
+  DesertDataSource _desertsDataSource = new DesertDataSource();
 
   void _sort/*<T>*/(Comparable<dynamic/*=T*/> getField(Desert d), int columnIndex, bool ascending) {
-    _deserts._sort/*<T>*/(getField, ascending);
+    _desertsDataSource._sort/*<T>*/(getField, ascending);
     setState(() {
       _sortColumnIndex = columnIndex;
       _sortAscending = ascending;
@@ -153,10 +169,12 @@ class _DataTableDemoState extends State<DataTableDemo> {
         padding: const EdgeInsets.all(20.0),
         children: <Widget>[
           new PaginatedDataTable(
+            header: new Text('Nutrition'),
             rowsPerPage: _rowsPerPage,
             onRowsPerPageChanged: (int value) { setState(() { _rowsPerPage = value; }); },
             sortColumnIndex: _sortColumnIndex,
             sortAscending: _sortAscending,
+            onSelectAll: _desertsDataSource._selectAll,
             columns: <DataColumn>[
               new DataColumn(
                 label: new Text('Dessert (100g serving)'),
@@ -200,7 +218,7 @@ class _DataTableDemoState extends State<DataTableDemo> {
                 onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.iron, columnIndex, ascending)
               ),
             ],
-            source: _deserts
+            source: _desertsDataSource
           )
         ]
       )

@@ -50,15 +50,21 @@ class ButtonTheme extends InheritedWidget {
     Widget child
   }) : super(key: key, child: child);
 
-  /// Creates a button theme that is appropriate for footer buttons.
+  /// Creates a button theme that is appropriate for button bars, as used in
+  /// dialog footers and in the headers of data tables.
   ///
   /// This theme is denser, with a smaller [minWidth] and [padding], than the
   /// default theme. Also, this theme uses [ButtonTextTheme.accent] rather than
   /// [ButtonTextTheme.normal].
   ///
+  /// For best effect, the label of the button at the edge of the container
+  /// should have text that ends up wider than 64.0 pixels. This ensures that
+  /// the alignment of the text matches the alignment of the edge of the
+  /// container.
+  ///
   /// For example, buttons at the bottom of [Dialog] or [Card] widgets use this
   /// button theme.
-  const ButtonTheme.footer({
+  const ButtonTheme.bar({
     Key key,
     this.textTheme: ButtonTextTheme.accent,
     this.minWidth: 64.0,

@@ -4,9 +4,12 @@
 
 import 'dart:math' as math;
 
+import 'package:meta/meta.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
+import 'button.dart';
+import 'button_bar.dart';
 import 'card.dart';
 import 'data_table.dart';
 import 'data_table_source.dart';
@@ -22,6 +25,9 @@ import 'theme.dart';
 /// and displays it one page at a time. The widget is presented as a [Card].
 class PaginatedDataTable extends StatefulWidget {
   /// Creates a widget describing a paginated [DataTable] on a [Card].
+  ///
+  /// The [header] should give the card's header, typically a [Text] widget. It
+  /// must not be null.
   ///
   /// The [columns] argument must be a list of as many [DataColumn] objects as
   /// the table is to have columns, ignoring the leading checkbox column if any.
@@ -43,10 +49,12 @@ class PaginatedDataTable extends StatefulWidget {
   /// widget unless the data table really is to now show entirely different
   /// data from a new source.
   ///
-  /// The [rowsPerPage] and [availableRowsPerPage] must not be null (though they
-  /// both have defaults, so don't have to be specified).
+  /// The [rowsPerPage] and [availableRowsPerPage] must not be null (they
+  /// both have defaults, though, so don't have to be specified).
   PaginatedDataTable({
     Key key,
+    @required this.header,
+    this.actions,
     this.columns,
     this.sortColumnIndex,
     this.sortAscending: true,
@@ -56,8 +64,9 @@ class PaginatedDataTable extends StatefulWidget {
     this.rowsPerPage: defaultRowsPerPage,
     this.availableRowsPerPage: const <int>[defaultRowsPerPage, defaultRowsPerPage * 2, defaultRowsPerPage * 5, defaultRowsPerPage * 10],
     this.onRowsPerPageChanged,
-    this.source
+    @required this.source
   }) : super(key: key) {
+    assert(header != null);
     assert(columns != null);
     assert(columns.length > 0);
     assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length));
@@ -68,6 +77,24 @@ class PaginatedDataTable extends StatefulWidget {
     assert(availableRowsPerPage.contains(rowsPerPage));
     assert(source != null);
   }
+
+  /// The table card's header.
+  ///
+  /// This is typically a [Text] widget, but can also be a [ButtonBar] with
+  /// [FlatButton]s. Suitable defaults are automatically provided for the font,
+  /// button color, button padding, and so forth.
+  ///
+  /// If items in the table are selectable, then, when the selection is not
+  /// empty, the header is replaced by a count of the selected items.
+  final Widget header;
+
+  /// Icon buttons to show at the top right of the table.
+  ///
+  /// Typically, the exact actions included in this list will vary based on
+  /// whether any rows are selected or not.
+  ///
+  /// These should be size 24.0 with default padding (8.0).
+  final List<Widget> actions;
 
   /// The configuration and labels for the columns in the table.
   final List<DataColumn> columns;
@@ -142,6 +169,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
   int _firstRowIndex;
   int _rowCount;
   bool _rowCountApproximate;
+  int _selectedRowCount;
   final Map<int, DataRow> _rows = <int, DataRow>{};
 
   @override
@@ -172,6 +200,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     setState(() {
       _rowCount = config.source.rowCount;
       _rowCountApproximate = config.source.isRowCountApproximate;
+      _selectedRowCount = config.source.selectedRowCount;
       _rows.clear();
     });
   }
@@ -237,7 +266,42 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle textStyle = Theme.of(context).textTheme.caption;
+    // TODO(ianh): This whole build function doesn't handle RTL yet.
+    ThemeData themeData = Theme.of(context);
+    // HEADER
+    final List<Widget> headerWidgets = <Widget>[];
+    double leftPadding = 24.0;
+    if (_selectedRowCount == 0) {
+      headerWidgets.add(new Flexible(child: config.header));
+      if (config.header is ButtonBar) {
+        // We adjust the padding when a button bar is present, because the
+        // ButtonBar introduces 2 pixels of outside padding, plus 2 pixels
+        // around each button on each side, and the button itself will have 8
+        // pixels internally on each side, yet we want the left edge of the
+        // inside of the button to line up with the 24.0 left inset.
+        // TODO(ianh): Better magic. See https://github.com/flutter/flutter/issues/4460
+        leftPadding = 12.0;
+      }
+    } else if (_selectedRowCount == 1) {
+      // TODO(ianh): Real l10n.
+      headerWidgets.add(new Flexible(child: new Text('1 item selected')));
+    } else {
+      headerWidgets.add(new Flexible(child: new Text('$_selectedRowCount items selected')));
+    }
+    if (config.actions != null) {
+      headerWidgets.addAll(
+        config.actions.map/*<Widget>*/((Widget widget) {
+          return new Padding(
+            // 8.0 is the default padding of an icon button
+            padding: new EdgeInsets.only(left: 24.0 - 8.0 * 2.0),
+            child: widget
+          );
+        }).toList()
+      );
+    }
+
+    // FOOTER
+    final TextStyle footerTextStyle = themeData.textTheme.caption;
     final List<Widget> footerWidgets = <Widget>[];
     if (config.onRowsPerPageChanged != null) {
       List<Widget> availableRowsPerPage = config.availableRowsPerPage
@@ -256,7 +320,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
             items: availableRowsPerPage,
             value: config.rowsPerPage,
             onChanged: config.onRowsPerPageChanged,
-            style: textStyle,
+            style: footerTextStyle,
             iconSize: 24.0
           )
         ),
@@ -285,21 +349,39 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
       ),
       new Container(width: 14.0),
     ]);
+
+    // CARD
     return new Card(
-      // TODO(ianh): data table card headers
-      /*
-         - title, top left
-            - 20px Roboto Regular, black87
-         - persistent actions, top left
-         - header when there's a selection
-            - accent 50?
-            - show number of selected items
-            - different actions
-         - actions, top right
-            - 24px icons, black54
-      */
       child: new BlockBody(
         children: <Widget>[
+          new DefaultTextStyle(
+            // These typographic styles aren't quite the regular ones. We pick the closest ones from the regular
+            // list and then tweak them appropriately.
+            // See https://www.google.com/design/spec/components/data-tables.html#data-tables-tables-within-cards
+            style: _selectedRowCount > 0 ? themeData.textTheme.subhead.copyWith(color: themeData.accentColor)
+                                         : themeData.textTheme.title.copyWith(fontWeight: FontWeight.w400),
+            child: new IconTheme(
+              data: new IconThemeData(
+                opacity: 0.54
+              ),
+              child: new ButtonTheme.bar(
+                child: new Container(
+                  height: 64.0,
+                  padding: new EdgeInsets.fromLTRB(leftPadding, 0.0, 14.0, 0.0),
+                  // TODO(ianh): This decoration will prevent ink splashes from being visible.
+                  // Instead, we should have a widget that prints the decoration on the material.
+                  // See https://github.com/flutter/flutter/issues/3782
+                  decoration: _selectedRowCount > 0 ? new BoxDecoration(
+                    backgroundColor: themeData.secondaryHeaderColor
+                  ) : null,
+                  child: new Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: headerWidgets
+                  )
+                )
+              )
+            )
+          ),
           new ScrollableViewport(
             scrollDirection: Axis.horizontal,
             child: new DataTable(
@@ -312,7 +394,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
             )
           ),
           new DefaultTextStyle(
-            style: textStyle,
+            style: footerTextStyle,
             child: new IconTheme(
               data: new IconThemeData(
                 opacity: 0.54

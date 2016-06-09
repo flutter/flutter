@@ -67,6 +67,7 @@ class ThemeData {
     Color unselectedWidgetColor,
     Color disabledColor,
     Color buttonColor,
+    Color secondaryHeaderColor,
     Color textSelectionColor,
     Color textSelectionHandleColor,
     Color backgroundColor,
@@ -93,6 +94,7 @@ class ThemeData {
     unselectedWidgetColor ??= isDark ? Colors.white70 : Colors.black54;
     disabledColor ??= isDark ? Colors.white30 : Colors.black26;
     buttonColor ??= isDark ? primarySwatch[600] : Colors.grey[300];
+    secondaryHeaderColor ??= primarySwatch[50]; // TODO(ianh): dark theme support (https://github.com/flutter/flutter/issues/3370)
     textSelectionColor ??= isDark ? accentColor : primarySwatch[200];
     textSelectionHandleColor ??= isDark ? Colors.tealAccent[400] : primarySwatch[300];
     backgroundColor ??= isDark ? Colors.grey[700] : primarySwatch[200];
@@ -117,6 +119,7 @@ class ThemeData {
       unselectedWidgetColor: unselectedWidgetColor,
       disabledColor: disabledColor,
       buttonColor: buttonColor,
+      secondaryHeaderColor: secondaryHeaderColor,
       textSelectionColor: textSelectionColor,
       textSelectionHandleColor: textSelectionHandleColor,
       backgroundColor: backgroundColor,
@@ -150,6 +153,7 @@ class ThemeData {
     this.unselectedWidgetColor,
     this.disabledColor,
     this.buttonColor,
+    this.secondaryHeaderColor,
     this.textSelectionColor,
     this.textSelectionHandleColor,
     this.backgroundColor,
@@ -174,6 +178,7 @@ class ThemeData {
     assert(unselectedWidgetColor != null);
     assert(disabledColor != null);
     assert(buttonColor != null);
+    assert(secondaryHeaderColor != null);
     assert(textSelectionColor != null);
     assert(textSelectionHandleColor != null);
     assert(disabledColor != null);
@@ -257,6 +262,12 @@ class ThemeData {
   /// The default color of the [Material] used in [RaisedButton]s.
   final Color buttonColor;
 
+  /// The color of the header of a [PaginatedDataTable] when there are selected rows.
+  // According to the spec for data tables:
+  // https://material.google.com/components/data-tables.html#data-tables-tables-within-cards
+  // ...this should be the "50-value of secondary app color".
+  final Color secondaryHeaderColor;
+
   /// The color of text selections in text fields, such as [Input].
   final Color textSelectionColor;
 
@@ -301,6 +312,7 @@ class ThemeData {
       unselectedWidgetColor: Color.lerp(begin.unselectedWidgetColor, end.unselectedWidgetColor, t),
       disabledColor: Color.lerp(begin.disabledColor, end.disabledColor, t),
       buttonColor: Color.lerp(begin.buttonColor, end.buttonColor, t),
+      secondaryHeaderColor: Color.lerp(begin.secondaryHeaderColor, end.secondaryHeaderColor, t),
       textSelectionColor: Color.lerp(begin.textSelectionColor, end.textSelectionColor, t),
       textSelectionHandleColor: Color.lerp(begin.textSelectionHandleColor, end.textSelectionHandleColor, t),
       backgroundColor: Color.lerp(begin.backgroundColor, end.backgroundColor, t),
@@ -332,6 +344,7 @@ class ThemeData {
            (otherData.unselectedWidgetColor == unselectedWidgetColor) &&
            (otherData.disabledColor == disabledColor) &&
            (otherData.buttonColor == buttonColor) &&
+           (otherData.secondaryHeaderColor == secondaryHeaderColor) &&
            (otherData.textSelectionColor == textSelectionColor) &&
            (otherData.textSelectionHandleColor == textSelectionHandleColor) &&
            (otherData.backgroundColor == backgroundColor) &&
@@ -360,12 +373,13 @@ class ThemeData {
       unselectedWidgetColor,
       disabledColor,
       buttonColor,
+      secondaryHeaderColor,
       textSelectionColor,
       textSelectionHandleColor,
       backgroundColor,
       accentColor,
+      accentColorBrightness,
       hashValues( // Too many values.
-        accentColorBrightness,
         indicatorColor,
         hintColor,
         errorColor,

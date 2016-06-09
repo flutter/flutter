@@ -96,7 +96,7 @@ class Dialog extends StatelessWidget {
     }
 
     if (actions != null) {
-      dialogBody.add(new ButtonTheme.footer(
+      dialogBody.add(new ButtonTheme.bar(
         child: new ButtonBar(
           alignment: MainAxisAlignment.end,
           children: actions

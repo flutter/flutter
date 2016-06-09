@@ -54,4 +54,9 @@ abstract class DataTableSource extends ChangeNotifier {
   /// then later the exact number becomes available, then call
   /// [notifyListeners].
   bool get isRowCountApproximate;
+
+  /// Called to obtain the number of rows that are currently selected.
+  ///
+  /// If the selected row count changes, call [notifyListeners].
+  int get selectedRowCount;
 }
