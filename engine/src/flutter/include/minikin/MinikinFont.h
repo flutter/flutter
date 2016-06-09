@@ -25,7 +25,7 @@
 // An abstraction for platform fonts, allowing Minikin to be used with
 // multiple actual implementations of fonts.
 
-namespace android {
+namespace minikin {
 
 // The hyphen edit represents an edit to the string when a word is
 // hyphenated. The most common hyphen edit is adding a "-" at the end
@@ -137,6 +137,6 @@ private:
     const int32_t mUniqueId;
 };
 
-}  // namespace android
+}  // namespace minikin
 
 #endif  // MINIKIN_FONT_H

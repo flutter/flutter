@@ -23,7 +23,7 @@
 #include <minikin/GraphemeBreak.h>
 #include <minikin/Measurement.h>
 
-namespace android {
+namespace minikin {
 
 // These could be considered helper methods of layout, but need only be loosely coupled, so
 // are separate.
@@ -119,4 +119,4 @@ size_t getOffsetForAdvance(const float* advances, const uint16_t* buf, size_t st
     return best;
 }
 
-}
+}  // namespace minikin

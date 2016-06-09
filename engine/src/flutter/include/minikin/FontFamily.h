@@ -26,7 +26,7 @@
 #include <minikin/MinikinRefCounted.h>
 #include <minikin/SparseBitSet.h>
 
-namespace android {
+namespace minikin {
 
 class MinikinFont;
 
@@ -52,7 +52,7 @@ public:
           return bits == other.bits && mLanguageListId == other.mLanguageListId;
     }
 
-    hash_t hash() const;
+    android::hash_t hash() const;
 
     // Looks up a language list from an internal cache and returns its ID.
     // If the passed language list is not in the cache, registers it and returns newly assigned ID.
@@ -75,7 +75,7 @@ enum FontVariant {
     VARIANT_ELEGANT = 2,
 };
 
-inline hash_t hash_type(const FontStyle &style) {
+inline android::hash_t hash_type(const FontStyle &style) {
     return style.hash();
 }
 
@@ -158,6 +158,6 @@ private:
     bool mCoverageValid;
 };
 
-}  // namespace android
+}  // namespace minikin
 
 #endif  // MINIKIN_FONT_FAMILY_H

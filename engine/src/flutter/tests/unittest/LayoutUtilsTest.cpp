@@ -19,7 +19,7 @@
 
 #include "LayoutUtils.h"
 
-namespace {
+namespace minikin {
 
 void ExpectNextWordBreakForCache(size_t offset_in, const char* query_str) {
     const size_t BUF_SIZE = 256U;
@@ -507,4 +507,4 @@ TEST(WordBreakTest, goPrevWordBreakTest) {
     ExpectPrevWordBreakForCache(1000, "U+4444 U+302D U+302D | U+4444");
 }
 
-}  // namespace
+}  // namespace minikin

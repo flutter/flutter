@@ -23,7 +23,7 @@
 #include <minikin/MinikinFont.h>
 #include <minikin/FontFamily.h>
 
-namespace android {
+namespace minikin {
 
 class FontCollection : public MinikinRefCounted {
 public:
@@ -98,6 +98,6 @@ private:
     std::vector<Range> mRanges;
 };
 
-}  // namespace android
+}  // namespace minikin
 
 #endif  // MINIKIN_FONT_COLLECTION_H

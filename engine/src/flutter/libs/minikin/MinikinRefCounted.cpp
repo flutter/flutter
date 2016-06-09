@@ -20,16 +20,16 @@
 
 #include <minikin/MinikinRefCounted.h>
 
-namespace android {
+namespace minikin {
 
 void MinikinRefCounted::Ref() {
-    AutoMutex _l(gMinikinLock);
+    android::AutoMutex _l(gMinikinLock);
     this->RefLocked();
 }
 
 void MinikinRefCounted::Unref() {
-    AutoMutex _l(gMinikinLock);
+    android::AutoMutex _l(gMinikinLock);
     this->UnrefLocked();
 }
 
-}
+}  // namespace minikin

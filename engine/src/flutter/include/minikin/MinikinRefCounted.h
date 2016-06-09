@@ -19,7 +19,7 @@
 #ifndef MINIKIN_REF_COUNTED_H
 #define MINIKIN_REF_COUNTED_H
 
-namespace android {
+namespace minikin {
 
 class MinikinRefCounted {
 public:
@@ -54,6 +54,6 @@ private:
     T* mObj;
 };
 
-}
+}  // namespace minikin
 
 #endif   // MINIKIN_REF_COUNTED_H

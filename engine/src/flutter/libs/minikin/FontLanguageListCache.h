@@ -22,7 +22,7 @@
 #include <minikin/FontFamily.h>
 #include "FontLanguage.h"
 
-namespace android {
+namespace minikin {
 
 class FontLanguageListCache {
 public:
@@ -51,6 +51,6 @@ private:
     std::unordered_map<std::string, uint32_t> mLanguageListLookupTable;
 };
 
-}  // namespace android
+}  // namespace minikin
 
 #endif  // MINIKIN_FONT_LANGUAGE_LIST_CACHE_H

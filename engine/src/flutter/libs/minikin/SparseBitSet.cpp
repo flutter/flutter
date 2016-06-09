@@ -19,7 +19,7 @@
 #include <string.h>
 #include <minikin/SparseBitSet.h>
 
-namespace android {
+namespace minikin {
 
 const uint32_t SparseBitSet::kNotFound;
 
@@ -146,4 +146,4 @@ uint32_t SparseBitSet::nextSetBit(uint32_t fromIndex) const {
     return kNotFound;
 }
 
-}  // namespace android
+}  // namespace minikin

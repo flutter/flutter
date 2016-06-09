@@ -30,7 +30,7 @@
 
 using std::vector;
 
-namespace android {
+namespace minikin {
 
 static const uint16_t CHAR_SOFT_HYPHEN = 0x00AD;
 
@@ -232,4 +232,4 @@ void Hyphenator::hyphenateFromCodes(uint8_t* result, const uint16_t* codes, size
     }
 }
 
-}  // namespace android
+}  // namespace minikin

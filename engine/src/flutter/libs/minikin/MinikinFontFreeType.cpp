@@ -25,7 +25,7 @@
 
 #include <minikin/MinikinFontFreeType.h>
 
-namespace android {
+namespace minikin {
 
 int32_t MinikinFontFreeType::sIdCounter = 0;
 
@@ -97,4 +97,4 @@ MinikinFontFreeType* MinikinFontFreeType::GetFreeType() {
     return this;
 }
 
-}  // namespace android
+}  // namespace minikin

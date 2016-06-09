@@ -17,7 +17,7 @@
 #ifndef MINIKIN_GRAPHEME_BREAK_H
 #define MINIKIN_GRAPHEME_BREAK_H
 
-namespace android {
+namespace minikin {
 
 class GraphemeBreak {
 public:
@@ -42,6 +42,6 @@ public:
             size_t offset, MoveOpt opt);
 };
 
-}  // namespace android
+}  // namespace minikin
 
 #endif  // MINIKIN_GRAPHEME_BREAK_H

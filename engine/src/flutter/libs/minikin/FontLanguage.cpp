@@ -21,7 +21,7 @@
 #include <hb.h>
 #include <unicode/uloc.h>
 
-namespace android {
+namespace minikin {
 
 #define SCRIPT_TAG(c1, c2, c3, c4) \
         (((uint32_t)(c1)) << 24 | ((uint32_t)(c2)) << 16 | ((uint32_t)(c3)) <<  8 | \
@@ -183,4 +183,4 @@ FontLanguages::FontLanguages(std::vector<FontLanguage>&& languages)
 }
 
 #undef SCRIPT_TAG
-}  // namespace android
+}  // namespace minikin

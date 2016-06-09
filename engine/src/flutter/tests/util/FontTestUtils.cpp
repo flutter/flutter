@@ -24,31 +24,33 @@
 #include "FontLanguage.h"
 #include "MinikinFontForTest.h"
 
-android::FontCollection* getFontCollection(const char* fontDir, const char* fontXml) {
+namespace minikin {
+
+FontCollection* getFontCollection(const char* fontDir, const char* fontXml) {
     xmlDoc* doc = xmlReadFile(fontXml, NULL, 0);
     xmlNode* familySet = xmlDocGetRootElement(doc);
 
-    std::vector<android::FontFamily*> families;
+    std::vector<FontFamily*> families;
     for (xmlNode* familyNode = familySet->children; familyNode; familyNode = familyNode->next) {
         if (xmlStrcmp(familyNode->name, (const xmlChar*)"family") != 0) {
             continue;
         }
 
         xmlChar* variantXmlch = xmlGetProp(familyNode, (const xmlChar*)"variant");
-        int variant = android::VARIANT_DEFAULT;
+        int variant = VARIANT_DEFAULT;
         if (variantXmlch) {
             if (xmlStrcmp(variantXmlch, (const xmlChar*)"elegant") == 0) {
-                variant = android::VARIANT_ELEGANT;
+                variant = VARIANT_ELEGANT;
             } else if (xmlStrcmp(variantXmlch, (const xmlChar*)"compact") == 0) {
-                variant = android::VARIANT_COMPACT;
+                variant = VARIANT_COMPACT;
             }
         }
 
         xmlChar* lang = xmlGetProp(familyNode, (const xmlChar*)"lang");
-        uint32_t langId = android::FontStyle::registerLanguageList(
+        uint32_t langId = FontStyle::registerLanguageList(
                 std::string((const char*)lang, xmlStrlen(lang)));
 
-        android::FontFamily* family = new android::FontFamily(langId, variant);
+        FontFamily* family = new FontFamily(langId, variant);
 
         for (xmlNode* fontNode = familyNode->children; fontNode; fontNode = fontNode->next) {
             if (xmlStrcmp(fontNode->name, (const xmlChar*)"font") != 0) {
@@ -66,16 +68,18 @@ android::FontCollection* getFontCollection(const char* fontDir, const char* font
             LOG_ALWAYS_FATAL_IF(access(fontPath.c_str(), R_OK) != 0,
                     "%s is not found", fontPath.c_str());
 
-            family->addFont(new MinikinFontForTest(fontPath), android::FontStyle(weight, italic));
+            family->addFont(new MinikinFontForTest(fontPath), FontStyle(weight, italic));
         }
         families.push_back(family);
     }
     xmlFreeDoc(doc);
 
-    android::FontCollection* collection = new android::FontCollection(families);
+    FontCollection* collection = new FontCollection(families);
     collection->Ref();
     for (size_t i = 0; i < families.size(); ++i) {
         families[i]->Unref();
     }
     return collection;
 }
+
+}  // namespace minikin

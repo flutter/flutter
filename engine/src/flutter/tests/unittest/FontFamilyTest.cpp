@@ -25,19 +25,19 @@
 #include "MinikinFontForTest.h"
 #include "MinikinInternal.h"
 
-namespace android {
+namespace minikin {
 
 typedef ICUTestBase FontLanguagesTest;
 typedef ICUTestBase FontLanguageTest;
 
 static const FontLanguages& createFontLanguages(const std::string& input) {
-    AutoMutex _l(gMinikinLock);
+    android::AutoMutex _l(gMinikinLock);
     uint32_t langId = FontLanguageListCache::getId(input);
     return FontLanguageListCache::getById(langId);
 }
 
 static FontLanguage createFontLanguage(const std::string& input) {
-    AutoMutex _l(gMinikinLock);
+    android::AutoMutex _l(gMinikinLock);
     uint32_t langId = FontLanguageListCache::getId(input);
     return FontLanguageListCache::getById(langId)[0];
 }
@@ -354,7 +354,7 @@ TEST_F(FontFamilyTest, hasVariationSelectorTest) {
     MinikinAutoUnref<FontFamily> family(new FontFamily);
     family->addFont(minikinFont.get());
 
-    AutoMutex _l(gMinikinLock);
+    android::AutoMutex _l(gMinikinLock);
 
     const uint32_t kVS1 = 0xFE00;
     const uint32_t kVS2 = 0xFE01;
@@ -406,11 +406,11 @@ TEST_F(FontFamilyTest, hasVSTableTest) {
         MinikinAutoUnref<MinikinFontForTest> minikinFont(new MinikinFontForTest(testCase.fontPath));
         MinikinAutoUnref<FontFamily> family(new FontFamily);
         family->addFont(minikinFont.get());
-        AutoMutex _l(gMinikinLock);
+        android::AutoMutex _l(gMinikinLock);
         family->getCoverage();
 
         EXPECT_EQ(testCase.hasVSTable, family->hasVSTable());
     }
 }
 
-}  // namespace android
+}  // namespace minikin

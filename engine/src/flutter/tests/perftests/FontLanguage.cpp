@@ -17,7 +17,7 @@
 
 #include "FontLanguage.h"
 
-using android::FontLanguage;
+namespace minikin {
 
 static void BM_FontLanguage_en_US(benchmark::State& state) {
     while (state.KeepRunning()) {
@@ -32,3 +32,5 @@ static void BM_FontLanguage_en_Latn_US(benchmark::State& state) {
     }
 }
 BENCHMARK(BM_FontLanguage_en_Latn_US);
+
+}  // namespace minikin

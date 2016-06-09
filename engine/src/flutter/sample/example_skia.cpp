@@ -37,7 +37,7 @@
 
 using std::vector;
 
-namespace android {
+namespace minikin {
 
 FT_Library library;  // TODO: this should not be a global
 
@@ -145,8 +145,8 @@ int runMinikinTest() {
     return 0;
 }
 
-}
+}  // namespace minikin
 
 int main(int argc, const char** argv) {
-    return android::runMinikinTest();
+    return minikin::runMinikinTest();
 }

@@ -19,6 +19,8 @@
 
 #include <stdint.h>
 
+namespace minikin {
+
 /**
  * Return offset of previous word break. It is either < offset or == 0.
  *
@@ -39,4 +41,5 @@ size_t getPrevWordBreakForCache(
 size_t getNextWordBreakForCache(
         const uint16_t* chars, size_t offset, size_t len);
 
+}  // namespace minikin
 #endif  // MINIKIN_LAYOUT_UTILS_H

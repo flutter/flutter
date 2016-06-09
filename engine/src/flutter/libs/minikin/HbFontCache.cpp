@@ -26,7 +26,7 @@
 #include <minikin/MinikinFont.h>
 #include "MinikinInternal.h"
 
-namespace android {
+namespace minikin {
 
 static hb_blob_t* referenceTable(hb_face_t* /* face */, hb_tag_t tag, void* userData) {
     MinikinFont* font = reinterpret_cast<MinikinFont*>(userData);
@@ -44,7 +44,7 @@ static hb_blob_t* referenceTable(hb_face_t* /* face */, hb_tag_t tag, void* user
             HB_MEMORY_MODE_READONLY, const_cast<void*>(buffer), destroy);
 }
 
-class HbFontCache : private OnEntryRemoved<int32_t, hb_font_t*> {
+class HbFontCache : private android::OnEntryRemoved<int32_t, hb_font_t*> {
 public:
     HbFontCache() : mCache(kMaxEntries) {
         mCache.setOnEntryRemovedListener(this);
@@ -74,7 +74,7 @@ public:
 private:
     static const size_t kMaxEntries = 100;
 
-    LruCache<int32_t, hb_font_t*> mCache;
+    android::LruCache<int32_t, hb_font_t*> mCache;
 };
 
 HbFontCache* getFontCacheLocked() {
@@ -141,4 +141,4 @@ hb_font_t* getHbFontLocked(MinikinFont* minikinFont) {
     return hb_font_reference(font);
 }
 
-}  // namespace android
+}  // namespace minikin

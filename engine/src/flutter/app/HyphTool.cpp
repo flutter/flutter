@@ -7,7 +7,7 @@
 #include <vector>
 #include <minikin/Hyphenator.h>
 
-using android::Hyphenator;
+using minikin::Hyphenator;
 
 Hyphenator* loadHybFile(const char* fn) {
     struct stat statbuf;

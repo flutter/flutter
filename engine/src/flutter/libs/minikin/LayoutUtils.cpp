@@ -18,6 +18,8 @@
 
 #include "LayoutUtils.h"
 
+namespace minikin {
+
 /**
  * For the purpose of layout, a word break is a boundary with no
  * kerning or complex script processing. This is necessarily a
@@ -74,3 +76,5 @@ size_t getNextWordBreakForCache(
     }
     return len;
 }
+
+}  // namespace minikin
