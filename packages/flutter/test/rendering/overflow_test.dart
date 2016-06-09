@@ -8,6 +8,20 @@ import 'package:test/test.dart';
 
 import 'rendering_tester.dart';
 
+class TestLayoutDelegate extends SingleChildLayoutDelegate {
+  TestLayoutDelegate({ this.maxHeight });
+
+  final double maxHeight;
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    return constraints.copyWith(maxHeight: maxHeight);
+  }
+
+  @override
+  bool shouldRelayout(TestLayoutDelegate oldDelegate) => maxHeight != oldDelegate.maxHeight;
+}
+
 void main() {
   test("overflow should not affect baseline", () {
     RenderBox root, child, text;
@@ -28,10 +42,9 @@ void main() {
 
     root = new RenderPositionedBox(
       child: new RenderCustomPaint(
-        child: child = new RenderConstrainedOverflowBox(
-          child: text = new RenderParagraph(new TextSpan(text: 'Hello World')),
-          maxHeight: height1 / 2.0,
-          alignment: const FractionalOffset(0.0, 0.0)
+        child: child = new RenderCustomSingleChildLayoutBox(
+          delegate: new TestLayoutDelegate(maxHeight: height1 / 2.0),
+          child: text = new RenderParagraph(new TextSpan(text: 'Hello World'))
         ),
         painter: new TestCallbackPainter(
           onPaint: () {
