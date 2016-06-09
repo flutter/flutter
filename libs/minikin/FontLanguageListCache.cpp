@@ -25,7 +25,7 @@
 #include "MinikinInternal.h"
 #include "FontLanguage.h"
 
-namespace android {
+namespace minikin {
 
 const uint32_t FontLanguageListCache::kEmptyListId;
 
@@ -152,4 +152,4 @@ FontLanguageListCache* FontLanguageListCache::getInstance() {
     return instance;
 }
 
-}  // namespace android
+}  // namespace minikin

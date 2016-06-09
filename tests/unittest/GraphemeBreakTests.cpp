@@ -18,7 +18,7 @@
 #include <UnicodeUtils.h>
 #include <minikin/GraphemeBreak.h>
 
-using namespace android;
+namespace minikin {
 
 bool IsBreak(const char* src) {
     const size_t BUF_SIZE = 256;
@@ -188,3 +188,5 @@ TEST(GraphemeBreak, offsets) {
     EXPECT_TRUE(GraphemeBreak::isGraphemeBreak(string, 2, 3, 4));
     EXPECT_TRUE(GraphemeBreak::isGraphemeBreak(string, 2, 3, 5));
 }
+
+}  // namespace minikin

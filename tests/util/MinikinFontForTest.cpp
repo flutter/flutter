@@ -22,6 +22,8 @@
 
 #include <cutils/log.h>
 
+namespace minikin {
+
 MinikinFontForTest::MinikinFontForTest(const std::string& font_path) :
     MinikinFontForTest(font_path, SkTypeface::CreateFromFile(font_path.c_str())) {
 }
@@ -36,18 +38,18 @@ MinikinFontForTest::~MinikinFontForTest() {
 }
 
 float MinikinFontForTest::GetHorizontalAdvance(uint32_t /* glyph_id */,
-        const android::MinikinPaint& /* paint */) const {
+        const MinikinPaint& /* paint */) const {
     LOG_ALWAYS_FATAL("MinikinFontForTest::GetHorizontalAdvance is not yet implemented");
     return 0.0f;
 }
 
-void MinikinFontForTest::GetBounds(android::MinikinRect* /* bounds */, uint32_t /* glyph_id */,
-        const android::MinikinPaint& /* paint */) const {
+void MinikinFontForTest::GetBounds(MinikinRect* /* bounds */, uint32_t /* glyph_id */,
+        const MinikinPaint& /* paint */) const {
     LOG_ALWAYS_FATAL("MinikinFontForTest::GetBounds is not yet implemented");
 }
 
 const void* MinikinFontForTest::GetTable(uint32_t tag, size_t* size,
-        android::MinikinDestroyFunc* destroy) {
+        MinikinDestroyFunc* destroy) {
     const size_t tableSize = mTypeface->getTableSize(tag);
     *size = tableSize;
     if (tableSize == 0) {
@@ -61,3 +63,5 @@ const void* MinikinFontForTest::GetTable(uint32_t tag, size_t* size,
     *destroy = free;
     return buf;
 }
+
+}  // namespace minikin

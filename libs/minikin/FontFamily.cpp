@@ -38,7 +38,7 @@
 
 using std::vector;
 
-namespace android {
+namespace minikin {
 
 FontStyle::FontStyle(int variant, int weight, bool italic)
         : FontStyle(FontLanguageListCache::kEmptyListId, variant, weight, italic) {
@@ -48,15 +48,15 @@ FontStyle::FontStyle(uint32_t languageListId, int variant, int weight, bool ital
         : bits(pack(variant, weight, italic)), mLanguageListId(languageListId) {
 }
 
-hash_t FontStyle::hash() const {
-    uint32_t hash = JenkinsHashMix(0, bits);
-    hash = JenkinsHashMix(hash, mLanguageListId);
-    return JenkinsHashWhiten(hash);
+android::hash_t FontStyle::hash() const {
+    uint32_t hash = android::JenkinsHashMix(0, bits);
+    hash = android::JenkinsHashMix(hash, mLanguageListId);
+    return android::JenkinsHashWhiten(hash);
 }
 
 // static
 uint32_t FontStyle::registerLanguageList(const std::string& languages) {
-    AutoMutex _l(gMinikinLock);
+    android::AutoMutex _l(gMinikinLock);
     return FontLanguageListCache::getId(languages);
 }
 
@@ -78,7 +78,7 @@ FontFamily::~FontFamily() {
 }
 
 bool FontFamily::addFont(MinikinFont* typeface) {
-    AutoMutex _l(gMinikinLock);
+    android::AutoMutex _l(gMinikinLock);
     const uint32_t os2Tag = MinikinFont::MakeTag('O', 'S', '/', '2');
     HbBlob os2Table(getFontTable(typeface, os2Tag));
     if (os2Table.get() == nullptr) return false;
@@ -96,7 +96,7 @@ bool FontFamily::addFont(MinikinFont* typeface) {
 }
 
 void FontFamily::addFont(MinikinFont* typeface, FontStyle style) {
-    AutoMutex _l(gMinikinLock);
+    android::AutoMutex _l(gMinikinLock);
     addFontLocked(typeface, style);
 }
 
@@ -214,4 +214,4 @@ bool FontFamily::hasVSTable() const {
     return mHasVSTable;
 }
 
-}  // namespace android
+}  // namespace minikin

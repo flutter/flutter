@@ -19,12 +19,12 @@
 
 struct hb_font_t;
 
-namespace android {
+namespace minikin {
 class MinikinFont;
 
 void purgeHbFontCacheLocked();
 void purgeHbFontLocked(const MinikinFont* minikinFont);
 hb_font_t* getHbFontLocked(MinikinFont* minikinFont);
 
-}  // namespace android
+}  // namespace minikin
 #endif  // MINIKIN_HBFONT_CACHE_H

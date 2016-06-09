@@ -4,7 +4,7 @@
 #include <minikin/MinikinFont.h>
 #include "MinikinSkia.h"
 
-namespace android {
+namespace minikin {
 
 MinikinFontSkia::MinikinFontSkia(SkTypeface *typeface) :
     MinikinFont(typeface->uniqueID()),
@@ -68,4 +68,4 @@ SkTypeface *MinikinFontSkia::GetSkTypeface() {
     return mTypeface;
 }
 
-}
+}  // namespace minikin

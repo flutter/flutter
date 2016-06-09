@@ -21,22 +21,26 @@
 
 class SkTypeface;
 
-class MinikinFontForTest : public android::MinikinFont {
+namespace minikin {
+
+class MinikinFontForTest : public MinikinFont {
 public:
     explicit MinikinFontForTest(const std::string& font_path);
     MinikinFontForTest(const std::string& font_path, SkTypeface* typeface);
     ~MinikinFontForTest();
 
     // MinikinFont overrides.
-    float GetHorizontalAdvance(uint32_t glyph_id, const android::MinikinPaint &paint) const;
-    void GetBounds(android::MinikinRect* bounds, uint32_t glyph_id,
-            const android::MinikinPaint& paint) const;
-    const void* GetTable(uint32_t tag, size_t* size, android::MinikinDestroyFunc* destroy);
+    float GetHorizontalAdvance(uint32_t glyph_id, const MinikinPaint &paint) const;
+    void GetBounds(MinikinRect* bounds, uint32_t glyph_id,
+            const MinikinPaint& paint) const;
+    const void* GetTable(uint32_t tag, size_t* size, MinikinDestroyFunc* destroy);
 
     const std::string& fontPath() const { return mFontPath; }
 private:
     SkTypeface *mTypeface;
     const std::string mFontPath;
 };
+
+}  // namespace minikin
 
 #endif  // MINIKIN_TEST_MINIKIN_FONT_FOR_TEST_H

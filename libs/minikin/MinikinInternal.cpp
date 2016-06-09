@@ -22,9 +22,9 @@
 
 #include <cutils/log.h>
 
-namespace android {
+namespace minikin {
 
-Mutex gMinikinLock;
+android::Mutex gMinikinLock;
 
 void assertMinikinLocked() {
 #ifdef ENABLE_RACE_DETECTION
@@ -88,4 +88,4 @@ hb_blob_t* getFontTable(MinikinFont* minikinFont, uint32_t tag) {
     return blob;
 }
 
-}
+}  // namespace minikin

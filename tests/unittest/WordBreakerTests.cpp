@@ -31,7 +31,7 @@
 
 #define UTF16(codepoint) U16_LEAD(codepoint), U16_TRAIL(codepoint)
 
-using namespace android;
+namespace minikin {
 
 typedef ICUTestBase WordBreakerTest;
 
@@ -388,3 +388,5 @@ TEST_F(WordBreakerTest, emailStartsWithSlash) {
     EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
 }
+
+}  // namespace minikin

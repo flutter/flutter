@@ -23,7 +23,7 @@
 #include <unicode/uchar.h>
 #include <unicode/utf16.h>
 
-namespace android {
+namespace minikin {
 
 const uint32_t CHAR_SOFT_HYPHEN = 0x00AD;
 const uint32_t CHAR_ZWJ = 0x200D;
@@ -258,4 +258,4 @@ void WordBreaker::finish() {
     utext_close(&mUText);
 }
 
-}  // namespace android
+}  // namespace minikin

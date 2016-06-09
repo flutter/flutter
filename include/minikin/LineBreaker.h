@@ -29,7 +29,7 @@
 #include "minikin/Hyphenator.h"
 #include "minikin/WordBreaker.h"
 
-namespace android {
+namespace minikin {
 
 enum BreakStrategy {
     kBreakStrategy_Greedy = 0,
@@ -243,6 +243,6 @@ class LineBreaker {
         int mFirstTabIndex;
 };
 
-}  // namespace android
+}  // namespace minikin
 
 #endif  // MINIKIN_LINE_BREAKER_H

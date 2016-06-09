@@ -26,7 +26,7 @@
 #include "unicode/brkiter.h"
 #include <memory>
 
-namespace android {
+namespace minikin {
 
 class WordBreaker {
 public:
@@ -68,6 +68,6 @@ private:
     bool mInEmailOrUrl;
 };
 
-}  // namespace
+}  // namespace minikin
 
 #endif  // MINIKIN_WORD_BREAKER_H

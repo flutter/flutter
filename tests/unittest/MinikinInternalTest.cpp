@@ -18,7 +18,7 @@
 
 #include "MinikinInternal.h"
 
-namespace android {
+namespace minikin {
 
 TEST(MinikinInternalTest, isEmojiTest) {
     EXPECT_TRUE(isEmoji(0x0023));  // NUMBER SIGN
@@ -31,4 +31,4 @@ TEST(MinikinInternalTest, isEmojiTest) {
     EXPECT_FALSE(isEmoji(0x29E3D));  // A han character.
 }
 
-}  // namespace android
+}  // namespace minikin

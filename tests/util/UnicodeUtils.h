@@ -14,5 +14,9 @@
  * limitations under the License.
  */
 
- void ParseUnicode(uint16_t* buf, size_t buf_size, const char* src, size_t* result_size,
+namespace minikin {
+
+void ParseUnicode(uint16_t* buf, size_t buf_size, const char* src, size_t* result_size,
         size_t* offset);
+
+}  // namespace minikin

@@ -30,7 +30,7 @@
 
 using std::vector;
 
-namespace android {
+namespace minikin {
 
 template <typename T>
 static inline T max(T a, T b) {
@@ -77,7 +77,7 @@ uint32_t FontCollection::sNextId = 0;
 
 FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
     mMaxChar(0) {
-    AutoMutex _l(gMinikinLock);
+    android::AutoMutex _l(gMinikinLock);
     mId = sNextId++;
     vector<uint32_t> lastChar;
     size_t nTypefaces = typefaces.size();
@@ -362,7 +362,7 @@ bool FontCollection::hasVariationSelector(uint32_t baseCodepoint,
         return false;
     }
 
-    AutoMutex _l(gMinikinLock);
+    android::AutoMutex _l(gMinikinLock);
 
     // Currently mRanges can not be used here since it isn't aware of the variation sequence.
     for (size_t i = 0; i < mVSFamilyVec.size(); i++) {
@@ -471,4 +471,4 @@ uint32_t FontCollection::getId() const {
     return mId;
 }
 
-}  // namespace android
+}  // namespace minikin

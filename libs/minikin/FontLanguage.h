@@ -22,7 +22,7 @@
 
 #include <hb.h>
 
-namespace android {
+namespace minikin {
 
 // Due to the limits in font fallback score calculation, we can't use anything more than 17
 // languages.
@@ -121,6 +121,6 @@ private:
     void operator=(const FontLanguages&) = delete;
 };
 
-}  // namespace android
+}  // namespace minikin
 
 #endif  // MINIKIN_FONT_LANGUAGE_H

@@ -63,7 +63,7 @@ void Bitmap::writePnm(std::ofstream &o) const {
     o.close();
 }
 
-void Bitmap::drawGlyph(const android::GlyphBitmap& bitmap, int x, int y) {
+void Bitmap::drawGlyph(const GlyphBitmap& bitmap, int x, int y) {
     int bmw = bitmap.width;
     int bmh = bitmap.height;
     x += bitmap.left;
@@ -84,10 +84,6 @@ void Bitmap::drawGlyph(const android::GlyphBitmap& bitmap, int x, int y) {
         dst += width;
     }
 }
-
-} // namespace minikin
-
-namespace android {
 
 const int kDirection_Mask = 0x1;
 
@@ -120,7 +116,7 @@ public:
     }
     bool operator==(const LayoutCacheKey &other) const;
 
-    hash_t hash() const {
+    android::hash_t hash() const {
         return mHash;
     }
 
@@ -157,12 +153,12 @@ private:
     bool mIsRtl;
     // Note: any fields added to MinikinPaint must also be reflected here.
     // TODO: language matching (possibly integrate into style)
-    hash_t mHash;
+    android::hash_t mHash;
 
-    hash_t computeHash() const;
+    android::hash_t computeHash() const;
 };
 
-class LayoutCache : private OnEntryRemoved<LayoutCacheKey, Layout*> {
+class LayoutCache : private android::OnEntryRemoved<LayoutCacheKey, Layout*> {
 public:
     LayoutCache() : mCache(kMaxEntries) {
         mCache.setOnEntryRemovedListener(this);
@@ -190,7 +186,7 @@ private:
         delete value;
     }
 
-    LruCache<LayoutCacheKey, Layout*> mCache;
+    android::LruCache<LayoutCacheKey, Layout*> mCache;
 
     //static const size_t kMaxEntries = LruCache<LayoutCacheKey, Layout*>::kUnlimitedCapacity;
 
@@ -204,7 +200,7 @@ static unsigned int disabledDecomposeCompatibility(hb_unicode_funcs_t*, hb_codep
     return 0;
 }
 
-class LayoutEngine : public Singleton<LayoutEngine> {
+class LayoutEngine : public ::android::Singleton<LayoutEngine> {
 public:
     LayoutEngine() {
         unicodeFunctions = hb_unicode_funcs_create(hb_icu_get_unicode_funcs());
@@ -219,8 +215,6 @@ public:
     hb_unicode_funcs_t* unicodeFunctions;
     LayoutCache layoutCache;
 };
-
-ANDROID_SINGLETON_STATIC_INSTANCE(LayoutEngine);
 
 bool LayoutCacheKey::operator==(const LayoutCacheKey& other) const {
     return mId == other.mId
@@ -238,23 +232,23 @@ bool LayoutCacheKey::operator==(const LayoutCacheKey& other) const {
             && !memcmp(mChars, other.mChars, mNchars * sizeof(uint16_t));
 }
 
-hash_t LayoutCacheKey::computeHash() const {
-    uint32_t hash = JenkinsHashMix(0, mId);
-    hash = JenkinsHashMix(hash, mStart);
-    hash = JenkinsHashMix(hash, mCount);
-    hash = JenkinsHashMix(hash, hash_type(mStyle));
-    hash = JenkinsHashMix(hash, hash_type(mSize));
-    hash = JenkinsHashMix(hash, hash_type(mScaleX));
-    hash = JenkinsHashMix(hash, hash_type(mSkewX));
-    hash = JenkinsHashMix(hash, hash_type(mLetterSpacing));
-    hash = JenkinsHashMix(hash, hash_type(mPaintFlags));
-    hash = JenkinsHashMix(hash, hash_type(mHyphenEdit.hasHyphen()));
-    hash = JenkinsHashMix(hash, hash_type(mIsRtl));
-    hash = JenkinsHashMixShorts(hash, mChars, mNchars);
-    return JenkinsHashWhiten(hash);
+android::hash_t LayoutCacheKey::computeHash() const {
+    uint32_t hash = android::JenkinsHashMix(0, mId);
+    hash = android::JenkinsHashMix(hash, mStart);
+    hash = android::JenkinsHashMix(hash, mCount);
+    hash = android::JenkinsHashMix(hash, hash_type(mStyle));
+    hash = android::JenkinsHashMix(hash, hash_type(mSize));
+    hash = android::JenkinsHashMix(hash, hash_type(mScaleX));
+    hash = android::JenkinsHashMix(hash, hash_type(mSkewX));
+    hash = android::JenkinsHashMix(hash, hash_type(mLetterSpacing));
+    hash = android::JenkinsHashMix(hash, hash_type(mPaintFlags));
+    hash = android::JenkinsHashMix(hash, hash_type(mHyphenEdit.hasHyphen()));
+    hash = android::JenkinsHashMix(hash, hash_type(mIsRtl));
+    hash = android::JenkinsHashMixShorts(hash, mChars, mNchars);
+    return android::JenkinsHashWhiten(hash);
 }
 
-hash_t hash_type(const LayoutCacheKey& key) {
+android::hash_t hash_type(const LayoutCacheKey& key) {
     return key.hash();
 }
 
@@ -578,7 +572,7 @@ BidiText::BidiText(const uint16_t* buf, size_t start, size_t count, size_t bufSi
 
 void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
         int bidiFlags, const FontStyle &style, const MinikinPaint &paint) {
-    AutoMutex _l(gMinikinLock);
+    android::AutoMutex _l(gMinikinLock);
 
     LayoutContext ctx;
     ctx.style = style;
@@ -597,7 +591,7 @@ void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bu
 float Layout::measureText(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
         int bidiFlags, const FontStyle &style, const MinikinPaint &paint,
         const FontCollection* collection, float* advances) {
-    AutoMutex _l(gMinikinLock);
+    android::AutoMutex _l(gMinikinLock);
 
     LayoutContext ctx;
     ctx.style = style;
@@ -965,10 +959,17 @@ void Layout::getBounds(MinikinRect* bounds) {
 }
 
 void Layout::purgeCaches() {
-    AutoMutex _l(gMinikinLock);
+    android::AutoMutex _l(gMinikinLock);
     LayoutCache& layoutCache = LayoutEngine::getInstance().layoutCache;
     layoutCache.clear();
     purgeHbFontCacheLocked();
 }
 
+}  // namespace minikin
+
+// Unable to define the static data member outside of android.
+// TODO: introduce our own Singleton to drop android namespace.
+namespace android {
+ANDROID_SINGLETON_STATIC_INSTANCE(minikin::LayoutEngine);
 }  // namespace android
+

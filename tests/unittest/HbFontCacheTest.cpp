@@ -26,19 +26,18 @@
 #include "MinikinFontForTest.h"
 #include <minikin/MinikinFont.h>
 
-namespace android {
-namespace {
+namespace minikin {
 
 class HbFontCacheTest : public testing::Test {
 public:
     virtual void TearDown() {
-        AutoMutex _l(gMinikinLock);
+        android::AutoMutex _l(gMinikinLock);
         purgeHbFontCacheLocked();
     }
 };
 
 TEST_F(HbFontCacheTest, getHbFontLockedTest) {
-    AutoMutex _l(gMinikinLock);
+    android::AutoMutex _l(gMinikinLock);
 
     MinikinFontForTest fontA(kTestFontDir "Regular.ttf");
     MinikinFontForTest fontB(kTestFontDir "Bold.ttf");
@@ -62,7 +61,7 @@ TEST_F(HbFontCacheTest, getHbFontLockedTest) {
 }
 
 TEST_F(HbFontCacheTest, purgeCacheTest) {
-    AutoMutex _l(gMinikinLock);
+    android::AutoMutex _l(gMinikinLock);
     MinikinFontForTest minikinFont(kTestFontDir "Regular.ttf");
 
     hb_font_t* font = getHbFontLocked(&minikinFont);
@@ -83,5 +82,4 @@ TEST_F(HbFontCacheTest, purgeCacheTest) {
     EXPECT_EQ(nullptr, hb_font_get_user_data(font, &key));
 }
 
-}  // namespace
-}  // namespace android
+}  // namespace minikin

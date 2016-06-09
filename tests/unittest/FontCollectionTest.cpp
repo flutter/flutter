@@ -21,7 +21,7 @@
 #include "MinikinFontForTest.h"
 #include "MinikinInternal.h"
 
-namespace android {
+namespace minikin {
 
 // The test font has following glyphs.
 // U+82A6
@@ -107,4 +107,4 @@ TEST(FontCollectionTest, hasVariationSelectorTest_emoji) {
     EXPECT_FALSE(collection->hasVariationSelector(0x2229, 0xFE0F));
 }
 
-}  // namespace android
+}  // namespace minikin

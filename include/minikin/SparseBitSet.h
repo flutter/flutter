@@ -23,7 +23,7 @@
 
 // ---------------------------------------------------------------------------
 
-namespace android {
+namespace minikin {
 
 // This is an implementation of a set of integers. It is optimized for
 // values that are somewhat sparse, in the ballpark of a maximum value
@@ -87,6 +87,6 @@ private:
 // Note: this thing cannot be used in vectors yet. If that were important, we'd need to
 // make the copy constructor work, and probably set up move traits as well.
 
-}; // namespace android
+}  // namespace minikin
 
 #endif // MINIKIN_SPARSE_BIT_SET_H

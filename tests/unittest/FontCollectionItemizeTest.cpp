@@ -25,16 +25,7 @@
 #include "UnicodeUtils.h"
 #include "minikin/FontFamily.h"
 
-using android::AutoMutex;
-using android::FontCollection;
-using android::FontFamily;
-using android::FontLanguage;
-using android::FontLanguages;
-using android::FontLanguageListCache;
-using android::FontStyle;
-using android::MinikinAutoUnref;
-using android::MinikinFont;
-using android::gMinikinLock;
+namespace minikin {
 
 const char kItemizeFontXml[] = kTestFontDir "itemize.xml";
 const char kEmojiFont[] = kTestFontDir "Emoji.ttf";
@@ -64,7 +55,7 @@ void itemize(FontCollection* collection, const char* str, FontStyle style,
 
     result->clear();
     ParseUnicode(buf, BUF_SIZE, str, &len, NULL);
-    AutoMutex _l(gMinikinLock);
+    android::AutoMutex _l(gMinikinLock);
     collection->itemize(buf, len, style, result);
 }
 
@@ -76,7 +67,7 @@ const std::string& getFontPath(const FontCollection::Run& run) {
 
 // Utility function to obtain FontLanguages from string.
 const FontLanguages& registerAndGetFontLanguages(const std::string& lang_string) {
-    AutoMutex _l(gMinikinLock);
+    android::AutoMutex _l(gMinikinLock);
     return FontLanguageListCache::getById(FontLanguageListCache::getId(lang_string));
 }
 
@@ -673,12 +664,12 @@ TEST_F(FontCollectionItemizeTest, itemize_vs_sequence_but_no_base_char) {
     // point.
     const std::string kVSTestFont = kTestFontDir "VarioationSelectorTest-Regular.ttf";
 
-    std::vector<android::FontFamily*> families;
-    FontFamily* family1 = new FontFamily(android::VARIANT_DEFAULT);
+    std::vector<FontFamily*> families;
+    FontFamily* family1 = new FontFamily(VARIANT_DEFAULT);
     family1->addFont(new MinikinFontForTest(kLatinFont));
     families.push_back(family1);
 
-    FontFamily* family2 = new FontFamily(android::VARIANT_DEFAULT);
+    FontFamily* family2 = new FontFamily(VARIANT_DEFAULT);
     family2->addFont(new MinikinFontForTest(kVSTestFont));
     families.push_back(family2);
 
@@ -1372,3 +1363,5 @@ TEST_F(FontCollectionItemizeTest, itemize_PrivateUseArea) {
     EXPECT_EQ(4, runs[0].end);
     EXPECT_EQ(kNoGlyphFont, getFontPath(runs[0]));
 }
+
+}  // namespace minikin

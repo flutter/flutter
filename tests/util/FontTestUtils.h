@@ -19,6 +19,8 @@
 
 #include <minikin/FontCollection.h>
 
+namespace minikin {
+
 /**
  * Returns FontCollection from installed fonts.
  *
@@ -27,6 +29,7 @@
  *
  * Caller must unref the returned pointer.
  */
-android::FontCollection* getFontCollection(const char* fontDir, const char* fontXml);
+FontCollection* getFontCollection(const char* fontDir, const char* fontXml);
 
+}  // namespace minikin
 #endif  // MINIKIN_FONT_TEST_UTILS_H

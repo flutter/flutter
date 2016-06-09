@@ -18,6 +18,8 @@
 #include <unicode/utf.h>
 #include <cstdlib>
 
+namespace minikin {
+
 // src is of the form "U+1F431 | 'h' 'i'". Position of "|" gets saved to offset if non-null.
 // Size is returned in an out parameter because gtest needs a void return for ASSERT to work.
 void ParseUnicode(uint16_t* buf, size_t buf_size, const char* src, size_t* result_size,
@@ -94,3 +96,5 @@ TEST(UnicodeUtils, parse) {
     EXPECT_EQ(buf[2], 0xDC31);
     EXPECT_EQ(buf[3], 'a');
 }
+
+}  // namespace minikin

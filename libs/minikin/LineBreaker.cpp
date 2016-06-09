@@ -26,7 +26,7 @@
 
 using std::vector;
 
-namespace android {
+namespace minikin {
 
 const int CHAR_TAB = 0x0009;
 
@@ -441,4 +441,4 @@ void LineBreaker::finish() {
     mLinePenalty = 0.0f;
 }
 
-}  // namespace android
+}  // namespace minikin

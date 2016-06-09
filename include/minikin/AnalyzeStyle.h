@@ -17,10 +17,10 @@
 #ifndef MINIKIN_ANALYZE_STYLE_H
 #define MINIKIN_ANALYZE_STYLE_H
 
-namespace android {
+namespace minikin {
 
 bool analyzeStyle(const uint8_t* os2_data, size_t os2_size, int* weight, bool* italic);
 
-}  // namespace android
+}  // namespace minikin
 
 #endif  // MINIKIN_ANALYZE_STYLE_H

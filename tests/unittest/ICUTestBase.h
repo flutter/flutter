@@ -26,6 +26,8 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 
+namespace minikin {
+
 class ICUTestBase : public testing::Test {
 protected:
     virtual void SetUp() override {
@@ -48,5 +50,5 @@ protected:
     }
 };
 
-
+}  // namespace minikin
 #endif  //  MINIKIN_TEST_ICU_TEST_BASE_H
