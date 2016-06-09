@@ -134,13 +134,11 @@ class FeatureItem extends StatelessWidget {
                   new LayoutId(
                     id: FeatureLayout.left,
                     child: new ClipRect(
-                      child: new OverflowBox(
-                        minWidth: 340.0,
-                        maxWidth: 340.0,
-                        minHeight: 340.0,
-                        maxHeight: 340.0,
+                      child: new Align(
                         alignment: FractionalOffset.topRight,
                         child: new NetworkImage(
+                          width: 340.0,
+                          height: 340.0,
                           fit: ImageFit.cover,
                           src: product.imageUrl
                         )

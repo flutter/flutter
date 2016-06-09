@@ -264,34 +264,26 @@ class AppBar extends StatelessWidget {
     // If the appBar's height shrinks below collapsedHeight, it will be clipped and bottom
     // justified. This is so that the toolbar and the tabbar appear to move upwards as
     // the appBar's height is reduced below collapsedHeight.
-    final double paddedCollapsedHeight = collapsedHeight + combinedPadding.top + combinedPadding.bottom;
+    final double paddedCollapsedHeight = collapsedHeight + combinedPadding.vertical;
     if (size.height < paddedCollapsedHeight) {
-      appBar = new ClipRect(
-        child: new OverflowBox(
-          alignment: FractionalOffset.bottomLeft,
-          minHeight: paddedCollapsedHeight,
-          maxHeight: paddedCollapsedHeight,
-          child: appBar
-        )
+      appBar = new Positioned(
+        left: 0.0,
+        bottom: 0.0,
+        height: paddedCollapsedHeight,
+        child: appBar
       );
     }
 
-    if (flexibleSpace != null) {
-      appBar = new Stack(
-        children: <Widget>[
-          flexibleSpace,
-          appBar
-        ]
-      );
-    }
+    List<Widget> children = <Widget>[];
+    if (flexibleSpace != null)
+      children.add(flexibleSpace);
+    children.add(appBar);
 
-    appBar = new Material(
+    return new Material(
       color: backgroundColor ?? theme.primaryColor,
       elevation: elevation,
-      child: appBar
+      child: new Stack(children: children)
     );
-
-    return appBar;
   }
 
   @override

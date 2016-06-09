@@ -8,16 +8,25 @@ import 'package:test/test.dart';
 
 import 'rendering_tester.dart';
 
+class TestLayoutDelegate extends SingleChildLayoutDelegate {
+  TestLayoutDelegate(this.childConstraints);
+
+  final BoxConstraints childConstraints;
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) => childConstraints;
+
+  @override
+  bool shouldRelayout(TestLayoutDelegate oldDelegate) => childConstraints != oldDelegate.childConstraints;
+}
+
 void main() {
   test('parent max size is unconstrained', () {
     RenderBox child = new RenderConstrainedBox(
       additionalConstraints: new BoxConstraints.tightFor(width: 300.0, height: 400.0)
     );
-    RenderBox parent = new RenderConstrainedOverflowBox(
-      minWidth: 0.0,
-      maxWidth: double.INFINITY,
-      minHeight: 0.0,
-      maxHeight: double.INFINITY,
+    RenderBox parent = new RenderCustomSingleChildLayoutBox(
+      delegate: new TestLayoutDelegate(const BoxConstraints()),
       child: new RenderLimitedBox(
         maxWidth: 100.0,
         maxHeight: 200.0,
@@ -33,11 +42,8 @@ void main() {
     RenderBox child = new RenderConstrainedBox(
       additionalConstraints: new BoxConstraints.tightFor(width: 300.0, height: 400.0)
     );
-    RenderBox parent = new RenderConstrainedOverflowBox(
-      minWidth: 0.0,
-      maxWidth: double.INFINITY,
-      minHeight: 500.0,
-      maxHeight: 500.0,
+    RenderBox parent = new RenderCustomSingleChildLayoutBox(
+      delegate: new TestLayoutDelegate(const BoxConstraints.tightFor(height: 500.0)),
       child: new RenderLimitedBox(
         maxWidth: 100.0,
         maxHeight: 200.0,
@@ -53,11 +59,8 @@ void main() {
     RenderBox child = new RenderConstrainedBox(
       additionalConstraints: new BoxConstraints.tightFor(width: 300.0, height: 400.0)
     );
-    RenderBox parent = new RenderConstrainedOverflowBox(
-      minWidth: 500.0,
-      maxWidth: 500.0,
-      minHeight: 0.0,
-      maxHeight: double.INFINITY,
+    RenderBox parent = new RenderCustomSingleChildLayoutBox(
+      delegate: new TestLayoutDelegate(const BoxConstraints.tightFor(width: 500.0)),
       child: new RenderLimitedBox(
         maxWidth: 100.0,
         maxHeight: 200.0,
