@@ -18,6 +18,16 @@ typedef Widget LayoutWidgetBuilder(BuildContext context, BoxConstraints constrai
 /// is useful when the parent constrains the child's size and doesn't depend on
 /// the child's intrinsic size. The LayoutBuilder's final size will match its
 /// child's size.
+///
+/// If the child should be smaller than the parent, consider wrapping the child
+/// in an [Align] widget. If the child might want to be bigger, consider
+/// wrapping it in a [ScrollableViewport].
+///
+/// See also:
+///
+/// * [Builder], which calls a `builder` function at build time.
+/// * [StatefulBuilder], which passes its `builder` function a `setState` callback.
+/// * [CustomSingleChildLayout], which positions its child during layout.
 class LayoutBuilder extends RenderObjectWidget {
   /// Creates a widget that defers its building until layout.
   ///
