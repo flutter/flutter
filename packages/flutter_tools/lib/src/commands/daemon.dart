@@ -536,7 +536,7 @@ class NotifyingLogger extends Logger {
   }
 
   @override
-  void printStatus(String message, { bool emphasis: false }) {
+  void printStatus(String message, { bool emphasis: false, bool newline: true }) {
     _messageController.add(new LogMessage('status', message));
   }
 
@@ -603,7 +603,7 @@ class _AppRunLogger extends Logger {
   }
 
   @override
-  void printStatus(String message, { bool emphasis: false }) {
+  void printStatus(String message, { bool emphasis: false, bool newline: true }) {
     domain?._sendAppEvent(app, 'log', <String, dynamic>{ 'log': message });
   }
 
