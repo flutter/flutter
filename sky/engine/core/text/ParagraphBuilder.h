@@ -8,18 +8,15 @@
 #include "sky/engine/core/text/Paragraph.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/tonic/int32_list.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/ThreadSafeRefCounted.h"
+#include "base/memory/ref_counted.h"
 
 namespace blink {
 class DartLibraryNatives;
 
-class ParagraphBuilder : public ThreadSafeRefCounted<ParagraphBuilder>, public DartWrappable {
+class ParagraphBuilder : public base::RefCountedThreadSafe<ParagraphBuilder>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtr<ParagraphBuilder> create() {
-      return adoptRef(new ParagraphBuilder());
-    }
+    static scoped_refptr<ParagraphBuilder> create() { return new ParagraphBuilder(); }
 
     ~ParagraphBuilder() override;
 
@@ -28,7 +25,7 @@ public:
 
     void addText(const std::string& text);
 
-    PassRefPtr<Paragraph> build(Int32List& encoded, const std::string& fontFamily, double fontSize, double lineHeight);
+    scoped_refptr<Paragraph> build(Int32List& encoded, const std::string& fontFamily, double fontSize, double lineHeight);
 
     static void RegisterNatives(DartLibraryNatives* natives);
 

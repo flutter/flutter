@@ -8,28 +8,27 @@
 #include <jni.h>
 
 #include "base/android/jni_android.h"
+#include "base/memory/ref_counted.h"
 #include "sky/engine/tonic/dart_wrappable.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 
 class JniClass;
 
 // Wrapper that exposes a JNI jobject to Dart
-class JniObject : public ThreadSafeRefCounted<JniObject>, public DartWrappable {
+class JniObject : public base::RefCountedThreadSafe<JniObject>, public DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
 
  public:
   ~JniObject() override;
 
-  static PassRefPtr<JniObject> Create(JNIEnv* env, jobject object);
+  static scoped_refptr<JniObject> Create(JNIEnv* env, jobject object);
 
   jobject java_object() const { return object_.obj(); }
 
-  PassRefPtr<JniClass> GetObjectClass();
+  scoped_refptr<JniClass> GetObjectClass();
 
-  PassRefPtr<JniObject> GetObjectField(jfieldID fieldId);
+  scoped_refptr<JniObject> GetObjectField(jfieldID fieldId);
   bool GetBooleanField(jfieldID fieldId);
   int64_t GetByteField(jfieldID fieldId);
   int64_t GetCharField(jfieldID fieldId);
@@ -49,8 +48,8 @@ class JniObject : public ThreadSafeRefCounted<JniObject>, public DartWrappable {
   void SetFloatField(jfieldID fieldId, double value);
   void SetDoubleField(jfieldID fieldId, double value);
 
-  PassRefPtr<JniObject> CallObjectMethod(jmethodID methodId,
-                                         const std::vector<Dart_Handle>& args);
+  scoped_refptr<JniObject> CallObjectMethod(jmethodID methodId,
+                                            const std::vector<Dart_Handle>& args);
   bool CallBooleanMethod(jmethodID methodId,
                          const std::vector<Dart_Handle>& args);
   int64_t CallByteMethod(jmethodID methodId,

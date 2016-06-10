@@ -8,21 +8,20 @@
 #include <stdint.h>
 #include <memory>
 
+#include "base/memory/ref_counted.h"
 #include "flow/layers/layer_tree.h"
 #include "sky/engine/tonic/dart_wrappable.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/ThreadSafeRefCounted.h"
 #include "third_party/skia/include/core/SkPicture.h"
 
 namespace blink {
 class DartLibraryNatives;
 
-class Scene : public ThreadSafeRefCounted<Scene>, public DartWrappable {
+class Scene : public base::RefCountedThreadSafe<Scene>, public DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
 
  public:
   ~Scene() override;
-  static PassRefPtr<Scene> create(
+  static scoped_refptr<Scene> create(
       std::unique_ptr<flow::Layer> rootLayer,
       uint32_t rasterizerTracingThreshold);
 

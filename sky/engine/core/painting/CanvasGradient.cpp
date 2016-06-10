@@ -32,8 +32,8 @@ FOR_EACH_BINDING(DART_REGISTER_NATIVE)
   });
 }
 
-PassRefPtr<CanvasGradient> CanvasGradient::create() {
-  return adoptRef(new CanvasGradient());
+scoped_refptr<CanvasGradient> CanvasGradient::create() {
+  return new CanvasGradient();
 }
 
 void CanvasGradient::initLinear(const std::vector<Point>& end_points,

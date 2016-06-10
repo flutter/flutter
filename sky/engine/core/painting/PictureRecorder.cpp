@@ -50,22 +50,22 @@ SkCanvas* PictureRecorder::beginRecording(SkRect bounds)
         &m_rtreeFactory, SkPictureRecorder::kComputeSaveLayerInfo_RecordFlag);
 }
 
-PassRefPtr<Picture> PictureRecorder::endRecording()
+scoped_refptr<Picture> PictureRecorder::endRecording()
 {
     if (!isRecording())
         return nullptr;
-    RefPtr<Picture> picture = Picture::create(
+    scoped_refptr<Picture> picture = Picture::create(
         m_pictureRecorder.finishRecordingAsPicture());
     m_canvas->clearSkCanvas();
     m_canvas->ClearDartWrapper();
     m_canvas = nullptr;
     ClearDartWrapper();
-    return picture.release();
+    return std::move(picture);
 }
 
-void PictureRecorder::set_canvas(PassRefPtr<Canvas> canvas)
+void PictureRecorder::set_canvas(scoped_refptr<Canvas> canvas)
 {
-    m_canvas = canvas;
+    m_canvas = std::move(canvas);
 }
 
 } // namespace blink

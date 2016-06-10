@@ -18,7 +18,7 @@ jstring JniString::java_string() {
   return static_cast<jstring>(java_object());
 }
 
-PassRefPtr<JniString> JniString::Create(Dart_Handle dart_string) {
+scoped_refptr<JniString> JniString::Create(Dart_Handle dart_string) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -27,11 +27,11 @@ PassRefPtr<JniString> JniString::Create(Dart_Handle dart_string) {
                                                     &exception);
     if (exception) goto fail;
 
-    return adoptRef(new JniString(env, java_string));
+    return new JniString(env, java_string);
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return nullptr;
 }
 
@@ -53,7 +53,7 @@ Dart_Handle JniString::GetText() {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return Dart_Null();
 }
 

@@ -231,7 +231,7 @@ void ParagraphBuilder::addText(const std::string& text)
     m_currentRenderObject->addChild(renderText);
 }
 
-PassRefPtr<Paragraph> ParagraphBuilder::build(Int32List& encoded, const std::string& fontFamily, double fontSize, double lineHeight)
+scoped_refptr<Paragraph> ParagraphBuilder::build(Int32List& encoded, const std::string& fontFamily, double fontSize, double lineHeight)
 {
     DCHECK(encoded.num_elements() == 5);
     int32_t mask = encoded[0];

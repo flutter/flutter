@@ -33,8 +33,8 @@ class JniObjectArray : public JniArray {
  public:
   ~JniObjectArray() override;
 
-  static PassRefPtr<JniObjectArray> Create(const JniClass* clazz, jsize length);
-  PassRefPtr<JniObject> GetArrayElement(jsize index);
+  static scoped_refptr<JniObjectArray> Create(const JniClass* clazz, jsize length);
+  scoped_refptr<JniObject> GetArrayElement(jsize index);
   void SetArrayElement(jsize index, const JniObject* value);
 
  private:
@@ -48,7 +48,7 @@ class JniBooleanArray : public JniArray {
  public:
   ~JniBooleanArray() override;
 
-  static PassRefPtr<JniBooleanArray> Create(jsize length);
+  static scoped_refptr<JniBooleanArray> Create(jsize length);
   bool GetArrayElement(jsize index);
   void SetArrayElement(jsize index, bool value);
 
@@ -63,7 +63,7 @@ class JniByteArray : public JniArray {
  public:
   ~JniByteArray() override;
 
-  static PassRefPtr<JniByteArray> Create(jsize length);
+  static scoped_refptr<JniByteArray> Create(jsize length);
   int64_t GetArrayElement(jsize index);
   void SetArrayElement(jsize index, int64_t value);
 
@@ -78,7 +78,7 @@ class JniCharArray : public JniArray {
  public:
   ~JniCharArray() override;
 
-  static PassRefPtr<JniCharArray> Create(jsize length);
+  static scoped_refptr<JniCharArray> Create(jsize length);
   int64_t GetArrayElement(jsize index);
   void SetArrayElement(jsize index, int64_t value);
 
@@ -93,7 +93,7 @@ class JniShortArray : public JniArray {
  public:
   ~JniShortArray() override;
 
-  static PassRefPtr<JniShortArray> Create(jsize length);
+  static scoped_refptr<JniShortArray> Create(jsize length);
   int64_t GetArrayElement(jsize index);
   void SetArrayElement(jsize index, int64_t value);
 
@@ -108,7 +108,7 @@ class JniIntArray : public JniArray {
  public:
   ~JniIntArray() override;
 
-  static PassRefPtr<JniIntArray> Create(jsize length);
+  static scoped_refptr<JniIntArray> Create(jsize length);
   int64_t GetArrayElement(jsize index);
   void SetArrayElement(jsize index, int64_t value);
 
@@ -123,7 +123,7 @@ class JniLongArray : public JniArray {
  public:
   ~JniLongArray() override;
 
-  static PassRefPtr<JniLongArray> Create(jsize length);
+  static scoped_refptr<JniLongArray> Create(jsize length);
   int64_t GetArrayElement(jsize index);
   void SetArrayElement(jsize index, int64_t value);
 
@@ -138,7 +138,7 @@ class JniFloatArray : public JniArray {
  public:
   ~JniFloatArray() override;
 
-  static PassRefPtr<JniFloatArray> Create(jsize length);
+  static scoped_refptr<JniFloatArray> Create(jsize length);
   double GetArrayElement(jsize index);
   void SetArrayElement(jsize index, double value);
 
@@ -153,7 +153,7 @@ class JniDoubleArray : public JniArray {
  public:
   ~JniDoubleArray() override;
 
-  static PassRefPtr<JniDoubleArray> Create(jsize length);
+  static scoped_refptr<JniDoubleArray> Create(jsize length);
   double GetArrayElement(jsize index);
   void SetArrayElement(jsize index, double value);
 

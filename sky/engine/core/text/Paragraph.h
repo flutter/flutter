@@ -5,9 +5,8 @@
 #ifndef SKY_ENGINE_CORE_TEXT_PARAGRAPH_H_
 #define SKY_ENGINE_CORE_TEXT_PARAGRAPH_H_
 
+#include "base/memory/ref_counted.h"
 #include "sky/engine/tonic/dart_wrappable.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/ThreadSafeRefCounted.h"
 #include "sky/engine/core/painting/Canvas.h"
 #include "sky/engine/core/painting/Offset.h"
 #include "sky/engine/core/rendering/RenderView.h"
@@ -16,11 +15,11 @@
 namespace blink {
 class DartLibraryNatives;
 
-class Paragraph : public ThreadSafeRefCounted<Paragraph>, public DartWrappable {
+class Paragraph : public base::RefCountedThreadSafe<Paragraph>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtr<Paragraph> create(PassOwnPtr<RenderView> renderView) {
-      return adoptRef(new Paragraph(renderView));
+    static scoped_refptr<Paragraph> create(PassOwnPtr<RenderView> renderView) {
+      return new Paragraph(renderView);
     }
 
     ~Paragraph() override;

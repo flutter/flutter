@@ -5,14 +5,13 @@
 #ifndef SKY_ENGINE_CORE_PAINTING_SHADER_H_
 #define SKY_ENGINE_CORE_PAINTING_SHADER_H_
 
+#include "base/memory/ref_counted.h"
 #include "sky/engine/tonic/dart_wrappable.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/ThreadSafeRefCounted.h"
 #include "third_party/skia/include/core/SkShader.h"
 
 namespace blink {
 
-class Shader : public ThreadSafeRefCounted<Shader>, public DartWrappable {
+class Shader : public base::RefCountedThreadSafe<Shader>, public DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
  public:
   ~Shader() override;

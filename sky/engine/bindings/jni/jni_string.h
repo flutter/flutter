@@ -18,7 +18,7 @@ class JniString : public JniObject {
  public:
   ~JniString() override;
 
-  static PassRefPtr<JniString> Create(Dart_Handle dart_string);
+  static scoped_refptr<JniString> Create(Dart_Handle dart_string);
   Dart_Handle GetText();
 
  private:

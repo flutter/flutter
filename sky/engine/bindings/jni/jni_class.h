@@ -8,10 +8,9 @@
 #include <jni.h>
 
 #include "base/android/jni_android.h"
+#include "base/memory/ref_counted.h"
 #include "sky/engine/bindings/jni/jni_object.h"
 #include "sky/engine/tonic/dart_wrappable.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 
@@ -23,8 +22,8 @@ class JniClass : public JniObject {
  public:
   ~JniClass() override;
 
-  static PassRefPtr<JniClass> FromName(const char* className);
-  static PassRefPtr<JniClass> FromClassObject(const JniObject* clazz);
+  static scoped_refptr<JniClass> FromName(const char* className);
+  static scoped_refptr<JniClass> FromClassObject(const JniObject* clazz);
 
   jclass java_class() const { return static_cast<jclass>(object_.obj()); }
 
@@ -33,12 +32,12 @@ class JniClass : public JniObject {
   intptr_t GetMethodId(const char* name, const char* sig);
   intptr_t GetStaticMethodId(const char* name, const char* sig);
 
-  PassRefPtr<JniObject> NewObject(jmethodID methodId,
+  scoped_refptr<JniObject> NewObject(jmethodID methodId,
                                   const std::vector<Dart_Handle>& args);
 
   bool IsAssignable(const JniClass* clazz);
 
-  PassRefPtr<JniObject> GetStaticObjectField(jfieldID fieldId);
+  scoped_refptr<JniObject> GetStaticObjectField(jfieldID fieldId);
   bool GetStaticBooleanField(jfieldID fieldId);
   int64_t GetStaticByteField(jfieldID fieldId);
   int64_t GetStaticCharField(jfieldID fieldId);
@@ -58,7 +57,7 @@ class JniClass : public JniObject {
   void SetStaticFloatField(jfieldID fieldId, double value);
   void SetStaticDoubleField(jfieldID fieldId, double value);
 
-  PassRefPtr<JniObject> CallStaticObjectMethod(
+  scoped_refptr<JniObject> CallStaticObjectMethod(
       jmethodID methodId, const std::vector<Dart_Handle>& args);
   bool CallStaticBooleanMethod(jmethodID methodId,
                                const std::vector<Dart_Handle>& args);

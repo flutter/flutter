@@ -5,20 +5,19 @@
 #ifndef SKY_ENGINE_CORE_PAINTING_IMAGE_FILTER_H_
 #define SKY_ENGINE_CORE_PAINTING_IMAGE_FILTER_H_
 
+#include "base/memory/ref_counted.h"
 #include "sky/engine/core/painting/CanvasImage.h"
 #include "sky/engine/core/painting/Picture.h"
 #include "sky/engine/tonic/dart_wrappable.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/ThreadSafeRefCounted.h"
 #include "third_party/skia/include/core/SkImageFilter.h"
 
 namespace blink {
 
-class ImageFilter : public ThreadSafeRefCounted<ImageFilter>, public DartWrappable {
+class ImageFilter : public base::RefCountedThreadSafe<ImageFilter>, public DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
  public:
   ~ImageFilter() override;
-  static PassRefPtr<ImageFilter> create();
+  static scoped_refptr<ImageFilter> create();
 
   void initImage(CanvasImage* image);
   void initPicture(Picture*);

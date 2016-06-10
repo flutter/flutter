@@ -20,7 +20,7 @@ int64_t JniApi::FromReflectedField(const JniObject* field) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return 0;
 }
 
@@ -36,16 +36,16 @@ int64_t JniApi::FromReflectedMethod(const JniObject* method) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return 0;
 }
 
-PassRefPtr<JniObject> JniApi::GetApplicationContext() {
+scoped_refptr<JniObject> JniApi::GetApplicationContext() {
   ENTER_JNI();
   return JniObject::Create(env, base::android::GetApplicationContext());
 }
 
-PassRefPtr<JniObject> JniApi::GetClassLoader() {
+scoped_refptr<JniObject> JniApi::GetClassLoader() {
   ENTER_JNI();
   return JniObject::Create(env, DartJni::class_loader());
 }

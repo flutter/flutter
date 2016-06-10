@@ -5,22 +5,21 @@
 #ifndef SKY_ENGINE_CORE_PAINTING_COLORFILTER_H_
 #define SKY_ENGINE_CORE_PAINTING_COLORFILTER_H_
 
+#include "base/memory/ref_counted.h"
 #include "sky/engine/core/painting/CanvasColor.h"
 #include "sky/engine/core/painting/TransferMode.h"
 #include "sky/engine/tonic/dart_wrappable.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/ThreadSafeRefCounted.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 
 namespace blink {
 class DartLibraryNatives;
 
-class ColorFilter : public ThreadSafeRefCounted<ColorFilter>, public DartWrappable {
+class ColorFilter : public base::RefCountedThreadSafe<ColorFilter>, public DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
  public:
   ~ColorFilter() override;
-  static PassRefPtr<ColorFilter> create(CanvasColor color,
-                                        TransferMode transfer_mode);
+  static scoped_refptr<ColorFilter> create(CanvasColor color,
+                                           TransferMode transfer_mode);
 
   sk_sp<SkColorFilter> filter() { return filter_; }
 

@@ -62,7 +62,6 @@ source_set("tonic") {
     "//dart/runtime/bin:embedded_dart_io",
     "//mojo/data_pipe_utils",
     "//mojo/public/cpp/system",
-    "//sky/engine/wtf",
   ]
 
   public_deps = [

@@ -18,7 +18,7 @@ JniClass::JniClass(JNIEnv* env, jclass clazz)
 JniClass::~JniClass() {
 }
 
-PassRefPtr<JniClass> JniClass::FromName(const char* name) {
+scoped_refptr<JniClass> JniClass::FromName(const char* name) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -28,15 +28,15 @@ PassRefPtr<JniClass> JniClass::FromName(const char* name) {
     ScopedJavaLocalRef<jclass> clazz = DartJni::GetClass(env, name);
     if (CheckJniException(env, &exception)) goto fail;
 
-    return adoptRef(new JniClass(env, clazz.obj()));
+    return new JniClass(env, clazz.obj());
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return nullptr;
 }
 
-PassRefPtr<JniClass> JniClass::FromClassObject(const JniObject* clazz) {
+scoped_refptr<JniClass> JniClass::FromClassObject(const JniObject* clazz) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -49,11 +49,11 @@ PassRefPtr<JniClass> JniClass::FromClassObject(const JniObject* clazz) {
       goto fail;
     }
 
-    return adoptRef(new JniClass(env, static_cast<jclass>(class_object)));
+    return new JniClass(env, static_cast<jclass>(class_object));
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return nullptr;
 }
 
@@ -69,7 +69,7 @@ intptr_t JniClass::GetFieldId(const char* name, const char* sig) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return 0;
 }
 
@@ -85,7 +85,7 @@ intptr_t JniClass::GetStaticFieldId(const char* name, const char* sig) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return 0;
 }
 
@@ -101,7 +101,7 @@ intptr_t JniClass::GetMethodId(const char* name, const char* sig) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return 0;
 }
 
@@ -117,11 +117,11 @@ intptr_t JniClass::GetStaticMethodId(const char* name, const char* sig) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return 0;
 }
 
-PassRefPtr<JniObject> JniClass::NewObject(
+scoped_refptr<JniObject> JniClass::NewObject(
     jmethodID methodId, const std::vector<Dart_Handle>& args) {
   Dart_Handle exception = nullptr;
   {
@@ -138,7 +138,7 @@ PassRefPtr<JniObject> JniClass::NewObject(
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return nullptr;
 }
 
@@ -154,11 +154,11 @@ bool JniClass::IsAssignable(const JniClass* clazz) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return false;
 }
 
-PassRefPtr<JniObject> JniClass::GetStaticObjectField(jfieldID fieldId) {
+scoped_refptr<JniObject> JniClass::GetStaticObjectField(jfieldID fieldId) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -170,7 +170,7 @@ PassRefPtr<JniObject> JniClass::GetStaticObjectField(jfieldID fieldId) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return nullptr;
 }
 
@@ -186,7 +186,7 @@ bool JniClass::GetStaticBooleanField(jfieldID fieldId) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return false;
 }
 
@@ -202,7 +202,7 @@ int64_t JniClass::GetStaticByteField(jfieldID fieldId) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return 0;
 }
 
@@ -218,7 +218,7 @@ int64_t JniClass::GetStaticCharField(jfieldID fieldId) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return 0;
 }
 
@@ -234,7 +234,7 @@ int64_t JniClass::GetStaticShortField(jfieldID fieldId) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return 0;
 }
 
@@ -250,7 +250,7 @@ int64_t JniClass::GetStaticIntField(jfieldID fieldId) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return 0;
 }
 
@@ -266,7 +266,7 @@ int64_t JniClass::GetStaticLongField(jfieldID fieldId) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return 0;
 }
 
@@ -282,7 +282,7 @@ double JniClass::GetStaticFloatField(jfieldID fieldId) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return 0;
 }
 
@@ -298,7 +298,7 @@ double JniClass::GetStaticDoubleField(jfieldID fieldId) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return 0;
 }
 
@@ -315,7 +315,7 @@ void JniClass::SetStaticObjectField(jfieldID fieldId, const JniObject* value) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return;
 }
 
@@ -332,7 +332,7 @@ void JniClass::SetStaticBooleanField(jfieldID fieldId, bool value) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return;
 }
 
@@ -348,7 +348,7 @@ void JniClass::SetStaticByteField(jfieldID fieldId, int64_t value) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return;
 }
 
@@ -364,7 +364,7 @@ void JniClass::SetStaticCharField(jfieldID fieldId, int64_t value) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return;
 }
 
@@ -380,7 +380,7 @@ void JniClass::SetStaticShortField(jfieldID fieldId, int64_t value) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return;
 }
 
@@ -396,7 +396,7 @@ void JniClass::SetStaticIntField(jfieldID fieldId, int64_t value) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return;
 }
 
@@ -412,7 +412,7 @@ void JniClass::SetStaticLongField(jfieldID fieldId, int64_t value) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return;
 }
 
@@ -428,7 +428,7 @@ void JniClass::SetStaticFloatField(jfieldID fieldId, double value) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return;
 }
 
@@ -444,11 +444,11 @@ void JniClass::SetStaticDoubleField(jfieldID fieldId, double value) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return;
 }
 
-PassRefPtr<JniObject> JniClass::CallStaticObjectMethod(
+scoped_refptr<JniObject> JniClass::CallStaticObjectMethod(
     jmethodID methodId, const std::vector<Dart_Handle>& args) {
   Dart_Handle exception = nullptr;
   {
@@ -466,7 +466,7 @@ PassRefPtr<JniObject> JniClass::CallStaticObjectMethod(
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return nullptr;
 }
 
@@ -488,7 +488,7 @@ bool JniClass::CallStaticBooleanMethod(jmethodID methodId,
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return false;
 }
 
@@ -510,7 +510,7 @@ int64_t JniClass::CallStaticByteMethod(jmethodID methodId,
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return 0;
 }
 
@@ -532,7 +532,7 @@ int64_t JniClass::CallStaticCharMethod(jmethodID methodId,
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return 0;
 }
 
@@ -554,7 +554,7 @@ int64_t JniClass::CallStaticShortMethod(jmethodID methodId,
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return 0;
 }
 
@@ -576,7 +576,7 @@ int64_t JniClass::CallStaticIntMethod(jmethodID methodId,
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return 0;
 }
 
@@ -598,7 +598,7 @@ int64_t JniClass::CallStaticLongMethod(jmethodID methodId,
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return 0;
 }
 
@@ -620,7 +620,7 @@ double JniClass::CallStaticFloatMethod(jmethodID methodId,
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return 0;
 }
 
@@ -642,7 +642,7 @@ double JniClass::CallStaticDoubleMethod(jmethodID methodId,
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return 0;
 }
 
@@ -663,7 +663,7 @@ void JniClass::CallStaticVoidMethod(jmethodID methodId,
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return;
 }
 

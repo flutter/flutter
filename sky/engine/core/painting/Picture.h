@@ -5,20 +5,19 @@
 #ifndef SKY_ENGINE_CORE_PAINTING_PICTURE_H_
 #define SKY_ENGINE_CORE_PAINTING_PICTURE_H_
 
+#include "base/memory/ref_counted.h"
 #include "sky/engine/tonic/dart_wrappable.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/ThreadSafeRefCounted.h"
 #include "third_party/skia/include/core/SkPicture.h"
 
 namespace blink {
 class Canvas;
 class DartLibraryNatives;
 
-class Picture : public ThreadSafeRefCounted<Picture>, public DartWrappable {
+class Picture : public base::RefCountedThreadSafe<Picture>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     ~Picture() override;
-    static PassRefPtr<Picture> create(sk_sp<SkPicture> skPicture);
+    static scoped_refptr<Picture> create(sk_sp<SkPicture> skPicture);
 
     sk_sp<SkPicture> toSkia() const { return m_picture; }
 

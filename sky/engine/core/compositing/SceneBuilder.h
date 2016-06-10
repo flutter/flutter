@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <memory>
 
+#include "base/memory/ref_counted.h"
 #include "flow/layers/container_layer.h"
 #include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/compositing/Scene.h"
@@ -21,17 +22,13 @@
 #include "sky/engine/core/painting/RRect.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/tonic/float64_list.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/ThreadSafeRefCounted.h"
 
 namespace blink {
 
-class SceneBuilder : public ThreadSafeRefCounted<SceneBuilder>, public DartWrappable {
+class SceneBuilder : public base::RefCountedThreadSafe<SceneBuilder>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtr<SceneBuilder> create() {
-      return adoptRef(new SceneBuilder());
-    }
+    static scoped_refptr<SceneBuilder> create() { return new SceneBuilder(); }
 
     ~SceneBuilder() override;
 
@@ -65,7 +62,7 @@ public:
 
     void setRasterizerTracingThreshold(uint32_t frameInterval);
 
-    PassRefPtr<Scene> build();
+    scoped_refptr<Scene> build();
 
     static void RegisterNatives(DartLibraryNatives* natives);
 

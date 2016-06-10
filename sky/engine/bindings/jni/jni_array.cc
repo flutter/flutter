@@ -28,7 +28,7 @@ jsize JniArray::GetLength() {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return 0;
 }
 
@@ -45,7 +45,7 @@ JniObjectArray::JniObjectArray(JNIEnv* env, jobjectArray array)
 JniObjectArray::~JniObjectArray() {
 }
 
-PassRefPtr<JniObjectArray> JniObjectArray::Create(const JniClass* clazz,
+scoped_refptr<JniObjectArray> JniObjectArray::Create(const JniClass* clazz,
                                                   jsize length) {
   Dart_Handle exception = nullptr;
   {
@@ -55,15 +55,15 @@ PassRefPtr<JniObjectArray> JniObjectArray::Create(const JniClass* clazz,
                                              nullptr);
     if (CheckJniException(env, &exception)) goto fail;
 
-    return adoptRef(new JniObjectArray(env, array));
+    return new JniObjectArray(env, array);
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return nullptr;
 }
 
-PassRefPtr<JniObject> JniObjectArray::GetArrayElement(jsize index) {
+scoped_refptr<JniObject> JniObjectArray::GetArrayElement(jsize index) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -76,7 +76,7 @@ PassRefPtr<JniObject> JniObjectArray::GetArrayElement(jsize index) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return nullptr;
 }
 
@@ -93,7 +93,7 @@ void JniObjectArray::SetArrayElement(jsize index, const JniObject* value) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return;
 }
 
@@ -105,7 +105,7 @@ JniBooleanArray::JniBooleanArray(JNIEnv* env, jbooleanArray array)
 JniBooleanArray::~JniBooleanArray() {
 }
 
-PassRefPtr<JniBooleanArray> JniBooleanArray::Create(jsize length) {
+scoped_refptr<JniBooleanArray> JniBooleanArray::Create(jsize length) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -113,11 +113,11 @@ PassRefPtr<JniBooleanArray> JniBooleanArray::Create(jsize length) {
     jbooleanArray array = env->NewBooleanArray(length);
     if (CheckJniException(env, &exception)) goto fail;
 
-    return adoptRef(new JniBooleanArray(env, array));
+    return new JniBooleanArray(env, array);
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return nullptr;
 }
 
@@ -134,7 +134,7 @@ bool JniBooleanArray::GetArrayElement(jsize index) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return false;
 }
 
@@ -152,7 +152,7 @@ void JniBooleanArray::SetArrayElement(jsize index, bool value) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return;
 }
 
@@ -164,7 +164,7 @@ JniByteArray::JniByteArray(JNIEnv* env, jbyteArray array)
 JniByteArray::~JniByteArray() {
 }
 
-PassRefPtr<JniByteArray> JniByteArray::Create(jsize length) {
+scoped_refptr<JniByteArray> JniByteArray::Create(jsize length) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -172,11 +172,11 @@ PassRefPtr<JniByteArray> JniByteArray::Create(jsize length) {
     jbyteArray array = env->NewByteArray(length);
     if (CheckJniException(env, &exception)) goto fail;
 
-    return adoptRef(new JniByteArray(env, array));
+    return new JniByteArray(env, array);
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return nullptr;
 }
 
@@ -193,7 +193,7 @@ int64_t JniByteArray::GetArrayElement(jsize index) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return false;
 }
 
@@ -211,7 +211,7 @@ void JniByteArray::SetArrayElement(jsize index, int64_t value) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return;
 }
 
@@ -223,7 +223,7 @@ JniCharArray::JniCharArray(JNIEnv* env, jcharArray array)
 JniCharArray::~JniCharArray() {
 }
 
-PassRefPtr<JniCharArray> JniCharArray::Create(jsize length) {
+scoped_refptr<JniCharArray> JniCharArray::Create(jsize length) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -231,11 +231,11 @@ PassRefPtr<JniCharArray> JniCharArray::Create(jsize length) {
     jcharArray array = env->NewCharArray(length);
     if (CheckJniException(env, &exception)) goto fail;
 
-    return adoptRef(new JniCharArray(env, array));
+    return new JniCharArray(env, array);
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return nullptr;
 }
 
@@ -252,7 +252,7 @@ int64_t JniCharArray::GetArrayElement(jsize index) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return false;
 }
 
@@ -270,7 +270,7 @@ void JniCharArray::SetArrayElement(jsize index, int64_t value) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return;
 }
 
@@ -282,7 +282,7 @@ JniShortArray::JniShortArray(JNIEnv* env, jshortArray array)
 JniShortArray::~JniShortArray() {
 }
 
-PassRefPtr<JniShortArray> JniShortArray::Create(jsize length) {
+scoped_refptr<JniShortArray> JniShortArray::Create(jsize length) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -290,11 +290,11 @@ PassRefPtr<JniShortArray> JniShortArray::Create(jsize length) {
     jshortArray array = env->NewShortArray(length);
     if (CheckJniException(env, &exception)) goto fail;
 
-    return adoptRef(new JniShortArray(env, array));
+    return new JniShortArray(env, array);
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return nullptr;
 }
 
@@ -311,7 +311,7 @@ int64_t JniShortArray::GetArrayElement(jsize index) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return false;
 }
 
@@ -329,7 +329,7 @@ void JniShortArray::SetArrayElement(jsize index, int64_t value) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return;
 }
 
@@ -341,7 +341,7 @@ JniIntArray::JniIntArray(JNIEnv* env, jintArray array)
 JniIntArray::~JniIntArray() {
 }
 
-PassRefPtr<JniIntArray> JniIntArray::Create(jsize length) {
+scoped_refptr<JniIntArray> JniIntArray::Create(jsize length) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -349,11 +349,11 @@ PassRefPtr<JniIntArray> JniIntArray::Create(jsize length) {
     jintArray array = env->NewIntArray(length);
     if (CheckJniException(env, &exception)) goto fail;
 
-    return adoptRef(new JniIntArray(env, array));
+    return new JniIntArray(env, array);
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return nullptr;
 }
 
@@ -370,7 +370,7 @@ int64_t JniIntArray::GetArrayElement(jsize index) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return false;
 }
 
@@ -388,7 +388,7 @@ void JniIntArray::SetArrayElement(jsize index, int64_t value) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return;
 }
 
@@ -400,7 +400,7 @@ JniLongArray::JniLongArray(JNIEnv* env, jlongArray array)
 JniLongArray::~JniLongArray() {
 }
 
-PassRefPtr<JniLongArray> JniLongArray::Create(jsize length) {
+scoped_refptr<JniLongArray> JniLongArray::Create(jsize length) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -408,11 +408,11 @@ PassRefPtr<JniLongArray> JniLongArray::Create(jsize length) {
     jlongArray array = env->NewLongArray(length);
     if (CheckJniException(env, &exception)) goto fail;
 
-    return adoptRef(new JniLongArray(env, array));
+    return new JniLongArray(env, array);
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return nullptr;
 }
 
@@ -429,7 +429,7 @@ int64_t JniLongArray::GetArrayElement(jsize index) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return false;
 }
 
@@ -447,7 +447,7 @@ void JniLongArray::SetArrayElement(jsize index, int64_t value) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return;
 }
 
@@ -459,7 +459,7 @@ JniFloatArray::JniFloatArray(JNIEnv* env, jfloatArray array)
 JniFloatArray::~JniFloatArray() {
 }
 
-PassRefPtr<JniFloatArray> JniFloatArray::Create(jsize length) {
+scoped_refptr<JniFloatArray> JniFloatArray::Create(jsize length) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -467,11 +467,11 @@ PassRefPtr<JniFloatArray> JniFloatArray::Create(jsize length) {
     jfloatArray array = env->NewFloatArray(length);
     if (CheckJniException(env, &exception)) goto fail;
 
-    return adoptRef(new JniFloatArray(env, array));
+    return new JniFloatArray(env, array);
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return nullptr;
 }
 
@@ -488,7 +488,7 @@ double JniFloatArray::GetArrayElement(jsize index) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return false;
 }
 
@@ -506,7 +506,7 @@ void JniFloatArray::SetArrayElement(jsize index, double value) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return;
 }
 
@@ -518,7 +518,7 @@ JniDoubleArray::JniDoubleArray(JNIEnv* env, jdoubleArray array)
 JniDoubleArray::~JniDoubleArray() {
 }
 
-PassRefPtr<JniDoubleArray> JniDoubleArray::Create(jsize length) {
+scoped_refptr<JniDoubleArray> JniDoubleArray::Create(jsize length) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -526,11 +526,11 @@ PassRefPtr<JniDoubleArray> JniDoubleArray::Create(jsize length) {
     jdoubleArray array = env->NewDoubleArray(length);
     if (CheckJniException(env, &exception)) goto fail;
 
-    return adoptRef(new JniDoubleArray(env, array));
+    return new JniDoubleArray(env, array);
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return nullptr;
 }
 
@@ -547,7 +547,7 @@ double JniDoubleArray::GetArrayElement(jsize index) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return false;
 }
 
@@ -564,7 +564,7 @@ void JniDoubleArray::SetArrayElement(jsize index, double value) {
   }
 fail:
   Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
+  NOTREACHED();
   return;
 }
 

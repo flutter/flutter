@@ -6,20 +6,17 @@
 #define SKY_ENGINE_TONIC_DART_WRAPPABLE_H_
 
 #include "base/logging.h"
+#include "base/memory/ref_counted.h"
 #include "base/template_util.h"
 #include "dart/runtime/include/dart_api.h"
 #include "sky/engine/tonic/dart_converter.h"
 #include "sky/engine/tonic/dart_error.h"
 #include "sky/engine/tonic/dart_state.h"
 #include "sky/engine/tonic/dart_wrapper_info.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RefPtr.h"
-#include "sky/engine/wtf/ThreadSafeRefCounted.h"
 
 #include <type_traits>
 
 namespace blink {
-class DartGCVisitor;
 struct DartWrapperInfo;
 
 // DartWrappable is a base class that you can inherit from in order to be
@@ -38,11 +35,6 @@ class DartWrappable {
   // and provide information about their wrapper. There is no need to call your
   // base class's implementation of this function.
   virtual const DartWrapperInfo& GetDartWrapperInfo() const = 0;
-
-  // Subclasses that wish to integrate with the Dart garbage collector should
-  // override this function. Please call your base class's AcceptDartGCVisitor
-  // at the end of your override.
-  virtual void AcceptDartGCVisitor(DartGCVisitor& visitor) const;
 
   Dart_Handle CreateDartWrapper(DartState* dart_state);
   void AssociateWithDartWrapper(Dart_NativeArguments args);
@@ -72,10 +64,10 @@ class DartWrappable {
 
 #define IMPLEMENT_WRAPPERTYPEINFO(LibraryName, ClassName)                      \
 static void RefObject_##LibraryName_##ClassName(DartWrappable* impl) {         \
-  static_cast<ClassName*>(impl)->ref();                                        \
+  static_cast<ClassName*>(impl)->AddRef();                                     \
 }                                                                              \
 static void DerefObject_##LibraryName_##ClassName(DartWrappable* impl) {       \
-  static_cast<ClassName*>(impl)->deref();                                      \
+  static_cast<ClassName*>(impl)->Release();                                    \
 }                                                                              \
 static const DartWrapperInfo kDartWrapperInfo_##LibraryName_##ClassName = {    \
   #LibraryName,                                                                \
@@ -86,7 +78,8 @@ static const DartWrapperInfo kDartWrapperInfo_##LibraryName_##ClassName = {    \
 };                                                                             \
 const DartWrapperInfo& ClassName::dart_wrapper_info_ =                         \
     kDartWrapperInfo_##LibraryName_##ClassName;                                \
-static_assert(std::is_base_of<WTF::ThreadSafeRefCountedBase, ClassName>::value,\
+static_assert(std::is_base_of<base::subtle::RefCountedThreadSafeBase,          \
+                              ClassName>::value,                               \
     #ClassName " must be thread-safe reference-countable.");
 
 struct DartConverterWrappable {
@@ -136,20 +129,17 @@ struct DartConverter<
 };
 
 template<typename T>
-struct DartConverter<RefPtr<T>> {
-  static Dart_Handle ToDart(RefPtr<T> val) {
+struct DartConverter<scoped_refptr<T>> {
+  static Dart_Handle ToDart(const scoped_refptr<T>& val) {
     return DartConverter<T*>::ToDart(val.get());
   }
 
-  static RefPtr<T> FromDart(Dart_Handle handle) {
+  static scoped_refptr<T> FromDart(Dart_Handle handle) {
     return DartConverter<T*>::FromDart(handle);
   }
-};
 
-template<typename T>
-struct DartConverter<PassRefPtr<T>> {
   static void SetReturnValue(Dart_NativeArguments args,
-                             PassRefPtr<T> val,
+                             const scoped_refptr<T>& val,
                              bool auto_scope = true) {
     DartConverter<T*>::SetReturnValue(args, val.get());
   }

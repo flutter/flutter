@@ -5,9 +5,8 @@
 #ifndef SKY_ENGINE_CORE_PAINTING_MASKFILTER_H_
 #define SKY_ENGINE_CORE_PAINTING_MASKFILTER_H_
 
+#include "base/memory/ref_counted.h"
 #include "sky/engine/tonic/dart_wrappable.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/ThreadSafeRefCounted.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"
 
 class SkMaskFilter;
@@ -15,11 +14,11 @@ class SkMaskFilter;
 namespace blink {
 class DartLibraryNatives;
 
-class MaskFilter : public ThreadSafeRefCounted<MaskFilter>, public DartWrappable {
+class MaskFilter : public base::RefCountedThreadSafe<MaskFilter>, public DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
  public:
   ~MaskFilter() override;
-  static PassRefPtr<MaskFilter> create(
+  static scoped_refptr<MaskFilter> create(
       unsigned style, double sigma, unsigned flags);
 
   sk_sp<SkMaskFilter> filter() { return filter_; }

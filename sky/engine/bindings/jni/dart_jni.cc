@@ -16,7 +16,6 @@
 #include "sky/engine/tonic/dart_args.h"
 #include "sky/engine/tonic/dart_binding_macros.h"
 #include "sky/engine/tonic/dart_converter.h"
-#include "sky/engine/wtf/MakeUnique.h"
 
 namespace blink {
 
@@ -49,7 +48,7 @@ DartJniJvmData* g_jvm_data = nullptr;
 
 void CreateIsolateData() {
   static_cast<FlutterDartState*>(DartState::Current())->set_jni_data(
-      WTF::MakeUnique<DartJniIsolateData>());
+      std::unique_ptr<DartJniIsolateData>(new DartJniIsolateData()));
 }
 
 DartJniIsolateData* IsolateData() {

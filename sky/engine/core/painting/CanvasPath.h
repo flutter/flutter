@@ -7,13 +7,12 @@
 
 #include "math.h"
 
+#include "base/memory/ref_counted.h"
 #include "sky/engine/core/painting/Offset.h"
 #include "sky/engine/core/painting/Point.h"
 #include "sky/engine/core/painting/RRect.h"
 #include "sky/engine/core/painting/Rect.h"
 #include "sky/engine/tonic/dart_wrappable.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/ThreadSafeRefCounted.h"
 #include "third_party/skia/include/core/SkPath.h"
 
 // Note: There's a very similar class in ../../platform/graphics/Path.h
@@ -25,14 +24,11 @@
 namespace blink {
 class DartLibraryNatives;
 
-class CanvasPath : public ThreadSafeRefCounted<CanvasPath>, public DartWrappable {
+class CanvasPath : public base::RefCountedThreadSafe<CanvasPath>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
     ~CanvasPath() override;
-    static PassRefPtr<CanvasPath> create()
-    {
-        return adoptRef(new CanvasPath);
-    }
+    static scoped_refptr<CanvasPath> create() { return new CanvasPath(); }
 
     void moveTo(float x, float y) { m_path.moveTo(x, y); }
     void relativeMoveTo(float x, float y) { m_path.rMoveTo(x, y); }
@@ -68,7 +64,7 @@ public:
 
     const SkPath& path() const { return m_path; }
 
-    PassRefPtr<CanvasPath> shift(const Offset& offset);
+    scoped_refptr<CanvasPath> shift(const Offset& offset);
 
     static void RegisterNatives(DartLibraryNatives* natives);
 

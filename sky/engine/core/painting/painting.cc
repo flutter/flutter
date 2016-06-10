@@ -46,7 +46,7 @@ void InvokeImageCallback(sk_sp<SkImage> image,
   if (!image) {
     DartInvoke(callback->value(), {Dart_Null()});
   } else {
-    RefPtr<CanvasImage> resultImage = CanvasImage::create();
+    scoped_refptr<CanvasImage> resultImage = CanvasImage::create();
     resultImage->setImage(std::move(image));
     DartInvoke(callback->value(), {ToDart(resultImage)});
   }

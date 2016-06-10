@@ -38,8 +38,8 @@ void ImageShader::RegisterNatives(DartLibraryNatives* natives) {
   });
 }
 
-PassRefPtr<ImageShader> ImageShader::create() {
-  return adoptRef(new ImageShader());
+scoped_refptr<ImageShader> ImageShader::create() {
+  return new ImageShader();
 }
 
 void ImageShader::initWithImage(CanvasImage* image,

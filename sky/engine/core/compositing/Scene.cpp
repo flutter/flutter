@@ -20,10 +20,10 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Scene);
 
 DART_BIND_ALL(Scene, FOR_EACH_BINDING)
 
-PassRefPtr<Scene> Scene::create(
+scoped_refptr<Scene> Scene::create(
     std::unique_ptr<flow::Layer> rootLayer,
     uint32_t rasterizerTracingThreshold) {
-  return adoptRef(new Scene(std::move(rootLayer), rasterizerTracingThreshold));
+  return new Scene(std::move(rootLayer), rasterizerTracingThreshold);
 }
 
 Scene::Scene(std::unique_ptr<flow::Layer> rootLayer,

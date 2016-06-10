@@ -5,6 +5,7 @@
 #ifndef SKY_ENGINE_CORE_PAINTING_CANVAS_H_
 #define SKY_ENGINE_CORE_PAINTING_CANVAS_H_
 
+#include "base/memory/ref_counted.h"
 #include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/painting/CanvasPath.h"
 #include "sky/engine/core/painting/Offset.h"
@@ -12,13 +13,11 @@
 #include "sky/engine/core/painting/Picture.h"
 #include "sky/engine/core/painting/PictureRecorder.h"
 #include "sky/engine/core/painting/Point.h"
-#include "sky/engine/core/painting/RRect.h"
 #include "sky/engine/core/painting/Rect.h"
+#include "sky/engine/core/painting/RRect.h"
 #include "sky/engine/core/painting/RSTransform.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/tonic/float64_list.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/ThreadSafeRefCounted.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
 namespace blink {
@@ -29,14 +28,14 @@ class Paragraph;
 template <>
 struct DartConverter<SkCanvas::VertexMode> : public DartConverterInteger<SkCanvas::VertexMode> {};
 
-class Canvas : public ThreadSafeRefCounted<Canvas>, public DartWrappable {
+class Canvas : public base::RefCountedThreadSafe<Canvas>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtr<Canvas> create(PictureRecorder* recorder,
-                                     double left,
-                                     double top,
-                                     double right,
-                                     double bottom);
+    static scoped_refptr<Canvas> create(PictureRecorder* recorder,
+                                        double left,
+                                        double top,
+                                        double right,
+                                        double bottom);
 
     ~Canvas() override;
 

@@ -16,9 +16,6 @@ DartWrappable::~DartWrappable() {
   CHECK(!dart_wrapper_);
 }
 
-void DartWrappable::AcceptDartGCVisitor(DartGCVisitor& visitor) const {
-}
-
 Dart_Handle DartWrappable::CreateDartWrapper(DartState* dart_state) {
   DCHECK(!dart_wrapper_);
   const DartWrapperInfo& info = GetDartWrapperInfo();

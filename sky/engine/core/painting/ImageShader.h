@@ -22,7 +22,7 @@ class ImageShader : public Shader {
     DEFINE_WRAPPERTYPEINFO();
  public:
   ~ImageShader() override;
-  static PassRefPtr<ImageShader> create();
+  static scoped_refptr<ImageShader> create();
 
   void initWithImage(CanvasImage* image,
                      SkShader::TileMode tmx,

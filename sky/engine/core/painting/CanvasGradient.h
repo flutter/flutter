@@ -23,7 +23,7 @@ class CanvasGradient : public Shader {
   DEFINE_WRAPPERTYPEINFO();
  public:
   ~CanvasGradient() override;
-  static PassRefPtr<CanvasGradient> create();
+  static scoped_refptr<CanvasGradient> create();
 
   void initLinear(const std::vector<Point>& end_points,
                   const std::vector<CanvasColor>& colors,

@@ -34,8 +34,8 @@ FOR_EACH_BINDING(DART_REGISTER_NATIVE)
   });
 }
 
-PassRefPtr<ImageFilter> ImageFilter::create() {
-  return adoptRef(new ImageFilter());
+scoped_refptr<ImageFilter> ImageFilter::create() {
+  return new ImageFilter();
 }
 
 ImageFilter::ImageFilter() {

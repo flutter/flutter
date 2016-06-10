@@ -66,15 +66,15 @@ FOR_EACH_BINDING(DART_REGISTER_NATIVE)
   });
 }
 
-PassRefPtr<Canvas> Canvas::create(PictureRecorder* recorder,
-                                  double left,
-                                  double top,
-                                  double right,
-                                  double bottom) {
+scoped_refptr<Canvas> Canvas::create(PictureRecorder* recorder,
+                                     double left,
+                                     double top,
+                                     double right,
+                                     double bottom) {
     ASSERT(recorder);
     ASSERT(!recorder->isRecording());
-    PassRefPtr<Canvas> canvas = adoptRef(new Canvas(recorder->beginRecording(
-        SkRect::MakeLTRB(left, top, right, bottom))));
+    scoped_refptr<Canvas> canvas = new Canvas(recorder->beginRecording(
+        SkRect::MakeLTRB(left, top, right, bottom)));
     recorder->set_canvas(canvas.get());
     return canvas;
 }
