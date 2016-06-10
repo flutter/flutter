@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert' show BASE64;
 import 'dart:io';
 
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
@@ -130,6 +131,74 @@ class Observatory {
 
   Future<Response> getVMTimeline() => sendRequest('_getVMTimeline');
 
+  // DevFS / VM virtual file system methods
+
+  /// Create a new file system.
+  ///
+  /// When you create a file system you provide a fsName parameter. Given the
+  /// [fsName] parameter you can build all the URIs you need with the following
+  /// format:
+  ///
+  ///     dart-devfs://$fsName/$path
+  Future<Response> createDevFS(String fsName) {
+    return sendRequest('_createDevFS', <String, dynamic> { 'fsName': fsName });
+  }
+
+  /// List the available file systems.
+  Future<List<String>> listDevFS() {
+    return sendRequest('_listDevFS').then((Response response) {
+      return response.response['fsNames'];
+    });
+  }
+
+  // Write one file into a file system.
+  Future<Response> writeDevFSFile(String fsName, {
+    String path,
+    List<int> fileContents
+  }) {
+    assert(path != null);
+    assert(fileContents != null);
+
+    return sendRequest('_writeDevFSFile', <String, dynamic> {
+      'fsName': fsName,
+      'path': path,
+      'fileContents': BASE64.encode(fileContents)
+    });
+  }
+
+  // Write multiple files into a file system.
+  Future<Response> writeDevFSFiles(String fsName, {
+    String path,
+    List<DevFSFile> files
+  }) {
+    assert(path != null);
+    assert(files != null);
+
+    return sendRequest('_writeDevFSFiles', <String, dynamic> {
+      'fsName': fsName,
+      'files': files.map((DevFSFile file) => file.toJson()).toList()
+    });
+  }
+
+  // Read one file from a file system.
+  Future<List<int>> readDevFSFile() {
+    return sendRequest('_readDevFSFile').then((Response response) {
+      return BASE64.decode(response.response['fileContents']);
+    });
+  }
+
+  /// The complete list of a file system.
+  Future<List<String>> listDevFSFiles() {
+    return sendRequest('_listDevFSFiles').then((Response response) {
+      return response.response['files'];
+    });
+  }
+
+  /// Delete an existing file system.
+  Future<Response> deleteDevFS(String fsName) {
+    return sendRequest('_deleteDevFS', <String, dynamic> { 'fsName': fsName });
+  }
+
   // Flutter extension methods.
 
   Future<Response> flutterExit(String isolateId) {
@@ -148,6 +217,25 @@ class Observatory {
       }
     }
   }
+}
+
+abstract class DevFSFile {
+  DevFSFile(this.path);
+
+  final String path;
+
+  List<int> getContents();
+
+  List<String> toJson() => <String>[path, BASE64.encode(getContents())];
+}
+
+class ByteDevFSFile extends DevFSFile {
+  ByteDevFSFile(String path, this.contents): super(path);
+
+  final List<int> contents;
+
+  @override
+  List<int> getContents() => contents;
 }
 
 class Response {
