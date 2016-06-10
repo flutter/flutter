@@ -66,8 +66,8 @@ class TravelDestinationItem extends StatelessWidget {
                     top: 0.0,
                     bottom: 0.0,
                     right: 0.0,
-                    child: new AssetImage(
-                      name: destination.assetName,
+                    child: new Image(
+                      image: new AssetImage(destination.assetName),
                       fit: ImageFit.cover
                     )
                   ),

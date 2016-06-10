@@ -157,8 +157,8 @@ class WeatherButton extends StatelessWidget {
           child: new InkWell(
             onTap: onPressed,
             child: new Center(
-              child: new AssetImage(
-                name: icon,
+              child: new Image(
+                image: new AssetImage(icon),
                 width: _kWeatherIconSize,
                 height: _kWeatherIconSize
               )

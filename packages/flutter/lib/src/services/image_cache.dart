@@ -2,89 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:collection';
-import 'dart:ui' show hashValues, Image;
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/http.dart' as http;
-import 'package:mojo/core.dart' as mojo;
-
-import 'image_decoder.dart';
-import 'image_resource.dart';
-
-/// Implements a way to retrieve an image, for example by fetching it from the
-/// network. Also used as a key in the image cache.
-///
-/// This is the interface implemented by objects that can be used as the
-/// argument to [ImageCache.loadProvider].
-///
-/// The [ImageCache.load] function uses an [ImageProvider] that fetches images
-/// described by URLs. One could create an [ImageProvider] that used a custom
-/// protocol, e.g. a direct TCP connection to a remote host, or using a
-/// screenshot API from the host platform; such an image provider would then
-/// share the same cache as all the other image loading codepaths that used the
-/// [imageCache].
-abstract class ImageProvider { // ignore: one_member_abstracts
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const ImageProvider();
-
-  /// Subclasses must implement this method by having it asynchronously return
-  /// an [ImageInfo] that represents the image provided by this [ImageProvider].
-  Future<ImageInfo> loadImage();
-
-  /// Subclasses must implement the `==` operator so that the image cache can
-  /// distinguish identical requests.
-  @override
-  bool operator ==(dynamic other);
-
-  /// Subclasses must implement the `hashCode` operator so that the image cache
-  /// can efficiently store the providers in a map.
-  @override
-  int get hashCode;
-}
-
-class _UrlFetcher implements ImageProvider {
-  _UrlFetcher(this._url, this._scale);
-
-  final String _url;
-  final double _scale;
-
-  @override
-  Future<ImageInfo> loadImage() async {
-    try {
-      final Uri resolvedUrl = Uri.base.resolve(_url);
-      final mojo.MojoDataPipeConsumer dataPipe = await http.readDataPipe(resolvedUrl);
-      if (dataPipe == null)
-        throw 'Unable to read data from: $resolvedUrl';
-      final Image image = await decodeImageFromDataPipe(dataPipe);
-      if (image == null)
-        throw 'Unable to decode image data from: $resolvedUrl';
-      return new ImageInfo(image: image, scale: _scale);
-    } catch (exception, stack) {
-      FlutterError.reportError(new FlutterErrorDetails(
-        exception: exception,
-        stack: stack,
-        library: 'services library',
-        context: 'while fetching an image for the image cache',
-        silent: true
-      ));
-      return null;
-    }
-  }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! _UrlFetcher)
-      return false;
-    final _UrlFetcher typedOther = other;
-    return _url == typedOther._url && _scale == typedOther._scale;
-  }
-
-  @override
-  int get hashCode => hashValues(_url, _scale);
-}
+import 'image_stream.dart';
 
 const int _kDefaultSize = 1000;
 
@@ -93,20 +13,21 @@ const int _kDefaultSize = 1000;
 /// Implements a least-recently-used cache of up to 1000 images. The maximum
 /// size can be adjusted using [maximumSize]. Images that are actively in use
 /// (i.e. to which the application is holding references, either via
-/// [ImageResource] objects, [ImageInfo] objects, or raw [ui.Image] objects) may
-/// get evicted from the cache (and thus need to be refetched from the network
-/// if they are referenced in the [load] method), but the raw bits are kept in
-/// memory for as long as the application is using them.
+/// [ImageStream] objects, [ImageStreamCompleter] objects, [ImageInfo] objects,
+/// or raw [ui.Image] objects) may get evicted from the cache (and thus need to
+/// be refetched from the network if they are referenced in the [putIfAbsent]
+/// method), but the raw bits are kept in memory for as long as the application
+/// is using them.
 ///
-/// The [load] method fetches the image with the given URL and scale.
+/// The [putIfAbsent] method is the main entry-point to the cache API. It
+/// returns the previously cached [ImageStreamCompleter] for the given key, if
+/// available; if not, it calls the given callback to obtain it first. In either
+/// case, the key is moved to the "most recently used" position.
 ///
-/// For more complicated use cases, the [loadProvider] method can be used with a
-/// custom [ImageProvider].
+/// Generally this class is not used directly. The [ImageProvider] class and its
+/// subclasses automatically handle the caching of images.
 class ImageCache {
-  ImageCache._();
-
-  final LinkedHashMap<ImageProvider, ImageResource> _cache =
-      new LinkedHashMap<ImageProvider, ImageResource>();
+  final LinkedHashMap<Object, ImageStreamCompleter> _cache = new LinkedHashMap<Object, ImageStreamCompleter>();
 
   /// Maximum number of entries to store in the cache.
   ///
@@ -134,53 +55,35 @@ class ImageCache {
     }
   }
 
-  /// Calls the [ImageProvider.loadImage] method on the given image provider, if
-  /// necessary, and returns an [ImageResource] that encapsulates a [Future] for
-  /// the given image.
+  /// Returns the previously cached [ImageStream] for the given key, if available;
+  /// if not, calls the given callback to obtain it first. In either case, the
+  /// key is moved to the "most recently used" position.
   ///
-  /// If the given [ImageProvider] has already been used and is still in the
-  /// cache, then the [ImageResource] object is immediately usable and the
-  /// provider is not called.
-  ImageResource loadProvider(ImageProvider provider) {
-    assert(provider != null);
-    ImageResource result = _cache[provider];
+  /// The arguments cannot be null. The `loader` cannot return null.
+  ImageStreamCompleter putIfAbsent(Object key, ImageStreamCompleter loader()) {
+    assert(key != null);
+    assert(loader != null);
+    ImageStreamCompleter result = _cache[key];
     if (result != null) {
-      _cache.remove(provider);
+      // Remove the provider from the list so that we can put it back in below
+      // and thus move it to the end of the list.
+      _cache.remove(key);
     } else {
       if (_cache.length == maximumSize && maximumSize > 0)
         _cache.remove(_cache.keys.first);
-      result = new ImageResource(provider.loadImage());;
+      result = loader();
     }
     if (maximumSize > 0) {
       assert(_cache.length < maximumSize);
-      _cache[provider] = result;
+      _cache[key] = result;
     }
     assert(_cache.length <= maximumSize);
     return result;
-  }
-
-  /// Fetches the given URL, associating it with the given scale.
-  ///
-  /// The return value is an [ImageResource], which encapsulates a [Future] for
-  /// the given image.
-  ///
-  /// If the given URL has already been fetched for the given scale, and it is
-  /// still in the cache, then the [ImageResource] object is immediately usable.
-  ImageResource load(String url, { double scale: 1.0 }) {
-    assert(url != null);
-    assert(scale != null);
-    return loadProvider(new _UrlFetcher(url, scale));
   }
 }
 
 /// The singleton that implements the Flutter framework's image cache.
 ///
-/// The simplest use of this object is as follows:
-///
-/// ```dart
-/// imageCache.load(myImageUrl).first.then(myImageHandler);
-/// ```
-///
-/// ...where `myImageHandler` is a function with one argument, an [ImageInfo]
-/// object.
-final ImageCache imageCache = new ImageCache._();
+/// The cache is used internally by [ImageProvider] and should generally not be
+/// accessed directly.
+final ImageCache imageCache = new ImageCache();

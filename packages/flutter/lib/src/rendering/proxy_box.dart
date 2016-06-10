@@ -6,6 +6,7 @@ import 'dart:ui' as ui show ImageFilter;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
@@ -1093,17 +1094,23 @@ enum DecorationPosition {
 class RenderDecoratedBox extends RenderProxyBox {
   /// Creates a decorated box.
   ///
-  /// The [decoration] and [position] arguments must not be null. By default the
-  /// decoration paints behind the child.
+  /// The [decoration], [position], and [configuration] arguments must not be
+  /// null. By default the decoration paints behind the child.
+  ///
+  /// The [ImageConfiguration] will be passed to the decoration (with the size
+  /// filled in) to let it resolve images.
   RenderDecoratedBox({
-    Decoration decoration,
+    @required Decoration decoration,
     DecorationPosition position: DecorationPosition.background,
+    ImageConfiguration configuration: ImageConfiguration.empty,
     RenderBox child
   }) : _decoration = decoration,
        _position = position,
+       _configuration = configuration,
        super(child) {
     assert(decoration != null);
     assert(position != null);
+    assert(configuration != null);
   }
 
   BoxPainter _painter;
@@ -1117,10 +1124,9 @@ class RenderDecoratedBox extends RenderProxyBox {
     assert(newDecoration != null);
     if (newDecoration == _decoration)
       return;
-    _removeListenerIfNeeded();
+    _painter?.dispose();
     _painter = null;
     _decoration = newDecoration;
-    _addListenerIfNeeded();
     markNeedsPaint();
   }
 
@@ -1135,29 +1141,23 @@ class RenderDecoratedBox extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  bool get _needsListeners {
-    return attached && _decoration.needsListeners;
-  }
-
-  void _addListenerIfNeeded() {
-    if (_needsListeners)
-      _decoration.addChangeListener(markNeedsPaint);
-  }
-
-  void _removeListenerIfNeeded() {
-    if (_needsListeners)
-      _decoration.removeChangeListener(markNeedsPaint);
-  }
-
-  @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    _addListenerIfNeeded();
+  /// The settings to pass to the decoration when painting, so that it can
+  /// resolve images appropriately. See [ImageProvider.resolve] and
+  /// [BoxPainter.paint].
+  ImageConfiguration get configuration => _configuration;
+  ImageConfiguration _configuration;
+  set configuration (ImageConfiguration newConfiguration) {
+    assert(newConfiguration != null);
+    if (newConfiguration == _configuration)
+      return;
+    _configuration = newConfiguration;
+    markNeedsPaint();
   }
 
   @override
   void detach() {
-    _removeListenerIfNeeded();
+    _painter?.dispose();
+    _painter = null;
     super.detach();
   }
 
@@ -1170,12 +1170,13 @@ class RenderDecoratedBox extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     assert(size.width != null);
     assert(size.height != null);
-    _painter ??= _decoration.createBoxPainter();
+    _painter ??= _decoration.createBoxPainter(markNeedsPaint);
+    final ImageConfiguration filledConfiguration = configuration.copyWith(size: size);
     if (position == DecorationPosition.background)
-      _painter.paint(context.canvas, offset & size);
+      _painter.paint(context.canvas, offset, filledConfiguration);
     super.paint(context, offset);
     if (position == DecorationPosition.foreground)
-      _painter.paint(context.canvas, offset & size);
+      _painter.paint(context.canvas, offset, filledConfiguration);
   }
 
   @override
@@ -1183,6 +1184,7 @@ class RenderDecoratedBox extends RenderProxyBox {
     super.debugFillDescription(description);
     description.add('decoration:');
     description.addAll(_decoration.toString("  ").split('\n'));
+    description.add('configuration: $configuration');
   }
 }
 
@@ -1466,11 +1468,11 @@ abstract class CustomPainter {
   ///
   /// To paint an image on a [Canvas]:
   ///
-  /// 1. Obtain an [ImageResource], for example by using the [ImageCache.load]
-  ///    method on the [imageCache] singleton.
+  /// 1. Obtain an [ImageStream], for example by calling [ImageProvider.resolve]
+  ///    on an [AssetImage] or [NetworkImage] object.
   ///
-  /// 2. Whenever the [ImageResource]'s underlying [ImageInfo] object changes
-  ///    (see [ImageResource.addListener]), create a new instance of your custom
+  /// 2. Whenever the [ImageStream]'s underlying [ImageInfo] object changes
+  ///    (see [ImageStream.addListener]), create a new instance of your custom
   ///    paint delegate, giving it the new [ImageInfo] object.
   ///
   /// 3. In your delegate's [paint] method, call the [Canvas.drawImage],

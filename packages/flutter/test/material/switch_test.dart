@@ -3,27 +3,43 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestBoxPainter extends BoxPainter {
+  TestBoxPainter(VoidCallback onChanged): super(onChanged);
+
   @override
-  void paint(Canvas canvas, Rect rect) { }
+  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) { }
 }
 
 class TestDecoration extends Decoration {
-  final List<VoidCallback> listeners = <VoidCallback>[];
+  int listeners = 0;
 
   @override
-  bool get needsListeners => true;
+  Decoration lerpFrom(Decoration a, double t) {
+    if (t == 0.0)
+      return a;
+    if (t == 1.0)
+      return this;
+    return new TestDecoration();
+  }
 
   @override
-  void addChangeListener(VoidCallback listener) { listeners.add(listener); }
+  Decoration lerpTo(Decoration b, double t) {
+    if (t == 1.0)
+      return b;
+    if (t == 0.0)
+      return this;
+    return new TestDecoration();
+  }
 
   @override
-  void removeChangeListener(VoidCallback listener) { listeners.remove(listener); }
-
-  @override
-  BoxPainter createBoxPainter() => new TestBoxPainter();
+  BoxPainter createBoxPainter([VoidCallback onChanged]) {
+    if (onChanged != null)
+      listeners += 1;
+    return new TestBoxPainter(onChanged);
+  }
 }
 
 void main() {
@@ -56,15 +72,15 @@ void main() {
     expect(value, isTrue);
   });
 
-  testWidgets('Switch listens to decorations', (WidgetTester tester) async {
+  testWidgets('Switch listens to the decorations it paints', (WidgetTester tester) async {
     TestDecoration activeDecoration = new TestDecoration();
     TestDecoration inactiveDecoration = new TestDecoration();
 
-    Widget build(TestDecoration activeDecoration, TestDecoration inactiveDecoration) {
+    Widget build(bool active, TestDecoration activeDecoration, TestDecoration inactiveDecoration) {
       return new Material(
         child: new Center(
           child: new Switch(
-            value: false,
+            value: active,
             onChanged: null,
             activeThumbDecoration: activeDecoration,
             inactiveThumbDecoration: inactiveDecoration
@@ -73,19 +89,27 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(build(activeDecoration, inactiveDecoration));
+    // no build yet
+    expect(activeDecoration.listeners, 0);
+    expect(inactiveDecoration.listeners, 0);
 
-    expect(activeDecoration.listeners.length, 1);
-    expect(inactiveDecoration.listeners.length, 1);
+    await tester.pumpWidget(build(false, activeDecoration, inactiveDecoration));
+    expect(activeDecoration.listeners, 0);
+    expect(inactiveDecoration.listeners, 1);
 
-    await tester.pumpWidget(build(activeDecoration, null));
+    await tester.pumpWidget(build(true, activeDecoration, inactiveDecoration));
+    // started the animation, but we're on frame 0
+    expect(activeDecoration.listeners, 0);
+    expect(inactiveDecoration.listeners, 2);
 
-    expect(activeDecoration.listeners.length, 1);
-    expect(inactiveDecoration.listeners.length, 0);
+    await tester.pump(const Duration(milliseconds: 30)); // slightly into the animation
+    // we're painting some lerped decoration that doesn't exactly match either
+    expect(activeDecoration.listeners, 0);
+    expect(inactiveDecoration.listeners, 2);
 
-    await tester.pumpWidget(new Container(key: new UniqueKey()));
+    await tester.pump(const Duration(seconds: 1)); // ended animation
+    expect(activeDecoration.listeners, 1);
+    expect(inactiveDecoration.listeners, 2);
 
-    expect(activeDecoration.listeners.length, 0);
-    expect(inactiveDecoration.listeners.length, 0);
   });
 }

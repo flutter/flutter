@@ -291,4 +291,12 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
 
   @override
   void handleSemanticScrollDown() { }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('value: ${value ? "checked" : "unchecked"}');
+    if (!isInteractive)
+      description.add('disabled');
+  }
 }

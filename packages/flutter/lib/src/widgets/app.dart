@@ -6,13 +6,12 @@ import 'dart:async';
 import 'dart:ui' as ui show window;
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 
-import 'asset_vendor.dart';
 import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
+import 'container.dart';
 import 'framework.dart';
 import 'locale_query.dart';
 import 'media_query.dart';
@@ -28,8 +27,8 @@ typedef Future<LocaleQueryData> LocaleChangedCallback(Locale locale);
 /// required for an application.
 ///
 /// See also: [CheckedModeBanner], [DefaultTextStyle], [MediaQuery],
-/// [LocaleQuery], [AssetVendor], [Title], [Navigator], [Overlay],
-/// [SemanticsDebugger] (the widgets wrapped by this one).
+/// [LocaleQuery], [Title], [Navigator], [Overlay], [SemanticsDebugger] (the
+/// widgets wrapped by this one).
 ///
 /// The [onGenerateRoute] argument is required, and corresponds to
 /// [Navigator.onGenerateRoute].
@@ -179,19 +178,15 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       data: new MediaQueryData.fromWindow(ui.window),
       child: new LocaleQuery(
         data: _localeData,
-        child: new AssetVendor(
-          bundle: rootBundle,
-          devicePixelRatio: ui.window.devicePixelRatio,
-          child: new Title(
-            title: config.title,
-            brightness: config.brightness,
-            color: config.color,
-            child: new Navigator(
-              key: _navigator,
-              initialRoute: ui.window.defaultRouteName,
-              onGenerateRoute: config.onGenerateRoute,
-              observer: config.navigatorObserver
-            )
+        child: new Title(
+          title: config.title,
+          brightness: config.brightness,
+          color: config.color,
+          child: new Navigator(
+            key: _navigator,
+            initialRoute: ui.window.defaultRouteName,
+            onGenerateRoute: config.onGenerateRoute,
+            observer: config.navigatorObserver
           )
         )
       )

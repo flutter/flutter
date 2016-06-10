@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/rendering.dart' show RenderStack;
 
 import 'basic.dart';
+import 'container.dart';
 import 'framework.dart';
 import 'overlay.dart';
 

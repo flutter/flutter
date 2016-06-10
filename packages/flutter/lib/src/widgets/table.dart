@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 
 import 'debug.dart';
 import 'framework.dart';
+import 'image.dart';
 
 export 'package:flutter/rendering.dart' show
     FixedColumnWidth,
@@ -145,6 +146,7 @@ class Table extends RenderObjectWidget {
       defaultColumnWidth: defaultColumnWidth,
       border: border,
       rowDecorations: _rowDecorations,
+      configuration: createLocalImageConfiguration(context),
       defaultVerticalAlignment: defaultVerticalAlignment,
       textBaseline: textBaseline
     );
@@ -159,6 +161,7 @@ class Table extends RenderObjectWidget {
       ..defaultColumnWidth = defaultColumnWidth
       ..border = border
       ..rowDecorations = _rowDecorations
+      ..configuration = createLocalImageConfiguration(context)
       ..defaultVerticalAlignment = defaultVerticalAlignment
       ..textBaseline = textBaseline;
   }

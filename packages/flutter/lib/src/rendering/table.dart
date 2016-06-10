@@ -465,6 +465,7 @@ class RenderTable extends RenderBox {
   ///  * `children` must either be null or contain lists of all the same length.
   ///    if `children` is not null, then `rows` must be null.
   ///  * [defaultColumnWidth] must not be null.
+  ///  * [configuration] must not be null (but has a default value).
   RenderTable({
     int columns,
     int rows,
@@ -472,6 +473,7 @@ class RenderTable extends RenderBox {
     TableColumnWidth defaultColumnWidth: const FlexColumnWidth(1.0),
     TableBorder border,
     List<Decoration> rowDecorations,
+    ImageConfiguration configuration: ImageConfiguration.empty,
     Decoration defaultRowDecoration,
     TableCellVerticalAlignment defaultVerticalAlignment: TableCellVerticalAlignment.top,
     TextBaseline textBaseline,
@@ -481,13 +483,15 @@ class RenderTable extends RenderBox {
     assert(rows == null || rows >= 0);
     assert(rows == null || children == null);
     assert(defaultColumnWidth != null);
+    assert(configuration != null);
     _columns = columns ?? (children != null && children.length > 0 ? children.first.length : 0);
     _rows = rows ?? 0;
     _children = new List<RenderBox>()..length = _columns * _rows;
     _columnWidths = columnWidths ?? new HashMap<int, TableColumnWidth>();
     _defaultColumnWidth = defaultColumnWidth;
     _border = border;
-    this.rowDecorations = rowDecorations; // must use setter to initialize box painters
+    this.rowDecorations = rowDecorations; // must use setter to initialize box painters array
+    _configuration = configuration;
     _defaultVerticalAlignment = defaultVerticalAlignment;
     _textBaseline = textBaseline;
     if (children != null) {
@@ -619,30 +623,25 @@ class RenderTable extends RenderBox {
   set rowDecorations(List<Decoration> value) {
     if (_rowDecorations == value)
       return;
-    _removeListenersIfNeeded();
     _rowDecorations = value;
+    if (_rowDecorationPainters != null) {
+      for (BoxPainter painter in _rowDecorationPainters)
+        painter?.dispose();
+    }
     _rowDecorationPainters = _rowDecorations != null ? new List<BoxPainter>(_rowDecorations.length) : null;
-    _addListenersIfNeeded();
   }
 
-  void _removeListenersIfNeeded() {
-    Set<Decoration> visitedDecorations = new Set<Decoration>();
-    if (_rowDecorations != null && attached) {
-      for (Decoration decoration in _rowDecorations) {
-        if (decoration != null && decoration.needsListeners && visitedDecorations.add(decoration))
-          decoration.removeChangeListener(markNeedsPaint);
-      }
-    }
-  }
-
-  void _addListenersIfNeeded() {
-    Set<Decoration> visitedDecorations = new Set<Decoration>();
-    if (_rowDecorations != null && attached) {
-      for (Decoration decoration in _rowDecorations) {
-        if (decoration != null && decoration.needsListeners && visitedDecorations.add(decoration))
-          decoration.addChangeListener(markNeedsPaint);
-      }
-    }
+  /// The settings to pass to the [rowDecorations] when painting, so that they
+  /// can resolve images appropriately. See [ImageProvider.resolve] and
+  /// [BoxPainter.paint].
+  ImageConfiguration get configuration => _configuration;
+  ImageConfiguration _configuration;
+  set configuration (ImageConfiguration value) {
+    assert(value != null);
+    if (value == _configuration)
+      return;
+    _configuration = value;
+    markNeedsPaint();
   }
 
   /// How cells that do not explicitly specify a vertical alignment are aligned vertically.
@@ -798,12 +797,15 @@ class RenderTable extends RenderBox {
     super.attach(owner);
     for (RenderBox child in _children)
       child?.attach(owner);
-    _addListenersIfNeeded();
   }
 
   @override
   void detach() {
-    _removeListenersIfNeeded();
+    if (_rowDecorationPainters != null) {
+      for (BoxPainter painter in _rowDecorationPainters)
+        painter?.dispose();
+      _rowDecorationPainters = null;
+    }
     for (RenderBox child in _children)
       child?.detach();
     super.detach();
@@ -1214,13 +1216,12 @@ class RenderTable extends RenderBox {
         if (_rowDecorations.length <= y)
           break;
         if (_rowDecorations[y] != null) {
-          _rowDecorationPainters[y] ??= _rowDecorations[y].createBoxPainter();
-          _rowDecorationPainters[y].paint(canvas, new Rect.fromLTRB(
-            offset.dx,
-            offset.dy + _rowTops[y],
-            offset.dx + size.width,
-            offset.dy + _rowTops[y+1]
-          ));
+          _rowDecorationPainters[y] ??= _rowDecorations[y].createBoxPainter(markNeedsPaint);
+          _rowDecorationPainters[y].paint(
+            canvas,
+            new Offset(offset.dx, offset.dy + _rowTops[y]),
+            configuration.copyWith(size: new Size(size.width, _rowTops[y+1] - _rowTops[y]))
+          );
         }
       }
     }

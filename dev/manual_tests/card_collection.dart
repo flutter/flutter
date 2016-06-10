@@ -429,7 +429,7 @@ class CardCollectionState extends State<CardCollection> {
     if (_sunshine) {
       cardCollection = new Stack(
         children: <Widget>[
-          new Column(children: <Widget>[new NetworkImage(src: _sunshineURL)]),
+          new Column(children: <Widget>[new Image(image: new NetworkImage(_sunshineURL))]),
           new ShaderMask(child: cardCollection, shaderCallback: _createShader)
         ]
       );

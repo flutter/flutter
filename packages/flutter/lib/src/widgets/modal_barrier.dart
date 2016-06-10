@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'basic.dart';
+import 'container.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'navigator.dart';

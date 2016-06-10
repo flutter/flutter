@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
+import 'container.dart';
 import 'editable.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';

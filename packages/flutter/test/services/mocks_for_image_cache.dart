@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:ui' as ui show Image;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 class TestImageInfo implements ImageInfo {
@@ -22,27 +23,33 @@ class TestImageInfo implements ImageInfo {
   String toString() => '$runtimeType($value)';
 }
 
-class TestProvider extends ImageProvider {
-  const TestProvider(this.equalityValue, this.imageValue);
+class TestProvider extends ImageProvider<int> {
+  const TestProvider(this.key, this.imageValue);
+  final int key;
   final int imageValue;
-  final int equalityValue;
 
   @override
-  Future<ImageInfo> loadImage() async {
-    return new TestImageInfo(imageValue);
+  Future<int> obtainKey(ImageConfiguration configuration) {
+    return new Future<int>.value(key);
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (other is! TestProvider)
-      return false;
-    final TestProvider typedOther = other;
-    return equalityValue == typedOther.equalityValue;
+  ImageStreamCompleter load(int key) {
+    return new OneFrameImageStreamCompleter(
+      new SynchronousFuture<ImageInfo>(new TestImageInfo(imageValue))
+    );
   }
 
   @override
-  int get hashCode => equalityValue.hashCode;
+  String toString() => '$runtimeType($key, $imageValue)';
+}
 
-  @override
-  String toString() => '$runtimeType($equalityValue, $imageValue)';
+Future<ImageInfo> extractOneFrame(ImageStream stream) {
+  Completer<ImageInfo> completer = new Completer<ImageInfo>();
+  void listener(ImageInfo image) {
+    completer.complete(image);
+    stream.removeListener(listener);
+  }
+  stream.addListener(listener);
+  return completer.future;
 }

@@ -1039,20 +1039,29 @@ class FractionalOffset {
 }
 
 /// A background image for a box.
+///
+/// The image is painted using [paintImage], which describes the meanings of the
+/// various fields on this class in more detail.
 class BackgroundImage {
   /// Creates a background image.
   ///
   /// The [image] argument must not be null.
-  BackgroundImage({
-    ImageResource image,
+  const BackgroundImage({
+    this.image,
     this.fit,
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
     this.colorFilter,
     this.alignment
-  }) : _imageResource = image;
+  });
+
+  /// The image to be painted into the background.
+  final ImageProvider image;
 
   /// How the background image should be inscribed into the box.
+  ///
+  /// The default varies based on the other fields. See the discussion at
+  /// [paintImage].
   final ImageFit fit;
 
   /// How to paint any portions of the box not covered by the background image.
@@ -1077,44 +1086,6 @@ class BackgroundImage {
   /// of the right edge of its layout bounds.
   final FractionalOffset alignment;
 
-  /// The image to be painted into the background.
-  ui.Image get image => _image;
-  ui.Image _image;
-
-  final ImageResource _imageResource;
-
-  final List<VoidCallback> _listeners = <VoidCallback>[];
-
-  /// Adds a listener for background-image changes (e.g., for when it arrives
-  /// from the network).
-  void _addChangeListener(VoidCallback listener) {
-    // We add the listener to the _imageResource first so that the first change
-    // listener doesn't get callback synchronously if the image resource is
-    // already resolved.
-    if (_listeners.isEmpty)
-      _imageResource.addListener(_handleImageChanged);
-    _listeners.add(listener);
-  }
-
-  /// Removes the listener for background-image changes.
-  void _removeChangeListener(VoidCallback listener) {
-    _listeners.remove(listener);
-    // We need to remove ourselves as listeners from the _imageResource so that
-    // we're not kept alive by the image_cache.
-    if (_listeners.isEmpty)
-      _imageResource.removeListener(_handleImageChanged);
-  }
-
-  void _handleImageChanged(ImageInfo resolvedImage) {
-    if (resolvedImage == null)
-      return;
-    _image = resolvedImage.image;
-    final List<VoidCallback> localListeners =
-      new List<VoidCallback>.from(_listeners);
-    for (VoidCallback listener in localListeners)
-      listener();
-  }
-
   @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
@@ -1122,19 +1093,19 @@ class BackgroundImage {
     if (other is! BackgroundImage)
       return false;
     final BackgroundImage typedOther = other;
-    return fit == typedOther.fit &&
+    return image == typedOther.image &&
+           fit == typedOther.fit &&
            repeat == typedOther.repeat &&
            centerSlice == typedOther.centerSlice &&
            colorFilter == typedOther.colorFilter &&
-           alignment == typedOther.alignment &&
-           _imageResource == typedOther._imageResource;
+           alignment == typedOther.alignment;
   }
 
   @override
-  int get hashCode => hashValues(fit, repeat, centerSlice, colorFilter, alignment, _imageResource);
+  int get hashCode => hashValues(image, fit, repeat, centerSlice, colorFilter, alignment);
 
   @override
-  String toString() => 'BackgroundImage($fit, $repeat)';
+  String toString() => 'BackgroundImage($image, $fit, $repeat)';
 }
 
 /// The shape to use when rendering a BoxDecoration.
@@ -1318,24 +1289,6 @@ class BoxDecoration extends Decoration {
     return result.join('\n');
   }
 
-  /// Whether this [Decoration] subclass needs its painters to use
-  /// [addChangeListener] to listen for updates.
-  ///
-  /// [BoxDecoration] objects only need a listener if they have a
-  /// background image.
-  @override
-  bool get needsListeners => backgroundImage != null;
-
-  @override
-  void addChangeListener(VoidCallback listener) {
-    backgroundImage?._addChangeListener(listener);
-  }
-
-  @override
-  void removeChangeListener(VoidCallback listener) {
-    backgroundImage?._removeChangeListener(listener);
-  }
-
   @override
   bool hitTest(Size size, Point position) {
     assert(shape != null);
@@ -1358,12 +1311,15 @@ class BoxDecoration extends Decoration {
   }
 
   @override
-  _BoxDecorationPainter createBoxPainter() => new _BoxDecorationPainter(this);
+  _BoxDecorationPainter createBoxPainter([VoidCallback onChanged]) {
+    assert(onChanged != null || backgroundImage == null);
+    return new _BoxDecorationPainter(this, onChanged);
+  }
 }
 
 /// An object that paints a [BoxDecoration] into a canvas.
 class _BoxDecorationPainter extends BoxPainter {
-  _BoxDecorationPainter(this._decoration) {
+  _BoxDecorationPainter(this._decoration, VoidCallback onChange) : super(onChange) {
     assert(_decoration != null);
   }
 
@@ -1430,11 +1386,20 @@ class _BoxDecorationPainter extends BoxPainter {
       _paintBox(canvas, rect, _getBackgroundPaint(rect));
   }
 
-  void _paintBackgroundImage(Canvas canvas, Rect rect) {
+  ImageStream _imageStream;
+  ImageInfo _image;
+
+  void _paintBackgroundImage(Canvas canvas, Rect rect, ImageConfiguration configuration) {
     final BackgroundImage backgroundImage = _decoration.backgroundImage;
     if (backgroundImage == null)
       return;
-    ui.Image image = backgroundImage.image;
+    final ImageStream newImageStream = backgroundImage.image.resolve(configuration);
+    if (newImageStream.key != _imageStream?.key) {
+      _imageStream?.removeListener(_imageListener);
+      _imageStream = newImageStream;
+      _imageStream.addListener(_imageListener);
+    }
+    final ui.Image image = _image?.image;
     if (image == null)
       return;
     paintImage(
@@ -1448,12 +1413,31 @@ class _BoxDecorationPainter extends BoxPainter {
     );
   }
 
+  void _imageListener(ImageInfo value) {
+    if (_image == value)
+      return;
+    _image = value;
+    assert(onChanged != null);
+    onChanged();
+  }
+
+  @override
+  void dispose() {
+    _imageStream?.removeListener(_imageListener);
+    _imageStream = null;
+    _image = null;
+    super.dispose();
+  }
+
   /// Paint the box decoration into the given location on the given canvas
   @override
-  void paint(Canvas canvas, Rect rect) {
+  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
+    assert(configuration != null);
+    assert(configuration.size != null);
+    final Rect rect = offset & configuration.size;
     _paintShadows(canvas, rect);
     _paintBackgroundColor(canvas, rect);
-    _paintBackgroundImage(canvas, rect);
+    _paintBackgroundImage(canvas, rect, configuration);
     _decoration.border?.paint(
       canvas,
       rect,

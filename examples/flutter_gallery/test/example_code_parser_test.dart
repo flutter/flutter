@@ -36,17 +36,19 @@ test 1 1
 
 class TestAssetBundle extends AssetBundle {
   @override
-  ImageResource loadImage(String key) => null;
+  Future<core.MojoDataPipeConsumer> load(String key) => null;
 
   @override
-  Future<String> loadString(String key) {
+  Future<String> loadString(String key, { bool cache: true }) {
     if (key == 'lib/gallery/example_code.dart')
       return new Future<String>.value(testCodeFile);
     return null;
   }
 
   @override
-  Future<core.MojoDataPipeConsumer> load(String key) => null;
+  Future<dynamic> loadStructuredData(String key, Future<dynamic> parser(String value)) async {
+    return parser(await loadString(key));
+  }
 
   @override
   String toString() => '$runtimeType@$hashCode()';

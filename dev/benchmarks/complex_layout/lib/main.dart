@@ -57,9 +57,9 @@ class FancyItemDelegate extends LazyBlockDelegate {
   @override
   Widget buildItem(BuildContext context, int index) {
     if (index % 2 == 0)
-      return new FancyImageItem(index, key: new Key("Item $index"));
+      return new FancyImageItem(index, key: new Key('Item $index'));
     else
-      return new FancyGalleryItem(index, key: new Key("Item $index"));
+      return new FancyGalleryItem(index, key: new Key('Item $index'));
   }
 
   @override
@@ -78,7 +78,7 @@ class ComplexLayoutState extends State<ComplexLayout> {
             icon: Icons.create,
             tooltip: 'Search',
             onPressed: () {
-              print("Pressed search");
+              print('Pressed search');
             }
           ),
           new TopBarMenu()
@@ -88,7 +88,7 @@ class ComplexLayoutState extends State<ComplexLayout> {
         children: <Widget>[
           new Flexible(
             child: new LazyBlock(
-              key: new Key("main-scroll"),
+              key: new Key('main-scroll'),
               delegate: new FancyItemDelegate()
             )
           ),
@@ -104,47 +104,47 @@ class TopBarMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new PopupMenuButton<String>(
-      onSelected: (String value) { print("Selected: $value"); },
+      onSelected: (String value) { print('Selected: $value'); },
       itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
         new PopupMenuItem<String>(
-          value: "Friends",
-          child: new MenuItemWithIcon(Icons.people, "Friends", "5 new")
+          value: 'Friends',
+          child: new MenuItemWithIcon(Icons.people, 'Friends', '5 new')
         ),
         new PopupMenuItem<String>(
-          value: "Events",
-          child: new MenuItemWithIcon(Icons.event, "Events", "12 upcoming")
+          value: 'Events',
+          child: new MenuItemWithIcon(Icons.event, 'Events', '12 upcoming')
         ),
         new PopupMenuItem<String>(
-          value: "Events",
-          child: new MenuItemWithIcon(Icons.group, "Groups", "14")
+          value: 'Events',
+          child: new MenuItemWithIcon(Icons.group, 'Groups', '14')
         ),
         new PopupMenuItem<String>(
-          value: "Events",
-          child: new MenuItemWithIcon(Icons.image, "Pictures", "12")
+          value: 'Events',
+          child: new MenuItemWithIcon(Icons.image, 'Pictures', '12')
         ),
         new PopupMenuItem<String>(
-          value: "Events",
-          child: new MenuItemWithIcon(Icons.near_me, "Nearby", "33")
+          value: 'Events',
+          child: new MenuItemWithIcon(Icons.near_me, 'Nearby', '33')
         ),
         new PopupMenuItem<String>(
-          value: "Friends",
-          child: new MenuItemWithIcon(Icons.people, "Friends", "5")
+          value: 'Friends',
+          child: new MenuItemWithIcon(Icons.people, 'Friends', '5')
         ),
         new PopupMenuItem<String>(
-          value: "Events",
-          child: new MenuItemWithIcon(Icons.event, "Events", "12")
+          value: 'Events',
+          child: new MenuItemWithIcon(Icons.event, 'Events', '12')
         ),
         new PopupMenuItem<String>(
-          value: "Events",
-          child: new MenuItemWithIcon(Icons.group, "Groups", "14")
+          value: 'Events',
+          child: new MenuItemWithIcon(Icons.group, 'Groups', '14')
         ),
         new PopupMenuItem<String>(
-          value: "Events",
-          child: new MenuItemWithIcon(Icons.image, "Pictures", "12")
+          value: 'Events',
+          child: new MenuItemWithIcon(Icons.image, 'Pictures', '12')
         ),
         new PopupMenuItem<String>(
-          value: "Events",
-          child: new MenuItemWithIcon(Icons.near_me, "Nearby", "33")
+          value: 'Events',
+          child: new MenuItemWithIcon(Icons.near_me, 'Nearby', '33')
         )
       ]
     );
@@ -182,7 +182,7 @@ class FancyImageItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return new BlockBody(
       children: <Widget>[
-        new UserHeader("Ali Connors $index"),
+        new UserHeader('Ali Connors $index'),
         new ItemDescription(),
         new ItemImageBox(),
         new InfoBar(),
@@ -205,7 +205,7 @@ class FancyGalleryItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return new BlockBody(
       children: <Widget>[
-        new UserHeader("Ali Connors"),
+        new UserHeader('Ali Connors'),
         new ItemGalleryBox(index),
         new InfoBar(),
         new Padding(
@@ -227,8 +227,8 @@ class InfoBar extends StatelessWidget {
       child: new Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          new MiniIconWithText(Icons.thumb_up, "42"),
-          new Text("3 Comments", style: Theme.of(context).textTheme.caption)
+          new MiniIconWithText(Icons.thumb_up, '42'),
+          new Text('3 Comments', style: Theme.of(context).textTheme.caption)
         ]
       )
     );
@@ -243,9 +243,9 @@ class IconBar extends StatelessWidget {
       child: new Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          new IconWithText(Icons.thumb_up, "Like"),
-          new IconWithText(Icons.comment, "Comment"),
-          new IconWithText(Icons.share, "Share"),
+          new IconWithText(Icons.thumb_up, 'Like'),
+          new IconWithText(Icons.comment, 'Comment'),
+          new IconWithText(Icons.share, 'Share'),
         ]
       )
     );
@@ -263,7 +263,7 @@ class IconWithText extends StatelessWidget {
     return new Row(
       mainAxisAlignment: MainAxisAlignment.collapse,
       children: <Widget>[
-        new IconButton(icon: icon, onPressed: () { print("Pressed $title button"); } ),
+        new IconButton(icon: icon, onPressed: () { print('Pressed $title button'); } ),
         new Text(title)
       ]
     );
@@ -325,8 +325,8 @@ class UserHeader extends StatelessWidget {
         children: <Widget>[
           new Padding(
             padding: new EdgeInsets.only(right: 8.0),
-            child: new AssetImage(
-              name: "packages/flutter_gallery_assets/ali_connors_sml.png",
+            child: new Image(
+              image: new AssetImage('packages/flutter_gallery_assets/ali_connors_sml.png'),
               width: 32.0,
               height: 32.0
             )
@@ -340,13 +340,13 @@ class UserHeader extends StatelessWidget {
                   style: Theme.of(context).textTheme.body1,
                   children: <TextSpan>[
                     new TextSpan(text: userName, style: new TextStyle(fontWeight: FontWeight.bold)),
-                    new TextSpan(text: " shared a new "),
-                    new TextSpan(text: "photo", style: new TextStyle(fontWeight: FontWeight.bold))
+                    new TextSpan(text: ' shared a new '),
+                    new TextSpan(text: 'photo', style: new TextStyle(fontWeight: FontWeight.bold))
                   ]
                 )),
                 new Row(
                   children: <Widget>[
-                    new Text("Yesterday at 11:55 • ", style: Theme.of(context).textTheme.caption),
+                    new Text('Yesterday at 11:55 • ', style: Theme.of(context).textTheme.caption),
                     new Icon(icon: Icons.people, size: 16.0, color: Theme.of(context).textTheme.caption.color)
                   ]
                 )
@@ -365,7 +365,7 @@ class ItemDescription extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Padding(
       padding: new EdgeInsets.all(8.0),
-      child: new Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")
+      child: new Text('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.')
     );
   }
 }
@@ -383,8 +383,8 @@ class ItemImageBox extends StatelessWidget {
               children: <Widget>[
                 new SizedBox(
                   height: 230.0,
-                  child: new AssetImage(
-                    name: "packages/flutter_gallery_assets/top_10_australian_beaches.png"
+                  child: new Image(
+                    image: new AssetImage('packages/flutter_gallery_assets/top_10_australian_beaches.png')
                   )
                 ),
                 new Theme(
@@ -392,8 +392,8 @@ class ItemImageBox extends StatelessWidget {
                   child: new Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: <Widget>[
-                      new IconButton(icon: Icons.edit, onPressed: () { print("Pressed edit button"); }),
-                      new IconButton(icon: Icons.zoom_in, onPressed: () { print("Pressed zoom button"); })
+                      new IconButton(icon: Icons.edit, onPressed: () { print('Pressed edit button'); }),
+                      new IconButton(icon: Icons.zoom_in, onPressed: () { print('Pressed zoom button'); })
                     ]
                   )
                 ),
@@ -411,11 +411,11 @@ class ItemImageBox extends StatelessWidget {
                         style: new TextStyle(color: Colors.white),
                         children: <TextSpan>[
                           new TextSpan(
-                            text: "Photo by "
+                            text: 'Photo by '
                           ),
                           new TextSpan(
                             style: new TextStyle(fontWeight: FontWeight.bold),
-                            text: "Magic Mike"
+                            text: 'Magic Mike'
                           )
                         ]
                       )
@@ -430,9 +430,9 @@ class ItemImageBox extends StatelessWidget {
               child: new Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  new Text("Where can you find that amazing sunset?", style: Theme.of(context).textTheme.body2),
-                  new Text("The sun sets over stinson beach", style: Theme.of(context).textTheme.body1),
-                  new Text("flutter.io/amazingsunsets", style: Theme.of(context).textTheme.caption)
+                  new Text('Where can you find that amazing sunset?', style: Theme.of(context).textTheme.body2),
+                  new Text('The sun sets over stinson beach', style: Theme.of(context).textTheme.body1),
+                  new Text('flutter.io/amazingsunsets', style: Theme.of(context).textTheme.caption)
                 ]
               )
             )
@@ -451,7 +451,7 @@ class ItemGalleryBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<String> tabNames = <String>[
-      "A", "B", "C", "D"
+      'A', 'B', 'C', 'D'
     ];
 
     return new SizedBox(
@@ -464,7 +464,7 @@ class ItemGalleryBox extends StatelessWidget {
               child: new TabBarView<String>(
                 children: tabNames.map((String tabName) {
                   return new Container(
-                    key: new Key("Tab $index - $tabName"),
+                    key: new Key('Tab $index - $tabName'),
                     child: new Padding(
                       padding: new EdgeInsets.all(8.0),
                       child: new Card(
@@ -484,16 +484,16 @@ class ItemGalleryBox extends StatelessWidget {
                               children: <Widget>[
                                 new IconButton(
                                   icon: Icons.share,
-                                  onPressed: () { print("Pressed share"); }
+                                  onPressed: () { print('Pressed share'); }
                                 ),
                                 new IconButton(
                                   icon: Icons.event,
-                                  onPressed: () { print("Pressed event"); }
+                                  onPressed: () { print('Pressed event'); }
                                 ),
                                 new Flexible(
                                   child: new Padding(
                                     padding: new EdgeInsets.only(left: 8.0),
-                                    child: new Text("This is item $tabName")
+                                    child: new Text('This is item $tabName')
                                   )
                                 )
                               ]
@@ -531,11 +531,11 @@ class BottomBar extends StatelessWidget {
       child: new Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          new BottomBarButton(Icons.new_releases, "News"),
-          new BottomBarButton(Icons.people, "Requests"),
-          new BottomBarButton(Icons.chat, "Messenger"),
-          new BottomBarButton(Icons.bookmark, "Bookmark"),
-          new BottomBarButton(Icons.alarm, "Alarm")
+          new BottomBarButton(Icons.new_releases, 'News'),
+          new BottomBarButton(Icons.people, 'Requests'),
+          new BottomBarButton(Icons.chat, 'Messenger'),
+          new BottomBarButton(Icons.bookmark, 'Bookmark'),
+          new BottomBarButton(Icons.alarm, 'Alarm')
         ]
       )
     );
@@ -556,7 +556,7 @@ class BottomBarButton extends StatelessWidget {
         children: <Widget>[
           new IconButton(
             icon: icon,
-            onPressed: () { print("Pressed: $title"); }
+            onPressed: () { print('Pressed: $title'); }
           ),
           new Text(title, style: Theme.of(context).textTheme.caption)
         ]

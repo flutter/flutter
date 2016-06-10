@@ -485,7 +485,11 @@ class _Block {
       }
     }
 
-    return new NetworkImage(src: path, width: width, height: height);
+    return new Image(
+      image: new NetworkImage(path),
+      width: width,
+      height: height
+    );
   }
 }
 

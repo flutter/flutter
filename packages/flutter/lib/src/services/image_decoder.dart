@@ -14,6 +14,9 @@ import 'package:mojo/core.dart' show MojoDataPipeConsumer;
 /// in the data pipe as an image. If successful, the returned [Future] resolves
 /// to the decoded image. Otherwise, the [Future] resolves to [null].
 Future<ui.Image> decodeImageFromDataPipe(MojoDataPipeConsumer consumerHandle) {
+  assert(consumerHandle != null);
+  assert(consumerHandle.handle != null);
+  assert(consumerHandle.handle.h != null);
   Completer<ui.Image> completer = new Completer<ui.Image>();
   ui.decodeImageFromDataPipe(consumerHandle.handle.h, (ui.Image image) {
     completer.complete(image);

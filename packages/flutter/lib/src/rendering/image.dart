@@ -15,6 +15,9 @@ export 'package:flutter/painting.dart' show
 ///
 /// The render image attempts to find a size for itself that fits in the given
 /// constraints and preserves the image's intrinisc aspect ratio.
+///
+/// The image is painted using [paintImage], which describes the meanings of the
+/// various fields on this class in more detail.
 class RenderImage extends RenderBox {
   /// Creates a render box that displays an image.
   RenderImage({
@@ -112,6 +115,9 @@ class RenderImage extends RenderBox {
   }
 
   /// How to inscribe the image into the place allocated during layout.
+  ///
+  /// The default varies based on the other fields. See the discussion at
+  /// [paintImage].
   ImageFit get fit => _fit;
   ImageFit _fit;
   set fit (ImageFit value) {
