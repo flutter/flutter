@@ -12,7 +12,6 @@ import '../base/process.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
-import '../observatory.dart';
 import 'mac.dart';
 
 const String _ideviceinstallerInstructions =

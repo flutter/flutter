@@ -16,7 +16,6 @@ import '../build_info.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
-import '../observatory.dart';
 import '../protocol_discovery.dart';
 import 'mac.dart';
 
