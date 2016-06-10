@@ -15,11 +15,11 @@
 library services;
 
 export 'src/services/activity.dart';
-export 'src/services/app_messages.dart';
 export 'src/services/asset_bundle.dart';
 export 'src/services/binding.dart';
 export 'src/services/clipboard.dart';
 export 'src/services/haptic_feedback.dart';
+export 'src/services/host_messages.dart';
 export 'src/services/image_cache.dart';
 export 'src/services/image_decoder.dart';
 export 'src/services/image_resource.dart';

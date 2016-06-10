@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:mojo/core.dart' as core;
 import 'package:sky_services/flutter/platform/app_messages.mojom.dart' as mojom;
@@ -48,13 +49,28 @@ final _ApplicationMessagesImpl _appMessages = new _ApplicationMessagesImpl();
 /// Flutter framework to exchange application-specific messages.
 class HostMessages {
   /// Send a message to the host application.
-  static Future<String> sendToHost(String messageName, String message) async {
+  static Future<String> sendToHost(String messageName, [String message = '']) async {
     return (await _hostAppMessagesProxy.sendString(messageName, message)).reply;
   }
 
-  /// Register a callback for messages received from the host application.
-  /// The callback function must return a String, Future<String>, or null.
+  /// Sends a JSON-encoded message to the host application and JSON-decodes the response.
+  static Future<dynamic> sendJSON(String messageName, [dynamic json]) async {
+    return JSON.decode((await _hostAppMessagesProxy.sendString(messageName, JSON.encode(json))).reply);
+  }
+
+  /// Register a callback for receiving messages from the host application.
   static void addMessageHandler(String messageName, HostMessageCallback callback) {
     _appMessages.handlers[messageName] = callback;
+  }
+
+  /// Register a callback for receiving JSON messages from the host application.
+  ///
+  /// Messages received from the host application are decoded as JSON before
+  /// being passed to `callback`. The result of the callback is encoded as JSON
+  /// before being returned to the host application.
+  static void addJSONMessageHandler(String messageName, Future<dynamic> callback(dynamic json)) {
+    _appMessages.handlers[messageName] = (String message) async {
+      return JSON.encode(await callback(JSON.decode(message)));
+    };
   }
 }
