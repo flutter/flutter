@@ -52,15 +52,12 @@ class PestoDemo extends StatefulWidget {
 
 class _PestoDemoState extends State<PestoDemo> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final TextStyle favoritesMessageStyle = _textStyle(16.0);
   final TextStyle userStyle = _textStyle(12.0, FontWeight.bold);
   final TextStyle emailStyle = _textStyle(12.0).copyWith(color: Colors.black54);
 
   @override
   Widget build(BuildContext context) {
-    final double statusBarHeight = MediaQuery.of(context).padding.top;
-
-    List<Recipe> recipes = config.showFavorites ? favoriteRecipes.toList() : kRecipes;
-
     return new Theme(
       data: _kTheme,
       child: new Scaffold(
@@ -72,20 +69,7 @@ class _PestoDemoState extends State<PestoDemo> {
           child: new Icon(icon: Icons.edit),
           onPressed: () { }
         ),
-        body: new ScrollableGrid(
-          delegate: new MaxTileWidthGridDelegate(
-            maxTileWidth: 500.0,
-            rowSpacing: 8.0,
-            columnSpacing: 8.0,
-            padding: new EdgeInsets.fromLTRB(8.0, 8.0 + _kAppBarHeight + statusBarHeight, 8.0, 8.0)
-          ),
-          children: recipes.map(
-            (Recipe recipe) => new _RecipeCard(
-              recipe: recipe,
-              onTap: () { _showRecipe(context, recipe); }
-            )
-          )
-        )
+        body: _buildBody(context)
       )
     );
   }
@@ -184,6 +168,34 @@ class _PestoDemoState extends State<PestoDemo> {
     );
   }
 
+  Widget _buildBody(BuildContext context) {
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
+    List<Recipe> recipes = config.showFavorites ? favoriteRecipes.toList() : kRecipes;
+    final EdgeInsets padding = new EdgeInsets.fromLTRB(8.0, 8.0 + _kAppBarHeight + statusBarHeight, 8.0, 8.0);
+
+    if (config.showFavorites && recipes.isEmpty) {
+      return new Padding(
+        padding: padding,
+        child: new Text('Save your favorite recipes to see them here.', style: favoritesMessageStyle)
+      );
+    }
+
+    return new ScrollableGrid(
+      delegate: new MaxTileWidthGridDelegate(
+        maxTileWidth: 500.0,
+        rowSpacing: 8.0,
+        columnSpacing: 8.0,
+        padding: padding
+      ),
+      children: recipes.map(
+        (Recipe recipe) => new _RecipeCard(
+          recipe: recipe,
+          onTap: () { _showRecipe(context, recipe); }
+        )
+      )
+    );
+  }
+
   void _showFavorites(BuildContext context) {
     Navigator.push(context, new MaterialPageRoute<Null>(
       builder: (BuildContext context) {
@@ -218,37 +230,40 @@ class _RecipeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return new GestureDetector(
       onTap: onTap,
-      child: new Card(
-        child: new Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            new AssetImage(
-              name: recipe.imagePath,
-              fit: ImageFit.scaleDown
-            ),
-            new Flexible(
-              child: new Row(
-                children: <Widget>[
-                  new Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: new AssetImage(
-                      width: 48.0,
-                      height: 48.0,
-                      name: recipe.ingredientsImagePath
+      child: new Hero(
+        tag: recipe.imagePath,
+        child: new Card(
+          child: new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              new AssetImage(
+                name: recipe.imagePath,
+                fit: ImageFit.scaleDown
+              ),
+              new Flexible(
+                child: new Row(
+                  children: <Widget>[
+                    new Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: new AssetImage(
+                        width: 48.0,
+                        height: 48.0,
+                        name: recipe.ingredientsImagePath
+                      )
+                    ),
+                    new Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        new Text(recipe.name, style: titleStyle),
+                        new Text(recipe.author, style: authorStyle),
+                      ]
                     )
-                  ),
-                  new Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      new Text(recipe.name, style: titleStyle),
-                      new Text(recipe.author, style: authorStyle),
-                    ]
-                  )
-                ]
+                  ]
+                )
               )
-            )
-          ]
+            ]
+          )
         )
       )
     );
@@ -275,13 +290,14 @@ class _RecipePageState extends State<_RecipePage> {
     // here because that doesn't allow us to overlap the app bar on top of the
     // content.
     final double statusBarHeight = MediaQuery.of(context).padding.top;
-    return new Padding(
-      padding: new EdgeInsets.only(top: statusBarHeight),
-      child: new Stack(
-        children: <Widget>[
-          _buildContainer(context),
-          new AppBar(
+    return new Stack(
+      children: <Widget>[
+        _buildContainer(context),
+        new Padding(
+          padding: new EdgeInsets.only(top: statusBarHeight),
+          child: new AppBar(
             backgroundColor: Colors.transparent,
+            elevation: 0,
             leading: new IconButton(
               icon: Icons.arrow_back,
               onPressed: () => Navigator.pop(context),
@@ -299,8 +315,8 @@ class _RecipePageState extends State<_RecipePage> {
               )
             ]
           )
-        ]
-      )
+        )
+      ]
     );
   }
 
@@ -312,40 +328,44 @@ class _RecipePageState extends State<_RecipePage> {
     Size screenSize = MediaQuery.of(context).size;
     bool fullWidth = (screenSize.width < _kRecipePageMaxWidth);
     const double fabHalfSize = 28.0;  // TODO(mpcomplete): needs to adapt to screen size
-    return new DecoratedBox(
-      decoration: new BoxDecoration(
-        backgroundImage: new BackgroundImage(
-          image: DefaultAssetBundle.of(context).loadImage(config.recipe.imagePath),
-          alignment: FractionalOffset.topCenter,
-          fit: fullWidth ? ImageFit.fitWidth : ImageFit.cover
-        )
-      ),
-      child: new Align(
-        alignment: FractionalOffset.bottomCenter,
-        child: new Block(
-          children: <Widget>[
-            new Padding(
-              padding: new EdgeInsets.only(top: screenSize.height*0.3),
-              child: new Stack(
-                children: <Widget>[
-                  new Padding(
-                    padding: new EdgeInsets.only(top: fabHalfSize),
-                    child: new SizedBox(
-                      width: fullWidth ? null : _kRecipePageMaxWidth,
-                      child: new _RecipeSheet(recipe: config.recipe)
+    return new Hero(
+      tag: config.recipe.imagePath,
+      child: new DecoratedBox(
+        decoration: new BoxDecoration(
+          backgroundColor: Theme.of(context).canvasColor,
+          backgroundImage: new BackgroundImage(
+            image: DefaultAssetBundle.of(context).loadImage(config.recipe.imagePath),
+            alignment: FractionalOffset.topCenter,
+            fit: fullWidth ? ImageFit.fitWidth : ImageFit.cover
+          )
+        ),
+        child: new Align(
+          alignment: FractionalOffset.bottomCenter,
+          child: new Block(
+            children: <Widget>[
+              new Padding(
+                padding: new EdgeInsets.only(top: screenSize.height*0.3),
+                child: new Stack(
+                  children: <Widget>[
+                    new Padding(
+                      padding: new EdgeInsets.only(top: fabHalfSize),
+                      child: new SizedBox(
+                        width: fullWidth ? null : _kRecipePageMaxWidth,
+                        child: new _RecipeSheet(recipe: config.recipe)
+                      )
+                    ),
+                    new Positioned(
+                      right: 16.0,
+                      child: new FloatingActionButton(
+                        child: new Icon(icon: isFavorite ? Icons.favorite : Icons.favorite_border),
+                        onPressed: _toggleFavorite
+                      )
                     )
-                  ),
-                  new Positioned(
-                    right: 16.0,
-                    child: new FloatingActionButton(
-                      child: new Icon(icon: isFavorite ? Icons.favorite : Icons.favorite_border),
-                      onPressed: _toggleFavorite
-                    )
-                  )
-                ]
+                  ]
+                )
               )
-            )
-          ]
+            ]
+          )
         )
       )
     );
