@@ -14,13 +14,13 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     FlutterDartProject* project = [[FlutterDartProject alloc] initFromDefaultSourceForConfiguration];
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-    FlutterViewController* controller = [[FlutterViewController alloc] initWithProject:project
-                                                                               nibName:nil
-                                                                                bundle:nil];
+    FlutterViewController* flutterController = [[FlutterViewController alloc] initWithProject:project
+                                                                                      nibName:nil
+                                                                                       bundle:nil];
     _locationProvider = [[LocationProvider alloc] init];
-    [controller addMessageListener: _locationProvider];
+    [flutterController addMessageListener:_locationProvider];
 
-    self.window.rootViewController = controller;
+    self.window.rootViewController = flutterController;
     [self.window makeKeyAndVisible];
     return YES;
 }
