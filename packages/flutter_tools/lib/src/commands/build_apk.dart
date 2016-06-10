@@ -104,7 +104,7 @@ class _ApkBuilder {
     runCheckedSync(packageArgs);
   }
 
-  void package(File outputApk, File androidManifest, Directory assets, Directory artifacts, Directory resources) {
+  void package(File outputApk, File androidManifest, Directory assets, Directory artifacts, Directory resources, BuildMode buildMode) {
     List<String> packageArgs = <String>[_aapt.path,
       'package',
       '-M', androidManifest.path,
@@ -112,6 +112,8 @@ class _ApkBuilder {
       '-I', _androidJar.path,
       '-F', outputApk.path,
     ];
+    if (buildMode == BuildMode.debug)
+      packageArgs.add('--debug-mode');
     if (resources != null)
       packageArgs.addAll(<String>['-S', resources.absolute.path]);
     packageArgs.add(artifacts.path);
@@ -333,7 +335,7 @@ int _buildApk(
     File unalignedApk = new File('${tempDir.path}/app.apk.unaligned');
     builder.package(
       unalignedApk, components.manifest, assetBuilder.directory,
-      artifactBuilder.directory, components.resources
+      artifactBuilder.directory, components.resources, buildMode
     );
 
     int signResult = _signApk(builder, components, unalignedApk, keystore);
