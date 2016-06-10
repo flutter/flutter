@@ -553,7 +553,11 @@ class AnalysisServer {
             _handleServerError(response['params']);
         }
       } else if (response['error'] != null) {
-        printError('Error from the analysis server: ${response['error']['message']}');
+        // Fields are 'code', 'message', and 'stackTrace'.
+        Map<String, dynamic> error = response['error'];
+        printError('Error response from the server: ${error['code']} ${error['message']}');
+        if (error['stackTrace'] != null)
+          printError(error['stackTrace']);
       }
     }
   }
@@ -566,8 +570,11 @@ class AnalysisServer {
     }
   }
 
-  void _handleServerError(Map<String, dynamic> errorInfo) {
-    printError('Error from the analysis server: ${errorInfo['message']}');
+  void _handleServerError(Map<String, dynamic> error) {
+    // Fields are 'isFatal', 'message', and 'stackTrace'.
+    printError('Error from the analysis server: ${error['message']}');
+    if (error['stackTrace'] != null)
+      printError(error['stackTrace']);
   }
 
   void _handleAnalysisIssues(Map<String, dynamic> issueInfo) {
