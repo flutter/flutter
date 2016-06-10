@@ -389,6 +389,9 @@ class AndroidDevice extends Device {
   }
 
   @override
+  bool get supportsRestart => true;
+
+  @override
   Future<bool> restartApp(
     ApplicationPackage package,
     LaunchResult result, {

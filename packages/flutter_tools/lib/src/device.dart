@@ -189,6 +189,8 @@ abstract class Device {
     Map<String, dynamic> platformArgs
   });
 
+  bool get supportsRestart => false;
+
   /// Restart the given app; the application will already have been launched with
   /// [startApp].
   Future<bool> restartApp(
@@ -196,7 +198,9 @@ abstract class Device {
     LaunchResult result, {
     String mainPath,
     Observatory observatory
-  });
+  }) async {
+    throw 'unsupported';
+  }
 
   /// Stop an app package on the current device.
   Future<bool> stopApp(ApplicationPackage app);

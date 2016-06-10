@@ -214,21 +214,6 @@ class IOSDevice extends Device {
   }
 
   @override
-  Future<bool> restartApp(
-    ApplicationPackage package,
-    LaunchResult result, {
-    String mainPath,
-    Observatory observatory
-  }) async {
-    return observatory.isolateReload(observatory.firstIsolateId).then((Response response) {
-      return true;
-    }).catchError((dynamic error) {
-      printError('Error restarting app: $error');
-      return false;
-    });
-  }
-
-  @override
   Future<bool> stopApp(ApplicationPackage app) async {
     // Currently we don't have a way to stop an app running on iOS.
     return false;
