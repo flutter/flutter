@@ -298,7 +298,7 @@ const char* kDataSnapshotName = "kDataSnapshot";
 
 #if OS(IOS)
 
-const char* kDartApplicationLibraryPath = "app.so";
+const char* kDartApplicationLibraryPath = "app.dylib";
 
 static void* DartLookupSymbolInLibrary(const char* symbol_name,
                                        const char* library) {

@@ -11,7 +11,7 @@
 		9760422B1CFB925B006EFB43 /* app.flx in Resources */ = {isa = PBXBuildFile; fileRef = 976042281CFB925B006EFB43 /* app.flx */; };
 		9760422D1CFB925B006EFB43 /* Flutter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9760422A1CFB925B006EFB43 /* Flutter.framework */; };
 		9760422E1CFB92B0006EFB43 /* Flutter.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9760422A1CFB925B006EFB43 /* Flutter.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		9766DC6F1CFB93D50041C027 /* app.so in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9766DC6D1CFB93C80041C027 /* app.so */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		9766DC6F1CFB93D50041C027 /* app.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9766DC6D1CFB93C80041C027 /* app.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		9E07CFA91BE8280A00BCD8DE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9E07CFA81BE8280A00BCD8DE /* Assets.xcassets */; };
 		9E07CFBA1BE82DFF00BCD8DE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E07CF9D1BE8280A00BCD8DE /* main.m */; };
 		9EA2FB801C6D2D6B00670B03 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9EA2FB7F1C6D2D6B00670B03 /* LaunchScreen.storyboard */; };
@@ -24,7 +24,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				9766DC6F1CFB93D50041C027 /* app.so in Embed Frameworks */,
+				9766DC6F1CFB93D50041C027 /* app.dylib in Embed Frameworks */,
 				9760422E1CFB92B0006EFB43 /* Flutter.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -36,7 +36,7 @@
 		976042261CFB91C5006EFB43 /* Flutter.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Flutter.xcconfig; path = Flutter/Flutter.xcconfig; sourceTree = "<group>"; };
 		976042281CFB925B006EFB43 /* app.flx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = app.flx; path = Flutter/app.flx; sourceTree = "<group>"; };
 		9760422A1CFB925B006EFB43 /* Flutter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Flutter.framework; path = Flutter/Flutter.framework; sourceTree = "<group>"; };
-		9766DC6D1CFB93C80041C027 /* app.so */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = app.so; path = Flutter/app.so; sourceTree = "<group>"; };
+		9766DC6D1CFB93C80041C027 /* app.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = app.dylib; path = Flutter/app.dylib; sourceTree = "<group>"; };
 		9E07CF9A1BE8280A00BCD8DE /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E07CF9D1BE8280A00BCD8DE /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		9E07CFA81BE8280A00BCD8DE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = ../Assets.xcassets; sourceTree = SOURCE_ROOT; };
@@ -59,7 +59,7 @@
 		976042251CFB918B006EFB43 /* Flutter */ = {
 			isa = PBXGroup;
 			children = (
-				9766DC6D1CFB93C80041C027 /* app.so */,
+				9766DC6D1CFB93C80041C027 /* app.dylib */,
 				976042281CFB925B006EFB43 /* app.flx */,
 				9760422A1CFB925B006EFB43 /* Flutter.framework */,
 				976042261CFB91C5006EFB43 /* Flutter.xcconfig */,
