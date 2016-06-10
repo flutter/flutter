@@ -57,8 +57,6 @@ public:
     void transform(const Float64List& matrix4);
     void setMatrix(const Float64List& matrix4);
 
-    Float64List getTotalMatrix();
-
     void clipRect(double left,
                   double top,
                   double right,

@@ -524,10 +524,6 @@ class Canvas extends NativeFieldWrapperClass2 {
   }
   void _setMatrix(Float64List matrix4) native "Canvas_setMatrix";
 
-  /// Returns the current 4⨉4 transformation matrix as a list of 16 values in
-  /// column-major order.
-  Float64List getTotalMatrix() native "Canvas_getTotalMatrix";
-
   /// Reduces the clip region to the intersection of the current clip and the
   /// given rectangle.
   void clipRect(Rect rect) {

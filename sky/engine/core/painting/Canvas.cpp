@@ -37,7 +37,6 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Canvas);
   V(Canvas, skew) \
   V(Canvas, transform) \
   V(Canvas, setMatrix) \
-  V(Canvas, getTotalMatrix) \
   V(Canvas, clipRect) \
   V(Canvas, clipRRect) \
   V(Canvas, clipPath) \
@@ -168,15 +167,6 @@ void Canvas::setMatrix(const Float64List& matrix4)
     if (!m_canvas)
         return;
     m_canvas->setMatrix(toSkMatrix(matrix4));
-}
-
-Float64List Canvas::getTotalMatrix()
-{
-    // Maybe we should throw an exception instead of returning an empty matrix?
-    SkMatrix sk_matrix;
-    if (m_canvas)
-        sk_matrix = m_canvas->getTotalMatrix();
-    return toMatrix4(sk_matrix);
 }
 
 void Canvas::clipRect(double left,
