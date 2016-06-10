@@ -10,6 +10,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart' as yaml;
 
+import '../base/logger.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/analysis.dart';
@@ -299,18 +300,22 @@ class AnalyzeCommand extends FlutterCommand {
   Map<String, List<AnalysisError>> analysisErrors = <String, List<AnalysisError>>{};
   Stopwatch analysisTimer;
   int lastErrorCount = 0;
+  Status analysisStatus;
 
   void _handleAnalysisStatus(AnalysisServer server, bool isAnalyzing) {
     if (isAnalyzing) {
+      analysisStatus?.cancel();
+
       if (firstAnalysis) {
-        printStatus('Analyzing ${path.basename(Directory.current.path)}...');
+        analysisStatus = logger.startProgress('Analyzing ${path.basename(Directory.current.path)}...');
       } else {
-        printStatus('');
+        analysisStatus = logger.startProgress('\nAnalyzing...');
       }
 
       analyzedPaths.clear();
       analysisTimer = new Stopwatch()..start();
     } else {
+      analysisStatus?.stop(showElapsedTime: true);
       analysisTimer.stop();
 
       // Sort and print errors.
