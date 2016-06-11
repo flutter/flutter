@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/lib/jni/dart_jni.gni")
 import("//mojo/dart/packages/mojo/sdk_ext_sources.gni")
 import("//sky/engine/bindings/bindings.gni")
 import("//sky/engine/core/core.gni")
@@ -19,23 +20,6 @@ source_set("bindings") {
     "mojo_services.cc",
     "mojo_services.h",
   ]
-
-  if (is_android) {
-    sources += [
-      "jni/dart_jni.cc",
-      "jni/dart_jni.h",
-      "jni/jni_api.cc",
-      "jni/jni_api.h",
-      "jni/jni_array.cc",
-      "jni/jni_array.h",
-      "jni/jni_class.cc",
-      "jni/jni_class.h",
-      "jni/jni_object.cc",
-      "jni/jni_object.h",
-      "jni/jni_string.cc",
-      "jni/jni_string.h",
-    ]
-  }
 
   defines = [ "DART_IO_SECURE_SOCKET_DISABLED" ]
 
@@ -57,6 +41,10 @@ source_set("bindings") {
     "//sky/engine/wtf",
     "//sky/services/engine:interfaces",
   ]
+
+  if (is_android) {
+    deps += [ "//flutter/lib/jni" ]
+  }
 
   # On iOS (device), precompiled snapshots contain the instruction buffer.
   # Generation of the same requires all application specific script code to be
@@ -83,11 +71,9 @@ action("generate_snapshot_bin") {
   ]
   inputs = [
     "//dart/runtime/tools/create_snapshot_bin.py",
-    "//sky/engine/bindings/jni/jni.dart",
-    "//sky/engine/bindings/jni/jni_raw.dart",
-    "//sky/engine/bindings/jni/jni_helper.dart",
     "snapshot.dart",
-  ] + rebase_path(dart_mojo_internal_sdk_sources,
+  ] + dart_jni_files
+    + rebase_path(dart_mojo_internal_sdk_sources,
                   "",
                   "//mojo/dart/packages/mojo")
   vm_isolate_snapshot = "$target_gen_dir/vm_isolate_snapshot.bin"
@@ -99,8 +85,8 @@ action("generate_snapshot_bin") {
 
   dart_mojo_internal_path =
       rebase_path("//mojo/dart/packages/mojo/sdk_ext/internal.dart")
-  dart_ui_path = rebase_path("$bindings_output_dir/dart_ui.dart")
-  dart_jni_path = rebase_path("//sky/engine/bindings/jni/jni.dart")
+  rebased_dart_ui_path = rebase_path("$bindings_output_dir/dart_ui.dart")
+  rebased_dart_jni_path = rebase_path(dart_jni_path)
 
   gen_snapshot_dir =
       get_label_info("//dart/runtime/bin:gen_snapshot($dart_host_toolchain)",
@@ -121,8 +107,8 @@ action("generate_snapshot_bin") {
     "--target_os",
     target_os,
     "--url_mapping=dart:mojo.internal,$dart_mojo_internal_path",
-    "--url_mapping=dart:ui,$dart_ui_path",
-    "--url_mapping=dart:jni,$dart_jni_path",
+    "--url_mapping=dart:ui,$rebased_dart_ui_path",
+    "--url_mapping=dart:jni,$rebased_dart_jni_path",
   ]
 }
 
@@ -176,11 +162,7 @@ copy("generate_dart_ui") {
 }
 
 copy("generate_dart_jni") {
-  sources = [
-    "jni/jni.dart",
-    "jni/jni_helper.dart",
-    "jni/jni_raw.dart",
-  ]
+  sources = dart_jni_files
 
   outputs = [
     "$bindings_output_dir/dart_jni/{{source_file_part}}",

@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_BINDINGS_JNI_JNI_STRING_H_
-#define SKY_ENGINE_BINDINGS_JNI_JNI_STRING_H_
+#ifndef FLUTTER_LIB_JNI_JNI_STRING_H_
+#define FLUTTER_LIB_JNI_JNI_STRING_H_
 
-#include "sky/engine/bindings/jni/dart_jni.h"
-#include "sky/engine/bindings/jni/jni_object.h"
+#include "flutter/lib/jni/dart_jni.h"
+#include "flutter/lib/jni/jni_object.h"
 
 namespace blink {
 
@@ -29,4 +29,4 @@ class JniString : public JniObject {
 
 } // namespace blink
 
-#endif  // SKY_ENGINE_BINDINGS_JNI_JNI_STRING_H_
+#endif  // FLUTTER_LIB_JNI_JNI_STRING_H_

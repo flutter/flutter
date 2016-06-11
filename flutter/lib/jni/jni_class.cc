@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/bindings/jni/jni_class.h"
+#include "flutter/lib/jni/jni_class.h"
 
-#include "sky/engine/bindings/jni/dart_jni.h"
+#include "flutter/lib/jni/dart_jni.h"
 
 namespace blink {
 

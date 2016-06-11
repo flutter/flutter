@@ -35,7 +35,7 @@
 #include "sky/engine/wtf/MakeUnique.h"
 
 #ifdef OS_ANDROID
-#include "sky/engine/bindings/jni/dart_jni.h"
+#include "flutter/lib/jni/dart_jni.h"
 #endif
 
 namespace blink {

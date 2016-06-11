@@ -48,7 +48,6 @@ class FlutterDartState : public DartState {
   MojoServices* mojo_services();
 
 #ifdef OS_ANDROID
-  void set_jni_data(std::unique_ptr<DartJniIsolateData> jni_data);
   DartJniIsolateData* jni_data();
 #endif
 

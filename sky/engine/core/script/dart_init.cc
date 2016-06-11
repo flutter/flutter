@@ -45,7 +45,7 @@
 #include "sky/engine/wtf/MakeUnique.h"
 
 #ifdef OS_ANDROID
-#include "sky/engine/bindings/jni/dart_jni.h"
+#include "flutter/lib/jni/dart_jni.h"
 #endif
 
 namespace dart {
@@ -286,6 +286,14 @@ static void ServiceStreamCancelCallback(const char* stream_id) {
     dart::bin::SetCaptureStderr(false);
   }
 }
+
+#ifdef OS_ANDROID
+
+DartJniIsolateData* GetDartJniDataForCurrentIsolate() {
+ return FlutterDartState::Current()->jni_data();
+}
+
+#endif
 
 }  // namespace
 
@@ -541,7 +549,7 @@ void InitDartVM() {
 
   DartUI::InitForGlobal();
 #ifdef OS_ANDROID
-  DartJni::InitForGlobal();
+  DartJni::InitForGlobal(GetDartJniDataForCurrentIsolate);
 #endif
 
   // Setup embedder tracing hooks. To avoid data races, it is recommended that

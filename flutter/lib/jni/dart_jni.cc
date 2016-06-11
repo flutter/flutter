@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/bindings/jni/dart_jni.h"
+#include "flutter/lib/jni/dart_jni.h"
 
 #include "base/android/jni_android.h"
 #include "base/android/jni_string.h"
 #include "base/logging.h"
+#include "flutter/lib/jni/jni_api.h"
+#include "flutter/lib/jni/jni_array.h"
+#include "flutter/lib/jni/jni_class.h"
+#include "flutter/lib/jni/jni_object.h"
+#include "flutter/lib/jni/jni_string.h"
 #include "flutter/tonic/dart_args.h"
 #include "flutter/tonic/dart_binding_macros.h"
 #include "flutter/tonic/dart_converter.h"
 #include "sky/engine/bindings/flutter_dart_state.h"
-#include "sky/engine/bindings/jni/jni_api.h"
-#include "sky/engine/bindings/jni/jni_array.h"
-#include "sky/engine/bindings/jni/jni_class.h"
-#include "sky/engine/bindings/jni/jni_object.h"
-#include "sky/engine/bindings/jni/jni_string.h"
 
 namespace blink {
 
@@ -45,14 +45,10 @@ struct DartJniJvmData {
 };
 
 DartJniJvmData* g_jvm_data = nullptr;
-
-void CreateIsolateData() {
-  static_cast<FlutterDartState*>(DartState::Current())->set_jni_data(
-      std::unique_ptr<DartJniIsolateData>(new DartJniIsolateData()));
-}
+DartJniIsolateDataProvider g_isolate_data_provider = nullptr;
 
 DartJniIsolateData* IsolateData() {
-  return static_cast<FlutterDartState*>(DartState::Current())->jni_data();
+  return g_isolate_data_provider();
 }
 
 } // anonymous namespace
@@ -185,7 +181,10 @@ DART_NATIVE_CALLBACK_STATIC(JniString, Create);
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
-void DartJni::InitForGlobal() {
+void DartJni::InitForGlobal(DartJniIsolateDataProvider provider) {
+  if (!g_isolate_data_provider)
+    g_isolate_data_provider = provider;
+
   if (!g_natives) {
     g_natives = new DartLibraryNatives();
 
@@ -219,8 +218,6 @@ void DartJni::InitForIsolate() {
 
   DART_CHECK_VALID(Dart_SetNativeResolver(
       jni_library, GetNativeFunction, GetSymbol));
-
-  CreateIsolateData();
 
   Dart_Handle object_type = Dart_GetType(
       jni_library, ToDart("JniObject"), 0, nullptr);

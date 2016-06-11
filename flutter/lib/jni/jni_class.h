@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_BINDINGS_JNI_JNI_CLASS_H_
-#define SKY_ENGINE_BINDINGS_JNI_JNI_CLASS_H_
+#ifndef FLUTTER_LIB_JNI_JNI_CLASS_H_
+#define FLUTTER_LIB_JNI_JNI_CLASS_H_
 
 #include <jni.h>
 
 #include "base/android/jni_android.h"
 #include "base/memory/ref_counted.h"
+#include "flutter/lib/jni/jni_object.h"
 #include "flutter/tonic/dart_wrappable.h"
-#include "sky/engine/bindings/jni/jni_object.h"
 
 namespace blink {
 
@@ -84,4 +84,4 @@ class JniClass : public JniObject {
 
 } // namespace blink
 
-#endif  // SKY_ENGINE_BINDINGS_JNI_JNI_CLASS_H_
+#endif  // FLUTTER_LIB_JNI_JNI_CLASS_H_

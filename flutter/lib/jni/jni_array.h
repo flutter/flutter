@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_BINDINGS_JNI_JNI_ARRAY_H_
-#define SKY_ENGINE_BINDINGS_JNI_JNI_ARRAY_H_
+#ifndef FLUTTER_LIB_JNI_JNI_ARRAY_H_
+#define FLUTTER_LIB_JNI_JNI_ARRAY_H_
 
 #include <jni.h>
 
-#include "sky/engine/bindings/jni/jni_class.h"
-#include "sky/engine/bindings/jni/jni_object.h"
+#include "flutter/lib/jni/jni_class.h"
+#include "flutter/lib/jni/jni_object.h"
 
 namespace blink {
 
@@ -163,4 +163,4 @@ class JniDoubleArray : public JniArray {
 
 } // namespace blink
 
-#endif  // SKY_ENGINE_BINDINGS_JNI_JNI_ARRAY_H_
+#endif  // FLUTTER_LIB_JNI_JNI_ARRAY_H_

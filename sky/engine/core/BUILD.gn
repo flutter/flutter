@@ -27,6 +27,12 @@ source_set("libraries") {
     "//third_party/qcms",
     "//third_party/zlib",
   ]
+
+  if (is_android) {
+    public_deps += [
+      "//flutter/lib/jni",
+    ]
+  }
 }
 
 source_set("prerequisites") {

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_BINDINGS_JNI_DART_JNI_H_
-#define SKY_ENGINE_BINDINGS_JNI_DART_JNI_H_
+#ifndef FLUTTER_LIB_JNI_DART_JNI_H_
+#define FLUTTER_LIB_JNI_DART_JNI_H_
 
 #include <vector>
 
@@ -22,9 +22,17 @@ namespace blink {
 bool CheckJniException(JNIEnv* env, Dart_Handle *exception);
 bool CheckDartException(Dart_Handle result, Dart_Handle* exception);
 
+// Data cached for each Dart isolate.
+struct DartJniIsolateData {
+  Dart_PersistentHandle jni_object_type;
+  Dart_PersistentHandle jni_float_type;
+};
+
+typedef DartJniIsolateData* (*DartJniIsolateDataProvider)();
+
 class DartJni {
  public:
-  static void InitForGlobal();
+  static void InitForGlobal(DartJniIsolateDataProvider provider);
   static void InitForIsolate();
   static bool InitJni();
   static void OnThreadExit();
@@ -41,12 +49,6 @@ class DartJni {
   static jclass class_clazz();
   static Dart_Handle jni_object_type();
   static Dart_Handle jni_float_type();
-};
-
-// Data cached for each Dart isolate.
-struct DartJniIsolateData {
-  Dart_PersistentHandle jni_object_type;
-  Dart_PersistentHandle jni_float_type;
 };
 
 class JniMethodArgs {
@@ -92,4 +94,4 @@ struct DartConverter<jmethodID> {
 
 } // namespace blink
 
-#endif  // SKY_ENGINE_BINDINGS_JNI_DART_JNI_H_
+#endif  // FLUTTER_LIB_JNI_DART_JNI_H_

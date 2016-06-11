@@ -9,11 +9,11 @@
 #include "base/android/library_loader/library_loader_hooks.h"
 #include "base/bind.h"
 #include "base/logging.h"
+#include "flutter/lib/jni/dart_jni.h"
 #include "mojo/android/system/base_run_loop.h"
 #include "mojo/android/system/core_impl.h"
-#include "sky/engine/bindings/jni/dart_jni.h"
-#include "sky/shell/platform/android/platform_view_android.h"
 #include "sky/shell/platform/android/flutter_main.h"
+#include "sky/shell/platform/android/platform_view_android.h"
 
 namespace {
 

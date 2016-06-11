@@ -8,7 +8,7 @@
 #include "sky/engine/bindings/mojo_services.h"
 
 #ifdef OS_ANDROID
-#include "sky/engine/bindings/jni/dart_jni.h"
+#include "flutter/lib/jni/dart_jni.h"
 #endif
 
 namespace blink {
@@ -19,6 +19,9 @@ IsolateClient::~IsolateClient() {
 FlutterDartState::FlutterDartState(IsolateClient* isolate_client,
                                    const std::string& url)
     : isolate_client_(isolate_client), url_(url) {
+#ifdef OS_ANDROID
+  jni_data_.reset(new DartJniIsolateData());
+#endif
 }
 
 FlutterDartState::~FlutterDartState() {
@@ -58,11 +61,6 @@ MojoServices* FlutterDartState::mojo_services() {
 }
 
 #ifdef OS_ANDROID
-void FlutterDartState::set_jni_data(
-    std::unique_ptr<DartJniIsolateData> jni_data) {
-  jni_data_ = std::move(jni_data);
-}
-
 DartJniIsolateData* FlutterDartState::jni_data() {
   return jni_data_.get();
 }

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_BINDINGS_JNI_JNI_OBJECT_H_
-#define SKY_ENGINE_BINDINGS_JNI_JNI_OBJECT_H_
+#ifndef FLUTTER_LIB_JNI_JNI_OBJECT_H_
+#define FLUTTER_LIB_JNI_JNI_OBJECT_H_
 
 #include <jni.h>
 
@@ -77,4 +77,4 @@ class JniObject : public base::RefCountedThreadSafe<JniObject>, public DartWrapp
 
 } // namespace blink
 
-#endif  // SKY_ENGINE_BINDINGS_JNI_JNI_OBJECT_H_
+#endif  // FLUTTER_LIB_JNI_JNI_OBJECT_H_

@@ -1,0 +1,25 @@
+# Copyright 2016 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("jni") {
+  sources = [
+    "dart_jni.cc",
+    "dart_jni.h",
+    "jni_api.cc",
+    "jni_api.h",
+    "jni_array.cc",
+    "jni_array.h",
+    "jni_class.cc",
+    "jni_class.h",
+    "jni_object.cc",
+    "jni_object.h",
+    "jni_string.cc",
+    "jni_string.h",
+  ]
+
+  deps = [
+    "//base",
+    "//flutter/tonic",
+  ]
+}

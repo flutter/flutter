@@ -150,13 +150,14 @@ if (is_android) {
     ]
 
     deps = [
+      ":common",
+      ":gpu_direct",
+      ":jni_headers",
+      "//flutter/lib/jni",
       "//mojo/android:libsystem_java",
       "//mojo/edk/base_edk",
       "//mojo/edk/system",
       "//ui/gl",
-      ":common",
-      ":gpu_direct",
-      ":jni_headers",
     ]
 
     ldflags = [
