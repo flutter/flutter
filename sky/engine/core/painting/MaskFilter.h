@@ -6,7 +6,7 @@
 #define SKY_ENGINE_CORE_PAINTING_MASKFILTER_H_
 
 #include "base/memory/ref_counted.h"
-#include "sky/engine/tonic/dart_wrappable.h"
+#include "flutter/tonic/dart_wrappable.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"
 
 class SkMaskFilter;

@@ -6,13 +6,13 @@
 
 #include "sky/engine/core/painting/Canvas.h"
 
+#include "flutter/tonic/dart_args.h"
+#include "flutter/tonic/dart_binding_macros.h"
+#include "flutter/tonic/dart_converter.h"
+#include "flutter/tonic/dart_library_natives.h"
 #include "sky/engine/core/painting/CanvasImage.h"
 #include "sky/engine/core/painting/Matrix.h"
 #include "sky/engine/core/text/Paragraph.h"
-#include "sky/engine/tonic/dart_args.h"
-#include "sky/engine/tonic/dart_binding_macros.h"
-#include "sky/engine/tonic/dart_converter.h"
-#include "sky/engine/tonic/dart_library_natives.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 

@@ -6,17 +6,17 @@
 #define SKY_ENGINE_CORE_PAINTING_CANVAS_H_
 
 #include "base/memory/ref_counted.h"
+#include "flutter/tonic/dart_wrappable.h"
+#include "flutter/tonic/float64_list.h"
 #include "sky/engine/core/painting/CanvasPath.h"
 #include "sky/engine/core/painting/Offset.h"
 #include "sky/engine/core/painting/Paint.h"
 #include "sky/engine/core/painting/Picture.h"
 #include "sky/engine/core/painting/PictureRecorder.h"
 #include "sky/engine/core/painting/Point.h"
-#include "sky/engine/core/painting/Rect.h"
 #include "sky/engine/core/painting/RRect.h"
 #include "sky/engine/core/painting/RSTransform.h"
-#include "sky/engine/tonic/dart_wrappable.h"
-#include "sky/engine/tonic/float64_list.h"
+#include "sky/engine/core/painting/Rect.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
 namespace blink {

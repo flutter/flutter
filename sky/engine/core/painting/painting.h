@@ -5,7 +5,7 @@
 #ifndef SKY_ENGINE_CORE_PAINTING_PAINTING_H_
 #define SKY_ENGINE_CORE_PAINTING_PAINTING_H_
 
-#include "sky/engine/tonic/dart_library_natives.h"
+#include "flutter/tonic/dart_library_natives.h"
 
 namespace blink {
 

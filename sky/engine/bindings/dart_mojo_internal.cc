@@ -5,9 +5,9 @@
 #include "sky/engine/bindings/dart_mojo_internal.h"
 
 #include "dart/runtime/include/dart_api.h"
+#include "flutter/tonic/dart_converter.h"
+#include "flutter/tonic/dart_error.h"
 #include "mojo/public/platform/dart/mojo_natives.h"
-#include "sky/engine/tonic/dart_converter.h"
-#include "sky/engine/tonic/dart_error.h"
 
 namespace blink {
 namespace {

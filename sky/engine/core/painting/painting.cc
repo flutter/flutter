@@ -7,14 +7,14 @@
 #include "base/bind.h"
 #include "base/logging.h"
 #include "base/trace_event/trace_event.h"
+#include "flutter/tonic/dart_invoke.h"
+#include "flutter/tonic/dart_persistent_value.h"
+#include "flutter/tonic/mojo_converter.h"
+#include "flutter/tonic/uint8_list.h"
 #include "sky/engine/core/painting/CanvasImage.h"
 #include "sky/engine/platform/SharedBuffer.h"
 #include "sky/engine/platform/image-decoders/ImageDecoder.h"
 #include "sky/engine/platform/mojo/data_pipe.h"
-#include "sky/engine/tonic/dart_invoke.h"
-#include "sky/engine/tonic/dart_persistent_value.h"
-#include "sky/engine/tonic/mojo_converter.h"
-#include "sky/engine/tonic/uint8_list.h"
 
 namespace blink {
 namespace {

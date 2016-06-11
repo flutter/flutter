@@ -5,10 +5,10 @@
 #include "sky/engine/core/script/dart_init.h"
 
 #include <dlfcn.h>
+#include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <fcntl.h>
 
 #include "base/bind.h"
 #include "base/command_line.h"
@@ -20,6 +20,18 @@
 #include "base/trace_event/trace_event.h"
 #include "dart/runtime/bin/embedded_dart_io.h"
 #include "dart/runtime/include/dart_mirrors_api.h"
+#include "flutter/tonic/dart_api_scope.h"
+#include "flutter/tonic/dart_class_library.h"
+#include "flutter/tonic/dart_dependency_catcher.h"
+#include "flutter/tonic/dart_error.h"
+#include "flutter/tonic/dart_invoke.h"
+#include "flutter/tonic/dart_io.h"
+#include "flutter/tonic/dart_isolate_scope.h"
+#include "flutter/tonic/dart_library_loader.h"
+#include "flutter/tonic/dart_snapshot_loader.h"
+#include "flutter/tonic/dart_state.h"
+#include "flutter/tonic/dart_wrappable.h"
+#include "flutter/tonic/uint8_list.h"
 #include "mojo/public/platform/dart/dart_handle_watcher.h"
 #include "services/asset_bundle/zip_asset_bundle.h"
 #include "sky/engine/bindings/dart_mojo_internal.h"
@@ -28,21 +40,9 @@
 #include "sky/engine/core/script/dart_debugger.h"
 #include "sky/engine/core/script/dart_service_isolate.h"
 #include "sky/engine/core/script/ui_dart_state.h"
-#include "sky/engine/public/platform/sky_settings.h"
-#include "sky/engine/tonic/dart_api_scope.h"
-#include "sky/engine/tonic/dart_class_library.h"
-#include "sky/engine/tonic/dart_dependency_catcher.h"
-#include "sky/engine/tonic/dart_error.h"
-#include "sky/engine/tonic/dart_invoke.h"
-#include "sky/engine/tonic/dart_io.h"
-#include "sky/engine/tonic/dart_isolate_scope.h"
-#include "sky/engine/tonic/dart_library_loader.h"
-#include "sky/engine/tonic/dart_snapshot_loader.h"
-#include "sky/engine/tonic/dart_state.h"
-#include "sky/engine/tonic/dart_wrappable.h"
-#include "sky/engine/tonic/uint8_list.h"
-#include "sky/engine/wtf/MakeUnique.h"
 #include "sky/engine/core/start_up.h"
+#include "sky/engine/public/platform/sky_settings.h"
+#include "sky/engine/wtf/MakeUnique.h"
 
 #ifdef OS_ANDROID
 #include "sky/engine/bindings/jni/dart_jni.h"

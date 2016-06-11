@@ -23,9 +23,10 @@ mojo_native_application("mojo") {
   ]
 
   deps = [
+    "//flutter/tonic",
     "//mojo/application",
-    "//mojo/common",
     "//mojo/common:tracing_impl",
+    "//mojo/common",
     "//mojo/converters/geometry",
     "//mojo/icu",
     "//mojo/public/cpp/bindings",
@@ -41,7 +42,6 @@ mojo_native_application("mojo") {
     "//services/asset_bundle:lib",
     "//skia",
     "//sky/engine/public/sky",
-    "//sky/engine/tonic",
     "//sky/engine/web",
     "//sky/services/raw_keyboard:interfaces",
     "//sky/shell:common",

@@ -6,8 +6,8 @@
 #define SKY_SHELL_DART_DART_LIBRARY_PROVIDER_FILES_H_
 
 #include "base/files/file_path.h"
-#include "sky/engine/tonic/dart_library_provider.h"
-#include "sky/engine/tonic/parsers/packages_map.h"
+#include "flutter/tonic/dart_library_provider.h"
+#include "flutter/tonic/parsers/packages_map.h"
 
 namespace sky {
 namespace shell {

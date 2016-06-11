@@ -5,6 +5,10 @@
 #include "sky/engine/core/text/ParagraphBuilder.h"
 
 #include "base/location.h"
+#include "flutter/tonic/dart_args.h"
+#include "flutter/tonic/dart_binding_macros.h"
+#include "flutter/tonic/dart_converter.h"
+#include "flutter/tonic/dart_library_natives.h"
 #include "sky/engine/core/painting/Rect.h"
 #include "sky/engine/core/rendering/PaintInfo.h"
 #include "sky/engine/core/rendering/RenderText.h"
@@ -13,10 +17,6 @@
 #include "sky/engine/platform/graphics/GraphicsContext.h"
 #include "sky/engine/platform/text/TextBoundaries.h"
 #include "sky/engine/public/platform/Platform.h"
-#include "sky/engine/tonic/dart_args.h"
-#include "sky/engine/tonic/dart_binding_macros.h"
-#include "sky/engine/tonic/dart_converter.h"
-#include "sky/engine/tonic/dart_library_natives.h"
 
 namespace blink {
 

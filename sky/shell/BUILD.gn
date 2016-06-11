@@ -47,11 +47,12 @@ source_set("common") {
 
   public_deps = [
     ":generate_sky_embedder_diagnostic_server_resources_cc",
-    "//base",
     "//base:i18n",
+    "//base",
     "//build/config/sanitizers:deps",
     "//dart/runtime:libdart",
     "//flow",
+    "//flutter/tonic",
     "//mojo/common",
     "//mojo/data_pipe_utils",
     "//mojo/message_pump",
@@ -66,7 +67,6 @@ source_set("common") {
     "//sky/engine",
     "//sky/engine/bindings",
     "//sky/engine/core:core",
-    "//sky/engine/tonic",
     "//sky/engine/wtf",
     "//sky/services/editing:interfaces",
     "//sky/services/engine:interfaces",

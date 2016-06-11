@@ -6,8 +6,8 @@
 #define SKY_ENGINE_CORE_PAINTING_PICTURERECORDER_H_
 
 #include "base/memory/ref_counted.h"
+#include "flutter/tonic/dart_wrappable.h"
 #include "sky/engine/core/painting/Rect.h"
-#include "sky/engine/tonic/dart_wrappable.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 
 namespace blink {

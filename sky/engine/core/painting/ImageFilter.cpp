@@ -4,10 +4,10 @@
 
 #include "sky/engine/core/painting/ImageFilter.h"
 
-#include "sky/engine/tonic/dart_args.h"
-#include "sky/engine/tonic/dart_binding_macros.h"
-#include "sky/engine/tonic/dart_converter.h"
-#include "sky/engine/tonic/dart_library_natives.h"
+#include "flutter/tonic/dart_args.h"
+#include "flutter/tonic/dart_binding_macros.h"
+#include "flutter/tonic/dart_converter.h"
+#include "flutter/tonic/dart_library_natives.h"
 #include "third_party/skia/include/effects/SkBlurImageFilter.h"
 #include "third_party/skia/include/effects/SkImageSource.h"
 #include "third_party/skia/include/effects/SkPictureImageFilter.h"

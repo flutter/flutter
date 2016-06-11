@@ -6,10 +6,10 @@
 
 #include "base/logging.h"
 #include "dart/runtime/include/dart_api.h"
+#include "flutter/tonic/dart_converter.h"
+#include "flutter/tonic/dart_error.h"
+#include "flutter/tonic/dart_library_natives.h"
 #include "sky/engine/core/script/embedder_resources.h"
-#include "sky/engine/tonic/dart_converter.h"
-#include "sky/engine/tonic/dart_error.h"
-#include "sky/engine/tonic/dart_library_natives.h"
 
 #define RETURN_ERROR_HANDLE(handle)                             \
   if (Dart_IsError(handle)) {                                   \

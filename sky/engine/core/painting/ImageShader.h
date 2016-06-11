@@ -5,14 +5,14 @@
 #ifndef SKY_ENGINE_CORE_PAINTING_IMAGESHADER_H_
 #define SKY_ENGINE_CORE_PAINTING_IMAGESHADER_H_
 
+#include "flutter/tonic/dart_wrappable.h"
+#include "flutter/tonic/float64_list.h"
 #include "sky/engine/core/painting/CanvasGradient.h"
 #include "sky/engine/core/painting/CanvasImage.h"
-#include "sky/engine/core/painting/Shader.h"
-#include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/core/painting/Matrix.h"
-#include "sky/engine/tonic/float64_list.h"
-#include "third_party/skia/include/core/SkShader.h"
+#include "sky/engine/core/painting/Shader.h"
 #include "third_party/skia/include/core/SkMatrix.h"
+#include "third_party/skia/include/core/SkShader.h"
 
 namespace blink {
 class DartLibraryNatives;

@@ -8,8 +8,8 @@
 #include <string>
 
 #include "dart/runtime/include/dart_api.h"
-#include "sky/engine/tonic/dart_persistent_value.h"
-#include "sky/engine/tonic/dart_state.h"
+#include "flutter/tonic/dart_persistent_value.h"
+#include "flutter/tonic/dart_state.h"
 
 namespace blink {
 

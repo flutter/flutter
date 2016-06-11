@@ -6,9 +6,9 @@
 #define SKY_ENGINE_CORE_PAINTING_IMAGE_FILTER_H_
 
 #include "base/memory/ref_counted.h"
+#include "flutter/tonic/dart_wrappable.h"
 #include "sky/engine/core/painting/CanvasImage.h"
 #include "sky/engine/core/painting/Picture.h"
-#include "sky/engine/tonic/dart_wrappable.h"
 #include "third_party/skia/include/core/SkImageFilter.h"
 
 namespace blink {

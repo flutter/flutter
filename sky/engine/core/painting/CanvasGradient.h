@@ -5,10 +5,10 @@
 #ifndef SKY_ENGINE_CORE_PAINTING_CANVASGRADIENT_H_
 #define SKY_ENGINE_CORE_PAINTING_CANVASGRADIENT_H_
 
+#include "flutter/tonic/dart_wrappable.h"
 #include "sky/engine/core/painting/CanvasColor.h"
 #include "sky/engine/core/painting/Point.h"
 #include "sky/engine/core/painting/Shader.h"
-#include "sky/engine/tonic/dart_wrappable.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 
 namespace blink {

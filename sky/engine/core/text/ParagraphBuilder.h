@@ -5,10 +5,10 @@
 #ifndef SKY_ENGINE_CORE_TEXT_PARAGRAPHBUILDER_H_
 #define SKY_ENGINE_CORE_TEXT_PARAGRAPHBUILDER_H_
 
-#include "sky/engine/core/text/Paragraph.h"
-#include "sky/engine/tonic/dart_wrappable.h"
-#include "sky/engine/tonic/int32_list.h"
 #include "base/memory/ref_counted.h"
+#include "flutter/tonic/dart_wrappable.h"
+#include "flutter/tonic/int32_list.h"
+#include "sky/engine/core/text/Paragraph.h"
 
 namespace blink {
 class DartLibraryNatives;

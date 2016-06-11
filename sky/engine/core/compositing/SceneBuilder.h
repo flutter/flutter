@@ -10,6 +10,8 @@
 
 #include "base/memory/ref_counted.h"
 #include "flow/layers/container_layer.h"
+#include "flutter/tonic/dart_wrappable.h"
+#include "flutter/tonic/float64_list.h"
 #include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/compositing/Scene.h"
 #include "sky/engine/core/painting/CanvasPath.h"
@@ -18,10 +20,8 @@
 #include "sky/engine/core/painting/Paint.h"
 #include "sky/engine/core/painting/Picture.h"
 #include "sky/engine/core/painting/Point.h"
-#include "sky/engine/core/painting/Rect.h"
 #include "sky/engine/core/painting/RRect.h"
-#include "sky/engine/tonic/dart_wrappable.h"
-#include "sky/engine/tonic/float64_list.h"
+#include "sky/engine/core/painting/Rect.h"
 
 namespace blink {
 

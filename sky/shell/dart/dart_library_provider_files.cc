@@ -8,8 +8,8 @@
 #include "base/files/file_util.h"
 #include "base/strings/string_util.h"
 #include "base/threading/worker_pool.h"
+#include "flutter/tonic/dart_converter.h"
 #include "mojo/data_pipe_utils/data_pipe_utils.h"
-#include "sky/engine/tonic/dart_converter.h"
 
 namespace sky {
 namespace shell {

@@ -6,9 +6,9 @@
 #define SKY_ENGINE_CORE_PAINTING_COLORFILTER_H_
 
 #include "base/memory/ref_counted.h"
+#include "flutter/tonic/dart_wrappable.h"
 #include "sky/engine/core/painting/CanvasColor.h"
 #include "sky/engine/core/painting/TransferMode.h"
-#include "sky/engine/tonic/dart_wrappable.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 
 namespace blink {

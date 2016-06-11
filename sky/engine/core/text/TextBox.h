@@ -6,8 +6,8 @@
 #define SKY_ENGINE_CORE_TEXT_TEXT_BOX_H_
 
 #include "dart/runtime/include/dart_api.h"
+#include "flutter/tonic/dart_converter.h"
 #include "sky/engine/platform/text/TextDirection.h"
-#include "sky/engine/tonic/dart_converter.h"
 #include "third_party/skia/include/core/SkRect.h"
 
 namespace blink {

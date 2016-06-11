@@ -10,8 +10,8 @@
 #include "base/android/jni_android.h"
 #include "base/android/jni_utils.h"
 #include "base/memory/ref_counted.h"
-#include "sky/engine/tonic/dart_library_natives.h"
-#include "sky/engine/tonic/dart_wrappable.h"
+#include "flutter/tonic/dart_library_natives.h"
+#include "flutter/tonic/dart_wrappable.h"
 
 #define ENTER_JNI()                                                            \
   JNIEnv* env = base::android::AttachCurrentThread();                          \

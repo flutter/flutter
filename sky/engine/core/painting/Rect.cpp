@@ -5,9 +5,9 @@
 #include "sky/engine/core/painting/Rect.h"
 
 #include "base/logging.h"
+#include "flutter/tonic/dart_class_library.h"
+#include "flutter/tonic/dart_error.h"
 #include "sky/engine/core/script/ui_dart_state.h"
-#include "sky/engine/tonic/dart_class_library.h"
-#include "sky/engine/tonic/dart_error.h"
 
 namespace blink {
 
