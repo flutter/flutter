@@ -12,7 +12,6 @@
 #include "flow/layers/container_layer.h"
 #include "flutter/tonic/dart_wrappable.h"
 #include "flutter/tonic/float64_list.h"
-#include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/compositing/Scene.h"
 #include "sky/engine/core/painting/CanvasPath.h"
 #include "sky/engine/core/painting/ImageFilter.h"
