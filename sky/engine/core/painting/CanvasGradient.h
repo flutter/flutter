@@ -17,7 +17,7 @@ class DartLibraryNatives;
 template <>
 struct DartConverter<SkShader::TileMode> : public DartConverterInteger<SkShader::TileMode> {};
 
-COMPILE_ASSERT(SkShader::kTileModeCount == 3, Need_to_update_TileMode_enum);
+static_assert(SkShader::kTileModeCount == 3, "Need to update tile mode enum");
 
 class CanvasGradient : public Shader {
   DEFINE_WRAPPERTYPEINFO();

@@ -28,7 +28,7 @@ RSTransform DartConverter<RSTransform>::FromDart(Dart_Handle dart_xform) {
   Dart_TypedDataAcquireData(
       value, &type, reinterpret_cast<void**>(&data), &num_elements);
   DCHECK(!LogIfError(value));
-  ASSERT(type == Dart_TypedData_kFloat32 && num_elements == 4);
+  DCHECK(type == Dart_TypedData_kFloat32 && num_elements == 4);
 
   SkScalar* dest[] = {
     &result.sk_xform.fSCos,

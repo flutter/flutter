@@ -25,7 +25,7 @@ struct DartConverter<TransferMode>
 // If this fails, it's because SkXfermode has changed. We need to change
 // TransferMode.dart to ensure the TransferMode enum is in sync with the C++
 // values.
-COMPILE_ASSERT(SkXfermode::kLastMode == 28, Need_to_update_TransferMode_dart);
+static_assert(SkXfermode::kLastMode == 28, "Need to update transfer mode enum");
 
 } // namespace blink
 

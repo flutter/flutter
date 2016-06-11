@@ -29,7 +29,7 @@ RRect DartConverter<RRect>::FromDart(Dart_Handle dart_rrect) {
   Dart_TypedDataAcquireData(
       value, &type, reinterpret_cast<void**>(&data), &num_elements);
   DCHECK(!LogIfError(value));
-  ASSERT(type == Dart_TypedData_kFloat32 && num_elements == 6);
+  DCHECK(type == Dart_TypedData_kFloat32 && num_elements == 6);
 
   result.sk_rrect.setRectXY(
       SkRect::MakeLTRB(data[0], data[1], data[2], data[3]),

@@ -32,7 +32,7 @@ public:
 
     ~SceneBuilder() override;
 
-    void pushTransform(const Float64List& matrix4, ExceptionState&);
+    void pushTransform(const Float64List& matrix4);
     void pushClipRect(double left, double right, double top, double bottom);
     void pushClipRRect(const RRect& rrect);
     void pushClipPath(const CanvasPath* path);

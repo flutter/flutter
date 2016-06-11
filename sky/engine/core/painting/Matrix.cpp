@@ -13,23 +13,9 @@ static const int kSkMatrixIndexToMatrix4Index[] = {
     3, 7, 15,
 };
 
-SkMatrix toSkMatrix(const Float64List& matrix4, ExceptionState& es)
-{
-    ASSERT(matrix4.data());
-    SkMatrix sk_matrix;
-    if (matrix4.num_elements() != 16) {
-        es.ThrowTypeError("Incorrect number of elements in matrix.");
-        return sk_matrix;
-    }
-
-    for (int i = 0; i < 9; ++i)
-        sk_matrix[i] = matrix4[kSkMatrixIndexToMatrix4Index[i]];
-    return sk_matrix;
-}
-
 SkMatrix toSkMatrix(const Float64List& matrix4)
 {
-    ASSERT(matrix4.data());
+    DCHECK(matrix4.data());
     SkMatrix sk_matrix;
     for (int i = 0; i < 9; ++i) {
         int matrix4_index = kSkMatrixIndexToMatrix4Index[i];

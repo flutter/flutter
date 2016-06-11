@@ -6,7 +6,6 @@
 #define SKY_ENGINE_CORE_PAINTING_CANVAS_H_
 
 #include "base/memory/ref_counted.h"
-#include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/painting/CanvasPath.h"
 #include "sky/engine/core/painting/Offset.h"
 #include "sky/engine/core/painting/Paint.h"

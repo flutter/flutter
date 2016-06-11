@@ -5,7 +5,6 @@
 #ifndef SKY_ENGINE_CORE_PAINTING_IMAGESHADER_H_
 #define SKY_ENGINE_CORE_PAINTING_IMAGESHADER_H_
 
-#include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/painting/CanvasGradient.h"
 #include "sky/engine/core/painting/CanvasImage.h"
 #include "sky/engine/core/painting/Shader.h"
@@ -27,8 +26,7 @@ class ImageShader : public Shader {
   void initWithImage(CanvasImage* image,
                      SkShader::TileMode tmx,
                      SkShader::TileMode tmy,
-                     const Float64List& matrix4,
-                     ExceptionState& es);
+                     const Float64List& matrix4);
 
   static void RegisterNatives(DartLibraryNatives* natives);
 

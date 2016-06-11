@@ -15,26 +15,17 @@ static void ImageShader_constructor(Dart_NativeArguments args) {
   DartCallConstructor(&ImageShader::create, args);
 }
 
-static void ImageShader_initWithImage(Dart_NativeArguments args) {
-  DartArgIterator it(args);
-  CanvasImage* image = it.GetNext<CanvasImage*>();
-  SkShader::TileMode tmx = it.GetNext<SkShader::TileMode>();
-  SkShader::TileMode tmy = it.GetNext<SkShader::TileMode>();
-  Float64List matrix4 = it.GetNext<Float64List>();
-  if (it.had_exception())
-    return;
-  ExceptionState es;
-  GetReceiver<ImageShader>(args)->initWithImage(image, tmx, tmy, matrix4, es);
-  if (es.had_exception())
-    Dart_ThrowException(es.GetDartException(args, true));
-}
-
 IMPLEMENT_WRAPPERTYPEINFO(ui, ImageShader);
+
+#define FOR_EACH_BINDING(V) \
+  V(ImageShader, initWithImage)
+
+FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
 void ImageShader::RegisterNatives(DartLibraryNatives* natives) {
   natives->Register({
     { "ImageShader_constructor", ImageShader_constructor, 1, true },
-    { "ImageShader_initWithImage", ImageShader_initWithImage, 5, true },
+FOR_EACH_BINDING(DART_REGISTER_NATIVE)
   });
 }
 
@@ -45,14 +36,9 @@ scoped_refptr<ImageShader> ImageShader::create() {
 void ImageShader::initWithImage(CanvasImage* image,
                                 SkShader::TileMode tmx,
                                 SkShader::TileMode tmy,
-                                const Float64List& matrix4,
-                                ExceptionState& es) {
-  ASSERT(image != NULL);
-
-  SkMatrix sk_matrix = toSkMatrix(matrix4, es);
-  if (es.had_exception())
-      return;
-
+                                const Float64List& matrix4) {
+  DCHECK(image != NULL);
+  SkMatrix sk_matrix = toSkMatrix(matrix4);
   SkBitmap bitmap;
   image->image()->asLegacyBitmap(&bitmap, SkImage::kRO_LegacyBitmapMode);
 

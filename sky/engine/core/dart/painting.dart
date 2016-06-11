@@ -380,6 +380,8 @@ class ImageShader extends Shader {
       throw new ArgumentError("[tmy] argument cannot be null");
     if (matrix4 == null)
       throw new ArgumentError("[matrix4] argument cannot be null");
+    if (matrix4.length != 16)
+      throw new ArgumentError("[matrix4] must have 16 entries.");
     _constructor();
     _initWithImage(image, tmx.index, tmy.index, matrix4);
   }

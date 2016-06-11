@@ -21,7 +21,7 @@ DART_BIND_ALL(Picture, FOR_EACH_BINDING)
 
 scoped_refptr<Picture> Picture::create(sk_sp<SkPicture> skPicture)
 {
-    ASSERT(skPicture);
+    DCHECK(skPicture);
     return new Picture(skPicture);
 }
 

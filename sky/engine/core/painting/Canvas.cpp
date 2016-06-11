@@ -9,7 +9,6 @@
 #include "sky/engine/core/painting/CanvasImage.h"
 #include "sky/engine/core/painting/Matrix.h"
 #include "sky/engine/core/text/Paragraph.h"
-#include "sky/engine/platform/geometry/IntRect.h"
 #include "sky/engine/tonic/dart_args.h"
 #include "sky/engine/tonic/dart_binding_macros.h"
 #include "sky/engine/tonic/dart_converter.h"
@@ -71,8 +70,8 @@ scoped_refptr<Canvas> Canvas::create(PictureRecorder* recorder,
                                      double top,
                                      double right,
                                      double bottom) {
-    ASSERT(recorder);
-    ASSERT(!recorder->isRecording());
+    DCHECK(recorder);
+    DCHECK(!recorder->isRecording());
     scoped_refptr<Canvas> canvas = new Canvas(recorder->beginRecording(
         SkRect::MakeLTRB(left, top, right, bottom)));
     recorder->set_canvas(canvas.get());
@@ -262,14 +261,14 @@ void Canvas::drawPath(const CanvasPath* path, const Paint& paint)
 {
     if (!m_canvas)
         return;
-    ASSERT(path);
+    DCHECK(path);
     m_canvas->drawPath(path->path(), paint.sk_paint);
 }
 
 void Canvas::drawImage(const CanvasImage* image, double x, double y, const Paint& paint) {
     if (!m_canvas)
         return;
-    ASSERT(image);
+    DCHECK(image);
     m_canvas->drawImage(image->image(), x, y, paint.paint());
 }
 
@@ -285,7 +284,7 @@ void Canvas::drawImageRect(const CanvasImage* image,
                            const Paint& paint) {
     if (!m_canvas)
         return;
-    ASSERT(image);
+    DCHECK(image);
     m_canvas->drawImageRect(image->image(),
                             SkRect::MakeLTRB(srcLeft, srcTop, srcRight, srcBottom),
                             SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom),
@@ -305,7 +304,7 @@ void Canvas::drawImageNine(const CanvasImage* image,
                            const Paint& paint) {
     if (!m_canvas)
         return;
-    ASSERT(image);
+    DCHECK(image);
     SkRect center = SkRect::MakeLTRB(centerLeft, centerTop, centerRight, centerBottom);
     SkIRect icenter;
     center.round(&icenter);
@@ -319,14 +318,14 @@ void Canvas::drawPicture(Picture* picture)
 {
     if (!m_canvas)
         return;
-    ASSERT(picture);
+    DCHECK(picture);
     m_canvas->drawPicture(picture->toSkia().get());
 }
 
 void Canvas::drawParagraph(Paragraph* paragraph, double x, double y) {
     if (!m_canvas)
         return;
-    ASSERT(paragraph);
+    DCHECK(paragraph);
     paragraph->paint(this, x, y);
 }
 

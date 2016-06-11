@@ -5,15 +5,10 @@
 #ifndef SKY_ENGINE_CORE_PAINTING_MATRIX_H_
 #define SKY_ENGINE_CORE_PAINTING_MATRIX_H_
 
-#include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/tonic/float64_list.h"
 #include "third_party/skia/include/core/SkMatrix.h"
 
 namespace blink {
-
-// TODO(abarth): Remove this version of toSkMatrix and do the error checking
-// inside the VM.
-SkMatrix toSkMatrix(const Float64List& matrix4, ExceptionState& es);
 
 SkMatrix toSkMatrix(const Float64List& matrix4);
 Float64List toMatrix4(const SkMatrix& sk_matrix);

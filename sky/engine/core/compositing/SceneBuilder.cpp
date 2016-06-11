@@ -30,20 +30,10 @@ static void SceneBuilder_constructor(Dart_NativeArguments args) {
   DartCallConstructor(&SceneBuilder::create, args);
 }
 
-static void SceneBuilder_pushTransform(Dart_NativeArguments args) {
-  DartArgIterator it(args);
-  Float64List matrix4 = it.GetNext<Float64List>();
-  if (it.had_exception())
-    return;
-  ExceptionState es;
-  GetReceiver<SceneBuilder>(args)->pushTransform(matrix4, es);
-  if (es.had_exception())
-    Dart_ThrowException(es.GetDartException(args, true));
-}
-
 IMPLEMENT_WRAPPERTYPEINFO(ui, SceneBuilder);
 
 #define FOR_EACH_BINDING(V) \
+  V(SceneBuilder, pushTransform) \
   V(SceneBuilder, pushClipRect) \
   V(SceneBuilder, pushClipRRect) \
   V(SceneBuilder, pushClipPath) \
@@ -63,7 +53,6 @@ FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 void SceneBuilder::RegisterNatives(DartLibraryNatives* natives) {
   natives->Register({
     { "SceneBuilder_constructor", SceneBuilder_constructor, 1, true },
-    { "SceneBuilder_pushTransform", SceneBuilder_pushTransform, 2, true },
 FOR_EACH_BINDING(DART_REGISTER_NATIVE)
   });
 }
@@ -78,11 +67,9 @@ SceneBuilder::~SceneBuilder()
 {
 }
 
-void SceneBuilder::pushTransform(const Float64List& matrix4, ExceptionState& es)
+void SceneBuilder::pushTransform(const Float64List& matrix4)
 {
-    SkMatrix sk_matrix = toSkMatrix(matrix4, es);
-    if (es.had_exception())
-        return;
+    SkMatrix sk_matrix = toSkMatrix(matrix4);
     std::unique_ptr<flow::TransformLayer> layer(new flow::TransformLayer());
     layer->set_transform(sk_matrix);
     addLayer(std::move(layer));

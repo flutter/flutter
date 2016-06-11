@@ -40,8 +40,8 @@ void CanvasGradient::initLinear(const std::vector<Point>& end_points,
                                 const std::vector<CanvasColor>& colors,
                                 const std::vector<float>& color_stops,
                                 SkShader::TileMode tile_mode) {
-  ASSERT(end_points.size() == 2);
-  ASSERT(colors.size() == color_stops.size() || color_stops.data() == nullptr);
+  DCHECK(end_points.size() == 2);
+  DCHECK(colors.size() == color_stops.size() || color_stops.data() == nullptr);
   SkPoint sk_end_points[2];
   for (int i = 0; i < 2; ++i)
     sk_end_points[i] = end_points[i].sk_point;
@@ -61,7 +61,7 @@ void CanvasGradient::initRadial(const Point& center,
                                 const std::vector<CanvasColor>& colors,
                                 const std::vector<float>& color_stops,
                                 SkShader::TileMode tile_mode) {
-  ASSERT(colors.size() == color_stops.size() || color_stops.data() == nullptr);
+  DCHECK(colors.size() == color_stops.size() || color_stops.data() == nullptr);
 
   std::vector<SkColor> sk_colors;
   sk_colors.reserve(colors.size());
