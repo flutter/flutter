@@ -7,7 +7,6 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart';
