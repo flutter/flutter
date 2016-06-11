@@ -128,15 +128,25 @@ class Path extends NativeFieldWrapperClass2 {
   ///
   /// The line segment added if [forceMoveTo] is false starts at the
   /// current point and ends at the start of the arc.
-  void arcTo(Rect rect, double startAngle, double sweepAngle, bool forceMoveTo) native "Path_arcTo";
+  void arcTo(Rect rect, double startAngle, double sweepAngle, bool forceMoveTo) {
+    _arcTo(rect.left, rect.top, rect.right, rect.bottom, startAngle, sweepAngle, forceMoveTo);
+  }
+  void _arcTo(double left, double top, double right, double bottom,
+              double startAngle, double sweepAngle, bool forceMoveTo) native "Path_arcTo";
 
   /// Adds a new subpath that consists of four lines that outline the
   /// given rectangle.
-  void addRect(Rect rect) native "Path_addRect";
+  void addRect(Rect rect) {
+    _addRect(rect.left, rect.top, rect.right, rect.bottom);
+  }
+  void _addRect(double left, double top, double right, double bottom) native "Path_addRect";
 
   /// Adds a new subpath that consists of a curve that forms the
   /// ellipse that fills the given rectangle.
-  void addOval(Rect oval) native "Path_addOval";
+  void addOval(Rect oval) {
+    _addOval(oval.left, oval.top, oval.right, oval.bottom);
+  }
+  void _addOval(double left, double top, double right, double bottom) native "Path_addOval";
 
   /// Adds a new subpath with one arc segment that consists of the arc
   /// that follows the edge of the oval bounded by the given
@@ -146,7 +156,11 @@ class Path extends NativeFieldWrapperClass2 {
   /// crosses the horizontal line that intersects the center of the
   /// rectangle and with positive angles going clockwise around the
   /// oval.
-  void addArc(Rect oval, double startAngle, double sweepAngle) native "Path_addArc";
+  void addArc(Rect oval, double startAngle, double sweepAngle) {
+    _addArc(oval.left, oval.top, oval.right, oval.bottom, startAngle, sweepAngle);
+  }
+  void _addArc(double left, double top, double right, double bottom,
+               double startAngle, double sweepAngle) native "Path_addArc";
 
   /// Adds a new subpath that consists of the straight lines and
   /// curves needed to form the rounded rectangle described by the
@@ -167,11 +181,13 @@ class Path extends NativeFieldWrapperClass2 {
   /// path was used with [Canvas.clipPath].)
   ///
   /// Returns true if the point is in the path, and false otherwise.
-  bool contains(Point position) native "Path_contains";
+  bool contains(Point position) => _contains(position.x, position.y);
+  bool _contains(double x, double y) native "Path_contains";
 
   /// Returns a copy of the path with all the segments of every
   /// subpath translated by the given offset.
-  Path shift(Offset offset) native "Path_shift";
+  Path shift(Offset offset) => _shift(offset.dx, offset.dy);
+  Path _shift(double dx, double dy) native "Path_shift";
 }
 
 /// Styles to use for blurs in [MaskFilter] objects.
@@ -263,9 +279,9 @@ class ColorFilter extends NativeFieldWrapperClass2 {
   /// to the [Paint.transferMode], using the output of this filter as the source
   /// and the background as the destination.
   ColorFilter.mode(Color color, TransferMode transferMode) {
-    _constructor(color, transferMode);
+    _constructor(color.value, transferMode.index);
   }
-  void _constructor(Color color, TransferMode transferMode) native "ColorFilter_constructor";
+  void _constructor(int color, int transferMode) native "ColorFilter_constructor";
 }
 
 /// A filter operation to apply to a raster image.
@@ -703,59 +719,108 @@ class Canvas extends NativeFieldWrapperClass2 {
                     TransferMode transferMode,
                     List<int> indicies,
                     Paint paint) {
-    int vertexCount = vertices.length;
+    final int vertexCount = vertices.length;
+
     if (textureCoordinates.isNotEmpty && textureCoordinates.length != vertexCount)
       throw new ArgumentError("[vertices] and [textureCoordinates] lengths must match");
     if (colors.isNotEmpty && colors.length != vertexCount)
       throw new ArgumentError("[vertices] and [colors] lengths must match");
-    for (Point point in vertices) {
-      if (point == null)
-        throw new ArgumentError("[vertices] cannot contain a null");
+
+    final Float32List vertexBuffer = new Float32List(vertexCount * 2);
+    for (int i = 0; i < vertexCount; ++i) {
+      final int xIndex = i * 2;
+      final int yIndex = xIndex + 1;
+      final Point vertex = vertices[i];
+      vertexBuffer[xIndex] = vertex.x;
+      vertexBuffer[yIndex] = vertex.y;
     }
-    for (Point point in textureCoordinates) {
-      if (point == null)
-        throw new ArgumentError("[textureCoordinates] cannot contain a null");
+
+    Float32List textureCoordinateBuffer;
+    if (textureCoordinates.isNotEmpty) {
+      textureCoordinateBuffer = new Float32List(vertexCount * 2);
+      for (int i = 0; i < vertexCount; ++i) {
+        final int xIndex = i * 2;
+        final int yIndex = xIndex + 1;
+        final Point textureCoordinate = textureCoordinates[i];
+        textureCoordinateBuffer[xIndex] = textureCoordinate.x;
+        textureCoordinateBuffer[yIndex] = textureCoordinate.y;
+      }
     }
-    _drawVertices(vertexMode.index, vertices, textureCoordinates, colors, transferMode, indicies, paint);
+
+    Int32List colorBuffer;
+    if (colors.isNotEmpty) {
+      colorBuffer = new Int32List(vertexCount);
+      for (int i = 0; i < vertexCount; ++i)
+        colorBuffer[i] = colors[i].value;
+    }
+
+    final Int32List indexBuffer = new Int32List.fromList(indicies);
+
+    _drawVertices(
+      vertexMode.index, vertexBuffer, textureCoordinateBuffer, colorBuffer,
+      transferMode.index, indexBuffer, paint
+    );
   }
-  // TODO(abarth): Convert to primitives.
   void _drawVertices(int vertexMode,
-                     List<Point> vertices,
-                     List<Point> textureCoordinates,
-                     List<Color> colors,
-                     TransferMode transferMode,
-                     List<int> indicies,
+                     Float32List vertices,
+                     Float32List textureCoordinates,
+                     Int32List colors,
+                     int transferMode,
+                     Int32List indicies,
                      Paint paint) native "Canvas_drawVertices";
 
-  void drawAtlas(Image image,
+  // TODO(eseidel): Paint should be optional, but optional doesn't work.
+  void drawAtlas(Image atlas,
                  List<RSTransform> transforms,
                  List<Rect> rects,
                  List<Color> colors,
-                 TransferMode mode,
+                 TransferMode transferMode,
                  Rect cullRect,
                  Paint paint) {
-    if (transforms.length != rects.length)
+    final int rectCount = rects.length;
+
+    if (transforms.length != rectCount)
       throw new ArgumentError("[transforms] and [rects] lengths must match");
-    if (colors.isNotEmpty && colors.length != rects.length)
+    if (colors.isNotEmpty && colors.length != rectCount)
       throw new ArgumentError("if supplied, [colors] length must match that of [transforms] and [rects]");
-    for (RSTransform transform in transforms) {
-      if (transform == null)
-        throw new ArgumentError("[transforms] cannot contain a null");
+
+    final Float32List rstTransformBuffer = new Float32List(rectCount);
+    final Float32List rectBuffer = new Float32List(rectCount);
+
+    for (int i = 0; i < rectCount; ++i) {
+      final int index0 = i * 4;
+      final int index1 = index0 + 1;
+      final int index2 = index0 + 2;
+      final int index3 = index0 + 3;
+      final RSTransform rstTransform = transforms[i];
+      final Rect rect = rects[i];
+      rstTransformBuffer[index0] = rstTransform.scos;
+      rstTransformBuffer[index1] = rstTransform.ssin;
+      rstTransformBuffer[index2] = rstTransform.tx;
+      rstTransformBuffer[index3] = rstTransform.ty;
+      rectBuffer[index0] = rect.left;
+      rectBuffer[index1] = rect.top;
+      rectBuffer[index2] = rect.right;
+      rectBuffer[index3] = rect.bottom;
     }
-    for (Rect rect in rects) {
-      if (rect == null)
-        throw new ArgumentError("[rects] cannot contain a null");
+
+    Int32List colorBuffer;
+    if (colors.isNotEmpty) {
+      colorBuffer = new Int32List(rectCount);
+      for (int i = 0; i < rectCount; ++i)
+        colorBuffer[i] = colors[i].value;
     }
-    _drawAtlas(image, transforms, rects, colors, mode, cullRect, paint);
+
+    final Float32List cullRectBuffer = cullRect?._value;
+
+    _drawAtlas(atlas, rstTransformBuffer, rectBuffer, colorBuffer, transferMode.index, cullRectBuffer, paint);
   }
-  // TODO(abarth): Convert to primitives.
-  void _drawAtlas(Image image,
-                  List<RSTransform> transforms,
-                  List<Rect> rects,
-                  List<Color> colors,
-                  TransferMode mode,
-                  Rect cullRect,
-                  // TODO(eseidel): Paint should be optional, but optional doesn't work.
+  void _drawAtlas(Image atlas,
+                  Float32List rstTransforms,
+                  Float32List rects,
+                  Int32List colors,
+                  int transferMode,
+                  Float32List cullRect,
                   Paint paint) native "Canvas_drawAtlas";
 }
 

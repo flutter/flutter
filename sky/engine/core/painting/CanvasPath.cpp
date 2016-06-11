@@ -57,9 +57,9 @@ CanvasPath::~CanvasPath()
 {
 }
 
-scoped_refptr<CanvasPath> CanvasPath::shift(const Offset& offset) {
+scoped_refptr<CanvasPath> CanvasPath::shift(double dx, double dy) {
   scoped_refptr<CanvasPath> path = CanvasPath::create();
-  m_path.offset(offset.sk_size.width(), offset.sk_size.height(), &path->m_path);
+  m_path.offset(dx, dy, &path->m_path);
   return std::move(path);
 }
 

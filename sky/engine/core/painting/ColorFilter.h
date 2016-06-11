@@ -7,8 +7,6 @@
 
 #include "base/memory/ref_counted.h"
 #include "flutter/tonic/dart_wrappable.h"
-#include "sky/engine/core/painting/CanvasColor.h"
-#include "sky/engine/core/painting/TransferMode.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 
 namespace blink {
@@ -18,8 +16,7 @@ class ColorFilter : public base::RefCountedThreadSafe<ColorFilter>, public DartW
   DEFINE_WRAPPERTYPEINFO();
  public:
   ~ColorFilter() override;
-  static scoped_refptr<ColorFilter> create(CanvasColor color,
-                                           TransferMode transfer_mode);
+  static scoped_refptr<ColorFilter> create(int color, int transfer_mode);
 
   sk_sp<SkColorFilter> filter() { return filter_; }
 

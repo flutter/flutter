@@ -8,7 +8,6 @@
 #include "base/memory/ref_counted.h"
 #include "flutter/tonic/dart_wrappable.h"
 #include "sky/engine/core/painting/Canvas.h"
-#include "sky/engine/core/painting/Offset.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/core/text/TextBox.h"
 
@@ -35,7 +34,7 @@ public:
     void paint(Canvas* canvas, double x, double y);
 
     std::vector<TextBox> getRectsForRange(unsigned start, unsigned end);
-    Dart_Handle getPositionForOffset(const Offset& offset);
+    Dart_Handle getPositionForOffset(double dx, double dy);
     Dart_Handle getWordBoundary(unsigned offset);
 
     RenderView* renderView() const { return m_renderView.get(); }

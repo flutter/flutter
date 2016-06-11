@@ -6,7 +6,6 @@
 #define SKY_ENGINE_CORE_PAINTING_CANVASCOLOR_H_
 
 #include "flutter/tonic/dart_wrappable.h"
-#include "sky/engine/core/painting/Rect.h"
 #include "third_party/skia/include/core/SkColor.h"
 
 namespace blink {

@@ -670,10 +670,10 @@ abstract class Paragraph extends NativeFieldWrapperClass2 {
 
   /// Returns the text position closest to the given offset.
   TextPosition getPositionForOffset(Offset offset) {
-    List<int> encoded = _getPositionForOffset(offset);
+    List<int> encoded = _getPositionForOffset(offset.dx, offset.dy);
     return new TextPosition(offset: encoded[0], affinity: TextAffinity.values[encoded[1]]);
   }
-  List<int> _getPositionForOffset(Offset offset) native "Paragraph_getPositionForOffset";
+  List<int> _getPositionForOffset(double dx, double dy) native "Paragraph_getPositionForOffset";
 
   /// Returns the [start, end] of the word at the given offset. Characters not
   /// part of a word, such as spaces, symbols, and punctuation, have word breaks
@@ -716,4 +716,3 @@ class ParagraphBuilder extends NativeFieldWrapperClass2 {
   Paragraph build(ParagraphStyle style) => _build(style._encoded, style._fontFamily, style._fontSize, style._lineHeight);
   Paragraph _build(Int32List encoded, String fontFamily, double fontSize, double lineHeight) native "ParagraphBuilder_build";
 }
-

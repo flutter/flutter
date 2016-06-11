@@ -23,9 +23,11 @@ void ColorFilter::RegisterNatives(DartLibraryNatives* natives) {
   });
 }
 
-scoped_refptr<ColorFilter> ColorFilter::create(CanvasColor color,
-                                               TransferMode transfer_mode) {
-  return new ColorFilter(SkColorFilter::MakeModeFilter(color, transfer_mode));
+scoped_refptr<ColorFilter> ColorFilter::create(int color,
+                                               int transfer_mode) {
+  return new ColorFilter(SkColorFilter::MakeModeFilter(
+      static_cast<SkColor>(color),
+      static_cast<SkXfermode::Mode>(transfer_mode)));
 }
 
 ColorFilter::ColorFilter(sk_sp<SkColorFilter> filter)

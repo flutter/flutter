@@ -9,7 +9,6 @@
 #include "flutter/tonic/dart_binding_macros.h"
 #include "flutter/tonic/dart_converter.h"
 #include "flutter/tonic/dart_library_natives.h"
-#include "sky/engine/core/painting/Rect.h"
 #include "sky/engine/core/rendering/PaintInfo.h"
 #include "sky/engine/core/rendering/RenderText.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
@@ -146,8 +145,8 @@ int Paragraph::absoluteOffsetForPosition(const PositionWithAffinity& position) {
   return 0;
 }
 
-Dart_Handle Paragraph::getPositionForOffset(const Offset& offset) {
-  LayoutPoint point(offset.sk_size.width(), offset.sk_size.height());
+Dart_Handle Paragraph::getPositionForOffset(double dx, double dy) {
+  LayoutPoint point(dx, dy);
   PositionWithAffinity position = m_renderView->positionForPoint(point);
   Dart_Handle result = Dart_NewList(2);
   Dart_ListSetAt(result, 0, ToDart(absoluteOffsetForPosition(position)));

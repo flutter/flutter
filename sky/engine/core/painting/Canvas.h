@@ -7,16 +7,14 @@
 
 #include "base/memory/ref_counted.h"
 #include "flutter/tonic/dart_wrappable.h"
+#include "flutter/tonic/float32_list.h"
 #include "flutter/tonic/float64_list.h"
+#include "flutter/tonic/int32_list.h"
 #include "sky/engine/core/painting/CanvasPath.h"
-#include "sky/engine/core/painting/Offset.h"
 #include "sky/engine/core/painting/Paint.h"
 #include "sky/engine/core/painting/Picture.h"
 #include "sky/engine/core/painting/PictureRecorder.h"
-#include "sky/engine/core/painting/Point.h"
 #include "sky/engine/core/painting/RRect.h"
-#include "sky/engine/core/painting/RSTransform.h"
-#include "sky/engine/core/painting/Rect.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
 namespace blink {
@@ -104,19 +102,20 @@ public:
     void drawParagraph(Paragraph* paragraph, double x, double y);
 
     void drawVertices(SkCanvas::VertexMode vertexMode,
-        const std::vector<Point>& vertices,
-        const std::vector<Point>& textureCoordinates,
-        const std::vector<CanvasColor>& colors,
-        TransferMode transferMode,
-        const std::vector<int>& indices,
-        const Paint& paint);
+                      const Float32List& vertices,
+                      const Float32List& textureCoordinates,
+                      const Int32List& colors,
+                      int transferMode,
+                      const Int32List& indices,
+                      const Paint& paint);
 
     void drawAtlas(CanvasImage* atlas,
-        const std::vector<RSTransform>& transforms,
-        const std::vector<Rect>& rects,
-        const std::vector<CanvasColor>& colors,
-        TransferMode mode,
-        const Rect& cullRect, const Paint& paint);
+                   const Float32List& transforms,
+                   const Float32List& rects,
+                   const Int32List& colors,
+                   int transferMode,
+                   const Float32List& cullRect,
+                   const Paint& paint);
 
     SkCanvas* skCanvas() { return m_canvas; }
     void clearSkCanvas() { m_canvas = nullptr; }

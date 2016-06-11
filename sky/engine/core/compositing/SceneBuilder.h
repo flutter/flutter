@@ -15,12 +15,10 @@
 #include "sky/engine/core/compositing/Scene.h"
 #include "sky/engine/core/painting/CanvasPath.h"
 #include "sky/engine/core/painting/ImageFilter.h"
-#include "sky/engine/core/painting/Offset.h"
 #include "sky/engine/core/painting/Paint.h"
 #include "sky/engine/core/painting/Picture.h"
-#include "sky/engine/core/painting/Point.h"
 #include "sky/engine/core/painting/RRect.h"
-#include "sky/engine/core/painting/Rect.h"
+#include "sky/engine/core/painting/Shader.h"
 
 namespace blink {
 

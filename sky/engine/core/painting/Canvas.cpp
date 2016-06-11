@@ -329,86 +329,65 @@ void Canvas::drawParagraph(Paragraph* paragraph, double x, double y) {
     paragraph->paint(this, x, y);
 }
 
-void Canvas::drawVertices(SkCanvas::VertexMode vertexMode,
-        const std::vector<Point>& vertices,
-        const std::vector<Point>& textureCoordinates,
-        const std::vector<CanvasColor>& colors,
-        TransferMode transferMode,
-        const std::vector<int>& indices,
-        const Paint& paint)
-{
+void Canvas::drawVertices(
+    SkCanvas::VertexMode vertexMode,
+    const Float32List& vertices,
+    const Float32List& textureCoordinates,
+    const Int32List& colors,
+    int transferMode,
+    const Int32List& indices,
+    const Paint& paint) {
   if (!m_canvas)
     return;
 
-  std::vector<SkPoint> skVertices;
-  skVertices.reserve(vertices.size());
-  for (const Point& point : vertices)
-    skVertices.push_back(point.sk_point);
+  sk_sp<SkXfermode> transferModePtr = SkXfermode::Make(
+    static_cast<SkXfermode::Mode>(transferMode));
 
-  std::vector<SkPoint> skTextureCoordinates;
-  skVertices.reserve(textureCoordinates.size());
-  for (const Point& point : textureCoordinates)
-    skTextureCoordinates.push_back(point.sk_point);
+  std::vector<uint16_t> indices16;
+  indices16.reserve(indices.num_elements());
+  for (int i = 0; i < indices.num_elements(); ++i)
+    indices16.push_back(indices.data()[i]);
 
-  std::vector<SkColor> skColors;
-  skColors.reserve(colors.size());
-  for (const CanvasColor& color : colors)
-    skColors.push_back(color);
-
-  std::vector<uint16_t> skIndices;
-  skIndices.reserve(indices.size());
-  for (uint16_t i : indices)
-    skIndices.push_back(i);
-
-  sk_sp<SkXfermode> transferModePtr = SkXfermode::Make(transferMode);
+  static_assert(sizeof(SkPoint) == sizeof(float) * 2, "SkPoint doesn't use floats.");
 
   m_canvas->drawVertices(
     vertexMode,
-    skVertices.size(),
-    skVertices.data(),
-    skTextureCoordinates.empty() ? nullptr : skTextureCoordinates.data(),
-    skColors.empty() ? nullptr : skColors.data(),
+    vertices.num_elements(),
+    reinterpret_cast<const SkPoint*>(vertices.data()),
+    reinterpret_cast<const SkPoint*>(textureCoordinates.data()),
+    reinterpret_cast<const SkColor*>(colors.data()),
     transferModePtr.get(),
-    skIndices.empty() ? nullptr : skIndices.data(),
-    skIndices.size(),
+    indices16.empty() ? nullptr : indices16.data(),
+    indices16.size(),
     *paint.paint()
   );
 }
 
-void Canvas::drawAtlas(CanvasImage* atlas,
-    const std::vector<RSTransform>& transforms, const std::vector<Rect>& rects,
-    const std::vector<CanvasColor>& colors, TransferMode mode,
-    const Rect& cullRect, const Paint& paint)
-{
+void Canvas::drawAtlas(
+    CanvasImage* atlas,
+    const Float32List& transforms,
+    const Float32List& rects,
+    const Int32List& colors,
+    int transferMode,
+    const Float32List& cullRect,
+    const Paint& paint) {
   if (!m_canvas)
     return;
 
   sk_sp<SkImage> skImage = atlas->image();
 
-  std::vector<SkRSXform> skXForms;
-  skXForms.reserve(transforms.size());
-  for (const RSTransform& transform : transforms)
-    skXForms.push_back(transform.sk_xform);
-
-  std::vector<SkRect> skRects;
-  skRects.reserve(rects.size());
-  for (const Rect& rect : rects)
-    skRects.push_back(rect.sk_rect);
-
-  std::vector<SkColor> skColors;
-  skColors.reserve(colors.size());
-  for (const CanvasColor& color : colors)
-    skColors.push_back(color);
+  static_assert(sizeof(SkRSXform) == sizeof(float) * 4, "SkRSXform doesn't use floats.");
+  static_assert(sizeof(SkRect) == sizeof(float) * 4, "SkRect doesn't use floats.");
 
   m_canvas->drawAtlas(
-      skImage.get(),
-      skXForms.data(),
-      skRects.data(),
-      skColors.empty() ? nullptr : skColors.data(),
-      skXForms.size(),
-      mode,
-      cullRect.is_null ? nullptr : &cullRect.sk_rect,
-      paint.paint()
+    skImage.get(),
+    reinterpret_cast<const SkRSXform*>(transforms.data()),
+    reinterpret_cast<const SkRect*>(rects.data()),
+    reinterpret_cast<const SkColor*>(colors.data()),
+    rects.num_elements(),
+    static_cast<SkXfermode::Mode>(transferMode),
+    reinterpret_cast<const SkRect*>(cullRect.data()),
+    paint.paint()
   );
 }
 

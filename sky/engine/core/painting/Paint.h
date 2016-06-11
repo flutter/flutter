@@ -6,15 +6,9 @@
 #define SKY_ENGINE_CORE_PAINTING_PAINT_H_
 
 #include "flutter/tonic/dart_wrappable.h"
-#include "sky/engine/core/painting/CanvasColor.h"
-#include "sky/engine/core/painting/TransferMode.h"
 #include "third_party/skia/include/core/SkPaint.h"
 
 namespace blink {
-
-class ColorFilter;
-class MaskFilter;
-class Shader;
 
 class Paint {
  public:

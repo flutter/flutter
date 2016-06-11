@@ -9,10 +9,7 @@
 
 #include "base/memory/ref_counted.h"
 #include "flutter/tonic/dart_wrappable.h"
-#include "sky/engine/core/painting/Offset.h"
-#include "sky/engine/core/painting/Point.h"
 #include "sky/engine/core/painting/RRect.h"
-#include "sky/engine/core/painting/Rect.h"
 #include "third_party/skia/include/core/SkPath.h"
 
 // Note: There's a very similar class in ../../platform/graphics/Path.h
@@ -40,31 +37,21 @@ public:
     void relativeCubicTo(float x1, float y1, float x2, float y2, float x3, float y3) { m_path.rCubicTo(x1, y1, x2, y2, x3, y3); }
     void conicTo(float x1, float y1, float x2, float y2, float w) { m_path.conicTo(x1, y1, x2, y2, w); }
     void relativeConicTo(float x1, float y1, float x2, float y2, float w) { m_path.rConicTo(x1, y1, x2, y2, w); }
-    void arcTo(const Rect& rect, float startAngle, float sweepAngle, bool forceMoveTo) {
-        m_path.arcTo(rect.sk_rect, startAngle*180.0/M_PI, sweepAngle*180.0/M_PI, forceMoveTo);
+    void arcTo(float left, float top, float right, float bottom, float startAngle, float sweepAngle, bool forceMoveTo) {
+        m_path.arcTo(SkRect::MakeLTRB(left, top, right, bottom), startAngle*180.0/M_PI, sweepAngle*180.0/M_PI, forceMoveTo);
     }
-    void addRect(const Rect& rect) { m_path.addRect(rect.sk_rect); }
-    void addOval(const Rect& oval) { m_path.addOval(oval.sk_rect); }
-    void addArc(const Rect& rect, float startAngle, float sweepAngle) {
-        m_path.addArc(rect.sk_rect, startAngle*180.0/M_PI, sweepAngle*180.0/M_PI);
+    void addRect(float left, float top, float right, float bottom) { m_path.addRect(SkRect::MakeLTRB(left, top, right, bottom)); }
+    void addOval(float left, float top, float right, float bottom) { m_path.addOval(SkRect::MakeLTRB(left, top, right, bottom)); }
+    void addArc(float left, float top, float right, float bottom, float startAngle, float sweepAngle) {
+        m_path.addArc(SkRect::MakeLTRB(left, top, right, bottom), startAngle*180.0/M_PI, sweepAngle*180.0/M_PI);
     }
     void addRRect(const RRect& rrect) { m_path.addRRect(rrect.sk_rrect); }
-
-    void close()
-    {
-        m_path.close();
-    }
-
-    void reset()
-    {
-        m_path.reset();
-    }
-
-    bool contains(const Point& point) { return m_path.contains(point.sk_point.x(), point.sk_point.y()); }
+    void close() { m_path.close(); }
+    void reset() { m_path.reset(); }
+    bool contains(double x, double y) { return m_path.contains(x, y); }
+    scoped_refptr<CanvasPath> shift(double dx, double dy);
 
     const SkPath& path() const { return m_path; }
-
-    scoped_refptr<CanvasPath> shift(const Offset& offset);
 
     static void RegisterNatives(DartLibraryNatives* natives);
 
