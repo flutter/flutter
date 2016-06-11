@@ -18,10 +18,10 @@ executable("sky_snapshot") {
 
   deps = [
     "//base",
-    "//dart/runtime/vm:libdart_platform",
     "//dart/runtime:libdart",
+    "//dart/runtime/vm:libdart_platform",
+    "//flutter/tonic/parsers",
     "//sky/engine/bindings:snapshot_cc",
-    "//sky/engine/tonic/parsers",
     "//third_party/zlib",
   ]
 

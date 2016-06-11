@@ -11,10 +11,10 @@
 #include "base/files/file_util.h"
 #include "base/logging.h"
 #include "base/strings/string_util.h"
+#include "flutter/tonic/parsers/packages_map.h"
 #include "sky/tools/sky_snapshot/logging.h"
 #include "sky/tools/sky_snapshot/scope.h"
 #include "sky/tools/sky_snapshot/switches.h"
-#include "sky/engine/tonic/parsers/packages_map.h"
 
 namespace {
 
