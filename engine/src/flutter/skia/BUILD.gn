@@ -78,17 +78,6 @@ gypi_skia_opts =
                 "scope",
                 [ "//third_party/skia/gyp/opts.gypi" ])
 
-# The list of Skia files is kept in skia_gn_files.gypi. Read it.
-gypi_values =
-    exec_script("//build/gypi_to_gn.py",
-                [
-                  rebase_path("skia_gn_files.gypi"),
-                  "--replace=<(skia_include_path)=//third_party/skia/include",
-                  "--replace=<(skia_src_path)=//third_party/skia/src",
-                ],
-                "scope",
-                [ "skia_gn_files.gypi" ])
-
 # External-facing config for dependent code.
 config("skia_config") {
   include_dirs = [
@@ -261,43 +250,65 @@ component("skia") {
     "ext/SkDiscardableMemory_chrome.cc",
     "ext/SkDiscardableMemory_chrome.h",
     "ext/SkMemory_new_handler.cpp",
-    "ext/bitmap_platform_device.h",
     "ext/convolver.cc",
     "ext/convolver.h",
     "ext/event_tracer_impl.cc",
     "ext/event_tracer_impl.h",
-    "ext/fontmgr_default_win.cc",
-    "ext/fontmgr_default_win.h",
     "ext/google_logging.cc",
     "ext/image_operations.cc",
     "ext/image_operations.h",
-    "ext/opacity_draw_filter.cc",
-    "ext/opacity_draw_filter.h",
-    "ext/platform_canvas.cc",
-    "ext/platform_canvas.h",
-    "ext/platform_device.cc",
-    "ext/platform_device.h",
-    "ext/platform_device_linux.cc",
-    "ext/platform_device_mac.cc",
-    "ext/platform_device_win.cc",
-    "ext/recursive_gaussian_convolution.cc",
-    "ext/recursive_gaussian_convolution.h",
     "ext/refptr.h",
-    "ext/skia_utils_base.cc",
-    "ext/skia_utils_base.h",
-    "ext/skia_utils_ios.h",
-    "ext/skia_utils_ios.mm",
-    "ext/skia_utils_mac.h",
-    "ext/skia_utils_mac.mm",
-    "ext/skia_utils_win.cc",
-    "ext/skia_utils_win.h",
   ]
 
   # The skia gypi values are relative to the skia_dir, so we need to rebase.
   sources += gypi_skia_core.sources
   sources += gypi_skia_effects.sources
   sources += gypi_skia_utils.sources
-  sources += gypi_values.skia_library_sources
+
+  sources += [
+    "//third_party/skia/src/ports/SkImageGenerator_none.cpp",
+
+    "//third_party/skia/include/images/SkMovie.h",
+    "//third_party/skia/include/ports/SkTypeface_win.h",
+    "//third_party/skia/src/fonts/SkFontMgr_fontconfig.cpp",
+    "//third_party/skia/src/fonts/SkFontMgr_indirect.cpp",
+    "//third_party/skia/src/fonts/SkRemotableFontMgr.cpp",
+    "//third_party/skia/src/ports/SkFontConfigInterface_direct.cpp",
+    "//third_party/skia/src/ports/SkFontConfigInterface_direct_factory.cpp",
+    "//third_party/skia/src/ports/SkFontHost_fontconfig.cpp",
+    "//third_party/skia/src/ports/SkFontHost_FreeType_common.cpp",
+    "//third_party/skia/src/ports/SkFontHost_FreeType_common.h",
+    "//third_party/skia/src/ports/SkFontHost_FreeType.cpp",
+    "//third_party/skia/src/ports/SkFontHost_mac.cpp",
+    "//third_party/skia/src/ports/SkFontHost_win.cpp",
+    "//third_party/skia/src/ports/SkFontMgr_android.cpp",
+    "//third_party/skia/src/ports/SkFontMgr_android_factory.cpp",
+    "//third_party/skia/src/ports/SkFontMgr_android_parser.cpp",
+    "//third_party/skia/src/ports/SkFontMgr_win_dw.cpp",
+    "//third_party/skia/src/ports/SkGlobalInitialization_default.cpp",
+    "//third_party/skia/src/ports/SkImageEncoder_none.cpp",
+    "//third_party/skia/src/ports/SkOSFile_posix.cpp",
+    "//third_party/skia/src/ports/SkRemotableFontMgr_win_dw.cpp",
+    "//third_party/skia/src/ports/SkOSFile_stdio.cpp",
+    "//third_party/skia/src/ports/SkOSFile_win.cpp",
+    "//third_party/skia/src/ports/SkScalerContext_win_dw.cpp",
+    "//third_party/skia/src/ports/SkScalerContext_win_dw.h",
+    "//third_party/skia/src/ports/SkTLS_pthread.cpp",
+    "//third_party/skia/src/ports/SkTLS_win.cpp",
+    "//third_party/skia/src/ports/SkTypeface_win_dw.cpp",
+    "//third_party/skia/src/ports/SkTypeface_win_dw.h",
+    "//third_party/skia/src/sfnt/SkOTTable_name.cpp",
+    "//third_party/skia/src/sfnt/SkOTTable_name.h",
+    "//third_party/skia/src/sfnt/SkOTUtils.cpp",
+    "//third_party/skia/src/sfnt/SkOTUtils.h",
+
+    #mac
+    "//third_party/skia/src/utils/mac/SkStream_mac.cpp",
+
+    #testing
+    "//third_party/skia/src/fonts/SkGScalerContext.cpp",
+    "//third_party/skia/src/fonts/SkGScalerContext.h",
+  ]
 
   # This and skia_opts are really the same conceptual target so share headers.
   allow_circular_includes_from = [ ":skia_opts" ]
@@ -401,10 +412,6 @@ component("skia") {
     set_sources_assignment_filter(sources_assignment_filter)
   }
 
-  if (is_android && (!enable_basic_printing && !enable_print_preview)) {
-    sources -= [ "ext/skia_utils_base.cc" ]
-  }
-
   # Fixup skia library sources.
   if (is_win) {
     sources -= [
@@ -451,29 +458,6 @@ component("skia") {
     ]
   }
 
-  # Select the right BitmapPlatformDevice.
-  if (is_win) {
-    sources += [
-      "ext/bitmap_platform_device_win.cc",
-      "ext/bitmap_platform_device_win.h",
-    ]
-  } else if (is_mac || is_ios) {
-    sources += [
-      "ext/bitmap_platform_device_mac.cc",
-      "ext/bitmap_platform_device_mac.h",
-    ]
-  } else if (use_cairo) {
-    sources += [
-      "ext/bitmap_platform_device_cairo.cc",
-      "ext/bitmap_platform_device_cairo.h",
-    ]
-  } else {
-    sources += [
-      "ext/bitmap_platform_device_skia.cc",
-      "ext/bitmap_platform_device_skia.h",
-    ]
-  }
-
   if (is_clang) {
     # Skia won't compile with some of the more strict clang warnings.
     # e.g. it does:
@@ -507,9 +491,6 @@ component("skia") {
   }
 
   if (is_android) {
-    set_sources_assignment_filter([])
-    sources += [ "ext/platform_device_linux.cc" ]
-    set_sources_assignment_filter(sources_assignment_filter)
     deps += [
       "//third_party/expat",
       "//third_party/freetype-android:freetype",
@@ -604,55 +585,4 @@ source_set("skia_opts") {
   ]
 
   visibility = [ ":skia" ]
-}
-
-test("skia_unittests") {
-  sources = [
-    "ext/bitmap_platform_device_mac_unittest.cc",
-    "ext/convolver_unittest.cc",
-    "ext/image_operations_unittest.cc",
-    "ext/platform_canvas_unittest.cc",
-    "ext/recursive_gaussian_convolution_unittest.cc",
-    "ext/refptr_unittest.cc",
-    "ext/skia_utils_ios_unittest.mm",
-    "ext/skia_utils_mac_unittest.mm",
-  ]
-
-  if (!is_win && !is_mac) {
-    sources -= [ "ext/platform_canvas_unittest.cc" ]
-  }
-
-  deps = [
-    ":skia",
-    "//base",
-    "//base/test:run_all_unittests",
-    "//testing/gtest",
-    "//ui/gfx",
-    "//ui/gfx/geometry",
-  ]
-}
-
-if (is_linux) {
-  # TODO(GYP): Figure out which of these work and are needed on other platforms.
-  executable("image_operations_bench") {
-    sources = [
-      "ext/image_operations_bench.cc",
-    ]
-
-    deps = [
-      ":skia",
-      "//base",
-    ]
-  }
-
-  executable("filter_fuzz_stub") {
-    sources = [
-      "tools/filter_fuzz_stub/filter_fuzz_stub.cc",
-    ]
-
-    deps = [
-      ":skia",
-      "//base",
-    ]
-  }
 }
