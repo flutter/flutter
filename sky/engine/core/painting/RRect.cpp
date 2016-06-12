@@ -5,37 +5,24 @@
 #include "sky/engine/core/painting/RRect.h"
 
 #include "flutter/tonic/dart_error.h"
-#include "sky/engine/core/script/ui_dart_state.h"
+#include "flutter/tonic/float32_list.h"
 
 namespace blink {
 
 // Construct an SkRRect from a Dart RRect object.
-// The Dart RRect has a _value field which is a Float32List containing
-//   [left, top, right, bottom, xRad, yRad]
-RRect DartConverter<RRect>::FromDart(Dart_Handle dart_rrect) {
+// The Dart RRect is a Float32List containing
+//   [left, top, right, bottom, xRadius, yRadius]
+RRect DartConverter<RRect>::FromDart(Dart_Handle value) {
+  Float32List buffer(value);
+
   RRect result;
   result.is_null = true;
-  if (Dart_IsNull(dart_rrect))
+  if (buffer.data() == nullptr)
     return result;
-
-  Dart_Handle value =
-    Dart_GetField(dart_rrect, UIDartState::Current()->value_handle());
-  if (Dart_IsNull(value))
-    return result;
-
-  Dart_TypedData_Type type;
-  float* data = nullptr;
-  intptr_t num_elements = 0;
-  Dart_TypedDataAcquireData(
-      value, &type, reinterpret_cast<void**>(&data), &num_elements);
-  DCHECK(!LogIfError(value));
-  DCHECK(type == Dart_TypedData_kFloat32 && num_elements == 6);
 
   result.sk_rrect.setRectXY(
-      SkRect::MakeLTRB(data[0], data[1], data[2], data[3]),
-      data[4], data[5]);
-
-  Dart_TypedDataReleaseData(value);
+      SkRect::MakeLTRB(buffer[0], buffer[1], buffer[2], buffer[3]),
+      buffer[4], buffer[5]);
 
   result.is_null = false;
   return result;
@@ -44,9 +31,9 @@ RRect DartConverter<RRect>::FromDart(Dart_Handle dart_rrect) {
 RRect DartConverter<RRect>::FromArguments(Dart_NativeArguments args,
                                           int index,
                                           Dart_Handle& exception) {
-  Dart_Handle dart_rrect = Dart_GetNativeArgument(args, index);
-  DCHECK(!LogIfError(dart_rrect));
-  return FromDart(dart_rrect);
+  Dart_Handle value = Dart_GetNativeArgument(args, index);
+  DCHECK(!LogIfError(value));
+  return FromDart(value);
 }
 
 } // namespace blink

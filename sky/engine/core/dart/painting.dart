@@ -165,7 +165,8 @@ class Path extends NativeFieldWrapperClass2 {
   /// Adds a new subpath that consists of the straight lines and
   /// curves needed to form the rounded rectangle described by the
   /// argument.
-  void addRRect(RRect rrect) native "Path_addRRect";
+  void addRRect(RRect rrect) => _addRRect(rrect._value);
+  void _addRRect(Float32List rrect) native "Path_addRRect";
 
   /// Closes the last subpath, as if a straight line had been drawn
   /// from the current point to the first point of the subpath.
@@ -326,6 +327,27 @@ enum TileMode {
   mirror
 }
 
+Int32List _encodeColorList(List<Color> colors) {
+  final int colorCount = colors.length;
+  final Int32List result = new Int32List(colorCount);
+  for (int i = 0; i < colorCount; ++i)
+    result[i] = colors[i].value;
+  return result;
+}
+
+Float32List _encodePointList(List<Point> points) {
+  final int pointCount = points.length;
+  final Float32List result = new Float32List(pointCount * 2);
+  for (int i = 0; i < pointCount; ++i) {
+    final int xIndex = i * 2;
+    final int yIndex = xIndex + 1;
+    final Point point = points[i];
+    result[xIndex] = point.x;
+    result[yIndex] = point.y;
+  }
+  return result;
+}
+
 /// A shader (as used by [Paint.shader]) that renders a color gradient.
 ///
 /// There are two useful types of gradients, created by [new Gradient.linear]
@@ -349,13 +371,16 @@ class Gradient extends Shader {
                   List<Color> colors,
                   [List<double> colorStops = null,
                   TileMode tileMode = TileMode.clamp]) {
-    _constructor();
     if (endPoints == null || endPoints.length != 2)
       throw new ArgumentError("Expected exactly 2 [endPoints].");
     _validateColorStops(colors, colorStops);
-    _initLinear(endPoints, colors, colorStops, tileMode.index);
+    final Float32List endPointsBuffer = _encodePointList(endPoints);
+    final Int32List colorsBuffer = _encodeColorList(colors);
+    final Float32List colorStopsBuffer = colorStops == null ? null : new Float32List.fromList(colorStops);
+    _constructor();
+    _initLinear(endPointsBuffer, colorsBuffer, colorStopsBuffer, tileMode.index);
   }
-  void _initLinear(List<Point> endPoints, List<Color> colors, List<double> colorStops, int tileMode) native "Gradient_initLinear";
+  void _initLinear(Float32List endPoints, Int32List colors, Float32List colorStops, int tileMode) native "Gradient_initLinear";
 
   /// Creates a radial gradient centered at `center` that ends at `radius`
   /// distance from the center. If `colorStops` is provided, `colorStops[i]` is
@@ -368,14 +393,16 @@ class Gradient extends Shader {
                   List<Color> colors,
                   [List<double> colorStops = null,
                   TileMode tileMode = TileMode.clamp]) {
-    _constructor();
     _validateColorStops(colors, colorStops);
-    _initRadial(center, radius, colors, colorStops, tileMode.index);
+    final Int32List colorsBuffer = _encodeColorList(colors);
+    final Float32List colorStopsBuffer = colorStops == null ? null : new Float32List.fromList(colorStops);
+    _constructor();
+    _initRadial(center.x, center.y, radius, colorsBuffer, colorStopsBuffer, tileMode.index);
   }
-  void _initRadial(Point center, double radius, List<Color> colors, List<double> colorStops, int tileMode) native "Gradient_initRadial";
+  void _initRadial(double centerX, double centerY, double radius, Int32List colors, Float32List colorStops, int tileMode) native "Gradient_initRadial";
 
   static void _validateColorStops(List<Color> colors, List<double> colorStops) {
-    if (colorStops != null && (colors == null || colors.length != colorStops.length))
+    if (colorStops != null && colors.length != colorStops.length)
       throw new ArgumentError("[colors] and [colorStops] parameters must be equal length.");
   }
 }
@@ -554,7 +581,8 @@ class Canvas extends NativeFieldWrapperClass2 {
 
   /// Reduces the clip region to the intersection of the current clip and the
   /// given rounded rectangle.
-  void clipRRect(RRect rrect) native "Canvas_clipRRect";
+  void clipRRect(RRect rrect) => _clipRRect(rrect._value);
+  void _clipRRect(Float32List rrect) native "Canvas_clipRRect";
 
   /// Reduces the clip region to the intersection of the current clip and the
   /// given [Path].
@@ -594,14 +622,16 @@ class Canvas extends NativeFieldWrapperClass2 {
 
   /// Draws a rounded rectangle with the given [Paint]. Whether the rectangle is
   /// filled or stroked (or both) is controlled by [Paint.style].
-  void drawRRect(RRect rrect, Paint paint) native "Canvas_drawRRect";
+  void drawRRect(RRect rrect, Paint paint) => _drawRRect(rrect._value, paint);
+  void _drawRRect(Float32List rrect, Paint paint) native "Canvas_drawRRect";
 
   /// Draws a shape consisting of the difference between two rounded rectangles
   /// with the given [Paint]. Whether this shape is filled or stroked (or both)
   /// is controlled by [Paint.style].
   ///
   /// This shape is almost but not quite entirely unlike an annulus.
-  void drawDRRect(RRect outer, RRect inner, Paint paint) native "Canvas_drawDRRect";
+  void drawDRRect(RRect outer, RRect inner, Paint paint) => _drawDRRect(outer._value, inner._value, paint);
+  void _drawDRRect(Float32List outer, Float32List inner, Paint paint) native "Canvas_drawDRRect";
 
   /// Draws an axis-aligned oval that fills the given axis-aligned rectangle
   /// with the given [Paint]. Whether the oval is filled or stroked (or both) is
@@ -726,34 +756,9 @@ class Canvas extends NativeFieldWrapperClass2 {
     if (colors.isNotEmpty && colors.length != vertexCount)
       throw new ArgumentError("[vertices] and [colors] lengths must match");
 
-    final Float32List vertexBuffer = new Float32List(vertexCount * 2);
-    for (int i = 0; i < vertexCount; ++i) {
-      final int xIndex = i * 2;
-      final int yIndex = xIndex + 1;
-      final Point vertex = vertices[i];
-      vertexBuffer[xIndex] = vertex.x;
-      vertexBuffer[yIndex] = vertex.y;
-    }
-
-    Float32List textureCoordinateBuffer;
-    if (textureCoordinates.isNotEmpty) {
-      textureCoordinateBuffer = new Float32List(vertexCount * 2);
-      for (int i = 0; i < vertexCount; ++i) {
-        final int xIndex = i * 2;
-        final int yIndex = xIndex + 1;
-        final Point textureCoordinate = textureCoordinates[i];
-        textureCoordinateBuffer[xIndex] = textureCoordinate.x;
-        textureCoordinateBuffer[yIndex] = textureCoordinate.y;
-      }
-    }
-
-    Int32List colorBuffer;
-    if (colors.isNotEmpty) {
-      colorBuffer = new Int32List(vertexCount);
-      for (int i = 0; i < vertexCount; ++i)
-        colorBuffer[i] = colors[i].value;
-    }
-
+    final Float32List vertexBuffer = _encodePointList(vertices);
+    final Float32List textureCoordinateBuffer = textureCoordinates.isEmpty ? null : _encodePointList(textureCoordinates);
+    final Int32List colorBuffer = colors.isEmpty ? null : _encodeColorList(colors);
     final Int32List indexBuffer = new Int32List.fromList(indicies);
 
     _drawVertices(
@@ -804,13 +809,7 @@ class Canvas extends NativeFieldWrapperClass2 {
       rectBuffer[index3] = rect.bottom;
     }
 
-    Int32List colorBuffer;
-    if (colors.isNotEmpty) {
-      colorBuffer = new Int32List(rectCount);
-      for (int i = 0; i < rectCount; ++i)
-        colorBuffer[i] = colors[i].value;
-    }
-
+    final Int32List colorBuffer = colors.isEmpty ? null : _encodeColorList(colors);
     final Float32List cullRectBuffer = cullRect?._value;
 
     _drawAtlas(atlas, rstTransformBuffer, rectBuffer, colorBuffer, transferMode.index, cullRectBuffer, paint);

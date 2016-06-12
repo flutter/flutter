@@ -349,6 +349,7 @@ void Canvas::drawVertices(
     indices16.push_back(indices.data()[i]);
 
   static_assert(sizeof(SkPoint) == sizeof(float) * 2, "SkPoint doesn't use floats.");
+  static_assert(sizeof(SkColor) == sizeof(int32_t), "SkColor doesn't use int32_t.");
 
   m_canvas->drawVertices(
     vertexMode,

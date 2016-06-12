@@ -6,8 +6,8 @@
 #define SKY_ENGINE_CORE_PAINTING_CANVASGRADIENT_H_
 
 #include "flutter/tonic/dart_wrappable.h"
-#include "sky/engine/core/painting/CanvasColor.h"
-#include "sky/engine/core/painting/Point.h"
+#include "flutter/tonic/float32_list.h"
+#include "flutter/tonic/int32_list.h"
 #include "sky/engine/core/painting/Shader.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 
@@ -25,15 +25,16 @@ class CanvasGradient : public Shader {
   ~CanvasGradient() override;
   static scoped_refptr<CanvasGradient> create();
 
-  void initLinear(const std::vector<Point>& end_points,
-                  const std::vector<CanvasColor>& colors,
-                  const std::vector<float>& color_stops,
+  void initLinear(const Float32List& end_points,
+                  const Int32List& colors,
+                  const Float32List& color_stops,
                   SkShader::TileMode tile_mode);
 
-  void initRadial(const Point& center,
+  void initRadial(double centerX,
+                  double centerY,
                   double radius,
-                  const std::vector<CanvasColor>& colors,
-                  const std::vector<float>& color_stops,
+                  const Int32List& colors,
+                  const Float32List& color_stops,
                   SkShader::TileMode tile_mode);
 
   static void RegisterNatives(DartLibraryNatives* natives);

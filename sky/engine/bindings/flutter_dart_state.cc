@@ -41,14 +41,7 @@ FlutterDartState* FlutterDartState::Current() {
 
 void FlutterDartState::DidSetIsolate() {
   Scope dart_scope(this);
-  x_handle_.Set(this, ToDart("x"));
-  y_handle_.Set(this, ToDart("y"));
-  dx_handle_.Set(this, ToDart("_dx"));
-  dy_handle_.Set(this, ToDart("_dy"));
   value_handle_.Set(this, ToDart("_value"));
-
-  Dart_Handle library = Dart_LookupLibrary(ToDart("dart:ui"));
-  color_class_.Set(this, Dart_GetType(library, ToDart("Color"), 0, 0));
 }
 
 void FlutterDartState::set_mojo_services(

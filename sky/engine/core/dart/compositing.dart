@@ -67,7 +67,8 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// Rasterization outside the given rounded rectangle is discarded.
   ///
   /// See [pop] for details about the operation stack.
-  void pushClipRRect(RRect rrect) native "SceneBuilder_pushClipRRect";
+  void pushClipRRect(RRect rrect) => _pushClipRRect(rrect._value);
+  void _pushClipRRect(Float32List rrect) native "SceneBuilder_pushClipRRect";
 
   /// Pushes a path clip operation onto the operation stack.
   ///

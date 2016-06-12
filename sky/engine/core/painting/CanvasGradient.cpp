@@ -36,41 +36,41 @@ scoped_refptr<CanvasGradient> CanvasGradient::create() {
   return new CanvasGradient();
 }
 
-void CanvasGradient::initLinear(const std::vector<Point>& end_points,
-                                const std::vector<CanvasColor>& colors,
-                                const std::vector<float>& color_stops,
+void CanvasGradient::initLinear(const Float32List& end_points,
+                                const Int32List& colors,
+                                const Float32List& color_stops,
                                 SkShader::TileMode tile_mode) {
-  DCHECK(end_points.size() == 2);
-  DCHECK(colors.size() == color_stops.size() || color_stops.data() == nullptr);
-  SkPoint sk_end_points[2];
-  for (int i = 0; i < 2; ++i)
-    sk_end_points[i] = end_points[i].sk_point;
+  DCHECK(end_points.num_elements() == 2);
+  DCHECK(colors.num_elements() == color_stops.num_elements() || color_stops.data() == nullptr);
 
-  std::vector<SkColor> sk_colors;
-  sk_colors.reserve(colors.size());
-  for (const CanvasColor& color : colors)
-    sk_colors.push_back(color);
+  static_assert(sizeof(SkPoint) == sizeof(float) * 2, "SkPoint doesn't use floats.");
+  static_assert(sizeof(SkColor) == sizeof(int32_t), "SkColor doesn't use int32_t.");
 
   set_shader(SkGradientShader::MakeLinear(
-      sk_end_points, sk_colors.data(), color_stops.data(), sk_colors.size(),
+      reinterpret_cast<const SkPoint*>(end_points.data()),
+      reinterpret_cast<const SkColor*>(colors.data()),
+      color_stops.data(),
+      colors.num_elements(),
       tile_mode));
 }
 
-void CanvasGradient::initRadial(const Point& center,
+void CanvasGradient::initRadial(double centerX,
+                                double centerY,
                                 double radius,
-                                const std::vector<CanvasColor>& colors,
-                                const std::vector<float>& color_stops,
+                                const Int32List& colors,
+                                const Float32List& color_stops,
                                 SkShader::TileMode tile_mode) {
-  DCHECK(colors.size() == color_stops.size() || color_stops.data() == nullptr);
+  DCHECK(colors.num_elements() == color_stops.num_elements() || color_stops.data() == nullptr);
 
-  std::vector<SkColor> sk_colors;
-  sk_colors.reserve(colors.size());
-  for (const CanvasColor& color : colors)
-    sk_colors.push_back(color);
+  static_assert(sizeof(SkColor) == sizeof(int32_t), "SkColor doesn't use int32_t.");
 
   set_shader(SkGradientShader::MakeRadial(
-      center.sk_point, radius, sk_colors.data(), color_stops.data(),
-      sk_colors.size(), tile_mode));
+      SkPoint::Make(centerX, centerY),
+      radius,
+      reinterpret_cast<const SkColor*>(colors.data()),
+      color_stops.data(),
+      colors.num_elements(),
+      tile_mode));
 }
 
 CanvasGradient::CanvasGradient()
