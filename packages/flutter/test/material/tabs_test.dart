@@ -31,6 +31,7 @@ Widget buildFrame({ List<String> tabs, String value, bool isScrollable: false, K
     child: new TabBarSelection<String>(
       value: value,
       values: tabs,
+      onChanged: null,
       child: new TabBar<String>(
         key: tabBarKey,
         labels: new Map<String, TabLabel>.fromIterable(tabs, value: (String tab) => new TabLabel(text: tab)),

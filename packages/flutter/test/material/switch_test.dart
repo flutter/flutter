@@ -65,6 +65,7 @@ void main() {
         child: new Center(
           child: new Switch(
             value: false,
+            onChanged: null,
             activeThumbDecoration: activeDecoration,
             inactiveThumbDecoration: inactiveDecoration
           )

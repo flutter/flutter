@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 import 'colors.dart';
 import 'debug.dart';
@@ -455,9 +456,9 @@ class TabBarSelection<T> extends StatefulWidget {
   TabBarSelection({
     Key key,
     this.value,
-    this.values,
+    @required this.values,
     this.onChanged,
-    this.child
+    @required this.child
   }) : super(key: key)  {
     assert(values != null && values.length > 0);
     assert(new Set<T>.from(values).length == values.length);

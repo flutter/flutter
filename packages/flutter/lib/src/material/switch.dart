@@ -5,6 +5,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 import 'colors.dart';
 import 'constants.dart';
@@ -42,15 +43,24 @@ class Switch extends StatelessWidget {
   /// * [onChanged] is called when the user toggles with switch on or off.
   Switch({
     Key key,
-    this.value,
+    @required this.value,
+    @required this.onChanged,
     this.activeColor,
     this.activeThumbDecoration,
-    this.inactiveThumbDecoration,
-    this.onChanged
+    this.inactiveThumbDecoration
   }) : super(key: key);
 
   /// Whether this switch is on or off.
   final bool value;
+
+  /// Called when the user toggles with switch on or off.
+  ///
+  /// The switch passes the new value to the callback but does not actually
+  /// change state until the parent widget rebuilds the switch with the new
+  /// value.
+  ///
+  /// If null, the switch will be displayed as disabled.
+  final ValueChanged<bool> onChanged;
 
   /// The color to use when this switch is on.
   ///
@@ -66,15 +76,6 @@ class Switch extends StatelessWidget {
   ///
   /// Defaults to a circular piece of material.
   final Decoration inactiveThumbDecoration;
-
-  /// Called when the user toggles with switch on or off.
-  ///
-  /// The switch passes the new value to the callback but does not actually
-  /// change state until the parent widget rebuilds the switch with the new
-  /// value.
-  ///
-  /// If null, the switch will be displayed as disabled.
-  final ValueChanged<bool> onChanged;
 
   @override
   Widget build(BuildContext context) {

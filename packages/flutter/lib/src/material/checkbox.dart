@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 import 'constants.dart';
 import 'debug.dart';
@@ -42,18 +43,13 @@ class Checkbox extends StatelessWidget {
   /// * [onChanged] is called when the value of the checkbox should change.
   Checkbox({
     Key key,
-    this.value,
-    this.activeColor,
-    this.onChanged
+    @required this.value,
+    @required this.onChanged,
+    this.activeColor
   }) : super(key: key);
 
   /// Whether this checkbox is checked.
   final bool value;
-
-  /// The color to use when this checkbox is checked.
-  ///
-  /// Defaults to accent color of the current [Theme].
-  final Color activeColor;
 
   /// Called when the value of the checkbox should change.
   ///
@@ -63,6 +59,11 @@ class Checkbox extends StatelessWidget {
   ///
   /// If null, the checkbox will be displayed as disabled.
   final ValueChanged<bool> onChanged;
+
+  /// The color to use when this checkbox is checked.
+  ///
+  /// Defaults to accent color of the current [Theme].
+  final Color activeColor;
 
   /// The width of a checkbox widget.
   static const double width = 18.0;

@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/date_symbols.dart';
 import 'package:intl/intl.dart';
+import 'package:meta/meta.dart';
 
 import 'colors.dart';
 import 'debug.dart';
@@ -37,10 +38,10 @@ class DatePicker extends StatefulWidget {
   /// [showDatePicker] to show a date picker in a dialog.
   DatePicker({
     Key key,
-    this.selectedDate,
-    this.onChanged,
-    this.firstDate,
-    this.lastDate
+    @required this.selectedDate,
+    @required this.onChanged,
+    @required this.firstDate,
+    @required this.lastDate
   }) : super(key: key) {
     assert(selectedDate != null);
     assert(firstDate != null);
@@ -134,9 +135,9 @@ class _DatePickerState extends State<DatePicker> {
 class _DatePickerHeader extends StatelessWidget {
   _DatePickerHeader({
     Key key,
-    this.selectedDate,
-    this.mode,
-    this.onModeChanged
+    @required this.selectedDate,
+    @required this.mode,
+    @required this.onModeChanged
   }) : super(key: key) {
     assert(selectedDate != null);
     assert(mode != null);
@@ -241,10 +242,10 @@ class DayPicker extends StatelessWidget {
   /// Rarely used directly. Instead, typically used as part of a [DatePicker].
   DayPicker({
     Key key,
-    this.selectedDate,
-    this.currentDate,
-    this.onChanged,
-    this.displayedMonth
+    @required this.selectedDate,
+    @required this.currentDate,
+    @required this.onChanged,
+    @required this.displayedMonth
   }) : super(key: key) {
     assert(selectedDate != null);
     assert(currentDate != null);
@@ -365,10 +366,10 @@ class MonthPicker extends StatefulWidget {
   /// Rarely used directly. Instead, typically used as part of a [DatePicker].
   MonthPicker({
     Key key,
-    this.selectedDate,
-    this.onChanged,
-    this.firstDate,
-    this.lastDate
+    @required this.selectedDate,
+    @required this.onChanged,
+    @required this.firstDate,
+    @required this.lastDate
   }) : super(key: key) {
     assert(selectedDate != null);
     assert(onChanged != null);
@@ -515,10 +516,10 @@ class YearPicker extends StatefulWidget {
   /// Rarely used directly. Instead, typically used as part of a [DatePicker].
   YearPicker({
     Key key,
-    this.selectedDate,
-    this.onChanged,
-    this.firstDate,
-    this.lastDate
+    @required this.selectedDate,
+    @required this.onChanged,
+    @required this.firstDate,
+    @required this.lastDate
   }) : super(key: key) {
     assert(selectedDate != null);
     assert(onChanged != null);

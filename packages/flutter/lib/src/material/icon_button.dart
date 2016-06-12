@@ -50,7 +50,7 @@ class IconButton extends StatelessWidget {
     @required this.icon,
     this.color,
     this.disabledColor,
-    this.onPressed,
+    @required this.onPressed,
     this.tooltip
   }) : super(key: key);
 
