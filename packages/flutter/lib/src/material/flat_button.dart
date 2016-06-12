@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 import 'button.dart';
 import 'theme.dart';
@@ -40,7 +41,7 @@ class FlatButton extends StatelessWidget {
   /// caps.
   FlatButton({
     Key key,
-    this.onPressed,
+    @required this.onPressed,
     this.textColor,
     this.disabledTextColor,
     this.color,

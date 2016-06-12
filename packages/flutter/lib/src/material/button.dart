@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 import 'colors.dart';
 import 'constants.dart';
@@ -128,7 +129,7 @@ class MaterialButton extends StatefulWidget {
     this.minWidth,
     this.height,
     this.padding,
-    this.onPressed,
+    @required this.onPressed,
     this.child
   }) : super(key: key);
 

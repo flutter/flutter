@@ -4,6 +4,7 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 import 'constants.dart';
 import 'debug.dart';
@@ -47,10 +48,10 @@ class Radio<T> extends StatelessWidget {
   /// * [onChanged] is when the user selects this radio button.
   Radio({
     Key key,
-    this.value,
-    this.groupValue,
-    this.activeColor,
-    this.onChanged
+    @required this.value,
+    @required this.groupValue,
+    @required this.onChanged,
+    this.activeColor
   }) : super(key: key);
 
   /// The value represented by this radio button.
@@ -62,11 +63,6 @@ class Radio<T> extends StatelessWidget {
   /// [groupValue].
   final T groupValue;
 
-  /// The color to use when this radio button is selected.
-  ///
-  /// Defaults to accent color of the current [Theme].
-  final Color activeColor;
-
   /// Called when the user selects this radio button.
   ///
   /// The radio button passes [value] as a parameter to this callback. The radio
@@ -75,6 +71,11 @@ class Radio<T> extends StatelessWidget {
   ///
   /// If null, the radio button will be displayed as disabled.
   final ValueChanged<T> onChanged;
+
+  /// The color to use when this radio button is selected.
+  ///
+  /// Defaults to accent color of the current [Theme].
+  final Color activeColor;
 
   bool get _enabled => onChanged != null;
 

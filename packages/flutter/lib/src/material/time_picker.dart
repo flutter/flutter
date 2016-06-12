@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 import 'colors.dart';
 import 'theme.dart';
@@ -119,8 +120,8 @@ class TimePicker extends StatefulWidget {
   /// creates a time picker dialog.
   TimePicker({
     Key key,
-    this.selectedTime,
-    this.onChanged
+    @required this.selectedTime,
+    @required this.onChanged
   }) : super(key: key) {
     assert(selectedTime != null);
   }
@@ -180,10 +181,10 @@ class _TimePickerState extends State<TimePicker> {
 // TODO(ianh): Localize!
 class _TimePickerHeader extends StatelessWidget {
   _TimePickerHeader({
-    this.selectedTime,
-    this.mode,
-    this.onModeChanged,
-    this.onChanged
+    @required this.selectedTime,
+    @required this.mode,
+    @required this.onModeChanged,
+    @required this.onChanged
   }) {
     assert(selectedTime != null);
     assert(mode != null);
@@ -393,9 +394,9 @@ class _DialPainter extends CustomPainter {
 
 class _Dial extends StatefulWidget {
   _Dial({
-    this.selectedTime,
-    this.mode,
-    this.onChanged
+    @required this.selectedTime,
+    @required this.mode,
+    @required this.onChanged
   }) {
     assert(selectedTime != null);
   }

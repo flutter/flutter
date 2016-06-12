@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 import 'button.dart';
 import 'flat_button.dart';
@@ -46,7 +47,11 @@ class SnackBarAction extends StatefulWidget {
   /// Creates an action for a [SnackBar].
   ///
   /// The [label] and [onPressed] arguments must be non-null.
-  SnackBarAction({Key key, this.label, this.onPressed }) : super(key: key) {
+  SnackBarAction({
+    Key key,
+    this.label,
+    @required this.onPressed
+  }) : super(key: key) {
     assert(label != null);
     assert(onPressed != null);
   }

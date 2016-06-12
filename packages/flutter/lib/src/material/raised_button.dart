@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 import 'button.dart';
 import 'colors.dart';
@@ -38,7 +39,7 @@ class RaisedButton extends StatelessWidget {
   /// caps.
   RaisedButton({
     Key key,
-    this.onPressed,
+    @required this.onPressed,
     this.color,
     this.disabledColor,
     this.elevation: 2,

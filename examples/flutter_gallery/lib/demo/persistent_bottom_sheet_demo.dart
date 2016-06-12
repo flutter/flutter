@@ -59,8 +59,9 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
       key: _scaffoldKey,
       appBar: new AppBar(title: new Text('Persistent bottom sheet')),
       floatingActionButton: new FloatingActionButton(
-        child: new Icon(icon: Icons.add),
-        backgroundColor: Colors.redAccent[200]
+        onPressed: null,
+        backgroundColor: Colors.redAccent[200],
+        child: new Icon(icon: Icons.add)
       ),
       body: new Center(
         child: new RaisedButton(
