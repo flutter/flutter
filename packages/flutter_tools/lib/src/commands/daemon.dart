@@ -635,7 +635,10 @@ class _AppRunLogger extends Logger {
   }
 
   void _sendLogEvent(Map<String, dynamic> event) {
-    domain?._sendAppEvent(app, 'log', event);
+    if (domain == null)
+      printStatus('event sent after app closed: $event');
+    else
+      domain._sendAppEvent(app, 'log', event);
   }
 }
 
@@ -647,15 +650,15 @@ class _AppLoggerStatus implements Status {
 
   @override
   void stop({ bool showElapsedTime: false }) {
-    logger._sendLogEvent(<String, dynamic>{
-      'progress': true,
-      'id': id.toString(),
-      'finished': true
-    });
+    _sendFinished();
   }
 
   @override
   void cancel() {
+    _sendFinished();
+  }
+
+  void _sendFinished() {
     logger._sendLogEvent(<String, dynamic>{
       'progress': true,
       'id': id.toString(),
