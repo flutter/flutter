@@ -197,17 +197,6 @@ bool _checkXcodeVersion() {
   return true;
 }
 
-String _getIOSEngineRevision(ApplicationPackage app) {
-  File revisionFile = new File(path.join(app.rootPath, 'REVISION'));
-  if (revisionFile.existsSync()) {
-    // The format is 'REVISION-mode'. We only need the revision.
-    String revisionStamp = revisionFile.readAsStringSync().trim();
-    return revisionStamp.split('-')[0];
-  } else {
-    return null;
-  }
-}
-
 Future<Null> _addServicesToBundle(Directory bundle) async {
   List<Map<String, String>> services = <Map<String, String>>[];
   printTrace("Trying to resolve native pub services.");
