@@ -347,13 +347,13 @@ void Canvas::drawPoints(const Paint& paint,
 }
 
 void Canvas::drawVertices(
+    const Paint& paint,
     SkCanvas::VertexMode vertexMode,
     const Float32List& vertices,
     const Float32List& textureCoordinates,
     const Int32List& colors,
     int transferMode,
-    const Int32List& indices,
-    const Paint& paint) {
+    const Int32List& indices) {
   if (!m_canvas)
     return;
 
