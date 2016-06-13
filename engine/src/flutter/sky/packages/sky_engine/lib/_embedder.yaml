@@ -9,7 +9,7 @@ embedded_libs:
   "dart:jni": "../sdk_ext/dart_jni/jni.dart"
   "dart:math": "../dart_sdk/math/math.dart"
   "dart:typed_data": "../dart_sdk/typed_data/typed_data.dart"
-  "dart:ui": "../sdk_ext/dart_ui.dart"
+  "dart:ui": "../sdk_ext/dart_ui/ui.dart"
   "dart:_internal": "../dart_sdk/_empty.dart"
   "dart:nativewrappers": "../dart_sdk/_empty.dart"
 
