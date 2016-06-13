@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:test/src/executable.dart' as executable; // ignore: implementation_imports
 
+import '../base/logger.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
@@ -91,7 +92,7 @@ class TestCommand extends FlutterCommand {
     }
 
     testArgs.insert(0, '--');
-    if (Platform.environment['TERM'] == 'dumb')
+    if (!terminal.supportsColor)
       testArgs.insert(0, '--no-color');
 
     loader.installHook();

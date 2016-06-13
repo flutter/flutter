@@ -25,7 +25,9 @@ void printError(String message, [StackTrace stackTrace]) => logger.printError(me
 
 /// Display normal output of the command. This should be used for things like
 /// progress messages, success messages, or just normal command output.
-void printStatus(String message, { bool emphasis: false }) => logger.printStatus(message, emphasis: emphasis);
+void printStatus(String message, { bool emphasis: false, bool newline: true }) {
+  logger.printStatus(message, emphasis: emphasis, newline: newline);
+}
 
 /// Use this for verbose tracing output. Users can turn this output on in order
 /// to help diagnose issues with the toolchain or with their setup.

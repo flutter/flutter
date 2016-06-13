@@ -264,6 +264,17 @@ class FlutterCommandRunner extends CommandRunner {
       .toList();
   }
 
+  /// Get the entry-points we want to analyze in the Flutter repo.
+  List<Directory> getRepoAnalysisEntryPoints() {
+    String rootPath = path.absolute(Cache.flutterRoot);
+    return <Directory>[
+      // not bin, and not the root
+      new Directory(path.join(rootPath, 'dev')),
+      new Directory(path.join(rootPath, 'examples')),
+      new Directory(path.join(rootPath, 'packages')),
+    ];
+  }
+
   bool _checkFlutterCopy() {
     // If the current directory is contained by a flutter repo, check that it's
     // the same flutter that is currently running.
