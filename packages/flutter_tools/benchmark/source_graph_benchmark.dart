@@ -15,8 +15,5 @@ void main() {
   stopwatch.stop();
   print('${graph.sources.length} sources parsed in ${stopwatch.elapsedMilliseconds}ms.');
 
-  stopwatch = new Stopwatch()..start();
-  graph.reparseSources();
-  stopwatch.stop();
-  print('${graph.changes.length} sources reparsed in ${stopwatch.elapsedMilliseconds}ms.');
+  // TODO(devoncarew): Benchmark an incremental `reparseSources()` mode.
 }

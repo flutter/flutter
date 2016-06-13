@@ -28,19 +28,15 @@ void main() {
       temp.deleteSync(recursive: true);
     });
 
-    test('reparse with no changes', () {
+    test('initial parse', () {
       Directory directory = new Directory('../../examples/flutter_gallery');
       SourceGraph graph = new SourceGraph(directory, 'lib/main.dart');
 
       graph.initialParse();
       expect(graph.sources.length, greaterThan(100));
-
-      graph.reparseSources();
-      expect(graph.wasIncremental, true);
-      expect(graph.changes.length, 0);
     });
 
-    testUsingContext('reparse with changes', () async {
+    testUsingContext('parse with changes', () async {
       await _createProject(temp);
 
       // initial parse
@@ -48,20 +44,9 @@ void main() {
       graph.initialParse();
       expect(graph.sources.length, greaterThan(100));
 
-      // touch the main file
-      File mainFile = new File('${temp.path}/lib/main.dart');
-      mainFile.writeAsStringSync(mainFile.readAsStringSync() + '\n');
-      graph.reparseSources();
-      expect(graph.wasIncremental, true);
-      expect(graph.changes.length, 1);
+      // TODO(devoncarew): touch the main file, verify incremental is correct
 
-      // expect no changes
-      graph.reparseSources();
-      expect(graph.wasIncremental, true);
-      expect(graph.changes.length, 1);
-
-      // change an import
-      // TODO:
+      // TODO(devoncarew): reparse with no changes, expect that there are no changes
 
       // touch the .packages file
       File packagesFile = new File('${temp.path}/.packages');

@@ -14,18 +14,9 @@ import 'package:yaml/yaml.dart' as yaml;
 
 import 'sdk.dart';
 
-// TODO: do we need to traverse into dart: libraries? Or ones that are really packages?
-
-// TODO: added, changed, and removed sources
-
-// TODO: For performance, the lexer should not lex the entire file.
-
-// TODO: switch to sources having sourcerefs that need to be resolved
-
-// TODO: they should know - independently of being dirty - whether all their
-// refs were resolved
-
-// TODO: support conditional directives
+// TODO(devoncarew): Implement added, changed, and removed sources information (add a GraphChange class).
+// TODO(devoncarew): Use GraphSourceReferences.resolved when doing incremental checks.
+// TODO(devoncarew): For performance, the lexer should not lex the entire file.
 
 class SourceGraph {
   SourceGraph(this.directory, this.entryPointPath, { this.parseEmbedderSource: false });
@@ -38,45 +29,19 @@ class SourceGraph {
   Map<String, String> _dartLibraryMap = <String, String>{};
   bool _wasIncremental = false;
   Map<String, GraphSource> _sourceMap = <String, GraphSource>{};
-  List<GraphChange> _changes = <GraphChange>[];
 
   /// Whether the last parse was incremental, or a full re-parse.
   bool get wasIncremental => _wasIncremental;
 
   Iterable<GraphSource> get sources => _sourceMap.values;
 
-  List<GraphChange> get changes => _changes;
-
   void initialParse() {
     _fullParse();
   }
 
+  // TODO(devoncarew): Implement an incremental mode.
   void reparseSources() {
-    if (!_packagesFile.isUpToDate) {
-      _fullParse();
-      return;
-    }
-
-    _wasIncremental = true;
-
-    // TODO: start with the root node again
-
-
-    // TODO: find any out-of-date sources
-
-
-    // TODO: find any sources that didn't resolve their dependencies
-
-
-    // Parse any dirty sources.
-    while (sources.any((GraphSource source) => source.dirty)) {
-      for (GraphSource source in sources.where((GraphSource source) => source.dirty).toList()) {
-        source.parse();
-      }
-    }
-
-    // TODO: check for no longer referenced sources
-
+    _fullParse();
   }
 
   /// Flush any cached file contents.
@@ -89,7 +54,6 @@ class SourceGraph {
     _wasIncremental = false;
 
     _sourceMap.clear();
-    _changes.clear();
 
     if (parseEmbedderSource) {
       // Parse the libraries.dart file - use that info to resolve dart: references.
@@ -195,17 +159,15 @@ class GraphSource {
         String uri = uriBasedDirective.uri.stringValue;
 
         GraphSourceReference reference = new GraphSourceReference(this, uri);
+
+        // Skip dart: references if we're not concerned with them.
+        if (uri.startsWith('dart:') && !graph.parseEmbedderSource)
+          continue;
+
         references.add(reference);
-
-        // TODO: resolve the reference
-
-        String resolvedPath = graph._resolveDirectiveUri(uri, fullpath);
-        // TODO: it's ok if parseEmbedderSource and the dart: ref didn't resolve
-
-        // TODO: What to do if this doesn't return a value?
-        if (resolvedPath != null) {
-          graph._getCreateSource(resolvedPath);
-        }
+        reference.resolve();
+        if (reference.resolved)
+          graph._getCreateSource(reference.resolvedPath);
       }
     }
   }
@@ -228,13 +190,14 @@ class GraphSourceReference {
   final GraphSource parent;
   final String uri;
 
-  bool resolved;
-  bool unneeded;
+  String resolvedPath;
 
-}
+  bool resolved = false;
 
-class GraphChange {
-
+  void resolve() {
+    resolvedPath = parent.graph._resolveDirectiveUri(uri, parent.fullpath);
+    resolved = resolvedPath != null;
+  }
 }
 
 class PackagesFile {
@@ -250,6 +213,12 @@ class PackagesFile {
   bool get isUpToDate => file.lastModifiedSync() == _stamp;
 
   void parse() {
+    if (!file.existsSync()) {
+      _packageInfo = <String, Uri>{};
+      _stamp = new DateTime.fromMillisecondsSinceEpoch(0);
+      return;
+    }
+
     _packageInfo = packages.parse(file.readAsBytesSync(), file.parent.uri);
     _stamp = file.lastModifiedSync();
 
