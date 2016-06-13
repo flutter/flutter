@@ -33,7 +33,7 @@ class Product {
     this.description,
     this.featureTitle,
     this.featureDescription,
-    this.imageUrl,
+    this.imageAsset,
     this.categories,
     this.price,
     this.vendor
@@ -43,7 +43,7 @@ class Product {
   final String description;
   final String featureTitle;
   final String featureDescription;
-  final String imageUrl;
+  final String imageAsset;
   final List<String> categories;
   final double price;
   final Vendor vendor;
@@ -53,7 +53,7 @@ class Product {
   bool isValid() {
     return name != null &&
       description != null &&
-      imageUrl != null &&
+      imageAsset != null &&
       categories != null &&
       categories.length > 0 &&
       price != null &&

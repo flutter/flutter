@@ -41,9 +41,9 @@ class OrderItem extends StatelessWidget {
                 height: 248.0,
                 child: new Hero(
                   tag: productHeroTag,
-                  child: new NetworkImage(
+                  child: new AssetImage(
                     fit: ImageFit.contain,
-                    src: product.imageUrl
+                    name: product.imageAsset
                   )
                 )
               )
@@ -192,9 +192,9 @@ class _OrderPageState extends State<OrderPage> {
               .map((Product product) {
               return new Card(
                 elevation: 0,
-                child: new NetworkImage(
+                child: new AssetImage(
                   fit: ImageFit.contain,
-                  src: product.imageUrl
+                  name: product.imageAsset
                 )
               );
             }).toList()

@@ -51,7 +51,7 @@ const Vendor _stella = const Vendor(
 const List<Product> _allProducts = const <Product> [
   const Product(
     name: 'Vintage Bluetooth Radio',
-    imageUrl: 'https://www.gstatic.com/angular/material-adaptive/shrine/radio.png',
+    imageAsset: 'packages/flutter_gallery_assets/shrine/products/radio.png',
     categories: const <String>['furniture', 'latest'],
     price: 300.00,
     vendor: _sandra,
@@ -62,7 +62,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Sunglasses',
-    imageUrl: 'https://www.gstatic.com/angular/material-adaptive/shrine/sunnies.png',
+    imageAsset: 'packages/flutter_gallery_assets/shrine/products/sunnies.png',
     categories: const <String>['travel', 'fashion', 'beauty'],
     price: 70.00,
     vendor: _trevor,
@@ -74,7 +74,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Clock',
-    imageUrl: 'https://www.gstatic.com/angular/material-adaptive/shrine/clock.png',
+    imageAsset: 'packages/flutter_gallery_assets/shrine/products/clock.png',
     categories: const <String>['furniture'],
     price: 120.00,
     vendor: _trevor,
@@ -85,7 +85,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Red popsicle',
-    imageUrl: 'https://www.gstatic.com/angular/material-adaptive/shrine/popsicle.png',
+    imageAsset: 'packages/flutter_gallery_assets/shrine/products/popsicle.png',
     categories: const <String>['food', 'fashion'],
     price: 300.00,
     vendor: _stella,
@@ -96,7 +96,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Folding Chair',
-    imageUrl: 'https://www.gstatic.com/angular/material-adaptive/shrine/lawn_chair.png',
+    imageAsset: 'packages/flutter_gallery_assets/shrine/products/lawn_chair.png',
     categories: const <String>['furniture'],
     price: 63.00,
     vendor: _stella,
@@ -105,7 +105,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Green comfort chair',
-    imageUrl: 'https://www.gstatic.com/angular/material-adaptive/shrine/chair.png',
+    imageAsset: 'packages/flutter_gallery_assets/shrine/products/chair.png',
     categories: const <String>['furniture'],
     price: 36.00,
     vendor: _ali,
@@ -114,7 +114,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Better wearing heels',
-    imageUrl: 'https://www.gstatic.com/angular/material-adaptive/shrine/heels.png',
+    imageAsset: 'packages/flutter_gallery_assets/shrine/products/heels.png',
     categories: const <String>['fashion'],
     price: 125.00,
     vendor: _peter,
@@ -123,7 +123,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Green Slip-ons',
-    imageUrl: 'https://www.gstatic.com/angular/material-adaptive/shrine/green-shoes.png',
+    imageAsset: 'packages/flutter_gallery_assets/shrine/products/green-shoes.png',
     categories: const <String>['travel', 'fashion'],
     price: 75.00,
     vendor: _sandra,
@@ -134,7 +134,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Teapot',
-    imageUrl: 'https://www.gstatic.com/angular/material-adaptive/shrine/teapot.png',
+    imageAsset: 'packages/flutter_gallery_assets/shrine/products/teapot.png',
     categories: const <String>['furniture', 'fashion'],
     price: 210.00,
     vendor: _trevor,
@@ -148,7 +148,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Blue suede shoes',
-    imageUrl: 'https://www.gstatic.com/angular/material-adaptive/shrine/chucks.png',
+    imageAsset: 'packages/flutter_gallery_assets/shrine/products/chucks.png',
     categories: const <String>['travel', 'fashion'],
     price: 89.00,
     vendor: _trevor,
@@ -158,7 +158,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Dipped Brush',
-    imageUrl: 'https://www.gstatic.com/angular/material-adaptive/shrine/brush.png',
+    imageAsset: 'packages/flutter_gallery_assets/shrine/products/brush.png',
     categories: const <String>['fashion', 'beauty'],
     price: 25.00,
     vendor: _stella,
@@ -169,7 +169,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Perfect Goldfish Bowl',
-    imageUrl: 'https://www.gstatic.com/angular/material-adaptive/shrine/fish_bowl.png',
+    imageAsset: 'packages/flutter_gallery_assets/shrine/products/fish_bowl.png',
     categories: const <String>['latest', 'furniture'],
     price: 25.00,
     vendor: _ali,
@@ -180,7 +180,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Red Lipstick Set',
-    imageUrl: 'https://www.gstatic.com/angular/material-adaptive/shrine/lipstick.png',
+    imageAsset: 'packages/flutter_gallery_assets/shrine/products/lipstick.png',
     categories: const <String>['fashion', 'beauty'],
     price: 25.00,
     vendor: _sandra,
@@ -191,7 +191,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Backpack',
-    imageUrl: 'https://www.gstatic.com/angular/material-adaptive/shrine/backpack.png',
+    imageAsset: 'packages/flutter_gallery_assets/shrine/products/backpack.png',
     categories: const <String>['travel', 'fashion'],
     price: 25.00,
     vendor: _peter,
@@ -202,7 +202,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Half Shield Helmet',
-    imageUrl: 'https://www.gstatic.com/angular/material-adaptive/shrine/helmet.png',
+    imageAsset: 'packages/flutter_gallery_assets/shrine/products/helmet.png',
     categories: const <String>['travel', 'fashion', 'latest'],
     price: 25.00,
     vendor: _ali,
@@ -213,7 +213,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Beachball',
-    imageUrl: 'https://www.gstatic.com/angular/material-adaptive/shrine/beachball.png',
+    imageAsset: 'packages/flutter_gallery_assets/shrine/products/beachball.png',
     categories: const <String>['latest'],
     price: 17.00,
     vendor: _peter,
@@ -224,7 +224,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Old Binoculars',
-    imageUrl: 'https://www.gstatic.com/angular/material-adaptive/shrine/binoculars.png',
+    imageAsset: 'packages/flutter_gallery_assets/shrine/products/binoculars.png',
     categories: const <String>['travel', 'fashion', 'latest'],
     price: 25.00,
     vendor: _stella,
@@ -236,7 +236,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Lime Flippers',
-    imageUrl: 'https://www.gstatic.com/angular/material-adaptive/shrine/flippers.png',
+    imageAsset: 'packages/flutter_gallery_assets/shrine/products/flippers.png',
     categories: const <String>['travel', 'fashion', 'beauty'],
     price: 25.00,
     vendor: _peter,
@@ -247,7 +247,7 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Surfboard',
-    imageUrl: 'https://www.gstatic.com/angular/material-adaptive/shrine/surfboard.png',
+    imageAsset: 'packages/flutter_gallery_assets/shrine/products/surfboard.png',
     categories: const <String>[ 'travel', 'latest'],
     price: 25.00,
     vendor: _stella,
