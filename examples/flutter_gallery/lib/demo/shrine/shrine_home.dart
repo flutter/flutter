@@ -140,9 +140,9 @@ class FeatureItem extends StatelessWidget {
                         minHeight: 340.0,
                         maxHeight: 340.0,
                         alignment: FractionalOffset.topRight,
-                        child: new NetworkImage(
+                        child: new AssetImage(
                           fit: ImageFit.cover,
-                          src: product.imageUrl
+                          name: product.imageAsset
                         )
                       )
                     )
@@ -205,9 +205,9 @@ class ProductItem extends StatelessWidget {
                   new Hero(
                     tag: productHeroTag,
                     key: new ObjectKey(product),
-                    child: new NetworkImage(
+                    child: new AssetImage(
                       fit: ImageFit.contain,
-                      src: product.imageUrl
+                      name: product.imageAsset
                     )
                   ),
                   new Material(
@@ -280,7 +280,7 @@ class _ShrineHomeState extends State<ShrineHome> {
                 rowSpacing: 8.0,
                 columnSpacing: 8.0,
                 padding: const EdgeInsets.all(8.0),
-                tileAspectRatio: 160.0 / 216.0, // width/height
+                tileAspectRatio: 160.0 / 224.0, // width/height
                 children: _products.map((Product product) {
                   return new RepaintBoundary(
                     child: new ProductItem(
