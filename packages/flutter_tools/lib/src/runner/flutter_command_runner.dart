@@ -266,13 +266,18 @@ class FlutterCommandRunner extends CommandRunner {
 
   /// Get the entry-points we want to analyze in the Flutter repo.
   List<Directory> getRepoAnalysisEntryPoints() {
-    String rootPath = path.absolute(Cache.flutterRoot);
-    return <Directory>[
+    final String rootPath = path.absolute(Cache.flutterRoot);
+    final List<Directory> result = <Directory>[
       // not bin, and not the root
       new Directory(path.join(rootPath, 'dev')),
       new Directory(path.join(rootPath, 'examples')),
-      new Directory(path.join(rootPath, 'packages')),
     ];
+    // And since analyzer refuses to look at paths that end in "packages/":
+    result.addAll(
+      _gatherProjectPaths(path.join(rootPath, 'packages'))
+      .map/*<Directory>*/((String path) => new Directory(path))
+    );
+    return result;
   }
 
   bool _checkFlutterCopy() {
