@@ -31,6 +31,7 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('preamble', help: 'Display the number of files that will be analyzed.', defaultsTo: true);
     argParser.addFlag('congratulate', help: 'Show output even when there are no errors, warnings, hints, or lints.', defaultsTo: true);
     argParser.addFlag('watch', help: 'Run analysis continuously, watching the filesystem for changes.', negatable: false);
+    argParser.addOption('write', help: 'Also output the results to a file. This is useful with --watch if you want a file to always contain the latest results.');
     argParser.addOption('dart-sdk', help: 'The path to the Dart SDK.', hide: true);
 
     // Hidden option to enable a benchmarking mode.
@@ -202,7 +203,7 @@ class AnalyzeCommand extends FlutterCommand {
     options.analysisOptionsFile = path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'flutter_analysis_options');
     AnalysisDriver analyzer = new AnalysisDriver(options);
 
-    //TODO (pq): consider error handling
+    // TODO(pq): consider error handling
     List<AnalysisErrorDescription> errors = analyzer.analyze(dartFiles);
 
     int errorCount = 0;
@@ -221,7 +222,7 @@ class AnalyzeCommand extends FlutterCommand {
           shouldIgnore = true;
         }
       }
-      //TODO(ianh): Fix the Dart mojom compiler
+      // TODO(ianh): Fix the Dart mojom compiler
       if (error.source.fullName.endsWith('.mojom.dart'))
         shouldIgnore = true;
       if (shouldIgnore)
@@ -229,6 +230,7 @@ class AnalyzeCommand extends FlutterCommand {
       printError(error.asString());
       errorCount += 1;
     }
+    _dumpErrors(errors.map/*<String>*/((AnalysisErrorDescription error) => error.asString()));
 
     stopwatch.stop();
     String elapsed = (stopwatch.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
@@ -251,6 +253,22 @@ class AnalyzeCommand extends FlutterCommand {
       }
     }
     return 0;
+  }
+
+  void _dumpErrors(Iterable<String> errors) {
+    if (argResults['write'] != null) {
+      try {
+        final RandomAccessFile resultsFile = new File(argResults['write']).openSync(mode: FileMode.WRITE);
+        try {
+          resultsFile.lockSync();
+          resultsFile.writeStringSync(errors.join('\n'));
+        } finally {
+          resultsFile.close();
+        }
+      } catch (e) {
+        printError('Failed to save output to "${argResults['write']}": $e');
+      }
+    }
   }
 
   List<File> _collectDartFiles(Directory dir, List<File> collected, {FileFilter exclude}) {
@@ -336,6 +354,8 @@ class AnalyzeCommand extends FlutterCommand {
         if (error.code != null)
           printTrace('error code: ${error.code}');
       }
+
+      _dumpErrors(errors.map/*<String>*/((AnalysisError error) => error.toLegacyString()));
 
       // Print an analysis summary.
       String errorsMessage;
@@ -650,5 +670,9 @@ class AnalysisError implements Comparable<AnalysisError> {
   String toString() {
     String relativePath = path.relative(file);
     return '${severity.toLowerCase().padLeft(7)} • $message • $relativePath:$startLine:$startColumn';
+  }
+
+  String toLegacyString() {
+    return '[${severity.toLowerCase()}] $message ($file:$startLine:$startColumn)';
   }
 }
