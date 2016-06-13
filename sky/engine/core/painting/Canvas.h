@@ -104,25 +104,33 @@ public:
     void drawPicture(Picture* picture);
     void drawParagraph(Paragraph* paragraph, double x, double y);
 
-    void drawPoints(SkCanvas::PointMode pointMode,
-                    const Float32List& points,
-                    const Paint& paint);
+    // The paint argument is first for the following functions because Paint
+    // still uses Dart_GetField to extract data from the DartVM. Once we create
+    // a view unto a Float32List, we cannot re-enter the VM to call
+    // Dart_GetField. That means we either need to process the paint argument
+    // first or remove the Dart_GetField from marshalling the paint argument.
+    //
+    // TODO(abarth): Remove the Dart_GetField from marshalling the paint argument.
 
-    void drawVertices(SkCanvas::VertexMode vertexMode,
+    void drawPoints(const Paint& paint,
+                    SkCanvas::PointMode pointMode,
+                    const Float32List& points);
+
+    void drawVertices(const Paint& paint,
+                      SkCanvas::VertexMode vertexMode,
                       const Float32List& vertices,
                       const Float32List& textureCoordinates,
                       const Int32List& colors,
                       int transferMode,
-                      const Int32List& indices,
-                      const Paint& paint);
+                      const Int32List& indices);
 
-    void drawAtlas(CanvasImage* atlas,
+    void drawAtlas(const Paint& paint,
+                   CanvasImage* atlas,
                    const Float32List& transforms,
                    const Float32List& rects,
                    const Int32List& colors,
                    int transferMode,
-                   const Float32List& cullRect,
-                   const Paint& paint);
+                   const Float32List& cullRect);
 
     SkCanvas* skCanvas() { return m_canvas; }
     void clearSkCanvas() { m_canvas = nullptr; }

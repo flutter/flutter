@@ -330,9 +330,9 @@ void Canvas::drawParagraph(Paragraph* paragraph, double x, double y) {
     paragraph->paint(this, x, y);
 }
 
-void Canvas::drawPoints(SkCanvas::PointMode pointMode,
-                        const Float32List& points,
-                        const Paint& paint) {
+void Canvas::drawPoints(const Paint& paint,
+                        SkCanvas::PointMode pointMode,
+                        const Float32List& points) {
   if (!m_canvas)
     return;
 
@@ -382,13 +382,13 @@ void Canvas::drawVertices(
 }
 
 void Canvas::drawAtlas(
+    const Paint& paint,
     CanvasImage* atlas,
     const Float32List& transforms,
     const Float32List& rects,
     const Int32List& colors,
     int transferMode,
-    const Float32List& cullRect,
-    const Paint& paint) {
+    const Float32List& cullRect) {
   if (!m_canvas)
     return;
 

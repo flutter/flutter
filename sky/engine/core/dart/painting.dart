@@ -813,9 +813,9 @@ class Canvas extends NativeFieldWrapperClass2 {
 
   /// Draws a sequence of points according to the given [PointMode].
   void drawPoints(PointMode pointMode, List<Point> points, Paint paint) {
-    _drawPoints(pointMode.index, _encodePointList(points), paint);
+    _drawPoints(paint, pointMode.index, _encodePointList(points));
   }
-  void _drawPoints(int pointMode, Float32List points, Paint paint) native "Canvas_drawPoints";
+  void _drawPoints(Paint paint, int pointMode, Float32List points) native "Canvas_drawPoints";
 
   void drawVertices(VertexMode vertexMode,
                     List<Point> vertices,
@@ -837,17 +837,17 @@ class Canvas extends NativeFieldWrapperClass2 {
     final Int32List indexBuffer = new Int32List.fromList(indicies);
 
     _drawVertices(
-      vertexMode.index, vertexBuffer, textureCoordinateBuffer, colorBuffer,
-      transferMode.index, indexBuffer, paint
+      paint, vertexMode.index, vertexBuffer, textureCoordinateBuffer,
+      colorBuffer, transferMode.index, indexBuffer
     );
   }
-  void _drawVertices(int vertexMode,
+  void _drawVertices(Paint paint,
+                     int vertexMode,
                      Float32List vertices,
                      Float32List textureCoordinates,
                      Int32List colors,
                      int transferMode,
-                     Int32List indicies,
-                     Paint paint) native "Canvas_drawVertices";
+                     Int32List indicies) native "Canvas_drawVertices";
 
   // TODO(eseidel): Paint should be optional, but optional doesn't work.
   void drawAtlas(Image atlas,
@@ -864,8 +864,8 @@ class Canvas extends NativeFieldWrapperClass2 {
     if (colors.isNotEmpty && colors.length != rectCount)
       throw new ArgumentError("if supplied, [colors] length must match that of [transforms] and [rects]");
 
-    final Float32List rstTransformBuffer = new Float32List(rectCount);
-    final Float32List rectBuffer = new Float32List(rectCount);
+    final Float32List rstTransformBuffer = new Float32List(rectCount * 4);
+    final Float32List rectBuffer = new Float32List(rectCount * 4);
 
     for (int i = 0; i < rectCount; ++i) {
       final int index0 = i * 4;
@@ -887,15 +887,15 @@ class Canvas extends NativeFieldWrapperClass2 {
     final Int32List colorBuffer = colors.isEmpty ? null : _encodeColorList(colors);
     final Float32List cullRectBuffer = cullRect?._value;
 
-    _drawAtlas(atlas, rstTransformBuffer, rectBuffer, colorBuffer, transferMode.index, cullRectBuffer, paint);
+    _drawAtlas(paint, atlas, rstTransformBuffer, rectBuffer, colorBuffer, transferMode.index, cullRectBuffer);
   }
-  void _drawAtlas(Image atlas,
+  void _drawAtlas(Paint paint,
+                  Image atlas,
                   Float32List rstTransforms,
                   Float32List rects,
                   Int32List colors,
                   int transferMode,
-                  Float32List cullRect,
-                  Paint paint) native "Canvas_drawAtlas";
+                  Float32List cullRect) native "Canvas_drawAtlas";
 }
 
 /// An object representing a sequence of recorded graphical operations.
