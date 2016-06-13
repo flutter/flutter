@@ -12,7 +12,6 @@ import '../application_package.dart';
 import '../base/context.dart';
 import '../base/process.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
 import '../services.dart';
