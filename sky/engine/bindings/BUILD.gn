@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("//flutter/lib/jni/dart_jni.gni")
+import("//flutter/lib/ui/dart_ui.gni")
 import("//mojo/dart/packages/mojo/sdk_ext_sources.gni")
 import("//sky/engine/bindings/bindings.gni")
 import("//sky/engine/core/core.gni")
@@ -85,7 +86,9 @@ action("generate_snapshot_bin") {
 
   dart_mojo_internal_path =
       rebase_path("//mojo/dart/packages/mojo/sdk_ext/internal.dart")
-  rebased_dart_ui_path = rebase_path("$bindings_output_dir/dart_ui.dart")
+  # TODO(abarth): Make rebased_dart_ui_path match rebased_dart_jni_path once
+  # dart:ui is fully migrated to //flutter/lib/ui.
+  rebased_dart_ui_path = rebase_path("$bindings_output_dir/dart_ui/ui.dart")
   rebased_dart_jni_path = rebase_path(dart_jni_path)
 
   gen_snapshot_dir =
@@ -151,13 +154,10 @@ source_set("snapshot_cc") {
 }
 
 copy("generate_dart_ui") {
-  sources = [
-    "dart_ui.dart",
-  ]
-  sources += core_dart_files
+  sources = core_dart_files + dart_ui_files
 
   outputs = [
-    "$bindings_output_dir/{{source_file_part}}",
+    "$bindings_output_dir/dart_ui/{{source_file_part}}",
   ]
 }
 

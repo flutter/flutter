@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 import("//build/config/templates/templates.gni")
-import("//sky/engine/bindings/bindings.gni")
 import("//sky/build/template.gni")
 
 template("sky_ios_sdk") {

@@ -21,17 +21,11 @@ import 'dart:typed_data';
 
 part 'Color.dart';
 part 'FilterQuality.dart';
-part 'Offset.dart';
-part 'OffsetBase.dart';
 part 'Paint.dart';
 part 'PaintingStyle.dart';
-part 'Point.dart';
-part 'RRect.dart';
-part 'RSTransform.dart';
-part 'Rect.dart';
-part 'Size.dart';
 part 'TransferMode.dart';
 part 'compositing.dart';
+part 'geometry.dart';
 part 'hash_codes.dart';
 part 'hooks.dart';
 part 'lerp.dart';
