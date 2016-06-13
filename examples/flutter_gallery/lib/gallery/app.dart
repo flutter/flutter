@@ -46,12 +46,12 @@ final Map<String, WidgetBuilder> kRoutes = <String, WidgetBuilder>{
 
 final ThemeData _kGalleryLightTheme = new ThemeData(
   brightness: Brightness.light,
-  primarySwatch: Colors.purple
+  primarySwatch: Colors.green
 );
 
 final ThemeData _kGalleryDarkTheme = new ThemeData(
   brightness: Brightness.dark,
-  primarySwatch: Colors.purple
+  primarySwatch: Colors.green
 );
 
 class GalleryApp extends StatefulWidget {
