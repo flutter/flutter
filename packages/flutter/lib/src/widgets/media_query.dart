@@ -18,7 +18,14 @@ enum Orientation {
   landscape
 }
 
-/// The result of a media query.
+/// Information about a piece of media (e.g., a window).
+///
+/// For example, the [MediaQueryData.size] property contains the width and
+/// height of the current window.
+///
+/// To obtain the current [MediaQueryData] for a given [BuildContext], use the
+/// [MediaQuery.of] function. For example, to obtain the size of the current
+/// window, use `MediaQuery.of(context).size`.
 class MediaQueryData {
   /// Creates data for a media query with explicit values.
   ///
@@ -75,6 +82,15 @@ class MediaQueryData {
 }
 
 /// Establishes a subtree in which media queries resolve to the given data.
+///
+/// For example, to learn the size of the current media (e.g., the window
+/// containing your app), you can read the [MediaQueryData.size] property from
+/// the [MediaQueryData] returned by [MediaQuery.of]:
+/// `MediaQuery.of(context).size`.
+///
+/// Querying the current media using [MediaQuery.of] will cause your widget to
+/// rebuild automatically whenever the [MediaQueryData] changes (e.g., if the
+/// user rotates their device).
 class MediaQuery extends InheritedWidget {
   /// Creates a widget that provides [MediaQueryData] to its descendants.
   ///
@@ -88,7 +104,10 @@ class MediaQuery extends InheritedWidget {
     assert(data != null);
   }
 
-  /// The result of media queries in this subtree.
+  /// Contains information about the current media.
+  ///
+  /// For example, the [MediaQueryData.size] property contains the width and
+  /// height of the current window.
   final MediaQueryData data;
 
   /// The data from the closest instance of this class that encloses the given context.
