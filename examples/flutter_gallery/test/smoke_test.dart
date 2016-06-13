@@ -2,23 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection' show LinkedHashSet;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_gallery/gallery/app.dart' as flutter_gallery_app;
-import 'package:flutter_gallery/gallery/item.dart' as flutter_gallery_item;
+import 'package:flutter_gallery/gallery/item.dart' show GalleryItem, kAllGalleryItems;
 import 'package:flutter_gallery/main.dart' as flutter_gallery_main;
 
-// Warning: the following strings must be kept in sync with GalleryHome.
-const List<String> demoCategories = const <String>[
-  'Demos',
-  'Components',
-  'Style'
-];
+final List<String> demoCategories = new LinkedHashSet<String>.from(
+  kAllGalleryItems.map((GalleryItem item) => item.category)
+).toList();
+
+final List<String> routeNames =
+  kAllGalleryItems.map((GalleryItem item) => item.routeName).toList();
 
 Finder findGalleryItemByRouteName(WidgetTester tester, String routeName) {
   return find.byWidgetPredicate((Widget widget) {
-    return widget is flutter_gallery_item.GalleryItem &&
-        widget.routeName == routeName;
+    return widget is GalleryItem && widget.routeName == routeName;
   });
 }
 
@@ -34,8 +34,8 @@ Finder findNavigationMenuButton(WidgetTester tester) =>
 Finder findBackButton(WidgetTester tester) => byTooltip(tester, 'Back');
 
 // Start a gallery demo and then go back. This function assumes that the
-// we're starting on home route and that the submenu that contains the demo
-// called 'name' is already open.
+// we're starting on the home route and that the submenu that contains
+// the item for a demo that pushes route 'routeName' is already open.
 Future<Null> smokeDemo(WidgetTester tester, String routeName) async {
   // Ensure that we're (likely to be) on the home page
   final Finder menuItem = findGalleryItemByRouteName(tester, routeName);
@@ -84,10 +84,8 @@ void main() {
 
     final List<double> scrollDeltas = new List<double>();
     double previousY = tester.getTopRight(find.text(demoCategories[0])).y;
-    final List<String> routeNames = flutter_gallery_app.kRoutes.keys.toList();
     for (String routeName in routeNames) {
-      final double y =
-          tester.getTopRight(findGalleryItemByRouteName(tester, routeName)).y;
+      final double y = tester.getTopRight(findGalleryItemByRouteName(tester, routeName)).y;
       scrollDeltas.add(previousY - y);
       previousY = y;
     }
