@@ -8,6 +8,7 @@ assets:
   - assets/section_components.png
   - assets/section_patterns.png
   - assets/section_usability.png
+  - packages/flutter_gallery_assets/appbar_background.jpg
   - packages/flutter_gallery_assets/pesto/avatar.jpg
   - packages/flutter_gallery_assets/pesto/image10.jpg
   - packages/flutter_gallery_assets/pesto/image11.jpg
