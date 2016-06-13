@@ -40,8 +40,8 @@ void CanvasGradient::initLinear(const Float32List& end_points,
                                 const Int32List& colors,
                                 const Float32List& color_stops,
                                 SkShader::TileMode tile_mode) {
-  DCHECK(end_points.num_elements() == 2);
-  DCHECK(colors.num_elements() == color_stops.num_elements() || color_stops.data() == nullptr);
+  DCHECK(end_points.num_elements() == 4);
+  DCHECK(colors.num_elements() * 2 == color_stops.num_elements() || color_stops.data() == nullptr);
 
   static_assert(sizeof(SkPoint) == sizeof(float) * 2, "SkPoint doesn't use floats.");
   static_assert(sizeof(SkColor) == sizeof(int32_t), "SkColor doesn't use int32_t.");
@@ -60,7 +60,7 @@ void CanvasGradient::initRadial(double centerX,
                                 const Int32List& colors,
                                 const Float32List& color_stops,
                                 SkShader::TileMode tile_mode) {
-  DCHECK(colors.num_elements() == color_stops.num_elements() || color_stops.data() == nullptr);
+  DCHECK(colors.num_elements() * 2 == color_stops.num_elements() || color_stops.data() == nullptr);
 
   static_assert(sizeof(SkColor) == sizeof(int32_t), "SkColor doesn't use int32_t.");
 

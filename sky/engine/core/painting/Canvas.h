@@ -23,6 +23,9 @@ class DartLibraryNatives;
 class Paragraph;
 
 template <>
+struct DartConverter<SkCanvas::PointMode> : public DartConverterInteger<SkCanvas::PointMode> {};
+
+template <>
 struct DartConverter<SkCanvas::VertexMode> : public DartConverterInteger<SkCanvas::VertexMode> {};
 
 class Canvas : public base::RefCountedThreadSafe<Canvas>, public DartWrappable {
@@ -100,6 +103,10 @@ public:
                        const Paint& paint);
     void drawPicture(Picture* picture);
     void drawParagraph(Paragraph* paragraph, double x, double y);
+
+    void drawPoints(SkCanvas::PointMode pointMode,
+                    const Float32List& points,
+                    const Paint& paint);
 
     void drawVertices(SkCanvas::VertexMode vertexMode,
                       const Float32List& vertices,

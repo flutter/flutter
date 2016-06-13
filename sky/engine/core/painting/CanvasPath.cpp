@@ -8,6 +8,7 @@
 #include "flutter/tonic/dart_binding_macros.h"
 #include "flutter/tonic/dart_converter.h"
 #include "flutter/tonic/dart_library_natives.h"
+#include "sky/engine/core/painting/Matrix.h"
 
 namespace blink {
 
@@ -20,6 +21,8 @@ static void Path_constructor(Dart_NativeArguments args) {
 IMPLEMENT_WRAPPERTYPEINFO(ui, Path);
 
 #define FOR_EACH_BINDING(V) \
+  V(Path, getFillType) \
+  V(Path, setFillType) \
   V(Path, moveTo) \
   V(Path, relativeMoveTo) \
   V(Path, lineTo) \
@@ -34,11 +37,15 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Path);
   V(Path, addRect) \
   V(Path, addOval) \
   V(Path, addArc) \
+  V(Path, addPolygon) \
   V(Path, addRRect) \
+  V(Path, addPath) \
+  V(Path, extendWithPath) \
   V(Path, close) \
   V(Path, reset) \
   V(Path, contains) \
-  V(Path, shift)
+  V(Path, shift) \
+  V(Path, transform)
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
@@ -60,6 +67,12 @@ CanvasPath::~CanvasPath()
 scoped_refptr<CanvasPath> CanvasPath::shift(double dx, double dy) {
   scoped_refptr<CanvasPath> path = CanvasPath::create();
   m_path.offset(dx, dy, &path->m_path);
+  return std::move(path);
+}
+
+scoped_refptr<CanvasPath> CanvasPath::transform(const Float64List& matrix4) {
+  scoped_refptr<CanvasPath> path = CanvasPath::create();
+  m_path.transform(toSkMatrix(matrix4), &path->m_path);
   return std::move(path);
 }
 

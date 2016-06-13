@@ -37,6 +37,21 @@ void decodeImageFromDataPipe(int handle, ImageDecoderCallback callback)
 void decodeImageFromList(Uint8List list, ImageDecoderCallback callback)
     native "decodeImageFromList";
 
+/// Determines how the interior of a [Path] is calculated.
+enum PathFillType {
+  /// The interior is defined by a non-zero sum of signed edge crossings.
+  winding,
+
+  /// The interior is defined by an odd number of edge crossings.
+  evenOdd,
+
+  /// The interior is defined as the exterior region calculated by [winding].
+  inverseWinding,
+
+  /// The interior is defined as the exterior region calculated by [evenOdd].
+  inverseEvenOdd,
+}
+
 /// A complex, one-dimensional subset of a plane.
 ///
 /// A path consists of a number of subpaths, and a _current point_.
@@ -60,6 +75,13 @@ class Path extends NativeFieldWrapperClass2 {
   /// Create a new empty [Path] object.
   Path() { _constructor(); }
   void _constructor() native "Path_constructor";
+
+  /// Determines how the interior of this path is calculated.
+  PathFillType get fillType => PathFillType.values[_getFillType()];
+  set fillType (PathFillType value) => _setFillType(value.index);
+
+  int _getFillType() native "Path_getFillType";
+  void _setFillType(int fillType) native "Path_setFillType";
 
   /// Starts a new subpath at the given coordinate.
   void moveTo(double x, double y) native "Path_moveTo";
@@ -162,11 +184,29 @@ class Path extends NativeFieldWrapperClass2 {
   void _addArc(double left, double top, double right, double bottom,
                double startAngle, double sweepAngle) native "Path_addArc";
 
+  /// Adds a new subpath with a sequence of line segments that connect the given
+  /// points. If `close` is true, a final line segment will be added that
+  /// connects the last point to the first point.
+  void addPolygon(List<Point> points, bool close) {
+    _addPolygon(_encodePointList(points), close);
+  }
+  void _addPolygon(Float32List points, bool close) native "Path_addPolygon";
+
   /// Adds a new subpath that consists of the straight lines and
   /// curves needed to form the rounded rectangle described by the
   /// argument.
   void addRRect(RRect rrect) => _addRRect(rrect._value);
   void _addRRect(Float32List rrect) native "Path_addRRect";
+
+  /// Adds a new subpath that consists of the given path offset by the given
+  /// offset.
+  void addPath(Path path, Offset offset) => _addPath(path, offset.dx, offset.dy);
+  void _addPath(Path path, double dx, double dy) native "Path_addPath";
+
+  /// Adds the given path to this path by extending the current segment of this
+  /// path with the the first segment of the given path.
+  void extendWithPath(Path path, Offset offset) => _extendWithPath(path, offset.dx, offset.dy);
+  void _extendWithPath(Path path, double dx, double dy) native "Path_extendWithPath";
 
   /// Closes the last subpath, as if a straight line had been drawn
   /// from the current point to the first point of the subpath.
@@ -189,6 +229,15 @@ class Path extends NativeFieldWrapperClass2 {
   /// subpath translated by the given offset.
   Path shift(Offset offset) => _shift(offset.dx, offset.dy);
   Path _shift(double dx, double dy) native "Path_shift";
+
+  /// Returns a copy of the path with all the segments of every
+  /// subpath transformed by the given matrix.
+  Path transform(Float64List matrix4) {
+    if (matrix4.length != 16)
+      throw new ArgumentError("[matrix4] must have 16 entries.");
+    return _transform(matrix4);
+  }
+  Path _transform(Float64List matrix4) native "Path_transform";
 }
 
 /// Styles to use for blurs in [MaskFilter] objects.
@@ -433,11 +482,31 @@ class ImageShader extends Shader {
 }
 
 /// Defines how a list of points is interpreted when drawing a set of triangles.
-/// See Skia or OpenGL documentation for more details.
+///
+/// Used by [Canvas.drawVertices].
 enum VertexMode {
+  /// Draw each sequence of three points as the vertices of a triangle.
   triangles,
+
+  /// Draw each sliding window of three points as the vertices of a triangle.
   triangleStrip,
+
+  /// Draw the first point and each sliding window of two points as the vertices of a triangle.
   triangleFan,
+}
+
+/// Defines how a list of points is interpreted when drawing a set of points.
+///
+/// Used by [Canvas.drawPoints].
+enum PointMode {
+  // Draw each point separately.
+  points,
+
+  // Draw each sequence of two points as a line segment.
+  lines,
+
+  // Draw the entire sequence of point as the vertices of a polygon.
+  polygon,
 }
 
 /// An interface for recording graphical operations.
@@ -741,6 +810,12 @@ class Canvas extends NativeFieldWrapperClass2 {
     _drawParagraph(paragraph, offset.dx, offset.dy);
   }
   void _drawParagraph(Paragraph paragraph, double x, double y) native "Canvas_drawParagraph";
+
+  /// Draws a sequence of points according to the given [PointMode].
+  void drawPoints(PointMode pointMode, List<Point> points, Paint paint) {
+    _drawPoints(pointMode.index, _encodePointList(points), paint);
+  }
+  void _drawPoints(int pointMode, Float32List points, Paint paint) native "Canvas_drawPoints";
 
   void drawVertices(VertexMode vertexMode,
                     List<Point> vertices,

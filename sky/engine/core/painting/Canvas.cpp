@@ -53,6 +53,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Canvas);
   V(Canvas, drawImageNine) \
   V(Canvas, drawPicture) \
   V(Canvas, drawParagraph) \
+  V(Canvas, drawPoints) \
   V(Canvas, drawVertices) \
   V(Canvas, drawAtlas)
 
@@ -329,6 +330,22 @@ void Canvas::drawParagraph(Paragraph* paragraph, double x, double y) {
     paragraph->paint(this, x, y);
 }
 
+void Canvas::drawPoints(SkCanvas::PointMode pointMode,
+                        const Float32List& points,
+                        const Paint& paint) {
+  if (!m_canvas)
+    return;
+
+  static_assert(sizeof(SkPoint) == sizeof(float) * 2, "SkPoint doesn't use floats.");
+
+  m_canvas->drawPoints(
+    pointMode,
+    points.num_elements() / 2,  // SkPoints have two floats.
+    reinterpret_cast<const SkPoint*>(points.data()),
+    *paint.paint()
+  );
+}
+
 void Canvas::drawVertices(
     SkCanvas::VertexMode vertexMode,
     const Float32List& vertices,
@@ -353,7 +370,7 @@ void Canvas::drawVertices(
 
   m_canvas->drawVertices(
     vertexMode,
-    vertices.num_elements(),
+    vertices.num_elements() / 2,  // SkPoints have two floats.
     reinterpret_cast<const SkPoint*>(vertices.data()),
     reinterpret_cast<const SkPoint*>(textureCoordinates.data()),
     reinterpret_cast<const SkColor*>(colors.data()),
@@ -385,7 +402,7 @@ void Canvas::drawAtlas(
     reinterpret_cast<const SkRSXform*>(transforms.data()),
     reinterpret_cast<const SkRect*>(rects.data()),
     reinterpret_cast<const SkColor*>(colors.data()),
-    rects.num_elements(),
+    rects.num_elements() / 4,  // SkRect have four floats.
     static_cast<SkXfermode::Mode>(transferMode),
     reinterpret_cast<const SkRect*>(cullRect.data()),
     paint.paint()

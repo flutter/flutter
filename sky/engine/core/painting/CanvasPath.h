@@ -9,6 +9,8 @@
 
 #include "base/memory/ref_counted.h"
 #include "flutter/tonic/dart_wrappable.h"
+#include "flutter/tonic/float32_list.h"
+#include "flutter/tonic/float64_list.h"
 #include "sky/engine/core/painting/RRect.h"
 #include "third_party/skia/include/core/SkPath.h"
 
@@ -26,6 +28,9 @@ class CanvasPath : public base::RefCountedThreadSafe<CanvasPath>, public DartWra
 public:
     ~CanvasPath() override;
     static scoped_refptr<CanvasPath> create() { return new CanvasPath(); }
+
+    int getFillType() { return m_path.getFillType(); }
+    void setFillType(int fill_type) { m_path.setFillType(static_cast<SkPath::FillType>(fill_type)); }
 
     void moveTo(float x, float y) { m_path.moveTo(x, y); }
     void relativeMoveTo(float x, float y) { m_path.rMoveTo(x, y); }
@@ -45,11 +50,23 @@ public:
     void addArc(float left, float top, float right, float bottom, float startAngle, float sweepAngle) {
         m_path.addArc(SkRect::MakeLTRB(left, top, right, bottom), startAngle*180.0/M_PI, sweepAngle*180.0/M_PI);
     }
+    void addPolygon(const Float32List& points, bool close) {
+        m_path.addPoly(reinterpret_cast<const SkPoint*>(points.data()), points.num_elements() / 2, close);
+    }
     void addRRect(const RRect& rrect) { m_path.addRRect(rrect.sk_rrect); }
+    void addPath(CanvasPath* path, double dx, double dy) {
+      if (path)
+        m_path.addPath(path->path(), dx, dy, SkPath::kAppend_AddPathMode);
+    }
+    void extendWithPath(CanvasPath* path, double dx, double dy) {
+      if (path)
+        m_path.addPath(path->path(), dx, dy, SkPath::kExtend_AddPathMode);
+    }
     void close() { m_path.close(); }
     void reset() { m_path.reset(); }
     bool contains(double x, double y) { return m_path.contains(x, y); }
     scoped_refptr<CanvasPath> shift(double dx, double dy);
+    scoped_refptr<CanvasPath> transform(const Float64List& matrix4);
 
     const SkPath& path() const { return m_path; }
 
