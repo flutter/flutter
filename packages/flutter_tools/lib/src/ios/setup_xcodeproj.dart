@@ -7,52 +7,11 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import '../base/process.dart';
+import '../base/file_system.dart' show copyFolderSync;
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart';
-
-bool _inflateXcodeArchive(String directory, List<int> archiveBytes) {
-  printStatus('Unzipping Xcode project to local directory...');
-
-  // We cannot use ArchiveFile because this archive contains files that are exectuable
-  // and there is currently no provision to modify file permissions during
-  // or after creation. See https://github.com/dart-lang/sdk/issues/15078.
-  // So we depend on the platform to unzip the archive for us.
-
-  Directory tempDir = Directory.systemTemp.createTempSync('flutter_xcode');
-  File tempFile = new File(path.join(tempDir.path, 'FlutterXcode.zip'))..createSync();
-  tempFile.writeAsBytesSync(archiveBytes);
-
-  try {
-    Directory dir = new Directory(directory);
-
-    // Remove the old generated project if one is present
-    if (dir.existsSync())
-      dir.deleteSync(recursive: true);
-
-    // Create the directory so unzip can write to it
-    dir.createSync(recursive: true);
-
-    // Unzip the Xcode project into the new empty directory
-    runCheckedSync(<String>['/usr/bin/unzip', tempFile.path, '-d', dir.path]);
-  } catch (error) {
-    printTrace('$error');
-    return false;
-  }
-
-  // Cleanup the temp directory after unzipping
-  tempDir.deleteSync(recursive: true);
-
-  // Verify that we have an Xcode project
-  Directory flutterProj = new Directory(path.join(directory, 'FlutterApplication.xcodeproj'));
-  if (!flutterProj.existsSync()) {
-    printError("${flutterProj.path} does not exist");
-    return false;
-  }
-
-  return true;
-}
+import '../version.dart';
 
 void updateXcodeGeneratedProperties(String projectPath, BuildMode mode, String target) {
   StringBuffer localsBuffer = new StringBuffer();
@@ -93,7 +52,7 @@ bool xcodeProjectRequiresUpdate(BuildMode mode) {
     return true;
   }
 
-  if (revisionFile.readAsStringSync() != '${Cache.engineRevision}-${getModeName(mode)}') {
+  if (revisionFile.readAsStringSync() != _getCurrentXcodeRevisionString(mode)) {
     printTrace("The revision stamp and the Flutter engine revision differ or the build mode has changed.");
     printTrace("Project needs to be updated.");
     return true;
@@ -104,36 +63,27 @@ bool xcodeProjectRequiresUpdate(BuildMode mode) {
 }
 
 Future<int> setupXcodeProjectHarness(String flutterProjectPath, BuildMode mode, String target) async {
-  // Step 1: Fetch the archive from the cloud
+  // Step 1: Copy templates into user project directory
   String iosFilesPath = path.join(flutterProjectPath, 'ios');
-  String xcodeprojPath = path.join(iosFilesPath, '.generated');
+  String xcodeProjectPath = path.join(iosFilesPath, '.generated');
+  String templatesPath = path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'build-ios');
+  copyFolderSync(templatesPath, xcodeProjectPath);
 
-  Directory toolDir = tools.getEngineArtifactsDirectory(TargetPlatform.ios, mode);
-  File archiveFile = new File(path.join(toolDir.path, 'FlutterXcode.zip'));
-  List<int> archiveBytes = archiveFile.readAsBytesSync();
-
-  if (archiveBytes.isEmpty) {
-    printError('Error: No archive bytes received.');
-    return 1;
-  }
-
-  // Step 2: Inflate the archive into the user project directory
-  bool result = _inflateXcodeArchive(xcodeprojPath, archiveBytes);
-  if (!result) {
-    printError('Could not inflate the Xcode project archive.');
-    return 1;
-  }
-
-  // Step 3: Populate the Generated.xcconfig with project specific paths
+  // Step 2: Populate the Generated.xcconfig with project specific paths
   updateXcodeGeneratedProperties(flutterProjectPath, mode, target);
 
-  // Step 4: Write the REVISION file
-  File revisionFile = new File(path.join(xcodeprojPath, 'REVISION'));
+  // Step 3: Write the REVISION file
+  File revisionFile = new File(path.join(xcodeProjectPath, 'REVISION'));
   revisionFile.createSync();
-  revisionFile.writeAsStringSync('${Cache.engineRevision}-${getModeName(mode)}');
+  revisionFile.writeAsStringSync(_getCurrentXcodeRevisionString(mode));
 
-  // Step 5: Tell the user the location of the generated project.
+  // Step 4: Tell the user the location of the generated project.
   printStatus('Xcode project created in $iosFilesPath/.');
 
   return 0;
 }
+
+String _getCurrentXcodeRevisionString(BuildMode mode) => (new StringBuffer()
+    ..write('${FlutterVersion.getVersion().frameworkRevision}')
+    ..write('-${tools.isLocalEngine ? tools.engineBuildPath : getModeName(mode)}')
+    ).toString();
