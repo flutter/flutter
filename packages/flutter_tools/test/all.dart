@@ -25,6 +25,7 @@ import 'logs_test.dart' as logs_test;
 import 'os_utils_test.dart' as os_utils_test;
 import 'protocol_discovery_test.dart' as protocol_discovery_test;
 import 'run_test.dart' as run_test;
+import 'source_graph_test.dart' as source_graph_test;
 import 'stop_test.dart' as stop_test;
 import 'toolchain_test.dart' as toolchain_test;
 import 'trace_test.dart' as trace_test;
@@ -49,6 +50,7 @@ void main() {
   os_utils_test.main();
   protocol_discovery_test.main();
   run_test.main();
+  source_graph_test.main();
   stop_test.main();
   toolchain_test.main();
   trace_test.main();
