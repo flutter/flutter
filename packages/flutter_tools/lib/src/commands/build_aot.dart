@@ -271,7 +271,7 @@ Future<String> _buildAotSnapshot(
   // On iOS, we use Xcode to compile the snapshot into a dynamic library that the
   // end-developer can link into their app.
   if (platform == TargetPlatform.ios) {
-    printStatus('Building app.so...');
+    printStatus('Building app.dylib...');
 
     // These names are known to from the engine.
     const String kDartVmIsolateSnapshotBuffer = 'kDartVmIsolateSnapshotBuffer';
@@ -306,7 +306,7 @@ Future<String> _buildAotSnapshot(
       ..addAll(commonBuildOptions)
       ..addAll(<String>['-c', kDartIsolateSnapshotBufferC, '-o', kDartIsolateSnapshotBufferO]));
 
-    String appSo = path.join(outputDir.path, 'app.so');
+    String appSo = path.join(outputDir.path, 'app.dylib');
 
     List<String> linkCommand = <String>['xcrun', 'clang']
       ..addAll(commonBuildOptions)
@@ -314,7 +314,7 @@ Future<String> _buildAotSnapshot(
         '-dynamiclib',
         '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
         '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
-        '-install_name', '@rpath/app.so',
+        '-install_name', '@rpath/app.dylib',
         '-o', appSo,
         kDartVmIsolateSnapshotBufferO,
         kDartIsolateSnapshotBufferO,

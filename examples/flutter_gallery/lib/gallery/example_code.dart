@@ -26,7 +26,8 @@ new RaisedButton(
 // Buttons are disabled when onPressed isn't
 // specified or is null.
 new RaisedButton(
-  child: new Text('BUTTON TITLE')
+  child: new Text('BUTTON TITLE'),
+  onPressed: null
 );
 // END
 
@@ -44,7 +45,8 @@ new FlatButton(
 // Buttons are disabled when onPressed isn't
 // specified or is null.
 new FlatButton(
-  child: new Text('BUTTON TITLE')
+  child: new Text('BUTTON TITLE'),
+  onPressed: null
 );
 // END
 
@@ -97,7 +99,8 @@ new Scaffold(
     title: new Text('Demo')
   ),
   floatingActionButton: new FloatingActionButton(
-    child: new Icon(icon: Icons.add)
+    child: new Icon(icon: Icons.add),
+    onPressed: null
   )
 );
 // END
@@ -127,7 +130,7 @@ new Checkbox(
 // Create a disabled checkbox.
 // Checkboxes are disabled when onChanged isn't
 // specified or null.
-new Checkbox(value: false);
+new Checkbox(value: false, onChanged: null);
 // END
 
 
@@ -166,7 +169,8 @@ new Row(
 // Creates a disabled radio button.
 new Radio<int>(
   value: 0,
-  groupValue: 0
+  groupValue: 0,
+  onChanged: null
 );
 // END
 
@@ -188,7 +192,7 @@ new Switch(
 // Create a disabled switch.
 // Switches are disabled when onChanged isn't
 // specified or null.
-new Switch(value: false);
+new Switch(value: false, onChanged: null);
 // END
   }
 }

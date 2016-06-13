@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 import 'colors.dart';
 import 'constants.dart';
@@ -50,13 +51,13 @@ class Slider extends StatelessWidget {
   /// * [onChanged] is called when the user selects a new value for the slider.
   Slider({
     Key key,
-    this.value,
+    @required this.value,
+    @required this.onChanged,
     this.min: 0.0,
     this.max: 1.0,
     this.divisions,
     this.label,
-    this.activeColor,
-    this.onChanged
+    this.activeColor
   }) : super(key: key) {
     assert(value != null);
     assert(min != null);
@@ -69,6 +70,15 @@ class Slider extends StatelessWidget {
   ///
   /// The slider's thumb is drawn at a position that corresponds to this value.
   final double value;
+
+  /// Called when the user selects a new value for the slider.
+  ///
+  /// The slider passes the new value to the callback but does not actually
+  /// change state until the parent widget rebuilds the slider with the new
+  /// value.
+  ///
+  /// If null, the slider will be displayed as disabled.
+  final ValueChanged<double> onChanged;
 
   /// The minium value the user can select.
   ///
@@ -96,15 +106,6 @@ class Slider extends StatelessWidget {
   ///
   /// Defaults to accent color of the current [Theme].
   final Color activeColor;
-
-  /// Called when the user selects a new value for the slider.
-  ///
-  /// The slider passes the new value to the callback but does not actually
-  /// change state until the parent widget rebuilds the slider with the new
-  /// value.
-  ///
-  /// If null, the slider will be displayed as disabled.
-  final ValueChanged<double> onChanged;
 
   void _handleChanged(double value) {
     assert(onChanged != null);

@@ -10,6 +10,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart' as yaml;
 
+import '../base/logger.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/analysis.dart';
@@ -270,17 +271,27 @@ class AnalyzeCommand extends FlutterCommand {
     return collected;
   }
 
+
+  String analysisTarget;
+  bool firstAnalysis = true;
+  Set<String> analyzedPaths = new Set<String>();
+  Map<String, List<AnalysisError>> analysisErrors = <String, List<AnalysisError>>{};
+  Stopwatch analysisTimer;
+  int lastErrorCount = 0;
+  Status analysisStatus;
+
   Future<int> _analyzeWatch() async {
     List<String> directories;
 
     if (argResults['flutter-repo']) {
-      directories = runner.getRepoPackages().map((Directory dir) => dir.path).toList();
-      printStatus('Analyzing Flutter repository (${directories.length} projects).');
+      directories = runner.getRepoAnalysisEntryPoints().map((Directory dir) => dir.path).toList();
+      analysisTarget = 'Flutter repository';
+      printTrace('Analyzing Flutter repository:');
       for (String projectPath in directories)
         printTrace('  ${path.relative(projectPath)}');
-      printStatus('');
     } else {
       directories = <String>[Directory.current.path];
+      analysisTarget = Directory.current.path;
     }
 
     AnalysisServer server = new AnalysisServer(dartSdkPath, directories);
@@ -288,35 +299,35 @@ class AnalyzeCommand extends FlutterCommand {
     server.onErrors.listen(_handleAnalysisErrors);
 
     await server.start();
+    final int exitCode = await server.onExit;
 
-    int exitCode = await server.onExit;
     printStatus('Analysis server exited with code $exitCode.');
     return 0;
   }
 
-  bool firstAnalysis = true;
-  Set<String> analyzedPaths = new Set<String>();
-  Map<String, List<AnalysisError>> analysisErrors = <String, List<AnalysisError>>{};
-  Stopwatch analysisTimer;
-  int lastErrorCount = 0;
-
   void _handleAnalysisStatus(AnalysisServer server, bool isAnalyzing) {
     if (isAnalyzing) {
-      if (firstAnalysis) {
-        printStatus('Analyzing ${path.basename(Directory.current.path)}...');
-      } else {
-        printStatus('');
-      }
-
+      analysisStatus?.cancel();
+      if (!firstAnalysis)
+        printStatus('\n');
+      analysisStatus = logger.startProgress('Analyzing $analysisTarget...');
       analyzedPaths.clear();
       analysisTimer = new Stopwatch()..start();
     } else {
+      analysisStatus?.stop(showElapsedTime: true);
       analysisTimer.stop();
 
-      // Sort and print errors.
-      List<AnalysisError> errors = <AnalysisError>[];
-      for (List<AnalysisError> fileErrors in analysisErrors.values)
-        errors.addAll(fileErrors);
+      logger.printStatus(terminal.clearScreen(), newline: false);
+
+      // Remove errors for deleted files, sort, and print errors.
+      final List<AnalysisError> errors = <AnalysisError>[];
+      for (String path in analysisErrors.keys.toList()) {
+        if (FileSystemEntity.isFileSync(path)) {
+          errors.addAll(analysisErrors[path]);
+        } else {
+          analysisErrors.remove(path);
+        }
+      }
 
       errors.sort();
 
@@ -336,11 +347,11 @@ class AnalyzeCommand extends FlutterCommand {
       if (firstAnalysis)
         errorsMessage = '$issueCount ${pluralize('issue', issueCount)} found';
       else if (issueDiff > 0)
-        errorsMessage = '$issueDiff new ${pluralize('issue', issueDiff)}, $issueCount total';
+        errorsMessage = '$issueCount ${pluralize('issue', issueCount)} found ($issueDiff new)';
       else if (issueDiff < 0)
-        errorsMessage = '${-issueDiff} ${pluralize('issue', -issueDiff)} fixed, $issueCount remaining';
+        errorsMessage = '$issueCount ${pluralize('issue', issueCount)} found (${-issueDiff} fixed)';
       else if (issueCount != 0)
-        errorsMessage = 'no new issues, $issueCount total';
+        errorsMessage = '$issueCount ${pluralize('issue', issueCount)} found';
       else
         errorsMessage = 'no issues found';
 

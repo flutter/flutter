@@ -106,7 +106,8 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             }
           ),
           new RaisedButton(
-            child: new Text('DISABLED')
+            child: new Text('DISABLED'),
+            onPressed: null
           )
         ]
       )
@@ -126,7 +127,8 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             }
           ),
           new FlatButton(
-            child: new Text('DISABLED')
+            child: new Text('DISABLED'),
+            onPressed: null
           )
         ]
       )
@@ -173,7 +175,8 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             color: iconButtonToggle ? Theme.of(context).primaryColor : null
           ),
           new IconButton(
-            icon: Icons.thumb_up
+            icon: Icons.thumb_up,
+            onPressed: null
           )
         ]
         .map((Widget button) => new SizedBox(width: 64.0, height: 64.0, child: button))

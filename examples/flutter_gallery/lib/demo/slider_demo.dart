@@ -34,7 +34,7 @@ class _SliderDemoState extends State<SliderDemo> {
               }
             )
           ),
-          new Center(child: new Slider(value: 0.25)),
+          new Center(child: new Slider(value: 0.25, onChanged: null)),
           new Center(
             child: new Slider(
               value: _discreteValue,

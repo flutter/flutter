@@ -12,7 +12,7 @@ import 'home.dart';
 final Map<String, WidgetBuilder> kRoutes = <String, WidgetBuilder>{
   PestoDemo.routeName: (BuildContext context) => new PestoDemo(),
   ShrineDemo.routeName: (BuildContext context) => new ShrineDemo(),
-  Calculator.routeName: (BuildContext context) => new Calculator(),
+  CalculatorDemo.routeName: (BuildContext context) => new CalculatorDemo(),
   ContactsDemo.routeName: (BuildContext context) => new ContactsDemo(),
   ButtonsDemo.routeName: (BuildContext context) => new ButtonsDemo(),
   CardsDemo.routeName: (BuildContext context) => new CardsDemo(),
@@ -46,12 +46,12 @@ final Map<String, WidgetBuilder> kRoutes = <String, WidgetBuilder>{
 
 final ThemeData _kGalleryLightTheme = new ThemeData(
   brightness: Brightness.light,
-  primarySwatch: Colors.purple
+  primarySwatch: Colors.green
 );
 
 final ThemeData _kGalleryDarkTheme = new ThemeData(
   brightness: Brightness.dark,
-  primarySwatch: Colors.purple
+  primarySwatch: Colors.green
 );
 
 class GalleryApp extends StatefulWidget {

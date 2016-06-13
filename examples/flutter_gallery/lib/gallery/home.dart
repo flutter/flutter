@@ -59,6 +59,11 @@ class GalleryHomeState extends State<GalleryHome> {
       appBar: new AppBar(
         expandedHeight: _kFlexibleSpaceMaxHeight,
         flexibleSpace: new FlexibleSpaceBar(
+          background: new AssetImage(
+            name: 'packages/flutter_gallery_assets/appbar_background.jpg',
+            fit: ImageFit.cover,
+            height: _kFlexibleSpaceMaxHeight
+          ),
           title: new Text('Flutter gallery')
         )
       ),
@@ -73,7 +78,7 @@ class GalleryHomeState extends State<GalleryHome> {
             children: <Widget>[
               new GalleryItem(title: 'Pesto', routeName: PestoDemo.routeName),
               new GalleryItem(title: 'Shrine', routeName: ShrineDemo.routeName),
-              new GalleryItem(title: 'Calculator', routeName: Calculator.routeName),
+              new GalleryItem(title: 'Calculator', routeName: CalculatorDemo.routeName),
               new GalleryItem(title: 'Contacts', routeName: ContactsDemo.routeName)
             ]
           ),

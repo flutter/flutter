@@ -64,3 +64,26 @@ void ensureDirectoryExists(String filePath) {
     return;
   syncFs.directory(dirPath).create(recursive: true);
 }
+
+/// Recursively copies a folder from `srcPath` to `destPath`
+void copyFolderSync(String srcPath, String destPath) {
+  dart_io.Directory srcDir = new dart_io.Directory(srcPath);
+  if (!srcDir.existsSync())
+    throw new Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
+
+  dart_io.Directory destDir = new dart_io.Directory(destPath);
+  if (!destDir.existsSync())
+    destDir.createSync(recursive: true);
+
+  srcDir.listSync().forEach((dart_io.FileSystemEntity entity) {
+    String newPath = path.join(destDir.path, path.basename(entity.path));
+    if (entity is dart_io.File) {
+      dart_io.File newFile = new dart_io.File(newPath);
+      newFile.writeAsBytesSync(entity.readAsBytesSync());
+    } else if (entity is dart_io.Directory) {
+      copyFolderSync(entity.path, newPath);
+    } else {
+      throw new Exception('${entity.path} is neither File nor Directory');
+    }
+  });
+}

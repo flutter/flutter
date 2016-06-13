@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 import 'debug.dart';
 import 'icon.dart';
@@ -376,9 +377,9 @@ class DropDownButton<T> extends StatefulWidget {
   /// defaults, so do not need to be specified).
   DropDownButton({
     Key key,
-    this.items,
-    this.value,
-    this.onChanged,
+    @required this.items,
+    @required this.value,
+    @required this.onChanged,
     this.elevation: 8,
     this.style,
     this.iconSize: 36.0

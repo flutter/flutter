@@ -58,7 +58,7 @@ BuildApp() {
   AssertExists $derived_dir
 
   RunCommand rm -f ${derived_dir}/Flutter.framework
-  RunCommand rm -f ${derived_dir}/app.so
+  RunCommand rm -f ${derived_dir}/app.dylib
   RunCommand rm -f ${derived_dir}/app.flx
   RunCommand cp -r ${framework_path}/Flutter.framework ${derived_dir}
   RunCommand pushd ${project_path}
@@ -89,9 +89,9 @@ BuildApp() {
       exit -1
     fi
 
-    RunCommand cp build/aot/app.so ${derived_dir}/app.so
+    RunCommand cp build/aot/app.dylib ${derived_dir}/app.dylib
   else
-    RunCommand eval "$(echo \"static const int Moo = 88;\" | xcrun clang -x c --shared -o ${derived_dir}/app.so -)"
+    RunCommand eval "$(echo \"static const int Moo = 88;\" | xcrun clang -x c --shared -o ${derived_dir}/app.dylib -)"
   fi
 
   local precompilation_flag=""

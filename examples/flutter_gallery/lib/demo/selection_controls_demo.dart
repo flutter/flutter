@@ -101,8 +101,8 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
             mainAxisAlignment: MainAxisAlignment.collapse,
             children: <Widget>[
               // Disabled checkboxes
-              new Checkbox(value: true),
-              new Checkbox(value: false)
+              new Checkbox(value: true, onChanged: null),
+              new Checkbox(value: false, onChanged: null)
             ]
           )
         ]
@@ -142,15 +142,18 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
             children: <Widget>[
               new Radio<int>(
                 value: 0,
-                groupValue: 0
+                groupValue: 0,
+                onChanged: null
               ),
               new Radio<int>(
                 value: 1,
-                groupValue: 0
+                groupValue: 0,
+                onChanged: null
               ),
               new Radio<int>(
                 value: 2,
-                groupValue: 0
+                groupValue: 0,
+                onChanged: null
               )
             ]
           )
@@ -171,8 +174,8 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
             });
           }),
           // Disabled switches
-          new Switch(value: true),
-          new Switch(value: false)
+          new Switch(value: true, onChanged: null),
+          new Switch(value: false, onChanged: null)
         ]
       )
     );

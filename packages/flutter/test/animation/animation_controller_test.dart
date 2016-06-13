@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test("Can set value during status callback", () {
+  test('Can set value during status callback', () {
     WidgetsFlutterBinding.ensureInitialized();
     AnimationController controller = new AnimationController(
       duration: const Duration(milliseconds: 100)
@@ -39,7 +39,7 @@ void main() {
     controller.stop();
   });
 
-  test("Receives status callbacks for forward and reverse", () {
+  test('Receives status callbacks for forward and reverse', () {
     WidgetsFlutterBinding.ensureInitialized();
     AnimationController controller = new AnimationController(
       duration: const Duration(milliseconds: 100)
@@ -102,7 +102,7 @@ void main() {
     controller.stop();
   });
 
-  test("Forward and reverse from values", () {
+  test('Forward and reverse from values', () {
     WidgetsFlutterBinding.ensureInitialized();
     AnimationController controller = new AnimationController(
       duration: const Duration(milliseconds: 100)
@@ -128,5 +128,34 @@ void main() {
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.dismissed, AnimationStatus.forward ]));
     expect(valueLog, equals(<double>[ 0.0 ]));
     expect(controller.value, equals(0.0));
+  });
+
+  test('Can fling to upper and lower bounds', () {
+    WidgetsFlutterBinding.ensureInitialized();
+    AnimationController controller = new AnimationController(
+      duration: const Duration(milliseconds: 100)
+    );
+
+    controller.fling();
+    WidgetsBinding.instance.handleBeginFrame(const Duration(seconds: 1));
+    WidgetsBinding.instance.handleBeginFrame(const Duration(seconds: 2));
+    expect(controller.value, 1.0);
+    controller.stop();
+
+    AnimationController largeRangeController = new AnimationController(
+      duration: const Duration(milliseconds: 100),
+      lowerBound: -30.0,
+      upperBound: 45.0
+    );
+
+    largeRangeController.fling();
+    WidgetsBinding.instance.handleBeginFrame(const Duration(seconds: 3));
+    WidgetsBinding.instance.handleBeginFrame(const Duration(seconds: 4));
+    expect(largeRangeController.value, 45.0);
+    largeRangeController.fling(velocity: -1.0);
+    WidgetsBinding.instance.handleBeginFrame(const Duration(seconds: 5));
+    WidgetsBinding.instance.handleBeginFrame(const Duration(seconds: 6));
+    expect(largeRangeController.value, -30.0);
+    largeRangeController.stop();
   });
 }

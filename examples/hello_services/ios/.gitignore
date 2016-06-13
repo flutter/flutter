@@ -31,7 +31,7 @@ Icon?
 .tags*
 
 /Flutter/app.flx
-/Flutter/app.so
+/Flutter/app.dylib
 /Flutter/app.zip
 /Flutter/Flutter.framework
 /Flutter/Generated.xcconfig

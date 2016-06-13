@@ -33,6 +33,19 @@ class SpringForce extends Force {
   /// Where to put the spring's resting point when releasing right.
   final double right;
 
+  /// Creates a copy of this spring force but with the given fields replaced with the new values.
+  SpringForce copyWith({
+    SpringDescription spring,
+    double left,
+    double right
+  }) {
+    return new SpringForce(
+      spring ?? this.spring,
+      left: left ?? this.left,
+      right: right ?? this.right
+    );
+  }
+
   /// How pricely to terminate the simulation.
   ///
   /// We overshoot the target by this distance, but stop the simulation when

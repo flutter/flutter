@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 import 'colors.dart';
 import 'icon_theme_data.dart';
@@ -49,7 +50,7 @@ class FloatingActionButton extends StatefulWidget {
     this.backgroundColor,
     this.elevation: 6,
     this.highlightElevation: 12,
-    this.onPressed,
+    @required this.onPressed,
     this.mini: false
   }) : super(key: key);
 
