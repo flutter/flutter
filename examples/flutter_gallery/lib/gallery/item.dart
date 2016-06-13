@@ -40,7 +40,7 @@ class GalleryItem extends StatelessWidget {
   }
 }
 
-final List<GalleryItem> kAllGalleryItems = [
+final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
   // Demos
   new GalleryItem(
     title: 'Pesto',
@@ -70,145 +70,144 @@ final List<GalleryItem> kAllGalleryItems = [
   new GalleryItem(
     title: 'Buttons',
     routeName: ButtonsDemo.routeName,
-    buildRoute: (BuildContext) => new ButtonsDemo()
+    buildRoute: (BuildContext context) => new ButtonsDemo()
   ),
   new GalleryItem(
     title: 'Cards',
     routeName: CardsDemo.routeName,
-    buildRoute: (BuildContext) => new CardsDemo()
+    buildRoute: (BuildContext context) => new CardsDemo()
   ),
   new GalleryItem(
     title: 'Chips',
     routeName: ChipDemo.routeName,
-    buildRoute: (BuildContext) => new ChipDemo()
+    buildRoute: (BuildContext context) => new ChipDemo()
   ),
   new GalleryItem(
     title: 'Date picker',
     routeName: DatePickerDemo.routeName,
-    buildRoute: (BuildContext) => new DatePickerDemo()
+    buildRoute: (BuildContext context) => new DatePickerDemo()
   ),
   new GalleryItem(
     title: 'Data tables',
     routeName: DataTableDemo.routeName,
-    buildRoute: (BuildContext) => new DataTableDemo()
+    buildRoute: (BuildContext context) => new DataTableDemo()
   ),
   new GalleryItem(
     title: 'Dialog',
     routeName: DialogDemo.routeName,
-    buildRoute: (BuildContext) => new DialogDemo()
+    buildRoute: (BuildContext context) => new DialogDemo()
   ),
   new GalleryItem(
     title: 'Expand/collapse list control',
     routeName: TwoLevelListDemo.routeName,
-    buildRoute: (BuildContext) => new TwoLevelListDemo()
+    buildRoute: (BuildContext context) => new TwoLevelListDemo()
   ),
   new GalleryItem(
     title: 'Floating action button',
     routeName: TabsFabDemo.routeName,
-    buildRoute: (BuildContext) => new TabsFabDemo()
+    buildRoute: (BuildContext context) => new TabsFabDemo()
   ),
   new GalleryItem(
     title: 'Grid',
     routeName: GridListDemo.routeName,
-    buildRoute: (BuildContext) => new GridListDemo()
+    buildRoute: (BuildContext context) => new GridListDemo()
   ),
   new GalleryItem(
     title: 'Icons',
     routeName: IconsDemo.routeName,
-    buildRoute: (BuildContext) => new IconsDemo()
+    buildRoute: (BuildContext context) => new IconsDemo()
   ),
   new GalleryItem(
     title: 'Leave-behind list items',
     routeName: LeaveBehindDemo.routeName,
-    buildRoute: (BuildContext) => new LeaveBehindDemo()
+    buildRoute: (BuildContext context) => new LeaveBehindDemo()
   ),
   new GalleryItem(
     title: 'List',
     routeName: ListDemo.routeName,
-    buildRoute: (BuildContext) => new ListDemo()
+    buildRoute: (BuildContext context) => new ListDemo()
   ),
   new GalleryItem(
     title: 'Menus',
     routeName: MenuDemo.routeName,
-    buildRoute: (BuildContext) => new MenuDemo()
-
+    buildRoute: (BuildContext context) => new MenuDemo()
   ),
   new GalleryItem(
     title: 'Modal bottom sheet',
     routeName: ModalBottomSheetDemo.routeName,
-    buildRoute: (BuildContext) => new ModalBottomSheetDemo()
+    buildRoute: (BuildContext context) => new ModalBottomSheetDemo()
   ),
   new GalleryItem(
     title: 'Over-scroll',
     routeName: OverscrollDemo.routeName,
-    buildRoute: (BuildContext) => new OverscrollDemo()
+    buildRoute: (BuildContext context) => new OverscrollDemo()
   ),
   new GalleryItem(
     title: 'Page selector',
     routeName: PageSelectorDemo.routeName,
-    buildRoute: (BuildContext) => new PageSelectorDemo()
+    buildRoute: (BuildContext context) => new PageSelectorDemo()
   ),
   new GalleryItem(
     title: 'Persistent bottom sheet',
     routeName: PersistentBottomSheetDemo.routeName,
-    buildRoute: (BuildContext) => new PersistentBottomSheetDemo()
+    buildRoute: (BuildContext context) => new PersistentBottomSheetDemo()
   ),
   new GalleryItem(
     title: 'Progress indicators',
     routeName: ProgressIndicatorDemo.routeName,
-    buildRoute: (BuildContext) => new ProgressIndicatorDemo()
+    buildRoute: (BuildContext context) => new ProgressIndicatorDemo()
   ),
   new GalleryItem(
     title: 'Scrollable tabs',
     routeName: ScrollableTabsDemo.routeName,
-    buildRoute: (BuildContext) => new ScrollableTabsDemo()
+    buildRoute: (BuildContext context) => new ScrollableTabsDemo()
   ),
   new GalleryItem(
     title: 'Selection controls',
     routeName: SelectionControlsDemo.routeName,
-    buildRoute: (BuildContext) => new SelectionControlsDemo()
+    buildRoute: (BuildContext context) => new SelectionControlsDemo()
   ),
   new GalleryItem(
     title: 'Sliders',
     routeName: SliderDemo.routeName,
-    buildRoute: (BuildContext) => new SliderDemo()
+    buildRoute: (BuildContext context) => new SliderDemo()
   ),
   new GalleryItem(
     title: 'Snackbar',
     routeName: SnackBarDemo.routeName,
-    buildRoute: (BuildContext) => new SnackBarDemo()
+    buildRoute: (BuildContext context) => new SnackBarDemo()
   ),
   new GalleryItem(
     title: 'Tabs',
     routeName: TabsDemo.routeName,
-    buildRoute: (BuildContext) => new TabsDemo()
+    buildRoute: (BuildContext context) => new TabsDemo()
   ),
   new GalleryItem(
     title: 'Text fields',
     routeName: TextFieldDemo.routeName,
-    buildRoute: (BuildContext) => new TextFieldDemo()
+    buildRoute: (BuildContext context) => new TextFieldDemo()
   ),
   new GalleryItem(
     title: 'Time picker',
     routeName: TimePickerDemo.routeName,
-    buildRoute: (BuildContext) => new TimePickerDemo()
+    buildRoute: (BuildContext context) => new TimePickerDemo()
   ),
   new GalleryItem(
     title: 'Tooltips',
     routeName: TooltipDemo.routeName,
-    buildRoute: (BuildContext) => new TooltipDemo()
+    buildRoute: (BuildContext context) => new TooltipDemo()
   ),
   // Styles
   new GalleryItem(
     title: 'Colors',
     category: 'Style',
     routeName: ColorsDemo.routeName,
-    buildRoute: (BuildContext) => new ColorsDemo()
+    buildRoute: (BuildContext context) => new ColorsDemo()
   ),
   new GalleryItem(
     title: 'Typography',
     category: 'Style',
     routeName: TypographyDemo.routeName,
-    buildRoute: (BuildContext) => new TypographyDemo()
+    buildRoute: (BuildContext context) => new TypographyDemo()
   )
 ];

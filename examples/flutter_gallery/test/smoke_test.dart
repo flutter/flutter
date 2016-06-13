@@ -9,8 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gallery/gallery/item.dart' show GalleryItem, kAllGalleryItems;
 import 'package:flutter_gallery/main.dart' as flutter_gallery_main;
 
-final List<String> demoCategories = new LinkedHashSet.from(
-  kAllGalleryItems.map((GalleryItem item) => item.category)).toList();
+final List<String> demoCategories = new LinkedHashSet<String>.from(
+  kAllGalleryItems.map((GalleryItem item) => item.category)
+).toList();
 
 final List<String> routeNames =
   kAllGalleryItems.map((GalleryItem item) => item.routeName).toList();

@@ -13,7 +13,7 @@ import 'package:flutter_gallery/gallery/item.dart' show GalleryItem, kAllGallery
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
-final List<String> demoCategories = new LinkedHashSet.from(
+final List<String> demoCategories = new LinkedHashSet<String>.from(
   kAllGalleryItems.map((GalleryItem item) => item.category)).toList();
 
 final List<String> demoTitles =
