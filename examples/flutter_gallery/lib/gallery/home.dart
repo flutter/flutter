@@ -73,7 +73,7 @@ class GalleryHomeState extends State<GalleryHome> {
             children: <Widget>[
               new GalleryItem(title: 'Pesto', routeName: PestoDemo.routeName),
               new GalleryItem(title: 'Shrine', routeName: ShrineDemo.routeName),
-              new GalleryItem(title: 'Calculator', routeName: Calculator.routeName),
+              new GalleryItem(title: 'Calculator', routeName: CalculatorDemo.routeName),
               new GalleryItem(title: 'Contacts', routeName: ContactsDemo.routeName)
             ]
           ),
