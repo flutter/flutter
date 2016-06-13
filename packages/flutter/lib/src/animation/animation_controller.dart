@@ -194,10 +194,10 @@ class AnimationController extends Animation<double>
   }
 
   /// Flings the timeline with an optional force (defaults to a critically
-  /// damped spring) and initial velocity. If velocity is positive, the
-  /// animation will complete, otherwise it will dismiss.
+  /// damped spring within [lowerBound] and [upperBound]) and initial velocity.
+  /// If velocity is positive, the animation will complete, otherwise it will dismiss.
   Future<Null> fling({ double velocity: 1.0, Force force }) {
-    force ??= kDefaultSpringForce;
+    force ??= kDefaultSpringForce.copyWith(left: lowerBound, right: upperBound);
     _direction = velocity < 0.0 ? _AnimationDirection.reverse : _AnimationDirection.forward;
     return animateWith(force.release(value, velocity));
   }
