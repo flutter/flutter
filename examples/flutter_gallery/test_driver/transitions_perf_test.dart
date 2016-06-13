@@ -3,50 +3,21 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection' show LinkedHashSet;
 import 'dart:convert' show JsonEncoder;
 
 import 'package:file/file.dart';
 import 'package:file/io.dart';
 import 'package:flutter_driver/flutter_driver.dart';
+import 'package:flutter_gallery/gallery/item.dart' show GalleryItem, kAllGalleryItems;
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
-// Warning: the following strings must be kept in sync with GalleryHome.
-const List<String> demoCategories = const <String>['Demos', 'Components', 'Style'];
+final List<String> demoCategories = new LinkedHashSet.from(
+  kAllGalleryItems.map((GalleryItem item) => item.category)).toList();
 
-const List<String> demoNames = const <String>[
-  'Shrine',
-  'Contacts',
-  'Buttons',
-  'Cards',
-  'Chips',
-  'Date picker',
-  'Data tables',
-  'Dialog',
-  'Expand/collapse list control',
-  'Floating action button',
-  'Grid',
-  'Icons',
-  'Leave-behind list items',
-  'List',
-  'Menus',
-  'Modal bottom sheet',
-  'Over-scroll',
-  'Page selector',
-  'Persistent bottom sheet',
-  'Progress indicators',
-  'Scrollable tabs',
-  'Selection controls',
-  'Sliders',
-  'Snackbar',
-  'Tabs',
-  'Text fields',
-  'Time picker',
-  'Tooltips',
-  'Colors',
-  'Typography'
-];
-
+final List<String> demoTitles =
+  kAllGalleryItems.map((GalleryItem item) => item.title).toList();
 
 Future<Null> saveDurationsHistogram(List<Map<String, dynamic>> events) async {
   final Map<String, List<int>> durations = new Map<String, List<int>>();
@@ -103,8 +74,8 @@ void main() {
         }
         // Scroll each demo menu item into view, launch the demo and
         // return to the demo menu 2x.
-        for(String demoName in demoNames) {
-          SerializableFinder menuItem = find.text(demoName);
+        for(String demoTitle in demoTitles) {
+          SerializableFinder menuItem = find.text(demoTitle);
           await driver.scrollIntoView(menuItem);
           await new Future<Null>.delayed(new Duration(milliseconds: 500));
 
