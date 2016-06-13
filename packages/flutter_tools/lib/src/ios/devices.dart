@@ -12,7 +12,6 @@ import '../base/process.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
-import '../observatory.dart';
 import 'mac.dart';
 
 const String _ideviceinstallerInstructions =
@@ -211,21 +210,6 @@ class IOSDevice extends Device {
     }
 
     return new LaunchResult.succeeded();
-  }
-
-  @override
-  Future<bool> restartApp(
-    ApplicationPackage package,
-    LaunchResult result, {
-    String mainPath,
-    Observatory observatory
-  }) async {
-    return observatory.isolateReload(observatory.firstIsolateId).then((Response response) {
-      return true;
-    }).catchError((dynamic error) {
-      printError('Error restarting app: $error');
-      return false;
-    });
   }
 
   @override

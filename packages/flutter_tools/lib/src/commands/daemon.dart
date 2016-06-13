@@ -284,7 +284,7 @@ class AppDomain extends Domain {
   Future<Map<String, dynamic>> start(Map<String, dynamic> args) async {
     String deviceId = _getStringArg(args, 'deviceId', required: true);
     String projectDirectory = _getStringArg(args, 'projectDirectory', required: true);
-    bool startPaused = _getBoolArg(args, 'startPaused');
+    bool startPaused = _getBoolArg(args, 'startPaused') ?? false;
     String route = _getStringArg(args, 'route');
     String mode = _getStringArg(args, 'mode');
     String target = _getStringArg(args, 'target');
@@ -325,8 +325,9 @@ class AppDomain extends Domain {
     AppInstance app = new AppInstance(_getNextAppId(), runner);
     _apps.add(app);
     _sendAppEvent(app, 'start', <String, dynamic>{
+      'deviceId': deviceId,
       'directory': projectDirectory,
-      'deviceId': deviceId
+      'supportsRestart': device.supportsRestart
     });
 
     Completer<int> observatoryPortCompleter;
@@ -349,7 +350,12 @@ class AppDomain extends Domain {
       });
     });
 
-    return <String, dynamic>{ 'appId': app.id };
+    return <String, dynamic>{
+      'appId': app.id,
+      'deviceId': deviceId,
+      'directory': projectDirectory,
+      'supportsRestart': device.supportsRestart
+    };
   }
 
   Future<bool> restart(Map<String, dynamic> args) async {
@@ -585,17 +591,18 @@ class _AppRunLogger extends Logger {
 
   AppDomain domain;
   final AppInstance app;
+  int _nextProgressId = 0;
 
   @override
   void printError(String message, [StackTrace stackTrace]) {
     if (stackTrace != null) {
-      domain?._sendAppEvent(app, 'log', <String, dynamic>{
+      _sendLogEvent(<String, dynamic>{
         'log': message,
         'stackTrace': stackTrace.toString(),
         'error': true
       });
     } else {
-      domain?._sendAppEvent(app, 'log', <String, dynamic>{
+      _sendLogEvent(<String, dynamic>{
         'log': message,
         'error': true
       });
@@ -604,7 +611,7 @@ class _AppRunLogger extends Logger {
 
   @override
   void printStatus(String message, { bool emphasis: false, bool newline: true }) {
-    domain?._sendAppEvent(app, 'log', <String, dynamic>{ 'log': message });
+    _sendLogEvent(<String, dynamic>{ 'log': message });
   }
 
   @override
@@ -612,12 +619,51 @@ class _AppRunLogger extends Logger {
 
   @override
   Status startProgress(String message) {
-    printStatus(message);
-    return new Status();
+    int id = _nextProgressId++;
+
+    _sendLogEvent(<String, dynamic>{
+      'log': message,
+      'progress': true,
+      'id': id.toString()
+    });
+
+    return new _AppLoggerStatus(this, id);
   }
 
   void close() {
     domain = null;
+  }
+
+  void _sendLogEvent(Map<String, dynamic> event) {
+    if (domain == null)
+      printStatus('event sent after app closed: $event');
+    else
+      domain._sendAppEvent(app, 'log', event);
+  }
+}
+
+class _AppLoggerStatus implements Status {
+  _AppLoggerStatus(this.logger, this.id);
+
+  final _AppRunLogger logger;
+  final int id;
+
+  @override
+  void stop({ bool showElapsedTime: false }) {
+    _sendFinished();
+  }
+
+  @override
+  void cancel() {
+    _sendFinished();
+  }
+
+  void _sendFinished() {
+    logger._sendLogEvent(<String, dynamic>{
+      'progress': true,
+      'id': id.toString(),
+      'finished': true
+    });
   }
 }
 

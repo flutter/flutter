@@ -16,7 +16,6 @@ import '../build_info.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
-import '../observatory.dart';
 import '../protocol_discovery.dart';
 import 'mac.dart';
 
@@ -575,21 +574,6 @@ class IOSSimulator extends Device {
   }
 
   @override
-  Future<bool> restartApp(
-    ApplicationPackage package,
-    LaunchResult result, {
-    String mainPath,
-    Observatory observatory
-  }) {
-    return observatory.isolateReload(observatory.firstIsolateId).then((Response response) {
-      return true;
-    }).catchError((dynamic error) {
-      printError('Error restarting app: $error');
-      return false;
-    });
-  }
-
-  @override
   Future<bool> stopApp(ApplicationPackage app) async {
     // Currently we don't have a way to stop an app running on iOS.
     return false;
@@ -780,7 +764,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
       if (_lastLine != null) {
         int repeat = int.parse(multi.group(1));
         repeat = math.max(0, math.min(100, repeat));
-        for (int i = 0; i < repeat; i++)
+        for (int i = 1; i < repeat; i++)
           _linesController.add(_lastLine);
       }
     } else {

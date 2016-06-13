@@ -243,8 +243,10 @@ class RunAndStayResident {
             // F1, help
             _printHelp();
           } else if (lower == 'r' || code == AnsiTerminal.KEY_F5) {
-            // F5, restart
-            restart();
+            if (device.supportsRestart) {
+              // F5, restart
+              restart();
+            }
           } else if (lower == 'q' || code == AnsiTerminal.KEY_F10) {
             // F10, exit
             _stopApp();
@@ -287,7 +289,8 @@ class RunAndStayResident {
   }
 
   void _printHelp() {
-    printStatus('Type "h" or F1 for help, "r" or F5 to restart the app, and "q", F10, or ctrl-c to quit.');
+    String restartText = device.supportsRestart ? ', "r" or F5 to restart the app,' : '';
+    printStatus('Type "h" or F1 for help$restartText and "q", F10, or ctrl-c to quit.');
   }
 
   void _stopLogger() {
