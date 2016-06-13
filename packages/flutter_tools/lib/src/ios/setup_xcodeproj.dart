@@ -7,9 +7,11 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
+import '../base/file_system.dart' show copyFolderSync;
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart';
+import '../version.dart';
 
 void updateXcodeGeneratedProperties(String projectPath, BuildMode mode, String target) {
   StringBuffer localsBuffer = new StringBuffer();
@@ -50,7 +52,7 @@ bool xcodeProjectRequiresUpdate(BuildMode mode) {
     return true;
   }
 
-  if (revisionFile.readAsStringSync() != '${Cache.engineRevision}-${getModeName(mode)}') {
+  if (revisionFile.readAsStringSync() != _getCurrentXcodeRevisionString(mode)) {
     printTrace("The revision stamp and the Flutter engine revision differ or the build mode has changed.");
     printTrace("Project needs to be updated.");
     return true;
@@ -63,17 +65,17 @@ bool xcodeProjectRequiresUpdate(BuildMode mode) {
 Future<int> setupXcodeProjectHarness(String flutterProjectPath, BuildMode mode, String target) async {
   // Step 1: Copy templates into user project directory
   String iosFilesPath = path.join(flutterProjectPath, 'ios');
-  String xcodeProjPath = path.join(iosFilesPath, '.generated');
+  String xcodeProjectPath = path.join(iosFilesPath, '.generated');
   String templatesPath = path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'build-ios');
-  _copyFolderSync(templatesPath, xcodeProjPath);
+  copyFolderSync(templatesPath, xcodeProjectPath);
 
   // Step 2: Populate the Generated.xcconfig with project specific paths
   updateXcodeGeneratedProperties(flutterProjectPath, mode, target);
 
   // Step 3: Write the REVISION file
-  File revisionFile = new File(path.join(xcodeProjPath, 'REVISION'));
+  File revisionFile = new File(path.join(xcodeProjectPath, 'REVISION'));
   revisionFile.createSync();
-  revisionFile.writeAsStringSync('${Cache.engineRevision}-${getModeName(mode)}');
+  revisionFile.writeAsStringSync(_getCurrentXcodeRevisionString(mode));
 
   // Step 4: Tell the user the location of the generated project.
   printStatus('Xcode project created in $iosFilesPath/.');
@@ -81,24 +83,7 @@ Future<int> setupXcodeProjectHarness(String flutterProjectPath, BuildMode mode, 
   return 0;
 }
 
-void _copyFolderSync(String srcPath, String destPath) {
-  Directory srcDir = new Directory(srcPath);
-  if (!srcDir.existsSync())
-    throw new Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
-
-  Directory destDir = new Directory(destPath);
-  if (!destDir.existsSync())
-    destDir.createSync(recursive: true);
-
-  srcDir.listSync().forEach((FileSystemEntity entity) {
-    String newPath = path.join(destDir.path, path.basename(entity.path));
-    if (entity is File) {
-      File newFile = new File(newPath);
-      newFile.writeAsBytesSync(entity.readAsBytesSync());
-    } else if (entity is Directory) {
-      _copyFolderSync(entity.path, newPath);
-    } else {
-      throw new Exception('${entity.path} is neither File nor Directory');
-    }
-  });
-}
+String _getCurrentXcodeRevisionString(BuildMode mode) => (new StringBuffer()
+    ..write('${FlutterVersion.getVersion().frameworkRevision}')
+    ..write('-${tools.isLocalEngine ? tools.engineBuildPath : getModeName(mode)}')
+    ).toString();

@@ -114,11 +114,8 @@ Future<XcodeBuildResult> buildXcodeProject({
       return new XcodeBuildResult(false);
     }
   } else {
-   updateXcodeGeneratedProperties(flutterProjectPath, mode, target);
+    updateXcodeGeneratedProperties(flutterProjectPath, mode, target);
   }
-
-  if (!_validateEngineRevision(app))
-    return new XcodeBuildResult(false);
 
   if (!_checkXcodeVersion())
     return new XcodeBuildResult(false);
@@ -198,20 +195,6 @@ bool _checkXcodeVersion() {
     return false;
   }
   return true;
-}
-
-bool _validateEngineRevision(ApplicationPackage app) {
-  String skyRevision = Cache.engineRevision;
-  String iosRevision = _getIOSEngineRevision(app);
-
-  if (iosRevision != skyRevision) {
-    printError("Error: incompatible sky_engine revision.");
-    printStatus('sky_engine revision: $skyRevision, iOS engine revision: $iosRevision');
-    return false;
-  } else {
-    printTrace('sky_engine revision: $skyRevision, iOS engine revision: $iosRevision');
-    return true;
-  }
 }
 
 String _getIOSEngineRevision(ApplicationPackage app) {
