@@ -259,9 +259,9 @@ class CalcExpression {
       case ExpressionState.NumberWithPoint:
       case ExpressionState.Result:
         return appendOperation(Operation.Subtraction);
+      default:
+        return null;
     }
-    assert(state != null);
-    return null;
   }
 
   /// Computes the result of the current expression and returns a new
