@@ -33,8 +33,7 @@ abstract class Layer {
   /// Removes this layer from its parent layer's child list
   @mustCallSuper
   void detach() {
-    if (_parent != null)
-      _parent._remove(this);
+    _parent?._remove(this);
   }
 
   /// Replaces this layer with the given layer in the parent layer's child list
