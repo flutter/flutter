@@ -147,7 +147,7 @@ class FlutterCommandRunner extends CommandRunner {
     // enginePath's initialiser uses it).
     Cache.flutterRoot = path.normalize(path.absolute(globalResults['flutter-root']));
 
-    if (globalResults['lock']);
+    if (globalResults['lock'])
       await Cache.lock();
 
     if (globalResults['suppress-analytics'])
