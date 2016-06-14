@@ -55,7 +55,7 @@ class Cache {
         locked = true;
       } on FileSystemException {
         if (!printed) {
-          printStatus('Waiting to be able to obtain lock of Flutter cache directory...');
+          printStatus('Waiting to be able to obtain lock of Flutter binary artifacts directory...');
           printed = true;
         }
         await new Future/*<Null>*/.delayed(const Duration(milliseconds: 50));
@@ -65,9 +65,8 @@ class Cache {
 
   /// Releases the lock. This is not necessary unless the process is long-lived.
   static void releaseLockEarly() {
-    if (!_lockEnabled)
+    if (!_lockEnabled || _lock == null)
       return;
-    assert(_lock != null);
     _lock.closeSync();
     _lock = null;
   }

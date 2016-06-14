@@ -45,10 +45,13 @@ class UpgradeCommand extends FlutterCommand {
       return code;
 
     // Check for and download any engine and pkg/ updates.
+    // We run the 'flutter' shell script re-entrantly here
+    // so that it will download the updated Dart and so forth
+    // if necessary.
     printStatus('');
     printStatus('Upgrading engine...');
     code = await runCommandAndStreamOutput(<String>[
-      'bin/flutter', '--no-color', 'precache'
+      'bin/flutter', '--no-lock', '--no-color', 'precache'
     ], workingDirectory: Cache.flutterRoot);
 
     printStatus('');
