@@ -4,12 +4,12 @@
 
 #include "sky/engine/core/painting/PictureRecorder.h"
 
+#include "flutter/lib/ui/painting/picture.h"
 #include "flutter/tonic/dart_args.h"
 #include "flutter/tonic/dart_binding_macros.h"
 #include "flutter/tonic/dart_converter.h"
 #include "flutter/tonic/dart_library_natives.h"
 #include "sky/engine/core/painting/Canvas.h"
-#include "sky/engine/core/painting/Picture.h"
 
 namespace blink {
 
@@ -54,7 +54,7 @@ scoped_refptr<Picture> PictureRecorder::endRecording()
 {
     if (!isRecording())
         return nullptr;
-    scoped_refptr<Picture> picture = Picture::create(
+    scoped_refptr<Picture> picture = Picture::Create(
         m_pictureRecorder.finishRecordingAsPicture());
     m_canvas->clearSkCanvas();
     m_canvas->ClearDartWrapper();

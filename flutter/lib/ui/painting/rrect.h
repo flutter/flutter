@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_CORE_PAINTING_RRECT_H_
-#define SKY_ENGINE_CORE_PAINTING_RRECT_H_
+#ifndef FLUTTER_LIB_UI_PAINTING_RRECT_H_
+#define FLUTTER_LIB_UI_PAINTING_RRECT_H_
 
 #include "dart/runtime/include/dart_api.h"
 #include "flutter/tonic/dart_converter.h"
@@ -27,4 +27,4 @@ struct DartConverter<RRect> {
 
 } // namespace blink
 
-#endif  // SKY_ENGINE_CORE_PAINTING_RRECT_H_
+#endif  // FLUTTER_LIB_UI_PAINTING_RRECT_H_

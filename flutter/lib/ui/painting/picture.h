@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_CORE_PAINTING_PICTURE_H_
-#define SKY_ENGINE_CORE_PAINTING_PICTURE_H_
+#ifndef FLUTTER_LIB_UI_PAINTING_PICTURE_H_
+#define FLUTTER_LIB_UI_PAINTING_PICTURE_H_
 
 #include "base/memory/ref_counted.h"
 #include "flutter/tonic/dart_wrappable.h"
@@ -14,23 +14,23 @@ class Canvas;
 class DartLibraryNatives;
 
 class Picture : public base::RefCountedThreadSafe<Picture>, public DartWrappable {
-    DEFINE_WRAPPERTYPEINFO();
+  DEFINE_WRAPPERTYPEINFO();
 public:
-    ~Picture() override;
-    static scoped_refptr<Picture> create(sk_sp<SkPicture> skPicture);
+  ~Picture() override;
+  static scoped_refptr<Picture> Create(sk_sp<SkPicture> picture);
 
-    sk_sp<SkPicture> toSkia() const { return m_picture; }
+  const sk_sp<SkPicture>& picture() const { return picture_; }
 
-    void dispose();
+  void dispose();
 
-    static void RegisterNatives(DartLibraryNatives* natives);
+  static void RegisterNatives(DartLibraryNatives* natives);
 
 private:
-    explicit Picture(sk_sp<SkPicture> skPicture);
+  explicit Picture(sk_sp<SkPicture> picture);
 
-    sk_sp<SkPicture> m_picture;
+  sk_sp<SkPicture> picture_;
 };
 
 } // namespace blink
 
-#endif  // SKY_ENGINE_CORE_PAINTING_PICTURE_H_
+#endif  // FLUTTER_LIB_UI_PAINTING_PICTURE_H_

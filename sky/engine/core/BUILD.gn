@@ -11,6 +11,7 @@ source_set("libraries") {
   public_deps = [
     "//base",
     "//flow",
+    "//flutter/lib/ui",
     "//flutter/tonic",
     "//mojo/application",
     "//mojo/data_pipe_utils",

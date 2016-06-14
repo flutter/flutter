@@ -2,28 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_CORE_PAINTING_IMAGE_FILTER_H_
-#define SKY_ENGINE_CORE_PAINTING_IMAGE_FILTER_H_
+#ifndef FLUTTER_LIB_UI_PAINTING_IMAGE_FILTER_H_
+#define FLUTTER_LIB_UI_PAINTING_IMAGE_FILTER_H_
 
 #include "base/memory/ref_counted.h"
+#include "flutter/lib/ui/painting/image.h"
+#include "flutter/lib/ui/painting/picture.h"
 #include "flutter/tonic/dart_wrappable.h"
-#include "sky/engine/core/painting/CanvasImage.h"
-#include "sky/engine/core/painting/Picture.h"
 #include "third_party/skia/include/core/SkImageFilter.h"
 
 namespace blink {
 
-class ImageFilter : public base::RefCountedThreadSafe<ImageFilter>, public DartWrappable {
+class ImageFilter : public base::RefCountedThreadSafe<ImageFilter>,
+                    public DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
  public:
   ~ImageFilter() override;
-  static scoped_refptr<ImageFilter> create();
+  static scoped_refptr<ImageFilter> Create();
 
   void initImage(CanvasImage* image);
   void initPicture(Picture*);
-  void initBlur(double sigmaX, double sigmaY);
+  void initBlur(double sigma_x, double sigma_y);
 
-  sk_sp<SkImageFilter> toSkia() { return filter_; }
+  const sk_sp<SkImageFilter>& filter() { return filter_; }
 
   static void RegisterNatives(DartLibraryNatives* natives);
 
@@ -35,4 +36,4 @@ class ImageFilter : public base::RefCountedThreadSafe<ImageFilter>, public DartW
 
 } // namespace blink
 
-#endif  // SKY_ENGINE_CORE_PAINTING_IMAGE_FILTER_H_
+#endif  // FLUTTER_LIB_UI_PAINTING_IMAGE_FILTER_H_

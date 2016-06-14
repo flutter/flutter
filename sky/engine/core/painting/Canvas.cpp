@@ -6,12 +6,12 @@
 
 #include "sky/engine/core/painting/Canvas.h"
 
+#include "flutter/lib/ui/painting/image.h"
+#include "flutter/lib/ui/painting/matrix.h"
 #include "flutter/tonic/dart_args.h"
 #include "flutter/tonic/dart_binding_macros.h"
 #include "flutter/tonic/dart_converter.h"
 #include "flutter/tonic/dart_library_natives.h"
-#include "sky/engine/core/painting/CanvasImage.h"
-#include "sky/engine/core/painting/Matrix.h"
 #include "sky/engine/core/text/Paragraph.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -159,14 +159,14 @@ void Canvas::transform(const Float64List& matrix4)
 {
     if (!m_canvas)
         return;
-    m_canvas->concat(toSkMatrix(matrix4));
+    m_canvas->concat(ToSkMatrix(matrix4));
 }
 
 void Canvas::setMatrix(const Float64List& matrix4)
 {
     if (!m_canvas)
         return;
-    m_canvas->setMatrix(toSkMatrix(matrix4));
+    m_canvas->setMatrix(ToSkMatrix(matrix4));
 }
 
 void Canvas::clipRect(double left,
@@ -320,7 +320,7 @@ void Canvas::drawPicture(Picture* picture)
     if (!m_canvas)
         return;
     DCHECK(picture);
-    m_canvas->drawPicture(picture->toSkia().get());
+    m_canvas->drawPicture(picture->picture().get());
 }
 
 void Canvas::drawParagraph(Paragraph* paragraph, double x, double y) {

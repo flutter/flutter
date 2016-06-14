@@ -16,12 +16,12 @@
 #include "flow/layers/picture_layer.h"
 #include "flow/layers/shader_mask_layer.h"
 #include "flow/layers/transform_layer.h"
+#include "flutter/lib/ui/painting/matrix.h"
+#include "flutter/lib/ui/painting/shader.h"
 #include "flutter/tonic/dart_args.h"
 #include "flutter/tonic/dart_binding_macros.h"
 #include "flutter/tonic/dart_converter.h"
 #include "flutter/tonic/dart_library_natives.h"
-#include "sky/engine/core/painting/Matrix.h"
-#include "sky/engine/core/painting/Shader.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 
 namespace blink {
@@ -69,7 +69,7 @@ SceneBuilder::~SceneBuilder()
 
 void SceneBuilder::pushTransform(const Float64List& matrix4)
 {
-    SkMatrix sk_matrix = toSkMatrix(matrix4);
+    SkMatrix sk_matrix = ToSkMatrix(matrix4);
     std::unique_ptr<flow::TransformLayer> layer(new flow::TransformLayer());
     layer->set_transform(sk_matrix);
     addLayer(std::move(layer));
@@ -114,7 +114,7 @@ void SceneBuilder::pushColorFilter(int color, int transferMode)
 void SceneBuilder::pushBackdropFilter(ImageFilter* filter)
 {
     std::unique_ptr<flow::BackdropFilterLayer> layer(new flow::BackdropFilterLayer());
-    layer->set_filter(filter->toSkia());
+    layer->set_filter(filter->filter());
     addLayer(std::move(layer));
 }
 
@@ -161,7 +161,7 @@ void SceneBuilder::addPicture(double dx, double dy, Picture* picture)
         return;
     std::unique_ptr<flow::PictureLayer> layer(new flow::PictureLayer());
     layer->set_offset(SkPoint::Make(dx, dy));
-    layer->set_picture(picture->toSkia());
+    layer->set_picture(picture->picture());
     m_currentLayer->Add(std::move(layer));
 }
 

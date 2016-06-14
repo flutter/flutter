@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/core/painting/Shader.h"
+#include "flutter/lib/ui/painting/shader.h"
 
 namespace blink {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, Shader);
 
-Shader::Shader(sk_sp<SkShader> shader)
-    : shader_(shader) {
+Shader::Shader(sk_sp<SkShader> shader) : shader_(shader) {
 }
 
 Shader::~Shader() {

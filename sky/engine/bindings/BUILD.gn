@@ -28,6 +28,7 @@ source_set("bindings") {
     "//base",
     "//dart/runtime:libdart",
     "//dart/runtime/bin:embedded_dart_io",
+    "//flutter/lib/ui",
     "//flutter/tonic",
     "//mojo/public/c/system",
     "//mojo/public/cpp/application",

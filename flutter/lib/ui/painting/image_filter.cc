@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/core/painting/ImageFilter.h"
+#include "flutter/lib/ui/painting/image_filter.h"
 
 #include "flutter/tonic/dart_args.h"
 #include "flutter/tonic/dart_binding_macros.h"
@@ -15,7 +15,7 @@
 namespace blink {
 
 static void ImageFilter_constructor(Dart_NativeArguments args) {
-  DartCallConstructor(&ImageFilter::create, args);
+  DartCallConstructor(&ImageFilter::Create, args);
 }
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, ImageFilter);
@@ -34,7 +34,7 @@ FOR_EACH_BINDING(DART_REGISTER_NATIVE)
   });
 }
 
-scoped_refptr<ImageFilter> ImageFilter::create() {
+scoped_refptr<ImageFilter> ImageFilter::Create() {
   return new ImageFilter();
 }
 
@@ -49,11 +49,11 @@ void ImageFilter::initImage(CanvasImage* image) {
 }
 
 void ImageFilter::initPicture(Picture* picture) {
-  filter_ = SkPictureImageFilter::Make(picture->toSkia());
+  filter_ = SkPictureImageFilter::Make(picture->picture());
 }
 
-void ImageFilter::initBlur(double sigmaX, double sigmaY) {
-  filter_ = SkBlurImageFilter::Make(sigmaX, sigmaY, nullptr);
+void ImageFilter::initBlur(double sigma_x, double sigma_y) {
+  filter_ = SkBlurImageFilter::Make(sigma_x, sigma_y, nullptr);
 }
 
 } // namespace blink

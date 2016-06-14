@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_CORE_PAINTING_SHADER_H_
-#define SKY_ENGINE_CORE_PAINTING_SHADER_H_
+#ifndef FLUTTER_LIB_UI_PAINTING_SHADER_H_
+#define FLUTTER_LIB_UI_PAINTING_SHADER_H_
 
 #include "base/memory/ref_counted.h"
 #include "flutter/tonic/dart_wrappable.h"
@@ -16,8 +16,8 @@ class Shader : public base::RefCountedThreadSafe<Shader>, public DartWrappable {
  public:
   ~Shader() override;
 
-  sk_sp<SkShader> shader() { return shader_; }
-  void set_shader(sk_sp<SkShader> shader) { shader_ = shader; }
+  const sk_sp<SkShader>& shader() { return shader_; }
+  void set_shader(sk_sp<SkShader> shader) { shader_ = std::move(shader); }
 
  protected:
   Shader(sk_sp<SkShader> shader);
@@ -28,4 +28,4 @@ class Shader : public base::RefCountedThreadSafe<Shader>, public DartWrappable {
 
 } // namespace blink
 
-#endif  // SKY_ENGINE_CORE_PAINTING_SHADER_H_
+#endif  // FLUTTER_LIB_UI_PAINTING_SHADER_H_

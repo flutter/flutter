@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/core/painting/CanvasImage.h"
+#include "flutter/lib/ui/painting/image.h"
 
 #include "flutter/tonic/dart_args.h"
 #include "flutter/tonic/dart_binding_macros.h"
@@ -32,14 +32,6 @@ CanvasImage::CanvasImage() {
 }
 
 CanvasImage::~CanvasImage() {
-}
-
-int CanvasImage::width() {
-  return image_->width();
-}
-
-int CanvasImage::height() {
-  return image_->height();
 }
 
 void CanvasImage::dispose() {

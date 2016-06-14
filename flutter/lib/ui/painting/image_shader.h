@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_CORE_PAINTING_IMAGESHADER_H_
-#define SKY_ENGINE_CORE_PAINTING_IMAGESHADER_H_
+#ifndef FLUTTER_LIB_UI_PAINTING_IMAGE_SHADER_H_
+#define FLUTTER_LIB_UI_PAINTING_IMAGE_SHADER_H_
 
+#include "flutter/lib/ui/painting/gradient.h"
+#include "flutter/lib/ui/painting/image.h"
+#include "flutter/lib/ui/painting/matrix.h"
+#include "flutter/lib/ui/painting/shader.h"
 #include "flutter/tonic/dart_wrappable.h"
 #include "flutter/tonic/float64_list.h"
-#include "sky/engine/core/painting/CanvasGradient.h"
-#include "sky/engine/core/painting/CanvasImage.h"
-#include "sky/engine/core/painting/Matrix.h"
-#include "sky/engine/core/painting/Shader.h"
 #include "third_party/skia/include/core/SkMatrix.h"
 #include "third_party/skia/include/core/SkShader.h"
 
@@ -18,10 +18,10 @@ namespace blink {
 class DartLibraryNatives;
 
 class ImageShader : public Shader {
-    DEFINE_WRAPPERTYPEINFO();
+  DEFINE_WRAPPERTYPEINFO();
  public:
   ~ImageShader() override;
-  static scoped_refptr<ImageShader> create();
+  static scoped_refptr<ImageShader> Create();
 
   void initWithImage(CanvasImage* image,
                      SkShader::TileMode tmx,
@@ -36,4 +36,4 @@ class ImageShader : public Shader {
 
 } // namespace blink
 
-#endif  // SKY_ENGINE_CORE_PAINTING_IMAGESHADER_H_
+#endif  // FLUTTER_LIB_UI_PAINTING_IMAGE_SHADER_H_

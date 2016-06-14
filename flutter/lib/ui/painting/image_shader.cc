@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/core/painting/ImageShader.h"
+#include "flutter/lib/ui/painting/image_shader.h"
 
 #include "flutter/tonic/dart_args.h"
 #include "flutter/tonic/dart_binding_macros.h"
@@ -12,7 +12,7 @@
 namespace blink {
 
 static void ImageShader_constructor(Dart_NativeArguments args) {
-  DartCallConstructor(&ImageShader::create, args);
+  DartCallConstructor(&ImageShader::Create, args);
 }
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, ImageShader);
@@ -29,7 +29,7 @@ FOR_EACH_BINDING(DART_REGISTER_NATIVE)
   });
 }
 
-scoped_refptr<ImageShader> ImageShader::create() {
+scoped_refptr<ImageShader> ImageShader::Create() {
   return new ImageShader();
 }
 
@@ -38,7 +38,7 @@ void ImageShader::initWithImage(CanvasImage* image,
                                 SkShader::TileMode tmy,
                                 const Float64List& matrix4) {
   DCHECK(image != NULL);
-  SkMatrix sk_matrix = toSkMatrix(matrix4);
+  SkMatrix sk_matrix = ToSkMatrix(matrix4);
   SkBitmap bitmap;
   image->image()->asLegacyBitmap(&bitmap, SkImage::kRO_LegacyBitmapMode);
 

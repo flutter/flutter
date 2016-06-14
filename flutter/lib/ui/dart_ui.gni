@@ -4,6 +4,7 @@
 
 dart_ui_files = [
   "//flutter/lib/ui/geometry.dart",
+  "//flutter/lib/ui/painting.dart",
   "//flutter/lib/ui/ui.dart",
 ]
 

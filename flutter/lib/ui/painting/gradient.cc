@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/core/painting/CanvasGradient.h"
+#include "flutter/lib/ui/painting/gradient.h"
 
 #include "flutter/tonic/dart_args.h"
 #include "flutter/tonic/dart_binding_macros.h"
@@ -14,7 +14,7 @@ namespace blink {
 typedef CanvasGradient Gradient; // Because the C++ name doesn't match the Dart name.
 
 static void Gradient_constructor(Dart_NativeArguments args) {
-  DartCallConstructor(&CanvasGradient::create, args);
+  DartCallConstructor(&CanvasGradient::Create, args);
 }
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, Gradient);
@@ -32,7 +32,7 @@ FOR_EACH_BINDING(DART_REGISTER_NATIVE)
   });
 }
 
-scoped_refptr<CanvasGradient> CanvasGradient::create() {
+scoped_refptr<CanvasGradient> CanvasGradient::Create() {
   return new CanvasGradient();
 }
 
@@ -54,8 +54,8 @@ void CanvasGradient::initLinear(const Float32List& end_points,
       tile_mode));
 }
 
-void CanvasGradient::initRadial(double centerX,
-                                double centerY,
+void CanvasGradient::initRadial(double center_x,
+                                double center_y,
                                 double radius,
                                 const Int32List& colors,
                                 const Float32List& color_stops,
@@ -65,7 +65,7 @@ void CanvasGradient::initRadial(double centerX,
   static_assert(sizeof(SkColor) == sizeof(int32_t), "SkColor doesn't use int32_t.");
 
   set_shader(SkGradientShader::MakeRadial(
-      SkPoint::Make(centerX, centerY),
+      SkPoint::Make(center_x, center_y),
       radius,
       reinterpret_cast<const SkColor*>(colors.data()),
       color_stops.data(),

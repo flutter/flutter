@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_CORE_PAINTING_MASKFILTER_H_
-#define SKY_ENGINE_CORE_PAINTING_MASKFILTER_H_
+#ifndef FLUTTER_LIB_UI_PAINTING_MASK_FILTER_H_
+#define FLUTTER_LIB_UI_PAINTING_MASK_FILTER_H_
 
 #include "base/memory/ref_counted.h"
 #include "flutter/tonic/dart_wrappable.h"
@@ -18,10 +18,10 @@ class MaskFilter : public base::RefCountedThreadSafe<MaskFilter>, public DartWra
   DEFINE_WRAPPERTYPEINFO();
  public:
   ~MaskFilter() override;
-  static scoped_refptr<MaskFilter> create(
-      unsigned style, double sigma, unsigned flags);
+  static scoped_refptr<MaskFilter> Create(unsigned style, double sigma,
+                                          unsigned flags);
 
-  sk_sp<SkMaskFilter> filter() { return filter_; }
+  const sk_sp<SkMaskFilter>& filter() { return filter_; }
 
   static void RegisterNatives(DartLibraryNatives* natives);
 
@@ -33,4 +33,4 @@ class MaskFilter : public base::RefCountedThreadSafe<MaskFilter>, public DartWra
 
 } // namespace blink
 
-#endif  // SKY_ENGINE_CORE_PAINTING_MASKFILTER_H_
+#endif  // FLUTTER_LIB_UI_PAINTING_MASK_FILTER_H_

@@ -4,9 +4,9 @@
 
 #include "sky/engine/core/painting/Paint.h"
 
-#include "sky/engine/core/painting/ColorFilter.h"
-#include "sky/engine/core/painting/MaskFilter.h"
-#include "sky/engine/core/painting/Shader.h"
+#include "flutter/lib/ui/painting/color_filter.h"
+#include "flutter/lib/ui/painting/mask_filter.h"
+#include "flutter/lib/ui/painting/shader.h"
 #include "sky/engine/core/script/ui_dart_state.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"

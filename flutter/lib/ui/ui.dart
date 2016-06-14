@@ -19,11 +19,6 @@ import 'dart:mojo.internal';
 import 'dart:nativewrappers';
 import 'dart:typed_data';
 
-part 'Color.dart';
-part 'FilterQuality.dart';
-part 'Paint.dart';
-part 'PaintingStyle.dart';
-part 'TransferMode.dart';
 part 'compositing.dart';
 part 'geometry.dart';
 part 'hash_codes.dart';

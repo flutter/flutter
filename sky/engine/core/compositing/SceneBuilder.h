@@ -10,15 +10,15 @@
 
 #include "base/memory/ref_counted.h"
 #include "flow/layers/container_layer.h"
+#include "flutter/lib/ui/painting/image_filter.h"
+#include "flutter/lib/ui/painting/path.h"
+#include "flutter/lib/ui/painting/picture.h"
+#include "flutter/lib/ui/painting/rrect.h"
+#include "flutter/lib/ui/painting/shader.h"
 #include "flutter/tonic/dart_wrappable.h"
 #include "flutter/tonic/float64_list.h"
 #include "sky/engine/core/compositing/Scene.h"
-#include "sky/engine/core/painting/CanvasPath.h"
-#include "sky/engine/core/painting/ImageFilter.h"
 #include "sky/engine/core/painting/Paint.h"
-#include "sky/engine/core/painting/Picture.h"
-#include "sky/engine/core/painting/RRect.h"
-#include "sky/engine/core/painting/Shader.h"
 
 namespace blink {
 

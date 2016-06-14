@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/core/painting/ColorFilter.h"
+#include "flutter/lib/ui/painting/color_filter.h"
 
 #include "flutter/tonic/dart_args.h"
 #include "flutter/tonic/dart_binding_macros.h"
@@ -12,7 +12,7 @@
 namespace blink {
 
 static void ColorFilter_constructor(Dart_NativeArguments args) {
-  DartCallConstructor(&ColorFilter::create, args);
+  DartCallConstructor(&ColorFilter::Create, args);
 }
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, ColorFilter);
@@ -23,7 +23,7 @@ void ColorFilter::RegisterNatives(DartLibraryNatives* natives) {
   });
 }
 
-scoped_refptr<ColorFilter> ColorFilter::create(int color,
+scoped_refptr<ColorFilter> ColorFilter::Create(int color,
                                                int transfer_mode) {
   return new ColorFilter(SkColorFilter::MakeModeFilter(
       static_cast<SkColor>(color),
@@ -31,7 +31,7 @@ scoped_refptr<ColorFilter> ColorFilter::create(int color,
 }
 
 ColorFilter::ColorFilter(sk_sp<SkColorFilter> filter)
-    : filter_(filter) {
+    : filter_(std::move(filter)) {
 }
 
 ColorFilter::~ColorFilter() {

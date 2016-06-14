@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/core/painting/Picture.h"
+#include "flutter/lib/ui/painting/picture.h"
 
 #include "flutter/tonic/dart_args.h"
 #include "flutter/tonic/dart_binding_macros.h"
@@ -19,24 +19,18 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Picture);
 
 DART_BIND_ALL(Picture, FOR_EACH_BINDING)
 
-scoped_refptr<Picture> Picture::create(sk_sp<SkPicture> skPicture)
-{
-    DCHECK(skPicture);
-    return new Picture(skPicture);
+scoped_refptr<Picture> Picture::Create(sk_sp<SkPicture> picture) {
+  return new Picture(std::move(picture));
 }
 
-Picture::Picture(sk_sp<SkPicture> skPicture)
-    : m_picture(skPicture)
-{
+Picture::Picture(sk_sp<SkPicture> picture) : picture_(std::move(picture)) {
 }
 
-Picture::~Picture()
-{
+Picture::~Picture() {
 }
 
-void Picture::dispose()
-{
-    ClearDartWrapper();
+void Picture::dispose() {
+  ClearDartWrapper();
 }
 
 } // namespace blink

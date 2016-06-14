@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_CORE_PAINTING_COLORFILTER_H_
-#define SKY_ENGINE_CORE_PAINTING_COLORFILTER_H_
+#ifndef FLUTTER_LIB_UI_PAINTING_COLOR_FILTER_H_
+#define FLUTTER_LIB_UI_PAINTING_COLOR_FILTER_H_
 
 #include "base/memory/ref_counted.h"
 #include "flutter/tonic/dart_wrappable.h"
@@ -16,9 +16,9 @@ class ColorFilter : public base::RefCountedThreadSafe<ColorFilter>, public DartW
   DEFINE_WRAPPERTYPEINFO();
  public:
   ~ColorFilter() override;
-  static scoped_refptr<ColorFilter> create(int color, int transfer_mode);
+  static scoped_refptr<ColorFilter> Create(int color, int transfer_mode);
 
-  sk_sp<SkColorFilter> filter() { return filter_; }
+  const sk_sp<SkColorFilter>& filter() { return filter_; }
 
   static void RegisterNatives(DartLibraryNatives* natives);
 
@@ -30,4 +30,4 @@ class ColorFilter : public base::RefCountedThreadSafe<ColorFilter>, public DartW
 
 } // namespace blink
 
-#endif  // SKY_ENGINE_CORE_PAINTING_COLORFILTER_H_
+#endif  // FLUTTER_LIB_UI_PAINTING_COLOR_FILTER_H_

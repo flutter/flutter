@@ -7,11 +7,11 @@
 #include "base/bind.h"
 #include "base/logging.h"
 #include "base/trace_event/trace_event.h"
+#include "flutter/lib/ui/painting/image.h"
 #include "flutter/tonic/dart_invoke.h"
 #include "flutter/tonic/dart_persistent_value.h"
 #include "flutter/tonic/mojo_converter.h"
 #include "flutter/tonic/uint8_list.h"
-#include "sky/engine/core/painting/CanvasImage.h"
 #include "sky/engine/platform/SharedBuffer.h"
 #include "sky/engine/platform/image-decoders/ImageDecoder.h"
 #include "sky/engine/platform/mojo/data_pipe.h"
@@ -46,8 +46,8 @@ void InvokeImageCallback(sk_sp<SkImage> image,
   if (!image) {
     DartInvoke(callback->value(), {Dart_Null()});
   } else {
-    scoped_refptr<CanvasImage> resultImage = CanvasImage::create();
-    resultImage->setImage(std::move(image));
+    scoped_refptr<CanvasImage> resultImage = CanvasImage::Create();
+    resultImage->set_image(std::move(image));
     DartInvoke(callback->value(), {ToDart(resultImage)});
   }
 }

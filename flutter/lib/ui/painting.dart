@@ -4,6 +4,413 @@
 
 part of dart_ui;
 
+Color _scaleAlpha(Color a, double factor) {
+  return a.withAlpha((a.alpha * factor).round());
+}
+
+/// An immutable 32 bit color value in ARGB
+class Color {
+  /// Construct a color from the lower 32 bits of an int.
+  ///
+  /// Bits 24-31 are the alpha value.
+  /// Bits 16-23 are the red value.
+  /// Bits 8-15 are the green value.
+  /// Bits 0-7 are the blue value.
+  const Color(int value) : _value = (value & 0xFFFFFFFF);
+
+  /// Construct a color from the lower 8 bits of four integers.
+  const Color.fromARGB(int a, int r, int g, int b) :
+    _value = ((((a & 0xff) << 24) |
+                ((r & 0xff) << 16) |
+                ((g & 0xff) << 8) |
+                ((b & 0xff) << 0)) & 0xFFFFFFFF);
+
+  /// A 32 bit value representing this color.
+  ///
+  /// Bits 24-31 are the alpha value.
+  /// Bits 16-23 are the red value.
+  /// Bits 8-15 are the green value.
+  /// Bits 0-7 are the blue value.
+  int get value => _value;
+  final int _value;
+
+  /// The alpha channel of this color in an 8 bit value.
+  int get alpha => (0xff000000 & _value) >> 24;
+
+  /// The alpha channel of this color as a double.
+  double get opacity => alpha / 0xFF;
+
+  /// The red channel of this color in an 8 bit value.
+  int get red => (0x00ff0000 & _value) >> 16;
+
+  /// The green channel of this color in an 8 bit value.
+  int get green => (0x0000ff00 & _value) >> 8;
+
+  /// The blue channel of this color in an 8 bit value.
+  int get blue => (0x000000ff & _value) >> 0;
+
+  /// Returns a new color that matches this color with the alpha channel
+  /// replaced with a (which ranges from 0 to 255).
+  Color withAlpha(int a) {
+    return new Color.fromARGB(a, red, green, blue);
+  }
+
+  /// Returns a new color that matches this color with the alpha channel
+  /// replaced with the given opacity (which ranges from 0.0 to 1.0).
+  Color withOpacity(double opacity) {
+    assert(opacity >= 0.0 && opacity <= 1.0);
+    return withAlpha((255.0 * opacity).round());
+  }
+
+  /// Returns a new color that matches this color with the red channel replaced
+  /// with r.
+  Color withRed(int r) {
+    return new Color.fromARGB(alpha, r, green, blue);
+  }
+
+  /// Returns a new color that matches this color with the green channel
+  /// replaced with g.
+  Color withGreen(int g) {
+    return new Color.fromARGB(alpha, red, g, blue);
+  }
+
+  /// Returns a new color that matches this color with the blue channel replaced
+  /// with b.
+  Color withBlue(int b) {
+    return new Color.fromARGB(alpha, red, green, b);
+  }
+
+  /// Linearly interpolate between two colors
+  ///
+  /// If either color is null, this function linearly interpolates from a
+  /// transparent instance of the other color.
+  static Color lerp(Color a, Color b, double t) {
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return _scaleAlpha(b, t);
+    if (b == null)
+      return _scaleAlpha(a, 1.0 - t);
+    return new Color.fromARGB(
+      lerpDouble(a.alpha, b.alpha, t).toInt(),
+      lerpDouble(a.red, b.red, t).toInt(),
+      lerpDouble(a.green, b.green, t).toInt(),
+      lerpDouble(a.blue, b.blue, t).toInt()
+    );
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other is! Color)
+      return false;
+    final Color typedOther = other;
+    return value == typedOther.value;
+  }
+
+  @override
+  int get hashCode => _value.hashCode;
+
+  @override
+  String toString() => "Color(0x${_value.toRadixString(16).padLeft(8, '0')})";
+}
+
+/// Algorithms to use when painting on the canvas.
+///
+/// When drawing a shape or image onto a canvas, different algorithms
+/// can be used to blend the pixels. The image below shows the effects
+/// of these modes.
+///
+/// [![Open Skia fiddle to view image.](https://flutter.io/images/transfer_mode.png)](https://fiddle.skia.org/c/864acd0659c7a866ea7296a3184b8bdd)
+///
+/// See [Paint.transferMode].
+enum TransferMode {
+  // This list comes from Skia's SkXfermode.h and the values (order) should be
+  // kept in sync.
+  // See: https://skia.org/user/api/skpaint#SkXfermode
+
+  clear,
+  src,
+  dst,
+  srcOver,
+  dstOver,
+  srcIn,
+  dstIn,
+  srcOut,
+  dstOut,
+  srcATop,
+  dstATop,
+  xor,
+  plus,
+  modulate,
+
+  // Following blend modes are defined in the CSS Compositing standard.
+
+  screen,  // The last coeff mode.
+
+  overlay,
+  darken,
+  lighten,
+  colorDodge,
+  colorBurn,
+  hardLight,
+  softLight,
+  difference,
+  exclusion,
+  multiply,  // The last separable mode.
+
+  hue,
+  saturation,
+  color,
+  luminosity,
+}
+
+/// Quality levels for image filters.
+///
+/// See [Paint.filterQuality].
+enum FilterQuality {
+  // This list comes from Skia's SkFilterQuality.h and the values (order) should
+  // be kept in sync.
+
+  /// Fastest possible filtering, albeit also the lowest quality.
+  ///
+  /// Typically this implies nearest-neighbour filtering.
+  none,
+
+  /// Better quality than [none], faster than [medium].
+  ///
+  /// Typically this implies bilinear interpolation.
+  low,
+
+  /// Better quality than [low], faster than [high].
+  ///
+  /// Typically this implies a combination of bilinear interpolation and
+  /// pyramidal parametric prefiltering (mipmaps).
+  medium,
+
+  /// Best possible quality filtering, albeit also the slowest.
+  ///
+  /// Typically this implies bicubic interpolation or better.
+  high,
+}
+
+/// Styles to use for line endings.
+///
+/// See [Paint.strokeCap].
+enum StrokeCap {
+  /// Begin and end contours with a flat edge and no extension.
+  butt,
+
+  /// Begin and end contours with a semi-circle extension.
+  round,
+
+  /// Begin and end contours with a half square extension. This is
+  /// similar to extending each contour by half the stroke width (as
+  /// given by [Paint.strokeWidth]).
+  square,
+}
+
+/// Strategies for painting shapes and paths on a canvas.
+///
+/// See [Paint.style].
+enum PaintingStyle {
+  // This list comes from Skia's SkPaint.h and the values (order) should be kept
+  // in sync.
+
+  /// Apply the [Paint] to the inside of the shape. For example, when
+  /// applied to the [Paint.drawCircle] call, this results in a disc
+  /// of the given size being painted.
+  fill,
+
+  /// Apply the [Paint] to the edge of the shape. For example, when
+  /// applied to the [Paint.drawCircle] call, this results is a hoop
+  /// of the given size being painted. The line drawn on the edge will
+  /// be the width given by the [Paint.strokeWidth] property.
+  stroke,
+
+  /// Apply the [Paint] to the inside of the shape and the edge of the
+  /// shape at the same time. The resulting drawing is similar to what
+  /// would be achieved by inflating the shape by half the stroke
+  /// width (as given by [Paint.strokeWidth]), and then using [fill].
+  strokeAndFill,
+}
+
+/// A description of the style to use when drawing on a [Canvas].
+///
+/// Most APIs on [Canvas] take a [Paint] object to describe the style
+/// to use for that operation.
+class Paint {
+  /// Whether to paint inside shapes, the edges of shapes, or both.
+  ///
+  /// If null, defaults to [PaintingStyle.fill].
+  PaintingStyle style;
+  static const PaintingStyle _kDefaultStyle = PaintingStyle.fill;
+
+  /// How wide to make edges drawn when [style] is set to
+  /// [PaintingStyle.stroke] or [PaintingStyle.strokeAndFill]. The
+  /// width is given in logical pixels measured in the direction
+  /// orthogonal to the direction of the path.
+  ///
+  /// The values null and 0.0 correspond to a hairline width.
+  double strokeWidth;
+  static const double _kDefaultStrokeWidth = 0.0;
+
+  /// The kind of finish to place on the end of lines drawn when
+  /// [style] is set to [PaintingStyle.stroke] or
+  /// [PaintingStyle.strokeAndFill].
+  ///
+  /// If null, defaults to [StrokeCap.butt], i.e. no caps.
+  StrokeCap strokeCap;
+  static const StrokeCap _kDefaultStrokeCap = StrokeCap.butt;
+
+  /// Whether to apply anti-aliasing to lines and images drawn on the
+  /// canvas.
+  ///
+  /// Defaults to true. The value null is treated as false.
+  bool isAntiAlias = true;
+
+  /// The color to use when stroking or filling a shape.
+  ///
+  /// Defaults to black.
+  ///
+  /// See also:
+  ///
+  ///  * [style], which controls whether to stroke or fill (or both).
+  ///  * [colorFilter], which overrides [color].
+  ///  * [shader], which overrides [color] with more elaborate effects.
+  ///
+  /// This color is not used when compositing. To colorize a layer, use
+  /// [colorFilter].
+  Color color = _kDefaultPaintColor;
+  static const Color _kDefaultPaintColor = const Color(0xFF000000);
+
+  /// A mask filter (for example, a blur) to apply to a shape after it has been
+  /// drawn but before it has been composited into the image.
+  ///
+  /// See [MaskFilter] for details.
+  MaskFilter maskFilter;
+
+  /// Controls the performance vs quality trade-off to use when applying
+  /// filters, such as [maskFilter], or when drawing images, as with
+  /// [Canvas.drawImageRect] or [Canvas.drawImageNine].
+  // TODO(ianh): verify that the image drawing methods actually respect this
+  FilterQuality filterQuality;
+
+  /// The shader to use when stroking or filling a shape.
+  ///
+  /// When this is null, the [color] is used instead.
+  ///
+  /// See also:
+  ///
+  ///  * [Gradient], a shader that paints a color gradient.
+  ///  * [ImageShader], a shader that tiles an [Image].
+  ///  * [colorFilter], which overrides [shader].
+  ///  * [color], which is used if [shader] and [colorFilter] are null.
+  Shader shader;
+
+  /// A color filter to apply when a shape is drawn or when a layer is
+  /// composited.
+  ///
+  /// See [ColorFilter] for details.
+  ///
+  /// When a shape is being drawn, [colorFilter] overrides [color] and [shader].
+  ColorFilter colorFilter;
+
+  /// A transfer mode to apply when a shape is drawn or a layer is composited.
+  ///
+  /// The source colors are from the shape being drawn (e.g. from
+  /// [Canvas.drawPath]) or layer being composited (the graphics that were drawn
+  /// between the [Canvas.saveLayer] and [Canvas.restore] calls), after applying
+  /// the [colorFilter], if any.
+  ///
+  /// The destination colors are from the background onto which the shape or
+  /// layer is being composited.
+  ///
+  /// If null, defaults to [TransferMode.srcOver].
+  TransferMode transferMode;
+  static const TransferMode _kDefaultTransferMode = TransferMode.srcOver;
+
+
+  // Must match PaintFields enum in Paint.cpp.
+  dynamic get _value {
+    // The most common usage is a Paint with no options besides a color and
+    // anti-aliasing.  In this case, save time by just returning the color
+    // as an int.
+    if ((style == null || style == _kDefaultStyle) &&
+        (strokeWidth == null || strokeWidth == _kDefaultStrokeWidth) &&
+        (strokeCap == null || strokeCap == _kDefaultStrokeCap) &&
+        isAntiAlias &&
+        color != null &&
+        (transferMode == null || transferMode == _kDefaultTransferMode) &&
+        colorFilter == null &&
+        maskFilter == null &&
+        filterQuality == null &&
+        shader == null) {
+      return color.value;
+    }
+
+    return <dynamic>[
+      style?.index,
+      strokeWidth,
+      strokeCap?.index,
+      isAntiAlias,
+      color.value,
+      transferMode?.index,
+      colorFilter,
+      maskFilter,
+      filterQuality?.index,
+      shader,
+    ];
+  }
+
+  @override
+  String toString() {
+    StringBuffer result = new StringBuffer();
+    String semicolon = '';
+    result.write('Paint(');
+    if (style == PaintingStyle.stroke || style == PaintingStyle.strokeAndFill) {
+      result.write('$style');
+      if (strokeWidth != null && strokeWidth != 0.0)
+        result.write(' $strokeWidth');
+      else
+        result.write(' hairline');
+      if (strokeCap != null && strokeCap != _kDefaultStrokeCap)
+        result.write(' $strokeCap');
+      semicolon = '; ';
+    }
+    if (isAntiAlias != true) {
+      result.write('${semicolon}antialias off');
+      semicolon = '; ';
+    }
+    if (color != _kDefaultPaintColor) {
+      if (color != null)
+        result.write('$semicolon$color');
+      else
+        result.write('${semicolon}no color');
+      semicolon = '; ';
+    }
+    if (transferMode != null) {
+      result.write('$semicolon$transferMode');
+      semicolon = '; ';
+    }
+    if (colorFilter != null) {
+      result.write('${semicolon}colorFilter: $colorFilter');
+      semicolon = '; ';
+    }
+    if (maskFilter != null) {
+      result.write('${semicolon}maskFilter: $maskFilter');
+      semicolon = '; ';
+    }
+    if (filterQuality != null) {
+      result.write('${semicolon}filterQuality: $filterQuality');
+      semicolon = '; ';
+    }
+    if (shader != null)
+      result.write('${semicolon}shader: $shader');
+    result.write(')');
+    return result.toString();
+  }
+}
+
 /// Opaque handle to raw decoded image data (pixels).
 ///
 /// To obtain an Image object, use the [decodeImageFromDataPipe] or
