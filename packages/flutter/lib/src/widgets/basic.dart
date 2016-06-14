@@ -310,8 +310,12 @@ class ClipRect extends SingleChildRenderObjectWidget {
 /// rectangle.
 class ClipRRect extends SingleChildRenderObjectWidget {
   /// Creates a rounded-rectangular clip.
-  ClipRRect({ Key key, this.xRadius, this.yRadius, Widget child })
-    : super(key: key, child: child);
+  ClipRRect({
+    Key key,
+    @required this.xRadius,
+    @required this.yRadius,
+    Widget child
+  }) : super(key: key, child: child);
 
   /// The radius of the rounded corners in the horizontal direction in logical pixels.
   ///
