@@ -81,20 +81,13 @@ class SourceGraph {
 
     // Parse any dirty sources.
     while (sources.any((GraphSource source) => source.dirty)) {
-      for (GraphSource source in sources.where((GraphSource source) => source.dirty).toList()) {
+      for (GraphSource source in sources.where((GraphSource source) => source.dirty).toList())
         source.parse();
-      }
     }
   }
 
   GraphSource _getCreateSource(String resolvedPath) {
-    if (_sourceMap.containsKey(resolvedPath)) {
-      return _sourceMap[resolvedPath];
-    } else {
-      GraphSource source = new GraphSource(this, resolvedPath);
-      _sourceMap[resolvedPath] = source;
-      return source;
-    }
+    return _sourceMap.putIfAbsent(resolvedPath, () => new GraphSource(this, resolvedPath));
   }
 
   String _resolveDirectiveUri(String uriString, String basePath) {
@@ -154,9 +147,8 @@ class GraphSource {
     CompilationUnit unit = parseDirectives(getSource(), name: fullpath, suppressErrors: true);
 
     for (Directive directive in unit.directives) {
-      if (directive is ExportDirective || directive is ImportDirective || directive is PartDirective) {
-        UriBasedDirective uriBasedDirective = directive;
-        String uri = uriBasedDirective.uri.stringValue;
+      if (directive is UriBasedDirective) {
+        String uri = directive.uri.stringValue;
 
         GraphSourceReference reference = new GraphSourceReference(this, uri);
 
