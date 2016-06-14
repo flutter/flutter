@@ -245,7 +245,6 @@ class _DismissableState extends State<Dismissable> {
           return vy > _kMinFlingVelocity;
       }
     }
-    return false;
   }
 
   void _handleDragEnd(DragEndDetails details) {

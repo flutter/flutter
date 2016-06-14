@@ -125,6 +125,8 @@ class TextPainter {
       case TextBaseline.ideographic:
         return _paragraph.ideographicBaseline;
     }
+    assert(baseline != null);
+    return null;
   }
 
   double _lastMinWidth;
@@ -211,6 +213,8 @@ class TextPainter {
             ?? _getOffsetFromUpstream(offset, caretPrototype)
             ?? emptyOffset;
     }
+    assert(position.affinity != null);
+    return null;
   }
 
   /// Returns a list of rects that bound the given selection.

@@ -130,6 +130,8 @@ class GridDemoPhotoItem extends StatelessWidget {
           child: image
         );
     }
+    assert(tileStyle != null);
+    return null;
   }
 }
 

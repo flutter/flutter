@@ -1353,6 +1353,8 @@ class BoxDecoration extends Decoration {
         double distance = (position - center).distance;
         return distance <= math.min(size.width, size.height) / 2.0;
     }
+    assert(shape != null);
+    return null;
   }
 
   @override

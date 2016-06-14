@@ -224,6 +224,8 @@ abstract class PageableState<T extends Pageable> extends ScrollableState<T> {
       case Axis.vertical:
         return box.size.height;
     }
+    assert(config.scrollDirection != null);
+    return null;
   }
 
   @override
@@ -248,6 +250,8 @@ abstract class PageableState<T extends Pageable> extends ScrollableState<T> {
       case ViewportAnchor.end:
         return (_itemCount - scrollIndex - 1) % itemCount;
     }
+    assert(config.scrollAnchor != null);
+    return null;
   }
 
   @override
@@ -324,6 +328,8 @@ abstract class PageableState<T extends Pageable> extends ScrollableState<T> {
       case PageableListFlingBehavior.stopAtNextPage:
         return _flingToAdjacentItem(scrollVelocity);
     }
+    assert(config.itemsSnapAlignment != null);
+    return null;
   }
 
   @override

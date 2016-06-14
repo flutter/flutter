@@ -186,4 +186,6 @@ Widget buildTextSelectionHandle(
         child: handle
       );
   }
+  assert(type != null);
+  return null;
 }

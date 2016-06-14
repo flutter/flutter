@@ -157,7 +157,6 @@ class Expression extends EquationMember {
     if (!m.isConstant) {
       throw new ParserException(
           'The divisor was not a constant expression', <EquationMember>[this, m]);
-      return null;
     }
 
     return this._applyMultiplicand(1.0 / m.value);

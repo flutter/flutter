@@ -1125,7 +1125,6 @@ abstract class RenderBox extends RenderObject {
           'set a size and lay out any children, or, set sizedByParent to true '
           'so that performResize() sizes the render object.'
         );
-        return true;
       }
       return true;
     });

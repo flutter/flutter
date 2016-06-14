@@ -57,12 +57,15 @@ class Dialog extends StatelessWidget {
   final List<Widget> actions;
 
   Color _getColor(BuildContext context) {
-    switch (Theme.of(context).brightness) {
+    Brightness brightness = Theme.of(context).brightness;
+    switch (brightness) {
       case Brightness.light:
         return Colors.white;
       case Brightness.dark:
         return Colors.grey[800];
     }
+    assert(brightness != null);
+    return null;
   }
 
   @override

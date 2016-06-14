@@ -287,6 +287,8 @@ class ReverseAnimation extends Animation<double>
       case AnimationStatus.completed: return AnimationStatus.dismissed;
       case AnimationStatus.dismissed: return AnimationStatus.completed;
     }
+    assert(status != null);
+    return null;
   }
 
   @override

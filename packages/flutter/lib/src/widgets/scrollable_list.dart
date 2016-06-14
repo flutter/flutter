@@ -239,6 +239,8 @@ class _VirtualListViewport extends VirtualViewport {
         }
         break;
     }
+    assert(mainAxis != null);
+    return null;
   }
 
   @override

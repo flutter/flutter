@@ -134,6 +134,8 @@ ApplicationPackage getApplicationPackageForPlatform(TargetPlatform platform) {
     case TargetPlatform.linux_x64:
       return null;
   }
+  assert(platform != null);
+  return null;
 }
 
 class ApplicationPackageStore {
@@ -156,5 +158,6 @@ class ApplicationPackageStore {
       case TargetPlatform.linux_x64:
         return null;
     }
+    return null;
   }
 }

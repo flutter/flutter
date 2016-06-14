@@ -23,12 +23,15 @@ class TestOrientedBox extends SingleChildRenderObjectWidget {
   TestOrientedBox({ Key key, Widget child }) : super(key: key, child: child);
 
   Decoration _getDecoration(BuildContext context) {
-    switch (MediaQuery.of(context).orientation) {
+    Orientation orientation = MediaQuery.of(context).orientation;
+    switch (orientation) {
       case Orientation.landscape:
         return new BoxDecoration(backgroundColor: const Color(0xFF00FF00));
       case Orientation.portrait:
         return new BoxDecoration(backgroundColor: const Color(0xFF0000FF));
     }
+    assert(orientation != null);
+    return null;
   }
 
   @override

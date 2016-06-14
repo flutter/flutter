@@ -70,6 +70,8 @@ abstract class VirtualViewportElement extends RenderObjectElement {
       case ViewportAnchor.end:
         return scrollOffset;
     }
+    assert(renderObject.anchor != null);
+    return null;
   }
 
   /// Returns a two-dimensional representation of the scroll offset, accounting
