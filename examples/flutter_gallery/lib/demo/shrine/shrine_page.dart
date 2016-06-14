@@ -12,8 +12,7 @@ enum ShrineAction {
   emptyCart
 }
 
-/// Defines the Scaffold, AppBar, etc that the demo pages have in common.
-class ShrinePage extends StatelessWidget {
+class ShrinePage extends StatefulWidget {
   ShrinePage({ Key key, this.scaffoldKey, this.body, this.floatingActionButton }) : super(key: key);
 
   final Key scaffoldKey;
@@ -21,14 +20,40 @@ class ShrinePage extends StatelessWidget {
   final Widget floatingActionButton;
 
   @override
+  ShrinePageState createState() => new ShrinePageState();
+}
+
+/// Defines the Scaffold, AppBar, etc that the demo pages have in common.
+class ShrinePageState extends State<ShrinePage> {
+  int _appBarElevation = 0;
+
+  bool _handleScrollNotification(ScrollNotification notification) {
+    int elevation = notification.scrollable.scrollOffset <= 0.0 ? 0 : 1;
+    if (elevation != _appBarElevation) {
+      setState(() {
+        _appBarElevation = elevation;
+      });
+    }
+    return false;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      key: scaffoldKey,
+      key: config.scaffoldKey,
       appBar: new AppBar(
+        elevation: _appBarElevation,
+        backgroundColor: Theme.of(context).cardColor,
+        flexibleSpace: new Container(
+          decoration: new BoxDecoration(
+            border: new Border(
+              bottom: new BorderSide(color: const Color(0xFFD9D9D9))
+            )
+          )
+        ),
         title: new Center(
           child: new Text('SHRINE', style: ShrineTheme.of(context).appBarTitleStyle)
         ),
-        backgroundColor: Theme.of(context).canvasColor,
         actions: <Widget>[
           new IconButton(
             icon: Icons.shopping_cart,
@@ -68,8 +93,11 @@ class ShrinePage extends StatelessWidget {
           )
         ]
       ),
-      floatingActionButton: floatingActionButton,
-      body: body
+      floatingActionButton: config.floatingActionButton,
+      body: new NotificationListener<ScrollNotification>(
+        onNotification: _handleScrollNotification,
+        child: config.body
+      )
     );
   }
 }

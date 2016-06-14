@@ -17,6 +17,7 @@ TextStyle robotoLight12(Color color) => new ShrineStyle.roboto(12.0, FontWeight.
 TextStyle robotoRegular14(Color color) => new ShrineStyle.roboto(14.0, FontWeight.w500, color);
 TextStyle robotoMedium14(Color color) => new ShrineStyle.roboto(14.0, FontWeight.w600, color);
 TextStyle robotoLight14(Color color) => new ShrineStyle.roboto(14.0, FontWeight.w300, color);
+TextStyle robotoRegular16(Color color) => new ShrineStyle.roboto(16.0, FontWeight.w500, color);
 TextStyle robotoRegular20(Color color) => new ShrineStyle.roboto(20.0, FontWeight.w500, color);
 TextStyle abrilFatfaceRegular24(Color color) => new ShrineStyle.abrilFatface(24.0, FontWeight.w500, color);
 TextStyle abrilFatfaceRegular34(Color color) => new ShrineStyle.abrilFatface(34.0, FontWeight.w500, color);
@@ -32,7 +33,8 @@ class ShrineTheme extends InheritedWidget {
   final TextStyle appBarTitleStyle = robotoRegular20(Colors.black87);
   final TextStyle vendorItemStyle = robotoRegular12(const Color(0xFF81959D));
   final TextStyle priceStyle = robotoRegular14(Colors.black87);
-  final TextStyle featureTitleStyle = abrilFatfaceRegular34(Colors.black87);
+  final TextStyle featureTitleStyle = abrilFatfaceRegular34(const Color(0xFF0A3142));
+  final TextStyle featurePriceStyle = robotoRegular16(Colors.black87);
   final TextStyle featureStyle = robotoLight14(Colors.black54);
   final TextStyle orderTitleStyle = abrilFatfaceRegular24(Colors.black87);
   final TextStyle orderStyle = robotoLight14(Colors.black54);

@@ -54,23 +54,48 @@ class VendorItem extends StatelessWidget {
 
 /// Displays the product's price. If the product is in the shopping cart the background
 /// is highlighted.
-class PriceItem extends StatelessWidget {
+abstract class PriceItem extends StatelessWidget {
   PriceItem({ Key key, this.product }) : super(key: key) {
     assert(product != null);
   }
 
   final Product product;
 
-  @override
-  Widget build(BuildContext context) {
+  Widget buildItem(BuildContext context, TextStyle style, EdgeInsets padding) {
     BoxDecoration decoration;
     if (shoppingCart[product] != null)
       decoration = new BoxDecoration(backgroundColor: const Color(0xFFFFE0E0));
 
     return new Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: padding,
       decoration: decoration,
-      child: new Text(product.priceString, style: ShrineTheme.of(context).priceStyle)
+      child: new Text(product.priceString, style: style)
+    );
+  }
+}
+
+class ProductPriceItem extends PriceItem {
+  ProductPriceItem({ Key key, Product product }) : super(key: key, product: product);
+
+  @override
+  Widget build(BuildContext context) {
+    return buildItem(
+      context,
+      ShrineTheme.of(context).priceStyle,
+      const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0)
+    );
+  }
+}
+
+class FeaturePriceItem extends PriceItem {
+  FeaturePriceItem({ Key key, Product product }) : super(key: key, product: product);
+
+  @override
+  Widget build(BuildContext context) {
+    return buildItem(
+      context,
+      ShrineTheme.of(context).featurePriceStyle,
+      const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0)
     );
   }
 }
@@ -124,7 +149,7 @@ class FeatureItem extends StatelessWidget {
               height: unitSize,
               child: new Align(
                 alignment: FractionalOffset.topRight,
-                child: new PriceItem(product: product)
+                child: new FeaturePriceItem(product: product)
               )
             ),
             new Flexible(
@@ -189,37 +214,38 @@ class ProductItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Card(
-      child: new Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: new Column(
-          children: <Widget>[
-            new Align(
-              alignment: FractionalOffset.centerRight,
-              child: new PriceItem(product: product)
-            ),
-            new SizedBox(
-              width: 144.0,
-              height: 144.0,
-              child: new Stack(
-                children: <Widget>[
-                  new Hero(
-                    tag: productHeroTag,
-                    key: new ObjectKey(product),
-                    child: new AssetImage(
-                      fit: ImageFit.contain,
-                      name: product.imageAsset
-                    )
-                  ),
-                  new Material(
-                    color: Theme.of(context).canvasColor.withAlpha(0x00),
-                    child: new InkWell(onTap: onPressed)
-                  ),
-                ]
-              )
-            ),
-            new VendorItem(vendor: product.vendor)
-          ]
-        )
+      child: new Column(
+        children: <Widget>[
+          new Align(
+            alignment: FractionalOffset.centerRight,
+            child: new ProductPriceItem(product: product)
+          ),
+          new Container(
+            width: 144.0,
+            height: 144.0,
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: new Stack(
+              children: <Widget>[
+                new Hero(
+                  tag: productHeroTag,
+                  key: new ObjectKey(product),
+                  child: new AssetImage(
+                    fit: ImageFit.contain,
+                    name: product.imageAsset
+                  )
+                ),
+                new Material(
+                  color: Theme.of(context).canvasColor.withAlpha(0x00),
+                  child: new InkWell(onTap: onPressed)
+                ),
+              ]
+            )
+          ),
+          new Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: new VendorItem(vendor: product.vendor)
+          )
+        ]
       )
     );
   }
