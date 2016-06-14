@@ -64,7 +64,7 @@ const List<Product> _allProducts = const <Product> [
     name: 'Sunglasses',
     imageAsset: 'packages/flutter_gallery_assets/shrine/products/sunnies.png',
     categories: const <String>['travel', 'fashion', 'beauty'],
-    price: 70.00,
+    price: 20.00,
     vendor: _trevor,
     description:
       'Be an optimist. Carry Sunglasses with you at all times. All Tints and '
@@ -76,7 +76,7 @@ const List<Product> _allProducts = const <Product> [
     name: 'Clock',
     imageAsset: 'packages/flutter_gallery_assets/shrine/products/clock.png',
     categories: const <String>['furniture'],
-    price: 120.00,
+    price: 30.00,
     vendor: _trevor,
     description:
       'Timekeeper Co makes clocks that tell time precisely. Clock is '
@@ -136,7 +136,7 @@ const List<Product> _allProducts = const <Product> [
     name: 'Teapot',
     imageAsset: 'packages/flutter_gallery_assets/shrine/products/teapot.png',
     categories: const <String>['furniture', 'fashion'],
-    price: 210.00,
+    price: 70.00,
     vendor: _trevor,
     featureTitle: 'Beautiful little teapot',
     featureDescription:
@@ -171,7 +171,7 @@ const List<Product> _allProducts = const <Product> [
     name: 'Perfect Goldfish Bowl',
     imageAsset: 'packages/flutter_gallery_assets/shrine/products/fish_bowl.png',
     categories: const <String>['latest', 'furniture'],
-    price: 25.00,
+    price: 30.00,
     vendor: _ali,
     description:
       'The Perfect Bowl Co makes the best bowls for just about anything you can '
@@ -182,7 +182,7 @@ const List<Product> _allProducts = const <Product> [
     name: 'Red Lipstick Set',
     imageAsset: 'packages/flutter_gallery_assets/shrine/products/lipstick.png',
     categories: const <String>['fashion', 'beauty'],
-    price: 25.00,
+    price: 54.00,
     vendor: _sandra,
     description:
       'Trying to find the perfect shade to match your mood? Try no longer. Red '
@@ -249,7 +249,7 @@ const List<Product> _allProducts = const <Product> [
     name: 'Surfboard',
     imageAsset: 'packages/flutter_gallery_assets/shrine/products/surfboard.png',
     categories: const <String>[ 'travel', 'latest'],
-    price: 25.00,
+    price: 120.00,
     vendor: _stella,
     description:
       'Who says you can’t walk on water? With Surfboard, by Surfboard Supply, '
