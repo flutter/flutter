@@ -285,6 +285,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
       case ViewportAnchor.end:
         return pixelOffset;
     }
+    assert(config.scrollAnchor != null);
     return null;
   }
 

@@ -731,6 +731,8 @@ class _LazyBlockElement extends RenderObjectElement {
       case Axis.vertical:
         return size.height;
     }
+    assert(widget.mainAxis != null);
+    return null;
   }
 
   Offset _getMainAxisOffsetForSize(Size size) {
@@ -740,7 +742,8 @@ class _LazyBlockElement extends RenderObjectElement {
       case Axis.vertical:
         return new Offset(0.0, size.height);
     }
-    return null;    
+    assert(widget.mainAxis != null);
+    return null;
   }
 
   static RenderBox _getNextWithin(_RenderLazyBlock block, RenderBox child) {

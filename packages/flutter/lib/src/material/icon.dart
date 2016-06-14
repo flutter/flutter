@@ -65,7 +65,8 @@ class Icon extends StatelessWidget {
       case Brightness.light:
         return Colors.black;
     }
-    return null;    
+    assert(brightness != null);
+    return null;
   }
 
   Color _getDefaultColor(BuildContext context) {

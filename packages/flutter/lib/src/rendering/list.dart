@@ -82,6 +82,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
       case Axis.horizontal:
         return padding.horizontal;
     }
+    assert(mainAxis != null);
     return null;
   }
 
@@ -109,6 +110,8 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
         assert(debugThrowIfNotCheckingIntrinsics());
         return 0.0;
     }
+    assert(mainAxis != null);
+    return null;
   }
 
   @override

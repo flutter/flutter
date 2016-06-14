@@ -57,6 +57,7 @@ class ViewportDimensions {
       case ViewportAnchor.end:
         return paintOffset + (containerSize - contentSize);
     }
+    assert(anchor != null);
     return null;
   }
 
@@ -109,6 +110,8 @@ class RenderViewportBase extends RenderBox {
       case Axis.vertical:
         return offset.dx == 0.0;
     }
+    assert(direction != null);
+    return null;
   }
 
   /// The offset at which to paint the child.

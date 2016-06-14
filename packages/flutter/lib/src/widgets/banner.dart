@@ -90,6 +90,8 @@ class BannerPainter extends CustomPainter {
       case BannerLocation.topLeft:
         return 0.0;
     }
+    assert(location != null);
+    return null;
   }
 
   double _translationY(double height) {
@@ -101,6 +103,8 @@ class BannerPainter extends CustomPainter {
       case BannerLocation.topLeft:
         return 0.0;
     }
+    assert(location != null);
+    return null;
   }
 
   double get _rotation {
@@ -112,6 +116,7 @@ class BannerPainter extends CustomPainter {
       case BannerLocation.topLeft:
         return -math.PI / 4.0;
     }
+    assert(location != null);
     return null;
   }
 }

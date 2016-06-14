@@ -125,6 +125,7 @@ class TextPainter {
       case TextBaseline.ideographic:
         return _paragraph.ideographicBaseline;
     }
+    assert(baseline != null);
     return null;
   }
 
@@ -212,6 +213,7 @@ class TextPainter {
             ?? _getOffsetFromUpstream(offset, caretPrototype)
             ?? emptyOffset;
     }
+    assert(position.affinity != null);
     return null;
   }
 

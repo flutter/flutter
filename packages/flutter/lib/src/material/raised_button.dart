@@ -98,12 +98,14 @@ class RaisedButton extends StatelessWidget {
     } else {
       if (disabledColor != null)
         return disabledColor;
+      Brightness brightness = Theme.of(context).brightness;
       switch (Theme.of(context).brightness) {
         case Brightness.light:
           return Colors.black12;
         case Brightness.dark:
           return Colors.white12;
       }
+      assert(brightness != null);
       return null;
     }
   }

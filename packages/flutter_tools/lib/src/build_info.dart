@@ -99,6 +99,7 @@ TargetPlatform getTargetPlatformForName(String platform) {
     case 'linux-x64':
       return TargetPlatform.linux_x64;
   }
+  assert(platform != null);
   return null;
 }
 

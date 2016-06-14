@@ -75,6 +75,7 @@ class StocksAppState extends State<StocksApp> {
           accentColor: Colors.redAccent[200]
         );
     }
+    assert(_configuration.stockMode != null);
     return null;
   }
 

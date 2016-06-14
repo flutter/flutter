@@ -227,6 +227,7 @@ class _MaterialButtonState extends State<MaterialButton> {
           return Colors.white30;
       }
     }
+    assert(_colorBrightness != null);
     return null;
   }
 

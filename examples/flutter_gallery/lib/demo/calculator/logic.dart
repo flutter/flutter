@@ -83,6 +83,7 @@ class OperationToken extends ExpressionToken {
       case Operation.Division:
         return '  \u00F7  ';
     }
+    assert(operation != null);
     return null;
   }
 }
