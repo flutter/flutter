@@ -140,21 +140,24 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
   Widget buildDropdownButton() {
     return new Align(
       alignment: new FractionalOffset(0.5, 0.4),
-      child: new DropDownButton<String>(
-        value: dropdownValue,
-        onChanged: (String newValue) {
-          setState(() {
-            if (newValue != null)
-              dropdownValue = newValue;
-          });
-        },
-        items: <String>['One', 'Two', 'Free', 'Four']
-          .map((String value) {
-            return new DropDownMenuItem<String>(
-              value: value,
-              child: new Text(value));
-          })
-          .toList()
+      child: new SizedBox(
+        width: 96.0,
+        child: new DropDownButton<String>(
+          value: dropdownValue,
+          onChanged: (String newValue) {
+            setState(() {
+              if (newValue != null)
+                dropdownValue = newValue;
+            });
+          },
+          items: <String>['One', 'Two', 'Free', 'Four']
+            .map((String value) {
+              return new DropDownMenuItem<String>(
+                value: value,
+                child: new Text(value));
+            })
+            .toList()
+        )
       )
     );
   }
