@@ -307,10 +307,12 @@ class LaunchResult {
 }
 
 class ForwardedPort {
-  ForwardedPort(this.hostPort, this.devicePort);
+  ForwardedPort(this.hostPort, this.devicePort) : context = null;
+  ForwardedPort.withContext(this.hostPort, this.devicePort, this.context);
 
   final int hostPort;
   final int devicePort;
+  final dynamic context;
 
   @override
   String toString() => 'ForwardedPort HOST:$hostPort to DEVICE:$devicePort';
