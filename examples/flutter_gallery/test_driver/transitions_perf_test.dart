@@ -3,21 +3,61 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:collection' show LinkedHashSet;
 import 'dart:convert' show JsonEncoder;
 
 import 'package:file/file.dart';
 import 'package:file/io.dart';
 import 'package:flutter_driver/flutter_driver.dart';
-import 'package:flutter_gallery/gallery/item.dart' show GalleryItem, kAllGalleryItems;
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
-final List<String> demoCategories = new LinkedHashSet<String>.from(
-  kAllGalleryItems.map((GalleryItem item) => item.category)).toList();
+// Warning: this list must be kept in sync with the value of
+// kAllGalleryItems.map((GalleryItem item) => item.category)).toList();
+final List<String> demoCategories = <String>[
+  'Demos',
+  'Components',
+  'Style'
+];
 
-final List<String> demoTitles =
-  kAllGalleryItems.map((GalleryItem item) => item.title).toList();
+// Warning: this list must be kept in sync with the value of
+// kAllGalleryItems.map((GalleryItem item) => item.title).toList();
+final List<String> demoTitles = <String>[
+  // Demos
+  // 'Pesto', TODO(hansmuller): restore when Pesto has a back button.
+  'Shrine',
+  'Calculator',
+  'Contacts',
+  // Components
+  'Buttons',
+  'Cards',
+  'Chips',
+  'Date picker',
+  'Data tables',
+  'Dialog',
+  'Expand/collapse list control',
+  'Floating action button',
+  'Grid',
+  'Icons',
+  'Leave-behind list items',
+  'List',
+  'Menus',
+  'Modal bottom sheet',
+  'Over-scroll',
+  'Page selector',
+  'Persistent bottom sheet',
+  'Progress indicators',
+  'Scrollable tabs',
+  'Selection controls',
+  'Sliders',
+  'Snackbar',
+  'Tabs',
+  'Text fields',
+  'Time picker',
+  'Tooltips',
+  // Style
+  'Colors',
+  'Typography'
+];
 
 Future<Null> saveDurationsHistogram(List<Map<String, dynamic>> events) async {
   final Map<String, List<int>> durations = new Map<String, List<int>>();
