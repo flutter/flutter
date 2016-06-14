@@ -150,7 +150,11 @@ Future<XcodeBuildResult> buildXcodeProject({
     commands.addAll(<String>['-sdk', 'iphonesimulator', '-arch', 'x86_64']);
   }
 
-  RunResult result = await runAsync(commands, workingDirectory: app.rootPath);
+  RunResult result = await runAsync(
+    commands,
+    workingDirectory: app.rootPath,
+    allowReentrantFlutter: true
+  );
 
   if (result.exitCode != 0) {
     if (result.stderr.isNotEmpty)

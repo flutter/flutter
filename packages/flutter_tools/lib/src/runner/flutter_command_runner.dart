@@ -48,11 +48,6 @@ class FlutterCommandRunner extends CommandRunner {
         negatable: true,
         hide: !verboseHelp,
         help: 'Whether to use terminal colors.');
-    argParser.addFlag('lock',
-        negatable: true,
-        hide: !verboseHelp,
-        help: 'Whether to lock the Flutter binary artifacts directory while running. (This prevents multiple simultaneous Flutter instances from colliding.)',
-        defaultsTo: true);
     argParser.addFlag('suppress-analytics',
         negatable: false,
         hide: !verboseHelp,
@@ -147,7 +142,7 @@ class FlutterCommandRunner extends CommandRunner {
     // enginePath's initialiser uses it).
     Cache.flutterRoot = path.normalize(path.absolute(globalResults['flutter-root']));
 
-    if (globalResults['lock'])
+    if (Platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true')
       await Cache.lock();
 
     if (globalResults['suppress-analytics'])

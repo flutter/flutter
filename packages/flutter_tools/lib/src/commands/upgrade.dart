@@ -50,9 +50,13 @@ class UpgradeCommand extends FlutterCommand {
     // if necessary.
     printStatus('');
     printStatus('Upgrading engine...');
-    code = await runCommandAndStreamOutput(<String>[
-      'bin/flutter', '--no-lock', '--no-color', 'precache'
-    ], workingDirectory: Cache.flutterRoot);
+    code = await runCommandAndStreamOutput(
+      <String>[
+        'bin/flutter', '--no-color', 'precache'
+      ],
+      workingDirectory: Cache.flutterRoot,
+      allowReentrantFlutter: true
+    );
 
     printStatus('');
     printStatus(FlutterVersion.getVersion(Cache.flutterRoot).toString());
