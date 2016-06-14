@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include <unicode/utf.h>
+#include <unicode/utf8.h>
 #include <cstdlib>
+#include <cutils/log.h>
+#include <vector>
+#include <string>
 
 namespace minikin {
 
@@ -32,33 +35,35 @@ void ParseUnicode(uint16_t* buf, size_t buf_size, const char* src, size_t* resul
         switch (src[input_ix]) {
         case '\'':
             // single ASCII char
-            ASSERT_LT(src[input_ix], 0x80);
+            LOG_ALWAYS_FATAL_IF(static_cast<uint8_t>(src[input_ix]) >= 0x80);
             input_ix++;
-            ASSERT_NE(src[input_ix], 0);
-            ASSERT_LT(output_ix, buf_size);
+            LOG_ALWAYS_FATAL_IF(src[input_ix] == 0);
+            LOG_ALWAYS_FATAL_IF(output_ix >= buf_size);
             buf[output_ix++] = (uint16_t)src[input_ix++];
-            ASSERT_EQ(src[input_ix], '\'');
+            LOG_ALWAYS_FATAL_IF(src[input_ix] != '\'');
             input_ix++;
             break;
         case 'u':
         case 'U': {
             // Unicode codepoint in hex syntax
             input_ix++;
-            ASSERT_EQ(src[input_ix], '+');
+            LOG_ALWAYS_FATAL_IF(src[input_ix] != '+');
             input_ix++;
             char* endptr = (char*)src + input_ix;
             unsigned long int codepoint = strtoul(src + input_ix, &endptr, 16);
             size_t num_hex_digits = endptr - (src + input_ix);
-            ASSERT_GE(num_hex_digits, 4u);  // also triggers on invalid number syntax, digits = 0
-            ASSERT_LE(num_hex_digits, 6u);
-            ASSERT_LE(codepoint, 0x10FFFFu);
+
+            // also triggers on invalid number syntax, digits = 0
+            LOG_ALWAYS_FATAL_IF(num_hex_digits < 4u);
+            LOG_ALWAYS_FATAL_IF(num_hex_digits > 6u);
+            LOG_ALWAYS_FATAL_IF(codepoint > 0x10FFFFu);
             input_ix += num_hex_digits;
             if (U16_LENGTH(codepoint) == 1) {
-                ASSERT_LE(output_ix + 1, buf_size);
+                LOG_ALWAYS_FATAL_IF(output_ix + 1 > buf_size);
                 buf[output_ix++] = codepoint;
             } else {
                 // UTF-16 encoding
-                ASSERT_LE(output_ix + 2, buf_size);
+                LOG_ALWAYS_FATAL_IF(output_ix + 2 > buf_size);
                 buf[output_ix++] = U16_LEAD(codepoint);
                 buf[output_ix++] = U16_TRAIL(codepoint);
             }
@@ -68,33 +73,36 @@ void ParseUnicode(uint16_t* buf, size_t buf_size, const char* src, size_t* resul
             input_ix++;
             break;
         case '|':
-            ASSERT_FALSE(seen_offset);
-            ASSERT_NE(offset, nullptr);
+            LOG_ALWAYS_FATAL_IF(seen_offset);
+            LOG_ALWAYS_FATAL_IF(offset == nullptr);
             *offset = output_ix;
             seen_offset = true;
             input_ix++;
             break;
         default:
-            FAIL();  // unexpected character
+            LOG_ALWAYS_FATAL("Unexpected Character");
         }
     }
-    ASSERT_NE(result_size, nullptr);
+    LOG_ALWAYS_FATAL_IF(result_size == nullptr);
     *result_size = output_ix;
-    ASSERT_TRUE(seen_offset || offset == nullptr);
+    LOG_ALWAYS_FATAL_IF(!seen_offset && offset != nullptr);
 }
 
-TEST(UnicodeUtils, parse) {
-    const size_t BUF_SIZE = 256;
-    uint16_t buf[BUF_SIZE];
-    size_t offset;
-    size_t size;
-    ParseUnicode(buf, BUF_SIZE, "U+000D U+1F431 | 'a'", &size, &offset);
-    EXPECT_EQ(size, 4u);
-    EXPECT_EQ(offset, 3u);
-    EXPECT_EQ(buf[0], 0x000D);
-    EXPECT_EQ(buf[1], 0xD83D);
-    EXPECT_EQ(buf[2], 0xDC31);
-    EXPECT_EQ(buf[3], 'a');
+std::vector<uint16_t> utf8ToUtf16(const std::string& text) {
+    std::vector<uint16_t> result;
+    int32_t i = 0;
+    const int32_t textLength = static_cast<int32_t>(text.size());
+    uint32_t c = 0;
+    while (i < textLength) {
+        U8_NEXT(text.c_str(), i, textLength, c);
+        if (U16_LENGTH(c) == 1) {
+            result.push_back(c);
+        } else {
+            result.push_back(U16_LEAD(c));
+            result.push_back(U16_TRAIL(c));
+        }
+    }
+    return result;
 }
 
 }  // namespace minikin

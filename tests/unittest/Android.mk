@@ -81,6 +81,7 @@ LOCAL_SRC_FILES += \
     MinikinInternalTest.cpp \
     GraphemeBreakTests.cpp \
     LayoutUtilsTest.cpp \
+    UnicodeUtilsTest.cpp \
     WordBreakerTests.cpp
 
 LOCAL_C_INCLUDES := \

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2016 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,24 @@
  * limitations under the License.
  */
 
+#include <gtest/gtest.h>
+
+#include "UnicodeUtils.h"
+
 namespace minikin {
 
-void ParseUnicode(uint16_t* buf, size_t buf_size, const char* src, size_t* result_size,
-        size_t* offset);
+TEST(UnicodeUtils, parse) {
+    const size_t BUF_SIZE = 256;
+    uint16_t buf[BUF_SIZE];
+    size_t offset;
+    size_t size;
+    ParseUnicode(buf, BUF_SIZE, "U+000D U+1F431 | 'a'", &size, &offset);
+    EXPECT_EQ(size, 4u);
+    EXPECT_EQ(offset, 3u);
+    EXPECT_EQ(buf[0], 0x000D);
+    EXPECT_EQ(buf[1], 0xD83D);
+    EXPECT_EQ(buf[2], 0xDC31);
+    EXPECT_EQ(buf[3], 'a');
+}
 
-// Converts UTF-8 to UTF-16.
-std::vector<uint16_t> utf8ToUtf16(const std::string& text);
-
-}  // namespace minikin
+} // namespace minikin
