@@ -224,6 +224,7 @@ abstract class PageableState<T extends Pageable> extends ScrollableState<T> {
       case Axis.vertical:
         return box.size.height;
     }
+    return null;
   }
 
   @override

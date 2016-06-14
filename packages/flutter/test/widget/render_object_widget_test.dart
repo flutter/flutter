@@ -29,6 +29,7 @@ class TestOrientedBox extends SingleChildRenderObjectWidget {
       case Orientation.portrait:
         return new BoxDecoration(backgroundColor: const Color(0xFF0000FF));
     }
+    return null;
   }
 
   @override

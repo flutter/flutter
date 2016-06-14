@@ -75,6 +75,7 @@ class StocksAppState extends State<StocksApp> {
           accentColor: Colors.redAccent[200]
         );
     }
+    return null;
   }
 
   Route<Null> _getRoute(RouteSettings settings) {

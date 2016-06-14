@@ -82,6 +82,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
       case Axis.horizontal:
         return padding.horizontal;
     }
+    return null;
   }
 
   double get _preferredExtent {

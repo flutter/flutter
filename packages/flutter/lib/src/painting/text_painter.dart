@@ -125,6 +125,7 @@ class TextPainter {
       case TextBaseline.ideographic:
         return _paragraph.ideographicBaseline;
     }
+    return null;
   }
 
   double _lastMinWidth;
@@ -211,6 +212,7 @@ class TextPainter {
             ?? _getOffsetFromUpstream(offset, caretPrototype)
             ?? emptyOffset;
     }
+    return null;
   }
 
   /// Returns a list of rects that bound the given selection.

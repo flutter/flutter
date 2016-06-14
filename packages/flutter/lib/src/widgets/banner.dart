@@ -112,6 +112,7 @@ class BannerPainter extends CustomPainter {
       case BannerLocation.topLeft:
         return -math.PI / 4.0;
     }
+    return null;
   }
 }
 

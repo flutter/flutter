@@ -235,7 +235,6 @@ class IOSDevice extends Device {
     } else {
       return false;
     }
-    return false;
   }
 
   @override

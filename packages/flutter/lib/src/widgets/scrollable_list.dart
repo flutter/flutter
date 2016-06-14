@@ -239,6 +239,7 @@ class _VirtualListViewport extends VirtualViewport {
         }
         break;
     }
+    return null;
   }
 
   @override

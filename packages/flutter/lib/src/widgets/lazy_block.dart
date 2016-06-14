@@ -740,6 +740,7 @@ class _LazyBlockElement extends RenderObjectElement {
       case Axis.vertical:
         return new Offset(0.0, size.height);
     }
+    return null;    
   }
 
   static RenderBox _getNextWithin(_RenderLazyBlock block, RenderBox child) {

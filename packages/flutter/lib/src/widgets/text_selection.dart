@@ -294,5 +294,6 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
       case TextDirection.rtl:
         return rtlType;
     }
+    return null;
   }
 }

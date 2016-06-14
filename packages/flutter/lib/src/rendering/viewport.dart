@@ -57,6 +57,7 @@ class ViewportDimensions {
       case ViewportAnchor.end:
         return paintOffset + (containerSize - contentSize);
     }
+    return null;
   }
 
   @override

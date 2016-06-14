@@ -285,6 +285,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
       case ViewportAnchor.end:
         return pixelOffset;
     }
+    return null;
   }
 
   /// Convert a scrollOffset value to the number of pixels to which it corresponds.

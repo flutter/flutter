@@ -104,6 +104,7 @@ class RaisedButton extends StatelessWidget {
         case Brightness.dark:
           return Colors.white12;
       }
+      return null;
     }
   }
 

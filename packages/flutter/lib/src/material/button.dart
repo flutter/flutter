@@ -227,6 +227,7 @@ class _MaterialButtonState extends State<MaterialButton> {
           return Colors.white30;
       }
     }
+    return null;
   }
 
   void _handleHighlightChanged(bool value) {

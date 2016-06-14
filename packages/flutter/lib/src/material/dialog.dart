@@ -63,6 +63,7 @@ class Dialog extends StatelessWidget {
       case Brightness.dark:
         return Colors.grey[800];
     }
+    return null;
   }
 
   @override

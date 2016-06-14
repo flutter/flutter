@@ -53,6 +53,7 @@ String getNameForHostPlatform(HostPlatform platform) {
       return 'linux-x64';
   }
   assert(false);
+  return null;
 }
 
 enum TargetPlatform {
@@ -80,6 +81,7 @@ String getNameForTargetPlatform(TargetPlatform platform) {
       return 'linux-x64';
   }
   assert(false);
+  return null;
 }
 
 TargetPlatform getTargetPlatformForName(String platform) {

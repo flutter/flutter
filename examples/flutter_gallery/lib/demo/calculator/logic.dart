@@ -83,6 +83,7 @@ class OperationToken extends ExpressionToken {
       case Operation.Division:
         return '  \u00F7  ';
     }
+    return null;
   }
 }
 
@@ -258,6 +259,7 @@ class CalcExpression {
       case ExpressionState.Result:
         return appendOperation(Operation.Subtraction);
     }
+    return null;
   }
 
   /// Computes the result of the current expression and returns a new
