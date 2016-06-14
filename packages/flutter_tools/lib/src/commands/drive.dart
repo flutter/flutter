@@ -16,6 +16,7 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../dart/sdk.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -134,6 +135,8 @@ class DriveCommand extends RunCommandBase {
       await runAsync(<String>[sdkBinaryName('pub'), 'get', '--no-precompile']);
       status.stop(showElapsedTime: true);
     }
+
+    Cache.releaseLockEarly();
 
     try {
       return await testRunner(<String>[testFile])

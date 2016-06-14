@@ -9,6 +9,7 @@ import 'package:path/path.dart' as path;
 
 import '../base/process.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
 import '../run.dart';
@@ -150,6 +151,8 @@ class RunMojoCommand extends FlutterCommand {
       if (result != 0)
         return result;
     }
+
+    Cache.releaseLockEarly();
 
     return await runCommandAndStreamOutput(await _getShellConfig(targetApp));
   }

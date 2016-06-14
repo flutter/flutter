@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import '../cache.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
@@ -38,6 +39,8 @@ class LogsCommand extends FlutterCommand {
       device.clearLogs();
 
     DeviceLogReader logReader = device.logReader;
+
+    Cache.releaseLockEarly();
 
     printStatus('Showing $logReader logs:');
 

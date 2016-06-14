@@ -9,6 +9,7 @@ import 'package:path/path.dart' as path;
 import 'package:test/src/executable.dart' as executable; // ignore: implementation_imports
 
 import '../base/logger.dart';
+import '../cache.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
@@ -101,6 +102,9 @@ class TestCommand extends FlutterCommand {
         printError('Cannot find Flutter shell at ${loader.shellPath}');
       return 1;
     }
+
+    Cache.releaseLockEarly();
+
     return await _runTests(testArgs, testDir);
   }
 }

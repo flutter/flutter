@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import '../application_package.dart';
+import '../cache.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
@@ -23,6 +24,8 @@ class InstallCommand extends FlutterCommand {
   Future<int> runInProject() async {
     Device device = deviceForCommand;
     ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
+
+    Cache.releaseLockEarly();
 
     printStatus('Installing $package to $device...');
 

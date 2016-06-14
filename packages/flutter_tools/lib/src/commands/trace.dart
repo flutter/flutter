@@ -8,6 +8,7 @@ import 'dart:io';
 
 import '../base/common.dart';
 import '../base/utils.dart';
+import '../cache.dart';
 import '../globals.dart';
 import '../observatory.dart';
 import '../runner/flutter_command.dart';
@@ -56,6 +57,8 @@ class TraceCommand extends FlutterCommand {
       printError('Error connecting to observatory: $error');
       return 1;
     }
+
+    Cache.releaseLockEarly();
 
     if ((!argResults['start'] && !argResults['stop']) ||
         (argResults['start'] && argResults['stop'])) {

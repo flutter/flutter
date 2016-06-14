@@ -30,16 +30,22 @@ DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"
 
 DART="$DART_SDK_PATH/bin/dart"
 
-REVISION=`(cd "$FLUTTER_ROOT"; git rev-parse HEAD)`
-if [ ! -f "$SNAPSHOT_PATH" ] || [ ! -f "$STAMP_PATH" ] || [ `cat "$STAMP_PATH"` != "$REVISION" ] || [ "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]; then
-  "$FLUTTER_ROOT/bin/cache/update_dart_sdk.sh"
+(
+  if hash flock 2>/dev/null; then
+    flock 3 # ensures that we don't simultaneously update Dart in multiple parallel instances
+    # some platforms (e.g. Mac) don't have flock or any reliable alternative
+  fi
+  REVISION=`(cd "$FLUTTER_ROOT"; git rev-parse HEAD)`
+  if [ ! -f "$SNAPSHOT_PATH" ] || [ ! -f "$STAMP_PATH" ] || [ `cat "$STAMP_PATH"` != "$REVISION" ] || [ "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]; then
+    "$FLUTTER_ROOT/bin/cache/update_dart_sdk.sh"
 
-  echo Building flutter tool...
-  FLUTTER_DIR="$FLUTTER_ROOT/packages/flutter"
-  (cd "$FLUTTER_TOOLS_DIR"; "../../bin/cache/dart-sdk/bin/pub" get --verbosity=warning)
-  "$DART" --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
-  echo $REVISION > "$STAMP_PATH"
-fi
+    echo Building flutter tool...
+    FLUTTER_DIR="$FLUTTER_ROOT/packages/flutter"
+    (cd "$FLUTTER_TOOLS_DIR"; "../../bin/cache/dart-sdk/bin/pub" get --verbosity=warning)
+    "$DART" --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
+    echo $REVISION > "$STAMP_PATH"
+  fi
+) 3< $PROG_NAME
 
 if [ $FLUTTER_DEV ]; then
   "$DART" --packages="$FLUTTER_TOOLS_DIR/.packages" -c "$SCRIPT_PATH" "$@"

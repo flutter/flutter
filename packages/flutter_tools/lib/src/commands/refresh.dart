@@ -9,6 +9,7 @@ import 'package:path/path.dart' as path;
 
 import '../android/android_device.dart';
 import '../application_package.dart';
+import '../cache.dart';
 import '../flx.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
@@ -45,6 +46,8 @@ class RefreshCommand extends FlutterCommand {
         printError('Failed to run the Flutter compiler. Exit code: $result');
         return result;
       }
+
+      Cache.releaseLockEarly();
 
       AndroidDevice device = deviceForCommand;
 

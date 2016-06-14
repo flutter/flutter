@@ -18,16 +18,16 @@ void main() {
   group('test', () {
     testUsingContext('TestAsyncUtils guarded function test', () async {
       Cache.flutterRoot = '../..';
-      return _testFile('test_async_utils_guarded');
+      return _testFile('test_async_utils_guarded', 1);
     });
     testUsingContext('TestAsyncUtils unguarded function test', () async {
       Cache.flutterRoot = '../..';
-      return _testFile('test_async_utils_unguarded');
+      return _testFile('test_async_utils_unguarded', 1);
     });
   }, timeout: new Timeout(const Duration(seconds: 5)));
 }
 
-Future<Null> _testFile(String testName) async {
+Future<Null> _testFile(String testName, int wantedExitCode) async {
   final String manualTestsDirectory = path.join('..', '..', 'dev', 'automated_tests');
   final String fullTestName = path.join(manualTestsDirectory, 'flutter_test', '${testName}_test.dart');
   final File testFile = new File(fullTestName);
@@ -40,11 +40,12 @@ Future<Null> _testFile(String testName) async {
     <String>[
       path.absolute(path.join('bin', 'flutter_tools.dart')),
       'test',
+      '--no-color',
       fullTestName
     ],
     workingDirectory: manualTestsDirectory
   );
-  expect(exec.exitCode, 0);
+  expect(exec.exitCode, wantedExitCode);
   final List<String> output = exec.stdout.split('\n');
   final List<String> expectations = new File(fullTestExpectation).readAsLinesSync();
   bool allowSkip = false;

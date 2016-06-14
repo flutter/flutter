@@ -9,6 +9,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../observatory.dart';
@@ -108,6 +109,8 @@ class RunCommand extends RunCommandBase {
         observatoryPort: debugPort
       );
     }
+
+    Cache.releaseLockEarly();
 
     if (argResults['resident']) {
       RunAndStayResident runner = new RunAndStayResident(

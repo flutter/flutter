@@ -24,6 +24,54 @@ class Cache {
   // Initialized by FlutterCommandRunner on startup.
   static String flutterRoot;
 
+  static RandomAccessFile _lock;
+  static bool _lockEnabled = true;
+
+  /// Turn off the [lock]/[releaseLockEarly] mechanism.
+  ///
+  /// This is used by the tests since they run simultaneously and all in one
+  /// process and so it would be a mess if they had to use the lock.
+  static void disableLocking() {
+    _lockEnabled = false;
+  }
+
+  /// Lock the cache directory.
+  ///
+  /// This happens automatically on startup (see [FlutterCommandRunner.runCommand]).
+  ///
+  /// Normally the lock will be held until the process exits (this uses normal
+  /// POSIX flock semantics). Long-lived commands should release the lock by
+  /// calling [Cache.releaseLockEarly] once they are no longer touching the cache.
+  static Future<Null> lock() async {
+    if (!_lockEnabled)
+      return null;
+    assert(_lock == null);
+    _lock = new File(path.join(flutterRoot, 'bin', 'cache', 'lockfile')).openSync(mode: FileMode.WRITE);
+    bool locked = false;
+    bool printed = false;
+    while (!locked) {
+      try {
+        await _lock.lock();
+        locked = true;
+      } on FileSystemException {
+        if (!printed) {
+          printStatus('Waiting to be able to obtain lock of Flutter cache directory...');
+          printed = true;
+        }
+        await new Future/*<Null>*/.delayed(const Duration(milliseconds: 50));
+      }
+    }
+  }
+
+  /// Releases the lock. This is not necessary unless the process is long-lived.
+  static void releaseLockEarly() {
+    if (!_lockEnabled)
+      return;
+    assert(_lock != null);
+    _lock.closeSync();
+    _lock = null;
+  }
+
   static String _engineRevision;
 
   static String get engineRevision {

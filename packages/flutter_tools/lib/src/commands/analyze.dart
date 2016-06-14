@@ -190,6 +190,8 @@ class AnalyzeCommand extends FlutterCommand {
       packages['sky_services'] = path.join(tools.engineBuildPath, 'gen/dart-pkg/sky_services/lib');
     }
 
+    Cache.releaseLockEarly();
+
     if (argResults['preamble']) {
       if (dartFiles.length == 1) {
         logger.printStatus('Analyzing ${path.relative(dartFiles.first.path)}...');
@@ -315,6 +317,8 @@ class AnalyzeCommand extends FlutterCommand {
     AnalysisServer server = new AnalysisServer(dartSdkPath, directories);
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);
+
+    Cache.releaseLockEarly();
 
     await server.start();
     final int exitCode = await server.onExit;

@@ -7,6 +7,8 @@
 // doesn't support running without symlinks. We can delete these files once that
 // fix lands.
 
+import 'package:flutter_tools/src/cache.dart';
+
 import 'adb_test.dart' as adb_test;
 import 'analytics_test.dart' as analytics_test;
 import 'analyze_duplicate_names_test.dart' as analyze_duplicate_names_test;
@@ -18,6 +20,7 @@ import 'context_test.dart' as context_test;
 import 'create_test.dart' as create_test;
 import 'daemon_test.dart' as daemon_test;
 import 'device_test.dart' as device_test;
+// import 'devices_test.dart' as devices_test;
 import 'drive_test.dart' as drive_test;
 import 'install_test.dart' as install_test;
 import 'listen_test.dart' as listen_test;
@@ -26,11 +29,13 @@ import 'os_utils_test.dart' as os_utils_test;
 import 'protocol_discovery_test.dart' as protocol_discovery_test;
 import 'run_test.dart' as run_test;
 import 'stop_test.dart' as stop_test;
+import 'test_test.dart' as test_test;
 import 'toolchain_test.dart' as toolchain_test;
 import 'trace_test.dart' as trace_test;
 import 'upgrade_test.dart' as upgrade_test;
 
 void main() {
+  Cache.disableLocking();
   adb_test.main();
   analytics_test.main();
   analyze_duplicate_names_test.main();
@@ -42,6 +47,7 @@ void main() {
   create_test.main();
   daemon_test.main();
   device_test.main();
+  // devices_test.main(); // https://github.com/flutter/flutter/issues/4480
   drive_test.main();
   install_test.main();
   listen_test.main();
@@ -50,6 +56,7 @@ void main() {
   protocol_discovery_test.main();
   run_test.main();
   stop_test.main();
+  test_test.main();
   toolchain_test.main();
   trace_test.main();
   upgrade_test.main();
