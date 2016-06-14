@@ -260,6 +260,7 @@ class CalcExpression {
       case ExpressionState.Result:
         return appendOperation(Operation.Subtraction);
     }
+    assert(state != null);
     return null;
   }
 

@@ -46,7 +46,7 @@ class GridDemoPhotoItem extends StatelessWidget {
   }
 
   final Photo photo;
-final GridDemoTileStyle tileStyle;
+  final GridDemoTileStyle tileStyle;
   final BannerTapCallback onBannerTap; // User taps on the photo's header or footer.
 
   void showPhoto(BuildContext context) {
