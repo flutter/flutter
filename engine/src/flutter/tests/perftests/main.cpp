@@ -15,4 +15,32 @@
  */
 #include <benchmark/benchmark.h>
 
-BENCHMARK_MAIN();
+#include <cutils/log.h>
+
+#include <unicode/uclean.h>
+#include <unicode/udata.h>
+
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+
+int main(int argc, char** argv) {
+    const char* fn = "/system/usr/icu/" U_ICUDATA_NAME ".dat";
+    int fd = open(fn, O_RDONLY);
+    LOG_ALWAYS_FATAL_IF(fd == -1);
+    struct stat st;
+    LOG_ALWAYS_FATAL_IF(fstat(fd, &st) != 0);
+    void* data = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, fd, 0);
+
+    UErrorCode errorCode = U_ZERO_ERROR;
+    udata_setCommonData(data, &errorCode);
+    LOG_ALWAYS_FATAL_IF(U_FAILURE(errorCode));
+    u_init(&errorCode);
+    LOG_ALWAYS_FATAL_IF(U_FAILURE(errorCode));
+
+    benchmark::Initialize(&argc, argv);
+    benchmark::RunSpecifiedBenchmarks();
+
+    u_cleanup();
+    return 0;
+}

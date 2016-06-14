@@ -17,7 +17,12 @@
 LOCAL_PATH := $(call my-dir)
 
 perftest_src_files := \
+  ../util/FileUtils.cpp \
+  ../util/UnicodeUtils.cpp \
   FontLanguage.cpp \
+  GraphemeBreak.cpp \
+  Hyphenator.cpp \
+  WordBreaker.cpp \
   main.cpp
 
 include $(CLEAR_VARS)
@@ -25,7 +30,11 @@ LOCAL_MODULE := minikin_perftests
 LOCAL_CPPFLAGS := -Werror -Wall -Wextra
 LOCAL_SRC_FILES := $(perftest_src_files)
 LOCAL_STATIC_LIBRARIES := libminikin
+LOCAL_SHARED_LIBRARIES := \
+  libicuuc \
+  liblog
 LOCAL_C_INCLUDES := \
+  $(LOCAL_PATH)/../ \
   $(LOCAL_PATH)/../../libs/minikin \
   external/harfbuzz_ng/src
 include $(BUILD_NATIVE_BENCHMARK)

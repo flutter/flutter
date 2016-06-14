@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2016 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,22 @@
  * limitations under the License.
  */
 
-namespace minikin {
+#include <cutils/log.h>
 
-void ParseUnicode(uint16_t* buf, size_t buf_size, const char* src, size_t* result_size,
-        size_t* offset);
+#include <stdio.h>
+#include <sys/stat.h>
 
-// Converts UTF-8 to UTF-16.
-std::vector<uint16_t> utf8ToUtf16(const std::string& text);
+#include <string>
+#include <vector>
 
-}  // namespace minikin
+std::vector<uint8_t> readWholeFile(const std::string& filePath) {
+    FILE* fp = fopen(filePath.c_str(), "r");
+    LOG_ALWAYS_FATAL_IF(fp == nullptr);
+    struct stat st;
+    LOG_ALWAYS_FATAL_IF(fstat(fileno(fp), &st) != 0);
+
+    std::vector<uint8_t> result(st.st_size);
+    LOG_ALWAYS_FATAL_IF(fread(result.data(), 1, st.st_size, fp) != st.st_size);
+    fclose(fp);
+    return result;
+}
