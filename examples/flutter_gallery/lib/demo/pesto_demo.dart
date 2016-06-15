@@ -90,7 +90,8 @@ class _PestoDemoState extends State<PestoDemo> {
         )
       ],
       flexibleSpace: new LayoutBuilder(
-        builder: (BuildContext context, Size size) {
+        builder: (BuildContext context, BoxConstraints constraints) {
+          final Size size = constraints.biggest;
           double appBarHeight = size.height - statusBarHeight;
           double bestHeight = _kLogoImages.keys.lastWhere(
             (double height) => appBarHeight >= height

@@ -9,14 +9,15 @@ import 'package:flutter/rendering.dart';
 import 'package:meta/meta.dart';
 
 /// The signature of the [LayoutBuilder] builder function.
-typedef Widget LayoutWidgetBuilder(BuildContext context, Size size);
+typedef Widget LayoutWidgetBuilder(BuildContext context, BoxConstraints constraints);
 
 /// Builds a widget tree that can depend on the parent widget's size.
 ///
 /// Similar to the [Builder] widget except that the framework calls the [builder]
-/// function at layout time and provides the parent widget's size. This is useful
-/// when the parent constrains the child's size and doesn't depend on the child's
-/// intrinsic size.
+/// function at layout time and provides the parent widget's constraints. This
+/// is useful when the parent constrains the child's size and doesn't depend on
+/// the child's intrinsic size. The LayoutBuilder's final size will match its
+/// child's size modulo the incoming constraints.
 class LayoutBuilder extends RenderObjectWidget {
   /// Creates a widget that defers its building until layout.
   ///
@@ -90,19 +91,15 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
   }
 
   @override
-  bool get sizedByParent => true;
-
-  @override
-  void performResize() {
-    size = constraints.biggest;
-  }
-
-  @override
   void performLayout() {
     if (callback != null)
       invokeLayoutCallback(callback);
-    if (child != null)
-      child.layout(constraints.loosen());
+    if (child != null) {
+      child.layout(constraints, parentUsesSize: true);
+      size = constraints.constrain(child.size);
+    } else {
+      size = constraints.biggest;
+    }
   }
 
   @override
@@ -169,7 +166,7 @@ class _LayoutBuilderElement extends RenderObjectElement {
     owner.lockState(() {
       Widget built;
       try {
-        built = widget.builder(this, constraints.biggest);
+        built = widget.builder(this, constraints);
         debugWidgetBuilderValue(widget, built);
       } catch (e, stack) {
         _debugReportException('building $widget', e, stack);
