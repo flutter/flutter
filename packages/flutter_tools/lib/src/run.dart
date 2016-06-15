@@ -433,7 +433,7 @@ class DevFS {
     entries.putIfAbsent(devPath, () => new DevFSFileEntry(devPath, file));
   }
 
-  /// Flush any modified files to the devfs and return the number of files transferred.
+  /// Flush any modified files to the devfs.
   Future<Null> flush() async {
     List<DevFSFileEntry> toSend = entries.values
       .where((DevFSFileEntry entry) => entry.isModified)
