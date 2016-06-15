@@ -17,8 +17,6 @@ import 'tooltip.dart';
 // http://www.google.com/design/spec/layout/metrics-keylines.html#metrics-keylines-keylines-spacing
 const double _kSize = 56.0;
 const double _kSizeMini = 40.0;
-const Duration _kChildSegue = const Duration(milliseconds: 400);
-const Interval _kChildSegueInterval = const Interval(0.65, 1.0);
 
 /// A material design floating action button.
 ///
