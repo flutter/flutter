@@ -471,18 +471,18 @@ if (is_android) {
     ]
   }
 
+  resource_copy_mac("sky_resources") {
+    resources = [
+      "//third_party/icu/android/icudtl.dat",
+    ]
+    bundle_directory = "."
+  }
+
   mac_app("shell_application") {
     app_name = "SkyShell"
     info_plist = "platform/mac/Info.plist"
 
     xibs = [ "platform/mac/sky_mac.xib" ]
-
-    resource_copy_mac("sky_resources") {
-      resources = [
-        "//third_party/icu/android/icudtl.dat",
-      ]
-      bundle_directory = "."
-    }
 
     deps = [
       ":mac_scaffolding",
