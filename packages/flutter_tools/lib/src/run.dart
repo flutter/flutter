@@ -14,6 +14,7 @@ import 'build_info.dart';
 import 'commands/build_apk.dart';
 import 'commands/install.dart';
 import 'commands/trace.dart';
+import 'dart/package_map.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'observatory.dart';
@@ -35,13 +36,15 @@ class RunAndStayResident {
     this.device, {
     this.target,
     this.debuggingOptions,
-    this.usesTerminalUI: true
+    this.usesTerminalUI: true,
+    this.useDevFS: false
   });
 
   final Device device;
   final String target;
   final DebuggingOptions debuggingOptions;
   final bool usesTerminalUI;
+  final bool useDevFS;
 
   ApplicationPackage _package;
   String _mainPath;
@@ -250,6 +253,8 @@ class RunAndStayResident {
           } else if (lower == 'q' || code == AnsiTerminal.KEY_F10) {
             // F10, exit
             _stopApp();
+          } else if (useDevFS && lower == 'd') {
+            _updateDevFS();
           }
         });
       }
@@ -288,9 +293,78 @@ class RunAndStayResident {
     });
   }
 
+  DevFS devFS;
+
+  Future<Null> _updateDevFS() async {
+    if (devFS == null) {
+      devFS = new DevFS(Directory.current, observatory);
+
+      try {
+        await devFS.init();
+      } catch (error) {
+        devFS = null;
+        printError('Error initing DevFS: $error');
+        return null;
+      }
+    }
+
+    // Send the root and lib directories.
+    Directory directory = Directory.current;
+    _sendFiles(directory, '', _dartFiles(directory.listSync()));
+
+    directory = new Directory('lib');
+    _sendFiles(directory, 'lib', _dartFiles(directory.listSync(recursive: true, followLinks: false)));
+
+    // Send the packages.
+    if (FileSystemEntity.isFileSync(kPackagesFileName)) {
+      PackageMap packageMap = new PackageMap(kPackagesFileName);
+
+      for (String packageName in packageMap.map.keys) {
+        Uri uri = packageMap.map[packageName];
+        // Ignore self-references.
+        if (uri.toString() == 'lib/')
+          continue;
+        Directory directory = new Directory.fromUri(uri);
+        if (directory.existsSync()) {
+          _sendFiles(
+            directory,
+            'packages/$packageName',
+            _dartFiles(directory.listSync(recursive: true, followLinks: false))
+          );
+        }
+      }
+    }
+
+    try {
+      await devFS.flush();
+    } catch (error) {
+      printError('Error sending DevFS files: $error');
+    }
+  }
+
+  void _sendFiles(Directory base, String prefix, List<File> files) {
+    String basePath = base.path;
+
+    for (File file in files) {
+      String devPath = file.path.substring(basePath.length);
+      if (devPath.startsWith('/'))
+        devPath = devPath.substring(1);
+      devFS.stageFile(prefix.isEmpty ? devPath : '$prefix/$devPath', file);
+    }
+  }
+
+  List<File> _dartFiles(List<FileSystemEntity> entities) {
+    return new List<File>.from(entities
+      .where((FileSystemEntity entity) => entity is File)
+      .where((File file) => file.path.endsWith('.dart')));
+  }
+
   void _printHelp() {
     String restartText = device.supportsRestart ? ', "r" or F5 to restart the app,' : '';
     printStatus('Type "h" or F1 for help$restartText and "q", F10, or ctrl-c to quit.');
+
+    if (useDevFS)
+      printStatus('Type "d" to send modified project files to the the client\'s DevFS.');
   }
 
   void _stopLogger() {
@@ -340,4 +414,72 @@ void writeRunBenchmarkFile(Stopwatch startTime, [Stopwatch restartTime]) {
 
   new File(benchmarkOut).writeAsStringSync(toPrettyJson(data));
   printStatus('Run benchmark written to $benchmarkOut ($data).');
+}
+
+class DevFS {
+  DevFS(this.directory, this.observatory) {
+    fsName = path.basename(directory.path);
+  }
+
+  final Directory directory;
+  final Observatory observatory;
+
+  String fsName;
+  Map<String, DevFSFileEntry> entries = <String, DevFSFileEntry>{};
+
+  Future<dynamic> init() => observatory.createDevFS(fsName);
+
+  void stageFile(String devPath, File file) {
+    entries.putIfAbsent(devPath, () => new DevFSFileEntry(devPath, file));
+  }
+
+  /// Flush any modified files to the devfs and return the number of files transferred.
+  Future<Null> flush() async {
+    List<DevFSFileEntry> toSend = entries.values
+      .where((DevFSFileEntry entry) => entry.isModified)
+      .toList();
+
+    for (DevFSFileEntry entry in toSend) {
+      printTrace('sending devfs://$fsName/${entry.devPath}');
+      entry.updateLastModified();
+    }
+
+    Status status = logger.startProgress('Sending ${toSend.length} files...');
+
+    if (toSend.isEmpty) {
+      status.stop(showElapsedTime: true);
+      return;
+    }
+
+    await observatory.writeDevFSFiles(fsName, files: toSend.map((DevFSFileEntry entry) {
+      return new _DevFSFile('/${entry.devPath}', entry.file);
+    }).toList()).whenComplete(() {
+      status.stop(showElapsedTime: true);
+    });
+  }
+
+  Future<List<String>> listDevFSFiles() => observatory.listDevFSFiles(fsName);
+}
+
+class DevFSFileEntry {
+  DevFSFileEntry(this.devPath, this.file);
+
+  String devPath;
+  File file;
+  DateTime lastModified;
+
+  bool get isModified => lastModified == null || file.lastModifiedSync().isAfter(lastModified);
+
+  void updateLastModified() {
+    lastModified = file.lastModifiedSync();
+  }
+}
+
+class _DevFSFile extends DevFSFile {
+  _DevFSFile(String path, this.file) : super(path);
+
+  final File file;
+
+  @override
+  List<int> getContents() => file.readAsBytesSync();
 }

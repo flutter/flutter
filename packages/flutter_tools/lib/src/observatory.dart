@@ -168,10 +168,8 @@ class Observatory {
 
   // Write multiple files into a file system.
   Future<Response> writeDevFSFiles(String fsName, {
-    String path,
     List<DevFSFile> files
   }) {
-    assert(path != null);
     assert(files != null);
 
     return sendRequest('_writeDevFSFiles', <String, dynamic> {
@@ -188,8 +186,10 @@ class Observatory {
   }
 
   /// The complete list of a file system.
-  Future<List<String>> listDevFSFiles() {
-    return sendRequest('_listDevFSFiles').then((Response response) {
+  Future<List<String>> listDevFSFiles(String fsName) {
+    return sendRequest('_listDevFSFiles', <String, dynamic> {
+      'fsName': fsName
+    }).then((Response response) {
       return response.response['files'];
     });
   }
