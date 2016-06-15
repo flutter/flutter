@@ -99,6 +99,12 @@ void WindowImpl::RunFromBundle(const std::string& script_uri,
   engine_->RunFromBundle(script_uri, bundle_path);
 }
 
+void WindowImpl::RunFromFile(const std::string& file) {
+  // TODO(johnmccutchan): Wire up support for asset bundles when running
+  // from source.
+  engine_->RunFromFile(file, "", "");
+}
+
 void WindowImpl::UpdateViewportMetrics(int width, int height) {
   auto metrics = sky::ViewportMetrics::New();
   metrics->physical_width = width;

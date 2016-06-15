@@ -26,6 +26,8 @@ class WindowImpl : public mojo::ServiceProvider,
   void RunFromBundle(const std::string& script_uri,
                      const std::string& bundle_path);
 
+  void RunFromFile(const std::string& file);
+
   void UpdateViewportMetrics(int width, int height);
   void DispatchMouseButtonEvent(int button, int action, int mods);
   void DispatchMouseMoveEvent(double x, double y);

@@ -200,18 +200,87 @@ DartLibraryLoader::DartLibraryLoader(DartState* dart_state)
 DartLibraryLoader::~DartLibraryLoader() {
 }
 
+
+static void BlockWaitingForDependencies(
+    DartLibraryLoader* loader,
+    const std::unordered_set<DartDependency*>& dependencies) {
+  scoped_refptr<base::SingleThreadTaskRunner> task_runner =
+      base::MessageLoop::current()->task_runner();
+  base::RunLoop run_loop;
+  task_runner->PostTask(
+      FROM_HERE,
+      base::Bind(
+          &DartLibraryLoader::WaitForDependencies,
+          base::Unretained(loader),
+          dependencies,
+          base::Bind(
+             base::IgnoreResult(&base::SingleThreadTaskRunner::PostTask),
+             task_runner.get(), FROM_HERE,
+             run_loop.QuitClosure())));
+  run_loop.Run();
+}
+
+static void InnerLoadScript(
+    const std::string& script_uri,
+    DartLibraryLoader* library_loader) {
+  // When spawning isolates, Dart expects the script loading to be completed
+  // before returning from the isolate creation callback. The mojo dart
+  // controller also expects the isolate to be finished loading a script
+  // before the isolate creation callback returns.
+
+  // We block here by creating a nested message pump and waiting for the load
+  // to complete.
+
+  DCHECK(base::MessageLoop::current() != nullptr);
+  base::MessageLoop::ScopedNestableTaskAllower allow(
+      base::MessageLoop::current());
+
+  // Initiate the load.
+  DartLibraryLoader& loader = *library_loader;
+  std::unordered_set<DartDependency*> dependencies;
+  {
+    DartDependencyCatcher dependency_catcher(loader);
+    loader.LoadScript(script_uri);
+    // Copy dependencies before dependency_catcher goes out of scope.
+    dependencies = std::unordered_set<DartDependency*>(
+        dependency_catcher.dependencies());
+  }
+
+  // Run inner message loop.
+  BlockWaitingForDependencies(&loader, dependencies);
+
+  // Finalize loading.
+  LogIfError(Dart_FinalizeLoading(true));
+}
+
+
+static void LoadScriptSync(
+    const std::string& script_uri,
+    DartLibraryLoader* library_loader) {
+  CHECK(base::MessageLoop::current() != nullptr);
+  // Thread has a message loop, use it.
+  InnerLoadScript(script_uri, library_loader);
+}
+
+
 Dart_Handle DartLibraryLoader::HandleLibraryTag(Dart_LibraryTag tag,
                                                 Dart_Handle library,
                                                 Dart_Handle url) {
-  DCHECK(Dart_IsLibrary(library));
+  DCHECK(Dart_IsLibrary(library) || Dart_IsNull(library));
   DCHECK(Dart_IsString(url));
-  if (tag == Dart_kCanonicalizeUrl)
+  if (tag == Dart_kCanonicalizeUrl) {
     return DartState::Current()->library_loader().CanonicalizeURL(library, url);
+  }
   if (tag == Dart_kImportTag) {
     return DartState::Current()->library_loader().Import(library, url);
   }
   if (tag == Dart_kSourceTag) {
     return DartState::Current()->library_loader().Source(library, url);
+  }
+  if (tag == Dart_kScriptTag) {
+    LoadScriptSync(StdStringFromDart(url),
+                   &DartState::Current()->library_loader());
+    return Dart_Null();
   }
   DCHECK(false);
   return Dart_NewApiError("Unknown library tag.");
