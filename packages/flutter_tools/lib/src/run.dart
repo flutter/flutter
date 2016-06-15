@@ -303,7 +303,7 @@ class RunAndStayResident {
         await devFS.init();
       } catch (error) {
         devFS = null;
-        printError('Error initing DevFS: $error');
+        printError('Error initializing development client: $error');
         return null;
       }
     }
@@ -313,7 +313,7 @@ class RunAndStayResident {
     _sendFiles(directory, '', _dartFiles(directory.listSync()));
 
     directory = new Directory('lib');
-    _sendFiles(directory, 'lib', _dartFiles(directory.listSync(recursive: true, followLinks: false)));
+    _sendFiles(directory, 'lib', _dartFiles(directory.listSync(recursive: true)));
 
     // Send the packages.
     if (FileSystemEntity.isFileSync(kPackagesFileName)) {
@@ -329,7 +329,7 @@ class RunAndStayResident {
           _sendFiles(
             directory,
             'packages/$packageName',
-            _dartFiles(directory.listSync(recursive: true, followLinks: false))
+            _dartFiles(directory.listSync(recursive: true))
           );
         }
       }
@@ -338,7 +338,7 @@ class RunAndStayResident {
     try {
       await devFS.flush();
     } catch (error) {
-      printError('Error sending DevFS files: $error');
+      printError('Error sending sources to the client device: $error');
     }
   }
 
@@ -355,8 +355,7 @@ class RunAndStayResident {
 
   List<File> _dartFiles(List<FileSystemEntity> entities) {
     return new List<File>.from(entities
-      .where((FileSystemEntity entity) => entity is File)
-      .where((File file) => file.path.endsWith('.dart')));
+      .where((FileSystemEntity entity) => entity is File && entity.path.endsWith('.dart')));
   }
 
   void _printHelp() {
@@ -425,21 +424,21 @@ class DevFS {
   final Observatory observatory;
 
   String fsName;
-  Map<String, DevFSFileEntry> entries = <String, DevFSFileEntry>{};
+  Map<String, _DevFSFileEntry> entries = <String, _DevFSFileEntry>{};
 
   Future<dynamic> init() => observatory.createDevFS(fsName);
 
   void stageFile(String devPath, File file) {
-    entries.putIfAbsent(devPath, () => new DevFSFileEntry(devPath, file));
+    entries.putIfAbsent(devPath, () => new _DevFSFileEntry(devPath, file));
   }
 
   /// Flush any modified files to the devfs.
   Future<Null> flush() async {
-    List<DevFSFileEntry> toSend = entries.values
-      .where((DevFSFileEntry entry) => entry.isModified)
+    List<_DevFSFileEntry> toSend = entries.values
+      .where((_DevFSFileEntry entry) => entry.isModified)
       .toList();
 
-    for (DevFSFileEntry entry in toSend) {
+    for (_DevFSFileEntry entry in toSend) {
       printTrace('sending devfs://$fsName/${entry.devPath}');
       entry.updateLastModified();
     }
@@ -451,21 +450,25 @@ class DevFS {
       return;
     }
 
-    await observatory.writeDevFSFiles(fsName, files: toSend.map((DevFSFileEntry entry) {
-      return new _DevFSFile('/${entry.devPath}', entry.file);
-    }).toList()).whenComplete(() {
+    try {
+      List<_DevFSFile> files = toSend.map((_DevFSFileEntry entry) {
+        return new _DevFSFile('/${entry.devPath}', entry.file);
+      }).toList();
+      await observatory.writeDevFSFiles(fsName, files: files);
+    } finally {
       status.stop(showElapsedTime: true);
-    });
+    }
   }
 
   Future<List<String>> listDevFSFiles() => observatory.listDevFSFiles(fsName);
 }
 
-class DevFSFileEntry {
-  DevFSFileEntry(this.devPath, this.file);
+class _DevFSFileEntry {
+  _DevFSFileEntry(this.devPath, this.file);
 
-  String devPath;
-  File file;
+  final String devPath;
+  final File file;
+
   DateTime lastModified;
 
   bool get isModified => lastModified == null || file.lastModifiedSync().isAfter(lastModified);
