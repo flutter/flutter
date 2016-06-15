@@ -6,10 +6,10 @@ embedded_libs:
   "dart:developer": "../dart_sdk/developer/developer.dart"
   "dart:io": "../dart_sdk/io/io.dart"
   "dart:isolate": "../dart_sdk/isolate/isolate.dart"
-  "dart:jni": "../sdk_ext/dart_jni/jni.dart"
+  "dart:jni": "../dart_jni/jni.dart"
   "dart:math": "../dart_sdk/math/math.dart"
   "dart:typed_data": "../dart_sdk/typed_data/typed_data.dart"
-  "dart:ui": "../sdk_ext/dart_ui/ui.dart"
+  "dart:ui": "../dart_ui/ui.dart"
   "dart:_internal": "../dart_sdk/_empty.dart"
   "dart:nativewrappers": "../dart_sdk/_empty.dart"
 
