@@ -2,18 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_CORE_PAINTING_PAINTING_H_
-#define SKY_ENGINE_CORE_PAINTING_PAINTING_H_
+#ifndef FLUTTER_LIB_UI_PAINTING_IMAGE_DECODING_H_
+#define FLUTTER_LIB_UI_PAINTING_IMAGE_DECODING_H_
 
 #include "flutter/tonic/dart_library_natives.h"
 
 namespace blink {
 
-class Painting {
+class ImageDecoding {
  public:
   static void RegisterNatives(DartLibraryNatives* natives);
 };
 
 }  // namespace blink
 
-#endif  // SKY_ENGINE_CORE_PAINTING_PAINTING_H_
+#endif  // FLUTTER_LIB_UI_PAINTING_IMAGE_DECODING_H_

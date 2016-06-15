@@ -29,6 +29,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Paragraph);
   V(Paragraph, alphabeticBaseline) \
   V(Paragraph, ideographicBaseline) \
   V(Paragraph, layout) \
+  V(Paragraph, paint) \
   V(Paragraph, getWordBoundary) \
   V(Paragraph, getRectsForRange) \
   V(Paragraph, getPositionForOffset)
@@ -87,11 +88,14 @@ void Paragraph::layout(double width)
 
 void Paragraph::paint(Canvas* canvas, double x, double y)
 {
+    SkCanvas* skCanvas = canvas->canvas();
+    if (!skCanvas)
+      return;
+
     FontCachePurgePreventer fontCachePurgePreventer;
 
     // Very simplified painting to allow painting an arbitrary (layer-less) subtree.
     RenderBox* box = firstChildBox();
-    SkCanvas* skCanvas = canvas->skCanvas();
     skCanvas->translate(x, y);
 
     GraphicsContext context(skCanvas);

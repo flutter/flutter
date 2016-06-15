@@ -4,9 +4,17 @@
 
 source_set("ui") {
   sources = [
+    "compositing/scene_builder.cc",
+    "compositing/scene_builder.h",
+    "compositing/scene.cc",
+    "compositing/scene.h",
+    "painting/canvas.cc",
+    "painting/canvas.h",
     "painting/gradient.cc",
     "painting/gradient.h",
     "painting/image.cc",
+    "painting/image_decoding.cc",
+    "painting/image_decoding.h",
     "painting/image_filter.cc",
     "painting/image_filter.h",
     "painting/image.h",
@@ -20,6 +28,8 @@ source_set("ui") {
     "painting/paint.h",
     "painting/path.cc",
     "painting/path.h",
+    "painting/picture_recorder.cc",
+    "painting/picture_recorder.h",
     "painting/picture.cc",
     "painting/picture.h",
     "painting/rrect.cc",
@@ -30,7 +40,12 @@ source_set("ui") {
 
   deps = [
     "//base",
+    "//flow",
     "//flutter/tonic",
     "//skia",
+
+    # For image_decoding:
+    "//sky/engine/platform",
+    "//sky/engine/wtf",
   ]
 }

@@ -6,8 +6,8 @@
 #define SKY_ENGINE_CORE_TEXT_PARAGRAPH_H_
 
 #include "base/memory/ref_counted.h"
+#include "flutter/lib/ui/painting/canvas.h"
 #include "flutter/tonic/dart_wrappable.h"
-#include "sky/engine/core/painting/Canvas.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/core/text/TextBox.h"
 

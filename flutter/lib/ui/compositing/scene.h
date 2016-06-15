@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_CORE_COMPOSITING_SCENE_H_
-#define SKY_ENGINE_CORE_COMPOSITING_SCENE_H_
+#ifndef FLUTTER_LIB_UI_COMPOSITING_SCENE_H_
+#define FLUTTER_LIB_UI_COMPOSITING_SCENE_H_
 
 #include <stdint.h>
 #include <memory>
@@ -40,4 +40,4 @@ class Scene : public base::RefCountedThreadSafe<Scene>, public DartWrappable {
 
 }  // namespace blink
 
-#endif  // SKY_ENGINE_CORE_COMPOSITING_SCENE_H_
+#endif  // FLUTTER_LIB_UI_COMPOSITING_SCENE_H_

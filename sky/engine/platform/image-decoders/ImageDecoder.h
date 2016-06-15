@@ -27,10 +27,10 @@
 #ifndef SKY_ENGINE_PLATFORM_IMAGE_DECODERS_IMAGEDECODER_H_
 #define SKY_ENGINE_PLATFORM_IMAGE_DECODERS_IMAGEDECODER_H_
 
-#include "platform/image-decoders/ImageFrame.h"
+#include "sky/engine/platform/graphics/ImageSource.h"
+#include "sky/engine/platform/image-decoders/ImageFrame.h"
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/SharedBuffer.h"
-#include "sky/engine/platform/graphics/ImageSource.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/PassOwnPtr.h"

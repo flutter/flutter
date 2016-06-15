@@ -6,7 +6,7 @@
 
 #include "base/bind.h"
 #include "base/trace_event/trace_event.h"
-#include "sky/engine/core/compositing/Scene.h"
+#include "flutter/lib/ui/compositing/scene.h"
 #include "sky/engine/core/script/dart_controller.h"
 #include "sky/engine/core/script/ui_dart_state.h"
 #include "sky/engine/core/window/window.h"

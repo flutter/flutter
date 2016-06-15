@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/core/compositing/SceneBuilder.h"
+#include "flutter/lib/ui/compositing/scene_builder.h"
 
 #include "flow/layers/backdrop_filter_layer.h"
 #include "flow/layers/child_scene_layer.h"

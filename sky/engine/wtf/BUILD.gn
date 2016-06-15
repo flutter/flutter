@@ -4,8 +4,6 @@
 
 import("//testing/test.gni")
 
-visibility = [ "//sky/*" ]
-
 component("wtf") {
   sources = [
     "ASCIICType.h",

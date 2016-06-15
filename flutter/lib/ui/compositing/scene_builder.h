@@ -2,14 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_CORE_COMPOSITING_SCENEBUILDER_H_
-#define SKY_ENGINE_CORE_COMPOSITING_SCENEBUILDER_H_
+#ifndef FLUTTER_LIB_UI_COMPOSITING_SCENE_BUILDER_H_
+#define FLUTTER_LIB_UI_COMPOSITING_SCENE_BUILDER_H_
 
 #include <stdint.h>
 #include <memory>
 
 #include "base/memory/ref_counted.h"
 #include "flow/layers/container_layer.h"
+#include "flutter/lib/ui/compositing/scene.h"
 #include "flutter/lib/ui/painting/image_filter.h"
 #include "flutter/lib/ui/painting/path.h"
 #include "flutter/lib/ui/painting/picture.h"
@@ -17,7 +18,6 @@
 #include "flutter/lib/ui/painting/shader.h"
 #include "flutter/tonic/dart_wrappable.h"
 #include "flutter/tonic/float64_list.h"
-#include "sky/engine/core/compositing/Scene.h"
 
 namespace blink {
 
@@ -74,4 +74,4 @@ private:
 
 } // namespace blink
 
-#endif  // SKY_ENGINE_CORE_COMPOSITING_SCENEBUILDER_H_
+#endif  // FLUTTER_LIB_UI_COMPOSITING_SCENE_BUILDER_H_

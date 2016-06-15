@@ -6,6 +6,7 @@ source_set("sky") {
   deps = [
     "//base",
     "//flow",
+    "//flutter/lib/ui",
     "//mojo/public/cpp/system",
     "//mojo/services/network/interfaces",
     "//skia",

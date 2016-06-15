@@ -4,10 +4,10 @@
 
 #include "sky/engine/core/window/window.h"
 
+#include "flutter/lib/ui/compositing/scene.h"
 #include "flutter/tonic/dart_converter.h"
 #include "flutter/tonic/dart_invoke.h"
 #include "flutter/tonic/dart_library_natives.h"
-#include "sky/engine/core/compositing/Scene.h"
 #include "sky/engine/core/script/ui_dart_state.h"
 
 namespace blink {

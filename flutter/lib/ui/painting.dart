@@ -1363,9 +1363,8 @@ class Canvas extends NativeFieldWrapperClass2 {
   ///
   /// Valid only after [Paragraph.layout] has been called on the paragraph.
   void drawParagraph(Paragraph paragraph, Offset offset) {
-    _drawParagraph(paragraph, offset.dx, offset.dy);
+    paragraph._paint(this, offset.dx, offset.dy);
   }
-  void _drawParagraph(Paragraph paragraph, double x, double y) native "Canvas_drawParagraph";
 
   /// Draws a sequence of points according to the given [PointMode].
   void drawPoints(PointMode pointMode, List<Point> points, Paint paint) {

@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 dart_ui_files = [
+  "//flutter/lib/ui/compositing.dart",
   "//flutter/lib/ui/geometry.dart",
   "//flutter/lib/ui/painting.dart",
   "//flutter/lib/ui/ui.dart",

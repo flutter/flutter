@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/core/painting/painting.h"
+#include "flutter/lib/ui/painting/image_decoding.h"
 
 #include "base/bind.h"
 #include "base/logging.h"
@@ -113,7 +113,7 @@ void DecodeImageFromList(Dart_NativeArguments args) {
 
 }  // namespace
 
-void Painting::RegisterNatives(DartLibraryNatives* natives) {
+void ImageDecoding::RegisterNatives(DartLibraryNatives* natives) {
   natives->Register({
     { "decodeImageFromDataPipe", DecodeImageFromDataPipe, 2, true },
     { "decodeImageFromList", DecodeImageFromList, 2, true },
