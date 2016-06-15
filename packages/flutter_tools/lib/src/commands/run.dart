@@ -59,6 +59,10 @@ class RunCommand extends RunCommandBase {
         defaultsTo: true,
         help: 'Don\'t terminate the \'flutter run\' process after starting the application.');
 
+    // Hidden option to ship all the sources of the current project over to the
+    // embedder via the DevFS observatory API.
+    argParser.addFlag('devfs', negatable: false, hide: true);
+
     // Hidden option to enable a benchmarking mode. This will run the given
     // application, measure the startup time and the app restart time, write the
     // results out to 'refresh_benchmark.json', and exit. This flag is intended
@@ -116,7 +120,8 @@ class RunCommand extends RunCommandBase {
       RunAndStayResident runner = new RunAndStayResident(
         deviceForCommand,
         target: target,
-        debuggingOptions: options
+        debuggingOptions: options,
+        useDevFS: argResults['devfs']
       );
 
       return runner.run(
