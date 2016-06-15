@@ -19,7 +19,7 @@ import 'material.dart';
 const Duration _kDropDownMenuDuration = const Duration(milliseconds: 300);
 const double _kMenuItemHeight = 48.0;
 const EdgeInsets _kMenuVerticalPadding = const EdgeInsets.symmetric(vertical: 8.0);
-const EdgeInsets _kMenuHorizontalPadding = const EdgeInsets.symmetric(horizontal:4.0);
+const EdgeInsets _kMenuHorizontalPadding = const EdgeInsets.symmetric(horizontal: 4.0);
 const double _kBaselineOffsetFromBottom = 20.0;
 const double _kBottomBorderHeight = 2.0;
 const Border _kDropDownUnderline = const Border(bottom: const BorderSide(color: const Color(0xFFBDBDBD), width: _kBottomBorderHeight));
