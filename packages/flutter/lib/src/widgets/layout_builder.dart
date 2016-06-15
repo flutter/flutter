@@ -17,7 +17,7 @@ typedef Widget LayoutWidgetBuilder(BuildContext context, BoxConstraints constrai
 /// function at layout time and provides the parent widget's constraints. This
 /// is useful when the parent constrains the child's size and doesn't depend on
 /// the child's intrinsic size. The LayoutBuilder's final size will match its
-/// child's size modulo the incoming constraints.
+/// child's size.
 class LayoutBuilder extends RenderObjectWidget {
   /// Creates a widget that defers its building until layout.
   ///

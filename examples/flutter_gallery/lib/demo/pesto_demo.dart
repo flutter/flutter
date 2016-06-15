@@ -294,27 +294,33 @@ class _RecipePageState extends State<_RecipePage> {
     return new Stack(
       children: <Widget>[
         _buildContainer(context),
-        new Padding(
-          padding: new EdgeInsets.only(top: statusBarHeight),
-          child: new AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            leading: new IconButton(
-              icon: Icons.arrow_back,
-              onPressed: () => Navigator.pop(context),
-              tooltip: 'Back'
-            ),
-            actions: <Widget>[
-              new PopupMenuButton<String>(
-                onSelected: (String item) {},
-                itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
-                  _buildMenuItem(Icons.share, 'Tweet recipe'),
-                  _buildMenuItem(Icons.email, 'Email recipe'),
-                  _buildMenuItem(Icons.message, 'Message recipe'),
-                  _buildMenuItem(Icons.people, 'Share on Facebook'),
-                ]
-              )
-            ]
+        new Positioned(
+          top: 0.0,
+          left: 0.0,
+          right: 0.0,
+          child: new Container(
+            height: kToolBarHeight + statusBarHeight,
+            padding: new EdgeInsets.only(top: statusBarHeight),
+            child: new AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              leading: new IconButton(
+                icon: Icons.arrow_back,
+                onPressed: () => Navigator.pop(context),
+                tooltip: 'Back'
+              ),
+              actions: <Widget>[
+                new PopupMenuButton<String>(
+                  onSelected: (String item) {},
+                  itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
+                    _buildMenuItem(Icons.share, 'Tweet recipe'),
+                    _buildMenuItem(Icons.email, 'Email recipe'),
+                    _buildMenuItem(Icons.message, 'Message recipe'),
+                    _buildMenuItem(Icons.people, 'Share on Facebook'),
+                  ]
+                )
+              ]
+            )
           )
         )
       ]
