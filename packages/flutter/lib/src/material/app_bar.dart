@@ -178,8 +178,9 @@ class AppBar extends StatelessWidget {
     return ((appBarHeight - statusBarHeight) / tabBarHeight).clamp(0.0, 1.0);
   }
 
-  Widget _buildForSize(BuildContext context, Size size) {
-    assert(size.height < double.INFINITY);
+  Widget _buildForSize(BuildContext context, BoxConstraints constraints) {
+    assert(constraints.maxHeight < double.INFINITY);
+    final Size size = constraints.biggest;
     final double statusBarHeight = MediaQuery.of(context).padding.top;
     final ThemeData theme = Theme.of(context);
 
@@ -274,6 +275,8 @@ class AppBar extends StatelessWidget {
           child: appBar
         )
       );
+    } else if (flexibleSpace != null) {
+      appBar = new Positioned(top: 0.0, left: 0.0, right: 0.0, child: appBar);
     }
 
     if (flexibleSpace != null) {
