@@ -20,7 +20,7 @@
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
   'mojo_sdk_revision': 'fbe912aa65e0346382bc1e2874eb88fa3aad3358',
-  'base_revision': '672b04e54b937ec899429a6bd5409c5a6300d151',
+  'base_revision': '9e74307b276b2f9988005c0e97e85ee222586f79',
   'skia_revision': '8cc209111876b7c78b5ec577c9221d8ed5e21024',
 
   # Note: When updating the Dart revision, ensure that all entries that are
@@ -30,7 +30,7 @@ vars = {
   'dart_observatory_packages_revision': 'cf90eb9077177d3d6b3fd5e8289477c2385c026a',
   'dart_root_certificates_revision': 'aed07942ce98507d2be28cbd29e879525410c7fc',
 
-  'buildtools_revision': '565d04e8741429fb1b4f26d102f2c6c3b849edeb',
+  'buildtools_revision': '222bd42ce39d1bd8f08fe089b066f49c469e1cdf',
 }
 
 # Only these hosts are allowed for dependencies in this DEPS file.
@@ -48,13 +48,13 @@ deps = {
    Var('chromium_git') + '/chromium/buildtools.git' + '@' +  Var('buildtools_revision'),
 
   'src/testing/gtest':
-   Var('chromium_git') + '/external/googletest.git' + '@' + '23574bf2333f834ff665f894c97bef8a5b33a0a9',
+   Var('chromium_git') + '/external/googletest.git' + '@' + '9855a87157778d39b95eccfb201a9dc90f6d61c6',
 
   'src/testing/gmock':
-   Var('chromium_git') + '/external/googlemock.git' + '@' + '29763965ab52f24565299976b936d1265cb6a271',
+   Var('chromium_git') + '/external/googlemock.git' + '@' + '0421b6f358139f02e102c9c332ce19a33faf75be',
 
   'src/third_party/icu':
-   Var('chromium_git') + '/chromium/deps/icu.git' + '@' + 'c3f79166089e5360c09e3053fce50e6e296c3204',
+   Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '94e4b770ce2f6065d4261d29c32683a6099b9d93',
 
   'src/dart':
     Var('chromium_git') + '/external/github.com/dart-lang/sdk.git' + '@' + Var('dart_revision'),
@@ -80,7 +80,7 @@ deps = {
    Var('chromium_git') + '/skia.git' + '@' +  Var('skia_revision'),
 
   'src/third_party/yasm/source/patched-yasm':
-   Var('chromium_git') + '/chromium/deps/yasm/patched-yasm.git' + '@' + '4671120cd8558ce62ee8672ebf3eb6f5216f909b',
+   Var('chromium_git') + '/chromium/deps/yasm/patched-yasm.git' + '@' + '7da28c6c7c6a1387217352ce02b31754deb54d2a',
 
   'src/third_party/libjpeg_turbo':
    Var('chromium_git') + '/chromium/deps/libjpeg_turbo.git' + '@' + 'f4631b6ee8b1dbb05e51ae335a7886f9ac598ab6',

@@ -20,10 +20,6 @@ config("gtest_config") {
   # Gtest headers need to be able to find themselves.
   include_dirs = [ "include" ]
 
-  if (is_win) {
-    cflags = [ "/wd4800" ]  # Unused variable warning.
-  }
-
   if (is_posix) {
     defines += [
       # gtest isn't able to figure out when RTTI is disabled for gcc
@@ -111,16 +107,6 @@ static_library("gtest") {
 
   configs -= [ "//build/config/compiler:chromium_code" ]
   configs += [ "//build/config/compiler:no_chromium_code" ]
-
-  config("gtest_warnings") {
-    if (is_win && is_clang) {
-      # The Mutex constructor initializer list in gtest-port.cc is incorrectly
-      # ordered. See
-      # https://groups.google.com/d/msg/googletestframework/S5uSV8L2TX8/U1FaTDa6J6sJ.
-      cflags = [ "-Wno-reorder" ]
-    }
-  }
-  configs += [ ":gtest_warnings" ]
 }
 
 source_set("gtest_main") {

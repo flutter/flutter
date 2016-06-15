@@ -11,10 +11,11 @@
 #       Path to .grd file.
 #
 #   outputs (required)
-#       List of outputs from grit, relative to the target_gen_dir. Grit will
-#       verify at build time that this list is correct and will fail if there
-#       is a mismatch between the outputs specified by the .grd file and the
-#       outputs list here.
+#       List of outputs from grit, relative to the target_gen_dir. If supplied,
+#       a call to Grit to compute the outputs can be skipped which will make
+#       GN run faster. Grit will verify at build time that this list is correct
+#       and will fail if there is a mismatch between the outputs specified by
+#       the .grd file and the outputs list here.
 #
 #       To get this list, you can look in the .grd file for
 #       <output filename="..." and put those filename here. The base directory
@@ -49,10 +50,6 @@
 #       output_dir, but if multiple targets with the same name end up in
 #       the same output_dir, they can collide.
 #
-#   depfile_dir (optional)
-#       If set, used to store the depfile and corresponding stamp file.
-#       Defaults to output_dir
-#
 #   use_qualified_include (optional)
 #       If set, output_dir is not added to include_dirs.
 #
@@ -79,7 +76,6 @@
 #     # files.
 #   }
 import("//build/config/chrome_build.gni")
-import("//build/config/crypto.gni")
 import("//build/config/features.gni")
 import("//build/config/ui.gni")
 
@@ -110,15 +106,6 @@ if (is_chrome_branded) {
   ]
 }
 
-if (is_chromeos) {
-  grit_defines += [
-    "-D",
-    "chromeos",
-    "-D",
-    "scale_factors=2x",
-  ]
-}
-
 if (is_desktop_linux) {
   grit_defines += [
     "-D",
@@ -126,52 +113,10 @@ if (is_desktop_linux) {
   ]
 }
 
-if (toolkit_views) {
-  grit_defines += [
-    "-D",
-    "toolkit_views",
-  ]
-}
-
-if (use_aura) {
-  grit_defines += [
-    "-D",
-    "use_aura",
-  ]
-}
-
-if (use_ash) {
-  grit_defines += [
-    "-D",
-    "use_ash",
-  ]
-}
-
-if (use_nss_certs) {
-  grit_defines += [
-    "-D",
-    "use_nss_certs",
-  ]
-}
-
 if (use_ozone) {
   grit_defines += [
     "-D",
     "use_ozone",
-  ]
-}
-
-if (enable_image_loader_extension) {
-  grit_defines += [
-    "-D",
-    "image_loader_extension",
-  ]
-}
-
-if (enable_remoting) {
-  grit_defines += [
-    "-D",
-    "remoting",
   ]
 }
 
@@ -199,106 +144,6 @@ if (is_ios) {
     # iOS uses a whitelist to filter resources.
     "-w",
     rebase_path("//build/ios/grit_whitelist.txt", root_build_dir),
-  ]
-}
-
-if (enable_extensions) {
-  grit_defines += [
-    "-D",
-    "enable_extensions",
-  ]
-}
-if (enable_media_router) {
-  grit_defines += [
-    "-D",
-    "enable_media_router",
-  ]
-}
-if (enable_plugins) {
-  grit_defines += [
-    "-D",
-    "enable_plugins",
-  ]
-}
-if (enable_basic_printing || enable_print_preview) {
-  grit_defines += [
-    "-D",
-    "enable_printing",
-  ]
-  if (enable_print_preview) {
-    grit_defines += [
-      "-D",
-      "enable_print_preview",
-    ]
-  }
-}
-if (enable_themes) {
-  grit_defines += [
-    "-D",
-    "enable_themes",
-  ]
-}
-if (enable_app_list) {
-  grit_defines += [
-    "-D",
-    "enable_app_list",
-  ]
-}
-if (enable_settings_app) {
-  grit_defines += [
-    "-D",
-    "enable_settings_app",
-  ]
-}
-if (enable_google_now) {
-  grit_defines += [
-    "-D",
-    "enable_google_now",
-  ]
-}
-
-# Note: use_concatenated_impulse_responses is omitted. It is never used and
-# should probably be removed from GYP build.
-if (enable_webrtc) {
-  grit_defines += [
-    "-D",
-    "enable_webrtc",
-  ]
-}
-if (enable_hangout_services_extension) {
-  grit_defines += [
-    "-D",
-    "enable_hangout_services_extension",
-  ]
-}
-if (enable_task_manager) {
-  grit_defines += [
-    "-D",
-    "enable_task_manager",
-  ]
-}
-if (enable_notifications) {
-  grit_defines += [
-    "-D",
-    "enable_notifications",
-  ]
-}
-if (enable_wifi_bootstrapping) {
-  grit_defines += [
-    "-D",
-    "enable_wifi_bootstrapping",
-  ]
-}
-if (enable_service_discovery) {
-  grit_defines += [
-    "-D",
-    "enable_service_discovery",
-  ]
-}
-if (mac_views_browser) {
-  grit_defines += [
-    "-D",
-    "mac_views_browser",
   ]
 }
 
@@ -332,12 +177,6 @@ template("grit") {
     grit_output_name = invoker.output_name
   } else {
     grit_output_name = target_name
-  }
-
-  if (defined(invoker.depfile_dir)) {
-    depfile_dir = invoker.depfile_dir
-  } else {
-    depfile_dir = output_dir
   }
 
   # These are all passed as arguments to the script so have to be relative to
@@ -392,7 +231,7 @@ template("grit") {
     script = "//tools/grit/grit.py"
     inputs = grit_inputs
 
-    depfile = "$depfile_dir/${grit_output_name}_stamp.d"
+    depfile = "$output_dir/${grit_output_name}_stamp.d"
     outputs = [ "${depfile}.stamp" ] + grit_outputs
 
     args = [
