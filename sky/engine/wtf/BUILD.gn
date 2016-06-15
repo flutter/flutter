@@ -4,7 +4,7 @@
 
 import("//testing/test.gni")
 
-component("wtf") {
+source_set("wtf") {
   sources = [
     "ASCIICType.h",
     "AddressSpaceRandomization.cpp",
@@ -225,14 +225,15 @@ component("wtf") {
 
   defines = [ "WTF_IMPLEMENTATION=1" ]
 
-  direct_dependent_configs = [ "//sky/engine:features" ]
+  public_configs = [ "//sky/engine:features" ]
 
   deps = [
     "//base",
-    "//third_party/icu",
   ]
 
-  forward_dependent_configs_from = [ "//third_party/icu" ]
+  public_deps = [
+    "//third_party/icu",
+  ]
 
   if (is_android) {
     libs = [ "log" ]

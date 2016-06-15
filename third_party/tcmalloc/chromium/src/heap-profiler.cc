@@ -68,7 +68,6 @@
 #include "base/spinlock.h"
 #include "base/low_level_alloc.h"
 #include "base/sysinfo.h"      // for GetUniquePathFromEnv()
-#include "deep-heap-profile.h"
 #include "heap-profile-table.h"
 #include "memory_region_map.h"
 
@@ -80,38 +79,6 @@
 #define	PATH_MAX	4096         // seems conservative for max filename len!
 #endif
 #endif
-
-#if defined(__ANDROID__) || defined(ANDROID)
-// On android, there are no environment variables.
-// Instead, we use system properties, set via:
-//   adb shell setprop prop_name prop_value
-// From <sys/system_properties.h>,
-//   PROP_NAME_MAX   32
-//   PROP_VALUE_MAX  92
-#define HEAPPROFILE "heapprof"
-#define HEAP_PROFILE_ALLOCATION_INTERVAL "heapprof.allocation_interval"
-#define HEAP_PROFILE_DEALLOCATION_INTERVAL "heapprof.deallocation_interval"
-#define HEAP_PROFILE_INUSE_INTERVAL "heapprof.inuse_interval"
-#define HEAP_PROFILE_TIME_INTERVAL "heapprof.time_interval"
-#define HEAP_PROFILE_MMAP_LOG "heapprof.mmap_log"
-#define HEAP_PROFILE_MMAP "heapprof.mmap"
-#define HEAP_PROFILE_ONLY_MMAP "heapprof.only_mmap"
-#define DEEP_HEAP_PROFILE "heapprof.deep_heap_profile"
-#define DEEP_HEAP_PROFILE_PAGEFRAME "heapprof.deep.pageframe"
-#define HEAP_PROFILE_TYPE_STATISTICS "heapprof.type_statistics"
-#else  // defined(__ANDROID__) || defined(ANDROID)
-#define HEAPPROFILE "HEAPPROFILE"
-#define HEAP_PROFILE_ALLOCATION_INTERVAL "HEAP_PROFILE_ALLOCATION_INTERVAL"
-#define HEAP_PROFILE_DEALLOCATION_INTERVAL "HEAP_PROFILE_DEALLOCATION_INTERVAL"
-#define HEAP_PROFILE_INUSE_INTERVAL "HEAP_PROFILE_INUSE_INTERVAL"
-#define HEAP_PROFILE_TIME_INTERVAL "HEAP_PROFILE_TIME_INTERVAL"
-#define HEAP_PROFILE_MMAP_LOG "HEAP_PROFILE_MMAP_LOG"
-#define HEAP_PROFILE_MMAP "HEAP_PROFILE_MMAP"
-#define HEAP_PROFILE_ONLY_MMAP "HEAP_PROFILE_ONLY_MMAP"
-#define DEEP_HEAP_PROFILE "DEEP_HEAP_PROFILE"
-#define DEEP_HEAP_PROFILE_PAGEFRAME "DEEP_HEAP_PROFILE_PAGEFRAME"
-#define HEAP_PROFILE_TYPE_STATISTICS "HEAP_PROFILE_TYPE_STATISTICS"
-#endif  // defined(__ANDROID__) || defined(ANDROID)
 
 using STL_NAMESPACE::string;
 using STL_NAMESPACE::sort;
@@ -154,20 +121,6 @@ DEFINE_bool(only_mmap_profile,
             EnvToBool(HEAP_PROFILE_ONLY_MMAP, false),
             "If heap-profiling is on, only profile mmap, mremap, and sbrk; "
             "do not profile malloc/new/etc");
-DEFINE_bool(deep_heap_profile,
-            EnvToBool(DEEP_HEAP_PROFILE, false),
-            "If heap-profiling is on, profile deeper (Linux and Android)");
-DEFINE_int32(deep_heap_profile_pageframe,
-             EnvToInt(DEEP_HEAP_PROFILE_PAGEFRAME, 0),
-             "Needs deeper profile. If 1, dump page frame numbers (PFNs). "
-             "If 2, dump page counts (/proc/kpagecount) with PFNs.");
-#if defined(TYPE_PROFILING)
-DEFINE_bool(heap_profile_type_statistics,
-            EnvToBool(HEAP_PROFILE_TYPE_STATISTICS, false),
-            "If heap-profiling is on, dump type statistics.");
-#endif  // defined(TYPE_PROFILING)
-
-
 //----------------------------------------------------------------------
 // Locking
 //----------------------------------------------------------------------
@@ -220,7 +173,6 @@ static int64 high_water_mark = 0;     // In-use-bytes at last high-water dump
 static int64 last_dump_time = 0;      // The time of the last dump
 
 static HeapProfileTable* heap_profile = NULL;  // the heap profile table
-static DeepHeapProfile* deep_profile = NULL;  // deep memory profiler
 
 // Callback to generate a stack trace for an allocation. May be overriden
 // by an application to provide its own pseudo-stacks.
@@ -301,24 +253,10 @@ static void DumpProfileLocked(const char* reason) {
         reinterpret_cast<char*>(ProfilerMalloc(kProfileBufferSize));
   }
 
-  if (deep_profile) {
-    deep_profile->DumpOrderedProfile(reason, global_profiler_buffer,
-                                     kProfileBufferSize, fd);
-  } else {
-    char* profile = DoGetHeapProfileLocked(global_profiler_buffer,
-                                           kProfileBufferSize);
-    RawWrite(fd, profile, strlen(profile));
-  }
+  char* profile =
+      DoGetHeapProfileLocked(global_profiler_buffer, kProfileBufferSize);
+  RawWrite(fd, profile, strlen(profile));
   RawClose(fd);
-
-#if defined(TYPE_PROFILING)
-  if (FLAGS_heap_profile_type_statistics) {
-    snprintf(file_name, sizeof(file_name), "%s.%05d.%04d.type",
-             filename_prefix, getpid(), dump_count);
-    RAW_VLOG(0, "Dumping type statistics to %s", file_name);
-    heap_profile->DumpTypeStatistics(file_name);
-  }
-#endif  // defined(TYPE_PROFILING)
 
   dumping = false;
 }
@@ -529,14 +467,6 @@ extern "C" void HeapProfilerStart(const char* prefix) {
   high_water_mark = 0;
   last_dump_time = 0;
 
-  if (FLAGS_deep_heap_profile) {
-    // Initialize deep memory profiler
-    RAW_VLOG(0, "[%d] Starting a deep memory profiler", getpid());
-    deep_profile = new(ProfilerMalloc(sizeof(DeepHeapProfile)))
-        DeepHeapProfile(heap_profile, prefix, DeepHeapProfile::PageFrameType(
-            FLAGS_deep_heap_profile_pageframe));
-  }
-
   // We do not reset dump_count so if the user does a sequence of
   // HeapProfilerStart/HeapProfileStop, we will get a continuous
   // sequence of profiles.
@@ -596,13 +526,6 @@ extern "C" void HeapProfilerStop() {
     RAW_CHECK(MallocHook::RemoveMremapHook(&MremapHook), "");
     RAW_CHECK(MallocHook::RemoveSbrkHook(&SbrkHook), "");
     RAW_CHECK(MallocHook::RemoveMunmapHook(&MunmapHook), "");
-  }
-
-  if (deep_profile) {
-    // free deep memory profiler
-    deep_profile->~DeepHeapProfile();
-    ProfilerFree(deep_profile);
-    deep_profile = NULL;
   }
 
   // free profile

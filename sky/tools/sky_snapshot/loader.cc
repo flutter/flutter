@@ -20,9 +20,9 @@ namespace {
 
 // Extract the scheme prefix ('package:' or 'file:' from )
 static std::string ExtractSchemePrefix(std::string url) {
-  if (base::StartsWithASCII(url, "package:", true)) {
+  if (base::StartsWith(url, "package:", base::CompareCase::SENSITIVE)) {
     return "package:";
-  } else if (base::StartsWithASCII(url, "file:", true)) {
+  } else if (base::StartsWith(url, "file:", base::CompareCase::SENSITIVE)) {
     return "file:";
   }
   return "";
@@ -30,9 +30,9 @@ static std::string ExtractSchemePrefix(std::string url) {
 
 // Extract the path from a package: or file: url.
 static std::string ExtractPath(std::string url) {
-  if (base::StartsWithASCII(url, "package:", true)) {
+  if (base::StartsWith(url, "package:", base::CompareCase::SENSITIVE)) {
     base::ReplaceFirstSubstringAfterOffset(&url, 0, "package:", "");
-  } else if (base::StartsWithASCII(url, "file:", true)) {
+  } else if (base::StartsWith(url, "file:", base::CompareCase::SENSITIVE)) {
     base::ReplaceFirstSubstringAfterOffset(&url, 0, "file:", "");
   }
   return url;
@@ -107,11 +107,11 @@ void Loader::LoadPackagesMap(const base::FilePath& packages) {
 
 Dart_Handle Loader::CanonicalizeURL(Dart_Handle library, Dart_Handle url) {
   std::string string = StringFromDart(url);
-  if (base::StartsWithASCII(string, "dart:", true))
+  if (base::StartsWith(string, "dart:", base::CompareCase::SENSITIVE))
     return url;
-  if (base::StartsWithASCII(string, "package:", true))
+  if (base::StartsWith(string, "package:", base::CompareCase::SENSITIVE))
     return url;
-  if (base::StartsWithASCII(string, "file:", true)) {
+  if (base::StartsWith(string, "file:", base::CompareCase::SENSITIVE)) {
     base::ReplaceFirstSubstringAfterOffset(&string, 0, "file:", "");
     return StringToDart(string);;
   }
@@ -126,9 +126,9 @@ Dart_Handle Loader::CanonicalizeURL(Dart_Handle library, Dart_Handle url) {
 }
 
 std::string Loader::GetFilePathForURL(std::string url) {
-  if (base::StartsWithASCII(url, "package:", true))
+  if (base::StartsWith(url, "package:", base::CompareCase::SENSITIVE))
     return GetFilePathForPackageURL(url);
-  if (base::StartsWithASCII(url, "file:", true))
+  if (base::StartsWith(url, "file:", base::CompareCase::SENSITIVE))
     return GetFilePathForFileURL(url);
 
   return url;
@@ -136,7 +136,7 @@ std::string Loader::GetFilePathForURL(std::string url) {
 
 std::string Loader::GetFilePathForPackageURL(
     std::string url) {
-  DCHECK(base::StartsWithASCII(url, "package:", true));
+  DCHECK(base::StartsWith(url, "package:", base::CompareCase::SENSITIVE));
   base::ReplaceFirstSubstringAfterOffset(&url, 0, "package:", "");
   size_t slash = url.find('/');
   if (slash == std::string::npos)
@@ -146,7 +146,7 @@ std::string Loader::GetFilePathForPackageURL(
   std::string package_path = packages_map_->Resolve(package);
   if (package_path.empty())
     return std::string();
-  if (base::StartsWithASCII(package_path, "file://", true)) {
+  if (base::StartsWith(package_path, "file://", base::CompareCase::SENSITIVE)) {
     base::ReplaceFirstSubstringAfterOffset(&package_path, 0, "file://", "");
     return package_path + library_path;
   }
@@ -155,7 +155,7 @@ std::string Loader::GetFilePathForPackageURL(
 }
 
 std::string Loader::GetFilePathForFileURL(std::string url) {
-  DCHECK(base::StartsWithASCII(url, "file://", true));
+  DCHECK(base::StartsWith(url, "file://", base::CompareCase::SENSITIVE));
   base::ReplaceFirstSubstringAfterOffset(&url, 0, "file://", "");
   return url;
 }

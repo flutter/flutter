@@ -189,7 +189,7 @@ class WatcherThreadManager {
 
   typedef std::vector<RequestData> Requests;
 
-  friend struct DefaultSingletonTraits<WatcherThreadManager>;
+  friend struct base::DefaultSingletonTraits<WatcherThreadManager>;
 
   WatcherThreadManager();
 
@@ -221,7 +221,7 @@ WatcherThreadManager::~WatcherThreadManager() {
 }
 
 WatcherThreadManager* WatcherThreadManager::GetInstance() {
-  return Singleton<WatcherThreadManager>::get();
+  return base::Singleton<WatcherThreadManager>::get();
 }
 
 WatcherID WatcherThreadManager::StartWatching(

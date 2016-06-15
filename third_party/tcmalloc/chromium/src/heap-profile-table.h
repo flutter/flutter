@@ -40,10 +40,6 @@
 #include "base/logging.h"   // for RawFD
 #include "heap-profile-stats.h"
 
-#if defined(TYPE_PROFILING)
-#include <gperftools/type_profiler_map.h>
-#endif  // defined(TYPE_PROFILING)
-
 // Table to maintain a heap profile data inside,
 // i.e. the set of currently active heap memory allocations.
 // thread-unsafe and non-reentrant code:
@@ -223,13 +219,7 @@ class HeapProfileTable {
   // used for leak checking (using HeapLeakChecker).
   void DumpMarkedObjects(AllocationMark mark, const char* file_name);
 
-#if defined(TYPE_PROFILING)
-  void DumpTypeStatistics(const char* file_name) const;
-#endif  // defined(TYPE_PROFILING)
-
  private:
-  friend class DeepHeapProfile;
-
   // data types ----------------------------
 
   // Hash table bucket to hold (de)allocation stats
@@ -328,18 +318,6 @@ class HeapProfileTable {
                     // mark unmarked allocations.
   };
 
-#if defined(TYPE_PROFILING)
-  struct TypeCount {
-    TypeCount(size_t bytes_arg, unsigned int objects_arg)
-        : bytes(bytes_arg),
-          objects(objects_arg) {
-    }
-
-    size_t bytes;
-    unsigned int objects;
-  };
-#endif  // defined(TYPE_PROFILING)
-
   struct AllocationAddressIteratorArgs {
     AllocationAddressIteratorArgs(AddressIterator callback_arg, void* data_arg)
         : callback(callback_arg),
@@ -408,16 +386,6 @@ class HeapProfileTable {
   // gets passed to AllocationMap::Iterate.
   inline static void DumpMarkedIterator(const void* ptr, AllocValue* v,
                                         const DumpMarkedArgs& args);
-
-#if defined(TYPE_PROFILING)
-  inline static void TallyTypesItererator(const void* ptr,
-                                          AllocValue* value,
-                                          AddressMap<TypeCount>* type_size_map);
-
-  inline static void DumpTypesIterator(const void* ptr,
-                                       TypeCount* size,
-                                       const DumpArgs& args);
-#endif  // defined(TYPE_PROFILING)
 
   // Helper for IterateOrderedAllocContexts and FillOrderedProfile.
   // Creates a sorted list of Buckets whose length is num_buckets_.

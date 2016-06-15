@@ -67,6 +67,8 @@ source_set("common") {
     "//sky/engine",
     "//sky/engine/bindings",
     "//sky/engine/core:core",
+    "//sky/engine/platform",
+    "//sky/engine/public/sky",
     "//sky/engine/wtf",
     "//sky/services/editing:interfaces",
     "//sky/services/engine:interfaces",

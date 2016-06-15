@@ -67,13 +67,6 @@ static_library("zlib") {
 
   if (!is_ios && (current_cpu == "x86" || current_cpu == "x64")) {
     sources += [ "x86.c" ]
-
-    config("zlib_warnings") {
-      if (is_clang) {
-        cflags = [ "-Wno-incompatible-pointer-types" ]
-      }
-    }
-    configs += [ ":zlib_warnings" ]
   }
 
   configs -= [ "//build/config/compiler:chromium_code" ]
@@ -109,20 +102,17 @@ static_library("minizip") {
     defines = [ "USE_FILE32API" ]
   }
 
+  if (is_clang) {
+    # zlib uses `if ((a == b))` for some reason.
+    cflags = [ "-Wno-parentheses-equality" ]
+  }
+
   deps = [
     ":zlib",
   ]
 
-  config("minizip_warnings") {
-    if (is_clang) {
-      # zlib uses `if ((a == b))` for some reason.
-      cflags = [ "-Wno-parentheses-equality" ]
-    }
-  }
-
   configs -= [ "//build/config/compiler:chromium_code" ]
   configs += [ "//build/config/compiler:no_chromium_code" ]
-  configs += [ ":minizip_warnings" ]
   public_configs = [ ":zlib_config" ]
 }
 

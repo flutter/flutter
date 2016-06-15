@@ -98,4 +98,3 @@ Modifications:
 - Changed DEFINE_foo macros to ignore envname unless ENABLE_PROFILING is defined
 - Changed DEFINE_string to define const char*s instead of strings
 - Disabled HEAPPROFILE envvar unless ENABLE_PROFILING is defined
-- Add "ARMv8-a" to the supporting list of ARM architecture
