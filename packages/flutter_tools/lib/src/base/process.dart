@@ -10,16 +10,26 @@ import '../globals.dart';
 
 typedef String StringConverter(String string);
 
+// TODO(ianh): We have way too many ways to run subprocesses in this project.
+
+Map<String, String> _environment(bool allowReentrantFlutter) {
+  return allowReentrantFlutter ? <String, String>{ 'FLUTTER_ALREADY_LOCKED': 'true' } : null;
+}
+
 /// This runs the command in the background from the specified working
 /// directory. Completes when the process has been started.
-Future<Process> runCommand(List<String> cmd, { String workingDirectory }) async {
+Future<Process> runCommand(List<String> cmd, {
+  String workingDirectory,
+  bool allowReentrantFlutter: false
+}) async {
   printTrace(cmd.join(' '));
   String executable = cmd[0];
   List<String> arguments = cmd.length > 1 ? cmd.sublist(1) : <String>[];
   Process process = await Process.start(
     executable,
     arguments,
-    workingDirectory: workingDirectory
+    workingDirectory: workingDirectory,
+    environment: _environment(allowReentrantFlutter)
   );
   return process;
 }
@@ -28,12 +38,17 @@ Future<Process> runCommand(List<String> cmd, { String workingDirectory }) async 
 /// this process' stdout/stderr. Completes with the process's exit code.
 Future<int> runCommandAndStreamOutput(List<String> cmd, {
   String workingDirectory,
+  bool allowReentrantFlutter: false,
   String prefix: '',
   bool trace: false,
   RegExp filter,
   StringConverter mapFunction
 }) async {
-  Process process = await runCommand(cmd, workingDirectory: workingDirectory);
+  Process process = await runCommand(
+    cmd,
+    workingDirectory: workingDirectory,
+    allowReentrantFlutter: allowReentrantFlutter
+  );
   process.stdout
     .transform(UTF8.decoder)
     .transform(const LineSplitter())
@@ -73,42 +88,30 @@ Future<Null> runAndKill(List<String> cmd, Duration timeout) {
 Future<Process> runDetached(List<String> cmd) {
   printTrace(cmd.join(' '));
   Future<Process> proc = Process.start(
-      cmd[0], cmd.getRange(1, cmd.length).toList(),
-      mode: ProcessStartMode.DETACHED);
+    cmd[0], cmd.getRange(1, cmd.length).toList(),
+    mode: ProcessStartMode.DETACHED
+  );
   return proc;
 }
 
-/// Run cmd and return stdout.
-///
-/// Throws an error if cmd exits with a non-zero value.
-String runCheckedSync(List<String> cmd, {
-  String workingDirectory, bool truncateCommand: false
-}) {
-  return _runWithLoggingSync(
-    cmd, workingDirectory: workingDirectory, checked: true, noisyErrors: true, truncateCommand: truncateCommand
-  );
-}
-
-Future<RunResult> runAsync(List<String> cmd, { String workingDirectory }) async {
+Future<RunResult> runAsync(List<String> cmd, {
+  String workingDirectory,
+  bool allowReentrantFlutter: false
+}) async {
   printTrace(cmd.join(' '));
   ProcessResult results = await Process.run(
     cmd[0],
     cmd.getRange(1, cmd.length).toList(),
-    workingDirectory: workingDirectory
+    workingDirectory: workingDirectory,
+    environment: _environment(allowReentrantFlutter)
   );
   RunResult runResults = new RunResult(results);
   printTrace(runResults.toString());
   return runResults;
 }
 
-/// Run cmd and return stdout.
-String runSync(List<String> cmd, { String workingDirectory }) {
-  return _runWithLoggingSync(cmd, workingDirectory: workingDirectory);
-}
-
 bool exitsHappy(List<String> cli) {
   printTrace(cli.join(' '));
-
   try {
     return Process.runSync(cli.first, cli.sublist(1)).exitCode == 0;
   } catch (error) {
@@ -116,18 +119,53 @@ bool exitsHappy(List<String> cli) {
   }
 }
 
+/// Run cmd and return stdout.
+///
+/// Throws an error if cmd exits with a non-zero value.
+String runCheckedSync(List<String> cmd, {
+  String workingDirectory,
+  bool allowReentrantFlutter: false,
+  bool truncateCommand: false
+}) {
+  return _runWithLoggingSync(
+    cmd,
+    workingDirectory: workingDirectory,
+    allowReentrantFlutter: allowReentrantFlutter,
+    checked: true,
+    noisyErrors: true,
+    truncateCommand: truncateCommand
+  );
+}
+
+/// Run cmd and return stdout.
+String runSync(List<String> cmd, {
+  String workingDirectory,
+  bool allowReentrantFlutter: false
+}) {
+  return _runWithLoggingSync(
+    cmd,
+    workingDirectory: workingDirectory,
+    allowReentrantFlutter: allowReentrantFlutter
+  );
+}
+
 String _runWithLoggingSync(List<String> cmd, {
   bool checked: false,
   bool noisyErrors: false,
   String workingDirectory,
+  bool allowReentrantFlutter: false,
   bool truncateCommand: false
 }) {
   String cmdText = cmd.join(' ');
   if (truncateCommand && cmdText.length > 160)
     cmdText = cmdText.substring(0, 160) + '…';
   printTrace(cmdText);
-  ProcessResult results =
-      Process.runSync(cmd[0], cmd.getRange(1, cmd.length).toList(), workingDirectory: workingDirectory);
+  ProcessResult results = Process.runSync(
+    cmd[0],
+    cmd.getRange(1, cmd.length).toList(),
+    workingDirectory: workingDirectory,
+    environment: _environment(allowReentrantFlutter)
+  );
 
   printTrace('Exit code ${results.exitCode} from: ${cmd.join(' ')}');
 
