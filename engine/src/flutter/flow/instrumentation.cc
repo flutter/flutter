@@ -71,7 +71,7 @@ void Stopwatch::Visualize(SkCanvas& canvas, const SkRect& rect) const {
   const SkScalar bottom = y + height;
   const SkScalar right = x + width;
 
-  // Scale the graph to show frame times up to those that are 4 times the frame time.
+  // Scale the graph to show frame times up to those that are 3 times the frame time.
   const double max_interval = kOneFrameMS * 3.0;
   const double max_unit_interval = UnitFrameInterval(max_interval);
 
