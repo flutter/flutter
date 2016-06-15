@@ -216,6 +216,14 @@ void GLSurfaceIOS::SetupFramebufferIfNecessary() {
 }
 
 bool GLSurfaceIOS::SwapBuffers() {
+  const GLenum discards[] = {
+    GL_DEPTH_ATTACHMENT,
+    GL_STENCIL_ATTACHMENT,
+  };
+
+  glDiscardFramebufferEXT(GL_FRAMEBUFFER, sizeof(discards) / sizeof(GLenum),
+                          discards);
+
   glBindRenderbuffer(GL_RENDERBUFFER, colorbuffer_);
   return [[EAGLContext currentContext] presentRenderbuffer:GL_RENDERBUFFER];
 }
