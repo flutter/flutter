@@ -20,7 +20,7 @@
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
   'mojo_sdk_revision': 'fbe912aa65e0346382bc1e2874eb88fa3aad3358',
-  'base_revision': '9e74307b276b2f9988005c0e97e85ee222586f79',
+  'base_revision': 'ff0b4b505e01de0098fd6ed13cf6661fa58be851',
   'skia_revision': '8cc209111876b7c78b5ec577c9221d8ed5e21024',
 
   # Note: When updating the Dart revision, ensure that all entries that are
@@ -42,7 +42,7 @@ allowed_hosts = [
 
 deps = {
   'src/base':
-   Var('chromium_git') + '/external/github.com/domokit/base' + '@' +  Var('base_revision'),
+   'https://github.com/domokit/base.git' + '@' + Var('base_revision'),
 
   'src/buildtools':
    Var('chromium_git') + '/chromium/buildtools.git' + '@' +  Var('buildtools_revision'),
