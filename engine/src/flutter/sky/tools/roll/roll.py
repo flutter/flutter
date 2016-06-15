@@ -69,7 +69,6 @@ dirs_from_mojo = [
     'mojo/data_pipe_utils',
     'mojo/edk',
     'mojo/environment',
-    'mojo/icu',
     'mojo/java',
     'mojo/message_pump',
     'mojo/services',
