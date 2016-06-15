@@ -5,12 +5,12 @@
 import("//mojo/public/tools/bindings/mojom.gni")
 
 group("media") {
-  deps = [
+  public_deps = [
     ":interfaces",
   ]
 
   if (is_android || is_ios) {
-    deps += [ ":media_lib" ]
+    public_deps += [ ":media_lib" ]
   }
 }
 

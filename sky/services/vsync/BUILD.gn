@@ -5,10 +5,10 @@
 import("//mojo/public/tools/bindings/mojom.gni")
 
 group("vsync") {
-  deps = []
+  public_deps = []
 
   if (is_android || is_ios) {
-    deps += [ ":vsync_lib" ]
+    public_deps += [ ":vsync_lib" ]
   }
 }
 

@@ -22,7 +22,7 @@ copy("sky_shell") {
     ]
 
     deps = [
-      "//sky/shell",
+      "//sky/shell:shell_application_struct",
     ]
   } else if (!is_ios) {
     sources = [

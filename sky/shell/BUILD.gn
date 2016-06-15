@@ -315,71 +315,71 @@ if (is_android) {
     ]
   }
 
+  framework_dir = "$root_out_dir/Flutter.framework"
+
+  copy("framework_dylib") {
+    sources = [ "$root_out_dir/libFlutter.dylib" ]
+    outputs = [ "$framework_dir/Flutter" ]
+
+    deps = [
+      ":flutter_framework_dylib",
+    ]
+  }
+
+  action("framework_install_name") {
+    stamp_file = "$root_out_dir/flutter_install_name_stamp"
+    script = "//sky/tools/change_install_name.py"
+
+    inputs = [ "$framework_dir/Flutter" ]
+    outputs = [ stamp_file ]
+
+    args = [
+      "--dylib",
+      rebase_path("$framework_dir/Flutter"),
+      "--install_name",
+      "@rpath/Flutter.framework/Flutter",
+      "--stamp",
+      rebase_path(stamp_file),
+    ]
+
+    deps = [
+      ":framework_dylib"
+    ]
+  }
+
+  copy("framework_info_plist") {
+    sources = [ "platform/ios/framework/Info.plist" ]
+    outputs = [ "$framework_dir/Info.plist" ]
+  }
+
+  copy("framework_module_map") {
+    sources = [ "platform/ios/framework/module.modulemap" ]
+    outputs = [ "$framework_dir/Modules/module.modulemap" ]
+  }
+
+  copy("framework_headers") {
+    sources = [
+      "platform/ios/framework/Headers/Flutter.h",
+      "platform/ios/framework/Headers/FlutterAppDelegate.h",
+      "platform/ios/framework/Headers/FlutterAsyncMessageListener.h",
+      "platform/ios/framework/Headers/FlutterDartProject.h",
+      "platform/ios/framework/Headers/FlutterMacros.h",
+      "platform/ios/framework/Headers/FlutterMessageListener.h",
+      "platform/ios/framework/Headers/FlutterViewController.h",
+    ]
+    outputs = [ "$framework_dir/Headers/{{source_file_part}}" ]
+  }
+
+  copy("framework_icu") {
+    set_sources_assignment_filter([])
+    sources = [
+      "//third_party/icu/android/icudtl.dat",
+    ]
+    set_sources_assignment_filter(sources_assignment_filter)
+    outputs = [ "$framework_dir/{{source_file_part}}" ]
+  }
+
   group("flutter_framework") {
-    framework_dir = "$root_out_dir/Flutter.framework"
-
-    copy("framework_dylib") {
-      sources = [ "$root_out_dir/libFlutter.dylib" ]
-      outputs = [ "$framework_dir/Flutter" ]
-
-      deps = [
-        ":flutter_framework_dylib",
-      ]
-    }
-
-    action("framework_install_name") {
-      stamp_file = "$root_out_dir/flutter_install_name_stamp"
-      script = "//sky/tools/change_install_name.py"
-
-      inputs = [ "$framework_dir/Flutter" ]
-      outputs = [ stamp_file ]
-
-      args = [
-        "--dylib",
-        rebase_path("$framework_dir/Flutter"),
-        "--install_name",
-        "@rpath/Flutter.framework/Flutter",
-        "--stamp",
-        rebase_path(stamp_file),
-      ]
-
-      deps = [
-        ":framework_dylib"
-      ]
-    }
-
-    copy("framework_info_plist") {
-      sources = [ "platform/ios/framework/Info.plist" ]
-      outputs = [ "$framework_dir/Info.plist" ]
-    }
-
-    copy("framework_module_map") {
-      sources = [ "platform/ios/framework/module.modulemap" ]
-      outputs = [ "$framework_dir/Modules/module.modulemap" ]
-    }
-
-    copy("framework_headers") {
-      sources = [
-        "platform/ios/framework/Headers/Flutter.h",
-        "platform/ios/framework/Headers/FlutterAppDelegate.h",
-        "platform/ios/framework/Headers/FlutterAsyncMessageListener.h",
-        "platform/ios/framework/Headers/FlutterDartProject.h",
-        "platform/ios/framework/Headers/FlutterMacros.h",
-        "platform/ios/framework/Headers/FlutterMessageListener.h",
-        "platform/ios/framework/Headers/FlutterViewController.h",
-      ]
-      outputs = [ "$framework_dir/Headers/{{source_file_part}}" ]
-    }
-
-    copy("framework_icu") {
-      set_sources_assignment_filter([])
-      sources = [
-        "//third_party/icu/android/icudtl.dat",
-      ]
-      set_sources_assignment_filter(sources_assignment_filter)
-      outputs = [ "$framework_dir/{{source_file_part}}" ]
-    }
-
     public_deps = [
       ":framework_dylib",
       ":framework_headers",
@@ -472,6 +472,7 @@ if (is_android) {
   }
 
   resource_copy_mac("sky_resources") {
+  app_name = "SkyShell"
     resources = [
       "//third_party/icu/android/icudtl.dat",
     ]
