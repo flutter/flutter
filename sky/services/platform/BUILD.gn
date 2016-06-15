@@ -25,6 +25,7 @@ if (is_android) {
       "src/org/domokit/platform/PathProviderImpl.java",
       "src/org/domokit/platform/SystemChromeImpl.java",
       "src/org/domokit/platform/SystemSoundImpl.java",
+      "src/org/domokit/platform/UriLauncherImpl.java",
     ]
 
     deps = [
