@@ -158,7 +158,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
 }
 
 const double _kTrackHeight = 14.0;
-const double _kTrackWidth = 29.0;
+const double _kTrackWidth = 33.0;
 const double _kTrackRadius = _kTrackHeight / 2.0;
 const double _kThumbRadius = 10.0;
 const double _kSwitchWidth = _kTrackWidth - 2 * _kTrackRadius + 2 * kRadialReactionRadius;
@@ -355,7 +355,7 @@ class _RenderSwitch extends RenderToggleable {
     }
 
     // The thumb contracts slightly during the animation
-    double inset = 2.0 - (currentPosition - 0.5).abs() * 2.0;
+    double inset = 1.0 - (currentPosition - 0.5).abs() * 2.0;
     double radius = _kThumbRadius - inset;
     Rect thumbRect = new Rect.fromLTRB(thumbPosition.x + offset.dx - radius,
                                        thumbPosition.y + offset.dy - radius,
