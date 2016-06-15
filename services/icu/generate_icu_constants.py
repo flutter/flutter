@@ -22,7 +22,7 @@ if not os.path.exists(out_dir):
 sha1hash = hashlib.sha1(data).hexdigest()
 
 with open(out_file, "w") as f:
-    f.write('#include "mojo/icu/constants.h"\n')
+    f.write('#include "services/icu/constants.h"\n')
     f.write("namespace mojo {\n")
     f.write("namespace icu {\n")
     f.write("const size_t kDataSize = %s;\n" % len(data))

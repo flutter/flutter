@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef MOJO_ICU_CONSTANTS_H_
-#define MOJO_ICU_CONSTANTS_H_
+#ifndef SERVICES_ICU_CONSTANTS_H_
+#define SERVICES_ICU_CONSTANTS_H_
 
 #include <stddef.h>
 
@@ -16,4 +16,4 @@ extern const size_t kDataSize;
 }  // namespace icu
 }  // namespace mojo
 
-#endif  // MOJO_ICU_CONSTANTS_H_
+#endif  // SERVICES_ICU_CONSTANTS_H_

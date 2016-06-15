@@ -7,15 +7,15 @@
 #include "base/threading/thread.h"
 #include "mojo/application/application_runner_chromium.h"
 #include "mojo/common/tracing_impl.h"
-#include "mojo/icu/icu.h"
 #include "mojo/public/c/system/main.h"
 #include "mojo/public/cpp/application/application_delegate.h"
 #include "mojo/public/cpp/application/application_impl.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/services/content_handler/interfaces/content_handler.mojom.h"
+#include "services/icu/icu.h"
 #include "sky/engine/public/platform/sky_settings.h"
-#include "sky/shell/shell.h"
 #include "sky/shell/platform/mojo/content_handler_impl.h"
+#include "sky/shell/shell.h"
 
 namespace sky {
 namespace shell {

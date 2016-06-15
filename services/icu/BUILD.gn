@@ -10,7 +10,7 @@ action("generate_icu_constants") {
   ]
 
   outputs = [
-    "$root_gen_dir/mojo/icu/constants.cc",
+    "$root_gen_dir/services/icu/constants.cc",
   ]
 
   args = rebase_path(inputs + outputs, root_build_dir)
@@ -22,7 +22,7 @@ action("generate_icu_constants") {
 
 source_set("icu") {
   sources = [
-    "$root_gen_dir/mojo/icu/constants.cc",
+    "$root_gen_dir/services/icu/constants.cc",
     "constants.h",
     "icu.cc",
     "icu.h",
