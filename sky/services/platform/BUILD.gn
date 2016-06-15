@@ -11,6 +11,7 @@ mojom("interfaces") {
     "path_provider.mojom",
     "system_chrome.mojom",
     "system_sound.mojom",
+    "uri_launcher.mojom",
   ]
 }
 
@@ -46,6 +47,8 @@ if (is_ios) {
       "ios/system_chrome_impl.mm",
       "ios/system_sound_impl.h",
       "ios/system_sound_impl.mm",
+      "ios/uri_launcher_impl.h",
+      "ios/uri_launcher_impl.mm",
     ]
     deps = [
       "//base:base",

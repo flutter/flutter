@@ -2,8 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "base/logging.h"
 #include "sky/shell/platform/mac/platform_service_provider.h"
+
+#if TARGET_OS_IPHONE
+#include "sky/services/activity/ios/activity_impl.h"
+#include "sky/services/editing/ios/clipboard_impl.h"
+#include "sky/services/media/ios/media_player_impl.h"
+#include "sky/services/media/ios/media_service_impl.h"
+#include "sky/services/platform/ios/haptic_feedback_impl.h"
+#include "sky/services/platform/ios/path_provider_impl.h"
+#include "sky/services/platform/ios/system_chrome_impl.h"
+#include "sky/services/platform/ios/system_sound_impl.h"
+#include "sky/services/platform/ios/uri_launcher_impl.h"
+#include "sky/services/vsync/ios/vsync_provider_impl.h"
+#endif  // TARGET_OS_IPHONE
+
+#include "sky/services/ns_net/network_service_impl.h"
 
 namespace sky {
 namespace shell {
@@ -70,6 +84,12 @@ void PlatformServiceProvider::ConnectToService(
   if (service_name == flutter::platform::SystemSound::Name_) {
     new flutter::platform::SystemSoundImpl(
         mojo::InterfaceRequest<flutter::platform::SystemSound>(
+            client_handle.Pass()));
+    return;
+  }
+  if (service_name == flutter::platform::URILauncher::Name_) {
+    new flutter::platform::URILauncherImpl(
+        mojo::InterfaceRequest<flutter::platform::URILauncher>(
             client_handle.Pass()));
     return;
   }
