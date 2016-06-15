@@ -16,11 +16,11 @@ class Color {
   /// Bits 16-23 are the red value.
   /// Bits 8-15 are the green value.
   /// Bits 0-7 are the blue value.
-  const Color(int value) : _value = (value & 0xFFFFFFFF);
+  const Color(int value) : value = value & 0xFFFFFFFF;
 
   /// Construct a color from the lower 8 bits of four integers.
   const Color.fromARGB(int a, int r, int g, int b) :
-    _value = ((((a & 0xff) << 24) |
+    value = ((((a & 0xff) << 24) |
                 ((r & 0xff) << 16) |
                 ((g & 0xff) << 8) |
                 ((b & 0xff) << 0)) & 0xFFFFFFFF);
@@ -31,23 +31,22 @@ class Color {
   /// Bits 16-23 are the red value.
   /// Bits 8-15 are the green value.
   /// Bits 0-7 are the blue value.
-  int get value => _value;
-  final int _value;
+  final int value;
 
   /// The alpha channel of this color in an 8 bit value.
-  int get alpha => (0xff000000 & _value) >> 24;
+  int get alpha => (0xff000000 & value) >> 24;
 
   /// The alpha channel of this color as a double.
   double get opacity => alpha / 0xFF;
 
   /// The red channel of this color in an 8 bit value.
-  int get red => (0x00ff0000 & _value) >> 16;
+  int get red => (0x00ff0000 & value) >> 16;
 
   /// The green channel of this color in an 8 bit value.
-  int get green => (0x0000ff00 & _value) >> 8;
+  int get green => (0x0000ff00 & value) >> 8;
 
   /// The blue channel of this color in an 8 bit value.
-  int get blue => (0x000000ff & _value) >> 0;
+  int get blue => (0x000000ff & value) >> 0;
 
   /// Returns a new color that matches this color with the alpha channel
   /// replaced with a (which ranges from 0 to 255).
@@ -108,10 +107,10 @@ class Color {
   }
 
   @override
-  int get hashCode => _value.hashCode;
+  int get hashCode => value.hashCode;
 
   @override
-  String toString() => "Color(0x${_value.toRadixString(16).padLeft(8, '0')})";
+  String toString() => "Color(0x${value.toRadixString(16).padLeft(8, '0')})";
 }
 
 /// Algorithms to use when painting on the canvas.
@@ -234,43 +233,80 @@ enum PaintingStyle {
   strokeAndFill,
 }
 
+// If we actually run on big endian machines, we'll need to do something smarter
+// here. We don't use [Endianness.HOST_ENDIAN] because it's not a compile-time
+// constant and can't propagate into the set/get calls.
+const Endianness _kFakeHostEndian = Endianness.LITTLE_ENDIAN;
+
 /// A description of the style to use when drawing on a [Canvas].
 ///
 /// Most APIs on [Canvas] take a [Paint] object to describe the style
 /// to use for that operation.
 class Paint {
-  /// Whether to paint inside shapes, the edges of shapes, or both.
-  ///
-  /// If null, defaults to [PaintingStyle.fill].
-  PaintingStyle style;
-  static const PaintingStyle _kDefaultStyle = PaintingStyle.fill;
+  // Paint objects are encoded in two buffers:
+  //
+  // * _data is binary data in four-byte fields, each of which is either a
+  //   uint32_t or a float. The default value for each field is encoded as
+  //   zero to make initialization trivial. Most values already have a default
+  //   value of zero, but some, such a color, have a non-zero default value.
+  //   To encode or decode these values, XOR the value with the default value.
+  //
+  // * _objects is a list of unencodable objects, typically wrappers for native
+  //   objects. The objects are simply stored in the list without any additional
+  //   encoding.
+  //
+  // The binary format must match the deserialization code in paint.cc.
 
-  /// How wide to make edges drawn when [style] is set to
-  /// [PaintingStyle.stroke] or [PaintingStyle.strokeAndFill]. The
-  /// width is given in logical pixels measured in the direction
-  /// orthogonal to the direction of the path.
-  ///
-  /// The values null and 0.0 correspond to a hairline width.
-  double strokeWidth;
-  static const double _kDefaultStrokeWidth = 0.0;
+  final ByteData _data = new ByteData(_kDataByteCount);
+  static const int _kIsAntiAliasIndex = 0;
+  static const int _kColorIndex = 1;
+  static const int _kTransferModeIndex = 2;
+  static const int _kStyleIndex = 3;
+  static const int _kStrokeWidthIndex = 4;
+  static const int _kStrokeCapIndex = 5;
+  static const int _kFilterQualityIndex = 6;
+  static const int _kColorFilterIndex = 7;
+  static const int _kColorFilterColorIndex = 8;
+  static const int _kColorFilterTransferModeIndex = 9;
 
-  /// The kind of finish to place on the end of lines drawn when
-  /// [style] is set to [PaintingStyle.stroke] or
-  /// [PaintingStyle.strokeAndFill].
-  ///
-  /// If null, defaults to [StrokeCap.butt], i.e. no caps.
-  StrokeCap strokeCap;
-  static const StrokeCap _kDefaultStrokeCap = StrokeCap.butt;
+  static const int _kIsAntiAliasOffset = _kIsAntiAliasIndex << 2;
+  static const int _kColorOffset = _kColorIndex << 2;
+  static const int _kTransferModeOffset = _kTransferModeIndex << 2;
+  static const int _kStyleOffset = _kStyleIndex << 2;
+  static const int _kStrokeWidthOffset = _kStrokeWidthIndex << 2;
+  static const int _kStrokeCapOffset = _kStrokeCapIndex << 2;
+  static const int _kFilterQualityOffset = _kFilterQualityIndex << 2;
+  static const int _kColorFilterOffset = _kColorFilterIndex << 2;
+  static const int _kColorFilterColorOffset = _kColorFilterColorIndex << 2;
+  static const int _kColorFilterTransferModeOffset = _kColorFilterTransferModeIndex << 2;
+  // If you add more fields, remember to update _kDataByteCount.
+  static const int _kDataByteCount = 40;
+
+  // Binary format must match the deserialization code in paint.cc.
+  List<dynamic> _objects;
+  static const int _kMaskFilterIndex = 0;
+  static const int _kShaderIndex = 1;
+  static const int _kObjectCount = 2;  // Must be one larger than the largest index
 
   /// Whether to apply anti-aliasing to lines and images drawn on the
   /// canvas.
   ///
-  /// Defaults to true. The value null is treated as false.
-  bool isAntiAlias = true;
+  /// Defaults to true.
+  bool get isAntiAlias {
+    return _data.getInt32(_kIsAntiAliasOffset, _kFakeHostEndian) == 0;
+  }
+  set isAntiAlias(bool value) {
+    // We encode true as zero and false as one because the default value, which
+    // we always encode as zero, is true.
+    final int encoded = value ? 0 : 1;
+    _data.setInt32(_kIsAntiAliasOffset, encoded, _kFakeHostEndian);
+  }
+
+  static const int _kColorDefault = 0xFF000000;
 
   /// The color to use when stroking or filling a shape.
   ///
-  /// Defaults to black.
+  /// Defaults to opaque black.
   ///
   /// See also:
   ///
@@ -280,40 +316,17 @@ class Paint {
   ///
   /// This color is not used when compositing. To colorize a layer, use
   /// [colorFilter].
-  Color color = _kDefaultPaintColor;
-  static const Color _kDefaultPaintColor = const Color(0xFF000000);
+  Color get color {
+    final int encoded = _data.getInt32(_kColorOffset, _kFakeHostEndian);
+    return new Color(encoded ^ _kColorDefault);
+  }
+  set color(Color value) {
+    assert(value != null);
+    final int encoded = value.value ^ _kColorDefault;
+    _data.setInt32(_kColorOffset, encoded, _kFakeHostEndian);
+  }
 
-  /// A mask filter (for example, a blur) to apply to a shape after it has been
-  /// drawn but before it has been composited into the image.
-  ///
-  /// See [MaskFilter] for details.
-  MaskFilter maskFilter;
-
-  /// Controls the performance vs quality trade-off to use when applying
-  /// filters, such as [maskFilter], or when drawing images, as with
-  /// [Canvas.drawImageRect] or [Canvas.drawImageNine].
-  // TODO(ianh): verify that the image drawing methods actually respect this
-  FilterQuality filterQuality;
-
-  /// The shader to use when stroking or filling a shape.
-  ///
-  /// When this is null, the [color] is used instead.
-  ///
-  /// See also:
-  ///
-  ///  * [Gradient], a shader that paints a color gradient.
-  ///  * [ImageShader], a shader that tiles an [Image].
-  ///  * [colorFilter], which overrides [shader].
-  ///  * [color], which is used if [shader] and [colorFilter] are null.
-  Shader shader;
-
-  /// A color filter to apply when a shape is drawn or when a layer is
-  /// composited.
-  ///
-  /// See [ColorFilter] for details.
-  ///
-  /// When a shape is being drawn, [colorFilter] overrides [color] and [shader].
-  ColorFilter colorFilter;
+  static final int _kTransferModeDefault = TransferMode.srcOver.index;
 
   /// A transfer mode to apply when a shape is drawn or a layer is composited.
   ///
@@ -325,41 +338,134 @@ class Paint {
   /// The destination colors are from the background onto which the shape or
   /// layer is being composited.
   ///
-  /// If null, defaults to [TransferMode.srcOver].
-  TransferMode transferMode;
-  static const TransferMode _kDefaultTransferMode = TransferMode.srcOver;
+  /// Defaults to [TransferMode.srcOver].
+  TransferMode get transferMode {
+    final int encoded = _data.getInt32(_kTransferModeOffset, _kFakeHostEndian);
+    return TransferMode.values[encoded ^ _kTransferModeDefault];
+  }
+  set transferMode(TransferMode value) {
+    assert(value != null);
+    final int encoded = value.index ^ _kTransferModeDefault;
+    _data.setInt32(_kTransferModeOffset, encoded, _kFakeHostEndian);
+  }
 
+  /// Whether to paint inside shapes, the edges of shapes, or both.
+  ///
+  /// Defaults to [PaintingStyle.fill].
+  PaintingStyle get style {
+    return PaintingStyle.values[_data.getInt32(_kStyleOffset, _kFakeHostEndian)];
+  }
+  set style(PaintingStyle value) {
+    assert(value != null);
+    final int encoded = value.index;
+    _data.setInt32(_kStyleOffset, encoded, _kFakeHostEndian);
+  }
 
-  // Must match PaintFields enum in Paint.cpp.
-  dynamic get _value {
-    // The most common usage is a Paint with no options besides a color and
-    // anti-aliasing.  In this case, save time by just returning the color
-    // as an int.
-    if ((style == null || style == _kDefaultStyle) &&
-        (strokeWidth == null || strokeWidth == _kDefaultStrokeWidth) &&
-        (strokeCap == null || strokeCap == _kDefaultStrokeCap) &&
-        isAntiAlias &&
-        color != null &&
-        (transferMode == null || transferMode == _kDefaultTransferMode) &&
-        colorFilter == null &&
-        maskFilter == null &&
-        filterQuality == null &&
-        shader == null) {
-      return color.value;
+  /// How wide to make edges drawn when [style] is set to
+  /// [PaintingStyle.stroke] or [PaintingStyle.strokeAndFill]. The
+  /// width is given in logical pixels measured in the direction
+  /// orthogonal to the direction of the path.
+  ///
+  /// Defaults to 0.0, which correspond to a hairline width.
+  double get strokeWidth {
+    return _data.getFloat32(_kStrokeWidthOffset, _kFakeHostEndian);
+  }
+  set strokeWidth(double value) {
+    assert(value != null);
+    final double encoded = value;
+    _data.setFloat32(_kStrokeWidthOffset, encoded, _kFakeHostEndian);
+  }
+
+  /// The kind of finish to place on the end of lines drawn when
+  /// [style] is set to [PaintingStyle.stroke] or
+  /// [PaintingStyle.strokeAndFill].
+  ///
+  /// Defaults to [StrokeCap.butt], i.e. no caps.
+  StrokeCap get strokeCap {
+    return StrokeCap.values[_data.getInt32(_kStrokeCapOffset, _kFakeHostEndian)];
+  }
+  set strokeCap(StrokeCap value) {
+    assert(value != null);
+    final int encoded = value.index;
+    _data.setInt32(_kStrokeCapOffset, encoded, _kFakeHostEndian);
+  }
+
+  /// A mask filter (for example, a blur) to apply to a shape after it has been
+  /// drawn but before it has been composited into the image.
+  ///
+  /// See [MaskFilter] for details.
+  MaskFilter get maskFilter {
+    if (_objects == null)
+      return null;
+    return _objects[_kMaskFilterIndex];
+  }
+  set maskFilter(MaskFilter value) {
+    _objects ??= new List<dynamic>(_kObjectCount);
+    _objects[_kMaskFilterIndex] = value;
+  }
+
+  /// Controls the performance vs quality trade-off to use when applying
+  /// filters, such as [maskFilter], or when drawing images, as with
+  /// [Canvas.drawImageRect] or [Canvas.drawImageNine].
+  ///
+  /// Defaults to [FilterQuality.none].
+  // TODO(ianh): verify that the image drawing methods actually respect this
+  FilterQuality get filterQuality {
+    return FilterQuality.values[_data.getInt32(_kFilterQualityOffset, _kFakeHostEndian)];
+  }
+  set filterQuality(FilterQuality value) {
+    assert(value != null);
+    final int encoded = value.index;
+    _data.setInt32(_kFilterQualityOffset, encoded, _kFakeHostEndian);
+  }
+
+  /// The shader to use when stroking or filling a shape.
+  ///
+  /// When this is null, the [color] is used instead.
+  ///
+  /// See also:
+  ///
+  ///  * [Gradient], a shader that paints a color gradient.
+  ///  * [ImageShader], a shader that tiles an [Image].
+  ///  * [colorFilter], which overrides [shader].
+  ///  * [color], which is used if [shader] and [colorFilter] are null.
+  Shader get shader {
+    if (_objects == null)
+      return null;
+    return _objects[_kShaderIndex];
+  }
+  set shader(Shader value) {
+    _objects ??= new List<dynamic>(_kObjectCount);
+    _objects[_kShaderIndex] = value;
+  }
+
+  /// A color filter to apply when a shape is drawn or when a layer is
+  /// composited.
+  ///
+  /// See [ColorFilter] for details.
+  ///
+  /// When a shape is being drawn, [colorFilter] overrides [color] and [shader].
+  ColorFilter get colorFilter {
+    final bool isNull = _data.getInt32(_kColorFilterOffset, _kFakeHostEndian) == 0;
+    if (isNull)
+      return null;
+    return new ColorFilter.mode(
+      new Color(_data.getInt32(_kColorFilterColorOffset, _kFakeHostEndian)),
+      TransferMode.values[_data.getInt32(_kColorFilterTransferModeOffset, _kFakeHostEndian)]
+    );
+  }
+  set colorFilter(ColorFilter value) {
+    if (value == null) {
+      _data.setInt32(_kColorFilterOffset, 0, _kFakeHostEndian);
+      _data.setInt32(_kColorFilterColorOffset, 0, _kFakeHostEndian);
+      _data.setInt32(_kColorFilterTransferModeOffset, 0, _kFakeHostEndian);
+    } else {
+      assert(value._color != null);
+      assert(value._transferMode != null);
+      _data.setInt32(_kColorFilterOffset, 1, _kFakeHostEndian);
+      _data.setInt32(_kColorFilterColorOffset, value._color.value, _kFakeHostEndian);
+      _data.setInt32(_kColorFilterTransferModeOffset, value._transferMode.index, _kFakeHostEndian);
     }
-
-    return <dynamic>[
-      style?.index,
-      strokeWidth,
-      strokeCap?.index,
-      isAntiAlias,
-      color.value,
-      transferMode?.index,
-      colorFilter,
-      maskFilter,
-      filterQuality?.index,
-      shader,
-    ];
   }
 
   @override
@@ -369,11 +475,11 @@ class Paint {
     result.write('Paint(');
     if (style == PaintingStyle.stroke || style == PaintingStyle.strokeAndFill) {
       result.write('$style');
-      if (strokeWidth != null && strokeWidth != 0.0)
+      if (strokeWidth != 0.0)
         result.write(' $strokeWidth');
       else
         result.write(' hairline');
-      if (strokeCap != null && strokeCap != _kDefaultStrokeCap)
+      if (strokeCap != StrokeCap.butt)
         result.write(' $strokeCap');
       semicolon = '; ';
     }
@@ -381,14 +487,14 @@ class Paint {
       result.write('${semicolon}antialias off');
       semicolon = '; ';
     }
-    if (color != _kDefaultPaintColor) {
+    if (color != const Color(0xFF000000)) {
       if (color != null)
         result.write('$semicolon$color');
       else
         result.write('${semicolon}no color');
       semicolon = '; ';
     }
-    if (transferMode != null) {
+    if (transferMode != TransferMode.srcOver) {
       result.write('$semicolon$transferMode');
       semicolon = '; ';
     }
@@ -400,7 +506,7 @@ class Paint {
       result.write('${semicolon}maskFilter: $maskFilter');
       semicolon = '; ';
     }
-    if (filterQuality != null) {
+    if (filterQuality != FilterQuality.none) {
       result.write('${semicolon}filterQuality: $filterQuality');
       semicolon = '; ';
     }
@@ -727,7 +833,7 @@ class MaskFilter extends NativeFieldWrapperClass2 {
 ///
 /// Instances of this class are used with [Paint.colorFilter] on [Paint]
 /// objects.
-class ColorFilter extends NativeFieldWrapperClass2 {
+class ColorFilter {
   /// Creates a color filter that applies the transfer mode given as the second
   /// argument. The source color is the one given as the first argument, and the
   /// destination color is the one from the layer being composited.
@@ -735,10 +841,11 @@ class ColorFilter extends NativeFieldWrapperClass2 {
   /// The output of this filter is then composited into the background according
   /// to the [Paint.transferMode], using the output of this filter as the source
   /// and the background as the destination.
-  ColorFilter.mode(Color color, TransferMode transferMode) {
-    _constructor(color.value, transferMode.index);
-  }
-  void _constructor(int color, int transferMode) native "ColorFilter_constructor";
+  ColorFilter.mode(Color color, TransferMode transferMode)
+    : _color = color, _transferMode = transferMode;
+
+  final Color _color;
+  final TransferMode _transferMode;
 }
 
 /// A filter operation to apply to a raster image.
@@ -777,10 +884,12 @@ abstract class Shader extends NativeFieldWrapperClass2 { }
 enum TileMode {
   /// Edge is clamped to the final color.
   clamp,
+
   /// Edge is repeated from first color to last.
   repeated,
+
   /// Edge is mirrored from last color to first.
-  mirror
+  mirror,
 }
 
 Int32List _encodeColorList(List<Color> colors) {
@@ -979,18 +1088,22 @@ class Canvas extends NativeFieldWrapperClass2 {
   ///
   /// Call [restore] to pop the save stack and apply the paint to the group.
   void saveLayer(Rect bounds, Paint paint) {
-    if (bounds == null)
-      _saveLayerWithoutBounds(paint);
-    else
-      _saveLayer(bounds.left, bounds.top, bounds.right, bounds.bottom, paint);
+    if (bounds == null) {
+      _saveLayerWithoutBounds(paint._objects, paint._data);
+    } else {
+      _saveLayer(bounds.left, bounds.top, bounds.right, bounds.bottom,
+                 paint._objects, paint._data);
+    }
   }
-  void _saveLayerWithoutBounds(Paint paint) native "Canvas_saveLayerWithoutBounds";
+  void _saveLayerWithoutBounds(List<dynamic> paintObjects, ByteData paintData)
+      native "Canvas_saveLayerWithoutBounds";
   // TODO(jackson): Paint should be optional, but making it optional causes crash
   void _saveLayer(double left,
                   double top,
                   double right,
                   double bottom,
-                  Paint paint) native "Canvas_saveLayer";
+                  List<dynamic> paintObjects,
+                  ByteData paintData) native "Canvas_saveLayer";
 
   /// Pops the current save stack, if there is anything to pop.
   /// Otherwise, does nothing.
@@ -1075,72 +1188,104 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// Draws a line between the given [Point]s using the given paint. The line is
   /// stroked, the value of the [Paint.style] is ignored for this call.
   void drawLine(Point p1, Point p2, Paint paint) {
-    _drawLine(p1.x, p1.y, p2.x, p2.y, paint);
+    _drawLine(p1.x, p1.y, p2.x, p2.y, paint._objects, paint._data);
   }
-  void _drawLine(double x1, double y1, double x2, double y2, Paint paint) native "Canvas_drawLine";
+  void _drawLine(double x1,
+                 double y1,
+                 double x2,
+                 double y2,
+                 List<dynamic> paintObjects,
+                 ByteData paintData) native "Canvas_drawLine";
 
   /// Fills the canvas with the given [Paint].
   ///
   /// To fill the canvas with a solid color and transfer mode, consider
   /// [drawColor] instead.
-  void drawPaint(Paint paint) native "Canvas_drawPaint";
+  void drawPaint(Paint paint) => _drawPaint(paint._objects, paint._data);
+  void _drawPaint(List<dynamic> paintObjects, ByteData paintData) native "Canvas_drawPaint";
 
   /// Draws a rectangle with the given [Paint]. Whether the rectangle is filled
   /// or stroked (or both) is controlled by [Paint.style].
   void drawRect(Rect rect, Paint paint) {
-    _drawRect(rect.left, rect.top, rect.right, rect.bottom, paint);
+    _drawRect(rect.left, rect.top, rect.right, rect.bottom,
+              paint._objects, paint._data);
   }
   void _drawRect(double left,
                  double top,
                  double right,
                  double bottom,
-                 Paint paint) native "Canvas_drawRect";
+                 List<dynamic> paintObjects,
+                 ByteData paintData) native "Canvas_drawRect";
 
   /// Draws a rounded rectangle with the given [Paint]. Whether the rectangle is
   /// filled or stroked (or both) is controlled by [Paint.style].
-  void drawRRect(RRect rrect, Paint paint) => _drawRRect(rrect._value, paint);
-  void _drawRRect(Float32List rrect, Paint paint) native "Canvas_drawRRect";
+  void drawRRect(RRect rrect, Paint paint) {
+    _drawRRect(rrect._value, paint._objects, paint._data);
+  }
+  void _drawRRect(Float32List rrect,
+                  List<dynamic> paintObjects,
+                  ByteData paintData) native "Canvas_drawRRect";
 
   /// Draws a shape consisting of the difference between two rounded rectangles
   /// with the given [Paint]. Whether this shape is filled or stroked (or both)
   /// is controlled by [Paint.style].
   ///
   /// This shape is almost but not quite entirely unlike an annulus.
-  void drawDRRect(RRect outer, RRect inner, Paint paint) => _drawDRRect(outer._value, inner._value, paint);
-  void _drawDRRect(Float32List outer, Float32List inner, Paint paint) native "Canvas_drawDRRect";
+  void drawDRRect(RRect outer, RRect inner, Paint paint) {
+    _drawDRRect(outer._value, inner._value, paint._objects, paint._data);
+  }
+  void _drawDRRect(Float32List outer,
+                   Float32List inner,
+                   List<dynamic> paintObjects,
+                   ByteData paintData) native "Canvas_drawDRRect";
 
   /// Draws an axis-aligned oval that fills the given axis-aligned rectangle
   /// with the given [Paint]. Whether the oval is filled or stroked (or both) is
   /// controlled by [Paint.style].
   void drawOval(Rect rect, Paint paint) {
-    _drawOval(rect.left, rect.top, rect.right, rect.bottom, paint);
+    _drawOval(rect.left, rect.top, rect.right, rect.bottom,
+              paint._objects, paint._data);
   }
   void _drawOval(double left,
                  double top,
                  double right,
                  double bottom,
-                 Paint paint) native "Canvas_drawOval";
+                 List<dynamic> paintObjects,
+                 ByteData paintData) native "Canvas_drawOval";
 
   /// Draws a circle centered at the point given by the first two arguments and
   /// that has the radius given by the third argument, with the [Paint] given in
   /// the fourth argument. Whether the circle is filled or stroked (or both) is
   /// controlled by [Paint.style].
   void drawCircle(Point c, double radius, Paint paint) {
-    _drawCircle(c.x, c.y, radius, paint);
+    _drawCircle(c.x, c.y, radius, paint._objects, paint._data);
   }
-  void _drawCircle(double x, double y, double radius, Paint paint) native "Canvas_drawCircle";
+  void _drawCircle(double x,
+                   double y,
+                   double radius,
+                   List<dynamic> paintObjects,
+                   ByteData paintData) native "Canvas_drawCircle";
 
   /// Draws the given [Path] with the given [Paint]. Whether this shape is
   /// filled or stroked (or both) is controlled by [Paint.style]. If the path is
   /// filled, then subpaths within it are implicitly closed (see [Path.close]).
-  void drawPath(Path path, Paint paint) native "Canvas_drawPath";
+  void drawPath(Path path, Paint paint) {
+    _drawPath(path, paint._objects, paint._data);
+  }
+  void _drawPath(Path path,
+                 List<dynamic> paintObjects,
+                 ByteData paintData) native "Canvas_drawPath";
 
   /// Draws the given [Image] into the canvas with its top-left corner at the
   /// given [Point]. The image is composited into the canvas using the given [Paint].
   void drawImage(Image image, Point p, Paint paint) {
-    _drawImage(image, p.x, p.y, paint);
+    _drawImage(image, p.x, p.y, paint._objects, paint._data);
   }
-  void _drawImage(Image image, double x, double y, Paint paint) native "Canvas_drawImage";
+  void _drawImage(Image image,
+                  double x,
+                  double y,
+                  List<dynamic> paintObjects,
+                  ByteData paintData) native "Canvas_drawImage";
 
   /// Draws the subset of the given image described by the `src` argument into
   /// the canvas in the axis-aligned rectangle given by the `dst` argument.
@@ -1157,7 +1302,8 @@ class Canvas extends NativeFieldWrapperClass2 {
                    dst.top,
                    dst.right,
                    dst.bottom,
-                   paint);
+                   paint._objects,
+                   paint._data);
   }
   void _drawImageRect(Image image,
                       double srcLeft,
@@ -1168,7 +1314,8 @@ class Canvas extends NativeFieldWrapperClass2 {
                       double dstTop,
                       double dstRight,
                       double dstBottom,
-                      Paint paint) native "Canvas_drawImageRect";
+                      List<dynamic> paintObjects,
+                      ByteData paintData) native "Canvas_drawImageRect";
 
   /// Draws the given [Image] into the canvas using the given [Paint].
   ///
@@ -1193,7 +1340,8 @@ class Canvas extends NativeFieldWrapperClass2 {
                    dst.top,
                    dst.right,
                    dst.bottom,
-                   paint);
+                   paint._objects,
+                   paint._data);
   }
   void _drawImageNine(Image image,
                       double centerLeft,
@@ -1204,7 +1352,8 @@ class Canvas extends NativeFieldWrapperClass2 {
                       double dstTop,
                       double dstRight,
                       double dstBottom,
-                      Paint paint) native "Canvas_drawImageNine";
+                      List<dynamic> paintObjects,
+                      ByteData paintData) native "Canvas_drawImageNine";
 
   /// Draw the given picture onto the canvas. To create a picture, see
   /// [PictureRecorder].
@@ -1220,9 +1369,12 @@ class Canvas extends NativeFieldWrapperClass2 {
 
   /// Draws a sequence of points according to the given [PointMode].
   void drawPoints(PointMode pointMode, List<Point> points, Paint paint) {
-    _drawPoints(paint, pointMode.index, _encodePointList(points));
+    _drawPoints(paint._objects, paint._data, pointMode.index, _encodePointList(points));
   }
-  void _drawPoints(Paint paint, int pointMode, Float32List points) native "Canvas_drawPoints";
+  void _drawPoints(List<dynamic> paintObjects,
+                   ByteData paintData,
+                   int pointMode,
+                   Float32List points) native "Canvas_drawPoints";
 
   void drawVertices(VertexMode vertexMode,
                     List<Point> vertices,
@@ -1244,11 +1396,12 @@ class Canvas extends NativeFieldWrapperClass2 {
     final Int32List indexBuffer = new Int32List.fromList(indicies);
 
     _drawVertices(
-      paint, vertexMode.index, vertexBuffer, textureCoordinateBuffer,
-      colorBuffer, transferMode.index, indexBuffer
+      paint._objects, paint._data, vertexMode.index, vertexBuffer,
+      textureCoordinateBuffer, colorBuffer, transferMode.index, indexBuffer
     );
   }
-  void _drawVertices(Paint paint,
+  void _drawVertices(List<dynamic> paintObjects,
+                     ByteData paintData,
                      int vertexMode,
                      Float32List vertices,
                      Float32List textureCoordinates,
@@ -1294,9 +1447,13 @@ class Canvas extends NativeFieldWrapperClass2 {
     final Int32List colorBuffer = colors.isEmpty ? null : _encodeColorList(colors);
     final Float32List cullRectBuffer = cullRect?._value;
 
-    _drawAtlas(paint, atlas, rstTransformBuffer, rectBuffer, colorBuffer, transferMode.index, cullRectBuffer);
+    _drawAtlas(
+      paint._objects, paint._data, atlas, rstTransformBuffer, rectBuffer,
+      colorBuffer, transferMode.index, cullRectBuffer
+    );
   }
-  void _drawAtlas(Paint paint,
+  void _drawAtlas(List<dynamic> paintObjects,
+                  ByteData paintData,
                   Image atlas,
                   Float32List rstTransforms,
                   Float32List rects,

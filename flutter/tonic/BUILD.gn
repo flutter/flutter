@@ -7,6 +7,8 @@ source_set("tonic") {
     "dart_api_scope.h",
     "dart_args.h",
     "dart_binding_macros.h",
+    "dart_byte_data.cc",
+    "dart_byte_data.h",
     "dart_class_library.cc",
     "dart_class_library.h",
     "dart_class_provider.cc",

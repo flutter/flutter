@@ -6,6 +6,7 @@
 #define SKY_ENGINE_CORE_PAINTING_CANVAS_H_
 
 #include "base/memory/ref_counted.h"
+#include "flutter/lib/ui/painting/paint.h"
 #include "flutter/lib/ui/painting/path.h"
 #include "flutter/lib/ui/painting/picture.h"
 #include "flutter/lib/ui/painting/rrect.h"
@@ -13,7 +14,6 @@
 #include "flutter/tonic/float32_list.h"
 #include "flutter/tonic/float64_list.h"
 #include "flutter/tonic/int32_list.h"
-#include "sky/engine/core/painting/Paint.h"
 #include "sky/engine/core/painting/PictureRecorder.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
@@ -23,10 +23,12 @@ class DartLibraryNatives;
 class Paragraph;
 
 template <>
-struct DartConverter<SkCanvas::PointMode> : public DartConverterInteger<SkCanvas::PointMode> {};
+struct DartConverter<SkCanvas::PointMode>
+    : public DartConverterInteger<SkCanvas::PointMode> {};
 
 template <>
-struct DartConverter<SkCanvas::VertexMode> : public DartConverterInteger<SkCanvas::VertexMode> {};
+struct DartConverter<SkCanvas::VertexMode>
+    : public DartConverterInteger<SkCanvas::VertexMode> {};
 
 class Canvas : public base::RefCountedThreadSafe<Canvas>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
@@ -40,12 +42,14 @@ public:
     ~Canvas() override;
 
     void save();
-    void saveLayerWithoutBounds(const Paint& paint);
+    void saveLayerWithoutBounds(const Paint& paint,
+                                const PaintData& paint_data);
     void saveLayer(double left,
                    double top,
                    double right,
                    double bottom,
-                   const Paint& paint);
+                   const Paint& paint,
+                   const PaintData& paint_data);
     void restore();
     int getSaveCount();
 
@@ -63,24 +67,47 @@ public:
     void clipRRect(const RRect& rrect);
     void clipPath(const CanvasPath* path);
 
-    void drawColor(int color, int transferMode);
-    void drawLine(double x1, double y1, double x2, double y2, const Paint& paint);
-    void drawPaint(const Paint& paint);
+    void drawColor(SkColor color, SkXfermode::Mode transferMode);
+    void drawLine(double x1,
+                  double y1,
+                  double x2,
+                  double y2,
+                  const Paint& paint,
+                  const PaintData& paint_data);
+    void drawPaint(const Paint& paint,
+                   const PaintData& paint_data);
     void drawRect(double left,
                   double top,
                   double right,
                   double bottom,
-                  const Paint& paint);
-    void drawRRect(const RRect& rrect, const Paint& paint);
-    void drawDRRect(const RRect& outer, const RRect& inner, const Paint& paint);
+                  const Paint& paint,
+                  const PaintData& paint_data);
+    void drawRRect(const RRect& rrect,
+                   const Paint& paint,
+                   const PaintData& paint_data);
+    void drawDRRect(const RRect& outer,
+                    const RRect& inner,
+                    const Paint& paint,
+                    const PaintData& paint_data);
     void drawOval(double left,
                   double top,
                   double right,
                   double bottom,
-                  const Paint& paint);
-    void drawCircle(double x, double y, double radius, const Paint& paint);
-    void drawPath(const CanvasPath* path, const Paint& paint);
-    void drawImage(const CanvasImage* image, double x, double y, const Paint& paint);
+                  const Paint& paint,
+                  const PaintData& paint_data);
+    void drawCircle(double x,
+                    double y,
+                    double radius,
+                    const Paint& paint,
+                    const PaintData& paint_data);
+    void drawPath(const CanvasPath* path,
+                  const Paint& paint,
+                  const PaintData& paint_data);
+    void drawImage(const CanvasImage* image,
+                   double x,
+                   double y,
+                   const Paint& paint,
+                   const PaintData& paint_data);
     void drawImageRect(const CanvasImage* image,
                        double srcLeft,
                        double srcTop,
@@ -90,7 +117,8 @@ public:
                        double dstTop,
                        double dstRight,
                        double dstBottom,
-                       const Paint& paint);
+                       const Paint& paint,
+                       const PaintData& paint_data);
     void drawImageNine(const CanvasImage* image,
                        double centerLeft,
                        double centerTop,
@@ -100,36 +128,37 @@ public:
                        double dstTop,
                        double dstRight,
                        double dstBottom,
-                       const Paint& paint);
+                       const Paint& paint,
+                       const PaintData& paint_data);
     void drawPicture(Picture* picture);
     void drawParagraph(Paragraph* paragraph, double x, double y);
 
     // The paint argument is first for the following functions because Paint
-    // still uses Dart_GetField to extract data from the DartVM. Once we create
-    // a view unto a Float32List, we cannot re-enter the VM to call
-    // Dart_GetField. That means we either need to process the paint argument
-    // first or remove the Dart_GetField from marshalling the paint argument.
-    //
-    // TODO(abarth): Remove the Dart_GetField from marshalling the paint argument.
+    // unwraps a number of C++ objects. Once we create a view unto a
+    // Float32List, we cannot re-enter the VM to unwrap objects. That means we
+    // either need to process the paint argument first.
 
     void drawPoints(const Paint& paint,
+                    const PaintData& paint_data,
                     SkCanvas::PointMode pointMode,
                     const Float32List& points);
 
     void drawVertices(const Paint& paint,
+                      const PaintData& paint_data,
                       SkCanvas::VertexMode vertexMode,
                       const Float32List& vertices,
                       const Float32List& textureCoordinates,
                       const Int32List& colors,
-                      int transferMode,
+                      SkXfermode::Mode transferMode,
                       const Int32List& indices);
 
     void drawAtlas(const Paint& paint,
+                   const PaintData& paint_data,
                    CanvasImage* atlas,
                    const Float32List& transforms,
                    const Float32List& rects,
                    const Int32List& colors,
-                   int transferMode,
+                   SkXfermode::Mode transferMode,
                    const Float32List& cullRect);
 
     SkCanvas* skCanvas() { return m_canvas; }

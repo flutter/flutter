@@ -18,7 +18,6 @@
 #include "flutter/tonic/dart_wrappable.h"
 #include "flutter/tonic/float64_list.h"
 #include "sky/engine/core/compositing/Scene.h"
-#include "sky/engine/core/painting/Paint.h"
 
 namespace blink {
 

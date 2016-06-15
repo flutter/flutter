@@ -4,8 +4,6 @@
 
 source_set("ui") {
   sources = [
-    "painting/color_filter.cc",
-    "painting/color_filter.h",
     "painting/gradient.cc",
     "painting/gradient.h",
     "painting/image.cc",
@@ -18,6 +16,8 @@ source_set("ui") {
     "painting/mask_filter.h",
     "painting/matrix.cc",
     "painting/matrix.h",
+    "painting/paint.cc",
+    "painting/paint.h",
     "painting/path.cc",
     "painting/path.h",
     "painting/picture.cc",

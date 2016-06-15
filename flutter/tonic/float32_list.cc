@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/tonic/dart_error.h"
 #include "flutter/tonic/float32_list.h"
+
+#include "flutter/tonic/dart_error.h"
 
 namespace blink {
 
@@ -41,9 +42,7 @@ Float32List DartConverter<Float32List>::FromArguments(
     Dart_Handle& exception) {
   Dart_Handle list = Dart_GetNativeArgument(args, index);
   DCHECK(!LogIfError(list));
-
-  Float32List result(list);
-  return result;
+  return Float32List(list);
 }
 
 void DartConverter<Float32List>::SetReturnValue(Dart_NativeArguments args,

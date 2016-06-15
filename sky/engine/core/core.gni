@@ -20,8 +20,6 @@ sky_core_files = [
   "editing/PositionWithAffinity.h",
   "painting/Canvas.cpp",
   "painting/Canvas.h",
-  "painting/Paint.cpp",
-  "painting/Paint.h",
   "painting/painting.cc",
   "painting/painting.h",
   "painting/PictureRecorder.cpp",

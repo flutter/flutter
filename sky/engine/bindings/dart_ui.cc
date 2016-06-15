@@ -4,7 +4,6 @@
 
 #include "sky/engine/bindings/dart_ui.h"
 
-#include "flutter/lib/ui/painting/color_filter.h"
 #include "flutter/lib/ui/painting/gradient.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/painting/image_filter.h"
@@ -49,7 +48,6 @@ void DartUI::InitForGlobal() {
     CanvasGradient::RegisterNatives(g_natives);
     CanvasImage::RegisterNatives(g_natives);
     CanvasPath::RegisterNatives(g_natives);
-    ColorFilter::RegisterNatives(g_natives);
     DartRuntimeHooks::RegisterNatives(g_natives);
     ImageFilter::RegisterNatives(g_natives);
     ImageShader::RegisterNatives(g_natives);

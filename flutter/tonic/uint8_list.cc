@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/tonic/dart_error.h"
 #include "flutter/tonic/uint8_list.h"
+
+#include "flutter/tonic/dart_error.h"
 
 namespace blink {
 
@@ -41,9 +42,7 @@ Uint8List DartConverter<Uint8List>::FromArguments(
     Dart_Handle& exception) {
   Dart_Handle list = Dart_GetNativeArgument(args, index);
   DCHECK(!LogIfError(list));
-
-  Uint8List result(list);
-  return result;
+  return Uint8List(list);
 }
 
 void DartConverter<Uint8List>::SetReturnValue(Dart_NativeArguments args,
