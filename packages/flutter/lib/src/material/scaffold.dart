@@ -18,6 +18,7 @@ import 'snack_bar.dart';
 
 const double _kFloatingActionButtonMargin = 16.0; // TODO(hmuller): should be device dependent
 const Duration _kFloatingActionButtonSegue = const Duration(milliseconds: 200);
+const Object _kScaffoldStorageIdentifier = const Object();
 final Tween<double> _kFloatingActionButtonTurnTween = new Tween<double>(begin: -0.125, end: 0.0);
 
 /// The Scaffold's appbar is the toolbar, tabbar, and the "flexible space" that's
@@ -511,7 +512,11 @@ class ScaffoldState extends State<Scaffold> {
   void initState() {
     super.initState();
     _appBarController = new AnimationController();
-    List<double> scrollValues = PageStorage.of(context)?.readState(context);
+    // Use an explicit identifier to guard against the possibility that the
+    // Scaffold's key is recreated by the Widget that creates the Scaffold.
+    List<double> scrollValues = PageStorage.of(context)?.readState(context,
+      identifier: _kScaffoldStorageIdentifier
+    );
     if (scrollValues != null) {
       assert(scrollValues.length == 2);
       _scrollOffset = scrollValues[0];
@@ -526,7 +531,9 @@ class ScaffoldState extends State<Scaffold> {
     _snackBarController = null;
     _snackBarTimer?.cancel();
     _snackBarTimer = null;
-    PageStorage.of(context)?.writeState(context, <double>[_scrollOffset, _scrollOffsetDelta]);
+    PageStorage.of(context)?.writeState(context, <double>[_scrollOffset, _scrollOffsetDelta],
+      identifier:_kScaffoldStorageIdentifier
+    );
     super.dispose();
   }
 
