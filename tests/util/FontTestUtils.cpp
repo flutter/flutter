@@ -68,14 +68,16 @@ FontCollection* getFontCollection(const char* fontDir, const char* fontXml) {
             LOG_ALWAYS_FATAL_IF(access(fontPath.c_str(), R_OK) != 0,
                     "%s is not found", fontPath.c_str());
 
-            family->addFont(new MinikinFontForTest(fontPath), FontStyle(weight, italic));
+            MinikinAutoUnref<MinikinFontForTest>
+                    minikinFont(MinikinFontForTest::createFromFile(fontPath));
+
+            family->addFont(minikinFont.get(), FontStyle(weight, italic));
         }
         families.push_back(family);
     }
     xmlFreeDoc(doc);
 
     FontCollection* collection = new FontCollection(families);
-    collection->Ref();
     for (size_t i = 0; i < families.size(); ++i) {
         families[i]->Unref();
     }

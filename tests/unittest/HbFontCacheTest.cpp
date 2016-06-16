@@ -37,34 +37,39 @@ public:
 };
 
 TEST_F(HbFontCacheTest, getHbFontLockedTest) {
+    MinikinAutoUnref<MinikinFontForTest> fontA(
+            MinikinFontForTest::createFromFile(kTestFontDir "Regular.ttf"));
+
+    MinikinAutoUnref<MinikinFontForTest> fontB(
+            MinikinFontForTest::createFromFile(kTestFontDir "Bold.ttf"));
+
+    MinikinAutoUnref<MinikinFontForTest> fontC(
+            MinikinFontForTest::createFromFile(kTestFontDir "BoldItalic.ttf"));
+
     android::AutoMutex _l(gMinikinLock);
-
-    MinikinFontForTest fontA(kTestFontDir "Regular.ttf");
-    MinikinFontForTest fontB(kTestFontDir "Bold.ttf");
-    MinikinFontForTest fontC(kTestFontDir "BoldItalic.ttf");
-
     // Never return NULL.
-    EXPECT_NE(nullptr, getHbFontLocked(&fontA));
-    EXPECT_NE(nullptr, getHbFontLocked(&fontB));
-    EXPECT_NE(nullptr, getHbFontLocked(&fontC));
+    EXPECT_NE(nullptr, getHbFontLocked(fontA.get()));
+    EXPECT_NE(nullptr, getHbFontLocked(fontB.get()));
+    EXPECT_NE(nullptr, getHbFontLocked(fontC.get()));
 
     EXPECT_NE(nullptr, getHbFontLocked(nullptr));
 
     // Must return same object if same font object is passed.
-    EXPECT_EQ(getHbFontLocked(&fontA), getHbFontLocked(&fontA));
-    EXPECT_EQ(getHbFontLocked(&fontB), getHbFontLocked(&fontB));
-    EXPECT_EQ(getHbFontLocked(&fontC), getHbFontLocked(&fontC));
+    EXPECT_EQ(getHbFontLocked(fontA.get()), getHbFontLocked(fontA.get()));
+    EXPECT_EQ(getHbFontLocked(fontB.get()), getHbFontLocked(fontB.get()));
+    EXPECT_EQ(getHbFontLocked(fontC.get()), getHbFontLocked(fontC.get()));
 
     // Different object must be returned if the passed minikinFont has different ID.
-    EXPECT_NE(getHbFontLocked(&fontA), getHbFontLocked(&fontB));
-    EXPECT_NE(getHbFontLocked(&fontA), getHbFontLocked(&fontC));
+    EXPECT_NE(getHbFontLocked(fontA.get()), getHbFontLocked(fontB.get()));
+    EXPECT_NE(getHbFontLocked(fontA.get()), getHbFontLocked(fontC.get()));
 }
 
 TEST_F(HbFontCacheTest, purgeCacheTest) {
-    android::AutoMutex _l(gMinikinLock);
-    MinikinFontForTest minikinFont(kTestFontDir "Regular.ttf");
+    MinikinAutoUnref<MinikinFontForTest> minikinFont(
+            MinikinFontForTest::createFromFile(kTestFontDir "Regular.ttf"));
 
-    hb_font_t* font = getHbFontLocked(&minikinFont);
+    android::AutoMutex _l(gMinikinLock);
+    hb_font_t* font = getHbFontLocked(minikinFont.get());
     ASSERT_NE(nullptr, font);
 
     // Set user data to identify the font object.
@@ -78,7 +83,7 @@ TEST_F(HbFontCacheTest, purgeCacheTest) {
     // By checking user data, confirm that the object after purge is different from previously
     // created one. Do not compare the returned pointer here since memory allocator may assign
     // same region for new object.
-    font = getHbFontLocked(&minikinFont);
+    font = getHbFontLocked(minikinFont.get());
     EXPECT_EQ(nullptr, hb_font_get_user_data(font, &key));
 }
 

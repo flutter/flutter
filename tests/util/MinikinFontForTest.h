@@ -25,9 +25,12 @@ namespace minikin {
 
 class MinikinFontForTest : public MinikinFont {
 public:
-    explicit MinikinFontForTest(const std::string& font_path);
     MinikinFontForTest(const std::string& font_path, SkTypeface* typeface);
     ~MinikinFontForTest();
+
+    // Helper function for creating MinikinFontForTest instance from font file.
+    // Calller need to unref returned object.
+    static MinikinFontForTest* createFromFile(const std::string& font_path);
 
     // MinikinFont overrides.
     float GetHorizontalAdvance(uint32_t glyph_id, const MinikinPaint &paint) const;
@@ -37,6 +40,10 @@ public:
 
     const std::string& fontPath() const { return mFontPath; }
 private:
+    MinikinFontForTest() = delete;
+    MinikinFontForTest(const MinikinFontForTest&) = delete;
+    MinikinFontForTest& operator=(MinikinFontForTest&) = delete;
+
     SkTypeface *mTypeface;
     const std::string mFontPath;
 };
