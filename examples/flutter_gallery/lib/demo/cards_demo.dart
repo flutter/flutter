@@ -22,7 +22,7 @@ final List<TravelDestination> destinations = <TravelDestination>[
     description: const <String>[
       'Number 10',
       'Whitehaven Beach',
-      'Whitsunday Island, Whitsunday Islands aksdhfakjsdhf aksdjfa dskfh adsfkjh '
+      'Whitsunday Island, Whitsunday Islands'
     ]
   ),
   const TravelDestination(
@@ -74,11 +74,10 @@ class TravelDestinationItem extends StatelessWidget {
                   new Positioned(
                     bottom: 16.0,
                     left: 16.0,
-                    child: new DefaultTextStyle(
-                      softWrap: false,
-                      overflow: TextOverflow.ellipsis,
+                    child: new Text(destination.title,
                       style: titleStyle,
-                      child: new Text(destination.title)
+                      softWrap: false,
+                      overflow: TextOverflow.ellipsis
                     )
                   )
                 ]
