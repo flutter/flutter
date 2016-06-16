@@ -808,7 +808,7 @@ class PipelineOwner {
   /// information is cleaned prior to painting so that render objects will
   /// appear on screen in their up-to-date locations.
   ///
-  /// See [FlutterBinding] for an example of how this function is used.
+  /// See [RendererBinding] for an example of how this function is used.
   void flushLayout() {
     Timeline.startSync('Layout');
     _debugDoingLayout = true;
@@ -860,7 +860,7 @@ class PipelineOwner {
   /// Painting occurs after layout and before the scene is recomposited so that
   /// scene is composited with up-to-date display lists for every render object.
   ///
-  /// See [FlutterBinding] for an example of how this function is used.
+  /// See [RendererBinding] for an example of how this function is used.
   void flushPaint() {
     Timeline.startSync('Paint');
     _debugDoingPaint = true;
@@ -889,7 +889,7 @@ class PipelineOwner {
   /// semantics are compiled after painting and only after
   /// [RenderObject.scheduleInitialSemantics] has been called.
   ///
-  /// See [FlutterBinding] for an example of how this function is used.
+  /// See [RendererBinding] for an example of how this function is used.
   void flushSemantics() {
     Timeline.startSync('Semantics');
     assert(_semanticsEnabled);
