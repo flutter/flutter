@@ -51,7 +51,7 @@ class PestoDemo extends StatefulWidget {
 }
 
 class _PestoDemoState extends State<PestoDemo> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  static final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   final TextStyle favoritesMessageStyle = _textStyle(16.0);
   final TextStyle userStyle = _textStyle(12.0, FontWeight.bold);
   final TextStyle emailStyle = _textStyle(12.0).copyWith(color: Colors.black54);
@@ -77,7 +77,7 @@ class _PestoDemoState extends State<PestoDemo> {
   Widget _buildAppBar(BuildContext context) {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
     return new AppBar(
-      expandedHeight: 128.0,
+      expandedHeight: _kAppBarHeight,
       actions: <Widget>[
         new IconButton(
           icon: Icons.search,
