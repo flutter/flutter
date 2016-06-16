@@ -56,7 +56,7 @@ bool AddEntryToZip(zipFile zip_file, const base::FilePath& path,
   DCHECK(result);
   std::string str_path = relative_path.AsUTF8Unsafe();
 #if defined(OS_WIN)
-  ReplaceSubstringsAfterOffset(&str_path, 0u, "\\", "/");
+  base::ReplaceSubstringsAfterOffset(&str_path, 0u, "\\", "/");
 #endif
 
   bool is_directory = base::DirectoryExists(path);

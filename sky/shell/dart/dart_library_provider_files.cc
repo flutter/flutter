@@ -24,9 +24,9 @@ void CopyComplete(base::FilePath file, std::string uri, bool success) {
 
 // Extract the scheme prefix ('package:' or 'file:' from )
 static std::string ExtractSchemePrefix(std::string url) {
-  if (base::StartsWith(url, "package:", base::CompareCase::SENSITIVE)) {
+  if (base::StartsWithASCII(url, "package:", true)) {
     return "package:";
-  } else if (base::StartsWith(url, "file:", base::CompareCase::SENSITIVE)) {
+  } else if (base::StartsWithASCII(url, "file:", true)) {
     return "file:";
   }
   return "";
@@ -34,9 +34,9 @@ static std::string ExtractSchemePrefix(std::string url) {
 
 // Extract the path from a package: or file: url.
 static std::string ExtractPath(std::string url) {
-  if (base::StartsWith(url, "package:", base::CompareCase::SENSITIVE)) {
+  if (base::StartsWithASCII(url, "package:", true)) {
     base::ReplaceFirstSubstringAfterOffset(&url, 0, "package:", "");
-  } else if (base::StartsWith(url, "file:", base::CompareCase::SENSITIVE)) {
+  } else if (base::StartsWithASCII(url, "file:", true)) {
     base::ReplaceFirstSubstringAfterOffset(&url, 0, "file:", "");
   }
   return url;
@@ -100,11 +100,11 @@ void DartLibraryProviderFiles::GetLibraryAsStream(
 Dart_Handle DartLibraryProviderFiles::CanonicalizeURL(Dart_Handle library,
                                                       Dart_Handle url) {
   std::string string = blink::StdStringFromDart(url);
-  if (base::StartsWith(string, "dart:", base::CompareCase::SENSITIVE))
+  if (base::StartsWithASCII(string, "dart:", true))
     return url;
-  if (base::StartsWith(string, "package:", base::CompareCase::SENSITIVE))
+  if (base::StartsWithASCII(string, "package:", true))
     return url;
-  if (base::StartsWith(string, "file:", base::CompareCase::SENSITIVE)) {
+  if (base::StartsWithASCII(string, "file:", true)) {
     base::ReplaceFirstSubstringAfterOffset(&string, 0, "file:", "");
     return blink::StdStringToDart(string);;
   }
@@ -119,9 +119,9 @@ Dart_Handle DartLibraryProviderFiles::CanonicalizeURL(Dart_Handle library,
 }
 
 std::string DartLibraryProviderFiles::GetFilePathForURL(std::string url) {
-  if (base::StartsWith(url, "package:", base::CompareCase::SENSITIVE))
+  if (base::StartsWithASCII(url, "package:", true))
     return GetFilePathForPackageURL(url);
-  if (base::StartsWith(url, "file:", base::CompareCase::SENSITIVE))
+  if (base::StartsWithASCII(url, "file:", true))
     return GetFilePathForFileURL(url);
 
   return url;
@@ -129,7 +129,7 @@ std::string DartLibraryProviderFiles::GetFilePathForURL(std::string url) {
 
 std::string DartLibraryProviderFiles::GetFilePathForPackageURL(
     std::string url) {
-  DCHECK(base::StartsWith(url, "package:", base::CompareCase::SENSITIVE));
+  DCHECK(base::StartsWithASCII(url, "package:", true));
   base::ReplaceFirstSubstringAfterOffset(&url, 0, "package:", "");
   size_t slash = url.find('/');
   if (slash == std::string::npos)
@@ -139,7 +139,7 @@ std::string DartLibraryProviderFiles::GetFilePathForPackageURL(
   std::string package_path = packages_map_.Resolve(package);
   if (package_path.empty())
     return std::string();
-  if (base::StartsWith(package_path, "file://", base::CompareCase::SENSITIVE)) {
+  if (base::StartsWithASCII(package_path, "file://", true)) {
     base::ReplaceFirstSubstringAfterOffset(&package_path, 0, "file://", "");
     return package_path + library_path;
   }
@@ -148,7 +148,7 @@ std::string DartLibraryProviderFiles::GetFilePathForPackageURL(
 }
 
 std::string DartLibraryProviderFiles::GetFilePathForFileURL(std::string url) {
-  DCHECK(base::StartsWith(url, "file://", base::CompareCase::SENSITIVE));
+  DCHECK(base::StartsWithASCII(url, "file://", true));
   base::ReplaceFirstSubstringAfterOffset(&url, 0, "file://", "");
   return url;
 }

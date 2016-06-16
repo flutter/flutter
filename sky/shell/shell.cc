@@ -12,11 +12,10 @@
 #include "base/command_line.h"
 #include "base/i18n/icu_util.h"
 #include "base/lazy_instance.h"
-#include "base/memory/discardable_memory_allocator.h"
 #include "base/memory/discardable_memory.h"
+#include "base/memory/discardable_memory_allocator.h"
 #include "base/posix/eintr_wrapper.h"
 #include "base/single_thread_task_runner.h"
-#include "base/trace_event/process_memory_dump.h"
 #include "base/trace_event/trace_event.h"
 #include "mojo/message_pump/message_pump_mojo.h"
 #include "sky/engine/core/script/dart_init.h"
@@ -45,12 +44,6 @@ class NonDiscardableMemory : public base::DiscardableMemory {
   bool Lock() override { return false; }
   void Unlock() override {}
   void* data() const override { return data_.get(); }
-
-  base::trace_event::MemoryAllocatorDump* CreateMemoryAllocatorDump(
-      const char* name,
-      base::trace_event::ProcessMemoryDump* pmd) const override {
-    return pmd->CreateAllocatorDump(name);
-  }
 
  private:
   std::unique_ptr<uint8_t[]> data_;

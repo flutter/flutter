@@ -354,13 +354,17 @@ source_set("platform") {
     "//mojo/public/cpp/system",
     "//mojo/public/cpp/utility",
     "//mojo/services/network/interfaces",
+    "//skia",
     "//sky/engine/wtf",
     "//third_party/harfbuzz-ng",
+    "//third_party/iccjpeg",
     "//third_party/icu",
+    "//third_party/libpng",
     "//third_party/qcms",
+    "//third_party:jpeg",
   ]
 
-  public_deps = [
+  forward_dependent_configs_from = [
     "//skia",
     "//third_party:jpeg",
     "//third_party/iccjpeg",
@@ -379,7 +383,7 @@ source_set("platform") {
   }
 
   if (is_linux) {
-    public_configs = [ "//build/config/linux:fontconfig" ]
+    direct_dependent_configs = [ "//build/config/linux:fontconfig" ]
   }
 }
 

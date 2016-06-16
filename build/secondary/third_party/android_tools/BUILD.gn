@@ -28,8 +28,11 @@ android_java_prebuilt("uiautomator_java") {
   jar_path = "$android_sdk/uiautomator.jar"
 }
 
+android_java_prebuilt("android_support_annotations_javalib") {
+  jar_path = "$android_sdk_root/extras/android/support/annotations/android-support-annotations.jar"
+}
+
 java_prebuilt("android_support_multidex_java") {
-  supports_android = true
   jar_path = "$android_sdk_root/extras/android/support/multidex/library/libs/android-support-multidex.jar"
 }
 
@@ -64,8 +67,8 @@ android_resources("android_support_v7_mediarouter_resources") {
 
 android_java_prebuilt("android_support_v7_mediarouter_java") {
   deps = [
-    ":android_support_v7_appcompat_java",
     ":android_support_v7_mediarouter_resources",
+    ":android_support_v7_appcompat_java",
   ]
   jar_path = "$android_sdk_root/extras/android/support/v7/mediarouter/libs/android-support-v7-mediarouter.jar"
 }
@@ -93,7 +96,9 @@ android_resources("google_play_services_default_resources") {
 android_java_prebuilt("google_play_services_default_java") {
   deps = [
     ":android_support_v13_java",
+    ":android_support_v7_mediarouter_java",
     ":google_play_services_default_resources",
   ]
+  proguard_preprocess = false
   jar_path = "$android_sdk_root/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar"
 }

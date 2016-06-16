@@ -180,5 +180,16 @@ if (use_system_harfbuzz) {
         "src/hb-glib.h",
       ]
     }
+
+    # See also chrome/browser/ui/libgtk2ui/BUILD.gn which pulls this.
+    config("pangoft2_link_hack") {
+      if (is_linux && use_pango && !is_chromeos && !is_official_build &&
+          current_cpu != "arm" && !is_component_build) {
+        # These symbols are referenced from libpangoft2, which will be
+        # dynamically linked later.
+        ldflags =
+            [ "-Wl,-uhb_ft_face_create_cached,-uhb_glib_get_unicode_funcs" ]
+      }
+    }
   }
 }

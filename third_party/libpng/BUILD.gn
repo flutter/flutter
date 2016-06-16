@@ -61,6 +61,16 @@ source_set("libpng_sources") {
   public_deps = [
     "//third_party/zlib",
   ]
+
+  # Must be in a config because of how GN orders flags (otherwise -Wall will
+  # appear after this, and turn it back on).
+  config("clang_warnings") {
+    if (is_clang) {
+      # Upstream uses self-assignment to avoid warnings.
+      cflags = [ "-Wno-self-assign" ]
+    }
+  }
+  configs += [ ":clang_warnings" ]
 }
 
 if (is_win) {

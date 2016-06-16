@@ -23,7 +23,6 @@ source_set("libraries") {
     "//mojo/public/platform/dart:mojo_internal_impl",
     "//skia",
     "//sky/engine/wtf",
-    "//third_party:jpeg",
     "//third_party/iccjpeg",
     "//third_party/libpng",
     "//third_party/qcms",
@@ -39,14 +38,13 @@ source_set("libraries") {
 
 source_set("prerequisites") {
   deps = [
+    ":libraries",
     "//sky/engine/platform",
   ]
 
-  public_deps = [
-    ":libraries",
-  ]
+  forward_dependent_configs_from = [ ":libraries" ]
 
-  public_configs = [
+  direct_dependent_configs = [
     "//sky/engine:config",
     "//sky/engine:inside_blink",
     "//build/config/compiler:wexit_time_destructors",
@@ -102,7 +100,7 @@ static_library("core") {
     rebase_path("//dart/runtime"),
   ]
 
-  public_deps = [ ":libraries" ]
+  forward_dependent_configs_from = [ ":libraries" ]
 
   # core and core_generated are really the same thing.
   allow_circular_includes_from = [

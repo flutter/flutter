@@ -5,12 +5,12 @@
 import("//mojo/public/tools/bindings/mojom.gni")
 
 group("activity") {
-  public_deps = [
+  deps = [
     ":interfaces",
   ]
 
   if (is_android || is_ios) {
-    public_deps += [ ":activity_lib" ]
+    deps += [ ":activity_lib" ]
   }
 }
 
