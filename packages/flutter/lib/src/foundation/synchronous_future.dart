@@ -12,8 +12,8 @@ import 'dart:async';
 /// ⚠ This class is useful in cases where you want to expose a single API, where
 /// you normally want to have everything execute synchronously, but where on
 /// rare occasions you want the ability to switch to an asynchronous model. **In
-/// general use of this class should be avoided as it is very easy difficult to
-/// debug such bimodal behavior.**
+/// general use of this class should be avoided as it is very difficult to debug
+/// such bimodal behavior.**
 class SynchronousFuture<T> implements Future<T> {
   /// Creates a synchronous future.
   ///
