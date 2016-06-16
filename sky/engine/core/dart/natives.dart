@@ -23,6 +23,9 @@ void _scheduleMicrotask(void callback()) native "ScheduleMicrotask";
 String _getBaseURLString() native "GetBaseURLString";
 Uri _getBaseURL() => Uri.parse(_getBaseURLString());
 
+// Required for gen_snapshot to work correctly.
+int _isolateId;
+
 _getPrintClosure() => _print;
 _getScheduleMicrotaskClosure() => _scheduleMicrotask;
 _getGetBaseURLClosure() => _getBaseURL;
