@@ -74,19 +74,28 @@ class PageStorageBucket {
     return result;
   }
 
-  Map<_StorageEntryIdentifier, dynamic> _storage;
+  Map<Object, dynamic> _storage;
 
   /// Write the given data into this page storage bucket using an identifier
-  /// computed from the given context.
-  void writeState(BuildContext context, dynamic data) {
-    _storage ??= <_StorageEntryIdentifier, dynamic>{};
-    _storage[_computeStorageIdentifier(context)] = data;
+  /// computed from the given context. The identifier is based on the keys
+  /// found in the path from context to the root of the widget tree for this
+  /// page. Keys are collected until the widget tree's root is reached or
+  /// a GlobalKey is found.
+  ///
+  /// An explicit identifier can be used in cases where the list of keys
+  /// is not stable. For example if the path concludes with a GlobalKey
+  /// that's created by a stateful widget, if the stateful widget is
+  /// recreated when it's exposed by [Navigator.pop], then its storage
+  /// identifier will change.
+  void writeState(BuildContext context, dynamic data, { Object identifier }) {
+    _storage ??= <Object, dynamic>{};
+    _storage[identifier ?? _computeStorageIdentifier(context)] = data;
   }
 
   /// Read given data from into this page storage bucket using an identifier
-  /// computed from the given context.
-  dynamic readState(BuildContext context) {
-    return _storage != null ? _storage[_computeStorageIdentifier(context)] : null;
+  /// computed from the given context. More about [identifier] in [writeState].
+  dynamic readState(BuildContext context, { Object identifier }) {
+    return _storage != null ? _storage[identifier ?? _computeStorageIdentifier(context)] : null;
   }
 }
 

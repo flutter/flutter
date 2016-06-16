@@ -320,6 +320,8 @@ class Scaffold extends StatefulWidget {
 /// the current [BuildContext] using [Scaffold.of].
 class ScaffoldState extends State<Scaffold> {
 
+  static final Object _kScaffoldStorageIdentifier = new Object();
+
   // APPBAR API
 
   AnimationController _appBarController;
@@ -511,7 +513,11 @@ class ScaffoldState extends State<Scaffold> {
   void initState() {
     super.initState();
     _appBarController = new AnimationController();
-    List<double> scrollValues = PageStorage.of(context)?.readState(context);
+    // Use an explicit identifier to guard against the possibility that the
+    // Scaffold's key is recreated by the Widget that creates the Scaffold.
+    List<double> scrollValues = PageStorage.of(context)?.readState(context,
+      identifier: _kScaffoldStorageIdentifier
+    );
     if (scrollValues != null) {
       assert(scrollValues.length == 2);
       _scrollOffset = scrollValues[0];
@@ -526,7 +532,9 @@ class ScaffoldState extends State<Scaffold> {
     _snackBarController = null;
     _snackBarTimer?.cancel();
     _snackBarTimer = null;
-    PageStorage.of(context)?.writeState(context, <double>[_scrollOffset, _scrollOffsetDelta]);
+    PageStorage.of(context)?.writeState(context, <double>[_scrollOffset, _scrollOffsetDelta],
+      identifier: _kScaffoldStorageIdentifier
+    );
     super.dispose();
   }
 
