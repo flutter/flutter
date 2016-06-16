@@ -19,7 +19,6 @@ void main() {
 
     try {
       throw null;
-      expect(false, isTrue); // shouldn't get here
     } catch (e, stack) {
       StringBuffer information = new StringBuffer();
       expect(reportExpectCall(stack, information), 0);

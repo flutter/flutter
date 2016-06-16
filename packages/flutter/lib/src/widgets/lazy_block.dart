@@ -324,6 +324,8 @@ class LazyBlockViewport extends RenderObjectWidget {
       case Axis.vertical:
         return padding.vertical;
     }
+    assert(mainAxis != null);
+    return null;
   }
 
   @override
@@ -716,6 +718,8 @@ class _LazyBlockElement extends RenderObjectElement {
         double width = math.max(0.0, constraints.maxWidth - padding);
         return new BoxConstraints.tightFor(width: width);
     }
+    assert(widget.mainAxis != null);
+    return null;
   }
 
   Offset get _initialChildOffset {
