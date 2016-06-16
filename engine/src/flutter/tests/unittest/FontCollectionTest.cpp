@@ -40,40 +40,40 @@ namespace minikin {
 // U+717D U+E0103 (VS20)
 const char kVsTestFont[] = kTestFontDir "/VarioationSelectorTest-Regular.ttf";
 
-void expectVSGlyphs(const FontCollection& fc, uint32_t codepoint, const std::set<uint32_t>& vsSet) {
+void expectVSGlyphs(const FontCollection* fc, uint32_t codepoint, const std::set<uint32_t>& vsSet) {
     for (uint32_t vs = 0xFE00; vs <= 0xE01EF; ++vs) {
         // Move to variation selectors supplements after variation selectors.
         if (vs == 0xFF00) {
             vs = 0xE0100;
         }
         if (vsSet.find(vs) == vsSet.end()) {
-            EXPECT_FALSE(fc.hasVariationSelector(codepoint, vs))
+            EXPECT_FALSE(fc->hasVariationSelector(codepoint, vs))
                 << "Glyph for U+" << std::hex << codepoint << " U+" << vs;
         } else {
-            EXPECT_TRUE(fc.hasVariationSelector(codepoint, vs))
+            EXPECT_TRUE(fc->hasVariationSelector(codepoint, vs))
                 << "Glyph for U+" << std::hex << codepoint << " U+" << vs;
         }
     }
 }
 
 TEST(FontCollectionTest, hasVariationSelectorTest) {
-  FontFamily* family = new FontFamily();
-  family->addFont(new MinikinFontForTest(kVsTestFont));
-  std::vector<FontFamily*> families({family});
-  FontCollection fc(families);
-  family->Unref();
+  MinikinAutoUnref<FontFamily> family(new FontFamily());
+  MinikinAutoUnref<MinikinFont> font(MinikinFontForTest::createFromFile(kVsTestFont));
+  family->addFont(font.get());
+  std::vector<FontFamily*> families({family.get()});
+  MinikinAutoUnref<FontCollection> fc(new FontCollection(families));
 
-  EXPECT_FALSE(fc.hasVariationSelector(0x82A6, 0));
-  expectVSGlyphs(fc, 0x82A6, std::set<uint32_t>({0xFE00, 0xE0100, 0xE0101, 0xE0102}));
+  EXPECT_FALSE(fc->hasVariationSelector(0x82A6, 0));
+  expectVSGlyphs(fc.get(), 0x82A6, std::set<uint32_t>({0xFE00, 0xE0100, 0xE0101, 0xE0102}));
 
-  EXPECT_FALSE(fc.hasVariationSelector(0x845B, 0));
-  expectVSGlyphs(fc, 0x845B, std::set<uint32_t>({0xFE01, 0xE0101, 0xE0102, 0xE0103}));
+  EXPECT_FALSE(fc->hasVariationSelector(0x845B, 0));
+  expectVSGlyphs(fc.get(), 0x845B, std::set<uint32_t>({0xFE01, 0xE0101, 0xE0102, 0xE0103}));
 
-  EXPECT_FALSE(fc.hasVariationSelector(0x537F, 0));
-  expectVSGlyphs(fc, 0x537F, std::set<uint32_t>({}));
+  EXPECT_FALSE(fc->hasVariationSelector(0x537F, 0));
+  expectVSGlyphs(fc.get(), 0x537F, std::set<uint32_t>({}));
 
-  EXPECT_FALSE(fc.hasVariationSelector(0x717D, 0));
-  expectVSGlyphs(fc, 0x717D, std::set<uint32_t>({0xFE02, 0xE0102, 0xE0103}));
+  EXPECT_FALSE(fc->hasVariationSelector(0x717D, 0));
+  expectVSGlyphs(fc.get(), 0x717D, std::set<uint32_t>({0xFE02, 0xE0102, 0xE0103}));
 }
 
 const char kEmojiXmlFile[] = kTestFontDir "emoji.xml";

@@ -24,17 +24,23 @@
 
 namespace minikin {
 
-MinikinFontForTest::MinikinFontForTest(const std::string& font_path) :
-    MinikinFontForTest(font_path, SkTypeface::CreateFromFile(font_path.c_str())) {
+// static
+MinikinFontForTest* MinikinFontForTest::createFromFile(const std::string& font_path) {
+    SkTypeface* typeface = SkTypeface::CreateFromFile(font_path.c_str());
+    MinikinFontForTest* font = new MinikinFontForTest(font_path, typeface);
+    SkSafeUnref(typeface);
+    return font;
 }
 
 MinikinFontForTest::MinikinFontForTest(const std::string& font_path, SkTypeface* typeface) :
-    MinikinFont(typeface->uniqueID()),
-    mTypeface(typeface),
-    mFontPath(font_path) {
+        MinikinFont(typeface->uniqueID()),
+        mTypeface(typeface),
+        mFontPath(font_path) {
+    SkSafeRef(mTypeface);
 }
 
 MinikinFontForTest::~MinikinFontForTest() {
+    SkSafeUnref(mTypeface);
 }
 
 float MinikinFontForTest::GetHorizontalAdvance(uint32_t /* glyph_id */,
