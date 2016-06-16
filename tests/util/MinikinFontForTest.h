@@ -31,6 +31,7 @@ public:
     // Helper function for creating MinikinFontForTest instance from font file.
     // Calller need to unref returned object.
     static MinikinFontForTest* createFromFile(const std::string& font_path);
+    static MinikinFontForTest* createFromFileWithIndex(const std::string& font_path, int index);
 
     // MinikinFont overrides.
     float GetHorizontalAdvance(uint32_t glyph_id, const MinikinPaint &paint) const;

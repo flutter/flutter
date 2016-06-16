@@ -47,10 +47,14 @@ FontCollection* getFontCollection(const char* fontDir, const char* fontXml) {
         }
 
         xmlChar* lang = xmlGetProp(familyNode, (const xmlChar*)"lang");
-        uint32_t langId = FontStyle::registerLanguageList(
-                std::string((const char*)lang, xmlStrlen(lang)));
-
-        FontFamily* family = new FontFamily(langId, variant);
+        FontFamily* family;
+        if (lang == nullptr) {
+            family = new FontFamily(variant);
+        } else {
+            uint32_t langId = FontStyle::registerLanguageList(
+                    std::string((const char*)lang, xmlStrlen(lang)));
+            family = new FontFamily(langId, variant);
+        }
 
         for (xmlNode* fontNode = familyNode->children; fontNode; fontNode = fontNode->next) {
             if (xmlStrcmp(fontNode->name, (const xmlChar*)"font") != 0) {
@@ -60,18 +64,27 @@ FontCollection* getFontCollection(const char* fontDir, const char* fontXml) {
             int weight = atoi((const char*)(xmlGetProp(fontNode, (const xmlChar*)"weight"))) / 100;
             bool italic = xmlStrcmp(
                     xmlGetProp(fontNode, (const xmlChar*)"style"), (const xmlChar*)"italic") == 0;
+            xmlChar* index = xmlGetProp(familyNode, (const xmlChar*)"index");
 
             xmlChar* fontFileName = xmlNodeListGetString(doc, fontNode->xmlChildrenNode, 1);
             std::string fontPath = fontDir + std::string((const char*)fontFileName);
             xmlFree(fontFileName);
 
-            LOG_ALWAYS_FATAL_IF(access(fontPath.c_str(), R_OK) != 0,
-                    "%s is not found", fontPath.c_str());
+            if (access(fontPath.c_str(), R_OK) != 0) {
+                ALOGW("%s is not found.", fontPath.c_str());
+                continue;
+            }
 
-            MinikinAutoUnref<MinikinFontForTest>
-                    minikinFont(MinikinFontForTest::createFromFile(fontPath));
-
-            family->addFont(minikinFont.get(), FontStyle(weight, italic));
+            if (index == nullptr) {
+                MinikinAutoUnref<MinikinFontForTest>
+                        minikinFont(MinikinFontForTest::createFromFile(fontPath));
+                family->addFont(minikinFont.get(), FontStyle(weight, italic));
+            } else {
+                MinikinAutoUnref<MinikinFontForTest>
+                        minikinFont(MinikinFontForTest::createFromFileWithIndex(fontPath,
+                                atoi((const char*)index)));
+                family->addFont(minikinFont.get(), FontStyle(weight, italic));
+            }
         }
         families.push_back(family);
     }

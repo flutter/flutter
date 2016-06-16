@@ -32,6 +32,15 @@ MinikinFontForTest* MinikinFontForTest::createFromFile(const std::string& font_p
     return font;
 }
 
+// static
+MinikinFontForTest* MinikinFontForTest::createFromFileWithIndex(const std::string& font_path,
+        int index) {
+    SkTypeface* typeface = SkTypeface::CreateFromFile(font_path.c_str(), index);
+    MinikinFontForTest* font = new MinikinFontForTest(font_path, typeface);
+    SkSafeUnref(typeface);
+    return font;
+}
+
 MinikinFontForTest::MinikinFontForTest(const std::string& font_path, SkTypeface* typeface) :
         MinikinFont(typeface->uniqueID()),
         mTypeface(typeface),
