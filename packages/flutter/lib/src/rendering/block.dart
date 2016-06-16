@@ -57,6 +57,8 @@ class RenderBlock extends RenderBox
       case Axis.vertical:
         return new BoxConstraints.tightFor(width: constraints.maxWidth);
     }
+    assert(_mainAxis != null);
+    return null;
   }
 
   double get _mainAxisExtent {
@@ -70,6 +72,8 @@ class RenderBlock extends RenderBox
       case Axis.vertical:
         return parentData.offset.dy + child.size.height;
     }
+    assert(mainAxis != null);
+    return null;
   }
 
   @override
@@ -92,7 +96,6 @@ class RenderBlock extends RenderBox
         'axis. You probably want to put the RenderBlock inside a '
         'RenderViewport with a matching main axis.'
       );
-      return false;
     });
     assert(() {
       switch (mainAxis) {
@@ -118,7 +121,6 @@ class RenderBlock extends RenderBox
         'for example, a RenderIntrinsicWidth or RenderIntrinsicHeight object. '
         'This is relatively expensive, however.' // (that's why we don't do it automatically)
       );
-      return false;
     });
     BoxConstraints innerConstraints = _getInnerConstraints(constraints);
     double position = 0.0;
@@ -187,6 +189,8 @@ class RenderBlock extends RenderBox
       case Axis.vertical:
         return _getIntrinsicCrossAxis((RenderBox child) => child.getMinIntrinsicWidth(height));
     }
+    assert(mainAxis != null);
+    return null;
   }
 
   @override
@@ -197,6 +201,8 @@ class RenderBlock extends RenderBox
       case Axis.vertical:
         return _getIntrinsicCrossAxis((RenderBox child) => child.getMaxIntrinsicWidth(height));
     }
+    assert(mainAxis != null);
+    return null;
   }
 
   @override
@@ -207,6 +213,8 @@ class RenderBlock extends RenderBox
       case Axis.vertical:
         return _getIntrinsicCrossAxis((RenderBox child) => child.getMinIntrinsicHeight(width));
     }
+    assert(mainAxis != null);
+    return null;
   }
 
   @override
@@ -217,6 +225,8 @@ class RenderBlock extends RenderBox
       case Axis.vertical:
         return _getIntrinsicCrossAxis((RenderBox child) => child.getMaxIntrinsicHeight(width));
     }
+    assert(mainAxis != null);
+    return null;
   }
 
   @override

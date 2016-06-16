@@ -299,6 +299,8 @@ class ScrollableState<T extends Scrollable> extends State<T> {
       case ViewportAnchor.end:
         return scrollOffset;
     }
+    assert(config.scrollAnchor != null);
+    return null;
   }
 
   /// Returns the scroll offset component of the given pixel delta, accounting
@@ -313,6 +315,8 @@ class ScrollableState<T extends Scrollable> extends State<T> {
       case Axis.vertical:
         return pixelOffsetToScrollOffset(pixelDelta.dy);
     }
+    assert(config.scrollDirection != null);
+    return null;
   }
 
   /// Returns a two-dimensional representation of the scroll offset, accounting
@@ -326,6 +330,8 @@ class ScrollableState<T extends Scrollable> extends State<T> {
       case Axis.vertical:
         return new Offset(0.0, scrollOffsetToPixelOffset(scrollOffset));
     }
+    assert(config.scrollDirection != null);
+    return null;
   }
 
   /// The current scroll behavior of this widget.
