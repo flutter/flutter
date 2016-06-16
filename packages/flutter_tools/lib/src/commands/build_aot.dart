@@ -73,7 +73,7 @@ class BuildAotCommand extends FlutterCommand {
 
 String _getSdkExtensionPath(String packagesPath, String package) {
   Directory packageDir = new Directory(path.join(packagesPath, package));
-  return path.join(path.dirname(packageDir.resolveSymbolicLinksSync()), 'sdk_ext');
+  return path.dirname(packageDir.resolveSymbolicLinksSync());
 }
 
 /// Build an AOT snapshot. Return `null` (and log to `printError`) if the method
@@ -166,13 +166,13 @@ Future<String> _buildAotSnapshot(
     return null;
   }
 
-  String mojoSdkExt = _getSdkExtensionPath(packagesPath, 'mojo');
-  String mojoInternalPath = path.join(mojoSdkExt, 'internal.dart');
+  String mojoPkg = _getSdkExtensionPath(packagesPath, 'mojo');
+  String mojoInternalPath = path.join(mojoPkg, 'sdk_ext', 'internal.dart');
 
   String skyEnginePkg = _getSdkExtensionPath(packagesPath, 'sky_engine');
-  String uiPath = path.join(skyEnginePkg, 'dart_ui', 'dart_ui.dart');
+  String uiPath = path.join(skyEnginePkg, 'dart_ui', 'ui.dart');
   String jniPath = path.join(skyEnginePkg, 'dart_jni', 'jni.dart');
-  String vmServicePath = path.join(skyEnginePkg, 'dart', 'runtime', 'bin', 'vmservice', 'vmservice_io.dart');
+  String vmServicePath = path.join(skyEnginePkg, 'sdk_ext', 'dart', 'runtime', 'bin', 'vmservice', 'vmservice_io.dart');
 
   List<String> filePaths = <String>[
     genSnapshot,
