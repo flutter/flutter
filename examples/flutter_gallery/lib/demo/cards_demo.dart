@@ -22,7 +22,7 @@ final List<TravelDestination> destinations = <TravelDestination>[
     description: const <String>[
       'Number 10',
       'Whitehaven Beach',
-      'Whitsunday Island, Whitsunday Islands'
+      'Whitsunday Island, Whitsunday Islands aksdhfakjsdhf aksdjfa dskfh adsfkjh '
     ]
   ),
   const TravelDestination(
@@ -74,7 +74,12 @@ class TravelDestinationItem extends StatelessWidget {
                   new Positioned(
                     bottom: 16.0,
                     left: 16.0,
-                    child: new Text(destination.title, style: titleStyle)
+                    child: new DefaultTextStyle(
+                      softWrap: false,
+                      overflow: TextOverflow.ellipsis,
+                      style: titleStyle,
+                      child: new Text(destination.title)
+                    )
                   )
                 ]
               )
@@ -83,14 +88,19 @@ class TravelDestinationItem extends StatelessWidget {
             new Flexible(
               child: new Padding(
                 padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
-                child: new Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    // three line description
-                    new Text(destination.description[0], style: descriptionStyle),
-                    new Text(destination.description[1], style: descriptionStyle),
-                    new Text(destination.description[2], style: descriptionStyle),
-                  ]
+                child: new DefaultTextStyle(
+                  softWrap: false,
+                  overflow: TextOverflow.ellipsis,
+                  style: descriptionStyle,
+                  child: new Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      // three line description
+                      new Text(destination.description[0]),
+                      new Text(destination.description[1]),
+                      new Text(destination.description[2]),
+                    ]
+                  )
                 )
               )
             ),
