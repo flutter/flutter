@@ -177,7 +177,6 @@ class _MaterialAppState extends State<MaterialApp> {
       child: new WidgetsApp(
         title: config.title,
         textStyle: _errorTextStyle,
-        brightness: theme.primaryColorBrightness,
         color: theme?.primaryColor ?? Colors.blue[500], // blue[500] is the primary color of the default theme
         navigatorObserver: _heroController,
         onGenerateRoute: _onGenerateRoute,

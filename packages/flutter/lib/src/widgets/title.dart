@@ -4,7 +4,6 @@
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:sky_services/flutter/platform/system_chrome.mojom.dart' as mojom;
 
 /// A widget that describes this app in the operating system.
 class Title extends StatelessWidget {
@@ -12,7 +11,6 @@ class Title extends StatelessWidget {
   Title({
     Key key,
     this.title,
-    this.brightness,
     this.color,
     this.child
   }) : super(key: key) {
@@ -22,9 +20,6 @@ class Title extends StatelessWidget {
   /// A one-line description of this app for use in the window manager.
   final String title;
 
-  /// The brightness against which the window manager should render system text.
-  final Brightness brightness;
-
   /// A color that the window manager should use to identify this app.
   final Color color;
 
@@ -33,20 +28,8 @@ class Title extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _updateSystemChrome();
     updateTaskDescription(label: title, color: color);
     return child;
-  }
-
-  /// Updates the system chrome settings based on this title's metadata.
-  void _updateSystemChrome() {
-    // TODO(tvolkert): This may result in a decent amount of unnecessary
-    // overhead in the embedder (on every build). Consider making Title
-    // a StatefulWidget that only calls into the SystemChrome service when
-    // it sees that a value has changed.
-    SystemChrome.setSystemUIOverlayStyle(brightness == Brightness.dark
-        ? mojom.SystemUiOverlayStyle.light
-        : mojom.SystemUiOverlayStyle.dark);
   }
 
   @override

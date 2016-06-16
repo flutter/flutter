@@ -85,21 +85,89 @@ class SystemChrome {
   /// embedder (if any). The embedder may choose to ignore unsupported
   /// overlays.
   ///
+  /// This method will schedule the embedder update to be run in a microtask.
+  /// Any subsequent calls to this method during the current event loop will
+  /// overwrite the pending value to be set on the embedder.
+  ///
   /// Arguments:
   ///
   ///  * [style]: A [SystemUiOverlayStyle] enum value denoting the style to use
   ///
   /// Return Value:
   ///
-  ///   boolean indicating if the preference was conveyed successfully to the
-  ///   embedder.
+  ///   The preference that was eventually conveyed to the embedder, along with
+  ///   whether it was successfully conveyed. This can be different than the
+  ///   value you specify here if another caller specified a different value
+  ///   later in the same event loop.
   ///
   /// Platform Specific Notes:
   ///
   ///   If the overlay is unsupported on the platform, enabling or disabling
   ///   that overlay is a no-op and always return true.
-  static Future<bool> setSystemUIOverlayStyle(SystemUiOverlayStyle style) async {
-    return (await _systemChromeProxy.setSystemUiOverlayStyle(
-      style)).success;
+  static Future<SystemUiOverlayStyleUpdate> setSystemUIOverlayStyle(SystemUiOverlayStyle style) {
+    assert(style != null);
+
+    if (_pendingStyleUpdate != null) {
+      _pendingStyleUpdate.style = style;
+      return _pendingStyleUpdate.future;
+    }
+
+    _pendingStyleUpdate = new _PendingStyleUpdate(style);
+    scheduleMicrotask(() {
+      assert(_pendingStyleUpdate != null);
+      if (_pendingStyleUpdate.style == _latestStyle) {
+        // No update needed; trivial success
+        _pendingStyleUpdate.complete();
+        _pendingStyleUpdate = null;
+        return;
+      }
+
+      _PendingStyleUpdate update = _pendingStyleUpdate;
+      _systemChromeProxy.setSystemUiOverlayStyle(update.style).then((dynamic value) {
+        update.complete(value.success);
+      }, onError: () {
+        update.complete(false);
+      });
+      _latestStyle = _pendingStyleUpdate.style;
+      _pendingStyleUpdate = null;
+    });
+
+    return _pendingStyleUpdate.future;
+  }
+
+  static _PendingStyleUpdate _pendingStyleUpdate;
+  static SystemUiOverlayStyle _latestStyle;
+}
+
+/// Struct that represents an attempted update to the system overlays that are
+/// visible on the embedder
+class SystemUiOverlayStyleUpdate {
+  /// The style that was passed to the embedder
+  final SystemUiOverlayStyle style;
+  /// Whether the preference was successfully conveyed to the embedder
+  final bool success;
+  const SystemUiOverlayStyleUpdate._({this.style, this.success});
+}
+
+class _PendingStyleUpdate {
+  final Completer<SystemUiOverlayStyleUpdate> _completer =
+    new Completer<SystemUiOverlayStyleUpdate>();
+  SystemUiOverlayStyle _style;
+
+  _PendingStyleUpdate(this._style);
+
+  Future<SystemUiOverlayStyleUpdate> get future => _completer.future;
+
+  SystemUiOverlayStyle get style => _style;
+  set style(SystemUiOverlayStyle style) {
+    assert(style != null);
+    _style = style;
+  }
+
+  void complete([bool success = true]) {
+    _completer.complete(new SystemUiOverlayStyleUpdate._(
+      style: _style,
+      success: success
+    ));
   }
 }

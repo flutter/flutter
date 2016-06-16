@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:sky_services/flutter/platform/system_chrome.mojom.dart' as mojom;
 
 import 'constants.dart';
 import 'icon_theme.dart';
@@ -54,6 +56,7 @@ class AppBar extends StatelessWidget {
     this.tabBar,
     this.elevation: 4,
     this.backgroundColor,
+    this.brightness,
     this.textTheme,
     this.padding: EdgeInsets.zero,
     double expandedHeight,
@@ -102,10 +105,15 @@ class AppBar extends StatelessWidget {
   /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
   final int elevation;
 
-  /// The color to use for the the app bar's material.
+  /// The color to use for the app bar's material.
   ///
   /// Defaults to [ThemeData.primaryColor].
   final Color backgroundColor;
+
+  /// The brightness of the app bar's material.
+  ///
+  /// Defaults to [ThemeData.brightness].
+  final Brightness brightness;
 
   /// The typographic style to use for text in the app bar.
   ///
@@ -130,6 +138,7 @@ class AppBar extends StatelessWidget {
     Widget flexibleSpace,
     int elevation,
     Color backgroundColor,
+    Brightness brightness,
     TextTheme textTheme,
     EdgeInsets padding,
     double expandedHeight,
@@ -144,6 +153,7 @@ class AppBar extends StatelessWidget {
       tabBar: tabBar ?? this.tabBar,
       elevation: elevation ?? this.elevation,
       backgroundColor: backgroundColor ?? this.backgroundColor,
+      brightness: brightness ?? this.brightness,
       textTheme: textTheme ?? this.textTheme,
       padding: padding ?? this.padding,
       expandedHeight: expandedHeight ?? this._expandedHeight,
@@ -187,6 +197,11 @@ class AppBar extends StatelessWidget {
     IconThemeData iconTheme = IconTheme.of(context) ?? theme.primaryIconTheme;
     TextStyle centerStyle = textTheme?.title ?? theme.primaryTextTheme.title;
     TextStyle sideStyle = textTheme?.body1 ?? theme.primaryTextTheme.body1;
+
+    Brightness brightness = this.brightness ?? theme.brightness;
+    SystemChrome.setSystemUIOverlayStyle(brightness == Brightness.dark
+      ? mojom.SystemUiOverlayStyle.light
+      : mojom.SystemUiOverlayStyle.dark);
 
     final double toolBarOpacity = _toolBarOpacity(size.height, statusBarHeight);
     if (toolBarOpacity != 1.0) {
