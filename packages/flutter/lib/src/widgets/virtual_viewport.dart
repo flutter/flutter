@@ -83,6 +83,8 @@ abstract class VirtualViewportElement extends RenderObjectElement {
       case Axis.vertical:
         return new Offset(0.0, scrollOffsetToPixelOffset(scrollOffset));
     }
+    assert(renderObject.mainAxis != null);
+    return null;
   }
 
   List<Element> _materializedChildren = const <Element>[];

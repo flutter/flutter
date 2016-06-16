@@ -9,7 +9,7 @@ import 'dart:typed_data';
 
 import 'package:asn1lib/asn1lib.dart';
 import 'package:bignum/bignum.dart';
-import 'package:crypto/crypto.dart' hide BASE64, Digest;
+import 'package:crypto/crypto.dart' hide Digest;
 import 'package:pointycastle/pointycastle.dart';
 
 export 'package:pointycastle/pointycastle.dart' show AsymmetricKeyPair, PublicKey, PrivateKey;

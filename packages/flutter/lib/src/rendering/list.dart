@@ -136,6 +136,8 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
         assert(debugThrowIfNotCheckingIntrinsics());
         return 0.0;
     }
+    assert(mainAxis != null);
+    return null;
   }
 
   @override
