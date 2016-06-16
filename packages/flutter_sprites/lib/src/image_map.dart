@@ -21,9 +21,16 @@ class ImageMap {
   }
 
   Future<ui.Image> _loadImage(String url) async {
-    ui.Image image = (await _bundle.loadImage(url).first).image;
-    _images[url] = image;
-    return image;
+    ImageStream stream = new NetworkImage(url).resolve(ImageConfiguration.empty);
+    Completer<ui.Image> completer = new Completer<ui.Image>();
+    void listener(ImageInfo frame) {
+      final ui.Image image = frame.image;
+      _images[url] = image;
+      completer.complete(image);
+      stream.removeListener(listener);
+    }
+    stream.addListener(listener);
+    return completer.future;
   }
 
   /// Returns a preloaded image, given its [url].

@@ -12,69 +12,69 @@ void main() {
 
     imageCache.maximumSize = 3;
 
-    TestImageInfo a = (await imageCache.loadProvider(new TestProvider(1, 1)).first);
+    TestImageInfo a = await extractOneFrame(new TestProvider(1, 1).resolve(ImageConfiguration.empty));
     expect(a.value, equals(1));
-    TestImageInfo b = (await imageCache.loadProvider(new TestProvider(1, 2)).first);
+    TestImageInfo b = await extractOneFrame(new TestProvider(1, 2).resolve(ImageConfiguration.empty));
     expect(b.value, equals(1));
-    TestImageInfo c = (await imageCache.loadProvider(new TestProvider(1, 3)).first);
+    TestImageInfo c = await extractOneFrame(new TestProvider(1, 3).resolve(ImageConfiguration.empty));
     expect(c.value, equals(1));
-    TestImageInfo d = (await imageCache.loadProvider(new TestProvider(1, 4)).first);
+    TestImageInfo d = await extractOneFrame(new TestProvider(1, 4).resolve(ImageConfiguration.empty));
     expect(d.value, equals(1));
-    TestImageInfo e = (await imageCache.loadProvider(new TestProvider(1, 5)).first);
+    TestImageInfo e = await extractOneFrame(new TestProvider(1, 5).resolve(ImageConfiguration.empty));
     expect(e.value, equals(1));
-    TestImageInfo f = (await imageCache.loadProvider(new TestProvider(1, 6)).first);
+    TestImageInfo f = await extractOneFrame(new TestProvider(1, 6).resolve(ImageConfiguration.empty));
     expect(f.value, equals(1));
 
     expect(f, equals(a));
 
     // cache still only has one entry in it: 1(1)
 
-    TestImageInfo g = (await imageCache.loadProvider(new TestProvider(2, 7)).first);
+    TestImageInfo g = await extractOneFrame(new TestProvider(2, 7).resolve(ImageConfiguration.empty));
     expect(g.value, equals(7));
 
     // cache has two entries in it: 1(1), 2(7)
 
-    TestImageInfo h = (await imageCache.loadProvider(new TestProvider(1, 8)).first);
+    TestImageInfo h = await extractOneFrame(new TestProvider(1, 8).resolve(ImageConfiguration.empty));
     expect(h.value, equals(1));
 
     // cache still has two entries in it: 2(7), 1(1)
 
-    TestImageInfo i = (await imageCache.loadProvider(new TestProvider(3, 9)).first);
+    TestImageInfo i = await extractOneFrame(new TestProvider(3, 9).resolve(ImageConfiguration.empty));
     expect(i.value, equals(9));
 
     // cache has three entries in it: 2(7), 1(1), 3(9)
 
-    TestImageInfo j = (await imageCache.loadProvider(new TestProvider(1, 10)).first);
+    TestImageInfo j = await extractOneFrame(new TestProvider(1, 10).resolve(ImageConfiguration.empty));
     expect(j.value, equals(1));
 
     // cache still has three entries in it: 2(7), 3(9), 1(1)
 
-    TestImageInfo k = (await imageCache.loadProvider(new TestProvider(4, 11)).first);
+    TestImageInfo k = await extractOneFrame(new TestProvider(4, 11).resolve(ImageConfiguration.empty));
     expect(k.value, equals(11));
 
     // cache has three entries: 3(9), 1(1), 4(11)
 
-    TestImageInfo l = (await imageCache.loadProvider(new TestProvider(1, 12)).first);
+    TestImageInfo l = await extractOneFrame(new TestProvider(1, 12).resolve(ImageConfiguration.empty));
     expect(l.value, equals(1));
 
     // cache has three entries: 3(9), 4(11), 1(1)
 
-    TestImageInfo m = (await imageCache.loadProvider(new TestProvider(2, 13)).first);
+    TestImageInfo m = await extractOneFrame(new TestProvider(2, 13).resolve(ImageConfiguration.empty));
     expect(m.value, equals(13));
 
     // cache has three entries: 4(11), 1(1), 2(13)
 
-    TestImageInfo n = (await imageCache.loadProvider(new TestProvider(3, 14)).first);
+    TestImageInfo n = await extractOneFrame(new TestProvider(3, 14).resolve(ImageConfiguration.empty));
     expect(n.value, equals(14));
 
     // cache has three entries: 1(1), 2(13), 3(14)
 
-    TestImageInfo o = (await imageCache.loadProvider(new TestProvider(4, 15)).first);
+    TestImageInfo o = await extractOneFrame(new TestProvider(4, 15).resolve(ImageConfiguration.empty));
     expect(o.value, equals(15));
 
     // cache has three entries: 2(13), 3(14), 4(15)
 
-    TestImageInfo p = (await imageCache.loadProvider(new TestProvider(1, 16)).first);
+    TestImageInfo p = await extractOneFrame(new TestProvider(1, 16).resolve(ImageConfiguration.empty));
     expect(p.value, equals(16));
 
     // cache has three entries: 3(14), 4(15), 1(16)

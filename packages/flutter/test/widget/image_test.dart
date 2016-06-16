@@ -5,98 +5,20 @@
 import 'dart:async';
 import 'dart:ui' as ui show Image;
 
-import 'package:mojo/core.dart' as core;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
-  testWidgets('Verify NetworkImage sets an ObjectKey on its ImageResource if it doesn\'t have a key', (WidgetTester tester) async {
-    final String testUrl = 'https://foo.bar/baz1.png';
-    await tester.pumpWidget(
-      new NetworkImage(
-        scale: 1.0,
-        src: testUrl
-      )
-    );
-
-    ImageResource imageResource = imageCache.load(testUrl, scale: 1.0);
-    expect(find.byKey(new ObjectKey(imageResource)), findsOneWidget);
-  });
-
-  testWidgets('Verify NetworkImage doesn\'t set an ObjectKey on its ImageResource if it has a key', (WidgetTester tester) async {
-    final String testUrl = 'https://foo.bar/baz2.png';
-    await tester.pumpWidget(
-      new NetworkImage(
-        key: new GlobalKey(),
-        scale: 1.0,
-        src: testUrl
-      )
-    );
-
-    ImageResource imageResource = imageCache.load(testUrl, scale: 1.0);
-    expect(find.byKey(new ObjectKey(imageResource)), findsNothing);
-  });
-
-  testWidgets('Verify AsyncImage sets an ObjectKey on its ImageResource if it doesn\'t have a key', (WidgetTester tester) async {
-    ImageProvider imageProvider = new TestImageProvider();
-    await tester.pumpWidget(new AsyncImage(provider: imageProvider));
-
-    ImageResource imageResource = imageCache.loadProvider(imageProvider);
-    expect(find.byKey(new ObjectKey(imageResource)), findsOneWidget);
-  });
-
-  testWidgets('Verify AsyncImage doesn\'t set an ObjectKey on its ImageResource if it has a key', (WidgetTester tester) async {
-    ImageProvider imageProvider = new TestImageProvider();
-    await tester.pumpWidget(
-      new AsyncImage(
-        key: new GlobalKey(),
-        provider: imageProvider
-      )
-    );
-
-    ImageResource imageResource = imageCache.loadProvider(imageProvider);
-    expect(find.byKey(new ObjectKey(imageResource)), findsNothing);
-  });
-
-  testWidgets('Verify AssetImage sets an ObjectKey on its ImageResource if it doesn\'t have a key', (WidgetTester tester) async {
-    final String name = 'foo';
-    final AssetBundle assetBundle = new TestAssetBundle();
-    await tester.pumpWidget(
-      new AssetImage(
-        name: name,
-        bundle: assetBundle
-      )
-    );
-
-    ImageResource imageResource = assetBundle.loadImage(name);
-    expect(find.byKey(new ObjectKey(imageResource)), findsOneWidget);
-  });
-
-  testWidgets('Verify AssetImage doesn\'t set an ObjectKey on its ImageResource if it has a key', (WidgetTester tester) async {
-    final String name = 'foo';
-    final AssetBundle assetBundle = new TestAssetBundle();
-    await tester.pumpWidget(
-      new AssetImage(
-        key: new GlobalKey(),
-        name: name,
-        bundle: assetBundle
-      )
-    );
-
-    ImageResource imageResource = assetBundle.loadImage(name);
-    expect(find.byKey(new ObjectKey(imageResource)), findsNothing);
-  });
-
-  testWidgets('Verify AsyncImage resets its RenderImage when changing providers if it doesn\'t have a key', (WidgetTester tester) async {
+  testWidgets('Verify Image resets its RenderImage when changing providers', (WidgetTester tester) async {
     final GlobalKey key = new GlobalKey();
     TestImageProvider imageProvider1 = new TestImageProvider();
     await tester.pumpWidget(
       new Container(
         key: key,
-        child: new AsyncImage(
-          provider: imageProvider1
+        child: new Image(
+          image: imageProvider1
         )
       ),
       null,
@@ -116,8 +38,8 @@ void main() {
     await tester.pumpWidget(
       new Container(
         key: key,
-        child: new AsyncImage(
-          provider: imageProvider2
+        child: new Image(
+          image: imageProvider2
         )
       ),
       null,
@@ -126,16 +48,18 @@ void main() {
 
     renderImage = key.currentContext.findRenderObject();
     expect(renderImage.image, isNull);
-
   });
 
-  testWidgets('Verify AsyncImage doesn\'t reset its RenderImage when changing providers if it has a key', (WidgetTester tester) async {
+  testWidgets('Verify Image doesn\'t reset its RenderImage when changing providers if it has gaplessPlayback set', (WidgetTester tester) async {
     final GlobalKey key = new GlobalKey();
     TestImageProvider imageProvider1 = new TestImageProvider();
     await tester.pumpWidget(
-      new AsyncImage(
-          key: key,
-          provider: imageProvider1
+      new Container(
+        key: key,
+        child: new Image(
+          gaplessPlayback: true,
+          image: imageProvider1
+        )
       ),
       null,
       EnginePhase.layout
@@ -152,9 +76,84 @@ void main() {
 
     TestImageProvider imageProvider2 = new TestImageProvider();
     await tester.pumpWidget(
-      new AsyncImage(
+      new Container(
         key: key,
-        provider: imageProvider2
+        child: new Image(
+          gaplessPlayback: true,
+          image: imageProvider2
+        )
+      ),
+      null,
+      EnginePhase.layout
+    );
+
+    renderImage = key.currentContext.findRenderObject();
+    expect(renderImage.image, isNotNull);
+  });
+
+  testWidgets('Verify Image resets its RenderImage when changing providers if it has a key', (WidgetTester tester) async {
+    final GlobalKey key = new GlobalKey();
+    TestImageProvider imageProvider1 = new TestImageProvider();
+    await tester.pumpWidget(
+      new Image(
+        key: key,
+        image: imageProvider1
+      ),
+      null,
+      EnginePhase.layout
+    );
+    RenderImage renderImage = key.currentContext.findRenderObject();
+    expect(renderImage.image, isNull);
+
+    imageProvider1.complete();
+    await tester.idle(); // resolve the future from the image provider
+    await tester.pump(null, EnginePhase.layout);
+
+    renderImage = key.currentContext.findRenderObject();
+    expect(renderImage.image, isNotNull);
+
+    TestImageProvider imageProvider2 = new TestImageProvider();
+    await tester.pumpWidget(
+      new Image(
+        key: key,
+        image: imageProvider2
+      ),
+      null,
+      EnginePhase.layout
+    );
+
+    renderImage = key.currentContext.findRenderObject();
+    expect(renderImage.image, isNull);
+  });
+
+  testWidgets('Verify Image doesn\'t reset its RenderImage when changing providers if it has gaplessPlayback set', (WidgetTester tester) async {
+    final GlobalKey key = new GlobalKey();
+    TestImageProvider imageProvider1 = new TestImageProvider();
+    await tester.pumpWidget(
+      new Image(
+        key: key,
+        gaplessPlayback: true,
+        image: imageProvider1
+      ),
+      null,
+      EnginePhase.layout
+    );
+    RenderImage renderImage = key.currentContext.findRenderObject();
+    expect(renderImage.image, isNull);
+
+    imageProvider1.complete();
+    await tester.idle(); // resolve the future from the image provider
+    await tester.pump(null, EnginePhase.layout);
+
+    renderImage = key.currentContext.findRenderObject();
+    expect(renderImage.image, isNotNull);
+
+    TestImageProvider imageProvider2 = new TestImageProvider();
+    await tester.pumpWidget(
+      new Image(
+        key: key,
+        gaplessPlayback: true,
+        image: imageProvider2
       ),
       null,
       EnginePhase.layout
@@ -166,28 +165,23 @@ void main() {
 
 }
 
-class TestImageProvider extends ImageProvider {
+class TestImageProvider extends ImageProvider<TestImageProvider> {
   final Completer<ImageInfo> _completer = new Completer<ImageInfo>();
 
   @override
-  Future<ImageInfo> loadImage() => _completer.future;
+  Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
+    return new SynchronousFuture<TestImageProvider>(this);
+  }
+
+  @override
+  ImageStreamCompleter load(TestImageProvider key) => new OneFrameImageStreamCompleter(_completer.future);
 
   void complete() {
-    _completer.complete(new ImageInfo(image:new TestImage()));
+    _completer.complete(new ImageInfo(image: new TestImage()));
   }
-}
-
-class TestAssetBundle extends AssetBundle {
-  final ImageResource _imageResource = new ImageResource(new Completer<ImageInfo>().future);
 
   @override
-  ImageResource loadImage(String key) => _imageResource;
-
-  @override
-  Future<String> loadString(String key) => new Completer<String>().future;
-
-  @override
-  Future<core.MojoDataPipeConsumer> load(String key) => new Completer<core.MojoDataPipeConsumer>().future;
+  String toString() => '$runtimeType($hashCode)';
 }
 
 class TestImage extends ui.Image {
@@ -198,6 +192,5 @@ class TestImage extends ui.Image {
   int get height => 100;
 
   @override
-  void dispose() {
-  }
+  void dispose() { }
 }

@@ -66,8 +66,8 @@ class GridDemoPhotoItem extends StatelessWidget {
           body: new Material(
             child: new Hero(
               tag: photoHeroTag,
-              child: new AssetImage(
-                name: photo.assetName,
+              child: new Image(
+                image: new AssetImage(photo.assetName),
                 fit: ImageFit.cover
               )
             )
@@ -84,8 +84,8 @@ class GridDemoPhotoItem extends StatelessWidget {
       child: new Hero(
         key: new Key(photo.assetName),
         tag: photoHeroTag,
-        child: new AssetImage(
-          name: photo.assetName,
+        child: new Image(
+          image: new AssetImage(photo.assetName),
           fit: ImageFit.cover
         )
       )

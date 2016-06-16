@@ -2,10 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
+
 import 'basic_types.dart';
 import 'edge_insets.dart';
 
+export 'basic_types.dart' show Point, Offset, Size;
 export 'edge_insets.dart' show EdgeInsets;
+export 'package:flutter/services.dart' show ImageConfiguration;
 
 // This group of classes is intended for painting in cartesian coordinates.
 
@@ -64,26 +69,12 @@ abstract class Decoration {
   /// otherwise.
   bool hitTest(Size size, Point position) => true;
 
-  /// Whether this [Decoration] subclass needs its painters to use
-  /// [addChangeListener] to listen for updates. For example, if a
-  /// decoration draws a background image, owners would have to listen
-  /// for the image's load completing so that they could repaint
-  /// themselves when appropriate.
-  bool get needsListeners => false;
-
-  /// Register a listener. See [needsListeners].
-  ///
-  /// Only call this if [needsListeners] is true.
-  void addChangeListener(VoidCallback listener) { assert(false); }
-
-  /// Unregisters a listener previous registered with
-  /// [addChangeListener]. See [needsListeners].
-  ///
-  /// Only call this if [needsListeners] is true.
-  void removeChangeListener(VoidCallback listener) { assert(false); }
-
   /// Returns a [BoxPainter] that will paint this decoration.
-  BoxPainter createBoxPainter();
+  ///
+  /// The `onChanged` argument configures [BoxPainter.onChanged]. It can be
+  /// omitted if there is no chance that the painter will change (for example,
+  /// if it is a [BoxDecoration] with definitely no [BackgroundImage]).
+  BoxPainter createBoxPainter([VoidCallback onChanged]);
 
   @override
   String toString([String prefix = '']) => '$prefix$runtimeType';
@@ -93,16 +84,26 @@ abstract class Decoration {
 ///
 /// [BoxPainter] objects can cache resources so that they can be used
 /// multiple times.
-abstract class BoxPainter { // ignore: one_member_abstracts
+///
+/// Some resources used by [BoxPainter] may load asynchronously. When this
+/// happens, the [onChanged] callback will be invoked. To stop this callback
+/// from being called after the painter has been discarded, call [dispose].
+abstract class BoxPainter {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  BoxPainter([this._onChanged]);
 
   /// Paints the [Decoration] for which this object was created on the
-  /// given canvas using the given rectangle.
+  /// given canvas using the given configuration.
   ///
-  /// If this object caches resources for painting (e.g. [Paint]
-  /// objects), the cache may be flushed when [paint] is called with a
-  /// new [Rect]. For this reason, it may be more efficient to call
-  /// [Decoration.createBoxPainter] for each different rectangle that
-  /// is being painted in a particular frame.
+  /// The [ImageConfiguration] object passed as the third argument must, at a
+  /// minimum, have a non-null [Size].
+  ///
+  /// If this object caches resources for painting (e.g. [Paint] objects), the
+  /// cache may be flushed when [paint] is called with a new configuration. For
+  /// this reason, it may be more efficient to call
+  /// [Decoration.createBoxPainter] for each different rectangle that is being
+  /// painted in a particular frame.
   ///
   /// For example, if a decoration's owner wants to paint a particular
   /// decoration once for its whole size, and once just in the bottom
@@ -110,5 +111,21 @@ abstract class BoxPainter { // ignore: one_member_abstracts
   /// However, when its size changes, it could continue using those
   /// same instances, since the previous resources would no longer be
   /// relevant and thus losing them would not be an issue.
-  void paint(Canvas canvas, Rect rect);
+  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration);
+
+  /// Callback that is invoked if an asynchronously-loading resource used by the
+  /// decoration finishes loading. For example, an image. When this is invoked,
+  /// the [paint] method should be called again.
+  ///
+  /// Resources might not start to load until after [paint] has been called,
+  /// because they might depend on the configuration.
+  VoidCallback get onChanged => _onChanged;
+  VoidCallback _onChanged;
+
+  /// Discard any resources being held by the object. This also guarantees that
+  /// the [onChanged] callback will not be called again.
+  @mustCallSuper
+  void dispose() {
+    _onChanged = null;
+  }
 }

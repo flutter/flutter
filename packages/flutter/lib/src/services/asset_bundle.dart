@@ -3,16 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ui' as ui;
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/http.dart' as http;
 import 'package:mojo/core.dart' as core;
 import 'package:mojo_services/mojo/asset_bundle/asset_bundle.mojom.dart' as mojom;
 
-import 'image_cache.dart';
-import 'image_decoder.dart';
-import 'image_resource.dart';
 import 'shell.dart';
 
 /// A collection of resources used by the application.
@@ -43,20 +42,33 @@ import 'shell.dart';
 ///  * [NetworkAssetBundle]
 ///  * [rootBundle]
 abstract class AssetBundle {
-  /// Retrieve an image from the asset bundle.
-  ImageResource loadImage(String key);
-
-  /// Retrieve string from the asset bundle.
-  Future<String> loadString(String key);
-
   /// Retrieve a binary resource from the asset bundle as a data stream.
   Future<core.MojoDataPipeConsumer> load(String key);
+
+  /// Retrieve a string from the asset bundle.
+  ///
+  /// If the `cache` argument is set to `false`, then the data will not be
+  /// cached, and reading the data may bypass the cache. This is useful if the
+  /// caller is going to be doing its own caching. (It might not be cached if
+  /// it's set to `true` either, that depends on the asset bundle
+  /// implementation.)
+  Future<String> loadString(String key, { bool cache: true });
+
+  /// Retrieve a string from the asset bundle, parse it with the given function,
+  /// and return the function's result.
+  ///
+  /// Implementations may cache the result, so a particular key should only be
+  /// used with one parser for the lifetime of the asset bundle.
+  Future<dynamic> loadStructuredData(String key, dynamic parser(String value));
 
   @override
   String toString() => '$runtimeType@$hashCode()';
 }
 
 /// An [AssetBundle] that loads resources over the network.
+///
+/// This asset bundle does not cache any resources, though the underlying
+/// network stack may implement some level of caching itself.
 class NetworkAssetBundle extends AssetBundle {
   /// Creates an network asset bundle that resolves asset keys as URLs relative
   /// to the given base URL.
@@ -71,52 +83,76 @@ class NetworkAssetBundle extends AssetBundle {
     return await http.readDataPipe(_urlFromKey(key));
   }
 
-  /// Retrieve an image from the asset bundle.
-  ///
-  /// Images are cached in the [imageCache].
   @override
-  ImageResource loadImage(String key) => imageCache.load(_urlFromKey(key));
-
-  @override
-  Future<String> loadString(String key) async {
+  Future<String> loadString(String key, { bool cache: true }) async {
     return (await http.get(_urlFromKey(key))).body;
+  }
+
+  /// Retrieve a string from the asset bundle, parse it with the given function,
+  /// and return the function's result.
+  ///
+  /// The result is not cached. The parser is run each time the resource is
+  /// fetched.
+  @override
+  Future<dynamic> loadStructuredData(String key, Future<dynamic> parser(String value)) async {
+    assert(key != null);
+    assert(parser != null);
+    return parser(await loadString(key));
   }
 
   @override
   String toString() => '$runtimeType@$hashCode($_baseUrl)';
 }
 
-/// An [AssetBundle] that adds a layer of caching to an asset bundle.
+/// An [AssetBundle] that permanently caches string and structured resources
+/// that have been fetched.
+///
+/// Strings (for [loadString] and [loadStructuredData]) are decoded as UTF-8.
+/// Data that is cached is cached for the lifetime of the asset bundle
+/// (typically the lifetime of the application).
+///
+/// Binary resources (from [load]) are not cached.
 abstract class CachingAssetBundle extends AssetBundle {
-  final Map<String, ImageResource> _imageResourceCache =
-    <String, ImageResource>{};
-  final Map<String, Future<String>> _stringCache =
-    <String, Future<String>>{};
-
-  /// Override to alter how images are retrieved from the underlying [AssetBundle].
-  ///
-  /// For example, the resolution-aware asset bundle created by [AssetVendor]
-  /// overrides this function to fetch an image with the appropriate resolution.
-  Future<ImageInfo> fetchImage(String key) async {
-    return new ImageInfo(image: await decodeImageFromDataPipe(await load(key)));
-  }
+  // TODO(ianh): Replace this with an intelligent cache, see https://github.com/flutter/flutter/issues/3568
+  final Map<String, Future<String>> _stringCache = <String, Future<String>>{};
+  final Map<String, Future<dynamic>> _structuredDataCache = <String, Future<dynamic>>{};
 
   @override
-  ImageResource loadImage(String key) {
-    return _imageResourceCache.putIfAbsent(key, () {
-      return new ImageResource(fetchImage(key));
-    });
+  Future<String> loadString(String key, { bool cache: true }) {
+    if (cache)
+      return _stringCache.putIfAbsent(key, () => _fetchString(key));
+    return _fetchString(key);
   }
 
   Future<String> _fetchString(String key) async {
-    core.MojoDataPipeConsumer pipe = await load(key);
-    ByteData data = await core.DataPipeDrainer.drainHandle(pipe);
-    return new String.fromCharCodes(new Uint8List.view(data.buffer));
+    final core.MojoDataPipeConsumer pipe = await load(key);
+    final ByteData data = await core.DataPipeDrainer.drainHandle(pipe);
+    return UTF8.decode(new Uint8List.view(data.buffer));
   }
 
+  /// Retrieve a string from the asset bundle, parse it with the given function,
+  /// and return the function's result.
+  ///
+  /// The result of parsing the string is cached (the string itself is not,
+  /// unless you also fetch it with [loadString]). For any given `key`, the
+  /// `parser` is only run the first time.
+  ///
+  /// Once the value has been parsed, the future returned by this function for
+  /// subsequent calls will be a [SynchronousFuture], which resolves its
+  /// callback synchronously.
   @override
-  Future<String> loadString(String key) {
-    return _stringCache.putIfAbsent(key, () => _fetchString(key));
+  Future<dynamic> loadStructuredData(String key, Future<dynamic> parser(String value)) {
+    assert(key != null);
+    assert(parser != null);
+    if (_structuredDataCache.containsKey(key))
+      return _structuredDataCache[key];
+    final Completer<dynamic> completer = new Completer<dynamic>();
+    _structuredDataCache[key] = completer.future;
+    completer.complete(loadString(key, cache: false).then/*<dynamic>*/(parser));
+    completer.future.then((dynamic value) {
+      _structuredDataCache[key] = new SynchronousFuture<dynamic>(value);
+    });
+    return completer.future;
   }
 }
 
@@ -127,15 +163,16 @@ class MojoAssetBundle extends CachingAssetBundle {
 
   /// Retrieves the asset bundle located at the given URL, unpacks it, and provides it contents.
   factory MojoAssetBundle.fromNetwork(String relativeUrl) {
-    mojom.AssetBundleProxy bundle = new mojom.AssetBundleProxy.unbound();
-    _fetchAndUnpackBundle(relativeUrl, bundle);
+    final mojom.AssetBundleProxy bundle = new mojom.AssetBundleProxy.unbound();
+    _fetchAndUnpackBundleAsychronously(relativeUrl, bundle);
     return new MojoAssetBundle(bundle);
   }
 
-  static Future<Null> _fetchAndUnpackBundle(String relativeUrl, mojom.AssetBundleProxy bundle) async {
-    core.MojoDataPipeConsumer bundleData = await http.readDataPipe(Uri.base.resolve(relativeUrl));
-    mojom.AssetUnpackerProxy unpacker = shell.connectToApplicationService(
-      'mojo:asset_bundle', mojom.AssetUnpacker.connectToService);
+  static Future<Null> _fetchAndUnpackBundleAsychronously(String relativeUrl, mojom.AssetBundleProxy bundle) async {
+    final core.MojoDataPipeConsumer bundleData = await http.readDataPipe(Uri.base.resolve(relativeUrl));
+    final mojom.AssetUnpackerProxy unpacker = shell.connectToApplicationService(
+      'mojo:asset_bundle', mojom.AssetUnpacker.connectToService
+    );
     unpacker.unpackZipStream(bundleData, bundle);
     unpacker.close();
   }
@@ -166,10 +203,14 @@ AssetBundle _initRootBundle() {
 /// Rather than using [rootBundle] directly, consider obtaining the
 /// [AssetBundle] for the current [BuildContext] using [DefaultAssetBundle.of].
 /// This layer of indirection lets ancestor widgets substitute a different
-/// [AssetBundle] (e.g., for testing or localization) at runtime rather than
+/// [AssetBundle] at runtime (e.g., for testing or localization) rather than
 /// directly replying upon the [rootBundle] created at build time. For
 /// convenience, the [WidgetsApp] or [MaterialApp] widget at the top of the
 /// widget hierarchy configures the [DefaultAssetBundle] to be the [rootBundle].
+///
+/// In normal operation, the [rootBundle] is a [MojoAssetBundle], though it can
+/// also end up being a [NetworkAssetBundle] in some cases (e.g. if the
+/// application's resources are being served from a local HTTP server).
 ///
 /// See also:
 ///

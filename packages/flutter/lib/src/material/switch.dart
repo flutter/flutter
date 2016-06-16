@@ -80,11 +80,11 @@ class Switch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    ThemeData themeData = Theme.of(context);
+    final ThemeData themeData = Theme.of(context);
     final bool isDark = themeData.brightness == Brightness.dark;
 
-    Color activeThumbColor = activeColor ?? themeData.accentColor;
-    Color activeTrackColor = activeThumbColor.withAlpha(0x80);
+    final Color activeThumbColor = activeColor ?? themeData.accentColor;
+    final Color activeTrackColor = activeThumbColor.withAlpha(0x80);
 
     Color inactiveThumbColor;
     Color inactiveTrackColor;
@@ -104,8 +104,17 @@ class Switch extends StatelessWidget {
       inactiveThumbDecoration: inactiveThumbDecoration,
       activeTrackColor: activeTrackColor,
       inactiveTrackColor: inactiveTrackColor,
+      configuration: createLocalImageConfiguration(context),
       onChanged: onChanged
     );
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('value: ${value ? "on" : "off"}');
+    if (onChanged == null)
+      description.add('disabled');
   }
 }
 
@@ -119,6 +128,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
     this.inactiveThumbDecoration,
     this.activeTrackColor,
     this.inactiveTrackColor,
+    this.configuration,
     this.onChanged
   }) : super(key: key);
 
@@ -129,6 +139,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
   final Decoration inactiveThumbDecoration;
   final Color activeTrackColor;
   final Color inactiveTrackColor;
+  final ImageConfiguration configuration;
   final ValueChanged<bool> onChanged;
 
   @override
@@ -140,6 +151,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
     inactiveThumbDecoration: inactiveThumbDecoration,
     activeTrackColor: activeTrackColor,
     inactiveTrackColor: inactiveTrackColor,
+    configuration: configuration,
     onChanged: onChanged
   );
 
@@ -153,6 +165,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       ..inactiveThumbDecoration = inactiveThumbDecoration
       ..activeTrackColor = activeTrackColor
       ..inactiveTrackColor = inactiveTrackColor
+      ..configuration = configuration
       ..onChanged = onChanged;
   }
 }
@@ -173,11 +186,13 @@ class _RenderSwitch extends RenderToggleable {
     Decoration inactiveThumbDecoration,
     Color activeTrackColor,
     Color inactiveTrackColor,
+    ImageConfiguration configuration,
     ValueChanged<bool> onChanged
   }) : _activeThumbDecoration = activeThumbDecoration,
        _inactiveThumbDecoration = inactiveThumbDecoration,
        _activeTrackColor = activeTrackColor,
        _inactiveTrackColor = inactiveTrackColor,
+       _configuration = configuration,
        super(
          value: value,
          activeColor: activeColor,
@@ -196,20 +211,8 @@ class _RenderSwitch extends RenderToggleable {
   set activeThumbDecoration(Decoration value) {
     if (value == _activeThumbDecoration)
       return;
-    _removeActiveThumbListenerIfNeeded();
     _activeThumbDecoration = value;
-    _addActiveThumbListenerIfNeeded();
     markNeedsPaint();
-  }
-
-  void _addActiveThumbListenerIfNeeded() {
-    if (attached && _activeThumbDecoration != null && _activeThumbDecoration.needsListeners)
-      _activeThumbDecoration.addChangeListener(markNeedsPaint);
-  }
-
-  void _removeActiveThumbListenerIfNeeded() {
-    if (attached && _activeThumbDecoration != null && _activeThumbDecoration.needsListeners)
-      _activeThumbDecoration.removeChangeListener(markNeedsPaint);
   }
 
   Decoration get inactiveThumbDecoration => _inactiveThumbDecoration;
@@ -217,20 +220,8 @@ class _RenderSwitch extends RenderToggleable {
   set inactiveThumbDecoration(Decoration value) {
     if (value == _inactiveThumbDecoration)
       return;
-    _removeInactiveThumbListenerIfNeeded();
     _inactiveThumbDecoration = value;
-    _addInactiveThumbListenerIfNeeded();
     markNeedsPaint();
-  }
-
-  void _addInactiveThumbListenerIfNeeded() {
-    if (attached && _inactiveThumbDecoration != null && _inactiveThumbDecoration.needsListeners)
-      _inactiveThumbDecoration.addChangeListener(markNeedsPaint);
-  }
-
-  void _removeInactiveThumbListenerIfNeeded() {
-    if (attached && _inactiveThumbDecoration != null && _inactiveThumbDecoration.needsListeners)
-      _inactiveThumbDecoration.removeChangeListener(markNeedsPaint);
   }
 
   Color get activeTrackColor => _activeTrackColor;
@@ -253,17 +244,20 @@ class _RenderSwitch extends RenderToggleable {
     markNeedsPaint();
   }
 
-  @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    _addInactiveThumbListenerIfNeeded();
-    _addActiveThumbListenerIfNeeded();
+  ImageConfiguration get configuration => _configuration;
+  ImageConfiguration _configuration;
+  set configuration (ImageConfiguration value) {
+    assert(value != null);
+    if (value == _configuration)
+      return;
+    _configuration = value;
+    markNeedsPaint();
   }
 
   @override
   void detach() {
-    _removeActiveThumbListenerIfNeeded();
-    _removeInactiveThumbListenerIfNeeded();
+    _cachedThumbPainter?.dispose();
+    _cachedThumbPainter = null;
     super.detach();
   }
 
@@ -318,22 +312,22 @@ class _RenderSwitch extends RenderToggleable {
     final bool isActive = onChanged != null;
     final double currentPosition = position.value;
 
-    Color trackColor = isActive ? Color.lerp(inactiveTrackColor, activeTrackColor, currentPosition) : inactiveTrackColor;
+    final Color trackColor = isActive ? Color.lerp(inactiveTrackColor, activeTrackColor, currentPosition) : inactiveTrackColor;
 
     // Paint the track
-    Paint paint = new Paint()
+    final Paint paint = new Paint()
       ..color = trackColor;
-    double trackHorizontalPadding = kRadialReactionRadius - _kTrackRadius;
-    Rect trackRect = new Rect.fromLTWH(
+    final double trackHorizontalPadding = kRadialReactionRadius - _kTrackRadius;
+    final Rect trackRect = new Rect.fromLTWH(
       offset.dx + trackHorizontalPadding,
       offset.dy + (size.height - _kTrackHeight) / 2.0,
       size.width - 2.0 * trackHorizontalPadding,
       _kTrackHeight
     );
-    RRect trackRRect = new RRect.fromRectXY(trackRect, _kTrackRadius, _kTrackRadius);
+    final RRect trackRRect = new RRect.fromRectXY(trackRect, _kTrackRadius, _kTrackRadius);
     canvas.drawRRect(trackRRect, paint);
 
-    Point thumbPosition = new Point(
+    final Point thumbPosition = new Point(
       kRadialReactionRadius + currentPosition * _trackInnerLength,
       size.height / 2.0
     );
@@ -342,25 +336,25 @@ class _RenderSwitch extends RenderToggleable {
 
     BoxPainter thumbPainter;
     if (_inactiveThumbDecoration == null && _activeThumbDecoration == null) {
-      Color thumbColor = isActive ? Color.lerp(inactiveColor, activeColor, currentPosition) : inactiveColor;
+      final Color thumbColor = isActive ? Color.lerp(inactiveColor, activeColor, currentPosition) : inactiveColor;
       if (thumbColor != _cachedThumbColor || _cachedThumbPainter == null) {
         _cachedThumbColor = thumbColor;
-        _cachedThumbPainter = _createDefaultThumbDecoration(thumbColor).createBoxPainter();
+        _cachedThumbPainter = _createDefaultThumbDecoration(thumbColor).createBoxPainter(markNeedsPaint);
       }
       thumbPainter = _cachedThumbPainter;
     } else {
-      Decoration startDecoration = _inactiveThumbDecoration ?? _createDefaultThumbDecoration(inactiveColor);
-      Decoration endDecoration = _activeThumbDecoration ?? _createDefaultThumbDecoration(isActive ? activeTrackColor : inactiveColor);
-      thumbPainter = Decoration.lerp(startDecoration, endDecoration, currentPosition).createBoxPainter();
+      final Decoration startDecoration = _inactiveThumbDecoration ?? _createDefaultThumbDecoration(inactiveColor);
+      final Decoration endDecoration = _activeThumbDecoration ?? _createDefaultThumbDecoration(isActive ? activeTrackColor : inactiveColor);
+      thumbPainter = Decoration.lerp(startDecoration, endDecoration, currentPosition).createBoxPainter(markNeedsPaint);
     }
 
     // The thumb contracts slightly during the animation
-    double inset = 1.0 - (currentPosition - 0.5).abs() * 2.0;
-    double radius = _kThumbRadius - inset;
-    Rect thumbRect = new Rect.fromLTRB(thumbPosition.x + offset.dx - radius,
-                                       thumbPosition.y + offset.dy - radius,
-                                       thumbPosition.x + offset.dx + radius,
-                                       thumbPosition.y + offset.dy + radius);
-    thumbPainter.paint(canvas, thumbRect);
+    final double inset = 1.0 - (currentPosition - 0.5).abs() * 2.0;
+    final double radius = _kThumbRadius - inset;
+    thumbPainter.paint(
+      canvas,
+      thumbPosition.toOffset() + offset,
+      configuration.copyWith(size: new Size.fromRadius(radius))
+    );
   }
 }

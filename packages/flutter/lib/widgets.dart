@@ -9,13 +9,13 @@
 library widgets;
 
 export 'src/widgets/app.dart';
-export 'src/widgets/asset_vendor.dart';
 export 'src/widgets/auto_layout.dart';
 export 'src/widgets/banner.dart';
 export 'src/widgets/basic.dart';
 export 'src/widgets/binding.dart';
 export 'src/widgets/child_view.dart';
 export 'src/widgets/clamp_overscrolls.dart';
+export 'src/widgets/container.dart';
 export 'src/widgets/debug.dart';
 export 'src/widgets/dismissable.dart';
 export 'src/widgets/drag_target.dart';
@@ -26,6 +26,7 @@ export 'src/widgets/framework.dart';
 export 'src/widgets/gesture_detector.dart';
 export 'src/widgets/gridpaper.dart';
 export 'src/widgets/heroes.dart';
+export 'src/widgets/image.dart';
 export 'src/widgets/implicit_animations.dart';
 export 'src/widgets/layout_builder.dart';
 export 'src/widgets/lazy_block.dart';

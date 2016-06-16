@@ -34,6 +34,9 @@ class _DropDownMenuPainter extends CustomPainter {
        elevation = elevation,
        resize = resize,
        _painter = new BoxDecoration(
+         // If you add a background image here, you must provide a real
+         // configuration in the paint() function and you must provide some sort
+         // of onChanged callback here.
          backgroundColor: color,
          borderRadius: 2.0,
          boxShadow: kElevationToShadow[elevation]
@@ -59,7 +62,9 @@ class _DropDownMenuPainter extends CustomPainter {
       end: size.height
     );
 
-    _painter.paint(canvas, new Rect.fromLTRB(0.0, top.evaluate(resize), size.width, bottom.evaluate(resize)));
+    final Rect rect = new Rect.fromLTRB(0.0, top.evaluate(resize), size.width, bottom.evaluate(resize));
+
+    _painter.paint(canvas, rect.topLeft.toOffset(), new ImageConfiguration(size: rect.size));
   }
 
   @override

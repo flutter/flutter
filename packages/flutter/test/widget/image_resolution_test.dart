@@ -5,11 +5,11 @@
 import 'dart:async';
 import 'dart:ui' as ui show Image;
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:mojo/core.dart' as core;
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mojo/core.dart' as mojo;
 
 class TestImage extends ui.Image {
   TestImage(this.scale);
@@ -25,7 +25,7 @@ class TestImage extends ui.Image {
   void dispose() { }
 }
 
-class TestMojoDataPipeConsumer extends core.MojoDataPipeConsumer {
+class TestMojoDataPipeConsumer extends mojo.MojoDataPipeConsumer {
   TestMojoDataPipeConsumer(this.scale) : super(null);
   final double scale;
 }
@@ -41,21 +41,10 @@ String testManifest = '''
 }
 ''';
 
-class TestAssetBundle extends AssetBundle {
-  // Image loading logic routes through load(key)
+class TestAssetBundle extends CachingAssetBundle {
   @override
-  ImageResource loadImage(String key) => null;
-
-  @override
-  Future<String> loadString(String key) {
-    if (key == 'AssetManifest.json')
-      return (new Completer<String>()..complete(testManifest)).future;
-    return null;
-  }
-
-  @override
-  Future<core.MojoDataPipeConsumer> load(String key) {
-    core.MojoDataPipeConsumer pipe;
+  Future<mojo.MojoDataPipeConsumer> load(String key) {
+    mojo.MojoDataPipeConsumer pipe;
     switch (key) {
       case 'assets/image.png':
         pipe = new TestMojoDataPipeConsumer(1.0);
@@ -73,18 +62,27 @@ class TestAssetBundle extends AssetBundle {
         pipe = new TestMojoDataPipeConsumer(4.0);
         break;
     }
-    return (new Completer<core.MojoDataPipeConsumer>()..complete(pipe)).future;
+    return (new Completer<mojo.MojoDataPipeConsumer>()..complete(pipe)).future;
+  }
+
+  @override
+  Future<String> loadString(String key, { bool cache: true }) {
+    if (key == 'AssetManifest.json')
+      return new SynchronousFuture<String>(testManifest);
+    return null;
   }
 
   @override
   String toString() => '$runtimeType@$hashCode()';
 }
 
-Future<ui.Image> testDecodeImageFromDataPipe(core.MojoDataPipeConsumer pipe) {
-  TestMojoDataPipeConsumer testPipe = pipe;
-  assert(testPipe != null);
-  ui.Image image = new TestImage(testPipe.scale);
-  return (new Completer<ui.Image>()..complete(image)).future;
+class TestAssetImage extends AssetImage {
+  TestAssetImage(String name) : super(name);
+
+  @override
+  Future<ui.Image> decodeImage(TestMojoDataPipeConsumer pipe) {
+    return new Future<ui.Image>.value(new TestImage(pipe.scale));
+  }
 }
 
 Widget buildImageAtRatio(String image, Key key, double ratio, bool inferSize) {
@@ -97,19 +95,17 @@ Widget buildImageAtRatio(String image, Key key, double ratio, bool inferSize) {
       devicePixelRatio: ratio,
       padding: const EdgeInsets.all(0.0)
     ),
-    child: new AssetVendor(
+    child: new DefaultAssetBundle(
       bundle: new TestAssetBundle(),
-      devicePixelRatio: ratio,
-      imageDecoder: testDecodeImageFromDataPipe,
       child: new Center(
         child: inferSize ?
-          new AssetImage(
+          new Image(
             key: key,
-            name: image
+            image: new TestAssetImage(image)
           ) :
-          new AssetImage(
+          new Image(
             key: key,
-            name: image,
+            image: new TestAssetImage(image),
             height: imageSize,
             width: imageSize,
             fit: ImageFit.fill
