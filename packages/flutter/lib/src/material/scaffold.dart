@@ -18,7 +18,6 @@ import 'snack_bar.dart';
 
 const double _kFloatingActionButtonMargin = 16.0; // TODO(hmuller): should be device dependent
 const Duration _kFloatingActionButtonSegue = const Duration(milliseconds: 200);
-const Object _kScaffoldStorageIdentifier = const Object();
 final Tween<double> _kFloatingActionButtonTurnTween = new Tween<double>(begin: -0.125, end: 0.0);
 
 /// The Scaffold's appbar is the toolbar, tabbar, and the "flexible space" that's
@@ -321,6 +320,8 @@ class Scaffold extends StatefulWidget {
 /// the current [BuildContext] using [Scaffold.of].
 class ScaffoldState extends State<Scaffold> {
 
+  static final Object _kScaffoldStorageIdentifier = new Object();
+
   // APPBAR API
 
   AnimationController _appBarController;
@@ -532,7 +533,7 @@ class ScaffoldState extends State<Scaffold> {
     _snackBarTimer?.cancel();
     _snackBarTimer = null;
     PageStorage.of(context)?.writeState(context, <double>[_scrollOffset, _scrollOffsetDelta],
-      identifier:_kScaffoldStorageIdentifier
+      identifier: _kScaffoldStorageIdentifier
     );
     super.dispose();
   }
