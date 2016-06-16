@@ -169,10 +169,10 @@ Future<String> _buildAotSnapshot(
   String mojoSdkExt = _getSdkExtensionPath(packagesPath, 'mojo');
   String mojoInternalPath = path.join(mojoSdkExt, 'internal.dart');
 
-  String skyEngineSdkExt = _getSdkExtensionPath(packagesPath, 'sky_engine');
-  String uiPath = path.join(skyEngineSdkExt, 'dart_ui.dart');
-  String jniPath = path.join(skyEngineSdkExt, 'dart_jni', 'jni.dart');
-  String vmServicePath = path.join(skyEngineSdkExt, 'dart', 'runtime', 'bin', 'vmservice', 'vmservice_io.dart');
+  String skyEnginePkg = _getSdkExtensionPath(packagesPath, 'sky_engine');
+  String uiPath = path.join(skyEnginePkg, 'dart_ui', 'dart_ui.dart');
+  String jniPath = path.join(skyEnginePkg, 'dart_jni', 'jni.dart');
+  String vmServicePath = path.join(skyEnginePkg, 'dart', 'runtime', 'bin', 'vmservice', 'vmservice_io.dart');
 
   List<String> filePaths = <String>[
     genSnapshot,
