@@ -132,6 +132,7 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
   void _hide() {
     _hideTimer?.cancel();
     _hideTimer = null;
+    // Gaurding _hide() being called while indicator is already animating.
     if (!_extentAnimation.isAnimating) {
       _extentAnimation.reverse();
     }
@@ -153,10 +154,10 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
 
   void _onScrollUpdated(ScrollableState scrollable) {
     final double value = scrollable.scrollOffset;
-    if (_isOverscrolling(value)) {
+    if (_isOverscroll(value)) {
       _refreshHideTimer();
-      // Hide the indicator as soon as user starts scrolling in the opposite direction of overscroll.
-      if (_isScrollingInOpposite(value)) {
+      // Hide the indicator as soon as user starts scrolling in the reverse direction of overscroll.
+      if (_isReverseScroll(value)) {
         _hide();
       } else {
         // Changing the animation's value causes an implicit setState().
@@ -176,18 +177,14 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
     _hideTimer = new Timer(_kIndicatorTimeoutDuration, _hide);
   }
 
-  bool _isOverscrolling(double scrollOffset) {
+  bool _isOverscroll(double scrollOffset) {
     return (scrollOffset < _minScrollOffset || scrollOffset > _maxScrollOffset) &&
       ((scrollOffset - _scrollOffset).abs() > kPixelScrollTolerance.distance);
   }
 
-  bool _isScrollingInOpposite(double scrollOffset) {
-    double delta = _scrollOffset - scrollOffset;
-    if (scrollOffset < _minScrollOffset) {
-      return delta < 0;
-    } else {
-      return delta > 0;
-    }
+  bool _isReverseScroll(double scrollOffset) {
+    final double delta = _scrollOffset - scrollOffset;
+    return scrollOffset < _minScrollOffset ? delta < 0 : delta > 0;
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
