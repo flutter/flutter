@@ -6,8 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flx/bundle.dart';
-import 'package:flx/signing.dart';
 import 'package:json_schema/json_schema.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
@@ -449,29 +447,10 @@ Future<int> assemble({
   if (fontManifest != null)
     zipBuilder.addEntry(fontManifest);
 
-  AsymmetricKeyPair<PublicKey, PrivateKey> keyPair = keyPairFromPrivateKeyFileSync(privateKeyPath);
-  printTrace('KeyPair from $privateKeyPath: $keyPair.');
-
-  if (keyPair != null) {
-    printTrace('Calling CipherParameters.seedRandom().');
-    CipherParameters.get().seedRandom();
-  }
-
-  File zipFile = new File(outputPath.substring(0, outputPath.length - 4) + '.zip');
-  printTrace('Encoding zip file to ${zipFile.path}');
-  zipBuilder.createZip(zipFile, new Directory(workingDirPath));
-  List<int> zipBytes = zipFile.readAsBytesSync();
-
   ensureDirectoryExists(outputPath);
 
-  printTrace('Creating flx at $outputPath.');
-  Bundle bundle = new Bundle.fromContent(
-    path: outputPath,
-    manifest: manifestDescriptor,
-    contentBytes: zipBytes,
-    keyPair: keyPair
-  );
-  bundle.writeSync();
+  printTrace('Encoding zip file to $outputPath');
+  zipBuilder.createZip(new File(outputPath), new Directory(workingDirPath));
 
   printTrace('Built $outputPath.');
 

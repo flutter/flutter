@@ -16,7 +16,6 @@ flutter analyze --flutter-repo
 (cd packages/flutter_sprites; flutter test)
 (cd packages/flutter_test; flutter test)
 (cd packages/flutter_tools; dart -c test/all.dart)
-(cd packages/flx; dart -c test/all.dart)
 
 (cd dev/manual_tests; flutter test)
 (cd examples/hello_world; flutter test)
