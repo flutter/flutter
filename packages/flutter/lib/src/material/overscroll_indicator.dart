@@ -13,7 +13,7 @@ const double _kMaxIndicatorExtent = 64.0;
 const double _kMinIndicatorOpacity = 0.0;
 const double _kMaxIndicatorOpacity = 0.25;
 const Duration _kIndicatorHideDuration = const Duration(milliseconds: 200);
-const Duration _kIndicatorTimeoutDuration = const Duration(seconds: 1);
+const Duration _kIndicatorTimeoutDuration = const Duration(milliseconds: 500);
 final Tween<double> _kIndicatorOpacity = new Tween<double>(begin: 0.0, end: 0.3);
 
 class _Painter extends CustomPainter {
@@ -132,7 +132,9 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
   void _hide() {
     _hideTimer?.cancel();
     _hideTimer = null;
-    _extentAnimation.reverse();
+    if (!_extentAnimation.isAnimating) {
+      _extentAnimation.reverse();
+    }
   }
 
   void _updateState(ScrollableState scrollable) {
@@ -151,12 +153,15 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
 
   void _onScrollUpdated(ScrollableState scrollable) {
     final double value = scrollable.scrollOffset;
-    if ((value < _minScrollOffset || value > _maxScrollOffset) &&
-        ((value - _scrollOffset).abs() > kPixelScrollTolerance.distance)) {
-      _hideTimer?.cancel();
-      _hideTimer = new Timer(_kIndicatorTimeoutDuration, _hide);
-      // Changing the animation's value causes an implicit setState().
-      _extentAnimation.value = value < _minScrollOffset ? _minScrollOffset - value : value - _maxScrollOffset;
+    if (_isOverscrolling(value)) {
+      _refreshHideTimer();
+      // Hide the indicator as soon as user starts scrolling in the opposite direction of overscroll.
+      if (_isScrollingInOpposite(value)) {
+        _hide();
+      } else {
+        // Changing the animation's value causes an implicit setState().
+        _extentAnimation.value = value < _minScrollOffset ? _minScrollOffset - value : value - _maxScrollOffset;
+      }
     }
     _updateState(scrollable);
   }
@@ -164,6 +169,25 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
   void _onScrollEnded(ScrollableState scrollable) {
     _updateState(scrollable);
     _hide();
+  }
+
+  void _refreshHideTimer() {
+    _hideTimer?.cancel();
+    _hideTimer = new Timer(_kIndicatorTimeoutDuration, _hide);
+  }
+
+  bool _isOverscrolling(double scrollOffset) {
+    return (scrollOffset < _minScrollOffset || scrollOffset > _maxScrollOffset) &&
+      ((scrollOffset - _scrollOffset).abs() > kPixelScrollTolerance.distance);
+  }
+
+  bool _isScrollingInOpposite(double scrollOffset) {
+    double delta = _scrollOffset - scrollOffset;
+    if (scrollOffset < _minScrollOffset) {
+      return delta < 0;
+    } else {
+      return delta > 0;
+    }
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
