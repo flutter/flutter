@@ -64,7 +64,7 @@ class Layer {
   void set_parent(ContainerLayer* parent) { parent_ = parent; }
 
   // subclasses should assume this will be true by the time Paint() is called
-  const bool has_paint_bounds() const { return has_paint_bounds_; }
+  bool has_paint_bounds() const { return has_paint_bounds_; }
 
   const SkRect& paint_bounds() const {
     DCHECK(has_paint_bounds_);
