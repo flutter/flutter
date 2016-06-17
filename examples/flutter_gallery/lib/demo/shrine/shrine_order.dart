@@ -118,13 +118,15 @@ class OrderItem extends StatelessWidget {
 }
 
 class OrderPage extends StatefulWidget {
-  OrderPage({ Key key, this.order, this.products }) : super(key: key) {
+  OrderPage({ Key key, this.order, this.products, this.shoppingCart }) : super(key: key) {
     assert(order != null);
     assert(products != null && products.length > 0);
+    assert(shoppingCart != null);
   }
 
   final Order order;
   final List<Product> products;
+  final Map<Product, Order> shoppingCart;
 
   @override
   _OrderPageState createState() => new _OrderPageState();
@@ -134,7 +136,7 @@ class OrderPage extends StatefulWidget {
 /// arranged in two columns. Enables the user to specify a quantity and add an
 /// order to the shopping cart.
 class _OrderPageState extends State<OrderPage> {
-  final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>(debugLabel: 'Order Page');
+  static final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>(debugLabel: 'Order page');
 
   Order get currentOrder => ShrineOrderRoute.of(context).order;
 
@@ -146,6 +148,7 @@ class _OrderPageState extends State<OrderPage> {
     Order newOrder = currentOrder.copyWith(quantity: quantity, inCart: inCart);
     if (currentOrder != newOrder) {
       setState(() {
+        config.shoppingCart[newOrder.product] = newOrder;
         currentOrder = newOrder;
       });
     }
@@ -159,12 +162,15 @@ class _OrderPageState extends State<OrderPage> {
   Widget build(BuildContext context) {
     return new ShrinePage(
       scaffoldKey: scaffoldKey,
+      products: config.products,
+      shoppingCart: config.shoppingCart,
       floatingActionButton: new FloatingActionButton(
         onPressed: () {
           updateOrder(inCart: true);
           final int n = currentOrder.quantity;
+          final String item = currentOrder.product.name;
           showSnackBarMessage(
-            'There ${ n == 1 ? "is one item" : "are $n items" } in the shopping cart.'
+            'There ${ n == 1 ? "is one $item item" : "are $n $item items" } in the shopping cart.'
           );
         },
         backgroundColor: const Color(0xFF16F0F0),

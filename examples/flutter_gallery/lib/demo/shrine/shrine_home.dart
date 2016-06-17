@@ -15,7 +15,8 @@ import 'shrine_types.dart';
 
 const double unitSize = kToolBarHeight;
 
-Map<Product, Order> shoppingCart = <Product, Order>{};
+final List<Product> _products = new List.from(allProducts());
+final Map<Product, Order> _shoppingCart = <Product, Order>{};
 
 /// Displays the Vendor's name and avatar.
 class VendorItem extends StatelessWidget {
@@ -63,7 +64,7 @@ abstract class PriceItem extends StatelessWidget {
 
   Widget buildItem(BuildContext context, TextStyle style, EdgeInsets padding) {
     BoxDecoration decoration;
-    if (shoppingCart[product] != null)
+    if (_shoppingCart[product] != null)
       decoration = new BoxDecoration(backgroundColor: const Color(0xFFFFE0E0));
 
     return new Container(
@@ -259,18 +260,16 @@ class ShrineHome extends StatefulWidget {
 }
 
 class _ShrineHomeState extends State<ShrineHome> {
-  final List<Product> _products = allProducts();
+  static final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>(debugLabel: 'Order page');
 
   void handleCompletedOrder(Order completedOrder) {
     assert(completedOrder.product != null);
-    if (completedOrder.inCart && completedOrder.quantity > 0)
-      shoppingCart[completedOrder.product] = completedOrder;
-    else
-      shoppingCart[completedOrder.product] = null;
+    if (completedOrder.quantity == 0)
+      _shoppingCart.remove(completedOrder.product);
   }
 
   void showOrderPage(Product product) {
-    final Order order = shoppingCart[product] ?? new Order(product: product);
+    final Order order = _shoppingCart[product] ?? new Order(product: product);
     final Completer<Order> completer = new Completer<Order>();
     final Key productKey = new ObjectKey(product);
     final Set<Key> mostValuableKeys = new HashSet<Key>();
@@ -282,7 +281,8 @@ class _ShrineHomeState extends State<ShrineHome> {
       builder: (BuildContext context) {
         return new OrderPage(
           order: order,
-          products: _products
+          products: _products,
+          shoppingCart: _shoppingCart
         );
       }
     ));
@@ -293,6 +293,9 @@ class _ShrineHomeState extends State<ShrineHome> {
   Widget build(BuildContext context) {
     final Product featured = _products.firstWhere((Product product) => product.featureDescription != null);
     return new ShrinePage(
+      scaffoldKey: scaffoldKey,
+      products: _products,
+      shoppingCart: _shoppingCart,
       body: new ScrollableViewport(
         child: new RepaintBoundary(
           child: new Column(

@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 import 'shrine_theme.dart';
+import 'shrine_types.dart';
 
 enum ShrineAction {
   sortByPrice,
@@ -13,11 +14,23 @@ enum ShrineAction {
 }
 
 class ShrinePage extends StatefulWidget {
-  ShrinePage({ Key key, this.scaffoldKey, this.body, this.floatingActionButton }) : super(key: key);
+  ShrinePage({
+    Key key,
+    this.scaffoldKey,
+    this.body,
+    this.floatingActionButton,
+    this.products,
+    this.shoppingCart
+  }) : super(key: key) {
+    assert(body != null);
+    assert(scaffoldKey != null);
+  }
 
   final Key scaffoldKey;
   final Widget body;
   final Widget floatingActionButton;
+  final List<Product> products;
+  final Map<Product, Order> shoppingCart;
 
   @override
   ShrinePageState createState() => new ShrinePageState();
@@ -35,6 +48,37 @@ class ShrinePageState extends State<ShrinePage> {
       });
     }
     return false;
+  }
+
+  void _showShoppingCart() {
+    showModalBottomSheet/*<Null>*/(context: context, builder: (BuildContext context) {
+      if (config.shoppingCart.isEmpty) {
+        return new Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: new Text('The shopping cart is empty')
+        );
+      }
+      return new MaterialList(children: config.shoppingCart.values.map((Order order) {
+        return new ListItem(
+          title: new Text(order.product.name),
+          leading: new Text('${order.quantity}'),
+          subtitle: new Text(order.product.vendor.name)
+        );
+      }).toList());
+    });
+  }
+
+  void _sortByPrice() {
+    config.products.sort((Product a, Product b) => a.price.compareTo(b.price));
+  }
+
+  void _sortByProduct() {
+    config.products.sort((Product a, Product b) => a.name.compareTo(b.name));
+  }
+
+  void _emptyCart() {
+    config.shoppingCart.clear();
+    config.scaffoldKey.currentState.showSnackBar(new SnackBar(content: new Text('Shopping cart is empty')));
   }
 
   @override
@@ -59,7 +103,7 @@ class ShrinePageState extends State<ShrinePage> {
             icon: Icons.shopping_cart,
             tooltip: 'Shopping cart',
             onPressed: () {
-              // TODO(hansmuller): implement the action.
+              _showShoppingCart();
             }
           ),
           new PopupMenuButton<ShrineAction>(
@@ -80,13 +124,13 @@ class ShrinePageState extends State<ShrinePage> {
             onSelected: (ShrineAction action) {
               switch (action) {
                 case ShrineAction.sortByPrice:
-                  // TODO(hansmuller): implement the action.
+                  setState(_sortByPrice);
                   break;
                 case ShrineAction.sortByProduct:
-                  // TODO(hansmuller): implement the action.
+                  setState(_sortByProduct);
                   break;
                 case ShrineAction.emptyCart:
-                  // TODO(hansmuller): implement the action.
+                  setState(_emptyCart);
                   break;
               }
             }
