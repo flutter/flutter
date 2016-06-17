@@ -5,6 +5,8 @@
 # Do not use the targets in this file unless you need a certain libjpeg
 # implementation. Use the meta target //third_party:jpeg instead.
 
+import("//build/config/sanitizers/sanitizers.gni")
+
 if (current_cpu == "arm") {
   import("//build/config/arm.gni")
 }
@@ -17,60 +19,68 @@ if (current_cpu == "x86" || current_cpu == "x64") {
 
     if (current_cpu == "x86") {
       sources = [
-        "simd/jccolmmx.asm",
-        "simd/jccolss2.asm",
-        "simd/jcgrammx.asm",
-        "simd/jcgrass2.asm",
-        "simd/jcqnt3dn.asm",
-        "simd/jcqntmmx.asm",
-        "simd/jcqnts2f.asm",
-        "simd/jcqnts2i.asm",
-        "simd/jcqntsse.asm",
-        "simd/jcsammmx.asm",
-        "simd/jcsamss2.asm",
-        "simd/jdcolmmx.asm",
-        "simd/jdcolss2.asm",
-        "simd/jdmermmx.asm",
-        "simd/jdmerss2.asm",
-        "simd/jdsammmx.asm",
-        "simd/jdsamss2.asm",
-        "simd/jf3dnflt.asm",
-        "simd/jfmmxfst.asm",
-        "simd/jfmmxint.asm",
-        "simd/jfss2fst.asm",
-        "simd/jfss2int.asm",
-        "simd/jfsseflt.asm",
-        "simd/ji3dnflt.asm",
-        "simd/jimmxfst.asm",
-        "simd/jimmxint.asm",
-        "simd/jimmxred.asm",
-        "simd/jiss2flt.asm",
-        "simd/jiss2fst.asm",
-        "simd/jiss2int.asm",
-        "simd/jiss2red.asm",
-        "simd/jisseflt.asm",
+        "simd/jccolor-mmx.asm",
+        "simd/jccolor-sse2.asm",
+        "simd/jcgray-mmx.asm",
+        "simd/jcgray-sse2.asm",
+        "simd/jchuff-sse2.asm",
+        "simd/jcsample-mmx.asm",
+        "simd/jcsample-sse2.asm",
+        "simd/jdcolor-mmx.asm",
+        "simd/jdcolor-sse2.asm",
+        "simd/jdmerge-mmx.asm",
+        "simd/jdmerge-sse2.asm",
+        "simd/jdsample-mmx.asm",
+        "simd/jdsample-sse2.asm",
+        "simd/jfdctflt-3dn.asm",
+        "simd/jfdctflt-sse.asm",
+        "simd/jfdctfst-mmx.asm",
+        "simd/jfdctfst-sse2.asm",
+        "simd/jfdctint-mmx.asm",
+        "simd/jfdctint-sse2.asm",
+        "simd/jidctflt-3dn.asm",
+        "simd/jidctflt-sse.asm",
+        "simd/jidctflt-sse2.asm",
+        "simd/jidctfst-mmx.asm",
+        "simd/jidctfst-sse2.asm",
+        "simd/jidctint-mmx.asm",
+        "simd/jidctint-sse2.asm",
+        "simd/jidctred-mmx.asm",
+        "simd/jidctred-sse2.asm",
+        "simd/jquant-3dn.asm",
+        "simd/jquant-mmx.asm",
+        "simd/jquant-sse.asm",
+        "simd/jquantf-sse2.asm",
+        "simd/jquanti-sse2.asm",
         "simd/jsimdcpu.asm",
       ]
-      defines += [ "__x86__" ]
+      defines += [
+        "__x86__",
+        "PIC",
+      ]
     } else if (current_cpu == "x64") {
       sources = [
-        "simd/jccolss2-64.asm",
-        "simd/jcgrass2-64.asm",
-        "simd/jcqnts2f-64.asm",
-        "simd/jcqnts2i-64.asm",
-        "simd/jcsamss2-64.asm",
-        "simd/jdcolss2-64.asm",
-        "simd/jdmerss2-64.asm",
-        "simd/jdsamss2-64.asm",
-        "simd/jfss2fst-64.asm",
-        "simd/jfss2int-64.asm",
-        "simd/jfsseflt-64.asm",
-        "simd/jiss2flt-64.asm",
-        "simd/jiss2fst-64.asm",
-        "simd/jiss2int-64.asm",
-        "simd/jiss2red-64.asm",
+        "simd/jccolor-sse2-64.asm",
+        "simd/jcgray-sse2-64.asm",
+        "simd/jchuff-sse2-64.asm",
+        "simd/jcsample-sse2-64.asm",
+        "simd/jdcolor-sse2-64.asm",
+        "simd/jdmerge-sse2-64.asm",
+        "simd/jdsample-sse2-64.asm",
+        "simd/jfdctflt-sse-64.asm",
+        "simd/jfdctfst-sse2-64.asm",
+        "simd/jfdctint-sse2-64.asm",
+        "simd/jidctflt-sse2-64.asm",
+        "simd/jidctfst-sse2-64.asm",
+        "simd/jidctint-sse2-64.asm",
+        "simd/jidctred-sse2-64.asm",
+        "simd/jquantf-sse2-64.asm",
+        "simd/jquanti-sse2-64.asm",
       ]
-      defines += [ "__x86_64__" ]
+      defines += [
+        "__x86_64__",
+        "PIC",
+      ]
     }
 
     if (is_win) {
@@ -119,6 +129,9 @@ source_set("simd") {
     sources = [
       "jsimd_none.c",
     ]
+  }
+  if (is_win) {
+    cflags = [ "/wd4245" ]
   }
 }
 
@@ -188,24 +201,21 @@ source_set("libjpeg") {
 
   defines = [
     "WITH_SIMD",
-    "MOTION_JPEG_SUPPORTED",
     "NO_GETENV",
   ]
 
-  configs += [ ":libjpeg_config" ]
+  configs -= [ "//build/config/compiler:chromium_code" ]
+  configs += [ "//build/config/compiler:no_chromium_code" ]
 
   public_configs = [ ":libjpeg_config" ]
 
   # MemorySanitizer doesn't support assembly code, so keep it disabled in
   # MSan builds for now.
-  # TODO: Enable on Linux when .asm files are recognized.
-  if (is_msan || is_linux) {
+  if (is_msan) {
     sources += [ "jsimd_none.c" ]
   } else {
     deps = [
       ":simd",
     ]
   }
-
-  # TODO(GYP): Compile the .asm files with YASM as GYP does.
 }
