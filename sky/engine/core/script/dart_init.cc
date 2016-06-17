@@ -390,13 +390,11 @@ void* _DartSymbolLookup(const char* symbol_name) {
       mmap_flags |= PROT_EXEC;
 
     void* symbol = ::mmap(NULL, asset_size, mmap_flags, MAP_PRIVATE, fd, 0);
-    if (symbol == MAP_FAILED) {
-      HANDLE_EINTR(::close(fd));
-      return nullptr;
-    }
+    symbol_asset.mapping = symbol == MAP_FAILED ? nullptr : symbol;
 
-    symbol_asset.mapping = symbol;
-    return symbol;
+    IGNORE_EINTR(::close(fd));
+
+    return symbol_asset.mapping;
   }
 
   return nullptr;

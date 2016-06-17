@@ -109,7 +109,7 @@ void Shell::InitStandalone(std::string icu_data_path) {
   } else {
     auto region = base::MemoryMappedFile::Region::kWholeFile;
     CHECK(base::i18n::InitializeICUWithFileDescriptor(file_descriptor, region));
-    HANDLE_EINTR(::close(file_descriptor));
+    IGNORE_EINTR(::close(file_descriptor));
   }
 
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
