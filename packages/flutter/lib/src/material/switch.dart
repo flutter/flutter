@@ -353,7 +353,7 @@ class _RenderSwitch extends RenderToggleable {
     final double radius = _kThumbRadius - inset;
     thumbPainter.paint(
       canvas,
-      thumbPosition.toOffset() + offset,
+      thumbPosition.toOffset() + offset - new Offset(radius, radius),
       configuration.copyWith(size: new Size.fromRadius(radius))
     );
   }
