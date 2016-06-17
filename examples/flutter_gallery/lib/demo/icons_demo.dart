@@ -34,7 +34,7 @@ class IconsDemoState extends State<IconsDemo> {
     Colors.blueGrey
   ];
 
-  int iconColorIndex = 9; // green
+  int iconColorIndex = 8; // teal
   double iconOpacity = 1.0;
 
   Color get iconColor => iconColorSwatches[iconColorIndex][400];
