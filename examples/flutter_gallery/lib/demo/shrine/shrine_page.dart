@@ -26,7 +26,7 @@ class ShrinePage extends StatefulWidget {
     assert(scaffoldKey != null);
   }
 
-  final Key scaffoldKey;
+  final GlobalKey<ScaffoldState> scaffoldKey;
   final Widget body;
   final Widget floatingActionButton;
   final List<Product> products;

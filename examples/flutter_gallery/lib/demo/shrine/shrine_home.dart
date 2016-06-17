@@ -15,7 +15,7 @@ import 'shrine_types.dart';
 
 const double unitSize = kToolBarHeight;
 
-final List<Product> _products = new List.from(allProducts());
+final List<Product> _products = new List<Product>.from(allProducts());
 final Map<Product, Order> _shoppingCart = <Product, Order>{};
 
 /// Displays the Vendor's name and avatar.
