@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 
+import 'app_bar.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'icon.dart';
@@ -643,7 +644,7 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
 ///  * [TabBarView]
 ///  * [AppBar.tabBar]
 ///  * <https://www.google.com/design/spec/components/tabs.html>
-class TabBar<T> extends Scrollable {
+class TabBar<T> extends Scrollable implements AppBarBottomWidget {
   TabBar({
     Key key,
     this.labels,
@@ -671,7 +672,9 @@ class TabBar<T> extends Scrollable {
   /// the color of the theme's body2 text color is used.
   final Color labelColor;
 
-  double get minimumHeight {
+  /// The height of the tab labels and indicator.
+  @override
+  double get bottomHeight {
     for (TabLabel label in labels.values) {
       if (label.text != null && (label.icon != null || label.iconBuilder != null))
         return _kTextAndIconTabHeight + _kTabIndicatorHeight;

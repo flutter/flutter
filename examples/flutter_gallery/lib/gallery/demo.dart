@@ -73,7 +73,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
       child: new Scaffold(
         appBar: new AppBar(
           title: new Text(title),
-          tabBar: new TabBar<ComponentDemoTabData>(
+          bottom: new TabBar<ComponentDemoTabData>(
             isScrollable: true,
             labels: ComponentDemoTabData.buildTabLabels(demos)
           )

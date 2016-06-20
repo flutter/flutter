@@ -71,7 +71,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> {
               ]
             )
           ],
-          tabBar: new TabBar<IconData>(
+          bottom: new TabBar<IconData>(
             isScrollable: true,
             labels: new Map<IconData, TabLabel>.fromIterable(
               icons,

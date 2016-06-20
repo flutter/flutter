@@ -119,7 +119,7 @@ class ColorsDemo extends StatelessWidget {
         appBar: new AppBar(
           elevation: 0,
           title: new Text('Colors'),
-          tabBar: new TabBar<ColorSwatch>(
+          bottom: new TabBar<ColorSwatch>(
             isScrollable: true,
             labels: new Map<ColorSwatch, TabLabel>.fromIterable(colorSwatches, value: (ColorSwatch swatch) {
               return new TabLabel(text: swatch.name);

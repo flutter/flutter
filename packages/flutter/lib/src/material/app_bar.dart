@@ -12,6 +12,14 @@ import 'tabs.dart';
 import 'theme.dart';
 import 'typography.dart';
 
+/// A widget that can appear at the bottom of an [AppBar]. The [Scaffold] uses
+/// the bottom widget's [bottomHeight] to handle layout for
+/// [AppBarBehavior.scroll] and [AppBarBehavior.under].
+abstract class AppBarBottomWidget extends Widget {
+  /// Defines the height of the app bar's optional bottom widget.
+  double get bottomHeight;
+}
+
 // TODO(eseidel) Toolbar needs to change size based on orientation:
 // http://www.google.com/design/spec/layout/structure.html#structure-app-bar
 // Mobile Landscape: 48dp
@@ -19,7 +27,6 @@ import 'typography.dart';
 // Tablet/Desktop: 64dp
 
 /// A material design app bar.
-///
 /// An app bar consists of a toolbar and potentially other widgets, such as a
 /// [TabBar] and a [FlexibleSpaceBar]. App bars typically expose one or more
 /// common actions with [IconButtons]s which are optionally followed by a
@@ -28,10 +35,13 @@ import 'typography.dart';
 /// App bars are most commonly used in the [Scaffold.appBar] property, which
 /// places the app bar at the top of the app.
 ///
-/// The AppBar displays the toolbar widgets, [leading], [title],
-/// and [actions], above the [tabBar] (if any). If a [flexibleSpace] widget is
-/// specified then it is stacked behind the toolbar and tabbar. The [Scaffold]
-/// typically creates the appbar with an initial height equal to [expandedHeight].
+/// The AppBar displays the toolbar widgets, [leading], [title], and
+/// [actions], above the [bottom] (if any). If a [flexibleSpace] widget is
+/// specified then it is stacked behind the toolbar and the bottom widget.
+/// The [Scaffold] typically creates the appbar with an initial height equal to
+/// [expandedHeight]. If the [Scaffold.appBarBehavior] is set then the
+/// AppBar's [collapsedHeight] and [bottomHeight] define how small the app bar
+/// will become when the application is scrolled.
 ///
 /// See also:
 ///
@@ -51,17 +61,15 @@ class AppBar extends StatelessWidget {
     this.title,
     this.actions,
     this.flexibleSpace,
-    this.tabBar,
+    this.bottom,
     this.elevation: 4,
     this.backgroundColor,
     this.textTheme,
     this.padding: EdgeInsets.zero,
     double expandedHeight,
-    double collapsedHeight,
-    double minimumHeight
+    double collapsedHeight
   }) : _expandedHeight = expandedHeight,
        _collapsedHeight = collapsedHeight,
-       _minimumHeight = minimumHeight,
        super(key: key);
 
   /// A widget to display before the [title].
@@ -74,7 +82,7 @@ class AppBar extends StatelessWidget {
   /// field with an [IconButton] that calls [Navigator.pop].
   final Widget leading;
 
-  /// The primary widget displayed in the app bar.
+  /// The primary widget displayed in the appbar.
   ///
   /// Typically a [Text] widget containing a description of the current contents
   /// of the app.
@@ -94,8 +102,10 @@ class AppBar extends StatelessWidget {
   /// Typically a [FlexibleSpaceBar]. See [FlexibleSpaceBar] for details.
   final Widget flexibleSpace;
 
-  /// A horizontal bar of tabs to display at the bottom of the app bar.
-  final TabBar<dynamic> tabBar;
+  /// This widget appears across the bottom of the appbar.
+  ///
+  /// Typically a [TabBar].
+  final AppBarBottomWidget bottom;
 
   /// The z-coordinate at which to place this app bar.
   ///
@@ -119,7 +129,6 @@ class AppBar extends StatelessWidget {
 
   final double _expandedHeight;
   final double _collapsedHeight;
-  final double _minimumHeight;
 
   /// Creates a copy of this app bar but with the given fields replaced with the new values.
   AppBar copyWith({
@@ -128,6 +137,7 @@ class AppBar extends StatelessWidget {
     Widget title,
     List<Widget> actions,
     Widget flexibleSpace,
+    AppBarBottomWidget bottom,
     int elevation,
     Color backgroundColor,
     TextTheme textTheme,
@@ -141,7 +151,7 @@ class AppBar extends StatelessWidget {
       title: title ?? this.title,
       actions: actions ?? this.actions,
       flexibleSpace: flexibleSpace ?? this.flexibleSpace,
-      tabBar: tabBar ?? this.tabBar,
+      bottom: bottom ?? this.bottom,
       elevation: elevation ?? this.elevation,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       textTheme: textTheme ?? this.textTheme,
@@ -151,31 +161,31 @@ class AppBar extends StatelessWidget {
     );
   }
 
-  double get _tabBarHeight => tabBar == null ? null : tabBar.minimumHeight;
-
   double get _toolBarHeight => kToolBarHeight;
 
-  /// By default, the height of the toolbar and the tabbar (if any).
-  /// The [Scaffold] gives its appbar this height initially. If a
+  /// The height of the bottom widget. The [Scaffold] uses this value to control
+  /// the size of the app bar when its appBarBehavior is [AppBarBehavior.scroll]
+  /// or [AppBarBehavior.under].
+  double get bottomHeight => bottom?.bottomHeight ?? 0.0;
+
+  /// By default, the total height of the toolbar and the bottom widget (if any).
+  /// The [Scaffold] gives its app bar this height initially. If a
   /// [flexibleSpace] widget is specified this height should be big
   /// enough to accommodate whatever that widget contains.
-  double get expandedHeight => _expandedHeight ?? (_toolBarHeight + (_tabBarHeight ?? 0.0));
+  double get expandedHeight => _expandedHeight ?? (_toolBarHeight + bottomHeight);
 
-  /// By default, the height of the toolbar and the tabbar (if any).
+  /// By default, the height of the toolbar and the bottom widget (if any).
   /// If the height of the app bar is constrained to be less than this value
-  /// the toolbar and tabbar are scrolled upwards, out of view.
-  double get collapsedHeight => _collapsedHeight ?? (_toolBarHeight + (_tabBarHeight ?? 0.0));
-
-  double get minimumHeight => _minimumHeight ?? _tabBarHeight ?? _toolBarHeight;
+  /// then the toolbar and bottom widget are scrolled upwards, out of view.
+  double get collapsedHeight => _collapsedHeight ?? (_toolBarHeight + bottomHeight);
 
   // Defines the opacity of the toolbar's text and icons.
   double _toolBarOpacity(double appBarHeight, double statusBarHeight) {
-    return ((appBarHeight - (_tabBarHeight ?? 0.0) - statusBarHeight) / _toolBarHeight).clamp(0.0, 1.0);
+    return ((appBarHeight - bottomHeight - statusBarHeight) / _toolBarHeight).clamp(0.0, 1.0);
   }
 
-  double _tabBarOpacity(double appBarHeight, double statusBarHeight) {
-    final double tabBarHeight = _tabBarHeight ?? 0.0;
-    return ((appBarHeight - statusBarHeight) / tabBarHeight).clamp(0.0, 1.0);
+  double _bottomOpacity(double appBarHeight, double statusBarHeight) {
+    return ((appBarHeight - statusBarHeight) / bottomHeight).clamp(0.0, 1.0);
   }
 
   Widget _buildForSize(BuildContext context, BoxConstraints constraints) {
@@ -237,15 +247,15 @@ class AppBar extends StatelessWidget {
       )
     );
 
-    final double tabBarOpacity = _tabBarOpacity(size.height, statusBarHeight);
-    if (tabBar != null) {
+    final double bottomOpacity = _bottomOpacity(size.height, statusBarHeight);
+    if (bottom != null) {
       appBar = new Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           appBar,
-          tabBarOpacity == 1.0 ? tabBar : new Opacity(
-            child: tabBar,
-            opacity: const Interval(0.25, 1.0, curve: Curves.ease).transform(tabBarOpacity)
+          bottomOpacity == 1.0 ? bottom : new Opacity(
+            child: bottom,
+            opacity: const Interval(0.25, 1.0, curve: Curves.ease).transform(bottomOpacity)
           )
         ]
       );

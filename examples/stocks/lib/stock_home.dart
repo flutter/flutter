@@ -241,7 +241,7 @@ class StockHomeState extends State<StockHome> {
           ]
         )
       ],
-      tabBar: new TabBar<StockHomeTab>(
+      bottom: new TabBar<StockHomeTab>(
         labels: <StockHomeTab, TabLabel>{
           StockHomeTab.market: new TabLabel(text: StockStrings.of(context).market()),
           StockHomeTab.portfolio: new TabLabel(text: StockStrings.of(context).portfolio())
