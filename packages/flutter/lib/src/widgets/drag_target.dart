@@ -262,6 +262,12 @@ class _DraggableState<T> extends State<DraggableBase<T>> {
     _recognizer = config.createRecognizer(_startDrag);
   }
 
+  @override
+  void dispose() {
+    _recognizer.dispose();
+    super.dispose();
+  }
+
   GestureRecognizer _recognizer;
   int _activeCount = 0;
 

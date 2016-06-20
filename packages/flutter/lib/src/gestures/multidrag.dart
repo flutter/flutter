@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:ui' show Point, Offset;
 
+import 'package:meta/meta.dart';
+
 import 'arena.dart';
 import 'binding.dart';
 import 'constants.dart';
@@ -147,7 +149,9 @@ abstract class MultiDragPointerState {
   }
 
   /// Releases any resources used by the object.
+  @mustCallSuper
   void dispose() {
+    _arenaEntry?.resolve(GestureDisposition.rejected);
     assert(() { _pendingDelta = null; return true; });
   }
 }
@@ -258,14 +262,14 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
     assert(_pointers != null);
     assert(_pointers.containsKey(pointer));
     GestureBinding.instance.pointerRouter.removeRoute(pointer, _handleEvent);
-    _pointers[pointer].dispose();
-    _pointers.remove(pointer);
+    _pointers.remove(pointer).dispose();
   }
 
   @override
   void dispose() {
-    for (int pointer in _pointers.keys)
+    for (int pointer in _pointers.keys.toList())
       _removeState(pointer);
+    assert(_pointers.isEmpty);
     _pointers = null;
     super.dispose();
   }
