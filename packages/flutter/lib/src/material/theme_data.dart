@@ -4,11 +4,24 @@
 
 import 'dart:ui' show Color, hashValues;
 
-import 'package:flutter/widgets.dart';
-
 import 'colors.dart';
 import 'icon_theme_data.dart';
 import 'typography.dart';
+
+/// Describes the contrast needs of a color.
+enum Brightness {
+  /// The color is dark and will require a light text color to achieve readable
+  /// contrast.
+  ///
+  /// For example, the color might be dark grey, requiring white text.
+  dark,
+
+  /// The color is light and will require a dark text color to achieve readable
+  /// contrast.
+  ///
+  /// For example, the color might be bright white, requiring black text.
+  light,
+}
 
 // Deriving these values is black magic. The spec claims that pressed buttons
 // have a highlight of 0x66999999, but that's clearly wrong. The videos in the
