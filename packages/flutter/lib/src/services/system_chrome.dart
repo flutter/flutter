@@ -101,11 +101,21 @@ class SystemChrome {
       return _pendingStyleUpdate.future;
     }
 
+    if (style == _latestStyle) {
+      // Trivial success; no need to queue a microtask.
+      return new Future<SystemUiOverlayStyleUpdate>.value(
+        new SystemUiOverlayStyleUpdate._(
+          style: style,
+          success: true
+        )
+      );
+    }
+
     _pendingStyleUpdate = new _PendingStyleUpdate(style);
     scheduleMicrotask(() {
       assert(_pendingStyleUpdate != null);
       if (_pendingStyleUpdate.style == _latestStyle) {
-        // No update needed; trivial success.
+        // Trivial success; no need to invoke the embedder.
         _pendingStyleUpdate.complete(success: true);
         _pendingStyleUpdate = null;
         return;
