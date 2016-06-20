@@ -27,6 +27,7 @@ abstract class AppBarBottomWidget extends Widget {
 // Tablet/Desktop: 64dp
 
 /// A material design app bar.
+///
 /// An app bar consists of a toolbar and potentially other widgets, such as a
 /// [TabBar] and a [FlexibleSpaceBar]. App bars typically expose one or more
 /// common actions with [IconButtons]s which are optionally followed by a

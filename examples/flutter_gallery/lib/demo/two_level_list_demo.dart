@@ -11,41 +11,21 @@ class TwoLevelListDemo extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(title: new Text('Expand/collapse list control')),
-      body: new Column(
+      body: new TwoLevelList(
+        type: MaterialListType.oneLine,
         children: <Widget>[
-          new Container(
-            height: 56.0,
-            child: new Material(
-              elevation: 4,
-              type: MaterialType.canvas,
-              child: new Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: new Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    new Text('foo'),
-                    new Text('bar')
-                  ]
-                )
-              )
-            )
-          ),
-          new TwoLevelList(
-            type: MaterialListType.oneLine,
-            children: <Widget>[
-              new TwoLevelListItem(title: new Text('Top')),
-              new TwoLevelSublist(
-                title: new Text('Sublist'),
-                children: <Widget>[
-                  new TwoLevelListItem(title: new Text('One')),
-                  new TwoLevelListItem(title: new Text('Two')),
-                  new TwoLevelListItem(title: new Text('Free')),
-                  new TwoLevelListItem(title: new Text('Four'))
-                ]
-              ),
-              new TwoLevelListItem(title: new Text('Bottom'))
-            ]
-          )
+          new TwoLevelListItem(title: new Text('Top')),
+          new TwoLevelSublist(
+             title: new Text('Sublist'),
+              children: <Widget>[
+                new TwoLevelListItem(title: new Text('One')),
+                new TwoLevelListItem(title: new Text('Two')),
+                // https://en.wikipedia.org/wiki/Free_Four
+                new TwoLevelListItem(title: new Text('Free')),
+                new TwoLevelListItem(title: new Text('Four'))
+              ]
+           ),
+           new TwoLevelListItem(title: new Text('Bottom'))
         ]
       )
     );
