@@ -113,25 +113,27 @@ class _CalculatorState extends State<Calculator> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        backgroundColor: Theme.of(context).canvasColor,
-        elevation: 0
-      ),
-      body: new Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          // Give the key-pad 3/5 of the vertical space and the display 2/5.
-          new Flexible(
-            flex: 2,
-            child: new CalcDisplay(content: _expression.toString())
-          ),
-          new Divider(height: 1.0),
-          new Flexible(
-            flex: 3,
-            child: new KeyPad(calcState: this)
-          )
-        ]
+    return new Title(
+      child: new Scaffold(
+        appBar: new AppBar(
+          backgroundColor: Theme.of(context).canvasColor,
+          elevation: 0
+        ),
+        body: new Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            // Give the key-pad 3/5 of the vertical space and the display 2/5.
+            new Flexible(
+              flex: 2,
+              child: new CalcDisplay(content: _expression.toString())
+            ),
+            new Divider(height: 1.0),
+            new Flexible(
+              flex: 3,
+              child: new KeyPad(calcState: this)
+            )
+          ]
+        )
       )
     );
   }
