@@ -13,7 +13,7 @@ void main() {
           color: Colors.green[500],
           opacity: 0.5
         ),
-        child: new Icon(icon: Icons.add)
+        child: new Icon(Icons.add)
       )
     );
     Text text = tester.widget(find.byType(Text));

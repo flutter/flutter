@@ -153,7 +153,7 @@ class _FitnessDemoContentsState extends State<_FitnessDemoContents> {
       child: new Center(
         child: new Column(
           children: <Widget>[
-            new Icon(icon: icon, size: 48.0, color: color),
+            new Icon(icon, size: 48.0, color: color),
             new Text(value, style: new TextStyle(fontSize: 24.0, color: color)),
             new Text(description, style: new TextStyle(color: color))
           ]

@@ -14,6 +14,7 @@ import 'card.dart';
 import 'data_table.dart';
 import 'data_table_source.dart';
 import 'drop_down.dart';
+import 'icon.dart';
 import 'icon_button.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
@@ -333,16 +334,16 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
       ),
       new Container(width: 32.0),
       new IconButton(
+        icon: new Icon(Icons.chevron_left),
         padding: EdgeInsets.zero,
-        icon: Icons.chevron_left,
         onPressed: _firstRowIndex <= 0 ? null : () {
           pageTo(math.max(_firstRowIndex - config.rowsPerPage, 0));
         }
       ),
       new Container(width: 24.0),
       new IconButton(
+        icon: new Icon(Icons.chevron_right),
         padding: EdgeInsets.zero,
-        icon: Icons.chevron_right,
         onPressed: (!_rowCountApproximate && (_firstRowIndex + config.rowsPerPage >= _rowCount)) ? null : () {
           pageTo(_firstRowIndex + config.rowsPerPage);
         }
@@ -360,7 +361,8 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
             // See https://www.google.com/design/spec/components/data-tables.html#data-tables-tables-within-cards
             style: _selectedRowCount > 0 ? themeData.textTheme.subhead.copyWith(color: themeData.accentColor)
                                          : themeData.textTheme.title.copyWith(fontWeight: FontWeight.w400),
-            child: new IconTheme(
+            child: new IconTheme.merge(
+              context: context,
               data: new IconThemeData(
                 opacity: 0.54
               ),
@@ -395,7 +397,8 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
           ),
           new DefaultTextStyle(
             style: footerTextStyle,
-            child: new IconTheme(
+            child: new IconTheme.merge(
+              context: context,
               data: new IconThemeData(
                 opacity: 0.54
               ),

@@ -61,7 +61,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
       floatingActionButton: new FloatingActionButton(
         onPressed: null,
         backgroundColor: Colors.redAccent[200],
-        child: new Icon(icon: Icons.add)
+        child: new Icon(Icons.add)
       ),
       body: new Center(
         child: new RaisedButton(

@@ -23,7 +23,7 @@ class _ContactCategory extends StatelessWidget {
           children: <Widget>[
             new SizedBox(
               width: 72.0,
-              child: new Icon(icon: icon, color: Theme.of(context).primaryColor)
+              child: new Icon(icon, color: Theme.of(context).primaryColor)
             ),
             new Flexible(child: new Column(children: children))
           ]
@@ -59,7 +59,7 @@ class _ContactItem extends StatelessWidget {
     if (icon != null) {
       rowChildren.add(new SizedBox(
         width: 72.0,
-        child: new IconButton(icon: icon, onPressed: onPressed)
+        child: new IconButton(icon: new Icon(icon), onPressed: onPressed)
       ));
     }
     return new Padding(
@@ -99,7 +99,7 @@ class ContactsDemoState extends State<ContactsDemo> {
           expandedHeight: _appBarHeight,
           actions: <Widget>[
             new IconButton(
-              icon: Icons.create,
+              icon: new Icon(Icons.create),
               tooltip: 'Edit',
               onPressed: () {
                 _scaffoldKey.currentState.showSnackBar(new SnackBar(

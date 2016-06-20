@@ -75,7 +75,7 @@ class ComplexLayoutState extends State<ComplexLayout> {
         title: new Text('Advanced Layout'),
         actions: <Widget>[
           new IconButton(
-            icon: Icons.create,
+            icon: new Icon(Icons.create),
             tooltip: 'Search',
             onPressed: () {
               print('Pressed search');
@@ -162,7 +162,7 @@ class MenuItemWithIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Row(
       children: <Widget>[
-        new Icon(icon: icon),
+        new Icon(icon),
         new Padding(
           padding: new EdgeInsets.only(left: 8.0, right: 8.0),
           child: new Text(title)
@@ -263,7 +263,10 @@ class IconWithText extends StatelessWidget {
     return new Row(
       mainAxisAlignment: MainAxisAlignment.collapse,
       children: <Widget>[
-        new IconButton(icon: icon, onPressed: () { print('Pressed $title button'); } ),
+        new IconButton(
+          icon: new Icon(icon),
+          onPressed: () { print('Pressed $title button'); }
+        ),
         new Text(title)
       ]
     );
@@ -290,7 +293,7 @@ class MiniIconWithText extends StatelessWidget {
               backgroundColor: Theme.of(context).primaryColor,
               shape: BoxShape.circle
             ),
-            child: new Icon(icon: icon, color: Colors.white, size: 12.0)
+            child: new Icon(icon, color: Colors.white, size: 12.0)
           )
         ),
         new Text(title, style: Theme.of(context).textTheme.caption)
@@ -347,7 +350,7 @@ class UserHeader extends StatelessWidget {
                 new Row(
                   children: <Widget>[
                     new Text('Yesterday at 11:55 • ', style: Theme.of(context).textTheme.caption),
-                    new Icon(icon: Icons.people, size: 16.0, color: Theme.of(context).textTheme.caption.color)
+                    new Icon(Icons.people, size: 16.0, color: Theme.of(context).textTheme.caption.color)
                   ]
                 )
               ]
@@ -392,8 +395,14 @@ class ItemImageBox extends StatelessWidget {
                   child: new Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: <Widget>[
-                      new IconButton(icon: Icons.edit, onPressed: () { print('Pressed edit button'); }),
-                      new IconButton(icon: Icons.zoom_in, onPressed: () { print('Pressed zoom button'); })
+                      new IconButton(
+                        icon: new Icon(Icons.edit),
+                        onPressed: () { print('Pressed edit button'); }
+                      ),
+                      new IconButton(
+                        icon: new Icon(Icons.zoom_in),
+                        onPressed: () { print('Pressed zoom button'); }
+                      ),
                     ]
                   )
                 ),
@@ -483,11 +492,11 @@ class ItemGalleryBox extends StatelessWidget {
                             new Row(
                               children: <Widget>[
                                 new IconButton(
-                                  icon: Icons.share,
+                                  icon: new Icon(Icons.share),
                                   onPressed: () { print('Pressed share'); }
                                 ),
                                 new IconButton(
-                                  icon: Icons.event,
+                                  icon: new Icon(Icons.event),
                                   onPressed: () { print('Pressed event'); }
                                 ),
                                 new Flexible(
@@ -555,7 +564,7 @@ class BottomBarButton extends StatelessWidget {
       child: new Column(
         children: <Widget>[
           new IconButton(
-            icon: icon,
+            icon: new Icon(icon),
             onPressed: () { print('Pressed: $title'); }
           ),
           new Text(title, style: Theme.of(context).textTheme.caption)
@@ -579,7 +588,7 @@ class GalleryDrawer extends StatelessWidget {
         children: <Widget>[
           new FancyDrawerHeader(),
           new DrawerItem(
-            icon: Icons.brightness_5,
+            icon: new Icon(Icons.brightness_5),
             onPressed: () { _changeTheme(context, true); },
             selected: ComplexLayoutApp.of(context).lightTheme,
             child: new Row(
@@ -594,7 +603,7 @@ class GalleryDrawer extends StatelessWidget {
             )
           ),
           new DrawerItem(
-            icon: Icons.brightness_7,
+            icon: new Icon(Icons.brightness_7),
             onPressed: () { _changeTheme(context, false); },
             selected: !ComplexLayoutApp.of(context).lightTheme,
             child: new Row(
@@ -610,7 +619,7 @@ class GalleryDrawer extends StatelessWidget {
           ),
           new Divider(),
           new DrawerItem(
-            icon: Icons.hourglass_empty,
+            icon: new Icon(Icons.hourglass_empty),
             selected: timeDilation != 1.0,
             onPressed: () { ComplexLayoutApp.of(context).toggleAnimationSpeed(); },
             child: new Row(

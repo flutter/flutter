@@ -39,14 +39,14 @@ class PageSelectorDemo extends StatelessWidget {
                   child: new Row(
                     children: <Widget>[
                       new IconButton(
-                        icon: Icons.chevron_left,
+                        icon: new Icon(Icons.chevron_left),
                         color: color,
                         onPressed: () { _handleArrowButtonPress(context, -1); },
                         tooltip: 'Page back'
                       ),
                       new TabPageSelector<IconData>(),
                       new IconButton(
-                        icon: Icons.chevron_right,
+                        icon: new Icon(Icons.chevron_right),
                         color: color,
                         onPressed: () { _handleArrowButtonPress(context, 1); },
                         tooltip: 'Page forward'
@@ -63,7 +63,7 @@ class PageSelectorDemo extends StatelessWidget {
                         padding: const EdgeInsets.all(12.0),
                         child: new Card(
                           child: new Center(
-                            child: new Icon(icon: icon, size: 128.0, color: color)
+                            child: new Icon(icon, size: 128.0, color: color)
                           )
                         )
                       );

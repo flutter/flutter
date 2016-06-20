@@ -8,51 +8,51 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Icon sizing - no theme, default size', (WidgetTester tester) async {
+  testWidgets('ImageIcon sizing - no theme, default size', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Center(
-        child: new Icon(null)
+        child: new ImageIcon(null)
       )
     );
 
-    RenderBox renderObject = tester.renderObject(find.byType(Icon));
+    RenderBox renderObject = tester.renderObject(find.byType(ImageIcon));
     expect(renderObject.size, equals(const Size.square(24.0)));
   });
 
-  testWidgets('Icon sizing - no theme, explicit size', (WidgetTester tester) async {
+  testWidgets('ImageIcon sizing - no theme, explicit size', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Center(
-        child: new Icon(
+        child: new ImageIcon(
           null,
           size: 96.0
         )
       )
     );
 
-    RenderBox renderObject = tester.renderObject(find.byType(Icon));
+    RenderBox renderObject = tester.renderObject(find.byType(ImageIcon));
     expect(renderObject.size, equals(const Size.square(96.0)));
   });
 
-  testWidgets('Icon sizing - sized theme', (WidgetTester tester) async {
+  testWidgets('ImageIcon sizing - sized theme', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Center(
         child: new IconTheme(
           data: new IconThemeData(size: 36.0),
-          child: new Icon(null)
+          child: new ImageIcon(null)
         )
       )
     );
 
-    RenderBox renderObject = tester.renderObject(find.byType(Icon));
+    RenderBox renderObject = tester.renderObject(find.byType(ImageIcon));
     expect(renderObject.size, equals(const Size.square(36.0)));
   });
 
-  testWidgets('Icon sizing - sized theme, explicit size', (WidgetTester tester) async {
+  testWidgets('ImageIcon sizing - sized theme, explicit size', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Center(
         child: new IconTheme(
           data: new IconThemeData(size: 36.0),
-          child: new Icon(
+          child: new ImageIcon(
             null,
             size: 48.0
           )
@@ -60,21 +60,21 @@ void main() {
       )
     );
 
-    RenderBox renderObject = tester.renderObject(find.byType(Icon));
+    RenderBox renderObject = tester.renderObject(find.byType(ImageIcon));
     expect(renderObject.size, equals(const Size.square(48.0)));
   });
 
-  testWidgets('Icon sizing - sizeless theme, default size', (WidgetTester tester) async {
+  testWidgets('ImageIcon sizing - sizeless theme, default size', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Center(
         child: new IconTheme(
           data: new IconThemeData(),
-          child: new Icon(null)
+          child: new ImageIcon(null)
         )
       )
     );
 
-    RenderBox renderObject = tester.renderObject(find.byType(Icon));
+    RenderBox renderObject = tester.renderObject(find.byType(ImageIcon));
     expect(renderObject.size, equals(const Size.square(24.0)));
   });
 }

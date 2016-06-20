@@ -47,8 +47,8 @@ class IconsDemoState extends State<IconsDemo> {
 
   Widget buildIconButton(double size, IconData icon, bool enabled) {
     return new IconButton(
+      icon: new Icon(icon),
       size: size,
-      icon: icon,
       color: iconColor,
       tooltip: "${enabled ? 'Enabled' : 'Disabled'} icon button",
       onPressed: enabled ? handleIconButtonPress : null
@@ -130,7 +130,7 @@ class IconsDemoState extends State<IconsDemo> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         new Icon(
-                          icon: Icons.brightness_7,
+                          Icons.brightness_7,
                           color: iconColor.withAlpha(0x33) // 0.2 * 255 = 0x33
                         ),
                         new Slider(
@@ -145,7 +145,7 @@ class IconsDemoState extends State<IconsDemo> {
                           }
                         ),
                         new Icon(
-                          icon: Icons.brightness_7,
+                          Icons.brightness_7,
                           color: iconColor.withAlpha(0xFF)
                         ),
                       ]

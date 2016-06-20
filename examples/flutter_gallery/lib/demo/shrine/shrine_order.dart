@@ -55,7 +55,7 @@ class OrderItem extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: new Center(
                     child: new Icon(
-                      icon: Icons.info_outline,
+                      Icons.info_outline,
                       size: 24.0,
                       color: const Color(0xFFFFE0E0)
                     )
@@ -175,7 +175,7 @@ class _OrderPageState extends State<OrderPage> {
         },
         backgroundColor: const Color(0xFF16F0F0),
         child: new Icon(
-          icon: Icons.add_shopping_cart,
+          Icons.add_shopping_cart,
           color: Colors.black
         )
       ),

@@ -168,14 +168,14 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
         mainAxisAlignment: MainAxisAlignment.collapse,
         children: <Widget>[
           new IconButton(
-            icon: Icons.thumb_up,
+            icon: new Icon(Icons.thumb_up),
             onPressed: () {
               setState(() => iconButtonToggle = !iconButtonToggle);
             },
             color: iconButtonToggle ? Theme.of(context).primaryColor : null
           ),
           new IconButton(
-            icon: Icons.thumb_up,
+            icon: new Icon(Icons.thumb_up),
             onPressed: null
           )
         ]
@@ -189,7 +189,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
     return new Align(
       alignment: new FractionalOffset(0.5, 0.4),
       child: new FloatingActionButton(
-        child: new Icon(icon: Icons.add),
+        child: new Icon(Icons.add),
         onPressed: () {
           // Perform some action
         }

@@ -4,10 +4,10 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
 import 'icons.dart';
 import 'icon_button.dart';
 import 'icon_theme.dart';
+import 'icon_theme_data.dart';
 import 'theme.dart';
 
 /// A material design icon.
@@ -29,20 +29,21 @@ import 'theme.dart';
 ///  * [IconButton], for interactive icons.
 ///  * [Icons], for the list of available icons for use with this class.
 ///  * [IconTheme], which provides ambient configuration for icons.
+///  * [ImageIcon], for showing icons from [AssetImage]s or other [ImageProvider]s.
 class Icon extends StatelessWidget {
   /// Creates an icon.
   ///
   /// The [size] and [color] default to the value given by the current [IconTheme].
-  const Icon({
+  const Icon(this.icon, {
     Key key,
-    this.icon,
     this.size,
     this.color
   }) : super(key: key);
 
   /// The icon to display. The available icons are described in [Icons].
   ///
-  /// If null, no icon is shown.
+  /// The icon can be null, in which case the widget will render as an empty
+  /// space of the specified [size].
   final IconData icon;
 
   /// The size of the icon in logical pixels.
@@ -66,30 +67,17 @@ class Icon extends StatelessWidget {
   /// [IconTheme], if any.
   final Color color;
 
-  Color _getDefaultColorForBrightness(Brightness brightness) {
-    switch (brightness) {
-      case Brightness.dark:
-        return Colors.white;
-      case Brightness.light:
-        return Colors.black;
-    }
-    assert(brightness != null);
-    return null;
-  }
-
-  Color _getDefaultColor(BuildContext context) {
-    return IconTheme.of(context)?.color ?? _getDefaultColorForBrightness(Theme.of(context).brightness);
-  }
-
   @override
   Widget build(BuildContext context) {
-    final double iconSize = size ?? IconTheme.of(context)?.size ?? 24.0;
+    final IconThemeData iconTheme = IconTheme.of(context).fallback();
+
+    final double iconSize = size ?? iconTheme.size;
 
     if (icon == null)
       return new SizedBox(width: iconSize, height: iconSize);
 
-    final double iconOpacity = IconTheme.of(context)?.opacity ?? 1.0;
-    Color iconColor = color ?? _getDefaultColor(context);
+    final double iconOpacity = iconTheme.opacity;
+    Color iconColor = color ?? iconTheme.color;
     if (iconOpacity != 1.0)
       iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
 

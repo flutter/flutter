@@ -147,7 +147,7 @@ class CardCollectionState extends State<CardCollection> {
           buildFontRadioItem("Right-align text", TextAlign.right, _textAlign, _changeTextAlign, icon: Icons.format_align_right, enabled: !_editable),
           new Divider(),
           new DrawerItem(
-            icon: Icons.dvr,
+            icon: new Icon(Icons.dvr),
             onPressed: () { debugDumpApp(); debugDumpRenderTree(); },
             child: new Text('Dump App to Console')
           ),
@@ -227,7 +227,7 @@ class CardCollectionState extends State<CardCollection> {
 
   Widget buildDrawerColorRadioItem(String label, Map<int, Color> itemValue, Map<int, Color> currentValue, ValueChanged<Map<int, Color>> onChanged, { IconData icon, bool enabled: true }) {
     return new DrawerItem(
-      icon: icon,
+      icon: new Icon(icon),
       onPressed: enabled ? () { onChanged(itemValue); } : null,
       child: new Row(
         children: <Widget>[
@@ -244,7 +244,7 @@ class CardCollectionState extends State<CardCollection> {
 
   Widget buildDrawerDirectionRadioItem(String label, DismissDirection itemValue, DismissDirection currentValue, ValueChanged<DismissDirection> onChanged, { IconData icon, bool enabled: true }) {
     return new DrawerItem(
-      icon: icon,
+      icon: new Icon(icon),
       onPressed: enabled ? () { onChanged(itemValue); } : null,
       child: new Row(
         children: <Widget>[
@@ -261,7 +261,7 @@ class CardCollectionState extends State<CardCollection> {
 
   Widget buildFontRadioItem(String label, TextAlign itemValue, TextAlign currentValue, ValueChanged<TextAlign> onChanged, { IconData icon, bool enabled: true }) {
     return new DrawerItem(
-      icon: icon,
+      icon: new Icon(icon),
       onPressed: enabled ? () { onChanged(itemValue); } : null,
       child: new Row(
         children: <Widget>[
@@ -351,12 +351,12 @@ class CardCollectionState extends State<CardCollection> {
     }
 
     // TODO(abarth): This icon is wrong in RTL.
-    Widget leftArrowIcon =  new Icon(icon: Icons.arrow_back, size: 36.0);
+    Widget leftArrowIcon =  new Icon(Icons.arrow_back, size: 36.0);
     if (_dismissDirection == DismissDirection.startToEnd)
       leftArrowIcon = new Opacity(opacity: 0.1, child: leftArrowIcon);
 
       // TODO(abarth): This icon is wrong in RTL.
-    Widget rightArrowIcon =  new Icon(icon: Icons.arrow_forward, size: 36.0);
+    Widget rightArrowIcon =  new Icon(Icons.arrow_forward, size: 36.0);
     if (_dismissDirection == DismissDirection.endToStart)
       rightArrowIcon = new Opacity(opacity: 0.1, child: rightArrowIcon);
 

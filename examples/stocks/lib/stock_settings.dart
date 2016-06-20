@@ -104,7 +104,7 @@ class StockSettingsState extends State<StockSettings> {
   Widget buildSettingsPane(BuildContext context) {
     List<Widget> rows = <Widget>[
       new DrawerItem(
-        icon: Icons.thumb_up,
+        icon: new Icon(Icons.thumb_up),
         onPressed: () => _confirmOptimismChange(),
         child: new Row(
           children: <Widget>[
@@ -117,7 +117,7 @@ class StockSettingsState extends State<StockSettings> {
         )
       ),
       new DrawerItem(
-        icon: Icons.backup,
+        icon: new Icon(Icons.backup),
         onPressed: () { _handleBackupChanged(!(config.configuration.backupMode == BackupMode.enabled)); },
         child: new Row(
           children: <Widget>[
@@ -130,7 +130,7 @@ class StockSettingsState extends State<StockSettings> {
         )
       ),
       new DrawerItem(
-        icon: Icons.picture_in_picture,
+        icon: new Icon(Icons.picture_in_picture),
         onPressed: () { _handleShowPerformanceOverlayChanged(!config.configuration.showPerformanceOverlay); },
         child: new Row(
           children: <Widget>[
@@ -143,7 +143,7 @@ class StockSettingsState extends State<StockSettings> {
         )
       ),
       new DrawerItem(
-        icon: Icons.accessibility,
+        icon: new Icon(Icons.accessibility),
         onPressed: () { _handleShowSemanticsDebuggerChanged(!config.configuration.showSemanticsDebugger); },
         child: new Row(
           children: <Widget>[
@@ -158,9 +158,9 @@ class StockSettingsState extends State<StockSettings> {
     ];
     assert(() {
       // material grid and size construction lines are only available in checked mode
-      rows.addAll([
+      rows.addAll(<Widget>[
         new DrawerItem(
-          icon: Icons.border_clear,
+          icon: new Icon(Icons.border_clear),
           onPressed: () { _handleShowGridChanged(!config.configuration.debugShowGrid); },
           child: new Row(
             children: <Widget>[
@@ -173,7 +173,7 @@ class StockSettingsState extends State<StockSettings> {
           )
         ),
         new DrawerItem(
-          icon: Icons.border_all,
+          icon: new Icon(Icons.border_all),
           onPressed: () { _handleShowSizesChanged(!config.configuration.debugShowSizes); },
           child: new Row(
             children: <Widget>[
@@ -186,7 +186,7 @@ class StockSettingsState extends State<StockSettings> {
           )
         ),
         new DrawerItem(
-          icon: Icons.format_color_text,
+          icon: new Icon(Icons.format_color_text),
           onPressed: () { _handleShowBaselinesChanged(!config.configuration.debugShowBaselines); },
           child: new Row(
             children: <Widget>[
@@ -199,7 +199,7 @@ class StockSettingsState extends State<StockSettings> {
           )
         ),
         new DrawerItem(
-          icon: Icons.filter_none,
+          icon: new Icon(Icons.filter_none),
           onPressed: () { _handleShowLayersChanged(!config.configuration.debugShowLayers); },
           child: new Row(
             children: <Widget>[
@@ -212,7 +212,7 @@ class StockSettingsState extends State<StockSettings> {
           )
         ),
         new DrawerItem(
-          icon: Icons.mouse,
+          icon: new Icon(Icons.mouse),
           onPressed: () { _handleShowPointersChanged(!config.configuration.debugShowPointers); },
           child: new Row(
             children: <Widget>[
@@ -225,7 +225,7 @@ class StockSettingsState extends State<StockSettings> {
           )
         ),
         new DrawerItem(
-          icon: Icons.gradient,
+          icon: new Icon(Icons.gradient),
           onPressed: () { _handleShowRainbowChanged(!config.configuration.debugShowRainbow); },
           child: new Row(
             children: <Widget>[

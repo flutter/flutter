@@ -74,7 +74,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
         title: new Text('$indicatorTypeText'),
         actions: <Widget>[
           new IconButton(
-            icon: Icons.refresh,
+            icon: new Icon(Icons.refresh),
             tooltip: 'Pull to refresh',
             onPressed: () {
               setState(() {
@@ -83,7 +83,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
             }
           ),
           new IconButton(
-            icon: Icons.play_for_work,
+            icon: new Icon(Icons.play_for_work),
             tooltip: 'Over-scroll indicator',
             onPressed: () {
               setState(() {

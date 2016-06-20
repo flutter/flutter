@@ -160,7 +160,8 @@ class _PopupMenuItemState<T extends PopupMenuItem<dynamic>> extends State<T> {
     );
     if (!config.enabled) {
       final bool isDark = theme.brightness == Brightness.dark;
-      item = new IconTheme(
+      item = new IconTheme.merge(
+        context: context,
         data: new IconThemeData(opacity: isDark ? 0.5 : 0.38),
         child: item
       );
@@ -244,7 +245,7 @@ class _CheckedPopupMenuItemState<T> extends _PopupMenuItemState<CheckedPopupMenu
       enabled: config.enabled,
       leading: new FadeTransition(
         opacity: _opacity,
-        child: new Icon(icon: _controller.isDismissed ? null : Icons.done)
+        child: new Icon(_controller.isDismissed ? null : Icons.done)
       ),
       title: config.child
     );
@@ -526,7 +527,7 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   Widget build(BuildContext context) {
     if (config.child == null) {
       return new IconButton(
-        icon: Icons.more_vert,
+        icon: new Icon(Icons.more_vert),
         padding: config.padding,
         tooltip: config.tooltip,
         onPressed: () { showButtonMenu(context); }

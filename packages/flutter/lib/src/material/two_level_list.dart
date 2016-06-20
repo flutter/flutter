@@ -111,7 +111,8 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> {
       ),
       child: new Column(
         children: <Widget>[
-          new IconTheme(
+          new IconTheme.merge(
+            context: context,
             data: new IconThemeData(color: _iconColor.evaluate(_easeInAnimation)),
             child: new TwoLevelListItem(
               onTap: _handleOnTap,
@@ -122,9 +123,7 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> {
               ),
               trailing: new RotationTransition(
                 turns: _iconTurns,
-                child: new Icon(
-                  icon: Icons.expand_more
-                )
+                child: new Icon(Icons.expand_more)
               )
             )
           ),

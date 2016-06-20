@@ -66,7 +66,7 @@ class _PestoDemoState extends State<PestoDemo> {
         appBar: _buildAppBar(context),
         drawer: _buildDrawer(context),
         floatingActionButton: new FloatingActionButton(
-          child: new Icon(icon: Icons.edit),
+          child: new Icon(Icons.edit),
           onPressed: () { }
         ),
         body: _buildBody(context)
@@ -80,7 +80,7 @@ class _PestoDemoState extends State<PestoDemo> {
       expandedHeight: _kAppBarHeight,
       actions: <Widget>[
         new IconButton(
-          icon: Icons.search,
+          icon: new Icon(Icons.search),
           tooltip: 'Search',
           onPressed: () {
             _scaffoldKey.currentState.showSnackBar(new SnackBar(
@@ -305,7 +305,7 @@ class _RecipePageState extends State<_RecipePage> {
               backgroundColor: Colors.transparent,
               elevation: 0,
               leading: new IconButton(
-                icon: Icons.arrow_back,
+                icon: new Icon(Icons.arrow_back),
                 onPressed: () => Navigator.pop(context),
                 tooltip: 'Back'
               ),
@@ -364,7 +364,7 @@ class _RecipePageState extends State<_RecipePage> {
                     new Positioned(
                       right: 16.0,
                       child: new FloatingActionButton(
-                        child: new Icon(icon: isFavorite ? Icons.favorite : Icons.favorite_border),
+                        child: new Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
                         onPressed: _toggleFavorite
                       )
                     )
@@ -384,7 +384,7 @@ class _RecipePageState extends State<_RecipePage> {
         children: <Widget>[
           new Padding(
             padding: const EdgeInsets.only(right: 24.0),
-            child: new Icon(icon: icon, color: Colors.black54)
+            child: new Icon(icon, color: Colors.black54)
           ),
           new Text(label, style: menuItemStyle)
         ]

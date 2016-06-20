@@ -85,18 +85,18 @@ class TextStyle {
   }) {
     return new TextStyle(
       inherit: inherit,
-      color: color != null ? color : this.color,
-      fontFamily: fontFamily != null ? fontFamily : this.fontFamily,
-      fontSize: fontSize != null ? fontSize : this.fontSize,
-      fontWeight: fontWeight != null ? fontWeight : this.fontWeight,
-      fontStyle: fontStyle != null ? fontStyle : this.fontStyle,
-      letterSpacing: letterSpacing != null ? letterSpacing : this.letterSpacing,
-      wordSpacing: wordSpacing != null ? wordSpacing : this.wordSpacing,
-      textBaseline: textBaseline != null ? textBaseline : this.textBaseline,
-      height: height != null ? height : this.height,
-      decoration: decoration != null ? decoration : this.decoration,
-      decorationColor: decorationColor != null ? decorationColor : this.decorationColor,
-      decorationStyle: decorationStyle != null ? decorationStyle : this.decorationStyle
+      color: color ?? this.color,
+      fontFamily: fontFamily ?? this.fontFamily,
+      fontSize: fontSize ?? this.fontSize,
+      fontWeight: fontWeight ?? this.fontWeight,
+      fontStyle: fontStyle ?? this.fontStyle,
+      letterSpacing: letterSpacing ?? this.letterSpacing,
+      wordSpacing: wordSpacing ?? this.wordSpacing,
+      textBaseline: textBaseline ?? this.textBaseline,
+      height: height ?? this.height,
+      decoration: decoration ?? this.decoration,
+      decorationColor: decorationColor ?? this.decorationColor,
+      decorationStyle: decorationStyle ?? this.decorationStyle
     );
   }
 

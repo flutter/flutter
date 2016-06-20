@@ -83,7 +83,7 @@ bool value;
 
 // Toggleable icon button.
 new IconButton(
-  icon: Icons.thumb_up,
+  icon: new Icon(Icons.thumb_up),
   onPressed: () {
     setState(() => value = !value);
   },
@@ -99,7 +99,7 @@ new Scaffold(
     title: new Text('Demo')
   ),
   floatingActionButton: new FloatingActionButton(
-    child: new Icon(icon: Icons.add),
+    child: new Icon(Icons.add),
     onPressed: null
   )
 );

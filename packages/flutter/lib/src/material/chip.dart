@@ -96,7 +96,7 @@ class Chip extends StatelessWidget {
           child: new Container(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: new Icon(
-              icon: Icons.cancel,
+              Icons.cancel,
               size: 18.0,
               color: Colors.black54
             )

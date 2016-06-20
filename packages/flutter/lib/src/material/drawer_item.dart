@@ -8,7 +8,9 @@ import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'icon.dart';
-import 'icons.dart';
+import 'icon_theme.dart';
+import 'icon_theme_data.dart';
+import 'image_icon.dart';
 import 'ink_well.dart';
 import 'theme.dart';
 
@@ -36,7 +38,13 @@ class DrawerItem extends StatelessWidget {
   }) : super(key: key);
 
   /// The icon to display before the child widget.
-  final IconData icon;
+  ///
+  /// The size and color of the icon is configured automatically using an
+  /// [IconTheme] and therefore do not need to be explicitly given in the
+  /// icon widget.
+  ///
+  /// See [Icon], [ImageIcon].
+  final Widget icon;
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -94,9 +102,13 @@ class DrawerItem extends StatelessWidget {
       children.add(
         new Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: new Icon(
-            icon: icon,
-            color: _getIconColor(themeData)
+          child: new IconTheme.merge(
+            context: context,
+            data: new IconThemeData(
+              color: _getIconColor(themeData),
+              size: 24.0
+            ),
+            child: icon
           )
         )
       );

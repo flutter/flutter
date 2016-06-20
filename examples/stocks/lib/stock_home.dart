@@ -26,10 +26,11 @@ class _NotImplementedDialog extends StatelessWidget {
       content: new Text('This feature has not yet been implemented.'),
       actions: <Widget>[
         new FlatButton(
+          onPressed: () { debugDumpApp(); },
           child: new Row(
             children: <Widget>[
               new Icon(
-                icon: Icons.dvr,
+                Icons.dvr,
                 size: 18.0
               ),
               new Container(
@@ -37,14 +38,13 @@ class _NotImplementedDialog extends StatelessWidget {
               ),
               new Text('DUMP APP TO CONSOLE'),
             ]
-          ),
-          onPressed: () { debugDumpApp(); }
+          )
         ),
         new FlatButton(
-          child: new Text('OH WELL'),
           onPressed: () {
             Navigator.pop(context, false);
-          }
+          },
+          child: new Text('OH WELL')
         )
       ]
     );
@@ -126,12 +126,12 @@ class StockHomeState extends State<StockHome> {
       child: new Block(children: <Widget>[
         new DrawerHeader(content: new Center(child: new Text('Stocks'))),
         new DrawerItem(
-          icon: Icons.assessment,
+          icon: new Icon(Icons.assessment),
           selected: true,
           child: new Text('Stock List')
         ),
         new DrawerItem(
-          icon: Icons.account_balance,
+          icon: new Icon(Icons.account_balance),
           onPressed: () {
             showDialog(
               context: context,
@@ -158,7 +158,7 @@ class StockHomeState extends State<StockHome> {
           child: new Text('Account Balance')
         ),
         new DrawerItem(
-          icon: Icons.dvr,
+          icon: new Icon(Icons.dvr),
           onPressed: () {
             try {
               debugDumpApp();
@@ -173,7 +173,7 @@ class StockHomeState extends State<StockHome> {
         ),
         new Divider(),
         new DrawerItem(
-          icon: Icons.thumb_up,
+          icon: new Icon(Icons.thumb_up),
           onPressed: () => _handleStockModeChange(StockMode.optimistic),
           child: new Row(
             children: <Widget>[
@@ -183,7 +183,7 @@ class StockHomeState extends State<StockHome> {
           )
         ),
         new DrawerItem(
-          icon: Icons.thumb_down,
+          icon: new Icon(Icons.thumb_down),
           onPressed: () => _handleStockModeChange(StockMode.pessimistic),
           child: new Row(
             children: <Widget>[
@@ -194,11 +194,11 @@ class StockHomeState extends State<StockHome> {
         ),
         new Divider(),
         new DrawerItem(
-          icon: Icons.settings,
+          icon: new Icon(Icons.settings),
           onPressed: _handleShowSettings,
           child: new Text('Settings')),
         new DrawerItem(
-          icon: Icons.help,
+          icon: new Icon(Icons.help),
           child: new Text('Help & Feedback'))
       ])
     );
@@ -214,7 +214,7 @@ class StockHomeState extends State<StockHome> {
       title: new Text(StockStrings.of(context).title()),
       actions: <Widget>[
         new IconButton(
-          icon: Icons.search,
+          icon: new Icon(Icons.search),
           onPressed: _handleSearchBegin,
           tooltip: 'Search'
         ),
@@ -307,7 +307,7 @@ class StockHomeState extends State<StockHome> {
   Widget buildSearchBar() {
     return new AppBar(
       leading: new IconButton(
-        icon: Icons.arrow_back,
+        icon: new Icon(Icons.arrow_back),
         color: Theme.of(context).accentColor,
         onPressed: _handleSearchEnd,
         tooltip: 'Back'
@@ -332,7 +332,7 @@ class StockHomeState extends State<StockHome> {
   Widget buildFloatingActionButton() {
     return new FloatingActionButton(
       tooltip: 'Create company',
-      child: new Icon(icon: Icons.add),
+      child: new Icon(Icons.add),
       backgroundColor: Colors.redAccent[200],
       onPressed: _handleCreateCompany
     );
