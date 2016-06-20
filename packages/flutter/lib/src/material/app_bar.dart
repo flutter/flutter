@@ -105,12 +105,14 @@ class AppBar extends StatelessWidget {
   /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
   final int elevation;
 
-  /// The color to use for the app bar's material.
+  /// The color to use for the app bar's material. This generally should be set
+  /// in tandem with [brightness].
   ///
   /// Defaults to [ThemeData.primaryColor].
   final Color backgroundColor;
 
-  /// The brightness of the app bar's material.
+  /// The brightness of the app bar's material. This generally should be set in
+  /// tandem with [backgroundColor].
   ///
   /// Defaults to [ThemeData.brightness].
   final Brightness brightness;
