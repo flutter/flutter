@@ -20,24 +20,27 @@ const double _kFloatingActionButtonMargin = 16.0; // TODO(hmuller): should be de
 const Duration _kFloatingActionButtonSegue = const Duration(milliseconds: 200);
 final Tween<double> _kFloatingActionButtonTurnTween = new Tween<double>(begin: -0.125, end: 0.0);
 
-/// The Scaffold's appbar is the toolbar, tabbar, and the "flexible space" that's
-/// stacked behind them. The Scaffold's appBarBehavior defines how the appbar
-/// responds to scrolling the application.
+/// The Scaffold's appbar is the toolbar, bottom, and the "flexible space"
+/// that's stacked behind them. The Scaffold's appBarBehavior defines how
+/// its layout responds to scrolling the application's body.
 enum AppBarBehavior {
-  /// The tool bar's layout does not respond to scrolling.
+  /// The app bar's layout does not respond to scrolling.
   anchor,
 
-  /// The tool bar's appearance and layout depend on the scrollOffset of the
+  /// The app bar's appearance and layout depend on the scrollOffset of the
   /// Scrollable identified by the Scaffold's scrollableKey. With the scrollOffset
   /// at 0.0, scrolling downwards causes the toolbar's flexible space to shrink,
-  /// and then the entire toolbar fade outs and scrolls off the top of the screen.
-  /// Scrolling upwards always causes the toolbar to reappear.
+  /// and then the app bar fades out and scrolls off the top of the screen.
+  /// Scrolling upwards always causes the app bar's bottom widget to reappear
+  /// if the bottom widget isn't null, otherwise the app bar's toolbar reappears.
   scroll,
 
-  /// The tool bar's appearance and layout depend on the scrollOffset of the
+  /// The app bar's appearance and layout depend on the scrollOffset of the
   /// Scrollable identified by the Scaffold's scrollableKey. With the scrollOffset
   /// at 0.0, Scrolling downwards causes the toolbar's flexible space to shrink.
-  /// Other than that, the toolbar remains anchored at the top.
+  /// If the bottom widget isn't null the app bar shrinks to the bottom widget's
+  /// [AppBarBottomWidget.bottomHeight], otherwise the app bar shrinks to its
+  /// [AppBar.collapsedHeight].
   under,
 }
 
@@ -612,13 +615,14 @@ class ScaffoldState extends State<Scaffold> {
   Widget _buildScrollableAppBar(BuildContext context, EdgeInsets padding) {
     final double expandedHeight = (config.appBar?.expandedHeight ?? 0.0) + padding.top;
     final double collapsedHeight = (config.appBar?.collapsedHeight ?? 0.0) + padding.top;
-    final double minimumHeight = (config.appBar?.minimumHeight ?? 0.0) + padding.top;
+    final double bottomHeight = config.appBar?.bottomHeight + padding.top;
+    final double underHeight = config.appBar.bottom != null ? bottomHeight : collapsedHeight;
     Widget appBar;
 
-    if (_scrollOffset <= expandedHeight && _scrollOffset >= expandedHeight - minimumHeight) {
+    if (_scrollOffset <= expandedHeight && _scrollOffset >= expandedHeight - underHeight) {
       // scrolled to the top, flexible space collapsed, only the toolbar and tabbar are (partially) visible.
       if (config.appBarBehavior == AppBarBehavior.under) {
-        appBar = _buildAnchoredAppBar(expandedHeight, minimumHeight, padding);
+        appBar = _buildAnchoredAppBar(expandedHeight, underHeight, padding);
       } else {
         final double height = math.max(_floatingAppBarHeight, expandedHeight - _scrollOffset);
         _appBarController.value = (expandedHeight - height) / expandedHeight;
@@ -630,7 +634,7 @@ class ScaffoldState extends State<Scaffold> {
     } else if (_scrollOffset > expandedHeight) {
       // scrolled past the entire app bar, maybe show the "floating" toolbar.
       if (config.appBarBehavior == AppBarBehavior.under) {
-        appBar = _buildAnchoredAppBar(expandedHeight, minimumHeight, padding);
+        appBar = _buildAnchoredAppBar(expandedHeight, underHeight, padding);
       } else {
         _floatingAppBarHeight = (_floatingAppBarHeight + _scrollOffsetDelta).clamp(0.0, collapsedHeight);
         _appBarController.value = (expandedHeight - _floatingAppBarHeight) / expandedHeight;

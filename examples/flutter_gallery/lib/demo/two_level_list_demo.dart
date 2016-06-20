@@ -16,15 +16,16 @@ class TwoLevelListDemo extends StatelessWidget {
         children: <Widget>[
           new TwoLevelListItem(title: new Text('Top')),
           new TwoLevelSublist(
-            title: new Text('Sublist'),
-            children: <Widget>[
-              new TwoLevelListItem(title: new Text('One')),
-              new TwoLevelListItem(title: new Text('Two')),
-              new TwoLevelListItem(title: new Text('Free')),
-              new TwoLevelListItem(title: new Text('Four'))
-            ]
-          ),
-          new TwoLevelListItem(title: new Text('Bottom'))
+             title: new Text('Sublist'),
+              children: <Widget>[
+                new TwoLevelListItem(title: new Text('One')),
+                new TwoLevelListItem(title: new Text('Two')),
+                // https://en.wikipedia.org/wiki/Free_Four
+                new TwoLevelListItem(title: new Text('Free')),
+                new TwoLevelListItem(title: new Text('Four'))
+              ]
+           ),
+           new TwoLevelListItem(title: new Text('Bottom'))
         ]
       )
     );
