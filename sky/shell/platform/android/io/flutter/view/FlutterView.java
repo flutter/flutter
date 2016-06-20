@@ -177,9 +177,6 @@ public class FlutterView extends SurfaceView
         mSkyEngine.onAppLifecycleStateChanged(AppLifecycleState.PAUSED);
     }
 
-    public void onResume() {
-    }
-
     public void onPostResume() {
         mSkyEngine.onAppLifecycleStateChanged(AppLifecycleState.RESUMED);
     }

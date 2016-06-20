@@ -106,14 +106,6 @@ public class SkyActivity extends Activity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        if (mView != null) {
-            mView.onResume();
-        }
-    }
-
-    @Override
     protected void onPostResume() {
         super.onPostResume();
         if (mView != null) {
