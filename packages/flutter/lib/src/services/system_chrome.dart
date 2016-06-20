@@ -115,7 +115,7 @@ class SystemChrome {
       _systemChromeProxy.setSystemUiOverlayStyle(update.style)
         .then((SystemChromeSetSystemUiOverlayStyleResponseParams value) {
           update.complete(success: value.success);
-        }, onError: () {
+        }, onError: (_) {
           update.complete(success: false);
         });
       _latestStyle = _pendingStyleUpdate.style;
