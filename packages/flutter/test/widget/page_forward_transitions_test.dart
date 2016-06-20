@@ -98,8 +98,8 @@ void main() {
                 )
               );
             case '/2': return new TestRoute<Null>(settings: settings, child: new Text('E'));
-            case '/3': return new TestRoute<Null> (settings: settings, child: new Text('F'));
-            case '/4': return new TestRoute<Null> (settings: settings, child: new Text('G'));
+            case '/3': return new TestRoute<Null>(settings: settings, child: new Text('F'));
+            case '/4': return new TestRoute<Null>(settings: settings, child: new Text('G'));
           }
         }
       )
