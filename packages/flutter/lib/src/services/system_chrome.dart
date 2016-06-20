@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:sky_services/flutter/platform/system_chrome.mojom.dart' as mojom;
 import 'package:sky_services/flutter/platform/system_chrome.mojom.dart';
 
@@ -85,21 +86,77 @@ class SystemChrome {
   /// embedder (if any). The embedder may choose to ignore unsupported
   /// overlays.
   ///
-  /// Arguments:
+  /// This method will schedule the embedder update to be run in a microtask.
+  /// Any subsequent calls to this method during the current event loop will
+  /// overwrite the pending value to be set on the embedder.
   ///
-  ///  * [style]: A [SystemUiOverlayStyle] enum value denoting the style to use
-  ///
-  /// Return Value:
-  ///
-  ///   boolean indicating if the preference was conveyed successfully to the
-  ///   embedder.
-  ///
-  /// Platform Specific Notes:
-  ///
-  ///   If the overlay is unsupported on the platform, enabling or disabling
-  ///   that overlay is a no-op and always return true.
-  static Future<bool> setSystemUIOverlayStyle(SystemUiOverlayStyle style) async {
-    return (await _systemChromeProxy.setSystemUiOverlayStyle(
-      style)).success;
+  /// The return value indicates both the preference that was eventually
+  /// conveyed to the embedder, along with whether it was successfully
+  /// conveyed.
+  static Future<SystemUiOverlayStyleUpdate> setSystemUIOverlayStyle(SystemUiOverlayStyle style) {
+    assert(style != null);
+
+    if (_pendingStyleUpdate != null) {
+      _pendingStyleUpdate.style = style;
+      return _pendingStyleUpdate.future;
+    }
+
+    _pendingStyleUpdate = new _PendingStyleUpdate(style);
+    scheduleMicrotask(() {
+      assert(_pendingStyleUpdate != null);
+      if (_pendingStyleUpdate.style == _latestStyle) {
+        // No update needed; trivial success.
+        _pendingStyleUpdate.complete(success: true);
+        _pendingStyleUpdate = null;
+        return;
+      }
+
+      _PendingStyleUpdate update = _pendingStyleUpdate;
+      _systemChromeProxy.setSystemUiOverlayStyle(update.style)
+        .then((SystemChromeSetSystemUiOverlayStyleResponseParams value) {
+          update.complete(success: value.success);
+        }, onError: (_) {
+          update.complete(success: false);
+        });
+      _latestStyle = _pendingStyleUpdate.style;
+      _pendingStyleUpdate = null;
+    });
+
+    return _pendingStyleUpdate.future;
+  }
+
+  static _PendingStyleUpdate _pendingStyleUpdate;
+  static SystemUiOverlayStyle _latestStyle;
+}
+
+/// Struct that represents an attempted update to the system overlays that are
+/// visible on the embedder.
+class SystemUiOverlayStyleUpdate {
+  const SystemUiOverlayStyleUpdate._({
+    @required this.style,
+    @required this.success
+  });
+
+  /// The style that was passed to the embedder.
+  final SystemUiOverlayStyle style;
+
+  /// Whether the preference was successfully conveyed to the embedder.
+  final bool success;
+}
+
+class _PendingStyleUpdate {
+  _PendingStyleUpdate(this.style);
+
+  final Completer<SystemUiOverlayStyleUpdate> _completer =
+    new Completer<SystemUiOverlayStyleUpdate>();
+  SystemUiOverlayStyle style;
+
+  Future<SystemUiOverlayStyleUpdate> get future => _completer.future;
+
+  void complete({@required bool success}) {
+    _completer.complete(new SystemUiOverlayStyleUpdate._(
+      style: style,
+      success: success
+    ));
   }
 }
