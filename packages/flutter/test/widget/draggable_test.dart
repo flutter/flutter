@@ -871,6 +871,75 @@ void main() {
       await tester.pump();
     }
   });
+
+  testWidgets('Draggable disposes recognizer', (WidgetTester tester) async {
+    bool didTap = false;
+    await tester.pumpWidget(new Overlay(
+      initialEntries: <OverlayEntry>[
+        new OverlayEntry(
+          builder: (BuildContext context) => new GestureDetector(
+            onTap: () {
+              didTap = true;
+            },
+            child: new Draggable<dynamic>(
+              child: new Container(
+                decoration: new BoxDecoration(
+                  backgroundColor: new Color(0xFFFFFF00)
+                )
+              ),
+              feedback: new Container(
+                width: 100.0,
+                height: 100.0,
+                decoration: new BoxDecoration(
+                  backgroundColor: new Color(0xFFFF0000)
+                )
+              )
+            )
+          )
+        )
+      ]
+    ));
+
+    await tester.startGesture(const Point(10.0, 10.0));
+    expect(didTap, isFalse);
+
+    // This tears down the draggable without terminating the gesture sequence,
+    // which used to trigger asserts in the multi-drag gesture recognizer.
+    await tester.pumpWidget(new Container(key: new UniqueKey()));
+    expect(didTap, isFalse);
+  });
+
+  testWidgets('Draggable plays nice with onTap', (WidgetTester tester) async {
+    await tester.pumpWidget(new Overlay(
+      initialEntries: <OverlayEntry>[
+        new OverlayEntry(
+          builder: (BuildContext context) => new GestureDetector(
+            onTap: () { /* registers a tap recognizer */ },
+            child: new Draggable<dynamic>(
+              child: new Container(
+                decoration: new BoxDecoration(
+                  backgroundColor: new Color(0xFFFFFF00)
+                )
+              ),
+              feedback: new Container(
+                width: 100.0,
+                height: 100.0,
+                decoration: new BoxDecoration(
+                  backgroundColor: new Color(0xFFFF0000)
+                )
+              )
+            )
+          )
+        )
+      ]
+    ));
+
+    TestGesture firstGesture = await tester.startGesture(const Point(10.0, 10.0), pointer: 24);
+    TestGesture secondGesture = await tester.startGesture(const Point(10.0, 20.0), pointer: 25);
+
+    await firstGesture.moveBy(new Offset(100.0, 0.0));
+    await secondGesture.up();
+  });
 }
 
 class DragTargetData { }
