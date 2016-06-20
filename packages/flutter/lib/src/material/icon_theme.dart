@@ -7,9 +7,10 @@ import 'package:meta/meta.dart';
 
 import 'icon_theme_data.dart';
 
-/// Controls the color and opacity of icons in a widget subtree.
+/// Controls the default color, opacity, and size of icons in a widget subtree.
 class IconTheme extends InheritedWidget {
-  /// Creates an icon theme that controls the color and opacity of descendant widgets.
+  /// Creates an icon theme that controls the color, opacity, and size of
+  /// descendant widgets.
   ///
   /// Both [data] and [child] arguments must not be null.
   IconTheme({
@@ -21,7 +22,7 @@ class IconTheme extends InheritedWidget {
     assert(child != null);
   }
 
-  /// The color and opacity to use for icons in this subtree.
+  /// The color, opacity, and size to use for icons in this subtree.
   final IconThemeData data;
 
   /// The data from the closest instance of this class that encloses the given context.
