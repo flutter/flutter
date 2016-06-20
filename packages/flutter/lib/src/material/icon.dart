@@ -26,28 +26,33 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-///  * [IconButton], for interactive icons
-///  * [Icons], for the list of available icons for use with this class
+///  * [IconButton], for interactive icons.
+///  * [Icons], for the list of available icons for use with this class.
+///  * [IconTheme], which provides ambient configuration for icons.
 class Icon extends StatelessWidget {
   /// Creates an icon.
   ///
-  /// The [size] argument most not be null.
-  Icon({
+  /// The [size] and [color] default to the value given by the current [IconTheme].
+  const Icon({
     Key key,
     this.icon,
-    this.size: 24.0,
+    this.size,
     this.color
-  }) : super(key: key) {
-    assert(size != null);
-  }
+  }) : super(key: key);
+
+  /// The icon to display. The available icons are described in [Icons].
+  ///
+  /// If null, no icon is shown.
+  final IconData icon;
 
   /// The size of the icon in logical pixels.
   ///
   /// Icons occupy a square with width and height equal to size.
+  ///
+  /// Defaults to the current [IconTheme] size, if any. If there is no
+  /// [IconTheme], or it does not specify an explicit size, then it defaults to
+  /// 24.0.
   final double size;
-
-  /// The icon to display. The available icons are described in [Icons].
-  final IconData icon;
 
   /// The color to use when drawing the icon.
   ///
@@ -56,6 +61,9 @@ class Icon extends StatelessWidget {
   /// and black if the theme is light. See [Theme] to set the current
   /// theme and [ThemeData.brightness] for setting the current theme's
   /// brightness.
+  ///
+  /// The given color will be adjusted by the opacity of the current
+  /// [IconTheme], if any.
   final Color color;
 
   Color _getDefaultColorForBrightness(Brightness brightness) {
@@ -75,8 +83,10 @@ class Icon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double iconSize = size ?? IconTheme.of(context)?.size ?? 24.0;
+
     if (icon == null)
-      return new SizedBox(width: size, height: size);
+      return new SizedBox(width: iconSize, height: iconSize);
 
     final double iconOpacity = IconTheme.of(context)?.opacity ?? 1.0;
     Color iconColor = color ?? _getDefaultColor(context);
@@ -85,15 +95,15 @@ class Icon extends StatelessWidget {
 
     return new ExcludeSemantics(
       child: new SizedBox(
-        width: size,
-        height: size,
+        width: iconSize,
+        height: iconSize,
         child: new Center(
           child: new Text(
             new String.fromCharCode(icon.codePoint),
             style: new TextStyle(
               inherit: false,
               color: iconColor,
-              fontSize: size,
+              fontSize: iconSize,
               fontFamily: 'MaterialIcons'
             )
           )
@@ -105,9 +115,14 @@ class Icon extends StatelessWidget {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('$icon');
-    description.add('size: $size');
-    if (this.color != null)
+    if (icon != null) {
+      description.add('$icon');
+    } else {
+      description.add('<empty>');
+    }
+    if (size != null)
+      description.add('size: $size');
+    if (color != null)
       description.add('color: $color');
   }
 }
