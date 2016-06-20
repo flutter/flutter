@@ -279,10 +279,10 @@ class _TimePickerHeader extends StatelessWidget {
                     onTap: _handleChangeDayPeriod,
                     behavior: HitTestBehavior.opaque,
                     child: new Column(
-                      mainAxisAlignment: MainAxisAlignment.collapse,
+                      mainAxisSpace: MainAxisSpace.min,
                       children: <Widget>[
                         new Text('AM', style: amStyle),
-                        new Container(width: 0.0, height: 8.0),  // Vertical spsacer
+                        new Container(width: 0.0, height: 8.0),  // Vertical spacer
                         new Text('PM', style: pmStyle),
                       ]
                     )

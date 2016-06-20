@@ -29,6 +29,18 @@ enum FlexDirection {
   vertical
 }
 
+/// Which incoming constraint parameter defines how much free space is
+/// available along the main axis in a flex layout.
+enum MainAxisSpace {
+  /// The free space is the difference between incoming constraint's min parameter
+  /// and the collective size of the children, but not less than zero.
+  min,
+
+  /// The free space is the difference between incoming constraint's max parameter
+  /// and the collective size of the children, but not less than zero.
+  max,
+}
+
 /// How the children should be placed along the main axis in a flex layout.
 enum MainAxisAlignment {
   /// Place the children as close to the start of the main axis as possible.
@@ -47,10 +59,7 @@ enum MainAxisAlignment {
   spaceAround,
 
   /// Place the free space evenly between the children as well as before and after the first and last child.
-  spaceEvenly,
-
-  /// Do not expand to fill the free space. None of the children may specify a flex factor.
-  collapse,
+  spaceEvenly
 }
 
 /// How the children should be placed along the cross axis in a flex layout.
@@ -97,11 +106,13 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   RenderFlex({
     List<RenderBox> children,
     FlexDirection direction: FlexDirection.horizontal,
+    MainAxisSpace mainAxisSpace: MainAxisSpace.max,
     MainAxisAlignment mainAxisAlignment: MainAxisAlignment.start,
     CrossAxisAlignment crossAxisAlignment: CrossAxisAlignment.center,
     TextBaseline textBaseline
   }) : _direction = direction,
        _mainAxisAlignment = mainAxisAlignment,
+       _mainAxisSpace = mainAxisSpace,
        _crossAxisAlignment = crossAxisAlignment,
        _textBaseline = textBaseline {
     addAll(children);
@@ -123,6 +134,16 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   set mainAxisAlignment (MainAxisAlignment value) {
     if (_mainAxisAlignment != value) {
       _mainAxisAlignment = value;
+      markNeedsLayout();
+    }
+  }
+
+  /// The limit used to compute free space along the main axis.
+  MainAxisSpace get mainAxisSpace => _mainAxisSpace;
+  MainAxisSpace _mainAxisSpace;
+  set mainAxisSpace (MainAxisSpace value) {
+    if (_mainAxisSpace != value) {
+      _mainAxisSpace = value;
       markNeedsLayout();
     }
   }
@@ -299,10 +320,14 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     int totalFlex = 0;
     int totalChildren = 0;
     assert(constraints != null);
-    final double mainSize = (_direction == FlexDirection.horizontal) ? constraints.constrainWidth() : constraints.constrainHeight();
-    final bool canFlex = mainSize < double.INFINITY && mainAxisAlignment != MainAxisAlignment.collapse;
-    double crossSize = 0.0;  // This is determined as we lay out the children
-    double freeSpace = canFlex ? mainSize : 0.0;
+    final bool isHorizontal = _direction == FlexDirection.horizontal;
+    final double minMainSize = isHorizontal ? constraints.constrainWidth(0.0) : constraints.constrainHeight(0.0);
+    final double maxMainSize = isHorizontal ? constraints.constrainWidth() : constraints.constrainHeight();
+    final double mainSize = mainAxisSpace == MainAxisSpace.max ? maxMainSize : minMainSize;
+    final bool canFlex = mainSize < double.INFINITY;
+
+    double crossSize = 0.0;
+    double allocatedSize = 0.0; // Sum of the sizes of the the non-flexible children.
     RenderBox child = firstChild;
     while (child != null) {
       final FlexParentData childParentData = child.parentData;
@@ -315,12 +340,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           final String dimension = _direction == FlexDirection.horizontal ? 'width' : 'height';
           String error, message;
           String addendum = '';
-          if (mainAxisAlignment == MainAxisAlignment.collapse) {
-            error = 'RenderFlex children have non-zero flex but mainAxisAlignment is set to "collapse".';
-            message = 'The MainAxisAlignment.collapse value indicates that the $identity is to shrink-wrap its children '
-                      'along the $axis axis. Setting a flex on a child (e.g. using a Flexible) indicates that the '
-                      'child is to expand to fill the remaining space in the $axis direction.';
-          } else if (mainSize == double.INFINITY) {
+          if (mainSize == double.INFINITY) {
             error = 'RenderFlex children have non-zero flex but incoming $dimension constraints are unbounded.';
             message = 'When a $identity is in a parent that does not provide a finite $dimension constraint, for example '
                       'if it is in a $axis scrollable, it will try to shrink-wrap its children along the $axis '
@@ -397,16 +417,17 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           }
         }
         child.layout(innerConstraints, parentUsesSize: true);
-        freeSpace -= _getMainSize(child);
+        final double childMainSize = _getMainSize(child);
+        allocatedSize += childMainSize;
         crossSize = math.max(crossSize, _getCrossSize(child));
       }
       assert(child.parentData == childParentData);
       child = childParentData.nextSibling;
     }
-    _overflow = math.max(0.0, -freeSpace);
-    freeSpace = math.max(0.0, freeSpace);
+    _overflow = math.max(0.0, allocatedSize - (canFlex ? maxMainSize : 0.0));
 
-    // Distribute remaining space to flexible children, and determine baseline.
+    // Distribute free space to flexible children, and determine baseline.
+    double freeSpace = math.max(0.0, (canFlex ? mainSize : 0.0) - allocatedSize);
     double maxBaselineDistance = 0.0;
     double usedSpace = 0.0;
     if (totalFlex > 0 || crossAxisAlignment == CrossAxisAlignment.baseline) {
@@ -470,17 +491,19 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     double betweenSpace;
     double remainingSpace;
     if (canFlex) {
+      final bool isMainAxisSpaceMax = mainAxisSpace == MainAxisSpace.max;
+      final double expectedSize = isMainAxisSpaceMax ? maxMainSize : allocatedSize;
       remainingSpace = math.max(0.0, freeSpace - usedSpace);
       switch (_direction) {
         case FlexDirection.horizontal:
-          size = constraints.constrain(new Size(mainSize, crossSize));
+          size = constraints.constrain(new Size(expectedSize, crossSize));
           crossSize = size.height;
-          assert(size.width == mainSize);
+          assert(isMainAxisSpaceMax ? size.width == maxMainSize : size.width >= minMainSize);
           break;
         case FlexDirection.vertical:
-          size = constraints.constrain(new Size(crossSize, mainSize));
+          size = constraints.constrain(new Size(crossSize, expectedSize));
           crossSize = size.width;
-          assert(size.height == mainSize);
+          assert(isMainAxisSpaceMax ? size.height == maxMainSize : size.height >= minMainSize);
           break;
       }
     } else {
@@ -502,7 +525,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
     switch (_mainAxisAlignment) {
       case MainAxisAlignment.start:
-      case MainAxisAlignment.collapse:
         leadingSpace = 0.0;
         betweenSpace = 0.0;
         break;
@@ -632,6 +654,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     super.debugFillDescription(description);
     description.add('direction: $_direction');
     description.add('mainAxisAlignment: $_mainAxisAlignment');
+    description.add('mainAxisSpace: $_mainAxisSpace');
     description.add('crossAxisAlignment: $_crossAxisAlignment');
     description.add('textBaseline: $_textBaseline');
   }

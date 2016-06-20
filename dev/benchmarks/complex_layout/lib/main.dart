@@ -261,7 +261,7 @@ class IconWithText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Row(
-      mainAxisAlignment: MainAxisAlignment.collapse,
+      mainAxisSpace: MainAxisSpace.min,
       children: <Widget>[
         new IconButton(
           icon: new Icon(icon),
@@ -282,7 +282,7 @@ class MiniIconWithText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Row(
-      mainAxisAlignment: MainAxisAlignment.collapse,
+      mainAxisSpace: MainAxisSpace.min,
       children: <Widget>[
         new Padding(
           padding: new EdgeInsets.only(right: 8.0),

@@ -116,7 +116,7 @@ class Chip extends StatelessWidget {
         ),
         child: new Row(
           children: children,
-          mainAxisAlignment: MainAxisAlignment.collapse
+          mainAxisSpace: MainAxisSpace.min
         )
       )
     );

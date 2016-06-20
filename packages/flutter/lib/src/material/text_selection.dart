@@ -44,7 +44,7 @@ class _TextSelectionToolbar extends StatelessWidget {
       elevation: 1,
       child: new Container(
         height: 44.0,
-         child: new Row(mainAxisAlignment: MainAxisAlignment.collapse, children: items)
+        child: new Row(mainAxisSpace: MainAxisSpace.min, children: items)
       )
     );
   }

@@ -16,7 +16,7 @@ void main() {
           key: rotatedBoxKey,
           quarterTurns: 1,
           child: new Row(
-            mainAxisAlignment: MainAxisAlignment.collapse,
+            mainAxisSpace: MainAxisSpace.min,
             children: <Widget>[
               new GestureDetector(
                 onTap: () { log.add('left'); },

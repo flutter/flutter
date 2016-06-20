@@ -48,10 +48,10 @@ void main() {
     expect(didReceiveTap, isTrue);
   });
 
-  testWidgets('Row and FlexJustifyContent.collapse', (WidgetTester tester) async {
+  testWidgets('Row and MainAxisSpace.min', (WidgetTester tester) async {
     final Key flexKey = new Key('flexKey');
 
-    // Row without mainAxisAlignment: FlexJustifyContent.collapse
+    // Default is MainAxisSpace.max so the Row should be as wide as the test: 800.
     await tester.pumpWidget(new Center(
       child: new Row(
         children: <Widget>[
@@ -65,7 +65,7 @@ void main() {
     expect(renderBox.size.width, equals(800.0));
     expect(renderBox.size.height, equals(100.0));
 
-    // Row with mainAxisAlignment: FlexJustifyContent.collapse
+    // Row with MainAxisSpace.min without flexible children shrink wraps.
     await tester.pumpWidget(new Center(
       child: new Row(
         children: <Widget>[
@@ -73,7 +73,7 @@ void main() {
           new Container(width: 30.0, height: 100.0)
         ],
         key: flexKey,
-        mainAxisAlignment: MainAxisAlignment.collapse
+        mainAxisSpace: MainAxisSpace.min
       )
     ));
     renderBox = tester.renderObject(find.byKey(flexKey));
@@ -81,10 +81,10 @@ void main() {
     expect(renderBox.size.height, equals(100.0));
   });
 
-  testWidgets('Column and FlexJustifyContent.collapse', (WidgetTester tester) async {
+  testWidgets('Column and MainAxisSpace.min', (WidgetTester tester) async {
     final Key flexKey = new Key('flexKey');
 
-    // Column without mainAxisAlignment: FlexJustifyContent.collapse
+    // Default is MainAxisSpace.max so the Column should be as high as the test: 600.
     await tester.pumpWidget(new Center(
       child: new Column(
         children: <Widget>[
@@ -98,7 +98,7 @@ void main() {
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(600.0));
 
-    // Column with mainAxisAlignment: FlexJustifyContent.collapse
+    // Column with MainAxisSpace.min without flexible children shrink wraps.
     await tester.pumpWidget(new Center(
       child: new Column(
         children: <Widget>[
@@ -106,7 +106,7 @@ void main() {
           new Container(width: 100.0, height: 150.0)
         ],
         key: flexKey,
-        mainAxisAlignment: MainAxisAlignment.collapse
+        mainAxisSpace: MainAxisSpace.min
       )
     ));
     renderBox = tester.renderObject(find.byKey(flexKey));
@@ -129,7 +129,7 @@ void main() {
               height: 100.0
             )
           ],
-          mainAxisAlignment: MainAxisAlignment.collapse
+          mainAxisSpace: MainAxisSpace.min
         )
       )
     ));
@@ -150,7 +150,7 @@ void main() {
               height: 100.0
             )
           ],
-          mainAxisAlignment: MainAxisAlignment.collapse
+          mainAxisSpace: MainAxisSpace.min
         )
       )
     ));

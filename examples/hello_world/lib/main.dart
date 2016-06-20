@@ -1,7 +1,37 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+import 'package:flutter/material.dart';
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';  // TBD remove this
 
-void main() => runApp(new Center(child: new Text('Hello, world!')));
+class Home extends StatefulWidget {
+  @override
+  HomeState createState() => new HomeState();
+}
+
+class HomeState extends State<Home> {
+  @override
+  Widget build(BuildContext context) {
+    return new Container(
+      decoration: new BoxDecoration(backgroundColor: Colors.green[300]),
+      child: new Center(
+        child: new Container(
+          decoration: new BoxDecoration(backgroundColor: Colors.purple[300]),
+          padding: const EdgeInsets.all(8.0),
+          width: 100.0,
+          child: new Row(
+            mainAxisSpace: MainAxisSpace.min,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget> [
+              new Text('Menu item'),
+              new Text('V')
+            ]
+          )
+        )
+      )
+    );
+  }
+}
+
+void main() {
+  debugPaintSizeEnabled = true;
+  runApp(new MaterialApp(home: new Home()));
+}
