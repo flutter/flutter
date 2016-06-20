@@ -73,9 +73,9 @@ public class ExampleActivity extends Activity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        flutterView.onResume();
+    protected void onPostResume() {
+        super.onPostResume();
+        flutterView.onPostResume();
     }
 
     @Override
