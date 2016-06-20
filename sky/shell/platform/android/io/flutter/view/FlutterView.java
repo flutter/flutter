@@ -610,7 +610,7 @@ public class FlutterView extends SurfaceView
          * Called when a message is received from the Flutter app.
          * @return the reply to the message (can be null)
          */
-        String onMessage(String message);
+        String onMessage(FlutterView view, String message);
     };
 
     public interface OnMessageListenerAsync {
@@ -618,7 +618,7 @@ public class FlutterView extends SurfaceView
          * Called when a message is received from the Flutter app.
          * @param response Used to send a reply back to the app.
          */
-        void onMessage(String message, MessageResponse response);
+        void onMessage(FlutterView view, String message, MessageResponse response);
     }
 
     public interface MessageResponse {
@@ -636,13 +636,13 @@ public class FlutterView extends SurfaceView
         public void sendString(String messageName, String message, SendStringResponse callback) {
             OnMessageListener listener = mOnMessageListeners.get(messageName);
             if (listener != null) {
-                callback.call(listener.onMessage(message));
+                callback.call(listener.onMessage(FlutterView.this, message));
                 return;
             }
 
             OnMessageListenerAsync asyncListener = mAsyncOnMessageListeners.get(messageName);
             if (asyncListener != null) {
-                asyncListener.onMessage(message, new MessageResponseAdapter(callback));
+                asyncListener.onMessage(FlutterView.this, message, new MessageResponseAdapter(callback));
                 return;
             }
 
