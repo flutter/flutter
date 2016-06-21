@@ -49,13 +49,21 @@ final _ApplicationMessagesImpl _appMessages = new _ApplicationMessagesImpl();
 /// Flutter framework to exchange application-specific messages.
 class HostMessages {
   /// Send a message to the host application.
-  static Future<String> sendToHost(String messageName, [String message = '']) async {
-    return (await _hostAppMessagesProxy.sendString(messageName, message)).reply;
+  static Future<String> sendToHost(String messageName, [String message = '']) {
+    Completer<String> completer = new Completer<String>();
+    _hostAppMessagesProxy.sendString(messageName, message, (String reply) {
+      completer.complete(reply);
+    });
+    return completer.future;
   }
 
   /// Sends a JSON-encoded message to the host application and JSON-decodes the response.
   static Future<dynamic> sendJSON(String messageName, [dynamic json]) async {
-    return JSON.decode((await _hostAppMessagesProxy.sendString(messageName, JSON.encode(json))).reply);
+    Completer<dynamic> completer = new Completer<dynamic>();
+    _hostAppMessagesProxy.sendString(messageName, JSON.encode(json), (String reply) {
+      completer.complete(JSON.decode(reply));
+    });
+    return completer.future;
   }
 
   /// Register a callback for receiving messages from the host application.

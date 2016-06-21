@@ -130,28 +130,26 @@ class MojoClient {
   ///
   /// The Future will emit a [ClientException] if the response doesn't have a
   /// success status code.
-  Future<mojo.MojoDataPipeConsumer> readDataPipe(dynamic url, { Map<String, String> headers }) async {
+  Future<mojo.MojoDataPipeConsumer> readDataPipe(dynamic url, { Map<String, String> headers }) {
+    Completer<mojo.MojoDataPipeConsumer> completer = new Completer<mojo.MojoDataPipeConsumer>();
     mojom.UrlLoaderProxy loader = new mojom.UrlLoaderProxy.unbound();
-    mojom.UrlRequest request = _prepareRequest('GET', url, headers);
-    mojom.UrlResponse response;
-    try {
-      networkService.createUrlLoader(loader);
-      response = (await loader.start(request)).response;
-    } catch (exception, stack) {
-      FlutterError.reportError(new FlutterErrorDetails(
-        exception: exception,
-        stack: stack,
-        library: 'networking HTTP library',
-        context: 'while sending bytes to the Mojo network library',
-        silent: true
-      ));
-      return null;
-    } finally {
+    networkService.createUrlLoader(loader);
+    loader.start(_prepareRequest('GET', url, headers), (mojom.UrlResponse response) {
       loader.close();
-    }
-    if (response.statusCode < 400)
-      return response.body;
-    throw new Exception("Request to $url failed with status ${response.statusCode}.");
+      if (response.statusCode < 400) {
+        completer.complete(response.body);
+      } else {
+        Exception exception = new Exception("Request to $url failed with status ${response.statusCode}.");
+        FlutterError.reportError(new FlutterErrorDetails(
+          exception: exception,
+          library: 'networking HTTP library',
+          context: 'while sending bytes to the Mojo network library',
+          silent: true
+        ));
+        completer.completeError(exception);
+      }
+    });
+    return completer.future;
   }
 
   mojom.UrlRequest _prepareRequest(String method, dynamic url, Map<String, String> headers, [dynamic body, Encoding encoding = UTF8]) {
@@ -177,35 +175,37 @@ class MojoClient {
     return request;
   }
 
-  Future<Response> _send(String method, dynamic url, Map<String, String> headers, [dynamic body, Encoding encoding = UTF8]) async {
+  Future<Response> _send(String method, dynamic url, Map<String, String> headers, [dynamic body, Encoding encoding = UTF8]) {
+    Completer<Response> completer = new Completer<Response>();
     mojom.UrlLoaderProxy loader = new mojom.UrlLoaderProxy.unbound();
+    networkService.createUrlLoader(loader);
     mojom.UrlRequest request = _prepareRequest(method, url, headers, body, encoding);
-    try {
-      networkService.createUrlLoader(loader);
-      mojom.UrlResponse response = (await loader.start(request)).response;
-      ByteData data = await mojo.DataPipeDrainer.drainHandle(response.body);
-      Uint8List bodyBytes = new Uint8List.view(data.buffer);
-      Map<String, String> headers = <String, String>{};
-      if (response.headers != null) {
-        for (mojom.HttpHeader header in response.headers) {
-          String headerName = header.name.toLowerCase();
-          String existingValue = headers[headerName];
-          headers[headerName] = existingValue != null ? '$existingValue, ${header.value}' : header.value;
-        }
-      }
-      return new Response.bytes(bodyBytes, response.statusCode, headers: headers);
-    } catch (exception, stack) {
-      FlutterError.reportError(new FlutterErrorDetails(
-        exception: exception,
-        stack: stack,
-        library: 'networking HTTP library',
-        context: 'while sending bytes to the Mojo network library',
-        silent: true
-      ));
-      return new Response.bytes(null, 500);
-    } finally {
+    loader.start(request, (mojom.UrlResponse response) async {
       loader.close();
-    }
+      try {
+        ByteData data = await mojo.DataPipeDrainer.drainHandle(response.body);
+        Uint8List bodyBytes = new Uint8List.view(data.buffer);
+        Map<String, String> headers = <String, String>{};
+        if (response.headers != null) {
+          for (mojom.HttpHeader header in response.headers) {
+            String headerName = header.name.toLowerCase();
+            String existingValue = headers[headerName];
+            headers[headerName] = existingValue != null ? '$existingValue, ${header.value}' : header.value;
+          }
+        }
+        completer.complete(new Response.bytes(bodyBytes, response.statusCode, headers: headers));
+      } catch (exception, stack) {
+        FlutterError.reportError(new FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'networking HTTP library',
+          context: 'while sending bytes to the Mojo network library',
+          silent: true
+        ));
+        completer.complete(new Response.bytes(null, 500));
+      }
+    });
+    return completer.future;
   }
 
   void _checkResponseSuccess(dynamic url, Response response) {

@@ -64,7 +64,7 @@ class _ShellServiceConnector extends bindings.ServiceConnector {
       return;
     }
     mojom.ServiceProviderProxy services = new mojom.ServiceProviderProxy.unbound();
-    instance._shell.connectToApplication(url, services, null);
+    instance._shell.connectToApplication(url, services);
     core.MojoMessagePipe pipe = new core.MojoMessagePipe();
     proxy.ctrl.bind(pipe.endpoints[0]);
     services.connectToService_(serviceName, pipe.endpoints[1]);
@@ -116,9 +116,8 @@ class MojoShell {
     if (_shell == null)
       return null;
     mojom.ServiceProviderProxy services = new mojom.ServiceProviderProxy.unbound();
-    mojom.ServiceProviderStub exposedServices = new mojom.ServiceProviderStub.unbound();
-    _shell.connectToApplication(url, services, exposedServices);
-    return new ApplicationConnection(exposedServices, services);
+    _shell.connectToApplication(url, services);
+    return new ApplicationConnection(null, services);
   }
 
   /// Interceptor for calls to [connectToService] and

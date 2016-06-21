@@ -180,8 +180,12 @@ class MojoAssetBundle extends CachingAssetBundle {
   mojom.AssetBundleProxy _bundle;
 
   @override
-  Future<core.MojoDataPipeConsumer> load(String key) async {
-    return (await _bundle.getAsStream(key)).assetData;
+  Future<core.MojoDataPipeConsumer> load(String key) {
+    Completer<core.MojoDataPipeConsumer> completer = new Completer<core.MojoDataPipeConsumer>();
+    _bundle.getAsStream(key, (core.MojoDataPipeConsumer assetData) {
+      completer.complete(assetData);
+    });
+    return completer.future;
   }
 }
 

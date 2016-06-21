@@ -31,7 +31,11 @@ class Clipboard {
   /// Retrieves data from the clipboard that matches the given format.
   ///
   ///  * `format` is a media type, such as `text/plain`.
-  static Future<mojom.ClipboardData> getClipboardData(String format) async {
-    return (await _clipboardProxy.getClipboardData(format)).clip;
+  static Future<mojom.ClipboardData> getClipboardData(String format) {
+    Completer<mojom.ClipboardData> completer = new Completer<mojom.ClipboardData>();
+    _clipboardProxy.getClipboardData(format, (mojom.ClipboardData clip) {
+      completer.complete(clip);
+    });
+    return completer.future;
   }
 }

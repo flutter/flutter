@@ -98,12 +98,15 @@ class SoundEffectPlayer {
   int _nextStreamId = 0;
 
   /// Loads a sound effect.
-  Future<SoundEffect> load(MojoDataPipeConsumer data) async {
-    SoundPoolLoadResponseParams result = await _soundPool.load(data);
-    if (result.success)
-      return new SoundEffect(result.soundId);
-
-    throw new Exception('Unable to load sound');
+  Future<SoundEffect> load(MojoDataPipeConsumer data) {
+    Completer<SoundEffect> completer = new Completer<SoundEffect>();
+    _soundPool.load(data, (bool success, int soundId) {
+      if (success)
+        completer.complete(new SoundEffect(soundId));
+      else
+        completer.completeError(new Exception('Unable to load sound'));
+    });
+    return completer.future;
   }
 
   /// Plays a sound effect.
@@ -112,21 +115,26 @@ class SoundEffectPlayer {
     double rightVolume: 1.0,
     bool loop: false,
     double pitch: 1.0
-  }) async {
+  }) {
+    Completer<SoundEffectStream> completer = new Completer<SoundEffectStream>();
     int streamId = _nextStreamId++;
-    SoundPoolPlayResponseParams result = await _soundPool.play(
-      sound._soundId, streamId, <double>[leftVolume, rightVolume], loop, pitch
-    );
-
-    if (result.success) {
-      return new SoundEffectStream(this, streamId,
-        leftVolume: leftVolume,
-        rightVolume: rightVolume,
-        pitch: pitch
-      );
-    }
-
-    throw new Exception('Unable to play sound');
+    _soundPool.play(sound._soundId,
+                    streamId,
+                    <double>[leftVolume, rightVolume],
+                    loop,
+                    pitch,
+                    (bool success) {
+      if (success) {
+        completer.complete(new SoundEffectStream(this, streamId,
+          leftVolume: leftVolume,
+          rightVolume: rightVolume,
+          pitch: pitch
+        ));
+      } else {
+        completer.completeError(new Exception('Unable to play sound'));
+      }
+    });
+    return completer.future;
   }
 
   /// Set to true to pause a sound effect.
@@ -203,8 +211,11 @@ class SoundTrackPlayer {
     soundTrack._player = new MediaPlayerProxy.unbound();
     _mediaService.createPlayer(soundTrack._player);
 
-    await soundTrack._player.prepare(await pipe);
-    return soundTrack;
+    Completer<SoundTrack> completer = new Completer<SoundTrack>();
+    soundTrack._player.prepare(await pipe, (bool ignored) {
+      completer.complete(soundTrack);
+    });
+    return await completer.future;
   }
 
   /// Unloads a [SoundTrack] from memory.

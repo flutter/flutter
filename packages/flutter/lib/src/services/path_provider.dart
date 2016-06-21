@@ -29,8 +29,12 @@ class PathProvider {
   ///
   ///  * _iOS_: `NSTemporaryDirectory()`
   ///  * _Android_: `getCacheDir()` on the context.
-  static Future<Directory> getTemporaryDirectory() async {
-    return new Directory((await _pathProviderProxy.temporaryDirectory()).path);
+  static Future<Directory> getTemporaryDirectory() {
+    Completer<Directory> completer = new Completer<Directory>();
+    _pathProviderProxy.temporaryDirectory((String path) {
+      completer.complete(new Directory(path));
+    });
+    return completer.future;
   }
 
   /// Path to a directory where the application may place files that are private
@@ -41,7 +45,11 @@ class PathProvider {
   ///
   ///  * _iOS_: `NSDocumentsDirectory`
   ///  * _Android_: The AppData directory.
-  static Future<Directory> getApplicationDocumentsDirectory() async {
-    return new Directory((await _pathProviderProxy.applicationDocumentsDirectory()).path);
+  static Future<Directory> getApplicationDocumentsDirectory() {
+    Completer<Directory> completer = new Completer<Directory>();
+    _pathProviderProxy.applicationDocumentsDirectory((String path) {
+      completer.complete(new Directory(path));
+    });
+    return completer.future;
   }
 }
