@@ -112,6 +112,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// Whether there is currently a test executing.
   bool get inTest;
 
+  /// The number of outstanding microtasks in the queue.
+  int get microtaskCount;
+
   /// The default test timeout for tests when using this binding.
   test_package.Timeout get defaultTestTimeout;
 
@@ -411,6 +414,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   bool get inTest => _fakeAsync != null;
 
   @override
+  int get microtaskCount => _fakeAsync.microtaskCount;
+
+  @override
   Future<Null> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsTree ]) {
     return TestAsyncUtils.guard(() {
       assert(inTest);
@@ -543,6 +549,14 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   bool get inTest => _inTest;
   bool _inTest = false;
+
+  @override
+  int get microtaskCount {
+    // Unsupported until we have a wrapper around the real async API
+    // https://github.com/flutter/flutter/issues/4637
+    assert(false);
+    return -1;
+  }
 
   @override
   test_package.Timeout get defaultTestTimeout => test_package.Timeout.none;
