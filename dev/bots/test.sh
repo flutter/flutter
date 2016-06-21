@@ -3,12 +3,18 @@ set -ex
 
 export PATH="$PWD/bin:$PWD/bin/cache/dart-sdk/bin:$PATH"
 
+die() {
+    set +x
+    echo "Error: script executed early due to error"
+    exit 1
+}
+
 # analyze all the Dart code in the repo
 flutter analyze --flutter-repo
 
 # verify that the tests actually return failure on failure and success on success
-(cd dev/automated_tests; ! flutter test test_smoke_test/fail_test.dart > /dev/null)
-(cd dev/automated_tests; flutter test test_smoke_test/pass_test.dart > /dev/null)
+(cd dev/automated_tests; ! flutter test test_smoke_test/fail_test.dart > /dev/null) || die
+(cd dev/automated_tests; flutter test test_smoke_test/pass_test.dart > /dev/null) || die
 
 # run tests
 (cd packages/flutter; flutter test)
