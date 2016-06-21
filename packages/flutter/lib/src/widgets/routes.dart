@@ -525,14 +525,17 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @override
   void didPush() {
     if (!settings.isInitialRoute) {
-      BuildContext overlayContext = navigator.overlay.context;
-      if (overlayContext == null) {
-        throw new FlutterError(
-          'Unable to find the BuildContext for the Navigator\'s overlay.\n'
-          'Did you remember to pass the settings object to the route\'s '
-          'constructor in your onGenerateRoute callback?'
-        );
-      }
+      BuildContext overlayContext = navigator.overlay?.context;
+      assert(() {
+        if (overlayContext == null) {
+          throw new FlutterError(
+            'Unable to find the BuildContext for the Navigator\'s overlay.\n'
+            'Did you remember to pass the settings object to the route\'s '
+            'constructor in your onGenerateRoute callback?'
+          );
+        }
+        return true;
+      });
       Focus.moveScopeTo(focusKey, context: overlayContext);
     }
     super.didPush();
