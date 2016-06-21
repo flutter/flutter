@@ -245,7 +245,8 @@ class _MaterialButtonState extends State<MaterialButton> {
     final ButtonTheme buttonTheme = ButtonTheme.of(context);
     final double height = config.height ?? buttonTheme.height;
     final int elevation = (_highlight ? config.highlightElevation : config.elevation) ?? 0;
-    Widget contents = new IconTheme(
+    Widget contents = new IconTheme.merge(
+      context: context,
       data: new IconThemeData(
         color: textColor
       ),

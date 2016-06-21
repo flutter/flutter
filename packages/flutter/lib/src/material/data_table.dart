@@ -436,6 +436,7 @@ class DataTable extends StatelessWidget {
   }
 
   Widget _buildDataCell({
+    BuildContext context,
     EdgeInsets padding,
     Widget label,
     bool numeric,
@@ -445,7 +446,7 @@ class DataTable extends StatelessWidget {
     VoidCallback onSelectChanged
   }) {
     if (showEditIcon) {
-      final Widget icon = new Icon(icon: Icons.edit, size: 18.0);
+      final Widget icon = new Icon(Icons.edit, size: 18.0);
       label = new Flexible(child: label);
       label = new Row(children: numeric ? <Widget>[ icon, label ] : <Widget>[ label, icon ]);
     }
@@ -460,7 +461,8 @@ class DataTable extends StatelessWidget {
             fontSize: 13.0,
             color: placeholder ? Colors.black38 : Colors.black87 // TODO(ianh): defer to theme, since this won't work in e.g. the dark theme
           ),
-          child: new IconTheme(
+          child: new IconTheme.merge(
+            context: context,
             data: new IconThemeData(
               color: Colors.black54
             ),
@@ -561,6 +563,7 @@ class DataTable extends StatelessWidget {
       for (DataRow row in rows) {
         DataCell cell = row.cells[dataColumnIndex];
         tableRows[rowIndex].children[displayColumnIndex] = _buildDataCell(
+          context: context,
           padding: padding,
           label: cell.widget,
           numeric: column.numeric,
@@ -765,7 +768,7 @@ class _SortArrowState extends State<_SortArrow> {
                              ..setTranslationRaw(0.0, _kArrowIconBaselineOffset, 0.0),
         alignment: FractionalOffset.center,
         child: new Icon(
-          icon: Icons.arrow_downward,
+          Icons.arrow_downward,
           size: _kArrowIconSize,
           color: Colors.black87
         )

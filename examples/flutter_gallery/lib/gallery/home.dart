@@ -80,17 +80,17 @@ class GalleryHomeState extends State<GalleryHome> {
         type: MaterialListType.oneLine,
         children: <Widget>[
           new TwoLevelSublist(
-            leading: new Icon(icon: Icons.star),
+            leading: new Icon(Icons.star),
             title: new Text('Demos'),
             children: _demoItems
           ),
           new TwoLevelSublist(
-            leading: new Icon(icon: Icons.extension),
+            leading: new Icon(Icons.extension),
             title: new Text('Components'),
             children: _componentItems
           ),
           new TwoLevelSublist(
-            leading: new Icon(icon: Icons.color_lens),
+            leading: new Icon(Icons.color_lens),
             title: new Text('Style'),
             children: _styleItems
           )

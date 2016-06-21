@@ -144,7 +144,7 @@ class ListDemoState extends State<ListDemo> {
       leading: _showAvatars ? new CircleAvatar(child: new Text(item)) : null,
       title: new Text('This item represents $item.'),
       subtitle: secondary,
-      trailing: _showIcons ? new Icon(icon: Icons.info, color: Theme.of(context).disabledColor) : null
+      trailing: _showIcons ? new Icon(Icons.info, color: Theme.of(context).disabledColor) : null
     );
   }
 
@@ -175,7 +175,7 @@ class ListDemoState extends State<ListDemo> {
         title: new Text('Scrolling list\n$itemTypeText$layoutText'),
         actions: <Widget>[
           new IconButton(
-            icon: Icons.sort_by_alpha,
+            icon: new Icon(Icons.sort_by_alpha),
             tooltip: 'Sort',
             onPressed: () {
               setState(() {
@@ -185,7 +185,7 @@ class ListDemoState extends State<ListDemo> {
             }
           ),
           new IconButton(
-            icon: Icons.more_vert,
+            icon: new Icon(Icons.more_vert),
             tooltip: 'Show menu',
             onPressed: () { showConfigurationSheet(context); }
           )

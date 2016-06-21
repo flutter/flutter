@@ -42,6 +42,7 @@ export 'src/material/icon_button.dart';
 export 'src/material/icon_theme.dart';
 export 'src/material/icon_theme_data.dart';
 export 'src/material/icons.dart';
+export 'src/material/image_icon.dart';
 export 'src/material/ink_well.dart';
 export 'src/material/input.dart';
 export 'src/material/list.dart';

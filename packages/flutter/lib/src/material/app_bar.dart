@@ -46,6 +46,10 @@ abstract class AppBarBottomWidget extends Widget {
 /// AppBar's [collapsedHeight] and [bottomHeight] define how small the app bar
 /// will become when the application is scrolled.
 ///
+/// By default, icons within an app bar will use the
+/// [ThemeData.primaryIconTheme]. This can be overridden by nesting an
+/// [IconTheme] inside the [AppBar].
+///
 /// See also:
 ///
 ///  * [Scaffold]
@@ -126,6 +130,10 @@ class AppBar extends StatelessWidget {
   /// tandem with [backgroundColor].
   ///
   /// Defaults to [ThemeData.brightness].
+  ///
+  /// Icons within the app bar will continue to use
+  /// [ThemeData.primaryIconTheme]. If this clashes with the brightness
+  /// specified here, consider using an [IconTheme] inside the [AppBar].
   final Brightness brightness;
 
   /// The typographic style to use for text in the app bar.
@@ -207,7 +215,7 @@ class AppBar extends StatelessWidget {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
     final ThemeData theme = Theme.of(context);
 
-    IconThemeData iconTheme = IconTheme.of(context) ?? theme.primaryIconTheme;
+    IconThemeData iconTheme = theme.primaryIconTheme;
     TextStyle centerStyle = textTheme?.title ?? theme.primaryTextTheme.title;
     TextStyle sideStyle = textTheme?.body1 ?? theme.primaryTextTheme.body1;
 
@@ -223,13 +231,9 @@ class AppBar extends StatelessWidget {
         centerStyle = centerStyle.copyWith(color: centerStyle.color.withOpacity(opacity));
       if (sideStyle?.color != null)
         sideStyle = sideStyle.copyWith(color: sideStyle.color.withOpacity(opacity));
-
-      if (iconTheme != null) {
-        iconTheme = new IconThemeData(
-          opacity: opacity * iconTheme.opacity,
-          color: iconTheme.color
-        );
-      }
+      iconTheme = iconTheme.copyWith(
+        opacity: opacity * (iconTheme.opacity ?? 1.0)
+      );
     }
 
     final List<Widget> toolBarRow = <Widget>[];
@@ -256,7 +260,8 @@ class AppBar extends StatelessWidget {
 
     Widget appBar = new SizedBox(
       height: kToolBarHeight,
-      child: new IconTheme(
+      child: new IconTheme.merge(
+        context: context,
         data: iconTheme,
         child: new DefaultTextStyle(
           style: sideStyle,

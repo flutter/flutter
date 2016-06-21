@@ -39,8 +39,8 @@ class DialogDemoItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             new Icon(
+              icon,
               size: 36.0,
-              icon: icon,
               color: color
             ),
             new Padding(

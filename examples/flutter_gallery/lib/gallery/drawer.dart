@@ -36,7 +36,7 @@ class GalleryDrawer extends StatelessWidget {
             content: new Center(child: new Text('Flutter gallery'))
           ),
           new DrawerItem(
-            icon: Icons.brightness_5,
+            icon: new Icon(Icons.brightness_5),
             onPressed: () { onThemeChanged(true); },
             selected: useLightTheme,
             child: new Row(
@@ -51,7 +51,7 @@ class GalleryDrawer extends StatelessWidget {
             )
           ),
           new DrawerItem(
-            icon: Icons.brightness_7,
+            icon: new Icon(Icons.brightness_7),
             onPressed: () { onThemeChanged(false); },
             selected: useLightTheme,
             child: new Row(
@@ -67,7 +67,7 @@ class GalleryDrawer extends StatelessWidget {
           ),
           new Divider(),
           new DrawerItem(
-            icon: Icons.hourglass_empty,
+            icon: new Icon(Icons.hourglass_empty),
             selected: timeDilation != 1.0,
             onPressed: () { onTimeDilationChanged(timeDilation != 1.0 ? 1.0 : 20.0); },
             child: new Row(
@@ -81,7 +81,7 @@ class GalleryDrawer extends StatelessWidget {
             )
           ),
           new DrawerItem(
-            icon: Icons.assessment,
+            icon: new Icon(Icons.assessment),
             onPressed: () { onShowPerformanceOverlayChanged(!showPerformanceOverlay); },
             selected: showPerformanceOverlay,
             child: new Row(

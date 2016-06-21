@@ -78,9 +78,9 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> {
               value: (IconData icon) {
                 switch(_demoStyle) {
                   case TabsDemoStyle.iconsAndText:
-                    return new TabLabel(text: labels[icon], icon: icon);
+                    return new TabLabel(text: labels[icon], icon: new Icon(icon));
                   case TabsDemoStyle.iconsOnly:
-                    return new TabLabel(icon: icon);
+                    return new TabLabel(icon: new Icon(icon));
                   case TabsDemoStyle.textOnly:
                     return new TabLabel(text: labels[icon]);
                 }
@@ -96,7 +96,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> {
               child:new Card(
                 child: new Center(
                   child: new Icon(
-                    icon: icon,
+                    icon,
                     color: iconColor,
                     size: 128.0
                   )

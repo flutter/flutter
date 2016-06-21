@@ -100,7 +100,7 @@ class ShrinePageState extends State<ShrinePage> {
         ),
         actions: <Widget>[
           new IconButton(
-            icon: Icons.shopping_cart,
+            icon: new Icon(Icons.shopping_cart),
             tooltip: 'Shopping cart',
             onPressed: () {
               _showShoppingCart();

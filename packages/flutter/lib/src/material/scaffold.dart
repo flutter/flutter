@@ -11,8 +11,9 @@ import 'package:flutter/widgets.dart';
 import 'app_bar.dart';
 import 'bottom_sheet.dart';
 import 'drawer.dart';
-import 'icons.dart';
+import 'icon.dart';
 import 'icon_button.dart';
+import 'icons.dart';
 import 'material.dart';
 import 'snack_bar.dart';
 
@@ -556,7 +557,7 @@ class ScaffoldState extends State<Scaffold> {
     if (leading == null) {
       if (config.drawer != null) {
         leading = new IconButton(
-          icon: Icons.menu,
+          icon: new Icon(Icons.menu),
           alignment: FractionalOffset.centerLeft,
           onPressed: openDrawer,
           tooltip: 'Open navigation menu' // TODO(ianh): Figure out how to localize this string
@@ -565,7 +566,7 @@ class ScaffoldState extends State<Scaffold> {
         _shouldShowBackArrow ??= Navigator.canPop(context);
         if (_shouldShowBackArrow) {
           leading = new IconButton(
-            icon: Icons.arrow_back,
+            icon: new Icon(Icons.arrow_back),
             alignment: FractionalOffset.centerLeft,
             onPressed: () => Navigator.pop(context),
             tooltip: 'Back' // TODO(ianh): Figure out how to localize this string

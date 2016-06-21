@@ -8,7 +8,8 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'icon.dart';
-import 'icons.dart';
+import 'icon_theme.dart';
+import 'icon_theme_data.dart';
 import 'material.dart';
 import 'text_selection.dart';
 import 'theme.dart';
@@ -50,7 +51,13 @@ class Input extends StatefulWidget {
   final KeyboardType keyboardType;
 
   /// An icon to show adjacent to the input field.
-  final IconData icon;
+  ///
+  /// The size and color of the icon is configured automatically using an
+  /// [IconTheme] and therefore does not need to be explicitly given in the
+  /// icon widget.
+  ///
+  /// See [Icon], [ImageIcon].
+  final Widget icon;
 
   /// Text to show above the input field.
   final String labelText;
@@ -224,10 +231,13 @@ class _InputState extends State<Input> {
           new Container(
             margin: new EdgeInsets.only(right: 16.0, top: iconTop),
             width: config.isDense ? 40.0 : 48.0,
-            child: new Icon(
-              icon: config.icon,
-              color: focused ? activeColor : Colors.black45,
-              size: config.isDense ? 18.0 : 24.0
+            child: new IconTheme.merge(
+              context: context,
+              data: new IconThemeData(
+                color: focused ? activeColor : Colors.black45,
+                size: config.isDense ? 18.0 : 24.0
+              ),
+              child: config.icon
             )
           ),
           new Flexible(child: child)

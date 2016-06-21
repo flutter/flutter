@@ -57,7 +57,7 @@ class DateTimeItem extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     new Text(new DateFormat('EEE, MMM d yyyy').format(date)),
-                    new Icon(icon: Icons.arrow_drop_down, color: Colors.black54),
+                    new Icon(Icons.arrow_drop_down, color: Colors.black54),
                   ]
                 )
               )
@@ -82,7 +82,7 @@ class DateTimeItem extends StatelessWidget {
               child: new Row(
                 children: <Widget>[
                   new Text('$time'),
-                  new Icon(icon: Icons.arrow_drop_down, color: Colors.black54),
+                  new Icon(Icons.arrow_drop_down, color: Colors.black54),
                 ]
               )
             )
@@ -146,7 +146,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
     return new Scaffold(
       appBar: new AppBar(
         leading: new IconButton(
-          icon: Icons.clear,
+          icon: new Icon(Icons.clear),
           onPressed: () { handleDismissButton(context); }
         ),
         title: new Text('New event'),

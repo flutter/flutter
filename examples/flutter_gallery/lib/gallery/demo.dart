@@ -158,7 +158,7 @@ class DemoBottomBar extends StatelessWidget {
                   children: <Widget>[
                     new Padding(
                       padding: new EdgeInsets.only(right: 8.0),
-                      child: new Icon(icon: Icons.code)
+                      child: new Icon(Icons.code)
                     ),
                     new Text('VIEW CODE')
                   ]
@@ -170,7 +170,7 @@ class DemoBottomBar extends StatelessWidget {
                   children: <Widget>[
                     new Padding(
                       padding: new EdgeInsets.only(right: 8.0),
-                      child: new Icon(icon: Icons.star)
+                      child: new Icon(Icons.star)
                     ),
                     new Text('LIVE DEMO')
                   ]
@@ -267,7 +267,7 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
     return new Scaffold(
       appBar: new AppBar(
         leading: new IconButton(
-          icon: Icons.clear,
+          icon: new Icon(Icons.clear),
           onPressed: () { Navigator.pop(context); }
         ),
         title: new Text('Example code')

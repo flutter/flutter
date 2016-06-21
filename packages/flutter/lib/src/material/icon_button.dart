@@ -7,6 +7,8 @@ import 'package:meta/meta.dart';
 
 import 'debug.dart';
 import 'icon.dart';
+import 'icon_theme.dart';
+import 'icon_theme_data.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'theme.dart';
@@ -40,8 +42,8 @@ class IconButton extends StatelessWidget {
   /// The [size], [padding], and [alignment] arguments must not be null (though
   /// they each have default values).
   ///
-  /// The [icon] argument must be specified. See [Icons] for a list of icons to
-  /// use for this argument.
+  /// The [icon] argument must be specified, and is typically either an [Icon]
+  /// or an [ImageIcon].
   const IconButton({
     Key key,
     this.size: 24.0,
@@ -70,13 +72,19 @@ class IconButton extends StatelessWidget {
   /// This property must not be null. It defaults to [FractionalOffset.center].
   final FractionalOffset alignment;
 
-  /// The icon to display inside the button, from the list in [Icons].
+  /// The icon to display inside the button.
+  ///
+  /// The size and color of the icon is configured automatically using an
+  /// [IconTheme] and therefore does not need to be explicitly given in the
+  /// icon widget.
   ///
   /// This property must not be null.
-  final IconData icon;
+  ///
+  /// See [Icon], [ImageIcon].
+  final Widget icon;
 
   /// The color to use for the icon inside the button, if the icon is enabled.
-  /// Defaults to the current color, as defined by [Icon.color].
+  /// Defaults to leaving this up to the [icon] widget.
   ///
   /// The icon is enabled if [onPressed] is not null.
   ///
@@ -117,10 +125,13 @@ class IconButton extends StatelessWidget {
         maxHeight: size,
         child: new Align(
           alignment: alignment,
-          child: new Icon(
-            size: size,
-            icon: icon,
-            color: currentColor
+          child: new IconTheme.merge(
+            context: context,
+            data: new IconThemeData(
+              size: size,
+              color: currentColor
+            ),
+            child: icon
           )
         )
       )

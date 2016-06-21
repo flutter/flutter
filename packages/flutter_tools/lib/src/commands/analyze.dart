@@ -131,9 +131,9 @@ class AnalyzeCommand extends FlutterCommand {
       pubSpecDirectories.add(currentDirectory);
     }
 
-    //TODO (ianh): Fix the intl package resource generator
-    //TODO (pq): extract this regexp from the exclude in options
-    RegExp stockExampleFiles = new RegExp('examples/stocks/lib/.*\.dart\$');
+    // TODO(ianh): Fix the intl package resource generator
+    // TODO(pq): extract this regexp from the exclude in options
+    RegExp stockExampleFiles = new RegExp('examples/stocks/lib/i18n/.*\.dart\$');
 
     if (flutterRepo) {
       for (Directory dir in runner.getRepoPackages()) {

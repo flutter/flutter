@@ -89,6 +89,7 @@ class ThemeData {
     Color errorColor,
     TextTheme textTheme,
     TextTheme primaryTextTheme,
+    IconThemeData iconTheme,
     IconThemeData primaryIconTheme
   }) {
     brightness ??= Brightness.light;
@@ -96,6 +97,7 @@ class ThemeData {
     primarySwatch ??= Colors.blue;
     primaryColor ??= isDark ? Colors.grey[900] : primarySwatch[500];
     primaryColorBrightness ??= Brightness.dark;
+    final bool primaryIsDark = primaryColorBrightness == Brightness.dark;
     accentColor ??= isDark ? Colors.tealAccent[200] : primarySwatch[500];
     accentColorBrightness ??= Brightness.dark;
     canvasColor ??= isDark ? Colors.grey[850] : Colors.grey[50];
@@ -115,8 +117,9 @@ class ThemeData {
     hintColor ??= isDark ? const Color(0x42FFFFFF) : const Color(0x4C000000);
     errorColor ??= Colors.red[700];
     textTheme ??= isDark ? Typography.white : Typography.black;
-    primaryTextTheme ??= primaryColorBrightness == Brightness.dark ? Typography.white : Typography.black;
-    primaryIconTheme ??= primaryColorBrightness == Brightness.dark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
+    primaryTextTheme ??= primaryIsDark ? Typography.white : Typography.black;
+    iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
+    primaryIconTheme ??= primaryIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     return new ThemeData.raw(
       brightness: brightness,
       primaryColor: primaryColor,
@@ -141,6 +144,7 @@ class ThemeData {
       errorColor: errorColor,
       textTheme: textTheme,
       primaryTextTheme: primaryTextTheme,
+      iconTheme: iconTheme,
       primaryIconTheme: primaryIconTheme
     );
   }
@@ -175,6 +179,7 @@ class ThemeData {
     this.errorColor,
     this.textTheme,
     this.primaryTextTheme,
+    this.iconTheme,
     this.primaryIconTheme
   }) {
     assert(brightness != null);
@@ -200,6 +205,7 @@ class ThemeData {
     assert(errorColor != null);
     assert(textTheme != null);
     assert(primaryTextTheme != null);
+    assert(iconTheme != null);
     assert(primaryIconTheme != null);
   }
 
@@ -307,6 +313,9 @@ class ThemeData {
   /// A text theme that contrasts with the primary color.
   final TextTheme primaryTextTheme;
 
+  /// An icon theme that contrasts with the card and canvas colors.
+  final IconThemeData iconTheme;
+
   /// An icon theme that contrasts with the primary color.
   final IconThemeData primaryIconTheme;
 
@@ -336,6 +345,7 @@ class ThemeData {
       errorColor: Color.lerp(begin.errorColor, end.errorColor, t),
       textTheme: TextTheme.lerp(begin.textTheme, end.textTheme, t),
       primaryTextTheme: TextTheme.lerp(begin.primaryTextTheme, end.primaryTextTheme, t),
+      iconTheme: IconThemeData.lerp(begin.iconTheme, end.iconTheme, t),
       primaryIconTheme: IconThemeData.lerp(begin.primaryIconTheme, end.primaryIconTheme, t)
     );
   }
@@ -368,6 +378,7 @@ class ThemeData {
            (otherData.errorColor == errorColor) &&
            (otherData.textTheme == textTheme) &&
            (otherData.primaryTextTheme == primaryTextTheme) &&
+           (otherData.iconTheme == iconTheme) &&
            (otherData.primaryIconTheme == primaryIconTheme);
   }
 
@@ -398,6 +409,7 @@ class ThemeData {
         errorColor,
         textTheme,
         primaryTextTheme,
+        iconTheme,
         primaryIconTheme
       )
     );

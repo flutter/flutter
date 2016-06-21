@@ -14,7 +14,6 @@ import 'app_bar.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'icon.dart';
-import 'icons.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
 import 'ink_well.dart';
@@ -312,8 +311,14 @@ class TabLabel {
   /// The text to display as the label of the tab.
   final String text;
 
-  /// Data for an [Icon] to display as the label of the tab.
-  final IconData icon;
+  /// The icon to display as the label of the tab.
+  ///
+  /// The size and color of the icon is configured automatically using an
+  /// [IconTheme] and therefore does not need to be explicitly given in the
+  /// icon widget.
+  ///
+  /// See [Icon], [ImageIcon].
+  final Widget icon;
 
   /// Called if [icon] is null to build an icon as a label for this tab.
   ///
@@ -322,6 +327,12 @@ class TabLabel {
   ///
   /// Return value must be non-null.
   final TabLabelIconBuilder iconBuilder;
+
+  /// Whether this label has any text (specified using [text]).
+  bool get hasText => text != null;
+
+  /// Whether this label has an icon (specified either using [icon] or [iconBuilder]).
+  bool get hasIcon => icon != null || iconBuilder != null;
 }
 
 class _Tab extends StatelessWidget {
@@ -331,7 +342,7 @@ class _Tab extends StatelessWidget {
     this.label,
     this.color
   }) : super(key: key) {
-    assert(label.text != null || label.icon != null || label.iconBuilder != null);
+    assert(label.hasText || label.hasIcon);
   }
 
   final VoidCallback onSelected;
@@ -350,9 +361,16 @@ class _Tab extends StatelessWidget {
   }
 
   Widget _buildLabelIcon(BuildContext context) {
-    assert(label.icon != null || label.iconBuilder != null);
+    assert(label.hasIcon);
     if (label.icon != null) {
-      return new Icon(icon: label.icon, color: color);
+      return new IconTheme.merge(
+        context: context,
+        data: new IconThemeData(
+          color: color,
+          size: 24.0
+        ),
+        child: label.icon
+      );
     } else {
       return new SizedBox(
         width: 24.0,
@@ -366,9 +384,9 @@ class _Tab extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     Widget labelContent;
-    if (label.icon == null && label.iconBuilder == null) {
+    if (!label.hasIcon) {
       labelContent = _buildLabelText();
-    } else if (label.text == null) {
+    } else if (!label.hasText) {
       labelContent = _buildLabelIcon(context);
     } else {
       labelContent = new Column(
@@ -676,7 +694,7 @@ class TabBar<T> extends Scrollable implements AppBarBottomWidget {
   @override
   double get bottomHeight {
     for (TabLabel label in labels.values) {
-      if (label.text != null && (label.icon != null || label.iconBuilder != null))
+      if (label.hasText && label.hasIcon)
         return _kTextAndIconTabHeight + _kTabIndicatorHeight;
     }
     return _kTabHeight + _kTabIndicatorHeight;
@@ -922,7 +940,6 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
     }
 
     final TextStyle textStyle = themeData.primaryTextTheme.body2;
-    final IconThemeData iconTheme = themeData.primaryIconTheme;
     final Color selectedLabelColor = config.labelColor ?? themeData.primaryTextTheme.body2.color;
     final Color labelColor = selectedLabelColor.withAlpha(0xB2); // 70% alpha
 
@@ -931,23 +948,20 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
     int tabIndex = 0;
     for (TabLabel label in config.labels.values) {
       tabs.add(_toTab(label, tabIndex++, labelColor, selectedLabelColor));
-      if (label.text != null && (label.icon != null || label.iconBuilder != null))
+      if (label.hasText && label.hasIcon)
         textAndIcons = true;
     }
 
-    Widget contents = new IconTheme(
-      data: iconTheme,
-      child: new DefaultTextStyle(
-        style: textStyle,
-        child: new _TabBarWrapper(
-          children: tabs,
-          selectedIndex: _selection?.index,
-          indicatorColor: indicatorColor,
-          indicatorRect: _indicatorRect,
-          textAndIcons: textAndIcons,
-          isScrollable: config.isScrollable,
-          onLayoutChanged: _layoutChanged
-        )
+    Widget contents = new DefaultTextStyle(
+      style: textStyle,
+      child: new _TabBarWrapper(
+        children: tabs,
+        selectedIndex: _selection?.index,
+        indicatorColor: indicatorColor,
+        indicatorRect: _indicatorRect,
+        textAndIcons: textAndIcons,
+        isScrollable: config.isScrollable,
+        onLayoutChanged: _layoutChanged
       )
     );
 

@@ -105,7 +105,7 @@ class GridDemoPhotoItem extends StatelessWidget {
               title: new Text(photo.title),
               backgroundColor: Colors.black45,
               leading: new Icon(
-                icon: icon,
+                icon,
                 color: Colors.white
               )
             )
@@ -122,7 +122,7 @@ class GridDemoPhotoItem extends StatelessWidget {
               title: new Text(photo.title),
               subtitle: new Text(photo.caption),
               trailing: new Icon(
-                icon: icon,
+                icon,
                 color: Colors.white
               )
             )
