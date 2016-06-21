@@ -323,8 +323,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     int totalChildren = 0;
     assert(constraints != null);
     final bool isHorizontal = _direction == FlexDirection.horizontal;
-    final double minMainSize = isHorizontal ? constraints.constrainWidth(0.0) : constraints.constrainHeight(0.0);
-    final double maxMainSize = isHorizontal ? constraints.constrainWidth() : constraints.constrainHeight();
+    final double minMainSize = isHorizontal ? constraints.minWidth : constraints.minHeight;
+    final double maxMainSize = isHorizontal ? constraints.maxWidth : constraints.maxHeight;
     final double availableSize = mainAxisSize == MainAxisSize.max ? maxMainSize : minMainSize;
     final bool canFlex = availableSize < double.INFINITY;
 
