@@ -22,7 +22,7 @@ class Awakable {
   //     takes "non-terminal" locks, i.e., those which are always safe to take.
   //   - It should return false if it must not be called again for the same
   //     reason (e.g., for the same call to |AwakableList::Add()|).
-  virtual bool Awake(MojoResult result, uintptr_t context) = 0;
+  virtual bool Awake(MojoResult result, uint64_t context) = 0;
 
  protected:
   Awakable() {}

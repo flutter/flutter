@@ -4,18 +4,18 @@
 
 source_set("application") {
   sources = [
-    "application_runner_chromium.cc",
-    "application_runner_chromium.h",
+    "run_application.cc",
+    "run_application_options_chromium.h",
   ]
 
   public_deps = [
+    "//mojo/environment:chromium",
     "//mojo/public/cpp/application",
   ]
   deps = [
     "//base",
     "//mojo/message_pump",
     "//mojo/public/cpp/system",
-    "//mojo/environment:chromium",
   ]
 }
 

@@ -5,11 +5,8 @@
 [DartPackage="mojo_services"]
 module mojo.media;
 
-import "mojo/services/media/common/interfaces/media_common.mojom";
-import "mojo/services/media/common/interfaces/media_state.mojom";
 import "mojo/services/media/common/interfaces/media_transport.mojom";
-import "mojo/services/media/common/interfaces/media_types.mojom";
-import "mojo/services/media/common/interfaces/rate_control.mojom";
+import "mojo/services/media/core/interfaces/timeline_controller.mojom";
 
 // TODO(dalesat): Define a media sink that multiplexes streams.
 
@@ -17,32 +14,9 @@ import "mojo/services/media/common/interfaces/rate_control.mojom";
 interface MediaSink {
   // TODO(dalesat): Support fanout to many destinations.
 
-  // Special value for GetStatus version_last_seen parameter to get the current
-  // status immediately.
-  const uint64 kInitialStatus = 0;
-
   // Gets the consumer for the stream to be delivered.
   GetConsumer(MediaConsumer& consumer);
 
-  // Gets the status. To get the status immediately, call
-  // GetStatus(kInitialStatus). To get updates thereafter, pass the version
-  // sent in the previous callback.
-  GetStatus(uint64 version_last_seen)
-      => (uint64 version, MediaSinkStatus status);
-
-  // Starts playback.
-  Play();
-
-  // Pauses playback.
-  Pause();
-};
-
-// MediaSink status information.
-struct MediaSinkStatus {
-  // Current state of the sink.
-  MediaState state;
-
-  // Transform translating local time to presentation time. Reverse translation
-  // (presentation time to local time) is only valid when media is playing.
-  TimelineTransform? timeline_transform;
+  // Request the timeline control site for this sink
+  GetTimelineControlSite(MediaTimelineControlSite& timeline_control_site);
 };

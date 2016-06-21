@@ -4,8 +4,9 @@
 
 #include "mojo/common/tracing_impl.h"
 
+#include <algorithm>
+
 #include "base/trace_event/trace_event_impl.h"
-#include "mojo/public/cpp/application/application_impl.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/cpp/bindings/interface_handle.h"
 #include "mojo/public/cpp/bindings/interface_request.h"
@@ -18,17 +19,19 @@ TracingImpl::TracingImpl() {}
 
 TracingImpl::~TracingImpl() {}
 
-void TracingImpl::Initialize(ApplicationImpl* app) {
+void TracingImpl::Initialize(Shell* shell,
+                             const std::vector<std::string>* args) {
   tracing::TraceProviderRegistryPtr registry;
-  ConnectToService(app->shell(), "mojo:tracing", GetProxy(&registry));
+  ConnectToService(shell, "mojo:tracing", GetProxy(&registry));
 
   mojo::InterfaceHandle<tracing::TraceProvider> provider;
   provider_impl_.Bind(GetProxy(&provider));
   registry->RegisterTraceProvider(provider.Pass());
 
 #ifdef NDEBUG
-  if (app->HasArg("--early-tracing")) {
-    provider_impl_.ForceEnableTracing();
+  if (args) {
+    if (std::find(args->begin(), args->end(), "--early-tracing") != args->end())
+      provider_impl_.ForceEnableTracing();
   }
 #else
   provider_impl_.ForceEnableTracing();

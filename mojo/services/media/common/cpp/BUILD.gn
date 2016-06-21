@@ -19,6 +19,7 @@ mojo_sdk_source_set("cpp") {
     "mapped_shared_buffer.h",
     "shared_media_buffer_allocator.cc",
     "shared_media_buffer_allocator.h",
+    "timeline.h",
     "timeline_function.cc",
     "timeline_function.h",
     "timeline_rate.cc",

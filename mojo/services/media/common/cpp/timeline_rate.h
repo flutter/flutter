@@ -62,6 +62,25 @@ class TimelineRate {
   explicit TimelineRate(uint32_t subject_delta)
       : subject_delta_(subject_delta), reference_delta_(1) {}
 
+  explicit TimelineRate(float rate_as_float)
+      : subject_delta_(
+            rate_as_float > 1.0f
+                ? kFloatFactor
+                : static_cast<uint32_t>(kFloatFactor * rate_as_float)),
+        reference_delta_(
+            rate_as_float > 1.0f
+                ? static_cast<uint32_t>(kFloatFactor / rate_as_float)
+                : kFloatFactor) {
+    // The expressions above are intended to provide good precision for
+    // 'reasonable' playback rate values (say in the range 0.0 to 4.0). The
+    // expressions always produce a ratio of kFloatFactor and a number smaller
+    // than kFloatFactor. kFloatFactor's value was chosen because floats have
+    // a 23-bit mantissa, and operations with a larger factor would sacrifice
+    // precision.
+    MOJO_DCHECK(rate_as_float >= 0.0f);
+    Reduce(&subject_delta_, &reference_delta_);
+  }
+
   TimelineRate(uint32_t subject_delta, uint32_t reference_delta)
       : subject_delta_(subject_delta), reference_delta_(reference_delta) {
     MOJO_DCHECK(reference_delta != 0);
@@ -84,6 +103,10 @@ class TimelineRate {
   uint32_t reference_delta() const { return reference_delta_; }
 
  private:
+  // A multiplier for float-to-TimelineRate conversions chosen because floats
+  // have a 23-bit mantissa.
+  static constexpr uint32_t kFloatFactor = 1ul << 23;
+
   uint32_t subject_delta_;
   uint32_t reference_delta_;
 };

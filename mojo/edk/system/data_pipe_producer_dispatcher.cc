@@ -63,9 +63,9 @@ DataPipeProducerDispatcher::~DataPipeProducerDispatcher() {
   DCHECK(!data_pipe_);
 }
 
-void DataPipeProducerDispatcher::CancelAllAwakablesNoLock() {
+void DataPipeProducerDispatcher::CancelAllStateNoLock() {
   mutex().AssertHeld();
-  data_pipe_->ProducerCancelAllAwakables();
+  data_pipe_->ProducerCancelAllState();
 }
 
 void DataPipeProducerDispatcher::CloseImplNoLock() {
@@ -80,7 +80,7 @@ DataPipeProducerDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock(
     unsigned /*port*/) {
   mutex().AssertHeld();
 
-  CancelAllAwakablesNoLock();
+  CancelAllStateNoLock();
 
   auto dispatcher = DataPipeProducerDispatcher::Create();
   dispatcher->Init(std::move(data_pipe_));
@@ -170,10 +170,11 @@ HandleSignalsState DataPipeProducerDispatcher::GetHandleSignalsStateImplNoLock()
 MojoResult DataPipeProducerDispatcher::AddAwakableImplNoLock(
     Awakable* awakable,
     MojoHandleSignals signals,
-    uint32_t context,
+    bool force,
+    uint64_t context,
     HandleSignalsState* signals_state) {
   mutex().AssertHeld();
-  return data_pipe_->ProducerAddAwakable(awakable, signals, context,
+  return data_pipe_->ProducerAddAwakable(awakable, signals, force, context,
                                          signals_state);
 }
 
@@ -203,11 +204,6 @@ bool DataPipeProducerDispatcher::EndSerializeAndCloseImplNoLock(
                                              platform_handles);
   data_pipe_ = nullptr;
   return rv;
-}
-
-bool DataPipeProducerDispatcher::IsBusyNoLock() const {
-  mutex().AssertHeld();
-  return data_pipe_->ProducerIsBusy();
 }
 
 }  // namespace system

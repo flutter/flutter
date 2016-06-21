@@ -51,7 +51,7 @@ void AwakableList::CancelAll() {
 
 void AwakableList::Add(Awakable* awakable,
                        MojoHandleSignals signals,
-                       uint32_t context) {
+                       uint64_t context) {
   awakables_.push_back(AwakeInfo(awakable, signals, context));
 }
 

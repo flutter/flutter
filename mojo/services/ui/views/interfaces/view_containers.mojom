@@ -40,7 +40,7 @@ import "mojo/services/ui/views/interfaces/view_token.mojom";
 //    |SetChildProperties()|, it should provide a new scene version and
 //    update its corresponding |SceneNodeOp| to match.
 //
-// 5. Watch for the child becoming unavailable, as reported by
+// 6. Watch for the child becoming unavailable, as reported by
 //    |OnChildUnavailable()|, which indicates that the child is no longer
 //    in a usable state (perhaps the application which provided it has
 //    stopped).  When this happens, you are still responsible for calling
@@ -152,6 +152,15 @@ interface ViewContainer {
   // as invalid layout properties; the connection will be closed.
   SetChildProperties(uint32 child_key, uint32 child_scene_version,
       ViewProperties? child_view_properties);
+
+  // Flushes changes to the children.
+  //
+  // This method must be called in response to |ViewListener.OnInvalidation()|
+  // whenever |ViewInvalidation.container_flush_token| is non-zero even if
+  // no changes were applied to children.
+  //
+  // This method does nothing if |flush_token| is zero.
+  FlushChildren(uint32 flush_token);
 };
 
 // An interface clients may implement to receive events from a view container.

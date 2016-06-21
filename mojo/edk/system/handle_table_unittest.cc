@@ -247,6 +247,8 @@ TEST(HandleTableTest, AddHandleVectorTooMany) {
     EXPECT_EQ(MOJO_RESULT_OK, handles[i].dispatcher->Close()) << i;
 }
 
+// TODO(vtl): Figure out how to test |MarkBusyAndStartTransport()|.
+
 }  // namespace
 }  // namespace system
 }  // namespace mojo

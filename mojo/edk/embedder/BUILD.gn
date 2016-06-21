@@ -19,7 +19,6 @@ mojo_edk_source_set("embedder") {
     "entrypoints.cc",
     "multiprocess_embedder.cc",
     "multiprocess_embedder.h",
-    "system_impl_private_entrypoints.cc",
 
     # Test-only code:
     # TODO(vtl): It's a little unfortunate that these end up in the same
@@ -41,8 +40,6 @@ mojo_edk_source_set("embedder") {
   deps = [
     "//base",
   ]
-
-  mojo_sdk_deps = [ "mojo/public/platform/native:system_impl_private_api" ]
 
   mojo_edk_deps = [ "mojo/edk/util" ]
 }

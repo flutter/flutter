@@ -5,6 +5,7 @@
 #ifndef MOJO_SKIA_GL_BINDINGS_SKIA_H_
 #define MOJO_SKIA_GL_BINDINGS_SKIA_H_
 
+#include "third_party/skia/include/core/SkRefCnt.h"
 #include "third_party/skia/include/core/SkTypes.h"
 
 struct GrGLInterface;
@@ -14,7 +15,7 @@ namespace skia {
 
 // The GPU back-end for skia requires pointers to GL functions. This function
 // returns a binding for skia-gpu to the Mojo C GL entry points.
-GrGLInterface* CreateMojoSkiaGLBinding();
+sk_sp<GrGLInterface> CreateMojoSkiaGLBinding();
 
 }  // namespace skia
 }  // namespace mojo

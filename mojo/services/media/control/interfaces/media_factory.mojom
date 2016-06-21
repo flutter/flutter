@@ -12,6 +12,7 @@ import "mojo/services/media/control/interfaces/media_source.mojom";
 import "mojo/services/media/core/interfaces/media_demux.mojom";
 import "mojo/services/media/core/interfaces/media_type_converter.mojom";
 import "mojo/services/media/core/interfaces/seeking_reader.mojom";
+import "mojo/services/media/core/interfaces/timeline_controller.mojom";
 
 // Exposed by the factory service to create media-related agents.
 [ServiceName="mojo::media::MediaFactory"]
@@ -42,4 +43,7 @@ interface MediaFactory {
 
   // Creates a network reader.
   CreateNetworkReader(string url, SeekingReader& reader);
+
+  // Creates a timeline controller reader.
+  CreateTimelineController(MediaTimelineController& timeline_controller);
 };

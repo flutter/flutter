@@ -32,24 +32,26 @@ namespace mojo {
 namespace android {
 
 static void InitApplicationContext(JNIEnv* env,
-                                   jobject jcaller,
-                                   jobject context) {
-  base::android::ScopedJavaLocalRef<jobject> scoped_context(env, context);
-  base::android::InitApplicationContext(env, scoped_context);
+                                   const JavaParamRef<jobject>& jcaller,
+                                   const JavaParamRef<jobject>& context) {
+  base::android::InitApplicationContext(env, context);
   base::InitAndroidTestMessageLoop();
 }
 
-static jlong SetupTestEnvironment(JNIEnv* env, jobject jcaller) {
+static jlong SetupTestEnvironment(JNIEnv* env,
+                                  const JavaParamRef<jobject>& jcaller) {
   return reinterpret_cast<intptr_t>(new TestEnvironment());
 }
 
 static void TearDownTestEnvironment(JNIEnv* env,
-                                    jobject jcaller,
+                                    const JavaParamRef<jobject>& jcaller,
                                     jlong test_environment) {
   delete reinterpret_cast<TestEnvironment*>(test_environment);
 }
 
-static void RunLoop(JNIEnv* env, jobject jcaller, jlong timeout_ms) {
+static void RunLoop(JNIEnv* env,
+                    const JavaParamRef<jobject>& jcaller,
+                    jlong timeout_ms) {
   base::RunLoop run_loop;
   if (timeout_ms) {
     base::MessageLoop::current()->PostDelayedTask(

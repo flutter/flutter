@@ -64,9 +64,9 @@ DataPipeConsumerDispatcher::~DataPipeConsumerDispatcher() {
   DCHECK(!data_pipe_);
 }
 
-void DataPipeConsumerDispatcher::CancelAllAwakablesNoLock() {
+void DataPipeConsumerDispatcher::CancelAllStateNoLock() {
   mutex().AssertHeld();
-  data_pipe_->ConsumerCancelAllAwakables();
+  data_pipe_->ConsumerCancelAllState();
 }
 
 void DataPipeConsumerDispatcher::CloseImplNoLock() {
@@ -81,7 +81,7 @@ DataPipeConsumerDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock(
     unsigned /*port*/) {
   mutex().AssertHeld();
 
-  CancelAllAwakablesNoLock();
+  CancelAllStateNoLock();
 
   auto dispatcher = DataPipeConsumerDispatcher::Create();
   dispatcher->Init(std::move(data_pipe_));
@@ -195,10 +195,11 @@ HandleSignalsState DataPipeConsumerDispatcher::GetHandleSignalsStateImplNoLock()
 MojoResult DataPipeConsumerDispatcher::AddAwakableImplNoLock(
     Awakable* awakable,
     MojoHandleSignals signals,
-    uint32_t context,
+    bool force,
+    uint64_t context,
     HandleSignalsState* signals_state) {
   mutex().AssertHeld();
-  return data_pipe_->ConsumerAddAwakable(awakable, signals, context,
+  return data_pipe_->ConsumerAddAwakable(awakable, signals, force, context,
                                          signals_state);
 }
 
@@ -228,11 +229,6 @@ bool DataPipeConsumerDispatcher::EndSerializeAndCloseImplNoLock(
                                              platform_handles);
   data_pipe_ = nullptr;
   return rv;
-}
-
-bool DataPipeConsumerDispatcher::IsBusyNoLock() const {
-  mutex().AssertHeld();
-  return data_pipe_->ConsumerIsBusy();
 }
 
 }  // namespace system

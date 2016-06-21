@@ -38,9 +38,8 @@ class ViewImpl : public mojo::ui::ViewListener,
 
  private:
   // mojo::ui::ViewListener
-  void OnPropertiesChanged(uint32_t scene_version,
-                           mojo::ui::ViewPropertiesPtr properties,
-                           const OnPropertiesChangedCallback& callback) override;
+  void OnInvalidation(mojo::ui::ViewInvalidationPtr invalidation,
+                      const OnInvalidationCallback& callback) override;
 
   // mojo::ui::InputListener
   void OnEvent(mojo::EventPtr event, const OnEventCallback& callback) override;

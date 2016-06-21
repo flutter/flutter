@@ -8,7 +8,7 @@ module mojo.media;
 import "mojo/services/media/common/interfaces/media_common.mojom";
 import "mojo/services/media/common/interfaces/media_transport.mojom";
 import "mojo/services/media/common/interfaces/media_types.mojom";
-import "mojo/services/media/common/interfaces/rate_control.mojom";
+import "mojo/services/media/core/interfaces/timeline_controller.mojom";
 
 struct AudioTrackDescriptor {
   // The track supports the union of all these media type sets.
@@ -50,8 +50,8 @@ interface AudioTrack {
   // Set the configuration, receive a pipe to send data to in return.
   Configure(AudioTrackConfiguration configuration, MediaConsumer& pipe);
 
-  // Request the rate control interface for this AudioTrack
-  GetRateControl(RateControl& rate_control);
+  // Request the timeline control site for this AudioTrack
+  GetTimelineControlSite(MediaTimelineControlSite& timeline_control_site);
 
   // Sets the current gain/attenuation of the track, expressed in dB.  Legal
   // values are in the range [-inf, 20.0].  Any value less than or equal to the

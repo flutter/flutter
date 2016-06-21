@@ -20,11 +20,10 @@ Waiter::Waiter()
 #endif
       awoken_(false),
       awake_result_(MOJO_RESULT_INTERNAL),
-      awake_context_(static_cast<uint32_t>(-1)) {
+      awake_context_(static_cast<uint64_t>(-1)) {
 }
 
-Waiter::~Waiter() {
-}
+Waiter::~Waiter() {}
 
 void Waiter::Init() {
 #ifndef NDEBUG
@@ -37,7 +36,7 @@ void Waiter::Init() {
 }
 
 // TODO(vtl): Fast-path the |deadline == 0| case?
-MojoResult Waiter::Wait(MojoDeadline deadline, uint32_t* context) {
+MojoResult Waiter::Wait(MojoDeadline deadline, uint64_t* context) {
   MutexLocker locker(&mutex_);
 
 #ifndef NDEBUG
@@ -50,7 +49,7 @@ MojoResult Waiter::Wait(MojoDeadline deadline, uint32_t* context) {
   if (awoken_) {
     DCHECK_NE(awake_result_, MOJO_RESULT_INTERNAL);
     if (context)
-      *context = static_cast<uint32_t>(awake_context_);
+      *context = awake_context_;
     return awake_result_;
   }
 
@@ -88,11 +87,11 @@ MojoResult Waiter::Wait(MojoDeadline deadline, uint32_t* context) {
 
   DCHECK_NE(awake_result_, MOJO_RESULT_INTERNAL);
   if (context)
-    *context = static_cast<uint32_t>(awake_context_);
+    *context = awake_context_;
   return awake_result_;
 }
 
-bool Waiter::Awake(MojoResult result, uintptr_t context) {
+bool Waiter::Awake(MojoResult result, uint64_t context) {
   MutexLocker locker(&mutex_);
 
   if (awoken_)

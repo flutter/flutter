@@ -78,11 +78,11 @@ TEST_F(CoreTest, Basic) {
 
   EXPECT_EQ(0u, info.GetDtorCallCount());
   EXPECT_EQ(0u, info.GetCloseCallCount());
-  EXPECT_EQ(0u, info.GetCancelAllAwakablesCallCount());
+  EXPECT_EQ(0u, info.GetCancelAllStateCallCount());
   EXPECT_EQ(MOJO_RESULT_OK, core()->Close(h_dup));
   EXPECT_EQ(1u, info.GetDtorCallCount());
   EXPECT_EQ(1u, info.GetCloseCallCount());
-  EXPECT_EQ(1u, info.GetCancelAllAwakablesCallCount());
+  EXPECT_EQ(1u, info.GetCancelAllStateCallCount());
 
   EXPECT_EQ(0u, info.GetWriteMessageCallCount());
   EXPECT_EQ(MOJO_RESULT_OK,
@@ -216,14 +216,33 @@ TEST_F(CoreTest, Basic) {
   EXPECT_EQ(0u, hss.satisfied_signals);
   EXPECT_EQ(0u, hss.satisfiable_signals);
 
-  // |h| shares |info| with |h_dup|, which was closed above.
-  EXPECT_EQ(1u, info.GetDtorCallCount());
-  EXPECT_EQ(1u, info.GetCloseCallCount());
-  EXPECT_EQ(1u, info.GetCancelAllAwakablesCallCount());
-  EXPECT_EQ(MOJO_RESULT_OK, core()->Close(h));
+  constexpr MojoHandleRights kRightsToRemove = MOJO_HANDLE_RIGHT_MAP_EXECUTABLE;
+  static_assert(kDefaultMockHandleRights & kRightsToRemove,
+                "Oops, reducing rights will be a no-op");
+  MojoHandle h_replacement = MOJO_HANDLE_INVALID;
+  EXPECT_EQ(MOJO_RESULT_OK,
+            core()->ReplaceHandleWithReducedRights(
+                h, kRightsToRemove, MakeUserPointer(&h_replacement)));
+  EXPECT_NE(h_replacement, MOJO_HANDLE_INVALID);
+  // This isn't guaranteed per se, but we count on handle values not being
+  // reused eagerly.
+  EXPECT_NE(h_replacement, h);
+  // |h| should be dead.
+  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT, core()->Close(h));
+  rights = MOJO_HANDLE_RIGHT_NONE;
+  EXPECT_EQ(MOJO_RESULT_OK,
+            core()->GetRights(h_replacement, MakeUserPointer(&rights)));
+  EXPECT_EQ(kDefaultMockHandleRights & ~kRightsToRemove, rights);
+
+  // |info| is shared between |h| (which was replaced, but not explicitly closed
+  // per se), |h_dup| (which was closed), and |h_replacement|.
   EXPECT_EQ(2u, info.GetDtorCallCount());
+  EXPECT_EQ(1u, info.GetCloseCallCount());
+  EXPECT_EQ(2u, info.GetCancelAllStateCallCount());
+  EXPECT_EQ(MOJO_RESULT_OK, core()->Close(h_replacement));
+  EXPECT_EQ(3u, info.GetDtorCallCount());
   EXPECT_EQ(2u, info.GetCloseCallCount());
-  EXPECT_EQ(2u, info.GetCancelAllAwakablesCallCount());
+  EXPECT_EQ(3u, info.GetCancelAllStateCallCount());
 
   // No awakables should ever have ever been added.
   EXPECT_EQ(0u, info.GetRemoveAwakableCallCount());
@@ -254,6 +273,20 @@ TEST_F(CoreTest, InvalidArguments) {
     EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
               core()->GetRights(10, MakeUserPointer(&rights)));
     EXPECT_EQ(0u, rights);
+  }
+
+  // |ReplaceHandleWithReducedRights()|:
+  {
+    MojoHandle h = MOJO_HANDLE_INVALID;
+    EXPECT_EQ(
+        MOJO_RESULT_INVALID_ARGUMENT,
+        core()->ReplaceHandleWithReducedRights(
+            MOJO_HANDLE_INVALID, MOJO_HANDLE_RIGHT_NONE, MakeUserPointer(&h)));
+    EXPECT_EQ(MOJO_HANDLE_INVALID, h);
+    EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+              core()->ReplaceHandleWithReducedRights(10, MOJO_HANDLE_RIGHT_NONE,
+                                                     MakeUserPointer(&h)));
+    EXPECT_EQ(MOJO_HANDLE_INVALID, h);
   }
 
   // |DuplicateHandleWithReducedRights()|:
@@ -627,6 +660,17 @@ TEST_F(CoreTest, InvalidArgumentsDeath) {
     MockHandleInfo info;
     MojoHandle h = CreateMockHandle(&info);
     EXPECT_DEATH_IF_SUPPORTED(core()->GetRights(h, NullUserPointer()),
+                              kMemoryCheckFailedRegex);
+
+    EXPECT_EQ(MOJO_RESULT_OK, core()->Close(h));
+  }
+
+  // |ReplaceHandleWithReducedRights()|:
+  {
+    MockHandleInfo info;
+    MojoHandle h = CreateMockHandle(&info);
+    EXPECT_DEATH_IF_SUPPORTED(core()->ReplaceHandleWithReducedRights(
+                                  h, MOJO_HANDLE_RIGHT_NONE, NullUserPointer()),
                               kMemoryCheckFailedRegex);
 
     EXPECT_EQ(MOJO_RESULT_OK, core()->Close(h));
@@ -1642,20 +1686,48 @@ TEST_F(CoreTest, MessagePipeBasicLocalHandlePassing2) {
   ch = ch_received;
   ch_received = MOJO_HANDLE_INVALID;
 
-  // Make sure that |ph| can't be sent if it's in a two-phase write.
+  // Sending |ph| during a two-phase write cancels the two-phase write.
   void* write_ptr = nullptr;
   num_bytes = 0;
   ASSERT_EQ(MOJO_RESULT_OK,
             core()->BeginWriteData(ph, MakeUserPointer(&write_ptr),
                                    MakeUserPointer(&num_bytes),
                                    MOJO_WRITE_DATA_FLAG_NONE));
+  ASSERT_TRUE(write_ptr);
   ASSERT_GE(num_bytes, 1u);
-  EXPECT_EQ(MOJO_RESULT_BUSY,
+  EXPECT_EQ(MOJO_RESULT_OK,
             core()->WriteMessage(h_passing[0], UserPointer<const void>(kHello),
                                  kHelloSize, MakeUserPointer(&ph), 1,
                                  MOJO_WRITE_MESSAGE_FLAG_NONE));
+  ph = MOJO_HANDLE_INVALID;
+  EXPECT_EQ(MOJO_RESULT_OK,
+            core()->Wait(h_passing[1], MOJO_HANDLE_SIGNAL_READABLE, 1000000000,
+                         NullUserPointer()));
+  num_bytes = kBufferSize;
+  num_handles = MOJO_ARRAYSIZE(handles);
+  EXPECT_EQ(MOJO_RESULT_OK,
+            core()->ReadMessage(
+                h_passing[1], UserPointer<void>(buffer),
+                MakeUserPointer(&num_bytes), MakeUserPointer(handles),
+                MakeUserPointer(&num_handles), MOJO_READ_MESSAGE_FLAG_NONE));
+  EXPECT_EQ(kHelloSize, num_bytes);
+  EXPECT_STREQ(kHello, buffer);
+  EXPECT_EQ(1u, num_handles);
+  ph = handles[0];
+  EXPECT_NE(ph, MOJO_HANDLE_INVALID);
+  // The two-phase write is over, so trying to complete it will fail.
+  EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION, core()->EndWriteData(ph, 0));
+  // And we can begin a two-phase write on the new handle.
+  write_ptr = nullptr;
+  num_bytes = 0;
+  ASSERT_EQ(MOJO_RESULT_OK,
+            core()->BeginWriteData(ph, MakeUserPointer(&write_ptr),
+                                   MakeUserPointer(&num_bytes),
+                                   MOJO_WRITE_DATA_FLAG_NONE));
+  ASSERT_TRUE(write_ptr);
+  ASSERT_GE(num_bytes, 1u);
 
-  // But |ch| can, even if |ph| is in a two-phase write.
+  // |ch| can be sent, even if |ph| is in a two-phase write.
   EXPECT_EQ(MOJO_RESULT_OK,
             core()->WriteMessage(h_passing[0], UserPointer<const void>(kHello),
                                  kHelloSize, MakeUserPointer(&ch), 1,
@@ -1691,19 +1763,48 @@ TEST_F(CoreTest, MessagePipeBasicLocalHandlePassing2) {
                 MOJO_HANDLE_SIGNAL_READ_THRESHOLD,
             hss.satisfiable_signals);
 
-  // Make sure that |ch| can't be sent if it's in a two-phase read.
+  // Sending |ch| during a two-phase read cancels the two-phase read.
   const void* read_ptr = nullptr;
-  num_bytes = 1;
+  num_bytes = 0;
   ASSERT_EQ(MOJO_RESULT_OK,
             core()->BeginReadData(ch, MakeUserPointer(&read_ptr),
                                   MakeUserPointer(&num_bytes),
                                   MOJO_READ_DATA_FLAG_NONE));
-  EXPECT_EQ(MOJO_RESULT_BUSY,
+  ASSERT_TRUE(read_ptr);
+  EXPECT_EQ(1u, num_bytes);
+  EXPECT_EQ(MOJO_RESULT_OK,
             core()->WriteMessage(h_passing[0], UserPointer<const void>(kHello),
                                  kHelloSize, MakeUserPointer(&ch), 1,
                                  MOJO_WRITE_MESSAGE_FLAG_NONE));
+  ch = MOJO_HANDLE_INVALID;
+  EXPECT_EQ(MOJO_RESULT_OK,
+            core()->Wait(h_passing[1], MOJO_HANDLE_SIGNAL_READABLE, 1000000000,
+                         NullUserPointer()));
+  num_bytes = kBufferSize;
+  num_handles = MOJO_ARRAYSIZE(handles);
+  EXPECT_EQ(MOJO_RESULT_OK,
+            core()->ReadMessage(
+                h_passing[1], UserPointer<void>(buffer),
+                MakeUserPointer(&num_bytes), MakeUserPointer(handles),
+                MakeUserPointer(&num_handles), MOJO_READ_MESSAGE_FLAG_NONE));
+  EXPECT_EQ(kHelloSize, num_bytes);
+  EXPECT_STREQ(kHello, buffer);
+  EXPECT_EQ(1u, num_handles);
+  ch = handles[0];
+  EXPECT_NE(ch, MOJO_HANDLE_INVALID);
+  // The two-phase read is over, so trying to complete it will fail.
+  EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION, core()->EndReadData(ch, 1));
+  // And we can begin a two-phase read on the new handle.
+  read_ptr = nullptr;
+  num_bytes = 0;
+  ASSERT_EQ(MOJO_RESULT_OK,
+            core()->BeginReadData(ch, MakeUserPointer(&read_ptr),
+                                  MakeUserPointer(&num_bytes),
+                                  MOJO_READ_DATA_FLAG_NONE));
+  ASSERT_TRUE(read_ptr);
+  EXPECT_EQ(1u, num_bytes);
 
-  // But |ph| can, even if |ch| is in a two-phase read.
+  // |ph| can be sent, even if |ch| is in a two-phase write.
   EXPECT_EQ(MOJO_RESULT_OK,
             core()->WriteMessage(h_passing[0], UserPointer<const void>(kWorld),
                                  kWorldSize, MakeUserPointer(&ph), 1,
@@ -1790,6 +1891,40 @@ TEST_F(CoreTest, MessagePipeBasicLocalHandlePassing3) {
     // Again, nothing bad happens, but again you can only close |h0|.
     EXPECT_EQ(MOJO_RESULT_OK, core()->Close(h0));
   }
+}
+
+// Tests not having versus not having the transfer right.
+TEST_F(CoreTest, MessagePipeBasicLocalHandlePassing4) {
+  MojoHandle h0 = MOJO_HANDLE_INVALID;
+  MojoHandle h1 = MOJO_HANDLE_INVALID;
+  EXPECT_EQ(MOJO_RESULT_OK,
+            core()->CreateMessagePipe(NullUserPointer(), MakeUserPointer(&h0),
+                                      MakeUserPointer(&h1)));
+
+  MojoHandle h_transferrable = MOJO_HANDLE_INVALID;
+  EXPECT_EQ(MOJO_RESULT_OK,
+            core()->CreateSharedBuffer(NullUserPointer(), 100,
+                                       MakeUserPointer(&h_transferrable)));
+  MojoHandle h_not_transferrable = MOJO_HANDLE_INVALID;
+  EXPECT_EQ(MOJO_RESULT_OK, core()->DuplicateHandleWithReducedRights(
+                                h_transferrable, MOJO_HANDLE_RIGHT_TRANSFER,
+                                MakeUserPointer(&h_not_transferrable)));
+
+  // We can send |h_transferrable|.
+  EXPECT_EQ(MOJO_RESULT_OK,
+            core()->WriteMessage(h0, NullUserPointer(), 0,
+                                 MakeUserPointer(&h_transferrable), 1,
+                                 MOJO_WRITE_MESSAGE_FLAG_NONE));
+
+  // But not |h_not_transferrable|.
+  EXPECT_EQ(MOJO_RESULT_PERMISSION_DENIED,
+            core()->WriteMessage(h0, NullUserPointer(), 0,
+                                 MakeUserPointer(&h_not_transferrable), 1,
+                                 MOJO_WRITE_MESSAGE_FLAG_NONE));
+
+  EXPECT_EQ(MOJO_RESULT_OK, core()->Close(h0));
+  EXPECT_EQ(MOJO_RESULT_OK, core()->Close(h1));
+  EXPECT_EQ(MOJO_RESULT_OK, core()->Close(h_not_transferrable));
 }
 
 struct TestAsyncWaiter {

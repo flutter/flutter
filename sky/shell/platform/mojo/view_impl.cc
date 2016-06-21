@@ -99,16 +99,17 @@ void ViewImpl::Run(base::FilePath bundle_path) {
   engine_->RunFromBundle(url_, bundle_path.value());
 }
 
-void ViewImpl::OnPropertiesChanged(
-    uint32_t scene_version,
-    mojo::ui::ViewPropertiesPtr properties,
-    const OnPropertiesChangedCallback& callback) {
-  auto& display_metrics = properties->display_metrics;
-  viewport_metrics_.device_pixel_ratio = display_metrics->device_pixel_ratio;
-  auto& size = properties->view_layout->size;
-  viewport_metrics_.physical_width = size->width;
-  viewport_metrics_.physical_height = size->height;
-  viewport_metrics_.scene_version = scene_version;
+void ViewImpl::OnInvalidation(mojo::ui::ViewInvalidationPtr invalidation,
+                              const OnInvalidationCallback& callback) {
+  auto& properties = invalidation->properties;
+  if (properties) {
+    auto& display_metrics = properties->display_metrics;
+    viewport_metrics_.device_pixel_ratio = display_metrics->device_pixel_ratio;
+    auto& size = properties->view_layout->size;
+    viewport_metrics_.physical_width = size->width;
+    viewport_metrics_.physical_height = size->height;
+  }
+  viewport_metrics_.scene_version = invalidation->scene_version;
   engine_->OnViewportMetricsChanged(viewport_metrics_.Clone());
   callback.Run();
 }

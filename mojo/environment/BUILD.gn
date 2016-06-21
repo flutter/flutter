@@ -9,6 +9,8 @@ source_set("chromium") {
     "default_logger.cc",
     "default_logger.h",
     "environment.cc",
+    "scoped_chromium_init.cc",
+    "scoped_chromium_init.h",
 
     # TODO(vtl): This is kind of ugly. (See TODO in logging.h.)
     "../public/cpp/environment/async_waiter.h",

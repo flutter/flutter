@@ -81,7 +81,7 @@ class MessagePipeDispatcher final : public Dispatcher {
   unsigned GetPortNoLock() const;
 
   // |Dispatcher| protected methods:
-  void CancelAllAwakablesNoLock() override;
+  void CancelAllStateNoLock() override;
   void CloseImplNoLock() override;
   util::RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock(
       MessagePipe* message_pipe,
@@ -98,7 +98,8 @@ class MessagePipeDispatcher final : public Dispatcher {
   HandleSignalsState GetHandleSignalsStateImplNoLock() const override;
   MojoResult AddAwakableImplNoLock(Awakable* awakable,
                                    MojoHandleSignals signals,
-                                   uint32_t context,
+                                   bool force,
+                                   uint64_t context,
                                    HandleSignalsState* signals_state) override;
   void RemoveAwakableImplNoLock(Awakable* awakable,
                                 HandleSignalsState* signals_state) override;

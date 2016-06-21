@@ -4,6 +4,7 @@
 
 #include "mojo/edk/system/core.h"
 
+#include <limits>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -186,6 +187,27 @@ MojoResult Core::GetRights(MojoHandle handle,
   return MOJO_RESULT_OK;
 }
 
+MojoResult Core::ReplaceHandleWithReducedRights(
+    MojoHandle handle,
+    MojoHandleRights rights_to_remove,
+    UserPointer<MojoHandle> replacement_handle) {
+  if (handle == MOJO_HANDLE_INVALID)
+    return MOJO_RESULT_INVALID_ARGUMENT;
+
+  MojoHandle replacement_handle_value = MOJO_HANDLE_INVALID;
+  {
+    MutexLocker locker(&handle_table_mutex_);
+    MojoResult result = handle_table_.ReplaceHandleWithReducedRights(
+        handle, rights_to_remove, &replacement_handle_value);
+    if (result != MOJO_RESULT_OK)
+      return result;
+  }
+  DCHECK_NE(replacement_handle_value, MOJO_HANDLE_INVALID);
+
+  replacement_handle.Put(replacement_handle_value);
+  return MOJO_RESULT_OK;
+}
+
 MojoResult Core::DuplicateHandleWithReducedRights(
     MojoHandle handle,
     MojoHandleRights rights_to_remove,
@@ -219,7 +241,7 @@ MojoResult Core::Wait(MojoHandle handle,
                       MojoHandleSignals signals,
                       MojoDeadline deadline,
                       UserPointer<MojoHandleSignalsState> signals_state) {
-  uint32_t unused = static_cast<uint32_t>(-1);
+  uint64_t unused = static_cast<uint64_t>(-1);
   HandleSignalsState hss;
   MojoResult result = WaitManyInternal(&handle, &signals, 1, deadline, &unused,
                                        signals_state.IsNull() ? nullptr : &hss);
@@ -242,7 +264,7 @@ MojoResult Core::WaitMany(UserPointer<const MojoHandle> handles,
   UserPointer<const MojoHandle>::Reader handles_reader(handles, num_handles);
   UserPointer<const MojoHandleSignals>::Reader signals_reader(signals,
                                                               num_handles);
-  uint32_t index = static_cast<uint32_t>(-1);
+  uint64_t index = static_cast<uint64_t>(-1);
   MojoResult result;
   if (signals_states.IsNull()) {
     result = WaitManyInternal(handles_reader.GetPointer(),
@@ -260,8 +282,10 @@ MojoResult Core::WaitMany(UserPointer<const MojoHandle> handles,
     if (result != MOJO_RESULT_INVALID_ARGUMENT)
       signals_states_writer.Commit();
   }
-  if (index != static_cast<uint32_t>(-1) && !result_index.IsNull())
-    result_index.Put(index);
+  if (index != static_cast<uint64_t>(-1) && !result_index.IsNull()) {
+    DCHECK_LE(index, std::numeric_limits<uint32_t>::max());
+    result_index.Put(static_cast<uint32_t>(index));
+  }
   return result;
 }
 
@@ -734,10 +758,10 @@ MojoResult Core::WaitManyInternal(const MojoHandle* handles,
                                   const MojoHandleSignals* signals,
                                   uint32_t num_handles,
                                   MojoDeadline deadline,
-                                  uint32_t* result_index,
+                                  uint64_t* result_index,
                                   HandleSignalsState* signals_states) {
   DCHECK_GT(num_handles, 0u);
-  DCHECK_EQ(*result_index, static_cast<uint32_t>(-1));
+  DCHECK_EQ(*result_index, static_cast<uint64_t>(-1));
 
   DispatcherVector dispatchers;
   dispatchers.reserve(num_handles);

@@ -43,10 +43,6 @@ class Stub<T> implements MojoInterface<T> {
 
 abstract class StubMessageHandler extends core.MojoEventHandler
                                   implements MojoInterfaceControl {
-  int _outstandingResponseFutures = 0;
-  bool _isClosing = false;
-  Completer _closeCompleter;
-
   StubMessageHandler.fromEndpoint(core.MojoMessagePipeEndpoint endpoint,
                                   {bool autoBegin: true})
       : super.fromEndpoint(endpoint, autoBegin: autoBegin);
@@ -58,7 +54,7 @@ abstract class StubMessageHandler extends core.MojoEventHandler
 
   /// Generated StubControl classes implement this method to route messages to
   /// the correct implementation method.
-  dynamic handleMessage(ServiceMessage message);
+  void handleMessage(ServiceMessage message);
 
   /// Generated StubControl classes implement this getter to return the version
   /// of the mojom interface for which the bindings are generated.
@@ -71,41 +67,15 @@ abstract class StubMessageHandler extends core.MojoEventHandler
       throw new MojoCodecError('Unexpected empty message or error: $result');
     }
 
-    // Prepare the response.
-    var message;
-    var response;
     try {
-      message = new ServiceMessage.fromMessage(new Message(result.data,
+      var message = new ServiceMessage.fromMessage(new Message(result.data,
           result.handles, result.dataLength, result.handlesLength));
-      response = _isClosing ? null : handleMessage(message);
+      handleMessage(message);
     } catch (e) {
       if (result.handles != null) {
         result.handles.forEach((h) => h.close());
       }
       rethrow;
-    }
-
-    // If there's a response, send it.
-    if (response != null) {
-      if (response is Future) {
-        _outstandingResponseFutures++;
-        response.then((response) {
-          _outstandingResponseFutures--;
-          return response;
-        }).then(_sendResponse);
-      } else {
-        _sendResponse(response);
-      }
-    } else if (_isClosing && (_outstandingResponseFutures == 0)) {
-      // We are closing, there is no response to send for this message, and
-      // there are no outstanding response futures. Do the close now.
-      super.close().then((_) {
-        if (_isClosing) {
-          _isClosing = false;
-          _closeCompleter.complete(null);
-          _closeCompleter = null;
-        }
-      });
     }
   }
 
@@ -114,30 +84,16 @@ abstract class StubMessageHandler extends core.MojoEventHandler
     throw 'Unexpected write signal in client.';
   }
 
-  // NB: |immediate| should only be true when calling close() while handling an
-  // exception thrown from handleRead(), e.g. when we receive a malformed
-  // message, or when we have received the PEER_CLOSED event.
-  @override
-  Future close({bool immediate: false}) {
-    if (isOpen &&
-        !immediate &&
-        !isPeerClosed &&
-        (isInHandler || (_outstandingResponseFutures > 0))) {
-      // Either close() is being called from within handleRead() or
-      // handleWrite(), or close() is being called while there are outstanding
-      // response futures. Defer the actual close until all response futures
-      // have been resolved.
-      _isClosing = true;
-      _closeCompleter = new Completer();
-      return _closeCompleter.future;
-    } else {
-      return super.close(immediate: immediate).then((_) {
-        if (_isClosing) {
-          _isClosing = false;
-          _closeCompleter.complete(null);
-          _closeCompleter = null;
-        }
-      });
+  /// Called by generated handleMessage functions in implementations.
+  void sendResponse(Message response) {
+    if (isOpen) {
+      endpoint.write(
+          response.buffer, response.buffer.lengthInBytes, response.handles);
+      // FailedPrecondition is only used to indicate that the other end of
+      // the pipe has been closed. We can ignore the close here and wait for
+      // the PeerClosed signal on the event stream.
+      assert((endpoint.status == core.MojoResult.kOk) ||
+          (endpoint.status == core.MojoResult.kFailedPrecondition));
     }
   }
 
@@ -161,27 +117,4 @@ abstract class StubMessageHandler extends core.MojoEventHandler
   /// of the service being stubbed.
   /// Note: The description is null or incomplete if type info is unavailable.
   service_describer.ServiceDescription get description => null;
-
-  void _sendResponse(Message response) {
-    if (isOpen) {
-      endpoint.write(
-          response.buffer, response.buffer.lengthInBytes, response.handles);
-      // FailedPrecondition is only used to indicate that the other end of
-      // the pipe has been closed. We can ignore the close here and wait for
-      // the PeerClosed signal on the event stream.
-      assert((endpoint.status == core.MojoResult.kOk) ||
-          (endpoint.status == core.MojoResult.kFailedPrecondition));
-      if (_isClosing && (_outstandingResponseFutures == 0)) {
-        // This was the final response future for which we needed to send
-        // a response. It is safe to close.
-        super.close().then((_) {
-          if (_isClosing) {
-            _isClosing = false;
-            _closeCompleter.complete(null);
-            _closeCompleter = null;
-          }
-        });
-      }
-    }
-  }
 }

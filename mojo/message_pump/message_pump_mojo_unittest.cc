@@ -14,11 +14,7 @@ namespace mojo {
 namespace common {
 namespace test {
 
-scoped_ptr<base::MessagePump> CreateMojoMessagePump() {
-  return scoped_ptr<base::MessagePump>(new MessagePumpMojo());
-}
-
-RUN_MESSAGE_LOOP_TESTS(Mojo, &CreateMojoMessagePump);
+RUN_MESSAGE_LOOP_TESTS(Mojo, &MessagePumpMojo::Create);
 
 class CountingMojoHandler : public MessagePumpMojoHandler {
  public:

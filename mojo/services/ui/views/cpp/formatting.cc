@@ -38,6 +38,14 @@ std::ostream& operator<<(std::ostream& os, const mojo::ui::ViewLayout& value) {
 }
 
 std::ostream& operator<<(std::ostream& os,
+                         const mojo::ui::ViewInvalidation& value) {
+  return os << "{properties=" << value.properties
+            << ", container_flush_token=" << value.container_flush_token
+            << ", scene_version=" << value.scene_version
+            << ", frame_info=" << value.frame_info << "}";
+}
+
+std::ostream& operator<<(std::ostream& os,
                          const mojo::ui::ViewAssociateInfo& value) {
   return os << "{view_service_names=" << value.view_service_names
             << ", view_tree_service_names=" << value.view_tree_service_names

@@ -33,7 +33,7 @@ namespace system {
 class SharedBufferDispatcher final : public SimpleDispatcher {
  public:
   // The default/standard rights for a shared buffer handle. Note that they're
-  // duplicable by default.
+  // duplicatable by default.
   static constexpr MojoHandleRights kDefaultHandleRights =
       MOJO_HANDLE_RIGHT_DUPLICATE | MOJO_HANDLE_RIGHT_TRANSFER |
       MOJO_HANDLE_RIGHT_GET_OPTIONS | MOJO_HANDLE_RIGHT_SET_OPTIONS |
@@ -55,8 +55,7 @@ class SharedBufferDispatcher final : public SimpleDispatcher {
       MojoCreateSharedBufferOptions* out_options);
 
   // Static factory method: |validated_options| must be validated (obviously).
-  // Returns null on error; |*result| will be set to an appropriate result
-  // code).
+  // Returns null on error; |*result| will be set to an appropriate result code.
   static util::RefPtr<SharedBufferDispatcher> Create(
       embedder::PlatformSupport* platform_support,
       const MojoCreateSharedBufferOptions& validated_options,

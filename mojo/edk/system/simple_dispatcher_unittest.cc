@@ -39,7 +39,7 @@ TEST(SimpleDispatcherTest, Basic) {
 
   auto d = MakeRefCounted<test::MockSimpleDispatcher>();
   Waiter w;
-  uint32_t context = 0;
+  uint64_t context = 0;
   HandleSignalsState hss;
 
   // Try adding a readable waiter when already readable.
@@ -141,7 +141,7 @@ TEST(SimpleDispatcherTest, BasicUnsatisfiable) {
 
   auto d = MakeRefCounted<test::MockSimpleDispatcher>();
   Waiter w;
-  uint32_t context = 0;
+  uint64_t context = 0;
   HandleSignalsState hss;
 
   // Try adding a writable waiter when it can never be writable.
@@ -214,7 +214,7 @@ TEST(SimpleDispatcherTest, BasicClosed) {
 
   RefPtr<test::MockSimpleDispatcher> d;
   Waiter w;
-  uint32_t context = 0;
+  uint64_t context = 0;
   HandleSignalsState hss;
 
   // Try adding a writable waiter when the dispatcher has been closed.
@@ -271,7 +271,7 @@ TEST(SimpleDispatcherTest, BasicThreaded) {
   Stopwatch stopwatch;
   bool did_wait;
   MojoResult result;
-  uint32_t context;
+  uint64_t context;
   HandleSignalsState hss;
 
   // Wait for readable (already readable).
@@ -393,7 +393,7 @@ TEST(SimpleDispatcherTest, MultipleWaiters) {
 
   bool did_wait[kNumWaiters];
   MojoResult result[kNumWaiters];
-  uint32_t context[kNumWaiters];
+  uint64_t context[kNumWaiters];
   HandleSignalsState hss[kNumWaiters];
 
   // All wait for readable and becomes readable after some time.

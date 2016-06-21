@@ -5,8 +5,10 @@
 #ifndef MOJO_SERVICES_MEDIA_COMMON_CPP_TIMELINE_FUNCTION_H_
 #define MOJO_SERVICES_MEDIA_COMMON_CPP_TIMELINE_FUNCTION_H_
 
+#include "mojo/public/cpp/bindings/type_converter.h"
 #include "mojo/public/cpp/environment/logging.h"
 #include "mojo/services/media/common/cpp/timeline_rate.h"
+#include "mojo/services/media/common/interfaces/timelines.mojom.h"
 
 namespace mojo {
 namespace media {
@@ -128,6 +130,19 @@ inline TimelineFunction operator*(const TimelineFunction& bc,
 }
 
 }  // namespace media
+
+template <>
+struct TypeConverter<TimelineTransformPtr, media::TimelineFunction> {
+  static TimelineTransformPtr Convert(
+      const media::TimelineFunction& input);
+};
+
+template <>
+struct TypeConverter<media::TimelineFunction, TimelineTransformPtr> {
+  static media::TimelineFunction Convert(
+      const TimelineTransformPtr& input);
+};
+
 }  // namespace mojo
 
 #endif  // MOJO_SERVICES_MEDIA_COMMON_CPP_TIMELINE_FUNCTION_H_

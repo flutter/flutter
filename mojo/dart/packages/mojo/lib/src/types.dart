@@ -4,25 +4,29 @@
 
 part of core;
 
+// TODO(vtl): Find a way of supporting the new, more flexible/extensible
+// MojoResult (see mojo/public/c/syste/result.h).
 class MojoResult {
-  static const int kOk = 0;
-  static const int kCancelled = 1;
-  static const int kUnknown = 2;
-  static const int kInvalidArgument = 3;
-  static const int kDeadlineExceeded = 4;
-  static const int kNotFound = 5;
-  static const int kAlreadyExists = 6;
-  static const int kPermissionDenied = 7;
-  static const int kResourceExhausted = 8;
-  static const int kFailedPrecondition = 9;
-  static const int kAborted = 10;
-  static const int kOutOfRange = 11;
-  static const int kUnimplemented = 12;
-  static const int kInternal = 13;
-  static const int kUnavailable = 14;
-  static const int kDataLoss = 15;
-  static const int kBusy = 16;
-  static const int kShouldWait = 17;
+  static const int kOk = 0x0;
+  static const int kCancelled = 0x1;
+  static const int kUnknown = 0x2;
+  static const int kInvalidArgument = 0x3;
+  static const int kDeadlineExceeded = 0x4;
+  static const int kNotFound = 0x5;
+  static const int kAlreadyExists = 0x6;
+  static const int kPermissionDenied = 0x7;
+  static const int kResourceExhausted = 0x8;
+  static const int kFailedPrecondition = 0x9;
+  static const int kAborted = 0xa;
+  static const int kOutOfRange = 0xb;
+  static const int kUnimplemented = 0xc;
+  static const int kInternal = 0xd;
+  static const int kUnavailable = 0xe;
+  static const int kDataLoss = 0xf;
+  // kFailedPrecondition, subcode 0x001:
+  static const int kBusy = 0x0019;
+  // kUnavailable, subcode 0x001:
+  static const int kShouldWait = 0x001e;
 
   MojoResult._();
 

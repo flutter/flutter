@@ -8,7 +8,7 @@
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
 #include "mojo/gpu/gl_context.h"
-#include "skia/ext/refptr.h"
+#include "third_party/skia/include/core/SkRefCnt.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 
 namespace mojo {
@@ -48,7 +48,7 @@ class GaneshContext : public base::RefCounted<GaneshContext>,
     }
 
     // Gets the underlying Ganesh rendering context, never null.
-    const ::skia::RefPtr<GrContext>& gr_context() const {
+    const sk_sp<GrContext>& gr_context() const {
       return ganesh_context_->gr_context_;
     }
 
@@ -84,7 +84,7 @@ class GaneshContext : public base::RefCounted<GaneshContext>,
   void OnContextLost() override;
 
   const scoped_refptr<GLContext> gl_context_;
-  ::skia::RefPtr<GrContext> gr_context_;
+  sk_sp<GrContext> gr_context_;
   bool scope_entered_ = false;
 
   DISALLOW_COPY_AND_ASSIGN(GaneshContext);

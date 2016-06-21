@@ -30,7 +30,7 @@ class LocalMessagePipeEndpoint final : public MessagePipeEndpoint {
   // There's a dispatcher for |LocalMessagePipeEndpoint|s, so we have to
   // implement/override these:
   void Close() override;
-  void CancelAllAwakables() override;
+  void CancelAllState() override;
   MojoResult ReadMessage(UserPointer<void> bytes,
                          UserPointer<uint32_t> num_bytes,
                          HandleVector* handles,
@@ -39,7 +39,8 @@ class LocalMessagePipeEndpoint final : public MessagePipeEndpoint {
   HandleSignalsState GetHandleSignalsState() const override;
   MojoResult AddAwakable(Awakable* awakable,
                          MojoHandleSignals signals,
-                         uint32_t context,
+                         bool force,
+                         uint64_t context,
                          HandleSignalsState* signals_state) override;
   void RemoveAwakable(Awakable* awakable,
                       HandleSignalsState* signals_state) override;

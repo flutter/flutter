@@ -234,7 +234,7 @@ SharedBufferDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock(
     unsigned /*port*/) {
   mutex().AssertHeld();
 
-  CancelAllAwakablesNoLock();
+  CancelAllStateNoLock();
 
   DCHECK(shared_buffer_);
   return CreateInternal(std::move(shared_buffer_));

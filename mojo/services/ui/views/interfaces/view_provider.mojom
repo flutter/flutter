@@ -24,10 +24,6 @@ interface ViewProvider {
   //
   // The caller may provide services to the view via the |services|
   // service provider.
-  //
-  // The caller may receive services from the view via the |exposed_services|
-  // service provider.
   CreateView(ViewOwner& view_owner,
-             mojo.ServiceProvider&? services,
-             mojo.ServiceProvider? exposed_services);
+             mojo.ServiceProvider&? services);
 };

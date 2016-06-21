@@ -25,7 +25,7 @@ class AsyncWaiter final : public Awakable {
 
  private:
   // |Awakable| implementation:
-  bool Awake(MojoResult result, uintptr_t context) override;
+  bool Awake(MojoResult result, uint64_t context) override;
 
   AwakeCallback callback_;
 

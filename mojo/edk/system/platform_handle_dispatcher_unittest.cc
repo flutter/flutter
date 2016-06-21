@@ -104,7 +104,6 @@ TEST(PlatformHandleDispatcherTest, CreateEquivalentDispatcherAndClose) {
   HandleTransport transport(test::HandleTryStartTransport(handle));
   EXPECT_TRUE(transport.is_valid());
   EXPECT_EQ(Dispatcher::Type::PLATFORM_HANDLE, transport.GetType());
-  EXPECT_FALSE(transport.IsBusy());
 
   Handle equivalent_handle =
       transport.CreateEquivalentHandleAndClose(nullptr, 0u);

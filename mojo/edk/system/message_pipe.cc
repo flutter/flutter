@@ -124,9 +124,9 @@ MessagePipeEndpoint::Type MessagePipe::GetType(unsigned port) {
   return endpoints_[port]->GetType();
 }
 
-void MessagePipe::CancelAllAwakables(unsigned port) {
+void MessagePipe::CancelAllState(unsigned port) {
   MutexLocker locker(&mutex_);
-  CancelAllAwakablesNoLock(port);
+  CancelAllStateNoLock(port);
 }
 
 void MessagePipe::Close(unsigned port) {
@@ -192,14 +192,15 @@ HandleSignalsState MessagePipe::GetHandleSignalsState(unsigned port) const {
 MojoResult MessagePipe::AddAwakable(unsigned port,
                                     Awakable* awakable,
                                     MojoHandleSignals signals,
-                                    uint32_t context,
+                                    bool force,
+                                    uint64_t context,
                                     HandleSignalsState* signals_state) {
   DCHECK(port == 0 || port == 1);
 
   MutexLocker locker(&mutex_);
   DCHECK(endpoints_[port]);
 
-  return endpoints_[port]->AddAwakable(awakable, signals, context,
+  return endpoints_[port]->AddAwakable(awakable, signals, force, context,
                                        signals_state);
 }
 
@@ -283,11 +284,11 @@ bool MessagePipe::EndSerialize(
   return true;
 }
 
-void MessagePipe::CancelAllAwakablesNoLock(unsigned port) {
+void MessagePipe::CancelAllStateNoLock(unsigned port) {
   DCHECK(port == 0 || port == 1);
   mutex_.AssertHeld();
   DCHECK(endpoints_[port]);
-  endpoints_[port]->CancelAllAwakables();
+  endpoints_[port]->CancelAllState();
 }
 
 bool MessagePipe::OnReadMessage(unsigned port, MessageInTransit* message) {

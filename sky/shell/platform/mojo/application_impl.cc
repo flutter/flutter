@@ -36,10 +36,9 @@ void ApplicationImpl::Initialize(mojo::InterfaceHandle<mojo::Shell> shell,
 
 void ApplicationImpl::AcceptConnection(
     const mojo::String& requestor_url,
-    mojo::InterfaceRequest<mojo::ServiceProvider> outgoing_services,
-    mojo::InterfaceHandle<mojo::ServiceProvider> incoming_services,
-    const mojo::String& resolved_url) {
-  service_provider_bindings_.AddBinding(this, outgoing_services.Pass());
+    const mojo::String& resolved_url,
+    mojo::InterfaceRequest<mojo::ServiceProvider> services) {
+  service_provider_bindings_.AddBinding(this, services.Pass());
 }
 
 void ApplicationImpl::RequestQuit() {
@@ -55,11 +54,8 @@ void ApplicationImpl::ConnectToService(const mojo::String& service_name,
 
 void ApplicationImpl::ConnectToApplication(
     const mojo::String& application_url,
-    mojo::InterfaceRequest<mojo::ServiceProvider> services,
-    mojo::InterfaceHandle<mojo::ServiceProvider> exposed_services) {
-  shell_->ConnectToApplication(application_url,
-                               services.Pass(),
-                               exposed_services.Pass());
+    mojo::InterfaceRequest<mojo::ServiceProvider> services) {
+  shell_->ConnectToApplication(application_url, services.Pass());
 }
 
 void ApplicationImpl::CreateApplicationConnector(
@@ -69,19 +65,17 @@ void ApplicationImpl::CreateApplicationConnector(
 
 void ApplicationImpl::CreateView(
     mojo::InterfaceRequest<mojo::ui::ViewOwner> view_owner,
-      mojo::InterfaceRequest<mojo::ServiceProvider> outgoing_services,
-      mojo::InterfaceHandle<mojo::ServiceProvider> incoming_services) {
+    mojo::InterfaceRequest<mojo::ServiceProvider> services) {
   // TODO(abarth): Rather than proxying the shell, we should give Dart an
   //               ApplicationConnectorPtr instead of a ShellPtr.
   mojo::ShellPtr shell;
   shell_bindings_.AddBinding(this, mojo::GetProxy(&shell));
 
-  ServicesDataPtr services = ServicesData::New();
-  services->shell = shell.Pass();
-  services->incoming_services = incoming_services.Pass();
-  services->outgoing_services = outgoing_services.Pass();
+  ServicesDataPtr services_data = ServicesData::New();
+  services_data->shell = shell.Pass();
+  services_data->outgoing_services = services.Pass();
 
-  ViewImpl* view = new ViewImpl(view_owner.Pass(), services.Pass(), url_);
+  ViewImpl* view = new ViewImpl(view_owner.Pass(), services_data.Pass(), url_);
   view->Run(bundle_path_);
 }
 

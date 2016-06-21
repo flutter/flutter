@@ -36,6 +36,10 @@ enum class EntrypointClass {
   // |Dispatcher::DuplicateBufferHandle()|,
   // |Dispatcher::GetBufferInformation()|, |Dispatcher::MapBuffer()|:
   BUFFER,
+
+  // |Dispatcher::WaitSetAdd()|, |Dispatcher::WaitSetRemove()|,
+  // |Dispatcher::WaitSetWait()|:
+  WAIT_SET,
 };
 
 }  // namespace system

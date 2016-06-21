@@ -19,10 +19,9 @@ abstract class ProxyControl<T> implements ProxyMessageHandler {
   // try to remove when/after ApplicationConnection is removed/refactored.
   String get serviceName;
 
-  // Currently we don't have impl hooked up to anything for Proxies, but we have
-  // the field here so that there is a consistent interface with Stubs. By
-  // having the field here we can also retain the option of hooking a proxy
-  // up to something other than the remote implementation in the future.
+  /// By default, a Proxy's calls are "implemented" by a remote service. Before
+  /// binding, this field can be set to an alternate implementation of the
+  /// service that may be local.
   T impl;
 }
 
@@ -33,7 +32,8 @@ class Proxy<T> implements MojoInterface<T> {
   // generation to avoid name conflicts.
 
   /// Proxies control the ProxyMessageHandler by way of this [ProxyControl]
-  /// object.
+  /// object. If a Mojo interface has a method 'ctrl', its name will be
+  /// mangled to be 'ctrl_'.
   final ProxyControl<T> ctrl;
 
   Proxy(this.ctrl);
@@ -49,7 +49,7 @@ class Proxy<T> implements MojoInterface<T> {
   Future responseOrError(Future f) => ctrl.responseOrError(f);
 
   /// This getter and setter pair is for convenience and simply forwards to
-  /// ctrl.impl. If a Mojo interface has a method 'close', its name will be
+  /// ctrl.impl. If a Mojo interface has a method 'impl', its name will be
   /// mangled to be 'impl_'.
   T get impl => ctrl.impl;
   set impl(T impl) {
@@ -69,7 +69,7 @@ abstract class ServiceConnector {
 
 abstract class ProxyMessageHandler extends core.MojoEventHandler
                                    implements MojoInterfaceControl {
-  HashMap<int, Completer> _completerMap = new HashMap<int, Completer>();
+  HashMap<int, Function> _callbackMap = new HashMap<int, Function>();
   Completer _errorCompleter = new Completer();
   Set<Completer> _errorCompleters;
   int _nextId = 0;
@@ -131,9 +131,8 @@ abstract class ProxyMessageHandler extends core.MojoEventHandler
 
   @override
   Future close({bool immediate: false}) {
-    // Drop the completers for outstanding calls. The Futures will never
-    // complete.
-    _completerMap.clear();
+    // Drop the callbacks for outstanding calls. They will never be called.
+    _callbackMap.clear();
 
     // Signal to any pending calls that the ProxyMessageHandler is closed.
     if (_pendingCount > 0) {
@@ -160,11 +159,11 @@ abstract class ProxyMessageHandler extends core.MojoEventHandler
     }
   }
 
-  Future sendMessageWithRequestId(Struct message, int name, int id, int flags) {
-    var completer = new Completer();
+  void sendMessageWithRequestId(
+      Struct message, int name, int id, int flags, Function callback) {
     if (!isBound) {
-      proxyError("The ProxyMessageHandler is closed.");
-      return completer.future;
+      proxyError("The Proxy is closed.");
+      return;
     }
     if (!isOpen) {
       beginHandlingEvents();
@@ -179,16 +178,15 @@ abstract class ProxyMessageHandler extends core.MojoEventHandler
         serviceMessage.handles);
 
     if (endpoint.status == core.MojoResult.kOk) {
-      _completerMap[id] = completer;
+      _callbackMap[id] = callback;
       _pendingCount++;
     } else {
       proxyError("Write to message pipe endpoint failed: ${endpoint}");
     }
-    return completer.future;
   }
 
   // Need a getter for this for access in subclasses.
-  HashMap<int, Completer> get completerMap => _completerMap;
+  HashMap<int, Function> get callbackMap => _callbackMap;
 
   @override
   String toString() {
@@ -198,15 +196,19 @@ abstract class ProxyMessageHandler extends core.MojoEventHandler
 
   /// Queries the max version that the remote side supports.
   /// Updates [version].
-  Future<int> queryVersion() async {
+  Future<int> queryVersion() {
+    Completer<int> completer = new Completer<int>();
     var params = new icm.RunMessageParams();
     params.reserved0 = 16;
     params.reserved1 = 0;
     params.queryVersion = new icm.QueryVersion();
-    var response = await sendMessageWithRequestId(
-        params, icm.kRunMessageId, -1, MessageHeader.kMessageExpectsResponse);
-    _version = response.queryVersionResult.version;
-    return _version;
+    sendMessageWithRequestId(
+        params, icm.kRunMessageId,  -1, MessageHeader.kMessageExpectsResponse,
+        (r0, r1, queryResult) {
+      _version = queryResult.version;
+      completer.complete(_version);
+    });
+    return completer.future;
   }
 
   /// If the remote side doesn't support the [requiredVersion], it will close
@@ -287,22 +289,119 @@ abstract class ProxyMessageHandler extends core.MojoEventHandler
           "${message.header.type}");
       return;
     }
-
     var response = icm.RunResponseMessageParams.deserialize(message.payload);
     if (!message.header.hasRequestId) {
       proxyError("Expected a message with a valid request Id.");
       return;
     }
-    Completer c = completerMap[message.header.requestId];
-    if (c == null) {
+    Function callback = callbackMap[message.header.requestId];
+    if (callback == null) {
       proxyError("Message had unknown request Id: ${message.header.requestId}");
       return;
     }
-    completerMap.remove(message.header.requestId);
-    if (c.isCompleted) {
-      proxyError("Control message response completer already completed");
-      return;
-    }
-    c.complete(response);
+    callbackMap.remove(message.header.requestId);
+    callback(
+        response.reserved0, response.reserved1, response.queryVersionResult);
+    return;
   }
+}
+
+// A class that acts like a function, but which completes a completer with the
+// the result of the function rather than returning the result. E.g.:
+//
+// Completer c = new Completer();
+// var completerator = new Completerator._(c, f);
+// completerator(a, b);
+// await c.future;
+//
+// This completes the future c with the result of passing a and b to f.
+//
+// More usefully for Mojo, e.g.:
+// await _Completerator.completerate(
+//     proxy.method, argList, MethodResponseParams#init);
+class _Completerator implements Function {
+  final Completer _c;
+  final Function _toComplete;
+
+  _Completerator._(this._c, this._toComplete);
+
+  static Future completerate(Function f, List args, Function ctor) {
+    Completer c = new Completer();
+    var newArgs = new List.from(args);
+    newArgs.add(new _Completerator._(c, ctor));
+    Function.apply(f, newArgs);
+    return c.future;
+  }
+
+  // Work-around to avoid checked-mode only having grudging support for
+  // Function implemented with noSuchMethod. See:
+  // https://github.com/dart-lang/sdk/issues/26528
+  dynamic call([
+      dynamic a1, dynamic a2, dynamic a3, dynamic a4, dynamic a5,
+      dynamic a6, dynamic a7, dynamic a8, dynamic a9, dynamic a10,
+      dynamic a11, dynamic a12, dynamic a13, dynamic a14, dynamic a15,
+      dynamic a16, dynamic a17, dynamic a18, dynamic a19, dynamic a20]);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      (invocation.memberName == #call)
+      ? _c.complete(Function.apply(_toComplete, invocation.positionalArguments))
+      : super.noSuchMethod(invocation);
+}
+
+/// Base class for Proxy class Futurizing wrappers. It turns callback-based
+/// methods on the Proxy into Future based methods in derived classes. E.g.:
+///
+/// class FuturizedHostResolverProxy extends FuturizedProxy<HostResolverProxy> {
+///   Map<Symbol, Function> _mojoMethods;
+///
+///   FuturizedHostResolverProxy(HostResolverProxy proxy) : super(proxy) {
+///     _mojoMethods = <Symbol, Function>{
+///       #getHostAddresses: proxy.getHostAddresses,
+///     };
+///   }
+///   Map<Symbol, Function> get mojoMethods => _mojoMethods;
+///
+///   FuturizedHostResolverProxy.unbound() :
+///       this(new HostResolverProxy.unbound());
+///
+///   static final Map<Symbol, Function> _mojoResponses = {
+///     #getHostAddresses: new HostResolverGetHostAddressesResponseParams#init,
+///   };
+///   Map<Symbol, Function> get mojoResponses => _mojoResponses;
+/// }
+///
+/// Then:
+///
+/// HostResolveProxy proxy = ...
+/// var futurizedProxy = new FuturizedHostResolverProxy(proxy);
+/// var response = await futurizedProxy.getHostAddresses(host, family);
+/// // etc.
+///
+/// Warning 1: The list of methods and return object constructors in
+/// FuturizedHostResolverProxy has to be kept up-do-date by hand with changes
+/// to the Mojo interface.
+///
+/// Warning 2: The recommended API to use is the generated callback-based API.
+/// This wrapper class is exposed only for convenience during development,
+/// and has no guarantee of optimal performance.
+abstract class FuturizedProxy<T extends Proxy> {
+  final T _proxy;
+  Map<Symbol, Function> get mojoMethods;
+  Map<Symbol, Function> get mojoResponses;
+
+  FuturizedProxy(T this._proxy);
+
+  T get proxy => _proxy;
+  Future responseOrError(Future f) => _proxy.responseOrError(f);
+  Future close({immediate: false}) => _proxy.close(immediate: immediate);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      mojoMethods.containsKey(invocation.memberName)
+      ? _Completerator.completerate(
+            mojoMethods[invocation.memberName],
+            invocation.positionalArguments,
+            mojoResponses[invocation.memberName])
+      : super.noSuchMethod(invocation);
 }

@@ -15,8 +15,8 @@
 namespace mojo {
 namespace skia {
 
-GrGLInterface* CreateMojoSkiaGLBinding() {
-  GrGLInterface* interface = new GrGLInterface;
+sk_sp<GrGLInterface> CreateMojoSkiaGLBinding() {
+  sk_sp<GrGLInterface> interface = sk_make_sp<GrGLInterface>();
   interface->fStandard = kGLES_GrGLStandard;
   interface->fExtensions.init(kGLES_GrGLStandard, glGetString, nullptr,
                               glGetIntegerv);

@@ -125,9 +125,9 @@ unsigned MessagePipeDispatcher::GetPortNoLock() const {
   return port_;
 }
 
-void MessagePipeDispatcher::CancelAllAwakablesNoLock() {
+void MessagePipeDispatcher::CancelAllStateNoLock() {
   mutex().AssertHeld();
-  message_pipe_->CancelAllAwakables(port_);
+  message_pipe_->CancelAllState(port_);
 }
 
 void MessagePipeDispatcher::CloseImplNoLock() {
@@ -144,14 +144,16 @@ MessagePipeDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock(
   mutex().AssertHeld();
 
   // "We" are being sent over our peer.
+  // If |message_pipe| is null, the |if| condition below should be false.
+  DCHECK(message_pipe_.get());
   if (message_pipe == message_pipe_.get()) {
     // A message pipe dispatcher can't be sent over itself (this should be
     // disallowed by |Core|). Note that |port| is the destination port.
     DCHECK_EQ(port, port_);
     // In this case, |message_pipe_|'s mutex should already be held!
-    message_pipe_->CancelAllAwakablesNoLock(port_);
+    message_pipe_->CancelAllStateNoLock(port_);
   } else {
-    CancelAllAwakablesNoLock();
+    CancelAllStateNoLock();
   }
 
   // TODO(vtl): Currently, there are no options, so we just use
@@ -201,10 +203,11 @@ HandleSignalsState MessagePipeDispatcher::GetHandleSignalsStateImplNoLock()
 MojoResult MessagePipeDispatcher::AddAwakableImplNoLock(
     Awakable* awakable,
     MojoHandleSignals signals,
-    uint32_t context,
+    bool force,
+    uint64_t context,
     HandleSignalsState* signals_state) {
   mutex().AssertHeld();
-  return message_pipe_->AddAwakable(port_, awakable, signals, context,
+  return message_pipe_->AddAwakable(port_, awakable, signals, force, context,
                                     signals_state);
 }
 

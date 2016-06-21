@@ -270,10 +270,9 @@ bool DataPipe::ConsumerDeserialize(Channel* channel,
   return true;
 }
 
-void DataPipe::ProducerCancelAllAwakables() {
+void DataPipe::ProducerCancelAllState() {
   MutexLocker locker(&mutex_);
-  DCHECK(has_local_producer_no_lock());
-  producer_awakable_list_->CancelAll();
+  ProducerCancelAllStateNoLock();
 }
 
 void DataPipe::ProducerClose() {
@@ -400,13 +399,16 @@ HandleSignalsState DataPipe::ProducerGetHandleSignalsState() {
 
 MojoResult DataPipe::ProducerAddAwakable(Awakable* awakable,
                                          MojoHandleSignals signals,
-                                         uint32_t context,
+                                         bool force,
+                                         uint64_t context,
                                          HandleSignalsState* signals_state) {
   MutexLocker locker(&mutex_);
   DCHECK(has_local_producer_no_lock());
 
   HandleSignalsState producer_state = impl_->ProducerGetHandleSignalsState();
   if (producer_state.satisfies(signals)) {
+    if (force)
+      producer_awakable_list_->Add(awakable, signals, context);
     if (signals_state)
       *signals_state = producer_state;
     return MOJO_RESULT_ALREADY_EXISTS;
@@ -450,30 +452,17 @@ bool DataPipe::ProducerEndSerialize(
   bool rv = impl_->ProducerEndSerialize(channel, destination, actual_size,
                                         platform_handles);
 
-  // TODO(vtl): The code below is similar to, but not quite the same as,
-  // |ProducerCloseNoLock()|.
-  DCHECK(has_local_producer_no_lock());
-  producer_awakable_list_->CancelAll();
+  ProducerCancelAllStateNoLock();
   producer_awakable_list_.reset();
-  // Not a bug, except possibly in "user" code.
-  DVLOG_IF(2, producer_in_two_phase_write_no_lock())
-      << "Producer transferred with active two-phase write";
-  producer_two_phase_max_num_bytes_written_ = 0;
   if (!has_local_consumer_no_lock())
     producer_open_ = false;
 
   return rv;
 }
 
-bool DataPipe::ProducerIsBusy() const {
+void DataPipe::ConsumerCancelAllState() {
   MutexLocker locker(&mutex_);
-  return producer_in_two_phase_write_no_lock();
-}
-
-void DataPipe::ConsumerCancelAllAwakables() {
-  MutexLocker locker(&mutex_);
-  DCHECK(has_local_consumer_no_lock());
-  consumer_awakable_list_->CancelAll();
+  ConsumerCancelAllStateNoLock();
 }
 
 void DataPipe::ConsumerClose() {
@@ -632,13 +621,16 @@ HandleSignalsState DataPipe::ConsumerGetHandleSignalsState() {
 
 MojoResult DataPipe::ConsumerAddAwakable(Awakable* awakable,
                                          MojoHandleSignals signals,
-                                         uint32_t context,
+                                         bool force,
+                                         uint64_t context,
                                          HandleSignalsState* signals_state) {
   MutexLocker locker(&mutex_);
   DCHECK(has_local_consumer_no_lock());
 
   HandleSignalsState consumer_state = impl_->ConsumerGetHandleSignalsState();
   if (consumer_state.satisfies(signals)) {
+    if (force)
+      consumer_awakable_list_->Add(awakable, signals, context);
     if (signals_state)
       *signals_state = consumer_state;
     return MOJO_RESULT_ALREADY_EXISTS;
@@ -682,23 +674,12 @@ bool DataPipe::ConsumerEndSerialize(
   bool rv = impl_->ConsumerEndSerialize(channel, destination, actual_size,
                                         platform_handles);
 
-  // TODO(vtl): The code below is similar to, but not quite the same as,
-  // |ConsumerCloseNoLock()|.
-  consumer_awakable_list_->CancelAll();
+  ConsumerCancelAllStateNoLock();
   consumer_awakable_list_.reset();
-  // Not a bug, except possibly in "user" code.
-  DVLOG_IF(2, consumer_in_two_phase_read_no_lock())
-      << "Consumer transferred with active two-phase read";
-  consumer_two_phase_max_num_bytes_read_ = 0;
   if (!has_local_producer_no_lock())
     consumer_open_ = false;
 
   return rv;
-}
-
-bool DataPipe::ConsumerIsBusy() const {
-  MutexLocker locker(&mutex_);
-  return consumer_in_two_phase_read_no_lock();
 }
 
 DataPipe::DataPipe(bool has_local_producer,
@@ -747,6 +728,26 @@ std::unique_ptr<DataPipeImpl> DataPipe::ReplaceImplNoLock(
   return rv;
 }
 
+void DataPipe::ProducerCancelAllStateNoLock() {
+  DCHECK(has_local_producer_no_lock());
+  if (producer_awakable_list_)
+    producer_awakable_list_->CancelAll();
+  // Not a bug, except possibly in "user" code.
+  DVLOG_IF(2, producer_in_two_phase_write_no_lock())
+      << "Active two-phase write cancelled";
+  producer_two_phase_max_num_bytes_written_ = 0;
+}
+
+void DataPipe::ConsumerCancelAllStateNoLock() {
+  DCHECK(has_local_consumer_no_lock());
+  if (consumer_awakable_list_)
+    consumer_awakable_list_->CancelAll();
+  // Not a bug, except possibly in "user" code.
+  DVLOG_IF(2, consumer_in_two_phase_read_no_lock())
+      << "Active two-phase read cancelled";
+  consumer_two_phase_max_num_bytes_read_ = 0;
+}
+
 void DataPipe::SetProducerClosedNoLock() {
   mutex_.AssertHeld();
   DCHECK(!has_local_producer_no_lock());
@@ -766,11 +767,8 @@ void DataPipe::ProducerCloseNoLock() {
   DCHECK(producer_open_);
   producer_open_ = false;
   if (has_local_producer_no_lock()) {
+    ProducerCancelAllStateNoLock();
     producer_awakable_list_.reset();
-    // Not a bug, except possibly in "user" code.
-    DVLOG_IF(2, producer_in_two_phase_write_no_lock())
-        << "Producer closed with active two-phase write";
-    producer_two_phase_max_num_bytes_written_ = 0;
     impl_->ProducerClose();
     AwakeConsumerAwakablesForStateChangeNoLock(
         impl_->ConsumerGetHandleSignalsState());
@@ -782,11 +780,8 @@ void DataPipe::ConsumerCloseNoLock() {
   DCHECK(consumer_open_);
   consumer_open_ = false;
   if (has_local_consumer_no_lock()) {
+    ConsumerCancelAllStateNoLock();
     consumer_awakable_list_.reset();
-    // Not a bug, except possibly in "user" code.
-    DVLOG_IF(2, consumer_in_two_phase_read_no_lock())
-        << "Consumer closed with active two-phase read";
-    consumer_two_phase_max_num_bytes_read_ = 0;
     impl_->ConsumerClose();
     AwakeProducerAwakablesForStateChangeNoLock(
         impl_->ProducerGetHandleSignalsState());

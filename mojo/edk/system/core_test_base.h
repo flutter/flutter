@@ -81,7 +81,7 @@ class CoreTestBase_MockHandleInfo {
   unsigned GetMapBufferCallCount() const;
   unsigned GetAddAwakableCallCount() const;
   unsigned GetRemoveAwakableCallCount() const;
-  unsigned GetCancelAllAwakablesCallCount() const;
+  unsigned GetCancelAllStateCallCount() const;
 
   size_t GetAddedAwakableSize() const;
   Awakable* GetAddedAwakableAt(unsigned i) const;
@@ -104,7 +104,7 @@ class CoreTestBase_MockHandleInfo {
   void IncrementMapBufferCallCount();
   void IncrementAddAwakableCallCount();
   void IncrementRemoveAwakableCallCount();
-  void IncrementCancelAllAwakablesCallCount();
+  void IncrementCancelAllStateCallCount();
 
   void AllowAddAwakable(bool alllow);
   bool IsAddAwakableAllowed() const;

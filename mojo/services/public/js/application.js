@@ -42,9 +42,9 @@ define("mojo/services/public/js/application", [
     // Implements AcceptConnection() from Application.mojom. Calls
     // this.acceptConnection() with a JS ServiceExchange instead of a pair
     // of Mojo ServiceProviders.
-    doAcceptConnection(requestorUrl, servicesRequest, exposedServicesProxy) {
-      var serviceExchange =
-        new ServiceExchange(servicesRequest, exposedServicesProxy);
+    // TODO(vtl): Do something with resolvedUrl.
+    doAcceptConnection(requestorUrl, resolvedUrl, servicesRequest) {
+      var serviceExchange = new ServiceExchange(servicesRequest);
       this.serviceExchanges.push(serviceExchange);
       this.acceptConnection(requestorUrl, serviceExchange);
     }

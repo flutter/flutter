@@ -74,12 +74,21 @@ class HandleTable {
   // (and all the handles unadded) and |handle_values[...]| untouched.
   bool AddHandleVector(HandleVector* handles, MojoHandle* handle_values);
 
+  // Replaces the given handle value with an "equivalent" one with the specified
+  // rights not removed. (The handle need not have those rights in the first
+  // place.) |handle_value| should not be |MOJO_HANDLE_INVALID|.
+  MojoResult ReplaceHandleWithReducedRights(
+      MojoHandle handle_value,
+      MojoHandleRights rights_to_remove,
+      MojoHandle* replacement_handle_value);
+
   // Tries to mark the given handle values as busy and start transport on them
-  // (i.e., take their dispatcher locks); |transports| must be sized to contain
-  // |num_handles| elements. On failure, returns them to their original
+  // (i.e., take their dispatcher locks). The handles to be transported must all
+  // have the |MOJO_HANDLE_RIGHT_TRANSFER| right. |transports| must be sized to
+  // contain |num_handles| elements. On failure, returns them to their original
   // (non-busy, unlocked state).
   MojoResult MarkBusyAndStartTransport(
-      MojoHandle disallowed_handle,
+      MojoHandle disallowed_handle_value,
       const MojoHandle* handle_values,
       uint32_t num_handles,
       std::vector<HandleTransport>* transports);

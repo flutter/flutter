@@ -7,13 +7,11 @@
 namespace mojo {
 namespace system {
 
-AsyncWaiter::AsyncWaiter(const AwakeCallback& callback) : callback_(callback) {
-}
+AsyncWaiter::AsyncWaiter(const AwakeCallback& callback) : callback_(callback) {}
 
-AsyncWaiter::~AsyncWaiter() {
-}
+AsyncWaiter::~AsyncWaiter() {}
 
-bool AsyncWaiter::Awake(MojoResult result, uintptr_t context) {
+bool AsyncWaiter::Awake(MojoResult result, uint64_t /*context*/) {
   callback_(result);
   delete this;
   return false;

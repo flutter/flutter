@@ -55,11 +55,11 @@ class Waiter final : public Awakable {
   //     |MojoWait()|/|MojoWaitMany()| cannot or can no longer be satisfied by
   //     the corresponding handle (e.g., if the other end of a message or data
   //     pipe is closed).
-  MojoResult Wait(MojoDeadline deadline, uint32_t* context);
+  MojoResult Wait(MojoDeadline deadline, uint64_t* context);
 
   // Wake the waiter up with the given result and context (or no-op if it's been
   // woken up already).
-  bool Awake(MojoResult result, uintptr_t context) override;
+  bool Awake(MojoResult result, uint64_t context) override;
 
  private:
   util::CondVar cv_;  // Associated to |mutex_|.
@@ -69,7 +69,7 @@ class Waiter final : public Awakable {
 #endif
   bool awoken_ MOJO_GUARDED_BY(mutex_);
   MojoResult awake_result_ MOJO_GUARDED_BY(mutex_);
-  uintptr_t awake_context_ MOJO_GUARDED_BY(mutex_);
+  uint64_t awake_context_ MOJO_GUARDED_BY(mutex_);
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(Waiter);
 };

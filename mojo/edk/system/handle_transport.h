@@ -17,8 +17,8 @@ namespace system {
 class MessagePipe;
 
 // Like |Handle|, but non-owning, for use while a handle is being processed to
-// be passed in a message pipe (note this is only *during* the "write message"
-// call). (I.e., this is a wrapper around a |Dispatcher*| and a
+// be replaced or to be passed in a message pipe (note this is only *during* the
+// "write message" call). (I.e., this is a wrapper around a |Dispatcher*| and a
 // |MojoHandleRights|.) See the comment about |Dispatcher::HandleTableAccess|
 // for more details.
 //
@@ -26,15 +26,21 @@ class MessagePipe;
 // containing a |Dispatcher*| and a |MojoHandleRights|.
 class HandleTransport final {
  public:
+  // Constructs a "null"/invalid |HandleTransport|. No methods other than
+  // |is_valid()| may be called on the resulting instance.
   HandleTransport() : dispatcher_(nullptr), rights_(MOJO_HANDLE_RIGHT_NONE) {}
 
+  // Ends transport. This must be called exactly once (on the result, or one of
+  // the copies thereof) if |Dispatcher::HandleTableAccess::TryStartTransport()|
+  // succeeds.
   void End() MOJO_NOT_THREAD_SAFE;
 
   Dispatcher::Type GetType() const { return dispatcher_->GetType(); }
-  bool IsBusy() const MOJO_NOT_THREAD_SAFE {
-    return dispatcher_->IsBusyNoLock();
-  }
   void Close() MOJO_NOT_THREAD_SAFE { dispatcher_->CloseNoLock(); }
+  // Creates an equivalent handle and closes the original one. If this is done
+  // while being sent on a message pipe (i.e., under a |MessagePipe| mutex),
+  // then |message_pipe|/|port| should be set appropriately. Otherwise,
+  // |message_pipe| should be null (and |port| will be ignored).
   Handle CreateEquivalentHandleAndClose(MessagePipe* message_pipe,
                                         unsigned port) MOJO_NOT_THREAD_SAFE {
     return Handle(dispatcher_->CreateEquivalentDispatcherAndCloseNoLock(

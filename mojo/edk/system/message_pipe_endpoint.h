@@ -58,7 +58,7 @@ class MessagePipeEndpoint {
   // These methods implement the methods of the same name in |MessagePipe|,
   // though |MessagePipe|'s implementation may have to do a little more if the
   // operation involves both endpoints.
-  virtual void CancelAllAwakables();
+  virtual void CancelAllState();
   virtual MojoResult ReadMessage(UserPointer<void> bytes,
                                  UserPointer<uint32_t> num_bytes,
                                  HandleVector* handles,
@@ -67,7 +67,8 @@ class MessagePipeEndpoint {
   virtual HandleSignalsState GetHandleSignalsState() const;
   virtual MojoResult AddAwakable(Awakable* awakable,
                                  MojoHandleSignals signals,
-                                 uint32_t context,
+                                 bool force,
+                                 uint64_t context,
                                  HandleSignalsState* signals_state);
   virtual void RemoveAwakable(Awakable* awakable,
                               HandleSignalsState* signals_state);

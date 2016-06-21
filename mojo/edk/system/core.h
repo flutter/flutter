@@ -117,6 +117,10 @@ class Core {
   // "mojo/public/c/system/handle.h":
   MojoResult Close(MojoHandle handle);
   MojoResult GetRights(MojoHandle handle, UserPointer<MojoHandleRights> rights);
+  MojoResult ReplaceHandleWithReducedRights(
+      MojoHandle handle,
+      MojoHandleRights rights_to_remove,
+      UserPointer<MojoHandle> replacement_handle);
   MojoResult DuplicateHandleWithReducedRights(
       MojoHandle handle,
       MojoHandleRights rights_to_remove,
@@ -226,7 +230,7 @@ class Core {
                               const MojoHandleSignals* signals,
                               uint32_t num_handles,
                               MojoDeadline deadline,
-                              uint32_t* result_index,
+                              uint64_t* result_index,
                               HandleSignalsState* signals_states);
 
   embedder::PlatformSupport* const platform_support_;

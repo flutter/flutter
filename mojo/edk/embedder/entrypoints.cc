@@ -31,6 +31,13 @@ MojoResult MojoGetRights(MojoHandle handle, MojoHandleRights* rights) {
   return g_core->GetRights(handle, MakeUserPointer(rights));
 }
 
+MojoResult MojoReplaceHandleWithReducedRights(MojoHandle handle,
+                                              MojoHandleRights rights_to_remove,
+                                              MojoHandle* replacement_handle) {
+  return g_core->ReplaceHandleWithReducedRights(
+      handle, rights_to_remove, MakeUserPointer(replacement_handle));
+}
+
 MojoResult MojoDuplicateHandleWithReducedRights(
     MojoHandle handle,
     MojoHandleRights rights_to_remove,

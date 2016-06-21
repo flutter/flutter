@@ -7,7 +7,7 @@ package org.chromium.mojo;
 import android.content.Context;
 import android.test.InstrumentationTestCase;
 
-import org.chromium.base.JNINamespace;
+import org.chromium.base.annotations.JNINamespace;
 import org.chromium.base.library_loader.LibraryLoader;
 import org.chromium.base.library_loader.LibraryProcessType;
 

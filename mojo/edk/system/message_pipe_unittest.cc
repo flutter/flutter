@@ -333,8 +333,9 @@ TEST(MessagePipeTest, BasicWaiting) {
   // Always writable (until the other port is closed).
   waiter.Init();
   hss = HandleSignalsState();
-  EXPECT_EQ(MOJO_RESULT_ALREADY_EXISTS,
-            mp->AddAwakable(0, &waiter, MOJO_HANDLE_SIGNAL_WRITABLE, 0, &hss));
+  EXPECT_EQ(
+      MOJO_RESULT_ALREADY_EXISTS,
+      mp->AddAwakable(0, &waiter, MOJO_HANDLE_SIGNAL_WRITABLE, false, 0, &hss));
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_WRITABLE, hss.satisfied_signals);
   EXPECT_EQ(kAllSignals, hss.satisfiable_signals);
   waiter.Init();
@@ -342,15 +343,15 @@ TEST(MessagePipeTest, BasicWaiting) {
   EXPECT_EQ(MOJO_RESULT_ALREADY_EXISTS,
             mp->AddAwakable(0, &waiter, MOJO_HANDLE_SIGNAL_READABLE |
                                             MOJO_HANDLE_SIGNAL_WRITABLE,
-                            0, &hss));
+                            false, 0, &hss));
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_WRITABLE, hss.satisfied_signals);
   EXPECT_EQ(kAllSignals, hss.satisfiable_signals);
 
   // Not yet readable.
   waiter.Init();
-  ASSERT_EQ(
-      MOJO_RESULT_OK,
-      mp->AddAwakable(0, &waiter, MOJO_HANDLE_SIGNAL_READABLE, 1, nullptr));
+  ASSERT_EQ(MOJO_RESULT_OK,
+            mp->AddAwakable(0, &waiter, MOJO_HANDLE_SIGNAL_READABLE, false, 1,
+                            nullptr));
   EXPECT_EQ(MOJO_RESULT_DEADLINE_EXCEEDED, waiter.Wait(0, nullptr));
   hss = HandleSignalsState();
   mp->RemoveAwakable(0, &waiter, &hss);
@@ -359,9 +360,9 @@ TEST(MessagePipeTest, BasicWaiting) {
 
   // The peer is not closed.
   waiter.Init();
-  ASSERT_EQ(
-      MOJO_RESULT_OK,
-      mp->AddAwakable(0, &waiter, MOJO_HANDLE_SIGNAL_PEER_CLOSED, 2, nullptr));
+  ASSERT_EQ(MOJO_RESULT_OK,
+            mp->AddAwakable(0, &waiter, MOJO_HANDLE_SIGNAL_PEER_CLOSED, false,
+                            2, nullptr));
   EXPECT_EQ(MOJO_RESULT_DEADLINE_EXCEEDED, waiter.Wait(0, nullptr));
   hss = HandleSignalsState();
   mp->RemoveAwakable(0, &waiter, &hss);
@@ -377,8 +378,9 @@ TEST(MessagePipeTest, BasicWaiting) {
   // Port 1 should already be readable now.
   waiter.Init();
   hss = HandleSignalsState();
-  EXPECT_EQ(MOJO_RESULT_ALREADY_EXISTS,
-            mp->AddAwakable(1, &waiter, MOJO_HANDLE_SIGNAL_READABLE, 3, &hss));
+  EXPECT_EQ(
+      MOJO_RESULT_ALREADY_EXISTS,
+      mp->AddAwakable(1, &waiter, MOJO_HANDLE_SIGNAL_READABLE, false, 3, &hss));
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE,
             hss.satisfied_signals);
   EXPECT_EQ(kAllSignals, hss.satisfiable_signals);
@@ -387,15 +389,16 @@ TEST(MessagePipeTest, BasicWaiting) {
   EXPECT_EQ(MOJO_RESULT_ALREADY_EXISTS,
             mp->AddAwakable(1, &waiter, MOJO_HANDLE_SIGNAL_READABLE |
                                             MOJO_HANDLE_SIGNAL_WRITABLE,
-                            0, &hss));
+                            false, 0, &hss));
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE,
             hss.satisfied_signals);
   EXPECT_EQ(kAllSignals, hss.satisfiable_signals);
   // ... and still writable.
   waiter.Init();
   hss = HandleSignalsState();
-  EXPECT_EQ(MOJO_RESULT_ALREADY_EXISTS,
-            mp->AddAwakable(1, &waiter, MOJO_HANDLE_SIGNAL_WRITABLE, 4, &hss));
+  EXPECT_EQ(
+      MOJO_RESULT_ALREADY_EXISTS,
+      mp->AddAwakable(1, &waiter, MOJO_HANDLE_SIGNAL_WRITABLE, false, 4, &hss));
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE,
             hss.satisfied_signals);
   EXPECT_EQ(kAllSignals, hss.satisfiable_signals);
@@ -406,9 +409,9 @@ TEST(MessagePipeTest, BasicWaiting) {
   // Port 1 should be signaled with peer closed.
   waiter.Init();
   hss = HandleSignalsState();
-  EXPECT_EQ(
-      MOJO_RESULT_ALREADY_EXISTS,
-      mp->AddAwakable(1, &waiter, MOJO_HANDLE_SIGNAL_PEER_CLOSED, 5, &hss));
+  EXPECT_EQ(MOJO_RESULT_ALREADY_EXISTS,
+            mp->AddAwakable(1, &waiter, MOJO_HANDLE_SIGNAL_PEER_CLOSED, false,
+                            5, &hss));
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_PEER_CLOSED,
             hss.satisfied_signals);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_PEER_CLOSED,
@@ -417,8 +420,9 @@ TEST(MessagePipeTest, BasicWaiting) {
   // Port 1 should not be writable.
   waiter.Init();
   hss = HandleSignalsState();
-  EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION,
-            mp->AddAwakable(1, &waiter, MOJO_HANDLE_SIGNAL_WRITABLE, 6, &hss));
+  EXPECT_EQ(
+      MOJO_RESULT_FAILED_PRECONDITION,
+      mp->AddAwakable(1, &waiter, MOJO_HANDLE_SIGNAL_WRITABLE, false, 6, &hss));
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_PEER_CLOSED,
             hss.satisfied_signals);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_PEER_CLOSED,
@@ -427,8 +431,9 @@ TEST(MessagePipeTest, BasicWaiting) {
   // But it should still be readable.
   waiter.Init();
   hss = HandleSignalsState();
-  EXPECT_EQ(MOJO_RESULT_ALREADY_EXISTS,
-            mp->AddAwakable(1, &waiter, MOJO_HANDLE_SIGNAL_READABLE, 7, &hss));
+  EXPECT_EQ(
+      MOJO_RESULT_ALREADY_EXISTS,
+      mp->AddAwakable(1, &waiter, MOJO_HANDLE_SIGNAL_READABLE, false, 7, &hss));
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_PEER_CLOSED,
             hss.satisfied_signals);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_PEER_CLOSED,
@@ -446,9 +451,9 @@ TEST(MessagePipeTest, BasicWaiting) {
   // Now port 1 should no longer be readable.
   waiter.Init();
   hss = HandleSignalsState();
-  EXPECT_EQ(
-      MOJO_RESULT_FAILED_PRECONDITION,
-      mp->AddAwakable(1, &waiter, MOJO_HANDLE_SIGNAL_READABLE, 8, nullptr));
+  EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION,
+            mp->AddAwakable(1, &waiter, MOJO_HANDLE_SIGNAL_READABLE, false, 8,
+                            nullptr));
   EXPECT_EQ(0u, hss.satisfied_signals);
   EXPECT_EQ(0u, hss.satisfiable_signals);
 
@@ -460,7 +465,7 @@ TEST(MessagePipeTest, ThreadedWaiting) {
   const uint32_t kBufferSize = static_cast<uint32_t>(sizeof(buffer));
 
   MojoResult result;
-  uint32_t context;
+  uint64_t context;
 
   // Write to wake up waiter waiting for read.
   {
@@ -470,7 +475,7 @@ TEST(MessagePipeTest, ThreadedWaiting) {
     thread.waiter()->Init();
     ASSERT_EQ(MOJO_RESULT_OK,
               mp->AddAwakable(1, thread.waiter(), MOJO_HANDLE_SIGNAL_READABLE,
-                              1, nullptr));
+                              false, 1, nullptr));
     thread.Start();
 
     buffer[0] = 123456789;
@@ -500,11 +505,11 @@ TEST(MessagePipeTest, ThreadedWaiting) {
     thread.waiter()->Init();
     ASSERT_EQ(MOJO_RESULT_OK,
               mp->AddAwakable(1, thread.waiter(), MOJO_HANDLE_SIGNAL_READABLE,
-                              2, nullptr));
+                              false, 2, nullptr));
     thread.Start();
 
     // Close port 1 first -- this should result in the waiter being cancelled.
-    mp->CancelAllAwakables(1);
+    mp->CancelAllState(1);
     mp->Close(1);
 
     // Port 1 is closed, so |Dispatcher::RemoveAwakable()| wouldn't call into
@@ -521,13 +526,13 @@ TEST(MessagePipeTest, ThreadedWaiting) {
     test::SimpleWaiterThread thread(&result, &context);
 
     thread.waiter()->Init();
-    ASSERT_EQ(MOJO_RESULT_OK,
-              mp->AddAwakable(1, thread.waiter(),
-                              MOJO_HANDLE_SIGNAL_PEER_CLOSED, 3, nullptr));
+    ASSERT_EQ(MOJO_RESULT_OK, mp->AddAwakable(1, thread.waiter(),
+                                              MOJO_HANDLE_SIGNAL_PEER_CLOSED,
+                                              false, 3, nullptr));
     thread.Start();
 
     // Close port 1 first -- this should result in the waiter being cancelled.
-    mp->CancelAllAwakables(1);
+    mp->CancelAllState(1);
     mp->Close(1);
 
     // Port 1 is closed, so |Dispatcher::RemoveAwakable()| wouldn't call into
@@ -546,12 +551,12 @@ TEST(MessagePipeTest, ThreadedWaiting) {
     thread.waiter()->Init();
     ASSERT_EQ(MOJO_RESULT_OK,
               mp->AddAwakable(1, thread.waiter(), MOJO_HANDLE_SIGNAL_READABLE,
-                              4, nullptr));
+                              false, 4, nullptr));
     thread.Start();
 
     // Close port 0 first -- this should wake the waiter up, since port 1 will
     // never be readable.
-    mp->CancelAllAwakables(0);
+    mp->CancelAllState(0);
     mp->Close(0);
 
     HandleSignalsState hss;
@@ -559,7 +564,7 @@ TEST(MessagePipeTest, ThreadedWaiting) {
     EXPECT_EQ(MOJO_HANDLE_SIGNAL_PEER_CLOSED, hss.satisfied_signals);
     EXPECT_EQ(MOJO_HANDLE_SIGNAL_PEER_CLOSED, hss.satisfiable_signals);
 
-    mp->CancelAllAwakables(1);
+    mp->CancelAllState(1);
     mp->Close(1);
   }  // Joins |thread|.
   EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION, result);

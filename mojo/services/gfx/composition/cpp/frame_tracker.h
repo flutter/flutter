@@ -26,26 +26,29 @@ class FrameTracker {
     return frame_info_;
   }
 
+  // Returns the difference between the previous frame time and the
+  // current frame time in microseconds, or 0 if this is the first frame.
+  // This value is guaranteed to be non-negative.
+  MojoTimeTicks frame_time_delta() const { return frame_time_delta_; }
+
   // Clears the frame tracker's state such that the next update will be
   // treated as if it were the first.
   void Clear();
 
-  // Updates |frame_info()| with new frame scheduling information
-  // from |raw_frame_info| and applies compensation for lag.
+  // Updates the properties of this object with new frame scheduling
+  // information from |raw_frame_info| and applies compensation for lag.
   //
   // |now| should come from a recent call to |mojo::GetTimeTicksNow()|.
   //
   // Whenever an application receives new frame scheduling information from the
   // system, it should call this function before using it.
-  //
-  // Returns the time delta between the previous frame and the current frame
-  // in microseconds, or 0 if this is the first frame.
-  uint64_t Update(const mojo::gfx::composition::FrameInfo& raw_frame_info,
-                  MojoTimeTicks now);
+  void Update(const mojo::gfx::composition::FrameInfo& raw_frame_info,
+              MojoTimeTicks now);
 
  private:
   uint64_t frame_count_ = 0u;
   mojo::gfx::composition::FrameInfo frame_info_;
+  MojoTimeTicks frame_time_delta_ = 0;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(FrameTracker);
 };

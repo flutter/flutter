@@ -15,21 +15,19 @@ class ControlMessageHandler {
   static bool _isRunOrClose(ServiceMessage message) =>
       (message.header.type == icm.kRunOrClosePipeMessageId);
 
-  static Future<Message> handleMessage(StubControl stubControl,
-                                       int interface_version,
-                                       ServiceMessage message) {
+  static handleMessage(
+      StubControl stubControl, int interface_version, ServiceMessage message) {
     assert(isControlMessage(message));
     if (_isRun(message)) {
-      return _handleRun(stubControl, interface_version, message);
+      _handleRun(stubControl, interface_version, message);
     } else {
       assert(_isRunOrClose(message));
-      return _handleRunOrClose(stubControl, interface_version, message);
+      _handleRunOrClose(stubControl, interface_version, message);
     }
   }
 
-  static Future<Message> _handleRun(StubControl stubControl,
-                                    int interface_version,
-                                    ServiceMessage message) {
+  static void _handleRun(
+      StubControl stubControl, int interface_version, ServiceMessage message) {
     // Construct RunMessage response.
     var response = new icm.RunResponseMessageParams();
     response.reserved0 = 16;
@@ -37,16 +35,16 @@ class ControlMessageHandler {
     response.queryVersionResult = new icm.QueryVersionResult();
     response.queryVersionResult.version = interface_version;
     // Return response.
-    return new Future.value(
-        stubControl.buildResponseWithId(response,
-                                        icm.kRunMessageId,
-                                        message.header.requestId,
-                                        MessageHeader.kMessageIsResponse));
+    var responseMessage = stubControl.buildResponseWithId(
+        response,
+        icm.kRunMessageId,
+        message.header.requestId,
+        MessageHeader.kMessageIsResponse);
+    stubControl.sendResponse(responseMessage);
   }
 
-  static Future _handleRunOrClose(StubControl stubControl,
-                                  int interface_version,
-                                  ServiceMessage message) {
+  static void _handleRunOrClose(
+      StubControl stubControl, int interface_version, ServiceMessage message) {
     // Deserialize message.
     var params = icm.RunOrClosePipeMessageParams.deserialize(message.payload);
     // Grab required version.
@@ -55,6 +53,5 @@ class ControlMessageHandler {
       // Stub does not implement required version. Close the pipe immediately.
       stubControl.close(immediate: true);
     }
-    return null;
   }
 }

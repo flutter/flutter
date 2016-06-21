@@ -17,9 +17,12 @@ define("mojo/services/public/js/service_exchange", [
       throw new Error("Service was closed");
   }
 
+  // TODO(vtl): This is largely overkill now that we no longer have "wrong way"
+  // service providers (a.k.a. "exposed services"). Things should be simplified.
+  // https://github.com/domokit/mojo/issues/762
   class ServiceExchange {
-    constructor(servicesRequest, exposedServicesProxy) {
-      this.proxy = exposedServicesProxy;
+    constructor(servicesRequest) {
+      this.proxy = null;
       this.providers_ = new Map(); // serviceName => see provideService() below
       this.pendingRequests_ = new Map(); // serviceName => serviceHandle
       if (servicesRequest)

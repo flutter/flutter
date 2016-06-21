@@ -7,6 +7,9 @@ module mojo;
 
 // TODO(dalesat): Move out of media to somewhere more generic.
 
+// Used as a placefolder for unspecified time values.
+const int64 kUnspecifiedTime = 0x7fffffffffffffff;
+
 // Represents the relationship between and subject timeline and a reference
 // timeline.
 //
@@ -37,17 +40,18 @@ struct TimelineTransform {
 
 // A push-mode consumer of timeline updates.
 interface TimelineConsumer {
-  const int64 kUnspecifiedTime = 0x7fffffffffffffff;
-
-  // Sets the timeline transform at the indicated effective time. Exactly one
-  // of the effective_*_time values must be kUnspecifiedTime.
+  // Sets the timeline transform at the indicated effective time. At least one
+  // of the effective_*_time values must be kUnspecifiedTime. If both are
+  // kUnspecifiedTime, the requested change is implemented as soon as possible.
   // effective_subject_time can only be specified if the current subject_delta
   // isn’t zero. reference_delta may not be zero. subject_time may be
   // kUnspecifiedTime to indicate that the new transform subject_time should
-  // be inferred from the effective time. The new transform reference_time is
-  // always inferred from the effective time. The callback is called at the
-  // effective time or when a pending operation is cancelled due to a
-  // subsequent call, in which case the 'completed' value is false.
+  // be inferred from the effective time. The reference time for the new
+  // transform (the reference time that will correspond to the specified or
+  // inferred subject_time) is always inferred from the effective time. The
+  // callback is called at the effective time or when a pending operation is
+  // cancelled due to a subsequent call, in which case the 'completed' value is
+  // false.
   SetTimelineTransform(
       int64 subject_time,
       uint32 reference_delta,

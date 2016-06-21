@@ -5,9 +5,10 @@
 #ifndef MOJO_MESSAGE_PUMP_HANDLE_WATCHER_H_
 #define MOJO_MESSAGE_PUMP_HANDLE_WATCHER_H_
 
+#include <memory>
+
 #include "base/callback_forward.h"
 #include "base/macros.h"
-#include "base/memory/scoped_ptr.h"
 #include "base/run_loop.h"
 #include "mojo/public/c/system/time.h"
 #include "mojo/public/cpp/system/handle.h"
@@ -52,8 +53,8 @@ class HandleWatcher {
   class SameThreadWatchingState;
   class SecondaryThreadWatchingState;
 
-  // If non-NULL Start() has been invoked.
-  scoped_ptr<StateBase> state_;
+  // If non-null, Start() has been invoked.
+  std::unique_ptr<StateBase> state_;
 
   DISALLOW_COPY_AND_ASSIGN(HandleWatcher);
 };

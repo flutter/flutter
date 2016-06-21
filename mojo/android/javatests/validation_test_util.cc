@@ -18,7 +18,10 @@ bool RegisterValidationTestUtil(JNIEnv* env) {
   return RegisterNativesImpl(env);
 }
 
-jobject ParseData(JNIEnv* env, jclass jcaller, jstring data_as_string) {
+ScopedJavaLocalRef<jobject> ParseData(
+    JNIEnv* env,
+    const JavaParamRef<jclass>& jcaller,
+    const JavaParamRef<jstring>& data_as_string) {
   std::string input =
       base::android::ConvertJavaStringToUTF8(env, data_as_string);
   std::vector<uint8_t> data;
@@ -28,8 +31,8 @@ jobject ParseData(JNIEnv* env, jclass jcaller, jstring data_as_string) {
           input, &data, &num_handles, &error_message)) {
     ScopedJavaLocalRef<jstring> j_error_message =
         base::android::ConvertUTF8ToJavaString(env, error_message);
-    return Java_ValidationTestUtil_buildData(
-               env, NULL, 0, j_error_message.obj()).Release();
+    return Java_ValidationTestUtil_buildData(env, NULL, 0,
+                                             j_error_message.obj());
   }
   void* data_ptr = &data[0];
   if (!data_ptr) {
@@ -38,8 +41,7 @@ jobject ParseData(JNIEnv* env, jclass jcaller, jstring data_as_string) {
   }
   jobject byte_buffer =
       env->NewDirectByteBuffer(data_ptr, data.size());
-  return Java_ValidationTestUtil_buildData(env, byte_buffer, num_handles, NULL)
-      .Release();
+  return Java_ValidationTestUtil_buildData(env, byte_buffer, num_handles, NULL);
 }
 
 }  // namespace android

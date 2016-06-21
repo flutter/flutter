@@ -29,7 +29,7 @@ scoped_refptr<GLContext> GLContext::CreateOffscreen(
     ApplicationConnector* connector) {
   ServiceProviderPtr native_viewport;
   connector->ConnectToApplication("mojo:native_viewport_service",
-                                  GetProxy(&native_viewport), nullptr);
+                                  GetProxy(&native_viewport));
   GpuPtr gpu_service;
   ConnectToService(native_viewport.get(), GetProxy(&gpu_service));
   InterfaceHandle<CommandBuffer> command_buffer;

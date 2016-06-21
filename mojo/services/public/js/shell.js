@@ -32,10 +32,6 @@ define("mojo/services/public/js/shell", [
       this.shellProxy.connectToApplication(url,
           function(servicesProxy) {
             application.proxy = servicesProxy;
-          },
-          function(exposedServicesStub) {
-            application.stub = exposedServicesStub;
-            StubBindings(exposedServicesStub).delegate = application;
           });
       this.applications_.set(url, application);
       return application;
@@ -43,7 +39,7 @@ define("mojo/services/public/js/shell", [
 
     connectToService(url, service) {
       return this.connectToApplication(url).requestService(service);
-    };
+    }
 
     close() {
       this.applications_.forEach(function(application, url) {

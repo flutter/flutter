@@ -5,9 +5,7 @@
 [DartPackage="mojo_services"]
 module mojo.media;
 
-import "mojo/services/media/common/interfaces/media_common.mojom";
 import "mojo/services/media/common/interfaces/media_metadata.mojom";
-import "mojo/services/media/common/interfaces/media_state.mojom";
 import "mojo/services/media/common/interfaces/media_transport.mojom";
 import "mojo/services/media/common/interfaces/media_types.mojom";
 
@@ -59,9 +57,6 @@ struct MediaSourceStreamDescriptor {
 
 // Describes the media source.
 struct MediaSourceStatus {
-  // Current state of the source.
-  MediaState state;
-
   // Describes the media.
   MediaMetadata? metadata;
 };

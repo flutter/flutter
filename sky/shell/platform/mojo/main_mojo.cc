@@ -5,12 +5,13 @@
 #include "base/files/file_path.h"
 #include "base/message_loop/message_loop.h"
 #include "base/threading/thread.h"
-#include "mojo/application/application_runner_chromium.h"
 #include "mojo/common/tracing_impl.h"
+#include "mojo/environment/scoped_chromium_init.h"
 #include "mojo/public/c/system/main.h"
-#include "mojo/public/cpp/application/application_delegate.h"
-#include "mojo/public/cpp/application/application_impl.h"
+#include "mojo/public/cpp/application/application_impl_base.h"
 #include "mojo/public/cpp/application/connect.h"
+#include "mojo/public/cpp/application/run_application.h"
+#include "mojo/public/cpp/application/service_provider_impl.h"
 #include "mojo/services/content_handler/interfaces/content_handler.mojom.h"
 #include "services/icu/icu.h"
 #include "sky/engine/public/platform/sky_settings.h"
@@ -25,29 +26,29 @@ const char kEnableCheckedMode[] = "--enable-checked-mode";
 
 }  // namespace
 
-class MojoApp : public mojo::ApplicationDelegate {
+class MojoApp : public mojo::ApplicationImplBase {
  public:
   MojoApp() {}
   ~MojoApp() override { }
 
  private:
   // Overridden from ApplicationDelegate:
-  void Initialize(mojo::ApplicationImpl* app) override {
+  void OnInitialize() override {
     mojo::ApplicationConnectorPtr application_connector =
         mojo::ApplicationConnectorPtr::Create(
-            mojo::CreateApplicationConnector(app->shell()));
+            mojo::CreateApplicationConnector(shell()));
     mojo::icu::Initialize(application_connector.get());
-    tracing_.Initialize(app);
+    tracing_.Initialize(shell(), &args());
 
     blink::SkySettings settings;
     settings.enable_observatory = true;
-    settings.enable_dart_checked_mode = app->HasArg(kEnableCheckedMode);
+    settings.enable_dart_checked_mode = HasArg(kEnableCheckedMode);
     blink::SkySettings::Set(settings);
 
     Shell::Init();
   }
 
-  bool ConfigureIncomingConnection(
+  bool OnAcceptConnection(
       mojo::ServiceProviderImpl* service_provider_impl) override {
     service_provider_impl->AddService<mojo::ContentHandler>(
       [](const mojo::ConnectionContext& connection_context,
@@ -66,6 +67,7 @@ class MojoApp : public mojo::ApplicationDelegate {
 }  // namespace sky
 
 MojoResult MojoMain(MojoHandle application_request) {
-  mojo::ApplicationRunnerChromium runner(new sky::shell::MojoApp);
-  return runner.Run(application_request);
+  mojo::ScopedChromiumInit init;
+  sky::shell::MojoApp app;
+  return mojo::RunApplication(application_request, &app);
 }

@@ -1,0 +1,75 @@
+// Copyright 2016 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[DartPackage="mojo_services"]
+module mojo.flog;
+
+// TODO(dalesat): Move out of media to somewhere more generic.
+
+// Exposed by the log service to enable creation and consumption of logs.
+[ServiceName="mojo::flog::FlogService"]
+interface FlogService {
+  // Creates a new logger.
+  CreateLogger(FlogLogger& logger, string label);
+
+  // Gets the descriptions of all logs.
+  GetLogDescriptions() => (array<FlogDescription> descriptions);
+
+  // Gets a reader for the specified log.
+  CreateReader(FlogReader& reader, uint32 log_id);
+};
+
+// A logger that logs messages regarding multiple channels.
+interface FlogLogger {
+  // Logs the creation of a channel.
+  LogChannelCreation(int64 time_us, uint32 channel_id, string type_name);
+
+  // Logs a message sent to an existing channel.
+  LogChannelMessage(int64 time_us, uint32 channel_id, array<uint8> data);
+
+  // Logs the deletion of a channel.
+  LogChannelDeletion(int64 time_us, uint32 channel_id);
+};
+
+// A reader that reads messages from one or more logs.
+interface FlogReader {
+  // Gets entries from the log starting and the specified index (entries are
+  // indexed starting at 0). If the log is open, the callback will be called
+  // when max_count entries are avaiable starting at start_index. If the log
+  // is closed, the callback will be called immediately with as many entries
+  // as are available starting at start_index and not exceeding max_count
+  // entries. entry_count and open refer to the entire log at the time the
+  // callback occurred.
+  GetEntries(uint32 start_index, uint32 max_count) =>
+      (array<FlogEntry> entries, uint32 entry_count, bool open);
+};
+
+struct FlogDescription {
+  string label;
+  uint32 log_id;
+  uint32 entry_count;
+  int64 start_time_us;
+  int64 stop_time_us;
+  bool open;
+};
+
+struct FlogEntry {
+  int64 time_us;
+  uint32 log_id;
+  uint32 channel_id;
+  FlogEntryDetails? details;
+};
+
+union FlogEntryDetails {
+  FlogChannelCreationEntryDetails channel_creation;
+  FlogChannelMessageEntryDetails channel_message;
+};
+
+struct FlogChannelCreationEntryDetails {
+  string type_name;
+};
+
+struct FlogChannelMessageEntryDetails {
+  array<uint8> data;
+};

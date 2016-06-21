@@ -20,7 +20,7 @@ void SimpleDispatcher::HandleSignalsStateChangedNoLock() {
   awakable_list_.AwakeForStateChange(GetHandleSignalsStateImplNoLock());
 }
 
-void SimpleDispatcher::CancelAllAwakablesNoLock() {
+void SimpleDispatcher::CancelAllStateNoLock() {
   mutex().AssertHeld();
   awakable_list_.CancelAll();
 }
@@ -28,12 +28,15 @@ void SimpleDispatcher::CancelAllAwakablesNoLock() {
 MojoResult SimpleDispatcher::AddAwakableImplNoLock(
     Awakable* awakable,
     MojoHandleSignals signals,
-    uint32_t context,
+    bool force,
+    uint64_t context,
     HandleSignalsState* signals_state) {
   mutex().AssertHeld();
 
   HandleSignalsState state(GetHandleSignalsStateImplNoLock());
   if (state.satisfies(signals)) {
+    if (force)
+      awakable_list_.Add(awakable, signals, context);
     if (signals_state)
       *signals_state = state;
     return MOJO_RESULT_ALREADY_EXISTS;

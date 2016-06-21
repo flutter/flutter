@@ -83,7 +83,7 @@ class MessagePipe final : public ChannelEndpointClient {
 
   // These are called by the dispatcher to implement its methods of
   // corresponding names. In all cases, the port |port| must be open.
-  void CancelAllAwakables(unsigned port);
+  void CancelAllState(unsigned port);
   void Close(unsigned port);
   // Unlike |MessagePipeDispatcher::WriteMessage()|, this does not validate its
   // arguments.
@@ -102,7 +102,8 @@ class MessagePipe final : public ChannelEndpointClient {
   MojoResult AddAwakable(unsigned port,
                          Awakable* awakable,
                          MojoHandleSignals signals,
-                         uint32_t context,
+                         bool force,
+                         uint64_t context,
                          HandleSignalsState* signals_state);
   void RemoveAwakable(unsigned port,
                       Awakable* awakable,
@@ -118,10 +119,10 @@ class MessagePipe final : public ChannelEndpointClient {
       size_t* actual_size,
       std::vector<platform::ScopedPlatformHandle>* platform_handles);
 
-  // This "implements" |CancelAllAwakables()|, but assumes that |mutex_| is
-  // already held. This is for use by
+  // This "implements" |CancelAllState()|, but assumes that |mutex_| is already
+  // held. This is for use by
   // |MessagePipeDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock()|.
-  void CancelAllAwakablesNoLock(unsigned port)
+  void CancelAllStateNoLock(unsigned port)
       MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
 
   // |ChannelEndpointClient| methods:

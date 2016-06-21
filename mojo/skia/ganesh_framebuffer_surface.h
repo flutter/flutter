@@ -7,7 +7,7 @@
 
 #include "base/macros.h"
 #include "mojo/skia/ganesh_context.h"
-#include "skia/ext/refptr.h"
+#include "third_party/skia/include/core/SkRefCnt.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace mojo {

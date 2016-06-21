@@ -34,8 +34,8 @@ GaneshTextureSurface::GaneshTextureSurface(const GaneshContext::Scope& scope,
   desc.fSampleCnt = 0;
   desc.fTextureHandle = reinterpret_cast<GrBackendObject>(&info);
 
-  surface_ = SkSurface::MakeFromBackendTexture(
-      scope.gr_context().get(), desc, nullptr);
+  surface_ = SkSurface::MakeFromBackendTexture(scope.gr_context().get(), desc,
+                                               nullptr);
   DCHECK(surface_);
 }
 
@@ -43,7 +43,7 @@ GaneshTextureSurface::~GaneshTextureSurface() {}
 
 std::unique_ptr<GLTexture> GaneshTextureSurface::TakeTexture() {
   surface_->getCanvas()->flush();
-  surface_ = nullptr;
+  surface_.reset();
   return std::move(texture_);
 }
 

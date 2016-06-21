@@ -5,7 +5,8 @@
 #ifndef MOJO_APPLICATION_CONTENT_HANDLER_FACTORY_H_
 #define MOJO_APPLICATION_CONTENT_HANDLER_FACTORY_H_
 
-#include "base/memory/scoped_ptr.h"
+#include <memory>
+
 #include "mojo/public/cpp/application/service_provider_impl.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
 #include "mojo/services/content_handler/interfaces/content_handler.mojom.h"
@@ -41,7 +42,7 @@ class ContentHandlerFactory {
     // This method will be called on a new thread. The application will be run
     // on this new thread, and the returned value will be kept alive until the
     // application ends.
-    virtual scoped_ptr<HandledApplicationHolder> CreateApplication(
+    virtual std::unique_ptr<HandledApplicationHolder> CreateApplication(
         InterfaceRequest<Application> application_request,
         URLResponsePtr response) = 0;
 
@@ -62,13 +63,14 @@ class HandledApplicationHolderImpl
   explicit HandledApplicationHolderImpl(A* value) : value_(value) {}
 
  private:
-  scoped_ptr<A> value_;
+  std::unique_ptr<A> value_;
 };
 
 template <class A>
-scoped_ptr<ContentHandlerFactory::HandledApplicationHolder>
+std::unique_ptr<ContentHandlerFactory::HandledApplicationHolder>
 make_handled_factory_holder(A* value) {
-  return make_scoped_ptr(new HandledApplicationHolderImpl<A>(value));
+  return std::unique_ptr<ContentHandlerFactory::HandledApplicationHolder>(
+      new HandledApplicationHolderImpl<A>(value));
 }
 
 }  // namespace mojo

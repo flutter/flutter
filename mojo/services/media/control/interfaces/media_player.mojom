@@ -6,8 +6,7 @@
 module mojo.media;
 
 import "mojo/services/media/common/interfaces/media_metadata.mojom";
-import "mojo/services/media/common/interfaces/media_state.mojom";
-import "mojo/services/media/common/interfaces/rate_control.mojom";
+import "mojo/services/media/common/interfaces/timelines.mojom";
 
 // Plays media.
 interface MediaPlayer {
@@ -22,8 +21,6 @@ interface MediaPlayer {
   Pause();
 
   // Seeks to the specified position, specified in nanoseconds.
-  // TODO(dalesat): Consider adding relative vs remote flag.
-  // TODO(dalesat): Consider adding parameters regarding desired precision.
   Seek(int64 position);
 
   // Gets the status. To get the status immediately, call
@@ -35,12 +32,12 @@ interface MediaPlayer {
 
 // MediaPlayer status information.
 struct MediaPlayerStatus {
-  // Current state of the player.
-  MediaState state;
-
   // Transform translating local time to presentation time. Reverse translation
   // (presentation time to local time) is only valid when media is playing.
-  TimelineTransform? timeline_transform;
+  mojo.TimelineTransform? timeline_transform;
+
+  // Indicates whether presentation has reached end-of-stream.
+  bool end_of_stream;
 
   // Describes the media.
   MediaMetadata? metadata;

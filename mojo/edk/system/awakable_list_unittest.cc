@@ -24,7 +24,7 @@ namespace {
 
 TEST(AwakableListTest, BasicCancel) {
   MojoResult result;
-  uint32_t context;
+  uint64_t context;
 
   // Cancel immediately after thread start.
   {
@@ -65,7 +65,7 @@ TEST(AwakableListTest, BasicCancel) {
 
 TEST(AwakableListTest, BasicAwakeSatisfied) {
   MojoResult result;
-  uint32_t context;
+  uint64_t context;
 
   // Awake immediately after thread start.
   {
@@ -115,7 +115,7 @@ TEST(AwakableListTest, BasicAwakeSatisfied) {
 
 TEST(AwakableListTest, BasicAwakeUnsatisfiable) {
   MojoResult result;
-  uint32_t context;
+  uint64_t context;
 
   // Awake (for unsatisfiability) immediately after thread start.
   {
@@ -165,10 +165,10 @@ TEST(AwakableListTest, MultipleAwakables) {
   MojoResult result2;
   MojoResult result3;
   MojoResult result4;
-  uint32_t context1;
-  uint32_t context2;
-  uint32_t context3;
-  uint32_t context4;
+  uint64_t context1;
+  uint64_t context2;
+  uint64_t context3;
+  uint64_t context4;
 
   // Cancel two awakables.
   {
@@ -289,7 +289,7 @@ class KeepAwakable : public Awakable {
  public:
   KeepAwakable() : awake_count(0) {}
 
-  bool Awake(MojoResult result, uintptr_t context) override {
+  bool Awake(MojoResult result, uint64_t context) override {
     awake_count++;
     return true;
   }
@@ -303,7 +303,7 @@ class RemoveAwakable : public Awakable {
  public:
   RemoveAwakable() : awake_count(0) {}
 
-  bool Awake(MojoResult result, uintptr_t context) override {
+  bool Awake(MojoResult result, uint64_t context) override {
     awake_count++;
     return false;
   }

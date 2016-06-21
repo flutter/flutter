@@ -30,7 +30,7 @@ MojoResult WaitIfNecessary(MessagePipe* mp,
   waiter.Init();
 
   MojoResult add_result =
-      mp->AddAwakable(0, &waiter, signals, 0, signals_state);
+      mp->AddAwakable(0, &waiter, signals, false, 0, signals_state);
   if (add_result != MOJO_RESULT_OK) {
     return (add_result == MOJO_RESULT_ALREADY_EXISTS) ? MOJO_RESULT_OK
                                                       : add_result;

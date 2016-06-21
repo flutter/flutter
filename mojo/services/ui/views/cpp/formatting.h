@@ -30,6 +30,9 @@ std::ostream& operator<<(std::ostream& os,
 std::ostream& operator<<(std::ostream& os, const mojo::ui::ViewLayout& value);
 
 std::ostream& operator<<(std::ostream& os,
+                         const mojo::ui::ViewInvalidation& value);
+
+std::ostream& operator<<(std::ostream& os,
                          const mojo::ui::ViewAssociateInfo& value);
 
 }  // namespace ui

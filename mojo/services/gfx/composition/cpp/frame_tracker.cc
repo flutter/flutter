@@ -17,9 +17,10 @@ FrameTracker::~FrameTracker() {}
 void FrameTracker::Clear() {
   frame_count_ = 0u;
   frame_info_ = mojo::gfx::composition::FrameInfo();
+  frame_time_delta_ = 0;
 }
 
-uint64_t FrameTracker::Update(
+void FrameTracker::Update(
     const mojo::gfx::composition::FrameInfo& raw_frame_info,
     MojoTimeTicks now) {
   const int64_t old_frame_time = frame_info_.frame_time;
@@ -67,7 +68,7 @@ uint64_t FrameTracker::Update(
 
   // Ensure monotonicity.
   if (frame_count_++ == 0u)
-    return 0u;
+    return;
   if (frame_info_.frame_time < old_frame_time) {
     MOJO_LOG(WARNING) << "Frame time is going backwards: new="
                       << frame_info_.frame_time << ", old=" << old_frame_time
@@ -80,7 +81,7 @@ uint64_t FrameTracker::Update(
                       << ", old=" << old_presentation_time << ", now=" << now;
     frame_info_.presentation_time = old_presentation_time;
   }
-  return frame_info_.frame_time - old_frame_time;
+  frame_time_delta_ = frame_info_.frame_time - old_frame_time;
 }
 
 }  // namespace composition

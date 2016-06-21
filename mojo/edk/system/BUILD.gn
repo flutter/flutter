@@ -103,6 +103,8 @@ mojo_edk_source_set("system") {
     "transport_data.h",
     "unique_identifier.cc",
     "unique_identifier.h",
+    "wait_set_dispatcher.cc",
+    "wait_set_dispatcher.h",
     "waiter.cc",
     "waiter.h",
   ]

@@ -7,6 +7,7 @@
 #include <stdio.h>
 
 #include <limits>
+#include <memory>
 
 #include "base/files/file.h"
 #include "base/files/file_path.h"
@@ -41,7 +42,7 @@ class CopyToFileHandler {
   base::TaskRunner* file_task_runner_;
   base::Callback<void(bool)> callback_;
   base::File file_;
-  scoped_ptr<AsyncWaiter> waiter_;
+  std::unique_ptr<AsyncWaiter> waiter_;
   const void* buffer_;
   uint32_t buffer_size_;
   scoped_refptr<base::SingleThreadTaskRunner> main_runner_;
@@ -178,7 +179,7 @@ class CopyFromFileHandler {
   base::TaskRunner* file_task_runner_;
   base::Callback<void(bool)> callback_;
   base::File file_;
-  scoped_ptr<AsyncWaiter> waiter_;
+  std::unique_ptr<AsyncWaiter> waiter_;
   void* buffer_;
   uint32_t buffer_size_;
   scoped_refptr<base::SingleThreadTaskRunner> main_runner_;

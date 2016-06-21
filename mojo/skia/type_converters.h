@@ -7,10 +7,10 @@
 
 #include "mojo/services/geometry/interfaces/geometry.mojom.h"
 #include "third_party/skia/include/core/SkMatrix.h"
+#include "third_party/skia/include/core/SkMatrix44.h"
 #include "third_party/skia/include/core/SkPoint.h"
 #include "third_party/skia/include/core/SkRRect.h"
 #include "third_party/skia/include/core/SkRect.h"
-#include "third_party/skia/include/core/SkMatrix44.h"
 
 namespace mojo {
 

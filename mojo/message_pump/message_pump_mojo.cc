@@ -5,6 +5,7 @@
 #include "mojo/message_pump/message_pump_mojo.h"
 
 #include <algorithm>
+#include <memory>
 #include <vector>
 
 #include "base/debug/alias.h"
@@ -57,8 +58,8 @@ struct MessagePumpMojo::RunState {
   ScopedMessagePipeHandle write_handle;
 
   // Cached structures to avoid the heap allocation cost of std::vector<>.
-  scoped_ptr<WaitState> wait_state;
-  scoped_ptr<HandleToHandlerList> cloned_handlers;
+  std::unique_ptr<WaitState> wait_state;
+  std::unique_ptr<HandleToHandlerList> cloned_handlers;
 
   bool should_quit;
 };

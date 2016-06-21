@@ -28,10 +28,9 @@ GaneshContext::GaneshContext(const scoped_refptr<GLContext>& gl_context)
   gl_context_->AddObserver(this);
 
   GLContext::Scope gl_scope(gl_context_);
-  ::skia::RefPtr<GrGLInterface> interface =
-      ::skia::AdoptRef(CreateMojoSkiaGLBinding());
+  sk_sp<GrGLInterface> interface = CreateMojoSkiaGLBinding();
   DCHECK(interface);
-  gr_context_ = ::skia::AdoptRef(GrContext::Create(
+  gr_context_.reset(GrContext::Create(
       kOpenGL_GrBackend, reinterpret_cast<GrBackendContext>(interface.get())));
   DCHECK(gr_context_);
   gr_context_->setResourceCacheLimits(kMaxGaneshResourceCacheCount,
@@ -62,7 +61,7 @@ void GaneshContext::OnContextLost() {
   gl_context_->RemoveObserver(this);
   if (!scope_entered_) {
     gr_context_->abandonContext();
-    gr_context_.clear();
+    gr_context_.reset();
   }
 }
 
@@ -94,7 +93,7 @@ GaneshContext::Scope::~Scope() {
   // flushing it above.
   if (ganesh_context_->is_lost()) {
     ganesh_context_->gr_context_->abandonContext();
-    ganesh_context_->gr_context_.clear();
+    ganesh_context_->gr_context_.reset();
   }
 
   // Do this last to avoid potential reentrance if the context is lost.

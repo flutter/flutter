@@ -32,17 +32,17 @@ class AwakableList {
 
   void AwakeForStateChange(const HandleSignalsState& state);
   void CancelAll();
-  void Add(Awakable* awakable, MojoHandleSignals signals, uint32_t context);
+  void Add(Awakable* awakable, MojoHandleSignals signals, uint64_t context);
   void Remove(Awakable* awakable);
 
  private:
   struct AwakeInfo {
-    AwakeInfo(Awakable* awakable, MojoHandleSignals signals, uint32_t context)
+    AwakeInfo(Awakable* awakable, MojoHandleSignals signals, uint64_t context)
         : awakable(awakable), signals(signals), context(context) {}
 
     Awakable* awakable;
     MojoHandleSignals signals;
-    uint32_t context;
+    uint64_t context;
   };
   using AwakeInfoList = std::vector<AwakeInfo>;
 

@@ -49,7 +49,7 @@ class DataPipeProducerDispatcher final : public Dispatcher {
   ~DataPipeProducerDispatcher() override;
 
   // |Dispatcher| protected methods:
-  void CancelAllAwakablesNoLock() override;
+  void CancelAllStateNoLock() override;
   void CloseImplNoLock() override;
   util::RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock(
       MessagePipe* message_pipe,
@@ -69,7 +69,8 @@ class DataPipeProducerDispatcher final : public Dispatcher {
   HandleSignalsState GetHandleSignalsStateImplNoLock() const override;
   MojoResult AddAwakableImplNoLock(Awakable* awakable,
                                    MojoHandleSignals signals,
-                                   uint32_t context,
+                                   bool force,
+                                   uint64_t context,
                                    HandleSignalsState* signals_state) override;
   void RemoveAwakableImplNoLock(Awakable* awakable,
                                 HandleSignalsState* signals_state) override;
@@ -83,7 +84,6 @@ class DataPipeProducerDispatcher final : public Dispatcher {
       size_t* actual_size,
       std::vector<platform::ScopedPlatformHandle>* platform_handles) override
       MOJO_NOT_THREAD_SAFE;
-  bool IsBusyNoLock() const override;
 
   // This will be null if closed.
   util::RefPtr<DataPipe> data_pipe_ MOJO_GUARDED_BY(mutex());

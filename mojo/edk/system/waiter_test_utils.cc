@@ -12,11 +12,11 @@ namespace mojo {
 namespace system {
 namespace test {
 
-SimpleWaiterThread::SimpleWaiterThread(MojoResult* result, uint32_t* context)
+SimpleWaiterThread::SimpleWaiterThread(MojoResult* result, uint64_t* context)
     : result_(result), context_(context) {
   waiter_.Init();
-  *result_ = 5420734;    // Totally invalid result.
-  *context_ = 23489023;  // "Random".
+  *result_ = 5420734;            // Totally invalid result.
+  *context_ = 2341532489023ULL;  // "Random".
 }
 
 SimpleWaiterThread::~SimpleWaiterThread() {
@@ -30,10 +30,10 @@ void SimpleWaiterThread::Run() {
 WaiterThread::WaiterThread(RefPtr<Dispatcher>&& dispatcher,
                            MojoHandleSignals handle_signals,
                            MojoDeadline deadline,
-                           uint32_t context,
+                           uint64_t context,
                            bool* did_wait_out,
                            MojoResult* result_out,
-                           uint32_t* context_out,
+                           uint64_t* context_out,
                            HandleSignalsState* signals_state_out)
     : dispatcher_(std::move(dispatcher)),
       handle_signals_(handle_signals),

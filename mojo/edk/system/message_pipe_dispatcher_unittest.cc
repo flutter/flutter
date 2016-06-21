@@ -57,7 +57,7 @@ TEST(MessagePipeDispatcherTest, Basic) {
       d1->Init(std::move(mp), i ^ 1);  // 1, 0.
     }
     Waiter w;
-    uint32_t context = 0;
+    uint64_t context = 0;
     HandleSignalsState hss;
 
     // Try adding a writable waiter when already writable.
@@ -392,7 +392,7 @@ TEST(MessagePipeDispatcherTest, BasicThreaded) {
   MojoDeadline elapsed;
   bool did_wait;
   MojoResult result;
-  uint32_t context;
+  uint64_t context;
   HandleSignalsState hss;
 
   // Run this test both with |d0| as port 0, |d1| as port 1 and vice versa.

@@ -9,48 +9,11 @@ import "mojo/services/media/common/interfaces/timelines.mojom";
 
 // Timing controller for a media graph.
 interface MediaTimelineController {
-  const int64 kUnspecifiedTime = 0x7fffffffffffffff;
-  const uint64 kInitialStatus = 0;
-
   // Associates a control site with the controller.
   AddControlSite(MediaTimelineControlSite control_site);
 
-  // Gets the status. To get the status immediately, call
-  // GetStatus(kInitialStatus). To get updates thereafter, pass
-  // the version sent in the previous callback.
-  GetStatus(uint64 version_last_seen)
-      => (uint64 version, MediaTimelineControllerStatus status);
-
-  // Sets the timeline transform at the indicated effective time. At least one
-  // of the effective_*_time values must be kUnspecifiedTime. If both are
-  // kUnspecifiedTime, the requested change is implemented as soon as possible.
-  // effective_subject_time can only be specified if the current subject_delta
-  // isn’t zero. reference_delta may not be zero. subject_time may be
-  // kUnspecifiedTime to indicate that the new transform subject_time should
-  // be inferred from the effective time. The reference time for the new
-  // transform (the reference time that will correspond to the specified or
-  // inferred subject_time) is always inferred from the effective time. The
-  // callback is called at the effective time or when a pending operation is
-  // cancelled due to a subsequent call, in which case the 'completed' value is
-  // false.
-  SetTimelineTransform(
-      int64 subject_time,
-      uint32 subject_delta,
-      uint32 reference_delta,
-      int64 effective_subject_time,
-      int64 effective_reference_time) => (bool completed);
-
   // Gets a timeline control site interface for the controller.
   GetControlSite(MediaTimelineControlSite& control_site);
-};
-
-// Status returned by MediaTimelineController's GetStatus method.
-struct MediaTimelineControllerStatus {
-  // Current timeline transform.
-  mojo.TimelineTransform timeline_transform;
-
-  // Whether end of stream was encountered.
-  bool end_of_stream;
 };
 
 // Media graph component controlled by a MediaTimelineController.
@@ -69,9 +32,9 @@ interface MediaTimelineControlSite {
 
 // Status returned by MediaTimelineControlSite's GetStatus method.
 struct MediaTimelineControlSiteStatus {
-  // Whether end of stream was encountered.
-  bool end_of_stream;
+  // Current timeline transform.
+  mojo.TimelineTransform timeline_transform;
 
-  // Whether the site is starving.
-  bool starving;
+  // Indicates whether presentation has reached end-of-stream.
+  bool end_of_stream;
 };

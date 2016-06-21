@@ -75,7 +75,7 @@ RefPtr<Dispatcher>
 MockSimpleDispatcher::CreateEquivalentDispatcherAndCloseImplNoLock(
     MessagePipe* /*message_pipe*/,
     unsigned /*port*/) MOJO_NO_THREAD_SAFETY_ANALYSIS {
-  CancelAllAwakablesNoLock();
+  CancelAllStateNoLock();
   return MakeRefCounted<MockSimpleDispatcher>(state_);
 }
 

@@ -63,9 +63,9 @@ TEST_F(ChannelTest, ShutdownAfterAttach) {
 
   Waiter waiter;
   waiter.Init();
-  ASSERT_EQ(
-      MOJO_RESULT_OK,
-      mp->AddAwakable(0, &waiter, MOJO_HANDLE_SIGNAL_READABLE, 123, nullptr));
+  ASSERT_EQ(MOJO_RESULT_OK,
+            mp->AddAwakable(0, &waiter, MOJO_HANDLE_SIGNAL_READABLE, false, 123,
+                            nullptr));
 
   // Don't wait for the shutdown to run ...
   io_thread()->PostTaskAndWait([this]() { ShutdownChannelOnIOThread(0); });
@@ -98,9 +98,9 @@ TEST_F(ChannelTest, WaitAfterAttachRunAndShutdown) {
   Waiter waiter;
   waiter.Init();
   HandleSignalsState hss;
-  EXPECT_EQ(
-      MOJO_RESULT_FAILED_PRECONDITION,
-      mp->AddAwakable(0, &waiter, MOJO_HANDLE_SIGNAL_READABLE, 123, &hss));
+  EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION,
+            mp->AddAwakable(0, &waiter, MOJO_HANDLE_SIGNAL_READABLE, false, 123,
+                            &hss));
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_PEER_CLOSED, hss.satisfied_signals);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_PEER_CLOSED, hss.satisfiable_signals);
 

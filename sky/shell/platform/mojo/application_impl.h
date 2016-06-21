@@ -34,9 +34,8 @@ class ApplicationImpl : public mojo::Application,
                   const mojo::String& url) override;
   void AcceptConnection(
       const mojo::String& requestor_url,
-      mojo::InterfaceRequest<mojo::ServiceProvider> outgoing_services,
-      mojo::InterfaceHandle<mojo::ServiceProvider> incoming_services,
-      const mojo::String& resolved_url) override;
+      const mojo::String& resolved_url,
+      mojo::InterfaceRequest<mojo::ServiceProvider> services) override;
   void RequestQuit() override;
 
   // mojo::ServiceProvider
@@ -46,16 +45,14 @@ class ApplicationImpl : public mojo::Application,
   // mojo::Shell
   void ConnectToApplication(
       const mojo::String& application_url,
-      mojo::InterfaceRequest<mojo::ServiceProvider> services,
-      mojo::InterfaceHandle<mojo::ServiceProvider> exposed_services) override;
+      mojo::InterfaceRequest<mojo::ServiceProvider> services) override;
   void CreateApplicationConnector(
       mojo::InterfaceRequest<mojo::ApplicationConnector> request) override;
 
   // mojo::ui::ViewProvider
   void CreateView(
       mojo::InterfaceRequest<mojo::ui::ViewOwner> view_owner,
-      mojo::InterfaceRequest<mojo::ServiceProvider> incoming_services,
-      mojo::InterfaceHandle<mojo::ServiceProvider> outgoing_services) override;
+      mojo::InterfaceRequest<mojo::ServiceProvider> services) override;
 
   void UnpackInitialResponse(mojo::Shell* shell);
 

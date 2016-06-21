@@ -10,8 +10,8 @@
 
 #include "base/callback.h"
 #include "mojo/skia/ganesh_context.h"
-#include "skia/ext/refptr.h"
 #include "third_party/skia/include/core/SkImageGenerator.h"
+#include "third_party/skia/include/core/SkRefCnt.h"
 #include "third_party/skia/include/gpu/GrTypes.h"
 
 class SkImage;
@@ -22,13 +22,12 @@ namespace skia {
 // Creates an SkImage from a GL texture.
 // The underlying texture must be kept alive for as long as the SkImage exists.
 // Invokes |release_callback| when the SkImage is deleted.
-sk_sp<SkImage> CreateImageFromTexture(
-    const GaneshContext::Scope& scope,
-    uint32_t texture_id,
-    uint32_t width,
-    uint32_t height,
-    GrSurfaceOrigin origin,
-    const base::Closure& release_callback);
+sk_sp<SkImage> CreateImageFromTexture(const GaneshContext::Scope& scope,
+                                      uint32_t texture_id,
+                                      uint32_t width,
+                                      uint32_t height,
+                                      GrSurfaceOrigin origin,
+                                      const base::Closure& release_callback);
 
 // Generates backing content for SkImages from a texture mailbox.
 // If |sync_point| is non-zero, inserts a sync point into the command stream

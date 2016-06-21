@@ -9,7 +9,7 @@
 namespace mojo {
 namespace system {
 
-void MessagePipeEndpoint::CancelAllAwakables() {
+void MessagePipeEndpoint::CancelAllState() {
   NOTREACHED();
 }
 
@@ -29,7 +29,8 @@ HandleSignalsState MessagePipeEndpoint::GetHandleSignalsState() const {
 
 MojoResult MessagePipeEndpoint::AddAwakable(Awakable* /*awakable*/,
                                             MojoHandleSignals /*signals*/,
-                                            uint32_t /*context*/,
+                                            bool /*force*/,
+                                            uint64_t /*context*/,
                                             HandleSignalsState* signals_state) {
   NOTREACHED();
   if (signals_state)

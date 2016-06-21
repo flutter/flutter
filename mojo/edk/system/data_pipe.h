@@ -103,7 +103,7 @@ class DataPipe final : public ChannelEndpointClient {
 
   // These are called by the producer dispatcher to implement its methods of
   // corresponding names.
-  void ProducerCancelAllAwakables();
+  void ProducerCancelAllState();
   void ProducerClose();
   MojoResult ProducerSetOptions(uint32_t write_threshold_num_bytes);
   void ProducerGetOptions(uint32_t* write_threshold_num_bytes);
@@ -116,7 +116,8 @@ class DataPipe final : public ChannelEndpointClient {
   HandleSignalsState ProducerGetHandleSignalsState();
   MojoResult ProducerAddAwakable(Awakable* awakable,
                                  MojoHandleSignals signals,
-                                 uint32_t context,
+                                 bool force,
+                                 uint64_t context,
                                  HandleSignalsState* signals_state);
   void ProducerRemoveAwakable(Awakable* awakable,
                               HandleSignalsState* signals_state);
@@ -128,11 +129,10 @@ class DataPipe final : public ChannelEndpointClient {
       void* destination,
       size_t* actual_size,
       std::vector<platform::ScopedPlatformHandle>* platform_handles);
-  bool ProducerIsBusy() const;
 
   // These are called by the consumer dispatcher to implement its methods of
   // corresponding names.
-  void ConsumerCancelAllAwakables();
+  void ConsumerCancelAllState();
   void ConsumerClose();
   MojoResult ConsumerSetOptions(uint32_t read_threshold_num_bytes);
   void ConsumerGetOptions(uint32_t* read_threshold_num_bytes);
@@ -151,7 +151,8 @@ class DataPipe final : public ChannelEndpointClient {
   HandleSignalsState ConsumerGetHandleSignalsState();
   MojoResult ConsumerAddAwakable(Awakable* awakable,
                                  MojoHandleSignals signals,
-                                 uint32_t context,
+                                 bool force,
+                                 uint64_t context,
                                  HandleSignalsState* signals_state);
   void ConsumerRemoveAwakable(Awakable* awakable,
                               HandleSignalsState* signals_state);
@@ -163,7 +164,6 @@ class DataPipe final : public ChannelEndpointClient {
       void* destination,
       size_t* actual_size,
       std::vector<platform::ScopedPlatformHandle>* platform_handles);
-  bool ConsumerIsBusy() const;
 
   // The following are only to be used by |DataPipeImpl| (and its subclasses):
 
@@ -174,6 +174,10 @@ class DataPipe final : public ChannelEndpointClient {
   std::unique_ptr<DataPipeImpl> ReplaceImplNoLock(
       std::unique_ptr<DataPipeImpl> new_impl)
       MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
+
+  void ProducerCancelAllStateNoLock() MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
+  void ConsumerCancelAllStateNoLock() MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
+
   void SetProducerClosedNoLock() MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
   void SetConsumerClosedNoLock() MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
 
