@@ -11,7 +11,7 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../dart/sdk.dart';
+import '../dart/package_map.dart';
 import '../globals.dart';
 import '../run.dart';
 import '../runner/flutter_command.dart';
@@ -71,9 +71,8 @@ class BuildAotCommand extends FlutterCommand {
   }
 }
 
-String _getSdkExtensionPath(String packagesPath, String package) {
-  Directory packageDir = new Directory(path.join(packagesPath, package));
-  return path.dirname(packageDir.resolveSymbolicLinksSync());
+String _getSdkExtensionPath(PackageMap packageMap, String package) {
+  return path.dirname(packageMap.map[package].toFilePath());
 }
 
 /// Build an AOT snapshot. Return `null` (and log to `printError`) if the method
@@ -152,24 +151,17 @@ Future<String> _buildAotSnapshot(
   String vmEntryPoints = path.join(entryPointsDir, 'dart_vm_entry_points.txt');
   String ioEntryPoints = path.join(dartEntryPointsDir, 'dart_io_entries.txt');
 
-  String packagesPath = path.absolute(Directory.current.path, 'packages');
-  if (!FileSystemEntity.isDirectorySync(packagesPath)) {
-    printStatus('Missing packages directory; running `pub get` (to work around https://github.com/dart-lang/sdk/issues/26362).');
-    // We don't use [pubGet] because we explicitly want to avoid --no-package-symlinks.
-    runCheckedSync(<String>[sdkBinaryName('pub'), 'get', '--no-precompile']);
-  }
-  if (!FileSystemEntity.isDirectorySync(packagesPath)) {
-    printError('Could not find packages directory: $packagesPath\n' +
-               'Did you run `pub get` in this directory?');
-    printError('This is needed to work around ' +
-               'https://github.com/dart-lang/sdk/issues/26362');
+  PackageMap packageMap = new PackageMap(PackageMap.globalPackagesPath);
+  String packageMapError = packageMap.checkValid();
+  if (packageMapError != null) {
+    printError(packageMapError);
     return null;
   }
 
-  String mojoPkg = _getSdkExtensionPath(packagesPath, 'mojo');
+  String mojoPkg = _getSdkExtensionPath(packageMap, 'mojo');
   String mojoInternalPath = path.join(mojoPkg, 'sdk_ext', 'internal.dart');
 
-  String skyEnginePkg = _getSdkExtensionPath(packagesPath, 'sky_engine');
+  String skyEnginePkg = _getSdkExtensionPath(packageMap, 'sky_engine');
   String uiPath = path.join(skyEnginePkg, 'dart_ui', 'ui.dart');
   String jniPath = path.join(skyEnginePkg, 'dart_jni', 'jni.dart');
   String vmServicePath = path.join(skyEnginePkg, 'sdk_ext', 'dart', 'runtime', 'bin', 'vmservice', 'vmservice_io.dart');
@@ -222,7 +214,7 @@ Future<String> _buildAotSnapshot(
     genSnapshot,
     '--vm_isolate_snapshot=$vmIsolateSnapshot',
     '--isolate_snapshot=$isolateSnapshot',
-    '--package_root=$packagesPath',
+    '--packages=${packageMap.packagesPath}',
     '--url_mapping=dart:mojo.internal,$mojoInternalPath',
     '--url_mapping=dart:ui,$uiPath',
     '--url_mapping=dart:jni,$jniPath',
