@@ -44,7 +44,7 @@ public class ExampleActivity extends Activity {
         flutterView.addOnMessageListener("getLocation",
             new FlutterView.OnMessageListener() {
                 @Override
-                public String onMessage(String message) {
+                public String onMessage(FlutterView view, String message) {
                     return onGetLocation(message);
                 }
             });
