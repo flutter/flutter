@@ -485,7 +485,7 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
     Widget result = new DefaultTextStyle(
       style: style,
       child: new Row(
-        mainAxisSpace: MainAxisSpace.min,
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           // We use an IndexedStack to make sure we have enough width to show any

@@ -29,15 +29,15 @@ class ButtonBar extends StatelessWidget {
   ButtonBar({
     Key key,
     this.alignment: MainAxisAlignment.end,
-    this.mainAxisSpace: MainAxisSpace.max,
+    this.mainAxisSize: MainAxisSize.max,
     this.children
   }) : super(key: key);
 
   /// How the children should be placed along the horizontal axis.
   final MainAxisAlignment alignment;
 
-  /// How much free space is available along the main axis.
-  final MainAxisSpace mainAxisSpace;
+  /// How much horizontal space is available. See [Row.mainAxisSize].
+  final MainAxisSize mainAxisSize;
 
   /// The buttons to arrange horizontally.
   ///
@@ -55,7 +55,7 @@ class ButtonBar extends StatelessWidget {
       ),
       child: new Row(
         mainAxisAlignment: alignment,
-        mainAxisSpace: mainAxisSpace,
+        mainAxisSize: mainAxisSize,
         children: children.map/*<Widget>*/((Widget child) {
           return new Padding(
             padding: new EdgeInsets.symmetric(horizontal: paddingUnit),

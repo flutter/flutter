@@ -1207,7 +1207,7 @@ class TabPageSelector<T> extends StatelessWidget {
           label: 'Page ${selection.index + 1} of ${selection.values.length}',
           child: new Row(
             children: selection.values.map((T tab) => _buildTabIndicator(selection, tab, animation, selectedColor, previousColor)).toList(),
-            mainAxisSpace: MainAxisSpace.min
+            mainAxisSize: MainAxisSize.min
           )
         );
       }

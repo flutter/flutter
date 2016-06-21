@@ -61,7 +61,7 @@ class StockSymbolView extends StatelessWidget {
             )
           ),
         ],
-        mainAxisSpace: MainAxisSpace.min
+        mainAxisSize: MainAxisSize.min
       )
     );
   }

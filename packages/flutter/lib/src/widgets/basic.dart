@@ -29,7 +29,7 @@ export 'package:flutter/rendering.dart' show
     GridSpecification,
     HitTestBehavior,
     MainAxisAlignment,
-    MainAxisSpace,
+    MainAxisSize,
     MaxTileWidthGridDelegate,
     MultiChildLayoutDelegate,
     PaintingContext,
@@ -1779,14 +1779,14 @@ class Flex extends MultiChildRenderObjectWidget {
     Key key,
     this.direction: FlexDirection.horizontal,
     this.mainAxisAlignment: MainAxisAlignment.start,
-    this.mainAxisSpace: MainAxisSpace.max,
+    this.mainAxisSize: MainAxisSize.max,
     this.crossAxisAlignment: CrossAxisAlignment.center,
     this.textBaseline,
     List<Widget> children: _emptyWidgetList
   }) : super(key: key, children: children) {
     assert(direction != null);
     assert(mainAxisAlignment != null);
-    assert(mainAxisSpace != null);
+    assert(mainAxisSize != null);
     assert(crossAxisAlignment != null);
     assert(crossAxisAlignment != CrossAxisAlignment.baseline || textBaseline != null);
   }
@@ -1797,8 +1797,16 @@ class Flex extends MultiChildRenderObjectWidget {
   /// How the children should be placed along the main axis.
   final MainAxisAlignment mainAxisAlignment;
 
-  /// The limit used to compute free space along the main axis.
-  final MainAxisSpace mainAxisSpace;
+  /// The limit that defines how much space is available along the main axis.
+  ///
+  /// By default the size of this widget will be as big as the incoming
+  /// max constraint. In other words it will become as big as possible
+  /// along its main axis by growing [Flexible] children and inserting
+  /// space between children per the [mainAxisAlignment] parameter.
+  /// If mainAxisSize is [MainAxisSize.min] then this widget's size along
+  /// the main axis will be as small as possible. This version of the layout
+  /// is sometimes referred to as "shrink wrapping".
+  final MainAxisSize mainAxisSize;
 
   /// How the children should be placed along the cross axis.
   final CrossAxisAlignment crossAxisAlignment;
@@ -1807,14 +1815,22 @@ class Flex extends MultiChildRenderObjectWidget {
   final TextBaseline textBaseline;
 
   @override
-  RenderFlex createRenderObject(BuildContext context) => new RenderFlex(direction: direction, mainAxisAlignment: mainAxisAlignment, mainAxisSpace: mainAxisSpace, crossAxisAlignment: crossAxisAlignment, textBaseline: textBaseline);
+  RenderFlex createRenderObject(BuildContext context) {
+    return new RenderFlex(
+      direction: direction,
+      mainAxisAlignment: mainAxisAlignment,
+      mainAxisSize: mainAxisSize,
+      crossAxisAlignment: crossAxisAlignment,
+      textBaseline: textBaseline
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderFlex renderObject) {
     renderObject
       ..direction = direction
       ..mainAxisAlignment = mainAxisAlignment
-      ..mainAxisSpace = mainAxisSpace
+      ..mainAxisSize = mainAxisSize
       ..crossAxisAlignment = crossAxisAlignment
       ..textBaseline = textBaseline;
   }
@@ -1827,13 +1843,13 @@ class Flex extends MultiChildRenderObjectWidget {
 class Row extends Flex {
   /// Creates a horizontal array of children.
   ///
-  /// The [direction], [mainAxisAlignment], [mainAxisSpace], and
+  /// The [direction], [mainAxisAlignment], [mainAxisSize], and
   /// [crossAxisAlignment] arguments must not be null. If [crossAxisAlignment]
   /// is [CrossAxisAlignment.baseline], then [textBaseline] must not be null.
   Row({
     Key key,
     MainAxisAlignment mainAxisAlignment: MainAxisAlignment.start,
-    MainAxisSpace mainAxisSpace: MainAxisSpace.max,
+    MainAxisSize mainAxisSize: MainAxisSize.max,
     CrossAxisAlignment crossAxisAlignment: CrossAxisAlignment.center,
     TextBaseline textBaseline,
     List<Widget> children: _emptyWidgetList
@@ -1842,7 +1858,7 @@ class Row extends Flex {
     key: key,
     direction: FlexDirection.horizontal,
     mainAxisAlignment: mainAxisAlignment,
-    mainAxisSpace: mainAxisSpace,
+    mainAxisSize: mainAxisSize,
     crossAxisAlignment: crossAxisAlignment,
     textBaseline: textBaseline
   );
@@ -1855,13 +1871,13 @@ class Row extends Flex {
 class Column extends Flex {
   /// Creates a vertical array of children.
   ///
-  /// The [direction], [mainAxisAlignment], [mainAxisSpace], and
+  /// The [direction], [mainAxisAlignment], [mainAxisSize], and
   /// [crossAxisAlignment] arguments must not be null. If [crossAxisAlignment]
   /// is [CrossAxisAlignment.baseline], then [textBaseline] must not be null.
   Column({
     Key key,
     MainAxisAlignment mainAxisAlignment: MainAxisAlignment.start,
-    MainAxisSpace mainAxisSpace: MainAxisSpace.max,
+    MainAxisSize mainAxisSize: MainAxisSize.max,
     CrossAxisAlignment crossAxisAlignment: CrossAxisAlignment.center,
     TextBaseline textBaseline,
     List<Widget> children: _emptyWidgetList
@@ -1870,7 +1886,7 @@ class Column extends Flex {
     key: key,
     direction: FlexDirection.vertical,
     mainAxisAlignment: mainAxisAlignment,
-    mainAxisSpace: mainAxisSpace,
+    mainAxisSize: mainAxisSize,
     crossAxisAlignment: crossAxisAlignment,
     textBaseline: textBaseline
   );

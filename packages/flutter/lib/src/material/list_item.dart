@@ -169,7 +169,7 @@ class ListItem extends StatelessWidget {
     Widget center = primaryLine;
     if (subtitle != null && (isTwoLine || isThreeLine)) {
       center = new Column(
-        mainAxisSpace: MainAxisSpace.min,
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           primaryLine,

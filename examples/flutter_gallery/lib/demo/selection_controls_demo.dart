@@ -80,10 +80,10 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
     return new Align(
       alignment: new FractionalOffset(0.5, 0.4),
       child: new Column(
-        mainAxisSpace: MainAxisSpace.min,
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           new Row(
-            mainAxisSpace: MainAxisSpace.min,
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new Checkbox(value: checkboxValueA, onChanged: (bool value) {
                 setState(() {
@@ -98,7 +98,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
             ]
           ),
           new Row(
-            mainAxisSpace: MainAxisSpace.min,
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               // Disabled checkboxes
               new Checkbox(value: true, onChanged: null),
@@ -114,10 +114,10 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
     return new Align(
       alignment: new FractionalOffset(0.5, 0.4),
       child: new Column(
-        mainAxisSpace: MainAxisSpace.min,
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           new Row(
-            mainAxisSpace: MainAxisSpace.min,
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new Radio<int>(
                 value: 0,
@@ -138,7 +138,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
           ),
           // Disabled radio buttons
           new Row(
-            mainAxisSpace: MainAxisSpace.min,
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new Radio<int>(
                 value: 0,
@@ -166,7 +166,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
     return new Align(
       alignment: new FractionalOffset(0.5, 0.4),
       child: new Row(
-        mainAxisSpace: MainAxisSpace.min,
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           new Switch(value: switchValue, onChanged: (bool value) {
             setState(() {
