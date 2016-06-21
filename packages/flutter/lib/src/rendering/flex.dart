@@ -36,8 +36,8 @@ enum MainAxisSpace {
   /// and the collective size of the children, but not less than zero.
   min,
 
-  /// The free space is the difference between incoming constraint's max parameter
-  /// and the collective size of the children, but not less than zero.
+    /// The free space is the difference between incoming constraint's max parameter
+    /// and the collective size of the children, but not less than zero.
   max,
 }
 
@@ -46,19 +46,19 @@ enum MainAxisAlignment {
   /// Place the children as close to the start of the main axis as possible.
   start,
 
-  /// Place the children as close to the end of the main axis as possible.
+    /// Place the children as close to the end of the main axis as possible.
   end,
 
-  /// Place the children as close to the middle of the main axis as possible.
+    /// Place the children as close to the middle of the main axis as possible.
   center,
 
-  /// Place the free space evenly between the children.
+    /// Place the free space evenly between the children.
   spaceBetween,
 
-  /// Place the free space evenly between the children as well as half of that space before and after the first and last child.
+    /// Place the free space evenly between the children as well as half of that space before and after the first and last child.
   spaceAround,
 
-  /// Place the free space evenly between the children as well as before and after the first and last child.
+    /// Place the free space evenly between the children as well as before and after the first and last child.
   spaceEvenly
 }
 
@@ -67,16 +67,16 @@ enum CrossAxisAlignment {
   /// Place the children as close to the start of the cross axis as possible.
   start,
 
-  /// Place the children as close to the end of the cross axis as possible.
+    /// Place the children as close to the end of the cross axis as possible.
   end,
 
-  /// Place the children as close to the middle of the cross axis as possible.
+    /// Place the children as close to the middle of the cross axis as possible.
   center,
 
-  /// Require the children to fill the cross axis.
+    /// Require the children to fill the cross axis.
   stretch,
 
-  /// Place the children along the cross axis such that their baselines match.
+    /// Place the children along the cross axis such that their baselines match.
   baseline,
 }
 
@@ -98,7 +98,7 @@ typedef double _ChildSizingFunction(RenderBox child, double extent);
 /// its cross axis to fix the largest of its children. The children are then
 /// positioned along the cross axis according to the [crossAxisAlignment] property.
 class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, FlexParentData>,
-                                        RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData> {
+  RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData> {
   /// Creates a flex render object.
   ///
   /// By default, the flex layout is horizontal and children are aligned to the
@@ -115,7 +115,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
        _mainAxisSpace = mainAxisSpace,
        _crossAxisAlignment = crossAxisAlignment,
        _textBaseline = textBaseline {
-    addAll(children);
+         addAll(children);
   }
 
   /// The direction to use as the main axis.
@@ -172,7 +172,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   double _overflow;
 
   @override
-  void setupParentData(RenderBox child) {
+    void setupParentData(RenderBox child) {
     if (child.parentData is! FlexParentData)
       child.parentData = new FlexParentData();
   }
@@ -223,14 +223,14 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         double crossSize;
         if (flex == 0) {
           switch (_direction) {
-              case FlexDirection.horizontal:
-                mainSize = child.getMaxIntrinsicWidth(double.INFINITY);
-                crossSize = childSize(child, mainSize);
-                break;
-              case FlexDirection.vertical:
-                mainSize = child.getMaxIntrinsicHeight(double.INFINITY);
-                crossSize = childSize(child, mainSize);
-                break;
+            case FlexDirection.horizontal:
+              mainSize = child.getMaxIntrinsicWidth(double.INFINITY);
+              crossSize = childSize(child, mainSize);
+              break;
+            case FlexDirection.vertical:
+              mainSize = child.getMaxIntrinsicHeight(double.INFINITY);
+              crossSize = childSize(child, mainSize);
+              break;
           }
           inflexibleSpace += mainSize;
           maxCrossSize = math.max(maxCrossSize, crossSize);
@@ -259,43 +259,43 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   @override
-  double computeMinIntrinsicWidth(double height) {
+    double computeMinIntrinsicWidth(double height) {
     return _getIntrinsicSize(
-      sizingDirection: FlexDirection.horizontal,
-      extent: height,
-      childSize: (RenderBox child, double extent) => child.getMinIntrinsicWidth(extent)
-    );
+        sizingDirection: FlexDirection.horizontal,
+        extent: height,
+        childSize: (RenderBox child, double extent) => child.getMinIntrinsicWidth(extent)
+                             );
   }
 
   @override
-  double computeMaxIntrinsicWidth(double height) {
+    double computeMaxIntrinsicWidth(double height) {
     return _getIntrinsicSize(
-      sizingDirection: FlexDirection.horizontal,
-      extent: height,
-      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicWidth(extent)
-    );
+        sizingDirection: FlexDirection.horizontal,
+        extent: height,
+        childSize: (RenderBox child, double extent) => child.getMaxIntrinsicWidth(extent)
+                             );
   }
 
   @override
-  double computeMinIntrinsicHeight(double width) {
+    double computeMinIntrinsicHeight(double width) {
     return _getIntrinsicSize(
-      sizingDirection: FlexDirection.vertical,
-      extent: width,
-      childSize: (RenderBox child, double extent) => child.getMinIntrinsicHeight(extent)
-    );
+        sizingDirection: FlexDirection.vertical,
+        extent: width,
+        childSize: (RenderBox child, double extent) => child.getMinIntrinsicHeight(extent)
+                             );
   }
 
   @override
-  double computeMaxIntrinsicHeight(double width) {
+    double computeMaxIntrinsicHeight(double width) {
     return _getIntrinsicSize(
-      sizingDirection: FlexDirection.vertical,
-      extent: width,
-      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicHeight(extent)
-    );
+        sizingDirection: FlexDirection.vertical,
+        extent: width,
+        childSize: (RenderBox child, double extent) => child.getMaxIntrinsicHeight(extent)
+                             );
   }
 
   @override
-  double computeDistanceToActualBaseline(TextBaseline baseline) {
+    double computeDistanceToActualBaseline(TextBaseline baseline) {
     if (_direction == FlexDirection.horizontal)
       return defaultComputeDistanceToHighestActualBaseline(baseline);
     return defaultComputeDistanceToFirstActualBaseline(baseline);
@@ -315,7 +315,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   @override
-  void performLayout() {
+    void performLayout() {
     // Determine used flex factor, size inflexible items, calculate free space.
     int totalFlex = 0;
     int totalChildren = 0;
@@ -343,9 +343,9 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           if (mainSize == double.INFINITY) {
             error = 'RenderFlex children have non-zero flex but incoming $dimension constraints are unbounded.';
             message = 'When a $identity is in a parent that does not provide a finite $dimension constraint, for example '
-                      'if it is in a $axis scrollable, it will try to shrink-wrap its children along the $axis '
-                      'axis. Setting a flex on a child (e.g. using a Flexible) indicates that the child is to '
-                      'expand to fill the remaining space in the $axis direction.';
+              'if it is in a $axis scrollable, it will try to shrink-wrap its children along the $axis '
+              'axis. Setting a flex on a child (e.g. using a Flexible) indicates that the child is to '
+              'expand to fill the remaining space in the $axis direction.';
             StringBuffer information = new StringBuffer();
             RenderBox node = this;
             switch (_direction) {
@@ -376,21 +376,21 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             return true;
           }
           throw new FlutterError(
-            '$error\n'
-            '$message\n'
-            'These two directives are mutually exclusive. If a parent is to shrink-wrap its child, the child '
-            'cannot simultaneously expand to fit its parent.\n'
-            'The affected RenderFlex is:\n'
-            '  $this\n'
-            'The creator information is set to:\n'
-            '  $debugCreator\n'
-            '$addendum'
-            'If this message did not help you determine the problem, consider using debugDumpRenderTree():\n'
-            '  https://flutter.io/debugging/#rendering-layer\n'
-            '  http://docs.flutter.io/flutter/rendering/debugDumpRenderTree.html\n'
-            'If none of the above helps enough to fix this problem, please don\'t hesitate to file a bug:\n'
-            '  https://github.com/flutter/flutter/issues/new'
-          );
+              '$error\n'
+              '$message\n'
+              'These two directives are mutually exclusive. If a parent is to shrink-wrap its child, the child '
+              'cannot simultaneously expand to fit its parent.\n'
+              'The affected RenderFlex is:\n'
+              '  $this\n'
+              'The creator information is set to:\n'
+              '  $debugCreator\n'
+              '$addendum'
+              'If this message did not help you determine the problem, consider using debugDumpRenderTree():\n'
+              '  https://flutter.io/debugging/#rendering-layer\n'
+              '  http://docs.flutter.io/flutter/rendering/debugDumpRenderTree.html\n'
+              'If none of the above helps enough to fix this problem, please don\'t hesitate to file a bug:\n'
+              '  https://github.com/flutter/flutter/issues/new'
+                                 );
         });
         totalFlex += childParentData.flex;
       } else {
@@ -399,11 +399,11 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           switch (_direction) {
             case FlexDirection.horizontal:
               innerConstraints = new BoxConstraints(minHeight: constraints.maxHeight,
-                                                    maxHeight: constraints.maxHeight);
+                  maxHeight: constraints.maxHeight);
               break;
             case FlexDirection.vertical:
               innerConstraints = new BoxConstraints(minWidth: constraints.maxWidth,
-                                                    maxWidth: constraints.maxWidth);
+                  maxWidth: constraints.maxWidth);
               break;
           }
         } else {
@@ -417,8 +417,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           }
         }
         child.layout(innerConstraints, parentUsesSize: true);
-        final double childMainSize = _getMainSize(child);
-        allocatedSize += childMainSize;
+        allocatedSize += _getMainSize(child);
         crossSize = math.max(crossSize, _getCrossSize(child));
       }
       assert(child.parentData == childParentData);
