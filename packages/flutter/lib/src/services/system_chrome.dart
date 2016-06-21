@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:meta/meta.dart';
 import 'package:sky_services/flutter/platform/system_chrome.mojom.dart' as mojom;
 import 'package:sky_services/flutter/platform/system_chrome.mojom.dart';
 
