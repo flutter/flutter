@@ -21,7 +21,7 @@ class ImageMap {
   }
 
   Future<ui.Image> _loadImage(String url) async {
-    ImageStream stream = new NetworkImage(url).resolve(ImageConfiguration.empty);
+    ImageStream stream = new AssetImage(url, bundle: _bundle).resolve(ImageConfiguration.empty);
     Completer<ui.Image> completer = new Completer<ui.Image>();
     void listener(ImageInfo frame) {
       final ui.Image image = frame.image;
