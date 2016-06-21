@@ -26,10 +26,17 @@ void main() {
     await tester.pumpWidget(new Navigator(
       key: navigatorKey,
       onGenerateRoute: (RouteSettings settings) {
-        if (settings.name == '/')
-          return new MaterialPageRoute<Null>(builder: (_) => new Container(child: new ThePositiveNumbers()));
-        else if (settings.name == '/second')
-          return new MaterialPageRoute<Null>(builder: (_) => new Container(child: new ThePositiveNumbers()));
+        if (settings.name == '/') {
+          return new MaterialPageRoute<Null>(
+            settings: settings,
+            builder: (_) => new Container(child: new ThePositiveNumbers())
+          );
+        } else if (settings.name == '/second') {
+          return new MaterialPageRoute<Null>(
+            settings: settings,
+            builder: (_) => new Container(child: new ThePositiveNumbers())
+          );
+        }
         return null;
       }
     ));

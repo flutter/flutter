@@ -431,7 +431,7 @@ class _ModalScopeState extends State<_ModalScope> {
       );
     }
     contents = new Focus(
-      key: new GlobalObjectKey(config.route),
+      key: config.route.focusKey,
       child: new RepaintBoundary(child: contents)
     );
     return contents;
@@ -520,9 +520,28 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   @override
+  GlobalKey get focusKey => new GlobalObjectKey(this);
+
+  @override
   void didPush() {
-    Focus.moveScopeTo(new GlobalObjectKey(this), context: navigator.context);
+    if (!settings.isInitialRoute) {
+      BuildContext overlayContext = navigator.overlay.context;
+      if (overlayContext == null) {
+        throw new FlutterError(
+          'Unable to find the BuildContext for the Navigator\'s overlay.\n'
+          'Did you remember to pass the settings object to the route\'s '
+          'constructor in your onGenerateRoute callback?'
+        );
+      }
+      Focus.moveScopeTo(focusKey, context: overlayContext);
+    }
     super.didPush();
+  }
+
+  @override
+  void didPopNext(Route<dynamic> nextRoute) {
+    Focus.moveScopeTo(focusKey, context: navigator.overlay.context);
+    super.didPopNext(nextRoute);
   }
 
   // The API for subclasses to override - used by this class

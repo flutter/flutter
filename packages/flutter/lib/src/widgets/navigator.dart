@@ -4,6 +4,7 @@
 
 import 'package:meta/meta.dart';
 
+import 'focus.dart';
 import 'framework.dart';
 import 'overlay.dart';
 
@@ -20,6 +21,12 @@ abstract class Route<T> {
 
   /// The overlay entries for this route.
   List<OverlayEntry> get overlayEntries => const <OverlayEntry>[];
+
+  /// The key this route will use for its root [Focus] widget, if any.
+  ///
+  /// If this route is the first route shown by the navigator, the navigator
+  /// will initialize its [Focus] to this key.
+  GlobalKey get focusKey => null;
 
   /// Called when the route is inserted into the navigator.
   ///
@@ -515,14 +522,23 @@ class NavigatorState extends State<Navigator> {
     return true;
   }
 
+  // TODO(abarth): We should be able to take a focusScopeKey as configuration
+  // information in case our parent wants to control whether we are focused.
+  final GlobalKey _focusScopeKey = new GlobalKey();
+
   @override
   Widget build(BuildContext context) {
     assert(!_debugLocked);
     assert(_history.isNotEmpty);
     _hadTransaction = false;
-    return new Overlay(
-      key: _overlayKey,
-      initialEntries: _history.first.overlayEntries
+    final Route<dynamic> initialRoute = _history.first;
+    return new Focus(
+      key: _focusScopeKey,
+      initiallyFocusedScope: initialRoute.focusKey,
+      child: new Overlay(
+        key: _overlayKey,
+        initialEntries: initialRoute.overlayEntries
+      )
     );
   }
 }

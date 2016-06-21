@@ -21,19 +21,30 @@ class _FocusScope extends InheritedWidget {
   _FocusScope({
     Key key,
     this.focusState,
-    this.scopeFocused: true, // are we focused in our ancestor scope?
-    this.focusedScope, // which of our descendant scopes is focused, if any?
+    this.scopeFocused,
+    this.focusedScope,
     this.focusedWidget,
     Widget child
-  }) : super(key: key, child: child);
+  }) : super(key: key, child: child) {
+    assert(scopeFocused != null);
+  }
 
+  /// The state for this focus scope.
+  ///
+  /// This widget is always our direct parent widget.
   final _FocusState focusState;
+
+  /// Whether this scope is focused in our ancestor focus scope.
   final bool scopeFocused;
 
   // These are mutable because we implicitly change them when they're null in
   // certain cases, basically pretending retroactively that we were constructed
   // with the right keys.
+
+  /// Which of our descendant scopes is focused, if any.
   GlobalKey focusedScope;
+
+  /// Which of our descendant widgets is focused, if any.
   GlobalKey focusedWidget;
 
   // The _setFocusedWidgetIfUnset() methodsdon't need to notify descendants
@@ -101,10 +112,19 @@ class Focus extends StatefulWidget {
   /// The [key] argument must not be null.
   Focus({
     @required GlobalKey key,
+    this.initiallyFocusedScope,
     this.child
   }) : super(key: key) {
     assert(key != null);
   }
+
+  /// The global key of the [Focus] widget below this widget in the tree that
+  /// will be focused initially.
+  ///
+  /// If non-null, a [Focus] widget with this key must be added to the tree
+  /// before the end of the current microtask in which the [Focus] widget was
+  /// initially constructed.
+  final GlobalKey initiallyFocusedScope;
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -210,8 +230,15 @@ class _FocusState extends State<Focus> {
   @override
   void initState() {
     super.initState();
+    _focusedScope = config.initiallyFocusedScope;
     _updateWidgetRemovalListener(_focusedWidget);
     _updateScopeRemovalListener(_focusedScope);
+
+    assert(() {
+      if (_focusedScope != null)
+        scheduleMicrotask(_debugCheckInitiallyFocusedScope);
+      return true;
+    });
   }
 
   @override
@@ -219,6 +246,34 @@ class _FocusState extends State<Focus> {
     _updateWidgetRemovalListener(null);
     _updateScopeRemovalListener(null);
     super.dispose();
+  }
+
+  void _debugCheckInitiallyFocusedScope() {
+    assert(config.initiallyFocusedScope != null);
+    assert(() {
+      if (!mounted)
+        return true;
+      Widget widget = config.initiallyFocusedScope.currentWidget;
+      if (widget == null) {
+        throw new FlutterError(
+          'The initially focused scope is not in the tree.\n'
+          'When a Focus widget is given an initially focused scope, that focus '
+          'scope must be added to the tree before the end of the microtask in '
+          'which the Focus widget was first built. However, it is the end of '
+          'the microtask and ${config.initiallyFocusedScope} is not in the '
+          'tree.'
+        );
+      }
+      if (widget is! Focus) {
+        throw new FlutterError(
+          'The initially focused scope was not a Focus widget.\n'
+          'The initially focused scope for a Focus widget must be another '
+          'Focus widget. Instead, the initially focused scope was a '
+          '${widget.runtimeType} widget.'
+        );
+      }
+      return true;
+    });
   }
 
   GlobalKey _focusedWidget; // when null, the first widget to ask if it's focused will get the focus
