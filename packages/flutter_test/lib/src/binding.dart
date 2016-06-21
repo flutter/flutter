@@ -552,7 +552,8 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   int get microtaskCount {
-    // Unsupported until we have a wrapper around the real async API (#4637)
+    // Unsupported until we have a wrapper around the real async API
+    // https://github.com/flutter/flutter/issues/4637
     assert(false);
     return -1;
   }
