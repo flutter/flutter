@@ -5,7 +5,7 @@ export PATH="$PWD/bin:$PWD/bin/cache/dart-sdk/bin:$PATH"
 
 die() {
     set +x
-    echo "Error: script executed early due to error"
+    echo "Error: script exited early due to error"
     exit 1
 }
 
