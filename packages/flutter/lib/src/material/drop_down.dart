@@ -484,6 +484,7 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
       style: style,
       child: new Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           // We use an IndexedStack to make sure we have enough width to show any
           // possible item as the selected item without changing size.
