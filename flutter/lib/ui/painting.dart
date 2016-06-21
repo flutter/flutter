@@ -846,6 +846,21 @@ class ColorFilter {
 
   final Color _color;
   final TransferMode _transferMode;
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other is! ColorFilter)
+      return false;
+    final ColorFilter typedOther = other;
+    return _color == typedOther._color &&
+           _transferMode == typedOther._transferMode;
+  }
+
+  @override
+  int get hashCode => hashValues(_color, _transferMode);
+
+  @override
+  String toString() => "ColorFilter($_color, $TransferMode)";
 }
 
 /// A filter operation to apply to a raster image.
