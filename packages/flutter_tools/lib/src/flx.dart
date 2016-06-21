@@ -127,8 +127,7 @@ List<_Asset> _getMaterialAssets(String fontSet) {
 Map<_Asset, List<_Asset>> _parseAssets(
   PackageMap packageMap,
   Map<String, dynamic> manifestDescriptor,
-  String assetBase,
-  Map<String, String> assetPathOverrides, {
+  String assetBase, {
   List<String> excludeDirs: const <String>[]
 }) {
   Map<_Asset, List<_Asset>> result = <_Asset, List<_Asset>>{};
@@ -141,7 +140,7 @@ Map<_Asset, List<_Asset>> _parseAssets(
 
   if (manifestDescriptor.containsKey('assets')) {
     for (String asset in manifestDescriptor['assets']) {
-      _Asset baseAsset = _resolveAsset(packageMap, assetBase, assetPathOverrides, asset);
+      _Asset baseAsset = _resolveAsset(packageMap, assetBase, asset);
 
       if (!baseAsset.assetFileExists) {
         printError('Error: unable to locate asset entry in flutter.yaml: "$asset".');
@@ -187,7 +186,7 @@ Map<_Asset, List<_Asset>> _parseAssets(
         String asset = font['asset'];
         if (asset == null) continue;
 
-        _Asset baseAsset = _resolveAsset(packageMap, assetBase, assetPathOverrides, asset);
+        _Asset baseAsset = _resolveAsset(packageMap, assetBase, asset);
         if (!baseAsset.assetFileExists) {
           printError('Error: unable to locate asset entry in flutter.yaml: "$asset".');
           return null;
@@ -204,18 +203,8 @@ Map<_Asset, List<_Asset>> _parseAssets(
 _Asset _resolveAsset(
   PackageMap packageMap,
   String assetBase,
-  Map<String, String> assetPathOverrides,
   String asset
 ) {
-  String overridePath = assetPathOverrides[asset];
-  if (overridePath != null) {
-    return new _Asset(
-      base: path.dirname(overridePath),
-      source: path.basename(overridePath),
-      relativePath: asset
-    );
-  }
-
   if (asset.startsWith('packages/') && !FileSystemEntity.isFileSync(path.join(assetBase, asset))) {
     // Convert packages/flutter_gallery_assets/clouds-0.png to clouds-0.png.
     String packageKey = asset.substring(9);
@@ -387,7 +376,6 @@ Future<int> assemble({
   Map<String, dynamic> manifestDescriptor: const <String, dynamic>{},
   File snapshotFile,
   String assetBasePath: defaultAssetBasePath,
-  Map<String, String> assetPathOverrides: const <String, String>{},
   String outputPath: defaultFlxOutputPath,
   String privateKeyPath: defaultPrivateKeyPath,
   String workingDirPath: defaultWorkingDirPath,
@@ -399,7 +387,6 @@ Future<int> assemble({
     new PackageMap(path.join(assetBasePath, '.packages')),
     manifestDescriptor,
     assetBasePath,
-    assetPathOverrides,
     excludeDirs: <String>[workingDirPath, path.join(assetBasePath, 'build')]
   );
 
