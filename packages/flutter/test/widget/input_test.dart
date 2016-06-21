@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -38,8 +40,10 @@ class MockClipboard extends mojom.ClipboardProxy {
   }
 
   @override
-  dynamic getClipboardData(String format,[Function responseFactory = null]) {
-    return new mojom.ClipboardGetClipboardDataResponseParams()..clip = _clip;
+  void getClipboardData(String format, void callback(mojom.ClipboardData clip)) {
+    scheduleMicrotask(() {
+      callback(_clip);
+    });
   }
 }
 

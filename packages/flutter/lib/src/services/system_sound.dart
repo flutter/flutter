@@ -30,7 +30,11 @@ class SystemSound {
   ///   boolean indicating if the intent to play the specified sound was
   ///   successfully conveyed to the embedder. No sound may actually play if the
   ///   device is muted or the sound was not available on the platform.
-  static Future<bool> play(SystemSoundType type) async {
-    return (await _systemChromeProxy.play(type)).success;
+  static Future<bool> play(SystemSoundType type) {
+    Completer<bool> completer = new Completer<bool>();
+    _systemChromeProxy.play(type, (bool success) {
+      completer.complete(success);
+    });
+    return completer.future;
   }
 }

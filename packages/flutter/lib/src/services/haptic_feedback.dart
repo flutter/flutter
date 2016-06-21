@@ -36,7 +36,11 @@ class HapticFeedback {
   ///   was successfully conveyed to the embedder. There may not be any actual
   ///   feedback if the device does not have a vibrator or one is disabled in
   ///   system settings.
-  static Future<bool> vibrate() async {
-    return (await _hapticFeedbackProxy.vibrate()).success;
+  static Future<bool> vibrate() {
+    Completer<bool> completer = new Completer<bool>();
+    _hapticFeedbackProxy.vibrate((bool result) {
+      completer.complete(result);
+    });
+    return completer.future;
   }
 }

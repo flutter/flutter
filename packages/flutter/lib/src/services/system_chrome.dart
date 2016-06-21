@@ -33,8 +33,12 @@ class SystemChrome {
   ///
   ///   boolean indicating if the orientation mask is valid and the changes
   ///   could be conveyed successfully to the embedder.
-  static Future<bool> setPreferredOrientations(int deviceOrientationMask) async {
-    return (await _systemChromeProxy.setPreferredOrientations(deviceOrientationMask)).success;
+  static Future<bool> setPreferredOrientations(int deviceOrientationMask) {
+    Completer<bool> completer = new Completer<bool>();
+    _systemChromeProxy.setPreferredOrientations(deviceOrientationMask, (bool success) {
+      completer.complete(success);
+    });
+    return completer.future;
   }
 
   /// Specifies the description of the current state of the application as it
@@ -53,32 +57,12 @@ class SystemChrome {
   ///
   ///   If application-specified metadata is unsupported on the platform,
   ///   specifying it is a no-op and always return true.
-  static Future<bool> setApplicationSwitcherDescription(mojom.ApplicationSwitcherDescription description) async {
-    return (await _systemChromeProxy.setApplicationSwitcherDescription(
-      description)).success;
-  }
-
-  /// Specifies the set of overlays visible on the embedder when the
-  /// application is running. The embedder may choose to ignore unsupported
-  /// overlays
-  ///
-  /// Arguments:
-  ///
-  ///  * [overlaysMask]: A mask of [SystemUIOverlay] enum values that denotes
-  ///    the overlays to show.
-  ///
-  /// Return Value:
-  ///
-  ///   boolean indicating if the preference was conveyed successfully to the
-  ///   embedder.
-  ///
-  /// Platform Specific Notes:
-  ///
-  ///   If the overlay is unsupported on the platform, enabling or disabling
-  ///   that overlay is a no-op and always return true.
-  static Future<bool> setEnabledSystemUIOverlays(int overlaysMask) async {
-    return (await _systemChromeProxy.setEnabledSystemUiOverlays(
-      overlaysMask)).success;
+  static Future<bool> setApplicationSwitcherDescription(mojom.ApplicationSwitcherDescription description) {
+    Completer<bool> completer = new Completer<bool>();
+    _systemChromeProxy.setApplicationSwitcherDescription(description, (bool success) {
+      completer.complete(success);
+    });
+    return completer.future;
   }
 
   /// Specifies the style of the system overlays that are visible on the
@@ -106,7 +90,9 @@ class SystemChrome {
     scheduleMicrotask(() {
       assert(_pendingStyle != null);
       if (_pendingStyle != _latestStyle) {
-        _systemChromeProxy.setSystemUiOverlayStyle(_pendingStyle);
+        _systemChromeProxy.setSystemUiOverlayStyle(_pendingStyle, (bool success) {
+          // Ignored.
+        });
         _latestStyle = _pendingStyle;
       }
       _pendingStyle = null;

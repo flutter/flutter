@@ -79,11 +79,10 @@ class ChildViewConnection {
       url, mojom.ViewProvider.connectToService
     );
     mojom.ServiceProviderProxy incomingServices = new mojom.ServiceProviderProxy.unbound();
-    mojom.ServiceProviderStub outgoingServices = new mojom.ServiceProviderStub.unbound();
     _viewOwner = new mojom.ViewOwnerProxy.unbound();
-    viewProvider.createView(_viewOwner, incomingServices, outgoingServices);
+    viewProvider.createView(_viewOwner, incomingServices);
     viewProvider.close();
-    _connection = new ApplicationConnection(outgoingServices, incomingServices);
+    _connection = new ApplicationConnection(null, incomingServices);
   }
 
   /// Wraps an already-established connection to a child app.

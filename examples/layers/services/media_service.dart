@@ -42,7 +42,7 @@ class PianoKey {
   Future<Null> load(mojom.MediaServiceProxy mediaService) async {
     try {
       mediaService.createPlayer(player);
-      await player.prepare(await http.readDataPipe(soundUrl));
+      player.prepare(await http.readDataPipe(soundUrl), (bool ignored) { });
     } catch (e) {
       print("Error: failed to load sound file $soundUrl");
       player.close();
