@@ -349,14 +349,30 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   void mount(Element parent, dynamic newSlot) {
     assert(parent == null);
     super.mount(parent, newSlot);
-    _child = updateChild(_child, widget.child, _rootChildSlot);
+    _rebuild();
   }
 
   @override
   void update(RenderObjectToWidgetAdapter<T> newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
-    _child = updateChild(_child, widget.child, _rootChildSlot);
+    _rebuild();
+  }
+
+  void _rebuild() {
+    try {
+      _child = updateChild(_child, widget.child, _rootChildSlot);
+      assert(_child != null);
+    } catch (exception, stack) {
+      FlutterError.reportError(new FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'widgets library',
+        context: 'attaching to the render tree'
+      ));
+      Widget error = new ErrorWidget(exception);
+      _child = updateChild(null, error, _rootChildSlot);
+    }
   }
 
   @override

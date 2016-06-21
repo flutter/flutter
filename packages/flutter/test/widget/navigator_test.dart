@@ -112,4 +112,16 @@ void main() {
     expect(exception, new isInstanceOf<FlutterError>());
     expect('$exception', startsWith('openTransaction called with a context'));
   });
+
+  testWidgets('Missing settings in onGenerateRoute throws exception', (WidgetTester tester) async {
+    await tester.pumpWidget(new Navigator(
+      onGenerateRoute: (RouteSettings settings) {
+        return new MaterialPageRoute<Null>(
+          builder: (BuildContext context) => new Container()
+        );
+      }
+    ));
+    Object exception = tester.takeException();
+    expect(exception is FlutterError, isTrue);
+  });
 }
