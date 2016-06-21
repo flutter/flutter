@@ -1807,7 +1807,7 @@ class Flex extends MultiChildRenderObjectWidget {
   final TextBaseline textBaseline;
 
   @override
-    RenderFlex createRenderObject(BuildContext context) => new RenderFlex(direction: direction, mainAxisAlignment: mainAxisAlignment, mainAxisSpace: mainAxisSpace, crossAxisAlignment: crossAxisAlignment, textBaseline: textBaseline);
+  RenderFlex createRenderObject(BuildContext context) => new RenderFlex(direction: direction, mainAxisAlignment: mainAxisAlignment, mainAxisSpace: mainAxisSpace, crossAxisAlignment: crossAxisAlignment, textBaseline: textBaseline);
 
   @override
   void updateRenderObject(BuildContext context, RenderFlex renderObject) {
