@@ -19,7 +19,7 @@ import 'material.dart';
 const Duration _kDropDownMenuDuration = const Duration(milliseconds: 300);
 const double _kMenuItemHeight = 48.0;
 const EdgeInsets _kMenuVerticalPadding = const EdgeInsets.symmetric(vertical: 8.0);
-const EdgeInsets _kMenuHorizontalPadding = const EdgeInsets.symmetric(horizontal: 36.0);
+const EdgeInsets _kMenuHorizontalPadding = const EdgeInsets.symmetric(horizontal: 4.0);
 const double _kBaselineOffsetFromBottom = 20.0;
 const double _kBottomBorderHeight = 2.0;
 const Border _kDropDownUnderline = const Border(bottom: const BorderSide(color: const Color(0xFFBDBDBD), width: _kBottomBorderHeight));
@@ -424,8 +424,6 @@ class DropDownButton<T> extends StatefulWidget {
 }
 
 class _DropDownButtonState<T> extends State<DropDownButton<T>> {
-  final GlobalKey _itemKey = new GlobalKey(debugLabel: 'DropDownButton item key');
-
   @override
   void initState() {
     super.initState();
@@ -456,7 +454,7 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
 
   void _handleTap() {
     assert(_currentRoute == null);
-    final RenderBox itemBox = _itemKey.currentContext.findRenderObject();
+    final RenderBox itemBox = context.findRenderObject();
     final Rect itemRect = itemBox.localToGlobal(Point.origin) & itemBox.size;
     final Completer<_DropDownRouteResult<T>> completer = new Completer<_DropDownRouteResult<T>>();
     _currentRoute = new _DropDownRoute<T>(
@@ -485,13 +483,12 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
     Widget result = new DefaultTextStyle(
       style: style,
       child: new Row(
-        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           // We use an IndexedStack to make sure we have enough width to show any
           // possible item as the selected item without changing size.
           new IndexedStack(
-            key: _itemKey,
             index: _selectedIndex,
             alignment: FractionalOffset.centerLeft,
             children: config.items
