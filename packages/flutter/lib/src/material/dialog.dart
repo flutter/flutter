@@ -18,6 +18,7 @@ import 'theme.dart';
 /// dialog.
 ///
 /// See also:
+///
 ///  * [showDialog]
 ///  * <https://www.google.com/design/spec/components/dialogs.html>
 class Dialog extends StatelessWidget {
@@ -35,6 +36,8 @@ class Dialog extends StatelessWidget {
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
+  ///
+  /// Typically a [Text] widget.
   final Widget title;
 
   /// Padding around the title.
@@ -45,6 +48,10 @@ class Dialog extends StatelessWidget {
 
   /// The (optional) content of the dialog is displayed in the center of the
   /// dialog in a lighter font.
+  ///
+  /// Typically, this is a [Block] containing the contents of the dialog. Using
+  /// a [Block] ensures that the contents can scroll if they are too big to fit
+  /// on the display.
   final Widget content;
 
   /// Padding around the content.
@@ -54,6 +61,10 @@ class Dialog extends StatelessWidget {
 
   /// The (optional) set of actions that are displayed at the bottom of the
   /// dialog.
+  ///
+  /// Typically this is a list of [FlatButton] widgets.
+  ///
+  /// These widgets will be wrapped in a [ButtonBar].
   final List<Widget> actions;
 
   Color _getColor(BuildContext context) {

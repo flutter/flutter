@@ -52,7 +52,7 @@ class TypographyDemo extends StatelessWidget {
       new TextStyleItem(name: 'Title', style: textTheme.title, text: 'Medium 20sp'),
       new TextStyleItem(name: 'Subheading', style: textTheme.subhead, text: 'Regular 16sp'),
       new TextStyleItem(name: 'Body 2', style: textTheme.body2, text: 'Medium 14sp'),
-      new TextStyleItem(name: 'Body 1', style: textTheme.body1, text: 'Reguluar 14sp'),
+      new TextStyleItem(name: 'Body 1', style: textTheme.body1, text: 'Regular 14sp'),
       new TextStyleItem(name: 'Caption', style: textTheme.caption, text: 'Regular 12sp'),
       new TextStyleItem(name: 'Button', style: textTheme.button, text: 'MEDIUM (ALL CAPS) 14sp')
     ];
