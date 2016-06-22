@@ -7,10 +7,6 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import '../gallery/demo.dart';
-
-const String _kExampleCode = 'gridlists';
-
 enum GridDemoTileStyle {
   imageOnly,
   oneLine,
@@ -268,9 +264,6 @@ class GridListDemoState extends State<GridListDemo> {
                 );
               })
             )
-          ),
-          new DemoBottomBar(
-            exampleCodeTag: _kExampleCode
           )
         ]
       )

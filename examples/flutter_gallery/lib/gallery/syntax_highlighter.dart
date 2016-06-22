@@ -17,15 +17,28 @@ class SyntaxHighlighterStyle {
     this.constantStyle
   });
 
-  static SyntaxHighlighterStyle defaultStyle() {
+  static SyntaxHighlighterStyle lightThemeStyle() {
     return new SyntaxHighlighterStyle(
-      baseStyle: new TextStyle(color: const Color(0xff000000)),
+      baseStyle: new TextStyle(color: const Color(0xFF000000)),
       numberStyle: new TextStyle(color: const Color(0xFF1565C0)),
       commentStyle: new TextStyle(color: const Color(0xFF9E9E9E)),
       keywordStyle: new TextStyle(color: const Color(0xFF9C27B0)),
       stringStyle: new TextStyle(color: const Color(0xFF43A047)),
-      punctuationStyle: new TextStyle(color: const Color(0xff000000)),
+      punctuationStyle: new TextStyle(color: const Color(0xFF000000)),
       classStyle: new TextStyle(color: const Color(0xFF512DA8)),
+      constantStyle: new TextStyle(color: const Color(0xFF795548))
+    );
+  }
+
+  static SyntaxHighlighterStyle darkThemeStyle() {
+    return new SyntaxHighlighterStyle(
+      baseStyle: new TextStyle(color: const Color(0xFFFFFFFF)),
+      numberStyle: new TextStyle(color: const Color(0xFF1565C0)),
+      commentStyle: new TextStyle(color: const Color(0xFF9E9E9E)),
+      keywordStyle: new TextStyle(color: const Color(0xFF80CBC4)),
+      stringStyle: new TextStyle(color: const Color(0xFF009688)),
+      punctuationStyle: new TextStyle(color: const Color(0xFFFFFFFF)),
+      classStyle: new TextStyle(color: const Color(0xFF009688)),
       constantStyle: new TextStyle(color: const Color(0xFF795548))
     );
   }
@@ -49,7 +62,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
     _spans = <_HighlightSpan>[];
 
     if (_style == null)
-      _style = SyntaxHighlighterStyle.defaultStyle();
+      _style = SyntaxHighlighterStyle.darkThemeStyle();
   }
 
   SyntaxHighlighterStyle _style;

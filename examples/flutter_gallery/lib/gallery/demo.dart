@@ -8,34 +8,17 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'example_code_parser.dart';
 import 'syntax_highlighter.dart';
 
-class SingleComponentDemoData {
-  SingleComponentDemoData({
+class ComponentDemoTabData {
+  ComponentDemoTabData({
     this.widget,
     this.exampleCodeTag,
     this.description,
-    this.onPressedDemo
+    this.tabName
   });
 
   final Widget widget;
   final String exampleCodeTag;
   final String description;
-  final VoidCallback onPressedDemo;
-}
-
-class ComponentDemoTabData extends SingleComponentDemoData {
-  ComponentDemoTabData({
-    Widget widget,
-    String exampleCodeTag,
-    String description,
-    VoidCallback onPressedDemo,
-    this.tabName
-  }) : super(
-    widget: widget,
-    exampleCodeTag: exampleCodeTag,
-    description: description,
-    onPressedDemo: onPressedDemo
-  );
-
   final String tabName;
 
   static Map<ComponentDemoTabData, TabLabel> buildTabLabels(List<ComponentDemoTabData> demos) {
@@ -66,6 +49,16 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
   final List<ComponentDemoTabData> demos;
   final String title;
 
+  void _showExampleCode(BuildContext context) {
+    TabBarSelectionState<ComponentDemoTabData> selection = TabBarSelection.of(context);
+    String tag = selection.value?.exampleCodeTag;
+    if (tag != null) {
+      Navigator.push(context, new MaterialPageRoute<FullScreenCodeDialog>(
+        builder: (BuildContext context) => new FullScreenCodeDialog(exampleCodeTag: tag)
+      ));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return new TabBarSelection<ComponentDemoTabData>(
@@ -73,153 +66,36 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
       child: new Scaffold(
         appBar: new AppBar(
           title: new Text(title),
+          actions: <Widget>[
+            new Builder(
+              builder: (BuildContext context) {
+                return new IconButton(
+                  icon: new Icon(Icons.description),
+                  tooltip: 'Show example code',
+                  onPressed: () { _showExampleCode(context); }
+                );
+              }
+            )
+          ],
           bottom: new TabBar<ComponentDemoTabData>(
             isScrollable: true,
             labels: ComponentDemoTabData.buildTabLabels(demos)
           )
         ),
-        body: new TabbedComponentDemo(demos)
+        body: new TabBarView<ComponentDemoTabData>(
+          children: demos.map((ComponentDemoTabData demo) {
+            return new Column(
+              children: <Widget>[
+                new Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: new MarkdownBody(data: demo.description)
+                ),
+                new Flexible(child: demo.widget)
+              ]
+            );
+          }).toList()
+        )
       )
-    );
-  }
-}
-
-class TabbedComponentDemo extends StatelessWidget {
-  TabbedComponentDemo(this.demos);
-
-  final List<ComponentDemoTabData> demos;
-
-  @override
-  Widget build(BuildContext context) {
-    return new TabBarView<ComponentDemoTabData>(
-      children: demos.map(buildTabView).toList()
-    );
-  }
-
-  Widget buildTabView(ComponentDemoTabData demo) {
-    return new SingleComponentDemo(demo);
-  }
-}
-
-class SingleComponentDemo extends StatelessWidget {
-  SingleComponentDemo(this.demo);
-
-  final SingleComponentDemoData demo;
-
-  @override
-  Widget build(BuildContext context) {
-    return new Column(
-      children: <Widget>[
-        new Padding(
-          padding: new EdgeInsets.all(16.0),
-          child: new MarkdownBody(data: demo.description)
-        ),
-        new Flexible(
-          child: demo.widget
-        ),
-        new DemoBottomBar(
-          exampleCodeTag: demo.exampleCodeTag,
-          onPressedDemo: demo.onPressedDemo
-        )
-      ]
-    );
-  }
-}
-
-class DemoBottomBar extends StatelessWidget {
-  DemoBottomBar({ this.exampleCodeTag, this.onPressedDemo });
-
-  final String exampleCodeTag;
-  final VoidCallback onPressedDemo;
-
-  @override
-  Widget build(BuildContext context) {
-    VoidCallback onPressedCode;
-    if (exampleCodeTag != null) {
-      onPressedCode = () {
-        Navigator.push(context, new MaterialPageRoute<FullScreenCodeDialog>(
-          builder: (BuildContext context) => new FullScreenCodeDialog(exampleCodeTag: exampleCodeTag)
-        ));
-      };
-    }
-
-    return new Column(
-      children: <Widget>[
-        new Divider(
-          height: 1.0
-        ),
-        new Container(
-          height: 48.0,
-          child: new Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              new FlatButton(
-                child: new Row(
-                  children: <Widget>[
-                    new Padding(
-                      padding: new EdgeInsets.only(right: 8.0),
-                      child: new Icon(Icons.code)
-                    ),
-                    new Text('VIEW CODE')
-                  ]
-                ),
-                onPressed: onPressedCode
-              ),
-              new FlatButton(
-                child: new Row(
-                  children: <Widget>[
-                    new Padding(
-                      padding: new EdgeInsets.only(right: 8.0),
-                      child: new Icon(Icons.star)
-                    ),
-                    new Text('LIVE DEMO')
-                  ]
-                ),
-                onPressed: onPressedDemo
-              )
-            ]
-          )
-        )
-      ]
-    );
-  }
-}
-
-class FormattedCode extends StatefulWidget {
-  FormattedCode(this.exampleCode);
-
-  final String exampleCode;
-
-  @override
-  _FormattedCodeState createState() => new _FormattedCodeState();
-}
-
-class _FormattedCodeState extends State<FormattedCode> {
-  @override
-  void initState() {
-    super.initState();
-    _formatText();
-  }
-
-  TextSpan _formattedText;
-
-  @override
-  Widget build(BuildContext context) {
-    return new RichText(text: _formattedText);
-  }
-
-  @override
-  void didUpdateConfig(FormattedCode oldConfig) {
-    super.didUpdateConfig(oldConfig);
-
-    if (oldConfig.exampleCode != config.exampleCode)
-      _formatText();
-  }
-
-  void _formatText() {
-    _formattedText = new TextSpan(
-      style: new TextStyle(fontFamily: 'monospace', fontSize: 10.0),
-      children: <TextSpan>[new DartSyntaxHighlighter().format(config.exampleCode)]
     );
   }
 }
@@ -250,6 +126,10 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final SyntaxHighlighterStyle style = Theme.of(context).brightness == Brightness.dark
+      ? SyntaxHighlighterStyle.darkThemeStyle()
+      : SyntaxHighlighterStyle.lightThemeStyle();
+
     Widget body;
     if (_exampleCode == null) {
       body = new Center(
@@ -259,7 +139,14 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
       body = new ScrollableViewport(
         child: new Padding(
           padding: new EdgeInsets.all(16.0),
-          child: new FormattedCode(_exampleCode)
+          child: new RichText(
+            text: new TextSpan(
+              style: new TextStyle(fontFamily: 'monospace', fontSize: 10.0),
+              children: <TextSpan>[
+                new DartSyntaxHighlighter(style).format(_exampleCode)
+              ]
+            )
+          )
         )
       );
     }
