@@ -22,6 +22,7 @@ import 'theme.dart';
 /// its body.
 ///
 /// See also:
+///
 ///  * [AppBar]
 ///  * [Scaffold]
 ///  * <https://www.google.com/design/spec/patterns/scrolling-techniques.html>

@@ -94,6 +94,18 @@ class GalleryDrawer extends StatelessWidget {
               ]
             )
           ),
+          new AboutDrawerItem(
+            applicationVersion: '2016 Q2 Preview',
+            applicationIcon: new AssetImage('packages/flutter_gallery_assets/appbar_background.jpg'),
+            applicationLegalese: '© 2016 The Chromium Authors',
+            aboutBoxChildren: <Widget>[
+              new Padding(
+                padding: const EdgeInsets.only(top: 24.0, bottom: 8.0),
+                child: new Center(child: new CircularProgressIndicator())
+              ),
+              new Text('Awaiting fix for issue 4512.', textAlign: TextAlign.center),
+            ]
+          ),
         ]
       )
     );

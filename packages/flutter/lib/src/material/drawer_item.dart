@@ -31,7 +31,7 @@ class DrawerItem extends StatelessWidget {
   /// Requires one of its ancestors to be a [Material] widget.
   const DrawerItem({
     Key key,
-    this.icon,
+    this.icon: const Icon(null),
     this.child,
     this.onPressed,
     this.selected: false
