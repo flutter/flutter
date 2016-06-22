@@ -23,8 +23,13 @@ flutter analyze --flutter-repo
 (cd dev/automated_tests; ! flutter test test_smoke_test/fail_test.dart > /dev/null)
 (cd dev/automated_tests; flutter test test_smoke_test/pass_test.dart > /dev/null)
 
+COVERAGE_FLAG=
+if [ -n $TRAVIS ]; then
+  COVERAGE_FLAG=--coverage
+fi
+
 # run tests
-(cd packages/flutter; flutter test)
+(cd packages/flutter; flutter test $COVERAGE_FLAG)
 (cd packages/flutter_driver; dart -c test/all.dart)
 (cd packages/flutter_sprites; flutter test)
 (cd packages/flutter_test; flutter test)
