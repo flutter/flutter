@@ -8,9 +8,9 @@ detect_error_on_exit() {
     exit_code=$?
     set +x
     if [[ $exit_code -ne 0 ]]; then
-        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-        echo "Error: script exited early due to error ($exit_code)"
-        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo -e "\x1B[31m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo -e "\x1B[1mError:\x1B[0m\x1B[31m script exited early due to error ($exit_code)"
+        echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\x1B[0m"
     fi
 }
 
