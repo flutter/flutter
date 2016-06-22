@@ -2,6 +2,7 @@ Flutter
 =======
 
 [![Build Status](https://travis-ci.org/flutter/flutter.svg?branch=master)](https://travis-ci.org/flutter/flutter)
+[![Coverage Status](https://coveralls.io/repos/github/flutter/flutter/badge.svg?branch=master)](https://coveralls.io/github/flutter/flutter?branch=master)
 [![Issue Stats](http://issuestats.com/github/flutter/flutter/badge/pr?style=flat)](http://issuestats.com/github/flutter/flutter)
 [![Issue Stats](http://issuestats.com/github/flutter/flutter/badge/issue?style=flat)](http://issuestats.com/github/flutter/flutter)
 
