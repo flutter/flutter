@@ -14,7 +14,9 @@ dart dev/tools/dartdoc.dart
 # Ensure google webmaster tools can verify our site.
 cp dev/docs/google2ed1af765c529f57.html dev/docs/doc
 
-# Upload the docs.
+# Upload the docs to cloud storage.
+# TODO: remove this when we're comfortable with Firebase hosting.
+
 if [ "$1" = "--upload" ]; then
   # This isn't great, because we're uploading our files twice. But,
   # we're ensuring we're not leaving any deleted files on the server.
@@ -28,4 +30,11 @@ if [ "$1" = "--upload" ]; then
 
   # Ensure compressable files are gzipped and then stored.
   gsutil -m cp -r -z "js,json,html,css" dev/docs/doc/* gs://docs.flutter.io/
+fi
+
+# Upload new API docs when on Travis and branch is master
+
+if [[ "$TRAVIS" = "true" && "$TRAVIS_BRANCH" = "master" ]]; then
+  cd dev/docs
+  firebase deploy --project docs-flutter-io --token "$FIREBASE_TOKEN_API_DOCS"
 fi
