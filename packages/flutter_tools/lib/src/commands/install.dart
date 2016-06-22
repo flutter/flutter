@@ -33,11 +33,11 @@ class InstallCommand extends FlutterCommand {
   }
 }
 
-bool installApp(Device device, ApplicationPackage package) {
+bool installApp(Device device, ApplicationPackage package, { bool uninstall: true }) {
   if (package == null)
     return false;
 
-  if (device.isAppInstalled(package)) {
+  if (uninstall && device.isAppInstalled(package)) {
     printStatus('Uninstalling old version...');
     if (!device.uninstallApp(package))
       printError('Warning: uninstalling old version failed');

@@ -31,8 +31,8 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('preamble', help: 'Display the number of files that will be analyzed.', defaultsTo: true);
     argParser.addFlag('congratulate', help: 'Show output even when there are no errors, warnings, hints, or lints.', defaultsTo: true);
     argParser.addFlag('watch', help: 'Run analysis continuously, watching the filesystem for changes.', negatable: false);
-    argParser.addOption('write', help: 'Also output the results to a file. This is useful with --watch if you want a file to always contain the latest results.');
-    argParser.addOption('dart-sdk', help: 'The path to the Dart SDK.', hide: true);
+    argParser.addOption('write', valueHelp: 'file', help: 'Also output the results to a file. This is useful with --watch if you want a file to always contain the latest results.');
+    argParser.addOption('dart-sdk', valueHelp: 'path-to-sdk', help: 'The path to the Dart SDK.', hide: true);
 
     // Hidden option to enable a benchmarking mode.
     argParser.addFlag('benchmark', negatable: false, hide: true);
