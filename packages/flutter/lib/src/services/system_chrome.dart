@@ -5,11 +5,13 @@
 import 'dart:async';
 
 import 'package:sky_services/flutter/platform/system_chrome.mojom.dart' as mojom;
-import 'package:sky_services/flutter/platform/system_chrome.mojom.dart';
+import 'package:sky_services/flutter/platform/system_chrome.mojom.dart'
+    show DeviceOrientation, SystemUiOverlay, SystemUiOverlayStyle;
 
 import 'shell.dart';
 
-export 'package:sky_services/flutter/platform/system_chrome.mojom.dart' show DeviceOrientation;
+export 'package:sky_services/flutter/platform/system_chrome.mojom.dart'
+    show DeviceOrientation, SystemUiOverlay, SystemUiOverlayStyle;
 
 mojom.SystemChromeProxy _initSystemChromeProxy() {
   return shell.connectToApplicationService('mojo:flutter_platform', mojom.SystemChrome.connectToService);
@@ -64,6 +66,32 @@ class SystemChrome {
     });
     return completer.future;
   }
+
+  /// Specifies the set of overlays visible on the embedder when the
+  /// application is running. The embedder may choose to ignore unsupported
+  /// overlays
+  ///
+  /// Arguments:
+  ///
+  ///  * [overlaysMask]: A mask of [SystemUiOverlay] enum values that denotes
+  ///    the overlays to show.
+  ///
+  /// Return Value:
+  ///
+  ///   boolean indicating if the preference was conveyed successfully to the
+  ///   embedder.
+  ///
+  /// Platform Specific Notes:
+  ///
+  ///   If the overlay is unsupported on the platform, enabling or disabling
+  ///   that overlay is a no-op and always return true.
+  static Future<bool> setEnabledSystemUIOverlays(int overlaysMask) {
+    Completer<bool> completer = new Completer<bool>();
+    _systemChromeProxy.setEnabledSystemUiOverlays(overlaysMask, (bool success) {
+      completer.complete(success);
+    });
+    return completer.future;
+ }
 
   /// Specifies the style of the system overlays that are visible on the
   /// embedder (if any). The embedder may choose to ignore unsupported
