@@ -14,13 +14,11 @@ import 'shrine/shrine_theme.dart' show ShrineTheme;
 // isn't a standalone app with its own main() and MaterialApp.
 Widget buildShrine(Widget child) {
   return new Theme(
-    data: new ThemeData(primarySwatch: Colors.grey),
-    child: new IconTheme(
-      data: new IconThemeData(color: const Color(0xFF707070)),
-      child: new ShrineTheme(
-        child: child
-      )
-    )
+    data: new ThemeData(
+      primarySwatch: Colors.grey,
+      iconTheme: new IconThemeData(color: const Color(0xFF707070))
+    ),
+    child: new ShrineTheme(child: child)
   );
 }
 

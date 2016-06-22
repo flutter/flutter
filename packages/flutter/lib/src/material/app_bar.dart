@@ -123,20 +123,20 @@ class AppBar extends StatelessWidget {
   /// Defaults to [ThemeData.primaryColor].
   final Color backgroundColor;
 
-  /// The brightness of the app bar's material. Typically this should be set along
+  /// The brightness of the app bar's material. Typically this is set along
   /// with [backgroundColor], [iconTheme], [textTheme].
   ///
-  /// Defaults to [ThemeData.brightness].
+  /// Defaults to [ThemeData.primaryColorBrightness].
   final Brightness brightness;
 
   /// The color, opacity, and size to use for app bar icons. Typically this
-  /// should be set along with [backgroundColor], [brightness], [textTheme].
+  /// is set along with [backgroundColor], [brightness], [textTheme].
   ///
   /// Defaults to [ThemeData.primaryIconTheme].
   final IconThemeData iconTheme;
 
-  /// The typographic styles to use for text in the app bar. Typically this should
-  /// be set along with [brightness] [backgroundColor], [iconTheme].
+  /// The typographic styles to use for text in the app bar. Typically this is
+  /// set along with [brightness] [backgroundColor], [iconTheme].
   ///
   /// Defaults to [ThemeData.primaryTextTheme].
   final TextTheme textTheme;
@@ -220,7 +220,7 @@ class AppBar extends StatelessWidget {
     TextStyle centerStyle = textTheme?.title ?? theme.primaryTextTheme.title;
     TextStyle sideStyle = textTheme?.body1 ?? theme.primaryTextTheme.body1;
 
-    Brightness brightness = this.brightness ?? theme.brightness;
+    Brightness brightness = this.brightness ?? theme.primaryColorBrightness;
     SystemChrome.setSystemUIOverlayStyle(brightness == Brightness.dark
       ? mojom.SystemUiOverlayStyle.light
       : mojom.SystemUiOverlayStyle.dark);
