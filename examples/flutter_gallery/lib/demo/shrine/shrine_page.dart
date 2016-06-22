@@ -88,6 +88,8 @@ class ShrinePageState extends State<ShrinePage> {
       appBar: new AppBar(
         elevation: _appBarElevation,
         backgroundColor: Theme.of(context).cardColor,
+        iconTheme: Theme.of(context).iconTheme,
+        brightness: Brightness.light,
         flexibleSpace: new Container(
           decoration: new BoxDecoration(
             border: new Border(
