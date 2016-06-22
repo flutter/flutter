@@ -33,7 +33,7 @@ class InstallCommand extends FlutterCommand {
   }
 }
 
-bool installApp(Device device, ApplicationPackage package, {bool uninstall: true}) {
+bool installApp(Device device, ApplicationPackage package, { bool uninstall: true }) {
   if (package == null)
     return false;
 
