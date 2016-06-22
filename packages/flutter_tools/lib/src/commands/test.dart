@@ -13,12 +13,21 @@ import '../cache.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
+import '../test/coverage_collector.dart';
 import '../test/flutter_platform.dart' as loader;
 import '../toolchain.dart';
 
 class TestCommand extends FlutterCommand {
   TestCommand() {
     usesPubOption();
+    argParser.addFlag('coverage',
+      defaultsTo: false,
+      help: 'Whether to collect coverage information.'
+    );
+    argParser.addOption('coverage-path',
+      defaultsTo: 'coverage/lcov.info',
+      help: 'Where to store coverage information (if coverage is enabled).'
+    );
   }
 
   @override
@@ -67,6 +76,7 @@ class TestCommand extends FlutterCommand {
       printTrace('running test package with arguments: $testArgs');
       await executable.main(testArgs);
       printTrace('test package returned with exit code $exitCode');
+
       return exitCode;
     } finally {
       Directory.current = currentDirectory;
@@ -96,6 +106,9 @@ class TestCommand extends FlutterCommand {
     if (!terminal.supportsColor)
       testArgs.insert(0, '--no-color');
 
+    if (argResults['coverage'])
+      testArgs.insert(0, '--concurrency=1');
+
     loader.installHook();
     loader.shellPath = tools.getHostToolPath(HostTool.SkyShell);
     if (!FileSystemEntity.isFileSync(loader.shellPath)) {
@@ -105,6 +118,23 @@ class TestCommand extends FlutterCommand {
 
     Cache.releaseLockEarly();
 
-    return await _runTests(testArgs, testDir);
+    CoverageCollector collector = CoverageCollector.instance;
+    collector.enabled = argResults['coverage'];
+
+    int result = await _runTests(testArgs, testDir);
+
+    if (collector.enabled) {
+      Status status = logger.startProgress("Collecting coverage information...");
+      String coverageData = await collector.finalizeCoverage();
+      status.stop(showElapsedTime: true);
+
+      String coveragePath = argResults['coverage-path'];
+      new File(coveragePath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(coverageData, flush: true);
+      printTrace('wrote coverage data to $coveragePath (size=${coverageData.length})');
+    }
+
+    return result;
   }
 }

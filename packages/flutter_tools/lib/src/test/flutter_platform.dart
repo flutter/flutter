@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:async/async.dart';
 import 'package:path/path.dart' as path;
@@ -16,6 +17,7 @@ import 'package:test/src/runner/plugin/hack_register_platform.dart' as hack; // 
 
 import '../dart/package_map.dart';
 import '../globals.dart';
+import 'coverage_collector.dart';
 
 final String _kSkyShell = Platform.environment['SKY_SHELL'];
 const String _kHost = '127.0.0.1';
@@ -45,15 +47,20 @@ Future<_ServerInfo> _startServer() async {
   return new _ServerInfo(server, 'ws://$_kHost:${server.port}$_kPath', socket.future);
 }
 
-Future<Process> _startProcess(String mainPath, { String packages }) {
+Future<Process> _startProcess(String mainPath, { String packages, int observatoryPort }) {
   assert(shellPath != null || _kSkyShell != null); // Please provide the path to the shell in the SKY_SHELL environment variable.
   String executable = shellPath ?? _kSkyShell;
-  List<String> arguments = <String>[
+  List<String> arguments = <String>[];
+  if (observatoryPort != null) {
+    arguments.add('--observatory-port=$observatoryPort');
+  } else {
+    arguments.add('--non-interactive');
+  }
+  arguments.addAll(<String>[
     '--enable-checked-mode',
-    '--non-interactive',
     '--packages=$packages',
     mainPath
-  ];
+  ]);
   printTrace('$executable ${arguments.join(' ')}');
   return Process.start(executable, arguments, environment: <String, String>{ 'FLUTTER_TEST': 'true' });
 }
@@ -105,8 +112,16 @@ void main() {
 }
 ''');
 
+    int observatoryPort;
+    if (CoverageCollector.instance.enabled) {
+      observatoryPort = new math.Random().nextInt(30000) + 2000;
+      await CoverageCollector.instance.finishPendingJobs();
+    }
+
     Process process = await _startProcess(
-      listenerFile.path, packages: PackageMap.globalPackagesPath
+      listenerFile.path,
+      packages: PackageMap.globalPackagesPath,
+      observatoryPort: observatoryPort
     );
 
     _attachStandardStreams(process);
@@ -115,7 +130,11 @@ void main() {
       if (process != null) {
         Process processToKill = process;
         process = null;
-        processToKill.kill();
+        CoverageCollector.instance.collectCoverage(
+          host: _kHost,
+          port: observatoryPort,
+          processToKill: processToKill
+        );
       }
       if (tempDir != null) {
         Directory dirToDelete = tempDir;
