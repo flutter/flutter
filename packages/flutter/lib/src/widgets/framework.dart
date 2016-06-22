@@ -304,6 +304,9 @@ abstract class Widget {
   }
 }
 
+/// The signature of build() functions.
+typedef Widget _BuildFunction(BuildContext context);
+
 /// StatelessWidgets describe a way to compose other Widgets to form reusable
 /// parts, which doesn't depend on anything other than the configuration
 /// information in the object itself. (For compositions that can change
@@ -328,7 +331,7 @@ abstract class StatelessWidget extends Widget {
   Widget build(BuildContext context);
 
   /// Trampoline to make the [build] closure library-accessible.
-  Widget _build(BuildContext context) => build(context);
+  _BuildFunction get _build => build;
 }
 
 /// StatefulWidgets provide the configuration for
@@ -488,7 +491,7 @@ abstract class State<T extends StatefulWidget> {
   Widget build(BuildContext context);
 
   /// Trampoline to make the [build] closure library-accessible.
-  Widget _build(BuildContext context) => build(context);
+  _BuildFunction get _build => build;
 
   /// Called when an Inherited widget in the ancestor chain has changed. Usually
   /// there is nothing to do here; whenever this is called, build() is also
