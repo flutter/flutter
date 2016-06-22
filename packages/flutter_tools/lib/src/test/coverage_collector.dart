@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:coverage/coverage.dart';
 import 'package:path/path.dart' as path;
 
+import '../dart/package_map.dart';
 import '../globals.dart';
 
 class CoverageCollector {
@@ -61,9 +62,7 @@ class CoverageCollector {
     assert(enabled);
     await finishPendingJobs();
     printTrace('formating coverage data');
-    // TODO(abarth): Use PackageMap.globalPackagesPath once
-    // https://github.com/dart-lang/coverage/issues/100 is fixed.
-    Resolver resolver = new Resolver(packageRoot: path.absolute('packages'));
+    Resolver resolver = new Resolver(packagesPath: PackageMap.globalPackagesPath);
     Formatter formater = new LcovFormatter(resolver);
     List<String> reportOn = <String>[path.join(Directory.current.path, 'lib')];
     return await formater.format(_globalHitmap, reportOn: reportOn);

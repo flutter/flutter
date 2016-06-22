@@ -6,10 +6,14 @@ addons:
       - ubuntu-toolchain-r-test # if we don't specify this, the libstdc++6 we get is the wrong version
     packages:
       - libstdc++6
+install:
+  - gem install coveralls-lcov
 before_script:
   - ./dev/bots/setup.sh
 script:
   - ./dev/bots/test.sh
+after_success:
+  - coveralls-lcov packages/flutter/coverage/lcov.info
 cache:
   directories:
     - $HOME/.pub-cache
