@@ -30,3 +30,4 @@ export 'src/services/path_provider.dart';
 export 'src/services/shell.dart';
 export 'src/services/system_chrome.dart';
 export 'src/services/system_sound.dart';
+export 'src/services/uri_launcher.dart';
