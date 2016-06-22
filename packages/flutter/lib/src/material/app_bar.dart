@@ -46,10 +46,6 @@ abstract class AppBarBottomWidget extends Widget {
 /// AppBar's [collapsedHeight] and [bottomHeight] define how small the app bar
 /// will become when the application is scrolled.
 ///
-/// By default, icons within an app bar will use the
-/// [ThemeData.primaryIconTheme]. This can be overridden by nesting an
-/// [IconTheme] inside the [AppBar].
-///
 /// See also:
 ///
 ///  * [Scaffold]
@@ -72,6 +68,7 @@ class AppBar extends StatelessWidget {
     this.elevation: 4,
     this.backgroundColor,
     this.brightness,
+    this.iconTheme,
     this.textTheme,
     this.padding: EdgeInsets.zero,
     double expandedHeight,
@@ -120,23 +117,26 @@ class AppBar extends StatelessWidget {
   /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
   final int elevation;
 
-  /// The color to use for the app bar's material. This generally should be set
-  /// in tandem with [brightness].
+  /// The color to use for the app bar's material. Typically this should be set
+  /// along with [brightness], [iconTheme], [textTheme].
   ///
   /// Defaults to [ThemeData.primaryColor].
   final Color backgroundColor;
 
-  /// The brightness of the app bar's material. This generally should be set in
-  /// tandem with [backgroundColor].
+  /// The brightness of the app bar's material. Typically this should be set along
+  /// with [backgroundColor], [iconTheme], [textTheme].
   ///
   /// Defaults to [ThemeData.brightness].
-  ///
-  /// Icons within the app bar will continue to use
-  /// [ThemeData.primaryIconTheme]. If this clashes with the brightness
-  /// specified here, consider using an [IconTheme] inside the [AppBar].
   final Brightness brightness;
 
-  /// The typographic style to use for text in the app bar.
+  /// The color, opacity, and size to use for app bar icons. Typically this
+  /// should be set along with [backgroundColor], [brightness], [textTheme].
+  ///
+  /// Defaults to [ThemeData.primaryIconTheme].
+  final IconThemeData iconTheme;
+
+  /// The typographic styles to use for text in the app bar. Typically this should
+  /// be set along with [brightness] [backgroundColor], [iconTheme].
   ///
   /// Defaults to [ThemeData.primaryTextTheme].
   final TextTheme textTheme;
@@ -175,6 +175,7 @@ class AppBar extends StatelessWidget {
       elevation: elevation ?? this.elevation,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       brightness: brightness ?? this.brightness,
+      iconTheme: iconTheme ?? this.iconTheme,
       textTheme: textTheme ?? this.textTheme,
       padding: padding ?? this.padding,
       expandedHeight: expandedHeight ?? this._expandedHeight,
@@ -215,7 +216,7 @@ class AppBar extends StatelessWidget {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
     final ThemeData theme = Theme.of(context);
 
-    IconThemeData iconTheme = theme.primaryIconTheme;
+    IconThemeData appBarIconTheme = iconTheme ?? theme.primaryIconTheme;
     TextStyle centerStyle = textTheme?.title ?? theme.primaryTextTheme.title;
     TextStyle sideStyle = textTheme?.body1 ?? theme.primaryTextTheme.body1;
 
@@ -231,8 +232,8 @@ class AppBar extends StatelessWidget {
         centerStyle = centerStyle.copyWith(color: centerStyle.color.withOpacity(opacity));
       if (sideStyle?.color != null)
         sideStyle = sideStyle.copyWith(color: sideStyle.color.withOpacity(opacity));
-      iconTheme = iconTheme.copyWith(
-        opacity: opacity * (iconTheme.opacity ?? 1.0)
+      appBarIconTheme = appBarIconTheme.copyWith(
+        opacity: opacity * (appBarIconTheme.opacity ?? 1.0)
       );
     }
 
@@ -262,7 +263,7 @@ class AppBar extends StatelessWidget {
       height: kToolBarHeight,
       child: new IconTheme.merge(
         context: context,
-        data: iconTheme,
+        data: appBarIconTheme,
         child: new DefaultTextStyle(
           style: sideStyle,
           child: new Row(children: toolBarRow)
