@@ -11,6 +11,7 @@ import 'package:meta/meta.dart';
 
 import 'assertions.dart';
 import 'basic_types.dart';
+import 'licenses.dart';
 
 /// Signature for service extensions.
 ///
@@ -74,7 +75,12 @@ abstract class BindingBase {
   /// `initInstances()`.
   void initInstances() {
     assert(!_debugInitialized);
+    LicenseRegistry.addLicense(_addLicenses);
     assert(() { _debugInitialized = true; return true; });
+  }
+
+  Iterable<LicenseEntry> _addLicenses() sync* {
+    // TODO(ianh): Populate the license registry.
   }
 
   /// Called when the binding is initialized, to register service

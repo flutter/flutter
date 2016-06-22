@@ -301,7 +301,7 @@ class AboutDialog extends StatelessWidget {
 ///
 /// To show a [LicensePage], use [showLicensePage].
 // TODO(ianh): Mention the API for registering more licenses once it exists.
-class LicensePage extends StatelessWidget {
+class LicensePage extends StatefulWidget {
   /// Creates a page that shows licenses for software used by the application.
   ///
   /// The arguments are all optional. The application name, if omitted, will be
@@ -338,26 +338,72 @@ class LicensePage extends StatelessWidget {
   final String applicationLegalese;
 
   @override
+  _LicensePageState createState() => new _LicensePageState();
+}
+
+class _LicensePageState extends State<LicensePage> {
+  List<Widget> _licenses = _initLicenses();
+
+  static List<Widget> _initLicenses() {
+    List<Widget> result = <Widget>[];
+    for (LicenseEntry license in LicenseRegistry.licenses) {
+      bool haveMargin = true;
+      result.add(new Padding(
+        padding: new EdgeInsets.symmetric(vertical: 18.0),
+        child: new Text(
+          '🍀‬', // That's U+1F340. Could also use U+2766 (❦) if U+1F340 doesn't work everywhere.
+          textAlign: TextAlign.center
+        )
+      ));
+      for (LicenseParagraph paragraph in license.paragraphs) {
+        if (paragraph.indent == LicenseParagraph.centeredIndent) {
+          result.add(new Padding(
+            padding: new EdgeInsets.only(top: haveMargin ? 0.0 : 16.0),
+            child: new Text(
+              paragraph.text,
+              style: new TextStyle(fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center
+            )
+          ));
+        } else {
+          assert(paragraph.indent >= 0);
+          result.add(new Padding(
+            padding: new EdgeInsets.only(top: haveMargin ? 0.0 : 8.0, left: 16.0 * paragraph.indent),
+            child: new Text(paragraph.text)
+          ));
+        }
+        haveMargin = false;
+      }
+    }
+    return result;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final String name = applicationName ?? _defaultApplicationName(context);
-    final String version = applicationVersion ?? _defaultApplicationVersion(context);
+    final String name = config.applicationName ?? _defaultApplicationName(context);
+    final String version = config.applicationVersion ?? _defaultApplicationVersion(context);
+    final List<Widget> contents = <Widget>[
+      new Text(name, style: Theme.of(context).textTheme.headline, textAlign: TextAlign.center),
+      new Text(version, style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
+      new Container(height: 18.0),
+      new Text(config.applicationLegalese ?? '', style: Theme.of(context).textTheme.caption, textAlign: TextAlign.center),
+      new Container(height: 18.0),
+      new Text('Powered by Flutter', style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
+      new Container(height: 24.0),
+    ];
+    contents.addAll(_licenses);
     return new Scaffold(
       appBar: new AppBar(
         title: new Text('Licenses')
       ),
-      body: new Block(
-        padding: new EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
-        children: <Widget>[
-          new Text(name, style: Theme.of(context).textTheme.headline, textAlign: TextAlign.center),
-          new Text(version, style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
-          new Container(height: 18.0),
-          new Text(applicationLegalese ?? '', style: Theme.of(context).textTheme.caption, textAlign: TextAlign.center),
-          new Container(height: 18.0),
-          new Text('Powered by Flutter', style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
-          new Container(height: 24.0),
-          // TODO(ianh): Fill in the licenses from the API for registering more licenses once it exists.
-          new Text('<licenses will be automatically included here>', style: Theme.of(context).textTheme.caption)
-        ]
+      body: new DefaultTextStyle(
+        style: Theme.of(context).textTheme.caption,
+        child: new LazyBlock(
+          padding: new EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+          delegate: new LazyBlockChildren(
+            children: contents
+          )
+        )
       )
     );
   }
