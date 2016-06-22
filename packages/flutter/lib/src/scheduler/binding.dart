@@ -16,7 +16,16 @@ import 'priority.dart';
 export 'dart:ui' show VoidCallback;
 
 /// Slows down animations by this factor to help in development.
-double timeDilation = 1.0;
+double get timeDilation => _timeDilation;
+double _timeDilation = 1.0;
+set timeDilation(double value) {
+  if (_timeDilation == value)
+    return;
+  // We need to resetEpoch first so that we capture start of the epoch with the
+  // current time dilation.
+  SchedulerBinding.instance?.resetEpoch();
+  _timeDilation = value;
+}
 
 /// A frame-related callback from the scheduler.
 ///
@@ -368,6 +377,28 @@ abstract class SchedulerBinding extends BindingBase {
     _hasScheduledFrame = true;
   }
 
+  Duration _firstRawTimeStampInEpoch;
+  Duration _epochStart = Duration.ZERO;
+  Duration _lastRawTimeStamp = Duration.ZERO;
+
+  void resetEpoch() {
+    _epochStart = _adjustForEpoch(_lastRawTimeStamp);
+    _firstRawTimeStampInEpoch = null;
+  }
+
+  /// Adjusts the given time stamp into the current epoch.
+  ///
+  /// This both offsets the time stamp to account for when the epoch started
+  /// (both in raw time and in the epoch's own time line) and scales the time
+  /// stamp to reflect the time dilation in the current epoch.
+  ///
+  /// These mechanisms together combine to ensure that the durations we give
+  /// during frame callbacks are monotonically increasing.
+  Duration _adjustForEpoch(Duration rawTimeStamp) {
+    Duration rawDurationSinceEpoch = _firstRawTimeStampInEpoch == null ? Duration.ZERO : rawTimeStamp - _firstRawTimeStampInEpoch;
+    return new Duration(microseconds: (rawDurationSinceEpoch.inMicroseconds / timeDilation).round() + _epochStart.inMicroseconds);
+  }
+
   /// Called by the engine to produce a new frame.
   ///
   /// This function first calls all the callbacks registered by
@@ -377,11 +408,12 @@ abstract class SchedulerBinding extends BindingBase {
   /// callbacks registered by [addPostFrameCallback].
   void handleBeginFrame(Duration rawTimeStamp) {
     Timeline.startSync('Frame');
+    _firstRawTimeStampInEpoch ??= rawTimeStamp;
+    Duration timeStamp = _adjustForEpoch(rawTimeStamp);
+    _lastRawTimeStamp = rawTimeStamp;
     assert(!_isProducingFrame);
     _isProducingFrame = true;
     _hasScheduledFrame = false;
-    Duration timeStamp = new Duration(
-        microseconds: (rawTimeStamp.inMicroseconds / timeDilation).round());
     _invokeTransientFrameCallbacks(timeStamp);
 
     for (FrameCallback callback in _persistentCallbacks)

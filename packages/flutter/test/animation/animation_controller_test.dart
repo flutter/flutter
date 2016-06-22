@@ -7,8 +7,12 @@ import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Can set value during status callback', () {
+  setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
+    WidgetsBinding.instance.resetEpoch();
+  });
+
+  test('Can set value during status callback', () {
     AnimationController controller = new AnimationController(
       duration: const Duration(milliseconds: 100)
     );
@@ -40,7 +44,6 @@ void main() {
   });
 
   test('Receives status callbacks for forward and reverse', () {
-    WidgetsFlutterBinding.ensureInitialized();
     AnimationController controller = new AnimationController(
       duration: const Duration(milliseconds: 100)
     );
@@ -103,7 +106,6 @@ void main() {
   });
 
   test('Forward and reverse from values', () {
-    WidgetsFlutterBinding.ensureInitialized();
     AnimationController controller = new AnimationController(
       duration: const Duration(milliseconds: 100)
     );
@@ -131,7 +133,6 @@ void main() {
   });
 
   test('Can fling to upper and lower bounds', () {
-    WidgetsFlutterBinding.ensureInitialized();
     AnimationController controller = new AnimationController(
       duration: const Duration(milliseconds: 100)
     );
@@ -157,5 +158,17 @@ void main() {
     WidgetsBinding.instance.handleBeginFrame(const Duration(seconds: 6));
     expect(largeRangeController.value, -30.0);
     largeRangeController.stop();
+  });
+
+  test('lastElapsedDuration control test', () {
+    AnimationController controller = new AnimationController(
+      duration: const Duration(milliseconds: 100)
+    );
+    controller.forward();
+    WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 20));
+    WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 30));
+    WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 40));
+    expect(controller.lastElapsedDuration, equals(const Duration(milliseconds: 20)));
+    controller.stop();
   });
 }
