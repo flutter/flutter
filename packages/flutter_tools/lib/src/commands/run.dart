@@ -213,7 +213,7 @@ Future<int> startApp(
   if (install && device is AndroidDevice) {
     printStatus('Installing $package to $device...');
 
-    if (!(installApp(device, package)))
+    if (!(installApp(device, package, uninstall: false)))
       return 1;
   }
 
