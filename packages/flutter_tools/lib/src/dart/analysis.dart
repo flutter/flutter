@@ -14,7 +14,6 @@ import 'package:analyzer/source/error_processor.dart';
 import 'package:analyzer/src/generated/engine.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/error.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/java_io.dart'; // ignore: implementation_imports
-import 'package:analyzer/src/generated/sdk_io.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/source.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/source_io.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/task/options.dart'; // ignore: implementation_imports
@@ -90,30 +89,33 @@ class AnalysisDriver {
 
   List<UriResolver> _getResolvers(InternalAnalysisContext context,
       Map<String, List<file_system.Folder>> packageMap) {
-    DirectoryBasedDartSdk sdk = new DirectoryBasedDartSdk(new JavaFile(sdkDir));
+
+    // Locate our embedder.
+    EmbedderYamlLocator locator = new EmbedderYamlLocator(packageMap);
+
+    // Create and configure an SDK.
+    EmbedderSdk sdk = new EmbedderSdk(locator.embedderYamls);
+
+    // Fail fast if no URI mappings are found.
+    assert(sdk.libraryMap.size() > 0);
+
     sdk.analysisOptions = context.analysisOptions;
+
     // TODO(pq): re-enable once we have a proper story for SDK summaries
     // in the presence of embedders (https://github.com/dart-lang/sdk/issues/26467).
     sdk.useSummary = false;
+
+    // Create our list of resolvers.
     List<UriResolver> resolvers = <UriResolver>[];
 
-    EmbedderYamlLocator yamlLocator = context.embedderYamlLocator;
-    yamlLocator.refresh(packageMap);
-
-    EmbedderUriResolver embedderUriResolver =
-        new EmbedderUriResolver(yamlLocator.embedderYamls);
-    if (embedderUriResolver.length == 0) {
-      resolvers.add(new DartUriResolver(sdk));
-    } else {
-      resolvers.add(embedderUriResolver);
-    }
+    resolvers.add(new DartUriResolver(sdk));
 
     if (options.packageRootPath != null) {
       JavaFile packageDirectory = new JavaFile(options.packageRootPath);
       resolvers.add(new PackageUriResolver(<JavaFile>[packageDirectory]));
     }
 
-    resolvers.add(new FileUriResolver());
+    resolvers.add(new file_system.ResourceUriResolver(PhysicalResourceProvider.INSTANCE));
     return resolvers;
   }
 
@@ -202,6 +204,7 @@ class DriverOptions extends AnalysisOptionsImpl {
     cacheSize = 512;
     lint = true;
     generateSdkErrors = false;
+    trackCacheDependencies = false;
   }
 
   /// The path to the dart SDK.

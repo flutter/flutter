@@ -10,7 +10,7 @@ dependencies:
   # We don't actually depend on 'analyzer', but 'test' and 'flutter_tools' do.
   # We pin the version of analyzer we depend on to avoid version skew across our
   # packages.
-  analyzer: 0.27.4-alpha.9
+  analyzer: 0.27.4-alpha.14
 
   flutter:
     path: ../flutter
