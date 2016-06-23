@@ -9,6 +9,7 @@ import 'package:path/path.dart' as path;
 
 import 'base/context.dart';
 import 'base/logger.dart';
+import 'base/net.dart';
 import 'base/os.dart';
 import 'globals.dart';
 
@@ -167,25 +168,6 @@ class Cache {
       await engine.download();
   }
 
-  /// Download a file from the given URL and return the bytes.
-  static Future<List<int>> _downloadFile(Uri url) async {
-    printTrace('Downloading $url.');
-
-    HttpClient httpClient = new HttpClient();
-    HttpClientRequest request = await httpClient.getUrl(url);
-    HttpClientResponse response = await request.close();
-
-    printTrace('Received response statusCode=${response.statusCode}');
-    if (response.statusCode != 200)
-      throw new Exception(response.reasonPhrase);
-
-    BytesBuilder responseBody = new BytesBuilder(copy: false);
-    await for (List<int> chunk in response)
-      responseBody.add(chunk);
-
-    return responseBody.takeBytes();
-  }
-
   /// Download a file from the given url and write it to the cache.
   /// If [unzip] is true, treat the url as a zip file, and unzip it to the
   /// directory given.
@@ -193,7 +175,7 @@ class Cache {
     if (!location.parent.existsSync())
       location.parent.createSync(recursive: true);
 
-    List<int> fileBytes = await _downloadFile(url);
+    List<int> fileBytes = await fetchUrl(url);
     if (unzip) {
       if (location is Directory && !location.existsSync())
         location.createSync(recursive: true);

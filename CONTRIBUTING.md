@@ -150,11 +150,14 @@ Coveralls to [track our test coverage](https://coveralls.io/github/flutter/flutt
 You can download our current coverage data from cloud storage and visualize it
 in Atom as follows:
 
- * `mkdir packages/flutter/coverage`
- * Download the latest `lcov.info` file produced by Travis using
-   `curl https://storage.googleapis.com/flutter_infra/flutter/coverage/lcov.info -o packages/flutter/coverage/lcov.info`
  * Install the [lcov-info](https://atom.io/packages/lcov-info) package for Atom.
- * Open a file in `packages/flutter/lib` in Atom and type `Ctrl+Alt+C`.
+ * Open the `packages/flutter` folder in Atom.
+ * Open a Dart file in the `lib` directory an type `Ctrl+Alt+C` to bring up the
+   coverage data.
+
+If you don't see any coverage data, check that you have an `lcov.info` file in
+the `packages/flutter/coverage` directory. It should have been downloaded by the
+`flutter update-packages` command you ran previously.
 
 See [issue 4719](https://github.com/flutter/flutter/issues/4719) for ideas about
 how to improve this workflow.
