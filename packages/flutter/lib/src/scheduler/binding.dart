@@ -381,6 +381,22 @@ abstract class SchedulerBinding extends BindingBase {
   Duration _epochStart = Duration.ZERO;
   Duration _lastRawTimeStamp = Duration.ZERO;
 
+  /// Prepares the scheduler for a non-monotonic change to how time stamps are calcuated.
+  ///
+  /// Callbacks received from the scheduler assume that their time stamps are
+  /// monotonically increasing. The raw time stamp passed to [handleBeginFrame]
+  /// is monotonic, but the scheduler might adjust those time stamps to provide
+  /// [timeDilation]. Without careful handling, these adjusts could cause time
+  /// to appear to run backwards.
+  ///
+  /// The [resetEpoch] function ensures that the time stamps are monotonic by
+  /// reseting the base time stamp used for future time stamp adjustments to the
+  /// current value. For example, if the [timeDilation] decreases, rather than
+  /// scaling down the [Duration] since the beginning of time, [resetEpoch] will
+  /// ensure that we only scale down the duration since [resetEpoch] was called.
+  ///
+  /// Note: Setting [timeDilation] calls [resetEpoch] automatically. You don't
+  /// need to call [resetEpoch] yourself.
   void resetEpoch() {
     _epochStart = _adjustForEpoch(_lastRawTimeStamp);
     _firstRawTimeStampInEpoch = null;

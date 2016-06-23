@@ -519,9 +519,15 @@ class TabBarSelection<T> extends StatefulWidget {
   }
 }
 
+/// State for a [TabBarSelection] widget.
+///
+/// Subclasses of [TabBarSelection] typically use [State] objects that extend
+/// this class.
 class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
 
+  /// An animation that updates as the selected tab changes.
   Animation<double> get animation => _controller.view;
+
   // Both the TabBar and TabBarView classes access _controller because they
   // alternately drive selection progress between tabs.
   final AnimationController _controller = new AnimationController(duration: _kTabBarScroll, value: 1.0);
@@ -559,18 +565,38 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
     PageStorage.of(context)?.writeState(context, _value);
   }
 
+  /// The list of possible values that the selection can obtain.
   List<T> get values => config.values;
 
+  /// The previously selected value.
+  ///
+  /// When the tab selection changes, the tab selection animates from the
+  /// previously selected value to the new value.
   T get previousValue => _previousValue;
   T _previousValue;
 
-  bool _valueIsChanging = false;
+  /// Whether the tab selection is in the process of animating from one value to
+  /// another.
+  // TODO(abarth): Try computing this value from _controller.state so we don't
+  // need to keep a separate bool in sync.
   bool get valueIsChanging => _valueIsChanging;
+  bool _valueIsChanging = false;
 
+  /// The index of a given value in [values].
+  ///
+  /// Runs in constant time.
   int indexOf(T tabValue) => _valueToIndex[tabValue];
+
+  /// The index of the currently selected value.
   int get index => _valueToIndex[value];
+
+  /// The index of the previoulsy selected value.
   int get previousIndex => indexOf(_previousValue);
 
+  /// The currently selected value.
+  ///
+  /// Writing to this field will cause the tab selection to animate from the
+  /// previous value to the new value.
   T get value => _value;
   T _value;
   set value(T newValue) {
@@ -607,6 +633,8 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
     _controller
       ..value = value
       ..forward().then((_) {
+        // TODO(abarth): Consider using a status listener and checking for
+        // AnimationStatus.completed.
         if (_controller.value == 1.0) {
           if (config.onChanged != null)
             config.onChanged(_value);
@@ -617,6 +645,9 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
 
   final List<TabBarSelectionAnimationListener> _animationListeners = <TabBarSelectionAnimationListener>[];
 
+  /// Calls listener methods every time the value or status of the selection animation changes.
+  ///
+  /// Listeners can be removed with [unregisterAnimationListener].
   void registerAnimationListener(TabBarSelectionAnimationListener listener) {
     _animationListeners.add(listener);
     _controller
@@ -624,6 +655,9 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
       ..addListener(listener.handleProgressChange);
   }
 
+  /// Stop calling listener methods every time the value or status of the animation changes.
+  ///
+  /// Listeners can be added with [registerAnimationListener].
   void unregisterAnimationListener(TabBarSelectionAnimationListener listener) {
     _animationListeners.remove(listener);
     _controller
@@ -649,7 +683,7 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
   }
 }
 
-/// Displays a horizontal row of tabs, one per label.
+/// A widget that displays a horizontal row of tabs, one per label.
 ///
 /// Requires one of its ancestors to be a [TabBarSelection] widget to enable
 /// saving and monitoring the selected tab.
@@ -663,15 +697,23 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
 ///  * [AppBar.tabBar]
 ///  * <https://www.google.com/design/spec/components/tabs.html>
 class TabBar<T> extends Scrollable implements AppBarBottomWidget {
+  /// Creates a widget that displays a horizontal row of tabs, one per label.
+  ///
+  /// The [labels] argument must not be null.
   TabBar({
     Key key,
-    this.labels,
+    @required this.labels,
     this.isScrollable: false,
     this.indicatorColor,
     this.labelColor
-  }) : super(key: key, scrollDirection: Axis.horizontal);
+  }) : super(key: key, scrollDirection: Axis.horizontal) {
+    assert(labels != null);
+  }
 
   /// The labels to display in the tabs.
+  ///
+  /// The [TabBarSelection.values] are used as keys for this map to determine
+  /// which tab label is selected.
   final Map<T, TabLabel> labels;
 
   /// Whether this tab bar can be scrolled horizontally.
@@ -978,10 +1020,23 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
   }
 }
 
+/// A widget that displays the contents of a tab.
+///
+/// Requires one of its ancestors to be a [TabBarSelection] widget to enable
+/// saving and monitoring the selected tab.
+///
+/// See also:
+///
+///  * [TabBarSelection]
+///  * [TabBar]
+///  * <https://www.google.com/design/spec/components/tabs.html>
 class TabBarView<T> extends PageableList {
+  /// Creates a widget that displays the contents of a tab.
+  ///
+  /// The [children] argument must not be null and must not be empty.
   TabBarView({
     Key key,
-    List<Widget> children
+    @required List<Widget> children
   }) : super(
     key: key,
     scrollDirection: Axis.horizontal,
@@ -1165,7 +1220,20 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
   }
 }
 
+/// A widget that displays a visual indicator of which tab is selected.
+///
+/// Requires one of its ancestors to be a [TabBarSelection] widget to enable
+/// saving and monitoring the selected tab.
+///
+/// See also:
+///
+///  * [TabBarSelection]
+///  * [TabBarView]
 class TabPageSelector<T> extends StatelessWidget {
+  /// Creates a widget that displays a visual indicator of which tab is selected.
+  ///
+  /// Requires one of its ancestors to be a [TabBarSelection] widget to enable
+  /// saving and monitoring the selected tab.
   const TabPageSelector({ Key key }) : super(key: key);
 
   Widget _buildTabIndicator(TabBarSelectionState<T> selection, T tab, Animation<double> animation, ColorTween selectedColor, ColorTween previousColor) {

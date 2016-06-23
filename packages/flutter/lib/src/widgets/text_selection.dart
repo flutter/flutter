@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
+import 'package:meta/meta.dart';
 
 import 'basic.dart';
 import 'container.dart';
@@ -12,21 +13,36 @@ import 'gesture_detector.dart';
 import 'overlay.dart';
 
 // TODO(mpcomplete): Need one for [collapsed].
-/// Which type of selection handle to be displayed. With mixed-direction text,
-/// both handles may be the same type. Examples:
-/// LTR text: 'the <quick brown> fox'
+/// Which type of selection handle to be displayed.
+///
+/// With mixed-direction text, both handles may be the same type. Examples:
+///
+/// * LTR text: 'the <quick brown> fox':
 ///   The '<' is drawn with the [left] type, the '>' with the [right]
-/// RTL text: 'xof <nworb kciuq> eht'
+///
+/// * RTL text: 'xof <nworb kciuq> eht':
 ///   Same as above.
-/// mixed text: '<the nwor<b quick fox'
+///
+/// * mixed text: '<the nwor<b quick fox'
 ///   Here 'the b' is selected, but 'brown' is RTL. Both are drawn with the
 ///   [left] type.
-enum TextSelectionHandleType { left, right, collapsed }
+enum TextSelectionHandleType {
+  /// The selection handle is to the left of the selection end point.
+  left,
 
-/// Builds a handle of the given type.
+  /// The selection handle is to the right of the selection end point.
+  right,
+
+  /// The start and end of the selection are co-incident at this point.
+  collapsed,
+}
+
+/// Builds a selection handle of the given type.
 typedef Widget TextSelectionHandleBuilder(BuildContext context, TextSelectionHandleType type);
 
-// Builds a copy/paste toolbar.
+/// Builds a tool bar near a text selection.
+///
+/// Typically displays buttons for copying and pasting text.
 // TODO(mpcomplete): A single position is probably insufficient.
 typedef Widget TextSelectionToolbarBuilder(BuildContext context, Point position, TextSelectionDelegate delegate);
 
@@ -47,27 +63,57 @@ abstract class TextSelectionDelegate {
   void hideToolbar();
 }
 
-/// Manages a pair of text selection handles to be shown in an Overlay
-/// containing the owning widget.
+/// An object that manages a pair of text selection handles.
+///
+/// The selection handles are displayed in the [Overlay] that most closely
+/// encloses the given [BuildContext].
 class TextSelectionOverlay implements TextSelectionDelegate {
+  /// Creates an object that manages overly entries for selection handles.
+  ///
+  /// The [context] must not be null and must have an [Overlay] as an ancestor.
   TextSelectionOverlay({
     InputValue input,
-    this.context,
+    @required this.context,
     this.debugRequiredFor,
     this.renderObject,
     this.onSelectionOverlayChanged,
     this.handleBuilder,
     this.toolbarBuilder
-  }): _input = input;
+  }): _input = input {
+    assert(context != null);
+  }
 
+  /// The context in which the selection handles should appear.
+  ///
+  /// This context must have an [Overlay] as an ancestor because this object
+  /// will display the text selection handles in that [Overlay].
   final BuildContext context;
+
+  /// Debugging information for explaining why the [Overlay] is required.
   final Widget debugRequiredFor;
+
   // TODO(mpcomplete): what if the renderObject is removed or replaced, or
   // moves? Not sure what cases I need to handle, or how to handle them.
+  /// The editable line in which the selected text is being displayed.
   final RenderEditableLine renderObject;
+
+  /// Called when the the selection changes.
+  ///
+  /// For example, if the use drags one of the selection handles, this function
+  /// will be called with a new input value with an updated selection.
   final ValueChanged<InputValue> onSelectionOverlayChanged;
+
+  /// Builds the selection handles.
+  ///
+  /// The selection handles let the user adjust which portion of the text is
+  /// selected.
   final TextSelectionHandleBuilder handleBuilder;
+
+  /// Builds a tool bar to display near the selection.
+  ///
+  /// The tool bar typically contains buttons for copying and pasting text.
   final TextSelectionToolbarBuilder toolbarBuilder;
+
   InputValue _input;
 
   /// A pair of handles. If this is non-null, there are always 2, though the
