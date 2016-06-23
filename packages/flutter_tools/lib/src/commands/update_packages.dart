@@ -5,6 +5,11 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:path/path.dart' as path;
+
+import '../base/logger.dart';
+import '../base/net.dart';
+import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
@@ -30,12 +35,25 @@ class UpdatePackagesCommand extends FlutterCommand {
   @override
   bool get requiresProjectRoot => false;
 
+  Future<Null> _downloadCoverageData() async {
+    Status status = logger.startProgress("Downloading lcov data for package:flutter...");
+    final List<int> data = await fetchUrl(Uri.parse('https://storage.googleapis.com/flutter_infra/flutter/coverage/lcov.info'));
+    final String coverageDir = path.join(Cache.flutterRoot, 'packages/flutter/coverage');
+    new File(path.join(coverageDir, 'lcov.base.info'))
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(data, flush: true);
+    new File(path.join(coverageDir, 'lcov.info'))
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(data, flush: true);
+    status.stop(showElapsedTime: true);
+  }
+
   @override
   Future<int> runInProject() async {
     try {
-      Stopwatch timer = new Stopwatch()..start();
+      final Stopwatch timer = new Stopwatch()..start();
       int count = 0;
-      bool upgrade = argResults['upgrade'];
+      final bool upgrade = argResults['upgrade'];
 
       for (Directory dir in runner.getRepoPackages()) {
         int code = await pubGet(directory: dir.path, upgrade: upgrade, checkLastModified: false);
@@ -44,9 +62,10 @@ class UpdatePackagesCommand extends FlutterCommand {
         count++;
       }
 
-      double seconds = timer.elapsedMilliseconds / 1000.0;
-      printStatus('\nRan \'pub\' $count time${count == 1 ? "" : "s"} in ${seconds.toStringAsFixed(1)}s.');
+      await _downloadCoverageData();
 
+      final double seconds = timer.elapsedMilliseconds / 1000.0;
+      printStatus('\nRan \'pub\' $count time${count == 1 ? "" : "s"} and fetched coverage data in ${seconds.toStringAsFixed(1)}s.');
       return 0;
     } on int catch (code) {
       return code;
