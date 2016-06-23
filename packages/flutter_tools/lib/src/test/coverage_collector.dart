@@ -63,8 +63,9 @@ class CoverageCollector {
     await finishPendingJobs();
     printTrace('formating coverage data');
     Resolver resolver = new Resolver(packagesPath: PackageMap.globalPackagesPath);
-    Formatter formater = new LcovFormatter(resolver);
-    List<String> reportOn = <String>[path.join(Directory.current.path, 'lib')];
-    return await formater.format(_globalHitmap, reportOn: reportOn);
+    LcovFormatter formater = new LcovFormatter(resolver);
+    String packagePath = Directory.current.path;
+    List<String> reportOn = <String>[path.join(packagePath, 'lib')];
+    return await formater.format(_globalHitmap, reportOn: reportOn, basePath: packagePath);
   }
 }
