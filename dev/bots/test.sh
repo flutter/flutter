@@ -9,7 +9,7 @@ detect_error_on_exit() {
     set +x
     if [[ $exit_code -ne 0 ]]; then
         echo -e "\x1B[31m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\x1B[0m"
-        echo -e "\x1B[31m\x1B[1mError:\x1B[0m\x1B[31m script exited early due to error ($exit_code)"
+        echo -e "\x1B[1mError:\x1B[31m script exited early due to error ($exit_code)\x1B[0m"
         echo -e "\x1B[31m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\x1B[0m"
     fi
 }
