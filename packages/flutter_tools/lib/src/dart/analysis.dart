@@ -14,6 +14,7 @@ import 'package:analyzer/source/error_processor.dart';
 import 'package:analyzer/src/generated/engine.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/error.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/java_io.dart'; // ignore: implementation_imports
+import 'package:analyzer/src/generated/sdk_io.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/source.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/source_io.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/task/options.dart'; // ignore: implementation_imports
@@ -90,25 +91,30 @@ class AnalysisDriver {
   List<UriResolver> _getResolvers(InternalAnalysisContext context,
       Map<String, List<file_system.Folder>> packageMap) {
 
-    // Locate our embedder.
-    EmbedderYamlLocator locator = new EmbedderYamlLocator(packageMap);
-
-    // Create and configure an SDK.
-    EmbedderSdk sdk = new EmbedderSdk(locator.embedderYamls);
-
-    // Fail fast if no URI mappings are found.
-    assert(sdk.libraryMap.size() > 0);
-
-    sdk.analysisOptions = context.analysisOptions;
-
-    // TODO(pq): re-enable once we have a proper story for SDK summaries
-    // in the presence of embedders (https://github.com/dart-lang/sdk/issues/26467).
-    sdk.useSummary = false;
 
     // Create our list of resolvers.
     List<UriResolver> resolvers = <UriResolver>[];
+    
+    // Look for an embedder.
+    EmbedderYamlLocator locator = new EmbedderYamlLocator(packageMap);
+    if (locator.embedderYamls.isNotEmpty) {
+      // Create and configure an embedded SDK.
+      EmbedderSdk sdk = new EmbedderSdk(locator.embedderYamls);
+      // Fail fast if no URI mappings are found.
+      assert(sdk.libraryMap.size() > 0);
+      sdk.analysisOptions = context.analysisOptions;
+      // TODO(pq): re-enable once we have a proper story for SDK summaries
+      // in the presence of embedders (https://github.com/dart-lang/sdk/issues/26467).
+      sdk.useSummary = false;
 
-    resolvers.add(new DartUriResolver(sdk));
+      resolvers.add(new DartUriResolver(sdk));
+    } else {
+      // Fall back to a standard SDK if no embedder is found.
+      DirectoryBasedDartSdk sdk = new DirectoryBasedDartSdk(new JavaFile(sdkDir));
+      sdk.analysisOptions = context.analysisOptions;
+
+      resolvers.add(new DartUriResolver(sdk));
+    }
 
     if (options.packageRootPath != null) {
       JavaFile packageDirectory = new JavaFile(options.packageRootPath);
