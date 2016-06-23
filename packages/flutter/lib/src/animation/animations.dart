@@ -281,13 +281,13 @@ class ReverseAnimation extends Animation<double>
   double get value => 1.0 - parent.value;
 
   AnimationStatus _reverseStatus(AnimationStatus status) {
+    assert(status != null);
     switch (status) {
       case AnimationStatus.forward: return AnimationStatus.reverse;
       case AnimationStatus.reverse: return AnimationStatus.forward;
       case AnimationStatus.completed: return AnimationStatus.dismissed;
       case AnimationStatus.dismissed: return AnimationStatus.completed;
     }
-    assert(status != null);
     return null;
   }
 
@@ -399,7 +399,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
     if (reverseCurve == null)
       return '$parent\u27A9$curve';
     if (_useForwardCurve)
-     return '$parent\u27A9$curve\u2092\u2099/$reverseCurve';
+      return '$parent\u27A9$curve\u2092\u2099/$reverseCurve';
     return '$parent\u27A9$curve/$reverseCurve\u2092\u2099';
   }
 }
@@ -438,8 +438,7 @@ class TrainHoppingAnimation extends Animation<double>
     }
     _currentTrain.addStatusListener(_statusChangeHandler);
     _currentTrain.addListener(_valueChangeHandler);
-    if (_nextTrain != null)
-      _nextTrain.addListener(_valueChangeHandler);
+    _nextTrain?.addListener(_valueChangeHandler);
     assert(_mode != null);
   }
 
@@ -479,14 +478,13 @@ class TrainHoppingAnimation extends Animation<double>
           break;
       }
       if (hop) {
-        _currentTrain.removeStatusListener(_statusChangeHandler);
-        _currentTrain.removeListener(_valueChangeHandler);
+        _currentTrain
+          ..removeStatusListener(_statusChangeHandler)
+          ..removeListener(_valueChangeHandler);
         _currentTrain = _nextTrain;
-        // TODO(hixie): This should be setting a status listener on the next
-        // train, not a value listener, and it should pass in _statusChangeHandler,
-        // not _valueChangeHandler
-        _nextTrain.addListener(_valueChangeHandler);
-        _statusChangeHandler(_nextTrain.status);
+        _nextTrain = null;
+        _currentTrain.addStatusListener(_statusChangeHandler);
+        _statusChangeHandler(_currentTrain.status);
       }
     }
     double newValue = value;
@@ -510,10 +508,8 @@ class TrainHoppingAnimation extends Animation<double>
     _currentTrain.removeStatusListener(_statusChangeHandler);
     _currentTrain.removeListener(_valueChangeHandler);
     _currentTrain = null;
-    if (_nextTrain != null) {
-      _nextTrain.removeListener(_valueChangeHandler);
-      _nextTrain = null;
-    }
+    _nextTrain?.removeListener(_valueChangeHandler);
+    _nextTrain = null;
   }
 
   @override
