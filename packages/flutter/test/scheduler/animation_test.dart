@@ -24,7 +24,7 @@ void main() {
     void firstCallback(Duration timeStamp) {
       expect(firstCallbackRan, isFalse);
       expect(secondCallbackRan, isFalse);
-      expect(timeStamp.inMilliseconds, equals(16));
+      expect(timeStamp.inMilliseconds, equals(0));
       firstCallbackRan = true;
       scheduler.cancelFrameCallbackWithId(secondId);
     }
@@ -32,7 +32,7 @@ void main() {
     void secondCallback(Duration timeStamp) {
       expect(firstCallbackRan, isTrue);
       expect(secondCallbackRan, isFalse);
-      expect(timeStamp.inMilliseconds, equals(16));
+      expect(timeStamp.inMilliseconds, equals(0));
       secondCallbackRan = true;
     }
 
