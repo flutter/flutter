@@ -683,6 +683,22 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
   }
 }
 
+// Used when the user is dragging the TabBar or the TabBarView left or right.
+// Dragging from the selected tab to the left varies t between 0.5 and 0.0.
+// Dragging towards the tab on the right varies t between 0.5 and 1.0.
+class _TabIndicatorTween extends Tween<Rect> {
+  _TabIndicatorTween({ Rect begin, this.middle, Rect end }) : super(begin: begin, end: end);
+
+  final Rect middle;
+
+  @override
+  Rect lerp(double t) {
+    return t <= 0.5
+      ? Rect.lerp(begin, middle, t * 2.0)
+      : Rect.lerp(middle, end, (t - 0.5) * 2.0);
+    }
+}
+
 /// A widget that displays a horizontal row of tabs, one per label.
 ///
 /// Requires one of its ancestors to be a [TabBarSelection] widget to enable
@@ -789,10 +805,21 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
   // when it's under the tab on the right.
   void _initIndicatorTweenForDrag() {
     assert(!_valueIsChanging);
-    _indicatorTween = new RectTween(
-      begin: _tabIndicatorRect(math.max(0, _selection.index - 1)),
-      end: _tabIndicatorRect(math.min(config.labels.length - 1, _selection.index + 1))
-    );
+    int index = _selection.index;
+    int beginIndex = math.max(0, index - 1);
+    int endIndex = math.min(config.labels.length - 1, index + 1);
+    if (beginIndex == index || endIndex == index) {
+      _indicatorTween = new RectTween(
+        begin: _tabIndicatorRect(beginIndex),
+        end: _tabIndicatorRect(endIndex)
+      );
+    } else {
+      _indicatorTween = new _TabIndicatorTween(
+        begin: _tabIndicatorRect(beginIndex),
+        middle: _tabIndicatorRect(index),
+        end: _tabIndicatorRect(endIndex)
+      );
+    }
   }
 
   // Initialize _indicatorTween for animating the selected tab indicator from the
@@ -869,7 +896,7 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
   Size _tabBarSize;
   List<double> _tabWidths;
   Rect _indicatorRect;
-  RectTween _indicatorTween;
+  Tween<Rect> _indicatorTween;
 
   Rect _tabRect(int tabIndex) {
     assert(_tabBarSize != null);
