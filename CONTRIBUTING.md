@@ -142,6 +142,23 @@ You can do this online, and it only takes a minute.
 If you've never submitted code before, you must add your (or your
 organization's) name and contact info to the [AUTHORS](AUTHORS) file.
 
+Tools for tracking an improving test coverage
+---------------------------------------------
+
+We strive for a high degree of test coverage for the Flutter framework. We use
+Coveralls to [track our test coverage](https://coveralls.io/github/flutter/flutter?branch=master).
+You can download our current coverage data from cloud storage and visualize it
+in Atom as follows:
+
+ * `mkdir packages/flutter/coverage`
+ * Download the latest `lcov.info` file produced by Travis using
+   `curl https://storage.googleapis.com/flutter_infra/flutter/coverage/lcov.info -o packages/flutter/coverage/lcov.info`
+ * Install the [lcov-info](https://atom.io/packages/lcov-info) package for Atom.
+ * Open a file in `packages/flutter/lib` in Atom and type `Ctrl+Alt+C`.
+
+See [issue 4719](https://github.com/flutter/flutter/issues/4719) for ideas about
+how to improve this workflow.
+
 Working on the engine and the framework at the same time
 --------------------------------------------------------
 

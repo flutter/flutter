@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
 
 void main() {
   setUp(() {
@@ -169,6 +169,24 @@ void main() {
     WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 30));
     WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 40));
     expect(controller.lastElapsedDuration, equals(const Duration(milliseconds: 20)));
+    controller.stop();
+  });
+
+  test('toString control test', () {
+    AnimationController controller = new AnimationController(
+      duration: const Duration(milliseconds: 100)
+    );
+    expect(controller.toString(), isOneLineDescription);
+    controller.forward();
+    WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 20));
+    WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 30));
+    expect(controller.toString(), isOneLineDescription);
+    WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 120));
+    expect(controller.toString(), isOneLineDescription);
+    controller.reverse();
+    WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 20));
+    WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 30));
+    expect(controller.toString(), isOneLineDescription);
     controller.stop();
   });
 }
