@@ -352,6 +352,7 @@ class DataTable extends StatelessWidget {
   static const Duration _kSortArrowAnimationDuration = const Duration(milliseconds: 150);
   static const Color _kGrey100Opacity = const Color(0x0A000000); // Grey 100 as opacity instead of solid color
   static const Color _kGrey300Opacity = const Color(0x1E000000); // Dark theme variant is just a guess.
+
   Widget _buildCheckbox({
     Color color,
     bool checked,
