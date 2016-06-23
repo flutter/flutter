@@ -44,6 +44,9 @@ const char kColorEmojiFont[] = kTestFontDir "ColorEmojiFont.ttf";
 const char kTextEmojiFont[] = kTestFontDir "TextEmojiFont.ttf";
 const char kMixedEmojiFont[] = kTestFontDir "ColorTextMixedEmojiFont.ttf";
 
+const char kHasCmapFormat14Font[] =  kTestFontDir "NoCmapFormat14.ttf";
+const char kNoCmapFormat14Font[] =  kTestFontDir "VarioationSelectorTest-Regular.ttf";
+
 typedef ICUTestBase FontCollectionItemizeTest;
 
 // Utility function for calling itemize function.
@@ -1390,6 +1393,76 @@ TEST_F(FontCollectionItemizeTest, itemize_genderBalancedEmoji) {
     EXPECT_EQ(0, runs[0].start);
     EXPECT_EQ(4, runs[0].end);
     EXPECT_EQ(kColorEmojiFont, getFontPath(runs[0]));
+}
+
+// For b/29585939
+TEST_F(FontCollectionItemizeTest, itemizeShouldKeepOrderForVS) {
+    const FontStyle kDefaultFontStyle;
+
+    MinikinAutoUnref<MinikinFont> dummyFont(MinikinFontForTest::createFromFile(kNoGlyphFont));
+    MinikinAutoUnref<MinikinFont> fontA(MinikinFontForTest::createFromFile(kZH_HansFont));
+    MinikinAutoUnref<MinikinFont> fontB(MinikinFontForTest::createFromFile(kZH_HansFont));
+
+    MinikinAutoUnref<FontFamily> dummyFamily(new FontFamily());
+    MinikinAutoUnref<FontFamily> familyA(new FontFamily());
+    MinikinAutoUnref<FontFamily> familyB(new FontFamily());
+
+    dummyFamily->addFont(dummyFont.get());
+    familyA->addFont(fontA.get());
+    familyB->addFont(fontB.get());
+
+    std::vector<FontFamily*> families =
+            { dummyFamily.get(), familyA.get(), familyB.get() };
+    std::vector<FontFamily*> reversedFamilies =
+            { dummyFamily.get(), familyB.get(), familyA.get() };
+
+    MinikinAutoUnref<FontCollection> collection(new FontCollection(families));
+    MinikinAutoUnref<FontCollection> reversedCollection(new FontCollection(reversedFamilies));
+
+    // Both fontA/fontB support U+35A8 but don't support U+35A8 U+E0100. The first font should be
+    // selected.
+    std::vector<FontCollection::Run> runs;
+    itemize(collection.get(), "U+35A8 U+E0100", kDefaultFontStyle, &runs);
+    EXPECT_EQ(fontA.get(), runs[0].fakedFont.font);
+
+    itemize(reversedCollection.get(), "U+35A8 U+E0100", kDefaultFontStyle, &runs);
+    EXPECT_EQ(fontB.get(), runs[0].fakedFont.font);
+}
+
+// For b/29585939
+TEST_F(FontCollectionItemizeTest, itemizeShouldKeepOrderForVS2) {
+    const FontStyle kDefaultFontStyle;
+
+    MinikinAutoUnref<MinikinFont> dummyFont(MinikinFontForTest::createFromFile(kNoGlyphFont));
+    MinikinAutoUnref<MinikinFont> hasCmapFormat14Font(
+            MinikinFontForTest::createFromFile(kHasCmapFormat14Font));
+    MinikinAutoUnref<MinikinFont> noCmapFormat14Font(
+            MinikinFontForTest::createFromFile(kNoCmapFormat14Font));
+
+    MinikinAutoUnref<FontFamily> dummyFamily(new FontFamily());
+    MinikinAutoUnref<FontFamily> hasCmapFormat14Family(new FontFamily());
+    MinikinAutoUnref<FontFamily> noCmapFormat14Family(new FontFamily());
+
+    dummyFamily->addFont(dummyFont.get());
+    hasCmapFormat14Family->addFont(hasCmapFormat14Font.get());
+    noCmapFormat14Family->addFont(noCmapFormat14Font.get());
+
+    std::vector<FontFamily*> families =
+            { dummyFamily.get(), hasCmapFormat14Family.get(), noCmapFormat14Family.get() };
+    std::vector<FontFamily*> reversedFamilies =
+            { dummyFamily.get(), noCmapFormat14Family.get(), hasCmapFormat14Family.get() };
+
+    MinikinAutoUnref<FontCollection> collection(new FontCollection(families));
+    MinikinAutoUnref<FontCollection> reversedCollection(new FontCollection(reversedFamilies));
+
+    // Both hasCmapFormat14Font/noCmapFormat14Font support U+5380 but don't support U+5380 U+E0100.
+    // The first font should be selected.
+    std::vector<FontCollection::Run> runs;
+    itemize(collection.get(), "U+5380 U+E0100", kDefaultFontStyle, &runs);
+    EXPECT_EQ(hasCmapFormat14Font.get(), runs[0].fakedFont.font);
+
+    itemize(reversedCollection.get(), "U+5380 U+E0100", kDefaultFontStyle, &runs);
+    EXPECT_EQ(noCmapFormat14Font.get(), runs[0].fakedFont.font);
 }
 
 }  // namespace minikin

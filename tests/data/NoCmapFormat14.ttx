@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (C) 2015 The Android Open Source Project
+<!-- Copyright (C) 2016 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -142,31 +142,9 @@
   <cmap>
     <tableVersion version="0"/>
     <cmap_format_4 platformID="3" platEncID="10" language="0">
-      <map code="0x82A6" name="defaultGlyph" />
-      <map code="0x845B" name="defaultGlyph" />
-      <map code="0x537F" name="defaultGlyph" />
       <map code="0x5380" name="defaultGlyph" />
     </cmap_format_4>
-    <cmap_format_14 format="14" platformID="0" platEncID="5" length="40" numVarSelectorRecords="3">
-      <map uvs="0xFE00" uv="0x82A6" name="None" />
-      <map uvs="0xE0100" uv="0x82A6" name="None" />
-      <map uvs="0xE0101" uv="0x82A6" name="None" />
-      <map uvs="0xE0102" uv="0x82A6" name="None" />
-
-      <map uvs="0xFE01" uv="0x845B" name="None" />
-      <map uvs="0xE0101" uv="0x845B" name="None" />
-      <map uvs="0xE0102" uv="0x845B" name="None" />
-      <map uvs="0xE0103" uv="0x845B" name="None" />
-
-      <map uvs="0xFE02" uv="0x717D" name="defaultGlyph" />
-      <map uvs="0xE0102" uv="0x717D" name="defaultGlyph" />
-      <map uvs="0xE0103" uv="0x717D" name="defaultGlyph" />
-      <!-- There is no default glyph for U+717D U+E0104 but there is a entry for
-           default UVS entry.  hasVariationSelector should return false in this
-           case.  -->
-      <map uvs="0xE0104" uv="0x717D" name="None" />
-      <!-- Do not add entry for U+5380. -->
-    </cmap_format_14>
+    <!-- Do not add cmap_format_14 here since this font is desinged for testing purpose. -->
   </cmap>
 
   <loca>
@@ -189,28 +167,28 @@
 
   <name>
     <namerecord nameID="1" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      VariationSelector Test
+      No Cmap Format 14 Subtable Test
     </namerecord>
     <namerecord nameID="2" platformID="1" platEncID="0" langID="0x0" unicode="True">
       Regular
     </namerecord>
     <namerecord nameID="4" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      VariationSelector Test
+      No Cmap Format 14 Subtable Test
     </namerecord>
     <namerecord nameID="6" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      VariationSelectorTest-Regular
+      No Cmap Format 14 SubtableTest-Regular
     </namerecord>
     <namerecord nameID="1" platformID="3" platEncID="1" langID="0x409">
-      VariationSelector Test
+      No Cmap Format 14 Subtable Test
     </namerecord>
     <namerecord nameID="2" platformID="3" platEncID="1" langID="0x409">
       Regular
     </namerecord>
     <namerecord nameID="4" platformID="3" platEncID="1" langID="0x409">
-      VariationSelector Test
+      No Cmap Format 14 Subtable Test
     </namerecord>
     <namerecord nameID="6" platformID="3" platEncID="1" langID="0x409">
-      VariationSelectorTest-Regular
+      No Cmap Format 14 SubtableTest-Regular
     </namerecord>
   </name>
 
