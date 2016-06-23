@@ -15,7 +15,12 @@ dependencies:
   file: ^0.1.0
   http: ^0.11.3
   json_rpc_2: ^2.0.0
-  json_schema: ^1.0.3
+
+  # Version 1.0.4 has mysterious "pub get" spam about "drudge". If you update
+  # this dependency, be sure not to include 1.0.4 and to check the output of
+  # "pub get" for spam about "drudge".
+  json_schema: 1.0.3
+
   linter: ^0.1.17
   mustache4dart: ^1.0.0
   package_config: '>=0.1.5 <2.0.0'
