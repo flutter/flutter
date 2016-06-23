@@ -326,6 +326,9 @@ abstract class StatelessWidget extends Widget {
   /// provides the set of inherited widgets for this location in the tree.
   @protected
   Widget build(BuildContext context);
+
+  /// Trampoline to make the [build] closure library-accessible.
+  WidgetBuilder get _build => build;
 }
 
 /// StatefulWidgets provide the configuration for
@@ -483,6 +486,9 @@ abstract class State<T extends StatefulWidget> {
   /// signature used by [StatelessWidget.build] and other widgets.
   @protected
   Widget build(BuildContext context);
+
+  /// Trampoline to make the [build] closure library-accessible.
+  WidgetBuilder get _build => build;
 
   /// Called when an Inherited widget in the ancestor chain has changed. Usually
   /// there is nothing to do here; whenever this is called, build() is also
@@ -1606,7 +1612,7 @@ abstract class ComponentElement extends BuildableElement {
 /// Instantiation of [StatelessWidget]s.
 class StatelessElement extends ComponentElement {
   StatelessElement(StatelessWidget widget) : super(widget) {
-    _builder = widget.build;
+    _builder = widget._build;
   }
 
   @override
@@ -1616,14 +1622,14 @@ class StatelessElement extends ComponentElement {
   void update(StatelessWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
-    _builder = widget.build;
+    _builder = widget._build;
     _dirty = true;
     rebuild();
   }
 
   @override
   void _reassemble() {
-    _builder = widget.build;
+    _builder = widget._build;
     super._reassemble();
   }
 }
@@ -1636,7 +1642,7 @@ class StatefulElement extends ComponentElement {
     assert(_state._element == null);
     _state._element = this;
     assert(_builder == _buildNothing);
-    _builder = _state.build;
+    _builder = _state._build;
     assert(_state._config == null);
     _state._config = widget;
     assert(_state._debugLifecycleState == _StateLifecycle.created);
@@ -1647,7 +1653,7 @@ class StatefulElement extends ComponentElement {
 
   @override
   void _reassemble() {
-    _builder = state.build;
+    _builder = state._build;
     super._reassemble();
   }
 

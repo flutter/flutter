@@ -90,22 +90,30 @@ class AnalysisDriver {
 
   List<UriResolver> _getResolvers(InternalAnalysisContext context,
       Map<String, List<file_system.Folder>> packageMap) {
-    DirectoryBasedDartSdk sdk = new DirectoryBasedDartSdk(new JavaFile(sdkDir));
-    sdk.analysisOptions = context.analysisOptions;
-    // TODO(pq): re-enable once we have a proper story for SDK summaries
-    // in the presence of embedders (https://github.com/dart-lang/sdk/issues/26467).
-    sdk.useSummary = false;
+
+
+    // Create our list of resolvers.
     List<UriResolver> resolvers = <UriResolver>[];
+    
+    // Look for an embedder.
+    EmbedderYamlLocator locator = new EmbedderYamlLocator(packageMap);
+    if (locator.embedderYamls.isNotEmpty) {
+      // Create and configure an embedded SDK.
+      EmbedderSdk sdk = new EmbedderSdk(locator.embedderYamls);
+      // Fail fast if no URI mappings are found.
+      assert(sdk.libraryMap.size() > 0);
+      sdk.analysisOptions = context.analysisOptions;
+      // TODO(pq): re-enable once we have a proper story for SDK summaries
+      // in the presence of embedders (https://github.com/dart-lang/sdk/issues/26467).
+      sdk.useSummary = false;
 
-    EmbedderYamlLocator yamlLocator = context.embedderYamlLocator;
-    yamlLocator.refresh(packageMap);
-
-    EmbedderUriResolver embedderUriResolver =
-        new EmbedderUriResolver(yamlLocator.embedderYamls);
-    if (embedderUriResolver.length == 0) {
       resolvers.add(new DartUriResolver(sdk));
     } else {
-      resolvers.add(embedderUriResolver);
+      // Fall back to a standard SDK if no embedder is found.
+      DirectoryBasedDartSdk sdk = new DirectoryBasedDartSdk(new JavaFile(sdkDir));
+      sdk.analysisOptions = context.analysisOptions;
+
+      resolvers.add(new DartUriResolver(sdk));
     }
 
     if (options.packageRootPath != null) {
@@ -113,7 +121,7 @@ class AnalysisDriver {
       resolvers.add(new PackageUriResolver(<JavaFile>[packageDirectory]));
     }
 
-    resolvers.add(new FileUriResolver());
+    resolvers.add(new file_system.ResourceUriResolver(PhysicalResourceProvider.INSTANCE));
     return resolvers;
   }
 
@@ -202,6 +210,7 @@ class DriverOptions extends AnalysisOptionsImpl {
     cacheSize = 512;
     lint = true;
     generateSdkErrors = false;
+    trackCacheDependencies = false;
   }
 
   /// The path to the dart SDK.
