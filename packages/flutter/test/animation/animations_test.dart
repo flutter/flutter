@@ -13,16 +13,16 @@ void main() {
   });
 
   test('toString control test', () {
-    expect(kAlwaysCompleteAnimation.toString(), isOneLineDescription);
-    expect(kAlwaysDismissedAnimation.toString(), isOneLineDescription);
-    expect(new AlwaysStoppedAnimation<double>(0.5).toString(), isOneLineDescription);
+    expect(kAlwaysCompleteAnimation.toString(), hasOneLineDescription);
+    expect(kAlwaysDismissedAnimation.toString(), hasOneLineDescription);
+    expect(new AlwaysStoppedAnimation<double>(0.5).toString(), hasOneLineDescription);
     CurvedAnimation curvedAnimation = new CurvedAnimation(
       parent: kAlwaysDismissedAnimation,
       curve: Curves.ease
     );
-    expect(curvedAnimation.toString(), isOneLineDescription);
+    expect(curvedAnimation.toString(), hasOneLineDescription);
     curvedAnimation.reverseCurve = Curves.elasticOut;
-    expect(curvedAnimation.toString(), isOneLineDescription);
+    expect(curvedAnimation.toString(), hasOneLineDescription);
     AnimationController controller = new AnimationController(
       duration: const Duration(milliseconds: 500)
     );
@@ -34,7 +34,7 @@ void main() {
       curve: Curves.ease,
       reverseCurve: Curves.elasticOut
     );
-    expect(curvedAnimation.toString(), isOneLineDescription);
+    expect(curvedAnimation.toString(), hasOneLineDescription);
     controller.stop();
   });
 
@@ -42,9 +42,9 @@ void main() {
     ProxyAnimation animation = new ProxyAnimation();
     expect(animation.value, 0.0);
     expect(animation.status, AnimationStatus.dismissed);
-    expect(animation.toString(), isOneLineDescription);
+    expect(animation.toString(), hasOneLineDescription);
     animation.parent = kAlwaysDismissedAnimation;
-    expect(animation.toString(), isOneLineDescription);
+    expect(animation.toString(), hasOneLineDescription);
   });
 
   test('ProxyAnimation set parent generates value changed', () {
@@ -81,7 +81,7 @@ void main() {
     expect(didReceiveCallback, isFalse);
     controller.value = 0.7;
     expect(didReceiveCallback, isFalse);
-    expect(animation.toString(), isOneLineDescription);
+    expect(animation.toString(), hasOneLineDescription);
   });
 
   test('TrainHoppingAnimation', () {
@@ -96,11 +96,11 @@ void main() {
       });
     expect(didSwitchTrains, isFalse);
     expect(animation.value, 0.5);
-    expect(animation.toString(), isOneLineDescription);
+    expect(animation.toString(), hasOneLineDescription);
     nextTrain.value = 0.25;
     expect(didSwitchTrains, isTrue);
     expect(animation.value, 0.25);
-    expect(animation.toString(), isOneLineDescription);
+    expect(animation.toString(), hasOneLineDescription);
     expect(animation.toString(), contains('no next'));
   });
 }
