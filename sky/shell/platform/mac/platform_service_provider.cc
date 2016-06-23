@@ -13,7 +13,7 @@
 #include "sky/services/platform/ios/path_provider_impl.h"
 #include "sky/services/platform/ios/system_chrome_impl.h"
 #include "sky/services/platform/ios/system_sound_impl.h"
-#include "sky/services/platform/ios/uri_launcher_impl.h"
+#include "sky/services/platform/ios/url_launcher_impl.h"
 #include "sky/services/vsync/ios/vsync_provider_impl.h"
 #endif  // TARGET_OS_IPHONE
 
@@ -87,9 +87,9 @@ void PlatformServiceProvider::ConnectToService(
             client_handle.Pass()));
     return;
   }
-  if (service_name == flutter::platform::URILauncher::Name_) {
-    new flutter::platform::URILauncherImpl(
-        mojo::InterfaceRequest<flutter::platform::URILauncher>(
+  if (service_name == flutter::platform::URLLauncher::Name_) {
+    new flutter::platform::URLLauncherImpl(
+        mojo::InterfaceRequest<flutter::platform::URLLauncher>(
             client_handle.Pass()));
     return;
   }

@@ -11,7 +11,7 @@ mojom("interfaces") {
     "path_provider.mojom",
     "system_chrome.mojom",
     "system_sound.mojom",
-    "uri_launcher.mojom",
+    "url_launcher.mojom",
   ]
 }
 
@@ -25,7 +25,7 @@ if (is_android) {
       "src/org/domokit/platform/PathProviderImpl.java",
       "src/org/domokit/platform/SystemChromeImpl.java",
       "src/org/domokit/platform/SystemSoundImpl.java",
-      "src/org/domokit/platform/UriLauncherImpl.java",
+      "src/org/domokit/platform/UrlLauncherImpl.java",
     ]
 
     deps = [
@@ -48,8 +48,8 @@ if (is_ios) {
       "ios/system_chrome_impl.mm",
       "ios/system_sound_impl.h",
       "ios/system_sound_impl.mm",
-      "ios/uri_launcher_impl.h",
-      "ios/uri_launcher_impl.mm",
+      "ios/url_launcher_impl.h",
+      "ios/url_launcher_impl.mm",
     ]
     deps = [
       "//base:base",

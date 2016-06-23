@@ -38,7 +38,7 @@ import org.chromium.mojom.flutter.platform.HapticFeedback;
 import org.chromium.mojom.flutter.platform.PathProvider;
 import org.chromium.mojom.flutter.platform.SystemChrome;
 import org.chromium.mojom.flutter.platform.SystemSound;
-import org.chromium.mojom.flutter.platform.UriLauncher;
+import org.chromium.mojom.flutter.platform.UrlLauncher;
 import org.chromium.mojom.media.MediaService;
 import org.chromium.mojom.mojo.NetworkService;
 import org.chromium.mojom.sensors.SensorService;
@@ -51,7 +51,7 @@ import org.domokit.platform.HapticFeedbackImpl;
 import org.domokit.platform.PathProviderImpl;
 import org.domokit.platform.SystemChromeImpl;
 import org.domokit.platform.SystemSoundImpl;
-import org.domokit.platform.UriLauncherImpl;
+import org.domokit.platform.UrlLauncherImpl;
 import org.domokit.vsync.VSyncProviderImpl;
 
 /**
@@ -213,10 +213,10 @@ public class FlutterMain {
             }
         });
 
-        registry.register(UriLauncher.MANAGER.getName(), new ServiceFactory() {
+        registry.register(UrlLauncher.MANAGER.getName(), new ServiceFactory() {
             @Override
             public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                return UriLauncher.MANAGER.bind(new UriLauncherImpl((android.app.Activity) context), pipe);
+                return UrlLauncher.MANAGER.bind(new UrlLauncherImpl((android.app.Activity) context), pipe);
             }
         });
     }

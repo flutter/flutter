@@ -10,15 +10,15 @@ import android.net.Uri;
 
 import org.chromium.mojo.system.MojoException;
 
-import org.chromium.mojom.flutter.platform.UriLauncher;
+import org.chromium.mojom.flutter.platform.UrlLauncher;
 
 /**
- * Android implementation of UriLauncher.
+ * Android implementation of UrlLauncher.
  */
-public class UriLauncherImpl implements UriLauncher {
+public class UrlLauncherImpl implements UrlLauncher {
     private final Activity mActivity;
 
-    public UriLauncherImpl(Activity activity) {
+    public UrlLauncherImpl(Activity activity) {
         mActivity = activity;
     }
 

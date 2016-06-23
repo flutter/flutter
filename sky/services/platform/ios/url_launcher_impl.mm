@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/services/platform/ios/uri_launcher_impl.h"
+#include "sky/services/platform/ios/url_launcher_impl.h"
 #include "base/mac/scoped_nsautorelease_pool.h"
 
 #include <UIKit/UIKit.h>
@@ -10,16 +10,16 @@
 namespace flutter {
 namespace platform {
 
-URILauncherImpl::URILauncherImpl(mojo::InterfaceRequest<URILauncher> request)
+URLLauncherImpl::URLLauncherImpl(mojo::InterfaceRequest<URLLauncher> request)
     : binding_(this, request.Pass()) {}
 
-URILauncherImpl::~URILauncherImpl() {}
+URLLauncherImpl::~URLLauncherImpl() {}
 
-void URILauncherImpl::Launch(const mojo::String& uriString,
+void URLLauncherImpl::Launch(const mojo::String& urlString,
                              const LaunchCallback& callback) {
   base::mac::ScopedNSAutoreleasePool pool;
 
-  NSURL* url = [NSURL URLWithString:@(uriString.data())];
+  NSURL* url = [NSURL URLWithString:@(urlString.data())];
 
   UIApplication* application = [UIApplication sharedApplication];
 
