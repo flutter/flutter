@@ -24,7 +24,7 @@ flutter analyze --flutter-repo
 (cd dev/automated_tests; flutter test test_smoke_test/pass_test.dart > /dev/null)
 
 COVERAGE_FLAG=
-if [ -n $TRAVIS ]; then
+if [ -n $TRAVIS ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
   COVERAGE_FLAG=--coverage
 fi
 
