@@ -351,6 +351,7 @@ class DataTable extends StatelessWidget {
   static const double _kHeadingFontSize = 12.0;
   static const Duration _kSortArrowAnimationDuration = const Duration(milliseconds: 150);
   static const Color _kGrey100Opacity = const Color(0x0A000000); // Grey 100 as opacity instead of solid color
+  static const Color _kGrey300Opacity = const Color(0x1E000000); // Dark theme variant is just a guess.
 
   Widget _buildCheckbox({
     Color color,
@@ -381,6 +382,7 @@ class DataTable extends StatelessWidget {
   }
 
   Widget _buildHeadingCell({
+    BuildContext context,
     EdgeInsets padding,
     Widget label,
     String tooltip,
@@ -411,8 +413,10 @@ class DataTable extends StatelessWidget {
             // TODO(ianh): font family should be Roboto; see https://github.com/flutter/flutter/issues/3116
             fontWeight: FontWeight.w500,
             fontSize: _kHeadingFontSize,
-            color: onSort != null && sorted ? Colors.black87 : Colors.black54,
-            height: _kHeadingRowHeight / _kHeadingFontSize
+            height: _kHeadingRowHeight / _kHeadingFontSize,
+            color: (Theme.of(context).brightness == Brightness.light)
+              ? ((onSort != null && sorted) ? Colors.black87 : Colors.black54)
+              : ((onSort != null && sorted) ? Colors.white : Colors.white70)
           ),
           duration: _kSortArrowAnimationDuration,
           child: label
@@ -445,6 +449,7 @@ class DataTable extends StatelessWidget {
     VoidCallback onTap,
     VoidCallback onSelectChanged
   }) {
+    final bool isLightTheme = Theme.of(context).brightness == Brightness.light;
     if (showEditIcon) {
       final Widget icon = new Icon(Icons.edit, size: 18.0);
       label = new Flexible(child: label);
@@ -459,12 +464,14 @@ class DataTable extends StatelessWidget {
           style: new TextStyle(
             // TODO(ianh): font family should be Roboto; see https://github.com/flutter/flutter/issues/3116
             fontSize: 13.0,
-            color: placeholder ? Colors.black38 : Colors.black87 // TODO(ianh): defer to theme, since this won't work in e.g. the dark theme
+            color: isLightTheme
+              ? (placeholder ? Colors.black38 : Colors.black87)
+              : (placeholder ? Colors.white30 : Colors.white70)
           ),
           child: new IconTheme.merge(
             context: context,
             data: new IconThemeData(
-              color: Colors.black54
+              color: isLightTheme ? Colors.black54 : Colors.white70
             ),
             child: new DropDownButtonHideUnderline(child: label)
           )
@@ -491,8 +498,9 @@ class DataTable extends StatelessWidget {
 
     final ThemeData theme = Theme.of(context);
     final BoxDecoration _kSelectedDecoration = new BoxDecoration(
-      backgroundColor: _kGrey100Opacity, // has to be transparent so you can see the ink on the material
-      border: new Border(bottom: new BorderSide(color: theme.dividerColor))
+      border: new Border(bottom: new BorderSide(color: theme.dividerColor)),
+      // The backgroundColor has to be transparent so you can see the ink on the material
+      backgroundColor: (Theme.of(context).brightness == Brightness.light) ? _kGrey100Opacity : _kGrey300Opacity
     );
     final BoxDecoration _kUnselectedDecoration = new BoxDecoration(
       border: new Border(bottom: new BorderSide(color: theme.dividerColor))
@@ -551,6 +559,7 @@ class DataTable extends StatelessWidget {
         tableColumns[displayColumnIndex] = const IntrinsicColumnWidth();
       }
       tableRows[0].children[displayColumnIndex] = _buildHeadingCell(
+        context: context,
         padding: padding,
         label: column.label,
         tooltip: column.tooltip,
@@ -770,7 +779,7 @@ class _SortArrowState extends State<_SortArrow> {
         child: new Icon(
           Icons.arrow_downward,
           size: _kArrowIconSize,
-          color: Colors.black87
+          color: (Theme.of(context).brightness == Brightness.light) ? Colors.black87 : Colors.white70
         )
       )
     );

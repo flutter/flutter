@@ -109,7 +109,8 @@ class ThemeData {
     unselectedWidgetColor ??= isDark ? Colors.white70 : Colors.black54;
     disabledColor ??= isDark ? Colors.white30 : Colors.black26;
     buttonColor ??= isDark ? primarySwatch[600] : Colors.grey[300];
-    secondaryHeaderColor ??= primarySwatch[50]; // TODO(ianh): dark theme support (https://github.com/flutter/flutter/issues/3370)
+    // Spec doesn't specify a dark theme secondaryHeaderColor, this is a guess.
+    secondaryHeaderColor ??= isDark ? Colors.grey[700] : primarySwatch[50];
     textSelectionColor ??= isDark ? accentColor : primarySwatch[200];
     textSelectionHandleColor ??= isDark ? Colors.tealAccent[400] : primarySwatch[300];
     backgroundColor ??= isDark ? Colors.grey[700] : primarySwatch[200];
