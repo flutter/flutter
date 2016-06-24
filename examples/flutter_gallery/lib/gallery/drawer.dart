@@ -6,23 +6,14 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:sky_services/flutter/platform/uri_launcher.mojom.dart' as mojo;
-
 class LinkTextSpan extends TextSpan {
   LinkTextSpan({ TextStyle style, String url }) : super(
     style: style,
     text: url,
     recognizer: new TapGestureRecognizer()..onTap = () {
-      _launcherService.launch(url, null);
+      UrlLauncher.launch(url);
     }
   );
-
-  static mojo.UriLauncherProxy _initLauncherService() =>
-      shell.connectToApplicationService(
-        mojo.UriLauncher.serviceName,
-        mojo.UriLauncher.connectToService);
-
-  static mojo.UriLauncherProxy _launcherService = _initLauncherService();
 }
 
 class GalleryDrawer extends StatelessWidget {
