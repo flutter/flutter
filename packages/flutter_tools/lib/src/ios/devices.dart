@@ -318,12 +318,7 @@ class IOSDevice extends Device {
     String mainPath,
     Observatory observatory
   }) async {
-    return observatory.isolateReload(observatory.firstIsolateId).then((Response response) {
-      return true;
-    }).catchError((dynamic error) {
-      printError('Error restarting app: $error');
-      return false;
-    });
+    throw 'unsupported';
   }
 
   @override

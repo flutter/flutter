@@ -9,6 +9,8 @@ import 'dart:io';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:web_socket_channel/io.dart';
 
+import 'globals.dart';
+
 class Observatory {
   Observatory._(this.peer, this.port) {
     peer.registerMethod('streamNotify', (rpc.Parameters event) {
@@ -113,10 +115,22 @@ class Observatory {
     });
   }
 
-  Future<Response> isolateReload(String isolateId) {
-    return sendRequest('isolateReload', <String, dynamic>{
-      'isolateId': isolateId
-    });
+  Future<bool> reloadSources(String isolateId) async {
+    Completer<Event> whenIsolateReloads = new Completer<Event>();
+    StreamSubscription<Event> sub = onIsolateEvent
+      .where((Event event) => event.kind == 'IsolateReload')
+      .listen((Event event) => whenIsolateReloads.complete(event));
+
+    try {
+      await sendRequest('_reloadSources', <String, dynamic>{ 'isolateId': isolateId });
+      Event event = await whenIsolateReloads.future.timeout(new Duration(seconds: 20));
+      dynamic error = event.response['reloadError'];
+      if (error != null)
+        printError('Error reloading application sources: $error');
+      return error == null;
+    } finally {
+      await sub.cancel();
+    }
   }
 
   Future<Response> clearVMTimeline() => sendRequest('_clearVMTimeline');

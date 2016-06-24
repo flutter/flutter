@@ -19,6 +19,9 @@ import 'build_apk.dart';
 import 'install.dart';
 import 'trace.dart';
 
+/// Whether the user has passed the `--reload-sources` command-line option.
+bool useReloadSources = false;
+
 abstract class RunCommandBase extends FlutterCommand {
   RunCommandBase() {
     addBuildModeFlags(defaultToRelease: false);
@@ -62,6 +65,9 @@ class RunCommand extends RunCommandBase {
     // Hidden option to ship all the sources of the current project over to the
     // embedder via the DevFS observatory API.
     argParser.addFlag('devfs', negatable: false, hide: true);
+
+    // Send the _reloadSource command to the VM.
+    argParser.addFlag('reload-sources', negatable: true, defaultsTo: false, hide: true);
 
     // Hidden option to enable a benchmarking mode. This will run the given
     // application, measure the startup time and the app restart time, write the
@@ -115,6 +121,8 @@ class RunCommand extends RunCommandBase {
     }
 
     Cache.releaseLockEarly();
+
+    useReloadSources = argResults['reload-sources'];
 
     if (argResults['resident']) {
       RunAndStayResident runner = new RunAndStayResident(
