@@ -158,6 +158,20 @@ class Solver {
   /// Attempts to add the constraints in the list to the solver. If it cannot
   /// add any for some reason, a cleanup is attempted so that either all
   /// constraints will be added or none.
+  ///
+  /// Check the [Result] returned to make sure the operation succeeded. Any
+  /// errors will be reported via the `message` property on the [Result].
+  ///
+  /// Possible [Result]s:
+  ///
+  /// * [Result.success]: All constraints successfully added.
+  /// * [Result.duplicateConstraint]: One of the constraints in the list was
+  ///   already in the solver or the same constraint was specified multiple
+  ///   times in the argument list. Remove the duplicates and try again.
+  /// * [Result.unsatisfiableConstraint]: One or more constraints were at
+  ///   [Priority.required] but could not added because of conflicts with other
+  ///   constraints at the same priority. Lower the priority of these
+  ///   constraints and try again.
   Result addConstraints(List<Constraint> constraints) {
     _SolverBulkUpdate applier = (Constraint c) => addConstraint(c);
     _SolverBulkUpdate undoer = (Constraint c) => removeConstraint(c);
@@ -165,6 +179,20 @@ class Solver {
     return _bulkEdit(constraints, applier, undoer);
   }
 
+  /// Attempts to add an individual [Constraint] to the solver.
+  ///
+  /// Check the [Result] returned to make sure the operation succeeded. Any
+  /// errors will be reported via the `message` property on the [Result].
+  ///
+  /// Possible [Result]s:
+  ///
+  /// * [Result.success]: The constraint was successfully added.
+  /// * [Result.duplicateConstraint]: The constraint was already present in the
+  ///   solver.
+  /// * [Result.unsatisfiableConstraint]: The constraint was at
+  ///   [Priority.required] but could not be added because of a conflict with
+  ///   another constraint at that priority already in the solver. Try lowering
+  ///   the priority of the constraint and try again.
   Result addConstraint(Constraint constraint) {
     if (_constraints.containsKey(constraint))
       return Result.duplicateConstraint;
@@ -198,6 +226,21 @@ class Solver {
     return _optimizeObjectiveRow(_objective);
   }
 
+  /// Attempts to remove a list of constraints from the solver. Either all
+  /// constraints are removed or none. If more fine-grained control over the
+  /// removal is required (for example, not failing on removal of constraints
+  /// not already present in the solver), try removing the each [Constraint]
+  /// individually and check the result on each attempt.
+  ///
+  /// Check the [Result] returned to make sure the operation succeeded. Any
+  /// errors will be reported via the `message` property on the [Result].
+  ///
+  /// Possible [Result]s:
+  ///
+  /// * [Result.success]: The constraints were successfully removed from the
+  ///   solver.
+  /// * [Result.unknownConstraint]: One or more constraints in the list were
+  ///   not in the solver. So there was nothing to remove.
   Result removeConstraints(List<Constraint> constraints) {
     _SolverBulkUpdate applier = (Constraint c) => removeConstraint(c);
     _SolverBulkUpdate undoer = (Constraint c) => addConstraint(c);
@@ -205,6 +248,17 @@ class Solver {
     return _bulkEdit(constraints, applier, undoer);
   }
 
+  /// Attempt to remove an individual [Constraint] from the solver.
+  ///
+  /// Check the [Result] returned to make sure the operation succeeded. Any
+  /// errors will be reported via the `message` property on the [Result].
+  ///
+  /// Possible [Result]s:
+  ///
+  /// * [Result.success]: The [Constraint] was successfully removed from the
+  ///   solver.
+  /// * [Result.unknownConstraint]: The [Constraint] was not in the solver so
+  ///   there was nothing to remove.
   Result removeConstraint(Constraint constraint) {
     _Tag tag = _constraints[constraint];
     if (tag == null)
@@ -231,10 +285,32 @@ class Solver {
     return _optimizeObjectiveRow(_objective);
   }
 
+  /// Returns whether the given [Constraint] is present in the solver.
   bool hasConstraint(Constraint constraint) {
     return _constraints.containsKey(constraint);
   }
 
+  /// Adds a list of edit [Variable]s to the [Solver] at a given priority.
+  /// Either all edit [Variable] are added or none. No edit variables may be
+  /// added at `Priority.required`.
+  ///
+  /// Check the [Result] returned to make sure the operation succeeded. Any
+  /// errors will be reported via the `message` property on the [Result].
+  ///
+  /// Possible [Result]s:
+  ///
+  /// * [Result.success]: The edit variables were successfully added to [Solver]
+  ///   at the specified priority.
+  /// * [Result.duplicateEditVariable]: One of more edit variables were already
+  ///   present in the [Solver] or the same edit variables were specified
+  ///   multiple times in the list. Remove the duplicates and try again.
+  /// * [Result.badRequiredStrength]: The edit variables were added at
+  ///   [Priority.required]. Edit variables are used to
+  ///   suggest values to the solver. Since suggestions can't be mandatory,
+  ///   priorities cannot be [Priority.required]. If variable values need to be
+  ///   fixed at [Priority.required], add that preference as a constraint. This
+  ///   allows the solver to check for satisfiability of the constraint (w.r.t
+  ///   other constraints at [Priority.required]) and check for duplicates.
   Result addEditVariables(List<Variable> variables, double priority) {
     _SolverBulkUpdate applier = (Variable v) => addEditVariable(v, priority);
     _SolverBulkUpdate undoer = (Variable v) => removeEditVariable(v);
@@ -242,6 +318,26 @@ class Solver {
     return _bulkEdit(variables, applier, undoer);
   }
 
+  /// Attempt to add a single edit [Variable] to the [Solver] at the given
+  /// priority. No edit variables may be added to the [Solver] at
+  /// `Priority.required`.
+  ///
+  /// Check the [Result] returned to make sure the operation succeeded. Any
+  /// errors will be reported via the `message` property on the [Result].
+  ///
+  /// Possible [Result]s:
+  ///
+  /// * [Result.success]: The edit variable was successfully added to [Solver]
+  ///   at the specified priority.
+  /// * [Result.duplicateEditVariable]: The edit variable was already present
+  ///   in the [Solver].
+  /// * [Result.badRequiredStrength]: The edit variable was added at
+  ///   [Priority.required]. Edit variables are used to
+  ///   suggest values to the solver. Since suggestions can't be mandatory,
+  ///   priorities cannot be [Priority.required]. If variable values need to be
+  ///   fixed at [Priority.required], add that preference as a constraint. This
+  ///   allows the solver to check for satisfiability of the constraint (w.r.t
+  ///   other constraints at [Priority.required]) and check for duplicates.
   Result addEditVariable(Variable variable, double priority) {
     if (_edits.containsKey(variable))
       return Result.duplicateEditVariable;
@@ -267,6 +363,18 @@ class Solver {
     return Result.success;
   }
 
+  /// Attempt the remove the list of edit [Variable] from the solver. Either
+  /// all the specified edit variables are removed or none.
+  ///
+  /// Check the [Result] returned to make sure the operation succeeded. Any
+  /// errors will be reported via the `message` property on the [Result].
+  ///
+  /// Possible [Result]s:
+  ///
+  /// * [Result.success]: The edit variables were successfully removed from the
+  ///   [Solver].
+  /// * [Result.unknownEditVariable]: One of more edit variables were not
+  ///   already present in the solver.
   Result removeEditVariables(List<Variable> variables) {
     _SolverBulkUpdate applier = (Variable v) => removeEditVariable(v);
     _SolverBulkUpdate undoer = (Variable v) =>
@@ -275,6 +383,17 @@ class Solver {
     return _bulkEdit(variables, applier, undoer);
   }
 
+  /// Attempt to remove the specified edit [Variable] from the solver.
+  ///
+  /// Check the [Result] returned to make sure the operation succeeded. Any
+  /// errors will be reported via the `message` property on the [Result].
+  ///
+  /// Possible [Result]s:
+  ///
+  /// * [Result.success]: The edit variable was successfully removed from the
+  ///   solver.
+  /// * [Result.unknownEditVariable]: The edit variable was not present in the
+  ///   solver. There was nothing to remove.
   Result removeEditVariable(Variable variable) {
     _EditInfo info = _edits[variable];
     if (info == null)
@@ -286,10 +405,34 @@ class Solver {
     return Result.success;
   }
 
+  /// Returns whether the given edit [Variable] is present in the solver.
   bool hasEditVariable(Variable variable) {
     return _edits.containsKey(variable);
   }
 
+  /// Suggest an updated value for the edit variable. The edit variable
+  /// must already be added to the solver.
+  ///
+  /// Suggestions update values of variables within the [Solver] but take into
+  /// account all the constraints already present in the [Solver]. Depending
+  /// on the constraints, the value of the [Variable] may not actually be the
+  /// value specified. The actual value can be read after the next
+  /// `flushUpdates` call. Since these updates are merely "suggestions", they
+  /// cannot be at `Priority.required`.
+  ///
+  ///
+  /// Check the [Result] returned to make sure the operation succeeded. Any
+  /// errors will be reported via the `message` property on the [Result].
+  ///
+  /// Possible [Result]s:
+  ///
+  /// * [Result.success]: The suggestion was successfully applied to the
+  ///   variable within the solver.
+  /// * [Result.unknownEditVariable]: The edit variable was not already present
+  ///   in the [Solver]. So the suggestion could not be applied. Add this edit
+  ///   variable to the solver and then apply the value again. If you have
+  ///   already added the variable to the [Solver], make sure the [Result]
+  ///   was `Result.success`.
   Result suggestValueForVariable(Variable variable, double value) {
     if (!_edits.containsKey(variable))
       return Result.unknownEditVariable;
@@ -299,6 +442,16 @@ class Solver {
     return _dualOptimize();
   }
 
+  /// Flush the results of solver. The set of all `context` objects associated
+  /// with variables in the [Solver] is returned. If a [Variable] does not
+  /// contain an associated context, its updates are ignored.
+  ///
+  /// The addition and removal of constraints and edit variables to and from the
+  /// [Solver] as well as the application of suggestions to the added edit
+  /// variables leads to the modification of values on a lot of other variables.
+  /// External entities that rely on the values of the variables within the
+  /// [Solver] can read these updates in one shot by "flushing" out these
+  /// updates.
   Set<dynamic> flushUpdates() {
     Set<dynamic> updates = new HashSet<dynamic>();
 
