@@ -17,6 +17,7 @@ import '../ios/devices.dart';
 import '../ios/simulators.dart';
 import '../run.dart';
 import '../runner/flutter_command.dart';
+import 'run.dart' as run;
 
 const String protocolVersion = '0.2.0';
 
@@ -291,6 +292,7 @@ class AppDomain extends Domain {
     String route = _getStringArg(args, 'route');
     String mode = _getStringArg(args, 'mode');
     String target = _getStringArg(args, 'target');
+    bool reloadSources = _getBoolArg(args, 'reload-sources');
 
     Device device = daemon.deviceDomain._getDevice(deviceId);
     if (device == null)
@@ -298,6 +300,9 @@ class AppDomain extends Domain {
 
     if (!FileSystemEntity.isDirectorySync(projectDirectory))
       throw "'$projectDirectory' does not exist";
+
+    if (reloadSources != null)
+      run.useReloadSources = reloadSources;
 
     BuildMode buildMode = getBuildModeForName(mode) ?? BuildMode.debug;
     DebuggingOptions options;
