@@ -116,16 +116,21 @@ class Observatory {
   }
 
   Future<bool> reloadSources(String isolateId) async {
-    Future<Event> whenIsolateReloads = onIsolateEvent
+    Completer<Event> whenIsolateReloads = new Completer<Event>();
+    StreamSubscription<Event> sub = onIsolateEvent
       .where((Event event) => event.kind == 'IsolateReload')
-      .single;
+      .listen((Event event) => whenIsolateReloads.complete(event));
 
-    await sendRequest('_reloadSources', <String, dynamic>{ 'isolateId': isolateId });
-    Event event = await whenIsolateReloads.timeout(new Duration(seconds: 20));
-    dynamic error = event.response['reloadError'];
-    if (error != null)
-      printError('Error reloading application sources: $error');
-    return error == null;
+    try {
+      await sendRequest('_reloadSources', <String, dynamic>{ 'isolateId': isolateId });
+      Event event = await whenIsolateReloads.future.timeout(new Duration(seconds: 20));
+      dynamic error = event.response['reloadError'];
+      if (error != null)
+        printError('Error reloading application sources: $error');
+      return error == null;
+    } finally {
+      await sub.cancel();
+    }
   }
 
   Future<Response> clearVMTimeline() => sendRequest('_clearVMTimeline');
