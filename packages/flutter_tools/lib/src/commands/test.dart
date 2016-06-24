@@ -163,7 +163,7 @@ class TestCommand extends FlutterCommand {
 
     testArgs.insert(0, '--');
     if (!terminal.supportsColor)
-      testArgs.insert(0, '--no-color');
+      testArgs.insertAll(0, <String>['--no-color', '-rexpanded']);
 
     if (argResults['coverage'])
       testArgs.insert(0, '--concurrency=1');
