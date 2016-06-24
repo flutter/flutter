@@ -159,6 +159,17 @@ If you don't see any coverage data, check that you have an `lcov.info` file in
 the `packages/flutter/coverage` directory. It should have been downloaded by the
 `flutter update-packages` command you ran previously.
 
+If you want to iterate quickly on improving test coverage, consider using this
+workflow:
+
+ * Open a file and observe that some line is untested.
+ * Write a test that exercises that line.
+ * Run `flutter test --merge-coverage path/to/your/test_test.dart`.
+ * After the test passes, observe that the line is now tested.
+
+This workflow merges the coverage data from this test run with the base coverage
+data downloaded by `flutter update-packages`.
+
 See [issue 4719](https://github.com/flutter/flutter/issues/4719) for ideas about
 how to improve this workflow.
 

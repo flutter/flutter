@@ -51,11 +51,11 @@ const Matcher isInCard = const _IsInCard();
 /// [Card] widget ancestors.
 const Matcher isNotInCard = const _IsNotInCard();
 
-/// Asserts that a string is a plausible one-line description of an object.
+/// Asserts that an object's toString() is a plausible one-line description.
 ///
 /// Specifically, this matcher checks that the string does not contains newline
 /// characters and does not have leading or trailing whitespace.
-const Matcher isOneLineDescription = const _IsOneLineDescription();
+const Matcher hasOneLineDescription = const _HasOneLineDescription();
 
 class _FindsWidgetMatcher extends Matcher {
   const _FindsWidgetMatcher(this.min, this.max);
@@ -189,11 +189,12 @@ class _IsNotInCard extends Matcher {
   Description describe(Description description) => description.add('not in card');
 }
 
-class _IsOneLineDescription extends Matcher {
-  const _IsOneLineDescription();
+class _HasOneLineDescription extends Matcher {
+  const _HasOneLineDescription();
 
   @override
-  bool matches(String description, Map<dynamic, dynamic> matchState) {
+  bool matches(Object object, Map<dynamic, dynamic> matchState) {
+    String description = object.toString();
     return description.isNotEmpty &&
         !description.contains('\n') &&
         description.trim() == description;

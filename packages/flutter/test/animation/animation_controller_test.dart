@@ -176,17 +176,17 @@ void main() {
     AnimationController controller = new AnimationController(
       duration: const Duration(milliseconds: 100)
     );
-    expect(controller.toString(), isOneLineDescription);
+    expect(controller.toString(), hasOneLineDescription);
     controller.forward();
     WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 20));
     WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 30));
-    expect(controller.toString(), isOneLineDescription);
+    expect(controller.toString(), hasOneLineDescription);
     WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 120));
-    expect(controller.toString(), isOneLineDescription);
+    expect(controller.toString(), hasOneLineDescription);
     controller.reverse();
     WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 20));
     WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 30));
-    expect(controller.toString(), isOneLineDescription);
+    expect(controller.toString(), hasOneLineDescription);
     controller.stop();
   });
 }
