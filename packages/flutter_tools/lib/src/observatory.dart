@@ -116,12 +116,12 @@ class Observatory {
   }
 
   Future<bool> reloadSources(String isolateId) async {
-    Future<Event> future = onIsolateEvent
+    Future<Event> whenIsolateReloads = onIsolateEvent
       .where((Event event) => event.kind == 'IsolateReload')
       .single;
 
     await sendRequest('_reloadSources', <String, dynamic>{ 'isolateId': isolateId });
-    Event event = await future.timeout(new Duration(seconds: 20));
+    Event event = await whenIsolateReloads.timeout(new Duration(seconds: 20));
     dynamic error = event.response['reloadError'];
     if (error != null)
       printError('Error reloading application sources: $error');
