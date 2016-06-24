@@ -8,7 +8,7 @@ Things you will need
 
  * Linux or Mac OS X. (Windows is not yet supported.)
  * git (used for source version control).
- * An IDE. We recommend [Atom](https://github.com/flutter/engine/wiki/Using-Atom-with-Flutter).
+ * An IDE. We recommend [Atom](http://dart-atom.github.io/dartlang/).
  * An ssh client (used to authenticate with GitHub).
  * Python (used by some of our tools).
  * The Android platform tools (see [Issue #55](https://github.com/flutter/flutter/issues/55)
