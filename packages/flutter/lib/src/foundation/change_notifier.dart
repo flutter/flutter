@@ -30,23 +30,26 @@ abstract class ChangeNotifier {
   /// This method should only be called by the object's owner.
   @mustCallSuper
   void dispose() {
-    _listeners = null;
+    _listeners = const <VoidCallback>[];
   }
 
   /// Call all the registered listeners.
   ///
   /// Call this method whenever the object changes, to notify any clients the
-  /// object may have.
+  /// object may have. Listeners that are added during this iteration will not
+  /// be visited. Listeners that are removed during this iteration will not be
+  /// visited after they are removed.
   ///
   /// Exceptions thrown by listeners will be caught and reported using
   /// [FlutterError.reportError].
   @protected
   void notifyListeners() {
     if (_listeners != null) {
-      List<VoidCallback> listeners = new List<VoidCallback>.from(_listeners);
-      for (VoidCallback listener in listeners) {
+      List<VoidCallback> localListeners = new List<VoidCallback>.from(_listeners);
+      for (VoidCallback listener in localListeners) {
         try {
-          listener();
+          if (_listeners.contains(listener))
+            listener();
         } catch (exception, stack) {
           FlutterError.reportError(new FlutterErrorDetails(
             exception: exception,
