@@ -296,10 +296,12 @@ class FlutterDriver {
   ///
   /// Returns a [Future] that fires once the connection has been closed.
   // TODO(yjbanov): cleanup object references
-  Future<Null> close() => _serviceClient.close().then((_) {
+  Future<Null> close() async{
     // Don't leak vm_service_client-specific objects, if any
+    await _serviceClient.close();
+    await _peer.close();
     return null;
-  });
+  }
 }
 
 /// Encapsulates connection information to an instance of a Flutter application.
