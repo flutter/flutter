@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class LinkTextSpan extends TextSpan {
-  LinkTextSpan({ TextStyle style, String url }) : super(
+  LinkTextSpan({ TextStyle style, String url, String text }) : super(
     style: style,
-    text: url,
+    text: text ?? url,
     recognizer: new TapGestureRecognizer()..onTap = () {
       UrlLauncher.launch(url);
     }
@@ -134,11 +134,12 @@ class GalleryDrawer extends StatelessWidget {
                       ),
                       new TextSpan(
                         style: aboutTextStyle,
-                        text: ".\n\nTo see the source code for this app, please visit "
+                        text: ".\n\nTo see the source code for this app, please visit the "
                       ),
                       new LinkTextSpan(
                         style: aboutLinkStyle,
-                        url: 'https://goo.gl/iv1p4G'
+                        url: 'https://goo.gl/iv1p4G',
+                        text: 'flutter github repo'
                       ),
                       new TextSpan(
                         style: aboutTextStyle,
