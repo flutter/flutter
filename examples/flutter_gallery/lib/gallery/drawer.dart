@@ -2,7 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+class LinkTextSpan extends TextSpan {
+  LinkTextSpan({ TextStyle style, String url, String text }) : super(
+    style: style,
+    text: text ?? url,
+    recognizer: new TapGestureRecognizer()..onTap = () {
+      UrlLauncher.launch(url);
+    }
+  );
+}
 
 class GalleryDrawer extends StatelessWidget {
   GalleryDrawer({
@@ -29,6 +41,10 @@ class GalleryDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ThemeData themeData = Theme.of(context);
+    TextStyle aboutTextStyle = themeData.textTheme.body2;
+    TextStyle aboutLinkStyle = themeData.textTheme.body2.copyWith(color: themeData.accentColor);
+
     return new Drawer(
       child: new Block(
         children: <Widget>[
@@ -100,12 +116,41 @@ class GalleryDrawer extends StatelessWidget {
             applicationLegalese: '© 2016 The Chromium Authors',
             aboutBoxChildren: <Widget>[
               new Padding(
-                padding: const EdgeInsets.only(top: 24.0, bottom: 8.0),
-                child: new Center(child: new CircularProgressIndicator())
-              ),
-              new Text('Awaiting fix for issue 4512.', textAlign: TextAlign.center),
+                padding: const EdgeInsets.only(top: 24.0),
+                child: new RichText(
+                  text: new TextSpan(
+                    children: <TextSpan>[
+                      new TextSpan(
+                        style: aboutTextStyle,
+                        text: "Flutter is an early-stage, open-source project to help "
+                        "developers build high-performance, high-fidelity, mobile "
+                        "apps for iOS and Android from a single codebase. This "
+                        "gallery is a preview of Flutter's many widgets, behaviors, "
+                        "animations, layouts, and more. Learn more about Flutter at "
+                      ),
+                      new LinkTextSpan(
+                        style: aboutLinkStyle,
+                        url: 'https://flutter.io'
+                      ),
+                      new TextSpan(
+                        style: aboutTextStyle,
+                        text: ".\n\nTo see the source code for this app, please visit the "
+                      ),
+                      new LinkTextSpan(
+                        style: aboutLinkStyle,
+                        url: 'https://goo.gl/iv1p4G',
+                        text: 'flutter github repo'
+                      ),
+                      new TextSpan(
+                        style: aboutTextStyle,
+                        text: "."
+                      )
+                    ]
+                  )
+                )
+              )
             ]
-          ),
+          )
         ]
       )
     );
