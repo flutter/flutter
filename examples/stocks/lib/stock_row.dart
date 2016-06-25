@@ -9,8 +9,8 @@ import 'stock_arrow.dart';
 
 enum StockRowPartKind { arrow }
 
-class StockRowPartKey extends Key {
-  const StockRowPartKey(this.keySalt, this.stock, this.part) : super.constructor();
+class StockRowPartKey extends LocalKey {
+  const StockRowPartKey(this.keySalt, this.stock, this.part);
 
   final Object keySalt;
   final Stock stock;

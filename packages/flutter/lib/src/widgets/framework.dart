@@ -18,35 +18,45 @@ export 'package:flutter/foundation.dart' show FlutterError;
 
 // KEYS
 
-/// A Key is an identifier for [Widget]s and [Element]s. A new Widget will only
-/// be used to reconfigure an existing Element if its Key is the same as its
-/// original Widget's Key.
+/// A [Key] is an identifier for [Widget]s and [Element]s.
 ///
-/// Keys must be unique amongst the Elements with the same parent.
+/// A new widget will only be used to update an existing element if its key is
+/// the same as the key of the current widget associted with the element.
 ///
-/// Subclasses of Key should either subclass [LocalKey] or [GlobalKey].
+/// Keys must be unique amongst the [Element]s with the same parent.
+///
+/// Subclasses of [Key] should either subclass [LocalKey] or [GlobalKey].
 abstract class Key {
-  /// Construct a ValueKey<String> with the given String.
+  /// Construct a [ValueKey<String>] with the given [String].
+  ///
   /// This is the simplest way to create keys.
   factory Key(String value) => new ValueKey<String>(value);
 
   /// Default constructor, used by subclasses.
-  const Key.constructor(); // so that subclasses can call us, since the Key() factory constructor shadows the implicit constructor
+  ///
+  /// Useful so that subclasses can call us, because the Key() factory
+  /// constructor shadows the implicit constructor.
+  const Key._();
 }
 
 /// A key that is not a [GlobalKey].
+///
+/// Keys must be unique amongst the [Element]s with the same parent. By
+/// contrast, [GlobalKey]s must be unique across the entire app.
 abstract class LocalKey extends Key {
   /// Default constructor, used by subclasses.
-  const LocalKey() : super.constructor();
+  const LocalKey() : super._();
 }
 
-/// A kind of [Key] that uses a value of a particular type to identify itself.
+/// A key that uses a value of a particular type to identify itself.
 ///
-/// For example, a ValueKey<String> is equal to another ValueKey<String> if
-/// their values match.
+/// A [ValueKey<T>] is equal to another [ValueKey<T>] if, and only if, their
+/// values are [operator==].
 class ValueKey<T> extends LocalKey {
+  /// Creates a key that delgates its [operator==] to the given value.
   const ValueKey(this.value);
 
+  /// The value to which this key delegates its [operator==]
   final T value;
 
   @override
@@ -64,21 +74,24 @@ class ValueKey<T> extends LocalKey {
   String toString() => '[\'$value\']';
 }
 
-/// A [Key] that is only equal to itself.
+/// A key that is only equal to itself.
 class UniqueKey extends LocalKey {
-  const UniqueKey();
+  /// Creates a key that is equal only to itself.
+  UniqueKey();
 
   @override
   String toString() => '[$hashCode]';
 }
 
-/// A kind of [Key] that takes its identity from the object used as its value.
+/// A key that takes its identity from the object used as its value.
 ///
-/// Used to tie the identity of a Widget to the identity of an object used to
-/// generate that Widget.
+/// Used to tie the identity of a widget to the identity of an object used to
+/// generate that widget.
 class ObjectKey extends LocalKey {
+  /// Creates a key that uses [identical] on [value] for its [operator==].
   const ObjectKey(this.value);
 
+  /// The object whose identity is used by this key's [operator==].
   final Object value;
 
   @override
@@ -96,13 +109,14 @@ class ObjectKey extends LocalKey {
   String toString() => '[${value.runtimeType}(${value.hashCode})]';
 }
 
+/// Signature for a callback when a global key is removed from the tree.
 typedef void GlobalKeyRemoveListener(GlobalKey key);
 
-/// A GlobalKey is a [Key] that must be unique across the widget tree.
+/// A key that is unique across the entire app.
 ///
-/// Global keys uniquely indentify widget subtrees.  The GlobalKey object provides
-/// access to other objects that are associated with the subtree, such as the subtree's
-/// [BuildContext] and, for [StatefulWidget]s, the subtree's [State].
+/// Global keys uniquely indentify elements. Global keys provide access to other
+/// objects that are associated with elements, such as the a [BuildContext] and,
+/// for [StatefulWidget]s, a [State].
 ///
 /// Widgets that have global keys reparent their subtrees when they are moved
 /// from one location in the tree to another location in the tree. In order to
@@ -110,16 +124,22 @@ typedef void GlobalKeyRemoveListener(GlobalKey key);
 /// in the same animation frame in which it was removed from its old location in
 /// the tree.
 ///
-/// GlobalKeys are relatively expensive. If you don't need any of the features
+/// Global keys are relatively expensive. If you don't need any of the features
 /// listed above, consider using a [Key], [ValueKey], [ObjectKey], or
 /// [UniqueKey] instead.
 @optionalTypeArgs
 abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
-  /// Creates a LabeledGlobalKey, which is a GlobalKey with a label used for debugging.
-  /// The label is not used for comparing the identity of the key.
+  /// Creates a [LabeledGlobalKey], which is a [GlobalKey] with a label used for debugging.
+  ///
+  /// The label is purely for debugging and not used for comparing the identity
+  /// of the key.
   factory GlobalKey({ String debugLabel }) => new LabeledGlobalKey<T>(debugLabel); // the label is purely for debugging purposes and is otherwise ignored
 
-  const GlobalKey.constructor() : super.constructor(); // so that subclasses can call us, since the Key() factory constructor shadows the implicit constructor
+  /// Creates a global key without a label.
+  ///
+  /// Used by subclasss because the factory constructor shadows the implicit
+  /// constructor.
+  const GlobalKey.constructor() : super._();
 
   static final Map<GlobalKey, Element> _registry = new Map<GlobalKey, Element>();
   static final Map<GlobalKey, int> _debugDuplicates = new Map<GlobalKey, int>();
@@ -158,17 +178,39 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   }
 
   Element get _currentElement => _registry[this];
+
+  /// The build context in which the widget with this key builds.
+  ///
+  /// The current context is null if there is no widget in the tree that matches
+  /// this global key.
   BuildContext get currentContext => _currentElement;
+
+  /// The widget in the tree that currently has this global key.
+  ///
+  /// The current widget is null if there is no widget in the tree that matches
+  /// this global key.
   Widget get currentWidget => _currentElement?.widget;
+
+  /// The [State] for the widget in the tree that currently has this global key.
+  ///
+  /// The current state is null if (1) there is no widget in the tree that
+  /// matches this global key, (2) that widget is not a [StatefulWidget], or the
+  /// assoicated [State] object is not a subtype of `T`.
   T get currentState {
     Element element = _currentElement;
     if (element is StatefulElement) {
       StatefulElement statefulElement = element;
-      return statefulElement.state;
+      State state = statefulElement.state;
+      if (state is T)
+        return state;
     }
     return null;
   }
 
+  /// Calls `listener` whenever a widget with the given global key is removed
+  /// from the tree.
+  ///
+  /// Listeners can be removed with [unregisterRemoveListener].
   static void registerRemoveListener(GlobalKey key, GlobalKeyRemoveListener listener) {
     assert(key != null);
     Set<GlobalKeyRemoveListener> listeners =
@@ -177,6 +219,10 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
     assert(added);
   }
 
+  /// Stop calling `listener` whenever a widget with the given global key is
+  /// removed from the tree.
+  ///
+  /// Listeners can be added with [addListener].
   static void unregisterRemoveListener(GlobalKey key, GlobalKeyRemoveListener listener) {
     assert(key != null);
     assert(_removeListeners.containsKey(key));
@@ -219,10 +265,14 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
 
 }
 
-/// Each LabeledGlobalKey instance is a unique key.
-/// The optional label can be used for documentary purposes. It does not affect
-/// the key's identity.
+/// A global key with a debugging label.
+///
+/// The debug label is useful for documentation and for debugging. The label
+/// does not affect the key's identity.
 class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
+  /// Creates a global key with a debugging label.
+  ///
+  /// The label does not affect the key's identity.
   const LabeledGlobalKey(this._debugLabel) : super.constructor();
 
   final String _debugLabel;
@@ -231,12 +281,15 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   String toString() => '[GlobalKey ${_debugLabel != null ? _debugLabel : hashCode}]';
 }
 
-/// A kind of [GlobalKey] that takes its identity from the object used as its value.
+/// A global key that takes its identity from the object used as its value.
 ///
-/// Used to tie the identity of a Widget to the identity of an object used to
-/// generate that Widget.
+/// Used to tie the identity of a widget to the identity of an object used to
+/// generate that widget.
 class GlobalObjectKey extends GlobalKey {
+  /// Creates a global key that uses [identical] on [value] for its [operator==].
   const GlobalObjectKey(this.value) : super.constructor();
+
+  /// The object whose identity is used by this key's [operator==].
   final Object value;
 
   @override
@@ -257,22 +310,67 @@ class GlobalObjectKey extends GlobalKey {
 /// This class is a work-around for the "is" operator not accepting a variable value as its right operand
 @optionalTypeArgs
 class TypeMatcher<T> {
+  /// Creates a type matcher for the given type parameter.
   const TypeMatcher();
+
+  /// Returns `true` if the given object is of type `T`.
   bool check(dynamic object) => object is T;
 }
 
-// WIDGETS
-
-/// A Widget object describes the configuration for an [Element].
-/// Widget subclasses should be immutable with const constructors.
-/// Widgets form a tree that is then inflated into an Element tree.
+/// Describes the configuration for an [Element].
+///
+/// Widgets are the central class hierarchy in the Flutter framework. A widget
+/// is an immutable description of part of a user interface. Widgets can be
+/// inflated into elements, which manage the underlying render tree.
+///
+/// Widgets themselves have no mutable state. If you wish to associate
+/// mutatable state with a widget, consider using a [StatefulWidget], which
+/// creates a [State] object (via [StatefulWidget.createState]) whenever it is
+/// inflated into an element and incorporated into the tree.
+///
+/// A given widget can be included in the tree zero or more times. In particular
+/// a given widget can be placed in the tree multiple times. Each time a widget
+/// is placed in the tree, it is inflated into an [Element], which means a
+/// widget that is incorporated into the tree multiple times will be inflated
+/// multiple times.
+///
+/// The [key] property controls how one widget replaces another widget in the
+/// tree. If the [runtimeType] and [key] properties of the two widgets are
+/// [operator==], respectively, then the new widget replaces the old widget by
+/// updating the underlying element (i.e., by calling [Element.update] with the
+/// new widget). Otherwise, the old element is removed from the tree, the new
+/// widget is inflated into an element, and the new element is inserted into the
+/// tree.
+///
+/// See also:
+///
+///  * [StatelessWidget]
+///  * [StatefulWidget]
+///  * [InheritedWidget]
 abstract class Widget {
+  /// Initializes [key] for subclasses.
   const Widget({ this.key });
+
+  /// Controls how one widget replaces another widget in the tree.
+  ///
+  /// If the [runtimeType] and [key] properties of the two widgets are
+  /// [operator==], respectively, then the new widget replaces the old widget by
+  /// updating the underlying element (i.e., by calling [Element.update] with the
+  /// new widget). Otherwise, the old element is removed from the tree, the new
+  /// widget is inflated into an element, and the new element is inserted into the
+  /// tree.
   final Key key;
 
   /// Inflates this configuration to a concrete instance.
+  ///
+  /// A given widget can be included in the tree zero or more times. In particular
+  /// a given widget can be placed in the tree multiple times. Each time a widget
+  /// is placed in the tree, it is inflated into an [Element], which means a
+  /// widget that is incorporated into the tree multiple times will be inflated
+  /// multiple times.
   Element createElement();
 
+  /// A short, textual description of this widget.
   String toStringShort() {
     return key == null ? '$runtimeType' : '$runtimeType-$key';
   }
@@ -287,6 +385,11 @@ abstract class Widget {
     return '$name(${data.join("; ")})';
   }
 
+  /// Accumulates a list of strings describing the current widget's fields, one
+  /// field per string.
+  ///
+  /// Subclasses should override this to have their information included in
+  /// [toString].
   @protected
   @mustCallSuper
   void debugFillDescription(List<String> description) { }
@@ -298,32 +401,68 @@ abstract class Widget {
     debugFillDescription(description);
   }
 
+  /// Whether the `newWidget` can be used to update an [Element] that currently
+  /// has the `oldWidget` as its configuration.
+  ///
+  /// An element that uses a given widget as its configuration can be updated to
+  /// use another widget as its configuration if, and only if, the two widgets
+  /// have [runtimeType] and [key] properties that are [operator==].
   static bool canUpdate(Widget oldWidget, Widget newWidget) {
     return oldWidget.runtimeType == newWidget.runtimeType &&
       oldWidget.key == newWidget.key;
   }
 }
 
-/// StatelessWidgets describe a way to compose other Widgets to form reusable
-/// parts, which doesn't depend on anything other than the configuration
-/// information in the object itself. (For compositions that can change
-/// dynamically, e.g. due to having an internal clock-driven state, or depending
-/// on some system state, use [StatefulWidget].)
+/// A widget that does not require mutable state.
+///
+/// A stateless widget is a widget that describes part of the user interface by
+/// building a constellation of other widgets that describe the user interface
+/// more concretely. The building process continues recursively until the
+/// description of the user interface is fully concrete (e.g., consists
+/// enitrely of [RenderObjectWidget]s, which describe concrete [RenderObject]s).
+///
+/// Stateless widget are useful when the part of the user interface you are
+/// describing does not depend on anything other than the configuration
+/// information in the object itself and the [BuildContext] in which the widget
+/// is inflated. For compositions that can change dynamically, e.g. due to
+/// having an internal clock-driven state, or depending on some system state,
+/// consider using [StatefulWidget].
+///
+/// See also:
+///
+///  * [StatefulWidget]
 abstract class StatelessWidget extends Widget {
+  /// Initializes [key] for subclasses.
   const StatelessWidget({ Key key }) : super(key: key);
 
-  /// StatelessWidget always use [StatelessElement]s to represent
-  /// themselves in the Element tree.
+  /// Creates a [StatelessElement] to manage this widget's location in the tree.
+  ///
+  /// It is uncommon for subclasses to override this function.
   @override
   StatelessElement createElement() => new StatelessElement(this);
 
-  /// Returns another Widget out of which this StatelessWidget is built.
-  /// Typically that Widget will have been configured with further children,
-  /// such that really this function returns a tree of configuration.
+  /// Describes the part of the user interface represented by this widget.
   ///
-  /// The given build context object contains information about the location in
-  /// the tree at which this widget is being built. For example, the context
-  /// provides the set of inherited widgets for this location in the tree.
+  /// The framework calls this function when this widget is inserted into the
+  /// tree in a given [BuildContext] and when the dependencies of this widget
+  /// change (e.g., an [InheritedWidget] referenced by this widget changes).
+  ///
+  /// The framework replaces the subtree below this widget with the widget
+  /// returned by this function, either by updating the existing subtree or by
+  /// removing the subtree and inflating a new subtree, depending on whether the
+  /// widget returned by this function [Widget.canUpdate] the root of the
+  /// existing subtree.
+  ///
+  /// Typically implementations return a newly created constellation of widget
+  /// that are configured with information from this widget's constructor and
+  /// from the given [BuildContext].
+  ///
+  /// The given [BuildContext] contains information about the location in the
+  /// tree at which this widget is being built. For example, the context
+  /// provides the set of inherited widgets for this location in the tree. A
+  /// given widget might be with multiple different [BuildContext] arguments
+  /// over time if the widget is moved around the tree or if the widget is
+  /// inserted into the tree in multiple places at once.
   @protected
   Widget build(BuildContext context);
 
@@ -331,34 +470,102 @@ abstract class StatelessWidget extends Widget {
   WidgetBuilder get _build => build;
 }
 
-/// StatefulWidgets provide the configuration for
-/// [StatefulElement]s, which wrap [State]s, which hold mutable state
-/// and can dynamically and spontaneously ask to be rebuilt.
+/// A widget that has mutable state.
+///
+/// State is information (1) that can be read synchronously when the widget is
+/// built and (2) for which we will be notified when it changes.
+///
+/// A stateful widget is a widget that describes part of the user interface by
+/// building a constellation of other widgets that describe the user interface
+/// more concretely. The building process continues recursively until the
+/// description of the user interface is fully concrete (e.g., consists
+/// enitrely of [RenderObjectWidget]s, which describe concrete [RenderObject]s).
+///
+/// Stateless widget are useful when the part of the user interface you are
+/// describing can change dynamically, e.g. due to having an internal
+/// clock-driven state, or depending on some system state. For compositions that
+/// depend only on the configuration information in the object itself and the
+/// [BuildContext] in which the widget is inflated, consider using
+/// [StatelessWidget].
+///
+/// [StatefulWidget] instances themselves are immutable and store their mutable
+/// state in separate [State] objects that are created by the [createState]
+/// function. The framework calls [createState] whenever it inflates a
+/// [StatefulWidget], which means that multiple [State] objects might be
+/// associated with the same [StatefulWidget] if that widget has been inserted
+/// into the tree in multiple places. Similarly, if a [StatefulWidget] is
+/// removed from the tree and later inserted in to the tree again, the framework
+/// will call [createState] again to create a fresh [State] object, simplifying
+/// the lifecycle of [State] objects.
+///
+/// A [StatefulWidget] keeps the same [State] object when moving from one
+/// location in the tree to another if its creator used a [GlobalKey] for its
+/// [key]. Because a widget with a [GlobalKey] can be used in at most one
+/// location in the tree, a widget that uses a [GlobalKey] has at most one
+/// associated element. The framework takes advantage of this property when
+/// moving a widget with a global key from one location in the tree to another
+/// by grafting the (unique) subtree associated with that widget from the old
+/// location to the new location (instead of recreating the subtree at the new
+/// location). The [State] objects associated with [StatefulWidget] are grafted
+/// along with the rest of the subtree, which means the [State] object is reused
+/// (instead of being recreated) in the new location. However, in order to be
+/// eligible for grafting, the widget might be inserted into the new location in
+/// the same animation frame in which it was removed from the old location.
+///
+/// See also:
+///
+///  * [State]
+///  * [StatelessWidget]
 abstract class StatefulWidget extends Widget {
+  /// Initializes [key] for subclasses.
   const StatefulWidget({ Key key }) : super(key: key);
 
-  /// StatefulWidget always use [StatefulElement]s to represent
-  /// themselves in the Element tree.
+  /// Creates a [StatefulElement] to manage this widget's location in the tree.
+  ///
+  /// It is uncommon for subclasses to override this function.
   @override
   StatefulElement createElement() => new StatefulElement(this);
 
-  /// Returns an instance of the state to which this StatefulWidget is
-  /// related, using this object as the configuration. Subclasses should
-  /// override this to return a new instance of the State class associated with
-  /// this StatefulWidget class, like this:
+  /// Creates the mutable state for this widget at a given location in the tree.
   ///
-  ///   _MyState createState() => new _MyState();
+  /// Subclasses should override this function to return a newly created
+  /// instance of their associated [State] subclass:
+  ///
+  /// ```dart
+  /// @override
+  /// _MyState createState() => new _MyState();
+  /// ```
+  ///
+  /// The framework can call this function multiple times over the lifetime of
+  /// a [StatefulWidget]. For example, if the widget is inserted into the tree
+  /// in multiple locations, the framework will create a separate [State] object
+  /// for each location. Similarly, if the widget is removed from the tree and
+  /// later inserted into the tree again, the framework will call [createState]
+  /// again to create a fresh [State] object, simplifying the lifecycle of
+  /// [State] objects.
   State createState();
 }
 
+/// Tracks the lifecycle of [State] objects when asserts are enabled.
 enum _StateLifecycle {
+  /// The [State] object has been created but [State.initState] has not yet been
+  /// called.
   created,
+
+  /// The [State.initState] function has been called but the [State] object is
+  /// not yet ready to build.
   initialized,
+
+  /// The [State] object is ready to build and [State.dispose] has not yet been
+  /// called.
   ready,
+
+  /// The [State.dispose] function has been called and the [State] object is
+  /// no longer able to build.
   defunct,
 }
 
-/// The signature of setState() methods.
+/// The signature of [State.setState] functions.
 typedef void StateSetter(VoidCallback fn);
 
 /// The logic and internal state for a [StatefulWidget].
