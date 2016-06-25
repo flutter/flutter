@@ -6,45 +6,70 @@ import 'equation_member.dart';
 import 'expression.dart';
 import 'term.dart';
 
+/// A [Variable] inside the layout [Solver]. It represents an indeterminate
+/// in the [Expression] that is used to create the [Constraint]. If any entity
+/// is interested in watching updates to the value of this indeterminate,
+/// it can assign a watcher as the `owner`.
 class Variable {
   static int _total = 0;
 
+  /// Creates a new [Variable] with the given constant value.
   Variable(this.value) : _tick = _total++;
 
   final int _tick;
 
+  /// The current value of the variable.
   double value;
 
+  /// An optional name given to the variable. This is useful in debugging
+  /// [Solver] state.
   String name;
 
+  /// Variables represent state inside the solver. This state is usually of
+  /// interest to some entity outside the solver. Such entities can (optionally)
+  /// associate themselves with these variables. This means that when solver
+  /// is flushed, it is easy to obtain a reference to the entity the variable
+  /// is associated with.
   Param get owner => _owner;
+
   Param _owner;
 
+  /// Used by the [Solver] to apply updates to this variable. Only updated
+  /// variables show up in [Solver] flush results.
   bool applyUpdate(double updated) {
     bool res = updated != value;
     value = updated;
     return res;
   }
 
+  /// The name used for this [Variable] when debugging the internal state of the
+  /// solver.
   String get debugName => name ?? 'variable$_tick';
 
   @override
   String toString() => debugName;
 }
 
+/// A [Param] wraps a [Variable] and makes it suitable to be used in an
+/// expression.
 class Param extends EquationMember {
+  /// Creates a new [Param] with the specified constant value.
   Param([double value = 0.0]) : variable = new Variable(value) {
     variable._owner = this;
   }
 
+  /// Creates a new [Param] with the specified constant value that is tied
+  /// to some object outside the solver.
   Param.withContext(dynamic context, [double value = 0.0])
     : variable = new Variable(value),
       context = context {
     variable._owner = this;
   }
 
+  /// The [Variable] associated with this [Param].
   final Variable variable;
 
+  /// Some object outside the [Solver] that is associated with this Param.
   dynamic context;
 
   @override
@@ -56,6 +81,9 @@ class Param extends EquationMember {
   @override
   double get value => variable.value;
 
+  /// The name of the [Variable] associated with this [Param].
   String get name => variable.name;
+
+  /// Set the name of the [Variable] associated with this [Param].
   set name(String name) { variable.name = name; }
 }

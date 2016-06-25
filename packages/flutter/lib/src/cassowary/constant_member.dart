@@ -6,6 +6,8 @@ import 'expression.dart';
 import 'equation_member.dart';
 import 'term.dart';
 
+/// A member of a [Constraint] [Expression] that represent a constant at the
+/// time the [Constraint] is added to the solver.
 class ConstantMember extends EquationMember {
   /// Creates a [ConstantMember] object.
   ///

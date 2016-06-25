@@ -15,15 +15,24 @@ class _Multiplication {
   final double multiplicand;
 }
 
+/// The representation of a linear [Expression] that can be used to create a
+/// constraint.
 class Expression extends EquationMember {
+  /// Creates a new linear [Expression] using the given terms and constant.
   Expression(this.terms, this.constant);
 
+  /// Creates a new linear [Expression] by copying the terms and constant of
+  /// another expression.
   Expression.fromExpression(Expression expr)
     : this.terms = new List<Term>.from(expr.terms),
       this.constant = expr.constant;
 
+  /// The list of terms in this linear expression. Terms in a an [Expression]
+  /// must have only one [Variable] (indeterminate) and a degree of 1.
   final List<Term> terms;
 
+  /// The constant portion of this linear expression. This is just another
+  /// [Term] with no [Variable].
   final double constant;
 
   @override
