@@ -6,12 +6,16 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
+
+
 import 'package:meta/meta.dart';
 
+import 'colors.dart';
 import 'debug.dart';
 import 'icon.dart';
 import 'icons.dart';
 import 'ink_well.dart';
+import 'scrollbar.dart';
 import 'shadows.dart';
 import 'theme.dart';
 import 'material.dart';
@@ -19,10 +23,7 @@ import 'material.dart';
 const Duration _kDropDownMenuDuration = const Duration(milliseconds: 300);
 const double _kMenuItemHeight = 48.0;
 const EdgeInsets _kMenuVerticalPadding = const EdgeInsets.symmetric(vertical: 8.0);
-const EdgeInsets _kMenuHorizontalPadding = const EdgeInsets.symmetric(horizontal: 4.0);
-const double _kBaselineOffsetFromBottom = 20.0;
-const double _kBottomBorderHeight = 2.0;
-const Border _kDropDownUnderline = const Border(bottom: const BorderSide(color: const Color(0xFFBDBDBD), width: _kBottomBorderHeight));
+const EdgeInsets _kMenuHorizontalPadding = const EdgeInsets.symmetric(horizontal: 16.0);
 
 class _DropDownMenuPainter extends CustomPainter {
   _DropDownMenuPainter({
@@ -121,7 +122,6 @@ class _DropDownMenuState<T> extends State<_DropDownMenu<T>> {
     //
     // When the menu is dismissed we just fade the entire thing out
     // in the first 0.25s.
-
     final _DropDownRoute<T> route = config.route;
     final double unit = 0.5 / (route.items.length + 1.5);
     final List<Widget> children = <Widget>[];
@@ -161,10 +161,13 @@ class _DropDownMenuState<T> extends State<_DropDownMenu<T>> {
         child: new Material(
           type: MaterialType.transparency,
           textStyle: route.style,
-          child: new ScrollableList(
-            padding: _kMenuVerticalPadding,
-            itemExtent: _kMenuItemHeight,
-            children: children
+          child: new Scrollbar(
+            child: new ScrollableList(
+              scrollableKey: config.route.scrollableKey,
+              padding: _kMenuVerticalPadding,
+              itemExtent: _kMenuItemHeight,
+              children: children
+            )
           )
         )
       )
@@ -172,11 +175,14 @@ class _DropDownMenuState<T> extends State<_DropDownMenu<T>> {
   }
 }
 
-class _DropDownMenuRouteLayout extends SingleChildLayoutDelegate {
-  _DropDownMenuRouteLayout(this.buttonRect, this.selectedIndex);
+class _DropDownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
+  _DropDownMenuRouteLayout({ this.route });
 
-  final Rect buttonRect;
-  final int selectedIndex;
+  final _DropDownRoute<T> route;
+
+  Rect get buttonRect => route.buttonRect;
+  int get selectedIndex => route.selectedIndex;
+  GlobalKey<ScrollableState> get scrollableKey => route.scrollableKey;
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
@@ -185,7 +191,7 @@ class _DropDownMenuRouteLayout extends SingleChildLayoutDelegate {
     // with which to dismiss the menu.
     //   -- https://www.google.com/design/spec/components/menus.html#menus-simple-menus
     final double maxHeight = math.max(0.0, constraints.maxHeight - 2 * _kMenuItemHeight);
-    final double width = buttonRect.width;
+    final double width = buttonRect.width + 8.0;
     return new BoxConstraints(
       minWidth: width,
       maxWidth: width,
@@ -218,11 +224,18 @@ class _DropDownMenuRouteLayout extends SingleChildLayoutDelegate {
       }
       return true;
     });
+
+    if (route.initialLayout) {
+      route.initialLayout = false;
+      final double offset = selectedIndex * _kMenuItemHeight + _kMenuVerticalPadding.top - (buttonTop - top);
+      scrollableKey.currentState.scrollTo(offset);
+    }
+
     return new Offset(buttonRect.left, top);
   }
 
   @override
-  bool shouldRelayout(_DropDownMenuRouteLayout oldDelegate) {
+  bool shouldRelayout(_DropDownMenuRouteLayout<T> oldDelegate) {
     return oldDelegate.buttonRect != buttonRect
         || oldDelegate.selectedIndex != selectedIndex;
   }
@@ -260,10 +273,14 @@ class _DropDownRoute<T> extends PopupRoute<_DropDownRouteResult<T>> {
     assert(style != null);
   }
 
+  final GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>(debugLabel: '_DropDownMenu');
   final List<DropDownMenuItem<T>> items;
   final Rect buttonRect;
   final int selectedIndex;
   final int elevation;
+  // The layout gets this route's scrollableKey so that it can scroll the
+  /// selected item into position, but only on the initial layout.
+  bool initialLayout = true;
 
   TextStyle get style => _style;
   TextStyle _style;
@@ -288,7 +305,7 @@ class _DropDownRoute<T> extends PopupRoute<_DropDownRouteResult<T>> {
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
     return new CustomSingleChildLayout(
-      delegate: new _DropDownMenuRouteLayout(buttonRect, selectedIndex),
+      delegate: new _DropDownMenuRouteLayout<T>(route: this),
       child: new _DropDownMenu<T>(route: this)
     );
   }
@@ -324,10 +341,8 @@ class DropDownMenuItem<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Container(
       height: _kMenuItemHeight,
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: new Baseline(
-        baselineType: TextBaseline.alphabetic,
-        baseline: _kMenuItemHeight - _kBaselineOffsetFromBottom,
+      child: new Align(
+        alignment: FractionalOffset.centerLeft,
         child: child
       )
     );
@@ -387,7 +402,7 @@ class DropDownButton<T> extends StatefulWidget {
     @required this.onChanged,
     this.elevation: 8,
     this.style,
-    this.iconSize: 36.0
+    this.iconSize: 24.0
   }) : super(key: key) {
     assert(items != null);
     assert(items.where((DropDownMenuItem<T> item) => item.value == value).length == 1);
@@ -416,7 +431,7 @@ class DropDownButton<T> extends StatefulWidget {
 
   /// The size to use for the drop-down button's down arrow icon button.
   ///
-  /// Defaults to 36.0.
+  /// Defaults to 24.0.
   final double iconSize;
 
   @override
@@ -493,18 +508,37 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
             alignment: FractionalOffset.centerLeft,
             children: config.items
           ),
-          new Icon(Icons.arrow_drop_down, size: config.iconSize)
+          new Icon(Icons.arrow_drop_down,
+            size: config.iconSize,
+            // These colors are not defined in the Material Design spec.
+            color: Theme.of(context).brightness == Brightness.light ? Colors.grey[700] : Colors.white70
+          )
         ]
       )
     );
+
     if (!DropDownButtonHideUnderline.at(context)) {
-      result = new Container(
-        decoration: const BoxDecoration(border: _kDropDownUnderline),
-        child: result
+      result = new Stack(
+        children: <Widget>[
+          result,
+          new Positioned(
+            left: 0.0,
+            right: 0.0,
+            bottom: 8.0,
+            child: new Container(
+              height: 1.0,
+              decoration: const BoxDecoration(
+                border: const Border(bottom: const BorderSide(color: const Color(0xFFBDBDBD), width: 0.0))
+              )
+            )
+          )
+        ]
       );
     }
+
     return new GestureDetector(
       onTap: _handleTap,
+      behavior: HitTestBehavior.opaque,
       child: result
     );
   }
