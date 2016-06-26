@@ -437,23 +437,23 @@ abstract class StatelessWidget extends Widget {
 
   /// Creates a [StatelessElement] to manage this widget's location in the tree.
   ///
-  /// It is uncommon for subclasses to override this function.
+  /// It is uncommon for subclasses to override this method.
   @override
   StatelessElement createElement() => new StatelessElement(this);
 
   /// Describes the part of the user interface represented by this widget.
   ///
-  /// The framework calls this function when this widget is inserted into the
+  /// The framework calls this method when this widget is inserted into the
   /// tree in a given [BuildContext] and when the dependencies of this widget
   /// change (e.g., an [InheritedWidget] referenced by this widget changes).
   ///
   /// The framework replaces the subtree below this widget with the widget
-  /// returned by this function, either by updating the existing subtree or by
+  /// returned by this method, either by updating the existing subtree or by
   /// removing the subtree and inflating a new subtree, depending on whether the
-  /// widget returned by this function [Widget.canUpdate] the root of the
-  /// existing subtree.
+  /// widget returned by this method can update the root of the existing
+  /// subtree, as determined by calling [Widget.canUpdate].
   ///
-  /// Typically implementations return a newly created constellation of widget
+  /// Typically implementations return a newly created constellation of widgets
   /// that are configured with information from this widget's constructor and
   /// from the given [BuildContext].
   ///
@@ -490,7 +490,7 @@ abstract class StatelessWidget extends Widget {
 ///
 /// [StatefulWidget] instances themselves are immutable and store their mutable
 /// state in separate [State] objects that are created by the [createState]
-/// function. The framework calls [createState] whenever it inflates a
+/// method. The framework calls [createState] whenever it inflates a
 /// [StatefulWidget], which means that multiple [State] objects might be
 /// associated with the same [StatefulWidget] if that widget has been inserted
 /// into the tree in multiple places. Similarly, if a [StatefulWidget] is
@@ -522,13 +522,13 @@ abstract class StatefulWidget extends Widget {
 
   /// Creates a [StatefulElement] to manage this widget's location in the tree.
   ///
-  /// It is uncommon for subclasses to override this function.
+  /// It is uncommon for subclasses to override this method.
   @override
   StatefulElement createElement() => new StatefulElement(this);
 
   /// Creates the mutable state for this widget at a given location in the tree.
   ///
-  /// Subclasses should override this function to return a newly created
+  /// Subclasses should override this method to return a newly created
   /// instance of their associated [State] subclass:
   ///
   /// ```dart
@@ -536,7 +536,7 @@ abstract class StatefulWidget extends Widget {
   /// _MyState createState() => new _MyState();
   /// ```
   ///
-  /// The framework can call this function multiple times over the lifetime of
+  /// The framework can call this method multiple times over the lifetime of
   /// a [StatefulWidget]. For example, if the widget is inserted into the tree
   /// in multiple locations, the framework will create a separate [State] object
   /// for each location. Similarly, if the widget is removed from the tree and
@@ -552,7 +552,7 @@ enum _StateLifecycle {
   /// called.
   created,
 
-  /// The [State.initState] function has been called but the [State] object is
+  /// The [State.initState] method has been called but the [State] object is
   /// not yet ready to build.
   initialized,
 
@@ -560,7 +560,7 @@ enum _StateLifecycle {
   /// called.
   ready,
 
-  /// The [State.dispose] function has been called and the [State] object is
+  /// The [State.dispose] method has been called and the [State] object is
   /// no longer able to build.
   defunct,
 }
@@ -569,31 +569,143 @@ enum _StateLifecycle {
 typedef void StateSetter(VoidCallback fn);
 
 /// The logic and internal state for a [StatefulWidget].
+///
+/// State is information (1) that can be read synchronously when the widget is
+/// built and (2) for which we will be notified when it changes.
+///
+/// [State] objects are created by the framework by calling the
+/// [StatefulWidget.createState] method when inflating a [StatefulWidget] to
+/// insert it into the tree. Because a given [StatefulWidget] instance can be
+/// inflated multiple times (e.g., the widget is incorporated into the tree in
+/// multiple places at once), there might be more than one [State] object
+/// associated with a given [StatefulWidget] instance. Similarly, if a
+/// [StatefulWidget] is removed from the tree and later inserted in to the tree
+/// again, the framework will call [StatefulWidget.createState] again to create
+/// a fresh [State] object, simplifying the lifecycle of [State] objects.
+///
+/// [State] objects have the following lifecycle:
+///
+///  * The framework creates a [State] object by calling
+///    [StatefulWidget.createState].
+///  * The newly created [State] object is associated with a [BuildContext].
+///    This association is permanent: the [State] object will never change its
+///    [BuildContext]. However, the [BuildContext] itself can be moved around
+///    the tree along with its subtree. At this point, the [State] object is
+///    considered [mounted].
+///  * The framework calls [initState]. Subclasses of [State] should override
+///    [initState] to perform one-time initialization that depends on the
+///    [BuildContext] or the widget, which are available as the [context] and
+///    [config] properties, respectively, when the [initState] method is
+///    called.
+///  * At this point, the [State] object is fully initialized and the framework
+///    might call its [build] method any number of times to obtain a
+///    description of the user interface for this subtree. [State] objects can
+///    spontanteously request to rebuild their subtree by callings their
+///    [setState] method, which indicates that some of their internal state
+///    has changed in a way that might impact the user interface in this
+///    subtree.
+///  * During this time, a parent widget might rebuild and request that this
+///    location in the tree update to display a new widget with the same
+///    [runtimeType] and [key]. When this happens, the framework will update the
+///    [config] property to refer to the new widget and then call the
+///    [didUpdateConfig] method with the previous widget as an argument.
+///    [State] objects should override [didUpdateConfig] to respond to changes
+///    in their associated wiget (e.g., to start implicit animations).
+///    The framework always calls [build] after calling [didUpdateConfig], which
+///    means any calls to [setState] in [didUpdateConfig] are redundant.
+///  * If the subtree containing the [State] object is removed from the tree
+///    (e.g., because the parent built a widget with a different [runtimeType]
+///    or [key]), the framework calls the [deactivate] method. Subclasses
+///    should override this method to clean up any links between this object
+///    and other elements in the tree (e.g. if you have provided an ancestor
+///    with a pointer to a descendant's [RenderObject]).
+///  * At this point, the framework might reinsert this subtree into another
+///    part of the tree. If that happens, the framework will ensure that it
+///    calls [build] to give the [State] object a chance to adapt to its new
+///    location in the tree. If the framework does reinsert this subtree, it
+///    will do so before the end of the animation frame in which the subtree was
+///    removed from the tree. For this reason, [State] objects can defer
+///    releasing most resources until the framework calls their [dispose]
+///    method.
+///  * If the framework does not reinsert this subtree by the end of the current
+///    animation frame, the framework will call [dispose], which indiciates that
+///    this [State] object will never build again. Subclasses should override
+///    this method to release any resources retained by this object (e.g.,
+///    stop any active animations).
+///  * After the framework calls [dispose], the [State] object is considered
+///    unmounted and the [mounted] property is false. It is an error to call
+///    [setState] at this point. This stage of the lifecycle is terminal: there
+///    is no way to remount a [State] object that has been disposed.
+///
+/// See also:
+///
+///  * [StatefulWidget]
+///  * [StatelessWidget]
 @optionalTypeArgs
 abstract class State<T extends StatefulWidget> {
-  /// The current configuration (an instance of the corresponding
-  /// [StatefulWidget] class).
+  /// The current configuration.
+  ///
+  /// A [State] object's configuration is the corresponding [StatefulWidget]
+  /// instance. This property is initialized by the framework before calling
+  /// [initState]. If the parent updates this location in the tree to a new
+  /// widget with the same [runtimeType] and [key] as the current configuration,
+  /// the framework will update this property to refer to the new widget and
+  /// then call [didUpdateConfig], passing the old configuration as an argument.
   T get config => _config;
   T _config;
 
-  /// This is used to verify that State objects move through life in an orderly fashion.
+  /// The current stage in the lifecycle for this state object.
+  ///
+  /// This field is used by the framework when asserts are enabled to verify
+  /// that [State] objects move through their lifecycle in an orderly fashion.
   _StateLifecycle _debugLifecycleState = _StateLifecycle.created;
 
-  /// Verifies that the State that was created is one that expects to be created
-  /// for that particular Widget.
+  /// Verifies that the [State] that was created is one that expects to be
+  /// created for that particular [Widget].
   bool _debugTypesAreRight(Widget widget) => widget is T;
 
-  /// Pointer to the owner Element object
+  /// The [StatefulElement] that owns this [State] object.
+  ///
+  /// The framework associates [State] objects with an element after creating
+  /// them with [StatefulWidget.createState] and before calling [initState]. The
+  /// association is permanent: the [State] object will never change its
+  /// element. However, the element itself can be moved around the tree.
+  ///
+  /// After calling [dispose], the framework severs the [State] object's
+  /// connection with the element.
   StatefulElement _element;
 
-  /// The context in which this object will be built
+  /// The location in the tree where this widget builds.
+  ///
+  /// The framework associates [State] objects with a [BuildContext] after
+  /// creating them with [StatefulWidget.createState] and before calling
+  /// [initState]. The association is permanent: the [State] object will never
+  /// change its [BuildContext]. However, the [BuildContext] itself can be moved
+  /// around the tree.
+  ///
+  /// After calling [dispose], the framework severs the [State] object's
+  /// connection with the [BuildContext].
   BuildContext get context => _element;
 
+  /// Whether this [State] object is currently in a tree.
+  ///
+  /// After creating a [State] object and before calling [initState], the
+  /// framework "mounts" the [State] object by associating it with a
+  /// [BuildContext]. The [State] object remains mounted until the framework
+  /// calls [dispose], after which time the framework will never ask the [State]
+  /// object to [build] again.
+  ///
+  /// It is an error to call [setState] unless [mounted] is true.
   bool get mounted => _element != null;
 
-  /// Called when this object is inserted into the tree. Override this function
-  /// to perform initialization that depends on the location at which this
-  /// object was inserted into the tree or on the widget configuration object.
+  /// Called when this object is inserted into the tree.
+  ///
+  /// Override this method to perform initialization that depends on the
+  /// location at which this object was inserted into the tree (i.e., [context])
+  /// or on the widget used to configure this object (i.e., [config])
+  ///
+  /// The framework will call this method exactly once for each [State] object
+  /// it creates.
   ///
   /// If you override this, make sure your method starts with a call to
   /// super.initState().
@@ -603,20 +715,46 @@ abstract class State<T extends StatefulWidget> {
     assert(() { _debugLifecycleState = _StateLifecycle.initialized; return true; });
   }
 
-  /// Called whenever the configuration changes. Override this method to update
-  /// additional state when the config field's value is changed.
+  /// Called whenever the configuration changes.
+  ///
+  /// If the parent widget rebuilds and request that this location in the tree
+  /// update to display a new widget with the same [runtimeType] and [key], the
+  /// framework will update the [config] property of this [State] object to
+  /// refer to the new widget and then call the this method with the previous
+  /// widget as an argument.
+  ///
+  /// Override this metthod to respond to changes in the [config] widget (e.g.,
+  /// to start implicit animations).
+  ///
+  /// The framework always calls [build] after calling [didUpdateConfig], which
+  /// means any calls to [setState] in [didUpdateConfig] are redundant.
+  ///
+  /// If you override this, make sure your method starts with a call to
+  /// super.didUpdateConfig(oldConfig).
+  // TODO(abarth): Add @mustCallSuper.
   void didUpdateConfig(T oldConfig) { }
 
-  /// Whenever you need to change internal state for a State object, make the
-  /// change in a function that you pass to setState(), as in:
+  /// Notify the framework that the internal state of this object has changed.
+  ///
+  /// Whenever you change the internal state of a [State] object, make the
+  /// change in a function that you pass to [setState]:
   ///
   /// ```dart
-  /// setState(() { myState = newValue });
+  /// setState(() { _myState = newValue });
   /// ```
   ///
-  /// If you just change the state directly without calling setState(), then the
-  /// widget will not be scheduled for rebuilding, meaning that its rendering
-  /// will not be updated.
+  /// Calling [setState] notifies the framework that the internal state of this
+  /// object has changed in a way that might impact the user interface in this
+  /// subtree, which causes the framework to schedule a [build] for this [State]
+  /// object.
+  ///
+  /// If you just change the state directly without calling [setState], the
+  /// framework might not schedule a [build] and the user interface for this
+  /// subtree might not be updated to reflect the new state.
+  ///
+  /// It is an error to call this method after the framework calls [dispose].
+  /// You can determine whether it is legal to call this method by checking
+  /// whether the [mounted] property is true.
   @protected
   void setState(VoidCallback fn) {
     assert(() {
@@ -660,17 +798,37 @@ abstract class State<T extends StatefulWidget> {
   }
 
   /// Called when this object is removed from the tree.
-  /// The object might momentarily be reattached to the tree elsewhere.
   ///
-  /// Use this to clean up any links between this state and other
-  /// elements in the tree (e.g. if you have provided an ancestor with
-  /// a pointer to a descendant's renderObject).
+  /// The framework calls this method whenever it removes this [State] object
+  /// from the tree. In some cases, the framework will reinsert the [State]
+  /// object into another part of the tree (e.g., if the subtree containing this
+  /// [State] object is grafted from one location in the tree to another). If
+  /// that happens, the framework will ensure that it calls [build] to give the
+  /// [State] object a chance to adapt to its new location in the tree. If
+  /// the framework does reinsert this subtree, it will do so before the end of
+  /// the animation frame in which the subtree was removed from the tree. For
+  /// this reason, [State] objects can defer releasing most resources until the
+  /// framework calls their [dispose] method.
+  ///
+  /// Subclasses should override this method to clean up any links between
+  /// this object and other elements in the tree (e.g. if you have provided an
+  /// ancestor with a pointer to a descendant's [RenderObject]).
+  ///
+  /// If you override this, make sure to end your method with a call to
+  /// super.deactivate().
   @mustCallSuper
   void deactivate() { }
 
   /// Called when this object is removed from the tree permanently.
-  /// Override this to clean up any resources allocated by this
-  /// object.
+  ///
+  /// The framework calls this method when this [State] object will never
+  /// build again. After the framework calls [dispose], the [State] object is
+  /// considered unmounted and the [mounted] property is false. It is an error
+  /// to call [setState] at this point. This stage of the lifecycle is terminal:
+  /// there is no way to remount a [State] object that has been disposed.
+  ///
+  /// Subclasses should override this method to release any resources retained
+  /// by this object (e.g., stop any active animations).
   ///
   /// If you override this, make sure to end your method with a call to
   /// super.dispose().
@@ -680,26 +838,52 @@ abstract class State<T extends StatefulWidget> {
     assert(() { _debugLifecycleState = _StateLifecycle.defunct; return true; });
   }
 
-  /// Returns another Widget out of which this [StatefulWidget] is built.
-  /// Typically that Widget will have been configured with further children,
-  /// such that really this function returns a tree of configuration.
+  /// Describes the part of the user interface represented by this widget.
   ///
-  /// The given build context object contains information about the location in
-  /// the tree at which this widget is being built. For example, the context
-  /// provides the set of inherited widgets for this location in the tree.
+  /// The framework calls this method in a number of different situations:
   ///
-  /// The context argument is always the same as [State.context]. This argument
-  /// is provided redundantly here to match the [WidgetBuilder] function
-  /// signature used by [StatelessWidget.build] and other widgets.
+  ///  * After calling [initState].
+  ///  * After calling [didUpdateConfig].
+  ///  * After receiving a call to [setState].
+  ///  * After a dependency of this [State] object changes (e.g., an
+  ///    [InheritedWidget] referenced by the previous [build] changes).
+  ///  * After calling [deactivate] and then reinserting the [State] object into
+  ///    the tree at another location.
+  ///
+  /// The framework replaces the subtree below this widget with the widget
+  /// returned by this method, either by updating the existing subtree or by
+  /// removing the subtree and inflating a new subtree, depending on whether the
+  /// widget returned by this method can update the root of the existing
+  /// subtree, as determined by calling [Widget.canUpdate].
+  ///
+  /// Typically implementations return a newly created constellation of widgets
+  /// that are configured with information from this widget's constructor, the
+  /// given [BuildContext], and the internal state of this [State] object.
+  ///
+  /// The given [BuildContext] contains information about the location in the
+  /// tree at which this widget is being built. For example, the context
+  /// provides the set of inherited widgets for this location in the tree. The
+  /// [BuildContext] argument is always the same as the [context] property of
+  /// this [State] object and will remain the same for the lifetime of this
+  /// object. The [BuildContext] argument is provided redundantly here so that
+  /// this method matches the signature for a [WidgetBuilder].
   @protected
   Widget build(BuildContext context);
 
   /// Trampoline to make the [build] closure library-accessible.
   WidgetBuilder get _build => build;
 
-  /// Called when an Inherited widget in the ancestor chain has changed. Usually
-  /// there is nothing to do here; whenever this is called, build() is also
-  /// called.
+  /// Called when a dependencies of this [State] object changes.
+  ///
+  /// For example, if the previous call to [build] referenced an
+  /// [InheritedWidget] that later changed, the framework would call this
+  /// method to notify this object about the change.
+  ///
+  /// Subclasses rarely override this method because the framework always
+  /// calls [build] after a dependency changes. Some subclasses do override
+  /// this method because they need to do some expensive work (e.g., network
+  /// fetches) when their dependencies change, and that work would be too
+  /// expensive to do for every build.
   @mustCallSuper
   void dependenciesChanged() { }
 
@@ -710,6 +894,15 @@ abstract class State<T extends StatefulWidget> {
     return '$runtimeType(${data.join("; ")})';
   }
 
+  /// Add additional information to the given description for use by [toString].
+  ///
+  /// This method makes it easier for subclasses to coordinate to provide a
+  /// high-quality [toString] implementation. The [toString] implementation on
+  /// the [State] base class calls [debugFillDescription] to collect useful
+  /// information from subclasses to incorporate into its return value.
+  ///
+  /// If you override this, make sure to start your method with a call to
+  /// super.debugFillDescription(description).
   @protected
   @mustCallSuper
   void debugFillDescription(List<String> description) {
