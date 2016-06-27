@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 
 import 'focus.dart';
@@ -322,10 +324,30 @@ class NavigatorState extends State<Navigator> {
     super.initState();
     assert(config.observer == null || config.observer.navigator == null);
     config.observer?._navigator = this;
+
+    List<String> routes = _splitRoute(config.initialRoute ?? Navigator.defaultRouteName).toList();
+
     _push(config.onGenerateRoute(new RouteSettings(
-      name: config.initialRoute ?? Navigator.defaultRouteName,
+      name: routes.first,
       isInitialRoute: true
     )));
+
+    List<Route<dynamic>> remainingRoutes = routes.sublist(1).map((String route) {
+      return config.onGenerateRoute(new RouteSettings(
+        name: route,
+        isInitialRoute: true
+      ));
+    }).toList();
+
+    void scheduleOneRoute() {
+      if (remainingRoutes.isNotEmpty) {
+        _push(remainingRoutes.removeAt(0));
+        scheduleMicrotask(scheduleOneRoute);
+      }
+    };
+
+    if (remainingRoutes.isNotEmpty)
+      scheduleMicrotask(scheduleOneRoute);
   }
 
   @override
@@ -540,6 +562,25 @@ class NavigatorState extends State<Navigator> {
         initialEntries: initialRoute.overlayEntries
       )
     );
+  }
+
+  /// Return a hierarchical sequence of routes from the given route, e.g.
+  /// '/a/b/c' ==> '/', '/a', '/a/b', '/a/b/c'.
+  static Iterable<String> _splitRoute(String route) sync* {
+    if (route.isEmpty || !route.startsWith('/')) {
+      yield route;
+    } else {
+      yield '/';
+
+      StringBuffer buffer = new StringBuffer();
+
+      for (String fragment in route.substring(1).split('/')) {
+        if (fragment.isNotEmpty) {
+          buffer.write('/$fragment');
+          yield buffer.toString();
+        }
+      }
+    }
   }
 }
 
