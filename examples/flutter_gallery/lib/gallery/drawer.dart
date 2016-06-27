@@ -2,19 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
-class LinkTextSpan extends TextSpan {
-  LinkTextSpan({ TextStyle style, String url, String text }) : super(
-    style: style,
-    text: text ?? url,
-    recognizer: new TapGestureRecognizer()..onTap = () {
-      UrlLauncher.launch(url);
-    }
-  );
-}
 
 class GalleryDrawer extends StatelessWidget {
   GalleryDrawer({
