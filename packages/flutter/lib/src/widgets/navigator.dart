@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/rendering.dart';
 import 'package:meta/meta.dart';
 
@@ -295,10 +297,26 @@ class NavigatorState extends State<Navigator> {
     super.initState();
     assert(config.observer == null || config.observer.navigator == null);
     config.observer?._navigator = this;
+
+    List<String> routes = _splitRoute(config.initialRoute ?? Navigator.defaultRouteName);
+
     push(config.onGenerateRoute(new RouteSettings(
-      name: config.initialRoute ?? Navigator.defaultRouteName,
+      name: routes.first,
       isInitialRoute: true
     )));
+
+    routes = routes.sublist(1);
+
+    if (routes.isNotEmpty) {
+      scheduleMicrotask(() {
+        for (String route in routes) {
+          push(config.onGenerateRoute(new RouteSettings(
+            name: route,
+            isInitialRoute: true
+          )));
+        }
+      });
+    }
   }
 
   @override
@@ -522,5 +540,25 @@ class NavigatorState extends State<Navigator> {
         )
       )
     );
+  }
+
+  /// Return a hierarchical sequence of routes from the given route, e.g.
+  /// '/a/b/c' ==> '/', '/a', '/a/b', '/a/b/c'.
+  static List<String> _splitRoute(String route) {
+    if (route.isEmpty || !route.startsWith('/')) {
+      return <String>[route];
+    } else {
+      List<String> results = <String>['/'];
+      StringBuffer buffer = new StringBuffer();
+
+      for (String fragment in route.substring(1).split('/')) {
+        if (fragment.isNotEmpty) {
+          buffer.write('/$fragment');
+          results.add(buffer.toString());
+        }
+      }
+
+      return results;
+    }
   }
 }
