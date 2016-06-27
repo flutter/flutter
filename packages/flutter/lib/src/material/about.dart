@@ -167,17 +167,15 @@ void showLicensePage({
   ImageProvider applicationIcon,
   String applicationLegalese
 }) {
-  Navigator.openTransaction(context, (NavigatorTransaction transaction) {
-    // TODO(ianh): remove pop once https://github.com/flutter/flutter/issues/4667 is fixed
-    transaction.pop();
-    transaction.push(new MaterialPageRoute<Null>(
-      builder: (BuildContext context) => new LicensePage(
-        applicationName: applicationName,
-        applicationVersion: applicationVersion,
-        applicationLegalese: applicationLegalese
-      )
-    ));
-  });
+  // TODO(ianh): remove pop once https://github.com/flutter/flutter/issues/4667 is fixed
+  Navigator.pop(context);
+  Navigator.push(context, new MaterialPageRoute<Null>(
+    builder: (BuildContext context) => new LicensePage(
+      applicationName: applicationName,
+      applicationVersion: applicationVersion,
+      applicationLegalese: applicationLegalese
+    )
+  ));
 }
 
 /// An about box. This is a dialog box with the application's icon, name,

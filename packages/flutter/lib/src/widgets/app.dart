@@ -131,11 +131,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     assert(mounted);
     NavigatorState navigator = _navigator.currentState;
     assert(navigator != null);
-    bool result = false;
-    navigator.openTransaction((NavigatorTransaction transaction) {
-      result = transaction.pop();
-    });
-    return result;
+    return navigator.pop();
   }
 
   @override

@@ -128,10 +128,9 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
           new FlatButton(
             child: new Text('DISCARD'),
             onPressed: () {
-              Navigator.openTransaction(context, (NavigatorTransaction transaction) {
-                transaction.pop(DismissDialogAction.discard); // pop the cancel/discard dialog
-                transaction.pop(null); // pop this route
-              });
+              Navigator.of(context)
+                ..pop(DismissDialogAction.discard) // pop the cancel/discard dialog
+                ..pop(); // pop this route
             }
           )
         ]
