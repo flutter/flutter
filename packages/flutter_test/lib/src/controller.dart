@@ -17,8 +17,10 @@ import 'test_pointer.dart';
 ///
 /// For a variant of this class suited specifically for unit tests, see [WidgetTester].
 class WidgetController {
+  /// Creates a widget controller that uses the given binding.
   WidgetController(this.binding);
 
+  /// A reference to the current instance of the binding.
   final WidgetsBinding binding;
 
   // FINDER API

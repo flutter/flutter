@@ -145,6 +145,10 @@ class _Row {
   }
 }
 
+/// Solves cassowary constraints.
+///
+/// Typically clients will create a solver, [addConstraints], and then call
+/// [flushUpdates] to actually solve the constraints.
 class Solver {
   final Map<Constraint, _Tag> _constraints = new Map<Constraint, _Tag>();
   final Map<_Symbol, _Row> _rows = new Map<_Symbol, _Row>();
@@ -153,6 +157,9 @@ class Solver {
   final List<_Symbol> _infeasibleRows = new List<_Symbol>();
   final _Row _objective = new _Row(0.0);
   _Row _artificial = new _Row(0.0);
+
+  /// A monotonically increasing value that indicates how many times the solver
+  /// has iterated.
   int tick = 1;
 
   /// Attempts to add the constraints in the list to the solver. If it cannot

@@ -25,6 +25,7 @@ class TexturedLine extends Node {
 
 /// Draws a polyline to a [Canvas] from a list of points using the provided [Texture].
 class TexturedLinePainter {
+  /// Creates a painter that draws a polyline with a texture.
   TexturedLinePainter(this._points, this.colors, this.widths, [Texture texture, this.textureStops]) {
     this.texture = texture;
   }
