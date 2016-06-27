@@ -78,11 +78,11 @@ class TestRoute extends Route<String> {
 Future<Null> runNavigatorTest(
   WidgetTester tester,
   NavigatorState host,
-  NavigatorTransactionCallback test,
+  VoidCallback test,
   List<String> expectations
 ) async {
   expect(host, isNotNull);
-  host.openTransaction(test);
+  test();
   expect(results, equals(expectations));
   results.clear();
   await tester.pump();
@@ -99,8 +99,7 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      (NavigatorTransaction transaction) {
-      },
+      () { },
       <String>[
         'initial: install',
         'initial: didPush',
@@ -111,9 +110,7 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      (NavigatorTransaction transaction) {
-        transaction.push(second = new TestRoute('second'));
-      },
+      () { host.push(second = new TestRoute('second')); },
       <String>[
         'second: install',
         'second: didPush',
@@ -124,9 +121,7 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      (NavigatorTransaction transaction) {
-        transaction.push(new TestRoute('third'));
-      },
+      () { host.push(new TestRoute('third')); },
       <String>[
         'third: install',
         'third: didPush',
@@ -137,9 +132,7 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      (NavigatorTransaction transaction) {
-        transaction.replace(oldRoute: second, newRoute: new TestRoute('two'));
-      },
+      () { host.replace(oldRoute: second, newRoute: new TestRoute('two')); },
       <String>[
         'two: install',
         'two: didReplace second',
@@ -151,9 +144,7 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      (NavigatorTransaction transaction) {
-        transaction.pop('hello');
-      },
+      () { host.pop('hello'); },
       <String>[
         'third: didPop hello',
         'third: dispose',
@@ -163,9 +154,7 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      (NavigatorTransaction transaction) {
-        transaction.pop('good bye');
-      },
+      () { host.pop('good bye'); },
       <String>[
         'two: didPop good bye',
         'two: dispose',
@@ -188,8 +177,7 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      (NavigatorTransaction transaction) {
-      },
+      () { },
       <String>[
         'first: install',
         'first: didPush',
@@ -200,9 +188,7 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      (NavigatorTransaction transaction) {
-        transaction.push(second = new TestRoute('second'));
-      },
+      () { host.push(second = new TestRoute('second')); },
       <String>[
         'second: install',
         'second: didPush',
@@ -213,9 +199,7 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      (NavigatorTransaction transaction) {
-        transaction.push(new TestRoute('third'));
-      },
+      () { host.push(new TestRoute('third')); },
       <String>[
         'third: install',
         'third: didPush',
@@ -226,9 +210,7 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      (NavigatorTransaction transaction) {
-        transaction.removeRouteBefore(second);
-      },
+      () { host.removeRouteBefore(second); },
       <String>[
         'first: dispose',
       ]
@@ -236,9 +218,7 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      (NavigatorTransaction transaction) {
-        transaction.pop('good bye');
-      },
+      () { host.pop('good bye'); },
       <String>[
         'third: didPop good bye',
         'third: dispose',
@@ -248,9 +228,7 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      (NavigatorTransaction transaction) {
-        transaction.push(new TestRoute('three'));
-      },
+      () { host.push(new TestRoute('three')); },
       <String>[
         'three: install',
         'three: didPush',
@@ -262,9 +240,7 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      (NavigatorTransaction transaction) {
-        transaction.push(four = new TestRoute('four'));
-      },
+      () { host.push(four = new TestRoute('four')); },
       <String>[
         'four: install',
         'four: didPush',
@@ -275,9 +251,7 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      (NavigatorTransaction transaction) {
-        transaction.removeRouteBefore(four);
-      },
+      () { host.removeRouteBefore(four); },
       <String>[
         'second: didChangeNext four',
         'three: dispose',
@@ -286,9 +260,7 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      (NavigatorTransaction transaction) {
-        transaction.pop('the end');
-      },
+      () { host.pop('the end'); },
       <String>[
         'four: didPop the end',
         'four: dispose',
@@ -311,8 +283,7 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      (NavigatorTransaction transaction) {
-      },
+      () { },
       <String>[
         'A: install',
         'A: didPush',
@@ -322,9 +293,7 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      (NavigatorTransaction transaction) {
-        transaction.push(new TestRoute('B'));
-      },
+      () { host.push(new TestRoute('B')); },
       <String>[
         'B: install',
         'B: didPush',
@@ -336,9 +305,7 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      (NavigatorTransaction transaction) {
-        transaction.push(routeC = new TestRoute('C'));
-      },
+      () { host.push(routeC = new TestRoute('C')); },
       <String>[
         'C: install',
         'C: didPush',
@@ -350,9 +317,7 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      (NavigatorTransaction transaction) {
-        transaction.replaceRouteBefore(anchorRoute: routeC, newRoute: routeB = new TestRoute('b'));
-      },
+      () { host.replaceRouteBefore(anchorRoute: routeC, newRoute: routeB = new TestRoute('b')); },
       <String>[
         'b: install',
         'b: didReplace B',
@@ -364,9 +329,7 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      (NavigatorTransaction transaction) {
-        transaction.popUntil(routeB);
-      },
+      () { host.popUntil(routeB); },
       <String>[
         'C: didPop null',
         'C: dispose',

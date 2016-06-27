@@ -158,10 +158,9 @@ class _PestoDemoState extends State<PestoDemo> {
           new DrawerItem(
             child: new Text('Return to Gallery'),
             onPressed: () {
-              Navigator.openTransaction(context, (NavigatorTransaction transaction) {
-                transaction.pop();  // Close the Drawer
-                transaction.pop();  // Go back to the gallery
-              });
+              Navigator.of(context)
+                ..pop()  // Close the drawer.
+                ..pop();  // Go back to the gallery.
             }
           ),
         ]

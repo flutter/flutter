@@ -56,7 +56,7 @@ class ThirdWidget extends StatelessWidget {
       key: targetKey,
       onTap: () {
         try {
-          Navigator.openTransaction(context, (_) { });
+          Navigator.of(context);
         } catch (e) {
           onException(e);
         }
@@ -98,7 +98,7 @@ void main() {
     expect(find.text('Y'), findsNothing);
   });
 
-  testWidgets('Navigator.openTransaction fails gracefully when not found in context', (WidgetTester tester) async {
+  testWidgets('Navigator.of fails gracefully when not found in context', (WidgetTester tester) async {
     Key targetKey = new Key('foo');
     dynamic exception;
     Widget widget = new ThirdWidget(
@@ -110,7 +110,7 @@ void main() {
     await tester.pumpWidget(widget);
     await tester.tap(find.byKey(targetKey));
     expect(exception, new isInstanceOf<FlutterError>());
-    expect('$exception', startsWith('openTransaction called with a context'));
+    expect('$exception', startsWith('Navigator operation requested with a context'));
   });
 
   testWidgets('Missing settings in onGenerateRoute throws exception', (WidgetTester tester) async {

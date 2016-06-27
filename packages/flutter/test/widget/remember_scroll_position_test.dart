@@ -72,9 +72,7 @@ void main() {
     expect(find.text('16'), findsNothing);
     expect(find.text('100'), findsNothing);
 
-    navigatorKey.currentState.openTransaction(
-      (NavigatorTransaction transaction) => transaction.pushNamed('/second')
-    );
+    navigatorKey.currentState.pushNamed('/second');
     await tester.pump(); // navigating always takes two frames
     await tester.pump(new Duration(seconds: 1));
 
@@ -89,9 +87,7 @@ void main() {
     expect(find.text('10'), findsNothing);
     expect(find.text('100'), findsNothing);
 
-    navigatorKey.currentState.openTransaction(
-      (NavigatorTransaction transaction) => transaction.pop()
-    );
+    navigatorKey.currentState.pop();
     await tester.pump(); // navigating always takes two frames
     await tester.pump(new Duration(seconds: 1));
 

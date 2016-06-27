@@ -148,9 +148,6 @@ class RouteSettings {
 /// Creates a route for the given route settings.
 typedef Route<dynamic> RouteFactory(RouteSettings settings);
 
-/// A callback in during which you can perform a number of navigator operations (e.g., pop, push) that happen atomically.
-typedef void NavigatorTransactionCallback(NavigatorTransaction transaction);
-
 /// An interface for observing the behavior of a [Navigator].
 class NavigatorObserver {
   /// The navigator that the observer is observing, if any.
@@ -213,12 +210,8 @@ class Navigator extends StatefulWidget {
   /// The route name will be passed to that navigator's [onGenerateRoute]
   /// callback. The returned route will be pushed into the navigator. The set of
   /// most valuable keys will be used to construct an appropriate [Hero] transition.
-  ///
-  /// Uses [openTransaction()]. Only one transaction will be executed per frame.
   static void pushNamed(BuildContext context, String routeName, { Set<Key> mostValuableKeys }) {
-    openTransaction(context, (NavigatorTransaction transaction) {
-      transaction.pushNamed(routeName, mostValuableKeys: mostValuableKeys);
-    });
+    of(context).pushNamed(routeName, mostValuableKeys: mostValuableKeys);
   }
 
   /// Push a route onto the navigator that most tightly encloses the given context.
@@ -227,12 +220,8 @@ class Navigator extends StatefulWidget {
   /// The route will have didPush() and didChangeNext() called on it; the
   /// previous route, if any, will have didChangeNext() called on it; and the
   /// Navigator observer, if any, will have didPush() called on it.
-  ///
-  /// Uses [openTransaction()]. Only one transaction will be executed per frame.
   static void push(BuildContext context, Route<dynamic> route) {
-    openTransaction(context, (NavigatorTransaction transaction) {
-      transaction.push(route);
-    });
+    of(context).push(route);
   }
 
   /// Pop a route off the navigator that most tightly encloses the given context.
@@ -250,24 +239,14 @@ class Navigator extends StatefulWidget {
   ///
   /// Returns true if a route was popped; returns false if there are no further
   /// previous routes.
-  ///
-  /// Uses [openTransaction()]. Only one transaction will be executed per frame.
   static bool pop(BuildContext context, [ dynamic result ]) {
-    bool returnValue;
-    openTransaction(context, (NavigatorTransaction transaction) {
-      returnValue = transaction.pop(result);
-    });
-    return returnValue;
+    return of(context).pop(result);
   }
 
   /// Calls pop() repeatedly until the given route is the current route.
   /// If it is already the current route, nothing happens.
-  ///
-  /// Uses [openTransaction()]. Only one transaction will be executed per frame.
   static void popUntil(BuildContext context, Route<dynamic> targetRoute) {
-    openTransaction(context, (NavigatorTransaction transaction) {
-      transaction.popUntil(targetRoute);
-    });
+    of(context).popUntil(targetRoute);
   }
 
   /// Whether the navigator that most tightly encloses the given context can be popped.
@@ -282,33 +261,24 @@ class Navigator extends StatefulWidget {
 
   /// Executes a simple transaction that both pops the current route off and
   /// pushes a named route into the navigator that most tightly encloses the given context.
-  ///
-  /// Uses [openTransaction()]. Only one transaction will be executed per frame.
   static void popAndPushNamed(BuildContext context, String routeName, { Set<Key> mostValuableKeys }) {
-    openTransaction(context, (NavigatorTransaction transaction) {
-      transaction.pop();
-      transaction.pushNamed(routeName, mostValuableKeys: mostValuableKeys);
-    });
+    of(context)
+      ..pop()
+      ..pushNamed(routeName, mostValuableKeys: mostValuableKeys);
   }
 
-  /// Calls callback immediately to create a navigator transaction.
-  ///
-  /// To avoid race conditions, a navigator will execute at most one operation
-  /// per animation frame. If you wish to perform a compound change to the
-  /// navigator's state, you can use a navigator transaction to execute all the
-  /// changes atomically by making the changes inside the given callback.
-  static void openTransaction(BuildContext context, NavigatorTransactionCallback callback) {
+  static NavigatorState of(BuildContext context) {
     NavigatorState navigator = context.ancestorStateOfType(const TypeMatcher<NavigatorState>());
     assert(() {
       if (navigator == null) {
         throw new FlutterError(
-          'openTransaction called with a context that does not include a Navigator.\n'
-          'The context passed to the Navigator.openTransaction() method must be that of a widget that is a descendant of a Navigator widget.'
+          'Navigator operation requested with a context that does not include a Navigator.\n'
+          'The context used to push or pop routes from the Navigator must be that of a widget that is a descendant of a Navigator widget.'
         );
       }
       return true;
     });
-    navigator.openTransaction(callback);
+    return navigator;
   }
 
   @override
@@ -325,7 +295,7 @@ class NavigatorState extends State<Navigator> {
     super.initState();
     assert(config.observer == null || config.observer.navigator == null);
     config.observer?._navigator = this;
-    _push(config.onGenerateRoute(new RouteSettings(
+    push(config.onGenerateRoute(new RouteSettings(
       name: config.initialRoute ?? Navigator.defaultRouteName,
       isInitialRoute: true
     )));
@@ -366,7 +336,7 @@ class NavigatorState extends State<Navigator> {
 
   bool _debugLocked = false; // used to prevent re-entrant calls to push, pop, and friends
 
-  void _pushNamed(String name, { Set<Key> mostValuableKeys }) {
+  void pushNamed(String name, { Set<Key> mostValuableKeys }) {
     assert(!_debugLocked);
     assert(name != null);
     RouteSettings settings = new RouteSettings(
@@ -379,10 +349,10 @@ class NavigatorState extends State<Navigator> {
       route = config.onUnknownRoute(settings);
       assert(route != null);
     }
-    _push(route);
+    push(route);
   }
 
-  void _push(Route<dynamic> route) {
+  void push(Route<dynamic> route) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
     assert(route != null);
@@ -402,7 +372,7 @@ class NavigatorState extends State<Navigator> {
     _cancelActivePointers();
   }
 
-  void _replace({ Route<dynamic> oldRoute, Route<dynamic> newRoute }) {
+  void replace({ Route<dynamic> oldRoute, Route<dynamic> newRoute }) {
     assert(!_debugLocked);
     assert(oldRoute != null);
     assert(newRoute != null);
@@ -434,14 +404,14 @@ class NavigatorState extends State<Navigator> {
     _cancelActivePointers();
   }
 
-  void _replaceRouteBefore({ Route<dynamic> anchorRoute, Route<dynamic> newRoute }) {
+  void replaceRouteBefore({ Route<dynamic> anchorRoute, Route<dynamic> newRoute }) {
     assert(anchorRoute != null);
     assert(anchorRoute._navigator == this);
     assert(_history.indexOf(anchorRoute) > 0);
-    _replace(oldRoute: _history[_history.indexOf(anchorRoute)-1], newRoute: newRoute);
+    replace(oldRoute: _history[_history.indexOf(anchorRoute)-1], newRoute: newRoute);
   }
 
-  void _removeRouteBefore(Route<dynamic> anchorRoute) {
+  void removeRouteBefore(Route<dynamic> anchorRoute) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
     assert(anchorRoute._navigator == this);
@@ -462,7 +432,7 @@ class NavigatorState extends State<Navigator> {
     _cancelActivePointers();
   }
 
-  bool _pop([dynamic result]) {
+  bool pop([dynamic result]) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
     Route<dynamic> route = _history.last;
@@ -493,10 +463,10 @@ class NavigatorState extends State<Navigator> {
     return true;
   }
 
-  void _popUntil(Route<dynamic> targetRoute) {
+  void popUntil(Route<dynamic> targetRoute) {
     assert(_history.contains(targetRoute));
     while (!targetRoute.isCurrent)
-      _pop();
+      pop();
   }
 
   /// Whether this navigator can be popped.
@@ -506,27 +476,6 @@ class NavigatorState extends State<Navigator> {
   bool canPop() {
     assert(_history.length > 0);
     return _history.length > 1 || _history[0].willHandlePopInternally;
-  }
-
-  bool _hadTransaction = true;
-
-  /// Calls callback immediately to create a navigator transaction.
-  ///
-  /// To avoid race conditions, a navigator will execute at most one operation
-  /// per animation frame. If you wish to perform a compound change to the
-  /// navigator's state, you can use a navigator transaction to execute all the
-  /// changes atomically by making the changes inside the given callback.
-  bool openTransaction(NavigatorTransactionCallback callback) {
-    assert(callback != null);
-    if (_hadTransaction)
-      return false;
-    _hadTransaction = true;
-    NavigatorTransaction transaction = new NavigatorTransaction._(this);
-    setState(() {
-      callback(transaction);
-    });
-    assert(() { transaction._debugClose(); return true; });
-    return true;
   }
 
   final Set<int> _activePointers = new Set<int>();
@@ -543,7 +492,7 @@ class NavigatorState extends State<Navigator> {
     BuildContext overlayContext = _overlayKey.currentContext;
     if (overlayContext != null) {
       RenderAbsorbPointer absorber = overlayContext.ancestorRenderObjectOfType(const TypeMatcher<RenderAbsorbPointer>());
-      absorber.absorbing = true;
+      absorber?.absorbing = true;
     }
     for (int pointer in _activePointers.toList())
       WidgetsBinding.instance.cancelPointer(pointer);
@@ -557,7 +506,6 @@ class NavigatorState extends State<Navigator> {
   Widget build(BuildContext context) {
     assert(!_debugLocked);
     assert(_history.isNotEmpty);
-    _hadTransaction = false;
     final Route<dynamic> initialRoute = _history.first;
     return new Listener(
       onPointerDown: _handlePointerDown,
@@ -575,98 +523,5 @@ class NavigatorState extends State<Navigator> {
         )
       )
     );
-  }
-}
-
-/// A sequence of [Navigator] operations that are executed atomically.
-class NavigatorTransaction {
-  NavigatorTransaction._(this._navigator) {
-    assert(_navigator != null);
-  }
-  NavigatorState _navigator;
-  bool _debugOpen = true;
-
-  /// The route name will be passed to the navigator's [onGenerateRoute]
-  /// callback. The returned route will be pushed into the navigator. The set of
-  /// most valuable keys will be used to construct an appropriate [Hero] transition.
-  void pushNamed(String name, { Set<Key> mostValuableKeys }) {
-    assert(_debugOpen);
-    _navigator._pushNamed(name, mostValuableKeys: mostValuableKeys);
-  }
-
-  /// Adds the given route to the Navigator's history, and transitions to it.
-  /// The route will have didPush() and didChangeNext() called on it; the
-  /// previous route, if any, will have didChangeNext() called on it; and the
-  /// Navigator observer, if any, will have didPush() called on it.
-  void push(Route<dynamic> route) {
-    assert(_debugOpen);
-    _navigator._push(route);
-  }
-
-  /// Replaces one given route with another. Calls install(), didReplace(), and
-  /// didChangeNext() on the new route, then dispose() on the old route. The
-  /// navigator is not informed of the replacement.
-  ///
-  /// The old route must have overlay entries, otherwise we won't know where to
-  /// insert the entries of the new route. The old route must not be currently
-  /// visible (i.e. a later route have overlay entries that are currently
-  /// opaque), otherwise the replacement would have a jarring effect.
-  ///
-  /// It is safe to call this redundantly (replacing a route with itself). Such
-  /// calls are ignored.
-  void replace({ Route<dynamic> oldRoute, Route<dynamic> newRoute }) {
-    assert(_debugOpen);
-    _navigator._replace(oldRoute: oldRoute, newRoute: newRoute);
-  }
-
-  /// Like replace(), but affects the route before the given anchorRoute rather
-  /// than the anchorRoute itself.
-  ///
-  /// If newRoute is already the route before anchorRoute, then the call is
-  /// ignored.
-  ///
-  /// The conditions described for [replace()] apply; for instance, the route
-  /// before anchorRoute must have overlay entries.
-  void replaceRouteBefore({ Route<dynamic> anchorRoute, Route<dynamic> newRoute }) {
-    assert(_debugOpen);
-    _navigator._replaceRouteBefore(anchorRoute: anchorRoute, newRoute: newRoute);
-  }
-
-  /// Removes the route prior to the given anchorRoute, and calls didChangeNext
-  /// on the route prior to that one, if any. The observer is not notified.
-  void removeRouteBefore(Route<dynamic> anchorRoute) {
-    assert(_debugOpen);
-    _navigator._removeRouteBefore(anchorRoute);
-  }
-
-  /// Tries to removes the current route, calling its didPop() method. If that
-  /// method returns false, then nothing else happens. Otherwise, the observer
-  /// (if any) is notified using its didPop() method, and the previous route is
-  /// notified using [Route.didChangeNext].
-  ///
-  /// If non-null, [result] will be used as the result of the route, otherwise
-  /// the route's [Route.currentValue] will be used. Routes such as dialogs or
-  /// popup menus typically use this mechanism to return the value selected by
-  /// the user to the widget that created their route. The type of [result],
-  /// if provided, must match the type argument of the class of the current
-  /// route. (In practice, this is usually "dynamic".)
-  ///
-  /// Returns true if a route was popped; returns false if there are no further
-  /// previous routes.
-  bool pop([dynamic result]) {
-    assert(_debugOpen);
-    return _navigator._pop(result);
-  }
-
-  /// Calls pop() repeatedly until the given route is the current route.
-  /// If it is already the current route, nothing happens.
-  void popUntil(Route<dynamic> targetRoute) {
-    assert(_debugOpen);
-    _navigator._popUntil(targetRoute);
-  }
-
-  void _debugClose() {
-    assert(_debugOpen);
-    _debugOpen = false;
   }
 }
