@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui show Image, ImageFilter;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
@@ -2022,6 +2023,7 @@ class Flow extends MultiChildRenderObjectWidget {
 ///
 ///  * [Text]
 ///  * [TextSpan]
+///  * [LinkTextSpan]
 ///  * [DefaultTextStyle]
 class RichText extends LeafRenderObjectWidget {
   /// Creates a paragraph of rich text.
@@ -2070,6 +2072,22 @@ class RichText extends LeafRenderObjectWidget {
       ..softWrap = softWrap
       ..overflow = overflow;
   }
+}
+
+/// A TextSpan that opens [url] in the default browser. If [text] is null the url is displayed.
+///
+/// See also:
+///
+/// [TextSpan]
+/// [UrlLancher.launch]
+class LinkTextSpan extends TextSpan {
+  LinkTextSpan({ TextStyle style, @required String url, String text }) : super(
+    style: style,
+    text: text ?? url,
+    recognizer: new TapGestureRecognizer()..onTap = () {
+      UrlLauncher.launch(url);
+    }
+  );
 }
 
 /// The text style to apply to descendant [Text] widgets without explicit style.
