@@ -1892,8 +1892,8 @@ class RenderRepaintBoundary extends RenderProxyBox {
 ///
 /// When [ignoring] is `true`, this render object (and its subtree) is invisible
 /// to hit testing. It still consumes space during layout and paints its child
-/// as usual. It just cannot be the target of located events, because it returns
-/// `false` from [hitTest].
+/// as usual. It just cannot be the target of located events, because its render
+/// object returns `false` from [hitTest].
 ///
 /// When [ignoringSemantics] is `true`, the subtree will be invisible to
 /// the semantics layer (and thus e.g. accessibility tools). If
@@ -1971,12 +1971,12 @@ class RenderIgnorePointer extends RenderProxyBox {
 /// When [absorbing] is `true`, this render object prevents its subtree from
 /// receiving pointer events by terminating hit testing at itself. It still
 /// consumes space during layout and paints its child as usual. It just prevents
-/// its children from being the target of located events, because it returns
-/// `true` from [hitTest].
+/// its children from being the target of located events, because its render
+/// object returns `true` from [hitTest].
 class RenderAbsorbPointer extends RenderProxyBox {
   /// Creates a render object that absorbs pointers during hit testing.
   ///
-  /// The [absorbing] argument must not be null
+  /// The [absorbing] argument must not be null.
   RenderAbsorbPointer({
     RenderBox child,
     this.absorbing: true

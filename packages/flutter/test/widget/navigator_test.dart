@@ -159,6 +159,7 @@ void main() {
   // the pointer event dispatch loop.
   //
   // TODO(abarth): Test more of the real code and enable this test.
+  // See https://github.com/flutter/flutter/issues/4771.
   //
   // testWidgets('Pending gestures are rejected', (WidgetTester tester) async {
   //   List<String> log = <String>[];

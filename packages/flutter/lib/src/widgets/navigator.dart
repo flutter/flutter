@@ -211,7 +211,7 @@ class Navigator extends StatefulWidget {
   /// callback. The returned route will be pushed into the navigator. The set of
   /// most valuable keys will be used to construct an appropriate [Hero] transition.
   static void pushNamed(BuildContext context, String routeName, { Set<Key> mostValuableKeys }) {
-    of(context).pushNamed(routeName, mostValuableKeys: mostValuableKeys);
+    Navigator.of(context).pushNamed(routeName, mostValuableKeys: mostValuableKeys);
   }
 
   /// Push a route onto the navigator that most tightly encloses the given context.
@@ -221,7 +221,7 @@ class Navigator extends StatefulWidget {
   /// previous route, if any, will have didChangeNext() called on it; and the
   /// Navigator observer, if any, will have didPush() called on it.
   static void push(BuildContext context, Route<dynamic> route) {
-    of(context).push(route);
+    Navigator.of(context).push(route);
   }
 
   /// Pop a route off the navigator that most tightly encloses the given context.
@@ -240,13 +240,13 @@ class Navigator extends StatefulWidget {
   /// Returns true if a route was popped; returns false if there are no further
   /// previous routes.
   static bool pop(BuildContext context, [ dynamic result ]) {
-    return of(context).pop(result);
+    return Navigator.of(context).pop(result);
   }
 
   /// Calls pop() repeatedly until the given route is the current route.
   /// If it is already the current route, nothing happens.
   static void popUntil(BuildContext context, Route<dynamic> targetRoute) {
-    of(context).popUntil(targetRoute);
+    Navigator.of(context).popUntil(targetRoute);
   }
 
   /// Whether the navigator that most tightly encloses the given context can be popped.
@@ -262,7 +262,7 @@ class Navigator extends StatefulWidget {
   /// Executes a simple transaction that both pops the current route off and
   /// pushes a named route into the navigator that most tightly encloses the given context.
   static void popAndPushNamed(BuildContext context, String routeName, { Set<Key> mostValuableKeys }) {
-    of(context)
+    Navigator.of(context)
       ..pop()
       ..pushNamed(routeName, mostValuableKeys: mostValuableKeys);
   }
@@ -489,11 +489,10 @@ class NavigatorState extends State<Navigator> {
   }
 
   void _cancelActivePointers() {
-    BuildContext overlayContext = _overlayKey.currentContext;
-    if (overlayContext != null) {
-      RenderAbsorbPointer absorber = overlayContext.ancestorRenderObjectOfType(const TypeMatcher<RenderAbsorbPointer>());
-      absorber?.absorbing = true;
-    }
+    // This mechanism is far from perfect. See the issue below for more details:
+    // https://github.com/flutter/flutter/issues/4770
+    RenderAbsorbPointer absorber = _overlayKey.currentContext?.ancestorRenderObjectOfType(const TypeMatcher<RenderAbsorbPointer>());
+    absorber?.absorbing = true;
     for (int pointer in _activePointers.toList())
       WidgetsBinding.instance.cancelPointer(pointer);
   }

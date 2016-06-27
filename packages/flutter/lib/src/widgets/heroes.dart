@@ -489,8 +489,10 @@ class HeroController extends NavigatorObserver {
   }
 
   void _updateQuest(Duration timeStamp) {
-    if (navigator == null)
+    if (navigator == null) {
+      // The navigator has been removed for this end-of-frame callback was called.
       return;
+    }
     Set<Key> mostValuableKeys = _getMostValuableKeys();
     Map<Object, HeroHandle> heroesFrom = _party.isEmpty ?
         Hero.of(_from.subtreeContext, mostValuableKeys) : _party.getHeroesToAnimate();

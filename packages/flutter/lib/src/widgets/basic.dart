@@ -2624,10 +2624,9 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 /// from being the target of located events, because it returns `true` from
 /// [hitTest].
 class AbsorbPointer extends SingleChildRenderObjectWidget {
-  /// Creates a widget that is invisible to hit testing.
+  /// Creates a widget that absorbs pointers during hit testing.
   ///
-  /// The [ignoring] argument must not be null. If [ignoringSemantics], this
-  /// render object will be ignored for semantics if [ignoring] is true.
+  /// The [absorbing] argument must not be null
   AbsorbPointer({
     Key key,
     this.absorbing: true,

@@ -51,6 +51,10 @@ abstract class GestureBinding extends BindingBase implements HitTestable, HitTes
       _handlePointerEvent(_pendingPointerEvents.removeFirst());
   }
 
+  /// Dispatch a [PointerCancelEvent] for the given pointer soon.
+  ///
+  /// The pointer event will be dispatch before the next pointer event and
+  /// before the end of the microtask but not within this function call.
   void cancelPointer(int pointer) {
     if (_pendingPointerEvents.isEmpty)
       scheduleMicrotask(_flushPointerEventQueue);
