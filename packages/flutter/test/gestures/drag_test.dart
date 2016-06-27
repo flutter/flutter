@@ -128,4 +128,34 @@ void main() {
 
     drag.dispose();
   });
+
+  testGesture('Clamp max velocity', (GestureTester tester) {
+    HorizontalDragGestureRecognizer drag = new HorizontalDragGestureRecognizer();
+
+    Velocity velocity;
+    drag.onEnd = (DragEndDetails details) {
+      velocity = details.velocity;
+    };
+
+    TestPointer pointer = new TestPointer(5);
+    PointerDownEvent down = pointer.down(const Point(10.0, 25.0), timeStamp: const Duration(milliseconds: 10));
+    drag.addPointer(down);
+    tester.closeArena(5);
+    tester.route(down);
+    tester.route(pointer.move(const Point(20.0, 25.0), timeStamp: const Duration(milliseconds: 10)));
+    tester.route(pointer.move(const Point(30.0, 25.0), timeStamp: const Duration(milliseconds: 11)));
+    tester.route(pointer.move(const Point(40.0, 25.0), timeStamp: const Duration(milliseconds: 12)));
+    tester.route(pointer.move(const Point(50.0, 25.0), timeStamp: const Duration(milliseconds: 13)));
+    tester.route(pointer.move(const Point(60.0, 25.0), timeStamp: const Duration(milliseconds: 14)));
+    tester.route(pointer.move(const Point(70.0, 25.0), timeStamp: const Duration(milliseconds: 15)));
+    tester.route(pointer.move(const Point(80.0, 25.0), timeStamp: const Duration(milliseconds: 16)));
+    tester.route(pointer.move(const Point(90.0, 25.0), timeStamp: const Duration(milliseconds: 17)));
+    tester.route(pointer.move(const Point(100.0, 25.0), timeStamp: const Duration(milliseconds: 18)));
+    tester.route(pointer.move(const Point(110.0, 25.0), timeStamp: const Duration(milliseconds: 19)));
+    tester.route(pointer.move(const Point(120.0, 25.0), timeStamp: const Duration(milliseconds: 20)));
+    tester.route(pointer.up(timeStamp: const Duration(milliseconds: 20)));
+    expect(velocity.pixelsPerSecond.dx, inInclusiveRange(0.99 * kMaxFlingVelocity, kMaxFlingVelocity));
+
+    drag.dispose();
+  });
 }

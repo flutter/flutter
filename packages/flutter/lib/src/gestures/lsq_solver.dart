@@ -2,22 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import "dart:math" as math;
-import "dart:typed_data";
+import 'dart:math' as math;
+import 'dart:typed_data';
 
+// TODO(abarth): Consider using vector_math.
 class _Vector {
-  _Vector(int size)
-  : _offset = 0, _length = size, _elements = new Float64List(size);
-
-  _Vector.fromValues(List<double> values)
-  : _offset = 0, _length = values.length, _elements = values;
+  _Vector(int size) : _offset = 0, _length = size, _elements = new Float64List(size);
 
   _Vector.fromVOL(List<double> values, int offset, int length)
-  : _offset = offset, _length = length, _elements = values;
+    : _offset = offset, _length = length, _elements = values;
 
   final int _offset;
 
-  int get length => _length;
   final int _length;
 
   final List<double> _elements;
@@ -35,26 +31,14 @@ class _Vector {
   }
 
   double norm() => math.sqrt(this * this);
-
-  @override
-  String toString() {
-    String result = "";
-    for (int i = 0; i < _length; i++) {
-      if (i > 0)
-        result += ", ";
-        result += this[i].toString();
-    }
-    return result;
-  }
 }
 
+// TODO(abarth): Consider using vector_math.
 class _Matrix {
   _Matrix(int rows, int cols)
-  : _rows = rows,
-    _columns = cols,
+  : _columns = cols,
     _elements = new Float64List(rows * cols);
 
-  final int _rows;
   final int _columns;
   final List<double> _elements;
 
@@ -68,21 +52,6 @@ class _Matrix {
     row * _columns,
     _columns
   );
-
-  @override
-  String toString() {
-    String result = "";
-    for (int i = 0; i < _rows; i++) {
-      if (i > 0)
-        result += "; ";
-      for (int j = 0; j < _columns; j++) {
-        if (j > 0)
-          result += ", ";
-        result += get(i, j).toString();
-      }
-    }
-    return result;
-  }
 }
 
 /// An nth degree polynomial fit to a dataset.
