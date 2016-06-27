@@ -203,12 +203,13 @@ class _DropDownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
   @override
   Offset getPositionForChild(Size size, Size childSize) {
     final double buttonTop = buttonRect.top;
-    double top = buttonTop - selectedIndex * _kMenuItemHeight - _kMenuVerticalPadding.top;
-    double topPreferredLimit = _kMenuItemHeight;
+    final double selectedItemOffset = selectedIndex * _kMenuItemHeight + _kMenuVerticalPadding.top;
+    double top = buttonTop - selectedItemOffset;
+    final double topPreferredLimit = _kMenuItemHeight;
     if (top < topPreferredLimit)
       top = math.min(buttonTop, topPreferredLimit);
     double bottom = top + childSize.height;
-    double bottomPreferredLimit = size.height - _kMenuItemHeight;
+    final double bottomPreferredLimit = size.height - _kMenuItemHeight;
     if (bottom > bottomPreferredLimit) {
       bottom = math.max(buttonTop + _kMenuItemHeight, bottomPreferredLimit);
       top = bottom - childSize.height;
@@ -227,8 +228,8 @@ class _DropDownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
 
     if (route.initialLayout) {
       route.initialLayout = false;
-      final double offset = selectedIndex * _kMenuItemHeight + _kMenuVerticalPadding.top - (buttonTop - top);
-      scrollableKey.currentState.scrollTo(offset);
+      final double scrollOffset = selectedItemOffset - (buttonTop - top);
+      scrollableKey.currentState.scrollTo(scrollOffset);
     }
 
     return new Offset(buttonRect.left, top);
