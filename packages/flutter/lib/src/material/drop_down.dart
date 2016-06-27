@@ -6,8 +6,6 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
-
-
 import 'package:meta/meta.dart';
 
 import 'colors.dart';
@@ -236,11 +234,7 @@ class _DropDownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
   }
 
   @override
-  bool shouldRelayout(_DropDownMenuRouteLayout<T> oldDelegate) {
-    return oldDelegate.buttonRect != buttonRect
-        || oldDelegate.selectedIndex != selectedIndex
-        || oldDelegate.scrollableKey != scrollableKey;
-  }
+  bool shouldRelayout(_DropDownMenuRouteLayout<T> oldDelegate) => oldDelegate.route != route;
 }
 
 // We box the return value so that the return value can be null. Otherwise,
