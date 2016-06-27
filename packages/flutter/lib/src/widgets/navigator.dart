@@ -323,14 +323,12 @@ class NavigatorState extends State<Navigator> {
     assert(config.observer == null || config.observer.navigator == null);
     config.observer?._navigator = this;
 
-    bool isFirst = true;
     List<String> routes = _splitRoute(config.initialRoute ?? Navigator.defaultRouteName).toList();
     for (String route in routes) {
       _push(config.onGenerateRoute(new RouteSettings(
         name: route,
-        isInitialRoute: isFirst
+        isInitialRoute: true
       )));
-      isFirst = false;
     }
   }
 
