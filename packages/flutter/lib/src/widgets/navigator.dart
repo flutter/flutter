@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 
 import 'focus.dart';
@@ -324,12 +326,28 @@ class NavigatorState extends State<Navigator> {
     config.observer?._navigator = this;
 
     List<String> routes = _splitRoute(config.initialRoute ?? Navigator.defaultRouteName).toList();
-    for (String route in routes) {
-      _push(config.onGenerateRoute(new RouteSettings(
+
+    _push(config.onGenerateRoute(new RouteSettings(
+      name: routes.first,
+      isInitialRoute: true
+    )));
+
+    List<Route<dynamic>> remainingRoutes = routes.sublist(1).map((String route) {
+      return config.onGenerateRoute(new RouteSettings(
         name: route,
         isInitialRoute: true
-      )));
-    }
+      ));
+    }).toList();
+
+    void scheduleOneRoute() {
+      if (remainingRoutes.isNotEmpty) {
+        _push(remainingRoutes.removeAt(0));
+        scheduleMicrotask(scheduleOneRoute);
+      }
+    };
+
+    if (remainingRoutes.isNotEmpty)
+      scheduleMicrotask(scheduleOneRoute);
   }
 
   @override
