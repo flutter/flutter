@@ -49,11 +49,7 @@ void main() {
     await tester.tap(find.byConfig(button));
     expect(value, 4);
     await tester.idle(); // this waits for the route's completer to complete, which calls handleChanged
-
-    // Ideally this would be 4 because the menu would be overscrolled to the
-    // correct position, but currently we just reposition the menu so that it
-    // is visible on screen.
-    expect(value, 0);
+    expect(value, 4);
 
     // TODO(abarth): Remove these calls to pump once navigator cleans up its
     // pop transitions.

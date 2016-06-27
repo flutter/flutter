@@ -238,7 +238,8 @@ class _DropDownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
   @override
   bool shouldRelayout(_DropDownMenuRouteLayout<T> oldDelegate) {
     return oldDelegate.buttonRect != buttonRect
-        || oldDelegate.selectedIndex != selectedIndex;
+        || oldDelegate.selectedIndex != selectedIndex
+        || oldDelegate.scrollableKey != scrollableKey;
   }
 }
 
