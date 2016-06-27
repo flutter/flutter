@@ -322,10 +322,16 @@ class NavigatorState extends State<Navigator> {
     super.initState();
     assert(config.observer == null || config.observer.navigator == null);
     config.observer?._navigator = this;
-    _push(config.onGenerateRoute(new RouteSettings(
-      name: config.initialRoute ?? Navigator.defaultRouteName,
-      isInitialRoute: true
-    )));
+
+    bool isFirst = true;
+
+    for (String route in _splitRoute(config.initialRoute ?? Navigator.defaultRouteName)) {
+      _push(config.onGenerateRoute(new RouteSettings(
+        name: route,
+        isInitialRoute: isFirst
+      )));
+      isFirst = false;
+    }
   }
 
   @override
@@ -540,6 +546,23 @@ class NavigatorState extends State<Navigator> {
         initialEntries: initialRoute.overlayEntries
       )
     );
+  }
+
+  /// Return a hierarchical sequence of routes from the given route, e.g.
+  /// '/a/b/c' ==> '/', '/a', '/a/b', '/a/b/c'.
+  static Iterable<String> _splitRoute(String route) sync* {
+    if (route.isEmpty || !route.startsWith('/')) {
+      yield route;
+    } else {
+      yield '/';
+
+      StringBuffer buffer = new StringBuffer();
+
+      for (String fragment in route.substring(1).split('/')) {
+        buffer.write('/$fragment');
+        yield buffer.toString();
+      }
+    }
   }
 }
 
