@@ -324,8 +324,8 @@ class NavigatorState extends State<Navigator> {
     config.observer?._navigator = this;
 
     bool isFirst = true;
-
-    for (String route in _splitRoute(config.initialRoute ?? Navigator.defaultRouteName)) {
+    List<String> routes = _splitRoute(config.initialRoute ?? Navigator.defaultRouteName).toList();
+    for (String route in routes) {
       _push(config.onGenerateRoute(new RouteSettings(
         name: route,
         isInitialRoute: isFirst
@@ -559,8 +559,10 @@ class NavigatorState extends State<Navigator> {
       StringBuffer buffer = new StringBuffer();
 
       for (String fragment in route.substring(1).split('/')) {
-        buffer.write('/$fragment');
-        yield buffer.toString();
+        if (fragment.isNotEmpty) {
+          buffer.write('/$fragment');
+          yield buffer.toString();
+        }
       }
     }
   }
