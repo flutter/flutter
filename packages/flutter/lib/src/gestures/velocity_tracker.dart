@@ -16,15 +16,6 @@ class _Estimate {
   final Duration time;
   final int degree;
   final double confidence;
-
-  @override
-  String toString() {
-    return 'Estimate(xCoefficients: $xCoefficients, '
-                    'yCoefficients: $yCoefficients, '
-                    'time: $time, '
-                    'degree: $degree, '
-                    'confidence: $confidence)';
-  }
 }
 
 abstract class _VelocityTrackerStrategy {
@@ -33,46 +24,20 @@ abstract class _VelocityTrackerStrategy {
   void clear();
 }
 
-enum _Weighting {
-  weightingNone,
-  weightingDelta,
-  weightingCentral,
-  weightingRecent
-}
-
 class _Movement {
   Duration eventTime = Duration.ZERO;
   Point position = Point.origin;
 }
 
-typedef double _WeightChooser(int index);
-
 class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
   static const int kHistorySize = 20;
   static const int kHorizonMilliseconds = 100;
 
-  _LeastSquaresVelocityTrackerStrategy(this.degree, _Weighting weighting)
-    : _index = 0, _movements = new List<_Movement>(kHistorySize) {
-    switch (weighting) {
-      case _Weighting.weightingNone:
-        _chooseWeight = null;
-        break;
-      case _Weighting.weightingDelta:
-        _chooseWeight = _weightDelta;
-        break;
-      case _Weighting.weightingCentral:
-        _chooseWeight = _weightCentral;
-        break;
-      case _Weighting.weightingRecent:
-        _chooseWeight = _weightRecent;
-        break;
-    }
-  }
+  _LeastSquaresVelocityTrackerStrategy(this.degree);
 
   final int degree;
-  final List<_Movement> _movements;
-  _WeightChooser _chooseWeight;
-  int _index;
+  final List<_Movement> _movements = new List<_Movement>(kHistorySize);
+  int _index = 0;
 
   @override
   void addMovement(Duration timeStamp, Point position) {
@@ -104,7 +69,7 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
       Point position = movement.position;
       x.add(position.x);
       y.add(position.y);
-      w.add(_chooseWeight != null ? _chooseWeight(index) : 1.0);
+      w.add(1.0);
       time.add(-age);
       index = (index == 0 ? kHistorySize : index) - 1;
 
@@ -151,54 +116,6 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
   @override
   void clear() {
     _index = -1;
-  }
-
-  double _weightDelta(int index) {
-    // Weight points based on how much time elapsed between them and the next
-    // point so that points that "cover" a shorter time span are weighed less.
-    //   delta  0ms: 0.5
-    //   delta 10ms: 1.0
-    if (index == _index)
-      return 1.0;
-    int nextIndex = (index + 1) % kHistorySize;
-    int deltaMilliseconds = (_movements[nextIndex].eventTime - _movements[index].eventTime).inMilliseconds;
-    if (deltaMilliseconds < 0)
-      return 0.5;
-    if (deltaMilliseconds < 10)
-      return 0.5 + deltaMilliseconds * 0.05;
-    return 1.0;
-  }
-
-  double _weightCentral(int index) {
-    // Weight points based on their age, weighing very recent and very old
-    // points less.
-    //   age  0ms: 0.5
-    //   age 10ms: 1.0
-    //   age 50ms: 1.0
-    //   age 60ms: 0.5
-    int ageMilliseconds = (_movements[_index].eventTime - _movements[index].eventTime).inMilliseconds;
-    if (ageMilliseconds < 0)
-      return 0.5;
-    if (ageMilliseconds < 10)
-      return 0.5 + ageMilliseconds * 0.05;
-    if (ageMilliseconds < 50)
-      return 1.0;
-    if (ageMilliseconds < 60)
-      return 0.5 + (60 - ageMilliseconds) * 0.05;
-    return 0.5;
-  }
-
-  double _weightRecent(int index) {
-    // Weight points based on their age, weighing older points less.
-    //   age   0ms: 1.0
-    //   age  50ms: 1.0
-    //   age 100ms: 0.5
-    int ageMilliseconds = (_movements[_index].eventTime - _movements[index].eventTime).inMilliseconds;
-    if (ageMilliseconds < 50)
-      return 1.0;
-    if (ageMilliseconds < 100)
-      return 0.5 + (100 - ageMilliseconds) * 0.01;
-    return 0.5;
   }
 
   _Movement _getMovement(int i) {
@@ -310,6 +227,6 @@ class VelocityTracker {
   }
 
   static _VelocityTrackerStrategy _createStrategy() {
-    return new _LeastSquaresVelocityTrackerStrategy(2, _Weighting.weightingNone);
+    return new _LeastSquaresVelocityTrackerStrategy(2);
   }
 }

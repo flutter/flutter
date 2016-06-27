@@ -456,23 +456,18 @@ class DelayedMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Dela
   /// defaults to [kLongPressTimeout] to match [LongPressGestureRecognizer] but
   /// can be changed for specific behaviors.
   DelayedMultiDragGestureRecognizer({
-    Duration delay: kLongPressTimeout
-  }) : _delay = delay {
+    this.delay: kLongPressTimeout
+  }) {
     assert(delay != null);
   }
 
   /// The amount of time the pointer must remain in the same place for the drag
   /// to be recognized.
-  Duration get delay => _delay;
-  Duration _delay;
-  set delay(Duration value) {
-    assert(value != null);
-    _delay = value;
-  }
+  final Duration delay;
 
   @override
   _DelayedPointerState createNewPointerState(PointerDownEvent event) {
-    return new _DelayedPointerState(event.position, _delay);
+    return new _DelayedPointerState(event.position, delay);
   }
 
   @override

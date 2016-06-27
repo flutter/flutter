@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'velocity_tracker_data.dart';
 
 bool _withinTolerance(double actual, double expected) {
@@ -46,5 +46,15 @@ void main() {
         i += 1;
       }
     }
+  });
+
+  test('Velocity control test', () {
+    Velocity velocity1 = new Velocity(pixelsPerSecond: const Offset(7.0, 0.0));
+    Velocity velocity2 = new Velocity(pixelsPerSecond: const Offset(12.0, 0.0));
+    expect(velocity1, equals(new Velocity(pixelsPerSecond: new Offset(7.0, 0.0))));
+    expect(velocity1, isNot(equals(velocity2)));
+    expect(velocity2 - velocity1, equals(new Velocity(pixelsPerSecond: new Offset(5.0, 0.0))));
+    expect(velocity1.hashCode, isNot(equals(velocity2.hashCode)));
+    expect(velocity1, hasOneLineDescription);
   });
 }
