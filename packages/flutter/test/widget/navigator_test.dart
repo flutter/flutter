@@ -124,4 +124,70 @@ void main() {
     Object exception = tester.takeException();
     expect(exception is FlutterError, isTrue);
   });
+
+  testWidgets('Gestures between push and build are ignored', (WidgetTester tester) async {
+    List<String> log = <String>[];
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) {
+        return new Row(
+          children: <Widget>[
+            new GestureDetector(
+              onTap: () {
+                log.add('left');
+                Navigator.pushNamed(context, '/second');
+              },
+              child: new Text('left')
+            ),
+            new GestureDetector(
+              onTap: () { log.add('right'); },
+              child: new Text('right')
+            ),
+          ]
+        );
+      },
+      '/second': (BuildContext context) => new Container(),
+    };
+    await tester.pumpWidget(new MaterialApp(routes: routes));
+    expect(log, isEmpty);
+    await tester.tap(find.text('left'));
+    expect(log, equals(<String>['left']));
+    await tester.tap(find.text('right'));
+    expect(log, equals(<String>['left']));
+  });
+
+  // This test doesn't work because the testing framework uses a fake version of
+  // the pointer event dispatch loop.
+  //
+  // TODO(abarth): Test more of the real code and enable this test.
+  //
+  // testWidgets('Pending gestures are rejected', (WidgetTester tester) async {
+  //   List<String> log = <String>[];
+  //   final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+  //     '/': (BuildContext context) {
+  //       return new Row(
+  //         children: <Widget>[
+  //           new GestureDetector(
+  //             onTap: () {
+  //               log.add('left');
+  //               Navigator.pushNamed(context, '/second');
+  //             },
+  //             child: new Text('left')
+  //           ),
+  //           new GestureDetector(
+  //             onTap: () { log.add('right'); },
+  //             child: new Text('right')
+  //           ),
+  //         ]
+  //       );
+  //     },
+  //     '/second': (BuildContext context) => new Container(),
+  //   };
+  //   await tester.pumpWidget(new MaterialApp(routes: routes));
+  //   TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('right')), pointer: 23);
+  //   expect(log, isEmpty);
+  //   await tester.tap(find.text('left'));
+  //   expect(log, equals(<String>['left']));
+  //   await gesture.up();
+  //   expect(log, equals(<String>['left']));
+  // });
 }

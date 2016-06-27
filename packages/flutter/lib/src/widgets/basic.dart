@@ -2616,6 +2616,42 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
   }
 }
 
+/// A widget that absorbs pointers during hit testing.
+///
+/// When [absorbing] is `true`, this widget prevents its subtree from receiving
+/// pointer events by terminating hit testing at itself. It still consumes space
+/// during layout and paints its child as usual. It just prevents its children
+/// from being the target of located events, because it returns `true` from
+/// [hitTest].
+class AbsorbPointer extends SingleChildRenderObjectWidget {
+  /// Creates a widget that is invisible to hit testing.
+  ///
+  /// The [ignoring] argument must not be null. If [ignoringSemantics], this
+  /// render object will be ignored for semantics if [ignoring] is true.
+  AbsorbPointer({
+    Key key,
+    this.absorbing: true,
+    Widget child
+  }) : super(key: key, child: child) {
+    assert(absorbing != null);
+  }
+
+  /// Whether this widget absorbs pointers during hit testing.
+  ///
+  /// Regardless of whether this render object absorbs pointers during hit
+  /// testing, it will still consume space during layout and be visible during
+  /// painting.
+  final bool absorbing;
+
+  @override
+  RenderAbsorbPointer createRenderObject(BuildContext context) => new RenderAbsorbPointer(absorbing: absorbing);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderAbsorbPointer renderObject) {
+    renderObject.absorbing = absorbing;
+  }
+}
+
 /// Holds opaque meta data in the render tree.
 ///
 /// Useful for decorating the render tree with information that will be consumed

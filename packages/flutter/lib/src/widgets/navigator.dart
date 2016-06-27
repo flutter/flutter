@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart';
 import 'package:meta/meta.dart';
 
+import 'basic.dart';
+import 'binding.dart';
 import 'focus.dart';
 import 'framework.dart';
 import 'overlay.dart';
@@ -396,6 +399,7 @@ class NavigatorState extends State<Navigator> {
       config.observer?.didPush(route, oldRoute);
     });
     assert(() { _debugLocked = false; return true; });
+    _cancelActivePointers();
   }
 
   void _replace({ Route<dynamic> oldRoute, Route<dynamic> newRoute }) {
@@ -427,6 +431,7 @@ class NavigatorState extends State<Navigator> {
       oldRoute._navigator = null;
     });
     assert(() { _debugLocked = false; return true; });
+    _cancelActivePointers();
   }
 
   void _replaceRouteBefore({ Route<dynamic> anchorRoute, Route<dynamic> newRoute }) {
@@ -454,6 +459,7 @@ class NavigatorState extends State<Navigator> {
       targetRoute._navigator = null;
     });
     assert(() { _debugLocked = false; return true; });
+    _cancelActivePointers();
   }
 
   bool _pop([dynamic result]) {
@@ -483,6 +489,7 @@ class NavigatorState extends State<Navigator> {
       assert(!debugPredictedWouldPop);
     }
     assert(() { _debugLocked = false; return true; });
+    _cancelActivePointers();
     return true;
   }
 
@@ -522,6 +529,26 @@ class NavigatorState extends State<Navigator> {
     return true;
   }
 
+  final Set<int> _activePointers = new Set<int>();
+
+  void _handlePointerDown(PointerDownEvent event) {
+    _activePointers.add(event.pointer);
+  }
+
+  void _handlePointerUpOrCancel(PointerEvent event) {
+    _activePointers.remove(event.pointer);
+  }
+
+  void _cancelActivePointers() {
+    BuildContext overlayContext = _overlayKey.currentContext;
+    if (overlayContext != null) {
+      RenderAbsorbPointer absorber = overlayContext.ancestorRenderObjectOfType(const TypeMatcher<RenderAbsorbPointer>());
+      absorber.absorbing = true;
+    }
+    for (int pointer in _activePointers.toList())
+      WidgetsBinding.instance.cancelPointer(pointer);
+  }
+
   // TODO(abarth): We should be able to take a focusScopeKey as configuration
   // information in case our parent wants to control whether we are focused.
   final GlobalKey _focusScopeKey = new GlobalKey();
@@ -532,12 +559,20 @@ class NavigatorState extends State<Navigator> {
     assert(_history.isNotEmpty);
     _hadTransaction = false;
     final Route<dynamic> initialRoute = _history.first;
-    return new Focus(
-      key: _focusScopeKey,
-      initiallyFocusedScope: initialRoute.focusKey,
-      child: new Overlay(
-        key: _overlayKey,
-        initialEntries: initialRoute.overlayEntries
+    return new Listener(
+      onPointerDown: _handlePointerDown,
+      onPointerUp: _handlePointerUpOrCancel,
+      onPointerCancel: _handlePointerUpOrCancel,
+      child: new AbsorbPointer(
+        absorbing: false,
+        child: new Focus(
+          key: _focusScopeKey,
+          initiallyFocusedScope: initialRoute.focusKey,
+          child: new Overlay(
+            key: _overlayKey,
+            initialEntries: initialRoute.overlayEntries
+          )
+        )
       )
     );
   }

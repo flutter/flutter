@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:collection';
 import 'dart:typed_data';
 import 'dart:ui' as ui show window;
 
@@ -38,8 +40,21 @@ abstract class GestureBinding extends BindingBase implements HitTestable, HitTes
       0
     );
     final PointerPacket packet = PointerPacket.deserialize(message);
-    for (PointerEvent event in PointerEventConverter.expand(packet.pointers))
-      _handlePointerEvent(event);
+    _pendingPointerEvents.addAll(PointerEventConverter.expand(packet.pointers));
+    _flushPointerEventQueue();
+  }
+
+  final Queue<PointerEvent> _pendingPointerEvents = new Queue<PointerEvent>();
+
+  void _flushPointerEventQueue() {
+    while (_pendingPointerEvents.isNotEmpty)
+      _handlePointerEvent(_pendingPointerEvents.removeFirst());
+  }
+
+  void cancelPointer(int pointer) {
+    if (_pendingPointerEvents.isEmpty)
+      scheduleMicrotask(_flushPointerEventQueue);
+    _pendingPointerEvents.addFirst(new PointerCancelEvent(pointer: pointer));
   }
 
   /// A router that routes all pointer events received from the engine.
@@ -56,22 +71,21 @@ abstract class GestureBinding extends BindingBase implements HitTestable, HitTes
   Map<int, HitTestResult> _hitTests = <int, HitTestResult>{};
 
   void _handlePointerEvent(PointerEvent event) {
+    HitTestResult result;
     if (event is PointerDownEvent) {
       assert(!_hitTests.containsKey(event.pointer));
-      HitTestResult result = new HitTestResult();
+      result = new HitTestResult();
       hitTest(result, event.position);
       _hitTests[event.pointer] = result;
-    } else if (event is! PointerUpEvent && event is! PointerCancelEvent) {
-      assert(event.down == _hitTests.containsKey(event.pointer));
-      if (!event.down)
-        return; // we currently ignore add, remove, and hover move events
+    } else if (event is PointerUpEvent || event is PointerCancelEvent) {
+      result = _hitTests.remove(event.pointer);
+    } else if (event.down) {
+      result = _hitTests[event.pointer];
+    } else {
+      return;  // We currently ignore add, remove, and hover move events.
     }
-    assert(_hitTests[event.pointer] != null);
-    dispatchEvent(event, _hitTests[event.pointer]);
-    if (event is PointerUpEvent || event is PointerCancelEvent) {
-      assert(_hitTests.containsKey(event.pointer));
-      _hitTests.remove(event.pointer);
-    }
+    if (result != null)
+      dispatchEvent(event, result);
   }
 
   /// Determine which [HitTestTarget] objects are located at a given position.
@@ -160,4 +174,3 @@ class FlutterErrorDetailsForPointerEventDispatcher extends FlutterErrorDetails {
   /// the hitTestEntry object.
   final HitTestEntry hitTestEntry;
 }
-

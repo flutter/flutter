@@ -1888,7 +1888,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   }
 }
 
-/// A render object that os invisible during hit testing.
+/// A render object that is invisible during hit testing.
 ///
 /// When [ignoring] is `true`, this render object (and its subtree) is invisible
 /// to hit testing. It still consumes space during layout and paints its child
@@ -1963,6 +1963,43 @@ class RenderIgnorePointer extends RenderProxyBox {
     super.debugFillDescription(description);
     description.add('ignoring: $ignoring');
     description.add('ignoringSemantics: ${ ignoringSemantics == null ? "implicitly " : "" }$_effectiveIgnoringSemantics');
+  }
+}
+
+/// A render object that absorbs pointers during hit testing.
+///
+/// When [absorbing] is `true`, this render object prevents its subtree from
+/// receiving pointer events by terminating hit testing at itself. It still
+/// consumes space during layout and paints its child as usual. It just prevents
+/// its children from being the target of located events, because it returns
+/// `true` from [hitTest].
+class RenderAbsorbPointer extends RenderProxyBox {
+  /// Creates a render object that absorbs pointers during hit testing.
+  ///
+  /// The [absorbing] argument must not be null
+  RenderAbsorbPointer({
+    RenderBox child,
+    this.absorbing: true
+  }) : super(child) {
+    assert(absorbing != null);
+  }
+
+  /// Whether this render object absorbs pointers during hit testing.
+  ///
+  /// Regardless of whether this render object absorbs pointers during hit
+  /// testing, it will still consume space during layout and be visible during
+  /// painting.
+  bool absorbing;
+
+  @override
+  bool hitTest(HitTestResult result, { Point position }) {
+    return absorbing ? true : super.hitTest(result, position: position);
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('absorbing: $absorbing');
   }
 }
 
