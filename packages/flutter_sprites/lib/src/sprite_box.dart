@@ -85,6 +85,7 @@ class SpriteBox extends RenderBox {
   Duration _lastTimeStamp;
   double _frameRate = 0.0;
 
+  /// An instantaneous estimate of the number of frames per second this sprite box is producing.
   double get frameRate => _frameRate;
 
   // Transformation mode
