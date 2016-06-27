@@ -135,26 +135,61 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
     );
   }
 
-  String dropdownValue = 'Free';
+  // https://en.wikipedia.org/wiki/Free_Four
+  String dropdown1Value = 'Free';
+  String dropdown2Value = 'Four';
 
   Widget buildDropdownButton() {
-    return new Align(
-      alignment: new FractionalOffset(0.5, 0.4),
-      child: new DropDownButton<String>(
-        value: dropdownValue,
-        onChanged: (String newValue) {
-          setState(() {
-            if (newValue != null)
-              dropdownValue = newValue;
-          });
-        },
-        items: <String>['One', 'Two', 'Free', 'Four']
-          .map((String value) {
-            return new DropDownMenuItem<String>(
-              value: value,
-              child: new Text(value));
-          })
-          .toList()
+    return new Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: new Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          new ListItem(
+            title: new Text('Scrollable dropdown:'),
+            trailing: new DropDownButton<String>(
+              value: dropdown1Value,
+              onChanged: (String newValue) {
+                setState(() {
+                  if (newValue != null)
+                    dropdown1Value = newValue;
+                });
+              },
+              items: <String>[
+                  'One', 'Two', 'Free', 'Four', 'Can', 'I', 'Have', 'A', 'Little',
+                  'Bit', 'More', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'
+                 ]
+                .map((String value) {
+                  return new DropDownMenuItem<String>(
+                    value: value,
+                    child: new Text(value));
+                })
+                .toList()
+             )
+          ),
+          new SizedBox(
+            height: 24.0
+          ),
+          new ListItem(
+            title: new Text('Simple dropdown:'),
+            trailing: new DropDownButton<String>(
+              value: dropdown2Value,
+              onChanged: (String newValue) {
+                setState(() {
+                  if (newValue != null)
+                    dropdown2Value = newValue;
+                });
+              },
+              items: <String>['One', 'Two', 'Free', 'Four']
+                .map((String value) {
+                  return new DropDownMenuItem<String>(
+                    value: value,
+                    child: new Text(value));
+                })
+                .toList()
+            )
+          )
+        ]
       )
     );
   }
