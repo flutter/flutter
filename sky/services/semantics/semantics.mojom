@@ -24,6 +24,7 @@ struct SemanticFlags {
   bool canBeScrolledVertically = false;
   bool hasCheckedState = false; // whether isChecked is relevant
   bool isChecked = false;
+  bool isAdjustable = false;
 };
 
 struct SemanticStrings {
@@ -69,4 +70,6 @@ interface SemanticsServer {
   ScrollRight(uint32 nodeID);
   ScrollUp(uint32 nodeID);
   ScrollDown(uint32 nodeID);
+  AdjustIncrease(uint32 nodeID);
+  AdjustDecrease(uint32 nodeID);
 };

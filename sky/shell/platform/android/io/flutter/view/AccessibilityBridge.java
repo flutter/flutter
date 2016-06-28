@@ -297,6 +297,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
                 canBeScrolledVertically = node.flags.canBeScrolledVertically;
                 hasCheckedState = node.flags.hasCheckedState;
                 isChecked = node.flags.isChecked;
+                isAdjustable = node.flags.isAdjustable;
             }
             if (node.strings != null) {
                 label = node.strings.label;
@@ -351,6 +352,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
         boolean canBeScrolledVertically;
         boolean hasCheckedState;
         boolean isChecked;
+        boolean isAdjustable;
         String label;
         List<PersistentAccessibilityNode> children;
 

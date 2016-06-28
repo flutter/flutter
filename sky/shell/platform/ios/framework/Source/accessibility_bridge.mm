@@ -127,10 +127,12 @@ struct Geometry {
 }
 
 - (UIAccessibilityTraits)accessibilityTraits {
-  // TODO(tvolkert): We need more semantic info in the mojom definition
-  // in order to distinguish buttons, links, sliders, etc.
-  return _flags->canBeTapped ? UIAccessibilityTraitButton
-                             : UIAccessibilityTraitNone;
+  UIAccessibilityTraits traits = UIAccessibilityTraitNone;
+  if (_flags->canBeTapped)
+    traits |= UIAccessibilityTraitButton;
+  if (_flags->isAdjustable)
+    traits |= UIAccessibilityTraitAdjustable;
+  return traits;
 }
 
 - (CGRect)accessibilityFrame {
