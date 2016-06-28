@@ -70,7 +70,11 @@ void main() {
      *********************/
 
     RenderBox tip = tester.renderObject(find.text('TIP')).parent.parent.parent.parent.parent;
-    expect(tip.localToGlobal(tip.size.topLeft(Point.origin)), equals(const Point(284.0, 20.0)));
+
+    // See "_applyFloatingPointHack"
+    Point tipInGlobal = tip.localToGlobal(tip.size.topLeft(Point.origin));
+    expect(tipInGlobal.x.floor(), 284);
+    expect(tipInGlobal.y.floor(), 20);
   });
 
   testWidgets('Does tooltip end up in the right place - top left', (WidgetTester tester) async {
