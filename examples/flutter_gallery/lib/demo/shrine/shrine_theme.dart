@@ -30,6 +30,11 @@ class ShrineTheme extends InheritedWidget {
     assert(child != null);
   }
 
+  final Color cardBackgroundColor = Colors.white;
+  final Color appBarBackgroundColor = Colors.white;
+  final Color dividerColor = const Color(0xFFD9D9D9);
+  final Color priceHighlightColor = const Color(0xFFFFE0E0);
+
   final TextStyle appBarTitleStyle = robotoRegular20(Colors.black87);
   final TextStyle vendorItemStyle = robotoRegular12(const Color(0xFF81959D));
   final TextStyle priceStyle = robotoRegular14(Colors.black87);

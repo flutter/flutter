@@ -24,6 +24,7 @@ export 'package:flutter/rendering.dart' show
     FlowDelegate,
     FlowPaintingContext,
     FractionalOffsetTween,
+    GridChildPlacement,
     GridDelegate,
     GridDelegateWithInOrderChildPlacement,
     GridSpecification,

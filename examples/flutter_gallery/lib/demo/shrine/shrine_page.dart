@@ -83,17 +83,18 @@ class ShrinePageState extends State<ShrinePage> {
 
   @override
   Widget build(BuildContext context) {
+    final ShrineTheme theme = ShrineTheme.of(context);
     return new Scaffold(
       key: config.scaffoldKey,
       appBar: new AppBar(
         elevation: _appBarElevation,
-        backgroundColor: Theme.of(context).cardColor,
+        backgroundColor: theme.appBarBackgroundColor,
         iconTheme: Theme.of(context).iconTheme,
         brightness: Brightness.light,
         flexibleSpace: new Container(
           decoration: new BoxDecoration(
             border: new Border(
-              bottom: new BorderSide(color: const Color(0xFFD9D9D9))
+              bottom: new BorderSide(color: theme.dividerColor)
             )
           )
         ),
