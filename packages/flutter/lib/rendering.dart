@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 /// The Flutter rendering tree.
-/// 
+///
 /// To use, import `package:flutter/rendering.dart`.
 ///
 /// The [RenderObject] hierarchy is used by the Flutter Widgets
@@ -48,6 +48,7 @@ export 'src/rendering/semantics.dart';
 export 'src/rendering/shifted_box.dart';
 export 'src/rendering/stack.dart';
 export 'src/rendering/table.dart';
+export 'src/rendering/tweens.dart';
 export 'src/rendering/view.dart';
 export 'src/rendering/viewport.dart';
 
