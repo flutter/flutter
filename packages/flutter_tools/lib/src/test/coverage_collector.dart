@@ -62,6 +62,8 @@ class CoverageCollector {
     assert(enabled);
     await finishPendingJobs();
     printTrace('formating coverage data');
+    if (_globalHitmap == null)
+      return null;
     Resolver resolver = new Resolver(packagesPath: PackageMap.globalPackagesPath);
     LcovFormatter formater = new LcovFormatter(resolver);
     String packagePath = Directory.current.path;

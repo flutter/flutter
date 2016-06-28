@@ -30,7 +30,7 @@ class TestCommand extends FlutterCommand {
       defaultsTo: false,
       negatable: false,
       help: 'Whether to merge converage data with "coverage/lcov.base.info". '
-            'Implies collecting coverage data. (Linux only)'
+            'Implies collecting coverage data. (Requires lcov)'
     );
     argParser.addOption('coverage-path',
       defaultsTo: 'coverage/lcov.info',
@@ -95,6 +95,8 @@ class TestCommand extends FlutterCommand {
     Status status = logger.startProgress('Collecting coverage information...');
     String coverageData = await collector.finalizeCoverage();
     status.stop(showElapsedTime: true);
+    if (coverageData == null)
+      return false;
 
     String coveragePath = argResults['coverage-path'];
     File coverageFile = new File(coveragePath)
@@ -118,10 +120,12 @@ class TestCommand extends FlutterCommand {
       }
 
       if (os.which('lcov') == null) {
-        printError(
-          'Missing "lcov" tool. Unable to merge coverage data.\n'
-          'Consider running "sudo apt-get install lcov".'
-        );
+        String installMessage = 'Please install lcov.';
+        if (os.isLinux)
+          installMessage = 'Consider running "sudo apt-get install lcov".';
+        else if (os.isMacOS)
+          installMessage = 'Consider running "brew install lcov".';
+        printError('Missing "lcov" tool. Unable to merge coverage data.\n$installMessage');
         return false;
       }
 
