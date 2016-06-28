@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui show lerpDouble;
 
-import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -1455,18 +1454,4 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
     }
     return result;
   }
-}
-
-/// An interpolation between two fractional offsets.
-///
-/// This class specializes the interpolation of Tween<FractionalOffset> to be
-/// appropriate for rectangles.
-class FractionalOffsetTween extends Tween<FractionalOffset> {
-  /// Creates a fractional offset tween.
-  ///
-  /// The [begin] and [end] arguments must not be null.
-  FractionalOffsetTween({ FractionalOffset begin, FractionalOffset end }) : super(begin: begin, end: end);
-
-  @override
-  FractionalOffset lerp(double t) => FractionalOffset.lerp(begin, end, t);
 }
