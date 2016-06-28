@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
@@ -127,15 +128,52 @@ class _SemanticsDebuggerEntry {
            '${hasCheckedState ? isChecked ? "; checked" : "; unchecked" : ""}'
            ')';
   }
+
   String toStringDeep([ String prefix = '']) {
     if (prefix.length > 20)
       return '$prefix<ABORTED>\n';
     String result = '$prefix$this\n';
-    for (_SemanticsDebuggerEntry child in children.reversed) {
-      prefix += '  ';
+    prefix += '  ';
+    for (_SemanticsDebuggerEntry child in children) {
       result += '${child.toStringDeep(prefix)}';
     }
     return result;
+  }
+
+  void updateWith(mojom.SemanticsNode node) {
+    if (node.flags != null) {
+      canBeTapped = node.flags.canBeTapped;
+      canBeLongPressed = node.flags.canBeLongPressed;
+      canBeScrolledHorizontally = node.flags.canBeScrolledHorizontally;
+      canBeScrolledVertically = node.flags.canBeScrolledVertically;
+      hasCheckedState = node.flags.hasCheckedState;
+      isChecked = node.flags.isChecked;
+    }
+    if (node.strings != null) {
+      assert(node.strings.label != null);
+      label = node.strings.label;
+    } else {
+      assert(label != null);
+    }
+    if (node.geometry != null) {
+      if (node.geometry.transform != null) {
+        assert(node.geometry.transform.length == 16);
+        // TODO(ianh): Replace this with a cleaner call once
+        //  https://github.com/google/vector_math.dart/issues/159
+        // is fixed.
+        List<double> array = node.geometry.transform;
+        transform = new Matrix4(
+          array[0],  array[1],  array[2],  array[3],
+          array[4],  array[5],  array[6],  array[7],
+          array[8],  array[9],  array[10], array[11],
+          array[12], array[13], array[14], array[15]
+        );
+      } else {
+        transform = null;
+      }
+      rect = new Rect.fromLTWH(node.geometry.left, node.geometry.top, node.geometry.width, node.geometry.height);
+    }
+    _updateMessage();
   }
 
   int findDepth() {
@@ -153,7 +191,7 @@ class _SemanticsDebuggerEntry {
   );
 
   TextPainter textPainter;
-  void updateMessage() {
+  void _updateMessage() {
     List<String> annotations = <String>[];
     bool wantsTap = false;
     if (hasCheckedState) {
@@ -251,7 +289,7 @@ class _SemanticsDebuggerEntry {
   }
 }
 
-class _SemanticsDebuggerListener implements mojom.SemanticsListener {
+class _SemanticsDebuggerListener extends ChangeNotifier implements mojom.SemanticsListener {
   _SemanticsDebuggerListener._() {
     SemanticsNode.addListener(this);
   }
@@ -262,64 +300,38 @@ class _SemanticsDebuggerListener implements mojom.SemanticsListener {
     instance ??= new _SemanticsDebuggerListener._();
   }
 
-  Set<VoidCallback> _listeners = new Set<VoidCallback>();
-  void addListener(VoidCallback callback) {
-    assert(!_listeners.contains(callback));
-    _listeners.add(callback);
-  }
-  void removeListener(VoidCallback callback) {
-    _listeners.remove(callback);
-  }
-
-  Map<int, _SemanticsDebuggerEntry> nodes = <int, _SemanticsDebuggerEntry>{};
+  _SemanticsDebuggerEntry get rootNode => _nodes[0];
+  final Map<int, _SemanticsDebuggerEntry> _nodes = <int, _SemanticsDebuggerEntry>{};
 
   _SemanticsDebuggerEntry _updateNode(mojom.SemanticsNode node) {
-    _SemanticsDebuggerEntry entry = nodes.putIfAbsent(node.id, () => new _SemanticsDebuggerEntry(node.id));
-    if (node.flags != null) {
-      entry.canBeTapped = node.flags.canBeTapped;
-      entry.canBeLongPressed = node.flags.canBeLongPressed;
-      entry.canBeScrolledHorizontally = node.flags.canBeScrolledHorizontally;
-      entry.canBeScrolledVertically = node.flags.canBeScrolledVertically;
-      entry.hasCheckedState = node.flags.hasCheckedState;
-      entry.isChecked = node.flags.isChecked;
-    }
-    if (node.strings != null) {
-      assert(node.strings.label != null);
-      entry.label = node.strings.label;
-    } else {
-      assert(entry.label != null);
-    }
-    if (node.geometry != null) {
-      if (node.geometry.transform != null) {
-        assert(node.geometry.transform.length == 16);
-        // TODO(ianh): Replace this with a cleaner call once
-        //  https://github.com/google/vector_math.dart/issues/159
-        // is fixed.
-        List<double> array = node.geometry.transform;
-        entry.transform = new Matrix4(
-          array[0],  array[1],  array[2],  array[3],
-          array[4],  array[5],  array[6],  array[7],
-          array[8],  array[9],  array[10], array[11],
-          array[12], array[13], array[14], array[15]
-        );
-      } else {
-        entry.transform = null;
-      }
-      entry.rect = new Rect.fromLTWH(node.geometry.left, node.geometry.top, node.geometry.width, node.geometry.height);
-    }
-    entry.updateMessage();
+    final int id = node.id;
+    _SemanticsDebuggerEntry entry = _nodes.putIfAbsent(id, () => new _SemanticsDebuggerEntry(id));
+    entry.updateWith(node);
     if (node.children != null) {
-      Set<_SemanticsDebuggerEntry> oldChildren = new Set<_SemanticsDebuggerEntry>.from(entry.children ?? const <_SemanticsDebuggerEntry>[]);
-      entry.children?.clear();
-      entry.children ??= new List<_SemanticsDebuggerEntry>();
+      if (entry.children != null)
+        entry.children.clear();
+      else
+        entry.children = new List<_SemanticsDebuggerEntry>();
       for (mojom.SemanticsNode child in node.children)
         entry.children.add(_updateNode(child));
-      Set<_SemanticsDebuggerEntry> newChildren = new Set<_SemanticsDebuggerEntry>.from(entry.children);
-      Set<_SemanticsDebuggerEntry> removedChildren = oldChildren.difference(newChildren);
-      for (_SemanticsDebuggerEntry oldChild in removedChildren)
-        nodes.remove(oldChild.id);
     }
     return entry;
+  }
+
+  void _removeDetachedNodes() {
+    // TODO(abarth): We should be able to keep this table updated without
+    // walking the entire tree.
+    Set<int> detachedNodes = new Set<int>.from(_nodes.keys);
+    Queue<_SemanticsDebuggerEntry> unvisited = new Queue<_SemanticsDebuggerEntry>();
+    unvisited.add(rootNode);
+    while (unvisited.isNotEmpty) {
+      _SemanticsDebuggerEntry node = unvisited.removeFirst();
+      detachedNodes.remove(node.id);
+      if (node.children != null)
+        unvisited.addAll(node.children);
+    }
+    for (int id in detachedNodes)
+      _nodes.remove(id);
   }
 
   int generation = 0;
@@ -329,12 +341,12 @@ class _SemanticsDebuggerListener implements mojom.SemanticsListener {
     generation += 1;
     for (mojom.SemanticsNode node in nodes)
       _updateNode(node);
-    for (VoidCallback listener in _listeners)
-      listener();
+    _removeDetachedNodes();
+    notifyListeners();
   }
 
   _SemanticsDebuggerEntry _hitTest(Point position, _SemanticsDebuggerEntryFilter filter) {
-    return nodes[0]?.hitTest(position, filter);
+    return rootNode?.hitTest(position, filter);
   }
 
   void handleTap(Point position) {
@@ -370,10 +382,8 @@ class _SemanticsDebuggerPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    _SemanticsDebuggerListener.instance.nodes[0]?.paint(
-      canvas,
-      _SemanticsDebuggerListener.instance.nodes[0].findDepth()
-    );
+    _SemanticsDebuggerEntry rootNode = _SemanticsDebuggerListener.instance.rootNode;
+    rootNode?.paint(canvas, rootNode.findDepth());
     if (pointerPosition != null) {
       Paint paint = new Paint();
       paint.color = const Color(0x7F0090FF);
