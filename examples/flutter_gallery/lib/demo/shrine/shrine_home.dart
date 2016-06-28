@@ -18,6 +18,47 @@ const double unitSize = kToolBarHeight;
 final List<Product> _products = new List<Product>.from(allProducts());
 final Map<Product, Order> _shoppingCart = <Product, Order>{};
 
+// The Shrine home page arranges the product cards into two columns. The card
+// on every 4th and 5th row spans two columns.
+class ShrineGridDelegate extends GridDelegate {
+  int _rowAtIndex(int index) {
+    final int n = index ~/ 8;
+    return const <int>[0, 0, 1, 1, 2, 2, 3, 4][index - n * 8] + n * 5;
+  }
+
+  int _columnAtIndex(int index) {
+    return const <int>[0, 1, 0, 1, 0, 1, 0, 0][index % 8];
+  }
+
+  int _columnSpanAtIndex(int index) {
+    return const <int>[1, 1, 1, 1, 1, 1, 2, 2][index % 8];
+  }
+
+  @override
+  GridSpecification getGridSpecification(BoxConstraints constraints, int childCount) {
+    assert(childCount >= 0);
+    return new GridSpecification.fromRegularTiles(
+      tileWidth: constraints.maxWidth / 2.0 - 8.0,
+      tileHeight: constraints.maxWidth * 0.67,
+      columnCount: 2,
+      rowCount: childCount == 0 ? 0 : _rowAtIndex(childCount - 1) + 1,
+      rowSpacing: 8.0,
+      columnSpacing: 8.0
+    );
+  }
+
+  @override
+  GridChildPlacement getChildPlacement(GridSpecification specification, int index, Object placementData) {
+    assert(index >= 0);
+    return new GridChildPlacement(
+      column: _columnAtIndex(index),
+      row: _rowAtIndex(index),
+      columnSpan: _columnSpanAtIndex(index),
+      rowSpan: 1
+    );
+  }
+}
+
 /// Displays the Vendor's name and avatar.
 class VendorItem extends StatelessWidget {
   VendorItem({ Key key, this.vendor }) : super(key: key) {
@@ -65,7 +106,7 @@ abstract class PriceItem extends StatelessWidget {
   Widget buildItem(BuildContext context, TextStyle style, EdgeInsets padding) {
     BoxDecoration decoration;
     if (_shoppingCart[product] != null)
-      decoration = new BoxDecoration(backgroundColor: const Color(0xFFFFE0E0));
+      decoration = new BoxDecoration(backgroundColor: ShrineTheme.of(context).priceHighlightColor);
 
     return new Container(
       padding: padding,
@@ -140,9 +181,11 @@ class FeatureItem extends StatelessWidget {
     final ShrineTheme theme = ShrineTheme.of(context);
     return new AspectRatio(
       aspectRatio: 3.0 / 3.5,
-      child: new Material(
-        type: MaterialType.card,
-        elevation: 1,
+      child: new Container(
+        decoration: new BoxDecoration(
+          backgroundColor: theme.cardBackgroundColor,
+          border: new Border(bottom: new BorderSide(color: theme.dividerColor))
+        ),
         child: new Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
@@ -261,6 +304,7 @@ class ShrineHome extends StatefulWidget {
 
 class _ShrineHomeState extends State<ShrineHome> {
   static final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>(debugLabel: 'Order page');
+  static final GridDelegate gridDelegate = new ShrineGridDelegate();
 
   void handleCompletedOrder(Order completedOrder) {
     assert(completedOrder.product != null);
@@ -300,24 +344,20 @@ class _ShrineHomeState extends State<ShrineHome> {
         child: new RepaintBoundary(
           child: new Column(
             children: <Widget>[
-              new Container(
-                margin: new EdgeInsets.only(bottom: 8.0),
-                child: new FeatureItem(product: featured)
-              ),
-              new FixedColumnCountGrid(
-                columnCount: 2,
-                rowSpacing: 8.0,
-                columnSpacing: 8.0,
-                padding: const EdgeInsets.all(8.0),
-                tileAspectRatio: 160.0 / 224.0, // width/height
-                children: _products.map((Product product) {
-                  return new RepaintBoundary(
-                    child: new ProductItem(
-                      product: product,
-                      onPressed: () { showOrderPage(product); }
-                    )
-                  );
-                }).toList()
+              new FeatureItem(product: featured),
+              new Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: new CustomGrid(
+                  delegate: gridDelegate,
+                  children: _products.map((Product product) {
+                    return new RepaintBoundary(
+                      child: new ProductItem(
+                        product: product,
+                        onPressed: () { showOrderPage(product); }
+                      )
+                    );
+                  }).toList()
+                )
               )
             ]
           )
