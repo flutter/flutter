@@ -39,7 +39,7 @@ void main() {
       }
     ));
     log.add('---');
-    await tester.tap(find.text('inner'));;
+    await tester.tap(find.text('inner'));
     await tester.pump();
     log.add('---');
     expect(log, equals(<String>[

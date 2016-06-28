@@ -167,7 +167,7 @@ void main() {
     {
       Node rootNode = new Node();
 
-      Node node0 = new Node()..zPosition = -1.0;;
+      Node node0 = new Node()..zPosition = -1.0;
       Node node1 = new Node();
       Node node2 = new Node()..zPosition = 1.0;
 

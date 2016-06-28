@@ -461,7 +461,7 @@ Future<int> buildAndroid(
         String targetPath = entity.path.substring(assetsDir.path.length);
         extraFiles["assets/$targetPath"] = entity;
       }
-    };
+    }
   }
 
   // In debug (JIT) mode, the snapshot lives in the FLX, and we can skip the APK
