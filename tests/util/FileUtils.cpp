@@ -29,7 +29,7 @@ std::vector<uint8_t> readWholeFile(const std::string& filePath) {
     LOG_ALWAYS_FATAL_IF(fstat(fileno(fp), &st) != 0);
 
     std::vector<uint8_t> result(st.st_size);
-    LOG_ALWAYS_FATAL_IF(fread(result.data(), 1, st.st_size, fp) != st.st_size);
+    LOG_ALWAYS_FATAL_IF(fread(result.data(), 1, st.st_size, fp) != static_cast<size_t>(st.st_size));
     fclose(fp);
     return result;
 }
