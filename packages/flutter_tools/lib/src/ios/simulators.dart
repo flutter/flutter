@@ -660,7 +660,7 @@ class IOSSimulator extends Device {
         String name = path.basename(entity.path);
         return entity is File && name.startsWith('Simulator') && name.endsWith('.png');
       }));
-    };
+    }
 
     Set<File> existingScreenshots = getScreenshots();
 

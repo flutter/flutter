@@ -335,7 +335,7 @@ class RenderFlow extends RenderBox
 
     void painter(PaintingContext context, Offset offset) {
       context.paintChild(child, offset);
-    };
+    }
     if (opacity == 1.0) {
       _paintingContext.pushTransform(needsCompositing, _paintingOffset, transform, painter);
     } else {

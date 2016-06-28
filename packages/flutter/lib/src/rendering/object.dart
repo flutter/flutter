@@ -871,7 +871,7 @@ class PipelineOwner {
       for (RenderObject node in dirtyNodes..sort((RenderObject a, RenderObject b) => b.depth - a.depth)) {
         if (node._needsPaint && node.owner == this)
           PaintingContext.repaintCompositedChild(node);
-      };
+      }
       assert(_nodesNeedingPaint.length == 0);
     } finally {
       _debugDoingPaint = false;

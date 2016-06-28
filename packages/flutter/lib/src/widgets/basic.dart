@@ -2756,9 +2756,9 @@ class Semantics extends SingleChildRenderObjectWidget {
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('container: $container');
-    if (checked != null);
+    if (checked != null)
       description.add('checked: $checked');
-    if (label != null);
+    if (label != null)
       description.add('label: "$label"');
   }
 }

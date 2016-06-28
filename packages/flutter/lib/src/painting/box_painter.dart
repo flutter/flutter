@@ -272,7 +272,8 @@ class Border {
         }
         canvas.drawPath(path, paint);
         break;
-      case BorderStyle.none: ;
+      case BorderStyle.none:
+        break;
     }
 
     switch (right.style) {
@@ -290,7 +291,8 @@ class Border {
         }
         canvas.drawPath(path, paint);
         break;
-      case BorderStyle.none: ;
+      case BorderStyle.none:
+        break;
     }
 
     switch (bottom.style) {
@@ -308,7 +310,8 @@ class Border {
         }
         canvas.drawPath(path, paint);
         break;
-      case BorderStyle.none: ;
+      case BorderStyle.none:
+        break;
     }
 
     switch (left.style) {
@@ -326,7 +329,8 @@ class Border {
         }
         canvas.drawPath(path, paint);
         break;
-      case BorderStyle.none: ;
+      case BorderStyle.none:
+        break;
     }
   }
 
