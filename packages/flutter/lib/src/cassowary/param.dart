@@ -11,12 +11,8 @@ import 'term.dart';
 /// is interested in watching updates to the value of this indeterminate,
 /// it can assign a watcher as the `owner`.
 class Variable {
-  static int _total = 0;
-
   /// Creates a new [Variable] with the given constant value.
-  Variable(this.value) : _tick = _total++;
-
-  final int _tick;
+  Variable(this.value);
 
   /// The current value of the variable.
   double value;
@@ -41,13 +37,6 @@ class Variable {
     value = updated;
     return res;
   }
-
-  /// The name used for this [Variable] when debugging the internal state of the
-  /// solver.
-  String get debugName => name ?? 'variable$_tick';
-
-  @override
-  String toString() => debugName;
 }
 
 /// A [Param] wraps a [Variable] and makes it suitable to be used in an

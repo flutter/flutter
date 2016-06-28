@@ -14,32 +14,9 @@ import 'term.dart';
 enum _SymbolType { invalid, external, slack, error, dummy, }
 
 class _Symbol {
-  const _Symbol(this.type, this.tick);
-  final _SymbolType type;
-  final int tick;
+  const _Symbol(this.type);
 
-  @override
-  String toString() {
-    String typeString = 'unknown';
-    switch (type) {
-      case _SymbolType.invalid:
-        typeString = 'i';
-        break;
-      case _SymbolType.external:
-        typeString = 'v';
-        break;
-      case _SymbolType.slack:
-        typeString = 's';
-        break;
-      case _SymbolType.error:
-        typeString = 'e';
-        break;
-      case _SymbolType.dummy:
-        typeString = 'd';
-        break;
-    }
-    return '$typeString$tick';
-  }
+  final _SymbolType type;
 }
 
 class _Tag {
@@ -156,11 +133,8 @@ class Solver {
   final Map<Variable, _EditInfo> _edits = new Map<Variable, _EditInfo>();
   final List<_Symbol> _infeasibleRows = new List<_Symbol>();
   final _Row _objective = new _Row(0.0);
-  _Row _artificial = new _Row(0.0);
 
-  /// A monotonically increasing value that indicates how many times the solver
-  /// has iterated.
-  int tick = 1;
+  _Row _artificial = new _Row(0.0);
 
   /// Attempts to add the constraints in the list to the solver. If it cannot
   /// add any for some reason, a cleanup is attempted so that either all
@@ -204,8 +178,8 @@ class Solver {
     if (_constraints.containsKey(constraint))
       return Result.duplicateConstraint;
 
-    _Tag tag = new _Tag(new _Symbol(_SymbolType.invalid, 0),
-        new _Symbol(_SymbolType.invalid, 0));
+    _Tag tag = new _Tag(new _Symbol(_SymbolType.invalid),
+                        new _Symbol(_SymbolType.invalid));
 
     _Row row = _createRow(constraint, tag);
 
@@ -512,7 +486,7 @@ class Solver {
     if (symbol != null)
       return symbol;
 
-    symbol = new _Symbol(_SymbolType.external, tick++);
+    symbol = new _Symbol(_SymbolType.external);
     _vars[variable] = symbol;
 
     return symbol;
@@ -543,12 +517,12 @@ class Solver {
           double coefficient =
               constraint.relation == Relation.lessThanOrEqualTo ? 1.0 : -1.0;
 
-          _Symbol slack = new _Symbol(_SymbolType.slack, tick++);
+          _Symbol slack = new _Symbol(_SymbolType.slack);
           tag.marker = slack;
           row.insertSymbol(slack, coefficient);
 
           if (constraint.priority < Priority.required) {
-            _Symbol error = new _Symbol(_SymbolType.error, tick++);
+            _Symbol error = new _Symbol(_SymbolType.error);
             tag.other = error;
             row.insertSymbol(error, -coefficient);
             _objective.insertSymbol(error, constraint.priority);
@@ -557,8 +531,8 @@ class Solver {
         break;
       case Relation.equalTo:
         if (constraint.priority < Priority.required) {
-          _Symbol errPlus = new _Symbol(_SymbolType.error, tick++);
-          _Symbol errMinus = new _Symbol(_SymbolType.error, tick++);
+          _Symbol errPlus = new _Symbol(_SymbolType.error);
+          _Symbol errMinus = new _Symbol(_SymbolType.error);
           tag.marker = errPlus;
           tag.other = errMinus;
           row.insertSymbol(errPlus, -1.0);
@@ -566,7 +540,7 @@ class Solver {
           _objective.insertSymbol(errPlus, constraint.priority);
           _objective.insertSymbol(errMinus, constraint.priority);
         } else {
-          _Symbol dummy = new _Symbol(_SymbolType.dummy, tick++);
+          _Symbol dummy = new _Symbol(_SymbolType.dummy);
           tag.marker = dummy;
           row.insertSymbol(dummy);
         }
@@ -598,7 +572,7 @@ class Solver {
         return tag.other;
     }
 
-    return new _Symbol(_SymbolType.invalid, 0);
+    return new _Symbol(_SymbolType.invalid);
   }
 
   bool _allDummiesInRow(_Row row) {
@@ -610,7 +584,7 @@ class Solver {
   }
 
   bool _addWithArtificialVariableOnRow(_Row row) {
-    _Symbol artificial = new _Symbol(_SymbolType.slack, tick++);
+    _Symbol artificial = new _Symbol(_SymbolType.slack);
     _rows[artificial] = new _Row.fromRow(row);
     _artificial = new _Row.fromRow(row);
 
@@ -669,7 +643,7 @@ class Solver {
         return symbol;
     }
 
-    return new _Symbol(_SymbolType.invalid, 0);
+    return new _Symbol(_SymbolType.invalid);
   }
 
   _Symbol _leavingSymbolForEnteringSymbol(_Symbol entering) {
@@ -709,7 +683,7 @@ class Solver {
         return symbol;
       }
     }
-    return new _Symbol(_SymbolType.invalid, 0);
+    return new _Symbol(_SymbolType.invalid);
   }
 
   void _removeConstraintEffects(Constraint cn, _Tag tag) {
@@ -838,7 +812,7 @@ class Solver {
       }
     }
 
-    return entering ?? new _Symbol(_SymbolType.invalid, 0);
+    return entering ?? new _Symbol(_SymbolType.invalid);
   }
 
   @override
