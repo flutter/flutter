@@ -108,7 +108,7 @@ class WidgetsApp extends StatefulWidget {
   _WidgetsAppState createState() => new _WidgetsAppState();
 }
 
-class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserver {
+class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserver, NavigatorOwner {
   GlobalObjectKey _navigator;
   LocaleQueryData _localeData;
 
@@ -212,4 +212,6 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     return result;
   }
 
+  @override
+  NavigatorState get navigator => _navigator.currentState;
 }

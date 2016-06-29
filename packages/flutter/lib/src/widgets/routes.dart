@@ -455,6 +455,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// The settings for this route.
   ///
   /// See [RouteSettings] for details.
+  @override
   final RouteSettings settings;
 
   /// Returns the modal route most closely associated with the given context.

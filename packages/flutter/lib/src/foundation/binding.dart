@@ -90,6 +90,7 @@ abstract class BindingBase {
   /// this method to register them using calls to
   /// [registerSignalServiceExtension],
   /// [registerBoolServiceExtension],
+  /// [registerStringServiceExtension],
   /// [registerNumericServiceExtension], and
   /// [registerServiceExtension] (in increasing order of complexity).
   ///
@@ -173,6 +174,35 @@ abstract class BindingBase {
         if (parameters.containsKey('enabled'))
           setter(parameters['enabled'] == 'true');
         return <String, dynamic>{ 'enabled': getter() };
+      }
+    );
+  }
+
+  /// Registers a service extension method with the given name (full
+  /// name "ext.flutter.name"), which takes a single argument with the
+  /// same name as the method which, if present, must have a string value,
+  /// and can be omitted to read the current value. (Other arguments are
+  /// ignored.)
+  ///
+  /// Calls the `getter` callback to obtain the value when
+  /// responding to the service extension method being called.
+  ///
+  /// Calls the `setter` callback with the new value when the
+  /// service extension method is called with a new value.
+  void registerStringServiceExtension({
+    @required String name,
+    @required ValueGetter<String> getter,
+    @required ValueSetter<String> setter
+  }) {
+    assert(name != null);
+    assert(getter != null);
+    assert(setter != null);
+    registerServiceExtension(
+      name: name,
+      callback: (Map<String, String> parameters) async {
+        if (parameters.containsKey(name))
+          setter(parameters[name]);
+        return <String, dynamic>{ name: getter() };
       }
     );
   }

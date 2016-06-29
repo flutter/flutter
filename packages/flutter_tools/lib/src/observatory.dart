@@ -215,6 +215,27 @@ class Observatory {
 
   // Flutter extension methods.
 
+  Future<Response> flutterDebugDumpApp(String isolateId) {
+    return peer.sendRequest('ext.flutter.debugDumpApp', <String, dynamic>{
+      'isolateId': isolateId
+    }).then((dynamic result) => new Response(result));
+  }
+
+  Future<Response> flutterSetApplicationRoute(String isolateId, String route) {
+    return peer.sendRequest('ext.flutter.applicationRoute', <String, dynamic>{
+      'isolateId': isolateId,
+      'applicationRoute': route
+    }).then((dynamic result) => new Response(result));
+  }
+
+  /// Called when application code has changed to cause the application to pick
+  /// up any changed code.
+  Future<Response> flutterReassemble(String isolateId) {
+    return peer.sendRequest('ext.flutter.reassemble', <String, dynamic>{
+      'isolateId': isolateId
+    }).then((dynamic result) => new Response(result));
+  }
+
   Future<Response> flutterExit(String isolateId) {
     return peer.sendRequest('ext.flutter.exit', <String, dynamic>{
       'isolateId': isolateId
@@ -279,6 +300,7 @@ class Event extends Response {
 
   /// Only valid for [kind] == `Extension`.
   String get extensionKind => response['extensionKind'];
+  Map<String, dynamic> get extensionData => response['extensionData'];
 }
 
 class IsolateRef extends Response {

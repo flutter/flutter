@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:developer' as developer;
+
 import 'package:flutter/rendering.dart';
 import 'package:meta/meta.dart';
 
@@ -21,6 +23,11 @@ abstract class Route<T> {
   /// The navigator that the route is in, if any.
   NavigatorState get navigator => _navigator;
   NavigatorState _navigator;
+
+  /// The settings for this route, if any.
+  ///
+  /// See [RouteSettings] for details.
+  RouteSettings get settings => null;
 
   /// The overlay entries for this route.
   List<OverlayEntry> get overlayEntries => const <OverlayEntry>[];
@@ -366,10 +373,22 @@ class NavigatorState extends State<Navigator> {
       route.didChangeNext(null);
       if (oldRoute != null)
         oldRoute.didChangeNext(route);
-      config.observer?.didPush(route, oldRoute);
+      _didPush(route, oldRoute);
     });
     assert(() { _debugLocked = false; return true; });
     _cancelActivePointers();
+  }
+
+  void _didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
+    config.observer?.didPush(route, previousRoute);
+    assert(() {
+      String name = route?.settings?.name;
+      developer.postEvent('Flutter.RouteChanged', <String, dynamic>{
+        'route': name,
+        'changeType': 'push'
+      });
+      return true;
+    });
   }
 
   void replace({ Route<dynamic> oldRoute, Route<dynamic> newRoute }) {
@@ -448,7 +467,7 @@ class NavigatorState extends State<Navigator> {
           // state (e.g. ModalScope.isCurrent).
           _history.removeLast();
           _history.last.didPopNext(route);
-          config.observer?.didPop(route, _history.last);
+          _didPop(route, _history.last);
           route._navigator = null;
         });
       } else {
@@ -461,6 +480,18 @@ class NavigatorState extends State<Navigator> {
     assert(() { _debugLocked = false; return true; });
     _cancelActivePointers();
     return true;
+  }
+
+  void _didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
+    config.observer?.didPop(route, previousRoute);
+    assert(() {
+      String name = previousRoute?.settings?.name;
+      developer.postEvent('Flutter.RouteChanged', <String, dynamic>{
+        'route': name,
+        'changeType': 'pop'
+      });
+      return true;
+    });
   }
 
   void popUntil(Route<dynamic> targetRoute) {
@@ -477,6 +508,8 @@ class NavigatorState extends State<Navigator> {
     assert(_history.length > 0);
     return _history.length > 1 || _history[0].willHandlePopInternally;
   }
+
+  Route<dynamic> get currentRoute => _history.isEmpty ? null : _history.last;
 
   final Set<int> _activePointers = new Set<int>();
 
@@ -523,4 +556,8 @@ class NavigatorState extends State<Navigator> {
       )
     );
   }
+}
+
+abstract class NavigatorOwner implements WidgetsBindingObserver {
+  NavigatorState get navigator;
 }
