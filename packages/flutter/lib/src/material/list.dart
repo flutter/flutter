@@ -96,7 +96,7 @@ class MaterialList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new ScrollableList(
-      key: scrollableKey,
+      scrollableKey: scrollableKey,
       initialScrollOffset: initialScrollOffset,
       scrollDirection: Axis.vertical,
       onScrollStart: onScrollStart,
