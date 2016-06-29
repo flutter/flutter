@@ -44,21 +44,13 @@ enum RefreshIndicatorLocation {
   bottom,
 }
 
-class _Refresh {
-  _Refresh(this.refresh);
-
-  final RefreshCallback refresh;
-  bool dismissed = false;
-
-  void run(_RunRefreshCallback callback) {
-    if (!dismissed)
-      callback(this); // The callback will continue to check this.dismissed
-  }
+enum _RefreshIndicatorMode {
+  drag,
+  armed,
+  snap,
+  refresh,
+  dimiss
 }
-
-typedef Future<Null> _RunRefreshCallback(_Refresh thisRefresh);
-
-
 
 /// A widget that supports the Material "swipe to refresh" idiom.
 ///
@@ -125,8 +117,8 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
   double _minScrollOffset;
   double _maxScrollOffset;
   RefreshIndicatorLocation _location = RefreshIndicatorLocation.top;
-  _Refresh _activeRefresh;
-  bool _refreshUnderway = false;
+  _RefreshIndicatorMode _mode;
+  List<Future<Null>> _pendingRefreshFutures = <Future<Null>>[];
 
   @override
   void initState() {
@@ -187,8 +179,7 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
     _updateState(scrollable);
     _scaleController.value = 0.0;
     _sizeController.value = 0.0;
-    _activeRefresh?.dismissed = true;
-    _refreshUnderway = false;
+    _mode = _RefreshIndicatorMode.drag;
   }
 
   void _handlePointerMove(PointerMoveEvent event) {
@@ -207,30 +198,34 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
         });
       }
     }
+    _mode = _valueColor.value.alpha == 0xFF ? _RefreshIndicatorMode.armed : _RefreshIndicatorMode.drag;
     _updateState(scrollable);
   }
 
   Future<Null> _doHandlePointerUp(PointerUpEvent event) async {
-    if (_valueColor.value.alpha == 0xFF) {
-      _activeRefresh = new _Refresh(config.refresh)..run((_Refresh thisRefresh) async {
-        await _sizeController.animateTo(1.0 / _kDragSizeFactorLimit, duration: _kIndicatorSnapDuration);
-        if (!thisRefresh.dismissed) {
-          setState(() {
-            _refreshUnderway = true;
-          });
-          await thisRefresh.refresh(); // Actually run the app's refresh callback.
-          if (!thisRefresh.dismissed) {
-            setState(() {
-              _refreshUnderway = false;
-            });
-            _scaleController.animateTo(1.0, duration: _kIndicatorScaleDuration);
-          }
-        }
-      });
-      return new Future<Null>.value();
-    }
+    if (_mode == _RefreshIndicatorMode.armed) {
+      _mode = _RefreshIndicatorMode.snap;
+      await _sizeController.animateTo(1.0 / _kDragSizeFactorLimit, duration: _kIndicatorSnapDuration);
+      if (_mode == _RefreshIndicatorMode.snap) {
+        setState(() {
+          _mode = _RefreshIndicatorMode.refresh; // Show the indeterminate progress indicator.
+        });
 
-    return _scaleController.animateTo(1.0, duration: _kIndicatorScaleDuration);
+        final Future<Null> refreshFuture = config.refresh();
+        _pendingRefreshFutures.insert(0, refreshFuture);
+        await refreshFuture;
+        _pendingRefreshFutures.remove(refreshFuture);
+
+        if (_pendingRefreshFutures.length == 0 && _mode == _RefreshIndicatorMode.refresh) {
+          setState(() {
+            _mode = null; // Stop showing the indeterminate progress indicator.
+          });
+          _scaleController.animateTo(1.0, duration: _kIndicatorScaleDuration);
+        }
+      }
+    } else {
+      _scaleController.animateTo(1.0, duration: _kIndicatorScaleDuration);
+    }
   }
 
   void _handlePointerUp(PointerEvent event) {
@@ -270,7 +265,7 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
                       animation: _sizeController,
                       builder: (BuildContext context, Widget child) {
                         return new RefreshProgressIndicator(
-                          value: _refreshUnderway ? null : _value.value,
+                          value: _mode == _RefreshIndicatorMode.refresh ? null : _value.value,
                           valueColor: _valueColor
                         );
                       }

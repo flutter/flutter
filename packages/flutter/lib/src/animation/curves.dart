@@ -60,6 +60,8 @@ class SawTooth extends Curve {
 
   @override
   double transform(double t) {
+    if (t == 1.0)
+      return 1.0;
     t *= count;
     return t - t.truncateToDouble();
   }
