@@ -19,12 +19,13 @@ DartState::Scope::~Scope() {
 }
 
 DartState::DartState()
-    : isolate_(NULL),
+    : isolate_(nullptr),
       class_library_(std::unique_ptr<DartClassLibrary>(new DartClassLibrary)),
       exception_factory_(new DartExceptionFactory(this)),
       library_loader_(new DartLibraryLoader(this)),
       message_handler_(std::unique_ptr<DartMessageHandler>(
           new DartMessageHandler())),
+      isolate_reloader_(nullptr),
       weak_factory_(this) {
 }
 

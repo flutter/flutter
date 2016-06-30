@@ -11,7 +11,7 @@
 #include "dart/runtime/include/dart_api.h"
 #include "dart/runtime/include/dart_native_api.h"
 #include "dart/runtime/include/dart_tools_api.h"
-#include "sky/engine/core/script/monitor.h"
+#include "flutter/tonic/monitor.h"
 
 namespace base {
   class Lock;

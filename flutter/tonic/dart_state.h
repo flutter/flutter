@@ -11,6 +11,7 @@
 #include "flutter/tonic/dart_api_scope.h"
 #include "flutter/tonic/dart_isolate_scope.h"
 #include "flutter/tonic/dart_persistent_value.h"
+#include "flutter/tonic/dart_isolate_reloader.h"
 
 namespace blink {
 class DartClassLibrary;
@@ -52,6 +53,13 @@ class DartState {
   DartLibraryLoader& library_loader() { return *library_loader_; }
   DartMessageHandler& message_handler() { return *message_handler_; }
 
+  // Takes ownership of |isolate_reloader|.
+  void set_isolate_reloader(
+        std::unique_ptr<DartIsolateReloader> isolate_reloader) {
+    isolate_reloader_ = std::move(isolate_reloader);
+  }
+  DartIsolateReloader* isolate_reloader() { return isolate_reloader_.get(); }
+
   Dart_Handle index_handle() { return index_handle_.value(); }
 
   virtual void DidSetIsolate() {}
@@ -62,6 +70,7 @@ class DartState {
   std::unique_ptr<DartExceptionFactory> exception_factory_;
   std::unique_ptr<DartLibraryLoader> library_loader_;
   std::unique_ptr<DartMessageHandler> message_handler_;
+  std::unique_ptr<DartIsolateReloader> isolate_reloader_;
 
   DartPersistentValue index_handle_;
 

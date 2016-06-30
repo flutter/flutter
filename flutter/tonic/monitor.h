@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_CORE_SCRIPT_MONITOR_H_
-#define SKY_ENGINE_CORE_SCRIPT_MONITOR_H_
+#ifndef FLUTTER_TONIC_DART_MONITOR_H_
+#define FLUTTER_TONIC_DART_MONITOR_H_
 
 #include "base/synchronization/condition_variable.h"
 #include "base/synchronization/lock.h"
@@ -72,4 +72,4 @@ class MonitorLocker {
 }  // namespace blink
 
 
-#endif  // SKY_ENGINE_CORE_SCRIPT_MONITOR_H_
+#endif  // FLUTTER_TONIC_DART_MONITOR_H_

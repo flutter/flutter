@@ -10,6 +10,7 @@
 #include "flutter/tonic/dart_converter.h"
 #include "flutter/tonic/dart_dependency_catcher.h"
 #include "flutter/tonic/dart_error.h"
+#include "flutter/tonic/dart_isolate_reloader.h"
 #include "flutter/tonic/dart_isolate_scope.h"
 #include "flutter/tonic/dart_library_provider.h"
 #include "flutter/tonic/dart_state.h"
@@ -200,69 +201,6 @@ DartLibraryLoader::DartLibraryLoader(DartState* dart_state)
 DartLibraryLoader::~DartLibraryLoader() {
 }
 
-
-static void BlockWaitingForDependencies(
-    DartLibraryLoader* loader,
-    const std::unordered_set<DartDependency*>& dependencies) {
-  scoped_refptr<base::SingleThreadTaskRunner> task_runner =
-      base::MessageLoop::current()->task_runner();
-  base::RunLoop run_loop;
-  task_runner->PostTask(
-      FROM_HERE,
-      base::Bind(
-          &DartLibraryLoader::WaitForDependencies,
-          base::Unretained(loader),
-          dependencies,
-          base::Bind(
-             base::IgnoreResult(&base::SingleThreadTaskRunner::PostTask),
-             task_runner.get(), FROM_HERE,
-             run_loop.QuitClosure())));
-  run_loop.Run();
-}
-
-static void InnerLoadScript(
-    const std::string& script_uri,
-    DartLibraryLoader* library_loader) {
-  // When spawning isolates, Dart expects the script loading to be completed
-  // before returning from the isolate creation callback. The mojo dart
-  // controller also expects the isolate to be finished loading a script
-  // before the isolate creation callback returns.
-
-  // We block here by creating a nested message pump and waiting for the load
-  // to complete.
-
-  DCHECK(base::MessageLoop::current() != nullptr);
-  base::MessageLoop::ScopedNestableTaskAllower allow(
-      base::MessageLoop::current());
-
-  // Initiate the load.
-  DartLibraryLoader& loader = *library_loader;
-  std::unordered_set<DartDependency*> dependencies;
-  {
-    DartDependencyCatcher dependency_catcher(loader);
-    loader.LoadScript(script_uri);
-    // Copy dependencies before dependency_catcher goes out of scope.
-    dependencies = std::unordered_set<DartDependency*>(
-        dependency_catcher.dependencies());
-  }
-
-  // Run inner message loop.
-  BlockWaitingForDependencies(&loader, dependencies);
-
-  // Finalize loading.
-  LogIfError(Dart_FinalizeLoading(true));
-}
-
-
-static void LoadScriptSync(
-    const std::string& script_uri,
-    DartLibraryLoader* library_loader) {
-  CHECK(base::MessageLoop::current() != nullptr);
-  // Thread has a message loop, use it.
-  InnerLoadScript(script_uri, library_loader);
-}
-
-
 Dart_Handle DartLibraryLoader::HandleLibraryTag(Dart_LibraryTag tag,
                                                 Dart_Handle library,
                                                 Dart_Handle url) {
@@ -278,8 +216,7 @@ Dart_Handle DartLibraryLoader::HandleLibraryTag(Dart_LibraryTag tag,
     return DartState::Current()->library_loader().Source(library, url);
   }
   if (tag == Dart_kScriptTag) {
-    LoadScriptSync(StdStringFromDart(url),
-                   &DartState::Current()->library_loader());
+    DartIsolateReloader::HandleLibraryTag(tag, library, url);
     return Dart_Null();
   }
   DCHECK(false);

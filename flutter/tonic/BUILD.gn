@@ -27,6 +27,8 @@ source_set("tonic") {
     "dart_invoke.h",
     "dart_io.cc",
     "dart_io.h",
+    "dart_isolate_reloader.cc",
+    "dart_isolate_reloader.h",
     "dart_isolate_scope.cc",
     "dart_isolate_scope.h",
     "dart_library_loader.cc",
