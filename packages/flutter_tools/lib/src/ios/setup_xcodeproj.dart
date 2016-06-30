@@ -42,7 +42,7 @@ void updateXcodeGeneratedProperties(String projectPath, BuildMode mode, String t
   localsFile.writeAsStringSync(localsBuffer.toString());
 }
 
-bool xcodeProjectRequiresUpdate(BuildMode mode) {
+bool xcodeProjectRequiresUpdate(BuildMode mode, String target) {
   File revisionFile = new File(path.join(Directory.current.path, 'ios', '.generated', 'REVISION'));
 
   // If the revision stamp does not exist, the Xcode project definitely requires
@@ -52,7 +52,7 @@ bool xcodeProjectRequiresUpdate(BuildMode mode) {
     return true;
   }
 
-  if (revisionFile.readAsStringSync() != _getCurrentXcodeRevisionString(mode)) {
+  if (revisionFile.readAsStringSync() != _getCurrentXcodeRevisionString(mode, target)) {
     printTrace("The revision stamp and the Flutter engine revision differ or the build mode has changed.");
     printTrace("Project needs to be updated.");
     return true;
@@ -75,7 +75,7 @@ Future<int> setupXcodeProjectHarness(String flutterProjectPath, BuildMode mode, 
   // Step 3: Write the REVISION file
   File revisionFile = new File(path.join(xcodeProjectPath, 'REVISION'));
   revisionFile.createSync();
-  revisionFile.writeAsStringSync(_getCurrentXcodeRevisionString(mode));
+  revisionFile.writeAsStringSync(_getCurrentXcodeRevisionString(mode, target));
 
   // Step 4: Tell the user the location of the generated project.
   printStatus('Xcode project created in $iosFilesPath/.');
@@ -83,7 +83,8 @@ Future<int> setupXcodeProjectHarness(String flutterProjectPath, BuildMode mode, 
   return 0;
 }
 
-String _getCurrentXcodeRevisionString(BuildMode mode) => (new StringBuffer()
+String _getCurrentXcodeRevisionString(BuildMode mode, String target) => (new StringBuffer()
     ..write('${FlutterVersion.getVersion().frameworkRevision}')
     ..write('-${tools.isLocalEngine ? tools.engineBuildPath : getModeName(mode)}')
+    ..write('::$target')
     ).toString();

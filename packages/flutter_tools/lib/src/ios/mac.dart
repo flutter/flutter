@@ -106,7 +106,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 }) async {
   String flutterProjectPath = Directory.current.path;
 
-  if (xcodeProjectRequiresUpdate(mode)) {
+  if (xcodeProjectRequiresUpdate(mode, target)) {
     printTrace('Initializing the Xcode project.');
     if ((await setupXcodeProjectHarness(flutterProjectPath, mode, target)) != 0) {
       printError('Could not initialize the Xcode project.');
