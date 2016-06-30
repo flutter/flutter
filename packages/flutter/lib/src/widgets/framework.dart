@@ -465,9 +465,6 @@ abstract class StatelessWidget extends Widget {
   /// inserted into the tree in multiple places at once.
   @protected
   Widget build(BuildContext context);
-
-  /// Trampoline to make the [build] closure library-accessible.
-  WidgetBuilder get _build => build;
 }
 
 /// A widget that has mutable state.
@@ -2012,7 +2009,7 @@ abstract class ComponentElement extends BuildableElement {
 /// Instantiation of [StatelessWidget]s.
 class StatelessElement extends ComponentElement {
   StatelessElement(StatelessWidget widget) : super(widget) {
-    _builder = widget._build;
+    _builder = widget.build;
   }
 
   @override
@@ -2022,14 +2019,14 @@ class StatelessElement extends ComponentElement {
   void update(StatelessWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
-    _builder = widget._build;
+    _builder = widget.build;
     _dirty = true;
     rebuild();
   }
 
   @override
   void _reassemble() {
-    _builder = widget._build;
+    _builder = widget.build;
     super._reassemble();
   }
 }
