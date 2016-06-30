@@ -226,10 +226,10 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
       child: new AnimatedBuilder(
         animation: _extentAnimation,
         builder: (BuildContext context, Widget child) {
-          if (_scrollDirection == null) // Haven't seen a scroll yet.
-            return child;
+          // We keep the same widget hierarchy here, even when we're not
+          // painting anything, to avoid rebuilding the children.
           return new CustomPaint(
-            foregroundPainter: new _Painter(
+            foregroundPainter: _scrollDirection == null ? null : new _Painter(
               scrollDirection: _scrollDirection,
               extent: _extentAnimation.value,
               isLeading: _scrollOffset < _minScrollOffset,
