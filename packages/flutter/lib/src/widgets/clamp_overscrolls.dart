@@ -50,14 +50,18 @@ class ClampOverscrolls extends InheritedWidget {
   ///
   /// This utility function is typically used by [Scrollable.builder] callbacks.
   static Widget buildViewport(BuildContext context, ScrollableState state, ViewportBuilder builder) {
+    // TODO(ianh): minScrollOffset and maxScrollOffset are typically determined
+    // by the container and content size. But we don't know those until we
+    // layout the viewport, which happens after build phase. We need to rethink
+    // this.
     final bool clampOverscrolls = ClampOverscrolls.of(context);
     final double clampedScrollOffset = clampOverscrolls
       ? state.scrollOffset.clamp(state.scrollBehavior.minScrollOffset, state.scrollBehavior.maxScrollOffset)
       : state.scrollOffset;
-   Widget viewport = builder(context, state, clampedScrollOffset);
-   if (clampOverscrolls)
-     viewport = new ClampOverscrolls(value: false, child: viewport);
-   return viewport;
+    Widget viewport = builder(context, state, clampedScrollOffset);
+    if (clampOverscrolls)
+      viewport = new ClampOverscrolls(value: false, child: viewport);
+    return viewport;
   }
 
   @override

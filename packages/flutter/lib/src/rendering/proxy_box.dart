@@ -1610,8 +1610,8 @@ class RenderCustomPaint extends RenderProxyBox {
       markNeedsPaint();
     }
     if (attached) {
-      oldPainter._repaint?.removeListener(markNeedsPaint);
-      newPainter._repaint?.addListener(markNeedsPaint);
+      oldPainter?._repaint?.removeListener(markNeedsPaint);
+      newPainter?._repaint?.addListener(markNeedsPaint);
     }
   }
 
