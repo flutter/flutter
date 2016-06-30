@@ -317,15 +317,17 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> {
   @override
   void initState() {
     super.initState();
-    _controller = new AnimationController(
-      duration: const Duration(milliseconds: 6666)
-    )..repeat();
+    _controller = _buildController();
   }
 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  AnimationController _buildController() {
+    return new AnimationController(duration: const Duration(milliseconds: 6666))..repeat();
   }
 
   Widget _buildIndicator(BuildContext context, double headValue, double tailValue, int stepValue, double rotationValue) {
@@ -348,11 +350,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (config.value != null)
-      return _buildIndicator(context, 0.0, 0.0, 0, 0.0);
-
+  Widget _buildAnimation() {
     return new AnimatedBuilder(
       animation: _controller,
       builder: (BuildContext context, Widget child) {
@@ -365,6 +363,13 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> {
         );
       }
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (config.value != null)
+      return _buildIndicator(context, 0.0, 0.0, 0, 0.0);
+    return _buildAnimation();
   }
 }
 
@@ -438,7 +443,12 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
     double value,
     Color backgroundColor,
     Animation<Color> valueColor
-  }) : super(key: key, value: value, backgroundColor: backgroundColor, valueColor: valueColor);
+  }) : super(
+    key: key,
+    value: value,
+    backgroundColor: backgroundColor,
+    valueColor: valueColor
+  );
 
   @override
   _RefreshProgressIndicatorState createState() => new _RefreshProgressIndicatorState();
@@ -446,6 +456,19 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
 
 class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   static double _kIndicatorSize = 40.0;
+
+  // Always show the indeterminate version of the circular progress indicator.
+  // When value is non-null the sweep of the progress indicator arrow's arc
+  // varies from 0 to about 270 degrees. When value is null the arrow animates
+  // starting from wherever we left it.
+  @override
+  Widget build(BuildContext context) {
+    if (config.value != null)
+      _controller.value = config.value / 10.0;
+    else
+      _controller.forward();
+    return _buildAnimation();
+  }
 
   @override
   Widget _buildIndicator(BuildContext context, double headValue, double tailValue, int stepValue, double rotationValue) {
@@ -462,8 +485,8 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
           child: new CustomPaint(
             painter: new _RefreshProgressIndicatorPainter(
               valueColor: config._getValueColor(context),
-              value: config.value, // may be null
-              headValue: headValue, // remaining arguments are ignored if config.value is not null
+              value: null, // Draw the indeterminate progress indicator.
+              headValue: headValue,
               tailValue: tailValue,
               stepValue: stepValue,
               rotationValue: rotationValue,

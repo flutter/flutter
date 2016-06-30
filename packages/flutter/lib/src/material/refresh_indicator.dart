@@ -44,6 +44,14 @@ enum RefreshIndicatorLocation {
   bottom,
 }
 
+enum _RefreshIndicatorMode {
+  drag,
+  armed,
+  snap,
+  refresh,
+  dimiss
+}
+
 /// A widget that supports the Material "swipe to refresh" idiom.
 ///
 /// When the child's vertical Scrollable descendant overscrolls, an
@@ -76,7 +84,7 @@ class RefreshIndicator extends StatefulWidget {
   /// Identifies the [Scrollable] descendant of child that will cause the
   /// refresh indicator to appear. Can be null if there's only one
   /// [Scrollable] descendant.
-  final Key scrollableKey;
+  final GlobalKey<ScrollableState> scrollableKey;
 
   /// The distance from the child's top or bottom edge to where the refresh indicator
   /// will settle. During the drag that exposes the refresh indicator, its actual
@@ -101,6 +109,7 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
   final AnimationController _scaleController = new AnimationController();
   Animation<double> _sizeFactor;
   Animation<double> _scaleFactor;
+  Animation<double> _value;
   Animation<Color> _valueColor;
 
   double _scrollOffset;
@@ -108,6 +117,8 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
   double _minScrollOffset;
   double _maxScrollOffset;
   RefreshIndicatorLocation _location = RefreshIndicatorLocation.top;
+  _RefreshIndicatorMode _mode;
+  Future<Null> _pendingRefreshFuture;
 
   @override
   void initState() {
@@ -116,6 +127,13 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
     _scaleFactor = new Tween<double>(begin: 1.0, end: 0.0).animate(_scaleController);
 
     final ThemeData theme = Theme.of(context);
+
+    // The "value" of the circular progress indicator during a drag.
+    _value = new Tween<double>(
+      begin: 0.0,
+      end: 0.75
+    )
+    .animate(_sizeController);
 
     // Fully opaque when we've reached config.displacement.
     _valueColor = new ColorTween(
@@ -126,6 +144,7 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
       parent: _sizeController,
       curve: new Interval(0.0, 1.0 / _kDragSizeFactorLimit)
     ));
+
   }
 
   @override
@@ -146,73 +165,84 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
     _maxScrollOffset = scrollBehavior.maxScrollOffset;
   }
 
-  void _onScrollStarted(ScrollableState scrollable) {
-    _updateState(scrollable);
-    _scaleController.value = 0.0;
-    _sizeController.value = 0.0;
-  }
-
   RefreshIndicatorLocation get _locationForScrollOffset {
     return _scrollOffset < _minScrollOffset
       ? RefreshIndicatorLocation.top
       : RefreshIndicatorLocation.bottom;
   }
 
-  void _onScrollUpdated(ScrollableState scrollable) {
+  void _handlePointerDown(PointerDownEvent event) {
+    final ScrollableState scrollable = config.scrollableKey?.currentState;
+    if (scrollable == null)
+      return;
+
+    _updateState(scrollable);
+    _scaleController.value = 0.0;
+    _sizeController.value = 0.0;
+    _mode = _RefreshIndicatorMode.drag;
+  }
+
+  void _handlePointerMove(PointerMoveEvent event) {
+    final ScrollableState scrollable = config.scrollableKey?.currentState;
+    if (scrollable == null)
+      return;
     final double value = scrollable.scrollOffset;
     if ((value < _minScrollOffset || value > _maxScrollOffset) &&
         ((value - _scrollOffset).abs() > kPixelScrollTolerance.distance)) {
       final double overScroll = value < _minScrollOffset ? _minScrollOffset - value : value - _maxScrollOffset;
       final double newValue = overScroll / (_containerExtent * _kDragContainerExtentPercentage);
-      if (newValue > _sizeController.value) {
-        _sizeController.value = newValue;
-        if (_location != _locationForScrollOffset) {
-          setState(() {
-            _location = _locationForScrollOffset;
-          });
-        }
+      _sizeController.value = newValue.clamp(0.0, 1.0);
+      if (_location != _locationForScrollOffset) {
+        setState(() {
+          _location = _locationForScrollOffset;
+        });
       }
     }
+    _mode = _valueColor.value.alpha == 0xFF ? _RefreshIndicatorMode.armed : _RefreshIndicatorMode.drag;
     _updateState(scrollable);
   }
 
-  Future<Null> _doOnScrollEnded(ScrollableState scrollable) async {
-    if (_valueColor.value.alpha == 0xFF) {
+  Future<Null> _doHandlePointerUp(PointerUpEvent event) async {
+    if (_mode == _RefreshIndicatorMode.armed) {
+      _mode = _RefreshIndicatorMode.snap;
       await _sizeController.animateTo(1.0 / _kDragSizeFactorLimit, duration: _kIndicatorSnapDuration);
-      await config.refresh();
-    }
-    return _scaleController.animateTo(1.0, duration: _kIndicatorScaleDuration);
-  }
+      if (mounted && _mode == _RefreshIndicatorMode.snap) {
+        setState(() {
+          _mode = _RefreshIndicatorMode.refresh; // Show the indeterminate progress indicator.
+        });
 
-  void _onScrollEnded(ScrollableState scrollable) {
-    _doOnScrollEnded(scrollable);
-  }
+        // Only one refresh callback is allowed to run at a time. If the user
+        // attempts to start a refresh while one is still running ("pending") we
+        // just continue to wait on the pending refresh.
+        if (_pendingRefreshFuture == null)
+          _pendingRefreshFuture = config.refresh();
+        await _pendingRefreshFuture;
+        bool completed = _pendingRefreshFuture != null;
+        _pendingRefreshFuture = null;
 
-  bool _handleScrollNotification(ScrollNotification notification) {
-    if (config.scrollableKey == null || config.scrollableKey == notification.scrollable.config.key) {
-      final ScrollableState scrollable = notification.scrollable;
-      if (scrollable.config.scrollDirection != Axis.vertical)
-        return false;
-      switch(notification.kind) {
-        case ScrollNotificationKind.started:
-          _onScrollStarted(scrollable);
-          break;
-        case ScrollNotificationKind.updated:
-          _onScrollUpdated(scrollable);
-          break;
-        case ScrollNotificationKind.ended:
-          _onScrollEnded(scrollable);
-          break;
+        if (mounted && completed && _mode == _RefreshIndicatorMode.refresh) {
+          setState(() {
+            _mode = null; // Stop showing the indeterminate progress indicator.
+          });
+          _scaleController.animateTo(1.0, duration: _kIndicatorScaleDuration);
+        }
       }
+    } else {
+      _scaleController.animateTo(1.0, duration: _kIndicatorScaleDuration);
     }
-    return false;
+  }
+
+  void _handlePointerUp(PointerEvent event) {
+    _doHandlePointerUp(event);
   }
 
   @override
   Widget build(BuildContext context) {
     final bool isAtTop = _location == RefreshIndicatorLocation.top;
-    return new NotificationListener<ScrollNotification>(
-      onNotification: _handleScrollNotification,
+    return new Listener(
+      onPointerDown: _handlePointerDown,
+      onPointerMove: _handlePointerMove,
+      onPointerUp: _handlePointerUp,
       child: new Stack(
         children: <Widget>[
           new ClampOverscrolls(
@@ -235,9 +265,14 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
                   alignment: isAtTop ? FractionalOffset.bottomCenter : FractionalOffset.topCenter,
                   child: new ScaleTransition(
                     scale: _scaleFactor,
-                    child: new RefreshProgressIndicator(
-                      value: null,
-                      valueColor: _valueColor
+                    child: new AnimatedBuilder(
+                      animation: _sizeController,
+                      builder: (BuildContext context, Widget child) {
+                        return new RefreshProgressIndicator(
+                          value: _mode == _RefreshIndicatorMode.refresh ? null : _value.value,
+                          valueColor: _valueColor
+                        );
+                      }
                     )
                   )
                 )

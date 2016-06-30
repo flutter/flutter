@@ -18,6 +18,7 @@ class OverscrollDemo extends StatefulWidget {
 }
 
 class OverscrollDemoState extends State<OverscrollDemo> {
+  static final GlobalKey<ScrollableState> _scrollableKey = new GlobalKey<ScrollableState>();
   static final List<String> _items = <String>[
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'
   ];
@@ -50,6 +51,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
       child: new MaterialList(
         type: MaterialListType.threeLine,
         padding: const EdgeInsets.all(8.0),
+        scrollableKey: _scrollableKey,
         children: _items.map((String item) {
           return new ListItem(
             isThreeLine: true,
@@ -65,7 +67,11 @@ class OverscrollDemoState extends State<OverscrollDemo> {
         body = new OverscrollIndicator(child: body);
         break;
       case IndicatorType.refresh:
-        body = new RefreshIndicator(child: body, refresh: refresh);
+        body = new RefreshIndicator(
+          child: body,
+          refresh: refresh,
+          scrollableKey: _scrollableKey
+        );
         break;
     }
 
