@@ -287,11 +287,8 @@ class CircularProgressIndicator extends ProgressIndicator {
     Key key,
     double value,
     Color backgroundColor,
-    this.controller,
     Animation<Color> valueColor
   }) : super(key: key, value: value, backgroundColor: backgroundColor, valueColor: valueColor);
-
-  final AnimationController controller;
 
   @override
   _CircularProgressIndicatorState createState() => new _CircularProgressIndicatorState();

@@ -118,7 +118,7 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
   double _maxScrollOffset;
   RefreshIndicatorLocation _location = RefreshIndicatorLocation.top;
   _RefreshIndicatorMode _mode;
-  List<Future<Null>> _pendingRefreshFutures = <Future<Null>>[];
+  Future<Null> _pendingRefreshFuture;
 
   @override
   void initState() {
@@ -206,17 +206,21 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
     if (_mode == _RefreshIndicatorMode.armed) {
       _mode = _RefreshIndicatorMode.snap;
       await _sizeController.animateTo(1.0 / _kDragSizeFactorLimit, duration: _kIndicatorSnapDuration);
-      if (_mode == _RefreshIndicatorMode.snap) {
+      if (mounted && _mode == _RefreshIndicatorMode.snap) {
         setState(() {
           _mode = _RefreshIndicatorMode.refresh; // Show the indeterminate progress indicator.
         });
 
-        final Future<Null> refreshFuture = config.refresh();
-        _pendingRefreshFutures.insert(0, refreshFuture);
-        await refreshFuture;
-        _pendingRefreshFutures.remove(refreshFuture);
+        // Only one refresh callback is allowed to run at a time. If the user
+        // attempts to start a refresh while one is still running ("pending") we
+        // just continue to wait on the pending refresh.
+        if (_pendingRefreshFuture == null)
+          _pendingRefreshFuture = config.refresh();
+        await _pendingRefreshFuture;
+        bool completed = _pendingRefreshFuture != null;
+        _pendingRefreshFuture = null;
 
-        if (_pendingRefreshFutures.length == 0 && _mode == _RefreshIndicatorMode.refresh) {
+        if (mounted && completed && _mode == _RefreshIndicatorMode.refresh) {
           setState(() {
             _mode = null; // Stop showing the indeterminate progress indicator.
           });
