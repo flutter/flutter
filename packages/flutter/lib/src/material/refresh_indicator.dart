@@ -49,7 +49,7 @@ enum _RefreshIndicatorMode {
   armed,
   snap,
   refresh,
-  dimiss
+  dismiss
 }
 
 /// A widget that supports the Material "swipe to refresh" idiom.
@@ -61,6 +61,11 @@ enum _RefreshIndicatorMode {
 /// expected to udpate the scrollback and then complete the Future it
 /// returns. The refresh indicator disappears after the callback's
 /// Future has completed.
+///
+/// The required [scrollableKey] parameter identifies the scrollable widget
+/// whose scrollOffset is monitored by this RefreshIndicator. The same
+/// scrollableKey must also be set on the scrollable. See [Block.scrollableKey]
+/// [ScrollableList.scrollableKey], etc.
 ///
 /// See also:
 ///
@@ -82,8 +87,7 @@ class RefreshIndicator extends StatefulWidget {
   }
 
   /// Identifies the [Scrollable] descendant of child that will cause the
-  /// refresh indicator to appear. Can be null if there's only one
-  /// [Scrollable] descendant.
+  /// refresh indicator to appear.
   final GlobalKey<ScrollableState> scrollableKey;
 
   /// The distance from the child's top or bottom edge to where the refresh indicator
@@ -179,7 +183,9 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
     _updateState(scrollable);
     _scaleController.value = 0.0;
     _sizeController.value = 0.0;
-    _mode = _RefreshIndicatorMode.drag;
+    setState(() {
+      _mode = _RefreshIndicatorMode.drag;
+    });
   }
 
   void _handlePointerMove(PointerMoveEvent event) {
@@ -198,8 +204,22 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
         });
       }
     }
+    // No setState() here because this mode change doesn't cause a visual change.
     _mode = _valueColor.value.alpha == 0xFF ? _RefreshIndicatorMode.armed : _RefreshIndicatorMode.drag;
     _updateState(scrollable);
+  }
+
+  // Stop showing the refresh indicator
+  Future<Null> _dismiss() async {
+    setState(() {
+      _mode = _RefreshIndicatorMode.dismiss;
+    });
+    await _scaleController.animateTo(1.0, duration: _kIndicatorScaleDuration);
+    if (mounted && _mode == _RefreshIndicatorMode.dismiss) {
+      setState(() {
+        _mode = null;
+      });
+    }
   }
 
   Future<Null> _doHandlePointerUp(PointerUpEvent event) async {
@@ -220,15 +240,11 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
         bool completed = _pendingRefreshFuture != null;
         _pendingRefreshFuture = null;
 
-        if (mounted && completed && _mode == _RefreshIndicatorMode.refresh) {
-          setState(() {
-            _mode = null; // Stop showing the indeterminate progress indicator.
-          });
-          _scaleController.animateTo(1.0, duration: _kIndicatorScaleDuration);
-        }
+        if (mounted && completed && _mode == _RefreshIndicatorMode.refresh)
+          _dismiss();
       }
-    } else {
-      _scaleController.animateTo(1.0, duration: _kIndicatorScaleDuration);
+    } else if (_mode == _RefreshIndicatorMode.drag) {
+      _dismiss();
     }
   }
 
@@ -239,6 +255,8 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
   @override
   Widget build(BuildContext context) {
     final bool isAtTop = _location == RefreshIndicatorLocation.top;
+    final bool showIndeterminateIndicator =
+      _mode == _RefreshIndicatorMode.refresh || _mode == _RefreshIndicatorMode.dismiss;
     return new Listener(
       onPointerDown: _handlePointerDown,
       onPointerMove: _handlePointerMove,
@@ -269,7 +287,7 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
                       animation: _sizeController,
                       builder: (BuildContext context, Widget child) {
                         return new RefreshProgressIndicator(
-                          value: _mode == _RefreshIndicatorMode.refresh ? null : _value.value,
+                          value: showIndeterminateIndicator ? null : _value.value,
                           valueColor: _valueColor
                         );
                       }

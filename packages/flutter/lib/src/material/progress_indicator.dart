@@ -381,7 +381,8 @@ class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter
     double tailValue,
     int stepValue,
     double rotationValue,
-    double strokeWidth
+    double strokeWidth,
+    this.arrowheadScale
   }) : super(
     valueColor: valueColor,
     value: value,
@@ -392,23 +393,27 @@ class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter
     strokeWidth: strokeWidth
   );
 
+  final double arrowheadScale;
+
   void paintArrowhead(Canvas canvas, Size size) {
     // ux, uy: a unit vector whose direction parallels the base of the arrowhead.
-    // Note that -ux, uy points in the direction the arrowhead points.
+    // Note that ux, -uy points in the direction the arrowhead points.
     final double arcEnd = arcStart + arcSweep;
     final double ux = math.cos(arcEnd);
     final double uy = math.sin(arcEnd);
 
     assert(size.width == size.height);
     final double radius = size.width / 2.0;
-    final double arrowHeadRadius = strokeWidth * 1.5;
-    final double innerRadius = radius - arrowHeadRadius;
-    final double outerRadius = radius + arrowHeadRadius;
+    final double arrowheadPointX = radius + ux * radius + -uy * strokeWidth * 2.0 * arrowheadScale;
+    final double arrowheadPointY = radius + uy * radius +  ux * strokeWidth * 2.0 * arrowheadScale;
+    final double arrowheadRadius = strokeWidth * 1.5 * arrowheadScale;
+    final double innerRadius = radius - arrowheadRadius;
+    final double outerRadius = radius + arrowheadRadius;
 
     Path path = new Path()
       ..moveTo(radius + ux * innerRadius, radius + uy * innerRadius)
       ..lineTo(radius + ux * outerRadius, radius + uy * outerRadius)
-      ..lineTo(radius + ux * radius + -uy * strokeWidth * 2.0, radius + uy * radius + ux * strokeWidth * 2.0)
+      ..lineTo(arrowheadPointX, arrowheadPointY)
       ..close();
     Paint paint = new Paint()
       ..color = valueColor
@@ -420,7 +425,8 @@ class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter
   @override
   void paint(Canvas canvas, Size size) {
     super.paint(canvas, size);
-    paintArrowhead(canvas, size);
+    if (arrowheadScale > 0.0)
+      paintArrowhead(canvas, size);
   }
 }
 
@@ -472,6 +478,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
 
   @override
   Widget _buildIndicator(BuildContext context, double headValue, double tailValue, int stepValue, double rotationValue) {
+    final double arrowheadScale = config.value == null ? 0.0 : (config.value * 2.0).clamp(0.0, 1.0);
     return new Container(
       width: _kIndicatorSize,
       height: _kIndicatorSize,
@@ -490,7 +497,8 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
               tailValue: tailValue,
               stepValue: stepValue,
               rotationValue: rotationValue,
-              strokeWidth: 2.0
+              strokeWidth: 2.0,
+              arrowheadScale: arrowheadScale
             )
           )
         )
