@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 
 import 'app.dart';
 import 'framework.dart';
+import 'navigator.dart';
 
 export 'dart:ui' show AppLifecycleState, Locale;
 
@@ -72,6 +73,11 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   void initServiceExtensions() {
     super.initServiceExtensions();
 
+    registerSignalServiceExtension(
+      name: 'debugDumpApp',
+      callback: debugDumpApp
+    );
+
     registerBoolServiceExtension(
       name: 'showPerformanceOverlay',
       getter: () => WidgetsApp.showPerformanceOverlayOverride,
@@ -82,6 +88,22 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
         buildOwner.reassemble(renderViewElement);
       }
     );
+
+    registerStringServiceExtension(
+      name: 'applicationRoute',
+      getter: () => _navigatorState?.currentRoute?.settings?.name,
+      setter: (String route) {
+        _navigatorState?.pushNamed(route);
+      }
+    );
+  }
+
+  NavigatorState get _navigatorState {
+    NavigatorOwner observer = WidgetsBinding.instance._observers.firstWhere(
+      (WidgetsBindingObserver observer) => observer is NavigatorOwner,
+      orElse: () => null
+    );
+    return observer?.navigator;
   }
 
   /// The [BuildOwner] in charge of executing the build pipeline for the
