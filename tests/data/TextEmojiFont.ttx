@@ -161,6 +161,11 @@
       <!-- U+1F469 is reserved. -->
       <!-- U+1F373 is reserved. -->
       <map code="0x2695" name="defaultGlyph" />
+
+      <!-- For FontCollectionTest.newEmojiTest -->
+      <map code="0x2640" name="defaultGlyph" />
+      <map code="0x2642" name="defaultGlyph" />
+
     </cmap_format_4>
     <cmap_format_14 format="14" platformID="0" platEncID="5" length="40" numVarSelectorRecords="2">
       <!-- For FontCollectionTest.hasVariationSelectorTest_emoji -->
@@ -169,6 +174,8 @@
 
       <!--For FontCollectionItemizeTest,.itemize_genderBalancedEmoji -->
       <map uvs="0xFE0E" uv="0x2695" name="None" />
+
+      <!-- U+2640, U+2642 are reserved for FontCollectionTest.newEmojiTest -->
     </cmap_format_14>
   </cmap>
 

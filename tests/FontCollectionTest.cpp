@@ -105,6 +105,20 @@ TEST(FontCollectionTest, hasVariationSelectorTest_emoji) {
     // VS15/VS16 is only for emoji, should return false for not an emoji code point.
     EXPECT_FALSE(collection->hasVariationSelector(0x2229, 0xFE0E));
     EXPECT_FALSE(collection->hasVariationSelector(0x2229, 0xFE0F));
+
+}
+
+TEST(FontCollectionTest, newEmojiTest) {
+    MinikinAutoUnref<FontCollection> collection(getFontCollection(kTestFontDir, kEmojiXmlFile));
+
+    // U+2695, U+2640, U+2642 are not in emoji catrgory in Unicode 9 but they are now in emoji
+    // category. Should return true even if U+FE0E was appended.
+    // These three emojis are only avalilable in TextEmoji.ttf but U+2695 is excluded here since it
+    // is used in other tests.
+    EXPECT_TRUE(collection->hasVariationSelector(0x2640, 0xFE0E));
+    EXPECT_FALSE(collection->hasVariationSelector(0x2640, 0xFE0F));
+    EXPECT_TRUE(collection->hasVariationSelector(0x2642, 0xFE0E));
+    EXPECT_FALSE(collection->hasVariationSelector(0x2642, 0xFE0F));
 }
 
 }  // namespace android
