@@ -58,14 +58,14 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> {
 
   void _handleTap() {
     assert(_lastPointerDownLocation != null);
-    _SemanticsDebuggerListener.instance.handleTap(_lastPointerDownLocation);
+    _SemanticsDebuggerListener.instance._performAction(_lastPointerDownLocation, SemanticAction.tap);
     setState(() {
       _lastPointerDownLocation = null;
     });
   }
   void _handleLongPress() {
     assert(_lastPointerDownLocation != null);
-    _SemanticsDebuggerListener.instance.handleLongPress(_lastPointerDownLocation);
+    _SemanticsDebuggerListener.instance._performAction(_lastPointerDownLocation, SemanticAction.longPress);
     setState(() {
       _lastPointerDownLocation = null;
     });
@@ -107,10 +107,7 @@ class _SemanticsDebuggerEntry {
   _SemanticsDebuggerEntry(this.id);
 
   final int id;
-  bool canBeTapped = false;
-  bool canBeLongPressed = false;
-  bool canBeScrolledHorizontally = false;
-  bool canBeScrolledVertically = false;
+  final Set<SemanticAction> actions = new Set<SemanticAction>();
   bool hasCheckedState = false;
   bool isChecked = false;
   String label;
@@ -120,13 +117,14 @@ class _SemanticsDebuggerEntry {
 
   @override
   String toString() {
-    return '_SemanticsDebuggerEntry($id; $rect; "$label"'
-           '${canBeTapped ? "; canBeTapped" : ""}'
-           '${canBeLongPressed ? "; canBeLongPressed" : ""}'
-           '${canBeScrolledHorizontally ? "; canBeScrolledHorizontally" : ""}'
-           '${canBeScrolledVertically ? "; canBeScrolledVertically" : ""}'
-           '${hasCheckedState ? isChecked ? "; checked" : "; unchecked" : ""}'
-           ')';
+    StringBuffer buffer = new StringBuffer();
+    buffer.write('_SemanticsDebuggerEntry($id; $rect; "$label"');
+    for (SemanticAction action in actions)
+      buffer.write('; $action');
+    buffer
+      ..write('${hasCheckedState ? isChecked ? "; checked" : "; unchecked" : ""}')
+      ..write(')');
+    return buffer.toString();
   }
 
   String toStringDeep([ String prefix = '']) {
@@ -142,12 +140,13 @@ class _SemanticsDebuggerEntry {
 
   void updateWith(mojom.SemanticsNode node) {
     if (node.flags != null) {
-      canBeTapped = node.flags.canBeTapped;
-      canBeLongPressed = node.flags.canBeLongPressed;
-      canBeScrolledHorizontally = node.flags.canBeScrolledHorizontally;
-      canBeScrolledVertically = node.flags.canBeScrolledVertically;
       hasCheckedState = node.flags.hasCheckedState;
       isChecked = node.flags.isChecked;
+    }
+    if (node.actions != null) {
+      actions.clear();
+      for (int encodedAction in node.actions)
+        actions.add(SemanticAction.values[encodedAction]);
     }
     if (node.strings != null) {
       assert(node.strings.label != null);
@@ -190,6 +189,13 @@ class _SemanticsDebuggerEntry {
     height: 0.8
   );
 
+  bool get _isScrollable {
+    return actions.contains(SemanticAction.scrollLeft)
+        || actions.contains(SemanticAction.scrollRight)
+        || actions.contains(SemanticAction.scrollUp)
+        || actions.contains(SemanticAction.scrollDown);
+  }
+
   TextPainter textPainter;
   void _updateMessage() {
     List<String> annotations = <String>[];
@@ -198,16 +204,16 @@ class _SemanticsDebuggerEntry {
       annotations.add(isChecked ? 'checked' : 'unchecked');
       wantsTap = true;
     }
-    if (canBeTapped) {
+    if (actions.contains(SemanticAction.tap)) {
       if (!wantsTap)
         annotations.add('button');
     } else {
       if (wantsTap)
         annotations.add('disabled');
     }
-    if (canBeLongPressed)
+    if (actions.contains(SemanticAction.longPress))
       annotations.add('long-pressable');
-    if (canBeScrolledHorizontally || canBeScrolledVertically)
+    if (_isScrollable)
       annotations.add('scrollable');
     String message;
     if (annotations.isEmpty) {
@@ -349,12 +355,11 @@ class _SemanticsDebuggerListener extends ChangeNotifier implements mojom.Semanti
     return rootNode?.hitTest(position, filter);
   }
 
-  void handleTap(Point position) {
-    _server.tap(_hitTest(position, (_SemanticsDebuggerEntry entry) => entry.canBeTapped)?.id ?? 0);
+  void _performAction(Point position, SemanticAction action) {
+    _SemanticsDebuggerEntry entry = _hitTest(position, (_SemanticsDebuggerEntry entry) => entry.actions.contains(action));
+    _server.performAction(entry?.id ?? 0, mojom.SemanticAction.values[action.index]);
   }
-  void handleLongPress(Point position) {
-    _server.longPress(_hitTest(position, (_SemanticsDebuggerEntry entry) => entry.canBeLongPressed)?.id ?? 0);
-  }
+
   void handlePanEnd(Point position, Velocity velocity) {
     double vx = velocity.pixelsPerSecond.dx;
     double vy = velocity.pixelsPerSecond.dy;
@@ -362,14 +367,14 @@ class _SemanticsDebuggerListener extends ChangeNotifier implements mojom.Semanti
       return;
     if (vx.abs() > vy.abs()) {
       if (vx.sign < 0)
-        _server.scrollLeft(_hitTest(position, (_SemanticsDebuggerEntry entry) => entry.canBeScrolledHorizontally)?.id ?? 0);
+        _performAction(position, SemanticAction.scrollLeft);
       else
-        _server.scrollRight(_hitTest(position, (_SemanticsDebuggerEntry entry) => entry.canBeScrolledHorizontally)?.id ?? 0);
+        _performAction(position, SemanticAction.scrollRight);
     } else {
       if (vy.sign < 0)
-        _server.scrollUp(_hitTest(position, (_SemanticsDebuggerEntry entry) => entry.canBeScrolledVertically)?.id ?? 0);
+        _performAction(position, SemanticAction.scrollUp);
       else
-        _server.scrollDown(_hitTest(position, (_SemanticsDebuggerEntry entry) => entry.canBeScrolledVertically)?.id ?? 0);
+        _performAction(position, SemanticAction.scrollDown);
     }
   }
 }
