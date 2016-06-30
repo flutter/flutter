@@ -163,6 +163,8 @@
       <map code="0x1F373" name="defaultGlyph" />
       <map code="0x200D" name="defaultGlyph" />
       <map code="0x2695" name="defaultGlyph" />
+
+      <!-- U+2640, U+2642 are reserved for FontCollectionTest.newEmojiTest -->
     </cmap_format_12>
     <cmap_format_14 format="14" platformID="0" platEncID="5" length="40" numVarSelectorRecords="2">
       <!-- For FontCollectionTest.hasVariationSelectorTest_emoji -->
@@ -171,6 +173,8 @@
 
       <!--For FontCollectionItemizeTest,.itemize_genderBalancedEmoji -->
       <map uvs="0xFE0F" uv="0x2695" name="None" />
+
+      <!-- U+2640, U+2642 are reserved for FontCollectionTest.newEmojiTest -->
     </cmap_format_14>
   </cmap>
 

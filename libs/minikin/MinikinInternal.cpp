@@ -33,6 +33,11 @@ void assertMinikinLocked() {
 }
 
 bool isEmoji(uint32_t c) {
+    // U+2695 U+2640 U+2642 are not in emoji category in Unicode 9 but they are now emoji category.
+    // TODO: remove once emoji database is updated.
+    if (c == 0x2695 || c == 0x2640 || c == 0x2642) {
+        return true;
+    }
     const size_t length = sizeof(generated::EMOJI_LIST) / sizeof(generated::EMOJI_LIST[0]);
     return std::binary_search(generated::EMOJI_LIST, generated::EMOJI_LIST + length, c);
 }

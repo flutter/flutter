@@ -179,6 +179,17 @@ TEST(GraphemeBreak, emojiModifiers) {
 
     // rat is not an emoji modifer
     EXPECT_TRUE(IsBreak("U+1F466 | U+1F400"));  // boy + rat
+
+}
+
+TEST(GraphemeBreak, genderBalancedEmoji) {
+    // U+1F469 is WOMAN, U+200D is ZWJ, U+1F4BC is BRIEFCASE.
+    EXPECT_FALSE(IsBreak("U+1F469 | U+200D U+1F4BC"));
+    EXPECT_FALSE(IsBreak("U+1F469 U+200D | U+1F4BC"));
+
+    // U+2695 has now emoji property, so should be part of ZWJ sequence.
+    EXPECT_FALSE(IsBreak("U+1F469 | U+200D U+2695"));
+    EXPECT_FALSE(IsBreak("U+1F469 U+200D | U+2695"));
 }
 
 TEST(GraphemeBreak, offsets) {
