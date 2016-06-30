@@ -465,9 +465,6 @@ abstract class StatelessWidget extends Widget {
   /// inserted into the tree in multiple places at once.
   @protected
   Widget build(BuildContext context);
-
-  /// Trampoline to make the [build] closure library-accessible.
-  WidgetBuilder get _build => build;
 }
 
 /// A widget that has mutable state.
@@ -869,9 +866,6 @@ abstract class State<T extends StatefulWidget> {
   /// this method matches the signature for a [WidgetBuilder].
   @protected
   Widget build(BuildContext context);
-
-  /// Trampoline to make the [build] closure library-accessible.
-  WidgetBuilder get _build => build;
 
   /// Called when a dependencies of this [State] object changes.
   ///
@@ -2012,7 +2006,7 @@ abstract class ComponentElement extends BuildableElement {
 /// Instantiation of [StatelessWidget]s.
 class StatelessElement extends ComponentElement {
   StatelessElement(StatelessWidget widget) : super(widget) {
-    _builder = widget._build;
+    _builder = widget.build;
   }
 
   @override
@@ -2022,14 +2016,14 @@ class StatelessElement extends ComponentElement {
   void update(StatelessWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
-    _builder = widget._build;
+    _builder = widget.build;
     _dirty = true;
     rebuild();
   }
 
   @override
   void _reassemble() {
-    _builder = widget._build;
+    _builder = widget.build;
     super._reassemble();
   }
 }
@@ -2042,7 +2036,7 @@ class StatefulElement extends ComponentElement {
     assert(_state._element == null);
     _state._element = this;
     assert(_builder == _buildNothing);
-    _builder = _state._build;
+    _builder = _state.build;
     assert(_state._config == null);
     _state._config = widget;
     assert(_state._debugLifecycleState == _StateLifecycle.created);
@@ -2053,7 +2047,7 @@ class StatefulElement extends ComponentElement {
 
   @override
   void _reassemble() {
-    _builder = state._build;
+    _builder = state.build;
     super._reassemble();
   }
 
