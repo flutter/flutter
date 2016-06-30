@@ -165,13 +165,8 @@ class FlutterCommandRunner extends CommandRunner {
     }
 
     // The Android SDK could already have been set by tests.
-    if (!context.isSet(AndroidSdk)) {
-      if (enginePath != null) {
-        context[AndroidSdk] = new AndroidSdk('$enginePath/third_party/android_tools/sdk');
-      } else {
-        context[AndroidSdk] = AndroidSdk.locateAndroidSdk();
-      }
-    }
+    if (!context.isSet(AndroidSdk))
+      context[AndroidSdk] = AndroidSdk.locateAndroidSdk();
 
     if (globalResults['version']) {
       flutterUsage.sendCommand('version');
