@@ -5,12 +5,14 @@
 #include "sky/shell/platform/ios/framework/Source/accessibility_bridge.h"
 
 #import <UIKit/UIKit.h>
+#include <vector>
 
+#include "base/logging.h"
 #include "mojo/public/cpp/application/connect.h"
 
 namespace {
 
-static const uint32_t RootNodeId = 0;
+constexpr uint32_t kRootNodeId = 0;
 
 // Contains better abstractions than the raw Mojo data structure
 struct Geometry {
@@ -22,19 +24,25 @@ struct Geometry {
     return *this;
   }
 
-  SkMatrix44 transform =
-      SkMatrix44(SkMatrix44::Identity_Constructor::kIdentity_Constructor);
+  SkMatrix44 transform = SkMatrix44(SkMatrix44::kIdentity_Constructor);
   SkRect rect;
 };
 
-}  // anonymous namespace
+}  // namespace
 
-@implementation AccessibilityNode {
+@implementation SemanticObject {
   sky::shell::AccessibilityBridge* _bridge;
 
   semantics::SemanticFlagsPtr _flags;
   semantics::SemanticStringsPtr _strings;
   Geometry _geometry;
+  bool _canBeTapped;
+  bool _canBeLongPressed;
+  bool _canBeScrolledHorizontally;
+  bool _canBeScrolledVertically;
+  bool _canBeAdjusted;
+
+  std::vector<SemanticObject*> _children;
 }
 
 #pragma mark - Override base class designated initializers
@@ -51,7 +59,7 @@ struct Geometry {
 - (instancetype)initWithBridge:(sky::shell::AccessibilityBridge*)bridge
                            uid:(uint32_t)uid {
   DCHECK(bridge != nil) << "bridge must be set";
-  DCHECK(uid >= RootNodeId);
+  DCHECK(uid >= kRootNodeId);
   self = [super init];
 
   if (self) {
@@ -62,53 +70,61 @@ struct Geometry {
   return self;
 }
 
-#pragma mark - Semantics node methods
+#pragma mark - Semantic object methods
 
-- (void)update:(const semantics::SemanticsNodePtr&)mojoNode {
-  DCHECK(_uid == mojoNode->id);
+- (void)updateWith:(const semantics::SemanticsNodePtr&)node {
+  DCHECK(_uid == node->id);
 
-  if (!mojoNode->flags.is_null()) {
-    _flags = mojoNode->flags.Pass();
+  if (!node->flags.is_null()) {
+    _flags = node->flags.Pass();
   }
 
-  if (!mojoNode->strings.is_null()) {
-    _strings = mojoNode->strings.Pass();
+  if (!node->strings.is_null()) {
+    _strings = node->strings.Pass();
   }
 
-  if (!mojoNode->geometry.is_null()) {
-    _geometry = mojoNode->geometry;
+  if (!node->geometry.is_null()) {
+    _geometry = node->geometry;
   }
 
-  if (!mojoNode->children.is_null()) {
-    // Mark existing children as orphans
-    NSArray* oldChildren = _children;
-    for (AccessibilityNode* child in oldChildren) {
-      DCHECK(child->_parent != nil);
-      child->_parent = nil;
-    }
-
-    // Set the new list of children
-    NSMutableArray* children = [[NSMutableArray alloc] init];
-    _children = children;
-    for (const semantics::SemanticsNodePtr& mojoChild : mojoNode->children) {
-      AccessibilityNode* child = _bridge->UpdateNode(mojoChild);
-      child->_parent = self;
-      [children insertObject:child atIndex:0];
-    }
-
-    // Remove those children that are still marked as orphans
-    for (AccessibilityNode* child in oldChildren) {
-      if (child->_parent == nil) {
-        _bridge->RemoveNode(child);
+  if (!node->actions.is_null()) {
+    _canBeTapped = false;
+    _canBeLongPressed = false;
+    _canBeScrolledHorizontally = false;
+    _canBeScrolledVertically = false;
+    for (int action : node->actions) {
+      switch (static_cast<semantics::SemanticAction>(action)) {
+      case semantics::SemanticAction::TAP:
+        _canBeTapped = true;
+        break;
+      case semantics::SemanticAction::LONG_PRESS:
+        _canBeLongPressed = true;
+        break;
+      case semantics::SemanticAction::SCROLL_LEFT:
+      case semantics::SemanticAction::SCROLL_RIGHT:
+        _canBeScrolledHorizontally = true;
+        break;
+      case semantics::SemanticAction::SCROLL_UP:
+      case semantics::SemanticAction::SCROLL_DOWN:
+        _canBeScrolledVertically = true;
+        break;
+      case semantics::SemanticAction::INCREASE:
+      case semantics::SemanticAction::DECREASE:
+        _canBeAdjusted = true;
+        break;
       }
     }
-    [oldChildren release];
   }
 }
 
-- (void)remove {
-  _parent = nil;
-  _bridge->RemoveNode(self);
+- (std::vector<SemanticObject*>*)children {
+  return &_children;
+}
+
+- (void)neuter {
+  _bridge = nullptr;
+  _children.clear();
+  self.parent = nil;
 }
 
 #pragma mark - UIAccessibility overrides
@@ -117,27 +133,30 @@ struct Geometry {
   // Note: hit detection will only apply to elements that report
   // -isAccessibilityElement of YES. The framework will continue scanning the
   // entire element tree looking for such a hit.
-  return (_flags->canBeTapped || _children.count == 0);
+  return _canBeTapped || _children.empty();
 }
 
 - (NSString*)accessibilityLabel {
-  return (_strings.is_null() || _strings->label.get().empty())
-             ? nil
-             : @(_strings->label.data());
+  if (_strings.is_null() || _strings->label.get().empty()) {
+    return nil;
+  }
+  return @(_strings->label.data());
 }
 
 - (UIAccessibilityTraits)accessibilityTraits {
   UIAccessibilityTraits traits = UIAccessibilityTraitNone;
-  if (_flags->canBeTapped)
+  if (_canBeTapped) {
     traits |= UIAccessibilityTraitButton;
-  if (_flags->isAdjustable)
+  }
+  if (_canBeAdjusted) {
     traits |= UIAccessibilityTraitAdjustable;
+  }
   return traits;
 }
 
 - (CGRect)accessibilityFrame {
   SkMatrix44 globalTransform = _geometry.transform;
-  for (AccessibilityNode* parent = _parent; parent; parent = parent.parent) {
+  for (SemanticObject* parent = _parent; parent; parent = parent.parent) {
     globalTransform = globalTransform * parent->_geometry.transform;
   }
 
@@ -159,22 +178,28 @@ struct Geometry {
 #pragma mark - UIAccessibilityElement protocol
 
 - (id)accessibilityContainer {
-  return (_uid == RootNodeId) ? _bridge->view() : _parent;
+  return (_uid == kRootNodeId) ? _bridge->view() : _parent;
 }
 
 #pragma mark - UIAccessibilityContainer overrides
 
 - (NSInteger)accessibilityElementCount {
-  return _children.count;
+  return (NSInteger)_children.size();
 }
 
 - (nullable id)accessibilityElementAtIndex:(NSInteger)index {
-  return (index < 0 || index >= (NSInteger)_children.count ? nil
-                                                           : _children[index]);
+  if (index < 0 || index >= (NSInteger)_children.size()) {
+    return nil;
+  }
+  return _children[index];
 }
 
 - (NSInteger)indexOfAccessibilityElement:(id)element {
-  return (_children == nil) ? NSNotFound : [_children indexOfObject:element];
+  auto it = std::find(_children.begin(), _children.end(), element);
+  if (it == _children.end()) {
+    return NSNotFound;
+  }
+  return it - _children.begin();
 }
 
 #pragma mark - UIAccessibilityAction overrides
@@ -185,11 +210,15 @@ struct Geometry {
 }
 
 - (void)accessibilityIncrement {
-  // TODO(tvolkert): Implement
+  if (_canBeAdjusted) {
+    _bridge->server()->PerformAction(_uid, semantics::SemanticAction::INCREASE);
+  }
 }
 
 - (void)accessibilityDecrement {
-  // TODO(tvolkert): Implement
+  if (_canBeAdjusted) {
+    _bridge->server()->PerformAction(_uid, semantics::SemanticAction::DECREASE);
+  }
 }
 
 - (BOOL)accessibilityScroll:(UIAccessibilityScrollDirection)direction {
@@ -197,17 +226,18 @@ struct Geometry {
   switch (direction) {
     case UIAccessibilityScrollDirectionRight:
     case UIAccessibilityScrollDirectionLeft:
-      canBeScrolled = _flags->canBeScrolledHorizontally;
+      canBeScrolled = _canBeScrolledHorizontally;
       break;
     case UIAccessibilityScrollDirectionUp:
     case UIAccessibilityScrollDirectionDown:
-      canBeScrolled = _flags->canBeScrolledVertically;
+      canBeScrolled = _canBeScrolledVertically;
       break;
     default:
       // Note: page turning of reading content is not currently supported
       // (UIAccessibilityScrollDirectionNext,
       //  UIAccessibilityScrollDirectionPrevious)
       canBeScrolled = NO;
+      break;
   }
 
   if (!canBeScrolled) {
@@ -216,16 +246,16 @@ struct Geometry {
 
   switch (direction) {
     case UIAccessibilityScrollDirectionRight:
-      _bridge->server()->ScrollRight(_uid);
+      _bridge->server()->PerformAction(_uid, semantics::SemanticAction::SCROLL_RIGHT);
       break;
     case UIAccessibilityScrollDirectionLeft:
-      _bridge->server()->ScrollLeft(_uid);
+      _bridge->server()->PerformAction(_uid, semantics::SemanticAction::SCROLL_LEFT);
       break;
     case UIAccessibilityScrollDirectionUp:
-      _bridge->server()->ScrollDown(_uid);
+      _bridge->server()->PerformAction(_uid, semantics::SemanticAction::SCROLL_UP);
       break;
     case UIAccessibilityScrollDirectionDown:
-      _bridge->server()->ScrollUp(_uid);
+      _bridge->server()->PerformAction(_uid, semantics::SemanticAction::SCROLL_DOWN);
       break;
     default:
       DCHECK(false) << "Unsupported scroll direction: " << direction;
@@ -246,13 +276,6 @@ struct Geometry {
   return NO;
 }
 
-#pragma mark - Misc
-
-- (void)dealloc {
-  [_children release];
-  [super dealloc];
-}
-
 @end
 
 #pragma mark - AccessibilityBridge impl
@@ -262,59 +285,83 @@ namespace shell {
 
 AccessibilityBridge::AccessibilityBridge(FlutterView* view,
                                          mojo::ServiceProvider* serviceProvider)
-    : view_(view), binding_(this), weak_factory_(this) {
+    : view_(view), binding_(this) {
   mojo::ConnectToService(serviceProvider, mojo::GetProxy(&semantics_server_));
   mojo::InterfaceHandle<semantics::SemanticsListener> listener;
   binding_.Bind(&listener);
   semantics_server_->AddSemanticsListener(listener.Pass());
-
-  nodes_ = [[NSMutableDictionary alloc] init];
-}
-
-void AccessibilityBridge::UpdateSemanticsTree(
-    mojo::Array<semantics::SemanticsNodePtr> mojoNodes) {
-  for (const semantics::SemanticsNodePtr& mojoNode : mojoNodes) {
-    auto node = UpdateNode(mojoNode);
-    if (mojoNode->id == RootNodeId && view_.accessibilityElements == nil) {
-      view_.accessibilityElements = @[ node ];
-    }
-  }
-  DCHECK(view_.accessibilityElements != nil);
-
-  UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification,
-                                  nil);
-}
-
-base::WeakPtr<AccessibilityBridge> AccessibilityBridge::AsWeakPtr() {
-  return weak_factory_.GetWeakPtr();
-}
-
-AccessibilityNode* AccessibilityBridge::UpdateNode(
-    const semantics::SemanticsNodePtr& mojoNode) {
-  AccessibilityNode* node = nodes_[@(mojoNode->id)];
-  if (node == nil) {
-    node = [[AccessibilityNode alloc] initWithBridge:this uid:mojoNode->id];
-    DCHECK(nodes_ != nil);
-    nodes_[@(mojoNode->id)] = node;
-    [node release];
-  }
-  [node update:mojoNode];
-  return node;
-}
-
-void AccessibilityBridge::RemoveNode(AccessibilityNode* node) {
-  [node retain];
-  DCHECK(nodes_[@(node.uid)] != nil);
-  DCHECK(nodes_[@(node.uid)].parent == nil);
-  [nodes_ removeObjectForKey:@(node.uid)];
-  for (AccessibilityNode* child in node.children) {
-    [child remove];
-  }
-  [node release];
 }
 
 AccessibilityBridge::~AccessibilityBridge() {
-  [nodes_ release];
+  for (const auto& entry : objects_) {
+    SemanticObject* object = entry.second;
+    [object neuter];
+    [object release];
+  }
+}
+
+void AccessibilityBridge::UpdateSemanticsTree(
+    mojo::Array<semantics::SemanticsNodePtr> nodes) {
+  std::set<SemanticObject*> updated_objects;
+  std::set<SemanticObject*> removed_objects;
+
+  for (const semantics::SemanticsNodePtr& node : nodes) {
+    UpdateSemanticObject(node, &updated_objects, &removed_objects);
+  }
+
+  for (SemanticObject* object : removed_objects) {
+    if (!updated_objects.count(object)) {
+      RemoveSemanticObject(object, &updated_objects);
+    }
+  }
+
+  if (!view_.accessibilityElements) {
+    view_.accessibilityElements = @[ objects_[kRootNodeId] ];
+  }
+  UIAccessibilityPostNotification(
+      UIAccessibilityLayoutChangedNotification, nil);
+}
+
+SemanticObject* AccessibilityBridge::UpdateSemanticObject(
+    const semantics::SemanticsNodePtr& node,
+    std::set<SemanticObject*>* updated_objects,
+    std::set<SemanticObject*>* removed_objects) {
+  SemanticObject* object = objects_[node->id];
+  if (!object) {
+    object = [[SemanticObject alloc] initWithBridge:this uid:node->id];
+    objects_[node->id] = object;
+  }
+  [object updateWith:node];
+  updated_objects->insert(object);
+  if (!node->children.is_null()) {
+    std::vector<SemanticObject*>* children = [object children];
+    removed_objects->insert(children->begin(), children->end());
+    children->clear();
+    children->reserve(node->children.size());
+    for (const auto& child_node : node->children) {
+      SemanticObject* child_object =
+          UpdateSemanticObject(child_node, updated_objects, removed_objects);
+      child_object.parent = object;
+      children->push_back(child_object);
+    }
+  }
+  return object;
+}
+
+void AccessibilityBridge::RemoveSemanticObject(
+    SemanticObject* object,
+    std::set<SemanticObject*>* updated_objects) {
+  DCHECK(objects_[object.uid] == object);
+  objects_.erase(object.uid);
+  for (SemanticObject* child : *[object children]) {
+    if (!updated_objects->count(child)) {
+      DCHECK(child.parent == object);
+      child.parent = nil;
+      RemoveSemanticObject(child, updated_objects);
+    }
+  }
+  [object neuter];
+  [object release];
 }
 
 }  // namespace shell

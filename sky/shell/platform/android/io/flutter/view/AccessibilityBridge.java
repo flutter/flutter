@@ -14,6 +14,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
 
 import org.chromium.mojo.system.MojoException;
+import org.chromium.mojom.semantics.SemanticAction;
 import org.chromium.mojom.semantics.SemanticsListener;
 import org.chromium.mojom.semantics.SemanticsNode;
 import org.chromium.mojom.semantics.SemanticsServer;
@@ -21,22 +22,24 @@ import org.chromium.mojom.sky.ViewportMetrics;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 class AccessibilityBridge extends AccessibilityNodeProvider implements SemanticsListener {
-    private Map<Integer, PersistentAccessibilityNode> mTreeNodes;
+    private Map<Integer, SemanticObject> mObjects;
     private FlutterView mOwner;
     private SemanticsServer.Proxy mSemanticsServer;
     private boolean mAccessibilityEnabled = false;
-    private PersistentAccessibilityNode mFocusedNode;
-    private PersistentAccessibilityNode mHoveredNode;
+    private SemanticObject mFocusedObject;
+    private SemanticObject mHoveredObject;
 
     AccessibilityBridge(FlutterView owner, SemanticsServer.Proxy semanticsServer) {
         assert owner != null;
         assert semanticsServer != null;
         mOwner = owner;
-        mTreeNodes = new HashMap<Integer, PersistentAccessibilityNode>();
+        mObjects = new HashMap<Integer, SemanticObject>();
         mSemanticsServer = semanticsServer;
         mSemanticsServer.addSemanticsListener(this);
     }
@@ -47,17 +50,16 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
 
     @Override
     public AccessibilityNodeInfo createAccessibilityNodeInfo(int virtualViewId) {
-
         if (virtualViewId == View.NO_ID) {
             AccessibilityNodeInfo result = AccessibilityNodeInfo.obtain(mOwner);
             mOwner.onInitializeAccessibilityNodeInfo(result);
-            if (mTreeNodes.containsKey(0))
+            if (mObjects.containsKey(0))
                 result.addChild(mOwner, 0);
             return result;
         }
 
-        PersistentAccessibilityNode node = mTreeNodes.get(virtualViewId);
-        if (node == null)
+        SemanticObject object = mObjects.get(virtualViewId);
+        if (object == null)
             return null;
 
         AccessibilityNodeInfo result = AccessibilityNodeInfo.obtain(mOwner, virtualViewId);
@@ -65,17 +67,17 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
         result.setClassName("Flutter"); // Prettier than the more conventional node.getClass().getName()
         result.setSource(mOwner, virtualViewId);
 
-        if (node.parent != null) {
-            assert node.id > 0;
-            result.setParent(mOwner, node.parent.id);
+        if (object.parent != null) {
+            assert object.id > 0;
+            result.setParent(mOwner, object.parent.id);
         } else {
-            assert node.id == 0;
+            assert object.id == 0;
             result.setParent(mOwner);
         }
 
-        Rect bounds = node.getGlobalRect();
-        if (node.parent != null) {
-            Rect parentBounds = node.parent.getGlobalRect();
+        Rect bounds = object.getGlobalRect();
+        if (object.parent != null) {
+            Rect parentBounds = object.parent.getGlobalRect();
             Rect boundsInParent = new Rect(bounds);
             boundsInParent.offset(-parentBounds.left, -parentBounds.top);
             result.setBoundsInParent(boundsInParent);
@@ -86,15 +88,15 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
         result.setVisibleToUser(true);
         result.setEnabled(true); // TODO(ianh): Expose disabled subtrees
 
-        if (node.canBeTapped) {
+        if (object.canBeTapped) {
             result.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK);
             result.setClickable(true);
         }
-        if (node.canBeLongPressed) {
+        if (object.canBeLongPressed) {
             result.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK);
             result.setLongClickable(true);
         }
-        if (node.canBeScrolledHorizontally || node.canBeScrolledVertically) {
+        if (object.canBeScrolledHorizontally || object.canBeScrolledVertically) {
             // TODO(ianh): Once we're on SDK v23+, call addAction to
             // expose AccessibilityAction.ACTION_SCROLL_LEFT, _RIGHT,
             // _UP, and _DOWN when appropriate.
@@ -104,9 +106,9 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
             result.setScrollable(true);
         }
 
-        result.setCheckable(node.hasCheckedState);
-        result.setChecked(node.isChecked);
-        result.setText(node.label);
+        result.setCheckable(object.hasCheckedState);
+        result.setChecked(object.isChecked);
+        result.setText(object.label);
 
         // TODO(ianh): use setTraversalBefore/setTraversalAfter to set
         // the relative order of the views. For each set of siblings,
@@ -115,14 +117,14 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
         // width, and finally by list order.
 
         // Accessibility Focus
-        if (mFocusedNode != null && mFocusedNode.id == virtualViewId) {
+        if (mFocusedObject != null && mFocusedObject.id == virtualViewId) {
             result.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
         } else {
             result.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_ACCESSIBILITY_FOCUS);
         }
 
-        if (node.children != null) {
-            for (PersistentAccessibilityNode child : node.children) {
+        if (object.children != null) {
+            for (SemanticObject child : object.children) {
                 result.addChild(mOwner, child.id);
             }
         }
@@ -132,35 +134,36 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
 
     @Override
     public boolean performAction(int virtualViewId, int action, Bundle arguments) {
-        PersistentAccessibilityNode node = mTreeNodes.get(virtualViewId);
-        if (node == null)
+        SemanticObject object = mObjects.get(virtualViewId);
+        if (object == null) {
             return false;
+        }
         switch (action) {
             case AccessibilityNodeInfo.ACTION_CLICK: {
-                mSemanticsServer.tap(virtualViewId);
+                mSemanticsServer.performAction(virtualViewId, SemanticAction.TAP);
                 return true;
             }
             case AccessibilityNodeInfo.ACTION_LONG_CLICK: {
-                mSemanticsServer.longPress(virtualViewId);
+                mSemanticsServer.performAction(virtualViewId, SemanticAction.LONG_PRESS);
                 return true;
             }
             case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
-                if (node.canBeScrolledVertically) {
-                    mSemanticsServer.scrollUp(virtualViewId);
-                } else if (node.canBeScrolledHorizontally) {
+                if (object.canBeScrolledVertically) {
+                    mSemanticsServer.performAction(virtualViewId, SemanticAction.SCROLL_UP);
+                } else if (object.canBeScrolledHorizontally) {
                     // TODO(ianh): bidi support
-                    mSemanticsServer.scrollLeft(virtualViewId);
+                    mSemanticsServer.performAction(virtualViewId, SemanticAction.SCROLL_LEFT);
                 } else {
                     return false;
                 }
                 return true;
             }
             case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
-                if (node.canBeScrolledVertically) {
-                    mSemanticsServer.scrollDown(virtualViewId);
-                } else if (node.canBeScrolledHorizontally) {
+                if (object.canBeScrolledVertically) {
+                    mSemanticsServer.performAction(virtualViewId, SemanticAction.SCROLL_DOWN);
+                } else if (object.canBeScrolledHorizontally) {
                     // TODO(ianh): bidi support
-                    mSemanticsServer.scrollRight(virtualViewId);
+                    mSemanticsServer.performAction(virtualViewId, SemanticAction.SCROLL_RIGHT);
                 } else {
                     return false;
                 }
@@ -168,58 +171,107 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
             }
             case AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS: {
                 sendAccessibilityEvent(virtualViewId, AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
-                mFocusedNode = null;
+                mFocusedObject = null;
                 return true;
             }
             case AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS: {
                 sendAccessibilityEvent(virtualViewId, AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED);
-                if (mFocusedNode == null) {
+                if (mFocusedObject == null) {
                     // When Android focuses a node, it doesn't invalidate the view.
                     // (It does when it sends ACTION_CLEAR_ACCESSIBILITY_FOCUS, so
                     // we only have to worry about this when the focused node is null.)
                     mOwner.invalidate();
                 }
-                mFocusedNode = node;
+                mFocusedObject = object;
                 return true;
             }
         }
-        // TODO(ianh): Implement left/right/up/down scrolling
         return false;
     }
 
     // TODO(ianh): implement findAccessibilityNodeInfosByText()
     // TODO(ianh): implement findFocus()
 
+    private SemanticObject getRootObject() {
+      return mObjects.get(0);
+    }
+
     void handleTouchExplorationExit() {
-        if (mHoveredNode != null) {
-            sendAccessibilityEvent(mHoveredNode.id, AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
-            mHoveredNode = null;
+        if (mHoveredObject != null) {
+            sendAccessibilityEvent(mHoveredObject.id, AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
+            mHoveredObject = null;
         }
     }
 
     void handleTouchExploration(float x, float y) {
-        if (mTreeNodes.isEmpty())
+        if (mObjects.isEmpty()) {
             return;
-        assert mTreeNodes.containsKey(0);
-        PersistentAccessibilityNode newNode = mTreeNodes.get(0).hitTest(Math.round(x), Math.round(y));
-        if (newNode != mHoveredNode) {
+        }
+        assert mObjects.containsKey(0);
+        SemanticObject newObject = getRootObject().hitTest(Math.round(x), Math.round(y));
+        if (newObject != mHoveredObject) {
             // sending ENTER before EXIT is how Android wants it
-            if (newNode != null) {
-                sendAccessibilityEvent(newNode.id, AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
+            if (newObject != null) {
+                sendAccessibilityEvent(newObject.id, AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
             }
-            if (mHoveredNode != null) {
-                sendAccessibilityEvent(mHoveredNode.id, AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
+            if (mHoveredObject != null) {
+                sendAccessibilityEvent(mHoveredObject.id, AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
             }
-            mHoveredNode = newNode;
+            mHoveredObject = newObject;
         }
     }
 
     @Override
     public void updateSemanticsTree(SemanticsNode[] nodes) {
+        Set<SemanticObject> updatedObjects = new HashSet<SemanticObject>();
+        Set<SemanticObject> removedObjects = new HashSet<SemanticObject>();
         for (SemanticsNode node : nodes) {
-            updateSemanticsNode(node);
+            updateSemanticObject(node, updatedObjects, removedObjects);
             sendAccessibilityEvent(node.id, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
         }
+        for (SemanticObject object : removedObjects) {
+            if (!updatedObjects.contains(object)) {
+                removeSemanticObject(object, updatedObjects);
+            }
+        }
+    }
+
+    private SemanticObject updateSemanticObject(SemanticsNode node,
+                                                Set<SemanticObject> updatedObjects,
+                                                Set<SemanticObject> removedObjects) {
+        SemanticObject object = mObjects.get(node.id);
+        if (object == null) {
+            object = new SemanticObject();
+            mObjects.put(node.id, object);
+        }
+        object.updateWith(node);
+        updatedObjects.add(object);
+        if (node.children != null) {
+            if (node.children.length == 0) {
+                if (object.children != null) {
+                    removedObjects.addAll(object.children);
+                }
+                object.children = null;
+            } else {
+                if (object.children == null) {
+                    object.children = new ArrayList<SemanticObject>(node.children.length);
+                } else {
+                    removedObjects.addAll(object.children);
+                    object.children.clear();
+                }
+                for (SemanticsNode childNode : node.children) {
+                    SemanticObject childObject = updateSemanticObject(childNode, updatedObjects, removedObjects);
+                    childObject.parent = object;
+                    object.children.add(childObject);
+                }
+            }
+        }
+        if (node.geometry != null) {
+            // has to be done after children are updated
+            // since they also get marked dirty
+            object.invalidateGlobalGeometry();
+        }
+        return object;
     }
 
     private void sendAccessibilityEvent(int virtualViewId, int eventType) {
@@ -236,52 +288,43 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
         }
     }
 
-    private PersistentAccessibilityNode updateSemanticsNode(SemanticsNode node) {
-        PersistentAccessibilityNode persistentNode = mTreeNodes.get(node.id);
-        if (persistentNode != null) {
-            persistentNode.update(node);
-        } else {
-            persistentNode = new PersistentAccessibilityNode(node);
-            mTreeNodes.put(node.id, persistentNode);
+    private void removeSemanticObject(SemanticObject object, Set<SemanticObject> updatedObjects) {
+        assert mObjects.containsKey(object.id);
+        assert mObjects.get(object.id) == object;
+        object.parent = null;
+        mObjects.remove(object.id);
+        if (mFocusedObject == object) {
+            sendAccessibilityEvent(mFocusedObject.id, AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
+            mFocusedObject = null;
         }
-        assert persistentNode != null;
-        return persistentNode;
-    }
-
-    void removePersistentNode(PersistentAccessibilityNode node) {
-        assert mTreeNodes.containsKey(node.id);
-        assert mTreeNodes.get(node.id).parent == null;
-        mTreeNodes.remove(node.id);
-        if (mFocusedNode == node) {
-            sendAccessibilityEvent(mFocusedNode.id, AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
-            mFocusedNode = null;
+        if (mHoveredObject == object) {
+            mHoveredObject = null;
         }
-        if (mHoveredNode == node) {
-            mHoveredNode = null;
-        }
-        if (node.children != null) {
-            for (PersistentAccessibilityNode child : node.children) {
-                removePersistentNode(child);
+        if (object.children != null) {
+            for (SemanticObject child : object.children) {
+                if (!updatedObjects.contains(child)) {
+                    assert child.parent == object;
+                    removeSemanticObject(child, updatedObjects);
+                }
             }
         }
     }
 
     void reset(SemanticsServer.Proxy newSemanticsServer) {
-        mTreeNodes.clear();
-        sendAccessibilityEvent(mFocusedNode.id, AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
-        mFocusedNode = null;
-        mHoveredNode = null;
+        mObjects.clear();
+        sendAccessibilityEvent(mFocusedObject.id, AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
+        mFocusedObject = null;
+        mHoveredObject = null;
         mSemanticsServer.close();
         sendAccessibilityEvent(0, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
         mSemanticsServer = newSemanticsServer;
         mSemanticsServer.addSemanticsListener(this);
     }
 
-    private class PersistentAccessibilityNode {
-        PersistentAccessibilityNode(SemanticsNode node) {
-            update(node);
-        }
-        void update(SemanticsNode node) {
+    private class SemanticObject {
+        SemanticObject() { }
+
+        void updateWith(SemanticsNode node) {
             if (id == -1) {
                 id = node.id;
                 assert node.flags != null;
@@ -291,13 +334,8 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
             }
             assert id == node.id;
             if (node.flags != null) {
-                canBeTapped = node.flags.canBeTapped;
-                canBeLongPressed = node.flags.canBeLongPressed;
-                canBeScrolledHorizontally = node.flags.canBeScrolledHorizontally;
-                canBeScrolledVertically = node.flags.canBeScrolledVertically;
                 hasCheckedState = node.flags.hasCheckedState;
                 isChecked = node.flags.isChecked;
-                isAdjustable = node.flags.isAdjustable;
             }
             if (node.strings != null) {
                 label = node.strings.label;
@@ -309,52 +347,53 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
                 width = node.geometry.width;
                 height = node.geometry.height;
             }
-            if (node.children != null) {
-                List<PersistentAccessibilityNode> oldChildren = children;
-                if (oldChildren != null) {
-                    for (PersistentAccessibilityNode child : oldChildren) {
-                        assert child.parent != null;
-                        child.parent = null;
+            if (node.actions != null) {
+                canBeTapped = false;
+                canBeLongPressed = false;
+                canBeScrolledHorizontally = false;
+                canBeScrolledVertically = false;
+                for (int action : node.actions) {
+                    switch (action) {
+                    case SemanticAction.TAP:
+                        canBeTapped = true;
+                        break;
+                    case SemanticAction.LONG_PRESS:
+                        canBeLongPressed = true;
+                        break;
+                    case SemanticAction.SCROLL_LEFT:
+                        canBeScrolledHorizontally = true;
+                        break;
+                    case SemanticAction.SCROLL_RIGHT:
+                        canBeScrolledHorizontally = true;
+                        break;
+                    case SemanticAction.SCROLL_UP:
+                        canBeScrolledVertically = true;
+                        break;
+                    case SemanticAction.SCROLL_DOWN:
+                        canBeScrolledVertically = true;
+                        break;
+                    case SemanticAction.INCREASE:
+                        // Not implemented.
+                        break;
+                    case SemanticAction.DECREASE:
+                        // Not implemented.
+                        break;
                     }
                 }
-                if (node.children.length > 0) {
-                    children = new ArrayList<PersistentAccessibilityNode>(node.children.length);
-                    for (SemanticsNode childNode : node.children) {
-                        PersistentAccessibilityNode child = AccessibilityBridge.this.updateSemanticsNode(childNode);
-                        assert child != null;
-                        child.parent = this;
-                        children.add(child);
-                    }
-                } else {
-                    children = null;
-                }
-                if (oldChildren != null) {
-                    for (PersistentAccessibilityNode child : oldChildren) {
-                        if (child.parent == null) {
-                            AccessibilityBridge.this.removePersistentNode(child);
-                        }
-                    }
-                }
-            }
-            if (node.geometry != null) {
-                // has to be done after children are updated
-                // since they also get marked dirty
-                invalidateGlobalGeometry();
             }
         }
 
         // fields that we pass straight to the Android accessibility API
         int id = -1;
-        PersistentAccessibilityNode parent;
+        SemanticObject parent;
         boolean canBeTapped;
         boolean canBeLongPressed;
         boolean canBeScrolledHorizontally;
         boolean canBeScrolledVertically;
         boolean hasCheckedState;
         boolean isChecked;
-        boolean isAdjustable;
         String label;
-        List<PersistentAccessibilityNode> children;
+        List<SemanticObject> children;
 
         // geometry, which we have to convert to global coordinates to send to Android
         private float[] transform; // can be null, meaning identity transform
@@ -369,10 +408,10 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
                 return;
             }
             geometryDirty = true;
-            // TODO(ianh): if we are the AccessibilityBridge.this.mFocusedNode
+            // TODO(ianh): if we are the AccessibilityBridge.this.mFocusedObject
             // then we may have to unfocus and refocus ourselves to get Android to update the focus rect
             if (children != null) {
-                for (PersistentAccessibilityNode child : children) {
+                for (SemanticObject child : children) {
                     child.invalidateGlobalGeometry();
                 }
             }
@@ -437,14 +476,14 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
             return globalRect;
         }
 
-        PersistentAccessibilityNode hitTest(int x, int y) {
+        SemanticObject hitTest(int x, int y) {
             Rect rect = getGlobalRect();
             if (!rect.contains(x, y))
                 return null;
             if (children != null) {
                 for (int index = children.size()-1; index >= 0; index -= 1) {
-                    PersistentAccessibilityNode child = children.get(index);
-                    PersistentAccessibilityNode result = child.hitTest(x, y);
+                    SemanticObject child = children.get(index);
+                    SemanticObject result = child.hitTest(x, y);
                     if (result != null) {
                         return result;
                     }

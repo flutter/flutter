@@ -5,14 +5,11 @@
 #ifndef SKY_SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_ACCESSIBILITY_BRIDGE_H_
 #define SKY_SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_ACCESSIBILITY_BRIDGE_H_
 
-#include <map>
 #include <memory>
-#include <string>
-#include <vector>
+#include <set>
+#include <unordered_map>
 
 #include "base/macros.h"
-#include "base/memory/ref_counted.h"
-#include "base/memory/weak_ptr.h"
 #include "mojo/public/cpp/bindings/array.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
@@ -28,7 +25,7 @@ class AccessibilityBridge;
 }
 }
 
-@interface AccessibilityNode : NSObject
+@interface SemanticObject : NSObject
 
 /**
  * The globally unique identifier for this node.
@@ -39,12 +36,7 @@ class AccessibilityBridge;
  * The parent of this node in the node tree. Will be nil for the root node and
  * during transient state changes.
  */
-@property(nonatomic, readonly) AccessibilityNode* parent;
-
-/**
- * This node's children in the node tree.
- */
-@property(nonatomic, readonly) NSArray<AccessibilityNode*>* children;
+@property(nonatomic, assign) SemanticObject* parent;
 
 - (instancetype)init __attribute__((unavailable("Use initWithBridge instead")));
 - (instancetype)initWithBridge:(sky::shell::AccessibilityBridge*)bridge
@@ -55,36 +47,29 @@ class AccessibilityBridge;
 namespace sky {
 namespace shell {
 
-// Class that mediates communication between FlutterView and the Dart layer in
-// order to provide accessibility features.
-//
-// The bridge is owned by the FlutterView that created it. It maintains a raw
-// pointer back to the view to enable bidirectional communication with the view
-// without introducing a circular reference. Since the strong binding herein may
-// destroy the bridge, the view maintains its ownership via a weak reference.
 class AccessibilityBridge final : public semantics::SemanticsListener {
  public:
   AccessibilityBridge(FlutterView*, mojo::ServiceProvider*);
   ~AccessibilityBridge() override;
 
   void UpdateSemanticsTree(mojo::Array<semantics::SemanticsNodePtr>) override;
-  AccessibilityNode* UpdateNode(const semantics::SemanticsNodePtr& node);
-  void RemoveNode(AccessibilityNode* node);
-
-  base::WeakPtr<AccessibilityBridge> AsWeakPtr();
 
   FlutterView* view() { return view_; }
   semantics::SemanticsServer* server() { return semantics_server_.get(); }
 
  private:
-  // See class docs above about ownership relationship
+  SemanticObject* UpdateSemanticObject(
+      const semantics::SemanticsNodePtr& node,
+      std::set<SemanticObject*>* updated_objects,
+      std::set<SemanticObject*>* removed_objects);
+  void RemoveSemanticObject(SemanticObject* node,
+                            std::set<SemanticObject*>* updated_objects);
+
   FlutterView* view_;
   semantics::SemanticsServerPtr semantics_server_;
-  NSMutableDictionary<NSNumber*, AccessibilityNode*>* nodes_;
+  std::unordered_map<int, SemanticObject*> objects_;
 
-  mojo::StrongBinding<semantics::SemanticsListener> binding_;
-
-  base::WeakPtrFactory<AccessibilityBridge> weak_factory_;
+  mojo::Binding<semantics::SemanticsListener> binding_;
 
   DISALLOW_COPY_AND_ASSIGN(AccessibilityBridge);
 };

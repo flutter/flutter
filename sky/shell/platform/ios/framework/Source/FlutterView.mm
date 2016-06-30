@@ -12,12 +12,11 @@
 @end
 
 @implementation FlutterView {
-  base::WeakPtr<sky::shell::AccessibilityBridge> _accessibilityBridge;
+  std::unique_ptr<sky::shell::AccessibilityBridge> _accessibilityBridge;
 }
 
 - (void)withAccessibility:(mojo::ServiceProvider*)serviceProvider {
-  auto bridge = new sky::shell::AccessibilityBridge(self, serviceProvider);
-  _accessibilityBridge = bridge->AsWeakPtr();
+  _accessibilityBridge.reset(new sky::shell::AccessibilityBridge(self, serviceProvider));
 }
 
 - (void)layoutSubviews {
@@ -38,13 +37,6 @@
 
 - (BOOL)enableInputClicksWhenVisible {
   return YES;
-}
-
-- (void)dealloc {
-  delete _accessibilityBridge.get();
-  _accessibilityBridge.reset();
-
-  [super dealloc];
 }
 
 @end

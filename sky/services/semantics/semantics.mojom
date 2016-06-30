@@ -5,6 +5,17 @@
 [DartPackage="sky_services"]
 module semantics;
 
+enum SemanticAction {
+  TAP,
+  LONG_PRESS,
+  SCROLL_LEFT,
+  SCROLL_RIGHT,
+  SCROLL_UP,
+  SCROLL_DOWN,
+  INCREASE,
+  DECREASE,
+};
+
 struct SemanticsNode {
   uint32 id;
 
@@ -12,19 +23,17 @@ struct SemanticsNode {
   SemanticFlags? flags;
   SemanticStrings? strings;
   SemanticGeometry? geometry;
+  // TODO(abarth): Switch to array<SemanticAction> once that works.
+  // See https://github.com/domokit/mojo/issues/799
+  array<int32>? actions;
   array<SemanticsNode>? children;
 };
 
 struct SemanticFlags {
   // This is intended to just be booleans, so that it can be extended
   // over time yet still be packed tightly.
-  bool canBeTapped = false;
-  bool canBeLongPressed = false;
-  bool canBeScrolledHorizontally = false;
-  bool canBeScrolledVertically = false;
-  bool hasCheckedState = false; // whether isChecked is relevant
-  bool isChecked = false;
-  bool isAdjustable = false;
+  bool has_checked_state = false; // whether is_checked is relevant
+  bool is_checked = false;
 };
 
 struct SemanticStrings {
@@ -56,7 +65,7 @@ struct SemanticGeometry {
 };
 
 interface SemanticsListener {
-  // The OS side, invoked from the app.
+  // The engine side, invoked from the app.
   UpdateSemanticsTree(array<SemanticsNode> nodes);
 };
 
@@ -64,12 +73,5 @@ interface SemanticsListener {
 interface SemanticsServer {
   // The app side, invoked from the engine.
   AddSemanticsListener(SemanticsListener listener);
-  Tap(uint32 nodeID);
-  LongPress(uint32 nodeID);
-  ScrollLeft(uint32 nodeID);
-  ScrollRight(uint32 nodeID);
-  ScrollUp(uint32 nodeID);
-  ScrollDown(uint32 nodeID);
-  AdjustIncrease(uint32 nodeID);
-  AdjustDecrease(uint32 nodeID);
+  PerformAction(uint32 nodeID, SemanticAction action);
 };
