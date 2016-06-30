@@ -867,9 +867,6 @@ abstract class State<T extends StatefulWidget> {
   @protected
   Widget build(BuildContext context);
 
-  /// Trampoline to make the [build] closure library-accessible.
-  WidgetBuilder get _build => build;
-
   /// Called when a dependencies of this [State] object changes.
   ///
   /// For example, if the previous call to [build] referenced an
@@ -2039,7 +2036,7 @@ class StatefulElement extends ComponentElement {
     assert(_state._element == null);
     _state._element = this;
     assert(_builder == _buildNothing);
-    _builder = _state._build;
+    _builder = _state.build;
     assert(_state._config == null);
     _state._config = widget;
     assert(_state._debugLifecycleState == _StateLifecycle.created);
@@ -2050,7 +2047,7 @@ class StatefulElement extends ComponentElement {
 
   @override
   void _reassemble() {
-    _builder = state._build;
+    _builder = state.build;
     super._reassemble();
   }
 
