@@ -4,20 +4,28 @@
 
 part of dart_jni;
 
-/// Invoke Java Native Interface APIs from Dart.
+/// A group of methods which invoke Java Native Interface APIs from Dart.
 class JniApi {
+  /// Return the field ID matching a `java.lang.reflect.Field` object.
   static int fromReflectedField(JniObject field)
       native 'JniApi_FromReflectedField';
+
+  /// Return the method ID matching a `java.lang.reflect.Method` object.
   static int fromReflectedMethod(JniObject method)
       native 'JniApi_FromReflectedMethod';
 
+  /// The `ApplicationContext` of this Android application.
   static JniObject getApplicationContext()
       native 'JniApi_GetApplicationContext';
+
+  /// The application's class loader.
   static JniObject getClassLoader()
       native 'JniApi_GetClassLoader';
 }
 
-/// Wrapper for a Java object accessed via JNI.
+/// Low-level wrapper for a Java object accessed via JNI.
+/// These methods map directly to the corresponding JNI functions.  See the JNI
+/// documentation for more information.
 class JniObject extends NativeFieldWrapperClass2 {
   JniClass getObjectClass()
       native 'JniObject_GetObjectClass';
@@ -82,25 +90,44 @@ class JniObject extends NativeFieldWrapperClass2 {
       native 'JniObject_CallVoidMethod';
 }
 
-/// Wrapper for a Java class accessed via JNI.
+/// Low-level wrapper for a Java class accessed via JNI.
+/// These methods map directly to the corresponding JNI functions.  See the JNI
+/// documentation for more information.
 class JniClass extends JniObject {
+  /// Loads the Java class with the given fully qualified name.
   static JniClass fromName(String name)
       native 'JniClass_FromName';
+
+  /// Returns a wrapper for a `java.lang.Class` object.
   static JniClass fromClassObject(JniObject classObject)
       native 'JniClass_FromClassObject';
 
+  /// Returns a field ID for the instance field matching this name and type signature.
+  /// See the JNI reference for explanation of type signatures.
   int getFieldId(String name, String sig)
       native 'JniClass_GetFieldId';
+
+  /// Returns a field ID for a static field.
   int getStaticFieldId(String name, String sig)
       native 'JniClass_GetStaticFieldId';
+
+  /// Returns a method ID for an instance method.
   int getMethodId(String name, String sig)
       native 'JniClass_GetMethodId';
+
+  /// Returns a method ID for a static method.
   int getStaticMethodId(String name, String sig)
       native 'JniClass_GetStaticMethodId';
 
+  /// Constructs an instance of the wrapped Java class..
+  /// @param methodId The method ID of the constructor, obtained via getMethodId.
+  /// @param args A list of argument values passed to the constructor.  Each value should
+  ///             be a Dart number, bool, string, or [JniObject] instance.
   JniObject newObject(int methodId, List args)
       native 'JniClass_NewObject';
 
+  /// Returns true if objects of the wrapped Java class can be cast to the
+  /// class described by the argument.
   bool isAssignable(JniClass clazz)
       native 'JniClass_IsAssignable';
 
@@ -166,12 +193,14 @@ class JniClass extends JniObject {
 
 /// Wrapper for a Java string.
 class JniString extends JniObject {
+  /// Construct a Java string from a Dart string.
   static JniString create(String value)
       native 'JniString_Create';
 
-  // Retrieve the value as a Dart string.
+  /// Retrieve the value of the Java string represented by this object as a Dart string.
   String get text native 'JniString_GetText';
 
+  /// Convert a JniObject representing a Java string to a Dart string.
   static String unwrap(JniObject object) => (object as JniString).text;
 }
 
@@ -182,6 +211,7 @@ class JniArray extends JniObject {
   void set length(int value) { throw new UnsupportedError("Not supported."); }
 }
 
+/// Wrapper for a Java `Object` array.
 class JniObjectArray extends JniArray with ListMixin<JniObject> {
   static JniObjectArray create(JniClass clazz, int length)
       native 'JniObjectArray_Create';
@@ -193,6 +223,7 @@ class JniObjectArray extends JniArray with ListMixin<JniObject> {
       native 'JniObjectArray_SetArrayElement';
 }
 
+/// Wrapper for a Java `boolean` array.
 class JniBooleanArray extends JniArray with ListMixin<bool> {
   static JniBooleanArray create(int length)
       native 'JniBooleanArray_Create';
@@ -204,6 +235,7 @@ class JniBooleanArray extends JniArray with ListMixin<bool> {
       native 'JniBooleanArray_SetArrayElement';
 }
 
+/// Wrapper for a Java `byte` array.
 class JniByteArray extends JniArray with ListMixin<int> {
   static JniByteArray create(int length)
       native 'JniByteArray_Create';
@@ -215,6 +247,7 @@ class JniByteArray extends JniArray with ListMixin<int> {
       native 'JniByteArray_SetArrayElement';
 }
 
+/// Wrapper for a Java `char` array.
 class JniCharArray extends JniArray with ListMixin<int> {
   static JniCharArray create(int length)
       native 'JniCharArray_Create';
@@ -226,6 +259,7 @@ class JniCharArray extends JniArray with ListMixin<int> {
       native 'JniCharArray_SetArrayElement';
 }
 
+/// Wrapper for a Java `short` array.
 class JniShortArray extends JniArray with ListMixin<int> {
   static JniShortArray create(int length)
       native 'JniShortArray_Create';
@@ -237,6 +271,7 @@ class JniShortArray extends JniArray with ListMixin<int> {
       native 'JniShortArray_SetArrayElement';
 }
 
+/// Wrapper for a Java `int` array.
 class JniIntArray extends JniArray with ListMixin<int> {
   static JniIntArray create(int length)
       native 'JniIntArray_Create';
@@ -248,6 +283,7 @@ class JniIntArray extends JniArray with ListMixin<int> {
       native 'JniIntArray_SetArrayElement';
 }
 
+/// Wrapper for a Java `long` array.
 class JniLongArray extends JniArray with ListMixin<int> {
   static JniLongArray create(int length)
       native 'JniLongArray_Create';
@@ -259,6 +295,7 @@ class JniLongArray extends JniArray with ListMixin<int> {
       native 'JniLongArray_SetArrayElement';
 }
 
+/// Wrapper for a Java `float` array.
 class JniFloatArray extends JniArray with ListMixin<double> {
   static JniFloatArray create(int length)
       native 'JniFloatArray_Create';
@@ -270,6 +307,7 @@ class JniFloatArray extends JniArray with ListMixin<double> {
       native 'JniFloatArray_SetArrayElement';
 }
 
+/// Wrapper for a Java `double` array.
 class JniDoubleArray extends JniArray with ListMixin<double> {
   static JniDoubleArray create(int length)
       native 'JniDoubleArray_Create';

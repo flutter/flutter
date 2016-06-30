@@ -311,10 +311,11 @@ List _convertArgumentsToJava(List dartArgs, _HasArguments method) {
   return result;
 }
 
+/// A class that provides access to Java objects from within Dart.
 class Java {
   static final Map<String, JavaClass> _classCache = new Map<String, JavaClass>();
 
-  // Returns a JavaClass for the given class name
+  /// Returns a [JavaClass] for the given class name.
   static JavaClass getClass(String className) {
     JavaClass cacheEntry = _classCache[className];
     if (cacheEntry != null)
@@ -331,7 +332,7 @@ class Java {
     return javaClass;
   }
 
-  // Returns a JavaClass that wraps a raw JNI class object
+  /// Returns a [JavaClass] that wraps a raw JNI class object.
   static JavaClass wrapClassObject(dynamic classObject) {
     JniClass jniClass;
     if (classObject is JniClass) {
@@ -353,8 +354,8 @@ class Java {
   }
 }
 
-// A wrapper for a JNI class that uses reflection to provide access to the
-// class' static fields, methods, and constructors.
+/// A wrapper for a JNI class that uses reflection to provide access to the
+/// class' static fields, methods, and constructors.
 class JavaClass {
   JniClass _clazz;
   String _className;
@@ -408,11 +409,13 @@ class JavaClass {
 
   String toString() => 'JavaClass:$_className';
 
+  /// The name of the wrapped Java class.
   String get className => _className;
 
+  /// A raw [JniClass] representing the java.lang.Class instance for this class
   JniClass get jniClass => _clazz;
 
-  // Return a JavaObject representing the java.lang.Class instance for this class
+  /// A [JavaObject] representing the java.lang.Class instance for this class
   JavaObject get asJavaObject => new JavaObject(_clazz);
 
   dynamic noSuchMethod(Invocation invocation) {
@@ -519,8 +522,8 @@ class JavaClass {
   }
 }
 
-// A wrapper for a JNI object that provides access to the object's fields
-// and methods.
+/// A wrapper for a JNI object that provides access to the object's fields
+/// and methods.
 class JavaObject {
   JniObject _object;
   JavaClass _clazz;
@@ -624,6 +627,7 @@ class JavaObject {
     throw new JavaError('Unable to access ${invocation.memberName}');
   }
 
+  /// Convert this object to a string using the Java object's `toString` method.
   String toString() {
     String result = JniString.unwrap(_object.callObjectMethod(_reflect.objectToString, []));
     if (!result.isEmpty) {
@@ -633,7 +637,11 @@ class JavaObject {
     }
   }
 
+  /// A [JavaClass] representing this object's class.
   JavaClass get javaClass => _clazz;
 
+  /// The raw [JniObject] wrapped by this object.
+  /// This can be used to perform low-level JNI operations that aren't exposed
+  /// by [JavaObject], such as access to specific overloaded methods.
   JniObject get jniObject => _object;
 }
