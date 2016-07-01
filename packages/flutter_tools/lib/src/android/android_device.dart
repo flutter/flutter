@@ -640,8 +640,20 @@ class _AdbLogReader extends DeviceLogReader {
     // Start the adb logcat process.
     List<String> args = <String>['logcat', '-v', 'tag'];
     String lastTimestamp = device.lastLogcatTimestamp;
-    if (lastTimestamp != null)
-      args.addAll(<String>['-T', lastTimestamp]);
+    if (lastTimestamp != null) {
+      bool supportsLastTimestamp = false;
+
+      // Check to see if this copy of adb supports -T.
+      try {
+        // "logcat: invalid option -- T", "Unrecognized Option"
+        // logcat -g will finish immediately; it will print an error to stdout if -T isn't supported.
+        String result = runSync(device.adbCommandForDevice(<String>['logcat', '-g', '-T', lastTimestamp]));
+        supportsLastTimestamp = !result.contains('logcat: invalid option') && !result.contains('Unrecognized Option');
+      } catch (_) { }
+
+      if (supportsLastTimestamp)
+        args.addAll(<String>['-T', lastTimestamp]);
+    }
     runCommand(device.adbCommandForDevice(args)).then((Process process) {
       _process = process;
       _process.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);
