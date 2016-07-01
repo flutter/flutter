@@ -47,20 +47,16 @@ DART="$DART_SDK_PATH/bin/dart"
   fi
 ) 3< $PROG_NAME
 
-if [ $FLUTTER_DEV ]; then
-  "$DART" --packages="$FLUTTER_TOOLS_DIR/.packages" -c "$SCRIPT_PATH" "$@"
-else
-  set +e
-  "$DART" "$SNAPSHOT_PATH" "$@"
+set +e
+"$DART" "$SNAPSHOT_PATH" "$@"
 
-  # The VM exits with code 253 if the snapshot version is out-of-date.
-  # If it is, we need to snapshot it again.
-  EXIT_CODE=$?
-  if [ $EXIT_CODE != 253 ]; then
-    exit $EXIT_CODE
-  fi
-
-  set -e
-  "$DART" --snapshot="$SNAPSHOT_PATH" --package="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
-  "$DART" "$SNAPSHOT_PATH" "$@"
+# The VM exits with code 253 if the snapshot version is out-of-date.
+# If it is, we need to snapshot it again.
+EXIT_CODE=$?
+if [ $EXIT_CODE != 253 ]; then
+  exit $EXIT_CODE
 fi
+
+set -e
+"$DART" --snapshot="$SNAPSHOT_PATH" --package="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
+"$DART" "$SNAPSHOT_PATH" "$@"
