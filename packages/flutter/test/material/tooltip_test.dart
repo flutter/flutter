@@ -394,7 +394,7 @@ void main() {
   });
 
   testWidgets('Does tooltip contribute semantics', (WidgetTester tester) async {
-    TestSemanticsListener client = new TestSemanticsListener();
+    TestSemanticsListener client = new TestSemanticsListener(tester);
     GlobalKey key = new GlobalKey();
     await tester.pumpWidget(
       new Overlay(

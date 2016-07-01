@@ -12,8 +12,7 @@ enum EnginePhase {
   compositingBits,
   paint,
   composite,
-  flushSemantics,
-  sendSemanticsTree
+  flushSemantics
 }
 
 class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, ServicesBinding, RendererBinding, GestureBinding {
@@ -33,23 +32,20 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
     renderView.compositeFrame();
     if (phase == EnginePhase.composite)
       return;
-    if (SemanticsNode.hasListeners) {
-      pipelineOwner.flushSemantics();
-      if (phase == EnginePhase.flushSemantics)
-        return;
-      SemanticsNode.sendSemanticsTree();
-    }
+    pipelineOwner.flushSemantics();
+    assert(phase == EnginePhase.flushSemantics);
   }
 }
 
 TestRenderingFlutterBinding _renderer;
-TestRenderingFlutterBinding get renderer => _renderer;
+TestRenderingFlutterBinding get renderer {
+  _renderer ??= new TestRenderingFlutterBinding();
+  return _renderer;
+}
 
 void layout(RenderBox box, { BoxConstraints constraints, EnginePhase phase: EnginePhase.layout }) {
   assert(box != null); // If you want to just repump the last box, call pumpFrame().
   assert(box.parent == null); // We stick the box in another, so you can't reuse it easily, sorry.
-
-  _renderer ??= new TestRenderingFlutterBinding();
 
   renderer.renderView.child = null;
   if (constraints != null) {

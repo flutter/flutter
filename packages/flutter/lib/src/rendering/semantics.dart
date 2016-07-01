@@ -78,7 +78,7 @@ class SemanticsNode extends AbstractNode {
   /// The root node is assigned an identifier of zero.
   SemanticsNode.root({
     SemanticActionHandler handler,
-    Object owner
+    SemanticsOwner owner
   }) : _id = 0,
        _actionHandler = handler {
     attach(owner);
@@ -131,19 +131,32 @@ class SemanticsNode extends AbstractNode {
 
   final Set<SemanticAction> _actions = new Set<SemanticAction>();
 
+  /// Adds the given action to the set of semantic actions.
+  ///
+  /// If the user chooses to perform an action,
+  /// [SemanticActionHandler.performAction] will be called with the chosen
+  /// action.
   void addAction(SemanticAction action) {
     if (_actions.add(action))
       _markDirty();
   }
 
+  /// Adds the [SemanticAction.scrollLeft] and [SemanticAction.scrollRight] actions.
   void addHorizontalScrollingActions() {
     addAction(SemanticAction.scrollLeft);
     addAction(SemanticAction.scrollRight);
   }
 
+  /// Adds the [SemanticAction.scrollUp] and [SemanticAction.scrollDown] actions.
   void addVerticalScrollingActions() {
     addAction(SemanticAction.scrollUp);
     addAction(SemanticAction.scrollDown);
+  }
+
+  /// Adds the [SemanticAction.increase] and [SemanticAction.decrease] actions.
+  void addAdjustmentActions() {
+    addAction(SemanticAction.increase);
+    addAction(SemanticAction.decrease);
   }
 
   bool _hasAction(SemanticAction action) {
@@ -286,6 +299,9 @@ class SemanticsNode extends AbstractNode {
   }
 
   @override
+  SemanticsOwner get owner => super.owner;
+
+  @override
   SemanticsNode get parent => super.parent;
 
   @override
@@ -309,15 +325,16 @@ class SemanticsNode extends AbstractNode {
     return true;
   }
 
-  static Map<int, SemanticsNode> _nodes = <int, SemanticsNode>{};
-  static Set<SemanticsNode> _detachedNodes = new Set<SemanticsNode>();
-
   @override
-  void attach(Object owner) {
+  void attach(SemanticsOwner owner) {
     super.attach(owner);
-    assert(!_nodes.containsKey(_id));
-    _nodes[_id] = this;
-    _detachedNodes.remove(this);
+    assert(!owner._nodes.containsKey(_id));
+    owner._nodes[_id] = this;
+    owner._detachedNodes.remove(this);
+    if (_dirty) {
+      _dirty = false;
+      _markDirty();
+    }
     if (parent != null)
       _inheritedMergeAllDescendantsIntoThisNode = parent._shouldMergeAllDescendantsIntoThisNode;
     if (_children != null) {
@@ -328,26 +345,27 @@ class SemanticsNode extends AbstractNode {
 
   @override
   void detach() {
+    assert(owner._nodes.containsKey(_id));
+    assert(!owner._detachedNodes.contains(this));
+    owner._nodes.remove(_id);
+    owner._detachedNodes.add(this);
     super.detach();
-    assert(_nodes.containsKey(_id));
-    assert(!_detachedNodes.contains(this));
-    _nodes.remove(_id);
-    _detachedNodes.add(this);
     if (_children != null) {
       for (SemanticsNode child in _children)
         child.detach();
     }
   }
 
-  static List<SemanticsNode> _dirtyNodes = <SemanticsNode>[];
   bool _dirty = false;
   void _markDirty() {
     if (_dirty)
       return;
     _dirty = true;
-    assert(!_dirtyNodes.contains(this));
-    assert(!_detachedNodes.contains(this));
-    _dirtyNodes.add(this);
+    if (attached) {
+      assert(!owner._dirtyNodes.contains(this));
+      assert(!owner._detachedNodes.contains(this));
+      owner._dirtyNodes.add(this);
+    }
   }
 
   mojom.SemanticsNode _serialize() {
@@ -397,35 +415,71 @@ class SemanticsNode extends AbstractNode {
     return result;
   }
 
-  static List<mojom.SemanticsListener> _listeners;
+  @override
+  String toString() {
+    StringBuffer buffer = new StringBuffer();
+    buffer.write('$runtimeType($_id');
+    if (_dirty)
+      buffer.write(" (${ owner != null && owner._dirtyNodes.contains(this) ? 'dirty' : 'STALE' })");
+    if (_shouldMergeAllDescendantsIntoThisNode)
+      buffer.write(' (leaf merge)');
+    buffer.write('; $rect');
+    if (wasAffectedByClip)
+      buffer.write(' (clipped)');
+    for (SemanticAction action in _actions) {
+      buffer.write('; $action');
+    }
+    if (hasCheckedState) {
+      if (isChecked)
+        buffer.write('; checked');
+      else
+        buffer.write('; unchecked');
+    }
+    if (label.isNotEmpty)
+      buffer.write('; "$label"');
+    buffer.write(')');
+    return buffer.toString();
+  }
+
+  /// Returns a string representation of this node and its descendants.
+  String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
+    String result = '$prefixLineOne$this\n';
+    if (_children != null && _children.isNotEmpty) {
+      for (int index = 0; index < _children.length - 1; index += 1) {
+        SemanticsNode child = _children[index];
+        result += '${child.toStringDeep("$prefixOtherLines \u251C", "$prefixOtherLines \u2502")}';
+      }
+      result += '${_children.last.toStringDeep("$prefixOtherLines \u2514", "$prefixOtherLines  ")}';
+    }
+    return result;
+  }
+}
+
+class SemanticsOwner {
+  final List<SemanticsNode> _dirtyNodes = <SemanticsNode>[];
+  final Map<int, SemanticsNode> _nodes = <int, SemanticsNode>{};
+  final Set<SemanticsNode> _detachedNodes = new Set<SemanticsNode>();
+
+  List<mojom.SemanticsListener> _listeners;
 
   /// Whether there are currently any consumers of semantic data.
   ///
   /// If there are no consumers of semantic data, there is no need to compile
   /// semantic data into a [SemanticsNode] tree.
-  static bool get hasListeners => _listeners != null && _listeners.length > 0;
-
-  /// Called when the first consumer of semantic data arrives.
-  ///
-  /// Typically set by [RendererBinding].
-  static VoidCallback onSemanticsEnabled;
+  bool get hasListeners => _listeners != null && _listeners.length > 0;
 
   /// Add a consumer of semantic data.
   ///
   /// After the [PipelineOwner] updates the semantic data for a given frame, it
   /// calls [sendSemanticsTree], which uploads the data to each listener
   /// registered with this function.
-  static void addListener(mojom.SemanticsListener listener) {
-    if (!hasListeners) {
-      assert(onSemanticsEnabled != null); // initialise the binding _before_ adding listeners
-      onSemanticsEnabled();
-    }
+  void addListener(mojom.SemanticsListener listener) {
     _listeners ??= <mojom.SemanticsListener>[];
     _listeners.add(listener);
   }
 
   /// Uploads the semantics tree to the listeners registered with [addListener].
-  static void sendSemanticsTree() {
+  void sendSemanticsTree() {
     assert(hasListeners);
     for (SemanticsNode oldNode in _detachedNodes) {
       // The other side will have forgotten this node if we even send
@@ -491,7 +545,7 @@ class SemanticsNode extends AbstractNode {
     _dirtyNodes.clear();
   }
 
-  static SemanticActionHandler _getSemanticActionHandlerForId(int id, { @required SemanticAction action }) {
+  SemanticActionHandler _getSemanticActionHandlerForId(int id, { @required SemanticAction action }) {
     assert(action != null);
     SemanticsNode result = _nodes[id];
     if (result != null && result._shouldMergeAllDescendantsIntoThisNode && !result._hasAction(action)) {
@@ -508,59 +562,29 @@ class SemanticsNode extends AbstractNode {
     return result._actionHandler;
   }
 
-  @override
-  String toString() {
-    StringBuffer buffer = new StringBuffer();
-    buffer.write('$runtimeType($_id');
-    if (_dirty)
-      buffer.write(" (${ _dirtyNodes.contains(this) ? 'dirty' : 'STALE' })");
-    if (_shouldMergeAllDescendantsIntoThisNode)
-      buffer.write(' (leaf merge)');
-    buffer.write('; $rect');
-    if (wasAffectedByClip)
-      buffer.write(' (clipped)');
-    for (SemanticAction action in _actions) {
-      buffer.write('; $action');
-    }
-    if (hasCheckedState) {
-      if (isChecked)
-        buffer.write('; checked');
-      else
-        buffer.write('; unchecked');
-    }
-    if (label.isNotEmpty)
-      buffer.write('; "$label"');
-    buffer.write(')');
-    return buffer.toString();
-  }
-
-  /// Returns a string representation of this node and its descendants.
-  String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
-    String result = '$prefixLineOne$this\n';
-    if (_children != null && _children.isNotEmpty) {
-      for (int index = 0; index < _children.length - 1; index += 1) {
-        SemanticsNode child = _children[index];
-        result += '${child.toStringDeep("$prefixOtherLines \u251C", "$prefixOtherLines \u2502")}';
-      }
-      result += '${_children.last.toStringDeep("$prefixOtherLines \u2514", "$prefixOtherLines  ")}';
-    }
-    return result;
+  void performAction(int id, SemanticAction action) {
+    SemanticActionHandler handler = _getSemanticActionHandlerForId(id, action: action);
+    handler?.performAction(action);
   }
 }
 
 /// Exposes the [SemanticsNode] tree to the underlying platform.
 class SemanticsServer extends mojom.SemanticsServer {
+  SemanticsServer({ @required this.semanticsOwner }) {
+    assert(semanticsOwner != null);
+  }
+
+  final SemanticsOwner semanticsOwner;
+
   @override
   void addSemanticsListener(mojom.SemanticsListenerProxy listener) {
     // TODO(abarth): We should remove the listener when this pipe closes.
     // See <https://github.com/flutter/flutter/issues/3342>.
-    SemanticsNode.addListener(listener);
+    semanticsOwner.addListener(listener);
   }
 
   @override
   void performAction(int id, mojom.SemanticAction encodedAction) {
-    SemanticAction action = SemanticAction.values[encodedAction.mojoEnumValue];
-    SemanticActionHandler node = SemanticsNode._getSemanticActionHandlerForId(id, action: action);
-    node?.performAction(action);
+    semanticsOwner.performAction(id, SemanticAction.values[encodedAction.mojoEnumValue]);
   }
 }

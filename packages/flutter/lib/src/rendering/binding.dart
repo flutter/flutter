@@ -133,11 +133,17 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   ///
   /// Called automatically when the binding is created.
   void initSemantics() {
-    SemanticsNode.onSemanticsEnabled = renderView.scheduleInitialSemantics;
     shell.provideService(mojom.SemanticsServer.serviceName, (core.MojoMessagePipeEndpoint endpoint) {
+      ensureSemantics();
       mojom.SemanticsServerStub server = new mojom.SemanticsServerStub.fromEndpoint(endpoint);
-      server.impl = new SemanticsServer();
+      server.impl = new SemanticsServer(semanticsOwner: pipelineOwner.semanticsOwner);
     });
+  }
+
+  void ensureSemantics() {
+    if (pipelineOwner.semanticsOwner == null)
+      renderView.scheduleInitialSemantics();
+    assert(pipelineOwner.semanticsOwner != null);
   }
 
   void _handlePersistentFrameCallback(Duration timeStamp) {
@@ -153,10 +159,7 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
     pipelineOwner.flushCompositingBits();
     pipelineOwner.flushPaint();
     renderView.compositeFrame(); // this sends the bits to the GPU
-    if (SemanticsNode.hasListeners) {
-      pipelineOwner.flushSemantics();
-      SemanticsNode.sendSemanticsTree();
-    }
+    pipelineOwner.flushSemantics();
   }
 
   @override

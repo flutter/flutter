@@ -136,9 +136,10 @@ void main() {
   test('objects can be detached and re-attached: semantics', () {
     TestTree testTree = new TestTree();
     TestSemanticsListener listener = new TestSemanticsListener();
-    SemanticsNode.addListener(listener);
+    renderer.ensureSemantics();
+    renderer.pipelineOwner.semanticsOwner.addListener(listener);
     // Lay out, composite, paint, and update semantics
-    layout(testTree.root, phase: EnginePhase.sendSemanticsTree);
+    layout(testTree.root, phase: EnginePhase.flushSemantics);
     expect(listener.updates.length, equals(1));
     // Remove testTree from the custom render view
     renderer.renderView.child = null;
@@ -148,7 +149,7 @@ void main() {
     testTree.child.markNeedsSemanticsUpdate();
     expect(listener.updates.length, equals(0));
     // Lay out, composite, paint, and update semantics again
-    layout(testTree.root, phase: EnginePhase.sendSemanticsTree);
+    layout(testTree.root, phase: EnginePhase.flushSemantics);
     expect(listener.updates.length, equals(1));
   });
 }
