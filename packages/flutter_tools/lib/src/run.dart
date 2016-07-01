@@ -82,9 +82,13 @@ class RunAndStayResident {
     } else {
       Status status = logger.startProgress('Re-starting application...');
 
-      Future<Event> extensionAddedEvent = observatory.onExtensionEvent
-        .where((Event event) => event.extensionKind == 'Flutter.FrameworkInitialization')
-        .first;
+      Future<Event> extensionAddedEvent;
+
+      if (device.restartSendsFrameworkInitEvent) {
+        extensionAddedEvent = observatory.onExtensionEvent
+          .where((Event event) => event.extensionKind == 'Flutter.FrameworkInitialization')
+          .first;
+      }
 
       bool restartResult = await device.restartApp(
         _package,
@@ -95,7 +99,7 @@ class RunAndStayResident {
 
       status.stop(showElapsedTime: true);
 
-      if (restartResult) {
+      if (restartResult && extensionAddedEvent != null) {
         // TODO(devoncarew): We should restore the route here.
         await extensionAddedEvent;
       }
@@ -255,6 +259,8 @@ class RunAndStayResident {
             _stopApp();
           } else if (useDevFS && lower == 'd') {
             _updateDevFS();
+          } else if (lower == 'a') {
+            _debugDumpApp();
           }
         });
       }
@@ -291,6 +297,10 @@ class RunAndStayResident {
       _stopLogger();
       return exitCode;
     });
+  }
+
+  void _debugDumpApp() {
+    observatory.flutterDebugDumpApp(observatory.firstIsolateId);
   }
 
   DevFS devFS;
@@ -361,6 +371,7 @@ class RunAndStayResident {
   void _printHelp() {
     String restartText = device.supportsRestart ? ', "r" or F5 to restart the app,' : '';
     printStatus('Type "h" or F1 for help$restartText and "q", F10, or ctrl-c to quit.');
+    printStatus('Type "a" to print the widget hierarchy of the current app.');
 
     if (useDevFS)
       printStatus('Type "d" to send modified project files to the the client\'s DevFS.');

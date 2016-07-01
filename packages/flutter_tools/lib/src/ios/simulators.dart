@@ -579,6 +579,9 @@ class IOSSimulator extends Device {
   bool get supportsRestart => run.useReloadSources;
 
   @override
+  bool get restartSendsFrameworkInitEvent => false;
+
+  @override
   Future<bool> restartApp(
     ApplicationPackage package,
     LaunchResult result, {
@@ -587,7 +590,15 @@ class IOSSimulator extends Device {
   }) async {
     if (observatory.firstIsolateId == null)
       throw 'Application isolate not found';
-    return observatory.reloadSources(observatory.firstIsolateId);
+    Event result = await observatory.reloadSources(observatory.firstIsolateId);
+    dynamic error = result.response['reloadError'];
+    if (error != null) {
+      printError('Error reloading application sources: $error');
+      return false;
+    } else {
+      await observatory.flutterReassemble(observatory.firstIsolateId);
+      return true;
+    }
   }
 
   @override

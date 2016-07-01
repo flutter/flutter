@@ -72,6 +72,11 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   void initServiceExtensions() {
     super.initServiceExtensions();
 
+    registerSignalServiceExtension(
+      name: 'debugDumpApp',
+      callback: debugDumpApp
+    );
+
     registerBoolServiceExtension(
       name: 'showPerformanceOverlay',
       getter: () => WidgetsApp.showPerformanceOverlayOverride,
