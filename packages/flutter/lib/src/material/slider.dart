@@ -180,6 +180,8 @@ final Tween<double> _kLabelBalloonRadiusTween = new Tween<double>(begin: _kThumb
 final Tween<double> _kLabelBalloonTipTween = new Tween<double>(begin: 0.0, end: -8.0);
 final double _kLabelBalloonTipAttachmentRatio = math.sin(math.PI / 4.0);
 
+const double _kAdjustmentUnit = 0.1; // Matches iOS implementation of material slider.
+
 double _getAdditionalHeightForLabel(String label) {
   return label == null ? 0.0 : _kLabelBalloonRadius * 2.0;
 }
@@ -191,7 +193,7 @@ BoxConstraints _getAdditionalConstraints(String label) {
   );
 }
 
-class _RenderSlider extends RenderConstrainedBox {
+class _RenderSlider extends RenderConstrainedBox implements SemanticActionHandler {
   _RenderSlider({
     double value,
     int divisions,
@@ -291,8 +293,10 @@ class _RenderSlider extends RenderConstrainedBox {
     return dragValue;
   }
 
+  bool get isInteractive => onChanged != null;
+
   void _handleDragStart(DragStartDetails details) {
-    if (onChanged != null) {
+    if (isInteractive) {
       _active = true;
       _currentDragValue = (globalToLocal(details.globalPosition).x - _kReactionRadius) / _trackLength;
       onChanged(_discretizedCurrentDragValue);
@@ -302,7 +306,7 @@ class _RenderSlider extends RenderConstrainedBox {
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    if (onChanged != null) {
+    if (isInteractive) {
       _currentDragValue += details.primaryDelta / _trackLength;
       onChanged(_discretizedCurrentDragValue);
     }
@@ -322,7 +326,7 @@ class _RenderSlider extends RenderConstrainedBox {
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
-    if (event is PointerDownEvent && onChanged != null)
+    if (event is PointerDownEvent && isInteractive)
       _drag.addPointer(event);
   }
 
@@ -331,7 +335,7 @@ class _RenderSlider extends RenderConstrainedBox {
     final Canvas canvas = context.canvas;
 
     final double trackLength = _trackLength;
-    final bool enabled = onChanged != null;
+    final bool enabled = isInteractive;
     final double value = _position.value;
 
     final double additionalHeightForLabel = _getAdditionalHeightForLabel(label);
@@ -416,5 +420,33 @@ class _RenderSlider extends RenderConstrainedBox {
       thumbRadiusDelta = -1.0;
     }
     canvas.drawCircle(thumbCenter, thumbRadius + thumbRadiusDelta, thumbPaint);
+  }
+
+  @override
+  bool get hasSemantics => isInteractive;
+
+  @override
+  Iterable<SemanticAnnotator> getSemanticAnnotators() sync* {
+    yield (SemanticsNode semantics) {
+      if (isInteractive)
+        semantics.addAdjustmentActions();
+    };
+  }
+
+  @override
+  void performAction(SemanticAction action) {
+    switch (action) {
+      case SemanticAction.increase:
+        if (isInteractive)
+          onChanged((value + _kAdjustmentUnit).clamp(0.0, 1.0));
+        break;
+      case SemanticAction.decrease:
+        if (isInteractive)
+          onChanged((value - _kAdjustmentUnit).clamp(0.0, 1.0));
+        break;
+      default:
+        assert(false);
+        break;
+    }
   }
 }

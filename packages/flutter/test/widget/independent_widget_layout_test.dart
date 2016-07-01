@@ -43,10 +43,7 @@ class OffscreenWidgetTree {
     pipelineOwner.flushCompositingBits();
     pipelineOwner.flushPaint();
     renderView.compositeFrame();
-    if (SemanticsNode.hasListeners) {
-      pipelineOwner.flushSemantics();
-      SemanticsNode.sendSemanticsTree();
-    }
+    pipelineOwner.flushSemantics();
     buildOwner.finalizeTree();
   }
 

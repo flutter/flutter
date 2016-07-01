@@ -11,7 +11,7 @@ import 'test_semantics.dart';
 
 void main() {
   testWidgets('Semantics 1', (WidgetTester tester) async {
-    TestSemanticsListener client = new TestSemanticsListener();
+    TestSemanticsListener client = new TestSemanticsListener(tester);
 
     // smoketest
     await tester.pumpWidget(

@@ -463,12 +463,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     renderView.compositeFrame(); // this sends the bits to the GPU
     if (_phase == EnginePhase.composite)
       return;
-    if (SemanticsNode.hasListeners) {
-      pipelineOwner.flushSemantics();
-      if (_phase == EnginePhase.flushSemantics)
-        return;
-      SemanticsNode.sendSemanticsTree();
-    }
+    pipelineOwner.flushSemantics();
+    if (_phase == EnginePhase.flushSemantics)
+      return;
     buildOwner.finalizeTree();
   }
 

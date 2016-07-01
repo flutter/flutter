@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:sky_services/semantics/semantics.mojom.dart' as mojom;
 
 import 'basic.dart';
+import 'binding.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 
@@ -30,16 +31,23 @@ class SemanticsDebugger extends StatefulWidget {
 }
 
 class _SemanticsDebuggerState extends State<SemanticsDebugger> {
+  _SemanticsClient _client;
+
   @override
   void initState() {
     super.initState();
-    _SemanticsDebuggerListener.ensureInstantiated();
-    _SemanticsDebuggerListener.instance.addListener(_update);
+    // TODO(abarth): We shouldn't reach out to the WidgetsBinding.instance
+    // static here because we might not be in a tree that's attached to that
+    // binding. Instead, we should find a way to get to the PipelineOwner from
+    // the BuildContext.
+    WidgetsBinding.instance.ensureSemantics();
+    _client = new _SemanticsClient(WidgetsBinding.instance.pipelineOwner.semanticsOwner)
+      ..addListener(_update);
   }
 
   @override
   void dispose() {
-    _SemanticsDebuggerListener.instance.removeListener(_update);
+    _client.removeListener(_update);
     super.dispose();
   }
 
@@ -58,21 +66,21 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> {
 
   void _handleTap() {
     assert(_lastPointerDownLocation != null);
-    _SemanticsDebuggerListener.instance._performAction(_lastPointerDownLocation, SemanticAction.tap);
+    _client._performAction(_lastPointerDownLocation, SemanticAction.tap);
     setState(() {
       _lastPointerDownLocation = null;
     });
   }
   void _handleLongPress() {
     assert(_lastPointerDownLocation != null);
-    _SemanticsDebuggerListener.instance._performAction(_lastPointerDownLocation, SemanticAction.longPress);
+    _client._performAction(_lastPointerDownLocation, SemanticAction.longPress);
     setState(() {
       _lastPointerDownLocation = null;
     });
   }
   void _handlePanEnd(DragEndDetails details) {
     assert(_lastPointerDownLocation != null);
-    _SemanticsDebuggerListener.instance.handlePanEnd(_lastPointerDownLocation, details.velocity);
+    _client.handlePanEnd(_lastPointerDownLocation, details.velocity);
     setState(() {
       _lastPointerDownLocation = null;
     });
@@ -81,7 +89,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> {
   @override
   Widget build(BuildContext context) {
     return new CustomPaint(
-      foregroundPainter: new _SemanticsDebuggerPainter(_SemanticsDebuggerListener.instance.generation, _lastPointerDownLocation),
+      foregroundPainter: new _SemanticsDebuggerPainter(_client.generation, _client, _lastPointerDownLocation),
       child: new GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: _handleTap,
@@ -196,6 +204,11 @@ class _SemanticsDebuggerEntry {
         || actions.contains(SemanticAction.scrollDown);
   }
 
+  bool get _isAdjustable {
+    return actions.contains(SemanticAction.increase)
+        || actions.contains(SemanticAction.decrease);
+  }
+
   TextPainter textPainter;
   void _updateMessage() {
     List<String> annotations = <String>[];
@@ -215,6 +228,8 @@ class _SemanticsDebuggerEntry {
       annotations.add('long-pressable');
     if (_isScrollable)
       annotations.add('scrollable');
+    if (_isAdjustable)
+      annotations.add('adjustable');
     String message;
     if (annotations.isEmpty) {
       assert(label != null);
@@ -295,16 +310,12 @@ class _SemanticsDebuggerEntry {
   }
 }
 
-class _SemanticsDebuggerListener extends ChangeNotifier implements mojom.SemanticsListener {
-  _SemanticsDebuggerListener._() {
-    SemanticsNode.addListener(this);
+class _SemanticsClient extends ChangeNotifier implements mojom.SemanticsListener {
+  _SemanticsClient(this.semanticsOwner) {
+    semanticsOwner.addListener(this);
   }
 
-  static _SemanticsDebuggerListener instance;
-  static final SemanticsServer _server = new SemanticsServer();
-  static void ensureInstantiated() {
-    instance ??= new _SemanticsDebuggerListener._();
-  }
+  final SemanticsOwner semanticsOwner;
 
   _SemanticsDebuggerEntry get rootNode => _nodes[0];
   final Map<int, _SemanticsDebuggerEntry> _nodes = <int, _SemanticsDebuggerEntry>{};
@@ -357,7 +368,7 @@ class _SemanticsDebuggerListener extends ChangeNotifier implements mojom.Semanti
 
   void _performAction(Point position, SemanticAction action) {
     _SemanticsDebuggerEntry entry = _hitTest(position, (_SemanticsDebuggerEntry entry) => entry.actions.contains(action));
-    _server.performAction(entry?.id ?? 0, mojom.SemanticAction.values[action.index]);
+    semanticsOwner.performAction(entry?.id ?? 0, action);
   }
 
   void handlePanEnd(Point position, Velocity velocity) {
@@ -366,10 +377,13 @@ class _SemanticsDebuggerListener extends ChangeNotifier implements mojom.Semanti
     if (vx.abs() == vy.abs())
       return;
     if (vx.abs() > vy.abs()) {
-      if (vx.sign < 0)
+      if (vx.sign < 0) {
+        _performAction(position, SemanticAction.decrease);
         _performAction(position, SemanticAction.scrollLeft);
-      else
+      } else {
+        _performAction(position, SemanticAction.increase);
         _performAction(position, SemanticAction.scrollRight);
+      }
     } else {
       if (vy.sign < 0)
         _performAction(position, SemanticAction.scrollUp);
@@ -380,14 +394,15 @@ class _SemanticsDebuggerListener extends ChangeNotifier implements mojom.Semanti
 }
 
 class _SemanticsDebuggerPainter extends CustomPainter {
-  const _SemanticsDebuggerPainter(this.generation, this.pointerPosition);
+  const _SemanticsDebuggerPainter(this.generation, this.client, this.pointerPosition);
 
   final int generation;
+  final _SemanticsClient client;
   final Point pointerPosition;
 
   @override
   void paint(Canvas canvas, Size size) {
-    _SemanticsDebuggerEntry rootNode = _SemanticsDebuggerListener.instance.rootNode;
+    _SemanticsDebuggerEntry rootNode = client.rootNode;
     rootNode?.paint(canvas, rootNode.findDepth());
     if (pointerPosition != null) {
       Paint paint = new Paint();
@@ -399,6 +414,7 @@ class _SemanticsDebuggerPainter extends CustomPainter {
   @override
   bool shouldRepaint(_SemanticsDebuggerPainter oldDelegate) {
     return generation != oldDelegate.generation
+        || client != oldDelegate.client
         || pointerPosition != oldDelegate.pointerPosition;
   }
 }
