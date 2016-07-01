@@ -52,6 +52,7 @@ class AbstractNode {
   int get depth => _depth;
 
   /// Call only from overrides of [redepthChildren]
+  @protected
   void redepthChild(AbstractNode child) {
     assert(child.owner == owner);
     if (child._depth <= _depth) {
@@ -97,6 +98,7 @@ class AbstractNode {
   AbstractNode get parent => _parent;
 
   /// Subclasses should call this function when they acquire a new child.
+  @protected
   @mustCallSuper
   void adoptChild(AbstractNode child) {
     assert(child != null);
@@ -115,6 +117,7 @@ class AbstractNode {
   }
 
   /// Subclasses should call this function when they lose a child.
+  @protected
   @mustCallSuper
   void dropChild(AbstractNode child) {
     assert(child != null);

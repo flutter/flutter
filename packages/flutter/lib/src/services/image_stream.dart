@@ -133,7 +133,7 @@ class ImageStream {
     } else {
       result.write('${_completer.runtimeType}; ');
       final List<String> description = <String>[];
-      _completer._debugFillDescription(description);
+      _completer.debugFillDescription(description);
       result.write(description.join('; '));
     }
     result.write(')');
@@ -213,9 +213,6 @@ class ImageStreamCompleter {
       description.add('$_current');
     description.add('${_listeners.length} listener${_listeners.length == 1 ? "" : "s" }');
   }
-
-  // TODO(ianh): remove once @protected allows in-file references
-  void _debugFillDescription(List<String> description) => debugFillDescription(description);
 }
 
 /// Manages the loading of [ui.Image] objects for static [ImageStream]s (those

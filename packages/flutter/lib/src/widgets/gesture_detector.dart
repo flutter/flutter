@@ -393,7 +393,8 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     if (!config.excludeFromSemantics) {
       RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
       context.visitChildElements((RenderObjectElement element) {
-        element.widget.updateRenderObject(context, semanticsGestureHandler);
+        _GestureSemantics widget = element.widget;
+        widget._updateHandlers(semanticsGestureHandler, _recognizers);
       });
     }
   }
@@ -558,9 +559,7 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
     return result;
   }
 
-  @override
-  void updateRenderObject(BuildContext context, RenderSemanticsGestureHandler renderObject) {
-    Map<Type, GestureRecognizer> recognizers = owner._recognizers;
+  void _updateHandlers(RenderSemanticsGestureHandler renderObject, Map<Type, GestureRecognizer> recognizers) {
     renderObject
       ..onTap = recognizers.containsKey(TapGestureRecognizer) ? _handleTap : null
       ..onLongPress = recognizers.containsKey(LongPressGestureRecognizer) ? _handleLongPress : null
@@ -568,5 +567,10 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
           recognizers.containsKey(PanGestureRecognizer) ? _handleHorizontalDragUpdate : null
       ..onVerticalDragUpdate = recognizers.containsKey(VerticalDragGestureRecognizer) ||
           recognizers.containsKey(PanGestureRecognizer) ? _handleVerticalDragUpdate : null;
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSemanticsGestureHandler renderObject) {
+    _updateHandlers(renderObject, owner._recognizers);
   }
 }

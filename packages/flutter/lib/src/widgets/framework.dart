@@ -368,6 +368,7 @@ abstract class Widget {
   /// is placed in the tree, it is inflated into an [Element], which means a
   /// widget that is incorporated into the tree multiple times will be inflated
   /// multiple times.
+  @protected
   Element createElement();
 
   /// A short, textual description of this widget.
@@ -393,13 +394,6 @@ abstract class Widget {
   @protected
   @mustCallSuper
   void debugFillDescription(List<String> description) { }
-
-  /// Lets [Element.debugFillDescription] call the @protected method
-  /// [debugFillDescription]. This pattern prevents other unwanted callers
-  /// outside this library.
-  void _debugFillDescription(List<String> description) {
-    debugFillDescription(description);
-  }
 
   /// Whether the `newWidget` can be used to update an [Element] that currently
   /// has the `oldWidget` as its configuration.
@@ -540,6 +534,7 @@ abstract class StatefulWidget extends Widget {
   /// later inserted into the tree again, the framework will call [createState]
   /// again to create a fresh [State] object, simplifying the lifecycle of
   /// [State] objects.
+  @protected
   State createState();
 }
 
@@ -706,6 +701,7 @@ abstract class State<T extends StatefulWidget> {
   ///
   /// If you override this, make sure your method starts with a call to
   /// super.initState().
+  @protected
   @mustCallSuper
   void initState() {
     assert(_debugLifecycleState == _StateLifecycle.created);
@@ -729,6 +725,7 @@ abstract class State<T extends StatefulWidget> {
   /// If you override this, make sure your method starts with a call to
   /// super.didUpdateConfig(oldConfig).
   // TODO(abarth): Add @mustCallSuper.
+  @protected
   void didUpdateConfig(T oldConfig) { }
 
   /// Notify the framework that the internal state of this object has changed.
@@ -813,6 +810,7 @@ abstract class State<T extends StatefulWidget> {
   ///
   /// If you override this, make sure to end your method with a call to
   /// super.deactivate().
+  @protected
   @mustCallSuper
   void deactivate() { }
 
@@ -829,6 +827,7 @@ abstract class State<T extends StatefulWidget> {
   ///
   /// If you override this, make sure to end your method with a call to
   /// super.dispose().
+  @protected
   @mustCallSuper
   void dispose() {
     assert(_debugLifecycleState == _StateLifecycle.ready);
@@ -878,6 +877,7 @@ abstract class State<T extends StatefulWidget> {
   /// this method because they need to do some expensive work (e.g., network
   /// fetches) when their dependencies change, and that work would be too
   /// expensive to do for every build.
+  @protected
   @mustCallSuper
   void dependenciesChanged() { }
 
@@ -965,6 +965,7 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends _ProxyWidg
     return result;
   }
 
+  @protected
   void applyParentData(RenderObject renderObject);
 }
 
@@ -975,6 +976,7 @@ abstract class InheritedWidget extends _ProxyWidget {
   @override
   InheritedElement createElement() => new InheritedElement(this);
 
+  @protected
   bool updateShouldNotify(InheritedWidget oldWidget);
 }
 
@@ -991,13 +993,16 @@ abstract class RenderObjectWidget extends Widget {
   /// Creates an instance of the [RenderObject] class that this
   /// [RenderObjectWidget] represents, using the configuration described by this
   /// [RenderObjectWidget].
+  @protected
   RenderObject createRenderObject(BuildContext context);
 
   /// Copies the configuration described by this [RenderObjectWidget] to the
   /// given [RenderObject], which will be of the same type as returned by this
   /// object's [createRenderObject].
+  @protected
   void updateRenderObject(BuildContext context, RenderObject renderObject) { }
 
+  @protected
   void didUnmountRenderObject(RenderObject renderObject) { }
 }
 
@@ -1730,7 +1735,7 @@ abstract class Element implements BuildContext {
     } else {
       if (widget.key != null)
         description.add('${widget.key}');
-      widget._debugFillDescription(description);
+      widget.debugFillDescription(description);
     }
   }
 
@@ -2212,7 +2217,7 @@ class ParentDataElement<T extends RenderObjectWidget> extends _ProxyElement {
   void notifyClients(ParentDataWidget<T> oldWidget) {
     void notifyChildren(Element child) {
       if (child is RenderObjectElement) {
-        child.updateParentData(widget);
+        child._updateParentData(widget);
       } else {
         assert(child is! ParentDataElement<RenderObjectWidget>);
         child.visitChildren(notifyChildren);
@@ -2514,7 +2519,7 @@ abstract class RenderObjectElement extends BuildableElement {
     widget.didUnmountRenderObject(renderObject);
   }
 
-  void updateParentData(ParentDataWidget<RenderObjectWidget> parentData) {
+  void _updateParentData(ParentDataWidget<RenderObjectWidget> parentData) {
     parentData.applyParentData(renderObject);
   }
 
@@ -2534,7 +2539,7 @@ abstract class RenderObjectElement extends BuildableElement {
     _ancestorRenderObjectElement?.insertChildRenderObject(renderObject, newSlot);
     ParentDataElement<RenderObjectWidget> parentDataElement = _findAncestorParentDataElement();
     if (parentDataElement != null)
-      updateParentData(parentDataElement.widget);
+      _updateParentData(parentDataElement.widget);
   }
 
   @override
