@@ -57,11 +57,15 @@ class HostMessages {
     return completer.future;
   }
 
+  static dynamic _decode(String message) {
+    return message != null ? JSON.decode(message) : null;
+  }
+
   /// Sends a JSON-encoded message to the host application and JSON-decodes the response.
   static Future<dynamic> sendJSON(String messageName, [dynamic json]) async {
     Completer<dynamic> completer = new Completer<dynamic>();
     _hostAppMessagesProxy.sendString(messageName, JSON.encode(json), (String reply) {
-      completer.complete(JSON.decode(reply));
+      completer.complete(_decode(reply));
     });
     return completer.future;
   }
@@ -78,7 +82,7 @@ class HostMessages {
   /// before being returned to the host application.
   static void addJSONMessageHandler(String messageName, Future<dynamic> callback(dynamic json)) {
     _appMessages.handlers[messageName] = (String message) async {
-      return JSON.encode(await callback(JSON.decode(message)));
+      return JSON.encode(await callback(_decode(message)));
     };
   }
 }
