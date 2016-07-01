@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widget/test_semantics.dart';
+import '../rendering/test_semantics_client.dart';
 
 // This file uses "as dynamic" in a few places to defeat the static
 // analysis. In general you want to avoid using this style in your
@@ -394,7 +394,7 @@ void main() {
   });
 
   testWidgets('Does tooltip contribute semantics', (WidgetTester tester) async {
-    TestSemanticsListener client = new TestSemanticsListener(tester);
+    TestSemanticsClient client = new TestSemanticsClient(tester.binding.pipelineOwner);
     GlobalKey key = new GlobalKey();
     await tester.pumpWidget(
       new Overlay(
@@ -419,7 +419,7 @@ void main() {
         ]
       )
     );
-    expect(client.updates.length, equals(2));
+    expect(client.updates.length, equals(1));
     expect(client.updates[0].id, equals(0));
     expect(client.updates[0].actions, isEmpty);
     expect(client.updates[0].flags.hasCheckedState, isFalse);
@@ -431,14 +431,13 @@ void main() {
     expect(client.updates[0].geometry.width, equals(800.0));
     expect(client.updates[0].geometry.height, equals(600.0));
     expect(client.updates[0].children.length, equals(0));
-    expect(client.updates[1], isNull);
     client.updates.clear();
 
     // before using "as dynamic" in your code, see note top of file
     (key.currentState as dynamic).ensureTooltipVisible(); // this triggers a rebuild of the semantics because the tree changes
 
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
-    expect(client.updates.length, equals(2));
+    expect(client.updates.length, equals(1));
     expect(client.updates[0].id, equals(0));
     expect(client.updates[0].actions, isEmpty);
     expect(client.updates[0].flags.hasCheckedState, isFalse);
@@ -450,7 +449,7 @@ void main() {
     expect(client.updates[0].geometry.width, equals(800.0));
     expect(client.updates[0].geometry.height, equals(600.0));
     expect(client.updates[0].children.length, equals(0));
-    expect(client.updates[1], isNull);
     client.updates.clear();
+    client.dispose();
   });
 }

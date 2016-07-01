@@ -7,11 +7,11 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'test_semantics.dart';
+import '../rendering/test_semantics_client.dart';
 
 void main() {
   testWidgets('Semantics 1', (WidgetTester tester) async {
-    TestSemanticsListener client = new TestSemanticsListener(tester);
+    TestSemanticsClient client = new TestSemanticsClient(tester.binding.pipelineOwner);
 
     // smoketest
     await tester.pumpWidget(
@@ -22,7 +22,7 @@ void main() {
         )
       )
     );
-    expect(client.updates.length, equals(2));
+    expect(client.updates.length, equals(1));
     expect(client.updates[0].id, equals(0));
     expect(client.updates[0].actions, isEmpty);
     expect(client.updates[0].flags.hasCheckedState, isFalse);
@@ -34,7 +34,6 @@ void main() {
     expect(client.updates[0].geometry.width, equals(800.0));
     expect(client.updates[0].geometry.height, equals(600.0));
     expect(client.updates[0].children.length, equals(0));
-    expect(client.updates[1], isNull);
     client.updates.clear();
 
     // control for forking
@@ -56,7 +55,7 @@ void main() {
         crossAxisAlignment: CrossAxisAlignment.stretch
       )
     );
-    expect(client.updates.length, equals(2));
+    expect(client.updates.length, equals(1));
     expect(client.updates[0].id, equals(0));
     expect(client.updates[0].actions, isEmpty);
     expect(client.updates[0].flags.hasCheckedState, isFalse);
@@ -68,7 +67,6 @@ void main() {
     expect(client.updates[0].geometry.width, equals(800.0));
     expect(client.updates[0].geometry.height, equals(600.0));
     expect(client.updates[0].children.length, equals(0));
-    expect(client.updates[1], isNull);
     client.updates.clear();
 
     // forking semantics
@@ -90,7 +88,7 @@ void main() {
         crossAxisAlignment: CrossAxisAlignment.stretch
       )
     );
-    expect(client.updates.length, equals(2));
+    expect(client.updates.length, equals(1));
     expect(client.updates[0].id, equals(0));
     expect(client.updates[0].actions, isEmpty);
     expect(client.updates[0].flags.hasCheckedState, isFalse);
@@ -124,7 +122,6 @@ void main() {
     expect(client.updates[0].children[1].geometry.width, equals(800.0));
     expect(client.updates[0].children[1].geometry.height, equals(10.0));
     expect(client.updates[0].children[1].children.length, equals(0));
-    expect(client.updates[1], isNull);
     client.updates.clear();
 
     // toggle a branch off
@@ -146,7 +143,7 @@ void main() {
         crossAxisAlignment: CrossAxisAlignment.stretch
       )
     );
-    expect(client.updates.length, equals(2));
+    expect(client.updates.length, equals(1));
     expect(client.updates[0].id, equals(0));
     expect(client.updates[0].actions, isEmpty);
     expect(client.updates[0].flags.hasCheckedState, isFalse);
@@ -158,7 +155,6 @@ void main() {
     expect(client.updates[0].geometry.width, equals(800.0));
     expect(client.updates[0].geometry.height, equals(600.0));
     expect(client.updates[0].children.length, equals(0));
-    expect(client.updates[1], isNull);
     client.updates.clear();
 
     // toggle a branch back on
@@ -180,7 +176,7 @@ void main() {
         crossAxisAlignment: CrossAxisAlignment.stretch
       )
     );
-    expect(client.updates.length, equals(2));
+    expect(client.updates.length, equals(1));
     expect(client.updates[0].id, equals(0));
     expect(client.updates[0].actions, isEmpty);
     expect(client.updates[0].flags.hasCheckedState, isFalse);
@@ -214,7 +210,7 @@ void main() {
     expect(client.updates[0].children[1].geometry.width, equals(800.0));
     expect(client.updates[0].children[1].geometry.height, equals(10.0));
     expect(client.updates[0].children[1].children.length, equals(0));
-    expect(client.updates[1], isNull);
     client.updates.clear();
+    client.dispose();
   });
 }

@@ -793,6 +793,41 @@ class PipelineOwner {
       onNeedVisualUpdate();
   }
 
+  /// The unique render object managed by this pipeline that has no parent.
+  RenderObject get rootRenderObject => _rootRenderObject;
+  RenderObject _rootRenderObject;
+  set rootRenderObject(RenderObject value) {
+    if (_rootRenderObject == value)
+      return;
+    _rootRenderObject?.detach();
+    _rootRenderObject = value;
+    _rootRenderObject?.attach(this);
+  }
+
+  /// Calls the given listener whenever the semantics of the render tree change.
+  ///
+  /// Creates [semanticsOwner] if necessary.
+  SemanticsOwner addSemanticsListener(SemanticsListener listener) {
+    if (_semanticsOwner == null) {
+      _semanticsOwner = new SemanticsOwner(
+        initialListener: listener,
+        onLastListenerRemoved: _handleLastSemanticsListenerRemoved
+      );
+      _rootRenderObject.scheduleInitialSemantics();
+    } else {
+      _semanticsOwner.addListener(listener);
+    }
+    assert(_semanticsOwner != null);
+    return _semanticsOwner;
+  }
+
+  void _handleLastSemanticsListenerRemoved() {
+    assert(!_debugDoingSemantics);
+    rootRenderObject._clearSemantics();
+    _semanticsOwner.dispose();
+    _semanticsOwner = null;
+  }
+
   List<RenderObject> _nodesNeedingLayout = <RenderObject>[];
 
   /// Whether this pipeline is currently in the layout phase.
@@ -883,7 +918,7 @@ class PipelineOwner {
   SemanticsOwner get semanticsOwner => _semanticsOwner;
   SemanticsOwner _semanticsOwner;
   bool _debugDoingSemantics = false;
-  List<RenderObject> _nodesNeedingSemantics = <RenderObject>[];
+  final List<RenderObject> _nodesNeedingSemantics = <RenderObject>[];
 
   /// Update the semantics for all render objects.
   ///
@@ -912,17 +947,14 @@ class PipelineOwner {
     _semanticsOwner.sendSemanticsTree();
   }
 
-  /// Cause the entire subtree rooted at the given [RenderObject] to
-  /// be entirely reprocessed. This is used by development tools when
-  /// the application code has changed, to cause the rendering tree to
-  /// pick up any changed implementations.
+  /// Cause the entire render tree rooted at [rootRenderObject] to be entirely
+  /// reprocessed. This is used by development tools when the application code
+  /// has changed, to cause the rendering tree to pick up any changed
+  /// implementations.
   ///
-  /// This is expensive and should not be called except during
-  /// development.
-  void reassemble(RenderObject root) {
-    assert(root.parent is! RenderObject);
-    assert(root.owner == this);
-    root._reassemble();
+  /// This is expensive and should not be called except during development.
+  void reassemble() {
+    _rootRenderObject?._reassemble();
   }
 }
 
@@ -1862,8 +1894,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(!owner._debugDoingSemantics);
     assert(_semantics == null);
     assert(_needsSemanticsUpdate);
-    assert(owner._semanticsOwner == null);
-    owner._semanticsOwner = new SemanticsOwner();
+    assert(owner._semanticsOwner != null);
     owner._nodesNeedingSemantics.add(this);
     owner.requestVisualUpdate();
   }
@@ -1894,6 +1925,16 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       return true;
     });
     return result;
+  }
+
+  /// Removes all semantics from this render object and its descendants.
+  void _clearSemantics() {
+    _needsSemanticsUpdate = true;
+    _needsSemanticsGeometryUpdate = true;
+    _semantics = null;
+    visitChildren((RenderObject child) {
+      child._clearSemantics();
+    });
   }
 
   /// Mark this node as needing an update to its semantics

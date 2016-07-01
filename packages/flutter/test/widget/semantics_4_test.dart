@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'test_semantics.dart';
+import '../rendering/test_semantics_client.dart';
 
 void main() {
   testWidgets('Semantics 4', (WidgetTester tester) async {
-    TestSemanticsListener client = new TestSemanticsListener(tester);
+    TestSemanticsClient client = new TestSemanticsClient(tester.binding.pipelineOwner);
 
     //    O
     //   / \       O=root
@@ -40,7 +40,7 @@ void main() {
         ]
       )
     );
-    expect(client.updates.length, equals(2));
+    expect(client.updates.length, equals(1));
     expect(client.updates[0].id, equals(0));
     expect(client.updates[0].children.length, equals(2));
     expect(client.updates[0].children[0].id, equals(1));
@@ -51,7 +51,6 @@ void main() {
     expect(client.updates[0].children[1].children[0].children.length, equals(0));
     expect(client.updates[0].children[1].children[1].id, equals(4));
     expect(client.updates[0].children[1].children[1].children.length, equals(0));
-    expect(client.updates[1], isNull);
     client.updates.clear();
 
     //    O        O=root
@@ -79,10 +78,9 @@ void main() {
         ]
       )
     );
-    expect(client.updates.length, equals(2));
+    expect(client.updates.length, equals(1));
     expect(client.updates[0].id, equals(2));
     expect(client.updates[0].children.length, equals(0));
-    expect(client.updates[1], isNull);
     client.updates.clear();
 
     //             O=root
@@ -107,11 +105,10 @@ void main() {
         ]
       )
     );
-    expect(client.updates.length, equals(2));
+    expect(client.updates.length, equals(1));
     expect(client.updates[0].id, equals(0));
     expect(client.updates[0].children.length, equals(0));
-    expect(client.updates[1], isNull);
     client.updates.clear();
-
+    client.dispose();
   });
 }

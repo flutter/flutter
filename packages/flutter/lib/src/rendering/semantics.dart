@@ -455,32 +455,68 @@ class SemanticsNode extends AbstractNode {
   }
 }
 
+/// Signature for functions that receive updates about render tree semantics.
+typedef void SemanticsListener(List<mojom.SemanticsNode> nodes);
+
+/// Owns [SemanticsNode] objects and notifies listeners of changes to the
+/// render tree semantics.
+///
+/// To listen for semantic updates, call [PipelineOwner.addSemanticsListener],
+/// which will create a [SemanticsOwner] if necessary.
 class SemanticsOwner {
+  /// Creates a [SemanticsOwner].
+  ///
+  /// The `onLastListenerRemoved` argument must not be null and will be called
+  /// when the last listener is removed from this object.
+  SemanticsOwner({
+    @required SemanticsListener initialListener,
+    @required VoidCallback onLastListenerRemoved
+  }) : _onLastListenerRemoved = onLastListenerRemoved {
+    assert(_onLastListenerRemoved != null);
+    addListener(initialListener);
+  }
+
+  final VoidCallback _onLastListenerRemoved;
+
   final List<SemanticsNode> _dirtyNodes = <SemanticsNode>[];
   final Map<int, SemanticsNode> _nodes = <int, SemanticsNode>{};
   final Set<SemanticsNode> _detachedNodes = new Set<SemanticsNode>();
 
-  List<mojom.SemanticsListener> _listeners;
+  final List<SemanticsListener> _listeners = <SemanticsListener>[];
 
-  /// Whether there are currently any consumers of semantic data.
+  /// Releases any resources retained by this object.
   ///
-  /// If there are no consumers of semantic data, there is no need to compile
-  /// semantic data into a [SemanticsNode] tree.
-  bool get hasListeners => _listeners != null && _listeners.length > 0;
+  /// Requires that there are no listeners registered with [addListener].
+  void dispose() {
+    assert(_listeners.isEmpty);
+    _dirtyNodes.clear();
+    _nodes.clear();
+    _detachedNodes.clear();
+  }
 
   /// Add a consumer of semantic data.
   ///
   /// After the [PipelineOwner] updates the semantic data for a given frame, it
   /// calls [sendSemanticsTree], which uploads the data to each listener
   /// registered with this function.
-  void addListener(mojom.SemanticsListener listener) {
-    _listeners ??= <mojom.SemanticsListener>[];
+  ///
+  /// Listeners can be removed with [removeListener].
+  void addListener(SemanticsListener listener) {
     _listeners.add(listener);
+  }
+
+  /// Removes a consumer of semantic data.
+  ///
+  /// Listeners can be added with [addListener].
+  void removeListener(SemanticsListener listener) {
+    _listeners.remove(listener);
+    if (_listeners.isEmpty)
+      _onLastListenerRemoved();
   }
 
   /// Uploads the semantics tree to the listeners registered with [addListener].
   void sendSemanticsTree() {
-    assert(hasListeners);
+    assert(_listeners.isNotEmpty);
     for (SemanticsNode oldNode in _detachedNodes) {
       // The other side will have forgotten this node if we even send
       // it again, so make sure to mark it dirty so that it'll get
@@ -540,8 +576,8 @@ class SemanticsOwner {
       if (node._dirty && node.attached)
         updatedNodes.add(node._serialize());
     }
-    for (mojom.SemanticsListener listener in _listeners)
-      listener.updateSemanticsTree(updatedNodes);
+    for (SemanticsListener listener in new List<SemanticsListener>.from(_listeners))
+      listener(updatedNodes);
     _dirtyNodes.clear();
   }
 
@@ -562,29 +598,12 @@ class SemanticsOwner {
     return result._actionHandler;
   }
 
+  /// Asks the [SemanticsNode] with the given id to perform the given action.
+  ///
+  /// If the [SemanticsNode] has not indicated that it can perform the action,
+  /// this function does nothing.
   void performAction(int id, SemanticAction action) {
     SemanticActionHandler handler = _getSemanticActionHandlerForId(id, action: action);
     handler?.performAction(action);
-  }
-}
-
-/// Exposes the [SemanticsNode] tree to the underlying platform.
-class SemanticsServer extends mojom.SemanticsServer {
-  SemanticsServer({ @required this.semanticsOwner }) {
-    assert(semanticsOwner != null);
-  }
-
-  final SemanticsOwner semanticsOwner;
-
-  @override
-  void addSemanticsListener(mojom.SemanticsListenerProxy listener) {
-    // TODO(abarth): We should remove the listener when this pipe closes.
-    // See <https://github.com/flutter/flutter/issues/3342>.
-    semanticsOwner.addListener(listener);
-  }
-
-  @override
-  void performAction(int id, mojom.SemanticAction encodedAction) {
-    semanticsOwner.performAction(id, SemanticAction.values[encodedAction.mojoEnumValue]);
   }
 }

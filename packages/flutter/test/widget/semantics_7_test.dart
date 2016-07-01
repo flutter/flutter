@@ -5,13 +5,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'test_semantics.dart';
 import 'package:sky_services/semantics/semantics.mojom.dart' as mojom;
+
+import '../rendering/test_semantics_client.dart';
 
 void main() {
   testWidgets('Semantics 7 - Merging', (WidgetTester tester) async {
-    TestSemanticsListener client = new TestSemanticsListener(tester);
+    TestSemanticsClient client = new TestSemanticsClient(tester.binding.pipelineOwner);
 
     String label;
 
@@ -44,7 +44,7 @@ void main() {
         ]
       )
     );
-    expect(client.updates.length, equals(2));
+    expect(client.updates.length, equals(1));
     expect(client.updates[0].id, equals(0));
     expect(client.updates[0].actions, isEmpty);
     expect(client.updates[0].flags.hasCheckedState, isFalse);
@@ -80,7 +80,6 @@ void main() {
     expect(client.updates[0].children[1].geometry.height, equals(600.0));
     expect(client.updates[0].children[1].children.length, equals(0));
     // IDs 5 and 6 are used up by the nodes that get merged in
-    expect(client.updates[1], isNull);
     client.updates.clear();
 
     label = '2';
@@ -112,8 +111,7 @@ void main() {
         ]
       )
     );
-    expect(client.updates.length, equals(3));
-    expect(client.updates[2], isNull);
+    expect(client.updates.length, equals(2));
 
     // The order of the nodes is undefined, so allow both orders.
     mojom.SemanticsNode a, b;
@@ -150,6 +148,6 @@ void main() {
     expect(b.children.length, equals(0));
 
     client.updates.clear();
-
+    client.dispose();
   });
 }
