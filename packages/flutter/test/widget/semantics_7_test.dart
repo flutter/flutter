@@ -46,10 +46,7 @@ void main() {
     );
     expect(client.updates.length, equals(2));
     expect(client.updates[0].id, equals(0));
-    expect(client.updates[0].flags.canBeTapped, isFalse);
-    expect(client.updates[0].flags.canBeLongPressed, isFalse);
-    expect(client.updates[0].flags.canBeScrolledHorizontally, isFalse);
-    expect(client.updates[0].flags.canBeScrolledVertically, isFalse);
+    expect(client.updates[0].actions, isEmpty);
     expect(client.updates[0].flags.hasCheckedState, isFalse);
     expect(client.updates[0].flags.isChecked, isFalse);
     expect(client.updates[0].strings.label, equals(''));
@@ -60,10 +57,7 @@ void main() {
     expect(client.updates[0].geometry.height, equals(600.0));
     expect(client.updates[0].children.length, equals(2));
     expect(client.updates[0].children[0].id, equals(1));
-    expect(client.updates[0].children[0].flags.canBeTapped, isFalse);
-    expect(client.updates[0].children[0].flags.canBeLongPressed, isFalse);
-    expect(client.updates[0].children[0].flags.canBeScrolledHorizontally, isFalse);
-    expect(client.updates[0].children[0].flags.canBeScrolledVertically, isFalse);
+    expect(client.updates[0].children[0].actions, isEmpty);
     expect(client.updates[0].children[0].flags.hasCheckedState, isTrue);
     expect(client.updates[0].children[0].flags.isChecked, isTrue);
     expect(client.updates[0].children[0].strings.label, equals(label));
@@ -75,10 +69,7 @@ void main() {
     expect(client.updates[0].children[0].children.length, equals(0));
     // IDs 2 and 3 are used up by the nodes that get merged in
     expect(client.updates[0].children[1].id, equals(4));
-    expect(client.updates[0].children[1].flags.canBeTapped, isFalse);
-    expect(client.updates[0].children[1].flags.canBeLongPressed, isFalse);
-    expect(client.updates[0].children[1].flags.canBeScrolledHorizontally, isFalse);
-    expect(client.updates[0].children[1].flags.canBeScrolledVertically, isFalse);
+    expect(client.updates[0].children[1].actions, isEmpty);
     expect(client.updates[0].children[1].flags.hasCheckedState, isTrue);
     expect(client.updates[0].children[1].flags.isChecked, isTrue);
     expect(client.updates[0].children[1].strings.label, equals(label));
@@ -135,10 +126,7 @@ void main() {
     }
 
     expect(a.id, equals(1));
-    expect(a.flags.canBeTapped, isFalse);
-    expect(a.flags.canBeLongPressed, isFalse);
-    expect(a.flags.canBeScrolledHorizontally, isFalse);
-    expect(a.flags.canBeScrolledVertically, isFalse);
+    expect(a.actions, isEmpty);
     expect(a.flags.hasCheckedState, isTrue);
     expect(a.flags.isChecked, isTrue);
     expect(a.strings.label, equals(label));
@@ -150,10 +138,7 @@ void main() {
     expect(a.children.length, equals(0));
 
     expect(b.id, equals(4));
-    expect(b.flags.canBeTapped, isFalse);
-    expect(b.flags.canBeLongPressed, isFalse);
-    expect(b.flags.canBeScrolledHorizontally, isFalse);
-    expect(b.flags.canBeScrolledVertically, isFalse);
+    expect(b.actions, isEmpty);
     expect(b.flags.hasCheckedState, isTrue);
     expect(b.flags.isChecked, isTrue);
     expect(b.strings.label, equals(label));

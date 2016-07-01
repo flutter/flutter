@@ -90,7 +90,7 @@ class DragEndDetails {
   /// Creates details for a [GestureDragEndCallback].
   ///
   /// The [velocity] argument must not be null.
-  DragEndDetails({ this.velocity }) {
+  DragEndDetails({ this.velocity: Velocity.zero }) {
     assert(velocity != null);
   }
 

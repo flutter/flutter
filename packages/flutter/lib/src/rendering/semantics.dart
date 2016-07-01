@@ -7,10 +7,33 @@ import 'dart:ui' show Rect;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
+import 'package:meta/meta.dart';
 import 'package:sky_services/semantics/semantics.mojom.dart' as mojom;
 import 'package:vector_math/vector_math_64.dart';
 
 import 'node.dart';
+
+enum SemanticAction {
+  tap,
+  longPress,
+  scrollLeft,
+  scrollRight,
+  scrollUp,
+  scrollDown,
+  increase,
+  decrease,
+}
+
+/// Interface for [RenderObject]s to implement when they want to support
+/// being tapped, etc.
+///
+/// These handlers will only be called if the relevant flag is set
+/// (e.g. [handleSemanticTap]() will only be called if
+/// [SemanticsNode.canBeTapped] is true, [handleSemanticScrollDown]() will only
+/// be called if [SemanticsNode.canBeScrolledVertically] is true, etc).
+abstract class SemanticActionHandler { // ignore: one_member_abstracts
+  void performAction(SemanticAction action);
+}
 
 /// The type of function returned by [RenderObject.getSemanticAnnotators()].
 ///
@@ -22,40 +45,9 @@ import 'node.dart';
 /// contract that semantic annotators must follow.
 typedef void SemanticAnnotator(SemanticsNode semantics);
 
-/// Interface for [RenderObject]s to implement when they want to support
-/// being tapped, etc.
-///
-/// These handlers will only be called if the relevant flag is set
-/// (e.g. [handleSemanticTap]() will only be called if
-/// [SemanticsNode.canBeTapped] is true, [handleSemanticScrollDown]() will only
-/// be called if [SemanticsNode.canBeScrolledVertically] is true, etc).
-abstract class SemanticActionHandler {
-  /// Called when the user taps on the render object.
-  void handleSemanticTap() { }
-
-  /// Called when the user presses on the render object for a long period of time.
-  void handleSemanticLongPress() { }
-
-  /// Called when the user scrolls to the left.
-  void handleSemanticScrollLeft() { }
-
-  /// Called when the user scrolls to the right.
-  void handleSemanticScrollRight() { }
-
-  /// Called when the user scrolls up.
-  void handleSemanticScrollUp() { }
-
-  /// Called when the user scrolls down.
-  void handleSemanticScrollDown() { }
-}
-
 enum _SemanticFlags {
   mergeAllDescendantsIntoThisNode,
   inheritedMergeAllDescendantsIntoThisNode, // whether an ancestor had mergeAllDescendantsIntoThisNode set
-  canBeTapped,
-  canBeLongPressed,
-  canBeScrolledHorizontally,
-  canBeScrolledVertically,
   hasCheckedState,
   isChecked,
 }
@@ -137,6 +129,27 @@ class SemanticsNode extends AbstractNode {
   // FLAGS AND LABELS
   // These are supposed to be set by SemanticAnnotator obtained from getSemanticAnnotators
 
+  final Set<SemanticAction> _actions = new Set<SemanticAction>();
+
+  void addAction(SemanticAction action) {
+    if (_actions.add(action))
+      _markDirty();
+  }
+
+  void addHorizontalScrollingActions() {
+    addAction(SemanticAction.scrollLeft);
+    addAction(SemanticAction.scrollRight);
+  }
+
+  void addVerticalScrollingActions() {
+    addAction(SemanticAction.scrollUp);
+    addAction(SemanticAction.scrollDown);
+  }
+
+  bool _hasAction(SemanticAction action) {
+    return _actionHandler != null && _actions.contains(action);
+  }
+
   BitField<_SemanticFlags> _flags = new BitField<_SemanticFlags>.filled(_SemanticFlags.values.length, false);
 
   void _setFlag(_SemanticFlags flag, bool value, { bool needsHandler: false }) {
@@ -148,10 +161,6 @@ class SemanticsNode extends AbstractNode {
     }
   }
 
-  bool _canHandle(_SemanticFlags flag) {
-    return _actionHandler != null && _flags[flag];
-  }
-
   /// Whether all this node and all of its descendants should be treated as one logical entity.
   bool get mergeAllDescendantsIntoThisNode => _flags[_SemanticFlags.mergeAllDescendantsIntoThisNode];
   set mergeAllDescendantsIntoThisNode(bool value) => _setFlag(_SemanticFlags.mergeAllDescendantsIntoThisNode, value);
@@ -160,22 +169,6 @@ class SemanticsNode extends AbstractNode {
   set _inheritedMergeAllDescendantsIntoThisNode(bool value) => _setFlag(_SemanticFlags.inheritedMergeAllDescendantsIntoThisNode, value);
 
   bool get _shouldMergeAllDescendantsIntoThisNode => mergeAllDescendantsIntoThisNode || _inheritedMergeAllDescendantsIntoThisNode;
-
-  /// Whether this node responds to tap gestures.
-  bool get canBeTapped => _flags[_SemanticFlags.canBeTapped];
-  set canBeTapped(bool value) => _setFlag(_SemanticFlags.canBeTapped, value, needsHandler: true);
-
-  /// Whether this node responds to long-press gestures.
-  bool get canBeLongPressed => _flags[_SemanticFlags.canBeLongPressed];
-  set canBeLongPressed(bool value) => _setFlag(_SemanticFlags.canBeLongPressed, value, needsHandler: true);
-
-  /// Whether this node responds to horizontal scrolling.
-  bool get canBeScrolledHorizontally => _flags[_SemanticFlags.canBeScrolledHorizontally];
-  set canBeScrolledHorizontally(bool value) => _setFlag(_SemanticFlags.canBeScrolledHorizontally, value, needsHandler: true);
-
-  /// Whether this node responds to vertical scrolling.
-  bool get canBeScrolledVertically => _flags[_SemanticFlags.canBeScrolledVertically];
-  set canBeScrolledVertically(bool value) => _setFlag(_SemanticFlags.canBeScrolledVertically, value, needsHandler: true);
 
   /// Whether this node has Boolean state that can be controlled by the user.
   bool get hasCheckedState => _flags[_SemanticFlags.hasCheckedState];
@@ -199,6 +192,7 @@ class SemanticsNode extends AbstractNode {
   /// Restore this node to its default state.
   void reset() {
     bool hadInheritedMergeAllDescendantsIntoThisNode = _inheritedMergeAllDescendantsIntoThisNode;
+    _actions.clear();
     _flags.reset();
     if (hadInheritedMergeAllDescendantsIntoThisNode)
       _inheritedMergeAllDescendantsIntoThisNode = true;
@@ -370,21 +364,16 @@ class SemanticsNode extends AbstractNode {
       result.geometry.width = math.max(rect.width, 0.0);
       result.geometry.height = math.max(rect.height, 0.0);
       result.flags = new mojom.SemanticFlags();
-      result.flags.canBeTapped = canBeTapped;
-      result.flags.canBeLongPressed = canBeLongPressed;
-      result.flags.canBeScrolledHorizontally = canBeScrolledHorizontally;
-      result.flags.canBeScrolledVertically = canBeScrolledVertically;
       result.flags.hasCheckedState = hasCheckedState;
       result.flags.isChecked = isChecked;
       result.strings = new mojom.SemanticStrings();
       result.strings.label = label;
       List<mojom.SemanticsNode> children = <mojom.SemanticsNode>[];
+      Set<SemanticAction> mergedActions = new Set<SemanticAction>();
+      mergedActions.addAll(_actions);
       if (_shouldMergeAllDescendantsIntoThisNode) {
         _visitDescendants((SemanticsNode node) {
-          result.flags.canBeTapped = result.flags.canBeTapped || node.canBeTapped;
-          result.flags.canBeLongPressed = result.flags.canBeLongPressed || node.canBeLongPressed;
-          result.flags.canBeScrolledHorizontally = result.flags.canBeScrolledHorizontally || node.canBeScrolledHorizontally;
-          result.flags.canBeScrolledVertically = result.flags.canBeScrolledVertically || node.canBeScrolledVertically;
+          mergedActions.addAll(node._actions);
           result.flags.hasCheckedState = result.flags.hasCheckedState || node.hasCheckedState;
           result.flags.isChecked = result.flags.isChecked || node.isChecked;
           if (node.label != '')
@@ -400,6 +389,9 @@ class SemanticsNode extends AbstractNode {
         }
       }
       result.children = children;
+      result.actions = <int>[];
+      for (SemanticAction action in mergedActions)
+        result.actions.add(action.index);
       _dirty = false;
     }
     return result;
@@ -499,37 +491,47 @@ class SemanticsNode extends AbstractNode {
     _dirtyNodes.clear();
   }
 
-  static SemanticActionHandler _getSemanticActionHandlerForId(int id, { _SemanticFlags neededFlag }) {
-    assert(neededFlag != null);
+  static SemanticActionHandler _getSemanticActionHandlerForId(int id, { @required SemanticAction action }) {
+    assert(action != null);
     SemanticsNode result = _nodes[id];
-    if (result != null && result._shouldMergeAllDescendantsIntoThisNode && !result._canHandle(neededFlag)) {
+    if (result != null && result._shouldMergeAllDescendantsIntoThisNode && !result._hasAction(action)) {
       result._visitDescendants((SemanticsNode node) {
-        if (node._actionHandler != null && node._flags[neededFlag]) {
+        if (node._actionHandler != null && node._hasAction(action)) {
           result = node;
           return false; // found node, abort walk
         }
         return true; // continue walk
       });
     }
-    if (result == null || !result._canHandle(neededFlag))
+    if (result == null || !result._hasAction(action))
       return null;
     return result._actionHandler;
   }
 
   @override
   String toString() {
-    return '$runtimeType($_id'
-             '${_dirty ? " (${ _dirtyNodes.contains(this) ? 'dirty' : 'STALE' })" : ""}'
-             '${_shouldMergeAllDescendantsIntoThisNode ? " (leaf merge)" : ""}'
-             '; $rect'
-             '${wasAffectedByClip ? " (clipped)" : ""}'
-             '${canBeTapped ? "; canBeTapped" : ""}'
-             '${canBeLongPressed ? "; canBeLongPressed" : ""}'
-             '${canBeScrolledHorizontally ? "; canBeScrolledHorizontally" : ""}'
-             '${canBeScrolledVertically ? "; canBeScrolledVertically" : ""}'
-             '${hasCheckedState ? (isChecked ? "; checked" : "; unchecked") : ""}'
-             '${label != "" ? "; \"$label\"" : ""}'
-           ')';
+    StringBuffer buffer = new StringBuffer();
+    buffer.write('$runtimeType($_id');
+    if (_dirty)
+      buffer.write(" (${ _dirtyNodes.contains(this) ? 'dirty' : 'STALE' })");
+    if (_shouldMergeAllDescendantsIntoThisNode)
+      buffer.write(' (leaf merge)');
+    buffer.write('; $rect');
+    if (wasAffectedByClip)
+      buffer.write(' (clipped)');
+    for (SemanticAction action in _actions) {
+      buffer.write('; $action');
+    }
+    if (hasCheckedState) {
+      if (isChecked)
+        buffer.write('; checked');
+      else
+        buffer.write('; unchecked');
+    }
+    if (label.isNotEmpty)
+      buffer.write('; "$label"');
+    buffer.write(')');
+    return buffer.toString();
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -556,32 +558,9 @@ class SemanticsServer extends mojom.SemanticsServer {
   }
 
   @override
-  void tap(int nodeID) {
-    SemanticsNode._getSemanticActionHandlerForId(nodeID, neededFlag: _SemanticFlags.canBeTapped)?.handleSemanticTap();
-  }
-
-  @override
-  void longPress(int nodeID) {
-    SemanticsNode._getSemanticActionHandlerForId(nodeID, neededFlag: _SemanticFlags.canBeLongPressed)?.handleSemanticLongPress();
-  }
-
-  @override
-  void scrollLeft(int nodeID) {
-    SemanticsNode._getSemanticActionHandlerForId(nodeID, neededFlag: _SemanticFlags.canBeScrolledHorizontally)?.handleSemanticScrollLeft();
-  }
-
-  @override
-  void scrollRight(int nodeID) {
-    SemanticsNode._getSemanticActionHandlerForId(nodeID, neededFlag: _SemanticFlags.canBeScrolledHorizontally)?.handleSemanticScrollRight();
-  }
-
-  @override
-  void scrollUp(int nodeID) {
-    SemanticsNode._getSemanticActionHandlerForId(nodeID, neededFlag: _SemanticFlags.canBeScrolledVertically)?.handleSemanticScrollUp();
-  }
-
-  @override
-  void scrollDown(int nodeID) {
-    SemanticsNode._getSemanticActionHandlerForId(nodeID, neededFlag: _SemanticFlags.canBeScrolledVertically)?.handleSemanticScrollDown();
+  void performAction(int id, mojom.SemanticAction encodedAction) {
+    SemanticAction action = SemanticAction.values[encodedAction.mojoEnumValue];
+    SemanticActionHandler node = SemanticsNode._getSemanticActionHandlerForId(id, action: action);
+    node?.performAction(action);
   }
 }

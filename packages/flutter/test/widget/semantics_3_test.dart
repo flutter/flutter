@@ -27,10 +27,7 @@ void main() {
     );
     expect(client.updates.length, equals(2));
     expect(client.updates[0].id, equals(0));
-    expect(client.updates[0].flags.canBeTapped, isFalse);
-    expect(client.updates[0].flags.canBeLongPressed, isFalse);
-    expect(client.updates[0].flags.canBeScrolledHorizontally, isFalse);
-    expect(client.updates[0].flags.canBeScrolledVertically, isFalse);
+    expect(client.updates[0].actions, isEmpty);
     expect(client.updates[0].flags.hasCheckedState, isTrue);
     expect(client.updates[0].flags.isChecked, isTrue);
     expect(client.updates[0].strings.label, equals('test'));
@@ -55,10 +52,7 @@ void main() {
     );
     expect(client.updates.length, equals(2));
     expect(client.updates[0].id, equals(0));
-    expect(client.updates[0].flags.canBeTapped, isFalse);
-    expect(client.updates[0].flags.canBeLongPressed, isFalse);
-    expect(client.updates[0].flags.canBeScrolledHorizontally, isFalse);
-    expect(client.updates[0].flags.canBeScrolledVertically, isFalse);
+    expect(client.updates[0].actions, isEmpty);
     expect(client.updates[0].flags.hasCheckedState, isTrue);
     expect(client.updates[0].flags.isChecked, isTrue);
     expect(client.updates[0].strings.label, equals(''));
@@ -83,10 +77,7 @@ void main() {
     );
     expect(client.updates.length, equals(2));
     expect(client.updates[0].id, equals(0));
-    expect(client.updates[0].flags.canBeTapped, isFalse);
-    expect(client.updates[0].flags.canBeLongPressed, isFalse);
-    expect(client.updates[0].flags.canBeScrolledHorizontally, isFalse);
-    expect(client.updates[0].flags.canBeScrolledVertically, isFalse);
+    expect(client.updates[0].actions, isEmpty);
     expect(client.updates[0].flags.hasCheckedState, isFalse);
     expect(client.updates[0].flags.isChecked, isFalse);
     expect(client.updates[0].strings.label, equals('test'));
@@ -114,10 +105,7 @@ void main() {
     );
     expect(client.updates.length, equals(2));
     expect(client.updates[0].id, equals(0));
-    expect(client.updates[0].flags.canBeTapped, isFalse);
-    expect(client.updates[0].flags.canBeLongPressed, isFalse);
-    expect(client.updates[0].flags.canBeScrolledHorizontally, isFalse);
-    expect(client.updates[0].flags.canBeScrolledVertically, isFalse);
+    expect(client.updates[0].actions, isEmpty);
     expect(client.updates[0].flags.hasCheckedState, isTrue);
     expect(client.updates[0].flags.isChecked, isTrue);
     expect(client.updates[0].strings.label, equals('test'));

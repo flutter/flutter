@@ -2119,63 +2119,65 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
   Iterable<SemanticAnnotator> getSemanticAnnotators() sync* {
     if (hasSemantics) {
       yield (SemanticsNode semantics) {
-        semantics.canBeTapped = onTap != null;
-        semantics.canBeLongPressed = onLongPress != null;
-        semantics.canBeScrolledHorizontally = onHorizontalDragUpdate != null;
-        semantics.canBeScrolledVertically = onVerticalDragUpdate != null;
+        if (onTap != null)
+          semantics.addAction(SemanticAction.tap);
+        if (onLongPress != null)
+          semantics.addAction(SemanticAction.longPress);
+        if (onHorizontalDragUpdate != null)
+          semantics.addHorizontalScrollingActions();
+        if (onVerticalDragUpdate != null)
+          semantics.addVerticalScrollingActions();
       };
     }
   }
 
   @override
-  void handleSemanticTap() {
-    if (onTap != null)
-      onTap();
-  }
-
-  @override
-  void handleSemanticLongPress() {
-    if (onLongPress != null)
-      onLongPress();
-  }
-
-  @override
-  void handleSemanticScrollLeft() {
-    if (onHorizontalDragUpdate != null) {
-      final double primaryDelta = size.width * -scrollFactor;
-      onHorizontalDragUpdate(new DragUpdateDetails(
-        delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta
-      ));
-    }
-  }
-
-  @override
-  void handleSemanticScrollRight() {
-    if (onHorizontalDragUpdate != null) {
-      final double primaryDelta = size.width * scrollFactor;
-      onHorizontalDragUpdate(new DragUpdateDetails(
-        delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta
-      ));
-    }
-  }
-
-  @override
-  void handleSemanticScrollUp() {
-    if (onVerticalDragUpdate != null) {
-      final double primaryDelta = size.height * -scrollFactor;
-      onVerticalDragUpdate(new DragUpdateDetails(
-        delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta
-      ));
-    }
-  }
-
-  @override
-  void handleSemanticScrollDown() {
-    if (onVerticalDragUpdate != null) {
-      final double primaryDelta = size.height * scrollFactor;
-      onVerticalDragUpdate(new DragUpdateDetails(
-        delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta
-      ));
+  void performAction(SemanticAction action) {
+    switch (action) {
+      case SemanticAction.tap:
+        if (onTap != null)
+          onTap();
+        break;
+      case SemanticAction.longPress:
+        if (onLongPress != null)
+          onLongPress();
+        break;
+      case SemanticAction.scrollLeft:
+        if (onHorizontalDragUpdate != null) {
+          final double primaryDelta = size.width * -scrollFactor;
+          onHorizontalDragUpdate(new DragUpdateDetails(
+            delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta
+          ));
+        }
+        break;
+      case SemanticAction.scrollRight:
+        if (onHorizontalDragUpdate != null) {
+          final double primaryDelta = size.width * scrollFactor;
+          onHorizontalDragUpdate(new DragUpdateDetails(
+            delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta
+          ));
+        }
+        break;
+      case SemanticAction.scrollUp:
+        if (onVerticalDragUpdate != null) {
+          final double primaryDelta = size.height * -scrollFactor;
+          onVerticalDragUpdate(new DragUpdateDetails(
+            delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta
+          ));
+        }
+        break;
+      case SemanticAction.scrollDown:
+        if (onVerticalDragUpdate != null) {
+          final double primaryDelta = size.height * scrollFactor;
+          onVerticalDragUpdate(new DragUpdateDetails(
+            delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta
+          ));
+        }
+        break;
+      case SemanticAction.increase:
+      case SemanticAction.decrease:
+        assert(false);
+        break;
     }
   }
 }
