@@ -30,6 +30,7 @@ export 'package:flutter/foundation.dart' show FlutterError, InformationCollector
 /// to other children.
 class ParentData {
   /// Called when the RenderObject is removed from the tree.
+  @protected
   @mustCallSuper
   void detach() { }
 
@@ -1139,7 +1140,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   @override
   PipelineOwner get owner => super.owner;
 
-  // Workaround for https://github.com/dart-lang/sdk/issues/25232
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);

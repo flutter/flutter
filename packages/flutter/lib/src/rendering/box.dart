@@ -932,6 +932,7 @@ abstract class RenderBox extends RenderObject {
   /// This function must only be called from [getDistanceToBaseline] and
   /// [computeDistanceToActualBaseline]. Do not call this function directly from
   /// outside those two methods.
+  @protected
   @mustCallSuper
   double getDistanceToActualBaseline(TextBaseline baseline) {
     assert(_debugDoingBaseline);
