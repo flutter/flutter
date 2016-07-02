@@ -423,14 +423,14 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticActionHandle
   }
 
   @override
-  bool get hasSemantics => isInteractive;
+  bool get isSemanticBoundary => isInteractive;
 
   @override
-  Iterable<SemanticAnnotator> getSemanticAnnotators() sync* {
-    yield (SemanticsNode semantics) {
-      if (isInteractive)
-        semantics.addAdjustmentActions();
-    };
+  SemanticAnnotator get semanticAnnotator => _annotate;
+
+  void _annotate(SemanticsNode semantics) {
+    if (isInteractive)
+      semantics.addAdjustmentActions();
   }
 
   @override

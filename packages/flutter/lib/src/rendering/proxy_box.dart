@@ -2054,11 +2054,11 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
   set onTap(GestureTapCallback value) {
     if (_onTap == value)
       return;
-    bool didHaveSemantics = hasSemantics;
+    bool wasSemanticBoundary = isSemanticBoundary;
     bool hadHandler = _onTap != null;
     _onTap = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyChanges: hasSemantics == didHaveSemantics);
+      markNeedsSemanticsUpdate(onlyChanges: isSemanticBoundary == wasSemanticBoundary);
   }
 
   /// Called when the user presses on the render object for a long period of time.
@@ -2067,11 +2067,11 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
   set onLongPress(GestureLongPressCallback value) {
     if (_onLongPress == value)
       return;
-    bool didHaveSemantics = hasSemantics;
+    bool wasSemanticBoundary = isSemanticBoundary;
     bool hadHandler = _onLongPress != null;
     _onLongPress = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyChanges: hasSemantics == didHaveSemantics);
+      markNeedsSemanticsUpdate(onlyChanges: isSemanticBoundary == wasSemanticBoundary);
   }
 
   /// Called when the user scrolls to the left or to the right.
@@ -2080,11 +2080,11 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
   set onHorizontalDragUpdate(GestureDragUpdateCallback value) {
     if (_onHorizontalDragUpdate == value)
       return;
-    bool didHaveSemantics = hasSemantics;
+    bool wasSemanticBoundary = isSemanticBoundary;
     bool hadHandler = _onHorizontalDragUpdate != null;
     _onHorizontalDragUpdate = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyChanges: hasSemantics == didHaveSemantics);
+      markNeedsSemanticsUpdate(onlyChanges: isSemanticBoundary == wasSemanticBoundary);
   }
 
   /// Called when the user scrolls up or down.
@@ -2093,11 +2093,11 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
   set onVerticalDragUpdate(GestureDragUpdateCallback value) {
     if (_onVerticalDragUpdate == value)
       return;
-    bool didHaveSemantics = hasSemantics;
+    bool wasSemanticBoundary = isSemanticBoundary;
     bool hadHandler = _onVerticalDragUpdate != null;
     _onVerticalDragUpdate = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyChanges: hasSemantics == didHaveSemantics);
+      markNeedsSemanticsUpdate(onlyChanges: isSemanticBoundary == wasSemanticBoundary);
   }
 
   /// The fraction of the dimension of this render box to use when
@@ -2108,7 +2108,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
   double scrollFactor;
 
   @override
-  bool get hasSemantics {
+  bool get isSemanticBoundary {
     return onTap != null
         || onLongPress != null
         || onHorizontalDragUpdate != null
@@ -2116,19 +2116,17 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
   }
 
   @override
-  Iterable<SemanticAnnotator> getSemanticAnnotators() sync* {
-    if (hasSemantics) {
-      yield (SemanticsNode semantics) {
-        if (onTap != null)
-          semantics.addAction(SemanticAction.tap);
-        if (onLongPress != null)
-          semantics.addAction(SemanticAction.longPress);
-        if (onHorizontalDragUpdate != null)
-          semantics.addHorizontalScrollingActions();
-        if (onVerticalDragUpdate != null)
-          semantics.addVerticalScrollingActions();
-      };
-    }
+  SemanticAnnotator get semanticAnnotator => isSemanticBoundary ? _annotate : null;
+
+  void _annotate(SemanticsNode node) {
+    if (onTap != null)
+      node.addAction(SemanticAction.tap);
+    if (onLongPress != null)
+      node.addAction(SemanticAction.longPress);
+    if (onHorizontalDragUpdate != null)
+      node.addHorizontalScrollingActions();
+    if (onVerticalDragUpdate != null)
+      node.addVerticalScrollingActions();
   }
 
   @override
@@ -2243,21 +2241,19 @@ class RenderSemanticAnnotations extends RenderProxyBox {
   }
 
   @override
-  bool get hasSemantics => container;
+  bool get isSemanticBoundary => container;
 
   @override
-  Iterable<SemanticAnnotator> getSemanticAnnotators() sync* {
+  SemanticAnnotator get semanticAnnotator => checked != null || label != null ? _annotate : null;
+
+  void _annotate(SemanticsNode node) {
     if (checked != null) {
-      yield (SemanticsNode semantics) {
-        semantics.hasCheckedState = true;
-        semantics.isChecked = checked;
-      };
+      node
+        ..hasCheckedState = true
+        ..isChecked = checked;
     }
-    if (label != null) {
-      yield (SemanticsNode semantics) {
-        semantics.label = label;
-      };
-    }
+    if (label != null)
+      node.label = label;
   }
 }
 
@@ -2273,8 +2269,10 @@ class RenderMergeSemantics extends RenderProxyBox {
   RenderMergeSemantics({ RenderBox child }) : super(child);
 
   @override
-  Iterable<SemanticAnnotator> getSemanticAnnotators() sync* {
-    yield (SemanticsNode node) { node.mergeAllDescendantsIntoThisNode = true; };
+  SemanticAnnotator get semanticAnnotator => _annotate;
+
+  void _annotate(SemanticsNode node) {
+    node.mergeAllDescendantsIntoThisNode = true;
   }
 }
 

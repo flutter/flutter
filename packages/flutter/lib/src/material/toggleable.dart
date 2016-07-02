@@ -263,17 +263,17 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
   }
 
   @override
-  bool get hasSemantics => isInteractive;
+  bool get isSemanticBoundary => isInteractive;
 
   @override
-  Iterable<SemanticAnnotator> getSemanticAnnotators() sync* {
-    yield (SemanticsNode semantics) {
-      semantics
-        ..hasCheckedState = true
-        ..isChecked = _value;
-      if (isInteractive)
-        semantics.addAction(SemanticAction.tap);
-    };
+  SemanticAnnotator get semanticAnnotator => _annotate;
+
+  void _annotate(SemanticsNode semantics) {
+    semantics
+      ..hasCheckedState = true
+      ..isChecked = _value;
+    if (isInteractive)
+      semantics.addAction(SemanticAction.tap);
   }
 
   @override
