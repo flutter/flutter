@@ -23,6 +23,7 @@ namespace shell {
 namespace {
 
 const char kEnableCheckedMode[] = "--enable-checked-mode";
+const char kPauseIsolatesOnStart[] = "--pause-isolates-on-start";
 
 }  // namespace
 
@@ -43,6 +44,7 @@ class MojoApp : public mojo::ApplicationImplBase {
     blink::SkySettings settings;
     settings.enable_observatory = true;
     settings.enable_dart_checked_mode = HasArg(kEnableCheckedMode);
+    settings.start_paused = HasArg(kPauseIsolatesOnStart);
     blink::SkySettings::Set(settings);
 
     Shell::Init();
