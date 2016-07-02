@@ -40,14 +40,15 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> {
     // static here because we might not be in a tree that's attached to that
     // binding. Instead, we should find a way to get to the PipelineOwner from
     // the BuildContext.
-    WidgetsBinding.instance.ensureSemantics();
-    _client = new _SemanticsClient(WidgetsBinding.instance.pipelineOwner.semanticsOwner)
+    _client = new _SemanticsClient(WidgetsBinding.instance.pipelineOwner)
       ..addListener(_update);
   }
 
   @override
   void dispose() {
-    _client.removeListener(_update);
+    _client
+      ..removeListener(_update)
+      ..dispose();
     super.dispose();
   }
 
@@ -310,12 +311,19 @@ class _SemanticsDebuggerEntry {
   }
 }
 
-class _SemanticsClient extends ChangeNotifier implements mojom.SemanticsListener {
-  _SemanticsClient(this.semanticsOwner) {
-    semanticsOwner.addListener(this);
+class _SemanticsClient extends ChangeNotifier {
+  _SemanticsClient(PipelineOwner pipelineOwner) {
+    _semanticsOwner = pipelineOwner.addSemanticsListener(_updateSemanticsTree);
   }
 
-  final SemanticsOwner semanticsOwner;
+  SemanticsOwner _semanticsOwner;
+
+  @override
+  void dispose() {
+    _semanticsOwner.removeListener(_updateSemanticsTree);
+    _semanticsOwner = null;
+    super.dispose();
+  }
 
   _SemanticsDebuggerEntry get rootNode => _nodes[0];
   final Map<int, _SemanticsDebuggerEntry> _nodes = <int, _SemanticsDebuggerEntry>{};
@@ -353,8 +361,7 @@ class _SemanticsClient extends ChangeNotifier implements mojom.SemanticsListener
 
   int generation = 0;
 
-  @override
-  void updateSemanticsTree(List<mojom.SemanticsNode> nodes) {
+  void _updateSemanticsTree(List<mojom.SemanticsNode> nodes) {
     generation += 1;
     for (mojom.SemanticsNode node in nodes)
       _updateNode(node);
@@ -368,7 +375,7 @@ class _SemanticsClient extends ChangeNotifier implements mojom.SemanticsListener
 
   void _performAction(Point position, SemanticAction action) {
     _SemanticsDebuggerEntry entry = _hitTest(position, (_SemanticsDebuggerEntry entry) => entry.actions.contains(action));
-    semanticsOwner.performAction(entry?.id ?? 0, action);
+    _semanticsOwner.performAction(entry?.id ?? 0, action);
   }
 
   void handlePanEnd(Point position, Velocity velocity) {

@@ -90,18 +90,12 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   PipelineOwner _pipelineOwner;
 
   /// The render tree that's attached to the output surface.
-  RenderView get renderView => _renderView;
-  RenderView _renderView;
+  RenderView get renderView => _pipelineOwner.rootRenderObject;
   /// Sets the given [RenderView] object (which must not be null), and its tree, to
   /// be the new render tree to display. The previous tree, if any, is detached.
   set renderView(RenderView value) {
     assert(value != null);
-    if (_renderView == value)
-      return;
-    if (_renderView != null)
-      _renderView.detach();
-    _renderView = value;
-    _renderView.attach(pipelineOwner);
+    _pipelineOwner.rootRenderObject = value;
   }
 
   /// Called when the system metrics change.
@@ -134,16 +128,13 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   /// Called automatically when the binding is created.
   void initSemantics() {
     shell.provideService(mojom.SemanticsServer.serviceName, (core.MojoMessagePipeEndpoint endpoint) {
-      ensureSemantics();
-      mojom.SemanticsServerStub server = new mojom.SemanticsServerStub.fromEndpoint(endpoint);
-      server.impl = new SemanticsServer(semanticsOwner: pipelineOwner.semanticsOwner);
+      mojom.SemanticsServerStub stub = new mojom.SemanticsServerStub.fromEndpoint(endpoint);
+      SemanticsServer server = new SemanticsServer(pipelineOwner);
+      stub.impl = server;
+      stub.ctrl.onError = (_) {
+        server.dispose();
+      };
     });
-  }
-
-  void ensureSemantics() {
-    if (pipelineOwner.semanticsOwner == null)
-      renderView.scheduleInitialSemantics();
-    assert(pipelineOwner.semanticsOwner != null);
   }
 
   void _handlePersistentFrameCallback(Duration timeStamp) {
@@ -165,7 +156,7 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   @override
   void reassembleApplication() {
     super.reassembleApplication();
-    pipelineOwner.reassemble(renderView);
+    pipelineOwner.reassemble();
   }
 
   @override
@@ -200,6 +191,44 @@ void debugDumpLayerTree() {
 /// Otherwise, the tree is empty and this will print "null".
 void debugDumpSemanticsTree() {
   debugPrint(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep() ?? 'Semantics not collected.');
+}
+
+/// Exposes the [SemanticsNode] tree to the underlying platform.
+class SemanticsServer extends mojom.SemanticsServer {
+  /// Creates a semantics server that listens to semantic informationa about the
+  /// given [PipelineOwner].
+  ///
+  /// Call [dispose] to stop listening for semantic updates.
+  SemanticsServer(PipelineOwner pipelineOwner) {
+    _semanticsOwner = pipelineOwner.addSemanticsListener(_updateSemanticsTree);
+  }
+
+  SemanticsOwner _semanticsOwner;
+  final List<mojom.SemanticsListenerProxy> _listeners = <mojom.SemanticsListenerProxy>[];
+
+  /// Stops listening for semantic updates and closes all outstanding listeners.
+  void dispose() {
+    for (mojom.SemanticsListenerProxy listener in _listeners)
+      listener.close();
+    _listeners.clear();
+    _semanticsOwner.removeListener(_updateSemanticsTree);
+    _semanticsOwner = null;
+  }
+
+  void _updateSemanticsTree(List<mojom.SemanticsNode> nodes) {
+    for (mojom.SemanticsListenerProxy listener in _listeners)
+      listener.updateSemanticsTree(nodes);
+  }
+
+  @override
+  void addSemanticsListener(mojom.SemanticsListenerProxy listener) {
+    _listeners.add(listener);
+  }
+
+  @override
+  void performAction(int id, mojom.SemanticAction encodedAction) {
+    _semanticsOwner.performAction(id, SemanticAction.values[encodedAction.mojoEnumValue]);
+  }
 }
 
 /// A concrete binding for applications that use the Rendering framework

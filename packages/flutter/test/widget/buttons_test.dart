@@ -7,11 +7,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sky_services/semantics/semantics.mojom.dart' as mojom;
 
-import 'test_semantics.dart';
+import '../rendering/test_semantics_client.dart';
 
 void main() {
   testWidgets('Does FlatButton contribute semantics', (WidgetTester tester) async {
-    TestSemanticsListener client = new TestSemanticsListener(tester);
+    TestSemanticsClient client = new TestSemanticsClient(tester.binding.pipelineOwner);
     await tester.pumpWidget(
       new Material(
         child: new Center(
@@ -22,7 +22,7 @@ void main() {
         )
       )
     );
-    expect(client.updates.length, equals(2));
+    expect(client.updates.length, equals(1));
     expect(client.updates[0].id, equals(0));
     expect(client.updates[0].actions, isEmpty);
     expect(client.updates[0].flags.hasCheckedState, isFalse);
@@ -40,7 +40,7 @@ void main() {
     expect(client.updates[0].children[0].flags.isChecked, isFalse);
     expect(client.updates[0].children[0].strings.label, equals('Hello'));
     expect(client.updates[0].children[0].children.length, equals(0));
-    expect(client.updates[1], isNull);
     client.updates.clear();
+    client.dispose();
   });
 }

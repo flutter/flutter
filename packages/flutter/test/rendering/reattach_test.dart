@@ -4,10 +4,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:sky_services/semantics/semantics.mojom.dart' as mojom;
 import 'package:test/test.dart';
 
 import 'rendering_tester.dart';
+import 'test_semantics_client.dart';
 
 class TestTree {
   TestTree() {
@@ -77,15 +77,6 @@ class TestCompositingBitsTree {
   bool painted = false;
 }
 
-class TestSemanticsListener implements mojom.SemanticsListener {
-  final List<mojom.SemanticsNode> updates = <mojom.SemanticsNode>[];
-
-  @override
-  void updateSemanticsTree(List<mojom.SemanticsNode> nodes) {
-    updates.addAll(nodes);
-  }
-}
-
 void main() {
   test('objects can be detached and re-attached: layout', () {
     TestTree testTree = new TestTree();
@@ -135,21 +126,20 @@ void main() {
   });
   test('objects can be detached and re-attached: semantics', () {
     TestTree testTree = new TestTree();
-    TestSemanticsListener listener = new TestSemanticsListener();
-    renderer.ensureSemantics();
-    renderer.pipelineOwner.semanticsOwner.addListener(listener);
+    TestSemanticsClient client = new TestSemanticsClient(renderer.pipelineOwner);
     // Lay out, composite, paint, and update semantics
     layout(testTree.root, phase: EnginePhase.flushSemantics);
-    expect(listener.updates.length, equals(1));
+    expect(client.updates.length, equals(1));
     // Remove testTree from the custom render view
     renderer.renderView.child = null;
     expect(testTree.child.owner, isNull);
     // Dirty one of the elements
-    listener.updates.clear();
+    client.updates.clear();
     testTree.child.markNeedsSemanticsUpdate();
-    expect(listener.updates.length, equals(0));
+    expect(client.updates.length, equals(0));
     // Lay out, composite, paint, and update semantics again
     layout(testTree.root, phase: EnginePhase.flushSemantics);
-    expect(listener.updates.length, equals(1));
+    expect(client.updates.length, equals(1));
+    client.dispose();
   });
 }
