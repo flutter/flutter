@@ -191,6 +191,8 @@ abstract class Device {
 
   bool get supportsRestart => false;
 
+  bool get restartSendsFrameworkInitEvent => true;
+
   /// Restart the given app; the application will already have been launched with
   /// [startApp].
   Future<bool> restartApp(
