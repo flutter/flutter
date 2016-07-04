@@ -508,13 +508,11 @@ class _SemanticsGeometry {
 abstract class _SemanticsFragment {
   _SemanticsFragment({
     RenderObject renderObjectOwner,
-    Iterable<SemanticAnnotator> annotators,
+    this.annotator,
     List<_SemanticsFragment> children
   }) {
     assert(renderObjectOwner != null);
     _ancestorChain = <RenderObject>[renderObjectOwner];
-    if (annotators != null)
-      addAnnotators(annotators);
     assert(() {
       if (children == null)
         return true;
@@ -526,20 +524,14 @@ abstract class _SemanticsFragment {
     _children = children ?? const <_SemanticsFragment>[];
   }
 
+  final SemanticAnnotator annotator;
+
   List<RenderObject> _ancestorChain;
   void addAncestor(RenderObject ancestor) {
     _ancestorChain.add(ancestor);
   }
 
   RenderObject get renderObjectOwner => _ancestorChain.first;
-
-  List<SemanticAnnotator> _annotators;
-  void addAnnotators(Iterable<SemanticAnnotator> moreAnnotators) {
-    if (_annotators == null)
-      _annotators = moreAnnotators is List<SemanticAnnotator> ? moreAnnotators : moreAnnotators.toList();
-    else
-      _annotators.addAll(moreAnnotators);
-  }
 
   List<_SemanticsFragment> _children;
 
@@ -579,9 +571,9 @@ class _CleanSemanticsFragment extends _SemanticsFragment {
 abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   _InterestingSemanticsFragment({
     RenderObject renderObjectOwner,
-    Iterable<SemanticAnnotator> annotators,
+    SemanticAnnotator annotator,
     Iterable<_SemanticsFragment> children
-  }) : super(renderObjectOwner: renderObjectOwner, annotators: annotators, children: children);
+  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children);
 
   bool get haveConcreteNode => true;
 
@@ -590,7 +582,7 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
     assert(!_debugCompiled);
     assert(() { _debugCompiled = true; return true; });
     SemanticsNode node = establishSemanticsNode(geometry, currentSemantics, parentSemantics);
-    for (SemanticAnnotator annotator in _annotators)
+    if (annotator != null)
       annotator(node);
     for (_SemanticsFragment child in _children) {
       assert(child._ancestorChain.last == renderObjectOwner);
@@ -613,9 +605,9 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
 class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   _RootSemanticsFragment({
     RenderObject renderObjectOwner,
-    Iterable<SemanticAnnotator> annotators,
+    SemanticAnnotator annotator,
     Iterable<_SemanticsFragment> children
-  }) : super(renderObjectOwner: renderObjectOwner, annotators: annotators, children: children);
+  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children);
 
   @override
   SemanticsNode establishSemanticsNode(_SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics) {
@@ -643,9 +635,9 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
 class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
   _ConcreteSemanticsFragment({
     RenderObject renderObjectOwner,
-    Iterable<SemanticAnnotator> annotators,
+    SemanticAnnotator annotator,
     Iterable<_SemanticsFragment> children
-  }) : super(renderObjectOwner: renderObjectOwner, annotators: annotators, children: children);
+  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children);
 
   @override
   SemanticsNode establishSemanticsNode(_SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics) {
@@ -671,9 +663,9 @@ class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
 class _ImplicitSemanticsFragment extends _InterestingSemanticsFragment {
   _ImplicitSemanticsFragment({
     RenderObject renderObjectOwner,
-    Iterable<SemanticAnnotator> annotators,
+    SemanticAnnotator annotator,
     Iterable<_SemanticsFragment> children
-  }) : super(renderObjectOwner: renderObjectOwner, annotators: annotators, children: children);
+  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children);
 
   @override
   bool get haveConcreteNode => _haveConcreteNode;
@@ -683,7 +675,7 @@ class _ImplicitSemanticsFragment extends _InterestingSemanticsFragment {
   SemanticsNode establishSemanticsNode(_SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics) {
     SemanticsNode node;
     assert(_haveConcreteNode == null);
-    _haveConcreteNode = currentSemantics == null && _annotators.isNotEmpty;
+    _haveConcreteNode = currentSemantics == null && annotator != null;
     if (haveConcreteNode) {
       renderObjectOwner._semantics ??= new SemanticsNode(
         handler: renderObjectOwner is SemanticActionHandler ? renderObjectOwner as dynamic : null
@@ -758,10 +750,9 @@ class _ForkingSemanticsFragment extends _SemanticsFragment {
 /// 3. [flushPaint] visites any render objects that need to paint. During this
 ///    phase, render objects get a chance to record painting commands into
 ///    [PictureLayer]s and construct other composited [Layer]s.
-/// 4. Finally, if [SemanticsNode.hasListeners] is true, [flushSemantics] will
-///    compile the semantics for the render objects. This semantic information
-///    is used by assistive technology to improve the accessibility of the
-///    render tree.
+/// 4. Finally, if semantics are enabled, [flushSemantics] will compile the
+///    semantics for the render objects. This semantic information is used by
+///    assistive technology to improve the accessibility of the render tree.
 ///
 /// The [RendererBinding] holds the pipeline owner for the render objects that
 /// are visible on screen. You can create other pipeline owners to manage
@@ -1197,7 +1188,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       _needsPaint = false;
       markNeedsPaint();
     }
-    if (_needsSemanticsUpdate && hasSemantics) {
+    if (_needsSemanticsUpdate && isSemanticBoundary) {
       // Don't enter this block if we've never updated semantics at all;
       // scheduleInitialSemantics() will handle it
       _needsSemanticsUpdate = false;
@@ -1900,7 +1891,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   }
 
   /// Whether this RenderObject introduces a new box for accessibility purposes.
-  bool get hasSemantics => false;
+  bool get isSemanticBoundary => false;
 
   /// The bounding box, in the local coordinate system, of this
   /// object, for accessibility purposes.
@@ -2024,7 +2015,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   _SemanticsFragment _getSemanticsFragment() {
     // early-exit if we're not dirty and have our own semantics
-    if (!_needsSemanticsUpdate && hasSemantics) {
+    if (!_needsSemanticsUpdate && isSemanticBoundary) {
       assert(_semantics != null);
       return new _CleanSemanticsFragment(renderObjectOwner: this);
     }
@@ -2047,13 +2038,13 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     });
     _needsSemanticsUpdate = false;
     _needsSemanticsGeometryUpdate = false;
-    Iterable<SemanticAnnotator> annotators = getSemanticAnnotators();
+    SemanticAnnotator annotator = semanticAnnotator;
     if (parent is! RenderObject)
-      return new _RootSemanticsFragment(renderObjectOwner: this, annotators: annotators, children: children);
-    if (hasSemantics)
-      return new _ConcreteSemanticsFragment(renderObjectOwner: this, annotators: annotators, children: children);
-    if (annotators.isNotEmpty)
-      return new _ImplicitSemanticsFragment(renderObjectOwner: this, annotators: annotators, children: children);
+      return new _RootSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children);
+    if (isSemanticBoundary)
+      return new _ConcreteSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children);
+    if (annotator != null)
+      return new _ImplicitSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children);
     _semantics = null;
     if (children == null)
       return null;
@@ -2098,7 +2089,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// non-zero, and hasSemantics isn't true, then the associated call
   /// to markNeedsSemanticsUpdate() must not have 'onlyChanges' set, as
   /// it is possible that the node should be entirely removed.
-  Iterable<SemanticAnnotator> getSemanticAnnotators() sync* { }
+  SemanticAnnotator get semanticAnnotator => null;
 
 
   // EVENTS

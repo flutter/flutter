@@ -231,10 +231,10 @@ class RenderParagraph extends RenderBox {
   }
 
   @override
-  Iterable<SemanticAnnotator> getSemanticAnnotators() sync* {
-    yield (SemanticsNode node) {
-      node.label = text.toPlainText();
-    };
+  SemanticAnnotator get semanticAnnotator => _annotate;
+
+  void _annotate(SemanticsNode node) {
+    node.label = text.toPlainText();
   }
 
   @override
