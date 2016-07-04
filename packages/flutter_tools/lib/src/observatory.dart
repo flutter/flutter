@@ -215,6 +215,12 @@ class Observatory {
     }).then((dynamic result) => new Response(result));
   }
 
+  Future<Response> flutterDebugDumpRenderTree(String isolateId) {
+    return peer.sendRequest('ext.flutter.debugDumpRenderTree', <String, dynamic>{
+      'isolateId': isolateId
+    }).then((dynamic result) => new Response(result));
+  }
+
   /// Causes the application to pick up any changed code.
   Future<Response> flutterReassemble(String isolateId) {
     return peer.sendRequest('ext.flutter.reassemble', <String, dynamic>{

@@ -259,8 +259,10 @@ class RunAndStayResident {
             _stopApp();
           } else if (useDevFS && lower == 'd') {
             _updateDevFS();
-          } else if (lower == 'a') {
+          } else if (lower == 'w') {
             _debugDumpApp();
+          } else if (lower == 't') {
+            _debugDumpRenderTree();
           }
         });
       }
@@ -301,6 +303,10 @@ class RunAndStayResident {
 
   void _debugDumpApp() {
     observatory.flutterDebugDumpApp(observatory.firstIsolateId);
+  }
+
+  void _debugDumpRenderTree() {
+    observatory.flutterDebugDumpRenderTree(observatory.firstIsolateId);
   }
 
   DevFS devFS;
@@ -371,7 +377,7 @@ class RunAndStayResident {
   void _printHelp() {
     String restartText = device.supportsRestart ? ', "r" or F5 to restart the app,' : '';
     printStatus('Type "h" or F1 for help$restartText and "q", F10, or ctrl-c to quit.');
-    printStatus('Type "a" to print the widget hierarchy of the current app.');
+    printStatus('Type "w" to print the widget hierarchy of the app, and "t" for the render tree.');
 
     if (useDevFS)
       printStatus('Type "d" to send modified project files to the the client\'s DevFS.');
