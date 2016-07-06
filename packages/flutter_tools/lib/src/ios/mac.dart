@@ -105,16 +105,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool codesign: true
 }) async {
   String flutterProjectPath = Directory.current.path;
-
-  if (xcodeProjectRequiresUpdate(mode, target)) {
-    printTrace('Initializing the Xcode project.');
-    if ((await setupXcodeProjectHarness(flutterProjectPath, mode, target)) != 0) {
-      printError('Could not initialize the Xcode project.');
-      return new XcodeBuildResult(false);
-    }
-  } else {
-    updateXcodeGeneratedProperties(flutterProjectPath, mode, target);
-  }
+  updateXcodeGeneratedProperties(flutterProjectPath, mode, target);
 
   if (!_checkXcodeVersion())
     return new XcodeBuildResult(false);
@@ -130,7 +121,6 @@ Future<XcodeBuildResult> buildXcodeProject({
     'xcodebuild',
     'clean',
     'build',
-    '-target', 'Runner',
     '-configuration', 'Release',
     'ONLY_ACTIVE_ARCH=YES',
   ];

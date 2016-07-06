@@ -413,7 +413,7 @@ String getMissingPackageHintForPlatform(TargetPlatform platform) {
     case TargetPlatform.android_x64:
       return 'Is your project missing an android/AndroidManifest.xml?\nConsider running "flutter create ." to create one.';
     case TargetPlatform.ios:
-      return 'Is your project missing an ios/Info.plist?\nConsider running "flutter create ." to create one.';
+      return 'Is your project missing an ios/Runner/Info.plist?\nConsider running "flutter create ." to create one.';
     default:
       return null;
   }
