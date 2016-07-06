@@ -56,6 +56,19 @@ target_os = ["android"]
 Building and running the code
 -----------------------------
 
+### General
+
+Most developers will use the `flutter` tool in [the main Flutter repository](https://github.com/flutter/flutter) for interacting with their built flutter/engine.  To do so, the `flutter` tool accepts two global parameters `local-engine-src-path` and `local-engine`, a typical invocation would be: `--local-engine-src-path /path/to/engine/src --local-engine=android_debug_unopt`.
+
+Additionally if you've modified dart sources in `flutter/engine`, you'll need to add a `dependency_overrides` section to point to your modified `package:sky_engine` and `package:sky_services` to the `pubspec.yaml` for the flutter app you're using the custom engine with.  A typical example would be:
+```
+dependency_overrides:
+  sky_engine:
+    path: /path/to/flutter/engine/out/host_debug/gen/dart-pkg/sky_engine
+  sky_services:
+    path: /path/to/flutter/engine/out/host_debug/gen/dart-pkg/sky_services
+```
+
 ### Android (cross-compiling from Mac or Linux)
 
 Run the following steps, from the `src` directory created in the steps above:
