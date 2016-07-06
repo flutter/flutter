@@ -96,13 +96,13 @@ class IOSApp extends ApplicationPackage {
     if (getCurrentHostPlatform() != HostPlatform.darwin_x64)
       return null;
 
-    String plistPath = path.join('ios', 'Info.plist');
+    String plistPath = path.join('ios', 'Runner', 'Info.plist');
     String value = getValueFromFile(plistPath, kCFBundleIdentifierKey);
     if (value == null)
       return null;
 
     return new IOSApp(
-      projectDir: path.join('ios', '.generated'),
+      projectDir: path.join('ios'),
       projectBundleId: value
     );
   }
