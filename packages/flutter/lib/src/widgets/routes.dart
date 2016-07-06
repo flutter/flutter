@@ -230,13 +230,13 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 
   /// Whether this route can perform a transition to the given route.
   ///
-  /// Subclasses can override this function to restrict the set of routes they
+  /// Subclasses can override this method to restrict the set of routes they
   /// need to coordinate transitions with.
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) => true;
 
   /// Whether this route can perform a transition from the given route.
   ///
-  /// Subclasses can override this function to restrict the set of routes they
+  /// Subclasses can override this method to restrict the set of routes they
   /// need to coordinate transitions with.
   bool canTransitionFrom(TransitionRoute<dynamic> nextRoute) => true;
 
@@ -490,7 +490,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   // The API for subclasses to override - used by _ModalScope
 
-  /// Override this function to build the primary content of this route.
+  /// Override this method to build the primary content of this route.
   ///
   /// * [context] The context in which the route is being built.
   /// * [animation] The animation for this route's transition. When entering,
@@ -501,7 +501,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///   and exit transition of routes pushed on top of this route.
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation);
 
-  /// Override this function to wrap the route in a number of transition widgets.
+  /// Override this method to wrap the route in a number of transition widgets.
   ///
   /// For example, to create a fade entrance transition, wrap the given child
   /// widget in a [FadeTransition] using the given animation as the opacity.

@@ -187,10 +187,10 @@ class GridChildPlacement {
 
 /// An abstract interface to control the layout of a [RenderGrid].
 abstract class GridDelegate {
-  /// Override this function to control size of the columns and rows.
+  /// Override this method to control size of the columns and rows.
   GridSpecification getGridSpecification(BoxConstraints constraints, int childCount);
 
-  /// Override this function to control where children are placed in the grid.
+  /// Override this method to control where children are placed in the grid.
   ///
   /// During layout, the grid calls this function for each child, passing the
   /// [placementData] associated with that child as context. The returned

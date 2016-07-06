@@ -545,7 +545,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
 
   /// Calls the onScroll callback.
   ///
-  /// Subclasses can override this function to hook the scroll callback.
+  /// Subclasses can override this method to hook the scroll callback.
   void dispatchOnScroll() {
     assert(_numberOfInProgressScrolls > 0);
     if (config.onScroll != null)
@@ -575,7 +575,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
 
   /// Calls the onScrollStart callback.
   ///
-  /// Subclasses can override this function to hook the scroll start callback.
+  /// Subclasses can override this method to hook the scroll start callback.
   void dispatchOnScrollStart() {
     assert(_numberOfInProgressScrolls == 1);
     if (config.onScrollStart != null)
@@ -603,7 +603,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
 
   /// Calls the dispatchOnScrollEnd callback.
   ///
-  /// Subclasses can override this function to hook the scroll end callback.
+  /// Subclasses can override this method to hook the scroll end callback.
   void dispatchOnScrollEnd() {
     assert(_numberOfInProgressScrolls == 0);
     if (config.onScrollEnd != null)
@@ -672,7 +672,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
 
   /// Calls the widget's [builder] by default.
   ///
-  /// Subclasses can override this function to build the interior of their
+  /// Subclasses can override this method to build the interior of their
   /// scrollable widget. Scrollable wraps the returned widget in a
   /// [GestureDetector] to observe the user's interaction with this widget and
   /// to adjust the scroll offset accordingly.
