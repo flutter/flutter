@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../android/android_sdk.dart';
+import '../android/gradle.dart';
 import '../base/file_system.dart' show ensureDirectoryExists;
 import '../base/logger.dart';
 import '../base/os.dart';
@@ -202,25 +203,32 @@ class BuildApkCommand extends FlutterCommand {
 
   @override
   Future<int> runInProject() async {
-    // TODO(devoncarew): This command should take an arg for the output type (arm / x64).
-
-    return await buildAndroid(
-      TargetPlatform.android_arm,
-      getBuildMode(),
-      force: true,
-      manifest: argResults['manifest'],
-      resources: argResults['resources'],
-      outputFile: argResults['output-file'],
-      target: argResults['target'],
-      flxPath: argResults['flx'],
-      aotPath: argResults['aot-path'],
-      keystore: (argResults['keystore'] ?? '').isEmpty ? null : new ApkKeystoreInfo(
-        keystore: argResults['keystore'],
-        password: argResults['keystore-password'],
-        keyAlias: argResults['keystore-key-alias'],
-        keyPassword: argResults['keystore-key-password']
-      )
-    );
+    if (isProjectUsingGradle()) {
+      return await buildAndroidWithGradle(
+        TargetPlatform.android_arm,
+        getBuildMode(),
+        target: argResults['target']
+      );
+    } else {
+      // TODO(devoncarew): This command should take an arg for the output type (arm / x64).
+      return await buildAndroid(
+        TargetPlatform.android_arm,
+        getBuildMode(),
+        force: true,
+        manifest: argResults['manifest'],
+        resources: argResults['resources'],
+        outputFile: argResults['output-file'],
+        target: argResults['target'],
+        flxPath: argResults['flx'],
+        aotPath: argResults['aot-path'],
+        keystore: (argResults['keystore'] ?? '').isEmpty ? null : new ApkKeystoreInfo(
+          keystore: argResults['keystore'],
+          password: argResults['keystore-password'],
+          keyAlias: argResults['keystore-key-alias'],
+          keyPassword: argResults['keystore-key-password']
+        )
+      );
+    }
   }
 }
 
@@ -556,24 +564,53 @@ Future<int> buildAndroid(
   return result;
 }
 
+Future<int> buildAndroidWithGradle(
+  TargetPlatform platform,
+  BuildMode buildMode, {
+  bool force: false,
+  String target
+}) async {
+  // Validate that we can find an android sdk.
+  if (androidSdk == null) {
+    printError('No Android SDK found. Try setting the ANDROID_HOME environment variable.');
+    return 1;
+  }
+
+  List<String> validationResult = androidSdk.validateSdkWellFormed();
+  if (validationResult.isNotEmpty) {
+    validationResult.forEach(printError);
+    printError('Try re-installing or updating your Android SDK.');
+    return 1;
+  }
+
+  return buildGradleProject(buildMode);
+}
+
 Future<int> buildApk(
   TargetPlatform platform, {
   String target,
   BuildMode buildMode: BuildMode.debug
 }) async {
-  if (!FileSystemEntity.isFileSync(_kDefaultAndroidManifestPath)) {
-    printError('Cannot build APK: missing $_kDefaultAndroidManifestPath.');
-    return 1;
+  if (isProjectUsingGradle()) {
+    return await buildAndroidWithGradle(
+      platform,
+      buildMode,
+      force: false,
+      target: target
+    );
+  } else {
+    if (!FileSystemEntity.isFileSync(_kDefaultAndroidManifestPath)) {
+      printError('Cannot build APK: missing $_kDefaultAndroidManifestPath.');
+      return 1;
+    }
+
+    return await buildAndroid(
+      platform,
+      buildMode,
+      force: false,
+      target: target
+    );
   }
-
-  int result = await buildAndroid(
-    platform,
-    buildMode,
-    force: false,
-    target: target
-  );
-
-  return result;
 }
 
 Map<String, dynamic> _readBuildMeta(String buildDirectoryPath) {
