@@ -193,7 +193,7 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
     state._setArenaEntry(GestureBinding.instance.gestureArena.add(event.pointer, this));
   }
 
-  /// Subclasses should override this function to create per-pointer state
+  /// Subclasses should override this method to create per-pointer state
   /// objects to track the pointer associated with the given event.
   T createNewPointerState(PointerDownEvent event);
 

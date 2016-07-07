@@ -65,7 +65,7 @@ abstract class Layer {
     _parent = null;
   }
 
-  /// Override this function to upload this layer to the engine
+  /// Override this method to upload this layer to the engine
   ///
   /// The layerOffset is the accumulated offset of this layer's parent from the
   /// origin of the builder's coordinate system.

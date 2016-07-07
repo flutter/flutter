@@ -15,13 +15,13 @@ abstract class HitTestable { // ignore: one_member_abstracts
 
 /// An object that can dispatch events.
 abstract class HitTestDispatcher { // ignore: one_member_abstracts
-  /// Override this function to dispatch events.
+  /// Override this method to dispatch events.
   void dispatchEvent(PointerEvent event, HitTestResult result);
 }
 
 /// An object that can handle events.
 abstract class HitTestTarget { // ignore: one_member_abstracts
-  /// Override this function to receive events.
+  /// Override this method to receive events.
   void handleEvent(PointerEvent event, HitTestEntry entry);
 }
 

@@ -22,7 +22,7 @@ abstract class StatusTransitionWidget extends StatefulWidget {
   /// The animation to which this widget is listening.
   final Animation<double> animation;
 
-  /// Override this function to build widgets that depend on the current status
+  /// Override this method to build widgets that depend on the current status
   /// of the animation.
   Widget build(BuildContext context);
 

@@ -206,7 +206,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
 
   /// Override to be notified when [deadline] is exceeded.
   ///
-  /// You must override this function if you supply a [deadline].
+  /// You must override this method if you supply a [deadline].
   void didExceedDeadline() {
     assert(deadline == null);
   }

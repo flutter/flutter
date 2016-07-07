@@ -552,7 +552,7 @@ abstract class RenderBox extends RenderObject {
   /// Calling this function is expensive and as it can result in O(N^2)
   /// behavior.
   ///
-  /// Do not override this function. Instead, implement [computeMinIntrinsicWidth].
+  /// Do not override this method. Instead, implement [computeMinIntrinsicWidth].
   @mustCallSuper
   double getMinIntrinsicWidth(double height) {
     return _computeIntrinsicDimension(_IntrinsicDimension.minWidth, height, computeMinIntrinsicWidth);
@@ -652,7 +652,7 @@ abstract class RenderBox extends RenderObject {
   /// Calling this function is expensive and as it can result in O(N^2)
   /// behavior.
   ///
-  /// Do not override this function. Instead, implement
+  /// Do not override this method. Instead, implement
   /// [computeMaxIntrinsicWidth].
   @mustCallSuper
   double getMaxIntrinsicWidth(double height) {
@@ -707,7 +707,7 @@ abstract class RenderBox extends RenderObject {
   /// Calling this function is expensive and as it can result in O(N^2)
   /// behavior.
   ///
-  /// Do not override this function. Instead, implement
+  /// Do not override this method. Instead, implement
   /// [computeMinIntrinsicHeight].
   @mustCallSuper
   double getMinIntrinsicHeight(double width) {
@@ -754,7 +754,7 @@ abstract class RenderBox extends RenderObject {
   /// Calling this function is expensive and as it can result in O(N^2)
   /// behavior.
   ///
-  /// Do not override this function. Instead, implement
+  /// Do not override this method. Instead, implement
   /// [computeMaxIntrinsicHeight].
   @mustCallSuper
   double getMaxIntrinsicHeight(double width) {
@@ -952,7 +952,7 @@ abstract class RenderBox extends RenderObject {
   /// are implementing [computeDistanceToActualBaseline] and need to defer to a
   /// child.
   ///
-  /// Subclasses should override this function to supply the distances to their
+  /// Subclasses should override this method to supply the distances to their
   /// baselines.
   @protected
   double computeDistanceToActualBaseline(TextBaseline baseline) {
@@ -1174,7 +1174,7 @@ abstract class RenderBox extends RenderObject {
     return false;
   }
 
-  /// Override this function if this render object can be hit even if its
+  /// Override this method if this render object can be hit even if its
   /// children were not hit.
   ///
   /// Used by [hitTest]. If you override [hitTest] and do not call this
@@ -1182,7 +1182,7 @@ abstract class RenderBox extends RenderObject {
   @protected
   bool hitTestSelf(Point position) => false;
 
-  /// Override this function to check whether any children are located at the
+  /// Override this method to check whether any children are located at the
   /// given position.
   ///
   /// Typically children should be hit tested in reverse paint order so that
@@ -1261,7 +1261,7 @@ abstract class RenderBox extends RenderObject {
 
   int _debugActivePointers = 0;
 
-  /// Override this function to handle pointer events that hit this render object.
+  /// Override this method to handle pointer events that hit this render object.
   ///
   /// For [RenderBox] objects, the `entry` argument is a [BoxHitTestEntry]. From this
   /// object you can determine the [PointerDownEvent]'s position in local coordinates.

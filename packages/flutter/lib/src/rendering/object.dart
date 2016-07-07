@@ -1525,7 +1525,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// render object during layout. The layout constraints provided by your
   /// parent are available via the [constraints] getter.
   ///
-  /// Subclasses that set [sizedByParent] to true should override this function
+  /// Subclasses that set [sizedByParent] to true should override this method
   /// to compute their size.
   ///
   /// This function is called only if [sizedByParent] is true.
@@ -1827,13 +1827,13 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// layer.
   Rect get paintBounds;
 
-  /// Override this function to paint debugging information.
+  /// Override this method to paint debugging information.
   @protected
   void debugPaint(PaintingContext context, Offset offset) { }
 
   /// Paint this render object into the given context at the given offset.
   ///
-  /// Subclasses should override this function to provide a visual appearance
+  /// Subclasses should override this method to provide a visual appearance
   /// for themselves. The render object's local coordinate system is
   /// axis-aligned with the coordinate system of the context's canvas and the
   /// render object's local origin (i.e, x=0 and y=0) is placed at the given
@@ -2094,7 +2094,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   // EVENTS
 
-  /// Override this function to handle pointer events that hit this render object.
+  /// Override this method to handle pointer events that hit this render object.
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) { }
 

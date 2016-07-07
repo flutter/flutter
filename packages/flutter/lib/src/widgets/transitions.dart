@@ -33,7 +33,7 @@ abstract class AnimatedWidget extends StatefulWidget {
   /// The animation to which this widget is listening.
   final Animation<Object> animation;
 
-  /// Override this function to build widgets that depend on the current value
+  /// Override this method to build widgets that depend on the current value
   /// of the animation.
   Widget build(BuildContext context);
 

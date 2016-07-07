@@ -926,7 +926,7 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends _ProxyWidg
   @override
   ParentDataElement<T> createElement() => new ParentDataElement<T>(this);
 
-  /// Subclasses should override this function to return true if the given
+  /// Subclasses should override this method to return true if the given
   /// ancestor is a RenderObjectWidget that wraps a RenderObject that can handle
   /// the kind of ParentData widget that the ParentDataWidget subclass handles.
   ///
