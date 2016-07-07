@@ -392,6 +392,10 @@ class BoxConstraints extends Constraints {
   /// The returned [maxWidth] is at least as large as the [minWidth]. Similarly,
   /// the returned [maxHeight] is at least as large as the [minHeight].
   BoxConstraints normalize() {
+    if (isNormalized)
+      return this;
+    final double minWidth = this.minWidth >= 0.0 ? this.minWidth : 0.0;
+    final double minHeight = this.minHeight >= 0.0 ? this.minHeight : 0.0;
     return new BoxConstraints(
       minWidth: minWidth,
       maxWidth: minWidth > maxWidth ? minWidth : maxWidth,
@@ -829,6 +833,7 @@ abstract class RenderBox extends RenderObject {
     return _size;
   }
   Size _size;
+  @protected
   set size(Size value) {
     assert(!(debugDoingThisResize && debugDoingThisLayout));
     assert(sizedByParent || !debugDoingThisResize);
