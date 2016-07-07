@@ -57,6 +57,11 @@ enum _RefreshIndicatorMode {
   dismiss  // Animating the indicator's fade-out.
 }
 
+enum _DismissTransition {
+  shrink, // Refresh callback completed, scale the indicator to 0.
+  slide // No refresh, translate the indicator out of view.
+}
+
 /// A widget that supports the Material "swipe to refresh" idiom.
 ///
 /// When the child's vertical Scrollable descendant overscrolls, an
@@ -182,7 +187,7 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
 
   void _handlePointerDown(PointerDownEvent event) {
     final ScrollableState scrollable = config.scrollableKey?.currentState;
-    if (scrollable == null)
+    if (scrollable == null || _mode != null)
       return;
 
     _updateState(scrollable);
@@ -225,6 +230,9 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
   }
 
   void _handlePointerMove(PointerMoveEvent event) {
+    if (_mode != _RefreshIndicatorMode.drag && _mode != _RefreshIndicatorMode.armed)
+      return;
+
     final double overscroll = _overscrollDistance();
     if (overscroll > 0.0) {
       final double newValue = overscroll / (_containerExtent * _kDragContainerExtentPercentage);
@@ -242,11 +250,18 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
   }
 
   // Stop showing the refresh indicator
-  Future<Null> _dismiss() async {
+  Future<Null> _dismiss(_DismissTransition transition) async {
     setState(() {
       _mode = _RefreshIndicatorMode.dismiss;
     });
-    await _scaleController.animateTo(1.0, duration: _kIndicatorScaleDuration);
+    switch(transition) {
+      case _DismissTransition.shrink:
+        await _sizeController.animateTo(0.0, duration: _kIndicatorScaleDuration);
+        break;
+      case _DismissTransition.slide:
+        await _scaleController.animateTo(1.0, duration: _kIndicatorScaleDuration);
+        break;
+    }
     if (mounted && _mode == _RefreshIndicatorMode.dismiss) {
       setState(() {
         _mode = null;
@@ -273,10 +288,10 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
         _pendingRefreshFuture = null;
 
         if (mounted && completed && _mode == _RefreshIndicatorMode.refresh)
-          _dismiss();
+          _dismiss(_DismissTransition.slide);
       }
     } else if (_mode == _RefreshIndicatorMode.drag) {
-      _dismiss();
+      _dismiss(_DismissTransition.shrink);
     }
   }
 
