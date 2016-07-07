@@ -274,7 +274,7 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
 
   @override
   void performLayout() {
-    ViewportDimensions oldDimensions = dimensions;
+    final ViewportDimensions oldDimensions = dimensions;
     if (child != null) {
       child.layout(_getInnerConstraints(constraints), parentUsesSize: true);
       size = constraints.constrain(child.size);
