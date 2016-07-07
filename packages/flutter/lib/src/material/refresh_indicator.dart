@@ -184,7 +184,7 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
     final double scrollOffset = scrollable.scrollOffset;
     switch (config.location) {
       case RefreshIndicatorLocation.top:
-        return  scrollOffset <= minScrollOffset;
+        return scrollOffset <= minScrollOffset;
       case RefreshIndicatorLocation.bottom:
         return scrollOffset >= maxScrollOffset;
       case RefreshIndicatorLocation.both:
