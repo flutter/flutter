@@ -68,7 +68,7 @@ DartLibraryProviderFiles::~DartLibraryProviderFiles() {
 }
 
 void DartLibraryProviderFiles::LoadPackagesMap(const base::FilePath& packages) {
-  packages_ = base::MakeAbsoluteFilePath(packages);
+  packages_ = packages;
   std::string packages_source;
   if (!base::ReadFileToString(packages_, &packages_source)) {
     LOG(ERROR) << "error: Unable to load .packages file '"
