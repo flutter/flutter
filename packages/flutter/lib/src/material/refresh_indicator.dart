@@ -238,7 +238,7 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
     if (!_isValidScrollable(scrollable))
       return;
 
-    final dragOffsetDelta = scrollable.pixelOffsetToScrollOffset(event.delta.dy);
+    final double dragOffsetDelta = scrollable.pixelOffsetToScrollOffset(event.delta.dy);
     _dragOffset += dragOffsetDelta / 2.0;
     if (_dragOffset.abs() < kPixelScrollTolerance.distance)
       return;
