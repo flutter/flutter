@@ -2,8 +2,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//mojo/public/dart/rules.gni")
 import("//dart/sdk/lib/rules.gni")
+import("//flutter/lib/jni/dart_jni.gni")
+import("//flutter/lib/ui/dart_ui.gni")
+import("//mojo/public/dart/rules.gni")
+import("//sky/engine/core/core.gni")
 
 copy("copy_sky_engine_license") {
   sources = [
@@ -61,6 +64,21 @@ dart_sdk_lib_copy("typed_data") {
   destination = "$root_gen_dir/dart-pkg/sky_engine/dart_sdk"
 }
 
+copy("copy_dart_ui") {
+  sources = core_dart_files + dart_ui_files
+
+  outputs = [
+    "$root_gen_dir/dart-pkg/sky_engine/dart_ui/{{source_file_part}}",
+  ]
+}
+
+copy("copy_dart_jni") {
+  sources = dart_jni_files
+
+  outputs = [
+    "$root_gen_dir/dart-pkg/sky_engine/dart_jni/{{source_file_part}}",
+  ]
+}
 
 group("copy_dart_sdk") {
   deps = [
@@ -85,8 +103,10 @@ dart_pkg("sky_engine") {
   ]
 
   deps = [
-    ":copy_sky_engine_license",
+    ":copy_dart_jni",
     ":copy_dart_sdk",
+    ":copy_dart_ui",
+    ":copy_sky_engine_license",
     "//sky/engine/bindings",
   ]
 
