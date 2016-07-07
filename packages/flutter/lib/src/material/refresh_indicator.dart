@@ -132,10 +132,7 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
   Animation<double> _value;
   Animation<Color> _valueColor;
 
-  double _scrollOffset;
-  double _containerExtent;
-  double _minScrollOffset;
-  double _maxScrollOffset;
+  double _dragOffset;
   bool _isIndicatorAtTop = true;
   _RefreshIndicatorMode _mode;
   Future<Null> _pendingRefreshFuture;
@@ -174,54 +171,42 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
     super.dispose();
   }
 
-  void _updateState(ScrollableState scrollable) {
-    final Axis axis = scrollable.config.scrollDirection;
-    if (axis != Axis.vertical || scrollable.scrollBehavior is! ExtentScrollBehavior)
-      return;
-    final ExtentScrollBehavior scrollBehavior = scrollable.scrollBehavior;
-    _scrollOffset = scrollable.scrollOffset;
-    _containerExtent = scrollBehavior.containerExtent;
-    _minScrollOffset = scrollBehavior.minScrollOffset;
-    _maxScrollOffset = scrollBehavior.maxScrollOffset;
-  }
-
-  void _handlePointerDown(PointerDownEvent event) {
-    final ScrollableState scrollable = config.scrollableKey?.currentState;
-    if (scrollable == null || _mode != null)
-      return;
-
-    _updateState(scrollable);
-    _scaleController.value = 0.0;
-    _sizeController.value = 0.0;
-    setState(() {
-      _mode = _RefreshIndicatorMode.drag;
-    });
-  }
-
-  double _overscrollDistance() {
-    final ScrollableState scrollable = config.scrollableKey?.currentState;
+  bool _isValidScrollable(ScrollableState scrollable) {
     if (scrollable == null)
-      return 0.0;
+      return false;
+    final Axis axis = scrollable.config.scrollDirection;
+    return axis == Axis.vertical && scrollable.scrollBehavior is ExtentScrollBehavior;
+  }
 
-    final double oldOffset = _scrollOffset;
-    final double newOffset = scrollable.scrollOffset;
-    _updateState(scrollable);
-
-    if ((newOffset - oldOffset).abs() < kPixelScrollTolerance.distance)
-      return 0.0;
-
+  bool _isScrolledToLimit(ScrollableState scrollable) {
+    final double minScrollOffset = scrollable.scrollBehavior.minScrollOffset;
+    final double maxScrollOffset = scrollable.scrollBehavior.maxScrollOffset;
+    final double scrollOffset = scrollable.scrollOffset;
     switch (config.location) {
       case RefreshIndicatorLocation.top:
-        return newOffset < _minScrollOffset ? _minScrollOffset - newOffset : 0.0;
-
+        return  scrollOffset <= minScrollOffset;
       case RefreshIndicatorLocation.bottom:
-        return newOffset > _maxScrollOffset ? newOffset - _maxScrollOffset : 0.0;
+        return scrollOffset >= maxScrollOffset;
+      case RefreshIndicatorLocation.both:
+        return scrollOffset <= minScrollOffset || scrollOffset >= maxScrollOffset;
+    }
+    return false;
+  }
 
+  double _overscrollDistance(ScrollableState scrollable) {
+    final double minScrollOffset = scrollable.scrollBehavior.minScrollOffset;
+    final double maxScrollOffset = scrollable.scrollBehavior.maxScrollOffset;
+    final double scrollOffset = scrollable.scrollOffset;
+    switch (config.location) {
+      case RefreshIndicatorLocation.top:
+        return  scrollOffset <= minScrollOffset ? -_dragOffset : 0.0;
+      case RefreshIndicatorLocation.bottom:
+        return scrollOffset >= maxScrollOffset ? _dragOffset : 0.0;
       case RefreshIndicatorLocation.both: {
-        if (newOffset < _minScrollOffset)
-          return _minScrollOffset - newOffset;
-        else if (newOffset > _maxScrollOffset)
-          return newOffset - _maxScrollOffset;
+        if (scrollOffset <= minScrollOffset)
+          return -_dragOffset;
+        else if (scrollOffset >= maxScrollOffset)
+          return _dragOffset;
         else
           return 0.0;
       }
@@ -229,16 +214,42 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
     return 0.0;
   }
 
+  void _handlePointerDown(PointerDownEvent event) {
+    if (_mode != null)
+      return;
+
+    final ScrollableState scrollable = config.scrollableKey.currentState;
+    if (!_isValidScrollable(scrollable) || !_isScrolledToLimit(scrollable))
+      return;
+
+    _dragOffset = 0.0;
+    _scaleController.value = 0.0;
+    _sizeController.value = 0.0;
+    setState(() {
+      _mode = _RefreshIndicatorMode.drag;
+    });
+  }
+
   void _handlePointerMove(PointerMoveEvent event) {
     if (_mode != _RefreshIndicatorMode.drag && _mode != _RefreshIndicatorMode.armed)
       return;
 
-    final double overscroll = _overscrollDistance();
+    final ScrollableState scrollable = config.scrollableKey?.currentState;
+    if (!_isValidScrollable(scrollable))
+      return;
+
+    final dragOffsetDelta = scrollable.pixelOffsetToScrollOffset(event.delta.dy);
+    _dragOffset += dragOffsetDelta / 2.0;
+    if (_dragOffset.abs() < kPixelScrollTolerance.distance)
+      return;
+
+    final double containerExtent = scrollable.scrollBehavior.containerExtent;
+    final double overscroll = _overscrollDistance(scrollable);
     if (overscroll > 0.0) {
-      final double newValue = overscroll / (_containerExtent * _kDragContainerExtentPercentage);
+      final double newValue = overscroll / (containerExtent * _kDragContainerExtentPercentage);
       _sizeController.value = newValue.clamp(0.0, 1.0);
 
-      final bool newIsAtTop = _scrollOffset < _minScrollOffset;
+      final bool newIsAtTop = _dragOffset < 0;
       if (_isIndicatorAtTop != newIsAtTop) {
         setState(() {
           _isIndicatorAtTop = newIsAtTop;

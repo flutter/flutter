@@ -70,7 +70,8 @@ class OverscrollDemoState extends State<OverscrollDemo> {
         body = new RefreshIndicator(
           child: body,
           refresh: refresh,
-          scrollableKey: _scrollableKey
+          scrollableKey: _scrollableKey,
+          location: RefreshIndicatorLocation.top
         );
         break;
     }
