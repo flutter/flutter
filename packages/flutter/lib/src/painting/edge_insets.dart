@@ -6,6 +6,15 @@ import 'dart:ui' as ui show lerpDouble, WindowPadding;
 
 import 'basic_types.dart';
 
+/// The two cardinal directions in two dimensions.
+enum Axis {
+  /// Left and right
+  horizontal,
+
+  /// Up and down
+  vertical,
+}
+
 /// An immutable set of offsets in each of the four cardinal directions.
 ///
 /// Typically used for an offset from each of the four sides of a box. For
@@ -55,6 +64,18 @@ class EdgeInsets {
 
   /// The total offset in the horizontal direction.
   double get vertical => top + bottom;
+
+  /// The total offset in the given direction.
+  double along(Axis axis) {
+    assert(axis != null);
+    switch (axis) {
+      case Axis.horizontal:
+        return horizontal;
+      case Axis.vertical:
+        return vertical;
+    }
+    return null;
+  }
 
   /// The size that this EdgeInsets would occupy with an empty interior.
   Size get collapsedSize => new Size(horizontal, vertical);

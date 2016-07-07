@@ -315,18 +315,7 @@ class LazyBlockViewport extends RenderObjectWidget {
   /// See [LazyBlockDelegate] for details.
   final LazyBlockDelegate delegate;
 
-  double get _mainAxisPadding {
-    if (padding == null)
-      return 0.0;
-    switch (mainAxis) {
-      case Axis.horizontal:
-        return padding.horizontal;
-      case Axis.vertical:
-        return padding.vertical;
-    }
-    assert(mainAxis != null);
-    return null;
-  }
+  double get _mainAxisPadding => padding == null ? 0.0 : padding.along(mainAxis);
 
   @override
   _LazyBlockElement createElement() => new _LazyBlockElement(this);
