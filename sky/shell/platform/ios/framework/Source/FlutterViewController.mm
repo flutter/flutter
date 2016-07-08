@@ -18,6 +18,7 @@
 #include "sky/services/platform/app_messages.mojom.h"
 #include "sky/services/platform/ios/system_chrome_impl.h"
 #include "sky/services/semantics/semantics.mojom.h"
+#include "sky/shell/platform/ios/framework/Source/accessibility_bridge.h"
 #include "sky/shell/platform/ios/framework/Source/application_messages_impl.h"
 #include "sky/shell/platform/ios/framework/Source/flutter_touch_mapper.h"
 #include "sky/shell/platform/ios/framework/Source/FlutterDartProject_Internal.h"
@@ -50,6 +51,7 @@ void FlutterInit(int argc, const char* argv[]) {
   std::unique_ptr<sky::shell::ShellView> _shellView;
   sky::SkyEnginePtr _engine;
   mojo::ServiceProviderPtr _dartServices;
+  std::unique_ptr<sky::shell::AccessibilityBridge> _accessibilityBridge;
   flutter::platform::ApplicationMessagesPtr _appMessageSender;
   sky::shell::ApplicationMessagesImpl _appMessageReceiver;
   BOOL _initialized;
@@ -147,6 +149,11 @@ void FlutterInit(int argc, const char* argv[]) {
              selector:@selector(onLocaleUpdated:)
                  name:NSCurrentLocaleDidChangeNotification
                object:nil];
+
+  [center addObserver:self
+             selector:@selector(onVoiceOverChanged:)
+                 name:UIAccessibilityVoiceOverStatusChanged
+               object:nil];
 }
 
 #pragma mark - Initializing the engine
@@ -226,12 +233,13 @@ static void DynamicServiceResolve(void* baton,
 
 - (void)loadView {
   FlutterView* surface = [[FlutterView alloc] init];
-  [surface withAccessibility:_dartServices.get()];
 
   self.view = surface;
   self.view.multipleTouchEnabled = YES;
   self.view.autoresizingMask =
       UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+
+  [self onVoiceOverChanged:nil];
 
   [surface release];
 }
@@ -418,6 +426,27 @@ static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
 
 - (NSUInteger)supportedInterfaceOrientations {
   return _orientationPreferences;
+}
+
+#pragma mark - Accessibility
+
+- (void)onVoiceOverChanged:(NSNotification*)notification {
+#if TARGET_OS_SIMULATOR
+  // There doesn't appear to be any way to determine whether the accessibility
+  // inspector is enabled on the simulator. We conservatively always turn on the
+  // accessibility bridge in the simulator.
+  bool enable = true;
+#else
+  bool enable = UIAccessibilityIsVoiceOverRunning();
+#endif
+  if (enable) {
+    if (!_accessibilityBridge) {
+      _accessibilityBridge.reset(
+        new sky::shell::AccessibilityBridge(self.view, _dartServices.get()));
+    }
+  } else {
+    _accessibilityBridge = nullptr;
+  }
 }
 
 #pragma mark - Locale updates

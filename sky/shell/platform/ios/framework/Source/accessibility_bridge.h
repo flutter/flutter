@@ -49,12 +49,12 @@ namespace shell {
 
 class AccessibilityBridge final : public semantics::SemanticsListener {
  public:
-  AccessibilityBridge(FlutterView*, mojo::ServiceProvider*);
+  AccessibilityBridge(UIView*, mojo::ServiceProvider*);
   ~AccessibilityBridge() override;
 
   void UpdateSemanticsTree(mojo::Array<semantics::SemanticsNodePtr>) override;
 
-  FlutterView* view() { return view_; }
+  UIView* view() { return view_; }
   semantics::SemanticsServer* server() { return semantics_server_.get(); }
 
  private:
@@ -65,7 +65,7 @@ class AccessibilityBridge final : public semantics::SemanticsListener {
   void RemoveSemanticObject(SemanticObject* node,
                             std::set<SemanticObject*>* updated_objects);
 
-  FlutterView* view_;
+  UIView* view_;
   semantics::SemanticsServerPtr semantics_server_;
   std::unordered_map<int, SemanticObject*> objects_;
 

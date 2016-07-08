@@ -283,7 +283,7 @@ struct Geometry {
 namespace sky {
 namespace shell {
 
-AccessibilityBridge::AccessibilityBridge(FlutterView* view,
+AccessibilityBridge::AccessibilityBridge(UIView* view,
                                          mojo::ServiceProvider* serviceProvider)
     : view_(view), binding_(this) {
   mojo::ConnectToService(serviceProvider, mojo::GetProxy(&semantics_server_));
@@ -302,6 +302,7 @@ AccessibilityBridge::~AccessibilityBridge() {
 
 void AccessibilityBridge::UpdateSemanticsTree(
     mojo::Array<semantics::SemanticsNodePtr> nodes) {
+  LOG(INFO) << "UpdateSemanticsTree";
   std::set<SemanticObject*> updated_objects;
   std::set<SemanticObject*> removed_objects;
 

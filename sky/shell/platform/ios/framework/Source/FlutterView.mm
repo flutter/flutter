@@ -4,20 +4,11 @@
 
 #include "sky/shell/platform/ios/framework/Source/FlutterView.h"
 
-#include "base/memory/weak_ptr.h"
-#include "sky/shell/platform/ios/framework/Source/accessibility_bridge.h"
-
 @interface FlutterView ()<UIInputViewAudioFeedback>
 
 @end
 
-@implementation FlutterView {
-  std::unique_ptr<sky::shell::AccessibilityBridge> _accessibilityBridge;
-}
-
-- (void)withAccessibility:(mojo::ServiceProvider*)serviceProvider {
-  _accessibilityBridge.reset(new sky::shell::AccessibilityBridge(self, serviceProvider));
-}
+@implementation FlutterView
 
 - (void)layoutSubviews {
   CGFloat screenScale = [UIScreen mainScreen].scale;
