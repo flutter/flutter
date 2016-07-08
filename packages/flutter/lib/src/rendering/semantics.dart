@@ -362,7 +362,6 @@ class SemanticsNode extends AbstractNode {
       return;
     _dirty = true;
     if (attached) {
-      assert(!owner._dirtyNodes.contains(this));
       assert(!owner._detachedNodes.contains(this));
       owner._dirtyNodes.add(this);
     }
@@ -478,7 +477,7 @@ class SemanticsOwner {
 
   final VoidCallback _onLastListenerRemoved;
 
-  final List<SemanticsNode> _dirtyNodes = <SemanticsNode>[];
+  final Set<SemanticsNode> _dirtyNodes = new Set<SemanticsNode>();
   final Map<int, SemanticsNode> _nodes = <int, SemanticsNode>{};
   final Set<SemanticsNode> _detachedNodes = new Set<SemanticsNode>();
 
@@ -526,42 +525,45 @@ class SemanticsOwner {
     _detachedNodes.clear();
     if (_dirtyNodes.isEmpty)
       return;
-    _dirtyNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
-    for (int index = 0; index < _dirtyNodes.length; index += 1) {
-      // we mutate the list as we walk it here, which is why we use an index instead of an iterator
-      SemanticsNode node = _dirtyNodes[index];
-      assert(node._dirty);
-      assert(node.parent == null || !node.parent._shouldMergeAllDescendantsIntoThisNode || node._inheritedMergeAllDescendantsIntoThisNode);
-      if (node._shouldMergeAllDescendantsIntoThisNode) {
-        assert(node.mergeAllDescendantsIntoThisNode || node.parent != null);
-        if (node.mergeAllDescendantsIntoThisNode ||
-            node.parent != null && node.parent._shouldMergeAllDescendantsIntoThisNode) {
-          // if we're merged into our parent, make sure our parent is added to the list
-          if (node.parent != null && node.parent._shouldMergeAllDescendantsIntoThisNode)
-            node.parent._markDirty(); // this can add the node to the dirty list
-          // make sure all the descendants are also marked, so that if one gets marked dirty later we know to walk up then too
-          if (node._children != null) {
-            for (SemanticsNode child in node._children)
-              child._inheritedMergeAllDescendantsIntoThisNode = true; // this can add the node to the dirty list
-          }
-        } else {
-          // we previously were being merged but aren't any more
-          // update our bits and all our descendants'
-          assert(node._inheritedMergeAllDescendantsIntoThisNode);
-          assert(!node.mergeAllDescendantsIntoThisNode);
-          assert(node.parent == null || !node.parent._shouldMergeAllDescendantsIntoThisNode);
-          node._inheritedMergeAllDescendantsIntoThisNode = false;
-          if (node._children != null) {
-            for (SemanticsNode child in node._children)
-              child._inheritedMergeAllDescendantsIntoThisNode = false; // this can add the node to the dirty list
+    List<SemanticsNode> visitedNodes = <SemanticsNode>[];
+    while (_dirtyNodes.isNotEmpty) {
+      List<SemanticsNode> localDirtyNodes = _dirtyNodes.toList();
+      _dirtyNodes.clear();
+      localDirtyNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
+      visitedNodes.addAll(localDirtyNodes);
+      for (SemanticsNode node in localDirtyNodes) {
+        assert(node._dirty);
+        assert(node.parent == null || !node.parent._shouldMergeAllDescendantsIntoThisNode || node._inheritedMergeAllDescendantsIntoThisNode);
+        if (node._shouldMergeAllDescendantsIntoThisNode) {
+          assert(node.mergeAllDescendantsIntoThisNode || node.parent != null);
+          if (node.mergeAllDescendantsIntoThisNode ||
+              node.parent != null && node.parent._shouldMergeAllDescendantsIntoThisNode) {
+            // if we're merged into our parent, make sure our parent is added to the list
+            if (node.parent != null && node.parent._shouldMergeAllDescendantsIntoThisNode)
+              node.parent._markDirty(); // this can add the node to the dirty list
+            // make sure all the descendants are also marked, so that if one gets marked dirty later we know to walk up then too
+            if (node._children != null) {
+              for (SemanticsNode child in node._children)
+                child._inheritedMergeAllDescendantsIntoThisNode = true; // this can add the node to the dirty list
+            }
+          } else {
+            // we previously were being merged but aren't any more
+            // update our bits and all our descendants'
+            assert(node._inheritedMergeAllDescendantsIntoThisNode);
+            assert(!node.mergeAllDescendantsIntoThisNode);
+            assert(node.parent == null || !node.parent._shouldMergeAllDescendantsIntoThisNode);
+            node._inheritedMergeAllDescendantsIntoThisNode = false;
+            if (node._children != null) {
+              for (SemanticsNode child in node._children)
+                child._inheritedMergeAllDescendantsIntoThisNode = false; // this can add the node to the dirty list
+            }
           }
         }
       }
-      assert(_dirtyNodes[index] == node); // make sure nothing went in front of us in the list
     }
-    _dirtyNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
+    visitedNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
     List<mojom.SemanticsNode> updatedNodes = <mojom.SemanticsNode>[];
-    for (SemanticsNode node in _dirtyNodes) {
+    for (SemanticsNode node in visitedNodes) {
       assert(node.parent?._dirty != true); // could be null (no parent) or false (not dirty)
       // The _serialize() method marks the node as not dirty, and
       // recurses through the tree to do a deep serialization of all
