@@ -13,7 +13,7 @@ before_script:
 script:
   - ./dev/bots/test.sh
 after_success:
-  - coveralls-lcov packages/flutter/coverage/lcov.info
+  - coveralls-lcov --repo-token $COVERALLS_TOKEN packages/flutter/coverage/lcov.info
 cache:
   directories:
     - $HOME/.pub-cache
