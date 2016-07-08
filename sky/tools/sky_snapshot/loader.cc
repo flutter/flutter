@@ -64,9 +64,9 @@ class Loader {
   const std::set<std::string>& dependencies() const { return dependencies_; }
 
   Dart_Handle CanonicalizeURL(Dart_Handle library, Dart_Handle url);
-  std::string GetFilePathForURL(std::string url);
-  std::string GetFilePathForPackageURL(std::string url);
-  std::string GetFilePathForFileURL(std::string url);
+  base::FilePath GetFilePathForURL(std::string url);
+  base::FilePath GetFilePathForPackageURL(std::string url);
+  base::FilePath GetFilePathForFileURL(std::string url);
   std::string Fetch(const std::string& url);
   Dart_Handle Import(Dart_Handle url);
   Dart_Handle Source(Dart_Handle library, Dart_Handle url);
@@ -125,50 +125,48 @@ Dart_Handle Loader::CanonicalizeURL(Dart_Handle library, Dart_Handle url) {
   return StringToDart(prefix + normalized_path.AsUTF8Unsafe());
 }
 
-std::string Loader::GetFilePathForURL(std::string url) {
+base::FilePath Loader::GetFilePathForURL(std::string url) {
   if (base::StartsWithASCII(url, "package:", true))
     return GetFilePathForPackageURL(url);
   if (base::StartsWithASCII(url, "file:", true))
     return GetFilePathForFileURL(url);
 
-  return url;
+  return base::FilePath(url);
 }
 
-std::string Loader::GetFilePathForPackageURL(
+base::FilePath Loader::GetFilePathForPackageURL(
     std::string url) {
   DCHECK(base::StartsWithASCII(url, "package:", true));
   base::ReplaceFirstSubstringAfterOffset(&url, 0, "package:", "");
   size_t slash = url.find('/');
   if (slash == std::string::npos)
-    return std::string();
+    return base::FilePath();
   std::string package = url.substr(0, slash);
   std::string library_path = url.substr(slash + 1);
   std::string package_path = packages_map_->Resolve(package);
   if (package_path.empty())
-    return std::string();
+    return base::FilePath();
   if (base::StartsWithASCII(package_path, "file://", true)) {
     base::ReplaceFirstSubstringAfterOffset(&package_path, 0, "file://", "");
-    return package_path + library_path;
+    return base::FilePath(package_path + library_path);
   }
-  auto path = packages_.DirName().Append(package_path).Append(library_path);
-  return SimplifyPath(path).AsUTF8Unsafe();
+  return packages_.DirName().Append(package_path).Append(library_path);
 }
 
-std::string Loader::GetFilePathForFileURL(std::string url) {
+base::FilePath Loader::GetFilePathForFileURL(std::string url) {
   DCHECK(base::StartsWithASCII(url, "file://", true));
   base::ReplaceFirstSubstringAfterOffset(&url, 0, "file://", "");
-  return url;
+  return base::FilePath(url);
 }
 
 std::string Loader::Fetch(const std::string& url) {
-  std::string url_path = GetFilePathForURL(url);
-  base::FilePath path(url_path);
+  base::FilePath path = GetFilePathForURL(url);
   std::string source;
-  if (!base::ReadFileToString(path, &source)) {
+  if (!base::ReadFileToString(base::MakeAbsoluteFilePath(path), &source)) {
     fprintf(stderr, "error: Unable to find Dart library '%s'.\n", url.c_str());
     exit(1);
   }
-  dependencies_.insert(url_path);
+  dependencies_.insert(path.AsUTF8Unsafe());
   return source;
 }
 

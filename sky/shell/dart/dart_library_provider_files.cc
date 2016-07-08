@@ -70,7 +70,8 @@ DartLibraryProviderFiles::~DartLibraryProviderFiles() {
 void DartLibraryProviderFiles::LoadPackagesMap(const base::FilePath& packages) {
   packages_ = packages;
   std::string packages_source;
-  if (!base::ReadFileToString(packages_, &packages_source)) {
+  if (!base::ReadFileToString(base::MakeAbsoluteFilePath(packages_),
+                              &packages_source)) {
     LOG(ERROR) << "error: Unable to load .packages file '"
                << packages_.AsUTF8Unsafe() << "'.";
     exit(1);
@@ -88,8 +89,8 @@ void DartLibraryProviderFiles::GetLibraryAsStream(
     blink::DataPipeConsumerCallback callback) {
   mojo::DataPipe pipe;
   callback.Run(pipe.consumer_handle.Pass());
-  std::string path = GetFilePathForURL(name);
-  base::FilePath source(path);
+  base::FilePath path = GetFilePathForURL(name);
+  base::FilePath source = base::MakeAbsoluteFilePath(path);
   scoped_refptr<base::TaskRunner> runner =
       base::WorkerPool::GetTaskRunner(true);
   mojo::common::CopyFromFile(source, pipe.producer_handle.Pass(), 0,
@@ -118,39 +119,38 @@ Dart_Handle DartLibraryProviderFiles::CanonicalizeURL(Dart_Handle library,
   return blink::StdStringToDart(prefix + normalized_path.AsUTF8Unsafe());
 }
 
-std::string DartLibraryProviderFiles::GetFilePathForURL(std::string url) {
+base::FilePath DartLibraryProviderFiles::GetFilePathForURL(std::string url) {
   if (base::StartsWithASCII(url, "package:", true))
     return GetFilePathForPackageURL(url);
   if (base::StartsWithASCII(url, "file:", true))
     return GetFilePathForFileURL(url);
 
-  return url;
+  return base::FilePath(url);
 }
 
-std::string DartLibraryProviderFiles::GetFilePathForPackageURL(
+base::FilePath DartLibraryProviderFiles::GetFilePathForPackageURL(
     std::string url) {
   DCHECK(base::StartsWithASCII(url, "package:", true));
   base::ReplaceFirstSubstringAfterOffset(&url, 0, "package:", "");
   size_t slash = url.find('/');
   if (slash == std::string::npos)
-    return std::string();
+    return base::FilePath();
   std::string package = url.substr(0, slash);
   std::string library_path = url.substr(slash + 1);
   std::string package_path = packages_map_.Resolve(package);
   if (package_path.empty())
-    return std::string();
+    return base::FilePath();
   if (base::StartsWithASCII(package_path, "file://", true)) {
     base::ReplaceFirstSubstringAfterOffset(&package_path, 0, "file://", "");
-    return package_path + library_path;
+    return base::FilePath(package_path + library_path);
   }
-  auto path = packages_.DirName().Append(package_path).Append(library_path);
-  return SimplifyPath(path).AsUTF8Unsafe();
+  return packages_.DirName().Append(package_path).Append(library_path);
 }
 
-std::string DartLibraryProviderFiles::GetFilePathForFileURL(std::string url) {
+base::FilePath DartLibraryProviderFiles::GetFilePathForFileURL(std::string url) {
   DCHECK(base::StartsWithASCII(url, "file://", true));
   base::ReplaceFirstSubstringAfterOffset(&url, 0, "file://", "");
-  return url;
+  return base::FilePath(url);
 }
 
 }  // namespace shell
