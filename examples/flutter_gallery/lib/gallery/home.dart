@@ -58,6 +58,7 @@ class GalleryHomeState extends State<GalleryHome> {
     // the flexible app bar. As it's scrolled out of the way, the app bar's
     // height will shrink.
     final double statusBarHeight = (MediaQuery.of(context)?.padding ?? EdgeInsets.zero).top;
+    print("statusBarHeight=$statusBarHeight");
     _listItems.add(new SizedBox(height: _kFlexibleSpaceMaxHeight + statusBarHeight));
 
     final ThemeData themeData = Theme.of(context);
@@ -107,11 +108,7 @@ class GalleryHomeState extends State<GalleryHome> {
         )
       ),
       appBarBehavior: AppBarBehavior.under,
-      body: new LazyBlock(
-        delegate: new LazyBlockBuilder(
-          builder: (BuildContext context, int index) => index < _listItems.length ? _listItems[index] : null
-        )
-      )
+      body: new LazyBlock(delegate: new LazyBlockChildren(children: _listItems))
     );
   }
 }
