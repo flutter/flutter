@@ -123,8 +123,12 @@ class _TooltipState extends State<Tooltip> {
   }
 
   void ensureTooltipVisible() {
-    if (_entry != null)
+    if (_entry != null) {
+      _timer?.cancel();
+      _timer = null;
+      _controller.forward();
       return;  // Already visible.
+    }
     RenderBox box = context.findRenderObject();
     Point target = box.localToGlobal(box.size.center(Point.origin));
     _entry = new OverlayEntry(builder: (BuildContext context) {
@@ -158,7 +162,7 @@ class _TooltipState extends State<Tooltip> {
   void _handlePointerEvent(PointerEvent event) {
     assert(_entry != null);
     if (event is PointerUpEvent || event is PointerCancelEvent)
-      _timer = new Timer(_kShowDuration, _controller.reverse);
+      _timer ??= new Timer(_kShowDuration, _controller.reverse);
     else if (event is PointerDownEvent)
       _controller.reverse();
   }
@@ -174,6 +178,7 @@ class _TooltipState extends State<Tooltip> {
   void dispose() {
     if (_entry != null)
       _removeEntry();
+    _controller.stop();
     super.dispose();
   }
 
