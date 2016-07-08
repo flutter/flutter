@@ -71,45 +71,4 @@ void main() {
     await tester.tap(find.byKey(switchKey));
     expect(value, isTrue);
   });
-
-  testWidgets('Switch listens to the decorations it paints', (WidgetTester tester) async {
-    TestDecoration activeDecoration = new TestDecoration();
-    TestDecoration inactiveDecoration = new TestDecoration();
-
-    Widget build(bool active, TestDecoration activeDecoration, TestDecoration inactiveDecoration) {
-      return new Material(
-        child: new Center(
-          child: new Switch(
-            value: active,
-            onChanged: null,
-            activeThumbDecoration: activeDecoration,
-            inactiveThumbDecoration: inactiveDecoration
-          )
-        )
-      );
-    }
-
-    // no build yet
-    expect(activeDecoration.listeners, 0);
-    expect(inactiveDecoration.listeners, 0);
-
-    await tester.pumpWidget(build(false, activeDecoration, inactiveDecoration));
-    expect(activeDecoration.listeners, 0);
-    expect(inactiveDecoration.listeners, 1);
-
-    await tester.pumpWidget(build(true, activeDecoration, inactiveDecoration));
-    // started the animation, but we're on frame 0
-    expect(activeDecoration.listeners, 0);
-    expect(inactiveDecoration.listeners, 2);
-
-    await tester.pump(const Duration(milliseconds: 30)); // slightly into the animation
-    // we're painting some lerped decoration that doesn't exactly match either
-    expect(activeDecoration.listeners, 0);
-    expect(inactiveDecoration.listeners, 2);
-
-    await tester.pump(const Duration(seconds: 1)); // ended animation
-    expect(activeDecoration.listeners, 1);
-    expect(inactiveDecoration.listeners, 2);
-
-  });
 }
