@@ -1367,4 +1367,29 @@ TEST_F(FontCollectionItemizeTest, itemize_PrivateUseArea) {
     EXPECT_EQ(kNoGlyphFont, getFontPath(runs[0]));
 }
 
+TEST_F(FontCollectionItemizeTest, itemize_genderBalancedEmoji) {
+    MinikinAutoUnref<FontCollection> collection(getFontCollection(kTestFontDir, kEmojiXmlFile));
+    std::vector<FontCollection::Run> runs;
+
+    const FontStyle kDefaultFontStyle;
+
+    itemize(collection.get(), "U+1F469 U+200D U+1F373", kDefaultFontStyle, &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(5, runs[0].end);
+    EXPECT_EQ(kColorEmojiFont, getFontPath(runs[0]));
+
+    itemize(collection.get(), "U+1F469 U+200D U+2695 U+FE0F", kDefaultFontStyle, &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(5, runs[0].end);
+    EXPECT_EQ(kColorEmojiFont, getFontPath(runs[0]));
+
+    itemize(collection.get(), "U+1F469 U+200D U+2695", kDefaultFontStyle, &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(4, runs[0].end);
+    EXPECT_EQ(kColorEmojiFont, getFontPath(runs[0]));
+}
+
 }  // namespace minikin
