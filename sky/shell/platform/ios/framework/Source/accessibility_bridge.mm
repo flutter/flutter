@@ -315,8 +315,13 @@ void AccessibilityBridge::UpdateSemanticsTree(
     }
   }
 
-  if (!view_.accessibilityElements) {
-    view_.accessibilityElements = @[ objects_[kRootNodeId] ];
+  SemanticObject* root = objects_[kRootNodeId];
+  if (root) {
+    if (!view_.accessibilityElements) {
+      view_.accessibilityElements = @[ root ];
+    }
+  } else {
+    view_.accessibilityElements = nil;
   }
   UIAccessibilityPostNotification(
       UIAccessibilityLayoutChangedNotification, nil);
