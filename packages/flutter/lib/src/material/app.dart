@@ -175,6 +175,7 @@ class _MaterialAppState extends State<MaterialApp> {
     Widget result = new AnimatedTheme(
       data: theme,
       child: new WidgetsApp(
+        key: new GlobalObjectKey(this),
         title: config.title,
         textStyle: _errorTextStyle,
         color: theme?.primaryColor ?? Colors.blue[500], // blue[500] is the primary color of the default theme
