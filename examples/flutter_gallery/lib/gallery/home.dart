@@ -48,10 +48,38 @@ class GalleryHome extends StatefulWidget {
 
 class GalleryHomeState extends State<GalleryHome> {
   final Key _homeKey = new ValueKey<String>("Gallery Home");
+  final List<Widget> _listItems = <Widget>[];
+
+  @override
+  void initState() {
+    super.initState();
+
+    final ThemeData themeData = Theme.of(context);
+    final TextStyle headerStyle = themeData.textTheme.body2.copyWith(color: themeData.primaryColor);
+    String category;
+    for (GalleryItem galleryItem in kAllGalleryItems) {
+      if (category != galleryItem.category) {
+        if (category != null)
+          _listItems.add(new Divider());
+        _listItems.add(
+          new Container(
+            height: 48.0,
+            padding: const EdgeInsets.only(left: 16.0),
+            child: new Align(
+              alignment: FractionalOffset.centerLeft,
+              child: new Text(galleryItem.category, style: headerStyle)
+            )
+          )
+        );
+        category = galleryItem.category;
+      }
+      _listItems.add(galleryItem);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final double statusBarHight = (MediaQuery.of(context)?.padding ?? EdgeInsets.zero).top;
+    final double _statusBarHight = (MediaQuery.of(context)?.padding ?? EdgeInsets.zero).top;
 
     return new Scaffold(
       key: _homeKey,
@@ -75,26 +103,9 @@ class GalleryHomeState extends State<GalleryHome> {
         )
       ),
       appBarBehavior: AppBarBehavior.under,
-      body: new TwoLevelList(
-        padding: new EdgeInsets.only(top: _kFlexibleSpaceMaxHeight + statusBarHight),
-        type: MaterialListType.oneLine,
-        children: <Widget>[
-          new TwoLevelSublist(
-            leading: new Icon(Icons.star),
-            title: new Text('Demos'),
-            children: _demoItems
-          ),
-          new TwoLevelSublist(
-            leading: new Icon(Icons.extension),
-            title: new Text('Components'),
-            children: _componentItems
-          ),
-          new TwoLevelSublist(
-            leading: new Icon(Icons.color_lens),
-            title: new Text('Style'),
-            children: _styleItems
-          )
-        ]
+      body: new Block(
+        padding: new EdgeInsets.only(top: _kFlexibleSpaceMaxHeight + _statusBarHight),
+        children: _listItems
       )
     );
   }
