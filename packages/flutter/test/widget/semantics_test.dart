@@ -50,4 +50,57 @@ void main() {
     client.updates.clear();
     client.dispose();
   });
+
+  testWidgets('Detach and reattach assert', (WidgetTester tester) async {
+    TestSemanticsClient client = new TestSemanticsClient(tester.binding.pipelineOwner);
+    GlobalKey key = new GlobalKey();
+
+    await tester.pumpWidget(
+      new Container(
+        child: new Semantics(
+          label: 'test1',
+          child: new Semantics(
+            key: key,
+            container: true,
+            label: 'test2a',
+            child: new Container()
+          )
+        )
+      )
+    );
+
+    expect(client.updates.length, equals(1));
+    expect(client.updates[0].strings.label, equals('test1'));
+    expect(client.updates[0].children.length, equals(1));
+    expect(client.updates[0].children[0].strings.label, equals('test2a'));
+    client.updates.clear();
+
+    await tester.pumpWidget(
+      new Container(
+        child: new Semantics(
+          label: 'test1',
+          child: new Semantics(
+            container: true,
+            label: 'middle',
+            child: new Semantics(
+              key: key,
+              container: true,
+              label: 'test2b',
+              child: new Container()
+            )
+          )
+        )
+      )
+    );
+
+    expect(client.updates.length, equals(1));
+    expect(client.updates[0].strings.label, equals('test1'));
+    expect(client.updates[0].children.length, equals(1));
+    expect(client.updates[0].children[0].strings.label, equals('middle'));
+    expect(client.updates[0].children[0].children.length, equals(1));
+    expect(client.updates[0].children[0].children[0].strings.label, equals('test2b'));
+    expect(client.updates[0].children[0].children[0].children.length, equals(0));
+
+    client.dispose();
+  });
 }
