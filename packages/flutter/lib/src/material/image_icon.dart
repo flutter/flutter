@@ -61,9 +61,12 @@ class ImageIcon extends StatelessWidget {
       return new SizedBox(width: iconSize, height: iconSize);
 
     final double iconOpacity = iconTheme.opacity;
-    final Color iconColor = color ?? iconTheme.color;
+    Color iconColor = color ?? iconTheme.color;
 
-    Widget result = new Image(
+    if (iconOpacity != null && iconOpacity != 1.0)
+      iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
+
+    return new Image(
       image: image,
       width: iconSize,
       height: iconSize,
@@ -71,15 +74,6 @@ class ImageIcon extends StatelessWidget {
       fit: ImageFit.scaleDown,
       alignment: FractionalOffset.center
     );
-
-    if (iconOpacity != 1.0) {
-      result = new Opacity(
-        opacity: iconOpacity,
-        child: result
-      );
-    }
-
-    return result;
   }
 
   @override
