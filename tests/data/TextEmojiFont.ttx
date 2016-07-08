@@ -18,16 +18,7 @@
   <GlyphOrder>
     <!-- The 'id' attribute is only for humans; it is ignored when parsed. -->
     <GlyphID id="0" name=".notdef"/>
-    <GlyphID id="1" name="Emoji1"/>
-    <GlyphID id="2" name="Emoji2"/>
-    <GlyphID id="3" name="Emoji3"/>
-    <GlyphID id="4" name="Emoji4"/>
-    <GlyphID id="5" name="Emoji5"/>
-    <GlyphID id="6" name="Emoji6"/>
-    <GlyphID id="7" name="Emoji7"/>
-    <GlyphID id="8" name="Emoji8"/>
-    <GlyphID id="9" name="Emoji9"/>
-    <GlyphID id="10" name="WHITE_UP_POINTING_INDEX" />
+    <GlyphID id="1" name="defaultGlyph"/>
   </GlyphOrder>
 
   <head>
@@ -145,40 +136,39 @@
 
   <hmtx>
     <mtx name=".notdef" width="500" lsb="93"/>
-    <mtx name="Emoji1" width="500" lsb="93"/>
-    <mtx name="Emoji2" width="500" lsb="93"/>
-    <mtx name="Emoji3" width="500" lsb="93"/>
-    <mtx name="Emoji4" width="500" lsb="93"/>
-    <mtx name="Emoji5" width="500" lsb="93"/>
-    <mtx name="Emoji6" width="500" lsb="93"/>
-    <mtx name="Emoji7" width="500" lsb="93"/>
-    <mtx name="Emoji8" width="500" lsb="93"/>
-    <mtx name="Emoji9" width="500" lsb="93"/>
-    <mtx name="WHITE_UP_POINTING_INDEX" width="500" lsb="93"/>
+    <mtx name="defaultGlyph" width="500" lsb="93"/>
   </hmtx>
 
   <cmap>
     <tableVersion version="0"/>
     <cmap_format_4 platformID="3" platEncID="10" language="0">
       <!-- TODO: Clean up and write the target test name. -->
-      <map code="0x00A9" name="Emoji1" /> <!-- Text Default -->
-      <map code="0x203C" name="Emoji3" /> <!-- Text Default -->
-      <map code="0x231A" name="Emoji5" /> <!-- Emoji Default -->
-      <map code="0x23E9" name="Emoji7" /> <!-- Emoji Default -->
-      <map code="0x26FA" name="Emoji9" /> <!-- U+26FA U+FE0E is in ColorTextMixedEmojiFont.ttf -->
-      <map code="0x261D" name="WHITE_UP_POINTING_INDEX" />
+      <map code="0x00A9" name="defaultGlyph" /> <!-- Text Default -->
+      <map code="0x203C" name="defaultGlyph" /> <!-- Text Default -->
+      <map code="0x231A" name="defaultGlyph" /> <!-- Emoji Default -->
+      <map code="0x23E9" name="defaultGlyph" /> <!-- Emoji Default -->
+      <map code="0x26FA" name="defaultGlyph" /> <!-- U+26FA U+FE0E is in ColorTextMixedEmojiFont.ttf -->
+      <map code="0x261D" name="defaultGlyph" />
 
       <!-- For FontCollectionTest.hasVariationSelectorTest_emoji -->
-      <map code="0x2623" name="Emoji1" />
-      <map code="0x2626" name="Emoji1" />
-      <map code="0x262A" name="Emoji1" />
-      <map code="0x262E" name="Emoji1" />
+      <map code="0x2623" name="defaultGlyph" />
+      <map code="0x2626" name="defaultGlyph" />
+      <map code="0x262A" name="defaultGlyph" />
+      <map code="0x262E" name="defaultGlyph" />
       <!-- U+262F is reserved for this test. -->
+
+      <!--For FontCollectionItemizeTest,.itemize_genderBalancedEmoji -->
+      <!-- U+1F469 is reserved. -->
+      <!-- U+1F373 is reserved. -->
+      <map code="0x2695" name="defaultGlyph" />
     </cmap_format_4>
     <cmap_format_14 format="14" platformID="0" platEncID="5" length="40" numVarSelectorRecords="2">
       <!-- For FontCollectionTest.hasVariationSelectorTest_emoji -->
       <map uvs="0xFE0E" uv="0x2623" name="None" />
       <map uvs="0xFE0E" uv="0x2626" name="None" />
+
+      <!--For FontCollectionItemizeTest,.itemize_genderBalancedEmoji -->
+      <map uvs="0xFE0E" uv="0x2695" name="None" />
     </cmap_format_14>
   </cmap>
 
@@ -195,34 +185,7 @@
       <contour></contour><instructions><assembly></assembly></instructions>
     </TTGlyph>
 
-    <TTGlyph name="Emoji1" xMin="0" yMin="0" xMax="0" yMax="0">
-      <contour></contour><instructions><assembly></assembly></instructions>
-    </TTGlyph>
-    <TTGlyph name="Emoji2" xMin="0" yMin="0" xMax="0" yMax="0">
-      <contour></contour><instructions><assembly></assembly></instructions>
-    </TTGlyph>
-    <TTGlyph name="Emoji3" xMin="0" yMin="0" xMax="0" yMax="0">
-      <contour></contour><instructions><assembly></assembly></instructions>
-    </TTGlyph>
-    <TTGlyph name="Emoji4" xMin="0" yMin="0" xMax="0" yMax="0">
-      <contour></contour><instructions><assembly></assembly></instructions>
-    </TTGlyph>
-    <TTGlyph name="Emoji5" xMin="0" yMin="0" xMax="0" yMax="0">
-      <contour></contour><instructions><assembly></assembly></instructions>
-    </TTGlyph>
-    <TTGlyph name="Emoji6" xMin="0" yMin="0" xMax="0" yMax="0">
-      <contour></contour><instructions><assembly></assembly></instructions>
-    </TTGlyph>
-    <TTGlyph name="Emoji7" xMin="0" yMin="0" xMax="0" yMax="0">
-      <contour></contour><instructions><assembly></assembly></instructions>
-    </TTGlyph>
-    <TTGlyph name="Emoji8" xMin="0" yMin="0" xMax="0" yMax="0">
-      <contour></contour><instructions><assembly></assembly></instructions>
-    </TTGlyph>
-    <TTGlyph name="Emoji9" xMin="0" yMin="0" xMax="0" yMax="0">
-      <contour></contour><instructions><assembly></assembly></instructions>
-    </TTGlyph>
-    <TTGlyph name="WHITE_UP_POINTING_INDEX" xMin="0" yMin="0" xMax="0" yMax="0">
+    <TTGlyph name="defaultGlyph" xMin="0" yMin="0" xMax="0" yMax="0">
       <contour></contour><instructions><assembly></assembly></instructions>
     </TTGlyph>
   </glyf>
