@@ -66,4 +66,41 @@ void main() {
     expect(getY(bottomKey) - getY(sublistKey), greaterThan(getHeight(topKey)));
     expect(getY(bottomKey) - getY(sublistKey), greaterThan(getHeight(bottomKey)));
   });
+
+  testWidgets('onOpenChanged callback', (WidgetTester tester) async {
+    bool didChangeOpen;
+
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (_) {
+        return new Material(
+          child: new Viewport(
+            child: new TwoLevelList(
+              children: <Widget>[
+                new TwoLevelSublist(
+                  title: new Text('Sublist'),
+                  onOpenChanged: (bool opened) {
+                    didChangeOpen = opened;
+                  },
+                  children: <Widget>[
+                    new TwoLevelListItem(title: new Text('0')),
+                    new TwoLevelListItem(title: new Text('1'))
+                  ]
+                ),
+              ]
+            )
+          )
+        );
+      }
+    };
+
+    await tester.pumpWidget(new MaterialApp(routes: routes));
+
+    expect(didChangeOpen, isNull);
+    await tester.tap(find.text('Sublist'));
+    expect(didChangeOpen, isTrue);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('Sublist'));
+    expect(didChangeOpen, isFalse);
+  });
 }
