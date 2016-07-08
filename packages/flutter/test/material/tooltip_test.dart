@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/test_semantics_client.dart';
 
@@ -391,6 +392,43 @@ void main() {
     expect(tip.localToGlobal(tip.size.topLeft(Point.origin)).y, equals(310.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).x, equals(790.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).y, equals(320.0));
+  });
+
+  testWidgets('Tooltip stays around', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Center(
+          child: new Tooltip(
+            message: 'TIP',
+            child: new Container(
+              width: 100.0,
+              height: 100.0,
+              decoration: new BoxDecoration(
+                backgroundColor: Colors.green[500]
+              )
+            )
+          )
+        )
+      )
+    );
+
+    Finder tooltip = find.byType(Tooltip);
+    TestGesture gesture = await tester.startGesture(tester.getCenter(tooltip));
+    await tester.pump(kLongPressTimeout);
+    await tester.pump(const Duration(milliseconds: 10));
+    await gesture.up();
+    expect(find.text('TIP'), findsOneWidget);
+    await tester.tap(tooltip);
+    await tester.pump(const Duration(milliseconds: 10));
+    gesture = await tester.startGesture(tester.getCenter(tooltip));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('TIP'), findsNothing);
+    await tester.pump(kLongPressTimeout);
+    expect(find.text('TIP'), findsOneWidget);
+    await tester.pump(kLongPressTimeout);
+    expect(find.text('TIP'), findsOneWidget);
+    gesture.up();
   });
 
   testWidgets('Does tooltip contribute semantics', (WidgetTester tester) async {
