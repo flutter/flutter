@@ -74,14 +74,6 @@ void main() {
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame
 
-    // Expand the demo category submenus.
-    for (String category in demoCategories.reversed) {
-      await tester.tap(find.text(category));
-      await tester.pump();
-      await tester.pump(
-          const Duration(seconds: 1)); // Wait until the menu has expanded.
-    }
-
     final List<double> scrollDeltas = new List<double>();
     double previousY = tester.getTopRight(find.text(demoCategories[0])).y;
     for (String routeName in routeNames) {
@@ -94,8 +86,7 @@ void main() {
     for (int i = 0; i < routeNames.length; i += 1) {
       final String routeName = routeNames[i];
       await smokeDemo(tester, routeName);
-      await tester.scroll(findGalleryItemByRouteName(tester, routeName),
-          new Offset(0.0, scrollDeltas[i]));
+      await tester.scroll(findGalleryItemByRouteName(tester, routeName), new Offset(0.0, scrollDeltas[i]));
       await tester.pump();
     }
 

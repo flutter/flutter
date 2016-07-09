@@ -107,7 +107,7 @@ class GalleryHomeState extends State<GalleryHome> {
         )
       ),
       appBarBehavior: AppBarBehavior.under,
-      body: new LazyBlock(delegate: new LazyBlockChildren(children: _listItems))
+      body: new Block(children: _listItems)
     );
   }
 }
