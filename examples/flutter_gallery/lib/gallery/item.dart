@@ -92,7 +92,7 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
   ),
   new GalleryItem(
     title: 'Data tables',
-    subtitle: 'Full-freatured grid',
+    subtitle: 'Full-featured grid',
     routeName: DataTableDemo.routeName,
     buildRoute: (BuildContext context) => new DataTableDemo()
   ),
