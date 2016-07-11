@@ -321,14 +321,14 @@ class RefreshIndicatorState extends State<RefreshIndicator> {
   /// callback is running, it quietly does nothing.
   ///
   /// See also:
-  /// [GlobalKey] (creating the RefreshIndicator with a
-  /// [GlobalKey<RefreshIndicatorState>] will make it possible to refer to
-  /// the [RefreshIndicatorState] later)
+  ///
+  /// * [GlobalKey] (creating the RefreshIndicator with a [GlobalKey<RefreshIndicatorState>]
+  ///   will make it possible to refer to the [RefreshIndicatorState] later)
   Future<Null> show() async {
     if (_mode != _RefreshIndicatorMode.refresh) {
       _sizeController.value = 0.0;
       _scaleController.value = 0.0;
-      _show();
+      await _show();
     }
   }
 
