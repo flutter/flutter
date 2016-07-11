@@ -147,7 +147,7 @@
       <map code="0x203C" name="defaultGlyph" /> <!-- Text Default -->
       <map code="0x231B" name="defaultGlyph" /> <!-- Emoji Default -->
       <map code="0x23E9" name="defaultGlyph" /> <!-- Emoji Default -->
-      <map code="0x26F9" name="defaultGlyph" /> <!-- U+26F9 U+FE0F is in ColorTextMixedEmojiFont.ttf -->
+      <map code="0x26F8" name="defaultGlyph" /> <!-- U+26F8 U+FE0F is in ColorTextMixedEmojiFont.ttf -->
       <map code="0x261D" name="defaultGlyph" />
       <map code="0x1F3FD" name="defaultGlyph" />
 
@@ -158,10 +158,11 @@
       <map code="0x262E" name="defaultGlyph" />
       <map code="0x262F" name="defaultGlyph" />
 
-      <!--For FontCollectionItemizeTest,.itemize_genderBalancedEmoji -->
+      <!--For FontCollectionItemizeTest.itemize_genderBalancedEmoji -->
       <map code="0x1F469" name="defaultGlyph" />
       <map code="0x1F373" name="defaultGlyph" />
       <map code="0x200D" name="defaultGlyph" />
+      <map code="0x26F9" name="defaultGlyph" />
       <map code="0x2695" name="defaultGlyph" />
 
       <!-- U+2640, U+2642 are reserved for FontCollectionTest.newEmojiTest -->

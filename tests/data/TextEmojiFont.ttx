@@ -165,6 +165,7 @@
       <!-- For FontCollectionTest.newEmojiTest -->
       <map code="0x2640" name="defaultGlyph" />
       <map code="0x2642" name="defaultGlyph" />
+      <map code="0x26F9" name="defaultGlyph" />
 
     </cmap_format_4>
     <cmap_format_14 format="14" platformID="0" platEncID="5" length="40" numVarSelectorRecords="2">
