@@ -36,5 +36,5 @@ fi
 
 if [[ "$TRAVIS" = "true" && "$TRAVIS_BRANCH" = "master" ]]; then
   cd dev/docs
-  firebase deploy --project docs-flutter-io --token "$FIREBASE_TOKEN_API_DOCS"
+  firebase deploy --project docs-flutter-io
 fi
