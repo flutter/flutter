@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex
+set -e
 
 # Install dartdoc.
 pub global activate dartdoc
@@ -34,7 +34,9 @@ fi
 
 # Upload new API docs when on Travis and branch is master
 
-if [[ "$TRAVIS" = "true" && "$TRAVIS_BRANCH" = "master" ]]; then
-  cd dev/docs
-  firebase deploy --project docs-flutter-io
+if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+  if [ "$TRAVIS_BRANCH" = "master" ]; then
+    cd dev/docs
+    firebase deploy --project docs-flutter-io
+  fi
 fi
