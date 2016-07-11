@@ -87,7 +87,10 @@ class OrderItem extends StatelessWidget {
                           items: <int>[0, 1, 2, 3, 4, 5].map((int value) {
                             return new DropDownMenuItem<int>(
                               value: value,
-                              child: new Text('Quantity $value', style: theme.quantityMenuStyle)
+                              child: new Padding(
+                                padding: const EdgeInsets.only(left: 8.0),
+                                child: new Text('Quantity $value', style: theme.quantityMenuStyle)
+                              )
                             );
                           }).toList(),
                           value: quantity,
