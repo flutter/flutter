@@ -121,10 +121,12 @@ class RefreshIndicator extends StatefulWidget {
   final RefreshIndicatorLocation location;
 
   @override
-  _RefreshIndicatorState createState() => new _RefreshIndicatorState();
+  RefreshIndicatorState createState() => new RefreshIndicatorState();
 }
 
-class _RefreshIndicatorState extends State<RefreshIndicator> {
+/// Contains the state for a [RefreshIndicator]. This class can be used to
+/// programmatically show the refresh indicator, see the [show] method.
+class RefreshIndicatorState extends State<RefreshIndicator> {
   final AnimationController _sizeController = new AnimationController();
   final AnimationController _scaleController = new AnimationController();
   Animation<double> _sizeFactor;
@@ -280,34 +282,54 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
     }
   }
 
-  Future<Null> _doHandlePointerUp(PointerUpEvent event) async {
-    if (_mode == _RefreshIndicatorMode.armed) {
-      _mode = _RefreshIndicatorMode.snap;
-      await _sizeController.animateTo(1.0 / _kDragSizeFactorLimit, duration: _kIndicatorSnapDuration);
-      if (mounted && _mode == _RefreshIndicatorMode.snap) {
-        setState(() {
-          _mode = _RefreshIndicatorMode.refresh; // Show the indeterminate progress indicator.
-        });
+  Future<Null> _show() async {
+    _mode = _RefreshIndicatorMode.snap;
+    await _sizeController.animateTo(1.0 / _kDragSizeFactorLimit, duration: _kIndicatorSnapDuration);
+    if (mounted && _mode == _RefreshIndicatorMode.snap) {
+      assert(config.refresh != null);
+      setState(() {
+        _mode = _RefreshIndicatorMode.refresh; // Show the indeterminate progress indicator.
+      });
 
-        // Only one refresh callback is allowed to run at a time. If the user
-        // attempts to start a refresh while one is still running ("pending") we
-        // just continue to wait on the pending refresh.
-        if (_pendingRefreshFuture == null)
-          _pendingRefreshFuture = config.refresh();
-        await _pendingRefreshFuture;
-        bool completed = _pendingRefreshFuture != null;
-        _pendingRefreshFuture = null;
+      // Only one refresh callback is allowed to run at a time. If the user
+      // attempts to start a refresh while one is still running ("pending") we
+      // just continue to wait on the pending refresh.
+      if (_pendingRefreshFuture == null)
+        _pendingRefreshFuture = config.refresh();
+      await _pendingRefreshFuture;
+      bool completed = _pendingRefreshFuture != null;
+      _pendingRefreshFuture = null;
 
-        if (mounted && completed && _mode == _RefreshIndicatorMode.refresh)
-          _dismiss(_DismissTransition.slide);
-      }
-    } else if (_mode == _RefreshIndicatorMode.drag) {
-      _dismiss(_DismissTransition.shrink);
+      if (mounted && completed && _mode == _RefreshIndicatorMode.refresh)
+        _dismiss(_DismissTransition.slide);
     }
+  }
+
+  Future<Null> _doHandlePointerUp(PointerUpEvent event) async {
+    if (_mode == _RefreshIndicatorMode.armed)
+      _show();
+    else if (_mode == _RefreshIndicatorMode.drag)
+      _dismiss(_DismissTransition.shrink);
   }
 
   void _handlePointerUp(PointerEvent event) {
     _doHandlePointerUp(event);
+  }
+
+  /// Show the refresh indicator and run the refresh callback as if it had
+  /// been started interactively. If this method is called while the refresh
+  /// callback is running, it quietly does nothing.
+  ///
+  /// See also:
+  /// [GlobalKey] (creating the RefreshIndicator with a
+  /// [GlobalKey<RefreshIndicatorState>] will make it possible to refer to
+  /// the [RefreshIndicatorState] later)
+  Future<Null> show() async {
+    if (_mode != _RefreshIndicatorMode.refresh) {
+      _sizeController.value = 0.0;
+      _scaleController.value = 0.0;
+      _show();
+    }
   }
 
   @override

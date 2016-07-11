@@ -18,6 +18,8 @@ class OverscrollDemo extends StatefulWidget {
 }
 
 class OverscrollDemoState extends State<OverscrollDemo> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = new GlobalKey<RefreshIndicatorState>();
   static final GlobalKey<ScrollableState> _scrollableKey = new GlobalKey<ScrollableState>();
   static final List<String> _items = <String>[
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'
@@ -28,9 +30,18 @@ class OverscrollDemoState extends State<OverscrollDemo> {
   Future<Null> refresh() {
     Completer<Null> completer = new Completer<Null>();
     new Timer(new Duration(seconds: 3), () { completer.complete(null); });
-    return completer.future;
+    return completer.future.then((_) {
+      _scaffoldKey.currentState.showSnackBar(new SnackBar(
+       content: new Text("Refresh complete"),
+       action: new SnackBarAction(
+         label: 'RETRY',
+         onPressed: () {
+           _refreshIndicatorKey.currentState.show();
+         }
+       )
+      ));
+    });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +79,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
         break;
       case IndicatorType.refresh:
         body = new RefreshIndicator(
+          key: _refreshIndicatorKey,
           child: body,
           refresh: refresh,
           scrollableKey: _scrollableKey,
@@ -77,6 +89,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
     }
 
     return new Scaffold(
+      key: _scaffoldKey,
       appBar: new AppBar(
         title: new Text('$indicatorTypeText'),
         actions: <Widget>[
