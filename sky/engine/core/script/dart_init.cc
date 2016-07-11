@@ -171,8 +171,12 @@ Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
     if (settings.enable_observatory) {
       std::string ip = "127.0.0.1";
       const intptr_t port = settings.observatory_port;
+      const bool disable_websocket_origin_check = false;
       const bool service_isolate_booted = DartServiceIsolate::Startup(
-          ip, port, DartLibraryTagHandler, IsRunningPrecompiledCode(), error);
+          ip, port, DartLibraryTagHandler,
+          IsRunningPrecompiledCode(),
+          disable_websocket_origin_check,
+          error);
       CHECK(service_isolate_booted) << error;
     }
 

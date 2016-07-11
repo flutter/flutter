@@ -82,6 +82,7 @@ bool DartServiceIsolate::Startup(std::string server_ip,
                                  intptr_t server_port,
                                  Dart_LibraryTagHandler embedder_tag_handler,
                                  bool running_precompiled,
+                                 bool disable_origin_check,
                                  char** error) {
   Dart_Isolate isolate = Dart_CurrentIsolate();
   CHECK(isolate);
@@ -166,6 +167,10 @@ bool DartServiceIsolate::Startup(std::string server_ip,
   result = Dart_SetField(library,
                          Dart_NewStringFromCString("_autoStart"),
                          Dart_NewBoolean(auto_start));
+  SHUTDOWN_ON_ERROR(result);
+  result = Dart_SetField(library,
+                         Dart_NewStringFromCString("_originCheckDisabled"),
+                         Dart_NewBoolean(disable_origin_check));
   SHUTDOWN_ON_ERROR(result);
   return true;
 }

@@ -19,6 +19,7 @@ class DartServiceIsolate {
                       intptr_t server_port,
                       Dart_LibraryTagHandler embedder_tag_handler,
                       bool running_precompiled,
+                      bool disable_origin_check,
                       char** error);
 
   static int GetObservatoryPort();
