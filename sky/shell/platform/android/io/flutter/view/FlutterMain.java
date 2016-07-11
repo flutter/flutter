@@ -61,7 +61,10 @@ import org.domokit.vsync.VSyncProviderImpl;
 public class FlutterMain {
     private static final String TAG = "FlutterMain";
 
-    public static final String APP_BUNDLE = "app.flx";
+    // Resource names that can be used for the the FLX application bundle.
+    public static final String[] APP_BUNDLE_RESOURCES = {
+        "app.flx", "app_release.flx"
+    };
 
     // Resource names used for components of the precompiled snapshot.
     private static final String AOT_INSTR = "snapshot_aot_instr";
@@ -78,7 +81,8 @@ public class FlutterMain {
 
     private static final List<String> SKY_RESOURCES = new ArrayList<String>();
     static {
-        Collections.addAll(SKY_RESOURCES, "icudtl.dat", APP_BUNDLE, MANIFEST);
+        Collections.addAll(SKY_RESOURCES, "icudtl.dat", MANIFEST);
+        Collections.addAll(SKY_RESOURCES, APP_BUNDLE_RESOURCES);
         Collections.addAll(SKY_RESOURCES, AOT_RESOURCES);
     }
 
@@ -307,5 +311,15 @@ public class FlutterMain {
 
     public static boolean isRunningPrecompiledCode() {
         return sIsPrecompiled;
+    }
+
+    public static String findAppBundlePath(Context applicationContext) {
+        String dataDirectory = PathUtils.getDataDirectory(applicationContext);
+        for (String appBundleResource : APP_BUNDLE_RESOURCES) {
+            File appBundle = new File(dataDirectory, appBundleResource);
+            if (appBundle.exists())
+                return appBundle.getPath();
+        }
+        return null;
     }
 }
