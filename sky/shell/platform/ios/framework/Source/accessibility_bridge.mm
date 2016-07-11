@@ -302,7 +302,6 @@ AccessibilityBridge::~AccessibilityBridge() {
 
 void AccessibilityBridge::UpdateSemanticsTree(
     mojo::Array<semantics::SemanticsNodePtr> nodes) {
-  LOG(INFO) << "UpdateSemanticsTree";
   std::set<SemanticObject*> updated_objects;
   std::set<SemanticObject*> removed_objects;
 
