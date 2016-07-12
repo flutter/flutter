@@ -116,7 +116,7 @@ class Template {
       // Step 4: This file does not end in .tmpl but is in a directory that
       //         does. Directly copy the file to the destination.
 
-      finalDestinationFile.writeAsBytesSync(sourceFile.readAsBytesSync());
+      sourceFile.copySync(finalDestinationFile.path);
     });
   }
 }
