@@ -16,5 +16,5 @@ import org.chromium.mojo.system.MessagePipeHandle;
  * clients.
  **/
 interface ServiceFactory {
-    Binding connectToService(Context context, Core core, MessagePipeHandle pipe);
+    Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe);
 }

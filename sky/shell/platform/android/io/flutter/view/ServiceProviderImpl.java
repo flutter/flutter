@@ -23,15 +23,15 @@ class ServiceProviderImpl implements ServiceProvider {
     private static final String TAG = "ServiceProviderImpl";
 
     private Core mCore;
-    private Context mContext;
+    private FlutterView mView;
     private ServiceRegistry mRegistry;
     private HashSet<Binding> mBindings = new HashSet<Binding>();
 
-    ServiceProviderImpl(Core core, Context context, ServiceRegistry registry) {
+    ServiceProviderImpl(Core core, FlutterView view, ServiceRegistry registry) {
         assert core != null;
-        assert context != null;
+        assert view != null;
         mCore = core;
-        mContext = context;
+        mView = view;
         mRegistry = registry;
     }
 
@@ -48,7 +48,7 @@ class ServiceProviderImpl implements ServiceProvider {
             pipe.close();
             return;
         }
-        final Binding binding = factory.connectToService(mContext, mCore, pipe);
+        final Binding binding = factory.connectToService(mView, mCore, pipe);
         mBindings.add(binding);
         binding.registerErrorHandler(new ConnectionErrorHandler() {
             @Override

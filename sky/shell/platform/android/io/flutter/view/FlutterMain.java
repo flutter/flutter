@@ -149,78 +149,80 @@ public class FlutterMain {
 
         registry.register(Activity.MANAGER.getName(), new ServiceFactory() {
             @Override
-            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
+            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
                 return Activity.MANAGER.bind(new ActivityImpl(), pipe);
             }
         });
 
         registry.register(Clipboard.MANAGER.getName(), new ServiceFactory() {
             @Override
-            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                return Clipboard.MANAGER.bind(new ClipboardImpl(context), pipe);
+            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
+                return Clipboard.MANAGER.bind(new ClipboardImpl(view.getContext()), pipe);
             }
         });
 
         registry.register(MediaService.MANAGER.getName(), new ServiceFactory() {
             @Override
-            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                return MediaService.MANAGER.bind(new MediaServiceImpl(context, core), pipe);
+            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
+                return MediaService.MANAGER.bind(new MediaServiceImpl(view.getContext(), core), pipe);
             }
         });
 
         registry.register(NetworkService.MANAGER.getName(), new ServiceFactory() {
             @Override
-            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                return NetworkService.MANAGER.bind(new NetworkServiceImpl(context, core), pipe);
+            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
+                return NetworkService.MANAGER.bind(new NetworkServiceImpl(view.getContext(), core), pipe);
             }
         });
 
         registry.register(SensorService.MANAGER.getName(), new ServiceFactory() {
             @Override
-            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                return SensorService.MANAGER.bind(new SensorServiceImpl(context), pipe);
+            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
+                return SensorService.MANAGER.bind(new SensorServiceImpl(view.getContext()), pipe);
             }
         });
 
         registry.register(VSyncProvider.MANAGER.getName(), new ServiceFactory() {
             @Override
-            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
+            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
                 return VSyncProvider.MANAGER.bind(new VSyncProviderImpl(pipe), pipe);
             }
         });
 
         registry.register(HapticFeedback.MANAGER.getName(), new ServiceFactory() {
             @Override
-            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                return HapticFeedback.MANAGER.bind(new HapticFeedbackImpl((android.app.Activity) context), pipe);
+            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
+                return HapticFeedback.MANAGER.bind(new HapticFeedbackImpl((android.app.Activity) view.getContext()), pipe);
             }
         });
 
         registry.register(PathProvider.MANAGER.getName(), new ServiceFactory() {
             @Override
-            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                return PathProvider.MANAGER.bind(new PathProviderImpl(context), pipe);
+            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
+                return PathProvider.MANAGER.bind(new PathProviderImpl(view.getContext()), pipe);
             }
         });
 
         registry.register(SystemChrome.MANAGER.getName(), new ServiceFactory() {
             @Override
-            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                return SystemChrome.MANAGER.bind(new SystemChromeImpl((android.app.Activity) context), pipe);
+            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
+                SystemChromeImpl chrome = new SystemChromeImpl((android.app.Activity) view.getContext());
+                view.addActivityLifecycleListener(chrome);
+                return SystemChrome.MANAGER.bind(chrome, pipe);
             }
         });
 
         registry.register(SystemSound.MANAGER.getName(), new ServiceFactory() {
             @Override
-            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                return SystemSound.MANAGER.bind(new SystemSoundImpl((android.app.Activity) context), pipe);
+            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
+                return SystemSound.MANAGER.bind(new SystemSoundImpl((android.app.Activity) view.getContext()), pipe);
             }
         });
 
         registry.register(UrlLauncher.MANAGER.getName(), new ServiceFactory() {
             @Override
-            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                return UrlLauncher.MANAGER.bind(new UrlLauncherImpl((android.app.Activity) context), pipe);
+            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
+                return UrlLauncher.MANAGER.bind(new UrlLauncherImpl((android.app.Activity) view.getContext()), pipe);
             }
         });
     }
@@ -262,11 +264,11 @@ public class FlutterMain {
     private static void registerService(ServiceRegistry registry, final String serviceName, final String className) {
         registry.register(serviceName, new ServiceFactory() {
             @Override
-            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
+            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
                 try {
                     return (Binding) Class.forName(className)
-                        .getMethod("connectToService", Context.class, Core.class, MessagePipeHandle.class)
-                        .invoke(null, context, core, pipe);
+                        .getMethod("connectToService", FlutterView.class, Core.class, MessagePipeHandle.class)
+                        .invoke(null, view, core, pipe);
                 } catch(Exception e) {
                     Log.e(TAG, "Failed to register service '" + serviceName + "'", e);
                     throw new RuntimeException(e);

@@ -32,6 +32,7 @@ if (is_android) {
       "//base:base_java",
       "//mojo/public/java:bindings",
       "//mojo/public/java:system",
+      "//sky/services/common:common_lib",
       ":interfaces_java",
     ]
   }

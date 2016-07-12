@@ -4,6 +4,7 @@ if (is_android) {
 
   android_library("common_lib") {
     java_files = [
+      "src/org/domokit/common/ActivityLifecycleListener.java",
       "src/org/domokit/common/ResourcePaths.java",
     ]
   }

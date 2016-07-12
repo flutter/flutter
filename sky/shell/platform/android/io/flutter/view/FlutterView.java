@@ -59,6 +59,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.domokit.common.ActivityLifecycleListener;
 import org.domokit.activity.ActivityImpl;
 import org.domokit.editing.KeyboardImpl;
 import org.domokit.editing.KeyboardViewState;
@@ -92,6 +93,7 @@ public class FlutterView extends SurfaceView
     private final RawKeyboardServiceState mRawKeyboardState;
     private final AccessibilityManager mAccessibilityManager;
     private BroadcastReceiver discoveryReceiver;
+    private List<ActivityLifecycleListener> mActivityLifecycleListeners;
 
     public FlutterView(Context context) {
         this(context, null);
@@ -136,16 +138,17 @@ public class FlutterView extends SurfaceView
 
         Core core = CoreImpl.getInstance();
 
-        mPlatformServiceProvider = new ServiceProviderImpl(core, getContext(), ServiceRegistry.SHARED);
+        mPlatformServiceProvider = new ServiceProviderImpl(core, this, ServiceRegistry.SHARED);
 
         ServiceRegistry localRegistry = new ServiceRegistry();
         configureLocalServices(localRegistry);
-        mViewServiceProvider = new ServiceProviderImpl(core, getContext(), localRegistry);
+        mViewServiceProvider = new ServiceProviderImpl(core, this, localRegistry);
 
         mAccessibilityManager = (AccessibilityManager)getContext().getSystemService(Context.ACCESSIBILITY_SERVICE);
 
         mOnMessageListeners = new HashMap<String, OnMessageListener>();
         mAsyncOnMessageListeners = new HashMap<String, OnMessageListenerAsync>();
+        mActivityLifecycleListeners = new ArrayList<ActivityLifecycleListener>();
 
         setLocale(getResources().getConfiguration().locale);
 
@@ -173,11 +176,18 @@ public class FlutterView extends SurfaceView
         return mSkyEngine;
     }
 
+    public void addActivityLifecycleListener(ActivityLifecycleListener listener) {
+        mActivityLifecycleListeners.add(listener);
+    }
+
     public void onPause() {
         mSkyEngine.onAppLifecycleStateChanged(AppLifecycleState.PAUSED);
     }
 
     public void onPostResume() {
+        for (ActivityLifecycleListener listener : mActivityLifecycleListeners)
+            listener.onPostResume();
+
         mSkyEngine.onAppLifecycleStateChanged(AppLifecycleState.RESUMED);
     }
 
@@ -369,21 +379,21 @@ public class FlutterView extends SurfaceView
     private void configureLocalServices(ServiceRegistry registry) {
         registry.register(Keyboard.MANAGER.getName(), new ServiceFactory() {
             @Override
-            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                return Keyboard.MANAGER.bind(new KeyboardImpl(context, mKeyboardState), pipe);
+            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
+                return Keyboard.MANAGER.bind(new KeyboardImpl(view.getContext(), mKeyboardState), pipe);
             }
         });
 
         registry.register(RawKeyboardService.MANAGER.getName(), new ServiceFactory() {
             @Override
-            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
+            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
                 return RawKeyboardService.MANAGER.bind(new RawKeyboardServiceImpl(mRawKeyboardState), pipe);
             }
         });
 
         registry.register(ApplicationMessages.MANAGER.getName(), new ServiceFactory() {
             @Override
-            public Binding connectToService(Context context, Core core, MessagePipeHandle pipe) {
+            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
                 return ApplicationMessages.MANAGER.bind(new ApplicationMessagesImpl(), pipe);
             }
         });
