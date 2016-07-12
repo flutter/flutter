@@ -123,6 +123,9 @@ Future<XcodeBuildResult> buildXcodeProject({
     'build',
     '-configuration', 'Release',
     'ONLY_ACTIVE_ARCH=YES',
+    '-workspace', 'Runner.xcworkspace',
+    '-scheme', 'Runner',
+    "BUILD_DIR=${path.absolute(app.rootPath, 'build')}",
   ];
 
   if (buildForDevice) {
