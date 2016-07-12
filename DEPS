@@ -85,9 +85,6 @@ deps = {
   'src/third_party/libjpeg_turbo':
    Var('chromium_git') + '/chromium/deps/libjpeg_turbo.git' + '@' + '7260e4d8b8e1e40b17f03fafdf1cd83296900f76',
 
-  'src/third_party/mesa/src':
-   Var('chromium_git') + '/chromium/deps/mesa.git' + '@' + '071d25db04c23821a12a8b260ab9d96a097402f0',
-
   'src/third_party/gcm':
    'https://github.com/flutter/flutter_gcm.git@master',
 }

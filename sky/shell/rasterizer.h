@@ -9,6 +9,7 @@
 
 #include "base/callback.h"
 #include "base/memory/weak_ptr.h"
+#include "base/synchronization/waitable_event.h"
 #include "flow/layers/layer_tree.h"
 #include "mojo/public/cpp/bindings/binding.h"
 #include "sky/services/rasterizer/rasterizer.mojom.h"
@@ -16,12 +17,22 @@
 namespace sky {
 namespace shell {
 
+class PlatformView;
+
 class Rasterizer : public rasterizer::Rasterizer {
  public:
   ~Rasterizer() override;
+
   virtual void ConnectToRasterizer(
       mojo::InterfaceRequest<rasterizer::Rasterizer> request) = 0;
-  virtual base::WeakPtr<::sky::shell::Rasterizer> GetWeakRasterizerPtr() = 0;
+
+  virtual void Setup(PlatformView* platform_view,
+                     base::Closure rasterizer_continuation,
+                     base::WaitableEvent* setup_completion_event) = 0;
+
+  virtual void Teardown(base::WaitableEvent* teardown_completion_event) = 0;
+
+  virtual base::WeakPtr<sky::shell::Rasterizer> GetWeakRasterizerPtr() = 0;
 
   virtual flow::LayerTree* GetLastLayerTree() = 0;
 

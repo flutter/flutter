@@ -18,7 +18,8 @@ namespace {
 
 void DidEcho(void* context) {
   TRACE_EVENT_ASYNC_END0("flutter", "MGLEcho", context);
-  Rasterizer::DrawCallback* callback = static_cast<Rasterizer::DrawCallback*>(context);
+  Rasterizer::DrawCallback* callback =
+      static_cast<Rasterizer::DrawCallback*>(context);
   callback->Run();
   delete callback;
 }
@@ -32,24 +33,19 @@ std::unique_ptr<Rasterizer> Rasterizer::Create() {
   return std::unique_ptr<Rasterizer>(new RasterizerMojo());
 }
 
-RasterizerMojo::RasterizerMojo() : binding_(this), weak_factory_(this) {
-}
+RasterizerMojo::RasterizerMojo() : binding_(this), weak_factory_(this) {}
 
 RasterizerMojo::~RasterizerMojo() {
   weak_factory_.InvalidateWeakPtrs();
   Shell::Shared().PurgeRasterizers();
 }
 
-base::WeakPtr<RasterizerMojo> RasterizerMojo::GetWeakPtr() {
+base::WeakPtr<Rasterizer> RasterizerMojo::GetWeakRasterizerPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
-base::WeakPtr<Rasterizer> RasterizerMojo::GetWeakRasterizerPtr() {
-  return GetWeakPtr();
-}
-
-void RasterizerMojo::ConnectToRasterizer (
-    mojo::InterfaceRequest<rasterizer::Rasterizer> request ) {
+void RasterizerMojo::ConnectToRasterizer(
+    mojo::InterfaceRequest<rasterizer::Rasterizer> request) {
   binding_.Bind(request.Pass());
 
   Shell::Shared().AddRasterizer(GetWeakRasterizerPtr());
@@ -61,6 +57,17 @@ void RasterizerMojo::Init(mojo::ApplicationConnectorPtr connector,
   scene_ = scene.Pass();
 }
 
+void RasterizerMojo::Setup(PlatformView* platform_view,
+                           base::Closure rasterizer_continuation,
+                           base::WaitableEvent* setup_completion_event) {
+  rasterizer_continuation.Run();
+  setup_completion_event->Signal();
+}
+
+void RasterizerMojo::Teardown(base::WaitableEvent* teardown_completion_event) {
+  teardown_completion_event->Signal();
+}
+
 void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
                           const DrawCallback& callback) {
   TRACE_EVENT0("flutter", "RasterizerMojo::Draw");
@@ -69,7 +76,8 @@ void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
       reinterpret_cast<flow::LayerTree*>(layer_tree_ptr));
 
   if (!scene_ || !gl_state_ || gl_state_->gl_context->is_lost()) {
-    TRACE_EVENT_INSTANT0("flutter", "RasterizerMojo::Draw error one", TRACE_EVENT_SCOPE_THREAD);
+    TRACE_EVENT_INSTANT0("flutter", "RasterizerMojo::Draw error one",
+                         TRACE_EVENT_SCOPE_THREAD);
     callback.Run();
     return;
   }
@@ -79,7 +87,8 @@ void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
   size.height = layer_tree->frame_size().height();
 
   if (size.width <= 0 || size.height <= 0.0) {
-    TRACE_EVENT_INSTANT0("flutter", "RasterizerMojo::Draw empty frame size", TRACE_EVENT_SCOPE_THREAD);
+    TRACE_EVENT_INSTANT0("flutter", "RasterizerMojo::Draw empty frame size",
+                         TRACE_EVENT_SCOPE_THREAD);
     callback.Run();
     return;
   }
@@ -145,13 +154,11 @@ flow::LayerTree* RasterizerMojo::GetLastLayerTree() {
 }
 
 RasterizerMojo::GLState::GLState(mojo::ApplicationConnector* connector)
-  : gl_context(mojo::GLContext::CreateOffscreen(connector)),
-    gl_texture_recycler(gl_context),
-    ganesh_context(new mojo::skia::GaneshContext(gl_context)) {
-}
+    : gl_context(mojo::GLContext::CreateOffscreen(connector)),
+      gl_texture_recycler(gl_context),
+      ganesh_context(new mojo::skia::GaneshContext(gl_context)) {}
 
-RasterizerMojo::GLState::~GLState() {
-}
+RasterizerMojo::GLState::~GLState() {}
 
 }  // namespace shell
 }  // namespace sky

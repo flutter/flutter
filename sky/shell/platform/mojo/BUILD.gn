@@ -27,7 +27,6 @@ mojo_native_application("mojo") {
     "//mojo/application",
     "//mojo/common:tracing_impl",
     "//mojo/common",
-    "//mojo/converters/geometry",
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/system",
     "//mojo/public/cpp/utility",

@@ -16,6 +16,7 @@ dart_embedder_resources("generate_sky_embedder_diagnostic_server_resources_cc") 
 
 source_set("common") {
   sources = [
+    "$target_gen_dir/sky_embedder_diagnostic_server_resources.cc",
     "diagnostic/diagnostic_server.cc",
     "diagnostic/diagnostic_server.h",
     "gpu/picture_serializer.cc",
@@ -42,7 +43,6 @@ source_set("common") {
     "ui/platform_impl.h",
     "ui_delegate.cc",
     "ui_delegate.h",
-    "$target_gen_dir/sky_embedder_diagnostic_server_resources.cc",
   ]
 
   public_deps = [
@@ -75,22 +75,18 @@ source_set("common") {
     "//sky/services/rasterizer:interfaces",
     "//sky/services/semantics:interfaces",
     "//sky/shell/dart",
-    "//ui/gfx",
   ]
 }
 
 source_set("gpu_direct") {
   sources = [
-    "gpu/direct/surface_notifications_direct.cc",
-    "gpu/direct/surface_notifications_direct.h",
-    "gpu/direct/rasterizer_direct.cc",
-    "gpu/direct/rasterizer_direct.h",
     "gpu/direct/ganesh_canvas.cc",
     "gpu/direct/ganesh_canvas.h",
+    "gpu/direct/rasterizer_direct.cc",
+    "gpu/direct/rasterizer_direct.h",
   ]
 
   deps = [
-    "//ui/gl",
     ":common",
   ]
 }
@@ -157,12 +153,12 @@ if (is_android) {
       "//mojo/android:libsystem_java",
       "//mojo/edk/base_edk",
       "//mojo/edk/system",
-      "//ui/gl",
     ]
 
     ldflags = [
-      "-lGLESv2",
+      "-landroid",
       "-lEGL",
+      "-lGLESv2",
     ]
   }
 
@@ -257,6 +253,8 @@ if (is_android) {
       "platform/ios/framework/Source/accessibility_bridge.mm",
       "platform/ios/framework/Source/application_messages_impl.h",
       "platform/ios/framework/Source/application_messages_impl.mm",
+      "platform/ios/framework/Source/flutter_touch_mapper.h",
+      "platform/ios/framework/Source/flutter_touch_mapper.mm",
       "platform/ios/framework/Source/FlutterAppDelegate.mm",
       "platform/ios/framework/Source/FlutterDartProject.mm",
       "platform/ios/framework/Source/FlutterDartProject_Internal.h",
@@ -267,8 +265,8 @@ if (is_android) {
       "platform/ios/framework/Source/FlutterView.h",
       "platform/ios/framework/Source/FlutterView.mm",
       "platform/ios/framework/Source/FlutterViewController.mm",
-      "platform/ios/framework/Source/flutter_touch_mapper.h",
-      "platform/ios/framework/Source/flutter_touch_mapper.mm",
+      "platform/ios/platform_view_ios.h",
+      "platform/ios/platform_view_ios.mm",
     ]
 
     set_sources_assignment_filter([])
@@ -277,8 +275,6 @@ if (is_android) {
       "platform/mac/platform_mac.mm",
       "platform/mac/platform_service_provider.cc",
       "platform/mac/platform_service_provider.h",
-      "platform/mac/platform_view_mac.h",
-      "platform/mac/platform_view_mac.mm",
       "platform/mac/view_service_provider.cc",
       "platform/mac/view_service_provider.h",
     ]
@@ -295,7 +291,6 @@ if (is_android) {
       "//sky/services/ns_net",
       "//sky/services/semantics",
       "//sky/services/vsync",
-      "//ui/gl",
       ":common",
       ":gpu_direct",
     ]
@@ -455,7 +450,6 @@ if (is_android) {
       "//mojo/edk/base_edk",
       "//mojo/edk/system",
       "//sky/services/ns_net",
-      "//ui/gl",
       ":common",
       ":gpu_direct",
       ":testing",

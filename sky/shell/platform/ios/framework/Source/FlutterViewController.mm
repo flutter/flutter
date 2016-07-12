@@ -24,9 +24,9 @@
 #include "sky/shell/platform/ios/framework/Source/FlutterDartProject_Internal.h"
 #include "sky/shell/platform/ios/framework/Source/FlutterDynamicServiceLoader.h"
 #include "sky/shell/platform/ios/framework/Source/FlutterView.h"
+#include "sky/shell/platform/ios/platform_view_ios.h"
 #include "sky/shell/platform/mac/platform_mac.h"
 #include "sky/shell/platform/mac/platform_service_provider.h"
-#include "sky/shell/platform/mac/platform_view_mac.h"
 #include "sky/shell/platform/mac/view_service_provider.h"
 #include "sky/shell/platform_view.h"
 #include "sky/shell/shell.h"
@@ -461,16 +461,15 @@ static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
 #pragma mark - Surface creation and teardown updates
 
 - (void)surfaceUpdated:(BOOL)appeared {
-  auto view =
-      reinterpret_cast<sky::shell::PlatformViewMac*>(_shellView->view());
-
-  // The widget is a reference to the CALayer (EAGL) of the view.
-  auto widget = reinterpret_cast<gfx::AcceleratedWidget>(self.view.layer);
+  auto platform_view =
+      reinterpret_cast<sky::shell::PlatformViewIOS*>(_shellView->view());
 
   if (appeared) {
-    view->SurfaceCreated(widget);
+    auto layer = reinterpret_cast<CAEAGLLayer *>(self.view.layer);
+    platform_view->SetEAGLLayer(layer);
+    platform_view->NotifyCreated();
   } else {
-    view->SurfaceDestroyed();
+    platform_view->NotifyDestroyed();
   }
 }
 

@@ -23,7 +23,6 @@
 #include "mojo/edk/embedder/simple_platform_support.h"
 #include "sky/shell/shell.h"
 #include "sky/engine/core/start_up.h"
-#include "ui/gl/gl_surface.h"
 #include "dart/runtime/include/dart_tools_api.h"
 
 using base::LazyInstance;
@@ -80,7 +79,6 @@ static void Init(JNIEnv* env,
 
   mojo::embedder::Init(mojo::embedder::CreateSimplePlatformSupport());
 
-  CHECK(gfx::GLSurface::InitializeOneOff());
   Shell::InitStandalone();
 
   InitializeTracing();

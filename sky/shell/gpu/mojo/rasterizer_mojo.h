@@ -19,26 +19,35 @@ namespace shell {
 
 class RasterizerMojo : public Rasterizer {
  public:
-  explicit RasterizerMojo();
+  RasterizerMojo();
+
   ~RasterizerMojo() override;
-
-  base::WeakPtr<RasterizerMojo> GetWeakPtr();
-
-  base::WeakPtr<Rasterizer> GetWeakRasterizerPtr() override;
-
-  void ConnectToRasterizer(
-       mojo::InterfaceRequest<rasterizer::Rasterizer> request) override;
 
   void Init(mojo::ApplicationConnectorPtr connector,
             mojo::gfx::composition::ScenePtr scene);
 
+  // sky::shell::rasterizer::Rasterizer override
+  void ConnectToRasterizer(
+      mojo::InterfaceRequest<rasterizer::Rasterizer> request) override;
+
+  // sky::shell::rasterizer::Rasterizer override
+  void Setup(PlatformView* platform_view,
+             base::Closure rasterizer_continuation,
+             base::WaitableEvent* setup_completion_event) override;
+
+  // sky::shell::rasterizer::Rasterizer override
+  void Teardown(base::WaitableEvent* teardown_completion_event) override;
+
+  // sky::shell::rasterizer::Rasterizer override
+  base::WeakPtr<Rasterizer> GetWeakRasterizerPtr() override;
+
+  // sky::shell::rasterizer::Rasterizer override
   flow::LayerTree* GetLastLayerTree() override;
 
  private:
-  void Draw(uint64_t layer_tree_ptr, const DrawCallback& callback) override;
-
   struct GLState {
     explicit GLState(mojo::ApplicationConnector* connector);
+
     ~GLState();
 
     scoped_refptr<mojo::GLContext> gl_context;
@@ -51,8 +60,9 @@ class RasterizerMojo : public Rasterizer {
   std::unique_ptr<GLState> gl_state_;
   flow::CompositorContext compositor_context_;
   std::unique_ptr<flow::LayerTree> last_layer_tree_;
-
   base::WeakPtrFactory<RasterizerMojo> weak_factory_;
+
+  void Draw(uint64_t layer_tree_ptr, const DrawCallback& callback) override;
 
   DISALLOW_COPY_AND_ASSIGN(RasterizerMojo);
 };

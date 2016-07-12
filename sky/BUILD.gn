@@ -32,10 +32,6 @@ group("sky") {
     deps += [ "//sky/services/activity" ]
   }
 
-  if (!is_android) {
-    deps += [ "//third_party/mesa:osmesa" ]
-  }
-
   # TODO(mpcomplete): This is temporary until we move GCM and Firebase
   # out of the engine repo.
   if (enable_firebase) {

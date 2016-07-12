@@ -4,30 +4,64 @@
 
 #include "sky/shell/platform/mac/platform_view_mac.h"
 
-#include "sky/shell/gpu/direct/surface_notifications_direct.h"
+#include <AppKit/AppKit.h>
 
 namespace sky {
 namespace shell {
 
-PlatformView* PlatformView::Create(const Config& config) {
-  return new PlatformViewMac(config);
+PlatformView* PlatformView::Create(const Config& config,
+                                   SurfaceConfig surface_config) {
+  return new PlatformViewMac(config, surface_config);
 }
 
-PlatformViewMac::PlatformViewMac(const Config& config)
-    : PlatformView(config), window_(gfx::kNullAcceleratedWidget) {}
+PlatformViewMac::PlatformViewMac(const Config& config,
+                                 SurfaceConfig surface_config)
+    : PlatformView(config, surface_config), weak_factory_(this) {}
 
-PlatformViewMac::~PlatformViewMac() {}
+PlatformViewMac::~PlatformViewMac() = default;
 
-void PlatformViewMac::SurfaceCreated(gfx::AcceleratedWidget widget) {
-  DCHECK(window_ == gfx::kNullAcceleratedWidget);
-  window_ = widget;
-  SurfaceNotificationsDirect::NotifyCreated(config_, window_, nullptr);
+base::WeakPtr<sky::shell::PlatformView> PlatformViewMac::GetWeakViewPtr() {
+  return weak_factory_.GetWeakPtr();
 }
 
-void PlatformViewMac::SurfaceDestroyed() {
-  DCHECK(window_ != gfx::kNullAcceleratedWidget);
-  window_ = gfx::kNullAcceleratedWidget;
-  SurfaceNotificationsDirect::NotifyDestroyed(config_);
+void PlatformViewMac::SetOpenGLView(NSOpenGLView* view) {
+  opengl_view_ = decltype(opengl_view_){view};
+}
+
+uint64_t PlatformViewMac::DefaultFramebuffer() const {
+  return 0;
+}
+
+bool PlatformViewMac::ContextMakeCurrent() {
+  if (!IsValid()) {
+    return false;
+  }
+
+  [opengl_view_.get().openGLContext makeCurrentContext];
+  return true;
+}
+
+bool PlatformViewMac::SwapBuffers() {
+  if (!IsValid()) {
+    return false;
+  }
+
+  [opengl_view_.get().openGLContext flushBuffer];
+  return true;
+}
+
+bool PlatformViewMac::IsValid() const {
+  if (opengl_view_ == nullptr) {
+    return false;
+  }
+
+  auto context = opengl_view_.get().openGLContext;
+
+  if (context == nullptr) {
+    return false;
+  }
+
+  return true;
 }
 
 }  // namespace shell

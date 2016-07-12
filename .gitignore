@@ -52,7 +52,6 @@ Thumbs.db
 /third_party/llvm/
 /third_party/llvm-build/
 /third_party/junit/src/
-/third_party/mesa/src/
 /third_party/mockito/src/
 /third_party/pdfium/
 /third_party/pywebsocket/src/

@@ -4,12 +4,11 @@
 
 #include "sky/shell/gpu/picture_serializer.h"
 
-#include <vector>
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkData.h"
+#include "third_party/skia/include/core/SkImageEncoder.h"
 #include "third_party/skia/include/core/SkPixelSerializer.h"
 #include "third_party/skia/include/core/SkStream.h"
-#include "ui/gfx/codec/png_codec.h"
 
 namespace sky {
 
@@ -18,15 +17,15 @@ bool PngPixelSerializer::onUseEncodedData(const void*, size_t) {
 }
 
 SkData* PngPixelSerializer::onEncode(const SkPixmap& pixmap) {
-  std::vector<unsigned char> data;
+  SkBitmap bitmap;
 
-  SkBitmap bm;
-  if (!bm.installPixels(pixmap))
+  if (!bitmap.installPixels(pixmap)) {
     return nullptr;
-  if (!gfx::PNGCodec::EncodeBGRASkBitmap(bm, false, &data))
-    return nullptr;
-  return SkData::NewWithCopy(&data.front(), data.size());
-};
+  }
+
+  return SkImageEncoder::EncodeData(bitmap, SkImageEncoder::Type::kPNG_Type,
+                                    SkImageEncoder::kDefaultQuality);
+}
 
 void SerializePicture(const base::FilePath& file_name, SkPicture* picture) {
   SkFILEWStream stream(file_name.AsUTF8Unsafe().c_str());

@@ -46,7 +46,7 @@ void ShellView::CreatePlatformView() {
   config.ui_task_runner = shell_.ui_task_runner();
   config.ui_delegate = engine_->GetWeakPtr();
   config.rasterizer = rasterizer_.get();
-  view_.reset(PlatformView::Create(config));
+  view_.reset(PlatformView::Create(config, PlatformView::SurfaceConfig{}));
 }
 
 }  // namespace shell

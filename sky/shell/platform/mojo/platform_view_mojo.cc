@@ -12,27 +12,41 @@
 namespace sky {
 namespace shell {
 
-PlatformView* PlatformView::Create(const Config& config) {
-  return new PlatformViewMojo(config);
+PlatformView* PlatformView::Create(const Config& config,
+                                   SurfaceConfig surface_config) {
+  return new PlatformViewMojo(config, surface_config);
 }
 
-PlatformViewMojo::PlatformViewMojo(const Config& config)
-  : PlatformView(config) {
-}
+PlatformViewMojo::PlatformViewMojo(const Config& config,
+                                   SurfaceConfig surface_config)
+    : PlatformView(config, surface_config), weak_factory_(this) {}
 
-PlatformViewMojo::~PlatformViewMojo() {
-}
+PlatformViewMojo::~PlatformViewMojo() {}
 
 void PlatformViewMojo::InitRasterizer(mojo::ApplicationConnectorPtr connector,
                                       mojo::gfx::composition::ScenePtr scene) {
-  RasterizerMojo* rasterizer = static_cast<RasterizerMojo*>(config_.rasterizer);
-  config_.ui_task_runner->PostTask(FROM_HERE, base::Bind(
-      &UIDelegate::OnOutputSurfaceCreated,
-      config_.ui_delegate,
-      base::Bind(&RasterizerMojo::Init,
-                 rasterizer->GetWeakPtr(),
-                 base::Passed(&connector),
-                 base::Passed(&scene))));
+  auto rasterizer_mojo = reinterpret_cast<RasterizerMojo*>(config_.rasterizer);
+  auto continuation =
+      base::Bind(&RasterizerMojo::Init,              // method
+                 base::Unretained(rasterizer_mojo),  // target
+                 base::Passed(&connector), base::Passed(&scene));
+  NotifyCreated(continuation);
+}
+
+base::WeakPtr<sky::shell::PlatformView> PlatformViewMojo::GetWeakViewPtr() {
+  return weak_factory_.GetWeakPtr();
+}
+
+uint64_t PlatformViewMojo::DefaultFramebuffer() const {
+  return 0;
+}
+
+bool PlatformViewMojo::ContextMakeCurrent() {
+  return false;
+}
+
+bool PlatformViewMojo::SwapBuffers() {
+  return false;
 }
 
 }  // namespace shell

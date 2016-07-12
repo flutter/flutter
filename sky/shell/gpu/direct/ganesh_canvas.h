@@ -21,7 +21,8 @@ class GaneshCanvas {
   GaneshCanvas();
   ~GaneshCanvas();
 
-  void SetGrGLInterface(const GrGLInterface* interface);
+  void SetupGrGLInterface();
+
   SkCanvas* GetCanvas(int32_t fbo, const SkISize& size);
 
   bool IsValid();

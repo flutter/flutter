@@ -24,7 +24,6 @@
 #include "sky/shell/switches.h"
 #include "sky/shell/tracing_controller.h"
 #include "sky/shell/ui_delegate.h"
-#include "ui/gl/gl_surface.h"
 
 namespace sky {
 namespace shell {
@@ -94,8 +93,6 @@ class EmbedderState {
 #endif
 
     mojo::embedder::Init(mojo::embedder::CreateSimplePlatformSupport());
-
-    CHECK(gfx::GLSurface::InitializeOneOff());
 
     sky::shell::Shell::InitStandalone(icu_data_path);
   }

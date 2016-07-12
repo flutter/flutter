@@ -7,7 +7,6 @@
 
 #include "mojo/public/cpp/bindings/interface_request.h"
 #include "sky/services/engine/sky_engine.mojom.h"
-#include "ui/gfx/native_widget_types.h"
 #include "base/callback.h"
 
 namespace sky {
@@ -16,8 +15,12 @@ namespace shell {
 class UIDelegate {
  public:
   virtual void ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request) = 0;
-  virtual void OnOutputSurfaceCreated(const base::Closure& gpu_continuation) = 0;
-  virtual void OnOutputSurfaceDestroyed(const base::Closure& gpu_continuation) = 0;
+
+  virtual void OnOutputSurfaceCreated(
+      const base::Closure& gpu_continuation) = 0;
+
+  virtual void OnOutputSurfaceDestroyed(
+      const base::Closure& gpu_continuation) = 0;
 
  protected:
   virtual ~UIDelegate();

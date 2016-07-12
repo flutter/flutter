@@ -224,6 +224,12 @@ config("compiler") {
     }
   }
 
+  if (!is_clang) {
+    color_diagnostics_flag = [ "-fdiagnostics-color=always" ]
+    cflags_cc += color_diagnostics_flag
+    cflags_objcc += color_diagnostics_flag
+  }
+
   if (is_clang && is_debug) {
     # Allow comparing the address of references and 'this' against 0
     # in debug builds. Technically, these can never be null in
