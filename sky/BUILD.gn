@@ -4,12 +4,6 @@
 
 import("//sky/engine/bindings/bindings.gni")
 
-declare_args() {
-  enable_gcm = false
-  enable_firebase = false
-  enable_google_sign_in = false
-}
-
 group("sky") {
   testonly = true
 
@@ -30,19 +24,5 @@ group("sky") {
 
   if (is_android) {
     deps += [ "//sky/services/activity" ]
-  }
-
-  # TODO(mpcomplete): This is temporary until we move GCM and Firebase
-  # out of the engine repo.
-  if (enable_firebase) {
-    deps += [ "//third_party/firebase" ]
-  }
-
-  if (enable_gcm) {
-    deps += [ "//third_party/gcm:gcm" ]
-  }
-
-  if (enable_google_sign_in) {
-    deps += [ "//third_party/google_sign_in" ]
   }
 }

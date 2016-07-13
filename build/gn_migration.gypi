@@ -189,7 +189,6 @@
         '../third_party/mojo/mojo_edk_tests.gyp:mojo_public_utility_unittests',
         '../third_party/pdfium/samples/samples.gyp:pdfium_diff',
         '../third_party/pdfium/samples/samples.gyp:pdfium_test',
-        '../third_party/smhasher/smhasher.gyp:pmurhash',
         '../tools/gn/gn.gyp:gn',
         '../tools/gn/gn.gyp:generate_test_gn_data',
         '../tools/gn/gn.gyp:gn_unittests',
@@ -332,7 +331,6 @@
 
             # TODO(GYP): Are these needed?
             #"//chrome/test:test_support_unit",
-            #"//third_party/smhasher:murmurhash3",
             #"//ui/message_center:test_support",
           ],
           'dependencies!': [
@@ -443,7 +441,6 @@
             #"//third_party/libphonenumber",
             #"//third_party/ots",
             #"//third_party/qcms",
-            #"//third_party/smhasher:murmurhash3",
             #"//third_party/speex",
             #"//third_party/webrtc/system_wrappers",
             #"//ui/native_theme",
