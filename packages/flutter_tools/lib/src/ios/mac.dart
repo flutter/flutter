@@ -123,10 +123,19 @@ Future<XcodeBuildResult> buildXcodeProject({
     'build',
     '-configuration', 'Release',
     'ONLY_ACTIVE_ARCH=YES',
-    '-workspace', 'Runner.xcworkspace',
-    '-scheme', 'Runner',
-    "BUILD_DIR=${path.absolute(app.rootPath, 'build')}",
   ];
+
+  List<FileSystemEntity> contents = new Directory(app.rootPath).listSync();
+  for (FileSystemEntity entity in contents) {
+    if (path.extension(entity.path) == '.xcworkspace') {
+      commands.addAll(<String>[
+        '-workspace', path.basename(entity.path),
+        '-scheme', path.basenameWithoutExtension(entity.path),
+        "BUILD_DIR=${path.absolute(app.rootPath, 'build')}",
+      ]);
+      break;
+    }
+  }
 
   if (buildForDevice) {
     commands.addAll(<String>['-sdk', 'iphoneos', '-arch', 'arm64']);
