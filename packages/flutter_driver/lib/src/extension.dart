@@ -14,6 +14,7 @@ import 'error.dart';
 import 'find.dart';
 import 'gesture.dart';
 import 'health.dart';
+import 'input.dart';
 import 'message.dart';
 
 const String _extensionMethodName = 'driver';
@@ -64,6 +65,8 @@ class FlutterDriverExtension {
       'get_text': getText,
       'scroll': scroll,
       'scrollIntoView': scrollIntoView,
+      'setInputText': setInputText,
+      'submitInputText': submitInputText,
       'waitFor': waitFor,
     });
 
@@ -73,6 +76,8 @@ class FlutterDriverExtension {
       'get_text': GetText.deserialize,
       'scroll': Scroll.deserialize,
       'scrollIntoView': ScrollIntoView.deserialize,
+      'setInputText': SetInputText.deserialize,
+      'submitInputText': SubmitInputText.deserialize,
       'waitFor': WaitFor.deserialize,
     });
 
@@ -213,6 +218,20 @@ class FlutterDriverExtension {
     Finder target = await _waitForElement(_createFinder(command.finder));
     await Scrollable.ensureVisible(target.evaluate().single);
     return new ScrollResult();
+  }
+
+  Future<SetInputTextResult> setInputText(SetInputText command) async {
+    Finder target = await _waitForElement(_createFinder(command.finder));
+    Input input = target.evaluate().single.widget;
+    input.onChanged(new InputValue(text: command.text));
+    return new SetInputTextResult();
+  }
+
+  Future<SubmitInputTextResult> submitInputText(SubmitInputText command) async {
+    Finder target = await _waitForElement(_createFinder(command.finder));
+    Input input = target.evaluate().single.widget;
+    input.onSubmitted(input.value);
+    return new SubmitInputTextResult(input.value.text);
   }
 
   Future<GetTextResult> getText(GetText command) async {
