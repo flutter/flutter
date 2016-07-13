@@ -9,9 +9,8 @@
 
 #include "FlutterMacros.h"
 
-// A simple app delegate that creates a single full-screen Flutter application.
-// Using FlutterAppDelegate is optional. The framework provides this interface
-// to make it easy to get started with simple Flutter apps.
+// Empty implementation of UIApplicationDelegate, for simple apps
+// that don't need to customize the application delegate.
 FLUTTER_EXPORT
 @interface FlutterAppDelegate : UIResponder<UIApplicationDelegate>
 

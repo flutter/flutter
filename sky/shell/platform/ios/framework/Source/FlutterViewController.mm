@@ -65,7 +65,10 @@ void FlutterInit(int argc, const char* argv[]) {
   self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
 
   if (self) {
-    _dartProject.reset([project retain]);
+    if (project == nil)
+      _dartProject.reset([[FlutterDartProject alloc] initFromDefaultSourceForConfiguration]);
+    else
+      _dartProject.reset([project retain]);
 
     [self performCommonViewControllerInitialization];
   }
