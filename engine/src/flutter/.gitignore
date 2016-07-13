@@ -40,9 +40,7 @@ Thumbs.db
 /third_party/colorama/src/
 /third_party/dart-sdk/
 /third_party/dejavu-fonts-ttf-2.34/ttf/*.ttf
-/third_party/firebase
 /third_party/freetype-android/src
-/third_party/gcm/
 /third_party/go/tool/
 /third_party/icu/
 /third_party/jsr-305/src/
@@ -58,7 +56,6 @@ Thumbs.db
 /third_party/requests/src/
 /third_party/robolectric/lib/
 /third_party/skia/
-/third_party/smhasher/src/
 /third_party/yasm/binaries/
 /third_party/yasm/source/patched-yasm/
 /tools/grit/
