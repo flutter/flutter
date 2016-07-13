@@ -671,6 +671,7 @@ class _AdbLogReader extends DeviceLogReader {
 
   static final List<RegExp> _whitelistedTags = <RegExp>[
     new RegExp(r'^[VDIWEF]\/flutter[^:]*:\s+', caseSensitive: false),
+    new RegExp(r'^[IE]\/DartVM[^:]*:\s+'),
     new RegExp(r'^[WEF]\/AndroidRuntime:\s+'),
     new RegExp(r'^[WEF]\/ActivityManager:\s+'),
     new RegExp(r'^[WEF]\/System\.err:\s+'),
