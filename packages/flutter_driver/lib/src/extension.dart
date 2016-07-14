@@ -65,8 +65,8 @@ class FlutterDriverExtension {
       'get_text': getText,
       'scroll': scroll,
       'scrollIntoView': scrollIntoView,
-      'setInputText': setInputText,
-      'submitInputText': submitInputText,
+      'setInputText': _setInputText,
+      'submitInputText': _submitInputText,
       'waitFor': waitFor,
     });
 
@@ -220,14 +220,14 @@ class FlutterDriverExtension {
     return new ScrollResult();
   }
 
-  Future<SetInputTextResult> setInputText(SetInputText command) async {
+  Future<SetInputTextResult> _setInputText(SetInputText command) async {
     Finder target = await _waitForElement(_createFinder(command.finder));
     Input input = target.evaluate().single.widget;
     input.onChanged(new InputValue(text: command.text));
     return new SetInputTextResult();
   }
 
-  Future<SubmitInputTextResult> submitInputText(SubmitInputText command) async {
+  Future<SubmitInputTextResult> _submitInputText(SubmitInputText command) async {
     Finder target = await _waitForElement(_createFinder(command.finder));
     Input input = target.evaluate().single.widget;
     input.onSubmitted(input.value);
