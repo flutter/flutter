@@ -5,16 +5,6 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
-    FlutterDartProject* project = [[FlutterDartProject alloc] initFromDefaultSourceForConfiguration];
-    CGRect frame = [UIScreen mainScreen].bounds;
-    UIWindow* window = [[UIWindow alloc] initWithFrame:frame];
-    FlutterViewController* viewController = [[FlutterViewController alloc] initWithProject:project
-                                                                                   nibName:nil
-                                                                                    bundle:nil];
-    window.rootViewController = viewController;
-    self.window = window;
-    [self.window makeKeyAndVisible];
-
     return YES;
 }
 
