@@ -1,0 +1,9 @@
+# This file defines a semantic version for the Flutter SDK. This version will
+# describes breaking changes in the SDK as a whole, separately from the
+# individual packages in the SDK. For example, if the flutter command line
+# tool's options change in an incompatible way, this version will update to
+# reflect that change. However, if the API for package:flutter changes in an
+# incompatible way, this version number might not change. Instead, the version
+# number for package:flutter will update to reflect that change.
+
+0.0.1
