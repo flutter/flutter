@@ -12,6 +12,7 @@ import 'error.dart';
 import 'find.dart';
 import 'gesture.dart';
 import 'health.dart';
+import 'input.dart';
 import 'message.dart';
 import 'timeline.dart';
 
@@ -212,6 +213,24 @@ class FlutterDriver {
   Future<Null> tap(SerializableFinder finder) async {
     await _sendCommand(new Tap(finder));
     return null;
+  }
+
+  /// Sets the text value of the `Input` widget located by [finder].
+  ///
+  /// This command invokes the `onChanged` handler of the `Input` widget with
+  /// the provided [text].
+  Future<Null> setInputText(SerializableFinder finder, String text) async {
+    await _sendCommand(new SetInputText(finder, text));
+    return null;
+  }
+
+  /// Submits the current text value of the `Input` widget located by [finder].
+  ///
+  /// This command invokes the `onSubmitted` handler of the `Input` widget and
+  /// the returns the submitted text value.
+  Future<String> submitInputText(SerializableFinder finder) async {
+    Map<String, dynamic> json = await _sendCommand(new SubmitInputText(finder));
+    return json['text'];
   }
 
   /// Waits until [finder] locates the target.
