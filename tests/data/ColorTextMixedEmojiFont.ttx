@@ -145,7 +145,7 @@
     <tableVersion version="0"/>
     <cmap_format_14 format="14" platformID="0" platEncID="5" length="40" numVarSelectorRecords="2">
       <map uvs="0xFE0E" uv="0x26FA" name="Emoji1" />
-      <map uvs="0xFE0F" uv="0x26F9" name="Emoji2" />
+      <map uvs="0xFE0F" uv="0x26F8" name="Emoji2" />
     </cmap_format_14>
   </cmap>
 
