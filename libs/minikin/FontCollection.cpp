@@ -336,11 +336,14 @@ const uint32_t ZWJ = 0x200c;
 const uint32_t ZWNJ = 0x200d;
 const uint32_t HYPHEN = 0x2010;
 const uint32_t NB_HYPHEN = 0x2011;
+const uint32_t FEMALE_SIGN = 0x2640;
+const uint32_t MALE_SIGN = 0x2642;
+const uint32_t STAFF_OF_AESCULAPIUS = 0x2695;
 
 // Characters where we want to continue using existing font run instead of
 // recomputing the best match in the fallback list.
 static const uint32_t stickyWhitelist[] = { '!', ',', '-', '.', ':', ';', '?', NBSP, ZWJ, ZWNJ,
-        HYPHEN, NB_HYPHEN };
+        HYPHEN, NB_HYPHEN, FEMALE_SIGN, MALE_SIGN, STAFF_OF_AESCULAPIUS };
 
 static bool isStickyWhitelisted(uint32_t c) {
     for (size_t i = 0; i < sizeof(stickyWhitelist) / sizeof(stickyWhitelist[0]); i++) {
