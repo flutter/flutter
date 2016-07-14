@@ -16,7 +16,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import org.chromium.base.PathUtils;
 import org.domokit.activity.ActivityImpl;
 import io.flutter.view.FlutterMain;
 import io.flutter.view.FlutterView;
@@ -38,8 +37,7 @@ public class ExampleActivity extends Activity {
         setContentView(R.layout.hello_services_layout);
 
         flutterView = (FlutterView) findViewById(R.id.flutter_view);
-        File appBundle = new File(PathUtils.getDataDirectory(this), FlutterMain.APP_BUNDLE);
-        flutterView.runFromBundle(appBundle.getPath(), null);
+        flutterView.runFromBundle(FlutterMain.findAppBundlePath(getApplicationContext()), null);
 
         flutterView.addOnMessageListener("getLocation",
             new FlutterView.OnMessageListener() {
