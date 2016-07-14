@@ -46,14 +46,15 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// much actual progress is being made.
   final double value;
 
-  /// The progress indicator's background color. If null, the background color is
-  /// the current theme's backgroundColor.
+  /// The progress indicator's background color. The current theme's
+  /// [ThemeData.backgroundColor] by default.
   final Color backgroundColor;
 
   /// The indicator's color is the animation's value. To specify a constant
   /// color use: `new AlwaysStoppedAnimation<Color>(color)`.
   ///
-  /// If null, the progress indicator is rendered with the current theme's primaryColor.
+  /// If null, the progress indicator is rendered with the current theme's
+  /// [ThemeData.primaryColor].
   final Animation<Color> valueColor;
 
   Color _getBackgroundColor(BuildContext context) => backgroundColor ?? Theme.of(context).backgroundColor;
@@ -485,7 +486,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
       margin: const EdgeInsets.all(4.0), // acommodate the shadow
       child: new Material(
         type: MaterialType.circle,
-        color: Theme.of(context).canvasColor,
+        color: config.backgroundColor ?? Theme.of(context).canvasColor,
         elevation: 2,
         child: new Padding(
           padding: const EdgeInsets.all(12.0),
