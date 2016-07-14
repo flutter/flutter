@@ -45,6 +45,13 @@ class GalleryItem extends StatelessWidget {
 final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
   // Demos
   new GalleryItem(
+    title: 'Animation',
+    subtitle: 'Material motion for points',
+    category: 'Demos',
+    routeName: AnimationDemo.routeName,
+    buildRoute: (BuildContext context) => new AnimationDemo()
+  ),
+  new GalleryItem(
     title: 'Pesto',
     subtitle: 'A simple recipe browser',
     category: 'Demos',
