@@ -9,21 +9,97 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart'; // @required
 
+bool _simpleInterpolation = false;
+
 enum _DragTarget {
   start,
   end
 }
 
+enum _CornerId {
+  topLeft,
+  topRight,
+  bottomLeft,
+  bottomRight
+}
+
+class _Diagonal {
+  const _Diagonal(this.startId, this.endId);
+  final _CornerId startId;
+  final _CornerId endId;
+}
+
+Point _cornerFor(Rect rect, _CornerId id) {
+  switch(id) {
+    case _CornerId.topLeft: return rect.topLeft;
+    case _CornerId.topRight: return rect.topRight;
+    case _CornerId.bottomLeft: return rect.bottomLeft;
+    case _CornerId.bottomRight: return rect.bottomRight;
+  }
+  return Point.origin;
+}
+
+class MaterialRect {
+  static final List<_Diagonal> _allDiagonals = <_Diagonal>[
+    const _Diagonal(_CornerId.topLeft, _CornerId.bottomRight),
+    const _Diagonal(_CornerId.bottomRight, _CornerId.topLeft),
+    const _Diagonal(_CornerId.topRight, _CornerId.bottomLeft),
+    const _Diagonal(_CornerId.bottomLeft, _CornerId.topRight),
+  ];
+
+  MaterialRect(this.start, this.end) {
+    _centersVector = end.center - start.center;
+
+    double maxSupport = 0.0;
+    for (_Diagonal diagonal in _allDiagonals) {
+      final double support = _diagonalSupport(diagonal);
+      if (support > maxSupport) {
+        _diagonal = diagonal;
+        maxSupport = support;
+      }
+    }
+
+    _startArc = new MaterialArc(_cornerFor(start, _diagonal.startId), _cornerFor(end, _diagonal.startId));
+    _endArc = new MaterialArc(_cornerFor(start, _diagonal.endId), _cornerFor(end, _diagonal.endId));
+  }
+
+  final Rect start;
+  final Rect end;
+
+  Offset _centersVector;
+  _Diagonal _diagonal;
+  MaterialArc _startArc;
+  MaterialArc _endArc;
+
+  double _diagonalSupport(_Diagonal diagonal) {
+    final Offset delta = _cornerFor(start, diagonal.endId) - _cornerFor(start, diagonal.startId);
+    final double length = delta.distance;
+    return _centersVector.dx * delta.dx / length + _centersVector.dy * delta.dy / length;
+  }
+
+  Rect transform(double t) {
+    if (_simpleInterpolation)
+      return Rect.lerp(start, end, t);
+    Point startArcPoint = _startArc.transform(t);
+    Point endArcPoint = _endArc.transform(t);
+    double minX = math.min(startArcPoint.x, endArcPoint.x);
+    double maxX = math.max(startArcPoint.x, endArcPoint.x);
+    double minY = math.min(startArcPoint.y, endArcPoint.y);
+    double maxY = math.max(startArcPoint.y, endArcPoint.y);
+    return new Rect.fromLTRB(minX, minY, maxX, maxY);
+  }
+}
+
 class _Background extends CustomPainter {
   _Background({
     Animation<double> repaint,
-    this.arc,
+    this.materialRect,
     this.themeData
   }) : _repaint = repaint, super(repaint: repaint);
 
   static final double pointRadius = 6.0;
 
-  final MaterialArc arc;
+  final MaterialRect materialRect;
   final ThemeData themeData;
   Animation<double> _repaint;
 
@@ -39,32 +115,24 @@ class _Background extends CustomPainter {
     canvas.drawCircle(p, pointRadius + 1.0, paint);
   }
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Color color = themeData.primaryColor;
-    final Paint paint = new Paint();
-
-    if (arc._center != null)
-      drawPoint(canvas, arc._center, Colors.blue[400]);
-
-    paint
-      ..color = themeData.primaryColor.withOpacity(0.25)
+  void drawRect(Canvas canvas, Rect rect, Color color) {
+    final Paint paint = new Paint()
+      ..color = color.withOpacity(0.25)
       ..strokeWidth = 4.0
       ..style = PaintingStyle.stroke;
-    if (arc._center != null && arc._radius != null)
-      canvas.drawCircle(arc._center, arc._radius, paint);
-    else {
-      canvas.drawLine(arc.a, arc.b, paint);
-    }
+    canvas.drawRect(rect, paint);
+    drawPoint(canvas, rect.center, color);
+  }
 
-    drawPoint(canvas, arc.a, color);
-    drawPoint(canvas, arc.b, color);
+  @override
+  void paint(Canvas canvas, Size size) {
+    drawRect(canvas, materialRect.start, Colors.green[500]);
+    drawRect(canvas, materialRect.end, Colors.red[500]);
 
-    final Point animatedPoint = new MaterialArcAnimation(arc: arc, parent: _repaint).value;
-    paint
-      ..color = color
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(animatedPoint, pointRadius, paint);
+    Point corner = _cornerFor(materialRect.start, materialRect._diagonal.endId);
+    drawPoint(canvas, corner, Colors.red[500]);
+
+    drawRect(canvas, materialRect.transform(_repaint.value), Colors.blue[500]);
   }
 
   @override
@@ -182,16 +250,22 @@ class AnimationDemo extends StatefulWidget {
 class AnimationDemoState extends State<AnimationDemo> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   final GlobalKey _backgroundKey = new GlobalKey();
-  AnimationController _controller = new AnimationController(duration: const Duration(milliseconds: 300));
+  final AnimationController _controller = new AnimationController(duration: const Duration(milliseconds: 1000));
 
+  CurvedAnimation _animation;
   _DragTarget _dragTarget;
-  Point _start = const Point(225.0, 175.0);
-  Point _end = const Point(150.0, 300.0);
+  Rect _start = new Rect.fromLTWH(150.0, 100.0, 150.0, 100.0);
+  Rect _end = new Rect.fromLTWH(200.0, 300.0, 100.0, 150.0);
+
+  void initState() {
+    super.initState();
+    _animation = new CurvedAnimation(parent: _controller, curve: Curves.ease);
+  }
 
   void _handlePointerDown(PointerDownEvent event) {
     final RenderBox box = _backgroundKey.currentContext.findRenderObject();
-    final double startOffset = (box.localToGlobal(_start) - event.position).distance;
-    final double endOffset = (box.localToGlobal(_end) - event.position).distance;
+    final double startOffset = (box.localToGlobal(_start.center) - event.position).distance;
+    final double endOffset = (box.localToGlobal(_end.center) - event.position).distance;
     if (startOffset < endOffset && startOffset < 50.0)
       _dragTarget = _DragTarget.start;
     else if (endOffset < 50.0)
@@ -204,12 +278,12 @@ class AnimationDemoState extends State<AnimationDemo> {
     switch (_dragTarget) {
       case _DragTarget.start:
         setState(() {
-          _start = _start + event.delta;
+          _start = _start.shift(event.delta);
         });
         break;
       case _DragTarget.end:
         setState(() {
-          _end = _end + event.delta;
+          _end = _end.shift(event.delta);
         });
         break;
     }
@@ -226,11 +300,22 @@ class AnimationDemoState extends State<AnimationDemo> {
 
   @override
   Widget build(BuildContext context) {
-    final MaterialArc arc = new MaterialArc(_start, _end);
+    final MaterialRect materialRect = new MaterialRect(_start, _end);
     return new Scaffold(
       key: _scaffoldKey,
       appBar: new AppBar(
-        title: new Text('Animation')
+        title: new Text('Animation - ${_simpleInterpolation ? "simple" : "arc"}'),
+        actions: <Widget>[
+          new IconButton(
+              icon: new Icon(Icons.rotate_90_degrees_ccw),
+            tooltip: 'Toggle arc path',
+            onPressed: () {
+              setState(() {
+                _simpleInterpolation = !_simpleInterpolation;
+              });
+            }
+          )
+        ]
       ),
       floatingActionButton: new FloatingActionButton(
         onPressed: _play,
@@ -243,9 +328,9 @@ class AnimationDemoState extends State<AnimationDemo> {
         child: new CustomPaint(
           key: _backgroundKey,
           painter: new _Background(
-            repaint: _controller,
+            repaint: _animation,
             themeData: Theme.of(context),
-            arc: arc
+            materialRect: materialRect
           )
         )
       )
