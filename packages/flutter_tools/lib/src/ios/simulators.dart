@@ -786,6 +786,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   String _lastLine;
 
   void _onDeviceLine(String line) {
+    printTrace('[DEVICE LOG] $line');
     Match multi = _lastMessageMultipleRegex.matchAsPrefix(line);
 
     if (multi != null) {
@@ -808,6 +809,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   }
 
   void _onSystemLine(String line) {
+    printTrace('[SYS LOG] $line');
     if (!_flutterRunnerRegex.hasMatch(line))
       return;
 
