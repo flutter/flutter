@@ -68,18 +68,20 @@ enum _DismissTransition {
 /// animated circular progress indicator is faded into view. When the scroll
 /// ends, if the indicator has been dragged far enough for it to become
 /// completely opaque, the refresh callback is called. The callback is
-/// expected to udpate the scrollback and then complete the Future it
-/// returns. The refresh indicator disappears after the callback's
+/// expected to update the scrollable's contents and then complete the Future
+/// it returns. The refresh indicator disappears after the callback's
 /// Future has completed.
 ///
 /// The required [scrollableKey] parameter identifies the scrollable widget
 /// whose scrollOffset is monitored by this RefreshIndicator. The same
-/// scrollableKey must also be set on the scrollable. See [Block.scrollableKey]
+/// scrollableKey must also be set on the scrollable. See [Block.scrollableKey],
 /// [ScrollableList.scrollableKey], etc.
 ///
 /// See also:
 ///
 ///  * <https://www.google.com/design/spec/patterns/swipe-to-refresh.html>
+///  * [RefreshIndicatorState] (can be used to programatically show the refresh indicator)
+///  * [RefreshProgressIndicator]
 class RefreshIndicator extends StatefulWidget {
   /// Creates a refresh indicator.
   ///
@@ -91,7 +93,9 @@ class RefreshIndicator extends StatefulWidget {
     this.child,
     this.displacement: 40.0,
     this.refresh,
-    this.location: RefreshIndicatorLocation.top
+    this.location: RefreshIndicatorLocation.top,
+    this.color,
+    this.backgroundColor
   }) : super(key: key) {
     assert(child != null);
     assert(refresh != null);
@@ -116,9 +120,17 @@ class RefreshIndicator extends StatefulWidget {
   /// Future must complete when the refresh operation is finished.
   final RefreshCallback refresh;
 
-  /// Where the refresh indicator should appear, RefreshIndicatorLocation.top
+  /// Where the refresh indicator should appear, [RefreshIndicatorLocation.top]
   /// by default.
   final RefreshIndicatorLocation location;
+
+  /// The progress indicator's foreground color. The current theme's
+  /// [ThemeData.primaryColor] by default.
+  final Color color;
+
+  /// The progress indicator's background color. The current theme's
+  /// [ThemeData.canvasColor] by default.
+  final Color backgroundColor;
 
   @override
   RefreshIndicatorState createState() => new RefreshIndicatorState();
@@ -156,8 +168,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> {
 
     // Fully opaque when we've reached config.displacement.
     _valueColor = new ColorTween(
-      begin: theme.primaryColor.withOpacity(0.0),
-      end: theme.primaryColor.withOpacity(1.0)
+      begin: (config.color ?? theme.primaryColor).withOpacity(0.0),
+      end: (config.color ?? theme.primaryColor).withOpacity(1.0)
     )
     .animate(new CurvedAnimation(
       parent: _sizeController,
@@ -369,7 +381,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> {
                       builder: (BuildContext context, Widget child) {
                         return new RefreshProgressIndicator(
                           value: showIndeterminateIndicator ? null : _value.value,
-                          valueColor: _valueColor
+                          valueColor: _valueColor,
+                          backgroundColor: config.backgroundColor
                         );
                       }
                     )

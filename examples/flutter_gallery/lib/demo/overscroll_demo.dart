@@ -31,15 +31,18 @@ class OverscrollDemoState extends State<OverscrollDemo> {
     Completer<Null> completer = new Completer<Null>();
     new Timer(new Duration(seconds: 3), () { completer.complete(null); });
     return completer.future.then((_) {
-      _scaffoldKey.currentState.showSnackBar(new SnackBar(
-       content: new Text("Refresh complete"),
-       action: new SnackBarAction(
-         label: 'RETRY',
-         onPressed: () {
-           _refreshIndicatorKey.currentState.show();
-         }
-       )
-      ));
+      final ScaffoldState scaffoldState = _scaffoldKey.currentState;
+      if (scaffoldState != null) {
+         scaffoldState.showSnackBar(new SnackBar(
+           content: new Text("Refresh complete"),
+           action: new SnackBarAction(
+             label: 'RETRY',
+             onPressed: () {
+               _refreshIndicatorKey.currentState.show();
+             }
+           )
+         ));
+       }
     });
   }
 
