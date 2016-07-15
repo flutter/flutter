@@ -511,6 +511,15 @@ class Rect {
       ..[3] = center.y + radius;
   }
 
+  /// Construct the smallest rectangle that encloses the given points.
+  Rect.fromPoints(Point a, Point b) {
+    _value
+      ..[0] = math.min(a.x, b.x)
+      ..[1] = math.min(a.y, b.y)
+      ..[2] = math.max(a.x, b.x)
+      ..[3] = math.max(a.y, b.y);
+  }
+
   static const int _kDataSize = 4;
   final Float32List _value = new Float32List(_kDataSize);
 
