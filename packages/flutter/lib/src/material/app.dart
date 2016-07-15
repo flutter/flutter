@@ -7,6 +7,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'arc.dart';
 import 'colors.dart';
 import 'overscroll_indicator.dart';
 import 'page.dart';
@@ -152,7 +153,17 @@ final ScrollConfigurationDelegate _indicatorScroll = new _IndicatorScrollConfigu
 final ScrollConfigurationDelegate _bounceScroll = new ScrollConfigurationDelegate();
 
 class _MaterialAppState extends State<MaterialApp> {
-  final HeroController _heroController = new HeroController();
+  HeroController _heroController;
+
+  @override
+  void initState() {
+    super.initState();
+    _heroController = new HeroController(createRectTween: _createRectTween);
+  }
+
+  RectTween _createRectTween(Rect begin, Rect end) {
+    return new MaterialRectArcTween(begin: begin, end: end);
+  }
 
   Route<dynamic> _onGenerateRoute(RouteSettings settings) {
     WidgetBuilder builder = config.routes[settings.name];

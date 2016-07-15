@@ -320,6 +320,35 @@ class PositionedTransition extends AnimatedWidget {
   }
 }
 
+class RelativePositionedTransition extends AnimatedWidget {
+  RelativePositionedTransition({
+    Key key,
+    @required Animation<Rect> rect,
+    @required this.size,
+    this.child
+  }) : super(key: key, animation: rect);
+
+  /// The animation that controls the child's size and position.
+  Animation<Rect> get rect => animation;
+
+  final Size size;
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final RelativeRect offsets = new RelativeRect.fromSize(rect.value, size);
+    return new Positioned(
+      top: offsets.top,
+      right: offsets.right,
+      bottom: offsets.bottom,
+      left: offsets.left,
+      child: child
+    );
+  }
+}
+
 /// A builder that builds a widget given a child.
 typedef Widget TransitionBuilder(BuildContext context, Widget child);
 

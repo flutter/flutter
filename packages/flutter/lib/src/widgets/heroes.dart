@@ -66,13 +66,13 @@ class _HeroManifest {
   final GlobalKey key;
   final Widget config;
   final Set<HeroState> sourceStates;
-  final RelativeRect currentRect;
+  final Rect currentRect;
   final double currentTurns;
 }
 
 abstract class HeroHandle {
   bool get alwaysAnimate;
-  _HeroManifest _takeChild(Rect animationArea, Animation<double> currentAnimation);
+  _HeroManifest _takeChild(Animation<double> currentAnimation);
 }
 
 class Hero extends StatefulWidget {
@@ -161,7 +161,7 @@ class HeroState extends State<Hero> implements HeroHandle {
   bool get alwaysAnimate => config.alwaysAnimate;
 
   @override
-  _HeroManifest _takeChild(Rect animationArea, Animation<double> currentAnimation) {
+  _HeroManifest _takeChild(Animation<double> currentAnimation) {
     assert(mounted);
     final RenderBox renderObject = context.findRenderObject();
     assert(renderObject != null);
@@ -175,12 +175,11 @@ class HeroState extends State<Hero> implements HeroHandle {
     final Point heroTopLeft = renderObject.localToGlobal(Point.origin);
     final Point heroBottomRight = renderObject.localToGlobal(renderObject.size.bottomRight(Point.origin));
     final Rect heroArea = new Rect.fromLTRB(heroTopLeft.x, heroTopLeft.y, heroBottomRight.x, heroBottomRight.y);
-    final RelativeRect startRect = new RelativeRect.fromRect(heroArea, animationArea);
     _HeroManifest result = new _HeroManifest(
       key: _key, // might be null, e.g. if the hero is returning to us
       config: config,
       sourceStates: new HashSet<HeroState>.from(<HeroState>[this]),
-      currentRect: startRect,
+      currentRect: heroArea,
       currentTurns: config.turns.toDouble()
     );
     if (_key != null)
@@ -224,6 +223,7 @@ class _HeroQuestState implements HeroHandle {
     this.key,
     this.child,
     this.sourceStates,
+    this.animationArea,
     this.targetRect,
     this.targetTurns,
     this.targetState,
@@ -237,10 +237,11 @@ class _HeroQuestState implements HeroHandle {
   final GlobalKey key;
   final Widget child;
   final Set<HeroState> sourceStates;
-  final RelativeRect targetRect;
+  final Rect animationArea;
+  final Rect targetRect;
   final int targetTurns;
   final HeroState targetState;
-  final RelativeRectTween currentRect;
+  final RectTween currentRect;
   final Tween<double> currentTurns;
 
   @override
@@ -250,7 +251,7 @@ class _HeroQuestState implements HeroHandle {
   bool _taken = false;
 
   @override
-  _HeroManifest _takeChild(Rect animationArea, Animation<double> currentAnimation) {
+  _HeroManifest _takeChild(Animation<double> currentAnimation) {
     assert(!taken);
     _taken = true;
     Set<HeroState> states = sourceStates;
@@ -266,8 +267,9 @@ class _HeroQuestState implements HeroHandle {
   }
 
   Widget build(BuildContext context, Animation<double> animation) {
-    return new PositionedTransition(
+    return new RelativePositionedTransition(
       rect: currentRect.animate(animation),
+      size: animationArea.size,
       child: new RotationTransition(
         turns: currentTurns.animate(animation),
         child: new KeyedSubtree(
@@ -286,10 +288,13 @@ class _HeroMatch {
   final Object tag;
 }
 
+typedef RectTween CreateRectTween(Rect begin, Rect end);
+
 class HeroParty {
-  HeroParty({ this.onQuestFinished });
+  HeroParty({ this.onQuestFinished, this.createRectTween });
 
   final VoidCallback onQuestFinished;
+  final CreateRectTween createRectTween;
 
   List<_HeroQuestState> _heroes = <_HeroQuestState>[];
   bool get isEmpty => _heroes.isEmpty;
@@ -302,8 +307,10 @@ class HeroParty {
     return result;
   }
 
-  RelativeRectTween createRectTween(RelativeRect begin, RelativeRect end) {
-    return new RelativeRectTween(begin: begin, end: end);
+  RectTween doCreateRectTween(Rect begin, Rect end) {
+    if (createRectTween != null)
+      return createRectTween(begin, end);
+    return new RectTween(begin: begin, end: end);
   }
 
   Tween<double> createTurnsTween(double begin, double end) {
@@ -331,30 +338,29 @@ class HeroParty {
       if ((heroPair.from == null && !heroPair.to.alwaysAnimate) ||
           (heroPair.to == null && !heroPair.from.alwaysAnimate))
         continue;
-      _HeroManifest from = heroPair.from?._takeChild(animationArea, _currentAnimation);
+      _HeroManifest from = heroPair.from?._takeChild(_currentAnimation);
       assert(heroPair.to == null || heroPair.to is HeroState);
-      _HeroManifest to = heroPair.to?._takeChild(animationArea, _currentAnimation);
+      _HeroManifest to = heroPair.to?._takeChild(_currentAnimation);
       assert(from != null || to != null);
       assert(to == null || to.sourceStates.length == 1);
       assert(to == null || to.currentTurns.floor() == to.currentTurns);
       HeroState targetState = to != null ? to.sourceStates.elementAt(0) : null;
       Set<HeroState> sourceStates = from != null ? from.sourceStates : new HashSet<HeroState>();
       sourceStates.remove(targetState);
-      RelativeRect sourceRect = from != null ? from.currentRect :
-        new RelativeRect.fromRect(to.currentRect.toRect(animationArea).center & Size.zero, animationArea);
-      RelativeRect targetRect = to != null ? to.currentRect :
-        new RelativeRect.fromRect(from.currentRect.toRect(animationArea).center & Size.zero, animationArea);
-      double sourceTurns = from != null ? from.currentTurns : 0.0;
-      double targetTurns = to != null ? to.currentTurns : 0.0;
+      Rect sourceRect = from?.currentRect ?? to.currentRect.center & Size.zero;
+      Rect targetRect = to?.currentRect ?? from.currentRect.center & Size.zero;
+      double sourceTurns = from?.currentTurns ?? 0.0;
+      double targetTurns = to?.currentTurns ?? 0.0;
       _newHeroes.add(new _HeroQuestState(
         tag: heroPair.tag,
-        key: from != null ? from.key : to.key,
-        child: to != null ? to.config : from.config,
+        key: from?.key ?? to.key,
+        child: to?.config ?? from.config,
         sourceStates: sourceStates,
+        animationArea: animationArea,
         targetRect: targetRect,
         targetTurns: targetTurns.floor(),
         targetState: targetState,
-        currentRect: createRectTween(sourceRect, targetRect),
+        currentRect: doCreateRectTween(sourceRect, targetRect),
         currentTurns: createTurnsTween(sourceTurns, targetTurns)
       ));
     }
@@ -400,8 +406,11 @@ class HeroParty {
 }
 
 class HeroController extends NavigatorObserver {
-  HeroController() {
-    _party = new HeroParty(onQuestFinished: _handleQuestFinished);
+  HeroController({ CreateRectTween createRectTween }) {
+    _party = new HeroParty(
+      onQuestFinished: _handleQuestFinished,
+      createRectTween: createRectTween
+    );
   }
 
   HeroParty _party;
