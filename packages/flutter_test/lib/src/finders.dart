@@ -107,7 +107,7 @@ class CommonFinders {
   ///
   /// Example:
   ///
-  ///     expect(tester, hasWidget(find.byWidgetPredicate(
+  ///     expect(tester, hasWidget(find.byElementPredicate(
   ///       // finds elements of type SingleChildRenderObjectElement, including
   ///       // those that are actually subclasses of that type.
   ///       // (contrast with byElementType, which only returns exact matches)
