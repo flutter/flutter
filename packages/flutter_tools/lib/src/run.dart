@@ -267,15 +267,17 @@ class RunAndStayResident {
         });
       }
 
-      ProcessSignal.SIGINT.watch().listen((ProcessSignal signal) {
+      ProcessSignal.SIGINT.watch().listen((ProcessSignal signal) async {
         _resetTerminal();
-        _stopLogger();
-        _stopApp();
+        await _stopLogger();
+        await _stopApp();
+        exit(0);
       });
-      ProcessSignal.SIGTERM.watch().listen((ProcessSignal signal) {
+      ProcessSignal.SIGTERM.watch().listen((ProcessSignal signal) async {
         _resetTerminal();
-        _stopLogger();
-        _stopApp();
+        await _stopLogger();
+        await _stopApp();
+        exit(0);
       });
     }
 
@@ -383,8 +385,8 @@ class RunAndStayResident {
       printStatus('Type "d" to send modified project files to the the client\'s DevFS.');
   }
 
-  void _stopLogger() {
-    _loggingSubscription?.cancel();
+  Future<dynamic> _stopLogger() {
+    return _loggingSubscription?.cancel();
   }
 
   void _resetTerminal() {
@@ -441,9 +443,13 @@ class DevFS {
   final Observatory observatory;
 
   String fsName;
+  String uri;
   Map<String, _DevFSFileEntry> entries = <String, _DevFSFileEntry>{};
 
-  Future<dynamic> init() => observatory.createDevFS(fsName);
+  Future<Null> init() async {
+    CreateDevFSResponse response = await observatory.createDevFS(fsName);
+    uri = response.uri;
+  }
 
   void stageFile(String devPath, File file) {
     entries.putIfAbsent(devPath, () => new _DevFSFileEntry(devPath, file));
@@ -456,7 +462,7 @@ class DevFS {
       .toList();
 
     for (_DevFSFileEntry entry in toSend) {
-      printTrace('sending devfs://$fsName/${entry.devPath}');
+      printTrace('sending to devfs: ${entry.devPath}');
       entry.updateLastModified();
     }
 
@@ -471,7 +477,16 @@ class DevFS {
       List<_DevFSFile> files = toSend.map((_DevFSFileEntry entry) {
         return new _DevFSFile('/${entry.devPath}', entry.file);
       }).toList();
-      await observatory.writeDevFSFiles(fsName, files: files);
+
+      // TODO(devoncarew): Batch this up in larger groups using writeDevFSFiles().
+      // The current implementation leaves dangling service protocol calls on a timeout.
+      await Future.wait(files.map((_DevFSFile file) {
+        return observatory.writeDevFSFile(
+          fsName,
+          path: file.path,
+          fileContents: file.getContents()
+        );
+      })).timeout(new Duration(seconds: 10));
     } finally {
       status.stop(showElapsedTime: true);
     }
