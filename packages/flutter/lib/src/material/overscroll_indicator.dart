@@ -55,12 +55,12 @@ class _Painter extends CustomPainter {
           path.moveTo(0.0, 0.0);
           path.relativeLineTo(0.0, height);
           path.relativeLineTo(rectBias, 0.0);
-          path.relativeCubicTo(arcBias, height * -0.25, arcBias, height * -0.75, arcBias,  0.0, -height);
+          path.relativeCubicTo(arcBias, height * -0.25, arcBias, height * -0.75, 0.0, -height);
         } else {
           path.moveTo(size.width, 0.0);
           path.relativeLineTo(0.0, height);
           path.relativeLineTo(-rectBias, 0.0);
-          path.relativeCubicTo(-arcBias, height * -0.25, -arcBias, height * -0.75, arcBias,  0.0, -height);
+          path.relativeCubicTo(-arcBias, height * -0.25, -arcBias, height * -0.75, 0.0, -height);
         }
         break;
     }

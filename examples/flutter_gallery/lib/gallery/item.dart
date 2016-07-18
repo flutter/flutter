@@ -200,7 +200,7 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
   ),
   new GalleryItem(
     title: 'Tabs',
-    subtitle: 'Tabs with indepdently scrollable views',
+    subtitle: 'Tabs with independently scrollable views',
     routeName: TabsDemo.routeName,
     buildRoute: (BuildContext context) => new TabsDemo()
   ),
