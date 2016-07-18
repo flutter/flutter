@@ -307,7 +307,7 @@ class IOSDevice extends Device {
       return null;
     }
 
-    printTrace("Successfully forwarded remote $serviceName port $remotePort to $localPort.");
+    printStatus('$serviceName listening on http://127.0.0.1:$localPort');
     return localPort;
   }
 
