@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
@@ -68,4 +69,35 @@ void applyMocksToCommand(FlutterCommand command) {
   command
     ..applicationPackages = new MockApplicationPackageStore()
     ..commandValidator = () => true;
+}
+
+class MockDevFSOperations implements DevFSOperations {
+  final List<String> messages = new List<String>();
+
+  bool contains(String match) {
+    bool result = messages.contains(match);
+    messages.clear();
+    return result;
+  }
+
+  @override
+  Future<Uri> create(String fsName) async {
+    messages.add('create $fsName');
+    return Uri.parse('file:///$fsName');
+  }
+
+  @override
+  Future<dynamic> destroy(String fsName) async {
+    messages.add('destroy $fsName');
+  }
+
+  @override
+  Future<dynamic> writeFiles(String fsName, List<DevFSEntry> entries) async {
+    StringBuffer sb = new StringBuffer();
+    sb.write('writeFiles $fsName');
+    for (DevFSEntry entry in entries) {
+      sb.write(' ${entry.devicePath}');
+    }
+    messages.add(sb.toString());
+  }
 }
