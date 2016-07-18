@@ -21,6 +21,7 @@ const char kTraceStartup[] = "trace-startup";
 const char kDeviceObservatoryPort[] = "observatory-port";
 const char kAotSnapshotPath[] = "aot-snapshot-path";
 const char kNoRedirectToSyslog[] = "no-redirect-to-syslog";
+const char kCacheDirPath[] = "cache-dir-path";
 
 void PrintUsage(const std::string& executable_name) {
   std::cerr << "Usage: " << executable_name

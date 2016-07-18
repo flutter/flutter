@@ -138,6 +138,10 @@ void Shell::InitStandalone(std::string icu_data_path) {
   settings.trace_startup = command_line.HasSwitch(switches::kTraceStartup);
   settings.aot_snapshot_path = command_line.GetSwitchValueASCII(
       switches::kAotSnapshotPath);
+  if (command_line.HasSwitch(switches::kCacheDirPath)) {
+    settings.temp_directory_path =
+        command_line.GetSwitchValueASCII(switches::kCacheDirPath);
+  }
   blink::SkySettings::Set(settings);
 
   Init();

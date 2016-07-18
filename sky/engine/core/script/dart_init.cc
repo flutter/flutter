@@ -494,6 +494,11 @@ void InitDartVM() {
   {
     TRACE_EVENT0("flutter", "dart::bin::BootstrapDartIo");
     dart::bin::BootstrapDartIo();
+
+    const SkySettings& settings = SkySettings::Get();
+    if (!settings.temp_directory_path.empty()) {
+      dart::bin::SetSystemTempDirectory(settings.temp_directory_path.c_str());
+    }
   }
 
   DartMojoInternal::SetHandleWatcherProducerHandle(

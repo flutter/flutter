@@ -121,13 +121,13 @@ public class FlutterMain {
         try {
             sResourceExtractor.waitForCompletion();
 
-            String[] shellArgs;
+            String[] shellArgs = (args != null) ? Arrays.copyOf(args, args.length + 1) : new String[1];
             if (sIsPrecompiled) {
-                shellArgs = (args != null) ? Arrays.copyOf(args, args.length + 1) : new String[1];
                 shellArgs[shellArgs.length - 1] =
                     "--aot-snapshot-path=" + PathUtils.getDataDirectory(applicationContext);
             } else {
-                shellArgs = args;
+                shellArgs[shellArgs.length - 1] =
+                    "--cache-dir-path=" + PathUtils.getCacheDirectory(applicationContext);
             }
 
             nativeInit(applicationContext, shellArgs);

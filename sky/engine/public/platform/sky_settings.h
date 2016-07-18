@@ -20,6 +20,7 @@ struct SkySettings {
   bool enable_dart_checked_mode = false;
   bool trace_startup = false;
   std::string aot_snapshot_path;
+  std::string temp_directory_path;
 
   static const SkySettings& Get();
   static void Set(const SkySettings& settings);
