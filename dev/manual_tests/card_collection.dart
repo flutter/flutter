@@ -126,7 +126,7 @@ class CardCollectionState extends State<CardCollection> {
       child: new IconTheme(
         data: const IconThemeData(color: Colors.black),
         child: new Block(children: <Widget>[
-          new DrawerHeader(content: new Center(child: new Text('Options'))),
+          new DrawerHeader(child: new Center(child: new Text('Options'))),
           buildDrawerCheckbox("Make card labels editable", _editable, _toggleEditable),
           buildDrawerCheckbox("Snap fling scrolls to center", _snapToCenter, _toggleSnapToCenter),
           buildDrawerCheckbox("Fixed size cards", _fixedSizeCards, _toggleFixedSizeCards),

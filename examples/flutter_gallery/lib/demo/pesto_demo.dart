@@ -121,7 +121,8 @@ class _PestoDemoState extends State<PestoDemo> {
       child: new Block(
         children: <Widget>[
           new DrawerHeader(
-            content: new Column(
+            child: new Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 new Container(
                   decoration: new BoxDecoration(
@@ -131,7 +132,7 @@ class _PestoDemoState extends State<PestoDemo> {
                   width: 72.0,
                   height: 72.0,
                   padding: const EdgeInsets.all(2.0),
-                  margin: const EdgeInsets.only(bottom: 8.0),
+                  margin: const EdgeInsets.only(bottom: 16.0),
                   child: new ClipOval(
                     child: new Image(
                       image: new AssetImage(_kUserImage),
