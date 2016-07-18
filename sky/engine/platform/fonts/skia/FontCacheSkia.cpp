@@ -215,17 +215,9 @@ PassRefPtr<SimpleFontData> FontCache::getLastResortFallbackFont(const FontDescri
 
 sk_sp<SkTypeface> FontCache::createTypeface(const FontDescription& fontDescription, const FontFaceCreationParams& creationParams, CString& name)
 {
-#if !OS(WIN) && !OS(ANDROID) && !OS(IOS) && !OS(MACOSX)
+#if !OS(WIN) && !OS(ANDROID)
     if (creationParams.creationType() == CreateFontByFciIdAndTtcIndex) {
-        // TODO(dro): crbug.com/381620 Use creationParams.ttcIndex() after
-        // https://code.google.com/p/skia/issues/detail?id=1186 gets fixed.
-        sk_sp<SkTypeface> typeface;
-        if (Platform::current()->sandboxSupport())
-            typeface = SkTypeface::MakeFromStream(streamForFontconfigInterfaceId(creationParams.fontconfigInterfaceId()));
-        else
-            typeface = SkTypeface::MakeFromFile(creationParams.filename().data());
-
-        return typeface;
+        return SkTypeface::MakeFromFile(creationParams.filename().data());
     }
 #endif
 

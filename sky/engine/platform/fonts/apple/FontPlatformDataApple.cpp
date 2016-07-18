@@ -28,9 +28,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "base/logging.h"
 #include "sky/engine/platform/fonts/FontPlatformData.h"
-#include "sky/engine/platform/fonts/FontCache.h"
 #include "third_party/skia/include/core/SkTypeface.h"
 
 namespace blink {
@@ -47,7 +45,7 @@ void FontPlatformData::setupPaint(SkPaint* paint,
   paint->setTypeface(m_typeface);
   paint->setFakeBoldText(m_syntheticBold);
   paint->setTextSkewX(m_syntheticItalic ? -SK_Scalar1 / 4 : 0);
-  paint->setAutohinted(false); // freetype specific
+  paint->setAutohinted(false);  // freetype specific
   paint->setLCDRenderText(shouldSmoothFonts);
   paint->setSubpixelText(useSubpixelText);
   paint->setHinting(SkPaint::kNo_Hinting);
@@ -75,11 +73,4 @@ bool FontPlatformData::defaultUseSubpixelPositioning() {
   return false;
 }
 
-void FontCache::getFontForCharacter(
-    UChar32 c,
-    const char* preferredLocale,
-    FontCache::PlatformFallbackFont* fallbackFont) {
-  DCHECK(false);
-}
-
-}  // namespace blink
+}  // namespace  blink

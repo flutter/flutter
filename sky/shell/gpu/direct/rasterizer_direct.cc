@@ -17,7 +17,8 @@
 namespace sky {
 namespace shell {
 
-RasterizerDirect::RasterizerDirect() : binding_(this), weak_factory_(this) {}
+RasterizerDirect::RasterizerDirect()
+    : binding_(this), platform_view_(nullptr), weak_factory_(this) {}
 
 RasterizerDirect::~RasterizerDirect() {
   weak_factory_.InvalidateWeakPtrs();

@@ -332,6 +332,14 @@ source_set("platform") {
     sources += [ "fonts/apple/FontPlatformDataApple.cpp" ]
   }
 
+  if (is_ios) {
+    sources += [ "fonts/apple/FontCacheIOS.mm" ]
+  }
+
+  if (is_mac && !is_ios) {
+    sources += [ "fonts/apple/FontCacheMac.cpp" ]
+  }
+
   configs += [
     "//sky/engine:config",
     "//sky/engine:non_test_config",

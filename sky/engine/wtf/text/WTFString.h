@@ -376,14 +376,6 @@ public:
     RetainPtr<CFStringRef> createCFString() const;
 #endif
 
-#ifdef __OBJC__
-    String(NSString*);
-
-    // This conversion maps NULL to "", which loses the meaning of NULL, but we
-    // need this mapping because AppKit crashes when passed nil NSStrings.
-    operator NSString*() const { if (!m_impl) return @""; return *m_impl; }
-#endif
-
     static String make8BitFrom16BitSource(const UChar*, size_t);
     template<size_t inlineCapacity>
     static String make8BitFrom16BitSource(const Vector<UChar, inlineCapacity>& buffer)
@@ -511,14 +503,6 @@ inline bool String::containsOnlyLatin1() const
         ored |= characters[i];
     return !(ored & 0xFF00);
 }
-
-
-#ifdef __OBJC__
-// This is for situations in WebKit where the long standing behavior has been
-// "nil if empty", so we try to maintain longstanding behavior for the sake of
-// entrenched clients
-inline NSString* nsStringNilIfEmpty(const String& str) {  return str.isEmpty() ? nil : (NSString*)str; }
-#endif
 
 inline bool String::containsOnlyASCII() const
 {

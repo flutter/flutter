@@ -140,10 +140,6 @@ public:
 #if USE(CF)
     AtomicString(CFStringRef s) :  m_string(add(s)) { }
 #endif
-#ifdef __OBJC__
-    AtomicString(NSString* s) : m_string(add((CFStringRef)s)) { }
-    operator NSString*() const { return m_string; }
-#endif
     // AtomicString::fromUTF8 will return a null string if
     // the input data contains invalid UTF-8 sequences.
     static AtomicString fromUTF8(const char*, size_t);
