@@ -31,7 +31,7 @@ class _Painter extends CustomPainter {
 
   void paintIndicator(Canvas canvas, Size size) {
     final double rectBias = extent / 2.0;
-    final double arcBias = extent;
+    final double arcBias = extent * 0.66;
 
     final Path path = new Path();
     switch(scrollDirection) {
@@ -41,12 +41,12 @@ class _Painter extends CustomPainter {
           path.moveTo(0.0, 0.0);
           path.relativeLineTo(width, 0.0);
           path.relativeLineTo(0.0, rectBias);
-          path.relativeQuadraticBezierTo(width / -2.0, arcBias, -width, 0.0);
+          path.relativeCubicTo(width * -0.25, arcBias, width * -0.75, arcBias, -width, 0.0);
         } else {
           path.moveTo(0.0, size.height);
           path.relativeLineTo(width, 0.0);
           path.relativeLineTo(0.0, -rectBias);
-          path.relativeQuadraticBezierTo(width / -2.0, -arcBias, -width, 0.0);
+          path.relativeCubicTo(width * -0.25, -arcBias, width * -0.75, -arcBias, -width, 0.0);
         }
         break;
       case Axis.horizontal:
@@ -55,12 +55,12 @@ class _Painter extends CustomPainter {
           path.moveTo(0.0, 0.0);
           path.relativeLineTo(0.0, height);
           path.relativeLineTo(rectBias, 0.0);
-          path.relativeQuadraticBezierTo(arcBias, height / -2.0, 0.0, -height);
+          path.relativeCubicTo(arcBias, height * -0.25, arcBias, height * -0.75, arcBias,  0.0, -height);
         } else {
           path.moveTo(size.width, 0.0);
           path.relativeLineTo(0.0, height);
           path.relativeLineTo(-rectBias, 0.0);
-          path.relativeQuadraticBezierTo(-arcBias, height / -2.0, 0.0, -height);
+          path.relativeCubicTo(-arcBias, height * -0.25, -arcBias, height * -0.75, arcBias,  0.0, -height);
         }
         break;
     }
