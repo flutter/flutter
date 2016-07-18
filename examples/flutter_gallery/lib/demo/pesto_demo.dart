@@ -238,7 +238,7 @@ class _RecipeCard extends StatelessWidget {
             children: <Widget>[
               new Image(
                 image: new AssetImage(recipe.imagePath),
-                fit: ImageFit.scaleDown
+                fit: ImageFit.contain
               ),
               new Flexible(
                 child: new Row(
@@ -282,47 +282,41 @@ class _RecipePage extends StatefulWidget {
 }
 
 class _RecipePageState extends State<_RecipePage> {
+  static final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   final TextStyle menuItemStyle = _textStyle(15.0).copyWith(color: Colors.black54, height: 24.0/15.0);
+
+  double _getAppBarHeight(BuildContext context) => MediaQuery.of(context).size.height * 0.3;
 
   @override
   Widget build(BuildContext context) {
-    // Overlays a transparent app bar onto the page. We can't use a Scaffold
-    // here because that doesn't allow us to overlap the app bar on top of the
-    // content.
-    final double statusBarHeight = MediaQuery.of(context).padding.top;
-    return new Stack(
-      children: <Widget>[
-        _buildContainer(context),
-        new Positioned(
-          top: 0.0,
-          left: 0.0,
-          right: 0.0,
-          child: new Container(
-            height: kToolBarHeight + statusBarHeight,
-            padding: new EdgeInsets.only(top: statusBarHeight),
-            child: new AppBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              leading: new IconButton(
-                icon: new Icon(Icons.arrow_back),
-                onPressed: () => Navigator.pop(context),
-                tooltip: 'Back'
-              ),
-              actions: <Widget>[
-                new PopupMenuButton<String>(
-                  onSelected: (String item) {},
-                  itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
-                    _buildMenuItem(Icons.share, 'Tweet recipe'),
-                    _buildMenuItem(Icons.email, 'Email recipe'),
-                    _buildMenuItem(Icons.message, 'Message recipe'),
-                    _buildMenuItem(Icons.people, 'Share on Facebook'),
-                  ]
-                )
-              ]
-            )
+    return new Scaffold(
+      key: _scaffoldKey,
+      appBarBehavior: AppBarBehavior.scroll,
+      appBar: new AppBar(
+        expandedHeight: _getAppBarHeight(context),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: new IconButton(
+          icon: new Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+          tooltip: 'Back'
+        ),
+        actions: <Widget>[
+          new PopupMenuButton<String>(
+            onSelected: (String item) {},
+            itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
+              _buildMenuItem(Icons.share, 'Tweet recipe'),
+              _buildMenuItem(Icons.email, 'Email recipe'),
+              _buildMenuItem(Icons.message, 'Message recipe'),
+              _buildMenuItem(Icons.people, 'Share on Facebook'),
+            ]
           )
-        )
-      ]
+        ],
+        // This empty space keeps the app bar from moving until the screen is
+        // scrolled at least _getAppBarHeight().
+        flexibleSpace: new Container()
+      ),
+      body: _buildContainer(context)
     );
   }
 
@@ -350,7 +344,7 @@ class _RecipePageState extends State<_RecipePage> {
           child: new Block(
             children: <Widget>[
               new Padding(
-                padding: new EdgeInsets.only(top: screenSize.height*0.3),
+                padding: new EdgeInsets.only(top: _getAppBarHeight(context)),
                 child: new Stack(
                   children: <Widget>[
                     new Padding(
