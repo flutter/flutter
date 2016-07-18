@@ -142,14 +142,10 @@ class Observatory {
   // DevFS / VM virtual file system methods
 
   /// Create a new file system.
-  ///
-  /// When you create a file system you provide a fsName parameter. Given the
-  /// [fsName] parameter you can build all the URIs you need with the following
-  /// format:
-  ///
-  ///     dart-devfs://$fsName/$path
-  Future<Response> createDevFS(String fsName) {
-    return sendRequest('_createDevFS', <String, dynamic> { 'fsName': fsName });
+  Future<CreateDevFSResponse> createDevFS(String fsName) {
+    return sendRequest(
+      '_createDevFS', <String, dynamic> { 'fsName': fsName }
+    ).then((Response response) => new CreateDevFSResponse(response.response));
   }
 
   /// List the available file systems.
@@ -175,21 +171,12 @@ class Observatory {
   }
 
   // Write multiple files into a file system.
-  Future<Response> writeDevFSFiles(String fsName, {
-    List<DevFSFile> files
-  }) {
+  Future<Response> writeDevFSFiles(String fsName, { List<DevFSFile> files }) {
     assert(files != null);
 
     return sendRequest('_writeDevFSFiles', <String, dynamic> {
       'fsName': fsName,
       'files': files.map((DevFSFile file) => file.toJson()).toList()
-    });
-  }
-
-  // Read one file from a file system.
-  Future<List<int>> readDevFSFile() {
-    return sendRequest('_readDevFSFile').then((Response response) {
-      return BASE64.decode(response.response['fileContents']);
     });
   }
 
@@ -229,9 +216,10 @@ class Observatory {
   }
 
   Future<Response> flutterExit(String isolateId) {
-    return peer.sendRequest('ext.flutter.exit', <String, dynamic>{
-      'isolateId': isolateId
-    }).then((dynamic result) => new Response(result));
+    return peer
+      .sendRequest('ext.flutter.exit', <String, dynamic>{ 'isolateId': isolateId })
+      .then((dynamic result) => new Response(result))
+      .timeout(new Duration(seconds: 2), onTimeout: () => null);
   }
 
   void _addIsolate(IsolateRef isolate) {
@@ -276,6 +264,13 @@ class Response {
 
   @override
   String toString() => response.toString();
+}
+
+class CreateDevFSResponse extends Response {
+  CreateDevFSResponse(Map<String, dynamic> response) : super(response);
+
+  String get name => response['name'];
+  String get uri => response['uri'];
 }
 
 class VM extends Response {
