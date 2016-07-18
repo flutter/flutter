@@ -479,6 +479,7 @@ class DevFS {
       }).toList();
 
       // TODO(devoncarew): Batch this up in larger groups using writeDevFSFiles().
+      // The current implementation leaves dangling service protocol calls on a timeout.
       await Future.wait(files.map((_DevFSFile file) {
         return observatory.writeDevFSFile(
           fsName,

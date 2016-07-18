@@ -142,10 +142,9 @@ class Observatory {
   // DevFS / VM virtual file system methods
 
   /// Create a new file system.
-  Future<CreateDevFSResponse> createDevFS(String fsName) {
-    return sendRequest(
-      '_createDevFS', <String, dynamic> { 'fsName': fsName }
-    ).then((Response response) => new CreateDevFSResponse(response.response));
+  Future<CreateDevFSResponse> createDevFS(String fsName) async {
+    Response response = await sendRequest('_createDevFS', <String, dynamic> { 'fsName': fsName });
+    return new CreateDevFSResponse(response.response);
   }
 
   /// List the available file systems.
