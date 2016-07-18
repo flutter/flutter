@@ -94,15 +94,22 @@ class FontFallbackSelector {
         CTFontCreateWithFontDescriptor(desc.get(), ui_desc.pointSize, nullptr)};
   }
 
-  CFRef<CTFontDescriptorRef> fallbackFont(unichar glyph) {
+  CFRef<CTFontDescriptorRef> fallbackFont(UChar32 glyph) {
     if (!_prototype) {
       return {};
     }
 
     base::mac::ScopedNSAutoreleasePool pool;
 
-    CFRef<CFStringRef> unicode_string(CFStringCreateWithFormat(
-        kCFAllocatorDefault, nullptr, CFSTR("%C"), glyph));
+    glyph = CFSwapInt32HostToLittle(glyph);
+
+    CFRef<CFStringRef> unicode_string(CFStringCreateWithBytes(
+        kCFAllocatorDefault,                     // allocator
+        reinterpret_cast<const UInt8*>(&glyph),  // buffer
+        sizeof(glyph),                           // size
+        kCFStringEncodingUTF32LE,                // excoding
+        false                                    // external representation
+        ));
 
     if (!unicode_string) {
       return {};
