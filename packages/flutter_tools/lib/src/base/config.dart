@@ -11,11 +11,7 @@ import 'context.dart';
 
 class Config {
   Config([File configFile]) {
-    if (configFile == null)
-      configFile = new File(path.join(_userHomeDir(), '.flutter_settings'));
-
-    _configFile = configFile;
-
+    _configFile = configFile ?? new File(path.join(_userHomeDir(), '.flutter_settings'));
     if (_configFile.existsSync())
       _values = JSON.decode(_configFile.readAsStringSync());
   }
