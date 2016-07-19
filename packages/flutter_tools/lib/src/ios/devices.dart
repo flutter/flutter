@@ -232,7 +232,7 @@ class IOSDevice extends Device {
     int localObsPort;
     int localDiagPort;
 
-    if (!debuggingOptions.debuggingEnabled || mode == BuildMode.release) {
+    if (!debuggingOptions.debuggingEnabled) {
       // If debugging is not enabled, just launch the application and continue.
       printTrace("Debugging is not enabled");
       installationResult = await runCommandAndStreamOutput(launchCommand, trace: true);
@@ -253,11 +253,17 @@ class IOSDevice extends Device {
 
         printTrace("Application launched on the device. Attempting to forward ports.");
 
-        return Future.wait(<Future<int>>[
-          _acquireAndForwardPort(ProtocolDiscovery.kObservatoryService, debuggingOptions.observatoryPort),
-          _acquireAndForwardPort(ProtocolDiscovery.kDiagnosticService, debuggingOptions.diagnosticPort),
-        ]);
+        Future<int> forwardObsPort = _acquireAndForwardPort(ProtocolDiscovery.kObservatoryService,
+                                                            debuggingOptions.observatoryPort);
+        Future<int> forwardDiagPort;
+        if (debuggingOptions.buildMode == BuildMode.debug) {
+          forwardDiagPort = _acquireAndForwardPort(ProtocolDiscovery.kDiagnosticService,
+                                                   debuggingOptions.diagnosticPort);
+        } else {
+          forwardDiagPort = new Future.value(null);
+        }
 
+        return Future.wait(<Future<int>>[forwardObsPort, forwardDiagPort]);
       });
 
       printTrace("Local Observatory Port: ${ports[0]}");
