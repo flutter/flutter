@@ -864,11 +864,12 @@ void paintImage({
       break;
     case ImageFit.scaleDown:
       sourceSize = inputSize;
-      destinationSize = outputSize;
-      if (sourceSize.height > destinationSize.height)
-        destinationSize = new Size(sourceSize.width * destinationSize.height / sourceSize.height, sourceSize.height);
-      if (sourceSize.width > destinationSize.width)
-        destinationSize = new Size(destinationSize.width, sourceSize.height * destinationSize.width / sourceSize.width);
+      destinationSize = inputSize;
+      final double aspectRatio = inputSize.width / inputSize.height;
+      if (destinationSize.height > outputSize.height)
+        destinationSize = new Size(outputSize.height * aspectRatio, outputSize.height);
+      if (destinationSize.width > outputSize.width)
+        destinationSize = new Size(outputSize.width, outputSize.width / aspectRatio);
       break;
   }
   if (centerSlice != null) {

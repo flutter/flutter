@@ -168,11 +168,14 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
       child: new Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          new Switch(value: switchValue, onChanged: (bool value) {
-            setState(() {
+          new Switch(
+            value: switchValue,
+            onChanged: (bool value) {
+              setState(() {
               switchValue = value;
-            });
-          }),
+              });
+            }
+          ),
           // Disabled switches
           new Switch(value: true, onChanged: null),
           new Switch(value: false, onChanged: null)

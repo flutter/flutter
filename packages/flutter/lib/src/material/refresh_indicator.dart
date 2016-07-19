@@ -57,24 +57,31 @@ enum _RefreshIndicatorMode {
   dismiss  // Animating the indicator's fade-out.
 }
 
+enum _DismissTransition {
+  shrink, // Refresh callback completed, scale the indicator to 0.
+  slide // No refresh, translate the indicator out of view.
+}
+
 /// A widget that supports the Material "swipe to refresh" idiom.
 ///
 /// When the child's vertical Scrollable descendant overscrolls, an
 /// animated circular progress indicator is faded into view. When the scroll
 /// ends, if the indicator has been dragged far enough for it to become
 /// completely opaque, the refresh callback is called. The callback is
-/// expected to udpate the scrollback and then complete the Future it
-/// returns. The refresh indicator disappears after the callback's
+/// expected to update the scrollable's contents and then complete the Future
+/// it returns. The refresh indicator disappears after the callback's
 /// Future has completed.
 ///
 /// The required [scrollableKey] parameter identifies the scrollable widget
 /// whose scrollOffset is monitored by this RefreshIndicator. The same
-/// scrollableKey must also be set on the scrollable. See [Block.scrollableKey]
+/// scrollableKey must also be set on the scrollable. See [Block.scrollableKey],
 /// [ScrollableList.scrollableKey], etc.
 ///
 /// See also:
 ///
 ///  * <https://www.google.com/design/spec/patterns/swipe-to-refresh.html>
+///  * [RefreshIndicatorState] (can be used to programatically show the refresh indicator)
+///  * [RefreshProgressIndicator]
 class RefreshIndicator extends StatefulWidget {
   /// Creates a refresh indicator.
   ///
@@ -86,7 +93,9 @@ class RefreshIndicator extends StatefulWidget {
     this.child,
     this.displacement: 40.0,
     this.refresh,
-    this.location: RefreshIndicatorLocation.top
+    this.location: RefreshIndicatorLocation.top,
+    this.color,
+    this.backgroundColor
   }) : super(key: key) {
     assert(child != null);
     assert(refresh != null);
@@ -111,15 +120,25 @@ class RefreshIndicator extends StatefulWidget {
   /// Future must complete when the refresh operation is finished.
   final RefreshCallback refresh;
 
-  /// Where the refresh indicator should appear, RefreshIndicatorLocation.top
+  /// Where the refresh indicator should appear, [RefreshIndicatorLocation.top]
   /// by default.
   final RefreshIndicatorLocation location;
 
+  /// The progress indicator's foreground color. The current theme's
+  /// [ThemeData.primaryColor] by default.
+  final Color color;
+
+  /// The progress indicator's background color. The current theme's
+  /// [ThemeData.canvasColor] by default.
+  final Color backgroundColor;
+
   @override
-  _RefreshIndicatorState createState() => new _RefreshIndicatorState();
+  RefreshIndicatorState createState() => new RefreshIndicatorState();
 }
 
-class _RefreshIndicatorState extends State<RefreshIndicator> {
+/// Contains the state for a [RefreshIndicator]. This class can be used to
+/// programmatically show the refresh indicator, see the [show] method.
+class RefreshIndicatorState extends State<RefreshIndicator> {
   final AnimationController _sizeController = new AnimationController();
   final AnimationController _scaleController = new AnimationController();
   Animation<double> _sizeFactor;
@@ -127,10 +146,7 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
   Animation<double> _value;
   Animation<Color> _valueColor;
 
-  double _scrollOffset;
-  double _containerExtent;
-  double _minScrollOffset;
-  double _maxScrollOffset;
+  double _dragOffset;
   bool _isIndicatorAtTop = true;
   _RefreshIndicatorMode _mode;
   Future<Null> _pendingRefreshFuture;
@@ -152,8 +168,8 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
 
     // Fully opaque when we've reached config.displacement.
     _valueColor = new ColorTween(
-      begin: theme.primaryColor.withOpacity(0.0),
-      end: theme.primaryColor.withOpacity(1.0)
+      begin: (config.color ?? theme.primaryColor).withOpacity(0.0),
+      end: (config.color ?? theme.primaryColor).withOpacity(1.0)
     )
     .animate(new CurvedAnimation(
       parent: _sizeController,
@@ -169,54 +185,42 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
     super.dispose();
   }
 
-  void _updateState(ScrollableState scrollable) {
+  bool _isValidScrollable(ScrollableState scrollable) {
+    if (scrollable == null)
+      return false;
     final Axis axis = scrollable.config.scrollDirection;
-    if (axis != Axis.vertical || scrollable.scrollBehavior is! ExtentScrollBehavior)
-      return;
-    final ExtentScrollBehavior scrollBehavior = scrollable.scrollBehavior;
-    _scrollOffset = scrollable.scrollOffset;
-    _containerExtent = scrollBehavior.containerExtent;
-    _minScrollOffset = scrollBehavior.minScrollOffset;
-    _maxScrollOffset = scrollBehavior.maxScrollOffset;
+    return axis == Axis.vertical && scrollable.scrollBehavior is ExtentScrollBehavior;
   }
 
-  void _handlePointerDown(PointerDownEvent event) {
-    final ScrollableState scrollable = config.scrollableKey?.currentState;
-    if (scrollable == null)
-      return;
-
-    _updateState(scrollable);
-    _scaleController.value = 0.0;
-    _sizeController.value = 0.0;
-    setState(() {
-      _mode = _RefreshIndicatorMode.drag;
-    });
-  }
-
-  double _overscrollDistance() {
-    final ScrollableState scrollable = config.scrollableKey?.currentState;
-    if (scrollable == null)
-      return 0.0;
-
-    final double oldOffset = _scrollOffset;
-    final double newOffset = scrollable.scrollOffset;
-    _updateState(scrollable);
-
-    if ((newOffset - oldOffset).abs() < kPixelScrollTolerance.distance)
-      return 0.0;
-
+  bool _isScrolledToLimit(ScrollableState scrollable) {
+    final double minScrollOffset = scrollable.scrollBehavior.minScrollOffset;
+    final double maxScrollOffset = scrollable.scrollBehavior.maxScrollOffset;
+    final double scrollOffset = scrollable.scrollOffset;
     switch (config.location) {
       case RefreshIndicatorLocation.top:
-        return newOffset < _minScrollOffset ? _minScrollOffset - newOffset : 0.0;
-
+        return scrollOffset <= minScrollOffset;
       case RefreshIndicatorLocation.bottom:
-        return newOffset > _maxScrollOffset ? newOffset - _maxScrollOffset : 0.0;
+        return scrollOffset >= maxScrollOffset;
+      case RefreshIndicatorLocation.both:
+        return scrollOffset <= minScrollOffset || scrollOffset >= maxScrollOffset;
+    }
+    return false;
+  }
 
+  double _overscrollDistance(ScrollableState scrollable) {
+    final double minScrollOffset = scrollable.scrollBehavior.minScrollOffset;
+    final double maxScrollOffset = scrollable.scrollBehavior.maxScrollOffset;
+    final double scrollOffset = scrollable.scrollOffset;
+    switch (config.location) {
+      case RefreshIndicatorLocation.top:
+        return  scrollOffset <= minScrollOffset ? -_dragOffset : 0.0;
+      case RefreshIndicatorLocation.bottom:
+        return scrollOffset >= maxScrollOffset ? _dragOffset : 0.0;
       case RefreshIndicatorLocation.both: {
-        if (newOffset < _minScrollOffset)
-          return _minScrollOffset - newOffset;
-        else if (newOffset > _maxScrollOffset)
-          return newOffset - _maxScrollOffset;
+        if (scrollOffset <= minScrollOffset)
+          return -_dragOffset;
+        else if (scrollOffset >= maxScrollOffset)
+          return _dragOffset;
         else
           return 0.0;
       }
@@ -224,13 +228,42 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
     return 0.0;
   }
 
+  void _handlePointerDown(PointerDownEvent event) {
+    if (_mode != null)
+      return;
+
+    final ScrollableState scrollable = config.scrollableKey.currentState;
+    if (!_isValidScrollable(scrollable) || !_isScrolledToLimit(scrollable))
+      return;
+
+    _dragOffset = 0.0;
+    _scaleController.value = 0.0;
+    _sizeController.value = 0.0;
+    setState(() {
+      _mode = _RefreshIndicatorMode.drag;
+    });
+  }
+
   void _handlePointerMove(PointerMoveEvent event) {
-    final double overscroll = _overscrollDistance();
+    if (_mode != _RefreshIndicatorMode.drag && _mode != _RefreshIndicatorMode.armed)
+      return;
+
+    final ScrollableState scrollable = config.scrollableKey?.currentState;
+    if (!_isValidScrollable(scrollable))
+      return;
+
+    final double dragOffsetDelta = scrollable.pixelOffsetToScrollOffset(event.delta.dy);
+    _dragOffset += dragOffsetDelta / 2.0;
+    if (_dragOffset.abs() < kPixelScrollTolerance.distance)
+      return;
+
+    final double containerExtent = scrollable.scrollBehavior.containerExtent;
+    final double overscroll = _overscrollDistance(scrollable);
     if (overscroll > 0.0) {
-      final double newValue = overscroll / (_containerExtent * _kDragContainerExtentPercentage);
+      final double newValue = overscroll / (containerExtent * _kDragContainerExtentPercentage);
       _sizeController.value = newValue.clamp(0.0, 1.0);
 
-      final bool newIsAtTop = _scrollOffset < _minScrollOffset;
+      final bool newIsAtTop = _dragOffset < 0;
       if (_isIndicatorAtTop != newIsAtTop) {
         setState(() {
           _isIndicatorAtTop = newIsAtTop;
@@ -242,11 +275,18 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
   }
 
   // Stop showing the refresh indicator
-  Future<Null> _dismiss() async {
+  Future<Null> _dismiss(_DismissTransition transition) async {
     setState(() {
       _mode = _RefreshIndicatorMode.dismiss;
     });
-    await _scaleController.animateTo(1.0, duration: _kIndicatorScaleDuration);
+    switch(transition) {
+      case _DismissTransition.shrink:
+        await _sizeController.animateTo(0.0, duration: _kIndicatorScaleDuration);
+        break;
+      case _DismissTransition.slide:
+        await _scaleController.animateTo(1.0, duration: _kIndicatorScaleDuration);
+        break;
+    }
     if (mounted && _mode == _RefreshIndicatorMode.dismiss) {
       setState(() {
         _mode = null;
@@ -254,34 +294,54 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
     }
   }
 
-  Future<Null> _doHandlePointerUp(PointerUpEvent event) async {
-    if (_mode == _RefreshIndicatorMode.armed) {
-      _mode = _RefreshIndicatorMode.snap;
-      await _sizeController.animateTo(1.0 / _kDragSizeFactorLimit, duration: _kIndicatorSnapDuration);
-      if (mounted && _mode == _RefreshIndicatorMode.snap) {
-        setState(() {
-          _mode = _RefreshIndicatorMode.refresh; // Show the indeterminate progress indicator.
-        });
+  Future<Null> _show() async {
+    _mode = _RefreshIndicatorMode.snap;
+    await _sizeController.animateTo(1.0 / _kDragSizeFactorLimit, duration: _kIndicatorSnapDuration);
+    if (mounted && _mode == _RefreshIndicatorMode.snap) {
+      assert(config.refresh != null);
+      setState(() {
+        _mode = _RefreshIndicatorMode.refresh; // Show the indeterminate progress indicator.
+      });
 
-        // Only one refresh callback is allowed to run at a time. If the user
-        // attempts to start a refresh while one is still running ("pending") we
-        // just continue to wait on the pending refresh.
-        if (_pendingRefreshFuture == null)
-          _pendingRefreshFuture = config.refresh();
-        await _pendingRefreshFuture;
-        bool completed = _pendingRefreshFuture != null;
-        _pendingRefreshFuture = null;
+      // Only one refresh callback is allowed to run at a time. If the user
+      // attempts to start a refresh while one is still running ("pending") we
+      // just continue to wait on the pending refresh.
+      if (_pendingRefreshFuture == null)
+        _pendingRefreshFuture = config.refresh();
+      await _pendingRefreshFuture;
+      bool completed = _pendingRefreshFuture != null;
+      _pendingRefreshFuture = null;
 
-        if (mounted && completed && _mode == _RefreshIndicatorMode.refresh)
-          _dismiss();
-      }
-    } else if (_mode == _RefreshIndicatorMode.drag) {
-      _dismiss();
+      if (mounted && completed && _mode == _RefreshIndicatorMode.refresh)
+        _dismiss(_DismissTransition.slide);
     }
+  }
+
+  Future<Null> _doHandlePointerUp(PointerUpEvent event) async {
+    if (_mode == _RefreshIndicatorMode.armed)
+      _show();
+    else if (_mode == _RefreshIndicatorMode.drag)
+      _dismiss(_DismissTransition.shrink);
   }
 
   void _handlePointerUp(PointerEvent event) {
     _doHandlePointerUp(event);
+  }
+
+  /// Show the refresh indicator and run the refresh callback as if it had
+  /// been started interactively. If this method is called while the refresh
+  /// callback is running, it quietly does nothing.
+  ///
+  /// See also:
+  ///
+  /// * [GlobalKey] (creating the RefreshIndicator with a [GlobalKey<RefreshIndicatorState>]
+  ///   will make it possible to refer to the [RefreshIndicatorState] later)
+  Future<Null> show() async {
+    if (_mode != _RefreshIndicatorMode.refresh) {
+      _sizeController.value = 0.0;
+      _scaleController.value = 0.0;
+      await _show();
+    }
   }
 
   @override
@@ -321,7 +381,8 @@ class _RefreshIndicatorState extends State<RefreshIndicator> {
                       builder: (BuildContext context, Widget child) {
                         return new RefreshProgressIndicator(
                           value: showIndeterminateIndicator ? null : _value.value,
-                          valueColor: _valueColor
+                          valueColor: _valueColor,
+                          backgroundColor: config.backgroundColor
                         );
                       }
                     )

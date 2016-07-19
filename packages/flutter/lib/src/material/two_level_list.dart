@@ -53,10 +53,17 @@ class TwoLevelListItem extends StatelessWidget {
 }
 
 class TwoLevelSublist extends StatefulWidget {
-  TwoLevelSublist({ Key key, this.leading, this.title, this.children }) : super(key: key);
+  TwoLevelSublist({
+    Key key,
+    this.leading,
+    this.title,
+    this.onOpenChanged,
+    this.children
+  }) : super(key: key);
 
   final Widget leading;
   final Widget title;
+  final ValueChanged<bool> onOpenChanged;
   final List<Widget> children;
 
   @override
@@ -90,6 +97,12 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> {
       _controller.value = 1.0;
   }
 
+  @override
+  void dispose() {
+    _controller.stop();
+    super.dispose();
+  }
+
   void _handleOnTap() {
     setState(() {
       _isExpanded = !_isExpanded;
@@ -99,6 +112,8 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> {
         _controller.reverse();
       PageStorage.of(context)?.writeState(context, _isExpanded);
     });
+    if (config.onOpenChanged != null)
+      config.onOpenChanged(_isExpanded);
   }
 
   Widget buildList(BuildContext context, Widget child) {

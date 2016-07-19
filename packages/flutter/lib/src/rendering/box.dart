@@ -19,15 +19,6 @@ class _DebugSize extends Size {
   final bool _canBeUsedByParent;
 }
 
-/// The two cardinal directions in two dimensions.
-enum Axis {
-  /// Left and right
-  horizontal,
-
-  /// Up and down
-  vertical,
-}
-
 /// Immutable layout constraints for box layout.
 ///
 /// A size respects a BoxConstraints if, and only if, all of the following
@@ -130,10 +121,10 @@ class BoxConstraints extends Constraints {
   BoxConstraints deflate(EdgeInsets edges) {
     assert(edges != null);
     assert(debugAssertIsValid());
-    double horizontal = edges.left + edges.right;
-    double vertical = edges.top + edges.bottom;
-    double deflatedMinWidth = math.max(0.0, minWidth - horizontal);
-    double deflatedMinHeight = math.max(0.0, minHeight - vertical);
+    final double horizontal = edges.horizontal;
+    final double vertical = edges.vertical;
+    final double deflatedMinWidth = math.max(0.0, minWidth - horizontal);
+    final double deflatedMinHeight = math.max(0.0, minHeight - vertical);
     return new BoxConstraints(
       minWidth: deflatedMinWidth,
       maxWidth: math.max(deflatedMinWidth, maxWidth - horizontal),
@@ -1144,7 +1135,7 @@ abstract class RenderBox extends RenderObject {
   /// The caller is responsible for transforming [position] into the local
   /// coordinate space of the callee.  The callee is responsible for checking
   /// whether the given position is within its bounds.
-  bool hitTest(HitTestResult result, { Point position }) {
+  bool hitTest(HitTestResult result, { @required Point position }) {
     assert(() {
       if (needsLayout) {
         throw new FlutterError(

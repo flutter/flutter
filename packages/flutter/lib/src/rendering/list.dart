@@ -75,17 +75,6 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
       child.parentData = new ListParentData();
   }
 
-  double get _scrollAxisPadding {
-    switch (mainAxis) {
-      case Axis.vertical:
-        return padding.vertical;
-      case Axis.horizontal:
-        return padding.horizontal;
-    }
-    assert(mainAxis != null);
-    return null;
-  }
-
   double get _preferredExtent {
     if (itemExtent == null)
       return double.INFINITY;
@@ -94,7 +83,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
       return double.INFINITY;
     double extent = itemExtent * count;
     if (padding != null)
-      extent += _scrollAxisPadding;
+      extent += padding.along(mainAxis);
     return extent;
   }
 

@@ -4,6 +4,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 
@@ -46,8 +47,8 @@ class Switch extends StatelessWidget {
     @required this.value,
     @required this.onChanged,
     this.activeColor,
-    this.activeThumbDecoration,
-    this.inactiveThumbDecoration
+    this.activeThumbImage,
+    this.inactiveThumbImage
   }) : super(key: key);
 
   /// Whether this switch is on or off.
@@ -67,15 +68,11 @@ class Switch extends StatelessWidget {
   /// Defaults to accent color of the current [Theme].
   final Color activeColor;
 
-  /// A decoration to use for the thumb of this switch when the switch is on.
-  ///
-  /// Defaults to a circular piece of material.
-  final Decoration activeThumbDecoration;
+  /// An image to use on the thumb of this switch when the switch is on.
+  final ImageProvider activeThumbImage;
 
-  /// A decoration to use for the thumb of this switch when the switch is off.
-  ///
-  /// Defaults to a circular piece of material.
-  final Decoration inactiveThumbDecoration;
+  /// An image to use on the thumb of this switch when the switch is off.
+  final ImageProvider inactiveThumbImage;
 
   @override
   Widget build(BuildContext context) {
@@ -100,8 +97,8 @@ class Switch extends StatelessWidget {
       value: value,
       activeColor: activeThumbColor,
       inactiveColor: inactiveThumbColor,
-      activeThumbDecoration: activeThumbDecoration,
-      inactiveThumbDecoration: inactiveThumbDecoration,
+      activeThumbImage: activeThumbImage,
+      inactiveThumbImage: inactiveThumbImage,
       activeTrackColor: activeTrackColor,
       inactiveTrackColor: inactiveTrackColor,
       configuration: createLocalImageConfiguration(context),
@@ -124,8 +121,8 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
     this.value,
     this.activeColor,
     this.inactiveColor,
-    this.activeThumbDecoration,
-    this.inactiveThumbDecoration,
+    this.activeThumbImage,
+    this.inactiveThumbImage,
     this.activeTrackColor,
     this.inactiveTrackColor,
     this.configuration,
@@ -135,8 +132,8 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
   final bool value;
   final Color activeColor;
   final Color inactiveColor;
-  final Decoration activeThumbDecoration;
-  final Decoration inactiveThumbDecoration;
+  final ImageProvider activeThumbImage;
+  final ImageProvider inactiveThumbImage;
   final Color activeTrackColor;
   final Color inactiveTrackColor;
   final ImageConfiguration configuration;
@@ -147,8 +144,8 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
     value: value,
     activeColor: activeColor,
     inactiveColor: inactiveColor,
-    activeThumbDecoration: activeThumbDecoration,
-    inactiveThumbDecoration: inactiveThumbDecoration,
+    activeThumbImage: activeThumbImage,
+    inactiveThumbImage: inactiveThumbImage,
     activeTrackColor: activeTrackColor,
     inactiveTrackColor: inactiveTrackColor,
     configuration: configuration,
@@ -161,8 +158,8 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       ..value = value
       ..activeColor = activeColor
       ..inactiveColor = inactiveColor
-      ..activeThumbDecoration = activeThumbDecoration
-      ..inactiveThumbDecoration = inactiveThumbDecoration
+      ..activeThumbImage = activeThumbImage
+      ..inactiveThumbImage = inactiveThumbImage
       ..activeTrackColor = activeTrackColor
       ..inactiveTrackColor = inactiveTrackColor
       ..configuration = configuration
@@ -182,14 +179,14 @@ class _RenderSwitch extends RenderToggleable {
     bool value,
     Color activeColor,
     Color inactiveColor,
-    Decoration activeThumbDecoration,
-    Decoration inactiveThumbDecoration,
+    ImageProvider activeThumbImage,
+    ImageProvider inactiveThumbImage,
     Color activeTrackColor,
     Color inactiveTrackColor,
     ImageConfiguration configuration,
     ValueChanged<bool> onChanged
-  }) : _activeThumbDecoration = activeThumbDecoration,
-       _inactiveThumbDecoration = inactiveThumbDecoration,
+  }) : _activeThumbImage = activeThumbImage,
+       _inactiveThumbImage = inactiveThumbImage,
        _activeTrackColor = activeTrackColor,
        _inactiveTrackColor = inactiveTrackColor,
        _configuration = configuration,
@@ -206,21 +203,21 @@ class _RenderSwitch extends RenderToggleable {
       ..onEnd = _handleDragEnd;
   }
 
-  Decoration get activeThumbDecoration => _activeThumbDecoration;
-  Decoration _activeThumbDecoration;
-  set activeThumbDecoration(Decoration value) {
-    if (value == _activeThumbDecoration)
+  ImageProvider get activeThumbImage => _activeThumbImage;
+  ImageProvider _activeThumbImage;
+  set activeThumbImage(ImageProvider value) {
+    if (value == _activeThumbImage)
       return;
-    _activeThumbDecoration = value;
+    _activeThumbImage = value;
     markNeedsPaint();
   }
 
-  Decoration get inactiveThumbDecoration => _inactiveThumbDecoration;
-  Decoration _inactiveThumbDecoration;
-  set inactiveThumbDecoration(Decoration value) {
-    if (value == _inactiveThumbDecoration)
+  ImageProvider get inactiveThumbImage => _inactiveThumbImage;
+  ImageProvider _inactiveThumbImage;
+  set inactiveThumbImage(ImageProvider value) {
+    if (value == _inactiveThumbImage)
       return;
-    _inactiveThumbDecoration = value;
+    _inactiveThumbImage = value;
     markNeedsPaint();
   }
 
@@ -295,14 +292,27 @@ class _RenderSwitch extends RenderToggleable {
   }
 
   Color _cachedThumbColor;
+  ImageProvider _cachedThumbImage;
   BoxPainter _cachedThumbPainter;
 
-  BoxDecoration _createDefaultThumbDecoration(Color color) {
+  BoxDecoration _createDefaultThumbDecoration(Color color, ImageProvider image) {
     return new BoxDecoration(
       backgroundColor: color,
+      backgroundImage: image == null ? null : new BackgroundImage(image: image),
       shape: BoxShape.circle,
       boxShadow: kElevationToShadow[1]
     );
+  }
+
+  bool _isPainting = false;
+
+  void _handleDecorationChanged() {
+    // If the image decoration is available synchronously, we'll get called here
+    // during paint. There's no reason to mark ourselves as needing paint if we
+    // are already in the middle of painting. (In fact, doing so would trigger
+    // an assert).
+    if (!_isPainting)
+      markNeedsPaint();
   }
 
   @override
@@ -334,27 +344,28 @@ class _RenderSwitch extends RenderToggleable {
 
     paintRadialReaction(canvas, offset, thumbPosition);
 
-    BoxPainter thumbPainter;
-    if (_inactiveThumbDecoration == null && _activeThumbDecoration == null) {
+    try {
+      _isPainting = true;
+      BoxPainter thumbPainter;
       final Color thumbColor = isActive ? Color.lerp(inactiveColor, activeColor, currentPosition) : inactiveColor;
-      if (thumbColor != _cachedThumbColor || _cachedThumbPainter == null) {
+      final ImageProvider thumbImage = isActive ? (currentPosition < 0.5 ? inactiveThumbImage : activeThumbImage) : inactiveThumbImage;
+      if (_cachedThumbPainter == null || thumbColor != _cachedThumbColor || thumbImage != _cachedThumbImage) {
         _cachedThumbColor = thumbColor;
-        _cachedThumbPainter = _createDefaultThumbDecoration(thumbColor).createBoxPainter(markNeedsPaint);
+        _cachedThumbImage = thumbImage;
+        _cachedThumbPainter = _createDefaultThumbDecoration(thumbColor, thumbImage).createBoxPainter(_handleDecorationChanged);
       }
       thumbPainter = _cachedThumbPainter;
-    } else {
-      final Decoration startDecoration = _inactiveThumbDecoration ?? _createDefaultThumbDecoration(inactiveColor);
-      final Decoration endDecoration = _activeThumbDecoration ?? _createDefaultThumbDecoration(isActive ? activeTrackColor : inactiveColor);
-      thumbPainter = Decoration.lerp(startDecoration, endDecoration, currentPosition).createBoxPainter(markNeedsPaint);
-    }
 
-    // The thumb contracts slightly during the animation
-    final double inset = 1.0 - (currentPosition - 0.5).abs() * 2.0;
-    final double radius = _kThumbRadius - inset;
-    thumbPainter.paint(
-      canvas,
-      thumbPosition.toOffset() + offset - new Offset(radius, radius),
-      configuration.copyWith(size: new Size.fromRadius(radius))
-    );
+      // The thumb contracts slightly during the animation
+      final double inset = 1.0 - (currentPosition - 0.5).abs() * 2.0;
+      final double radius = _kThumbRadius - inset;
+      thumbPainter.paint(
+        canvas,
+        thumbPosition.toOffset() + offset - new Offset(radius, radius),
+        configuration.copyWith(size: new Size.fromRadius(radius))
+      );
+    } finally {
+      _isPainting = false;
+    }
   }
 }

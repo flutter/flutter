@@ -344,7 +344,7 @@ abstract class SchedulerBinding extends BindingBase {
     _postFrameCallbacks.add(callback);
   }
 
-  /// Whether this scheduler as requested that handleBeginFrame be called soon.
+  /// Whether this scheduler has requested that handleBeginFrame be called soon.
   bool get hasScheduledFrame => _hasScheduledFrame;
   bool _hasScheduledFrame = false;
 

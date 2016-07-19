@@ -53,3 +53,6 @@ if [ -n "$COVERAGE_FLAG" ]; then
   STORAGE_URL=gs://flutter_infra/flutter/coverage/lcov.info
   $GSUTIL cp packages/flutter/coverage/lcov.info $STORAGE_URL
 fi
+
+# generate the API docs, upload them
+dev/bots/docs.sh

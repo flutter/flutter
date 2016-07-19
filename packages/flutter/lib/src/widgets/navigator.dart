@@ -157,7 +157,7 @@ class NavigatorObserver {
   /// The [Navigator] pushed the given route.
   void didPush(Route<dynamic> route, Route<dynamic> previousRoute) { }
 
-  /// THe [Navigator] popped the given route.
+  /// The [Navigator] popped the given route.
   void didPop(Route<dynamic> route, Route<dynamic> previousRoute) { }
 }
 
