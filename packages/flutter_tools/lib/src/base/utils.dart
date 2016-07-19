@@ -129,8 +129,8 @@ class ItemListNotifier<T> {
 }
 
 class SettingsFile {
-  SettingsFile.parse(File file) {
-    for (String line in file.readAsLinesSync()) {
+  SettingsFile.parse(String contents) {
+    for (String line in contents.split('\n')) {
       line = line.trim();
       if (line.startsWith('#') || line.isEmpty)
         continue;
@@ -138,6 +138,10 @@ class SettingsFile {
       if (index != -1)
         values[line.substring(0, index)] = line.substring(index + 1);
     }
+  }
+
+  factory SettingsFile.parseFromFile(File file) {
+    return new SettingsFile.parse(file.readAsStringSync());
   }
 
   final Map<String, String> values = <String, String>{};

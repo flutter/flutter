@@ -34,6 +34,7 @@ import 'test_test.dart' as test_test;
 import 'toolchain_test.dart' as toolchain_test;
 import 'trace_test.dart' as trace_test;
 import 'upgrade_test.dart' as upgrade_test;
+import 'utils_test.dart' as utils_test;
 
 void main() {
   Cache.disableLocking();
@@ -62,4 +63,5 @@ void main() {
   toolchain_test.main();
   trace_test.main();
   upgrade_test.main();
+  utils_test.main();
 }

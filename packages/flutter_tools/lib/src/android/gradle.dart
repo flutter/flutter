@@ -24,13 +24,22 @@ bool isProjectUsingGradle() {
 }
 
 String locateSystemGradle({ bool ensureExecutable: true }) {
+  String gradle = _locateSystemGradle();
+  if (ensureExecutable && gradle != null) {
+    File file = new File(gradle);
+    if (file.existsSync())
+      os.makeExecutable(file);
+  }
+  return gradle;
+}
+
+String _locateSystemGradle() {
   // See if the user has explicitly configured gradle-dir.
   String gradleDir = config.getValue('gradle-dir');
   if (gradleDir != null) {
     if (FileSystemEntity.isFileSync(gradleDir))
-      return _ensureExecutable(gradleDir, ensureExecutable);
-    String executable = path.join(gradleDir, 'bin', 'gradle');
-    return _ensureExecutable(executable, ensureExecutable);
+      return gradleDir;
+    return path.join(gradleDir, 'bin', 'gradle');
   }
 
   // Look relative to Android Studio.
@@ -54,7 +63,7 @@ String locateSystemGradle({ bool ensureExecutable: true }) {
         if (entity is Directory && path.basename(entity.path).startsWith('gradle-')) {
           String executable = path.join(entity.path, 'bin', 'gradle');
           if (FileSystemEntity.isFileSync(executable))
-            return _ensureExecutable(executable, ensureExecutable);
+            return executable;
         }
       }
     }
@@ -63,7 +72,7 @@ String locateSystemGradle({ bool ensureExecutable: true }) {
   // Use 'which'.
   File file = os.which('gradle');
   if (file != null)
-    return _ensureExecutable(file.path, ensureExecutable);
+    return file.path;
 
   // We couldn't locate gradle.
   return null;
@@ -93,7 +102,7 @@ Future<int> buildGradleProject(BuildMode buildMode) async {
 
   // Update the local.settings file with the build mode.
   // TODO(devoncarew): It would be nicer if we could pass this information in via a cli flag.
-  SettingsFile settings = new SettingsFile.parse(localProperties);
+  SettingsFile settings = new SettingsFile.parseFromFile(localProperties);
   settings.values['flutter.buildMode'] = getModeName(buildMode);
   settings.writeContents(localProperties);
 
@@ -176,14 +185,4 @@ class _GradleFile {
   void writeContents(File file) {
     file.writeAsStringSync(contents);
   }
-}
-
-String _ensureExecutable(String execPath, bool ensureExecutable) {
-  if (ensureExecutable) {
-    File file = new File(execPath);
-    if (file.existsSync())
-      os.makeExecutable(file);
-  }
-
-  return execPath;
 }
