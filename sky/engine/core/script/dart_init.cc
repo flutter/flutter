@@ -83,7 +83,7 @@ static const char* kDartProfilingArgs[] = {
     // default profile period to 100Hz. This number is suitable for older
     // Raspberry Pi devices but quite low for current smartphones.
     "--profile_period=1000",
-#if (WTF_OS_IOS || WTF_OS_MACOSX)
+#if ((WTF_OS_IOS || WTF_OS_MACOSX) && !defined(NDEBUG))
     // On platforms where LLDB is the primary debugger, SIGPROF signals
     // overwhelm LLDB.
     "--no-profiler",
@@ -96,10 +96,6 @@ static const char *kDartMirrorsArgs[] = {
 
 static const char* kDartPrecompilationArgs[] = {
     "--precompilation",
-};
-
-static const char* kDartBackgroundCompilationArgs[] = {
-  "--background_compilation",
 };
 
 static const char* kDartCheckedModeArgs[] = {
@@ -514,8 +510,6 @@ void InitDartVM() {
 
   args.append(kDartProfilingArgs, arraysize(kDartProfilingArgs));
   args.append(kDartMirrorsArgs, arraysize(kDartMirrorsArgs));
-  args.append(kDartBackgroundCompilationArgs,
-              arraysize(kDartBackgroundCompilationArgs));
 
   if (IsRunningPrecompiledCode())
     args.append(kDartPrecompilationArgs, arraysize(kDartPrecompilationArgs));
