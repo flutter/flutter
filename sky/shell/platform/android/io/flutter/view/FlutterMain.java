@@ -63,7 +63,7 @@ public class FlutterMain {
 
     // Resource names that can be used for the the FLX application bundle.
     public static final String[] APP_BUNDLE_RESOURCES = {
-        "app.flx", "app_release.flx"
+        "app.flx", "app_profile.flx", "app_release.flx"
     };
 
     // Resource names used for components of the precompiled snapshot.
