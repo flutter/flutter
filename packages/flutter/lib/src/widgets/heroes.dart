@@ -307,7 +307,7 @@ class HeroParty {
     return result;
   }
 
-  RectTween doCreateRectTween(Rect begin, Rect end) {
+  RectTween _doCreateRectTween(Rect begin, Rect end) {
     if (createRectTween != null)
       return createRectTween(begin, end);
     return new RectTween(begin: begin, end: end);
@@ -360,7 +360,7 @@ class HeroParty {
         targetRect: targetRect,
         targetTurns: targetTurns.floor(),
         targetState: targetState,
-        currentRect: doCreateRectTween(sourceRect, targetRect),
+        currentRect: _doCreateRectTween(sourceRect, targetRect),
         currentTurns: createTurnsTween(sourceTurns, targetTurns)
       ));
     }

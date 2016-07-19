@@ -2,24 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
-import 'package:meta/meta.dart'; // @required definition
+import 'package:meta/meta.dart';
 
-abstract class _MaterialArc<T> {
-  _MaterialArc({ this.begin, this.end });
-
-  final T begin;
-  final T end;
-
-  T transform(double t);
-}
-
-class MaterialPointArc extends _MaterialArc<Point> {
-  MaterialPointArc({
+/// TBD: explain about the degenerate cases, etc.
+class MaterialPointArcTween extends Tween<Point> {
+  MaterialPointArcTween({
     @required Point begin,
     @required Point end
   }) : super(begin: begin, end: end) {
@@ -62,14 +53,48 @@ class MaterialPointArc extends _MaterialArc<Point> {
   double _beginAngle;
   double _endAngle;
 
+  /// The center of the circular arc, null if begin and end are horiztonally or
+  /// vertically aligned.
+  Point get center => _center;
+
+  /// The radius of the circular arc, null if begin and end are horiztonally or
+  /// vertically aligned.
+  double get radius => _radius;
+
+  /// The beginning of the arc's sweep in radians, measured from the positive X axis.
+  /// Positive angles turn clockwise. Null if begin and end are horiztonally or
+  /// vertically aligned.
+  double get beginAngle => _beginAngle;
+
+  /// The end of the arc's sweep in radians, measured from the positive X axis.
+  /// Positive angles turn clockwise.
+  double get endAngle => _beginAngle;
+
+  /// Setting the arc's [begin] parameter is not supported. Construct a new arc instead.
   @override
-  Point transform(double t) {
+  set begin(Point value) {
+    assert(false); // not supported
+  }
+
+  /// Setting the arc's [end] parameter is not supported. Construct a new arc instead.
+  @override
+  set end(Point value) {
+    assert(false); // not supported
+  }
+
+  @override
+  Point lerp(double t) {
     if (_beginAngle == null || _endAngle == null)
       return Point.lerp(begin, end, t);
     final double angle = lerpDouble(_beginAngle, _endAngle, t);
     final double x = math.cos(angle) * _radius;
     final double y = math.sin(angle) * _radius;
-    return  _center + new Offset(x, y);
+    return _center + new Offset(x, y);
+  }
+
+  @override
+  String toString() {
+    return '$runtimeType($begin \u2192 $end center=$center, radius=$radius, beginAngle=$beginAngle, endAngle=$endAngle)';
   }
 }
 
@@ -86,15 +111,15 @@ class _Diagonal {
   final _CornerId endId;
 }
 
-class MaterialRectArc extends _MaterialArc<Rect> {
-  static final List<_Diagonal> _allDiagonals = <_Diagonal>[
-    const _Diagonal(_CornerId.topLeft, _CornerId.bottomRight),
-    const _Diagonal(_CornerId.bottomRight, _CornerId.topLeft),
-    const _Diagonal(_CornerId.topRight, _CornerId.bottomLeft),
-    const _Diagonal(_CornerId.bottomLeft, _CornerId.topRight),
-  ];
+const List<_Diagonal> _allDiagonals = const <_Diagonal>[
+  const _Diagonal(_CornerId.topLeft, _CornerId.bottomRight),
+  const _Diagonal(_CornerId.bottomRight, _CornerId.topLeft),
+  const _Diagonal(_CornerId.topRight, _CornerId.bottomLeft),
+  const _Diagonal(_CornerId.bottomLeft, _CornerId.topRight),
+];
 
-  MaterialRectArc({
+class MaterialRectArcTween extends RectTween {
+  MaterialRectArcTween({
     @required Rect begin,
     @required Rect end
   }) : super(begin: begin, end: end) {
@@ -107,19 +132,19 @@ class MaterialRectArc extends _MaterialArc<Rect> {
         maxSupport = support;
       }
     }
-    _beginArc = new MaterialPointArc(
+    _beginArc = new MaterialPointArcTween(
       begin: _cornerFor(begin, _diagonal.beginId),
       end: _cornerFor(end, _diagonal.beginId)
     );
-    _endArc = new MaterialPointArc(
+    _endArc = new MaterialPointArcTween(
       begin: _cornerFor(begin, _diagonal.endId),
       end: _cornerFor(end, _diagonal.endId)
     );
   }
 
   _Diagonal _diagonal;
-  MaterialPointArc _beginArc;
-  MaterialPointArc _endArc;
+  MaterialPointArcTween _beginArc;
+  MaterialPointArcTween _endArc;
 
   Point _cornerFor(Rect rect, _CornerId id) {
     switch (id) {
@@ -137,38 +162,29 @@ class MaterialRectArc extends _MaterialArc<Rect> {
     return centersVector.dx * delta.dx / length + centersVector.dy * delta.dy / length;
   }
 
+  MaterialPointArcTween get  beginArc => _beginArc;
+
+  MaterialPointArcTween get  endArc => _endArc;
+
+  /// Setting the arc's [begin] parameter is not supported. Construct a new arc instead.
   @override
-  Rect transform(double t) {
-    Point beginArcPoint = _beginArc.transform(t);
-    Point endArcPoint = _endArc.transform(t);
-    double minX = math.min(beginArcPoint.x, endArcPoint.x);
-    double maxX = math.max(beginArcPoint.x, endArcPoint.x);
-    double minY = math.min(beginArcPoint.y, endArcPoint.y);
-    double maxY = math.max(beginArcPoint.y, endArcPoint.y);
-    return new Rect.fromLTRB(minX, minY, maxX, maxY);
+  set begin(Rect value) {
+    assert(false); // not supported
   }
-}
 
-class MaterialPointArcTween extends Tween<Point> {
-  MaterialPointArcTween({
-    @required Point begin,
-    @required Point end
-  }) : _arc = new MaterialPointArc(begin: begin, end: end), super(begin: begin, end: end);
-
-  final MaterialPointArc _arc;
+  /// Setting the arc's [end] parameter is not supported. Construct a new arc instead.
+  @override
+  set end(Rect value) {
+    assert(false); // not supported
+  }
 
   @override
-  Point lerp(double t) => _arc.transform(t);
-}
-
-class MaterialRectArcTween extends Tween<Rect> {
-  MaterialRectArcTween({
-    @required Rect begin,
-    @required Rect end
-  }) : _arc = new MaterialRectArc(begin: begin, end: end), super(begin: begin, end: end);
-
-  final MaterialRectArc _arc;
+  Rect lerp(double t) {
+    return new Rect.fromPoints(_beginArc.lerp(t), _endArc.lerp(t));
+  }
 
   @override
-  Rect lerp(double t) => _arc.transform(t);
+  String toString() {
+    return '$runtimeType($begin \u2192 $end beginArc=$beginArc, endArc=$endArc)';
+  }
 }
