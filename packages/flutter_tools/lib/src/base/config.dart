@@ -25,12 +25,17 @@ class Config {
   File _configFile;
   Map<String, dynamic> _values = <String, dynamic>{};
 
-  Iterator<String> get keys => _values.keys;
+  Iterable<String> get keys => _values.keys;
 
   dynamic getValue(String key) => _values[key];
 
   void setValue(String key, String value) {
     _values[key] = value;
+    _flushValues();
+  }
+
+  void removeValue(String key) {
+    _values.remove(key);
     _flushValues();
   }
 

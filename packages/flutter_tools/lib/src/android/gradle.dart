@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:path/path.dart' as path;
+
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/process.dart';
@@ -22,20 +24,48 @@ bool isProjectUsingGradle() {
 }
 
 String locateSystemGradle({ bool ensureExecutable: true }) {
-  final String hack = '/Applications/Android Studio.app/Contents/gradle/gradle-2.10/bin/gradle';
-
-  // TODO: see if something's been configured
-  String gradlePath = config.getValue('gradle');
-
-  // TODO: on mac, look in /Applications/Android Studio.app/
-  if (FileSystemEntity.isFileSync(hack)) {
-    if (ensureExecutable)
-      os.makeExecutable(new File(hack));
-    return hack;
+  // See if the user has explicitly configured gradle-dir.
+  String gradleDir = config.getValue('gradle-dir');
+  if (gradleDir != null) {
+    if (FileSystemEntity.isFileSync(gradleDir))
+      return _ensureExecutable(gradleDir, ensureExecutable);
+    String executable = path.join(gradleDir, 'bin', 'gradle');
+    return _ensureExecutable(executable, ensureExecutable);
   }
 
-  // TODO: use 'which'
+  // Look relative to Android Studio.
+  String studioPath = config.getValue('android-studio-dir');
 
+  if (studioPath == null && os.isMacOS) {
+    final String kDefaultMacPath = '/Applications/Android Studio.app';
+    if (FileSystemEntity.isDirectorySync(kDefaultMacPath))
+      studioPath = kDefaultMacPath;
+  }
+
+  if (studioPath != null) {
+    // '/Applications/Android Studio.app/Contents/gradle/gradle-2.10/bin/gradle'
+    if (os.isMacOS && !studioPath.endsWith('Contents'))
+      studioPath = path.join(studioPath, 'Contents');
+
+    Directory dir = new Directory(path.join(studioPath, 'gradle'));
+    if (dir.existsSync()) {
+      // We find the first valid gradle directory.
+      for (FileSystemEntity entity in dir.listSync()) {
+        if (entity is Directory && path.basename(entity.path).startsWith('gradle-')) {
+          String executable = path.join(entity.path, 'bin', 'gradle');
+          if (FileSystemEntity.isFileSync(executable))
+            return _ensureExecutable(executable, ensureExecutable);
+        }
+      }
+    }
+  }
+
+  // Use 'which'.
+  File file = os.which('gradle');
+  if (file != null)
+    return _ensureExecutable(file.path, ensureExecutable);
+
+  // We couldn't locate gradle.
   return null;
 }
 
@@ -76,6 +106,8 @@ Future<int> buildGradleProject(BuildMode buildMode) async {
         'Unable to locate gradle. Please configure the path to gradle using \'flutter config --gradle\'.'
       );
       return 1;
+    } else {
+      printTrace('Using gradle from $gradle.');
     }
 
     // Stamp the android/app/build.gradle file with the current android sdk and build tools version.
@@ -144,4 +176,14 @@ class _GradleFile {
   void writeContents(File file) {
     file.writeAsStringSync(contents);
   }
+}
+
+String _ensureExecutable(String execPath, bool ensureExecutable) {
+  if (ensureExecutable) {
+    File file = new File(execPath);
+    if (file.existsSync())
+      os.makeExecutable(file);
+  }
+
+  return execPath;
 }
