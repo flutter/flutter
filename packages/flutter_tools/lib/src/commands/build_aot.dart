@@ -256,7 +256,8 @@ Future<String> _buildAotSnapshot(
 
   RunResult results = await runAsync(genSnapshotCmd);
   if (results.exitCode != 0) {
-    printStatus(results.toString());
+    printError('Dart snapshot generator failed with exit code ${results.exitCode}');
+    printError(results.toString());
     return null;
   }
 

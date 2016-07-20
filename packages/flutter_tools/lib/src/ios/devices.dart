@@ -260,7 +260,7 @@ class IOSDevice extends Device {
           forwardDiagPort = _acquireAndForwardPort(ProtocolDiscovery.kDiagnosticService,
                                                    debuggingOptions.diagnosticPort);
         } else {
-          forwardDiagPort = new Future.value(null);
+          forwardDiagPort = new Future<int>.value(null);
         }
 
         return Future.wait(<Future<int>>[forwardObsPort, forwardDiagPort]);
