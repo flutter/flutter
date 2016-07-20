@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:xml/xml.dart' as xml;
 
+import 'android/gradle.dart';
 import 'build_info.dart';
 import 'ios/plist_utils.dart';
 
@@ -49,9 +50,20 @@ class AndroidApk extends ApplicationPackage {
 
   /// Creates a new AndroidApk based on the information in the Android manifest.
   factory AndroidApk.fromCurrentDirectory() {
-    String manifestPath = path.join('android', 'AndroidManifest.xml');
+    String manifestPath;
+    String apkPath;
+
+    if (isProjectUsingGradle()) {
+      manifestPath = gradleManifestPath;
+      apkPath = gradleAppOut;
+    } else {
+      manifestPath = path.join('android', 'AndroidManifest.xml');
+      apkPath = path.join('build', 'app.apk');
+    }
+
     if (!FileSystemEntity.isFileSync(manifestPath))
       return null;
+
     String manifestString = new File(manifestPath).readAsStringSync();
     xml.XmlDocument document = xml.parse(manifestString);
 
@@ -75,7 +87,7 @@ class AndroidApk extends ApplicationPackage {
     return new AndroidApk(
       buildDir: 'build',
       id: id,
-      apkPath: path.join('build', 'app.apk'),
+      apkPath: apkPath,
       launchActivity: launchActivity
     );
   }

@@ -12,6 +12,8 @@ class ConfigCommand extends FlutterCommand {
     argParser.addFlag('analytics',
       negatable: true,
       help: 'Enable or disable reporting anonymously tool usage statistics and crash reports.');
+    argParser.addOption('gradle-dir', help: 'The gradle install directory.');
+    argParser.addOption('android-studio-dir', help: 'The Android Studio install directory.');
   }
 
   @override
@@ -27,7 +29,17 @@ class ConfigCommand extends FlutterCommand {
   final List<String> aliases = <String>['configure'];
 
   @override
-  String get usageFooter => 'Analytics reporting is currently ${flutterUsage.enabled ? 'enabled' : 'disabled'}.';
+  String get usageFooter {
+    // List all config settings.
+    String values = config.keys.map((String key) {
+      return '  $key: ${config.getValue(key)}';
+    }).join('\n');
+    if (values.isNotEmpty)
+      values = '\nSettings:\n$values\n\n';
+    return
+      '$values'
+      'Analytics reporting is currently ${flutterUsage.enabled ? 'enabled' : 'disabled'}.';
+  }
 
   @override
   bool get requiresProjectRoot => false;
@@ -42,10 +54,27 @@ class ConfigCommand extends FlutterCommand {
       bool value = argResults['analytics'];
       flutterUsage.enabled = value;
       printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
-    } else {
-      printStatus(usage);
     }
 
+    if (argResults.wasParsed('gradle-dir'))
+      _updateConfig('gradle-dir', argResults['gradle-dir']);
+
+    if (argResults.wasParsed('android-studio-dir'))
+      _updateConfig('android-studio-dir', argResults['android-studio-dir']);
+
+    if (argResults.arguments.isEmpty)
+      printStatus(usage);
+
     return 0;
+  }
+
+  void _updateConfig(String keyName, String keyValue) {
+    if (keyValue.isEmpty) {
+      config.removeValue(keyName);
+      printStatus('Removing "$keyName" value.');
+    } else {
+      config.setValue(keyName, keyValue);
+      printStatus('Setting "$keyName" value to "$keyValue".');
+    }
   }
 }

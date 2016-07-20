@@ -127,3 +127,28 @@ class ItemListNotifier<T> {
     _removedController.close();
   }
 }
+
+class SettingsFile {
+  SettingsFile.parse(String contents) {
+    for (String line in contents.split('\n')) {
+      line = line.trim();
+      if (line.startsWith('#') || line.isEmpty)
+        continue;
+      int index = line.indexOf('=');
+      if (index != -1)
+        values[line.substring(0, index)] = line.substring(index + 1);
+    }
+  }
+
+  factory SettingsFile.parseFromFile(File file) {
+    return new SettingsFile.parse(file.readAsStringSync());
+  }
+
+  final Map<String, String> values = <String, String>{};
+
+  void writeContents(File file) {
+    file.writeAsStringSync(values.keys.map((String key) {
+      return '$key=${values[key]}';
+    }).join('\n'));
+  }
+}

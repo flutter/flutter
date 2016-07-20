@@ -16,6 +16,7 @@ import 'analyze_test.dart' as analyze_test;
 import 'android_device_test.dart' as android_device_test;
 import 'android_sdk_test.dart' as android_sdk_test;
 import 'base_utils_test.dart' as base_utils_test;
+import 'config_test.dart' as config_test;
 import 'context_test.dart' as context_test;
 import 'create_test.dart' as create_test;
 import 'daemon_test.dart' as daemon_test;
@@ -33,6 +34,7 @@ import 'test_test.dart' as test_test;
 import 'toolchain_test.dart' as toolchain_test;
 import 'trace_test.dart' as trace_test;
 import 'upgrade_test.dart' as upgrade_test;
+import 'utils_test.dart' as utils_test;
 
 void main() {
   Cache.disableLocking();
@@ -43,6 +45,7 @@ void main() {
   android_device_test.main();
   android_sdk_test.main();
   base_utils_test.main();
+  config_test.main();
   context_test.main();
   create_test.main();
   daemon_test.main();
@@ -60,4 +63,5 @@ void main() {
   toolchain_test.main();
   trace_test.main();
   upgrade_test.main();
+  utils_test.main();
 }
