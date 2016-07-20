@@ -16,7 +16,6 @@ the [Flutter Setup](https://flutter.io/setup/) guide.
 
 * `cd $FLUTTER_ROOT/examples/flutter_gallery`
 * `flutter upgrade`
-* `flutter devices` and note the name of the device you want to build for
 * `flutter -d <device name> run --release`
 
 The `flutter run --release` command both builds and installed the Flutter app.
