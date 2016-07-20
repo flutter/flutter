@@ -135,11 +135,19 @@ public class SkyActivity extends Activity {
 
     public boolean loadIntent(Intent intent) {
         String action = intent.getAction();
-
         if (Intent.ACTION_RUN.equals(action)) {
-            mView.runFromBundle(intent.getDataString(),
-                                intent.getStringExtra("snapshot"));
+            String file = intent.getStringExtra("file");
+            String packageRoot = intent.getStringExtra("packages");
             String route = intent.getStringExtra("route");
+            // TODO(johnmccutchan): Remove the need for the runFromFile
+            // intent by launching an empty application at startup and
+            // reloading from within that.
+            if ((file != null) && (packageRoot != null)) {
+                mView.runFromFile(file, packageRoot);
+            } else {
+                mView.runFromBundle(intent.getDataString(),
+                                    intent.getStringExtra("snapshot"));
+            }
             if (route != null)
                 mView.pushRoute(route);
             return true;

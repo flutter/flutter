@@ -407,7 +407,7 @@ public class FlutterView extends SurfaceView
         mNativePlatformView = nativeAttach(engine.second.passHandle().releaseNativeHandle());
     }
 
-    public void runFromBundle(String bundlePath, String snapshotPath) {
+    private void preRun() {
         if (mPlatformServiceProviderBinding != null) {
             mPlatformServiceProviderBinding.unbind().close();
             mPlatformServiceProvider.unbindServices();
@@ -443,6 +443,20 @@ public class FlutterView extends SurfaceView
         mSkyEngine.setServices(services);
 
         resetAccessibilityTree();
+    }
+
+    private void postRun() {
+        Core core = CoreImpl.getInstance();
+        // Connect to the ApplicationMessages service exported by the Flutter framework
+        Pair<ApplicationMessages.Proxy, InterfaceRequest<ApplicationMessages>> appMessages =
+                  ApplicationMessages.MANAGER.getInterfaceRequest(core);
+        mDartServiceProvider.connectToService(ApplicationMessages.MANAGER.getName(),
+                                              appMessages.second.passHandle());
+        mFlutterAppMessages = appMessages.first;
+    }
+
+    public void runFromBundle(String bundlePath, String snapshotPath) {
+        preRun();
 
         if (FlutterMain.isRunningPrecompiledCode()) {
             mSkyEngine.runFromPrecompiledSnapshot(bundlePath);
@@ -455,12 +469,13 @@ public class FlutterView extends SurfaceView
             }
         }
 
-        // Connect to the ApplicationMessages service exported by the Flutter framework
-        Pair<ApplicationMessages.Proxy, InterfaceRequest<ApplicationMessages>> appMessages =
-                  ApplicationMessages.MANAGER.getInterfaceRequest(core);
-        mDartServiceProvider.connectToService(ApplicationMessages.MANAGER.getName(),
-                                              appMessages.second.passHandle());
-        mFlutterAppMessages = appMessages.first;
+        postRun();
+    }
+
+    public void runFromFile(String main, String packageRoot) {
+        preRun();
+        mSkyEngine.runFromFile(main, packageRoot, "");
+        postRun();
     }
 
     private static native long nativeAttach(int inputObserverHandle);
