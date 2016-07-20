@@ -12,12 +12,14 @@ and install it onto your device.
 If you are new to Flutter, please first follow
 the [Flutter Setup](https://flutter.io/setup/) guide.
 
-### Building the Flutter app
+### Building and installing the Flutter app
 
-* `cd $FLUTTER_HOME/examples/flutter_gallery`
+* `cd $FLUTTER_ROOT/examples/flutter_gallery`
 * `flutter upgrade`
 * `flutter devices` and note the name of the device you want to build for
 * `flutter -d <device name> run --release`
+
+The `flutter run --release` command both builds and installed the Flutter app.
 
 ## Icon
 
