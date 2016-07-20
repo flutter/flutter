@@ -1,6 +1,23 @@
 # Flutter gallery
 
-Demo app for the Material Design widgets and other features provided by Flutter.
+Demo app for the material design widgets and other features provided by Flutter.
+
+## Building
+
+You can follow these instructions to build the gallery app
+and install it onto your device.
+
+### Prereqs
+
+If you are new to Flutter, please first follow
+the [Flutter Setup](https://flutter.io/setup/) guide.
+
+### Building the Flutter app
+
+* `cd $FLUTTER_HOME/examples/flutter_gallery`
+* `flutter upgrade`
+* `flutter devices` and note the name of the device you want to build for
+* `flutter -d <device name> run --release`
 
 ## Icon
 
