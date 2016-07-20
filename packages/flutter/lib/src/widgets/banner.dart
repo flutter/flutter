@@ -162,6 +162,7 @@ class Banner extends StatelessWidget {
 }
 
 /// Displays a [Banner] saying "SLOW MODE" when running in checked mode.
+/// [MaterialApp] builds one of these by default.
 /// Does nothing in release mode.
 class CheckedModeBanner extends StatelessWidget {
   /// Creates a checked mode banner.
