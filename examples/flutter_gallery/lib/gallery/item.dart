@@ -68,8 +68,7 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
   // Components
   new GalleryItem(
     title: 'Animation',
-    subtitle: 'Material motion for points',
-    category: 'Demos',
+    subtitle: 'Material motion for points and rectangles',
     routeName: AnimationDemo.routeName,
     buildRoute: (BuildContext context) => new AnimationDemo()
   ),
