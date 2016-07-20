@@ -4,11 +4,45 @@
 
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 enum _DragTarget {
   start,
   end
+}
+
+// How close a drag's start position must be to the target point. This is
+// a distance squared.
+const double _kTargetSlop = 2500.0;
+
+// Used by the Painter classes.
+const double _kPointRadius = 6.0;
+
+class _DragHandler extends Drag {
+  _DragHandler(this.updateCallback, this.cancelCallback, this.endCallback);
+
+  final GestureDragUpdateCallback updateCallback;
+  final GestureDragCancelCallback cancelCallback;
+  final GestureDragEndCallback endCallback;
+
+  @override
+  void update(DragUpdateDetails details)  {
+    updateCallback(details);
+  }
+
+  @override
+  void cancel()  {
+    cancelCallback();
+  }
+
+  @override
+  void end(DragEndDetails details)  {
+    endCallback(details);
+  }
+}
+
+class _IgnoreDrag extends Drag {
 }
 
 class _PointDemoPainter extends CustomPainter {
@@ -17,8 +51,6 @@ class _PointDemoPainter extends CustomPainter {
     this.arc
   }) : _repaint = repaint, super(repaint: repaint);
 
-  static final double pointRadius = 6.0;
-
   final MaterialPointArcTween arc;
   Animation<double> _repaint;
 
@@ -26,12 +58,12 @@ class _PointDemoPainter extends CustomPainter {
     final Paint paint = new Paint()
       ..color = color.withOpacity(0.25)
       ..style = PaintingStyle.fill;
-    canvas.drawCircle(point, pointRadius, paint);
+    canvas.drawCircle(point, _kPointRadius, paint);
     paint
       ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
-    canvas.drawCircle(point, pointRadius + 1.0, paint);
+    canvas.drawCircle(point, _kPointRadius + 1.0, paint);
   }
 
   @override
@@ -47,9 +79,8 @@ class _PointDemoPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
     if (arc.center != null && arc.radius != null)
       canvas.drawCircle(arc.center, arc.radius, paint);
-    else {
+    else
       canvas.drawLine(arc.begin, arc.end, paint);
-    }
 
     drawPoint(canvas, arc.begin, Colors.green[500]);
     drawPoint(canvas, arc.end, Colors.red[500]);
@@ -57,18 +88,18 @@ class _PointDemoPainter extends CustomPainter {
     paint
       ..color = Colors.green[500]
       ..style = PaintingStyle.fill;
-    canvas.drawCircle(arc.lerp(_repaint.value), pointRadius, paint);
+    canvas.drawCircle(arc.lerp(_repaint.value), _kPointRadius, paint);
   }
 
   @override
-  hitTest(Point position) {
-    return (arc.begin - position).distance < 50.0 || (arc.end - position).distance < 50.0;
+  bool hitTest(Point position) {
+    return (arc.begin - position).distanceSquared < _kTargetSlop
+        || (arc.end - position).distanceSquared < _kTargetSlop;
   }
 
   @override
   bool shouldRepaint(_PointDemoPainter oldPainter) => true;
 }
-
 
 class _PointDemo extends StatefulWidget {
   _PointDemo({ Key key, this.controller }) : super(key: key);
@@ -95,60 +126,84 @@ class _PointDemoState extends State<_PointDemo> {
 
   @override
   void dispose() {
-    config.controller.stop();
+    config.controller.value = 0.0;
     super.dispose();
   }
 
-  void _handlePointerDown(PointerDownEvent event) {
+  Drag _handleOnStart(Point position) {
+    // TODO(hansmuller): allow the user to drag both points at the same time.
+    if (_dragTarget != null)
+      return new _IgnoreDrag();
+
     final RenderBox box = _painterKey.currentContext.findRenderObject();
-    final double startOffset = (box.localToGlobal(_begin) - event.position).distance;
-    final double endOffset = (box.localToGlobal(_end) - event.position).distance;
-    if (startOffset < endOffset && startOffset < 50.0)
-      _dragTarget = _DragTarget.start;
-    else if (endOffset < 50.0)
-      _dragTarget = _DragTarget.end;
-    else
-      _dragTarget = null;
+    final double startOffset = (box.localToGlobal(_begin) - position).distanceSquared;
+    final double endOffset = (box.localToGlobal(_end) - position).distanceSquared;
+    setState(() {
+      if (startOffset < endOffset && startOffset < _kTargetSlop)
+        _dragTarget = _DragTarget.start;
+      else if (endOffset < _kTargetSlop)
+        _dragTarget = _DragTarget.end;
+      else
+        _dragTarget = null;
+    });
+
+    return new _DragHandler(_handleDragUpdate, _handleDragCancel, _handleDragEnd);
   }
 
-  void _handlePointerMove(PointerMoveEvent event) {
+  void _handleDragUpdate(DragUpdateDetails details)  {
     switch (_dragTarget) {
       case _DragTarget.start:
         setState(() {
-          _begin = _begin + event.delta;
+          _begin = _begin + details.delta;
         });
         break;
       case _DragTarget.end:
         setState(() {
-          _end = _end + event.delta;
+          _end = _end + details.delta;
         });
         break;
     }
   }
 
-  void _handlePointerUp(PointerEvent event) {
+  void _handleDragCancel()  {
+    _dragTarget = null;
+    config.controller.value = 0.0;
+  }
+
+  void _handleDragEnd(DragEndDetails details)  {
     _dragTarget = null;
   }
 
   @override
   Widget build(BuildContext context) {
     final MaterialPointArcTween arc = new MaterialPointArcTween(begin: _begin, end: _end);
-    return new Listener(
-      onPointerDown: _handlePointerDown,
-      onPointerMove: _handlePointerMove,
-      onPointerUp: _handlePointerUp,
-      child: new CustomPaint(
-        key: _painterKey,
-        painter: new _PointDemoPainter(
-          repaint: _animation,
-          arc: arc
-        ),
-        child: new Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: new Text(
-            "Tap the refresh button to run the animation. Drag the green "
-            "and red points to change the animation's path.",
-            style: Theme.of(context).textTheme.caption.copyWith(fontSize: 16.0)
+    return new RawGestureDetector(
+      behavior: _dragTarget == null ? HitTestBehavior.deferToChild : HitTestBehavior.opaque,
+      gestures: <Type, GestureRecognizerFactory>{
+        ImmediateMultiDragGestureRecognizer: (ImmediateMultiDragGestureRecognizer recognizer) {
+          return (recognizer ??= new ImmediateMultiDragGestureRecognizer())
+            ..onStart = _handleOnStart;
+        }
+      },
+      child: new ClipRect(
+        child: new CustomPaint(
+          key: _painterKey,
+          foregroundPainter: new _PointDemoPainter(
+            repaint: _animation,
+            arc: arc
+          ),
+          // Watch out: if this IgnorePointer is left out, then gestures that
+          // fail _PointDemoPainter.hitTest() will still be recognized because
+          // they do overlap this child, which is as big as the CustomPaint.
+          child: new IgnorePointer(
+            child: new Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: new Text(
+                "Tap the refresh button to run the animation. Drag the green "
+                "and red points to change the animation's path.",
+                style: Theme.of(context).textTheme.caption.copyWith(fontSize: 16.0)
+              )
+            )
           )
         )
       )
@@ -162,8 +217,6 @@ class _RectangleDemoPainter extends CustomPainter {
     this.arc
   }) : _repaint = repaint, super(repaint: repaint);
 
-  static final double pointRadius = 6.0;
-
   final MaterialRectArcTween arc;
   Animation<double> _repaint;
 
@@ -171,12 +224,12 @@ class _RectangleDemoPainter extends CustomPainter {
     final Paint paint = new Paint()
       ..color = color.withOpacity(0.25)
       ..style = PaintingStyle.fill;
-    canvas.drawCircle(p, pointRadius, paint);
+    canvas.drawCircle(p, _kPointRadius, paint);
     paint
       ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
-    canvas.drawCircle(p, pointRadius + 1.0, paint);
+    canvas.drawCircle(p, _kPointRadius + 1.0, paint);
   }
 
   void drawRect(Canvas canvas, Rect rect, Color color) {
@@ -193,6 +246,12 @@ class _RectangleDemoPainter extends CustomPainter {
     drawRect(canvas, arc.begin, Colors.green[500]);
     drawRect(canvas, arc.end, Colors.red[500]);
     drawRect(canvas, arc.lerp(_repaint.value), Colors.blue[500]);
+  }
+
+  @override
+  bool hitTest(Point position) {
+    return (arc.begin.center - position).distanceSquared < _kTargetSlop
+        || (arc.end.center - position).distanceSquared < _kTargetSlop;
   }
 
   @override
@@ -224,60 +283,83 @@ class _RectangleDemoState extends State<_RectangleDemo> {
 
   @override
   void dispose() {
-    config.controller.stop();
+    config.controller.value = 0.0;
     super.dispose();
   }
 
-  void _handlePointerDown(PointerDownEvent event) {
+  Drag _handleOnStart(Point position) {
+    // TODO(hansmuller): allow the user to drag both points at the same time.
+    if (_dragTarget != null)
+      return new _IgnoreDrag();
+
     final RenderBox box = _painterKey.currentContext.findRenderObject();
-    final double startOffset = (box.localToGlobal(_begin.center) - event.position).distance;
-    final double endOffset = (box.localToGlobal(_end.center) - event.position).distance;
-    if (startOffset < endOffset && startOffset < 50.0)
-      _dragTarget = _DragTarget.start;
-    else if (endOffset < 50.0)
-      _dragTarget = _DragTarget.end;
-    else
-      _dragTarget = null;
+    final double startOffset = (box.localToGlobal(_begin.center) - position).distanceSquared;
+    final double endOffset = (box.localToGlobal(_end.center) - position).distanceSquared;
+    setState(() {
+      if (startOffset < endOffset && startOffset < _kTargetSlop)
+        _dragTarget = _DragTarget.start;
+      else if (endOffset < _kTargetSlop)
+        _dragTarget = _DragTarget.end;
+      else
+        _dragTarget = null;
+    });
+    return new _DragHandler(_handleDragUpdate, _handleDragCancel, _handleDragEnd);
   }
 
-  void _handlePointerMove(PointerMoveEvent event) {
+  void _handleDragUpdate(DragUpdateDetails details)  {
     switch (_dragTarget) {
       case _DragTarget.start:
         setState(() {
-          _begin = _begin.shift(event.delta);
+          _begin = _begin.shift(details.delta);
         });
         break;
       case _DragTarget.end:
         setState(() {
-          _end = _end.shift(event.delta);
+          _end = _end.shift(details.delta);
         });
         break;
     }
   }
 
-  void _handlePointerUp(PointerEvent event) {
+  void _handleDragCancel()  {
+    _dragTarget = null;
+    config.controller.value = 0.0;
+  }
+
+  void _handleDragEnd(DragEndDetails details)  {
     _dragTarget = null;
   }
 
   @override
   Widget build(BuildContext context) {
     final MaterialRectArcTween arc = new MaterialRectArcTween(begin: _begin, end: _end);
-    return new Listener(
-      onPointerDown: _handlePointerDown,
-      onPointerMove: _handlePointerMove,
-      onPointerUp: _handlePointerUp,
-      child: new CustomPaint(
-        key: _painterKey,
-        painter: new _RectangleDemoPainter(
-          repaint: _animation,
-          arc: arc
-        ),
-        child: new Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: new Text(
-            "Tap the refresh button to run the animation. Drag the rectangles "
-            "to change the animation's path.",
-            style: Theme.of(context).textTheme.caption.copyWith(fontSize: 16.0)
+    return new RawGestureDetector(
+      behavior: _dragTarget == null ? HitTestBehavior.deferToChild : HitTestBehavior.opaque,
+      gestures: <Type, GestureRecognizerFactory>{
+        ImmediateMultiDragGestureRecognizer: (ImmediateMultiDragGestureRecognizer recognizer) {
+          return (recognizer ??= new ImmediateMultiDragGestureRecognizer())
+            ..onStart = _handleOnStart;
+        }
+      },
+      child: new ClipRect(
+        child: new CustomPaint(
+          key: _painterKey,
+          foregroundPainter: new _RectangleDemoPainter(
+            repaint: _animation,
+            arc: arc
+          ),
+          // Watch out: if this IgnorePointer is left out, then gestures that
+          // fail _RectDemoPainter.hitTest() will still be recognized because
+          // they do overlap this child, which is as big as the CustomPaint.
+          child: new IgnorePointer(
+            child: new Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: new Text(
+                "Tap the refresh button to run the animation. Drag the rectangles "
+                "to change the animation's path.",
+                style: Theme.of(context).textTheme.caption.copyWith(fontSize: 16.0)
+              )
+            )
           )
         )
       )
@@ -290,7 +372,7 @@ typedef Widget _DemoBuilder(_ArcDemo demo);
 class _ArcDemo {
   _ArcDemo(String _title, this.builder) : title = _title, key = new GlobalKey(debugLabel: _title);
 
-  final AnimationController controller = new AnimationController(duration: const Duration(milliseconds: 1000));
+  final AnimationController controller = new AnimationController(duration: const Duration(milliseconds: 500));
   final String title;
   final _DemoBuilder builder;
   final GlobalKey key;

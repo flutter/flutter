@@ -8,7 +8,17 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
-/// TBD: explain about the degenerate cases, etc.
+/// A Tween that animates a point along a circular arc.
+///
+/// The arc's radius is related to the bounding box that contains the [begin]
+/// and [end] points. If the bounding box is taller than it is wide, then the
+/// center of the circle will be horizontally aligned with the end point.
+/// Otherwise the center of the circle will be aligned with the begin point.
+/// The arc's sweep is always less than or equal to 90 degrees.
+///
+/// See also:
+///
+/// [MaterialRectArcTween]
 class MaterialPointArcTween extends Tween<Point> {
   MaterialPointArcTween({
     @required Point begin,
@@ -53,7 +63,7 @@ class MaterialPointArcTween extends Tween<Point> {
   double _beginAngle;
   double _endAngle;
 
-  /// The center of the circular arc, null if begin and end are horiztonally or
+  /// The center of the circular arc, null if [begin] and [end] are horiztonally or
   /// vertically aligned.
   Point get center => _center;
 
@@ -118,6 +128,15 @@ const List<_Diagonal> _allDiagonals = const <_Diagonal>[
   const _Diagonal(_CornerId.bottomLeft, _CornerId.topRight),
 ];
 
+/// A Tween that animates a rectangle from [begin] to [end].
+///
+/// The rectangle corners whose diagonal is closest to the overall direction of
+/// the animation follow arcs defined with [MaterialPointArcTween].
+///
+/// See also:
+///
+/// [RectTween] (linear rectangle interpolation)
+/// [MaterialPointArcTween]
 class MaterialRectArcTween extends RectTween {
   MaterialRectArcTween({
     @required Rect begin,
@@ -162,8 +181,12 @@ class MaterialRectArcTween extends RectTween {
     return centersVector.dx * delta.dx / length + centersVector.dy * delta.dy / length;
   }
 
+  /// The path of the corresponding [begin], [end] rectangle corners that lead
+  /// the animation.
   MaterialPointArcTween get  beginArc => _beginArc;
 
+  /// The path of the corresponding [begin], [end] rectangle corners that trail
+  /// the animation.
   MaterialPointArcTween get  endArc => _endArc;
 
   /// Setting the arc's [begin] parameter is not supported. Construct a new arc instead.
