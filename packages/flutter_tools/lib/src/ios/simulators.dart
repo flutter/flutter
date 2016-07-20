@@ -13,11 +13,9 @@ import '../application_package.dart';
 import '../base/context.dart';
 import '../base/process.dart';
 import '../build_info.dart';
-import '../commands/run.dart' as run;
 import '../device.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
-import '../observatory.dart';
 import '../protocol_discovery.dart';
 import 'mac.dart';
 
@@ -361,6 +359,12 @@ class IOSSimulator extends Device {
   @override
   bool get isLocalEmulator => true;
 
+  @override
+  bool get supportsHotMode => true;
+
+  @override
+  bool get needsDevFS => false;
+
   _IOSSimulatorLogReader _logReader;
   _IOSSimulatorDevicePortForwarder _portForwarder;
 
@@ -573,32 +577,6 @@ class IOSSimulator extends Device {
   Future<bool> _sideloadUpdatedAssetsForInstalledApplicationBundle(
       ApplicationPackage app) async {
     return (await flx.build(precompiledSnapshot: true)) == 0;
-  }
-
-  @override
-  bool get supportsRestart => run.useReloadSources;
-
-  @override
-  bool get restartSendsFrameworkInitEvent => false;
-
-  @override
-  Future<bool> restartApp(
-    ApplicationPackage package,
-    LaunchResult result, {
-    String mainPath,
-    Observatory observatory
-  }) async {
-    if (observatory.firstIsolateId == null)
-      throw 'Application isolate not found';
-    Event result = await observatory.reloadSources(observatory.firstIsolateId);
-    dynamic error = result.response['reloadError'];
-    if (error != null) {
-      printError('Error reloading application sources: $error');
-      return false;
-    } else {
-      await observatory.flutterReassemble(observatory.firstIsolateId);
-      return true;
-    }
   }
 
   @override

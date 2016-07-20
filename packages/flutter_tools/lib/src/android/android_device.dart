@@ -389,6 +389,31 @@ class AndroidDevice extends Device {
   }
 
   @override
+  bool get supportsHotMode => true;
+
+  @override
+  Future<bool> runFromFile(ApplicationPackage package,
+                           String scriptUri,
+                           String packagesUri) async {
+    AndroidApk apk = package;
+    List<String> cmd = adbCommandForDevice(<String>[
+      'shell', 'am', 'start',
+      '-a', 'android.intent.action.RUN',
+      '-d', _deviceBundlePath,
+      '-f', '0x20000000',  // FLAG_ACTIVITY_SINGLE_TOP
+    ]);
+    cmd.addAll(<String>['--es', 'file', scriptUri]);
+    cmd.addAll(<String>['--es', 'packages', packagesUri]);
+    cmd.add(apk.launchActivity);
+    String result = runCheckedSync(cmd);
+    if (result.contains('Error: ')) {
+      printError(result.trim());
+      return false;
+    }
+    return true;
+  }
+
+  @override
   bool get supportsRestart => true;
 
   @override

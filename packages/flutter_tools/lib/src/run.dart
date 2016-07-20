@@ -14,10 +14,10 @@ import 'build_info.dart';
 import 'commands/build_apk.dart';
 import 'commands/install.dart';
 import 'commands/trace.dart';
-import 'dart/package_map.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'observatory.dart';
+import 'devfs.dart';
 
 /// Given the value of the --target option, return the path of the Dart file
 /// where the app's main function should be.
@@ -37,20 +37,20 @@ class RunAndStayResident {
     this.target,
     this.debuggingOptions,
     this.usesTerminalUI: true,
-    this.useDevFS: false
+    this.hotMode: false
   });
 
   final Device device;
   final String target;
   final DebuggingOptions debuggingOptions;
   final bool usesTerminalUI;
-  final bool useDevFS;
+  final bool hotMode;
 
   ApplicationPackage _package;
   String _mainPath;
   LaunchResult _result;
 
-  Completer<int> _exitCompleter = new Completer<int>();
+  final Completer<int> _exitCompleter = new Completer<int>();
   StreamSubscription<String> _loggingSubscription;
 
   Observatory observatory;
@@ -207,7 +207,15 @@ class RunAndStayResident {
     if (debuggingOptions.debuggingEnabled) {
       observatory = await Observatory.connect(_result.observatoryPort);
       printTrace('Connected to observatory port: ${_result.observatoryPort}.');
-
+      if (hotMode && device.needsDevFS) {
+        bool result = await _updateDevFS();
+        if (!result) {
+          printError('Could not perform initial file synchronization.');
+          return 3;
+        }
+        printStatus('Launching from sources.');
+        await _launchFromDevFS(_package, _mainPath);
+      }
       observatory.populateIsolateInfo();
       observatory.onExtensionEvent.listen((Event event) {
         printTrace(event.toString());
@@ -250,15 +258,17 @@ class RunAndStayResident {
             // F1, help
             _printHelp();
           } else if (lower == 'r' || code == AnsiTerminal.KEY_F5) {
-            if (device.supportsRestart) {
-              // F5, restart
-              restart();
+            if (hotMode) {
+              _reloadSources();
+            } else {
+              if (device.supportsRestart) {
+                // F5, restart
+                restart();
+              }
             }
           } else if (lower == 'q' || code == AnsiTerminal.KEY_F10) {
             // F10, exit
             _stopApp();
-          } else if (useDevFS && lower == 'd') {
-            _updateDevFS();
           } else if (lower == 'w') {
             _debugDumpApp();
           } else if (lower == 't') {
@@ -269,12 +279,14 @@ class RunAndStayResident {
 
       ProcessSignal.SIGINT.watch().listen((ProcessSignal signal) async {
         _resetTerminal();
+        await _cleanupDevFS();
         await _stopLogger();
         await _stopApp();
         exit(0);
       });
       ProcessSignal.SIGTERM.watch().listen((ProcessSignal signal) async {
         _resetTerminal();
+        await _cleanupDevFS();
         await _stopLogger();
         await _stopApp();
         exit(0);
@@ -311,78 +323,84 @@ class RunAndStayResident {
     observatory.flutterDebugDumpRenderTree(observatory.firstIsolateId);
   }
 
-  DevFS devFS;
-
-  Future<Null> _updateDevFS() async {
-    if (devFS == null) {
-      devFS = new DevFS(Directory.current, observatory);
+  DevFS _devFS;
+  String _devFSProjectRootPath;
+  Future<bool> _updateDevFS() async {
+    if (_devFS == null) {
+      Directory directory = Directory.current;
+      _devFSProjectRootPath = directory.path;
+      String fsName = path.basename(directory.path);
+      _devFS = new DevFS(observatory, fsName, directory);
 
       try {
-        await devFS.init();
+        await _devFS.create();
       } catch (error) {
-        devFS = null;
-        printError('Error initializing development client: $error');
-        return null;
+        _devFS = null;
+        printError('Error initializing DevFS: $error');
+        return false;
       }
+
+      _exitCompleter.future.then((_) async {
+        await _cleanupDevFS();
+      });
     }
 
-    // Send the root and lib directories.
-    Directory directory = Directory.current;
-    _sendFiles(directory, '', _dartFiles(directory.listSync()));
-
-    directory = new Directory('lib');
-    _sendFiles(directory, 'lib', _dartFiles(directory.listSync(recursive: true)));
-
-    // Send the packages.
-    if (FileSystemEntity.isFileSync(kPackagesFileName)) {
-      PackageMap packageMap = new PackageMap(kPackagesFileName);
-
-      for (String packageName in packageMap.map.keys) {
-        Uri uri = packageMap.map[packageName];
-        // Ignore self-references.
-        if (uri.toString() == 'lib/')
-          continue;
-        Directory directory = new Directory.fromUri(uri);
-        if (directory.existsSync()) {
-          _sendFiles(
-            directory,
-            'packages/$packageName',
-            _dartFiles(directory.listSync(recursive: true))
-          );
-        }
-      }
-    }
-
-    try {
-      await devFS.flush();
-    } catch (error) {
-      printError('Error sending sources to the client device: $error');
-    }
+    printStatus('DevFS: Updating files on device...');
+    await _devFS.update();
+    printStatus('DevFS: Finished updating files on device...');
+    return true;
   }
 
-  void _sendFiles(Directory base, String prefix, List<File> files) {
-    String basePath = base.path;
-
-    for (File file in files) {
-      String devPath = file.path.substring(basePath.length);
-      if (devPath.startsWith('/'))
-        devPath = devPath.substring(1);
-      devFS.stageFile(prefix.isEmpty ? devPath : '$prefix/$devPath', file);
+  Future<Null> _cleanupDevFS() async {
+    if (_devFS != null) {
+      // Cleanup the devFS.
+      await _devFS.destroy();
     }
+    _devFS = null;
   }
 
-  List<File> _dartFiles(List<FileSystemEntity> entities) {
-    return new List<File>.from(entities
-      .where((FileSystemEntity entity) => entity is File && entity.path.endsWith('.dart')));
+  Future<Null> _launchFromDevFS(ApplicationPackage package,
+                                String mainScript) async {
+    String entryPath = path.relative(mainScript, from: _devFSProjectRootPath);
+    String deviceEntryPath =
+        _devFS.baseUri.resolve(entryPath).toFilePath();
+    String devicePackagesPath =
+        _devFS.baseUri.resolve('.packages').toFilePath();
+    await device.runFromFile(package,
+                             deviceEntryPath,
+                             devicePackagesPath);
+  }
+
+  Future<bool> _reloadSources() async {
+    if (observatory.firstIsolateId == null)
+      throw 'Application isolate not found';
+    if (_devFS != null) {
+      await _updateDevFS();
+    }
+    Status reloadStatus = logger.startProgress('Performing hot reload');
+    Event result = await observatory.reloadSources(observatory.firstIsolateId);
+    reloadStatus.stop(showElapsedTime: true);
+    dynamic error = result.response['reloadError'];
+    if (error != null) {
+      printError('Error reloading application sources: $error');
+      return false;
+    }
+    Status reassembleStatus =
+        logger.startProgress('Reassembling application');
+    await observatory.flutterReassemble(observatory.firstIsolateId);
+    reassembleStatus.stop(showElapsedTime: true);
+    return true;
   }
 
   void _printHelp() {
-    String restartText = device.supportsRestart ? ', "r" or F5 to restart the app,' : '';
+    String restartText = '';
+    if (hotMode) {
+      restartText = ', "r" or F5 to perform a hot reload of the app,';
+    } else if (device.supportsRestart) {
+      restartText = ', "r" or F5 to restart the app,';
+    }
     printStatus('Type "h" or F1 for help$restartText and "q", F10, or ctrl-c to quit.');
     printStatus('Type "w" to print the widget hierarchy of the app, and "t" for the render tree.');
-
-    if (useDevFS)
-      printStatus('Type "d" to send modified project files to the the client\'s DevFS.');
   }
 
   Future<dynamic> _stopLogger() {
@@ -432,89 +450,4 @@ void writeRunBenchmarkFile(Stopwatch startTime, [Stopwatch restartTime]) {
 
   new File(benchmarkOut).writeAsStringSync(toPrettyJson(data));
   printStatus('Run benchmark written to $benchmarkOut ($data).');
-}
-
-class DevFS {
-  DevFS(this.directory, this.observatory) {
-    fsName = path.basename(directory.path);
-  }
-
-  final Directory directory;
-  final Observatory observatory;
-
-  String fsName;
-  String uri;
-  Map<String, _DevFSFileEntry> entries = <String, _DevFSFileEntry>{};
-
-  Future<Null> init() async {
-    CreateDevFSResponse response = await observatory.createDevFS(fsName);
-    uri = response.uri;
-  }
-
-  void stageFile(String devPath, File file) {
-    entries.putIfAbsent(devPath, () => new _DevFSFileEntry(devPath, file));
-  }
-
-  /// Flush any modified files to the devfs.
-  Future<Null> flush() async {
-    List<_DevFSFileEntry> toSend = entries.values
-      .where((_DevFSFileEntry entry) => entry.isModified)
-      .toList();
-
-    for (_DevFSFileEntry entry in toSend) {
-      printTrace('sending to devfs: ${entry.devPath}');
-      entry.updateLastModified();
-    }
-
-    Status status = logger.startProgress('Sending ${toSend.length} files...');
-
-    if (toSend.isEmpty) {
-      status.stop(showElapsedTime: true);
-      return;
-    }
-
-    try {
-      List<_DevFSFile> files = toSend.map((_DevFSFileEntry entry) {
-        return new _DevFSFile('/${entry.devPath}', entry.file);
-      }).toList();
-
-      // TODO(devoncarew): Batch this up in larger groups using writeDevFSFiles().
-      // The current implementation leaves dangling service protocol calls on a timeout.
-      await Future.wait(files.map((_DevFSFile file) {
-        return observatory.writeDevFSFile(
-          fsName,
-          path: file.path,
-          fileContents: file.getContents()
-        );
-      })).timeout(new Duration(seconds: 10));
-    } finally {
-      status.stop(showElapsedTime: true);
-    }
-  }
-
-  Future<List<String>> listDevFSFiles() => observatory.listDevFSFiles(fsName);
-}
-
-class _DevFSFileEntry {
-  _DevFSFileEntry(this.devPath, this.file);
-
-  final String devPath;
-  final File file;
-
-  DateTime lastModified;
-
-  bool get isModified => lastModified == null || file.lastModifiedSync().isAfter(lastModified);
-
-  void updateLastModified() {
-    lastModified = file.lastModifiedSync();
-  }
-}
-
-class _DevFSFile extends DevFSFile {
-  _DevFSFile(String path, this.file) : super(path);
-
-  final File file;
-
-  @override
-  List<int> getContents() => file.readAsBytesSync();
 }

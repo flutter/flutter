@@ -19,9 +19,6 @@ import 'build_apk.dart';
 import 'install.dart';
 import 'trace.dart';
 
-/// Whether the user has passed the `--reload-sources` command-line option.
-bool useReloadSources = false;
-
 abstract class RunCommandBase extends FlutterCommand {
   RunCommandBase() {
     addBuildModeFlags(defaultToRelease: false);
@@ -58,16 +55,16 @@ class RunCommand extends RunCommandBase {
     argParser.addOption('debug-port',
         help: 'Listen to the given port for a debug connection (defaults to $kDefaultObservatoryPort).');
     usesPubOption();
+
     argParser.addFlag('resident',
         defaultsTo: true,
         help: 'Don\'t terminate the \'flutter run\' process after starting the application.');
 
-    // Hidden option to ship all the sources of the current project over to the
-    // embedder via the DevFS observatory API.
-    argParser.addFlag('devfs', negatable: false, hide: true);
-
-    // Send the _reloadSource command to the VM.
-    argParser.addFlag('reload-sources', negatable: true, defaultsTo: false, hide: true);
+    // Option to enable hot reloading.
+    argParser.addFlag('hot',
+                      negatable: false,
+                      defaultsTo: false,
+                      help: 'Run with support for hot reloading.');
 
     // Hidden option to enable a benchmarking mode. This will run the given
     // application, measure the startup time and the app restart time, write the
@@ -122,14 +119,25 @@ class RunCommand extends RunCommandBase {
 
     Cache.releaseLockEarly();
 
-    useReloadSources = argResults['reload-sources'];
+    // Do some early error checks for hot mode.
+    bool hotMode = argResults['hot'];
+    if (hotMode) {
+      if (getBuildMode() != BuildMode.debug) {
+        printError('Hot mode only works with debug builds.');
+        return 1;
+      }
+      if (!deviceForCommand.supportsHotMode) {
+        printError('Hot mode is not supported by this device.');
+        return 1;
+      }
+    }
 
     if (argResults['resident']) {
       RunAndStayResident runner = new RunAndStayResident(
         deviceForCommand,
         target: target,
         debuggingOptions: options,
-        useDevFS: argResults['devfs']
+        hotMode: argResults['hot']
       );
 
       return runner.run(

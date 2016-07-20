@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:web_socket_channel/io.dart';
 
+// TODO(johnmccutchan): Rename this class to ServiceProtocol or VmService.
 class Observatory {
   Observatory._(this.peer, this.port) {
     peer.registerMethod('streamNotify', (rpc.Parameters event) {
@@ -169,13 +170,13 @@ class Observatory {
     });
   }
 
-  // Write multiple files into a file system.
-  Future<Response> writeDevFSFiles(String fsName, { List<DevFSFile> files }) {
-    assert(files != null);
-
-    return sendRequest('_writeDevFSFiles', <String, dynamic> {
+  // Read one file from a file system.
+  Future<List<int>> readDevFSFile(String fsName, String path) {
+    return sendRequest('_readDevFSFile', <String, dynamic> {
       'fsName': fsName,
-      'files': files.map((DevFSFile file) => file.toJson()).toList()
+      'path': path
+    }).then((Response response) {
+      return BASE64.decode(response.response['fileContents']);
     });
   }
 
@@ -231,25 +232,6 @@ class Observatory {
       }
     }
   }
-}
-
-abstract class DevFSFile {
-  DevFSFile(this.path);
-
-  final String path;
-
-  List<int> getContents();
-
-  List<String> toJson() => <String>[path, BASE64.encode(getContents())];
-}
-
-class ByteDevFSFile extends DevFSFile {
-  ByteDevFSFile(String path, this.contents): super(path);
-
-  final List<int> contents;
-
-  @override
-  List<int> getContents() => contents;
 }
 
 class Response {
