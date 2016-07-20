@@ -172,22 +172,18 @@ S
     expect(paragraphs, hasLength(1));
   });
 
-  test('LicenseRegistry', () {
-    expect(LicenseRegistry.licenses, isEmpty);
-    LicenseRegistry.addLicense(() {
-      return <LicenseEntry>[
-        new LicenseEntryWithLineBreaks('A'),
-        new LicenseEntryWithLineBreaks('B'),
-      ];
+  test('LicenseRegistry', () async {
+    expect(await LicenseRegistry.licenses.toList(), isEmpty);
+    LicenseRegistry.addLicense(() async* {
+      yield new LicenseEntryWithLineBreaks('A');
+      yield new LicenseEntryWithLineBreaks('B');
     });
-    LicenseRegistry.addLicense(() {
-      return <LicenseEntry>[
-        new LicenseEntryWithLineBreaks('C'),
-        new LicenseEntryWithLineBreaks('D'),
-      ];
+    LicenseRegistry.addLicense(() async* {
+      yield new LicenseEntryWithLineBreaks('C');
+      yield new LicenseEntryWithLineBreaks('D');
     });
-    expect(LicenseRegistry.licenses, hasLength(4));
-    List<LicenseEntry> licenses = LicenseRegistry.licenses.toList();
+    expect(await LicenseRegistry.licenses.toList(), hasLength(4));
+    List<LicenseEntry> licenses = await LicenseRegistry.licenses.toList();
     expect(licenses, hasLength(4));
     expect(licenses[0].paragraphs.single.text, 'A');
     expect(licenses[1].paragraphs.single.text, 'B');
