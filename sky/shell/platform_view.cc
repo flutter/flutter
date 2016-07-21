@@ -19,7 +19,8 @@ PlatformView::Config::~Config() {}
 
 PlatformView::PlatformView(const PlatformView::Config& config,
                            SurfaceConfig surface_config)
-    : config_(config), surface_config_(surface_config) {}
+    : config_(config), surface_config_(surface_config),
+      size_(SkISize::Make(0, 0)) {}
 
 PlatformView::~PlatformView() {}
 
@@ -70,6 +71,14 @@ void PlatformView::NotifyDestroyed() {
                             delegate_continuation));
 
   latch.Wait();
+}
+
+SkISize PlatformView::GetSize() {
+  return size_;
+}
+
+void PlatformView::Resize(const SkISize& size) {
+  size_ = size;
 }
 
 }  // namespace shell

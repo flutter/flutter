@@ -83,13 +83,16 @@ void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
   std::unique_ptr<flow::LayerTree> layer_tree(
       reinterpret_cast<flow::LayerTree*>(layer_tree_ptr));
 
+  SkISize size = layer_tree->frame_size();
+  if (platform_view_->GetSize() != size) {
+    platform_view_->Resize(size);
+  }
+
   if (platform_view_ == nullptr || !platform_view_->ContextMakeCurrent() ||
       !layer_tree->root_layer()) {
     callback.Run();
     return;
   }
-
-  SkISize size = layer_tree->frame_size();
 
   // There is no way for the compositor to know how long the layer tree
   // construction took. Fortunately, the layer tree does. Grab that time

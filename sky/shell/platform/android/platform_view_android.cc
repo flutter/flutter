@@ -129,6 +129,30 @@ class AndroidGLContext {
 
   bool SwapBuffers() { return eglSwapBuffers(display_, surface_); }
 
+  SkISize GetSize() {
+    EGLint width = 0;
+    EGLint height = 0;
+    if (!eglQuerySurface(display_, surface_, EGL_WIDTH, &width) ||
+        !eglQuerySurface(display_, surface_, EGL_HEIGHT, &height)) {
+      LOG(ERROR) << "Unable to query EGL surface size";
+      return SkISize::Make(0, 0);
+    }
+    return SkISize::Make(width, height);
+  }
+
+  void Resize(const SkISize& size) {
+    eglMakeCurrent(display_, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
+    TeardownSurface(display_, surface_);
+
+    bool success;
+    std::tie(success, surface_) =
+        CreateWindowSurface(display_, config_, window_.handle());
+    if (!success) {
+      LOG(ERROR) << "Unable to create EGL window surface";
+    }
+  }
+
  private:
   AndroidNativeWindow window_;
   EGLDisplay display_;
@@ -316,6 +340,14 @@ bool PlatformViewAndroid::ContextMakeCurrent() {
 
 bool PlatformViewAndroid::SwapBuffers() {
   return context_ != nullptr ? context_->SwapBuffers() : false;
+}
+
+SkISize PlatformViewAndroid::GetSize() {
+  return context_->GetSize();
+}
+
+void PlatformViewAndroid::Resize(const SkISize& size) {
+  context_->Resize(size);
 }
 
 }  // namespace shell

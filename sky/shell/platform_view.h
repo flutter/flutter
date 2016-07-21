@@ -9,6 +9,7 @@
 #include "base/memory/weak_ptr.h"
 #include "base/synchronization/waitable_event.h"
 #include "sky/shell/ui_delegate.h"
+#include "third_party/skia/include/core/SkSize.h"
 
 namespace sky {
 namespace shell {
@@ -57,11 +58,16 @@ class PlatformView {
 
   virtual bool SwapBuffers() = 0;
 
+  virtual SkISize GetSize();
+
+  virtual void Resize(const SkISize& size);
+
  protected:
   explicit PlatformView(const Config& config, SurfaceConfig surface_config);
 
   Config config_;
   SurfaceConfig surface_config_;
+  SkISize size_;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(PlatformView);

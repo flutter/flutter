@@ -48,6 +48,12 @@ class PlatformViewAndroid : public PlatformView {
   // sky::shell::PlatformView override
   bool SwapBuffers() override;
 
+  // sky::shell::PlatformView override
+  virtual SkISize GetSize();
+
+  // sky::shell::PlatformView override
+  virtual void Resize(const SkISize& size);
+
  private:
   // In principle, the ShellView should own the PlatformView, but because our
   // lifetime is controlled by the Android view hierarchy, we flip around the
