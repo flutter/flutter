@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -24,7 +25,8 @@ class CircleAvatar extends StatelessWidget {
     Key key,
     this.child,
     this.backgroundColor,
-    this.radius: 40.0
+    this.backgroundImage,
+    this.radius: 20.0
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
@@ -33,6 +35,10 @@ class CircleAvatar extends StatelessWidget {
   /// The color with which to fill the circle. Changing the background
   /// color will cause the avatar to animate to the new color.
   final Color backgroundColor;
+
+  /// The background image of the circle. Changing the background
+  /// image will cause the avatar to animate to the new image.
+  final ImageProvider backgroundImage;
 
   /// The size of the avatar. Changing the radius will cause the
   /// avatar to animate to the new size.
@@ -44,11 +50,14 @@ class CircleAvatar extends StatelessWidget {
     final Color color = backgroundColor ?? theme.primaryColor;
 
     return new AnimatedContainer(
-      width: radius,
-      height: radius,
+      width: radius * 2.0,
+      height: radius * 2.0,
       duration: kThemeChangeDuration,
       decoration: new BoxDecoration(
         backgroundColor: color,
+        backgroundImage: backgroundImage != null ? new BackgroundImage(
+          image: backgroundImage
+        ) : null,
         shape: BoxShape.circle
       ),
       child: new Center(
