@@ -47,7 +47,6 @@ class TabsDemoState extends State<TabsDemo> {
         });
       },
       child: new Scaffold(
-        appBarBehavior: AppBarBehavior.under,
         appBar: new AppBar(
           title: new Text('Tabs and scrolling'),
           bottom: new TabBar<_Page>(
@@ -58,14 +57,14 @@ class TabsDemoState extends State<TabsDemo> {
         ),
         body: new TabBarView<_Page>(
           children: _pages.map((_Page page) {
-            return new Block(
-              padding: new EdgeInsets.only(top: kTextTabBarHeight + kToolBarHeight + statusBarHeight),
+            return new ScrollableList(
+              itemExtent: 192.0,
               scrollableKey: page.key,
               onScroll: (double value) { _scrollOffset = value; },
               children: new List<Widget>.generate(6, (int i) {
                 return new Container(
-                  padding: const EdgeInsets.all(8.0),
                   height: 192.0,
+                  padding: const EdgeInsets.all(8.0),
                   child: new Card(
                     child: new Center(
                       child: new Text('Tab ${page.label}, item $i')
