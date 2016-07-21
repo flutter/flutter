@@ -19,9 +19,9 @@ import '../build_info.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
 import '../run.dart';
-import '../runner/flutter_command.dart';
 import '../services.dart';
 import 'build_aot.dart';
+import 'build.dart';
 
 export '../android/android_device.dart' show AndroidDevice;
 
@@ -159,7 +159,7 @@ class ApkKeystoreInfo {
   final String keyPassword;
 }
 
-class BuildApkCommand extends FlutterCommand {
+class BuildApkCommand extends BuildSubCommand {
   BuildApkCommand() {
     usesTargetOption();
     addBuildModeFlags();
@@ -203,6 +203,7 @@ class BuildApkCommand extends FlutterCommand {
 
   @override
   Future<int> runInProject() async {
+    await super.runInProject();
     if (isProjectUsingGradle()) {
       return await buildAndroidWithGradle(
         TargetPlatform.android_arm,

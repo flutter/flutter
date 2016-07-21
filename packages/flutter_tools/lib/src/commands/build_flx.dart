@@ -6,9 +6,9 @@ import 'dart:async';
 
 import '../flx.dart';
 import '../globals.dart';
-import '../runner/flutter_command.dart';
+import 'build.dart';
 
-class BuildFlxCommand extends FlutterCommand {
+class BuildFlxCommand extends BuildSubCommand {
   BuildFlxCommand() {
     usesTargetOption();
     argParser.addFlag('precompiled', negatable: false);
@@ -37,6 +37,7 @@ class BuildFlxCommand extends FlutterCommand {
 
   @override
   Future<int> runInProject() async {
+    await super.runInProject();
     String outputPath = argResults['output-file'];
 
     return await build(

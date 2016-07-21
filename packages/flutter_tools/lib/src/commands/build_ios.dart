@@ -11,9 +11,9 @@ import '../base/logger.dart';
 import '../build_info.dart';
 import '../globals.dart';
 import '../ios/mac.dart';
-import '../runner/flutter_command.dart';
+import 'build.dart';
 
-class BuildIOSCommand extends FlutterCommand {
+class BuildIOSCommand extends BuildSubCommand {
   BuildIOSCommand() {
     usesTargetOption();
     addBuildModeFlags();
@@ -30,6 +30,7 @@ class BuildIOSCommand extends FlutterCommand {
 
   @override
   Future<int> runInProject() async {
+    await super.runInProject();
     if (getCurrentHostPlatform() != HostPlatform.darwin_x64) {
       printError('Building for iOS is only supported on the Mac.');
       return 1;
