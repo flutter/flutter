@@ -5,8 +5,11 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:meta/meta.dart';
+
 import '../globals.dart';
 import '../runner/flutter_command.dart';
+import '../base/utils.dart';
 import 'build_apk.dart';
 import 'build_aot.dart';
 import 'build_flx.dart';
@@ -29,6 +32,29 @@ class BuildCommand extends FlutterCommand {
 
   @override
   Future<int> runInProject() => new Future<int>.value(0);
+}
+
+abstract class BuildSubCommand extends FlutterCommand {
+  @override
+  @mustCallSuper
+  Future<int> runInProject() async {
+    if (isRunningOnBot) {
+      File dotPackages = new File('.packages');
+      printStatus('Contents of .packages:');
+      if (dotPackages.existsSync())
+        printStatus(dotPackages.readAsStringSync());
+      else
+        printError('File not found: ${dotPackages.absolute.path}');
+
+      File pubspecLock = new File('pubspec.lock');
+      printStatus('Contents of pubspec.lock:');
+      if (pubspecLock.existsSync())
+        printStatus(pubspecLock.readAsStringSync());
+      else
+        printError('File not found: ${pubspecLock.absolute.path}');
+    }
+    return 0;
+  }
 }
 
 class BuildCleanCommand extends FlutterCommand {

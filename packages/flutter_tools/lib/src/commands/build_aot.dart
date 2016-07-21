@@ -14,7 +14,7 @@ import '../build_info.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../run.dart';
-import '../runner/flutter_command.dart';
+import 'build.dart';
 
 const String _kDefaultAotOutputDir = 'build/aot';
 
@@ -23,7 +23,7 @@ const List<String> kAotSnapshotFiles = const <String>[
   'snapshot_aot_instr', 'snapshot_aot_isolate', 'snapshot_aot_rodata', 'snapshot_aot_vmisolate',
 ];
 
-class BuildAotCommand extends FlutterCommand {
+class BuildAotCommand extends BuildSubCommand {
   BuildAotCommand() {
     usesTargetOption();
     addBuildModeFlags();
@@ -45,6 +45,7 @@ class BuildAotCommand extends FlutterCommand {
 
   @override
   Future<int> runInProject() async {
+    await super.runInProject();
     String targetPlatform = argResults['target-platform'];
     TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     if (platform == null) {
