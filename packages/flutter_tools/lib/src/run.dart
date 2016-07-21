@@ -345,9 +345,9 @@ class RunAndStayResident {
       });
     }
 
-    printStatus('DevFS: Updating files on device...');
+    Status devFSStatus = logger.startProgress('Updating files on device...');
     await _devFS.update();
-    printStatus('DevFS: Finished updating files on device...');
+    devFSStatus.stop(showElapsedTime: true);
     return true;
   }
 
