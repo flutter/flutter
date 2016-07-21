@@ -165,6 +165,7 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   void reassembleApplication() {
     super.reassembleApplication();
     pipelineOwner.reassemble();
+    beginFrame();
   }
 
   @override

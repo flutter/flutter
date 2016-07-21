@@ -429,7 +429,7 @@ abstract class SchedulerBinding extends BindingBase {
     Duration timeStamp = _adjustForEpoch(rawTimeStamp);
     assert(() {
       if (debugPrintBeginFrameBanner)
-        print('━‬━‬━‬━‬━‬━‬━┫ Begin Frame ($timeStamp) ┣━‬━‬━‬━‬━‬━‬━');
+        print('━━━━━━━┫ Begin Frame ($timeStamp) ┣━━━━━━━');
       return true;
     });
     _lastRawTimeStamp = rawTimeStamp;
