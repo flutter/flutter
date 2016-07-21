@@ -7,11 +7,11 @@ import 'package:flutter/widgets.dart';
 import 'debug.dart';
 import 'theme.dart';
 
-const double _kDrawerHeaderHeight = 140.0;
+const double _kDrawerHeaderHeight = 160.0 + 1.0; // bottom edge
 
-/// The top-most region of a material design drawer. The header's [background]
-/// widget extends behind the system status bar and its [content] widget is
-/// stacked on top of the background and below the status bar.
+/// The top-most region of a material design drawer. The header's [child]
+/// widget is placed inside of a [Container] whose [decoration] can be passed as
+/// an argument.
 ///
 /// Part of the material design [Drawer].
 ///
@@ -22,19 +22,24 @@ const double _kDrawerHeaderHeight = 140.0;
 ///  * [Drawer]
 ///  * [DrawerItem]
 ///  * <https://www.google.com/design/spec/patterns/navigation-drawer.html>
+
 class DrawerHeader extends StatelessWidget {
   /// Creates a material design drawer header.
   ///
   /// Requires one of its ancestors to be a [Material] widget.
-  const DrawerHeader({ Key key, this.background, this.content }) : super(key: key);
+  const DrawerHeader({
+    Key key,
+    this.decoration,
+    this.child
+  }) : super(key: key);
 
-  /// A widget that extends behind the system status bar and is stacked
-  /// behind the [content] widget.
-  final Widget background;
+  /// Decoration for the main drawer header [Container]; useful for applying
+  /// backgrounds.
+  final BoxDecoration decoration;
 
-  /// A widget that's positioned below the status bar and stacked on top of the
-  /// [background] widget. Typically a view of the user's id.
-  final Widget content;
+  /// A widget that extends behind the system status bar and is placed inside a
+  /// [Container].
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +47,7 @@ class DrawerHeader extends StatelessWidget {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
     return new Container(
       height: statusBarHeight + _kDrawerHeaderHeight,
-      margin: const EdgeInsets.only(bottom: 7.0), // 8 less 1 for the bottom border.
+      margin: const EdgeInsets.only(bottom: 8.0),
       decoration: new BoxDecoration(
         border: const Border(
           bottom: const BorderSide(
@@ -51,20 +56,18 @@ class DrawerHeader extends StatelessWidget {
           )
         )
       ),
-      child: new Stack(
-        children: <Widget>[
-          background ?? new Container(),
-          new Positioned(
-            top: statusBarHeight + 16.0,
-            left: 16.0,
-            right: 16.0,
-            bottom: 8.0,
-            child: new DefaultTextStyle(
-              style: Theme.of(context).textTheme.body2,
-              child: content
-            )
-          )
-        ]
+      child: new Container(
+        padding: new EdgeInsets.only(
+          top: 16.0 + statusBarHeight,
+          left: 16.0,
+          right: 16.0,
+          bottom: 8.0
+        ),
+        decoration: decoration,
+        child: new DefaultTextStyle(
+          style: Theme.of(context).textTheme.body2,
+          child: child
+        )
       )
     );
   }
