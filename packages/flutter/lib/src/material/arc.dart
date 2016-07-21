@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' show lerpDouble;
+import 'dart:ui' show hashValues, lerpDouble;
 
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
@@ -22,7 +22,7 @@ const double _kOnAxisDelta = 2.0;
 ///
 /// See also:
 ///
-/// [MaterialRectArcTween]
+/// * [MaterialRectArcTween]
 class MaterialPointArcTween extends Tween<Point> {
   MaterialPointArcTween({
     @required Point begin,
@@ -111,6 +111,20 @@ class MaterialPointArcTween extends Tween<Point> {
   }
 
   @override
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! MaterialPointArcTween)
+      return false;
+    final MaterialPointArcTween typedOther = other;
+    return begin == typedOther.begin
+        && end == typedOther.end;
+  }
+
+  @override
+  int get hashCode => hashValues(begin, end);
+
+  @override
   String toString() {
     return '$runtimeType($begin \u2192 $end center=$center, radius=$radius, beginAngle=$beginAngle, endAngle=$endAngle)';
   }
@@ -143,8 +157,8 @@ const List<_Diagonal> _allDiagonals = const <_Diagonal>[
 ///
 /// See also:
 ///
-/// [RectTween] (linear rectangle interpolation)
-/// [MaterialPointArcTween]
+/// * [RectTween] (linear rectangle interpolation)
+/// * [MaterialPointArcTween]
 class MaterialRectArcTween extends RectTween {
   MaterialRectArcTween({
     @required Rect begin,
@@ -191,11 +205,11 @@ class MaterialRectArcTween extends RectTween {
 
   /// The path of the corresponding [begin], [end] rectangle corners that lead
   /// the animation.
-  MaterialPointArcTween get  beginArc => _beginArc;
+  MaterialPointArcTween get beginArc => _beginArc;
 
   /// The path of the corresponding [begin], [end] rectangle corners that trail
   /// the animation.
-  MaterialPointArcTween get  endArc => _endArc;
+  MaterialPointArcTween get endArc => _endArc;
 
   /// Setting the arc's [begin] parameter is not supported. Construct a new arc instead.
   @override
@@ -217,6 +231,20 @@ class MaterialRectArcTween extends RectTween {
       return end;
     return new Rect.fromPoints(_beginArc.lerp(t), _endArc.lerp(t));
   }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! MaterialRectArcTween)
+      return false;
+    final MaterialRectArcTween typedOther = other;
+    return begin == typedOther.begin
+        && end == typedOther.end;
+  }
+
+  @override
+  int get hashCode => hashValues(begin, end);
 
   @override
   String toString() {

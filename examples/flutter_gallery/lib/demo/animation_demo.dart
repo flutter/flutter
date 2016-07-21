@@ -20,25 +20,25 @@ const double _kTargetSlop = 2500.0;
 const double _kPointRadius = 6.0;
 
 class _DragHandler extends Drag {
-  _DragHandler(this.updateCallback, this.cancelCallback, this.endCallback);
+  _DragHandler(this.onUpdate, this.onCancel, this.onEnd);
 
-  final GestureDragUpdateCallback updateCallback;
-  final GestureDragCancelCallback cancelCallback;
-  final GestureDragEndCallback endCallback;
+  final GestureDragUpdateCallback onUpdate;
+  final GestureDragCancelCallback onCancel;
+  final GestureDragEndCallback onEnd;
 
   @override
   void update(DragUpdateDetails details)  {
-    updateCallback(details);
+    onUpdate(details);
   }
 
   @override
   void cancel()  {
-    cancelCallback();
+    onCancel();
   }
 
   @override
   void end(DragEndDetails details)  {
-    endCallback(details);
+    onEnd(details);
   }
 }
 
@@ -98,7 +98,7 @@ class _PointDemoPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_PointDemoPainter oldPainter) => true;
+  bool shouldRepaint(_PointDemoPainter oldPainter) => arc != oldPainter.arc;
 }
 
 class _PointDemo extends StatefulWidget {
@@ -255,7 +255,7 @@ class _RectangleDemoPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_RectangleDemoPainter oldPainter) => true;
+  bool shouldRepaint(_RectangleDemoPainter oldPainter) => arc != oldPainter.arc;
 }
 
 class _RectangleDemo extends StatefulWidget {

@@ -292,6 +292,10 @@ class RelativeRectTween extends Tween<RelativeRect> {
 /// position to and end position over the lifetime of the animation.
 ///
 /// Only works if it's the child of a [Stack].
+///
+/// See also:
+///
+/// * [RelativePositionedTransition]
 class PositionedTransition extends AnimatedWidget {
   /// Creates a transition for [Positioned].
   ///
@@ -320,6 +324,15 @@ class PositionedTransition extends AnimatedWidget {
   }
 }
 
+/// Animated version of [Positioned] which transitions the child's position
+/// based on the value of [rect] relative to a bounding box with the
+/// specified [size].
+///
+/// Only works if it's the child of a [Stack].
+///
+/// See also:
+///
+/// * [PositionedTransition]
 class RelativePositionedTransition extends AnimatedWidget {
   RelativePositionedTransition({
     Key key,
@@ -331,6 +344,8 @@ class RelativePositionedTransition extends AnimatedWidget {
   /// The animation that controls the child's size and position.
   Animation<Rect> get rect => animation;
 
+  /// The [Positioned] widget's offsets are relative to a box of this
+  /// size whose origin is 0,0.
   final Size size;
 
   /// The widget below this widget in the tree.
