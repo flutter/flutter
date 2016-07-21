@@ -188,6 +188,8 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
+    if (notification.depth != 0)
+      return false;
     if (config.scrollableKey == null || config.scrollableKey == notification.scrollable.config.key) {
       final ScrollableState scrollable = notification.scrollable;
       switch(notification.kind) {
