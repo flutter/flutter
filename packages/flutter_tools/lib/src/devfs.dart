@@ -79,12 +79,16 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
       return e;
     }
     String fileContents = BASE64.encode(bytes);
+    try {
     return await serviceProtocol.sendRequest('_writeDevFSFile',
                                              <String, dynamic> {
                                                 'fsName': fsName,
                                                 'path': entry.devicePath,
                                                 'fileContents': fileContents
                                              });
+    } catch (e) {
+      print('failed on ${entry.devicePath} $e');
+    }
   }
 
   @override

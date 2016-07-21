@@ -61,7 +61,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   final WidgetBuilder builder;
 
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 150);
+  Duration get transitionDuration => const Duration(milliseconds: 300);
 
   @override
   Color get barrierColor => null;

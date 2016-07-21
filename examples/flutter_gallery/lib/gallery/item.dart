@@ -67,6 +67,12 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
   ),
   // Components
   new GalleryItem(
+    title: 'Animation',
+    subtitle: 'Material motion for points and rectangles',
+    routeName: AnimationDemo.routeName,
+    buildRoute: (BuildContext context) => new AnimationDemo()
+  ),
+  new GalleryItem(
     title: 'Buttons',
     subtitle: 'All kinds: flat, raised, dropdown, icon, etc',
     routeName: ButtonsDemo.routeName,

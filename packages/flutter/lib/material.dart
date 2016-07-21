@@ -14,6 +14,7 @@ library material;
 export 'src/material/about.dart';
 export 'src/material/app.dart';
 export 'src/material/app_bar.dart';
+export 'src/material/arc.dart';
 export 'src/material/bottom_sheet.dart';
 export 'src/material/button.dart';
 export 'src/material/button_bar.dart';

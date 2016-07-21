@@ -292,6 +292,10 @@ class RelativeRectTween extends Tween<RelativeRect> {
 /// position to and end position over the lifetime of the animation.
 ///
 /// Only works if it's the child of a [Stack].
+///
+/// See also:
+///
+/// * [RelativePositionedTransition]
 class PositionedTransition extends AnimatedWidget {
   /// Creates a transition for [Positioned].
   ///
@@ -315,6 +319,46 @@ class PositionedTransition extends AnimatedWidget {
       right: rect.value.right,
       bottom: rect.value.bottom,
       left: rect.value.left,
+      child: child
+    );
+  }
+}
+
+/// Animated version of [Positioned] which transitions the child's position
+/// based on the value of [rect] relative to a bounding box with the
+/// specified [size].
+///
+/// Only works if it's the child of a [Stack].
+///
+/// See also:
+///
+/// * [PositionedTransition]
+class RelativePositionedTransition extends AnimatedWidget {
+  RelativePositionedTransition({
+    Key key,
+    @required Animation<Rect> rect,
+    @required this.size,
+    this.child
+  }) : super(key: key, animation: rect);
+
+  /// The animation that controls the child's size and position.
+  Animation<Rect> get rect => animation;
+
+  /// The [Positioned] widget's offsets are relative to a box of this
+  /// size whose origin is 0,0.
+  final Size size;
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final RelativeRect offsets = new RelativeRect.fromSize(rect.value, size);
+    return new Positioned(
+      top: offsets.top,
+      right: offsets.right,
+      bottom: offsets.bottom,
+      left: offsets.left,
       child: child
     );
   }
