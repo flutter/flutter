@@ -66,7 +66,7 @@ class _Asset {
   /// The entry to list in the generated asset manifest.
   String get assetEntry => _assetEntry ?? relativePath;
 
-  /// Where the resource is on disk realtive to [base].
+  /// Where the resource is on disk relative to [base].
   final String relativePath;
 
   final String source;
@@ -198,6 +198,34 @@ Map<_Asset, List<_Asset>> _parseAssets(
   }
 
   return result;
+}
+
+final String _licenseSeparator = '\n' + ('-' * 80) + '\n';
+
+/// Returns a ZipEntry representing the license file.
+ZipEntry _obtainLicenses(
+  PackageMap packageMap,
+  String assetBase
+) {
+  // Read the LICENSE file from each package in the .packages file,
+  // splitting each one into each component license (so that we can
+  // de-dupe if possible).
+  final Set<String> packageLicenses = new Set<String>();
+  final List<Uri> packages = packageMap.map.values;
+  for (Uri package in packages) {
+    if (package != null && package.scheme == 'file') {
+      final File file = new File.fromUri(package.resolve('../LICENSE'));
+      if (file.existsSync())
+        packageLicenses.addAll(file.readAsStringSync().split(_licenseSeparator));
+    }
+  }
+
+  final List<String> combinedLicensesList = packageLicenses.toList();
+  combinedLicensesList.sort();
+
+  final String combinedLicenses = combinedLicensesList.join(_licenseSeparator);
+
+  return new ZipEntry.fromString('LICENSE', combinedLicenses);
 }
 
 _Asset _resolveAsset(
@@ -362,13 +390,13 @@ Future<int> build({
   }
 
   return assemble(
-      manifestDescriptor: manifestDescriptor,
-      snapshotFile: snapshotFile,
-      assetBasePath: assetBasePath,
-      outputPath: outputPath,
-      privateKeyPath: privateKeyPath,
-      workingDirPath: workingDirPath,
-      includeRobotoFonts: includeRobotoFonts
+    manifestDescriptor: manifestDescriptor,
+    snapshotFile: snapshotFile,
+    assetBasePath: assetBasePath,
+    outputPath: outputPath,
+    privateKeyPath: privateKeyPath,
+    workingDirPath: workingDirPath,
+    includeRobotoFonts: includeRobotoFonts
   );
 }
 
@@ -383,8 +411,10 @@ Future<int> assemble({
 }) async {
   printTrace('Building $outputPath');
 
+  final PackageMap packageMap = new PackageMap(path.join(assetBasePath, '.packages'));
+
   Map<_Asset, List<_Asset>> assetVariants = _parseAssets(
-    new PackageMap(path.join(assetBasePath, '.packages')),
+    packageMap,
     manifestDescriptor,
     assetBasePath,
     excludeDirs: <String>[workingDirPath, path.join(assetBasePath, 'build')]
@@ -433,6 +463,8 @@ Future<int> assemble({
   ZipEntry fontManifest = _createFontManifest(manifestDescriptor, usesMaterialDesign, includeRobotoFonts);
   if (fontManifest != null)
     zipBuilder.addEntry(fontManifest);
+
+  zipBuilder.addEntry(_obtainLicenses(packageMap, assetBasePath));
 
   ensureDirectoryExists(outputPath);
 

@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 /// Signature for callbacks passed to [LicenseRegistry.addLicense].
-typedef Iterable<LicenseEntry> LicenseEntryCollector();
+typedef Stream<LicenseEntry> LicenseEntryCollector();
 
 /// A string that represents one paragraph in a [LicenseEntry].
 ///
@@ -230,8 +232,14 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
 /// A registry for packages to add licenses to, so that they can be displayed
 /// together in an interface such as the [LicensePage].
 ///
-/// Packages should register their licenses using [addLicense]. User interfaces
+/// Packages can register their licenses using [addLicense]. User interfaces
 /// that wish to show all the licenses can obtain them by calling [licenses].
+///
+/// The flutter tool will automatically collect the contents of all the LICENSE
+/// files found at the root of each package into a single LICENSE file in the
+/// default asset bundle. Each license in that file is separated from the next
+/// by a line of eighty hyphens (`-`). The `services` package registers a
+/// license collector that splits that file and adds each entry to the registry.
 class LicenseRegistry {
   LicenseRegistry._();
 
@@ -251,11 +259,9 @@ class LicenseRegistry {
 
   /// Returns the licenses that have been registered.
   ///
-  /// Each time the iterable returned by this function is called, the callbacks
-  /// registered with [addLicense] are called again, which is relatively
-  /// expensive. For this reason, consider immediately converting the results to
-  /// a list with [Iterable.toList].
-  static Iterable<LicenseEntry> get licenses sync* {
+  /// Because generating the list of licenses is expensive, this function should
+  /// only be called once.
+  static Stream<LicenseEntry> get licenses async* {
     if (_collectors == null)
       return;
     for (LicenseEntryCollector collector in _collectors)

@@ -28,8 +28,7 @@ class PackageMap {
   final String packagesPath;
 
   Map<String, Uri> get map {
-    if (_map == null)
-      _map = _parse(packagesPath);
+    _map ??= _parse(packagesPath);
     return _map;
   }
   Map<String, Uri> _map;

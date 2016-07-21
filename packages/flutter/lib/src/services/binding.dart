@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
+import 'asset_bundle.dart';
 import 'shell.dart';
 
 /// Ensures that the [MojoShell] singleton is created synchronously
@@ -15,10 +18,24 @@ import 'shell.dart';
 /// [MojoShell] is then created in an earlier call stack than the
 /// server for that service is provided, then the request will be
 /// rejected as not matching any registered servers.
+///
+/// The ServicesBinding also registers a [LicenseEntryCollector] that exposes
+/// the licenses found in the LICENSE file stored at the root of the asset
+/// bundle.
 abstract class ServicesBinding extends BindingBase {
   @override
   void initInstances() {
     super.initInstances();
     new MojoShell();
+    LicenseRegistry.addLicense(_addLicenses);
+  }
+
+  static final String _licenseSeparator = '\n' + ('-' * 80) + '\n';
+
+  Stream<LicenseEntry> _addLicenses() async* {
+    final String rawLicenses = await rootBundle.loadString('LICENSE', cache: false);
+    final List<String> licenses = rawLicenses.split(_licenseSeparator);
+    for (String license in licenses)
+      yield new LicenseEntryWithLineBreaks(license);
   }
 }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
@@ -13,6 +15,7 @@ import 'drawer_item.dart';
 import 'flat_button.dart';
 import 'icon.dart';
 import 'page.dart';
+import 'progress_indicator.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
@@ -340,40 +343,51 @@ class LicensePage extends StatefulWidget {
 }
 
 class _LicensePageState extends State<LicensePage> {
-  List<Widget> _licenses = _initLicenses();
 
-  static List<Widget> _initLicenses() {
-    List<Widget> result = <Widget>[];
-    for (LicenseEntry license in LicenseRegistry.licenses) {
+  @override
+  void initState() {
+    super.initState();
+    _initLicenses();
+  }
+
+  List<Widget> _licenses = <Widget>[];
+  bool _loaded = false;
+
+  Future<Null> _initLicenses() async {
+    await for (LicenseEntry license in LicenseRegistry.licenses) {
       bool haveMargin = true;
-      result.add(new Padding(
-        padding: new EdgeInsets.symmetric(vertical: 18.0),
-        child: new Text(
-          '🍀‬', // That's U+1F340. Could also use U+2766 (❦) if U+1F340 doesn't work everywhere.
-          textAlign: TextAlign.center
-        )
-      ));
-      for (LicenseParagraph paragraph in license.paragraphs) {
-        if (paragraph.indent == LicenseParagraph.centeredIndent) {
-          result.add(new Padding(
-            padding: new EdgeInsets.only(top: haveMargin ? 0.0 : 16.0),
-            child: new Text(
-              paragraph.text,
-              style: new TextStyle(fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center
-            )
-          ));
-        } else {
-          assert(paragraph.indent >= 0);
-          result.add(new Padding(
-            padding: new EdgeInsets.only(top: haveMargin ? 0.0 : 8.0, left: 16.0 * paragraph.indent),
-            child: new Text(paragraph.text)
-          ));
+      setState(() {
+        _licenses.add(new Padding(
+          padding: new EdgeInsets.symmetric(vertical: 18.0),
+          child: new Text(
+            '🍀‬', // That's U+1F340. Could also use U+2766 (❦) if U+1F340 doesn't work everywhere.
+            textAlign: TextAlign.center
+          )
+        ));
+        for (LicenseParagraph paragraph in license.paragraphs) {
+          if (paragraph.indent == LicenseParagraph.centeredIndent) {
+            _licenses.add(new Padding(
+              padding: new EdgeInsets.only(top: haveMargin ? 0.0 : 16.0),
+              child: new Text(
+                paragraph.text,
+                style: new TextStyle(fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center
+              )
+            ));
+          } else {
+            assert(paragraph.indent >= 0);
+            _licenses.add(new Padding(
+              padding: new EdgeInsets.only(top: haveMargin ? 0.0 : 8.0, left: 16.0 * paragraph.indent),
+              child: new Text(paragraph.text)
+            ));
+          }
+          haveMargin = false;
         }
-        haveMargin = false;
-      }
+      });
     }
-    return result;
+    setState(() {
+      _loaded = true;
+    });
   }
 
   @override
@@ -390,6 +404,14 @@ class _LicensePageState extends State<LicensePage> {
       new Container(height: 24.0),
     ];
     contents.addAll(_licenses);
+    if (!_loaded) {
+      contents.add(new Padding(
+        padding: new EdgeInsets.symmetric(vertical: 24.0),
+        child: new Center(
+          child: new CircularProgressIndicator()
+        )
+      ));
+    }
     return new Scaffold(
       appBar: new AppBar(
         title: new Text('Licenses')
