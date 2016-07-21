@@ -8,6 +8,10 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
+// How close the begin and end points must be to an axis to be considered
+// vertical or horizontal.
+const double _kOnAxisDelta = 2.0;
+
 /// A Tween that animates a point along a circular arc.
 ///
 /// The arc's radius is related to the bounding box that contains the [begin]
@@ -31,9 +35,9 @@ class MaterialPointArcTween extends Tween<Point> {
     final double distanceFromAtoB = delta.distance;
     final Point c = new Point(end.x, begin.y);
 
-    double sweepAngle() => 2.0 *  math.asin(distanceFromAtoB / (2.0 * _radius));
+    double sweepAngle() => 2.0 * math.asin(distanceFromAtoB / (2.0 * _radius));
 
-    if (deltaX > 2.0 && deltaY > 2.0) {
+    if (deltaX > _kOnAxisDelta && deltaY > _kOnAxisDelta) {
       if (deltaX < deltaY) {
         _radius = distanceFromAtoB * distanceFromAtoB / (c - begin).distance / 2.0;
         _center = new Point(end.x + _radius * (begin.x - end.x).sign, end.y);
@@ -94,6 +98,10 @@ class MaterialPointArcTween extends Tween<Point> {
 
   @override
   Point lerp(double t) {
+    if (t == 0.0)
+      return begin;
+    if (t == 1.0)
+      return end;
     if (_beginAngle == null || _endAngle == null)
       return Point.lerp(begin, end, t);
     final double angle = lerpDouble(_beginAngle, _endAngle, t);
@@ -203,6 +211,10 @@ class MaterialRectArcTween extends RectTween {
 
   @override
   Rect lerp(double t) {
+    if (t == 0.0)
+      return begin;
+    if (t == 1.0)
+      return end;
     return new Rect.fromPoints(_beginArc.lerp(t), _endArc.lerp(t));
   }
 
