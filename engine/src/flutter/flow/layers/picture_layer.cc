@@ -13,16 +13,13 @@ namespace flow {
 // TODO(abarth): Make this configurable by developers.
 const bool kDebugCheckerboardRasterizedLayers = false;
 
-PictureLayer::PictureLayer() {
-}
+PictureLayer::PictureLayer() {}
 
-PictureLayer::~PictureLayer() {
-}
+PictureLayer::~PictureLayer() {}
 
-void PictureLayer::Preroll(PrerollContext* context,
-                           const SkMatrix& matrix) {
+void PictureLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   image_ = context->raster_cache.GetPrerolledImage(
-      context->gr_context, picture_.get(), matrix);
+      context->gr_context, picture_.get(), matrix, is_complex_, will_change_);
   context->child_paint_bounds =
       picture_->cullRect().makeOffset(offset_.x(), offset_.y());
 }

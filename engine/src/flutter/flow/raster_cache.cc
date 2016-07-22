@@ -27,30 +27,29 @@ static bool isWorthRasterizing(SkPicture* picture) {
 
 #endif
 
-RasterCache::RasterCache() {
-}
+RasterCache::RasterCache() {}
 
-RasterCache::~RasterCache() {
-}
+RasterCache::~RasterCache() {}
 
 RasterCache::Entry::Entry() {
   physical_size.setEmpty();
 }
 
-RasterCache::Entry::~Entry() {
-}
+RasterCache::Entry::~Entry() {}
 
 sk_sp<SkImage> RasterCache::GetPrerolledImage(GrContext* context,
-                                                     SkPicture* picture,
-                                                     const SkMatrix& ctm) {
+                                              SkPicture* picture,
+                                              const SkMatrix& ctm,
+                                              bool is_complex,
+                                              bool will_change) {
 #if ENABLE_RASTER_CACHE
   SkScalar scaleX = ctm.getScaleX();
   SkScalar scaleY = ctm.getScaleY();
 
   SkRect rect = picture->cullRect();
 
-  SkISize physical_size = SkISize::Make(rect.width() * scaleX,
-                                        rect.height() * scaleY);
+  SkISize physical_size =
+      SkISize::Make(rect.width() * scaleX, rect.height() * scaleY);
 
   if (physical_size.isEmpty())
     return nullptr;
@@ -74,10 +73,10 @@ sk_sp<SkImage> RasterCache::GetPrerolledImage(GrContext* context,
     // Saturate at the threshhold.
     entry.access_count = kRasterThreshold;
 
-    if (!entry.image && isWorthRasterizing(picture)) {
-      TRACE_EVENT2("flutter", "Rasterize picture layer",
-                   "width", physical_size.width(),
-                   "height", physical_size.height());
+    if (!entry.image && !will_change &&
+        (is_complex || isWorthRasterizing(picture))) {
+      TRACE_EVENT2("flutter", "Rasterize picture layer", "width",
+                   physical_size.width(), "height", physical_size.height());
       SkImageInfo info = SkImageInfo::MakeN32Premul(physical_size);
       sk_sp<SkSurface> surface =
           SkSurface::MakeRenderTarget(context, SkBudgeted::kYes, info);

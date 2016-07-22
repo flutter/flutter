@@ -15,8 +15,10 @@ class PictureLayer : public Layer {
   ~PictureLayer() override;
 
   void set_offset(const SkPoint& offset) { offset_ = offset; }
-
   void set_picture(sk_sp<SkPicture> picture) { picture_ = std::move(picture); }
+
+  void set_is_complex(bool value) { is_complex_ = value; }
+  void set_will_change(bool value) { will_change_ = value; }
 
   SkPicture* picture() const { return picture_.get(); }
 
@@ -26,6 +28,8 @@ class PictureLayer : public Layer {
  private:
   SkPoint offset_;
   sk_sp<SkPicture> picture_;
+  bool is_complex_ = false;
+  bool will_change_ = false;
 
   // If we rasterized the picture separately, image_ holds the pixels.
   sk_sp<SkImage> image_;
