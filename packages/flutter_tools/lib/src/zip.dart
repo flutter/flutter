@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert' show UTF8;
 import 'dart:io';
 
 import 'package:archive/archive.dart';
 import 'package:path/path.dart' as path;
 
+import 'asset.dart';
 import 'base/process.dart';
 
 abstract class ZipBuilder {
@@ -21,28 +21,11 @@ abstract class ZipBuilder {
 
   ZipBuilder._();
 
-  List<ZipEntry> entries = <ZipEntry>[];
+  List<AssetBundleEntry> entries = <AssetBundleEntry>[];
 
-  void addEntry(ZipEntry entry) => entries.add(entry);
+  void addEntry(AssetBundleEntry entry) => entries.add(entry);
 
   void createZip(File outFile, Directory zipBuildDir);
-}
-
-class ZipEntry {
-  ZipEntry.fromFile(this.archivePath, File file) {
-    this._file = file;
-  }
-
-  ZipEntry.fromString(this.archivePath, String contents) {
-    this._contents = contents;
-  }
-
-  final String archivePath;
-
-  File _file;
-  String _contents;
-
-  bool get isStringEntry => _contents != null;
 }
 
 class _ArchiveZipBuilder extends ZipBuilder {
@@ -52,14 +35,9 @@ class _ArchiveZipBuilder extends ZipBuilder {
   void createZip(File outFile, Directory zipBuildDir) {
     Archive archive = new Archive();
 
-    for (ZipEntry entry in entries) {
-      if (entry.isStringEntry) {
-        List<int> data = UTF8.encode(entry._contents);
-        archive.addFile(new ArchiveFile.noCompress(entry.archivePath, data.length, data));
-      } else {
-        List<int> data = entry._file.readAsBytesSync();
-        archive.addFile(new ArchiveFile(entry.archivePath, data.length, data));
-      }
+    for (AssetBundleEntry entry in entries) {
+      List<int> data = entry.contentsAsBytes();
+      archive.addFile(new ArchiveFile.noCompress(entry.archivePath, data.length, data));
     }
 
     List<int> zipData = new ZipEncoder().encode(archive);
@@ -79,18 +57,11 @@ class _ZipToolBuilder extends ZipBuilder {
       zipBuildDir.deleteSync(recursive: true);
     zipBuildDir.createSync(recursive: true);
 
-    for (ZipEntry entry in entries) {
-      if (entry.isStringEntry) {
-        List<int> data = UTF8.encode(entry._contents);
-        File file = new File(path.join(zipBuildDir.path, entry.archivePath));
-        file.parent.createSync(recursive: true);
-        file.writeAsBytesSync(data);
-      } else {
-        List<int> data = entry._file.readAsBytesSync();
-        File file = new File(path.join(zipBuildDir.path, entry.archivePath));
-        file.parent.createSync(recursive: true);
-        file.writeAsBytesSync(data);
-      }
+    for (AssetBundleEntry entry in entries) {
+      List<int> data = entry.contentsAsBytes();
+      File file = new File(path.join(zipBuildDir.path, entry.archivePath));
+      file.parent.createSync(recursive: true);
+      file.writeAsBytesSync(data);
     }
 
     if (_getCompressedNames().isNotEmpty) {
@@ -112,13 +83,13 @@ class _ZipToolBuilder extends ZipBuilder {
 
   Iterable<String> _getCompressedNames() {
     return entries
-      .where((ZipEntry entry) => !entry.isStringEntry)
-      .map((ZipEntry entry) => entry.archivePath);
+      .where((AssetBundleEntry entry) => !entry.isStringEntry)
+      .map((AssetBundleEntry entry) => entry.archivePath);
   }
 
   Iterable<String> _getStoredNames() {
     return entries
-      .where((ZipEntry entry) => entry.isStringEntry)
-      .map((ZipEntry entry) => entry.archivePath);
+      .where((AssetBundleEntry entry) => entry.isStringEntry)
+      .map((AssetBundleEntry entry) => entry.archivePath);
   }
 }
