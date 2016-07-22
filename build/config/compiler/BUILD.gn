@@ -509,17 +509,9 @@ config("compiler") {
 
   # C++11 compiler flags setup.
   # ---------------------------
-  if (is_linux || is_android || is_nacl) {
-    # gnu++11 instead of c++11 is needed because some code uses typeof() (a
-    # GNU extension).
-    # TODO(thakis): Eventually switch this to c++11 instead,
-    # http://crbug.com/427584
-    cflags_cc += [ "-std=gnu++11" ]
-  } else if (!is_win) {
-    cc_std = [ "-std=c++11" ]
-    cflags_cc += cc_std
-    cflags_objcc += cc_std
-  }
+  cc_std = [ "-std=c++11" ]
+  cflags_cc += cc_std
+  cflags_objcc += cc_std
 
   # Android-specific flags setup.
   # -----------------------------
