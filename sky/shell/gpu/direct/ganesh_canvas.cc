@@ -27,14 +27,18 @@ GaneshCanvas::GaneshCanvas() {
 GaneshCanvas::~GaneshCanvas() {
 }
 
-void GaneshCanvas::SetupGrGLInterface() {
+bool GaneshCanvas::SetupGrGLInterface() {
   sk_surface_ = nullptr;
   gr_context_ = skia::AdoptRef(GrContext::Create(
       kOpenGL_GrBackend,
       reinterpret_cast<GrBackendContext>(GrGLCreateNativeInterface())));
-  DCHECK(gr_context_);
+
+  if (!gr_context_)
+    return false;
+
   gr_context_->setResourceCacheLimits(kMaxGaneshResourceCacheCount,
                                       kMaxGaneshResourceCacheBytes);
+  return true;
 }
 
 bool GaneshCanvas::SelectPixelConfig(GrPixelConfig* config) {

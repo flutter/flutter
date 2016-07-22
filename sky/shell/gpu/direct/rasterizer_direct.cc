@@ -52,12 +52,19 @@ void RasterizerDirect::Setup(PlatformView* platform_view,
   // The context needs to be made current before the GrGL interface can be
   // setup.
   bool success = platform_view->ContextMakeCurrent();
+  if (success) {
+    success = ganesh_canvas_.SetupGrGLInterface();
+    if (!success)
+      LOG(ERROR) << "Could not create the GL interface";
+  } else {
+    LOG(ERROR) << "Could not make the context current for initial GL setup";
+  }
 
-  CHECK(success) << "Could not make the context current for initial GL setup";
-
-  ganesh_canvas_.SetupGrGLInterface();
-
-  platform_view_ = platform_view;
+  if (success) {
+    platform_view_ = platform_view;
+  } else {
+    LOG(ERROR) << "WARNING: Flutter will be unable to render to the display";
+  }
 
   continuation.Run();
 
@@ -80,6 +87,11 @@ void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
                             const DrawCallback& callback) {
   TRACE_EVENT0("flutter", "RasterizerDirect::Draw");
 
+  if (platform_view_ == nullptr) {
+    callback.Run();
+    return;
+  }
+
   std::unique_ptr<flow::LayerTree> layer_tree(
       reinterpret_cast<flow::LayerTree*>(layer_tree_ptr));
 
@@ -88,8 +100,7 @@ void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
     platform_view_->Resize(size);
   }
 
-  if (platform_view_ == nullptr || !platform_view_->ContextMakeCurrent() ||
-      !layer_tree->root_layer()) {
+  if (!platform_view_->ContextMakeCurrent() || !layer_tree->root_layer()) {
     callback.Run();
     return;
   }
