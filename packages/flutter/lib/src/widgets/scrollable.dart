@@ -710,7 +710,11 @@ enum ScrollNotificationKind {
   ended
 }
 
-/// Indicates that a descendant scrollable has scrolled.
+/// Indicates that a scrollable descendant is scrolling.
+///
+/// See also:
+///
+/// * [NotificationListener]
 class ScrollNotification extends Notification {
   /// Creates a notification about scrolling.
   ScrollNotification(this.scrollable, this.kind);
@@ -720,6 +724,19 @@ class ScrollNotification extends Notification {
 
   /// The scrollable that scrolled.
   final ScrollableState scrollable;
+
+  /// The number of scrollable widgets that have already received this
+  /// notification. Typically listeners only respond to notifications
+  /// with depth = 0.
+  int get depth => _depth;
+  int _depth = 0;
+
+  @override
+  bool visitAncestor(Element element) {
+    if (element is StatefulElement && element.state is ScrollableState)
+      _depth += 1;
+    return super.visitAncestor(element);
+  }
 }
 
 /// A simple scrolling widget that has a single child.

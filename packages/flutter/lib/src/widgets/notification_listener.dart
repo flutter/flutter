@@ -9,18 +9,22 @@ typedef bool NotificationListenerCallback<T extends Notification>(T notification
 
 /// A notification that can bubble up the widget tree.
 abstract class Notification {
+  /// Applied to each ancestor of the [dispatch] target. Dispatches this
+  /// Notification to ancestor [NotificationListener] widgets.
+  bool visitAncestor(Element element) {
+    if (element is StatelessElement &&
+        element.widget is NotificationListener<Notification>) {
+      final NotificationListener<Notification> widget = element.widget;
+      if (widget._dispatch(this)) // that function checks the type dynamically
+        return false;
+    }
+    return true;
+  }
+
   /// Start bubbling this notification at the given build context.
   void dispatch(BuildContext target) {
     assert(target != null); // Only call dispatch if the widget's State is still mounted.
-    target.visitAncestorElements((Element element) {
-      if (element is StatelessElement &&
-          element.widget is NotificationListener<Notification>) {
-        final NotificationListener<Notification> widget = element.widget;
-        if (widget._dispatch(this)) // that function checks the type dynamically
-          return false;
-      }
-      return true;
-    });
+    target.visitAncestorElements(visitAncestor);
   }
 }
 
