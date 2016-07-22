@@ -211,7 +211,7 @@ ZipEntry _obtainLicenses(
   // splitting each one into each component license (so that we can
   // de-dupe if possible).
   final Set<String> packageLicenses = new Set<String>();
-  final List<Uri> packages = packageMap.map.values;
+  final Iterable<Uri> packages = packageMap.map.values;
   for (Uri package in packages) {
     if (package != null && package.scheme == 'file') {
       final File file = new File.fromUri(package.resolve('../LICENSE'));
