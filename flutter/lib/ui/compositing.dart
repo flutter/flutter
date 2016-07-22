@@ -175,11 +175,11 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// Adds a [Picture] to the scene.
   ///
   /// The picture is rasterized at the given offset.
-  void addPicture(Offset offset, Picture picture, { bool isComplex, bool willChange }) {
+  void addPicture(Offset offset, Picture picture, { bool isComplexHint: false, bool willChangeHint: false }) {
     int hints = 0;
-    if (isComplex)
+    if (isComplexHint)
       hints |= 1;
-    if (willChange)
+    if (willChangeHint)
       hints |= 2;
     _addPicture(offset.dx, offset.dy, picture, hints);
   }
