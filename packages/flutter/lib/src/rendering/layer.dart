@@ -114,9 +114,24 @@ class PictureLayer extends Layer {
   /// The picture's coodinate system matches this layer's coodinate system
   ui.Picture picture;
 
+  /// Hints that the painting in this layer is complex and would benefit from
+  /// caching.
+  ///
+  /// If this hint is not set, the compositor will apply its own heuristics to
+  /// decide whether the this layer is complex enough to benefit from caching.
+  bool isComplexHint = false;
+
+  /// Hints that the painting in this layer is likely to change next frame.
+  ///
+  /// This hint tells the compositor not to cache this layer because the cache
+  /// will not be used in the future. If this hint is not set, the compositor
+  /// will apply its own heuristics to decide whether this layer is likely to be
+  /// reused in the future.
+  bool willChangeHint = false;
+
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    builder.addPicture(layerOffset, picture);
+    builder.addPicture(layerOffset, picture, isComplexHint: isComplexHint, willChangeHint: willChangeHint);
   }
 }
 

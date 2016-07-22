@@ -1172,11 +1172,17 @@ class RenderDecoratedBox extends RenderProxyBox {
     assert(size.height != null);
     _painter ??= _decoration.createBoxPainter(markNeedsPaint);
     final ImageConfiguration filledConfiguration = configuration.copyWith(size: size);
-    if (position == DecorationPosition.background)
+    if (position == DecorationPosition.background) {
       _painter.paint(context.canvas, offset, filledConfiguration);
+      if (decoration.isComplex)
+        context.setIsComplexHint();
+    }
     super.paint(context, offset);
-    if (position == DecorationPosition.foreground)
+    if (position == DecorationPosition.foreground) {
       _painter.paint(context.canvas, offset, filledConfiguration);
+      if (decoration.isComplex)
+        context.setIsComplexHint();
+    }
   }
 
   @override

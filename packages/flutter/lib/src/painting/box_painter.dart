@@ -1200,6 +1200,9 @@ class BoxDecoration extends Decoration {
     );
   }
 
+  @override
+  bool get isComplex => boxShadow != null;
+
   /// Linearly interpolate between two box decorations.
   ///
   /// Interpolates each parameter of the box decoration separately.
