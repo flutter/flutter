@@ -175,10 +175,15 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// Adds a [Picture] to the scene.
   ///
   /// The picture is rasterized at the given offset.
-  void addPicture(Offset offset, Picture picture) {
-    _addPicture(offset.dx, offset.dy, picture);
+  void addPicture(Offset offset, Picture picture, { bool isComplex, bool willChange }) {
+    int hints = 0;
+    if (isComplex)
+      hints |= 1;
+    if (willChange)
+      hints |= 2;
+    _addPicture(offset.dx, offset.dy, picture, hints);
   }
-  void _addPicture(double dx, double dy, Picture picture) native "SceneBuilder_addPicture";
+  void _addPicture(double dx, double dy, Picture picture, int hints) native "SceneBuilder_addPicture";
 
   /// (mojo-only) Adds a scene rendered by another application to the scene for
   /// this application.

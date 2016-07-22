@@ -21,57 +21,59 @@
 
 namespace blink {
 
-class SceneBuilder : public base::RefCountedThreadSafe<SceneBuilder>, public DartWrappable {
-    DEFINE_WRAPPERTYPEINFO();
-public:
-    static scoped_refptr<SceneBuilder> create() { return new SceneBuilder(); }
+class SceneBuilder : public base::RefCountedThreadSafe<SceneBuilder>,
+                     public DartWrappable {
+  DEFINE_WRAPPERTYPEINFO();
 
-    ~SceneBuilder() override;
+ public:
+  static scoped_refptr<SceneBuilder> create() { return new SceneBuilder(); }
 
-    void pushTransform(const Float64List& matrix4);
-    void pushClipRect(double left, double right, double top, double bottom);
-    void pushClipRRect(const RRect& rrect);
-    void pushClipPath(const CanvasPath* path);
-    void pushOpacity(int alpha);
-    void pushColorFilter(int color, int transferMode);
-    void pushBackdropFilter(ImageFilter* filter);
-    void pushShaderMask(Shader* shader,
-                        double maskRectLeft,
-                        double maskRectRight,
-                        double maskRectTop,
-                        double maskRectBottom,
-                        int transferMode);
-    void pop();
+  ~SceneBuilder() override;
 
-    void addPerformanceOverlay(uint64_t enabledOptions,
-                               double left,
-                               double right,
-                               double top,
-                               double bottom);
-    void addPicture(double dx, double dy, Picture* picture);
-    void addChildScene(double dx,
-                       double dy,
-                       double devicePixelRatio,
-                       int physicalWidth,
-                       int physicalHeight,
-                       uint32_t sceneToken);
+  void pushTransform(const Float64List& matrix4);
+  void pushClipRect(double left, double right, double top, double bottom);
+  void pushClipRRect(const RRect& rrect);
+  void pushClipPath(const CanvasPath* path);
+  void pushOpacity(int alpha);
+  void pushColorFilter(int color, int transferMode);
+  void pushBackdropFilter(ImageFilter* filter);
+  void pushShaderMask(Shader* shader,
+                      double maskRectLeft,
+                      double maskRectRight,
+                      double maskRectTop,
+                      double maskRectBottom,
+                      int transferMode);
+  void pop();
 
-    void setRasterizerTracingThreshold(uint32_t frameInterval);
+  void addPerformanceOverlay(uint64_t enabledOptions,
+                             double left,
+                             double right,
+                             double top,
+                             double bottom);
+  void addPicture(double dx, double dy, Picture* picture, int hints);
+  void addChildScene(double dx,
+                     double dy,
+                     double devicePixelRatio,
+                     int physicalWidth,
+                     int physicalHeight,
+                     uint32_t sceneToken);
 
-    scoped_refptr<Scene> build();
+  void setRasterizerTracingThreshold(uint32_t frameInterval);
 
-    static void RegisterNatives(DartLibraryNatives* natives);
+  scoped_refptr<Scene> build();
 
-private:
-    explicit SceneBuilder();
+  static void RegisterNatives(DartLibraryNatives* natives);
 
-    void addLayer(std::unique_ptr<flow::ContainerLayer> layer);
+ private:
+  explicit SceneBuilder();
 
-    std::unique_ptr<flow::ContainerLayer> m_rootLayer;
-    flow::ContainerLayer* m_currentLayer;
-    int32_t m_currentRasterizerTracingThreshold;
+  void addLayer(std::unique_ptr<flow::ContainerLayer> layer);
+
+  std::unique_ptr<flow::ContainerLayer> m_rootLayer;
+  flow::ContainerLayer* m_currentLayer;
+  int32_t m_currentRasterizerTracingThreshold;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // FLUTTER_LIB_UI_COMPOSITING_SCENE_BUILDER_H_
