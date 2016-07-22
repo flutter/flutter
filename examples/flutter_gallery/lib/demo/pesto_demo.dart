@@ -51,7 +51,7 @@ class PestoDemo extends StatefulWidget {
 }
 
 class _PestoDemoState extends State<PestoDemo> {
-  static final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   final TextStyle favoritesMessageStyle = _textStyle(16.0);
   final TextStyle userStyle = _textStyle(12.0, FontWeight.bold);
   final TextStyle emailStyle = _textStyle(12.0).copyWith(color: Colors.black54);
