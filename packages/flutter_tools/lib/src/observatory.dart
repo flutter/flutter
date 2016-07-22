@@ -114,17 +114,13 @@ class Observatory {
     });
   }
 
-  Future<Response> reloadSources(String isolateId) async {
-    Completer<Event> whenIsolateReloads = new Completer<Event>();
-    StreamSubscription<Event> sub = onIsolateEvent
-      .where((Event event) => event.kind == 'IsolateReload')
-      .listen((Event event) => whenIsolateReloads.complete(event));
-
+  Future<Null> reloadSources(String isolateId) async {
     try {
-      await sendRequest('_reloadSources', <String, dynamic>{ 'isolateId': isolateId });
-      return await whenIsolateReloads.future.timeout(new Duration(seconds: 20));
-    } finally {
-      await sub.cancel();
+      await sendRequest('_reloadSources',
+                        <String, dynamic>{ 'isolateId': isolateId });
+      return null;
+    } catch (e) {
+      return new Future<Null>.error(e.data['details']);
     }
   }
 

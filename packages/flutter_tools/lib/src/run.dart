@@ -378,13 +378,14 @@ class RunAndStayResident {
       await _updateDevFS();
     }
     Status reloadStatus = logger.startProgress('Performing hot reload');
-    Event result = await observatory.reloadSources(observatory.firstIsolateId);
-    reloadStatus.stop(showElapsedTime: true);
-    dynamic error = result.response['reloadError'];
-    if (error != null) {
-      printError('Error reloading application sources: $error');
+    try {
+      await observatory.reloadSources(observatory.firstIsolateId);
+    } catch (errorMessage) {
+      reloadStatus.stop(showElapsedTime: true);
+      printError('Hot reload was rejected:\n$errorMessage');
       return false;
     }
+    reloadStatus.stop(showElapsedTime: true);
     Status reassembleStatus =
         logger.startProgress('Reassembling application');
     await observatory.flutterReassemble(observatory.firstIsolateId);
