@@ -155,6 +155,11 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   @override
   void initState() {
     super.initState();
+    // If we start out with a child, have the child appear fully visible instead
+    // of animating in.
+    if (config.child != null)
+      _currentController.value = 1.0;
+
     _previousAnimation = new CurvedAnimation(
       parent: _previousController,
       curve: Curves.easeIn
@@ -165,7 +170,6 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     );
 
     _previousController.addStatusListener(_handleAnimationStatusChanged);
-    _currentController.forward();
   }
 
   @override

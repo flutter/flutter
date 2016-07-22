@@ -43,7 +43,7 @@ class FloatingActionButton extends StatefulWidget {
   /// Most commonly used in the [Scaffold.floatingActionButton] field.
   const FloatingActionButton({
     Key key,
-    this.child,
+    @required this.child,
     this.tooltip,
     this.backgroundColor,
     this.elevation: 6,

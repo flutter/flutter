@@ -40,4 +40,40 @@ void main() {
     bodyBox = tester.renderObject(find.byKey(bodyKey));
     expect(bodyBox.size, equals(new Size(800.0, 544.0)));
   });
+
+  testWidgets('Floating action animation', (WidgetTester tester) async {
+    await tester.pumpWidget(new Scaffold(
+      floatingActionButton: new FloatingActionButton(
+        key: new Key("one"),
+        onPressed: null,
+        child: new Text("1")
+      )
+    ));
+
+    expect(tester.binding.transientCallbackCount, 0);
+
+    await tester.pumpWidget(new Scaffold(
+      floatingActionButton: new FloatingActionButton(
+        key: new Key("two"),
+        onPressed: null,
+        child: new Text("2")
+      )
+    ));
+
+    expect(tester.binding.transientCallbackCount, greaterThan(0));
+    await tester.pumpWidget(new Container());
+    expect(tester.binding.transientCallbackCount, 0);
+    await tester.pumpWidget(new Scaffold());
+    expect(tester.binding.transientCallbackCount, 0);
+
+    await tester.pumpWidget(new Scaffold(
+      floatingActionButton: new FloatingActionButton(
+        key: new Key("one"),
+        onPressed: null,
+        child: new Text("1")
+      )
+    ));
+
+    expect(tester.binding.transientCallbackCount, greaterThan(0));
+  });
 }
