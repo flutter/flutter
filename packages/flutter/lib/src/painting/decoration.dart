@@ -44,6 +44,9 @@ abstract class Decoration {
   /// to inset the children so as to not overlap the frame.
   EdgeInsets get padding => null;
 
+  /// Whether this decoration is complex enough to benefit from caching its painting.
+  bool get isComplex => false;
+
   /// Linearly interpolates from [a] to [this].
   Decoration lerpFrom(Decoration a, double t) => this;
 

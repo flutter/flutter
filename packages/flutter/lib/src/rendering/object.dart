@@ -192,6 +192,26 @@ class PaintingContext {
 
   static final Paint _disableAntialias = new Paint()..isAntiAlias = false;
 
+  /// Hints that the painting in the current layer is complex and would benefit
+  /// from caching.
+  ///
+  /// If this hint is not set, the compositor will apply its own heuristics to
+  /// decide whether the current layer is complex enough to benefit from
+  /// caching.
+  void setIsComplexHint() {
+    _currentLayer?.isComplexHint = true;
+  }
+
+  /// Hints that the painting in the current layer is likely to change next frame.
+  ///
+  /// This hint tells the compositor not to cache the current layer because the
+  /// cache will not be used in the future. If this hint is not set, the
+  /// compositor will apply its own heuristics to decide whether the current
+  /// layer is likely to be reused in the future.
+  void setWillChangeHint() {
+    _currentLayer?.willChangeHint = true;
+  }
+
   /// Adds a performance overlay to the scene.
   ///
   /// * `offset` is the offset from the origin of the canvas' coordinate system
