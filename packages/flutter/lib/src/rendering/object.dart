@@ -173,8 +173,13 @@ class PaintingContext {
     if (!_isRecording)
       return;
     assert(() {
-      if (debugRepaintRainbowEnabled)
-        canvas.drawRect(_paintBounds, new Paint()..color = debugCurrentRepaintColor.toColor());
+      if (debugRepaintRainbowEnabled) {
+        Paint paint = new Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 6.0
+          ..color = debugCurrentRepaintColor.toColor();
+        canvas.drawRect(_paintBounds.deflate(3.0), paint);
+      }
       if (debugPaintLayerBordersEnabled) {
         Paint paint = new Paint()
           ..style = PaintingStyle.stroke

@@ -258,37 +258,37 @@ class ProductItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Card(
-      child: new Column(
+      child: new Stack(
         children: <Widget>[
-          new Align(
-            alignment: FractionalOffset.centerRight,
-            child: new ProductPriceItem(product: product)
-          ),
-          new Container(
-            width: 144.0,
-            height: 144.0,
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: new Stack(
-              children: <Widget>[
-                new Hero(
-                  tag: productHeroTag,
-                  key: new ObjectKey(product),
-                  child: new Image(
-                    image: new AssetImage(product.imageAsset),
-                    fit: ImageFit.contain
+          new Column(
+            children: <Widget>[
+              new Align(
+                alignment: FractionalOffset.centerRight,
+                child: new ProductPriceItem(product: product)
+              ),
+              new Container(
+                width: 144.0,
+                height: 144.0,
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: new Hero(
+                    tag: productHeroTag,
+                    key: new ObjectKey(product),
+                    child: new Image(
+                      image: new AssetImage(product.imageAsset),
+                      fit: ImageFit.contain
+                    )
                   )
                 ),
-                new Material(
-                  color: Theme.of(context).canvasColor.withAlpha(0x00),
-                  child: new InkWell(onTap: onPressed)
-                ),
-              ]
-            )
+              new Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: new VendorItem(vendor: product.vendor)
+              )
+            ]
           ),
-          new Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: new VendorItem(vendor: product.vendor)
-          )
+          new Material(
+            type: MaterialType.transparency,
+            child: new InkWell(onTap: onPressed)
+          ),
         ]
       )
     );

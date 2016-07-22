@@ -426,15 +426,14 @@ class _ModalScopeState extends State<_ModalScope> {
           context,
           config.route.animation,
           config.route.forwardAnimation,
-          contents
+          new RepaintBoundary(child: contents)
         )
       );
     }
-    contents = new Focus(
+    return new Focus(
       key: config.route.focusKey,
-      child: new RepaintBoundary(child: contents)
+      child: contents
     );
-    return contents;
   }
 }
 

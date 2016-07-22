@@ -272,7 +272,7 @@ class _HeroQuestState implements HeroHandle {
       size: animationArea.size,
       child: new RotationTransition(
         turns: currentTurns.animate(animation),
-        child: new KeyedSubtree(
+        child: new RepaintBoundary(
           key: key,
           child: child
         )
