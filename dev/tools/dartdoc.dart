@@ -100,7 +100,7 @@ void createIndexAndCleanup() {
 void removeOldFlutterDocsDir() {
   try {
     new Directory('$kDocRoot/flutter').deleteSync(recursive: true);
-  } catch(e) {
+  } catch (e) {
     // If the directory does not exist, that's OK.
   }
 }
@@ -109,8 +109,8 @@ void renameApiDir() {
   new Directory('$kDocRoot/api').renameSync('$kDocRoot/flutter');
 }
 
-File copyIndexToRootOfDocs() {
-  return new File('$kDocRoot/flutter/index.html').copySync('$kDocRoot/index.html');
+void copyIndexToRootOfDocs() {
+  new File('$kDocRoot/flutter/index.html').copySync('$kDocRoot/index.html');
 }
 
 void addHtmlBaseToIndex() {
