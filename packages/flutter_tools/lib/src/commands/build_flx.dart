@@ -41,7 +41,7 @@ class BuildFlxCommand extends BuildSubCommand {
     String outputPath = argResults['output-file'];
 
     return await build(
-      mainPath: argResults['target'],
+      mainPath: targetFile,
       manifestPath: argResults['manifest'],
       outputPath: outputPath,
       snapshotPath: argResults['snapshot'],
