@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
 import 'dart:ui' show Color, hashValues;
 
 import 'package:flutter/foundation.dart';
@@ -125,7 +124,7 @@ class ThemeData {
     primaryTextTheme ??= primaryIsDark ? Typography.white : Typography.black;
     iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     primaryIconTheme ??= primaryIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
-    platform ??= (Platform.isIOS || Platform.isMacOS) ? TargetPlatform.iOS : TargetPlatform.android;
+    platform ??= defaultTargetPlatform;
     return new ThemeData.raw(
       brightness: brightness,
       primaryColor: primaryColor,
