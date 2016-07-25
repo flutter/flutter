@@ -339,7 +339,7 @@ class Border {
     Paint paint = new Paint()
       ..color = top.color;
     double radius = _getEffectiveBorderRadius(rect, borderRadius);
-    RRect outer = new RRect.fromRectXY(rect, radius, radius);
+    RRect outer = new RRect.fromRectAndRadius(rect, new Radius.circular(radius));
     double width = top.width;
     if (width == 0.0) {
       paint
@@ -347,7 +347,7 @@ class Border {
         ..strokeWidth = 0.0;
       canvas.drawRRect(outer, paint);
     } else {
-      RRect inner = new RRect.fromRectXY(rect.deflate(width), radius - width, radius - width);
+      RRect inner = new RRect.fromRectAndRadius(rect.deflate(width), new Radius.circular(radius - width));
       canvas.drawDRRect(outer, inner, paint);
     }
   }
@@ -1304,7 +1304,7 @@ class BoxDecoration extends Decoration {
     switch (shape) {
       case BoxShape.rectangle:
         if (borderRadius != null) {
-          RRect bounds = new RRect.fromRectXY(Point.origin & size, borderRadius, borderRadius);
+          RRect bounds = new RRect.fromRectAndRadius(Point.origin & size, new Radius.circular(borderRadius));
           return bounds.contains(position);
         }
         return true;
@@ -1371,7 +1371,7 @@ class _BoxDecorationPainter extends BoxPainter {
           canvas.drawRect(rect, paint);
         } else {
           double radius = _getEffectiveBorderRadius(rect, _decoration.borderRadius);
-          canvas.drawRRect(new RRect.fromRectXY(rect, radius, radius), paint);
+          canvas.drawRRect(new RRect.fromRectAndRadius(rect, new Radius.circular(radius)), paint);
         }
         break;
     }

@@ -992,7 +992,7 @@ class RenderClipRRect extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       Rect rect = Point.origin & size;
-      RRect rrect = new RRect.fromRectXY(rect, xRadius, yRadius);
+      RRect rrect = new RRect.fromRectAndRadius(rect, new Radius.elliptical(xRadius, yRadius));
       context.pushClipRRect(needsCompositing, offset, rect, rrect, super.paint);
     }
   }
