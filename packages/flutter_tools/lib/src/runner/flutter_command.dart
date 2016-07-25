@@ -59,7 +59,7 @@ abstract class FlutterCommand extends Command {
     else if (argResults.rest.isNotEmpty)
       return argResults.rest.first;
     else
-      return null;
+      return flx.defaultMainPath;
   }
 
   void usesPubOption() {
