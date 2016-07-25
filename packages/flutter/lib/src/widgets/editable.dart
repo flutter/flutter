@@ -286,9 +286,11 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
                                           ..type = config.keyboardType);
       _keyboardHandle.setEditingState(_keyboardClient.editingState);
       _keyboardHandle.show();
-    } else if (!focused && _isAttachedToKeyboard) {
-      _keyboardHandle.release();
-      _keyboardHandle = null;
+    } else if (!focused) {
+      if (_isAttachedToKeyboard) {
+        _keyboardHandle.release();
+        _keyboardHandle = null;
+      }
       _keyboardClient.clearComposing();
     }
   }
@@ -424,7 +426,7 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
     }
 
     return new _EditableLineWidget(
-      value: config.value,
+      value: _keyboardClient.inputValue,
       style: config.style,
       cursorColor: config.cursorColor,
       showCursor: _showCursor,
