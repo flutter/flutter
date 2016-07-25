@@ -58,7 +58,7 @@ class BuildIOSCommand extends BuildSubCommand {
     XcodeBuildResult result = await buildXcodeProject(
       app: app,
       mode: getBuildMode(),
-      target: targetFile,
+      target: argResults['target'],
       buildForDevice: !forSimulator,
       codesign: shouldCodesign
     );

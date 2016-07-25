@@ -53,15 +53,6 @@ abstract class FlutterCommand extends Command {
     _usesTargetOption = true;
   }
 
-  String get targetFile {
-    if (argResults.wasParsed('target'))
-      return argResults['target'];
-    else if (argResults.rest.isNotEmpty)
-      return argResults.rest.first;
-    else
-      return null;
-  }
-
   void usesPubOption() {
     argParser.addFlag('pub',
       defaultsTo: true,
@@ -193,7 +184,7 @@ abstract class FlutterCommand extends Command {
     }
 
     if (_usesTargetOption) {
-      String targetPath = targetFile;
+      String targetPath = argResults['target'];
       if (!FileSystemEntity.isFileSync(targetPath)) {
         printError('Target file "$targetPath" not found.');
         return false;

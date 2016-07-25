@@ -62,7 +62,7 @@ class ListenCommand extends RunCommandBase {
 
       result = await startApp(
         deviceForCommand,
-        target: targetFile,
+        target: target,
         install: firstTime,
         stop: true,
         debuggingOptions: new DebuggingOptions.enabled(getBuildMode()),
