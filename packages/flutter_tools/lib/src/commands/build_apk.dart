@@ -208,7 +208,7 @@ class BuildApkCommand extends BuildSubCommand {
       return await buildAndroidWithGradle(
         TargetPlatform.android_arm,
         getBuildMode(),
-        target: argResults['target']
+        target: targetFile
       );
     } else {
       // TODO(devoncarew): This command should take an arg for the output type (arm / x64).
@@ -219,7 +219,7 @@ class BuildApkCommand extends BuildSubCommand {
         manifest: argResults['manifest'],
         resources: argResults['resources'],
         outputFile: argResults['output-file'],
-        target: argResults['target'],
+        target: targetFile,
         flxPath: argResults['flx'],
         aotPath: argResults['aot-path'],
         keystore: (argResults['keystore'] ?? '').isEmpty ? null : new ApkKeystoreInfo(
