@@ -4,6 +4,8 @@
 
 import 'dart:ui' show VoidCallback;
 
+import 'package:flutter/foundation.dart';
+
 import 'animation.dart';
 import 'curves.dart';
 import 'listener_helpers.dart';
@@ -388,7 +390,19 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
     if (activeCurve == null)
       return t;
     if (t == 0.0 || t == 1.0) {
-      assert(activeCurve.transform(t).round() == t);
+      assert(() {
+        final double transformedValue = activeCurve.transform(t);
+        final double roundedTransformedValue = transformedValue.round().toDouble();
+        if (roundedTransformedValue != t) {
+          throw new FlutterError(
+            'Invalided curve endpoint at $t.\n'
+            'Curves must map 0.0 to near zero and 1.0 to near one but '
+            '${activeCurve.runtimeType} mapped $t to $transformedValue, which '
+            'is near $roundedTransformedValue.'
+          );
+        }
+        return true;
+      });
       return t;
     }
     return activeCurve.transform(t);

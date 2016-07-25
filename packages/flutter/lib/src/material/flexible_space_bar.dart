@@ -31,7 +31,12 @@ class FlexibleSpaceBar extends StatefulWidget {
   ///
   /// Most commonly used in the [AppBar.flexibleSpace] field. Requires one of
   /// its ancestors to be a [Scaffold] widget.
-  FlexibleSpaceBar({ Key key, this.title, this.background }) : super(key: key);
+  FlexibleSpaceBar({
+    Key key,
+    this.title,
+    this.background,
+    this.centerTitle
+  }) : super(key: key);
 
   /// The primary contents of the flexible space bar when expanded.
   ///
@@ -42,6 +47,11 @@ class FlexibleSpaceBar extends StatefulWidget {
   ///
   /// Typically an [AssetImage] widget with [AssetImage.fit] set to [ImageFit.cover].
   final Widget background;
+
+  /// Whether the title should be centered.
+  ///
+  /// Defaults to being adapted to the current [TargetPlatform].
+  final bool centerTitle;
 
   @override
   _FlexibleSpaceBarState createState() => new _FlexibleSpaceBarState();
@@ -61,6 +71,19 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
     _scaffoldAnimation?.removeListener(_handleTick);
     _scaffoldAnimation = null;
     super.deactivate();
+  }
+
+  bool _getEffectiveCenterTitle(ThemeData theme) {
+    if (config.centerTitle != null)
+      return config.centerTitle;
+    assert(theme.platform != null);
+    switch (theme.platform) {
+      case TargetPlatform.android:
+        return false;
+      case TargetPlatform.iOS:
+        return true;
+    }
+    return false;
   }
 
   @override
@@ -101,6 +124,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
     // title
     if (config.title != null) {
+      final ThemeData theme = Theme.of(context);
       final double fadeStart = (appBarHeight - toolBarHeight) / appBarHeight;
       final double fadeEnd = (appBarHeight - toolBarHeight / 2.0) / appBarHeight;
       final CurvedAnimation opacityCurve = new CurvedAnimation(
@@ -109,7 +133,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
       );
       final int alpha = new Tween<double>(begin: 255.0, end: 0.0).evaluate(opacityCurve).toInt();
       if (alpha > 0) {
-        TextStyle titleStyle = Theme.of(context).primaryTextTheme.title;
+        TextStyle titleStyle = theme.primaryTextTheme.title;
         titleStyle = titleStyle.copyWith(
           color: titleStyle.color.withAlpha(alpha)
         );
@@ -120,18 +144,20 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
           parent: _scaffoldAnimation,
           curve: new Interval(0.0, scaleAndAlignEnd)
         );
+        final bool effectiveCenterTitle = _getEffectiveCenterTitle(theme);
+        final FractionalOffset titleAlignment = effectiveCenterTitle ? FractionalOffset.bottomCenter : FractionalOffset.bottomLeft;
         children.add(new Padding(
-          padding: const EdgeInsets.only(left: 72.0, bottom: 14.0),
+          padding: new EdgeInsets.only(left: effectiveCenterTitle ? 0.0 : 72.0, bottom: 14.0),
           child: new Align(
             alignment: new Tween<FractionalOffset>(
               begin: new FractionalOffset(0.0, yAlignStart),
               end: new FractionalOffset(0.0, yAlignEnd)
             ).evaluate(scaleAndAlignCurve),
             child: new ScaleTransition(
-              alignment: FractionalOffset.bottomLeft,
+              alignment: titleAlignment,
               scale: new Tween<double>(begin: 1.5, end: 1.0).animate(scaleAndAlignCurve),
               child: new Align(
-                alignment: new FractionalOffset(0.0, 1.0),
+                alignment: titleAlignment,
                 child: new DefaultTextStyle(style: titleStyle, child: config.title)
               )
             )
