@@ -33,7 +33,6 @@ abstract class RunCommandBase extends FlutterCommand {
   }
 
   bool get traceStartup => argResults['trace-startup'];
-  String get target => argResults['target'];
   String get route => argResults['route'];
 }
 
@@ -135,7 +134,7 @@ class RunCommand extends RunCommandBase {
     if (argResults['resident']) {
       RunAndStayResident runner = new RunAndStayResident(
         deviceForCommand,
-        target: target,
+        target: targetFile,
         debuggingOptions: options,
         hotMode: argResults['hot']
       );
@@ -150,7 +149,7 @@ class RunCommand extends RunCommandBase {
       // using the `RunAndStayResident` class.
       return startApp(
         deviceForCommand,
-        target: target,
+        target: targetFile,
         stop: argResults['full-restart'],
         install: true,
         debuggingOptions: options,

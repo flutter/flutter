@@ -160,7 +160,7 @@ class DriveCommand extends RunCommandBase {
   }
 
   String _getTestFile() {
-    String appFile = path.normalize(target);
+    String appFile = path.normalize(targetFile);
 
     // This command extends `flutter start` and therefore CWD == package dir
     String packageDir = getCurrentDirectory();
@@ -266,7 +266,7 @@ void restoreAppStarter() {
 }
 
 Future<int> startApp(DriveCommand command) async {
-  String mainPath = findMainDartFile(command.target);
+  String mainPath = findMainDartFile(command.targetFile);
   if (await fs.type(mainPath) != FileSystemEntityType.FILE) {
     printError('Tried to run $mainPath, but that file does not exist.');
     return 1;
@@ -277,7 +277,7 @@ Future<int> startApp(DriveCommand command) async {
     printTrace('Building an APK.');
     int result = await build_apk.buildApk(
       command.device.platform,
-      target: command.target,
+      target: command.targetFile,
       buildMode: command.getBuildMode()
     );
 

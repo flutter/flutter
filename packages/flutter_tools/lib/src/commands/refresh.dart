@@ -40,7 +40,7 @@ class RefreshCommand extends FlutterCommand {
     Directory tempDir = await Directory.systemTemp.createTemp('flutter_tools');
     try {
       String snapshotPath = path.join(tempDir.path, 'snapshot_blob.bin');
-      int result = await createSnapshot(mainPath: argResults['target'], snapshotPath: snapshotPath);
+      int result = await createSnapshot(mainPath: targetFile, snapshotPath: snapshotPath);
 
       if (result != 0) {
         printError('Failed to run the Flutter compiler. Exit code: $result');
