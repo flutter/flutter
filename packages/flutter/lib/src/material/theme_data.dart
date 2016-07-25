@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show Platform;
 import 'dart:ui' show Color, hashValues;
+
+import 'package:flutter/foundation.dart';
 
 import 'colors.dart';
 import 'icon_theme_data.dart';
@@ -90,7 +93,8 @@ class ThemeData {
     TextTheme textTheme,
     TextTheme primaryTextTheme,
     IconThemeData iconTheme,
-    IconThemeData primaryIconTheme
+    IconThemeData primaryIconTheme,
+    TargetPlatform platform
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
@@ -121,6 +125,7 @@ class ThemeData {
     primaryTextTheme ??= primaryIsDark ? Typography.white : Typography.black;
     iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     primaryIconTheme ??= primaryIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
+    platform ??= (Platform.isIOS || Platform.isMacOS) ? TargetPlatform.iOS : TargetPlatform.android;
     return new ThemeData.raw(
       brightness: brightness,
       primaryColor: primaryColor,
@@ -146,7 +151,8 @@ class ThemeData {
       textTheme: textTheme,
       primaryTextTheme: primaryTextTheme,
       iconTheme: iconTheme,
-      primaryIconTheme: primaryIconTheme
+      primaryIconTheme: primaryIconTheme,
+      platform: platform
     );
   }
 
@@ -181,7 +187,8 @@ class ThemeData {
     this.textTheme,
     this.primaryTextTheme,
     this.iconTheme,
-    this.primaryIconTheme
+    this.primaryIconTheme,
+    this.platform
   }) {
     assert(brightness != null);
     assert(primaryColor != null);
@@ -208,6 +215,7 @@ class ThemeData {
     assert(primaryTextTheme != null);
     assert(iconTheme != null);
     assert(primaryIconTheme != null);
+    assert(platform != null);
   }
 
   /// A default light blue theme.
@@ -320,6 +328,11 @@ class ThemeData {
   /// An icon theme that contrasts with the primary color.
   final IconThemeData primaryIconTheme;
 
+  /// The platform the material widgets should adapt to target.
+  ///
+  /// Defaults to the current platform.
+  final TargetPlatform platform;
+
   /// Linearly interpolate between two themes.
   static ThemeData lerp(ThemeData begin, ThemeData end, double t) {
     return new ThemeData.raw(
@@ -347,7 +360,8 @@ class ThemeData {
       textTheme: TextTheme.lerp(begin.textTheme, end.textTheme, t),
       primaryTextTheme: TextTheme.lerp(begin.primaryTextTheme, end.primaryTextTheme, t),
       iconTheme: IconThemeData.lerp(begin.iconTheme, end.iconTheme, t),
-      primaryIconTheme: IconThemeData.lerp(begin.primaryIconTheme, end.primaryIconTheme, t)
+      primaryIconTheme: IconThemeData.lerp(begin.primaryIconTheme, end.primaryIconTheme, t),
+      platform: t < 0.5 ? begin.platform : end.platform
     );
   }
 

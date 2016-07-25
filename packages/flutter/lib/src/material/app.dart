@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -24,6 +22,15 @@ const TextStyle _errorTextStyle = const TextStyle(
   decorationColor: const Color(0xFFFFFF00),
   decorationStyle: TextDecorationStyle.double
 );
+
+/// The visual and interaction design for overscroll.
+enum OverscrollStyle {
+  /// Overscrolls are clamped and indicated with a glow.
+  glow,
+
+  /// Overscrolls are not clamped and indicated with elastic physics.
+  bounce
+}
 
 /// An application that uses material design.
 ///
@@ -53,6 +60,7 @@ class MaterialApp extends StatefulWidget {
     this.theme,
     this.home,
     this.routes: const <String, WidgetBuilder>{},
+    this.overscrollStyle,
     this.onGenerateRoute,
     this.onLocaleChanged,
     this.debugShowMaterialGrid: false,
@@ -104,6 +112,11 @@ class MaterialApp extends StatefulWidget {
   /// build the page instead.
   final Map<String, WidgetBuilder> routes;
 
+  /// The visual and interaction design for overscroll.
+  ///
+  /// Defaults to being adapted to the current [TargetPlatform].
+  final OverscrollStyle overscrollStyle;
+
   /// The route generator callback used when the app is navigated to a
   /// named route.
   final RouteFactory onGenerateRoute;
@@ -149,7 +162,8 @@ class _IndicatorScrollConfigurationDelegate extends ScrollConfigurationDelegate 
   @override
   Widget wrapScrollWidget(Widget scrollWidget) => new OverscrollIndicator(child: scrollWidget);
 }
-final ScrollConfigurationDelegate _indicatorScroll = new _IndicatorScrollConfigurationDelegate();
+
+final ScrollConfigurationDelegate _glowScroll = new _IndicatorScrollConfigurationDelegate();
 final ScrollConfigurationDelegate _bounceScroll = new ScrollConfigurationDelegate();
 
 class _MaterialAppState extends State<MaterialApp> {
@@ -177,6 +191,24 @@ class _MaterialAppState extends State<MaterialApp> {
     }
     if (config.onGenerateRoute != null)
       return config.onGenerateRoute(settings);
+    return null;
+  }
+
+  ScrollConfigurationDelegate _getScrollDelegate(TargetPlatform platform) {
+    if (config.overscrollStyle != null) {
+      switch (config.overscrollStyle) {
+        case OverscrollStyle.glow:
+          return _glowScroll;
+        case OverscrollStyle.bounce:
+          return _bounceScroll;
+      }
+    }
+    switch (platform) {
+      case TargetPlatform.android:
+        return _glowScroll;
+      case TargetPlatform.iOS:
+        return _bounceScroll;
+    }
     return null;
   }
 
@@ -213,7 +245,7 @@ class _MaterialAppState extends State<MaterialApp> {
     });
 
     return new ScrollConfiguration(
-      delegate: (Platform.isIOS || Platform.isMacOS) ? _bounceScroll : _indicatorScroll,
+      delegate: _getScrollDelegate(theme.platform),
       child: result
     );
   }
