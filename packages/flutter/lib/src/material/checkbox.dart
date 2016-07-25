@@ -119,7 +119,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
 
 const double _kMidpoint = 0.5;
 const double _kEdgeSize = Checkbox.width;
-const double _kEdgeRadius = 1.0;
+const Radius _kEdgeRadius = const Radius.circular(1.0);
 const double _kStrokeWidth = 2.0;
 
 class _RenderCheckbox extends RenderToggleable {
@@ -159,7 +159,7 @@ class _RenderCheckbox extends RenderToggleable {
     double rectSize = _kEdgeSize - inset * _kStrokeWidth;
     Rect rect = new Rect.fromLTWH(offsetX + inset, offsetY + inset, rectSize, rectSize);
 
-    RRect outer = new RRect.fromRectXY(rect, _kEdgeRadius, _kEdgeRadius);
+    RRect outer = new RRect.fromRectAndRadius(rect, _kEdgeRadius);
     if (t <= 0.5) {
       // Outline
       RRect inner = outer.deflate(math.min(rectSize / 2.0, _kStrokeWidth + rectSize * t));

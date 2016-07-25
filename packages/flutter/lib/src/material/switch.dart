@@ -334,7 +334,7 @@ class _RenderSwitch extends RenderToggleable {
       size.width - 2.0 * trackHorizontalPadding,
       _kTrackHeight
     );
-    final RRect trackRRect = new RRect.fromRectXY(trackRect, _kTrackRadius, _kTrackRadius);
+    final RRect trackRRect = new RRect.fromRectAndRadius(trackRect, const Radius.circular(_kTrackRadius));
     canvas.drawRRect(trackRRect, paint);
 
     final Point thumbPosition = new Point(
