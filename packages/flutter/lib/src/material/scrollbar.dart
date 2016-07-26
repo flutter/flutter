@@ -110,6 +110,12 @@ class _ScrollbarState extends State<Scrollbar> {
     _opacity = new CurvedAnimation(parent: _fade, curve: Curves.ease);
   }
 
+  @override
+  dispose() {
+    _fade.stop();
+    super.dispose();
+  }
+
   void _updateState(ScrollableState scrollable) {
     if (scrollable.scrollBehavior is! ExtentScrollBehavior)
       return;
@@ -127,11 +133,12 @@ class _ScrollbarState extends State<Scrollbar> {
 
   void _onScrollUpdated(ScrollableState scrollable) {
     _updateState(scrollable);
-    if (_scrollOffsetAnchor != _scrollOffset && _fade.value == 0.0 && !_fade.isAnimating) {
-      _fade.forward(); // Lazily start the scrollbar fade-in.
-    } else if (!_fade.isAnimating) {
+    if (!_fade.isAnimating) {
+      if (_scrollOffsetAnchor != _scrollOffset && _fade.value == 0.0)
+        _fade.forward(); // Lazily start the scrollbar fade-in.
       setState(() {
-        // The scrollbar has faded in, rebuild it per the new scrollable state.
+        // If the scrollbar has faded in, rebuild it per the new scrollable state.
+        // If the fade-in is underway this setState() will have no effect.
       });
     }
   }
