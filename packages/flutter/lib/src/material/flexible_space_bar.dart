@@ -83,7 +83,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
       case TargetPlatform.iOS:
         return true;
     }
-    return false;
+    return null;
   }
 
   @override

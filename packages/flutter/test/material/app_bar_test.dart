@@ -6,15 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('FlexibleSpaceBar centers title on iOS', (WidgetTester tester) async {
+  testWidgets('AppBar centers title on iOS', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
         theme: new ThemeData(platform: TargetPlatform.android),
         home: new Scaffold(
           appBar: new AppBar(
-            flexibleSpace: new FlexibleSpaceBar(
-              title: new Text('X')
-            )
+            title: new Text('X')
           )
         )
       )
@@ -33,9 +31,7 @@ void main() {
         theme: new ThemeData(platform: TargetPlatform.iOS),
         home: new Scaffold(
           appBar: new AppBar(
-            flexibleSpace: new FlexibleSpaceBar(
-              title: new Text('X')
-            )
+            title: new Text('X')
           )
         )
       )
