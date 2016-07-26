@@ -71,6 +71,7 @@ class AppBar extends StatelessWidget {
     this.iconTheme,
     this.textTheme,
     this.padding: EdgeInsets.zero,
+    this.centerTitle,
     double expandedHeight,
     double collapsedHeight
   }) : _expandedHeight = expandedHeight,
@@ -146,6 +147,11 @@ class AppBar extends StatelessWidget {
   /// status bar so that the toolbar appears below the status bar.
   final EdgeInsets padding;
 
+  /// Whether the title should be centered.
+  ///
+  /// Defaults to being adapted to the current [TargetPlatform].
+  final bool centerTitle;
+
   final double _expandedHeight;
   final double _collapsedHeight;
 
@@ -210,17 +216,32 @@ class AppBar extends StatelessWidget {
     return ((appBarHeight - statusBarHeight) / bottomHeight).clamp(0.0, 1.0);
   }
 
+  bool _getEffectiveCenterTitle(ThemeData themeData) {
+    if (centerTitle != null)
+      return centerTitle;
+    assert(themeData.platform != null);
+    switch (themeData.platform) {
+      case TargetPlatform.android:
+        return false;
+      case TargetPlatform.iOS:
+        return true;
+    }
+    return null;
+  }
+
   Widget _buildForSize(BuildContext context, BoxConstraints constraints) {
     assert(constraints.maxHeight < double.INFINITY);
     final Size size = constraints.biggest;
     final double statusBarHeight = MediaQuery.of(context).padding.top;
-    final ThemeData theme = Theme.of(context);
+    final ThemeData themeData = Theme.of(context);
 
-    IconThemeData appBarIconTheme = iconTheme ?? theme.primaryIconTheme;
-    TextStyle centerStyle = textTheme?.title ?? theme.primaryTextTheme.title;
-    TextStyle sideStyle = textTheme?.body1 ?? theme.primaryTextTheme.body1;
+    IconThemeData appBarIconTheme = iconTheme ?? themeData.primaryIconTheme;
+    TextStyle centerStyle = textTheme?.title ?? themeData.primaryTextTheme.title;
+    TextStyle sideStyle = textTheme?.body1 ?? themeData.primaryTextTheme.body1;
 
-    Brightness brightness = this.brightness ?? theme.primaryColorBrightness;
+    final bool effectiveCenterTitle = _getEffectiveCenterTitle(themeData);
+
+    Brightness brightness = this.brightness ?? themeData.primaryColorBrightness;
     SystemChrome.setSystemUIOverlayStyle(brightness == Brightness.dark
       ? mojom.SystemUiOverlayStyle.light
       : mojom.SystemUiOverlayStyle.dark);
@@ -237,6 +258,16 @@ class AppBar extends StatelessWidget {
       );
     }
 
+    Widget centerWidget;
+    if (title != null) {
+      centerWidget = new DefaultTextStyle(
+        style: centerStyle,
+        softWrap: false,
+        overflow: TextOverflow.ellipsis,
+        child: title
+      );
+    }
+
     final List<Widget> toolBarRow = <Widget>[];
     if (leading != null) {
       toolBarRow.add(new Padding(
@@ -245,19 +276,30 @@ class AppBar extends StatelessWidget {
       ));
     }
     toolBarRow.add(new Flexible(
-      child: new Padding(
-        padding: new EdgeInsets.only(left: 8.0),
-        child: title != null ?
-          new DefaultTextStyle(
-            style: centerStyle,
-            softWrap: false,
-            overflow: TextOverflow.ellipsis,
-            child: title
-          ) : null
+      child: new Align(
+        // TODO(abarth): In RTL this should be aligned to the right.
+        alignment: FractionalOffset.centerLeft,
+        child: new Padding(
+          padding: new EdgeInsets.only(left: 8.0),
+          child: effectiveCenterTitle ? null : centerWidget
+        )
       )
     ));
     if (actions != null)
       toolBarRow.addAll(actions);
+
+    Widget toolBar = new Row(children: toolBarRow);
+
+    if (effectiveCenterTitle && centerWidget != null) {
+      toolBar = new Stack(
+        children: <Widget>[
+          // TODO(abarth): If there isn't enough room, we should move the title
+          // off center rather than overlap the actions.
+          new Center(child: centerWidget),
+          toolBar
+        ]
+      );
+    }
 
     Widget appBar = new SizedBox(
       height: kToolBarHeight,
@@ -266,7 +308,7 @@ class AppBar extends StatelessWidget {
         data: appBarIconTheme,
         child: new DefaultTextStyle(
           style: sideStyle,
-          child: new Row(children: toolBarRow)
+          child: toolBar
         )
       )
     );
@@ -323,7 +365,7 @@ class AppBar extends StatelessWidget {
     }
 
     appBar = new Material(
-      color: backgroundColor ?? theme.primaryColor,
+      color: backgroundColor ?? themeData.primaryColor,
       elevation: elevation,
       child: appBar
     );
