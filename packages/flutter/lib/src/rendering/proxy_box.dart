@@ -1972,6 +1972,108 @@ class RenderIgnorePointer extends RenderProxyBox {
   }
 }
 
+/// Lays the child out as if it was in the tree, but without painting anything,
+/// without making the child available for hit testing, and without taking any
+/// room in the parent.
+class RenderOffStage extends RenderProxyBox {
+  /// Creates an off-stage render object.
+  RenderOffStage({
+    bool offstage: true,
+    RenderBox child
+  }) : _offstage = offstage, super(child) {
+    assert(offstage != null);
+  }
+
+  /// Whether the child is hidden from the rest of the tree.
+  ///
+  /// If true, the child is laid out as if it was in the tree, but without
+  /// painting anything, without making the child available for hit testing, and
+  /// without taking any room in the parent.
+  ///
+  /// If false, the child is included in the tree as normal.
+  bool get offstage => _offstage;
+  bool _offstage;
+  set offstage(bool value) {
+    assert(value != null);
+    if (value == _offstage)
+      return;
+    _offstage = value;
+    markNeedsLayout();
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    if (offstage)
+      return 0.0;
+    return super.computeMinIntrinsicWidth(height);
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    if (offstage)
+      return 0.0;
+    return super.computeMaxIntrinsicWidth(height);
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    if (offstage)
+      return 0.0;
+    return super.computeMinIntrinsicHeight(width);
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    if (offstage)
+      return 0.0;
+    return super.computeMaxIntrinsicHeight(width);
+  }
+
+  @override
+  double computeDistanceToActualBaseline(TextBaseline baseline) {
+    if (offstage)
+      return null;
+    return super.computeDistanceToActualBaseline(baseline);
+  }
+
+  @override
+  bool get sizedByParent => offstage;
+
+  @override
+  void performResize() {
+    assert(offstage);
+    size = constraints.smallest;
+  }
+
+  @override
+  void performLayout() {
+    if (offstage) {
+      child?.layout(constraints);
+    } else {
+      super.performLayout();
+    }
+  }
+
+  @override
+  bool hitTest(HitTestResult result, { Point position }) {
+    return !offstage && super.hitTest(result, position: position);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (offstage)
+      return;
+    super.paint(context, offset);
+  }
+
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    if (offstage)
+      return;
+    super.visitChildrenForSemantics(visitor);
+  }
+}
+
 /// A render object that absorbs pointers during hit testing.
 ///
 /// When [absorbing] is `true`, this render object prevents its subtree from

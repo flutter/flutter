@@ -11,6 +11,7 @@ import 'dart:ui' show VoidCallback;
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
+import 'debug.dart';
 import 'priority.dart';
 
 export 'dart:ui' show VoidCallback;
@@ -426,6 +427,11 @@ abstract class SchedulerBinding extends BindingBase {
     Timeline.startSync('Frame');
     _firstRawTimeStampInEpoch ??= rawTimeStamp;
     Duration timeStamp = _adjustForEpoch(rawTimeStamp);
+    assert(() {
+      if (debugPrintBeginFrameBanner)
+        print('━‬━‬━‬━‬━‬━‬━┫ Begin Frame ($timeStamp) ┣━‬━‬━‬━‬━‬━‬━');
+      return true;
+    });
     _lastRawTimeStamp = rawTimeStamp;
     assert(!_isProducingFrame);
     _isProducingFrame = true;

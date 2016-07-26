@@ -1236,6 +1236,11 @@ class BuildOwner {
         int dirtyCount = _dirtyElements.length;
         int index = 0;
         while (index < dirtyCount) {
+          assert(() {
+            if (debugPrintRebuildDirtyWidgets)
+              debugPrint('Rebuilding ${_dirtyElements[index].widget}');
+            return true;
+          });
           _dirtyElements[index].rebuild();
           index += 1;
           if (dirtyCount < _dirtyElements.length) {

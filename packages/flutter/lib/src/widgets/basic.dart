@@ -1087,11 +1087,33 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 /// room in the parent.
 class OffStage extends SingleChildRenderObjectWidget {
   /// Creates a widget that visually hides its child.
-  OffStage({ Key key, Widget child })
-    : super(key: key, child: child);
+  OffStage({ Key key, this.offstage: true, Widget child })
+    : super(key: key, child: child) {
+    assert(offstage != null);
+  }
+
+  /// Whether the child is hidden from the rest of the tree.
+  ///
+  /// If true, the child is laid out as if it was in the tree, but without
+  /// painting anything, without making the child available for hit testing, and
+  /// without taking any room in the parent.
+  ///
+  /// If false, the child is included in the tree as normal.
+  final bool offstage;
 
   @override
-  RenderOffStage createRenderObject(BuildContext context) => new RenderOffStage();
+  RenderOffStage createRenderObject(BuildContext context) => new RenderOffStage(offstage: offstage);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderOffStage renderObject) {
+    renderObject.offstage = offstage;
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('offstage: $offstage');
+  }
 }
 
 /// A widget that attempts to size the child to a specific aspect ratio.

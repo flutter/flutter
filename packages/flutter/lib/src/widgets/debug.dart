@@ -8,6 +8,9 @@ import 'package:flutter/foundation.dart';
 import 'framework.dart';
 import 'table.dart';
 
+/// Log the dirty widgets that are built each frame.
+bool debugPrintRebuildDirtyWidgets = false;
+
 Key _firstNonUniqueKey(Iterable<Widget> widgets) {
   Set<Key> keySet = new HashSet<Key>();
   for (Widget widget in widgets) {

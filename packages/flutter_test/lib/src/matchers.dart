@@ -136,11 +136,11 @@ class _FindsWidgetMatcher extends Matcher {
   }
 }
 
-bool _hasAncestorOfType(Finder finder, Type targetType) {
+bool _hasAncestorMatching(Finder finder, bool predicate(Widget widget)) {
   expect(finder, findsOneWidget);
   bool result = false;
   finder.evaluate().single.visitAncestorElements((Element ancestor) {
-    if (ancestor.widget.runtimeType == targetType) {
+    if (predicate(ancestor.widget)) {
       result = true;
       return false;
     }
@@ -149,11 +149,22 @@ bool _hasAncestorOfType(Finder finder, Type targetType) {
   return result;
 }
 
+bool _hasAncestorOfType(Finder finder, Type targetType) {
+  return _hasAncestorMatching(finder, (Widget widget) => widget.runtimeType == targetType);
+}
+
 class _IsOffStage extends Matcher {
   const _IsOffStage();
 
   @override
-  bool matches(Finder finder, Map<dynamic, dynamic> matchState) => _hasAncestorOfType(finder, OffStage);
+  bool matches(Finder finder, Map<dynamic, dynamic> matchState) {
+    return _hasAncestorMatching(finder, (Widget widget) {
+      if (widget.runtimeType != OffStage)
+        return false;
+      OffStage offstage = widget;
+      return offstage.offstage;
+    });
+  }
 
   @override
   Description describe(Description description) => description.add('offstage');
@@ -163,7 +174,20 @@ class _IsOnStage extends Matcher {
   const _IsOnStage();
 
   @override
-  bool matches(Finder finder, Map<dynamic, dynamic> matchState) => !_hasAncestorOfType(finder, OffStage);
+  bool matches(Finder finder, Map<dynamic, dynamic> matchState) {
+    expect(finder, findsOneWidget);
+    bool result = true;
+    finder.evaluate().single.visitAncestorElements((Element ancestor) {
+      Widget widget = ancestor.widget;
+      if (widget.runtimeType == OffStage) {
+        OffStage offstage = widget;
+        result = !offstage.offstage;
+        return false;
+      }
+      return true;
+    });
+    return result;
+  }
 
   @override
   Description describe(Description description) => description.add('onstage');
