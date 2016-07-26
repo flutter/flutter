@@ -8,10 +8,9 @@ import("//flutter/lib/ui/dart_ui.gni")
 import("//mojo/public/dart/rules.gni")
 import("//sky/engine/core/core.gni")
 
-copy("copy_sky_engine_license") {
+copy("copy_sky_engine_authors") {
   sources = [
     "//AUTHORS",
-    "//LICENSE",
   ]
 
   outputs = [
@@ -100,13 +99,14 @@ dart_pkg("sky_engine") {
     "lib/_embedder.yaml",
     "README.md",
     "pubspec.yaml",
+    "LICENSE"
   ]
 
   deps = [
     ":copy_dart_jni",
     ":copy_dart_sdk",
     ":copy_dart_ui",
-    ":copy_sky_engine_license",
+    ":copy_sky_engine_authors",
     "//sky/engine/bindings",
   ]
 
