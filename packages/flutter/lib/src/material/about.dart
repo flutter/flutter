@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 
@@ -14,6 +13,8 @@ import 'dialog.dart';
 import 'drawer_item.dart';
 import 'flat_button.dart';
 import 'icon.dart';
+import 'icon_theme.dart';
+import 'icon_theme_data.dart';
 import 'page.dart';
 import 'progress_indicator.dart';
 import 'scaffold.dart';
@@ -84,9 +85,12 @@ class AboutDrawerItem extends StatelessWidget {
   ///
   /// By default no icon is shown.
   ///
+  /// Typically this will be an [ImageIcon] widget. It should honor the
+  /// [IconTheme]'s [IconThemeData.size].
+  ///
   /// This is not necessarily the same as the icon shown on the drawer item
   /// itself, which is controlled by the [icon] property.
-  final ImageProvider applicationIcon;
+  final Widget applicationIcon;
 
   /// A string to show in small print in the [AboutDialog].
   ///
@@ -137,7 +141,7 @@ void showAboutDialog({
   @required BuildContext context,
   String applicationName,
   String applicationVersion,
-  ImageProvider applicationIcon,
+  Widget applicationIcon,
   String applicationLegalese,
   List<Widget> children
 }) {
@@ -168,7 +172,7 @@ void showLicensePage({
   @required BuildContext context,
   String applicationName,
   String applicationVersion,
-  ImageProvider applicationIcon,
+  Widget applicationIcon,
   String applicationLegalese
 }) {
   // TODO(ianh): remove pop once https://github.com/flutter/flutter/issues/4667 is fixed
@@ -220,7 +224,10 @@ class AboutDialog extends StatelessWidget {
   /// The icon to show next to the application name.
   ///
   /// By default no icon is shown.
-  final ImageProvider applicationIcon;
+  ///
+  /// Typically this will be an [ImageIcon] widget. It should honor the
+  /// [IconTheme]'s [IconThemeData.size].
+  final Widget applicationIcon;
 
   /// A string to show in small print.
   ///
@@ -241,15 +248,10 @@ class AboutDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final String name = applicationName ?? _defaultApplicationName(context);
     final String version = applicationVersion ?? _defaultApplicationVersion(context);
-    final ImageProvider icon = applicationIcon ?? _defaultApplicationIcon(context);
+    final Widget icon = applicationIcon ?? _defaultApplicationIcon(context);
     List<Widget> body = <Widget>[];
-    if (icon != null) {
-      body.add(new Image(
-        image: icon,
-        width: 48.0,
-        height: 48.0
-      ));
-    }
+    if (icon != null)
+      body.add(new IconTheme(data: new IconThemeData(size: 48.0), child: icon));
     body.add(new Flexible(
       child: new Padding(
         padding: new EdgeInsets.symmetric(horizontal: 24.0),
@@ -454,7 +456,7 @@ String _defaultApplicationVersion(BuildContext context) {
   return '';
 }
 
-ImageProvider _defaultApplicationIcon(BuildContext context) {
+Widget _defaultApplicationIcon(BuildContext context) {
   // TODO(ianh): Get this from the embedder somehow.
   return null;
 }

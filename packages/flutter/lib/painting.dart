@@ -24,6 +24,7 @@ export 'src/painting/decoration.dart';
 export 'src/painting/image_fit.dart';
 export 'src/painting/edge_insets.dart';
 export 'src/painting/fractional_offset.dart';
+export 'src/painting/flutter_logo.dart';
 export 'src/painting/text_editing.dart';
 export 'src/painting/text_painter.dart';
 export 'src/painting/text_span.dart';

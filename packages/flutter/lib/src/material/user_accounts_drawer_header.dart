@@ -22,9 +22,8 @@ import 'debug.dart';
 /// See also:
 ///
 ///  * [Drawer]
-///  * [DrawerItem]
+///  * [DrawerHeader], for a drawer header that doesn't show user acounts
 ///  * <https://www.google.com/design/spec/patterns/navigation-drawer.html>
-
 class UserAccountsDrawerHeader extends StatefulWidget {
   /// Creates a material design drawer header.
   ///
@@ -43,41 +42,37 @@ class UserAccountsDrawerHeader extends StatefulWidget {
   /// section is pressed.
   final VoidCallback onDetailsPressed;
 
-  /// Decoration for the main drawer header container useful for applying
-  /// backgrounds.
-  final BoxDecoration decoration;
+  /// The background to show in the drawer header.
+  final Decoration decoration;
 
   /// A widget placed in the upper-left corner representing the current
   /// account picture. Normally a [CircleAvatar].
   final Widget currentAccountPicture;
 
-  /// A list of widgets that represent the user's accounts. Up to three of them
-  /// are arranged in a row in the header's upper-right corner. Normally a list
+  /// A list of widgets that represent the user's accounts. Up to three of will
+  /// be arranged in a row in the header's upper-right corner. Normally a list
   /// of [CircleAvatar] widgets.
   final List<Widget> otherAccountsPictures;
 
-  /// A widget placed on the top row of the account details representing
-  /// account name.
+  /// A widget placed on the top row of the account details representing the
+  /// account's name.
   final Widget accountName;
 
-  /// A widget placed on the bottom row of the account details representing
-  /// account email.
+  /// A widget placed on the bottom row of the account details representing the
+  /// account's e-mail address.
   final Widget accountEmail;
 
   @override
-  _UserAccountsDrawerHeaderState createState() =>
-      new _UserAccountsDrawerHeaderState();
+  _UserAccountsDrawerHeaderState createState() => new _UserAccountsDrawerHeaderState();
 }
 
 class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
-  /// Saves whether the account dropdown is open or not.
-  bool isOpen = false;
+  bool _isOpen = false;
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final List<Widget> otherAccountsPictures = config.otherAccountsPictures ??
-        <Widget>[];
+    final List<Widget> otherAccountsPictures = config.otherAccountsPictures ?? <Widget>[];
     return new DrawerHeader(
       decoration: config.decoration,
       child: new Column(
@@ -117,7 +112,7 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
             child: new InkWell(
               onTap: () {
                 setState(() {
-                  isOpen = !isOpen;
+                  _isOpen = !_isOpen;
                 });
                 if (config.onDetailsPressed != null)
                   config.onDetailsPressed();
@@ -146,8 +141,7 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
                           child: new Align(
                             alignment: FractionalOffset.centerRight,
                             child: new Icon(
-                              isOpen ? Icons.arrow_drop_up :
-                                  Icons.arrow_drop_down,
+                              _isOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
                               color: Colors.white
                             )
                           )

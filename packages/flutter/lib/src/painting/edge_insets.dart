@@ -56,6 +56,22 @@ class EdgeInsets {
   /// The offset from the bottom.
   final double bottom;
 
+  /// An Offset describing the vector from the top left of a rectangle to the
+  /// top left of that rectangle inset by this object.
+  Offset get topLeft => new Offset(left, top);
+
+  /// An Offset describing the vector from the top right of a rectangle to the
+  /// top right of that rectangle inset by this object.
+  Offset get topRight => new Offset(-right, top);
+
+  /// An Offset describing the vector from the bottom left of a rectangle to the
+  /// bottom left of that rectangle inset by this object.
+  Offset get bottomLeft => new Offset(left, -bottom);
+
+  /// An Offset describing the vector from the bottom right of a rectangle to the
+  /// bottom right of that rectangle inset by this object.
+  Offset get bottomRight => new Offset(-right, -bottom);
+
   /// Whether every dimension is non-negative.
   bool get isNonNegative => left >= 0.0 && top >= 0.0 && right >= 0.0 && bottom >= 0.0;
 
@@ -88,8 +104,55 @@ class EdgeInsets {
   /// rect is moved left by [left], the top edge of the rect is moved up by
   /// [top], the right edge of the rect is moved right by [right], and the
   /// bottom edge of the rect is moved down by [bottom].
+  ///
+  /// See also:
+  ///
+  ///  * [inflateSize], to inflate a [Size] rather than a [Rect].
+  ///  * [deflateRect], to deflate a [Rect] rather than inflating it.
   Rect inflateRect(Rect rect) {
     return new Rect.fromLTRB(rect.left - left, rect.top - top, rect.right + right, rect.bottom + bottom);
+  }
+
+  /// Returns a new rect that is smaller than the given rect in each direction by
+  /// the amount of inset in each direction. Specifically, the left edge of the
+  /// rect is moved right by [left], the top edge of the rect is moved down by
+  /// [top], the right edge of the rect is moved left by [right], and the
+  /// bottom edge of the rect is moved up by [bottom].
+  ///
+  /// If the argument's [Rect.size] is smaller than [collapsedSize], then the
+  /// resulting rectangle will have negative dimensions.
+  ///
+  /// See also:
+  ///
+  ///  * [deflateSize], to deflate a [Size] rather than a [Rect].
+  ///  * [inflateRect], to inflate a [Rect] rather than deflating it.
+  Rect deflateRect(Rect rect) {
+    return new Rect.fromLTRB(rect.left + left, rect.top + top, rect.right - right, rect.bottom - bottom);
+  }
+
+  /// Returns a new size that is bigger than the given size by the amount of
+  /// inset in the horizontal and vertical directions.
+  ///
+  /// See also:
+  ///
+  ///  * [inflateRect], to inflate a [Rect] rather than a [Size].
+  ///  * [deflateSize], to deflate a [Size] rather than inflating it.
+  Size inflateSize(Size size) {
+    return new Size(size.width + horizontal, size.height + vertical);
+  }
+
+  /// Returns a new size that is smaller than the given size by the amount of
+  /// inset in the horizontal and vertical directions.
+  ///
+  /// If the argument is smaller than [collapsedSize], then the resulting size
+  /// will have negative dimensions.
+  ///
+  /// See also:
+  ///
+  ///  * [deflateRect], to deflate a [Rect] rather than a [Size].
+  ///  * [inflateSize], to inflate a [Size] rather than deflating it.
+  Size deflateSize(Size size) {
+    return new Size(size.width - horizontal, size.height - vertical);
   }
 
   /// Returns the difference between two EdgeInsets.
