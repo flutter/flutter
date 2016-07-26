@@ -38,8 +38,11 @@ source_set("flow") {
     "layers/shader_mask_layer.h",
     "layers/transform_layer.cc",
     "layers/transform_layer.h",
+    "open_gl.h",
     "raster_cache.cc",
     "raster_cache.h",
+    "texture_image.cc",
+    "texture_image.h",
   ]
 
   deps = [
