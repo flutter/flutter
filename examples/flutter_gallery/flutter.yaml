@@ -1,7 +1,6 @@
 name: flutter_gallery
 uses-material-design: true
 assets:
-  - assets/flutter_logo.png
   - lib/gallery/example_code.dart
   - packages/flutter_gallery_assets/appbar_background.jpg
   - packages/flutter_gallery_assets/pesto/avatar.jpg
