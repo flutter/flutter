@@ -124,4 +124,54 @@ void main() {
     await gesture.up();
   });
 
+  testWidgets('Drawer navigator back button', (WidgetTester tester) async {
+    GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+    bool buttonPressed = false;
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Builder(
+          builder: (BuildContext context) {
+            return new Scaffold(
+              key: scaffoldKey,
+              drawer: new Drawer(
+                child: new Block(
+                  children: <Widget>[
+                    new Text('drawer'),
+                    new FlatButton(
+                      child: new Text('close'),
+                      onPressed: () => Navigator.pop(context)
+                    ),
+                  ]
+                )
+              ),
+              body: new Container(
+                child: new FlatButton(
+                  child: new Text('button'),
+                  onPressed: () { buttonPressed = true; }
+                )
+              )
+            );
+          }
+        )
+      )
+    );
+
+    // Open the drawer.
+    scaffoldKey.currentState.openDrawer();
+    await tester.pump(); // drawer should be starting to animate in
+    expect(find.text('drawer'), findsOneWidget);
+
+    // Tap the close button to pop the drawer route.
+    await tester.pump(new Duration(milliseconds: 100));
+    await tester.tap(find.text('close'));
+    await tester.pump();
+    await tester.pump(new Duration(seconds: 1));
+    expect(find.text('drawer'), findsNothing);
+
+    // Confirm that a button in the scaffold body is still clickable.
+    await tester.tap(find.text('button'));
+    expect(buttonPressed, equals(true));
+  });
+
 }

@@ -492,7 +492,9 @@ class NavigatorState extends State<Navigator> {
     // This mechanism is far from perfect. See the issue below for more details:
     // https://github.com/flutter/flutter/issues/4770
     RenderAbsorbPointer absorber = _overlayKey.currentContext?.ancestorRenderObjectOfType(const TypeMatcher<RenderAbsorbPointer>());
-    absorber?.absorbing = true;
+    setState(() {
+      absorber?.absorbing = true;
+    });
     for (int pointer in _activePointers.toList())
       WidgetsBinding.instance.cancelPointer(pointer);
   }
