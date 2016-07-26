@@ -118,7 +118,11 @@ void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
         compositor_context_.AcquireFrame(ganesh_canvas_.gr_context(), *canvas);
     canvas->clear(SK_ColorBLACK);
     layer_tree->Raster(frame);
-    canvas->flush();
+
+    {
+      TRACE_EVENT0("flutter", "SkCanvas::Flush");
+      canvas->flush();
+    }
 
     platform_view_->SwapBuffers();
   }

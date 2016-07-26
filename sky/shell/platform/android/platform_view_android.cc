@@ -13,11 +13,12 @@
 
 #include "base/bind.h"
 #include "base/location.h"
+#include "base/trace_event/trace_event.h"
 #include "jni/FlutterView_jni.h"
 #include "sky/engine/core/script/dart_service_isolate.h"
 #include "sky/engine/wtf/MakeUnique.h"
-#include "sky/shell/shell.h"
 #include "sky/shell/shell_view.h"
+#include "sky/shell/shell.h"
 
 namespace sky {
 namespace shell {
@@ -339,6 +340,7 @@ bool PlatformViewAndroid::ContextMakeCurrent() {
 }
 
 bool PlatformViewAndroid::SwapBuffers() {
+  TRACE_EVENT0("flutter", "PlatformViewAndroid::SwapBuffers");
   return context_ != nullptr ? context_->SwapBuffers() : false;
 }
 

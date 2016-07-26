@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "base/mac/scoped_nsautorelease_pool.h"
-#include "sky/engine/wtf/MakeUnique.h"
 #include "sky/shell/platform/ios/platform_view_ios.h"
+
+#include "base/mac/scoped_nsautorelease_pool.h"
+#include "base/trace_event/trace_event.h"
+#include "sky/engine/wtf/MakeUnique.h"
 
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
@@ -284,6 +286,7 @@ bool PlatformViewIOS::ContextMakeCurrent() {
 }
 
 bool PlatformViewIOS::SwapBuffers() {
+  TRACE_EVENT0("flutter", "PlatformViewIOS::SwapBuffers");
   return context_ != nullptr ? context_->PresentRenderBuffer() : false;
 }
 

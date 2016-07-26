@@ -6,6 +6,8 @@
 
 #include <AppKit/AppKit.h>
 
+#include "base/trace_event/trace_event.h"
+
 namespace sky {
 namespace shell {
 
@@ -42,6 +44,8 @@ bool PlatformViewMac::ContextMakeCurrent() {
 }
 
 bool PlatformViewMac::SwapBuffers() {
+  TRACE_EVENT0("flutter", "PlatformViewMac::SwapBuffers");
+
   if (!IsValid()) {
     return false;
   }
