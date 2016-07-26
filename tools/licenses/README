@@ -1,0 +1,3 @@
+To update the sky_engine LICENSE file, run:
+  gclient sync &&
+  dart lib/main.dart ../.. > ../../sky/packages/sky_engine/LICENSE
