@@ -130,7 +130,6 @@ void SimpleFontData::platformGlyphInit()
     // are mapped to the ZERO WIDTH SPACE glyph.
     if (m_zeroWidthSpaceGlyph == m_spaceGlyph) {
         m_zeroWidthSpaceGlyph = 0;
-        WTF_LOG_ERROR("Font maps SPACE and ZERO WIDTH SPACE to the same glyph. Glyph width will not be overridden.");
     }
 
     m_missingGlyphData.fontData = this;
