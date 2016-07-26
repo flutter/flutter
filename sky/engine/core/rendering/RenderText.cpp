@@ -224,7 +224,7 @@ void RenderText::appendAbsoluteTextBoxesForRange(std::vector<TextBox>& boxes, un
             boxes.emplace_back(localToAbsoluteQuad(r).enclosingBoundingBox(), box->direction());
         } else {
             FloatRect rect = localQuadForTextBox(box, start, end, /* useSelectionHeight */ false);
-            if (!rect.isZero())
+            if (!rect.isEmpty())
                 boxes.emplace_back(localToAbsoluteQuad(rect).enclosingBoundingBox(), box->direction());
         }
     }
