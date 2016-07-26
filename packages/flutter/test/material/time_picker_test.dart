@@ -15,7 +15,7 @@ void main() {
         builder: (BuildContext context, StateSetter setState) {
           return new Material(
             child: new Center(
-                child: new SizedBox(
+              child: new SizedBox(
                 width: 200.0,
                 height: 400.0,
                 child: new TimePicker(
@@ -54,6 +54,20 @@ void main() {
 
     await tester.pump(const Duration(seconds: 1)); // Finish gesture animation.
     await tester.pump(const Duration(seconds: 1)); // Finish settling animation.
+  });
+
+  testWidgets('render picker with intrinsic dimensions', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new IntrinsicWidth(
+        child: new IntrinsicHeight(
+          child: new TimePicker(
+            onChanged: null,
+            selectedTime: new TimeOfDay(hour: 0, minute: 0)
+          )
+        )
+      )
+    );
+    await tester.pump(const Duration(seconds: 5));
   });
 
   testWidgets('drag-select an hour', (WidgetTester tester) async {

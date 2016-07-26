@@ -33,7 +33,7 @@ class TimeOfDay {
   ///
   /// The [hour] argument must be between 0 and 23, inclusive. The [minute]
   /// argument must be between 0 and 59, inclusive.
-  const TimeOfDay({ this.hour, this.minute });
+  const TimeOfDay({ @required this.hour, @required this.minute });
 
   /// Returns a new TimeOfDay with the hour and/or minute replaced.
   TimeOfDay replacing({ int hour, int minute }) {
@@ -42,7 +42,7 @@ class TimeOfDay {
     return new TimeOfDay(hour: hour ?? this.hour, minute: minute ?? this.minute);
   }
 
-  /// The selected hour, in 24 hour time from 0..23
+  /// The selected hour, in 24 hour time from 0..23.
   final int hour;
 
   /// The selected minute.

@@ -118,8 +118,7 @@ class _DatePickerState extends State<DatePicker> {
         );
         break;
     }
-    return new Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    return new BlockBody(
       children: <Widget>[
         header,
         new Container(
@@ -213,7 +212,6 @@ const double _kMaxDayPickerHeight = _kDayPickerRowHeight * (_kMaxDayPickerRowCou
 class _DayPickerGridDelegate extends GridDelegateWithInOrderChildPlacement {
   @override
   GridSpecification getGridSpecification(BoxConstraints constraints, int childCount) {
-    assert(constraints.maxWidth < double.INFINITY);
     final int columnCount = DateTime.DAYS_PER_WEEK;
     return new GridSpecification.fromRegularTiles(
       tileWidth: constraints.maxWidth / columnCount,
@@ -459,34 +457,37 @@ class _MonthPickerState extends State<MonthPicker> {
 
   @override
   Widget build(BuildContext context) {
-    return new Stack(
-      children: <Widget>[
-        new PageableLazyList(
-          key: _dayPickerListKey,
-          initialScrollOffset: _monthDelta(config.firstDate, config.selectedDate).toDouble(),
-          scrollDirection: Axis.horizontal,
-          itemCount: _monthDelta(config.firstDate, config.lastDate) + 1,
-          itemBuilder: _buildItems
-        ),
-        new Positioned(
-          top: 0.0,
-          left: 8.0,
-          child: new IconButton(
-            icon: new Icon(Icons.chevron_left),
-            tooltip: 'Previous month',
-            onPressed: _handlePreviousMonth
+    return new SizedBox(
+      width: 330.0,
+      child: new Stack(
+        children: <Widget>[
+          new PageableLazyList(
+            key: _dayPickerListKey,
+            initialScrollOffset: _monthDelta(config.firstDate, config.selectedDate).toDouble(),
+            scrollDirection: Axis.horizontal,
+            itemCount: _monthDelta(config.firstDate, config.lastDate) + 1,
+            itemBuilder: _buildItems
+          ),
+          new Positioned(
+            top: 0.0,
+            left: 8.0,
+            child: new IconButton(
+              icon: new Icon(Icons.chevron_left),
+              tooltip: 'Previous month',
+              onPressed: _handlePreviousMonth
+            )
+          ),
+          new Positioned(
+            top: 0.0,
+            right: 8.0,
+            child: new IconButton(
+              icon: new Icon(Icons.chevron_right),
+              tooltip: 'Next month',
+              onPressed: _handleNextMonth
+            )
           )
-        ),
-        new Positioned(
-          top: 0.0,
-          right: 8.0,
-          child: new IconButton(
-            icon: new Icon(Icons.chevron_right),
-            tooltip: 'Next month',
-            onPressed: _handleNextMonth
-          )
-        )
-      ]
+        ]
+      )
     );
   }
 

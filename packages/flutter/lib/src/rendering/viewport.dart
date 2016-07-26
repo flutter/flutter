@@ -400,7 +400,7 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
     assert(() {
       if (!RenderObject.debugCheckingIntrinsics) {
         throw new FlutterError(
-          'RenderVirtualViewport does not support returning intrinsic dimensions.\n'
+          '$runtimeType does not support returning intrinsic dimensions.\n'
           'Calculating the intrinsic dimensions would require walking the entire '
           'child list, which cannot reliably and efficiently be done for render '
           'objects that potentially generate their child list during layout.'
