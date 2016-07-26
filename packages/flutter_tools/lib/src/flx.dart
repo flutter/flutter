@@ -203,24 +203,51 @@ Map<_Asset, List<_Asset>> _parseAssets(
 final String _licenseSeparator = '\n' + ('-' * 80) + '\n';
 
 /// Returns a ZipEntry representing the license file.
-ZipEntry _obtainLicenses(
+Future<ZipEntry> _obtainLicenses(
   PackageMap packageMap,
   String assetBase
-) {
+) async {
   // Read the LICENSE file from each package in the .packages file,
   // splitting each one into each component license (so that we can
   // de-dupe if possible).
-  final Set<String> packageLicenses = new Set<String>();
-  final Iterable<Uri> packages = packageMap.map.values;
-  for (Uri package in packages) {
+  // For the sky_engine package we assume each license starts with
+  // package names. For the other packages we assume that each
+  // license is raw.
+  final Map<String, Set<String>> packageLicenses = <String, Set<String>>{};
+  for (String packageName in packageMap.map.keys) {
+    final Uri package = packageMap.map[packageName];
     if (package != null && package.scheme == 'file') {
       final File file = new File.fromUri(package.resolve('../LICENSE'));
-      if (file.existsSync())
-        packageLicenses.addAll(file.readAsStringSync().split(_licenseSeparator));
+      if (file.existsSync()) {
+        final List<String> rawLicenses = (await file.readAsString()).split(_licenseSeparator);
+        for (String rawLicense in rawLicenses) {
+          String licenseText;
+          List<String> packageNames;
+          if (packageName == 'sky_engine') {
+            final int split = rawLicense.indexOf('\n\n');
+            if (split >= 0) {
+              packageNames = rawLicense.substring(0, split).split('\n');
+              licenseText = rawLicense.substring(split + 2);
+            }
+          }
+          if (licenseText == null) {
+            licenseText = rawLicense;
+            packageNames = <String>[packageName];
+          }
+          packageLicenses.putIfAbsent(rawLicense, () => new Set<String>())
+            ..addAll(packageNames);
+        }
+      }
     }
   }
 
-  final List<String> combinedLicensesList = packageLicenses.toList();
+  final List<String> combinedLicensesList = packageLicenses.keys.map(
+    (String license) {
+      List<String> packageNames = packageLicenses[license].toList()
+       ..sort();
+      return packageNames.join('\n') + '\n\n' + license;
+    }
+  ).toList();
   combinedLicensesList.sort();
 
   final String combinedLicenses = combinedLicensesList.join(_licenseSeparator);
@@ -464,7 +491,8 @@ Future<int> assemble({
   if (fontManifest != null)
     zipBuilder.addEntry(fontManifest);
 
-  zipBuilder.addEntry(_obtainLicenses(packageMap, assetBasePath));
+  // TODO(ianh): Only do the following line if we've changed packages
+  zipBuilder.addEntry(await _obtainLicenses(packageMap, assetBasePath));
 
   ensureDirectoryExists(outputPath);
 
