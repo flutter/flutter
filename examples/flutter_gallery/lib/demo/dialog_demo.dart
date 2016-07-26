@@ -64,6 +64,15 @@ class DialogDemo extends StatefulWidget {
 class DialogDemoState extends State<DialogDemo> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
+  TimeOfDay _selectedTime;
+
+  @override
+  void initState() {
+    final DateTime now = new DateTime.now();
+    _selectedTime = new TimeOfDay(hour: now.hour, minute: now.minute);
+    super.initState();
+  }
+
   void showDemoDialog/*<T>*/({ BuildContext context, Dialog dialog }) {
     showDialog/*<T>*/(
       context: context,
@@ -177,10 +186,11 @@ class DialogDemoState extends State<DialogDemo> {
             onPressed: () {
               showTimePicker(
                 context: context,
-                initialTime: const TimeOfDay(hour: 15, minute: 30)
+                initialTime: _selectedTime
               )
-              .then((TimeOfDay value) { // The value passed to Navigator.pop() or null.
-                if (value != null) {
+              .then((TimeOfDay value) {
+                if (value != _selectedTime) {
+                  _selectedTime = value;
                   _scaffoldKey.currentState.showSnackBar(new SnackBar(
                     content: new Text('You selected: $value')
                   ));

@@ -99,8 +99,8 @@ class TimeOfDay {
 }
 
 enum _TimePickerMode { hour, minute }
-const double _kHeaderFontSize = 65.0;
-const double _kPreferredDialExtent = 300.0;
+const double _kHeaderFontSize = 60.0;
+const double _kPreferredDialExtent = 296.0;
 
 /// A material design time picker.
 ///
@@ -250,8 +250,7 @@ class _TimePickerHeader extends StatelessWidget {
     );
 
     return new Container(
-      height: 100.0,
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      height: 96.0,
       decoration: new BoxDecoration(backgroundColor: backgroundColor),
       child: new Row(
         children: <Widget>[
@@ -274,7 +273,7 @@ class _TimePickerHeader extends StatelessWidget {
                     onTap: () => _handleChangeMode(_TimePickerMode.minute),
                     child: new Text(selectedTime.minuteLabel, style: minuteStyle)
                   ),
-                  new Container(width: 16.0, height: 0.0),  // Horizontal spacer
+                  new Container(width: 8.0, height: 0.0),  // Horizontal spacer
                   new GestureDetector(
                     onTap: _handleChangeDayPeriod,
                     behavior: HitTestBehavior.opaque,
