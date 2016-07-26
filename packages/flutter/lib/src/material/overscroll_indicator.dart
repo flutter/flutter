@@ -132,7 +132,6 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
   void _hide() {
     _hideTimer?.cancel();
     _hideTimer = null;
-    // Gaurding _hide() being called while indicator is already animating.
     if (!_extentAnimation.isAnimating) {
       _extentAnimation.reverse();
     }
@@ -188,21 +187,24 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
-    if (notification.depth != 0)
+    if (config.scrollableKey == null) {
+        if (notification.depth != 0)
+          return false;
+    } else if (config.scrollableKey != notification.scrollable.config.key) {
       return false;
-    if (config.scrollableKey == null || config.scrollableKey == notification.scrollable.config.key) {
-      final ScrollableState scrollable = notification.scrollable;
-      switch(notification.kind) {
-        case ScrollNotificationKind.started:
-          _onScrollStarted(scrollable);
-          break;
-        case ScrollNotificationKind.updated:
-          _onScrollUpdated(scrollable);
-          break;
-        case ScrollNotificationKind.ended:
-          _onScrollEnded(scrollable);
-          break;
-      }
+    }
+
+    final ScrollableState scrollable = notification.scrollable;
+    switch(notification.kind) {
+      case ScrollNotificationKind.started:
+        _onScrollStarted(scrollable);
+        break;
+      case ScrollNotificationKind.updated:
+        _onScrollUpdated(scrollable);
+        break;
+      case ScrollNotificationKind.ended:
+        _onScrollEnded(scrollable);
+        break;
     }
     return false;
   }

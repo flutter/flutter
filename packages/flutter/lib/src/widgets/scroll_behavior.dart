@@ -7,7 +7,6 @@ import 'dart:math' as math;
 import 'package:flutter/physics.dart';
 import 'package:meta/meta.dart';
 
-const double _kSecondsPerMillisecond = 1000.0;
 const double _kScrollDrag = 0.025;
 
 // TODO(hansmuller): Simplify these classes. We're no longer using the ScrollBehavior<T, U>
@@ -151,14 +150,12 @@ class BoundedBehavior extends ExtentScrollBehavior {
 }
 
 Simulation _createScrollSimulation(double position, double velocity, double minScrollOffset, double maxScrollOffset) {
-  final double startVelocity = velocity * _kSecondsPerMillisecond;
   final SpringDescription spring = new SpringDescription.withDampingRatio(mass: 1.0, springConstant: 170.0, ratio: 1.1);
-  return new ScrollSimulation(position, startVelocity, minScrollOffset, maxScrollOffset, spring, _kScrollDrag);
+  return new ScrollSimulation(position, velocity, minScrollOffset, maxScrollOffset, spring, _kScrollDrag);
 }
 
 Simulation _createSnapScrollSimulation(double startOffset, double endOffset, double startVelocity, double endVelocity) {
-  final double velocity = startVelocity * _kSecondsPerMillisecond;
-  return new FrictionSimulation.through(startOffset, endOffset, velocity, endVelocity);
+  return new FrictionSimulation.through(startOffset, endOffset, startVelocity, endVelocity);
 }
 
 /// A scroll behavior that does not prevent the user from exeeding scroll bounds.
@@ -169,9 +166,8 @@ class UnboundedBehavior extends ExtentScrollBehavior {
 
   @override
   Simulation createScrollSimulation(double position, double velocity) {
-    double velocityPerSecond = velocity * 1000.0;
     return new BoundedFrictionSimulation(
-      _kScrollDrag, position, velocityPerSecond, double.NEGATIVE_INFINITY, double.INFINITY
+      _kScrollDrag, position, velocity, double.NEGATIVE_INFINITY, double.INFINITY
     );
   }
 

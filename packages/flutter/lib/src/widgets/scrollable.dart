@@ -430,8 +430,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
     if (_numberOfInProgressScrolls > 0) {
       if (_simulation != null) {
         double dx = _simulation.dx(_controller.lastElapsedDuration.inMicroseconds / Duration.MICROSECONDS_PER_SECOND);
-        // TODO(abarth): We should be consistent about the units we use for velocity (i.e., per second).
-        _startToEndAnimation(dx / Duration.MILLISECONDS_PER_SECOND);
+        _startToEndAnimation(dx); // dx - logical pixels / second
       }
       return;
     }
@@ -456,14 +455,15 @@ class ScrollableState<T extends Scrollable> extends State<T> {
     updateGestureDetector();
   }
 
-  /// Fling the scroll offset with the given velocity.
+  /// Fling the scroll offset with the given velocity in logical pixels/second.
   ///
   /// Calling this function starts a physics-based animation of the scroll
   /// offset with the given value as the initial velocity. The physics
-  /// simulation used is determined by the scroll behavior.
+  /// simulation is determined by the scroll behavior.
   Future<Null> fling(double scrollVelocity) {
-    if (scrollVelocity != 0.0 || !_controller.isAnimating)
+    if (scrollVelocity.abs() > kPixelScrollTolerance.velocity || !_controller.isAnimating)
       return _startToEndAnimation(scrollVelocity);
+
     return new Future<Null>.value();
   }
 
@@ -587,9 +587,9 @@ class ScrollableState<T extends Scrollable> extends State<T> {
     scrollBy(pixelOffsetToScrollOffset(details.primaryDelta));
   }
 
-  Future<Null> _handleDragEnd(DragEndDetails details) {
-    double scrollVelocity = pixelDeltaToScrollOffset(details.velocity.pixelsPerSecond) / Duration.MILLISECONDS_PER_SECOND;
-    return fling(scrollVelocity).then(_endScroll);
+  void _handleDragEnd(DragEndDetails details) {
+    final double scrollVelocity = pixelDeltaToScrollOffset(details.velocity.pixelsPerSecond);
+    fling(scrollVelocity).then(_endScroll);
   }
 
   Null _endScroll([Null _]) {
