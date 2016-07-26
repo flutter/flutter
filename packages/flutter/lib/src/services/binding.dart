@@ -35,7 +35,16 @@ abstract class ServicesBinding extends BindingBase {
   Stream<LicenseEntry> _addLicenses() async* {
     final String rawLicenses = await rootBundle.loadString('LICENSE', cache: false);
     final List<String> licenses = rawLicenses.split(_licenseSeparator);
-    for (String license in licenses)
-      yield new LicenseEntryWithLineBreaks(license);
+    for (String license in licenses) {
+      final int split = license.indexOf('\n\n');
+      if (split >= 0) {
+        yield new LicenseEntryWithLineBreaks(
+          license.substring(0, split).split('\n'),
+          license.substring(split + 2)
+        );
+      } else {
+        yield new LicenseEntryWithLineBreaks(const <String>[], license);
+      }
+    }
   }
 }

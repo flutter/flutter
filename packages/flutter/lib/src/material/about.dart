@@ -355,7 +355,6 @@ class _LicensePageState extends State<LicensePage> {
 
   Future<Null> _initLicenses() async {
     await for (LicenseEntry license in LicenseRegistry.licenses) {
-      bool haveMargin = true;
       setState(() {
         _licenses.add(new Padding(
           padding: new EdgeInsets.symmetric(vertical: 18.0),
@@ -364,10 +363,20 @@ class _LicensePageState extends State<LicensePage> {
             textAlign: TextAlign.center
           )
         ));
+        _licenses.add(new Container(
+          decoration: new BoxDecoration(
+            border: new Border(bottom: new BorderSide(width: 0.0))
+          ),
+          child: new Text(
+            license.packages.join(', '),
+            style: new TextStyle(fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center
+          )
+        ));
         for (LicenseParagraph paragraph in license.paragraphs) {
           if (paragraph.indent == LicenseParagraph.centeredIndent) {
             _licenses.add(new Padding(
-              padding: new EdgeInsets.only(top: haveMargin ? 0.0 : 16.0),
+              padding: new EdgeInsets.only(top: 16.0),
               child: new Text(
                 paragraph.text,
                 style: new TextStyle(fontWeight: FontWeight.bold),
@@ -377,11 +386,10 @@ class _LicensePageState extends State<LicensePage> {
           } else {
             assert(paragraph.indent >= 0);
             _licenses.add(new Padding(
-              padding: new EdgeInsets.only(top: haveMargin ? 0.0 : 8.0, left: 16.0 * paragraph.indent),
+              padding: new EdgeInsets.only(top: 8.0, left: 16.0 * paragraph.indent),
               child: new Text(paragraph.text)
             ));
           }
-          haveMargin = false;
         }
       });
     }

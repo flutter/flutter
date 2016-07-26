@@ -44,10 +44,12 @@ abstract class LicenseEntry {
   /// const constructors so that they can be used in const expressions.
   const LicenseEntry();
 
-  /// Returns each paragraph of the license as a [LicenseParagraph], which
-  /// consists of a string and some formatting information. Paragraphs can
-  /// include newline characters, but this is discouraged as it results in
-  /// ugliness.
+  /// The names of the packages that this license entry applies to.
+  Iterable<String> get packages;
+
+  /// The paragraphs of the license, each as a [LicenseParagraph] consisting of
+  /// a string and some formatting information. Paragraphs can include newline
+  /// characters, but this is discouraged as it results in ugliness.
   Iterable<LicenseParagraph> get paragraphs;
 }
 
@@ -65,7 +67,7 @@ enum _LicenseEntryWithLineBreaksParserState {
 ///
 /// ```dart
 ///   LicenseRegistry.addLicense(() {
-///     yield new LicenseEntryWithLineBreaks('''
+///     yield new LicenseEntryWithLineBreaks(<String>['my_library'], '''
 /// Copyright 2016 The Sample Authors. All rights reserved.
 ///
 /// Redistribution and use in source and binary forms, with or without
@@ -102,7 +104,10 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
   /// Create a license entry for a license whose text is hard-wrapped within
   /// paragraphs and has paragraph breaks denoted by blank lines or with
   /// indented text.
-  const LicenseEntryWithLineBreaks(this.text);
+  const LicenseEntryWithLineBreaks(this.packages, this.text);
+
+  @override
+  final List<String> packages;
 
   /// The text of the license.
   ///
