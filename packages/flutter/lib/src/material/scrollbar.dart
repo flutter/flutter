@@ -98,6 +98,7 @@ class Scrollbar extends StatefulWidget {
 class _ScrollbarState extends State<Scrollbar> {
   final AnimationController _fade = new AnimationController(duration: _kScrollbarThumbFadeDuration);
   CurvedAnimation _opacity;
+  double _scrollOffsetAnchor;
   double _scrollOffset;
   Axis _scrollDirection;
   double _containerExtent;
@@ -121,13 +122,18 @@ class _ScrollbarState extends State<Scrollbar> {
 
   void _onScrollStarted(ScrollableState scrollable) {
     _updateState(scrollable);
-   _fade.forward();
+    _scrollOffsetAnchor = _scrollOffset;
   }
 
   void _onScrollUpdated(ScrollableState scrollable) {
-    setState(() {
-      _updateState(scrollable);
-    });
+    _updateState(scrollable);
+    if (_scrollOffsetAnchor != _scrollOffset && _fade.value == 0.0 && !_fade.isAnimating) {
+      _fade.forward(); // Lazily start the scrollbar fade-in.
+    } else if (!_fade.isAnimating) {
+      setState(() {
+        // The scrollbar has faded in, rebuild it per the new scrollable state.
+      });
+    }
   }
 
   void _onScrollEnded(ScrollableState scrollable) {
@@ -136,19 +142,24 @@ class _ScrollbarState extends State<Scrollbar> {
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
-    if (config.scrollableKey == null || config.scrollableKey == notification.scrollable.config.key) {
-      final ScrollableState scrollable = notification.scrollable;
-      switch(notification.kind) {
-        case ScrollNotificationKind.started:
-          _onScrollStarted(scrollable);
-          break;
-        case ScrollNotificationKind.updated:
-          _onScrollUpdated(scrollable);
-          break;
-        case ScrollNotificationKind.ended:
-          _onScrollEnded(scrollable);
-          break;
-      }
+    if (config.scrollableKey == null) {
+        if (notification.depth != 0)
+          return false;
+    } else if (config.scrollableKey != notification.scrollable.config.key) {
+      return false;
+    }
+
+    final ScrollableState scrollable = notification.scrollable;
+    switch(notification.kind) {
+      case ScrollNotificationKind.started:
+        _onScrollStarted(scrollable);
+        break;
+      case ScrollNotificationKind.updated:
+        _onScrollUpdated(scrollable);
+        break;
+      case ScrollNotificationKind.ended:
+        _onScrollEnded(scrollable);
+        break;
     }
     return false;
   }
