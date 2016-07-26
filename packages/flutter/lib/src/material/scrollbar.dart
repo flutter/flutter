@@ -111,7 +111,7 @@ class _ScrollbarState extends State<Scrollbar> {
   }
 
   @override
-  dispose() {
+  void dispose() {
     _fade.stop();
     super.dispose();
   }
