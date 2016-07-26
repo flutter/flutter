@@ -68,9 +68,9 @@ class DialogDemoState extends State<DialogDemo> {
 
   @override
   void initState() {
+    super.initState();
     final DateTime now = new DateTime.now();
     _selectedTime = new TimeOfDay(hour: now.hour, minute: now.minute);
-    super.initState();
   }
 
   void showDemoDialog/*<T>*/({ BuildContext context, Dialog dialog }) {
