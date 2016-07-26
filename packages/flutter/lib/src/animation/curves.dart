@@ -95,6 +95,8 @@ class Interval extends Curve {
     assert(end >= 0.0);
     assert(end <= 1.0);
     assert(end >= start);
+    if (t == 0.0 || t == 1.0)
+      return t;
     t = ((t - start) / (end - start)).clamp(0.0, 1.0);
     if (t == 0.0 || t == 1.0)
       return t;
