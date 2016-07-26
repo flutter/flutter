@@ -168,6 +168,11 @@ config("skia_library_config") {
     }
   }
 
+  if (current_cpu == "arm64") {
+    # All 64-bit ARM variants have NEON.
+    defines += [ "SK_ARM_HAS_NEON" ]
+  }
+
   # Settings for text blitting, chosen to approximate the system browser.
   if (is_linux) {
     defines += [
@@ -514,19 +519,14 @@ source_set("skia_opts") {
   defines = []
 
   if (current_cpu == "x86" || current_cpu == "x64") {
-    if (!is_ios) {
-      sources = gypi_skia_opts.sse2_sources + gypi_skia_opts.ssse3_sources +
-                gypi_skia_opts.sse41_sources + gypi_skia_opts.avx_sources +
-                [
-                  # Chrome-specific.
-                  "ext/convolver_SSE2.cc",
-                  "ext/convolver_SSE2.h",
-                ]
-
-      cflags += [ "-msse4.1" ]
-    } else {
-      sources = gypi_skia_opts.none_sources
-    }
+    sources = gypi_skia_opts.sse2_sources + gypi_skia_opts.ssse3_sources +
+              gypi_skia_opts.sse41_sources + gypi_skia_opts.avx_sources +
+              [
+                # Chrome-specific.
+                "ext/convolver_SSE2.cc",
+                "ext/convolver_SSE2.h",
+              ]
+    cflags += [ "-msse4.1" ]
   } else if (current_cpu == "arm") {
     # The assembly uses the frame pointer register (r7 in Thumb/r11 in
     # ARM), the compiler doesn't like that.
@@ -548,7 +548,7 @@ source_set("skia_opts") {
     }
   } else if (current_cpu == "arm64") {
     # TODO(1841): NEON sources are not currently used on arm64.
-    sources = gypi_skia_opts.none_sources
+    sources = gypi_skia_opts.armv7_sources + gypi_skia_opts.neon_sources
   } else if (current_cpu == "mipsel") {
     cflags += [ "-fomit-frame-pointer" ]
 
