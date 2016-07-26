@@ -176,7 +176,7 @@ static SkBitmap createBitmapWithSpace(const SkBitmap& bitmap, int spaceWidth, in
     SkImageInfo info = bitmap.info();
     SkImageInfo newInfo = SkImageInfo::Make(
         info.width() + spaceWidth, info.height() + spaceHeight,
-        info.colorType(), kPremul_SkAlphaType, info.profileType());
+        info.colorType(), kPremul_SkAlphaType, sk_ref_sp(info.colorSpace()));
 
     SkBitmap result;
     result.allocPixels(newInfo);

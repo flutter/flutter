@@ -219,16 +219,7 @@ sk_sp<SkTypeface> FontCache::createTypeface(const FontDescription& fontDescripti
     if (typeface)
         return typeface;
 
-    int legacyStyle = SkTypeface::kNormal;
-    if (fontDescription.weight() >= FontWeight600)
-        legacyStyle |= SkTypeface::kBold;
-    if (fontDescription.style())
-        legacyStyle |= SkTypeface::kItalic;
-
-    // FIXME: Use fm, SkFontStyle and matchFamilyStyle instead of this legacy
-    // API. To make this work, we need to understand the extra fallback behavior
-    // in CreateFromName.
-    return SkTypeface::MakeFromName(name.data(), static_cast<SkTypeface::Style>(legacyStyle));
+    return SkTypeface::MakeFromName(name.data(), style);
 }
 
 #if !OS(WIN)

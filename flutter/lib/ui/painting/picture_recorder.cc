@@ -47,10 +47,7 @@ bool PictureRecorder::isRecording() {
 }
 
 SkCanvas* PictureRecorder::BeginRecording(SkRect bounds) {
-  return picture_recorder_.beginRecording(
-      bounds,
-      &rtree_factory_,
-      SkPictureRecorder::kComputeSaveLayerInfo_RecordFlag);
+  return picture_recorder_.beginRecording(bounds, &rtree_factory_);
 }
 
 scoped_refptr<Picture> PictureRecorder::endRecording() {

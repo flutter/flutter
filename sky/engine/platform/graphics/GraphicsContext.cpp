@@ -794,39 +794,6 @@ void GraphicsContext::drawTiledImage(Image* image, const IntRect& dest, const In
     image->drawTiled(this, dest, srcRect, tileScaleFactor, hRule, vRule, op);
 }
 
-void GraphicsContext::writePixels(const SkImageInfo& info, const void* pixels, size_t rowBytes, int x, int y)
-{
-    if (contextDisabled())
-        return;
-
-    m_canvas->writePixels(info, pixels, rowBytes, x, y);
-
-    if (regionTrackingEnabled()) {
-        SkRect rect = SkRect::MakeXYWH(x, y, info.width(), info.height());
-        SkPaint paint;
-
-        paint.setXfermodeMode(SkXfermode::kSrc_Mode);
-        if (kOpaque_SkAlphaType != info.alphaType())
-            paint.setAlpha(0x80); // signal to m_trackedRegion that we are not fully opaque
-
-        m_trackedRegion.didDrawRect(this, rect, paint, 0);
-        // more efficient would be to call markRectAsOpaque or MarkRectAsNonOpaque directly,
-        // rather than cons-ing up a paint with an xfermode and alpha
-    }
-}
-
-void GraphicsContext::writePixels(const SkBitmap& bitmap, int x, int y)
-{
-    if (contextDisabled())
-        return;
-
-    if (!bitmap.getTexture()) {
-        SkAutoLockPixels alp(bitmap);
-        if (bitmap.getPixels())
-            writePixels(bitmap.info(), bitmap.getPixels(), bitmap.rowBytes(), x, y);
-    }
-}
-
 void GraphicsContext::drawBitmap(const SkBitmap& bitmap, SkScalar left, SkScalar top, const SkPaint* paint)
 {
     if (contextDisabled())

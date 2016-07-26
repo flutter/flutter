@@ -85,7 +85,7 @@ SkShader* Pattern::shader()
         // we explicitly require non-opaquness, since we are going to add a transparent strip.
         SkImageInfo newInfo = SkImageInfo::Make(
             info.width() + expandW, info.height() + expandH, info.colorType(),
-            kPremul_SkAlphaType, info.profileType());
+            kPremul_SkAlphaType, sk_ref_sp(info.colorSpace()));
 
         SkBitmap bm2;
         bm2.allocPixels(newInfo);

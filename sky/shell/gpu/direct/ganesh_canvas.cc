@@ -75,7 +75,7 @@ SkCanvas* GaneshCanvas::GetCanvas(int32_t fbo, const SkISize& size) {
   skia::RefPtr<GrRenderTarget> target = skia::AdoptRef(
     gr_context_->textureProvider()->wrapBackendRenderTarget(desc));
   DCHECK(target);
-  sk_surface_ = SkSurface::MakeRenderTargetDirect(target.get());
+  sk_surface_ = SkSurface::MakeRenderTargetDirect(target.get(), nullptr);
   DCHECK(sk_surface_);
   return sk_surface_->getCanvas();
 }
