@@ -9,23 +9,37 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import 'dart/package_map.dart';
+import 'asset.dart';
 import 'globals.dart';
 import 'observatory.dart';
 
 // A file that has been added to a DevFS.
 class DevFSEntry {
-  DevFSEntry(this.devicePath, this.file);
+  DevFSEntry(this.devicePath, this.file)
+      : bundleEntry = null;
+
+  DevFSEntry.bundle(this.devicePath, AssetBundleEntry bundleEntry)
+      : bundleEntry = bundleEntry,
+        file = bundleEntry.file;
 
   final String devicePath;
+  final AssetBundleEntry bundleEntry;
+
   final File file;
   FileStat _fileStat;
-
+  // When we updated the DevFS, did we see this entry?
+  bool _wasSeen = false;
   DateTime get lastModified => _fileStat?.modified;
   bool get stillExists {
+    if (_isSourceEntry)
+      return true;
     _stat();
     return _fileStat.type != FileSystemEntityType.NOT_FOUND;
   }
   bool get isModified {
+    if (_isSourceEntry)
+      return true;
+
     if (_fileStat == null) {
       _stat();
       return true;
@@ -36,7 +50,17 @@ class DevFSEntry {
   }
 
   void _stat() {
+    if (_isSourceEntry)
+      return;
     _fileStat = file.statSync();
+  }
+
+  bool get _isSourceEntry => file == null;
+
+  Future<List<int>> contentsAsBytes() async {
+    if (_isSourceEntry)
+      return bundleEntry.contentsAsBytes();
+    return file.readAsBytes();
   }
 }
 
@@ -46,6 +70,7 @@ abstract class DevFSOperations {
   Future<Uri> create(String fsName);
   Future<dynamic> destroy(String fsName);
   Future<dynamic> writeFile(String fsName, DevFSEntry entry);
+  Future<dynamic> deleteFile(String fsName, DevFSEntry entry);
   Future<dynamic> writeSource(String fsName,
                               String devicePath,
                               String contents);
@@ -74,7 +99,7 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
   Future<dynamic> writeFile(String fsName, DevFSEntry entry) async {
     List<int> bytes;
     try {
-      bytes = await entry.file.readAsBytes();
+      bytes = await entry.contentsAsBytes();
     } catch (e) {
       return e;
     }
@@ -89,6 +114,11 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
     } catch (e) {
       printTrace('DevFS: Failed to write ${entry.devicePath}: $e');
     }
+  }
+
+  @override
+  Future<dynamic> deleteFile(String fsName, DevFSEntry entry) async {
+    // TODO(johnmccutchan): Add file deletion to the devFS protocol.
   }
 
   @override
@@ -135,7 +165,11 @@ class DevFS {
     return await _operations.destroy(fsName);
   }
 
-  Future<dynamic> update() async {
+  Future<dynamic> update([AssetBundle bundle = null]) async {
+    // Mark all entries as not seen.
+    _entries.forEach((String path, DevFSEntry entry) {
+      entry._wasSeen = false;
+    });
     printTrace('DevFS: Starting sync from $rootDirectory');
     // Send the root and lib directories.
     Directory directory = rootDirectory;
@@ -162,6 +196,27 @@ class DevFS {
         }
       }
     }
+    if (bundle != null) {
+      // Synchronize asset bundle.
+      for (AssetBundleEntry entry in bundle.entries) {
+        // We write the assets into 'build/flx' so that they are in the
+        // same location in DevFS and the iOS simulator.
+        final String devicePath = path.join('build/flx', entry.archivePath);
+        _syncBundleEntry(devicePath, entry);
+      }
+    }
+    // Handle deletions.
+    final List<String> toRemove = new List<String>();
+    _entries.forEach((String path, DevFSEntry entry) {
+      if (!entry._wasSeen) {
+        _deleteEntry(path, entry);
+        toRemove.add(path);
+      }
+    });
+    for (int i = 0; i < toRemove.length; i++) {
+      _entries.remove(toRemove[i]);
+    }
+    // Send the assets.
     printTrace('DevFS: Waiting for sync of ${_pendingWrites.length} files '
                'to finish');
     await Future.wait(_pendingWrites);
@@ -175,6 +230,10 @@ class DevFS {
     logger.flush();
   }
 
+  void _deleteEntry(String path, DevFSEntry entry) {
+    _pendingWrites.add(_operations.deleteFile(fsName, entry));
+  }
+
   void _syncFile(String devicePath, File file) {
     DevFSEntry entry = _entries[devicePath];
     if (entry == null) {
@@ -182,6 +241,7 @@ class DevFS {
       entry = new DevFSEntry(devicePath, file);
       _entries[devicePath] = entry;
     }
+    entry._wasSeen = true;
     bool needsWrite = entry.isModified;
     if (needsWrite) {
       Future<dynamic> pendingWrite = _operations.writeFile(fsName, entry);
@@ -193,13 +253,29 @@ class DevFS {
     }
   }
 
-  bool _shouldIgnore(String path) {
+  void _syncBundleEntry(String devicePath, AssetBundleEntry assetBundleEntry) {
+    DevFSEntry entry = _entries[devicePath];
+    if (entry == null) {
+      // New file.
+      entry = new DevFSEntry.bundle(devicePath, assetBundleEntry);
+      _entries[devicePath] = entry;
+    }
+    entry._wasSeen = true;
+    Future<dynamic> pendingWrite = _operations.writeFile(fsName, entry);
+    if (pendingWrite != null) {
+      _pendingWrites.add(pendingWrite);
+    } else {
+      printTrace('DevFS: Failed to sync "$devicePath"');
+    }
+  }
+
+  bool _shouldIgnore(String devicePath) {
     List<String> ignoredPrefixes = <String>['android/',
                                             'build/',
                                             'ios/',
                                             'packages/analyzer'];
     for (String ignoredPrefix in ignoredPrefixes) {
-      if (path.startsWith(ignoredPrefix))
+      if (devicePath.startsWith(ignoredPrefix))
         return true;
     }
     return false;

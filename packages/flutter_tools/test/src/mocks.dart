@@ -75,6 +75,8 @@ class MockDevFSOperations implements DevFSOperations {
   final List<String> messages = new List<String>();
 
   bool contains(String match) {
+    print('Checking for `$match` in:');
+    print(messages);
     bool result = messages.contains(match);
     messages.clear();
     return result;
@@ -94,6 +96,11 @@ class MockDevFSOperations implements DevFSOperations {
   @override
   Future<dynamic> writeFile(String fsName, DevFSEntry entry) async {
     messages.add('writeFile $fsName ${entry.devicePath}');
+  }
+
+  @override
+  Future<dynamic> deleteFile(String fsName, DevFSEntry entry) async {
+    messages.add('deleteFile $fsName ${entry.devicePath}');
   }
 
   @override
