@@ -216,8 +216,8 @@ Future<AssetBundleEntry> _obtainLicenses(
         final List<String> rawLicenses =
             (await file.readAsString()).split(_licenseSeparator);
         for (String rawLicense in rawLicenses) {
-          String licenseText;
           List<String> packageNames;
+          String licenseText;
           if (packageName == 'sky_engine') {
             final int split = rawLicense.indexOf('\n\n');
             if (split >= 0) {
@@ -226,10 +226,10 @@ Future<AssetBundleEntry> _obtainLicenses(
             }
           }
           if (licenseText == null) {
-            licenseText = rawLicense;
             packageNames = <String>[packageName];
+            licenseText = rawLicense;
           }
-          packageLicenses.putIfAbsent(rawLicense, () => new Set<String>())
+          packageLicenses.putIfAbsent(licenseText, () => new Set<String>())
             ..addAll(packageNames);
         }
       }
