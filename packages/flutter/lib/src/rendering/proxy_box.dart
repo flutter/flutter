@@ -943,45 +943,32 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
 
 /// Clips its child using a rounded rectangle.
 ///
-/// Creates a rounded rectangle from its layout dimensions and the given x and
-/// y radius values and prevents its child from painting outside that rounded
+/// Creates a rounded rectangle from its layout dimensions and the given border
+/// radius and prevents its child from painting outside that rounded
 /// rectangle.
 class RenderClipRRect extends RenderProxyBox {
   /// Creates a rounded-rectangular clip.
+  ///
+  /// The [borderRadius] defaults to [BorderRadius.zero], i.e. a rectangle with
+  /// right-angled corners.
   RenderClipRRect({
     RenderBox child,
-    double xRadius,
-    double yRadius
-  }) : _xRadius = xRadius, _yRadius = yRadius, super(child) {
-    assert(_xRadius != null);
-    assert(_yRadius != null);
+    BorderRadius borderRadius: BorderRadius.zero
+  }) : _borderRadius = borderRadius, super(child) {
+    assert(_borderRadius != null);
   }
 
-  /// The radius of the rounded corners in the horizontal direction in logical pixels.
+  /// The border radius of the rounded corners..
   ///
-  /// Values are clamped to be between zero and half the width of the render
-  /// object.
-  double get xRadius => _xRadius;
-  double _xRadius;
-  set xRadius (double newXRadius) {
-    assert(newXRadius != null);
-    if (_xRadius == newXRadius)
+  /// Values are clamped so that horizontal and vertical radii sums do not
+  /// exceed width/height.
+  BorderRadius get borderRadius => _borderRadius;
+  BorderRadius _borderRadius;
+  set borderRadius (BorderRadius value) {
+    assert(value != null);
+    if (_borderRadius == value)
       return;
-    _xRadius = newXRadius;
-    markNeedsPaint();
-  }
-
-  /// The radius of the rounded corners in the vertical direction in logical pixels.
-  ///
-  /// Values are clamped to be between zero and half the height of the render
-  /// object.
-  double get yRadius => _yRadius;
-  double _yRadius;
-  set yRadius (double newYRadius) {
-    assert(newYRadius != null);
-    if (_yRadius == newYRadius)
-      return;
-    _yRadius = newYRadius;
+    _borderRadius = value;
     markNeedsPaint();
   }
 
@@ -992,7 +979,7 @@ class RenderClipRRect extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       Rect rect = Point.origin & size;
-      RRect rrect = new RRect.fromRectAndRadius(rect, new Radius.elliptical(xRadius, yRadius));
+      RRect rrect = borderRadius.toRRect(rect);
       context.pushClipRRect(needsCompositing, offset, rect, rrect, super.paint);
     }
   }

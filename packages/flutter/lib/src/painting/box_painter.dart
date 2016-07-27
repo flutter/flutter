@@ -14,18 +14,6 @@ import 'edge_insets.dart';
 
 export 'edge_insets.dart' show EdgeInsets;
 
-double _getEffectiveBorderRadius(Rect rect, double borderRadius) {
-  assert(rect != null);
-  assert(borderRadius != null);
-  double shortestSide = rect.shortestSide;
-  // In principle, we should use shortestSide / 2.0, but we don't want to
-  // run into floating point rounding errors. Instead, we just use
-  // shortestSide and let Canvas do any remaining clamping.
-  // The right long-term fix is to do layout using fixed precision
-  // arithmetic. (see also "_applyFloatingPointHack")
-  return borderRadius > shortestSide ? shortestSide : borderRadius;
-}
-
 /// The style of line to draw for a [BorderSide] in a [Border].
 enum BorderStyle {
   /// Skip the border.
@@ -232,7 +220,7 @@ class Border {
   /// Paints the border within the given rect on the given canvas.
   void paint(Canvas canvas, Rect rect, {
     BoxShape shape: BoxShape.rectangle,
-    double borderRadius: null
+    BorderRadius borderRadius: null
   }) {
     if (isUniform) {
       if (borderRadius != null) {
@@ -334,12 +322,12 @@ class Border {
     }
   }
 
-  void _paintBorderWithRadius(Canvas canvas, Rect rect, double borderRadius) {
+  void _paintBorderWithRadius(Canvas canvas, Rect rect,
+                              BorderRadius borderRadius) {
     assert(isUniform);
     Paint paint = new Paint()
       ..color = top.color;
-    double radius = _getEffectiveBorderRadius(rect, borderRadius);
-    RRect outer = new RRect.fromRectAndRadius(rect, new Radius.circular(radius));
+    RRect outer = borderRadius.toRRect(rect);
     double width = top.width;
     if (width == 0.0) {
       paint
@@ -347,7 +335,7 @@ class Border {
         ..strokeWidth = 0.0;
       canvas.drawRRect(outer, paint);
     } else {
-      RRect inner = new RRect.fromRectAndRadius(rect.deflate(width), new Radius.circular(radius - width));
+      RRect inner = outer.deflate(width);
       canvas.drawDRRect(outer, inner, paint);
     }
   }
@@ -1127,6 +1115,114 @@ enum BoxShape {
   circle
 }
 
+/// An immutable set of radii for each corner of a rectangle. Only used with
+/// [BoxShape.rectangle].
+class BorderRadius {
+  /// Creates a border radius where all radii are [radius].
+  const BorderRadius.all(Radius radius) : this.only(
+    topLeft: radius,
+    topRight: radius,
+    bottomRight: radius,
+    bottomLeft: radius
+  );
+
+  /// Creates a border radius where all radii are [Radius.circular(radius)].
+  BorderRadius.circular(double radius) : this.all(
+    new Radius.circular(radius)
+  );
+
+  /// Creates a vertically symmetric border radius where the top and bottom
+  /// sides of the rectangle have the same radii.
+  const BorderRadius.vertical({
+    Radius top: Radius.zero,
+    Radius bottom: Radius.zero
+  }) : this.only(
+    topLeft: top,
+    topRight: top,
+    bottomRight: bottom,
+    bottomLeft: bottom
+  );
+
+  /// Creates a horizontally symmetrical border radius where the left and right
+  /// sides of the rectangle have the same radii.
+  const BorderRadius.horizontal({
+    Radius left: Radius.zero,
+    Radius right: Radius.zero
+  }) : this.only(
+    topLeft: left,
+    topRight: right,
+    bottomRight: right,
+    bottomLeft: left
+  );
+
+  /// Creates a border radius with only the given non-zero values. The other
+  /// corners will be right angles.
+  const BorderRadius.only({
+    this.topLeft: Radius.zero,
+    this.topRight: Radius.zero,
+    this.bottomRight: Radius.zero,
+    this.bottomLeft: Radius.zero
+  });
+
+  /// A border radius with all zero radii.
+  static const BorderRadius zero = const BorderRadius.all(Radius.zero);
+
+  /// The top-left [Radius].
+  final Radius topLeft;
+  /// The top-right [Radius].
+  final Radius topRight;
+  /// The bottom-right [Radius].
+  final Radius bottomRight;
+  /// The bottom-left [Radius].
+  final Radius bottomLeft;
+
+  /// Linearly interpolates between two [BorderRadius] objects.
+  ///
+  /// If either is null, this function interpolates from [BorderRadius.zero].
+  static BorderRadius lerp(BorderRadius a, BorderRadius b, double t) {
+    if (a == null && b == null)
+      return null;
+    return new BorderRadius.only(
+      topLeft: Radius.lerp(a.topLeft, b.topLeft, t),
+      topRight: Radius.lerp(a.topRight, b.topRight, t),
+      bottomRight: Radius.lerp(a.bottomRight, b.bottomRight, t),
+      bottomLeft: Radius.lerp(a.bottomLeft, b.bottomLeft, t)
+    );
+  }
+
+  /// Creates a [RRect] from the current border radius and a [Rect].
+  RRect toRRect(Rect rect) {
+    return new RRect.fromRectAndCorners(
+      rect,
+      topLeft: topLeft,
+      topRight: topRight,
+      bottomRight: bottomRight,
+      bottomLeft: bottomLeft
+    );
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! BorderRadius)
+      return false;
+    final BorderRadius typedOther = other;
+    return topLeft == typedOther.topLeft &&
+           topRight == typedOther.topRight &&
+           bottomRight == typedOther.bottomRight &&
+           bottomLeft == typedOther.bottomLeft;
+  }
+
+  @override
+  int get hashCode => hashValues(topLeft, topRight, bottomRight, bottomLeft);
+
+  @override
+  String toString() {
+    return 'BorderRadius($topLeft, $topRight, $bottomRight, $bottomLeft)';
+  }
+}
+
 /// An immutable description of how to paint a box.
 class BoxDecoration extends Decoration {
   /// Creates a box decoration.
@@ -1168,10 +1264,10 @@ class BoxDecoration extends Decoration {
   /// A border to draw above the background.
   final Border border;
 
-  /// If non-null, the corners of this box are rounded by this radius.
+  /// If non-null, the corners of this box are rounded by this [BorderRadius].
   ///
   /// Applies only to boxes with rectangular shapes.
-  final double borderRadius;
+  final BorderRadius borderRadius;
 
   /// A list of shadows cast by this box behind the background.
   final List<BoxShadow> boxShadow;
@@ -1193,7 +1289,7 @@ class BoxDecoration extends Decoration {
       backgroundColor: Color.lerp(null, backgroundColor, factor),
       backgroundImage: backgroundImage,
       border: Border.lerp(null, border, factor),
-      borderRadius: ui.lerpDouble(null, borderRadius, factor),
+      borderRadius: BorderRadius.lerp(null, borderRadius, factor),
       boxShadow: BoxShadow.lerpList(null, boxShadow, factor),
       gradient: gradient,
       shape: shape
@@ -1220,7 +1316,7 @@ class BoxDecoration extends Decoration {
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
       backgroundImage: b.backgroundImage,
       border: Border.lerp(a.border, b.border, t),
-      borderRadius: ui.lerpDouble(a.borderRadius, b.borderRadius, t),
+      borderRadius: BorderRadius.lerp(a.borderRadius, b.borderRadius, t),
       boxShadow: BoxShadow.lerpList(a.boxShadow, b.boxShadow, t),
       gradient: b.gradient,
       shape: b.shape
@@ -1304,7 +1400,7 @@ class BoxDecoration extends Decoration {
     switch (shape) {
       case BoxShape.rectangle:
         if (borderRadius != null) {
-          RRect bounds = new RRect.fromRectAndRadius(Point.origin & size, new Radius.circular(borderRadius));
+          RRect bounds = borderRadius.toRRect(Point.origin & size);
           return bounds.contains(position);
         }
         return true;
@@ -1370,8 +1466,7 @@ class _BoxDecorationPainter extends BoxPainter {
         if (_decoration.borderRadius == null) {
           canvas.drawRect(rect, paint);
         } else {
-          double radius = _getEffectiveBorderRadius(rect, _decoration.borderRadius);
-          canvas.drawRRect(new RRect.fromRectAndRadius(rect, new Radius.circular(radius)), paint);
+          canvas.drawRRect(_decoration.borderRadius.toRRect(rect), paint);
         }
         break;
     }

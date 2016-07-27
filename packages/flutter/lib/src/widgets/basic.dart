@@ -277,31 +277,23 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   /// Creates a rounded-rectangular clip.
   ClipRRect({
     Key key,
-    @required this.xRadius,
-    @required this.yRadius,
+    @required this.borderRadius,
     Widget child
   }) : super(key: key, child: child);
 
-  /// The radius of the rounded corners in the horizontal direction in logical pixels.
+  /// The border radius of the rounded corners.
   ///
   /// Values are clamped to be between zero and half the width of the render
   /// object.
-  final double xRadius;
-
-  /// The radius of the rounded corners in the vertical direction in logical pixels.
-  ///
-  /// Values are clamped to be between zero and half the height of the render
-  /// object.
-  final double yRadius;
+  final BorderRadius borderRadius;
 
   @override
-  RenderClipRRect createRenderObject(BuildContext context) => new RenderClipRRect(xRadius: xRadius, yRadius: yRadius);
+  RenderClipRRect createRenderObject(BuildContext context) => new RenderClipRRect(borderRadius: borderRadius);
 
   @override
   void updateRenderObject(BuildContext context, RenderClipRRect renderObject) {
     renderObject
-      ..xRadius = xRadius
-      ..yRadius = yRadius;
+      ..borderRadius = borderRadius;
   }
 }
 

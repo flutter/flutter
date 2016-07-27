@@ -76,8 +76,7 @@ class VendorItem extends StatelessWidget {
           new SizedBox(
             width: 24.0,
             child: new ClipRRect(
-              xRadius: 12.0,
-              yRadius: 12.0,
+              borderRadius: new BorderRadius.circular(12.0),
               child: new Image.asset(vendor.avatarAsset, fit: ImageFit.cover)
             )
           ),

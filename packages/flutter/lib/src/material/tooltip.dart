@@ -284,7 +284,7 @@ class _TooltipOverlay extends StatelessWidget {
               child: new Container(
                 decoration: new BoxDecoration(
                   backgroundColor: Colors.grey[700],
-                  borderRadius: 2.0
+                  borderRadius: new BorderRadius.circular(2.0)
                 ),
                 height: height,
                 padding: padding,

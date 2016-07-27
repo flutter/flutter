@@ -45,11 +45,11 @@ enum MaterialType {
 ///
 ///  * [MaterialType]
 ///  * [Material]
-const Map<MaterialType, double> kMaterialEdges = const <MaterialType, double>{
+final Map<MaterialType, BorderRadius> kMaterialEdges = <MaterialType, BorderRadius> {
   MaterialType.canvas: null,
-  MaterialType.card: 2.0,
+  MaterialType.card: new BorderRadius.circular(2.0),
   MaterialType.circle: null,
-  MaterialType.button: 2.0,
+  MaterialType.button: new BorderRadius.circular(2.0),
   MaterialType.transparency: null,
 };
 
@@ -257,8 +257,7 @@ class _MaterialState extends State<Material> {
       contents = new ClipOval(child: contents);
     } else if (kMaterialEdges[config.type] != null) {
       contents = new ClipRRect(
-        xRadius: kMaterialEdges[config.type],
-        yRadius: kMaterialEdges[config.type],
+        borderRadius: kMaterialEdges[config.type],
         child: contents
       );
     }
