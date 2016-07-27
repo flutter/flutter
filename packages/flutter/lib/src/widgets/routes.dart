@@ -207,10 +207,10 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
           TrainHoppingAnimation newAnimation;
           newAnimation = new TrainHoppingAnimation(
             current.currentTrain,
-            nextRoute.animation,
+            nextRoute._animation,
             onSwitchedTrain: () {
               assert(_forwardAnimation.parent == newAnimation);
-              assert(newAnimation.currentTrain == nextRoute.animation);
+              assert(newAnimation.currentTrain == nextRoute._animation);
               _forwardAnimation.parent = newAnimation.currentTrain;
               newAnimation.dispose();
             }
@@ -218,10 +218,10 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
           _forwardAnimation.parent = newAnimation;
           current.dispose();
         } else {
-          _forwardAnimation.parent = new TrainHoppingAnimation(current, nextRoute.animation);
+          _forwardAnimation.parent = new TrainHoppingAnimation(current, nextRoute._animation);
         }
       } else {
-        _forwardAnimation.parent = nextRoute.animation;
+        _forwardAnimation.parent = nextRoute._animation;
       }
     } else {
       _forwardAnimation.parent = kAlwaysDismissedAnimation;
@@ -367,10 +367,12 @@ class _ModalScopeStatus extends InheritedWidget {
 class _ModalScope extends StatefulWidget {
   _ModalScope({
     Key key,
-    this.route
+    this.route,
+    this.page
   }) : super(key: key);
 
   final ModalRoute<dynamic> route;
+  final Widget page;
 
   @override
   _ModalScopeState createState() => new _ModalScopeState();
@@ -408,31 +410,30 @@ class _ModalScopeState extends State<_ModalScope> {
 
   @override
   Widget build(BuildContext context) {
-    Widget contents = new PageStorage(
-      key: config.route._subtreeKey,
-      bucket: config.route._storageBucket,
-      child: new _ModalScopeStatus(
-        route: config.route,
-        isCurrent: config.route.isCurrent,
-        child: config.route.buildPage(context, config.route.animation, config.route.forwardAnimation)
-      )
-    );
-    if (config.route.offstage) {
-      contents = new OffStage(child: contents);
-    } else {
-      contents = new IgnorePointer(
-        ignoring: config.route.animation?.status == AnimationStatus.reverse,
-        child: config.route.buildTransitions(
-          context,
-          config.route.animation,
-          config.route.forwardAnimation,
-          new RepaintBoundary(child: contents)
-        )
-      );
-    }
     return new Focus(
       key: config.route.focusKey,
-      child: contents
+      child: new OffStage(
+        offstage: config.route.offstage,
+        child: new IgnorePointer(
+          ignoring: config.route.animation?.status == AnimationStatus.reverse,
+          child: config.route.buildTransitions(
+            context,
+            config.route.animation,
+            config.route.forwardAnimation,
+            new RepaintBoundary(
+              child: new PageStorage(
+                key: config.route._subtreeKey,
+                bucket: config.route._storageBucket,
+                child: new _ModalScopeStatus(
+                  route: config.route,
+                  isCurrent: config.route.isCurrent,
+                  child: config.page
+                )
+              )
+            )
+          )
+        )
+      )
     );
   }
 }
@@ -522,6 +523,13 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   GlobalKey get focusKey => new GlobalObjectKey(this);
 
   @override
+  void install(OverlayEntry insertionPoint) {
+    super.install(insertionPoint);
+    _animationProxy = new ProxyAnimation(super.animation);
+    _forwardAnimationProxy = new ProxyAnimation(super.forwardAnimation);
+  }
+
+  @override
   void didPush() {
     if (!settings.isInitialRoute) {
       BuildContext overlayContext = navigator.overlay?.context;
@@ -573,10 +581,20 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     setState(() {
       _offstage = value;
     });
+    _animationProxy.parent = _offstage ? kAlwaysCompleteAnimation : super.animation;
+    _forwardAnimationProxy.parent = _offstage ? kAlwaysDismissedAnimation : super.forwardAnimation;
   }
 
   /// The build context for the subtree containing the primary content of this route.
   BuildContext get subtreeContext => _subtreeKey.currentContext;
+
+  @override
+  Animation<double> get animation => _animationProxy;
+  ProxyAnimation _animationProxy;
+
+  @override
+  Animation<double> get forwardAnimation => _forwardAnimationProxy;
+  ProxyAnimation _forwardAnimationProxy;
 
 
   // Internals
@@ -615,8 +633,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   Widget _buildModalScope(BuildContext context) {
     return new _ModalScope(
       key: _scopeKey,
-      route: this
-      // calls buildTransitions() and buildPage(), defined above
+      route: this,
+      page: buildPage(context, animation, forwardAnimation)
+      // _ModalScope calls buildTransitions(), defined above
     );
   }
 

@@ -186,7 +186,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
             child: new CustomSingleChildLayout(
               delegate: new _ModalBottomSheetLayout(config.route.animation.value),
               child: new BottomSheet(
-                animationController: config.route.animation,
+                animationController: config.route._animationController,
                 onClosing: () => Navigator.pop(context),
                 builder: config.route.builder
               )
@@ -215,9 +215,13 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   @override
   Color get barrierColor => Colors.black54;
 
+  AnimationController _animationController;
+
   @override
   AnimationController createAnimationController() {
-    return BottomSheet.createAnimationController();
+    assert(_animationController == null);
+    _animationController = BottomSheet.createAnimationController();
+    return _animationController;
   }
 
   @override
