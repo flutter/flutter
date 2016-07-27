@@ -31,7 +31,6 @@ final List<String> demoTitles = <String>[
   'Cards',
   'Chips',
   'Date picker',
-  'Data tables',
   'Dialog',
   'Expand/collapse list control',
   'Floating action button',

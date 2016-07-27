@@ -91,12 +91,6 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
     buildRoute: (BuildContext context) => new DatePickerDemo()
   ),
   new GalleryItem(
-    title: 'Data tables',
-    subtitle: 'Full-featured grid',
-    routeName: DataTableDemo.routeName,
-    buildRoute: (BuildContext context) => new DataTableDemo()
-  ),
-  new GalleryItem(
     title: 'Dialog',
     subtitle: 'All kinds: simple, alert, fullscreen, etc',
     routeName: DialogDemo.routeName,
