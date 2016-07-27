@@ -178,7 +178,7 @@ void TracingController::StartTracing() {
 
 void TracingController::StartBaseTracing() {
   namespace TE = base::trace_event;
-  auto config = TE::TraceConfig("*", TE::RECORD_CONTINUOUSLY);
+  auto config = TE::TraceConfig("*,disabled-by-default-skia", TE::RECORD_CONTINUOUSLY);
 
   auto log = TE::TraceLog::GetInstance();
 
