@@ -18,6 +18,7 @@
 #include "base/single_thread_task_runner.h"
 #include "base/trace_event/trace_event.h"
 #include "mojo/message_pump/message_pump_mojo.h"
+#include "skia/ext/event_tracer_impl.h"
 #include "sky/engine/core/script/dart_init.h"
 #include "sky/engine/public/platform/sky_settings.h"
 #include "sky/shell/diagnostic/diagnostic_server.h"
@@ -149,6 +150,11 @@ void Shell::InitStandalone(std::string icu_data_path) {
 
 void Shell::Init() {
   base::DiscardableMemoryAllocator::SetInstance(&g_discardable.Get());
+
+#ifndef FLUTTER_PRODUCT_MODE
+  InitSkiaEventTracer();
+#endif
+
   DCHECK(!g_shell);
   g_shell = new Shell();
   g_shell->ui_task_runner()->PostTask(FROM_HERE, base::Bind(&Engine::Init));
