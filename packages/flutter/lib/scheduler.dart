@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 /// The Flutter Scheduler library.
-/// 
+///
 /// To use, import `package:flutter/scheduler.dart`.
 ///
 /// This library is responsible for scheduler frame callbacks, and tasks at
@@ -14,5 +14,6 @@
 library scheduler;
 
 export 'src/scheduler/binding.dart';
+export 'src/scheduler/debug.dart';
 export 'src/scheduler/priority.dart';
 export 'src/scheduler/ticker.dart';
