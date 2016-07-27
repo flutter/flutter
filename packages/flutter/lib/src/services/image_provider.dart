@@ -221,7 +221,13 @@ abstract class DataPipeImageProvider<T> extends ImageProvider<T> {
 
   @override
   ImageStreamCompleter load(T key) {
-    return new OneFrameImageStreamCompleter(_loadAsync(key));
+    return new OneFrameImageStreamCompleter(
+      _loadAsync(key),
+      informationCollector: (StringBuffer information) {
+        information.writeln('Image provider: $this');
+        information.write('Image key: $key');
+      }
+    );
   }
 
   Future<ImageInfo> _loadAsync(T key) async {
