@@ -19,6 +19,10 @@
 
 #include <GLES2/gl2.h>
 
+#elif OS_LINUX
+
+#include <GL/gl.h>
+
 #else
 
 #error OpenGL headers not found for this platform.
