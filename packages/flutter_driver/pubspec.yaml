@@ -20,6 +20,6 @@ dependencies:
     path: '../flutter_test'
 
 dev_dependencies:
-  test: 0.12.15+1
+  test: 0.12.13+5
   mockito: '^0.11.0'
   quiver: '^0.21.4'

@@ -48,7 +48,7 @@ class TestCommand extends FlutterCommand {
   bool get requiresProjectRoot => false;
 
   @override
-  Validator commandValidator = () {
+  Validator projectRootValidator = () {
     if (!FileSystemEntity.isFileSync('pubspec.yaml')) {
       printError(
         'Error: No pubspec.yaml file found in the current working directory.\n'
@@ -150,7 +150,7 @@ class TestCommand extends FlutterCommand {
   Future<int> runInProject() async {
     List<String> testArgs = argResults.rest.map((String testPath) => path.absolute(testPath)).toList();
 
-    if (!commandValidator())
+    if (!projectRootValidator())
       return 1;
 
     Directory testDir;
