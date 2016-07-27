@@ -47,7 +47,6 @@ class TestCommand extends FlutterCommand {
   @override
   bool get requiresProjectRoot => false;
 
-  @override
   Validator projectRootValidator = () {
     if (!FileSystemEntity.isFileSync('pubspec.yaml')) {
       printError(
