@@ -75,6 +75,7 @@ void RasterizerDirect::Setup(PlatformView* platform_view,
 void RasterizerDirect::Teardown(
     base::WaitableEvent* teardown_completion_event) {
   platform_view_ = nullptr;
+  last_layer_tree_.reset();
   compositor_context_.OnGrContextDestroyed();
   teardown_completion_event->Signal();
 }
