@@ -8,7 +8,7 @@ dependencies:
   flutter:
     path: ../flutter
   markdown: '^0.9.0'
-  string_scanner: '^0.1.5'
+  string_scanner: ^1.0.0
 
 dev_dependencies:
   flutter_test:
