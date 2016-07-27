@@ -818,9 +818,20 @@ class RRect {
 
   /// Construct a rounded rectangle from its left, top, right, and bottom edges,
   /// and topLeft, topRight, bottomRight, and bottomLeft radii.
-  RRect.fromLTRBCustom(double left, double top, double right, double bottom,
-                      Radius topLeft, Radius topRight, Radius bottomRight,
-                      Radius bottomLeft) {
+  ///
+  /// The corner radii default to [Radius.zero], i.e. right-angled corners.
+  RRect.fromLTRBAndCorners(
+    double left,
+    double top,
+    double right,
+    double bottom,
+    {
+      Radius topLeft: Radius.zero,
+      Radius topRight: Radius.zero,
+      Radius bottomRight: Radius.zero,
+      Radius bottomLeft: Radius.zero
+    }
+  ) {
     _value
       ..[0] = left
       ..[1] = top
@@ -838,8 +849,17 @@ class RRect {
 
   /// Construct a rounded rectangle from its bounding box and and topLeft,
   /// topRight, bottomRight, and bottomLeft radii.
-  RRect.fromRectCustom(Rect rect, Radius topLeft, Radius topRight,
-                      Radius bottomRight, Radius bottomLeft) {
+  ///
+  /// The corner radii default to [Radius.zero], i.e. right-angled corners
+  RRect.fromRectAndCorners(
+    Rect rect,
+    {
+      Radius topLeft: Radius.zero,
+      Radius topRight: Radius.zero,
+      Radius bottomRight: Radius.zero,
+      Radius bottomLeft: Radius.zero
+    }
+  ) {
     _value
       ..[0] = rect.left
       ..[1] = rect.top
@@ -917,24 +937,24 @@ class RRect {
 
   /// Returns a new RRect translated by the given offset.
   RRect shift(Offset offset) {
-    return new RRect.fromLTRBCustom(
+    return new RRect.fromLTRBAndCorners(
       _value[0] + offset.dx,
       _value[1] + offset.dy,
       _value[2] + offset.dx,
       _value[3] + offset.dy,
-      new Radius.elliptical(
+      topLeft: new Radius.elliptical(
         _value[4],
         _value[5]
       ),
-      new Radius.elliptical(
+      topRight: new Radius.elliptical(
         _value[6],
         _value[7]
       ),
-      new Radius.elliptical(
+      bottomRight: new Radius.elliptical(
         _value[8],
         _value[9]
       ),
-      new Radius.elliptical(
+      bottomLeft: new Radius.elliptical(
         _value[10],
         _value[11]
       )
@@ -944,24 +964,24 @@ class RRect {
   /// Returns a new RRect with edges and radii moved outwards by the given
   /// delta.
   RRect inflate(double delta) {
-    return new RRect.fromLTRBCustom(
+    return new RRect.fromLTRBAndCorners(
       _value[0] - delta,
       _value[1] - delta,
       _value[2] + delta,
       _value[3] + delta,
-      new Radius.elliptical(
+      topLeft: new Radius.elliptical(
         _value[4] + delta,
         _value[5] + delta
       ),
-      new Radius.elliptical(
+      topRight: new Radius.elliptical(
         _value[6] + delta,
         _value[7] + delta
       ),
-      new Radius.elliptical(
+      bottomRight: new Radius.elliptical(
         _value[8] + delta,
         _value[9] + delta
       ),
-      new Radius.elliptical(
+      bottomLeft: new Radius.elliptical(
         _value[10] + delta,
         _value[11] + delta
       )
@@ -1242,10 +1262,11 @@ class RRect {
 
   @override
   String toString() {
-    return 'RRect.fromLTRBCustom(${left.toStringAsFixed(1)}, '
+    return 'RRect.fromLTRBAndCorners(${left.toStringAsFixed(1)}, '
         '${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, '
-        '${bottom.toStringAsFixed(1)}, ${tlRadius.toString()}, '
-        '${trRadius.toString()}, ${brRadius.toString()}, ${blRadius.toString()})';
+        '${bottom.toStringAsFixed(1)}, '
+        'topLeft: $tlRadius, topRight: $trRadius, '
+        'bottomRight: $brRadius, bottomLeft: $blRadius)';
   }
 }
 
