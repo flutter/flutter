@@ -463,7 +463,6 @@ class ScrollableState<T extends Scrollable> extends State<T> {
   Future<Null> fling(double scrollVelocity) {
     if (scrollVelocity.abs() > kPixelScrollTolerance.velocity || !_controller.isAnimating)
       return _startToEndAnimation(scrollVelocity);
-
     return new Future<Null>.value();
   }
 
@@ -524,7 +523,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
   }
 
   Simulation _createFlingSimulation(double scrollVelocity) {
-    final Simulation simulation =  scrollBehavior.createScrollSimulation(scrollOffset, scrollVelocity);
+    final Simulation simulation = scrollBehavior.createScrollSimulation(scrollOffset, scrollVelocity);
     if (simulation != null) {
       final double endVelocity = pixelOffsetToScrollOffset(kPixelScrollTolerance.velocity).abs();
       final double endDistance = pixelOffsetToScrollOffset(kPixelScrollTolerance.distance).abs();

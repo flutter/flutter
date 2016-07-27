@@ -72,6 +72,7 @@ class _FrameCallbackEntry {
         });
         stack = currentCallbackStack;
       } else {
+        // TODO(ianh): trim the frames from this library, so that the call to scheduleFrameCallback is the top one
         stack = StackTrace.current;
       }
       return true;
@@ -283,25 +284,30 @@ abstract class SchedulerBinding extends BindingBase {
   bool debugAssertNoTransientCallbacks(String reason) {
     assert(() {
       if (transientCallbackCount > 0) {
+        // We cache the values so that we can produce them later
+        // even if the information collector is called after
+        // the problem has been resolved.
+        final int count = transientCallbackCount;
+        final Map<int, _FrameCallbackEntry> callbacks = new Map<int, _FrameCallbackEntry>.from(_transientCallbacks);
         FlutterError.reportError(new FlutterErrorDetails(
           exception: reason,
           library: 'scheduler library',
           informationCollector: (StringBuffer information) {
-            if (transientCallbackCount == 1) {
+            if (count == 1) {
               information.writeln(
                 'There was one transient callback left. '
-                'The stack traces for when it was registered is as follows:'
+                'The stack trace for when it was registered is as follows:'
               );
             } else {
               information.writeln(
-                'There were $transientCallbackCount transient callbacks left. '
+                'There were $count transient callbacks left. '
                 'The stack traces for when they were registered are as follows:'
               );
             }
-            for (int id in _transientCallbacks.keys) {
-              _FrameCallbackEntry entry = _transientCallbacks[id];
-              information.writeln('-- callback $id --');
-              information.writeln(entry.stack);
+            for (int id in callbacks.keys) {
+              _FrameCallbackEntry entry = callbacks[id];
+              information.writeln('── callback $id ──');
+              FlutterError.defaultStackFilter(entry.stack.toString().trimRight().split('\n')).forEach(information.writeln);
             }
           }
         ));

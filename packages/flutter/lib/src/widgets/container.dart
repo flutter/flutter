@@ -72,6 +72,8 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// extent.
 class Container extends StatelessWidget {
   /// Creates a widget that combines common painting, positioning, and sizing widgets.
+  ///
+  /// The `height` and `width` values include the padding.
   Container({
     Key key,
     this.align,
@@ -116,6 +118,8 @@ class Container extends StatelessWidget {
   final Decoration foregroundDecoration;
 
   /// Additional constraints to apply to the child.
+  ///
+  /// The [padding] goes inside the constraints.
   final BoxConstraints constraints;
 
   /// Empty space to surround the decoration.

@@ -50,17 +50,56 @@ abstract class LazyBlockDelegate {
   /// When calling this function, [LazyBlock] will always pass an argument that
   /// matches the runtimeType of the receiver.
   bool shouldRebuild(LazyBlockDelegate oldDelegate);
+
+  /// Returns the estimated total height of the children, in pixels.
+  ///
+  /// If there's an infinite number of children, this should return
+  /// [double.INFINITY].
+  ///
+  /// The provided values can be used to estimate the total extent.
+  ///
+  /// The `firstIndex` and `lastIndex` values give the integers that were passed
+  /// to [buildItem] to build the respective widgets.
+  ///
+  /// The `minOffset` is the offset of the widget with index 0. Unless the
+  /// `firstIndex` is 0, the `minOffset` is only itself an estimate.
+  ///
+  /// The `firstStartOffset` is the offset of the widget with `firstIndex`, in
+  /// the same coordinate space as `minOffset`.
+  ///
+  /// The `lastEndOffset` is the offset of the widget that would be after
+  /// `lastIndex`, in the same coordinate space as `minOffset`. (In other words,
+  /// it's the offset to the end of the `lastIndex` widget.)
+  ///
+  /// A simple algorithm for this function, which works well when there are many
+  /// children, the exact child count is known, and the children near the top of
+  /// the list are more or less representative of the length of the other
+  /// children, is the following:
+  ///
+  /// ```dart
+  /// // childCount is the number of children
+  /// return (lastEndOffset - minOffset) * childCount / (lastIndex + 1);
+  /// ```
+  double estimateTotalExtent(int firstIndex, int lastIndex, double minOffset, double firstStartOffset, double lastEndOffset);
 }
+
+/// Signature for callbacks that estimate the total height of a [LazyBlock]'s contents.
+///
+/// See [LazyBlockDelegate.estimateTotalExtent] for details.
+typedef double TotalExtentEstimator(int firstIndex, int lastIndex, double minOffset, double firstStartOffset, double lastEndOffset);
 
 /// Uses an [IndexedWidgetBuilder] to provide children for [LazyBlock].
 ///
 /// A LazyBlockBuilder rebuilds the children whenever the [LazyBlock] is
 /// rebuilt, similar to the behavior of [Builder].
 ///
+/// To use a [Scrollbar] with this delegate, you must provide an
+/// [estimateTotalExtent] callback.
+///
 /// See also [LazyBlockViewport].
 class LazyBlockBuilder extends LazyBlockDelegate {
   /// Creates a LazyBlockBuilder based on the given builder.
-  LazyBlockBuilder({ this.builder }) {
+  LazyBlockBuilder({ this.builder, this.totalExtentEstimator }) {
     assert(builder != null);
   }
 
@@ -76,11 +115,26 @@ class LazyBlockBuilder extends LazyBlockDelegate {
   /// pipeline.
   final IndexedWidgetBuilder builder;
 
+  /// Returns the estimated total height of the children, in pixels.
+  ///
+  /// If null, the estimate will be infinite, even if a null child has been
+  /// returned by [builder].
+  ///
+  /// See [LazyBlockDelegate.estimateTotalExtent] for details.
+  final TotalExtentEstimator totalExtentEstimator;
+
   @override
   Widget buildItem(BuildContext context, int index) => builder(context, index);
 
   @override
   bool shouldRebuild(LazyBlockDelegate oldDelegate) => true;
+
+  @override
+  double estimateTotalExtent(int firstIndex, int lastIndex, double minOffset, double firstStartOffset, double lastEndOffset) {
+    if (totalExtentEstimator != null)
+      return totalExtentEstimator(firstIndex, lastIndex, minOffset, firstStartOffset, lastEndOffset);
+    return double.INFINITY;
+  }
 }
 
 /// Uses a [List<Widget>] to provide children for [LazyBlock].
@@ -109,6 +163,14 @@ class LazyBlockChildren extends LazyBlockDelegate {
   @override
   bool shouldRebuild(LazyBlockChildren oldDelegate) {
     return children != oldDelegate.children;
+  }
+
+  @override
+  double estimateTotalExtent(int firstIndex, int lastIndex, double minOffset, double firstStartOffset, double lastEndOffset) {
+    final int childCount = children.length;
+    if (childCount == 0)
+      return 0.0;
+    return (lastEndOffset - minOffset) * childCount / (lastIndex + 1);
   }
 }
 
@@ -202,10 +264,10 @@ class LazyBlock extends StatelessWidget {
       startOffset: scrollOffset,
       mainAxis: scrollDirection,
       padding: padding,
-      onExtentsChanged: (double contentExtent, double containerExtent, double minScrollOffset) {
+      onExtentsChanged: (int firstIndex, int lastIndex, double firstStartOffset, double lastEndOffset, double minScrollOffset, double containerExtent) {
         final BoundedBehavior scrollBehavior = state.scrollBehavior;
         state.didUpdateScrollBehavior(scrollBehavior.updateExtents(
-          contentExtent: contentExtent,
+          contentExtent: delegate.estimateTotalExtent(firstIndex, lastIndex, minScrollOffset, firstStartOffset, lastEndOffset),
           containerExtent: containerExtent,
           minScrollOffset: minScrollOffset,
           scrollOffset: state.scrollOffset
@@ -237,12 +299,16 @@ class LazyBlock extends StatelessWidget {
 
 /// Signature used by [LazyBlockViewport] to report its interior and exterior dimensions.
 ///
-///  * The [contentExtent] is the interior dimension of the viewport (i.e., the
-///    size of the thing that's being viewed through the viewport).
-///  * The [containerExtent] is the exterior dimension of the viewport (i.e.,
-///    the amount of the thing inside the viewport that is visible from outside
-///    the viewport).
-///  * The [minScrollOffset] is the offset at which the starting edge of the
+///  * The `firstIndex` is the index of the child that is visible at the
+///    starting edge of the viewport.
+///  * The `lastIndex` is the index of the child that is visible at the ending
+///    edge of the viewport. This could be the same as the `firstIndex` if the
+///    child is bigger than the viewport or if it is the last child.
+///  * The `firstStartOffset` is the offset of the starting edge of the child
+///    with index `firstIndex`.
+///  * The `lastEndOffset` is the offset of the ending edge of the child with
+///    index `lastIndex`.
+///  * The `minScrollOffset` is the offset at which the starting edge of the
 ///    first item in the viewport is aligned with the starting edge of the
 ///    viewport. (As the scroll offset increases, items with larger indices are
 ///    revealed in the viewport.) Typically the min scroll offset is 0.0, but
@@ -250,7 +316,10 @@ class LazyBlock extends StatelessWidget {
 ///    might not always be 0.0. For example, if an item that's offscreen changes
 ///    size, the visible items will retain their current scroll offsets even if
 ///    the distance to the starting edge of the first item changes.
-typedef void LazyBlockExtentsChangedCallback(double contentExtent, double containerExtent, double minScrollOffset);
+///  * The `containerExtent` is the exterior dimension of the viewport (i.e.,
+///    the amount of the thing inside the viewport that is visible from outside
+///    the viewport).
+typedef void LazyBlockExtentsChangedCallback(int firstIndex, int lastIndex, double firstStartOffset, double lastEndOffset, double minScrollOffset, double containerExtent);
 
 /// A viewport on an infinite list of variable height children.
 ///
@@ -314,8 +383,6 @@ class LazyBlockViewport extends RenderObjectWidget {
   ///
   /// See [LazyBlockDelegate] for details.
   final LazyBlockDelegate delegate;
-
-  double get _mainAxisPadding => padding == null ? 0.0 : padding.along(mainAxis);
 
   @override
   _LazyBlockElement createElement() => new _LazyBlockElement(this);
@@ -424,21 +491,18 @@ class _LazyBlockElement extends RenderObjectElement {
   /// reprsented explicitly in _children.
   double _minScrollOffset = 0.0;
 
-  /// The maximum scroll offset used by the scroll behavior.
-  ///
-  /// Not all the items between the minimum and maximum scroll offsets are
-  /// reprsented explicitly in _children.
-  double _maxScrollOffset = 0.0;
-
   /// The smallest start offset (inclusive) that can be displayed properly with the items currently represented in [_children].
   double _startOffsetLowerLimit = 0.0;
 
   /// The largest start offset (exclusive) that can be displayed properly with the items currently represented in [_children].
   double _startOffsetUpperLimit = 0.0;
 
-  double _lastReportedContentExtent;
-  double _lastReportedContainerExtent;
+  int _lastReportedFirstChildLogicalIndex;
+  int _lastReportedLastChildLogicalIndex;
+  double _lastReportedFirstChildLogicalOffset;
+  double _lastReportedLastChildLogicalOffset;
   double _lastReportedMinScrollOffset;
+  double _lastReportedContainerExtent;
 
   @override
   void visitChildren(ElementVisitor visitor) {
@@ -485,13 +549,45 @@ class _LazyBlockElement extends RenderObjectElement {
     super.unmount();
   }
 
+  Widget _callBuilder(IndexedWidgetBuilder builder, int index, { bool requireNonNull: false }) {
+    Widget result;
+    try {
+      result = builder(this, index);
+      if (requireNonNull && result == null) {
+        throw new FlutterError(
+          'buildItem must not return null after returning non-null.\n'
+          'If buildItem for a LazyBlockDelegate returns a non-null widget for a given '
+          'index, it must return non-null widgets for every smaller index as well. The '
+          'buildItem function for ${widget.delegate.runtimeType} returned null for '
+          'index $index after having returned a non-null value for index '
+          '${index - 1}.'
+        );
+      }
+    } catch (e, stack) {
+      FlutterError.reportError(new FlutterErrorDetails(
+        exception: e,
+        stack: stack,
+        library: 'widgets library',
+        context: 'while building items for a LazyBlock',
+        informationCollector: (StringBuffer information) {
+          information.writeln('The LazyBlock in question was:\n  $this');
+          information.writeln('The delegate that was being used was:\n  ${widget.delegate}');
+          information.write('The index of the offending child widget was: $index');
+        }
+      ));
+      result = new ErrorWidget(e);
+    }
+    return result;
+  }
+
+
   @override
   void performRebuild() {
     IndexedWidgetBuilder builder = widget.delegate.buildItem;
     List<Widget> widgets = <Widget>[];
     for (int i = 0; i < _children.length; ++i) {
       int logicalIndex = _firstChildLogicalIndex + i;
-      Widget childWidget = builder(this, logicalIndex);
+      Widget childWidget = _callBuilder(builder, logicalIndex);
       if (childWidget == null)
         break;
       widgets.add(new RepaintBoundary.wrap(childWidget, logicalIndex));
@@ -534,18 +630,7 @@ class _LazyBlockElement extends RenderObjectElement {
         currentLogicalIndex -= 1;
         Element newElement;
         owner.lockState(() {
-          // TODO(abarth): Handle exceptions from builder gracefully.
-          Widget newWidget = builder(this, currentLogicalIndex);
-          if (newWidget == null) {
-            throw new FlutterError(
-              'buildItem must not return null after returning non-null.\n'
-              'If buildItem for a LazyBlockDelegate returns a non-null widget for a given '
-              'index, it must return non-null widgets for every smaller index as well. The '
-              'buildItem function for ${widget.delegate.runtimeType} returned null for '
-              'index $currentLogicalIndex after having returned a non-null value for index '
-              '${currentLogicalIndex - 1}.'
-            );
-          }
+          Widget newWidget = _callBuilder(builder, currentLogicalIndex, requireNonNull: true);
           newWidget = new RepaintBoundary.wrap(newWidget, currentLogicalIndex);
           newElement = inflateWidget(newWidget, null);
         }, building: true);
@@ -597,12 +682,10 @@ class _LazyBlockElement extends RenderObjectElement {
     if (currentLogicalOffset >= startLogicalOffset) {
       // The first element is visible. We need to update our reckoning of where
       // the min scroll offset is.
-      _minScrollOffset = currentLogicalOffset;
       _startOffsetLowerLimit = double.NEGATIVE_INFINITY;
     } else {
       // The first element is not visible. Ensure that we have one blockExtent
       // of headroom so we don't hit the min scroll offset prematurely.
-      _minScrollOffset = currentLogicalOffset - blockExtent;
       _startOffsetLowerLimit = currentLogicalOffset;
     }
 
@@ -616,8 +699,7 @@ class _LazyBlockElement extends RenderObjectElement {
         assert(physicalIndex == _children.length);
         Element newElement;
         owner.lockState(() {
-          // TODO(abarth): Handle exceptions from builder gracefully.
-          Widget newWidget = builder(this, currentLogicalIndex);
+          Widget newWidget = _callBuilder(builder, currentLogicalIndex);
           if (newWidget == null)
             return;
           newWidget = new RepaintBoundary.wrap(newWidget, currentLogicalIndex);
@@ -644,14 +726,10 @@ class _LazyBlockElement extends RenderObjectElement {
     // we don't need.
 
     if (currentLogicalOffset < endLogicalOffset) {
-      // The last element is visible. We need to update our reckoning of where
-      // the max scroll offset is.
-      _maxScrollOffset = currentLogicalOffset + widget._mainAxisPadding - blockExtent;
+      // The last element is visible. We can scroll as far as they want, there's
+      // nothing more to paint.
       _startOffsetUpperLimit = double.INFINITY;
     } else {
-      // The last element is not visible. Ensure that we have one blockExtent
-      // of headroom so we don't hit the max scroll offset prematurely.
-      _maxScrollOffset = currentLogicalOffset;
       _startOffsetUpperLimit = currentLogicalOffset - blockExtent;
     }
 
@@ -684,14 +762,27 @@ class _LazyBlockElement extends RenderObjectElement {
 
     LazyBlockExtentsChangedCallback onExtentsChanged = widget.onExtentsChanged;
     if (onExtentsChanged != null) {
-      double contentExtent = _maxScrollOffset - _minScrollOffset + blockExtent;
-      if (_lastReportedContentExtent != contentExtent ||
-          _lastReportedContainerExtent != blockExtent ||
-          _lastReportedMinScrollOffset != _minScrollOffset) {
-        _lastReportedContentExtent = contentExtent;
-        _lastReportedContainerExtent = blockExtent;
+      int lastChildLogicalIndex = _firstChildLogicalIndex + _children.length - 1;
+      if (_lastReportedFirstChildLogicalIndex != _firstChildLogicalIndex ||
+          _lastReportedLastChildLogicalIndex != lastChildLogicalIndex ||
+          _lastReportedFirstChildLogicalOffset != _firstChildLogicalIndex ||
+          _lastReportedLastChildLogicalOffset != currentLogicalOffset ||
+          _lastReportedMinScrollOffset != _minScrollOffset ||
+          _lastReportedContainerExtent != blockExtent) {
+        _lastReportedFirstChildLogicalIndex = _firstChildLogicalIndex;
+        _lastReportedLastChildLogicalIndex = lastChildLogicalIndex;
+        _lastReportedFirstChildLogicalOffset = _firstChildLogicalOffset;
+        _lastReportedLastChildLogicalOffset = currentLogicalOffset;
         _lastReportedMinScrollOffset = _minScrollOffset;
-        onExtentsChanged(_lastReportedContentExtent, _lastReportedContainerExtent, _lastReportedMinScrollOffset);
+        _lastReportedContainerExtent = blockExtent;
+        onExtentsChanged(
+          _firstChildLogicalIndex,
+          lastChildLogicalIndex,
+          _firstChildLogicalOffset,
+          currentLogicalOffset,
+          _lastReportedMinScrollOffset,
+          _lastReportedContainerExtent
+        );
       }
     }
   }

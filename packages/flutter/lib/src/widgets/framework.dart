@@ -405,8 +405,8 @@ abstract class Widget {
   /// use another widget as its configuration if, and only if, the two widgets
   /// have [runtimeType] and [key] properties that are [operator==].
   static bool canUpdate(Widget oldWidget, Widget newWidget) {
-    return oldWidget.runtimeType == newWidget.runtimeType &&
-      oldWidget.key == newWidget.key;
+    return oldWidget.runtimeType == newWidget.runtimeType
+        && oldWidget.key == newWidget.key;
   }
 }
 

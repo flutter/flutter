@@ -132,29 +132,7 @@ class StockHomeState extends State<StockHome> {
         ),
         new DrawerItem(
           icon: new Icon(Icons.account_balance),
-          onPressed: () {
-            showDialog(
-              context: context,
-              child: new Dialog(
-                title: new Text('Not Implemented'),
-                content: new Text('This feature has not yet been implemented.'),
-                actions: <Widget>[
-                  new FlatButton(
-                    onPressed: () {
-                      Navigator.pop(context, false);
-                    },
-                    child: new Text('USE IT')
-                  ),
-                  new FlatButton(
-                    onPressed: () {
-                      Navigator.pop(context, false);
-                    },
-                    child: new Text('OH WELL')
-                  ),
-                ]
-              )
-            );
-          },
+          onPressed: null,
           child: new Text('Account Balance')
         ),
         new DrawerItem(
@@ -199,13 +177,18 @@ class StockHomeState extends State<StockHome> {
           child: new Text('Settings')),
         new DrawerItem(
           icon: new Icon(Icons.help),
-          child: new Text('Help & Feedback'))
+          onPressed: _handleShowAbout,
+          child: new Text('About'))
       ])
     );
   }
 
   void _handleShowSettings() {
     Navigator.popAndPushNamed(context, '/settings');
+  }
+
+  void _handleShowAbout() {
+    showAboutDialog(context: context);
   }
 
   Widget buildAppBar() {
