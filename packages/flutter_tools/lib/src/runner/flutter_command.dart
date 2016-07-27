@@ -214,7 +214,7 @@ abstract class FlutterCommand extends Command {
 
   Future<int> runInProject();
 
-  // This is caculated in run() if the command has [requiresDevice] specified.
+  // This is calculated in run() if the command has [requiresDevice] specified.
   Device _deviceForCommand;
 
   Device get deviceForCommand => _deviceForCommand;
