@@ -23,5 +23,5 @@ us [feedback](mailto:flutter-dev@googlegroups.com).
 Community
 ---------
 
-Join us on IRC at `#flutter` on Freenode or join our mailing list,
+Join us in our [Gitter chat room](https://gitter.im/flutter/flutter) or join our mailing list,
 [flutter-dev@googlegroups.com](https://groups.google.com/forum/#!forum/flutter-dev).
