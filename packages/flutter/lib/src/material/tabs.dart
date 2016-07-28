@@ -1188,10 +1188,10 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
 
     if (selectedIndex < previousSelectedIndex) {
       _updateItemsFromChildren(selectedIndex, previousSelectedIndex);
-      scrollTo(Curves.ease.flipped.transform(1.0 - animation.value));
+      scrollTo(new CurveTween(curve: Curves.ease.flipped).evaluate(new ReverseAnimation(animation)));
     } else {
       _updateItemsFromChildren(previousSelectedIndex, selectedIndex);
-      scrollTo(Curves.ease.transform(animation.value));
+      scrollTo(new CurveTween(curve: Curves.ease).evaluate(animation));
     }
   }
 
