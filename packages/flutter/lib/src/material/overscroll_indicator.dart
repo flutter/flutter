@@ -20,6 +20,7 @@ class _Painter extends CustomPainter {
   _Painter({
     this.scrollDirection,
     this.extent, // Indicator width or height, per scrollDirection.
+    this.dragPosition,
     this.isLeading, // Similarly true if the indicator appears at the top/left.
     this.color
   });
@@ -28,6 +29,7 @@ class _Painter extends CustomPainter {
   final double extent;
   final bool isLeading;
   final Color color;
+  final Point dragPosition;
 
   void paintIndicator(Canvas canvas, Size size) {
     final double rectBias = extent / 2.0;
@@ -37,16 +39,20 @@ class _Painter extends CustomPainter {
     switch(scrollDirection) {
       case Axis.vertical:
         final double width = size.width;
+        final double focus = dragPosition == null ? 0.5 : 1.0 - dragPosition.x / size.width;
+        print("focus=$focus dx1=${width * -focus * 0.5} dx2=${width * -focus * 1.5}");
         if (isLeading) {
           path.moveTo(0.0, 0.0);
           path.relativeLineTo(width, 0.0);
           path.relativeLineTo(0.0, rectBias);
-          path.relativeCubicTo(width * -0.25, arcBias, width * -0.75, arcBias, -width, 0.0);
+          //path.relativeCubicTo(width * -0.25, arcBias, width * -0.75, arcBias, -width, 0.0);
+          path.relativeCubicTo(width * -focus * 0.5, arcBias, width * -focus * 1.5, arcBias, -width, 0.0);
         } else {
           path.moveTo(0.0, size.height);
           path.relativeLineTo(width, 0.0);
           path.relativeLineTo(0.0, -rectBias);
-          path.relativeCubicTo(width * -0.25, -arcBias, width * -0.75, -arcBias, -width, 0.0);
+          // path.relativeCubicTo(width * -0.25, -arcBias, width * -0.75, -arcBias, -width, 0.0);
+          path.relativeCubicTo(width * -focus * 0.5, -arcBias, width * -focus * 1.5, -arcBias, -width, 0.0);
         }
         break;
       case Axis.horizontal:
@@ -128,6 +134,7 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
   double _scrollOffset;
   double _minScrollOffset;
   double _maxScrollOffset;
+  Point _dragPosition;
 
   void _hide() {
     _hideTimer?.cancel();
@@ -151,7 +158,7 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
     _updateState(scrollable);
   }
 
-  void _onScrollUpdated(ScrollableState scrollable) {
+  void _onScrollUpdated(ScrollableState scrollable, DragUpdateDetails details) {
     final double value = scrollable.scrollOffset;
     if (_isOverscroll(value)) {
       _refreshHideTimer();
@@ -160,6 +167,7 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
         _hide();
       } else {
         // Changing the animation's value causes an implicit setState().
+        _dragPosition = details?.globalPosition;
         _extentAnimation.value = value < _minScrollOffset ? _minScrollOffset - value : value - _maxScrollOffset;
       }
     }
@@ -200,7 +208,7 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
         _onScrollStarted(scrollable);
         break;
       case ScrollNotificationKind.updated:
-        _onScrollUpdated(scrollable);
+        _onScrollUpdated(scrollable, notification.dragUpdateDetails);
         break;
       case ScrollNotificationKind.ended:
         _onScrollEnded(scrollable);
@@ -236,6 +244,7 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
             foregroundPainter: _scrollDirection == null ? null : new _Painter(
               scrollDirection: _scrollDirection,
               extent: _extentAnimation.value,
+              dragPosition: _dragPosition,
               isLeading: _scrollOffset < _minScrollOffset,
               color: _indicatorColor
             ),
