@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 
 class _Page {
   _Page({ this.label });
-  final GlobalKey<ScrollableState<Scrollable>> key = new GlobalKey<ScrollableState<Scrollable>>();
   final String label;
   String get id => label[0];
 }
@@ -115,36 +114,14 @@ class _CardDataItem extends StatelessWidget {
   }
 }
 
-class TabsDemo extends StatefulWidget {
+class TabsDemo extends StatelessWidget {
   static const String routeName = '/tabs';
 
   @override
-  TabsDemoState createState() => new TabsDemoState();
-}
-
-class TabsDemoState extends State<TabsDemo> {
-  _Page _selectedPage;
-  double _scrollOffset = 0.0;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedPage = _allPages.keys.first;
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final double statusBarHeight = MediaQuery.of(context).padding.top;
     return new TabBarSelection<_Page>(
       values: _allPages.keys.toList(),
-      onChanged: (_Page value) {
-        setState(() {
-          _selectedPage = value;
-          _selectedPage.key.currentState.scrollTo(_scrollOffset);
-        });
-      },
       child: new Scaffold(
-        appBarBehavior: AppBarBehavior.under,
         appBar: new AppBar(
           title: new Text('Tabs and scrolling'),
           bottom: new TabBar<_Page>(
@@ -155,17 +132,15 @@ class TabsDemoState extends State<TabsDemo> {
         ),
         body: new TabBarView<_Page>(
           children: _allPages.keys.map((_Page page) {
-            return new Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: new ScrollableList(
-                padding: new EdgeInsets.only(top: kTextTabBarHeight + kToolBarHeight + statusBarHeight),
-                itemExtent: _CardDataItem.height,
-                scrollableKey: page.key,
-                onScroll: (double value) { _scrollOffset = value; },
-                children: _allPages[page].map((_CardData data) {
-                  return new _CardDataItem(page: page, data: data);
-                }).toList()
-              )
+            return new ScrollableList(
+              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              itemExtent: _CardDataItem.height,
+              children: _allPages[page].map((_CardData data) {
+                return new Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: new _CardDataItem(page: page, data: data)
+                );
+              }).toList()
             );
           }).toList()
         )

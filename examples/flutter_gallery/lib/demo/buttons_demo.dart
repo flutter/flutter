@@ -7,14 +7,12 @@ import 'package:flutter/material.dart';
 import '../gallery/demo.dart';
 
 const String _raisedText =
-  "# Raised buttons\n"
   "Raised buttons add dimension to mostly flat layouts. They emphasize "
   "functions on busy or wide spaces.";
 
 const String _raisedCode = 'buttons_raised';
 
 const String _flatText =
-  "# Flat buttons\n"
   "A flat button displays an ink splash on press "
   "but does not lift. Use flat buttons on toolbars, in dialogs and "
   "inline with padding";
@@ -22,7 +20,6 @@ const String _flatText =
 const String _flatCode = 'buttons_flat';
 
 const String _dropdownText =
-  "# Dropdown buttons\n"
   "A dropdown button displays a menu that's used to select a value from a "
   "small set of values. The button displays the current value and a down "
   "arrow.";
@@ -36,7 +33,6 @@ const String _iconText =
 const String _iconCode = 'buttons_icon';
 
 const String _actionText =
-  "# Floating action buttons\n"
   "Floating action buttons are used for a promoted action. They are "
   "distinguished by a circled icon floating above the UI and can have motion "
   "behaviors that include morphing, launching, and a transferring anchor "

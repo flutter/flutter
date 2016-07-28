@@ -75,11 +75,6 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> {
             height: 20.0,
             child: new CircularProgressIndicator(value: _animation.value)
         ),
-        new SizedBox(
-          width: 50.0,
-          height: 30.0,
-          child: new CircularProgressIndicator(value: _animation.value)
-        ),
         new Text('${(_animation.value * 100.0).toStringAsFixed(1)}%${ _controller.isAnimating ? "" : " (paused)" }')
     ];
     return new Column(
