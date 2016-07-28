@@ -119,7 +119,10 @@ abstract class BindingBase {
   /// that uses closures, so that they do not keep pointing to old
   /// code, and to flush any caches of previously computed values, in
   /// case the new code would compute them differently.
-  void reassembleApplication() { }
+  @mustCallSuper
+  void reassembleApplication() {
+    FlutterError.resetErrorCount();
+  }
 
   /// Registers a service extension method with the given name (full
   /// name "ext.flutter.name"), which takes no arguments and returns

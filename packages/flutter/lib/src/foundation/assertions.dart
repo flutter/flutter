@@ -153,6 +153,14 @@ class FlutterError extends AssertionError {
 
   static int _errorCount = 0;
 
+  /// Resets the count of errors used by [dumpErrorToConsole] to decide whether
+  /// to show a complete error message or an abbreviated one.
+  ///
+  /// After this is called, the next error message will be shown in full.
+  static void resetErrorCount() {
+    _errorCount = 0;
+  }
+
   static const int _kWrapWidth = 100;
 
   /// Prints the given exception details to the console.
@@ -162,6 +170,9 @@ class FlutterError extends AssertionError {
   ///
   /// Subsequent calls only dump the first line of the exception, unless
   /// `forceReport` is set to true (in which case it dumps the verbose message).
+  ///
+  /// Call [resetErrorCount] to cause this method to go back to acting as if it
+  /// had not been called before (so the next message is verbose again).
   ///
   /// The default behavior for the [onError] handler is to call this function.
   static void dumpErrorToConsole(FlutterErrorDetails details, { bool forceReport: false }) {
@@ -258,17 +269,18 @@ class FlutterError extends AssertionError {
   /// format but the frame numbers will not be consecutive (frames are elided)
   /// and the final line may be prose rather than a stack frame.
   static Iterable<String> defaultStackFilter(Iterable<String> frames) {
-    final List<String> result = <String>[];
-    final List<String> filteredPackages = <String>[
+    const List<String> filteredPackages = const <String>[
       'dart:async-patch',
       'dart:async',
       'package:stack_trace',
     ];
-    final List<String> filteredClasses = <String>[
+    const List<String> filteredClasses = const <String>[
+      '_AssertionError',
       '_FakeAsync',
     ];
     final RegExp stackParser = new RegExp(r'^#[0-9]+ +([^.]+).* \(([^/]*)/[^:]+:[0-9]+(?::[0-9]+)?\)$');
     final RegExp packageParser = new RegExp(r'^([^:]+):(.+)$');
+    final List<String> result = <String>[];
     final List<String> skipped = <String>[];
     for (String line in frames) {
       Match match = stackParser.firstMatch(line);

@@ -226,6 +226,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   static void unregisterRemoveListener(GlobalKey key, GlobalKeyRemoveListener listener) {
     assert(key != null);
     assert(_removeListeners.containsKey(key));
+    assert(_removeListeners[key].contains(listener));
     bool removed = _removeListeners[key].remove(listener);
     if (_removeListeners[key].isEmpty)
       _removeListeners.remove(key);
@@ -258,6 +259,8 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
             listener(key);
         }
       }
+    } catch (e, stack) {
+      _debugReportException('while notifying GlobalKey listeners', e, stack);
     } finally {
       _removedKeys.clear();
     }
