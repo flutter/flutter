@@ -7,7 +7,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 const String _kUserName = 'Jonathan';
-const String _kUserEmail = 'heyfromjonathan@gmail.com';
+const String _kUserEmail = 'jonathan@example.com';
 const String _kUserImage = 'packages/flutter_gallery_assets/pesto/avatar.jpg';
 // Map of logo images keyed by the minimum height their container needs to be.
 final Map<double, String> _kLogoImages = <double, String>{

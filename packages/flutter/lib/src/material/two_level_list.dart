@@ -57,6 +57,7 @@ class TwoLevelSublist extends StatefulWidget {
     Key key,
     this.leading,
     this.title,
+    this.backgroundColor,
     this.onOpenChanged,
     this.children
   }) : super(key: key);
@@ -65,6 +66,7 @@ class TwoLevelSublist extends StatefulWidget {
   final Widget title;
   final ValueChanged<bool> onOpenChanged;
   final List<Widget> children;
+  final Color backgroundColor;
 
   @override
   _TwoLevelSublistState createState() => new _TwoLevelSublistState();
@@ -77,6 +79,7 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> {
   ColorTween _borderColor;
   ColorTween _headerColor;
   ColorTween _iconColor;
+  ColorTween _backgroundColor;
   Animation<double> _iconTurns;
 
   bool _isExpanded = false;
@@ -91,6 +94,7 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> {
     _headerColor = new ColorTween();
     _iconColor = new ColorTween();
     _iconTurns = new Tween<double>(begin: 0.0, end: 0.5).animate(_easeInAnimation);
+    _backgroundColor = new ColorTween();
 
     _isExpanded = PageStorage.of(context)?.readState(context) ?? false;
     if (_isExpanded)
@@ -119,6 +123,7 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> {
   Widget buildList(BuildContext context, Widget child) {
     return new Container(
       decoration: new BoxDecoration(
+        backgroundColor: _backgroundColor.evaluate(_easeOutAnimation),
         border: new Border(
           top: new BorderSide(color: _borderColor.evaluate(_easeOutAnimation)),
           bottom: new BorderSide(color: _borderColor.evaluate(_easeOutAnimation))
@@ -163,6 +168,9 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> {
     _iconColor
       ..begin = theme.unselectedWidgetColor
       ..end = theme.accentColor;
+    _backgroundColor
+      ..begin = Colors.transparent
+      ..end = config.backgroundColor ?? Colors.transparent;
 
     return new AnimatedBuilder(
         animation: _controller.view,

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 
 import 'example_code_parser.dart';
 import 'syntax_highlighter.dart';
@@ -88,7 +87,9 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
               children: <Widget>[
                 new Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: new MarkdownBody(data: demo.description)
+                  child: new Text(demo.description,
+                    style: Theme.of(context).textTheme.subhead
+                  )
                 ),
                 new Flexible(child: demo.widget)
               ]

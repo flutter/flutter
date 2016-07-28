@@ -61,7 +61,7 @@ class GalleryHomeState extends State<GalleryHome> {
     _listItems.add(new SizedBox(height: _kFlexibleSpaceMaxHeight + statusBarHeight));
 
     final ThemeData themeData = Theme.of(context);
-    final TextStyle headerStyle = themeData.textTheme.body2.copyWith(color: themeData.primaryColor);
+    final TextStyle headerStyle = themeData.textTheme.body2.copyWith(color: themeData.accentColor);
     String category;
     for (GalleryItem galleryItem in kAllGalleryItems) {
       if (category != galleryItem.category) {

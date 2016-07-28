@@ -4,11 +4,6 @@
 
 import 'package:flutter/material.dart';
 
-final TextStyle _kTextStyle = new TextStyle(
-  color: Colors.indigo[400],
-  fontSize: 24.0
-);
-
 class ModalBottomSheetDemo extends StatelessWidget {
   static const String routeName = '/modal-bottom-sheet';
 
@@ -25,8 +20,11 @@ class ModalBottomSheetDemo extends StatelessWidget {
                 child: new Padding(
                   padding: const EdgeInsets.all(32.0),
                   child: new Text('This is the modal bottom sheet. Click anywhere to dismiss.',
-                    style: _kTextStyle,
-                    textAlign: TextAlign.center
+                    textAlign: TextAlign.center,
+                    style: new TextStyle(
+                      color: Theme.of(context).accentColor,
+                      fontSize: 24.0
+                    )
                   )
                 )
               );
