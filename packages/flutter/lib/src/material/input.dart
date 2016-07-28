@@ -104,17 +104,23 @@ class _InputState extends State<Input> {
   // Optional state to retain if we are inside a Form widget.
   _FormFieldData _formData;
 
+  bool _autofocus;
+
+  @override
+  void initState() {
+    super.initState();
+    _autofocus = config.autofocus;
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     ThemeData themeData = Theme.of(context);
     BuildContext focusContext = focusKey.currentContext;
-    bool focused = focusContext != null && Focus.at(focusContext, autofocus: config.autofocus);
+    bool focused = focusContext != null && Focus.at(focusContext, autofocus: _autofocus);
     if (_formData == null)
       _formData = _FormFieldData.maybeCreate(context, this);
     InputValue value = config.value ?? _formData?.value ?? InputValue.empty;
-    ValueChanged<InputValue> onChanged = config.onChanged ?? _formData?.onChanged;
-    ValueChanged<InputValue> onSubmitted = config.onSubmitted ?? _formData?.onSubmitted;
     String errorText = config.errorText;
 
     if (errorText == null && config.formField != null && config.formField.validator != null)
@@ -206,8 +212,8 @@ class _InputState extends State<Input> {
         selectionHandleBuilder: buildTextSelectionHandle,
         selectionToolbarBuilder: buildTextSelectionToolbar,
         keyboardType: config.keyboardType,
-        onChanged: onChanged,
-        onSubmitted: onSubmitted
+        onChanged: config.onChanged ?? _formData?.onChanged,
+        onSubmitted: _handleTextSubmitted
       )
     ));
 
@@ -253,6 +259,17 @@ class _InputState extends State<Input> {
         child: child
       )
     );
+  }
+
+  void _handleTextSubmitted(InputValue value) {
+    ValueChanged<InputValue> onSubmitted = config.onSubmitted ?? _formData?.onSubmitted;
+    if (onSubmitted != null)
+      onSubmitted(value);
+
+    // Rebuild to clear the focus highlights, and ensure we don't auto-refocus.
+    setState(() {
+      _autofocus = false;
+    });
   }
 }
 
