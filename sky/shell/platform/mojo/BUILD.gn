@@ -48,7 +48,9 @@ mojo_native_application("mojo") {
     "//third_party/icu",
   ]
 
-  ldflags = [
-    "-lGL",
-  ]
+  if (is_linux) {
+    ldflags = [
+      "-lGL",
+    ]
+  }
 }
