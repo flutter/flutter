@@ -609,14 +609,15 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
 
     // If the selected value change was triggered by a drag gesture, the current
     // value of _controller.value will reflect where the gesture ended. While
-    // the drag was underway progress indicates where the indicator and TabBarView
-    // scrollPosition are vis the indices of the two tabs adjacent to the selected
-    // one. So 0.5 means the drag didn't move at all, 0.0 means the drag extended
-    // to the beginning of the tab on the left and 1.0 likewise for the tab on the
-    // right. That is unless the index of the selected value was 0 or values.length - 1.
-    // In those cases progress just moves between the selected tab and the adjacent
-    // one. Convert progress to reflect the fact that we're now moving between (just)
-    // the previous and current selection index.
+    // the drag was underway the controller's value indicates where the indicator
+    // and TabBarView scrollPositions are vis the indices of the two tabs adjacent
+    // to the selected one. So 0.5 means the drag didn't move at all, 0.0 means the
+    // drag extended to the beginning of the tab on the left and 1.0 likewise for
+    // the tab on the right. That is unless the index of the selected value was 0
+    // or values.length - 1. In those cases the controller's value just moves between
+    // the selected tab and the adjacent one. So: convert the controller's value
+    // here to reflect the fact that we're now moving between (just) the previous
+    // and current selection index.
 
     double value;
     if (_controller.status == AnimationStatus.completed)
@@ -1187,10 +1188,10 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
 
     if (selectedIndex < previousSelectedIndex) {
       _updateItemsFromChildren(selectedIndex, previousSelectedIndex);
-      scrollTo(1.0 - animation.value);
+      scrollTo(Curves.ease.flipped.transform(1.0 - animation.value));
     } else {
       _updateItemsFromChildren(previousSelectedIndex, selectedIndex);
-      scrollTo(animation.value);
+      scrollTo(Curves.ease.transform(animation.value));
     }
   }
 
