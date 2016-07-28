@@ -402,6 +402,10 @@ if (is_android) {
       ":testing",
     ]
 
+    ldflags = [
+      "-lGL",
+    ]
+
     if (use_glfw) {
       sources += [
         "//sky/shell/platform/glfw/init_glfw.cc",

@@ -47,4 +47,8 @@ mojo_native_application("mojo") {
     "//sky/shell:gpu_mojo",
     "//third_party/icu",
   ]
+
+  ldflags = [
+    "-lGL",
+  ]
 }
