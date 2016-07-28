@@ -54,11 +54,11 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// color use: `new AlwaysStoppedAnimation<Color>(color)`.
   ///
   /// If null, the progress indicator is rendered with the current theme's
-  /// [ThemeData.primaryColor].
+  /// [ThemeData.accentColor].
   final Animation<Color> valueColor;
 
   Color _getBackgroundColor(BuildContext context) => backgroundColor ?? Theme.of(context).backgroundColor;
-  Color _getValueColor(BuildContext context) => valueColor?.value ?? Theme.of(context).primaryColor;
+  Color _getValueColor(BuildContext context) => valueColor?.value ?? Theme.of(context).accentColor;
 
   @override
   void debugFillDescription(List<String> description) {

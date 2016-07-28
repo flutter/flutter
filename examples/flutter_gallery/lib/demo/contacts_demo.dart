@@ -82,7 +82,7 @@ class ContactsDemo extends StatefulWidget {
 class ContactsDemoState extends State<ContactsDemo> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   final double _appBarHeight = 256.0;
-  AppBarBehavior _appBarBehavior = AppBarBehavior.scroll;
+  AppBarBehavior _appBarBehavior = AppBarBehavior.under;
 
   @override
   Widget build(BuildContext context) {
