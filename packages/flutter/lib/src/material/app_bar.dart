@@ -41,7 +41,8 @@ abstract class AppBarBottomWidget extends Widget {
 /// The AppBar displays the toolbar widgets, [leading], [title], and
 /// [actions], above the [bottom] (if any). If a [flexibleSpace] widget is
 /// specified then it is stacked behind the toolbar and the bottom widget.
-/// The [Scaffold] typically creates the appbar with an initial height equal to
+///
+/// The [Scaffold] typically creates the app bar with an initial height equal to
 /// [expandedHeight]. If the [Scaffold.appBarBehavior] is set then the
 /// AppBar's [collapsedHeight] and [bottomHeight] define how small the app bar
 /// will become when the application is scrolled.
@@ -288,7 +289,10 @@ class AppBar extends StatelessWidget {
     if (actions != null)
       toolBarRow.addAll(actions);
 
-    Widget toolBar = new Row(children: toolBarRow);
+    Widget toolBar = new Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: new Row(children: toolBarRow)
+    );
 
     if (effectiveCenterTitle && centerWidget != null) {
       toolBar = new Stack(
@@ -330,18 +334,15 @@ class AppBar extends StatelessWidget {
     // The padding applies to the toolbar and tabbar, not the flexible space.
     // The incoming padding parameter's top value typically equals the height
     // of the status bar - so that the toolbar appears below the status bar.
-    EdgeInsets combinedPadding = new EdgeInsets.symmetric(horizontal: 8.0);
-    if (padding != null)
-      combinedPadding += padding;
     appBar = new Padding(
-      padding: combinedPadding,
+      padding: padding,
       child: appBar
     );
 
     // If the appBar's height shrinks below collapsedHeight, it will be clipped and bottom
     // justified. This is so that the toolbar and the tabbar appear to move upwards as
     // the appBar's height is reduced below collapsedHeight.
-    final double paddedCollapsedHeight = collapsedHeight + combinedPadding.top + combinedPadding.bottom;
+    final double paddedCollapsedHeight = collapsedHeight + padding.top + padding.bottom;
     if (size.height < paddedCollapsedHeight) {
       appBar = new ClipRect(
         child: new OverflowBox(
