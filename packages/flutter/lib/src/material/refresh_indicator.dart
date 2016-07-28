@@ -125,7 +125,7 @@ class RefreshIndicator extends StatefulWidget {
   final RefreshIndicatorLocation location;
 
   /// The progress indicator's foreground color. The current theme's
-  /// [ThemeData.primaryColor] by default.
+  /// [ThemeData.accentColor] by default.
   final Color color;
 
   /// The progress indicator's background color. The current theme's
@@ -168,8 +168,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> {
 
     // Fully opaque when we've reached config.displacement.
     _valueColor = new ColorTween(
-      begin: (config.color ?? theme.primaryColor).withOpacity(0.0),
-      end: (config.color ?? theme.primaryColor).withOpacity(1.0)
+      begin: (config.color ?? theme.accentColor).withOpacity(0.0),
+      end: (config.color ?? theme.accentColor).withOpacity(1.0)
     )
     .animate(new CurvedAnimation(
       parent: _sizeController,
