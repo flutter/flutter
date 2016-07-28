@@ -114,29 +114,13 @@ class _CardDataItem extends StatelessWidget {
   }
 }
 
-class TabsDemo extends StatefulWidget {
+class TabsDemo extends StatelessWidget {
   static const String routeName = '/tabs';
-
-  @override
-  TabsDemoState createState() => new TabsDemoState();
-}
-
-class TabsDemoState extends State<TabsDemo> {
-  _Page _selectedPage;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedPage = _allPages.keys.first;
-  }
 
   @override
   Widget build(BuildContext context) {
     return new TabBarSelection<_Page>(
       values: _allPages.keys.toList(),
-      onChanged: (_Page value) {
-        _selectedPage = value;
-      },
       child: new Scaffold(
         appBar: new AppBar(
           title: new Text('Tabs and scrolling'),
