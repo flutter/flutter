@@ -41,7 +41,8 @@ abstract class AppBarBottomWidget extends Widget {
 /// The AppBar displays the toolbar widgets, [leading], [title], and
 /// [actions], above the [bottom] (if any). If a [flexibleSpace] widget is
 /// specified then it is stacked behind the toolbar and the bottom widget.
-/// The [Scaffold] typically creates the appbar with an initial height equal to
+///
+/// The [Scaffold] typically creates the app bar with an initial height equal to
 /// [expandedHeight]. If the [Scaffold.appBarBehavior] is set then the
 /// AppBar's [collapsedHeight] and [bottomHeight] define how small the app bar
 /// will become when the application is scrolled.
