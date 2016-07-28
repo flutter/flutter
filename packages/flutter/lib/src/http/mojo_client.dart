@@ -22,14 +22,20 @@ class MojoClient {
 
   /// Sends an HTTP HEAD request with the given headers to the given URL, which
   /// can be a [Uri] or a [String].
+  ///
+  /// Network errors will be turned into [Response] object with a non-null
+  /// [Response.error] field.
   Future<Response> head(dynamic url, { Map<String, String> headers }) {
-    return _send("HEAD", url, headers);
+    return _createResponse(_send("HEAD", url, headers));
   }
 
   /// Sends an HTTP GET request with the given headers to the given URL, which can
   /// be a [Uri] or a [String].
+  ///
+  /// Network errors will be turned into [Response] object with a non-null
+  /// [Response.error] field.
   Future<Response> get(dynamic url, { Map<String, String> headers }) {
-    return _send("GET", url, headers);
+    return _createResponse(_send("GET", url, headers));
   }
 
   /// Sends an HTTP POST request with the given headers and body to the given URL,
@@ -48,8 +54,11 @@ class MojoClient {
   /// `"application/x-www-form-urlencoded"`; this cannot be overridden.
   ///
   /// [encoding] defaults to [UTF8].
+  ///
+  /// Network errors will be turned into [Response] object with a non-null
+  /// [Response.error] field.
   Future<Response> post(dynamic url, { Map<String, String> headers, dynamic body, Encoding encoding: UTF8 }) {
-    return _send("POST", url, headers, body, encoding);
+    return _createResponse(_send("POST", url, headers, body, encoding));
   }
 
   /// Sends an HTTP PUT request with the given headers and body to the given URL,
@@ -68,8 +77,11 @@ class MojoClient {
   /// `"application/x-www-form-urlencoded"`; this cannot be overridden.
   ///
   /// [encoding] defaults to [UTF8].
+  ///
+  /// Network errors will be turned into [Response] object with a non-null
+  /// [Response.error] field.
   Future<Response> put(dynamic url, { Map<String, String> headers, dynamic body, Encoding encoding: UTF8 }) {
-    return _send("PUT", url, headers, body, encoding);
+    return _createResponse(_send("PUT", url, headers, body, encoding));
   }
 
   /// Sends an HTTP PATCH request with the given headers and body to the given
@@ -88,25 +100,31 @@ class MojoClient {
   /// `"application/x-www-form-urlencoded"`; this cannot be overridden.
   ///
   /// [encoding] defaults to [UTF8].
+  ///
+  /// Network errors will be turned into [Response] object with a non-null
+  /// [Response.error] field.
   Future<Response> patch(dynamic url, {Map<String, String> headers, dynamic body, Encoding encoding: UTF8 }) {
-    return _send("PATCH", url, headers, body, encoding);
+    return _createResponse(_send("PATCH", url, headers, body, encoding));
   }
 
   /// Sends an HTTP DELETE request with the given headers to the given URL, which
   /// can be a [Uri] or a [String].
+  ///
+  /// Network errors will be turned into [Response] object with a non-null
+  /// [Response.error] field.
   Future<Response> delete(dynamic url, { Map<String, String> headers }) {
-    return _send("DELETE", url, headers);
+    return _createResponse(_send("DELETE", url, headers));
   }
 
   /// Sends an HTTP GET request with the given headers to the given URL, which can
   /// be a [Uri] or a [String], and returns a Future that completes to the body of
   /// the response as a [String].
   ///
-  /// The Future will emit a [ClientException] if the response doesn't have a
-  /// success status code.
+  /// The Future will resolve with an error in the case of a network error or if
+  /// the response doesn't have a success status code.
   Future<String> read(dynamic url, { Map<String, String> headers }) {
     return get(url, headers: headers).then((Response response) {
-      _checkResponseSuccess(url, response);
+      _requireSuccess(url, response.statusCode, response.error);
       return response.body;
     });
   }
@@ -115,11 +133,11 @@ class MojoClient {
   /// be a [Uri] or a [String], and returns a Future that completes to the body of
   /// the response as a list of bytes.
   ///
-  /// The Future will emit a [ClientException] if the response doesn't have a
-  /// success status code.
+  /// The Future will resolve with an error in the case of a network error or if
+  /// the response doesn't have a success status code.
   Future<Uint8List> readBytes(dynamic url, { Map<String, String> headers }) {
     return get(url, headers: headers).then((Response response) {
-      _checkResponseSuccess(url, response);
+      _requireSuccess(url, response.statusCode, response.error);
       return response.bodyBytes;
     });
   }
@@ -128,28 +146,13 @@ class MojoClient {
   /// be a [Uri] or a [String], and returns a Future that completes to the body of
   /// the response as a [mojo.MojoDataPipeConsumer].
   ///
-  /// The Future will emit a [ClientException] if the response doesn't have a
-  /// success status code.
+  /// The Future will resolve with an error in the case of a network error or if
+  /// the response doesn't have a success status code.
   Future<mojo.MojoDataPipeConsumer> readDataPipe(dynamic url, { Map<String, String> headers }) {
-    Completer<mojo.MojoDataPipeConsumer> completer = new Completer<mojo.MojoDataPipeConsumer>();
-    mojom.UrlLoaderProxy loader = new mojom.UrlLoaderProxy.unbound();
-    networkService.createUrlLoader(loader);
-    loader.start(_prepareRequest('GET', url, headers), (mojom.UrlResponse response) {
-      loader.close();
-      if (response.statusCode < 400) {
-        completer.complete(response.body);
-      } else {
-        Exception exception = new Exception("Request to $url failed with status ${response.statusCode}.");
-        FlutterError.reportError(new FlutterErrorDetails(
-          exception: exception,
-          library: 'networking HTTP library',
-          context: 'while sending bytes to the Mojo network library',
-          silent: true
-        ));
-        completer.completeError(exception);
-      }
+    return _send('GET', url, headers).then((mojom.UrlResponse response) {
+      _requireSuccess(url, response.statusCode, response.statusLine);
+      return response.body;
     });
-    return completer.future;
   }
 
   mojom.UrlRequest _prepareRequest(String method, dynamic url, Map<String, String> headers, [dynamic body, Encoding encoding = UTF8]) {
@@ -175,13 +178,36 @@ class MojoClient {
     return request;
   }
 
-  Future<Response> _send(String method, dynamic url, Map<String, String> headers, [dynamic body, Encoding encoding = UTF8]) {
-    Completer<Response> completer = new Completer<Response>();
+  Future<mojom.UrlResponse> _send(String method, dynamic url, Map<String, String> headers, [dynamic body, Encoding encoding = UTF8]) {
+    Completer<mojom.UrlResponse> completer = new Completer<mojom.UrlResponse>();
     mojom.UrlLoaderProxy loader = new mojom.UrlLoaderProxy.unbound();
     networkService.createUrlLoader(loader);
     mojom.UrlRequest request = _prepareRequest(method, url, headers, body, encoding);
     loader.start(request, (mojom.UrlResponse response) async {
       loader.close();
+      try {
+        if (response.error != null)
+          throw new Exception('Request to "$url" failed with error ${response.error.code}.\n${response.error.description}');
+        if (!response.body.handle.isValid)
+          throw new Exception('Response body does not have a valid handle, but no error was reported.\n${response.body}');
+        completer.complete(response);
+      } catch (e, stack) {
+        FlutterError.reportError(new FlutterErrorDetails(
+          exception: e,
+          stack: stack,
+          library: 'networking HTTP library',
+          context: 'while interacting with the Mojo network library',
+          silent: true
+        ));
+        completer.completeError(e);
+      }
+    });
+    return completer.future;
+  }
+
+  Future<Response> _createResponse(Future<mojom.UrlResponse> futureResponse) async {
+    try {
+      mojom.UrlResponse response = await futureResponse;
       try {
         ByteData data = await mojo.DataPipeDrainer.drainHandle(response.body);
         Uint8List bodyBytes = new Uint8List.view(data.buffer);
@@ -193,25 +219,36 @@ class MojoClient {
             headers[headerName] = existingValue != null ? '$existingValue, ${header.value}' : header.value;
           }
         }
-        completer.complete(new Response.bytes(bodyBytes, response.statusCode, headers: headers));
-      } catch (exception, stack) {
+        return new Response.bytes(bodyBytes, response.statusCode, headers: headers, error: response.statusLine);
+      } catch (e, stack) {
         FlutterError.reportError(new FlutterErrorDetails(
-          exception: exception,
+          exception: e,
           stack: stack,
           library: 'networking HTTP library',
-          context: 'while sending bytes to the Mojo network library',
+          context: 'while interacting with the Mojo network library',
           silent: true
         ));
-        completer.complete(new Response.bytes(null, 500));
+        rethrow;
       }
-    });
-    return completer.future;
+    } catch (e) {
+      return new Response.bytes(null, 500, error: e);
+    }
   }
 
-  void _checkResponseSuccess(dynamic url, Response response) {
-    if (response.statusCode < 400)
-      return;
-    throw new Exception("Request to $url failed with status ${response.statusCode}.");
+  void _requireSuccess(dynamic url, int statusCode, dynamic error) {
+    if (error is Exception)
+      throw error;
+    if (statusCode >= 400) {
+      String extra;
+      if (error is String && error != '') {
+        extra = '\nServer response: "$error"';
+      } else if (error != null) {
+        extra = '\n$error';
+      } else {
+        extra = '';
+      }
+      throw new Exception('Request to "$url" failed with status $statusCode.$extra');
+    }
   }
 
   static mojom.NetworkServiceProxy _initNetworkService() {

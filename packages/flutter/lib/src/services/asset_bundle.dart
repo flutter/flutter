@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:ui' as ui;
 import 'dart:typed_data';
 
@@ -191,8 +192,26 @@ class MojoAssetBundle extends CachingAssetBundle {
 
 AssetBundle _initRootBundle() {
   int h = ui.MojoServices.takeRootBundle();
-  if (h == core.MojoHandle.INVALID)
+  if (h == core.MojoHandle.INVALID) {
+    assert(() {
+      if (!Platform.environment.containsKey('FLUTTER_TEST')) {
+        FlutterError.reportError(new FlutterErrorDetails(
+          exception:
+            'dart:ui MojoServices.takeRootBundle() returned an invalid handle.\n'
+            'This might happen if the Dart VM was restarted without restarting the underlying Flutter engine, '
+            'or if the Flutter framework\'s rootBundle object was first accessed after some other code called '
+            'takeRootBundle. The root bundle handle can only be obtained once in the lifetime of the Flutter '
+            'engine. Mojo handles cannot be shared.\n'
+            'The rootBundle object will be initialised with a NetworkAssetBundle instead of a MojoAssetBundle. '
+            'This may cause subsequent network errors.',
+          library: 'services library',
+          context: 'while initialising the root bundle'
+        ));
+      }
+      return true;
+    });
     return new NetworkAssetBundle(Uri.base);
+  }
   core.MojoHandle handle = new core.MojoHandle(h);
   return new MojoAssetBundle(new mojom.AssetBundleProxy.fromHandle(handle));
 }
