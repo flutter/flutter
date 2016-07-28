@@ -510,22 +510,12 @@ class TextBox {
 
   /// The left edge of the box for ltr text; the right edge of the box for rtl text.
   double get start {
-    switch (direction) {
-      case TextDirection.rtl:
-        return right;
-      case TextDirection.ltr:
-        return left;
-    }
+    return (direction == TextDirection.ltr) ? left : right;
   }
 
   /// The right edge of the box for ltr text; the left edge of the box for rtl text.
   double get end {
-    switch (direction) {
-      case TextDirection.rtl:
-        return left;
-      case TextDirection.ltr:
-        return right;
-    }
+    return (direction == TextDirection.ltr) ? right : left;
   }
 
   bool operator ==(dynamic other) {
