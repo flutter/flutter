@@ -37,6 +37,7 @@ class AssetBundleEntry {
   }
 
   bool get isStringEntry => _contents != null;
+  int get contentsLength => _contents.length;
 
   final File file;
   final String _contents;

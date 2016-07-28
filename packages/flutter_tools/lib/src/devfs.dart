@@ -49,6 +49,17 @@ class DevFSEntry {
     return _fileStat.modified.isAfter(_oldFileStat.modified);
   }
 
+  int get size {
+    if (_isSourceEntry) {
+      return bundleEntry.contentsLength;
+    } else {
+      if (_fileStat == null) {
+        _stat();
+      }
+      return _fileStat.size;
+    }
+  }
+
   void _stat() {
     if (_isSourceEntry)
       return;
@@ -151,6 +162,8 @@ class DevFS {
   final Directory rootDirectory;
   final Map<String, DevFSEntry> _entries = <String, DevFSEntry>{};
   final List<Future<Response>> _pendingWrites = new List<Future<Response>>();
+  int _bytes = 0;
+  int get bytes => _bytes;
   Uri _baseUri;
   Uri get baseUri => _baseUri;
 
@@ -166,6 +179,7 @@ class DevFS {
   }
 
   Future<dynamic> update([AssetBundle bundle = null]) async {
+    _bytes = 0;
     // Mark all entries as not seen.
     _entries.forEach((String path, DevFSEntry entry) {
       entry._wasSeen = false;
@@ -244,6 +258,7 @@ class DevFS {
     entry._wasSeen = true;
     bool needsWrite = entry.isModified;
     if (needsWrite) {
+      _bytes += entry.size;
       Future<dynamic> pendingWrite = _operations.writeFile(fsName, entry);
       if (pendingWrite != null) {
         _pendingWrites.add(pendingWrite);
@@ -261,11 +276,15 @@ class DevFS {
       _entries[devicePath] = entry;
     }
     entry._wasSeen = true;
-    Future<dynamic> pendingWrite = _operations.writeFile(fsName, entry);
-    if (pendingWrite != null) {
-      _pendingWrites.add(pendingWrite);
-    } else {
-      printTrace('DevFS: Failed to sync "$devicePath"');
+    bool needsWrite = entry.isModified;
+    if (needsWrite) {
+      _bytes += entry.size;
+      Future<dynamic> pendingWrite = _operations.writeFile(fsName, entry);
+      if (pendingWrite != null) {
+        _pendingWrites.add(pendingWrite);
+      } else {
+        printTrace('DevFS: Failed to sync "$devicePath"');
+      }
     }
   }
 

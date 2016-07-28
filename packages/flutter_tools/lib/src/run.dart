@@ -11,6 +11,7 @@ import 'application_package.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'cache.dart';
 import 'commands/build_apk.dart';
 import 'commands/install.dart';
 import 'commands/trace.dart';
@@ -29,6 +30,15 @@ String findMainDartFile([String target]) {
     return path.join(targetPath, 'lib', 'main.dart');
   else
     return targetPath;
+}
+
+String getDevFSLoaderScript() {
+  return path.absolute(path.join(Cache.flutterRoot,
+                                 'packages',
+                                 'flutter',
+                                 'bin',
+                                 'loader',
+                                 'loader_app.dart'));
 }
 
 class RunAndStayResident {
@@ -176,7 +186,9 @@ class RunAndStayResident {
     if (traceStartup != null)
       platformArgs = <String, dynamic>{ 'trace-startup': traceStartup };
 
-    printStatus('Running ${getDisplayPath(_mainPath)} on ${device.name}...');
+    if (!hotMode || (hotMode && !device.needsDevFS))
+      printStatus('Running ${getDisplayPath(_mainPath)} on ${device.name}...');
+
 
     _loggingSubscription = device.logReader.logLines.listen((String line) {
       if (!line.contains('Observatory listening on http') && !line.contains('Diagnostic server listening on http'))
@@ -186,7 +198,7 @@ class RunAndStayResident {
     _result = await device.startApp(
       _package,
       debuggingOptions.buildMode,
-      mainPath: _mainPath,
+      mainPath: (hotMode && device.needsDevFS) ? getDevFSLoaderScript() : _mainPath,
       debuggingOptions: debuggingOptions,
       platformArgs: platformArgs,
       route: route
@@ -213,7 +225,7 @@ class RunAndStayResident {
           printError('Could not perform initial file synchronization.');
           return 3;
         }
-        printStatus('Launching from sources.');
+        printStatus('Running ${getDisplayPath(_mainPath)} on ${device.name}...');
         await _launchFromDevFS(_package, _mainPath);
       }
       observatory.populateIsolateInfo();
@@ -345,9 +357,10 @@ class RunAndStayResident {
       });
     }
 
-    Status devFSStatus = logger.startProgress('Updating files on device...');
+    Status devFSStatus = logger.startProgress('Syncing files on device...');
     await _devFS.update();
     devFSStatus.stop(showElapsedTime: true);
+    printStatus('Synced ${getSizeAsMB(_devFS.bytes)} MB');
     return true;
   }
 
@@ -388,7 +401,13 @@ class RunAndStayResident {
     reloadStatus.stop(showElapsedTime: true);
     Status reassembleStatus =
         logger.startProgress('Reassembling application');
-    await observatory.flutterReassemble(observatory.firstIsolateId);
+    try {
+      await observatory.flutterReassemble(observatory.firstIsolateId);
+    } catch (_) {
+      reassembleStatus.stop(showElapsedTime: true);
+      printError('Reassembling application failed.');
+      return false;
+    }
     reassembleStatus.stop(showElapsedTime: true);
     return true;
   }
