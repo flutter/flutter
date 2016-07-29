@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 import 'dart:ui' show hashValues, lerpDouble;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
@@ -165,14 +166,7 @@ class MaterialRectArcTween extends RectTween {
     @required Rect end
   }) : super(begin: begin, end: end) {
     final Offset centersVector = end.center - begin.center;
-    double maxSupport = 0.0;
-    for (_Diagonal diagonal in _allDiagonals) {
-      final double support = _diagonalSupport(centersVector, diagonal);
-      if (support > maxSupport) {
-        _diagonal = diagonal;
-        maxSupport = support;
-      }
-    }
+    _diagonal = maxBy(_allDiagonals, (_Diagonal d) => _diagonalSupport(centersVector, d));
     _beginArc = new MaterialPointArcTween(
       begin: _cornerFor(begin, _diagonal.beginId),
       end: _cornerFor(end, _diagonal.beginId)
