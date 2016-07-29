@@ -26,7 +26,7 @@ class StateMarkerState extends State<StateMarker> {
   }
 }
 
- Widget buildFrame({ List<String> tabs, String value, bool isScrollable: false, Key tabBarKey }) {
+Widget buildFrame({ List<String> tabs, String value, bool isScrollable: false, Key tabBarKey }) {
   return new Material(
     child: new TabBarSelection<String>(
       value: value,
