@@ -11,6 +11,8 @@ import 'package:meta/meta.dart';
 import 'basic_types.dart';
 import 'decoration.dart';
 import 'edge_insets.dart';
+import 'fractional_offset.dart';
+import 'image_fit.dart';
 
 export 'edge_insets.dart' show EdgeInsets;
 
@@ -693,34 +695,6 @@ class RadialGradient extends Gradient {
   }
 }
 
-/// How an image should be inscribed into a box.
-enum ImageFit {
-  /// Fill the box by distorting the image's aspect ratio.
-  fill,
-
-  /// As large as possible while still containing the image entirely within the box.
-  contain,
-
-  /// As small as possible while still covering the entire box.
-  cover,
-
-  /// Make sure the full width of the image is shown, regardless of
-  /// whether this means the image overflows the box vertically.
-  fitWidth,
-
-  /// Make sure the full height of the image is shown, regardless of
-  /// whether this means the image overflows the box horizontally.
-  fitHeight,
-
-  /// Center the image within the box and discard any portions of the image that
-  /// lie outside the box.
-  none,
-
-  /// Center the image within the box and, if necessary, scale the image down to
-  /// ensure that the image fits within the box.
-  scaleDown
-}
-
 /// How to paint any portions of a box not covered by an image.
 enum ImageRepeat {
   /// Repeat the image in both the x and y directions until the box is filled.
@@ -820,58 +794,11 @@ void paintImage({
     outputSize -= sliceBorder;
     inputSize -= sliceBorder;
   }
-  Point sourcePosition = Point.origin;
-  Size sourceSize;
-  Size destinationSize;
   fit ??= centerSlice == null ? ImageFit.scaleDown : ImageFit.fill;
   assert(centerSlice == null || (fit != ImageFit.none && fit != ImageFit.cover));
-  switch (fit) {
-    case ImageFit.fill:
-      sourceSize = inputSize;
-      destinationSize = outputSize;
-      break;
-    case ImageFit.contain:
-      sourceSize = inputSize;
-      if (outputSize.width / outputSize.height > sourceSize.width / sourceSize.height)
-        destinationSize = new Size(sourceSize.width * outputSize.height / sourceSize.height, outputSize.height);
-      else
-        destinationSize = new Size(outputSize.width, sourceSize.height * outputSize.width / sourceSize.width);
-      break;
-    case ImageFit.cover:
-      if (outputSize.width / outputSize.height > inputSize.width / inputSize.height) {
-        sourceSize = new Size(inputSize.width, inputSize.width * outputSize.height / outputSize.width);
-        sourcePosition = new Point(0.0, (inputSize.height - sourceSize.height) * (alignment?.dy ?? 0.5));
-      } else {
-        sourceSize = new Size(inputSize.height * outputSize.width / outputSize.height, inputSize.height);
-        sourcePosition = new Point((inputSize.width - sourceSize.width) * (alignment?.dx ?? 0.5), 0.0);
-      }
-      destinationSize = outputSize;
-      break;
-    case ImageFit.fitWidth:
-      sourceSize = new Size(inputSize.width, inputSize.width * outputSize.height / outputSize.width);
-      sourcePosition = new Point(0.0, (inputSize.height - sourceSize.height) * (alignment?.dy ?? 0.5));
-      destinationSize = new Size(outputSize.width, sourceSize.height * outputSize.width / sourceSize.width);
-      break;
-    case ImageFit.fitHeight:
-      sourceSize = new Size(inputSize.height * outputSize.width / outputSize.height, inputSize.height);
-      sourcePosition = new Point((inputSize.width - sourceSize.width) * (alignment?.dx ?? 0.5), 0.0);
-      destinationSize = new Size(sourceSize.width * outputSize.height / sourceSize.height, outputSize.height);
-      break;
-    case ImageFit.none:
-      sourceSize = new Size(math.min(inputSize.width, outputSize.width),
-                            math.min(inputSize.height, outputSize.height));
-      destinationSize = sourceSize;
-      break;
-    case ImageFit.scaleDown:
-      sourceSize = inputSize;
-      destinationSize = inputSize;
-      final double aspectRatio = inputSize.width / inputSize.height;
-      if (destinationSize.height > outputSize.height)
-        destinationSize = new Size(outputSize.height * aspectRatio, outputSize.height);
-      if (destinationSize.width > outputSize.width)
-        destinationSize = new Size(outputSize.width, outputSize.width / aspectRatio);
-      break;
-  }
+  final FittedSizes fittedSizes = applyImageFit(fit, inputSize, outputSize);
+  final Size sourceSize = fittedSizes.source;
+  Size destinationSize = fittedSizes.destination;
   if (centerSlice != null) {
     outputSize += sliceBorder;
     destinationSize += sliceBorder;
@@ -902,7 +829,9 @@ void paintImage({
     canvas.clipRect(rect);
   }
   if (centerSlice == null) {
-    Rect sourceRect = sourcePosition & sourceSize;
+    final Rect sourceRect = (alignment ?? FractionalOffset.center).inscribe(
+      fittedSizes.source, Point.origin & inputSize
+    );
     for (Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
       canvas.drawImageRect(image, sourceRect, tileRect, paint);
   } else {
@@ -911,136 +840,6 @@ void paintImage({
   }
   if (repeat != ImageRepeat.noRepeat)
     canvas.restore();
-}
-
-/// An offset that's expressed as a fraction of a Size.
-///
-/// FractionalOffset(1.0, 0.0) represents the top right of the Size,
-/// FractionalOffset(0.0, 1.0) represents the bottom left of the Size,
-class FractionalOffset {
-  /// Creates a fractional offset.
-  ///
-  /// The [dx] and [dy] arguments must not be null.
-  const FractionalOffset(this.dx, this.dy);
-
-  /// The distance fraction in the horizontal direction.
-  ///
-  /// A value of 0.0 cooresponds to the leftmost edge. A value of 1.0
-  /// cooresponds to the rightmost edge.
-  final double dx;
-
-  /// The distance fraction in the vertical direction.
-  ///
-  /// A value of 0.0 cooresponds to the topmost edge. A value of 1.0
-  /// cooresponds to the bottommost edge.
-  final double dy;
-
-  /// The top left corner.
-  static const FractionalOffset topLeft = const FractionalOffset(0.0, 0.0);
-
-  /// The center point along the top edge.
-  static const FractionalOffset topCenter = const FractionalOffset(0.5, 0.0);
-
-  /// The top right corner.
-  static const FractionalOffset topRight = const FractionalOffset(1.0, 0.0);
-
-  /// The bottom left corner.
-  static const FractionalOffset bottomLeft = const FractionalOffset(0.0, 1.0);
-
-  /// The center point along the bottom edge.
-  static const FractionalOffset bottomCenter = const FractionalOffset(0.5, 1.0);
-
-  /// The bottom right corner.
-  static const FractionalOffset bottomRight = const FractionalOffset(1.0, 1.0);
-
-  /// The center point along the left edge.
-  static const FractionalOffset centerLeft = const FractionalOffset(0.0, 0.5);
-
-  /// The center point along the right edge.
-  static const FractionalOffset centerRight = const FractionalOffset(1.0, 0.5);
-
-  /// The center point, both horizontally and vertically.
-  static const FractionalOffset center = const FractionalOffset(0.5, 0.5);
-
-  /// Returns the negation of the given fractional offset.
-  FractionalOffset operator -() {
-    return new FractionalOffset(-dx, -dy);
-  }
-
-  /// Returns the difference between two fractional offsets.
-  FractionalOffset operator -(FractionalOffset other) {
-    return new FractionalOffset(dx - other.dx, dy - other.dy);
-  }
-
-  /// Returns the sum of two fractional offsets.
-  FractionalOffset operator +(FractionalOffset other) {
-    return new FractionalOffset(dx + other.dx, dy + other.dy);
-  }
-
-  /// Scales the fractional offset in each dimension by the given factor.
-  FractionalOffset operator *(double other) {
-    return new FractionalOffset(dx * other, dy * other);
-  }
-
-  /// Divides the fractional offset in each dimension by the given factor.
-  FractionalOffset operator /(double other) {
-    return new FractionalOffset(dx / other, dy / other);
-  }
-
-  /// Integer divides the fractional offset in each dimension by the given factor.
-  FractionalOffset operator ~/(double other) {
-    return new FractionalOffset((dx ~/ other).toDouble(), (dy ~/ other).toDouble());
-  }
-
-  /// Computes the remainder in each dimension by the given factor.
-  FractionalOffset operator %(double other) {
-    return new FractionalOffset(dx % other, dy % other);
-  }
-
-  /// Returns the offset that is this fraction in the direction of the given offset.
-  Offset alongOffset(Offset other) {
-    return new Offset(dx * other.dx, dy * other.dy);
-  }
-
-  /// Returns the offset that is this fraction within the given size.
-  Offset alongSize(Size other) {
-    return new Offset(dx * other.width, dy * other.height);
-  }
-
-  /// Returns the point that is this fraction within the given rect.
-  Point withinRect(Rect rect) {
-    return new Point(rect.left + dx * rect.width, rect.top + dy * rect.height);
-  }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! FractionalOffset)
-      return false;
-    final FractionalOffset typedOther = other;
-    return dx == typedOther.dx &&
-           dy == typedOther.dy;
-  }
-
-  @override
-  int get hashCode => hashValues(dx, dy);
-
-  /// Linearly interpolate between two EdgeInsets.
-  ///
-  /// If either is null, this function interpolates from [FractionalOffset.topLeft].
-  // TODO(abarth): Consider interpolating from [FractionalOffset.center] instead
-  // to remove upper-left bias.
-  static FractionalOffset lerp(FractionalOffset a, FractionalOffset b, double t) {
-    if (a == null && b == null)
-      return null;
-    if (a == null)
-      return new FractionalOffset(b.dx * t, b.dy * t);
-    if (b == null)
-      return new FractionalOffset(b.dx * (1.0 - t), b.dy * (1.0 - t));
-    return new FractionalOffset(ui.lerpDouble(a.dx, b.dx, t), ui.lerpDouble(a.dy, b.dy, t));
-  }
-
-  @override
-  String toString() => '$runtimeType($dx, $dy)';
 }
 
 /// A background image for a box.
