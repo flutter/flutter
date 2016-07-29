@@ -46,7 +46,7 @@ class TestProvider extends ImageProvider<int> {
 
 Future<ImageInfo> extractOneFrame(ImageStream stream) {
   Completer<ImageInfo> completer = new Completer<ImageInfo>();
-  void listener(ImageInfo image) {
+  void listener(ImageInfo image, bool synchronousCall) {
     completer.complete(image);
     stream.removeListener(listener);
   }
