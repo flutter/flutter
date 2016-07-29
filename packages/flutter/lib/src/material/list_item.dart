@@ -154,10 +154,8 @@ class ListItem extends StatelessWidget {
       children.add(new Container(
         margin: const EdgeInsets.only(right: 16.0),
         width: 40.0,
-        child: new Align(
-          alignment: FractionalOffset.centerLeft,
-          child: leading
-        )
+        align: FractionalOffset.centerLeft,
+        child: leading
       ));
     }
 
@@ -188,10 +186,8 @@ class ListItem extends StatelessWidget {
     if (trailing != null) {
       children.add(new Container(
         margin: const EdgeInsets.only(left: 16.0),
-        child: new Align(
-          alignment: FractionalOffset.centerRight,
-          child: trailing
-        )
+        align: FractionalOffset.centerRight,
+        child: trailing
       ));
     }
 

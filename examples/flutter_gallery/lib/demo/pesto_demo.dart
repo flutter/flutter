@@ -331,7 +331,7 @@ class _RecipePageState extends State<_RecipePage> {
     const double fabHalfSize = 28.0;  // TODO(mpcomplete): needs to adapt to screen size
     return new Hero(
       tag: config.recipe.imagePath,
-      child: new DecoratedBox(
+      child: new Container(
         decoration: new BoxDecoration(
           backgroundColor: Theme.of(context).canvasColor,
           backgroundImage: new BackgroundImage(
@@ -340,33 +340,31 @@ class _RecipePageState extends State<_RecipePage> {
             fit: fullWidth ? ImageFit.fitWidth : ImageFit.cover
           )
         ),
-        child: new Align(
-          alignment: FractionalOffset.bottomCenter,
-          child: new Block(
-            children: <Widget>[
-              new Padding(
-                padding: new EdgeInsets.only(top: _getAppBarHeight(context)),
-                child: new Stack(
-                  children: <Widget>[
-                    new Padding(
-                      padding: new EdgeInsets.only(top: fabHalfSize),
-                      child: new SizedBox(
-                        width: fullWidth ? null : _kRecipePageMaxWidth,
-                        child: new _RecipeSheet(recipe: config.recipe)
-                      )
-                    ),
-                    new Positioned(
-                      right: 16.0,
-                      child: new FloatingActionButton(
-                        child: new Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
-                        onPressed: _toggleFavorite
-                      )
+        align: FractionalOffset.bottomCenter,
+        child: new Block(
+          children: <Widget>[
+            new Padding(
+              padding: new EdgeInsets.only(top: _getAppBarHeight(context)),
+              child: new Stack(
+                children: <Widget>[
+                  new Padding(
+                    padding: new EdgeInsets.only(top: fabHalfSize),
+                    child: new SizedBox(
+                      width: fullWidth ? null : _kRecipePageMaxWidth,
+                      child: new _RecipeSheet(recipe: config.recipe)
                     )
-                  ]
-                )
+                  ),
+                  new Positioned(
+                    right: 16.0,
+                    child: new FloatingActionButton(
+                      child: new Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
+                      onPressed: _toggleFavorite
+                    )
+                  )
+                ]
               )
-            ]
-          )
+            )
+          ]
         )
       )
     );

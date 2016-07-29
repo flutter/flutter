@@ -406,21 +406,19 @@ class DataTable extends StatelessWidget {
     label = new Container(
       padding: padding,
       height: _kHeadingRowHeight,
-      child: new Align(
-        alignment: new FractionalOffset(numeric ? 1.0 : 0.0, 0.5), // TODO(ianh): RTL for non-numeric
-        child: new AnimatedDefaultTextStyle(
-          style: new TextStyle(
-            // TODO(ianh): font family should be Roboto; see https://github.com/flutter/flutter/issues/3116
-            fontWeight: FontWeight.w500,
-            fontSize: _kHeadingFontSize,
-            height: _kHeadingRowHeight / _kHeadingFontSize,
-            color: (Theme.of(context).brightness == Brightness.light)
-              ? ((onSort != null && sorted) ? Colors.black87 : Colors.black54)
-              : ((onSort != null && sorted) ? Colors.white : Colors.white70)
-          ),
-          duration: _kSortArrowAnimationDuration,
-          child: label
-        )
+      align: new FractionalOffset(numeric ? 1.0 : 0.0, 0.5), // TODO(ianh): RTL for non-numeric
+      child: new AnimatedDefaultTextStyle(
+        style: new TextStyle(
+          // TODO(ianh): font family should be Roboto; see https://github.com/flutter/flutter/issues/3116
+          fontWeight: FontWeight.w500,
+          fontSize: _kHeadingFontSize,
+          height: _kHeadingRowHeight / _kHeadingFontSize,
+          color: (Theme.of(context).brightness == Brightness.light)
+            ? ((onSort != null && sorted) ? Colors.black87 : Colors.black54)
+            : ((onSort != null && sorted) ? Colors.white : Colors.white70)
+        ),
+        duration: _kSortArrowAnimationDuration,
+        child: label
       )
     );
     if (tooltip != null) {
@@ -458,23 +456,21 @@ class DataTable extends StatelessWidget {
     label = new Container(
       padding: padding,
       height: _kDataRowHeight,
-      child: new Align(
-        alignment: new FractionalOffset(numeric ? 1.0 : 0.0, 0.5), // TODO(ianh): RTL for non-numeric
-        child: new DefaultTextStyle(
-          style: new TextStyle(
-            // TODO(ianh): font family should be Roboto; see https://github.com/flutter/flutter/issues/3116
-            fontSize: 13.0,
-            color: isLightTheme
-              ? (placeholder ? Colors.black38 : Colors.black87)
-              : (placeholder ? Colors.white30 : Colors.white70)
+      align: new FractionalOffset(numeric ? 1.0 : 0.0, 0.5), // TODO(ianh): RTL for non-numeric
+      child: new DefaultTextStyle(
+        style: new TextStyle(
+          // TODO(ianh): font family should be Roboto; see https://github.com/flutter/flutter/issues/3116
+          fontSize: 13.0,
+          color: isLightTheme
+            ? (placeholder ? Colors.black38 : Colors.black87)
+            : (placeholder ? Colors.white30 : Colors.white70)
+        ),
+        child: new IconTheme.merge(
+          context: context,
+          data: new IconThemeData(
+            color: isLightTheme ? Colors.black54 : Colors.white70
           ),
-          child: new IconTheme.merge(
-            context: context,
-            data: new IconThemeData(
-              color: isLightTheme ? Colors.black54 : Colors.white70
-            ),
-            child: new DropDownButtonHideUnderline(child: label)
-          )
+          child: new DropDownButtonHideUnderline(child: label)
         )
       )
     );

@@ -370,22 +370,20 @@ class RefreshIndicatorState extends State<RefreshIndicator> {
                 padding: _isIndicatorAtTop
                   ? new EdgeInsets.only(top: config.displacement)
                   : new EdgeInsets.only(bottom: config.displacement),
-                child: new Align(
-                  alignment: _isIndicatorAtTop
-                    ? FractionalOffset.bottomCenter
-                    : FractionalOffset.topCenter,
-                  child: new ScaleTransition(
-                    scale: _scaleFactor,
-                    child: new AnimatedBuilder(
-                      animation: _sizeController,
-                      builder: (BuildContext context, Widget child) {
-                        return new RefreshProgressIndicator(
-                          value: showIndeterminateIndicator ? null : _value.value,
-                          valueColor: _valueColor,
-                          backgroundColor: config.backgroundColor
-                        );
-                      }
-                    )
+                align: _isIndicatorAtTop
+                  ? FractionalOffset.bottomCenter
+                  : FractionalOffset.topCenter,
+                child: new ScaleTransition(
+                  scale: _scaleFactor,
+                  child: new AnimatedBuilder(
+                    animation: _sizeController,
+                    builder: (BuildContext context, Widget child) {
+                      return new RefreshProgressIndicator(
+                        value: showIndeterminateIndicator ? null : _value.value,
+                        valueColor: _valueColor,
+                        backgroundColor: config.backgroundColor
+                      );
+                    }
                   )
                 )
               )
