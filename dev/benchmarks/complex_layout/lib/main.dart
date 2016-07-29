@@ -417,7 +417,7 @@ class ItemImageBox extends StatelessWidget {
                   child: new Container(
                     decoration: new BoxDecoration(
                       backgroundColor: Colors.black54,
-                      borderRadius: 2.0
+                      borderRadius: new BorderRadius.circular(2.0)
                     ),
                     padding: new EdgeInsets.all(4.0),
                     child: new RichText(

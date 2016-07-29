@@ -112,7 +112,7 @@ class Chip extends StatelessWidget {
         padding: new EdgeInsets.only(left: leftPadding, right: rightPadding),
         decoration: new BoxDecoration(
           backgroundColor: Colors.grey[300],
-          borderRadius: 16.0
+          borderRadius: new BorderRadius.circular(16.0)
         ),
         child: new Row(
           children: children,

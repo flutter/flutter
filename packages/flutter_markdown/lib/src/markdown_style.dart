@@ -33,12 +33,12 @@ class MarkdownStyle extends MarkdownStyleRaw{
     blockquotePadding: 8.0,
     blockquoteDecoration: new BoxDecoration(
       backgroundColor: Colors.blue[100],
-      borderRadius: 2.0
+      borderRadius: new BorderRadius.circular(2.0)
     ),
     codeblockPadding: 8.0,
     codeblockDecoration: new BoxDecoration(
       backgroundColor: Colors.grey[100],
-      borderRadius: 2.0
+      borderRadius: new BorderRadius.circular(2.0)
     )
   );
 
@@ -67,12 +67,12 @@ class MarkdownStyle extends MarkdownStyleRaw{
     blockquotePadding: 8.0,
     blockquoteDecoration: new BoxDecoration(
       backgroundColor: Colors.blue[100],
-      borderRadius: 2.0
+      borderRadius: new BorderRadius.circular(2.0)
     ),
     codeblockPadding: 8.0,
     codeblockDecoration: new BoxDecoration(
       backgroundColor: Colors.grey[100],
-      borderRadius: 2.0
+      borderRadius: new BorderRadius.circular(2.0)
     )
   );
 }
