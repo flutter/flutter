@@ -112,9 +112,21 @@ If you're going to be debugging crashes in the engine, make sure you add
 `android/AndroidManifest.xml` file for the Flutter app you are using
 to test the engine.
 
-### iOS
+### iOS (cross-compiling from Mac)
 
-See [this wiki page](https://github.com/flutter/engine/wiki/Flutter-Apps-on-iOS).
+* Make sure you have Xcode 7.3.0+ installed.
+* `gclient sync` to update dependencies.
+* `./sky/tools/gn --ios --unoptimized` to prepare build files.
+  * For a discussion on the various flags and modes, [read this discussion](https://github.com/flutter/flutter/wiki/Flutter's-modes).
+* `ninja -C out/ios_debug_unopt` to build iOS artifacts.
+
+Once the artifacts are built, you can start using them in your application by following these steps:
+* `cd /path/to/flutter/examples/hello_world`
+* `pub get`
+* `../../bin/flutter run --local-engine-src-path /path/to/engine/src --local-engine=ios_debug_unopt`
+  * Depending on the configuration you built, modify the `local-engine` flag.
+* If you are debugging crashes in the engine, you can connect the `LLDB` debugger from `Xcode` by opening `ios/Runner.xcodeproj` and starting the application by clicking the Run button (CMD + R).
+
 
 ### Desktop (Mac and Linux), for tests
 
