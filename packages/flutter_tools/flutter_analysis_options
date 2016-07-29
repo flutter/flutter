@@ -35,8 +35,9 @@ linter:
     - avoid_empty_else
     # - comment_references # blocked on https://github.com/dart-lang/dartdoc/issues/1153
     - control_flow_in_finally
+    - empty_statements
     - hash_and_equals
-    # - iterable_contains_unrelated_type # https://github.com/dart-lang/linter/issues/245
+    - iterable_contains_unrelated_type
     - test_types_in_equals
     - throw_in_finally
     - unrelated_type_equality_checks
@@ -58,7 +59,7 @@ linter:
     - library_prefixes
     - non_constant_identifier_names
     - one_member_abstracts
-    # - overriden_field # the analyzer code itself violates this right now :-)
+    # - overridden_fields # the analyzer code itself violates this right now :-)
     - package_api_docs
     - package_prefixed_library_names
     - prefer_is_not_empty

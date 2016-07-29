@@ -21,7 +21,7 @@ dependencies:
   # "pub get" for spam about "drudge".
   json_schema: 1.0.3
 
-  linter: ^0.1.17
+  linter: ^0.1.21
   meta: ^0.12.0
   mustache4dart: ^1.0.0
   package_config: '>=0.1.5 <2.0.0'
