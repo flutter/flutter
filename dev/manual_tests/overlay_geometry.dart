@@ -125,6 +125,11 @@ class CardBuilder extends LazyBlockDelegate {
   bool shouldRebuild(CardBuilder oldDelegate) {
     return oldDelegate.cardModels != cardModels;
   }
+
+  @override
+  double estimateTotalExtent(int firstIndex, int lastIndex, double minOffset, double firstStartOffset, double lastEndOffset) {
+    return (lastEndOffset - minOffset) * cardModels.length / (lastIndex + 1);
+  }
 }
 
 class OverlayGeometryAppState extends State<OverlayGeometryApp> {

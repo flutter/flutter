@@ -64,6 +64,11 @@ class FancyItemDelegate extends LazyBlockDelegate {
 
   @override
   bool shouldRebuild(FancyItemDelegate oldDelegate) => false;
+
+  @override
+  double estimateTotalExtent(int firstIndex, int lastIndex, double minOffset, double firstStartOffset, double lastEndOffset) {
+    return double.INFINITY;
+  }
 }
 
 class ComplexLayoutState extends State<ComplexLayout> {

@@ -58,10 +58,10 @@ void main() {
 
     // sanity check
     expect(find.text('MARKET'), findsOneWidget);
-    expect(find.text('Help & Feedback'), findsNothing);
+    expect(find.text('Account Balance'), findsNothing);
     await tester.pump(new Duration(seconds: 2));
     expect(find.text('MARKET'), findsOneWidget);
-    expect(find.text('Help & Feedback'), findsNothing);
+    expect(find.text('Account Balance'), findsNothing);
 
     // drag the drawer out
     Point left = new Point(0.0, ui.window.size.height / 2.0);
@@ -73,12 +73,12 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(find.text('MARKET'), findsOneWidget);
-    expect(find.text('Help & Feedback'), findsOneWidget);
+    expect(find.text('Account Balance'), findsOneWidget);
 
     // check the colour of the icon - light mode
     checkIconColor(tester, 'Stock List', Colors.purple[500]); // theme primary color
-    checkIconColor(tester, 'Account Balance', Colors.black45); // enabled
-    checkIconColor(tester, 'Help & Feedback', Colors.black26); // disabled
+    checkIconColor(tester, 'Account Balance', Colors.black26); // disabled
+    checkIconColor(tester, 'About', Colors.black45); // enabled
 
     // switch to dark mode
     await tester.tap(find.text('Pessimistic'));
@@ -88,7 +88,7 @@ void main() {
 
     // check the colour of the icon - dark mode
     checkIconColor(tester, 'Stock List', Colors.redAccent[200]); // theme accent color
-    checkIconColor(tester, 'Account Balance', Colors.white); // enabled
-    checkIconColor(tester, 'Help & Feedback', Colors.white30); // disabled
+    checkIconColor(tester, 'Account Balance', Colors.white30); // disabled
+    checkIconColor(tester, 'About', Colors.white); // enabled
   });
 }

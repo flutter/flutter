@@ -27,7 +27,7 @@ Widget buildFrame(ViewportAnchor scrollAnchor) {
 }
 
 void main() {
-  testWidgets('Drag horizontally with scroll anchor at top', (WidgetTester tester) async {
+  testWidgets('Drag horizontally with scroll anchor at start', (WidgetTester tester) async {
     await tester.pumpWidget(buildFrame(ViewportAnchor.start));
 
     await tester.pump(const Duration(seconds: 1));

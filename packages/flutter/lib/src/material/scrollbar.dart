@@ -64,10 +64,10 @@ class _Painter extends CustomPainter {
   @override
   bool shouldRepaint(_Painter oldPainter) {
     return oldPainter.scrollOffset != scrollOffset
-      || oldPainter.scrollDirection != scrollDirection
-      || oldPainter.contentExtent != contentExtent
-      || oldPainter.containerExtent != containerExtent
-      || oldPainter.color != color;
+        || oldPainter.scrollDirection != scrollDirection
+        || oldPainter.contentExtent != contentExtent
+        || oldPainter.containerExtent != containerExtent
+        || oldPainter.color != color;
   }
 }
 
@@ -98,7 +98,6 @@ class Scrollbar extends StatefulWidget {
 class _ScrollbarState extends State<Scrollbar> {
   final AnimationController _fade = new AnimationController(duration: _kScrollbarThumbFadeDuration);
   CurvedAnimation _opacity;
-  double _scrollOffsetAnchor;
   double _scrollOffset;
   Axis _scrollDirection;
   double _containerExtent;
@@ -119,28 +118,25 @@ class _ScrollbarState extends State<Scrollbar> {
   void _updateState(ScrollableState scrollable) {
     if (scrollable.scrollBehavior is! ExtentScrollBehavior)
       return;
+    if (_scrollOffset != scrollable.scrollOffset)
+      setState(() { _scrollOffset = scrollable.scrollOffset; });
+    if (_scrollDirection != scrollable.config.scrollDirection)
+      setState(() { _scrollDirection = scrollable.config.scrollDirection; });
     final ExtentScrollBehavior scrollBehavior = scrollable.scrollBehavior;
-    _scrollOffset = scrollable.scrollOffset;
-    _scrollDirection = scrollable.config.scrollDirection;
-    _contentExtent = scrollBehavior.contentExtent;
-    _containerExtent = scrollBehavior.containerExtent;
+    if (_contentExtent != scrollBehavior.contentExtent)
+      setState(() { _contentExtent = scrollBehavior.contentExtent; });
+    if (_containerExtent != scrollBehavior.containerExtent)
+      setState(() { _containerExtent = scrollBehavior.containerExtent; });
   }
 
   void _onScrollStarted(ScrollableState scrollable) {
     _updateState(scrollable);
-    _scrollOffsetAnchor = _scrollOffset;
   }
 
   void _onScrollUpdated(ScrollableState scrollable) {
     _updateState(scrollable);
-    if (!_fade.isAnimating) {
-      if (_scrollOffsetAnchor != _scrollOffset && _fade.value == 0.0)
-        _fade.forward(); // Lazily start the scrollbar fade-in.
-      setState(() {
-        // If the scrollbar has faded in, rebuild it per the new scrollable state.
-        // If the fade-in is underway this setState() will have no effect.
-      });
-    }
+    if (_fade.status != AnimationStatus.completed)
+      _fade.forward();
   }
 
   void _onScrollEnded(ScrollableState scrollable) {
@@ -150,8 +146,8 @@ class _ScrollbarState extends State<Scrollbar> {
 
   bool _handleScrollNotification(ScrollNotification notification) {
     if (config.scrollableKey == null) {
-        if (notification.depth != 0)
-          return false;
+      if (notification.depth != 0)
+        return false;
     } else if (config.scrollableKey != notification.scrollable.config.key) {
       return false;
     }

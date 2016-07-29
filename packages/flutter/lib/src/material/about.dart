@@ -17,6 +17,7 @@ import 'icon.dart';
 import 'page.dart';
 import 'progress_indicator.dart';
 import 'scaffold.dart';
+import 'scrollbar.dart';
 import 'theme.dart';
 
 /// A [DrawerItem] to show an about box.
@@ -426,10 +427,12 @@ class _LicensePageState extends State<LicensePage> {
       ),
       body: new DefaultTextStyle(
         style: Theme.of(context).textTheme.caption,
-        child: new LazyBlock(
-          padding: new EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
-          delegate: new LazyBlockChildren(
-            children: contents
+        child: new Scrollbar(
+          child: new LazyBlock(
+            padding: new EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+            delegate: new LazyBlockChildren(
+              children: contents
+            )
           )
         )
       )

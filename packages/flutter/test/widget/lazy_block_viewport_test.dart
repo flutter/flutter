@@ -267,13 +267,19 @@ void main() {
   });
 
   testWidgets('Underflow extents', (WidgetTester tester) async {
-    double lastContentExtent;
-    double lastContainerExtent;
+    int lastFirstIndex;
+    int lastLastIndex;
+    double lastFirstStartOffset;
+    double lastLastEndOffset;
     double lastMinScrollOffset;
-    void handleExtendsChanged(double contentExtent, double containerExtent, double minScrollOffset) {
-      lastContentExtent = contentExtent;
-      lastContainerExtent = containerExtent;
+    double lastContainerExtent;
+    void handleExtendsChanged(int firstIndex, int lastIndex, double firstStartOffset, double lastEndOffset, double minScrollOffset, double containerExtent) {
+      lastFirstIndex = firstIndex;
+      lastLastIndex = lastIndex;
+      lastFirstStartOffset = firstStartOffset;
+      lastLastEndOffset = lastEndOffset;
       lastMinScrollOffset = minScrollOffset;
+      lastContainerExtent = containerExtent;
     }
 
     await tester.pumpWidget(new LazyBlockViewport(
@@ -287,8 +293,11 @@ void main() {
       )
     ));
 
-    expect(lastContentExtent, equals(300.0));
-    expect(lastContainerExtent, equals(600.0));
-    expect(lastMinScrollOffset, equals(0.0));
+    expect(lastFirstIndex, 0);
+    expect(lastLastIndex, 2);
+    expect(lastFirstStartOffset, 0.0);
+    expect(lastLastEndOffset, 300.0);
+    expect(lastContainerExtent, 600.0);
+    expect(lastMinScrollOffset, 0.0);
   });
 }
