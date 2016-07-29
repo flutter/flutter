@@ -33,8 +33,8 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 /// specified:
 ///
 /// * [new Image], for obtaining an image from an [ImageProvider].
-/// * [new Image.fromNetwork], for obtaining an image from a URL.
-/// * [new Image.fromAssetBundle], for obtaining an image from an [AssetBundle]
+/// * [new Image.network], for obtaining an image from a URL.
+/// * [new Image.asset], for obtaining an image from an [AssetBundle]
 ///   using a key.
 ///
 /// To automatically perform pixel-density-aware asset resolution, specify the
@@ -47,7 +47,7 @@ class Image extends StatefulWidget {
   /// Creates a widget that displays an image.
   ///
   /// To show an image from the network or from an asset bundle, consider using
-  /// [new Image.fromNetwork] and [new Image.fromAssetBundle] respectively.
+  /// [new Image.network] and [new Image.asset] respectively.
   ///
   /// The [image] and [repeat] arguments must not be null.
   Image({
@@ -68,9 +68,8 @@ class Image extends StatefulWidget {
   /// Creates a widget that displays an [ImageStream] obtained from the network.
   ///
   /// The [src], [scale], and [repeat] arguments must not be null.
-  Image.fromNetwork({
+  Image.network(String src, {
     Key key,
-    @required String src,
     double scale: 1.0,
     this.width,
     this.height,
@@ -96,10 +95,9 @@ class Image extends StatefulWidget {
   /// size-aware asset resolution will be attempted also.
   ///
   /// The [name] and [repeat] arguments must not be null.
-  Image.fromAssetBundle({
+  Image.asset(String name, {
     Key key,
     AssetBundle bundle,
-    @required String name,
     double scale,
     this.width,
     this.height,

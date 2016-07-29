@@ -96,8 +96,8 @@ class GalleryHomeState extends State<GalleryHome> {
       appBar: new AppBar(
         expandedHeight: _kFlexibleSpaceMaxHeight,
         flexibleSpace: new FlexibleSpaceBar(
-          background: new Image.fromAssetBundle(
-            name: 'packages/flutter_gallery_assets/appbar_background.jpg',
+          background: new Image.asset(
+            'packages/flutter_gallery_assets/appbar_background.jpg',
             fit: ImageFit.cover,
             height: _kFlexibleSpaceMaxHeight
           ),
