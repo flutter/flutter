@@ -485,8 +485,8 @@ class _Block {
       }
     }
 
-    return new Image(
-      image: new NetworkImage(path),
+    return new Image.fromNetwork(
+      src: path,
       width: width,
       height: height
     );
