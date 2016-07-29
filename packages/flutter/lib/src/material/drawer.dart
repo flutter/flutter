@@ -122,6 +122,7 @@ class DrawerControllerState extends State<DrawerController> {
 
   @override
   void dispose() {
+    _historyEntry?.remove();
     _controller
       ..removeListener(_animationChanged)
       ..removeStatusListener(_animationStatusChanged)
