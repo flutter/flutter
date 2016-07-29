@@ -41,10 +41,7 @@ class OrderItem extends StatelessWidget {
                 height: 248.0,
                 child: new Hero(
                   tag: productHeroTag,
-                  child: new Image.fromAssetBundle(
-                    name: product.imageAsset,
-                    fit: ImageFit.contain
-                  )
+                  child: new Image.asset(product.imageAsset, fit: ImageFit.contain)
                 )
               )
             ),
@@ -201,10 +198,7 @@ class _OrderPageState extends State<OrderPage> {
               .map((Product product) {
               return new Card(
                 elevation: 0,
-                child: new Image.fromAssetBundle(
-                  name: product.imageAsset,
-                  fit: ImageFit.contain
-                )
+                child: new Image.asset(product.imageAsset, fit: ImageFit.contain)
               );
             }).toList()
           )

@@ -51,7 +51,7 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
                   new RaisedButton(
                     child: new Row(
                       children: <Widget>[
-                        new Image.fromNetwork(src: 'http://flutter.io/favicon.ico'),
+                        new Image.network('http://flutter.io/favicon.ico'),
                         new Text('PRESS ME'),
                       ]
                     ),

@@ -129,8 +129,8 @@ class ContactsDemoState extends State<ContactsDemo> {
             title : new Text('Ali Connors'),
             background: new Stack(
               children: <Widget>[
-                new Image.fromAssetBundle(
-                  name: 'packages/flutter_gallery_assets/ali_connors.png',
+                new Image.asset(
+                  'packages/flutter_gallery_assets/ali_connors.png',
                   fit: ImageFit.cover,
                   height: _appBarHeight
                 ),

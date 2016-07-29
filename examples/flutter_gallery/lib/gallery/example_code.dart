@@ -222,10 +222,7 @@ new ScrollableGrid(
       footer: new GridTileBar(
         title: new Text(url)
       ),
-      child: new Image.fromNetwork(
-        src: url,
-        fit: ImageFit.cover
-      )
+      child: new Image.network(url, fit: ImageFit.cover)
     );
   })
 );

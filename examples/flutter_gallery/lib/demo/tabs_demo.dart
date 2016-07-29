@@ -99,10 +99,7 @@ class _CardDataItem extends StatelessWidget {
             new SizedBox(
               width: 144.0,
               height: 144.0,
-              child: new Image.fromAssetBundle(
-                name: data.imageAsset,
-                fit: ImageFit.contain
-              )
+              child: new Image.asset(data.imageAsset, fit: ImageFit.contain)
             ),
             new Center(
               child: new Text(data.title, style: Theme.of(context).textTheme.title)

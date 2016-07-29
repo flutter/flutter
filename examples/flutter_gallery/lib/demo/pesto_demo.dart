@@ -105,10 +105,7 @@ class _PestoDemoState extends State<PestoDemo> {
               bottom: extraPadding
             ),
             child: new Center(
-              child: new Image.fromAssetBundle(
-                name: _kLogoImages[bestHeight],
-                fit: ImageFit.scaleDown
-              )
+              child: new Image.asset(_kLogoImages[bestHeight], fit: ImageFit.scaleDown)
             )
           );
         }
@@ -134,10 +131,7 @@ class _PestoDemoState extends State<PestoDemo> {
                   padding: const EdgeInsets.all(2.0),
                   margin: const EdgeInsets.only(bottom: 16.0),
                   child: new ClipOval(
-                    child: new Image.fromAssetBundle(
-                      name: _kUserImage,
-                      fit: ImageFit.contain
-                    )
+                    child: new Image.asset(_kUserImage, fit: ImageFit.contain)
                   )
                 ),
                 new Text(_kUserName, style: userStyle),
@@ -237,17 +231,14 @@ class _RecipeCard extends StatelessWidget {
           child: new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              new Image.fromAssetBundle(
-                name: recipe.imagePath,
-                fit: ImageFit.contain
-              ),
+              new Image.asset(recipe.imagePath, fit: ImageFit.contain),
               new Flexible(
                 child: new Row(
                   children: <Widget>[
                     new Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: new Image.fromAssetBundle(
-                        name: recipe.ingredientsImagePath,
+                      child: new Image.asset(
+                        recipe.ingredientsImagePath,
                         width: 48.0,
                         height: 48.0
                       )
@@ -420,8 +411,8 @@ class _RecipeSheet extends StatelessWidget {
               children: <Widget>[
                 new TableCell(
                   verticalAlignment: TableCellVerticalAlignment.middle,
-                  child: new Image.fromAssetBundle(
-                    name: recipe.ingredientsImagePath,
+                  child: new Image.asset(
+                    recipe.ingredientsImagePath,
                     width: 32.0,
                     height: 32.0,
                     alignment: FractionalOffset.centerLeft,

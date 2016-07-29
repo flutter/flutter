@@ -78,10 +78,7 @@ class VendorItem extends StatelessWidget {
             child: new ClipRRect(
               xRadius: 12.0,
               yRadius: 12.0,
-              child: new Image.fromAssetBundle(
-                name: vendor.avatarAsset,
-                fit: ImageFit.cover
-              )
+              child: new Image.asset(vendor.avatarAsset, fit: ImageFit.cover)
             )
           ),
           new SizedBox(width: 8.0),
@@ -209,10 +206,7 @@ class FeatureItem extends StatelessWidget {
                         minHeight: 340.0,
                         maxHeight: 340.0,
                         alignment: FractionalOffset.topRight,
-                        child: new Image.fromAssetBundle(
-                          name: product.imageAsset,
-                          fit: ImageFit.cover
-                        )
+                        child: new Image.asset(product.imageAsset, fit: ImageFit.cover)
                       )
                     )
                   ),
@@ -273,10 +267,7 @@ class ProductItem extends StatelessWidget {
                 child: new Hero(
                     tag: productHeroTag,
                     key: new ObjectKey(product),
-                    child: new Image.fromAssetBundle(
-                      name: product.imageAsset,
-                      fit: ImageFit.contain
-                    )
+                    child: new Image.asset(product.imageAsset, fit: ImageFit.contain)
                   )
                 ),
               new Padding(
