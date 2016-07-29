@@ -1217,8 +1217,10 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
     if (scrollVelocity.abs() > _kMinFlingVelocity) {
       final int selectionDelta = scrollVelocity.sign.truncate();
       final int targetIndex = (_selection.index + selectionDelta).clamp(0, _tabCount - 1);
-      _selection.value = _selection.values[targetIndex];
-      return new Future<Null>.value();
+      if (_selection.index != targetIndex) {
+        _selection.value = _selection.values[targetIndex];
+        return new Future<Null>.value();
+      }
     }
 
     final int selectionIndex = _selection.index;

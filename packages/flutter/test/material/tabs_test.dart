@@ -31,11 +31,35 @@ Widget buildFrame({ List<String> tabs, String value, bool isScrollable: false, K
     child: new TabBarSelection<String>(
       value: value,
       values: tabs,
-      onChanged: null,
       child: new TabBar<String>(
         key: tabBarKey,
         labels: new Map<String, TabLabel>.fromIterable(tabs, value: (String tab) => new TabLabel(text: tab)),
         isScrollable: isScrollable
+      )
+    )
+  );
+}
+
+
+Widget buildLeftRightApp({ List<String> tabs, String value }) {
+  return new MaterialApp(
+    theme: new ThemeData(platform: TargetPlatform.android),
+    home: new TabBarSelection<String>(
+      value: value,
+      values: tabs,
+      child: new Scaffold(
+        appBar: new AppBar(
+          title: new Text('tabs'),
+          bottom: new TabBar<String>(
+            labels: new Map<String, TabLabel>.fromIterable(tabs, value: (String tab) => new TabLabel(text: tab)),
+          )
+        ),
+        body: new TabBarView<String>(
+          children: <Widget>[
+            new Center(child: new Text('LEFT CHILD')),
+            new Center(child: new Text('RIGHT CHILD'))
+          ]
+        )
       )
     )
   );
@@ -228,4 +252,61 @@ void main() {
     await tester.pumpWidget(builder());
     expect(findStateMarkerState(tabs[1]).marker, equals('marked'));
   });
+
+  testWidgets('TabBar left/right fling', (WidgetTester tester) async {
+    List<String> tabs = <String>['LEFT', 'RIGHT'];
+
+    await tester.pumpWidget(buildLeftRightApp(tabs: tabs, value: 'LEFT'));
+    expect(find.text('LEFT'), findsOneWidget);
+    expect(find.text('RIGHT'), findsOneWidget);
+    expect(find.text('LEFT CHILD'), findsOneWidget);
+    expect(find.text('RIGHT CHILD'), findsNothing);
+
+    TabBarSelectionState<String> selection = TabBarSelection.of(tester.element(find.text('LEFT')));
+    expect(selection.value, equals('LEFT'));
+
+    // Fling to the left, switch from the 'LEFT' tab to the 'RIGHT'
+    Point flingStart = tester.getCenter(find.text('LEFT CHILD'));
+    await tester.flingFrom(flingStart, new Offset(-200.0, 0.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    expect(selection.value, equals('RIGHT'));
+    expect(find.text('LEFT CHILD'), findsNothing);
+    expect(find.text('RIGHT CHILD'), findsOneWidget);
+
+    // Fling to the right, switch back to the 'LEFT' tab
+    flingStart = tester.getCenter(find.text('RIGHT CHILD'));
+    await tester.flingFrom(flingStart, new Offset(200.0, 0.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    expect(selection.value, equals('LEFT'));
+    expect(find.text('LEFT CHILD'), findsOneWidget);
+    expect(find.text('RIGHT CHILD'), findsNothing);
+  });
+
+  // A regression test for https://github.com/flutter/flutter/issues/5095
+  testWidgets('TabBar left/right fling reverse', (WidgetTester tester) async {
+    List<String> tabs = <String>['LEFT', 'RIGHT'];
+
+    await tester.pumpWidget(buildLeftRightApp(tabs: tabs, value: 'LEFT'));
+    expect(find.text('LEFT'), findsOneWidget);
+    expect(find.text('RIGHT'), findsOneWidget);
+    expect(find.text('LEFT CHILD'), findsOneWidget);
+    expect(find.text('RIGHT CHILD'), findsNothing);
+
+    TabBarSelectionState<String> selection = TabBarSelection.of(tester.element(find.text('LEFT')));
+    expect(selection.value, equals('LEFT'));
+
+    // End the fling by reversing direction. This should cause not cause
+    // a change to the selected tab, everything should just settle back to
+    // to where it started.
+    Point flingStart = tester.getCenter(find.text('LEFT CHILD'));
+    await tester.flingFrom(flingStart, new Offset(-200.0, 0.0), -1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    expect(selection.value, equals('LEFT'));
+    expect(find.text('LEFT CHILD'), findsOneWidget);
+    expect(find.text('RIGHT CHILD'), findsNothing);
+  });
+
 }
