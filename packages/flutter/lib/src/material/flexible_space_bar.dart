@@ -146,20 +146,18 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
         );
         final bool effectiveCenterTitle = _getEffectiveCenterTitle(theme);
         final FractionalOffset titleAlignment = effectiveCenterTitle ? FractionalOffset.bottomCenter : FractionalOffset.bottomLeft;
-        children.add(new Padding(
+        children.add(new Container(
           padding: new EdgeInsets.only(left: effectiveCenterTitle ? 0.0 : 72.0, bottom: 14.0),
-          child: new Align(
-            alignment: new Tween<FractionalOffset>(
-              begin: new FractionalOffset(0.0, yAlignStart),
-              end: new FractionalOffset(0.0, yAlignEnd)
-            ).evaluate(scaleAndAlignCurve),
-            child: new ScaleTransition(
+          align: new Tween<FractionalOffset>(
+            begin: new FractionalOffset(0.0, yAlignStart),
+            end: new FractionalOffset(0.0, yAlignEnd)
+          ).evaluate(scaleAndAlignCurve),
+          child: new ScaleTransition(
+            alignment: titleAlignment,
+            scale: new Tween<double>(begin: 1.5, end: 1.0).animate(scaleAndAlignCurve),
+            child: new Align(
               alignment: titleAlignment,
-              scale: new Tween<double>(begin: 1.5, end: 1.0).animate(scaleAndAlignCurve),
-              child: new Align(
-                alignment: titleAlignment,
-                child: new DefaultTextStyle(style: titleStyle, child: config.title)
-              )
+              child: new DefaultTextStyle(style: titleStyle, child: config.title)
             )
           )
         ));

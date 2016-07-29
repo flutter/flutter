@@ -166,20 +166,16 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
             decoration: new BoxDecoration(
               border: new Border(bottom: new BorderSide(color: theme.dividerColor))
             ),
-            child: new Align(
-              alignment: FractionalOffset.bottomLeft,
-              child: new Text('Event name', style: theme.textTheme.display2)
-            )
+            align: FractionalOffset.bottomLeft,
+            child: new Text('Event name', style: theme.textTheme.display2)
           ),
           new Container(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             decoration: new BoxDecoration(
               border: new Border(bottom: new BorderSide(color: theme.dividerColor))
             ),
-            child: new Align(
-              alignment: FractionalOffset.bottomLeft,
-              child: new Text('Location', style: theme.textTheme.title.copyWith(color: Colors.black54))
-            )
+            align: FractionalOffset.bottomLeft,
+            child: new Text('Location', style: theme.textTheme.title.copyWith(color: Colors.black54))
           ),
           new Column(
             crossAxisAlignment: CrossAxisAlignment.start,

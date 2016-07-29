@@ -337,10 +337,8 @@ class DropDownMenuItem<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Container(
       height: _kMenuItemHeight,
-      child: new Align(
-        alignment: FractionalOffset.centerLeft,
-        child: child
-      )
+      align: FractionalOffset.centerLeft,
+      child: child
     );
   }
 }

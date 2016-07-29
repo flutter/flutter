@@ -71,10 +71,8 @@ class GalleryHomeState extends State<GalleryHome> {
           new Container(
             height: 48.0,
             padding: const EdgeInsets.only(left: 16.0),
-            child: new Align(
-              alignment: FractionalOffset.centerLeft,
-              child: new Text(galleryItem.category, style: headerStyle)
-            )
+            align: FractionalOffset.centerLeft,
+            child: new Text(galleryItem.category, style: headerStyle)
           )
         );
         category = galleryItem.category;
