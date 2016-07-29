@@ -222,8 +222,8 @@ new ScrollableGrid(
       footer: new GridTileBar(
         title: new Text(url)
       ),
-      child: new Image(
-        image: new NetworkImage(url),
+      child: new Image.fromNetwork(
+        src: url,
         fit: ImageFit.cover
       )
     );
