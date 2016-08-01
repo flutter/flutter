@@ -9,12 +9,8 @@
 namespace sky {
 namespace shell {
 
-PlatformView* PlatformView::Create(const Config& config) {
-  return new PlatformViewGLFW(config);
-}
-
 PlatformViewGLFW::PlatformViewGLFW(const Config& config)
-    : PlatformView(config), window_(gfx::kNullAcceleratedWidget) {}
+    : window_(gfx::kNullAcceleratedWidget) {}
 
 PlatformViewGLFW::~PlatformViewGLFW() {}
 

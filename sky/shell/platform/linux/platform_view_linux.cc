@@ -7,14 +7,9 @@
 namespace sky {
 namespace shell {
 
-PlatformView* PlatformView::Create(const Config& config,
-                                   SurfaceConfig surface_config) {
-  return new PlatformViewLinux(config, surface_config);
-}
-
 PlatformViewLinux::PlatformViewLinux(const Config& config,
-                                    SurfaceConfig surface_config)
-    : PlatformView(config, surface_config), weak_factory_(this) {}
+                                     SurfaceConfig surface_config)
+    : weak_factory_(this) {}
 
 PlatformViewLinux::~PlatformViewLinux() {}
 

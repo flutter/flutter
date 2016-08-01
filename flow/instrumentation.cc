@@ -14,7 +14,7 @@ static const size_t kMaxSamples = 120;
 static const size_t kMaxFrameMarkers = 8;
 
 Stopwatch::Stopwatch() : start_(ftl::TimePoint::Now()), current_sample_(0) {
-  const ftl::TimeDelta delta;
+  const ftl::TimeDelta delta = ftl::TimeDelta::Zero();
   laps_.resize(kMaxSamples, delta);
 }
 
