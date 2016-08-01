@@ -143,10 +143,7 @@ class _PestoDemoState extends State<PestoDemo> {
             child: new Text('Home'),
             selected: !config.showFavorites,
             onPressed: () {
-              Navigator.popUntil(context, (Route<dynamic> route) {
-                return !route.willHandlePopInternally
-                  && route is ModalRoute && route.settings.name == '/pesto';
-              });
+              Navigator.popUntil(context, ModalRoute.withName('/pesto'));
             }
           ),
           new DrawerItem(
@@ -163,10 +160,7 @@ class _PestoDemoState extends State<PestoDemo> {
           new DrawerItem(
             child: new Text('Return to Gallery'),
             onPressed: () {
-              Navigator.popUntil(context, (Route<dynamic> route) {
-                return !route.willHandlePopInternally
-                  && route is ModalRoute && route.settings.name == '/';
-              });
+              Navigator.popUntil(context, ModalRoute.withName('/'));
             }
           ),
         ]

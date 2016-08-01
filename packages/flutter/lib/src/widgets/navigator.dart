@@ -161,7 +161,7 @@ class NavigatorObserver {
   void didPop(Route<dynamic> route, Route<dynamic> previousRoute) { }
 }
 
-/// See [Navigator.popUntil].
+/// Signature for the [Navigator.popUntil] predicate argument.
 typedef bool RoutePredicate(Route<dynamic> route);
 
 /// A widget that manages a set of child widgets with a stack discipline.
@@ -248,7 +248,7 @@ class Navigator extends StatefulWidget {
 
   /// Calls [pop()] repeatedly until the predicate returns false.
   /// The predicate may be applied to the same route more than once if
-  /// [Route.willHandlePopupInternally] is true.
+  /// [Route.willHandlePopInternally] is true.
   static void popUntil(BuildContext context, RoutePredicate predicate) {
     Navigator.of(context).popUntil(predicate);
   }
