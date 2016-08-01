@@ -246,7 +246,7 @@ class Navigator extends StatefulWidget {
     return Navigator.of(context).pop(result);
   }
 
-  /// Repeatedly pops the current route until the predicate returns false.
+  /// Calls [pop()] repeatedly until the predicate returns false.
   /// The predicate may be applied to the same route more than once if
   /// [Route.willHandlePopupInternally] is true.
   static void popUntil(BuildContext context, RoutePredicate predicate) {
