@@ -43,6 +43,7 @@ Thumbs.db
 /third_party/dejavu-fonts-ttf-2.34/ttf/*.ttf
 /third_party/freetype-android/src
 /third_party/go/tool/
+/third_party/gtest/
 /third_party/icu/
 /third_party/jsr-305/src/
 /third_party/libc++/trunk/

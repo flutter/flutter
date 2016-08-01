@@ -8,9 +8,9 @@
 #include <memory>
 #include <vector>
 
-#include "base/trace_event/trace_event.h"
 #include "flow/instrumentation.h"
 #include "flow/raster_cache.h"
+#include "glue/trace_event.h"
 #include "lib/ftl/logging.h"
 #include "lib/ftl/macros.h"
 #include "skia/ext/refptr.h"
