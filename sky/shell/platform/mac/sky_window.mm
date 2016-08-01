@@ -12,7 +12,6 @@
 #include "sky/shell/platform/mac/platform_view_mac.h"
 #include "sky/shell/platform/mac/platform_service_provider.h"
 #include "sky/shell/platform/mac/view_service_provider.h"
-#include "sky/shell/shell_view.h"
 #include "sky/shell/shell.h"
 #include "sky/shell/switches.h"
 #include "sky/shell/ui_delegate.h"
@@ -51,7 +50,7 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(
 
 @implementation SkyWindow {
   sky::SkyEnginePtr _sky_engine;
-  std::unique_ptr<sky::shell::ShellView> _shell_view;
+  std::unique_ptr<sky::shell::PlatformViewMac> _platform_view;
 }
 
 @synthesize renderSurface = _renderSurface;
@@ -65,21 +64,19 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(
   [self updateWindowSize];
 }
 
-- (void)setupShell {
-  NSAssert(_shell_view == nullptr, @"The shell view must not already be set");
-  auto shell_view = new sky::shell::ShellView(sky::shell::Shell::Shared());
-  _shell_view.reset(shell_view);
+- (void)setupPlatformView {
+  DCHECK(_platform_view == nullptr)
+      << "The platform view must not already be set.";
 
-  auto platformViewMac = self.platformView;
-
-  platformViewMac->SetOpenGLView(self.renderSurface);
-  platformViewMac->NotifyCreated();
+  _platform_view.reset(new sky::shell::PlatformViewMac(self.renderSurface));
+  _platform_view->SetupResourceContextOnIOThread();
+  _platform_view->NotifyCreated();
 }
 
 // TODO(eseidel): This does not belong in sky_window!
 // Probably belongs in NSApplicationDelegate didFinishLaunching.
 - (void)setupAndLoadDart {
-  self.platformView->ConnectToEngine(mojo::GetProxy(&_sky_engine));
+  _platform_view->ConnectToEngine(mojo::GetProxy(&_sky_engine));
 
   mojo::ServiceProviderPtr service_provider;
   new sky::shell::PlatformServiceProvider(mojo::GetProxy(&service_provider),
@@ -141,14 +138,8 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(
 
   self.surfaceSetup = YES;
 
-  [self setupShell];
+  [self setupPlatformView];
   [self setupAndLoadDart];
-}
-
-- (sky::shell::PlatformViewMac*)platformView {
-  auto view = static_cast<sky::shell::PlatformViewMac*>(_shell_view->view());
-  DCHECK(view);
-  return view;
 }
 
 #pragma mark - Responder overrides
@@ -202,7 +193,10 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(
 }
 
 - (void)dealloc {
-  self.platformView->NotifyDestroyed();
+  if (_platform_view) {
+    _platform_view->NotifyDestroyed();
+  }
+
   [super dealloc];
 }
 

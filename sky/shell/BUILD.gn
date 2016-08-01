@@ -27,8 +27,6 @@ source_set("common") {
     "rasterizer.h",
     "shell.cc",
     "shell.h",
-    "shell_view.cc",
-    "shell_view.h",
     "switches.cc",
     "switches.h",
     "tracing_controller.cc",
@@ -112,6 +110,8 @@ if (is_linux || is_mac) {
 
   source_set("testing") {
     sources = [
+      "testing/platform_view_test.cc",
+      "testing/platform_view_test.h",
       "testing/test_runner.cc",
       "testing/test_runner.h",
       "testing/testing.cc",

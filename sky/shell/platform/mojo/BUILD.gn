@@ -53,4 +53,11 @@ mojo_native_application("mojo") {
       "-lGL",
     ]
   }
+
+  if (is_android) {
+    ldflags = [
+      "-lEGL",
+      "-lGLESv2",
+    ]
+  }
 }

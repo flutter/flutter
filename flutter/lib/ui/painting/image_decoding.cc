@@ -5,36 +5,50 @@
 #include "flutter/lib/ui/painting/image_decoding.h"
 
 #include "base/bind.h"
+#include "base/lazy_instance.h"
 #include "base/logging.h"
 #include "base/trace_event/trace_event.h"
+#include "flow/texture_image.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/tonic/dart_invoke.h"
 #include "flutter/tonic/dart_persistent_value.h"
 #include "flutter/tonic/mojo_converter.h"
 #include "flutter/tonic/uint8_list.h"
-#include "sky/engine/platform/SharedBuffer.h"
 #include "sky/engine/platform/image-decoders/ImageDecoder.h"
 #include "sky/engine/platform/mojo/data_pipe.h"
+#include "sky/engine/platform/SharedBuffer.h"
+#include "sky/shell/platform_view.h"
+#include "third_party/skia/include/core/SkImageGenerator.h"
 
 namespace blink {
 namespace {
 
 sk_sp<SkImage> DecodeImage(PassRefPtr<SharedBuffer> buffer) {
   TRACE_EVENT0("blink", "DecodeImage");
-  OwnPtr<ImageDecoder> decoder =
-      ImageDecoder::create(*buffer.get(), ImageSource::AlphaPremultiplied,
-                           ImageSource::GammaAndColorProfileIgnored);
-  // decoder can be null if the buffer was empty and we couldn't even guess
-  // what type of image to decode.
-  if (!decoder)
+
+  const size_t data_size = buffer->size();
+
+  if (buffer == nullptr || data_size == 0) {
     return nullptr;
-  decoder->setData(buffer.get(), true);
-  if (decoder->failed() || decoder->frameCount() == 0)
+  }
+
+  sk_sp<SkData> sk_data = SkData::MakeWithoutCopy(buffer->data(), data_size);
+
+  if (sk_data == nullptr) {
     return nullptr;
-  ImageFrame* imageFrame = decoder->frameBufferAtIndex(0);
-  if (decoder->failed())
+  }
+
+  std::unique_ptr<SkImageGenerator> generator(
+      SkImageGenerator::NewFromEncoded(sk_data.get()));
+
+  if (generator == nullptr) {
     return nullptr;
-  return SkImage::MakeFromBitmap(imageFrame->getSkBitmap());
+  }
+
+  auto context = reinterpret_cast<GrContext*>(
+      sky::shell::PlatformView::ResourceContext.Get());
+
+  return flow::TextureImageCreate(context, std::move(generator));
 }
 
 void InvokeImageCallback(sk_sp<SkImage> image,
@@ -52,11 +66,12 @@ void InvokeImageCallback(sk_sp<SkImage> image,
   }
 }
 
-void DecodeImageAndInvokeImageCallback(
-    scoped_ptr<DartPersistentValue> callback, PassRefPtr<SharedBuffer> buffer) {
+void DecodeImageAndInvokeImageCallback(scoped_ptr<DartPersistentValue> callback,
+                                       PassRefPtr<SharedBuffer> buffer) {
   sk_sp<SkImage> image = DecodeImage(buffer);
-  Platform::current()->GetUITaskRunner()->PostTask(FROM_HERE,
-    base::Bind(InvokeImageCallback, image, base::Passed(&callback)));
+  Platform::current()->GetUITaskRunner()->PostTask(
+      FROM_HERE,
+      base::Bind(InvokeImageCallback, image, base::Passed(&callback)));
 }
 
 void DecodeImageFromDataPipe(Dart_NativeArguments args) {
@@ -78,11 +93,10 @@ void DecodeImageFromDataPipe(Dart_NativeArguments args) {
   scoped_ptr<DartPersistentValue> callback(
       new DartPersistentValue(DartState::Current(), callback_handle));
 
-  Platform::current()->GetIOTaskRunner()->PostTask(FROM_HERE,
-    base::Bind(&DrainDataPipe,
-               base::Passed(&consumer),
-               base::Bind(DecodeImageAndInvokeImageCallback,
-                          base::Passed(&callback))));
+  Platform::current()->GetIOTaskRunner()->PostTask(
+      FROM_HERE, base::Bind(&DrainDataPipe, base::Passed(&consumer),
+                            base::Bind(DecodeImageAndInvokeImageCallback,
+                                       base::Passed(&callback))));
 }
 
 void DecodeImageFromList(Dart_NativeArguments args) {
@@ -106,17 +120,17 @@ void DecodeImageFromList(Dart_NativeArguments args) {
   buffer->append(reinterpret_cast<const char*>(list.data()),
                  list.num_elements());
 
-  Platform::current()->GetIOTaskRunner()->PostTask(FROM_HERE,
-      base::Bind(DecodeImageAndInvokeImageCallback,
-                 base::Passed(&callback), buffer));
+  Platform::current()->GetIOTaskRunner()->PostTask(
+      FROM_HERE, base::Bind(DecodeImageAndInvokeImageCallback,
+                            base::Passed(&callback), buffer));
 }
 
 }  // namespace
 
 void ImageDecoding::RegisterNatives(DartLibraryNatives* natives) {
   natives->Register({
-    { "decodeImageFromDataPipe", DecodeImageFromDataPipe, 2, true },
-    { "decodeImageFromList", DecodeImageFromList, 2, true },
+      {"decodeImageFromDataPipe", DecodeImageFromDataPipe, 2, true},
+      {"decodeImageFromList", DecodeImageFromList, 2, true},
   });
 }
 

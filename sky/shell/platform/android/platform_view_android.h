@@ -13,15 +13,13 @@
 namespace sky {
 namespace shell {
 
-class ShellView;
 class AndroidGLContext;
 
 class PlatformViewAndroid : public PlatformView {
  public:
   static bool Register(JNIEnv* env);
 
-  explicit PlatformViewAndroid(const Config& config,
-                               SurfaceConfig sufrace_config);
+  explicit PlatformViewAndroid();
 
   ~PlatformViewAndroid() override;
 
@@ -34,8 +32,6 @@ class PlatformViewAndroid : public PlatformView {
   // Called from Java
   void SurfaceDestroyed(JNIEnv* env, jobject obj);
 
-  void SetShellView(std::unique_ptr<ShellView> shell_view);
-
   // sky::shell::PlatformView override
   base::WeakPtr<sky::shell::PlatformView> GetWeakViewPtr() override;
 
@@ -44,6 +40,9 @@ class PlatformViewAndroid : public PlatformView {
 
   // sky::shell::PlatformView override
   bool ContextMakeCurrent() override;
+
+  // sky::shell::PlatformView override
+  bool ResourceContextMakeCurrent() override;
 
   // sky::shell::PlatformView override
   bool SwapBuffers() override;
@@ -55,11 +54,6 @@ class PlatformViewAndroid : public PlatformView {
   virtual void Resize(const SkISize& size);
 
  private:
-  // In principle, the ShellView should own the PlatformView, but because our
-  // lifetime is controlled by the Android view hierarchy, we flip around the
-  // ownership and have the shell_view owned by Java. We reset this pointer in
-  // |Detach|, which will eventually cause |~PlatformViewAndroid|.
-  std::unique_ptr<ShellView> shell_view_;
   std::unique_ptr<AndroidGLContext> context_;
   base::WeakPtrFactory<PlatformViewAndroid> weak_factory_;
 

@@ -31,8 +31,7 @@
 namespace blink {
 
 FrameData::FrameData()
-    : m_frame(nullptr)
-    , m_orientation(DefaultImageOrientation)
+    : m_orientation(DefaultImageOrientation)
     , m_duration(0)
     , m_haveMetadata(false)
     , m_isComplete(false)
@@ -48,17 +47,6 @@ FrameData::~FrameData()
 
 bool FrameData::clear(bool clearMetadata)
 {
-    if (clearMetadata)
-        m_haveMetadata = false;
-
-    m_orientation = DefaultImageOrientation;
-    m_frameBytes = 0;
-
-    if (m_frame) {
-        m_frame.clear();
-
-        return true;
-    }
     return false;
 }
 

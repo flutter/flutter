@@ -10,17 +10,16 @@
 #include "base/mac/scoped_nsobject.h"
 
 @class NSOpenGLView;
+@class NSOpenGLContext;
 
 namespace sky {
 namespace shell {
 
 class PlatformViewMac : public PlatformView {
  public:
-  explicit PlatformViewMac(const Config& config, SurfaceConfig surface_config);
+  PlatformViewMac(NSOpenGLView* gl_view);
 
   ~PlatformViewMac() override;
-
-  void SetOpenGLView(NSOpenGLView* view);
 
   base::WeakPtr<sky::shell::PlatformView> GetWeakViewPtr() override;
 
@@ -28,10 +27,13 @@ class PlatformViewMac : public PlatformView {
 
   bool ContextMakeCurrent() override;
 
+  bool ResourceContextMakeCurrent() override;
+
   bool SwapBuffers() override;
 
  private:
   base::scoped_nsobject<NSOpenGLView> opengl_view_;
+  base::scoped_nsobject<NSOpenGLContext> resource_loading_context_;
   base::WeakPtrFactory<PlatformViewMac> weak_factory_;
 
   bool IsValid() const;

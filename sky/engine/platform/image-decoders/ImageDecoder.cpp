@@ -20,87 +20,13 @@
 
 #include "platform/image-decoders/ImageDecoder.h"
 
-#include "platform/image-decoders/bmp/BMPImageDecoder.h"
-#include "platform/image-decoders/gif/GIFImageDecoder.h"
-#include "platform/image-decoders/ico/ICOImageDecoder.h"
-#include "platform/image-decoders/jpeg/JPEGImageDecoder.h"
-#include "platform/image-decoders/png/PNGImageDecoder.h"
 #include "sky/engine/platform/graphics/DeferredImageDecoder.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 
-static unsigned copyFromSharedBuffer(char* buffer, unsigned bufferLength, const SharedBuffer& sharedBuffer, unsigned offset)
-{
-    unsigned bytesExtracted = 0;
-    const char* moreData;
-    while (unsigned moreDataLength = sharedBuffer.getSomeData(moreData, offset)) {
-        unsigned bytesToCopy = std::min(bufferLength - bytesExtracted, moreDataLength);
-        memcpy(buffer + bytesExtracted, moreData, bytesToCopy);
-        bytesExtracted += bytesToCopy;
-        if (bytesExtracted == bufferLength)
-            break;
-        offset += bytesToCopy;
-    }
-    return bytesExtracted;
-}
-
-inline bool matchesGIFSignature(char* contents)
-{
-    return !memcmp(contents, "GIF87a", 6) || !memcmp(contents, "GIF89a", 6);
-}
-
-inline bool matchesPNGSignature(char* contents)
-{
-    return !memcmp(contents, "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A", 8);
-}
-
-inline bool matchesJPEGSignature(char* contents)
-{
-    return !memcmp(contents, "\xFF\xD8\xFF", 3);
-}
-
-inline bool matchesBMPSignature(char* contents)
-{
-    return !memcmp(contents, "BM", 2);
-}
-
-inline bool matchesICOSignature(char* contents)
-{
-    return !memcmp(contents, "\x00\x00\x01\x00", 4);
-}
-
-inline bool matchesCURSignature(char* contents)
-{
-    return !memcmp(contents, "\x00\x00\x02\x00", 4);
-}
-
 PassOwnPtr<ImageDecoder> ImageDecoder::create(const SharedBuffer& data, ImageSource::AlphaOption alphaOption, ImageSource::GammaAndColorProfileOption gammaAndColorProfileOption)
 {
-    static const unsigned longestSignatureLength = sizeof("RIFF????WEBPVP") - 1;
-    ASSERT(longestSignatureLength == 14);
-
-    size_t maxDecodedBytes = blink::Platform::current()->maxDecodedImageBytes();
-
-    char contents[longestSignatureLength];
-    if (copyFromSharedBuffer(contents, longestSignatureLength, data, 0) < longestSignatureLength)
-        return nullptr;
-
-    if (matchesJPEGSignature(contents))
-        return adoptPtr(new JPEGImageDecoder(alphaOption, gammaAndColorProfileOption, maxDecodedBytes));
-
-    if (matchesPNGSignature(contents))
-        return adoptPtr(new PNGImageDecoder(alphaOption, gammaAndColorProfileOption, maxDecodedBytes));
-
-    if (matchesGIFSignature(contents))
-        return adoptPtr(new GIFImageDecoder(alphaOption, gammaAndColorProfileOption, maxDecodedBytes));
-
-    if (matchesICOSignature(contents) || matchesCURSignature(contents))
-        return adoptPtr(new ICOImageDecoder(alphaOption, gammaAndColorProfileOption, maxDecodedBytes));
-
-    if (matchesBMPSignature(contents))
-        return adoptPtr(new BMPImageDecoder(alphaOption, gammaAndColorProfileOption, maxDecodedBytes));
-
     return nullptr;
 }
 

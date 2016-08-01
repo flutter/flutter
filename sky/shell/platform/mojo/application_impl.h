@@ -10,7 +10,6 @@
 #include "mojo/public/interfaces/application/shell.mojom.h"
 #include "mojo/services/content_handler/interfaces/content_handler.mojom.h"
 #include "sky/shell/platform/mojo/platform_view_mojo.h"
-#include "sky/shell/shell_view.h"
 
 #include "mojo/services/ui/views/interfaces/view_provider.mojom.h"
 #include "mojo/common/binding_set.h"

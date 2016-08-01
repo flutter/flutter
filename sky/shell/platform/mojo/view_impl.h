@@ -19,7 +19,6 @@
 #include "sky/services/raw_keyboard/raw_keyboard.mojom.h"
 #include "sky/shell/platform/mojo/platform_view_mojo.h"
 #include "sky/shell/platform/mojo/pointer_converter_mojo.h"
-#include "sky/shell/shell_view.h"
 
 namespace sky {
 namespace shell {
@@ -49,13 +48,10 @@ class ViewImpl : public mojo::ui::ViewListener,
                         mojo::ScopedMessagePipeHandle client_handle) override;
 
   // raw_keyboard::RawKeyboardService
-  void AddListener(
-      mojo::InterfaceHandle<raw_keyboard::RawKeyboardListener> listener)
-      override;
+  void AddListener(mojo::InterfaceHandle<raw_keyboard::RawKeyboardListener>
+                       listener) override;
 
-  PlatformViewMojo* platform_view() {
-    return static_cast<PlatformViewMojo*>(shell_view_->view());
-  }
+  PlatformViewMojo* platform_view() { return platform_view_.get(); }
 
   mojo::StrongBinding<mojo::ui::ViewListener> binding_;
   std::string url_;
@@ -67,7 +63,7 @@ class ViewImpl : public mojo::ui::ViewListener,
   mojo::BindingSet<raw_keyboard::RawKeyboardService> raw_keyboard_bindings_;
   std::vector<raw_keyboard::RawKeyboardListenerPtr> raw_keyboard_listeners_;
 
-  std::unique_ptr<ShellView> shell_view_;
+  std::unique_ptr<PlatformViewMojo> platform_view_;
   SkyEnginePtr engine_;
   ViewportMetrics viewport_metrics_;
 

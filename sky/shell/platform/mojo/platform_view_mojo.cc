@@ -12,16 +12,9 @@
 namespace sky {
 namespace shell {
 
-PlatformView* PlatformView::Create(const Config& config,
-                                   SurfaceConfig surface_config) {
-  return new PlatformViewMojo(config, surface_config);
-}
+PlatformViewMojo::PlatformViewMojo() : weak_factory_(this) {}
 
-PlatformViewMojo::PlatformViewMojo(const Config& config,
-                                   SurfaceConfig surface_config)
-    : PlatformView(config, surface_config), weak_factory_(this) {}
-
-PlatformViewMojo::~PlatformViewMojo() {}
+PlatformViewMojo::~PlatformViewMojo() = default;
 
 void PlatformViewMojo::InitRasterizer(mojo::ApplicationConnectorPtr connector,
                                       mojo::gfx::composition::ScenePtr scene) {
@@ -42,6 +35,10 @@ uint64_t PlatformViewMojo::DefaultFramebuffer() const {
 }
 
 bool PlatformViewMojo::ContextMakeCurrent() {
+  return false;
+}
+
+bool PlatformViewMojo::ResourceContextMakeCurrent() {
   return false;
 }
 

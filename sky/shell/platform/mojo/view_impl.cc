@@ -28,12 +28,16 @@ sky::InputEventPtr ConvertKeyEvent(mojo::EventPtr event) {
       return nullptr;
   }
   result->key_data = sky::KeyData::New();
-  result->key_data->key_code = static_cast<int>(event->key_data->windows_key_code);
-  if (static_cast<int>(event->flags) & static_cast<int>(mojo::EventFlags::SHIFT_DOWN))
+  result->key_data->key_code =
+      static_cast<int>(event->key_data->windows_key_code);
+  if (static_cast<int>(event->flags) &
+      static_cast<int>(mojo::EventFlags::SHIFT_DOWN))
     result->key_data->meta_state |= 0x00000001;
-  if (static_cast<int>(event->flags) & static_cast<int>(mojo::EventFlags::CONTROL_DOWN))
+  if (static_cast<int>(event->flags) &
+      static_cast<int>(mojo::EventFlags::CONTROL_DOWN))
     result->key_data->meta_state |= 0x00001000;
-  if (static_cast<int>(event->flags) & static_cast<int>(mojo::EventFlags::ALT_DOWN))
+  if (static_cast<int>(event->flags) &
+      static_cast<int>(mojo::EventFlags::ALT_DOWN))
     result->key_data->meta_state |= 0x00000002;
 
   return result.Pass();
@@ -55,13 +59,13 @@ ViewImpl::ViewImpl(mojo::InterfaceRequest<mojo::ui::ViewOwner> view_owner,
   mojo::ShellPtr shell = mojo::ShellPtr::Create(services->shell.Pass());
 
   // Views
-  mojo::ConnectToService(
-      shell.get(), "mojo:view_manager_service", mojo::GetProxy(&view_manager_));
+  mojo::ConnectToService(shell.get(), "mojo:view_manager_service",
+                         mojo::GetProxy(&view_manager_));
   mojo::ui::ViewPtr view;
   mojo::ui::ViewListenerPtr view_listener;
   binding_.Bind(mojo::GetProxy(&view_listener));
-  view_manager_->CreateView(
-      mojo::GetProxy(&view), view_owner.Pass(), view_listener.Pass(), url_);
+  view_manager_->CreateView(mojo::GetProxy(&view), view_owner.Pass(),
+                            view_listener.Pass(), url_);
   view->GetServiceProvider(mojo::GetProxy(&view_service_provider_));
 
   // Input
@@ -78,8 +82,9 @@ ViewImpl::ViewImpl(mojo::InterfaceRequest<mojo::ui::ViewOwner> view_owner,
   services->view = view.Pass();
 
   // Engine
-  shell_view_.reset(new ShellView(Shell::Shared()));
-  shell_view_->view()->ConnectToEngine(GetProxy(&engine_));
+  platform_view_.reset(new PlatformViewMojo());
+  platform_view_->SetupResourceContextOnIOThread();
+  platform_view_->ConnectToEngine(GetProxy(&engine_));
   mojo::ApplicationConnectorPtr connector;
   shell->CreateApplicationConnector(mojo::GetProxy(&connector));
   platform_view()->InitRasterizer(connector.Pass(), scene.Pass());
@@ -92,8 +97,7 @@ ViewImpl::ViewImpl(mojo::InterfaceRequest<mojo::ui::ViewOwner> view_owner,
   engine_->SetServices(services.Pass());
 }
 
-ViewImpl::~ViewImpl() {
-}
+ViewImpl::~ViewImpl() {}
 
 void ViewImpl::Run(base::FilePath bundle_path) {
   engine_->RunFromBundle(url_, bundle_path.value());
@@ -148,8 +152,8 @@ void ViewImpl::ConnectToService(const mojo::String& service_name,
                                 mojo::ScopedMessagePipeHandle handle) {
   if (service_name == raw_keyboard::RawKeyboardService::Name_) {
     raw_keyboard_bindings_.AddBinding(
-        this,
-        mojo::InterfaceRequest<raw_keyboard::RawKeyboardService>(handle.Pass()));
+        this, mojo::InterfaceRequest<raw_keyboard::RawKeyboardService>(
+                  handle.Pass()));
   }
 }
 

@@ -11,14 +11,12 @@
 namespace sky {
 namespace shell {
 
-PlatformView* PlatformView::Create(const Config& config,
-                                   SurfaceConfig surface_config) {
-  return new PlatformViewMac(config, surface_config);
-}
-
-PlatformViewMac::PlatformViewMac(const Config& config,
-                                 SurfaceConfig surface_config)
-    : PlatformView(config, surface_config), weak_factory_(this) {}
+PlatformViewMac::PlatformViewMac(NSOpenGLView* gl_view)
+    : opengl_view_([gl_view retain]),
+      resource_loading_context_([[NSOpenGLContext alloc]
+          initWithFormat:gl_view.pixelFormat
+            shareContext:gl_view.openGLContext]),
+      weak_factory_(this) {}
 
 PlatformViewMac::~PlatformViewMac() = default;
 
@@ -26,11 +24,8 @@ base::WeakPtr<sky::shell::PlatformView> PlatformViewMac::GetWeakViewPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
-void PlatformViewMac::SetOpenGLView(NSOpenGLView* view) {
-  opengl_view_ = decltype(opengl_view_){view};
-}
-
 uint64_t PlatformViewMac::DefaultFramebuffer() const {
+  // Default window bound framebuffer FBO 0.
   return 0;
 }
 
@@ -40,6 +35,17 @@ bool PlatformViewMac::ContextMakeCurrent() {
   }
 
   [opengl_view_.get().openGLContext makeCurrentContext];
+  return true;
+}
+
+bool PlatformViewMac::ResourceContextMakeCurrent() {
+  NSOpenGLContext* context = resource_loading_context_.get();
+
+  if (context == nullptr) {
+    return false;
+  }
+
+  [context makeCurrentContext];
   return true;
 }
 

@@ -17,7 +17,6 @@
 #include "jni/FlutterView_jni.h"
 #include "sky/engine/core/script/dart_service_isolate.h"
 #include "sky/engine/wtf/MakeUnique.h"
-#include "sky/shell/shell_view.h"
 #include "sky/shell/shell.h"
 
 namespace sky {
@@ -50,6 +49,52 @@ class AndroidNativeWindow {
   DISALLOW_COPY_AND_ASSIGN(AndroidNativeWindow);
 };
 
+static void LogLastEGLError() {
+  struct EGLNameErrorPair {
+    const char* name;
+    EGLint code;
+  };
+
+#define _EGL_ERROR_DESC(a) \
+  { #a, a }
+
+  const EGLNameErrorPair pairs[] = {
+
+      _EGL_ERROR_DESC(EGL_SUCCESS),
+      _EGL_ERROR_DESC(EGL_NOT_INITIALIZED),
+      _EGL_ERROR_DESC(EGL_BAD_ACCESS),
+      _EGL_ERROR_DESC(EGL_BAD_ALLOC),
+      _EGL_ERROR_DESC(EGL_BAD_ATTRIBUTE),
+      _EGL_ERROR_DESC(EGL_BAD_CONTEXT),
+      _EGL_ERROR_DESC(EGL_BAD_CONFIG),
+      _EGL_ERROR_DESC(EGL_BAD_CURRENT_SURFACE),
+      _EGL_ERROR_DESC(EGL_BAD_DISPLAY),
+      _EGL_ERROR_DESC(EGL_BAD_SURFACE),
+      _EGL_ERROR_DESC(EGL_BAD_MATCH),
+      _EGL_ERROR_DESC(EGL_BAD_PARAMETER),
+      _EGL_ERROR_DESC(EGL_BAD_NATIVE_PIXMAP),
+      _EGL_ERROR_DESC(EGL_BAD_NATIVE_WINDOW),
+      _EGL_ERROR_DESC(EGL_CONTEXT_LOST),
+
+  };
+
+#undef _EGL_ERROR_DESC
+
+  const auto count = sizeof(pairs) / sizeof(EGLNameErrorPair);
+
+  EGLint last_error = eglGetError();
+
+  for (size_t i = 0; i < count; i++) {
+    if (last_error == pairs[i].code) {
+      DLOG(INFO) << "EGL Error: " << pairs[i].name << " (" << pairs[i].code
+                 << ")";
+      return;
+    }
+  }
+
+  DLOG(WARNING) << "Unknown EGL Error";
+}
+
 class AndroidGLContext {
  public:
   explicit AndroidGLContext(AndroidNativeWindow::Handle window_handle,
@@ -59,6 +104,7 @@ class AndroidGLContext {
         config_(nullptr),
         surface_(EGL_NO_SURFACE),
         context_(EGL_NO_CONTEXT),
+        resource_context_(EGL_NO_CONTEXT),
         valid_(false) {
     if (!window_.IsValid()) {
       // We always require a valid window since we are only going to deal
@@ -73,6 +119,8 @@ class AndroidGLContext {
     std::tie(success, display_) = SetupDisplayConnection();
 
     if (!success) {
+      DLOG(INFO) << "Could not setup the display connection.";
+      LogLastEGLError();
       return;
     }
 
@@ -81,6 +129,8 @@ class AndroidGLContext {
     std::tie(success, config_) = ChooseWindowConfiguration(display_, config);
 
     if (!success) {
+      DLOG(INFO) << "Could not choose a window configuration.";
+      LogLastEGLError();
       return;
     }
 
@@ -90,6 +140,20 @@ class AndroidGLContext {
         CreateWindowSurface(display_, config_, window_.handle());
 
     if (!success) {
+      DLOG(INFO) << "Could not create the window surface.";
+      LogLastEGLError();
+      return;
+    }
+
+    // Create a pbuffer surface for the configuration for resource loading.
+
+    std::tie(success, resource_surface_) =
+        CreatePBufferSurface(display_, config_);
+
+    if (!success) {
+      DLOG(INFO)
+          << "Could not create the pbuffer surface for resource loading.";
+      LogLastEGLError();
       return;
     }
 
@@ -98,6 +162,19 @@ class AndroidGLContext {
     std::tie(success, context_) = CreateContext(display_, config_);
 
     if (!success) {
+      DLOG(INFO) << "Could not create the main rendering context";
+      LogLastEGLError();
+      return;
+    }
+
+    // Create a resource context for the configuration.
+
+    std::tie(success, resource_context_) =
+        CreateContext(display_, config_, context_);
+
+    if (!success) {
+      DLOG(INFO) << "Could not create the resource context.";
+      LogLastEGLError();
       return;
     }
 
@@ -106,26 +183,56 @@ class AndroidGLContext {
   }
 
   ~AndroidGLContext() {
+    if (!TeardownContext(display_, resource_context_)) {
+      LOG(INFO) << "Could not tear down the EGL resource context. Possible "
+                   "resource leak.";
+      LogLastEGLError();
+    }
+
     if (!TeardownContext(display_, context_)) {
       LOG(INFO)
           << "Could not tear down the EGL context. Possible resource leak.";
+      LogLastEGLError();
+    }
+
+    if (!TeardownSurface(display_, resource_surface_)) {
+      LOG(INFO) << "Could not tear down the EGL resource surface. Possible "
+                   "resource leak.";
+      LogLastEGLError();
     }
 
     if (!TeardownSurface(display_, surface_)) {
       LOG(INFO)
           << "Could not tear down the EGL surface. Possible resource leak.";
+      LogLastEGLError();
     }
 
     if (!TeardownDisplayConnection(display_)) {
       LOG(INFO) << "Could not tear down the EGL display connection. Possible "
                    "resource leak.";
+      LogLastEGLError();
     }
   }
 
   bool IsValid() const { return valid_; }
 
   bool ContextMakeCurrent() {
-    return eglMakeCurrent(display_, surface_, surface_, context_) == EGL_TRUE;
+    if (eglMakeCurrent(display_, surface_, surface_, context_) != EGL_TRUE) {
+      LOG(INFO) << "Could not make the context current";
+      LogLastEGLError();
+      return false;
+    }
+    return true;
+  }
+
+  bool ResourceContextMakeCurrent() {
+    if (eglMakeCurrent(display_, resource_surface_, resource_surface_,
+                       resource_context_) != EGL_TRUE) {
+      LOG(INFO) << "Could not make the resource context current";
+      LogLastEGLError();
+      return false;
+    }
+    return true;
   }
 
   bool SwapBuffers() { return eglSwapBuffers(display_, surface_); }
@@ -136,6 +243,7 @@ class AndroidGLContext {
     if (!eglQuerySurface(display_, surface_, EGL_WIDTH, &width) ||
         !eglQuerySurface(display_, surface_, EGL_HEIGHT, &height)) {
       LOG(ERROR) << "Unable to query EGL surface size";
+      LogLastEGLError();
       return SkISize::Make(0, 0);
     }
     return SkISize::Make(width, height);
@@ -159,7 +267,9 @@ class AndroidGLContext {
   EGLDisplay display_;
   EGLConfig config_;
   EGLSurface surface_;
+  EGLSurface resource_surface_;
   EGLContext context_;
+  EGLContext resource_context_;
 
   bool valid_;
 
@@ -248,12 +358,22 @@ class AndroidGLContext {
     return {surface != EGL_NO_SURFACE, surface};
   }
 
-  static EGLResult<EGLSurface> CreateContext(EGLDisplay display,
-                                             EGLConfig config) {
+  static EGLResult<EGLSurface> CreatePBufferSurface(EGLDisplay display,
+                                                    EGLConfig config) {
+    // We only ever create pbuffer surfaces for background resource loading
+    // contexts. We never bind the pbuffer to anything.
+    const EGLint attribs[] = {EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE};
+    EGLSurface surface = eglCreatePbufferSurface(display, config, attribs);
+    return {surface != EGL_NO_SURFACE, surface};
+  }
+
+  static EGLResult<EGLSurface> CreateContext(
+      EGLDisplay display,
+      EGLConfig config,
+      EGLContext share = EGL_NO_CONTEXT) {
     EGLint attributes[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
 
-    EGLContext context =
-        eglCreateContext(display, config, EGL_NO_CONTEXT, attributes);
+    EGLContext context = eglCreateContext(display, config, share, attributes);
 
     return {context != EGL_NO_CONTEXT, context};
   }
@@ -262,12 +382,10 @@ class AndroidGLContext {
 };
 
 static jlong Attach(JNIEnv* env, jclass clazz, jint skyEngineHandle) {
-  ShellView* shell_view = new ShellView(Shell::Shared());
-  auto view = static_cast<PlatformViewAndroid*>(shell_view->view());
-  view->SetShellView(std::unique_ptr<ShellView>(shell_view));
+  PlatformViewAndroid* view = new PlatformViewAndroid();
   view->ConnectToEngine(mojo::InterfaceRequest<SkyEngine>(
       mojo::ScopedMessagePipeHandle(mojo::MessagePipeHandle(skyEngineHandle))));
-  return reinterpret_cast<jlong>(shell_view->view());
+  return reinterpret_cast<jlong>(view);
 }
 
 jint GetObservatoryPort(JNIEnv* env, jclass clazz) {
@@ -279,25 +397,11 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
   return RegisterNativesImpl(env);
 }
 
-// Per platform implementation of PlatformView::Create
-PlatformView* PlatformView::Create(const Config& config,
-                                   SurfaceConfig surface_config) {
-  return new PlatformViewAndroid(config, surface_config);
-}
-
-PlatformViewAndroid::PlatformViewAndroid(const Config& config,
-                                         SurfaceConfig surface_config)
-    : PlatformView(config, surface_config), weak_factory_(this) {}
+PlatformViewAndroid::PlatformViewAndroid() : weak_factory_(this) {}
 
 PlatformViewAndroid::~PlatformViewAndroid() = default;
 
-void PlatformViewAndroid::SetShellView(std::unique_ptr<ShellView> shell_view) {
-  DCHECK(!shell_view_);
-  shell_view_ = std::move(shell_view);
-}
-
 void PlatformViewAndroid::Detach(JNIEnv* env, jobject obj) {
-  shell_view_.reset();
   // Note: |this| has been destroyed at this point.
 }
 
@@ -319,6 +423,8 @@ void PlatformViewAndroid::SurfaceCreated(JNIEnv* env,
   }
 
   NotifyCreated();
+
+  SetupResourceContextOnIOThread();
 }
 
 void PlatformViewAndroid::SurfaceDestroyed(JNIEnv* env, jobject obj) {
@@ -337,6 +443,10 @@ uint64_t PlatformViewAndroid::DefaultFramebuffer() const {
 
 bool PlatformViewAndroid::ContextMakeCurrent() {
   return context_ != nullptr ? context_->ContextMakeCurrent() : false;
+}
+
+bool PlatformViewAndroid::ResourceContextMakeCurrent() {
+  return context_ != nullptr ? context_->ResourceContextMakeCurrent() : false;
 }
 
 bool PlatformViewAndroid::SwapBuffers() {

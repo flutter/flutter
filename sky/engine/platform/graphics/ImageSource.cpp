@@ -115,25 +115,6 @@ size_t ImageSource::frameCount() const
     return m_decoder ? m_decoder->frameCount() : 0;
 }
 
-PassRefPtr<NativeImageSkia> ImageSource::createFrameAtIndex(size_t index)
-{
-    if (!m_decoder)
-        return nullptr;
-
-    ImageFrame* buffer = m_decoder->frameBufferAtIndex(index);
-    if (!buffer || buffer->status() == ImageFrame::FrameEmpty)
-        return nullptr;
-
-    // Zero-height images can cause problems for some ports.  If we have an
-    // empty image dimension, just bail.
-    if (size().isEmpty())
-        return nullptr;
-
-    // Return the buffer contents as a native image.  For some ports, the data
-    // is already in a native container, and this just increments its refcount.
-    return buffer->asNewNativeImage();
-}
-
 float ImageSource::frameDurationAtIndex(size_t index) const
 {
     if (!m_decoder)

@@ -6,6 +6,7 @@
 #define FLOW_TEXTURE_IMAGE_H_
 
 #include "third_party/skia/include/core/SkImage.h"
+#include "third_party/skia/include/core/SkImageGenerator.h"
 
 namespace flow {
 
@@ -20,6 +21,11 @@ enum class TextureImageDataFormat {
   UnsignedByte,
   UnsignedShort565,
 };
+
+sk_sp<SkImage> TextureImageCreate(GrContext* context, const SkBitmap& bitmap);
+
+sk_sp<SkImage> TextureImageCreate(GrContext* context,
+                                  std::unique_ptr<SkImageGenerator> generator);
 
 sk_sp<SkImage> TextureImageCreate(GrContext* context,
                                   TextureImageFormat format,

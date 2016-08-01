@@ -38,7 +38,6 @@ class DeferredImageDecoder;
 class ImageOrientation;
 class IntPoint;
 class IntSize;
-class NativeImageSkia;
 class SharedBuffer;
 
 // GIF and WebP support animation. The explanation below is in terms of GIF,
@@ -114,8 +113,6 @@ public:
     int repetitionCount();
 
     size_t frameCount() const;
-
-    PassRefPtr<NativeImageSkia> createFrameAtIndex(size_t);
 
     float frameDurationAtIndex(size_t) const;
     bool frameHasAlphaAtIndex(size_t) const; // Whether or not the frame actually used any alpha.

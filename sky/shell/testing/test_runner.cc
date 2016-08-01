@@ -11,30 +11,27 @@
 #include "base/strings/string_util.h"
 #include "sky/shell/platform_view.h"
 #include "sky/shell/shell.h"
-#include "sky/shell/shell_view.h"
+#include "sky/shell/testing/platform_view_test.h"
 
 namespace sky {
 namespace shell {
-namespace {
-
-static TestRunner* g_test_runner = nullptr;
-
-}  // namespace
 
 TestRunner::TestRunner()
-    : shell_view_(new ShellView(Shell::Shared())), weak_ptr_factory_(this) {
-  CHECK(!g_test_runner) << "Only create one TestRunner.";
+    : platform_view_(new PlatformViewTest()), weak_ptr_factory_(this) {
+  platform_view_->ConnectToEngine(GetProxy(&sky_engine_));
 
-  shell_view_->view()->ConnectToEngine(GetProxy(&sky_engine_));
   ViewportMetricsPtr metrics = ViewportMetrics::New();
+
   metrics->physical_width = 800;
   metrics->physical_height = 600;
+
   sky_engine_->OnViewportMetricsChanged(metrics.Pass());
 }
 
-TestRunner::~TestRunner() {}
+TestRunner::~TestRunner() = default;
 
 TestRunner& TestRunner::Shared() {
+  static TestRunner* g_test_runner = nullptr;
   if (!g_test_runner)
     g_test_runner = new TestRunner();
   return *g_test_runner;

@@ -15,7 +15,8 @@
 
 namespace sky {
 namespace shell {
-class ShellView;
+
+class PlatformView;
 
 class TestRunner {
  public:
@@ -32,9 +33,8 @@ class TestRunner {
   TestRunner();
   ~TestRunner();
 
-  std::unique_ptr<ShellView> shell_view_;
+  std::unique_ptr<PlatformView> platform_view_;
   SkyEnginePtr sky_engine_;
-
   base::WeakPtrFactory<TestRunner> weak_ptr_factory_;
 
   DISALLOW_COPY_AND_ASSIGN(TestRunner);

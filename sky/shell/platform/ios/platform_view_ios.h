@@ -21,17 +21,17 @@ class IOSGLContext;
 
 class PlatformViewIOS : public PlatformView {
  public:
-  explicit PlatformViewIOS(const Config& config, SurfaceConfig surface_config);
+  explicit PlatformViewIOS(CAEAGLLayer* layer);
 
   ~PlatformViewIOS() override;
-
-  void SetEAGLLayer(CAEAGLLayer* layer);
 
   base::WeakPtr<sky::shell::PlatformView> GetWeakViewPtr() override;
 
   uint64_t DefaultFramebuffer() const override;
 
   bool ContextMakeCurrent() override;
+
+  bool ResourceContextMakeCurrent() override;
 
   bool SwapBuffers() override;
 

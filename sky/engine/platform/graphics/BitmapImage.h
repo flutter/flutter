@@ -38,7 +38,6 @@
 
 namespace blink {
 
-class NativeImageSkia;
 template <typename T> class Timer;
 
 class PLATFORM_EXPORT BitmapImage : public Image {
@@ -47,10 +46,6 @@ class PLATFORM_EXPORT BitmapImage : public Image {
     friend class GradientGeneratedImage;
     friend class GraphicsContext;
 public:
-    static PassRefPtr<BitmapImage> create(PassRefPtr<NativeImageSkia> nativeImage, ImageObserver* observer = 0)
-    {
-        return adoptRef(new BitmapImage(nativeImage, observer));
-    }
     static PassRefPtr<BitmapImage> create(ImageObserver* observer = 0)
     {
         return adoptRef(new BitmapImage(observer));
@@ -76,7 +71,6 @@ public:
     virtual void resetAnimation() override;
     virtual bool maybeAnimated() override;
 
-    virtual PassRefPtr<NativeImageSkia> nativeImageForCurrentFrame() override;
     virtual PassRefPtr<Image> imageForDefaultFrame() override;
     virtual bool currentFrameKnownToBeOpaque() override;
 
@@ -99,7 +93,6 @@ protected:
       Certain     // The repetition count is known to be correct.
     };
 
-    BitmapImage(PassRefPtr<NativeImageSkia>, ImageObserver* = 0);
     BitmapImage(ImageObserver* = 0);
 
     virtual void draw(GraphicsContext*, const FloatRect& dstRect, const FloatRect& srcRect, CompositeOperator, WebBlendMode) override;
@@ -109,7 +102,6 @@ protected:
     bool isAnimated();
     size_t currentFrame() const { return m_currentFrame; }
     size_t frameCount();
-    PassRefPtr<NativeImageSkia> frameAtIndex(size_t);
     bool frameIsCompleteAtIndex(size_t);
     float frameDurationAtIndex(size_t);
     bool frameHasAlphaAtIndex(size_t);

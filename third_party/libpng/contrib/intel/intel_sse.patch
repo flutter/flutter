@@ -1,0 +1,192 @@
+diff --git a/configure.ac b/configure.ac
+--- a/configure.ac	2016-04-27 22:33:47.805069558 -0500
++++ b/configure.ac	2016-04-27 22:33:47.829012469 -0500
+@@ -1,10 +1,13 @@
+ # configure.ac
+ 
++# Copyright (c) 2016 Google, Inc.
++# Written by Mike Klein and Matt Sarett
++# Derived from the ARM supporting code in libpng/configure.ac, which was
+ # Copyright (c) 2004-2015 Glenn Randers-Pehrson
+ # Last changed in libpng 1.6.22 [(PENDING RELEASE)]
+ 
+ # This code is released under the libpng license.
+ # For conditions of distribution and use, see the disclaimer
+ # and license in png.h
+ 
+ dnl Process this file with autoconf to produce a configure script.
+@@ -335,16 +338,50 @@ AC_ARG_ENABLE([arm-neon],
+ 
+ AM_CONDITIONAL([PNG_ARM_NEON],
+    [test "$enable_arm_neon" != 'no' &&
+     case "$host_cpu" in
+       arm*|aarch64*) :;;
+       *)    test "$enable_arm_neon" != '';;
+     esac])
+ 
++# INTEL
++# =====
++#
++# INTEL SSE (SIMD) support.
++
++AC_ARG_ENABLE([intel-sse],
++   AS_HELP_STRING([[[--enable-intel-sse]]],
++      [Enable Intel SSE optimizations: =no/off, yes/on:]
++      [no/off: disable the optimizations;]
++      [yes/on: enable the optimizations.]
++      [If not specified: determined by the compiler.]),
++   [case "$enableval" in
++      no|off)
++         # disable the default enabling:
++         AC_DEFINE([PNG_INTEL_SSE_OPT], [0],
++                   [Disable Intel SSE optimizations])
++         # Prevent inclusion of the assembler files below:
++         enable_intel_sse=no;;
++      yes|on)
++         AC_DEFINE([PNG_INTEL_SSE_OPT], [1],
++                   [Enable Intel SSE optimizations]);;
++      *)
++         AC_MSG_ERROR([--enable-intel-sse=${enable_intel_sse}: invalid value])
++   esac])
++
++# Add Intel specific files to all builds where the host_cpu is Intel ('x86*')
++# or where Intel optimizations were explicitly requested (this allows a
++# fallback if a future host CPU does not match 'x86*')
++AM_CONDITIONAL([PNG_INTEL_SSE],
++   [test "$enable_intel_sse" != 'no' &&
++    case "$host_cpu" in
++      i?86|x86_64) :;;
++      *)    test "$enable_intel_sse" != '';;
++    esac])
+ AC_MSG_NOTICE([[Extra options for compiler: $PNG_COPTS]])
+ 
+ # Config files, substituting as above
+ AC_CONFIG_FILES([Makefile libpng.pc:libpng.pc.in])
+ AC_CONFIG_FILES([libpng-config:libpng-config.in],
+    [chmod +x libpng-config])
+ 
+ AC_OUTPUT
+diff --git a/Makefile.am b/Makefile.am
+--- a/Makefile.am	2016-04-27 22:33:47.809928404 -0500
++++ b/Makefile.am	2016-04-27 22:33:47.832941146 -0500
+@@ -1,10 +1,13 @@
+ # Makefile.am, the source file for Makefile.in (and hence Makefile), is
+ #
++# Copyright (c) 2016 Google, Inc.
++# Written by Mike Klein and Matt Sarett
++# Derived from the ARM supporting code in libpng/configure.ac, which was
+ # Copyright (c) 2004-2016 Glenn Randers-Pehrson
+ # Last changed in libpng 1.6.22 [(PENDING RELEASE)]
+ #
+ # This code is released under the libpng license.
+ # For conditions of distribution and use, see the disclaimer
+ # and license in png.h
+ 
+ PNGLIB_BASENAME= libpng@PNGLIB_MAJOR@@PNGLIB_MINOR@
+@@ -86,16 +89,20 @@ libpng@PNGLIB_MAJOR@@PNGLIB_MINOR@_la_SO
+ 	pngset.c pngtrans.c pngwio.c pngwrite.c pngwtran.c pngwutil.c\
+ 	png.h pngconf.h pngdebug.h pnginfo.h pngpriv.h pngstruct.h pngusr.dfa
+ 
+ if PNG_ARM_NEON
+ libpng@PNGLIB_MAJOR@@PNGLIB_MINOR@_la_SOURCES += arm/arm_init.c\
+ 	arm/filter_neon.S arm/filter_neon_intrinsics.c
+ endif
+ 
++if PNG_INTEL_SSE
++libpng@PNGLIB_MAJOR@@PNGLIB_MINOR@_la_SOURCES += contrib/intel/intel_init.c\
++    contrib/intel/filter_sse2_intrinsics.c
++endif
+ nodist_libpng@PNGLIB_MAJOR@@PNGLIB_MINOR@_la_SOURCES = pnglibconf.h
+ 
+ libpng@PNGLIB_MAJOR@@PNGLIB_MINOR@_la_LDFLAGS = -no-undefined -export-dynamic \
+ 	-version-number @PNGLIB_MAJOR@@PNGLIB_MINOR@:@PNGLIB_RELEASE@:0
+ 
+ if HAVE_LD_VERSION_SCRIPT
+ #   Versioned symbols and restricted exports
+ if HAVE_SOLARIS_LD
+diff --git a/pngpriv.h b/pngpriv.h
+--- a/pngpriv.h	2016-04-27 22:33:47.800157005 -0500
++++ b/pngpriv.h	2016-04-27 22:33:47.838191194 -0500
+@@ -177,16 +177,52 @@
+ #  endif /* !PNG_ARM_NEON_IMPLEMENTATION */
+ 
+ #  ifndef PNG_ARM_NEON_IMPLEMENTATION
+       /* Use the intrinsics code by default. */
+ #     define PNG_ARM_NEON_IMPLEMENTATION 1
+ #  endif
+ #endif /* PNG_ARM_NEON_OPT > 0 */
+ 
++#ifndef PNG_INTEL_SSE_OPT
++#   ifdef PNG_INTEL_SSE
++      /* Only check for SSE if the build configuration has been modified to
++       * enable SSE optimizations.  This means that these optimizations will
++       * be off by default.  See contrib/intel for more details.
++       */
++#     if defined(__SSE4_1__) || defined(__AVX__) || defined(__SSSE3__) || \
++       defined(__SSE2__) || defined(_M_X64) || defined(_M_AMD64) || \
++       (defined(_M_IX86_FP) && _M_IX86_FP >= 2)
++#         define PNG_INTEL_SSE_OPT 1
++#      endif
++#   endif
++#endif
++
++#if PNG_INTEL_SSE_OPT > 0
++#   ifndef PNG_INTEL_SSE_IMPLEMENTATION
++#      if defined(__SSE4_1__) || defined(__AVX__)
++          /* We are not actually using AVX, but checking for AVX is the best
++             way we can detect SSE4.1 and SSSE3 on MSVC.
++          */
++#         define PNG_INTEL_SSE_IMPLEMENTATION 3
++#      elif defined(__SSSE3__)
++#         define PNG_INTEL_SSE_IMPLEMENTATION 2
++#      elif defined(__SSE2__) || defined(_M_X64) || defined(_M_AMD64) || \
++       (defined(_M_IX86_FP) && _M_IX86_FP >= 2)
++#         define PNG_INTEL_SSE_IMPLEMENTATION 1
++#      else
++#         define PNG_INTEL_SSE_IMPLEMENTATION 0
++#      endif
++#   endif
++
++#   if PNG_INTEL_SSE_IMPLEMENTATION > 0
++#      define PNG_FILTER_OPTIMIZATIONS png_init_filter_functions_sse2
++#   endif
++#endif
++
+ /* Is this a build of a DLL where compilation of the object modules requires
+  * different preprocessor settings to those required for a simple library?  If
+  * so PNG_BUILD_DLL must be set.
+  *
+  * If libpng is used inside a DLL but that DLL does not export the libpng APIs
+  * PNG_BUILD_DLL must not be set.  To avoid the code below kicking in build a
+  * static library of libpng then link the DLL against that.
+  */
+@@ -1184,16 +1220,29 @@ PNG_INTERNAL_FUNCTION(void,png_read_filt
+     row_info, png_bytep row, png_const_bytep prev_row),PNG_EMPTY);
+ PNG_INTERNAL_FUNCTION(void,png_read_filter_row_avg4_neon,(png_row_infop
+     row_info, png_bytep row, png_const_bytep prev_row),PNG_EMPTY);
+ PNG_INTERNAL_FUNCTION(void,png_read_filter_row_paeth3_neon,(png_row_infop
+     row_info, png_bytep row, png_const_bytep prev_row),PNG_EMPTY);
+ PNG_INTERNAL_FUNCTION(void,png_read_filter_row_paeth4_neon,(png_row_infop
+     row_info, png_bytep row, png_const_bytep prev_row),PNG_EMPTY);
+ 
++PNG_INTERNAL_FUNCTION(void,png_read_filter_row_sub3_sse2,(png_row_infop
++    row_info, png_bytep row, png_const_bytep prev_row),PNG_EMPTY);
++PNG_INTERNAL_FUNCTION(void,png_read_filter_row_sub4_sse2,(png_row_infop
++    row_info, png_bytep row, png_const_bytep prev_row),PNG_EMPTY);
++PNG_INTERNAL_FUNCTION(void,png_read_filter_row_avg3_sse2,(png_row_infop
++    row_info, png_bytep row, png_const_bytep prev_row),PNG_EMPTY);
++PNG_INTERNAL_FUNCTION(void,png_read_filter_row_avg4_sse2,(png_row_infop
++    row_info, png_bytep row, png_const_bytep prev_row),PNG_EMPTY);
++PNG_INTERNAL_FUNCTION(void,png_read_filter_row_paeth3_sse2,(png_row_infop
++    row_info, png_bytep row, png_const_bytep prev_row),PNG_EMPTY);
++PNG_INTERNAL_FUNCTION(void,png_read_filter_row_paeth4_sse2,(png_row_infop
++    row_info, png_bytep row, png_const_bytep prev_row),PNG_EMPTY);
++
+ /* Choose the best filter to use and filter the row data */
+ PNG_INTERNAL_FUNCTION(void,png_write_find_filter,(png_structrp png_ptr,
+     png_row_infop row_info),PNG_EMPTY);
+ 
+ #ifdef PNG_SEQUENTIAL_READ_SUPPORTED
+ PNG_INTERNAL_FUNCTION(void,png_read_IDAT_data,(png_structrp png_ptr,
+    png_bytep output, png_alloc_size_t avail_out),PNG_EMPTY);
+    /* Read 'avail_out' bytes of data from the IDAT stream.  If the output buffer

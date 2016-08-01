@@ -79,8 +79,8 @@ Shell::Shell() {
   gpu_thread_.reset(new base::Thread("gpu_thread"));
   gpu_thread_->StartWithOptions(options);
   gpu_task_runner_ = gpu_thread_->message_loop()->task_runner();
-  gpu_task_runner_->PostTask(FROM_HERE,
-      base::Bind(&Shell::InitGpuThread, base::Unretained(this)));
+  gpu_task_runner_->PostTask(
+      FROM_HERE, base::Bind(&Shell::InitGpuThread, base::Unretained(this)));
 
   ui_thread_.reset(new base::Thread("ui_thread"));
   ui_thread_->StartWithOptions(options);
@@ -128,17 +128,16 @@ void Shell::InitStandalone(std::string icu_data_path) {
     if (stream >> port) {
       settings.observatory_port = port;
     } else {
-      LOG(INFO)
-          << "Observatory port specified was malformed. Will default to "
-          << settings.observatory_port;
+      LOG(INFO) << "Observatory port specified was malformed. Will default to "
+                << settings.observatory_port;
     }
   }
   settings.start_paused = command_line.HasSwitch(switches::kStartPaused);
   settings.enable_dart_checked_mode =
       command_line.HasSwitch(switches::kEnableCheckedMode);
   settings.trace_startup = command_line.HasSwitch(switches::kTraceStartup);
-  settings.aot_snapshot_path = command_line.GetSwitchValueASCII(
-      switches::kAotSnapshotPath);
+  settings.aot_snapshot_path =
+      command_line.GetSwitchValueASCII(switches::kAotSnapshotPath);
   if (command_line.HasSwitch(switches::kCacheDirPath)) {
     settings.temp_directory_path =
         command_line.GetSwitchValueASCII(switches::kCacheDirPath);
@@ -185,7 +184,8 @@ void Shell::PurgeRasterizers() {
       rasterizers_.end());
 }
 
-void Shell::GetRasterizers(std::vector<base::WeakPtr<Rasterizer>>* rasterizers) {
+void Shell::GetRasterizers(
+    std::vector<base::WeakPtr<Rasterizer>>* rasterizers) {
   DCHECK(gpu_thread_checker_ && gpu_thread_checker_->CalledOnValidThread());
   *rasterizers = rasterizers_;
 }

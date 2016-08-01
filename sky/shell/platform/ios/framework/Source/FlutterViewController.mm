@@ -30,7 +30,6 @@
 #include "sky/shell/platform/mac/view_service_provider.h"
 #include "sky/shell/platform_view.h"
 #include "sky/shell/shell.h"
-#include "sky/shell/shell_view.h"
 
 @interface FlutterViewController ()<UIAlertViewDelegate>
 @end
@@ -48,7 +47,7 @@ void FlutterInit(int argc, const char* argv[]) {
   base::scoped_nsprotocol<FlutterDynamicServiceLoader*> _dynamicServiceLoader;
   sky::ViewportMetricsPtr _viewportMetrics;
   sky::shell::TouchMapper _touchMapper;
-  std::unique_ptr<sky::shell::ShellView> _shellView;
+  std::unique_ptr<sky::shell::PlatformViewIOS> _platformView;
   sky::SkyEnginePtr _engine;
   mojo::ServiceProviderPtr _dartServices;
   std::unique_ptr<sky::shell::AccessibilityBridge> _accessibilityBridge;
@@ -66,7 +65,8 @@ void FlutterInit(int argc, const char* argv[]) {
 
   if (self) {
     if (project == nil)
-      _dartProject.reset([[FlutterDartProject alloc] initFromDefaultSourceForConfiguration]);
+      _dartProject.reset(
+          [[FlutterDartProject alloc] initFromDefaultSourceForConfiguration]);
     else
       _dartProject.reset([project retain]);
 
@@ -96,8 +96,9 @@ void FlutterInit(int argc, const char* argv[]) {
   _statusBarStyle = UIStatusBarStyleDefault;
   _dynamicServiceLoader.reset([[FlutterDynamicServiceLoader alloc] init]);
   _viewportMetrics = sky::ViewportMetrics::New();
-  _shellView =
-      WTF::MakeUnique<sky::shell::ShellView>(sky::shell::Shell::Shared());
+  _platformView = WTF::MakeUnique<sky::shell::PlatformViewIOS>(
+      reinterpret_cast<CAEAGLLayer*>(self.view.layer));
+  _platformView->SetupResourceContextOnIOThread();
 
   [self setupTracing];
 
@@ -169,7 +170,7 @@ void FlutterInit(int argc, const char* argv[]) {
 - (void)connectToEngineAndLoad {
   TRACE_EVENT0("flutter", "connectToEngineAndLoad");
 
-  _shellView->view()->ConnectToEngine(mojo::GetProxy(&_engine));
+  _platformView->ConnectToEngine(mojo::GetProxy(&_engine));
 
   [self setupPlatformServiceProvider];
 
@@ -445,7 +446,7 @@ static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
   if (enable) {
     if (!_accessibilityBridge) {
       _accessibilityBridge.reset(
-        new sky::shell::AccessibilityBridge(self.view, _dartServices.get()));
+          new sky::shell::AccessibilityBridge(self.view, _dartServices.get()));
     }
   } else {
     _accessibilityBridge = nullptr;
@@ -464,15 +465,12 @@ static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
 #pragma mark - Surface creation and teardown updates
 
 - (void)surfaceUpdated:(BOOL)appeared {
-  auto platform_view =
-      reinterpret_cast<sky::shell::PlatformViewIOS*>(_shellView->view());
+  CHECK(_platformView != nullptr);
 
   if (appeared) {
-    auto layer = reinterpret_cast<CAEAGLLayer *>(self.view.layer);
-    platform_view->SetEAGLLayer(layer);
-    platform_view->NotifyCreated();
+    _platformView->NotifyCreated();
   } else {
-    platform_view->NotifyDestroyed();
+    _platformView->NotifyDestroyed();
   }
 }
 
@@ -530,8 +528,8 @@ static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
 }
 
 - (void)sendString:(NSString*)message
-   withMessageName:(NSString*)messageName
-          callback:(void (^)(NSString*))callback {
+    withMessageName:(NSString*)messageName
+           callback:(void (^)(NSString*))callback {
   NSAssert(message, @"The message must not be null");
   NSAssert(messageName, @"The messageName must not be null");
   NSAssert(callback, @"The callback must not be null");

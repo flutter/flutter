@@ -1,0 +1,176 @@
+Enabling SSE support
+
+Copyright (c) 2016 Google, Inc.
+Written by Mike Klein, Matt Sarett
+
+This INSTALL file written by Glenn Randers-Pehrson, 2016.
+
+If you have moved intel_init.c and filter_sse2_intrinsics.c to a different
+directory, be sure to update the '#include "../../pngpriv.h"' line in both
+files if necessary to point to the correct relative location of pngpriv.h
+with respect to the new location of those files.
+
+To enable SSE support in libpng, follow the instructions in I, II, or III,
+below:
+
+I. Using patched "configure" scripts:
+
+First, apply intel_sse.patch in your build directory.
+
+   patch -i contrib/intel/intel_sse.patch -p1
+
+Then, if you are not building in a new GIT clone, e.g., in a tar
+distribution, remove any existing pre-built configure scripts:
+
+   ./configure --enable-maintainer-mode
+   make maintainer-clean
+   ./autogen.sh --maintainer --clean
+
+Finally, configure libpng with -DPNG_INTEL_SSE in CPPFLAGS:
+
+   ./autogen.sh --maintainer
+   CPPFLAGS="-DPNG_INTEL_SSE" ./configure [options]
+   make CPPFLAGS="-DPNG_INTEL_SSE" [options]
+   make
+
+II. Using a custom makefile:
+
+If you are using a custom makefile makefile, you will have to update it
+manually to include contrib/intel/*.o in the dependencies, and to define
+PNG_INTEL_SSE.
+
+III. Using manually updated "configure" scripts:
+
+If you prefer, manually edit pngpriv.h, configure.ac, and Makefile.am,
+following the instructions below, then follow the instructions in
+section II of INSTALL in the main libpng directory, then configure libpng
+with -DPNG_INTEL_SSE in CPPFLAGS.
+
+1. Insert the following lines above the copyright line near the top of
+configure.ac:
+
+-----------------cut----------------
+# Copyright (c) 2016 Google, Inc.
+# Written by Mike Klein and Matt Sarett
+# Derived from the ARM supporting code in libpng/configure.ac, which was
+-----------------cut----------------
+
+2. Add the following code to configure.ac under HOST SPECIFIC OPTIONS
+directly beneath the section for ARM:
+
+-----------------cut----------------
+# INTEL
+# =====
+#
+# INTEL SSE (SIMD) support.
+
+AC_ARG_ENABLE([intel-sse],
+   AS_HELP_STRING([[[--enable-intel-sse]]],
+      [Enable Intel SSE optimizations: =no/off, yes/on:]
+      [no/off: disable the optimizations;]
+      [yes/on: enable the optimizations.]
+      [If not specified: determined by the compiler.]),
+   [case "$enableval" in
+      no|off)
+         # disable the default enabling:
+         AC_DEFINE([PNG_INTEL_SSE_OPT], [0],
+                   [Disable Intel SSE optimizations])
+         # Prevent inclusion of the assembler files below:
+         enable_intel_sse=no;;
+      yes|on)
+         AC_DEFINE([PNG_INTEL_SSE_OPT], [1],
+                   [Enable Intel SSE optimizations]);;
+      *)
+         AC_MSG_ERROR([--enable-intel-sse=${enable_intel_sse}: invalid value])
+   esac])
+
+# Add Intel specific files to all builds where the host_cpu is Intel ('x86*')
+# or where Intel optimizations were explicitly requested (this allows a
+# fallback if a future host CPU does not match 'x86*')
+AM_CONDITIONAL([PNG_INTEL_SSE],
+   [test "$enable_intel_sse" != 'no' &&
+    case "$host_cpu" in
+      i?86|x86_64) :;;
+      *)    test "$enable_intel_sse" != '';;
+    esac])
+-----------------cut----------------
+
+3. Insert the following lines above the copyright line near the top of
+Makefile.am:
+
+-----------------cut----------------
+# Copyright (c) 2016 Google, Inc.
+# Written by Mike Klein and Matt Sarett
+# Derived from the ARM supporting code in libpng/configure.ac, which was
+-----------------cut----------------
+
+4. Add the following code to Makefile.am under HOST SPECIFIC OPTIONS
+directly beneath the "if PNG_ARM_NEON ... endif" statement:
+
+-----------------cut----------------
+if PNG_INTEL_SSE
+libpng@PNGLIB_MAJOR@@PNGLIB_MINOR@_la_SOURCES += contrib/intel/intel_init.c\
+    contrib/intel/filter_sse2_intrinsics.c
+endif
+-----------------cut----------------
+
+5. Add the following lines to pngpriv.h, following the PNG_ARM_NEON_OPT
+code:
+
+-----------------cut----------------
+#ifndef PNG_INTEL_SSE_OPT
+#   ifdef PNG_INTEL_SSE
+      /* Only check for SSE if the build configuration has been modified to
+       * enable SSE optimizations.  This means that these optimizations will
+       * be off by default.  See contrib/intel for more details.
+       */
+#     if defined(__SSE4_1__) || defined(__AVX__) || defined(__SSSE3__) || \
+       defined(__SSE2__) || defined(_M_X64) || defined(_M_AMD64) || \
+       (defined(_M_IX86_FP) && _M_IX86_FP >= 2)
+#         define PNG_INTEL_SSE_OPT 1
+#      endif
+#   endif
+#endif
+
+#if PNG_INTEL_SSE_OPT > 0
+#   ifndef PNG_INTEL_SSE_IMPLEMENTATION
+#      if defined(__SSE4_1__) || defined(__AVX__)
+          /* We are not actually using AVX, but checking for AVX is the best
+             way we can detect SSE4.1 and SSSE3 on MSVC.
+          */
+#         define PNG_INTEL_SSE_IMPLEMENTATION 3
+#      elif defined(__SSSE3__)
+#         define PNG_INTEL_SSE_IMPLEMENTATION 2
+#      elif defined(__SSE2__) || defined(_M_X64) || defined(_M_AMD64) || \
+       (defined(_M_IX86_FP) && _M_IX86_FP >= 2)
+#         define PNG_INTEL_SSE_IMPLEMENTATION 1
+#      else
+#         define PNG_INTEL_SSE_IMPLEMENTATION 0
+#      endif
+#   endif
+
+#   if PNG_INTEL_SSE_IMPLEMENTATION > 0
+#      define PNG_FILTER_OPTIMIZATIONS png_init_filter_functions_sse2
+#   endif
+#endif
+
+-----------------cut----------------
+
+5. Add the following lines to pngpriv.h, following the prototype for
+png_read_filter_row_paeth4_neon:
+
+-----------------cut----------------
+PNG_INTERNAL_FUNCTION(void,png_read_filter_row_sub3_sse2,(png_row_infop
+    row_info, png_bytep row, png_const_bytep prev_row),PNG_EMPTY);
+PNG_INTERNAL_FUNCTION(void,png_read_filter_row_sub4_sse2,(png_row_infop
+    row_info, png_bytep row, png_const_bytep prev_row),PNG_EMPTY);
+PNG_INTERNAL_FUNCTION(void,png_read_filter_row_avg3_sse2,(png_row_infop
+    row_info, png_bytep row, png_const_bytep prev_row),PNG_EMPTY);
+PNG_INTERNAL_FUNCTION(void,png_read_filter_row_avg4_sse2,(png_row_infop
+    row_info, png_bytep row, png_const_bytep prev_row),PNG_EMPTY);
+PNG_INTERNAL_FUNCTION(void,png_read_filter_row_paeth3_sse2,(png_row_infop
+    row_info, png_bytep row, png_const_bytep prev_row),PNG_EMPTY);
+PNG_INTERNAL_FUNCTION(void,png_read_filter_row_paeth4_sse2,(png_row_infop
+    row_info, png_bytep row, png_const_bytep prev_row),PNG_EMPTY);
+
+-----------------cut----------------

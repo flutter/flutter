@@ -28,10 +28,10 @@
 #define SKY_ENGINE_PLATFORM_IMAGE_DECODERS_IMAGEFRAME_H_
 
 #include "sky/engine/platform/geometry/IntRect.h"
-#include "sky/engine/platform/graphics/skia/NativeImageSkia.h"
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/PassRefPtr.h"
+#include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkColorPriv.h"
 
 namespace blink {
@@ -106,11 +106,6 @@ public:
     // are written.  Must only be called once.  Returns whether allocation
     // succeeded.
     bool setSize(int newWidth, int newHeight);
-
-    // Returns a caller-owned pointer to the underlying native image data.
-    // (Actual use: This pointer will be owned by BitmapImage and freed in
-    // FrameData::clear()).
-    PassRefPtr<NativeImageSkia> asNewNativeImage() const;
 
     bool hasAlpha() const;
     const IntRect& originalFrameRect() const { return m_originalFrameRect; }

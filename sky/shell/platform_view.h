@@ -5,11 +5,17 @@
 #ifndef SKY_SHELL_PLATFORM_VIEW_H_
 #define SKY_SHELL_PLATFORM_VIEW_H_
 
+#include <memory>
+
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
 #include "base/synchronization/waitable_event.h"
+#include "base/threading/thread_local_storage.h"
+#include "sky/shell/shell.h"
+#include "sky/shell/ui/engine.h"
 #include "sky/shell/ui_delegate.h"
 #include "third_party/skia/include/core/SkSize.h"
+#include "third_party/skia/include/gpu/GrContext.h"
 
 namespace sky {
 namespace shell {
@@ -20,6 +26,7 @@ class PlatformView {
  public:
   struct Config {
     Config();
+
     ~Config();
 
     base::WeakPtr<UIDelegate> ui_delegate;
@@ -36,9 +43,9 @@ class PlatformView {
     uint8_t stencil_bits = 8;
   };
 
-  // Implemented by each platform.
-  static PlatformView* Create(const Config& config,
-                              SurfaceConfig surface_configuration);
+  void SetupResourceContextOnIOThread();
+
+  static base::ThreadLocalStorage::StaticSlot ResourceContext;
 
   virtual ~PlatformView();
 
@@ -56,6 +63,8 @@ class PlatformView {
 
   virtual bool ContextMakeCurrent() = 0;
 
+  virtual bool ResourceContextMakeCurrent() = 0;
+
   virtual bool SwapBuffers() = 0;
 
   virtual SkISize GetSize();
@@ -63,11 +72,17 @@ class PlatformView {
   virtual void Resize(const SkISize& size);
 
  protected:
-  explicit PlatformView(const Config& config, SurfaceConfig surface_config);
-
   Config config_;
   SurfaceConfig surface_config_;
+
+  std::unique_ptr<Rasterizer> rasterizer_;
+  std::unique_ptr<Engine> engine_;
+
   SkISize size_;
+
+  explicit PlatformView();
+
+  void SetupResourceContextOnIOThreadPerform(base::WaitableEvent* event);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(PlatformView);

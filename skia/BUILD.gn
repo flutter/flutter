@@ -128,6 +128,12 @@ config("skia_config") {
   if (is_ios) {
     defines += [ "SK_BUILD_FOR_IOS" ]
   }
+
+  defines += [
+    "SK_HAS_JPEG_LIBRARY",
+    "SK_HAS_PNG_LIBRARY",
+  ]
+  
 }
 
 # Internal-facing config for Skia library code.
@@ -137,14 +143,16 @@ config("skia_library_config") {
   # matches the GYP build.
   include_dirs = [
     "//third_party/skia/include/private",
+    "//third_party/skia/include/codec",
+    "//third_party/skia/src/codec",
     "//third_party/skia/src/core",
     "//third_party/skia/src/image",
+    "//third_party/skia/src/lazy",
     "//third_party/skia/src/opts",
     "//third_party/skia/src/pdf",
     "//third_party/skia/src/ports",
     "//third_party/skia/src/sfnt",
     "//third_party/skia/src/utils",
-    "//third_party/skia/src/lazy",
   ]
   if (is_mac || is_ios) {
     include_dirs += [ "//third_party/skia/include/utils/mac" ]
@@ -271,7 +279,26 @@ component("skia") {
   sources += gypi_skia_utils.sources
 
   sources += [
-    "//third_party/skia/src/ports/SkImageGenerator_none.cpp",
+    "//third_party/skia/src/ports/SkImageGenerator_skia.cpp",
+    
+    "//third_party/skia/src/codec/SkAndroidCodec.cpp",
+    "//third_party/skia/src/codec/SkBmpCodec.cpp",
+    "//third_party/skia/src/codec/SkBmpMaskCodec.cpp",
+    "//third_party/skia/src/codec/SkBmpRLECodec.cpp",
+    "//third_party/skia/src/codec/SkBmpStandardCodec.cpp",
+    "//third_party/skia/src/codec/SkCodec.cpp",
+    "//third_party/skia/src/codec/SkCodecImageGenerator.cpp",
+    "//third_party/skia/src/codec/SkIcoCodec.cpp",
+    "//third_party/skia/src/codec/SkJpegCodec.cpp",
+    "//third_party/skia/src/codec/SkJpegDecoderMgr.cpp",
+    "//third_party/skia/src/codec/SkJpegUtility.cpp",
+    "//third_party/skia/src/codec/SkMaskSwizzler.cpp",
+    "//third_party/skia/src/codec/SkMasks.cpp",
+    "//third_party/skia/src/codec/SkPngCodec.cpp",
+    "//third_party/skia/src/codec/SkSampledCodec.cpp",
+    "//third_party/skia/src/codec/SkSampler.cpp",
+    "//third_party/skia/src/codec/SkSwizzler.cpp",
+    "//third_party/skia/src/codec/SkWbmpCodec.cpp",
 
     "//third_party/skia/include/images/SkMovie.h",
     "//third_party/skia/include/ports/SkTypeface_win.h",
@@ -482,6 +509,8 @@ component("skia") {
     "//base",
     "//base/third_party/dynamic_annotations",
     "//third_party/zlib",
+    "//third_party/libpng",
+    "//third_party/libjpeg_turbo:libjpeg",
   ]
 
   if (is_linux) {

@@ -59,12 +59,8 @@ public:
 
 private:
     Pattern(PassRefPtr<Image>, RepeatMode);
-
-    RefPtr<NativeImageSkia> m_tileImage;
-    RepeatMode m_repeatMode;
     AffineTransform m_patternSpaceTransformation;
     RefPtr<SkShader> m_pattern;
-    int m_externalMemoryAllocated;
 };
 
 } // namespace blink

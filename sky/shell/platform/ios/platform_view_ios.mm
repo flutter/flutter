@@ -36,8 +36,11 @@ struct GLintSize {
 class IOSGLContext {
  public:
   IOSGLContext(PlatformView::SurfaceConfig config, CAEAGLLayer* layer)
-      : layer_(layer),
+      : layer_([layer retain]),
         context_([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2]),
+        resource_context_([[EAGLContext alloc]
+            initWithAPI:kEAGLRenderingAPIOpenGLES2
+             sharegroup:context_.get().sharegroup]),
         framebuffer_(GL_NONE),
         colorbuffer_(GL_NONE),
         depthbuffer_(GL_NONE),
@@ -47,6 +50,7 @@ class IOSGLContext {
 
     CHECK(layer_ != nullptr);
     CHECK(context_ != nullptr);
+    CHECK(resource_context_ != nullptr);
 
     bool context_current = [EAGLContext setCurrentContext:context_];
 
@@ -169,9 +173,16 @@ class IOSGLContext {
            [EAGLContext setCurrentContext:context_.get()];
   }
 
+  bool ResourceMakeCurrent() {
+    base::mac::ScopedNSAutoreleasePool pool;
+
+    return [EAGLContext setCurrentContext:resource_context_.get()];
+  }
+
  private:
   base::scoped_nsobject<CAEAGLLayer> layer_;
   base::scoped_nsobject<EAGLContext> context_;
+  base::scoped_nsobject<EAGLContext> resource_context_;
 
   GLuint framebuffer_;
   GLuint colorbuffer_;
@@ -258,20 +269,11 @@ class IOSGLContext {
   DISALLOW_COPY_AND_ASSIGN(IOSGLContext);
 };
 
-PlatformView* PlatformView::Create(const Config& config,
-                                   SurfaceConfig surface_config) {
-  return new PlatformViewIOS(config, surface_config);
-}
-
-PlatformViewIOS::PlatformViewIOS(const Config& config,
-                                 SurfaceConfig surface_config)
-    : PlatformView(config, surface_config), weak_factory_(this) {}
+PlatformViewIOS::PlatformViewIOS(CAEAGLLayer* layer)
+    : context_(WTF::MakeUnique<IOSGLContext>(surface_config_, layer)),
+      weak_factory_(this) {}
 
 PlatformViewIOS::~PlatformViewIOS() = default;
-
-void PlatformViewIOS::SetEAGLLayer(CAEAGLLayer* layer) {
-  context_ = WTF::MakeUnique<IOSGLContext>(surface_config_, layer);
-}
 
 base::WeakPtr<sky::shell::PlatformView> PlatformViewIOS::GetWeakViewPtr() {
   return weak_factory_.GetWeakPtr();
@@ -283,6 +285,10 @@ uint64_t PlatformViewIOS::DefaultFramebuffer() const {
 
 bool PlatformViewIOS::ContextMakeCurrent() {
   return context_ != nullptr ? context_->MakeCurrent() : false;
+}
+
+bool PlatformViewIOS::ResourceContextMakeCurrent() {
+  return context_ != nullptr ? context_->ResourceMakeCurrent() : false;
 }
 
 bool PlatformViewIOS::SwapBuffers() {

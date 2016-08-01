@@ -35,8 +35,6 @@
 
 namespace blink {
 
-class NativeImageSkia;
-
 struct FrameData {
     WTF_MAKE_NONCOPYABLE(FrameData);
 public:
@@ -47,7 +45,6 @@ public:
     // Returns whether there was cached image data to clear.
     bool clear(bool clearMetadata);
 
-    RefPtr<NativeImageSkia> m_frame;
     ImageOrientation m_orientation;
     float m_duration;
     bool m_haveMetadata : 1;

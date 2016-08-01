@@ -2,36 +2,18 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-config("libpng_config") {
+config("libpng_public") {
   include_dirs = [ "." ]
-
-  defines = [
-    "CHROME_PNG_WRITE_SUPPORT",
-    "PNG_USER_CONFIG",
-  ]
-
-  if (is_android) {
-    #'toolsets': ['target', 'host'],
-    defines += [ "CHROME_PNG_READ_PACK_SUPPORT" ]  # Required by freetype.
-  }
-
-  if (is_win) {
-    if (component_mode == "shared_library") {
-      defines += [
-        "PNG_USE_DLL",
-        "PNG_NO_MODULEDEF",
-      ]
-    }
-  }
 }
 
-source_set("libpng_sources") {
+source_set("libpng") {
+  public_configs = [ ":libpng_public" ]
+
+  defines = []
+
   sources = [
     "png.c",
-    "png.h",
-    "pngconf.h",
     "pngerror.c",
-    "pnggccrd.c",
     "pngget.c",
     "pngmem.c",
     "pngpread.c",
@@ -41,48 +23,25 @@ source_set("libpng_sources") {
     "pngrutil.c",
     "pngset.c",
     "pngtrans.c",
-    "pngusr.h",
-    "pngvcrd.c",
     "pngwio.c",
     "pngwrite.c",
     "pngwtran.c",
     "pngwutil.c",
   ]
 
-  configs -= [ "//build/config/compiler:chromium_code" ]
-  configs += [ "//build/config/compiler:no_chromium_code" ]
+  if ((is_ios && !use_ios_simulator) || (is_android && current_cpu == "arm")) {
+    sources += [
+      "arm/arm_init.c",
+      "arm/filter_neon.S",
+      "arm/filter_neon_intrinsics.c",
+    ]
 
-  if (is_win && is_component_build) {
-    defines = [ "PNG_BUILD_DLL" ]
+    defines += [
+      "PNG_ARM_NEON_OPT=2"
+    ]
   }
 
-  public_configs = [ ":libpng_config" ]
-
-  public_deps = [
+  deps = [
     "//third_party/zlib",
   ]
-
-  # Must be in a config because of how GN orders flags (otherwise -Wall will
-  # appear after this, and turn it back on).
-  config("clang_warnings") {
-    if (is_clang) {
-      # Upstream uses self-assignment to avoid warnings.
-      cflags = [ "-Wno-self-assign" ]
-    }
-  }
-  configs += [ ":clang_warnings" ]
-}
-
-if (is_win) {
-  component("libpng") {
-    public_deps = [
-      ":libpng_sources",
-    ]
-  }
-} else {
-  group("libpng") {
-    public_deps = [
-      ":libpng_sources",
-    ]
-  }
 }

@@ -17,7 +17,7 @@ namespace shell {
 
 class PlatformViewMojo : public PlatformView {
  public:
-  explicit PlatformViewMojo(const Config& config, SurfaceConfig surface_config);
+  explicit PlatformViewMojo();
 
   ~PlatformViewMojo() override;
 
@@ -32,6 +32,9 @@ class PlatformViewMojo : public PlatformView {
 
   // sky::shell::PlatformView override
   bool ContextMakeCurrent() override;
+
+  // sky::shell::PlatformView override
+  bool ResourceContextMakeCurrent() override;
 
   // sky::shell::PlatformView override
   bool SwapBuffers() override;

@@ -60,36 +60,6 @@ BitmapImage::BitmapImage(ImageObserver* observer)
 {
 }
 
-BitmapImage::BitmapImage(PassRefPtr<NativeImageSkia> nativeImage, ImageObserver* observer)
-    : Image(observer)
-    , m_size(nativeImage->bitmap().width(), nativeImage->bitmap().height())
-    , m_currentFrame(0)
-    , m_frames(0)
-    , m_frameTimer(0)
-    , m_repetitionCount(cAnimationNone)
-    , m_repetitionCountStatus(Unknown)
-    , m_repetitionsComplete(0)
-    , m_frameCount(1)
-    , m_isSolidColor(false)
-    , m_checkedForSolidColor(false)
-    , m_animationFinished(true)
-    , m_allDataReceived(true)
-    , m_haveSize(true)
-    , m_sizeAvailable(true)
-    , m_haveFrameCount(true)
-{
-    // Since we don't have a decoder, we can't figure out the image orientation.
-    // Set m_sizeRespectingOrientation to be the same as m_size so it's not 0x0.
-    m_sizeRespectingOrientation = m_size;
-
-    m_frames.grow(1);
-    m_frames[0].m_hasAlpha = !nativeImage->bitmap().isOpaque();
-    m_frames[0].m_frame = nativeImage;
-    m_frames[0].m_haveMetadata = true;
-
-    checkForSolidColor();
-}
-
 BitmapImage::~BitmapImage()
 {
     stopAnimation();
@@ -136,32 +106,7 @@ void BitmapImage::destroyMetadataAndNotify(size_t frameBytesCleared)
 
 void BitmapImage::cacheFrame(size_t index)
 {
-    size_t numFrames = frameCount();
-    if (m_frames.size() < numFrames)
-        m_frames.grow(numFrames);
 
-    m_frames[index].m_frame = m_source.createFrameAtIndex(index);
-    if (numFrames == 1 && m_frames[index].m_frame)
-        checkForSolidColor();
-
-    m_frames[index].m_orientation = m_source.orientationAtIndex(index);
-    m_frames[index].m_haveMetadata = true;
-    m_frames[index].m_isComplete = m_source.frameIsCompleteAtIndex(index);
-    if (repetitionCount(false) != cAnimationNone)
-        m_frames[index].m_duration = m_source.frameDurationAtIndex(index);
-    m_frames[index].m_hasAlpha = m_source.frameHasAlphaAtIndex(index);
-    m_frames[index].m_frameBytes = m_source.frameBytesAtIndex(index);
-
-    const IntSize frameSize(index ? m_source.frameSizeAtIndex(index) : m_size);
-    if (frameSize != m_size)
-        m_hasUniformFrameSize = false;
-    if (m_frames[index].m_frame) {
-        int deltaBytes = safeCast<int>(m_frames[index].m_frameBytes);
-        // The fully-decoded frame will subsume the partially decoded data used
-        // to determine image properties.
-        if (imageObserver())
-            imageObserver()->decodedSizeChanged(this, deltaBytes);
-    }
 }
 
 void BitmapImage::updateSize() const
@@ -259,47 +204,6 @@ void BitmapImage::draw(GraphicsContext* ctxt, const FloatRect& dstRect, const Fl
 
 void BitmapImage::draw(GraphicsContext* ctxt, const FloatRect& dstRect, const FloatRect& srcRect, CompositeOperator compositeOp, WebBlendMode blendMode, RespectImageOrientationEnum shouldRespectImageOrientation)
 {
-    // Spin the animation to the correct frame before we try to draw it, so we
-    // don't draw an old frame and then immediately need to draw a newer one,
-    // causing flicker and wasting CPU.
-    startAnimation();
-
-    RefPtr<NativeImageSkia> image = nativeImageForCurrentFrame();
-    if (!image)
-        return; // It's too early and we don't have an image yet.
-
-    FloatRect normDstRect = adjustForNegativeSize(dstRect);
-    FloatRect normSrcRect = adjustForNegativeSize(srcRect);
-    normSrcRect.intersect(FloatRect(0, 0, image->bitmap().width(), image->bitmap().height()));
-
-    if (normSrcRect.isEmpty() || normDstRect.isEmpty())
-        return; // Nothing to draw.
-
-    ImageOrientation orientation = DefaultImageOrientation;
-    if (shouldRespectImageOrientation == RespectImageOrientation)
-        orientation = frameOrientationAtIndex(m_currentFrame);
-
-    GraphicsContextStateSaver saveContext(*ctxt, false);
-    if (orientation != DefaultImageOrientation) {
-        saveContext.save();
-
-        // ImageOrientation expects the origin to be at (0, 0)
-        ctxt->translate(normDstRect.x(), normDstRect.y());
-        normDstRect.setLocation(FloatPoint());
-
-        ctxt->concatCTM(orientation.transformFromDefault(normDstRect.size()));
-
-        if (orientation.usesWidthAsHeight()) {
-            // The destination rect will have it's width and height already reversed for the orientation of
-            // the image, as it was needed for page layout, so we need to reverse it back here.
-            normDstRect = FloatRect(normDstRect.x(), normDstRect.y(), normDstRect.height(), normDstRect.width());
-        }
-    }
-
-    image->draw(ctxt, normSrcRect, normDstRect, compositeOp, blendMode);
-
-    if (ImageObserver* observer = imageObserver())
-        observer->didDraw(this);
 }
 
 void BitmapImage::resetDecoder()
@@ -333,19 +237,7 @@ bool BitmapImage::isSizeAvailable()
 
 bool BitmapImage::ensureFrameIsCached(size_t index)
 {
-    if (index >= frameCount())
-        return false;
-
-    if (index >= m_frames.size() || !m_frames[index].m_frame)
-        cacheFrame(index);
-    return true;
-}
-
-PassRefPtr<NativeImageSkia> BitmapImage::frameAtIndex(size_t index)
-{
-    if (!ensureFrameIsCached(index))
-        return nullptr;
-    return m_frames[index].m_frame;
+    return false;
 }
 
 bool BitmapImage::frameIsCompleteAtIndex(size_t index)
@@ -362,16 +254,9 @@ float BitmapImage::frameDurationAtIndex(size_t index)
     return m_source.frameDurationAtIndex(index);
 }
 
-PassRefPtr<NativeImageSkia> BitmapImage::nativeImageForCurrentFrame()
-{
-    return frameAtIndex(currentFrame());
-}
 
 PassRefPtr<Image> BitmapImage::imageForDefaultFrame()
 {
-    if (isAnimated())
-        return BitmapImage::create(frameAtIndex(0));
-
     return Image::imageForDefaultFrame();
 }
 
@@ -612,22 +497,6 @@ bool BitmapImage::internalAdvanceAnimation(bool skippingFrames)
 
 void BitmapImage::checkForSolidColor()
 {
-    m_isSolidColor = false;
-    m_checkedForSolidColor = true;
-
-    if (frameCount() > 1)
-        return;
-
-    RefPtr<NativeImageSkia> frame = frameAtIndex(0);
-
-    if (frame && size().width() == 1 && size().height() == 1) {
-        SkAutoLockPixels lock(frame->bitmap());
-        if (!frame->bitmap().getPixels())
-            return;
-
-        m_isSolidColor = true;
-        m_solidColor = Color(frame->bitmap().getColor(0, 0));
-    }
 }
 
 bool BitmapImage::mayFillWithSolidColor()
