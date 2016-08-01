@@ -11,7 +11,7 @@ final List<String> results = <String>[];
 
 Set<TestRoute> routes = new HashSet<TestRoute>();
 
-class TestRoute extends Route<String> {
+class TestRoute extends LocalHistoryRoute<String> {
   TestRoute(this.name);
   final String name;
 
@@ -340,5 +340,43 @@ void main() {
     expect(results, equals(<String>['A: dispose', 'b: dispose']));
     expect(routes.isEmpty, isTrue);
     results.clear();
+  });
+
+  testWidgets('Route localHistory - popUntil', (WidgetTester tester) async {
+    TestRoute routeA = new TestRoute('A');
+    routeA.addLocalHistoryEntry(new LocalHistoryEntry(
+      onRemove: () { routeA.log('onRemove 0'); }
+    ));
+    routeA.addLocalHistoryEntry(new LocalHistoryEntry(
+      onRemove: () { routeA.log('onRemove 1'); }
+    ));
+    GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
+    await tester.pumpWidget(new Navigator(
+      key: navigatorKey,
+      onGenerateRoute: (_) => routeA
+    ));
+    NavigatorState host = navigatorKey.currentState;
+    await runNavigatorTest(
+      tester,
+      host,
+      () { host.popUntil((Route<dynamic> route) => !route.willHandlePopInternally); },
+      <String>[
+        'A: install',
+        'A: didPush',
+        'A: didChangeNext null',
+        'A: didPop null',
+        'A: onRemove 1',
+        'A: didPop null',
+        'A: onRemove 0',
+      ]
+    );
+
+    await runNavigatorTest(
+      tester,
+      host,
+      () { host.popUntil((Route<dynamic> route) => !route.willHandlePopInternally); },
+      <String>[
+      ]
+    );
   });
 }
