@@ -19,6 +19,7 @@
 
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
+  'fuchsia_git': 'https://fuchsia.googlesource.com',
   'mojo_sdk_revision': 'b200aa62c93647a0421b9239804ef5ce1509ab20',
   'base_revision': '672b04e54b937ec899429a6bd5409c5a6300d151',
   'skia_revision': 'd1bdd1fcbd308afb9903f39d231742f5c951cf07',
@@ -37,16 +38,35 @@ vars = {
 # If you need to add a new host, contact chrome infrastructure team.
 allowed_hosts = [
   'chromium.googlesource.com',
+  'fuchsia.googlesource.com',
   'github.com',
 ]
 
 deps = {
+   # Fuchsia compatibility
+   #
+   # The dependencies in this section should match the layout in the Fuchsia gn
+   # build. Eventually, we'll manage these dependencies together with Fuchsia
+   # and not have to specific specific hashes.
+
+  'src/lib/ftl':
+   Var('fuchsia_git') + '/ftl' + '@' + 'f9b68c2007cc11069bb5abadcf757f1dc61c51ea',
+
+  'src/third_party/gtest':
+   Var('fuchsia_git') + '/third_party/gtest' + '@' + 'c00f82917331efbbd27124b537e4ccc915a02b72',
+
+   # Chromium-style
+   #
+   # As part of integrating with Fuchsia, we should eventually remove all these
+   # Chromium-style dependencies.
+
   'src/base':
    Var('chromium_git') + '/external/github.com/domokit/base' + '@' +  Var('base_revision'),
 
   'src/buildtools':
    Var('chromium_git') + '/chromium/buildtools.git' + '@' +  Var('buildtools_revision'),
 
+  # TODO(abarth): Remove in favor of //third_party/gtest
   'src/testing/gtest':
    Var('chromium_git') + '/external/googletest.git' + '@' + '23574bf2333f834ff665f894c97bef8a5b33a0a9',
 
