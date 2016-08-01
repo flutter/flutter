@@ -142,20 +142,25 @@ class _PestoDemoState extends State<PestoDemo> {
           new DrawerItem(
             child: new Text('Home'),
             selected: !config.showFavorites,
-            onPressed: () => Navigator.pushNamed(context, PestoDemo.routeName)
+            onPressed: () {
+              Navigator.popUntil(context, ModalRoute.withName('/pesto'));
+            }
           ),
           new DrawerItem(
             child: new Text('Favorites'),
             selected: config.showFavorites,
-            onPressed: () { _showFavorites(context); }
+            onPressed: () {
+              if (config.showFavorites)
+                Navigator.pop(context);
+              else
+                _showFavorites(context);
+            }
           ),
           new Divider(),
           new DrawerItem(
             child: new Text('Return to Gallery'),
             onPressed: () {
-              Navigator.of(context)
-                ..pop()  // Close the drawer.
-                ..pop();  // Go back to the gallery.
+              Navigator.popUntil(context, ModalRoute.withName('/'));
             }
           ),
         ]
@@ -193,6 +198,7 @@ class _PestoDemoState extends State<PestoDemo> {
 
   void _showFavorites(BuildContext context) {
     Navigator.push(context, new MaterialPageRoute<Null>(
+      settings: const RouteSettings(name: "/pesto/favorites"),
       builder: (BuildContext context) {
         return new PestoDemo(showFavorites: true);
       }
@@ -201,6 +207,7 @@ class _PestoDemoState extends State<PestoDemo> {
 
   void _showRecipe(BuildContext context, Recipe recipe) {
     Navigator.push(context, new MaterialPageRoute<Null>(
+      settings: const RouteSettings(name: "/pesto/recipe"),
       builder: (BuildContext context) {
         return new Theme(
           data: _kTheme,

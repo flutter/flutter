@@ -487,6 +487,17 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     }
   }
 
+  /// Returns a predicate that's true if the route has the specified name and if
+  /// popping the route will not yield the same route, i.e. if the route's
+  /// [willHandlePopInternally] property is false.
+  ///
+  /// This function is typically used with [Navigator.popUntil()].
+  static RoutePredicate withName(String name) {
+    return (Route<dynamic> route) {
+      return !route.willHandlePopInternally
+        && route is ModalRoute && route.settings.name == name;
+    };
+  }
 
   // The API for subclasses to override - used by _ModalScope
 
