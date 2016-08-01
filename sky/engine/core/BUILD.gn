@@ -13,6 +13,7 @@ source_set("libraries") {
     "//flow",
     "//flutter/lib/ui",
     "//flutter/tonic",
+    "//lib/ftl",
     "//mojo/application",
     "//mojo/data_pipe_utils",
     "//mojo/public/c/system",

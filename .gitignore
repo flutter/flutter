@@ -25,6 +25,7 @@ Thumbs.db
 /build/linux/bin/eu-strip
 /buildtools/
 /dart/
+/lib/
 /mojo/devtools/
 /mojo/public/
 /native_client/

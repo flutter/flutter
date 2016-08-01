@@ -6,7 +6,7 @@
 #define SKY_SHELL_UI_ANIMATOR_H_
 
 #include "base/memory/weak_ptr.h"
-#include "base/time/time.h"
+#include "lib/ftl/time/time_point.h"
 #include "mojo/services/gfx/composition/interfaces/scheduling.mojom.h"
 #include "mojo/services/vsync/interfaces/vsync.mojom.h"
 #include "sky/shell/ui/engine.h"
@@ -17,7 +17,8 @@ namespace shell {
 class Animator {
  public:
   explicit Animator(const Engine::Config& config,
-                    rasterizer::RasterizerPtr rasterizer, Engine* engine);
+                    rasterizer::RasterizerPtr rasterizer,
+                    Engine* engine);
   ~Animator();
 
   void RequestFrame();
@@ -32,10 +33,11 @@ class Animator {
   void set_vsync_provider(vsync::VSyncProviderPtr vsync_provider);
 
   void set_frame_scheduler(
-      mojo::InterfaceHandle<mojo::gfx::composition::FrameScheduler> frame_scheduler) {
-    frame_scheduler_ = mojo::gfx::composition::FrameSchedulerPtr::Create(frame_scheduler.Pass());
+      mojo::InterfaceHandle<mojo::gfx::composition::FrameScheduler>
+          frame_scheduler) {
+    frame_scheduler_ = mojo::gfx::composition::FrameSchedulerPtr::Create(
+        frame_scheduler.Pass());
   }
-
 
  private:
   void Animate(mojo::gfx::composition::FrameInfoPtr frame_info);
@@ -53,7 +55,7 @@ class Animator {
   bool engine_requested_frame_;
   bool paused_;
   bool is_ready_to_draw_;
-  base::TimeTicks begin_time_;
+  ftl::TimePoint begin_time_;
 
   base::WeakPtrFactory<Animator> weak_factory_;
 

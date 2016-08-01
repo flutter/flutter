@@ -54,7 +54,7 @@ class Engine : public UIDelegate,
 
   static void Init();
 
-  void BeginFrame(base::TimeTicks frame_time);
+  void BeginFrame(ftl::TimePoint frame_time);
 
  private:
   // UIDelegate implementation:

@@ -7,6 +7,7 @@ source_set("sky") {
     "//base",
     "//flow",
     "//flutter/lib/ui",
+    "//lib/ftl/",
     "//mojo/public/cpp/system",
     "//mojo/services/network/interfaces",
     "//skia",

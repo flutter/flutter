@@ -6,11 +6,9 @@
 
 namespace flow {
 
-TransformLayer::TransformLayer() {
-}
+TransformLayer::TransformLayer() {}
 
-TransformLayer::~TransformLayer() {
-}
+TransformLayer::~TransformLayer() {}
 
 void TransformLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   SkMatrix childMatrix;

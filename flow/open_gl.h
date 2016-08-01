@@ -5,7 +5,7 @@
 #ifndef FLOW_OPEN_GL_H_
 #define FLOW_OPEN_GL_H_
 
-#include "build/build_config.h"
+#include "lib/ftl/build_config.h"
 
 #if OS_IOS
 

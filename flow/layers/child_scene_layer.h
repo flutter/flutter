@@ -41,7 +41,7 @@ class ChildSceneLayer : public Layer {
   mojo::gfx::composition::SceneTokenPtr scene_token_;
   SkMatrix transform_;
 
-  DISALLOW_COPY_AND_ASSIGN(ChildSceneLayer);
+  FTL_DISALLOW_COPY_AND_ASSIGN(ChildSceneLayer);
 };
 
 }  // namespace flow

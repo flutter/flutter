@@ -27,22 +27,17 @@ void Render(Dart_NativeArguments args) {
   UIDartState::Current()->window()->client()->Render(scene);
 }
 
-
 void FlushRealTimeEvents(Dart_NativeArguments args) {
   UIDartState::Current()->window()->client()->FlushRealTimeEvents();
 }
 
 }  // namespace
 
-WindowClient::~WindowClient() {
-}
+WindowClient::~WindowClient() {}
 
-Window::Window(WindowClient* client)
-  : client_(client) {
-}
+Window::Window(WindowClient* client) : client_(client) {}
 
-Window::~Window() {
-}
+Window::~Window() {}
 
 void Window::DidCreateIsolate() {
   library_.Set(DartState::Current(), Dart_LookupLibrary(ToDart("dart:ui")));
@@ -54,15 +49,17 @@ void Window::UpdateWindowMetrics(const sky::ViewportMetricsPtr& metrics) {
     return;
   DartState::Scope scope(dart_state);
   double device_pixel_ratio = metrics->device_pixel_ratio;
-  DartInvokeField(library_.value(), "_updateWindowMetrics", {
-    ToDart(device_pixel_ratio),
-    ToDart(metrics->physical_width / device_pixel_ratio),
-    ToDart(metrics->physical_height / device_pixel_ratio),
-    ToDart(metrics->physical_padding_top / device_pixel_ratio),
-    ToDart(metrics->physical_padding_right / device_pixel_ratio),
-    ToDart(metrics->physical_padding_bottom / device_pixel_ratio),
-    ToDart(metrics->physical_padding_left / device_pixel_ratio),
-  });
+  DartInvokeField(
+      library_.value(), "_updateWindowMetrics",
+      {
+          ToDart(device_pixel_ratio),
+          ToDart(metrics->physical_width / device_pixel_ratio),
+          ToDart(metrics->physical_height / device_pixel_ratio),
+          ToDart(metrics->physical_padding_top / device_pixel_ratio),
+          ToDart(metrics->physical_padding_right / device_pixel_ratio),
+          ToDart(metrics->physical_padding_bottom / device_pixel_ratio),
+          ToDart(metrics->physical_padding_left / device_pixel_ratio),
+      });
 }
 
 void Window::UpdateLocale(const std::string& language_code,
@@ -72,10 +69,11 @@ void Window::UpdateLocale(const std::string& language_code,
     return;
   DartState::Scope scope(dart_state);
 
-  DartInvokeField(library_.value(), "_updateLocale", {
-    StdStringToDart(language_code),
-    StdStringToDart(country_code),
-  });
+  DartInvokeField(
+      library_.value(), "_updateLocale",
+      {
+          StdStringToDart(language_code), StdStringToDart(country_code),
+      });
 }
 
 void Window::PushRoute(const std::string& route) {
@@ -85,8 +83,8 @@ void Window::PushRoute(const std::string& route) {
   DartState::Scope scope(dart_state);
 
   DartInvokeField(library_.value(), "_pushRoute", {
-    StdStringToDart(route),
-  });
+                                                      StdStringToDart(route),
+                                                  });
 }
 
 void Window::PopRoute() {
@@ -104,8 +102,8 @@ void Window::DispatchPointerPacket(const pointer::PointerPacketPtr& packet) {
     return;
   DartState::Scope scope(dart_state);
 
-  Dart_Handle data_handle = Dart_NewTypedData(Dart_TypedData_kByteData,
-                                              packet->GetSerializedSize());
+  Dart_Handle data_handle =
+      Dart_NewTypedData(Dart_TypedData_kByteData, packet->GetSerializedSize());
   if (Dart_IsError(data_handle))
     return;
 
@@ -122,17 +120,18 @@ void Window::DispatchPointerPacket(const pointer::PointerPacketPtr& packet) {
   DartInvokeField(library_.value(), "_dispatchPointerPacket", {data_handle});
 }
 
-void Window::BeginFrame(base::TimeTicks frameTime) {
+void Window::BeginFrame(ftl::TimePoint frameTime) {
   DartState* dart_state = library_.dart_state().get();
   if (!dart_state)
     return;
   DartState::Scope scope(dart_state);
 
-  int64_t microseconds = (frameTime - base::TimeTicks()).InMicroseconds();
+  int64_t microseconds = (frameTime - ftl::TimePoint()).ToMicroseconds();
 
-  DartInvokeField(library_.value(), "_beginFrame", {
-    Dart_NewInteger(microseconds),
-  });
+  DartInvokeField(library_.value(), "_beginFrame",
+                  {
+                      Dart_NewInteger(microseconds),
+                  });
 }
 
 void Window::OnAppLifecycleStateChanged(sky::AppLifecycleState state) {
@@ -141,16 +140,15 @@ void Window::OnAppLifecycleStateChanged(sky::AppLifecycleState state) {
     return;
   DartState::Scope scope(dart_state);
 
-  DartInvokeField(library_.value(), "_onAppLifecycleStateChanged", {
-    ToDart(static_cast<int>(state))
-  });
+  DartInvokeField(library_.value(), "_onAppLifecycleStateChanged",
+                  {ToDart(static_cast<int>(state))});
 }
 
 void Window::RegisterNatives(DartLibraryNatives* natives) {
   natives->Register({
-    { "Window_scheduleFrame", ScheduleFrame, 1, true },
-    { "Window_render", Render, 2, true },
-    { "Scheduler_FlushRealTimeEvents", FlushRealTimeEvents, 1, true},
+      {"Window_scheduleFrame", ScheduleFrame, 1, true},
+      {"Window_render", Render, 2, true},
+      {"Scheduler_FlushRealTimeEvents", FlushRealTimeEvents, 1, true},
   });
 }
 

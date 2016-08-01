@@ -6,11 +6,9 @@
 
 namespace flow {
 
-ClipRRectLayer::ClipRRectLayer() {
-}
+ClipRRectLayer::ClipRRectLayer() {}
 
-ClipRRectLayer::~ClipRRectLayer() {
-}
+ClipRRectLayer::~ClipRRectLayer() {}
 
 void ClipRRectLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   PrerollChildren(context, matrix);

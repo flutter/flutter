@@ -8,11 +8,11 @@
 #include <memory>
 #include <vector>
 
-#include "base/logging.h"
-#include "base/macros.h"
 #include "base/trace_event/trace_event.h"
 #include "flow/instrumentation.h"
 #include "flow/raster_cache.h"
+#include "lib/ftl/logging.h"
+#include "lib/ftl/macros.h"
 #include "skia/ext/refptr.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColor.h"
@@ -67,7 +67,7 @@ class Layer {
   bool has_paint_bounds() const { return has_paint_bounds_; }
 
   const SkRect& paint_bounds() const {
-    DCHECK(has_paint_bounds_);
+    FTL_DCHECK(has_paint_bounds_);
     return paint_bounds_;
   }
 
@@ -78,10 +78,10 @@ class Layer {
 
  private:
   ContainerLayer* parent_;
-  bool has_paint_bounds_; // if false, paint_bounds_ is not valid
+  bool has_paint_bounds_;  // if false, paint_bounds_ is not valid
   SkRect paint_bounds_;
 
-  DISALLOW_COPY_AND_ASSIGN(Layer);
+  FTL_DISALLOW_COPY_AND_ASSIGN(Layer);
 };
 
 }  // namespace flow

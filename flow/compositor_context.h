@@ -8,10 +8,9 @@
 #include <memory>
 #include <string>
 
-#include "base/macros.h"
-#include "base/logging.h"
 #include "flow/instrumentation.h"
 #include "flow/raster_cache.h"
+#include "lib/ftl/macros.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 
@@ -41,7 +40,7 @@ class CompositorContext {
 
     friend class CompositorContext;
 
-    DISALLOW_COPY_AND_ASSIGN(ScopedFrame);
+    FTL_DISALLOW_COPY_AND_ASSIGN(ScopedFrame);
   };
 
   CompositorContext();
@@ -68,7 +67,7 @@ class CompositorContext {
   void BeginFrame(ScopedFrame& frame, bool enable_instrumentation);
   void EndFrame(ScopedFrame& frame, bool enable_instrumentation);
 
-  DISALLOW_COPY_AND_ASSIGN(CompositorContext);
+  FTL_DISALLOW_COPY_AND_ASSIGN(CompositorContext);
 };
 
 }  // namespace flow

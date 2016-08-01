@@ -15,7 +15,8 @@ namespace shell {
 const int kPipelineDepth = 3;
 
 Animator::Animator(const Engine::Config& config,
-                   rasterizer::RasterizerPtr rasterizer, Engine* engine)
+                   rasterizer::RasterizerPtr rasterizer,
+                   Engine* engine)
     : config_(config),
       rasterizer_(rasterizer.Pass()),
       engine_(engine),
@@ -24,11 +25,9 @@ Animator::Animator(const Engine::Config& config,
       engine_requested_frame_(false),
       paused_(false),
       is_ready_to_draw_(false),
-      weak_factory_(this) {
-}
+      weak_factory_(this) {}
 
-Animator::~Animator() {
-}
+Animator::~Animator() {}
 
 void Animator::RequestFrame() {
   if (engine_requested_frame_)
@@ -40,7 +39,9 @@ void Animator::RequestFrame() {
   outstanding_requests_++;
   TRACE_COUNTER1("flutter", "outstanding_requests_", outstanding_requests_);
   if (outstanding_requests_ >= kPipelineDepth) {
-    TRACE_EVENT_INSTANT1("flutter", "Frame request deferred", TRACE_EVENT_SCOPE_THREAD, "outstanding_requests_", outstanding_requests_);
+    TRACE_EVENT_INSTANT1("flutter", "Frame request deferred",
+                         TRACE_EVENT_SCOPE_THREAD, "outstanding_requests_",
+                         outstanding_requests_);
     did_defer_frame_request_ = true;
     return;
   }
@@ -87,9 +88,11 @@ void Animator::BeginFrame(int64_t time_stamp) {
     return;
   }
 
-  begin_time_ = base::TimeTicks::Now();
-  base::TimeTicks frame_time = time_stamp ?
-      base::TimeTicks::FromInternalValue(time_stamp) : begin_time_;
+  begin_time_ = ftl::TimePoint::Now();
+  ftl::TimePoint frame_time =
+      time_stamp
+          ? ftl::TimePoint() + ftl::TimeDelta::FromMicroseconds(time_stamp)
+          : begin_time_;
 
   is_ready_to_draw_ = true;
   engine_->BeginFrame(frame_time);
@@ -105,13 +108,14 @@ void Animator::BeginFrame(int64_t time_stamp) {
 
 void Animator::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
   if (!is_ready_to_draw_)
-    return; // Only draw once per frame.
+    return;  // Only draw once per frame.
   is_ready_to_draw_ = false;
 
-  layer_tree->set_construction_time(base::TimeTicks::Now() - begin_time_);
+  layer_tree->set_construction_time(ftl::TimePoint::Now() - begin_time_);
 
   // TODO(abarth): Doesn't this leak if OnFrameComplete never runs?
-  rasterizer_->Draw(reinterpret_cast<uint64_t>(layer_tree.release()),
+  rasterizer_->Draw(
+      reinterpret_cast<uint64_t>(layer_tree.release()),
       base::Bind(&Animator::OnFrameComplete, weak_factory_.GetWeakPtr()));
 }
 

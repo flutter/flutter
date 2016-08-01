@@ -21,12 +21,9 @@ std::unique_ptr<SkyView> SkyView::Create(SkyViewClient* client) {
 }
 
 SkyView::SkyView(SkyViewClient* client)
-    : client_(client),
-      weak_factory_(this) {
-}
+    : client_(client), weak_factory_(this) {}
 
-SkyView::~SkyView() {
-}
+SkyView::~SkyView() {}
 
 void SkyView::SetViewportMetrics(const sky::ViewportMetricsPtr& metrics) {
   if (metrics) {
@@ -38,7 +35,7 @@ void SkyView::SetViewportMetrics(const sky::ViewportMetricsPtr& metrics) {
 }
 
 void SkyView::SetLocale(const std::string& language_code,
-			const std::string& country_code) {
+                        const std::string& country_code) {
   if (language_code_ == language_code && country_code_ == country_code)
     return;
 
@@ -85,7 +82,7 @@ void SkyView::RunFromSnapshot(mojo::ScopedDataPipeConsumerHandle snapshot) {
   dart_controller_->RunFromSnapshot(snapshot.Pass());
 }
 
-void SkyView::BeginFrame(base::TimeTicks frame_time) {
+void SkyView::BeginFrame(ftl::TimePoint frame_time) {
   GetWindow()->BeginFrame(frame_time);
 }
 
@@ -118,4 +115,4 @@ void SkyView::OnAppLifecycleStateChanged(sky::AppLifecycleState state) {
   GetWindow()->OnAppLifecycleStateChanged(state);
 }
 
-} // namespace blink
+}  // namespace blink

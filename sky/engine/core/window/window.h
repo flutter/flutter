@@ -5,8 +5,8 @@
 #ifndef SKY_ENGINE_CORE_WINDOW_WINDOW_H_
 #define SKY_ENGINE_CORE_WINDOW_WINDOW_H_
 
-#include "base/time/time.h"
 #include "flutter/tonic/dart_persistent_value.h"
+#include "lib/ftl/time/time_point.h"
 #include "sky/engine/wtf/text/WTFString.h"
 #include "sky/services/engine/sky_engine.mojom.h"
 #include "sky/services/pointer/pointer.mojom.h"
@@ -37,7 +37,7 @@ class Window {
   void UpdateLocale(const std::string& language_code,
                     const std::string& country_code);
   void DispatchPointerPacket(const pointer::PointerPacketPtr& packet);
-  void BeginFrame(base::TimeTicks frameTime);
+  void BeginFrame(ftl::TimePoint frameTime);
 
   void PushRoute(const std::string& route);
   void PopRoute();

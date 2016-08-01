@@ -53,6 +53,7 @@ source_set("common") {
     "//dart/runtime:libdart",
     "//flow",
     "//flutter/tonic",
+    "//lib/ftl",
     "//mojo/common",
     "//mojo/data_pipe_utils",
     "//mojo/message_pump",

@@ -6,11 +6,9 @@
 
 namespace flow {
 
-ColorFilterLayer::ColorFilterLayer() {
-}
+ColorFilterLayer::ColorFilterLayer() {}
 
-ColorFilterLayer::~ColorFilterLayer() {
-}
+ColorFilterLayer::~ColorFilterLayer() {}
 
 void ColorFilterLayer::Paint(PaintContext& context) {
   TRACE_EVENT0("flutter", "ColorFilterLayer::Paint");

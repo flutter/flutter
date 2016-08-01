@@ -63,7 +63,7 @@ void Engine::Init() {
   blink::initialize(g_platform_impl);
 }
 
-void Engine::BeginFrame(base::TimeTicks frame_time) {
+void Engine::BeginFrame(ftl::TimePoint frame_time) {
   TRACE_EVENT0("flutter", "Engine::BeginFrame");
   if (sky_view_)
     sky_view_->BeginFrame(frame_time);
@@ -91,8 +91,8 @@ void Engine::SetServices(ServicesDataPtr services) {
   services_ = services.Pass();
 
   if (services_->incoming_services) {
-    incoming_services_ = mojo::ServiceProviderPtr::Create(
-        services_->incoming_services.Pass());
+    incoming_services_ =
+        mojo::ServiceProviderPtr::Create(services_->incoming_services.Pass());
     service_provider_impl_.set_fallback_service_provider(
         incoming_services_.get());
   }
@@ -107,10 +107,12 @@ void Engine::SetServices(ServicesDataPtr services) {
       // We bind and unbind our Shell here, since this is the only place we use
       // it in this class.
       auto shell = mojo::ShellPtr::Create(services_->shell.Pass());
-      mojo::ConnectToService(shell.get(), "mojo:vsync", mojo::GetProxy(&vsync_provider));
+      mojo::ConnectToService(shell.get(), "mojo:vsync",
+                             mojo::GetProxy(&vsync_provider));
       services_->shell = shell.Pass();
     } else {
-      mojo::ConnectToService(incoming_services_.get(), mojo::GetProxy(&vsync_provider));
+      mojo::ConnectToService(incoming_services_.get(),
+                             mojo::GetProxy(&vsync_provider));
     }
     animator_->Reset();
     animator_->set_vsync_provider(vsync_provider.Pass());
@@ -203,9 +205,8 @@ void Engine::RunFromFile(const mojo::String& main,
     base::FilePath main_dir = base::FilePath(main_str).DirName();
     packages_path = main_dir.Append(FILE_PATH_LITERAL(".packages"));
     if (!base::PathExists(packages_path)) {
-      packages_path = main_dir
-          .Append(base::FilePath::kParentDirectory)
-          .Append(FILE_PATH_LITERAL(".packages"));
+      packages_path = main_dir.Append(base::FilePath::kParentDirectory)
+                          .Append(FILE_PATH_LITERAL(".packages"));
       if (!base::PathExists(packages_path))
         packages_path = base::FilePath();
     }
@@ -223,10 +224,9 @@ void Engine::RunFromBundle(const mojo::String& script_uri,
 
   ConfigureZipAssetBundle(path);
 
-  root_bundle_->GetAsStream(
-      blink::kSnapshotAssetKey,
-      base::Bind(&Engine::RunFromSnapshotStream, weak_factory_.GetWeakPtr(),
-                 script_uri));
+  root_bundle_->GetAsStream(blink::kSnapshotAssetKey,
+                            base::Bind(&Engine::RunFromSnapshotStream,
+                                       weak_factory_.GetWeakPtr(), script_uri));
 }
 
 void Engine::RunFromBundleAndSnapshot(const mojo::String& script_uri,
@@ -240,10 +240,9 @@ void Engine::RunFromBundleAndSnapshot(const mojo::String& script_uri,
   zip_asset_bundle_->AddOverlayFile(blink::kSnapshotAssetKey,
                                     base::FilePath(snapshot_path_str));
 
-  root_bundle_->GetAsStream(
-      blink::kSnapshotAssetKey,
-      base::Bind(&Engine::RunFromSnapshotStream, weak_factory_.GetWeakPtr(),
-                 script_uri));
+  root_bundle_->GetAsStream(blink::kSnapshotAssetKey,
+                            base::Bind(&Engine::RunFromSnapshotStream,
+                                       weak_factory_.GetWeakPtr(), script_uri));
 }
 
 void Engine::PushRoute(const mojo::String& route) {
@@ -280,9 +279,9 @@ void Engine::DidCreateMainIsolate(Dart_Isolate isolate) {
   service_provider_bindings_.AddBinding(
       &service_provider_impl_, mojo::GetProxy(&services_from_embedder));
 
-  blink::MojoServices::Create(
-      isolate, services_.Pass(), services_from_embedder.Pass(),
-      root_bundle_.Pass());
+  blink::MojoServices::Create(isolate, services_.Pass(),
+                              services_from_embedder.Pass(),
+                              root_bundle_.Pass());
 
   if (zip_asset_bundle_) {
     FlutterFontSelector::install(zip_asset_bundle_);
@@ -293,13 +292,13 @@ void Engine::DidCreateSecondaryIsolate(Dart_Isolate isolate) {
   mojo::ServiceProviderPtr services_from_embedder;
   mojo::InterfaceRequest<mojo::ServiceProvider> request =
       mojo::GetProxy(&services_from_embedder);
-  blink::Platform::current()->GetUITaskRunner()->PostTask(FROM_HERE,
-      base::Bind(&Engine::BindToServiceProvider,
-                 weak_factory_.GetWeakPtr(),
+  blink::Platform::current()->GetUITaskRunner()->PostTask(
+      FROM_HERE,
+      base::Bind(&Engine::BindToServiceProvider, weak_factory_.GetWeakPtr(),
                  base::Passed(&request)));
 
-  blink::MojoServices::Create(
-      isolate, nullptr, services_from_embedder.Pass(), nullptr);
+  blink::MojoServices::Create(isolate, nullptr, services_from_embedder.Pass(),
+                              nullptr);
 }
 
 void Engine::BindToServiceProvider(
@@ -330,8 +329,8 @@ void Engine::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
     return;
   if (viewport_metrics_) {
     layer_tree->set_scene_version(viewport_metrics_->scene_version);
-    layer_tree->set_frame_size(SkISize::Make(viewport_metrics_->physical_width,
-                                             viewport_metrics_->physical_height));
+    layer_tree->set_frame_size(SkISize::Make(
+        viewport_metrics_->physical_width, viewport_metrics_->physical_height));
   } else {
     layer_tree->set_scene_version(0);
     layer_tree->set_frame_size(SkISize::Make(0, 0));

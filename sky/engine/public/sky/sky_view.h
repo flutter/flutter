@@ -39,11 +39,11 @@ class SkyView : public WindowClient, public IsolateClient {
 
   void SetViewportMetrics(const sky::ViewportMetricsPtr& metrics);
   void SetLocale(const std::string& language_code,
-		 const std::string& country_code);
+                 const std::string& country_code);
   void PushRoute(const std::string& route);
   void PopRoute();
 
-  void BeginFrame(base::TimeTicks frame_time);
+  void BeginFrame(ftl::TimePoint frame_time);
 
   void CreateView(const std::string& script_uri);
 
@@ -78,6 +78,6 @@ class SkyView : public WindowClient, public IsolateClient {
   DISALLOW_COPY_AND_ASSIGN(SkyView);
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PUBLIC_SKY_SKY_VIEW_H_

@@ -47,6 +47,7 @@ source_set("flow") {
 
   deps = [
     "//base",
+    "//lib/ftl",
     "//mojo/services/gfx/composition/interfaces",
     "//mojo/skia",
     "//skia",

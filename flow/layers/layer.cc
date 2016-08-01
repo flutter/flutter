@@ -8,20 +8,13 @@
 
 namespace flow {
 
-Layer::Layer()
-    : parent_(nullptr)
-    , has_paint_bounds_(false)
-    , paint_bounds_() {
-}
+Layer::Layer() : parent_(nullptr), has_paint_bounds_(false), paint_bounds_() {}
 
-Layer::~Layer() {
-}
+Layer::~Layer() {}
 
-void Layer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
-}
+void Layer::Preroll(PrerollContext* context, const SkMatrix& matrix) {}
 
 void Layer::UpdateScene(mojo::gfx::composition::SceneUpdate* update,
-                        mojo::gfx::composition::Node* container) {
-}
+                        mojo::gfx::composition::Node* container) {}
 
 }  // namespace flow

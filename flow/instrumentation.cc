@@ -13,26 +13,26 @@ namespace flow {
 static const size_t kMaxSamples = 120;
 static const size_t kMaxFrameMarkers = 8;
 
-Stopwatch::Stopwatch() : start_(base::TimeTicks::Now()), current_sample_(0) {
-  const base::TimeDelta delta;
+Stopwatch::Stopwatch() : start_(ftl::TimePoint::Now()), current_sample_(0) {
+  const ftl::TimeDelta delta;
   laps_.resize(kMaxSamples, delta);
 }
 
 void Stopwatch::Start() {
-  start_ = base::TimeTicks::Now();
+  start_ = ftl::TimePoint::Now();
   current_sample_ = (current_sample_ + 1) % kMaxSamples;
 }
 
 void Stopwatch::Stop() {
-  laps_[current_sample_] = base::TimeTicks::Now() - start_;
+  laps_[current_sample_] = ftl::TimePoint::Now() - start_;
 }
 
-void Stopwatch::SetLapTime(const base::TimeDelta& delta) {
+void Stopwatch::SetLapTime(const ftl::TimeDelta& delta) {
   current_sample_ = (current_sample_ + 1) % kMaxSamples;
   laps_[current_sample_] = delta;
 }
 
-const base::TimeDelta& Stopwatch::LastLap() const {
+const ftl::TimeDelta& Stopwatch::LastLap() const {
   return laps_[(current_sample_ - 1) % kMaxSamples];
 }
 
@@ -40,15 +40,16 @@ static inline constexpr double UnitFrameInterval(double frame_time_ms) {
   return frame_time_ms * 60.0 * 1e-3;
 }
 
-static inline double UnitHeight(double frame_time_ms, double max_unit_interval) {
+static inline double UnitHeight(double frame_time_ms,
+                                double max_unit_interval) {
   double unitHeight = UnitFrameInterval(frame_time_ms) / max_unit_interval;
   if (unitHeight > 1.0)
     unitHeight = 1.0;
   return unitHeight;
 }
 
-base::TimeDelta Stopwatch::MaxDelta() const {
-  base::TimeDelta max_delta;
+ftl::TimeDelta Stopwatch::MaxDelta() const {
+  ftl::TimeDelta max_delta;
   for (size_t i = 0; i < kMaxSamples; i++) {
     if (laps_[i] > max_delta)
       max_delta = laps_[i];
@@ -71,7 +72,8 @@ void Stopwatch::Visualize(SkCanvas& canvas, const SkRect& rect) const {
   const SkScalar bottom = y + height;
   const SkScalar right = x + width;
 
-  // Scale the graph to show frame times up to those that are 3 times the frame time.
+  // Scale the graph to show frame times up to those that are 3 times the frame
+  // time.
   const double max_interval = kOneFrameMS * 3.0;
   const double max_unit_interval = UnitFrameInterval(max_interval);
 
@@ -82,20 +84,26 @@ void Stopwatch::Visualize(SkCanvas& canvas, const SkRect& rect) const {
   const double sample_margin_unit_width = sample_unit_width / 6.0;
   const double sample_margin_width = width * sample_margin_unit_width;
   path.moveTo(x, bottom);
-  path.lineTo(x, y + height * (1.0 - UnitHeight(laps_[0].InMillisecondsF(),
+  path.lineTo(x, y +
+                     height * (1.0 - UnitHeight(laps_[0].ToMillisecondsF(),
                                                 max_unit_interval)));
   double unit_x;
   double unit_next_x = 0.0;
   for (size_t i = 0; i < kMaxSamples; i += 1) {
     unit_x = unit_next_x;
     unit_next_x = (static_cast<double>(i + 1) / kMaxSamples);
-    const double sample_y = y + height * (1.0 - UnitHeight(laps_[i].InMillisecondsF(),
-                                                          max_unit_interval));
+    const double sample_y =
+        y +
+        height *
+            (1.0 - UnitHeight(laps_[i].ToMillisecondsF(), max_unit_interval));
     path.lineTo(x + width * unit_x + sample_margin_width, sample_y);
     path.lineTo(x + width * unit_next_x - sample_margin_width, sample_y);
   }
-  path.lineTo(right, y + height * (1.0 - UnitHeight(laps_[kMaxSamples - 1].InMillisecondsF(),
-                                                    max_unit_interval)));
+  path.lineTo(
+      right,
+      y +
+          height * (1.0 - UnitHeight(laps_[kMaxSamples - 1].ToMillisecondsF(),
+                                     max_unit_interval)));
   path.lineTo(right, bottom);
   path.close();
 
@@ -104,7 +112,7 @@ void Stopwatch::Visualize(SkCanvas& canvas, const SkRect& rect) const {
   canvas.drawPath(path, paint);
 
   // Draw horizontal markers.
-  paint.setStrokeWidth(0); // hairline
+  paint.setStrokeWidth(0);  // hairline
   paint.setStyle(SkPaint::Style::kStroke_Style);
   paint.setColor(0xCC000000);
 
@@ -117,7 +125,8 @@ void Stopwatch::Visualize(SkCanvas& canvas, const SkRect& rect) const {
     if (frame_marker_count > kMaxFrameMarkers)
       frame_marker_count = 1;
 
-    for (size_t frame_index = 0; frame_index < frame_marker_count; frame_index++) {
+    for (size_t frame_index = 0; frame_index < frame_marker_count;
+         frame_index++) {
       const double frame_height =
           height * (1.0 - (UnitFrameInterval((frame_index + 1) * kOneFrameMS) /
                            max_unit_interval));
@@ -129,16 +138,19 @@ void Stopwatch::Visualize(SkCanvas& canvas, const SkRect& rect) const {
   // We paint it over the current frame, not after it, because when we
   // paint this we don't yet have all the times for the current frame.
   paint.setStyle(SkPaint::Style::kFill_Style);
-  if (UnitFrameInterval(LastLap().InMillisecondsF()) > 1.0) {
+  if (UnitFrameInterval(LastLap().ToMillisecondsF()) > 1.0) {
     // budget exceeded
     paint.setColor(SK_ColorRED);
   } else {
     // within budget
     paint.setColor(SK_ColorGREEN);
   }
-  double sample_x = x + width * (static_cast<double>(current_sample_) / kMaxSamples)
-                     - sample_margin_width;
-  canvas.drawRectCoords(sample_x, y, sample_x + width * sample_unit_width + sample_margin_width * 2, bottom, paint);
+  double sample_x =
+      x + width * (static_cast<double>(current_sample_) / kMaxSamples) -
+      sample_margin_width;
+  canvas.drawRectCoords(sample_x, y, sample_x + width * sample_unit_width +
+                                         sample_margin_width * 2,
+                        bottom, paint);
 }
 
 Stopwatch::~Stopwatch() = default;

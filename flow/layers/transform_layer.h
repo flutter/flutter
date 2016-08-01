@@ -22,7 +22,7 @@ class TransformLayer : public ContainerLayer {
  private:
   SkMatrix transform_;
 
-  DISALLOW_COPY_AND_ASSIGN(TransformLayer);
+  FTL_DISALLOW_COPY_AND_ASSIGN(TransformLayer);
 };
 
 }  // namespace flow

@@ -6,11 +6,9 @@
 
 namespace flow {
 
-ClipPathLayer::ClipPathLayer() {
-}
+ClipPathLayer::ClipPathLayer() {}
 
-ClipPathLayer::~ClipPathLayer() {
-}
+ClipPathLayer::~ClipPathLayer() {}
 
 void ClipPathLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   PrerollChildren(context, matrix);

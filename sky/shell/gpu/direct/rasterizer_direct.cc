@@ -133,7 +133,7 @@ void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
   bool frameExceededThreshold = false;
   uint32_t thresholdInterval = layer_tree->rasterizer_tracing_threshold();
   if (thresholdInterval != 0 &&
-      compositor_context_.frame_time().LastLap().InMillisecondsF() >
+      compositor_context_.frame_time().LastLap().ToMillisecondsF() >
           thresholdInterval * kOneFrameDuration) {
     // While rendering the last frame, if we exceeded the tracing threshold
     // specified in the layer tree, we force a trace to disk.

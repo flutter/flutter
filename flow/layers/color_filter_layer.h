@@ -27,7 +27,7 @@ class ColorFilterLayer : public ContainerLayer {
   SkColor color_;
   SkXfermode::Mode transfer_mode_;
 
-  DISALLOW_COPY_AND_ASSIGN(ColorFilterLayer);
+  FTL_DISALLOW_COPY_AND_ASSIGN(ColorFilterLayer);
 };
 
 }  // namespace flow

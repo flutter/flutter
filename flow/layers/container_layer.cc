@@ -6,11 +6,9 @@
 
 namespace flow {
 
-ContainerLayer::ContainerLayer() {
-}
+ContainerLayer::ContainerLayer() {}
 
-ContainerLayer::~ContainerLayer() {
-}
+ContainerLayer::~ContainerLayer() {}
 
 void ContainerLayer::Add(std::unique_ptr<Layer> layer) {
   layer->set_parent(this);
