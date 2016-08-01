@@ -10,28 +10,10 @@
 
 namespace flow {
 
-enum class TextureImageFormat {
-  Grey,
-  GreyAlpha,
-  RGB,
-  RGBA,
-};
-
-enum class TextureImageDataFormat {
-  UnsignedByte,
-  UnsignedShort565,
-};
-
-sk_sp<SkImage> TextureImageCreate(GrContext* context, const SkBitmap& bitmap);
-
 sk_sp<SkImage> TextureImageCreate(GrContext* context,
-                                  std::unique_ptr<SkImageGenerator> generator);
+                                  SkImageGenerator& generator);
 
-sk_sp<SkImage> TextureImageCreate(GrContext* context,
-                                  TextureImageFormat format,
-                                  const SkISize& size,
-                                  TextureImageDataFormat dataFormat,
-                                  const uint8_t* data);
+sk_sp<SkImage> BitmapImageCreate(SkImageGenerator& generator);
 
 }  // namespace flow
 
