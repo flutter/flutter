@@ -30,11 +30,13 @@ class DartIsolateReloader::LoadResult {
   LoadResult(intptr_t tag,
              const std::string& url,
              const std::string& library_url,
+             const std::string& resolved_url,
              std::vector<uint8_t> payload)
       : success_(true),
         tag_(tag),
         url_(url),
         library_url_(library_url),
+        resolved_url_(resolved_url),
         payload_(std::move(payload)) {
     DCHECK(success());
   }
@@ -58,6 +60,10 @@ class DartIsolateReloader::LoadResult {
       return StdStringToDart(error_);
     }
     Dart_Handle uri = StdStringToDart(url_);
+    Dart_Handle resolved_uri = Dart_Null();
+    if (!resolved_url_.empty()) {
+      resolved_uri = StdStringToDart(resolved_url_);
+    }
     Dart_Handle library = Dart_Null();
     if (!library_url_.empty()) {
       library = Dart_LookupLibrary(StdStringToDart(library_url_));
@@ -67,13 +73,13 @@ class DartIsolateReloader::LoadResult {
     Dart_Handle result = Dart_Null();
     switch (tag_) {
       case Dart_kImportTag:
-        result = Dart_LoadLibrary(uri, source, 0, 0);
+        result = Dart_LoadLibrary(uri, resolved_uri, source, 0, 0);
         break;
       case Dart_kSourceTag:
-        result = Dart_LoadSource(library, uri, source, 0, 0);
+        result = Dart_LoadSource(library, uri, resolved_uri, source, 0, 0);
         break;
       case Dart_kScriptTag:
-        result = Dart_LoadScript(uri, source, 0, 0);
+        result = Dart_LoadScript(uri, resolved_uri, source, 0, 0);
         break;
     }
 
@@ -88,6 +94,7 @@ class DartIsolateReloader::LoadResult {
   intptr_t tag_;
   std::string url_;
   std::string library_url_;
+  std::string resolved_url_;
   std::string error_;
   std::vector<uint8_t> payload_;
 };
@@ -153,7 +160,8 @@ class DartIsolateReloader::LoadRequest : public DataPipeDrainer::Client {
   }
 
  protected:
-  void OnStreamAvailable(mojo::ScopedDataPipeConsumerHandle pipe) {
+  void OnStreamAvailable(mojo::ScopedDataPipeConsumerHandle pipe,
+                         const std::string& resolved_url) {
     if (!pipe.is_valid()) {
       std::unique_ptr<DartIsolateReloader::LoadResult> result(
           new DartIsolateReloader::LoadResult(
@@ -167,6 +175,7 @@ class DartIsolateReloader::LoadRequest : public DataPipeDrainer::Client {
       delete this;
       return;
     }
+    resolved_url_ = resolved_url;
     drainer_.reset(new DataPipeDrainer(this, pipe.Pass()));
   }
 
@@ -182,6 +191,7 @@ class DartIsolateReloader::LoadRequest : public DataPipeDrainer::Client {
         new DartIsolateReloader::LoadResult(tag_,
                                             url_,
                                             library_url_,
+                                            resolved_url_,
                                             std::move(buffer_)));
     isolate_reloader_->PostResult(std::move(result));
     // We are finished with this request.
@@ -193,6 +203,7 @@ class DartIsolateReloader::LoadRequest : public DataPipeDrainer::Client {
   intptr_t tag_;
   std::string url_;
   std::string library_url_;
+  std::string resolved_url_;
   std::vector<uint8_t> buffer_;
   std::unique_ptr<DataPipeDrainer> drainer_;
 

@@ -31,7 +31,7 @@ class DartLibraryLoader {
   ~DartLibraryLoader();
 
   // TODO(dart): This can be called both on the main thread from application
-  // solates or from the handle watcher isolate thread.
+  // isolates or from the handle watcher isolate thread.
   static Dart_Handle HandleLibraryTag(Dart_LibraryTag tag,
                                       Dart_Handle library,
                                       Dart_Handle url);

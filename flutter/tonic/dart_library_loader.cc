@@ -5,6 +5,8 @@
 #include "flutter/tonic/dart_library_loader.h"
 
 #include "base/callback.h"
+#include "base/strings/string_util.h"
+#include "base/files/file_util.h"
 #include "base/trace_event/trace_event.h"
 #include "flutter/tonic/dart_api_scope.h"
 #include "flutter/tonic/dart_converter.h"
@@ -46,18 +48,23 @@ class DartLibraryLoader::Job : public DartDependency,
 
   const std::string& name() const { return name_; }
 
+  const std::string& resolved_url() const { return resolved_url_; }
+
  protected:
   DartLibraryLoader* loader_;
   // TODO(abarth): Should we be using SharedBuffer to buffer the data?
   std::vector<uint8_t> buffer_;
 
  private:
-  void OnStreamAvailable(mojo::ScopedDataPipeConsumerHandle pipe) {
+  void OnStreamAvailable(mojo::ScopedDataPipeConsumerHandle pipe,
+                         const std::string& resolved_url) {
     if (!pipe.is_valid()) {
       loader_->DidFailJob(this);
       return;
     }
-    drainer_ = std::unique_ptr<DataPipeDrainer>(new DataPipeDrainer(this, pipe.Pass()));
+    resolved_url_ = resolved_url;
+    drainer_ = std::unique_ptr<DataPipeDrainer>(
+        new DataPipeDrainer(this, pipe.Pass()));
   }
 
   // DataPipeDrainer::Client
@@ -68,6 +75,7 @@ class DartLibraryLoader::Job : public DartDependency,
   // Subclasses must implement OnDataComplete.
 
   std::string name_;
+  std::string resolved_url_;
   std::unique_ptr<DataPipeDrainer> drainer_;
 
   base::WeakPtrFactory<Job> weak_factory_;
@@ -291,11 +299,13 @@ void DartLibraryLoader::DidCompleteImportJob(
   if (job->should_load_as_script()) {
     result = Dart_LoadScript(
         StdStringToDart(job->name()),
+        StdStringToDart(job->resolved_url()),
         Dart_NewStringFromUTF8(buffer.data(), buffer.size()),
         0, 0);
   } else {
     result = Dart_LoadLibrary(
         StdStringToDart(job->name()),
+        StdStringToDart(job->resolved_url()),
         Dart_NewStringFromUTF8(buffer.data(), buffer.size()),
         0, 0);
   }
@@ -319,6 +329,7 @@ void DartLibraryLoader::DidCompleteSourceJob(
   Dart_Handle result = Dart_LoadSource(
       Dart_HandleFromPersistent(job->library()),
       StdStringToDart(job->name()),
+      StdStringToDart(job->resolved_url()),
       Dart_NewStringFromUTF8(buffer.data(), buffer.size()), 0, 0);
 
   if (Dart_IsError(result)) {

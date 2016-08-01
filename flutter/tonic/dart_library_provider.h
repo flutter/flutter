@@ -13,7 +13,8 @@
 
 namespace blink {
 
-typedef base::Callback<void(mojo::ScopedDataPipeConsumerHandle)>
+typedef base::Callback<void(mojo::ScopedDataPipeConsumerHandle,
+                            const std::string&)>
     DataPipeConsumerCallback;
 
 class DartLibraryProvider {

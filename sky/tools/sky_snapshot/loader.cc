@@ -67,7 +67,7 @@ class Loader {
   base::FilePath GetFilePathForURL(std::string url);
   base::FilePath GetFilePathForPackageURL(std::string url);
   base::FilePath GetFilePathForFileURL(std::string url);
-  std::string Fetch(const std::string& url);
+  std::string Fetch(const std::string& url, std::string* resolved_url);
   Dart_Handle Import(Dart_Handle url);
   Dart_Handle Source(Dart_Handle library, Dart_Handle url);
 
@@ -159,10 +159,13 @@ base::FilePath Loader::GetFilePathForFileURL(std::string url) {
   return base::FilePath(url);
 }
 
-std::string Loader::Fetch(const std::string& url) {
+std::string Loader::Fetch(const std::string& url,
+                          std::string* resolved_url) {
   base::FilePath path = GetFilePathForURL(url);
+  base::FilePath absolute_path = base::MakeAbsoluteFilePath(path);
+  *resolved_url = "file://" + absolute_path.value();
   std::string source;
-  if (!base::ReadFileToString(base::MakeAbsoluteFilePath(path), &source)) {
+  if (!base::ReadFileToString(absolute_path, &source)) {
     fprintf(stderr, "error: Unable to find Dart library '%s'.\n", url.c_str());
     exit(1);
   }
@@ -171,15 +174,22 @@ std::string Loader::Fetch(const std::string& url) {
 }
 
 Dart_Handle Loader::Import(Dart_Handle url) {
-  Dart_Handle source = StringToDart(Fetch(StringFromDart(url)));
-  Dart_Handle result = Dart_LoadLibrary(url, source, 0, 0);
+  std::string resolved_url;
+  Dart_Handle source = StringToDart(Fetch(StringFromDart(url), &resolved_url));
+  Dart_Handle result = Dart_LoadLibrary(url,
+                                        StringToDart(resolved_url),
+                                        source, 0, 0);
   LogIfError(result);
   return result;
 }
 
 Dart_Handle Loader::Source(Dart_Handle library, Dart_Handle url) {
-  Dart_Handle source = StringToDart(Fetch(StringFromDart(url)));
-  Dart_Handle result = Dart_LoadSource(library, url, source, 0, 0);
+  std::string resolved_url;
+  Dart_Handle source = StringToDart(Fetch(StringFromDart(url), &resolved_url));
+  Dart_Handle result = Dart_LoadSource(library,
+                                       url,
+                                       StringToDart(resolved_url),
+                                       source, 0, 0);
   LogIfError(result);
   return result;
 }
@@ -226,8 +236,12 @@ Dart_Handle HandleLibraryTag(Dart_LibraryTag tag,
 }
 
 void LoadScript(const std::string& url) {
+  std::string resolved_url;
+  Dart_Handle source = StringToDart(GetLoader().Fetch(url, &resolved_url));
   LogIfError(
-      Dart_LoadScript(StringToDart(url), StringToDart(GetLoader().Fetch(url)),
+      Dart_LoadScript(StringToDart(url),
+                      StringToDart(resolved_url),
+                      source,
                       0, 0));
 }
 

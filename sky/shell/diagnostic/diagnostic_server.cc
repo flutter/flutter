@@ -80,6 +80,7 @@ void DiagnosticServer::Start() {
 
   Dart_Handle diagnostic_library = Dart_LoadLibrary(
       Dart_NewStringFromCString("dart:diagnostic_server"),
+      Dart_Null(),
       Dart_NewStringFromUTF8(reinterpret_cast<const uint8_t*>(source),
                              source_length),
       0, 0);

@@ -188,13 +188,13 @@ Dart_Handle DartServiceIsolate::GetSource(const char* name) {
 Dart_Handle DartServiceIsolate::LoadScript(const char* name) {
   Dart_Handle url = Dart_NewStringFromCString("dart:vmservice_sky");
   Dart_Handle source = GetSource(name);
-  return Dart_LoadScript(url, source, 0, 0);
+  return Dart_LoadScript(url, Dart_Null(), source, 0, 0);
 }
 
 Dart_Handle DartServiceIsolate::LoadSource(Dart_Handle library, const char* name) {
   Dart_Handle url = Dart_NewStringFromCString(name);
   Dart_Handle source = GetSource(name);
-  return Dart_LoadSource(library, url, source, 0, 0);
+  return Dart_LoadSource(library, url, Dart_Null(), source, 0, 0);
 }
 
 Dart_Handle DartServiceIsolate::LoadResource(Dart_Handle library,
@@ -282,7 +282,7 @@ Dart_Handle DartServiceIsolate::LibraryTagHandler(Dart_LibraryTag tag,
   if (Dart_IsError(source)) {
     return source;
   }
-  return Dart_LoadSource(library, url, source, 0, 0);
+  return Dart_LoadSource(library, url, Dart_Null(), source, 0, 0);
 }
 
 

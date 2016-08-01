@@ -130,6 +130,29 @@ void IsolateShutdownCallback(void* callback_data) {
   delete dart_state;
 }
 
+bool DartFileModifiedCallback(const char* source_url,
+                              int64_t since_ms) {
+  std::string url(source_url);
+  if (!base::StartsWithASCII(url, "file:", true)) {
+    // Assume modified.
+    return true;
+  }
+  base::ReplaceFirstSubstringAfterOffset(&url, 0, "file:", "");
+  base::FilePath path(url);
+  base::File::Info file_info;
+  if (!base::GetFileInfo(path, &file_info)) {
+    // Assume modified.
+    return true;
+  }
+  int64_t since_seconds = since_ms / base::Time::kMillisecondsPerSecond;
+  int64_t since_milliseconds =
+      since_ms - (since_seconds * base::Time::kMillisecondsPerSecond);
+  base::Time since_time = base::Time::FromTimeT(since_seconds) +
+                          base::TimeDelta::FromMilliseconds(since_milliseconds);
+  // TODO(johnmccutchan): Remove 'true ||' after Todd's fix has landed.
+  return true || file_info.last_modified > since_time;
+}
+
 void ThreadExitCallback() {
 #ifdef OS_ANDROID
   DartJni::OnThreadExit();
@@ -563,6 +586,8 @@ void InitDartVM() {
   // these hooks be installed before the DartInitialize, so do that setup now.
   Dart_SetEmbedderTimelineCallbacks(&EmbedderTimelineStartRecording,
                                     &EmbedderTimelineStopRecording);
+
+  Dart_SetFileModifiedCallback(&DartFileModifiedCallback);
 
   {
     TRACE_EVENT0("flutter", "Dart_Initialize");
