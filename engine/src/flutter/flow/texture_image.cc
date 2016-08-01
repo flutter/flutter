@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "base/trace_event/trace_event.h"
 #include "flow/texture_image.h"
 #include "flow/open_gl.h"
+#include "third_party/skia/include/gpu/gl/GrGLTypes.h"
 
 namespace flow {
 
-inline GLint ToGLFormat(TextureImageFormat format) {
+static inline GLint ToGLFormat(TextureImageFormat format) {
   switch (format) {
     case TextureImageFormat::RGBA:
       return GL_RGBA;
@@ -21,7 +23,7 @@ inline GLint ToGLFormat(TextureImageFormat format) {
   return GL_NONE;
 }
 
-inline GLint ToGLDataFormat(TextureImageDataFormat dataFormat) {
+static inline GLint ToGLDataFormat(TextureImageDataFormat dataFormat) {
   switch (dataFormat) {
     case TextureImageDataFormat::UnsignedByte:
       return GL_UNSIGNED_BYTE;
@@ -31,11 +33,125 @@ inline GLint ToGLDataFormat(TextureImageDataFormat dataFormat) {
   return GL_NONE;
 }
 
+static inline GrPixelConfig ToGrPixelConfig(TextureImageDataFormat dataFormat) {
+  switch (dataFormat) {
+    case TextureImageDataFormat::UnsignedByte:
+      return kRGBA_8888_GrPixelConfig;
+    case TextureImageDataFormat::UnsignedShort565:
+      return kRGB_565_GrPixelConfig;
+  }
+  return kUnknown_GrPixelConfig;
+}
+
+static inline SkColorType ToSkColorType(TextureImageFormat format) {
+  switch (format) {
+    case TextureImageFormat::RGBA:
+      return SkColorType::kRGBA_8888_SkColorType;
+    case TextureImageFormat::RGB:
+    case TextureImageFormat::Grey:
+    case TextureImageFormat::GreyAlpha:
+      // Add more specializations for greyscale images.
+      return SkColorType::kRGB_565_SkColorType;
+  }
+  return kRGB_565_SkColorType;
+}
+
+sk_sp<SkImage> TextureImageCreate(GrContext* context, const SkBitmap& bitmap) {
+  if (context == nullptr) {
+    return nullptr;
+  }
+
+  if (bitmap.drawsNothing()) {
+    return nullptr;
+  }
+
+  TextureImageDataFormat dataFormat = TextureImageDataFormat::UnsignedByte;
+  TextureImageFormat imageFormat = TextureImageFormat::RGBA;
+
+  switch (bitmap.colorType()) {
+    case kRGB_565_SkColorType:
+      dataFormat = TextureImageDataFormat::UnsignedShort565;
+      imageFormat = TextureImageFormat::RGB;
+      break;
+    case kRGBA_8888_SkColorType:
+      dataFormat = TextureImageDataFormat::UnsignedByte;
+      imageFormat = TextureImageFormat::RGBA;
+      break;
+    default:
+      // Add more as supported.
+      return nullptr;
+  }
+
+  return TextureImageCreate(
+      context,                                              // context
+      imageFormat,                                          // image format
+      SkISize::Make(bitmap.width(), bitmap.height()),       // size
+      dataFormat,                                           // data format
+      reinterpret_cast<const uint8_t*>(bitmap.getPixels())  // data
+      );
+}
+
+sk_sp<SkImage> TextureImageCreate(GrContext* context,
+                                  std::unique_ptr<SkImageGenerator> generator) {
+  if (context == nullptr || generator == nullptr) {
+    return nullptr;
+  }
+
+  const SkImageInfo& info = generator->getInfo();
+
+  if (info.isEmpty()) {
+    return nullptr;
+  }
+
+  TextureImageFormat imageFormat = TextureImageFormat::RGBA;
+  bool preferOpaque = SkAlphaTypeIsOpaque(info.alphaType());
+
+  if (preferOpaque) {
+    imageFormat = TextureImageFormat::RGB;
+  }
+
+  auto preferredImageInfo =
+      SkImageInfo::Make(info.bounds().width(),       // width
+                        info.bounds().height(),      // height
+                        ToSkColorType(imageFormat),  // color type
+                        preferOpaque ? SkAlphaType::kOpaque_SkAlphaType
+                                     : SkAlphaType::kPremul_SkAlphaType);
+
+  SkBitmap bitmap;
+
+  {
+    TRACE_EVENT1("flutter", "DecodePrimaryPreferrence", "Type",
+                 preferOpaque ? "RGB565" : "RGBA8888");
+    // Try our preferred config.
+    if (generator->tryGenerateBitmap(&bitmap, preferredImageInfo, nullptr)) {
+      // Our got our preferred bitmap.
+      return TextureImageCreate(context, bitmap);
+    }
+  }
+
+  {
+    TRACE_EVENT0("flutter", "DecodeRecommended");
+    // Try the guessed config.
+    if (generator->tryGenerateBitmap(&bitmap)) {
+      return TextureImageCreate(context, bitmap);
+    }
+  }
+
+  return nullptr;
+}
+
 sk_sp<SkImage> TextureImageCreate(GrContext* context,
                                   TextureImageFormat format,
                                   const SkISize& size,
                                   TextureImageDataFormat dataFormat,
                                   const uint8_t* data) {
+  TRACE_EVENT2("flutter", __func__, "width", size.width(), "height",
+               size.height());
+
+  if (context == nullptr) {
+    return nullptr;
+  }
+
   GLuint handle = GL_NONE;
 
   // Generate the texture handle.
@@ -70,12 +186,20 @@ sk_sp<SkImage> TextureImageCreate(GrContext* context,
   // Clear the binding. We are done.
   glBindTexture(GL_TEXTURE_2D, GL_NONE);
 
+  GrGLTextureInfo texInfo;
+  texInfo.fTarget = GL_TEXTURE_2D;
+  texInfo.fID = handle;
+
   // Create an SkImage handle from the texture.
   GrBackendTextureDesc desc;
 
+  desc.fOrigin = kTopLeft_GrSurfaceOrigin;
+  desc.fFlags = kNone_GrBackendTextureFlag;
   desc.fWidth = size.fWidth;
   desc.fHeight = size.fHeight;
-  desc.fTextureHandle = handle;
+  desc.fTextureHandle = reinterpret_cast<GrBackendObject>(&texInfo);
+
+  desc.fConfig = ToGrPixelConfig(dataFormat);
 
   if (auto image = SkImage::MakeFromAdoptedTexture(context, desc)) {
     // Texture handle was successfully adopted by the SkImage.
