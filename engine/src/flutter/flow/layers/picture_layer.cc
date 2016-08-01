@@ -4,9 +4,9 @@
 
 #include "flow/layers/picture_layer.h"
 
-#include "base/logging.h"
 #include "flow/checkerboard.h"
 #include "flow/raster_cache.h"
+#include "lib/ftl/logging.h"
 
 namespace flow {
 
@@ -25,7 +25,7 @@ void PictureLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 }
 
 void PictureLayer::Paint(PaintContext& context) {
-  DCHECK(picture_);
+  FTL_DCHECK(picture_);
 
   if (image_) {
     TRACE_EVENT1("flutter", "PictureLayer::Paint", "image", "prerolled");

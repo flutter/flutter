@@ -5,7 +5,6 @@
 #ifndef FLOW_TEXTURE_IMAGE_H_
 #define FLOW_TEXTURE_IMAGE_H_
 
-#include "base/macros.h"
 #include "third_party/skia/include/core/SkImage.h"
 
 namespace flow {

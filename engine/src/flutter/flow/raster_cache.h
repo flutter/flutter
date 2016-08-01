@@ -8,11 +8,11 @@
 #include <memory>
 #include <unordered_map>
 
-#include "base/macros.h"
-#include "skia/ext/refptr.h"
-#include "third_party/skia/include/core/SkSize.h"
-#include "third_party/skia/include/core/SkImage.h"
 #include "flow/instrumentation.h"
+#include "lib/ftl/macros.h"
+#include "skia/ext/refptr.h"
+#include "third_party/skia/include/core/SkImage.h"
+#include "third_party/skia/include/core/SkSize.h"
 
 namespace flow {
 
@@ -44,7 +44,7 @@ class RasterCache {
   using Cache = std::unordered_map<uint32_t, Entry>;
   Cache cache_;
 
-  DISALLOW_COPY_AND_ASSIGN(RasterCache);
+  FTL_DISALLOW_COPY_AND_ASSIGN(RasterCache);
 };
 
 }  // namespace flow

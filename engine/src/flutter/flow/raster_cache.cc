@@ -4,8 +4,8 @@
 
 #include "flow/raster_cache.h"
 
-#include "base/logging.h"
 #include "base/trace_event/trace_event.h"
+#include "lib/ftl/logging.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkPicture.h"

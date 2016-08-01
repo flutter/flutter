@@ -6,11 +6,9 @@
 
 namespace flow {
 
-ShaderMaskLayer::ShaderMaskLayer() {
-}
+ShaderMaskLayer::ShaderMaskLayer() {}
 
-ShaderMaskLayer::~ShaderMaskLayer() {
-}
+ShaderMaskLayer::~ShaderMaskLayer() {}
 
 void ShaderMaskLayer::Paint(PaintContext& context) {
   TRACE_EVENT0("flutter", "ShaderMaskLayer::Paint");

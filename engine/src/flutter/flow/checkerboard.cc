@@ -8,7 +8,8 @@
 
 namespace flow {
 
-static sk_sp<SkShader> CreateCheckerboardShader(SkColor c1, SkColor c2,
+static sk_sp<SkShader> CreateCheckerboardShader(SkColor c1,
+                                                SkColor c2,
                                                 int size) {
   SkBitmap bm;
   bm.allocN32Pixels(2 * size, 2 * size);

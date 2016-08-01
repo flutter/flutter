@@ -9,28 +9,23 @@
 
 namespace flow {
 
-LayerTree::LayerTree() : scene_version_(0), rasterizer_tracing_threshold_(0) {
-}
+LayerTree::LayerTree() : scene_version_(0), rasterizer_tracing_threshold_(0) {}
 
-LayerTree::~LayerTree() {
-}
+LayerTree::~LayerTree() {}
 
 void LayerTree::Raster(CompositorContext::ScopedFrame& frame) {
   {
     TRACE_EVENT0("flutter", "LayerTree::Preroll");
     Layer::PrerollContext context = {
-      frame.context().raster_cache(),
-      frame.gr_context(),
-      SkRect::MakeEmpty(),
+        frame.context().raster_cache(), frame.gr_context(), SkRect::MakeEmpty(),
     };
     root_layer_->Preroll(&context, SkMatrix());
   }
 
   {
     Layer::PaintContext context = {
-      frame.canvas(),
-      frame.context().frame_time(),
-      frame.context().engine_time(),
+        frame.canvas(), frame.context().frame_time(),
+        frame.context().engine_time(),
     };
     TRACE_EVENT0("flutter", "LayerTree::Paint");
     root_layer_->Paint(context);

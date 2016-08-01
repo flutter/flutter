@@ -5,8 +5,8 @@
 #ifndef FLOW_LAYERS_PERFORMANCE_OVERLAY_LAYER_H_
 #define FLOW_LAYERS_PERFORMANCE_OVERLAY_LAYER_H_
 
-#include "base/macros.h"
 #include "flow/layers/layer.h"
+#include "lib/ftl/macros.h"
 
 namespace flow {
 
@@ -24,7 +24,7 @@ class PerformanceOverlayLayer : public Layer {
  private:
   int options_;
 
-  DISALLOW_COPY_AND_ASSIGN(PerformanceOverlayLayer);
+  FTL_DISALLOW_COPY_AND_ASSIGN(PerformanceOverlayLayer);
 };
 
 }  // namespace flow

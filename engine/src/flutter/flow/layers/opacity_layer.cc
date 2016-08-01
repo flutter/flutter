@@ -6,11 +6,9 @@
 
 namespace flow {
 
-OpacityLayer::OpacityLayer() {
-}
+OpacityLayer::OpacityLayer() {}
 
-OpacityLayer::~OpacityLayer() {
-}
+OpacityLayer::~OpacityLayer() {}
 
 void OpacityLayer::Paint(PaintContext& context) {
   TRACE_EVENT0("flutter", "OpacityLayer::Paint");

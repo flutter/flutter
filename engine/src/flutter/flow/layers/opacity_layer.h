@@ -22,7 +22,7 @@ class OpacityLayer : public ContainerLayer {
  private:
   int alpha_;
 
-  DISALLOW_COPY_AND_ASSIGN(OpacityLayer);
+  FTL_DISALLOW_COPY_AND_ASSIGN(OpacityLayer);
 };
 
 }  // namespace flow

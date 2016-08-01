@@ -11,11 +11,9 @@ namespace flow {
 // TODO(abarth): We need to figure out how to allocate these ids sensibly.
 static uint32_t next_id = 10;
 
-ChildSceneLayer::ChildSceneLayer() : device_pixel_ratio_(1.0f) {
-}
+ChildSceneLayer::ChildSceneLayer() : device_pixel_ratio_(1.0f) {}
 
-ChildSceneLayer::~ChildSceneLayer() {
-}
+ChildSceneLayer::~ChildSceneLayer() {}
 
 void ChildSceneLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   transform_ = matrix;
