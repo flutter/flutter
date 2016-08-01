@@ -329,7 +329,7 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      () { host.popUntil(routeB); },
+      () { host.popUntil((Route<dynamic> route) => route == routeB); },
       <String>[
         'C: didPop null',
         'C: dispose',

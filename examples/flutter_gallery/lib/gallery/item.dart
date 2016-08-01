@@ -35,6 +35,7 @@ class GalleryItem extends StatelessWidget {
             'from': '/',
             'to': routeName
           });
+          print("GalleryItem.pushNamed $routeName");
           Navigator.pushNamed(context, routeName);
         }
       }

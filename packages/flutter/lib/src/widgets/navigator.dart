@@ -161,6 +161,9 @@ class NavigatorObserver {
   void didPop(Route<dynamic> route, Route<dynamic> previousRoute) { }
 }
 
+/// See [Navigator.popUntil].
+typedef bool RoutePredicate(Route<dynamic> route);
+
 /// A widget that manages a set of child widgets with a stack discipline.
 ///
 /// Many apps have a navigator near the top of their widget hierarchy in order
@@ -243,10 +246,11 @@ class Navigator extends StatefulWidget {
     return Navigator.of(context).pop(result);
   }
 
-  /// Calls pop() repeatedly until the given route is the current route.
-  /// If it is already the current route, nothing happens.
-  static void popUntil(BuildContext context, Route<dynamic> targetRoute) {
-    Navigator.of(context).popUntil(targetRoute);
+  /// Repeatedly pops the current route until the predicate returns false.
+  /// The predicate may be applied to the same route more than once if
+  /// [Route.willHandlePopupInternally] is true.
+  static void popUntil(BuildContext context, RoutePredicate predicate) {
+    Navigator.of(context).popUntil(predicate);
   }
 
   /// Whether the navigator that most tightly encloses the given context can be popped.
@@ -463,9 +467,8 @@ class NavigatorState extends State<Navigator> {
     return true;
   }
 
-  void popUntil(Route<dynamic> targetRoute) {
-    assert(_history.contains(targetRoute));
-    while (!targetRoute.isCurrent)
+  void popUntil(RoutePredicate predicate) {
+    while (!predicate(_history.last))
       pop();
   }
 
