@@ -9,6 +9,18 @@
 
 namespace flow {
 
+enum class TextureImageFormat {
+  Grey,
+  GreyAlpha,
+  RGB,
+  RGBA,
+};
+
+enum class TextureImageDataFormat {
+  UnsignedByte,
+  UnsignedShort565,
+};
+
 static inline GLint ToGLFormat(TextureImageFormat format) {
   switch (format) {
     case TextureImageFormat::RGBA:
@@ -56,95 +68,11 @@ static inline SkColorType ToSkColorType(TextureImageFormat format) {
   return kRGB_565_SkColorType;
 }
 
-sk_sp<SkImage> TextureImageCreate(GrContext* context, const SkBitmap& bitmap) {
-  if (context == nullptr) {
-    return nullptr;
-  }
-
-  if (bitmap.drawsNothing()) {
-    return nullptr;
-  }
-
-  TextureImageDataFormat dataFormat = TextureImageDataFormat::UnsignedByte;
-  TextureImageFormat imageFormat = TextureImageFormat::RGBA;
-
-  switch (bitmap.colorType()) {
-    case kRGB_565_SkColorType:
-      dataFormat = TextureImageDataFormat::UnsignedShort565;
-      imageFormat = TextureImageFormat::RGB;
-      break;
-    case kRGBA_8888_SkColorType:
-      dataFormat = TextureImageDataFormat::UnsignedByte;
-      imageFormat = TextureImageFormat::RGBA;
-      break;
-    default:
-      // Add more as supported.
-      return nullptr;
-  }
-
-  return TextureImageCreate(
-      context,                                              // context
-      imageFormat,                                          // image format
-      SkISize::Make(bitmap.width(), bitmap.height()),       // size
-      dataFormat,                                           // data format
-      reinterpret_cast<const uint8_t*>(bitmap.getPixels())  // data
-      );
-}
-
-sk_sp<SkImage> TextureImageCreate(GrContext* context,
-                                  std::unique_ptr<SkImageGenerator> generator) {
-  if (context == nullptr || generator == nullptr) {
-    return nullptr;
-  }
-
-  const SkImageInfo& info = generator->getInfo();
-
-  if (info.isEmpty()) {
-    return nullptr;
-  }
-
-  TextureImageFormat imageFormat = TextureImageFormat::RGBA;
-  bool preferOpaque = SkAlphaTypeIsOpaque(info.alphaType());
-
-  if (preferOpaque) {
-    imageFormat = TextureImageFormat::RGB;
-  }
-
-  auto preferredImageInfo =
-      SkImageInfo::Make(info.bounds().width(),       // width
-                        info.bounds().height(),      // height
-                        ToSkColorType(imageFormat),  // color type
-                        preferOpaque ? SkAlphaType::kOpaque_SkAlphaType
-                                     : SkAlphaType::kPremul_SkAlphaType);
-
-  SkBitmap bitmap;
-
-  {
-    TRACE_EVENT1("flutter", "DecodePrimaryPreferrence", "Type",
-                 preferOpaque ? "RGB565" : "RGBA8888");
-    // Try our preferred config.
-    if (generator->tryGenerateBitmap(&bitmap, preferredImageInfo, nullptr)) {
-      // Our got our preferred bitmap.
-      return TextureImageCreate(context, bitmap);
-    }
-  }
-
-  {
-    TRACE_EVENT0("flutter", "DecodeRecommended");
-    // Try the guessed config.
-    if (generator->tryGenerateBitmap(&bitmap)) {
-      return TextureImageCreate(context, bitmap);
-    }
-  }
-
-  return nullptr;
-}
-
-sk_sp<SkImage> TextureImageCreate(GrContext* context,
-                                  TextureImageFormat format,
-                                  const SkISize& size,
-                                  TextureImageDataFormat dataFormat,
-                                  const uint8_t* data) {
+static sk_sp<SkImage> TextureImageCreate(GrContext* context,
+                                         TextureImageFormat format,
+                                         const SkISize& size,
+                                         TextureImageDataFormat dataFormat,
+                                         const uint8_t* data) {
   TRACE_EVENT2("flutter", __func__, "width", size.width(), "height",
                size.height());
 
@@ -209,6 +137,101 @@ sk_sp<SkImage> TextureImageCreate(GrContext* context,
   // We could not create an SkImage from the texture. Since it could not be
   // adopted, delete the handle and return null.
   glDeleteTextures(1, &handle);
+
+  return nullptr;
+}
+
+static sk_sp<SkImage> TextureImageCreate(GrContext* context,
+                                         const SkBitmap& bitmap) {
+  if (context == nullptr) {
+    return nullptr;
+  }
+
+  if (bitmap.drawsNothing()) {
+    return nullptr;
+  }
+
+  TextureImageDataFormat dataFormat = TextureImageDataFormat::UnsignedByte;
+  TextureImageFormat imageFormat = TextureImageFormat::RGBA;
+
+  switch (bitmap.colorType()) {
+    case kRGB_565_SkColorType:
+      dataFormat = TextureImageDataFormat::UnsignedShort565;
+      imageFormat = TextureImageFormat::RGB;
+      break;
+    case kRGBA_8888_SkColorType:
+      dataFormat = TextureImageDataFormat::UnsignedByte;
+      imageFormat = TextureImageFormat::RGBA;
+      break;
+    default:
+      // Add more as supported.
+      return nullptr;
+  }
+
+  return TextureImageCreate(
+      context,                                              // context
+      imageFormat,                                          // image format
+      SkISize::Make(bitmap.width(), bitmap.height()),       // size
+      dataFormat,                                           // data format
+      reinterpret_cast<const uint8_t*>(bitmap.getPixels())  // data
+      );
+}
+
+sk_sp<SkImage> BitmapImageCreate(SkImageGenerator& generator) {
+  SkBitmap bitmap;
+
+  if (generator.tryGenerateBitmap(&bitmap)) {
+    return SkImage::MakeFromBitmap(bitmap);
+  }
+
+  return nullptr;
+}
+
+sk_sp<SkImage> TextureImageCreate(GrContext* context,
+                                  SkImageGenerator& generator) {
+  if (context == nullptr) {
+    return nullptr;
+  }
+
+  const SkImageInfo& info = generator.getInfo();
+
+  if (info.isEmpty()) {
+    return nullptr;
+  }
+
+  TextureImageFormat imageFormat = TextureImageFormat::RGBA;
+  bool preferOpaque = SkAlphaTypeIsOpaque(info.alphaType());
+
+  if (preferOpaque) {
+    imageFormat = TextureImageFormat::RGB;
+  }
+
+  auto preferredImageInfo =
+      SkImageInfo::Make(info.bounds().width(),       // width
+                        info.bounds().height(),      // height
+                        ToSkColorType(imageFormat),  // color type
+                        preferOpaque ? SkAlphaType::kOpaque_SkAlphaType
+                                     : SkAlphaType::kPremul_SkAlphaType);
+
+  SkBitmap bitmap;
+
+  {
+    TRACE_EVENT1("flutter", "DecodePrimaryPreferrence", "Type",
+                 preferOpaque ? "RGB565" : "RGBA8888");
+    // Try our preferred config.
+    if (generator.tryGenerateBitmap(&bitmap, preferredImageInfo, nullptr)) {
+      // Our got our preferred bitmap.
+      return TextureImageCreate(context, bitmap);
+    }
+  }
+
+  {
+    TRACE_EVENT0("flutter", "DecodeRecommended");
+    // Try the guessed config.
+    if (generator.tryGenerateBitmap(&bitmap)) {
+      return TextureImageCreate(context, bitmap);
+    }
+  }
 
   return nullptr;
 }

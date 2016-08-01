@@ -48,7 +48,14 @@ sk_sp<SkImage> DecodeImage(PassRefPtr<SharedBuffer> buffer) {
   auto context = reinterpret_cast<GrContext*>(
       sky::shell::PlatformView::ResourceContext.Get());
 
-  return flow::TextureImageCreate(context, std::move(generator));
+  // First, try to create a texture image from the generator.
+  if (auto image = flow::TextureImageCreate(context, *generator)) {
+    return image;
+  }
+
+  // The, as a fallback, try to create a regular Skia managed image. These
+  // don't require a context ready.
+  return flow::BitmapImageCreate(*generator);
 }
 
 void InvokeImageCallback(sk_sp<SkImage> image,
