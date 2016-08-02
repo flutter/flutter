@@ -58,17 +58,17 @@ void main() {
       expect(devFSOperations.contains('deleteFile test bar/foo.txt'), isTrue);
     });
     testUsingContext('add file in an asset bundle', () async {
-      await devFS.update(assetBundle);
+      await devFS.update(bundle: assetBundle);
       expect(devFSOperations.contains('writeFile test build/flx/a.txt'), isTrue);
     });
     testUsingContext('add a file to the asset bundle', () async {
       assetBundle.entries.add(new AssetBundleEntry.fromString('b.txt', ''));
-      await devFS.update(assetBundle);
+      await devFS.update(bundle: assetBundle);
       expect(devFSOperations.contains('writeFile test build/flx/b.txt'), isTrue);
     });
     testUsingContext('delete a file from the asset bundle', () async {
       assetBundle.entries.clear();
-      await devFS.update(assetBundle);
+      await devFS.update(bundle: assetBundle);
       expect(devFSOperations.contains('deleteFile test build/flx/b.txt'), isTrue);
     });
     testUsingContext('delete dev file system', () async {

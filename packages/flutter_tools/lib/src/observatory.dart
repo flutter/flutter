@@ -9,6 +9,8 @@ import 'dart:io';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:web_socket_channel/io.dart';
 
+import 'globals.dart';
+
 // TODO(johnmccutchan): Rename this class to ServiceProtocol or VmService.
 class Observatory {
   Observatory._(this.peer, this.port) {
@@ -202,6 +204,38 @@ class Observatory {
     return peer.sendRequest('ext.flutter.debugDumpRenderTree', <String, dynamic>{
       'isolateId': isolateId
     }).then((dynamic result) => new Response(result));
+  }
+
+  // Loader page extension methods.
+
+  Future<Response> flutterLoaderShowMessage(String isolateId, String message) {
+    return peer.sendRequest('ext.flutter.loaderShowMessage', <String, dynamic>{
+      'isolateId': isolateId,
+      'value': message
+    }).then(
+      (dynamic result) => new Response(result),
+      onError: (dynamic exception) { printTrace('ext.flutter.loaderShowMessage: $exception'); }
+    );
+  }
+
+  Future<Response> flutterLoaderSetProgress(String isolateId, double progress) {
+    return peer.sendRequest('ext.flutter.loaderSetProgress', <String, dynamic>{
+      'isolateId': isolateId,
+      'loaderSetProgress': progress
+    }).then(
+      (dynamic result) => new Response(result),
+      onError: (dynamic exception) { printTrace('ext.flutter.loaderSetProgress: $exception'); }
+    );
+  }
+
+  Future<Response> flutterLoaderSetProgressMax(String isolateId, double max) {
+    return peer.sendRequest('ext.flutter.loaderSetProgressMax', <String, dynamic>{
+      'isolateId': isolateId,
+      'loaderSetProgressMax': max
+    }).then(
+      (dynamic result) => new Response(result),
+      onError: (dynamic exception) { printTrace('ext.flutter.loaderSetProgressMax: $exception'); }
+    );
   }
 
   /// Causes the application to pick up any changed code.

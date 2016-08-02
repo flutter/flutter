@@ -63,7 +63,7 @@ class RunCommand extends RunCommandBase {
     argParser.addFlag('hot',
                       negatable: false,
                       defaultsTo: false,
-                      help: 'Run with support for hot reloading.');
+                      help: 'Run with support for hot reloading. Requires resident.');
 
     // Hidden option to enable a benchmarking mode. This will run the given
     // application, measure the startup time and the app restart time, write the
