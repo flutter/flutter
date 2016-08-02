@@ -23,7 +23,7 @@ const Duration _kTimeoutDuration = const Duration(milliseconds: 500);
 // Fade-out duration if the fade-out was triggered by the timer.
 const Duration _kTimeoutHideDuration = const Duration(milliseconds: 2000);
 
-// Fade-out duration if the fade-out was triggered by an "up" gesture.
+// Fade-out duration if the fade-out was triggered by an input gesture.
 const Duration _kNormalHideDuration = const Duration(milliseconds: 600);
 
 
