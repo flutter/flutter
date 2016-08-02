@@ -251,13 +251,15 @@ class _RecipeCard extends StatelessWidget {
                       height: 48.0
                     )
                   ),
-                  new Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      new Text(recipe.name, style: titleStyle),
-                      new Text(recipe.author, style: authorStyle),
-                    ]
+                  new Flexible(
+                    child: new Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        new Text(recipe.name, style: titleStyle, softWrap: false, overflow: TextOverflow.ellipsis),
+                        new Text(recipe.author, style: authorStyle),
+                      ]
+                    )
                   )
                 ]
               )
