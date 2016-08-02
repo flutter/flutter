@@ -1030,13 +1030,29 @@ enum VertexMode {
 ///
 /// Used by [Canvas.drawPoints].
 enum PointMode {
-  // Draw each point separately.
+  /// Draw each point separately.
+  ///
+  /// If the [Paint.strokeCap] is [StrokeCat.round], then each point is drawn
+  /// as a circle with the diameter of the [Paint.strokeWidth], filled as
+  /// described by the [Paint] (ignoring [Paint.style]).
+  ///
+  /// Otherwise, each point is drawn as an axis-aligned square with sides of
+  /// length [Paint.strokeWidth], filled as described by the [Paint] (ignoring
+  /// [Paint.style]).
   points,
 
-  // Draw each sequence of two points as a line segment.
+  /// Draw each sequence of two points as a line segment.
+  ///
+  /// If the number of points is odd, then the last point is ignored.
+  ///
+  /// The lines are stroked as described by the [Paint] (ignoring
+  /// [Paint.style]).
   lines,
 
-  // Draw the entire sequence of point as the vertices of a polygon.
+  /// Draw the entire sequence of point as one line.
+  ///
+  /// The lines are stroked as described by the [Paint] (ignoring
+  /// [Paint.style]).
   polygon,
 }
 
