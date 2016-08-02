@@ -243,8 +243,6 @@ static void DynamicServiceResolve(void* baton,
   self.view.autoresizingMask =
       UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 
-  [self onVoiceOverChanged:nil];
-
   [surface release];
 }
 
@@ -381,9 +379,8 @@ static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
       [UIApplication sharedApplication].statusBarFrame.size.height * scale;
 
   _engine->OnViewportMetricsChanged(_viewportMetrics.Clone());
-
-  [self onLocaleUpdated:nil];
 }
+
 
 #pragma mark - Keyboard events
 
@@ -444,7 +441,7 @@ static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
   bool enable = UIAccessibilityIsVoiceOverRunning();
 #endif
   if (enable) {
-    if (!_accessibilityBridge) {
+    if (!_accessibilityBridge && _dartServices.get() != nullptr) {
       _accessibilityBridge.reset(
           new sky::shell::AccessibilityBridge(self.view, _dartServices.get()));
     }
@@ -476,6 +473,8 @@ static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
 
 - (void)viewDidAppear:(BOOL)animated {
   [self surfaceUpdated:YES];
+  [self onLocaleUpdated:nil];
+  [self onVoiceOverChanged:nil];
 
   [super viewWillAppear:animated];
 }
