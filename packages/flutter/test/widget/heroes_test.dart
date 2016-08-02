@@ -40,6 +40,18 @@ class ThreeRoute extends MaterialPageRoute<Null> {
   });
 }
 
+class MutatingRoute extends MaterialPageRoute<Null> {
+  MutatingRoute() : super(builder: (BuildContext context) {
+    return new Hero(tag: 'a', child: new Text('MutatingRoute'), key: new UniqueKey());
+  });
+
+  void markNeedsBuild() {
+    setState(() {
+      // Trigger a rebuild
+    });
+  }
+}
+
 void main() {
   testWidgets('Heroes animate', (WidgetTester tester) async {
 
@@ -142,5 +154,26 @@ void main() {
     expect(find.byKey(secondKey), findsNothing);
     expect(find.byKey(thirdKey), isOnStage);
     expect(find.byKey(thirdKey), isInCard);
+  });
+
+  testWidgets('Heroes animate', (WidgetTester tester) async {
+    MutatingRoute route = new MutatingRoute();
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new Material(child: new Block(children: <Widget>[
+        new Hero(tag: 'a', child: new Text('foo')),
+        new Builder(builder: (BuildContext context) {
+          return new FlatButton(child: new Text('two'), onPressed: () => Navigator.push(context, route));
+        })
+      ]))
+    ));
+
+    await tester.tap(find.text('two'));
+    await tester.pump(new Duration(milliseconds: 10));
+
+    route.markNeedsBuild();
+
+    await tester.pump(new Duration(milliseconds: 10));
+    await tester.pump(new Duration(seconds: 1));
   });
 }

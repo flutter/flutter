@@ -4,6 +4,8 @@
 
 import 'dart:collection';
 
+import 'package:meta/meta.dart';
+
 import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
@@ -156,6 +158,7 @@ class HeroState extends State<Hero> implements HeroHandle {
 
   GlobalKey _key = new GlobalKey();
   Size _placeholderSize;
+  VoidCallback _disposeCallback;
 
   @override
   bool get alwaysAnimate => config.alwaysAnimate;
@@ -203,6 +206,13 @@ class HeroState extends State<Hero> implements HeroHandle {
   }
 
   @override
+  void dispose() {
+    if (_disposeCallback != null)
+      _disposeCallback();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (_placeholderSize != null) {
       assert(_key == null);
@@ -231,6 +241,12 @@ class _HeroQuestState implements HeroHandle {
     this.currentTurns
   }) {
     assert(tag != null);
+
+    for (HeroState state in sourceStates)
+      state._disposeCallback = () => sourceStates.remove(state);
+
+    if (targetState != null)
+      targetState._disposeCallback = _handleTargetStateDispose;
   }
 
   final Object tag;
@@ -238,11 +254,13 @@ class _HeroQuestState implements HeroHandle {
   final Widget child;
   final Set<HeroState> sourceStates;
   final Rect animationArea;
-  final Rect targetRect;
-  final int targetTurns;
-  final HeroState targetState;
+  Rect targetRect;
+  int targetTurns;
+  HeroState targetState;
   final RectTween currentRect;
   final Tween<double> currentTurns;
+
+  OverlayEntry overlayEntry;
 
   @override
   bool get alwaysAnimate => true;
@@ -257,6 +275,10 @@ class _HeroQuestState implements HeroHandle {
     Set<HeroState> states = sourceStates;
     if (targetState != null)
       states = states.union(new HashSet<HeroState>.from(<HeroState>[targetState]));
+
+    for (HeroState state in states)
+      state._disposeCallback = null;
+
     return new _HeroManifest(
       key: key,
       config: child,
@@ -264,6 +286,13 @@ class _HeroQuestState implements HeroHandle {
       currentRect: currentRect.evaluate(currentAnimation),
       currentTurns: currentTurns.evaluate(currentAnimation)
     );
+  }
+
+  void _handleTargetStateDispose() {
+    targetState = null;
+    targetTurns = 0;
+    targetRect = targetRect.center & Size.zero;
+    WidgetsBinding.instance.addPostFrameCallback((Duration d) => overlayEntry.markNeedsBuild());
   }
 
   Widget build(BuildContext context, Animation<double> animation) {
@@ -278,6 +307,17 @@ class _HeroQuestState implements HeroHandle {
         )
       )
     );
+  }
+
+  @mustCallSuper
+  void dispose() {
+    overlayEntry = null;
+
+    for (HeroState state in sourceStates)
+      state._disposeCallback = null;
+
+    if (targetState != null)
+      targetState._disposeCallback = null;
   }
 }
 
@@ -366,6 +406,8 @@ class HeroParty {
     }
 
     assert(!_heroes.any((_HeroQuestState hero) => !hero.taken));
+    for (_HeroQuestState hero in _heroes)
+      hero.dispose();
     _heroes = _newHeroes;
   }
 
@@ -393,6 +435,7 @@ class HeroParty {
           hero.targetState._setChild(hero.key);
         for (HeroState source in hero.sourceStates)
           source._resetChild();
+        hero.dispose();
       }
       _heroes.clear();
       _clearCurrentAnimation();
@@ -476,14 +519,15 @@ class HeroController extends NavigatorObserver {
     _overlayEntries.clear();
   }
 
-  void _addHeroToOverlay(Widget hero, Object tag, OverlayState overlay) {
-    OverlayEntry entry = new OverlayEntry(builder: (_) => hero);
+  OverlayEntry _addHeroToOverlay(WidgetBuilder hero, Object tag, OverlayState overlay) {
+    OverlayEntry entry = new OverlayEntry(builder: hero);
     assert(_animation.status != AnimationStatus.dismissed && _animation.status != AnimationStatus.completed);
     if (_animation.status == AnimationStatus.forward)
       _to.insertHeroOverlayEntry(entry, tag, overlay);
     else
       _from.insertHeroOverlayEntry(entry, tag, overlay);
     _overlayEntries.add(entry);
+    return entry;
   }
 
   Set<Key> _getMostValuableKeys() {
@@ -523,8 +567,11 @@ class HeroController extends NavigatorObserver {
       curve: curve
     ));
     for (_HeroQuestState hero in _party._heroes) {
-      Widget widget = hero.build(navigator.context, animation);
-      _addHeroToOverlay(widget, hero.tag, navigator.overlay);
+      hero.overlayEntry = _addHeroToOverlay(
+        (BuildContext context) => hero.build(navigator.context, animation),
+        hero.tag,
+        navigator.overlay
+      );
     }
   }
 }
