@@ -383,7 +383,7 @@ PassRefPtr<ArrayBuffer> SharedBuffer::getAsArrayBuffer() const
     return arrayBuffer;
 }
 
-PassRefPtr<SkData> SharedBuffer::getAsSkData() const
+sk_sp<SkData> SharedBuffer::getAsSkData() const
 {
     unsigned bufferLength = size();
     char* buffer = static_cast<char*>(sk_malloc_throw(bufferLength));
@@ -399,7 +399,7 @@ PassRefPtr<SkData> SharedBuffer::getAsSkData() const
         // Don't return the incomplete SkData.
         return nullptr;
     }
-    return adoptRef(SkData::NewFromMalloc(buffer, bufferLength));
+    return sk_sp<SkData>(SkData::NewFromMalloc(buffer, bufferLength));
 }
 
 bool SharedBuffer::lock()

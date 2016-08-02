@@ -60,7 +60,7 @@ public:
 private:
     Pattern(PassRefPtr<Image>, RepeatMode);
     AffineTransform m_patternSpaceTransformation;
-    RefPtr<SkShader> m_pattern;
+    sk_sp<SkShader> m_pattern;
 };
 
 } // namespace blink

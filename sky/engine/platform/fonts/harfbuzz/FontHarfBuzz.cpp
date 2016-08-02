@@ -311,7 +311,7 @@ bool buildTextBlobInternal(const GlyphBuffer& glyphBuffer, SkScalar initialAdvan
 
 } // namespace
 
-PassTextBlobPtr Font::buildTextBlob(const GlyphBuffer& glyphBuffer, float initialAdvance, const FloatRect& bounds) const
+TextBlobPtr Font::buildTextBlob(const GlyphBuffer& glyphBuffer, float initialAdvance, const FloatRect& bounds) const
 {
     SkTextBlobBuilder builder;
     SkScalar advance = SkFloatToScalar(initialAdvance);
@@ -319,7 +319,7 @@ PassTextBlobPtr Font::buildTextBlob(const GlyphBuffer& glyphBuffer, float initia
     bool success = glyphBuffer.hasOffsets() ?
         buildTextBlobInternal<true>(glyphBuffer, advance, builder) :
         buildTextBlobInternal<false>(glyphBuffer, advance, builder);
-    return success ? adoptRef(builder.build()) : nullptr;
+    return success ? TextBlobPtr(builder.build()) : nullptr;
 }
 
 

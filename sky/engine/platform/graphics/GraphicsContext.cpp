@@ -1492,7 +1492,7 @@ void GraphicsContext::preparePaintForDrawRectToRect(
     paint->setXfermodeMode(WebCoreCompositeToSkiaComposite(compositeOp, blendMode));
     paint->setColorFilter(sk_ref_sp(this->colorFilter()));
     paint->setAlpha(this->getNormalizedAlpha());
-    paint->setLooper(toSkSp(this->drawLooper()));
+    paint->setLooper(this->drawLooper());
     paint->setAntiAlias(shouldDrawAntiAliased(this, destRect));
 
     InterpolationQuality resampling;

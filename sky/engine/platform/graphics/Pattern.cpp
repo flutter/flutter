@@ -56,7 +56,7 @@ void Pattern::setPatternSpaceTransform(const AffineTransform& patternSpaceTransf
         return;
 
     m_patternSpaceTransformation = patternSpaceTransformation;
-    m_pattern.clear();
+    m_pattern.reset();
 }
 
 } // namespace blink

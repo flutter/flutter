@@ -89,7 +89,7 @@ public:
 
     // Creates an SkData and copies this SharedBuffer's contents to that
     // SkData without merging segmented buffers into a flat buffer.
-    PassRefPtr<SkData> getAsSkData() const;
+    sk_sp<SkData> getAsSkData() const;
 
     // See PurgeableVector::lock().
     bool lock();

@@ -5,8 +5,7 @@
 #ifndef SKY_SHELL_GPU_DIRECT_GANESH_CANVAS_H_
 #define SKY_SHELL_GPU_DIRECT_GANESH_CANVAS_H_
 
-#include "base/basictypes.h"
-#include "skia/ext/refptr.h"
+#include "lib/ftl/macros.h"
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
@@ -32,10 +31,10 @@ class GaneshCanvas {
  private:
   bool SelectPixelConfig(GrPixelConfig* config);
 
-  skia::RefPtr<GrContext> gr_context_;
+  sk_sp<GrContext> gr_context_;
   sk_sp<SkSurface> sk_surface_;
 
-  DISALLOW_COPY_AND_ASSIGN(GaneshCanvas);
+  FTL_DISALLOW_COPY_AND_ASSIGN(GaneshCanvas);
 };
 
 }  // namespace shell

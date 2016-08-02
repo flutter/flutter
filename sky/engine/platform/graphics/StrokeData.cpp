@@ -45,7 +45,7 @@ void StrokeData::setLineDash(const DashArray& dashes, float dashOffset)
         // If no dash is set, revert to solid stroke
         // FIXME: do we need to set NoStroke in some cases?
         m_style = SolidStroke;
-        m_dash.clear();
+        m_dash.reset();
         return;
     }
 
@@ -55,7 +55,7 @@ void StrokeData::setLineDash(const DashArray& dashes, float dashOffset)
     for (unsigned i = 0; i < count; i++)
         intervals[i] = dashes[i % dashLength];
 
-    m_dash = fromSkSp(SkDashPathEffect::Make(intervals.get(), count, dashOffset));
+    m_dash = SkDashPathEffect::Make(intervals.get(), count, dashOffset);
 }
 
 void StrokeData::setupPaint(SkPaint* paint, int length) const
@@ -73,7 +73,7 @@ void StrokeData::setupPaintDashPathEffect(SkPaint* paint, int length) const
 {
     float width = m_thickness;
     if (m_dash) {
-        paint->setPathEffect(toSkSp(m_dash));
+        paint->setPathEffect(m_dash);
     } else {
         switch (m_style) {
         case NoStroke:

@@ -24,13 +24,14 @@
 #ifndef SKY_ENGINE_PLATFORM_TEXT_TEXTRUN_H_
 #define SKY_ENGINE_PLATFORM_TEXT_TEXTRUN_H_
 
-#include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/fonts/Glyph.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
+#include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/platform/text/TextDirection.h"
 #include "sky/engine/platform/text/TextPath.h"
 #include "sky/engine/wtf/RefCounted.h"
 #include "sky/engine/wtf/text/WTFString.h"
+#include "third_party/skia/include/core/SkRefCnt.h"
 
 class SkTextBlob;
 
@@ -247,7 +248,6 @@ struct TextRunPaintInfo {
         : run(r)
         , from(0)
         , to(r.length())
-        , cachedTextBlob(nullptr)
     {
     }
 
@@ -255,7 +255,7 @@ struct TextRunPaintInfo {
     int from;
     int to;
     FloatRect bounds;
-    RefPtr<const SkTextBlob>* cachedTextBlob;
+    sk_sp<const SkTextBlob>* cachedTextBlob;
 };
 
 }

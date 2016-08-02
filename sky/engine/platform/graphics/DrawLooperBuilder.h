@@ -66,7 +66,7 @@ public:
 
     // Creates the SkDrawLooper and passes ownership to the caller. The builder
     // should not be used any more after calling this method.
-    PassRefPtr<SkDrawLooper> detachDrawLooper();
+    sk_sp<SkDrawLooper> detachDrawLooper();
 
     void addUnmodifiedContent();
     void addShadow(const FloatSize& offset, float blur, const Color&,

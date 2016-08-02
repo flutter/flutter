@@ -138,7 +138,7 @@ private:
 
     // Returns the initial in-stream advance.
     float buildGlyphBuffer(const TextRunPaintInfo&, GlyphBuffer&, ForTextEmphasisOrNot = NotForTextEmphasis) const;
-    PassTextBlobPtr buildTextBlob(const GlyphBuffer&, float initialAdvance, const FloatRect& bounds) const;
+    TextBlobPtr buildTextBlob(const GlyphBuffer&, float initialAdvance, const FloatRect& bounds) const;
     void drawGlyphs(GraphicsContext*, const SimpleFontData*, const GlyphBuffer&, unsigned from, unsigned numGlyphs, const FloatPoint&, const FloatRect& textRect) const;
     void drawTextBlob(GraphicsContext*, const SkTextBlob*, const SkPoint& origin) const;
     float drawGlyphBuffer(GraphicsContext*, const TextRunPaintInfo&, const GlyphBuffer&, const FloatPoint&) const;

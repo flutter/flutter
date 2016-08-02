@@ -109,8 +109,8 @@ public:
     void setFillRule(WindRule rule) { m_fillRule = rule; }
 
     // Shadow. (This will need tweaking if we use draw loopers for other things.)
-    const RefPtr<SkDrawLooper>& drawLooper() const { return m_looper; }
-    void setDrawLooper(PassRefPtr<SkDrawLooper>);
+    const sk_sp<SkDrawLooper>& drawLooper() const { return m_looper; }
+    void setDrawLooper(sk_sp<SkDrawLooper>);
     void clearDrawLooper();
 
     // Text. (See TextModeFill & friends.)
@@ -122,7 +122,7 @@ public:
     void setAlphaAsFloat(float);
 
     SkColorFilter* colorFilter() const { return m_colorFilter.get(); }
-    void setColorFilter(PassRefPtr<SkColorFilter>);
+    void setColorFilter(sk_sp<SkColorFilter>);
 
     // Compositing control, for the CSS and Canvas compositing spec.
     void setCompositeOperation(CompositeOperator, WebBlendMode);
@@ -163,12 +163,12 @@ private:
     RefPtr<Gradient> m_fillGradient;
     RefPtr<Pattern> m_fillPattern;
 
-    RefPtr<SkDrawLooper> m_looper;
+    sk_sp<SkDrawLooper> m_looper;
 
     TextDrawingModeFlags m_textDrawingMode;
 
     int m_alpha;
-    RefPtr<SkColorFilter> m_colorFilter;
+    sk_sp<SkColorFilter> m_colorFilter;
 
     CompositeOperator m_compositeOperator;
     WebBlendMode m_blendMode;

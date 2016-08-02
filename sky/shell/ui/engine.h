@@ -16,7 +16,6 @@
 #include "mojo/public/cpp/system/handle.h"
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
 #include "mojo/services/asset_bundle/interfaces/asset_bundle.mojom.h"
-#include "skia/ext/refptr.h"
 #include "sky/engine/public/sky/sky_view.h"
 #include "sky/engine/public/sky/sky_view_client.h"
 #include "sky/services/engine/sky_engine.mojom.h"

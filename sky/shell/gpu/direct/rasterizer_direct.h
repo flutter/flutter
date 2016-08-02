@@ -8,7 +8,6 @@
 #include "base/memory/weak_ptr.h"
 #include "base/synchronization/waitable_event.h"
 #include "flow/compositor_context.h"
-#include "skia/ext/refptr.h"
 #include "sky/shell/gpu/direct/ganesh_canvas.h"
 #include "sky/shell/rasterizer.h"
 
@@ -40,7 +39,6 @@ class RasterizerDirect : public Rasterizer {
   flow::LayerTree* GetLastLayerTree() override;
 
  private:
-  skia::RefPtr<const GrGLInterface> gr_gl_interface_;
   GaneshCanvas ganesh_canvas_;
   flow::CompositorContext compositor_context_;
   mojo::Binding<rasterizer::Rasterizer> binding_;

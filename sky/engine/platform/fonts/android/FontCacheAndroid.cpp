@@ -41,7 +41,7 @@ namespace blink {
 
 static AtomicString getFamilyNameForCharacter(UChar32 c, const FontDescription& fontDescription)
 {
-    RefPtr<SkFontMgr> fm = adoptRef(SkFontMgr::RefDefault());
+    sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
     const char* bcp47Locales[2];
     int localeCount = 0;
     CString defaultLocale = defaultLanguage().ascii();

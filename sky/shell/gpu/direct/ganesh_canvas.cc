@@ -21,15 +21,13 @@ const size_t kMaxGaneshResourceCacheBytes = 96 * 1024 * 1024;
 
 }  // namespace
 
-GaneshCanvas::GaneshCanvas() {
-}
+GaneshCanvas::GaneshCanvas() {}
 
-GaneshCanvas::~GaneshCanvas() {
-}
+GaneshCanvas::~GaneshCanvas() {}
 
 bool GaneshCanvas::SetupGrGLInterface() {
   sk_surface_ = nullptr;
-  gr_context_ = skia::AdoptRef(GrContext::Create(
+  gr_context_ = sk_sp<GrContext>(GrContext::Create(
       kOpenGL_GrBackend,
       reinterpret_cast<GrBackendContext>(GrGLCreateNativeInterface())));
 
@@ -43,8 +41,7 @@ bool GaneshCanvas::SetupGrGLInterface() {
 
 bool GaneshCanvas::SelectPixelConfig(GrPixelConfig* config) {
   static const GrPixelConfig kConfigOptions[] = {
-    kSkia8888_GrPixelConfig,
-    kRGBA_4444_GrPixelConfig,
+      kSkia8888_GrPixelConfig, kRGBA_4444_GrPixelConfig,
   };
 
   for (size_t i = 0; i < arraysize(kConfigOptions); i++) {
@@ -60,8 +57,8 @@ bool GaneshCanvas::SelectPixelConfig(GrPixelConfig* config) {
 SkCanvas* GaneshCanvas::GetCanvas(int32_t fbo, const SkISize& size) {
   DCHECK(IsValid());
 
-  if (sk_surface_ && sk_surface_->width() == size.width()
-      && sk_surface_->height() == size.height())
+  if (sk_surface_ && sk_surface_->width() == size.width() &&
+      sk_surface_->height() == size.height())
     return sk_surface_->getCanvas();
 
   GrBackendRenderTargetDesc desc;
@@ -72,8 +69,8 @@ SkCanvas* GaneshCanvas::GetCanvas(int32_t fbo, const SkISize& size) {
   desc.fOrigin = kBottomLeft_GrSurfaceOrigin;
   desc.fRenderTargetHandle = fbo;
 
-  skia::RefPtr<GrRenderTarget> target = skia::AdoptRef(
-    gr_context_->textureProvider()->wrapBackendRenderTarget(desc));
+  sk_sp<GrRenderTarget> target(
+      gr_context_->textureProvider()->wrapBackendRenderTarget(desc));
   DCHECK(target);
   sk_surface_ = SkSurface::MakeRenderTargetDirect(target.get(), nullptr);
   DCHECK(sk_surface_);

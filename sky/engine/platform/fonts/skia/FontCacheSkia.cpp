@@ -214,7 +214,7 @@ sk_sp<SkTypeface> FontCache::createTypeface(const FontDescription& fontDescripti
     }
 
     SkFontStyle style = toSkiaFontStyle(fontDescription);
-    RefPtr<SkFontMgr> fm = adoptRef(SkFontMgr::RefDefault());
+    sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
     sk_sp<SkTypeface> typeface(fm->matchFamilyStyle(name.data(), style));
     if (typeface)
         return typeface;

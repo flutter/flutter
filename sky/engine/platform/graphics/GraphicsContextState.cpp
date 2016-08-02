@@ -185,16 +185,16 @@ void GraphicsContextState::clearFillPattern()
 }
 
 // Shadow. (This will need tweaking if we use draw loopers for other things.)
-void GraphicsContextState::setDrawLooper(PassRefPtr<SkDrawLooper> drawLooper)
+void GraphicsContextState::setDrawLooper(sk_sp<SkDrawLooper> drawLooper)
 {
     m_looper = drawLooper;
-    m_strokePaint.setLooper(toSkSp(m_looper));
-    m_fillPaint.setLooper(toSkSp(m_looper));
+    m_strokePaint.setLooper(m_looper);
+    m_fillPaint.setLooper(m_looper);
 }
 
 void GraphicsContextState::clearDrawLooper()
 {
-    m_looper.clear();
+    m_looper.reset();
     m_strokePaint.setLooper(nullptr);
     m_fillPaint.setLooper(nullptr);
 }
@@ -217,11 +217,11 @@ void GraphicsContextState::setLineDash(const DashArray& dashes, float dashOffset
     m_strokeData.setLineDash(dashes, dashOffset);
 }
 
-void GraphicsContextState::setColorFilter(PassRefPtr<SkColorFilter> colorFilter)
+void GraphicsContextState::setColorFilter(sk_sp<SkColorFilter> colorFilter)
 {
     m_colorFilter = colorFilter;
-    m_strokePaint.setColorFilter(toSkSp(m_colorFilter));
-    m_fillPaint.setColorFilter(toSkSp(m_colorFilter));
+    m_strokePaint.setColorFilter(m_colorFilter);
+    m_fillPaint.setColorFilter(m_colorFilter);
 }
 
 void GraphicsContextState::setCompositeOperation(CompositeOperator compositeOperation, WebBlendMode blendMode)
