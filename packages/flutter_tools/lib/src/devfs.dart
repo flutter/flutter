@@ -13,6 +13,8 @@ import 'asset.dart';
 import 'globals.dart';
 import 'observatory.dart';
 
+typedef void DevFSProgressReporter(int progress, int max);
+
 // A file that has been added to a DevFS.
 class DevFSEntry {
   DevFSEntry(this.devicePath, this.file)
@@ -178,7 +180,7 @@ class DevFS {
     return await _operations.destroy(fsName);
   }
 
-  Future<dynamic> update([AssetBundle bundle = null]) async {
+  Future<dynamic> update({ DevFSProgressReporter progressReporter, AssetBundle bundle }) async {
     _bytes = 0;
     // Mark all entries as not seen.
     _entries.forEach((String path, DevFSEntry entry) {
@@ -203,9 +205,7 @@ class DevFS {
         if (_syncDirectory(directory,
                            directoryName: 'packages/$packageName',
                            recursive: true)) {
-          if (sb == null) {
-            sb = new StringBuffer();
-          }
+          sb ??= new StringBuffer();
           sb.writeln('$packageName:packages/$packageName');
         }
       }
@@ -233,11 +233,20 @@ class DevFS {
     // Send the assets.
     printTrace('DevFS: Waiting for sync of ${_pendingWrites.length} files '
                'to finish');
-    await Future.wait(_pendingWrites);
-    _pendingWrites.clear();
-    if (sb != null) {
-      await _operations.writeSource(fsName, '.packages', sb.toString());
+
+    if (progressReporter != null) {
+      final int max = _pendingWrites.length;
+      int complete = 0;
+      _pendingWrites.forEach((Future<dynamic> f) => f.then((dynamic v) {
+        complete += 1;
+        progressReporter(complete, max);
+      }));
     }
+    await Future.wait(_pendingWrites, eagerError: true);
+    _pendingWrites.clear();
+
+    if (sb != null)
+      await _operations.writeSource(fsName, '.packages', sb.toString());
     printTrace('DevFS: Sync finished');
     // NB: You must call flush after a printTrace if you want to be printed
     // immediately.

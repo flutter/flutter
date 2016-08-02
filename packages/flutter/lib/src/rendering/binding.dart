@@ -56,13 +56,10 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
       return true;
     });
 
-    assert(() {
-      registerSignalServiceExtension(
-        name: 'debugDumpRenderTree',
-        callback: debugDumpRenderTree
-      );
-      return true;
-    });
+    registerSignalServiceExtension(
+      name: 'debugDumpRenderTree',
+      callback: debugDumpRenderTree
+    );
 
     assert(() {
       // this service extension only works in checked mode

@@ -219,15 +219,6 @@ class RunAndStayResident {
     if (debuggingOptions.debuggingEnabled) {
       observatory = await Observatory.connect(_result.observatoryPort);
       printTrace('Connected to observatory port: ${_result.observatoryPort}.');
-      if (hotMode && device.needsDevFS) {
-        bool result = await _updateDevFS();
-        if (!result) {
-          printError('Could not perform initial file synchronization.');
-          return 3;
-        }
-        printStatus('Running ${getDisplayPath(_mainPath)} on ${device.name}...');
-        await _launchFromDevFS(_package, _mainPath);
-      }
       observatory.populateIsolateInfo();
       observatory.onExtensionEvent.listen((Event event) {
         printTrace(event.toString());
@@ -235,6 +226,23 @@ class RunAndStayResident {
       observatory.onIsolateEvent.listen((Event event) {
         printTrace(event.toString());
       });
+
+      if (hotMode && device.needsDevFS) {
+        _loaderShowMessage('Connecting...', progress: 0);
+        bool result = await _updateDevFS(
+          progressReporter: (int progress, int max) {
+            _loaderShowMessage('Syncing files to device...', progress: progress, max: max);
+          }
+        );
+        if (!result) {
+          _loaderShowMessage('Failed.');
+          printError('Could not perform initial file synchronization.');
+          return 3;
+        }
+        printStatus('Running ${getDisplayPath(_mainPath)} on ${device.name}...');
+        _loaderShowMessage('Launching...');
+        await _launchFromDevFS(_package, _mainPath);
+      }
 
       if (benchmark)
         await observatory.waitFirstIsolate;
@@ -264,19 +272,20 @@ class RunAndStayResident {
 
         terminal.singleCharMode = true;
         terminal.onCharInput.listen((String code) {
-          String lower = code.toLowerCase();
-
-          if (lower == 'h' || code == AnsiTerminal.KEY_F1) {
+          printStatus(''); // the key the user tapped might be on this line
+          final String lower = code.toLowerCase();
+          if (lower == 'h' || lower == '?' || code == AnsiTerminal.KEY_F1) {
             // F1, help
             _printHelp();
           } else if (lower == 'r' || code == AnsiTerminal.KEY_F5) {
-            if (hotMode) {
+            // F5, restart
+            if (hotMode && code == 'r') {
+              // lower-case 'r'
               _reloadSources();
             } else {
-              if (device.supportsRestart) {
-                // F5, restart
+              // upper-case 'r', or hot restart disabled
+              if (device.supportsRestart)
                 restart();
-              }
             }
           } else if (lower == 'q' || code == AnsiTerminal.KEY_F10) {
             // F10, exit
@@ -335,9 +344,20 @@ class RunAndStayResident {
     observatory.flutterDebugDumpRenderTree(observatory.firstIsolateId);
   }
 
+  void _loaderShowMessage(String message, { int progress, int max }) {
+    observatory.flutterLoaderShowMessage(observatory.firstIsolateId, message);
+    if (progress != null) {
+      observatory.flutterLoaderSetProgress(observatory.firstIsolateId, progress.toDouble());
+      observatory.flutterLoaderSetProgressMax(observatory.firstIsolateId, max?.toDouble() ?? 0.0);
+    } else {
+      observatory.flutterLoaderSetProgress(observatory.firstIsolateId, 0.0);
+      observatory.flutterLoaderSetProgressMax(observatory.firstIsolateId, -1.0);
+    }
+  }
+
   DevFS _devFS;
   String _devFSProjectRootPath;
-  Future<bool> _updateDevFS() async {
+  Future<bool> _updateDevFS({ DevFSProgressReporter progressReporter }) async {
     if (_devFS == null) {
       Directory directory = Directory.current;
       _devFSProjectRootPath = directory.path;
@@ -358,7 +378,7 @@ class RunAndStayResident {
     }
 
     Status devFSStatus = logger.startProgress('Syncing files on device...');
-    await _devFS.update();
+    await _devFS.update(progressReporter: progressReporter);
     devFSStatus.stop(showElapsedTime: true);
     printStatus('Synced ${getSizeAsMB(_devFS.bytes)} MB');
     return true;
@@ -387,9 +407,8 @@ class RunAndStayResident {
   Future<bool> _reloadSources() async {
     if (observatory.firstIsolateId == null)
       throw 'Application isolate not found';
-    if (_devFS != null) {
+    if (_devFS != null)
       await _updateDevFS();
-    }
     Status reloadStatus = logger.startProgress('Performing hot reload');
     try {
       await observatory.reloadSources(observatory.firstIsolateId);
@@ -413,14 +432,21 @@ class RunAndStayResident {
   }
 
   void _printHelp() {
-    String restartText = '';
-    if (hotMode) {
-      restartText = ', "r" or F5 to perform a hot reload of the app,';
-    } else if (device.supportsRestart) {
-      restartText = ', "r" or F5 to restart the app,';
+    printStatus('Type "h" or F1 for this help message. Type "q", F10, or ctrl-c to quit.', emphasis: true);
+    String hot = '';
+    String cold = '';
+    if (hotMode)
+      hot = 'Type "r" or F5 to perform a hot reload of the app';
+    if (device.supportsRestart) {
+      if (hotMode) {
+        cold = ', and "R" to cold restart the app';
+      } else {
+        cold = 'Type "r" or F5 to restart the app';
+      }
     }
-    printStatus('Type "h" or F1 for help$restartText and "q", F10, or ctrl-c to quit.');
-    printStatus('Type "w" to print the widget hierarchy of the app, and "t" for the render tree.');
+    if (hot != '' || cold != '')
+      printStatus('$hot$cold.', emphasis: true);
+    printStatus('Type "w" to print the widget hierarchy of the app, and "t" for the render tree.', emphasis: true);
   }
 
   Future<dynamic> _stopLogger() {

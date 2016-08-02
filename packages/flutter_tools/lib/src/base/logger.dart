@@ -13,6 +13,7 @@ abstract class Logger {
 
   bool quiet = false;
 
+  bool get supportsColor => terminal.supportsColor;
   set supportsColor(bool value) {
     terminal.supportsColor = value;
   }
@@ -76,7 +77,7 @@ class StdoutLogger extends Logger {
     _status?.cancel();
     _status = null;
 
-    if (terminal.supportsColor) {
+    if (supportsColor) {
       _status = new _AnsiStatus(message);
       return _status;
     } else {
