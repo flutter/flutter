@@ -17,6 +17,7 @@ import 'tooltip.dart';
 // http://www.google.com/design/spec/layout/metrics-keylines.html#metrics-keylines-keylines-spacing
 const double _kSize = 56.0;
 const double _kSizeMini = 40.0;
+final Object _kDefaultHeroTag = new Object();
 
 /// A material design floating action button.
 ///
@@ -46,6 +47,7 @@ class FloatingActionButton extends StatefulWidget {
     @required this.child,
     this.tooltip,
     this.backgroundColor,
+    this.heroTag,
     this.elevation: 6,
     this.highlightElevation: 12,
     @required this.onPressed,
@@ -65,6 +67,11 @@ class FloatingActionButton extends StatefulWidget {
   ///
   /// Defaults to the accent color of the current theme.
   final Color backgroundColor;
+
+  /// The tag to apply to the button's [Hero] widget.
+  ///
+  /// Defaults to a tag that matches other floating action buttons.
+  final Object heroTag;
 
   /// The callback that is called when the button is tapped or otherwise activated.
   ///
@@ -124,17 +131,20 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
       );
     }
 
-    return new Material(
-      color: materialColor,
-      type: MaterialType.circle,
-      elevation: _highlight ? config.highlightElevation : config.elevation,
-      child: new Container(
-        width: config.mini ? _kSizeMini : _kSize,
-        height: config.mini ? _kSizeMini : _kSize,
-        child: new InkWell(
-          onTap: config.onPressed,
-          onHighlightChanged: _handleHighlightChanged,
-          child: result
+    return new Hero(
+      tag: config.heroTag ?? _kDefaultHeroTag,
+      child: new Material(
+        color: materialColor,
+        type: MaterialType.circle,
+        elevation: _highlight ? config.highlightElevation : config.elevation,
+        child: new Container(
+          width: config.mini ? _kSizeMini : _kSize,
+          height: config.mini ? _kSizeMini : _kSize,
+          child: new InkWell(
+            onTap: config.onPressed,
+            onHighlightChanged: _handleHighlightChanged,
+            child: result
+          )
         )
       )
     );

@@ -232,37 +232,37 @@ class _RecipeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return new GestureDetector(
       onTap: onTap,
-      child: new Hero(
-        tag: recipe.imagePath,
-        child: new Card(
-          child: new Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              new Image.asset(recipe.imagePath, fit: ImageFit.contain),
-              new Flexible(
-                child: new Row(
-                  children: <Widget>[
-                    new Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: new Image.asset(
-                        recipe.ingredientsImagePath,
-                        width: 48.0,
-                        height: 48.0
-                      )
-                    ),
-                    new Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        new Text(recipe.name, style: titleStyle),
-                        new Text(recipe.author, style: authorStyle),
-                      ]
+      child: new Card(
+        child: new Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            new Hero(
+              tag: recipe.imagePath,
+              child: new Image.asset(recipe.imagePath, fit: ImageFit.contain)
+            ),
+            new Flexible(
+              child: new Row(
+                children: <Widget>[
+                  new Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: new Image.asset(
+                      recipe.ingredientsImagePath,
+                      width: 48.0,
+                      height: 48.0
                     )
-                  ]
-                )
+                  ),
+                  new Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      new Text(recipe.name, style: titleStyle),
+                      new Text(recipe.author, style: authorStyle),
+                    ]
+                  )
+                ]
               )
-            ]
-          )
+            )
+          ]
         )
       )
     );
@@ -327,21 +327,23 @@ class _RecipePageState extends State<_RecipePage> {
     Size screenSize = MediaQuery.of(context).size;
     bool fullWidth = (screenSize.width < _kRecipePageMaxWidth);
     const double fabHalfSize = 28.0;  // TODO(mpcomplete): needs to adapt to screen size
-    return new Hero(
-      tag: config.recipe.imagePath,
-      child: new Container(
-        decoration: new BoxDecoration(
-          backgroundColor: Theme.of(context).canvasColor,
-          backgroundImage: new BackgroundImage(
-            image: new AssetImage(config.recipe.imagePath),
-            alignment: FractionalOffset.topCenter,
-            fit: fullWidth ? ImageFit.fitWidth : ImageFit.cover
+    return new Stack(
+      children: <Widget>[
+        new Positioned(
+          top: 0.0,
+          left: 0.0,
+          right: 0.0,
+          child: new Hero(
+            tag: config.recipe.imagePath,
+            child: new Image.asset(
+              config.recipe.imagePath,
+              fit: fullWidth ? ImageFit.fitWidth : ImageFit.cover
+            )
           )
         ),
-        align: FractionalOffset.bottomCenter,
-        child: new Block(
-          children: <Widget>[
-            new Padding(
+        new ScrollableViewport(
+          child: new RepaintBoundary(
+            child: new Padding(
               padding: new EdgeInsets.only(top: _getAppBarHeight(context)),
               child: new Stack(
                 children: <Widget>[
@@ -362,9 +364,9 @@ class _RecipePageState extends State<_RecipePage> {
                 ]
               )
             )
-          ]
+          )
         )
-      )
+      ]
     );
   }
 
