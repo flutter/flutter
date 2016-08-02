@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async' show Timer;
+import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
@@ -12,9 +13,19 @@ const double _kMinIndicatorExtent = 0.0;
 const double _kMaxIndicatorExtent = 64.0;
 const double _kMinIndicatorOpacity = 0.0;
 const double _kMaxIndicatorOpacity = 0.25;
-const Duration _kIndicatorHideDuration = const Duration(milliseconds: 200);
-const Duration _kIndicatorTimeoutDuration = const Duration(milliseconds: 500);
+
 final Tween<double> _kIndicatorOpacity = new Tween<double>(begin: 0.0, end: 0.3);
+
+// If an overscroll gesture lasts longer than this the hide timer will
+// cause the indicator to fade-out.
+const Duration _kTimeoutDuration = const Duration(milliseconds: 500);
+
+// Fade-out duration if the fade-out was triggered by the timer.
+const Duration _kTimeoutHideDuration = const Duration(milliseconds: 2000);
+
+// Fade-out duration if the fade-out was triggered by an "up" gesture.
+const Duration _kNormalHideDuration = const Duration(milliseconds: 600);
+
 
 class _Painter extends CustomPainter {
   _Painter({
@@ -25,6 +36,9 @@ class _Painter extends CustomPainter {
     this.color
   });
 
+  // See EdgeEffect setSize() in https://github.com/android
+  static final double _kSizeToRadius = 0.75 / math.sin(math.PI / 6.0);
+
   final Axis scrollDirection;
   final double extent;
   final bool isLeading;
@@ -32,53 +46,33 @@ class _Painter extends CustomPainter {
   final Point dragPosition;
 
   void paintIndicator(Canvas canvas, Size size) {
-    final double rectBias = extent / 2.0;
-    final double arcBias = extent * 0.66;
+    final Paint paint = new Paint()..color = color;
+    final double width = size.width;
+    final double height = size.height;
 
-    final Path path = new Path();
     switch(scrollDirection) {
       case Axis.vertical:
-        final double width = size.width;
-        final double focus = dragPosition == null ? 0.5 : 1.0 - dragPosition.x / size.width;
-        print("focus=$focus dx1=${width * -focus * 0.5} dx2=${width * -focus * 1.5}");
-        if (isLeading) {
-          path.moveTo(0.0, 0.0);
-          path.relativeLineTo(width, 0.0);
-          path.relativeLineTo(0.0, rectBias);
-          //path.relativeCubicTo(width * -0.25, arcBias, width * -0.75, arcBias, -width, 0.0);
-          path.relativeCubicTo(width * -focus * 0.5, arcBias, width * -focus * 1.5, arcBias, -width, 0.0);
-        } else {
-          path.moveTo(0.0, size.height);
-          path.relativeLineTo(width, 0.0);
-          path.relativeLineTo(0.0, -rectBias);
-          // path.relativeCubicTo(width * -0.25, -arcBias, width * -0.75, -arcBias, -width, 0.0);
-          path.relativeCubicTo(width * -focus * 0.5, -arcBias, width * -focus * 1.5, -arcBias, -width, 0.0);
-        }
+        final double radius = width * _kSizeToRadius;
+        final double centerX = width / 2.0;
+        final double centerY = isLeading ? extent - radius : height - extent + radius;
+        final double eventX = dragPosition?.x ?? 0.0;
+        final double biasX = (0.5 - (1.0 - eventX / width)) * centerX;
+        canvas.drawCircle(new Point(centerX + biasX, centerY), radius, paint);
         break;
       case Axis.horizontal:
-        final double height = size.height;
-        if (isLeading) {
-          path.moveTo(0.0, 0.0);
-          path.relativeLineTo(0.0, height);
-          path.relativeLineTo(rectBias, 0.0);
-          path.relativeCubicTo(arcBias, height * -0.25, arcBias, height * -0.75, 0.0, -height);
-        } else {
-          path.moveTo(size.width, 0.0);
-          path.relativeLineTo(0.0, height);
-          path.relativeLineTo(-rectBias, 0.0);
-          path.relativeCubicTo(-arcBias, height * -0.25, -arcBias, height * -0.75, 0.0, -height);
-        }
+        final double radius = height * _kSizeToRadius;
+        final double centerX = isLeading ? extent - radius : width - extent + radius;
+        final double centerY = height / 2.0;
+        final double eventY = dragPosition?.y ?? 0.0;
+        final double biasY = (0.5 - (1.0 - eventY / height)) * centerY;
+        canvas.drawCircle(new Point(centerX, centerY + biasY), radius, paint);
         break;
     }
-    path.close();
-
-    final Paint paint = new Paint()..color = color;
-    canvas.drawPath(path, paint);
   }
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (color.alpha == 0)
+    if (color.alpha == 0 || size.isEmpty)
       return;
     paintIndicator(canvas, size);
   }
@@ -126,9 +120,10 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
   final AnimationController _extentAnimation = new AnimationController(
     lowerBound: _kMinIndicatorExtent,
     upperBound: _kMaxIndicatorExtent,
-    duration: _kIndicatorHideDuration
+    duration: _kNormalHideDuration
   );
 
+  bool _scrollUnderway = false;
   Timer _hideTimer;
   Axis _scrollDirection;
   double _scrollOffset;
@@ -136,10 +131,12 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
   double _maxScrollOffset;
   Point _dragPosition;
 
-  void _hide() {
+  void _hide([Duration duration=_kTimeoutHideDuration]) {
+    _scrollUnderway = false;
     _hideTimer?.cancel();
     _hideTimer = null;
     if (!_extentAnimation.isAnimating) {
+      _extentAnimation.duration = duration;
       _extentAnimation.reverse();
     }
   }
@@ -155,19 +152,24 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
   }
 
   void _onScrollStarted(ScrollableState scrollable) {
+    assert(_scrollUnderway == false);
+    _scrollUnderway = true;
     _updateState(scrollable);
   }
 
   void _onScrollUpdated(ScrollableState scrollable, DragUpdateDetails details) {
+    if (!_scrollUnderway) // The hide timer has run.
+      return;
+
     final double value = scrollable.scrollOffset;
     if (_isOverscroll(value)) {
       _refreshHideTimer();
       // Hide the indicator as soon as user starts scrolling in the reverse direction of overscroll.
       if (_isReverseScroll(value)) {
-        _hide();
+        _hide(_kNormalHideDuration);
       } else {
         // Changing the animation's value causes an implicit setState().
-        _dragPosition = details?.globalPosition;
+        _dragPosition = details?.globalPosition ?? Point.origin;
         _extentAnimation.value = value < _minScrollOffset ? _minScrollOffset - value : value - _maxScrollOffset;
       }
     }
@@ -175,13 +177,16 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
   }
 
   void _onScrollEnded(ScrollableState scrollable) {
+    if (!_scrollUnderway) // The hide timer has run.
+      return;
+
     _updateState(scrollable);
-    _hide();
+    _hide(_kNormalHideDuration);
   }
 
   void _refreshHideTimer() {
     _hideTimer?.cancel();
-    _hideTimer = new Timer(_kIndicatorTimeoutDuration, _hide);
+    _hideTimer = new Timer(_kTimeoutDuration, _hide);
   }
 
   bool _isOverscroll(double scrollOffset) {
@@ -191,7 +196,7 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
 
   bool _isReverseScroll(double scrollOffset) {
     final double delta = _scrollOffset - scrollOffset;
-    return scrollOffset < _minScrollOffset ? delta < 0 : delta > 0;
+    return scrollOffset < _minScrollOffset ? delta < 0.0 : delta > 0.0;
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
