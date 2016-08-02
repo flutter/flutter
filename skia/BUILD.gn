@@ -218,33 +218,6 @@ config("skia_library_config") {
     defines += [ "SK_DEFAULT_FONT_CACHE_LIMIT=20971520" ]  # 20 * 1024 * 1024
   }
 
-  if (is_win) {
-    include_dirs += [
-      "//third_party/skia/include/utils/win",
-      "//third_party/skia/src/utils/win",
-    ]
-
-    defines += [
-      # On windows, GDI handles are a scarse system-wide resource so we have to
-      # keep the glyph cache, which holds up to 4 GDI handles per entry, to a
-      # fairly small size. http://crbug.com/314387
-      "SK_DEFAULT_FONT_CACHE_COUNT_LIMIT=256",
-    ]
-
-    cflags = [
-      "/wd4244",  # conversion from 'type1( __int64)' to 'type2 (unsigned int)'
-      "/wd4267",  # conversion from 'size_t' (64 bit) to 'type'(32 bit).
-      "/wd4341",  # signed value is out of range for enum constant.
-      "/wd4345",  # Object is default-initialized if initialization is omitted.
-      "/wd4390",  # ';'empty statement found in looping;is it what was intended?
-      "/wd4554",  # 'operator' : check operator precedence for possible error
-      "/wd4748",  # compiler will disable optimizations if a function has inline
-                  # assembly code contains flow control(jmp or jcc) statements.
-
-      "/wd4800",  # forcing value to bool 'true/false'(assigning int to bool).
-    ]
-  }
-
   if (is_ios) {
     cflags = [
       # Skia uses routines deprecated in iOS 7 and above
@@ -259,16 +232,10 @@ component("skia") {
   sources = [
     # Chrome sources.
     "config/SkUserConfig.h",
-    "ext/SkDiscardableMemory_chrome.cc",
-    "ext/SkDiscardableMemory_chrome.h",
     "ext/SkMemory_new_handler.cpp",
-    "ext/convolver.cc",
-    "ext/convolver.h",
     "ext/event_tracer_impl.cc",
     "ext/event_tracer_impl.h",
     "ext/google_logging.cc",
-    "ext/image_operations.cc",
-    "ext/image_operations.h",
   ]
 
   # The skia gypi values are relative to the skia_dir, so we need to rebase.
@@ -277,8 +244,6 @@ component("skia") {
   sources += gypi_skia_utils.sources
 
   sources += [
-    "//third_party/skia/src/ports/SkImageGenerator_skia.cpp",
-
     "//third_party/skia/src/codec/SkAndroidCodec.cpp",
     "//third_party/skia/src/codec/SkBmpCodec.cpp",
     "//third_party/skia/src/codec/SkBmpMaskCodec.cpp",
@@ -303,24 +268,26 @@ component("skia") {
     "//third_party/skia/src/fonts/SkFontMgr_fontconfig.cpp",
     "//third_party/skia/src/fonts/SkFontMgr_indirect.cpp",
     "//third_party/skia/src/fonts/SkRemotableFontMgr.cpp",
-    "//third_party/skia/src/ports/SkFontConfigInterface_direct.cpp",
+    "//third_party/skia/src/ports/SkDiscardableMemory_none.cpp",
     "//third_party/skia/src/ports/SkFontConfigInterface_direct_factory.cpp",
+    "//third_party/skia/src/ports/SkFontConfigInterface_direct.cpp",
     "//third_party/skia/src/ports/SkFontHost_fontconfig.cpp",
     "//third_party/skia/src/ports/SkFontHost_FreeType_common.cpp",
     "//third_party/skia/src/ports/SkFontHost_FreeType_common.h",
     "//third_party/skia/src/ports/SkFontHost_FreeType.cpp",
     "//third_party/skia/src/ports/SkFontHost_mac.cpp",
     "//third_party/skia/src/ports/SkFontHost_win.cpp",
-    "//third_party/skia/src/ports/SkFontMgr_android.cpp",
     "//third_party/skia/src/ports/SkFontMgr_android_factory.cpp",
     "//third_party/skia/src/ports/SkFontMgr_android_parser.cpp",
+    "//third_party/skia/src/ports/SkFontMgr_android.cpp",
     "//third_party/skia/src/ports/SkFontMgr_win_dw.cpp",
     "//third_party/skia/src/ports/SkGlobalInitialization_default.cpp",
     "//third_party/skia/src/ports/SkImageEncoder_none.cpp",
+    "//third_party/skia/src/ports/SkImageGenerator_skia.cpp",
     "//third_party/skia/src/ports/SkOSFile_posix.cpp",
-    "//third_party/skia/src/ports/SkRemotableFontMgr_win_dw.cpp",
     "//third_party/skia/src/ports/SkOSFile_stdio.cpp",
     "//third_party/skia/src/ports/SkOSFile_win.cpp",
+    "//third_party/skia/src/ports/SkRemotableFontMgr_win_dw.cpp",
     "//third_party/skia/src/ports/SkScalerContext_win_dw.cpp",
     "//third_party/skia/src/ports/SkScalerContext_win_dw.h",
     "//third_party/skia/src/ports/SkTLS_pthread.cpp",
@@ -413,21 +380,6 @@ component("skia") {
     sources -= [
       # Keeping _pthread.cpp and _pthread_other.cpp.
       "//third_party/skia/src/utils/SkThreadUtils_win.cpp",
-    ]
-  }
-
-  # need separate win section to handle chromes auto gn filter
-  # (build/config/BUILDCONFIG.gn)
-  if (is_win) {
-    sources -= [
-      #windows
-      "//third_party/skia/include/utils/win/SkAutoCoInitialize.h",
-      "//third_party/skia/include/utils/win/SkHRESULT.h",
-      "//third_party/skia/include/utils/win/SkIStream.h",
-      "//third_party/skia/include/utils/win/SkTScopedComPtr.h",
-      "//third_party/skia/src/utils/win/SkAutoCoInitialize.cpp",
-      "//third_party/skia/src/utils/win/SkIStream.cpp",
-      "//third_party/skia/src/utils/win/SkWGL_win.cpp",
     ]
   }
 
@@ -547,12 +499,7 @@ source_set("skia_opts") {
 
   if (current_cpu == "x86" || current_cpu == "x64") {
     sources = gypi_skia_opts.sse2_sources + gypi_skia_opts.ssse3_sources +
-              gypi_skia_opts.sse41_sources + gypi_skia_opts.avx_sources +
-              [
-                # Chrome-specific.
-                "ext/convolver_SSE2.cc",
-                "ext/convolver_SSE2.h",
-              ]
+              gypi_skia_opts.sse41_sources + gypi_skia_opts.avx_sources
     cflags += [ "-msse4.1" ]
   } else if (current_cpu == "arm") {
     # The assembly uses the frame pointer register (r7 in Thumb/r11 in
@@ -581,13 +528,6 @@ source_set("skia_opts") {
 
     if (mips_dsp_rev >= 1) {
       sources = gypi_skia_opts.mips_dsp_sources
-      if (mips_dsp_rev >= 2) {
-        sources += [
-          # Chrome-specific.
-          "ext/convolver_mips_dspr2.cc",
-          "ext/convolver_mips_dspr2.h",
-        ]
-      }
     } else {
       sources = gypi_skia_opts.none_sources
     }

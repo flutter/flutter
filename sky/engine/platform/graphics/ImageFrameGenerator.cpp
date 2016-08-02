@@ -31,7 +31,6 @@
 #include "sky/engine/platform/TraceEvent.h"
 #include "sky/engine/platform/graphics/ImageDecodingStore.h"
 
-#include "skia/ext/image_operations.h"
 #include "third_party/skia/include/core/SkMallocPixelRef.h"
 
 namespace blink {

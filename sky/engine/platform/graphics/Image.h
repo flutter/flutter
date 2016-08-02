@@ -32,7 +32,6 @@
 #include "sky/engine/platform/graphics/Color.h"
 #include "sky/engine/platform/graphics/GraphicsTypes.h"
 #include "sky/engine/platform/graphics/ImageOrientation.h"
-#include "sky/engine/platform/graphics/skia/NativeImageSkia.h"
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -103,8 +102,6 @@ public:
     void setImageObserver(ImageObserver* observer) { m_imageObserver = observer; }
 
     enum TileRule { StretchTile, RoundTile, SpaceTile, RepeatTile };
-
-    virtual PassRefPtr<NativeImageSkia> nativeImageForCurrentFrame() { return nullptr; }
 
     virtual PassRefPtr<Image> imageForDefaultFrame();
 

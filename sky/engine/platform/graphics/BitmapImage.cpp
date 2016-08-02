@@ -31,7 +31,6 @@
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/platform/graphics/GraphicsContextStateSaver.h"
 #include "sky/engine/platform/graphics/ImageObserver.h"
-#include "sky/engine/platform/graphics/skia/NativeImageSkia.h"
 #include "sky/engine/platform/graphics/skia/SkiaUtils.h"
 #include "sky/engine/wtf/CurrentTime.h"
 #include "sky/engine/wtf/PassRefPtr.h"

@@ -26,8 +26,6 @@
 
 #include "sky/engine/platform/graphics/FrameData.h"
 
-#include "sky/engine/platform/graphics/skia/NativeImageSkia.h"
-
 namespace blink {
 
 FrameData::FrameData()

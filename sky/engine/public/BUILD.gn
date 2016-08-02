@@ -35,8 +35,6 @@ source_set("platform_headers") {
     "platform/WebGestureDevice.h",
     "platform/WebGraphicsContext3D.h",
     "platform/WebGraphicsContext3DProvider.h",
-    "platform/WebImage.h",
-    "platform/WebImageLayer.h",
     "platform/WebInputEvent.h",
     "platform/WebLayer.h",
     "platform/WebLayerScrollClient.h",
