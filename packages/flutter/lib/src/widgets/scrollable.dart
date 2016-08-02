@@ -365,7 +365,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
     _setScrollOffset(_controller.value);
   }
 
-  void _setScrollOffset(double newScrollOffset, [DragUpdateDetails details]) {
+  void _setScrollOffset(double newScrollOffset, { DragUpdateDetails details }) {
     if (_scrollOffset == newScrollOffset)
       return;
     setState(() {
@@ -374,7 +374,11 @@ class ScrollableState<T extends Scrollable> extends State<T> {
     PageStorage.of(context)?.writeState(context, _scrollOffset);
     _startScroll();
     dispatchOnScroll();
-    new ScrollNotification(this, ScrollNotificationKind.updated, details).dispatch(context);
+    new ScrollNotification(
+      scrollable: this,
+      kind: ScrollNotificationKind.updated,
+      details: details
+    ).dispatch(context);
     _endScroll();
   }
 
@@ -409,7 +413,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
 
     if (duration == null) {
       _stop();
-      _setScrollOffset(newScrollOffset, details);
+      _setScrollOffset(newScrollOffset, details: details);
       return new Future<Null>.value();
     }
 
@@ -421,7 +425,9 @@ class ScrollableState<T extends Scrollable> extends State<T> {
     _stop();
     _controller.value = scrollOffset;
     _startScroll();
-    return _controller.animateTo(newScrollOffset, duration: duration, curve: curve).then(_endScroll);
+    return _controller.animateTo(newScrollOffset, duration: duration, curve: curve).then((Null _) {
+      _endScroll();
+    });
   }
 
   /// Update any in-progress scrolling physics to account for new scroll behavior.
@@ -490,7 +496,9 @@ class ScrollableState<T extends Scrollable> extends State<T> {
     if (_simulation == null)
       return new Future<Null>.value();
     _startScroll();
-    return _controller.animateWith(_simulation).then(_endScroll);
+    return _controller.animateWith(_simulation).then((Null _) {
+      _endScroll();
+    });
   }
 
   /// Whether this scrollable should attempt to snap scroll offsets.
@@ -571,14 +579,18 @@ class ScrollableState<T extends Scrollable> extends State<T> {
   }
 
   void _handleDragStart(DragStartDetails details) {
-    _startScroll(details);
+    _startScroll(details: details);
   }
 
-  void _startScroll([DragStartDetails details]) {
+  void _startScroll({ DragStartDetails details }) {
     _numberOfInProgressScrolls += 1;
     if (_numberOfInProgressScrolls == 1) {
       dispatchOnScrollStart();
-      new ScrollNotification(this, ScrollNotificationKind.started, details).dispatch(context);
+      new ScrollNotification(
+        scrollable: this,
+        kind: ScrollNotificationKind.started,
+        details: details
+      ).dispatch(context);
     }
   }
 
@@ -597,20 +609,24 @@ class ScrollableState<T extends Scrollable> extends State<T> {
 
   void _handleDragEnd(DragEndDetails details) {
     final double scrollVelocity = pixelDeltaToScrollOffset(details.velocity.pixelsPerSecond);
-    fling(scrollVelocity).then((Null value) {
-      _endScroll(value, details);
+    fling(scrollVelocity).then((Null _) {
+      _endScroll(details: details);
     });
   }
 
-  Null _endScroll([Null _, DragEndDetails details]) {
+  void _endScroll({ DragEndDetails details }) {
     _numberOfInProgressScrolls -= 1;
     if (_numberOfInProgressScrolls == 0) {
       _simulation = null;
       dispatchOnScrollEnd();
-      if (mounted)
-        new ScrollNotification(this, ScrollNotificationKind.ended, details).dispatch(context);
+      if (mounted) {
+        new ScrollNotification(
+          scrollable: this,
+          kind: ScrollNotificationKind.ended,
+          details: details
+        ).dispatch(context);
+      }
     }
-    return null;
   }
 
   /// Calls the dispatchOnScrollEnd callback.
@@ -727,7 +743,7 @@ enum ScrollNotificationKind {
 /// * [NotificationListener]
 class ScrollNotification extends Notification {
   /// Creates a notification about scrolling.
-  ScrollNotification(this.scrollable, this.kind, [dynamic details]) : _details = details {
+  ScrollNotification({ this.scrollable, this.kind, dynamic details }) : _details = details {
     assert(scrollable != null);
     assert(kind != null);
     assert(details == null
