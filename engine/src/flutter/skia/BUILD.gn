@@ -133,7 +133,6 @@ config("skia_config") {
     "SK_HAS_JPEG_LIBRARY",
     "SK_HAS_PNG_LIBRARY",
   ]
-  
 }
 
 # Internal-facing config for Skia library code.
@@ -270,7 +269,6 @@ component("skia") {
     "ext/google_logging.cc",
     "ext/image_operations.cc",
     "ext/image_operations.h",
-    "ext/refptr.h",
   ]
 
   # The skia gypi values are relative to the skia_dir, so we need to rebase.
@@ -280,7 +278,7 @@ component("skia") {
 
   sources += [
     "//third_party/skia/src/ports/SkImageGenerator_skia.cpp",
-    
+
     "//third_party/skia/src/codec/SkAndroidCodec.cpp",
     "//third_party/skia/src/codec/SkBmpCodec.cpp",
     "//third_party/skia/src/codec/SkBmpMaskCodec.cpp",
