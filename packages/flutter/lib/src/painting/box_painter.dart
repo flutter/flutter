@@ -1315,12 +1315,13 @@ class _BoxDecorationPainter extends BoxPainter {
     );
   }
 
-  void _imageListener(ImageInfo value) {
+  void _imageListener(ImageInfo value, bool synchronousCall) {
     if (_image == value)
       return;
     _image = value;
     assert(onChanged != null);
-    onChanged();
+    if (!synchronousCall)
+      onChanged();
   }
 
   @override

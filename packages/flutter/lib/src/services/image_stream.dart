@@ -46,8 +46,11 @@ class ImageInfo {
 
 /// Signature for callbacks reporting that an image is available.
 ///
+/// synchronousCall is true if the listener is being invoked during the call
+/// to addListener.
+///
 /// Used by [ImageStream].
-typedef void ImageListener(ImageInfo image);
+typedef void ImageListener(ImageInfo image, bool synchronousCall);
 
 /// A handle to an image resource.
 ///
@@ -154,11 +157,15 @@ class ImageStreamCompleter {
   /// Adds a listener callback that is called whenever a concrete [ImageInfo]
   /// object is available. If a concrete image is already available, this object
   /// will call the listener synchronously.
+  ///
+  /// The listener will be passed a flag indicating whether a synchronous call
+  /// occurred. If the listener is added within a render object paint function,
+  /// then use this flag to avoid calling markNeedsPaint during a paint.
   void addListener(ImageListener listener) {
     _listeners.add(listener);
     if (_current != null) {
       try {
-        listener(_current);
+        listener(_current, true);
       } catch (exception, stack) {
         _handleImageError('by a synchronously-called image listener', exception, stack);
       }
@@ -179,7 +186,7 @@ class ImageStreamCompleter {
     List<ImageListener> localListeners = new List<ImageListener>.from(_listeners);
     for (ImageListener listener in localListeners) {
       try {
-        listener(image);
+        listener(image, false);
       } catch (exception, stack) {
         _handleImageError('by an image listener', exception, stack);
       }

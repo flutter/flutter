@@ -226,7 +226,7 @@ class _ImageState extends State<Image> {
     }
   }
 
-  void _handleImageChanged(ImageInfo imageInfo) {
+  void _handleImageChanged(ImageInfo imageInfo, bool synchronousCall) {
     setState(() {
       _imageInfo = imageInfo;
     });
