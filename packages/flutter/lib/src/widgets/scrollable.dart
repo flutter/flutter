@@ -365,7 +365,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
     _setScrollOffset(_controller.value);
   }
 
-  void _setScrollOffset(double newScrollOffset) {
+  void _setScrollOffset(double newScrollOffset, { DragUpdateDetails details }) {
     if (_scrollOffset == newScrollOffset)
       return;
     setState(() {
@@ -374,6 +374,11 @@ class ScrollableState<T extends Scrollable> extends State<T> {
     PageStorage.of(context)?.writeState(context, _scrollOffset);
     _startScroll();
     dispatchOnScroll();
+    new ScrollNotification(
+      scrollable: this,
+      kind: ScrollNotificationKind.updated,
+      details: details
+    ).dispatch(context);
     _endScroll();
   }
 
@@ -381,9 +386,13 @@ class ScrollableState<T extends Scrollable> extends State<T> {
   ///
   /// If a non-null [duration] is provided, the widget will animate to the new
   /// scroll offset over the given duration with the given curve.
-  Future<Null> scrollBy(double scrollDelta, { Duration duration, Curve curve: Curves.ease }) {
+  Future<Null> scrollBy(double scrollDelta, {
+    Duration duration,
+    Curve curve: Curves.ease,
+    DragUpdateDetails details
+  }) {
     double newScrollOffset = scrollBehavior.applyCurve(_scrollOffset, scrollDelta);
-    return scrollTo(newScrollOffset, duration: duration, curve: curve);
+    return scrollTo(newScrollOffset, duration: duration, curve: curve, details: details);
   }
 
   /// Scroll this widget to the given scroll offset.
@@ -394,13 +403,17 @@ class ScrollableState<T extends Scrollable> extends State<T> {
   /// This function does not accept a zero duration. To jump-scroll to
   /// the new offset, do not provide a duration, rather than providing
   /// a zero duration.
-  Future<Null> scrollTo(double newScrollOffset, { Duration duration, Curve curve: Curves.ease }) {
+  Future<Null> scrollTo(double newScrollOffset, {
+    Duration duration,
+    Curve curve: Curves.ease,
+    DragUpdateDetails details
+  }) {
     if (newScrollOffset == _scrollOffset)
       return new Future<Null>.value();
 
     if (duration == null) {
       _stop();
-      _setScrollOffset(newScrollOffset);
+      _setScrollOffset(newScrollOffset, details: details);
       return new Future<Null>.value();
     }
 
@@ -412,7 +425,9 @@ class ScrollableState<T extends Scrollable> extends State<T> {
     _stop();
     _controller.value = scrollOffset;
     _startScroll();
-    return _controller.animateTo(newScrollOffset, duration: duration, curve: curve).then(_endScroll);
+    return _controller.animateTo(newScrollOffset, duration: duration, curve: curve).then((Null _) {
+      _endScroll();
+    });
   }
 
   /// Update any in-progress scrolling physics to account for new scroll behavior.
@@ -481,7 +496,9 @@ class ScrollableState<T extends Scrollable> extends State<T> {
     if (_simulation == null)
       return new Future<Null>.value();
     _startScroll();
-    return _controller.animateWith(_simulation).then(_endScroll);
+    return _controller.animateWith(_simulation).then((Null _) {
+      _endScroll();
+    });
   }
 
   /// Whether this scrollable should attempt to snap scroll offsets.
@@ -549,7 +566,6 @@ class ScrollableState<T extends Scrollable> extends State<T> {
     assert(_numberOfInProgressScrolls > 0);
     if (config.onScroll != null)
       config.onScroll(_scrollOffset);
-    new ScrollNotification(this, ScrollNotificationKind.updated).dispatch(context);
   }
 
   void _handleDragDown(_) {
@@ -563,13 +579,19 @@ class ScrollableState<T extends Scrollable> extends State<T> {
   }
 
   void _handleDragStart(DragStartDetails details) {
-    _startScroll();
+    _startScroll(details: details);
   }
 
-  void _startScroll() {
+  void _startScroll({ DragStartDetails details }) {
     _numberOfInProgressScrolls += 1;
-    if (_numberOfInProgressScrolls == 1)
+    if (_numberOfInProgressScrolls == 1) {
       dispatchOnScrollStart();
+      new ScrollNotification(
+        scrollable: this,
+        kind: ScrollNotificationKind.started,
+        details: details
+      ).dispatch(context);
+    }
   }
 
   /// Calls the onScrollStart callback.
@@ -579,25 +601,32 @@ class ScrollableState<T extends Scrollable> extends State<T> {
     assert(_numberOfInProgressScrolls == 1);
     if (config.onScrollStart != null)
       config.onScrollStart(_scrollOffset);
-    new ScrollNotification(this, ScrollNotificationKind.started).dispatch(context);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    scrollBy(pixelOffsetToScrollOffset(details.primaryDelta));
+    scrollBy(pixelOffsetToScrollOffset(details.primaryDelta), details: details);
   }
 
   void _handleDragEnd(DragEndDetails details) {
     final double scrollVelocity = pixelDeltaToScrollOffset(details.velocity.pixelsPerSecond);
-    fling(scrollVelocity).then(_endScroll);
+    fling(scrollVelocity).then((Null _) {
+      _endScroll(details: details);
+    });
   }
 
-  Null _endScroll([Null _]) {
+  void _endScroll({ DragEndDetails details }) {
     _numberOfInProgressScrolls -= 1;
     if (_numberOfInProgressScrolls == 0) {
       _simulation = null;
       dispatchOnScrollEnd();
+      if (mounted) {
+        new ScrollNotification(
+          scrollable: this,
+          kind: ScrollNotificationKind.ended,
+          details: details
+        ).dispatch(context);
+      }
     }
-    return null;
   }
 
   /// Calls the dispatchOnScrollEnd callback.
@@ -607,8 +636,6 @@ class ScrollableState<T extends Scrollable> extends State<T> {
     assert(_numberOfInProgressScrolls == 0);
     if (config.onScrollEnd != null)
       config.onScrollEnd(_scrollOffset);
-    if (mounted)
-      new ScrollNotification(this, ScrollNotificationKind.ended).dispatch(context);
   }
 
   final GlobalKey<RawGestureDetectorState> _gestureDetectorKey = new GlobalKey<RawGestureDetectorState>();
@@ -716,13 +743,25 @@ enum ScrollNotificationKind {
 /// * [NotificationListener]
 class ScrollNotification extends Notification {
   /// Creates a notification about scrolling.
-  ScrollNotification(this.scrollable, this.kind);
+  ScrollNotification({ this.scrollable, this.kind, dynamic details }) : _details = details {
+    assert(scrollable != null);
+    assert(kind != null);
+    assert(details == null
+        || (kind == ScrollNotificationKind.started && details is DragStartDetails)
+        || (kind == ScrollNotificationKind.updated && details is DragUpdateDetails)
+        || (kind == ScrollNotificationKind.ended && details is DragEndDetails));
+  }
 
   /// Indicates if we're at the start, middle, or end of a scroll.
   final ScrollNotificationKind kind;
 
   /// The scrollable that scrolled.
   final ScrollableState scrollable;
+
+  DragStartDetails get dragStartDetails => kind == ScrollNotificationKind.started ? _details : null;
+  DragUpdateDetails get dragUpdateDetails => kind == ScrollNotificationKind.updated ? _details : null;
+  DragEndDetails get dragEndDetails => kind == ScrollNotificationKind.ended ? _details : null;
+  final dynamic _details;
 
   /// The number of scrollable widgets that have already received this
   /// notification. Typically listeners only respond to notifications

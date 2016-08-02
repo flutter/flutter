@@ -56,7 +56,8 @@ class DragUpdateDetails {
   /// coordinates of [delta] and the other coordinate must be zero.
   DragUpdateDetails({
     this.delta: Offset.zero,
-    this.primaryDelta
+    this.primaryDelta,
+    this.globalPosition
   }) {
     assert(primaryDelta == null
         || (primaryDelta == delta.dx && delta.dy == 0.0)
@@ -79,6 +80,9 @@ class DragUpdateDetails {
   /// respectively). Otherwise, if the [GestureDragUpdateCallback] is for a
   /// two-dimensional drag (e.g., a pan), then this value is null.
   final double primaryDelta;
+
+  /// The pointer's global position.
+  final Point globalPosition;
 }
 
 /// Signature for when a pointer that is in contact with the screen and moving
@@ -184,7 +188,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         if (onUpdate != null) {
           onUpdate(new DragUpdateDetails(
             delta: _getDeltaForDetails(delta),
-            primaryDelta: _getPrimaryDeltaForDetails(delta)
+            primaryDelta: _getPrimaryDeltaForDetails(delta),
+            globalPosition: event.position
           ));
         }
       } else {

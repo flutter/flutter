@@ -23,16 +23,29 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(notification.kind, equals(ScrollNotificationKind.started));
     expect(notification.depth, equals(0));
+    expect(notification.dragStartDetails, isNotNull);
+    expect(notification.dragStartDetails.globalPosition, equals(new Point(100.0, 100.0)));
+    expect(notification.dragUpdateDetails, isNull);
+    expect(notification.dragEndDetails, isNull);
 
     await gesture.moveBy(new Offset(-10.0, -10.0));
     await tester.pump(const Duration(seconds: 1));
     expect(notification.kind, equals(ScrollNotificationKind.updated));
     expect(notification.depth, equals(0));
+    expect(notification.dragStartDetails, isNull);
+    expect(notification.dragUpdateDetails, isNotNull);
+    expect(notification.dragUpdateDetails.globalPosition, equals(new Point(90.0, 90.0)));
+    expect(notification.dragUpdateDetails.delta, equals(new Offset(0.0, -10.0)));
+    expect(notification.dragEndDetails, isNull);
 
     await gesture.up();
     await tester.pump(const Duration(seconds: 1));
     expect(notification.kind, equals(ScrollNotificationKind.ended));
     expect(notification.depth, equals(0));
+    expect(notification.dragStartDetails, isNull);
+    expect(notification.dragUpdateDetails, isNull);
+    expect(notification.dragEndDetails, isNotNull);
+    expect(notification.dragEndDetails.velocity, equals(Velocity.zero));
   });
 
   testWidgets('Scroll notifcation depth', (WidgetTester tester) async {
