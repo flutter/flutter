@@ -17,7 +17,7 @@ class TravelDestination {
 
 final List<TravelDestination> destinations = <TravelDestination>[
   const TravelDestination(
-    assetName: 'packages/flutter_gallery_assets/top_10_australian_beaches.png',
+    assetName: 'packages/flutter_gallery_assets/top_10_australian_beaches.jpg',
     title: 'Top 10 Australian beaches',
     description: const <String>[
       'Number 10',
@@ -26,7 +26,7 @@ final List<TravelDestination> destinations = <TravelDestination>[
     ]
   ),
   const TravelDestination(
-    assetName: 'packages/flutter_gallery_assets/kangaroo_valley_safari.png',
+    assetName: 'packages/flutter_gallery_assets/kangaroo_valley_safari.jpg',
     title: 'Kangaroo Valley Safari',
     description: const <String>[
       '2031 Moss Vale Road',

@@ -49,7 +49,15 @@ class GalleryDrawer extends StatelessWidget {
       child: new Block(
         children: <Widget>[
           new DrawerHeader(
-            child: new Center(child: new Text('Flutter gallery'))
+            child: new Center(
+              child: new Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: new Image.asset(
+                 'packages/flutter_gallery_assets/drawer_logo.png',
+                  fit: ImageFit.contain
+                )
+              )
+            )
           ),
           new DrawerItem(
             icon: new Icon(Icons.brightness_5),
