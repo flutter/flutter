@@ -360,29 +360,6 @@ unsigned SharedBuffer::getSomeData(const char*& someData, unsigned position) con
     return 0;
 }
 
-PassRefPtr<ArrayBuffer> SharedBuffer::getAsArrayBuffer() const
-{
-    RefPtr<ArrayBuffer> arrayBuffer = ArrayBuffer::createUninitialized(static_cast<unsigned>(size()), 1);
-
-    if (!arrayBuffer)
-        return nullptr;
-
-    const char* segment = 0;
-    unsigned position = 0;
-    while (unsigned segmentSize = getSomeData(segment, position)) {
-        memcpy(static_cast<char*>(arrayBuffer->data()) + position, segment, segmentSize);
-        position += segmentSize;
-    }
-
-    if (position != arrayBuffer->byteLength()) {
-        ASSERT_NOT_REACHED();
-        // Don't return the incomplete ArrayBuffer.
-        return nullptr;
-    }
-
-    return arrayBuffer;
-}
-
 sk_sp<SkData> SharedBuffer::getAsSkData() const
 {
     unsigned bufferLength = size();

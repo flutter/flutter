@@ -48,8 +48,6 @@ class CStringBuffer;
 
 namespace blink {
 
-class WebString;
-
 // A single-byte string container with unspecified encoding.  It is
 // inexpensive to copy a WebCString object.
 //
@@ -88,8 +86,6 @@ public:
 
     bool isEmpty() const { return !length(); }
     bool isNull() const { return m_private.isNull(); }
-
-    BLINK_COMMON_EXPORT WebString utf16() const;
 
 #if INSIDE_BLINK
     BLINK_COMMON_EXPORT WebCString(const WTF::CString&);

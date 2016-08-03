@@ -27,7 +27,6 @@
 #include "sky/engine/wtf/text/TextEncodingRegistry.h"
 
 #include "sky/engine/wtf/ASCIICType.h"
-#include "sky/engine/wtf/CurrentTime.h"
 #include "sky/engine/wtf/HashMap.h"
 #include "sky/engine/wtf/HashSet.h"
 #include "sky/engine/wtf/MainThread.h"

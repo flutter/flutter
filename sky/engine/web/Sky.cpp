@@ -31,17 +31,13 @@
 #include "sky/engine/public/web/Sky.h"
 
 #include "base/message_loop/message_loop.h"
-#include "base/rand_util.h"
 #include "base/trace_event/trace_event.h"
 #include "flutter/tonic/dart_microtask_queue.h"
 #include "mojo/message_pump/message_pump_mojo.h"
 #include "sky/engine/core/Init.h"
 #include "sky/engine/core/script/dart_init.h"
-#include "sky/engine/platform/LayoutTestSupport.h"
-#include "sky/engine/platform/Logging.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/wtf/Assertions.h"
-#include "sky/engine/wtf/CryptographicallyRandomNumber.h"
 #include "sky/engine/wtf/MainThread.h"
 #include "sky/engine/wtf/WTF.h"
 #include "sky/engine/wtf/text/AtomicString.h"
@@ -108,11 +104,6 @@ void removeMessageLoopObservers()
 // Doing so may cause hard to reproduce crashes.
 static bool s_webKitInitialized = false;
 
-static void cryptographicallyRandomValues(unsigned char* buffer, size_t length)
-{
-    base::RandBytes(buffer, length);
-}
-
 void initialize(Platform* platform)
 {
     TRACE_EVENT0("flutter", "blink::initialize");
@@ -123,7 +114,6 @@ void initialize(Platform* platform)
     ASSERT(platform);
     Platform::initialize(platform);
 
-    WTF::setRandomSource(cryptographicallyRandomValues);
     WTF::initialize();
     WTF::initializeMainThread();
 
@@ -153,35 +143,6 @@ void shutdown()
     CoreInitializer::shutdown();
     WTF::shutdown();
     Platform::shutdown();
-}
-
-void setLayoutTestMode(bool value)
-{
-    LayoutTestSupport::setIsRunningLayoutTest(value);
-}
-
-bool layoutTestMode()
-{
-    return LayoutTestSupport::isRunningLayoutTest();
-}
-
-void setFontAntialiasingEnabledForTest(bool value)
-{
-    LayoutTestSupport::setFontAntialiasingEnabledForTest(value);
-}
-
-bool fontAntialiasingEnabledForTest()
-{
-    return LayoutTestSupport::isFontAntialiasingEnabledForTest();
-}
-
-void enableLogChannel(const char* name)
-{
-#if !LOG_DISABLED
-    WTFLogChannel* channel = getChannelFromName(name);
-    if (channel)
-        channel->state = WTFLogChannelOn;
-#endif // !LOG_DISABLED
 }
 
 } // namespace blink

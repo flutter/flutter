@@ -28,7 +28,6 @@
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/public/platform/linux/WebFallbackFont.h"
 #include "sky/engine/public/platform/linux/WebFontInfo.h"
-#include "sky/engine/public/platform/linux/WebSandboxSupport.h"
 #include "sky/engine/wtf/text/CString.h"
 
 namespace blink {
@@ -36,10 +35,7 @@ namespace blink {
 void FontCache::getFontForCharacter(UChar32 c, const char* preferredLocale, FontCache::PlatformFallbackFont* fallbackFont)
 {
     WebFallbackFont webFallbackFont;
-    if (Platform::current()->sandboxSupport())
-        Platform::current()->sandboxSupport()->getFallbackFontForCharacter(c, preferredLocale, &webFallbackFont);
-    else
-        WebFontInfo::fallbackFontForChar(c, preferredLocale, &webFallbackFont);
+    WebFontInfo::fallbackFontForChar(c, preferredLocale, &webFallbackFont);
     fallbackFont->name = String::fromUTF8(CString(webFallbackFont.name));
     fallbackFont->filename = webFallbackFont.filename;
     fallbackFont->fontconfigInterfaceId = webFallbackFont.fontconfigInterfaceId;

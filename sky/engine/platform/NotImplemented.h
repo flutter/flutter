@@ -29,22 +29,6 @@
 #include "sky/engine/platform/PlatformExport.h"
 #include "sky/engine/wtf/Assertions.h"
 
-#if LOG_DISABLED
-    #define notImplemented() ((void)0)
-#else
-
-namespace blink {
-PLATFORM_EXPORT WTFLogChannel* notImplementedLoggingChannel();
-} // namespace blink
-
-#define notImplemented() do { \
-        static bool havePrinted = false; \
-        if (!havePrinted) { \
-            WTFLogVerbose(__FILE__, __LINE__, WTF_PRETTY_FUNCTION, blink::notImplementedLoggingChannel(), "UNIMPLEMENTED: "); \
-            havePrinted = true; \
-        } \
-    } while (0)
-
-#endif // NDEBUG
+#define notImplemented() ((void)0)
 
 #endif  // SKY_ENGINE_PLATFORM_NOTIMPLEMENTED_H_

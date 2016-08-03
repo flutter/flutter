@@ -10,7 +10,6 @@
 #include "sky/engine/core/script/dart_controller.h"
 #include "sky/engine/core/script/ui_dart_state.h"
 #include "sky/engine/core/window/window.h"
-#include "sky/engine/public/platform/WebInputEvent.h"
 #include "sky/engine/public/sky/sky_view_client.h"
 #include "sky/engine/wtf/MakeUnique.h"
 

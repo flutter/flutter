@@ -46,17 +46,6 @@ BLINK_EXPORT void initialize(Platform*);
 // terminated by the time this function returns.
 BLINK_EXPORT void shutdown();
 
-// Alters the rendering of content to conform to a fixed set of rules.
-BLINK_EXPORT void setLayoutTestMode(bool);
-BLINK_EXPORT bool layoutTestMode();
-
-// Alters the rendering of fonts for layout tests.
-BLINK_EXPORT void setFontAntialiasingEnabledForTest(bool);
-BLINK_EXPORT bool fontAntialiasingEnabledForTest();
-
-// Enables the named log channel. See WebCore/platform/Logging.h for details.
-BLINK_EXPORT void enableLogChannel(const char*);
-
 } // namespace blink
 
 #endif  // SKY_ENGINE_PUBLIC_WEB_SKY_H_

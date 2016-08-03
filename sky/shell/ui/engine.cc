@@ -16,7 +16,6 @@
 #include "sky/engine/bindings/mojo_services.h"
 #include "sky/engine/core/script/dart_init.h"
 #include "sky/engine/core/script/ui_dart_state.h"
-#include "sky/engine/public/platform/WebInputEvent.h"
 #include "sky/engine/public/web/Sky.h"
 #include "sky/shell/dart/dart_library_provider_files.h"
 #include "sky/shell/shell.h"

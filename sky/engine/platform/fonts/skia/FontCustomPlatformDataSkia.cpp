@@ -32,7 +32,6 @@
 
 #include "sky/engine/platform/fonts/FontCustomPlatformData.h"
 
-#include "sky/engine/platform/LayoutTestSupport.h"
 #include "sky/engine/platform/SharedBuffer.h"
 #include "sky/engine/platform/fonts/FontCache.h"
 #include "sky/engine/platform/fonts/FontPlatformData.h"

@@ -32,11 +32,9 @@
 #include "sky/engine/platform/geometry/FloatPoint.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/platform/geometry/FloatSize.h"
-#include "sky/engine/platform/graphics/BitmapImage.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
 #include "sky/engine/platform/graphics/GraphicsContextStateSaver.h"
 #include "sky/engine/public/platform/Platform.h"
-#include "sky/engine/public/platform/WebData.h"
 #include "sky/engine/wtf/MainThread.h"
 #include "sky/engine/wtf/StdLibExtras.h"
 
@@ -51,13 +49,6 @@ Image::Image(ImageObserver* observer)
 
 Image::~Image()
 {
-}
-
-Image* Image::nullImage()
-{
-    ASSERT(isMainThread());
-    DEFINE_STATIC_REF(Image, nullImage, (BitmapImage::create()));
-    return nullImage;
 }
 
 bool Image::setData(PassRefPtr<SharedBuffer> data, bool allDataReceived)

@@ -17,7 +17,7 @@ class PlatformImpl : public blink::Platform {
   ~PlatformImpl() override;
 
   // blink::Platform methods:
-  blink::WebString defaultLocale() override;
+  std::string defaultLocale() override;
 
   base::SingleThreadTaskRunner* GetUITaskRunner() override;
   base::SingleThreadTaskRunner* GetIOTaskRunner() override;

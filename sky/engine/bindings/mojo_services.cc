@@ -4,7 +4,6 @@
 
 #include "sky/engine/bindings/mojo_services.h"
 
-#include "base/threading/worker_pool.h"
 #include "flutter/tonic/dart_converter.h"
 #include "flutter/tonic/dart_error.h"
 #include "flutter/tonic/dart_library_natives.h"

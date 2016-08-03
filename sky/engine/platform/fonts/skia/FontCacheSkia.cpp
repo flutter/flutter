@@ -37,7 +37,6 @@
 #include "sky/engine/platform/fonts/FontFaceCreationParams.h"
 #include "sky/engine/platform/fonts/SimpleFontData.h"
 #include "sky/engine/public/platform/Platform.h"
-#include "sky/engine/public/platform/linux/WebSandboxSupport.h"
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/text/AtomicString.h"
 #include "sky/engine/wtf/text/CString.h"

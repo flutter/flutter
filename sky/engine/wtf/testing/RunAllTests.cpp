@@ -31,18 +31,11 @@
 
 #include <string.h>
 #include "base/test/test_suite.h"
-#include "sky/engine/wtf/CryptographicallyRandomNumber.h"
 #include "sky/engine/wtf/MainThread.h"
 #include "sky/engine/wtf/WTF.h"
 
-static void AlwaysZeroNumberSource(unsigned char* buf, size_t len)
-{
-    memset(buf, '\0', len);
-}
-
 int main(int argc, char** argv)
 {
-    WTF::setRandomSource(AlwaysZeroNumberSource);
     WTF::initialize();
     WTF::initializeMainThread();
     return base::RunUnitTestsUsingBaseTestSuite(argc, argv);

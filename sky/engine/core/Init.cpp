@@ -31,7 +31,6 @@
 #include "sky/engine/core/Init.h"
 
 #include "sky/engine/platform/Partitions.h"
-#include "sky/engine/platform/PlatformThreadData.h"
 #include "sky/engine/wtf/text/StringImpl.h"
 #include "sky/engine/wtf/text/StringStatics.h"
 
@@ -47,10 +46,6 @@ void CoreInitializer::init()
     WTF::StringStatics::init();
 
     Partitions::init();
-
-    // Ensure that the main thread's thread-local data is initialized before
-    // starting any worker threads.
-    PlatformThreadData::current();
 
     StringImpl::freezeStaticStrings();
 }

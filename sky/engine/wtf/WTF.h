@@ -32,7 +32,6 @@
 #define SKY_ENGINE_WTF_WTF_H_
 
 #include "sky/engine/wtf/Compiler.h"
-#include "sky/engine/wtf/CurrentTime.h"
 #include "sky/engine/wtf/PartitionAlloc.h"
 #include "sky/engine/wtf/WTFExport.h"
 

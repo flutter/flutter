@@ -34,7 +34,8 @@ static const AtomicString& platformLanguage()
 {
     DEFINE_STATIC_LOCAL(AtomicString, computedDefaultLanguage, ());
     if (computedDefaultLanguage.isEmpty()) {
-        computedDefaultLanguage = blink::Platform::current()->defaultLocale();
+        std::string defaultLocale = blink::Platform::current()->defaultLocale();
+        computedDefaultLanguage = AtomicString::fromUTF8(defaultLocale.data(), defaultLocale.size());
         ASSERT(!computedDefaultLanguage.isEmpty());
     }
     return computedDefaultLanguage;

@@ -37,7 +37,6 @@
 #include "sky/engine/platform/graphics/DrawLooperBuilder.h"
 #include "sky/engine/platform/graphics/GraphicsContextStateSaver.h"
 #include "sky/engine/platform/graphics/Path.h"
-#include "sky/engine/wtf/CurrentTime.h"
 
 namespace blink {
 

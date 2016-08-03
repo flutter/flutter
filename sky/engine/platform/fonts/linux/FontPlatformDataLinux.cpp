@@ -30,11 +30,9 @@
 
 #include "sky/engine/public/platform/Platform.h"
 
-#include "sky/engine/platform/LayoutTestSupport.h"
 #include "sky/engine/platform/fonts/FontPlatformData.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
 #include "sky/engine/public/platform/linux/WebFontRenderStyle.h"
-#include "sky/engine/public/platform/linux/WebSandboxSupport.h"
 #include "third_party/skia/include/core/SkTypeface.h"
 
 namespace blink {
@@ -85,7 +83,7 @@ void FontPlatformData::setupPaint(SkPaint* paint, GraphicsContext* context)
         || (context && context->deviceScaleFactor() > 1.0f);
 
     // TestRunner specifically toggles the subpixel positioning flag.
-    if (useSubpixelText && !LayoutTestSupport::isRunningLayoutTest())
+    if (useSubpixelText)
         paint->setSubpixelText(true);
     else
         paint->setSubpixelText(m_style.useSubpixelPositioning);
@@ -100,17 +98,7 @@ void FontPlatformData::setupPaint(SkPaint* paint, GraphicsContext* context)
 void FontPlatformData::querySystemForRenderStyle(bool useSkiaSubpixelPositioning)
 {
     WebFontRenderStyle style;
-#if OS(ANDROID)
     style.setDefaults();
-#else
-    // If the font name is missing (i.e. probably a web font) or the sandbox is disabled, use the system defaults.
-    if (!m_family.length() || !Platform::current()->sandboxSupport()) {
-        style.setDefaults();
-    } else {
-        const int sizeAndStyle = (((int)m_textSize) << 2) | (m_typeface->style() & 3);
-        Platform::current()->sandboxSupport()->getRenderStyleForStrike(m_family.data(), sizeAndStyle, &style);
-    }
-#endif
     style.toFontRenderStyle(&m_style);
 
     // Fix FontRenderStyle::NoPreference to actual styles.
@@ -132,8 +120,7 @@ void FontPlatformData::querySystemForRenderStyle(bool useSkiaSubpixelPositioning
         m_style.useSubpixelRendering = useSkiaSubpixelRendering;
 
     // TestRunner specifically toggles the subpixel positioning flag.
-    if (m_style.useSubpixelPositioning == FontRenderStyle::NoPreference
-        || LayoutTestSupport::isRunningLayoutTest())
+    if (m_style.useSubpixelPositioning == FontRenderStyle::NoPreference)
         m_style.useSubpixelPositioning = useSkiaSubpixelPositioning;
 }
 

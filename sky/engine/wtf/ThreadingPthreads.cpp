@@ -31,7 +31,6 @@
 #include "sky/engine/wtf/Threading.h"
 
 #include <errno.h>
-#include "sky/engine/wtf/DateMath.h"
 #include "sky/engine/wtf/HashMap.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
@@ -113,7 +112,6 @@ void initializeThreading()
     ThreadIdentifierData::initializeOnce();
     wtfThreadData();
     s_dtoaP5Mutex = new Mutex;
-    initializeDates();
 }
 
 void lockAtomicallyInitializedStaticMutex()
@@ -264,63 +262,6 @@ bool RecursiveMutex::tryLock()
 
     ASSERT_NOT_REACHED();
     return false;
-}
-
-ThreadCondition::ThreadCondition()
-{
-    pthread_cond_init(&m_condition, NULL);
-}
-
-ThreadCondition::~ThreadCondition()
-{
-    pthread_cond_destroy(&m_condition);
-}
-
-void ThreadCondition::wait(MutexBase& mutex)
-{
-    PlatformMutex& platformMutex = mutex.impl();
-    int result = pthread_cond_wait(&m_condition, &platformMutex.m_internalMutex);
-    ASSERT_UNUSED(result, !result);
-#if ENABLE(ASSERT)
-    ++platformMutex.m_recursionCount;
-#endif
-}
-
-bool ThreadCondition::timedWait(MutexBase& mutex, double absoluteTime)
-{
-    if (absoluteTime < currentTime())
-        return false;
-
-    if (absoluteTime > INT_MAX) {
-        wait(mutex);
-        return true;
-    }
-
-    int timeSeconds = static_cast<int>(absoluteTime);
-    int timeNanoseconds = static_cast<int>((absoluteTime - timeSeconds) * 1E9);
-
-    timespec targetTime;
-    targetTime.tv_sec = timeSeconds;
-    targetTime.tv_nsec = timeNanoseconds;
-
-    PlatformMutex& platformMutex = mutex.impl();
-    int result = pthread_cond_timedwait(&m_condition, &platformMutex.m_internalMutex, &targetTime);
-#if ENABLE(ASSERT)
-    ++platformMutex.m_recursionCount;
-#endif
-    return result == 0;
-}
-
-void ThreadCondition::signal()
-{
-    int result = pthread_cond_signal(&m_condition);
-    ASSERT_UNUSED(result, !result);
-}
-
-void ThreadCondition::broadcast()
-{
-    int result = pthread_cond_broadcast(&m_condition);
-    ASSERT_UNUSED(result, !result);
 }
 
 } // namespace WTF

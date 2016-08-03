@@ -107,23 +107,6 @@ private:
     bool m_locked;
 };
 
-class WTF_EXPORT ThreadCondition {
-    WTF_MAKE_NONCOPYABLE(ThreadCondition);
-public:
-    ThreadCondition();
-    ~ThreadCondition();
-
-    void wait(MutexBase&);
-    // Returns true if the condition was signaled before absoluteTime, false if the absoluteTime was reached or is in the past.
-    // The absoluteTime is in seconds, starting on January 1, 1970. The time is assumed to use the same time zone as WTF::currentTime().
-    bool timedWait(MutexBase&, double absoluteTime);
-    void signal();
-    void broadcast();
-
-private:
-    PlatformCondition m_condition;
-};
-
 } // namespace WTF
 
 using WTF::MutexBase;
@@ -131,6 +114,5 @@ using WTF::Mutex;
 using WTF::RecursiveMutex;
 using WTF::MutexLocker;
 using WTF::MutexTryLocker;
-using WTF::ThreadCondition;
 
 #endif  // SKY_ENGINE_WTF_THREADINGPRIMITIVES_H_

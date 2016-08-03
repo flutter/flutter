@@ -53,17 +53,14 @@ class ImageObserver;
 
 class PLATFORM_EXPORT Image : public RefCounted<Image> {
     friend class GeneratedImage;
-    friend class CrossfadeGeneratedImage;
     friend class GradientGeneratedImage;
     friend class GraphicsContext;
 
 public:
     virtual ~Image();
 
-    virtual bool isBitmapImage() const { return false; }
     virtual bool currentFrameKnownToBeOpaque() = 0;
 
-    static Image* nullImage();
     bool isNull() const { return size().isEmpty(); }
 
     virtual void setContainerSize(const IntSize&) { }

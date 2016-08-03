@@ -15,8 +15,8 @@ PlatformImpl::PlatformImpl() {
 PlatformImpl::~PlatformImpl() {
 }
 
-blink::WebString PlatformImpl::defaultLocale() {
-  return blink::WebString::fromUTF8("en-US");
+std::string PlatformImpl::defaultLocale() {
+  return "en-US";
 }
 
 base::SingleThreadTaskRunner* PlatformImpl::GetUITaskRunner() {

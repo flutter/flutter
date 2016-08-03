@@ -29,7 +29,6 @@
 #include "sky/engine/platform/TraceEvent.h"
 #include "sky/engine/platform/geometry/IntRect.h"
 #include "sky/engine/platform/geometry/RoundedRect.h"
-#include "sky/engine/platform/graphics/BitmapImage.h"
 #include "sky/engine/platform/graphics/Gradient.h"
 #include "sky/engine/platform/graphics/skia/SkiaUtils.h"
 #include "sky/engine/platform/text/BidiResolver.h"

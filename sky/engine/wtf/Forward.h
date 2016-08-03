@@ -31,26 +31,14 @@ namespace WTF {
     template<typename T> class RefPtr;
     template<typename T, size_t inlineCapacity, typename Allocator> class Vector;
 
-    class ArrayBuffer;
-    class ArrayBufferView;
-    class ArrayPiece;
     class AtomicString;
     class CString;
-    class Float32Array;
-    class Float64Array;
-    class Int8Array;
-    class Int16Array;
-    class Int32Array;
     template<size_t size>
     class SizeSpecificPartitionAllocator;
     class String;
     template <typename T> class StringBuffer;
     class StringBuilder;
     class StringImpl;
-    class Uint8Array;
-    class Uint8ClampedArray;
-    class Uint16Array;
-    class Uint32Array;
 }
 
 using WTF::Function;
@@ -60,23 +48,11 @@ using WTF::PassRefPtr;
 using WTF::RefPtr;
 using WTF::Vector;
 
-using WTF::ArrayBuffer;
-using WTF::ArrayBufferView;
-using WTF::ArrayPiece;
 using WTF::AtomicString;
 using WTF::CString;
-using WTF::Float32Array;
-using WTF::Float64Array;
-using WTF::Int8Array;
-using WTF::Int16Array;
-using WTF::Int32Array;
 using WTF::String;
 using WTF::StringBuffer;
 using WTF::StringBuilder;
 using WTF::StringImpl;
-using WTF::Uint8Array;
-using WTF::Uint8ClampedArray;
-using WTF::Uint16Array;
-using WTF::Uint32Array;
 
 #endif  // SKY_ENGINE_WTF_FORWARD_H_

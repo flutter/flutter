@@ -42,6 +42,7 @@
 #ifndef SKY_ENGINE_WTF_THREADSPECIFIC_H_
 #define SKY_ENGINE_WTF_THREADSPECIFIC_H_
 
+#include "sky/engine/wtf/FastMalloc.h"
 #include "sky/engine/wtf/Noncopyable.h"
 #include "sky/engine/wtf/StdLibExtras.h"
 #include "sky/engine/wtf/WTF.h"

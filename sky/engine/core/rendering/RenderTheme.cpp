@@ -29,8 +29,6 @@
 #include "sky/engine/platform/graphics/GraphicsContextStateSaver.h"
 #include "sky/engine/platform/text/StringTruncator.h"
 #include "sky/engine/public/platform/Platform.h"
-#include "sky/engine/public/platform/WebFallbackThemeEngine.h"
-#include "sky/engine/public/platform/WebRect.h"
 #include "sky/engine/wtf/text/StringBuilder.h"
 
 // The methods in this file are shared by all themes on every platform.

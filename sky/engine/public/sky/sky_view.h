@@ -15,7 +15,6 @@
 #include "sky/engine/bindings/flutter_dart_state.h"
 #include "sky/engine/core/window/window.h"
 #include "sky/engine/public/platform/WebCommon.h"
-#include "sky/engine/public/platform/WebString.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/RefPtr.h"
 #include "sky/engine/wtf/text/WTFString.h"
@@ -29,7 +28,6 @@ class DartLibraryProvider;
 class Scene;
 class SkyViewClient;
 class View;
-class WebInputEvent;
 class Window;
 
 class SkyView : public WindowClient, public IsolateClient {

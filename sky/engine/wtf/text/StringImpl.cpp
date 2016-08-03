@@ -44,7 +44,6 @@
 #include "sky/engine/wtf/DataLog.h"
 #include "sky/engine/wtf/HashMap.h"
 #include "sky/engine/wtf/HashSet.h"
-#include "sky/engine/wtf/ProcessID.h"
 #include "sky/engine/wtf/RefCounted.h"
 #include "sky/engine/wtf/ThreadingPrimitives.h"
 #endif
@@ -232,7 +231,7 @@ void StringStats::removeString(StringImpl* string)
 
 void StringStats::printStats()
 {
-    dataLogF("String stats for process id %d:\n", getCurrentProcessID());
+    dataLogF("String stats\n");
 
     unsigned long long totalNumberCharacters = m_total8BitData + m_total16BitData;
     double percent8Bit = m_totalNumberStrings ? ((double)m_number8BitStrings * 100) / (double)m_totalNumberStrings : 0.0;

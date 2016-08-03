@@ -32,7 +32,6 @@
 #include "sky/engine/public/platform/WebCString.h"
 
 #include <string.h>
-#include "sky/engine/public/platform/WebString.h"
 #include "sky/engine/wtf/text/CString.h"
 
 namespace blink {
@@ -44,7 +43,7 @@ int WebCString::compare(const WebCString& other) const
         return isNull() ? -1 : 1;
 
     if (isNull())
-        return 0; // Both WebStrings are null.
+        return 0; // Both WebCStrings are null.
 
     return strcmp(m_private->data(), other.m_private->data());
 }
@@ -76,11 +75,6 @@ size_t WebCString::length() const
 const char* WebCString::data() const
 {
     return m_private.isNull() ? 0 : m_private->data();
-}
-
-WebString WebCString::utf16() const
-{
-    return WebString::fromUTF8(data(), length());
 }
 
 WebCString::WebCString(const WTF::CString& s)

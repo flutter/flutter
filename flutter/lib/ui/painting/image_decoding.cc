@@ -14,9 +14,9 @@
 #include "flutter/tonic/dart_persistent_value.h"
 #include "flutter/tonic/mojo_converter.h"
 #include "flutter/tonic/uint8_list.h"
-#include "sky/engine/platform/image-decoders/ImageDecoder.h"
 #include "sky/engine/platform/mojo/data_pipe.h"
 #include "sky/engine/platform/SharedBuffer.h"
+#include "sky/engine/public/platform/Platform.h"
 #include "sky/shell/platform_view.h"
 #include "third_party/skia/include/core/SkImageGenerator.h"
 

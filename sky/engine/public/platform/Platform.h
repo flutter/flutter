@@ -31,29 +31,17 @@
 #ifndef SKY_ENGINE_PUBLIC_PLATFORM_PLATFORM_H_
 #define SKY_ENGINE_PUBLIC_PLATFORM_PLATFORM_H_
 
-#include "sky/engine/public/platform/WebCommon.h"
-#include "sky/engine/public/platform/WebData.h"
-#include "sky/engine/public/platform/WebGraphicsContext3D.h"
-#include "sky/engine/public/platform/WebLocalizedString.h"
-#include "sky/engine/public/platform/WebString.h"
-#include "sky/engine/public/platform/WebVector.h"
+#include <string>
 
-class GrContext;
+#include "sky/engine/public/platform/WebCommon.h"
+#include "sky/engine/public/platform/WebVector.h"
 
 namespace base {
 class SingleThreadTaskRunner;
 }
 
 namespace blink {
-
-class WebBlobRegistry;
 class WebDiscardableMemory;
-class WebFallbackThemeEngine;
-class WebGraphicsContext3DProvider;
-class WebSandboxSupport;
-struct WebFloatPoint;
-struct WebLocalizedString;
-struct WebSize;
 
 class Platform {
 public:
@@ -64,43 +52,6 @@ public:
     BLINK_PLATFORM_EXPORT static void shutdown();
     BLINK_PLATFORM_EXPORT static Platform* current();
 
-    // May return null if sandbox support is not necessary
-    virtual WebSandboxSupport* sandboxSupport() { return 0; }
-
-
-    // Blob ----------------------------------------------------------------
-
-    // Must return non-null.
-    virtual WebBlobRegistry* blobRegistry() { return 0; }
-
-
-    // Memory --------------------------------------------------------------
-
-    // Returns the current space allocated for the pagefile, in MB.
-    // That is committed size for Windows and virtual memory size for POSIX
-    virtual size_t memoryUsageMB() { return 0; }
-
-    // Same as above, but always returns actual value, without any caches.
-    virtual size_t actualMemoryUsageMB() { return 0; }
-
-    // Return the physical memory of the current machine, in MB.
-    virtual size_t physicalMemoryMB() { return 0; }
-
-    // Return the available virtual memory of the current machine, in MB. Or
-    // zero, if there is no limit.
-    virtual size_t virtualMemoryLimitMB() { return 0; }
-
-    // Return the number of of processors of the current machine.
-    virtual size_t numberOfProcessors() { return 0; }
-
-    // Returns private and shared usage, in bytes. Private bytes is the amount of
-    // memory currently allocated to this process that cannot be shared. Returns
-    // false on platform specific error conditions.
-    virtual bool processMemorySizesInBytes(size_t* privateBytes, size_t* sharedBytes) { return false; }
-
-    // Reports number of bytes used by memory allocator for internal needs.
-    // Returns true if the size has been reported, or false otherwise.
-    virtual bool memoryAllocatorWasteInBytes(size_t*) { return false; }
 
     // Allocates discardable memory. May return 0, even if the platform supports
     // discardable memory. If nonzero, however, then the WebDiscardableMmeory is
@@ -109,93 +60,14 @@ public:
     // discardable.
     virtual WebDiscardableMemory* allocateAndLockDiscardableMemory(size_t bytes) { return 0; }
 
-    // A wrapper for tcmalloc's HeapProfilerStart();
-    virtual void startHeapProfiling(const WebString& /*prefix*/) { }
-    // A wrapper for tcmalloc's HeapProfilerStop();
-    virtual void stopHeapProfiling() { }
-    // A wrapper for tcmalloc's HeapProfilerDump()
-    virtual void dumpHeapProfiling(const WebString& /*reason*/) { }
-    // A wrapper for tcmalloc's GetHeapProfile()
-    virtual WebString getHeapProfile() { return WebString(); }
-
-    static const size_t noDecodedImageByteLimit = static_cast<size_t>(-1);
-
-    // Returns the maximum amount of memory a decoded image should be allowed.
-    // See comments on ImageDecoder::m_maxDecodedBytes.
-    virtual size_t maxDecodedImageBytes() { return noDecodedImageByteLimit; }
-
-    // Resources -----------------------------------------------------------
-
-    // Returns a localized string resource (with substitution parameters).
-    virtual WebString queryLocalizedString(WebLocalizedString::Name) { return WebString(); }
-    virtual WebString queryLocalizedString(WebLocalizedString::Name, const WebString& parameter) { return WebString(); }
-    virtual WebString queryLocalizedString(WebLocalizedString::Name, const WebString& parameter1, const WebString& parameter2) { return WebString(); }
-
-
-    // Profiling -----------------------------------------------------------
-
-    virtual void decrementStatsCounter(const char* name) { }
-    virtual void incrementStatsCounter(const char* name) { }
-
-    // Screen -------------------------------------------------------------
-
-    // Supplies the system monitor color profile.
-    virtual void screenColorProfile(WebVector<char>* profile) { }
-
-
-    // Sudden Termination --------------------------------------------------
-
-    // Disable/Enable sudden termination.
-    virtual void suddenTerminationChanged(bool enabled) { }
-
 
     // System --------------------------------------------------------------
 
     // Returns a value such as "en-US".
-    virtual WebString defaultLocale() { return WebString(); }
+    virtual std::string defaultLocale() { return std::string(); }
 
     virtual base::SingleThreadTaskRunner* GetUITaskRunner() { return 0; }
     virtual base::SingleThreadTaskRunner* GetIOTaskRunner() { return 0; }
-
-    // Vibration -----------------------------------------------------------
-
-    // Starts a vibration for the given duration in milliseconds. If there is currently an active
-    // vibration it will be cancelled before the new one is started.
-    virtual void vibrate(unsigned time) { }
-
-    // Cancels the current vibration, if there is one.
-    virtual void cancelVibration() { }
-
-
-    // Tracing -------------------------------------------------------------
-
-    // Callbacks for reporting histogram data.
-    // CustomCounts histogram has exponential bucket sizes, so that min=1, max=1000000, bucketCount=50 would do.
-    virtual void histogramCustomCounts(const char* name, int sample, int min, int max, int bucketCount) { }
-    // Enumeration histogram buckets are linear, boundaryValue should be larger than any possible sample value.
-    virtual void histogramEnumeration(const char* name, int sample, int boundaryValue) { }
-    // Unlike enumeration histograms, sparse histograms only allocate memory for non-empty buckets.
-    virtual void histogramSparse(const char* name, int sample) { }
-
-
-    // GPU ----------------------------------------------------------------
-    //
-    // May return null if GPU is not supported.
-    // Returns newly allocated and initialized offscreen WebGraphicsContext3D instance.
-    // Passing an existing context to shareContext will create the new context in the same share group as the passed context.
-    virtual WebGraphicsContext3D* createOffscreenGraphicsContext3D(const WebGraphicsContext3D::Attributes&, WebGraphicsContext3D* shareContext) { return 0; }
-    virtual WebGraphicsContext3D* createOffscreenGraphicsContext3D(const WebGraphicsContext3D::Attributes&) { return 0; }
-
-    // Returns a newly allocated and initialized offscreen context provider. The provider may return a null
-    // graphics context if GPU is not supported.
-    virtual WebGraphicsContext3DProvider* createSharedOffscreenGraphicsContext3DProvider() { return 0; }
-
-    // Returns true if the platform is capable of producing an offscreen context suitable for accelerating 2d canvas.
-    // This will return false if the platform cannot promise that contexts will be preserved across operations like
-    // locking the screen or if the platform cannot provide a context with suitable performance characteristics.
-    //
-    // This value must be checked again after a context loss event as the platform's capabilities may have changed.
-    virtual bool canAccelerate2dCanvas() { return false; }
 
 protected:
     virtual ~Platform() { }
