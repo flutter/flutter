@@ -11,7 +11,7 @@
 #include "base/files/file_util.h"
 #include "base/logging.h"
 #include "base/strings/string_util.h"
-#include "flutter/tonic/parsers/packages_map.h"
+#include "lib/tonic/parsers/packages_map.h"
 #include "sky/tools/sky_snapshot/logging.h"
 #include "sky/tools/sky_snapshot/scope.h"
 #include "sky/tools/sky_snapshot/switches.h"
@@ -84,8 +84,7 @@ class Loader {
   DISALLOW_COPY_AND_ASSIGN(Loader);
 };
 
-Loader::Loader() {
-}
+Loader::Loader() {}
 
 void Loader::LoadPackagesMap(const base::FilePath& packages) {
   packages_ = packages;
@@ -93,14 +92,14 @@ void Loader::LoadPackagesMap(const base::FilePath& packages) {
   std::string packages_source;
   if (!base::ReadFileToString(packages_, &packages_source)) {
     fprintf(stderr, "error: Unable to load .packages file '%s'.\n",
-        packages_.AsUTF8Unsafe().c_str());
+            packages_.AsUTF8Unsafe().c_str());
     exit(1);
   }
   packages_map_.reset(new tonic::PackagesMap());
   std::string error;
   if (!packages_map_->Parse(packages_source, &error)) {
     fprintf(stderr, "error: Unable to parse .packages file '%s'.\n%s\n",
-        packages_.AsUTF8Unsafe().c_str(), error.c_str());
+            packages_.AsUTF8Unsafe().c_str(), error.c_str());
     exit(1);
   }
 }
@@ -113,7 +112,8 @@ Dart_Handle Loader::CanonicalizeURL(Dart_Handle library, Dart_Handle url) {
     return url;
   if (base::StartsWithASCII(string, "file:", true)) {
     base::ReplaceFirstSubstringAfterOffset(&string, 0, "file:", "");
-    return StringToDart(string);;
+    return StringToDart(string);
+    ;
   }
 
   std::string library_url = StringFromDart(Dart_LibraryUrl(library));
@@ -134,8 +134,7 @@ base::FilePath Loader::GetFilePathForURL(std::string url) {
   return base::FilePath(url);
 }
 
-base::FilePath Loader::GetFilePathForPackageURL(
-    std::string url) {
+base::FilePath Loader::GetFilePathForPackageURL(std::string url) {
   DCHECK(base::StartsWithASCII(url, "package:", true));
   base::ReplaceFirstSubstringAfterOffset(&url, 0, "package:", "");
   size_t slash = url.find('/');
@@ -159,8 +158,7 @@ base::FilePath Loader::GetFilePathForFileURL(std::string url) {
   return base::FilePath(url);
 }
 
-std::string Loader::Fetch(const std::string& url,
-                          std::string* resolved_url) {
+std::string Loader::Fetch(const std::string& url, std::string* resolved_url) {
   base::FilePath path = GetFilePathForURL(url);
   base::FilePath absolute_path = base::MakeAbsoluteFilePath(path);
   *resolved_url = "file://" + absolute_path.value();
@@ -176,9 +174,8 @@ std::string Loader::Fetch(const std::string& url,
 Dart_Handle Loader::Import(Dart_Handle url) {
   std::string resolved_url;
   Dart_Handle source = StringToDart(Fetch(StringFromDart(url), &resolved_url));
-  Dart_Handle result = Dart_LoadLibrary(url,
-                                        StringToDart(resolved_url),
-                                        source, 0, 0);
+  Dart_Handle result =
+      Dart_LoadLibrary(url, StringToDart(resolved_url), source, 0, 0);
   LogIfError(result);
   return result;
 }
@@ -186,10 +183,8 @@ Dart_Handle Loader::Import(Dart_Handle url) {
 Dart_Handle Loader::Source(Dart_Handle library, Dart_Handle url) {
   std::string resolved_url;
   Dart_Handle source = StringToDart(Fetch(StringFromDart(url), &resolved_url));
-  Dart_Handle result = Dart_LoadSource(library,
-                                       url,
-                                       StringToDart(resolved_url),
-                                       source, 0, 0);
+  Dart_Handle result =
+      Dart_LoadSource(library, url, StringToDart(resolved_url), source, 0, 0);
   LogIfError(result);
   return result;
 }
@@ -238,11 +233,8 @@ Dart_Handle HandleLibraryTag(Dart_LibraryTag tag,
 void LoadScript(const std::string& url) {
   std::string resolved_url;
   Dart_Handle source = StringToDart(GetLoader().Fetch(url, &resolved_url));
-  LogIfError(
-      Dart_LoadScript(StringToDart(url),
-                      StringToDart(resolved_url),
-                      source,
-                      0, 0));
+  LogIfError(Dart_LoadScript(StringToDart(url), StringToDart(resolved_url),
+                             source, 0, 0));
 }
 
 const std::set<std::string>& GetDependencies() {
