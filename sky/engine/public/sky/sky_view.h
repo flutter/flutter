@@ -7,8 +7,9 @@
 
 #include <memory>
 
+#include "base/memory/weak_ptr.h"
+#include "base/time/time.h"
 #include "flow/layers/layer_tree.h"
-#include "lib/ftl/macros.h"
 #include "mojo/public/cpp/system/data_pipe.h"
 #include "mojo/services/network/interfaces/url_loader.mojom.h"
 #include "sky/engine/bindings/flutter_dart_state.h"
@@ -70,7 +71,9 @@ class SkyView : public WindowClient, public IsolateClient {
   std::string country_code_;
   std::unique_ptr<DartController> dart_controller_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(SkyView);
+  base::WeakPtrFactory<SkyView> weak_factory_;
+
+  DISALLOW_COPY_AND_ASSIGN(SkyView);
 };
 
 }  // namespace blink

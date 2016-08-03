@@ -29,8 +29,7 @@
 #define SKY_ENGINE_WTF_DTOA_UTILS_H_
 
 #include <string.h>
-
-#include "lib/ftl/macros.h"
+#include "base/macros.h"
 #include "sky/engine/wtf/Assertions.h"
 
 #define UNIMPLEMENTED ASSERT_NOT_REACHED
@@ -221,7 +220,7 @@ namespace double_conversion {
 
         bool is_finalized() const { return position_ < 0; }
 
-        FTL_DISALLOW_IMPLICIT_CONSTRUCTORS(StringBuilder);
+        DISALLOW_IMPLICIT_CONSTRUCTORS(StringBuilder);
     };
 
     // The type-based aliasing rule allows the compiler to assume that pointers of

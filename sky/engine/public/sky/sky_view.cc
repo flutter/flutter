@@ -20,7 +20,7 @@ std::unique_ptr<SkyView> SkyView::Create(SkyViewClient* client) {
 }
 
 SkyView::SkyView(SkyViewClient* client)
-    : client_(client) {}
+    : client_(client), weak_factory_(this) {}
 
 SkyView::~SkyView() {}
 

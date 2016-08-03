@@ -8,9 +8,9 @@
 #include <memory>
 
 #include "base/callback_forward.h"
+#include "base/macros.h"
 #include "base/memory/weak_ptr.h"
 #include "dart/runtime/include/dart_api.h"
-#include "lib/ftl/macros.h"
 #include "mojo/public/cpp/system/data_pipe.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/text/AtomicString.h"
@@ -55,7 +55,7 @@ class DartController {
 
   base::WeakPtrFactory<DartController> weak_factory_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(DartController);
+  DISALLOW_COPY_AND_ASSIGN(DartController);
 };
 
 }

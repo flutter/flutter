@@ -5,7 +5,7 @@
 #ifndef SKY_ENGINE_BINDINGS_DART_UI_H_
 #define SKY_ENGINE_BINDINGS_DART_UI_H_
 
-#include "lib/ftl/macros.h"
+#include "base/macros.h"
 
 namespace blink {
 
@@ -15,7 +15,7 @@ class DartUI {
   static void InitForIsolate();
 
  private:
-  FTL_DISALLOW_IMPLICIT_CONSTRUCTORS(DartUI);
+  DISALLOW_IMPLICIT_CONSTRUCTORS(DartUI);
 };
 
 }  // namespace blink

@@ -4,9 +4,9 @@
 
 #include "sky/engine/core/text/TextBox.h"
 
+#include "base/logging.h"
 #include "flutter/tonic/dart_class_library.h"
 #include "flutter/tonic/dart_error.h"
-#include "lib/ftl/logging.h"
 #include "sky/engine/core/script/ui_dart_state.h"
 
 namespace blink {
@@ -17,7 +17,7 @@ Dart_Handle DartConverter<TextBox>::ToDart(const TextBox& val) {
   DartClassLibrary& class_library = DartState::Current()->class_library();
   Dart_Handle type = Dart_HandleFromPersistent(
       class_library.GetClass("ui", "TextBox"));
-  FTL_DCHECK(!LogIfError(type));
+  DCHECK(!LogIfError(type));
   const int argc = 5;
   Dart_Handle argv[argc] = {
     blink::ToDart(val.sk_rect.fLeft),

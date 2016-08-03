@@ -8,6 +8,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "base/bind.h"
+#include "base/logging.h"
+#include "base/macros.h"
+#include "base/time/time.h"
 #include "dart/runtime/bin/embedded_dart_io.h"
 #include "dart/runtime/include/dart_api.h"
 #include "dart/runtime/include/dart_tools_api.h"
@@ -19,7 +23,6 @@
 #include "flutter/tonic/dart_library_natives.h"
 #include "flutter/tonic/dart_microtask_queue.h"
 #include "flutter/tonic/dart_state.h"
-#include "lib/ftl/logging.h"
 #include "sky/engine/core/script/ui_dart_state.h"
 #include "sky/engine/wtf/text/WTFString.h"
 
@@ -83,7 +86,7 @@ static void InitDartInternal(Dart_Handle builtin_library,
     DART_CHECK_VALID(isolate_lib);
     DART_CHECK_VALID(Dart_Invoke(isolate_lib, method_name, 0, NULL));
   } else {
-    FTL_CHECK(isolate_type == DartRuntimeHooks::SecondaryIsolate);
+    CHECK(isolate_type == DartRuntimeHooks::SecondaryIsolate);
     Dart_Handle io_lib = Dart_LookupLibrary(ToDart("dart:io"));
     DART_CHECK_VALID(io_lib);
     Dart_Handle setup_hooks = Dart_NewStringFromCString("_setupHooks");
@@ -108,7 +111,7 @@ static void InitDartAsync(Dart_Handle builtin_library,
     schedule_microtask =
         GetClosure(builtin_library, "_getScheduleMicrotaskClosure");
   } else {
-    FTL_CHECK(isolate_type == DartRuntimeHooks::SecondaryIsolate);
+    CHECK(isolate_type == DartRuntimeHooks::SecondaryIsolate);
     Dart_Handle isolate_lib = Dart_LookupLibrary(ToDart("dart:isolate"));
     Dart_Handle method_name =
         Dart_NewStringFromCString("_getIsolateScheduleImmediateClosure");
