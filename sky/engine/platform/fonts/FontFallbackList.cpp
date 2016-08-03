@@ -34,8 +34,6 @@
 #include "sky/engine/platform/fonts/SegmentedFontData.h"
 #include "sky/engine/wtf/unicode/CharacterNames.h"
 
-#include "base/logging.h"
-
 namespace blink {
 
 FontFallbackList::FontFallbackList()

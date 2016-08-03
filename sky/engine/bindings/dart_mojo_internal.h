@@ -5,7 +5,7 @@
 #ifndef SKY_ENGINE_BINDINGS_DART_MOJO_INTERNAL_H_
 #define SKY_ENGINE_BINDINGS_DART_MOJO_INTERNAL_H_
 
-#include "base/macros.h"
+#include "lib/ftl/macros.h"
 #include "mojo/public/cpp/system/handle.h"
 
 namespace blink {
@@ -17,7 +17,7 @@ class DartMojoInternal {
   static void SetHandleWatcherProducerHandle(MojoHandle handle);
 
  private:
-  DISALLOW_IMPLICIT_CONSTRUCTORS(DartMojoInternal);
+  FTL_DISALLOW_IMPLICIT_CONSTRUCTORS(DartMojoInternal);
 };
 
 }  // namespace blink

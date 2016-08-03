@@ -6,6 +6,7 @@
 #define SKY_ENGINE_BINDINGS_MOJO_SERVICES_H_
 
 #include "dart/runtime/include/dart_api.h"
+#include "lib/ftl/macros.h"
 #include "mojo/public/cpp/application/service_provider_impl.h"
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
 #include "mojo/services/asset_bundle/interfaces/asset_bundle.mojom.h"
@@ -51,7 +52,7 @@ class MojoServices {
   // https://github.com/domokit/mojo/issues/536
   mojo::ServiceProviderPtr services_from_dart_;
 
-  MOJO_DISALLOW_COPY_AND_ASSIGN(MojoServices);
+  FTL_DISALLOW_COPY_AND_ASSIGN(MojoServices);
 };
 
 }  // namespace blink

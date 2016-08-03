@@ -135,7 +135,7 @@ namespace double_conversion {
         // The Bignum's value equals value(bigits_) * 2^(exponent_ * kBigitSize).
         int exponent_;
 
-        DISALLOW_COPY_AND_ASSIGN(Bignum);
+        FTL_DISALLOW_COPY_AND_ASSIGN(Bignum);
     };
 
 }  // namespace double_conversion

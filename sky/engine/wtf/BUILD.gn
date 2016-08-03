@@ -187,6 +187,10 @@ component("wtf") {
 
   direct_dependent_configs = [ "//sky/engine:features" ]
 
+  public_deps = [
+    "//lib/ftl",
+  ]
+
   deps = [
     "//base",
     "//third_party/icu",
