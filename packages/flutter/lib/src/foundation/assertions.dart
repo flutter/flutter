@@ -277,6 +277,7 @@ class FlutterError extends AssertionError {
     const List<String> filteredClasses = const <String>[
       '_AssertionError',
       '_FakeAsync',
+      '_FrameCallbackEntry',
     ];
     final RegExp stackParser = new RegExp(r'^#[0-9]+ +([^.]+).* \(([^/]*)/[^:]+:[0-9]+(?::[0-9]+)?\)$');
     final RegExp packageParser = new RegExp(r'^([^:]+):(.+)$');

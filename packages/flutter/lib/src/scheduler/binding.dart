@@ -57,7 +57,7 @@ class _FrameCallbackEntry {
     assert(() {
       if (rescheduling) {
         assert(() {
-          if (currentCallbackStack == null) {
+          if (debugCurrentCallbackStack == null) {
             throw new FlutterError(
               'addFrameCallback or scheduleFrameCallback called with rescheduling true, but no callback is in scope.\n'
               'The "rescheduling" argument should only be set to true if the '
@@ -70,17 +70,20 @@ class _FrameCallbackEntry {
           }
           return true;
         });
-        stack = currentCallbackStack;
+        debugStack = debugCurrentCallbackStack;
       } else {
         // TODO(ianh): trim the frames from this library, so that the call to scheduleFrameCallback is the top one
-        stack = StackTrace.current;
+        debugStack = StackTrace.current;
       }
       return true;
     });
   }
-  static StackTrace currentCallbackStack;
+
   final FrameCallback callback;
-  StackTrace stack;
+
+  // debug-mode fields
+  static StackTrace debugCurrentCallbackStack;
+  StackTrace debugStack;
 }
 
 /// Scheduler for running the following:
@@ -195,7 +198,7 @@ abstract class SchedulerBinding extends BindingBase {
   /// after a test's resources have been gracefully disposed.
   int get transientCallbackCount => _transientCallbacks.length;
 
-  /// Schedules the given frame callback.
+  /// Schedules the given transient frame callback.
   ///
   /// Adds the given callback to the list of frame callbacks and ensures that a
   /// frame is scheduled.
@@ -219,7 +222,7 @@ abstract class SchedulerBinding extends BindingBase {
     return addFrameCallback(callback, rescheduling: rescheduling);
   }
 
-  /// Adds a frame callback.
+  /// Adds a transient frame callback.
   ///
   /// Frame callbacks are executed at the beginning of a frame (see
   /// [handleBeginFrame]).
@@ -251,13 +254,13 @@ abstract class SchedulerBinding extends BindingBase {
     return _nextFrameCallbackId;
   }
 
-  /// Cancels the callback of the given [id].
+  /// Cancels the transient frame callback with the given [id].
   ///
   /// Removes the given callback from the list of frame callbacks. If a frame
   /// has been requested, this does not also cancel that request.
   ///
-  /// Frame callbacks are registered using [scheduleFrameCallback] or
-  /// [addFrameCallback].
+  /// Transient frame callbacks are those registered using
+  /// [scheduleFrameCallback] or [addFrameCallback].
   void cancelFrameCallbackWithId(int id) {
     assert(id > 0);
     _transientCallbacks.remove(id);
@@ -266,6 +269,9 @@ abstract class SchedulerBinding extends BindingBase {
 
   /// Asserts that there are no registered transient callbacks; if
   /// there are, prints their locations and throws an exception.
+  ///
+  /// A transient frame callback is one that was registered with
+  /// [scheduleFrameCallback] or [addFrameCallback].
   ///
   /// This is expected to be called at the end of tests (the
   /// flutter_test framework does it automatically in normal cases).
@@ -307,7 +313,7 @@ abstract class SchedulerBinding extends BindingBase {
             for (int id in callbacks.keys) {
               _FrameCallbackEntry entry = callbacks[id];
               information.writeln('── callback $id ──');
-              FlutterError.defaultStackFilter(entry.stack.toString().trimRight().split('\n')).forEach(information.writeln);
+              FlutterError.defaultStackFilter(entry.debugStack.toString().trimRight().split('\n')).forEach(information.writeln);
             }
           }
         ));
@@ -315,6 +321,42 @@ abstract class SchedulerBinding extends BindingBase {
       return true;
     });
     return true;
+  }
+
+  /// Prints the stack for where the current transient callback was registered.
+  ///
+  /// A transient frame callback is one that was registered with
+  /// [scheduleFrameCallback] or [addFrameCallback].
+  ///
+  /// When called in debug more and in the context of a transient callback, this
+  /// function prints the stack trace from where the current transient callback
+  /// was registered (i.e. where it first called addFrameCallback or
+  /// scheduleFrameCallback).
+  ///
+  /// When called in debug mode in other contexts, it prints a message saying
+  /// that this function was not called in the context a transient callback.
+  ///
+  /// In release mode, this function does nothing.
+  ///
+  /// To call this function, use the following code:
+  ///
+  /// ```dart
+  ///   SchedulerBinding.debugPrintTransientCallbackRegistrationStack();
+  /// ```
+  static void debugPrintTransientCallbackRegistrationStack() {
+    assert(() {
+      if (_FrameCallbackEntry.debugCurrentCallbackStack != null) {
+        debugPrint('When the current transient callback was registered, this was the stack:');
+        debugPrint(
+          FlutterError.defaultStackFilter(
+            _FrameCallbackEntry.debugCurrentCallbackStack.toString().trimRight().split('\n')
+          ).join('\n')
+        );
+      } else {
+        debugPrint('No transient callback is currently executing.');
+      }
+      return true;
+    });
   }
 
   final List<FrameCallback> _persistentCallbacks = new List<FrameCallback>();
@@ -328,6 +370,9 @@ abstract class SchedulerBinding extends BindingBase {
   /// callbacks are observers of "begin frame" events. Since they are
   /// executed after the transient frame callbacks they can drive the
   /// rendering pipeline.
+  ///
+  /// Persistent frame callbacks cannot be unregistered. Once registered, they
+  /// are called for every frame for the lifetime of the application.
   void addPersistentFrameCallback(FrameCallback callback) {
     _persistentCallbacks.add(callback);
   }
@@ -347,6 +392,8 @@ abstract class SchedulerBinding extends BindingBase {
   ///
   /// The callbacks are executed in the order in which they have been
   /// added.
+  ///
+  /// Post-frame callbacks cannot be unregistered. They are called exactly once.
   void addPostFrameCallback(FrameCallback callback) {
     _postFrameCallbacks.add(callback);
   }
@@ -435,7 +482,7 @@ abstract class SchedulerBinding extends BindingBase {
     Duration timeStamp = _adjustForEpoch(rawTimeStamp);
     assert(() {
       if (debugPrintBeginFrameBanner)
-        print('━━━━━━━┫ Begin Frame ($timeStamp) ┣━━━━━━━');
+        debugPrint('━━━━━━━┫ Begin Frame ($timeStamp) ┣━━━━━━━');
       return true;
     });
     _lastRawTimeStamp = rawTimeStamp;
@@ -468,7 +515,7 @@ abstract class SchedulerBinding extends BindingBase {
     _transientCallbacks = new Map<int, _FrameCallbackEntry>();
     callbacks.forEach((int id, _FrameCallbackEntry callbackEntry) {
       if (!_removedIds.contains(id))
-        _invokeFrameCallback(callbackEntry.callback, timeStamp, callbackEntry.stack);
+        _invokeFrameCallback(callbackEntry.callback, timeStamp, callbackEntry.debugStack);
     });
     _removedIds.clear();
     Timeline.finishSync();
@@ -481,9 +528,9 @@ abstract class SchedulerBinding extends BindingBase {
   // the error.
   void _invokeFrameCallback(FrameCallback callback, Duration timeStamp, [ StackTrace callbackStack ]) {
     assert(callback != null);
-    assert(_FrameCallbackEntry.currentCallbackStack == null);
+    assert(_FrameCallbackEntry.debugCurrentCallbackStack == null);
     // TODO(ianh): Consider using a Zone instead to track the current callback registration stack
-    assert(() { _FrameCallbackEntry.currentCallbackStack = callbackStack; return true; });
+    assert(() { _FrameCallbackEntry.debugCurrentCallbackStack = callbackStack; return true; });
     try {
       callback(timeStamp);
     } catch (exception, exceptionStack) {
@@ -502,7 +549,7 @@ abstract class SchedulerBinding extends BindingBase {
         }
       ));
     }
-    assert(() { _FrameCallbackEntry.currentCallbackStack = null; return true; });
+    assert(() { _FrameCallbackEntry.debugCurrentCallbackStack = null; return true; });
   }
 }
 
