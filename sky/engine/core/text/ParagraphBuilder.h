@@ -7,38 +7,50 @@
 
 #include "base/memory/ref_counted.h"
 #include "flutter/tonic/dart_wrappable.h"
-#include "flutter/tonic/int32_list.h"
+#include "lib/tonic/typed_data/int32_list.h"
 #include "sky/engine/core/text/Paragraph.h"
 
 namespace blink {
 class DartLibraryNatives;
 
-class ParagraphBuilder : public base::RefCountedThreadSafe<ParagraphBuilder>, public DartWrappable {
-    DEFINE_WRAPPERTYPEINFO();
-public:
-    static scoped_refptr<ParagraphBuilder> create() { return new ParagraphBuilder(); }
+class ParagraphBuilder : public base::RefCountedThreadSafe<ParagraphBuilder>,
+                         public DartWrappable {
+  DEFINE_WRAPPERTYPEINFO();
 
-    ~ParagraphBuilder() override;
+ public:
+  static scoped_refptr<ParagraphBuilder> create() {
+    return new ParagraphBuilder();
+  }
 
-    void pushStyle(Int32List& encoded, const std::string& fontFamily, double fontSize, double letterSpacing, double wordSpacing, double height);
-    void pop();
+  ~ParagraphBuilder() override;
 
-    void addText(const std::string& text);
+  void pushStyle(tonic::Int32List& encoded,
+                 const std::string& fontFamily,
+                 double fontSize,
+                 double letterSpacing,
+                 double wordSpacing,
+                 double height);
+  void pop();
 
-    scoped_refptr<Paragraph> build(Int32List& encoded, const std::string& fontFamily, double fontSize, double lineHeight);
+  void addText(const std::string& text);
 
-    static void RegisterNatives(DartLibraryNatives* natives);
+  scoped_refptr<Paragraph> build(tonic::Int32List& encoded,
+                                 const std::string& fontFamily,
+                                 double fontSize,
+                                 double lineHeight);
 
-private:
-    explicit ParagraphBuilder();
+  static void RegisterNatives(DartLibraryNatives* natives);
 
-    void createRenderView();
+ private:
+  explicit ParagraphBuilder();
 
-    OwnPtr<RenderView> m_renderView;
-    RenderObject* m_renderParagraph;
-    RenderObject* m_currentRenderObject;
+  void createRenderView();
+
+  OwnPtr<RenderView> m_renderView;
+  RenderObject* m_renderParagraph;
+  RenderObject* m_currentRenderObject;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_TEXT_PARAGRAPHBUILDER_H_

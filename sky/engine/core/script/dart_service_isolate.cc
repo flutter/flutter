@@ -5,32 +5,32 @@
 #include "dart_service_isolate.h"
 
 #include "dart/runtime/include/dart_api.h"
-#include "flutter/tonic/dart_converter.h"
+#include "lib/tonic/converter/dart_converter.h"
 #include "flutter/tonic/dart_error.h"
 #include "flutter/tonic/dart_library_natives.h"
 #include "lib/ftl/logging.h"
 #include "sky/engine/core/script/embedder_resources.h"
 
-#define RETURN_ERROR_HANDLE(handle)                             \
-  if (Dart_IsError(handle)) {                                   \
-    return handle;                                              \
+#define RETURN_ERROR_HANDLE(handle) \
+  if (Dart_IsError(handle)) {       \
+    return handle;                  \
   }
 
-#define SHUTDOWN_ON_ERROR(handle)                               \
-  if (Dart_IsError(handle)) {                                   \
-    *error = strdup(Dart_GetError(handle));                     \
-    Dart_ExitScope();                                           \
-    Dart_ShutdownIsolate();                                     \
-    return false;                                               \
+#define SHUTDOWN_ON_ERROR(handle)           \
+  if (Dart_IsError(handle)) {               \
+    *error = strdup(Dart_GetError(handle)); \
+    Dart_ExitScope();                       \
+    Dart_ShutdownIsolate();                 \
+    return false;                           \
   }
 
 #define kLibrarySourceNamePrefix "/vmservice"
 static const char* kServiceIsolateScript = "vmservice_io.dart";
 
 namespace mojo {
-  namespace dart {
-    extern ResourcesEntry __sky_embedder_service_isolate_resources_[];
-  }
+namespace dart {
+extern ResourcesEntry __sky_embedder_service_isolate_resources_[];
+}
 }
 
 namespace blink {
@@ -64,7 +64,7 @@ void DartServiceIsolate::TriggerResourceLoad(Dart_NativeArguments args) {
 
 void DartServiceIsolate::NotifyServerState(Dart_NativeArguments args) {
   Dart_Handle exception = nullptr;
-  int port = DartConverter<int>::FromArguments(args, 1, exception);
+  int port = tonic::DartConverter<int>::FromArguments(args, 1, exception);
   if (!exception) {
     observatory_port_ = port;
   }
@@ -95,8 +95,8 @@ bool DartServiceIsolate::Startup(std::string server_ip,
   if (!g_natives) {
     g_natives = new DartLibraryNatives();
     g_natives->Register({
-      {"VMServiceIO_NotifyServerState", NotifyServerState, 2, true },
-      {"VMServiceIO_Shutdown", Shutdown, 0, true },
+        {"VMServiceIO_NotifyServerState", NotifyServerState, 2, true},
+        {"VMServiceIO_Shutdown", Shutdown, 0, true},
     });
   }
 
@@ -148,8 +148,7 @@ bool DartServiceIsolate::Startup(std::string server_ip,
   SHUTDOWN_ON_ERROR(library);
 
   // Set the HTTP server's ip.
-  result = Dart_SetField(library,
-                         Dart_NewStringFromCString("_ip"),
+  result = Dart_SetField(library, Dart_NewStringFromCString("_ip"),
                          Dart_NewStringFromCString(server_ip.c_str()));
   SHUTDOWN_ON_ERROR(result);
   // If we have a port specified, start the server immediately.
@@ -160,17 +159,15 @@ bool DartServiceIsolate::Startup(std::string server_ip,
     server_port = 0;
   }
   // Set the HTTP's servers port.
-  result = Dart_SetField(library,
-                         Dart_NewStringFromCString("_port"),
+  result = Dart_SetField(library, Dart_NewStringFromCString("_port"),
                          Dart_NewInteger(server_port));
   SHUTDOWN_ON_ERROR(result);
-  result = Dart_SetField(library,
-                         Dart_NewStringFromCString("_autoStart"),
+  result = Dart_SetField(library, Dart_NewStringFromCString("_autoStart"),
                          Dart_NewBoolean(auto_start));
   SHUTDOWN_ON_ERROR(result);
-  result = Dart_SetField(library,
-                         Dart_NewStringFromCString("_originCheckDisabled"),
-                         Dart_NewBoolean(disable_origin_check));
+  result =
+      Dart_SetField(library, Dart_NewStringFromCString("_originCheckDisabled"),
+                    Dart_NewBoolean(disable_origin_check));
   SHUTDOWN_ON_ERROR(result);
   return true;
 }
@@ -178,7 +175,8 @@ bool DartServiceIsolate::Startup(std::string server_ip,
 Dart_Handle DartServiceIsolate::GetSource(const char* name) {
   const intptr_t kBufferSize = 512;
   char buffer[kBufferSize];
-  snprintf(&buffer[0], kBufferSize-1, "%s/%s", kLibrarySourceNamePrefix, name);
+  snprintf(&buffer[0], kBufferSize - 1, "%s/%s", kLibrarySourceNamePrefix,
+           name);
   const char* vmservice_source = NULL;
   int r = g_resources->ResourceLookup(buffer, &vmservice_source);
   DCHECK(r != EmbedderResources::kNoSuchInstance);
@@ -191,30 +189,30 @@ Dart_Handle DartServiceIsolate::LoadScript(const char* name) {
   return Dart_LoadScript(url, Dart_Null(), source, 0, 0);
 }
 
-Dart_Handle DartServiceIsolate::LoadSource(Dart_Handle library, const char* name) {
+Dart_Handle DartServiceIsolate::LoadSource(Dart_Handle library,
+                                           const char* name) {
   Dart_Handle url = Dart_NewStringFromCString(name);
   Dart_Handle source = GetSource(name);
   return Dart_LoadSource(library, url, Dart_Null(), source, 0, 0);
 }
 
 Dart_Handle DartServiceIsolate::LoadResource(Dart_Handle library,
-                                    const char* resource_name) {
+                                             const char* resource_name) {
   // Prepare for invoke call.
   Dart_Handle name = Dart_NewStringFromCString(resource_name);
   RETURN_ERROR_HANDLE(name);
   const char* data_buffer = NULL;
-  int data_buffer_length = g_resources->ResourceLookup(resource_name,
-                                                       &data_buffer);
+  int data_buffer_length =
+      g_resources->ResourceLookup(resource_name, &data_buffer);
   FTL_DCHECK(data_buffer_length != EmbedderResources::kNoSuchInstance);
-  Dart_Handle data_list = Dart_NewTypedData(Dart_TypedData_kUint8,
-                                            data_buffer_length);
+  Dart_Handle data_list =
+      Dart_NewTypedData(Dart_TypedData_kUint8, data_buffer_length);
   RETURN_ERROR_HANDLE(data_list);
   Dart_TypedData_Type type = Dart_TypedData_kInvalid;
   void* data_list_buffer = NULL;
   intptr_t data_list_buffer_length = 0;
-  Dart_Handle result = Dart_TypedDataAcquireData(data_list, &type,
-                                                 &data_list_buffer,
-                                                 &data_list_buffer_length);
+  Dart_Handle result = Dart_TypedDataAcquireData(
+      data_list, &type, &data_list_buffer, &data_list_buffer_length);
   RETURN_ERROR_HANDLE(result);
   FTL_DCHECK(data_buffer_length == data_list_buffer_length);
   FTL_DCHECK(data_list_buffer != NULL);
@@ -225,7 +223,7 @@ Dart_Handle DartServiceIsolate::LoadResource(Dart_Handle library,
 
   // Make invoke call.
   const intptr_t kNumArgs = 2;
-  Dart_Handle args[kNumArgs] = { name, data_list };
+  Dart_Handle args[kNumArgs] = {name, data_list};
   result = Dart_Invoke(library, Dart_NewStringFromCString("_addResource"),
                        kNumArgs, args);
   return result;
@@ -284,6 +282,5 @@ Dart_Handle DartServiceIsolate::LibraryTagHandler(Dart_LibraryTag tag,
   }
   return Dart_LoadSource(library, url, Dart_Null(), source, 0, 0);
 }
-
 
 }  // namespace blink

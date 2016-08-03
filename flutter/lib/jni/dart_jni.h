@@ -66,6 +66,10 @@ class JniMethodArgs {
   std::vector<jvalue> jvalues_;
 };
 
+} // namespace blink
+
+namespace tonic {
+
 template <>
 struct DartConverter<jfieldID> {
   static jfieldID FromArguments(Dart_NativeArguments args,
@@ -92,6 +96,6 @@ struct DartConverter<jmethodID> {
   }
 };
 
-} // namespace blink
+}  // namespace tonic
 
 #endif  // FLUTTER_LIB_JNI_DART_JNI_H_

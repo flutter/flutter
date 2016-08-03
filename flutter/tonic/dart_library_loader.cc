@@ -9,7 +9,7 @@
 #include "base/files/file_util.h"
 #include "base/trace_event/trace_event.h"
 #include "flutter/tonic/dart_api_scope.h"
-#include "flutter/tonic/dart_converter.h"
+#include "lib/tonic/converter/dart_converter.h"
 #include "flutter/tonic/dart_dependency_catcher.h"
 #include "flutter/tonic/dart_error.h"
 #include "flutter/tonic/dart_isolate_reloader.h"
@@ -19,19 +19,20 @@
 #include "mojo/data_pipe_utils/data_pipe_drainer.h"
 
 using mojo::common::DataPipeDrainer;
+using tonic::StdStringFromDart;
+using tonic::StdStringToDart;
 
 namespace blink {
 
 namespace {
 
 // Helper to erase a T* from a container of std::unique_ptr<T>s.
-template<typename T, typename C>
+template <typename T, typename C>
 void EraseUniquePtr(C& container, T* item) {
   std::unique_ptr<T> key = std::unique_ptr<T>(item);
   container.erase(key);
   key.release();
 }
-
 }
 
 // A DartLibraryLoader::Job represents a network load. It fetches data from the
@@ -86,11 +87,9 @@ class DartLibraryLoader::ImportJob : public Job {
   ImportJob(DartLibraryLoader* loader,
             const std::string& name,
             bool should_load_as_script)
-      : Job(loader, name),
-        should_load_as_script_(should_load_as_script) {
+      : Job(loader, name), should_load_as_script_(should_load_as_script) {
     TRACE_EVENT_ASYNC_BEGIN1("flutter", "DartLibraryLoader::ImportJob", this,
-                             "url",
-                             name);
+                             "url", name);
   }
 
   bool should_load_as_script() const { return should_load_as_script_; }
@@ -107,10 +106,12 @@ class DartLibraryLoader::ImportJob : public Job {
 
 class DartLibraryLoader::SourceJob : public Job {
  public:
-  SourceJob(DartLibraryLoader* loader, const std::string& name, Dart_Handle library)
+  SourceJob(DartLibraryLoader* loader,
+            const std::string& name,
+            Dart_Handle library)
       : Job(loader, name), library_(loader->dart_state(), library) {
-    TRACE_EVENT_ASYNC_BEGIN1("flutter", "DartLibraryLoader::SourceJob", this, "url",
-                             name);
+    TRACE_EVENT_ASYNC_BEGIN1("flutter", "DartLibraryLoader::SourceJob", this,
+                             "url", name);
   }
 
   Dart_PersistentHandle library() const { return library_.value(); }
@@ -203,11 +204,9 @@ class DartLibraryLoader::WatcherSignaler {
 DartLibraryLoader::DartLibraryLoader(DartState* dart_state)
     : dart_state_(dart_state),
       library_provider_(nullptr),
-      dependency_catcher_(nullptr) {
-}
+      dependency_catcher_(nullptr) {}
 
-DartLibraryLoader::~DartLibraryLoader() {
-}
+DartLibraryLoader::~DartLibraryLoader() {}
 
 Dart_Handle DartLibraryLoader::HandleLibraryTag(Dart_LibraryTag tag,
                                                 Dart_Handle library,
@@ -236,9 +235,8 @@ void DartLibraryLoader::WaitForDependencies(
     const base::Closure& callback) {
   if (dependencies.empty())
     return callback.Run();
-  dependency_watchers_.insert(
-      std::unique_ptr<DependencyWatcher>(
-          new DependencyWatcher(dependencies, callback)));
+  dependency_watchers_.insert(std::unique_ptr<DependencyWatcher>(
+      new DependencyWatcher(dependencies, callback)));
 }
 
 void DartLibraryLoader::LoadLibrary(const std::string& name) {
@@ -298,20 +296,16 @@ void DartLibraryLoader::DidCompleteImportJob(
 
   if (job->should_load_as_script()) {
     result = Dart_LoadScript(
-        StdStringToDart(job->name()),
-        StdStringToDart(job->resolved_url()),
-        Dart_NewStringFromUTF8(buffer.data(), buffer.size()),
-        0, 0);
+        StdStringToDart(job->name()), StdStringToDart(job->resolved_url()),
+        Dart_NewStringFromUTF8(buffer.data(), buffer.size()), 0, 0);
   } else {
     result = Dart_LoadLibrary(
-        StdStringToDart(job->name()),
-        StdStringToDart(job->resolved_url()),
-        Dart_NewStringFromUTF8(buffer.data(), buffer.size()),
-        0, 0);
+        StdStringToDart(job->name()), StdStringToDart(job->resolved_url()),
+        Dart_NewStringFromUTF8(buffer.data(), buffer.size()), 0, 0);
   }
   if (Dart_IsError(result)) {
     LOG(ERROR) << "Error Loading " << job->name() << " "
-        << Dart_GetError(result);
+               << Dart_GetError(result);
   }
 
   pending_libraries_.erase(job->name());
@@ -327,14 +321,13 @@ void DartLibraryLoader::DidCompleteSourceJob(
   WatcherSignaler watcher_signaler(*this, job);
 
   Dart_Handle result = Dart_LoadSource(
-      Dart_HandleFromPersistent(job->library()),
-      StdStringToDart(job->name()),
+      Dart_HandleFromPersistent(job->library()), StdStringToDart(job->name()),
       StdStringToDart(job->resolved_url()),
       Dart_NewStringFromUTF8(buffer.data(), buffer.size()), 0, 0);
 
   if (Dart_IsError(result)) {
     LOG(ERROR) << "Error Loading " << job->name() << " "
-        << Dart_GetError(result);
+               << Dart_GetError(result);
   }
 
   EraseUniquePtr<Job>(jobs_, job);

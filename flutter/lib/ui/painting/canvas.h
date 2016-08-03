@@ -12,14 +12,12 @@
 #include "flutter/lib/ui/painting/picture_recorder.h"
 #include "flutter/lib/ui/painting/rrect.h"
 #include "flutter/tonic/dart_wrappable.h"
-#include "flutter/tonic/float32_list.h"
-#include "flutter/tonic/float64_list.h"
-#include "flutter/tonic/int32_list.h"
+#include "lib/tonic/typed_data/float32_list.h"
+#include "lib/tonic/typed_data/float64_list.h"
+#include "lib/tonic/typed_data/int32_list.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
-namespace blink {
-class CanvasImage;
-class DartLibraryNatives;
+namespace tonic {
 
 template <>
 struct DartConverter<SkCanvas::PointMode>
@@ -29,8 +27,15 @@ template <>
 struct DartConverter<SkCanvas::VertexMode>
     : public DartConverterInteger<SkCanvas::VertexMode> {};
 
+}  // namespace tonic
+
+namespace blink {
+class CanvasImage;
+class DartLibraryNatives;
+
 class Canvas : public base::RefCountedThreadSafe<Canvas>, public DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
+
  public:
   static scoped_refptr<Canvas> Create(PictureRecorder* recorder,
                                       double left,
@@ -41,8 +46,7 @@ class Canvas : public base::RefCountedThreadSafe<Canvas>, public DartWrappable {
   ~Canvas() override;
 
   void save();
-  void saveLayerWithoutBounds(const Paint& paint,
-                              const PaintData& paint_data);
+  void saveLayerWithoutBounds(const Paint& paint, const PaintData& paint_data);
   void saveLayer(double left,
                  double top,
                  double right,
@@ -56,13 +60,10 @@ class Canvas : public base::RefCountedThreadSafe<Canvas>, public DartWrappable {
   void scale(double sx, double sy);
   void rotate(double radians);
   void skew(double sx, double sy);
-  void transform(const Float64List& matrix4);
-  void setMatrix(const Float64List& matrix4);
+  void transform(const tonic::Float64List& matrix4);
+  void setMatrix(const tonic::Float64List& matrix4);
 
-  void clipRect(double left,
-                double top,
-                double right,
-                double bottom);
+  void clipRect(double left, double top, double right, double bottom);
   void clipRRect(const RRect& rrect);
   void clipPath(const CanvasPath* path);
 
@@ -73,8 +74,7 @@ class Canvas : public base::RefCountedThreadSafe<Canvas>, public DartWrappable {
                 double y2,
                 const Paint& paint,
                 const PaintData& paint_data);
-  void drawPaint(const Paint& paint,
-                 const PaintData& paint_data);
+  void drawPaint(const Paint& paint, const PaintData& paint_data);
   void drawRect(double left,
                 double top,
                 double right,
@@ -139,25 +139,25 @@ class Canvas : public base::RefCountedThreadSafe<Canvas>, public DartWrappable {
   void drawPoints(const Paint& paint,
                   const PaintData& paint_data,
                   SkCanvas::PointMode point_mode,
-                  const Float32List& points);
+                  const tonic::Float32List& points);
 
   void drawVertices(const Paint& paint,
                     const PaintData& paint_data,
                     SkCanvas::VertexMode vertex_mode,
-                    const Float32List& vertices,
-                    const Float32List& texture_coordinates,
-                    const Int32List& colors,
+                    const tonic::Float32List& vertices,
+                    const tonic::Float32List& texture_coordinates,
+                    const tonic::Int32List& colors,
                     SkXfermode::Mode transfer_mode,
-                    const Int32List& indices);
+                    const tonic::Int32List& indices);
 
   void drawAtlas(const Paint& paint,
                  const PaintData& paint_data,
                  CanvasImage* atlas,
-                 const Float32List& transforms,
-                 const Float32List& rects,
-                 const Int32List& colors,
+                 const tonic::Float32List& transforms,
+                 const tonic::Float32List& rects,
+                 const tonic::Int32List& colors,
                  SkXfermode::Mode transfer_mode,
-                 const Float32List& cull_rect);
+                 const tonic::Float32List& cull_rect);
 
   SkCanvas* canvas() const { return canvas_; }
   void Clear();
@@ -174,6 +174,6 @@ class Canvas : public base::RefCountedThreadSafe<Canvas>, public DartWrappable {
   SkCanvas* canvas_;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // FLUTTER_LIB_UI_PAINTING_CANVAS_H_

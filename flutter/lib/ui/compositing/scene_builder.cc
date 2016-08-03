@@ -20,7 +20,7 @@
 #include "flutter/lib/ui/painting/shader.h"
 #include "flutter/tonic/dart_args.h"
 #include "flutter/tonic/dart_binding_macros.h"
-#include "flutter/tonic/dart_converter.h"
+#include "lib/tonic/converter/dart_converter.h"
 #include "flutter/tonic/dart_library_natives.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 
@@ -61,7 +61,7 @@ SceneBuilder::SceneBuilder()
 
 SceneBuilder::~SceneBuilder() {}
 
-void SceneBuilder::pushTransform(const Float64List& matrix4) {
+void SceneBuilder::pushTransform(const tonic::Float64List& matrix4) {
   SkMatrix sk_matrix = ToSkMatrix(matrix4);
   std::unique_ptr<flow::TransformLayer> layer(new flow::TransformLayer());
   layer->set_transform(sk_matrix);

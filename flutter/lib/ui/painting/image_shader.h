@@ -10,7 +10,7 @@
 #include "flutter/lib/ui/painting/matrix.h"
 #include "flutter/lib/ui/painting/shader.h"
 #include "flutter/tonic/dart_wrappable.h"
-#include "flutter/tonic/float64_list.h"
+#include "lib/tonic/typed_data/float64_list.h"
 #include "third_party/skia/include/core/SkMatrix.h"
 #include "third_party/skia/include/core/SkShader.h"
 
@@ -19,6 +19,7 @@ class DartLibraryNatives;
 
 class ImageShader : public Shader {
   DEFINE_WRAPPERTYPEINFO();
+
  public:
   ~ImageShader() override;
   static scoped_refptr<ImageShader> Create();
@@ -26,7 +27,7 @@ class ImageShader : public Shader {
   void initWithImage(CanvasImage* image,
                      SkShader::TileMode tmx,
                      SkShader::TileMode tmy,
-                     const Float64List& matrix4);
+                     const tonic::Float64List& matrix4);
 
   static void RegisterNatives(DartLibraryNatives* natives);
 
@@ -34,6 +35,6 @@ class ImageShader : public Shader {
   ImageShader();
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // FLUTTER_LIB_UI_PAINTING_IMAGE_SHADER_H_

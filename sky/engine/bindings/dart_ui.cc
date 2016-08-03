@@ -16,7 +16,7 @@
 #include "flutter/lib/ui/painting/path.h"
 #include "flutter/lib/ui/painting/picture.h"
 #include "flutter/lib/ui/painting/picture_recorder.h"
-#include "flutter/tonic/dart_converter.h"
+#include "lib/tonic/converter/dart_converter.h"
 #include "flutter/tonic/dart_error.h"
 #include "sky/engine/bindings/dart_runtime_hooks.h"
 #include "sky/engine/bindings/mojo_services.h"
@@ -24,14 +24,16 @@
 #include "sky/engine/core/text/ParagraphBuilder.h"
 #include "sky/engine/core/window/window.h"
 
+using tonic::ToDart;
+
 namespace blink {
 namespace {
 
 static DartLibraryNatives* g_natives;
 
 Dart_NativeFunction GetNativeFunction(Dart_Handle name,
-                                         int argument_count,
-                                         bool* auto_setup_scope) {
+                                      int argument_count,
+                                      bool* auto_setup_scope) {
   return g_natives->GetNativeFunction(name, argument_count, auto_setup_scope);
 }
 
@@ -66,8 +68,8 @@ void DartUI::InitForGlobal() {
 
 void DartUI::InitForIsolate() {
   DCHECK(g_natives);
-  DART_CHECK_VALID(Dart_SetNativeResolver(
-      Dart_LookupLibrary(ToDart("dart:ui")), GetNativeFunction, GetSymbol));
+  DART_CHECK_VALID(Dart_SetNativeResolver(Dart_LookupLibrary(ToDart("dart:ui")),
+                                          GetNativeFunction, GetSymbol));
 }
 
 }  // namespace blink

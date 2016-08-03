@@ -38,12 +38,12 @@
 #include "flutter/lib/jni/dart_jni.h"
 #endif
 
+using tonic::ToDart;
+
 namespace blink {
 
 DartController::DartController()
-    : ui_dart_state_(nullptr),
-      weak_factory_(this) {
-}
+    : ui_dart_state_(nullptr), weak_factory_(this) {}
 
 DartController::~DartController() {
   if (ui_dart_state_) {
@@ -79,10 +79,8 @@ bool DartController::SendStartMessage(Dart_Handle root_library) {
   Dart_LibraryImportLibrary(ui_library, root_library, Dart_Null());
 
   // Get the closure of main().
-  Dart_Handle main_closure = Dart_Invoke(ui_library,
-                                         ToDart("_getMainClosure"),
-                                         0,
-                                         NULL);
+  Dart_Handle main_closure =
+      Dart_Invoke(ui_library, ToDart("_getMainClosure"), 0, NULL);
   if (LogIfError(main_closure))
     return true;
 
@@ -92,10 +90,8 @@ bool DartController::SendStartMessage(Dart_Handle root_library) {
   Dart_Handle isolate_args[kNumIsolateArgs];
   isolate_args[0] = main_closure;
   isolate_args[1] = Dart_Null();
-  Dart_Handle result = Dart_Invoke(isolate_lib,
-                                   ToDart("_startMainIsolate"),
-                                   kNumIsolateArgs,
-                                   isolate_args);
+  Dart_Handle result = Dart_Invoke(isolate_lib, ToDart("_startMainIsolate"),
+                                   kNumIsolateArgs, isolate_args);
   return LogIfError(result);
 }
 
@@ -190,17 +186,15 @@ void DartController::CreateIsolateFor(std::unique_ptr<UIDartState> state) {
                               ui_dart_state_->url().c_str());
 
     dart_state()->class_library().add_provider(
-      "ui",
-      WTF::MakeUnique<DartClassProvider>(dart_state(), "dart:ui"));
+        "ui", WTF::MakeUnique<DartClassProvider>(dart_state(), "dart:ui"));
 
 #ifdef OS_ANDROID
     DartJni::InitForIsolate();
     dart_state()->class_library().add_provider(
-      "jni",
-      WTF::MakeUnique<DartClassProvider>(dart_state(), "dart:jni"));
+        "jni", WTF::MakeUnique<DartClassProvider>(dart_state(), "dart:jni"));
 #endif
   }
   Dart_ExitIsolate();
 }
 
-} // namespace blink
+}  // namespace blink

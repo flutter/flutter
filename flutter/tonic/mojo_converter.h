@@ -5,10 +5,10 @@
 #ifndef FLUTTER_TONIC_MOJO_CONVERTER_H_
 #define FLUTTER_TONIC_MOJO_CONVERTER_H_
 
-#include "flutter/tonic/dart_converter.h"
+#include "lib/tonic/converter/dart_converter.h"
 #include "mojo/public/cpp/system/handle.h"
 
-namespace blink {
+namespace tonic {
 
 template <typename HandleType>
 struct DartConverter<mojo::ScopedHandleBase<HandleType>> {
@@ -26,12 +26,11 @@ struct DartConverter<mojo::ScopedHandleBase<HandleType>> {
     return Dart_NewInteger(static_cast<int64_t>(mojo_handle.release().value()));
   }
 
-  static mojo::ScopedHandleBase<HandleType> FromArguments(
-      Dart_NativeArguments args,
-      int index,
-      Dart_Handle& exception) {
+  static mojo::ScopedHandleBase<HandleType>
+  FromArguments(Dart_NativeArguments args, int index, Dart_Handle& exception) {
     int64_t raw_handle = 0;
-    Dart_Handle result = Dart_GetNativeIntegerArgument(args, index, &raw_handle);
+    Dart_Handle result =
+        Dart_GetNativeIntegerArgument(args, index, &raw_handle);
     if (Dart_IsError(result) || !raw_handle)
       return mojo::ScopedHandleBase<HandleType>();
 
@@ -40,6 +39,6 @@ struct DartConverter<mojo::ScopedHandleBase<HandleType>> {
   }
 };
 
-}  // namespace blink
+}  // namespace tonic
 
 #endif  // FLUTTER_TONIC_MOJO_CONVERTER_H_

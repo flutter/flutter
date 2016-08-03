@@ -17,7 +17,7 @@
 #include "flutter/lib/ui/painting/rrect.h"
 #include "flutter/lib/ui/painting/shader.h"
 #include "flutter/tonic/dart_wrappable.h"
-#include "flutter/tonic/float64_list.h"
+#include "lib/tonic/typed_data/float64_list.h"
 
 namespace blink {
 
@@ -30,7 +30,7 @@ class SceneBuilder : public base::RefCountedThreadSafe<SceneBuilder>,
 
   ~SceneBuilder() override;
 
-  void pushTransform(const Float64List& matrix4);
+  void pushTransform(const tonic::Float64List& matrix4);
   void pushClipRect(double left, double right, double top, double bottom);
   void pushClipRRect(const RRect& rrect);
   void pushClipPath(const CanvasPath* path);

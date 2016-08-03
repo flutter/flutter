@@ -10,7 +10,7 @@
 #include "flutter/lib/ui/painting/matrix.h"
 #include "flutter/tonic/dart_args.h"
 #include "flutter/tonic/dart_binding_macros.h"
-#include "flutter/tonic/dart_converter.h"
+#include "lib/tonic/converter/dart_converter.h"
 #include "flutter/tonic/dart_library_natives.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -23,45 +23,43 @@ static void Canvas_constructor(Dart_NativeArguments args) {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, Canvas);
 
-#define FOR_EACH_BINDING(V) \
-  V(Canvas, save) \
+#define FOR_EACH_BINDING(V)         \
+  V(Canvas, save)                   \
   V(Canvas, saveLayerWithoutBounds) \
-  V(Canvas, saveLayer) \
-  V(Canvas, restore) \
-  V(Canvas, getSaveCount) \
-  V(Canvas, translate) \
-  V(Canvas, scale) \
-  V(Canvas, rotate) \
-  V(Canvas, skew) \
-  V(Canvas, transform) \
-  V(Canvas, setMatrix) \
-  V(Canvas, clipRect) \
-  V(Canvas, clipRRect) \
-  V(Canvas, clipPath) \
-  V(Canvas, drawColor) \
-  V(Canvas, drawLine) \
-  V(Canvas, drawPaint) \
-  V(Canvas, drawRect) \
-  V(Canvas, drawRRect) \
-  V(Canvas, drawDRRect) \
-  V(Canvas, drawOval) \
-  V(Canvas, drawCircle) \
-  V(Canvas, drawPath) \
-  V(Canvas, drawImage) \
-  V(Canvas, drawImageRect) \
-  V(Canvas, drawImageNine) \
-  V(Canvas, drawPicture) \
-  V(Canvas, drawPoints) \
-  V(Canvas, drawVertices) \
+  V(Canvas, saveLayer)              \
+  V(Canvas, restore)                \
+  V(Canvas, getSaveCount)           \
+  V(Canvas, translate)              \
+  V(Canvas, scale)                  \
+  V(Canvas, rotate)                 \
+  V(Canvas, skew)                   \
+  V(Canvas, transform)              \
+  V(Canvas, setMatrix)              \
+  V(Canvas, clipRect)               \
+  V(Canvas, clipRRect)              \
+  V(Canvas, clipPath)               \
+  V(Canvas, drawColor)              \
+  V(Canvas, drawLine)               \
+  V(Canvas, drawPaint)              \
+  V(Canvas, drawRect)               \
+  V(Canvas, drawRRect)              \
+  V(Canvas, drawDRRect)             \
+  V(Canvas, drawOval)               \
+  V(Canvas, drawCircle)             \
+  V(Canvas, drawPath)               \
+  V(Canvas, drawImage)              \
+  V(Canvas, drawImageRect)          \
+  V(Canvas, drawImageNine)          \
+  V(Canvas, drawPicture)            \
+  V(Canvas, drawPoints)             \
+  V(Canvas, drawVertices)           \
   V(Canvas, drawAtlas)
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
 void Canvas::RegisterNatives(DartLibraryNatives* natives) {
-  natives->Register({
-    { "Canvas_constructor", Canvas_constructor, 6, true },
-FOR_EACH_BINDING(DART_REGISTER_NATIVE)
-  });
+  natives->Register({{"Canvas_constructor", Canvas_constructor, 6, true},
+                     FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
 
 scoped_refptr<Canvas> Canvas::Create(PictureRecorder* recorder,
@@ -71,18 +69,15 @@ scoped_refptr<Canvas> Canvas::Create(PictureRecorder* recorder,
                                      double bottom) {
   DCHECK(recorder);
   DCHECK(!recorder->isRecording());
-  scoped_refptr<Canvas> canvas = new Canvas(recorder->BeginRecording(
-      SkRect::MakeLTRB(left, top, right, bottom)));
+  scoped_refptr<Canvas> canvas = new Canvas(
+      recorder->BeginRecording(SkRect::MakeLTRB(left, top, right, bottom)));
   recorder->set_canvas(canvas.get());
   return std::move(canvas);
 }
 
-Canvas::Canvas(SkCanvas* canvas)
-  : canvas_(canvas) {
-}
+Canvas::Canvas(SkCanvas* canvas) : canvas_(canvas) {}
 
-Canvas::~Canvas() {
-}
+Canvas::~Canvas() {}
 
 void Canvas::save() {
   if (!canvas_)
@@ -136,7 +131,7 @@ void Canvas::scale(double sx, double sy) {
 void Canvas::rotate(double radians) {
   if (!canvas_)
     return;
-  canvas_->rotate(radians * 180.0/M_PI);
+  canvas_->rotate(radians * 180.0 / M_PI);
 }
 
 void Canvas::skew(double sx, double sy) {
@@ -145,22 +140,19 @@ void Canvas::skew(double sx, double sy) {
   canvas_->skew(sx, sy);
 }
 
-void Canvas::transform(const Float64List& matrix4) {
+void Canvas::transform(const tonic::Float64List& matrix4) {
   if (!canvas_)
     return;
   canvas_->concat(ToSkMatrix(matrix4));
 }
 
-void Canvas::setMatrix(const Float64List& matrix4) {
+void Canvas::setMatrix(const tonic::Float64List& matrix4) {
   if (!canvas_)
     return;
   canvas_->setMatrix(ToSkMatrix(matrix4));
 }
 
-void Canvas::clipRect(double left,
-                      double top,
-                      double right,
-                      double bottom) {
+void Canvas::clipRect(double left, double top, double right, double bottom) {
   if (!canvas_)
     return;
   canvas_->clipRect(SkRect::MakeLTRB(left, top, right, bottom));
@@ -286,10 +278,7 @@ void Canvas::drawImageRect(const CanvasImage* image,
   DCHECK(image);
   SkRect src = SkRect::MakeLTRB(src_left, src_top, src_right, src_bottom);
   SkRect dst = SkRect::MakeLTRB(dst_left, dst_top, dst_right, dst_bottom);
-  canvas_->drawImageRect(image->image(),
-                         src,
-                         dst,
-                         paint.paint(),
+  canvas_->drawImageRect(image->image(), src, dst, paint.paint(),
                          SkCanvas::kFast_SrcRectConstraint);
 }
 
@@ -307,10 +296,8 @@ void Canvas::drawImageNine(const CanvasImage* image,
   if (!canvas_)
     return;
   DCHECK(image);
-  SkRect center = SkRect::MakeLTRB(center_left,
-                                   center_top,
-                                   center_right,
-                                   center_bottom);
+  SkRect center =
+      SkRect::MakeLTRB(center_left, center_top, center_right, center_bottom);
   SkIRect icenter;
   center.round(&icenter);
   SkRect dst = SkRect::MakeLTRB(dst_left, dst_top, dst_right, dst_bottom);
@@ -327,7 +314,7 @@ void Canvas::drawPicture(Picture* picture) {
 void Canvas::drawPoints(const Paint& paint,
                         const PaintData& paint_data,
                         SkCanvas::PointMode point_mode,
-                        const Float32List& points) {
+                        const tonic::Float32List& points) {
   if (!canvas_)
     return;
 
@@ -340,15 +327,14 @@ void Canvas::drawPoints(const Paint& paint,
                       *paint.paint());
 }
 
-void Canvas::drawVertices(
-    const Paint& paint,
-    const PaintData& paint_data,
-    SkCanvas::VertexMode vertex_mode,
-    const Float32List& vertices,
-    const Float32List& texture_coordinates,
-    const Int32List& colors,
-    SkXfermode::Mode transfer_mode,
-    const Int32List& indices) {
+void Canvas::drawVertices(const Paint& paint,
+                          const PaintData& paint_data,
+                          SkCanvas::VertexMode vertex_mode,
+                          const tonic::Float32List& vertices,
+                          const tonic::Float32List& texture_coordinates,
+                          const tonic::Int32List& colors,
+                          SkXfermode::Mode transfer_mode,
+                          const tonic::Int32List& indices) {
   if (!canvas_)
     return;
 
@@ -359,30 +345,29 @@ void Canvas::drawVertices(
   for (int i = 0; i < indices.num_elements(); ++i)
     indices16.push_back(indices.data()[i]);
 
-  static_assert(sizeof(SkPoint) == sizeof(float) * 2, "SkPoint doesn't use floats.");
-  static_assert(sizeof(SkColor) == sizeof(int32_t), "SkColor doesn't use int32_t.");
+  static_assert(sizeof(SkPoint) == sizeof(float) * 2,
+                "SkPoint doesn't use floats.");
+  static_assert(sizeof(SkColor) == sizeof(int32_t),
+                "SkColor doesn't use int32_t.");
 
   canvas_->drawVertices(
       vertex_mode,
       vertices.num_elements() / 2,  // SkPoints have two floats.
       reinterpret_cast<const SkPoint*>(vertices.data()),
       reinterpret_cast<const SkPoint*>(texture_coordinates.data()),
-      reinterpret_cast<const SkColor*>(colors.data()),
-      transfer_mode_ptr.get(),
-      indices16.empty() ? nullptr : indices16.data(),
-      indices16.size(),
+      reinterpret_cast<const SkColor*>(colors.data()), transfer_mode_ptr.get(),
+      indices16.empty() ? nullptr : indices16.data(), indices16.size(),
       *paint.paint());
 }
 
-void Canvas::drawAtlas(
-    const Paint& paint,
-    const PaintData& paint_data,
-    CanvasImage* atlas,
-    const Float32List& transforms,
-    const Float32List& rects,
-    const Int32List& colors,
-    SkXfermode::Mode transfer_mode,
-    const Float32List& cull_rect) {
+void Canvas::drawAtlas(const Paint& paint,
+                       const PaintData& paint_data,
+                       CanvasImage* atlas,
+                       const tonic::Float32List& transforms,
+                       const tonic::Float32List& rects,
+                       const tonic::Int32List& colors,
+                       SkXfermode::Mode transfer_mode,
+                       const tonic::Float32List& cull_rect) {
   if (!canvas_)
     return;
 
@@ -394,13 +379,11 @@ void Canvas::drawAtlas(
                 "SkRect doesn't use floats.");
 
   canvas_->drawAtlas(
-      skImage.get(),
-      reinterpret_cast<const SkRSXform*>(transforms.data()),
+      skImage.get(), reinterpret_cast<const SkRSXform*>(transforms.data()),
       reinterpret_cast<const SkRect*>(rects.data()),
       reinterpret_cast<const SkColor*>(colors.data()),
       rects.num_elements() / 4,  // SkRect have four floats.
-      transfer_mode,
-      reinterpret_cast<const SkRect*>(cull_rect.data()),
+      transfer_mode, reinterpret_cast<const SkRect*>(cull_rect.data()),
       paint.paint());
 }
 
@@ -412,4 +395,4 @@ bool Canvas::IsRecording() const {
   return !!canvas_;
 }
 
-} // namespace blink
+}  // namespace blink

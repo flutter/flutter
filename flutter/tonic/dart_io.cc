@@ -6,15 +6,16 @@
 
 #include "dart/runtime/bin/io_natives.h"
 #include "dart/runtime/include/dart_api.h"
-#include "flutter/tonic/dart_converter.h"
+#include "lib/tonic/converter/dart_converter.h"
+
+using tonic::ToDart;
 
 namespace blink {
 
 void DartIO::InitForIsolate() {
-  DART_CHECK_VALID(Dart_SetNativeResolver(
-      Dart_LookupLibrary(ToDart("dart:io")),
-      dart::bin::IONativeLookup,
-      dart::bin::IONativeSymbol));
+  DART_CHECK_VALID(Dart_SetNativeResolver(Dart_LookupLibrary(ToDart("dart:io")),
+                                          dart::bin::IONativeLookup,
+                                          dart::bin::IONativeSymbol));
 }
 
 }  // namespace blink

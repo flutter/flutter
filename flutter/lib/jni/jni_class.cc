@@ -8,25 +8,26 @@
 
 namespace blink {
 
+using tonic::ToDart;
 using base::android::ScopedJavaLocalRef;
 
 IMPLEMENT_WRAPPERTYPEINFO(jni, JniClass);
 
-JniClass::JniClass(JNIEnv* env, jclass clazz)
-    : JniObject(env, clazz) {}
+JniClass::JniClass(JNIEnv* env, jclass clazz) : JniObject(env, clazz) {}
 
-JniClass::~JniClass() {
-}
+JniClass::~JniClass() {}
 
 scoped_refptr<JniClass> JniClass::FromName(const char* name) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
 
-    if (!name) return nullptr;
+    if (!name)
+      return nullptr;
 
     ScopedJavaLocalRef<jclass> clazz = DartJni::GetClass(env, name);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return new JniClass(env, clazz.obj());
   }
@@ -41,7 +42,8 @@ scoped_refptr<JniClass> JniClass::FromClassObject(const JniObject* clazz) {
   {
     ENTER_JNI();
 
-    if (!clazz) return nullptr;
+    if (!clazz)
+      return nullptr;
 
     jobject class_object = clazz->java_object();
     if (!env->IsInstanceOf(class_object, DartJni::class_clazz())) {
@@ -63,7 +65,8 @@ intptr_t JniClass::GetFieldId(const char* name, const char* sig) {
     ENTER_JNI();
 
     jfieldID id = env->GetFieldID(java_class(), name, sig);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return reinterpret_cast<intptr_t>(id);
   }
@@ -79,7 +82,8 @@ intptr_t JniClass::GetStaticFieldId(const char* name, const char* sig) {
     ENTER_JNI();
 
     jfieldID id = env->GetStaticFieldID(java_class(), name, sig);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return reinterpret_cast<intptr_t>(id);
   }
@@ -95,7 +99,8 @@ intptr_t JniClass::GetMethodId(const char* name, const char* sig) {
     ENTER_JNI();
 
     jmethodID id = env->GetMethodID(java_class(), name, sig);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return reinterpret_cast<intptr_t>(id);
   }
@@ -111,7 +116,8 @@ intptr_t JniClass::GetStaticMethodId(const char* name, const char* sig) {
     ENTER_JNI();
 
     jmethodID id = env->GetStaticMethodID(java_class(), name, sig);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return reinterpret_cast<intptr_t>(id);
   }
@@ -122,17 +128,20 @@ fail:
 }
 
 scoped_refptr<JniObject> JniClass::NewObject(
-    jmethodID methodId, const std::vector<Dart_Handle>& args) {
+    jmethodID methodId,
+    const std::vector<Dart_Handle>& args) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
 
     JniMethodArgs java_args;
     java_args.Convert(env, args, &exception);
-    if (exception) goto fail;
+    if (exception)
+      goto fail;
 
     jobject obj = env->NewObjectA(java_class(), methodId, java_args.jvalues());
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return JniObject::Create(env, obj);
   }
@@ -148,7 +157,8 @@ bool JniClass::IsAssignable(const JniClass* clazz) {
     ENTER_JNI();
 
     jboolean result = env->IsAssignableFrom(java_class(), clazz->java_class());
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return result == JNI_TRUE;
   }
@@ -164,7 +174,8 @@ scoped_refptr<JniObject> JniClass::GetStaticObjectField(jfieldID fieldId) {
     ENTER_JNI();
 
     jobject obj = env->GetStaticObjectField(java_class(), fieldId);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return JniObject::Create(env, obj);
   }
@@ -180,7 +191,8 @@ bool JniClass::GetStaticBooleanField(jfieldID fieldId) {
     ENTER_JNI();
 
     jboolean result = env->GetStaticBooleanField(java_class(), fieldId);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return result == JNI_TRUE;
   }
@@ -196,7 +208,8 @@ int64_t JniClass::GetStaticByteField(jfieldID fieldId) {
     ENTER_JNI();
 
     jbyte result = env->GetStaticByteField(java_class(), fieldId);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return result;
   }
@@ -212,7 +225,8 @@ int64_t JniClass::GetStaticCharField(jfieldID fieldId) {
     ENTER_JNI();
 
     jchar result = env->GetStaticCharField(java_class(), fieldId);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return result;
   }
@@ -228,7 +242,8 @@ int64_t JniClass::GetStaticShortField(jfieldID fieldId) {
     ENTER_JNI();
 
     jshort result = env->GetStaticShortField(java_class(), fieldId);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return result;
   }
@@ -244,7 +259,8 @@ int64_t JniClass::GetStaticIntField(jfieldID fieldId) {
     ENTER_JNI();
 
     jint result = env->GetStaticIntField(java_class(), fieldId);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return result;
   }
@@ -260,7 +276,8 @@ int64_t JniClass::GetStaticLongField(jfieldID fieldId) {
     ENTER_JNI();
 
     jlong result = env->GetStaticLongField(java_class(), fieldId);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return result;
   }
@@ -276,7 +293,8 @@ double JniClass::GetStaticFloatField(jfieldID fieldId) {
     ENTER_JNI();
 
     jfloat result = env->GetStaticFloatField(java_class(), fieldId);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return result;
   }
@@ -292,7 +310,8 @@ double JniClass::GetStaticDoubleField(jfieldID fieldId) {
     ENTER_JNI();
 
     jfloat result = env->GetStaticDoubleField(java_class(), fieldId);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return result;
   }
@@ -309,7 +328,8 @@ void JniClass::SetStaticObjectField(jfieldID fieldId, const JniObject* value) {
 
     env->SetStaticObjectField(java_class(), fieldId,
                               value ? value->java_object() : nullptr);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return;
   }
@@ -326,7 +346,8 @@ void JniClass::SetStaticBooleanField(jfieldID fieldId, bool value) {
 
     env->SetStaticBooleanField(java_class(), fieldId,
                                value ? JNI_TRUE : JNI_FALSE);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return;
   }
@@ -342,7 +363,8 @@ void JniClass::SetStaticByteField(jfieldID fieldId, int64_t value) {
     ENTER_JNI();
 
     env->SetStaticByteField(java_class(), fieldId, value);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return;
   }
@@ -358,7 +380,8 @@ void JniClass::SetStaticCharField(jfieldID fieldId, int64_t value) {
     ENTER_JNI();
 
     env->SetStaticCharField(java_class(), fieldId, value);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return;
   }
@@ -374,7 +397,8 @@ void JniClass::SetStaticShortField(jfieldID fieldId, int64_t value) {
     ENTER_JNI();
 
     env->SetStaticShortField(java_class(), fieldId, value);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return;
   }
@@ -390,7 +414,8 @@ void JniClass::SetStaticIntField(jfieldID fieldId, int64_t value) {
     ENTER_JNI();
 
     env->SetStaticIntField(java_class(), fieldId, value);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return;
   }
@@ -406,7 +431,8 @@ void JniClass::SetStaticLongField(jfieldID fieldId, int64_t value) {
     ENTER_JNI();
 
     env->SetStaticLongField(java_class(), fieldId, value);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return;
   }
@@ -422,7 +448,8 @@ void JniClass::SetStaticFloatField(jfieldID fieldId, double value) {
     ENTER_JNI();
 
     env->SetStaticFloatField(java_class(), fieldId, value);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return;
   }
@@ -438,7 +465,8 @@ void JniClass::SetStaticDoubleField(jfieldID fieldId, double value) {
     ENTER_JNI();
 
     env->SetStaticDoubleField(java_class(), fieldId, value);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return;
   }
@@ -449,18 +477,21 @@ fail:
 }
 
 scoped_refptr<JniObject> JniClass::CallStaticObjectMethod(
-    jmethodID methodId, const std::vector<Dart_Handle>& args) {
+    jmethodID methodId,
+    const std::vector<Dart_Handle>& args) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
 
     JniMethodArgs java_args;
     java_args.Convert(env, args, &exception);
-    if (exception) goto fail;
+    if (exception)
+      goto fail;
 
     jobject obj = env->CallStaticObjectMethodA(java_class(), methodId,
                                                java_args.jvalues());
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return JniObject::Create(env, obj);
   }
@@ -478,11 +509,13 @@ bool JniClass::CallStaticBooleanMethod(jmethodID methodId,
 
     JniMethodArgs java_args;
     java_args.Convert(env, args, &exception);
-    if (exception) goto fail;
+    if (exception)
+      goto fail;
 
     jboolean result = env->CallStaticBooleanMethodA(java_class(), methodId,
                                                     java_args.jvalues());
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return result == JNI_TRUE;
   }
@@ -500,11 +533,13 @@ int64_t JniClass::CallStaticByteMethod(jmethodID methodId,
 
     JniMethodArgs java_args;
     java_args.Convert(env, args, &exception);
-    if (exception) goto fail;
+    if (exception)
+      goto fail;
 
-    jbyte result = env->CallStaticByteMethodA(java_class(), methodId,
-                                              java_args.jvalues());
-    if (CheckJniException(env, &exception)) goto fail;
+    jbyte result =
+        env->CallStaticByteMethodA(java_class(), methodId, java_args.jvalues());
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return result;
   }
@@ -522,11 +557,13 @@ int64_t JniClass::CallStaticCharMethod(jmethodID methodId,
 
     JniMethodArgs java_args;
     java_args.Convert(env, args, &exception);
-    if (exception) goto fail;
+    if (exception)
+      goto fail;
 
-    jchar result = env->CallStaticCharMethodA(java_class(), methodId,
-                                              java_args.jvalues());
-    if (CheckJniException(env, &exception)) goto fail;
+    jchar result =
+        env->CallStaticCharMethodA(java_class(), methodId, java_args.jvalues());
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return result;
   }
@@ -544,11 +581,13 @@ int64_t JniClass::CallStaticShortMethod(jmethodID methodId,
 
     JniMethodArgs java_args;
     java_args.Convert(env, args, &exception);
-    if (exception) goto fail;
+    if (exception)
+      goto fail;
 
     jshort result = env->CallStaticShortMethodA(java_class(), methodId,
                                                 java_args.jvalues());
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return result;
   }
@@ -566,11 +605,13 @@ int64_t JniClass::CallStaticIntMethod(jmethodID methodId,
 
     JniMethodArgs java_args;
     java_args.Convert(env, args, &exception);
-    if (exception) goto fail;
+    if (exception)
+      goto fail;
 
-    jint result = env->CallStaticIntMethodA(java_class(), methodId,
-                                            java_args.jvalues());
-    if (CheckJniException(env, &exception)) goto fail;
+    jint result =
+        env->CallStaticIntMethodA(java_class(), methodId, java_args.jvalues());
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return result;
   }
@@ -588,11 +629,13 @@ int64_t JniClass::CallStaticLongMethod(jmethodID methodId,
 
     JniMethodArgs java_args;
     java_args.Convert(env, args, &exception);
-    if (exception) goto fail;
+    if (exception)
+      goto fail;
 
-    jlong result = env->CallStaticLongMethodA(java_class(), methodId,
-                                              java_args.jvalues());
-    if (CheckJniException(env, &exception)) goto fail;
+    jlong result =
+        env->CallStaticLongMethodA(java_class(), methodId, java_args.jvalues());
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return result;
   }
@@ -610,11 +653,13 @@ double JniClass::CallStaticFloatMethod(jmethodID methodId,
 
     JniMethodArgs java_args;
     java_args.Convert(env, args, &exception);
-    if (exception) goto fail;
+    if (exception)
+      goto fail;
 
     jfloat result = env->CallStaticFloatMethodA(java_class(), methodId,
                                                 java_args.jvalues());
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return result;
   }
@@ -632,11 +677,13 @@ double JniClass::CallStaticDoubleMethod(jmethodID methodId,
 
     JniMethodArgs java_args;
     java_args.Convert(env, args, &exception);
-    if (exception) goto fail;
+    if (exception)
+      goto fail;
 
     jdouble result = env->CallStaticDoubleMethodA(java_class(), methodId,
                                                   java_args.jvalues());
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return result;
   }
@@ -654,10 +701,12 @@ void JniClass::CallStaticVoidMethod(jmethodID methodId,
 
     JniMethodArgs java_args;
     java_args.Convert(env, args, &exception);
-    if (exception) goto fail;
+    if (exception)
+      goto fail;
 
     env->CallStaticVoidMethodA(java_class(), methodId, java_args.jvalues());
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return;
   }
@@ -667,4 +716,4 @@ fail:
   return;
 }
 
-} // namespace blink
+}  // namespace blink

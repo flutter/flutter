@@ -6,7 +6,7 @@
 #define FLUTTER_LIB_UI_PAINTING_RRECT_H_
 
 #include "dart/runtime/include/dart_api.h"
-#include "flutter/tonic/dart_converter.h"
+#include "lib/tonic/converter/dart_converter.h"
 #include "third_party/skia/include/core/SkRRect.h"
 
 namespace blink {
@@ -17,14 +17,18 @@ class RRect {
   bool is_null;
 };
 
+}  // namespace blink
+
+namespace tonic {
+
 template <>
-struct DartConverter<RRect> {
-  static RRect FromDart(Dart_Handle handle);
-  static RRect FromArguments(Dart_NativeArguments args,
-                             int index,
-                             Dart_Handle& exception);
+struct DartConverter<blink::RRect> {
+  static blink::RRect FromDart(Dart_Handle handle);
+  static blink::RRect FromArguments(Dart_NativeArguments args,
+                                    int index,
+                                    Dart_Handle& exception);
 };
 
-} // namespace blink
+}  // namespace tonic
 
 #endif  // FLUTTER_LIB_UI_PAINTING_RRECT_H_

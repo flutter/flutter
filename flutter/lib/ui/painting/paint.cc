@@ -6,29 +6,31 @@
 
 #include "flutter/lib/ui/painting/mask_filter.h"
 #include "flutter/lib/ui/painting/shader.h"
-#include "flutter/tonic/dart_byte_data.h"
+#include "lib/tonic/typed_data/dart_byte_data.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"
 #include "third_party/skia/include/core/SkShader.h"
 #include "third_party/skia/include/core/SkString.h"
 
-namespace blink {
+using namespace blink;
 
-static const int kIsAntiAliasIndex = 0;
-static const int kColorIndex = 1;
-static const int kTransferModeIndex = 2;
-static const int kStyleIndex = 3;
-static const int kStrokeWidthIndex = 4;
-static const int kStrokeCapIndex = 5;
-static const int kFilterQualityIndex = 6;
-static const int kColorFilterIndex = 7;
-static const int kColorFilterColorIndex = 8;
-static const int kColorFilterTransferModeIndex = 9;
-static const size_t kDataByteCount = 40;
+namespace tonic {
 
-static const int kMaskFilterIndex = 0;
-static const int kShaderIndex = 1;
-static const int kObjectCount = 2;  // Must be one larger than the largest index
+constexpr int kIsAntiAliasIndex = 0;
+constexpr int kColorIndex = 1;
+constexpr int kTransferModeIndex = 2;
+constexpr int kStyleIndex = 3;
+constexpr int kStrokeWidthIndex = 4;
+constexpr int kStrokeCapIndex = 5;
+constexpr int kFilterQualityIndex = 6;
+constexpr int kColorFilterIndex = 7;
+constexpr int kColorFilterColorIndex = 8;
+constexpr int kColorFilterTransferModeIndex = 9;
+constexpr size_t kDataByteCount = 40;
+
+constexpr int kMaskFilterIndex = 0;
+constexpr int kShaderIndex = 1;
+constexpr int kObjectCount = 2;  // Must be one larger than the largest index
 
 Paint DartConverter<Paint>::FromArguments(Dart_NativeArguments args,
                                           int index,
@@ -65,7 +67,7 @@ Paint DartConverter<Paint>::FromArguments(Dart_NativeArguments args,
     }
   }
 
-  DartByteData byte_data(paint_data);
+  tonic::DartByteData byte_data(paint_data);
   CHECK_EQ(byte_data.length_in_bytes(), kDataByteCount);
 
   const uint32_t* uint_data = static_cast<const uint32_t*>(byte_data.data());
@@ -118,4 +120,4 @@ PaintData DartConverter<PaintData>::FromArguments(Dart_NativeArguments args,
   return PaintData();
 }
 
-}  // namespace blink
+}  // namespace tonic

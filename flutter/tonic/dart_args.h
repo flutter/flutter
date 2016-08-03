@@ -9,7 +9,7 @@
 #include <utility>
 
 #include "dart/runtime/include/dart_api.h"
-#include "flutter/tonic/dart_converter.h"
+#include "lib/tonic/converter/dart_converter.h"
 #include "flutter/tonic/dart_wrappable.h"
 
 namespace blink {
@@ -17,14 +17,14 @@ namespace blink {
 class DartArgIterator {
  public:
   DartArgIterator(Dart_NativeArguments args, int start_index = 1)
-      : args_(args), index_(start_index), had_exception_(false) { }
+      : args_(args), index_(start_index), had_exception_(false) {}
 
-  template<typename T>
+  template <typename T>
   T GetNext() {
     if (had_exception_)
       return T();
     Dart_Handle exception = nullptr;
-    T arg = DartConverter<T>::FromArguments(args_, index_++, exception);
+    T arg = tonic::DartConverter<T>::FromArguments(args_, index_++, exception);
     if (exception) {
       had_exception_ = true;
       Dart_ThrowException(exception);
@@ -64,26 +64,22 @@ struct IndicesGenerator<0, indices...> {
 template <typename T>
 class IndicesForSignature {};
 
-template <typename ResultType,
-          typename... ArgTypes>
+template <typename ResultType, typename... ArgTypes>
 struct IndicesForSignature<ResultType (*)(ArgTypes...)> {
   static const size_t count = sizeof...(ArgTypes);
   using type = typename IndicesGenerator<count>::type;
 };
 
-template <typename C,
-          typename ResultType,
-          typename... ArgTypes>
+template <typename C, typename ResultType, typename... ArgTypes>
 struct IndicesForSignature<ResultType (C::*)(ArgTypes...)> {
   static const size_t count = sizeof...(ArgTypes);
   using type = typename IndicesGenerator<count>::type;
 };
 
-template<size_t index, typename ArgType>
+template <size_t index, typename ArgType>
 struct DartArgHolder {
   using ValueType = typename std::remove_const<
-    typename std::remove_reference<ArgType>::type
-  >::type;
+      typename std::remove_reference<ArgType>::type>::type;
 
   ValueType value;
 
@@ -91,17 +87,15 @@ struct DartArgHolder {
       : value(it->GetNext<ValueType>()) {}
 };
 
-template<typename T>
+template <typename T>
 void DartReturn(T result, Dart_NativeArguments args) {
-  DartConverter<T>::SetReturnValue(args, std::move(result));
+  tonic::DartConverter<T>::SetReturnValue(args, std::move(result));
 }
 
 template <typename IndicesType, typename T>
-class DartDispatcher {
-};
+class DartDispatcher {};
 
-template <size_t... indices,
-          typename... ArgTypes>
+template <size_t... indices, typename... ArgTypes>
 struct DartDispatcher<IndicesHolder<indices...>, void (*)(ArgTypes...)>
     : public DartArgHolder<indices, ArgTypes>... {
   using FunctionPtr = void (*)(ArgTypes...);
@@ -109,16 +103,14 @@ struct DartDispatcher<IndicesHolder<indices...>, void (*)(ArgTypes...)>
   DartArgIterator* it_;
 
   explicit DartDispatcher(DartArgIterator* it)
-      : DartArgHolder<indices, ArgTypes>(it)..., it_(it) { }
+      : DartArgHolder<indices, ArgTypes>(it)..., it_(it) {}
 
   void Dispatch(FunctionPtr func) {
     (*func)(DartArgHolder<indices, ArgTypes>::value...);
   }
 };
 
-template <size_t... indices,
-          typename ResultType,
-          typename... ArgTypes>
+template <size_t... indices, typename ResultType, typename... ArgTypes>
 struct DartDispatcher<IndicesHolder<indices...>, ResultType (*)(ArgTypes...)>
     : public DartArgHolder<indices, ArgTypes>... {
   using FunctionPtr = ResultType (*)(ArgTypes...);
@@ -126,7 +118,7 @@ struct DartDispatcher<IndicesHolder<indices...>, ResultType (*)(ArgTypes...)>
   DartArgIterator* it_;
 
   explicit DartDispatcher(DartArgIterator* it)
-      : DartArgHolder<indices, ArgTypes>(it)..., it_(it) { }
+      : DartArgHolder<indices, ArgTypes>(it)..., it_(it) {}
 
   void Dispatch(FunctionPtr func) {
     DartReturn((*func)(DartArgHolder<indices, ArgTypes>::value...),
@@ -138,9 +130,7 @@ struct DartDispatcher<IndicesHolder<indices...>, ResultType (*)(ArgTypes...)>
   }
 };
 
-template <size_t... indices,
-          typename C,
-          typename... ArgTypes>
+template <size_t... indices, typename C, typename... ArgTypes>
 struct DartDispatcher<IndicesHolder<indices...>, void (C::*)(ArgTypes...)>
     : public DartArgHolder<indices, ArgTypes>... {
   using FunctionPtr = void (C::*)(ArgTypes...);
@@ -148,7 +138,7 @@ struct DartDispatcher<IndicesHolder<indices...>, void (C::*)(ArgTypes...)>
   DartArgIterator* it_;
 
   explicit DartDispatcher(DartArgIterator* it)
-      : DartArgHolder<indices, ArgTypes>(it)..., it_(it) { }
+      : DartArgHolder<indices, ArgTypes>(it)..., it_(it) {}
 
   void Dispatch(FunctionPtr func) {
     (GetReceiver<C>(it_->args())->*func)(
@@ -167,7 +157,7 @@ struct DartDispatcher<IndicesHolder<indices...>, ResultType (C::*)(ArgTypes...)>
   DartArgIterator* it_;
 
   explicit DartDispatcher(DartArgIterator* it)
-      : DartArgHolder<indices, ArgTypes>(it)..., it_(it) { }
+      : DartArgHolder<indices, ArgTypes>(it)..., it_(it) {}
 
   void Dispatch(FunctionPtr func) {
     DartReturn((GetReceiver<C>(it_->args())->*func)(
@@ -176,7 +166,7 @@ struct DartDispatcher<IndicesHolder<indices...>, ResultType (C::*)(ArgTypes...)>
   }
 };
 
-template<typename Sig>
+template <typename Sig>
 void DartCall(Sig func, Dart_NativeArguments args) {
   DartArgIterator it(args);
   using Indices = typename IndicesForSignature<Sig>::type;
@@ -186,7 +176,7 @@ void DartCall(Sig func, Dart_NativeArguments args) {
   decoder.Dispatch(func);
 }
 
-template<typename Sig>
+template <typename Sig>
 void DartCallStatic(Sig func, Dart_NativeArguments args) {
   DartArgIterator it(args, 0);
   using Indices = typename IndicesForSignature<Sig>::type;
@@ -196,7 +186,7 @@ void DartCallStatic(Sig func, Dart_NativeArguments args) {
   decoder.Dispatch(func);
 }
 
-template<typename Sig>
+template <typename Sig>
 void DartCallConstructor(Sig func, Dart_NativeArguments args) {
   DartArgIterator it(args);
   using Indices = typename IndicesForSignature<Sig>::type;

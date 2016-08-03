@@ -7,7 +7,7 @@
 #include "base/location.h"
 #include "flutter/tonic/dart_args.h"
 #include "flutter/tonic/dart_binding_macros.h"
-#include "flutter/tonic/dart_converter.h"
+#include "lib/tonic/converter/dart_converter.h"
 #include "flutter/tonic/dart_library_natives.h"
 #include "sky/engine/core/rendering/PaintInfo.h"
 #include "sky/engine/core/rendering/RenderText.h"
@@ -17,97 +17,91 @@
 #include "sky/engine/platform/text/TextBoundaries.h"
 #include "sky/engine/public/platform/Platform.h"
 
+using tonic::ToDart;
+
 namespace blink {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, Paragraph);
 
-#define FOR_EACH_BINDING(V) \
-  V(Paragraph, width) \
-  V(Paragraph, height) \
-  V(Paragraph, minIntrinsicWidth) \
-  V(Paragraph, maxIntrinsicWidth) \
-  V(Paragraph, alphabeticBaseline) \
+#define FOR_EACH_BINDING(V)         \
+  V(Paragraph, width)               \
+  V(Paragraph, height)              \
+  V(Paragraph, minIntrinsicWidth)   \
+  V(Paragraph, maxIntrinsicWidth)   \
+  V(Paragraph, alphabeticBaseline)  \
   V(Paragraph, ideographicBaseline) \
-  V(Paragraph, layout) \
-  V(Paragraph, paint) \
-  V(Paragraph, getWordBoundary) \
-  V(Paragraph, getRectsForRange) \
+  V(Paragraph, layout)              \
+  V(Paragraph, paint)               \
+  V(Paragraph, getWordBoundary)     \
+  V(Paragraph, getRectsForRange)    \
   V(Paragraph, getPositionForOffset)
 
 DART_BIND_ALL(Paragraph, FOR_EACH_BINDING)
 
 Paragraph::Paragraph(PassOwnPtr<RenderView> renderView)
-    : m_renderView(renderView)
-{
+    : m_renderView(renderView) {}
+
+Paragraph::~Paragraph() {
+  base::SingleThreadTaskRunner* runner = Platform::current()->GetUITaskRunner();
+  runner->DeleteSoon(FROM_HERE, m_renderView.leakPtr());
 }
 
-Paragraph::~Paragraph()
-{
-    base::SingleThreadTaskRunner* runner = Platform::current()->GetUITaskRunner();
-    runner->DeleteSoon(FROM_HERE, m_renderView.leakPtr());
+double Paragraph::width() {
+  return firstChildBox()->width();
 }
 
-double Paragraph::width()
-{
-    return firstChildBox()->width();
+double Paragraph::height() {
+  return firstChildBox()->height();
 }
 
-double Paragraph::height()
-{
-    return firstChildBox()->height();
+double Paragraph::minIntrinsicWidth() {
+  return firstChildBox()->minPreferredLogicalWidth();
 }
 
-double Paragraph::minIntrinsicWidth()
-{
-    return firstChildBox()->minPreferredLogicalWidth();
+double Paragraph::maxIntrinsicWidth() {
+  return firstChildBox()->maxPreferredLogicalWidth();
 }
 
-double Paragraph::maxIntrinsicWidth()
-{
-    return firstChildBox()->maxPreferredLogicalWidth();
+double Paragraph::alphabeticBaseline() {
+  return firstChildBox()->firstLineBoxBaseline(
+      FontBaselineOrAuto(AlphabeticBaseline));
 }
 
-double Paragraph::alphabeticBaseline()
-{
-    return firstChildBox()->firstLineBoxBaseline(FontBaselineOrAuto(AlphabeticBaseline));
+double Paragraph::ideographicBaseline() {
+  return firstChildBox()->firstLineBoxBaseline(
+      FontBaselineOrAuto(IdeographicBaseline));
 }
 
-double Paragraph::ideographicBaseline()
-{
-    return firstChildBox()->firstLineBoxBaseline(FontBaselineOrAuto(IdeographicBaseline));
+void Paragraph::layout(double width) {
+  FontCachePurgePreventer fontCachePurgePreventer;
+
+  int maxWidth = LayoutUnit(width);  // Handles infinity properly.
+  m_renderView->setFrameViewSize(IntSize(maxWidth, intMaxForLayoutUnit));
+  m_renderView->layout();
 }
 
-void Paragraph::layout(double width)
-{
-    FontCachePurgePreventer fontCachePurgePreventer;
+void Paragraph::paint(Canvas* canvas, double x, double y) {
+  SkCanvas* skCanvas = canvas->canvas();
+  if (!skCanvas)
+    return;
 
-    int maxWidth = LayoutUnit(width); // Handles infinity properly.
-    m_renderView->setFrameViewSize(IntSize(maxWidth, intMaxForLayoutUnit));
-    m_renderView->layout();
-}
+  FontCachePurgePreventer fontCachePurgePreventer;
 
-void Paragraph::paint(Canvas* canvas, double x, double y)
-{
-    SkCanvas* skCanvas = canvas->canvas();
-    if (!skCanvas)
-      return;
+  // Very simplified painting to allow painting an arbitrary (layer-less)
+  // subtree.
+  RenderBox* box = firstChildBox();
+  skCanvas->translate(x, y);
 
-    FontCachePurgePreventer fontCachePurgePreventer;
+  GraphicsContext context(skCanvas);
+  Vector<RenderBox*> layers;
+  LayoutRect bounds = box->absoluteBoundingBoxRect();
+  DCHECK(bounds.x() == 0 && bounds.y() == 0);
+  PaintInfo paintInfo(&context, enclosingIntRect(bounds), box);
+  box->paint(paintInfo, LayoutPoint(), layers);
+  // Note we're ignoring any layers encountered.
+  // TODO(abarth): Remove the concept of RenderLayers.
 
-    // Very simplified painting to allow painting an arbitrary (layer-less) subtree.
-    RenderBox* box = firstChildBox();
-    skCanvas->translate(x, y);
-
-    GraphicsContext context(skCanvas);
-    Vector<RenderBox*> layers;
-    LayoutRect bounds = box->absoluteBoundingBoxRect();
-    DCHECK(bounds.x() == 0 && bounds.y() == 0);
-    PaintInfo paintInfo(&context, enclosingIntRect(bounds), box);
-    box->paint(paintInfo, LayoutPoint(), layers);
-    // Note we're ignoring any layers encountered.
-    // TODO(abarth): Remove the concept of RenderLayers.
-
-    skCanvas->translate(-x, -y);
+  skCanvas->translate(-x, -y);
 }
 
 std::vector<TextBox> Paragraph::getRectsForRange(unsigned start, unsigned end) {
@@ -116,7 +110,8 @@ std::vector<TextBox> Paragraph::getRectsForRange(unsigned start, unsigned end) {
 
   unsigned offset = 0;
   std::vector<TextBox> boxes;
-  for (RenderObject* object = m_renderView.get(); object; object = object->nextInPreOrder()) {
+  for (RenderObject* object = m_renderView.get(); object;
+       object = object->nextInPreOrder()) {
     if (!object->isText())
       continue;
     RenderText* text = toRenderText(object);
@@ -137,7 +132,8 @@ std::vector<TextBox> Paragraph::getRectsForRange(unsigned start, unsigned end) {
 int Paragraph::absoluteOffsetForPosition(const PositionWithAffinity& position) {
   DCHECK(position.renderer());
   unsigned offset = 0;
-  for (RenderObject* object = m_renderView.get(); object; object = object->nextInPreOrder()) {
+  for (RenderObject* object = m_renderView.get(); object;
+       object = object->nextInPreOrder()) {
     if (object == position.renderer())
       return offset + position.offset();
     if (object->isText()) {
@@ -162,7 +158,8 @@ Dart_Handle Paragraph::getWordBoundary(unsigned offset) {
   String text;
   int start = 0, end = 0;
 
-  for (RenderObject* object = m_renderView.get(); object; object = object->nextInPreOrder()) {
+  for (RenderObject* object = m_renderView.get(); object;
+       object = object->nextInPreOrder()) {
     if (!object->isText())
       continue;
     RenderText* renderText = toRenderText(object);
@@ -173,7 +170,7 @@ Dart_Handle Paragraph::getWordBoundary(unsigned offset) {
   if (it) {
     end = it->following(offset);
     if (end < 0)
-        end = it->last();
+      end = it->last();
     start = it->previous();
   }
 
@@ -183,4 +180,4 @@ Dart_Handle Paragraph::getWordBoundary(unsigned offset) {
   return result;
 }
 
-} // namespace blink
+}  // namespace blink

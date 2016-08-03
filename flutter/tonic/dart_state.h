@@ -49,13 +49,12 @@ class DartState {
   void SetIsolate(Dart_Isolate isolate);
 
   DartClassLibrary& class_library() { return *class_library_; }
-  DartExceptionFactory& exception_factory() { return *exception_factory_; }
   DartLibraryLoader& library_loader() { return *library_loader_; }
   DartMessageHandler& message_handler() { return *message_handler_; }
 
   // Takes ownership of |isolate_reloader|.
   void set_isolate_reloader(
-        std::unique_ptr<DartIsolateReloader> isolate_reloader) {
+      std::unique_ptr<DartIsolateReloader> isolate_reloader) {
     isolate_reloader_ = std::move(isolate_reloader);
   }
   DartIsolateReloader* isolate_reloader() { return isolate_reloader_.get(); }
@@ -67,7 +66,6 @@ class DartState {
  private:
   Dart_Isolate isolate_;
   std::unique_ptr<DartClassLibrary> class_library_;
-  std::unique_ptr<DartExceptionFactory> exception_factory_;
   std::unique_ptr<DartLibraryLoader> library_loader_;
   std::unique_ptr<DartMessageHandler> message_handler_;
   std::unique_ptr<DartIsolateReloader> isolate_reloader_;

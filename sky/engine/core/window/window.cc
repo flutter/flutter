@@ -5,10 +5,13 @@
 #include "sky/engine/core/window/window.h"
 
 #include "flutter/lib/ui/compositing/scene.h"
-#include "flutter/tonic/dart_converter.h"
+#include "lib/tonic/converter/dart_converter.h"
 #include "flutter/tonic/dart_invoke.h"
 #include "flutter/tonic/dart_library_natives.h"
 #include "sky/engine/core/script/ui_dart_state.h"
+
+using tonic::StdStringToDart;
+using tonic::ToDart;
 
 namespace blink {
 namespace {
@@ -19,7 +22,8 @@ void ScheduleFrame(Dart_NativeArguments args) {
 
 void Render(Dart_NativeArguments args) {
   Dart_Handle exception = nullptr;
-  Scene* scene = DartConverter<Scene*>::FromArguments(args, 1, exception);
+  Scene* scene =
+      tonic::DartConverter<Scene*>::FromArguments(args, 1, exception);
   if (exception) {
     Dart_ThrowException(exception);
     return;

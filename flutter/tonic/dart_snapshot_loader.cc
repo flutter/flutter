@@ -7,20 +7,19 @@
 #include "base/callback.h"
 #include "base/trace_event/trace_event.h"
 #include "flutter/tonic/dart_api_scope.h"
-#include "flutter/tonic/dart_converter.h"
 #include "flutter/tonic/dart_error.h"
 #include "flutter/tonic/dart_isolate_scope.h"
+#include "flutter/tonic/dart_state.h"
+#include "lib/tonic/converter/dart_converter.h"
 
 using mojo::common::DataPipeDrainer;
 
 namespace blink {
 
 DartSnapshotLoader::DartSnapshotLoader(DartState* dart_state)
-    : dart_state_(dart_state->GetWeakPtr()) {
-}
+    : dart_state_(dart_state->GetWeakPtr()) {}
 
-DartSnapshotLoader::~DartSnapshotLoader() {
-}
+DartSnapshotLoader::~DartSnapshotLoader() {}
 
 void DartSnapshotLoader::LoadSnapshot(mojo::ScopedDataPipeConsumerHandle pipe,
                                       const base::Closure& callback) {

@@ -8,7 +8,7 @@
 #include "base/files/file_util.h"
 #include "base/strings/string_util.h"
 #include "base/threading/worker_pool.h"
-#include "flutter/tonic/dart_converter.h"
+#include "lib/tonic/converter/dart_converter.h"
 #include "mojo/data_pipe_utils/data_pipe_utils.h"
 
 namespace sky {
@@ -17,9 +17,8 @@ namespace {
 
 void CopyComplete(base::FilePath file, std::string uri, bool success) {
   if (!success)
-    LOG(FATAL) << "Failed to load "
-               << file.AsUTF8Unsafe()
-               << " (" << uri << ")";
+    LOG(FATAL) << "Failed to load " << file.AsUTF8Unsafe() << " (" << uri
+               << ")";
 }
 
 // Extract the scheme prefix ('package:' or 'file:' from )
@@ -61,11 +60,9 @@ base::FilePath SimplifyPath(const base::FilePath& path) {
 
 }  // namespace
 
-DartLibraryProviderFiles::DartLibraryProviderFiles() {
-}
+DartLibraryProviderFiles::DartLibraryProviderFiles() {}
 
-DartLibraryProviderFiles::~DartLibraryProviderFiles() {
-}
+DartLibraryProviderFiles::~DartLibraryProviderFiles() {}
 
 void DartLibraryProviderFiles::LoadPackagesMap(const base::FilePath& packages) {
   packages_ = packages;
@@ -79,7 +76,8 @@ void DartLibraryProviderFiles::LoadPackagesMap(const base::FilePath& packages) {
   std::string error;
   if (!packages_map_.Parse(packages_source, &error)) {
     LOG(ERROR) << "error: Unable to parse .packages file '"
-               << packages_.AsUTF8Unsafe() << "'.\n" << error;
+               << packages_.AsUTF8Unsafe() << "'.\n"
+               << error;
     exit(1);
   }
 }
@@ -101,23 +99,24 @@ void DartLibraryProviderFiles::GetLibraryAsStream(
 
 Dart_Handle DartLibraryProviderFiles::CanonicalizeURL(Dart_Handle library,
                                                       Dart_Handle url) {
-  std::string string = blink::StdStringFromDart(url);
+  std::string string = tonic::StdStringFromDart(url);
   if (base::StartsWithASCII(string, "dart:", true))
     return url;
   if (base::StartsWithASCII(string, "package:", true))
     return url;
   if (base::StartsWithASCII(string, "file:", true)) {
     base::ReplaceFirstSubstringAfterOffset(&string, 0, "file:", "");
-    return blink::StdStringToDart(string);;
+    return tonic::StdStringToDart(string);
+    ;
   }
 
-  std::string library_url = blink::StdStringFromDart(Dart_LibraryUrl(library));
+  std::string library_url = tonic::StdStringFromDart(Dart_LibraryUrl(library));
   std::string prefix = ExtractSchemePrefix(library_url);
   std::string path = ExtractPath(library_url);
   base::FilePath base_path(path);
   base::FilePath resolved_path = base_path.DirName().Append(string);
   base::FilePath normalized_path = SimplifyPath(resolved_path);
-  return blink::StdStringToDart(prefix + normalized_path.AsUTF8Unsafe());
+  return tonic::StdStringToDart(prefix + normalized_path.AsUTF8Unsafe());
 }
 
 base::FilePath DartLibraryProviderFiles::GetFilePathForURL(std::string url) {
@@ -148,7 +147,8 @@ base::FilePath DartLibraryProviderFiles::GetFilePathForPackageURL(
   return packages_.DirName().Append(package_path).Append(library_path);
 }
 
-base::FilePath DartLibraryProviderFiles::GetFilePathForFileURL(std::string url) {
+base::FilePath DartLibraryProviderFiles::GetFilePathForFileURL(
+    std::string url) {
   DCHECK(base::StartsWithASCII(url, "file://", true));
   base::ReplaceFirstSubstringAfterOffset(&url, 0, "file://", "");
   return base::FilePath(url);

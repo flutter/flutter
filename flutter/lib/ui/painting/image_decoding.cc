@@ -13,12 +13,14 @@
 #include "flutter/tonic/dart_invoke.h"
 #include "flutter/tonic/dart_persistent_value.h"
 #include "flutter/tonic/mojo_converter.h"
-#include "flutter/tonic/uint8_list.h"
+#include "lib/tonic/typed_data/uint8_list.h"
 #include "sky/engine/platform/mojo/data_pipe.h"
 #include "sky/engine/platform/SharedBuffer.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/shell/platform_view.h"
 #include "third_party/skia/include/core/SkImageGenerator.h"
+
+using tonic::ToDart;
 
 namespace blink {
 namespace {
@@ -85,7 +87,7 @@ void DecodeImageFromDataPipe(Dart_NativeArguments args) {
   Dart_Handle exception = nullptr;
 
   mojo::ScopedDataPipeConsumerHandle consumer =
-      DartConverter<mojo::ScopedDataPipeConsumerHandle>::FromArguments(
+      tonic::DartConverter<mojo::ScopedDataPipeConsumerHandle>::FromArguments(
           args, 0, exception);
   if (exception) {
     Dart_ThrowException(exception);
@@ -109,7 +111,8 @@ void DecodeImageFromDataPipe(Dart_NativeArguments args) {
 void DecodeImageFromList(Dart_NativeArguments args) {
   Dart_Handle exception = nullptr;
 
-  Uint8List list = DartConverter<Uint8List>::FromArguments(args, 0, exception);
+  tonic::Uint8List list =
+      tonic::DartConverter<tonic::Uint8List>::FromArguments(args, 0, exception);
   if (exception) {
     Dart_ThrowException(exception);
     return;

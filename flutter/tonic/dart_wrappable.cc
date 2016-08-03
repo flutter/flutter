@@ -6,7 +6,6 @@
 
 #include "flutter/tonic/dart_class_library.h"
 #include "flutter/tonic/dart_error.h"
-#include "flutter/tonic/dart_exception_factory.h"
 #include "flutter/tonic/dart_state.h"
 #include "flutter/tonic/dart_wrapper_info.h"
 
@@ -64,7 +63,8 @@ void DartWrappable::ClearDartWrapper() {
   DCHECK(dart_wrapper_);
   Dart_Handle wrapper = Dart_HandleFromWeakPersistent(dart_wrapper_);
   CHECK(!LogIfError(Dart_SetNativeInstanceField(wrapper, kPeerIndex, 0)));
-  CHECK(!LogIfError(Dart_SetNativeInstanceField(wrapper, kWrapperInfoIndex, 0)));
+  CHECK(
+      !LogIfError(Dart_SetNativeInstanceField(wrapper, kWrapperInfoIndex, 0)));
   Dart_DeleteWeakPersistentHandle(Dart_CurrentIsolate(), dart_wrapper_);
   dart_wrapper_ = nullptr;
   GetDartWrapperInfo().deref_object(this);

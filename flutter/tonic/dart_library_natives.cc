@@ -4,15 +4,15 @@
 
 #include "flutter/tonic/dart_library_natives.h"
 
-#include "flutter/tonic/dart_converter.h"
+#include "lib/tonic/converter/dart_converter.h"
+
+using tonic::StdStringFromDart;
 
 namespace blink {
 
-DartLibraryNatives::DartLibraryNatives() {
-}
+DartLibraryNatives::DartLibraryNatives() {}
 
-DartLibraryNatives::~DartLibraryNatives() {
-}
+DartLibraryNatives::~DartLibraryNatives() {}
 
 void DartLibraryNatives::Register(std::initializer_list<Entry> entries) {
   for (const Entry& entry : entries) {
@@ -22,7 +22,9 @@ void DartLibraryNatives::Register(std::initializer_list<Entry> entries) {
 }
 
 Dart_NativeFunction DartLibraryNatives::GetNativeFunction(
-    Dart_Handle name, int argument_count, bool* auto_setup_scope) {
+    Dart_Handle name,
+    int argument_count,
+    bool* auto_setup_scope) {
   std::string name_string = StdStringFromDart(name);
   auto it = entries_.find(name_string);
   if (it == entries_.end())

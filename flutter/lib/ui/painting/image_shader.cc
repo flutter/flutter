@@ -6,7 +6,7 @@
 
 #include "flutter/tonic/dart_args.h"
 #include "flutter/tonic/dart_binding_macros.h"
-#include "flutter/tonic/dart_converter.h"
+#include "lib/tonic/converter/dart_converter.h"
 #include "flutter/tonic/dart_library_natives.h"
 
 namespace blink {
@@ -17,16 +17,14 @@ static void ImageShader_constructor(Dart_NativeArguments args) {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, ImageShader);
 
-#define FOR_EACH_BINDING(V) \
-  V(ImageShader, initWithImage)
+#define FOR_EACH_BINDING(V) V(ImageShader, initWithImage)
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
 void ImageShader::RegisterNatives(DartLibraryNatives* natives) {
-  natives->Register({
-    { "ImageShader_constructor", ImageShader_constructor, 1, true },
-FOR_EACH_BINDING(DART_REGISTER_NATIVE)
-  });
+  natives->Register(
+      {{"ImageShader_constructor", ImageShader_constructor, 1, true},
+       FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
 
 scoped_refptr<ImageShader> ImageShader::Create() {
@@ -36,7 +34,7 @@ scoped_refptr<ImageShader> ImageShader::Create() {
 void ImageShader::initWithImage(CanvasImage* image,
                                 SkShader::TileMode tmx,
                                 SkShader::TileMode tmy,
-                                const Float64List& matrix4) {
+                                const tonic::Float64List& matrix4) {
   DCHECK(image != NULL);
   SkMatrix sk_matrix = ToSkMatrix(matrix4);
   SkBitmap bitmap;
@@ -45,10 +43,8 @@ void ImageShader::initWithImage(CanvasImage* image,
   set_shader(SkShader::MakeBitmapShader(bitmap, tmx, tmy, &sk_matrix));
 }
 
-ImageShader::ImageShader() : Shader(nullptr) {
-}
+ImageShader::ImageShader() : Shader(nullptr) {}
 
-ImageShader::~ImageShader() {
-}
+ImageShader::~ImageShader() {}
 
 }  // namespace blink

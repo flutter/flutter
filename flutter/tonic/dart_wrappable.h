@@ -9,7 +9,7 @@
 #include "base/memory/ref_counted.h"
 #include "base/template_util.h"
 #include "dart/runtime/include/dart_api.h"
-#include "flutter/tonic/dart_converter.h"
+#include "lib/tonic/converter/dart_converter.h"
 #include "flutter/tonic/dart_error.h"
 #include "flutter/tonic/dart_state.h"
 #include "flutter/tonic/dart_wrapper_info.h"
@@ -38,7 +38,7 @@ class DartWrappable {
 
   Dart_Handle CreateDartWrapper(DartState* dart_state);
   void AssociateWithDartWrapper(Dart_NativeArguments args);
-  void ClearDartWrapper(); // Warning: Might delete this.
+  void ClearDartWrapper();  // Warning: Might delete this.
   Dart_WeakPersistentHandle dart_wrapper() const { return dart_wrapper_; }
 
  protected:
@@ -54,33 +54,34 @@ class DartWrappable {
   DISALLOW_COPY_AND_ASSIGN(DartWrappable);
 };
 
-#define DEFINE_WRAPPERTYPEINFO()                                               \
- public:                                                                       \
-  const DartWrapperInfo& GetDartWrapperInfo() const override {                 \
-    return dart_wrapper_info_;                                                 \
-  }                                                                            \
- private:                                                                      \
+#define DEFINE_WRAPPERTYPEINFO()                               \
+ public:                                                       \
+  const DartWrapperInfo& GetDartWrapperInfo() const override { \
+    return dart_wrapper_info_;                                 \
+  }                                                            \
+                                                               \
+ private:                                                      \
   static const DartWrapperInfo& dart_wrapper_info_
 
-#define IMPLEMENT_WRAPPERTYPEINFO(LibraryName, ClassName)                      \
-static void RefObject_##LibraryName_##ClassName(DartWrappable* impl) {         \
-  static_cast<ClassName*>(impl)->AddRef();                                     \
-}                                                                              \
-static void DerefObject_##LibraryName_##ClassName(DartWrappable* impl) {       \
-  static_cast<ClassName*>(impl)->Release();                                    \
-}                                                                              \
-static const DartWrapperInfo kDartWrapperInfo_##LibraryName_##ClassName = {    \
-  #LibraryName,                                                                \
-  #ClassName,                                                                  \
-  sizeof(ClassName),                                                           \
-  &RefObject_##LibraryName_##ClassName,                                        \
-  &DerefObject_##LibraryName_##ClassName,                                      \
-};                                                                             \
-const DartWrapperInfo& ClassName::dart_wrapper_info_ =                         \
-    kDartWrapperInfo_##LibraryName_##ClassName;                                \
-static_assert(std::is_base_of<base::subtle::RefCountedThreadSafeBase,          \
-                              ClassName>::value,                               \
-    #ClassName " must be thread-safe reference-countable.");
+#define IMPLEMENT_WRAPPERTYPEINFO(LibraryName, ClassName)                     \
+  static void RefObject_##LibraryName_##ClassName(DartWrappable* impl) {      \
+    static_cast<ClassName*>(impl)->AddRef();                                  \
+  }                                                                           \
+  static void DerefObject_##LibraryName_##ClassName(DartWrappable* impl) {    \
+    static_cast<ClassName*>(impl)->Release();                                 \
+  }                                                                           \
+  static const DartWrapperInfo kDartWrapperInfo_##LibraryName_##ClassName = { \
+      #LibraryName,                                                           \
+      #ClassName,                                                             \
+      sizeof(ClassName),                                                      \
+      &RefObject_##LibraryName_##ClassName,                                   \
+      &DerefObject_##LibraryName_##ClassName,                                 \
+  };                                                                          \
+  const DartWrapperInfo& ClassName::dart_wrapper_info_ =                      \
+      kDartWrapperInfo_##LibraryName_##ClassName;                             \
+  static_assert(std::is_base_of<base::subtle::RefCountedThreadSafeBase,       \
+                                ClassName>::value,                            \
+                #ClassName " must be thread-safe reference-countable.");
 
 struct DartConverterWrappable {
   static DartWrappable* FromDart(Dart_Handle handle);
@@ -89,33 +90,46 @@ struct DartConverterWrappable {
                                       Dart_Handle& exception);
 };
 
-template<typename T>
+template <typename T>
+inline T* GetReceiver(Dart_NativeArguments args) {
+  intptr_t receiver;
+  Dart_Handle result = Dart_GetNativeReceiver(args, &receiver);
+  DCHECK(!Dart_IsError(result));
+  return static_cast<T*>(reinterpret_cast<DartWrappable*>(receiver));
+}
+
+}  // namespace blink
+
+namespace tonic {
+
+template <typename T>
 struct DartConverter<
     T*,
     typename base::enable_if<
-        base::is_convertible<T*, const DartWrappable*>::value>::type> {
-  static Dart_Handle ToDart(DartWrappable* val) {
+        base::is_convertible<T*, const blink::DartWrappable*>::value>::type> {
+  static Dart_Handle ToDart(blink::DartWrappable* val) {
     if (!val)
       return Dart_Null();
     if (Dart_WeakPersistentHandle wrapper = val->dart_wrapper())
       return Dart_HandleFromWeakPersistent(wrapper);
-    return val->CreateDartWrapper(DartState::Current());
+    return val->CreateDartWrapper(blink::DartState::Current());
   }
 
   static void SetReturnValue(Dart_NativeArguments args,
-                             DartWrappable* val,
+                             blink::DartWrappable* val,
                              bool auto_scope = true) {
     if (!val)
       Dart_SetReturnValue(args, Dart_Null());
     else if (Dart_WeakPersistentHandle wrapper = val->dart_wrapper())
       Dart_SetWeakHandleReturnValue(args, wrapper);
     else
-      Dart_SetReturnValue(args, val->CreateDartWrapper(DartState::Current()));
+      Dart_SetReturnValue(args,
+                          val->CreateDartWrapper(blink::DartState::Current()));
   }
 
   static T* FromDart(Dart_Handle handle) {
     // TODO(abarth): We're missing a type check.
-    return static_cast<T*>(DartConverterWrappable::FromDart(handle));
+    return static_cast<T*>(blink::DartConverterWrappable::FromDart(handle));
   }
 
   static T* FromArguments(Dart_NativeArguments args,
@@ -123,12 +137,12 @@ struct DartConverter<
                           Dart_Handle& exception,
                           bool auto_scope = true) {
     // TODO(abarth): We're missing a type check.
-    return static_cast<T*>(DartConverterWrappable::FromArguments(
-        args, index, exception));
+    return static_cast<T*>(
+        blink::DartConverterWrappable::FromArguments(args, index, exception));
   }
 };
 
-template<typename T>
+template <typename T>
 struct DartConverter<scoped_refptr<T>> {
   static Dart_Handle ToDart(const scoped_refptr<T>& val) {
     return DartConverter<T*>::ToDart(val.get());
@@ -145,14 +159,6 @@ struct DartConverter<scoped_refptr<T>> {
   }
 };
 
-template<typename T>
-inline T* GetReceiver(Dart_NativeArguments args) {
-  intptr_t receiver;
-  Dart_Handle result = Dart_GetNativeReceiver(args, &receiver);
-  DCHECK(!Dart_IsError(result));
-  return static_cast<T*>(reinterpret_cast<DartWrappable*>(receiver));
-}
-
-}  // namespace blink
+}  // namespace tonic
 
 #endif  // FLUTTER_TONIC_DART_WRAPPABLE_H_

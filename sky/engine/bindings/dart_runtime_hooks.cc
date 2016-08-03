@@ -12,7 +12,7 @@
 #include "dart/runtime/include/dart_api.h"
 #include "dart/runtime/include/dart_tools_api.h"
 #include "flutter/tonic/dart_api_scope.h"
-#include "flutter/tonic/dart_converter.h"
+#include "lib/tonic/converter/dart_converter.h"
 #include "flutter/tonic/dart_error.h"
 #include "flutter/tonic/dart_invoke.h"
 #include "flutter/tonic/dart_isolate_scope.h"
@@ -30,15 +30,16 @@
 #if __APPLE__
 extern "C" {
 // Cannot import the syslog.h header directly because of macro collision
-extern void syslog(int, const char *, ...);
+extern void syslog(int, const char*, ...);
 }
 #endif
 
+using tonic::ToDart;
+
 namespace blink {
 
-#define REGISTER_FUNCTION(name, count)                                         \
-  { "" #name, name, count, true },
-#define DECLARE_FUNCTION(name, count)                                          \
+#define REGISTER_FUNCTION(name, count) {"" #name, name, count, true},
+#define DECLARE_FUNCTION(name, count) \
   extern void name(Dart_NativeArguments args);
 
 // Lists the native functions implementing basic functionality in
@@ -51,9 +52,7 @@ namespace blink {
 BUILTIN_NATIVE_LIST(DECLARE_FUNCTION);
 
 void DartRuntimeHooks::RegisterNatives(DartLibraryNatives* natives) {
-  natives->Register({
-    BUILTIN_NATIVE_LIST(REGISTER_FUNCTION)
-  });
+  natives->Register({BUILTIN_NATIVE_LIST(REGISTER_FUNCTION)});
 }
 
 static Dart_Handle GetClosure(Dart_Handle builtin_library, const char* name) {
@@ -69,13 +68,12 @@ static void InitDartInternal(Dart_Handle builtin_library,
 
   Dart_Handle internal_library = Dart_LookupLibrary(ToDart("dart:_internal"));
 
-  DART_CHECK_VALID(Dart_SetField(
-      internal_library, ToDart("_printClosure"), print));
+  DART_CHECK_VALID(
+      Dart_SetField(internal_library, ToDart("_printClosure"), print));
 
   if (isolate_type == DartRuntimeHooks::MainIsolate) {
     // Call |_setupHooks| to configure |VMLibraryHooks|.
-    Dart_Handle method_name =
-        Dart_NewStringFromCString("_setupHooks");
+    Dart_Handle method_name = Dart_NewStringFromCString("_setupHooks");
     DART_CHECK_VALID(Dart_Invoke(builtin_library, method_name, 0, NULL))
 
     // Call |_setupHooks| to configure |VMLibraryHooks|.
@@ -97,8 +95,8 @@ static void InitDartInternal(Dart_Handle builtin_library,
 static void InitDartCore(Dart_Handle builtin) {
   Dart_Handle get_base_url = GetClosure(builtin, "_getGetBaseURLClosure");
   Dart_Handle core_library = Dart_LookupLibrary(ToDart("dart:core"));
-  DART_CHECK_VALID(Dart_SetField(core_library,
-      ToDart("_uriBaseClosure"), get_base_url));
+  DART_CHECK_VALID(
+      Dart_SetField(core_library, ToDart("_uriBaseClosure"), get_base_url));
 }
 
 static void InitDartAsync(Dart_Handle builtin_library,
@@ -124,15 +122,16 @@ static void InitDartIo(const std::string& script_uri) {
   if (!script_uri.empty()) {
     Dart_Handle io_lib = Dart_LookupLibrary(ToDart("dart:io"));
     DART_CHECK_VALID(io_lib);
-    Dart_Handle platform_type = Dart_GetType(io_lib, ToDart("_Platform"),
-                                             0, nullptr);
+    Dart_Handle platform_type =
+        Dart_GetType(io_lib, ToDart("_Platform"), 0, nullptr);
     DART_CHECK_VALID(platform_type);
-    DART_CHECK_VALID(Dart_SetField(
-        platform_type, ToDart("_nativeScript"), ToDart(script_uri)));
+    DART_CHECK_VALID(Dart_SetField(platform_type, ToDart("_nativeScript"),
+                                   ToDart(script_uri)));
   }
 }
 
-void DartRuntimeHooks::Install(IsolateType isolate_type, const std::string& script_uri) {
+void DartRuntimeHooks::Install(IsolateType isolate_type,
+                               const std::string& script_uri) {
   Dart_Handle builtin = Dart_LookupLibrary(ToDart("dart:ui"));
   DART_CHECK_VALID(builtin);
   InitDartInternal(builtin, isolate_type);
@@ -158,17 +157,17 @@ void Logger_PrintString(Dart_NativeArguments args) {
 #if defined(OS_ANDROID)
     // In addition to writing to the stdout, write to the logcat so that the
     // message is discoverable when running on an unrooted device.
-    __android_log_print(ANDROID_LOG_INFO, "flutter", "%.*s", (int)length, chars);
+    __android_log_print(ANDROID_LOG_INFO, "flutter", "%.*s", (int)length,
+                        chars);
 #elif __APPLE__
     syslog(1 /* LOG_ALERT */, "%.*s", (int)length, chars);
 #endif
   }
   if (dart::bin::ShouldCaptureStdout()) {
     // For now we report print output on the Stdout stream.
-    uint8_t newline[] = { '\n' };
+    uint8_t newline[] = {'\n'};
     Dart_ServiceSendDataEvent("Stdout", "WriteEvent", chars, length);
-    Dart_ServiceSendDataEvent("Stdout", "WriteEvent",
-                              newline, sizeof(newline));
+    Dart_ServiceSendDataEvent("Stdout", "WriteEvent", newline, sizeof(newline));
   }
 }
 

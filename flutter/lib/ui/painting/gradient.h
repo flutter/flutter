@@ -7,35 +7,40 @@
 
 #include "flutter/lib/ui/painting/shader.h"
 #include "flutter/tonic/dart_wrappable.h"
-#include "flutter/tonic/float32_list.h"
-#include "flutter/tonic/int32_list.h"
+#include "lib/tonic/typed_data/float32_list.h"
+#include "lib/tonic/typed_data/int32_list.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 
-namespace blink {
-class DartLibraryNatives;
+namespace tonic {
 
 template <>
 struct DartConverter<SkShader::TileMode>
     : public DartConverterInteger<SkShader::TileMode> {};
 
+}  // namspace tonic
+
+namespace blink {
+class DartLibraryNatives;
+
 static_assert(SkShader::kTileModeCount == 3, "Need to update tile mode enum");
 
 class CanvasGradient : public Shader {
   DEFINE_WRAPPERTYPEINFO();
+
  public:
   ~CanvasGradient() override;
   static scoped_refptr<CanvasGradient> Create();
 
-  void initLinear(const Float32List& end_points,
-                  const Int32List& colors,
-                  const Float32List& color_stops,
+  void initLinear(const tonic::Float32List& end_points,
+                  const tonic::Int32List& colors,
+                  const tonic::Float32List& color_stops,
                   SkShader::TileMode tile_mode);
 
   void initRadial(double center_x,
                   double center_y,
                   double radius,
-                  const Int32List& colors,
-                  const Float32List& color_stops,
+                  const tonic::Int32List& colors,
+                  const tonic::Float32List& color_stops,
                   SkShader::TileMode tile_mode);
 
   static void RegisterNatives(DartLibraryNatives* natives);
@@ -44,6 +49,6 @@ class CanvasGradient : public Shader {
   CanvasGradient();
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // FLUTTER_LIB_UI_PAINTING_GRADIENT_H_

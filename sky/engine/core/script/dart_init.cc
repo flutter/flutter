@@ -31,7 +31,7 @@
 #include "flutter/tonic/dart_snapshot_loader.h"
 #include "flutter/tonic/dart_state.h"
 #include "flutter/tonic/dart_wrappable.h"
-#include "flutter/tonic/uint8_list.h"
+#include "lib/tonic/typed_data/uint8_list.h"
 #include "mojo/public/platform/dart/dart_handle_watcher.h"
 #include "services/asset_bundle/zip_asset_bundle.h"
 #include "sky/engine/bindings/dart_mojo_internal.h"
@@ -47,6 +47,8 @@
 #ifdef OS_ANDROID
 #include "flutter/lib/jni/dart_jni.h"
 #endif
+
+using tonic::ToDart;
 
 namespace dart {
 namespace observatory {
@@ -90,8 +92,8 @@ static const char* kDartProfilingArgs[] = {
 #endif
 };
 
-static const char *kDartMirrorsArgs[] = {
-  "--enable_mirrors=false",
+static const char* kDartMirrorsArgs[] = {
+    "--enable_mirrors=false",
 };
 
 static const char* kDartPrecompilationArgs[] = {
@@ -99,14 +101,16 @@ static const char* kDartPrecompilationArgs[] = {
 };
 
 static const char* kDartBackgroundCompilationArgs[] = {
-  "--background_compilation",
+    "--background_compilation",
 };
 
 static const char* kDartCheckedModeArgs[] = {
+    // clang-format off
     "--enable_asserts",
     "--enable_type_checks",
     "--error_on_bad_type",
     "--error_on_bad_override",
+    // clang-format on
 };
 
 static const char* kDartStartPausedArgs[]{
@@ -130,8 +134,7 @@ void IsolateShutdownCallback(void* callback_data) {
   delete dart_state;
 }
 
-bool DartFileModifiedCallback(const char* source_url,
-                              int64_t since_ms) {
+bool DartFileModifiedCallback(const char* source_url, int64_t since_ms) {
   std::string url(source_url);
   if (!base::StartsWithASCII(url, "file:", true)) {
     // Assume modified.
@@ -177,8 +180,8 @@ Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
                                           char** error) {
   DartState* dart_state = new DartState();
   Dart_Isolate isolate = Dart_CreateIsolate(
-      script_uri, "main", reinterpret_cast<const uint8_t*>(
-                              DART_SYMBOL(kDartIsolateSnapshotBuffer)),
+      script_uri, "main",
+      reinterpret_cast<const uint8_t*>(DART_SYMBOL(kDartIsolateSnapshotBuffer)),
       nullptr, dart_state, error);
   CHECK(isolate) << error;
   dart_state->SetIsolate(isolate);
@@ -196,10 +199,8 @@ Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
       const intptr_t port = settings.observatory_port;
       const bool disable_websocket_origin_check = false;
       const bool service_isolate_booted = DartServiceIsolate::Startup(
-          ip, port, DartLibraryTagHandler,
-          IsRunningPrecompiledCode(),
-          disable_websocket_origin_check,
-          error);
+          ip, port, DartLibraryTagHandler, IsRunningPrecompiledCode(),
+          disable_websocket_origin_check, error);
       CHECK(service_isolate_booted) << error;
     }
 
@@ -258,19 +259,17 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
     DartRuntimeHooks::Install(DartRuntimeHooks::SecondaryIsolate, script_uri);
 
     dart_state->class_library().add_provider(
-      "ui",
-      WTF::MakeUnique<DartClassProvider>(dart_state, "dart:ui"));
+        "ui", WTF::MakeUnique<DartClassProvider>(dart_state, "dart:ui"));
 
 #ifdef OS_ANDROID
     DartJni::InitForIsolate();
     dart_state->class_library().add_provider(
-      "jni",
-      WTF::MakeUnique<DartClassProvider>(dart_state, "dart:jni"));
+        "jni", WTF::MakeUnique<DartClassProvider>(dart_state, "dart:jni"));
 #endif
 
     if (!snapshot_data.empty()) {
-      CHECK(!LogIfError(Dart_LoadScriptFromSnapshot(
-          snapshot_data.data(), snapshot_data.size())));
+      CHECK(!LogIfError(Dart_LoadScriptFromSnapshot(snapshot_data.data(),
+                                                    snapshot_data.size())));
     }
 
     dart_state->isolate_client()->DidCreateSecondaryIsolate(isolate);
@@ -286,7 +285,7 @@ Dart_Handle GetVMServiceAssetsArchiveCallback() {
 #if FLUTTER_PRODUCT_MODE
   return nullptr;
 #else   // FLUTTER_PRODUCT_MODE
-  return DartConverter<Uint8List>::ToDart(
+  return tonic::DartConverter<tonic::Uint8List>::ToDart(
       ::dart::observatory::observatory_assets_archive,
       ::dart::observatory::observatory_assets_archive_len);
 #endif  // FLUTTER_PRODUCT_MODE
@@ -317,7 +316,7 @@ static void ServiceStreamCancelCallback(const char* stream_id) {
 #ifdef OS_ANDROID
 
 DartJniIsolateData* GetDartJniDataForCurrentIsolate() {
- return FlutterDartState::Current()->jni_data();
+  return FlutterDartState::Current()->jni_data();
 }
 
 #endif
@@ -381,10 +380,10 @@ struct SymbolAsset {
 };
 
 static SymbolAsset g_symbol_assets[] = {
-  {kDartVmIsolateSnapshotBufferName, "snapshot_aot_vmisolate", false},
-  {kDartIsolateSnapshotBufferName, "snapshot_aot_isolate", false},
-  {kInstructionsSnapshotName, "snapshot_aot_instr", true},
-  {kDataSnapshotName, "snapshot_aot_rodata", false},
+    {kDartVmIsolateSnapshotBufferName, "snapshot_aot_vmisolate", false},
+    {kDartIsolateSnapshotBufferName, "snapshot_aot_isolate", false},
+    {kInstructionsSnapshotName, "snapshot_aot_instr", true},
+    {kDataSnapshotName, "snapshot_aot_rodata", false},
 };
 
 // Resolve a precompiled snapshot symbol by mapping the corresponding asset
@@ -468,8 +467,7 @@ static base::LazyInstance<std::unique_ptr<EmbedderTracingCallbacks>>::Leaky
 EmbedderTracingCallbacks::EmbedderTracingCallbacks(
     EmbedderTracingCallback start,
     EmbedderTracingCallback stop)
-    : start_tracing_callback(start),
-      stop_tracing_callback(stop) {}
+    : start_tracing_callback(start), stop_tracing_callback(stop) {}
 
 void SetEmbedderTracingCallbacks(
     std::unique_ptr<EmbedderTracingCallbacks> callbacks) {
@@ -617,10 +615,10 @@ void InitDartVM() {
       Dart_TimelineEvent("FlutterEngineMainEnter",     // label
                          blink::engine_main_enter_ts,  // timestamp0
                          blink::engine_main_enter_ts,  // timestamp1_or_async_id
-                         Dart_Timeline_Event_Duration, // event type
-                         0,                            // argument_count
-                         nullptr,                      // argument_names
-                         nullptr                       // argument_values
+                         Dart_Timeline_Event_Duration,  // event type
+                         0,                             // argument_count
+                         nullptr,                       // argument_names
+                         nullptr                        // argument_values
                          );
     }
   }

@@ -8,7 +8,7 @@
 #include "base/callback.h"
 #include "base/threading/thread.h"
 #include "flutter/tonic/dart_api_scope.h"
-#include "flutter/tonic/dart_converter.h"
+#include "lib/tonic/converter/dart_converter.h"
 #include "flutter/tonic/dart_dependency_catcher.h"
 #include "flutter/tonic/dart_error.h"
 #include "flutter/tonic/dart_isolate_scope.h"
@@ -19,6 +19,9 @@
 #include "mojo/data_pipe_utils/data_pipe_drainer.h"
 
 using mojo::common::DataPipeDrainer;
+using tonic::ToDart;
+using tonic::StdStringToDart;
+using tonic::StdStringFromDart;
 
 namespace blink {
 
@@ -50,8 +53,7 @@ class DartIsolateReloader::LoadResult {
         tag_(tag),
         url_(url),
         library_url_(library_url),
-        error_(error) {
-  }
+        error_(error) {}
 
   bool success() const { return success_; }
 
@@ -107,8 +109,7 @@ DartIsolateReloader::DartIsolateReloader(DartLibraryProvider* library_provider)
   CHECK(thread_->Start());
 }
 
-DartIsolateReloader::~DartIsolateReloader() {
-}
+DartIsolateReloader::~DartIsolateReloader() {}
 
 void DartIsolateReloader::SendRequest(Dart_LibraryTag tag,
                                       Dart_Handle url,
@@ -121,13 +122,10 @@ void DartIsolateReloader::SendRequest(Dart_LibraryTag tag,
   // Post a task to the worker thread. This task will request the I/O and
   // post a LoadResult to be processed once complete.
   if (runner->PostTask(
-        FROM_HERE,
-        base::Bind(&DartIsolateReloader::RequestTask,
-                   library_provider_,
-                   this,
-                   static_cast<intptr_t>(tag),
-                   StdStringFromDart(url),
-                   StdStringFromDart(library_url)))) {
+          FROM_HERE,
+          base::Bind(&DartIsolateReloader::RequestTask, library_provider_, this,
+                     static_cast<intptr_t>(tag), StdStringFromDart(url),
+                     StdStringFromDart(library_url)))) {
     pending_requests_++;
   }
 }
@@ -154,9 +152,8 @@ class DartIsolateReloader::LoadRequest : public DataPipeDrainer::Client {
         library_url_(library_url),
         weak_factory_(this) {
     library_provider->GetLibraryAsStream(
-        url_,
-        base::Bind(&LoadRequest::OnStreamAvailable,
-                   weak_factory_.GetWeakPtr()));
+        url_, base::Bind(&LoadRequest::OnStreamAvailable,
+                         weak_factory_.GetWeakPtr()));
   }
 
  protected:
@@ -165,9 +162,7 @@ class DartIsolateReloader::LoadRequest : public DataPipeDrainer::Client {
     if (!pipe.is_valid()) {
       std::unique_ptr<DartIsolateReloader::LoadResult> result(
           new DartIsolateReloader::LoadResult(
-              tag_,
-              url_,
-              library_url_,
+              tag_, url_, library_url_,
               "File " + url_ + " could not be read."));
       LOG(ERROR) << "Load failed for " << url_;
       isolate_reloader_->PostResult(std::move(result));
@@ -188,11 +183,8 @@ class DartIsolateReloader::LoadRequest : public DataPipeDrainer::Client {
   // DataPipeDrainer::Client
   void OnDataComplete() override {
     std::unique_ptr<DartIsolateReloader::LoadResult> result(
-        new DartIsolateReloader::LoadResult(tag_,
-                                            url_,
-                                            library_url_,
-                                            resolved_url_,
-                                            std::move(buffer_)));
+        new DartIsolateReloader::LoadResult(tag_, url_, library_url_,
+                                            resolved_url_, std::move(buffer_)));
     isolate_reloader_->PostResult(std::move(result));
     // We are finished with this request.
     delete this;
@@ -220,11 +212,7 @@ void DartIsolateReloader::RequestTask(DartLibraryProvider* library_provider,
   DCHECK(tag > 0);
   // Construct a new LoadRequest. The pointer is dropped here because
   // the request deletes itself on success and failure.
-  new LoadRequest(library_provider,
-                  isolate_reloader,
-                  tag,
-                  url,
-                  library_url);
+  new LoadRequest(library_provider, isolate_reloader, tag, url, library_url);
 }
 
 void DartIsolateReloader::HandleLoadResultLocked(LoadResult* load_result) {
@@ -294,9 +282,8 @@ Dart_Handle DartIsolateReloader::HandleLibraryTag(Dart_LibraryTag tag,
     // Associate the reloader with the isolate. The reloader is owned
     // by the dart_state.
     dart_state->set_isolate_reloader(
-        std::unique_ptr<DartIsolateReloader>(
-            new DartIsolateReloader(
-                dart_state->library_loader().library_provider())));
+        std::unique_ptr<DartIsolateReloader>(new DartIsolateReloader(
+            dart_state->library_loader().library_provider())));
     // Get a pointer to the reloader.
     isolate_reloader = dart_state->isolate_reloader();
     // Switch the tag handler.
@@ -307,10 +294,9 @@ Dart_Handle DartIsolateReloader::HandleLibraryTag(Dart_LibraryTag tag,
   }
 
   // Issue I/O request.
-  isolate_reloader->SendRequest(tag,
-                                url,
-                                (library != Dart_Null()) ?
-                                Dart_LibraryUrl(library) : Dart_Null());
+  isolate_reloader->SendRequest(tag, url, (library != Dart_Null())
+                                              ? Dart_LibraryUrl(library)
+                                              : Dart_Null());
 
   if (blocking_call) {
     // Block and process LoadResults until the load is complete.

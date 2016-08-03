@@ -66,7 +66,7 @@ void DiagnosticServer::Start() {
   if (!g_natives) {
     g_natives = new DartLibraryNatives();
     g_natives->Register({
-      DART_REGISTER_NATIVE_STATIC(DiagnosticServer, HandleSkiaPictureRequest)
+        DART_REGISTER_NATIVE_STATIC(DiagnosticServer, HandleSkiaPictureRequest),
     });
   }
 
@@ -74,20 +74,19 @@ void DiagnosticServer::Start() {
       &mojo::dart::__sky_embedder_diagnostic_server_resources_[0]);
 
   const char* source = NULL;
-  int source_length = resources.ResourceLookup(kDiagnosticServerScript,
-                                               &source);
+  int source_length =
+      resources.ResourceLookup(kDiagnosticServerScript, &source);
   DCHECK(source_length != EmbedderResources::kNoSuchInstance);
 
   Dart_Handle diagnostic_library = Dart_LoadLibrary(
-      Dart_NewStringFromCString("dart:diagnostic_server"),
-      Dart_Null(),
+      Dart_NewStringFromCString("dart:diagnostic_server"), Dart_Null(),
       Dart_NewStringFromUTF8(reinterpret_cast<const uint8_t*>(source),
                              source_length),
       0, 0);
   CHECK(!LogIfError(diagnostic_library));
 
-  CHECK(!LogIfError(Dart_SetNativeResolver(
-      diagnostic_library, GetNativeFunction, GetSymbol)));
+  CHECK(!LogIfError(Dart_SetNativeResolver(diagnostic_library,
+                                           GetNativeFunction, GetSymbol)));
 
   CHECK(!LogIfError(Dart_LibraryImportLibrary(
       Dart_RootLibrary(), diagnostic_library, Dart_Null())));
@@ -101,8 +100,8 @@ void DiagnosticServer::HandleSkiaPictureRequest(Dart_Handle send_port) {
   Dart_Port port_id;
   CHECK(!LogIfError(Dart_SendPortGetId(send_port, &port_id)));
 
-  Shell::Shared().gpu_task_runner()->PostTask(FROM_HERE,
-      base::Bind(SkiaPictureTask, port_id));
+  Shell::Shared().gpu_task_runner()->PostTask(
+      FROM_HERE, base::Bind(SkiaPictureTask, port_id));
 }
 
 void DiagnosticServer::SkiaPictureTask(Dart_Port port_id) {

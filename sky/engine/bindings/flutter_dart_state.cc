@@ -4,17 +4,18 @@
 
 #include "sky/engine/bindings/flutter_dart_state.h"
 
-#include "flutter/tonic/dart_converter.h"
+#include "lib/tonic/converter/dart_converter.h"
 #include "sky/engine/bindings/mojo_services.h"
 
 #ifdef OS_ANDROID
 #include "flutter/lib/jni/dart_jni.h"
 #endif
 
+using tonic::ToDart;
+
 namespace blink {
 
-IsolateClient::~IsolateClient() {
-}
+IsolateClient::~IsolateClient() {}
 
 FlutterDartState::FlutterDartState(IsolateClient* isolate_client,
                                    const std::string& url)
