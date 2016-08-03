@@ -17,11 +17,13 @@
 #include "base/posix/eintr_wrapper.h"
 #include "base/single_thread_task_runner.h"
 #include "base/trace_event/trace_event.h"
+#include "dart/runtime/include/dart_tools_api.h"
 #include "mojo/message_pump/message_pump_mojo.h"
 #include "skia/ext/event_tracer_impl.h"
 #include "sky/engine/core/script/dart_init.h"
 #include "sky/engine/public/platform/sky_settings.h"
 #include "sky/shell/diagnostic/diagnostic_server.h"
+#include "sky/shell/platform_view_service_protocol.h"
 #include "sky/shell/switches.h"
 #include "sky/shell/ui/engine.h"
 
@@ -37,6 +39,10 @@ scoped_ptr<base::MessagePump> CreateMessagePumpMojo() {
 
 bool IsInvalid(const base::WeakPtr<Rasterizer>& rasterizer) {
   return !rasterizer;
+}
+
+bool IsViewInvalid(const base::WeakPtr<PlatformView>& platform_view) {
+  return !platform_view;
 }
 
 class NonDiscardableMemory : public base::DiscardableMemory {
@@ -85,12 +91,16 @@ Shell::Shell() {
   ui_thread_.reset(new base::Thread("ui_thread"));
   ui_thread_->StartWithOptions(options);
   ui_task_runner_ = ui_thread_->message_loop()->task_runner();
+  ui_task_runner_->PostTask(
+      FROM_HERE, base::Bind(&Shell::InitUIThread, base::Unretained(this)));
 
   io_thread_.reset(new base::Thread("io_thread"));
   io_thread_->StartWithOptions(options);
   io_task_runner_ = io_thread_->message_loop()->task_runner();
 
   blink::SetServiceIsolateHook(ServiceIsolateHook);
+  blink::SetRegisterNativeServiceProtocolExtensionHook(
+      PlatformViewServiceProtocol::RegisterHook);
 }
 
 Shell::~Shell() {}
@@ -172,6 +182,12 @@ void Shell::InitGpuThread() {
   gpu_thread_checker_.reset(new base::ThreadChecker());
 }
 
+
+void Shell::InitUIThread() {
+  ui_thread_checker_.reset(new base::ThreadChecker());
+}
+
+
 void Shell::AddRasterizer(const base::WeakPtr<Rasterizer>& rasterizer) {
   DCHECK(gpu_thread_checker_ && gpu_thread_checker_->CalledOnValidThread());
   rasterizers_.push_back(rasterizer);
@@ -188,6 +204,49 @@ void Shell::GetRasterizers(
     std::vector<base::WeakPtr<Rasterizer>>* rasterizers) {
   DCHECK(gpu_thread_checker_ && gpu_thread_checker_->CalledOnValidThread());
   *rasterizers = rasterizers_;
+}
+
+void Shell::AddPlatformView(const base::WeakPtr<PlatformView>& platform_view) {
+  DCHECK(ui_thread_checker_ && ui_thread_checker_->CalledOnValidThread());
+  if (platform_view) {
+    platform_views_.push_back(platform_view);
+  }
+}
+
+void Shell::PurgePlatformViews() {
+  DCHECK(ui_thread_checker_ && ui_thread_checker_->CalledOnValidThread());
+  platform_views_.erase(std::remove_if(platform_views_.begin(),
+                                       platform_views_.end(),
+                                       IsViewInvalid),
+                        platform_views_.end());
+}
+
+void Shell::GetPlatformViews(
+    std::vector<base::WeakPtr<PlatformView>>* platform_views) {
+  DCHECK(ui_thread_checker_ && ui_thread_checker_->CalledOnValidThread());
+  *platform_views = platform_views_;
+}
+
+void Shell::WaitForPlatformViews(
+    std::vector<base::WeakPtr<PlatformView>>* platform_views) {
+
+  base::WaitableEvent latch(false, false);
+
+  ui_task_runner()->PostTask(
+      FROM_HERE,
+      base::Bind(&Shell::WaitForPlatformViewsUIThread,
+                 base::Unretained(this),
+                 base::Unretained(platform_views),
+                 base::Unretained(&latch)));
+
+  latch.Wait();
+}
+
+void Shell::WaitForPlatformViewsUIThread(
+    std::vector<base::WeakPtr<PlatformView>>* platform_views,
+    base::WaitableEvent* latch) {
+  GetPlatformViews(platform_views);
+  latch->Signal();
 }
 
 }  // namespace shell

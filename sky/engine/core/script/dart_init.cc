@@ -129,6 +129,8 @@ const char kDartFlags[] = "dart-flags";
 
 bool g_service_isolate_initialized = false;
 ServiceIsolateHook g_service_isolate_hook = nullptr;
+RegisterNativeServiceProtocolExtensionHook
+    g_register_native_service_protocol_extensions_hook = nullptr;
 
 void IsolateShutdownCallback(void* callback_data) {
   DartState* dart_state = static_cast<DartState*>(callback_data);
@@ -211,6 +213,11 @@ Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
   Dart_ExitIsolate();
 
   g_service_isolate_initialized = true;
+  // Register any native service protocol extensions.
+  if (g_register_native_service_protocol_extensions_hook) {
+    g_register_native_service_protocol_extensions_hook(
+        IsRunningPrecompiledCode());
+  }
   return isolate;
 }
 
@@ -494,6 +501,12 @@ static void EmbedderTimelineStopRecording() {
 void SetServiceIsolateHook(ServiceIsolateHook hook) {
   FTL_CHECK(!g_service_isolate_initialized);
   g_service_isolate_hook = hook;
+}
+
+void SetRegisterNativeServiceProtocolExtensionHook(
+    RegisterNativeServiceProtocolExtensionHook hook) {
+  CHECK(!g_service_isolate_initialized);
+  g_register_native_service_protocol_extensions_hook = hook;
 }
 
 static bool ShouldEnableCheckedMode() {

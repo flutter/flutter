@@ -9,12 +9,14 @@
 #include "base/memory/ref_counted.h"
 #include "base/memory/weak_ptr.h"
 #include "base/message_loop/message_loop.h"
+#include "base/synchronization/waitable_event.h"
 #include "base/threading/thread.h"
 #include "sky/shell/tracing_controller.h"
 
 namespace sky {
 namespace shell {
 
+class PlatformView;
 class Rasterizer;
 
 class Shell {
@@ -49,10 +51,27 @@ class Shell {
   void PurgeRasterizers();
   void GetRasterizers(std::vector<base::WeakPtr<Rasterizer>>* rasterizer);
 
+  // List of PlatformViews.
+
+  // These APIs must only be accessed on UI thread.
+  void AddPlatformView(const base::WeakPtr<PlatformView>& platform_view);
+  void PurgePlatformViews();
+  void GetPlatformViews(std::vector<base::WeakPtr<PlatformView>>*
+                        platform_views);
+
+  // These APIs can be called from any thread.
+  void WaitForPlatformViews(
+      std::vector<base::WeakPtr<PlatformView>>* platform_views);
+
  private:
   Shell();
 
   void InitGpuThread();
+  void InitUIThread();
+
+  void WaitForPlatformViewsUIThread(
+      std::vector<base::WeakPtr<PlatformView>>* platform_views,
+      base::WaitableEvent* latch);
 
   std::unique_ptr<base::Thread> gpu_thread_;
   std::unique_ptr<base::Thread> ui_thread_;
@@ -63,10 +82,12 @@ class Shell {
   scoped_refptr<base::SingleThreadTaskRunner> io_task_runner_;
 
   std::unique_ptr<base::ThreadChecker> gpu_thread_checker_;
+  std::unique_ptr<base::ThreadChecker> ui_thread_checker_;
 
   TracingController tracing_controller_;
 
   std::vector<base::WeakPtr<Rasterizer>> rasterizers_;
+  std::vector<base::WeakPtr<PlatformView>> platform_views_;
 
   DISALLOW_COPY_AND_ASSIGN(Shell);
 };

@@ -50,6 +50,10 @@ PlatformView::PlatformView()
 
 PlatformView::~PlatformView() {
   Shell& shell = Shell::Shared();
+  // Purge dead PlatformViews.
+  shell.ui_task_runner()->PostTask(
+      FROM_HERE,
+      base::Bind(&Shell::PurgePlatformViews, base::Unretained(&shell)));
   shell.gpu_task_runner()->DeleteSoon(FROM_HERE, rasterizer_.release());
   shell.ui_task_runner()->DeleteSoon(FROM_HERE, engine_.release());
 }
@@ -58,6 +62,12 @@ void PlatformView::ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request) {
   config_.ui_task_runner->PostTask(
       FROM_HERE, base::Bind(&UIDelegate::ConnectToEngine, config_.ui_delegate,
                             base::Passed(&request)));
+  Shell& shell = Shell::Shared();
+  shell.ui_task_runner()->PostTask(
+      FROM_HERE,
+      base::Bind(&Shell::AddPlatformView,
+                 base::Unretained(&shell),
+                 GetWeakViewPtr()));
 }
 
 void PlatformView::NotifyCreated() {

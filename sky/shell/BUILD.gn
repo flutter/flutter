@@ -23,6 +23,8 @@ source_set("common") {
     "gpu/picture_serializer.h",
     "platform_view.cc",
     "platform_view.h",
+    "platform_view_service_protocol.cc",
+    "platform_view_service_protocol.h",
     "rasterizer.cc",
     "rasterizer.h",
     "shell.cc",
