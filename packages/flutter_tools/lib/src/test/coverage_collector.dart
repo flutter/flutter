@@ -58,16 +58,18 @@ class CoverageCollector {
   List<Future<Null>> _jobs = <Future<Null>>[];
   Map<String, dynamic> _globalHitmap;
 
-  Future<String> finalizeCoverage() async {
+  Future<String> finalizeCoverage({Formatter formatter}) async {
     assert(enabled);
     await finishPendingJobs();
     printTrace('formating coverage data');
     if (_globalHitmap == null)
       return null;
-    Resolver resolver = new Resolver(packagesPath: PackageMap.globalPackagesPath);
-    LcovFormatter formater = new LcovFormatter(resolver);
-    String packagePath = Directory.current.path;
-    List<String> reportOn = <String>[path.join(packagePath, 'lib')];
-    return await formater.format(_globalHitmap, reportOn: reportOn, basePath: packagePath);
+    if (formatter == null) {
+      Resolver resolver = new Resolver(packagesPath: PackageMap.globalPackagesPath);
+      String packagePath = Directory.current.path;
+      List<String> reportOn = <String>[path.join(packagePath, 'lib')];
+      formatter = new LcovFormatter(resolver, reportOn: reportOn, basePath: packagePath);
+    }
+    return await formatter.format(_globalHitmap);
   }
 }
