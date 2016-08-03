@@ -5,7 +5,7 @@
 #include "sky/engine/bindings/mojo_services.h"
 
 #include "lib/tonic/converter/dart_converter.h"
-#include "flutter/tonic/dart_error.h"
+#include "lib/tonic/logging/dart_error.h"
 #include "flutter/tonic/dart_library_natives.h"
 #include "flutter/tonic/dart_state.h"
 #include "mojo/public/cpp/application/connect.h"

@@ -6,7 +6,7 @@
 
 #include "dart/runtime/include/dart_api.h"
 #include "lib/tonic/converter/dart_converter.h"
-#include "flutter/tonic/dart_error.h"
+#include "lib/tonic/logging/dart_error.h"
 #include "flutter/tonic/dart_library_natives.h"
 #include "lib/ftl/logging.h"
 #include "sky/engine/core/script/embedder_resources.h"

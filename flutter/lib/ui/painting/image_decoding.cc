@@ -10,7 +10,7 @@
 #include "base/trace_event/trace_event.h"
 #include "flow/texture_image.h"
 #include "flutter/lib/ui/painting/image.h"
-#include "flutter/tonic/dart_invoke.h"
+#include "lib/tonic/logging/dart_invoke.h"
 #include "flutter/tonic/dart_persistent_value.h"
 #include "flutter/tonic/mojo_converter.h"
 #include "lib/tonic/typed_data/uint8_list.h"
@@ -20,6 +20,7 @@
 #include "sky/shell/platform_view.h"
 #include "third_party/skia/include/core/SkImageGenerator.h"
 
+using tonic::DartInvoke;
 using tonic::ToDart;
 
 namespace blink {

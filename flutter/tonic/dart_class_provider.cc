@@ -5,7 +5,7 @@
 #include "flutter/tonic/dart_class_provider.h"
 
 #include "lib/tonic/converter/dart_converter.h"
-#include "flutter/tonic/dart_error.h"
+#include "lib/tonic/logging/dart_error.h"
 #include "flutter/tonic/dart_state.h"
 
 using tonic::ToDart;

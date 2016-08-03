@@ -11,11 +11,11 @@
 #include "dart/runtime/bin/embedded_dart_io.h"
 #include "dart/runtime/include/dart_api.h"
 #include "dart/runtime/include/dart_tools_api.h"
-#include "flutter/tonic/dart_api_scope.h"
+#include "lib/tonic/scopes/dart_api_scope.h"
 #include "lib/tonic/converter/dart_converter.h"
-#include "flutter/tonic/dart_error.h"
-#include "flutter/tonic/dart_invoke.h"
-#include "flutter/tonic/dart_isolate_scope.h"
+#include "lib/tonic/logging/dart_error.h"
+#include "lib/tonic/logging/dart_invoke.h"
+#include "lib/tonic/scopes/dart_isolate_scope.h"
 #include "flutter/tonic/dart_library_natives.h"
 #include "flutter/tonic/dart_microtask_queue.h"
 #include "flutter/tonic/dart_state.h"
@@ -34,6 +34,7 @@ extern void syslog(int, const char*, ...);
 }
 #endif
 
+using tonic::LogIfError;
 using tonic::ToDart;
 
 namespace blink {

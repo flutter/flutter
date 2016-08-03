@@ -17,7 +17,7 @@
 #include "flutter/lib/ui/painting/picture.h"
 #include "flutter/lib/ui/painting/picture_recorder.h"
 #include "lib/tonic/converter/dart_converter.h"
-#include "flutter/tonic/dart_error.h"
+#include "lib/tonic/logging/dart_error.h"
 #include "sky/engine/bindings/dart_runtime_hooks.h"
 #include "sky/engine/bindings/mojo_services.h"
 #include "sky/engine/core/text/Paragraph.h"

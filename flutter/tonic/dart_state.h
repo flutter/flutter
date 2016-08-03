@@ -8,8 +8,8 @@
 #include "base/logging.h"
 #include "base/memory/weak_ptr.h"
 #include "dart/runtime/include/dart_api.h"
-#include "flutter/tonic/dart_api_scope.h"
-#include "flutter/tonic/dart_isolate_scope.h"
+#include "lib/tonic/scopes/dart_api_scope.h"
+#include "lib/tonic/scopes/dart_isolate_scope.h"
 #include "flutter/tonic/dart_persistent_value.h"
 #include "flutter/tonic/dart_isolate_reloader.h"
 
@@ -33,8 +33,8 @@ class DartState {
     ~Scope();
 
    private:
-    DartIsolateScope scope_;
-    DartApiScope api_scope_;
+    tonic::DartIsolateScope scope_;
+    tonic::DartApiScope api_scope_;
   };
 
   DartState();

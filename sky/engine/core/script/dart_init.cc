@@ -15,22 +15,22 @@
 #include "base/files/file_path.h"
 #include "base/files/file_util.h"
 #include "base/lazy_instance.h"
-#include "base/logging.h"
 #include "base/single_thread_task_runner.h"
 #include "base/trace_event/trace_event.h"
 #include "dart/runtime/bin/embedded_dart_io.h"
 #include "dart/runtime/include/dart_mirrors_api.h"
-#include "flutter/tonic/dart_api_scope.h"
+#include "lib/tonic/scopes/dart_api_scope.h"
 #include "flutter/tonic/dart_class_library.h"
 #include "flutter/tonic/dart_dependency_catcher.h"
-#include "flutter/tonic/dart_error.h"
-#include "flutter/tonic/dart_invoke.h"
+#include "lib/tonic/logging/dart_error.h"
 #include "flutter/tonic/dart_io.h"
-#include "flutter/tonic/dart_isolate_scope.h"
+#include "lib/tonic/scopes/dart_isolate_scope.h"
 #include "flutter/tonic/dart_library_loader.h"
 #include "flutter/tonic/dart_snapshot_loader.h"
 #include "flutter/tonic/dart_state.h"
 #include "flutter/tonic/dart_wrappable.h"
+#include "lib/ftl/logging.h"
+#include "lib/tonic/logging/dart_invoke.h"
 #include "lib/tonic/typed_data/uint8_list.h"
 #include "mojo/public/platform/dart/dart_handle_watcher.h"
 #include "services/asset_bundle/zip_asset_bundle.h"
@@ -48,6 +48,7 @@
 #include "flutter/lib/jni/dart_jni.h"
 #endif
 
+using tonic::LogIfError;
 using tonic::ToDart;
 
 namespace dart {
@@ -183,12 +184,12 @@ Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
       script_uri, "main",
       reinterpret_cast<const uint8_t*>(DART_SYMBOL(kDartIsolateSnapshotBuffer)),
       nullptr, dart_state, error);
-  CHECK(isolate) << error;
+  FTL_CHECK(isolate) << error;
   dart_state->SetIsolate(isolate);
-  CHECK(Dart_IsServiceIsolate(isolate));
-  CHECK(!LogIfError(Dart_SetLibraryTagHandler(DartLibraryTagHandler)));
+  FTL_CHECK(Dart_IsServiceIsolate(isolate));
+  FTL_CHECK(!LogIfError(Dart_SetLibraryTagHandler(DartLibraryTagHandler)));
   {
-    DartApiScope dart_api_scope;
+    tonic::DartApiScope dart_api_scope;
     DartIO::InitForIsolate();
     DartUI::InitForIsolate();
     DartMojoInternal::InitForIsolate();
@@ -201,7 +202,7 @@ Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
       const bool service_isolate_booted = DartServiceIsolate::Startup(
           ip, port, DartLibraryTagHandler, IsRunningPrecompiledCode(),
           disable_websocket_origin_check, error);
-      CHECK(service_isolate_booted) << error;
+      FTL_CHECK(service_isolate_booted) << error;
     }
 
     if (g_service_isolate_hook)
@@ -230,12 +231,12 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
 
   std::vector<uint8_t> snapshot_data;
   if (!IsRunningPrecompiledCode()) {
-    CHECK(base::StartsWith(script_uri, kFileUriPrefix,
-                           base::CompareCase::SENSITIVE));
+    FTL_CHECK(base::StartsWith(script_uri, kFileUriPrefix,
+                               base::CompareCase::SENSITIVE));
     base::FilePath bundle_path(script_uri + strlen(kFileUriPrefix));
     scoped_refptr<ZipAssetBundle> zip_asset_bundle(
         new ZipAssetBundle(bundle_path, nullptr));
-    CHECK(zip_asset_bundle->GetAsBuffer(kSnapshotAssetKey, &snapshot_data));
+    FTL_CHECK(zip_asset_bundle->GetAsBuffer(kSnapshotAssetKey, &snapshot_data));
   }
 
   FlutterDartState* parent_dart_state =
@@ -246,13 +247,13 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
       script_uri, main,
       reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartIsolateSnapshotBuffer)),
       nullptr, dart_state, error);
-  CHECK(isolate) << error;
+  FTL_CHECK(isolate) << error;
   dart_state->SetIsolate(isolate);
 
-  CHECK(!LogIfError(Dart_SetLibraryTagHandler(DartLibraryTagHandler)));
+  FTL_CHECK(!LogIfError(Dart_SetLibraryTagHandler(DartLibraryTagHandler)));
 
   {
-    DartApiScope dart_api_scope;
+    tonic::DartApiScope dart_api_scope;
     DartIO::InitForIsolate();
     DartUI::InitForIsolate();
     DartMojoInternal::InitForIsolate();
@@ -268,8 +269,8 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
 #endif
 
     if (!snapshot_data.empty()) {
-      CHECK(!LogIfError(Dart_LoadScriptFromSnapshot(snapshot_data.data(),
-                                                    snapshot_data.size())));
+      FTL_CHECK(!LogIfError(Dart_LoadScriptFromSnapshot(snapshot_data.data(),
+                                                        snapshot_data.size())));
     }
 
     dart_state->isolate_client()->DidCreateSecondaryIsolate(isolate);
@@ -277,7 +278,7 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
 
   Dart_ExitIsolate();
 
-  CHECK(Dart_IsolateMakeRunnable(isolate));
+  FTL_CHECK(Dart_IsolateMakeRunnable(isolate));
   return isolate;
 }
 
@@ -398,7 +399,7 @@ void* _DartSymbolLookup(const char* symbol_name) {
     }
 
     const std::string& aot_snapshot_path = SkySettings::Get().aot_snapshot_path;
-    CHECK(!aot_snapshot_path.empty());
+    FTL_CHECK(!aot_snapshot_path.empty());
 
     base::FilePath asset_path =
         base::FilePath(aot_snapshot_path).Append(symbol_asset.file_name);
@@ -491,7 +492,7 @@ static void EmbedderTimelineStopRecording() {
 }
 
 void SetServiceIsolateHook(ServiceIsolateHook hook) {
-  CHECK(!g_service_isolate_initialized);
+  FTL_CHECK(!g_service_isolate_initialized);
   g_service_isolate_hook = hook;
 }
 
@@ -565,7 +566,7 @@ void InitDartVM() {
   for (size_t i = 0; i < dart_flags.size(); i++) {
     args.append(dart_flags[i].data());
   }
-  CHECK(Dart_SetVMFlags(args.size(), args.data()));
+  FTL_CHECK(Dart_SetVMFlags(args.size(), args.data()));
 
 #ifndef FLUTTER_PRODUCT_MODE
   {
@@ -601,9 +602,8 @@ void InitDartVM() {
         nullptr,
         // VM service assets archive
         GetVMServiceAssetsArchiveCallback);
-    LOG_IF(ERROR, init_error != nullptr)
-        << "Error while initializing the Dart VM: " << init_error;
-    CHECK(init_error == nullptr);
+    if (init_error != nullptr)
+      FTL_LOG(FATAL) << "Error while initializing the Dart VM: " << init_error;
     free(init_error);
 
     // Send the earliest available timestamp in the application lifecycle to

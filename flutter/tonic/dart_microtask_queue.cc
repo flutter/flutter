@@ -5,8 +5,10 @@
 #include "flutter/tonic/dart_microtask_queue.h"
 
 #include "base/trace_event/trace_event.h"
-#include "flutter/tonic/dart_invoke.h"
+#include "lib/tonic/logging/dart_invoke.h"
 #include "flutter/tonic/dart_state.h"
+
+using tonic::DartInvokeVoid;
 
 namespace blink {
 namespace {
@@ -26,7 +28,7 @@ void DartMicrotaskQueue::ScheduleMicrotask(Dart_Handle callback) {
 
 void DartMicrotaskQueue::RunMicrotasks() {
   MicrotaskQueue& queue = GetQueue();
-  while(!queue.empty()) {
+  while (!queue.empty()) {
     TRACE_EVENT0("flutter", "DartMicrotaskQueue::RunMicrotasks");
 
     MicrotaskQueue local;
@@ -40,5 +42,4 @@ void DartMicrotaskQueue::RunMicrotasks() {
     }
   }
 }
-
 }

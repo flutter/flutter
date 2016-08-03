@@ -5,11 +5,12 @@
 #include "sky/engine/bindings/dart_mojo_internal.h"
 
 #include "dart/runtime/include/dart_api.h"
-#include "flutter/tonic/dart_error.h"
+#include "lib/tonic/logging/dart_error.h"
 #include "lib/ftl/logging.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "mojo/public/platform/dart/mojo_natives.h"
 
+using tonic::LogIfError;
 using tonic::ToDart;
 
 namespace blink {

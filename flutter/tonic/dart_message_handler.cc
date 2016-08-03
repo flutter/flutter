@@ -5,12 +5,14 @@
 #include "flutter/tonic/dart_message_handler.h"
 
 #include "base/bind.h"
-#include "base/logging.h"
 #include "dart/runtime/include/dart_api.h"
 #include "dart/runtime/include/dart_native_api.h"
 #include "dart/runtime/include/dart_tools_api.h"
-#include "flutter/tonic/dart_error.h"
+#include "lib/tonic/logging/dart_error.h"
 #include "flutter/tonic/dart_state.h"
+#include "lib/ftl/logging.h"
+
+using tonic::LogIfError;
 
 namespace blink {
 
@@ -19,8 +21,7 @@ DartMessageHandler::DartMessageHandler()
       quit_message_loop_when_isolate_exits_(true),
       isolate_exited_(false),
       isolate_had_uncaught_exception_error_(false),
-      task_runner_(nullptr) {
-}
+      task_runner_(nullptr) {}
 
 DartMessageHandler::~DartMessageHandler() {
   task_runner_ = nullptr;
@@ -29,9 +30,9 @@ DartMessageHandler::~DartMessageHandler() {
 void DartMessageHandler::Initialize(
     const scoped_refptr<base::SingleThreadTaskRunner>& runner) {
   // Only can be called once.
-  CHECK(!task_runner_);
+  FTL_CHECK(!task_runner_);
   task_runner_ = runner;
-  CHECK(task_runner_);
+  FTL_CHECK(task_runner_);
   Dart_SetMessageNotifyCallback(MessageNotifyCallback);
 }
 
@@ -39,14 +40,13 @@ void DartMessageHandler::OnMessage(DartState* dart_state) {
   auto task_runner = dart_state->message_handler().task_runner();
 
   // Schedule a task to run on the message loop thread.
-  task_runner->PostTask(
-      FROM_HERE,
-      base::Bind(&HandleMessage, dart_state->GetWeakPtr()));
+  task_runner->PostTask(FROM_HERE,
+                        base::Bind(&HandleMessage, dart_state->GetWeakPtr()));
 }
 
 void DartMessageHandler::OnHandleMessage(DartState* dart_state) {
-  DartIsolateScope scope(dart_state->isolate());
-  DartApiScope dart_api_scope;
+  tonic::DartIsolateScope scope(dart_state->isolate());
+  tonic::DartApiScope dart_api_scope;
 
   bool error = false;
 
@@ -108,12 +108,11 @@ void DartMessageHandler::OnHandleMessage(DartState* dart_state) {
 
 void DartMessageHandler::MessageNotifyCallback(Dart_Isolate dest_isolate) {
   auto dart_state = DartState::From(dest_isolate);
-  CHECK(dart_state);
+  FTL_CHECK(dart_state);
   dart_state->message_handler().OnMessage(dart_state);
 }
 
-void DartMessageHandler::HandleMessage(
-    base::WeakPtr<DartState> dart_state) {
+void DartMessageHandler::HandleMessage(base::WeakPtr<DartState> dart_state) {
   if (!dart_state)
     return;
   dart_state->message_handler().OnHandleMessage(dart_state.get());

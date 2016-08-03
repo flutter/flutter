@@ -7,7 +7,7 @@
 
 #include "base/files/file_path.h"
 #include "flutter/tonic/dart_library_provider.h"
-#include "flutter/tonic/parsers/packages_map.h"
+#include "lib/tonic/parsers/packages_map.h"
 
 namespace sky {
 namespace shell {

@@ -5,7 +5,7 @@
 #include "sky/engine/core/text/TextBox.h"
 
 #include "flutter/tonic/dart_class_library.h"
-#include "flutter/tonic/dart_error.h"
+#include "lib/tonic/logging/dart_error.h"
 #include "lib/ftl/logging.h"
 #include "sky/engine/core/script/ui_dart_state.h"
 

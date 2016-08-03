@@ -5,17 +5,16 @@
 #include "sky/engine/core/script/dart_controller.h"
 
 #include "base/bind.h"
-#include "base/logging.h"
 #include "base/single_thread_task_runner.h"
 #include "base/trace_event/trace_event.h"
 #include "dart/runtime/include/dart_tools_api.h"
-#include "flutter/tonic/dart_api_scope.h"
+#include "lib/tonic/scopes/dart_api_scope.h"
 #include "flutter/tonic/dart_class_library.h"
 #include "flutter/tonic/dart_dependency_catcher.h"
-#include "flutter/tonic/dart_error.h"
-#include "flutter/tonic/dart_invoke.h"
+#include "lib/tonic/logging/dart_error.h"
+#include "lib/tonic/logging/dart_invoke.h"
 #include "flutter/tonic/dart_io.h"
-#include "flutter/tonic/dart_isolate_scope.h"
+#include "lib/tonic/scopes/dart_isolate_scope.h"
 #include "flutter/tonic/dart_library_loader.h"
 #include "flutter/tonic/dart_message_handler.h"
 #include "flutter/tonic/dart_snapshot_loader.h"
@@ -38,6 +37,7 @@
 #include "flutter/lib/jni/dart_jni.h"
 #endif
 
+using tonic::LogIfError;
 using tonic::ToDart;
 
 namespace blink {
@@ -47,7 +47,7 @@ DartController::DartController()
 
 DartController::~DartController() {
   if (ui_dart_state_) {
-    // Don't use a DartIsolateScope here since we never exit the isolate.
+    // Don't use a tonic::DartIsolateScope here since we never exit the isolate.
     Dart_EnterIsolate(ui_dart_state_->isolate());
     Dart_ShutdownIsolate();  // deletes ui_dart_state_
     ui_dart_state_ = nullptr;
@@ -58,7 +58,7 @@ bool DartController::SendStartMessage(Dart_Handle root_library) {
   {
     // Temporarily exit the isolate while we make it runnable.
     Dart_Isolate isolate = dart_state()->isolate();
-    DCHECK(Dart_CurrentIsolate() == isolate);
+    FTL_DCHECK(Dart_CurrentIsolate() == isolate);
     Dart_ExitIsolate();
     Dart_IsolateMakeRunnable(isolate);
     Dart_EnterIsolate(isolate);
@@ -96,10 +96,10 @@ bool DartController::SendStartMessage(Dart_Handle root_library) {
 }
 
 void DartController::DidLoadMainLibrary(std::string name) {
-  DCHECK(Dart_CurrentIsolate() == dart_state()->isolate());
-  DartApiScope dart_api_scope;
+  FTL_DCHECK(Dart_CurrentIsolate() == dart_state()->isolate());
+  tonic::DartApiScope dart_api_scope;
 
-  CHECK(!LogIfError(Dart_FinalizeLoading(true)));
+  FTL_CHECK(!LogIfError(Dart_FinalizeLoading(true)));
 
   Dart_Handle library = Dart_LookupLibrary(ToDart(name));
   if (LogIfError(library))
@@ -111,12 +111,12 @@ void DartController::DidLoadMainLibrary(std::string name) {
 void DartController::DidLoadSnapshot() {
   TRACE_EVENT0("flutter", "DartController::DidLoadSnapshot");
 
-  DCHECK(Dart_CurrentIsolate() == nullptr);
+  FTL_DCHECK(Dart_CurrentIsolate() == nullptr);
   snapshot_loader_ = nullptr;
 
   Dart_Isolate isolate = dart_state()->isolate();
-  DartIsolateScope isolate_scope(isolate);
-  DartApiScope dart_api_scope;
+  tonic::DartIsolateScope isolate_scope(isolate);
+  tonic::DartApiScope dart_api_scope;
   Dart_Handle library = Dart_RootLibrary();
   if (LogIfError(library))
     exit(1);
@@ -166,19 +166,19 @@ void DartController::CreateIsolateFor(std::unique_ptr<UIDartState> state) {
       state->url().c_str(), "main",
       reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartIsolateSnapshotBuffer)),
       nullptr, static_cast<DartState*>(state.get()), &error);
-  CHECK(isolate) << error;
+  FTL_CHECK(isolate) << error;
   ui_dart_state_ = state.release();
   auto& message_handler = dart_state()->message_handler();
   message_handler.set_quit_message_loop_when_isolate_exits(false);
-  DCHECK(Platform::current());
+  FTL_DCHECK(Platform::current());
   message_handler.Initialize(Platform::current()->GetUITaskRunner());
 
   Dart_SetShouldPauseOnStart(SkySettings::Get().start_paused);
   ui_dart_state_->SetIsolate(isolate);
-  CHECK(!LogIfError(Dart_SetLibraryTagHandler(DartLibraryTagHandler)));
+  FTL_CHECK(!LogIfError(Dart_SetLibraryTagHandler(DartLibraryTagHandler)));
 
   {
-    DartApiScope dart_api_scope;
+    tonic::DartApiScope dart_api_scope;
     DartIO::InitForIsolate();
     DartUI::InitForIsolate();
     DartMojoInternal::InitForIsolate();

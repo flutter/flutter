@@ -13,7 +13,7 @@ source_set("dart") {
     "//build/config/sanitizers:deps",
     "//dart/runtime:libdart",
     "//flutter/tonic",
-    "//flutter/tonic/parsers",
+    "//lib/tonic/parsers",
     "//mojo/data_pipe_utils",
     "//mojo/public/cpp/application",
     "//sky/engine/wtf",

@@ -4,7 +4,7 @@
 
 #include "flutter/tonic/dart_persistent_value.h"
 
-#include "flutter/tonic/dart_isolate_scope.h"
+#include "lib/tonic/scopes/dart_isolate_scope.h"
 #include "flutter/tonic/dart_state.h"
 
 namespace blink {
@@ -39,7 +39,7 @@ void DartPersistentValue::Clear() {
   if (!value_ || !dart_state_.get())
     return;
 
-  DartIsolateScope scope(dart_state_->isolate());
+  tonic::DartIsolateScope scope(dart_state_->isolate());
   Dart_DeletePersistentHandle(value_);
   dart_state_ = base::WeakPtr<DartState>();
   value_ = nullptr;

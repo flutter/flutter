@@ -5,9 +5,11 @@
 #include "flutter/tonic/dart_wrappable.h"
 
 #include "flutter/tonic/dart_class_library.h"
-#include "flutter/tonic/dart_error.h"
+#include "lib/tonic/logging/dart_error.h"
 #include "flutter/tonic/dart_state.h"
 #include "flutter/tonic/dart_wrapper_info.h"
+
+using tonic::LogIfError;
 
 namespace blink {
 
@@ -95,7 +97,7 @@ DartWrappable* DartConverterWrappable::FromArguments(Dart_NativeArguments args,
   Dart_Handle result = Dart_GetNativeFieldsOfArgument(
       args, index, DartWrappable::kNumberOfNativeFields, native_fields);
   if (Dart_IsError(result)) {
-    exception = Dart_NewStringFromCString(DartError::kInvalidArgument);
+    exception = Dart_NewStringFromCString(tonic::DartError::kInvalidArgument);
     return nullptr;
   }
   if (!native_fields[DartWrappable::kPeerIndex])

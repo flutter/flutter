@@ -20,7 +20,7 @@ executable("sky_snapshot") {
     "//base",
     "//dart/runtime:libdart",
     "//dart/runtime/vm:libdart_platform",
-    "//flutter/tonic/parsers",
+    "//lib/tonic/parsers",
     "//sky/engine/bindings:snapshot_cc",
     "//third_party/zlib",
   ]

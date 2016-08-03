@@ -6,10 +6,11 @@
 
 #include "flutter/lib/ui/compositing/scene.h"
 #include "lib/tonic/converter/dart_converter.h"
-#include "flutter/tonic/dart_invoke.h"
+#include "lib/tonic/logging/dart_invoke.h"
 #include "flutter/tonic/dart_library_natives.h"
 #include "sky/engine/core/script/ui_dart_state.h"
 
+using tonic::DartInvokeField;
 using tonic::StdStringToDart;
 using tonic::ToDart;
 

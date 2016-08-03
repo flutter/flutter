@@ -6,6 +6,7 @@
 
 #include "flutter/lib/ui/painting/mask_filter.h"
 #include "flutter/lib/ui/painting/shader.h"
+#include "lib/ftl/logging.h"
 #include "lib/tonic/typed_data/dart_byte_data.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"
@@ -36,20 +37,20 @@ Paint DartConverter<Paint>::FromArguments(Dart_NativeArguments args,
                                           int index,
                                           Dart_Handle& exception) {
   Dart_Handle paint_objects = Dart_GetNativeArgument(args, index);
-  DCHECK(!LogIfError(paint_objects));
+  FTL_DCHECK(!LogIfError(paint_objects));
 
   Dart_Handle paint_data = Dart_GetNativeArgument(args, index + 1);
-  DCHECK(!LogIfError(paint_data));
+  FTL_DCHECK(!LogIfError(paint_data));
 
   Paint result;
   SkPaint& paint = result.paint_;
 
   if (!Dart_IsNull(paint_objects)) {
-    DCHECK(Dart_IsList(paint_objects));
+    FTL_DCHECK(Dart_IsList(paint_objects));
     intptr_t length = 0;
     Dart_ListLength(paint_objects, &length);
 
-    CHECK_EQ(length, kObjectCount);
+    FTL_CHECK(length == kObjectCount);
     Dart_Handle values[kObjectCount];
     if (Dart_IsError(Dart_ListGetRange(paint_objects, 0, kObjectCount, values)))
       return result;
@@ -68,7 +69,7 @@ Paint DartConverter<Paint>::FromArguments(Dart_NativeArguments args,
   }
 
   tonic::DartByteData byte_data(paint_data);
-  CHECK_EQ(byte_data.length_in_bytes(), kDataByteCount);
+  FTL_CHECK(byte_data.length_in_bytes() == kDataByteCount);
 
   const uint32_t* uint_data = static_cast<const uint32_t*>(byte_data.data());
   const float* float_data = static_cast<const float*>(byte_data.data());

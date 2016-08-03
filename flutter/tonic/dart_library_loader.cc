@@ -8,12 +8,12 @@
 #include "base/strings/string_util.h"
 #include "base/files/file_util.h"
 #include "base/trace_event/trace_event.h"
-#include "flutter/tonic/dart_api_scope.h"
+#include "lib/tonic/scopes/dart_api_scope.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "flutter/tonic/dart_dependency_catcher.h"
-#include "flutter/tonic/dart_error.h"
+#include "lib/tonic/logging/dart_error.h"
 #include "flutter/tonic/dart_isolate_reloader.h"
-#include "flutter/tonic/dart_isolate_scope.h"
+#include "lib/tonic/scopes/dart_isolate_scope.h"
 #include "flutter/tonic/dart_library_provider.h"
 #include "flutter/tonic/dart_state.h"
 #include "mojo/data_pipe_utils/data_pipe_drainer.h"
@@ -287,8 +287,8 @@ Dart_Handle DartLibraryLoader::CanonicalizeURL(Dart_Handle library,
 void DartLibraryLoader::DidCompleteImportJob(
     ImportJob* job,
     const std::vector<uint8_t>& buffer) {
-  DartIsolateScope scope(dart_state_->isolate());
-  DartApiScope api_scope;
+  tonic::DartIsolateScope scope(dart_state_->isolate());
+  tonic::DartApiScope api_scope;
 
   WatcherSignaler watcher_signaler(*this, job);
 
@@ -315,8 +315,8 @@ void DartLibraryLoader::DidCompleteImportJob(
 void DartLibraryLoader::DidCompleteSourceJob(
     SourceJob* job,
     const std::vector<uint8_t>& buffer) {
-  DartIsolateScope scope(dart_state_->isolate());
-  DartApiScope api_scope;
+  tonic::DartIsolateScope scope(dart_state_->isolate());
+  tonic::DartApiScope api_scope;
 
   WatcherSignaler watcher_signaler(*this, job);
 
@@ -334,8 +334,8 @@ void DartLibraryLoader::DidCompleteSourceJob(
 }
 
 void DartLibraryLoader::DidFailJob(Job* job) {
-  DartIsolateScope scope(dart_state_->isolate());
-  DartApiScope api_scope;
+  tonic::DartIsolateScope scope(dart_state_->isolate());
+  tonic::DartApiScope api_scope;
 
   WatcherSignaler watcher_signaler(*this, job);
 

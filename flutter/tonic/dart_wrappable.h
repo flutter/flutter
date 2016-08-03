@@ -10,7 +10,7 @@
 #include "base/template_util.h"
 #include "dart/runtime/include/dart_api.h"
 #include "lib/tonic/converter/dart_converter.h"
-#include "flutter/tonic/dart_error.h"
+#include "lib/tonic/logging/dart_error.h"
 #include "flutter/tonic/dart_state.h"
 #include "flutter/tonic/dart_wrapper_info.h"
 
