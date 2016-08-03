@@ -24,7 +24,7 @@ class ExampleDragTargetState extends State<ExampleDragTarget> {
   Widget build(BuildContext context) {
     return new DragTarget<Color>(
       onAccept: _handleAccept,
-      builder: (BuildContext context, List<Color> data, List<Color> rejectedData) {
+      builder: (BuildContext context, List<Color> data, List<dynamic> rejectedData) {
         return new Container(
           height: 100.0,
           margin: new EdgeInsets.all(10.0),
@@ -214,7 +214,7 @@ class MovableBall extends StatelessWidget {
     } else {
       return new DragTarget<bool>(
         onAccept: (bool data) { callback(position); },
-        builder: (BuildContext context, List<bool> accepted, List<bool> rejected) {
+        builder: (BuildContext context, List<bool> accepted, List<dynamic> rejected) {
           return dashedBall;
         }
       );
