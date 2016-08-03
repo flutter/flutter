@@ -10,7 +10,7 @@ environment:
 dependencies:
   archive: ^1.0.20
   args: ^0.13.4
-  coverage: ^0.7.9
+  coverage: ^0.8.0
   crypto: '>=1.1.1 <3.0.0'
   file: ^0.1.0
   http: ^0.11.3
