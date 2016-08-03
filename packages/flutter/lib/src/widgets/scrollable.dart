@@ -249,7 +249,8 @@ class ScrollableState<T extends Scrollable> extends State<T> {
   void initState() {
     super.initState();
     _controller = new AnimationController.unbounded()
-      ..addListener(_handleAnimationChanged);
+      ..addListener(_handleAnimationChanged)
+      ..addStatusListener(_handleAnimationStatusChanged);
     _scrollOffset = PageStorage.of(context)?.readState(context) ?? config.initialScrollOffset ?? 0.0;
   }
 
@@ -363,6 +364,11 @@ class ScrollableState<T extends Scrollable> extends State<T> {
 
   void _handleAnimationChanged() {
     _setScrollOffset(_controller.value);
+  }
+
+  void _handleAnimationStatusChanged(AnimationStatus status) {
+    if (!_controller.isAnimating)
+      _simulation = null;
   }
 
   void _setScrollOffset(double newScrollOffset, { DragUpdateDetails details }) {
