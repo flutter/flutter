@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "base/bind.h"
+#include "lib/ftl/macros.h"
 #include "mojo/data_pipe_utils/data_pipe_drainer.h"
 #include "sky/engine/platform/mojo/data_pipe.h"
 #include "sky/engine/public/platform/Platform.h"
@@ -41,7 +42,7 @@ class DrainJob : public mojo::common::DataPipeDrainer::Client {
   RefPtr<SharedBuffer> buffer_;
   std::unique_ptr<mojo::common::DataPipeDrainer> drainer_;
 
-  DISALLOW_COPY_AND_ASSIGN(DrainJob);
+  FTL_DISALLOW_COPY_AND_ASSIGN(DrainJob);
 };
 
 } // namespace

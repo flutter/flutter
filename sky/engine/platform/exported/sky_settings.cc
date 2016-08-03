@@ -6,23 +6,24 @@
 
 #include <memory>
 
-#include "base/lazy_instance.h"
-#include "base/logging.h"
+#include "lib/ftl/logging.h"
 
 namespace blink {
+namespace {
 
-static base::LazyInstance<SkySettings> s_settings = LAZY_INSTANCE_INITIALIZER;
+SkySettings* g_settings = nullptr;
 
-static bool s_have_settings = false;
+}  // namespace
 
 const SkySettings& SkySettings::Get() {
-  return s_settings.Get();
+  FTL_CHECK(g_settings);
+  return *g_settings;
 }
 
 void SkySettings::Set(const SkySettings& settings) {
-  CHECK(!s_have_settings);
-  s_settings.Get() = settings;
-  s_have_settings = true;
+  FTL_CHECK(!g_settings);
+  g_settings = new SkySettings();
+  *g_settings = settings;
 }
 
 } // namespace blink

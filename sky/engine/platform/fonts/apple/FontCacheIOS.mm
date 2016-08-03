@@ -33,12 +33,12 @@
 #import <CoreText/CoreText.h>
 #import <UIKit/UIKit.h>
 
-#include "sky/engine/platform/fonts/FontCache.h"
+#include "base/lazy_instance.h"
+#include "base/logging.h"
 #include "base/mac/scoped_nsautorelease_pool.h"
 #include "base/mac/scoped_nsobject.h"
-#include "base/lazy_instance.h"
-#include "base/macros.h"
-#include "base/logging.h"
+#include "lib/ftl/macros.h"
+#include "sky/engine/platform/fonts/FontCache.h"
 
 namespace blink {
 
@@ -129,7 +129,7 @@ class FontFallbackSelector {
  private:
   CFRef<CTFontRef> _prototype;
 
-  DISALLOW_COPY_AND_ASSIGN(FontFallbackSelector);
+  FTL_DISALLOW_COPY_AND_ASSIGN(FontFallbackSelector);
 };
 
 static base::LazyInstance<FontFallbackSelector> g_fallback_selector =
