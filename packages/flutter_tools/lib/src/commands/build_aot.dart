@@ -13,7 +13,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
-import '../run.dart';
+import '../resident_runner.dart';
 import 'build.dart';
 
 const String _kDefaultAotOutputDir = 'build/aot';

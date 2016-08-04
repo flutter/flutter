@@ -291,7 +291,7 @@ class AppDomain extends Domain {
     String route = _getStringArg(args, 'route');
     String mode = _getStringArg(args, 'mode');
     String target = _getStringArg(args, 'target');
-    bool hotMode = _getBoolArg(args, 'hot');
+    // TODO(johnmccutchan): Wire up support for hot mode.
 
     Device device = daemon.deviceDomain._getDevice(deviceId);
     if (device == null)
@@ -323,8 +323,7 @@ class AppDomain extends Domain {
       device,
       target: target,
       debuggingOptions: options,
-      usesTerminalUI: false,
-      hotMode: hotMode
+      usesTerminalUI: false
     );
 
     AppInstance app = new AppInstance(_getNextAppId(), runner);

@@ -180,7 +180,9 @@ class DevFS {
     return await _operations.destroy(fsName);
   }
 
-  Future<dynamic> update({ DevFSProgressReporter progressReporter, AssetBundle bundle }) async {
+  Future<dynamic> update({ DevFSProgressReporter progressReporter,
+                           AssetBundle bundle,
+                           bool bundleDirty: false }) async {
     _bytes = 0;
     // Mark all entries as not seen.
     _entries.forEach((String path, DevFSEntry entry) {
@@ -189,7 +191,8 @@ class DevFS {
     printTrace('DevFS: Starting sync from $rootDirectory');
     // Send the root and lib directories.
     Directory directory = rootDirectory;
-    _syncDirectory(directory, recursive: true);
+    await _syncDirectory(directory, recursive: true);
+    printTrace('DevFS: Syncing of $rootDirectory finished');
     String packagesFilePath = path.join(rootDirectory.path, kPackagesFileName);
     StringBuffer sb;
     // Send the packages.
@@ -202,12 +205,16 @@ class DevFS {
         if (uri.toString() == 'lib/')
           continue;
         Directory directory = new Directory.fromUri(uri);
-        if (_syncDirectory(directory,
-                           directoryName: 'packages/$packageName',
-                           recursive: true)) {
+        printTrace('DevFS: Syncing package $packageName started');
+        bool packageWritten =
+            await _syncDirectory(directory,
+                                 directoryName: 'packages/$packageName',
+                                 recursive: true);
+        if (packageWritten) {
           sb ??= new StringBuffer();
           sb.writeln('$packageName:packages/$packageName');
         }
+        printTrace('DevFS: Syncing package $packageName finished');
       }
     }
     if (bundle != null) {
@@ -216,6 +223,11 @@ class DevFS {
         // We write the assets into 'build/flx' so that they are in the
         // same location in DevFS and the iOS simulator.
         final String devicePath = path.join('build/flx', entry.archivePath);
+        if (!bundleDirty && entry.isStringEntry) {
+          // When the bundle isn't dirty, we do not need to sync string
+          // entries.
+          continue;
+        }
         _syncBundleEntry(devicePath, entry);
       }
     }
@@ -309,10 +321,10 @@ class DevFS {
     return false;
   }
 
-  bool _syncDirectory(Directory directory,
-                      {String directoryName,
-                       bool recursive: false,
-                       bool ignoreDotFiles: true}) {
+  Future<bool> _syncDirectory(Directory directory,
+                              {String directoryName,
+                               bool recursive: false,
+                               bool ignoreDotFiles: true}) async {
     String prefix = directoryName;
     if (prefix == null) {
       prefix = path.relative(directory.path, from: rootDirectory.path);
@@ -320,9 +332,9 @@ class DevFS {
         prefix = '';
     }
     try {
-      List<FileSystemEntity> files =
-          directory.listSync(recursive: recursive, followLinks: false);
-      for (FileSystemEntity file in files) {
+      Stream<FileSystemEntity> files =
+          directory.list(recursive: recursive, followLinks: false);
+      await for (FileSystemEntity file in files) {
         if (file is! File) {
           // Skip non-files.
           continue;

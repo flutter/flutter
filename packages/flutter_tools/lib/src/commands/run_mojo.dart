@@ -12,7 +12,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
-import '../run.dart';
+import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
 
 const String _kDefaultBundlePath = 'build/app.flx';
