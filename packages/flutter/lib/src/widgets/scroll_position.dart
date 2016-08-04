@@ -694,7 +694,7 @@ class BallisticScrollActivity extends ScrollActivity {
     )
       ..addListener(_tick)
       ..animateWith(simulation)
-       .whenComplete(_end);
+       .whenComplete(_end); // won't trigger if we dispose _controller first
   }
 
   @override
@@ -773,7 +773,7 @@ class DrivenScrollActivity extends ScrollActivity {
     )
       ..addListener(_tick)
       ..animateTo(to, duration: duration, curve: curve)
-       .whenComplete(_end);
+       .whenComplete(_end); // won't trigger if we dispose _controller first
   }
 
   @override

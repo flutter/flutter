@@ -189,8 +189,8 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 
   @override
   void dispose() {
-    _previousController.stop();
-    _currentController.stop();
+    _previousController.dispose();
+    _currentController.dispose();
     super.dispose();
   }
 
@@ -677,6 +677,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       },
       onDismissed: () {
         if (_dismissedBottomSheets.contains(bottomSheet)) {
+          bottomSheet.animationController.dispose();
           setState(() {
             _dismissedBottomSheets.remove(bottomSheet);
           });
@@ -944,7 +945,7 @@ class _PersistentBottomSheet extends StatefulWidget {
     this.builder
   }) : super(key: key);
 
-  final AnimationController animationController;
+  final AnimationController animationController; // we control it, but it must be disposed by whoever created it
   final VoidCallback onClosing;
   final VoidCallback onDismissed;
   final WidgetBuilder builder;
@@ -954,10 +955,6 @@ class _PersistentBottomSheet extends StatefulWidget {
 }
 
 class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
-
-  // We take ownership of the animation controller given in the first configuration.
-  // We also share control of that animation with out BottomSheet widget.
-
   @override
   void initState() {
     super.initState();
@@ -969,12 +966,6 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
   void didUpdateWidget(_PersistentBottomSheet oldWidget) {
     super.didUpdateWidget(oldWidget);
     assert(widget.animationController == oldWidget.animationController);
-  }
-
-  @override
-  void dispose() {
-    widget.animationController.stop();
-    super.dispose();
   }
 
   void close() {
