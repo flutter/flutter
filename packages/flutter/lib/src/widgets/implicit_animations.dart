@@ -5,7 +5,9 @@
 import 'basic.dart';
 import 'container.dart';
 import 'framework.dart';
+import 'layout_builder.dart';
 
+import 'package:flutter/scheduler.dart';
 import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -492,6 +494,81 @@ class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositione
       description.add('has width');
     if (_height != null)
       description.add('has height');
+  }
+}
+
+/// Animated widget that automatically transitions the child's size over a given
+/// duration whenever the given child's size changes.
+class AnimatedSize extends StatefulWidget {
+  /// Creates a widget that animates the size of its child implicitly.
+  ///
+  /// The [curve] and [duration] arguments must not be null.
+  AnimatedSize({
+    Key key,
+    this.child,
+    this.curve: Curves.linear,
+    @required this.duration
+  }) : super(key: key);
+
+  /// The child widget whose size change triggers the animation.
+  final Widget child;
+
+  /// The curve to apply when animating the parameters of this container.
+  final Curve curve;
+
+  /// The duration over which to animate the parameters of this container.
+  final Duration duration;
+
+  @override
+  _AnimatedSizeState createState() => new _AnimatedSizeState();
+}
+
+class _AnimatedSizeState extends State<AnimatedSize> {
+  Size _size;
+
+  @override
+  Widget build(BuildContext context) {
+    LayoutBuilder layoutBuilder = new LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        SchedulerBinding.instance.addPostFrameCallback(
+          (Duration timeStamp) {
+            context.visitChildElements(
+              (Element element) {
+                RenderBox renderBox = element.renderObject;
+
+                if (_size != renderBox.size) {
+                  setState(() {
+                    _size = renderBox.size;
+                  });
+                }
+              }
+            );
+          }
+        );
+        return config.child;
+      }
+    );
+
+    if (_size != null) {
+      return new AnimatedContainer(
+        duration: config.duration,
+        width: _size?.width,
+        height: _size?.height,
+        child: new ClipRect(
+          child: new OverflowBox(
+            minWidth: 0.0,
+            maxWidth: double.INFINITY,
+            minHeight: 0.0,
+            maxHeight: double.INFINITY,
+            child: new RepaintBoundary(
+              child: layoutBuilder
+            )
+          )
+        )
+      );
+    } else {
+      return layoutBuilder;
+    }
   }
 }
 
