@@ -325,9 +325,10 @@ class _RecipePageState extends State<_RecipePage> {
   // adjusts based on the size of the screen. If the recipe sheet touches
   // the edge of the screen, use a slightly different layout.
   Widget _buildContainer(BuildContext context) {
-    bool isFavorite = favoriteRecipes.contains(config.recipe);
-    Size screenSize = MediaQuery.of(context).size;
-    bool fullWidth = (screenSize.width < _kRecipePageMaxWidth);
+    final bool isFavorite = favoriteRecipes.contains(config.recipe);
+    final Size screenSize = MediaQuery.of(context).size;
+    final bool fullWidth = (screenSize.width < _kRecipePageMaxWidth);
+    final double appBarHeight = _getAppBarHeight(context);
     const double fabHalfSize = 28.0;  // TODO(mpcomplete): needs to adapt to screen size
     return new Stack(
       children: <Widget>[
@@ -335,6 +336,7 @@ class _RecipePageState extends State<_RecipePage> {
           top: 0.0,
           left: 0.0,
           right: 0.0,
+          height: appBarHeight + fabHalfSize,
           child: new Hero(
             tag: config.recipe.imagePath,
             child: new Image.asset(
@@ -346,7 +348,7 @@ class _RecipePageState extends State<_RecipePage> {
         new ScrollableViewport(
           child: new RepaintBoundary(
             child: new Padding(
-              padding: new EdgeInsets.only(top: _getAppBarHeight(context)),
+              padding: new EdgeInsets.only(top: appBarHeight),
               child: new Stack(
                 children: <Widget>[
                   new Padding(

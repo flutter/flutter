@@ -419,7 +419,7 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
         if (focused) {
           _selectionOverlay.update(config.value);
         } else {
-          _selectionOverlay.hide();
+          _selectionOverlay?.hide();
           _selectionOverlay = null;
         }
       });

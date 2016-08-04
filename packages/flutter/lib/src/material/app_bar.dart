@@ -14,6 +14,8 @@ import 'tabs.dart';
 import 'theme.dart';
 import 'typography.dart';
 
+final Object _kDefaultHeroTag = new Object();
+
 /// A widget that can appear at the bottom of an [AppBar]. The [Scaffold] uses
 /// the bottom widget's [bottomHeight] to handle layout for
 /// [AppBarBehavior.scroll] and [AppBarBehavior.under].
@@ -73,6 +75,7 @@ class AppBar extends StatelessWidget {
     this.textTheme,
     this.padding: EdgeInsets.zero,
     this.centerTitle,
+    this.heroTag,
     double expandedHeight,
     double collapsedHeight
   }) : _expandedHeight = expandedHeight,
@@ -153,6 +156,11 @@ class AppBar extends StatelessWidget {
   /// Defaults to being adapted to the current [TargetPlatform].
   final bool centerTitle;
 
+  /// The tag to apply to the app bar's [Hero] widget.
+  ///
+  /// Defaults to a tag that matches other app bars.
+  final Object heroTag;
+
   final double _expandedHeight;
   final double _collapsedHeight;
 
@@ -169,6 +177,7 @@ class AppBar extends StatelessWidget {
     Brightness brightness,
     TextTheme textTheme,
     EdgeInsets padding,
+    Object heroTag,
     double expandedHeight,
     double collapsedHeight
   }) {
@@ -185,6 +194,7 @@ class AppBar extends StatelessWidget {
       iconTheme: iconTheme ?? this.iconTheme,
       textTheme: textTheme ?? this.textTheme,
       padding: padding ?? this.padding,
+      heroTag: heroTag ?? this.heroTag,
       expandedHeight: expandedHeight ?? this._expandedHeight,
       collapsedHeight: collapsedHeight ?? this._collapsedHeight
     );
@@ -365,13 +375,17 @@ class AppBar extends StatelessWidget {
       );
     }
 
-    appBar = new Material(
-      color: backgroundColor ?? themeData.primaryColor,
-      elevation: elevation,
-      child: appBar
+    return new Hero(
+      tag: heroTag ?? _kDefaultHeroTag,
+      child: new Material(
+        color: backgroundColor ?? themeData.primaryColor,
+        elevation: elevation,
+        child: new Align(
+          alignment: FractionalOffset.topCenter,
+          child: appBar
+        )
+      )
     );
-
-    return appBar;
   }
 
   @override
