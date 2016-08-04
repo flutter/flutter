@@ -127,7 +127,7 @@ void PlatformView::SetupResourceContextOnIOThread() {
   Shell::Shared().io_task_runner()->PostTask(
       FROM_HERE,
       base::Bind(&PlatformView::SetupResourceContextOnIOThreadPerform,
-                 GetWeakViewPtr(), base::Unretained(&latch)));
+                 base::Unretained(this), base::Unretained(&latch)));
   latch.Wait();
 }
 
