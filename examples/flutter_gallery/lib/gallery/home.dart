@@ -18,6 +18,53 @@ final List<GalleryItem> _demoItems = _itemsWithCategory('Demos');
 final List<GalleryItem> _componentItems = _itemsWithCategory('Components');
 final List<GalleryItem> _styleItems = _itemsWithCategory('Style');
 
+class _BackgroundLayer {
+  _BackgroundLayer({ int level, double parallax })
+    : assetName = 'packages/flutter_gallery_assets/appbar/appbar_background_layer$level.png',
+      parallaxTween = new Tween<double>(begin: 0.0, end: parallax);
+  final String assetName;
+  final Tween<double> parallaxTween;
+}
+
+final List<_BackgroundLayer> _kBackgroundLayers = <_BackgroundLayer>[
+  new _BackgroundLayer(level: 0, parallax: _kFlexibleSpaceMaxHeight),
+  new _BackgroundLayer(level: 1, parallax: _kFlexibleSpaceMaxHeight),
+  new _BackgroundLayer(level: 2, parallax: _kFlexibleSpaceMaxHeight / 2.0),
+  new _BackgroundLayer(level: 3, parallax: _kFlexibleSpaceMaxHeight / 4.0),
+  new _BackgroundLayer(level: 4, parallax: _kFlexibleSpaceMaxHeight / 2.0),
+  new _BackgroundLayer(level: 5, parallax: _kFlexibleSpaceMaxHeight)
+];
+
+class _AppBarBackground extends StatelessWidget {
+  _AppBarBackground({ Key key, this.animation }) : super(key: key);
+
+  final Animation<double> animation;
+
+  @override
+  Widget build(BuildContext context) {
+    return new AnimatedBuilder(
+      animation: animation,
+      builder: (BuildContext context, Widget child) {
+        return new Stack(
+          children: _kBackgroundLayers.map((_BackgroundLayer layer) {
+            return new Positioned(
+              top: -layer.parallaxTween.evaluate(animation),
+              left: 0.0,
+              right: 0.0,
+              bottom: 0.0,
+              child: new Image.asset(
+                layer.assetName,
+                fit: ImageFit.cover,
+                height: _kFlexibleSpaceMaxHeight
+              )
+            );
+          }).toList()
+        );
+      }
+    );
+  }
+}
+
 class GalleryHome extends StatefulWidget {
   GalleryHome({
     Key key,
@@ -96,12 +143,14 @@ class GalleryHomeState extends State<GalleryHome> {
       appBar: new AppBar(
         expandedHeight: _kFlexibleSpaceMaxHeight,
         flexibleSpace: new FlexibleSpaceBar(
-          background: new Image.asset(
-            'packages/flutter_gallery_assets/appbar_background.jpg',
-            fit: ImageFit.cover,
-            height: _kFlexibleSpaceMaxHeight
-          ),
-          title: new Text('Flutter gallery')
+          title: new Text('Flutter Gallery'),
+          background: new Builder(
+            builder: (BuildContext context) {
+              return new _AppBarBackground(
+                animation: Scaffold.of(context).appBarAnimation
+              );
+            }
+          )
         )
       ),
       appBarBehavior: AppBarBehavior.under,

@@ -50,6 +50,6 @@ void main() {
     await tapDrawerItem('Home');
     await tapDrawerItem('Return to Gallery');
 
-    expect(find.text('Flutter gallery'), findsOneWidget);
+    expect(find.text('Flutter Gallery'), findsOneWidget);
   });
 }

@@ -130,7 +130,7 @@ class ContactsDemoState extends State<ContactsDemo> {
             background: new Stack(
               children: <Widget>[
                 new Image.asset(
-                  'packages/flutter_gallery_assets/ali_connors.png',
+                  'packages/flutter_gallery_assets/ali_connors.jpg',
                   fit: ImageFit.cover,
                   height: _appBarHeight
                 ),
