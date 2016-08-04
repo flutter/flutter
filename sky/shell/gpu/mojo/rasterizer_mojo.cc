@@ -60,8 +60,8 @@ void RasterizerMojo::Init(mojo::ApplicationConnectorPtr connector,
 void RasterizerMojo::Setup(PlatformView* platform_view,
                            base::Closure rasterizer_continuation,
                            base::WaitableEvent* setup_completion_event) {
-  rasterizer_continuation.Run();
   setup_completion_event->Signal();
+  rasterizer_continuation.Run();
 }
 
 void RasterizerMojo::Teardown(base::WaitableEvent* teardown_completion_event) {
