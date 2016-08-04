@@ -8,6 +8,7 @@
 /// To use, import `package:flutter/widgets.dart`.
 library widgets;
 
+export 'src/widgets/animated_size.dart';
 export 'src/widgets/app.dart';
 export 'src/widgets/auto_layout.dart';
 export 'src/widgets/banner.dart';
