@@ -58,7 +58,7 @@ class CoverageCollector {
   List<Future<Null>> _jobs = <Future<Null>>[];
   Map<String, dynamic> _globalHitmap;
 
-  Future<String> finalizeCoverage({Formatter formatter}) async {
+  Future<String> finalizeCoverage({ Formatter formatter }) async {
     assert(enabled);
     await finishPendingJobs();
     printTrace('formating coverage data');
