@@ -6,6 +6,11 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
+final FractionalOffsetTween _kMaterialPageTransitionTween = new FractionalOffsetTween(
+  begin: FractionalOffset.bottomLeft,
+  end: FractionalOffset.topLeft
+);
+
 class _MaterialPageTransition extends AnimatedWidget {
   _MaterialPageTransition({
     Key key,
@@ -13,28 +18,17 @@ class _MaterialPageTransition extends AnimatedWidget {
     this.child
   }) : super(
     key: key,
-    animation: new CurvedAnimation(parent: animation, curve: Curves.easeOut)
+    animation: _kMaterialPageTransitionTween.animate(new CurvedAnimation(parent: animation, curve: Curves.fastOutSlowIn))
   );
 
   final Widget child;
 
-  final Tween<Point> _position = new Tween<Point>(
-    begin: const Point(0.0, 75.0),
-    end: Point.origin
-  );
-
   @override
   Widget build(BuildContext context) {
-    Point position = _position.evaluate(animation);
-    Matrix4 transform = new Matrix4.identity()
-      ..translate(position.x, position.y);
-    return new Transform(
-      transform: transform,
-      // TODO(ianh): tell the transform to be un-transformed for hit testing
-      child: new Opacity(
-        opacity: animation.value,
-        child: child
-      )
+    // TODO(ianh): tell the transform to be un-transformed for hit testing
+    return new SlideTransition(
+      position: animation,
+      child: child
     );
   }
 }

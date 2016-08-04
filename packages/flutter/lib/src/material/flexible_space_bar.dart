@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
-import 'debug.dart';
 import 'constants.dart';
 import 'scaffold.dart';
 import 'theme.dart';
@@ -58,19 +57,25 @@ class FlexibleSpaceBar extends StatefulWidget {
 }
 
 class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
-  Animation<double> _scaffoldAnimation;
+  final ProxyAnimation _scaffoldAnimation = new ProxyAnimation();
+  double _lastAppBarHeight;
+
+  @override
+  void initState() {
+    super.initState();
+    _scaffoldAnimation.addListener(_handleTick);
+  }
+
+  @override
+  void dispose() {
+    _scaffoldAnimation.removeListener(_handleTick);
+    super.dispose();
+  }
 
   void _handleTick() {
     setState(() {
       // The animation's state is our build state, and it changed already.
     });
-  }
-
-  @override
-  void deactivate() {
-    _scaffoldAnimation?.removeListener(_handleTick);
-    _scaffoldAnimation = null;
-    super.deactivate();
   }
 
   bool _getEffectiveCenterTitle(ThemeData theme) {
@@ -88,16 +93,18 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasScaffold(context));
     final double statusBarHeight = MediaQuery.of(context).padding.top;
     final ScaffoldState scaffold = Scaffold.of(context);
-    _scaffoldAnimation ??= scaffold.appBarAnimation..addListener(_handleTick);
-    final double appBarHeight = scaffold.appBarHeight + statusBarHeight;
+    if (scaffold != null) {
+      _scaffoldAnimation.parent ??= scaffold.appBarAnimation;
+      _lastAppBarHeight = scaffold.appBarHeight;
+    }
+    final double appBarHeight = (_lastAppBarHeight ?? kToolBarHeight) + statusBarHeight;
     final double toolBarHeight = kToolBarHeight + statusBarHeight;
     final List<Widget> children = <Widget>[];
 
     // background image
-    if (config.background != null) {
+    if (config.background != null && scaffold != null) {
       final double fadeStart = (appBarHeight - toolBarHeight * 2.0) / appBarHeight;
       final double fadeEnd = (appBarHeight - toolBarHeight) / appBarHeight;
       final CurvedAnimation opacityCurve = new CurvedAnimation(

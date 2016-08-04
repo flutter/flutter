@@ -59,11 +59,9 @@ class GridDemoPhotoItem extends StatelessWidget {
           appBar: new AppBar(
             title: new Text(photo.title)
           ),
-          body: new Material(
-            child: new Hero(
-              tag: photoHeroTag,
-              child: new Image.asset(photo.assetName, fit: ImageFit.cover)
-            )
+          body: new Hero(
+            tag: photoHeroTag,
+            child: new Image.asset(photo.assetName, fit: ImageFit.cover)
           )
         );
       }

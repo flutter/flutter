@@ -554,7 +554,7 @@ class HeroController extends NavigatorObserver {
     _to.offstage = false;
 
     Animation<double> animation = _animation;
-    Curve curve = Curves.ease;
+    Curve curve = Curves.fastOutSlowIn;
     if (animation.status == AnimationStatus.reverse) {
       animation = new ReverseAnimation(animation);
       curve = new Interval(animation.value, 1.0, curve: curve);
