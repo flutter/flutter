@@ -82,6 +82,7 @@ static_library("core") {
     "//dart/runtime/bin:embedded_dart_io",
     "//dart/runtime:libdart",
     "//dart/runtime/vm:libdart_platform",
+    "//mojo/services/asset_bundle/interfaces:interfaces",
     "//mojo/services/navigation/interfaces",
   ]
 

@@ -18,6 +18,7 @@
 #include "mojo/services/asset_bundle/interfaces/asset_bundle.mojom.h"
 #include "sky/engine/public/sky/sky_view.h"
 #include "sky/engine/public/sky/sky_view_client.h"
+#include "sky/engine/core/script/directory_asset_bundle.h"
 #include "sky/services/engine/sky_engine.mojom.h"
 #include "sky/services/rasterizer/rasterizer.mojom.h"
 #include "sky/shell/rasterizer.h"
