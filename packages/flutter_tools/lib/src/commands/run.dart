@@ -55,15 +55,11 @@ class RunCommand extends RunCommandBase {
         help: 'Listen to the given port for a debug connection (defaults to $kDefaultObservatoryPort).');
     usesPubOption();
 
-    argParser.addFlag('resident',
-        defaultsTo: true,
-        help: 'Don\'t terminate the \'flutter run\' process after starting the application.');
-
     // Option to enable hot reloading.
     argParser.addFlag('hot',
                       negatable: false,
                       defaultsTo: false,
-                      help: 'Run with support for hot reloading. Requires resident.');
+                      help: 'Run with support for hot reloading.');
 
     // Hidden option to enable a benchmarking mode. This will run the given
     // application, measure the startup time and the app restart time, write the
@@ -131,34 +127,18 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    if (argResults['resident']) {
-      RunAndStayResident runner = new RunAndStayResident(
-        deviceForCommand,
-        target: targetFile,
-        debuggingOptions: options,
-        hotMode: argResults['hot']
-      );
+    RunAndStayResident runner = new RunAndStayResident(
+      deviceForCommand,
+      target: targetFile,
+      debuggingOptions: options,
+      hotMode: argResults['hot']
+    );
 
-      return runner.run(
-        traceStartup: traceStartup,
-        benchmark: argResults['benchmark'],
-        route: route
-      );
-    } else {
-      // TODO(devoncarew): Remove this path and support the `--no-resident` option
-      // using the `RunAndStayResident` class.
-      return startApp(
-        deviceForCommand,
-        target: targetFile,
-        stop: argResults['full-restart'],
-        install: true,
-        debuggingOptions: options,
-        traceStartup: traceStartup,
-        benchmark: argResults['benchmark'],
-        route: route,
-        buildMode: getBuildMode()
-      );
-    }
+    return runner.run(
+      traceStartup: traceStartup,
+      benchmark: argResults['benchmark'],
+      route: route
+    );
   }
 }
 
