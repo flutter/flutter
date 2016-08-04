@@ -55,6 +55,16 @@ class ImageCache {
     }
   }
 
+  /// Evicts all entries from the cache.
+  ///
+  /// This is useful if, for instance, the root asset bundle has been updated
+  /// and therefore new images must be obtained.
+  // TODO(ianh): Provide a way to target individual images. This is currently non-trivial
+  // because by the time we get to the imageCache, the keys we're using are opaque.
+  void clear() {
+    _cache.clear();
+  }
+
   /// Returns the previously cached [ImageStream] for the given key, if available;
   /// if not, calls the given callback to obtain it first. In either case, the
   /// key is moved to the "most recently used" position.

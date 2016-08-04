@@ -62,6 +62,11 @@ abstract class AssetBundle {
   /// used with one parser for the lifetime of the asset bundle.
   Future<dynamic> loadStructuredData(String key, dynamic parser(String value));
 
+  /// If this is a caching asset bundle, and the given key describes a cached
+  /// asset, then evict the asset from the cache so that the next time it is
+  /// loaded, the cache will be reread from the asset bundle.
+  void evict(String key) { }
+
   @override
   String toString() => '$runtimeType@$hashCode()';
 }
@@ -100,6 +105,9 @@ class NetworkAssetBundle extends AssetBundle {
     assert(parser != null);
     return parser(await loadString(key));
   }
+
+  // TODO(ianh): Once the underlying network logic learns about caching, we
+  // should implement evict().
 
   @override
   String toString() => '$runtimeType@$hashCode($_baseUrl)';
@@ -154,6 +162,12 @@ abstract class CachingAssetBundle extends AssetBundle {
       _structuredDataCache[key] = new SynchronousFuture<dynamic>(value);
     });
     return completer.future;
+  }
+
+  @override
+  void evict(String key) {
+    _stringCache.remove(key);
+    _structuredDataCache.remove(key);
   }
 }
 

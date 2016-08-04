@@ -731,6 +731,28 @@ abstract class State<T extends StatefulWidget> {
   @protected
   void didUpdateConfig(T oldConfig) { }
 
+  /// Called whenever the application is reassembled during debugging.
+  ///
+  /// This method should rerun any initialization logic that depends on global
+  /// state, for example, image loading from asset bundles (since the asset
+  /// bundle may have changed).
+  ///
+  /// In addition to this method being invoked, it is guaranteed that the
+  /// [build] method will be invoked when a reassemble is signalled. Most
+  /// widgets therefore do not need to do anything in the [reassemble] method.
+  ///
+  /// This function will only be called during development. In release builds,
+  /// the `ext.flutter.reassemble` hook is not available, and so this code will
+  /// never execute.
+  ///
+  /// See also:
+  ///
+  /// * [BindingBase.reassembleApplication]
+  /// * [Image], which uses this to reload images
+  @protected
+  @mustCallSuper
+  void reassemble() { }
+
   /// Notify the framework that the internal state of this object has changed.
   ///
   /// Whenever you change the internal state of a [State] object, make the
@@ -2061,6 +2083,7 @@ class StatefulElement extends ComponentElement {
   @override
   void _reassemble() {
     _builder = state.build;
+    state.reassemble();
     super._reassemble();
   }
 

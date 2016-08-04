@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import 'asset_bundle.dart';
+import 'image_cache.dart';
 import 'shell.dart';
 
 /// Ensures that the [MojoShell] singleton is created synchronously
@@ -46,5 +47,22 @@ abstract class ServicesBinding extends BindingBase {
         yield new LicenseEntryWithLineBreaks(const <String>[], license);
       }
     }
+  }
+
+  @override
+  void initServiceExtensions() {
+    super.initServiceExtensions();
+    registerStringServiceExtension(
+      // ext.flutter.evict value=foo.png will cause foo.png to be evicted from the rootBundle cache
+      // and cause the entire image cache to be cleared. This is used by hot reload mode to clear
+      // out the cache of resources that have changed.
+      // TODO(ianh): find a way to only evict affected images, not all images
+      name: 'evict',
+      getter: () => '',
+      setter: (String value) {
+        rootBundle.evict(value);
+        imageCache.clear();
+      }
+    );
   }
 }
