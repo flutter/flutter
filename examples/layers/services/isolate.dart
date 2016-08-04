@@ -228,6 +228,12 @@ class IsolateExampleState extends State<StatefulWidget> {
   }
 
   @override
+  void dispose() {
+    _animation.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return new Material(
       child: new Column(
