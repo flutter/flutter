@@ -62,7 +62,7 @@ Future<Process> _startProcess(String mainPath, { String packages, int observator
     mainPath
   ]);
   printTrace('$executable ${arguments.join(' ')}');
-  return Process.start(executable, arguments, environment: <String, String>{ 'FLUTTER_TEST': 'true' });
+  return Process.start(executable, arguments, environment: FlutterPlatform.environment);
 }
 
 void _attachStandardStreams(Process process) {
@@ -78,6 +78,8 @@ void _attachStandardStreams(Process process) {
 }
 
 class FlutterPlatform extends PlatformPlugin {
+  static final Map<String, String> environment = <String, String>{ 'FLUTTER_TEST': 'true' };
+
   @override
   StreamChannel<dynamic> loadChannel(String mainPath, TestPlatform platform) {
     return StreamChannelCompleter.fromFuture(_startTest(mainPath));
