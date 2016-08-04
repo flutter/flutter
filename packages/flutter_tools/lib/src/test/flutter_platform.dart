@@ -114,7 +114,7 @@ void main() {
 
     int observatoryPort;
     if (CoverageCollector.instance.enabled) {
-      observatoryPort = new math.Random().nextInt(30000) + 2000;
+      observatoryPort = CoverageCollector.instance.observatoryPort ?? new math.Random().nextInt(30000) + 2000;
       await CoverageCollector.instance.finishPendingJobs();
     }
 

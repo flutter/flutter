@@ -15,6 +15,7 @@ class CoverageCollector {
   static final CoverageCollector instance = new CoverageCollector();
 
   bool enabled = false;
+  int observatoryPort;
 
   void collectCoverage({
     String host,
