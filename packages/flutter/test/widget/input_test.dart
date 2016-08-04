@@ -382,4 +382,58 @@ void main() {
     await tester.pumpWidget(builder());
     expect(inputValue.text, 'abc d${testValue}ef ghi');
   });
+
+  testWidgets('Selection toolbar fades in', (WidgetTester tester) async {
+    GlobalKey inputKey = new GlobalKey();
+    InputValue inputValue = InputValue.empty;
+
+    Widget builder() {
+      return new Overlay(
+        initialEntries: <OverlayEntry>[
+          new OverlayEntry(
+            builder: (BuildContext context) {
+              return new Center(
+                child: new Material(
+                  child: new Input(
+                    value: inputValue,
+                    key: inputKey,
+                    onChanged: (InputValue value) { inputValue = value; }
+                  )
+                )
+              );
+            }
+          )
+        ]
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+    String testValue = 'abc def ghi';
+    enterText(testValue);
+    await tester.pumpWidget(builder());
+
+    // Tap the selection handle to bring up the "paste / select all" menu.
+    await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+    await tester.pumpWidget(builder());
+    RenderEditableLine renderLine = findRenderEditableLine(tester);
+    List<TextSelectionPoint> endpoints = renderLine.getEndpointsForSelection(
+        inputValue.selection);
+    await tester.tapAt(endpoints[0].point + new Offset(1.0, 1.0));
+    await tester.pumpWidget(builder());
+
+    // Toolbar should fade in. Starting at 0% opacity.
+    Element target = tester.element(find.text('SELECT ALL'));
+    Opacity opacity = target.ancestorWidgetOfExactType(Opacity);
+    expect(opacity, isNotNull);
+    expect(opacity.opacity, equals(0.0));
+
+    // Still fading in.
+    await tester.pump(const Duration(milliseconds: 50));
+    opacity = target.ancestorWidgetOfExactType(Opacity);
+    expect(opacity.opacity, greaterThan(0.0));
+    expect(opacity.opacity, lessThan(1.0));
+
+    // End the test here to ensure the animation is properly disposed of.
+  });
 }

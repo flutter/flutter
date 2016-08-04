@@ -11,6 +11,7 @@ import 'editable.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'overlay.dart';
+import 'transitions.dart';
 
 // TODO(mpcomplete): Need one for [collapsed].
 /// Which type of selection handle to be displayed.
@@ -114,6 +115,13 @@ class TextSelectionOverlay implements TextSelectionDelegate {
   /// The tool bar typically contains buttons for copying and pasting text.
   final TextSelectionToolbarBuilder toolbarBuilder;
 
+  /// Controls the fade-in animations.
+  static const Duration _kFadeDuration = const Duration(milliseconds: 150);
+  final AnimationController _handleController = new AnimationController(duration: _kFadeDuration);
+  final AnimationController _toolbarController = new AnimationController(duration: _kFadeDuration);
+  Animation<double> get _handleOpacity => _handleController.view;
+  Animation<double> get _toolbarOpacity => _toolbarController.view;
+
   InputValue _input;
 
   /// A pair of handles. If this is non-null, there are always 2, though the
@@ -129,10 +137,11 @@ class TextSelectionOverlay implements TextSelectionDelegate {
   void showHandles() {
     assert(_handles == null);
     _handles = <OverlayEntry>[
-      new OverlayEntry(builder: (BuildContext c) => _buildOverlay(c, _TextSelectionHandlePosition.start)),
-      new OverlayEntry(builder: (BuildContext c) => _buildOverlay(c, _TextSelectionHandlePosition.end)),
+      new OverlayEntry(builder: (BuildContext c) => _buildHandle(c, _TextSelectionHandlePosition.start)),
+      new OverlayEntry(builder: (BuildContext c) => _buildHandle(c, _TextSelectionHandlePosition.end)),
     ];
     Overlay.of(context, debugRequiredFor: debugRequiredFor).insertAll(_handles);
+    _handleController.forward(from: 0.0);
   }
 
   /// Shows the toolbar by inserting it into the [context]'s overlay.
@@ -140,6 +149,7 @@ class TextSelectionOverlay implements TextSelectionDelegate {
     assert(_toolbar == null);
     _toolbar = new OverlayEntry(builder: _buildToolbar);
     Overlay.of(context, debugRequiredFor: debugRequiredFor).insert(_toolbar);
+    _toolbarController.forward(from: 0.0);
   }
 
   /// Updates the overlay after the [selection] has changed.
@@ -164,19 +174,26 @@ class TextSelectionOverlay implements TextSelectionDelegate {
     }
     _toolbar?.remove();
     _toolbar = null;
+
+    _handleController.stop();
+    _toolbarController.stop();
   }
 
-  Widget _buildOverlay(BuildContext context, _TextSelectionHandlePosition position) {
+  Widget _buildHandle(BuildContext context, _TextSelectionHandlePosition position) {
     if ((_selection.isCollapsed && position == _TextSelectionHandlePosition.end) ||
         handleBuilder == null)
       return new Container();  // hide the second handle when collapsed
-    return new _TextSelectionHandleOverlay(
-      onSelectionHandleChanged: _handleSelectionHandleChanged,
-      onSelectionHandleTapped: _handleSelectionHandleTapped,
-      renderObject: renderObject,
-      selection: _selection,
-      builder: handleBuilder,
-      position: position
+
+    return new FadeTransition(
+      opacity: _handleOpacity,
+      child: new _TextSelectionHandleOverlay(
+        onSelectionHandleChanged: _handleSelectionHandleChanged,
+        onSelectionHandleTapped: _handleSelectionHandleTapped,
+        renderObject: renderObject,
+        selection: _selection,
+        builder: handleBuilder,
+        position: position
+      )
     );
   }
 
@@ -193,7 +210,10 @@ class TextSelectionOverlay implements TextSelectionDelegate {
       endpoints[0].point.y - renderObject.size.height
     );
 
-    return toolbarBuilder(context, midpoint, this);
+    return new FadeTransition(
+      opacity: _toolbarOpacity,
+      child: toolbarBuilder(context, midpoint, this)
+    );
   }
 
   void _handleSelectionHandleChanged(TextSelection newSelection) {
@@ -252,6 +272,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
 
 class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay> {
   Point _dragPosition;
+
   void _handleDragStart(DragStartDetails details) {
     _dragPosition = details.globalPosition;
   }
