@@ -120,7 +120,7 @@ class GalleryDrawer extends StatelessWidget {
           ),
           new AboutDrawerItem(
             applicationVersion: '2016 Q2 Preview',
-            applicationIcon: new AssetImage('packages/flutter_gallery_assets/appbar_background.jpg'),
+            applicationIcon: new AssetImage('packages/flutter_gallery_assets/about_logo.png'),
             applicationLegalese: '© 2016 The Chromium Authors',
             aboutBoxChildren: <Widget>[
               new Padding(
