@@ -132,6 +132,26 @@ void main() {
     expect(controller.value, equals(0.0));
   });
 
+  test('Forward only from value', () {
+    AnimationController controller = new AnimationController(
+      duration: const Duration(milliseconds: 100)
+    );
+    List<double> valueLog = <double>[];
+    List<AnimationStatus> statusLog = <AnimationStatus>[];
+    controller
+      ..addStatusListener((AnimationStatus status) {
+        statusLog.add(status);
+      })
+      ..addListener(() {
+        valueLog.add(controller.value);
+      });
+
+    controller.forward(from: 0.2);
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward ]));
+    expect(valueLog, equals(<double>[ 0.2 ]));
+    expect(controller.value, equals(0.2));
+  });
+
   test('Can fling to upper and lower bounds', () {
     AnimationController controller = new AnimationController(
       duration: const Duration(milliseconds: 100)

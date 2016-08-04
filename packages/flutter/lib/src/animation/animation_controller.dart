@@ -53,8 +53,9 @@ class AnimationController extends Animation<double>
     this.upperBound: 1.0
   }) {
     assert(upperBound >= lowerBound);
-    _value = (value ?? lowerBound).clamp(lowerBound, upperBound);
+    _direction = _AnimationDirection.forward;
     _ticker = new Ticker(_tick);
+    _internalSetValue(value ?? lowerBound);
   }
 
   /// Creates an animation controller with no upper or lower bound for its value.
@@ -71,10 +72,11 @@ class AnimationController extends Animation<double>
     this.duration,
     this.debugLabel
   }) : lowerBound = double.NEGATIVE_INFINITY,
-       upperBound = double.INFINITY,
-       _value = value {
+       upperBound = double.INFINITY {
     assert(value != null);
+    _direction = _AnimationDirection.forward;
     _ticker = new Ticker(_tick);
+    _internalSetValue(value);
   }
 
   /// The value at which this animation is deemed to be dismissed.
@@ -119,9 +121,21 @@ class AnimationController extends Animation<double>
   set value(double newValue) {
     assert(newValue != null);
     stop();
-    _value = newValue.clamp(lowerBound, upperBound);
+    _internalSetValue(newValue);
     notifyListeners();
     _checkStatusChanged();
+  }
+
+  void _internalSetValue(double newValue) {
+    _value = newValue.clamp(lowerBound, upperBound);
+    if (_value == lowerBound) {
+      _status = AnimationStatus.dismissed;
+    } else if (_value == upperBound) {
+      _status = AnimationStatus.completed;
+    } else
+      _status = (_direction == _AnimationDirection.forward) ?
+        AnimationStatus.forward :
+        AnimationStatus.reverse;
   }
 
   /// The amount of time that has passed between the time the animation started and the most recent tick of the animation.
@@ -136,29 +150,22 @@ class AnimationController extends Animation<double>
   _AnimationDirection _direction;
 
   @override
-  AnimationStatus get status {
-    if (!isAnimating && value == upperBound)
-      return AnimationStatus.completed;
-    if (!isAnimating && value == lowerBound)
-      return AnimationStatus.dismissed;
-    return _direction == _AnimationDirection.forward ?
-        AnimationStatus.forward :
-        AnimationStatus.reverse;
-  }
+  AnimationStatus get status => _status;
+  AnimationStatus _status;
 
   /// Starts running this animation forwards (towards the end).
   Future<Null> forward({ double from }) {
+    _direction = _AnimationDirection.forward;
     if (from != null)
       value = from;
-    _direction = _AnimationDirection.forward;
     return animateTo(upperBound);
   }
 
   /// Starts running this animation in reverse (towards the beginning).
   Future<Null> reverse({ double from }) {
+    _direction = _AnimationDirection.reverse;
     if (from != null)
       value = from;
-    _direction = _AnimationDirection.reverse;
     return animateTo(lowerBound);
   }
 
@@ -174,6 +181,9 @@ class AnimationController extends Animation<double>
     stop();
     if (simulationDuration == Duration.ZERO) {
       assert(value == target);
+      _status = (_direction == _AnimationDirection.forward) ?
+        AnimationStatus.completed :
+        AnimationStatus.dismissed;
       _checkStatusChanged();
       return new Future<Null>.value();
     }
@@ -215,6 +225,9 @@ class AnimationController extends Animation<double>
     _lastElapsedDuration = Duration.ZERO;
     _value = simulation.x(0.0).clamp(lowerBound, upperBound);
     Future<Null> result = _ticker.start();
+    _status = (_direction == _AnimationDirection.forward) ?
+      AnimationStatus.forward :
+      AnimationStatus.reverse;
     _checkStatusChanged();
     return result;
   }
@@ -245,8 +258,12 @@ class AnimationController extends Animation<double>
     _lastElapsedDuration = elapsed;
     double elapsedInSeconds = elapsed.inMicroseconds.toDouble() / Duration.MICROSECONDS_PER_SECOND;
     _value = _simulation.x(elapsedInSeconds).clamp(lowerBound, upperBound);
-    if (_simulation.isDone(elapsedInSeconds))
+    if (_simulation.isDone(elapsedInSeconds)) {
+      _status = (_direction == _AnimationDirection.forward) ?
+        AnimationStatus.completed :
+        AnimationStatus.dismissed;
       stop();
+    }
     notifyListeners();
     _checkStatusChanged();
   }
