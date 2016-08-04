@@ -389,7 +389,7 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
     if (_cursorTimer != null)
       _stopCursorTimer();
     scheduleMicrotask(() { // can't hide while disposing, since it triggers a rebuild
-      _selectionOverlay?.hide();
+      _selectionOverlay?.dispose();
     });
     super.dispose();
   }

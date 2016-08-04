@@ -179,6 +179,13 @@ class TextSelectionOverlay implements TextSelectionDelegate {
     _toolbarController.stop();
   }
 
+  /// Final cleanup.
+  void dispose() {
+    hide();
+    _handleController.dispose();
+    _toolbarController.dispose();
+  }
+
   Widget _buildHandle(BuildContext context, _TextSelectionHandlePosition position) {
     if ((_selection.isCollapsed && position == _TextSelectionHandlePosition.end) ||
         handleBuilder == null)
