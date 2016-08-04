@@ -89,6 +89,12 @@ void main() {
 
     navigatorKey.currentState.pop();
     await tester.pump(); // navigating always takes two frames
+
+    // Ensure we don't clamp the scroll offset even during the navigation.
+    // https://github.com/flutter/flutter/issues/4883
+    LazyListViewport viewport = tester.firstWidget(find.byType(LazyListViewport));
+    expect(viewport.scrollOffset, equals(1000.0));
+
     await tester.pump(new Duration(seconds: 1));
 
     // we're 600 pixels high, each item is 100 pixels high, scroll position is

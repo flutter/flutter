@@ -62,7 +62,9 @@ abstract class ScrollBehavior<T, U> {
 /// that only scrolls along one axis).
 abstract class ExtentScrollBehavior extends ScrollBehavior<double, double> {
   /// Creates a scroll behavior for a scrollable widget with linear extent.
-  ExtentScrollBehavior({ double contentExtent: 0.0, double containerExtent: 0.0 })
+  /// We start with an INFINITE contentExtent so that we don't accidentally
+  /// clamp a scrollOffset until we receive an accurate value in updateExtents.
+  ExtentScrollBehavior({ double contentExtent: double.INFINITY, double containerExtent: 0.0 })
     : _contentExtent = contentExtent, _containerExtent = containerExtent;
 
   /// The linear extent of the content inside the scrollable widget.
@@ -111,7 +113,7 @@ abstract class ExtentScrollBehavior extends ScrollBehavior<double, double> {
 class BoundedBehavior extends ExtentScrollBehavior {
   /// Creates a scroll behavior that does not overscroll.
   BoundedBehavior({
-    double contentExtent: 0.0,
+    double contentExtent: double.INFINITY,
     double containerExtent: 0.0,
     double minScrollOffset: 0.0
   }) : _minScrollOffset = minScrollOffset,
@@ -161,7 +163,7 @@ Simulation _createSnapScrollSimulation(double startOffset, double endOffset, dou
 /// A scroll behavior that does not prevent the user from exeeding scroll bounds.
 class UnboundedBehavior extends ExtentScrollBehavior {
   /// Creates a scroll behavior with no scrolling limits.
-  UnboundedBehavior({ double contentExtent: 0.0, double containerExtent: 0.0 })
+  UnboundedBehavior({ double contentExtent: double.INFINITY, double containerExtent: 0.0 })
     : super(contentExtent: contentExtent, containerExtent: containerExtent);
 
   @override
@@ -191,7 +193,7 @@ class UnboundedBehavior extends ExtentScrollBehavior {
 /// A scroll behavior that lets the user scroll beyond the scroll bounds with some resistance.
 class OverscrollBehavior extends BoundedBehavior {
   /// Creates a scroll behavior that resists, but does not prevent, scrolling beyond its limits.
-  OverscrollBehavior({ double contentExtent: 0.0, double containerExtent: 0.0, double minScrollOffset: 0.0 })
+  OverscrollBehavior({ double contentExtent: double.INFINITY, double containerExtent: 0.0, double minScrollOffset: 0.0 })
     : super(contentExtent: contentExtent, containerExtent: containerExtent, minScrollOffset: minScrollOffset);
 
   @override
@@ -225,7 +227,7 @@ class OverscrollBehavior extends BoundedBehavior {
 /// A scroll behavior that lets the user scroll beyond the scroll bounds only when the bounds are disjoint.
 class OverscrollWhenScrollableBehavior extends OverscrollBehavior {
   /// Creates a scroll behavior that allows overscrolling only when some amount of scrolling is already possible.
-  OverscrollWhenScrollableBehavior({ double contentExtent: 0.0, double containerExtent: 0.0, double minScrollOffset: 0.0 })
+  OverscrollWhenScrollableBehavior({ double contentExtent: double.INFINITY, double containerExtent: 0.0, double minScrollOffset: 0.0 })
     : super(contentExtent: contentExtent, containerExtent: containerExtent, minScrollOffset: minScrollOffset);
 
   @override
