@@ -65,6 +65,8 @@ class RunAndStayResident {
 
   Observatory observatory;
 
+  bool get observatoryConnected => observatory != null;
+
   /// Start the app and keep the process running during its lifetime.
   Future<int> run({
     bool traceStartup: false,
@@ -277,7 +279,7 @@ class RunAndStayResident {
           if (lower == 'h' || lower == '?' || code == AnsiTerminal.KEY_F1) {
             // F1, help
             _printHelp();
-          } else if (lower == 'r' || code == AnsiTerminal.KEY_F5) {
+          } else if ((lower == 'r' || code == AnsiTerminal.KEY_F5) && observatoryConnected) {
             // F5, restart
             if (hotMode && code == 'r') {
               // lower-case 'r'
@@ -290,9 +292,9 @@ class RunAndStayResident {
           } else if (lower == 'q' || code == AnsiTerminal.KEY_F10) {
             // F10, exit
             _stopApp();
-          } else if (lower == 'w') {
+          } else if (lower == 'w' && observatoryConnected) {
             _debugDumpApp();
-          } else if (lower == 't') {
+          } else if (lower == 't' && observatoryConnected) {
             _debugDumpRenderTree();
           }
         });
@@ -437,7 +439,7 @@ class RunAndStayResident {
     String cold = '';
     if (hotMode)
       hot = 'Type "r" or F5 to perform a hot reload of the app';
-    if (device.supportsRestart) {
+    if (device.supportsRestart && debuggingOptions.buildMode == BuildMode.debug) {
       if (hotMode) {
         cold = ', and "R" to cold restart the app';
       } else {
@@ -446,7 +448,8 @@ class RunAndStayResident {
     }
     if (hot != '' || cold != '')
       printStatus('$hot$cold.', emphasis: true);
-    printStatus('Type "w" to print the widget hierarchy of the app, and "t" for the render tree.', emphasis: true);
+    if (observatoryConnected)
+      printStatus('Type "w" to print the widget hierarchy of the app, and "t" for the render tree.', emphasis: true);
   }
 
   Future<dynamic> _stopLogger() {
