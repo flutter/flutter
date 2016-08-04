@@ -60,8 +60,16 @@ class Shell {
                         platform_views);
 
   // These APIs can be called from any thread.
-  void WaitForPlatformViews(
-      std::vector<base::WeakPtr<PlatformView>>* platform_views);
+  // Return the list of platform view ids at the time of this call.
+  void WaitForPlatformViewIds(
+      std::vector<uintptr_t>* platform_view_ids);
+  // Attempt to run a script inside a flutter view indicated by |view_id|.
+  // Will set |view_existed| to true if the view was found and false otherwise.
+  void RunInPlatformView(uintptr_t view_id,
+                         const char* main_script,
+                         const char* packages_file,
+                         const char* asset_directory,
+                         bool* view_existed);
 
  private:
   Shell();
@@ -69,9 +77,16 @@ class Shell {
   void InitGpuThread();
   void InitUIThread();
 
-  void WaitForPlatformViewsUIThread(
-      std::vector<base::WeakPtr<PlatformView>>* platform_views,
+  void WaitForPlatformViewsIdsUIThread(
+      std::vector<uintptr_t>* platform_views,
       base::WaitableEvent* latch);
+
+  void RunInPlatformViewUIThread(uintptr_t view_id,
+                                 const std::string& main,
+                                 const std::string& packages,
+                                 const std::string& assets_directory,
+                                 bool* view_existed,
+                                 base::WaitableEvent* latch);
 
   std::unique_ptr<base::Thread> gpu_thread_;
   std::unique_ptr<base::Thread> ui_thread_;

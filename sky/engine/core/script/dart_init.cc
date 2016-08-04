@@ -155,8 +155,7 @@ bool DartFileModifiedCallback(const char* source_url, int64_t since_ms) {
       since_ms - (since_seconds * base::Time::kMillisecondsPerSecond);
   base::Time since_time = base::Time::FromTimeT(since_seconds) +
                           base::TimeDelta::FromMilliseconds(since_milliseconds);
-  // TODO(johnmccutchan): Remove 'true ||' after Todd's fix has landed.
-  return true || file_info.last_modified > since_time;
+  return file_info.last_modified > since_time;
 }
 
 void ThreadExitCallback() {

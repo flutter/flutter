@@ -15,6 +15,7 @@
 #include "services/asset_bundle/zip_asset_bundle.h"
 #include "sky/engine/bindings/mojo_services.h"
 #include "sky/engine/core/script/dart_init.h"
+#include "sky/engine/core/script/directory_asset_bundle.h"
 #include "sky/engine/core/script/ui_dart_state.h"
 #include "sky/engine/public/web/Sky.h"
 #include "sky/shell/dart/dart_library_provider_files.h"
@@ -66,6 +67,32 @@ void Engine::BeginFrame(ftl::TimePoint frame_time) {
   TRACE_EVENT0("flutter", "Engine::BeginFrame");
   if (sky_view_)
     sky_view_->BeginFrame(frame_time);
+}
+
+void Engine::RunFromSource(const std::string& main,
+                           const std::string& packages,
+                           const std::string& assets_directory) {
+  TRACE_EVENT0("flutter", "Engine::RunFromSource");
+  // Assets.
+  base::FilePath assets_directory_path = base::FilePath(assets_directory);
+  ConfigureDirectoryAssetBundle(assets_directory_path);
+  // .packages.
+  base::FilePath packages_path = base::FilePath(std::string(packages));
+  if (packages_path.empty()) {
+    base::FilePath main_dir = base::FilePath(main).DirName();
+    packages_path = main_dir.Append(FILE_PATH_LITERAL(".packages"));
+    if (!base::PathExists(packages_path)) {
+      packages_path = main_dir.Append(base::FilePath::kParentDirectory)
+                          .Append(FILE_PATH_LITERAL(".packages"));
+      if (!base::PathExists(packages_path))
+        packages_path = base::FilePath();
+    }
+  }
+  DartLibraryProviderFiles* provider = new DartLibraryProviderFiles();
+  dart_library_provider_.reset(provider);
+  if (!packages_path.empty())
+    provider->LoadPackagesMap(packages_path);
+  RunFromLibrary(main);
 }
 
 void Engine::ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request) {
@@ -174,6 +201,11 @@ void Engine::ConfigureZipAssetBundle(const mojo::String& path) {
   zip_asset_bundle_ = new ZipAssetBundle(base::FilePath(std::string{path}),
                                          base::WorkerPool::GetTaskRunner(true));
   ZipAssetService::Create(mojo::GetProxy(&root_bundle_), zip_asset_bundle_);
+}
+
+void Engine::ConfigureDirectoryAssetBundle(const base::FilePath& path) {
+  blink::DirectoryAssetBundleService::Create(
+      mojo::GetProxy(&root_bundle_), path);
 }
 
 void Engine::RunFromPrecompiledSnapshot(const mojo::String& bundle_path) {

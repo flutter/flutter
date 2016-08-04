@@ -49,6 +49,8 @@ DartController::~DartController() {
   if (ui_dart_state_) {
     // Don't use a tonic::DartIsolateScope here since we never exit the isolate.
     Dart_EnterIsolate(ui_dart_state_->isolate());
+    // Clear the message notify callback.
+    Dart_SetMessageNotifyCallback(nullptr);
     Dart_ShutdownIsolate();  // deletes ui_dart_state_
     ui_dart_state_ = nullptr;
   }

@@ -108,7 +108,11 @@ void DartMessageHandler::OnHandleMessage(DartState* dart_state) {
 
 void DartMessageHandler::MessageNotifyCallback(Dart_Isolate dest_isolate) {
   auto dart_state = DartState::From(dest_isolate);
-  FTL_CHECK(dart_state);
+  if (!dart_state) {
+    // The callback data for an isolate can be null if the isolate is in the
+    // middle of being shutdown.
+    return;
+  }
   dart_state->message_handler().OnMessage(dart_state);
 }
 

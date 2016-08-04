@@ -182,11 +182,9 @@ void Shell::InitGpuThread() {
   gpu_thread_checker_.reset(new base::ThreadChecker());
 }
 
-
 void Shell::InitUIThread() {
   ui_thread_checker_.reset(new base::ThreadChecker());
 }
-
 
 void Shell::AddRasterizer(const base::WeakPtr<Rasterizer>& rasterizer) {
   DCHECK(gpu_thread_checker_ && gpu_thread_checker_->CalledOnValidThread());
@@ -227,25 +225,82 @@ void Shell::GetPlatformViews(
   *platform_views = platform_views_;
 }
 
-void Shell::WaitForPlatformViews(
-    std::vector<base::WeakPtr<PlatformView>>* platform_views) {
+void Shell::WaitForPlatformViewIds(
+    std::vector<uintptr_t>* platform_view_ids) {
 
   base::WaitableEvent latch(false, false);
 
   ui_task_runner()->PostTask(
       FROM_HERE,
-      base::Bind(&Shell::WaitForPlatformViewsUIThread,
+      base::Bind(&Shell::WaitForPlatformViewsIdsUIThread,
                  base::Unretained(this),
-                 base::Unretained(platform_views),
+                 base::Unretained(platform_view_ids),
                  base::Unretained(&latch)));
 
   latch.Wait();
 }
 
-void Shell::WaitForPlatformViewsUIThread(
-    std::vector<base::WeakPtr<PlatformView>>* platform_views,
+void Shell::WaitForPlatformViewsIdsUIThread(
+    std::vector<uintptr_t>* platform_view_ids,
     base::WaitableEvent* latch) {
-  GetPlatformViews(platform_views);
+  std::vector<base::WeakPtr<PlatformView>> platform_views;
+  GetPlatformViews(&platform_views);
+  for (auto it = platform_views.begin(); it != platform_views.end(); it++) {
+    PlatformView* view = it->get();
+    if (!view) {
+      // Skip dead views.
+      continue;
+    }
+    platform_view_ids->push_back(reinterpret_cast<uintptr_t>(view));
+  }
+  latch->Signal();
+}
+
+void Shell::RunInPlatformView(uintptr_t view_id,
+                              const char* main_script,
+                              const char* packages_file,
+                              const char* asset_directory,
+                              bool* view_existed) {
+  base::WaitableEvent latch(false, false);
+  DCHECK(view_id != 0);
+  DCHECK(main_script);
+  DCHECK(packages_file);
+  DCHECK(asset_directory);
+  DCHECK(view_existed);
+
+  ui_task_runner()->PostTask(
+      FROM_HERE,
+      base::Bind(&Shell::RunInPlatformViewUIThread,
+                 base::Unretained(this),
+                 view_id,
+                 std::string(main_script),
+                 std::string(packages_file),
+                 std::string(asset_directory),
+                 base::Unretained(view_existed),
+                 base::Unretained(&latch)));
+
+  latch.Wait();
+}
+
+void Shell::RunInPlatformViewUIThread(uintptr_t view_id,
+                                      const std::string& main,
+                                      const std::string& packages,
+                                      const std::string& assets_directory,
+                                      bool* view_existed,
+                                      base::WaitableEvent* latch) {
+  DCHECK(ui_thread_checker_ && ui_thread_checker_->CalledOnValidThread());
+
+  *view_existed = false;
+
+  for (auto it = platform_views_.begin(); it != platform_views_.end(); it++) {
+    PlatformView* view = it->get();
+    if (reinterpret_cast<uintptr_t>(view) == view_id) {
+      *view_existed = true;
+      view->engine().RunFromSource(main, packages, assets_directory);
+      break;
+    }
+  }
+
   latch->Signal();
 }
 

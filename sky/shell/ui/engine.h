@@ -56,6 +56,10 @@ class Engine : public UIDelegate,
 
   void BeginFrame(ftl::TimePoint frame_time);
 
+  void RunFromSource(const std::string& main,
+                     const std::string& packages,
+                     const std::string& assets_directory);
+
  private:
   // UIDelegate implementation:
   void ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request) override;
@@ -102,6 +106,7 @@ class Engine : public UIDelegate,
   void StartAnimatorIfPossible();
 
   void ConfigureZipAssetBundle(const mojo::String& path);
+  void ConfigureDirectoryAssetBundle(const base::FilePath& path);
 
   Config config_;
   std::unique_ptr<Animator> animator_;

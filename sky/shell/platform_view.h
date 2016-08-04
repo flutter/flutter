@@ -71,6 +71,10 @@ class PlatformView {
 
   virtual void Resize(const SkISize& size);
 
+  Engine& engine() {
+    return *engine_;
+  }
+
  protected:
   Config config_;
   SurfaceConfig surface_config_;

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef SKY_ENGINE_CORE_SCRIPT_DIRECTORY_ASSET_BUNDLE_H_
+#define SKY_ENGINE_CORE_SCRIPT_DIRECTORY_ASSET_BUNDLE_H_
+
 #include "base/files/file_path.h"
 #include "base/memory/weak_ptr.h"
 #include "mojo/public/cpp/bindings/interface_request.h"
@@ -35,3 +38,5 @@ class DirectoryAssetBundleService : public mojo::asset_bundle::AssetBundle {
 };
 
 }  // namespace blink
+
+#endif  // SKY_ENGINE_CORE_SCRIPT_DIRECTORY_ASSET_BUNDLE_H_
