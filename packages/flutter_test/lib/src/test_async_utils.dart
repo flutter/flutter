@@ -67,7 +67,7 @@ class TestAsyncUtils {
     _AsyncScope scope = new _AsyncScope(StackTrace.current, zone);
     _scopeStack.add(scope);
     Future<Null> result = scope.zone.run(body);
-    result = result.whenComplete(() {
+    void completionHandler(dynamic error, StackTrace stack) {
       assert(_scopeStack.isNotEmpty);
       assert(_scopeStack.contains(scope));
       bool leaked = false;
@@ -77,8 +77,10 @@ class TestAsyncUtils {
         closedScope = _scopeStack.removeLast();
         if (closedScope == scope)
           break;
-        leaked = true;
-        message.writeln('Asynchronous call to guarded function leaked. You must use "await" with all Future-returning test APIs.');
+        if (!leaked) {
+          message.writeln('Asynchronous call to guarded function leaked. You must use "await" with all Future-returning test APIs.');
+          leaked = true;
+        }
         final _StackEntry originalGuarder = _findResponsibleMethod(closedScope.creationStack, 'guard', message);
         if (originalGuarder != null) {
           message.writeln(
@@ -90,10 +92,20 @@ class TestAsyncUtils {
           );
         }
       }
-      if (leaked)
+      if (leaked) {
+        if (error != null) {
+          message.writeln('An uncaught exception may have caused the guarded function leak. The exception was:');
+          message.writeln('$error');
+          message.writeln('The stack trace associated with this exception was:');
+          FlutterError.defaultStackFilter(stack.toString().trimRight().split('\n')).forEach(message.writeln);
+        }
         throw new FlutterError(message.toString().trimRight());
-    });
-    return result;
+      }
+    }
+    return result.then(
+      (Null value) => completionHandler(null, null),
+      onError: completionHandler
+    );
   }
 
   static Zone get _currentScopeZone {

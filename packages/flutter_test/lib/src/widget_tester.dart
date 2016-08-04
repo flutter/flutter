@@ -36,9 +36,9 @@ typedef Future<Null> WidgetTesterCallback(WidgetTester widgetTester);
 ///
 /// Example:
 ///
-///     testWidgets('MyWidget', (WidgetTester tester) {
-///       tester.pumpWidget(new MyWidget());
-///       tester.tap(find.text('Save'));
+///     testWidgets('MyWidget', (WidgetTester tester) async {
+///       await tester.pumpWidget(new MyWidget());
+///       await tester.tap(find.text('Save'));
 ///       expect(tester, hasWidget(find.text('Success')));
 ///     });
 void testWidgets(String description, WidgetTesterCallback callback, {
@@ -77,12 +77,12 @@ void testWidgets(String description, WidgetTesterCallback callback, {
 ///
 ///     main() async {
 ///       assert(false); // fail in checked mode
-///       await benchmarkWidgets((WidgetTester tester) {
-///         tester.pumpWidget(new MyWidget());
+///       await benchmarkWidgets((WidgetTester tester) async {
+///         await tester.pumpWidget(new MyWidget());
 ///         final Stopwatch timer = new Stopwatch()..start();
 ///         for (int index = 0; index < 10000; index += 1) {
-///           tester.tap(find.text('Tap me'));
-///           tester.pump();
+///           await tester.tap(find.text('Tap me'));
+///           await tester.pump();
 ///         }
 ///         timer.stop();
 ///         debugPrint('Time taken: ${timer.elapsedMilliseconds}ms');
@@ -99,7 +99,7 @@ Future<Null> benchmarkWidgets(WidgetTesterCallback callback) {
     print('│  enabled will not accurately reflect the performance  │');
     print('│  that will be experienced by end users using release  ╎');
     print('│  builds. Benchmarks should be run using this command  ┆');
-    print('│  line:  flutter run --release -t benchmark.dart       ┊');
+    print('│  line:  flutter run --release benchmark.dart          ┊');
     print('│                                                        ');
     print('└─────────────────────────────────────────────────╌┄┈  🐢');
     return true;
@@ -172,6 +172,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher {
   ///
   /// This is a convenience function that just calls
   /// [TestWidgetsFlutterBinding.pump].
+  @override
   Future<Null> pump([
     Duration duration,
     EnginePhase phase = EnginePhase.sendSemanticsTree

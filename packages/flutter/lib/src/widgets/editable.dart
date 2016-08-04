@@ -169,6 +169,7 @@ class RawInputLine extends Scrollable {
     this.selectionColor,
     this.selectionHandleBuilder,
     this.selectionToolbarBuilder,
+    @required this.platform,
     this.keyboardType,
     this.onChanged,
     this.onSubmitted
@@ -206,6 +207,12 @@ class RawInputLine extends Scrollable {
   /// text selection (e.g. copy and paste).
   final TextSelectionToolbarBuilder selectionToolbarBuilder;
 
+  /// The platform whose behavior should be approximated, in particular
+  /// for scroll physics. (See [ScrollBehavior.platform].)
+  ///
+  /// Must not be null.
+  final TargetPlatform platform;
+
   /// The type of keyboard to use for editing the text.
   final KeyboardType keyboardType;
 
@@ -229,7 +236,7 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
   TextSelectionOverlay _selectionOverlay;
 
   @override
-  ScrollBehavior<double, double> createScrollBehavior() => new BoundedBehavior();
+  ScrollBehavior<double, double> createScrollBehavior() => new BoundedBehavior(platform: config.platform);
 
   @override
   BoundedBehavior get scrollBehavior => super.scrollBehavior;

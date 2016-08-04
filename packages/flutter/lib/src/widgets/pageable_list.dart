@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart' show RenderList, ViewportDimensions;
 import 'basic.dart';
 import 'framework.dart';
 import 'scroll_behavior.dart';
+import 'scroll_configuration.dart';
 import 'scrollable.dart';
 import 'virtual_viewport.dart';
 
@@ -292,12 +293,17 @@ abstract class PageableState<T extends Pageable> extends ScrollableState<T> {
   @override
   ExtentScrollBehavior get scrollBehavior {
     if (config.itemsWrap) {
-      _unboundedBehavior ??= new UnboundedBehavior();
+      _unboundedBehavior ??= new UnboundedBehavior(platform: platform);
       return _unboundedBehavior;
     }
-    _overscrollBehavior ??= new OverscrollBehavior();
+    _overscrollBehavior ??= new OverscrollBehavior(platform: platform);
     return _overscrollBehavior;
   }
+
+  /// Returns the style of scrolling to use.
+  ///
+  /// By default, defers to the nearest [ScrollConfiguration].
+  TargetPlatform get platform => ScrollConfiguration.of(context)?.platform;
 
   @override
   ExtentScrollBehavior createScrollBehavior() => scrollBehavior;
