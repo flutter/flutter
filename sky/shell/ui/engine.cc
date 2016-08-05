@@ -127,7 +127,7 @@ void Engine::SetServices(ServicesDataPtr services) {
     animator_->Reset();
     animator_->set_frame_scheduler(services_->frame_scheduler.Pass());
   } else {
-#if defined(OS_ANDROID) || defined(OS_IOS)
+#if defined(OS_ANDROID) || defined(OS_IOS) || defined(OS_MACOSX)
     vsync::VSyncProviderPtr vsync_provider;
     if (services_->shell) {
       // We bind and unbind our Shell here, since this is the only place we use

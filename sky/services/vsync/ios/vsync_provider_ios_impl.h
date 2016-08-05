@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_SERVICES_VSYNC_IOS_VSYNCPROVIDERIMPL_H_
-#define SKY_SERVICES_VSYNC_IOS_VSYNCPROVIDERIMPL_H_
+#ifndef SKY_SERVICES_VSYNC_IOS_VSYNCPROVIDERIOSIMPL_H_
+#define SKY_SERVICES_VSYNC_IOS_VSYNCPROVIDERIOSIMPL_H_
 
 #include "base/macros.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
@@ -19,22 +19,22 @@ namespace sky {
 namespace services {
 namespace vsync {
 
-class VsyncProviderImpl : public ::vsync::VSyncProvider {
+class VsyncProviderIOSImpl : public ::vsync::VSyncProvider {
  public:
-  explicit VsyncProviderImpl(
+  explicit VsyncProviderIOSImpl(
       mojo::InterfaceRequest<::vsync::VSyncProvider> request);
-  ~VsyncProviderImpl() override;
+  ~VsyncProviderIOSImpl() override;
   void AwaitVSync(const AwaitVSyncCallback& callback) override;
 
  private:
   mojo::StrongBinding<::vsync::VSyncProvider> binding_;
   VSyncClient* client_;
 
-  DISALLOW_COPY_AND_ASSIGN(VsyncProviderImpl);
+  DISALLOW_COPY_AND_ASSIGN(VsyncProviderIOSImpl);
 };
 
 }  // namespace vsync
 }  // namespace services
 }  // namespace sky
 
-#endif  // SKY_SERVICES_VSYNC_IOS_VSYNCPROVIDERIMPL_H_
+#endif  // SKY_SERVICES_VSYNC_IOS_VSYNCPROVIDERIOSIMPL_H_

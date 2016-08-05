@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/services/vsync/ios/vsync_provider_impl.h"
+#include "sky/services/vsync/ios/vsync_provider_ios_impl.h"
 #include "base/trace_event/trace_event.h"
 
 #include <Foundation/Foundation.h>
@@ -73,15 +73,15 @@ namespace sky {
 namespace services {
 namespace vsync {
 
-VsyncProviderImpl::VsyncProviderImpl(
+VsyncProviderIOSImpl::VsyncProviderIOSImpl(
     mojo::InterfaceRequest<::vsync::VSyncProvider> request)
     : binding_(this, request.Pass()), client_([[VSyncClient alloc] init]) {}
 
-VsyncProviderImpl::~VsyncProviderImpl() {
+VsyncProviderIOSImpl::~VsyncProviderIOSImpl() {
   [client_ release];
 }
 
-void VsyncProviderImpl::AwaitVSync(const AwaitVSyncCallback& callback) {
+void VsyncProviderIOSImpl::AwaitVSync(const AwaitVSyncCallback& callback) {
   [client_ await:callback];
 }
 

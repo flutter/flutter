@@ -14,7 +14,9 @@
 #include "sky/services/platform/ios/system_chrome_impl.h"
 #include "sky/services/platform/ios/system_sound_impl.h"
 #include "sky/services/platform/ios/url_launcher_impl.h"
-#include "sky/services/vsync/ios/vsync_provider_impl.h"
+#include "sky/services/vsync/ios/vsync_provider_ios_impl.h"
+#else
+#include "sky/services/vsync/mac/vsync_provider_mac_impl.h"
 #endif  // TARGET_OS_IPHONE
 
 #include "sky/services/ns_net/network_service_impl.h"
@@ -46,11 +48,6 @@ void PlatformServiceProvider::ConnectToService(
   if (service_name == ::media::MediaService::Name_) {
     new sky::services::media::MediaServiceImpl(
         mojo::InterfaceRequest<::media::MediaService>(client_handle.Pass()));
-    return;
-  }
-  if (service_name == ::vsync::VSyncProvider::Name_) {
-    new sky::services::vsync::VsyncProviderImpl(
-        mojo::InterfaceRequest<::vsync::VSyncProvider>(client_handle.Pass()));
     return;
   }
   if (service_name == ::activity::Activity::Name_) {
@@ -93,7 +90,18 @@ void PlatformServiceProvider::ConnectToService(
             client_handle.Pass()));
     return;
   }
-#endif
+  if (service_name == ::vsync::VSyncProvider::Name_) {
+    new sky::services::vsync::VsyncProviderIOSImpl(
+        mojo::InterfaceRequest<::vsync::VSyncProvider>(client_handle.Pass()));
+    return;
+  }
+#else   // TARGET_OS_IPHONE
+  if (service_name == ::vsync::VSyncProvider::Name_) {
+    new sky::services::vsync::VsyncProviderMacImpl(
+        mojo::InterfaceRequest<::vsync::VSyncProvider>(client_handle.Pass()));
+    return;
+  }
+#endif  // TARGET_OS_IPHONE
 
   dynamic_service_provider_.Run(service_name, client_handle.Pass());
 }

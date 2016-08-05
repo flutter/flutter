@@ -7,7 +7,7 @@ import("//mojo/public/tools/bindings/mojom.gni")
 group("vsync") {
   deps = []
 
-  if (is_android || is_ios) {
+  if (is_android || is_ios || is_mac) {
     deps += [ ":vsync_lib" ]
   }
 }
@@ -28,12 +28,23 @@ if (is_android) {
   }
 }
 
-if (is_ios) {
+if (is_ios || is_mac) {
   source_set("vsync_lib") {
-    sources = [
-      "ios/vsync_provider_impl.h",
-      "ios/vsync_provider_impl.mm",
-    ]
+
+    if (is_ios) {
+      sources = [
+        "ios/vsync_provider_ios_impl.h",
+        "ios/vsync_provider_ios_impl.mm",
+      ]
+    }
+
+    if (is_mac) {
+      sources = [
+        "mac/vsync_provider_mac_impl.h",
+        "mac/vsync_provider_mac_impl.cc",
+      ]
+    }
+    
     deps = [
       "//base:base",
       "//mojo/public/cpp/application",

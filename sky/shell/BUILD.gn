@@ -458,6 +458,7 @@ if (is_android) {
       "//mojo/edk/base_edk",
       "//mojo/edk/system",
       "//sky/services/ns_net",
+      "//sky/services/vsync",
       ":common",
       ":gpu_direct",
       ":testing",
