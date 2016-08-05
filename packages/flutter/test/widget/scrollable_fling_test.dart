@@ -58,4 +58,49 @@ void main() {
 
     expect(result1, lessThan(result2)); // iOS (result2) is slipperier than Android (result1)
   });
+
+  testWidgets('fling and tap to stop', (WidgetTester tester) async {
+    List<String> log = <String>[];
+
+    List<Widget> textWidgets = <Widget>[];
+    for (int i = 0; i < 250; i++)
+      textWidgets.add(new GestureDetector(onTap: () { log.add('tap $i'); }, child: new Text('$i')));
+    await tester.pumpWidget(new Block(children: textWidgets));
+
+    expect(log, equals(<String>[]));
+    await tester.tap(find.byType(Scrollable));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(log, equals(<String>['tap 18']));
+    await tester.fling(find.byType(Scrollable), new Offset(0.0, -200.0), 1000.0);
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(log, equals(<String>['tap 18']));
+    await tester.tap(find.byType(Scrollable));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(log, equals(<String>['tap 18']));
+    await tester.tap(find.byType(Scrollable));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(log, equals(<String>['tap 18', 'tap 31']));
+  });
+
+  testWidgets('fling and wait and tap', (WidgetTester tester) async {
+    List<String> log = <String>[];
+
+    List<Widget> textWidgets = <Widget>[];
+    for (int i = 0; i < 250; i++)
+      textWidgets.add(new GestureDetector(onTap: () { log.add('tap $i'); }, child: new Text('$i')));
+    await tester.pumpWidget(new Block(children: textWidgets));
+
+    expect(log, equals(<String>[]));
+    await tester.tap(find.byType(Scrollable));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(log, equals(<String>['tap 18']));
+    await tester.fling(find.byType(Scrollable), new Offset(0.0, -200.0), 1000.0);
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(log, equals(<String>['tap 18']));
+    await tester.pump(const Duration(seconds: 50));
+    expect(log, equals(<String>['tap 18']));
+    await tester.tap(find.byType(Scrollable));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(log, equals(<String>['tap 18', 'tap 48']));
+  });
 }

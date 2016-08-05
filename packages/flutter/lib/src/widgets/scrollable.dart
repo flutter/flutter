@@ -259,7 +259,8 @@ class ScrollableState<T extends Scrollable> extends State<T> {
 
   @override
   void dispose() {
-    _stop();
+    _controller.dispose();
+    _simulation = null;
     super.dispose();
   }
 
@@ -367,8 +368,10 @@ class ScrollableState<T extends Scrollable> extends State<T> {
   }
 
   void _handleAnimationStatusChanged(AnimationStatus status) {
-    if (!_controller.isAnimating)
-      _simulation = null;
+    setState(() {
+      if (!_controller.isAnimating)
+        _simulation = null;
+    });
   }
 
   void _setScrollOffset(double newScrollOffset, { DragUpdateDetails details }) {
@@ -579,9 +582,12 @@ class ScrollableState<T extends Scrollable> extends State<T> {
   }
 
   void _stop() {
+    assert(mounted);
     assert(_controller.isAnimating || _simulation == null);
-    _controller.stop();
-    _simulation = null;
+    setState(() {
+      _controller.stop();
+      _simulation = null;
+    });
   }
 
   void _handleDragStart(DragStartDetails details) {
@@ -652,7 +658,10 @@ class ScrollableState<T extends Scrollable> extends State<T> {
       key: _gestureDetectorKey,
       gestures: buildGestureDetectors(),
       behavior: HitTestBehavior.opaque,
-      child: buildContent(context)
+      child: new IgnorePointer(
+        ignoring: _controller.isAnimating,
+        child: buildContent(context)
+      )
     );
   }
 
