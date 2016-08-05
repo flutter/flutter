@@ -5,7 +5,7 @@
 #ifndef SKY_SHELL_UI_PLATFORM_IMPL_H_
 #define SKY_SHELL_UI_PLATFORM_IMPL_H_
 
-#include "base/message_loop/message_loop.h"
+#include "lib/ftl/macros.h"
 #include "sky/engine/public/platform/Platform.h"
 
 namespace sky {
@@ -23,7 +23,7 @@ class PlatformImpl : public blink::Platform {
   ftl::TaskRunner* GetIOTaskRunner() override;
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(PlatformImpl);
+  FTL_DISALLOW_COPY_AND_ASSIGN(PlatformImpl);
 };
 
 }  // namespace shell

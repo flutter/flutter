@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "base/logging.h"
 #include "base/values.h"
 #include "base/json/json_reader.h"
 #include "services/asset_bundle/zip_asset_bundle.h"
@@ -60,8 +59,9 @@ const int kFontWeightNormal = kFontWeightValue[FontWeight::FontWeightNormal];
 
 int getFontWeightValue(FontWeight weight) {
   size_t weight_index = weight;
-  return (weight_index < arraysize(kFontWeightValue)) ?
-      kFontWeightValue[weight_index] : kFontWeightNormal;
+  return (weight_index < arraysize(kFontWeightValue))
+             ? kFontWeightValue[weight_index]
+             : kFontWeightNormal;
 }
 
 // Compares fonts within a family to determine which one most closely matches
@@ -71,8 +71,7 @@ struct FontMatcher {
 
   FontMatcher(const FontDescription& description)
       : description_(description),
-        target_weight_(getFontWeightValue(description.weight())) {
-  }
+        target_weight_(getFontWeightValue(description.weight())) {}
 
   bool operator()(const FlutterFontAttributes& font1,
                   const FlutterFontAttributes& font2) {
@@ -92,40 +91,33 @@ struct FontMatcher {
   const FontDescription& description_;
   int target_weight_;
 };
-
 }
 
 void FlutterFontSelector::install(
     const scoped_refptr<ZipAssetBundle>& zip_asset_bundle) {
-  RefPtr<FlutterFontSelector> font_selector = adoptRef(
-      new FlutterFontSelector(zip_asset_bundle));
+  RefPtr<FlutterFontSelector> font_selector =
+      adoptRef(new FlutterFontSelector(zip_asset_bundle));
   font_selector->parseFontManifest();
   blink::UIDartState::Current()->set_font_selector(font_selector);
 }
 
 FlutterFontSelector::FlutterFontSelector(
     const scoped_refptr<ZipAssetBundle>& zip_asset_bundle)
-    : zip_asset_bundle_(zip_asset_bundle) {
-}
+    : zip_asset_bundle_(zip_asset_bundle) {}
 
-FlutterFontSelector::~FlutterFontSelector() {
-}
+FlutterFontSelector::~FlutterFontSelector() {}
 
-FlutterFontSelector::TypefaceAsset::TypefaceAsset() {
-}
+FlutterFontSelector::TypefaceAsset::TypefaceAsset() {}
 
-FlutterFontSelector::TypefaceAsset::~TypefaceAsset() {
-}
+FlutterFontSelector::TypefaceAsset::~TypefaceAsset() {}
 
 FlutterFontSelector::FlutterFontAttributes::FlutterFontAttributes(
     const std::string& path)
     : asset_path(path),
       weight(kFontWeightNormal),
-      style(FontStyle::FontStyleNormal) {
-}
+      style(FontStyle::FontStyleNormal) {}
 
-FlutterFontSelector::FlutterFontAttributes::~FlutterFontAttributes() {
-}
+FlutterFontSelector::FlutterFontAttributes::~FlutterFontAttributes() {}
 
 void FlutterFontSelector::parseFontManifest() {
   std::vector<uint8_t> font_manifest_data;
@@ -157,8 +149,8 @@ void FlutterFontSelector::parseFontManifest() {
       continue;
 
     AtomicString family_key = AtomicString::fromUTF8(family_name.c_str());
-    auto set_result = font_family_map_.set(
-        family_key, std::vector<FlutterFontAttributes>());
+    auto set_result =
+        font_family_map_.set(family_key, std::vector<FlutterFontAttributes>());
     std::vector<FlutterFontAttributes>& family_assets =
         set_result.storedValue->value;
 
@@ -193,24 +185,22 @@ PassRefPtr<FontData> FlutterFontSelector::getFontData(
   RefPtr<SimpleFontData> font_data = font_platform_data_cache_.get(key);
 
   if (font_data == nullptr) {
-    sk_sp<SkTypeface> typeface = getTypefaceAsset(font_description, family_name);
+    sk_sp<SkTypeface> typeface =
+        getTypefaceAsset(font_description, family_name);
     if (!typeface)
       return nullptr;
 
-    bool synthetic_bold =
-        (font_description.weight() >= blink::FontWeight600 && !typeface->isBold()) ||
-        font_description.isSyntheticBold();
+    bool synthetic_bold = (font_description.weight() >= blink::FontWeight600 &&
+                           !typeface->isBold()) ||
+                          font_description.isSyntheticBold();
     bool synthetic_italic =
         (font_description.style() && !typeface->isItalic()) ||
         font_description.isSyntheticItalic();
-    FontPlatformData platform_data(
-        typeface,
-        family_name.utf8().data(),
-        font_description.effectiveFontSize(),
-        synthetic_bold,
-        synthetic_italic,
-        font_description.orientation(),
-        font_description.useSubpixelPositioning());
+    FontPlatformData platform_data(typeface, family_name.utf8().data(),
+                                   font_description.effectiveFontSize(),
+                                   synthetic_bold, synthetic_italic,
+                                   font_description.orientation(),
+                                   font_description.useSubpixelPositioning());
 
     font_data = SimpleFontData::create(platform_data);
     font_platform_data_cache_.set(key, font_data);
@@ -246,8 +236,7 @@ sk_sp<SkTypeface> FlutterFontSelector::getTypefaceAsset(
   }
 
   std::unique_ptr<TypefaceAsset> typeface_asset(new TypefaceAsset);
-  if (!zip_asset_bundle_->GetAsBuffer(asset_path,
-                                      &typeface_asset->data)) {
+  if (!zip_asset_bundle_->GetAsBuffer(asset_path, &typeface_asset->data)) {
     typeface_cache_.insert(std::make_pair(asset_path, nullptr));
     return nullptr;
   }
@@ -255,16 +244,15 @@ sk_sp<SkTypeface> FlutterFontSelector::getTypefaceAsset(
   SkAutoTUnref<SkFontMgr> font_mgr(SkFontMgr::RefDefault());
   SkMemoryStream* typeface_stream = new SkMemoryStream(
       typeface_asset->data.data(), typeface_asset->data.size());
-  typeface_asset->typeface = sk_sp<SkTypeface>(
-      font_mgr->createFromStream(typeface_stream));
+  typeface_asset->typeface =
+      sk_sp<SkTypeface>(font_mgr->createFromStream(typeface_stream));
   if (typeface_asset->typeface == nullptr) {
     typeface_cache_.insert(std::make_pair(asset_path, nullptr));
     return nullptr;
   }
 
   sk_sp<SkTypeface> result = typeface_asset->typeface;
-  typeface_cache_.insert(std::make_pair(
-      asset_path, std::move(typeface_asset)));
+  typeface_cache_.insert(std::make_pair(asset_path, std::move(typeface_asset)));
 
   return result;
 }
@@ -272,15 +260,13 @@ sk_sp<SkTypeface> FlutterFontSelector::getTypefaceAsset(
 void FlutterFontSelector::willUseFontData(
     const FontDescription& font_description,
     const AtomicString& family,
-    UChar32 character) {
-}
+    UChar32 character) {}
 
 unsigned FlutterFontSelector::version() const {
   return 0;
 }
 
-void FlutterFontSelector::fontCacheInvalidated() {
-}
+void FlutterFontSelector::fontCacheInvalidated() {}
 
 }  // namespace shell
 }  // namespace sky
