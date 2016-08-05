@@ -42,7 +42,9 @@ class _AppBarBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Animation<double> effectiveAnimation = animation ?? kAlwaysCompleteAnimation;
+    // TODO(abarth): Wire up to the parallax of the FlexibleSpaceBar in a way
+    // that doesn't pop during hero transition.
+    Animation<double> effectiveAnimation = kAlwaysDismissedAnimation;
     return new AnimatedBuilder(
       animation: effectiveAnimation,
       builder: (BuildContext context, Widget child) {
