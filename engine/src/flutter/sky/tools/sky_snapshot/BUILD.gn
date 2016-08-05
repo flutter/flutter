@@ -4,25 +4,16 @@
 
 executable("sky_snapshot") {
   sources = [
-    "loader.cc",
-    "loader.h",
-    "logging.cc",
-    "logging.h",
     "main.cc",
-    "scope.h",
-    "switches.cc",
-    "switches.h",
-    "vm.cc",
-    "vm.h",
   ]
 
   deps = [
-    "//base",
     "//dart/runtime:libdart",
     "//dart/runtime/vm:libdart_platform",
-    "//lib/tonic/parsers",
+    "//lib/ftl",
+    "//lib/tonic/converter",
+    "//lib/tonic/file_loader",
     "//sky/engine/bindings:snapshot_cc",
-    "//third_party/zlib",
   ]
 
   if (!is_ios && !is_mac) {

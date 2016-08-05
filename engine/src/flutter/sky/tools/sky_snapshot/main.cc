@@ -1,108 +1,240 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <iostream>
+#include <fcntl.h>
 
-#include "base/at_exit.h"
-#include "base/basictypes.h"
-#include "base/command_line.h"
-#include "base/files/file_path.h"
-#include "base/files/file_util.h"
-#include "base/logging.h"
-#include "base/process/memory.h"
+#include <iostream>
+#include <set>
+#include <string>
+
 #include "dart/runtime/include/dart_api.h"
-#include "sky/tools/sky_snapshot/loader.h"
-#include "sky/tools/sky_snapshot/logging.h"
-#include "sky/tools/sky_snapshot/scope.h"
-#include "sky/tools/sky_snapshot/switches.h"
-#include "sky/tools/sky_snapshot/vm.h"
+#include "lib/ftl/arraysize.h"
+#include "lib/ftl/command_line.h"
+#include "lib/ftl/files/directory.h"
+#include "lib/ftl/files/eintr_wrapper.h"
+#include "lib/ftl/files/file_descriptor.h"
+#include "lib/ftl/files/file.h"
+#include "lib/ftl/files/symlink.h"
+#include "lib/ftl/files/unique_fd.h"
+#include "lib/ftl/logging.h"
+#include "lib/tonic/converter/dart_converter.h"
+#include "lib/tonic/file_loader/file_loader.h"
+
+extern "C" {
+extern const uint8_t* kDartVmIsolateSnapshotBuffer;
+extern const uint8_t* kDartIsolateSnapshotBuffer;
+}
+
+namespace sky_snapshot {
+namespace {
+
+using tonic::ToDart;
+
+constexpr char kHelp[] = "help";
+constexpr char kPackages[] = "packages";
+constexpr char kSnapshot[] = "snapshot";
+constexpr char kDepfile[] = "depfile";
+constexpr char kBuildOutput[] = "build-output";
+
+const char* kDartArgs[] = {
+    // clang-format off
+    "--enable_mirrors=false",
+    "--load_deferred_eagerly=true",
+    "--conditional_directives",
+    // TODO(chinmaygarde): The experimental interpreter for iOS device targets
+    // does not support all these flags. The build process uses its own version
+    // of this snapshotter. Till support for all these flags is added, make
+    // sure the snapshotter does not error out on unrecognized flags.
+    "--ignore-unrecognized-flags",
+    // clang-format on
+};
 
 void Usage() {
-  std::cerr << R"USAGE(usage: sky_snapshot --packages=PACKAGES --snapshot=SNAPSHOT_BLOB <lib/main.dart>
-       [ --depfile=DEPS_FILE ] [ --build-output=BUILD_OUTPUT ] [ --help ]
-
- * PACKAGES is the '.packages' file that defines where to find Dart packages.
- * SNAPSHOT_BLOB is the file to write the snapshot into.
- * DEPS_FILE is an optional '.d' file to depedendency information into.
- * BUILD_OUTPUT optionally overrides the target name used in the DEPS_FILE.
-   (The default is SNAPSHOT_BLOB.)
-)USAGE";
+  std::cerr
+      << "Usage: sky_snapshot --" << kPackages << "=PACKAGES" << std::endl
+      << "                  [ --" << kSnapshot << "=OUTPUT_SNAPSHOT ]"
+      << std::endl
+      << "                  [ --" << kDepfile << "=DEPFILE ]" << std::endl
+      << "                  [ --" << kBuildOutput << "=BUILD_OUTPUT ]"
+      << std::endl
+      << std::endl
+      << "                        MAIN_DART" << std::endl
+      << " * PACKAGES is the '.packages' file that defines where to find Dart "
+         "packages."
+      << std::endl
+      << " * OUTPUT_SNAPSHOT is the file to write the snapshot into."
+      << std::endl
+      << " * DEPFILE is the file into which to write the '.d' depedendency "
+         "information into."
+      << std::endl
+      << " * BUILD_OUTPUT determines the target name used in the " << std::endl
+      << "   DEPFILE. (Required if DEPFILE is provided.) " << std::endl;
 }
 
-void WriteSnapshot(base::FilePath path) {
-  uint8_t* buffer;
-  intptr_t size;
-  CHECK(!LogIfError(Dart_CreateScriptSnapshot(&buffer, &size)));
+class DartScope {
+ public:
+  DartScope(Dart_Isolate isolate) {
+    Dart_EnterIsolate(isolate);
+    Dart_EnterScope();
+  }
 
-  CHECK_EQ(base::WriteFile(path, reinterpret_cast<const char*>(buffer), size),
-           size);
+  ~DartScope() {
+    Dart_ExitScope();
+    Dart_ExitIsolate();
+  }
+};
+
+void InitDartVM() {
+  FTL_CHECK(Dart_SetVMFlags(arraysize(kDartArgs), kDartArgs));
+  char* error = Dart_Initialize(
+      kDartVmIsolateSnapshotBuffer, nullptr, nullptr, nullptr, nullptr, nullptr,
+      nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+  if (error)
+    FTL_LOG(FATAL) << error;
 }
 
-void WriteDependencies(base::FilePath path,
-                       const std::string& build_output,
-                       const std::set<std::string>& deps) {
-  base::FilePath current_directory;
-  CHECK(base::GetCurrentDirectory(&current_directory));
+Dart_Isolate CreateDartIsolate() {
+  FTL_CHECK(kDartIsolateSnapshotBuffer);
+  char* error = nullptr;
+  Dart_Isolate isolate =
+      Dart_CreateIsolate("dart:snapshot", "main", kDartIsolateSnapshotBuffer,
+                         nullptr, nullptr, &error);
+  FTL_CHECK(isolate) << error;
+  Dart_ExitIsolate();
+  return isolate;
+}
+
+tonic::FileLoader* g_loader = nullptr;
+
+tonic::FileLoader& GetLoader() {
+  if (!g_loader)
+    g_loader = new tonic::FileLoader();
+  return *g_loader;
+}
+
+Dart_Handle HandleLibraryTag(Dart_LibraryTag tag,
+                             Dart_Handle library,
+                             Dart_Handle url) {
+  FTL_CHECK(Dart_IsLibrary(library));
+  FTL_CHECK(Dart_IsString(url));
+  tonic::FileLoader& loader = GetLoader();
+  if (tag == Dart_kCanonicalizeUrl)
+    return loader.CanonicalizeURL(library, url);
+  if (tag == Dart_kImportTag)
+    return loader.Import(url);
+  if (tag == Dart_kSourceTag)
+    return loader.Source(library, url);
+  return Dart_NewApiError("Unknown library tag.");
+}
+
+std::vector<char> CreateSnapshot() {
+  uint8_t* buffer = nullptr;
+  intptr_t size = 0;
+  DART_CHECK_VALID(Dart_CreateScriptSnapshot(&buffer, &size));
+  const char* begin = reinterpret_cast<const char*>(buffer);
+  return std::vector<char>(begin, begin + size);
+}
+
+bool WriteDepfile(const std::string& path,
+                  const std::string& build_output,
+                  const std::set<std::string>& deps) {
+  std::string current_directory = files::GetCurrentDirectory();
   std::string output = build_output + ":";
-  for (const auto& i : deps) {
-    output += " ";
-    base::FilePath dep_path(i);
-    if (dep_path.IsAbsolute()) {
-      output += dep_path.MaybeAsASCII();
+  for (const auto& dep : deps) {
+    std::string file = dep;
+    FTL_DCHECK(!file.empty());
+    if (file[0] != '/')
+      file = current_directory + "/" + file;
+
+    std::string resolved_file;
+    if (files::ReadSymbolicLink(file, &resolved_file)) {
+      output += " " + resolved_file;
     } else {
-      output += current_directory.Append(dep_path).MaybeAsASCII();
+      output += " " + file;
     }
   }
-  const char* data = output.c_str();
-  const intptr_t data_length = output.size();
-  CHECK_EQ(base::WriteFile(path, data, data_length), data_length);
+  return files::WriteFile(path, output.data(), output.size());
 }
 
-int main(int argc, const char* argv[]) {
-  base::AtExitManager exit_manager;
-  base::EnableTerminationOnHeapCorruption();
-  base::CommandLine::Init(argc, argv);
-
-  const base::CommandLine& command_line =
-      *base::CommandLine::ForCurrentProcess();
-
-  if (command_line.HasSwitch(switches::kHelp) ||
-      command_line.GetArgs().empty()) {
+int CreateSnapshot(const ftl::CommandLine& command_line) {
+  if (command_line.HasOption(kHelp, nullptr)) {
     Usage();
     return 0;
   }
 
-  if (!command_line.HasSwitch(switches::kSnapshot)) {
-    fprintf(stderr, "error: Need --snapshot.\n");
-    exit(1);
+  if (command_line.positional_args().empty()) {
+    Usage();
+    return 1;
+  }
+
+  std::string packages;
+  if (!command_line.GetOptionValue(kPackages, &packages)) {
+    std::cerr << "error: Need --" << kPackages << std::endl;
+    return 1;
+  }
+
+  std::vector<std::string> args = command_line.positional_args();
+  if (args.size() != 1) {
+    std::cerr << "error: Need one position argument. Got " << args.size() << "."
+              << std::endl;
+    return 1;
+  }
+
+  std::string main_dart = args[0];
+
+  std::string snapshot;
+  if (!command_line.GetOptionValue(kSnapshot, &snapshot)) {
+    std::cerr << "error: Need --" << kSnapshot << "." << std::endl;
+    return 1;
+  }
+
+  std::string depfile;
+  std::string build_output;
+  if (command_line.GetOptionValue(kDepfile, &depfile) &&
+      !command_line.GetOptionValue(kBuildOutput, &build_output)) {
+    std::cerr << "error: Need --" << kBuildOutput << " if --" << kDepfile
+              << " is specified." << std::endl;
+    return 1;
   }
 
   InitDartVM();
-  Dart_Isolate isolate = CreateDartIsolate();
-  CHECK(isolate);
 
-  DartIsolateScope scope(isolate);
-  DartApiScope api_scope;
-
-  auto args = command_line.GetArgs();
-  CHECK(args.size() == 1);
-  LoadScript(args[0]);
-
-  if (LogIfError(Dart_FinalizeLoading(true)))
+  tonic::FileLoader& loader = GetLoader();
+  if (!loader.LoadPackagesMap(packages))
     return 1;
 
-  CHECK(command_line.HasSwitch(switches::kSnapshot));
-  WriteSnapshot(command_line.GetSwitchValuePath(switches::kSnapshot));
+  Dart_Isolate isolate = CreateDartIsolate();
+  FTL_CHECK(isolate) << "Failed to create isolate.";
 
-  if (command_line.HasSwitch(switches::kDepfile)) {
-    auto build_output = command_line.HasSwitch(switches::kBuildOutput) ?
-        command_line.GetSwitchValueASCII(switches::kBuildOutput) :
-        command_line.GetSwitchValueASCII(switches::kSnapshot);
-    WriteDependencies(command_line.GetSwitchValuePath(switches::kDepfile),
-                      build_output,
-                      GetDependencies());
+  DartScope scope(isolate);
+
+  DART_CHECK_VALID(Dart_SetLibraryTagHandler(HandleLibraryTag));
+  DART_CHECK_VALID(Dart_LoadScript(ToDart(main_dart), Dart_Null(),
+                                   ToDart(loader.Fetch(main_dart)), 0, 0));
+
+  std::vector<char> snapshot_blob = CreateSnapshot();
+
+  if (!snapshot.empty() &&
+      !files::WriteFile(snapshot, snapshot_blob.data(), snapshot_blob.size())) {
+    std::cerr << "error: Failed to write snapshot to '" << snapshot << "'."
+              << std::endl;
+    return 1;
+  }
+
+  if (!depfile.empty() &&
+      !WriteDepfile(depfile, build_output, loader.dependencies())) {
+    std::cerr << "error: Failed to write depfile to '" << depfile << "'."
+              << std::endl;
+    return 1;
   }
 
   return 0;
+}
+
+}  // namespace
+}  // namespace sky_snapshot
+
+int main(int argc, const char* argv[]) {
+  return sky_snapshot::CreateSnapshot(ftl::CommandLineFromArgcArgv(argc, argv));
 }
