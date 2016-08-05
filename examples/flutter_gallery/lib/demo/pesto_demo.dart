@@ -12,8 +12,7 @@ const String _kUserImage = 'packages/flutter_gallery_assets/pesto/avatar.jpg';
 // Map of logo images keyed by the minimum height their container needs to be.
 final Map<double, String> _kLogoImages = <double, String>{
   0.0: 'packages/flutter_gallery_assets/pesto/logo_small.png',
-  70.0: 'packages/flutter_gallery_assets/pesto/logo_medium.png',
-  170.0: 'packages/flutter_gallery_assets/pesto/logo_big.png',
+  70.0: 'packages/flutter_gallery_assets/pesto/logo_medium.png'
 };
 
 final ThemeData _kTheme = new ThemeData(
