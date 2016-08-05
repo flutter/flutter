@@ -114,6 +114,9 @@ static sk_sp<SkImage> TextureImageCreate(GrContext* context,
   // Clear the binding. We are done.
   glBindTexture(GL_TEXTURE_2D, GL_NONE);
 
+  // Flush the texture before it can be bound by another thread.
+  glFlush();
+
   GrGLTextureInfo texInfo;
   texInfo.fTarget = GL_TEXTURE_2D;
   texInfo.fID = handle;
