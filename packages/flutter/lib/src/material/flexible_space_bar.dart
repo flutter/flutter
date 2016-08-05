@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
+import 'app_bar.dart';
 import 'constants.dart';
 import 'scaffold.dart';
 import 'theme.dart';
@@ -57,27 +58,6 @@ class FlexibleSpaceBar extends StatefulWidget {
 }
 
 class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
-  final ProxyAnimation _scaffoldAnimation = new ProxyAnimation();
-  double _lastAppBarHeight;
-
-  @override
-  void initState() {
-    super.initState();
-    _scaffoldAnimation.addListener(_handleTick);
-  }
-
-  @override
-  void dispose() {
-    _scaffoldAnimation.removeListener(_handleTick);
-    super.dispose();
-  }
-
-  void _handleTick() {
-    setState(() {
-      // The animation's state is our build state, and it changed already.
-    });
-  }
-
   bool _getEffectiveCenterTitle(ThemeData theme) {
     if (config.centerTitle != null)
       return config.centerTitle;
@@ -91,77 +71,62 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
     return null;
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildContent(BuildContext context, BoxConstraints constraints) {
+    final Size size = constraints.biggest;
     final double statusBarHeight = MediaQuery.of(context).padding.top;
-    final ScaffoldState scaffold = Scaffold.of(context);
-    if (scaffold != null) {
-      _scaffoldAnimation.parent ??= scaffold.appBarAnimation;
-      _lastAppBarHeight = scaffold.appBarHeight;
-    }
-    final double appBarHeight = (_lastAppBarHeight ?? kToolBarHeight) + statusBarHeight;
-    final double toolBarHeight = kToolBarHeight + statusBarHeight;
+
+    final double currentHeight = size.height;
+    final double maxHeight = statusBarHeight + AppBar.getExpandedHeightFor(context);
+    final double minHeight = statusBarHeight + kToolBarHeight;
+    final double deltaHeight = maxHeight - minHeight;
+
+    // 0.0 -> Expanded
+    // 1.0 -> Collapsed to toolbar
+    final double t = (1.0 - (currentHeight - minHeight) / deltaHeight).clamp(0.0, 1.0);
+
     final List<Widget> children = <Widget>[];
 
     // background image
-    if (config.background != null && scaffold != null) {
-      final double fadeStart = (appBarHeight - toolBarHeight * 2.0) / appBarHeight;
-      final double fadeEnd = (appBarHeight - toolBarHeight) / appBarHeight;
-      final CurvedAnimation opacityCurve = new CurvedAnimation(
-        parent: _scaffoldAnimation,
-        curve: new Interval(math.max(0.0, fadeStart), math.min(fadeEnd, 1.0))
-      );
-      final double parallax = new Tween<double>(begin: 0.0, end: appBarHeight / 4.0).evaluate(_scaffoldAnimation);
-      final double opacity = new Tween<double>(begin: 1.0, end: 0.0).evaluate(opacityCurve);
+    if (config.background != null) {
+      final double fadeStart = math.max(0.0, 1.0 - kToolBarHeight / deltaHeight);
+      final double fadeEnd = 1.0;
+      final double opacity = 1.0 - new Interval(fadeStart, fadeEnd).transform(t);
+      final double parallax = new Tween<double>(begin: 0.0, end: deltaHeight / 4.0).lerp(t);
       if (opacity > 0.0) {
         children.add(new Positioned(
           top: -parallax,
           left: 0.0,
           right: 0.0,
+          height: maxHeight,
           child: new Opacity(
             opacity: opacity,
-            child: new SizedBox(
-              height: appBarHeight + statusBarHeight,
-              child: config.background
-            )
+            child: config.background
           )
         ));
       }
     }
 
-    // title
     if (config.title != null) {
       final ThemeData theme = Theme.of(context);
-      final double fadeStart = (appBarHeight - toolBarHeight) / appBarHeight;
-      final double fadeEnd = (appBarHeight - toolBarHeight / 2.0) / appBarHeight;
-      final CurvedAnimation opacityCurve = new CurvedAnimation(
-        parent: _scaffoldAnimation,
-        curve: new Interval(fadeStart, fadeEnd)
-      );
-      final int alpha = new Tween<double>(begin: 255.0, end: 0.0).evaluate(opacityCurve).toInt();
-      if (alpha > 0) {
+      final double opacity = (1.0 - (minHeight - currentHeight) / (kToolBarHeight - statusBarHeight)).clamp(0.0, 1.0);
+      if (opacity > 0.0) {
         TextStyle titleStyle = theme.primaryTextTheme.title;
         titleStyle = titleStyle.copyWith(
-          color: titleStyle.color.withAlpha(alpha)
-        );
-        final double yAlignStart = 1.0;
-        final double yAlignEnd = (statusBarHeight + kToolBarHeight / 2.0) / toolBarHeight;
-        final double scaleAndAlignEnd = (appBarHeight - toolBarHeight) / appBarHeight;
-        final CurvedAnimation scaleAndAlignCurve = new CurvedAnimation(
-          parent: _scaffoldAnimation,
-          curve: new Interval(0.0, scaleAndAlignEnd)
+          color: titleStyle.color.withOpacity(opacity)
         );
         final bool effectiveCenterTitle = _getEffectiveCenterTitle(theme);
+        final double scaleValue = new Tween<double>(begin: 1.5, end: 1.0).lerp(t);
+        final Matrix4 scaleTransform = new Matrix4.identity()
+          ..scale(scaleValue, scaleValue, 1.0);
         final FractionalOffset titleAlignment = effectiveCenterTitle ? FractionalOffset.bottomCenter : FractionalOffset.bottomLeft;
         children.add(new Container(
-          padding: new EdgeInsets.only(left: effectiveCenterTitle ? 0.0 : 72.0, bottom: 14.0),
-          align: new Tween<FractionalOffset>(
-            begin: new FractionalOffset(0.0, yAlignStart),
-            end: new FractionalOffset(0.0, yAlignEnd)
-          ).evaluate(scaleAndAlignCurve),
-          child: new ScaleTransition(
+          padding: new EdgeInsets.only(
+            left: effectiveCenterTitle ? 0.0 : 72.0,
+            bottom: 16.0
+          ),
+          child: new Transform(
             alignment: titleAlignment,
-            scale: new Tween<double>(begin: 1.5, end: 1.0).animate(scaleAndAlignCurve),
+            transform: scaleTransform,
             child: new Align(
               alignment: titleAlignment,
               child: new DefaultTextStyle(style: titleStyle, child: config.title)
@@ -172,5 +137,10 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
     }
 
     return new ClipRect(child: new Stack(children: children));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new LayoutBuilder(builder: _buildContent);
   }
 }

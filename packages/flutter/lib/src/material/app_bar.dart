@@ -30,6 +30,22 @@ abstract class AppBarBottomWidget extends Widget {
 // Mobile Portrait: 56dp
 // Tablet/Desktop: 64dp
 
+class _AppBarExpandedHeight extends InheritedWidget {
+  _AppBarExpandedHeight({
+    this.expandedHeight,
+    Widget child
+  }) : super(child: child) {
+    assert(expandedHeight != null);
+  }
+
+  final double expandedHeight;
+
+  @override
+  bool updateShouldNotify(_AppBarExpandedHeight oldWidget) {
+    return expandedHeight != oldWidget.expandedHeight;
+  }
+}
+
 /// A material design app bar.
 ///
 /// An app bar consists of a toolbar and potentially other widgets, such as a
@@ -163,6 +179,11 @@ class AppBar extends StatelessWidget {
 
   final double _expandedHeight;
   final double _collapsedHeight;
+
+  static double getExpandedHeightFor(BuildContext context) {
+    _AppBarExpandedHeight marker = context.inheritFromWidgetOfExactType(_AppBarExpandedHeight);
+    return marker?.expandedHeight ?? 0.0;
+  }
 
   /// Creates a copy of this app bar but with the given fields replaced with the new values.
   AppBar copyWith({
@@ -377,12 +398,15 @@ class AppBar extends StatelessWidget {
 
     return new Hero(
       tag: heroTag ?? _kDefaultHeroTag,
-      child: new Material(
-        color: backgroundColor ?? themeData.primaryColor,
-        elevation: elevation,
-        child: new Align(
-          alignment: FractionalOffset.topCenter,
-          child: appBar
+      child: new _AppBarExpandedHeight(
+        expandedHeight: expandedHeight,
+        child: new Material(
+          color: backgroundColor ?? themeData.primaryColor,
+          elevation: elevation,
+          child: new Align(
+            alignment: FractionalOffset.topCenter,
+            child: appBar
+          )
         )
       )
     );

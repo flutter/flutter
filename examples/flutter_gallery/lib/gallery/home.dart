@@ -42,13 +42,14 @@ class _AppBarBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Animation<double> effectiveAnimation = animation ?? kAlwaysCompleteAnimation;
     return new AnimatedBuilder(
-      animation: animation,
+      animation: effectiveAnimation,
       builder: (BuildContext context, Widget child) {
         return new Stack(
           children: _kBackgroundLayers.map((_BackgroundLayer layer) {
             return new Positioned(
-              top: -layer.parallaxTween.evaluate(animation),
+              top: -layer.parallaxTween.evaluate(effectiveAnimation),
               left: 0.0,
               right: 0.0,
               bottom: 0.0,
@@ -147,7 +148,7 @@ class GalleryHomeState extends State<GalleryHome> {
           background: new Builder(
             builder: (BuildContext context) {
               return new _AppBarBackground(
-                animation: Scaffold.of(context).appBarAnimation
+                animation: Scaffold.of(context)?.appBarAnimation
               );
             }
           )
