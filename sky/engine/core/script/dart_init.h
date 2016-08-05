@@ -9,6 +9,7 @@
 #include "lib/ftl/functional/closure.h"
 #include "sky/engine/wtf/OperatingSystem.h"
 
+#include <memory>
 #include <string>
 
 namespace blink {
