@@ -345,27 +345,30 @@ class _RecipePageState extends State<_RecipePage> {
             )
           )
         ),
-        new ScrollableViewport(
-          child: new RepaintBoundary(
-            child: new Padding(
-              padding: new EdgeInsets.only(top: appBarHeight),
-              child: new Stack(
-                children: <Widget>[
-                  new Padding(
-                    padding: new EdgeInsets.only(top: fabHalfSize),
-                    child: new SizedBox(
-                      width: fullWidth ? null : _kRecipePageMaxWidth,
-                      child: new _RecipeSheet(recipe: config.recipe)
+        new ClampOverscrolls(
+          value: true,
+          child: new ScrollableViewport(
+            child: new RepaintBoundary(
+              child: new Padding(
+                padding: new EdgeInsets.only(top: appBarHeight),
+                child: new Stack(
+                  children: <Widget>[
+                    new Padding(
+                      padding: new EdgeInsets.only(top: fabHalfSize),
+                      child: new SizedBox(
+                        width: fullWidth ? null : _kRecipePageMaxWidth,
+                        child: new _RecipeSheet(recipe: config.recipe)
+                      )
+                    ),
+                    new Positioned(
+                      right: 16.0,
+                      child: new FloatingActionButton(
+                        child: new Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
+                        onPressed: _toggleFavorite
+                      )
                     )
-                  ),
-                  new Positioned(
-                    right: 16.0,
-                    child: new FloatingActionButton(
-                      child: new Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
-                      onPressed: _toggleFavorite
-                    )
-                  )
-                ]
+                  ]
+                )
               )
             )
           )
