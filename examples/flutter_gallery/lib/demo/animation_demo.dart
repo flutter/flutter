@@ -124,7 +124,6 @@ class _PointDemoState extends State<_PointDemo> {
     final Size screenSize = MediaQuery.of(context).size;
     _begin = new Point(screenSize.width * 0.5, screenSize.height * 0.2);
     _end = new Point(screenSize.width * 0.1, screenSize.height * 0.4);
-    print('screenSize=$screenSize gives $_begin and $_end');
     _animation = new CurvedAnimation(parent: config.controller, curve: Curves.ease);
   }
 
