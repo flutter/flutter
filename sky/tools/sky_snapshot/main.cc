@@ -22,8 +22,8 @@
 #include "lib/tonic/file_loader/file_loader.h"
 
 extern "C" {
-extern const uint8_t* kDartVmIsolateSnapshotBuffer;
-extern const uint8_t* kDartIsolateSnapshotBuffer;
+extern const uint8_t kDartVmIsolateSnapshotBuffer[];
+extern const uint8_t kDartIsolateSnapshotBuffer[];
 }
 
 namespace sky_snapshot {
