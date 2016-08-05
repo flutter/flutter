@@ -4,14 +4,10 @@
 
 #include "flow/layers/picture_layer.h"
 
-#include "flow/checkerboard.h"
 #include "flow/raster_cache.h"
 #include "lib/ftl/logging.h"
 
 namespace flow {
-
-// TODO(abarth): Make this configurable by developers.
-const bool kDebugCheckerboardRasterizedLayers = false;
 
 PictureLayer::PictureLayer() {}
 
@@ -32,8 +28,6 @@ void PictureLayer::Paint(PaintContext& context) {
     SkRect rect = picture_->cullRect().makeOffset(offset_.x(), offset_.y());
     context.canvas.drawImageRect(image_.get(), rect, nullptr,
                                  SkCanvas::kFast_SrcRectConstraint);
-    if (kDebugCheckerboardRasterizedLayers)
-      DrawCheckerboard(&context.canvas, rect);
   } else {
     TRACE_EVENT1("flutter", "PictureLayer::Paint", "image", "normal");
     SkAutoCanvasRestore save(&context.canvas, true);
