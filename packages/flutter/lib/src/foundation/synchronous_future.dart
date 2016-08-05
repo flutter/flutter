@@ -51,8 +51,8 @@ class SynchronousFuture<T> implements Future<T> {
       if (result is Future)
         return result.then((_) => _value);
       return this;
-    } catch (error, stackTrace) {
-      return new Future<T>.error(error, stackTrace);
+    } catch (e, stack) {
+      return new Future<T>.error(e, stack);
     }
   }
 }
