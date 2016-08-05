@@ -22,34 +22,16 @@
 namespace sky {
 namespace shell {
 
-class AndroidNativeWindow {
- public:
-  using Handle = ANativeWindow*;
+namespace {
 
-  explicit AndroidNativeWindow(Handle window) : window_(window) {
-    if (window_ != nullptr) {
-      ANativeWindow_acquire(window_);
-    }
-  }
+template <class T>
+using EGLResult = std::pair<bool, T>;
 
-  ~AndroidNativeWindow() {
-    if (window_ != nullptr) {
-      ANativeWindow_release(window_);
-      window_ = nullptr;
-    }
-  }
+EGLDisplay g_display = EGL_NO_DISPLAY;
+EGLContext g_resource_context = EGL_NO_CONTEXT;
+EGLSurface g_resource_surface = EGL_NO_SURFACE;
 
-  bool IsValid() const { return window_ != nullptr; }
-
-  Handle handle() const { return window_; }
-
- private:
-  Handle window_;
-
-  DISALLOW_COPY_AND_ASSIGN(AndroidNativeWindow);
-};
-
-static void LogLastEGLError() {
+void LogLastEGLError() {
   struct EGLNameErrorPair {
     const char* name;
     EGLint code;
@@ -95,16 +77,139 @@ static void LogLastEGLError() {
   DLOG(WARNING) << "Unknown EGL Error";
 }
 
+EGLResult<EGLSurface> CreatePBufferSurface(EGLDisplay display,
+                                           EGLConfig config) {
+  // We only ever create pbuffer surfaces for background resource loading
+  // contexts. We never bind the pbuffer to anything.
+  const EGLint attribs[] = {EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE};
+  EGLSurface surface = eglCreatePbufferSurface(display, config, attribs);
+  return {surface != EGL_NO_SURFACE, surface};
+}
+
+EGLResult<EGLSurface> CreateContext(
+    EGLDisplay display,
+    EGLConfig config,
+    EGLContext share = EGL_NO_CONTEXT) {
+  EGLint attributes[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
+
+  EGLContext context = eglCreateContext(display, config, share, attributes);
+
+  return {context != EGL_NO_CONTEXT, context};
+}
+
+EGLResult<EGLConfig> ChooseEGLConfiguration(
+    EGLDisplay display,
+    PlatformView::SurfaceConfig config) {
+  EGLint attributes[] = {
+      // clang-format off
+      EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+      EGL_SURFACE_TYPE,    EGL_WINDOW_BIT,
+      EGL_RED_SIZE,        config.red_bits,
+      EGL_GREEN_SIZE,      config.green_bits,
+      EGL_BLUE_SIZE,       config.blue_bits,
+      EGL_ALPHA_SIZE,      config.alpha_bits,
+      EGL_DEPTH_SIZE,      config.depth_bits,
+      EGL_STENCIL_SIZE,    config.stencil_bits,
+      EGL_NONE,            // termination sentinel
+      // clang-format on
+  };
+
+  EGLint config_count = 0;
+  EGLConfig egl_config = nullptr;
+
+  if (eglChooseConfig(display, attributes, &egl_config, 1, &config_count) !=
+      EGL_TRUE) {
+    return {false, nullptr};
+  }
+
+  bool success = config_count > 0 && egl_config != nullptr;
+
+  return {success, success ? egl_config : nullptr};
+}
+
+void InitGlobal() {
+  // Get the display.
+  g_display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+  if (g_display == EGL_NO_DISPLAY)
+    return;
+
+  // Initialize the display connection.
+  if (eglInitialize(g_display, nullptr, nullptr) != EGL_TRUE)
+    return;
+
+  bool success;
+
+  // Choose a config for resource loading.
+  PlatformView::SurfaceConfig resource_config;
+  resource_config.stencil_bits = 0;
+
+  EGLConfig resource_egl_config;
+  std::tie(success, resource_egl_config) =
+      ChooseEGLConfiguration(g_display, resource_config);
+  if (!success) {
+    DLOG(INFO) << "Could not choose a resource configuration.";
+    LogLastEGLError();
+    return;
+  }
+
+  // Create a pbuffer surface for the configuration for resource loading.
+  std::tie(success, g_resource_surface) =
+      CreatePBufferSurface(g_display, resource_egl_config);
+  if (!success) {
+    DLOG(INFO)
+        << "Could not create the pbuffer surface for resource loading.";
+    LogLastEGLError();
+    return;
+  }
+
+  // Create a resource context for the configuration.
+  std::tie(success, g_resource_context) =
+      CreateContext(g_display, resource_egl_config);
+
+  if (!success) {
+    DLOG(INFO) << "Could not create the resource context.";
+    LogLastEGLError();
+    return;
+  }
+}
+
+}  // namespace
+
+class AndroidNativeWindow {
+ public:
+  using Handle = ANativeWindow*;
+
+  explicit AndroidNativeWindow(Handle window) : window_(window) {
+    if (window_ != nullptr) {
+      ANativeWindow_acquire(window_);
+    }
+  }
+
+  ~AndroidNativeWindow() {
+    if (window_ != nullptr) {
+      ANativeWindow_release(window_);
+      window_ = nullptr;
+    }
+  }
+
+  bool IsValid() const { return window_ != nullptr; }
+
+  Handle handle() const { return window_; }
+
+ private:
+  Handle window_;
+
+  DISALLOW_COPY_AND_ASSIGN(AndroidNativeWindow);
+};
+
 class AndroidGLContext {
  public:
   explicit AndroidGLContext(AndroidNativeWindow::Handle window_handle,
                             PlatformView::SurfaceConfig config)
       : window_(window_handle),
-        display_(EGL_NO_DISPLAY),
         config_(nullptr),
         surface_(EGL_NO_SURFACE),
         context_(EGL_NO_CONTEXT),
-        resource_context_(EGL_NO_CONTEXT),
         valid_(false) {
     if (!window_.IsValid()) {
       // We always require a valid window since we are only going to deal
@@ -114,19 +219,9 @@ class AndroidGLContext {
 
     bool success = false;
 
-    // Setup the display connection.
-
-    std::tie(success, display_) = SetupDisplayConnection();
-
-    if (!success) {
-      DLOG(INFO) << "Could not setup the display connection.";
-      LogLastEGLError();
-      return;
-    }
-
     // Choose a valid configuration.
 
-    std::tie(success, config_) = ChooseWindowConfiguration(display_, config);
+    std::tie(success, config_) = ChooseEGLConfiguration(g_display, config);
 
     if (!success) {
       DLOG(INFO) << "Could not choose a window configuration.";
@@ -137,7 +232,7 @@ class AndroidGLContext {
     // Create a window surface for the configuration.
 
     std::tie(success, surface_) =
-        CreateWindowSurface(display_, config_, window_.handle());
+        CreateWindowSurface(g_display, config_, window_.handle());
 
     if (!success) {
       DLOG(INFO) << "Could not create the window surface.";
@@ -145,35 +240,13 @@ class AndroidGLContext {
       return;
     }
 
-    // Create a pbuffer surface for the configuration for resource loading.
-
-    std::tie(success, resource_surface_) =
-        CreatePBufferSurface(display_, config_);
-
-    if (!success) {
-      DLOG(INFO)
-          << "Could not create the pbuffer surface for resource loading.";
-      LogLastEGLError();
-      return;
-    }
-
     // Create a context for the configuration.
 
-    std::tie(success, context_) = CreateContext(display_, config_);
+    std::tie(success, context_) = CreateContext(g_display, config_,
+                                                g_resource_context);
 
     if (!success) {
       DLOG(INFO) << "Could not create the main rendering context";
-      LogLastEGLError();
-      return;
-    }
-
-    // Create a resource context for the configuration.
-
-    std::tie(success, resource_context_) =
-        CreateContext(display_, config_, context_);
-
-    if (!success) {
-      DLOG(INFO) << "Could not create the resource context.";
       LogLastEGLError();
       return;
     }
@@ -183,33 +256,15 @@ class AndroidGLContext {
   }
 
   ~AndroidGLContext() {
-    if (!TeardownContext(display_, resource_context_)) {
-      LOG(INFO) << "Could not tear down the EGL resource context. Possible "
-                   "resource leak.";
-      LogLastEGLError();
-    }
-
-    if (!TeardownContext(display_, context_)) {
+    if (!TeardownContext(g_display, context_)) {
       LOG(INFO)
           << "Could not tear down the EGL context. Possible resource leak.";
       LogLastEGLError();
     }
 
-    if (!TeardownSurface(display_, resource_surface_)) {
-      LOG(INFO) << "Could not tear down the EGL resource surface. Possible "
-                   "resource leak.";
-      LogLastEGLError();
-    }
-
-    if (!TeardownSurface(display_, surface_)) {
+    if (!TeardownSurface(g_display, surface_)) {
       LOG(INFO)
           << "Could not tear down the EGL surface. Possible resource leak.";
-      LogLastEGLError();
-    }
-
-    if (!TeardownDisplayConnection(display_)) {
-      LOG(INFO) << "Could not tear down the EGL display connection. Possible "
-                   "resource leak.";
       LogLastEGLError();
     }
   }
@@ -217,7 +272,7 @@ class AndroidGLContext {
   bool IsValid() const { return valid_; }
 
   bool ContextMakeCurrent() {
-    if (eglMakeCurrent(display_, surface_, surface_, context_) != EGL_TRUE) {
+    if (eglMakeCurrent(g_display, surface_, surface_, context_) != EGL_TRUE) {
       LOG(INFO) << "Could not make the context current";
       LogLastEGLError();
       return false;
@@ -225,23 +280,13 @@ class AndroidGLContext {
     return true;
   }
 
-  bool ResourceContextMakeCurrent() {
-    if (eglMakeCurrent(display_, resource_surface_, resource_surface_,
-                       resource_context_) != EGL_TRUE) {
-      LOG(INFO) << "Could not make the resource context current";
-      LogLastEGLError();
-      return false;
-    }
-    return true;
-  }
-
-  bool SwapBuffers() { return eglSwapBuffers(display_, surface_); }
+  bool SwapBuffers() { return eglSwapBuffers(g_display, surface_); }
 
   SkISize GetSize() {
     EGLint width = 0;
     EGLint height = 0;
-    if (!eglQuerySurface(display_, surface_, EGL_WIDTH, &width) ||
-        !eglQuerySurface(display_, surface_, EGL_HEIGHT, &height)) {
+    if (!eglQuerySurface(g_display, surface_, EGL_WIDTH, &width) ||
+        !eglQuerySurface(g_display, surface_, EGL_HEIGHT, &height)) {
       LOG(ERROR) << "Unable to query EGL surface size";
       LogLastEGLError();
       return SkISize::Make(0, 0);
@@ -250,13 +295,13 @@ class AndroidGLContext {
   }
 
   void Resize(const SkISize& size) {
-    eglMakeCurrent(display_, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    eglMakeCurrent(g_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 
-    TeardownSurface(display_, surface_);
+    TeardownSurface(g_display, surface_);
 
     bool success;
     std::tie(success, surface_) =
-        CreateWindowSurface(display_, config_, window_.handle());
+        CreateWindowSurface(g_display, config_, window_.handle());
     if (!success) {
       LOG(ERROR) << "Unable to create EGL window surface";
     }
@@ -264,41 +309,11 @@ class AndroidGLContext {
 
  private:
   AndroidNativeWindow window_;
-  EGLDisplay display_;
   EGLConfig config_;
   EGLSurface surface_;
-  EGLSurface resource_surface_;
   EGLContext context_;
-  EGLContext resource_context_;
 
   bool valid_;
-
-  template <class T>
-  using EGLResult = std::pair<bool, T>;
-
-  static EGLResult<EGLDisplay> SetupDisplayConnection() {
-    // Get the display.
-    EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-
-    if (display == EGL_NO_DISPLAY) {
-      return {false, EGL_NO_DISPLAY};
-    }
-
-    // Initialize the display connection.
-    if (eglInitialize(display, nullptr, nullptr) != EGL_TRUE) {
-      return {false, EGL_NO_DISPLAY};
-    }
-
-    return {true, display};
-  }
-
-  static bool TeardownDisplayConnection(EGLDisplay display) {
-    if (display != EGL_NO_DISPLAY) {
-      return eglTerminate(display) == EGL_TRUE;
-    }
-
-    return true;
-  }
 
   static bool TeardownContext(EGLDisplay display, EGLContext context) {
     if (context != EGL_NO_CONTEXT) {
@@ -316,36 +331,6 @@ class AndroidGLContext {
     return true;
   }
 
-  static EGLResult<EGLConfig> ChooseWindowConfiguration(
-      EGLDisplay display,
-      PlatformView::SurfaceConfig config) {
-    EGLint attributes[] = {
-        // clang-format off
-        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-        EGL_SURFACE_TYPE,    EGL_WINDOW_BIT,
-        EGL_RED_SIZE,        config.red_bits,
-        EGL_GREEN_SIZE,      config.green_bits,
-        EGL_BLUE_SIZE,       config.blue_bits,
-        EGL_ALPHA_SIZE,      config.alpha_bits,
-        EGL_DEPTH_SIZE,      config.depth_bits,
-        EGL_STENCIL_SIZE,    config.stencil_bits,
-        EGL_NONE,            // termination sentinel
-        // clang-format on
-    };
-
-    EGLint config_count = 0;
-    EGLConfig egl_config = nullptr;
-
-    if (eglChooseConfig(display, attributes, &egl_config, 1, &config_count) !=
-        EGL_TRUE) {
-      return {false, nullptr};
-    }
-
-    bool success = config_count > 0 && egl_config != nullptr;
-
-    return {success, success ? egl_config : nullptr};
-  }
-
   static EGLResult<EGLSurface> CreateWindowSurface(
       EGLDisplay display,
       EGLConfig config,
@@ -356,26 +341,6 @@ class AndroidGLContext {
         display, config, reinterpret_cast<EGLNativeWindowType>(window_handle),
         nullptr);
     return {surface != EGL_NO_SURFACE, surface};
-  }
-
-  static EGLResult<EGLSurface> CreatePBufferSurface(EGLDisplay display,
-                                                    EGLConfig config) {
-    // We only ever create pbuffer surfaces for background resource loading
-    // contexts. We never bind the pbuffer to anything.
-    const EGLint attribs[] = {EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE};
-    EGLSurface surface = eglCreatePbufferSurface(display, config, attribs);
-    return {surface != EGL_NO_SURFACE, surface};
-  }
-
-  static EGLResult<EGLSurface> CreateContext(
-      EGLDisplay display,
-      EGLConfig config,
-      EGLContext share = EGL_NO_CONTEXT) {
-    EGLint attributes[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
-
-    EGLContext context = eglCreateContext(display, config, share, attributes);
-
-    return {context != EGL_NO_CONTEXT, context};
   }
 
   DISALLOW_COPY_AND_ASSIGN(AndroidGLContext);
@@ -397,7 +362,12 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
   return RegisterNativesImpl(env);
 }
 
-PlatformViewAndroid::PlatformViewAndroid() : weak_factory_(this) {}
+PlatformViewAndroid::PlatformViewAndroid() : weak_factory_(this) {
+  // If this is the first PlatformView, then intiialize EGL and set up
+  // the resource context.
+  if (g_display == EGL_NO_DISPLAY)
+    InitGlobal();
+}
 
 PlatformViewAndroid::~PlatformViewAndroid() = default;
 
@@ -446,7 +416,13 @@ bool PlatformViewAndroid::ContextMakeCurrent() {
 }
 
 bool PlatformViewAndroid::ResourceContextMakeCurrent() {
-  return context_ != nullptr ? context_->ResourceContextMakeCurrent() : false;
+  if (eglMakeCurrent(g_display, g_resource_surface, g_resource_surface,
+                     g_resource_context) != EGL_TRUE) {
+    LOG(INFO) << "Could not make the resource context current";
+    LogLastEGLError();
+    return false;
+  }
+  return true;
 }
 
 bool PlatformViewAndroid::SwapBuffers() {
