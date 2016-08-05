@@ -223,8 +223,7 @@ Dart_Handle DartLibraryLoader::HandleLibraryTag(Dart_LibraryTag tag,
     return DartState::Current()->library_loader().Source(library, url);
   }
   if (tag == Dart_kScriptTag) {
-    DartIsolateReloader::HandleLibraryTag(tag, library, url);
-    return Dart_Null();
+    return DartIsolateReloader::HandleLibraryTag(tag, library, url);
   }
   DCHECK(false);
   return Dart_NewApiError("Unknown library tag.");
