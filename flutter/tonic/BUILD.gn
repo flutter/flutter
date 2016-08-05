@@ -18,7 +18,6 @@ source_set("tonic") {
     "dart_snapshot_loader.h",
     "dart_state.cc",
     "dart_state.h",
-    "mojo_converter.h",
   ]
 
   deps = [

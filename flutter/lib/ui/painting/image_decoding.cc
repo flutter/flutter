@@ -6,11 +6,11 @@
 
 #include "flow/texture_image.h"
 #include "flutter/lib/ui/painting/image.h"
-#include "flutter/tonic/mojo_converter.h"
 #include "glue/movable_wrapper.h"
 #include "glue/trace_event.h"
 #include "lib/tonic/dart_persistent_value.h"
 #include "lib/tonic/logging/dart_invoke.h"
+#include "lib/tonic/mojo_converter.h"
 #include "lib/tonic/typed_data/uint8_list.h"
 #include "sky/engine/platform/mojo/data_pipe.h"
 #include "sky/engine/platform/SharedBuffer.h"
