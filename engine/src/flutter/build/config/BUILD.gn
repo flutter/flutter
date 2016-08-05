@@ -386,10 +386,11 @@ config("default_libs") {
       "ApplicationServices.framework",
       "Carbon.framework",
       "CoreFoundation.framework",
+      "CoreVideo.framework",
       "Foundation.framework",
-      "IOKit.framework",
-      "Security.framework",
       "OpenGL.framework",
+      "Security.framework",
+      "IOKit.framework",
     ]
   } else if (is_ios) {
     # The libraries listed here will be specified for both the target and the
