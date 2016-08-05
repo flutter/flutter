@@ -25,6 +25,10 @@ class Cache {
   // Initialized by FlutterCommandRunner on startup.
   static String flutterRoot;
 
+  // Whether to cache artifacts for all platforms. Defaults to only caching
+  // artifacts for the current platform.
+  bool includeAllPlatforms = false;
+
   static RandomAccessFile _lock;
   static bool _lockEnabled = true;
 
@@ -238,7 +242,9 @@ class FlutterEngine {
       'android-x86',
     ];
 
-    if (Platform.isMacOS)
+    if (cache.includeAllPlatforms)
+      dirs.addAll(<String>['ios', 'ios-profile', 'ios-release', 'linux-x64']);
+    else if (Platform.isMacOS)
       dirs.addAll(<String>['ios', 'ios-profile', 'ios-release']);
     else if (Platform.isLinux)
       dirs.add('linux-x64');
