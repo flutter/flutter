@@ -57,8 +57,8 @@ FontCollection *makeFontCollection() {
     FontFamily *family = new FontFamily();
     for (size_t i = 0; i < sizeof(fns)/sizeof(fns[0]); i++) {
         const char *fn = fns[i];
-        SkTypeface *skFace = SkTypeface::CreateFromFile(fn);
-        MinikinFont *font = new MinikinFontSkia(skFace);
+        sk_sp<SkTypeface> skFace = SkTypeface::MakeFromFile(fn);
+        MinikinFont *font = new MinikinFontSkia(std::move(skFace));
         family->addFont(font);
     }
     typefaces.push_back(family);
@@ -66,8 +66,8 @@ FontCollection *makeFontCollection() {
 #if 1
     family = new FontFamily();
     const char *fn = "/system/fonts/DroidSansDevanagari-Regular.ttf";
-    SkTypeface *skFace = SkTypeface::CreateFromFile(fn);
-    MinikinFont *font = new MinikinFontSkia(skFace);
+    sk_sp<SkTypeface> skFace = SkTypeface::MakeFromFile(fn);
+    MinikinFont *font = new MinikinFontSkia(std::move(skFace));
     family->addFont(font);
     typefaces.push_back(family);
 #endif
@@ -93,13 +93,13 @@ void drawToSkia(SkCanvas *canvas, SkPaint *paint, Layout *layout, float x, float
         pos[i].fX = x + layout->getX(i);
         pos[i].fY = y + layout->getY(i);
         if (i > 0 && skFace != lastFace) {
-            paint->setTypeface(lastFace);
+            paint->setTypeface(sk_ref_sp(lastFace));
             canvas->drawPosText(glyphs + start, (i - start) << 1, pos + start, *paint);
             start = i;
         }
         lastFace = skFace;
     }
-    paint->setTypeface(skFace);
+    paint->setTypeface(sk_ref_sp(skFace));
     canvas->drawPosText(glyphs + start, (nGlyphs - start) << 1, pos + start, *paint);
     delete[] glyphs;
     delete[] pos;

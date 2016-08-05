@@ -6,17 +6,13 @@
 
 namespace minikin {
 
-MinikinFontSkia::MinikinFontSkia(SkTypeface *typeface) :
+MinikinFontSkia::MinikinFontSkia(sk_sp<SkTypeface> typeface) :
     MinikinFont(typeface->uniqueID()),
-    mTypeface(typeface) {
+    mTypeface(std::move(typeface)) {
 }
 
-MinikinFontSkia::~MinikinFontSkia() {
-    SkSafeUnref(mTypeface);
-}
-
-static void MinikinFontSkia_SetSkiaPaint(SkTypeface* typeface, SkPaint* skPaint, const MinikinPaint& paint) {
-    skPaint->setTypeface(typeface);
+static void MinikinFontSkia_SetSkiaPaint(sk_sp<SkTypeface> typeface, SkPaint* skPaint, const MinikinPaint& paint) {
+    skPaint->setTypeface(std::move(typeface));
     skPaint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
     // TODO: set more paint parameters from Minikin
     skPaint->setTextSize(paint.size);
@@ -65,7 +61,7 @@ const void* MinikinFontSkia::GetTable(uint32_t tag, size_t* size, MinikinDestroy
 }
 
 SkTypeface *MinikinFontSkia::GetSkTypeface() {
-    return mTypeface;
+    return mTypeface.get();
 }
 
 }  // namespace minikin
