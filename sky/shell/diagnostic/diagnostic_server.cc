@@ -10,8 +10,8 @@
 #include "dart/runtime/include/dart_api.h"
 #include "dart/runtime/include/dart_native_api.h"
 #include "flow/compositor_context.h"
-#include "flutter/tonic/dart_binding_macros.h"
-#include "flutter/tonic/dart_library_natives.h"
+#include "lib/tonic/dart_binding_macros.h"
+#include "lib/tonic/dart_library_natives.h"
 #include "lib/tonic/logging/dart_invoke.h"
 #include "sky/engine/core/script/embedder_resources.h"
 #include "sky/shell/gpu/picture_serializer.h"
@@ -29,7 +29,7 @@ extern ResourcesEntry __sky_embedder_diagnostic_server_resources_[];
 namespace sky {
 namespace shell {
 
-using blink::DartLibraryNatives;
+using tonic::DartLibraryNatives;
 using blink::EmbedderResources;
 using tonic::DartInvokeField;
 using tonic::LogIfError;

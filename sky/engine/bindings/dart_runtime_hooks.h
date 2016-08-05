@@ -6,7 +6,7 @@
 #define SKY_ENGINE_BINDINGS_DART_RUNTIME_HOOKS_H_
 
 #include "dart/runtime/include/dart_api.h"
-#include "flutter/tonic/dart_library_natives.h"
+#include "lib/tonic/dart_library_natives.h"
 #include "lib/ftl/macros.h"
 
 namespace blink {
@@ -19,7 +19,7 @@ class DartRuntimeHooks {
   };
 
   static void Install(IsolateType isolate_type, const std::string& script_uri);
-  static void RegisterNatives(DartLibraryNatives* natives);
+  static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
   FTL_DISALLOW_IMPLICIT_CONSTRUCTORS(DartRuntimeHooks);

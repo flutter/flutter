@@ -6,10 +6,10 @@
 
 #include "flow/texture_image.h"
 #include "flutter/lib/ui/painting/image.h"
-#include "flutter/tonic/dart_persistent_value.h"
 #include "flutter/tonic/mojo_converter.h"
 #include "glue/movable_wrapper.h"
 #include "glue/trace_event.h"
+#include "lib/tonic/dart_persistent_value.h"
 #include "lib/tonic/logging/dart_invoke.h"
 #include "lib/tonic/typed_data/uint8_list.h"
 #include "sky/engine/platform/mojo/data_pipe.h"
@@ -20,6 +20,7 @@
 #include "third_party/skia/include/core/SkImageGenerator.h"
 
 using tonic::DartInvoke;
+using tonic::DartPersistentValue;
 using tonic::ToDart;
 
 namespace blink {
@@ -62,14 +63,14 @@ sk_sp<SkImage> DecodeImage(PassRefPtr<SharedBuffer> buffer) {
 
 void InvokeImageCallback(sk_sp<SkImage> image,
                          PassOwnPtr<DartPersistentValue> callback) {
-  DartState* dart_state = callback->dart_state().get();
+  tonic::DartState* dart_state = callback->dart_state().get();
   if (!dart_state)
     return;
-  DartState::Scope scope(dart_state);
+  tonic::DartState::Scope scope(dart_state);
   if (!image) {
     DartInvoke(callback->value(), {Dart_Null()});
   } else {
-    scoped_refptr<CanvasImage> resultImage = CanvasImage::Create();
+    ftl::RefPtr<CanvasImage> resultImage = CanvasImage::Create();
     resultImage->set_image(std::move(image));
     DartInvoke(callback->value(), {ToDart(resultImage)});
   }
@@ -140,7 +141,7 @@ void DecodeImageFromList(Dart_NativeArguments args) {
 
 }  // namespace
 
-void ImageDecoding::RegisterNatives(DartLibraryNatives* natives) {
+void ImageDecoding::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register({
       {"decodeImageFromDataPipe", DecodeImageFromDataPipe, 2, true},
       {"decodeImageFromList", DecodeImageFromList, 2, true},

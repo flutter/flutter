@@ -17,7 +17,7 @@ JniClass::JniClass(JNIEnv* env, jclass clazz) : JniObject(env, clazz) {}
 
 JniClass::~JniClass() {}
 
-scoped_refptr<JniClass> JniClass::FromName(const char* name) {
+ftl::RefPtr<JniClass> JniClass::FromName(const char* name) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -29,7 +29,7 @@ scoped_refptr<JniClass> JniClass::FromName(const char* name) {
     if (CheckJniException(env, &exception))
       goto fail;
 
-    return new JniClass(env, clazz.obj());
+    return ftl::MakeRefCounted<JniClass>(env, clazz.obj());
   }
 fail:
   Dart_ThrowException(exception);
@@ -37,7 +37,7 @@ fail:
   return nullptr;
 }
 
-scoped_refptr<JniClass> JniClass::FromClassObject(const JniObject* clazz) {
+ftl::RefPtr<JniClass> JniClass::FromClassObject(const JniObject* clazz) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -51,7 +51,8 @@ scoped_refptr<JniClass> JniClass::FromClassObject(const JniObject* clazz) {
       goto fail;
     }
 
-    return new JniClass(env, static_cast<jclass>(class_object));
+    return ftl::MakeRefCounted<JniClass>(env,
+                                         static_cast<jclass>(class_object));
   }
 fail:
   Dart_ThrowException(exception);
@@ -127,7 +128,7 @@ fail:
   return 0;
 }
 
-scoped_refptr<JniObject> JniClass::NewObject(
+ftl::RefPtr<JniObject> JniClass::NewObject(
     jmethodID methodId,
     const std::vector<Dart_Handle>& args) {
   Dart_Handle exception = nullptr;
@@ -168,7 +169,7 @@ fail:
   return false;
 }
 
-scoped_refptr<JniObject> JniClass::GetStaticObjectField(jfieldID fieldId) {
+ftl::RefPtr<JniObject> JniClass::GetStaticObjectField(jfieldID fieldId) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -476,7 +477,7 @@ fail:
   return;
 }
 
-scoped_refptr<JniObject> JniClass::CallStaticObjectMethod(
+ftl::RefPtr<JniObject> JniClass::CallStaticObjectMethod(
     jmethodID methodId,
     const std::vector<Dart_Handle>& args) {
   Dart_Handle exception = nullptr;

@@ -8,8 +8,8 @@
 #include <string>
 
 #include "dart/runtime/include/dart_api.h"
-#include "flutter/tonic/dart_persistent_value.h"
 #include "flutter/tonic/dart_state.h"
+#include "lib/tonic/dart_persistent_value.h"
 
 namespace blink {
 
@@ -36,9 +36,6 @@ class FlutterDartState : public DartState {
 
   static FlutterDartState* Current();
 
-  // Cached handles to strings used in Dart/C++ conversions.
-  Dart_Handle value_handle() { return value_handle_.value(); }
-
   void set_mojo_services(std::unique_ptr<MojoServices> mojo_services);
   MojoServices* mojo_services();
 
@@ -53,8 +50,6 @@ class FlutterDartState : public DartState {
   IsolateClient* isolate_client_;
   std::string url_;
 
-  DartPersistentValue value_handle_;
-
   std::unique_ptr<MojoServices> mojo_services_;
 
 #ifdef OS_ANDROID
@@ -64,4 +59,4 @@ class FlutterDartState : public DartState {
 
 }  // namespace blink
 
-#endif // SKY_ENGINE_BINDINGS_FLUTTER_DART_STATE_H_
+#endif  // SKY_ENGINE_BINDINGS_FLUTTER_DART_STATE_H_

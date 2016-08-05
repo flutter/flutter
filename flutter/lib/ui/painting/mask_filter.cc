@@ -4,10 +4,10 @@
 
 #include "flutter/lib/ui/painting/mask_filter.h"
 
-#include "flutter/tonic/dart_args.h"
-#include "flutter/tonic/dart_binding_macros.h"
+#include "lib/tonic/dart_args.h"
+#include "lib/tonic/dart_binding_macros.h"
 #include "lib/tonic/converter/dart_converter.h"
-#include "flutter/tonic/dart_library_natives.h"
+#include "lib/tonic/dart_library_natives.h"
 #include "third_party/skia/include/effects/SkBlurMaskFilter.h"
 
 namespace blink {
@@ -18,23 +18,22 @@ static void MaskFilter_constructor(Dart_NativeArguments args) {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, MaskFilter);
 
-void MaskFilter::RegisterNatives(DartLibraryNatives* natives) {
+void MaskFilter::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register({
-    { "MaskFilter_constructor", MaskFilter_constructor, 4, true },
+      {"MaskFilter_constructor", MaskFilter_constructor, 4, true},
   });
 }
 
-scoped_refptr<MaskFilter> MaskFilter::Create(unsigned style, double sigma,
-                                             unsigned flags) {
-  return new MaskFilter(SkBlurMaskFilter::Make(
-      static_cast<SkBlurStyle>(style), sigma, flags));
+ftl::RefPtr<MaskFilter> MaskFilter::Create(unsigned style,
+                                           double sigma,
+                                           unsigned flags) {
+  return ftl::MakeRefCounted<MaskFilter>(
+      SkBlurMaskFilter::Make(static_cast<SkBlurStyle>(style), sigma, flags));
 }
 
 MaskFilter::MaskFilter(sk_sp<SkMaskFilter> filter)
-  : filter_(std::move(filter)) {
-}
+    : filter_(std::move(filter)) {}
 
-MaskFilter::~MaskFilter() {
-}
+MaskFilter::~MaskFilter() {}
 
-} // namespace blink
+}  // namespace blink

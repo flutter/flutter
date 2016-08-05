@@ -15,6 +15,7 @@ source_set("libraries") {
     "//flutter/tonic",
     "//glue",
     "//lib/ftl",
+    "//lib/tonic",
     "//mojo/application",
     "//mojo/data_pipe_utils",
     "//mojo/public/c/system",

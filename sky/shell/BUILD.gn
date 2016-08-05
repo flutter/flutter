@@ -55,6 +55,7 @@ source_set("common") {
     "//flutter/tonic",
     "//glue",
     "//lib/ftl",
+    "//lib/tonic",
     "//mojo/common",
     "//mojo/data_pipe_utils",
     "//mojo/message_pump",

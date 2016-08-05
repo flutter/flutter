@@ -7,10 +7,10 @@
 #include <math.h>
 
 #include "flutter/lib/ui/painting/matrix.h"
-#include "flutter/tonic/dart_args.h"
-#include "flutter/tonic/dart_binding_macros.h"
+#include "lib/tonic/dart_args.h"
+#include "lib/tonic/dart_binding_macros.h"
 #include "lib/tonic/converter/dart_converter.h"
-#include "flutter/tonic/dart_library_natives.h"
+#include "lib/tonic/dart_library_natives.h"
 
 namespace blink {
 
@@ -51,7 +51,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Path);
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
-void CanvasPath::RegisterNatives(DartLibraryNatives* natives) {
+void CanvasPath::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register({{"Path_constructor", Path_constructor, 1, true},
                      FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
@@ -186,15 +186,15 @@ bool CanvasPath::contains(double x, double y) {
   return path_.contains(x, y);
 }
 
-scoped_refptr<CanvasPath> CanvasPath::shift(double dx, double dy) {
-  scoped_refptr<CanvasPath> path = CanvasPath::Create();
+ftl::RefPtr<CanvasPath> CanvasPath::shift(double dx, double dy) {
+  ftl::RefPtr<CanvasPath> path = CanvasPath::Create();
   path_.offset(dx, dy, &path->path_);
   return std::move(path);
 }
 
-scoped_refptr<CanvasPath> CanvasPath::transform(
+ftl::RefPtr<CanvasPath> CanvasPath::transform(
     const tonic::Float64List& matrix4) {
-  scoped_refptr<CanvasPath> path = CanvasPath::Create();
+  ftl::RefPtr<CanvasPath> path = CanvasPath::Create();
   path_.transform(ToSkMatrix(matrix4), &path->path_);
   return std::move(path);
 }

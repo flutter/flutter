@@ -4,9 +4,9 @@
 
 #include "sky/engine/core/text/TextBox.h"
 
-#include "flutter/tonic/dart_class_library.h"
-#include "lib/tonic/logging/dart_error.h"
 #include "lib/ftl/logging.h"
+#include "lib/tonic/dart_class_library.h"
+#include "lib/tonic/logging/dart_error.h"
 #include "sky/engine/core/script/ui_dart_state.h"
 
 using namespace blink;
@@ -16,7 +16,7 @@ namespace tonic {
 Dart_Handle DartConverter<TextBox>::ToDart(const TextBox& val) {
   if (val.is_null)
     return Dart_Null();
-  DartClassLibrary& class_library = DartState::Current()->class_library();
+  tonic::DartClassLibrary& class_library = DartState::Current()->class_library();
   Dart_Handle type =
       Dart_HandleFromPersistent(class_library.GetClass("ui", "TextBox"));
   FTL_DCHECK(!LogIfError(type));

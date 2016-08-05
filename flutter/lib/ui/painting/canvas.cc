@@ -8,10 +8,10 @@
 
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/painting/matrix.h"
-#include "flutter/tonic/dart_args.h"
-#include "flutter/tonic/dart_binding_macros.h"
+#include "lib/tonic/dart_args.h"
+#include "lib/tonic/dart_binding_macros.h"
 #include "lib/tonic/converter/dart_converter.h"
-#include "flutter/tonic/dart_library_natives.h"
+#include "lib/tonic/dart_library_natives.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
@@ -57,22 +57,22 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Canvas);
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
-void Canvas::RegisterNatives(DartLibraryNatives* natives) {
+void Canvas::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register({{"Canvas_constructor", Canvas_constructor, 6, true},
                      FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
 
-scoped_refptr<Canvas> Canvas::Create(PictureRecorder* recorder,
-                                     double left,
-                                     double top,
-                                     double right,
-                                     double bottom) {
-  DCHECK(recorder);
-  DCHECK(!recorder->isRecording());
-  scoped_refptr<Canvas> canvas = new Canvas(
+ftl::RefPtr<Canvas> Canvas::Create(PictureRecorder* recorder,
+                                   double left,
+                                   double top,
+                                   double right,
+                                   double bottom) {
+  FTL_DCHECK(recorder);
+  FTL_DCHECK(!recorder->isRecording());
+  ftl::RefPtr<Canvas> canvas = ftl::MakeRefCounted<Canvas>(
       recorder->BeginRecording(SkRect::MakeLTRB(left, top, right, bottom)));
-  recorder->set_canvas(canvas.get());
-  return std::move(canvas);
+  recorder->set_canvas(canvas);
+  return canvas;
 }
 
 Canvas::Canvas(SkCanvas* canvas) : canvas_(canvas) {}
@@ -247,7 +247,7 @@ void Canvas::drawPath(const CanvasPath* path,
                       const PaintData& paint_data) {
   if (!canvas_)
     return;
-  DCHECK(path);
+  FTL_DCHECK(path);
   canvas_->drawPath(path->path(), *paint.paint());
 }
 
@@ -258,7 +258,7 @@ void Canvas::drawImage(const CanvasImage* image,
                        const PaintData& paint_data) {
   if (!canvas_)
     return;
-  DCHECK(image);
+  FTL_DCHECK(image);
   canvas_->drawImage(image->image(), x, y, paint.paint());
 }
 
@@ -275,7 +275,7 @@ void Canvas::drawImageRect(const CanvasImage* image,
                            const PaintData& paint_data) {
   if (!canvas_)
     return;
-  DCHECK(image);
+  FTL_DCHECK(image);
   SkRect src = SkRect::MakeLTRB(src_left, src_top, src_right, src_bottom);
   SkRect dst = SkRect::MakeLTRB(dst_left, dst_top, dst_right, dst_bottom);
   canvas_->drawImageRect(image->image(), src, dst, paint.paint(),
@@ -295,7 +295,7 @@ void Canvas::drawImageNine(const CanvasImage* image,
                            const PaintData& paint_data) {
   if (!canvas_)
     return;
-  DCHECK(image);
+  FTL_DCHECK(image);
   SkRect center =
       SkRect::MakeLTRB(center_left, center_top, center_right, center_bottom);
   SkIRect icenter;
@@ -307,7 +307,7 @@ void Canvas::drawImageNine(const CanvasImage* image,
 void Canvas::drawPicture(Picture* picture) {
   if (!canvas_)
     return;
-  DCHECK(picture);
+  FTL_DCHECK(picture);
   canvas_->drawPicture(picture->picture().get());
 }
 

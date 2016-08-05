@@ -4,54 +4,22 @@
 
 #include "flutter/tonic/dart_state.h"
 
-#include "flutter/tonic/dart_class_library.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "flutter/tonic/dart_library_loader.h"
-#include "flutter/tonic/dart_message_handler.h"
-
-using tonic::ToDart;
 
 namespace blink {
 
-DartState::Scope::Scope(DartState* dart_state)
-    : scope_(dart_state->isolate()) {}
-
-DartState::Scope::~Scope() {}
-
 DartState::DartState()
-    : isolate_(nullptr),
-      class_library_(std::unique_ptr<DartClassLibrary>(new DartClassLibrary)),
-      library_loader_(new DartLibraryLoader(this)),
-      message_handler_(
-          std::unique_ptr<DartMessageHandler>(new DartMessageHandler())),
-      isolate_reloader_(nullptr),
-      weak_factory_(this) {}
+    : library_loader_(new DartLibraryLoader(this)) {}
 
 DartState::~DartState() {}
 
-void DartState::SetIsolate(Dart_Isolate isolate) {
-  isolate_ = isolate;
-  if (!isolate_)
-    return;
-
-  {
-    Scope dart_scope(this);
-    index_handle_.Set(this, ToDart("index"));
-  }
-
-  DidSetIsolate();
-}
-
 DartState* DartState::From(Dart_Isolate isolate) {
-  return static_cast<DartState*>(Dart_IsolateData(isolate));
+  return static_cast<DartState*>(tonic::DartState::From(isolate));
 }
 
 DartState* DartState::Current() {
-  return static_cast<DartState*>(Dart_CurrentIsolateData());
-}
-
-base::WeakPtr<DartState> DartState::GetWeakPtr() {
-  return weak_factory_.GetWeakPtr();
+  return static_cast<DartState*>(tonic::DartState::Current());
 }
 
 }  // namespace blink

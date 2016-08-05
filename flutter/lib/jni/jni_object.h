@@ -9,26 +9,28 @@
 
 #include "base/android/jni_android.h"
 #include "base/memory/ref_counted.h"
-#include "flutter/tonic/dart_wrappable.h"
+#include "lib/tonic/dart_wrappable.h"
 
 namespace blink {
 
 class JniClass;
 
 // Wrapper that exposes a JNI jobject to Dart
-class JniObject : public base::RefCountedThreadSafe<JniObject>, public DartWrappable {
+class JniObject : public ftl::RefCountedThreadSafe<JniObject>,
+                  public tonic::DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
+  FRIEND_MAKE_REF_COUNTED(JniObject);
 
  public:
   ~JniObject() override;
 
-  static scoped_refptr<JniObject> Create(JNIEnv* env, jobject object);
+  static ftl::RefPtr<JniObject> Create(JNIEnv* env, jobject object);
 
   jobject java_object() const { return object_.obj(); }
 
-  scoped_refptr<JniClass> GetObjectClass();
+  ftl::RefPtr<JniClass> GetObjectClass();
 
-  scoped_refptr<JniObject> GetObjectField(jfieldID fieldId);
+  ftl::RefPtr<JniObject> GetObjectField(jfieldID fieldId);
   bool GetBooleanField(jfieldID fieldId);
   int64_t GetByteField(jfieldID fieldId);
   int64_t GetCharField(jfieldID fieldId);
@@ -48,8 +50,8 @@ class JniObject : public base::RefCountedThreadSafe<JniObject>, public DartWrapp
   void SetFloatField(jfieldID fieldId, double value);
   void SetDoubleField(jfieldID fieldId, double value);
 
-  scoped_refptr<JniObject> CallObjectMethod(jmethodID methodId,
-                                            const std::vector<Dart_Handle>& args);
+  ftl::RefPtr<JniObject> CallObjectMethod(jmethodID methodId,
+                                          const std::vector<Dart_Handle>& args);
   bool CallBooleanMethod(jmethodID methodId,
                          const std::vector<Dart_Handle>& args);
   int64_t CallByteMethod(jmethodID methodId,
@@ -66,8 +68,7 @@ class JniObject : public base::RefCountedThreadSafe<JniObject>, public DartWrapp
                          const std::vector<Dart_Handle>& args);
   double CallDoubleMethod(jmethodID methodId,
                           const std::vector<Dart_Handle>& args);
-  void CallVoidMethod(jmethodID methodId,
-                      const std::vector<Dart_Handle>& args);
+  void CallVoidMethod(jmethodID methodId, const std::vector<Dart_Handle>& args);
 
  protected:
   JniObject(JNIEnv* env, jobject object);
@@ -75,6 +76,6 @@ class JniObject : public base::RefCountedThreadSafe<JniObject>, public DartWrapp
   base::android::ScopedJavaGlobalRef<jobject> object_;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // FLUTTER_LIB_JNI_JNI_OBJECT_H_

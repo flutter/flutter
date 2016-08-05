@@ -5,23 +5,28 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_PATH_H_
 #define FLUTTER_LIB_UI_PAINTING_PATH_H_
 
-#include "base/memory/ref_counted.h"
 #include "flutter/lib/ui/painting/rrect.h"
-#include "flutter/tonic/dart_wrappable.h"
+#include "lib/tonic/dart_wrappable.h"
 #include "lib/tonic/typed_data/float32_list.h"
 #include "lib/tonic/typed_data/float64_list.h"
 #include "third_party/skia/include/core/SkPath.h"
 
-namespace blink {
+namespace tonic {
 class DartLibraryNatives;
+}  // namespace tonic
 
-class CanvasPath : public base::RefCountedThreadSafe<CanvasPath>,
-                   public DartWrappable {
+namespace blink {
+
+class CanvasPath : public ftl::RefCountedThreadSafe<CanvasPath>,
+                   public tonic::DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
+  FRIEND_MAKE_REF_COUNTED(CanvasPath);
 
  public:
   ~CanvasPath() override;
-  static scoped_refptr<CanvasPath> Create() { return new CanvasPath(); }
+  static ftl::RefPtr<CanvasPath> Create() {
+    return ftl::MakeRefCounted<CanvasPath>();
+  }
 
   int getFillType();
   void setFillType(int fill_type);
@@ -63,12 +68,12 @@ class CanvasPath : public base::RefCountedThreadSafe<CanvasPath>,
   void close();
   void reset();
   bool contains(double x, double y);
-  scoped_refptr<CanvasPath> shift(double dx, double dy);
-  scoped_refptr<CanvasPath> transform(const tonic::Float64List& matrix4);
+  ftl::RefPtr<CanvasPath> shift(double dx, double dy);
+  ftl::RefPtr<CanvasPath> transform(const tonic::Float64List& matrix4);
 
   const SkPath& path() const { return path_; }
 
-  static void RegisterNatives(DartLibraryNatives* natives);
+  static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
   CanvasPath();

@@ -5,21 +5,24 @@
 #ifndef SKY_ENGINE_CORE_TEXT_PARAGRAPHBUILDER_H_
 #define SKY_ENGINE_CORE_TEXT_PARAGRAPHBUILDER_H_
 
-#include "base/memory/ref_counted.h"
-#include "flutter/tonic/dart_wrappable.h"
+#include "lib/tonic/dart_wrappable.h"
 #include "lib/tonic/typed_data/int32_list.h"
 #include "sky/engine/core/text/Paragraph.h"
 
-namespace blink {
+namespace tonic {
 class DartLibraryNatives;
+}  // namespace tonic
 
-class ParagraphBuilder : public base::RefCountedThreadSafe<ParagraphBuilder>,
-                         public DartWrappable {
+namespace blink {
+
+class ParagraphBuilder : public ftl::RefCountedThreadSafe<ParagraphBuilder>,
+                         public tonic::DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
+  FRIEND_MAKE_REF_COUNTED(ParagraphBuilder);
 
  public:
-  static scoped_refptr<ParagraphBuilder> create() {
-    return new ParagraphBuilder();
+  static ftl::RefPtr<ParagraphBuilder> create() {
+    return ftl::MakeRefCounted<ParagraphBuilder>();
   }
 
   ~ParagraphBuilder() override;
@@ -34,12 +37,12 @@ class ParagraphBuilder : public base::RefCountedThreadSafe<ParagraphBuilder>,
 
   void addText(const std::string& text);
 
-  scoped_refptr<Paragraph> build(tonic::Int32List& encoded,
-                                 const std::string& fontFamily,
-                                 double fontSize,
-                                 double lineHeight);
+  ftl::RefPtr<Paragraph> build(tonic::Int32List& encoded,
+                               const std::string& fontFamily,
+                               double fontSize,
+                               double lineHeight);
 
-  static void RegisterNatives(DartLibraryNatives* natives);
+  static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
   explicit ParagraphBuilder();

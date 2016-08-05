@@ -8,9 +8,8 @@
 #include <jni.h>
 
 #include "base/android/jni_android.h"
-#include "base/memory/ref_counted.h"
 #include "flutter/lib/jni/jni_object.h"
-#include "flutter/tonic/dart_wrappable.h"
+#include "lib/tonic/dart_wrappable.h"
 
 namespace blink {
 
@@ -18,12 +17,13 @@ namespace blink {
 class JniClass : public JniObject {
   DEFINE_WRAPPERTYPEINFO();
   friend class JniObject;
+  FRIEND_MAKE_REF_COUNTED(JniClass);
 
  public:
   ~JniClass() override;
 
-  static scoped_refptr<JniClass> FromName(const char* className);
-  static scoped_refptr<JniClass> FromClassObject(const JniObject* clazz);
+  static ftl::RefPtr<JniClass> FromName(const char* className);
+  static ftl::RefPtr<JniClass> FromClassObject(const JniObject* clazz);
 
   jclass java_class() const { return static_cast<jclass>(object_.obj()); }
 
@@ -32,12 +32,12 @@ class JniClass : public JniObject {
   intptr_t GetMethodId(const char* name, const char* sig);
   intptr_t GetStaticMethodId(const char* name, const char* sig);
 
-  scoped_refptr<JniObject> NewObject(jmethodID methodId,
-                                  const std::vector<Dart_Handle>& args);
+  ftl::RefPtr<JniObject> NewObject(jmethodID methodId,
+                                   const std::vector<Dart_Handle>& args);
 
   bool IsAssignable(const JniClass* clazz);
 
-  scoped_refptr<JniObject> GetStaticObjectField(jfieldID fieldId);
+  ftl::RefPtr<JniObject> GetStaticObjectField(jfieldID fieldId);
   bool GetStaticBooleanField(jfieldID fieldId);
   int64_t GetStaticByteField(jfieldID fieldId);
   int64_t GetStaticCharField(jfieldID fieldId);
@@ -57,8 +57,9 @@ class JniClass : public JniObject {
   void SetStaticFloatField(jfieldID fieldId, double value);
   void SetStaticDoubleField(jfieldID fieldId, double value);
 
-  scoped_refptr<JniObject> CallStaticObjectMethod(
-      jmethodID methodId, const std::vector<Dart_Handle>& args);
+  ftl::RefPtr<JniObject> CallStaticObjectMethod(
+      jmethodID methodId,
+      const std::vector<Dart_Handle>& args);
   bool CallStaticBooleanMethod(jmethodID methodId,
                                const std::vector<Dart_Handle>& args);
   int64_t CallStaticByteMethod(jmethodID methodId,
@@ -82,6 +83,6 @@ class JniClass : public JniObject {
   JniClass(JNIEnv* env, jclass clazz);
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // FLUTTER_LIB_JNI_JNI_CLASS_H_

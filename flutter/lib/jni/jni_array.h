@@ -23,18 +23,21 @@ class JniArray : public JniObject {
 
  protected:
   JniArray(JNIEnv* env, jarray array);
-  template <typename JArrayType> JArrayType java_array() const;
+  template <typename JArrayType>
+  JArrayType java_array() const;
 };
 
 class JniObjectArray : public JniArray {
   DEFINE_WRAPPERTYPEINFO();
   friend class JniObject;
+  FRIEND_MAKE_REF_COUNTED(JniObjectArray);
 
  public:
   ~JniObjectArray() override;
 
-  static scoped_refptr<JniObjectArray> Create(const JniClass* clazz, jsize length);
-  scoped_refptr<JniObject> GetArrayElement(jsize index);
+  static ftl::RefPtr<JniObjectArray> Create(const JniClass* clazz,
+                                            jsize length);
+  ftl::RefPtr<JniObject> GetArrayElement(jsize index);
   void SetArrayElement(jsize index, const JniObject* value);
 
  private:
@@ -44,11 +47,12 @@ class JniObjectArray : public JniArray {
 class JniBooleanArray : public JniArray {
   DEFINE_WRAPPERTYPEINFO();
   friend class JniObject;
+  FRIEND_MAKE_REF_COUNTED(JniBooleanArray);
 
  public:
   ~JniBooleanArray() override;
 
-  static scoped_refptr<JniBooleanArray> Create(jsize length);
+  static ftl::RefPtr<JniBooleanArray> Create(jsize length);
   bool GetArrayElement(jsize index);
   void SetArrayElement(jsize index, bool value);
 
@@ -59,11 +63,12 @@ class JniBooleanArray : public JniArray {
 class JniByteArray : public JniArray {
   DEFINE_WRAPPERTYPEINFO();
   friend class JniObject;
+  FRIEND_MAKE_REF_COUNTED(JniByteArray);
 
  public:
   ~JniByteArray() override;
 
-  static scoped_refptr<JniByteArray> Create(jsize length);
+  static ftl::RefPtr<JniByteArray> Create(jsize length);
   int64_t GetArrayElement(jsize index);
   void SetArrayElement(jsize index, int64_t value);
 
@@ -74,11 +79,12 @@ class JniByteArray : public JniArray {
 class JniCharArray : public JniArray {
   DEFINE_WRAPPERTYPEINFO();
   friend class JniObject;
+  FRIEND_MAKE_REF_COUNTED(JniCharArray);
 
  public:
   ~JniCharArray() override;
 
-  static scoped_refptr<JniCharArray> Create(jsize length);
+  static ftl::RefPtr<JniCharArray> Create(jsize length);
   int64_t GetArrayElement(jsize index);
   void SetArrayElement(jsize index, int64_t value);
 
@@ -89,11 +95,12 @@ class JniCharArray : public JniArray {
 class JniShortArray : public JniArray {
   DEFINE_WRAPPERTYPEINFO();
   friend class JniObject;
+  FRIEND_MAKE_REF_COUNTED(JniShortArray);
 
  public:
   ~JniShortArray() override;
 
-  static scoped_refptr<JniShortArray> Create(jsize length);
+  static ftl::RefPtr<JniShortArray> Create(jsize length);
   int64_t GetArrayElement(jsize index);
   void SetArrayElement(jsize index, int64_t value);
 
@@ -104,11 +111,12 @@ class JniShortArray : public JniArray {
 class JniIntArray : public JniArray {
   DEFINE_WRAPPERTYPEINFO();
   friend class JniObject;
+  FRIEND_MAKE_REF_COUNTED(JniIntArray);
 
  public:
   ~JniIntArray() override;
 
-  static scoped_refptr<JniIntArray> Create(jsize length);
+  static ftl::RefPtr<JniIntArray> Create(jsize length);
   int64_t GetArrayElement(jsize index);
   void SetArrayElement(jsize index, int64_t value);
 
@@ -119,11 +127,12 @@ class JniIntArray : public JniArray {
 class JniLongArray : public JniArray {
   DEFINE_WRAPPERTYPEINFO();
   friend class JniObject;
+  FRIEND_MAKE_REF_COUNTED(JniLongArray);
 
  public:
   ~JniLongArray() override;
 
-  static scoped_refptr<JniLongArray> Create(jsize length);
+  static ftl::RefPtr<JniLongArray> Create(jsize length);
   int64_t GetArrayElement(jsize index);
   void SetArrayElement(jsize index, int64_t value);
 
@@ -134,11 +143,12 @@ class JniLongArray : public JniArray {
 class JniFloatArray : public JniArray {
   DEFINE_WRAPPERTYPEINFO();
   friend class JniObject;
+  FRIEND_MAKE_REF_COUNTED(JniFloatArray);
 
  public:
   ~JniFloatArray() override;
 
-  static scoped_refptr<JniFloatArray> Create(jsize length);
+  static ftl::RefPtr<JniFloatArray> Create(jsize length);
   double GetArrayElement(jsize index);
   void SetArrayElement(jsize index, double value);
 
@@ -149,11 +159,12 @@ class JniFloatArray : public JniArray {
 class JniDoubleArray : public JniArray {
   DEFINE_WRAPPERTYPEINFO();
   friend class JniObject;
+  FRIEND_MAKE_REF_COUNTED(JniDoubleArray);
 
  public:
   ~JniDoubleArray() override;
 
-  static scoped_refptr<JniDoubleArray> Create(jsize length);
+  static ftl::RefPtr<JniDoubleArray> Create(jsize length);
   double GetArrayElement(jsize index);
   void SetArrayElement(jsize index, double value);
 
@@ -161,6 +172,6 @@ class JniDoubleArray : public JniArray {
   JniDoubleArray(JNIEnv* env, jdoubleArray array);
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // FLUTTER_LIB_JNI_JNI_ARRAY_H_

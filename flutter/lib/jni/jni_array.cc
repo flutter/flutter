@@ -10,11 +10,9 @@ namespace blink {
 
 IMPLEMENT_WRAPPERTYPEINFO(jni, JniArray);
 
-JniArray::JniArray(JNIEnv* env, jarray array)
-    : JniObject(env, array) {}
+JniArray::JniArray(JNIEnv* env, jarray array) : JniObject(env, array) {}
 
-JniArray::~JniArray() {
-}
+JniArray::~JniArray() {}
 
 jsize JniArray::GetLength() {
   Dart_Handle exception = nullptr;
@@ -22,7 +20,8 @@ jsize JniArray::GetLength() {
     ENTER_JNI();
 
     jsize result = env->GetArrayLength(java_array<jarray>());
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return result;
   }
@@ -32,7 +31,7 @@ fail:
   return 0;
 }
 
-template<typename JArrayType>
+template <typename JArrayType>
 JArrayType JniArray::java_array() const {
   return static_cast<JArrayType>(java_object());
 }
@@ -42,20 +41,20 @@ IMPLEMENT_WRAPPERTYPEINFO(jni, JniObjectArray);
 JniObjectArray::JniObjectArray(JNIEnv* env, jobjectArray array)
     : JniArray(env, array) {}
 
-JniObjectArray::~JniObjectArray() {
-}
+JniObjectArray::~JniObjectArray() {}
 
-scoped_refptr<JniObjectArray> JniObjectArray::Create(const JniClass* clazz,
-                                                  jsize length) {
+ftl::RefPtr<JniObjectArray> JniObjectArray::Create(const JniClass* clazz,
+                                                   jsize length) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
 
-    jobjectArray array = env->NewObjectArray(length, clazz->java_class(),
-                                             nullptr);
-    if (CheckJniException(env, &exception)) goto fail;
+    jobjectArray array =
+        env->NewObjectArray(length, clazz->java_class(), nullptr);
+    if (CheckJniException(env, &exception))
+      goto fail;
 
-    return new JniObjectArray(env, array);
+    return ftl::MakeRefCounted<JniObjectArray>(env, array);
   }
 fail:
   Dart_ThrowException(exception);
@@ -63,14 +62,14 @@ fail:
   return nullptr;
 }
 
-scoped_refptr<JniObject> JniObjectArray::GetArrayElement(jsize index) {
+ftl::RefPtr<JniObject> JniObjectArray::GetArrayElement(jsize index) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
 
-    jobject obj = env->GetObjectArrayElement(java_array<jobjectArray>(),
-                                             index);
-    if (CheckJniException(env, &exception)) goto fail;
+    jobject obj = env->GetObjectArrayElement(java_array<jobjectArray>(), index);
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return JniObject::Create(env, obj);
   }
@@ -87,7 +86,8 @@ void JniObjectArray::SetArrayElement(jsize index, const JniObject* value) {
 
     env->SetObjectArrayElement(java_array<jobjectArray>(), index,
                                value ? value->java_object() : nullptr);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return;
   }
@@ -102,18 +102,18 @@ IMPLEMENT_WRAPPERTYPEINFO(jni, JniBooleanArray);
 JniBooleanArray::JniBooleanArray(JNIEnv* env, jbooleanArray array)
     : JniArray(env, array) {}
 
-JniBooleanArray::~JniBooleanArray() {
-}
+JniBooleanArray::~JniBooleanArray() {}
 
-scoped_refptr<JniBooleanArray> JniBooleanArray::Create(jsize length) {
+ftl::RefPtr<JniBooleanArray> JniBooleanArray::Create(jsize length) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
 
     jbooleanArray array = env->NewBooleanArray(length);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
-    return new JniBooleanArray(env, array);
+    return ftl::MakeRefCounted<JniBooleanArray>(env, array);
   }
 fail:
   Dart_ThrowException(exception);
@@ -128,7 +128,8 @@ bool JniBooleanArray::GetArrayElement(jsize index) {
 
     jboolean result;
     env->GetBooleanArrayRegion(java_array<jbooleanArray>(), index, 1, &result);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return result == JNI_TRUE;
   }
@@ -146,7 +147,8 @@ void JniBooleanArray::SetArrayElement(jsize index, bool value) {
     jboolean jni_value = value ? JNI_TRUE : JNI_FALSE;
     env->SetBooleanArrayRegion(java_array<jbooleanArray>(), index, 1,
                                &jni_value);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return;
   }
@@ -161,18 +163,18 @@ IMPLEMENT_WRAPPERTYPEINFO(jni, JniByteArray);
 JniByteArray::JniByteArray(JNIEnv* env, jbyteArray array)
     : JniArray(env, array) {}
 
-JniByteArray::~JniByteArray() {
-}
+JniByteArray::~JniByteArray() {}
 
-scoped_refptr<JniByteArray> JniByteArray::Create(jsize length) {
+ftl::RefPtr<JniByteArray> JniByteArray::Create(jsize length) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
 
     jbyteArray array = env->NewByteArray(length);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
-    return new JniByteArray(env, array);
+    return ftl::MakeRefCounted<JniByteArray>(env, array);
   }
 fail:
   Dart_ThrowException(exception);
@@ -187,7 +189,8 @@ int64_t JniByteArray::GetArrayElement(jsize index) {
 
     jbyte result;
     env->GetByteArrayRegion(java_array<jbyteArray>(), index, 1, &result);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return result;
   }
@@ -203,9 +206,9 @@ void JniByteArray::SetArrayElement(jsize index, int64_t value) {
     ENTER_JNI();
 
     jbyte jni_value = static_cast<jbyte>(value);
-    env->SetByteArrayRegion(java_array<jbyteArray>(), index, 1,
-                            &jni_value);
-    if (CheckJniException(env, &exception)) goto fail;
+    env->SetByteArrayRegion(java_array<jbyteArray>(), index, 1, &jni_value);
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return;
   }
@@ -220,18 +223,18 @@ IMPLEMENT_WRAPPERTYPEINFO(jni, JniCharArray);
 JniCharArray::JniCharArray(JNIEnv* env, jcharArray array)
     : JniArray(env, array) {}
 
-JniCharArray::~JniCharArray() {
-}
+JniCharArray::~JniCharArray() {}
 
-scoped_refptr<JniCharArray> JniCharArray::Create(jsize length) {
+ftl::RefPtr<JniCharArray> JniCharArray::Create(jsize length) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
 
     jcharArray array = env->NewCharArray(length);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
-    return new JniCharArray(env, array);
+    return ftl::MakeRefCounted<JniCharArray>(env, array);
   }
 fail:
   Dart_ThrowException(exception);
@@ -246,7 +249,8 @@ int64_t JniCharArray::GetArrayElement(jsize index) {
 
     jchar result;
     env->GetCharArrayRegion(java_array<jcharArray>(), index, 1, &result);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return result;
   }
@@ -262,9 +266,9 @@ void JniCharArray::SetArrayElement(jsize index, int64_t value) {
     ENTER_JNI();
 
     jchar jni_value = static_cast<jchar>(value);
-    env->SetCharArrayRegion(java_array<jcharArray>(), index, 1,
-                            &jni_value);
-    if (CheckJniException(env, &exception)) goto fail;
+    env->SetCharArrayRegion(java_array<jcharArray>(), index, 1, &jni_value);
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return;
   }
@@ -279,18 +283,18 @@ IMPLEMENT_WRAPPERTYPEINFO(jni, JniShortArray);
 JniShortArray::JniShortArray(JNIEnv* env, jshortArray array)
     : JniArray(env, array) {}
 
-JniShortArray::~JniShortArray() {
-}
+JniShortArray::~JniShortArray() {}
 
-scoped_refptr<JniShortArray> JniShortArray::Create(jsize length) {
+ftl::RefPtr<JniShortArray> JniShortArray::Create(jsize length) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
 
     jshortArray array = env->NewShortArray(length);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
-    return new JniShortArray(env, array);
+    return ftl::MakeRefCounted<JniShortArray>(env, array);
   }
 fail:
   Dart_ThrowException(exception);
@@ -305,7 +309,8 @@ int64_t JniShortArray::GetArrayElement(jsize index) {
 
     jshort result;
     env->GetShortArrayRegion(java_array<jshortArray>(), index, 1, &result);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return result;
   }
@@ -321,9 +326,9 @@ void JniShortArray::SetArrayElement(jsize index, int64_t value) {
     ENTER_JNI();
 
     jshort jni_value = static_cast<jshort>(value);
-    env->SetShortArrayRegion(java_array<jshortArray>(), index, 1,
-                             &jni_value);
-    if (CheckJniException(env, &exception)) goto fail;
+    env->SetShortArrayRegion(java_array<jshortArray>(), index, 1, &jni_value);
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return;
   }
@@ -335,21 +340,20 @@ fail:
 
 IMPLEMENT_WRAPPERTYPEINFO(jni, JniIntArray);
 
-JniIntArray::JniIntArray(JNIEnv* env, jintArray array)
-    : JniArray(env, array) {}
+JniIntArray::JniIntArray(JNIEnv* env, jintArray array) : JniArray(env, array) {}
 
-JniIntArray::~JniIntArray() {
-}
+JniIntArray::~JniIntArray() {}
 
-scoped_refptr<JniIntArray> JniIntArray::Create(jsize length) {
+ftl::RefPtr<JniIntArray> JniIntArray::Create(jsize length) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
 
     jintArray array = env->NewIntArray(length);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
-    return new JniIntArray(env, array);
+    return ftl::MakeRefCounted<JniIntArray>(env, array);
   }
 fail:
   Dart_ThrowException(exception);
@@ -364,7 +368,8 @@ int64_t JniIntArray::GetArrayElement(jsize index) {
 
     jint result;
     env->GetIntArrayRegion(java_array<jintArray>(), index, 1, &result);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return result;
   }
@@ -380,9 +385,9 @@ void JniIntArray::SetArrayElement(jsize index, int64_t value) {
     ENTER_JNI();
 
     jint jni_value = static_cast<jint>(value);
-    env->SetIntArrayRegion(java_array<jintArray>(), index, 1,
-                           &jni_value);
-    if (CheckJniException(env, &exception)) goto fail;
+    env->SetIntArrayRegion(java_array<jintArray>(), index, 1, &jni_value);
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return;
   }
@@ -397,18 +402,18 @@ IMPLEMENT_WRAPPERTYPEINFO(jni, JniLongArray);
 JniLongArray::JniLongArray(JNIEnv* env, jlongArray array)
     : JniArray(env, array) {}
 
-JniLongArray::~JniLongArray() {
-}
+JniLongArray::~JniLongArray() {}
 
-scoped_refptr<JniLongArray> JniLongArray::Create(jsize length) {
+ftl::RefPtr<JniLongArray> JniLongArray::Create(jsize length) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
 
     jlongArray array = env->NewLongArray(length);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
-    return new JniLongArray(env, array);
+    return ftl::MakeRefCounted<JniLongArray>(env, array);
   }
 fail:
   Dart_ThrowException(exception);
@@ -423,7 +428,8 @@ int64_t JniLongArray::GetArrayElement(jsize index) {
 
     jlong result;
     env->GetLongArrayRegion(java_array<jlongArray>(), index, 1, &result);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return static_cast<int64_t>(result);
   }
@@ -439,9 +445,9 @@ void JniLongArray::SetArrayElement(jsize index, int64_t value) {
     ENTER_JNI();
 
     jlong jni_value = static_cast<jlong>(value);
-    env->SetLongArrayRegion(java_array<jlongArray>(), index, 1,
-                            &jni_value);
-    if (CheckJniException(env, &exception)) goto fail;
+    env->SetLongArrayRegion(java_array<jlongArray>(), index, 1, &jni_value);
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return;
   }
@@ -456,18 +462,18 @@ IMPLEMENT_WRAPPERTYPEINFO(jni, JniFloatArray);
 JniFloatArray::JniFloatArray(JNIEnv* env, jfloatArray array)
     : JniArray(env, array) {}
 
-JniFloatArray::~JniFloatArray() {
-}
+JniFloatArray::~JniFloatArray() {}
 
-scoped_refptr<JniFloatArray> JniFloatArray::Create(jsize length) {
+ftl::RefPtr<JniFloatArray> JniFloatArray::Create(jsize length) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
 
     jfloatArray array = env->NewFloatArray(length);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
-    return new JniFloatArray(env, array);
+    return ftl::MakeRefCounted<JniFloatArray>(env, array);
   }
 fail:
   Dart_ThrowException(exception);
@@ -482,7 +488,8 @@ double JniFloatArray::GetArrayElement(jsize index) {
 
     jfloat result;
     env->GetFloatArrayRegion(java_array<jfloatArray>(), index, 1, &result);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return result;
   }
@@ -498,9 +505,9 @@ void JniFloatArray::SetArrayElement(jsize index, double value) {
     ENTER_JNI();
 
     jfloat jni_value = static_cast<jfloat>(value);
-    env->SetFloatArrayRegion(java_array<jfloatArray>(), index, 1,
-                             &jni_value);
-    if (CheckJniException(env, &exception)) goto fail;
+    env->SetFloatArrayRegion(java_array<jfloatArray>(), index, 1, &jni_value);
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return;
   }
@@ -515,18 +522,18 @@ IMPLEMENT_WRAPPERTYPEINFO(jni, JniDoubleArray);
 JniDoubleArray::JniDoubleArray(JNIEnv* env, jdoubleArray array)
     : JniArray(env, array) {}
 
-JniDoubleArray::~JniDoubleArray() {
-}
+JniDoubleArray::~JniDoubleArray() {}
 
-scoped_refptr<JniDoubleArray> JniDoubleArray::Create(jsize length) {
+ftl::RefPtr<JniDoubleArray> JniDoubleArray::Create(jsize length) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
 
     jdoubleArray array = env->NewDoubleArray(length);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
-    return new JniDoubleArray(env, array);
+    return ftl::MakeRefCounted<JniDoubleArray>(env, array);
   }
 fail:
   Dart_ThrowException(exception);
@@ -541,7 +548,8 @@ double JniDoubleArray::GetArrayElement(jsize index) {
 
     jdouble result;
     env->GetDoubleArrayRegion(java_array<jdoubleArray>(), index, 1, &result);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return result;
   }
@@ -556,9 +564,9 @@ void JniDoubleArray::SetArrayElement(jsize index, double value) {
   {
     ENTER_JNI();
 
-    env->SetDoubleArrayRegion(java_array<jdoubleArray>(), index, 1,
-                              &value);
-    if (CheckJniException(env, &exception)) goto fail;
+    env->SetDoubleArrayRegion(java_array<jdoubleArray>(), index, 1, &value);
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return;
   }
@@ -568,4 +576,4 @@ fail:
   return;
 }
 
-} // namespace blink
+}  // namespace blink

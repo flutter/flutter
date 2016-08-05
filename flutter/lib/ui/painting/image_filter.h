@@ -5,20 +5,21 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_IMAGE_FILTER_H_
 #define FLUTTER_LIB_UI_PAINTING_IMAGE_FILTER_H_
 
-#include "base/memory/ref_counted.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/painting/picture.h"
-#include "flutter/tonic/dart_wrappable.h"
+#include "lib/tonic/dart_wrappable.h"
 #include "third_party/skia/include/core/SkImageFilter.h"
 
 namespace blink {
 
-class ImageFilter : public base::RefCountedThreadSafe<ImageFilter>,
-                    public DartWrappable {
+class ImageFilter : public ftl::RefCountedThreadSafe<ImageFilter>,
+                    public tonic::DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
+  FRIEND_MAKE_REF_COUNTED(ImageFilter);
+
  public:
   ~ImageFilter() override;
-  static scoped_refptr<ImageFilter> Create();
+  static ftl::RefPtr<ImageFilter> Create();
 
   void initImage(CanvasImage* image);
   void initPicture(Picture*);
@@ -26,7 +27,7 @@ class ImageFilter : public base::RefCountedThreadSafe<ImageFilter>,
 
   const sk_sp<SkImageFilter>& filter() { return filter_; }
 
-  static void RegisterNatives(DartLibraryNatives* natives);
+  static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
   ImageFilter();
@@ -34,6 +35,6 @@ class ImageFilter : public base::RefCountedThreadSafe<ImageFilter>,
   sk_sp<SkImageFilter> filter_;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // FLUTTER_LIB_UI_PAINTING_IMAGE_FILTER_H_

@@ -4,9 +4,9 @@
 
 #include "sky/engine/core/text/ParagraphBuilder.h"
 
-#include "flutter/tonic/dart_args.h"
-#include "flutter/tonic/dart_binding_macros.h"
-#include "flutter/tonic/dart_library_natives.h"
+#include "lib/tonic/dart_args.h"
+#include "lib/tonic/dart_binding_macros.h"
+#include "lib/tonic/dart_library_natives.h"
 #include "lib/ftl/tasks/task_runner.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "sky/engine/core/rendering/PaintInfo.h"
@@ -96,7 +96,7 @@ void Paragraph::paint(Canvas* canvas, double x, double y) {
   GraphicsContext context(skCanvas);
   Vector<RenderBox*> layers;
   LayoutRect bounds = box->absoluteBoundingBoxRect();
-  DCHECK(bounds.x() == 0 && bounds.y() == 0);
+  FTL_DCHECK(bounds.x() == 0 && bounds.y() == 0);
   PaintInfo paintInfo(&context, enclosingIntRect(bounds), box);
   box->paint(paintInfo, LayoutPoint(), layers);
   // Note we're ignoring any layers encountered.
@@ -131,7 +131,7 @@ std::vector<TextBox> Paragraph::getRectsForRange(unsigned start, unsigned end) {
 }
 
 int Paragraph::absoluteOffsetForPosition(const PositionWithAffinity& position) {
-  DCHECK(position.renderer());
+  FTL_DCHECK(position.renderer());
   unsigned offset = 0;
   for (RenderObject* object = m_renderView.get(); object;
        object = object->nextInPreOrder()) {
@@ -142,7 +142,7 @@ int Paragraph::absoluteOffsetForPosition(const PositionWithAffinity& position) {
       offset += text->textLength();
     }
   }
-  DCHECK(false);
+  FTL_DCHECK(false);
   return 0;
 }
 

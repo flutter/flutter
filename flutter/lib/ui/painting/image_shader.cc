@@ -4,10 +4,10 @@
 
 #include "flutter/lib/ui/painting/image_shader.h"
 
-#include "flutter/tonic/dart_args.h"
-#include "flutter/tonic/dart_binding_macros.h"
+#include "lib/tonic/dart_args.h"
+#include "lib/tonic/dart_binding_macros.h"
 #include "lib/tonic/converter/dart_converter.h"
-#include "flutter/tonic/dart_library_natives.h"
+#include "lib/tonic/dart_library_natives.h"
 
 namespace blink {
 
@@ -21,21 +21,21 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, ImageShader);
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
-void ImageShader::RegisterNatives(DartLibraryNatives* natives) {
+void ImageShader::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register(
       {{"ImageShader_constructor", ImageShader_constructor, 1, true},
        FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
 
-scoped_refptr<ImageShader> ImageShader::Create() {
-  return new ImageShader();
+ftl::RefPtr<ImageShader> ImageShader::Create() {
+  return ftl::MakeRefCounted<ImageShader>();
 }
 
 void ImageShader::initWithImage(CanvasImage* image,
                                 SkShader::TileMode tmx,
                                 SkShader::TileMode tmy,
                                 const tonic::Float64List& matrix4) {
-  DCHECK(image != NULL);
+  FTL_DCHECK(image != NULL);
   SkMatrix sk_matrix = ToSkMatrix(matrix4);
   SkBitmap bitmap;
   image->image()->asLegacyBitmap(&bitmap, SkImage::kRO_LegacyBitmapMode);

@@ -32,7 +32,7 @@
 
 #include "base/message_loop/message_loop.h"
 #include "base/trace_event/trace_event.h"
-#include "flutter/tonic/dart_microtask_queue.h"
+#include "lib/tonic/dart_microtask_queue.h"
 #include "mojo/message_pump/message_pump_mojo.h"
 #include "sky/engine/core/Init.h"
 #include "sky/engine/core/script/dart_init.h"
@@ -47,102 +47,99 @@ namespace blink {
 
 namespace {
 
-void willProcessTask()
-{
-}
+void willProcessTask() {}
 
-void didProcessTask()
-{
-    DartMicrotaskQueue::RunMicrotasks();
-    // FIXME: Report memory usage to dart?
+void didProcessTask() {
+  tonic::DartMicrotaskQueue::RunMicrotasks();
+  // FIXME: Report memory usage to dart?
 }
 
 class TaskObserver : public base::MessageLoop::TaskObserver {
-public:
-    void WillProcessTask(const base::PendingTask& pending_task) override { willProcessTask(); }
-    void DidProcessTask(const base::PendingTask& pending_task) override { didProcessTask(); }
+ public:
+  void WillProcessTask(const base::PendingTask& pending_task) override {
+    willProcessTask();
+  }
+  void DidProcessTask(const base::PendingTask& pending_task) override {
+    didProcessTask();
+  }
 };
 
 class SignalObserver : public mojo::common::MessagePumpMojo::Observer {
-public:
-    void WillSignalHandler() override { willProcessTask(); }
-    void DidSignalHandler() override { didProcessTask(); }
+ public:
+  void WillSignalHandler() override { willProcessTask(); }
+  void DidSignalHandler() override { didProcessTask(); }
 };
 
 static TaskObserver* s_taskObserver = 0;
 static SignalObserver* s_signalObserver = 0;
 
-void addMessageLoopObservers()
-{
-    ASSERT(!s_taskObserver);
-    s_taskObserver = new TaskObserver;
+void addMessageLoopObservers() {
+  ASSERT(!s_taskObserver);
+  s_taskObserver = new TaskObserver;
 
-    ASSERT(!s_signalObserver);
-    s_signalObserver = new SignalObserver;
+  ASSERT(!s_signalObserver);
+  s_signalObserver = new SignalObserver;
 
-    base::MessageLoop::current()->AddTaskObserver(s_taskObserver);
-    mojo::common::MessagePumpMojo::current()->AddObserver(s_signalObserver);
+  base::MessageLoop::current()->AddTaskObserver(s_taskObserver);
+  mojo::common::MessagePumpMojo::current()->AddObserver(s_signalObserver);
 }
 
-void removeMessageLoopObservers()
-{
-    base::MessageLoop::current()->RemoveTaskObserver(s_taskObserver);
-    mojo::common::MessagePumpMojo::current()->RemoveObserver(s_signalObserver);
+void removeMessageLoopObservers() {
+  base::MessageLoop::current()->RemoveTaskObserver(s_taskObserver);
+  mojo::common::MessagePumpMojo::current()->RemoveObserver(s_signalObserver);
 
-    ASSERT(s_taskObserver);
-    delete s_taskObserver;
-    s_taskObserver = 0;
+  ASSERT(s_taskObserver);
+  delete s_taskObserver;
+  s_taskObserver = 0;
 
-    ASSERT(s_signalObserver);
-    delete s_signalObserver;
-    s_signalObserver = 0;
+  ASSERT(s_signalObserver);
+  delete s_signalObserver;
+  s_signalObserver = 0;
 }
 
-} // namespace
+}  // namespace
 
 // Make sure we are not re-initialized in the same address space.
 // Doing so may cause hard to reproduce crashes.
 static bool s_webKitInitialized = false;
 
-void initialize(Platform* platform)
-{
-    TRACE_EVENT0("flutter", "blink::initialize");
+void initialize(Platform* platform) {
+  TRACE_EVENT0("flutter", "blink::initialize");
 
-    ASSERT(!s_webKitInitialized);
-    s_webKitInitialized = true;
+  ASSERT(!s_webKitInitialized);
+  s_webKitInitialized = true;
 
-    ASSERT(platform);
-    Platform::initialize(platform);
+  ASSERT(platform);
+  Platform::initialize(platform);
 
-    WTF::initialize();
-    WTF::initializeMainThread();
+  WTF::initialize();
+  WTF::initializeMainThread();
 
-    DEFINE_STATIC_LOCAL(CoreInitializer, initializer, ());
-    initializer.init();
+  DEFINE_STATIC_LOCAL(CoreInitializer, initializer, ());
+  initializer.init();
 
-    // There are some code paths (for example, running WebKit in the browser
-    // process and calling into LocalStorage before anything else) where the
-    // UTF8 string encoding tables are used on a background thread before
-    // they're set up.  This is a problem because their set up routines assert
-    // they're running on the main WebKitThread.  It might be possible to make
-    // the initialization thread-safe, but given that so many code paths use
-    // this, initializing this lazily probably doesn't buy us much.
-    WTF::UTF8Encoding();
+  // There are some code paths (for example, running WebKit in the browser
+  // process and calling into LocalStorage before anything else) where the
+  // UTF8 string encoding tables are used on a background thread before
+  // they're set up.  This is a problem because their set up routines assert
+  // they're running on the main WebKitThread.  It might be possible to make
+  // the initialization thread-safe, but given that so many code paths use
+  // this, initializing this lazily probably doesn't buy us much.
+  WTF::UTF8Encoding();
 
-    InitDartVM();
+  InitDartVM();
 
-    addMessageLoopObservers();
+  addMessageLoopObservers();
 }
 
-void shutdown()
-{
-    removeMessageLoopObservers();
+void shutdown() {
+  removeMessageLoopObservers();
 
-    // FIXME: Shutdown dart?
+  // FIXME: Shutdown dart?
 
-    CoreInitializer::shutdown();
-    WTF::shutdown();
-    Platform::shutdown();
+  CoreInitializer::shutdown();
+  WTF::shutdown();
+  Platform::shutdown();
 }
 
-} // namespace blink
+}  // namespace blink

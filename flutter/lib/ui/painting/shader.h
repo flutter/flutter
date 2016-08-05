@@ -5,14 +5,16 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_SHADER_H_
 #define FLUTTER_LIB_UI_PAINTING_SHADER_H_
 
-#include "base/memory/ref_counted.h"
-#include "flutter/tonic/dart_wrappable.h"
+#include "lib/tonic/dart_wrappable.h"
 #include "third_party/skia/include/core/SkShader.h"
 
 namespace blink {
 
-class Shader : public base::RefCountedThreadSafe<Shader>, public DartWrappable {
+class Shader : public ftl::RefCountedThreadSafe<Shader>,
+               public tonic::DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
+  FRIEND_MAKE_REF_COUNTED(Shader);
+
  public:
   ~Shader() override;
 
@@ -26,6 +28,6 @@ class Shader : public base::RefCountedThreadSafe<Shader>, public DartWrappable {
   sk_sp<SkShader> shader_;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // FLUTTER_LIB_UI_PAINTING_SHADER_H_

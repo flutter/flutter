@@ -14,11 +14,12 @@ namespace blink {
 class JniString : public JniObject {
   DEFINE_WRAPPERTYPEINFO();
   friend class JniObject;
+  FRIEND_MAKE_REF_COUNTED(JniString);
 
  public:
   ~JniString() override;
 
-  static scoped_refptr<JniString> Create(Dart_Handle dart_string);
+  static ftl::RefPtr<JniString> Create(Dart_Handle dart_string);
   Dart_Handle GetText();
 
  private:
@@ -27,6 +28,6 @@ class JniString : public JniObject {
   jstring java_string();
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // FLUTTER_LIB_JNI_JNI_STRING_H_

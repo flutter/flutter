@@ -29,7 +29,7 @@ using tonic::ToDart;
 namespace blink {
 namespace {
 
-static DartLibraryNatives* g_natives;
+static tonic::DartLibraryNatives* g_natives;
 
 Dart_NativeFunction GetNativeFunction(Dart_Handle name,
                                       int argument_count,
@@ -45,7 +45,7 @@ const uint8_t* GetSymbol(Dart_NativeFunction native_function) {
 
 void DartUI::InitForGlobal() {
   if (!g_natives) {
-    g_natives = new DartLibraryNatives();
+    g_natives = new tonic::DartLibraryNatives();
     Canvas::RegisterNatives(g_natives);
     CanvasGradient::RegisterNatives(g_natives);
     CanvasImage::RegisterNatives(g_natives);

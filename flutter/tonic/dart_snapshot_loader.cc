@@ -17,7 +17,7 @@ using tonic::LogIfError;
 
 namespace blink {
 
-DartSnapshotLoader::DartSnapshotLoader(DartState* dart_state)
+DartSnapshotLoader::DartSnapshotLoader(tonic::DartState* dart_state)
     : dart_state_(dart_state->GetWeakPtr()) {}
 
 DartSnapshotLoader::~DartSnapshotLoader() {}
@@ -37,7 +37,7 @@ void DartSnapshotLoader::OnDataAvailable(const void* data, size_t num_bytes) {
 
 void DartSnapshotLoader::OnDataComplete() {
   TRACE_EVENT_ASYNC_END0("flutter", "DartSnapshotLoader::LoadSnapshot", this);
-
+  // TODO(abarth): Should we check dart_state_ for null?
   {
     tonic::DartIsolateScope scope(dart_state_->isolate());
     tonic::DartApiScope api_scope;

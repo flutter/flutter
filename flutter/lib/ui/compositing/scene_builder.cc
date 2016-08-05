@@ -18,10 +18,10 @@
 #include "flow/layers/transform_layer.h"
 #include "flutter/lib/ui/painting/matrix.h"
 #include "flutter/lib/ui/painting/shader.h"
-#include "flutter/tonic/dart_args.h"
-#include "flutter/tonic/dart_binding_macros.h"
+#include "lib/tonic/dart_args.h"
+#include "lib/tonic/dart_binding_macros.h"
 #include "lib/tonic/converter/dart_converter.h"
-#include "flutter/tonic/dart_library_natives.h"
+#include "lib/tonic/dart_library_natives.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 
 namespace blink {
@@ -50,7 +50,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, SceneBuilder);
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
-void SceneBuilder::RegisterNatives(DartLibraryNatives* natives) {
+void SceneBuilder::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register(
       {{"SceneBuilder_constructor", SceneBuilder_constructor, 1, true},
        FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
@@ -194,11 +194,11 @@ void SceneBuilder::setRasterizerTracingThreshold(uint32_t frameInterval) {
   m_currentRasterizerTracingThreshold = frameInterval;
 }
 
-scoped_refptr<Scene> SceneBuilder::build() {
+ftl::RefPtr<Scene> SceneBuilder::build() {
   m_currentLayer = nullptr;
   int32_t threshold = m_currentRasterizerTracingThreshold;
   m_currentRasterizerTracingThreshold = 0;
-  scoped_refptr<Scene> scene = Scene::create(std::move(m_rootLayer), threshold);
+  ftl::RefPtr<Scene> scene = Scene::create(std::move(m_rootLayer), threshold);
   ClearDartWrapper();
   return std::move(scene);
 }

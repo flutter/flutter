@@ -8,28 +8,31 @@
 #include <stdint.h>
 #include <memory>
 
-#include "base/memory/ref_counted.h"
 #include "flow/layers/layer_tree.h"
-#include "flutter/tonic/dart_wrappable.h"
+#include "lib/tonic/dart_wrappable.h"
 #include "third_party/skia/include/core/SkPicture.h"
 
-namespace blink {
+namespace tonic {
 class DartLibraryNatives;
+}  // namespace tonic
 
-class Scene : public base::RefCountedThreadSafe<Scene>, public DartWrappable {
+namespace blink {
+
+class Scene : public ftl::RefCountedThreadSafe<Scene>,
+              public tonic::DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
+  FRIEND_MAKE_REF_COUNTED(Scene);
 
  public:
   ~Scene() override;
-  static scoped_refptr<Scene> create(
-      std::unique_ptr<flow::Layer> rootLayer,
-      uint32_t rasterizerTracingThreshold);
+  static ftl::RefPtr<Scene> create(std::unique_ptr<flow::Layer> rootLayer,
+                                   uint32_t rasterizerTracingThreshold);
 
   std::unique_ptr<flow::LayerTree> takeLayerTree();
 
   void dispose();
 
-  static void RegisterNatives(DartLibraryNatives* natives);
+  static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
   explicit Scene(std::unique_ptr<flow::Layer> rootLayer,

@@ -16,8 +16,11 @@ namespace mojo {
 class ApplicationConnection;
 }
 
-namespace blink {
+namespace tonic {
 class DartLibraryNatives;
+}  // namespace tonic
+
+namespace blink {
 
 class MojoServices {
  public:
@@ -28,7 +31,7 @@ class MojoServices {
                      mojo::ServiceProviderPtr incoming_services,
                      mojo::asset_bundle::AssetBundlePtr root_bundle);
 
-  static void RegisterNatives(DartLibraryNatives* natives);
+  static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
   int TakeRootBundle();
   int TakeIncomingServices();

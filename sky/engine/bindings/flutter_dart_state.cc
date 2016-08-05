@@ -40,10 +40,7 @@ FlutterDartState* FlutterDartState::Current() {
   return static_cast<FlutterDartState*>(DartState::Current());
 }
 
-void FlutterDartState::DidSetIsolate() {
-  Scope dart_scope(this);
-  value_handle_.Set(this, ToDart("_value"));
-}
+void FlutterDartState::DidSetIsolate() {}
 
 void FlutterDartState::set_mojo_services(
     std::unique_ptr<MojoServices> mojo_services) {

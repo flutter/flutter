@@ -5,19 +5,19 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_CANVAS_H_
 #define FLUTTER_LIB_UI_PAINTING_CANVAS_H_
 
-#include "base/memory/ref_counted.h"
 #include "flutter/lib/ui/painting/paint.h"
 #include "flutter/lib/ui/painting/path.h"
 #include "flutter/lib/ui/painting/picture.h"
 #include "flutter/lib/ui/painting/picture_recorder.h"
 #include "flutter/lib/ui/painting/rrect.h"
-#include "flutter/tonic/dart_wrappable.h"
+#include "lib/tonic/dart_wrappable.h"
 #include "lib/tonic/typed_data/float32_list.h"
 #include "lib/tonic/typed_data/float64_list.h"
 #include "lib/tonic/typed_data/int32_list.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
 namespace tonic {
+class DartLibraryNatives;
 
 template <>
 struct DartConverter<SkCanvas::PointMode>
@@ -31,17 +31,18 @@ struct DartConverter<SkCanvas::VertexMode>
 
 namespace blink {
 class CanvasImage;
-class DartLibraryNatives;
 
-class Canvas : public base::RefCountedThreadSafe<Canvas>, public DartWrappable {
+class Canvas : public ftl::RefCountedThreadSafe<Canvas>,
+               public tonic::DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
+  FRIEND_MAKE_REF_COUNTED(Canvas);
 
  public:
-  static scoped_refptr<Canvas> Create(PictureRecorder* recorder,
-                                      double left,
-                                      double top,
-                                      double right,
-                                      double bottom);
+  static ftl::RefPtr<Canvas> Create(PictureRecorder* recorder,
+                                    double left,
+                                    double top,
+                                    double right,
+                                    double bottom);
 
   ~Canvas() override;
 
@@ -163,7 +164,7 @@ class Canvas : public base::RefCountedThreadSafe<Canvas>, public DartWrappable {
   void Clear();
   bool IsRecording() const;
 
-  static void RegisterNatives(DartLibraryNatives* natives);
+  static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
   explicit Canvas(SkCanvas* canvas);

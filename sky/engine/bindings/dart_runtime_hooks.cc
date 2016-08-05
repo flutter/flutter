@@ -11,15 +11,15 @@
 #include "dart/runtime/bin/embedded_dart_io.h"
 #include "dart/runtime/include/dart_api.h"
 #include "dart/runtime/include/dart_tools_api.h"
-#include "lib/tonic/scopes/dart_api_scope.h"
-#include "lib/tonic/converter/dart_converter.h"
-#include "lib/tonic/logging/dart_error.h"
-#include "lib/tonic/logging/dart_invoke.h"
-#include "lib/tonic/scopes/dart_isolate_scope.h"
-#include "flutter/tonic/dart_library_natives.h"
-#include "flutter/tonic/dart_microtask_queue.h"
+#include "lib/tonic/dart_library_natives.h"
 #include "flutter/tonic/dart_state.h"
 #include "lib/ftl/logging.h"
+#include "lib/tonic/converter/dart_converter.h"
+#include "lib/tonic/dart_microtask_queue.h"
+#include "lib/tonic/logging/dart_error.h"
+#include "lib/tonic/logging/dart_invoke.h"
+#include "lib/tonic/scopes/dart_api_scope.h"
+#include "lib/tonic/scopes/dart_isolate_scope.h"
 #include "sky/engine/core/script/ui_dart_state.h"
 #include "sky/engine/wtf/text/WTFString.h"
 
@@ -52,7 +52,7 @@ namespace blink {
 
 BUILTIN_NATIVE_LIST(DECLARE_FUNCTION);
 
-void DartRuntimeHooks::RegisterNatives(DartLibraryNatives* natives) {
+void DartRuntimeHooks::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register({BUILTIN_NATIVE_LIST(REGISTER_FUNCTION)});
 }
 
@@ -176,7 +176,7 @@ void ScheduleMicrotask(Dart_NativeArguments args) {
   Dart_Handle closure = Dart_GetNativeArgument(args, 0);
   if (LogIfError(closure) || !Dart_IsClosure(closure))
     return;
-  DartMicrotaskQueue::ScheduleMicrotask(closure);
+  tonic::DartMicrotaskQueue::ScheduleMicrotask(closure);
 }
 
 void GetBaseURLString(Dart_NativeArguments args) {

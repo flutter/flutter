@@ -7,7 +7,7 @@
 #include "flutter/lib/ui/compositing/scene.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/logging/dart_invoke.h"
-#include "flutter/tonic/dart_library_natives.h"
+#include "lib/tonic/dart_library_natives.h"
 #include "sky/engine/core/script/ui_dart_state.h"
 
 using tonic::DartInvokeField;
@@ -49,10 +49,10 @@ void Window::DidCreateIsolate() {
 }
 
 void Window::UpdateWindowMetrics(const sky::ViewportMetricsPtr& metrics) {
-  DartState* dart_state = library_.dart_state().get();
+  tonic::DartState* dart_state = library_.dart_state().get();
   if (!dart_state)
     return;
-  DartState::Scope scope(dart_state);
+  tonic::DartState::Scope scope(dart_state);
   double device_pixel_ratio = metrics->device_pixel_ratio;
   DartInvokeField(
       library_.value(), "_updateWindowMetrics",
@@ -69,10 +69,10 @@ void Window::UpdateWindowMetrics(const sky::ViewportMetricsPtr& metrics) {
 
 void Window::UpdateLocale(const std::string& language_code,
                           const std::string& country_code) {
-  DartState* dart_state = library_.dart_state().get();
+  tonic::DartState* dart_state = library_.dart_state().get();
   if (!dart_state)
     return;
-  DartState::Scope scope(dart_state);
+  tonic::DartState::Scope scope(dart_state);
 
   DartInvokeField(
       library_.value(), "_updateLocale",
@@ -82,10 +82,10 @@ void Window::UpdateLocale(const std::string& language_code,
 }
 
 void Window::PushRoute(const std::string& route) {
-  DartState* dart_state = library_.dart_state().get();
+  tonic::DartState* dart_state = library_.dart_state().get();
   if (!dart_state)
     return;
-  DartState::Scope scope(dart_state);
+  tonic::DartState::Scope scope(dart_state);
 
   DartInvokeField(library_.value(), "_pushRoute", {
                                                       StdStringToDart(route),
@@ -93,19 +93,19 @@ void Window::PushRoute(const std::string& route) {
 }
 
 void Window::PopRoute() {
-  DartState* dart_state = library_.dart_state().get();
+  tonic::DartState* dart_state = library_.dart_state().get();
   if (!dart_state)
     return;
-  DartState::Scope scope(dart_state);
+  tonic::DartState::Scope scope(dart_state);
 
   DartInvokeField(library_.value(), "_popRoute", {});
 }
 
 void Window::DispatchPointerPacket(const pointer::PointerPacketPtr& packet) {
-  DartState* dart_state = library_.dart_state().get();
+  tonic::DartState* dart_state = library_.dart_state().get();
   if (!dart_state)
     return;
-  DartState::Scope scope(dart_state);
+  tonic::DartState::Scope scope(dart_state);
 
   Dart_Handle data_handle =
       Dart_NewTypedData(Dart_TypedData_kByteData, packet->GetSerializedSize());
@@ -126,10 +126,10 @@ void Window::DispatchPointerPacket(const pointer::PointerPacketPtr& packet) {
 }
 
 void Window::BeginFrame(ftl::TimePoint frameTime) {
-  DartState* dart_state = library_.dart_state().get();
+  tonic::DartState* dart_state = library_.dart_state().get();
   if (!dart_state)
     return;
-  DartState::Scope scope(dart_state);
+  tonic::DartState::Scope scope(dart_state);
 
   int64_t microseconds = (frameTime - ftl::TimePoint()).ToMicroseconds();
 
@@ -140,16 +140,16 @@ void Window::BeginFrame(ftl::TimePoint frameTime) {
 }
 
 void Window::OnAppLifecycleStateChanged(sky::AppLifecycleState state) {
-  DartState* dart_state = library_.dart_state().get();
+  tonic::DartState* dart_state = library_.dart_state().get();
   if (!dart_state)
     return;
-  DartState::Scope scope(dart_state);
+  tonic::DartState::Scope scope(dart_state);
 
   DartInvokeField(library_.value(), "_onAppLifecycleStateChanged",
                   {ToDart(static_cast<int>(state))});
 }
 
-void Window::RegisterNatives(DartLibraryNatives* natives) {
+void Window::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register({
       {"Window_scheduleFrame", ScheduleFrame, 1, true},
       {"Window_render", Render, 2, true},

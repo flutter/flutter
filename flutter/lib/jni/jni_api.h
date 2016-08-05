@@ -15,8 +15,8 @@ class JniApi {
  public:
   static int64_t FromReflectedField(const JniObject* field);
   static int64_t FromReflectedMethod(const JniObject* method);
-  static scoped_refptr<JniObject> GetApplicationContext();
-  static scoped_refptr<JniObject> GetClassLoader();
+  static ftl::RefPtr<JniObject> GetApplicationContext();
+  static ftl::RefPtr<JniObject> GetClassLoader();
 };
 
 } // namespace blink

@@ -6,9 +6,9 @@
 #define FLUTTER_LIB_UI_COMPOSITING_SCENE_BUILDER_H_
 
 #include <stdint.h>
+
 #include <memory>
 
-#include "base/memory/ref_counted.h"
 #include "flow/layers/container_layer.h"
 #include "flutter/lib/ui/compositing/scene.h"
 #include "flutter/lib/ui/painting/image_filter.h"
@@ -16,17 +16,20 @@
 #include "flutter/lib/ui/painting/picture.h"
 #include "flutter/lib/ui/painting/rrect.h"
 #include "flutter/lib/ui/painting/shader.h"
-#include "flutter/tonic/dart_wrappable.h"
+#include "lib/tonic/dart_wrappable.h"
 #include "lib/tonic/typed_data/float64_list.h"
 
 namespace blink {
 
-class SceneBuilder : public base::RefCountedThreadSafe<SceneBuilder>,
-                     public DartWrappable {
+class SceneBuilder : public ftl::RefCountedThreadSafe<SceneBuilder>,
+                     public tonic::DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
+  FRIEND_MAKE_REF_COUNTED(SceneBuilder);
 
  public:
-  static scoped_refptr<SceneBuilder> create() { return new SceneBuilder(); }
+  static ftl::RefPtr<SceneBuilder> create() {
+    return ftl::MakeRefCounted<SceneBuilder>();
+  }
 
   ~SceneBuilder() override;
 
@@ -60,9 +63,9 @@ class SceneBuilder : public base::RefCountedThreadSafe<SceneBuilder>,
 
   void setRasterizerTracingThreshold(uint32_t frameInterval);
 
-  scoped_refptr<Scene> build();
+  ftl::RefPtr<Scene> build();
 
-  static void RegisterNatives(DartLibraryNatives* natives);
+  static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
   explicit SceneBuilder();

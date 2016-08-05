@@ -8,26 +8,25 @@ namespace blink {
 
 IMPLEMENT_WRAPPERTYPEINFO(jni, JniString);
 
-JniString::JniString(JNIEnv* env, jstring object)
-    : JniObject(env, object) {}
+JniString::JniString(JNIEnv* env, jstring object) : JniObject(env, object) {}
 
-JniString::~JniString() {
-}
+JniString::~JniString() {}
 
 jstring JniString::java_string() {
   return static_cast<jstring>(java_object());
 }
 
-scoped_refptr<JniString> JniString::Create(Dart_Handle dart_string) {
+ftl::RefPtr<JniString> JniString::Create(Dart_Handle dart_string) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
 
-    jstring java_string = DartJni::DartToJavaString(env, dart_string,
-                                                    &exception);
-    if (exception) goto fail;
+    jstring java_string =
+        DartJni::DartToJavaString(env, dart_string, &exception);
+    if (exception)
+      goto fail;
 
-    return new JniString(env, java_string);
+    return ftl::MakeRefCounted<JniString>(env, java_string);
   }
 fail:
   Dart_ThrowException(exception);
@@ -41,10 +40,12 @@ Dart_Handle JniString::GetText() {
     ENTER_JNI();
 
     jsize length = env->GetStringLength(java_string());
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     const jchar* chars = env->GetStringChars(java_string(), NULL);
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     Dart_Handle result = Dart_NewStringFromUTF16(chars, length);
     env->ReleaseStringChars(java_string(), chars);
@@ -57,4 +58,4 @@ fail:
   return Dart_Null();
 }
 
-} // namespace blink
+}  // namespace blink

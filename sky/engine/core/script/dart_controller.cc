@@ -6,15 +6,15 @@
 
 #include "base/bind.h"
 #include "dart/runtime/include/dart_tools_api.h"
-#include "flutter/tonic/dart_class_library.h"
 #include "flutter/tonic/dart_dependency_catcher.h"
 #include "flutter/tonic/dart_io.h"
 #include "flutter/tonic/dart_library_loader.h"
-#include "flutter/tonic/dart_message_handler.h"
 #include "flutter/tonic/dart_snapshot_loader.h"
 #include "flutter/tonic/dart_state.h"
-#include "flutter/tonic/dart_wrappable.h"
+#include "lib/tonic/dart_wrappable.h"
 #include "glue/trace_event.h"
+#include "lib/tonic/dart_class_library.h"
+#include "lib/tonic/dart_message_handler.h"
 #include "lib/tonic/logging/dart_error.h"
 #include "lib/tonic/logging/dart_invoke.h"
 #include "lib/tonic/scopes/dart_api_scope.h"
@@ -187,12 +187,14 @@ void DartController::CreateIsolateFor(std::unique_ptr<UIDartState> state) {
                               ui_dart_state_->url().c_str());
 
     dart_state()->class_library().add_provider(
-        "ui", WTF::MakeUnique<DartClassProvider>(dart_state(), "dart:ui"));
+        "ui",
+        WTF::MakeUnique<tonic::DartClassProvider>(dart_state(), "dart:ui"));
 
 #ifdef OS_ANDROID
     DartJni::InitForIsolate();
     dart_state()->class_library().add_provider(
-        "jni", WTF::MakeUnique<DartClassProvider>(dart_state(), "dart:jni"));
+        "jni",
+        WTF::MakeUnique<tonic::DartClassProvider>(dart_state(), "dart:jni"));
 #endif
   }
   Dart_ExitIsolate();

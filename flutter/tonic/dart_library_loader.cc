@@ -5,17 +5,18 @@
 #include "flutter/tonic/dart_library_loader.h"
 
 #include "base/callback.h"
-#include "base/strings/string_util.h"
 #include "base/files/file_util.h"
+#include "base/strings/string_util.h"
 #include "base/trace_event/trace_event.h"
-#include "lib/tonic/scopes/dart_api_scope.h"
-#include "lib/tonic/converter/dart_converter.h"
 #include "flutter/tonic/dart_dependency_catcher.h"
-#include "lib/tonic/logging/dart_error.h"
 #include "flutter/tonic/dart_isolate_reloader.h"
-#include "lib/tonic/scopes/dart_isolate_scope.h"
 #include "flutter/tonic/dart_library_provider.h"
 #include "flutter/tonic/dart_state.h"
+#include "lib/tonic/converter/dart_converter.h"
+#include "lib/tonic/dart_persistent_value.h"
+#include "lib/tonic/logging/dart_error.h"
+#include "lib/tonic/scopes/dart_api_scope.h"
+#include "lib/tonic/scopes/dart_isolate_scope.h"
 #include "mojo/data_pipe_utils/data_pipe_drainer.h"
 
 using mojo::common::DataPipeDrainer;
@@ -123,7 +124,7 @@ class DartLibraryLoader::SourceJob : public Job {
     loader_->DidCompleteSourceJob(this, buffer_);
   }
 
-  DartPersistentValue library_;
+  tonic::DartPersistentValue library_;
 };
 
 // A DependencyWatcher represents a request to watch for when a given set of

@@ -40,12 +40,12 @@ fail:
   return 0;
 }
 
-scoped_refptr<JniObject> JniApi::GetApplicationContext() {
+ftl::RefPtr<JniObject> JniApi::GetApplicationContext() {
   ENTER_JNI();
   return JniObject::Create(env, base::android::GetApplicationContext());
 }
 
-scoped_refptr<JniObject> JniApi::GetClassLoader() {
+ftl::RefPtr<JniObject> JniApi::GetClassLoader() {
   ENTER_JNI();
   return JniObject::Create(env, DartJni::class_loader());
 }

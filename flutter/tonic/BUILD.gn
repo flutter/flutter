@@ -4,12 +4,6 @@
 
 source_set("tonic") {
   sources = [
-    "dart_args.h",
-    "dart_binding_macros.h",
-    "dart_class_library.cc",
-    "dart_class_library.h",
-    "dart_class_provider.cc",
-    "dart_class_provider.h",
     "dart_dependency_catcher.cc",
     "dart_dependency_catcher.h",
     "dart_io.cc",
@@ -18,23 +12,12 @@ source_set("tonic") {
     "dart_isolate_reloader.h",
     "dart_library_loader.cc",
     "dart_library_loader.h",
-    "dart_library_natives.cc",
-    "dart_library_natives.h",
     "dart_library_provider.cc",
     "dart_library_provider.h",
-    "dart_message_handler.cc",
-    "dart_message_handler.h",
-    "dart_microtask_queue.cc",
-    "dart_microtask_queue.h",
-    "dart_persistent_value.cc",
-    "dart_persistent_value.h",
     "dart_snapshot_loader.cc",
     "dart_snapshot_loader.h",
     "dart_state.cc",
     "dart_state.h",
-    "dart_wrappable.cc",
-    "dart_wrappable.h",
-    "dart_wrapper_info.h",
     "mojo_converter.h",
   ]
 

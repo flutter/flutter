@@ -6,7 +6,7 @@
 
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/logging/dart_error.h"
-#include "flutter/tonic/dart_library_natives.h"
+#include "lib/tonic/dart_library_natives.h"
 #include "flutter/tonic/dart_state.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/cpp/bindings/array.h"
@@ -45,14 +45,14 @@ void DartTakeViewServices(Dart_NativeArguments args) {
 
 }  // namespace
 
-void MojoServices::RegisterNatives(DartLibraryNatives* natives) {
+void MojoServices::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register({
-    {"MojoServices_takeRootBundle", DartTakeRootBundle, 0, true},
-    {"MojoServices_takeIncomingServices", DartTakeIncomingServices, 0, true},
-    {"MojoServices_takeOutgoingServices", DartTakeOutgoingServices, 0, true},
-    {"MojoServices_takeShell", DartTakeShell, 0, true},
-    {"MojoServices_takeView", DartTakeView, 0, true},
-    {"MojoServices_takeViewServices", DartTakeViewServices, 0, true},
+      {"MojoServices_takeRootBundle", DartTakeRootBundle, 0, true},
+      {"MojoServices_takeIncomingServices", DartTakeIncomingServices, 0, true},
+      {"MojoServices_takeOutgoingServices", DartTakeOutgoingServices, 0, true},
+      {"MojoServices_takeShell", DartTakeShell, 0, true},
+      {"MojoServices_takeView", DartTakeView, 0, true},
+      {"MojoServices_takeViewServices", DartTakeViewServices, 0, true},
   });
 }
 
@@ -60,8 +60,8 @@ void MojoServices::Create(Dart_Isolate isolate,
                           sky::ServicesDataPtr services,
                           mojo::ServiceProviderPtr incoming_services,
                           mojo::asset_bundle::AssetBundlePtr root_bundle) {
-  FlutterDartState* state = static_cast<FlutterDartState*>(
-      DartState::From(isolate));
+  FlutterDartState* state =
+      static_cast<FlutterDartState*>(DartState::From(isolate));
   state->set_mojo_services(std::unique_ptr<MojoServices>(new MojoServices(
       services.Pass(), incoming_services.Pass(), root_bundle.Pass())));
 }
@@ -69,9 +69,9 @@ void MojoServices::Create(Dart_Isolate isolate,
 MojoServices::MojoServices(sky::ServicesDataPtr services,
                            mojo::ServiceProviderPtr incoming_services,
                            mojo::asset_bundle::AssetBundlePtr root_bundle)
-  : services_(services.Pass()),
-    root_bundle_(root_bundle.Pass()),
-    incoming_services_(incoming_services.Pass()) {
+    : services_(services.Pass()),
+      root_bundle_(root_bundle.Pass()),
+      incoming_services_(incoming_services.Pass()) {
   if (services_ && services_->outgoing_services.is_pending()) {
     outgoing_services_ = services_->outgoing_services.Pass();
   } else {
@@ -79,15 +79,17 @@ MojoServices::MojoServices(sky::ServicesDataPtr services,
   }
 }
 
-MojoServices::~MojoServices() {
-}
+MojoServices::~MojoServices() {}
 
 int MojoServices::TakeRootBundle() {
   return root_bundle_.PassInterfaceHandle().PassHandle().release().value();
 }
 
 int MojoServices::TakeIncomingServices() {
-  return incoming_services_.PassInterfaceHandle().PassHandle().release().value();
+  return incoming_services_.PassInterfaceHandle()
+      .PassHandle()
+      .release()
+      .value();
 }
 
 int MojoServices::TakeOutgoingServices() {

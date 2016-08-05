@@ -19,18 +19,18 @@
 #include "base/trace_event/trace_event.h"
 #include "dart/runtime/bin/embedded_dart_io.h"
 #include "dart/runtime/include/dart_mirrors_api.h"
-#include "lib/tonic/scopes/dart_api_scope.h"
-#include "flutter/tonic/dart_class_library.h"
 #include "flutter/tonic/dart_dependency_catcher.h"
-#include "lib/tonic/logging/dart_error.h"
 #include "flutter/tonic/dart_io.h"
-#include "lib/tonic/scopes/dart_isolate_scope.h"
 #include "flutter/tonic/dart_library_loader.h"
 #include "flutter/tonic/dart_snapshot_loader.h"
 #include "flutter/tonic/dart_state.h"
-#include "flutter/tonic/dart_wrappable.h"
+#include "lib/tonic/dart_wrappable.h"
 #include "lib/ftl/logging.h"
+#include "lib/tonic/dart_class_library.h"
+#include "lib/tonic/logging/dart_error.h"
 #include "lib/tonic/logging/dart_invoke.h"
+#include "lib/tonic/scopes/dart_api_scope.h"
+#include "lib/tonic/scopes/dart_isolate_scope.h"
 #include "lib/tonic/typed_data/uint8_list.h"
 #include "mojo/public/platform/dart/dart_handle_watcher.h"
 #include "services/asset_bundle/zip_asset_bundle.h"
@@ -266,12 +266,13 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
     DartRuntimeHooks::Install(DartRuntimeHooks::SecondaryIsolate, script_uri);
 
     dart_state->class_library().add_provider(
-        "ui", WTF::MakeUnique<DartClassProvider>(dart_state, "dart:ui"));
+        "ui", WTF::MakeUnique<tonic::DartClassProvider>(dart_state, "dart:ui"));
 
 #ifdef OS_ANDROID
     DartJni::InitForIsolate();
     dart_state->class_library().add_provider(
-        "jni", WTF::MakeUnique<DartClassProvider>(dart_state, "dart:jni"));
+        "jni",
+        WTF::MakeUnique<tonic::DartClassProvider>(dart_state, "dart:jni"));
 #endif
 
     if (!snapshot_data.empty()) {

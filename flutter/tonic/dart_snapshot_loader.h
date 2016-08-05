@@ -8,17 +8,16 @@
 #include <vector>
 
 #include "base/callback_forward.h"
-#include "base/macros.h"
-#include "base/memory/weak_ptr.h"
 #include "dart/runtime/include/dart_api.h"
+#include "lib/ftl/macros.h"
+#include "lib/tonic/dart_state.h"
 #include "mojo/data_pipe_utils/data_pipe_drainer.h"
 
 namespace blink {
-class DartState;
 
 class DartSnapshotLoader : public mojo::common::DataPipeDrainer::Client {
  public:
-  explicit DartSnapshotLoader(DartState* dart_state);
+  explicit DartSnapshotLoader(tonic::DartState* dart_state);
   ~DartSnapshotLoader();
 
   void LoadSnapshot(mojo::ScopedDataPipeConsumerHandle pipe,
@@ -29,13 +28,13 @@ class DartSnapshotLoader : public mojo::common::DataPipeDrainer::Client {
   void OnDataAvailable(const void* data, size_t num_bytes) override;
   void OnDataComplete() override;
 
-  base::WeakPtr<DartState> dart_state_;
+  ftl::WeakPtr<tonic::DartState> dart_state_;
   std::unique_ptr<mojo::common::DataPipeDrainer> drainer_;
   // TODO(abarth): Should we be using SharedBuffer to buffer the data?
   std::vector<uint8_t> buffer_;
   base::Closure callback_;
 
-  DISALLOW_COPY_AND_ASSIGN(DartSnapshotLoader);
+  FTL_DISALLOW_COPY_AND_ASSIGN(DartSnapshotLoader);
 };
 
 }  // namespace blink

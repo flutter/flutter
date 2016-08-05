@@ -5,41 +5,43 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_PICTURE_RECORDER_H_
 #define FLUTTER_LIB_UI_PAINTING_PICTURE_RECORDER_H_
 
-#include "base/memory/ref_counted.h"
-#include "flutter/tonic/dart_wrappable.h"
+#include "lib/tonic/dart_wrappable.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
+
+namespace tonic {
+class DartLibraryNatives;
+}  // namespace tonic
 
 namespace blink {
 class Canvas;
-class DartLibraryNatives;
 class Picture;
 
-class PictureRecorder : public base::RefCountedThreadSafe<PictureRecorder>,
-                        public DartWrappable {
+class PictureRecorder : public ftl::RefCountedThreadSafe<PictureRecorder>,
+                        public tonic::DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
+  FRIEND_MAKE_REF_COUNTED(PictureRecorder);
+
  public:
-  static scoped_refptr<PictureRecorder> Create();
+  static ftl::RefPtr<PictureRecorder> Create();
 
   ~PictureRecorder();
 
   SkCanvas* BeginRecording(SkRect bounds);
-  scoped_refptr<Picture> endRecording();
+  ftl::RefPtr<Picture> endRecording();
   bool isRecording();
 
-  void set_canvas(scoped_refptr<Canvas> canvas) {
-    canvas_ = std::move(canvas);
-  }
+  void set_canvas(ftl::RefPtr<Canvas> canvas) { canvas_ = std::move(canvas); }
 
-  static void RegisterNatives(DartLibraryNatives* natives);
+  static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
   PictureRecorder();
 
   SkRTreeFactory rtree_factory_;
   SkPictureRecorder picture_recorder_;
-  scoped_refptr<Canvas> canvas_;
+  ftl::RefPtr<Canvas> canvas_;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // FLUTTER_LIB_UI_PAINTING_PICTURE_RECORDER_H_

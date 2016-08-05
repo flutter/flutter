@@ -5,15 +5,18 @@
 #ifndef SKY_ENGINE_CORE_WINDOW_WINDOW_H_
 #define SKY_ENGINE_CORE_WINDOW_WINDOW_H_
 
-#include "flutter/tonic/dart_persistent_value.h"
 #include "lib/ftl/time/time_point.h"
+#include "lib/tonic/dart_persistent_value.h"
 #include "sky/engine/wtf/text/WTFString.h"
 #include "sky/services/engine/sky_engine.mojom.h"
 #include "sky/services/pointer/pointer.mojom.h"
 
+namespace tonic {
+class DartLibraryNatives;
+}  // namespace tonic
+
 namespace blink {
 class Scene;
-class DartLibraryNatives;
 
 class WindowClient {
  public:
@@ -44,11 +47,11 @@ class Window {
 
   void OnAppLifecycleStateChanged(sky::AppLifecycleState state);
 
-  static void RegisterNatives(DartLibraryNatives* natives);
+  static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
   WindowClient* client_;
-  DartPersistentValue library_;
+  tonic::DartPersistentValue library_;
 };
 
 }  // namespace blink

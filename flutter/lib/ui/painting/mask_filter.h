@@ -5,25 +5,31 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_MASK_FILTER_H_
 #define FLUTTER_LIB_UI_PAINTING_MASK_FILTER_H_
 
-#include "base/memory/ref_counted.h"
-#include "flutter/tonic/dart_wrappable.h"
+#include "lib/tonic/dart_wrappable.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"
 
 class SkMaskFilter;
 
-namespace blink {
+namespace tonic {
 class DartLibraryNatives;
+}  // namespace tonic
 
-class MaskFilter : public base::RefCountedThreadSafe<MaskFilter>, public DartWrappable {
+namespace blink {
+
+class MaskFilter : public ftl::RefCountedThreadSafe<MaskFilter>,
+                   public tonic::DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
+  FRIEND_MAKE_REF_COUNTED(MaskFilter);
+
  public:
   ~MaskFilter() override;
-  static scoped_refptr<MaskFilter> Create(unsigned style, double sigma,
-                                          unsigned flags);
+  static ftl::RefPtr<MaskFilter> Create(unsigned style,
+                                        double sigma,
+                                        unsigned flags);
 
   const sk_sp<SkMaskFilter>& filter() { return filter_; }
 
-  static void RegisterNatives(DartLibraryNatives* natives);
+  static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
   MaskFilter(sk_sp<SkMaskFilter> filter);
@@ -31,6 +37,6 @@ class MaskFilter : public base::RefCountedThreadSafe<MaskFilter>, public DartWra
   sk_sp<SkMaskFilter> filter_;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // FLUTTER_LIB_UI_PAINTING_MASK_FILTER_H_

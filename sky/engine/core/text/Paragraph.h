@@ -5,52 +5,57 @@
 #ifndef SKY_ENGINE_CORE_TEXT_PARAGRAPH_H_
 #define SKY_ENGINE_CORE_TEXT_PARAGRAPH_H_
 
-#include "base/memory/ref_counted.h"
 #include "flutter/lib/ui/painting/canvas.h"
-#include "flutter/tonic/dart_wrappable.h"
+#include "lib/tonic/dart_wrappable.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/core/text/TextBox.h"
 
-namespace blink {
+namespace tonic {
 class DartLibraryNatives;
+}  // namespace tonic
 
-class Paragraph : public base::RefCountedThreadSafe<Paragraph>, public DartWrappable {
-    DEFINE_WRAPPERTYPEINFO();
-public:
-    static scoped_refptr<Paragraph> create(PassOwnPtr<RenderView> renderView) {
-      return new Paragraph(renderView);
-    }
+namespace blink {
 
-    ~Paragraph() override;
+class Paragraph : public ftl::RefCountedThreadSafe<Paragraph>,
+                  public tonic::DartWrappable {
+  DEFINE_WRAPPERTYPEINFO();
+  FRIEND_MAKE_REF_COUNTED(Paragraph);
 
-    double width();
-    double height();
-    double minIntrinsicWidth();
-    double maxIntrinsicWidth();
-    double alphabeticBaseline();
-    double ideographicBaseline();
+ public:
+  static ftl::RefPtr<Paragraph> create(PassOwnPtr<RenderView> renderView) {
+    return ftl::MakeRefCounted<Paragraph>(renderView);
+  }
 
-    void layout(double width);
-    void paint(Canvas* canvas, double x, double y);
+  ~Paragraph() override;
 
-    std::vector<TextBox> getRectsForRange(unsigned start, unsigned end);
-    Dart_Handle getPositionForOffset(double dx, double dy);
-    Dart_Handle getWordBoundary(unsigned offset);
+  double width();
+  double height();
+  double minIntrinsicWidth();
+  double maxIntrinsicWidth();
+  double alphabeticBaseline();
+  double ideographicBaseline();
 
-    RenderView* renderView() const { return m_renderView.get(); }
+  void layout(double width);
+  void paint(Canvas* canvas, double x, double y);
 
-    static void RegisterNatives(DartLibraryNatives* natives);
+  std::vector<TextBox> getRectsForRange(unsigned start, unsigned end);
+  Dart_Handle getPositionForOffset(double dx, double dy);
+  Dart_Handle getWordBoundary(unsigned offset);
 
-private:
-    RenderBox* firstChildBox() const { return m_renderView->firstChildBox(); }
+  RenderView* renderView() const { return m_renderView.get(); }
 
-    int absoluteOffsetForPosition(const PositionWithAffinity& position);
+  static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
-    explicit Paragraph(PassOwnPtr<RenderView> renderView);
+ private:
+  RenderBox* firstChildBox() const { return m_renderView->firstChildBox(); }
 
-    OwnPtr<RenderView> m_renderView;
+  int absoluteOffsetForPosition(const PositionWithAffinity& position);
+
+  explicit Paragraph(PassOwnPtr<RenderView> renderView);
+
+  OwnPtr<RenderView> m_renderView;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_TEXT_PARAGRAPH_H_

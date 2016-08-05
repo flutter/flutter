@@ -4,10 +4,10 @@
 
 #include "flutter/lib/ui/painting/gradient.h"
 
-#include "flutter/tonic/dart_args.h"
-#include "flutter/tonic/dart_binding_macros.h"
+#include "lib/tonic/dart_args.h"
+#include "lib/tonic/dart_binding_macros.h"
 #include "lib/tonic/converter/dart_converter.h"
-#include "flutter/tonic/dart_library_natives.h"
+#include "lib/tonic/dart_library_natives.h"
 
 namespace blink {
 
@@ -26,22 +26,22 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Gradient);
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
-void CanvasGradient::RegisterNatives(DartLibraryNatives* natives) {
+void CanvasGradient::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register({{"Gradient_constructor", Gradient_constructor, 1, true},
                      FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
 
-scoped_refptr<CanvasGradient> CanvasGradient::Create() {
-  return new CanvasGradient();
+ftl::RefPtr<CanvasGradient> CanvasGradient::Create() {
+  return ftl::MakeRefCounted<CanvasGradient>();
 }
 
 void CanvasGradient::initLinear(const tonic::Float32List& end_points,
                                 const tonic::Int32List& colors,
                                 const tonic::Float32List& color_stops,
                                 SkShader::TileMode tile_mode) {
-  DCHECK(end_points.num_elements() == 4);
-  DCHECK(colors.num_elements() == color_stops.num_elements() ||
-         color_stops.data() == nullptr);
+  FTL_DCHECK(end_points.num_elements() == 4);
+  FTL_DCHECK(colors.num_elements() == color_stops.num_elements() ||
+             color_stops.data() == nullptr);
 
   static_assert(sizeof(SkPoint) == sizeof(float) * 2,
                 "SkPoint doesn't use floats.");
@@ -60,8 +60,8 @@ void CanvasGradient::initRadial(double center_x,
                                 const tonic::Int32List& colors,
                                 const tonic::Float32List& color_stops,
                                 SkShader::TileMode tile_mode) {
-  DCHECK(colors.num_elements() * 2 == color_stops.num_elements() ||
-         color_stops.data() == nullptr);
+  FTL_DCHECK(colors.num_elements() * 2 == color_stops.num_elements() ||
+             color_stops.data() == nullptr);
 
   static_assert(sizeof(SkColor) == sizeof(int32_t),
                 "SkColor doesn't use int32_t.");

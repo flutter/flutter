@@ -12,8 +12,8 @@
 #include "flutter/lib/jni/jni_class.h"
 #include "flutter/lib/jni/jni_object.h"
 #include "flutter/lib/jni/jni_string.h"
-#include "flutter/tonic/dart_args.h"
-#include "flutter/tonic/dart_binding_macros.h"
+#include "lib/tonic/dart_args.h"
+#include "lib/tonic/dart_binding_macros.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "sky/engine/bindings/flutter_dart_state.h"
 
@@ -27,7 +27,7 @@ using tonic::ToDart;
 
 namespace {
 
-DartLibraryNatives* g_natives = nullptr;
+tonic::DartLibraryNatives* g_natives = nullptr;
 
 Dart_NativeFunction GetNativeFunction(Dart_Handle name,
                                       int argument_count,
@@ -188,7 +188,7 @@ void DartJni::InitForGlobal(DartJniIsolateDataProvider provider) {
     g_isolate_data_provider = provider;
 
   if (!g_natives) {
-    g_natives = new DartLibraryNatives();
+    g_natives = new tonic::DartLibraryNatives();
     g_natives->Register(
         {DART_REGISTER_NATIVE_STATIC(JniApi, FromReflectedField),
          DART_REGISTER_NATIVE_STATIC(JniApi, FromReflectedMethod),

@@ -5,13 +5,13 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_IMAGE_DECODING_H_
 #define FLUTTER_LIB_UI_PAINTING_IMAGE_DECODING_H_
 
-#include "flutter/tonic/dart_library_natives.h"
+#include "lib/tonic/dart_library_natives.h"
 
 namespace blink {
 
 class ImageDecoding {
  public:
-  static void RegisterNatives(DartLibraryNatives* natives);
+  static void RegisterNatives(tonic::DartLibraryNatives* natives);
 };
 
 }  // namespace blink

@@ -4,9 +4,9 @@
 
 #include "sky/engine/core/text/ParagraphBuilder.h"
 
-#include "flutter/tonic/dart_args.h"
-#include "flutter/tonic/dart_binding_macros.h"
-#include "flutter/tonic/dart_library_natives.h"
+#include "lib/tonic/dart_args.h"
+#include "lib/tonic/dart_binding_macros.h"
+#include "lib/tonic/dart_library_natives.h"
 #include "lib/ftl/tasks/task_runner.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "sky/engine/core/rendering/RenderInline.h"
@@ -122,7 +122,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, ParagraphBuilder);
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
-void ParagraphBuilder::RegisterNatives(DartLibraryNatives* natives) {
+void ParagraphBuilder::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register(
       {{"ParagraphBuilder_constructor", ParagraphBuilder_constructor, 1, true},
        FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
@@ -232,10 +232,10 @@ void ParagraphBuilder::addText(const std::string& text) {
   m_currentRenderObject->addChild(renderText);
 }
 
-scoped_refptr<Paragraph> ParagraphBuilder::build(tonic::Int32List& encoded,
-                                                 const std::string& fontFamily,
-                                                 double fontSize,
-                                                 double lineHeight) {
+ftl::RefPtr<Paragraph> ParagraphBuilder::build(tonic::Int32List& encoded,
+                                               const std::string& fontFamily,
+                                               double fontSize,
+                                               double lineHeight) {
   DCHECK(encoded.num_elements() == 5);
   int32_t mask = encoded[0];
 

@@ -7,7 +7,7 @@
 #include "dart/runtime/include/dart_api.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/logging/dart_error.h"
-#include "flutter/tonic/dart_library_natives.h"
+#include "lib/tonic/dart_library_natives.h"
 #include "lib/ftl/logging.h"
 #include "sky/engine/core/script/embedder_resources.h"
 
@@ -37,7 +37,7 @@ namespace blink {
 namespace {
 
 static Dart_LibraryTagHandler g_embedder_tag_handler;
-static DartLibraryNatives* g_natives;
+static tonic::DartLibraryNatives* g_natives;
 static EmbedderResources* g_resources;
 static int observatory_port_;
 
@@ -93,7 +93,7 @@ bool DartServiceIsolate::Startup(std::string server_ip,
 
   // Setup native entries.
   if (!g_natives) {
-    g_natives = new DartLibraryNatives();
+    g_natives = new tonic::DartLibraryNatives();
     g_natives->Register({
         {"VMServiceIO_NotifyServerState", NotifyServerState, 2, true},
         {"VMServiceIO_Shutdown", Shutdown, 0, true},
@@ -179,7 +179,7 @@ Dart_Handle DartServiceIsolate::GetSource(const char* name) {
            name);
   const char* vmservice_source = NULL;
   int r = g_resources->ResourceLookup(buffer, &vmservice_source);
-  DCHECK(r != EmbedderResources::kNoSuchInstance);
+  FTL_DCHECK(r != EmbedderResources::kNoSuchInstance);
   return Dart_NewStringFromCString(vmservice_source);
 }
 

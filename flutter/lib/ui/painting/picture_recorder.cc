@@ -6,10 +6,10 @@
 
 #include "flutter/lib/ui/painting/canvas.h"
 #include "flutter/lib/ui/painting/picture.h"
-#include "flutter/tonic/dart_args.h"
-#include "flutter/tonic/dart_binding_macros.h"
+#include "lib/tonic/dart_args.h"
+#include "lib/tonic/dart_binding_macros.h"
 #include "lib/tonic/converter/dart_converter.h"
-#include "flutter/tonic/dart_library_natives.h"
+#include "lib/tonic/dart_library_natives.h"
 
 namespace blink {
 
@@ -19,28 +19,25 @@ static void PictureRecorder_constructor(Dart_NativeArguments args) {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, PictureRecorder);
 
-#define FOR_EACH_BINDING(V) \
+#define FOR_EACH_BINDING(V)       \
   V(PictureRecorder, isRecording) \
   V(PictureRecorder, endRecording)
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
-void PictureRecorder::RegisterNatives(DartLibraryNatives* natives) {
-  natives->Register({
-    { "PictureRecorder_constructor", PictureRecorder_constructor, 1, true },
-FOR_EACH_BINDING(DART_REGISTER_NATIVE)
-  });
+void PictureRecorder::RegisterNatives(tonic::DartLibraryNatives* natives) {
+  natives->Register(
+      {{"PictureRecorder_constructor", PictureRecorder_constructor, 1, true},
+       FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
 
-scoped_refptr<PictureRecorder> PictureRecorder::Create() {
-  return new PictureRecorder();
+ftl::RefPtr<PictureRecorder> PictureRecorder::Create() {
+  return ftl::MakeRefCounted<PictureRecorder>();
 }
 
-PictureRecorder::PictureRecorder() {
-}
+PictureRecorder::PictureRecorder() {}
 
-PictureRecorder::~PictureRecorder() {
-}
+PictureRecorder::~PictureRecorder() {}
 
 bool PictureRecorder::isRecording() {
   return canvas_ && canvas_->IsRecording();
@@ -50,11 +47,11 @@ SkCanvas* PictureRecorder::BeginRecording(SkRect bounds) {
   return picture_recorder_.beginRecording(bounds, &rtree_factory_);
 }
 
-scoped_refptr<Picture> PictureRecorder::endRecording() {
+ftl::RefPtr<Picture> PictureRecorder::endRecording() {
   if (!isRecording())
     return nullptr;
-  scoped_refptr<Picture> picture = Picture::Create(
-    picture_recorder_.finishRecordingAsPicture());
+  ftl::RefPtr<Picture> picture =
+      Picture::Create(picture_recorder_.finishRecordingAsPicture());
   canvas_->Clear();
   canvas_->ClearDartWrapper();
   canvas_ = nullptr;
@@ -62,4 +59,4 @@ scoped_refptr<Picture> PictureRecorder::endRecording() {
   return std::move(picture);
 }
 
-} // namespace blink
+}  // namespace blink
