@@ -193,6 +193,7 @@ component("wtf") {
 
   deps = [
     "//base",
+    "//glue",
     "//third_party/icu",
   ]
 

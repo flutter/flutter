@@ -5,6 +5,8 @@
 source_set("glue") {
   sources = [
     "movable_wrapper.h",
+    "stack_trace.cc",
+    "stack_trace.h",
     "task_runner_adaptor.cc",
     "task_runner_adaptor.h",
     "trace_event.h",

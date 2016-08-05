@@ -33,6 +33,7 @@
 
 #include "sky/engine/wtf/Assertions.h"
 
+#include "glue/stack_trace.h"
 #include "sky/engine/wtf/Compiler.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
@@ -55,8 +56,6 @@
 #if OS(ANDROID)
 #include <android/log.h>
 #endif
-
-#include "base/debug/stack_trace.h"
 
 extern "C" {
 
@@ -151,7 +150,7 @@ void WTFReportArgumentAssertionFailure(const char* file, int line, const char* f
 
 void WTFReportBacktrace()
 {
-    base::debug::StackTrace().Print();
+    glue::PrintStackTrace();
 }
 
 void WTFReportFatalError(const char* file, int line, const char* function, const char* format, ...)
