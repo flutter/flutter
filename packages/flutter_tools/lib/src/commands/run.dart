@@ -12,7 +12,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../device.dart';
 import '../globals.dart';
-import '../hot.dart' as hot;
+import '../hot.dart';
 import '../observatory.dart';
 import '../resident_runner.dart';
 import '../run.dart';
@@ -57,15 +57,11 @@ class RunCommand extends RunCommandBase {
         help: 'Listen to the given port for a debug connection (defaults to $kDefaultObservatoryPort).');
     usesPubOption();
 
-    argParser.addFlag('resident',
-        defaultsTo: true,
-        help: 'Don\'t terminate the \'flutter run\' process after starting the application.');
-
     // Option to enable hot reloading.
     argParser.addFlag('hot',
                       negatable: false,
                       defaultsTo: false,
-                      help: 'Run with support for hot reloading. Requires resident.');
+                      help: 'Run with support for hot reloading.');
 
     // Hidden option to enable a benchmarking mode. This will run the given
     // application, measure the startup time and the app restart time, write the
@@ -133,39 +129,23 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    if (argResults['resident']) {
-      if (argResults['hot']) {
-        hot.HotRunner runner = new hot.HotRunner(
-          deviceForCommand,
-          target: targetFile,
-          debuggingOptions: options
-        );
-        return runner.run(route: route);
-      } else {
-        RunAndStayResident runner = new RunAndStayResident(
-          deviceForCommand,
-          target: targetFile,
-          debuggingOptions: options
-        );
-        return runner.run(
-          traceStartup: traceStartup,
-          benchmark: argResults['benchmark'],
-          route: route
-        );
-      }
-    } else {
-      // TODO(devoncarew): Remove this path and support the `--no-resident` option
-      // using the `RunAndStayResident` class.
-      return startApp(
+    if (argResults['hot']) {
+      HotRunner runner = new HotRunner(
         deviceForCommand,
         target: targetFile,
-        stop: argResults['full-restart'],
-        install: true,
-        debuggingOptions: options,
+        debuggingOptions: options
+      );
+      return runner.run(route: route);
+    } else {
+      RunAndStayResident runner = new RunAndStayResident(
+        deviceForCommand,
+        target: targetFile,
+        debuggingOptions: options
+      );
+      return runner.run(
         traceStartup: traceStartup,
         benchmark: argResults['benchmark'],
-        route: route,
-        buildMode: getBuildMode()
+        route: route
       );
     }
   }
