@@ -40,6 +40,9 @@ abstract class OperatingSystemUtils {
   /// if `which` was not able to locate the binary.
   File which(String execName);
 
+  /// Return the File representing a new pipe.
+  File makePipe(String path);
+
   void unzip(File file, Directory targetDirectory);
 }
 
@@ -66,6 +69,12 @@ class _PosixUtils extends OperatingSystemUtils {
   @override
   void unzip(File file, Directory targetDirectory) {
     runSync(<String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path]);
+  }
+
+  @override
+  File makePipe(String path) {
+    runSync(<String>['mkfifo', path]);
+    return new File(path);
   }
 }
 
@@ -100,6 +109,11 @@ class _WindowsUtils extends OperatingSystemUtils {
         destFile.parent.createSync(recursive: true);
       destFile.writeAsBytesSync(archiveFile.content);
     }
+  }
+
+  @override
+  File makePipe(String path) {
+    throw new UnsupportedError('makePipe is not implemented on Windows.');
   }
 }
 

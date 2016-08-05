@@ -40,12 +40,12 @@ abstract class ResidentRunner {
     return stopApp();
   }
 
-  void _debugDumpApp() {
-    serviceProtocol.flutterDebugDumpApp(serviceProtocol.firstIsolateId);
+  Future<Null> _debugDumpApp() async {
+    await serviceProtocol.flutterDebugDumpApp(serviceProtocol.firstIsolateId);
   }
 
-  void _debugDumpRenderTree() {
-    serviceProtocol.flutterDebugDumpRenderTree(serviceProtocol.firstIsolateId);
+  Future<Null> _debugDumpRenderTree() async {
+    await serviceProtocol.flutterDebugDumpRenderTree(serviceProtocol.firstIsolateId);
   }
 
   void registerSignalHandlers() {
@@ -99,7 +99,7 @@ abstract class ResidentRunner {
   }
 
   /// Returns [true] if the input has been handled by this function.
-  bool _commonTerminalInputHandler(String character) {
+  Future<bool> _commonTerminalInputHandler(String character) async {
     final String lower = character.toLowerCase();
 
     printStatus(''); // the key the user tapped might be on this line
@@ -109,18 +109,24 @@ abstract class ResidentRunner {
       printHelp();
       return true;
     } else if (lower == 'w') {
-      _debugDumpApp();
+      await _debugDumpApp();
       return true;
     } else if (lower == 't') {
-      _debugDumpRenderTree();
+      await _debugDumpRenderTree();
       return true;
     } else if (lower == 'q' || character == AnsiTerminal.KEY_F10) {
       // F10, exit
-      stopApp();
+      await stopApp();
       return true;
     }
 
     return false;
+  }
+
+  Future<Null> processTerminalInput(String command) async {
+    bool handled = await _commonTerminalInputHandler(command);
+    if (!handled)
+      await handleTerminalCommand(command);
   }
 
   void appFinished() {
@@ -143,9 +149,7 @@ abstract class ResidentRunner {
 
       terminal.singleCharMode = true;
       terminal.onCharInput.listen((String code) {
-        if (!_commonTerminalInputHandler(code)) {
-          handleTerminalCommand(code);
-        }
+        processTerminalInput(code);
       });
     }
   }
@@ -174,7 +178,7 @@ abstract class ResidentRunner {
   /// Called to print help to the terminal.
   void printHelp();
   /// Called when the runner should handle a terminal command.
-  void handleTerminalCommand(String code);
+  Future<Null> handleTerminalCommand(String code);
 }
 
 /// Given the value of the --target option, return the path of the Dart file

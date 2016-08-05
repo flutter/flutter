@@ -208,12 +208,12 @@ class RunAndStayResident extends ResidentRunner {
   }
 
   @override
-  void handleTerminalCommand(String code) {
+  Future<Null> handleTerminalCommand(String code) async {
     String lower = code.toLowerCase();
     if (lower == 'r' || code == AnsiTerminal.KEY_F5) {
       if (device.supportsRestart) {
         // F5, restart
-        restart();
+        await restart();
       }
     }
   }
