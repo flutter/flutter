@@ -29,22 +29,21 @@ const String _kSnapshotKey = 'snapshot_blob.bin';
 Future<int> createSnapshot({
   String mainPath,
   String snapshotPath,
-  String depfilePath,
-  String buildOutputPath
+  String depfilePath
 }) {
   assert(mainPath != null);
   assert(snapshotPath != null);
 
   final List<String> args = <String>[
     tools.getHostToolPath(HostTool.SkySnapshot),
-    mainPath,
     '--packages=${path.absolute(PackageMap.globalPackagesPath)}',
     '--snapshot=$snapshotPath'
   ];
-  if (depfilePath != null)
+  if (depfilePath != null) {
     args.add('--depfile=$depfilePath');
-  if (buildOutputPath != null)
-    args.add('--build-output=$buildOutputPath');
+    args.add('--build-output=$snapshotPath');
+  }
+  args.add(mainPath);
   return runCommandAndStreamOutput(args);
 }
 
