@@ -196,10 +196,15 @@ class _OrderPageState extends State<OrderPage> {
             children: config.products
               .where((Product product) => product != config.order.product)
               .map((Product product) {
-              return new Card(
-                elevation: 0,
-                child: new Image.asset(product.imageAsset, fit: ImageFit.contain)
-              );
+                return new RepaintBoundary(
+                  child: new Card(
+                    elevation: 1,
+                    child: new Image.asset(
+                      product.imageAsset,
+                      fit: ImageFit.contain
+                    )
+                  )
+                );
             }).toList()
           )
         ]
