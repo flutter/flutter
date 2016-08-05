@@ -652,10 +652,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
       key: _gestureDetectorKey,
       gestures: buildGestureDetectors(),
       behavior: HitTestBehavior.opaque,
-      child: new IgnorePointer(
-        ignoring: _controller.isAnimating,
-        child: buildContent(context)
-      )
+      child: buildContent(context)
     );
   }
 

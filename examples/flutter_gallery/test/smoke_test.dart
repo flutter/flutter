@@ -43,9 +43,8 @@ Future<Null> smokeDemo(WidgetTester tester, String routeName) async {
 
   await tester.tap(menuItem);
   await tester.pump(); // Launch the demo.
-  await tester.pump(const Duration(seconds: 1)); // Wait until the demo has opened.
-
-  expect(find.text('Flutter Gallery'), findsNothing);
+  await tester
+      .pump(const Duration(seconds: 1)); // Wait until the demo has opened.
 
   // Go back
   if (routeName == '/pesto') {
@@ -65,9 +64,9 @@ Future<Null> smokeDemo(WidgetTester tester, String routeName) async {
 }
 
 void main() {
-  // TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-  // if (binding is LiveTestWidgetsFlutterBinding)
-  //   binding.allowAllFrames = true;
+  TestWidgetsFlutterBinding binding =
+      TestWidgetsFlutterBinding.ensureInitialized();
+  if (binding is LiveTestWidgetsFlutterBinding) binding.allowAllFrames = true;
 
   testWidgets('Flutter Gallery app smoke test', (WidgetTester tester) async {
     flutter_gallery_main
@@ -88,17 +87,15 @@ void main() {
       final String routeName = routeNames[i];
       await smokeDemo(tester, routeName);
       await tester.scroll(findGalleryItemByRouteName(tester, routeName), new Offset(0.0, scrollDeltas[i]));
-      await tester.pump(); // start the scroll
-      await tester.pump(const Duration(milliseconds: 500)); // wait for overscroll to timeout, if necessary
-      await tester.pump(const Duration(milliseconds: 2000)); // wait for overscroll to fade away, if necessary
-      tester.binding.debugAssertNoTransientCallbacks('A transient callback was still active after leaving route $routeName');
+      await tester.pump();
     }
 
     Finder navigationMenuButton = findNavigationMenuButton(tester);
     expect(navigationMenuButton, findsOneWidget);
     await tester.tap(navigationMenuButton);
     await tester.pump(); // Start opening drawer.
-    await tester.pump(const Duration(seconds: 1)); // Wait until it's really opened.
+    await tester
+        .pump(const Duration(seconds: 1)); // Wait until it's really opened.
 
     // switch theme
     await tester.tap(find.text('Dark'));
