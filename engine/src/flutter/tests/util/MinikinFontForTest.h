@@ -18,6 +18,7 @@
 #define MINIKIN_TEST_MINIKIN_FONT_FOR_TEST_H
 
 #include <minikin/MinikinFont.h>
+#include <SkRefCnt.h>
 
 class SkTypeface;
 
@@ -25,8 +26,7 @@ namespace minikin {
 
 class MinikinFontForTest : public MinikinFont {
 public:
-    MinikinFontForTest(const std::string& font_path, SkTypeface* typeface);
-    ~MinikinFontForTest();
+    MinikinFontForTest(const std::string& font_path, sk_sp<SkTypeface> typeface);
 
     // Helper function for creating MinikinFontForTest instance from font file.
     // Calller need to unref returned object.
@@ -45,7 +45,7 @@ private:
     MinikinFontForTest(const MinikinFontForTest&) = delete;
     MinikinFontForTest& operator=(MinikinFontForTest&) = delete;
 
-    SkTypeface *mTypeface;
+    sk_sp<SkTypeface> mTypeface;
     const std::string mFontPath;
 };
 

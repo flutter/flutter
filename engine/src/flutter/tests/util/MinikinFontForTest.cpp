@@ -26,30 +26,23 @@ namespace minikin {
 
 // static
 MinikinFontForTest* MinikinFontForTest::createFromFile(const std::string& font_path) {
-    SkTypeface* typeface = SkTypeface::CreateFromFile(font_path.c_str());
-    MinikinFontForTest* font = new MinikinFontForTest(font_path, typeface);
-    SkSafeUnref(typeface);
+    sk_sp<SkTypeface> typeface = SkTypeface::MakeFromFile(font_path.c_str());
+    MinikinFontForTest* font = new MinikinFontForTest(font_path, std::move(typeface));
     return font;
 }
 
 // static
 MinikinFontForTest* MinikinFontForTest::createFromFileWithIndex(const std::string& font_path,
         int index) {
-    SkTypeface* typeface = SkTypeface::CreateFromFile(font_path.c_str(), index);
-    MinikinFontForTest* font = new MinikinFontForTest(font_path, typeface);
-    SkSafeUnref(typeface);
+    sk_sp<SkTypeface> typeface = SkTypeface::MakeFromFile(font_path.c_str(), index);
+    MinikinFontForTest* font = new MinikinFontForTest(font_path, std::move(typeface));
     return font;
 }
 
-MinikinFontForTest::MinikinFontForTest(const std::string& font_path, SkTypeface* typeface) :
+MinikinFontForTest::MinikinFontForTest(const std::string& font_path, sk_sp<SkTypeface> typeface) :
         MinikinFont(typeface->uniqueID()),
-        mTypeface(typeface),
+        mTypeface(std::move(typeface)),
         mFontPath(font_path) {
-    SkSafeRef(mTypeface);
-}
-
-MinikinFontForTest::~MinikinFontForTest() {
-    SkSafeUnref(mTypeface);
 }
 
 float MinikinFontForTest::GetHorizontalAdvance(uint32_t /* glyph_id */,

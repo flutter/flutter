@@ -17,9 +17,7 @@ namespace minikin {
 
 class MinikinFontSkia : public MinikinFont {
 public:
-    explicit MinikinFontSkia(SkTypeface *typeface);
-
-    ~MinikinFontSkia();
+    explicit MinikinFontSkia(sk_sp<SkTypeface> typeface);
 
     float GetHorizontalAdvance(uint32_t glyph_id,
         const MinikinPaint &paint) const;
@@ -32,7 +30,7 @@ public:
     SkTypeface *GetSkTypeface();
 
 private:
-    SkTypeface *mTypeface;
+    sk_sp<SkTypeface> mTypeface;
 
 };
 
