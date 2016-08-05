@@ -301,9 +301,11 @@ class _HeroQuestState implements HeroHandle {
       size: animationArea.size,
       child: new RotationTransition(
         turns: currentTurns.animate(animation),
-        child: new RepaintBoundary(
-          key: key,
-          child: child
+        child: new IgnorePointer(
+          child: new RepaintBoundary(
+            key: key,
+            child: child
+          )
         )
       )
     );

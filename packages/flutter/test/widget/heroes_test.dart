@@ -176,4 +176,75 @@ void main() {
     await tester.pump(new Duration(milliseconds: 10));
     await tester.pump(new Duration(seconds: 1));
   });
+
+  testWidgets('Heroes are not interactive', (WidgetTester tester) async {
+    List<String> log = <String>[];
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new Center(
+        child: new Hero(
+          tag: 'foo',
+          child: new GestureDetector(
+            onTap: () {
+              log.add('foo');
+            },
+            child: new Container(
+              width: 100.0,
+              height: 100.0,
+              child: new Text('foo')
+            )
+          )
+        )
+      ),
+      routes: <String, WidgetBuilder>{
+        '/next': (BuildContext context) {
+          return new Align(
+            alignment: FractionalOffset.topLeft,
+            child: new Hero(
+              tag: 'foo',
+              child: new GestureDetector(
+                onTap: () {
+                  log.add('bar');
+                },
+                child: new Container(
+                  width: 100.0,
+                  height: 150.0,
+                  child: new Text('bar')
+                )
+              )
+            )
+          );
+        }
+      }
+    ));
+
+    expect(log, isEmpty);
+    await tester.tap(find.text('foo'));
+    expect(log, equals(<String>['foo']));
+    log.clear();
+
+    NavigatorState navigator = tester.state(find.byType(Navigator));
+    navigator.pushNamed('/next');
+
+    expect(log, isEmpty);
+    await tester.tap(find.text('foo'));
+    expect(log, isEmpty);
+
+    await tester.pump(new Duration(milliseconds: 10));
+    await tester.tap(find.text('foo'));
+    expect(log, isEmpty);
+    await tester.tap(find.text('bar'));
+    expect(log, isEmpty);
+
+    await tester.pump(new Duration(milliseconds: 10));
+    expect(find.text('foo'), findsNothing);
+    await tester.tap(find.text('bar'));
+    expect(log, isEmpty);
+
+    await tester.pump(new Duration(seconds: 1));
+    expect(find.text('foo'), findsNothing);
+    await tester.tap(find.text('bar'));
+    expect(log, equals(<String>['bar']));
+  });
+
 }
