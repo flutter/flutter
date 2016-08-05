@@ -4,13 +4,12 @@
 
 #include "flutter/tonic/dart_message_handler.h"
 
-#include "base/bind.h"
 #include "dart/runtime/include/dart_api.h"
 #include "dart/runtime/include/dart_native_api.h"
 #include "dart/runtime/include/dart_tools_api.h"
+#include "lib/ftl/logging.h"
 #include "lib/tonic/logging/dart_error.h"
 #include "flutter/tonic/dart_state.h"
-#include "lib/ftl/logging.h"
 
 using tonic::LogIfError;
 
@@ -18,7 +17,6 @@ namespace blink {
 
 DartMessageHandler::DartMessageHandler()
     : handled_first_message_(false),
-      quit_message_loop_when_isolate_exits_(true),
       isolate_exited_(false),
       isolate_had_uncaught_exception_error_(false),
       task_runner_(nullptr) {}
@@ -28,7 +26,7 @@ DartMessageHandler::~DartMessageHandler() {
 }
 
 void DartMessageHandler::Initialize(
-    const scoped_refptr<base::SingleThreadTaskRunner>& runner) {
+    const ftl::RefPtr<ftl::TaskRunner>& runner) {
   // Only can be called once.
   FTL_CHECK(!task_runner_);
   task_runner_ = runner;
@@ -40,8 +38,12 @@ void DartMessageHandler::OnMessage(DartState* dart_state) {
   auto task_runner = dart_state->message_handler().task_runner();
 
   // Schedule a task to run on the message loop thread.
-  task_runner->PostTask(FROM_HERE,
-                        base::Bind(&HandleMessage, dart_state->GetWeakPtr()));
+  base::WeakPtr<DartState> dart_state_ptr = dart_state->GetWeakPtr();
+  task_runner->PostTask([dart_state_ptr]() {
+    if (!dart_state_ptr)
+      return;
+    dart_state_ptr->message_handler().OnHandleMessage(dart_state_ptr.get());
+  });
 }
 
 void DartMessageHandler::OnHandleMessage(DartState* dart_state) {
@@ -98,10 +100,6 @@ void DartMessageHandler::OnHandleMessage(DartState* dart_state) {
       Dart_SetPausedOnExit(true);
     } else {
       isolate_exited_ = true;
-      if (quit_message_loop_when_isolate_exits()) {
-        // Quit.
-        base::MessageLoop::current()->QuitWhenIdle();
-      }
     }
   }
 }
@@ -114,12 +112,6 @@ void DartMessageHandler::MessageNotifyCallback(Dart_Isolate dest_isolate) {
     return;
   }
   dart_state->message_handler().OnMessage(dart_state);
-}
-
-void DartMessageHandler::HandleMessage(base::WeakPtr<DartState> dart_state) {
-  if (!dart_state)
-    return;
-  dart_state->message_handler().OnHandleMessage(dart_state.get());
 }
 
 }  // namespace blink

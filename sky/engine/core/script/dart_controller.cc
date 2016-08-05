@@ -171,9 +171,9 @@ void DartController::CreateIsolateFor(std::unique_ptr<UIDartState> state) {
   FTL_CHECK(isolate) << error;
   ui_dart_state_ = state.release();
   auto& message_handler = dart_state()->message_handler();
-  message_handler.set_quit_message_loop_when_isolate_exits(false);
   FTL_DCHECK(Platform::current());
-  message_handler.Initialize(Platform::current()->GetUITaskRunner());
+  message_handler.Initialize(
+      ftl::RefPtr<ftl::TaskRunner>(Platform::current()->GetUITaskRunner()));
 
   Dart_SetShouldPauseOnStart(SkySettings::Get().start_paused);
   ui_dart_state_->SetIsolate(isolate);

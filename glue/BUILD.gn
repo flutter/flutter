@@ -4,7 +4,10 @@
 
 source_set("glue") {
   sources = [
-    "trace_event.h"
+    "movable_wrapper.h",
+    "task_runner_adaptor.cc",
+    "task_runner_adaptor.h",
+    "trace_event.h",
   ]
 
   deps = [

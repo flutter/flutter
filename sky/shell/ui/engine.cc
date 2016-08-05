@@ -323,11 +323,11 @@ void Engine::DidCreateSecondaryIsolate(Dart_Isolate isolate) {
   mojo::ServiceProviderPtr services_from_embedder;
   mojo::InterfaceRequest<mojo::ServiceProvider> request =
       mojo::GetProxy(&services_from_embedder);
-  blink::Platform::current()->GetUITaskRunner()->PostTask(
-      FROM_HERE,
+  base::Closure closure =
       base::Bind(&Engine::BindToServiceProvider, weak_factory_.GetWeakPtr(),
-                 base::Passed(&request)));
-
+                 base::Passed(&request));
+  blink::Platform::current()->GetUITaskRunner()->PostTask(
+      [closure]() { closure.Run(); });
   blink::MojoServices::Create(isolate, nullptr, services_from_embedder.Pass(),
                               nullptr);
 }

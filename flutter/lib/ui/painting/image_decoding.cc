@@ -10,13 +10,15 @@
 #include "base/trace_event/trace_event.h"
 #include "flow/texture_image.h"
 #include "flutter/lib/ui/painting/image.h"
-#include "lib/tonic/logging/dart_invoke.h"
 #include "flutter/tonic/dart_persistent_value.h"
 #include "flutter/tonic/mojo_converter.h"
+#include "glue/movable_wrapper.h"
+#include "lib/tonic/logging/dart_invoke.h"
 #include "lib/tonic/typed_data/uint8_list.h"
 #include "sky/engine/platform/mojo/data_pipe.h"
 #include "sky/engine/platform/SharedBuffer.h"
 #include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/wtf/PassOwnPtr.h"
 #include "sky/shell/platform_view.h"
 #include "third_party/skia/include/core/SkImageGenerator.h"
 
@@ -62,7 +64,7 @@ sk_sp<SkImage> DecodeImage(PassRefPtr<SharedBuffer> buffer) {
 }
 
 void InvokeImageCallback(sk_sp<SkImage> image,
-                         scoped_ptr<DartPersistentValue> callback) {
+                         PassOwnPtr<DartPersistentValue> callback) {
   DartState* dart_state = callback->dart_state().get();
   if (!dart_state)
     return;
@@ -76,20 +78,19 @@ void InvokeImageCallback(sk_sp<SkImage> image,
   }
 }
 
-void DecodeImageAndInvokeImageCallback(scoped_ptr<DartPersistentValue> callback,
+void DecodeImageAndInvokeImageCallback(PassOwnPtr<DartPersistentValue> callback,
                                        PassRefPtr<SharedBuffer> buffer) {
   sk_sp<SkImage> image = DecodeImage(buffer);
   Platform::current()->GetUITaskRunner()->PostTask(
-      FROM_HERE,
-      base::Bind(InvokeImageCallback, image, base::Passed(&callback)));
+      [callback, image]() { InvokeImageCallback(image, callback); });
 }
 
 void DecodeImageFromDataPipe(Dart_NativeArguments args) {
   Dart_Handle exception = nullptr;
 
-  mojo::ScopedDataPipeConsumerHandle consumer =
+  auto consumer = glue::WrapMovable(
       tonic::DartConverter<mojo::ScopedDataPipeConsumerHandle>::FromArguments(
-          args, 0, exception);
+          args, 0, exception));
   if (exception) {
     Dart_ThrowException(exception);
     return;
@@ -100,13 +101,17 @@ void DecodeImageFromDataPipe(Dart_NativeArguments args) {
     Dart_ThrowException(ToDart("Callback must be a function"));
     return;
   }
-  scoped_ptr<DartPersistentValue> callback(
-      new DartPersistentValue(DartState::Current(), callback_handle));
+
+  PassOwnPtr<DartPersistentValue> callback =
+      adoptPtr(new DartPersistentValue(DartState::Current(), callback_handle));
 
   Platform::current()->GetIOTaskRunner()->PostTask(
-      FROM_HERE, base::Bind(&DrainDataPipe, base::Passed(&consumer),
-                            base::Bind(DecodeImageAndInvokeImageCallback,
-                                       base::Passed(&callback))));
+      [callback, consumer]() mutable {
+        DrainDataPipe(consumer.Unwrap(),
+                      [callback](PassRefPtr<SharedBuffer> buffer) {
+                        DecodeImageAndInvokeImageCallback(callback, buffer);
+                      });
+      });
 }
 
 void DecodeImageFromList(Dart_NativeArguments args) {
@@ -124,16 +129,16 @@ void DecodeImageFromList(Dart_NativeArguments args) {
     Dart_ThrowException(ToDart("Callback must be a function"));
     return;
   }
-  scoped_ptr<DartPersistentValue> callback(
-      new DartPersistentValue(DartState::Current(), callback_handle));
+  PassOwnPtr<DartPersistentValue> callback =
+      adoptPtr(new DartPersistentValue(DartState::Current(), callback_handle));
 
   RefPtr<SharedBuffer> buffer = SharedBuffer::create();
   buffer->append(reinterpret_cast<const char*>(list.data()),
                  list.num_elements());
 
-  Platform::current()->GetIOTaskRunner()->PostTask(
-      FROM_HERE, base::Bind(DecodeImageAndInvokeImageCallback,
-                            base::Passed(&callback), buffer));
+  Platform::current()->GetIOTaskRunner()->PostTask([callback, buffer]() {
+    DecodeImageAndInvokeImageCallback(callback, buffer);
+  });
 }
 
 }  // namespace

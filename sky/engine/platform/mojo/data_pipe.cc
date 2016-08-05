@@ -6,25 +6,25 @@
 
 #include <memory>
 
-#include "base/bind.h"
 #include "lib/ftl/macros.h"
 #include "mojo/data_pipe_utils/data_pipe_drainer.h"
 #include "sky/engine/platform/mojo/data_pipe.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/wtf/RefPtr.h"
 
+using mojo::common::DataPipeDrainer;
+
 namespace blink {
 namespace {
 
-class DrainJob : public mojo::common::DataPipeDrainer::Client {
+class DrainJob : public DataPipeDrainer::Client {
  public:
-  explicit DrainJob(base::Callback<void(PassRefPtr<SharedBuffer>)> callback)
-    : callback_(callback) {
-  }
+  explicit DrainJob(std::function<void(PassRefPtr<SharedBuffer>)> callback)
+      : callback_(callback) {}
 
   void Start(mojo::ScopedDataPipeConsumerHandle handle) {
     buffer_ = SharedBuffer::create();
-    drainer_.reset(new mojo::common::DataPipeDrainer(this, handle.Pass()));
+    drainer_.reset(new DataPipeDrainer(this, handle.Pass()));
   }
 
  private:
@@ -34,22 +34,25 @@ class DrainJob : public mojo::common::DataPipeDrainer::Client {
   }
 
   void OnDataComplete() override {
-    base::MessageLoop::current()->DeleteSoon(FROM_HERE, this);
-    callback_.Run(buffer_);
+    RefPtr<SharedBuffer> buffer = buffer_.release();
+    std::function<void(PassRefPtr<SharedBuffer>)> callback = callback_;
+
+    delete this;
+
+    callback(buffer);
   }
 
-  base::Callback<void(PassRefPtr<SharedBuffer>)> callback_;
+  std::function<void(PassRefPtr<SharedBuffer>)> callback_;
   RefPtr<SharedBuffer> buffer_;
   std::unique_ptr<mojo::common::DataPipeDrainer> drainer_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(DrainJob);
 };
 
-} // namespace
+}  // namespace
 
-void DrainDataPipe(
-    mojo::ScopedDataPipeConsumerHandle handle,
-    base::Callback<void(PassRefPtr<SharedBuffer>)> callback) {
+void DrainDataPipe(mojo::ScopedDataPipeConsumerHandle handle,
+                   std::function<void(PassRefPtr<SharedBuffer>)> callback) {
   (new DrainJob(callback))->Start(handle.Pass());
 }
 

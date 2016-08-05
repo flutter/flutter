@@ -7,6 +7,7 @@
 #include "base/location.h"
 #include "flutter/tonic/dart_args.h"
 #include "flutter/tonic/dart_binding_macros.h"
+#include "lib/ftl/tasks/task_runner.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "flutter/tonic/dart_library_natives.h"
 #include "sky/engine/core/rendering/RenderInline.h"
@@ -136,8 +137,9 @@ ParagraphBuilder::ParagraphBuilder() {
 }
 
 ParagraphBuilder::~ParagraphBuilder() {
-  base::SingleThreadTaskRunner* runner = Platform::current()->GetUITaskRunner();
-  runner->DeleteSoon(FROM_HERE, m_renderView.leakPtr());
+  PassOwnPtr<RenderView> renderView = m_renderView.release();
+  Platform::current()->GetUITaskRunner()->PostTask(
+      [renderView]() { /* renderView's destructor runs. */ });
 }
 
 void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,

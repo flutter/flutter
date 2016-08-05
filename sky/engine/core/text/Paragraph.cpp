@@ -7,8 +7,9 @@
 #include "base/location.h"
 #include "flutter/tonic/dart_args.h"
 #include "flutter/tonic/dart_binding_macros.h"
-#include "lib/tonic/converter/dart_converter.h"
 #include "flutter/tonic/dart_library_natives.h"
+#include "lib/ftl/tasks/task_runner.h"
+#include "lib/tonic/converter/dart_converter.h"
 #include "sky/engine/core/rendering/PaintInfo.h"
 #include "sky/engine/core/rendering/RenderText.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
@@ -42,8 +43,9 @@ Paragraph::Paragraph(PassOwnPtr<RenderView> renderView)
     : m_renderView(renderView) {}
 
 Paragraph::~Paragraph() {
-  base::SingleThreadTaskRunner* runner = Platform::current()->GetUITaskRunner();
-  runner->DeleteSoon(FROM_HERE, m_renderView.leakPtr());
+  PassOwnPtr<RenderView> renderView = m_renderView.release();
+  Platform::current()->GetUITaskRunner()->PostTask(
+      [renderView]() { /* renderView's destructor runs. */ });
 }
 
 double Paragraph::width() {

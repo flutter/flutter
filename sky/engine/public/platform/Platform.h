@@ -36,43 +36,43 @@
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebVector.h"
 
-namespace base {
-class SingleThreadTaskRunner;
+namespace ftl {
+class TaskRunner;
 }
 
 namespace blink {
 class WebDiscardableMemory;
 
 class Platform {
-public:
-    // HTML5 Database ------------------------------------------------------
-    typedef int FileHandle;
+ public:
+  // HTML5 Database ------------------------------------------------------
+  typedef int FileHandle;
 
-    BLINK_PLATFORM_EXPORT static void initialize(Platform*);
-    BLINK_PLATFORM_EXPORT static void shutdown();
-    BLINK_PLATFORM_EXPORT static Platform* current();
+  BLINK_PLATFORM_EXPORT static void initialize(Platform*);
+  BLINK_PLATFORM_EXPORT static void shutdown();
+  BLINK_PLATFORM_EXPORT static Platform* current();
 
+  // Allocates discardable memory. May return 0, even if the platform supports
+  // discardable memory. If nonzero, however, then the WebDiscardableMmeory is
+  // returned in an locked state. You may use its underlying data() member
+  // directly, taking care to unlock it when you are ready to let it become
+  // discardable.
+  virtual WebDiscardableMemory* allocateAndLockDiscardableMemory(size_t bytes) {
+    return 0;
+  }
 
-    // Allocates discardable memory. May return 0, even if the platform supports
-    // discardable memory. If nonzero, however, then the WebDiscardableMmeory is
-    // returned in an locked state. You may use its underlying data() member
-    // directly, taking care to unlock it when you are ready to let it become
-    // discardable.
-    virtual WebDiscardableMemory* allocateAndLockDiscardableMemory(size_t bytes) { return 0; }
+  // System --------------------------------------------------------------
 
+  // Returns a value such as "en-US".
+  virtual std::string defaultLocale() { return std::string(); }
 
-    // System --------------------------------------------------------------
+  virtual ftl::TaskRunner* GetUITaskRunner() { return 0; }
+  virtual ftl::TaskRunner* GetIOTaskRunner() { return 0; }
 
-    // Returns a value such as "en-US".
-    virtual std::string defaultLocale() { return std::string(); }
-
-    virtual base::SingleThreadTaskRunner* GetUITaskRunner() { return 0; }
-    virtual base::SingleThreadTaskRunner* GetIOTaskRunner() { return 0; }
-
-protected:
-    virtual ~Platform() { }
+ protected:
+  virtual ~Platform() {}
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PUBLIC_PLATFORM_PLATFORM_H_

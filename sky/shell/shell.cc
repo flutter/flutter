@@ -12,12 +12,13 @@
 #include "base/command_line.h"
 #include "base/i18n/icu_util.h"
 #include "base/lazy_instance.h"
-#include "base/memory/discardable_memory.h"
 #include "base/memory/discardable_memory_allocator.h"
+#include "base/memory/discardable_memory.h"
 #include "base/posix/eintr_wrapper.h"
 #include "base/single_thread_task_runner.h"
 #include "base/trace_event/trace_event.h"
 #include "dart/runtime/include/dart_tools_api.h"
+#include "glue/task_runner_adaptor.h"
 #include "mojo/message_pump/message_pump_mojo.h"
 #include "skia/ext/event_tracer_impl.h"
 #include "sky/engine/core/script/dart_init.h"
@@ -85,18 +86,24 @@ Shell::Shell() {
   gpu_thread_.reset(new base::Thread("gpu_thread"));
   gpu_thread_->StartWithOptions(options);
   gpu_task_runner_ = gpu_thread_->message_loop()->task_runner();
+  gpu_ftl_task_runner_ =
+      ftl::MakeRefCounted<glue::TaskRunnerAdaptor>(gpu_task_runner_);
   gpu_task_runner_->PostTask(
       FROM_HERE, base::Bind(&Shell::InitGpuThread, base::Unretained(this)));
 
   ui_thread_.reset(new base::Thread("ui_thread"));
   ui_thread_->StartWithOptions(options);
   ui_task_runner_ = ui_thread_->message_loop()->task_runner();
+  ui_ftl_task_runner_ =
+      ftl::MakeRefCounted<glue::TaskRunnerAdaptor>(ui_task_runner_);
   ui_task_runner_->PostTask(
       FROM_HERE, base::Bind(&Shell::InitUIThread, base::Unretained(this)));
 
   io_thread_.reset(new base::Thread("io_thread"));
   io_thread_->StartWithOptions(options);
   io_task_runner_ = io_thread_->message_loop()->task_runner();
+  io_ftl_task_runner_ =
+      ftl::MakeRefCounted<glue::TaskRunnerAdaptor>(io_task_runner_);
 
   blink::SetServiceIsolateHook(ServiceIsolateHook);
   blink::SetRegisterNativeServiceProtocolExtensionHook(
