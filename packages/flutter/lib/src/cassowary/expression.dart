@@ -148,7 +148,7 @@ class Expression extends EquationMember {
   }
 
   @override
-  EquationMember operator *(EquationMember m) {
+  Expression operator *(EquationMember m) {
     _Multiplication args = _findMulitplierAndMultiplicand(m);
 
     if (args == null) {
@@ -162,7 +162,7 @@ class Expression extends EquationMember {
   }
 
   @override
-  EquationMember operator /(EquationMember m) {
+  Expression operator /(EquationMember m) {
     if (!m.isConstant) {
       throw new ParserException(
           'The divisor was not a constant expression', <EquationMember>[this, m]);
@@ -187,7 +187,7 @@ class Expression extends EquationMember {
     return null;
   }
 
-  EquationMember _applyMultiplicand(double m) {
+  Expression _applyMultiplicand(double m) {
     List<Term> newTerms = terms.fold(
       new List<Term>(),
       (List<Term> list, Term term) {
