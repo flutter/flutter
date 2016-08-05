@@ -28,15 +28,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#include <string.h>
-#include "base/test/test_suite.h"
+#include "gtest/gtest.h"
 #include "sky/engine/wtf/MainThread.h"
 #include "sky/engine/wtf/WTF.h"
 
-int main(int argc, char** argv)
-{
-    WTF::initialize();
-    WTF::initializeMainThread();
-    return base::RunUnitTestsUsingBaseTestSuite(argc, argv);
+int main(int argc, char** argv) {
+  WTF::initialize();
+  WTF::initializeMainThread();
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }

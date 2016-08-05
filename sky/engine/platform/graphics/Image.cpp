@@ -28,7 +28,6 @@
 
 #include "sky/engine/platform/Length.h"
 #include "sky/engine/platform/SharedBuffer.h"
-#include "sky/engine/platform/TraceEvent.h"
 #include "sky/engine/platform/geometry/FloatPoint.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/platform/geometry/FloatSize.h"

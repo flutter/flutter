@@ -5,8 +5,8 @@
 #ifndef SKY_ENGINE_CORE_SCRIPT_DART_INIT_H_
 #define SKY_ENGINE_CORE_SCRIPT_DART_INIT_H_
 
-#include "base/callback.h"
 #include "dart/runtime/include/dart_api.h"
+#include "lib/ftl/functional/closure.h"
 #include "sky/engine/wtf/OperatingSystem.h"
 
 #include <string>
@@ -39,7 +39,7 @@ extern const char kSnapshotAssetKey[];
 
 bool IsRunningPrecompiledCode();
 
-using EmbedderTracingCallback = base::Callback<void(void)>;
+using EmbedderTracingCallback = ftl::Closure;
 
 typedef void (*ServiceIsolateHook)(bool);
 typedef void (*RegisterNativeServiceProtocolExtensionHook)(bool);

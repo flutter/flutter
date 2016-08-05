@@ -52,7 +52,6 @@
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/platform/LengthFunctions.h"
 #include "sky/engine/platform/Partitions.h"
-#include "sky/engine/platform/TraceEvent.h"
 #include "sky/engine/platform/geometry/FloatPoint3D.h"
 #include "sky/engine/platform/geometry/FloatRect.h"
 #include "sky/engine/platform/geometry/TransformState.h"

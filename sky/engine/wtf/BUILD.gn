@@ -192,7 +192,6 @@ component("wtf") {
   ]
 
   deps = [
-    "//base",
     "//glue",
     "//third_party/icu",
   ]
@@ -240,11 +239,7 @@ test("unittests") {
   deps = [
     ":test_support",
     ":wtf",
-    "//base",
-    "//base/allocator",
-    "//base/test:test_support",
-    "//testing/gmock",
-    "//testing/gtest",
+    "//third_party/gtest",
   ]
 }
 

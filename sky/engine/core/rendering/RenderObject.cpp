@@ -39,7 +39,6 @@
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/core/rendering/style/ShadowList.h"
 #include "sky/engine/platform/Partitions.h"
-#include "sky/engine/platform/TraceEvent.h"
 #include "sky/engine/platform/geometry/TransformState.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
 #include "sky/engine/wtf/RefCountedLeakCounter.h"

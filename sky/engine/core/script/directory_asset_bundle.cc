@@ -5,9 +5,7 @@
 #include "sky/engine/core/script/directory_asset_bundle.h"
 
 #include "base/bind.h"
-#include "base/location.h"
 #include "base/task_runner.h"
-#include "base/message_loop/message_loop.h"
 #include "base/threading/worker_pool.h"
 #include "mojo/data_pipe_utils/data_pipe_utils.h"
 

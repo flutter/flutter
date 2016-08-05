@@ -28,15 +28,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "lib/ftl/logging.h"
 #include "sky/engine/platform/fonts/FontCache.h"
-#include "base/logging.h"
 
 namespace blink {
 
 void FontCache::getFontForCharacter(UChar32,
                                     const char*,
                                     FontCache::PlatformFallbackFont*) {
-  LOG(INFO) << "Font fallbacks unimplemented on Mac.";
+  FTL_LOG(INFO) << "Font fallbacks unimplemented on Mac.";
 }
 
 }  // namespace  blink

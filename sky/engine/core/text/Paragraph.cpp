@@ -4,7 +4,6 @@
 
 #include "sky/engine/core/text/ParagraphBuilder.h"
 
-#include "base/location.h"
 #include "flutter/tonic/dart_args.h"
 #include "flutter/tonic/dart_binding_macros.h"
 #include "flutter/tonic/dart_library_natives.h"

@@ -31,7 +31,6 @@ source_set("platform") {
     "PurgeableVector.h",
     "SharedBuffer.cpp",
     "SharedBuffer.h",
-    "TraceEvent.h",
     "animation/AnimationUtilities.h",
     "animation/AnimationValue.h",
     "animation/KeyframeValueList.cpp",

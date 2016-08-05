@@ -4,12 +4,11 @@
 
 #include "sky/engine/core/text/ParagraphBuilder.h"
 
-#include "base/location.h"
 #include "flutter/tonic/dart_args.h"
 #include "flutter/tonic/dart_binding_macros.h"
+#include "flutter/tonic/dart_library_natives.h"
 #include "lib/ftl/tasks/task_runner.h"
 #include "lib/tonic/converter/dart_converter.h"
-#include "flutter/tonic/dart_library_natives.h"
 #include "sky/engine/core/rendering/RenderInline.h"
 #include "sky/engine/core/rendering/RenderParagraph.h"
 #include "sky/engine/core/rendering/RenderText.h"

@@ -23,7 +23,6 @@
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/RenderGeometryMap.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
-#include "sky/engine/platform/TraceEvent.h"
 #include "sky/engine/platform/geometry/FloatQuad.h"
 #include "sky/engine/platform/geometry/TransformState.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
@@ -60,7 +59,6 @@ bool RenderView::hitTest(const HitTestRequest& request, HitTestResult& result)
 
 bool RenderView::hitTest(const HitTestRequest& request, const HitTestLocation& location, HitTestResult& result)
 {
-    TRACE_EVENT0("blink", "RenderView::hitTest");
     m_hitTestCount++;
 
     // TODO(ojan): Does any of this intersection stuff make sense for Sky?

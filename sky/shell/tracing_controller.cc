@@ -18,10 +18,8 @@ namespace shell {
 
 TracingController::TracingController()
     : picture_tracing_enabled_(false), tracing_active_(false) {
-  auto start =
-      base::Bind(&TracingController::StartTracing, base::Unretained(this));
-  auto stop =
-      base::Bind(&TracingController::StopTracing, base::Unretained(this));
+  auto start = [this]() { StartTracing(); };
+  auto stop = [this]() { StopTracing(); };
 
   blink::SetEmbedderTracingCallbacks(
       WTF::MakeUnique<blink::EmbedderTracingCallbacks>(start, stop));
@@ -178,7 +176,8 @@ void TracingController::StartTracing() {
 
 void TracingController::StartBaseTracing() {
   namespace TE = base::trace_event;
-  auto config = TE::TraceConfig("*,disabled-by-default-skia", TE::RECORD_CONTINUOUSLY);
+  auto config =
+      TE::TraceConfig("*,disabled-by-default-skia", TE::RECORD_CONTINUOUSLY);
 
   auto log = TE::TraceLog::GetInstance();
 

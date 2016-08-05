@@ -6,7 +6,6 @@
 #define SKY_ENGINE_CORE_SCRIPT_DIRECTORY_ASSET_BUNDLE_H_
 
 #include "base/files/file_path.h"
-#include "base/memory/weak_ptr.h"
 #include "mojo/public/cpp/bindings/interface_request.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/public/cpp/environment/async_waiter.h"

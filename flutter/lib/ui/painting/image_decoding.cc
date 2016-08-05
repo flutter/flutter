@@ -4,15 +4,12 @@
 
 #include "flutter/lib/ui/painting/image_decoding.h"
 
-#include "base/bind.h"
-#include "base/lazy_instance.h"
-#include "base/logging.h"
-#include "base/trace_event/trace_event.h"
 #include "flow/texture_image.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/tonic/dart_persistent_value.h"
 #include "flutter/tonic/mojo_converter.h"
 #include "glue/movable_wrapper.h"
+#include "glue/trace_event.h"
 #include "lib/tonic/logging/dart_invoke.h"
 #include "lib/tonic/typed_data/uint8_list.h"
 #include "sky/engine/platform/mojo/data_pipe.h"

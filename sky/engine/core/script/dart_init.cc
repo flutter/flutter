@@ -486,7 +486,7 @@ static void EmbedderTimelineStartRecording() {
   if (!callbacks) {
     return;
   }
-  callbacks->start_tracing_callback.Run();
+  callbacks->start_tracing_callback();
 }
 
 static void EmbedderTimelineStopRecording() {
@@ -494,7 +494,7 @@ static void EmbedderTimelineStopRecording() {
   if (!callbacks) {
     return;
   }
-  callbacks->stop_tracing_callback.Run();
+  callbacks->stop_tracing_callback();
 }
 
 void SetServiceIsolateHook(ServiceIsolateHook hook) {

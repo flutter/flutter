@@ -26,7 +26,6 @@
 
 #include "sky/engine/platform/graphics/GraphicsContext.h"
 
-#include "sky/engine/platform/TraceEvent.h"
 #include "sky/engine/platform/geometry/IntRect.h"
 #include "sky/engine/platform/geometry/RoundedRect.h"
 #include "sky/engine/platform/graphics/Gradient.h"
@@ -1473,10 +1472,8 @@ SkPMColor GraphicsContext::antiColors2(int index)
 
 void GraphicsContext::didDrawTextInRect(const SkRect& textRect)
 {
-    if (m_trackTextRegion) {
-        TRACE_EVENT0("skia", "GraphicsContext::didDrawTextInRect");
+    if (m_trackTextRegion)
         m_textRegion.join(textRect);
-    }
 }
 
 void GraphicsContext::preparePaintForDrawRectToRect(
