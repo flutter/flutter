@@ -31,7 +31,7 @@ class RunAndStayResident extends ResidentRunner {
   String _mainPath;
   LaunchResult _result;
 
-  /// Start the app and keep the process running during its lifetime.
+  @override
   Future<int> run({
     bool traceStartup: false,
     bool benchmark: false,
@@ -51,6 +51,7 @@ class RunAndStayResident extends ResidentRunner {
     });
   }
 
+  @override
   Future<bool> restart() async {
     if (serviceProtocol == null) {
       printError('Debugging is not enabled.');
