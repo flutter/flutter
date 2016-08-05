@@ -38,10 +38,13 @@ class HotRunner extends ResidentRunner {
   }) : super(device,
              target: target,
              debuggingOptions: debuggingOptions,
-             usesTerminalUI: usesTerminalUI);
+             usesTerminalUI: usesTerminalUI) {
+    _projectRootPath = Directory.current.path;
+  }
 
   ApplicationPackage _package;
   String _mainPath;
+  String _projectRootPath;
   final AssetBundle bundle = new AssetBundle();
 
   /// Start the app and keep the process running during its lifetime.
@@ -202,13 +205,12 @@ class HotRunner extends ResidentRunner {
   }
 
   DevFS _devFS;
-  String _devFSProjectRootPath;
   Future<bool> _updateDevFS({ DevFSProgressReporter progressReporter }) async {
     if (_devFS == null) {
-      Directory directory = Directory.current;
-      _devFSProjectRootPath = directory.path;
-      String fsName = path.basename(directory.path);
-      _devFS = new DevFS(serviceProtocol, fsName, directory);
+      String fsName = path.basename(_projectRootPath);
+      _devFS = new DevFS(serviceProtocol,
+                         fsName,
+                         new Directory(_projectRootPath));
 
       try {
         await _devFS.create();
@@ -242,44 +244,68 @@ class HotRunner extends ResidentRunner {
     _devFS = null;
   }
 
+  Future<Null> _launchInView(String entryPath,
+                             String packagesPath,
+                             String assetsDirectoryPath) async {
+    String viewId = await serviceProtocol.getFirstViewId();
+    // When this completer completes the isolate is running.
+    // TODO(johnmccutchan): Have the framework send an event after the first
+    // frame is rendered and use that instead of 'runnable'.
+    Completer<Null> completer = new Completer<Null>();
+    StreamSubscription<Event> subscription =
+       serviceProtocol.onIsolateEvent.listen((Event event) {
+     if (event.kind == 'IsolateStart') {
+       printTrace('Isolate is spawned.');
+     } else if (event.kind == 'IsolateRunnable') {
+       printTrace('Isolate is runnable.');
+       completer.complete(null);
+     }
+    });
+    await serviceProtocol.runInView(viewId,
+                                   entryPath,
+                                   packagesPath,
+                                   assetsDirectoryPath);
+    await completer.future;
+    await subscription.cancel();
+  }
+
   Future<Null> _launchFromDevFS(ApplicationPackage package,
                                 String mainScript) async {
-    String entryPath = path.relative(mainScript, from: _devFSProjectRootPath);
+    String entryPath = path.relative(mainScript, from: _projectRootPath);
     String deviceEntryPath =
         _devFS.baseUri.resolve(entryPath).toFilePath();
     String devicePackagesPath =
         _devFS.baseUri.resolve('.packages').toFilePath();
     String deviceAssetsDirectoryPath =
         _devFS.baseUri.resolve('build/flx').toFilePath();
-    String viewId = await serviceProtocol.getFirstViewId();
+    await _launchInView(deviceEntryPath,
+                        devicePackagesPath,
+                        deviceAssetsDirectoryPath);
+  }
 
-    // When this completer completes the isolate is running.
-    // TODO(johnmccutchan): Have the framework send an event after the first
-    // frame is rendered and use that instead of 'runnable'.
-    Completer<Null> completer = new Completer<Null>();
-    StreamSubscription<Event> subscription =
-        serviceProtocol.onIsolateEvent.listen((Event event) {
-      if (event.kind == 'IsolateStart') {
-        printTrace('Isolate is spawned.');
-      } else if (event.kind == 'IsolateRunnable') {
-        printTrace('Isolate is runnable.');
-        completer.complete(null);
-      }
-    });
-    await serviceProtocol.runInView(viewId,
-                                    deviceEntryPath,
-                                    devicePackagesPath,
-                                    deviceAssetsDirectoryPath);
-    await completer.future;
-    await subscription.cancel();
+  Future<Null> _launchFromDisk(ApplicationPackage package,
+                               String mainScript) async {
+    Uri baseUri = new Uri.directory(_projectRootPath);
+    String entryPath = path.relative(mainScript, from: _projectRootPath);
+    String diskEntryPath = baseUri.resolve(entryPath).toFilePath();
+    String diskPackagesPath = baseUri.resolve('.packages').toFilePath();
+    String diskAssetsDirectoryPath = baseUri.resolve('build/flx').toFilePath();
+    await _launchInView(diskEntryPath,
+                        diskPackagesPath,
+                        diskAssetsDirectoryPath);
   }
 
   Future<Null> _restartFromSources() async {
-    if (_devFS != null)
+    if (_devFS == null) {
+      Status restartStatus = logger.startProgress('Restarting application...');
+      await _launchFromDisk(_package, _mainPath);
+      restartStatus.stop(showElapsedTime: true);
+    } else {
       await _updateDevFS();
-    Status restartStatus = logger.startProgress('Restarting application...');
-    await _launchFromDevFS(_package, _mainPath);
-    restartStatus.stop(showElapsedTime: true);
+      Status restartStatus = logger.startProgress('Restarting application...');
+      await _launchFromDevFS(_package, _mainPath);
+      restartStatus.stop(showElapsedTime: true);
+    }
   }
 
   /// Returns [true] if the reload was successful.
