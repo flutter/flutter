@@ -18,7 +18,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
-import '../run.dart';
+import '../resident_runner.dart';
 import '../services.dart';
 import 'build_aot.dart';
 import 'build.dart';

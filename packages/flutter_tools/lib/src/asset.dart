@@ -52,10 +52,27 @@ class AssetBundle {
   static const String _kFontSetMaterial = 'material';
   static const String _kFontSetRoboto = 'roboto';
 
+  DateTime _lastBuildTimestamp;
+
+  bool needsBuild({String manifestPath: defaultManifestPath}) {
+    if (_lastBuildTimestamp == null)
+      return true;
+
+    FileStat stat = new File(manifestPath).statSync();
+    if (stat.type == FileSystemEntityType.NOT_FOUND)
+      return true;
+
+    return stat.modified.isAfter(_lastBuildTimestamp);
+  }
+
   Future<int> build({String manifestPath: defaultManifestPath,
                      String workingDirPath: defaultWorkingDirPath,
                      bool includeRobotoFonts: true}) async {
     Object manifest = _loadFlutterYamlManifest(manifestPath);
+    if (manifest == null) {
+      // No manifest file found for this application.
+      return 0;
+    }
     if (manifest != null) {
      int result = await _validateFlutterYamlManifest(manifest);
      if (result != 0)
@@ -64,6 +81,8 @@ class AssetBundle {
     Map<String, dynamic> manifestDescriptor = manifest;
     assert(manifestDescriptor != null);
     String assetBasePath = path.dirname(path.absolute(manifestPath));
+
+    _lastBuildTimestamp = new DateTime.now();
 
     final PackageMap packageMap =
         new PackageMap(path.join(assetBasePath, '.packages'));

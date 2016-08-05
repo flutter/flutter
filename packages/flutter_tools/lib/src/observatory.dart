@@ -116,14 +116,35 @@ class Observatory {
     });
   }
 
-  Future<Null> reloadSources(String isolateId) async {
+  Future<Map<String, dynamic>> reloadSources(String isolateId) async {
     try {
-      await sendRequest('_reloadSources',
-                        <String, dynamic>{ 'isolateId': isolateId });
-      return null;
+      Response response =
+          await sendRequest('_reloadSources',
+                            <String, dynamic>{ 'isolateId': isolateId });
+      return response.response;
     } catch (e) {
-      return new Future<Null>.error(e.data['details']);
+      return new Future<Map<String, dynamic>>.error(e.data['details']);
     }
+  }
+
+  Future<String> getFirstViewId() async {
+    Map<String, dynamic> response = await peer.sendRequest('_flutter.listViews');
+    List<Map<String, String>> views = response['views'];
+    return views[0]['id'];
+  }
+
+  Future<Null> runInView(String viewId,
+                         String main,
+                         String packages,
+                         String assetsDirectory) async {
+    await peer.sendRequest('_flutter.runInView',
+                           <String, dynamic> {
+                             'viewId': viewId,
+                             'mainScript': main,
+                             'packagesFile': packages,
+                             'assetDirectory': assetsDirectory
+                           });
+    return null;
   }
 
   Future<Response> clearVMTimeline() => sendRequest('_clearVMTimeline');

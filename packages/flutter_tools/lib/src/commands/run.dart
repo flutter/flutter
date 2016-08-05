@@ -12,7 +12,9 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../hot.dart' as hot;
 import '../observatory.dart';
+import '../resident_runner.dart';
 import '../run.dart';
 import '../runner/flutter_command.dart';
 import 'build_apk.dart';
@@ -132,18 +134,25 @@ class RunCommand extends RunCommandBase {
     }
 
     if (argResults['resident']) {
-      RunAndStayResident runner = new RunAndStayResident(
-        deviceForCommand,
-        target: targetFile,
-        debuggingOptions: options,
-        hotMode: argResults['hot']
-      );
-
-      return runner.run(
-        traceStartup: traceStartup,
-        benchmark: argResults['benchmark'],
-        route: route
-      );
+      if (argResults['hot']) {
+        hot.HotRunner runner = new hot.HotRunner(
+          deviceForCommand,
+          target: targetFile,
+          debuggingOptions: options
+        );
+        return runner.run(route: route);
+      } else {
+        RunAndStayResident runner = new RunAndStayResident(
+          deviceForCommand,
+          target: targetFile,
+          debuggingOptions: options
+        );
+        return runner.run(
+          traceStartup: traceStartup,
+          benchmark: argResults['benchmark'],
+          route: route
+        );
+      }
     } else {
       // TODO(devoncarew): Remove this path and support the `--no-resident` option
       // using the `RunAndStayResident` class.
