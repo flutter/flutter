@@ -27,7 +27,7 @@ class Cache {
 
   // Whether to cache artifacts for all platforms. Defaults to only caching
   // artifacts for the current platform.
-  bool includeAllPlatforms;
+  bool includeAllPlatforms = false;
 
   static RandomAccessFile _lock;
   static bool _lockEnabled = true;
