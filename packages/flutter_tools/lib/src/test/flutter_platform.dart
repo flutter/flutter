@@ -25,6 +25,8 @@ const String _kPath = '/runner';
 
 String shellPath;
 
+List<String> fontDirectories = <String>[cache.getCacheArtifacts().path];
+
 void installHook() {
   hack.registerPlatformPlugin(<TestPlatform>[TestPlatform.vm], () => new FlutterPlatform());
 }
@@ -62,7 +64,11 @@ Future<Process> _startProcess(String mainPath, { String packages, int observator
     mainPath
   ]);
   printTrace('$executable ${arguments.join(' ')}');
-  return Process.start(executable, arguments, environment: <String, String>{ 'FLUTTER_TEST': 'true' });
+  Map<String, String> environment = <String, String>{
+    'FLUTTER_TEST': 'true',
+    'FONTCONFIG_FILE': _fontConfigFile.path,
+  };
+  return Process.start(executable, arguments, environment: environment);
 }
 
 void _attachStandardStreams(Process process) {
@@ -75,6 +81,29 @@ void _attachStandardStreams(Process process) {
           print('Shell: $line');
       });
   }
+}
+
+File _cachedFontConfig;
+
+/// Returns a Fontconfig config file that limits font fallback to directories
+/// specified in [fontDirectories].
+File get _fontConfigFile {
+  if (_cachedFontConfig != null) return _cachedFontConfig;
+
+  Directory fontsDir = Directory.systemTemp.createTempSync('flutter_fonts');
+
+  StringBuffer sb = new StringBuffer();
+  sb.writeln('<fontconfig>');
+  for (String fontDir in fontDirectories) {
+    sb.writeln('  <dir>$fontDir</dir>');
+  }
+  sb.writeln('  <cachedir>/var/cache/fontconfig</cachedir>');
+  sb.writeln('</fontconfig>');
+
+  _cachedFontConfig = new File('${fontsDir.path}/fonts.conf');
+  _cachedFontConfig.createSync();
+  _cachedFontConfig.writeAsStringSync(sb.toString());
+  return _cachedFontConfig;
 }
 
 class FlutterPlatform extends PlatformPlugin {
