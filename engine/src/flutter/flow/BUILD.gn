@@ -4,8 +4,6 @@
 
 source_set("flow") {
   sources = [
-    "checkerboard.cc",
-    "checkerboard.h",
     "compositor_context.cc",
     "compositor_context.h",
     "instrumentation.cc",
