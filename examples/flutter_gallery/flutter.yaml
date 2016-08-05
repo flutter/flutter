@@ -25,7 +25,6 @@ assets:
   - packages/flutter_gallery_assets/pesto/image9.jpg
   - packages/flutter_gallery_assets/pesto/logo_small.png
   - packages/flutter_gallery_assets/pesto/logo_medium.png
-  - packages/flutter_gallery_assets/pesto/logo_big.png
   - packages/flutter_gallery_assets/pesto/fish.png
   - packages/flutter_gallery_assets/pesto/healthy.png
   - packages/flutter_gallery_assets/pesto/main.png
