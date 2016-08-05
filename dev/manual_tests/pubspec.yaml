@@ -9,7 +9,7 @@ dependencies:
   flutter_gallery_assets:
     git:
       url: https://flutter.googlesource.com/gallery-assets
-      ref: ef658435dff4e3a7ad671feed19b634d53ae98f9
+      ref: ef928550119411358b8b25e16aecde6ace513526
 
 dev_dependencies:
   test: any # flutter_test provides the version constraints
