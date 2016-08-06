@@ -4,6 +4,8 @@
 
 source_set("tonic") {
   sources = [
+    "dart_debugger.cc",
+    "dart_debugger.h",
     "dart_dependency_catcher.cc",
     "dart_dependency_catcher.h",
     "dart_io.cc",

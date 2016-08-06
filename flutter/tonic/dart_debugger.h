@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_CORE_SCRIPT_DART_DEBUGGER_H_
-#define SKY_ENGINE_CORE_SCRIPT_DART_DEBUGGER_H_
+#ifndef FLUTTER_TONIC_DART_DEBUGGER_H_
+#define FLUTTER_TONIC_DART_DEBUGGER_H_
 
 #include <memory>
 #include <vector>
@@ -11,33 +11,24 @@
 #include "dart/runtime/include/dart_api.h"
 #include "dart/runtime/include/dart_native_api.h"
 #include "dart/runtime/include/dart_tools_api.h"
-#include "flutter/tonic/monitor.h"
-
-namespace base {
-  class Lock;
-}
+#include "lib/ftl/synchronization/monitor.h"
+#include "lib/ftl/synchronization/mutex.h"
 
 namespace blink {
 
 class DartDebuggerIsolate {
  public:
-  DartDebuggerIsolate(Dart_IsolateId id)
-      : id_(id) {
-  }
+  DartDebuggerIsolate(Dart_IsolateId id) : id_(id) {}
 
-  Dart_IsolateId id() const {
-    return id_;
-  }
+  Dart_IsolateId id() const { return id_; }
 
-  void Notify() {
-    monitor_.Notify();
-  }
+  void Notify() { monitor_.Signal(); }
 
   void MessageLoop();
 
  private:
   const Dart_IsolateId id_;
-  Monitor monitor_;
+  ftl::Monitor monitor_;
 };
 
 class DartDebugger {
@@ -70,7 +61,7 @@ class DartDebugger {
 
   static void RemoveIsolate(Dart_IsolateId id);
 
-  static base::Lock* lock_;
+  static ftl::Mutex* mutex_;
   static std::vector<std::unique_ptr<DartDebuggerIsolate>>* isolates_;
 
   friend class DartDebuggerIsolate;
@@ -78,4 +69,4 @@ class DartDebugger {
 
 }  // namespace blink
 
-#endif  // SKY_ENGINE_CORE_SCRIPT_DART_DEBUGGER_H_
+#endif  // FLUTTER_TONIC_DART_DEBUGGER_H_

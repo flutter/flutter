@@ -14,11 +14,10 @@
 #include "base/memory/weak_ptr.h"
 #include "base/threading/thread.h"
 #include "dart/runtime/include/dart_api.h"
-#include "flutter/tonic/monitor.h"
+#include "lib/ftl/synchronization/monitor.h"
 
 namespace blink {
 class DartLibraryProvider;
-class Monitor;
 
 // Reloading an isolate must be an atomic operation, meaning, no other tasks
 // can run while reloading. A nested run loop is not sufficient because other
@@ -60,7 +59,7 @@ class DartIsolateReloader {
   std::unique_ptr<base::Thread> thread_;
   DartLibraryProvider* library_provider_;
 
-  Monitor monitor_;
+  ftl::Monitor monitor_;
   // The monitor is used to protect the following fields:
   Dart_Handle load_error_;
   std::queue<std::unique_ptr<LoadResult>> load_results_;

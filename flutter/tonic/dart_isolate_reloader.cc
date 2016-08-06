@@ -7,15 +7,15 @@
 #include "base/bind.h"
 #include "base/callback.h"
 #include "base/threading/thread.h"
-#include "lib/tonic/scopes/dart_api_scope.h"
-#include "lib/tonic/converter/dart_converter.h"
 #include "flutter/tonic/dart_dependency_catcher.h"
-#include "lib/tonic/logging/dart_error.h"
-#include "lib/tonic/scopes/dart_isolate_scope.h"
-#include "flutter/tonic/dart_library_provider.h"
 #include "flutter/tonic/dart_library_loader.h"
+#include "flutter/tonic/dart_library_provider.h"
 #include "flutter/tonic/dart_state.h"
-#include "flutter/tonic/monitor.h"
+#include "lib/ftl/synchronization/monitor.h"
+#include "lib/tonic/converter/dart_converter.h"
+#include "lib/tonic/logging/dart_error.h"
+#include "lib/tonic/scopes/dart_api_scope.h"
+#include "lib/tonic/scopes/dart_isolate_scope.h"
 #include "mojo/data_pipe_utils/data_pipe_drainer.h"
 
 using mojo::common::DataPipeDrainer;
@@ -117,7 +117,7 @@ void DartIsolateReloader::SendRequest(Dart_LibraryTag tag,
   scoped_refptr<base::TaskRunner> runner =
       thread_->message_loop()->task_runner();
 
-  MonitorLocker ml(&monitor_);
+  ftl::MonitorLocker locker(&monitor_);
 
   // Post a task to the worker thread. This task will request the I/O and
   // post a LoadResult to be processed once complete.
@@ -131,10 +131,10 @@ void DartIsolateReloader::SendRequest(Dart_LibraryTag tag,
 }
 
 void DartIsolateReloader::PostResult(std::unique_ptr<LoadResult> load_result) {
-  MonitorLocker ml(&monitor_);
+  ftl::MonitorLocker locker(&monitor_);
   pending_requests_--;
   load_results_.push(std::move(load_result));
-  ml.Notify();
+  locker.Signal();
 }
 
 // As each source file is requested, a LoadRequest is queued to be processed on
@@ -247,7 +247,7 @@ bool DartIsolateReloader::IsCompleteLocked() {
 }
 
 bool DartIsolateReloader::BlockUntilComplete() {
-  MonitorLocker ml(&monitor_);
+  ftl::MonitorLocker locker(&monitor_);
 
   while (true) {
     ProcessResultQueueLocked();
@@ -257,7 +257,7 @@ bool DartIsolateReloader::BlockUntilComplete() {
     }
 
     // Wait to be notified about new I/O results.
-    ml.Wait();
+    locker.Wait();
   }
   return !Dart_IsNull(load_error_);
 }
