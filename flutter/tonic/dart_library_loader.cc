@@ -134,7 +134,7 @@ class DartLibraryLoader::SourceJob : public Job {
 class DartLibraryLoader::DependencyWatcher {
  public:
   DependencyWatcher(const std::unordered_set<DartDependency*>& dependencies,
-                    const base::Closure& callback)
+                    const ftl::Closure& callback)
       : dependencies_(dependencies), callback_(callback) {
     DCHECK(!dependencies_.empty());
   }
@@ -151,11 +151,11 @@ class DartLibraryLoader::DependencyWatcher {
     return dependencies_.empty();
   }
 
-  const base::Closure& callback() const { return callback_; }
+  const ftl::Closure& callback() const { return callback_; }
 
  private:
   std::unordered_set<DartDependency*> dependencies_;
-  base::Closure callback_;
+  ftl::Closure callback_;
 };
 
 // A WatcherSignaler is responsible for signaling DependencyWatchers when their
@@ -185,7 +185,7 @@ class DartLibraryLoader::WatcherSignaler {
     // callbacks before running any of them. We don't want to be re-entered
     // below the callbacks and end up in an inconsistent state.
     catcher_ = nullptr;
-    std::vector<base::Closure> callbacks;
+    std::vector<ftl::Closure> callbacks;
     for (const auto& watcher : completed_watchers) {
       callbacks.push_back(watcher->callback());
       EraseUniquePtr(loader_.dependency_watchers_, watcher);
@@ -193,7 +193,7 @@ class DartLibraryLoader::WatcherSignaler {
 
     // Finally, run all the callbacks while touching only data on the stack.
     for (const auto& callback : callbacks)
-      callback.Run();
+      callback();
   }
 
  private:
@@ -232,9 +232,9 @@ Dart_Handle DartLibraryLoader::HandleLibraryTag(Dart_LibraryTag tag,
 
 void DartLibraryLoader::WaitForDependencies(
     const std::unordered_set<DartDependency*>& dependencies,
-    const base::Closure& callback) {
+    const ftl::Closure& callback) {
   if (dependencies.empty())
-    return callback.Run();
+    return callback();
   dependency_watchers_.insert(std::unique_ptr<DependencyWatcher>(
       new DependencyWatcher(dependencies, callback)));
 }

@@ -7,32 +7,25 @@
 
 #include <vector>
 
-#include "base/callback_forward.h"
 #include "dart/runtime/include/dart_api.h"
+#include "glue/drain_data_pipe_job.h"
+#include "lib/ftl/functional/closure.h"
 #include "lib/ftl/macros.h"
 #include "lib/tonic/dart_state.h"
-#include "mojo/data_pipe_utils/data_pipe_drainer.h"
 
 namespace blink {
 
-class DartSnapshotLoader : public mojo::common::DataPipeDrainer::Client {
+class DartSnapshotLoader {
  public:
   explicit DartSnapshotLoader(tonic::DartState* dart_state);
   ~DartSnapshotLoader();
 
   void LoadSnapshot(mojo::ScopedDataPipeConsumerHandle pipe,
-                    const base::Closure& callback);
+                    const ftl::Closure& callback);
 
  private:
-  // mojo::common::DataPipeDrainer::Client
-  void OnDataAvailable(const void* data, size_t num_bytes) override;
-  void OnDataComplete() override;
-
   ftl::WeakPtr<tonic::DartState> dart_state_;
-  std::unique_ptr<mojo::common::DataPipeDrainer> drainer_;
-  // TODO(abarth): Should we be using SharedBuffer to buffer the data?
-  std::vector<uint8_t> buffer_;
-  base::Closure callback_;
+  std::unique_ptr<glue::DrainDataPipeJob> drain_job_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(DartSnapshotLoader);
 };

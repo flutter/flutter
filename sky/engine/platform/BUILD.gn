@@ -189,8 +189,6 @@ source_set("platform") {
     "graphics/skia/SkiaUtils.cpp",
     "graphics/skia/SkiaUtils.h",
     "heap/Handle.h",
-    "mojo/data_pipe.cc",
-    "mojo/data_pipe.h",
     "text/BidiCharacterRun.cpp",
     "text/BidiCharacterRun.h",
     "text/BidiContext.cpp",

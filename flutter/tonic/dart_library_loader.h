@@ -15,6 +15,7 @@
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
 #include "dart/runtime/include/dart_api.h"
+#include "lib/ftl/functional/closure.h"
 
 namespace blink {
 class DartDependency;
@@ -41,7 +42,7 @@ class DartLibraryLoader {
 
   void WaitForDependencies(
       const std::unordered_set<DartDependency*>& dependencies,
-      const base::Closure& callback);
+      const ftl::Closure& callback);
 
   void set_dependency_catcher(DartDependencyCatcher* dependency_catcher) {
     DCHECK(!dependency_catcher_ || !dependency_catcher);

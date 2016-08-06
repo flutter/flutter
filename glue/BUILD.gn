@@ -4,6 +4,8 @@
 
 source_set("glue") {
   sources = [
+    "drain_data_pipe_job.cc",
+    "drain_data_pipe_job.h",
     "movable_wrapper.h",
     "stack_trace.cc",
     "stack_trace.h",
@@ -14,5 +16,7 @@ source_set("glue") {
 
   deps = [
     "//base",
+    "//lib/ftl",
+    "//mojo/data_pipe_utils",
   ]
 }

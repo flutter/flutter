@@ -6,14 +6,13 @@
 
 #include "flow/texture_image.h"
 #include "flutter/lib/ui/painting/image.h"
+#include "glue/drain_data_pipe_job.h"
 #include "glue/movable_wrapper.h"
 #include "glue/trace_event.h"
 #include "lib/tonic/dart_persistent_value.h"
 #include "lib/tonic/logging/dart_invoke.h"
 #include "lib/tonic/mojo_converter.h"
 #include "lib/tonic/typed_data/uint8_list.h"
-#include "sky/engine/platform/mojo/data_pipe.h"
-#include "sky/engine/platform/SharedBuffer.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
 #include "sky/shell/platform_view.h"
@@ -26,16 +25,14 @@ using tonic::ToDart;
 namespace blink {
 namespace {
 
-sk_sp<SkImage> DecodeImage(PassRefPtr<SharedBuffer> buffer) {
+sk_sp<SkImage> DecodeImage(std::vector<char> buffer) {
   TRACE_EVENT0("blink", "DecodeImage");
 
-  const size_t data_size = buffer->size();
-
-  if (buffer == nullptr || data_size == 0) {
+  if (buffer.empty()) {
     return nullptr;
   }
 
-  sk_sp<SkData> sk_data = SkData::MakeWithoutCopy(buffer->data(), data_size);
+  sk_sp<SkData> sk_data = SkData::MakeWithoutCopy(buffer.data(), buffer.size());
 
   if (sk_data == nullptr) {
     return nullptr;
@@ -77,8 +74,8 @@ void InvokeImageCallback(sk_sp<SkImage> image,
 }
 
 void DecodeImageAndInvokeImageCallback(PassOwnPtr<DartPersistentValue> callback,
-                                       PassRefPtr<SharedBuffer> buffer) {
-  sk_sp<SkImage> image = DecodeImage(buffer);
+                                       std::vector<char> buffer) {
+  sk_sp<SkImage> image = DecodeImage(std::move(buffer));
   Platform::current()->GetUITaskRunner()->PostTask(
       [callback, image]() { InvokeImageCallback(image, callback); });
 }
@@ -105,10 +102,12 @@ void DecodeImageFromDataPipe(Dart_NativeArguments args) {
 
   Platform::current()->GetIOTaskRunner()->PostTask(
       [callback, consumer]() mutable {
-        DrainDataPipe(consumer.Unwrap(),
-                      [callback](PassRefPtr<SharedBuffer> buffer) {
-                        DecodeImageAndInvokeImageCallback(callback, buffer);
-                      });
+        glue::DrainDataPipeJob* job = nullptr;
+        job = new glue::DrainDataPipeJob(
+            consumer.Unwrap(), [callback, job](std::vector<char> buffer) {
+              delete job;
+              DecodeImageAndInvokeImageCallback(callback, std::move(buffer));
+            });
       });
 }
 
@@ -130,12 +129,12 @@ void DecodeImageFromList(Dart_NativeArguments args) {
   PassOwnPtr<DartPersistentValue> callback =
       adoptPtr(new DartPersistentValue(DartState::Current(), callback_handle));
 
-  RefPtr<SharedBuffer> buffer = SharedBuffer::create();
-  buffer->append(reinterpret_cast<const char*>(list.data()),
-                 list.num_elements());
+  const char* bytes = reinterpret_cast<const char*>(list.data());
+  PassOwnPtr<std::vector<char>> buffer =
+      adoptPtr(new std::vector<char>(bytes, bytes + list.num_elements()));
 
   Platform::current()->GetIOTaskRunner()->PostTask([callback, buffer]() {
-    DecodeImageAndInvokeImageCallback(callback, buffer);
+    DecodeImageAndInvokeImageCallback(callback, std::move(*buffer));
   });
 }
 

@@ -7,22 +7,14 @@
 
 #include <memory>
 
-#include "base/callback_forward.h"
-#include "base/memory/weak_ptr.h"
 #include "dart/runtime/include/dart_api.h"
 #include "lib/ftl/macros.h"
 #include "mojo/public/cpp/system/data_pipe.h"
-#include "sky/engine/wtf/OwnPtr.h"
-#include "sky/engine/wtf/text/AtomicString.h"
-#include "sky/engine/wtf/text/TextPosition.h"
 
 namespace blink {
-class AbstractModule;
-class DartUI;
 class UIDartState;
 class DartLibraryProvider;
 class DartSnapshotLoader;
-class View;
 
 class DartController {
  public:
@@ -31,8 +23,7 @@ class DartController {
 
   static void InitVM();
 
-  void RunFromLibrary(const std::string& name,
-                      DartLibraryProvider* library_provider);
+  void RunFromLibrary(std::string name, DartLibraryProvider* library_provider);
   void RunFromPrecompiledSnapshot();
   void RunFromSnapshot(mojo::ScopedDataPipeConsumerHandle snapshot);
   void RunFromSnapshotBuffer(const uint8_t* buffer, size_t size);
@@ -53,11 +44,8 @@ class DartController {
 
   std::unique_ptr<DartSnapshotLoader> snapshot_loader_;
 
-  base::WeakPtrFactory<DartController> weak_factory_;
-
   FTL_DISALLOW_COPY_AND_ASSIGN(DartController);
 };
-
 }
 
-#endif // SKY_ENGINE_CORE_SCRIPT_DART_CONTROLLER_H_
+#endif  // SKY_ENGINE_CORE_SCRIPT_DART_CONTROLLER_H_

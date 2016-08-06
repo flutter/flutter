@@ -4,7 +4,6 @@
 
 #include "sky/engine/core/script/dart_controller.h"
 
-#include "base/bind.h"
 #include "dart/runtime/include/dart_tools_api.h"
 #include "flutter/tonic/dart_debugger.h"
 #include "flutter/tonic/dart_dependency_catcher.h"
@@ -41,8 +40,7 @@ using tonic::ToDart;
 
 namespace blink {
 
-DartController::DartController()
-    : ui_dart_state_(nullptr), weak_factory_(this) {}
+DartController::DartController() : ui_dart_state_(nullptr) {}
 
 DartController::~DartController() {
   if (ui_dart_state_) {
@@ -132,9 +130,8 @@ void DartController::RunFromPrecompiledSnapshot() {
 void DartController::RunFromSnapshot(
     mojo::ScopedDataPipeConsumerHandle snapshot) {
   snapshot_loader_ = WTF::MakeUnique<DartSnapshotLoader>(dart_state());
-  snapshot_loader_->LoadSnapshot(
-      snapshot.Pass(),
-      base::Bind(&DartController::DidLoadSnapshot, weak_factory_.GetWeakPtr()));
+  snapshot_loader_->LoadSnapshot(snapshot.Pass(),
+                                 [this]() { DidLoadSnapshot(); });
 }
 
 void DartController::RunFromSnapshotBuffer(const uint8_t* buffer, size_t size) {
@@ -147,7 +144,7 @@ void DartController::RunFromSnapshotBuffer(const uint8_t* buffer, size_t size) {
     exit(1);
 }
 
-void DartController::RunFromLibrary(const std::string& name,
+void DartController::RunFromLibrary(std::string name,
                                     DartLibraryProvider* library_provider) {
   DartState::Scope scope(dart_state());
 
@@ -157,8 +154,7 @@ void DartController::RunFromLibrary(const std::string& name,
   DartDependencyCatcher dependency_catcher(loader);
   loader.LoadScript(name);
   loader.WaitForDependencies(dependency_catcher.dependencies(),
-                             base::Bind(&DartController::DidLoadMainLibrary,
-                                        weak_factory_.GetWeakPtr(), name));
+                             [this, name]() { DidLoadMainLibrary(name); });
 }
 
 void DartController::CreateIsolateFor(std::unique_ptr<UIDartState> state) {

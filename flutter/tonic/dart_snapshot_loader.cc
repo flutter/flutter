@@ -4,15 +4,15 @@
 
 #include "flutter/tonic/dart_snapshot_loader.h"
 
-#include "base/callback.h"
-#include "base/trace_event/trace_event.h"
-#include "lib/tonic/scopes/dart_api_scope.h"
-#include "lib/tonic/logging/dart_error.h"
-#include "lib/tonic/scopes/dart_isolate_scope.h"
-#include "flutter/tonic/dart_state.h"
-#include "lib/tonic/converter/dart_converter.h"
+#include <utility>
 
-using mojo::common::DataPipeDrainer;
+#include "flutter/tonic/dart_state.h"
+#include "glue/trace_event.h"
+#include "lib/tonic/converter/dart_converter.h"
+#include "lib/tonic/logging/dart_error.h"
+#include "lib/tonic/scopes/dart_api_scope.h"
+#include "lib/tonic/scopes/dart_isolate_scope.h"
+
 using tonic::LogIfError;
 
 namespace blink {
@@ -23,29 +23,24 @@ DartSnapshotLoader::DartSnapshotLoader(tonic::DartState* dart_state)
 DartSnapshotLoader::~DartSnapshotLoader() {}
 
 void DartSnapshotLoader::LoadSnapshot(mojo::ScopedDataPipeConsumerHandle pipe,
-                                      const base::Closure& callback) {
+                                      const ftl::Closure& callback) {
   TRACE_EVENT_ASYNC_BEGIN0("flutter", "DartSnapshotLoader::LoadSnapshot", this);
 
-  callback_ = callback;
-  drainer_.reset(new DataPipeDrainer(this, pipe.Pass()));
-}
+  drain_job_.reset(new glue::DrainDataPipeJob(
+      std::move(pipe), [this, callback](std::vector<char> buffer) {
+        TRACE_EVENT_ASYNC_END0("flutter", "DartSnapshotLoader::LoadSnapshot",
+                               this);
+        // TODO(abarth): Should we check dart_state_ for null?
+        {
+          tonic::DartIsolateScope scope(dart_state_->isolate());
+          tonic::DartApiScope api_scope;
 
-void DartSnapshotLoader::OnDataAvailable(const void* data, size_t num_bytes) {
-  const uint8_t* bytes = static_cast<const uint8_t*>(data);
-  buffer_.insert(buffer_.end(), bytes, bytes + num_bytes);
-}
+          LogIfError(Dart_LoadScriptFromSnapshot(
+              reinterpret_cast<uint8_t*>(buffer.data()), buffer.size()));
+        }
 
-void DartSnapshotLoader::OnDataComplete() {
-  TRACE_EVENT_ASYNC_END0("flutter", "DartSnapshotLoader::LoadSnapshot", this);
-  // TODO(abarth): Should we check dart_state_ for null?
-  {
-    tonic::DartIsolateScope scope(dart_state_->isolate());
-    tonic::DartApiScope api_scope;
-
-    LogIfError(Dart_LoadScriptFromSnapshot(buffer_.data(), buffer_.size()));
-  }
-
-  callback_.Run();
+        callback();
+      }));
 }
 
 }  // namespace blink
