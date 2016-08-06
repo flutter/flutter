@@ -11,6 +11,8 @@ source_set("glue") {
     "stack_trace.h",
     "task_runner_adaptor.cc",
     "task_runner_adaptor.h",
+    "thread.cc",
+    "thread.h",
     "trace_event.h",
   ]
 

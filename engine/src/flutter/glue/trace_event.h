@@ -8,6 +8,8 @@
 #define TRACE_EVENT2(a, b, c, d, e, f)
 #define TRACE_EVENT_ASYNC_BEGIN0(a, b, c)
 #define TRACE_EVENT_ASYNC_END0(a, b, c)
+#define TRACE_EVENT_ASYNC_BEGIN1(a, b, c, d, e)
+#define TRACE_EVENT_ASYNC_END1(a, b, c, d, e)
 #else
 #include "base/trace_event/trace_event.h"
 #endif  // defined(__Fuchsia__)
