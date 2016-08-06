@@ -30,6 +30,11 @@ abstract class ResidentRunner {
   Observatory serviceProtocol;
   StreamSubscription<String> _loggingSubscription;
 
+  /// Start the app and keep the process running during its lifetime.
+  Future<int> run({ Completer<int> observatoryPortCompleter, String route });
+
+  Future<bool> restart();
+
   Future<Null> stop() async {
     await stopEchoingDeviceLog();
     return stopApp();

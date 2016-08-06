@@ -129,25 +129,25 @@ class RunCommand extends RunCommandBase {
       }
     }
 
+    ResidentRunner runner;
+
     if (argResults['hot']) {
-      HotRunner runner = new HotRunner(
+      runner = new HotRunner(
         deviceForCommand,
         target: targetFile,
         debuggingOptions: options
       );
-      return runner.run(route: route);
     } else {
-      RunAndStayResident runner = new RunAndStayResident(
+      runner = new RunAndStayResident(
         deviceForCommand,
         target: targetFile,
-        debuggingOptions: options
-      );
-      return runner.run(
+        debuggingOptions: options,
         traceStartup: traceStartup,
-        benchmark: argResults['benchmark'],
-        route: route
+        benchmark: argResults['benchmark']
       );
     }
+
+    return runner.run(route: route);
   }
 }
 

@@ -47,11 +47,8 @@ class HotRunner extends ResidentRunner {
   String _projectRootPath;
   final AssetBundle bundle = new AssetBundle();
 
-  /// Start the app and keep the process running during its lifetime.
-  Future<int> run({
-    Completer<int> observatoryPortCompleter,
-    String route
-  }) {
+  @override
+  Future<int> run({ Completer<int> observatoryPortCompleter, String route }) {
     // Don't let uncaught errors kill the process.
     return runZoned(() {
       return _run(
@@ -322,6 +319,9 @@ class HotRunner extends ResidentRunner {
     printStatus('Reloaded $loadedLibraryCount out of $finalLibraryCount libraries.');
     return true;
   }
+
+  @override
+  Future<bool> restart() => _reloadSources();
 
   Future<bool> _reloadSources() async {
     if (serviceProtocol.firstIsolateId == null)

@@ -13,8 +13,10 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../hot.dart';
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
+import '../resident_runner.dart';
 import '../run.dart';
 import '../runner/flutter_command.dart';
 
@@ -291,7 +293,7 @@ class AppDomain extends Domain {
     String route = _getStringArg(args, 'route');
     String mode = _getStringArg(args, 'mode');
     String target = _getStringArg(args, 'target');
-    // TODO(johnmccutchan): Wire up support for hot mode.
+    bool hotMode = _getBoolArg(args, 'hot') ?? false;
 
     Device device = daemon.deviceDomain._getDevice(deviceId);
     if (device == null)
@@ -319,19 +321,30 @@ class AppDomain extends Domain {
     Directory cwd = Directory.current;
     Directory.current = new Directory(projectDirectory);
 
-    RunAndStayResident runner = new RunAndStayResident(
-      device,
-      target: target,
-      debuggingOptions: options,
-      usesTerminalUI: false
-    );
+    ResidentRunner runner;
+
+    if (hotMode) {
+      runner = new HotRunner(
+        device,
+        target: target,
+        debuggingOptions: options,
+        usesTerminalUI: false
+      );
+    } else {
+      runner = new RunAndStayResident(
+        device,
+        target: target,
+        debuggingOptions: options,
+        usesTerminalUI: false
+      );
+    }
 
     AppInstance app = new AppInstance(_getNextAppId(), runner);
     _apps.add(app);
     _sendAppEvent(app, 'start', <String, dynamic>{
       'deviceId': deviceId,
       'directory': projectDirectory,
-      'supportsRestart': device.supportsRestart
+      'supportsRestart': device.supportsRestart && hotMode
     });
 
     Completer<int> observatoryPortCompleter;
@@ -567,7 +580,7 @@ class AppInstance {
   AppInstance(this.id, [this.runner]);
 
   final String id;
-  final RunAndStayResident runner;
+  final ResidentRunner runner;
 
   _AppRunLogger _logger;
 
