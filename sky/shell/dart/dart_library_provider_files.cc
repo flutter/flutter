@@ -82,19 +82,20 @@ void DartLibraryProviderFiles::LoadPackagesMap(const base::FilePath& packages) {
   }
 }
 
-void DartLibraryProviderFiles::GetLibraryAsStream(
-    const std::string& name,
-    blink::DataPipeConsumerCallback callback) {
+blink::DartLibraryStream DartLibraryProviderFiles::GetLibraryAsStream(
+    const std::string& name) {
   mojo::DataPipe pipe;
   base::FilePath path = GetFilePathForURL(name);
   base::FilePath source = base::MakeAbsoluteFilePath(path);
-  std::string source_url = "file://" + source.value();
-  callback.Run(pipe.consumer_handle.Pass(), source_url);
+  blink::DartLibraryStream result;
+  result.handle = std::move(pipe.consumer_handle);
+  result.resolved_url = "file://" + source.value();
   scoped_refptr<base::TaskRunner> runner =
       base::WorkerPool::GetTaskRunner(true);
   mojo::common::CopyFromFile(source, pipe.producer_handle.Pass(), 0,
                              runner.get(),
                              base::Bind(&CopyComplete, source, name));
+  return result;
 }
 
 Dart_Handle DartLibraryProviderFiles::CanonicalizeURL(Dart_Handle library,

@@ -21,8 +21,7 @@ class DartLibraryProviderFiles : public blink::DartLibraryProvider {
 
  protected:
   // |DartLibraryProvider| implementation:
-  void GetLibraryAsStream(const std::string& name,
-                          blink::DataPipeConsumerCallback callback) override;
+  blink::DartLibraryStream GetLibraryAsStream(const std::string& name) override;
   Dart_Handle CanonicalizeURL(Dart_Handle library, Dart_Handle url) override;
 
  private:

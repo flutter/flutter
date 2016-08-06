@@ -5,22 +5,22 @@
 #ifndef FLUTTER_TONIC_DART_LIBRARY_PROVIDER_H_
 #define FLUTTER_TONIC_DART_LIBRARY_PROVIDER_H_
 
+#include <functional>
 #include <string>
 
-#include "base/callback.h"
 #include "dart/runtime/include/dart_api.h"
 #include "mojo/public/cpp/system/data_pipe.h"
 
 namespace blink {
 
-typedef base::Callback<void(mojo::ScopedDataPipeConsumerHandle,
-                            const std::string&)>
-    DataPipeConsumerCallback;
+struct DartLibraryStream {
+  mojo::ScopedDataPipeConsumerHandle handle;
+  std::string resolved_url;
+};
 
 class DartLibraryProvider {
  public:
-  virtual void GetLibraryAsStream(const std::string& name,
-                                  DataPipeConsumerCallback callback) = 0;
+  virtual DartLibraryStream GetLibraryAsStream(const std::string& name) = 0;
 
   virtual Dart_Handle CanonicalizeURL(Dart_Handle library, Dart_Handle url) = 0;
 

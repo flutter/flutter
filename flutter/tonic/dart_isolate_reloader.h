@@ -9,11 +9,9 @@
 #include <vector>
 #include <queue>
 
-#include "base/callback_forward.h"
-#include "base/macros.h"
-#include "base/memory/weak_ptr.h"
-#include "base/threading/thread.h"
 #include "dart/runtime/include/dart_api.h"
+#include "glue/thread.h"
+#include "lib/ftl/macros.h"
 #include "lib/ftl/synchronization/monitor.h"
 
 namespace blink {
@@ -56,7 +54,7 @@ class DartIsolateReloader {
   bool IsCompleteLocked();
   bool BlockUntilComplete();
 
-  std::unique_ptr<base::Thread> thread_;
+  glue::Thread thread_;
   DartLibraryProvider* library_provider_;
 
   ftl::Monitor monitor_;
@@ -64,6 +62,8 @@ class DartIsolateReloader {
   Dart_Handle load_error_;
   std::queue<std::unique_ptr<LoadResult>> load_results_;
   intptr_t pending_requests_;
+
+  FTL_DISALLOW_COPY_AND_ASSIGN(DartIsolateReloader);
 };
 
 }  // namespace blink

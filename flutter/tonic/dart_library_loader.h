@@ -11,11 +11,10 @@
 #include <unordered_set>
 #include <vector>
 
-#include "base/callback_forward.h"
-#include "base/macros.h"
-#include "base/memory/weak_ptr.h"
 #include "dart/runtime/include/dart_api.h"
 #include "lib/ftl/functional/closure.h"
+#include "lib/ftl/logging.h"
+#include "lib/ftl/macros.h"
 
 namespace blink {
 class DartDependency;
@@ -45,7 +44,7 @@ class DartLibraryLoader {
       const ftl::Closure& callback);
 
   void set_dependency_catcher(DartDependencyCatcher* dependency_catcher) {
-    DCHECK(!dependency_catcher_ || !dependency_catcher);
+    FTL_DCHECK(!dependency_catcher_ || !dependency_catcher);
     dependency_catcher_ = dependency_catcher;
   }
 
@@ -79,7 +78,7 @@ class DartLibraryLoader {
   std::unordered_set<std::unique_ptr<DependencyWatcher>> dependency_watchers_;
   DartDependencyCatcher* dependency_catcher_;
 
-  DISALLOW_COPY_AND_ASSIGN(DartLibraryLoader);
+  FTL_DISALLOW_COPY_AND_ASSIGN(DartLibraryLoader);
 };
 
 }  // namespace blink

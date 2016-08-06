@@ -4,13 +4,14 @@
 
 #include "flutter/tonic/dart_isolate_reloader.h"
 
-#include "base/bind.h"
-#include "base/callback.h"
-#include "base/threading/thread.h"
+#include <utility>
+
 #include "flutter/tonic/dart_dependency_catcher.h"
 #include "flutter/tonic/dart_library_loader.h"
 #include "flutter/tonic/dart_library_provider.h"
 #include "flutter/tonic/dart_state.h"
+#include "glue/thread.h"
+#include "lib/ftl/logging.h"
 #include "lib/ftl/synchronization/monitor.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/logging/dart_error.h"
@@ -41,7 +42,7 @@ class DartIsolateReloader::LoadResult {
         library_url_(library_url),
         resolved_url_(resolved_url),
         payload_(std::move(payload)) {
-    DCHECK(success());
+    FTL_DCHECK(success());
   }
 
   // Error load result.
@@ -102,11 +103,11 @@ class DartIsolateReloader::LoadResult {
 };
 
 DartIsolateReloader::DartIsolateReloader(DartLibraryProvider* library_provider)
-    : thread_(new base::Thread("DartIsolateReloader")),
+    : thread_("DartIsolateReloader"),
       library_provider_(library_provider),
       load_error_(Dart_Null()),
       pending_requests_(0) {
-  CHECK(thread_->Start());
+  FTL_CHECK(thread_.Start());
 }
 
 DartIsolateReloader::~DartIsolateReloader() {}
@@ -114,20 +115,20 @@ DartIsolateReloader::~DartIsolateReloader() {}
 void DartIsolateReloader::SendRequest(Dart_LibraryTag tag,
                                       Dart_Handle url,
                                       Dart_Handle library_url) {
-  scoped_refptr<base::TaskRunner> runner =
-      thread_->message_loop()->task_runner();
+  ftl::RefPtr<ftl::TaskRunner> runner = thread_.task_runner();
+  std::string url_string = StdStringFromDart(url);
+  std::string library_url_string = StdStringFromDart(library_url);
 
   ftl::MonitorLocker locker(&monitor_);
 
   // Post a task to the worker thread. This task will request the I/O and
   // post a LoadResult to be processed once complete.
-  if (runner->PostTask(
-          FROM_HERE,
-          base::Bind(&DartIsolateReloader::RequestTask, library_provider_, this,
-                     static_cast<intptr_t>(tag), StdStringFromDart(url),
-                     StdStringFromDart(library_url)))) {
-    pending_requests_++;
-  }
+  runner->PostTask([this, tag, url_string, library_url_string]() {
+    RequestTask(library_provider_, this, static_cast<intptr_t>(tag), url_string,
+                library_url_string);
+  });
+
+  pending_requests_++;
 }
 
 void DartIsolateReloader::PostResult(std::unique_ptr<LoadResult> load_result) {
@@ -149,17 +150,15 @@ class DartIsolateReloader::LoadRequest : public DataPipeDrainer::Client {
       : isolate_reloader_(isolate_reloader),
         tag_(tag),
         url_(url),
-        library_url_(library_url),
-        weak_factory_(this) {
-    library_provider->GetLibraryAsStream(
-        url_, base::Bind(&LoadRequest::OnStreamAvailable,
-                         weak_factory_.GetWeakPtr()));
+        library_url_(library_url) {
+    auto stream = library_provider->GetLibraryAsStream(url_);
+    OnStreamAvailable(std::move(stream.handle), std::move(stream.resolved_url));
   }
 
  protected:
-  void OnStreamAvailable(mojo::ScopedDataPipeConsumerHandle pipe,
-                         const std::string& resolved_url) {
-    if (!pipe.is_valid()) {
+  void OnStreamAvailable(mojo::ScopedDataPipeConsumerHandle handle,
+                         std::string resolved_url) {
+    if (!handle.is_valid()) {
       std::unique_ptr<DartIsolateReloader::LoadResult> result(
           new DartIsolateReloader::LoadResult(
               tag_, url_, library_url_,
@@ -170,8 +169,8 @@ class DartIsolateReloader::LoadRequest : public DataPipeDrainer::Client {
       delete this;
       return;
     }
-    resolved_url_ = resolved_url;
-    drainer_.reset(new DataPipeDrainer(this, pipe.Pass()));
+    resolved_url_ = std::move(resolved_url);
+    drainer_.reset(new DataPipeDrainer(this, std::move(handle)));
   }
 
   // DataPipeDrainer::Client
@@ -198,8 +197,6 @@ class DartIsolateReloader::LoadRequest : public DataPipeDrainer::Client {
   std::string resolved_url_;
   std::vector<uint8_t> buffer_;
   std::unique_ptr<DataPipeDrainer> drainer_;
-
-  base::WeakPtrFactory<LoadRequest> weak_factory_;
 };
 
 void DartIsolateReloader::RequestTask(DartLibraryProvider* library_provider,
@@ -207,9 +204,9 @@ void DartIsolateReloader::RequestTask(DartLibraryProvider* library_provider,
                                       intptr_t tag,
                                       const std::string& url,
                                       const std::string& library_url) {
-  DCHECK(isolate_reloader);
-  DCHECK(library_provider);
-  DCHECK(tag > 0);
+  FTL_DCHECK(isolate_reloader);
+  FTL_DCHECK(library_provider);
+  FTL_DCHECK(tag > 0);
   // Construct a new LoadRequest. The pointer is dropped here because
   // the request deletes itself on success and failure.
   new LoadRequest(library_provider, isolate_reloader, tag, url, library_url);
@@ -270,7 +267,7 @@ Dart_Handle DartIsolateReloader::HandleLibraryTag(Dart_LibraryTag tag,
     return DartLibraryLoader::HandleLibraryTag(tag, library, url);
   }
   DartState* dart_state = DartState::Current();
-  DCHECK(dart_state);
+  FTL_DCHECK(dart_state);
   DartIsolateReloader* isolate_reloader = dart_state->isolate_reloader();
   // The first call into the tag handler ends up blocking the calling thread
   // until the entire reload has completed. All other calls into the
@@ -278,7 +275,7 @@ Dart_Handle DartIsolateReloader::HandleLibraryTag(Dart_LibraryTag tag,
   const bool blocking_call = (tag == Dart_kScriptTag);
   if (!isolate_reloader) {
     // The first call into this tag handler must be for the script.
-    DCHECK(tag == Dart_kScriptTag);
+    FTL_DCHECK(tag == Dart_kScriptTag);
     // Associate the reloader with the isolate. The reloader is owned
     // by the dart_state.
     dart_state->set_isolate_reloader(
@@ -290,7 +287,7 @@ Dart_Handle DartIsolateReloader::HandleLibraryTag(Dart_LibraryTag tag,
     Dart_SetLibraryTagHandler(DartIsolateReloader::HandleLibraryTag);
   } else {
     // We should not see another request for the script.
-    DCHECK(tag != Dart_kScriptTag);
+    FTL_DCHECK(tag != Dart_kScriptTag);
   }
 
   // Issue I/O request.

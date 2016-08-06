@@ -4,14 +4,13 @@
 
 #include "flutter/tonic/dart_library_loader.h"
 
-#include "base/callback.h"
-#include "base/files/file_util.h"
-#include "base/strings/string_util.h"
-#include "base/trace_event/trace_event.h"
+#include <utility>
+
 #include "flutter/tonic/dart_dependency_catcher.h"
 #include "flutter/tonic/dart_isolate_reloader.h"
 #include "flutter/tonic/dart_library_provider.h"
 #include "flutter/tonic/dart_state.h"
+#include "glue/trace_event.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_persistent_value.h"
 #include "lib/tonic/logging/dart_error.h"
@@ -43,9 +42,9 @@ class DartLibraryLoader::Job : public DartDependency,
                                public DataPipeDrainer::Client {
  public:
   Job(DartLibraryLoader* loader, const std::string& name)
-      : loader_(loader), name_(name), weak_factory_(this) {
-    loader->library_provider()->GetLibraryAsStream(
-        name, base::Bind(&Job::OnStreamAvailable, weak_factory_.GetWeakPtr()));
+      : loader_(loader), name_(name) {
+    auto stream = loader->library_provider()->GetLibraryAsStream(name);
+    OnStreamAvailable(std::move(stream.handle), std::move(stream.resolved_url));
   }
 
   const std::string& name() const { return name_; }
@@ -79,8 +78,6 @@ class DartLibraryLoader::Job : public DartDependency,
   std::string name_;
   std::string resolved_url_;
   std::unique_ptr<DataPipeDrainer> drainer_;
-
-  base::WeakPtrFactory<Job> weak_factory_;
 };
 
 class DartLibraryLoader::ImportJob : public Job {
@@ -136,7 +133,7 @@ class DartLibraryLoader::DependencyWatcher {
   DependencyWatcher(const std::unordered_set<DartDependency*>& dependencies,
                     const ftl::Closure& callback)
       : dependencies_(dependencies), callback_(callback) {
-    DCHECK(!dependencies_.empty());
+    FTL_DCHECK(!dependencies_.empty());
   }
 
   bool DidResolveDependency(
@@ -212,8 +209,8 @@ DartLibraryLoader::~DartLibraryLoader() {}
 Dart_Handle DartLibraryLoader::HandleLibraryTag(Dart_LibraryTag tag,
                                                 Dart_Handle library,
                                                 Dart_Handle url) {
-  DCHECK(Dart_IsLibrary(library) || Dart_IsNull(library));
-  DCHECK(Dart_IsString(url));
+  FTL_DCHECK(Dart_IsLibrary(library) || Dart_IsNull(library));
+  FTL_DCHECK(Dart_IsString(url));
   if (tag == Dart_kCanonicalizeUrl) {
     return DartState::Current()->library_loader().CanonicalizeURL(library, url);
   }
@@ -226,7 +223,7 @@ Dart_Handle DartLibraryLoader::HandleLibraryTag(Dart_LibraryTag tag,
   if (tag == Dart_kScriptTag) {
     return DartIsolateReloader::HandleLibraryTag(tag, library, url);
   }
-  DCHECK(false);
+  FTL_NOTREACHED();
   return Dart_NewApiError("Unknown library tag.");
 }
 
