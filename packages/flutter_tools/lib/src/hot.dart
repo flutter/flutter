@@ -45,10 +45,7 @@ class HotRunner extends ResidentRunner {
   final AssetBundle bundle = new AssetBundle();
 
   @override
-  Future<int> run({
-    Completer<int> observatoryPortCompleter,
-    String route
-  }) {
+  Future<int> run({ Completer<int> observatoryPortCompleter, String route }) {
     // Don't let uncaught errors kill the process.
     return runZoned(() {
       return _run(

@@ -344,7 +344,7 @@ class AppDomain extends Domain {
     _sendAppEvent(app, 'start', <String, dynamic>{
       'deviceId': deviceId,
       'directory': projectDirectory,
-      'supportsRestart': device.supportsRestart
+      'supportsRestart': device.supportsRestart && hotMode
     });
 
     Completer<int> observatoryPortCompleter;

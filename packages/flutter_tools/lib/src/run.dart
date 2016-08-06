@@ -21,7 +21,9 @@ class RunAndStayResident extends ResidentRunner {
     Device device, {
     String target,
     DebuggingOptions debuggingOptions,
-    bool usesTerminalUI: true
+    bool usesTerminalUI: true,
+    this.traceStartup: false,
+    this.benchmark: false
   }) : super(device,
              target: target,
              debuggingOptions: debuggingOptions,
@@ -30,14 +32,11 @@ class RunAndStayResident extends ResidentRunner {
   ApplicationPackage _package;
   String _mainPath;
   LaunchResult _result;
+  bool traceStartup;
+  bool benchmark;
 
   @override
-  Future<int> run({
-    bool traceStartup: false,
-    bool benchmark: false,
-    Completer<int> observatoryPortCompleter,
-    String route
-  }) {
+  Future<int> run({ Completer<int> observatoryPortCompleter, String route }) {
     // Don't let uncaught errors kill the process.
     return runZoned(() {
       return _run(
