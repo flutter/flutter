@@ -27,7 +27,7 @@ jsize JniArray::GetLength() {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -58,7 +58,7 @@ ftl::RefPtr<JniObjectArray> JniObjectArray::Create(const JniClass* clazz,
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return nullptr;
 }
 
@@ -75,7 +75,7 @@ ftl::RefPtr<JniObject> JniObjectArray::GetArrayElement(jsize index) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return nullptr;
 }
 
@@ -93,7 +93,7 @@ void JniObjectArray::SetArrayElement(jsize index, const JniObject* value) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 
@@ -117,7 +117,7 @@ ftl::RefPtr<JniBooleanArray> JniBooleanArray::Create(jsize length) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return nullptr;
 }
 
@@ -135,7 +135,7 @@ bool JniBooleanArray::GetArrayElement(jsize index) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return false;
 }
 
@@ -154,7 +154,7 @@ void JniBooleanArray::SetArrayElement(jsize index, bool value) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 
@@ -178,7 +178,7 @@ ftl::RefPtr<JniByteArray> JniByteArray::Create(jsize length) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return nullptr;
 }
 
@@ -196,7 +196,7 @@ int64_t JniByteArray::GetArrayElement(jsize index) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return false;
 }
 
@@ -214,7 +214,7 @@ void JniByteArray::SetArrayElement(jsize index, int64_t value) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 
@@ -238,7 +238,7 @@ ftl::RefPtr<JniCharArray> JniCharArray::Create(jsize length) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return nullptr;
 }
 
@@ -256,7 +256,7 @@ int64_t JniCharArray::GetArrayElement(jsize index) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return false;
 }
 
@@ -274,7 +274,7 @@ void JniCharArray::SetArrayElement(jsize index, int64_t value) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 
@@ -298,7 +298,7 @@ ftl::RefPtr<JniShortArray> JniShortArray::Create(jsize length) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return nullptr;
 }
 
@@ -316,7 +316,7 @@ int64_t JniShortArray::GetArrayElement(jsize index) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return false;
 }
 
@@ -334,7 +334,7 @@ void JniShortArray::SetArrayElement(jsize index, int64_t value) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 
@@ -357,7 +357,7 @@ ftl::RefPtr<JniIntArray> JniIntArray::Create(jsize length) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return nullptr;
 }
 
@@ -375,7 +375,7 @@ int64_t JniIntArray::GetArrayElement(jsize index) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return false;
 }
 
@@ -393,7 +393,7 @@ void JniIntArray::SetArrayElement(jsize index, int64_t value) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 
@@ -417,7 +417,7 @@ ftl::RefPtr<JniLongArray> JniLongArray::Create(jsize length) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return nullptr;
 }
 
@@ -435,7 +435,7 @@ int64_t JniLongArray::GetArrayElement(jsize index) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return false;
 }
 
@@ -453,7 +453,7 @@ void JniLongArray::SetArrayElement(jsize index, int64_t value) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 
@@ -477,7 +477,7 @@ ftl::RefPtr<JniFloatArray> JniFloatArray::Create(jsize length) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return nullptr;
 }
 
@@ -495,7 +495,7 @@ double JniFloatArray::GetArrayElement(jsize index) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return false;
 }
 
@@ -513,7 +513,7 @@ void JniFloatArray::SetArrayElement(jsize index, double value) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 
@@ -537,7 +537,7 @@ ftl::RefPtr<JniDoubleArray> JniDoubleArray::Create(jsize length) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return nullptr;
 }
 
@@ -555,7 +555,7 @@ double JniDoubleArray::GetArrayElement(jsize index) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return false;
 }
 
@@ -572,7 +572,7 @@ void JniDoubleArray::SetArrayElement(jsize index, double value) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 

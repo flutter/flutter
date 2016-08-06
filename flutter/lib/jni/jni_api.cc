@@ -20,7 +20,7 @@ int64_t JniApi::FromReflectedField(const JniObject* field) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -36,7 +36,7 @@ int64_t JniApi::FromReflectedMethod(const JniObject* method) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 

@@ -7,7 +7,7 @@
 
 #include <unordered_set>
 
-#include "base/macros.h"
+#include "lib/ftl/macros.h"
 
 namespace blink {
 class DartLibraryLoader;
@@ -31,7 +31,7 @@ class DartDependencyCatcher {
   DartLibraryLoader& loader_;
   std::unordered_set<DartDependency*> dependencies_;
 
-  DISALLOW_COPY_AND_ASSIGN(DartDependencyCatcher);
+  FTL_DISALLOW_COPY_AND_ASSIGN(DartDependencyCatcher);
 };
 
 }  // namespace blink

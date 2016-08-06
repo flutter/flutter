@@ -8,7 +8,6 @@
 #include <jni.h>
 
 #include "base/android/jni_android.h"
-#include "base/memory/ref_counted.h"
 #include "lib/tonic/dart_wrappable.h"
 
 namespace blink {

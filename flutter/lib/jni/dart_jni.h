@@ -9,17 +9,16 @@
 
 #include "base/android/jni_android.h"
 #include "base/android/jni_utils.h"
-#include "base/memory/ref_counted.h"
 #include "lib/tonic/dart_library_natives.h"
 #include "lib/tonic/dart_wrappable.h"
 
-#define ENTER_JNI()                                                            \
-  JNIEnv* env = base::android::AttachCurrentThread();                          \
+#define ENTER_JNI()                                   \
+  JNIEnv* env = base::android::AttachCurrentThread(); \
   base::android::ScopedJavaLocalFrame java_frame(env);
 
 namespace blink {
 
-bool CheckJniException(JNIEnv* env, Dart_Handle *exception);
+bool CheckJniException(JNIEnv* env, Dart_Handle* exception);
 bool CheckDartException(Dart_Handle result, Dart_Handle* exception);
 
 // Data cached for each Dart isolate.
@@ -37,12 +36,13 @@ class DartJni {
   static bool InitJni();
   static void OnThreadExit();
 
-  static base::android::ScopedJavaLocalRef<jclass> GetClass(
-      JNIEnv* env, const char* name);
+  static base::android::ScopedJavaLocalRef<jclass> GetClass(JNIEnv* env,
+                                                            const char* name);
 
   static std::string GetObjectClassName(JNIEnv* env, jobject obj);
 
-  static jstring DartToJavaString(JNIEnv* env, Dart_Handle dart_string,
+  static jstring DartToJavaString(JNIEnv* env,
+                                  Dart_Handle dart_string,
                                   Dart_Handle* exception);
 
   static jobject class_loader();
@@ -66,7 +66,7 @@ class JniMethodArgs {
   std::vector<jvalue> jvalues_;
 };
 
-} // namespace blink
+}  // namespace blink
 
 namespace tonic {
 

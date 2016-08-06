@@ -77,7 +77,7 @@ ftl::RefPtr<JniClass> JniObject::GetObjectClass() {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return nullptr;
 }
 
@@ -94,7 +94,7 @@ ftl::RefPtr<JniObject> JniObject::GetObjectField(jfieldID fieldId) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return nullptr;
 }
 
@@ -111,7 +111,7 @@ bool JniObject::GetBooleanField(jfieldID fieldId) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return false;
 }
 
@@ -128,7 +128,7 @@ int64_t JniObject::GetByteField(jfieldID fieldId) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -145,7 +145,7 @@ int64_t JniObject::GetCharField(jfieldID fieldId) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -162,7 +162,7 @@ int64_t JniObject::GetShortField(jfieldID fieldId) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -179,7 +179,7 @@ int64_t JniObject::GetIntField(jfieldID fieldId) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -196,7 +196,7 @@ int64_t JniObject::GetLongField(jfieldID fieldId) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -213,7 +213,7 @@ double JniObject::GetFloatField(jfieldID fieldId) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -230,7 +230,7 @@ double JniObject::GetDoubleField(jfieldID fieldId) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -248,7 +248,7 @@ void JniObject::SetObjectField(jfieldID fieldId, const JniObject* value) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 
@@ -265,7 +265,7 @@ void JniObject::SetBooleanField(jfieldID fieldId, bool value) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 
@@ -282,7 +282,7 @@ void JniObject::SetByteField(jfieldID fieldId, int64_t value) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 
@@ -299,7 +299,7 @@ void JniObject::SetCharField(jfieldID fieldId, int64_t value) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 
@@ -316,7 +316,7 @@ void JniObject::SetShortField(jfieldID fieldId, int64_t value) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 
@@ -333,7 +333,7 @@ void JniObject::SetIntField(jfieldID fieldId, int64_t value) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 
@@ -350,7 +350,7 @@ void JniObject::SetLongField(jfieldID fieldId, int64_t value) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 
@@ -367,7 +367,7 @@ void JniObject::SetFloatField(jfieldID fieldId, double value) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 
@@ -384,7 +384,7 @@ void JniObject::SetDoubleField(jfieldID fieldId, double value) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 
@@ -409,7 +409,7 @@ ftl::RefPtr<JniObject> JniObject::CallObjectMethod(
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return nullptr;
 }
 
@@ -433,7 +433,7 @@ bool JniObject::CallBooleanMethod(jmethodID methodId,
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return false;
 }
 
@@ -457,7 +457,7 @@ int64_t JniObject::CallByteMethod(jmethodID methodId,
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -481,7 +481,7 @@ int64_t JniObject::CallCharMethod(jmethodID methodId,
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -505,7 +505,7 @@ int64_t JniObject::CallShortMethod(jmethodID methodId,
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -529,7 +529,7 @@ int64_t JniObject::CallIntMethod(jmethodID methodId,
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -553,7 +553,7 @@ int64_t JniObject::CallLongMethod(jmethodID methodId,
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -577,7 +577,7 @@ double JniObject::CallFloatMethod(jmethodID methodId,
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -601,7 +601,7 @@ double JniObject::CallDoubleMethod(jmethodID methodId,
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -624,7 +624,7 @@ void JniObject::CallVoidMethod(jmethodID methodId,
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 

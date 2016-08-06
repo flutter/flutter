@@ -30,7 +30,7 @@ ftl::RefPtr<JniString> JniString::Create(Dart_Handle dart_string) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return nullptr;
 }
 
@@ -54,7 +54,7 @@ Dart_Handle JniString::GetText() {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return Dart_Null();
 }
 

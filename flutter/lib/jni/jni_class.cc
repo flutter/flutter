@@ -33,7 +33,7 @@ ftl::RefPtr<JniClass> JniClass::FromName(const char* name) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return nullptr;
 }
 
@@ -56,7 +56,7 @@ ftl::RefPtr<JniClass> JniClass::FromClassObject(const JniObject* clazz) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return nullptr;
 }
 
@@ -73,7 +73,7 @@ intptr_t JniClass::GetFieldId(const char* name, const char* sig) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -90,7 +90,7 @@ intptr_t JniClass::GetStaticFieldId(const char* name, const char* sig) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -107,7 +107,7 @@ intptr_t JniClass::GetMethodId(const char* name, const char* sig) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -124,7 +124,7 @@ intptr_t JniClass::GetStaticMethodId(const char* name, const char* sig) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -148,7 +148,7 @@ ftl::RefPtr<JniObject> JniClass::NewObject(
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return nullptr;
 }
 
@@ -165,7 +165,7 @@ bool JniClass::IsAssignable(const JniClass* clazz) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return false;
 }
 
@@ -182,7 +182,7 @@ ftl::RefPtr<JniObject> JniClass::GetStaticObjectField(jfieldID fieldId) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return nullptr;
 }
 
@@ -199,7 +199,7 @@ bool JniClass::GetStaticBooleanField(jfieldID fieldId) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return false;
 }
 
@@ -216,7 +216,7 @@ int64_t JniClass::GetStaticByteField(jfieldID fieldId) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -233,7 +233,7 @@ int64_t JniClass::GetStaticCharField(jfieldID fieldId) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -250,7 +250,7 @@ int64_t JniClass::GetStaticShortField(jfieldID fieldId) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -267,7 +267,7 @@ int64_t JniClass::GetStaticIntField(jfieldID fieldId) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -284,7 +284,7 @@ int64_t JniClass::GetStaticLongField(jfieldID fieldId) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -301,7 +301,7 @@ double JniClass::GetStaticFloatField(jfieldID fieldId) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -318,7 +318,7 @@ double JniClass::GetStaticDoubleField(jfieldID fieldId) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -336,7 +336,7 @@ void JniClass::SetStaticObjectField(jfieldID fieldId, const JniObject* value) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 
@@ -354,7 +354,7 @@ void JniClass::SetStaticBooleanField(jfieldID fieldId, bool value) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 
@@ -371,7 +371,7 @@ void JniClass::SetStaticByteField(jfieldID fieldId, int64_t value) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 
@@ -388,7 +388,7 @@ void JniClass::SetStaticCharField(jfieldID fieldId, int64_t value) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 
@@ -405,7 +405,7 @@ void JniClass::SetStaticShortField(jfieldID fieldId, int64_t value) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 
@@ -422,7 +422,7 @@ void JniClass::SetStaticIntField(jfieldID fieldId, int64_t value) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 
@@ -439,7 +439,7 @@ void JniClass::SetStaticLongField(jfieldID fieldId, int64_t value) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 
@@ -456,7 +456,7 @@ void JniClass::SetStaticFloatField(jfieldID fieldId, double value) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 
@@ -473,7 +473,7 @@ void JniClass::SetStaticDoubleField(jfieldID fieldId, double value) {
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 
@@ -498,7 +498,7 @@ ftl::RefPtr<JniObject> JniClass::CallStaticObjectMethod(
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return nullptr;
 }
 
@@ -522,7 +522,7 @@ bool JniClass::CallStaticBooleanMethod(jmethodID methodId,
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return false;
 }
 
@@ -546,7 +546,7 @@ int64_t JniClass::CallStaticByteMethod(jmethodID methodId,
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -570,7 +570,7 @@ int64_t JniClass::CallStaticCharMethod(jmethodID methodId,
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -594,7 +594,7 @@ int64_t JniClass::CallStaticShortMethod(jmethodID methodId,
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -618,7 +618,7 @@ int64_t JniClass::CallStaticIntMethod(jmethodID methodId,
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -642,7 +642,7 @@ int64_t JniClass::CallStaticLongMethod(jmethodID methodId,
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -666,7 +666,7 @@ double JniClass::CallStaticFloatMethod(jmethodID methodId,
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -690,7 +690,7 @@ double JniClass::CallStaticDoubleMethod(jmethodID methodId,
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return 0;
 }
 
@@ -713,7 +713,7 @@ void JniClass::CallStaticVoidMethod(jmethodID methodId,
   }
 fail:
   Dart_ThrowException(exception);
-  NOTREACHED();
+  FTL_NOTREACHED();
   return;
 }
 

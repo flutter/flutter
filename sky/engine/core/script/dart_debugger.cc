@@ -7,7 +7,7 @@
 #include "dart/runtime/include/dart_api.h"
 #include "dart/runtime/include/dart_native_api.h"
 #include "dart/runtime/include/dart_tools_api.h"
-
+#include "lib/ftl/logging.h"
 
 namespace blink {
 
@@ -103,8 +103,7 @@ intptr_t DartDebugger::FindIsolateIndexById(Dart_IsolateId id) {
   return FindIsolateIndexByIdLocked(id);
 }
 
-intptr_t DartDebugger::FindIsolateIndexByIdLocked(
-      Dart_IsolateId id) {
+intptr_t DartDebugger::FindIsolateIndexByIdLocked(Dart_IsolateId id) {
   lock_->AssertAcquired();
   for (size_t i = 0; i < isolates_->size(); i++) {
     if ((*isolates_)[i]->id() == id) {
@@ -130,7 +129,7 @@ void DartDebugger::RemoveIsolate(Dart_IsolateId id) {
       return;
     }
   }
-  NOTREACHED();
+  FTL_NOTREACHED();
 }
 
 base::Lock* DartDebugger::lock_ = nullptr;
