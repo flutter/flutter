@@ -67,8 +67,8 @@ class DartLibraryLoader {
   Dart_Handle Import(Dart_Handle library, Dart_Handle url);
   Dart_Handle Source(Dart_Handle library, Dart_Handle url);
   Dart_Handle CanonicalizeURL(Dart_Handle library, Dart_Handle url);
-  void DidCompleteImportJob(ImportJob* job, const std::vector<uint8_t>& buffer);
-  void DidCompleteSourceJob(SourceJob* job, const std::vector<uint8_t>& buffer);
+  void DidCompleteImportJob(ImportJob* job, std::vector<char> buffer);
+  void DidCompleteSourceJob(SourceJob* job, std::vector<char> buffer);
   void DidFailJob(Job* job);
 
   DartState* dart_state_;

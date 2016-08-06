@@ -19,7 +19,6 @@
 #include "lib/tonic/logging/dart_invoke.h"
 #include "lib/tonic/scopes/dart_api_scope.h"
 #include "lib/tonic/scopes/dart_isolate_scope.h"
-#include "mojo/data_pipe_utils/data_pipe_utils.h"
 #include "mojo/public/cpp/system/data_pipe.h"
 #include "sky/engine/bindings/dart_mojo_internal.h"
 #include "sky/engine/bindings/dart_runtime_hooks.h"

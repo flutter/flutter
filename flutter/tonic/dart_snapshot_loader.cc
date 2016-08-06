@@ -26,7 +26,7 @@ void DartSnapshotLoader::LoadSnapshot(mojo::ScopedDataPipeConsumerHandle pipe,
                                       const ftl::Closure& callback) {
   TRACE_EVENT_ASYNC_BEGIN0("flutter", "DartSnapshotLoader::LoadSnapshot", this);
 
-  drain_job_.reset(new glue::DrainDataPipeJob(
+  drainer_.reset(new glue::DrainDataPipeJob(
       std::move(pipe), [this, callback](std::vector<char> buffer) {
         TRACE_EVENT_ASYNC_END0("flutter", "DartSnapshotLoader::LoadSnapshot",
                                this);

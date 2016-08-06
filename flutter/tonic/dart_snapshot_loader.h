@@ -25,7 +25,7 @@ class DartSnapshotLoader {
 
  private:
   ftl::WeakPtr<tonic::DartState> dart_state_;
-  std::unique_ptr<glue::DrainDataPipeJob> drain_job_;
+  std::unique_ptr<glue::DrainDataPipeJob> drainer_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(DartSnapshotLoader);
 };

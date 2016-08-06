@@ -297,7 +297,6 @@ source_set("platform") {
   deps = [
     "//base:base",
     "//mojo/application",
-    "//mojo/data_pipe_utils",
     "//mojo/environment:chromium",
     "//mojo/public/c/system",
     "//mojo/public/cpp/bindings",

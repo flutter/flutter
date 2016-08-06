@@ -10,6 +10,7 @@
 #include "flutter/tonic/dart_library_loader.h"
 #include "flutter/tonic/dart_library_provider.h"
 #include "flutter/tonic/dart_state.h"
+#include "glue/drain_data_pipe_job.h"
 #include "glue/thread.h"
 #include "lib/ftl/logging.h"
 #include "lib/ftl/synchronization/monitor.h"
@@ -17,9 +18,7 @@
 #include "lib/tonic/logging/dart_error.h"
 #include "lib/tonic/scopes/dart_api_scope.h"
 #include "lib/tonic/scopes/dart_isolate_scope.h"
-#include "mojo/data_pipe_utils/data_pipe_drainer.h"
 
-using mojo::common::DataPipeDrainer;
 using tonic::ToDart;
 using tonic::StdStringToDart;
 using tonic::StdStringFromDart;
@@ -35,7 +34,7 @@ class DartIsolateReloader::LoadResult {
              const std::string& url,
              const std::string& library_url,
              const std::string& resolved_url,
-             std::vector<uint8_t> payload)
+             std::vector<char> payload)
       : success_(true),
         tag_(tag),
         url_(url),
@@ -71,8 +70,8 @@ class DartIsolateReloader::LoadResult {
     if (!library_url_.empty()) {
       library = Dart_LookupLibrary(StdStringToDart(library_url_));
     }
-    Dart_Handle source =
-        Dart_NewStringFromUTF8(payload_.data(), payload_.size());
+    Dart_Handle source = Dart_NewStringFromUTF8(
+        reinterpret_cast<const uint8_t*>(payload_.data()), payload_.size());
     Dart_Handle result = Dart_Null();
     switch (tag_) {
       case Dart_kImportTag:
@@ -99,7 +98,7 @@ class DartIsolateReloader::LoadResult {
   std::string library_url_;
   std::string resolved_url_;
   std::string error_;
-  std::vector<uint8_t> payload_;
+  std::vector<char> payload_;
 };
 
 DartIsolateReloader::DartIsolateReloader(DartLibraryProvider* library_provider)
@@ -140,7 +139,7 @@ void DartIsolateReloader::PostResult(std::unique_ptr<LoadResult> load_result) {
 
 // As each source file is requested, a LoadRequest is queued to be processed on
 // worker thread.
-class DartIsolateReloader::LoadRequest : public DataPipeDrainer::Client {
+class DartIsolateReloader::LoadRequest {
  public:
   LoadRequest(DartLibraryProvider* library_provider,
               DartIsolateReloader* isolate_reloader,
@@ -163,30 +162,22 @@ class DartIsolateReloader::LoadRequest : public DataPipeDrainer::Client {
           new DartIsolateReloader::LoadResult(
               tag_, url_, library_url_,
               "File " + url_ + " could not be read."));
-      LOG(ERROR) << "Load failed for " << url_;
+      FTL_LOG(ERROR) << "Load failed for " << url_;
       isolate_reloader_->PostResult(std::move(result));
       // We are finished with this request.
       delete this;
       return;
     }
     resolved_url_ = std::move(resolved_url);
-    drainer_.reset(new DataPipeDrainer(this, std::move(handle)));
-  }
-
-  // DataPipeDrainer::Client
-  void OnDataAvailable(const void* data, size_t num_bytes) override {
-    const uint8_t* bytes = static_cast<const uint8_t*>(data);
-    buffer_.insert(buffer_.end(), bytes, bytes + num_bytes);
-  }
-
-  // DataPipeDrainer::Client
-  void OnDataComplete() override {
-    std::unique_ptr<DartIsolateReloader::LoadResult> result(
-        new DartIsolateReloader::LoadResult(tag_, url_, library_url_,
-                                            resolved_url_, std::move(buffer_)));
-    isolate_reloader_->PostResult(std::move(result));
-    // We are finished with this request.
-    delete this;
+    drainer_.reset(new glue::DrainDataPipeJob(
+        std::move(handle), [this](std::vector<char> buffer) {
+          std::unique_ptr<DartIsolateReloader::LoadResult> result(
+              new DartIsolateReloader::LoadResult(
+                  tag_, url_, library_url_, resolved_url_, std::move(buffer)));
+          isolate_reloader_->PostResult(std::move(result));
+          // We are finished with this request.
+          delete this;
+        }));
   }
 
  private:
@@ -196,7 +187,7 @@ class DartIsolateReloader::LoadRequest : public DataPipeDrainer::Client {
   std::string library_url_;
   std::string resolved_url_;
   std::vector<uint8_t> buffer_;
-  std::unique_ptr<DataPipeDrainer> drainer_;
+  std::unique_ptr<glue::DrainDataPipeJob> drainer_;
 };
 
 void DartIsolateReloader::RequestTask(DartLibraryProvider* library_provider,

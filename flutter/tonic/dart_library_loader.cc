@@ -10,17 +10,16 @@
 #include "flutter/tonic/dart_isolate_reloader.h"
 #include "flutter/tonic/dart_library_provider.h"
 #include "flutter/tonic/dart_state.h"
+#include "glue/drain_data_pipe_job.h"
 #include "glue/trace_event.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_persistent_value.h"
 #include "lib/tonic/logging/dart_error.h"
 #include "lib/tonic/scopes/dart_api_scope.h"
 #include "lib/tonic/scopes/dart_isolate_scope.h"
-#include "mojo/data_pipe_utils/data_pipe_drainer.h"
 
-using mojo::common::DataPipeDrainer;
 using tonic::StdStringFromDart;
-using tonic::StdStringToDart;
+using tonic::ToDart;
 
 namespace blink {
 
@@ -33,13 +32,13 @@ void EraseUniquePtr(C& container, T* item) {
   container.erase(key);
   key.release();
 }
-}
+
+}  // namespace
 
 // A DartLibraryLoader::Job represents a network load. It fetches data from the
 // network and buffers the data in std::vector. To cancel the job, delete this
 // object.
-class DartLibraryLoader::Job : public DartDependency,
-                               public DataPipeDrainer::Client {
+class DartLibraryLoader::Job : public DartDependency {
  public:
   Job(DartLibraryLoader* loader, const std::string& name)
       : loader_(loader), name_(name) {
@@ -48,13 +47,12 @@ class DartLibraryLoader::Job : public DartDependency,
   }
 
   const std::string& name() const { return name_; }
-
   const std::string& resolved_url() const { return resolved_url_; }
 
  protected:
   DartLibraryLoader* loader_;
-  // TODO(abarth): Should we be using SharedBuffer to buffer the data?
-  std::vector<uint8_t> buffer_;
+
+  virtual void OnDataAvailable(std::vector<char> buffer) = 0;
 
  private:
   void OnStreamAvailable(mojo::ScopedDataPipeConsumerHandle pipe,
@@ -64,20 +62,15 @@ class DartLibraryLoader::Job : public DartDependency,
       return;
     }
     resolved_url_ = resolved_url;
-    drainer_ = std::unique_ptr<DataPipeDrainer>(
-        new DataPipeDrainer(this, pipe.Pass()));
+    drainer_.reset(new glue::DrainDataPipeJob(
+        std::move(pipe), [this](std::vector<char> buffer) {
+          OnDataAvailable(std::move(buffer));
+        }));
   }
-
-  // DataPipeDrainer::Client
-  void OnDataAvailable(const void* data, size_t num_bytes) override {
-    const uint8_t* bytes = static_cast<const uint8_t*>(data);
-    buffer_.insert(buffer_.end(), bytes, bytes + num_bytes);
-  }
-  // Subclasses must implement OnDataComplete.
 
   std::string name_;
   std::string resolved_url_;
-  std::unique_ptr<DataPipeDrainer> drainer_;
+  std::unique_ptr<glue::DrainDataPipeJob> drainer_;
 };
 
 class DartLibraryLoader::ImportJob : public Job {
@@ -93,10 +86,9 @@ class DartLibraryLoader::ImportJob : public Job {
   bool should_load_as_script() const { return should_load_as_script_; }
 
  private:
-  // DataPipeDrainer::Client
-  void OnDataComplete() override {
+  void OnDataAvailable(std::vector<char> buffer) override {
     TRACE_EVENT_ASYNC_END0("flutter", "DartLibraryLoader::ImportJob", this);
-    loader_->DidCompleteImportJob(this, buffer_);
+    loader_->DidCompleteImportJob(this, std::move(buffer));
   }
 
   bool should_load_as_script_;
@@ -115,10 +107,9 @@ class DartLibraryLoader::SourceJob : public Job {
   Dart_PersistentHandle library() const { return library_.value(); }
 
  private:
-  // DataPipeDrainer::Client
-  void OnDataComplete() override {
+  void OnDataAvailable(std::vector<char> buffer) override {
     TRACE_EVENT_ASYNC_END0("flutter", "DartLibraryLoader::SourceJob", this);
-    loader_->DidCompleteSourceJob(this, buffer_);
+    loader_->DidCompleteSourceJob(this, std::move(buffer));
   }
 
   tonic::DartPersistentValue library_;
@@ -281,50 +272,49 @@ Dart_Handle DartLibraryLoader::CanonicalizeURL(Dart_Handle library,
   return library_provider_->CanonicalizeURL(library, url);
 }
 
-void DartLibraryLoader::DidCompleteImportJob(
-    ImportJob* job,
-    const std::vector<uint8_t>& buffer) {
+void DartLibraryLoader::DidCompleteImportJob(ImportJob* job,
+                                             std::vector<char> buffer) {
   tonic::DartIsolateScope scope(dart_state_->isolate());
   tonic::DartApiScope api_scope;
 
   WatcherSignaler watcher_signaler(*this, job);
 
   Dart_Handle result;
+  Dart_Handle source = Dart_NewStringFromUTF8(
+      reinterpret_cast<const uint8_t*>(buffer.data()), buffer.size());
 
   if (job->should_load_as_script()) {
-    result = Dart_LoadScript(
-        StdStringToDart(job->name()), StdStringToDart(job->resolved_url()),
-        Dart_NewStringFromUTF8(buffer.data(), buffer.size()), 0, 0);
+    result = Dart_LoadScript(ToDart(job->name()), ToDart(job->resolved_url()),
+                             source, 0, 0);
   } else {
-    result = Dart_LoadLibrary(
-        StdStringToDart(job->name()), StdStringToDart(job->resolved_url()),
-        Dart_NewStringFromUTF8(buffer.data(), buffer.size()), 0, 0);
+    result = Dart_LoadLibrary(ToDart(job->name()), ToDart(job->resolved_url()),
+                              source, 0, 0);
   }
   if (Dart_IsError(result)) {
-    LOG(ERROR) << "Error Loading " << job->name() << " "
-               << Dart_GetError(result);
+    FTL_LOG(ERROR) << "Error Loading " << job->name() << " "
+                   << Dart_GetError(result);
   }
 
   pending_libraries_.erase(job->name());
   EraseUniquePtr<Job>(jobs_, job);
 }
 
-void DartLibraryLoader::DidCompleteSourceJob(
-    SourceJob* job,
-    const std::vector<uint8_t>& buffer) {
+void DartLibraryLoader::DidCompleteSourceJob(SourceJob* job,
+                                             std::vector<char> buffer) {
   tonic::DartIsolateScope scope(dart_state_->isolate());
   tonic::DartApiScope api_scope;
 
   WatcherSignaler watcher_signaler(*this, job);
 
+  Dart_Handle source = Dart_NewStringFromUTF8(
+      reinterpret_cast<const uint8_t*>(buffer.data()), buffer.size());
   Dart_Handle result = Dart_LoadSource(
-      Dart_HandleFromPersistent(job->library()), StdStringToDart(job->name()),
-      StdStringToDart(job->resolved_url()),
-      Dart_NewStringFromUTF8(buffer.data(), buffer.size()), 0, 0);
+      Dart_HandleFromPersistent(job->library()), ToDart(job->name()),
+      ToDart(job->resolved_url()), source, 0, 0);
 
   if (Dart_IsError(result)) {
-    LOG(ERROR) << "Error Loading " << job->name() << " "
-               << Dart_GetError(result);
+    FTL_LOG(ERROR) << "Error Loading " << job->name() << " "
+                   << Dart_GetError(result);
   }
 
   EraseUniquePtr<Job>(jobs_, job);
@@ -336,7 +326,7 @@ void DartLibraryLoader::DidFailJob(Job* job) {
 
   WatcherSignaler watcher_signaler(*this, job);
 
-  LOG(ERROR) << "Library Load failed: " << job->name();
+  FTL_LOG(ERROR) << "Library Load failed: " << job->name();
   // TODO(eseidel): Call Dart_LibraryHandleError in the SourceJob case?
 
   EraseUniquePtr<Job>(jobs_, job);
