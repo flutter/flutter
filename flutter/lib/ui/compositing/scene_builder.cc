@@ -200,7 +200,7 @@ ftl::RefPtr<Scene> SceneBuilder::build() {
   m_currentRasterizerTracingThreshold = 0;
   ftl::RefPtr<Scene> scene = Scene::create(std::move(m_rootLayer), threshold);
   ClearDartWrapper();
-  return std::move(scene);
+  return scene;
 }
 
 }  // namespace blink

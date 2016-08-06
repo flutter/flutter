@@ -56,7 +56,7 @@ ftl::RefPtr<Picture> PictureRecorder::endRecording() {
   canvas_->ClearDartWrapper();
   canvas_ = nullptr;
   ClearDartWrapper();
-  return std::move(picture);
+  return picture;
 }
 
 }  // namespace blink

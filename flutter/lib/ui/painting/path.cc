@@ -189,14 +189,14 @@ bool CanvasPath::contains(double x, double y) {
 ftl::RefPtr<CanvasPath> CanvasPath::shift(double dx, double dy) {
   ftl::RefPtr<CanvasPath> path = CanvasPath::Create();
   path_.offset(dx, dy, &path->path_);
-  return std::move(path);
+  return path;
 }
 
 ftl::RefPtr<CanvasPath> CanvasPath::transform(
     const tonic::Float64List& matrix4) {
   ftl::RefPtr<CanvasPath> path = CanvasPath::Create();
   path_.transform(ToSkMatrix(matrix4), &path->path_);
-  return std::move(path);
+  return path;
 }
 
 }  // namespace blink
