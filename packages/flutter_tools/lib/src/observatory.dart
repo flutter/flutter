@@ -13,7 +13,7 @@ import 'globals.dart';
 
 // TODO(johnmccutchan): Rename this class to ServiceProtocol or VmService.
 class Observatory {
-  Observatory._(this.peer, this.port) {
+  Observatory._(this.peer, this.port, this.httpAddress) {
     peer.registerMethod('streamNotify', (rpc.Parameters event) {
       _handleStreamNotify(event.asMap);
     });
@@ -33,9 +33,10 @@ class Observatory {
     WebSocket ws = await WebSocket.connect(uri.toString());
     rpc.Peer peer = new rpc.Peer(new IOWebSocketChannel(ws));
     peer.listen();
-    return new Observatory._(peer, port);
+    Uri httpAddress = new Uri(scheme: 'http', host: '127.0.0.1', port: port);
+    return new Observatory._(peer, port, httpAddress);
   }
-
+  final Uri httpAddress;
   final rpc.Peer peer;
   final int port;
 

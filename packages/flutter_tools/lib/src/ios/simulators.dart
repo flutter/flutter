@@ -363,7 +363,7 @@ class IOSSimulator extends Device {
   bool get supportsHotMode => true;
 
   @override
-  bool get needsDevFS => false;
+  bool get needsDevFS => true;
 
   _IOSSimulatorLogReader _logReader;
   _IOSSimulatorDevicePortForwarder _portForwarder;
