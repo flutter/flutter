@@ -45,8 +45,6 @@ class PlatformView {
 
   void SetupResourceContextOnIOThread();
 
-  static base::ThreadLocalStorage::StaticSlot ResourceContext;
-
   virtual ~PlatformView();
 
   void ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request);
@@ -71,9 +69,7 @@ class PlatformView {
 
   virtual void Resize(const SkISize& size);
 
-  Engine& engine() {
-    return *engine_;
-  }
+  Engine& engine() { return *engine_; }
 
  protected:
   Config config_;

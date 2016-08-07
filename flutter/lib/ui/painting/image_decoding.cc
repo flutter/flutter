@@ -6,20 +6,22 @@
 
 #include "flow/texture_image.h"
 #include "flutter/lib/ui/painting/image.h"
+#include "flutter/lib/ui/painting/resource_context.h"
 #include "glue/drain_data_pipe_job.h"
 #include "glue/movable_wrapper.h"
 #include "glue/trace_event.h"
+#include "lib/ftl/tasks/task_runner.h"
 #include "lib/tonic/dart_persistent_value.h"
 #include "lib/tonic/logging/dart_invoke.h"
 #include "lib/tonic/mojo_converter.h"
 #include "lib/tonic/typed_data/uint8_list.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
-#include "sky/shell/platform_view.h"
 #include "third_party/skia/include/core/SkImageGenerator.h"
 
 using tonic::DartInvoke;
 using tonic::DartPersistentValue;
+using tonic::DartState;
 using tonic::ToDart;
 
 namespace blink {
@@ -45,11 +47,10 @@ sk_sp<SkImage> DecodeImage(std::vector<char> buffer) {
     return nullptr;
   }
 
-  auto context = reinterpret_cast<GrContext*>(
-      sky::shell::PlatformView::ResourceContext.Get());
+  GrContext* context = ResourceContext::Get();
 
   // First, try to create a texture image from the generator.
-  if (auto image = flow::TextureImageCreate(context, *generator)) {
+  if (sk_sp<SkImage> image = flow::TextureImageCreate(context, *generator)) {
     return image;
   }
 

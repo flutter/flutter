@@ -52,6 +52,7 @@ source_set("common") {
     "//build/config/sanitizers:deps",
     "//dart/runtime:libdart",
     "//flow",
+    "//flutter/lib/ui",
     "//flutter/tonic",
     "//glue",
     "//lib/ftl",

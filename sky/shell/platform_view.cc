@@ -4,10 +4,11 @@
 
 #include "sky/shell/platform_view.h"
 
-#include "base/bind.h"
 #include "base/bind_helpers.h"
+#include "base/bind.h"
 #include "base/location.h"
 #include "base/single_thread_task_runner.h"
+#include "flutter/lib/ui/painting/resource_context.h"
 #include "sky/shell/rasterizer.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
 
@@ -20,11 +21,6 @@ PlatformView::Config::~Config() = default;
 
 PlatformView::PlatformView()
     : rasterizer_(Rasterizer::Create()), size_(SkISize::Make(0, 0)) {
-  if (!ResourceContext.initialized()) {
-    ResourceContext.Initialize(
-        [](void* context) { delete reinterpret_cast<GrContext*>(context); });
-  }
-
   Shell& shell = Shell::Shared();
 
   // Create the engine for this platform view.
@@ -64,10 +60,8 @@ void PlatformView::ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request) {
                             base::Passed(&request)));
   Shell& shell = Shell::Shared();
   shell.ui_task_runner()->PostTask(
-      FROM_HERE,
-      base::Bind(&Shell::AddPlatformView,
-                 base::Unretained(&shell),
-                 GetWeakViewPtr()));
+      FROM_HERE, base::Bind(&Shell::AddPlatformView, base::Unretained(&shell),
+                            GetWeakViewPtr()));
 }
 
 void PlatformView::NotifyCreated() {
@@ -131,12 +125,9 @@ void PlatformView::SetupResourceContextOnIOThread() {
   latch.Wait();
 }
 
-base::ThreadLocalStorage::StaticSlot PlatformView::ResourceContext =
-    TLS_INITIALIZER;
-
 void PlatformView::SetupResourceContextOnIOThreadPerform(
     base::WaitableEvent* latch) {
-  if (ResourceContext.Get() != nullptr) {
+  if (blink::ResourceContext::Get() != nullptr) {
     // The resource context was already setup. This could happen if platforms
     // try to setup a context multiple times, or, if there are multiple platform
     // views. In any case, there is nothing else to do. So just signal the
@@ -152,7 +143,7 @@ void PlatformView::SetupResourceContextOnIOThreadPerform(
         << "WARNING: Could not setup an OpenGL context on the resource loader.";
   }
 
-  ResourceContext.Set(GrContext::Create(
+  blink::ResourceContext::Set(GrContext::Create(
       GrBackend::kOpenGL_GrBackend,
       reinterpret_cast<GrBackendContext>(GrGLCreateNativeInterface())));
 

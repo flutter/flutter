@@ -24,15 +24,13 @@ source_set("tonic") {
 
   deps = [
     "//dart/runtime/bin:embedded_dart_io",
+    "//glue",
     "//mojo/public/cpp/system",
   ]
 
   public_deps = [
     "//dart/runtime:libdart",
     "//dart/runtime/vm:libdart_platform",
-    "//lib/tonic/converter",
-    "//lib/tonic/logging",
-    "//lib/tonic/scopes",
-    "//lib/tonic/typed_data",
+    "//lib/tonic",
   ]
 }
