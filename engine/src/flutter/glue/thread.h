@@ -5,6 +5,8 @@
 #ifndef GLUE_THREAD_H_
 #define GLUE_THREAD_H_
 
+#include <memory>
+
 #include "lib/ftl/tasks/task_runner.h"
 
 namespace glue {
