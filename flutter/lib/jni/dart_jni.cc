@@ -15,7 +15,6 @@
 #include "lib/tonic/dart_args.h"
 #include "lib/tonic/dart_binding_macros.h"
 #include "lib/tonic/converter/dart_converter.h"
-#include "sky/engine/bindings/flutter_dart_state.h"
 
 namespace blink {
 

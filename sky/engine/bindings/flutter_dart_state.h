@@ -9,6 +9,7 @@
 
 #include "dart/runtime/include/dart_api.h"
 #include "flutter/tonic/dart_state.h"
+#include "lib/ftl/build_config.h"
 #include "lib/tonic/dart_persistent_value.h"
 
 namespace blink {
