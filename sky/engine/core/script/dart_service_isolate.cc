@@ -4,6 +4,8 @@
 
 #include "dart_service_isolate.h"
 
+#include <string.h>
+
 #include "dart/runtime/include/dart_api.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/logging/dart_error.h"
