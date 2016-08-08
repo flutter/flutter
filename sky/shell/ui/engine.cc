@@ -7,16 +7,15 @@
 #include "base/bind.h"
 #include "base/files/file_path.h"
 #include "base/files/file_util.h"
-#include "base/threading/worker_pool.h"
 #include "base/time/time.h"
 #include "base/trace_event/trace_event.h"
-#include "mojo/data_pipe_utils/data_pipe_utils.h"
+#include "flutter/assets/directory_asset_bundle.h"
+#include "flutter/assets/zip_asset_bundle.h"
 #include "mojo/public/cpp/application/connect.h"
-#include "services/asset_bundle/zip_asset_bundle.h"
 #include "sky/engine/bindings/mojo_services.h"
 #include "sky/engine/core/script/dart_init.h"
-#include "sky/engine/core/script/directory_asset_bundle.h"
 #include "sky/engine/core/script/ui_dart_state.h"
+#include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/public/web/Sky.h"
 #include "sky/shell/dart/dart_library_provider_files.h"
 #include "sky/shell/shell.h"
@@ -33,9 +32,6 @@ namespace {
 PlatformImpl* g_platform_impl = nullptr;
 
 }  // namespace
-
-using mojo::asset_bundle::ZipAssetBundle;
-using mojo::asset_bundle::ZipAssetService;
 
 Engine::Config::Config() {}
 
@@ -74,8 +70,7 @@ void Engine::RunFromSource(const std::string& main,
                            const std::string& assets_directory) {
   TRACE_EVENT0("flutter", "Engine::RunFromSource");
   // Assets.
-  base::FilePath assets_directory_path = base::FilePath(assets_directory);
-  ConfigureDirectoryAssetBundle(assets_directory_path);
+  ConfigureDirectoryAssetBundle(assets_directory);
   // .packages.
   base::FilePath packages_path = base::FilePath(std::string(packages));
   if (packages_path.empty()) {
@@ -198,14 +193,17 @@ void Engine::RunFromSnapshotStream(
 }
 
 void Engine::ConfigureZipAssetBundle(const mojo::String& path) {
-  zip_asset_bundle_ = new ZipAssetBundle(base::FilePath(std::string{path}),
-                                         base::WorkerPool::GetTaskRunner(true));
-  ZipAssetService::Create(mojo::GetProxy(&root_bundle_), zip_asset_bundle_);
+  asset_store_ = ftl::MakeRefCounted<blink::ZipAssetStore>(
+      path.get(), ftl::RefPtr<ftl::TaskRunner>(
+                      blink::Platform::current()->GetIOTaskRunner()));
+  new blink::ZipAssetBundle(mojo::GetProxy(&root_bundle_), asset_store_);
 }
 
-void Engine::ConfigureDirectoryAssetBundle(const base::FilePath& path) {
-  blink::DirectoryAssetBundleService::Create(
-      mojo::GetProxy(&root_bundle_), path);
+void Engine::ConfigureDirectoryAssetBundle(const std::string& path) {
+  new blink::DirectoryAssetBundle(
+      mojo::GetProxy(&root_bundle_), path,
+      ftl::RefPtr<ftl::TaskRunner>(
+          blink::Platform::current()->GetIOTaskRunner()));
 }
 
 void Engine::RunFromPrecompiledSnapshot(const mojo::String& bundle_path) {
@@ -267,10 +265,7 @@ void Engine::RunFromBundleAndSnapshot(const mojo::String& script_uri,
 
   ConfigureZipAssetBundle(bundle_path);
 
-  std::string snapshot_path_str = snapshot_path;
-  zip_asset_bundle_->AddOverlayFile(blink::kSnapshotAssetKey,
-                                    base::FilePath(snapshot_path_str));
-
+  asset_store_->AddOverlayFile(blink::kSnapshotAssetKey, snapshot_path);
   root_bundle_->GetAsStream(blink::kSnapshotAssetKey,
                             base::Bind(&Engine::RunFromSnapshotStream,
                                        weak_factory_.GetWeakPtr(), script_uri));
@@ -314,9 +309,8 @@ void Engine::DidCreateMainIsolate(Dart_Isolate isolate) {
                               services_from_embedder.Pass(),
                               root_bundle_.Pass());
 
-  if (zip_asset_bundle_) {
-    FlutterFontSelector::install(zip_asset_bundle_);
-  }
+  if (asset_store_)
+    FlutterFontSelector::Install(asset_store_);
 }
 
 void Engine::DidCreateSecondaryIsolate(Dart_Isolate isolate) {

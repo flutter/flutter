@@ -8,15 +8,10 @@
 #include <unordered_map>
 #include <vector>
 
+#include "flutter/assets/zip_asset_store.h"
 #include "sky/engine/platform/fonts/FontCacheKey.h"
 #include "sky/engine/platform/fonts/FontSelector.h"
 #include "sky/engine/platform/fonts/SimpleFontData.h"
-
-namespace mojo {
-namespace asset_bundle {
-class ZipAssetBundle;
-}
-}
 
 namespace sky {
 namespace shell {
@@ -29,8 +24,7 @@ class FlutterFontSelector : public blink::FontSelector {
 
   ~FlutterFontSelector() override;
 
-  static void install(
-      const scoped_refptr<mojo::asset_bundle::ZipAssetBundle>& zip_asset_bundle);
+  static void Install(ftl::RefPtr<blink::ZipAssetStore> asset_store);
 
   PassRefPtr<blink::FontData> getFontData(
       const blink::FontDescription& font_description,
@@ -47,8 +41,7 @@ class FlutterFontSelector : public blink::FontSelector {
  private:
   struct TypefaceAsset;
 
-  FlutterFontSelector(
-      const scoped_refptr<mojo::asset_bundle::ZipAssetBundle>& zip_asset_bundle);
+  FlutterFontSelector(ftl::RefPtr<blink::ZipAssetStore> asset_store);
 
   void parseFontManifest();
 
@@ -56,15 +49,17 @@ class FlutterFontSelector : public blink::FontSelector {
       const blink::FontDescription& font_description,
       const AtomicString& family_name);
 
-  scoped_refptr<mojo::asset_bundle::ZipAssetBundle> zip_asset_bundle_;
+  ftl::RefPtr<blink::ZipAssetStore> asset_store_;
 
   HashMap<AtomicString, std::vector<FlutterFontAttributes>> font_family_map_;
 
   std::unordered_map<std::string, std::unique_ptr<TypefaceAsset>>
       typeface_cache_;
 
-  typedef HashMap<blink::FontCacheKey, RefPtr<blink::SimpleFontData>,
-                  blink::FontCacheKeyHash, blink::FontCacheKeyTraits>
+  typedef HashMap<blink::FontCacheKey,
+                  RefPtr<blink::SimpleFontData>,
+                  blink::FontCacheKeyHash,
+                  blink::FontCacheKeyTraits>
       FontPlatformDataCache;
 
   FontPlatformDataCache font_platform_data_cache_;

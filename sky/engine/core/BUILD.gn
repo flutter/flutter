@@ -76,16 +76,15 @@ static_library("core") {
     ":generate_sky_embedder_service_isolate_resources_cc",
     ":libraries",
     ":prerequisites",
-    "//services/asset_bundle:lib",
-    "//sky/engine/platform",
+    "//dart/runtime:libdart",
+    "//dart/runtime/bin:embedded_dart_io",
+    "//dart/runtime/vm:libdart_platform",
+    "//flutter/assets",
+    "//mojo/services/navigation/interfaces",
     "//sky/engine/bindings",
+    "//sky/engine/platform",
     "//sky/services/engine:interfaces",
     "//sky/services/pointer:interfaces",
-    "//dart/runtime/bin:embedded_dart_io",
-    "//dart/runtime:libdart",
-    "//dart/runtime/vm:libdart_platform",
-    "//mojo/services/asset_bundle/interfaces:interfaces",
-    "//mojo/services/navigation/interfaces",
   ]
 
   if (!flutter_product_mode) {

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "base/values.h"
 #include "base/json/json_reader.h"
-#include "services/asset_bundle/zip_asset_bundle.h"
+#include "base/values.h"
+#include "flutter/assets/zip_asset_store.h"
 #include "sky/engine/core/script/ui_dart_state.h"
 #include "sky/engine/platform/fonts/FontData.h"
 #include "sky/engine/platform/fonts/FontFaceCreationParams.h"
@@ -30,7 +30,6 @@ using blink::FontPlatformData;
 using blink::FontStyle;
 using blink::FontWeight;
 using blink::SimpleFontData;
-using mojo::asset_bundle::ZipAssetBundle;
 
 // Style attributes of a Flutter font asset.
 struct FlutterFontSelector::FlutterFontAttributes {
@@ -93,17 +92,17 @@ struct FontMatcher {
 };
 }
 
-void FlutterFontSelector::install(
-    const scoped_refptr<ZipAssetBundle>& zip_asset_bundle) {
+void FlutterFontSelector::Install(
+    ftl::RefPtr<blink::ZipAssetStore> asset_store) {
   RefPtr<FlutterFontSelector> font_selector =
-      adoptRef(new FlutterFontSelector(zip_asset_bundle));
+      adoptRef(new FlutterFontSelector(std::move(asset_store)));
   font_selector->parseFontManifest();
   blink::UIDartState::Current()->set_font_selector(font_selector);
 }
 
 FlutterFontSelector::FlutterFontSelector(
-    const scoped_refptr<ZipAssetBundle>& zip_asset_bundle)
-    : zip_asset_bundle_(zip_asset_bundle) {}
+    ftl::RefPtr<blink::ZipAssetStore> asset_store)
+    : asset_store_(std::move(asset_store)) {}
 
 FlutterFontSelector::~FlutterFontSelector() {}
 
@@ -121,8 +120,7 @@ FlutterFontSelector::FlutterFontAttributes::~FlutterFontAttributes() {}
 
 void FlutterFontSelector::parseFontManifest() {
   std::vector<uint8_t> font_manifest_data;
-  if (!zip_asset_bundle_->GetAsBuffer(kFontManifestAssetPath,
-                                      &font_manifest_data))
+  if (!asset_store_->GetAsBuffer(kFontManifestAssetPath, &font_manifest_data))
     return;
 
   base::StringPiece font_manifest_str(
@@ -236,7 +234,7 @@ sk_sp<SkTypeface> FlutterFontSelector::getTypefaceAsset(
   }
 
   std::unique_ptr<TypefaceAsset> typeface_asset(new TypefaceAsset);
-  if (!zip_asset_bundle_->GetAsBuffer(asset_path, &typeface_asset->data)) {
+  if (!asset_store_->GetAsBuffer(asset_path, &typeface_asset->data)) {
     typeface_cache_.insert(std::make_pair(asset_path, nullptr));
     return nullptr;
   }

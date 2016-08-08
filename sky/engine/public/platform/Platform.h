@@ -66,8 +66,8 @@ class Platform {
   // Returns a value such as "en-US".
   virtual std::string defaultLocale() { return std::string(); }
 
-  virtual ftl::TaskRunner* GetUITaskRunner() { return 0; }
-  virtual ftl::TaskRunner* GetIOTaskRunner() { return 0; }
+  virtual ftl::TaskRunner* GetUITaskRunner() { return nullptr; }
+  virtual ftl::TaskRunner* GetIOTaskRunner() { return nullptr; }
 
  protected:
   virtual ~Platform() {}

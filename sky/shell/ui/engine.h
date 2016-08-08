@@ -9,6 +9,7 @@
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
 #include "base/single_thread_task_runner.h"
+#include "flutter/assets/zip_asset_store.h"
 #include "mojo/public/cpp/application/service_provider_impl.h"
 #include "mojo/public/cpp/bindings/binding.h"
 #include "mojo/public/cpp/bindings/binding_set.h"
@@ -16,20 +17,13 @@
 #include "mojo/public/cpp/system/handle.h"
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
 #include "mojo/services/asset_bundle/interfaces/asset_bundle.mojom.h"
-#include "sky/engine/public/sky/sky_view.h"
 #include "sky/engine/public/sky/sky_view_client.h"
-#include "sky/engine/core/script/directory_asset_bundle.h"
+#include "sky/engine/public/sky/sky_view.h"
 #include "sky/services/engine/sky_engine.mojom.h"
 #include "sky/services/rasterizer/rasterizer.mojom.h"
 #include "sky/shell/rasterizer.h"
 #include "sky/shell/ui_delegate.h"
 #include "third_party/skia/include/core/SkPicture.h"
-
-namespace mojo {
-namespace asset_bundle {
-class ZipAssetBundle;
-}
-}
 
 namespace sky {
 class PlatformImpl;
@@ -106,7 +100,7 @@ class Engine : public UIDelegate,
   void StartAnimatorIfPossible();
 
   void ConfigureZipAssetBundle(const mojo::String& path);
-  void ConfigureDirectoryAssetBundle(const base::FilePath& path);
+  void ConfigureDirectoryAssetBundle(const std::string& path);
 
   Config config_;
   std::unique_ptr<Animator> animator_;
@@ -125,7 +119,7 @@ class Engine : public UIDelegate,
   std::string language_code_;
   std::string country_code_;
   mojo::Binding<SkyEngine> binding_;
-  scoped_refptr<mojo::asset_bundle::ZipAssetBundle> zip_asset_bundle_;
+  ftl::RefPtr<blink::ZipAssetStore> asset_store_;
 
   // TODO(eseidel): This should move into an AnimatorStateMachine.
   bool activity_running_;

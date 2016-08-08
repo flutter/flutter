@@ -70,13 +70,12 @@ class Shell {
   // These APIs must only be accessed on UI thread.
   void AddPlatformView(const base::WeakPtr<PlatformView>& platform_view);
   void PurgePlatformViews();
-  void GetPlatformViews(std::vector<base::WeakPtr<PlatformView>>*
-                        platform_views);
+  void GetPlatformViews(
+      std::vector<base::WeakPtr<PlatformView>>* platform_views);
 
   // These APIs can be called from any thread.
   // Return the list of platform view ids at the time of this call.
-  void WaitForPlatformViewIds(
-      std::vector<uintptr_t>* platform_view_ids);
+  void WaitForPlatformViewIds(std::vector<uintptr_t>* platform_view_ids);
   // Attempt to run a script inside a flutter view indicated by |view_id|.
   // Will set |view_existed| to true if the view was found and false otherwise.
   void RunInPlatformView(uintptr_t view_id,
@@ -91,9 +90,8 @@ class Shell {
   void InitGpuThread();
   void InitUIThread();
 
-  void WaitForPlatformViewsIdsUIThread(
-      std::vector<uintptr_t>* platform_views,
-      base::WaitableEvent* latch);
+  void WaitForPlatformViewsIdsUIThread(std::vector<uintptr_t>* platform_views,
+                                       base::WaitableEvent* latch);
 
   void RunInPlatformViewUIThread(uintptr_t view_id,
                                  const std::string& main,

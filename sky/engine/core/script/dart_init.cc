@@ -10,21 +10,20 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include "base/bind.h"
 #include "base/command_line.h"
 #include "base/files/file_path.h"
 #include "base/files/file_util.h"
 #include "base/lazy_instance.h"
-#include "base/single_thread_task_runner.h"
-#include "base/trace_event/trace_event.h"
 #include "dart/runtime/bin/embedded_dart_io.h"
 #include "dart/runtime/include/dart_mirrors_api.h"
+#include "flutter/assets/zip_asset_store.h"
 #include "flutter/tonic/dart_debugger.h"
 #include "flutter/tonic/dart_dependency_catcher.h"
 #include "flutter/tonic/dart_io.h"
 #include "flutter/tonic/dart_library_loader.h"
 #include "flutter/tonic/dart_snapshot_loader.h"
 #include "flutter/tonic/dart_state.h"
+#include "glue/trace_event.h"
 #include "lib/ftl/logging.h"
 #include "lib/tonic/dart_class_library.h"
 #include "lib/tonic/dart_wrappable.h"
@@ -34,7 +33,6 @@
 #include "lib/tonic/scopes/dart_isolate_scope.h"
 #include "lib/tonic/typed_data/uint8_list.h"
 #include "mojo/public/platform/dart/dart_handle_watcher.h"
-#include "services/asset_bundle/zip_asset_bundle.h"
 #include "sky/engine/bindings/dart_mojo_internal.h"
 #include "sky/engine/bindings/dart_runtime_hooks.h"
 #include "sky/engine/bindings/dart_ui.h"
@@ -68,8 +66,6 @@ extern const uint8_t* observatory_assets_archive;
 }  // namespace dart
 
 namespace blink {
-
-using mojo::asset_bundle::ZipAssetBundle;
 
 const char kSnapshotAssetKey[] = "snapshot_blob.bin";
 
@@ -237,12 +233,13 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
 
   std::vector<uint8_t> snapshot_data;
   if (!IsRunningPrecompiledCode()) {
-    FTL_CHECK(base::StartsWith(script_uri, kFileUriPrefix,
-                               base::CompareCase::SENSITIVE));
-    base::FilePath bundle_path(script_uri + strlen(kFileUriPrefix));
-    scoped_refptr<ZipAssetBundle> zip_asset_bundle(
-        new ZipAssetBundle(bundle_path, nullptr));
-    FTL_CHECK(zip_asset_bundle->GetAsBuffer(kSnapshotAssetKey, &snapshot_data));
+    std::string uri = script_uri;
+    FTL_CHECK(uri.find(kFileUriPrefix) == 0u);
+    std::string bundle_path(script_uri + strlen(kFileUriPrefix));
+    ftl::RefPtr<ZipAssetStore> zip_asset_store =
+        ftl::MakeRefCounted<ZipAssetStore>(std::move(bundle_path),
+                                           ftl::RefPtr<ftl::TaskRunner>());
+    FTL_CHECK(zip_asset_store->GetAsBuffer(kSnapshotAssetKey, &snapshot_data));
   }
 
   FlutterDartState* parent_dart_state =
