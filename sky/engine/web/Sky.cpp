@@ -31,7 +31,7 @@
 #include "sky/engine/public/web/Sky.h"
 
 #include "base/message_loop/message_loop.h"
-#include "base/trace_event/trace_event.h"
+#include "glue/trace_event.h"
 #include "lib/tonic/dart_microtask_queue.h"
 #include "mojo/message_pump/message_pump_mojo.h"
 #include "sky/engine/core/Init.h"
@@ -39,9 +39,9 @@
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/MainThread.h"
-#include "sky/engine/wtf/WTF.h"
 #include "sky/engine/wtf/text/AtomicString.h"
 #include "sky/engine/wtf/text/TextEncoding.h"
+#include "sky/engine/wtf/WTF.h"
 
 namespace blink {
 

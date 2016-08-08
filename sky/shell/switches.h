@@ -23,6 +23,7 @@ extern const char kDeviceObservatoryPort[];
 extern const char kAotSnapshotPath[];
 extern const char kNoRedirectToSyslog[];
 extern const char kCacheDirPath[];
+extern const char kDartFlags[];
 
 void PrintUsage(const std::string& executable_name);
 

@@ -159,6 +159,15 @@ void Shell::InitStandalone(std::string icu_data_path) {
     settings.temp_directory_path =
         command_line.GetSwitchValueASCII(switches::kCacheDirPath);
   }
+
+  if (command_line.HasSwitch(switches::kDartFlags)) {
+    std::stringstream stream(
+        command_line.GetSwitchValueNative(switches::kDartFlags));
+    std::istream_iterator<std::string> end;
+    for (std::istream_iterator<std::string> it(stream); it != end; ++it)
+      settings.dart_flags.push_back(*it);
+  }
+
   blink::SkySettings::Set(settings);
 
   Init();
@@ -221,8 +230,7 @@ void Shell::AddPlatformView(const base::WeakPtr<PlatformView>& platform_view) {
 void Shell::PurgePlatformViews() {
   DCHECK(ui_thread_checker_ && ui_thread_checker_->CalledOnValidThread());
   platform_views_.erase(std::remove_if(platform_views_.begin(),
-                                       platform_views_.end(),
-                                       IsViewInvalid),
+                                       platform_views_.end(), IsViewInvalid),
                         platform_views_.end());
 }
 
@@ -234,14 +242,12 @@ void Shell::GetPlatformViews(
 
 void Shell::WaitForPlatformViewIds(
     std::vector<PlatformViewInfo>* platform_view_ids) {
-
   base::WaitableEvent latch(false, false);
 
   ui_task_runner()->PostTask(
       FROM_HERE,
       base::Bind(&Shell::WaitForPlatformViewsIdsUIThread,
-                 base::Unretained(this),
-                 base::Unretained(platform_view_ids),
+                 base::Unretained(this), base::Unretained(platform_view_ids),
                  base::Unretained(&latch)));
 
   latch.Wait();

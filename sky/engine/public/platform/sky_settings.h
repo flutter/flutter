@@ -8,6 +8,7 @@
 #include <stdint.h>
 
 #include <string>
+#include <vector>
 
 namespace blink {
 
@@ -21,6 +22,7 @@ struct SkySettings {
   bool trace_startup = false;
   std::string aot_snapshot_path;
   std::string temp_directory_path;
+  std::vector<std::string> dart_flags;
 
   static const SkySettings& Get();
   static void Set(const SkySettings& settings);

@@ -6,14 +6,12 @@
 
 #include <dlfcn.h>
 #include <fcntl.h>
+#include <string.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 
-#include "base/command_line.h"
-#include "base/files/file_path.h"
-#include "base/files/file_util.h"
-#include "base/lazy_instance.h"
 #include "dart/runtime/bin/embedded_dart_io.h"
 #include "dart/runtime/include/dart_mirrors_api.h"
 #include "flutter/assets/zip_asset_store.h"
@@ -24,7 +22,9 @@
 #include "flutter/tonic/dart_snapshot_loader.h"
 #include "flutter/tonic/dart_state.h"
 #include "glue/trace_event.h"
+#include "lib/ftl/files/eintr_wrapper.h"
 #include "lib/ftl/logging.h"
+#include "lib/ftl/time/time_delta.h"
 #include "lib/tonic/dart_class_library.h"
 #include "lib/tonic/dart_wrappable.h"
 #include "lib/tonic/logging/dart_error.h"
@@ -119,9 +119,8 @@ static const char* kDartTraceStartupArgs[]{
     "--timeline_recorder=endless",
 };
 
-const char kFileUriPrefix[] = "file://";
-
-const char kDartFlags[] = "dart-flags";
+constexpr char kFileUriPrefix[] = "file://";
+constexpr size_t kFileUriPrefixLength = sizeof(kFileUriPrefix) - 1;
 
 bool g_service_isolate_initialized = false;
 ServiceIsolateHook g_service_isolate_hook = nullptr;
@@ -134,24 +133,32 @@ void IsolateShutdownCallback(void* callback_data) {
 }
 
 bool DartFileModifiedCallback(const char* source_url, int64_t since_ms) {
-  std::string url(source_url);
-  if (!base::StartsWithASCII(url, "file:", true)) {
+  if (strncmp(source_url, kFileUriPrefix, kFileUriPrefixLength) != 0u) {
     // Assume modified.
     return true;
   }
-  base::ReplaceFirstSubstringAfterOffset(&url, 0, "file:", "");
-  base::FilePath path(url);
-  base::File::Info file_info;
-  if (!base::GetFileInfo(path, &file_info)) {
-    // Assume modified.
+
+  const char* path = source_url + kFileUriPrefixLength;
+  struct stat info;
+  if (stat(path, &info) < 0)
     return true;
-  }
-  int64_t since_seconds = since_ms / base::Time::kMillisecondsPerSecond;
-  int64_t since_milliseconds =
-      since_ms - (since_seconds * base::Time::kMillisecondsPerSecond);
-  base::Time since_time = base::Time::FromTimeT(since_seconds) +
-                          base::TimeDelta::FromMilliseconds(since_milliseconds);
-  return file_info.last_modified > since_time;
+
+  // If st_mtime is zero, it's more likely that the file system doesn't support
+  // mtime than that the file was actually modified in the 1970s.
+  if (!info.st_mtime)
+    return true;
+
+  // It's very unclear what time bases we're with here. The Dart API doesn't
+  // document the time base for since_ms. Reading the code, the value varies by
+  // platform, with a typical source being something like gettimeofday.
+  //
+  // We add one to st_mtime because st_mtime has less precision than since_ms
+  // and we want to treat the file as modified if the since time is between
+  // ticks of the mtime.
+  ftl::TimeDelta mtime = ftl::TimeDelta::FromSeconds(info.st_mtime + 1);
+  ftl::TimeDelta since = ftl::TimeDelta::FromMilliseconds(since_ms);
+
+  return mtime > since;
 }
 
 void ThreadExitCallback() {
@@ -405,25 +412,22 @@ void* _DartSymbolLookup(const char* symbol_name) {
     const std::string& aot_snapshot_path = SkySettings::Get().aot_snapshot_path;
     FTL_CHECK(!aot_snapshot_path.empty());
 
-    base::FilePath asset_path =
-        base::FilePath(aot_snapshot_path).Append(symbol_asset.file_name);
-    int64 asset_size;
-    if (!base::GetFileSize(asset_path, &asset_size))
+    std::string asset_path = aot_snapshot_path + "/" + symbol_asset.file_name;
+    struct stat info;
+    if (stat(asset_path.c_str(), &info) < 0)
       return nullptr;
+    int64_t asset_size = info.st_size;
 
-    int fd = HANDLE_EINTR(::open(asset_path.value().c_str(), O_RDONLY));
-    if (fd == -1) {
+    ftl::ScopedFD fd(HANDLE_EINTR(open(asset_path.c_str(), O_RDONLY)));
+    if (fd.get() == -1)
       return nullptr;
-    }
 
     int mmap_flags = PROT_READ;
     if (symbol_asset.is_executable)
       mmap_flags |= PROT_EXEC;
 
-    void* symbol = ::mmap(NULL, asset_size, mmap_flags, MAP_PRIVATE, fd, 0);
+    void* symbol = mmap(NULL, asset_size, mmap_flags, MAP_PRIVATE, fd, 0);
     symbol_asset.mapping = symbol == MAP_FAILED ? nullptr : symbol;
-
-    IGNORE_EINTR(::close(fd));
 
     return symbol_asset.mapping;
   }
@@ -466,8 +470,7 @@ bool IsRunningPrecompiledCode() {
 
 #endif  // DART_ALLOW_DYNAMIC_RESOLUTION
 
-static base::LazyInstance<std::unique_ptr<EmbedderTracingCallbacks>>::Leaky
-    g_tracing_callbacks = LAZY_INSTANCE_INITIALIZER;
+EmbedderTracingCallbacks* g_tracing_callbacks = nullptr;
 
 EmbedderTracingCallbacks::EmbedderTracingCallbacks(
     EmbedderTracingCallback start,
@@ -476,23 +479,17 @@ EmbedderTracingCallbacks::EmbedderTracingCallbacks(
 
 void SetEmbedderTracingCallbacks(
     std::unique_ptr<EmbedderTracingCallbacks> callbacks) {
-  g_tracing_callbacks.Get() = std::move(callbacks);
+  g_tracing_callbacks = callbacks.release();
 }
 
 static void EmbedderTimelineStartRecording() {
-  auto& callbacks = g_tracing_callbacks.Get();
-  if (!callbacks) {
-    return;
-  }
-  callbacks->start_tracing_callback();
+  if (g_tracing_callbacks)
+    g_tracing_callbacks->start_tracing_callback();
 }
 
 static void EmbedderTimelineStopRecording() {
-  auto& callbacks = g_tracing_callbacks.Get();
-  if (!callbacks) {
-    return;
-  }
-  callbacks->stop_tracing_callback();
+  if (g_tracing_callbacks)
+    g_tracing_callbacks->stop_tracing_callback();
 }
 
 void SetServiceIsolateHook(ServiceIsolateHook hook) {
@@ -523,11 +520,12 @@ static bool ShouldEnableCheckedMode() {
 void InitDartVM() {
   TRACE_EVENT0("flutter", __func__);
 
+  const SkySettings& settings = SkySettings::Get();
+
   {
     TRACE_EVENT0("flutter", "dart::bin::BootstrapDartIo");
     dart::bin::BootstrapDartIo();
 
-    const SkySettings& settings = SkySettings::Get();
     if (!settings.temp_directory_path.empty()) {
       dart::bin::SetSystemTempDirectory(settings.temp_directory_path.c_str());
     }
@@ -555,27 +553,15 @@ void InitDartVM() {
   if (ShouldEnableCheckedMode())
     args.append(kDartCheckedModeArgs, arraysize(kDartCheckedModeArgs));
 
-  if (SkySettings::Get().start_paused)
+  if (settings.start_paused)
     args.append(kDartStartPausedArgs, arraysize(kDartStartPausedArgs));
 
-  if (SkySettings::Get().trace_startup)
+  if (settings.trace_startup)
     args.append(kDartTraceStartupArgs, arraysize(kDartTraceStartupArgs));
 
-  Vector<std::string> dart_flags;
-  if (base::CommandLine::ForCurrentProcess()->HasSwitch(kDartFlags)) {
-    // Split up dart flags by spaces.
-    base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
-    std::stringstream ss(command_line.GetSwitchValueNative(kDartFlags));
-    std::istream_iterator<std::string> it(ss);
-    std::istream_iterator<std::string> end;
-    while (it != end) {
-      dart_flags.append(*it);
-      it++;
-    }
-  }
-  for (size_t i = 0; i < dart_flags.size(); i++) {
-    args.append(dart_flags[i].data());
-  }
+  for (size_t i = 0; i < settings.dart_flags.size(); i++)
+    args.append(settings.dart_flags[i].c_str());
+
   FTL_CHECK(Dart_SetVMFlags(args.size(), args.data()));
 
 #ifndef FLUTTER_PRODUCT_MODE

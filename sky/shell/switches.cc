@@ -22,8 +22,10 @@ const char kDeviceObservatoryPort[] = "observatory-port";
 const char kAotSnapshotPath[] = "aot-snapshot-path";
 const char kNoRedirectToSyslog[] = "no-redirect-to-syslog";
 const char kCacheDirPath[] = "cache-dir-path";
+const char kDartFlags[] = "dart-flags";
 
 void PrintUsage(const std::string& executable_name) {
+  // clang-format off
   std::cerr << "Usage: " << executable_name
             << " --" << kEnableCheckedMode
             << " --" << kNonInteractive
@@ -33,6 +35,7 @@ void PrintUsage(const std::string& executable_name) {
             << " --" << kPackages << "=PACKAGES"
             << " --" << kDeviceObservatoryPort << "=8181"
             << " [ MAIN_DART ]" << std::endl;
+  // clang-format on
 }
 
 }  // namespace switches
