@@ -321,7 +321,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
         clipCallback = rectCallback;
       } else {
         size = referenceBox.size;
-        clipCallback = () => Point.origin & size;
+        clipCallback = () => Point.origin & referenceBox.size;
       }
       radius = _getSplashTargetSize(size, position);
     } else {
