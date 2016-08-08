@@ -20,7 +20,7 @@
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
   'fuchsia_git': 'https://fuchsia.googlesource.com',
-  'mojo_sdk_revision': 'b200aa62c93647a0421b9239804ef5ce1509ab20',
+  'mojo_sdk_revision': '6b5fb1227c742f5ecc077486ebc029f2711c61fa',
   'base_revision': '672b04e54b937ec899429a6bd5409c5a6300d151',
   'skia_revision': 'd1bdd1fcbd308afb9903f39d231742f5c951cf07',
 
@@ -284,6 +284,31 @@ hooks = [
         'python',
         'src/tools/remove_stale_pyc_files.py',
         'src/tools',
+    ],
+  },
+  # Pull the mojom generator binaries using checked-in hashes.
+  {
+    'name': 'mojom_generators',
+    'pattern': '',
+    'action': [ 'download_from_google_storage.py',
+                '--no_resume',
+                '--quiet',
+                '--platform=linux*',
+                '--no_auth',
+                '--bucket', 'mojo/mojom_parser/linux64/generators',
+                '-d', 'src/mojo/public/tools/bindings/mojom_tool/bin/linux64/generators',
+    ],
+  },
+  {
+    'name': 'mojom_generators',
+    'pattern': '',
+    'action': [ 'download_from_google_storage.py',
+                '--no_resume',
+                '--quiet',
+                '--platform=darwin',
+                '--no_auth',
+                '--bucket', 'mojo/mojom_parser/mac64/generators',
+                '-d', 'src/mojo/public/tools/bindings/mojom_tool/bin/mac64/generators',
     ],
   },
 ]
