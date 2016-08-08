@@ -246,6 +246,7 @@ class _MaterialState extends State<Material> {
     contents = new NotificationListener<LayoutChangedNotification>(
       onNotification: (LayoutChangedNotification notification) {
         _inkFeatureRenderer.currentContext.findRenderObject().markNeedsPaint();
+        return true;
       },
       child: new _InkFeatures(
         key: _inkFeatureRenderer,
@@ -320,7 +321,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
         clipCallback = rectCallback;
       } else {
         size = referenceBox.size;
-        clipCallback = () => Point.origin & size;
+        clipCallback = () => Point.origin & referenceBox.size;
       }
       radius = _getSplashTargetSize(size, position);
     } else {
