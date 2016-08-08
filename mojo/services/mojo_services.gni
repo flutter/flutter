@@ -32,6 +32,7 @@ mojo_services = [
   "//mojo/services/media/common/interfaces",
   "//mojo/services/media/control/interfaces",
   "//mojo/services/media/core/interfaces",
+  "//mojo/services/media/logs/interfaces",
   "//mojo/services/native_support/interfaces",
   "//mojo/services/native_viewport/interfaces",
   "//mojo/services/navigation/interfaces",

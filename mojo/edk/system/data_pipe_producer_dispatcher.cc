@@ -169,20 +169,23 @@ HandleSignalsState DataPipeProducerDispatcher::GetHandleSignalsStateImplNoLock()
 
 MojoResult DataPipeProducerDispatcher::AddAwakableImplNoLock(
     Awakable* awakable,
-    MojoHandleSignals signals,
-    bool force,
     uint64_t context,
+    bool persistent,
+    MojoHandleSignals signals,
     HandleSignalsState* signals_state) {
   mutex().AssertHeld();
-  return data_pipe_->ProducerAddAwakable(awakable, signals, force, context,
+  return data_pipe_->ProducerAddAwakable(awakable, context, persistent, signals,
                                          signals_state);
 }
 
 void DataPipeProducerDispatcher::RemoveAwakableImplNoLock(
+    bool match_context,
     Awakable* awakable,
+    uint64_t context,
     HandleSignalsState* signals_state) {
   mutex().AssertHeld();
-  data_pipe_->ProducerRemoveAwakable(awakable, signals_state);
+  data_pipe_->ProducerRemoveAwakable(match_context, awakable, context,
+                                     signals_state);
 }
 
 void DataPipeProducerDispatcher::StartSerializeImplNoLock(

@@ -18,10 +18,15 @@
 namespace mojo {
 namespace system {
 
-// IMPORTANT (all-caps gets your attention, right?): |Waiter| methods are called
-// under other locks, in particular, |Dispatcher::lock_|s, so |Waiter| methods
-// must never call out to other objects (in particular, |Dispatcher|s). This
-// class is thread-safe.
+// An implementation of |Awakable| that is used for blocking waits. This should
+// be used in a non-persistent way (i.e., |Awake()| should be called at most
+// once by each source, and only for "leading edges").
+//
+// IMPORTANT: |Waiter| methods are called under other locks, in particular,
+// |Dispatcher::lock_|s, so |Waiter| methods must never call out to other
+// objects (in particular, |Dispatcher|s).
+//
+// This class is thread-safe.
 class Waiter final : public Awakable {
  public:
   Waiter();
@@ -34,32 +39,24 @@ class Waiter final : public Awakable {
   // Waits until a suitable |Awake()| is called. (|context| may be null, in
   // which case, obviously no context is ever returned.)
   // Returns:
-  //   - The result given to the first call to |Awake()| (possibly before this
-  //     call to |Wait()|); in this case, |*context| is set to the value passed
-  //     to that call to |Awake()|.
-  //   - |MOJO_RESULT_DEADLINE_EXCEEDED| if the deadline was exceeded; in this
-  //     case |*context| is not modified.
+  //   - |MOJO_RESULT_OK| if |Awake()| was called with |AwakeReason::SATISFIED|;
+  //   - |MOJO_RESULT_CANCELLED| if |Awake()| was called with
+  //     |AwakeReason::CANCELLED|;
+  //   - |MOJO_RESULT_FAILED_PRECONDITION| if |Awake()| was called with
+  //     |AwakeReason::UNSATISFIABLE|; or
+  //   - |MOJO_RESULT_DEADLINE_EXCEEDED| if the deadline was exceeded.
   //
-  // Usually, the context passed to |Awake()| will be the value passed to
-  // |Dispatcher::AddAwakable()|, which is usually the index to the array of
-  // handles passed to |MojoWaitMany()| (or 0 for |MojoWait()|).
-  //
-  // Typical |Awake()| results are:
-  //   - |MOJO_RESULT_OK| if one of the flags passed to
-  //     |MojoWait()|/|MojoWaitMany()| (hence |Dispatcher::AddAwakable()|) was
-  //     satisfied;
-  //   - |MOJO_RESULT_CANCELLED| if a handle (on which
-  //     |MojoWait()|/|MojoWaitMany()| was called) was closed (hence the
-  //     dispatcher closed); and
-  //   - |MOJO_RESULT_FAILED_PRECONDITION| if one of the set of flags passed to
-  //     |MojoWait()|/|MojoWaitMany()| cannot or can no longer be satisfied by
-  //     the corresponding handle (e.g., if the other end of a message or data
-  //     pipe is closed).
-  MojoResult Wait(MojoDeadline deadline, uint64_t* context);
+  // In all the cases except |MOJO_RESULT_DEADLINE_EXCEEDED|, the context and
+  // signals state passed to |Awake()| be made available via |*context| and
+  // |*signals_state|, respectively (unless the respective pointer is null).
+  MojoResult Wait(MojoDeadline deadline,
+                  uint64_t* context,
+                  HandleSignalsState* signals_state);
 
-  // Wake the waiter up with the given result and context (or no-op if it's been
-  // woken up already).
-  bool Awake(MojoResult result, uint64_t context) override;
+  // |Awakable| implementation:
+  void Awake(uint64_t context,
+             AwakeReason reason,
+             const HandleSignalsState& signals_state) override;
 
  private:
   util::CondVar cv_;  // Associated to |mutex_|.
@@ -68,7 +65,8 @@ class Waiter final : public Awakable {
   bool initialized_ MOJO_GUARDED_BY(mutex_);
 #endif
   bool awoken_ MOJO_GUARDED_BY(mutex_);
-  MojoResult awake_result_ MOJO_GUARDED_BY(mutex_);
+  AwakeReason awake_reason_ MOJO_GUARDED_BY(mutex_);
+  HandleSignalsState signals_state_ MOJO_GUARDED_BY(mutex_);
   uint64_t awake_context_ MOJO_GUARDED_BY(mutex_);
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(Waiter);

@@ -218,4 +218,33 @@ MojoResult MojoUnmapBuffer(void* buffer) {
   return g_core->UnmapBuffer(MakeUserPointer(buffer));
 }
 
+MojoResult MojoCreateWaitSet(const struct MojoCreateWaitSetOptions* options,
+                             MojoHandle* handle) {
+  return g_core->CreateWaitSet(MakeUserPointer(options),
+                               MakeUserPointer(handle));
+}
+
+MojoResult MojoWaitSetAdd(MojoHandle wait_set_handle,
+                          MojoHandle handle,
+                          MojoHandleSignals signals,
+                          uint64_t cookie,
+                          const struct MojoWaitSetAddOptions* options) {
+  return g_core->WaitSetAdd(wait_set_handle, handle, signals, cookie,
+                            MakeUserPointer(options));
+}
+
+MojoResult MojoWaitSetRemove(MojoHandle wait_set_handle, uint64_t cookie) {
+  return g_core->WaitSetRemove(wait_set_handle, cookie);
+}
+
+MojoResult MojoWaitSetWait(MojoHandle wait_set_handle,
+                           MojoDeadline deadline,
+                           uint32_t* num_results,
+                           struct MojoWaitSetResult* results,
+                           uint32_t* max_results) {
+  return g_core->WaitSetWait(
+      wait_set_handle, deadline, MakeUserPointer(num_results),
+      MakeUserPointer(results), MakeUserPointer(max_results));
+}
+
 }  // extern "C"

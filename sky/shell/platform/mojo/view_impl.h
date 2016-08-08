@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "base/macros.h"
-#include "mojo/common/binding_set.h"
+#include "mojo/public/cpp/bindings/binding_set.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/public/interfaces/application/application_connector.mojom.h"
 #include "mojo/services/gfx/composition/interfaces/scenes.mojom.h"

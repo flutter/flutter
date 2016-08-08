@@ -14,6 +14,7 @@ mojo_edk_source_set("system") {
   sources = [
     "async_waiter.cc",
     "async_waiter.h",
+    "awakable.cc",
     "awakable.h",
     "awakable_list.cc",
     "awakable_list.h",
@@ -173,6 +174,7 @@ mojo_edk_unittests("mojo_edk_system_unittests") {
     "test_channel_endpoint_client.cc",
     "test_channel_endpoint_client.h",
     "unique_identifier_unittest.cc",
+    "wait_set_dispatcher_unittest.cc",
     "waiter_test_utils.cc",
     "waiter_test_utils.h",
     "waiter_unittest.cc",

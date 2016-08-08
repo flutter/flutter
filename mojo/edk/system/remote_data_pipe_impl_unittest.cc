@@ -141,16 +141,17 @@ TEST_F(RemoteDataPipeImplTest, Sanity) {
   // first, to avoid any handling the case where it's already readable.)
   waiter.Init();
   ASSERT_EQ(MOJO_RESULT_OK,
-            message_pipe(1)->AddAwakable(
-                0, &waiter, MOJO_HANDLE_SIGNAL_READABLE, false, 123, nullptr));
+            message_pipe(1)->AddAwakable(0, &waiter, 123, false,
+                                         MOJO_HANDLE_SIGNAL_READABLE, nullptr));
   EXPECT_EQ(MOJO_RESULT_OK,
             message_pipe(0)->WriteMessage(0, UserPointer<const void>(kHello),
                                           sizeof(kHello), nullptr,
                                           MOJO_WRITE_MESSAGE_FLAG_NONE));
-  EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionTimeout(), &context));
+  EXPECT_EQ(MOJO_RESULT_OK,
+            waiter.Wait(test::ActionTimeout(), &context, nullptr));
   EXPECT_EQ(123u, context);
   hss = HandleSignalsState();
-  message_pipe(1)->RemoveAwakable(0, &waiter, &hss);
+  message_pipe(1)->RemoveAwakable(0, false, &waiter, 0, &hss);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE,
             hss.satisfied_signals);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE |
@@ -194,8 +195,8 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerWithClosedProducer) {
   // readable.)
   waiter.Init();
   ASSERT_EQ(MOJO_RESULT_OK,
-            message_pipe(1)->AddAwakable(
-                0, &waiter, MOJO_HANDLE_SIGNAL_READABLE, false, 123, nullptr));
+            message_pipe(1)->AddAwakable(0, &waiter, 123, false,
+                                         MOJO_HANDLE_SIGNAL_READABLE, nullptr));
   {
     HandleTransport transport(test::HandleTryStartTransport(consumer_handle));
     EXPECT_TRUE(transport.is_valid());
@@ -212,10 +213,11 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerWithClosedProducer) {
     EXPECT_TRUE(consumer_handle.dispatcher->HasOneRef());
     consumer_handle.reset();
   }
-  EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionTimeout(), &context));
+  EXPECT_EQ(MOJO_RESULT_OK,
+            waiter.Wait(test::ActionTimeout(), &context, nullptr));
   EXPECT_EQ(123u, context);
   hss = HandleSignalsState();
-  message_pipe(1)->RemoveAwakable(0, &waiter, &hss);
+  message_pipe(1)->RemoveAwakable(0, false, &waiter, 0, &hss);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE,
             hss.satisfied_signals);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE |
@@ -243,13 +245,14 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerWithClosedProducer) {
 
   waiter.Init();
   hss = HandleSignalsState();
-  MojoResult result =
-      consumer->AddAwakable(&waiter, MOJO_HANDLE_SIGNAL_READABLE, 456, &hss);
+  MojoResult result = consumer->AddAwakable(&waiter, 456, false,
+                                            MOJO_HANDLE_SIGNAL_READABLE, &hss);
   if (result == MOJO_RESULT_OK) {
     context = 0;
-    EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionTimeout(), &context));
+    EXPECT_EQ(MOJO_RESULT_OK,
+              waiter.Wait(test::ActionTimeout(), &context, nullptr));
     EXPECT_EQ(456u, context);
-    consumer->RemoveAwakable(&waiter, &hss);
+    consumer->RemoveAwakable(false, &waiter, 0, &hss);
   } else {
     ASSERT_EQ(MOJO_RESULT_ALREADY_EXISTS, result);
   }
@@ -272,14 +275,14 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerWithClosedProducer) {
 
   waiter.Init();
   hss = HandleSignalsState();
-  result =
-      consumer->AddAwakable(&waiter, MOJO_HANDLE_SIGNAL_READABLE, 789, &hss);
+  result = consumer->AddAwakable(&waiter, 789, false,
+                                 MOJO_HANDLE_SIGNAL_READABLE, &hss);
   if (result == MOJO_RESULT_OK) {
     context = 0;
     EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION,
-              waiter.Wait(test::ActionTimeout(), &context));
+              waiter.Wait(test::ActionTimeout(), &context, nullptr));
     EXPECT_EQ(789u, context);
-    consumer->RemoveAwakable(&waiter, &hss);
+    consumer->RemoveAwakable(false, &waiter, 0, &hss);
   } else {
     ASSERT_EQ(MOJO_RESULT_FAILED_PRECONDITION, result);
   }
@@ -317,8 +320,8 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringTwoPhaseWrite) {
   // readable.)
   waiter.Init();
   ASSERT_EQ(MOJO_RESULT_OK,
-            message_pipe(1)->AddAwakable(
-                0, &waiter, MOJO_HANDLE_SIGNAL_READABLE, false, 123, nullptr));
+            message_pipe(1)->AddAwakable(0, &waiter, 123, false,
+                                         MOJO_HANDLE_SIGNAL_READABLE, nullptr));
   {
     HandleTransport transport(test::HandleTryStartTransport(consumer_handle));
     EXPECT_TRUE(transport.is_valid());
@@ -335,10 +338,11 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringTwoPhaseWrite) {
     EXPECT_TRUE(consumer_handle.dispatcher->HasOneRef());
     consumer_handle.reset();
   }
-  EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionTimeout(), &context));
+  EXPECT_EQ(MOJO_RESULT_OK,
+            waiter.Wait(test::ActionTimeout(), &context, nullptr));
   EXPECT_EQ(123u, context);
   hss = HandleSignalsState();
-  message_pipe(1)->RemoveAwakable(0, &waiter, &hss);
+  message_pipe(1)->RemoveAwakable(0, false, &waiter, 0, &hss);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE,
             hss.satisfied_signals);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE |
@@ -374,13 +378,14 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringTwoPhaseWrite) {
   // Wait for the consumer to be readable.
   waiter.Init();
   hss = HandleSignalsState();
-  MojoResult result =
-      consumer->AddAwakable(&waiter, MOJO_HANDLE_SIGNAL_READABLE, 456, &hss);
+  MojoResult result = consumer->AddAwakable(&waiter, 456, false,
+                                            MOJO_HANDLE_SIGNAL_READABLE, &hss);
   if (result == MOJO_RESULT_OK) {
     context = 0;
-    EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionTimeout(), &context));
+    EXPECT_EQ(MOJO_RESULT_OK,
+              waiter.Wait(test::ActionTimeout(), &context, nullptr));
     EXPECT_EQ(456u, context);
-    consumer->RemoveAwakable(&waiter, &hss);
+    consumer->RemoveAwakable(false, &waiter, 0, &hss);
   } else {
     ASSERT_EQ(MOJO_RESULT_ALREADY_EXISTS, result);
   }
@@ -444,8 +449,8 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringSecondTwoPhaseWrite) {
   // readable.)
   waiter.Init();
   ASSERT_EQ(MOJO_RESULT_OK,
-            message_pipe(1)->AddAwakable(
-                0, &waiter, MOJO_HANDLE_SIGNAL_READABLE, false, 123, nullptr));
+            message_pipe(1)->AddAwakable(0, &waiter, 123, false,
+                                         MOJO_HANDLE_SIGNAL_READABLE, nullptr));
   {
     HandleTransport transport(test::HandleTryStartTransport(consumer_handle));
     EXPECT_TRUE(transport.is_valid());
@@ -462,10 +467,11 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringSecondTwoPhaseWrite) {
     EXPECT_TRUE(consumer_handle.dispatcher->HasOneRef());
     consumer_handle.reset();
   }
-  EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionTimeout(), &context));
+  EXPECT_EQ(MOJO_RESULT_OK,
+            waiter.Wait(test::ActionTimeout(), &context, nullptr));
   EXPECT_EQ(123u, context);
   hss = HandleSignalsState();
-  message_pipe(1)->RemoveAwakable(0, &waiter, &hss);
+  message_pipe(1)->RemoveAwakable(0, false, &waiter, 0, &hss);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE,
             hss.satisfied_signals);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE |
@@ -501,13 +507,14 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringSecondTwoPhaseWrite) {
   // Wait for the consumer to know that the producer is closed.
   waiter.Init();
   hss = HandleSignalsState();
-  MojoResult result =
-      consumer->AddAwakable(&waiter, MOJO_HANDLE_SIGNAL_PEER_CLOSED, 456, &hss);
+  MojoResult result = consumer->AddAwakable(
+      &waiter, 456, false, MOJO_HANDLE_SIGNAL_PEER_CLOSED, &hss);
   if (result == MOJO_RESULT_OK) {
     context = 0;
-    EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionTimeout(), &context));
+    EXPECT_EQ(MOJO_RESULT_OK,
+              waiter.Wait(test::ActionTimeout(), &context, nullptr));
     EXPECT_EQ(456u, context);
-    consumer->RemoveAwakable(&waiter, &hss);
+    consumer->RemoveAwakable(false, &waiter, 0, &hss);
   } else {
     ASSERT_EQ(MOJO_RESULT_ALREADY_EXISTS, result);
   }

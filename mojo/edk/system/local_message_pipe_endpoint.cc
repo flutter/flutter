@@ -39,7 +39,7 @@ bool LocalMessagePipeEndpoint::OnPeerClose() {
   HandleSignalsState new_state = GetHandleSignalsState();
 
   if (!new_state.equals(old_state))
-    awakable_list_.AwakeForStateChange(new_state);
+    awakable_list_.OnStateChange(old_state, new_state);
 
   return true;
 }
@@ -49,10 +49,12 @@ void LocalMessagePipeEndpoint::EnqueueMessage(
   DCHECK(is_open_);
   DCHECK(is_peer_open_);
 
-  bool was_empty = message_queue_.IsEmpty();
+  HandleSignalsState old_state = GetHandleSignalsState();
   message_queue_.AddMessage(std::move(message));
-  if (was_empty)
-    awakable_list_.AwakeForStateChange(GetHandleSignalsState());
+  HandleSignalsState new_state = GetHandleSignalsState();
+
+  if (!new_state.equals(old_state))
+    awakable_list_.OnStateChange(old_state, new_state);
 }
 
 void LocalMessagePipeEndpoint::Close() {
@@ -63,7 +65,7 @@ void LocalMessagePipeEndpoint::Close() {
 
 void LocalMessagePipeEndpoint::CancelAllState() {
   DCHECK(is_open_);
-  awakable_list_.CancelAll();
+  awakable_list_.CancelAndRemoveAll();
 }
 
 MojoResult LocalMessagePipeEndpoint::ReadMessage(
@@ -115,14 +117,12 @@ MojoResult LocalMessagePipeEndpoint::ReadMessage(
   message = nullptr;
 
   if (enough_space || (flags & MOJO_READ_MESSAGE_FLAG_MAY_DISCARD)) {
+    HandleSignalsState old_state = GetHandleSignalsState();
     message_queue_.DiscardMessage();
+    HandleSignalsState new_state = GetHandleSignalsState();
 
-    // Now it's empty, thus no longer readable.
-    if (message_queue_.IsEmpty()) {
-      // It's currently not possible to wait for non-readability, but we should
-      // do the state change anyway.
-      awakable_list_.AwakeForStateChange(GetHandleSignalsState());
-    }
+    if (!new_state.equals(old_state))
+      awakable_list_.OnStateChange(old_state, new_state);
   }
 
   if (!enough_space)
@@ -150,35 +150,36 @@ HandleSignalsState LocalMessagePipeEndpoint::GetHandleSignalsState() const {
 
 MojoResult LocalMessagePipeEndpoint::AddAwakable(
     Awakable* awakable,
-    MojoHandleSignals signals,
-    bool force,
     uint64_t context,
+    bool persistent,
+    MojoHandleSignals signals,
     HandleSignalsState* signals_state) {
   DCHECK(is_open_);
 
   HandleSignalsState state = GetHandleSignalsState();
-  if (state.satisfies(signals)) {
-    if (force)
-      awakable_list_.Add(awakable, signals, context);
-    if (signals_state)
-      *signals_state = state;
-    return MOJO_RESULT_ALREADY_EXISTS;
-  }
-  if (!state.can_satisfy(signals)) {
-    if (signals_state)
-      *signals_state = state;
-    return MOJO_RESULT_FAILED_PRECONDITION;
-  }
+  if (signals_state)
+    *signals_state = state;
+  MojoResult rv = MOJO_RESULT_OK;
+  bool should_add = persistent;
+  if (state.satisfies(signals))
+    rv = MOJO_RESULT_ALREADY_EXISTS;
+  else if (!state.can_satisfy(signals))
+    rv = MOJO_RESULT_FAILED_PRECONDITION;
+  else
+    should_add = true;
 
-  awakable_list_.Add(awakable, signals, context);
-  return MOJO_RESULT_OK;
+  if (should_add)
+    awakable_list_.Add(awakable, context, persistent, signals, state);
+  return rv;
 }
 
 void LocalMessagePipeEndpoint::RemoveAwakable(
+    bool match_context,
     Awakable* awakable,
+    uint64_t context,
     HandleSignalsState* signals_state) {
   DCHECK(is_open_);
-  awakable_list_.Remove(awakable);
+  awakable_list_.Remove(match_context, awakable, context);
   if (signals_state)
     *signals_state = GetHandleSignalsState();
 }

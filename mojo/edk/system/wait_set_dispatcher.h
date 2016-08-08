@@ -5,7 +5,14 @@
 #ifndef MOJO_EDK_SYSTEM_WAIT_SET_DISPATCHER_H_
 #define MOJO_EDK_SYSTEM_WAIT_SET_DISPATCHER_H_
 
+#include <map>
+#include <memory>
+
+#include "mojo/edk/system/awakable.h"
 #include "mojo/edk/system/dispatcher.h"
+#include "mojo/edk/util/cond_var.h"
+#include "mojo/edk/util/ref_ptr.h"
+#include "mojo/edk/util/thread_annotations.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -13,10 +20,12 @@ namespace system {
 
 // This is the |Dispatcher| implementation for wait sets (created by the Mojo
 // primitive |MojoCreateWaitSet()|). This class is thread-safe.
-class WaitSetDispatcher final : public Dispatcher {
+// TODO(vtl): We rely on |Dispatcher| itself never acquiring any other mutex
+// under |mutex()|. We should specify (and double-check) this requirement.
+class WaitSetDispatcher final : public Dispatcher, public Awakable {
  public:
-  // The default/standard rights for a wait set handle. Note that they are not
-  // transferrable.
+  // The default/standard rights for a wait set handle. Note that wait set
+  // handles are not transferrable.
   // TODO(vtl): Figure out if these are the correct rights. (E.g., we currently
   // don't have get/set options functions ... but maybe we should?)
   static constexpr MojoHandleRights kDefaultHandleRights =
@@ -37,6 +46,11 @@ class WaitSetDispatcher final : public Dispatcher {
       UserPointer<const MojoCreateWaitSetOptions> in_options,
       MojoCreateWaitSetOptions* out_options);
 
+  // Like |ValidateCreateOptions()|, but for |MojoWaitSetAddOptions|.
+  static MojoResult ValidateWaitSetAddOptions(
+      UserPointer<const MojoWaitSetAddOptions> in_options,
+      MojoWaitSetAddOptions* out_options);
+
   static util::RefPtr<WaitSetDispatcher> Create(
       const MojoCreateWaitSetOptions& /*validated_options*/) {
     return AdoptRef(new WaitSetDispatcher());
@@ -47,22 +61,86 @@ class WaitSetDispatcher final : public Dispatcher {
   bool SupportsEntrypointClass(EntrypointClass entrypoint_class) const override;
 
  private:
+  // Represents an entry in the wait set.
+  struct Entry {
+    Entry(util::RefPtr<Dispatcher>&& dispatcher,
+          MojoHandleSignals signals,
+          uint64_t cookie);
+    ~Entry();
+
+    // |dispatcher| is only null for an |Entry| in |WaitSetDispatcher::entries_|
+    // if the dispatcher was closed.
+    util::RefPtr<Dispatcher> dispatcher;
+    const MojoHandleSignals signals;
+    const uint64_t cookie;
+
+    // This is false until |WaitSetDispatcher::WaitSetAddImpl()| is "finished"
+    // adding it. |...::WaitSetRemoveImpl()| won't acknowledge the existence of
+    // this entry until this is true.
+    bool ready = false;
+
+    // This is set only "inside" |WaitSetDispatcher::WaitSetRemoveImpl()|: Since
+    // we can only call |dispatcher|'s |RemoveAwakable()| with |mutex()|
+    // unlocked, we may get awoken before that happens. So instead of removing
+    // the entry from |entries_| immediately, we first set this to true under
+    // |mutex()|, unlock and call |RemoveAwakable()|, and then reacquire
+    // |mutex()| and actually remove the entry.
+    bool is_being_removed = false;
+
+    HandleSignalsState signals_state;
+    bool is_triggered = false;
+
+    // Only meaningful if |is_triggered| is true. This is used to maintain a
+    // doubly linked list of entries that are triggered (for various reasons:
+    // being satisfied, being never-satisfiable, being cancelled/closed).
+    // |triggered_previous| and |triggered_next| are null if |this| is equal to
+    // |WaitSetDispatcher::triggered_head_| and
+    // |WaitSetDispatcher::triggered_tail_|, respectively.
+    Entry* triggered_previous = nullptr;
+    Entry* triggered_next = nullptr;
+  };
+
   WaitSetDispatcher();
   ~WaitSetDispatcher() override;
 
   // |Dispatcher| protected methods:
+  void CloseImplNoLock() override;
   util::RefPtr<Dispatcher> CreateEquivalentDispatcherAndCloseImplNoLock(
       MessagePipe* message_pipe,
       unsigned port) override;
-  MojoResult WaitSetAddImpl(UserPointer<const MojoWaitSetAddOptions> options,
-                            Handle&& handle,
-                            MojoHandleSignals signals,
-                            uint64_t cookie) override;
+  MojoResult WaitSetAddImpl(
+      util::RefPtr<Dispatcher>&& dispatcher,
+      MojoHandleSignals signals,
+      uint64_t cookie,
+      UserPointer<const MojoWaitSetAddOptions> options) override;
   MojoResult WaitSetRemoveImpl(uint64_t cookie) override;
   MojoResult WaitSetWaitImpl(MojoDeadline deadline,
                              UserPointer<uint32_t> num_results,
                              UserPointer<MojoWaitSetResult> results,
                              UserPointer<uint32_t> max_results) override;
+
+  // |Awakable| implementation:
+  void Awake(uint64_t context,
+             AwakeReason reason,
+             const HandleSignalsState& signals_state) override;
+
+  void AddTriggeredNoLock(Entry* entry) MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex());
+  void RemoveTriggeredNoLock(Entry* entry)
+      MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex());
+
+  // Associated to |mutex_|. This should be signaled when |triggered_count_|
+  // becomes nonzero or this dispatcher is closed.
+  util::CondVar cv_;
+
+  // Map of cookies to entries.
+  using CookieToEntryMap = std::map<uint64_t, std::unique_ptr<Entry>>;
+  CookieToEntryMap entries_ MOJO_GUARDED_BY(mutex());
+
+  // Intrusive "doubly linked list" (via cookies) of entries that are triggered.
+  Entry* triggered_head_ MOJO_GUARDED_BY(mutex()) = nullptr;
+  Entry* triggered_tail_ MOJO_GUARDED_BY(mutex()) = nullptr;
+  // Size of the above list.
+  size_t triggered_count_ MOJO_GUARDED_BY(mutex()) = 0u;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(WaitSetDispatcher);
 };

@@ -76,6 +76,7 @@ class MojoHandleNatives {
 
   // Called from the embedder's unhandled exception callback.
   // Returns the number of successfully closed handles.
+  // ignore: unused_element
   static int _closeOpenHandles() {
     int count = 0;
     _openHandles.forEach((int handle, _) {

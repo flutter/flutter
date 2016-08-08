@@ -92,39 +92,15 @@ class UrlRequest extends bindings.Struct {
     UrlRequestCacheMode this.cacheMode
   ) : super(kVersions.last.size);
 
-  static UrlRequest deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    if (decoder.excessHandles != null) {
-      decoder.excessHandles.forEach((h) => h.close());
-    }
-    return result;
-  }
+  static UrlRequest deserialize(bindings.Message message) =>
+      bindings.Struct.deserialize(decode, message);
 
   static UrlRequest decode(bindings.Decoder decoder0) {
     if (decoder0 == null) {
       return null;
     }
     UrlRequest result = new UrlRequest();
-
-    var mainDataHeader = decoder0.decodeStructDataHeader();
-    if (mainDataHeader.version <= kVersions.last.version) {
-      // Scan in reverse order to optimize for more recent versions.
-      for (int i = kVersions.length - 1; i >= 0; --i) {
-        if (mainDataHeader.version >= kVersions[i].version) {
-          if (mainDataHeader.size == kVersions[i].size) {
-            // Found a match.
-            break;
-          }
-          throw new bindings.MojoCodecError(
-              'Header size doesn\'t correspond to known version size.');
-        }
-      }
-    } else if (mainDataHeader.size < kVersions.last.size) {
-      throw new bindings.MojoCodecError(
-        'Message newer than the last known version cannot be shorter than '
-        'required by the last known version.');
-    }
+    var mainDataHeader = bindings.Struct.checkVersion(decoder0, kVersions);
     if (mainDataHeader.version >= 0) {
       
       result.url = decoder0.decodeString(8, false);
@@ -173,21 +149,14 @@ class UrlRequest extends bindings.Struct {
 
   void encode(bindings.Encoder encoder) {
     var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
+    const String structName = "UrlRequest";
+    String fieldName;
     try {
+      fieldName = "url";
       encoder0.encodeString(url, 8, false);
-    } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "url of struct UrlRequest: $e";
-      rethrow;
-    }
-    try {
+      fieldName = "method";
       encoder0.encodeString(method, 16, false);
-    } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "method of struct UrlRequest: $e";
-      rethrow;
-    }
-    try {
+      fieldName = "headers";
       if (headers == null) {
         encoder0.encodeNullPointer(24, true);
       } else {
@@ -196,37 +165,16 @@ class UrlRequest extends bindings.Struct {
           encoder1.encodeStruct(headers[i0], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i0, false);
         }
       }
-    } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "headers of struct UrlRequest: $e";
-      rethrow;
-    }
-    try {
+      fieldName = "body";
       encoder0.encodeConsumerHandleArray(body, 32, bindings.kArrayNullable, bindings.kUnspecifiedArrayLength);
-    } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "body of struct UrlRequest: $e";
-      rethrow;
-    }
-    try {
+      fieldName = "responseBodyBufferSize";
       encoder0.encodeUint32(responseBodyBufferSize, 40);
-    } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "responseBodyBufferSize of struct UrlRequest: $e";
-      rethrow;
-    }
-    try {
+      fieldName = "autoFollowRedirects";
       encoder0.encodeBool(autoFollowRedirects, 44, 0);
-    } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "autoFollowRedirects of struct UrlRequest: $e";
-      rethrow;
-    }
-    try {
+      fieldName = "cacheMode";
       encoder0.encodeEnum(cacheMode, 48);
     } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "cacheMode of struct UrlRequest: $e";
+      bindings.Struct.fixErrorMessage(e, fieldName, structName);
       rethrow;
     }
   }

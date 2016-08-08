@@ -6,6 +6,7 @@
 module mojo.media;
 
 import "mojo/services/media/common/interfaces/media_metadata.mojom";
+import "mojo/services/media/common/interfaces/problem.mojom";
 import "mojo/services/media/common/interfaces/timelines.mojom";
 
 // Plays media.
@@ -41,4 +42,7 @@ struct MediaPlayerStatus {
 
   // Describes the media.
   MediaMetadata? metadata;
+
+  // Indicates a problem preventing intended operation.
+  Problem? problem;
 };

@@ -25,6 +25,7 @@
 #include "mojo/edk/system/message_pipe.h"
 #include "mojo/edk/system/message_pipe_dispatcher.h"
 #include "mojo/edk/system/shared_buffer_dispatcher.h"
+#include "mojo/edk/system/wait_set_dispatcher.h"
 #include "mojo/edk/system/waiter.h"
 #include "mojo/public/c/system/macros.h"
 #include "mojo/public/cpp/system/macros.h"
@@ -147,7 +148,7 @@ MojoResult Core::AsyncWait(MojoHandle handle,
     return result;
 
   std::unique_ptr<AsyncWaiter> waiter(new AsyncWaiter(callback));
-  result = dispatcher->AddAwakable(waiter.get(), signals, 0, nullptr);
+  result = dispatcher->AddAwakable(waiter.get(), 0, false, signals, nullptr);
   if (result == MOJO_RESULT_OK)
     ignore_result(waiter.release());
   return result;
@@ -256,17 +257,18 @@ MojoResult Core::WaitMany(UserPointer<const MojoHandle> handles,
                           MojoDeadline deadline,
                           UserPointer<uint32_t> result_index,
                           UserPointer<MojoHandleSignalsState> signals_states) {
-  if (num_handles < 1)
-    return MOJO_RESULT_INVALID_ARGUMENT;
   if (num_handles > GetConfiguration().max_wait_many_num_handles)
     return MOJO_RESULT_RESOURCE_EXHAUSTED;
+
+  uint64_t index = static_cast<uint64_t>(-1);
+  if (num_handles == 0u)
+    return WaitManyInternal(nullptr, nullptr, 0u, deadline, &index, nullptr);
 
   UserPointer<const MojoHandle>::Reader handles_reader(handles, num_handles);
   UserPointer<const MojoHandleSignals>::Reader signals_reader(signals,
                                                               num_handles);
-  uint64_t index = static_cast<uint64_t>(-1);
   MojoResult result;
-  if (signals_states.IsNull()) {
+  if (signals_states.IsNull() || num_handles == 0u) {
     result = WaitManyInternal(handles_reader.GetPointer(),
                               signals_reader.GetPointer(), num_handles,
                               deadline, &index, nullptr);
@@ -750,17 +752,97 @@ MojoResult Core::UnmapBuffer(UserPointer<void> buffer) {
   return mapping_table_.RemoveMapping(buffer.GetPointerValue());
 }
 
+MojoResult Core::CreateWaitSet(
+    UserPointer<const MojoCreateWaitSetOptions> options,
+    UserPointer<MojoHandle> wait_set_handle) {
+  MojoCreateWaitSetOptions validated_options = {};
+  MojoResult result =
+      WaitSetDispatcher::ValidateCreateOptions(options, &validated_options);
+  if (result != MOJO_RESULT_OK)
+    return result;
+
+  auto dispatcher = WaitSetDispatcher::Create(validated_options);
+
+  MojoHandle handle = AddHandle(
+      Handle(dispatcher.Clone(), WaitSetDispatcher::kDefaultHandleRights));
+  if (handle == MOJO_HANDLE_INVALID) {
+    LOG(ERROR) << "Handle table full";
+    dispatcher->Close();
+    return MOJO_RESULT_RESOURCE_EXHAUSTED;
+  }
+
+  wait_set_handle.Put(handle);
+  return MOJO_RESULT_OK;
+}
+
+MojoResult Core::WaitSetAdd(MojoHandle wait_set_handle,
+                            MojoHandle handle,
+                            MojoHandleSignals signals,
+                            uint64_t cookie,
+                            UserPointer<const MojoWaitSetAddOptions> options) {
+  if (wait_set_handle == MOJO_HANDLE_INVALID)
+    return MOJO_RESULT_INVALID_ARGUMENT;
+  if (handle == MOJO_HANDLE_INVALID)
+    return MOJO_RESULT_INVALID_ARGUMENT;
+
+  Handle wait_set_h;
+  Handle h;
+  {
+    MutexLocker locker(&handle_table_mutex_);
+    MojoResult result = handle_table_.GetHandle(wait_set_handle, &wait_set_h);
+    if (result != MOJO_RESULT_OK)
+      return result;
+    result = handle_table_.GetHandle(handle, &h);
+    if (result != MOJO_RESULT_OK)
+      return result;
+  }
+
+  if (!wait_set_h.has_all_rights(MOJO_HANDLE_RIGHT_WRITE)) {
+    return wait_set_h.dispatcher->SupportsEntrypointClass(
+               EntrypointClass::WAIT_SET)
+               ? MOJO_RESULT_PERMISSION_DENIED
+               : MOJO_RESULT_INVALID_ARGUMENT;
+  }
+
+  return wait_set_h.dispatcher->WaitSetAdd(std::move(h.dispatcher), signals,
+                                           cookie, options);
+}
+
+MojoResult Core::WaitSetRemove(MojoHandle wait_set_handle, uint64_t cookie) {
+  RefPtr<Dispatcher> wait_set_dispatcher;
+  MojoResult result = GetDispatcherAndCheckRights(
+      wait_set_handle, MOJO_HANDLE_RIGHT_WRITE, EntrypointClass::WAIT_SET,
+      &wait_set_dispatcher);
+  if (result != MOJO_RESULT_OK)
+    return result;
+
+  return wait_set_dispatcher->WaitSetRemove(cookie);
+}
+
+MojoResult Core::WaitSetWait(MojoHandle wait_set_handle,
+                             MojoDeadline deadline,
+                             UserPointer<uint32_t> num_results,
+                             UserPointer<MojoWaitSetResult> results,
+                             UserPointer<uint32_t> max_results) {
+  RefPtr<Dispatcher> wait_set_dispatcher;
+  MojoResult result = GetDispatcherAndCheckRights(
+      wait_set_handle, MOJO_HANDLE_RIGHT_READ, EntrypointClass::WAIT_SET,
+      &wait_set_dispatcher);
+  if (result != MOJO_RESULT_OK)
+    return result;
+
+  return wait_set_dispatcher->WaitSetWait(deadline, num_results, results,
+                                          max_results);
+}
+
 // Note: We allow |handles| to repeat the same handle multiple times, since
 // different flags may be specified.
-// TODO(vtl): This incurs a performance cost in |Remove()|. Analyze this
-// more carefully and address it if necessary.
 MojoResult Core::WaitManyInternal(const MojoHandle* handles,
                                   const MojoHandleSignals* signals,
                                   uint32_t num_handles,
                                   MojoDeadline deadline,
                                   uint64_t* result_index,
                                   HandleSignalsState* signals_states) {
-  DCHECK_GT(num_handles, 0u);
   DCHECK_EQ(*result_index, static_cast<uint64_t>(-1));
 
   DispatcherVector dispatchers;
@@ -792,7 +874,8 @@ MojoResult Core::WaitManyInternal(const MojoHandle* handles,
   MojoResult result = MOJO_RESULT_OK;
   for (i = 0; i < num_handles; i++) {
     result = dispatchers[i]->AddAwakable(
-        &waiter, signals[i], i, signals_states ? &signals_states[i] : nullptr);
+        &waiter, i, false, signals[i],
+        signals_states ? &signals_states[i] : nullptr);
     if (result != MOJO_RESULT_OK) {
       *result_index = i;
       break;
@@ -803,14 +886,14 @@ MojoResult Core::WaitManyInternal(const MojoHandle* handles,
   if (result == MOJO_RESULT_ALREADY_EXISTS)
     result = MOJO_RESULT_OK;  // The i-th one is already "triggered".
   else if (result == MOJO_RESULT_OK)
-    result = waiter.Wait(deadline, result_index);
+    result = waiter.Wait(deadline, result_index, nullptr);
 
   // Make sure no other dispatchers try to wake |waiter| for the current
   // |Wait()|/|WaitMany()| call. (Only after doing this can |waiter| be
   // destroyed, but this would still be required if the waiter were in TLS.)
   for (i = 0; i < num_added; i++) {
     dispatchers[i]->RemoveAwakable(
-        &waiter, signals_states ? &signals_states[i] : nullptr);
+        false, &waiter, 0, signals_states ? &signals_states[i] : nullptr);
   }
   if (signals_states) {
     for (; i < num_handles; i++)

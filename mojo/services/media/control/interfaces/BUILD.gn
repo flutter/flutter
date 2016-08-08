@@ -12,4 +12,9 @@ mojom("interfaces") {
     "media_sink.mojom",
     "media_source.mojom",
   ]
+
+  deps = [
+    "../../common/interfaces",
+    "../../core/interfaces",
+  ]
 }

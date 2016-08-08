@@ -48,6 +48,7 @@ if (is_ios || is_mac) {
     deps = [
       "//base:base",
       "//mojo/public/cpp/application",
+      "//mojo/public/cpp/bindings:utility",
       "//mojo/services/vsync/interfaces",
     ]
   }

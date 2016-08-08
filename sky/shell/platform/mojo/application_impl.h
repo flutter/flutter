@@ -5,6 +5,7 @@
 #ifndef SKY_SHELL_PLATFORM_MOJO_APPLICATION_IMPL_H_
 #define SKY_SHELL_PLATFORM_MOJO_APPLICATION_IMPL_H_
 
+#include "mojo/public/cpp/bindings/binding_set.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/public/interfaces/application/application.mojom.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
@@ -12,7 +13,6 @@
 #include "sky/shell/platform/mojo/platform_view_mojo.h"
 
 #include "mojo/services/ui/views/interfaces/view_provider.mojom.h"
-#include "mojo/common/binding_set.h"
 
 namespace sky {
 namespace shell {

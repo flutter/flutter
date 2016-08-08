@@ -14,9 +14,9 @@ import "mojo/services/media/core/interfaces/timeline_controller.mojom";
 interface MediaSink {
   // TODO(dalesat): Support fanout to many destinations.
 
-  // Gets the consumer for the stream to be delivered.
-  GetConsumer(MediaConsumer& consumer);
+  // Gets the packet consumer for the stream to be delivered.
+  GetPacketConsumer(MediaPacketConsumer& packet_consumer);
 
-  // Request the timeline control site for this sink
-  GetTimelineControlSite(MediaTimelineControlSite& timeline_control_site);
+  // Request the timeline control point for this sink
+  GetTimelineControlPoint(MediaTimelineControlPoint& timeline_control_point);
 };

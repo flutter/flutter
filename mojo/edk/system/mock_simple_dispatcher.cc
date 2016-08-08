@@ -27,8 +27,9 @@ void MockSimpleDispatcher::SetSatisfiedSignals(
   if (new_satisfied_signals == state_.satisfied_signals)
     return;
 
+  HandleSignalsState old_state = state_;
   state_.satisfied_signals = new_satisfied_signals;
-  HandleSignalsStateChangedNoLock();
+  OnHandleSignalsStateChangeNoLock(old_state, state_);
 }
 
 void MockSimpleDispatcher::SetSatisfiableSignals(
@@ -42,8 +43,9 @@ void MockSimpleDispatcher::SetSatisfiableSignals(
   if (new_satisfiable_signals == state_.satisfiable_signals)
     return;
 
+  HandleSignalsState old_state = state_;
   state_.satisfiable_signals = new_satisfiable_signals;
-  HandleSignalsStateChangedNoLock();
+  OnHandleSignalsStateChangeNoLock(old_state, state_);
 }
 
 Dispatcher::Type MockSimpleDispatcher::GetType() const {

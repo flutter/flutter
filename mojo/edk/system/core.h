@@ -23,6 +23,7 @@
 #include "mojo/public/c/system/message_pipe.h"
 #include "mojo/public/c/system/result.h"
 #include "mojo/public/c/system/time.h"
+#include "mojo/public/c/system/wait_set.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -218,6 +219,22 @@ class Core {
                        UserPointer<void*> buffer,
                        MojoMapBufferFlags flags);
   MojoResult UnmapBuffer(UserPointer<void> buffer);
+
+  // These methods correspond to the API functions defined in
+  // "mojo/public/c/system/wait_set.h":
+  MojoResult CreateWaitSet(UserPointer<const MojoCreateWaitSetOptions> options,
+                           UserPointer<MojoHandle> wait_set_handle);
+  MojoResult WaitSetAdd(MojoHandle wait_set_handle,
+                        MojoHandle handle,
+                        MojoHandleSignals signals,
+                        uint64_t cookie,
+                        UserPointer<const MojoWaitSetAddOptions> options);
+  MojoResult WaitSetRemove(MojoHandle wait_set_handle, uint64_t cookie);
+  MojoResult WaitSetWait(MojoHandle wait_set_handle,
+                         MojoDeadline deadline,
+                         UserPointer<uint32_t> num_results,
+                         UserPointer<MojoWaitSetResult> results,
+                         UserPointer<uint32_t> max_results);
 
  private:
   friend bool internal::ShutdownCheckNoLeaks(Core*);

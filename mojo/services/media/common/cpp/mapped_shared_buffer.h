@@ -8,7 +8,6 @@
 #include <memory>
 
 #include "mojo/public/cpp/system/buffer.h"
-#include "mojo/services/media/common/cpp/fifo_allocator.h"
 
 namespace mojo {
 namespace media {
@@ -28,19 +27,25 @@ class MappedSharedBuffer {
   virtual ~MappedSharedBuffer();
 
   // Initializes by creating a new shared buffer of the indicated size.
-  void InitNew(uint64_t size);
+  MojoResult InitNew(uint64_t size);
 
   // Initializes from a handle to an existing shared buffer.
-  void InitFromHandle(ScopedSharedBufferHandle handle);
+  MojoResult InitFromHandle(ScopedSharedBufferHandle handle);
 
   // Indicates whether the buffer is initialized.
   bool initialized() const;
+
+  // Shuts down the buffer.
+  void Reset();
 
   // Gets the size of the buffer.
   uint64_t size() const;
 
   // Gets a duplicate handle for the shared buffer.
   ScopedSharedBufferHandle GetDuplicateHandle() const;
+
+  // Validates an offset and size.
+  bool Validate(uint64_t offset, uint64_t size);
 
   // Translates an offset into a pointer.
   void* PtrFromOffset(uint64_t offset) const;
@@ -49,7 +54,7 @@ class MappedSharedBuffer {
   uint64_t OffsetFromPtr(void* payload_ptr) const;
 
  protected:
-  void InitInternal(const ScopedSharedBufferHandle& handle);
+  MojoResult InitInternal(const ScopedSharedBufferHandle& handle);
 
   // Does nothing. Called when initialization is complete. Subclasses may
   // override.

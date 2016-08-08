@@ -35,7 +35,24 @@ inline bool operator!=(const Point& lhs, const Point& rhs) {
 }
 
 void SetIdentityTransform(Transform* transform);
-void SetTranslationTransform(Transform* transform, float x, float y, float z);
+void SetTranslationTransform(Transform* transform,
+                             float x,
+                             float y,
+                             float z = 0.0f);
+void SetScaleTransform(Transform* transform, float x, float y, float z = 1.0f);
+
+void Translate(Transform* transform, float x, float y, float z = 0.0f);
+void Scale(Transform* transform, float x, float y, float z = 1.0f);
+
+TransformPtr CreateIdentityTransform();
+TransformPtr CreateTranslationTransform(float x, float y, float z = 0.0f);
+TransformPtr CreateScaleTransform(float x, float y, float z = 1.0f);
+
+TransformPtr Translate(TransformPtr transform,
+                       float x,
+                       float y,
+                       float z = 0.0f);
+TransformPtr Scale(TransformPtr transform, float x, float y, float z = 1.0f);
 
 PointF TransformPoint(const Transform& transform, const PointF& point);
 

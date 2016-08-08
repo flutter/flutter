@@ -19,7 +19,7 @@ Waiter::Waiter()
       initialized_(false),
 #endif
       awoken_(false),
-      awake_result_(MOJO_RESULT_INTERNAL),
+      awake_reason_(AwakeReason::CANCELLED),
       awake_context_(static_cast<uint64_t>(-1)) {
 }
 
@@ -30,13 +30,12 @@ void Waiter::Init() {
   initialized_ = true;
 #endif
   awoken_ = false;
-  // NOTE(vtl): If performance ever becomes an issue, we can disable the setting
-  // of |awake_result_| (except the first one in |Awake()|) in Release builds.
-  awake_result_ = MOJO_RESULT_INTERNAL;
 }
 
 // TODO(vtl): Fast-path the |deadline == 0| case?
-MojoResult Waiter::Wait(MojoDeadline deadline, uint64_t* context) {
+MojoResult Waiter::Wait(MojoDeadline deadline,
+                        uint64_t* context,
+                        HandleSignalsState* signals_state) {
   MutexLocker locker(&mutex_);
 
 #ifndef NDEBUG
@@ -47,10 +46,11 @@ MojoResult Waiter::Wait(MojoDeadline deadline, uint64_t* context) {
 
   // Fast-path the already-awoken case:
   if (awoken_) {
-    DCHECK_NE(awake_result_, MOJO_RESULT_INTERNAL);
     if (context)
       *context = awake_context_;
-    return awake_result_;
+    if (signals_state)
+      *signals_state = signals_state_;
+    return MojoResultForAwakeReason(awake_reason_);
   }
 
   if (deadline == MOJO_DEADLINE_INDEFINITE) {
@@ -85,25 +85,28 @@ MojoResult Waiter::Wait(MojoDeadline deadline, uint64_t* context) {
     }
   }
 
-  DCHECK_NE(awake_result_, MOJO_RESULT_INTERNAL);
   if (context)
     *context = awake_context_;
-  return awake_result_;
+  if (signals_state)
+    *signals_state = signals_state_;
+  return MojoResultForAwakeReason(awake_reason_);
 }
 
-bool Waiter::Awake(MojoResult result, uint64_t context) {
+void Waiter::Awake(uint64_t context,
+                   AwakeReason reason,
+                   const HandleSignalsState& signals_state) {
   MutexLocker locker(&mutex_);
 
   if (awoken_)
-    return true;
+    return;
 
   awoken_ = true;
-  awake_result_ = result;
+  awake_reason_ = reason;
+  signals_state_ = signals_state;
   awake_context_ = context;
   cv_.Signal();
   // |cv_.Wait()|/|cv_.WaitWithTimeout()| will return after |mutex_| is
   // released.
-  return true;
 }
 
 }  // namespace system

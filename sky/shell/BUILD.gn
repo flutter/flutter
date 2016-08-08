@@ -61,6 +61,7 @@ source_set("common") {
     "//mojo/data_pipe_utils",
     "//mojo/message_pump",
     "//mojo/public/cpp/application",
+    "//mojo/public/cpp/bindings:utility",
     "//mojo/public/interfaces/application",
     "//mojo/services/asset_bundle/interfaces",
     "//mojo/services/gfx/composition/interfaces",

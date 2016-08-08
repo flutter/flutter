@@ -52,9 +52,9 @@ void TestWriteReadMessage(MessagePipeDispatcher* write_mp,
   // Set up waiting on the read end first (to avoid racing).
   Waiter waiter;
   waiter.Init();
-  ASSERT_EQ(
-      MOJO_RESULT_OK,
-      read_mp->AddAwakable(&waiter, MOJO_HANDLE_SIGNAL_READABLE, 0, nullptr));
+  ASSERT_EQ(MOJO_RESULT_OK,
+            read_mp->AddAwakable(&waiter, 0, false, MOJO_HANDLE_SIGNAL_READABLE,
+                                 nullptr));
 
   // Write a message with just 'x' through the write end.
   EXPECT_EQ(MOJO_RESULT_OK,
@@ -62,8 +62,9 @@ void TestWriteReadMessage(MessagePipeDispatcher* write_mp,
                                    MOJO_WRITE_MESSAGE_FLAG_NONE));
 
   // Wait for it to arrive.
-  EXPECT_EQ(MOJO_RESULT_OK, waiter.Wait(test::ActionTimeout(), nullptr));
-  read_mp->RemoveAwakable(&waiter, nullptr);
+  EXPECT_EQ(MOJO_RESULT_OK,
+            waiter.Wait(test::ActionTimeout(), nullptr, nullptr));
+  read_mp->RemoveAwakable(false, &waiter, 0, nullptr);
 
   // Read the message from the read end.
   char buffer[10] = {};
@@ -93,9 +94,9 @@ RefPtr<MessagePipeDispatcher> SendMessagePipeDispatcher(
   // Set up waiting on the read end first (to avoid racing).
   Waiter waiter;
   waiter.Init();
-  CHECK_EQ(
-      read_mp->AddAwakable(&waiter, MOJO_HANDLE_SIGNAL_READABLE, 0, nullptr),
-      MOJO_RESULT_OK);
+  CHECK_EQ(read_mp->AddAwakable(&waiter, 0, false, MOJO_HANDLE_SIGNAL_READABLE,
+                                nullptr),
+           MOJO_RESULT_OK);
 
   // Write a message with just |mp_handle_to_send| through the write end.
   HandleTransport transport(test::HandleTryStartTransport(mp_handle_to_send));
@@ -109,8 +110,9 @@ RefPtr<MessagePipeDispatcher> SendMessagePipeDispatcher(
   mp_handle_to_send.reset();
 
   // Wait for it to arrive.
-  CHECK_EQ(waiter.Wait(test::ActionTimeout(), nullptr), MOJO_RESULT_OK);
-  read_mp->RemoveAwakable(&waiter, nullptr);
+  CHECK_EQ(waiter.Wait(test::ActionTimeout(), nullptr, nullptr),
+           MOJO_RESULT_OK);
+  read_mp->RemoveAwakable(false, &waiter, 0, nullptr);
 
   // Read the message from the read end.
   HandleVector handles;

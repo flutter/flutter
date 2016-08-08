@@ -29,6 +29,7 @@ source_set("content_handler") {
     "//base",
     "//mojo/environment:chromium",
     "//mojo/message_pump",
+    "//mojo/public/cpp/bindings",
     "//mojo/public/interfaces/application",
     "//mojo/services/content_handler/interfaces",
     "//mojo/services/network/interfaces",

@@ -14,6 +14,7 @@ source_set("ns_net") {
     "//base:base",
     "//mojo/data_pipe_utils",
     "//mojo/public/cpp/application",
+    "//mojo/public/cpp/bindings:utility",
     "//mojo/services/network/interfaces",
   ]
 }

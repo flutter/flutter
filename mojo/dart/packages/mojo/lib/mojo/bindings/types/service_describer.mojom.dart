@@ -24,39 +24,15 @@ class _ServiceDescriberDescribeServiceParams extends bindings.Struct {
     ServiceDescriptionInterfaceRequest this.descriptionRequest
   ) : super(kVersions.last.size);
 
-  static _ServiceDescriberDescribeServiceParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    if (decoder.excessHandles != null) {
-      decoder.excessHandles.forEach((h) => h.close());
-    }
-    return result;
-  }
+  static _ServiceDescriberDescribeServiceParams deserialize(bindings.Message message) =>
+      bindings.Struct.deserialize(decode, message);
 
   static _ServiceDescriberDescribeServiceParams decode(bindings.Decoder decoder0) {
     if (decoder0 == null) {
       return null;
     }
     _ServiceDescriberDescribeServiceParams result = new _ServiceDescriberDescribeServiceParams();
-
-    var mainDataHeader = decoder0.decodeStructDataHeader();
-    if (mainDataHeader.version <= kVersions.last.version) {
-      // Scan in reverse order to optimize for more recent versions.
-      for (int i = kVersions.length - 1; i >= 0; --i) {
-        if (mainDataHeader.version >= kVersions[i].version) {
-          if (mainDataHeader.size == kVersions[i].size) {
-            // Found a match.
-            break;
-          }
-          throw new bindings.MojoCodecError(
-              'Header size doesn\'t correspond to known version size.');
-        }
-      }
-    } else if (mainDataHeader.size < kVersions.last.size) {
-      throw new bindings.MojoCodecError(
-        'Message newer than the last known version cannot be shorter than '
-        'required by the last known version.');
-    }
+    var mainDataHeader = bindings.Struct.checkVersion(decoder0, kVersions);
     if (mainDataHeader.version >= 0) {
       
       result.interfaceName = decoder0.decodeString(8, false);
@@ -70,18 +46,15 @@ class _ServiceDescriberDescribeServiceParams extends bindings.Struct {
 
   void encode(bindings.Encoder encoder) {
     var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
+    const String structName = "_ServiceDescriberDescribeServiceParams";
+    String fieldName;
     try {
+      fieldName = "interfaceName";
       encoder0.encodeString(interfaceName, 8, false);
-    } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "interfaceName of struct _ServiceDescriberDescribeServiceParams: $e";
-      rethrow;
-    }
-    try {
+      fieldName = "descriptionRequest";
       encoder0.encodeInterfaceRequest(descriptionRequest, 16, false);
     } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "descriptionRequest of struct _ServiceDescriberDescribeServiceParams: $e";
+      bindings.Struct.fixErrorMessage(e, fieldName, structName);
       rethrow;
     }
   }
@@ -109,44 +82,27 @@ class _ServiceDescriptionGetTopLevelInterfaceParams extends bindings.Struct {
   _ServiceDescriptionGetTopLevelInterfaceParams.init(
   ) : super(kVersions.last.size);
 
-  static _ServiceDescriptionGetTopLevelInterfaceParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    if (decoder.excessHandles != null) {
-      decoder.excessHandles.forEach((h) => h.close());
-    }
-    return result;
-  }
+  static _ServiceDescriptionGetTopLevelInterfaceParams deserialize(bindings.Message message) =>
+      bindings.Struct.deserialize(decode, message);
 
   static _ServiceDescriptionGetTopLevelInterfaceParams decode(bindings.Decoder decoder0) {
     if (decoder0 == null) {
       return null;
     }
     _ServiceDescriptionGetTopLevelInterfaceParams result = new _ServiceDescriptionGetTopLevelInterfaceParams();
-
-    var mainDataHeader = decoder0.decodeStructDataHeader();
-    if (mainDataHeader.version <= kVersions.last.version) {
-      // Scan in reverse order to optimize for more recent versions.
-      for (int i = kVersions.length - 1; i >= 0; --i) {
-        if (mainDataHeader.version >= kVersions[i].version) {
-          if (mainDataHeader.size == kVersions[i].size) {
-            // Found a match.
-            break;
-          }
-          throw new bindings.MojoCodecError(
-              'Header size doesn\'t correspond to known version size.');
-        }
-      }
-    } else if (mainDataHeader.size < kVersions.last.size) {
-      throw new bindings.MojoCodecError(
-        'Message newer than the last known version cannot be shorter than '
-        'required by the last known version.');
-    }
+    bindings.Struct.checkVersion(decoder0, kVersions);
     return result;
   }
 
   void encode(bindings.Encoder encoder) {
     encoder.getStructEncoderAtOffset(kVersions.last);
+    const String structName = "_ServiceDescriptionGetTopLevelInterfaceParams";
+    String fieldName;
+    try {
+    } on bindings.MojoCodecError catch(e) {
+      bindings.Struct.fixErrorMessage(e, fieldName, structName);
+      rethrow;
+    }
   }
 
   String toString() {
@@ -172,39 +128,15 @@ class ServiceDescriptionGetTopLevelInterfaceResponseParams extends bindings.Stru
     mojom_types_mojom.MojomInterface this.mojomInterface
   ) : super(kVersions.last.size);
 
-  static ServiceDescriptionGetTopLevelInterfaceResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    if (decoder.excessHandles != null) {
-      decoder.excessHandles.forEach((h) => h.close());
-    }
-    return result;
-  }
+  static ServiceDescriptionGetTopLevelInterfaceResponseParams deserialize(bindings.Message message) =>
+      bindings.Struct.deserialize(decode, message);
 
   static ServiceDescriptionGetTopLevelInterfaceResponseParams decode(bindings.Decoder decoder0) {
     if (decoder0 == null) {
       return null;
     }
     ServiceDescriptionGetTopLevelInterfaceResponseParams result = new ServiceDescriptionGetTopLevelInterfaceResponseParams();
-
-    var mainDataHeader = decoder0.decodeStructDataHeader();
-    if (mainDataHeader.version <= kVersions.last.version) {
-      // Scan in reverse order to optimize for more recent versions.
-      for (int i = kVersions.length - 1; i >= 0; --i) {
-        if (mainDataHeader.version >= kVersions[i].version) {
-          if (mainDataHeader.size == kVersions[i].size) {
-            // Found a match.
-            break;
-          }
-          throw new bindings.MojoCodecError(
-              'Header size doesn\'t correspond to known version size.');
-        }
-      }
-    } else if (mainDataHeader.size < kVersions.last.size) {
-      throw new bindings.MojoCodecError(
-        'Message newer than the last known version cannot be shorter than '
-        'required by the last known version.');
-    }
+    var mainDataHeader = bindings.Struct.checkVersion(decoder0, kVersions);
     if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(8, false);
@@ -215,11 +147,13 @@ class ServiceDescriptionGetTopLevelInterfaceResponseParams extends bindings.Stru
 
   void encode(bindings.Encoder encoder) {
     var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
+    const String structName = "ServiceDescriptionGetTopLevelInterfaceResponseParams";
+    String fieldName;
     try {
+      fieldName = "mojomInterface";
       encoder0.encodeStruct(mojomInterface, 8, false);
     } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "mojomInterface of struct ServiceDescriptionGetTopLevelInterfaceResponseParams: $e";
+      bindings.Struct.fixErrorMessage(e, fieldName, structName);
       rethrow;
     }
   }
@@ -249,39 +183,15 @@ class _ServiceDescriptionGetTypeDefinitionParams extends bindings.Struct {
     String this.typeKey
   ) : super(kVersions.last.size);
 
-  static _ServiceDescriptionGetTypeDefinitionParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    if (decoder.excessHandles != null) {
-      decoder.excessHandles.forEach((h) => h.close());
-    }
-    return result;
-  }
+  static _ServiceDescriptionGetTypeDefinitionParams deserialize(bindings.Message message) =>
+      bindings.Struct.deserialize(decode, message);
 
   static _ServiceDescriptionGetTypeDefinitionParams decode(bindings.Decoder decoder0) {
     if (decoder0 == null) {
       return null;
     }
     _ServiceDescriptionGetTypeDefinitionParams result = new _ServiceDescriptionGetTypeDefinitionParams();
-
-    var mainDataHeader = decoder0.decodeStructDataHeader();
-    if (mainDataHeader.version <= kVersions.last.version) {
-      // Scan in reverse order to optimize for more recent versions.
-      for (int i = kVersions.length - 1; i >= 0; --i) {
-        if (mainDataHeader.version >= kVersions[i].version) {
-          if (mainDataHeader.size == kVersions[i].size) {
-            // Found a match.
-            break;
-          }
-          throw new bindings.MojoCodecError(
-              'Header size doesn\'t correspond to known version size.');
-        }
-      }
-    } else if (mainDataHeader.size < kVersions.last.size) {
-      throw new bindings.MojoCodecError(
-        'Message newer than the last known version cannot be shorter than '
-        'required by the last known version.');
-    }
+    var mainDataHeader = bindings.Struct.checkVersion(decoder0, kVersions);
     if (mainDataHeader.version >= 0) {
       
       result.typeKey = decoder0.decodeString(8, false);
@@ -291,11 +201,13 @@ class _ServiceDescriptionGetTypeDefinitionParams extends bindings.Struct {
 
   void encode(bindings.Encoder encoder) {
     var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
+    const String structName = "_ServiceDescriptionGetTypeDefinitionParams";
+    String fieldName;
     try {
+      fieldName = "typeKey";
       encoder0.encodeString(typeKey, 8, false);
     } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "typeKey of struct _ServiceDescriptionGetTypeDefinitionParams: $e";
+      bindings.Struct.fixErrorMessage(e, fieldName, structName);
       rethrow;
     }
   }
@@ -325,39 +237,15 @@ class ServiceDescriptionGetTypeDefinitionResponseParams extends bindings.Struct 
     mojom_types_mojom.UserDefinedType this.type
   ) : super(kVersions.last.size);
 
-  static ServiceDescriptionGetTypeDefinitionResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    if (decoder.excessHandles != null) {
-      decoder.excessHandles.forEach((h) => h.close());
-    }
-    return result;
-  }
+  static ServiceDescriptionGetTypeDefinitionResponseParams deserialize(bindings.Message message) =>
+      bindings.Struct.deserialize(decode, message);
 
   static ServiceDescriptionGetTypeDefinitionResponseParams decode(bindings.Decoder decoder0) {
     if (decoder0 == null) {
       return null;
     }
     ServiceDescriptionGetTypeDefinitionResponseParams result = new ServiceDescriptionGetTypeDefinitionResponseParams();
-
-    var mainDataHeader = decoder0.decodeStructDataHeader();
-    if (mainDataHeader.version <= kVersions.last.version) {
-      // Scan in reverse order to optimize for more recent versions.
-      for (int i = kVersions.length - 1; i >= 0; --i) {
-        if (mainDataHeader.version >= kVersions[i].version) {
-          if (mainDataHeader.size == kVersions[i].size) {
-            // Found a match.
-            break;
-          }
-          throw new bindings.MojoCodecError(
-              'Header size doesn\'t correspond to known version size.');
-        }
-      }
-    } else if (mainDataHeader.size < kVersions.last.size) {
-      throw new bindings.MojoCodecError(
-        'Message newer than the last known version cannot be shorter than '
-        'required by the last known version.');
-    }
+    var mainDataHeader = bindings.Struct.checkVersion(decoder0, kVersions);
     if (mainDataHeader.version >= 0) {
       
         result.type = mojom_types_mojom.UserDefinedType.decode(decoder0, 8);
@@ -367,11 +255,13 @@ class ServiceDescriptionGetTypeDefinitionResponseParams extends bindings.Struct 
 
   void encode(bindings.Encoder encoder) {
     var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
+    const String structName = "ServiceDescriptionGetTypeDefinitionResponseParams";
+    String fieldName;
     try {
+      fieldName = "type";
       encoder0.encodeUnion(type, 8, true);
     } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "type of struct ServiceDescriptionGetTypeDefinitionResponseParams: $e";
+      bindings.Struct.fixErrorMessage(e, fieldName, structName);
       rethrow;
     }
   }
@@ -399,44 +289,27 @@ class _ServiceDescriptionGetAllTypeDefinitionsParams extends bindings.Struct {
   _ServiceDescriptionGetAllTypeDefinitionsParams.init(
   ) : super(kVersions.last.size);
 
-  static _ServiceDescriptionGetAllTypeDefinitionsParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    if (decoder.excessHandles != null) {
-      decoder.excessHandles.forEach((h) => h.close());
-    }
-    return result;
-  }
+  static _ServiceDescriptionGetAllTypeDefinitionsParams deserialize(bindings.Message message) =>
+      bindings.Struct.deserialize(decode, message);
 
   static _ServiceDescriptionGetAllTypeDefinitionsParams decode(bindings.Decoder decoder0) {
     if (decoder0 == null) {
       return null;
     }
     _ServiceDescriptionGetAllTypeDefinitionsParams result = new _ServiceDescriptionGetAllTypeDefinitionsParams();
-
-    var mainDataHeader = decoder0.decodeStructDataHeader();
-    if (mainDataHeader.version <= kVersions.last.version) {
-      // Scan in reverse order to optimize for more recent versions.
-      for (int i = kVersions.length - 1; i >= 0; --i) {
-        if (mainDataHeader.version >= kVersions[i].version) {
-          if (mainDataHeader.size == kVersions[i].size) {
-            // Found a match.
-            break;
-          }
-          throw new bindings.MojoCodecError(
-              'Header size doesn\'t correspond to known version size.');
-        }
-      }
-    } else if (mainDataHeader.size < kVersions.last.size) {
-      throw new bindings.MojoCodecError(
-        'Message newer than the last known version cannot be shorter than '
-        'required by the last known version.');
-    }
+    bindings.Struct.checkVersion(decoder0, kVersions);
     return result;
   }
 
   void encode(bindings.Encoder encoder) {
     encoder.getStructEncoderAtOffset(kVersions.last);
+    const String structName = "_ServiceDescriptionGetAllTypeDefinitionsParams";
+    String fieldName;
+    try {
+    } on bindings.MojoCodecError catch(e) {
+      bindings.Struct.fixErrorMessage(e, fieldName, structName);
+      rethrow;
+    }
   }
 
   String toString() {
@@ -462,39 +335,15 @@ class ServiceDescriptionGetAllTypeDefinitionsResponseParams extends bindings.Str
     Map<String, mojom_types_mojom.UserDefinedType> this.definitions
   ) : super(kVersions.last.size);
 
-  static ServiceDescriptionGetAllTypeDefinitionsResponseParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    if (decoder.excessHandles != null) {
-      decoder.excessHandles.forEach((h) => h.close());
-    }
-    return result;
-  }
+  static ServiceDescriptionGetAllTypeDefinitionsResponseParams deserialize(bindings.Message message) =>
+      bindings.Struct.deserialize(decode, message);
 
   static ServiceDescriptionGetAllTypeDefinitionsResponseParams decode(bindings.Decoder decoder0) {
     if (decoder0 == null) {
       return null;
     }
     ServiceDescriptionGetAllTypeDefinitionsResponseParams result = new ServiceDescriptionGetAllTypeDefinitionsResponseParams();
-
-    var mainDataHeader = decoder0.decodeStructDataHeader();
-    if (mainDataHeader.version <= kVersions.last.version) {
-      // Scan in reverse order to optimize for more recent versions.
-      for (int i = kVersions.length - 1; i >= 0; --i) {
-        if (mainDataHeader.version >= kVersions[i].version) {
-          if (mainDataHeader.size == kVersions[i].size) {
-            // Found a match.
-            break;
-          }
-          throw new bindings.MojoCodecError(
-              'Header size doesn\'t correspond to known version size.');
-        }
-      }
-    } else if (mainDataHeader.size < kVersions.last.size) {
-      throw new bindings.MojoCodecError(
-        'Message newer than the last known version cannot be shorter than '
-        'required by the last known version.');
-    }
+    var mainDataHeader = bindings.Struct.checkVersion(decoder0, kVersions);
     if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(8, true);
@@ -541,7 +390,10 @@ class ServiceDescriptionGetAllTypeDefinitionsResponseParams extends bindings.Str
 
   void encode(bindings.Encoder encoder) {
     var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
+    const String structName = "ServiceDescriptionGetAllTypeDefinitionsResponseParams";
+    String fieldName;
     try {
+      fieldName = "definitions";
       if (definitions == null) {
         encoder0.encodeNullPointer(8, true);
       } else {
@@ -564,8 +416,7 @@ class ServiceDescriptionGetAllTypeDefinitionsResponseParams extends bindings.Str
         }
       }
     } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "definitions of struct ServiceDescriptionGetAllTypeDefinitionsResponseParams: $e";
+      bindings.Struct.fixErrorMessage(e, fieldName, structName);
       rethrow;
     }
   }
@@ -909,52 +760,28 @@ class _ServiceDescriptionProxyControl
   void handleResponse(bindings.ServiceMessage message) {
     switch (message.header.type) {
       case _serviceDescriptionMethodGetTopLevelInterfaceName:
-        var r = ServiceDescriptionGetTopLevelInterfaceResponseParams.deserialize(
-            message.payload);
-        if (!message.header.hasRequestId) {
-          proxyError("Expected a message with a valid request Id.");
-          return;
+        Function callback = getCallback(message);
+        if (callback != null) {
+          var r = ServiceDescriptionGetTopLevelInterfaceResponseParams.deserialize(
+              message.payload);
+          callback(r.mojomInterface );
         }
-        Function callback = callbackMap[message.header.requestId];
-        if (callback == null) {
-          proxyError(
-              "Message had unknown request Id: ${message.header.requestId}");
-          return;
-        }
-        callbackMap.remove(message.header.requestId);
-        callback(r.mojomInterface );
         break;
       case _serviceDescriptionMethodGetTypeDefinitionName:
-        var r = ServiceDescriptionGetTypeDefinitionResponseParams.deserialize(
-            message.payload);
-        if (!message.header.hasRequestId) {
-          proxyError("Expected a message with a valid request Id.");
-          return;
+        Function callback = getCallback(message);
+        if (callback != null) {
+          var r = ServiceDescriptionGetTypeDefinitionResponseParams.deserialize(
+              message.payload);
+          callback(r.type );
         }
-        Function callback = callbackMap[message.header.requestId];
-        if (callback == null) {
-          proxyError(
-              "Message had unknown request Id: ${message.header.requestId}");
-          return;
-        }
-        callbackMap.remove(message.header.requestId);
-        callback(r.type );
         break;
       case _serviceDescriptionMethodGetAllTypeDefinitionsName:
-        var r = ServiceDescriptionGetAllTypeDefinitionsResponseParams.deserialize(
-            message.payload);
-        if (!message.header.hasRequestId) {
-          proxyError("Expected a message with a valid request Id.");
-          return;
+        Function callback = getCallback(message);
+        if (callback != null) {
+          var r = ServiceDescriptionGetAllTypeDefinitionsResponseParams.deserialize(
+              message.payload);
+          callback(r.definitions );
         }
-        Function callback = callbackMap[message.header.requestId];
-        if (callback == null) {
-          proxyError(
-              "Message had unknown request Id: ${message.header.requestId}");
-          return;
-        }
-        callbackMap.remove(message.header.requestId);
-        callback(r.definitions );
         break;
       default:
         proxyError("Unexpected message type: ${message.header.type}");
@@ -1001,12 +828,12 @@ class ServiceDescriptionProxy
 
   void getTopLevelInterface(void callback(mojom_types_mojom.MojomInterface mojomInterface)) {
     if (impl != null) {
-      impl.getTopLevelInterface(callback);
+      impl.getTopLevelInterface(callback ?? bindings.DoNothingFunction.fn);
       return;
     }
     var params = new _ServiceDescriptionGetTopLevelInterfaceParams();
     Function zonedCallback;
-    if (identical(Zone.current, Zone.ROOT)) {
+    if ((callback == null) || identical(Zone.current, Zone.ROOT)) {
       zonedCallback = callback;
     } else {
       Zone z = Zone.current;
@@ -1025,13 +852,13 @@ class ServiceDescriptionProxy
   }
   void getTypeDefinition(String typeKey,void callback(mojom_types_mojom.UserDefinedType type)) {
     if (impl != null) {
-      impl.getTypeDefinition(typeKey,callback);
+      impl.getTypeDefinition(typeKey,callback ?? bindings.DoNothingFunction.fn);
       return;
     }
     var params = new _ServiceDescriptionGetTypeDefinitionParams();
     params.typeKey = typeKey;
     Function zonedCallback;
-    if (identical(Zone.current, Zone.ROOT)) {
+    if ((callback == null) || identical(Zone.current, Zone.ROOT)) {
       zonedCallback = callback;
     } else {
       Zone z = Zone.current;
@@ -1050,12 +877,12 @@ class ServiceDescriptionProxy
   }
   void getAllTypeDefinitions(void callback(Map<String, mojom_types_mojom.UserDefinedType> definitions)) {
     if (impl != null) {
-      impl.getAllTypeDefinitions(callback);
+      impl.getAllTypeDefinitions(callback ?? bindings.DoNothingFunction.fn);
       return;
     }
     var params = new _ServiceDescriptionGetAllTypeDefinitionsParams();
     Function zonedCallback;
-    if (identical(Zone.current, Zone.ROOT)) {
+    if ((callback == null) || identical(Zone.current, Zone.ROOT)) {
       zonedCallback = callback;
     } else {
       Zone z = Zone.current;

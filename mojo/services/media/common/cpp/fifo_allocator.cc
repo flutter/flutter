@@ -67,22 +67,22 @@ uint64_t FifoAllocator::AllocateRegion(uint64_t size) {
   return allocated->offset;
 }
 
-void FifoAllocator::ReleaseRegion(uint64_t size, uint64_t offset) {
+void FifoAllocator::ReleaseRegion(uint64_t offset) {
   // Start at active_->next. That's usually the region we're looking for.
-  bool released = Release(size, offset, active_->next, nullptr) ||
-                  Release(size, offset, front_, active_);
+  bool released = Release(offset, active_->next, nullptr) ||
+                  Release(offset, front_, active_);
   MOJO_DCHECK(released);
 }
 
-bool FifoAllocator::Release(uint64_t size,
-                            uint64_t offset,
-                            Region* begin,
-                            Region* end) {
+bool FifoAllocator::AnyCurrentAllocatedRegions() const {
+  return front_ != back_ || front_ != active_;
+}
+
+bool FifoAllocator::Release(uint64_t offset, Region* begin, Region* end) {
   MOJO_DCHECK(begin != nullptr || end == nullptr);
   for (Region* region = begin; region != end; region = region->next) {
     if (region->offset == offset) {
       MOJO_DCHECK(region->allocated);
-      MOJO_DCHECK(region->size == size);
       region->allocated = false;
 
       Region* prev = region->prev;

@@ -1,0 +1,16 @@
+// Copyright 2016 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[DartPackage="mojo_services"]
+module mojo.media.logs;
+
+import "mojo/services/media/common/interfaces/media_types.mojom";
+
+[ServiceName="mojo::media::logs::MediaSinkChannel"]
+interface MediaSinkChannel {
+  Config(MediaType input_type,
+      MediaType output_type,
+      uint64 consumer_address,
+      uint64 producer_address);
+};

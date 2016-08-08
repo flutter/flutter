@@ -14,7 +14,9 @@
 namespace mojo {
 namespace system {
 
-// An |Awakable| implementation that just calls a given callback object.
+// An |Awakable| implementation that just calls a given callback object. It
+// should be used in a non-persistent way (i.e., |Awake()| should be called at
+// most once by each source, and only for "leading edges").
 class AsyncWaiter final : public Awakable {
  public:
   using AwakeCallback = std::function<void(MojoResult)>;
@@ -25,7 +27,9 @@ class AsyncWaiter final : public Awakable {
 
  private:
   // |Awakable| implementation:
-  bool Awake(MojoResult result, uint64_t context) override;
+  void Awake(uint64_t context,
+             AwakeReason reason,
+             const HandleSignalsState& signals_state) override;
 
   AwakeCallback callback_;
 

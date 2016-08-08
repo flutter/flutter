@@ -13,9 +13,9 @@ interface MediaTypeConverter {
   // Gets the converter’s output type.
   GetOutputType() => (MediaType output_type);
 
-  // Gets the consumer.
-  GetConsumer(MediaConsumer& consumer);
+  // Gets the packet consumer.
+  GetPacketConsumer(MediaPacketConsumer& packet_consumer);
 
-  // Gets the producer.
-  GetProducer(MediaProducer& producer);
+  // Gets the packet producer.
+  GetPacketProducer(MediaPacketProducer& packet_producer);
 };

@@ -97,11 +97,13 @@ class MessagePipeDispatcher final : public Dispatcher {
                                    MojoReadMessageFlags flags) override;
   HandleSignalsState GetHandleSignalsStateImplNoLock() const override;
   MojoResult AddAwakableImplNoLock(Awakable* awakable,
-                                   MojoHandleSignals signals,
-                                   bool force,
                                    uint64_t context,
+                                   bool persistent,
+                                   MojoHandleSignals signals,
                                    HandleSignalsState* signals_state) override;
-  void RemoveAwakableImplNoLock(Awakable* awakable,
+  void RemoveAwakableImplNoLock(bool match_context,
+                                Awakable* awakable,
+                                uint64_t context,
                                 HandleSignalsState* signals_state) override;
   void StartSerializeImplNoLock(Channel* channel,
                                 size_t* max_size,

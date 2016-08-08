@@ -42,39 +42,15 @@ class UrlResponse extends bindings.Struct {
     String this.redirectReferrer
   ) : super(kVersions.last.size);
 
-  static UrlResponse deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    if (decoder.excessHandles != null) {
-      decoder.excessHandles.forEach((h) => h.close());
-    }
-    return result;
-  }
+  static UrlResponse deserialize(bindings.Message message) =>
+      bindings.Struct.deserialize(decode, message);
 
   static UrlResponse decode(bindings.Decoder decoder0) {
     if (decoder0 == null) {
       return null;
     }
     UrlResponse result = new UrlResponse();
-
-    var mainDataHeader = decoder0.decodeStructDataHeader();
-    if (mainDataHeader.version <= kVersions.last.version) {
-      // Scan in reverse order to optimize for more recent versions.
-      for (int i = kVersions.length - 1; i >= 0; --i) {
-        if (mainDataHeader.version >= kVersions[i].version) {
-          if (mainDataHeader.size == kVersions[i].size) {
-            // Found a match.
-            break;
-          }
-          throw new bindings.MojoCodecError(
-              'Header size doesn\'t correspond to known version size.');
-        }
-      }
-    } else if (mainDataHeader.size < kVersions.last.size) {
-      throw new bindings.MojoCodecError(
-        'Message newer than the last known version cannot be shorter than '
-        'required by the last known version.');
-    }
+    var mainDataHeader = bindings.Struct.checkVersion(decoder0, kVersions);
     if (mainDataHeader.version >= 0) {
       
       var decoder1 = decoder0.decodePointer(8, true);
@@ -136,42 +112,20 @@ class UrlResponse extends bindings.Struct {
 
   void encode(bindings.Encoder encoder) {
     var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
+    const String structName = "UrlResponse";
+    String fieldName;
     try {
+      fieldName = "error";
       encoder0.encodeStruct(error, 8, true);
-    } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "error of struct UrlResponse: $e";
-      rethrow;
-    }
-    try {
+      fieldName = "body";
       encoder0.encodeConsumerHandle(body, 16, true);
-    } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "body of struct UrlResponse: $e";
-      rethrow;
-    }
-    try {
+      fieldName = "statusCode";
       encoder0.encodeUint32(statusCode, 20);
-    } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "statusCode of struct UrlResponse: $e";
-      rethrow;
-    }
-    try {
+      fieldName = "url";
       encoder0.encodeString(url, 24, true);
-    } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "url of struct UrlResponse: $e";
-      rethrow;
-    }
-    try {
+      fieldName = "statusLine";
       encoder0.encodeString(statusLine, 32, true);
-    } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "statusLine of struct UrlResponse: $e";
-      rethrow;
-    }
-    try {
+      fieldName = "headers";
       if (headers == null) {
         encoder0.encodeNullPointer(40, true);
       } else {
@@ -180,44 +134,18 @@ class UrlResponse extends bindings.Struct {
           encoder1.encodeStruct(headers[i0], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i0, false);
         }
       }
-    } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "headers of struct UrlResponse: $e";
-      rethrow;
-    }
-    try {
+      fieldName = "mimeType";
       encoder0.encodeString(mimeType, 48, true);
-    } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "mimeType of struct UrlResponse: $e";
-      rethrow;
-    }
-    try {
+      fieldName = "charset";
       encoder0.encodeString(charset, 56, true);
-    } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "charset of struct UrlResponse: $e";
-      rethrow;
-    }
-    try {
+      fieldName = "redirectMethod";
       encoder0.encodeString(redirectMethod, 64, true);
-    } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "redirectMethod of struct UrlResponse: $e";
-      rethrow;
-    }
-    try {
+      fieldName = "redirectUrl";
       encoder0.encodeString(redirectUrl, 72, true);
-    } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "redirectUrl of struct UrlResponse: $e";
-      rethrow;
-    }
-    try {
+      fieldName = "redirectReferrer";
       encoder0.encodeString(redirectReferrer, 80, true);
     } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "redirectReferrer of struct UrlResponse: $e";
+      bindings.Struct.fixErrorMessage(e, fieldName, structName);
       rethrow;
     }
   }

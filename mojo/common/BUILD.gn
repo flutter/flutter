@@ -6,37 +6,22 @@ import("//mojo/public/mojo_application.gni")
 import("//mojo/public/tools/bindings/mojom.gni")
 import("//testing/test.gni")
 
-source_set("common") {
-  sources = [
-    "binding_set.h",
-    "interface_ptr_set.h",
-    "strong_binding_set.h",
-  ]
-
-  deps = [
-    "//base",
-    "//mojo/public/cpp/bindings",
-  ]
+# TODO(vtl): Remove this when tonic stops depending on a :common target.
+group("common") {
 }
 
+# TODO(vtl): callback_binding_unittest.cc is orphaned. This target (and
+# :mojo_common_apptests) should be moved somewhere else, but where?
 source_set("tests") {
   testonly = true
 
   sources = [
-    "binding_set_unittest.cc",
     "callback_binding_unittest.cc",
-    "interface_ptr_set_unittest.cc",
-    "strong_binding_set_unittest.cc",
   ]
 
   deps = [
-    ":common",
-    ":test_interfaces",
     "//base",
-    "//mojo/message_pump",
     "//mojo/public/cpp/bindings",
-    "//mojo/public/cpp/bindings:callback",
-    "//mojo/public/cpp/system",
     "//testing/gtest",
   ]
 }
@@ -51,13 +36,7 @@ mojo_native_application("mojo_common_apptests") {
   ]
 }
 
-mojom("test_interfaces") {
-  testonly = true
-  sources = [
-    "test_interfaces.mojom",
-  ]
-}
-
+# TODO(vtl): This should probably be moved into its own directory.
 source_set("tracing_impl") {
   sources = [
     "trace_provider_impl.cc",

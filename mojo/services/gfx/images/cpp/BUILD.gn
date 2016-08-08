@@ -19,6 +19,7 @@ mojo_sdk_source_set("lib") {
   ]
 
   deps = [
+    "$mojo_sdk_root/mojo/public/cpp/bindings",
     "../interfaces",
   ]
 }

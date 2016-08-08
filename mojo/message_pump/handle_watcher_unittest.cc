@@ -400,7 +400,7 @@ void RunStressTest(int count,
     MessagePipe pipe;
     HandleWatcher watcher;
   };
-  ScopedVector<TestData> data_vector;
+  std::vector<std::unique_ptr<TestData>> data_vector;
   for (int i = 0; i < count; ++i) {
     if (i % 20 == 0) {
       // Every so often we wait. This results in some level of thread balancing
@@ -426,7 +426,7 @@ void RunStressTest(int count,
                     MOJO_HANDLE_SIGNAL_READABLE,
                     MOJO_DEADLINE_INDEFINITE,
                     base::Bind(&NeverReached));
-      data_vector.push_back(test_data.release());
+      data_vector.push_back(std::move(test_data));
     }
     if (i % 15 == 0)
       data_vector.clear();
@@ -452,7 +452,7 @@ TEST(HandleWatcherCleanEnvironmentTest, StressTest) {
   base::ShadowingAtExitManager at_exit;
   base::MessageLoop message_loop;
   base::RunLoop run_loop;
-  ScopedVector<base::Thread> threads;
+  std::vector<std::unique_ptr<base::Thread>> threads;
   int threads_active_counter = kThreadCount;
   // Starts the threads first and then post the task in hopes of having more
   // threads running at once.
@@ -466,7 +466,7 @@ TEST(HandleWatcherCleanEnvironmentTest, StressTest) {
     } else {
       thread->Start();
     }
-    threads.push_back(thread.release());
+    threads.push_back(std::move(thread));
   }
   for (int i = 0; i < kThreadCount; ++i) {
     threads[i]->task_runner()->PostTask(

@@ -10,6 +10,7 @@ class MojoHandleWatcher {
   static const int _REMOVE = 1;
   static const int _CLOSE = 2;
   static const int _TIMER = 3;
+  // ignore: unused_field
   static const int _SHUTDOWN = 4;
 
   static const int _kMojoHandleInvalid = 0;
@@ -17,10 +18,8 @@ class MojoHandleWatcher {
 
   static int mojoControlHandle;
 
-  static int _sendControlData(int command,
-                              int handleOrDeadline,
-                              SendPort port,
-                              int signals) {
+  static int _sendControlData(
+      int command, int handleOrDeadline, SendPort port, int signals) {
     int controlHandle = mojoControlHandle;
     if (controlHandle == _kMojoHandleInvalid) {
       return _kMojoResultFailedPrecondition;

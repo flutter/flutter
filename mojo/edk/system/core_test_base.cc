@@ -170,10 +170,35 @@ class MockDispatcher : public Dispatcher {
     return MOJO_RESULT_UNIMPLEMENTED;
   }
 
+  MojoResult WaitSetAddImpl(
+      RefPtr<Dispatcher>&& /*dispatcher*/,
+      MojoHandleSignals /*signals*/,
+      uint64_t /*cookie*/,
+      UserPointer<const MojoWaitSetAddOptions> /*options*/) override {
+    info_->IncrementWaitSetAddCallCount();
+    // Note: |mutex()| is *not* held.
+    return MOJO_RESULT_UNIMPLEMENTED;
+  }
+
+  MojoResult WaitSetRemoveImpl(uint64_t /*cookie*/) override {
+    info_->IncrementWaitSetRemoveCallCount();
+    // Note: |mutex()| is *not* held.
+    return MOJO_RESULT_UNIMPLEMENTED;
+  }
+
+  MojoResult WaitSetWaitImpl(MojoDeadline /*deadline*/,
+                             UserPointer<uint32_t> /*num_results*/,
+                             UserPointer<MojoWaitSetResult> /*results*/,
+                             UserPointer<uint32_t> /*max_results*/) override {
+    info_->IncrementWaitSetWaitCallCount();
+    // Note: |mutex()| is *not* held.
+    return MOJO_RESULT_UNIMPLEMENTED;
+  }
+
   MojoResult AddAwakableImplNoLock(Awakable* awakable,
-                                   MojoHandleSignals /*signals*/,
-                                   bool /*force*/,
                                    uint64_t /*context*/,
+                                   bool /*persistent*/,
+                                   MojoHandleSignals /*signals*/,
                                    HandleSignalsState* signals_state) override {
     info_->IncrementAddAwakableCallCount();
     mutex().AssertHeld();
@@ -187,7 +212,9 @@ class MockDispatcher : public Dispatcher {
     return MOJO_RESULT_FAILED_PRECONDITION;
   }
 
-  void RemoveAwakableImplNoLock(Awakable* /*awakable*/,
+  void RemoveAwakableImplNoLock(bool /*match_context*/,
+                                Awakable* /*awakable*/,
+                                uint64_t /*context*/,
                                 HandleSignalsState* signals_state) override {
     info_->IncrementRemoveAwakableCallCount();
     mutex().AssertHeld();
@@ -330,6 +357,21 @@ unsigned CoreTestBase_MockHandleInfo::GetMapBufferCallCount() const {
   return map_buffer_call_count_;
 }
 
+unsigned CoreTestBase_MockHandleInfo::GetWaitSetAddCallCount() const {
+  MutexLocker locker(&mutex_);
+  return wait_set_add_call_count_;
+}
+
+unsigned CoreTestBase_MockHandleInfo::GetWaitSetRemoveCallCount() const {
+  MutexLocker locker(&mutex_);
+  return wait_set_remove_call_count_;
+}
+
+unsigned CoreTestBase_MockHandleInfo::GetWaitSetWaitCallCount() const {
+  MutexLocker locker(&mutex_);
+  return wait_set_wait_call_count_;
+}
+
 unsigned CoreTestBase_MockHandleInfo::GetAddAwakableCallCount() const {
   MutexLocker locker(&mutex_);
   return add_awakable_call_count_;
@@ -428,6 +470,21 @@ void CoreTestBase_MockHandleInfo::IncrementGetBufferInformationCallCount() {
 void CoreTestBase_MockHandleInfo::IncrementMapBufferCallCount() {
   MutexLocker locker(&mutex_);
   map_buffer_call_count_++;
+}
+
+void CoreTestBase_MockHandleInfo::IncrementWaitSetAddCallCount() {
+  MutexLocker locker(&mutex_);
+  wait_set_add_call_count_++;
+}
+
+void CoreTestBase_MockHandleInfo::IncrementWaitSetRemoveCallCount() {
+  MutexLocker locker(&mutex_);
+  wait_set_remove_call_count_++;
+}
+
+void CoreTestBase_MockHandleInfo::IncrementWaitSetWaitCallCount() {
+  MutexLocker locker(&mutex_);
+  wait_set_wait_call_count_++;
 }
 
 void CoreTestBase_MockHandleInfo::IncrementAddAwakableCallCount() {

@@ -101,12 +101,14 @@ class MessagePipe final : public ChannelEndpointClient {
   HandleSignalsState GetHandleSignalsState(unsigned port) const;
   MojoResult AddAwakable(unsigned port,
                          Awakable* awakable,
-                         MojoHandleSignals signals,
-                         bool force,
                          uint64_t context,
+                         bool persistent,
+                         MojoHandleSignals signals,
                          HandleSignalsState* signals_state);
   void RemoveAwakable(unsigned port,
+                      bool match_context,
                       Awakable* awakable,
+                      uint64_t context,
                       HandleSignalsState* signals_state);
   void StartSerialize(unsigned port,
                       Channel* channel,

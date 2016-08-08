@@ -6,6 +6,7 @@ import("//build/module_args/mojo.gni")
 import("$mojo_sdk_root/mojo/public/mojo_sdk.gni")
 
 mojo_sdk_source_set("cpp") {
+  restrict_external_deps = false
   sources = [
     "flog.cc",
     "flog.h",

@@ -40,6 +40,7 @@ template void CheckUserPointerWithCount<1, 1>(const void*, size_t);
 template void CheckUserPointerWithCount<4, 4>(const void*, size_t);
 template void CheckUserPointerWithCount<8, 4>(const void*, size_t);
 template void CheckUserPointerWithCount<8, 8>(const void*, size_t);
+template void CheckUserPointerWithCount<24, 8>(const void*, size_t);
 
 template <size_t alignment>
 void CheckUserPointerWithSize(const void* pointer, size_t size) {

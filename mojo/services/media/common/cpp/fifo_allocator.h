@@ -77,7 +77,10 @@ class FifoAllocator {
   uint64_t AllocateRegion(uint64_t size);
 
   // Releases a previously-allocated region.
-  void ReleaseRegion(uint64_t size, uint64_t offset);
+  void ReleaseRegion(uint64_t offset);
+
+  // Determines if there are currently any allocated regions.
+  bool AnyCurrentAllocatedRegions() const;
 
  private:
   // List element to track allocated and free regions.
@@ -93,7 +96,7 @@ class FifoAllocator {
 
   // Releases the specified region if it's found between begin (inclusive) and
   // end (exclusive).
-  bool Release(uint64_t size, uint64_t offset, Region* begin, Region* end);
+  bool Release(uint64_t offset, Region* begin, Region* end);
 
   // Advances the active region to one that's at least the specified size.
   // Returns false if none could be found.

@@ -8,98 +8,65 @@ module mojo.media;
 import "mojo/services/media/common/interfaces/media_common.mojom";
 import "mojo/services/media/common/interfaces/media_types.mojom";
 
-// MediaPacketRegion
-//
-// A small structure used to keep track of a portion of a shared buffer used by
-// a MediaPacket to hold its payload.
-struct MediaPacketRegion {
-  uint64 offset;
-  uint64 length;
-};
-
-// MediaPacket
-//
-// A structure which hold the definition of an atomic unit of media which may be
-// sent across a media pipe.  MediaPackets consist of the metadata for the unit
-// of media, as well as the set of offset/lengths in the pipe's shared buffer
-// which define the payload of the packet itself.
+// Describes a fragment of media content, including metadata and a locator for
+// the payload.
 struct MediaPacket {
   const int64 kNoTimestamp = 0x7fffffffffffffff;
 
-  // Presentation Time Stamp.  Time at which the media should be presented,
+  // Presentation Time Stamp. Time at which the media should be presented,
   // according to the media timeline.
   int64 pts = kNoTimestamp;
 
   // Indicates whether this is the last packet in the stream.
   bool end_of_stream;
 
-  // Bookkeeping to determine where this MediaPacket's payload exists in its
-  // MediaPipe's shared buffer.
-  //
-  // For simple cases, only the payload field is used.  It provides the offset
-  // into the shared buffer for the payload, as well as its length.  In more
-  // complicated cases (circular buffer, arbitrary scatter-gather), additional
-  // regions may be described in the extra_payload array.  Logically, the
-  // payload is the concatination of the payload region, followed by the extra
-  // payload regions, from index 0 to index N-1.
-  //
-  // TODO(johngro): Depending on what happens with mojo struct marshalling,
-  // consider merging payload and extra_payload into just a single array.  The
-  // intention was to not need any extra allocations if there way only a single
-  // payload region, but right now we always need to allocate an array, even if
-  // it is zero length.  If this is not going to change, then we should just
-  // merge these two fields.
-  MediaPacketRegion payload;
-  array<MediaPacketRegion>? extra_payload;
+  // TODO(dalesat): Add ability to reference payload in texture memory.
 
-  // TODO(johngro): do we need to describe the MediaType of this payload, or is
-  // its type implicit based on the channel over which it is being pushed?
+  // Identifier of the shared buffer that contains the payload for this packet.
+  // This identifier must be established by a call to MediaPacketConsumer's
+  // AddPayloadBuffer method before it can be used.
+  uint32 payload_buffer_id;
 
-  // TODO(johngro): how do we attach per-packet media specific metadata to this
-  // packet?
+  // Offset of the packet payload in the indicated shared buffer.
+  uint64 payload_offset;
+
+  // Size in bytes of the packet payload.
+  uint64 payload_size;
 };
 
-// Models a stream producer. A MediaProducer allows a client to connect the
-// producer to a MediaConsumer so packets flow from the producer to the
-// consumer. Clients who want to receive packets directly from the producer
-// should use MediaPullModeProducer instead.
+// Describes consumer demand for MediaPackets. Demand is initially assumed to
+// be the default values given below. Changes in demand can be signalled
+// in-band with SupplyPacket responses or by responding to PullDemandUpdate.
+struct MediaPacketDemand {
+  // The minimum number of packets that should be outstanding at any moment.
+  // The producer should try to keep at least this many SupplyPacket operations
+  // pending.
+  uint32 min_packets_outstanding = 0;
+
+  // The minimum packet PTS value. If the last packet supplied has a PTS less
+  // than this value, another packet should be supplied. A value of kNoTimestamp
+  // means this value is not applicable.
+  int64 min_pts = MediaPacket.kNoTimestamp;
+};
+
+// Models a stream producer. A MediaPacketProducer allows a client to connect
+// the producer to a MediaPacketConsumer so packets flow from the producer to
+// the consumer.
 //
 // The client calls Connect to connect producer and consumer. The producer then
 // calls PushPacket on the consumer to deliver packets.
-interface MediaProducer {
-  // Connects this MediaProducer to a MediaConsumer.
-  Connect(MediaConsumer consumer) => ();
+interface MediaPacketProducer {
+  // Connects this MediaPacketProducer to a MediaPacketConsumer.
+  Connect(MediaPacketConsumer consumer) => ();
 
-  // Disconnects this MediaProducer from a previously-connected MediaConsumer.
+  // Disconnects this MediaPacketProducer from a previously-connected
+  // MediaPacketConsumer.
   Disconnect();
 };
 
-// Models a stream producer. A MediaPullModeProducer allows a client to receive
-// packets directly from the producer. Clients who want to connect the producer
-// to a MediaConsumer should use MediaProducer instead.
-//
-// The client calls PullPacket to get a packet. Once the client is done with
-// the packet, it calls ReleasePacket to let the producer know that the packet
-// buffer region can be reused. Alternatively, the client can piggyback a
-// release on a PullPacket call using the to_release parameter.
-interface MediaPullModeProducer {
-  // Gets the shared buffer in which packet payload will be located.
-  GetBuffer() => (handle<shared_buffer> buffer);
-
-  // Pulls a packet from the producer. When the client is done with the
-  // packet buffer region, it should call ReleasePacket or PullPacket passing
-  // the locator. Note that the optional locator passed in PullPacket is
-  // a locator to be released and probably won't be the same locator passed
-  // back in the callback.
-  PullPacket(MediaPacket? to_release) => (MediaPacket packet);
-
-  // Signals the producer that the client is done with the buffer region.
-  ReleasePacket(MediaPacket to_release);
-};
-
-// Models a stream consumer. A MediaConsumer allows a client to send packets
-// directly to the consumer or to connect the consumer to a MediaProducer so
-// packets flow from the producer to the consumer.
+// Models a stream consumer. A MediaPacketConsumer allows a client to send
+// packets directly to the consumer or to connect the consumer to a
+// MediaPacketProducer so packets flow from the producer to the consumer.
 //
 // In the former scenario, the client calls PushPacket to deliver a packet. The
 // callback notifies the client that the consumer is done with the packet
@@ -108,26 +75,26 @@ interface MediaPullModeProducer {
 // In the latter scenario, the client calls Connect on the producer to connect
 // producer and consumer. The producer then calls PushPacket on the consumer to
 // deliver packets.
-interface MediaConsumer {
+interface MediaPacketConsumer {
   const uint64 kMaxBufferLen = 0x3FFFFFFFFFFFFFFF;
 
-  // An enumeration used to indicate the ultimate fate of packets sent across
-  // the pipe using the SendPacket method.
-  enum SendResult {
-    CONSUMED,  // Media was completely consumed.
-    FLUSHED,  // Some or all of the media was flushed before being consumed.
-  };
+  // Gets the demand. The consumer is free to respond to this method when it
+  // sees fit to do so. Demand can be communicated in the response to
+  // SupplyPacket, so this method is only used when the demand update can't wait
+  // until the next SupplyPacket response is sent.
+  PullDemandUpdate() => (MediaPacketDemand? demand);
 
-  // Sets the shared buffer in which packet payload will be located.
-  SetBuffer(handle<shared_buffer> buffer) => ();
+  // Adds a payload buffer that may subsequently be referenced by a MediaPacket.
+  AddPayloadBuffer(uint32 payload_buffer_id,
+                   handle<shared_buffer> payload_buffer);
 
-  // Sends a packet to the consumer. The callback signals that the consumer
-  // is done with the packet buffer region.
-  SendPacket(MediaPacket packet) => (SendResult result);
+  // Indicates that the identified payload buffer will no longer be used.
+  RemovePayloadBuffer(uint32 payload_buffer_id);
 
-  // Primes the stream. The callback signals that the prime operation is
-  // complete.
-  Prime() => ();
+  // Supplies a packet to the consumer. The callback signals that the consumer
+  // is done with the packet and its payload. Demand is only provided in the
+  // response if it has changed.
+  SupplyPacket(MediaPacket packet) => (MediaPacketDemand? demand);
 
   // Flushes the stream. The callback signals that the flush operation is
   // complete.

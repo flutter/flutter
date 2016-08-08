@@ -11,6 +11,7 @@ mojom("interfaces") {
     "media_metadata.mojom",
     "media_transport.mojom",
     "media_types.mojom",
+    "problem.mojom",
     "timelines.mojom",
   ]
 }

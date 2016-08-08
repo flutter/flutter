@@ -79,6 +79,9 @@ class CoreTestBase_MockHandleInfo {
   unsigned GetDuplicateBufferHandleCallCount() const;
   unsigned GetGetBufferInformationCallCount() const;
   unsigned GetMapBufferCallCount() const;
+  unsigned GetWaitSetAddCallCount() const;
+  unsigned GetWaitSetRemoveCallCount() const;
+  unsigned GetWaitSetWaitCallCount() const;
   unsigned GetAddAwakableCallCount() const;
   unsigned GetRemoveAwakableCallCount() const;
   unsigned GetCancelAllStateCallCount() const;
@@ -102,6 +105,9 @@ class CoreTestBase_MockHandleInfo {
   void IncrementDuplicateBufferHandleCallCount();
   void IncrementGetBufferInformationCallCount();
   void IncrementMapBufferCallCount();
+  void IncrementWaitSetAddCallCount();
+  void IncrementWaitSetRemoveCallCount();
+  void IncrementWaitSetWaitCallCount();
   void IncrementAddAwakableCallCount();
   void IncrementRemoveAwakableCallCount();
   void IncrementCancelAllStateCallCount();
@@ -127,6 +133,9 @@ class CoreTestBase_MockHandleInfo {
   unsigned duplicate_buffer_handle_call_count_ MOJO_GUARDED_BY(mutex_) = 0;
   unsigned get_buffer_information_call_count_ MOJO_GUARDED_BY(mutex_) = 0;
   unsigned map_buffer_call_count_ MOJO_GUARDED_BY(mutex_) = 0;
+  unsigned wait_set_add_call_count_ MOJO_GUARDED_BY(mutex_) = 0;
+  unsigned wait_set_remove_call_count_ MOJO_GUARDED_BY(mutex_) = 0;
+  unsigned wait_set_wait_call_count_ MOJO_GUARDED_BY(mutex_) = 0;
   unsigned add_awakable_call_count_ MOJO_GUARDED_BY(mutex_) = 0;
   unsigned remove_awakable_call_count_ MOJO_GUARDED_BY(mutex_) = 0;
   unsigned cancel_all_awakables_call_count_ MOJO_GUARDED_BY(mutex_) = 0;

@@ -6,8 +6,9 @@
 module mojo.media;
 
 import "mojo/services/media/audio/interfaces/audio_track.mojom";
+import "mojo/services/media/core/interfaces/media_renderer.mojom";
 
 [ServiceName="mojo::media::AudioServer"]
 interface AudioServer {
-  CreateTrack(AudioTrack& track);
+  CreateTrack(AudioTrack& track, MediaRenderer& renderer);
 };

@@ -10,6 +10,7 @@ import "mojo/services/media/control/interfaces/media_player.mojom";
 import "mojo/services/media/control/interfaces/media_sink.mojom";
 import "mojo/services/media/control/interfaces/media_source.mojom";
 import "mojo/services/media/core/interfaces/media_demux.mojom";
+import "mojo/services/media/core/interfaces/media_renderer.mojom";
 import "mojo/services/media/core/interfaces/media_type_converter.mojom";
 import "mojo/services/media/core/interfaces/seeking_reader.mojom";
 import "mojo/services/media/core/interfaces/timeline_controller.mojom";
@@ -18,8 +19,10 @@ import "mojo/services/media/core/interfaces/timeline_controller.mojom";
 [ServiceName="mojo::media::MediaFactory"]
 interface MediaFactory {
   // Creates a player.
-  // TODO(dalesat): Add means of specifying destinations.
-  CreatePlayer(SeekingReader reader, MediaPlayer& player);
+  CreatePlayer(SeekingReader reader,
+               MediaRenderer? audio_renderer,
+               MediaRenderer? video_renderer,
+               MediaPlayer& player);
 
   // Creates a source. If allowed_media_types is supplied, conversions will be
   // added to each stream as needed to make the media type of the stream match
@@ -31,9 +34,10 @@ interface MediaFactory {
                MediaSource& source);
 
   // Creates a sink. Conversions are added to the pipeline as appropriate to
-  // convert the indicated media type to a type compatible with the
-  // destination.
-  CreateSink(string destination_url, MediaType media_type, MediaSink& sink);
+  // convert a media type supported by the renderer.
+  CreateSink(MediaRenderer? renderer,
+             MediaType media_type,
+             MediaSink& sink);
 
   // Creates a demux.
   CreateDemux(SeekingReader reader, MediaDemux& demux);

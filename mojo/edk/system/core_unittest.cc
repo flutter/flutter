@@ -2,18 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// NOTE(vtl): Some of these tests are inherently flaky (e.g., if run on a
+// heavily-loaded system). Sorry. |test::EpsilonTimeout()| may be increased to
+// increase tolerance and reduce observed flakiness (though doing so reduces the
+// meaningfulness of the test).
+
 #include "mojo/edk/system/core.h"
 
 #include <stdint.h>
 
 #include <limits>
 
+#include "mojo/edk/platform/test_stopwatch.h"
 #include "mojo/edk/platform/thread_utils.h"
 #include "mojo/edk/system/awakable.h"
 #include "mojo/edk/system/core_test_base.h"
 #include "mojo/edk/system/test/timeouts.h"
 #include "mojo/public/cpp/system/macros.h"
 
+using mojo::platform::test::Stopwatch;
 using mojo::platform::ThreadSleep;
 
 namespace mojo {
@@ -152,6 +159,22 @@ TEST_F(CoreTest, Basic) {
       MOJO_RESULT_UNIMPLEMENTED,
       core()->MapBuffer(h, 0, 0, NullUserPointer(), MOJO_MAP_BUFFER_FLAG_NONE));
   EXPECT_EQ(1u, info.GetMapBufferCallCount());
+
+  EXPECT_EQ(0u, info.GetWaitSetAddCallCount());
+  EXPECT_EQ(
+      MOJO_RESULT_UNIMPLEMENTED,
+      core()->WaitSetAdd(h, h, MOJO_HANDLE_SIGNAL_NONE, 0, NullUserPointer()));
+  EXPECT_EQ(1u, info.GetWaitSetAddCallCount());
+
+  EXPECT_EQ(0u, info.GetWaitSetRemoveCallCount());
+  EXPECT_EQ(MOJO_RESULT_UNIMPLEMENTED, core()->WaitSetRemove(h, 0));
+  EXPECT_EQ(1u, info.GetWaitSetRemoveCallCount());
+
+  EXPECT_EQ(0u, info.GetWaitSetWaitCallCount());
+  EXPECT_EQ(MOJO_RESULT_UNIMPLEMENTED,
+            core()->WaitSetWait(h, MOJO_DEADLINE_INDEFINITE, NullUserPointer(),
+                                NullUserPointer(), NullUserPointer()));
+  EXPECT_EQ(1u, info.GetWaitSetWaitCallCount());
 
   EXPECT_EQ(0u, info.GetAddAwakableCallCount());
   EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION,
@@ -337,44 +360,17 @@ TEST_F(CoreTest, InvalidArguments) {
     MojoHandle handles[2] = {MOJO_HANDLE_INVALID, MOJO_HANDLE_INVALID};
     MojoHandleSignals signals[2] = {~MOJO_HANDLE_SIGNAL_NONE,
                                     ~MOJO_HANDLE_SIGNAL_NONE};
-    EXPECT_EQ(
-        MOJO_RESULT_INVALID_ARGUMENT,
-        core()->WaitMany(MakeUserPointer(handles), MakeUserPointer(signals), 0,
-                         MOJO_DEADLINE_INDEFINITE, NullUserPointer(),
-                         NullUserPointer()));
-    EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
-              core()->WaitMany(NullUserPointer(), MakeUserPointer(signals), 0,
-                               MOJO_DEADLINE_INDEFINITE, NullUserPointer(),
-                               NullUserPointer()));
-    // If |num_handles| is invalid, it should leave |result_index| and
-    // |signals_states| alone.
-    // (We use -1 internally; make sure that doesn't leak.)
-    uint32_t result_index = 123;
-    MojoHandleSignalsState hss = kFullMojoHandleSignalsState;
-    EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
-              core()->WaitMany(NullUserPointer(), MakeUserPointer(signals), 0,
-                               MOJO_DEADLINE_INDEFINITE,
-                               MakeUserPointer(&result_index),
-                               MakeUserPointer(&hss)));
-    EXPECT_EQ(123u, result_index);
-    EXPECT_EQ(kFullMojoHandleSignalsState.satisfied_signals,
-              hss.satisfied_signals);
-    EXPECT_EQ(kFullMojoHandleSignalsState.satisfiable_signals,
-              hss.satisfiable_signals);
 
-    EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
-              core()->WaitMany(MakeUserPointer(handles), NullUserPointer(), 0,
-                               MOJO_DEADLINE_INDEFINITE, NullUserPointer(),
-                               NullUserPointer()));
     EXPECT_EQ(
         MOJO_RESULT_INVALID_ARGUMENT,
         core()->WaitMany(MakeUserPointer(handles), MakeUserPointer(signals), 1,
                          MOJO_DEADLINE_INDEFINITE, NullUserPointer(),
                          NullUserPointer()));
+
     // But if a handle is bad, then it should set |result_index| but still leave
     // |signals_states| alone.
-    result_index = static_cast<uint32_t>(-1);
-    hss = kFullMojoHandleSignalsState;
+    uint32_t result_index = static_cast<uint32_t>(-1);
+    MojoHandleSignalsState hss = kFullMojoHandleSignalsState;
     EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
               core()->WaitMany(
                   MakeUserPointer(handles), MakeUserPointer(signals), 1,
@@ -644,6 +640,37 @@ TEST_F(CoreTest, InvalidArguments) {
   // |UnmapBuffer()|:
   EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
             core()->UnmapBuffer(NullUserPointer()));
+
+  // |WaitSetAdd()|:
+  {
+    MockHandleInfo info;
+    MojoHandle h = CreateMockHandle(&info);
+
+    EXPECT_EQ(
+        MOJO_RESULT_INVALID_ARGUMENT,
+        core()->WaitSetAdd(MOJO_HANDLE_INVALID, MOJO_HANDLE_INVALID,
+                           MOJO_HANDLE_SIGNAL_NONE, 0, NullUserPointer()));
+    EXPECT_EQ(
+        MOJO_RESULT_INVALID_ARGUMENT,
+        core()->WaitSetAdd(MOJO_HANDLE_INVALID, h, MOJO_HANDLE_SIGNAL_NONE, 0,
+                           NullUserPointer()));
+    EXPECT_EQ(
+        MOJO_RESULT_INVALID_ARGUMENT,
+        core()->WaitSetAdd(h, MOJO_HANDLE_INVALID, MOJO_HANDLE_SIGNAL_NONE, 0,
+                           NullUserPointer()));
+
+    EXPECT_EQ(MOJO_RESULT_OK, core()->Close(h));
+  }
+
+  // |WaitSetRemove()|:
+  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+            core()->WaitSetRemove(MOJO_HANDLE_INVALID, 0));
+
+  // |WaitSetWait()|:
+  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+            core()->WaitSetWait(MOJO_HANDLE_INVALID, MOJO_DEADLINE_INDEFINITE,
+                                NullUserPointer(), NullUserPointer(),
+                                NullUserPointer()));
 }
 
 // These test invalid arguments that should cause death if we're being paranoid
@@ -756,6 +783,13 @@ TEST_F(CoreTest, InvalidArgumentsDeath) {
   }
 
   // TODO(vtl): Missing a bunch here.
+
+  // |CreateWaitSet()|:
+  {
+    EXPECT_DEATH_IF_SUPPORTED(
+        core()->CreateWaitSet(NullUserPointer(), NullUserPointer()),
+        kMemoryCheckFailedRegex);
+  }
 }
 
 // TODO(vtl): test |Wait()| and |WaitMany()| properly
@@ -1953,14 +1987,113 @@ TEST_F(CoreTest, AsyncWait) {
                                               }));
   EXPECT_EQ(1u, info.GetAddedAwakableSize());
 
-  EXPECT_FALSE(info.GetAddedAwakableAt(0)->Awake(MOJO_RESULT_BUSY, 0));
-  EXPECT_EQ(MOJO_RESULT_BUSY, waiter.result);
+  info.GetAddedAwakableAt(0)->Awake(0, Awakable::AwakeReason::UNSATISFIABLE,
+                                    HandleSignalsState());
+  EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION, waiter.result);
 
   EXPECT_EQ(MOJO_RESULT_OK, core()->Close(h));
 }
 
 // TODO(vtl): Test |CreateSharedBuffer()|, |DuplicateBufferHandle()|, and
 // |MapBuffer()|.
+
+TEST_F(CoreTest, WaitSet) {
+  MojoHandle h = MOJO_HANDLE_INVALID;
+  EXPECT_EQ(MOJO_RESULT_OK,
+            core()->CreateWaitSet(NullUserPointer(), MakeUserPointer(&h)));
+  EXPECT_NE(h, MOJO_HANDLE_INVALID);
+
+  MockHandleInfo info;
+  info.AllowAddAwakable(true);
+  MojoHandle h_member = CreateMockHandle(&info);
+
+  EXPECT_EQ(0u, info.GetAddAwakableCallCount());
+  EXPECT_EQ(MOJO_RESULT_OK,
+            core()->WaitSetAdd(h, h_member, MOJO_HANDLE_SIGNAL_READABLE, 123,
+                               NullUserPointer()));
+  EXPECT_EQ(1u, info.GetAddAwakableCallCount());
+
+  EXPECT_EQ(0u, info.GetRemoveAwakableCallCount());
+  EXPECT_EQ(MOJO_RESULT_OK, core()->WaitSetRemove(h, 123));
+  EXPECT_EQ(1u, info.GetRemoveAwakableCallCount());
+
+  EXPECT_EQ(MOJO_RESULT_OK, core()->Close(h_member));
+
+  uint32_t num_results = 5;
+  MojoWaitSetResult results[5] = {};
+  EXPECT_EQ(MOJO_RESULT_DEADLINE_EXCEEDED,
+            core()->WaitSetWait(h, static_cast<MojoDeadline>(0),
+                                MakeUserPointer(&num_results),
+                                MakeUserPointer(results), NullUserPointer()));
+
+  EXPECT_EQ(MOJO_RESULT_OK, core()->Close(h));
+}
+
+TEST_F(CoreTest, WaitTimeOut) {
+  Stopwatch stopwatch;
+
+  // Make some handles we can wait on.
+  MojoHandle h[2] = {MOJO_HANDLE_INVALID, MOJO_HANDLE_INVALID};
+  EXPECT_EQ(MOJO_RESULT_OK,
+            core()->CreateMessagePipe(NullUserPointer(), MakeUserPointer(&h[0]),
+                                      MakeUserPointer(&h[1])));
+
+  stopwatch.Start();
+  core()->Wait(h[0], MOJO_HANDLE_SIGNAL_READABLE, 2 * test::EpsilonTimeout(),
+               NullUserPointer());
+  MojoDeadline elapsed = stopwatch.Elapsed();
+  EXPECT_GT(elapsed, test::EpsilonTimeout());
+  EXPECT_LT(elapsed, 3 * test::EpsilonTimeout());
+
+  // Try |WaitMany()| with one handle.
+  static const MojoHandleSignals kHandleSignals[2] = {
+      MOJO_HANDLE_SIGNAL_READABLE, MOJO_HANDLE_SIGNAL_READABLE};
+  stopwatch.Start();
+  EXPECT_EQ(
+      MOJO_RESULT_DEADLINE_EXCEEDED,
+      core()->WaitMany(MakeUserPointer(h), MakeUserPointer(kHandleSignals), 1u,
+                       2 * test::EpsilonTimeout(), NullUserPointer(),
+                       NullUserPointer()));
+  elapsed = stopwatch.Elapsed();
+  EXPECT_GT(elapsed, test::EpsilonTimeout());
+  EXPECT_LT(elapsed, 3 * test::EpsilonTimeout());
+
+  // Try |WaitMany()| with two handles; also make sure it doesn't touch the
+  // |result_index| argument.
+  uint32_t result_index = 123u;
+  stopwatch.Start();
+  EXPECT_EQ(
+      MOJO_RESULT_DEADLINE_EXCEEDED,
+      core()->WaitMany(MakeUserPointer(h), MakeUserPointer(kHandleSignals), 2u,
+                       2 * test::EpsilonTimeout(),
+                       MakeUserPointer(&result_index), NullUserPointer()));
+  elapsed = stopwatch.Elapsed();
+  EXPECT_GT(elapsed, test::EpsilonTimeout());
+  EXPECT_LT(elapsed, 3 * test::EpsilonTimeout());
+  EXPECT_EQ(123u, result_index);
+
+  // Try |WaitMany()| with two handles; also make sure it doesn't touch the
+  // |result_index| and |signals_states| arguments.
+  result_index = 123u;
+  MojoHandleSignalsState hss = kFullMojoHandleSignalsState;
+  stopwatch.Start();
+  EXPECT_EQ(
+      MOJO_RESULT_DEADLINE_EXCEEDED,
+      core()->WaitMany(NullUserPointer(), NullUserPointer(), 0u,
+                       2 * test::EpsilonTimeout(),
+                       MakeUserPointer(&result_index), MakeUserPointer(&hss)));
+  elapsed = stopwatch.Elapsed();
+  EXPECT_GT(elapsed, test::EpsilonTimeout());
+  EXPECT_LT(elapsed, 3 * test::EpsilonTimeout());
+  EXPECT_EQ(123u, result_index);
+  EXPECT_EQ(kFullMojoHandleSignalsState.satisfied_signals,
+            hss.satisfied_signals);
+  EXPECT_EQ(kFullMojoHandleSignalsState.satisfiable_signals,
+            hss.satisfiable_signals);
+
+  EXPECT_EQ(MOJO_RESULT_OK, core()->Close(h[0]));
+  EXPECT_EQ(MOJO_RESULT_OK, core()->Close(h[1]));
+}
 
 }  // namespace
 }  // namespace system

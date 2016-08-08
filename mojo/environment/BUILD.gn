@@ -2,6 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//mojo/public/mojo_application.gni")
+import("//testing/test.gni")
+
 source_set("chromium") {
   sources = [
     "default_async_waiter.cc",
@@ -22,7 +25,6 @@ source_set("chromium") {
   deps = [
     "//base",
     "//base/third_party/dynamic_annotations",
-    "//mojo/common",
     "//mojo/message_pump",
     "//mojo/public/c/environment",
     "//mojo/public/cpp/bindings:callback",

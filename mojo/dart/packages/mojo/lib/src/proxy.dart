@@ -68,7 +68,7 @@ abstract class ServiceConnector {
 }
 
 abstract class ProxyMessageHandler extends core.MojoEventHandler
-                                   implements MojoInterfaceControl {
+    implements MojoInterfaceControl {
   HashMap<int, Function> _callbackMap = new HashMap<int, Function>();
   Completer _errorCompleter = new Completer();
   Set<Completer> _errorCompleters;
@@ -185,8 +185,20 @@ abstract class ProxyMessageHandler extends core.MojoEventHandler
     }
   }
 
-  // Need a getter for this for access in subclasses.
-  HashMap<int, Function> get callbackMap => _callbackMap;
+  Function getCallback(ServiceMessage message) {
+    if (!message.header.hasRequestId) {
+      proxyError("Expected a message with a valid request Id.");
+      return null;
+    }
+    int requestId = message.header.requestId;
+    if (!_callbackMap.containsKey(requestId)) {
+      proxyError("Message had unknown request Id: $requestId");
+      return null;
+    }
+    Function callback = _callbackMap[requestId];
+    _callbackMap.remove(requestId);
+    return callback;
+  }
 
   @override
   String toString() {
@@ -203,7 +215,7 @@ abstract class ProxyMessageHandler extends core.MojoEventHandler
     params.reserved1 = 0;
     params.queryVersion = new icm.QueryVersion();
     sendMessageWithRequestId(
-        params, icm.kRunMessageId,  -1, MessageHeader.kMessageExpectsResponse,
+        params, icm.kRunMessageId, -1, MessageHeader.kMessageExpectsResponse,
         (r0, r1, queryResult) {
       _version = queryResult.version;
       completer.complete(_version);
@@ -294,16 +306,31 @@ abstract class ProxyMessageHandler extends core.MojoEventHandler
       proxyError("Expected a message with a valid request Id.");
       return;
     }
-    Function callback = callbackMap[message.header.requestId];
+    Function callback = _callbackMap[message.header.requestId];
     if (callback == null) {
       proxyError("Message had unknown request Id: ${message.header.requestId}");
       return;
     }
-    callbackMap.remove(message.header.requestId);
+    _callbackMap.remove(message.header.requestId);
     callback(
         response.reserved0, response.reserved1, response.queryVersionResult);
     return;
   }
+}
+
+// The interface implemented by a class that can implement a function with up
+// to 20 unnamed arguments.
+abstract class _GenericFunction implements Function {
+  const _GenericFunction();
+
+  // Work-around to avoid checked-mode only having grudging support for
+  // Function implemented with noSuchMethod. See:
+  // https://github.com/dart-lang/sdk/issues/26528
+  dynamic call([
+      dynamic a1, dynamic a2, dynamic a3, dynamic a4, dynamic a5,
+      dynamic a6, dynamic a7, dynamic a8, dynamic a9, dynamic a10,
+      dynamic a11, dynamic a12, dynamic a13, dynamic a14, dynamic a15,
+      dynamic a16, dynamic a17, dynamic a18, dynamic a19, dynamic a20]);
 }
 
 // A class that acts like a function, but which completes a completer with the
@@ -319,7 +346,7 @@ abstract class ProxyMessageHandler extends core.MojoEventHandler
 // More usefully for Mojo, e.g.:
 // await _Completerator.completerate(
 //     proxy.method, argList, MethodResponseParams#init);
-class _Completerator implements Function {
+class _Completerator extends _GenericFunction {
   final Completer _c;
   final Function _toComplete;
 
@@ -332,15 +359,6 @@ class _Completerator implements Function {
     Function.apply(f, newArgs);
     return c.future;
   }
-
-  // Work-around to avoid checked-mode only having grudging support for
-  // Function implemented with noSuchMethod. See:
-  // https://github.com/dart-lang/sdk/issues/26528
-  dynamic call([
-      dynamic a1, dynamic a2, dynamic a3, dynamic a4, dynamic a5,
-      dynamic a6, dynamic a7, dynamic a8, dynamic a9, dynamic a10,
-      dynamic a11, dynamic a12, dynamic a13, dynamic a14, dynamic a15,
-      dynamic a16, dynamic a17, dynamic a18, dynamic a19, dynamic a20]);
 
   @override
   dynamic noSuchMethod(Invocation invocation) =>
@@ -399,9 +417,37 @@ abstract class FuturizedProxy<T extends Proxy> {
   @override
   dynamic noSuchMethod(Invocation invocation) =>
       mojoMethods.containsKey(invocation.memberName)
-      ? _Completerator.completerate(
-            mojoMethods[invocation.memberName],
-            invocation.positionalArguments,
-            mojoResponses[invocation.memberName])
-      : super.noSuchMethod(invocation);
+          ? _Completerator.completerate(
+              mojoMethods[invocation.memberName],
+              invocation.positionalArguments,
+              mojoResponses[invocation.memberName])
+          : super.noSuchMethod(invocation);
+}
+
+/// A class that acts like a function that can take up to 20 arguments, and
+/// does nothing.
+///
+/// This class is used in the generated bindings to allow null to be passed for
+/// the callback to interface methods implemented by mock services where the
+/// result of the method is not needed.
+class DoNothingFunction extends _GenericFunction {
+  // TODO(zra): DoNothingFunction could rather be implemented just by a function
+  // taking some large number of dynamic arguments as we're doing already in
+  // _GenericFunction. However, instead of duplicating that hack, we should
+  // keep it in once place, and extend from _GenericFunction when we need to
+  // use it. Then, if/when there's better support for this sort of thing, we
+  // can replace _GenericFunction and propagate any changes needed to things
+  // that use it.
+
+  const DoNothingFunction();
+
+  static const DoNothingFunction fn = const DoNothingFunction();
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    if (invocation.memberName != #call) {
+      return super.noSuchMethod(invocation);
+    }
+    return null;
+  }
 }

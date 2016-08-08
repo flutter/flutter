@@ -115,11 +115,13 @@ class DataPipe final : public ChannelEndpointClient {
   MojoResult ProducerEndWriteData(uint32_t num_bytes_written);
   HandleSignalsState ProducerGetHandleSignalsState();
   MojoResult ProducerAddAwakable(Awakable* awakable,
-                                 MojoHandleSignals signals,
-                                 bool force,
                                  uint64_t context,
+                                 bool persistent,
+                                 MojoHandleSignals signals,
                                  HandleSignalsState* signals_state);
-  void ProducerRemoveAwakable(Awakable* awakable,
+  void ProducerRemoveAwakable(bool match_context,
+                              Awakable* awakable,
+                              uint64_t context,
                               HandleSignalsState* signals_state);
   void ProducerStartSerialize(Channel* channel,
                               size_t* max_size,
@@ -150,11 +152,13 @@ class DataPipe final : public ChannelEndpointClient {
   MojoResult ConsumerEndReadData(uint32_t num_bytes_read);
   HandleSignalsState ConsumerGetHandleSignalsState();
   MojoResult ConsumerAddAwakable(Awakable* awakable,
-                                 MojoHandleSignals signals,
-                                 bool force,
                                  uint64_t context,
+                                 bool persistent,
+                                 MojoHandleSignals signals,
                                  HandleSignalsState* signals_state);
-  void ConsumerRemoveAwakable(Awakable* awakable,
+  void ConsumerRemoveAwakable(bool match_context,
+                              Awakable* awakable,
+                              uint64_t context,
                               HandleSignalsState* signals_state);
   void ConsumerStartSerialize(Channel* channel,
                               size_t* max_size,
@@ -269,11 +273,11 @@ class DataPipe final : public ChannelEndpointClient {
   bool OnReadMessage(unsigned port, MessageInTransit* message) override;
   void OnDetachFromChannel(unsigned port) override;
 
-  void AwakeProducerAwakablesForStateChangeNoLock(
-      const HandleSignalsState& new_producer_state)
+  void OnProducerMaybeStateChange(const HandleSignalsState& old_producer_state,
+                                  const HandleSignalsState& new_producer_state)
       MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
-  void AwakeConsumerAwakablesForStateChangeNoLock(
-      const HandleSignalsState& new_consumer_state)
+  void OnConsumerMaybeStateChange(const HandleSignalsState& old_consumer_state,
+                                  const HandleSignalsState& new_consumer_state)
       MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
 
   void SetProducerClosed();

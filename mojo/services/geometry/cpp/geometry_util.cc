@@ -23,9 +23,49 @@ void SetIdentityTransform(Transform* transform) {
 
 void SetTranslationTransform(Transform* transform, float x, float y, float z) {
   SetIdentityTransform(transform);
-  transform->matrix[3] = x;
-  transform->matrix[7] = y;
-  transform->matrix[11] = z;
+  Translate(transform, x, y, z);
+}
+
+void SetScaleTransform(Transform* transform, float x, float y, float z) {
+  SetIdentityTransform(transform);
+  Scale(transform, x, y, z);
+}
+
+void Translate(Transform* transform, float x, float y, float z) {
+  transform->matrix[3] += x;
+  transform->matrix[7] += y;
+  transform->matrix[11] += z;
+}
+
+void Scale(Transform* transform, float x, float y, float z) {
+  transform->matrix[0] *= x;
+  transform->matrix[5] *= y;
+  transform->matrix[10] *= z;
+}
+
+TransformPtr CreateIdentityTransform() {
+  TransformPtr result = Transform::New();
+  result->matrix = Array<float>::New(16);
+  SetIdentityTransform(result.get());
+  return result;
+}
+
+TransformPtr CreateTranslationTransform(float x, float y, float z) {
+  return Translate(CreateIdentityTransform(), x, y, z);
+}
+
+TransformPtr CreateScaleTransform(float x, float y, float z) {
+  return Scale(CreateIdentityTransform(), x, y, z);
+}
+
+TransformPtr Translate(TransformPtr transform, float x, float y, float z) {
+  Translate(transform.get(), x, y, z);
+  return transform;
+}
+
+TransformPtr Scale(TransformPtr transform, float x, float y, float z) {
+  Scale(transform.get(), x, y, z);
+  return transform;
 }
 
 PointF TransformPoint(const Transform& transform, const PointF& point) {

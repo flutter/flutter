@@ -13,5 +13,6 @@ mojom("interfaces") {
 
   deps = [
     "../../common/interfaces",
+    "../../core/interfaces",
   ]
 }

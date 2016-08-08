@@ -51,6 +51,7 @@ if (is_ios) {
     ]
     deps = [
       "//base:base",
+      "//mojo/public/cpp/bindings:utility",
       "//mojo/public/cpp/application",
       ":interfaces",
     ]

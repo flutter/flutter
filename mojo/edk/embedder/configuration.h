@@ -27,7 +27,8 @@ struct Configuration {
   size_t max_mapping_table_sze;
 
   // Upper limit of |MojoWaitMany()|'s |num_handles|. The default is 1,000,000.
-  // Must be same as or smaller than |max_handle_table_size|.
+  // TODO(vtl): Should probably decrease the default once we actually have wait
+  // sets and are using them.
   size_t max_wait_many_num_handles;
 
   // Maximum data size of messages sent over message pipes, in bytes. The
@@ -60,6 +61,9 @@ struct Configuration {
   // (This will also entail some auditing to make sure I'm not messing up my
   // checks anywhere.)
   size_t max_shared_memory_num_bytes;
+
+  // Maximum number of entries in a wait set. The default is 1,000,000.
+  size_t max_wait_set_num_entries;
 };
 
 }  // namespace embedder

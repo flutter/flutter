@@ -8,6 +8,7 @@ module mojo.media;
 import "mojo/services/media/common/interfaces/media_metadata.mojom";
 import "mojo/services/media/common/interfaces/media_transport.mojom";
 import "mojo/services/media/common/interfaces/media_types.mojom";
+import "mojo/services/media/common/interfaces/problem.mojom";
 
 // Demuxes content to produce media streams.
 interface MediaDemux {
@@ -18,21 +19,27 @@ interface MediaDemux {
   // Describes the demux.
   Describe() => (array<MediaType> stream_types);
 
-  // Gets the producer for the specified stream.
-  GetProducer(uint32 stream_index, MediaProducer& producer);
+  // Gets the packet producer for the specified stream.
+  GetPacketProducer(uint32 stream_index, MediaPacketProducer& packet_producer);
 
-  // Gets the metadata. To get the metadata immediately, call
-  // GetMetadata(kInitialMetadata). To get updates thereafter, pass the version
+  // Gets the status. To get the status immediately, call
+  // GetStatus(kInitialMetadata). To get updates thereafter, pass the version
   // sent in the previous callback.
-  GetMetadata(uint64 version_last_seen) =>
-      (uint64 version, MediaMetadata? metadata);
-
-  // Primes the demux and downstream components.
-  Prime() => ();
+  GetStatus(uint64 version_last_seen) =>
+      (uint64 version, MediaDemuxStatus status);
 
   // Flushes the demux and downstream components.
   Flush() => ();
 
   // Seeks to the specified position, specified in nanoseconds.
   Seek(int64 position) => ();
+};
+
+// Describes the status of the media source.
+struct MediaDemuxStatus {
+  // Describes the media.
+  MediaMetadata? metadata;
+
+  // Indicates a problem preventing intended operation.
+  Problem? problem;
 };

@@ -9,29 +9,35 @@ import "mojo/services/media/common/interfaces/timelines.mojom";
 
 // Timing controller for a media graph.
 interface MediaTimelineController {
-  // Associates a control site with the controller.
-  AddControlSite(MediaTimelineControlSite control_site);
+  // Associates a control point with the controller.
+  AddControlPoint(MediaTimelineControlPoint control_point);
 
-  // Gets a timeline control site interface for the controller.
-  GetControlSite(MediaTimelineControlSite& control_site);
+  // Gets a timeline control point interface for the controller.
+  GetControlPoint(MediaTimelineControlPoint& control_point);
 };
 
 // Media graph component controlled by a MediaTimelineController.
-interface MediaTimelineControlSite {
+interface MediaTimelineControlPoint {
   const uint64 kInitialStatus = 0;
 
   // Gets the status. To get the status immediately, call
-  // GetStatus(kInitialStatus). To get updates thereafter, pass
-  // the version sent in the previous callback.
+  // GetStatus(kInitialStatus). To get updates thereafter, pass the version sent
+  // in the previous callback.
   GetStatus(uint64 version_last_seen) =>
-      (uint64 version, MediaTimelineControlSiteStatus status);
+      (uint64 version, MediaTimelineControlPointStatus status);
 
-  // Gets a timeline consumer interface for the control site.
+  // Gets a timeline consumer interface for the control point.
   GetTimelineConsumer(TimelineConsumer& timeline_consumer);
+
+  // Signals that the control point should prepare for a timeline transition
+  // away from zero rate (stopped). The response indicates that the control
+  // point is ready for the transition.
+  // TODO(dalesat): Include a rate so the renderer won't starve on fast play.
+  Prime() => ();
 };
 
-// Status returned by MediaTimelineControlSite's GetStatus method.
-struct MediaTimelineControlSiteStatus {
+// Status returned by MediaTimelineControlPoint's GetStatus method.
+struct MediaTimelineControlPointStatus {
   // Current timeline transform.
   mojo.TimelineTransform timeline_transform;
 

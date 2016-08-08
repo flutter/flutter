@@ -8,6 +8,7 @@
 #include <atomic>
 #include <memory>
 
+#include "mojo/public/c/environment/logger.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/cpp/bindings/array.h"
 #include "mojo/public/cpp/bindings/message.h"
@@ -40,16 +41,21 @@ namespace flog {
 //
 // Note that the ServiceName annotation is required.
 //
-// A channel instance may be defined, typically as a member of a class, as
-// follows:
+// A channel instance may be defined as a member of a class as follows:
 //
-//     FLOG_CHANNEL(MyFlogChannelInterface, my_flog_channel_instance_);
+//     FLOG_INSTANCE_CHANNEL(MyFlogChannelInterface, my_flog_channel_);
 //
-// If NDEBUG is defined, this compiles to nothing. Otherwise, it declares and
-// initializes my_flog_channel_instance, which can be used via the FLOG macro:
+// For cases in which the channel isn't a class instance member, the
+// FLOG_CHANNEL macro is provided:
 //
-//     FLOG(my_flog_channel_instance_, Thing1(1234, 5678));
-//     FLOG(my_flog_channel_instance_, Thing2("To the lifeboats!"));
+//     FLOG_CHANNEL(MyFlogChannelInterface, g_my_flog_channel);
+//
+// If NDEBUG is defined, these compile to nothing. Otherwise, they declare and
+// initialize my_flog_channel_instance (or g_my_flog_channel), which can be used
+// via the FLOG macro:
+//
+//     FLOG(my_flog_channel_, Thing1(1234, 5678));
+//     FLOG(my_flog_channel_, Thing2("To the lifeboats!"));
 //
 // These invocations compile to nothing if NDEBUG is defined. Otherwise, they
 // log messages to the channel represented by my_flog_channel_instance.
@@ -58,57 +64,79 @@ namespace flog {
 // must be declared but not defined (e.g. as a static class member).
 //
 // Logging to a channel does nothing unless the Flog class has been initialized
-// with a call to Flog::Initialize. Flog::Initialize provides a FlogLogger
-// implementation to be used for logging. Typically, this implementation would
-// be acquired from the FlogService using CreateLogger.
+// with a call to Flog::Initialize (via the FLOG_INITIALIZE macro).
+// Flog::Initialize provides a FlogLogger implementation to be used for logging.
+// Typically, this implementation would be acquired from the FlogService using
+// CreateLogger.
 //
 
-#if defined(NDEBUG)
+// Converts a pointer to a uint64_t for channel messages that have address
+// parameters. Addresses can't be accessed by log consumers, but they can be
+// used for identification.
+#define FLOG_ADDRESS(p) reinterpret_cast<uintptr_t>(p)
 
-#define FLOG_INITIALIZE(app_or_logger, label) ((void)0)
-#define FLOG_DESTROY() ((void)0)
-#define FLOG_CHANNEL(channel_type, channel_name)
-#define FLOG_CHANNEL_DECL(channel_type, channel_name)
-#define FLOG(channel_name, call) ((void)0)
-#define FLOG_ID(channel_name) 0
+#if !defined(NDEBUG)
 
-#else
+// Initializes flog, connecting to the service and creating a new log. |shell|
+// is the application's shell (for connecting to the service), and |label| is
+// the log label, usually the name of the service or application. Should be
+// called once on startup, usually in the OnInitialize override of the
+// ApplicationImplBase subclass.
+#define FLOG_INITIALIZE(shell, label) mojo::flog::Flog::Initialize(shell, label)
 
-#define FLOG_INITIALIZE(app_or_logger, label) \
-  mojo::flog::Flog::Initialize(app_or_logger, label)
-
+// Destroys the resources created by FLOG_INITIALIZE. Should be called once on
+// shutdown, usually in the destructor of the ApplicationImplBase subclass.
 #define FLOG_DESTROY() mojo::flog::Flog::Destroy()
 
-#define FLOG_CHANNEL(channel_type, channel_name)                      \
-  std::unique_ptr<mojo::flog::FlogProxy<channel_type>> channel_name = \
-      mojo::flog::FlogProxy<channel_type>::Create()
-
+// Declares a flog channel but does not initialize it. This is useful when the
+// declaration and definition must be separate.
 #define FLOG_CHANNEL_DECL(channel_type, channel_name) \
   std::unique_ptr<mojo::flog::FlogProxy<channel_type>> channel_name
 
+// Defines a variable with the indicated name (|channel_name|) and the indicated
+// type (|channel_type|, which must be a mojo interface type). |subject_address|
+// is provided to associate an address with the channel. Use FLOG_CHANNEL or
+// FLOG_INSTANCE_CHANNEL instead of this macro unless there is a need to be
+// specific about the subject. A |subject_address| value of 0 indicates there
+// is no subject address for the channel.
+#define FLOG_CHANNEL_WITH_SUBJECT(channel_type, channel_name, subject_address) \
+  FLOG_CHANNEL_DECL(channel_type, channel_name) =                              \
+      mojo::flog::FlogProxy<channel_type>::Create(subject_address)
+
+// Logs a channel message on the specified channel (a name previously declared
+// using FLOG_CHANNEL, FLOG_INSTANCE_CHANNEL, FLOG_CHANNEL_WITH_SUBJECT or
+// FLOG_CHANNEL_DECL). |call| is a valid method call for the channel type. See
+// the example above.
 #define FLOG(channel_name, call) channel_name->call
 
-#define FLOG_ID(channel_name) channel_name->channel()->id()
+// Gets the numeric channel id from a channel.
+#define FLOG_ID(channel_name) channel_name->flog_channel()->id()
+
+#else
+
+#define FLOG_INITIALIZE(shell, label) ((void)0)
+#define FLOG_DESTROY() ((void)0)
+#define FLOG_CHANNEL_DECL(channel_type, channel_name)
+#define FLOG_CHANNEL_WITH_SUBJECT(channel_type, channel_name, subject)
+#define FLOG(channel_name, call) ((void)0)
+#define FLOG_ID(channel_name) 0
 
 #endif
+
+// Same as FLOG_CHANNEL_WITH_SUBJECT but supplies the address of |this| as
+// the subject address. This is the preferred form for declaring channels that
+// are instance members.
+#define FLOG_INSTANCE_CHANNEL(channel_type, channel_name) \
+  FLOG_CHANNEL_WITH_SUBJECT(channel_type, channel_name, FLOG_ADDRESS(this))
+
+// Same as FLOG_CHANNEL_WITH_SUBJECT but supplies a null subject address.
+#define FLOG_CHANNEL(channel_type, channel_name) \
+  FLOG_CHANNEL_WITH_SUBJECT(channel_type, channel_name, 0)
 
 // Thread-safe logger for all channels in a given process.
 class Flog {
  public:
-  static void Initialize(ApplicationImpl* app, const std::string& label) {
-    MOJO_DCHECK(!logger_);
-    FlogServicePtr flog_service;
-    FlogLoggerPtr flog_logger;
-    ConnectToService(app->shell(), "mojo:flog", GetProxy(&flog_service));
-    flog_service->CreateLogger(GetProxy(&flog_logger), label);
-    logger_ = flog_logger.Pass();
-  }
-
-  // Sets the flog logger singleton.
-  static void Initialize(FlogLoggerPtr flog_logger) {
-    MOJO_DCHECK(!logger_);
-    logger_ = flog_logger.Pass();
-  }
+  static void Initialize(Shell* shell, const std::string& label);
 
   // Deletes the flog logger singleton.
   static void Destroy() {
@@ -121,44 +149,44 @@ class Flog {
 
   // Logs the creation of a channel.
   static void LogChannelCreation(uint32_t channel_id,
-                                 const char* channel_type_name) {
-    if (!logger_) {
-      return;
-    }
-
-    logger_->LogChannelCreation(GetTimeTicksNow(), channel_id,
-                                channel_type_name);
-  }
+                                 const char* channel_type_name,
+                                 uint64_t subject_address);
 
   // Logs a channel message.
-  static void LogChannelMessage(uint32_t channel_id, Message* message) {
-    if (!logger_) {
-      return;
-    }
-
-    Array<uint8_t> array = Array<uint8_t>::New(message->data_num_bytes());
-    memcpy(array.data(), message->data(), message->data_num_bytes());
-    logger_->LogChannelMessage(GetTimeTicksNow(), channel_id, array.Pass());
-  }
+  static void LogChannelMessage(uint32_t channel_id, Message* message);
 
   // Logs the deletion of a channel.
-  static void LogChannelDeletion(uint32_t channel_id) {
-    if (!logger_) {
-      return;
-    }
+  static void LogChannelDeletion(uint32_t channel_id);
 
-    logger_->LogChannelDeletion(GetTimeTicksNow(), channel_id);
-  }
+  // TODO(dalesat): Add method for text/file/line
 
  private:
+  static const MojoLogger kMojoLogger;
+
+  // Logs a message string for MojoLogger support.
+  static void LogMojoLoggerMessage(MojoLogLevel log_level,
+                                   const char* source_file,
+                                   uint32_t source_line,
+                                   const char* message);
+
+  // Gets the minimum MojoLogLevel for MojoLogger support.
+  static MojoLogLevel GetMinimumMojoLogLevel();
+
+  // Sets the minimum MojoLogLevel for MojoLogger support.
+  static void SetMinimumMojoLogLevel(MojoLogLevel level);
+
+  // Gets the current time in microseconds since epoch.
+  static uint64_t GetTime();
+
   static std::atomic_ulong last_allocated_channel_id_;
   static FlogLoggerPtr logger_;
+  static const MojoLogger* fallback_logger_;
 };
 
 // Channel backing a FlogProxy.
 class FlogChannel : public MessageReceiverWithResponder {
  public:
-  FlogChannel(const char* channel_type_name);
+  FlogChannel(const char* channel_type_name, uint64_t subject_address);
 
   ~FlogChannel() override;
 
@@ -178,16 +206,17 @@ class FlogChannel : public MessageReceiverWithResponder {
 template <typename T>
 class FlogProxy : public T::Proxy_ {
  public:
-  static std::unique_ptr<FlogProxy<T>> Create() {
-    return std::unique_ptr<FlogProxy<T>>(new FlogProxy<T>());
+  static std::unique_ptr<FlogProxy<T>> Create(uint64_t subject_address) {
+    return std::unique_ptr<FlogProxy<T>>(new FlogProxy<T>(subject_address));
   }
 
-  FlogChannel* channel() {
+  FlogChannel* flog_channel() {
     return reinterpret_cast<FlogChannel*>(this->receiver_);
   }
 
  private:
-  explicit FlogProxy() : T::Proxy_(new FlogChannel(T::Name_)) {}
+  explicit FlogProxy(uint64_t subject_address)
+      : T::Proxy_(new FlogChannel(T::Name_, subject_address)) {}
 };
 
 }  // namespace flog

@@ -8,7 +8,7 @@
 #include <unordered_map>
 
 #include "base/memory/weak_ptr.h"
-#include "mojo/common/binding_set.h"
+#include "mojo/public/cpp/bindings/binding_set.h"
 #include "sky/services/platform/app_messages.mojom.h"
 #include "sky/shell/platform/ios/framework/Headers/FlutterAsyncMessageListener.h"
 #include "sky/shell/platform/ios/framework/Headers/FlutterMessageListener.h"

@@ -5,53 +5,12 @@
 [DartPackage="mojo_services"]
 module mojo.media;
 
-import "mojo/services/media/common/interfaces/media_common.mojom";
-import "mojo/services/media/common/interfaces/media_transport.mojom";
-import "mojo/services/media/common/interfaces/media_types.mojom";
-import "mojo/services/media/core/interfaces/timeline_controller.mojom";
-
-struct AudioTrackDescriptor {
-  // The track supports the union of all these media type sets.
-  array<MediaTypeSet> supported_media_types;
-};
-
-struct AudioTrackConfiguration {
-  // The media type to use.
-  MediaType media_type;
-
-  // Ratio of audio frames to media time ticks.
-  //
-  // Presentation time stamps on audio packets are expressed in units of media
-  // time ticks.  Many users will choose to use units of audio frames to express
-  // their media time, and can simply leave this ratio at the default of 1:1.
-  // For some, however, it may be more convenient to use different units for
-  // media time.  For example, if the audio frame rate was 48KHz, and the time
-  // stamps are expressed in 90KHz units (the units used by MPEG-2 Program
-  // Stream timestamps), the ratio should be set to 48000:90000 (aka, 8:15).
-  // IOW - audio_frame_ratio would be set to 8 and media_time_ratio would be set
-  // to 15.
-  //
-  // Neither of these values may be 0.  A configuration error will occur if they
-  // are.
-  uint32 audio_frame_ratio = 1;
-  uint32 media_time_ratio = 1;
-};
-
 interface AudioTrack {
   // A special value which will always cause a track to become explicitly muted.
   const float kMutedGain = -160.0;
 
   // The maximum permitted above-unity gain.
   const float kMaxGain = 20.0;
-
-  // Get the descriptor.
-  Describe() => (AudioTrackDescriptor descriptor);
-
-  // Set the configuration, receive a pipe to send data to in return.
-  Configure(AudioTrackConfiguration configuration, MediaConsumer& pipe);
-
-  // Request the timeline control site for this AudioTrack
-  GetTimelineControlSite(MediaTimelineControlSite& timeline_control_site);
 
   // Sets the current gain/attenuation of the track, expressed in dB.  Legal
   // values are in the range [-inf, 20.0].  Any value less than or equal to the

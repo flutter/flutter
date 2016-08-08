@@ -8,8 +8,6 @@ import("$mojo_sdk_root/mojo/public/mojo_sdk.gni")
 mojo_sdk_source_set("cpp") {
   restrict_external_deps = false
   sources = [
-    "circular_buffer_media_pipe_adapter.cc",
-    "circular_buffer_media_pipe_adapter.h",
     "fifo_allocator.cc",
     "fifo_allocator.h",
     "linear_transform.cc",
@@ -17,13 +15,26 @@ mojo_sdk_source_set("cpp") {
     "local_time.h",
     "mapped_shared_buffer.cc",
     "mapped_shared_buffer.h",
-    "shared_media_buffer_allocator.cc",
-    "shared_media_buffer_allocator.h",
+    "media_packet_consumer_base.cc",
+    "media_packet_consumer_base.h",
+    "media_packet_producer_base.cc",
+    "media_packet_producer_base.h",
+    "shared_buffer_set.cc",
+    "shared_buffer_set.h",
+    "shared_buffer_set_allocator.cc",
+    "shared_buffer_set_allocator.h",
+    "thread_checker.h",
     "timeline.h",
     "timeline_function.cc",
     "timeline_function.h",
     "timeline_rate.cc",
     "timeline_rate.h",
+    "video_converter.cc",
+    "video_converter.h",
+    "video_packet_layout.cc",
+    "video_packet_layout.h",
+    "video_renderer.cc",
+    "video_renderer.h",
   ]
 
   if (is_posix) {
@@ -38,7 +49,11 @@ mojo_sdk_source_set("cpp") {
   deps = [
     "$mojo_sdk_root/mojo/public/cpp/environment",
     "$mojo_sdk_root/mojo/public/cpp/utility",
+    "$mojo_sdk_root/mojo/services/flog/cpp",
+    "$mojo_sdk_root/mojo/services/geometry/interfaces",
     "$mojo_sdk_root/mojo/services/media/common/interfaces",
+    "$mojo_sdk_root/mojo/services/media/core/interfaces",
+    "$mojo_sdk_root/mojo/services/media/logs/interfaces",
   ]
 }
 # Look for unit tests in services/media/common/test

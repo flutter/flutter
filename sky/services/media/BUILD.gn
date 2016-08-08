@@ -55,6 +55,7 @@ if (is_android) {
       ":interfaces",
       "//base:base",
       "//mojo/data_pipe_utils",
+      "//mojo/public/cpp/bindings:utility",
       "//mojo/public/cpp/application",
     ]
   }

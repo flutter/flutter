@@ -5,8 +5,6 @@
 [DartPackage="mojo_services"]
 module mojo.flog;
 
-// TODO(dalesat): Move out of media to somewhere more generic.
-
 // Exposed by the log service to enable creation and consumption of logs.
 [ServiceName="mojo::flog::FlogService"]
 interface FlogService {
@@ -18,12 +16,27 @@ interface FlogService {
 
   // Gets a reader for the specified log.
   CreateReader(FlogReader& reader, uint32 log_id);
+
+  // Deletes the indicated log.
+  DeleteLog(uint32 log_id);
+
+  // Deletes all logs.
+  DeleteAllLogs();
 };
 
 // A logger that logs messages regarding multiple channels.
 interface FlogLogger {
+  // Logs a MojoLogger-style message.
+  LogMojoLoggerMessage(
+      int64 time_us,
+      int32 log_level,
+      string? message,
+      string? source_file,
+      uint32 source_line);
+
   // Logs the creation of a channel.
-  LogChannelCreation(int64 time_us, uint32 channel_id, string type_name);
+  LogChannelCreation(int64 time_us, uint32 channel_id, string type_name,
+      uint64 subject_address);
 
   // Logs a message sent to an existing channel.
   LogChannelMessage(int64 time_us, uint32 channel_id, array<uint8> data);
@@ -39,21 +52,23 @@ interface FlogReader {
   // when max_count entries are avaiable starting at start_index. If the log
   // is closed, the callback will be called immediately with as many entries
   // as are available starting at start_index and not exceeding max_count
-  // entries. entry_count and open refer to the entire log at the time the
-  // callback occurred.
+  // entries.
   GetEntries(uint32 start_index, uint32 max_count) =>
-      (array<FlogEntry> entries, uint32 entry_count, bool open);
+      (array<FlogEntry> entries);
 };
 
+// Describes a log.
 struct FlogDescription {
-  string label;
   uint32 log_id;
-  uint32 entry_count;
-  int64 start_time_us;
-  int64 stop_time_us;
+  string label;
   bool open;
 };
 
+// Log entry produced by |FlogReader|. Entry type is determined by interrogating
+// the |details| field. FlogEntry and its subordinates duplicate the semantics
+// of FlogLogger. This approach keeps producers simple (they don't have to
+// create a bunch of structs and unions to log a message) and allows consumers
+// to pull entries rather than having to implement FlogLogger.
 struct FlogEntry {
   int64 time_us;
   uint32 log_id;
@@ -62,14 +77,27 @@ struct FlogEntry {
 };
 
 union FlogEntryDetails {
+  FlogMojoLoggerMessageEntryDetails mojo_logger_message;
   FlogChannelCreationEntryDetails channel_creation;
   FlogChannelMessageEntryDetails channel_message;
+  FlogChannelDeletionEntryDetails channel_deletion;
+};
+
+struct FlogMojoLoggerMessageEntryDetails {
+  int32 log_level;
+  string? message;
+  string? source_file;
+  uint32 source_line;
 };
 
 struct FlogChannelCreationEntryDetails {
   string type_name;
+  uint64 subject_address;
 };
 
 struct FlogChannelMessageEntryDetails {
   array<uint8> data;
+};
+
+struct FlogChannelDeletionEntryDetails {
 };

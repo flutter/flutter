@@ -1,0 +1,25 @@
+// Copyright 2016 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[DartPackage="mojo_services"]
+module mojo.media;
+
+import "mojo/services/media/common/interfaces/media_transport.mojom";
+import "mojo/services/media/common/interfaces/media_types.mojom";
+import "mojo/services/media/core/interfaces/timeline_controller.mojom";
+
+// Models a service that renders content.
+interface MediaRenderer {
+  // Gets the list of supported media types.
+  GetSupportedMediaTypes() => (array<MediaTypeSet> supported_media_types);
+
+  // Sets the media type of the stream to be delivered.
+  SetMediaType(MediaType media_type);
+
+  // Gets the packet consumer for the stream to be delivered.
+  GetPacketConsumer(MediaPacketConsumer& packet_consumer);
+
+  // Requests the timeline control point for this output.
+  GetTimelineControlPoint(MediaTimelineControlPoint& timeline_control_point);
+};

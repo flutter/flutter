@@ -2,7 +2,6 @@
 // See $MOJO_SDK/tools/bindings/mojom_bindings_generator.py.
 
 library shell_mojom;
-import 'dart:async';
 import 'package:mojo/bindings.dart' as bindings;
 import 'package:mojo/core.dart' as core;
 import 'package:mojo/mojo/bindings/types/service_describer.mojom.dart' as service_describer;
@@ -25,39 +24,15 @@ class _ShellConnectToApplicationParams extends bindings.Struct {
     service_provider_mojom.ServiceProviderInterfaceRequest this.services
   ) : super(kVersions.last.size);
 
-  static _ShellConnectToApplicationParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    if (decoder.excessHandles != null) {
-      decoder.excessHandles.forEach((h) => h.close());
-    }
-    return result;
-  }
+  static _ShellConnectToApplicationParams deserialize(bindings.Message message) =>
+      bindings.Struct.deserialize(decode, message);
 
   static _ShellConnectToApplicationParams decode(bindings.Decoder decoder0) {
     if (decoder0 == null) {
       return null;
     }
     _ShellConnectToApplicationParams result = new _ShellConnectToApplicationParams();
-
-    var mainDataHeader = decoder0.decodeStructDataHeader();
-    if (mainDataHeader.version <= kVersions.last.version) {
-      // Scan in reverse order to optimize for more recent versions.
-      for (int i = kVersions.length - 1; i >= 0; --i) {
-        if (mainDataHeader.version >= kVersions[i].version) {
-          if (mainDataHeader.size == kVersions[i].size) {
-            // Found a match.
-            break;
-          }
-          throw new bindings.MojoCodecError(
-              'Header size doesn\'t correspond to known version size.');
-        }
-      }
-    } else if (mainDataHeader.size < kVersions.last.size) {
-      throw new bindings.MojoCodecError(
-        'Message newer than the last known version cannot be shorter than '
-        'required by the last known version.');
-    }
+    var mainDataHeader = bindings.Struct.checkVersion(decoder0, kVersions);
     if (mainDataHeader.version >= 0) {
       
       result.applicationUrl = decoder0.decodeString(8, false);
@@ -71,18 +46,15 @@ class _ShellConnectToApplicationParams extends bindings.Struct {
 
   void encode(bindings.Encoder encoder) {
     var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
+    const String structName = "_ShellConnectToApplicationParams";
+    String fieldName;
     try {
+      fieldName = "applicationUrl";
       encoder0.encodeString(applicationUrl, 8, false);
-    } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "applicationUrl of struct _ShellConnectToApplicationParams: $e";
-      rethrow;
-    }
-    try {
+      fieldName = "services";
       encoder0.encodeInterfaceRequest(services, 16, false);
     } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "services of struct _ShellConnectToApplicationParams: $e";
+      bindings.Struct.fixErrorMessage(e, fieldName, structName);
       rethrow;
     }
   }
@@ -112,39 +84,15 @@ class _ShellCreateApplicationConnectorParams extends bindings.Struct {
     application_connector_mojom.ApplicationConnectorInterfaceRequest this.applicationConnectorRequest
   ) : super(kVersions.last.size);
 
-  static _ShellCreateApplicationConnectorParams deserialize(bindings.Message message) {
-    var decoder = new bindings.Decoder(message);
-    var result = decode(decoder);
-    if (decoder.excessHandles != null) {
-      decoder.excessHandles.forEach((h) => h.close());
-    }
-    return result;
-  }
+  static _ShellCreateApplicationConnectorParams deserialize(bindings.Message message) =>
+      bindings.Struct.deserialize(decode, message);
 
   static _ShellCreateApplicationConnectorParams decode(bindings.Decoder decoder0) {
     if (decoder0 == null) {
       return null;
     }
     _ShellCreateApplicationConnectorParams result = new _ShellCreateApplicationConnectorParams();
-
-    var mainDataHeader = decoder0.decodeStructDataHeader();
-    if (mainDataHeader.version <= kVersions.last.version) {
-      // Scan in reverse order to optimize for more recent versions.
-      for (int i = kVersions.length - 1; i >= 0; --i) {
-        if (mainDataHeader.version >= kVersions[i].version) {
-          if (mainDataHeader.size == kVersions[i].size) {
-            // Found a match.
-            break;
-          }
-          throw new bindings.MojoCodecError(
-              'Header size doesn\'t correspond to known version size.');
-        }
-      }
-    } else if (mainDataHeader.size < kVersions.last.size) {
-      throw new bindings.MojoCodecError(
-        'Message newer than the last known version cannot be shorter than '
-        'required by the last known version.');
-    }
+    var mainDataHeader = bindings.Struct.checkVersion(decoder0, kVersions);
     if (mainDataHeader.version >= 0) {
       
       result.applicationConnectorRequest = decoder0.decodeInterfaceRequest(8, false, application_connector_mojom.ApplicationConnectorStub.newFromEndpoint);
@@ -154,11 +102,13 @@ class _ShellCreateApplicationConnectorParams extends bindings.Struct {
 
   void encode(bindings.Encoder encoder) {
     var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
+    const String structName = "_ShellCreateApplicationConnectorParams";
+    String fieldName;
     try {
+      fieldName = "applicationConnectorRequest";
       encoder0.encodeInterfaceRequest(applicationConnectorRequest, 8, false);
     } on bindings.MojoCodecError catch(e) {
-      e.message = "Error encountered while encoding field "
-          "applicationConnectorRequest of struct _ShellCreateApplicationConnectorParams: $e";
+      bindings.Struct.fixErrorMessage(e, fieldName, structName);
       rethrow;
     }
   }

@@ -9,6 +9,7 @@
 
 #include "mojo/edk/system/awakable_list.h"
 #include "mojo/edk/system/dispatcher.h"
+#include "mojo/edk/system/handle_signals_state.h"
 #include "mojo/edk/util/thread_annotations.h"
 #include "mojo/public/cpp/system/macros.h"
 
@@ -24,18 +25,21 @@ class SimpleDispatcher : public Dispatcher {
   SimpleDispatcher();
   ~SimpleDispatcher() override;
 
-  // To be called by subclasses when the state changes (so
-  // |GetHandleSignalsStateImplNoLock()| should be checked again).
-  void HandleSignalsStateChangedNoLock() MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex());
+  // To be called by subclasses when the state changes.
+  void OnHandleSignalsStateChangeNoLock(const HandleSignalsState& old_state,
+                                        const HandleSignalsState& new_state)
+      MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex());
 
   // |Dispatcher| protected methods:
   void CancelAllStateNoLock() override;
   MojoResult AddAwakableImplNoLock(Awakable* awakable,
-                                   MojoHandleSignals signals,
-                                   bool force,
                                    uint64_t context,
+                                   bool persistent,
+                                   MojoHandleSignals signals,
                                    HandleSignalsState* signals_state) override;
-  void RemoveAwakableImplNoLock(Awakable* awakable,
+  void RemoveAwakableImplNoLock(bool match_context,
+                                Awakable* awakable,
+                                uint64_t context,
                                 HandleSignalsState* signals_state) override;
 
  private:
