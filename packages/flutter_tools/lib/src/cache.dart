@@ -254,21 +254,29 @@ class FlutterEngine {
 
   // Return a list of (cache directory path, download URL path) tuples.
   List<List<String>> _getToolsDirs() {
-    if (Platform.isMacOS)
-      return <List<String>>[
-        <String>['darwin-x64', 'darwin-x64/artifacts.zip'],
-        <String>['android-arm-profile/darwin-x64', 'android-arm-profile/darwin-x64.zip'],
-        <String>['android-arm-release/darwin-x64', 'android-arm-release/darwin-x64.zip'],
-      ];
+    if (cache.includeAllPlatforms)
+      return <List<String>>[]
+        ..addAll(_osxToolsDirs)
+        ..addAll(_linuxToolsDirs);
+    else if (Platform.isMacOS)
+      return _osxToolsDirs;
     else if (Platform.isLinux)
-      return <List<String>>[
-        <String>['linux-x64', 'linux-x64/artifacts.zip'],
-        <String>['android-arm-profile/linux-x64', 'android-arm-profile/linux-x64.zip'],
-        <String>['android-arm-release/linux-x64', 'android-arm-release/linux-x64.zip'],
-      ];
+      return _linuxToolsDirs;
     else
       return <List<String>>[];
   }
+
+  List<List<String>> get _osxToolsDirs => <List<String>>[
+    <String>['darwin-x64', 'darwin-x64/artifacts.zip'],
+    <String>['android-arm-profile/darwin-x64', 'android-arm-profile/darwin-x64.zip'],
+    <String>['android-arm-release/darwin-x64', 'android-arm-release/darwin-x64.zip'],
+  ];
+
+  List<List<String>> get _linuxToolsDirs => <List<String>>[
+    <String>['linux-x64', 'linux-x64/artifacts.zip'],
+    <String>['android-arm-profile/linux-x64', 'android-arm-profile/linux-x64.zip'],
+    <String>['android-arm-release/linux-x64', 'android-arm-release/linux-x64.zip'],
+  ];
 
   bool isUpToDate() {
     Directory pkgDir = cache.getCacheDir('pkg');
