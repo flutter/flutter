@@ -23,6 +23,7 @@
 #include "flutter/tonic/dart_state.h"
 #include "glue/trace_event.h"
 #include "lib/ftl/files/eintr_wrapper.h"
+#include "lib/ftl/files/unique_fd.h"
 #include "lib/ftl/logging.h"
 #include "lib/ftl/time/time_delta.h"
 #include "lib/tonic/dart_class_library.h"
@@ -418,7 +419,7 @@ void* _DartSymbolLookup(const char* symbol_name) {
       return nullptr;
     int64_t asset_size = info.st_size;
 
-    ftl::ScopedFD fd(HANDLE_EINTR(open(asset_path.c_str(), O_RDONLY)));
+    ftl::UniqueFD fd(HANDLE_EINTR(open(asset_path.c_str(), O_RDONLY)));
     if (fd.get() == -1)
       return nullptr;
 
@@ -426,7 +427,7 @@ void* _DartSymbolLookup(const char* symbol_name) {
     if (symbol_asset.is_executable)
       mmap_flags |= PROT_EXEC;
 
-    void* symbol = mmap(NULL, asset_size, mmap_flags, MAP_PRIVATE, fd, 0);
+    void* symbol = mmap(NULL, asset_size, mmap_flags, MAP_PRIVATE, fd.get(), 0);
     symbol_asset.mapping = symbol == MAP_FAILED ? nullptr : symbol;
 
     return symbol_asset.mapping;
