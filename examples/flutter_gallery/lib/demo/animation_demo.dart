@@ -115,12 +115,15 @@ class _PointDemoState extends State<_PointDemo> {
 
   CurvedAnimation _animation;
   _DragTarget _dragTarget;
-  Point _begin = const Point(180.0, 110.0);
-  Point _end = const Point(37.0, 250.0);
+  Point _begin;
+  Point _end;
 
   @override
   void initState() {
     super.initState();
+    final Size screenSize = MediaQuery.of(context).size;
+    _begin = new Point(screenSize.width * 0.5, screenSize.height * 0.2);
+    _end = new Point(screenSize.width * 0.1, screenSize.height * 0.4);
     _animation = new CurvedAnimation(parent: config.controller, curve: Curves.ease);
   }
 
@@ -272,12 +275,21 @@ class _RectangleDemoState extends State<_RectangleDemo> {
 
   CurvedAnimation _animation;
   _DragTarget _dragTarget;
-  Rect _begin = new Rect.fromLTRB(180.0, 100.0, 330.0, 200.0);
-  Rect _end = new Rect.fromLTRB(32.0, 275.0, 132.0, 425.0);
+  Rect _begin;
+  Rect _end;
 
   @override
   void initState() {
     super.initState();
+    final Size screenSize = MediaQuery.of(context).size;
+    _begin = new Rect.fromLTWH(
+      screenSize.width * 0.5, screenSize.height * 0.2,
+      screenSize.width * 0.4, screenSize.height * 0.2
+    );
+    _end = new Rect.fromLTWH(
+      screenSize.width * 0.1, screenSize.height * 0.4,
+      screenSize.width * 0.3, screenSize.height * 0.3
+    );
     _animation = new CurvedAnimation(parent: config.controller, curve: Curves.ease);
   }
 

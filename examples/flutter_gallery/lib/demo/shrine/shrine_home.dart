@@ -39,7 +39,8 @@ class ShrineGridDelegate extends GridDelegate {
     assert(childCount >= 0);
     return new GridSpecification.fromRegularTiles(
       tileWidth: constraints.maxWidth / 2.0 - 8.0,
-      tileHeight: constraints.maxWidth * 0.67,
+      // height = ProductPriceItem + product image + VendorItem
+      tileHeight: 40.0 + 144.0 + 40.0,
       columnCount: 2,
       rowCount: childCount == 0 ? 0 : _rowAtIndex(childCount - 1) + 1,
       rowSpacing: 8.0,
