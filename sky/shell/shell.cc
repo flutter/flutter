@@ -233,7 +233,7 @@ void Shell::GetPlatformViews(
 }
 
 void Shell::WaitForPlatformViewIds(
-    std::vector<uintptr_t>* platform_view_ids) {
+    std::vector<PlatformViewInfo>* platform_view_ids) {
 
   base::WaitableEvent latch(false, false);
 
@@ -248,7 +248,7 @@ void Shell::WaitForPlatformViewIds(
 }
 
 void Shell::WaitForPlatformViewsIdsUIThread(
-    std::vector<uintptr_t>* platform_view_ids,
+    std::vector<PlatformViewInfo>* platform_view_ids,
     base::WaitableEvent* latch) {
   std::vector<base::WeakPtr<PlatformView>> platform_views;
   GetPlatformViews(&platform_views);
@@ -258,7 +258,10 @@ void Shell::WaitForPlatformViewsIdsUIThread(
       // Skip dead views.
       continue;
     }
-    platform_view_ids->push_back(reinterpret_cast<uintptr_t>(view));
+    PlatformViewInfo info;
+    info.view_id = reinterpret_cast<uintptr_t>(view);
+    info.isolate_id = view->engine().GetUIIsolateMainPort();
+    platform_view_ids->push_back(info);
   }
   latch->Signal();
 }
@@ -267,7 +270,8 @@ void Shell::RunInPlatformView(uintptr_t view_id,
                               const char* main_script,
                               const char* packages_file,
                               const char* asset_directory,
-                              bool* view_existed) {
+                              bool* view_existed,
+                              int64_t* dart_isolate_id) {
   base::WaitableEvent latch(false, false);
   DCHECK(view_id != 0);
   DCHECK(main_script);
@@ -284,6 +288,7 @@ void Shell::RunInPlatformView(uintptr_t view_id,
                  std::string(packages_file),
                  std::string(asset_directory),
                  base::Unretained(view_existed),
+                 base::Unretained(dart_isolate_id),
                  base::Unretained(&latch)));
 
   latch.Wait();
@@ -294,6 +299,7 @@ void Shell::RunInPlatformViewUIThread(uintptr_t view_id,
                                       const std::string& packages,
                                       const std::string& assets_directory,
                                       bool* view_existed,
+                                      int64_t* dart_isolate_id,
                                       base::WaitableEvent* latch) {
   DCHECK(ui_thread_checker_ && ui_thread_checker_->CalledOnValidThread());
 
@@ -304,6 +310,7 @@ void Shell::RunInPlatformViewUIThread(uintptr_t view_id,
     if (reinterpret_cast<uintptr_t>(view) == view_id) {
       *view_existed = true;
       view->engine().RunFromSource(main, packages, assets_directory);
+      *dart_isolate_id = view->engine().GetUIIsolateMainPort();
       break;
     }
   }

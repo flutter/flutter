@@ -53,6 +53,8 @@ class SkyView : public WindowClient, public IsolateClient {
 
   void OnAppLifecycleStateChanged(sky::AppLifecycleState state);
 
+  Dart_Port GetMainPort();
+
  private:
   explicit SkyView(SkyViewClient* client);
 

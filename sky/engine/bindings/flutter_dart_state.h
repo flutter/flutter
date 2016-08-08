@@ -37,6 +37,10 @@ class FlutterDartState : public DartState {
 
   static FlutterDartState* Current();
 
+  Dart_Port main_port() const {
+    return main_port_;
+  }
+
   void set_mojo_services(std::unique_ptr<MojoServices> mojo_services);
   MojoServices* mojo_services();
 
@@ -50,6 +54,8 @@ class FlutterDartState : public DartState {
  private:
   IsolateClient* isolate_client_;
   std::string url_;
+
+  Dart_Port main_port_;
 
   std::unique_ptr<MojoServices> mojo_services_;
 

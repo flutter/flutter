@@ -113,4 +113,15 @@ void SkyView::OnAppLifecycleStateChanged(sky::AppLifecycleState state) {
   GetWindow()->OnAppLifecycleStateChanged(state);
 }
 
+Dart_Port SkyView::GetMainPort() {
+  if (!dart_controller_) {
+    return ILLEGAL_PORT;
+  }
+  if (!dart_controller_->dart_state()) {
+    return ILLEGAL_PORT;
+  }
+  return dart_controller_->dart_state()->main_port();
+}
+
+
 }  // namespace blink

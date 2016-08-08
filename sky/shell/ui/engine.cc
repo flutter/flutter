@@ -90,6 +90,13 @@ void Engine::RunFromSource(const std::string& main,
   RunFromLibrary(main);
 }
 
+Dart_Port Engine::GetUIIsolateMainPort() {
+  if (!sky_view_) {
+    return ILLEGAL_PORT;
+  }
+  return sky_view_->GetMainPort();
+}
+
 void Engine::ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request) {
   binding_.Bind(request.Pass());
 }

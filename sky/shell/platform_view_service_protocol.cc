@@ -74,6 +74,18 @@ static bool ErrorUnknownView(const char** json_object,
   return false;
 }
 
+static bool ErrorIsolateSpawn(const char** json_object,
+                              const char* view_id) {
+  const intptr_t kInvalidParams = -32602;
+  std::stringstream response;
+  response << "{\"code\":" << std::to_string(kInvalidParams) << ",";
+  response << "\"message\":\"Invalid params\",";
+  response << "\"data\": {\"details\": \"view " << view_id;
+  response << " did not spawn an isolate\"}}";
+  *json_object = strdup(response.str().c_str());
+  return false;
+}
+
 } // namespace
 
 
@@ -130,19 +142,30 @@ bool PlatformViewServiceProtocol::RunInView(const char* method,
   // task on the UI thread before returning.
   Shell& shell = Shell::Shared();
   bool view_existed = false;
+  Dart_Port main_port = ILLEGAL_PORT;
   shell.RunInPlatformView(view_id_as_num,
                           main_script,
                           packages_file,
                           asset_directory,
-                          &view_existed);
+                          &view_existed,
+                          &main_port);
 
   if (!view_existed) {
     // If the view did not exist this request has definitely failed.
     return ErrorUnknownView(json_object, view_id);
+  } else if (main_port == ILLEGAL_PORT) {
+    // We did not create an isolate.
+    return ErrorIsolateSpawn(json_object, view_id);
   } else {
-    // The view existed and the run was requested. Success.
-    // TODO(johnmccutchan): Can we send back any launch errors here?
-    *json_object = strdup("{\"type\": \"Success\"}");
+    // The view existed and the isolate was created. Success.
+    std::stringstream response;
+    response << "{\"type\":\"Success\",";
+    response << "\"viewId\": \"_flutterView/";
+    response << "0x" << std::hex << view_id;
+    response << "\",";
+    response << "\"isolateId\": \"isolates/" << std::dec << main_port << "\"";
+    response << "}";
+    *json_object = strdup(response.str().c_str());
     return true;
   }
   return true;
@@ -160,7 +183,7 @@ bool PlatformViewServiceProtocol::ListViews(const char* method,
   // Ask the Shell for the list of platform views. This will run a task on
   // the UI thread before returning.
   Shell& shell = Shell::Shared();
-  std::vector<uintptr_t> platform_views;
+  std::vector<Shell::PlatformViewInfo> platform_views;
   shell.WaitForPlatformViewIds(&platform_views);
 
   std::stringstream response;
@@ -168,7 +191,8 @@ bool PlatformViewServiceProtocol::ListViews(const char* method,
   response << "{\"type\":\"FlutterViewList\",\"views\":[";
   bool prefix_comma = false;
   for (auto it = platform_views.begin(); it != platform_views.end(); it++) {
-    uintptr_t view_id = *it;
+    uintptr_t view_id = it->view_id;
+    int64_t isolate_id = it->isolate_id;
     if (!view_id) {
       continue;
     }
@@ -179,7 +203,9 @@ bool PlatformViewServiceProtocol::ListViews(const char* method,
     }
     response << "{\"type\":\"FlutterView\", \"id\": \"_flutterView/";
     response << "0x" << std::hex << view_id;
-    response << "\"}";
+    response << "\",";
+    response << "\"isolateId\": \"isolates/" << std::dec << isolate_id << "\"";
+    response << "}";
   }
   response << "]}";
   // Copy the response.

@@ -19,13 +19,14 @@ IsolateClient::~IsolateClient() {}
 
 FlutterDartState::FlutterDartState(IsolateClient* isolate_client,
                                    const std::string& url)
-    : isolate_client_(isolate_client), url_(url) {
+    : isolate_client_(isolate_client), url_(url), main_port_(ILLEGAL_PORT) {
 #ifdef OS_ANDROID
   jni_data_.reset(new DartJniIsolateData());
 #endif
 }
 
 FlutterDartState::~FlutterDartState() {
+  main_port_ = ILLEGAL_PORT;
   // We've already destroyed the isolate. Revoke any weak ptrs held by
   // DartPersistentValues so they don't try to enter the destroyed isolate to
   // clean themselves up.
@@ -40,7 +41,9 @@ FlutterDartState* FlutterDartState::Current() {
   return static_cast<FlutterDartState*>(DartState::Current());
 }
 
-void FlutterDartState::DidSetIsolate() {}
+void FlutterDartState::DidSetIsolate() {
+  main_port_ = Dart_GetMainPortId();
+}
 
 void FlutterDartState::set_mojo_services(
     std::unique_ptr<MojoServices> mojo_services) {

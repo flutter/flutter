@@ -170,6 +170,7 @@ void DartController::CreateIsolateFor(std::unique_ptr<UIDartState> state) {
       ftl::RefPtr<ftl::TaskRunner>(Platform::current()->GetUITaskRunner()));
 
   Dart_SetShouldPauseOnStart(SkySettings::Get().start_paused);
+
   ui_dart_state_->SetIsolate(isolate);
   FTL_CHECK(!LogIfError(Dart_SetLibraryTagHandler(DartLibraryTagHandler)));
 
