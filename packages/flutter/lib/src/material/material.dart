@@ -246,6 +246,7 @@ class _MaterialState extends State<Material> {
     contents = new NotificationListener<LayoutChangedNotification>(
       onNotification: (LayoutChangedNotification notification) {
         _inkFeatureRenderer.currentContext.findRenderObject().markNeedsPaint();
+        return true;
       },
       child: new _InkFeatures(
         key: _inkFeatureRenderer,
